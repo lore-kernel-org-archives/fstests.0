@@ -2,137 +2,127 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2656CC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 18:26:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21C4AC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 18:44:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 14FBA608FB
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 18:26:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D6AF610F9
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 18:44:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347238AbhIMS1z (ORCPT
+        id S239673AbhIMSp5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Sep 2021 14:27:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60314 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1347125AbhIMS1k (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Sep 2021 14:27:40 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 144C36108B;
-        Mon, 13 Sep 2021 18:26:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631557584;
-        bh=fyaePkL27KXkY/vVNwQ0WrVwKmALYDGk52hIGDl1atM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=A7OEbZdaURON7cz5bTzmNT9hzl+CBXzGkdLp0chyXn6ITX1XN9zbctQlvPqrOAmW7
-         aE5Wid6CkS4XLXV37fwIxrcOnjtF+ptVhsnYqvnLdIq33CP3g8ljcVhxPM5ds7yW64
-         5k+RDeCJRa+kU1MBIvYE3ZoOvysFYMFijWq2DBThFI10uqUsfetYLCRzS4cGNnmxmn
-         QNFbX+Fnrf5V42Qnfqo30P1QJQYruoNj5cUZXga3NZGqM/fSXLN+sdMUPvR2EZs94p
-         byPoB5NAyo/SGF0VG7kGX6l8EC6AcWy/7K48o0cIAcdHmC4nM0B20NRXBhrD0jEqt7
-         53ZzInaVjrZNQ==
-Date:   Mon, 13 Sep 2021 11:26:23 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 4/4] xfs: regresion test for fsmap problems with realtime
-Message-ID: <20210913182623.GG638503@magnolia>
-References: <163045512451.771394.12554760323831932499.stgit@magnolia>
- <163045514640.771394.1779112875987604476.stgit@magnolia>
- <YT3ZUiH7uANwHoRW@desktop>
+        Mon, 13 Sep 2021 14:45:57 -0400
+Received: from out1-smtp.messagingengine.com ([66.111.4.25]:43195 "EHLO
+        out1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S236631AbhIMSp4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Sep 2021 14:45:56 -0400
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.46])
+        by mailout.nyi.internal (Postfix) with ESMTP id 2906C5C011C;
+        Mon, 13 Sep 2021 14:44:40 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute6.internal (MEProxy); Mon, 13 Sep 2021 14:44:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=from
+        :to:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=fm1; bh=qt1xY/gUXmKuBr01z7pM8I1adc
+        Ed2o5wUKfVco5Dm/g=; b=r3Emd3gvqZ4ncvD88IjusdrPzMc1GXBqqc5hvsyXa4
+        cSHQvHF25DUdckhZMIp+rqULnN+qW3iwMx7A2E0wUTDEyYBR13Z9ObOeBm3y1CUk
+        gR7ylzpYaw+8TvCdcbsKkqpBfxnM7xY3jlG3CE5Bm2k4PspEpvsiwPxBuxkOJQHl
+        TKNdhx9Xszh75xm4YqfZ5oziol1ts/QGVy6R8/NxSPC/1j4APY2j05Ye8UDzfbn6
+        QDI9mGl6CTHa+gP7ffbRbArLvkChY1BqZVW0GzS2MITxrJ174lOuKxbJRFyCQjKv
+        MMYQPWM9Ssx0aXpWwpor+bgIj0esZ1SD8e/tbryS92ng==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=content-transfer-encoding:date:from
+        :message-id:mime-version:subject:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=qt1xY/gUXmKuBr01z
+        7pM8I1adcEd2o5wUKfVco5Dm/g=; b=aX35WSxz1RU5eYcoqrIJJ0Mt5Ifr85wmQ
+        Lw3RWcO5hsLDfWL5HOcZr7Jw1FUBtH/J14rN/cN3KpsENbgwlu3dsPi7SMggFgT8
+        HCRsEs7TDsjhzDBZy6zKq8M0Z5FOp4dfuZ75jASFd6gjMXCS3RGp6ypnfq2263Lx
+        nw0bwaISMHO7KcgLwvO3skceOzHlT11gN0balrq0qhmqNuixFpK2Hx5SvoQuY1Sl
+        d6ZTSJuEU2WMXkTy7AVZnQtruU1cqmto7Fgtjjn4Q1hXpI1EAyrBZz77RuJ+JUdL
+        nuHoQnRqZKGkxMpJIwMfvWSmFR0A3Ui7LRdDLbrInbAE3NjYn5kjQ==
+X-ME-Sender: <xms:F5w_YTlMT0S5kX_uHC9aqaJIchZ8cEMM1zLFyN6x132EH7xlOVhK5Q>
+    <xme:F5w_YW3GwE5hOY7imhf5oeYmhuS2MmwPEt4u5OJHEYiGzRtsiZvJIv-hb1bBxGgPL
+    b9LT2acovqKTRkqiZA>
+X-ME-Received: <xmr:F5w_YZrCNiTT-UxwgP8oMuiPJCvWnBic-yL9R_RGAlRWSNt3XvUYyXSMMdLuGNNOSP-I2SyLz8C9oRwB4pcKWqCVstLlKw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvtddrudegjedguddviecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
+    duteefkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:F5w_YbmjAtXtSM058EoRfFUw9ghAQmccCZhB9eciypAiTTS9YuXbVA>
+    <xmx:F5w_YR2wB6r2FZTqV66Rx9e0UhDpBCz-yHz7JAJ6wNXmFzIkNXPgqQ>
+    <xmx:F5w_YaumIk9yFdLuHbdIXJ394UGZ1DDVX75oBVh1c63kzQsh8DUqjA>
+    <xmx:GJw_YfDDW-V1CNoW0VWBNvABgFeYK-yvAhEyetYkxgft0iURJaTrdA>
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 13 Sep 2021 14:44:39 -0400 (EDT)
+From:   Boris Burkov <boris@bur.io>
+To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, kernel-team@fb.com
+Subject: [PATCH v5 0/4] tests for btrfs fsverity
+Date:   Mon, 13 Sep 2021 11:44:33 -0700
+Message-Id: <cover.1631558495.git.boris@bur.io>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YT3ZUiH7uANwHoRW@desktop>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Sep 12, 2021 at 06:41:22PM +0800, Eryu Guan wrote:
-> On Tue, Aug 31, 2021 at 05:12:26PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > This is a regression test for:
-> > 
-> > xfs: make xfs_rtalloc_query_range input parameters const
-> > xfs: fix off-by-one error when the last rt extent is in use
-> > xfs: make fsmap backend function key parameters const
-> > 
-> > In which we synthesize an XFS with a realtime volume and a special
-> > realtime volume to trip the bugs fixed by all three patches that
-> > resulted in incomplete fsmap output.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/922     |  183 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/922.out |    2 +
-> >  2 files changed, 185 insertions(+)
-> >  create mode 100755 tests/xfs/922
-> >  create mode 100644 tests/xfs/922.out
-> > 
-> > 
-> > diff --git a/tests/xfs/922 b/tests/xfs/922
-> > new file mode 100755
-> > index 00000000..95304d57
-> > --- /dev/null
-> > +++ b/tests/xfs/922
-> > @@ -0,0 +1,183 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 922
-> > +#
-> > +# Regression test for commits:
-> > +#
-> > +# c02f6529864a ("xfs: make xfs_rtalloc_query_range input parameters const")
-> > +# 9ab72f222774 ("xfs: fix off-by-one error when the last rt extent is in use")
-> > +# 7e1826e05ba6 ("xfs: make fsmap backend function key parameters const")
-> > +#
-> > +# These commits fix a bug in fsmap where the data device fsmap function would
-> > +# corrupt the high key passed to the rt fsmap function if the data device
-> > +# number is smaller than the rt device number and the data device itself is
-> > +# smaller than the rt device.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto fsmap
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -r -f $tmp.*
-> > +	_scratch_unmount
-> > +	test -n "$ddloop" && _destroy_loop_device "$ddloop"
-> > +	test -n "$rtloop" && _destroy_loop_device "$rtloop"
-> > +	test -n "$ddfile" && rm -f "$ddfile"
-> > +	test -n "$rtfile" && rm -f "$rtfile"
-> > +	test -n "$old_use_external" && USE_EXTERNAL="$old_use_external"
-> > +}
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> 
-> _supported_fs xfs
-> 
-> > +_require_test
-> 
-> Also need the following _require rules
-> 
-> _require_loop
-> _require_xfs_io_command "falloc"
-> _require_xfs_io_command "fpunch"
-> _require_xfs_io_command "fsmap"
-> 
-> I've fixed them all on commit.
+This patchset provides tests for fsverity support in btrfs.
 
-Thank you!
+It includes modifications for generic tests to pass with btrfs as well
+as new tests.
 
---D
+--
+v5:
+- more idiomatic requires structure for making efbig test generic
+- make efbig test use truncate instead of pwrite for making a big file
+- improve documentation for efbig test approximation
+- fix underscores vs dashes in btrfs_requires_corrupt_block
+- improvements in missing/redundant requires invocations
+- move orphan test image file to $TEST_DIR
+- make orphan test replay/snapshot device size depend on log device
+  instead of hard-coding it.
+- rebase (signicant: no more "groups" file; use preamble)
+v4:
+- mark local variables
+- get rid of redundant mounts and syncs
+- use '_' in function names correctly
+- add a test for the EFBIG case
+- reduce usage of requires_btrfs_corrupt_block
+- handle variable input when corrupting merkle tree
+v3: rebase onto xfstests master branch
+v2: pass generic tests, add logwrites test
 
-> 
-> Thanks,
-> Eryu
+Boris Burkov (4):
+  btrfs: test btrfs specific fsverity corruption
+  generic/574: corrupt btrfs merkle tree data
+  btrfs: test verity orphans with dmlogwrites
+  generic: test fs-verity EFBIG scenarios
+
+ common/btrfs          |   5 ++
+ common/config         |   1 +
+ common/verity         |  38 ++++++++++
+ tests/btrfs/290       | 165 ++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/290.out   |  25 +++++++
+ tests/btrfs/291       | 161 +++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/291.out   |   2 +
+ tests/generic/690     |  86 ++++++++++++++++++++++
+ tests/generic/690.out |   7 ++
+ 9 files changed, 490 insertions(+)
+ create mode 100755 tests/btrfs/290
+ create mode 100644 tests/btrfs/290.out
+ create mode 100755 tests/btrfs/291
+ create mode 100644 tests/btrfs/291.out
+ create mode 100755 tests/generic/690
+ create mode 100644 tests/generic/690.out
+
+-- 
+2.33.0
+
