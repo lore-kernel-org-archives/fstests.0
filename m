@@ -2,226 +2,317 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0A02C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 18:44:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57089C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 19:03:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9D71610E6
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 18:44:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 30A5E610D2
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 19:03:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237448AbhIMSqE (ORCPT
+        id S240231AbhIMTFJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Sep 2021 14:46:04 -0400
-Received: from out1-smtp.messagingengine.com ([66.111.4.25]:44911 "EHLO
-        out1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S240151AbhIMSqD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Sep 2021 14:46:03 -0400
-Received: from compute2.internal (compute2.nyi.internal [10.202.2.42])
-        by mailout.nyi.internal (Postfix) with ESMTP id D26E15C01D8;
-        Mon, 13 Sep 2021 14:44:46 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute2.internal (MEProxy); Mon, 13 Sep 2021 14:44:46 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=from
-        :to:subject:date:message-id:in-reply-to:references:mime-version
-        :content-transfer-encoding; s=fm1; bh=EZMgD8gCQ0N95PL4jZnTJencwH
-        VKgqAY01gdJAbHXyI=; b=0QOVp32lMYWY8IPJ1iIBx58fEV0n0oa7CYiG8OgI3f
-        8q1KXVNVQH35Hqd2xIJdw+vHsfGYeTPtONcOUSMBjlmTzcTAKo9dhsgk1aLzoYQ2
-        WXRchplVDwqE9sugLxf+LKwuuNLFaNOQbQkiIXU9yLcNQJ02sOWRLQvXR6XPvxFA
-        rTsby9gs3foBCBj6crtI7BVvl9DOGiF17KNvrZGV1037H74VdGQnboj3tF4dwzQE
-        vDJay1H7iDIUDaNRJLPzQ8Sw/tlsQXnPOMAY0jJ5afMdzVWvcH32E1JvdfSPpW5u
-        NNufvslzLkXATrTUe0JCuQG2vIaDwa5HvlhWN8DzZ6eA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=content-transfer-encoding:date:from
-        :in-reply-to:message-id:mime-version:references:subject:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; bh=EZMgD8gCQ0N95PL4jZnTJencwHVKgqAY01gdJAbHXyI=; b=DUiQViSd
-        hExYUF2ZiluYOykzP6Anh63tjJAdjmtNDAuVNSi5f+QTLMCjk2DsT1jkcJCxca8x
-        KEXJp8GHHuPcCNDY8xI1leF+EsAQm76hJII+mi/1LFmLsQgUjEv8jITmC5qEVXcM
-        /PnVCHnWHCnLICI5uOs8p1bvl92TAB8ohA53r03EL8VVdDrtnRshBdUnqSFdcOfJ
-        ujQrn9PsqujREaIaoLJrT/kE82WpUQ+FSQYCIdKJseeHpR5T9b/HhDKXlTEWAhec
-        aoarg/DjstplGL+Xf49wXcN7AYeSyx+aEtR5HM4X5TZbkAHNBRvFvA6MNwHsdKUt
-        Ar/Ht9a5LApyYA==
-X-ME-Sender: <xms:Hpw_YdW2XZLgKkD8NP3xYriJnh06mZlFymd0Sm013fwzLo8xSseN0w>
-    <xme:Hpw_YdlSfA6MzZONz-5u3nH-ai8T01IF-z57T7wunb9YS-N3Wp_MOfxlcA4YIUyqB
-    DQMn5yhvHCrKAMptZc>
-X-ME-Received: <xmr:Hpw_YZaUymLej7VLJWmAEowSdmk-5JK7knGJVT5ukiR4uktFSGWKOwISK4C0o5KOImEjW-Ax3fRCLQRleNpW-Jze2Jxeig>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvtddrudegjedguddvhecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffojghfggfgsedtke
-    ertdertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhr
-    rdhioheqnecuggftrfgrthhtvghrnhepieeuffeuvdeiueejhfehiefgkeevudejjeejff
-    evvdehtddufeeihfekgeeuheelnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghm
-    pehmrghilhhfrhhomhepsghorhhishessghurhdrihho
-X-ME-Proxy: <xmx:Hpw_YQV062QDhVN9Lqtqh8tztGH3IbUuedlKZqe14DGXJl4AFosMBg>
-    <xmx:Hpw_YXmoXAlELp2PsYAopIIhJg1Q-vXmGP9u-7OUgLztedjr_zVQSA>
-    <xmx:Hpw_YdcNQ_q4MtPH0ccaCV3FvpiPFsjS1dQxlmURIvBYlysdbPlGAA>
-    <xmx:Hpw_Yczr3P7jj_zqOZ2dWOKrGLzXXI2GYf5KH6QyqqcavTndtJVp2A>
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
- 13 Sep 2021 14:44:46 -0400 (EDT)
-From:   Boris Burkov <boris@bur.io>
-To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: [PATCH v5 4/4] generic: test fs-verity EFBIG scenarios
-Date:   Mon, 13 Sep 2021 11:44:37 -0700
-Message-Id: <b1d116cd4d0ea74b9cd86f349c672021e005a75c.1631558495.git.boris@bur.io>
-X-Mailer: git-send-email 2.33.0
-In-Reply-To: <cover.1631558495.git.boris@bur.io>
-References: <cover.1631558495.git.boris@bur.io>
+        Mon, 13 Sep 2021 15:05:09 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38486 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S238493AbhIMTFJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 13 Sep 2021 15:05:09 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0CD0F60F4A;
+        Mon, 13 Sep 2021 19:03:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1631559833;
+        bh=fJG4AKI86drLMD/IUO6WEyLneZLstqAsdbrfQ2rbtOI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nx9v0iqjmNkSrGz8UvdIhz6MfzuSXL9wW9giJUWOfiIU6QeMONwc5SBBSpDnlm0hm
+         UrrQ2bN0W35NDpr2y80xkagKjm1PsURZpgdSweXvdSULBADKTwwCM//tv9EtWflZCq
+         Pzx4nKTpNJq67SF0iywoq+dxmyZzxqjicCmobgkyGpXHYptn6zpKD1amK/XRc8QhJb
+         4P9Ltw8WGQh5Pd07n1oNf4/yrj3eJXNt0cKmrtMa1wW2KtldJq6OvSYzM8gEw7rAjK
+         1TafZgzZRLMngPNg/XYTjvJPAf5KbPBViYuOzSXpzTA+fP8VG4U55DRus17/X6e3LO
+         mvcGEnI0I0ZXA==
+Date:   Mon, 13 Sep 2021 12:03:52 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Subject: Re: [PATCH v2.1 6/8] tools: make sure that test groups are described
+ in the documentation
+Message-ID: <20210913190352.GH638503@magnolia>
+References: <163062674313.1579659.11141504872576317846.stgit@magnolia>
+ <163062677608.1579659.1360826362143203767.stgit@magnolia>
+ <20210904030600.GB2270902@magnolia>
+ <CAOQ4uxgReLEdycbNqYfNUVNaSgPa_30E_gfoppN9M2RwVu9c6Q@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxgReLEdycbNqYfNUVNaSgPa_30E_gfoppN9M2RwVu9c6Q@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs, ext4, and f2fs cache the Merkle tree past EOF, which restricts
-the maximum file size beneath the normal maximum. Test the logic in
-those filesystems against files with sizes near the maximum.
+On Sat, Sep 04, 2021 at 11:52:32AM +0300, Amir Goldstein wrote:
+> On Sat, Sep 4, 2021 at 6:06 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> >
+> > From: Darrick J. Wong <djwong@kernel.org>
+> >
+> > Create a file to document the purpose of each test group that is
+> > currently defined in fstests, and change mkgroupfile to check that every
+> > group mentioned in the tests is also mentioned in the documentation.
+> >
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/preamble     |   21 ++++++++
+> >  doc/group-names.txt |  135 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tools/mkgroupfile   |   15 +++++-
+> >  3 files changed, 168 insertions(+), 3 deletions(-)
+> >  create mode 100644 doc/group-names.txt
+> >
+> > diff --git a/common/preamble b/common/preamble
+> > index 66b0ed05..64d79385 100644
+> > --- a/common/preamble
+> > +++ b/common/preamble
+> > @@ -23,6 +23,26 @@ _register_cleanup()
+> >         trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
+> >  }
+> >
+> > +# Make sure each group is in the documentation file.
+> > +_check_groups() {
+> > +       test -n "$GROUPNAME_DOC_FILE" || return 0
+> > +
+> > +       local testname="$(echo "$0" | sed -e 's/^.*tests\///g')"
+> > +       declare -a missing=()
+> > +
+> > +       for group in "$@"; do
+> > +               if ! grep -q "^${group}[[:space:]]" "$GROUPNAME_DOC_FILE"; then
+> > +                       missing+=("\"${group}\"")
+> > +               fi
+> > +       done
+> > +       test "${#missing}" -eq 0 && return 0
+> > +
+> > +       local suffix=
+> > +       test "${#missing}" -gt 1 && suffix="s"
+> > +       echo "$testname: group$suffix ${missing[@]} not mentioned in documentation." 1>&2
+> > +       return 1
+> > +}
+> > +
+> >  # Prepare to run a fstest by initializing the required global variables to
+> >  # their defaults, sourcing common functions, registering a cleanup function,
+> >  # and removing the $seqres.full file.
+> > @@ -42,6 +62,7 @@ _begin_fstest()
+> >         # If we're only running the test to generate a group.list file,
+> >         # spit out the group data and exit.
+> >         if [ -n "$GENERATE_GROUPS" ]; then
+> > +               _check_groups "$@" || exit 1
+> >                 echo "$seq $@"
+> >                 exit 0
+> >         fi
+> > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > new file mode 100644
+> > index 00000000..e8e3477e
+> > --- /dev/null
+> > +++ b/doc/group-names.txt
+> > @@ -0,0 +1,135 @@
+> > +======================= =======================================================
+> > +Group Name:            Description:
+> > +======================= =======================================================
+> > +all                    All known tests, automatically generated by ./check at
+> > +                       runtime
+> > +auto                   Tests that should be run automatically.  These should
+> > +                       not require more than ~5 minutes to run.
+> > +quick                  Tests that should run in under 30 seconds.
+> > +deprecated             Old tests that should not be run.
+> > +
+> > +acl                    Access Control Lists
+> > +admin                  xfs_admin functionality
+> > +aio                    general libaio async io tests
+> > +atime                  file access time
+> > +attr                   extended attributes
+> > +attr2                  xfs v2 extended aributes
+> > +balance                        btrfs tree rebalance
+> > +bigtime                        timestamps beyond the year 2038
+> > +blockdev               block device functionality
+> > +broken                 broken tests
+> > +cap                    Linux capabilities
+> > +casefold               directory name casefolding
+> > +ci                     ASCII case-insensitive directory name lookups
+> > +clone                  FICLONE/FICLONERANGE ioctls
+> > +clone_stress           stress testing FICLONE/FICLONERANGE
+> > +collapse               fallocate FALLOC_FL_COLLAPSE_RANGE
+> > +compress               file compression
+> > +convert                        btrfs ext[34] conversion tool
+> > +copy                   xfs_copy functionality
+> > +copy_range             copy_file_range syscall
+> > +copyup                 overlayfs copyup
+> > +dangerous              dangerous test that can crash the system
+> > +dangerous_bothrepair   fuzzers to evaluate xfs_scrub + xfs_repair repair
+> > +dangerous_fuzzers      fuzzers that can crash your computer
+> > +dangerous_norepair     fuzzers to evaluate kernel metadata verifiers
+> > +dangerous_online_repair        fuzzers to evaluate xfs_scrub online repair
+> > +dangerous_repair       fuzzers to evaluate xfs_repair offline repair
+> > +dangerous_scrub                fuzzers to evaluate xfs_scrub checking
+> > +data                   data loss checkers
+> > +dax                    direct access mode for persistent memory files
+> > +db                     xfs_db functional tests
+> > +dedupe                 FIEDEDUPERANGE ioctl
+> > +defrag                 filesystem defragmenters
+> > +dir                    directory test functions
+> > +dump                   dump and restore utilities
+> > +eio                    IO error reporting
+> > +encrypt                        encrypted file contents
+> > +enospc                 ENOSPC error reporting
+> > +exportfs               file handles
+> > +filestreams            XFS filestreams allocator
+> > +freeze                 filesystem freeze tests
+> > +fsck                   general fsck tests
+> > +fsmap                  FS_IOC_GETFSMAP ioctl
+> > +fsr                    XFS free space reorganizer
+> > +fuzzers                        filesystem fuzz tests
+> > +growfs                 increasing the size of a filesystem
+> > +hardlink               hardlinks
+> > +health                 XFS health reporting
+> > +idmapped               idmapped mount functionality
+> > +inobtcount             XFS inode btree count tests
+> > +insert                 fallocate FALLOC_FL_INSERT_RANGE
+> > +ioctl                  general ioctl tests
+> > +io_uring               general io_uring async io tests
+> > +label                  filesystem labelling
+> > +limit                  resource limits
+> > +locks                  file locking
+> > +log                    metadata logging
+> > +logprint               xfs_logprint functional tests
+> > +long_rw                        long-soak read write IO path exercisers
+> > +metacopy               overlayfs metadata-only copy-up
+> > +metadata               filesystem metadata update exercisers
+> > +metadump               xfs_metadump/xfs_mdrestore functionality
+> > +mkfs                   filesystem formatting tools
+> > +mount                  mount option and functionality checks
+> > +nested                 nested overlayfs instances
+> > +nfs4_acl               NFSv4 access control lists
+> > +nonsamefs              overlayfs layers on different filesystems
+> > +online_repair          online repair functionality tests
+> > +other                  dumping ground, do not add more tests to this group
+> > +pattern                        specific IO pattern tests
+> > +perms                  access control and permission checking
+> > +pipe                   pipe functionality
+> > +pnfs                   PNFS
+> > +posix                  POSIX behavior conformance
+> > +prealloc               fallocate for preallocating unwritten space
+> > +preallocrw             fallocate, then read and write
+> > +punch                  fallocate FALLOC_FL_PUNCH_HOLE
+> > +qgroup                 btrfs qgroup feature
+> > +quota                  filesystem usage quotas
+> > +raid                   btrfs RAID
+> > +realtime               XFS realtime volumes
+> > +recoveryloop           crash recovery loops
+> > +redirect               overlayfs redirect_dir feature
+> > +remote                 dump and restore with a remote tape
+> > +remount                        remounting filesystems
+> > +rename                 rename system call
+> > +repair                 xfs_repair functional tests
+> > +replace                        btrfs device replace
+> > +replay                 dm-logwrites replays
+> > +resize                 resize2fs functionality tests
+> > +richacl                        rich ACL feature
+> > +rmap                   XFS reverse mapping exercisers
+> > +rotate                 overlayfs upper layer rotate tests from the unionmount
+> > +                       test suite
+> > +rw                     read/write IO tests
+> > +samefs                 overlayfs when all layers are on the same fs
+> > +scrub                  filesystem metadata scrubbers
+> > +seed                   btrfs seeded filesystems
+> > +seek                   llseek functionality
+> > +send                   btrfs send/receive
+> > +shrinkfs               decreasing the size of a filesystem
+> > +shutdown               FS_IOC_SHUTDOWN ioctl
+> > +snapshot               btrfs snapshots
+> > +soak                   long running soak tests of any kind
+> > +spaceman               xfs_spaceman functional tests
+> > +splice                 splice system call
+> > +stress                 fsstress filesystem exerciser
+> > +subvol                 btrfs subvolumes
+> > +swap                   swap files
+> > +symlink                        symbolic links
+> > +tape                   dump and restore with a tape
+> > +thin                   thin provisioning
+> > +trim                   FITRIM ioctl
+> > +udf                    UDF functionality tests
+> > +union                  tests from the unionmount test suite
+> > +unlink                 O_TMPFILE unlinked files
+> > +unshare                        fallocate FALLOC_FL_UNSHARE_RANGE
+> > +v2log                  XFS v2 log format tests
+> > +verity                 fsverity
+> > +volume                 btrfs volume management
+> > +whiteout               overlayfs whiteout functionality
+> > +xino                   overlayfs xino feature
+> > +zero                   fallocate FALLOC_FL_ZERO_RANGE
+> > +zone                   zoned (SMR) device support
+> > +======================= =======================================================
+> > diff --git a/tools/mkgroupfile b/tools/mkgroupfile
+> > index 0681e5d2..767bac90 100755
+> > --- a/tools/mkgroupfile
+> > +++ b/tools/mkgroupfile
+> > @@ -9,6 +9,8 @@ fi
+> >
+> >  test_dir="$PWD"
+> >  groupfile="$1"
+> > +GROUPNAME_DOC_FILE="$(readlink -m ../../doc/group-names.txt)"
+> > +export GROUPNAME_DOC_FILE
+> >
+> >  if [ ! -x ../../check ]; then
+> >         echo "$0: Run this from tests/XXX/."
+> > @@ -24,19 +26,26 @@ ENDL
+> >         cd ../../
+> >         export GENERATE_GROUPS=yes
+> >         grep -R -l "^_begin_fstest" "$test_dir/" 2>/dev/null | while read testfile; do
+> > -               test -x "$testfile" && "$testfile"
+> > +               test -x "$testfile" && "$testfile" || return 1
+> >         done | sort -g
+> > +       local ret="${PIPESTATUS[1]}"
+> >         cd "$test_dir"
+> > +       return $ret
+> >  }
+> >
+> >  if [ -z "$groupfile" ] || [ "$groupfile" = "-" ]; then
+> >         # Dump the group file to stdout and exit
+> >         generate_groupfile
+> > -       exit 0
+> 
+> Now the comment above is incorrect, but I think you
+> did want to exit $ret?
 
-To work properly, this does require some understanding of the practical
-but not standardized layout of the Merkle tree. This is a bit unpleasant
-and could make the test incorrect in the future, if the implementation
-changes. On the other hand, it feels quite useful to test this tricky
-edge case. It could perhaps be made more generic by adding some ioctls
-to let the file system communicate the maximum file size for a verity
-file or some information about the storage of the Merkle tree.
+"exit" by itself will cause the script to exit with the last accumulated
+return value (which is the 'return $ret' in the last line of
+generat_groupfile), but yes, thanks for pointing out that I'd deleted
+the whole line by mistake.  Fixed.
 
-Signed-off-by: Boris Burkov <boris@bur.io>
----
- common/verity         | 11 ++++++
- tests/generic/690     | 86 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/690.out |  7 ++++
- 3 files changed, 104 insertions(+)
- create mode 100755 tests/generic/690
- create mode 100644 tests/generic/690.out
+> 
+> >  fi
+> >
+> >  # Otherwise, write the group file to disk somewhere.
+> >  ngroupfile="${groupfile}.new"
+> >  rm -f "$ngroupfile"
+> >  generate_groupfile >> "$ngroupfile"
+> > -mv "$ngroupfile" "$groupfile"
+> > +ret=$?
+> > +if [ $ret -eq 0 ]; then
+> > +       mv "$ngroupfile" "$groupfile"
+> > +else
+> > +       rm -f "$ngroupfile"
+> > +fi
+> > +exit $ret
+> 
+> I think that a cleanup() trap would have made this script a lot cleaner,
+> not having to deal with ${PIPESTATUS[1]} and whatnot, but if there is
+> a reason not to use cleanup() trap, I'm fine with this as well.
 
-diff --git a/common/verity b/common/verity
-index 74163987..ca080f1e 100644
---- a/common/verity
-+++ b/common/verity
-@@ -340,3 +340,14 @@ _fsv_scratch_corrupt_merkle_tree()
- 		;;
- 	esac
- }
-+
-+_require_fsverity_max_file_size_limit()
-+{
-+	case $FSTYP in
-+	btrfs|ext4|f2fs)
-+		;;
-+	*)
-+		_notrun "$FSTYP does not store verity data past EOF; no special file size limit"
-+		;;
-+	esac
-+}
-diff --git a/tests/generic/690 b/tests/generic/690
-new file mode 100755
-index 00000000..251f3cc8
---- /dev/null
-+++ b/tests/generic/690
-@@ -0,0 +1,86 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Facebook, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 690
-+#
-+# fs-verity requires the filesystem to decide how it stores the Merkle tree,
-+# which can be quite large.
-+# It is convenient to treat the Merkle tree as past EOF, and ext4, f2fs, and
-+# btrfs do so in at least some fashion. This leads to an edge case where a
-+# large file can be under the file system file size limit, but trigger EFBIG
-+# on enabling fs-verity. Test enabling verity on some large files to exercise
-+# EFBIG logic for filesystems with fs-verity specific limits.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick verity
-+
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/verity
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_test
-+_require_math
-+_require_scratch_verity
-+_require_fsverity_max_file_size_limit
-+_require_scratch_nocheck
-+
-+_scratch_mkfs_verity &>> $seqres.full
-+_scratch_mount
-+
-+fsv_file=$SCRATCH_MNT/file.fsv
-+
-+max_sz=$(_get_max_file_size)
-+_fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-+# have to go back by 4096 from max to not hit the fsverity MAX_LEVELS check.
-+truncate -s $(($max_sz - 4095)) $fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+# The goal of this second test is to make a big enough file that we trip the
-+# EFBIG codepath, but not so big that we hit it immediately as soon as we try
-+# to write a Merkle leaf. Because of the layout of the Merkle tree that
-+# fs-verity uses, this is a bit complicated to compute dynamically.
-+
-+# The layout of the Merkle tree has the leaf nodes last, but writes them first.
-+# To get an interesting overflow, we need the start of L0 to be < MAX but the
-+# end of the merkle tree (EOM) to be past MAX. Ideally, the start of L0 is only
-+# just smaller than MAX, so that we don't have to write many blocks to blow up,
-+# but we take some liberties with adding alignments rather than computing them
-+# correctly, so we under-estimate the perfectly sized file.
-+
-+# We make the following assumptions to arrive at a Merkle tree layout:
-+# The Merkle tree is stored past EOF aligned to 64k.
-+# 4K blocks and pages
-+# Merkle tree levels aligned to the block (not pictured)
-+# SHA-256 hashes (32 bytes; 128 hashes per block/page)
-+# 64 bit max file size (and thus 8 levels)
-+
-+# 0                        EOF round-to-64k L7L6L5 L4   L3    L2    L1  L0 MAX  EOM
-+# |-------------------------|               ||-|--|---|----|-----|------|--|!!!!!|
-+
-+# Given this structure, we can compute the size of the file that yields the
-+# desired properties. (NB the diagram skips the block alignment of each level)
-+# sz + 64k + sz/128^8 + 4k + sz/128^7 + 4k + ... + sz/128^2 + 4k < MAX
-+# sz + 64k + 7(4k) + sz/128^8 + sz/128^7 + ... + sz/128^2 < MAX
-+# sz + 92k + sz/128^2 < MAX
-+# (128^8)sz + (128^8)92k + sz + (128)sz + (128^2)sz + ... + (128^6)sz < (128^8)MAX
-+# sz(128^8 + 128^6 + 128^5 + 128^4 + 128^3 + 128^2 + 128 + 1) < (128^8)(MAX - 92k)
-+# sz < (128^8/(128^8 + (128^6 + ... + 128 + 1)))(MAX - 92k)
-+#
-+# Do the actual caclulation with 'bc' and 20 digits of precision.
-+# set -f prevents the * from being expanded into the files in the cwd.
-+set -f
-+calc="scale=20; ($max_sz - 94208) * ((128^8) / (1 + 128 + 128^2 + 128^3 + 128^4 + 128^5 + 128^6 + 128^8))"
-+sz=$(echo $calc | $BC -q | cut -d. -f1)
-+set +f
-+
-+_fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
-+truncate -s $sz $fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/690.out b/tests/generic/690.out
-new file mode 100644
-index 00000000..a3e2b9b9
---- /dev/null
-+++ b/tests/generic/690.out
-@@ -0,0 +1,7 @@
-+QA output created by 690
-+
-+# way too big: fail on first merkle block
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
-+
-+# still too big: fail on first invalid merkle block
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
--- 
-2.33.0
+No real reason.  I'll reimplement the prologue as a cleanup trap so that
+we don't leave junk everywhere if someone ^Cs during build.
 
+--D
+
+> 
+> Thanks,
+> Amir.
