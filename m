@@ -2,115 +2,165 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D59EDC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 15:06:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E01DC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 17:08:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B938E60F92
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 15:06:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 515EB610A2
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 17:08:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346897AbhIMPHZ (ORCPT
+        id S241895AbhIMRJg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Sep 2021 11:07:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53524 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346473AbhIMPHW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Sep 2021 11:07:22 -0400
-Received: from mail-qv1-xf2f.google.com (mail-qv1-xf2f.google.com [IPv6:2607:f8b0:4864:20::f2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19816C00F7A1;
-        Mon, 13 Sep 2021 06:41:22 -0700 (PDT)
-Received: by mail-qv1-xf2f.google.com with SMTP id cf2so5460088qvb.10;
-        Mon, 13 Sep 2021 06:41:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=TQ/ua6a6n6ROb5TUoje1TeI9WAWedeILqs0fpPcCf4g=;
-        b=q0OMdJTfkNDbi6R0nBQJNEaBecIQAcBgwpE7gjLKtGpM2kIp3eyG4R/iTi1bbx61UJ
-         yxsB4HVT6zwVX9gpGhZNS3SCA2ixA7EWYlsxSH9Ogpq8h4ThdC3V1aJ+pEchdhu/HXPa
-         p5Hrs+wuP/yfV4azGSdrgN84/j3jhaUZOFlExpfjTcox4xaWF2v1+64VNR9SojIe0jEp
-         Zo4yBnj1dJBvXbqss5TV858CRdYVcKtxcBqwnCC+PDg4eSepFfB/F3bdx0CqENXuh4Or
-         c6m1p//aPhNM3EydMfherhENvMBCce2OoBZb8fEh0f2qUCOvMGG33X3w6i7txcFgrKq7
-         tYfg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=TQ/ua6a6n6ROb5TUoje1TeI9WAWedeILqs0fpPcCf4g=;
-        b=QnTq6VrHcaERC2FOsw4OkCTFgEWozFDAhbXyhDW3b85G/ie3t9H35Ed+L+odwZ+sP4
-         W0heLGHIiJavNGWwCO8oXCenYGCrMJMNocb6BQAfUjftsORkOemcjydbpukwZbPl4AUh
-         /kCqEFU3ovIQkHroOMt+74QncLmcEvzoYX9/q/BihNnjrPn9dDOoEeysLDIztBHbet8c
-         jM5K+QrC3mE7PsEu8dkja1V4sYYfavVPg3qg7fkWEyIy0FlBuJuyveLmKcqsRhrWBxa4
-         BwaFIsIevVgWNLFlyNUObfAPDOEAOPiF08Fw89i4mlibAHNVo6WeglkjwhHDFm8eN9MJ
-         uHZQ==
-X-Gm-Message-State: AOAM530y8oOLYr3g7ZjeGSVCA3OZLTl8/CWwdqDHmoSdzEU8DocnY4Dv
-        FgN3Ar4LztMTMLV2YDTtmgVOjrJa7QmiKa/sy/1lY+2p8e4=
-X-Google-Smtp-Source: ABdhPJyZpv2+49V3GAAovpfO4wJ+RWL2au3jZvQG2ubwwY61O8yWW82RWx0SGI38N2N7MS1XXn63GEfO7x+FD03qq2Y=
-X-Received: by 2002:a0c:fb4f:: with SMTP id b15mr10606659qvq.20.1631540481309;
- Mon, 13 Sep 2021 06:41:21 -0700 (PDT)
+        Mon, 13 Sep 2021 13:09:36 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52106 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S241817AbhIMRJg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 13 Sep 2021 13:09:36 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 07222610A2;
+        Mon, 13 Sep 2021 17:08:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1631552900;
+        bh=bQqsBZbSEoBftgvvkgrkyNd5nWA/o1m4OMIgznQcjTw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=QT5lG+pkKYmv0eFa+AMROdYXzD+POKWXiFmTralCSxHFOZ8H9NPK+7PskwyvKbsHR
+         mkEeoRMrQDKPD7r7TzsGvaZqkD1ZGW1Q6ybdURvMTXWXeHVZykTm9BN3rQdyMF0ez1
+         //gtGJktwTYD++awEB+eX/vn+EgR7PYaV311JPbYPDazlhdewBA7glU6sxDTS1ZEmZ
+         f9kHcxNA/T+QKPofLXnkkb+EgbmM8dYh765zaaoN6gGPbgReGtavc/LgXS92PHNXgJ
+         frEBLkKWlfFW8r2uBoLQxPxnrd3IYxe94kL5rLWThipWaoyoNJAC3bAnISxK+d01hL
+         RnMQqCkWBHM5w==
+Date:   Mon, 13 Sep 2021 10:08:19 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Catherine Hoang <catherine.hoang@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        linux-ext4 <linux-ext4@vger.kernel.org>
+Subject: Re: [PATCH 3/3] xfstests: Move *_dump_log routines to common/xfs
+Message-ID: <20210913170819.GA638503@magnolia>
+References: <20210909174142.357719-1-catherine.hoang@oracle.com>
+ <20210909174142.357719-4-catherine.hoang@oracle.com>
+ <YT22rajMLkNyhKyr@desktop>
 MIME-Version: 1.0
-References: <20210913133226.39007-1-nborisov@suse.com>
-In-Reply-To: <20210913133226.39007-1-nborisov@suse.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 13 Sep 2021 14:40:45 +0100
-Message-ID: <CAL3q7H6rkvgboQKvcGiZgG-qzejg+vBiTK+xBejXkuQojpRVQw@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: Make 233 be part of subvol group
-To:     Nikolay Borisov <nborisov@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YT22rajMLkNyhKyr@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 13, 2021 at 2:35 PM Nikolay Borisov <nborisov@suse.com> wrote:
->
-> All but this test use 'subvol' to designate they relate to btrfs
-> subvolume functionality. For the sake of consistency make btrfs/233
-> also be part of 'subvol' rather than 'subvolume'. This brings no
-> functional changes.
+[add ext4 list to cc]
 
-There's already a pending patch for this, which also fixes the same
-inconsistency for btrfs/245:
+On Sun, Sep 12, 2021 at 04:13:33PM +0800, Eryu Guan wrote:
+> On Thu, Sep 09, 2021 at 05:41:42PM +0000, Catherine Hoang wrote:
+> > Move _scratch_remount_dump_log and _test_remount_dump_log from
+> > common/inject to common/xfs. These routines do not inject errors and
+> > should be placed with other xfs common functions.
+> > 
+> > Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
+> > ---
+> >  common/inject | 26 --------------------------
+> >  common/xfs    | 26 ++++++++++++++++++++++++++
+> >  2 files changed, 26 insertions(+), 26 deletions(-)
+> > 
+> > diff --git a/common/inject b/common/inject
+> > index b5334d4a..6b590804 100644
+> > --- a/common/inject
+> > +++ b/common/inject
+> > @@ -111,29 +111,3 @@ _scratch_inject_error()
+> >  		_fail "Cannot inject error ${type} value ${value}."
+> >  	fi
+> >  }
+> > -
+> > -# Unmount and remount the scratch device, dumping the log
+> > -_scratch_remount_dump_log()
+> > -{
+> > -	local opts="$1"
+> > -
+> > -	if test -n "$opts"; then
+> > -		opts="-o $opts"
+> > -	fi
+> > -	_scratch_unmount
+> > -	_scratch_dump_log
+> 
+> This function is a common function that could handle multiple
+> filesystems, currently it supports xfs, ext4 and f2fs. So it's not a
 
-https://patchwork.kernel.org/project/fstests/patch/163062676513.1579659.125=
-16104685003091290.stgit@magnolia/
+I don't think it even works correctly for ext*.  *_dump_log() calls
+dumpe2fs -h, which displays the superblock contents, not the journal
+contents themselves, which is (I think) what this helper is supposed to
+do.
 
-Thanks.
+It really ought to do something along the lines of:
 
->
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> ---
->  tests/btrfs/233 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/tests/btrfs/233 b/tests/btrfs/233
-> index f3e3762c6951..6a4144433073 100755
-> --- a/tests/btrfs/233
-> +++ b/tests/btrfs/233
-> @@ -9,7 +9,7 @@
->  # performed.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick subvolume
-> +_begin_fstest auto quick subvol
->
->  # Override the default cleanup function.
->  _cleanup()
-> --
-> 2.17.1
->
+	echo 'logdump -a' | debugfs $SCRATCH_DEV
 
+Though fixing this is probably something the ext4 developers should look
+at...
 
---=20
-Filipe David Manana,
+> xfs-specific function, and moving it to common/xfs doesn't seem correct.
+> Perhaps we should move it to common/log.
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+Agreed. ;)
+
+--D
+
+> > -	_scratch_mount "$opts"
+> > -}
+> > -
+> > -# Unmount and remount the test device, dumping the log
+> > -_test_remount_dump_log()
+> > -{
+> > -	local opts="$1"
+> > -
+> > -	if test -n "$opts"; then
+> > -		opts="-o $opts"
+> > -	fi
+> > -	_test_unmount
+> > -	_test_dump_log
+> 
+> Same here.
+> 
+> Thanks,
+> Eryu
+> 
+> > -	_test_mount "$opts"
+> > -}
+> > diff --git a/common/xfs b/common/xfs
+> > index bfb1bf1e..cda1f768 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -1263,3 +1263,29 @@ _require_scratch_xfs_bigtime()
+> >  		_notrun "bigtime feature not advertised on mount?"
+> >  	_scratch_unmount
+> >  }
+> > +
+> > +# Unmount and remount the scratch device, dumping the log
+> > +_scratch_remount_dump_log()
+> > +{
+> > +	local opts="$1"
+> > +
+> > +	if test -n "$opts"; then
+> > +		opts="-o $opts"
+> > +	fi
+> > +	_scratch_unmount
+> > +	_scratch_dump_log
+> > +	_scratch_mount "$opts"
+> > +}
+> > +
+> > +# Unmount and remount the test device, dumping the log
+> > +_test_remount_dump_log()
+> > +{
+> > +	local opts="$1"
+> > +
+> > +	if test -n "$opts"; then
+> > +		opts="-o $opts"
+> > +	fi
+> > +	_test_unmount
+> > +	_test_dump_log
+> > +	_test_mount "$opts"
+> > +}
+> > -- 
+> > 2.25.1
