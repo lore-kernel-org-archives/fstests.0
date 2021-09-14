@@ -2,128 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92D42C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 19:11:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BCACC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Sep 2021 11:52:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6EE95610F9
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Sep 2021 19:11:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 72CE3610A2
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Sep 2021 11:52:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241507AbhIMTMh (ORCPT
+        id S232284AbhINLxj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Sep 2021 15:12:37 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39196 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S241529AbhIMTMg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Sep 2021 15:12:36 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 50A6F610CC;
-        Mon, 13 Sep 2021 19:11:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631560279;
-        bh=/6iniwcpC4tqAvqcqbLFQNPzbG/BZj4jTDp4yox5teA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=mpUxDcJudX8Sbr0xAYoiKjmKySDDo1+3SK3FfqoLPHguUc07eM55TqFNOZO/cbE/7
-         2X7cwN2QsNqjwIQRAaQIiqj+7BWTLT1VV3HHI2JbyCLxqR5nNSwCR/fPQJhBaM8iLA
-         IRz+LK13jOowd+zhhz2ZLDFfBP9xPM8f2D7dTjjaWtqTgJ07MAl9Ay+zhJXGYsNsjg
-         vL9KrF93hg3Sj/M0LcS6iJe9UcB6TeGlvFMij8STSpjuyCcViaklSEw0RlXPV3Z4fa
-         Kbr/7XMLQSatbbPFweYsobSR8bzpMfPSdxmYN1aRxLjdMGSXAq/7Moig9loVMw8Z4j
-         8+7BNgthCYgyQ==
-Date:   Mon, 13 Sep 2021 12:11:18 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, Christoph Hellwig <hch@lst.de>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH 8/8] new: only allow documented test group names
-Message-ID: <20210913191118.GI638503@magnolia>
-References: <163062674313.1579659.11141504872576317846.stgit@magnolia>
- <163062678708.1579659.15462141943907232473.stgit@magnolia>
- <CAOQ4uxioMargTa9GPppZ0ACvzX4yjm2OdfrT8gShMed7ZWghiA@mail.gmail.com>
+        Tue, 14 Sep 2021 07:53:39 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:45476 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232156AbhINLxi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Sep 2021 07:53:38 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id AE87621D62;
+        Tue, 14 Sep 2021 11:52:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1631620340; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=yS52rij573e/7nmA5rvtwQVMbZRG/ZCCMtdLxUFhUbY=;
+        b=m0MBff7khhGG9qLDkIZSvXsPMenGmmZ/1ze0pZ9SRn6Ig3rlC5fqT/TV13oTs5g/HUl8ZY
+        GfZTn3r+nvIOzNn7G9iYww4l3TYdMLZzee0dgJVUSI20aUnwj2+y0wY4hpwCurog65XZc4
+        DshiKG6+Lae0szuJ+dOT3XRQowJLJXA=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6F86A13342;
+        Tue, 14 Sep 2021 11:52:20 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id vazHGPSMQGHMFgAAMHmgww
+        (envelope-from <nborisov@suse.com>); Tue, 14 Sep 2021 11:52:20 +0000
+From:   Nikolay Borisov <nborisov@suse.com>
+To:     linux-btrfs@vger.kernel.org
+Cc:     fstests@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [RFC PATCH] btrfs: Add test for received information deletion upon RO->RW switch
+Date:   Tue, 14 Sep 2021 14:52:19 +0300
+Message-Id: <20210914115219.95720-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxioMargTa9GPppZ0ACvzX4yjm2OdfrT8gShMed7ZWghiA@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Sep 04, 2021 at 11:43:58AM +0300, Amir Goldstein wrote:
-> On Fri, Sep 3, 2021 at 5:14 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> >
-> > From: Darrick J. Wong <djwong@kernel.org>
-> >
-> > Now that we require all group names to be listed in doc/group-names.txt,
-> > we can use that (instead of running mkgroupfile) to check if the group
-> > name(s) supplied by the user actually exist.  This has the secondary
-> > effect of being a second nudge towards keeping the description of groups
-> > up to date.
-> >
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > ---
-> >  new |   24 +++++++++++-------------
-> >  1 file changed, 11 insertions(+), 13 deletions(-)
-> >
-> >
-> > diff --git a/new b/new
-> > index 2097a883..6b7dc5d4 100755
-> > --- a/new
-> > +++ b/new
-> > @@ -83,6 +83,14 @@ then
-> >      exit 1
-> >  fi
-> >
-> > +# Extract group names from the documentation.
-> > +group_names() {
-> > +       awk '/^[[:lower:][:digit:]_]/ {
-> > +               if ($1 != "" && $1 != "Group" && $2 != "Name:" && $1 != "all")
-> > +                       printf("%s\n", $1);
-> > +       }' doc/group-names.txt
-> > +}
-> > +
-> >  if [ $# -eq 0 ]
-> >  then
-> >
-> > @@ -93,16 +101,7 @@ then
-> >         [ -z "$ans" ] && ans=other
-> >         if [ "X$ans" = "X?" ]
-> >         then
-> > -           for d in $SRC_GROUPS; do
-> > -               (cd "tests/$d/" ; ../../tools/mkgroupfile "$tmpfile")
-> > -               l=$(sed -n < "$tmpfile" \
-> > -                   -e 's/#.*//' \
-> > -                   -e 's/$/ /' \
-> > -                   -e 's;\(^[0-9][0-9][0-9]\)\(.*$\);\2;p')
-> > -               grpl="$grpl $l"
-> > -           done
-> > -           lst=`for word in $grpl; do echo $word; done | sort| uniq `
-> > -           echo $lst
-> > +           echo $(group_names)
-> >         else
-> >             # only allow lower cases, spaces, digits and underscore in group
-> >             inval=`echo $ans | tr -d '[:lower:][:space:][:digit:]_'`
-> > @@ -120,11 +119,10 @@ then
-> >  else
-> >      # expert mode, groups are on the command line
-> >      #
-> > -    (cd "$tdir" ; ../../tools/mkgroupfile "$tmpfile")
-> >      for g in $*
-> >      do
-> > -       if ! grep -q "[[:space:]]$g" "$tmpfile"; then
-> > -           echo "Warning: group \"$g\" not defined in $tdir tests"
-> > +       if ! grep -q "^$g" doc/group-names.txt; then
-> > +           echo "Warning: group \"$g\" not defined in documentation"
-> >         fi
-> 
-> Do you want to warn (or fail) on new uses of the group "other"?
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
 
-Yeah, I'll add a new patch on the end to do that.
+Sending this now for initial review and completness' sake and once there is a
+final decision that we are taking the route of removing this functionality
+for users then it can be merged.
 
---D
 
-> Thanks,
-> Amir.
+ tests/btrfs/248     | 47 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/248.out |  2 ++
+ 2 files changed, 49 insertions(+)
+ create mode 100755 tests/btrfs/248
+ create mode 100644 tests/btrfs/248.out
+
+diff --git a/tests/btrfs/248 b/tests/btrfs/248
+new file mode 100755
+index 000000000000..13a2b92900ad
+--- /dev/null
++++ b/tests/btrfs/248
+@@ -0,0 +1,47 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 248
++#
++# Test that stransid/rtransid and received_uuid are being reset when a RO
++# snapshot is switched to RW.
++#
++. ./common/preamble
++_begin_fstest auto quick send subvol
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_require_scratch
++
++_require_btrfs_command inspect-internal dump-tree
++_require_btrfs_command property
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++# Create a snapshot and send it, so that it has the necessary fields populated
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/ro-snap &>> $seqres.full
++$BTRFS_UTIL_PROG send $SCRATCH_MNT/ro-snap -f $SCRATCH_MNT/snap.send &>>$seqres.full
++$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/ro-snap &>>$seqres.full
++$BTRFS_UTIL_PROG receive -f $SCRATCH_MNT/snap.send $SCRATCH_MNT 2>>$seqres.full
++
++# Flip the RO->RW switch and ensure that relevant fields are zeroed out
++$BTRFS_UTIL_PROG property set -ts $SCRATCH_MNT/ro-snap ro false
++
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t1 $SCRATCH_DEV | $AWK_PROG '
++	/received_uuid/ {print "received_uuid present"}
++
++	/stransid/ {
++		if ($6 != 0) {print "send trans id not 0"}
++
++		if ($8 != 0) {print "received trans id not 0"}
++	}
++
++'
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/248.out b/tests/btrfs/248.out
+new file mode 100644
+index 000000000000..58af9173bea3
+--- /dev/null
++++ b/tests/btrfs/248.out
+@@ -0,0 +1,2 @@
++QA output created by 248
++Silence is golden
+--
+2.17.1
+
