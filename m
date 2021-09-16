@@ -7,129 +7,121 @@ X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB9D6C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 21:44:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 559EAC433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 22:53:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE0B36120F
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 21:44:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3A2BB6120E
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 22:53:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237238AbhIPVqS (ORCPT
+        id S241319AbhIPWy2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Sep 2021 17:46:18 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50952 "EHLO mail.kernel.org"
+        Thu, 16 Sep 2021 18:54:28 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39630 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236462AbhIPVqR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Sep 2021 17:46:17 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A764A61206;
-        Thu, 16 Sep 2021 21:44:56 +0000 (UTC)
+        id S241276AbhIPWy1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Sep 2021 18:54:27 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8BAE46120D;
+        Thu, 16 Sep 2021 22:53:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631828696;
-        bh=aLEsIV45ZbEt9Q+0oxwp7pyFA8XgYM2WfTV0+s9OIZk=;
+        s=k20201202; t=1631832786;
+        bh=citTwsml1XSO/t1QTQ4k2wyZwIF8oGSYYQ6E9+rnQyY=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=GlNvUsYreygKl0Ueffv3PpKMWyTIyfcT9gZ2npIhbBGdxiIkJMCSIhAI/wMtHEokE
-         HOtOLFNBfSqBWnSRuTKrMY1bjIfJwOyEH0KyrE6RdjMl4iCk84XuxxCV13IJmiFhs9
-         eyVFgXqlRU/Cjw8e5T0tNYn1jgFu77cU9nhrT5z1XJtQIm/U9JHPXCHozK+5A5v1wn
-         pozVxx+kqlT/Q+RszsK64oRMzOZr55+9s5yN1MwTU/LbkoNd1Z8YKBUWD+Z1LEUJ7w
-         N5LpCVhpdD6R/aQUQ6cQI/s7L9mLA7j+H5cqJshAKRfTsSJ/eDbTTRHiBbsFvzEf0n
-         GYmFaULxqNH1w==
-Date:   Thu, 16 Sep 2021 14:44:56 -0700
+        b=hW+vw2Lf1whk0SInRDqqLh14cZeFpoghVko0tE6jNEKRtvnbiAJOleWY6DsEvA5l7
+         zaXtY2dERD1FpxR81bXcmtJzoQ1ms4p6qFVTRdhZVFx6Iz6AeruUz206BAjZpohfgN
+         Bieh+RnINhWSV8ZeTV66fftfsyABbpxN1Nuyczh0k3oJkErQekaqivfHviBhh7ez1q
+         BtDTd1mhgUrJ9QC++uld7Xnr2tQG3yPY+uGwrDD4sXiEfze9BOp6xpL/AfxeK/f9dP
+         qslIOcsqS9/gdBqjGuv9GN78sVOEob+J9Y2TgrwqGccyJIZrdghLIY4cz9qzJ+W/0Z
+         LRSO6aBmql8gQ==
+Date:   Thu, 16 Sep 2021 15:53:06 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Amir Goldstein <amir73il@gmail.com>
 Cc:     Eryu Guan <guaneryu@gmail.com>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
         fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH 7/9] tools: add missing license tags to my scripts
-Message-ID: <20210916214456.GA34846@magnolia>
+Subject: Re: [PATCH 9/9] new: don't allow new tests in group 'other'
+Message-ID: <20210916225306.GB34846@magnolia>
 References: <163174935747.380880.7635671692624086987.stgit@magnolia>
- <163174939566.380880.290670167130749389.stgit@magnolia>
- <CAOQ4uxh-_qHNRJF1Jn8A=NpFw4+8tneOMPTFE6B-Rj4ryWFeqw@mail.gmail.com>
+ <163174940659.380880.14564845266535022734.stgit@magnolia>
+ <CAOQ4uxh6fZNzCX2wAQdhmz4Z+4xGbZMF0zfSkKUZKjS0KZhpOA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxh-_qHNRJF1Jn8A=NpFw4+8tneOMPTFE6B-Rj4ryWFeqw@mail.gmail.com>
+In-Reply-To: <CAOQ4uxh6fZNzCX2wAQdhmz4Z+4xGbZMF0zfSkKUZKjS0KZhpOA@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 16, 2021 at 09:06:38AM +0300, Amir Goldstein wrote:
+On Thu, Sep 16, 2021 at 09:40:54AM +0300, Amir Goldstein wrote:
 > On Thu, Sep 16, 2021 at 2:43 AM Darrick J. Wong <djwong@kernel.org> wrote:
 > >
 > > From: Darrick J. Wong <djwong@kernel.org>
 > >
-> > I forgot to add spdx license tags and copyright statements to some of
-> > the tools that I've contributed to fstests.  Fix this to be explicit.
+> > The 'other' group is vaguely defined at best -- other than what?  It's
+> > not clear what tests belong in this group, and it has become a dumping
+> > ground for random stuff that are classified in other groups.  Don't let
+> > people create new other group tests.
 > >
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  new |    7 +++++--
+> >  1 file changed, 5 insertions(+), 2 deletions(-)
+> >
+> >
+> > diff --git a/new b/new
+> > index 6b7dc5d4..5cf96c50 100755
+> > --- a/new
+> > +++ b/new
+> > @@ -96,9 +96,9 @@ then
+> >
+> >      while true
+> >      do
+> > -       echo -n "Add to group(s) [other] (separate by space, ? for list): "
+> > +       echo -n "Add to group(s) [auto] (separate by space, ? for list): "
+> >         read ans
+> > -       [ -z "$ans" ] && ans=other
+> > +       [ -z "$ans" ] && ans=auto
+> >         if [ "X$ans" = "X?" ]
+> >         then
+> >             echo $(group_names)
+> > @@ -109,6 +109,9 @@ then
+> >                 echo "Invalid characters in group(s): $inval"
+> >                 echo "Only lower cases, digits and underscore are allowed in groups, separated by space"
+> >                 continue
+> > +           elif echo "$ans" | grep -q -w "other"; then
+> > +               echo "Do not add more tests to group \"other\"."
+> > +               continue
 > 
-> Is someone having an identity crisis? :-P
+> Should we also filter out "other" from group_names(), so it is not listed
+> for "?"?
 
-No, just an IT crisis.  @oracle.com is now exchange cloud, hence me
-moving to kernel.org mail forwarding.  For licensing things I want to
-make it clear that someone from oracle is adding an oracle copyright
-statement.
+No; there are drawbacks to that, as you point out below.
+
+> With this patch, "other" does not emit a warning when passed in as a script
+> command line argument.
+
+Done.
+
+> If we filter "other" from group_names(), then the warning in "expert mode"
+> will be a bit confusing (group "other" not defined in documentation).
+
+I will filter it out in the specific case case that the interactive user
+specified "?" to list the groups.
+
+> Also, it is not clear to me if this is intentional behavior that interactive
+> mode allows non-dcumented groups (with valid chars validation) and
+> expert mode does not allow non-documented groups?
+
+Probably not.
+
+> It may be simpler to use the same helper in both modes (is_group_valid)
+> to emit the correct warning and either proceed (expert mode) or get
+> back to prompt (interactive mode).
+
+This is getting farther afield from where I wanted this thing to go.
+Very well, I'll split the ./new cleanups into its own series, but TBH
+I've gotten tired of people asking for more and more cleanups out of me.
 
 --D
 
-> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-> 
-> > ---
-> >  common/preamble     |   21 ++++++++
-> >  doc/group-names.txt |  135 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tools/mkgroupfile   |   33 +++++++++---
-> >  3 files changed, 181 insertions(+), 8 deletions(-)
-> >  create mode 100644 doc/group-names.txt
-> >
-> >
-> > diff
-> > ---
-> >  tools/mkgroupfile |    4 +++-
-> >  tools/mvtest      |    5 ++++-
-> >  tools/nextid      |    4 +++-
-> >  3 files changed, 10 insertions(+), 3 deletions(-)
-> >
-> >
-> > diff --git a/tools/mkgroupfile b/tools/mkgroupfile
-> > index e4244507..634ec92c 100755
-> > --- a/tools/mkgroupfile
-> > +++ b/tools/mkgroupfile
-> > @@ -1,5 +1,7 @@
-> >  #!/bin/bash
-> > -
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > +#
-> >  # Generate a group file from the _begin_fstest call in each test.
-> >
-> >  if [ "$1" = "--help" ]; then
-> > diff --git a/tools/mvtest b/tools/mvtest
-> > index 5088b45f..99b15414 100755
-> > --- a/tools/mvtest
-> > +++ b/tools/mvtest
-> > @@ -1,6 +1,9 @@
-> >  #!/bin/sh
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2015 Oracle.  All Rights Reserved.
-> > +#
-> 
-> [...]
-> 
-> > diff --git a/tools/nextid b/tools/nextid
-> > index 9507de29..9e31718c 100755
-> > --- a/tools/nextid
-> > +++ b/tools/nextid
-> > @@ -1,5 +1,7 @@
-> >  #!/bin/bash
-> > -
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2015 Oracle.  All Rights Reserved.
-> > +#
-> 
-> I suppose 2015 is intentional?
-> Should it be 2015-2021? I have no idea what the legal implications
-> are, but anyway, very low probability that those scripts would end up
-> in litigation :)
-> 
 > Thanks,
 > Amir.
