@@ -2,126 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32BF2C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 21:18:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB9D6C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 21:44:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1945F6113A
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 21:18:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CE0B36120F
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Sep 2021 21:44:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239997AbhIPVT6 (ORCPT
+        id S237238AbhIPVqS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Sep 2021 17:19:58 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40128 "EHLO mail.kernel.org"
+        Thu, 16 Sep 2021 17:46:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50952 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S238340AbhIPVT5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Sep 2021 17:19:57 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1909160F8F;
-        Thu, 16 Sep 2021 21:18:36 +0000 (UTC)
+        id S236462AbhIPVqR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Sep 2021 17:46:17 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A764A61206;
+        Thu, 16 Sep 2021 21:44:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631827116;
-        bh=Aj7S6TSdOs1muBd4Yq+x62hBo15kKwVKqbt2uFFY170=;
+        s=k20201202; t=1631828696;
+        bh=aLEsIV45ZbEt9Q+0oxwp7pyFA8XgYM2WfTV0+s9OIZk=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=YLdeGsC52wekfUcun+JKsAiXb8otOFWTDMbIbOeAJ24BeWvvvYUH/Q94vhpi75sv3
-         NkkIOO0I6hhfcbS/SGXm9WFF1pPKCHU2FtcLmZdY8BSUFhdkNEGdA3CUAGrIb3R7I/
-         ZPijnMPq+ik1oCHFJwNxsDbMWm99J8J5fheOV97nR8KDBGNSVh9ooer5HrVm37inus
-         bzTZMlCtxNg0hGL/FjJHBqy6zOIb5hY3PpmiB8nmgJR5PbsD+Gk3Bnlovj4jlLaAXT
-         XM2bn6P8imtIqaoApubR2lNJk2AoTL8a3oBBhz9Hw5F3jIuul7oWhe7dbtATN+SqwU
-         P/32IPdtU6YpA==
-Date:   Thu, 16 Sep 2021 14:18:34 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Boris Burkov <boris@bur.io>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH v5 4/4] generic: test fs-verity EFBIG scenarios
-Message-ID: <YUO0qg3bqxsCy/iT@sol.localdomain>
-References: <cover.1631558495.git.boris@bur.io>
- <b1d116cd4d0ea74b9cd86f349c672021e005a75c.1631558495.git.boris@bur.io>
+        b=GlNvUsYreygKl0Ueffv3PpKMWyTIyfcT9gZ2npIhbBGdxiIkJMCSIhAI/wMtHEokE
+         HOtOLFNBfSqBWnSRuTKrMY1bjIfJwOyEH0KyrE6RdjMl4iCk84XuxxCV13IJmiFhs9
+         eyVFgXqlRU/Cjw8e5T0tNYn1jgFu77cU9nhrT5z1XJtQIm/U9JHPXCHozK+5A5v1wn
+         pozVxx+kqlT/Q+RszsK64oRMzOZr55+9s5yN1MwTU/LbkoNd1Z8YKBUWD+Z1LEUJ7w
+         N5LpCVhpdD6R/aQUQ6cQI/s7L9mLA7j+H5cqJshAKRfTsSJ/eDbTTRHiBbsFvzEf0n
+         GYmFaULxqNH1w==
+Date:   Thu, 16 Sep 2021 14:44:56 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Subject: Re: [PATCH 7/9] tools: add missing license tags to my scripts
+Message-ID: <20210916214456.GA34846@magnolia>
+References: <163174935747.380880.7635671692624086987.stgit@magnolia>
+ <163174939566.380880.290670167130749389.stgit@magnolia>
+ <CAOQ4uxh-_qHNRJF1Jn8A=NpFw4+8tneOMPTFE6B-Rj4ryWFeqw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <b1d116cd4d0ea74b9cd86f349c672021e005a75c.1631558495.git.boris@bur.io>
+In-Reply-To: <CAOQ4uxh-_qHNRJF1Jn8A=NpFw4+8tneOMPTFE6B-Rj4ryWFeqw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 13, 2021 at 11:44:37AM -0700, Boris Burkov wrote:
-> +_fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-> +# have to go back by 4096 from max to not hit the fsverity MAX_LEVELS check.
-> +truncate -s $(($max_sz - 4095)) $fsv_file
-> +_fsv_enable $fsv_file |& _filter_scratch
+On Thu, Sep 16, 2021 at 09:06:38AM +0300, Amir Goldstein wrote:
+> On Thu, Sep 16, 2021 at 2:43 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> >
+> > From: Darrick J. Wong <djwong@kernel.org>
+> >
+> > I forgot to add spdx license tags and copyright statements to some of
+> > the tools that I've contributed to fstests.  Fix this to be explicit.
+> >
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> 
+> Is someone having an identity crisis? :-P
 
-This is actually a kernel bug, so please don't work around it in the test :-(
+No, just an IT crisis.  @oracle.com is now exchange cloud, hence me
+moving to kernel.org mail forwarding.  For licensing things I want to
+make it clear that someone from oracle is adding an oracle copyright
+statement.
 
-It will be fixed by the kernel patch
-https://lore.kernel.org/linux-fscrypt/20210916203424.113376-1-ebiggers@kernel.org
+--D
 
-> +
-> +# The goal of this second test is to make a big enough file that we trip the
-> +# EFBIG codepath, but not so big that we hit it immediately as soon as we try
-> +# to write a Merkle leaf. Because of the layout of the Merkle tree that
-> +# fs-verity uses, this is a bit complicated to compute dynamically.
-> +
-> +# The layout of the Merkle tree has the leaf nodes last, but writes them first.
-> +# To get an interesting overflow, we need the start of L0 to be < MAX but the
-> +# end of the merkle tree (EOM) to be past MAX. Ideally, the start of L0 is only
-> +# just smaller than MAX, so that we don't have to write many blocks to blow up,
-> +# but we take some liberties with adding alignments rather than computing them
-> +# correctly, so we under-estimate the perfectly sized file.
-> +
-> +# We make the following assumptions to arrive at a Merkle tree layout:
-> +# The Merkle tree is stored past EOF aligned to 64k.
-> +# 4K blocks and pages
-> +# Merkle tree levels aligned to the block (not pictured)
-> +# SHA-256 hashes (32 bytes; 128 hashes per block/page)
-> +# 64 bit max file size (and thus 8 levels)
-> +
-> +# 0                        EOF round-to-64k L7L6L5 L4   L3    L2    L1  L0 MAX  EOM
-> +# |-------------------------|               ||-|--|---|----|-----|------|--|!!!!!|
-> +
-> +# Given this structure, we can compute the size of the file that yields the
-> +# desired properties. (NB the diagram skips the block alignment of each level)
-> +# sz + 64k + sz/128^8 + 4k + sz/128^7 + 4k + ... + sz/128^2 + 4k < MAX
-> +# sz + 64k + 7(4k) + sz/128^8 + sz/128^7 + ... + sz/128^2 < MAX
-> +# sz + 92k + sz/128^2 < MAX
-> +# (128^8)sz + (128^8)92k + sz + (128)sz + (128^2)sz + ... + (128^6)sz < (128^8)MAX
-> +# sz(128^8 + 128^6 + 128^5 + 128^4 + 128^3 + 128^2 + 128 + 1) < (128^8)(MAX - 92k)
-> +# sz < (128^8/(128^8 + (128^6 + ... + 128 + 1)))(MAX - 92k)
-> +#
-> +# Do the actual caclulation with 'bc' and 20 digits of precision.
-> +# set -f prevents the * from being expanded into the files in the cwd.
-> +set -f
-> +calc="scale=20; ($max_sz - 94208) * ((128^8) / (1 + 128 + 128^2 + 128^3 + 128^4 + 128^5 + 128^6 + 128^8))"
-> +sz=$(echo $calc | $BC -q | cut -d. -f1)
-> +set +f
-
-It's hard to follow the above explanation.  I'm still wondering whether it could
-be simplified a lot.  Maybe something like the following:
-
-# The goal of this second test is to make a big enough file that we trip the
-# EFBIG codepath, but not so big that we hit it immediately when writing the
-# first Merkle leaf.
-#
-# The Merkle tree is stored with the leaf node level (L0) last, but it is
-# written first.  To get an interesting overflow, we need the maximum file size
-# (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
-# don't have to write many blocks before getting an error.
-# 
-# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
-# padding, L0 is 1/128 of the file size while the other levels in total are
-# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
-# ignoring padding, for L0 start exactly at MAX, the file size must be s such
-# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
-# where MAX occurs *near* the start of L0 rather than *at* the start, we can
-# just subtract an overestimate of the padding: 64K after the file contents,
-# then 4K per level, where the consideration of 8 levels is sufficient.
-sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
-
-
-That gives a size only 4103 bytes different from your calculation, and IMO is
-much easier to understand.
-
-- Eric
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> 
+> > ---
+> >  common/preamble     |   21 ++++++++
+> >  doc/group-names.txt |  135 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tools/mkgroupfile   |   33 +++++++++---
+> >  3 files changed, 181 insertions(+), 8 deletions(-)
+> >  create mode 100644 doc/group-names.txt
+> >
+> >
+> > diff
+> > ---
+> >  tools/mkgroupfile |    4 +++-
+> >  tools/mvtest      |    5 ++++-
+> >  tools/nextid      |    4 +++-
+> >  3 files changed, 10 insertions(+), 3 deletions(-)
+> >
+> >
+> > diff --git a/tools/mkgroupfile b/tools/mkgroupfile
+> > index e4244507..634ec92c 100755
+> > --- a/tools/mkgroupfile
+> > +++ b/tools/mkgroupfile
+> > @@ -1,5 +1,7 @@
+> >  #!/bin/bash
+> > -
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> >  # Generate a group file from the _begin_fstest call in each test.
+> >
+> >  if [ "$1" = "--help" ]; then
+> > diff --git a/tools/mvtest b/tools/mvtest
+> > index 5088b45f..99b15414 100755
+> > --- a/tools/mvtest
+> > +++ b/tools/mvtest
+> > @@ -1,6 +1,9 @@
+> >  #!/bin/sh
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2015 Oracle.  All Rights Reserved.
+> > +#
+> 
+> [...]
+> 
+> > diff --git a/tools/nextid b/tools/nextid
+> > index 9507de29..9e31718c 100755
+> > --- a/tools/nextid
+> > +++ b/tools/nextid
+> > @@ -1,5 +1,7 @@
+> >  #!/bin/bash
+> > -
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2015 Oracle.  All Rights Reserved.
+> > +#
+> 
+> I suppose 2015 is intentional?
+> Should it be 2015-2021? I have no idea what the legal implications
+> are, but anyway, very low probability that those scripts would end up
+> in litigation :)
+> 
+> Thanks,
+> Amir.
