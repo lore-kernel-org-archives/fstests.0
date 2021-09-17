@@ -2,132 +2,139 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAAD6C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Sep 2021 10:42:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CB02C433FE
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Sep 2021 16:00:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 743B46120D
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Sep 2021 10:42:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 49EAA60F43
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Sep 2021 16:00:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343713AbhIQKnx (ORCPT
+        id S234914AbhIQQBX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Sep 2021 06:43:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40554 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231364AbhIQKnx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Sep 2021 06:43:53 -0400
-Received: from mail-il1-x12f.google.com (mail-il1-x12f.google.com [IPv6:2607:f8b0:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68297C061574;
-        Fri, 17 Sep 2021 03:42:31 -0700 (PDT)
-Received: by mail-il1-x12f.google.com with SMTP id m4so9808272ilj.9;
-        Fri, 17 Sep 2021 03:42:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=B59WIn6lLpW+T3exh+AhWXJEftTYi0iejRxBk6P7bvk=;
-        b=fmHMlfsAcIjVDJ+V9aw6JMVWUJWea+pDPnOwO/6XJQPfJ2jcw4EDbMwKmeLCCjncG4
-         A3lY1XAONnNQMgj5RioisVSdb7g02h2P+EHYbYva2Njw8YOWFrNE9iFHvKF7fIXP/MBR
-         TadqD9XVhebwgGG4sotww0+BtetEc3+2oZ6E6VkQN7dvzSJVsqi/gKiWWQugF1RKjDud
-         yafhv08c8h4mrfS7k9gth8t0lAmBrCjOGr6jknE+e/GUjgyrUfGkSAisK7ILIKYUXpPc
-         KbIM+aJY7WAIdOpd+Aih0CVDMpzIawfDYJspB3KQZf8CleSYyMgAhBXqQmt0jrC4/Yuc
-         1Qgg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=B59WIn6lLpW+T3exh+AhWXJEftTYi0iejRxBk6P7bvk=;
-        b=Q5XW2owO5M+JQEPVAsPlPrl8zXeSTTxKlE+6xNe+oOtDbE1XYULIql4uzkkl+YulL6
-         Wiqj6P+PSDhfpkp0jwJHRePsj/nc3WNHUDNYgUeJGE0naBYiZuQsxJcbC0EZnWEilmxz
-         gjwZfEiUnBh9wCOMVzbfXXVonhg1E8vAzlUVD4eLP9LwOBEZhPIuNwg+WVCt9OdDZVE9
-         Qy7Px6jLpYXlLHsiZ0EITvzrUDDmGxg+fH4kYO1EgwBeqw/k70G2W0B7JyVNi9JLWbUi
-         3JXGHuLehQVxu7xZX/jFyZboDNgIZgOf7eEIILSovdGIVr1+YV5+vd0piL/zRxUH+CUI
-         mAxw==
-X-Gm-Message-State: AOAM530u5oVY5yDU4EYaheoYHGmNQzjZrniZ5HO0EBa2n8nFUns19RK4
-        uChKy2HO4JCqYaiDJPpNld52Y/w1ySfVCakaz0w=
-X-Google-Smtp-Source: ABdhPJzPEQJY44CpnTx6w2g5NQ1AThmD4Cf5x9UjRKefkfIwkABnmVPfyfB4KT5wFBXtPEwVLNaykfVKa+j661imoqY=
-X-Received: by 2002:a05:6e02:1a67:: with SMTP id w7mr7435498ilv.24.1631875350690;
- Fri, 17 Sep 2021 03:42:30 -0700 (PDT)
-MIME-Version: 1.0
-References: <163183918998.953189.9876855385681643134.stgit@magnolia> <163183920637.953189.13037781612178012211.stgit@magnolia>
-In-Reply-To: <163183920637.953189.13037781612178012211.stgit@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 17 Sep 2021 13:42:19 +0300
-Message-ID: <CAOQ4uxiTu-b2HAQiFrtbziUKKxKwKjJe2fVnKiVM=AAm_9bXyg@mail.gmail.com>
-Subject: Re: [PATCH 3/3] new: don't allow new tests in group 'other'
-To:     "Darrick J. Wong" <djwong@kernel.org>
+        Fri, 17 Sep 2021 12:01:23 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51946 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229553AbhIQQBX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Sep 2021 12:01:23 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 255B661019;
+        Fri, 17 Sep 2021 16:00:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1631894401;
+        bh=5ajiJ7iHk5eR9Bt5z3D/ZQHJwfEgy4mmvqGfWLY2BFg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=RWE31FD47PGp3YPi66J7WgrniAXZDN3KZTisQ6rk2akztof5zYLI8gAcv7prTzmNo
+         45j0Zdwn+jtLU+tbhlHMxGzL5FTUW/dUvy/bJqhCkkoucsimQYrwB8HmoXhtmjBYQ2
+         JLrmTgy81XF8yz60+DS53EYX47Lfuv/bpWkDMaC5AFQ3QqnnsAMCvF11CxzLZQkvZo
+         fpsMZKj7Pexd7DzuMYpmV2a/cShnquYfHdj5lE7UlHaumMoMXTbRXILwNKlK1K/8js
+         krmmLC2uKX7YsESA9luoOejpI0+yM3CDTgySWPPodIxstv8lgIlZPU8q8tB5mAY+NN
+         wFTqJeo2LKXyQ==
+Date:   Fri, 17 Sep 2021 09:00:00 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
 Cc:     Eryu Guan <guaneryu@gmail.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
         fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH 9/9] new: don't allow new tests in group 'other'
+Message-ID: <20210917160000.GA10224@magnolia>
+References: <163174935747.380880.7635671692624086987.stgit@magnolia>
+ <163174940659.380880.14564845266535022734.stgit@magnolia>
+ <CAOQ4uxh6fZNzCX2wAQdhmz4Z+4xGbZMF0zfSkKUZKjS0KZhpOA@mail.gmail.com>
+ <20210916225306.GB34846@magnolia>
+ <CAOQ4uxiXFw9t61S3J3MPULqrS9RvGEUPQf3Eq54P9qtjL8zMcw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxiXFw9t61S3J3MPULqrS9RvGEUPQf3Eq54P9qtjL8zMcw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 17, 2021 at 12:57 PM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> From: Darrick J. Wong <djwong@kernel.org>
->
-> The 'other' group is vaguely defined at best -- other than what?  It's
-> not clear what tests belong in this group, and it has become a dumping
-> ground for random stuff that are classified in other groups.  Don't let
-> people create new other group tests.
->
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+On Fri, Sep 17, 2021 at 05:31:25AM +0300, Amir Goldstein wrote:
+> On Fri, Sep 17, 2021 at 1:53 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> >
+> > On Thu, Sep 16, 2021 at 09:40:54AM +0300, Amir Goldstein wrote:
+> > > On Thu, Sep 16, 2021 at 2:43 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> > > >
+> > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > >
+> > > > The 'other' group is vaguely defined at best -- other than what?  It's
+> > > > not clear what tests belong in this group, and it has become a dumping
+> > > > ground for random stuff that are classified in other groups.  Don't let
+> > > > people create new other group tests.
+> > > >
+> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > > ---
+> > > >  new |    7 +++++--
+> > > >  1 file changed, 5 insertions(+), 2 deletions(-)
+> > > >
+> > > >
+> > > > diff --git a/new b/new
+> > > > index 6b7dc5d4..5cf96c50 100755
+> > > > --- a/new
+> > > > +++ b/new
+> > > > @@ -96,9 +96,9 @@ then
+> > > >
+> > > >      while true
+> > > >      do
+> > > > -       echo -n "Add to group(s) [other] (separate by space, ? for list): "
+> > > > +       echo -n "Add to group(s) [auto] (separate by space, ? for list): "
+> > > >         read ans
+> > > > -       [ -z "$ans" ] && ans=other
+> > > > +       [ -z "$ans" ] && ans=auto
+> > > >         if [ "X$ans" = "X?" ]
+> > > >         then
+> > > >             echo $(group_names)
+> > > > @@ -109,6 +109,9 @@ then
+> > > >                 echo "Invalid characters in group(s): $inval"
+> > > >                 echo "Only lower cases, digits and underscore are allowed in groups, separated by space"
+> > > >                 continue
+> > > > +           elif echo "$ans" | grep -q -w "other"; then
+> > > > +               echo "Do not add more tests to group \"other\"."
+> > > > +               continue
+> > >
+> > > Should we also filter out "other" from group_names(), so it is not listed
+> > > for "?"?
+> >
+> > No; there are drawbacks to that, as you point out below.
+> >
+> > > With this patch, "other" does not emit a warning when passed in as a script
+> > > command line argument.
+> >
+> > Done.
+> >
+> > > If we filter "other" from group_names(), then the warning in "expert mode"
+> > > will be a bit confusing (group "other" not defined in documentation).
+> >
+> > I will filter it out in the specific case case that the interactive user
+> > specified "?" to list the groups.
+> >
+> > > Also, it is not clear to me if this is intentional behavior that interactive
+> > > mode allows non-dcumented groups (with valid chars validation) and
+> > > expert mode does not allow non-documented groups?
+> >
+> > Probably not.
+> >
+> > > It may be simpler to use the same helper in both modes (is_group_valid)
+> > > to emit the correct warning and either proceed (expert mode) or get
+> > > back to prompt (interactive mode).
+> >
+> > This is getting farther afield from where I wanted this thing to go.
+> > Very well, I'll split the ./new cleanups into its own series, but TBH
+> > I've gotten tired of people asking for more and more cleanups out of me.
+> >
+> 
+> Fair enough.
+> TBH I just wanted to point out the inconsistencies that I noticed.
+> I don't really mind if they are fixed.
+> I should have been more clear about this point.
 
-> ---
->  new |    9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
->
->
-> diff --git a/new b/new
-> index 3a657d20..9651e0e0 100755
-> --- a/new
-> +++ b/new
-> @@ -100,6 +100,9 @@ check_groups() {
->                         echo "Invalid characters in group(s): ${inval}"
->                         echo "Only lower cases, digits and underscore are allowed in groups, separated by space"
->                         return 1
-> +               elif [ "${g}" = "other" ]; then
-> +                       echo "Do not add more tests to group \"other\""
-> +                       return 1
->                 elif ! group_names | grep -q -w "${g}"; then
->                         echo "Warning: group \"${g}\" not defined in documentation"
->                         return 1
-> @@ -111,16 +114,16 @@ check_groups() {
->
->  if [ $# -eq 0 ]; then
->         # interactive mode
-> -       prompt="Add to group(s) [other] (separate by space, ? for list): "
-> +       prompt="Add to group(s) [auto] (separate by space, ? for list): "
->         while true; do
->                 read -p "${prompt}" -a new_groups || exit 1
->                 case "${#new_groups[@]}" in
->                 0)
-> -                       new_groups=("other")
-> +                       new_groups=("auto")
->                         ;;
->                 1)
->                         if [ "${new_groups[0]}" = "?" ]; then
-> -                               echo $(group_names)
-> +                               echo $(group_names | grep -v -w 'other')
->                                 continue
->                         fi
->                         ;;
->
+Oh.  Well thank you for reviewing this series and the ./new cleanups. :)
 
-Darrick,
+--D
 
-Thanks for the first cleanup and for this extra cleanup.
-I wanted to point out that with this patch there is no implication
-to filtering out "other" in group_names() SHOULD you think
-this is better. I definitely have no problem with the patch as is!
-
-Thanks,
-Amir.
+> Thanks,
+> Amir.
