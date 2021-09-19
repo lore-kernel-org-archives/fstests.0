@@ -2,243 +2,402 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 686BFC433F5
-	for <linux-fstests@archiver.kernel.org>; Sat, 18 Sep 2021 00:49:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBE2FC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Sep 2021 07:18:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4329E611C3
-	for <linux-fstests@archiver.kernel.org>; Sat, 18 Sep 2021 00:49:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CEEB160F93
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Sep 2021 07:18:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231519AbhIRAu3 (ORCPT
+        id S233741AbhISHTc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Sep 2021 20:50:29 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57472 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229890AbhIRAu2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Sep 2021 20:50:28 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6880E61076;
-        Sat, 18 Sep 2021 00:49:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631926144;
-        bh=nZawf79N9rG0gQ1ZmNXMSGQTVVMHE5S7FUBj4Xrk7jQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=GES1qbopnNcY5MqQ7+SPw6+2Vo4+3B6R4yuBFUsapaIqLq1m/1H3ye/+mQE4W/72l
-         Is9L/GA+p/6VvrAZPXXllKAcEbtAvkfbRaoIrEEFSesEaBPs/4+YQDqlxWnoYm7Iom
-         EtFm0Ul1mcwf5ZBsknnmZ6vrydEQxUJwOyF66Rm3ZG1jCkLW5wwajAKNq59CcJdtfK
-         SCCb1QxeFNa/j7Redn9CEfwJ9H3gujD7qVtMo2c7AI49oPOWFlhah4A2hBEMgTxK97
-         pyqZ9VUGVmA+E7QnjTVV87AHrIcMoEWj+YRIb2lJ1gNowJuzZXqSXj9w4cdQG0ye6l
-         U8lNo4jZz2kWA==
-Date:   Fri, 17 Sep 2021 17:49:04 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     riteshh <riteshh@linux.ibm.com>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me, osandov@fb.com
-Subject: Re: [PATCH 2/1] common/rc: use directio mode for the loop device
- when possible
-Message-ID: <20210918004904.GB10197@magnolia>
-References: <163174932046.379383.10637812567210248503.stgit@magnolia>
- <20210917004829.GD34874@magnolia>
- <20210917201451.s7235mmlnsez3kqb@riteshh-domain>
+        Sun, 19 Sep 2021 03:19:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36092 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232832AbhISHTa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Sep 2021 03:19:30 -0400
+Received: from mail-oi1-x231.google.com (mail-oi1-x231.google.com [IPv6:2607:f8b0:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06C8DC061574
+        for <fstests@vger.kernel.org>; Sun, 19 Sep 2021 00:18:06 -0700 (PDT)
+Received: by mail-oi1-x231.google.com with SMTP id 6so20340775oiy.8
+        for <fstests@vger.kernel.org>; Sun, 19 Sep 2021 00:18:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Ul1CFC5mSqJCSCt5ThlKehdpuyFzcM9RjNVreH2eZ1U=;
+        b=dWJ193V6XIVvsm/H0gE9d/520kga2TglsFzVmsiZwHkhSnm4KwvOVTS+rgwS7CTEBV
+         ZQIcksCyI3NoOSrlHAj81RbtoBY7MzX5wvi0VMV3vkOsaJL2ZHYg5rajcw0fCWOpx/Py
+         Vgp6CvPUeEf1AMfqsJkUQJ6/oGuDRLNDXwI3E9Vv0F/6TKNnOPwjiTubKn0w2BRuVxa3
+         u46RY9MbI5T9JlJn9u0TcuJ7MbXq6s4Zf+jF/bZTiE1APCoMJJZ96/zcFXk1w47U8bmR
+         HuJHKeAlKh9D0ATbgx4dpYXO9OiSTU4/97vINVQpGY8cWlP3TssYbTvje4J2GPR4tegt
+         4fHw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Ul1CFC5mSqJCSCt5ThlKehdpuyFzcM9RjNVreH2eZ1U=;
+        b=NFsraZeY8Haz+PndIDBRiZolZmz5o8u+Pz1I3qMeCw6ZKoFw/0847WQvojLhHcwWW0
+         Amh9+YdMllhzFvgHyiy/BQD0aGM3haUG95oee1XLG7lgFAgoU4s+GiFYf1+26kSJGP0b
+         Wfigiu1N1sGZtmfXpzqzZKSmAm4VhmNwPdbt1/yetqNUAQhTfBlIDG9YRaKiEtopBPA3
+         oMFg5l3KJNr3LXSMED9e+NqXvdH8t03LEiblrrerEu7v0W/cQhuhkSm408ueuBd+bnda
+         DEDaIHebbaCFNNi0oLD2jsKADgfbWNy17QqHwwhrMKIRCtmHSTUagEBsgOr/UeHmtjX2
+         z5+A==
+X-Gm-Message-State: AOAM530tSGcugw8izTK73OcXFtv8ZNm3xYd0/zYt7zJB5FKZC3hCteBj
+        smP2SPCjD46ekf7Rg7Y64Fe6jMjffzLB2dNQhVzD4EJ+TKQ=
+X-Google-Smtp-Source: ABdhPJzfqFaq6oHis+KdEW+eOcQvr+EDi2Cs+oU0W/CivQOVvGtmThVjYhTOVLFMpK6Ybg1cF65XvZwMRQWTrmnYi+E=
+X-Received: by 2002:a05:6808:1525:: with SMTP id u37mr18887506oiw.33.1632035879340;
+ Sun, 19 Sep 2021 00:17:59 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210917201451.s7235mmlnsez3kqb@riteshh-domain>
+References: <20210812045950.3190-1-bhumit.attarde01@gmail.com> <YRkg5GrK0XnD1fZZ@desktop>
+In-Reply-To: <YRkg5GrK0XnD1fZZ@desktop>
+From:   Bhumit Attarde <bhumitattarde01@gmail.com>
+Date:   Sun, 19 Sep 2021 12:47:48 +0530
+Message-ID: <CANb_4Ap9FUjLGxTQjtBn5LNdEzScV63tC-0G-=_3K0QO6pj+9A@mail.gmail.com>
+Subject: Re: [PATCH 1/1] Added FUSE support
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Sep 18, 2021 at 01:44:51AM +0530, riteshh wrote:
-> On 21/09/16 05:48PM, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> >
-> > Recently, I've been observing very high runtimes of tests that format a
-> > filesystem atop a loop device and write enough data to fill memory, such
-> > as generic/590 and generic/361.  Logging into the test VMs, I noticed
-> > that the writes to the file on the upper filesystem started fast, but
-> > soon slowed down to about 500KB/s and stayed that way for nearly 20
-> > minutes.  Looking through the D-state processes on the system revealed:
-> >
-> > /proc/4350/comm = xfs_io
-> > /proc/4350/stack : [<0>] balance_dirty_pages+0x332/0xda0
-> > [<0>] balance_dirty_pages_ratelimited+0x304/0x400
-> > [<0>] iomap_file_buffered_write+0x1ab/0x260
-> > [<0>] xfs_file_buffered_write+0xba/0x330 [xfs]
-> > [<0>] new_sync_write+0x119/0x1a0
-> > [<0>] vfs_write+0x274/0x310
-> > [<0>] __x64_sys_pwrite64+0x89/0xc0
-> > [<0>] do_syscall_64+0x35/0x80
-> > [<0>] entry_SYSCALL_64_after_hwframe+0x44/0xae
-> >
-> > Here's the xfs_io process performing a buffered write to the file on the
-> > upper filesystem, which at this point has dirtied enough pages to be
-> > ratelimited.
-> >
-> > /proc/28/comm = u10:0+flush-8:80
-> > /proc/28/stack : [<0>] blk_mq_get_tag+0x11c/0x280
-> > [<0>] __blk_mq_alloc_request+0xce/0xf0
-> > [<0>] blk_mq_submit_bio+0x139/0x5b0
-> > [<0>] submit_bio_noacct+0x3ba/0x430
-> > [<0>] iomap_submit_ioend+0x4b/0x70
-> > [<0>] xfs_vm_writepages+0x86/0x170 [xfs]
-> > [<0>] do_writepages+0xcc/0x200
-> > [<0>] __writeback_single_inode+0x3d/0x300
-> > [<0>] writeback_sb_inodes+0x207/0x4a0
-> > [<0>] __writeback_inodes_wb+0x4c/0xe0
-> > [<0>] wb_writeback+0x1da/0x2c0
-> > [<0>] wb_workfn+0x2ad/0x4f0
-> > [<0>] process_one_work+0x1e2/0x3d0
-> > [<0>] worker_thread+0x53/0x3c0
-> > [<0>] kthread+0x149/0x170
-> > [<0>] ret_from_fork+0x1f/0x30
-> >
-> > This is a flusher thread that has invoked writeback on the upper
-> > filesystem to try to clean memory pages.
-> >
-> > /proc/89/comm = u10:7+loop0
-> > /proc/89/stack : [<0>] balance_dirty_pages+0x332/0xda0
-> > [<0>] balance_dirty_pages_ratelimited+0x304/0x400
-> > [<0>] iomap_file_buffered_write+0x1ab/0x260
-> > [<0>] xfs_file_buffered_write+0xba/0x330 [xfs]
-> > [<0>] do_iter_readv_writev+0x14f/0x1a0
-> > [<0>] do_iter_write+0x7b/0x1c0
-> > [<0>] lo_write_bvec+0x62/0x1c0
-> > [<0>] loop_process_work+0x3a4/0xba0
-> > [<0>] process_one_work+0x1e2/0x3d0
-> > [<0>] worker_thread+0x53/0x3c0
-> > [<0>] kthread+0x149/0x170
-> > [<0>] ret_from_fork+0x1f/0x30
-> >
-> > Here's the loop device worker handling the writeback IO submitted by the
-> > flusher thread.  Unfortunately, the loop device is using buffered write
-> > mode, which means that /writeback/ is dirtying pages and being throttled
-> > for that.  This is stupid.
-> >
-> > Fix this by trying to enable "directio" mode on the loop device, which
-> > delivers two performance benefits: setting directio mode also enables
-> > async io mode, which will allow multiple IOs at once; and using directio
-> > nearly eliminates the chance that writeback will get throttled.
-> >
-> > On the author's system with fast storage, this reduces the runtime of
-> > g/590 from 20 minutes to 12 seconds, and g/361 from ~30s to ~3s.
-> >
-> 
-> Above observations looked interesting to me. I then happen to test it on
-> my setup and also observe such behavior. But I really don't see the timings
-> improvements as such. Both before and after the test g/590 took 90-95secs.
-> I did verify that after this patch applied, I was mostly seeing DIO path for
-> writes to ext4 FS.
+Apologies for the delayed response, too many things going on.
 
-Hm.  I would have thought that we'd see /some/ benefit to ext4 as well,
-but I guess it would depend on how much writeback ext4 will push at
-once?  i.e. if it issues smallish bios (unlike xfs, which will do
-megabytes at once) then that might influence what you see.
+> I think we could set different 'dev' for TEST_DEV and SCRATCH_DEV, e.g.
+>
+> TEST_DEV=fuse_test
+> SCRATCH_DEV=fuse_scratch
+>
+> And the "This check doesn't apply to FUSE since both mounts have the
+> same device" check could be removed.
 
---D
+We did actually try setting different `dev` for TEST_DEV and
+SCRATCH_DEV, but it doesn't work for certain FUSE applications like
+KIO-FUSE, which is also the reason FUSE check is added (XFSTESTS
+complaints that the device is already mounted and aborts). An
+application like KIO-FUSE has the same dev name (`kio-fuse`) for all
+FUSE mounts and deliberately setting different dev names not only
+doesn't work at all but, in my opinion, also feels a little hacky.
 
-> 
-> Note: I had ext4 as my root filesystem where fs images were kept for testfs and
-> scratchfs.
-> 
-> <pasting call stack observed>
-> PID: 6010   TASK: c000000030833380  CPU: 18  COMMAND: "kworker/u64:10"
->  #0 [c00000002a787480] __schedule at c00000000139ba50
->  #1 [c00000002a787550] schedule at c00000000139bcc4
->  #2 [c00000002a787580] schedule_timeout at c0000000013a42bc
->  #3 [c00000002a787650] io_schedule_timeout at c00000000139abe8
->  #4 [c00000002a787680] balance_dirty_pages_ratelimited at c0000000004b01c0
->  #5 [c00000002a787810] generic_perform_write at c0000000004965bc
->  #6 [c00000002a787900] ext4_buffered_write_iter at c00000000077f3e4
->  #7 [c00000002a787950] do_iter_readv_writev at c0000000005ef3a0
->  #8 [c00000002a7879c0] do_iter_write at c0000000005f2568
->  #9 [c00000002a787a10] lo_write_bvec at c000000000e506e8
-> #10 [c00000002a787ad0] loop_process_work at c000000000e523c4
-> #11 [c00000002a787c40] process_one_work at c00000000020e8d0
-> #12 [c00000002a787d10] worker_thread at c00000000020ef7c
-> #13 [c00000002a787da0] kthread at c00000000021cb74
-> #14 [c00000002a787e10] ret_from_kernel_thread at c00000000000cfd4
-> 
-> PID: 20175  TASK: c000000031de9980  CPU: 23  COMMAND: "kworker/u64:8"
->  #0 [c000000023967360] __schedule at c00000000139ba50
->  #1 [c000000023967430] schedule at c00000000139bcc4
->  #2 [c000000023967460] schedule_timeout at c0000000013a42bc
->  #3 [c000000023967530] io_schedule_timeout at c00000000139abe8
->  #4 [c000000023967560] balance_dirty_pages_ratelimited at c0000000004b01c0
->  #5 [c0000000239676f0] iomap_file_buffered_write at c0000000006e3018
->  #6 [c0000000239678a0] xfs_file_buffered_write at c0000000009d9d20
->  #7 [c000000023967950] do_iter_readv_writev at c0000000005ef3a0
->  #8 [c0000000239679c0] do_iter_write at c0000000005f2568
->  #9 [c000000023967a10] lo_write_bvec at c000000000e506e8
-> #10 [c000000023967ad0] loop_process_work at c000000000e523c4
-> #11 [c000000023967c40] process_one_work at c00000000020e8d0
-> #12 [c000000023967d10] worker_thread at c00000000020ef7c
-> #13 [c000000023967da0] kthread at c00000000021cb74
-> #14 [c000000023967e10] ret_from_kernel_thread at c00000000000cfd4
-> 
-> PID: 23482  TASK: c000000008e3cc80  CPU: 1   COMMAND: "kworker/u64:3"
->  #0 [c0000000297c7160] __schedule at c00000000139ba50
->  #1 [c0000000297c7230] schedule at c00000000139bcc4
->  #2 [c0000000297c7260] io_schedule at c00000000139bdd4
->  #3 [c0000000297c7290] blk_mq_get_tag at c000000000c4483c
->  #4 [c0000000297c7320] __blk_mq_alloc_request at c000000000c3b038
->  #5 [c0000000297c7360] blk_mq_submit_bio at c000000000c403dc
->  #6 [c0000000297c7410] submit_bio_noacct at c000000000c2cc38
->  #7 [c0000000297c74c0] iomap_do_writepage at c0000000006e2308
->  #8 [c0000000297c75a0] write_cache_pages at c0000000004b0fb4
->  #9 [c0000000297c76e0] iomap_writepages at c0000000006df2bc
-> #10 [c0000000297c7710] xfs_vm_writepages at c0000000009c2f2c
-> #11 [c0000000297c77d0] do_writepages at c0000000004b28e0
-> #12 [c0000000297c7890] __writeback_single_inode at c00000000064ea4c
-> #13 [c0000000297c7900] writeback_sb_inodes at c00000000064f954
-> #14 [c0000000297c79f0] __writeback_inodes_wb at c00000000064fdc4
-> #15 [c0000000297c7a50] wb_writeback at c0000000006500fc
-> #16 [c0000000297c7b00] wb_workfn at c000000000651908
-> #17 [c0000000297c7c40] process_one_work at c00000000020e8d0
-> #18 [c0000000297c7d10] worker_thread at c00000000020ef7c
-> #19 [c0000000297c7da0] kthread at c00000000021cb74
-> #20 [c0000000297c7e10] ret_from_kernel_thread at c00000000000cfd4
-> 
-> PID: 26082  TASK: c000000029740080  CPU: 3   COMMAND: "xfs_io"
->  #0 [c000000031937610] __schedule at c00000000139ba50
->  #1 [c0000000319376e0] schedule at c00000000139bcc4
->  #2 [c000000031937710] schedule_timeout at c0000000013a42bc
->  #3 [c0000000319377e0] io_schedule_timeout at c00000000139abe8
->  #4 [c000000031937810] balance_dirty_pages_ratelimited at c0000000004b01c0
->  #5 [c0000000319379a0] iomap_file_buffered_write at c0000000006e3018
->  #6 [c000000031937b50] xfs_file_buffered_write at c0000000009d9d20
->  #7 [c000000031937c00] new_sync_write at c0000000005ef194
->  #8 [c000000031937ca0] vfs_write at c0000000005f3bb4
->  #9 [c000000031937cf0] sys_pwrite64 at c0000000005f3f3c
-> #10 [c000000031937d50] system_call_exception at c000000000035ba0
-> #11 [c000000031937e10] system_call_common at c00000000000c764
-> 
-> 
-> -ritesh
-> 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Set MOUNT_OPTIONS should be fine here.
+>
+> And we should set "subtype" in options as well, i.e.
+>
+> MOUNT_OPTIONS="-o source=/home/test/scratch,allow_other, default_permissions,subtype=passthrough_ll"
+>
+> Otherwise the filesystem type printed by mount of a passthrough_ll mount
+> is only "fuse" and doesn't contain the subtype, and _check_mounted_on()
+> will fail the check.
+>
+> Should do the same to _test_mount().
+
+Will make these changes.
+
+> Update DF_PROG definition instead, so all callers of $DF_PROG would
+> print fuse mounts correctly.
+
+This for some reason is not producing the same results for us, will
+look into this more.
+
+Best,
+Bhumit Attarde
+
+
+On Sun, 15 Aug 2021 at 19:43, Eryu Guan <guan@eryu.me> wrote:
+>
+> On Thu, Aug 12, 2021 at 10:29:50AM +0530, Bhumit Attarde wrote:
+> > This allows any FUSE filesystem that can mounted like
+> > `mount -t fuse.$FUSE_SUBTYP`
+> > to be tested using XFSTESTS.
+> >
+> > This patch is an improvment on the patch originally submitted by Miklos
+> > Szeredi.
+> >
+> > Signed-off-by: Bhumit Attarde <bhumit.attarde01@gmail.com>
 > > ---
-> >  common/rc |    8 ++++++++
-> >  1 file changed, 8 insertions(+)
+> >  README.fuse   | 29 +++++++++++++++++++++++++++++
+> >  check         |  2 ++
+> >  common/attr   |  4 ++--
+> >  common/config | 10 ++++++++--
+> >  common/rc     | 31 +++++++++++++++++++++++--------
+> >  5 files changed, 64 insertions(+), 12 deletions(-)
+> >  create mode 100644 README.fuse
 > >
+> > diff --git a/README.fuse b/README.fuse
+> > new file mode 100644
+> > index 00000000..839db5dd
+> > --- /dev/null
+> > +++ b/README.fuse
+> > @@ -0,0 +1,29 @@
+> > +Make sure you've followed instructions from the principal README.
+> > +Instructions to test FUSE using the passthrough_ll example filesystem provided in the libfuse source tree:
+> > +
+> > +git clone git://github.com/libfuse/libfuse.git
+> > +cd libfuse
+> > +meson build
+> > +cd build
+> > +ninja
+> > +cp example/passthrough_ll /usr/bin
+> > +cd
+> > +cat << 'EOF' > /sbin/mount.fuse.passthrough_ll
+> > +#!/bin/bash
+> > +ulimit -n 1048576
+> > +exec /usr/bin/passthrough_ll -ofsname="$@"
+> > +EOF
+> > +chmod +x /sbin/mount.fuse.passthrough_ll
+> > +mkdir -p /mnt/test /mnt/scratch /home/test/test /home/test/scratch
+> > +
+> > +
+> > +Use the following config file:
+> > +
+> > +export TEST_DEV=passthrough_ll
+> > +export TEST_DIR=/mnt/test
+> > +export SCRATCH_DEV=passthrough_ll
+>
+> I think we could set different 'dev' for TEST_DEV and SCRATCH_DEV, e.g.
+>
+> TEST_DEV=fuse_test
+> SCRATCH_DEV=fuse_scratch
+>
+> And the "This check doesn't apply to FUSE since both mounts have the
+> same device" check could be removed.
+>
+> > +export SCRATCH_MNT=/mnt/scratch
+> > +export FSTYP=fuse
+> > +export FUSE_SUBTYP=.passthrough_ll
+> > +export FUSE_MOUNT_OPTIONS="-osource=/home/test/scratch,allow_other,default_permissions"
+>
+> Set MOUNT_OPTIONS should be fine here.
+>
+> And we should set "subtype" in options as well, i.e.
+>
+> MOUNT_OPTIONS="-o source=/home/test/scratch,allow_other, default_permissions,subtype=passthrough_ll"
+>
+> Otherwise the filesystem type printed by mount of a passthrough_ll mount
+> is only "fuse" and doesn't contain the subtype, and _check_mounted_on()
+> will fail the check.
+>
+> > +export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,allow_other,default_permissions"
+> > diff --git a/check b/check
+> > index a0863121..bae9fddd 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -59,6 +59,7 @@ check options
+> >      -glusterfs               test GlusterFS
+> >      -cifs            test CIFS
+> >      -9p                      test 9p
+> > +    -fuse            test fuse
+> >      -virtiofs                test virtiofs
+> >      -overlay         test overlay
+> >      -pvfs2           test PVFS2
+> > @@ -281,6 +282,7 @@ while [ $# -gt 0 ]; do
+> >       -glusterfs)     FSTYP=glusterfs ;;
+> >       -cifs)          FSTYP=cifs ;;
+> >       -9p)            FSTYP=9p ;;
+> > +     -fuse)          FSTYP=fuse ;;
+> >       -virtiofs)      FSTYP=virtiofs ;;
+> >       -overlay)       FSTYP=overlay; export OVERLAY=true ;;
+> >       -pvfs2)         FSTYP=pvfs2 ;;
+> > diff --git a/common/attr b/common/attr
+> > index 35682d7c..f3342d25 100644
+> > --- a/common/attr
+> > +++ b/common/attr
+> > @@ -253,7 +253,7 @@ _getfattr()
+> >
+> >  # set maximum total attr space based on fs type
+> >  case "$FSTYP" in
+> > -xfs|udf|pvfs2|9p|ceph|nfs)
+> > +xfs|udf|pvfs2|9p|ceph|nfs|fuse)
+> >       MAX_ATTRS=1000
+> >       ;;
+> >  ext2|ext3|ext4)
+> > @@ -312,7 +312,7 @@ xfs|udf|btrfs)
+> >  pvfs2)
+> >       MAX_ATTRVAL_SIZE=8192
+> >       ;;
+> > -9p|ceph|nfs)
+> > +9p|ceph|nfs|fuse)
+> >       MAX_ATTRVAL_SIZE=65536
+> >       ;;
+> >  bcachefs)
+> > diff --git a/common/config b/common/config
+> > index 005fd50a..8203492d 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -305,6 +305,9 @@ _mount_opts()
+> >       9p)
+> >               export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
+> >               ;;
+> > +     fuse)
+> > +             export MOUNT_OPTIONS=$FUSE_MOUNT_OPTIONS
+> > +             ;;
+> >       xfs)
+> >               export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
+> >               ;;
+> > @@ -363,6 +366,9 @@ _test_mount_opts()
+> >       9p)
+> >               export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
+> >               ;;
+> > +     fuse)
+> > +             export TEST_FS_MOUNT_OPTS=$FUSE_MOUNT_OPTIONS
+> > +             ;;
+> >       cifs)
+> >               export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+> >               ;;
+> > @@ -501,8 +507,8 @@ _check_device()
+> >       fi
+> >
+> >       case "$FSTYP" in
+> > -     9p|tmpfs|virtiofs)
+> > -             # 9p and virtiofs mount tags are just plain strings, so anything is allowed
+> > +     9p|fuse|tmpfs|virtiofs)
+> > +             # 9p, fuse and virtiofs mount tags are just plain strings, so anything is allowed
+> >               # tmpfs doesn't use mount source, ignore
+> >               ;;
+> >       overlay)
 > > diff --git a/common/rc b/common/rc
-> > index 275b1f24..a174b695 100644
+> > index d4b1f21f..1ae0746a 100644
 > > --- a/common/rc
 > > +++ b/common/rc
-> > @@ -3849,6 +3849,14 @@ _create_loop_device()
-> >  {
-> >  	local file=$1 dev
-> >  	dev=`losetup -f --show $file` || _fail "Cannot assign $file to a loop device"
-> > +
-> > +	# Try to enable asynchronous directio mode on the loopback device so
-> > +	# that writeback started by a filesystem mounted on the loop device
-> > +	# won't be throttled by buffered writes to the lower filesystem.  This
-> > +	# is a performance optimization for tests that want to write a lot of
-> > +	# data, so it isn't required to work.
-> > +	test -b "$dev" && losetup --direct-io=on $dev 2> /dev/null
-> > +
-> >  	echo $dev
+> > @@ -127,6 +127,8 @@ case "$FSTYP" in
+> >        ;;
+> >      9p)
+> >        ;;
+> > +    fuse)
+> > +      ;;
+> >      ceph)
+> >        . ./common/ceph
+> >        ;;
+> > @@ -333,7 +335,7 @@ _try_scratch_mount()
+> >               _overlay_scratch_mount $*
+> >               return $?
+> >       fi
+> > -     _mount -t $FSTYP `_scratch_mount_options $*`
+> > +     _mount -t $FSTYP$FUSE_SUBTYP `_scratch_mount_options $*`
+>
+> Should do the same to _test_mount().
+>
 > >  }
 > >
+> >  # mount scratch device with given options and _fail if mount fails
+> > @@ -643,6 +645,9 @@ _test_mkfs()
+> >      9p)
+> >       # do nothing for 9p
+> >       ;;
+> > +    fuse)
+> > +     # do nothing for fuse
+> > +     ;;
+> >      virtiofs)
+> >       # do nothing for virtiofs
+> >       ;;
+> > @@ -683,6 +688,9 @@ _mkfs_dev()
+> >      9p)
+> >       # do nothing for 9p
+> >       ;;
+> > +    fuse)
+> > +     # do nothing for fuse
+> > +     ;;
+> >      virtiofs)
+> >       # do nothing for virtiofs
+> >       ;;
+> > @@ -750,7 +758,7 @@ _scratch_mkfs()
+> >       local mkfs_status
+> >
+> >       case $FSTYP in
+> > -     nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
+> > +     nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs)
+> >               # unable to re-create this fstyp, just remove all files in
+> >               # $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+> >               # created in previous runs
+> > @@ -1271,7 +1279,7 @@ _df_device()
+> >
+> >      # Note that we use "==" here so awk doesn't try to interpret an NFS over
+> >      # IPv6 server as a regular expression.
+> > -    $DF_PROG 2>/dev/null | $AWK_PROG -v what=$1 '
+> > +    $DF_PROG -a 2>/dev/null | $AWK_PROG -v what=$1 '
+>
+> Update DF_PROG definition instead, so all callers of $DF_PROG would
+> print fuse mounts correctly.
+>
+> >          ($1==what) && (NF==1) {
+> >              v=$1
+> >              getline
+> > @@ -1514,14 +1522,15 @@ _check_mounted_on()
+> >       [ -n "$mount_rec" ] || return 1 # 1 = not mounted
+> >
+> >       # if it's mounted, make sure its on $mnt
+> > -     if [ "$mount_rec" != "$dev $mnt" ]; then
+> > +     # This check doesn't apply to FUSE since both mounts have the same device
+> > +     if [[ "$FSTYP" != "fuse" && "$mount_rec" != "$dev $mnt" ]]; then
+>
+> As stated above, I don't think this check is needed. Any reason to do so?
+>
+> Thanks,
+> Eryu
+>
+> >               echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
+> >               echo "Already mounted result:"
+> >               echo $mount_rec
+> >               return 2 # 2 = mounted on wrong mnt
+> >       fi
+> >
+> > -     if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+> > +     if [ -n "$type" -a "`_fs_type $dev`" != "$type$FUSE_SUBTYP" ]; then
+> >               echo "$devname=$dev is mounted but not a type $type filesystem"
+> >               # raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
+> >               _df_device $dev
+> > @@ -1545,7 +1554,7 @@ _require_scratch_nocheck()
+> >                       _notrun "this test requires a valid \$SCRATCH_MNT"
+> >               fi
+> >               ;;
+> > -     9p|virtiofs)
+> > +     9p|fuse|virtiofs)
+> >               if [ -z "$SCRATCH_DEV" ]; then
+> >                       _notrun "this test requires a valid \$SCRATCH_DEV"
+> >               fi
+> > @@ -1701,7 +1710,7 @@ _require_test()
+> >                       _notrun "this test requires a valid \$TEST_DIR"
+> >               fi
+> >               ;;
+> > -     9p|virtiofs)
+> > +     9p|fuse|virtiofs)
+> >               if [ -z "$TEST_DEV" ]; then
+> >                       _notrun "this test requires a valid \$TEST_DEV"
+> >               fi
+> > @@ -2863,7 +2872,7 @@ _mount_or_remount_rw()
+> >
+> >       if [ $USE_REMOUNT -eq 0 ]; then
+> >               if [ "$FSTYP" != "overlay" ]; then
+> > -                     _mount -t $FSTYP $mount_opts $device $mountpoint
+> > +                     _mount -t $FSTYP$FUSE_SUBTYP $mount_opts $device $mountpoint
+> >               else
+> >                       _overlay_mount $device $mountpoint
+> >               fi
+> > @@ -3000,6 +3009,9 @@ _check_test_fs()
+> >      9p)
+> >       # no way to check consistency for 9p
+> >       ;;
+> > +    fuse)
+> > +     # no way to check consistency for fuse
+> > +     ;;
+> >      virtiofs)
+> >       # no way to check consistency for virtiofs
+> >       ;;
+> > @@ -3061,6 +3073,9 @@ _check_scratch_fs()
+> >      9p)
+> >       # no way to check consistency for 9p
+> >       ;;
+> > +    fuse)
+> > +     # no way to check consistency for fuse
+> > +     ;;
+> >      virtiofs)
+> >       # no way to check consistency for virtiofs
+> >       ;;
+> > --
+> > 2.30.1
