@@ -2,123 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EADAC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Sep 2021 17:24:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED0C5C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Sep 2021 20:10:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 309DC611C9
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Sep 2021 17:24:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF44E611C4
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Sep 2021 20:10:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236749AbhIVR0A (ORCPT
+        id S237575AbhIVULb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Sep 2021 13:26:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:33100 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236717AbhIVRZ7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Sep 2021 13:25:59 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1632331469;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=5+bksXzzMzFqrFw3Ruf1ZmWWJl+uWpXr5K83+H4GCT0=;
-        b=TS+EU/u1EiS33VXtyE4eJR+LKSEEZf6XSTHr8tz2RwRSECbxvopeOAfxkc+tWPs2KxP/St
-        Zo6TzcTKUjtj6Pi9nXWGQMHv7kCUQmGHRvElzfie0MdE48ylXlTI0WGn6Fn3iP4oeZ3lwq
-        viiypvhjHSPNdltmr/zZFl4gJPTp71E=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-406-5aQ7oT0gNMaYo7O5nSLh4Q-1; Wed, 22 Sep 2021 13:24:27 -0400
-X-MC-Unique: 5aQ7oT0gNMaYo7O5nSLh4Q-1
-Received: by mail-qt1-f197.google.com with SMTP id f34-20020a05622a1a2200b0029c338949c1so10363940qtb.8
-        for <fstests@vger.kernel.org>; Wed, 22 Sep 2021 10:24:27 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=5+bksXzzMzFqrFw3Ruf1ZmWWJl+uWpXr5K83+H4GCT0=;
-        b=wbFSj0lZfSfBpDaRvDesjzTITm6r/bvBDeZ54jglTpJQ9qUqx3Qi7VYBReCs/f+UyG
-         aLetjabnQJctAYcU/aLDhTA6RPdawxeDBPS43LmTII44mvGuV7veitErgUP9fPYeKldD
-         D82XHGS29jhrsfjLAsd3FgWBJSaS9bfodoJ56Q0Csb2u+/ECwW8IpTY3BUA4Hs/3odNh
-         cQjURCu8Ccy9Y3r4mIO1RrfcOWyGesyDJQzu23Hu2dQZ0s2LfG7ItzK/eUjBM7oFJI3N
-         N9/WocGmM+AXTEMobUO/eXrh1TtwW0mNG/kOCDkC4JJFvltmC/VJ+LedXLqN8jC843VK
-         cLNw==
-X-Gm-Message-State: AOAM5335JYcE4JH0biU9fw3zMO12DZPFcQuYHHJzsFNRwJcODh9ZVkM+
-        FkiKsvCCbi5zxuZayE7H7kqF6vkfUgNOS3JouxWNTGzemick2SHXZvCPNW0kHqzVKu2TLR/YK2A
-        bctgTZECx0ZgpGPtUbQ==
-X-Received: by 2002:a37:6708:: with SMTP id b8mr349778qkc.283.1632331467174;
-        Wed, 22 Sep 2021 10:24:27 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzDJyQ/QlmDbDz7TbORkHifzU1pQxBmX45KHLxSRIAUX04Z8ctzxrITB5YbTJm9UGQclb54iQ==
-X-Received: by 2002:a37:6708:: with SMTP id b8mr349763qkc.283.1632331466978;
-        Wed, 22 Sep 2021 10:24:26 -0700 (PDT)
-Received: from bfoster (c-24-61-119-116.hsd1.ma.comcast.net. [24.61.119.116])
-        by smtp.gmail.com with ESMTPSA id m139sm2441016qke.18.2021.09.22.10.24.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Sep 2021 10:24:26 -0700 (PDT)
-Date:   Wed, 22 Sep 2021 13:24:24 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     fstests@vger.kernel.org, kaixuxia <kaixuxia@tencent.com>
-Subject: Re: [PATCH] fsstress: fix bogus compile warning do_renameat2()
-Message-ID: <YUtmyFtlOCT09dG3@bfoster>
-References: <20210921175059.1287420-1-mcgrof@kernel.org>
+        Wed, 22 Sep 2021 16:11:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50538 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237784AbhIVULQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Sep 2021 16:11:16 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2005EC0611FA
+        for <fstests@vger.kernel.org>; Wed, 22 Sep 2021 13:07:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=wjg0c008hIEYp3kuW728GJ5k4Yl8aMM/8+o1xtmwmus=; b=qt+A6/K58NV/uUOGGqVTjNvPOO
+        n5NRXjwOeCbQjpYYl7BXs2AUq3kt9kCF0K4BrjEzrRf/dsvUW262+SqhzOR53ilUx4cqnvGb0/9Wk
+        F5BozukCMlRsUcbz48GwAe5+4AWbAwDi/rS4ChIZWJhH0lOVor0rOljWUcNUz2+OV+/JpV7sOSMjL
+        etgC1Kj+jIckB/qYFIS5sOAwx88vbxaXCqcRtrAdM88YISjIY5FsAUU7GNHgOLSB9Np5ozvcsG/Nr
+        N15SBqq36pe/p9nhIaJXDntbHWZut8E8uta89ng1evpWVhCIniQirqr/tF4TRaqP4w1By2lq00z/M
+        P7ygF/ng==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mT8Wc-009ZEJ-It; Wed, 22 Sep 2021 20:07:26 +0000
+Date:   Wed, 22 Sep 2021 13:07:26 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Filipe Manana <fdmanana@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Anthony Iliopoulos <ailiopoulos@suse.de>
+Subject: Re: [PATCH] fsstress: improve error message on check_cwd() error
+Message-ID: <YUuM/h7zGaAsPggl@bombadil.infradead.org>
+References: <20210921175035.1286786-1-mcgrof@kernel.org>
+ <CAL3q7H4hvwDcio3qqTbQj0BK9GbEeGhfbx2F32WBpB3D5nKL8Q@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210921175059.1287420-1-mcgrof@kernel.org>
+In-Reply-To: <CAL3q7H4hvwDcio3qqTbQj0BK9GbEeGhfbx2F32WBpB3D5nKL8Q@mail.gmail.com>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 21, 2021 at 10:50:59AM -0700, Luis Chamberlain wrote:
-> gcc complains with:
+On Wed, Sep 22, 2021 at 11:15:08AM +0100, Filipe Manana wrote:
+> On Tue, Sep 21, 2021 at 6:51 PM Luis Chamberlain <mcgrof@kernel.org> wrote:
+> >
+> > I ran into an error with generic/083 with xfs due to check_cwd() but
+> > why it failed is not clear because there are two types of
+> > failures:
+> >
+> >   o stat64() failed (likely -ENOMEM is my guess)
+> >   o the inode actually changed
+> >
+> > Thow a bone out to developers so that in case en error does happen
+> > they know which rabbit hole to go down on.
+> >
+> > Cc: Anthony Iliopoulos <ailiopoulos@suse.de>
+> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> > ---
+> >  ltp/fsstress.c | 15 ++++++++++++++-
+> >  1 file changed, 14 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > index b4ddf5e2..d2f09901 100644
+> > --- a/ltp/fsstress.c
+> > +++ b/ltp/fsstress.c
+> > @@ -9,6 +9,7 @@
+> >  #include <sys/uio.h>
+> >  #include <stddef.h>
+> >  #include <stdbool.h>
+> > +#include <string.h>
+> >  #include "global.h"
+> >
+> >  #ifdef HAVE_BTRFSUTIL_H
+> > @@ -943,9 +944,21 @@ check_cwd(void)
+> >  {
+> >  #ifdef DEBUG
+> >         struct stat64   statbuf;
+> > +       int ret;
+> > +
+> > +       ret = stat64(".", &statbuf);
+> > +       if (ret !=0) {
+> > +               fprintf(stderr, "fsstress: check_cwd stat64 failed with: %d (%s)\n",
+> > +                       ret, strerror(ret));
 > 
-> fsstress.c:4629:4: warning: 'oldparid' may be used uninitialized in this function [-Wmaybe-uninitialized]
->  4629 |    printf("%d/%d: rename source entry: id=%d,parent=%d\n",
->       |    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->  4630 |     procid, opno, oldid, oldparid);
->       |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> fsstress.c:4629:4: warning: 'oldid' may be used uninitialized in this function [-Wmaybe-uninitialized]
+> The error is not in 'ret' but instead in 'errno', so it should print
+> errno and strerror(errno).
+
+Good call will fix.
+
+> > +               goto out;
+> > +       }
+> >
+> > -       if (stat64(".", &statbuf) == 0 && statbuf.st_ino == top_ino)
+> > +       if (statbuf.st_ino == top_ino)
+> >                 return;
+> > +
+> > +       fprintf(stderr, "fsstress: check_cwd statbuf.st_ino (%ld) != top_ino (%ld)\n",
+> > +               (long)statbuf.st_ino, (long)top_ino);
 > 
-> But the varaibles are sure to be initialized, it is just that the
-> heuristics are broken since another check is used later which confuses
-> gcc. So just initialize the variables, to shup the compile warning.
-> 
+> ino_t is guaranteed to be an unsigned integer, and can be either 64 or
+> 32 bits wide [1].
+> Casting to unsigned 64 bits would be better imo.
 
-https://www.urbandictionary.com/define.php?term=shup
+There are other similar mi-uses in the code, should I fix those to
+then?
 
-Huh. :P
-
-> Cc: kaixuxia <kaixuxia@tencent.com>
-> Cc: Brian Foster <bfoster@redhat.com>
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
->  ltp/fsstress.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index d2f09901..0d620d7b 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -4517,9 +4517,9 @@ do_renameat2(int opno, long r, int mode)
->  	flist_t		*flp;
->  	int		id;
->  	pathname_t	newf;
-> -	int		oldid;
-> +	int		oldid = 0;
->  	int		parid;
-> -	int		oldparid;
-> +	int		oldparid = 0;
->  	int		which;
->  	int		v;
->  	int		v1;
-> -- 
-> 2.30.2
-> 
-
+  Luis
+ 
