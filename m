@@ -7,106 +7,84 @@ X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EDE1FC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 23 Sep 2021 19:47:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28074C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Sep 2021 19:48:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D15156124E
-	for <linux-fstests@archiver.kernel.org>; Thu, 23 Sep 2021 19:47:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0C28560F6F
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Sep 2021 19:48:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242861AbhIWTsm (ORCPT
+        id S243055AbhIWTtk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 23 Sep 2021 15:48:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46152 "EHLO mail.kernel.org"
+        Thu, 23 Sep 2021 15:49:40 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47056 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S242885AbhIWTsm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 23 Sep 2021 15:48:42 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A814A60F6F;
-        Thu, 23 Sep 2021 19:47:10 +0000 (UTC)
+        id S243060AbhIWTth (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 23 Sep 2021 15:49:37 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B00D960F6F;
+        Thu, 23 Sep 2021 19:48:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1632426430;
-        bh=feVTZqQ7voDFHj1H/8tEvXqXxEW/Vz8029BLRnzAD68=;
+        s=k20201202; t=1632426485;
+        bh=ThNlI+F4pX8F4PRwzwa3dCCVrIV9QWjeMpQaHIPJmfg=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=XwW81AaAX0ehwTffpCjWgvHRnC7X9Tf+UXvFP9kQLAncRlPz1pdoOPjNyGqXHV/Hv
-         WQtPk/IHVDA+BRj+N+o1rgNuXuG1bpzSp2tfpJFKbVXf+5mTl1yUjQxul2NBVdHxJj
-         mn9xsjsYqqSxNSul+yBaTclJg7Vp/SBdR6RRjjD8XvDo9jCWky1CCBwlFFMO07v/8j
-         WBR1MRW90BjYpy9U5CER8XkxWQaI3UC0w/UOS3+mEUBqTPb249MShXlr8hybnQAbQy
-         cjg+YQ0xiC7GMvc9J9IulXYLcXY3tdxHqQLLTKTNEvqrfmONdos8txOzwB/JHnLtyf
-         AsXm3eugv1zeg==
-Date:   Thu, 23 Sep 2021 12:47:10 -0700
+        b=MARAuiyyHp3J3pNFnBe4+/g8tHVKhZxLVPJiopHTh/cc3GTgkAfKIla8Ztl7NHVWp
+         m/tpa6tzEeBa15hHx6w3Dt7tU57l06wCz0ecPbNUE+uvaAu0WqKddleMLvz4I4zuTG
+         iPXBuIKPbAY4CKjE274yv2kKkv0cyPBOKTjUCcnzV/tsX7bsXO8pA7+DFj+iCxHJVF
+         2yoaF1rObSObDvre5rrbgkrU8+8TXtfEKO/QXKMC6mWn5EHrZyvJxOLKI7CHeER7r/
+         rzvnGTPH7AFF1p4ZP9kL1MRshYPUhLeTgWN/dG3krNh9PNE5jfnVUPAShhQnXcmJOh
+         rAk0IDGlQXgDg==
+Date:   Thu, 23 Sep 2021 12:48:05 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Luis Henriques <lhenriques@suse.de>
 Cc:     fstests@vger.kernel.org, Eryu Guan <guan@eryu.me>,
         Luis Chamberlain <mcgrof@kernel.org>
-Subject: Re: [PATCH 1/2] common/rc: add _require_user_exists() to check if a
- user exists
-Message-ID: <20210923194710.GA570597@magnolia>
-References: <20210923104123.29878-1-lhenriques@suse.de>
- <20210923104123.29878-2-lhenriques@suse.de>
+Subject: Re: [PATCH 2/2] generic/079: make sure users 'nobody' and 'daemon'
+ exist
+Message-ID: <20210923194805.GB570597@magnolia>
+References: <20210923104123.29878-3-lhenriques@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210923104123.29878-2-lhenriques@suse.de>
+In-Reply-To: <20210923104123.29878-3-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 23, 2021 at 11:41:22AM +0100, Luis Henriques wrote:
-> Function _require_user() does check if a user exists *and* if it is able
-> to execute commands.  Add a new function to simply check if a user exists.
+On Thu, Sep 23, 2021 at 11:41:23AM +0100, Luis Henriques wrote:
+> Test 'src/t_immutable' assumes the existence of users 'nobody' and
+> 'daemon' on the system.  If any of these users don't exist, the test will
+> fail with:
+> 
+>   add_acl(/media/scratch/079/immutable.f) did not set errno == EPERM
+>   ...
+> 
+> because it tries to set ACLs such as:
+> 
+>   u::rwx,g::rwx,o::rwx,u:daemon:rwx,m::rwx
+> 
+> Use the new _require_user_exists() function to ensure these users exist.
 > 
 > Signed-off-by: Luis Henriques <lhenriques@suse.de>
 
-Looks like a simple enough hoist.
-
-You /could/ streamline the bash constructs too, but ... fmeh.  This is
-easy to review, at least.
+Looks correct.
 
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
 > ---
->  common/rc | 27 ++++++++++++++++++---------
->  1 file changed, 18 insertions(+), 9 deletions(-)
+>  tests/generic/079 | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> diff --git a/common/rc b/common/rc
-> index 154bc2dd7e94..c7e77c0e26dc 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2289,18 +2289,27 @@ _cat_group()
->  	cat /etc/group
->  }
+> diff --git a/tests/generic/079 b/tests/generic/079
+> index 829275db8cdf..9e7ccd31c8e2 100755
+> --- a/tests/generic/079
+> +++ b/tests/generic/079
+> @@ -26,6 +26,8 @@ _cleanup()
+>  _supported_fs generic
 >  
-> -# check for a user on the machine, fsgqa as default
-> +# check if a user exists in the system
-> +#
-> +_require_user_exists()
-> +{
-> +	user=$1
-> +	_cat_passwd | grep -q $user
-> +	[ "$?" == "0" ] || _notrun "$user user not defined."
-> +}
-> +
-> +# check if a user exists and is able to execute commands.
-> +# Uses 'fsgqa' user as default.
->  #
->  _require_user()
->  {
-> -    qa_user=fsgqa
-> -    if [ -n "$1" ];then
-> -        qa_user=$1
-> -    fi
-> -    _cat_passwd | grep -q $qa_user
-> -    [ "$?" == "0" ] || _notrun "$qa_user user not defined."
-> -    echo /bin/true | su $qa_user
-> -    [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
-> +	qa_user=fsgqa
-> +	if [ -n "$1" ];then
-> +		qa_user=$1
-> +	fi
-> +	_require_user_exists $qa_user
-> +	echo /bin/true | su $qa_user
-> +	[ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
->  }
+>  _require_chattr ia
+> +_require_user_exists "nobody"
+> +_require_user_exists "daemon"
+>  _require_test_program "t_immutable"
+>  _require_scratch
 >  
->  # check for a chown support
