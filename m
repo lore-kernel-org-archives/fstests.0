@@ -2,107 +2,94 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93377C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Sep 2021 09:19:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02D14C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Sep 2021 14:06:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7D5A06124C
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Sep 2021 09:19:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DA919610D1
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Sep 2021 14:06:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244407AbhIXJUt (ORCPT
+        id S234851AbhIXOIL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Sep 2021 05:20:49 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:47876 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244462AbhIXJUt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Sep 2021 05:20:49 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id A4E092241B;
-        Fri, 24 Sep 2021 09:19:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1632475155; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=M9/H5AFtlnnUB7yVH2boA1sKq/7FGMElsi1uSs9Ffsg=;
-        b=jKGRKnCVY+nzam5gkrs6rCeSjWtLof1PUjvEYph58tgV5BTnkoEP0N+sj2CX1L9MYCNXhj
-        Okjw/FX/8tAqVffNYuEFxJhwIUs3RXmErTtYyAqaGP3iaN0E/cvSxMwxDXZ7uPrPnS9Yaf
-        JRl+GyZG35ZixZStDEVGwkw2Z93vkRI=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1632475155;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=M9/H5AFtlnnUB7yVH2boA1sKq/7FGMElsi1uSs9Ffsg=;
-        b=XgqK+RMvxpQ6HCDtJSAwt4FcSLGjBNdNEEISLAg7wHNMwBkXm1HLyT9lAO67tipipIuPRi
-        fT6wZ7GjJ/01jSAQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 393AD13AB3;
-        Fri, 24 Sep 2021 09:19:15 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 8B3xChOYTWFoLAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Fri, 24 Sep 2021 09:19:15 +0000
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id 968b6c65;
-        Fri, 24 Sep 2021 09:19:13 +0000 (UTC)
-From:   Luis Henriques <lhenriques@suse.de>
+        Fri, 24 Sep 2021 10:08:11 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58908 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231683AbhIXOIL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 Sep 2021 10:08:11 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 03EE4610C7;
+        Fri, 24 Sep 2021 14:06:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1632492397;
+        bh=t/U+4ihTDB37ydJMfTiBQuY/KDa6PhKWA6bAsWj1bmk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=hdOiZdAVTspJVqNQoZzdwYy+5bdS6S3HmZew//DSv9xvS89Ab2PZAaT4nyVbkOSOL
+         OVdIL5AAZO4fnK6nBLppjCDSW47CTeEMs+2MC73ZgL5fcQhvKeOZx1nxAlfKwSd1+6
+         /gnZgOgsZ4MhQboadbU+2/LFBxLpqnthEGIFTatxv1dwXc8i+0Gjc9gCWmsVsJh04Z
+         JAbn4ABUqZsvQJgACDAveAfnIyj97gT4EJFPqCisrQg+NpESta/MR7Lllk54MX2TnV
+         TULRGlYFBGPZ4ERPPqNDuKnYNwQy4GgexLqSc0Yv1vfbLH8dojCGEeeZ8sCfGTbPkl
+         4+1rvQfw+sBGw==
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     Eric Biggers <ebiggers@kernel.org>,
-        "Darrick J . Wong" <djwong@kernel.org>, Eryu Guan <guan@eryu.me>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Luis Henriques <lhenriques@suse.de>
-Subject: [PATCH v2 2/2] generic/079: make sure users 'nobody' and 'daemon' exist
-Date:   Fri, 24 Sep 2021 10:19:11 +0100
-Message-Id: <20210924091911.19413-3-lhenriques@suse.de>
-In-Reply-To: <20210924091911.19413-1-lhenriques@suse.de>
-References: <20210924091911.19413-1-lhenriques@suse.de>
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs/179: fix test failure when there are no snapshots to delete
+Date:   Fri, 24 Sep 2021 15:06:32 +0100
+Message-Id: <b393419eff2e5fbb512be59d30ba8106afc63700.1632492293.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test 'src/t_immutable' assumes the existence of users 'nobody' and
-'daemon' on the system.  If any of these users don't exist, the test will
-fail with:
+From: Filipe Manana <fdmanana@suse.com>
 
-  add_acl(/media/scratch/079/immutable.f) did not set errno == EPERM
-  ...
+It's very rare, but we can end up in a situation where there are no
+snapshots to delete, in which case the $victim variable of the function
+delete_workload() ends up being assigned with an empty string. When
+that happens we end up running the command:
 
-because it tries to set ACLs such as:
+   btrfs subvolume delete "$SCRATCH_MNT/snapshots/"
 
-  u::rwx,g::rwx,o::rwx,u:daemon:rwx,m::rwx
+Which fails since the argument is not a subvolume or a snapshot.
+This causes the test to fail due to an unexpected error message from
+the subvolume delete command:
 
-Use the new _require_user_exists() function to ensure these users exist.
+  btrfs/179 129s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/179.out.bad)
+      --- tests/btrfs/179.out	2020-10-16 23:13:46.546152332 +0100
+      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/179.out.bad	2021-09-24 11:15:01.404863801 +0100
+      @@ -1,2 +1,3 @@
+       QA output created by 179
+      +ERROR: Not a Btrfs subvolume: Invalid argument
+       Silence is golden
+      ...
 
-Signed-off-by: Luis Henriques <lhenriques@suse.de>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Fix that by making the delete_workload() loop skip the deletion attempt
+when there are no snapshots.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/079 | 2 ++
- 1 file changed, 2 insertions(+)
+ tests/btrfs/179 | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/tests/generic/079 b/tests/generic/079
-index 829275db8cdf..9e7ccd31c8e2 100755
---- a/tests/generic/079
-+++ b/tests/generic/079
-@@ -26,6 +26,8 @@ _cleanup()
- _supported_fs generic
- 
- _require_chattr ia
-+_require_user_exists "nobody"
-+_require_user_exists "daemon"
- _require_test_program "t_immutable"
- _require_scratch
- 
+diff --git a/tests/btrfs/179 b/tests/btrfs/179
+index 9a3b36ab..2f17c9f9 100755
+--- a/tests/btrfs/179
++++ b/tests/btrfs/179
+@@ -70,6 +70,10 @@ delete_workload()
+ 	while true; do
+ 		sleep $((sleep_time * 2))
+ 		victim=$(ls "$SCRATCH_MNT/snapshots" | sort -R | head -n1)
++		if [ -z "$victim" ]; then
++			# No snapshots available, sleep and retry later.
++			continue
++		fi
+ 		$BTRFS_UTIL_PROG subvolume delete \
+ 			"$SCRATCH_MNT/snapshots/$victim" > /dev/null
+ 	done
+-- 
+2.33.0
+
