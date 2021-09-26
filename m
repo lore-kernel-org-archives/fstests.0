@@ -1,95 +1,149 @@
 Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-X-Spam-Level: 
-X-Spam-Status: No, score=-20.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02D14C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Sep 2021 14:06:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A816C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Sep 2021 09:52:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DA919610D1
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Sep 2021 14:06:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1224C60EE2
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Sep 2021 09:52:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234851AbhIXOIL (ORCPT
+        id S229950AbhIZJx4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Sep 2021 10:08:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58908 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231683AbhIXOIL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 24 Sep 2021 10:08:11 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 03EE4610C7;
-        Fri, 24 Sep 2021 14:06:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1632492397;
-        bh=t/U+4ihTDB37ydJMfTiBQuY/KDa6PhKWA6bAsWj1bmk=;
-        h=From:To:Cc:Subject:Date:From;
-        b=hdOiZdAVTspJVqNQoZzdwYy+5bdS6S3HmZew//DSv9xvS89Ab2PZAaT4nyVbkOSOL
-         OVdIL5AAZO4fnK6nBLppjCDSW47CTeEMs+2MC73ZgL5fcQhvKeOZx1nxAlfKwSd1+6
-         /gnZgOgsZ4MhQboadbU+2/LFBxLpqnthEGIFTatxv1dwXc8i+0Gjc9gCWmsVsJh04Z
-         JAbn4ABUqZsvQJgACDAveAfnIyj97gT4EJFPqCisrQg+NpESta/MR7Lllk54MX2TnV
-         TULRGlYFBGPZ4ERPPqNDuKnYNwQy4GgexLqSc0Yv1vfbLH8dojCGEeeZ8sCfGTbPkl
-         4+1rvQfw+sBGw==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs/179: fix test failure when there are no snapshots to delete
-Date:   Fri, 24 Sep 2021 15:06:32 +0100
-Message-Id: <b393419eff2e5fbb512be59d30ba8106afc63700.1632492293.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.33.0
+        Sun, 26 Sep 2021 05:53:56 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:46828 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229755AbhIZJxz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Sep 2021 05:53:55 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1632649937;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=9QfETEao2+uZZOw+WpmdC/V0MqR+SYKti+Q0i9WhmOo=;
+        b=FJ7NkgD5k6kPUcPXqr58jDyXgugdbyZ/srTEBO3COXqVqZ3axV711UxdstAQABCmzS4JRt
+        zyEvRXd6Xa6fJoDz+v7FQ+7ziRtB0SXdAUq08il5fUiMrP/CB1/MwrAtuQrGriuRDdcTVJ
+        Fc7v+0AqABl0AqO/Dm7D4lZYQMbWkT4=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-202-qLfFF81sMoWXfssV7f_JAA-1; Sun, 26 Sep 2021 05:52:13 -0400
+X-MC-Unique: qLfFF81sMoWXfssV7f_JAA-1
+Received: by mail-pg1-f198.google.com with SMTP id n9-20020a63f809000000b0026930ed1b24so10410347pgh.23
+        for <fstests@vger.kernel.org>; Sun, 26 Sep 2021 02:52:13 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=9QfETEao2+uZZOw+WpmdC/V0MqR+SYKti+Q0i9WhmOo=;
+        b=IvT+xpA0MV/BIo+jjFczcskLEoVP8A45B1qyy8gwtR+weegNc2tnd5JEcy8U/Vw6Lu
+         rWXe24vdhrH8QELd6h7woYcXSvCMGRQ+Z5PEfhknqQlflVO6F3eDjgVubB7Y+1Orfbcg
+         O4ht+QYDETPWqrjwMr6BTIYRxIZMs0x9FrfsAT6uWNyI90zA/mE/SD6YofGRGsNEF4h+
+         ZtO0/6ETcIQbcoWd+dr7RWFOD454C/awxf4qUP8WcKfaDnCbwI/JuTNfHVeNXfWzR9cx
+         smfEjvwtml2zAzBM4uN0G5cjODIofi1qs4UTDtjTpG/JkgbUAPWq5M/Ol5cW9jt4rCiP
+         LMYw==
+X-Gm-Message-State: AOAM532QQDPigUhgNf54GJK9lI08Ng8xWungD5taujGcIqB5Bv/31NG1
+        7s69odpyvMGji/QwpxAvGON/q87nujaBrw9wc3eqqh/AUoeIapYSmpQKTetGJHvHs5uZPIToeUg
+        wN9KifwLkD1v9E9n01Q==
+X-Received: by 2002:a17:90a:49:: with SMTP id 9mr12891038pjb.80.1632649932143;
+        Sun, 26 Sep 2021 02:52:12 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxY95PawLc41ntqzCVUZgoGSFjRzgcV2In2F3OlWqGxBuk6aZCAEIWG2qt8ussBQcn7BS6OBg==
+X-Received: by 2002:a17:90a:49:: with SMTP id 9mr12891030pjb.80.1632649931820;
+        Sun, 26 Sep 2021 02:52:11 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y15sm14030368pfq.32.2021.09.26.02.52.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 26 Sep 2021 02:52:11 -0700 (PDT)
+Date:   Sun, 26 Sep 2021 18:13:54 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Luis Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, Eric Biggers <ebiggers@kernel.org>,
+        "Darrick J . Wong" <djwong@kernel.org>, Eryu Guan <guan@eryu.me>,
+        Luis Chamberlain <mcgrof@kernel.org>
+Subject: Re: [PATCH v2 1/2] common/rc: add _require_user_exists() to check if
+ a user exists
+Message-ID: <20210926101354.gniy2ytswm662y5y@fedora>
+Mail-Followup-To: Luis Henriques <lhenriques@suse.de>,
+        fstests@vger.kernel.org, Eric Biggers <ebiggers@kernel.org>,
+        "Darrick J . Wong" <djwong@kernel.org>, Eryu Guan <guan@eryu.me>,
+        Luis Chamberlain <mcgrof@kernel.org>
+References: <20210924091911.19413-1-lhenriques@suse.de>
+ <20210924091911.19413-2-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210924091911.19413-2-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Sep 24, 2021 at 10:19:10AM +0100, Luis Henriques wrote:
+> Function _require_user() does check if a user exists *and* if it is able
+> to execute commands.  Add a new function to simply check if a user exists.
+> 
+> Signed-off-by: Luis Henriques <lhenriques@suse.de>
+> ---
+>  common/rc | 27 ++++++++++++++++++---------
+>  1 file changed, 18 insertions(+), 9 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 154bc2dd7e94..de9ba56eefcf 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2289,18 +2289,27 @@ _cat_group()
+>  	cat /etc/group
+>  }
+>  
+> -# check for a user on the machine, fsgqa as default
+> +# check if a user exists in the system
+> +#
+> +_require_user_exists()
+> +{
+> +	local user=$1
+> +	_cat_passwd | grep -q $user
+> +	[ "$?" == "0" ] || _notrun "$user user not defined."
 
-It's very rare, but we can end up in a situation where there are no
-snapshots to delete, in which case the $victim variable of the function
-delete_workload() ends up being assigned with an empty string. When
-that happens we end up running the command:
+As _require_user() does "su $qa_user" after the "grep", so it really make sure
+there's an "user". But if the _require_user_exists() only trys to grep /etc/passed
+to make sure there's an "$user", I'd like to make the "grep" condition be more exact.
+For example, if there's an user "myuser100" in the /etc/passwd, then _require_user_exists
+"myuser" or "user100" or "user1" or "user10" all return 0.
 
-   btrfs subvolume delete "$SCRATCH_MNT/snapshots/"
+So how about:
+  _cat_passwd | grep -qw $user
 
-Which fails since the argument is not a subvolume or a snapshot.
-This causes the test to fail due to an unexpected error message from
-the subvolume delete command:
+Or more exact:
+  _cat_passwd | cut -d: -f1 | grep -qw $user
 
-  btrfs/179 129s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/179.out.bad)
-      --- tests/btrfs/179.out	2020-10-16 23:13:46.546152332 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/179.out.bad	2021-09-24 11:15:01.404863801 +0100
-      @@ -1,2 +1,3 @@
-       QA output created by 179
-      +ERROR: Not a Btrfs subvolume: Invalid argument
-       Silence is golden
-      ...
+Or other better command line:)
 
-Fix that by making the delete_workload() loop skip the deletion attempt
-when there are no snapshots.
+Thanks,
+Zorro
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/179 | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/tests/btrfs/179 b/tests/btrfs/179
-index 9a3b36ab..2f17c9f9 100755
---- a/tests/btrfs/179
-+++ b/tests/btrfs/179
-@@ -70,6 +70,10 @@ delete_workload()
- 	while true; do
- 		sleep $((sleep_time * 2))
- 		victim=$(ls "$SCRATCH_MNT/snapshots" | sort -R | head -n1)
-+		if [ -z "$victim" ]; then
-+			# No snapshots available, sleep and retry later.
-+			continue
-+		fi
- 		$BTRFS_UTIL_PROG subvolume delete \
- 			"$SCRATCH_MNT/snapshots/$victim" > /dev/null
- 	done
--- 
-2.33.0
+> +}
+> +
+> +# check if a user exists and is able to execute commands.
+> +# Uses 'fsgqa' user as default.
+>  #
+>  _require_user()
+>  {
+> -    qa_user=fsgqa
+> -    if [ -n "$1" ];then
+> -        qa_user=$1
+> -    fi
+> -    _cat_passwd | grep -q $qa_user
+> -    [ "$?" == "0" ] || _notrun "$qa_user user not defined."
+> -    echo /bin/true | su $qa_user
+> -    [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
+> +	qa_user=fsgqa
+> +	if [ -n "$1" ];then
+> +		qa_user=$1
+> +	fi
+> +	_require_user_exists $qa_user
+> +	echo /bin/true | su $qa_user
+> +	[ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
+>  }
+>  
+>  # check for a chown support
+> 
 
