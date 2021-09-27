@@ -2,97 +2,127 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07092C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Sep 2021 07:23:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7CF4C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 27 Sep 2021 08:44:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DFCED60F6D
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Sep 2021 07:23:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8A8BE6108E
+	for <linux-fstests@archiver.kernel.org>; Mon, 27 Sep 2021 08:44:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233224AbhI0HYr (ORCPT
+        id S233435AbhI0IqC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 27 Sep 2021 03:24:47 -0400
-Received: from mga03.intel.com ([134.134.136.65]:58612 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233191AbhI0HYr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 27 Sep 2021 03:24:47 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10119"; a="224479882"
-X-IronPort-AV: E=Sophos;i="5.85,325,1624345200"; 
-   d="scan'208";a="224479882"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2021 00:23:10 -0700
-X-IronPort-AV: E=Sophos;i="5.85,325,1624345200"; 
-   d="scan'208";a="561113399"
-Received: from meiyuezh-mobl.ccr.corp.intel.com (HELO mxinjiax-mobl1.ccr.corp.intel.com) ([10.255.31.59])
-  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2021 00:23:08 -0700
-From:   Ma Xinjian <xinjianx.ma@intel.com>
-To:     fstests@vger.kernel.org
-Cc:     Philip Li <philip.li@intel.com>, kernel test robot <lkp@intel.com>,
-        Ma Xinjian <xinjianx.ma@intel.com>
-Subject: [PATCH 2/2] btrfs/091: remove noinode_cache option
-Date:   Mon, 27 Sep 2021 15:20:19 +0800
-Message-Id: <20210927072019.46609-2-xinjianx.ma@intel.com>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20210927072019.46609-1-xinjianx.ma@intel.com>
-References: <20210927072019.46609-1-xinjianx.ma@intel.com>
+        Mon, 27 Sep 2021 04:46:02 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:41564 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233425AbhI0Ip5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Sep 2021 04:45:57 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id E3FD1200A6;
+        Mon, 27 Sep 2021 08:44:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1632732258; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=5s4LzLYKDv1H379RX6zBCycenuUWDqkO7GNf+IvFNQM=;
+        b=LIatziQCxnj2sXrfR2c2+qp1B1M4gmMlU51PqCwUyUiAaItBLAGe4RKCH5zm7GugmIxYUO
+        Wm/1XaYHnjaIjjS9Hql7nUKKCFrxnI2mEeXy+eEXEeOJhHWQaVwNfltuu9INjXtMq3rzmr
+        M/HZNPeBjaShoxNTG5x4YVW1yiy/F3Y=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1632732258;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=5s4LzLYKDv1H379RX6zBCycenuUWDqkO7GNf+IvFNQM=;
+        b=NpFLvs2wzLHdi4dP6gugmtTxTMeapFG6O+deGdLhoX9W3cmLwl1SZzraBEdd7wUJnsbDcS
+        IEqRNj+KXWbowjAQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7B43D13A6A;
+        Mon, 27 Sep 2021 08:44:18 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id oZ8ZG2KEUWHhVQAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 27 Sep 2021 08:44:18 +0000
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id db4a4caa;
+        Mon, 27 Sep 2021 08:44:17 +0000 (UTC)
+Date:   Mon, 27 Sep 2021 09:44:17 +0100
+From:   Luis Henriques <lhenriques@suse.de>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, Eric Biggers <ebiggers@kernel.org>,
+        "Darrick J . Wong" <djwong@kernel.org>, Eryu Guan <guan@eryu.me>,
+        Luis Chamberlain <mcgrof@kernel.org>
+Subject: Re: [PATCH v2 1/2] common/rc: add _require_user_exists() to check if
+ a user exists
+Message-ID: <YVGEYQLYroePoys6@suse.de>
+References: <20210924091911.19413-1-lhenriques@suse.de>
+ <20210924091911.19413-2-lhenriques@suse.de>
+ <20210926101354.gniy2ytswm662y5y@fedora>
+ <20210926102217.332hdmrhwlvgkrxj@fedora>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210926102217.332hdmrhwlvgkrxj@fedora>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-inode cache feature has been removed
+On Sun, Sep 26, 2021 at 06:22:17PM +0800, Zorro Lang wrote:
+> On Sun, Sep 26, 2021 at 06:13:54PM +0800, Zorro Lang wrote:
+> > On Fri, Sep 24, 2021 at 10:19:10AM +0100, Luis Henriques wrote:
+> > > Function _require_user() does check if a user exists *and* if it is able
+> > > to execute commands.  Add a new function to simply check if a user exists.
+> > > 
+> > > Signed-off-by: Luis Henriques <lhenriques@suse.de>
+> > > ---
+> > >  common/rc | 27 ++++++++++++++++++---------
+> > >  1 file changed, 18 insertions(+), 9 deletions(-)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 154bc2dd7e94..de9ba56eefcf 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -2289,18 +2289,27 @@ _cat_group()
+> > >  	cat /etc/group
+> > >  }
+> > >  
+> > > -# check for a user on the machine, fsgqa as default
+> > > +# check if a user exists in the system
+> > > +#
+> > > +_require_user_exists()
+> > > +{
+> > > +	local user=$1
+> > > +	_cat_passwd | grep -q $user
+> > > +	[ "$?" == "0" ] || _notrun "$user user not defined."
+> > 
+> > As _require_user() does "su $qa_user" after the "grep", so it really make sure
+> > there's an "user". But if the _require_user_exists() only trys to grep /etc/passed
+> > to make sure there's an "$user", I'd like to make the "grep" condition be more exact.
+> > For example, if there's an user "myuser100" in the /etc/passwd, then _require_user_exists
+> > "myuser" or "user100" or "user1" or "user10" all return 0.
+> > 
+> > So how about:
+> >   _cat_passwd | grep -qw $user
+> > 
+> > Or more exact:
+> >   _cat_passwd | cut -d: -f1 | grep -qw $user
+> > 
+> > Or other better command line:)
+> 
+> Oh, the "-w" doesn't work with an user with "_", likes myuser_123. So
+> how about:
+> 
+>   _cat_passwd | grep -q ^$user:
 
-Link: https://www.spinics.net/lists/linux-btrfs/msg107910.html
-Reported-by: kernel test robot <lkp@intel.com>
-Signed-off-by: Ma Xinjian <xinjianx.ma@intel.com>
----
- tests/btrfs/091 | 21 +--------------------
- 1 file changed, 1 insertion(+), 20 deletions(-)
+Yep, that seems to make sense.  I'll prepare v3 and send it out soon.
 
-diff --git a/tests/btrfs/091 b/tests/btrfs/091
-index 307289b1..f2cd00b2 100755
---- a/tests/btrfs/091
-+++ b/tests/btrfs/091
-@@ -23,21 +23,12 @@ _require_cp_reflink
- # use largest node/leaf size (64K) to allow the test to be run on arch with
- # page size > 4k.
- NODESIZE=65536
--SUPPORT_NOINODE_CACHE="yes"
- 
- run_check _scratch_mkfs "--nodesize $NODESIZE"
- 
--# inode cache will also take space in fs tree, disable them to get consistent
--# result.
- # discard error output since we will check return value manually.
- # also disable all compression, or output will mismatch with golden output
--_try_scratch_mount "-o noinode_cache,compress=no,compress-force=no" 2> /dev/null
--
--# Check for old kernel which doesn't support 'noinode_cache' mount option
--if [ $? -ne 0 ]; then
--	support_noinode_cache="no"
--	_scratch_mount
--fi
-+_try_scratch_mount "-o compress=no,compress-force=no" 2> /dev/null
- 
- _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
- _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
-@@ -46,16 +37,6 @@ _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
- _run_btrfs_util_prog quota enable $SCRATCH_MNT
- _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
- 
--# if we don't support noinode_cache mount option, then we should double check
--# whether inode cache is enabled before executing the real test payload.
--if [ $SUPPORT_NOINODE_CACHE == "no" ]; then
--	EMPTY_SIZE=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | \
--		$SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2}' | head -n1`
--	if [ $EMPTY_SIZE != $NODESIZE ]; then
--		_notrun "Kernel doesn't support to disable inode cache"
--	fi
--fi
--
- $XFS_IO_PROG -f -c "pwrite 0 256K" $SCRATCH_MNT/subv1/file1 | _filter_xfs_io
- cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
- cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
--- 
-2.20.1
-
+Cheers,
+--
+Luís
