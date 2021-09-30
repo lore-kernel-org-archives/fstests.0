@@ -2,220 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3003C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Sep 2021 18:48:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7232DC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 30 Sep 2021 10:08:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D848961528
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Sep 2021 18:48:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 518FB6115A
+	for <linux-fstests@archiver.kernel.org>; Thu, 30 Sep 2021 10:08:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346287AbhI2SuR (ORCPT
+        id S1349669AbhI3KJp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 29 Sep 2021 14:50:17 -0400
-Received: from mga02.intel.com ([134.134.136.20]:62449 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1346078AbhI2SuQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 29 Sep 2021 14:50:16 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10122"; a="212270450"
-X-IronPort-AV: E=Sophos;i="5.85,334,1624345200"; 
-   d="scan'208";a="212270450"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Sep 2021 11:48:34 -0700
-X-IronPort-AV: E=Sophos;i="5.85,334,1624345200"; 
-   d="scan'208";a="479374879"
-Received: from ojefferi-mobl.ger.corp.intel.com (HELO ldmartin-desk2) ([10.212.173.172])
-  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Sep 2021 11:48:32 -0700
-Date:   Wed, 29 Sep 2021 11:48:31 -0700
-From:   Lucas De Marchi <lucas.demarchi@intel.com>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     linux-modules@vger.kernel.org, live-patching@vger.kernel.org,
-        fstests@vger.kernel.org, linux-block@vger.kernel.org, hare@suse.de,
-        dgilbert@interlog.com, jeyu@kernel.org, osandov@fb.com,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 3/3] libkmod-module: add support for a patient module
- removal option
-Message-ID: <20210929184810.adrqpsvlfybnc5qt@ldmartin-desk2>
-X-Patchwork-Hint: comment
-References: <20210810051602.3067384-1-mcgrof@kernel.org>
- <20210810051602.3067384-4-mcgrof@kernel.org>
- <20210923085156.scmf5wxr2phc356b@ldmartin-desk2>
- <YVJyIGXN/TR8zdU9@bombadil.infradead.org>
+        Thu, 30 Sep 2021 06:09:45 -0400
+Received: from mail1.bemta25.messagelabs.com ([195.245.230.5]:28275 "EHLO
+        mail1.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1349640AbhI3KJp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 Sep 2021 06:09:45 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1632996482; i=@fujitsu.com;
+        bh=f4kMF5kg6rCSr1FgizYxwFyzpjdaxGSzeirzOyNtqAs=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=COfcy+LFWpnsnv4YbXDz60TZ23A1m/qXjOXNZUujBJjSqO3adNcqIixjKHpZDyER+
+         2HPeY0Vj9Nt4r5C5St2FlO4n8VbXBJuhnHO3NclVeuVjhTVI4/bW1JqVcNkaY86t41
+         FJ/Qo/kfANqBCu9A5T9F7ygYv1aAAiY2qETDZP0/TOkOyVZcw+fUTHQ1QkrTU9Q1Ca
+         bQx0FR8kkrsfiUK9+1pSNpwvyPTS2aJ94XFlLlcbu4R6Is5w5IptGWDapNiDHG93Fn
+         KbKjWUFTclxEwwG5/RYgn7SDwsLH1wHnMlAVAWo/OfS03AODF1bOeJFhXo8PDhSR23
+         AYi/8UtwkdUWg==
+Received: from [100.112.195.149] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-5.bemta.az-a.eu-west-1.aws.symcld.net id 7D/33-01625-18C85516; Thu, 30 Sep 2021 10:08:01 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrMIsWRWlGSWpSXmKPExsViZ8MRqtvYE5p
+  o8KtV1eJ0y152B0aPz5vkAhijWDPzkvIrElgznq55yl7wlaNi+8pTbA2Md9i7GLk4hAQ6mSTW
+  tf1mhHD2MEoc3PsGKMPJwSagKfGscwEziC0iICvxf8ZqJhCbWUBdYvmkX2C2sICjxPEP31lAb
+  BYBVYkbp78wgti8Ah4S2+6fAbMlBBQkpjx8zwwRF5Q4OfMJC8QcCYmDL14wQ9QoSlzq+AZVXy
+  Exa1Yb0wRG3llIWmYhaVnAyLSK0SKpKDM9oyQ3MTNH19DAQNfQ0EjX0NJI18jARC+xSjdRL7V
+  Utzy1uETXUC+xvFivuDI3OSdFLy+1ZBMjMLxSCg6c2cF46vUHvUOMkhxMSqK8xWGhiUJ8Sfkp
+  lRmJxRnxRaU5qcWHGGU4OJQkeMu6gHKCRanpqRVpmTnAUIdJS3DwKInw+ncDpXmLCxJzizPTI
+  VKnGHU5Ll+ft4hZiCUvPy9VSpxXHKRIAKQoozQPbgQs7i4xykoJ8zIyMDAI8RSkFuVmlqDKv2
+  IU52BUEub1BJnCk5lXArfpFdARTEBHZLWHgBxRkoiQkmpgckx+ectzU+8DZ+dbFstYC6Yt/7x
+  +S2OCzZvEUFGu1+d65145Zn9/nlX15K11Mp8+ikg7MFocjpQRcmyY7tsnX+ZceFyps/jgKk1V
+  5RZD1qci6T7ljWW/upTVmmxOJxzyUj35R3XTymlBvxYVbpNlvSP8Wm56rvaPr/x/NHNflLznD
+  t31rm5j2L/oNYuC2PW1Vx+ftrbuf6r23zCmBU9//5k3Oe6O8PpnCxbevBfxvm63S0z12dcfCg
+  0uCPoHWMfECV7S1nU2YS8IjC47amUV9Hbliz7dKbbzqzROPVys6LEu/0fPs2sa+ke3eejdkdg
+  znfNBjt2dhMCZ5aGZs4NLa3hbJvpwCCxdkrHIz5lBiaU4I9FQi7moOBEAhEo4sjYDAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-5.tower-267.messagelabs.com!1632996481!149599!1
+X-Originating-IP: [62.60.8.85]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.81.4; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 22114 invoked from network); 30 Sep 2021 10:08:01 -0000
+Received: from unknown (HELO mailhost4.uk.fujitsu.com) (62.60.8.85)
+  by server-5.tower-267.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 30 Sep 2021 10:08:01 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost4.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 18UA7rFo003542
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+        for <fstests@vger.kernel.org>; Thu, 30 Sep 2021 11:08:01 +0100
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Thu, 30 Sep 2021 11:07:51 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] xfs/540: Use _scratch_xfs_set_metadata_field api
+Date:   Thu, 30 Sep 2021 18:08:00 +0800
+Message-ID: <1632996480-2153-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Content-Disposition: inline
-In-Reply-To: <YVJyIGXN/TR8zdU9@bombadil.infradead.org>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 27, 2021 at 06:38:40PM -0700, Luis Chamberlain wrote:
->On Thu, Sep 23, 2021 at 01:51:56AM -0700, Lucas De Marchi wrote:
->> On Mon, Aug 09, 2021 at 10:16:02PM -0700, Luis Chamberlain wrote:
->> The story was not kind like that. It wasn't removed "in favor for a 10
->> second sleep" in the sense that the sleep would replace the wait.
->>
->> It was actually for "this wait logic in the kernel is complex and
->> buggy, let's try to remove it". So we decided to deprecate it and add
->> a sleep rmmod to see if anyone complained. 1 year later of no complains
->> we removed it from kernel. This was all after noticing we had never
->> implemented the wait logic in modprobe - it was only done in rmmod.
->
->OK fixed the commit log thanks!
->
->> > --- a/libkmod/libkmod-module.c
->> > +++ b/libkmod/libkmod-module.c
->> > @@ -30,6 +30,9 @@
->> > #include <stdlib.h>
->> > #include <string.h>
->> > #include <unistd.h>
->> > +#include <poll.h>
->> > +#include <time.h>
->> > +#include <math.h>
->> > #include <sys/mman.h>
->> > #include <sys/stat.h>
->> > #include <sys/syscall.h>
->> > @@ -802,6 +805,143 @@ KMOD_EXPORT int kmod_module_remove_module(struct kmod_module *mod,
->> > 	return err;
->> > }
->> >
->> > +static int timespec_to_ms(struct timespec *t)
->> > +{
->> > +	return (t->tv_sec * 1000) + lround(t->tv_nsec / 1000000);
->> > +}
->> > +
->> > +static int time_delta_ms(struct timespec *before, struct timespec *after)
->> > +{
->> > +	if (!before || !after)
->> > +		return 0;
->> > +	return timespec_to_ms(after) - timespec_to_ms(before);
->> > +}
->>
->> we have a similar thing in util.[ch]
->
->Alright, this OK?
->
->diff --git a/shared/util.c b/shared/util.c
->index b487b5f..b911e63 100644
->--- a/shared/util.c
->+++ b/shared/util.c
->@@ -466,6 +466,19 @@ unsigned long long ts_usec(const struct timespec *ts)
-> 	       (unsigned long long) ts->tv_nsec / NSEC_PER_USEC;
-> }
->
->+unsigned long long ts_msec(const struct timespec *ts)
->+{
->+	return ts_usec(ts) * 1000;
->+}
->+
->+unsigned long long ts_delta_ms(const struct timespec *before,
->+			       const struct timespec *after)
->+{
->+	if (!before || !after)
->+		return 0;
->+	return ts_msec(after) - ts_msec(before);
->+}
->+
-> unsigned long long stat_mstamp(const struct stat *st)
-> {
-> #ifdef HAVE_STRUCT_STAT_ST_MTIM
->diff --git a/shared/util.h b/shared/util.h
->index c6a31df..f8c28e7 100644
->--- a/shared/util.h
->+++ b/shared/util.h
->@@ -43,6 +43,9 @@ int mkdir_p(const char *path, int len, mode_t mode);
-> int mkdir_parents(const char *path, mode_t mode);
-> unsigned long long stat_mstamp(const struct stat *st);
-> unsigned long long ts_usec(const struct timespec *ts);
->+unsigned long long ts_msec(const struct timespec *ts);
->+unsigned long long ts_delta_ms(const struct timespec *before,
->+			       const struct timespec *after);
->
-> /* endianess and alignments                                                 */
-> /* ************************************************************************ */
->
->> > +/**
->> > + * kmod_module_remove_module_wait:
->> > + * @mod: kmod module
->> > + * @flags: flags to pass to Linux kernel when removing the module. The only valid flag is
->> > + * KMOD_REMOVE_FORCE: force remove module regardless if it's still in
->> > + * use by a kernel subsystem or other process;
->> > + * KMOD_REMOVE_NOWAIT is always enforced, causing us to pass O_NONBLOCK to
->> > + * delete_module(2). We do the waiting in userspace, if a wait was desired.
->> > + *
->> > + * Remove a module from Linux kernel patiently.
->> > + *
->> > + * Returns: 0 on success or < 0 on failure.
->> > + */
->> > +KMOD_EXPORT int kmod_module_remove_module_wait(struct kmod_module *mod,
->> > +					       unsigned int flags,
->> > +					       bool wait)
->>
->> why do you have kmod_get_refcnt_timeout/kmod_set_refcnt_timeout instead
->> of just doing s/bool wait/unsigned int wait_msec/)?
->
->Because it lets us do a smaller change on the respetive tools:
->
->tools/modprobe.c-               flags |= KMOD_REMOVE_FORCE;
->tools/modprobe.c-
->tools/modprobe.c:       err = kmod_module_remove_module_wait(mod, flags, do_remove_patient);
->tools/modprobe.c-       if (err == -EEXIST) {
->tools/modprobe.c-               if (!first_time)
->--
->tools/remove.c-         goto unref;
->tools/remove.c-
->tools/remove.c: err = kmod_module_remove_module_wait(mod, 0, do_remove_patient);
->tools/remove.c- if (err < 0)
->tools/remove.c-         goto unref;
->--
->tools/rmmod.c-          }
->tools/rmmod.c-
->tools/rmmod.c:          err = kmod_module_remove_module_wait(mod, flags,
->tools/rmmod.c- do_remove_patient);
->tools/rmmod.c-          if (err < 0) {
->
->That is, the timeout is contextual of the context.
->
->> > +		if ((refcnt <= 0) || (refcnt > 0 && !wait)) {
->> > +			NOTICE(mod->ctx, "%s refcnt is %d\n", mod->name, (int) refcnt);
->> > +			err_time = clock_gettime(CLOCK_MONOTONIC, &t2);
->> > +			if (err_time != 0)
->> > +				kmod_set_removal_timeout(mod->ctx, 0);
->>
->> I don't follow why kmod_module_get_refcnt_wait() is setting the removal
->> timeout at all. This seems to be doing it behind users back.
->
->Because if clock_gettime() returns something other than 0 then
->your clock is messed up and you should not be using a timeout, so
->yes, we correct that then. We can scream loud, or use a default.
->
->I figured not using one would be better in that case.
->
->> The idea of using the refcnt fd was actually that then
->> users could integrate it on their mainloops (probably using epoll). And
->> then the same impl could be shared by kmod_module_remove_module_wait(),
->> which would do a select().
->>
->> This seems more like a kmod_module_refcnt_wait_zero() using poll()
->> + adjusting the timeout
->
->Sorry don't follow. And since I have one day before vacation, I suppose
->I won't get to this until I get back. But I'd be happy if you massage
->it as you see fit as you're used to the code base and I'm sure have
->a better idea of what likely is best for the library.
+With older xfsprogs, xfs_db write subcmd doesn't -d option. So this case fails.
+Use _scratch_xfs_set_metadata_field api to avoid this.
 
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/xfs/540 | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-sure, np. I will take a look as time permits.
+diff --git a/tests/xfs/540 b/tests/xfs/540
+index b00b9bcc..55484dd3 100755
+--- a/tests/xfs/540
++++ b/tests/xfs/540
+@@ -41,11 +41,11 @@ _scratch_unmount
+ 
+ echo "Misconfigure the root directory"
+ rtextsz_blks=$((rtextsz / dbsize))
+-_scratch_xfs_db -x -c "inode $rootino" \
+-	-c "write -d core.extsize $((rtextsz_blks + 1))" \
+-	-c 'write -d core.rtinherit 1' \
+-	-c 'write -d core.extszinherit 1' \
+-	-c 'print' >> $seqres.full
++
++_scratch_xfs_set_metadata_field core.extsize $((rtextsz_blks + 1)) "inode $rootino" >> $seqres.full
++_scratch_xfs_set_metadata_field core.rtinherit 1 "inode $rootino" >> $seqres.full
++_scratch_xfs_set_metadata_field core.extszinherit 1 "inode $rootino" >> $seqres.full
++_scratch_xfs_db -x -c "inode $rootino" -c 'print' >> $seqres.full
+ 
+ echo "Detect misconfigured directory"
+ _scratch_xfs_repair -n >> $seqres.full 2>&1 && \
+-- 
+2.23.0
 
-thanks
-Lucas De Marchi
-
->
->> > +	ret = kmod_module_get_refcnt_wait(mod, do_remove_patient);
->>
->> for tool implementation, shouldn't we just ignore
->> kmod_module_get_refcnt() and proceed to
->> kmod_module_remove_module_wait()?
->
->I'll let you decide. Otherwise this will have to wait until I get back
->from vacation.
->
->  Luis
