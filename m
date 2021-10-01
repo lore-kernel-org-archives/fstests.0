@@ -2,99 +2,76 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1C8FC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Oct 2021 17:11:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 177B4C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Oct 2021 20:07:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A9AD061A02
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Oct 2021 17:11:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA1AA610A3
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Oct 2021 20:07:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231727AbhJARNh (ORCPT
+        id S1354580AbhJAUJ2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Oct 2021 13:13:37 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:53504 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231186AbhJARNg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Oct 2021 13:13:36 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 4DF292006B;
-        Fri,  1 Oct 2021 17:11:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1633108311; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=VctBODUHbFQB1Sc2cd5LyFurOFpUoXLnR72mYi2P/5c=;
-        b=QbbtV/H8AtuB8tY2pr3WwYgbheB3RXD21+QNatQf1nFmZTowSIg8qECyrRmC6hQKQpQEW1
-        gx049amGXAMm01AEZ6LnSkZblwfAi1OooMSxcwv7hphxquo06++39TU1WABe7e2lZheHa8
-        a44EtrbKDWqGGQYo4cIDJElsWb+lEe4=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1633108311;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=VctBODUHbFQB1Sc2cd5LyFurOFpUoXLnR72mYi2P/5c=;
-        b=wKNHQ2XvIILnku1KouVQZBtALh9g6iUOZCowhgYNxk1dbEn7zdhvuQGPvpge4PyPcAqap7
-        3MU5iyZxL69JUTDg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1021513BC1;
-        Fri,  1 Oct 2021 17:11:51 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id lz5TAFdBV2FMeQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Fri, 01 Oct 2021 17:11:50 +0000
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id 8f79f75e;
-        Fri, 1 Oct 2021 17:11:50 +0000 (UTC)
-Date:   Fri, 1 Oct 2021 18:11:49 +0100
-From:   Luis Henriques <lhenriques@suse.de>
-To:     fstests@vger.kernel.org, fio@vger.kernel.org
-Subject: generic/095 failing in ext4 and xfs
-Message-ID: <YVdBVdOjPLCayG1k@suse.de>
+        Fri, 1 Oct 2021 16:09:28 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:49333 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1354661AbhJAUJ2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Oct 2021 16:09:28 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 191K7bA1009713
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 1 Oct 2021 16:07:37 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 4635815C34AA; Fri,  1 Oct 2021 16:07:37 -0400 (EDT)
+Date:   Fri, 1 Oct 2021 16:07:37 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Luis Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, fio@vger.kernel.org
+Subject: Re: generic/095 failing in ext4 and xfs
+Message-ID: <YVdqiQznwuKVcPYV@mit.edu>
+References: <YVdBVdOjPLCayG1k@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <YVdBVdOjPLCayG1k@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi!
+On Fri, Oct 01, 2021 at 06:11:49PM +0100, Luis Henriques wrote:
+> Hi!
+> 
+> I'm seeing generic/095 failing both with ext4 and xfs (but not on btrfs).
+> Here's what I'm getting:
+> 
+> This was for ext4 but the output for xfs is similar.  Since fio is getting
+> killed I suspect this may be an issue with this tool.  Thus I'm sending
+> this to both fio and fstests mailing-lists.
+> 
+> I'm using a 5.15-rc3 kernel and fio-3.28.  Is anyone else seeing something
+> similar?
 
-I'm seeing generic/095 failing both with ext4 and xfs (but not on btrfs).
-Here's what I'm getting:
+Hmm, it's not failing for me.
 
-# cat results/generic/095.out.bad 
-QA output created by 095
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=51200, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=133120, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=92160, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=158720, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=513024, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=33792, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=449536, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=45056, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=30720, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=222208, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=342016, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=177152, buflen=1024
-fio: pid=4090, got signal=11
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=43008, buflen=1024
-fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=308224, buflen=1024
-fio: pid=4086, got signal=11
-Silence is golden
+ext4/4k: 1 tests, 3 seconds
+  generic/095  Pass     2s
+Totals: 1 tests, 0 skipped, 0 failures, 0 errors, 2s
 
-This was for ext4 but the output for xfs is similar.  Since fio is getting
-killed I suspect this may be an issue with this tool.  Thus I'm sending
-this to both fio and fstests mailing-lists.
+root@kvm-xfstests:~# uname -a
+Linux kvm-xfstests 5.15.0-rc3-xfstests #355 SMP Fri Oct 1 14:44:55 EDT 2021 x86_64 GNU/Linux
+root@kvm-xfstests:~# ver
+blktests        62ec9d6 (Tue, 1 Jun 2021 10:08:38 -0700)
+e2fsprogs       v1.46.4-5-g4cda2545-orphan_file (Sun, 22 Aug 2021 10:07:15 -0400)
+fio             fio-3.27 (Wed, 26 May 2021 10:10:32 -0600)
+fsverity        v1.4 (Mon, 14 Jun 2021 16:14:52 -0700)
+ima-evm-utils   v1.3.2 (Wed, 28 Oct 2020 13:18:08 -0400)
+nvme-cli        v1.14-61-gf729e93 (Fri, 25 Jun 2021 10:21:17 -0600)
+quota           v4.05-40-g25f16b1 (Tue, 16 Mar 2021 17:57:19 +0100)
+util-linux      v2.37 (Tue, 1 Jun 2021 09:52:10 +0200)
+xfsprogs        v5.12.0 (Fri, 21 May 2021 15:53:24 -0400)
+xfstests        linux-v3.8-3301-ga8b2de63 (Wed, 1 Sep 2021 12:07:48 -0400)
+xfstests-bld    8c07d08 (Fri, 27 Aug 2021 22:11:13 -0400)
 
-I'm using a 5.15-rc3 kernel and fio-3.28.  Is anyone else seeing something
-similar?
+I'm using fio 3.27, though.
 
-Cheers,
---
-Luís
+					- Ted
