@@ -2,150 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35B83C433FE
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Oct 2021 15:28:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14E94C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Oct 2021 23:07:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1B74460F58
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Oct 2021 15:28:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DE94960E90
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Oct 2021 23:07:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232515AbhJJPa3 (ORCPT
+        id S231390AbhJJXJC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Oct 2021 11:30:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47458 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232832AbhJJPa3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Oct 2021 11:30:29 -0400
-Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92F65C061570
-        for <fstests@vger.kernel.org>; Sun, 10 Oct 2021 08:28:30 -0700 (PDT)
-Received: by mail-wr1-x431.google.com with SMTP id r10so47252830wra.12
-        for <fstests@vger.kernel.org>; Sun, 10 Oct 2021 08:28:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=ai0bFRMZ0qcSrjS+0l/BynD8L6ABY6Kxlm68DihJxaw=;
-        b=cYuBi3Tu+GGzhQ20aztFcdd7FthimtGCc64bcCz6Pcty657EHVk2FKVgbXESNMFDDX
-         Y5EPdfeHVPoEG31s331Pq6HZ6o8rgoCnlEkVSuntBfdp58uF3z/p0OnvmYp09CdIkyOn
-         kZXqXP3i1Tp8KnX+2mfEP2uKhV5asNpGZN3T+W+j8/uAq96SqHS1l65Vgox7eUETxd0m
-         qE5aH/RP8f3WYCULmn7ofrU+z68cV/LgPsEKhb2jh/b241LF6sTZLLr/3hT9JGCVqL7v
-         /tbfngpYKQrL/p/Q6q2Fk6mBeCQQ5TuWOjDBddbXzG0mhRep2rQ0Z+cVX1bZeLYfTJ0c
-         /gMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=ai0bFRMZ0qcSrjS+0l/BynD8L6ABY6Kxlm68DihJxaw=;
-        b=lLpAEHe1Bj9D4RBV9vkR4BkBQWfyJwfZbfeZe2qsf5NOuT8UsnTzG/BKyTkeeLvoTR
-         /5yAN7YEm3JM7mM//8242po4gQLMYaW7Fje3TTL8fTBPylcWdhMC4/5SvrRdgJ4+pacW
-         mhyIQpxkW1+KWBKJFHJhiDXqh0JzoUzYr0smy4iXbKISyWi0LaF938FYc3yw7stHIFDA
-         IIG/5EMqiKGJ00yAvId7tYMg69UoEjZMnrsfH8ed9a6DnzfxZz0lb5LJ11rlKj+x2EhU
-         J1rF/5Ob1usLqKyylyPonzV9jb7CbIwqfTRxvTCe635IeKTD8LPmh1Hv+3dB739uXikA
-         c+Qg==
-X-Gm-Message-State: AOAM532f4Xaz+YV91x30XlsJfrWe8acoYAZ0NqeDxDdWYJDidWT3I2sw
-        BqazbXaQgbogjpL2obX5g29SiC8uz6Y=
-X-Google-Smtp-Source: ABdhPJzB+xnlqdiyz4mGJeCx6LgjS178Y5bRtU9K/AIYOETsQEhI37WgyypsFJYAycOD+nEC0QnHuQ==
-X-Received: by 2002:a1c:2586:: with SMTP id l128mr15707591wml.109.1633879708873;
-        Sun, 10 Oct 2021 08:28:28 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id s13sm5450906wrv.97.2021.10.10.08.28.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 10 Oct 2021 08:28:27 -0700 (PDT)
-Message-ID: <6163069b.1c69fb81.bc811.b886@mx.google.com>
-Date:   Sun, 10 Oct 2021 23:28:23 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
+        Sun, 10 Oct 2021 19:09:02 -0400
+Received: from mail105.syd.optusnet.com.au ([211.29.132.249]:46522 "EHLO
+        mail105.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232849AbhJJXJC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Oct 2021 19:09:02 -0400
+Received: from dread.disaster.area (pa49-195-238-16.pa.nsw.optusnet.com.au [49.195.238.16])
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 05F1F10571FA
+        for <fstests@vger.kernel.org>; Mon, 11 Oct 2021 10:07:01 +1100 (AEDT)
+Received: from discord.disaster.area ([192.168.253.110])
+        by dread.disaster.area with esmtp (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1mZhuH-004nTJ-22
+        for fstests@vger.kernel.org; Mon, 11 Oct 2021 10:07:01 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.95)
+        (envelope-from <david@fromorbit.com>)
+        id 1mZhuH-000uFR-15
+        for fstests@vger.kernel.org;
+        Mon, 11 Oct 2021 10:07:01 +1100
+From:   Dave Chinner <david@fromorbit.com>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 47a1238bdb23
+Subject: [PATCH 2/2] fstests: groupfile generation needs force overwrite
+Date:   Mon, 11 Oct 2021 10:06:59 +1100
+Message-Id: <20211010230659.216166-3-david@fromorbit.com>
+X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20211010230659.216166-1-david@fromorbit.com>
+References: <20211010230659.216166-1-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="LjLUmnkckSGK"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=61637216
+        a=DzKKRZjfViQTE5W6EVc0VA==:117 a=DzKKRZjfViQTE5W6EVc0VA==:17
+        a=8gfv0ekSlNoA:10 a=20KFwNOVAAAA:8 a=cDzX3OqDMS_Mzbm7E6kA:9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Dave Chinner <dchinner@redhat.com>
 
---LjLUmnkckSGK
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Having built fstests as root as part of a run script, I get failures
+then trying to run it as a user because of the group list
+generation. The issue occurs because the group list files are owned
+by root, and so I get an interactive prompt to overwrite them such
+as:
 
-Hi all,
+Building btrfs
+ [GROUP] /home/dave/src/xfstests-dev/tests/btrfs/group.list
+mv: replace 'group.list', overriding mode 0644 (rw-r--r--)? y
+Building ceph
+ [GROUP] /home/dave/src/xfstests-dev/tests/ceph/group.list
+mv: replace 'group.list', overriding mode 0644 (rw-r--r--)? y
+Building cifs
+ [GROUP] /home/dave/src/xfstests-dev/tests/cifs/group.list
+mv: replace 'group.list', overriding mode 0644 (rw-r--r--)? y
+Building ext4
+ [GROUP] /home/dave/src/xfstests-dev/tests/ext4/group.list
+...
 
-The master branch of the xfstests repository at:
+Use 'mv -f' to ignore such trivial issues so that the new group
+lists are written correctly.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ tools/mkgroupfile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-have just been updated. This is a bugfix only update and should not introduce
-new failures.
+diff --git a/tools/mkgroupfile b/tools/mkgroupfile
+index 634ec92c..3844e57d 100755
+--- a/tools/mkgroupfile
++++ b/tools/mkgroupfile
+@@ -24,7 +24,7 @@ cleanup() {
+ 	test -z "$ngroupfile" && return
+ 
+ 	if [ $ret -eq 0 ]; then
+-		mv "$ngroupfile" "$groupfile"
++		mv -f "$ngroupfile" "$groupfile"
+ 	else
+ 		rm -f "$ngroupfile"
+ 	fi
+-- 
+2.33.0
 
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-47a1238bdb23 common/log: fix *_dump_log routines for ext4
-
-New commits:
-
-Catherine Hoang (4):
-      [69575301c85e] fstests: rename _scratch_inject_logprint to _scratch_remount_dump_log
-      [d888261aa0e6] fstests: rename _test_inject_logprint to _test_remount_dump_log
-      [e61c2b753cc4] common/log: move *_dump_log routines to common/log
-      [47a1238bdb23] common/log: fix *_dump_log routines for ext4
-
-Luis Henriques (2):
-      [7a2cdfa745aa] common/rc: add _require_user_exists() to check if a user exists
-      [dfae4068a824] generic/079: make sure users 'nobody' and 'daemon' exist
-
-Yang Xu (1):
-      [aca74d17ccfa] xfs/540: use _scratch_xfs_set_metadata_field api
-
-
-Code Diffstat:
-
- common/inject     | 26 --------------------------
- common/log        | 30 ++++++++++++++++++++++++++++--
- common/rc         | 27 ++++++++++++++++++---------
- tests/generic/079 |  2 ++
- tests/xfs/312     |  2 +-
- tests/xfs/313     |  2 +-
- tests/xfs/314     |  2 +-
- tests/xfs/315     |  2 +-
- tests/xfs/316     |  2 +-
- tests/xfs/317     |  2 +-
- tests/xfs/318     |  2 +-
- tests/xfs/319     |  2 +-
- tests/xfs/320     |  2 +-
- tests/xfs/321     |  2 +-
- tests/xfs/322     |  2 +-
- tests/xfs/323     |  2 +-
- tests/xfs/324     |  2 +-
- tests/xfs/325     |  2 +-
- tests/xfs/326     |  2 +-
- tests/xfs/329     |  2 +-
- tests/xfs/540     | 10 +++++-----
- 21 files changed, 69 insertions(+), 58 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---LjLUmnkckSGK
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmFjBmwACgkQJlKqKVyP
-52OeLw//Y8wpPKzD9jU4BmWfZAJZut8Pbq/xypiJoelxMzaB9W88gBLhSXRxOL0V
-pQZL2LWDIZ7uG8OWfhweKV3d9RAtMvfTe9mQlFlO9LNqzCplnNkK+1ElFxvYurWb
-kyqrtA5JCM4xlefMrADRlplr4/3Z6h3FhoO1chleOPC5zXb8yzPwMhqNeYA1KoVT
-upgYV6plrcRy5xr94n5ejKh2iBUMCqxWq3Bh1lwsrz/V4IA9Zb1yWpGQ14rT9qqh
-kNjXIPxrKtTmcK6UBtAC3AtzLuAY+w4NOltTG90pfLZk5DdcNrsIfQgXSbjr7faI
-4AceiMFNTyHXLls2GjTKVFLBVVSE47Qe/7KZZkggvl6bEi+NM4jegjgFdKOVNChX
-99FhfLaj3hT5n/bnn1LzPIilObelko0bwX5q9XAbhQ7StiDszNiAmujzlDaLotl4
-O+//M0VclZPtILiGTQFu7/mjA2cO3lnvPfRtRY8tGOvLOiURubPoXE34tPVcE70G
-hlOlV4UX33yoknvX4KVSSfKwk4cqOjq80GPXlO4cdWsqC4XQm6Mk6s+eEoifyqyA
-9LJELBuhM4dkbSg/32lC1/g3srBHzX75lCKtxXVV7io2U+Iz8KvEyTInLqiMV6dj
-DhOI4LEbAEn5Or1tUK3F3e6WAeJKLbSeXjPP0F2JYVmpzJnepPg=
-=YZKP
------END PGP SIGNATURE-----
-
---LjLUmnkckSGK--
