@@ -2,184 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47974C433FE
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Oct 2021 19:06:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A11BC433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Oct 2021 08:31:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2B7DF60FE8
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Oct 2021 19:06:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D9AAF60F4B
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Oct 2021 08:31:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240180AbhJHTIu (ORCPT
+        id S231169AbhJJIdc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Oct 2021 15:08:50 -0400
-Received: from mx0a-00069f02.pphosted.com ([205.220.165.32]:49602 "EHLO
-        mx0a-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231459AbhJHTIs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Oct 2021 15:08:48 -0400
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 198IZET7015902;
-        Fri, 8 Oct 2021 19:06:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : references : in-reply-to : content-type :
- content-id : content-transfer-encoding : mime-version; s=corp-2021-07-09;
- bh=eJhVvWBM9+zUile/jhNawcJy+Igihb97mGWxPPMrHcQ=;
- b=LxXuhmNSFKJjdMRgnD6iml/pjOVVVNAIGvIdLHtDC0Q4Plz84yjYPn5tGHqsJwN97NUD
- GDqAz2Os3h4AW81f1SCX4G6IfS0azCNhLKMNX0ssdwFUCX3tKfPUEkay4Wsu4CM22gBN
- G1lHh/1mMt/nLouxfhoa5RJ4GJIExoEdwpj07i365aKYZGn+D+LV9FiQys9+Qp/Ni4hX
- fakqIekd2m1GEiJV8YFmicNneRb+zd3b6MfJmZ7+wUnfKIDMPQHNLIm1QrzCZmMjLwiO
- SEjp4ACP5fsvyiPNZ/OvNqjwFf6d9S5rzUy5fojHUnHErbc8ON+dpS7zQ7nH5K6TkgSI 5w== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by mx0b-00069f02.pphosted.com with ESMTP id 3bjr7t9j20-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 08 Oct 2021 19:06:41 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 198J4rdH175878;
-        Fri, 8 Oct 2021 19:06:39 GMT
-Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2176.outbound.protection.outlook.com [104.47.56.176])
-        by userp3030.oracle.com with ESMTP id 3bf0sc7pyu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 08 Oct 2021 19:06:39 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=l2jMba26DUn7fJfjVG4apamfICUdshQ6QLWat/zodD6uG8UYua4SLPArfyG7Tc1TQ6OJJQwOCAq7gaE1Jaka4psuKLG5xUnNdQ0D2Lc+oY9mcL2ty5NmwVY47MYFFm10nPdnEHWbtHSAx6XBNQt9lWonw2eDedALS0i3tw+ydrAKfhZsYfoN41mywZANhHaHcnzWpSlw6SUXK7o7JNUpTivf5OxrGjYx7PrrR/FcZ0O+r2Hpw15Pi4zW44k/bx/RlYMJjQL3UhQeAQHWc0yFBKUwUzAixCkA3hFkmc9khtWOg72wkrMu+3USjQSLZkejM1pJfKEMm6knaVzLJ3bNQg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=eJhVvWBM9+zUile/jhNawcJy+Igihb97mGWxPPMrHcQ=;
- b=Oa4H1+my7i5cEoyFXnOJo4E7gFwPKZZs8tNMuAl06GgYUi6+VLQWraZ0B06ZIzODReVDRGiWHKm6f6bjhl3cpOkaAm7W+qn79VC6QdPDmi7t0lphieUmIKD6usG60iTtSXrbetTq3Eh9ugcOcLHMbpFoEUYrQlLAjjQZBtwc6j+a1ZRSxPFp8Kx4iIGNHfGkjm6+axpRCSkgTDrB4JMJpJIvRIdfUBGB1obe8qFwOA9UliDK/PVFA9+ivIQMqB5CtvpHeTH3InfX/PeF0/NLt0dTQKNThL2KfpEa0ku6kbYR0qm4okA32xKfuz0iIj3aPL1fuyoSLp/yGtzNIpj/Jg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=eJhVvWBM9+zUile/jhNawcJy+Igihb97mGWxPPMrHcQ=;
- b=UYkunlMf4bRhgCPP/byVPRkvtrfUTadQifd3J/+FioukInz/emmte1RDS4jpmTj4vp2+tzCxRPNT2D1ngec2zbK4y3/KfZc45NrfIFfAX15A/DJJA4lso4gCzzHv7PpTBnU6xHwtWrEk3oqCWWbMdFz0UYB2MlBwkAR5AxirtIg=
-Received: from BYAPR10MB2791.namprd10.prod.outlook.com (2603:10b6:a03:83::16)
- by BY5PR10MB3828.namprd10.prod.outlook.com (2603:10b6:a03:1f8::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.18; Fri, 8 Oct
- 2021 19:06:37 +0000
-Received: from BYAPR10MB2791.namprd10.prod.outlook.com
- ([fe80::8c13:27a8:24bb:723a]) by BYAPR10MB2791.namprd10.prod.outlook.com
- ([fe80::8c13:27a8:24bb:723a%7]) with mapi id 15.20.4587.020; Fri, 8 Oct 2021
- 19:06:37 +0000
-From:   Catherine Hoang <catherine.hoang@oracle.com>
-To:     Allison Henderson <allison.henderson@oracle.com>
-CC:     "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2 4/4] common/log: Fix *_dump_log routines for ext4
-Thread-Topic: [PATCH v2 4/4] common/log: Fix *_dump_log routines for ext4
-Thread-Index: AQHXuxIEIzzvwvY7tUGHhMFYp0RKF6vJY4OAgAAVkwA=
-Date:   Fri, 8 Oct 2021 19:06:37 +0000
-Message-ID: <AAD602F3-9A9B-494C-A0FE-8BF521271268@oracle.com>
-References: <20211007002641.714906-1-catherine.hoang@oracle.com>
- <20211007002641.714906-5-catherine.hoang@oracle.com>
- <9046a560-e064-b009-6867-b9e65d7296c7@oracle.com>
-In-Reply-To: <9046a560-e064-b009-6867-b9e65d7296c7@oracle.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-mailer: Apple Mail (2.3654.120.0.1.13)
-authentication-results: oracle.com; dkim=none (message not signed)
- header.d=none;oracle.com; dmarc=none action=none header.from=oracle.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: abffe697-46ba-4435-47b3-08d98a8ec0c4
-x-ms-traffictypediagnostic: BY5PR10MB3828:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <BY5PR10MB382820ED9DFB8DFBFFCCB70589B29@BY5PR10MB3828.namprd10.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:3513;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: Lxj9YOFc5tQ+MnV1dj5q95lB1qXx5vggP4ci4F7wnQA0v4zg6HFl/sUQWfeEepDKJzJL6zzG2cwcqovhKw+dLbzSGSLGW+px/rrfxW9uF8B1WpzYi/oAxEbUK0j5YMtc3BKyxv4YpJdFkyGkjj7owpnUV5JrdVr0lLbM3nU830+P5ZlrELef1xad9+tmUre4Qy1X3cSNhuPusDQRkcG24WCAsj8Jy859URme8QBhltQIq61QXf37v8KEFiGG95YlBncCEgBQWHxQf75mBrY6hCgMn7vW2e6mv31iYAt5iGC/6i41f2g8V7mbG8FsknU/QCsjNHbOU42pNWD8G5I8VGEr8kE4Wi0zbQf3LsQSaeai61KtB6zPbj63EDQ/8Gw+P1ssLbGIx2kv6lGMA4CCgrn5RDYEn+Dg0eQ7hSQrp7nwqaL+O7KXWtJ2/W2eVvT/NdorayzjAgHCygABQYrXEA2/X9iGK4/T8swTncOVN4R1s5BmWgK1JIwrkSFaXngr8N4WufMYK7QhsFGTEHdNUjL9CldzgEhlO/fRVpOaaF6qTwRCKsHup+uKn5u62JQ3Aq8BDOkBGF098S+01j4m9ZGgrZqIgL0DvN9X2SuLVp4vPy4ICvigO9qnVtxdKTbeo56zUS/X5OOAFS11q7l1CE2VOdFrwHTfPi5GwK7lQs7XqITaJri9FvLUFnsSnGiBRCUPWl5V2iKupIec7TDhcftbcWp3N8OPAmnU9s5ZedA=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR10MB2791.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(6862004)(44832011)(83380400001)(86362001)(2906002)(36756003)(186003)(6486002)(6636002)(71200400001)(53546011)(6506007)(38070700005)(508600001)(54906003)(33656002)(5660300002)(37006003)(8676002)(316002)(6512007)(450100002)(38100700002)(8936002)(2616005)(122000001)(66476007)(66946007)(66556008)(66446008)(64756008)(76116006)(26005)(4326008)(4744005)(45980500001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?eCLsMIv2OE0mnOIb8qKL7DeQf8zSr8bjqW4FnUEJG2T0iAMfdJjVbqrco5Z+?=
- =?us-ascii?Q?UDsP9coGp3dsrDkX28BqwzqidM9O2JG25lrD0PPnwxQR6Ap6CaWmhdWOmv5m?=
- =?us-ascii?Q?qEND3yHU9rR30CgxBt63ZcxTikpAhYLanzsZdM6waruHh/RtyaGfHSp+b/bv?=
- =?us-ascii?Q?86Z6tF5I7q4YftOIdBTIjOdB8ndRwNBCXjBxKkfUelE0DcJEIOsgDlq9Nxa8?=
- =?us-ascii?Q?+PVyrUnIdCCxZjzd7F4f7+xaROyxGyQPZvibMHAJC9QdEGLiN3rITToq4K81?=
- =?us-ascii?Q?ldHBvJOeu7466UAsRcTsmqQHaaGIZPVupE+HcnbzzqqVYg/Eb7MgBic5+Odp?=
- =?us-ascii?Q?FoMQfl5QKzTFHMvbpMU49NwOlSEy81KZvw2GCTRMrgn/9Ln4AI+tjU5YRmWo?=
- =?us-ascii?Q?FA8QEPJreRMHwMm1cZMEHZSBPcXRwuOajLUGAdfcOz0nlq03FNpMlgO9cHUU?=
- =?us-ascii?Q?nj84rnpBjQBMtjCW/p8YSr2g4+5F4rb8gESsQyajPc2ryN06vKDYxcfWlaVo?=
- =?us-ascii?Q?Nv/VvLRngM/EJTgP0KkyF78uBHDtKuW1YeNNxPLPw2XleetOoRPJL0Ys6dYm?=
- =?us-ascii?Q?XNaGMToumzH0IrnOVspK+z/0U+LTdCSUHC04YS2027UkW7hH+Eu+2DPDUZkJ?=
- =?us-ascii?Q?TsL6mDkgRNY+iwk4POLxhy7yXtO/M87g9F5aV3LlCbgvwiz7v8AXMc+/HrK6?=
- =?us-ascii?Q?j5XzTrHkJCDJbnpLLCxgO609FDqXzjk4HCosOXzYnmtO5PujPURWGmnHmOF3?=
- =?us-ascii?Q?toZhBrO6Na0k7ey1/OiFpMaUTA+rLACc7U2OFmFcurXb1s5dVKQDYcF7CUws?=
- =?us-ascii?Q?RWx+XIKx2oN8oCQccEXgzo+NPI/Trfdi7GX8zpXREDgsa6OG131z0CD2WtlZ?=
- =?us-ascii?Q?odL9wK+k21ssxi0Qz9JEbWrVOOrYiU/zoF/Lq8q6+iDMv2uo4Z50f99611xl?=
- =?us-ascii?Q?KqfpKjLEXj26yuYN/S5UYQS/uzaylaIDu9jqYw5XeyEJrYr/XrcC9qs9mztZ?=
- =?us-ascii?Q?ul4BTCVeky/rVD072K8xrWBQU+ZQ9UzUAxb7D6Bs6Qf3c84sNo1389QyDj6O?=
- =?us-ascii?Q?lVMxiSWDKotzJXZAUf2sE6NZvkiAVLvwlmS4W2b7zSbk3ATa22NDdEByFuUt?=
- =?us-ascii?Q?mb6kiIF1G0ovOT1oJ2JontELrvB6wH5dCkaNRkOIH51ZcCuUTuYd86HsCfHp?=
- =?us-ascii?Q?J8N0dXGWlI2HCMotHAIFpJXyV3hkcWEPbK0IZL4QNEcbS81SylkzpbA2hVwV?=
- =?us-ascii?Q?OiXMLceaJWOmg5RUbvmsMfBg1J5J2OeVqhG6g3qcaY+jEgIXHjs/i01BY4vq?=
- =?us-ascii?Q?QaFgtCiUZ5cClsApW3XpVIv5?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <1ACA02692856EF4BA0C6D342F30B4CF6@namprd10.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+        Sun, 10 Oct 2021 04:33:32 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:52526 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230254AbhJJIdb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Oct 2021 04:33:31 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1633854692;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=wWm6MZEgsIqvR/LGmdBzAuow2ZxRc8S3j2PHzbeom1E=;
+        b=Qw39YqL6q5cETCBx4VmGYN0ke1YThXXJz6oXg8fxIFodH0e2Kr0Q5UZfJVv88OWcgaWCr3
+        zPvkZ7aEF+L/ab7O2/tqGtCr5BfYLhx1mjzpg3rfWAV0OYR9eyOedDCx4mp4xlw8WhgAQR
+        LPVHrIV6wufX0/6TEB2SmHYNMKlKNI0=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-119-G0pbelEwNJGhbQWqhqf2bQ-1; Sun, 10 Oct 2021 04:31:31 -0400
+X-MC-Unique: G0pbelEwNJGhbQWqhqf2bQ-1
+Received: by mail-pf1-f198.google.com with SMTP id v13-20020a056a00148d00b0044ccf66dbd1so3234893pfu.4
+        for <fstests@vger.kernel.org>; Sun, 10 Oct 2021 01:31:31 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :content-transfer-encoding:in-reply-to;
+        bh=wWm6MZEgsIqvR/LGmdBzAuow2ZxRc8S3j2PHzbeom1E=;
+        b=Iq13m66Ymos3N3Gs+FBI10LrENh3UWUyFUp1/QqtCFAwnYmMRzjP8GNmOUx8VtKnbH
+         Nr39lz5/+sHU3j6WuEF4Uh/L07rKVTL2lgAsGoWDuT7l23d8WEU0+lmFdghTR/hcuyFB
+         +lc1dqoLi0VCpJMvLKmwYOIo6w3O5HTgv8EVR+wtlbn3SHcuxgteYclvv/jgzCzKTLsC
+         vOWKG6vlRIgqbLNG95kxAQaSYf03NHdCExeOxBaNmkWm2WL3DTCdXYGNnvRhj9TaAgMp
+         bu1YovSWPWt42Q5s8xk7jz6fbQugSBogLLiG5w6J98tVQdXJ1fP2kvd3CLPI8cPBsTvt
+         7WCg==
+X-Gm-Message-State: AOAM531dnDue9U+EFJ0T6JMW9P6yN19P3aV8XuSsXHBJB/A82qX4aLST
+        dFRxEBGTuzlN+gwqeKBvb71mh1zC2idlnuDp51k4+HIi2F5/fZeGw1M7qnfmVBMHBkIZ65TimLe
+        uwge1QsNGVcAjtlEbeA==
+X-Received: by 2002:a17:90b:4c4c:: with SMTP id np12mr22668210pjb.205.1633854690239;
+        Sun, 10 Oct 2021 01:31:30 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJylVddTVKM9QEike7OQzKOWn6zbeUYL/x8CwGY3KrZpaUXePVUcXZ5G8dw+YawN/BTqCsNjSQ==
+X-Received: by 2002:a17:90b:4c4c:: with SMTP id np12mr22668194pjb.205.1633854689960;
+        Sun, 10 Oct 2021 01:31:29 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id d14sm4018034pfr.123.2021.10.10.01.31.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 10 Oct 2021 01:31:29 -0700 (PDT)
+Date:   Sun, 10 Oct 2021 16:31:25 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Luis Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, fio@vger.kernel.org
+Subject: Re: generic/095 failing in ext4 and xfs
+Message-ID: <20211010083125.dne6pcjjboixdllo@fedora>
+Mail-Followup-To: Luis Henriques <lhenriques@suse.de>,
+        fstests@vger.kernel.org, fio@vger.kernel.org
+References: <YVdBVdOjPLCayG1k@suse.de>
 MIME-Version: 1.0
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: BYAPR10MB2791.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: abffe697-46ba-4435-47b3-08d98a8ec0c4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Oct 2021 19:06:37.2654
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: iEUMxfs8nvnbilPqRUzMhC0QOAhfT3tcqJYw+cZkG4Tl0z8Do184ujhAJFpx5KigU6GF7cLj94e9ZTH3Pf45BIPFmcQQIAXHCneiizePeeM=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR10MB3828
-X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10131 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 suspectscore=0 adultscore=0
- mlxscore=0 phishscore=0 bulkscore=0 mlxlogscore=999 malwarescore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2109230001
- definitions=main-2110080107
-X-Proofpoint-ORIG-GUID: kZFkri4T9wp3WPniAeae8tmnRgGHAZq3
-X-Proofpoint-GUID: kZFkri4T9wp3WPniAeae8tmnRgGHAZq3
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <YVdBVdOjPLCayG1k@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-> On Oct 8, 2021, at 10:49 AM, Allison Henderson <allison.henderson@oracle.=
-com> wrote:
->=20
->=20
->=20
-> On 10/6/21 5:26 PM, Catherine Hoang wrote:
->> dumpe2fs -h displays the superblock contents, not the journal contents.
->> Use the logdump utility to dump the contents of the journal.
->> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
-> Looks good to me.  Thanks for the fix
-> Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-Thanks for the review!
-Catherine
->=20
->> ---
->>  common/log | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->> diff --git a/common/log b/common/log
->> index 0a9aaa7f..154f3959 100644
->> --- a/common/log
->> +++ b/common/log
->> @@ -229,7 +229,7 @@ _scratch_dump_log()
->>  		$DUMP_F2FS_PROG $SCRATCH_DEV
->>  		;;
->>  	ext4)
->> -		$DUMPE2FS_PROG -h $SCRATCH_DEV
->> +		$DEBUGFS_PROG -R "logdump -a" $SCRATCH_DEV
->>  		;;
->>  	*)
->>  		;;
->> @@ -246,7 +246,7 @@ _test_dump_log()
->>  		$DUMP_F2FS_PROG $TEST_DEV
->>  		;;
->>  	ext4)
->> -		$DUMPE2FS_PROG -h $TEST_DEV
->> +		$DEBUGFS_PROG -R "logdump -a" $TEST_DEV
->>  		;;
->>  	*)
->>  		;;
+On Fri, Oct 01, 2021 at 06:11:49PM +0100, Luis Henriques wrote:
+> Hi!
+> 
+> I'm seeing generic/095 failing both with ext4 and xfs (but not on btrfs).
+> Here's what I'm getting:
+> 
+> # cat results/generic/095.out.bad 
+> QA output created by 095
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=51200, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=133120, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=92160, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=158720, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=513024, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=33792, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=449536, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=45056, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=30720, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=222208, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=342016, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=177152, buflen=1024
+> fio: pid=4090, got signal=11
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=43008, buflen=1024
+> fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=308224, buflen=1024
+> fio: pid=4086, got signal=11
+
+I *guess* it might be caused by a striped storage(fs) of you?
+
+Thanks,
+Zorro
+
+> Silence is golden
+> 
+> This was for ext4 but the output for xfs is similar.  Since fio is getting
+> killed I suspect this may be an issue with this tool.  Thus I'm sending
+> this to both fio and fstests mailing-lists.
+> 
+> I'm using a 5.15-rc3 kernel and fio-3.28.  Is anyone else seeing something
+> similar?
+> 
+> Cheers,
+> --
+> Luís
+> 
 
