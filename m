@@ -2,78 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7405C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 10:22:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 236DAC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 11:14:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8AD5D60F5B
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 10:22:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EBDA660462
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 11:14:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235602AbhJKKYY (ORCPT
+        id S235970AbhJKLQO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Oct 2021 06:24:24 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:41894 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235850AbhJKKYY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Oct 2021 06:24:24 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 6B8662004C;
-        Mon, 11 Oct 2021 10:22:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1633947743;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
+        Mon, 11 Oct 2021 07:16:14 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:60000 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S236143AbhJKLQK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Oct 2021 07:16:10 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1633950850;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=ElQrjxxlbs/iJLIPBE7j+Xps32ZSZlFv4Z11qLYaol4=;
-        b=kfMm3tCNuQ4ufimEUJFOcSUdWQEo9bt7dRlHf0scpJzRx+4YNA+rDB+YPuee78/LBZnnN+
-        g69LIGh/rWL/Rh1pmIUWZjSaFHt+qSxCfYBwYKHrjtlxgMMsBBYscu8hLw56GnG+FY1wVP
-        oTyyuTRSyCOZMHOn7ythVauRSAadXoc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1633947743;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ElQrjxxlbs/iJLIPBE7j+Xps32ZSZlFv4Z11qLYaol4=;
-        b=8Bo+f9ehwEqb6hrdN58JExQ2iLffwABo6Gx37Nn5HTalaq2fSkpggl/0qLXUak2oF95ERE
-        2kLCxIZDd7Y3J+Cw==
-Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
-        by relay2.suse.de (Postfix) with ESMTP id 623FAA3B8F;
-        Mon, 11 Oct 2021 10:22:22 +0000 (UTC)
-Received: by ds.suse.cz (Postfix, from userid 10065)
-        id 76C1BDA704; Mon, 11 Oct 2021 12:21:59 +0200 (CEST)
-Date:   Mon, 11 Oct 2021 12:21:59 +0200
-From:   David Sterba <dsterba@suse.cz>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Ma Xinjian <xinjianx.ma@intel.com>, fstests@vger.kernel.org,
-        Philip Li <philip.li@intel.com>,
-        kernel test robot <lkp@intel.com>,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] btrfs/049: remove the test
-Message-ID: <20211011102159.GB9286@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-Mail-Followup-To: dsterba@suse.cz, Eryu Guan <guan@eryu.me>,
-        Ma Xinjian <xinjianx.ma@intel.com>, fstests@vger.kernel.org,
-        Philip Li <philip.li@intel.com>, kernel test robot <lkp@intel.com>,
-        linux-btrfs@vger.kernel.org
-References: <20210927072019.46609-1-xinjianx.ma@intel.com>
- <YWLrZHPZ1VIn5qIH@desktop>
+        bh=PnpfxqAx5ZBl3fnKy32lAl1Jk1/daFqfsFzXCrwbgqs=;
+        b=OHWPCW4QtjTwRneuMmzBo6ieHoiI1hqWpCm33XZJMWLQDHEku94aLLSSie097rz/bvLnkB
+        NpQpi4xJw/U57h2B/mwkfPz5ZNwgpmdTmJCficM2dQSiP367mlFFcXXljfTb8IlEs6t4sC
+        8zijuSdKnrp8o+DINqCw7WlzQ9S0Ktw=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-552-OxrC04REOX6eD1Ngk49HTQ-1; Mon, 11 Oct 2021 07:14:06 -0400
+X-MC-Unique: OxrC04REOX6eD1Ngk49HTQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E088410A8E02;
+        Mon, 11 Oct 2021 11:14:05 +0000 (UTC)
+Received: from T590 (ovpn-8-37.pek2.redhat.com [10.72.8.37])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 5D85610023AE;
+        Mon, 11 Oct 2021 11:14:02 +0000 (UTC)
+Date:   Mon, 11 Oct 2021 19:13:57 +0800
+From:   Ming Lei <ming.lei@redhat.com>
+To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, fio@vger.kernel.org
+Subject: Re: generic/095 failing in ext4 and xfs
+Message-ID: <YWQcdTCMIFFdDnMh@T590>
+References: <YVdBVdOjPLCayG1k@suse.de>
+ <20211010083125.dne6pcjjboixdllo@fedora>
+ <YWP/SmhG8TviBE2w@suse.de>
+ <YWQEgBQLdD+zsHOZ@T590>
+ <YWQO6RdR7oUSNpxN@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <YWLrZHPZ1VIn5qIH@desktop>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <YWQO6RdR7oUSNpxN@suse.de>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 10, 2021 at 09:32:20PM +0800, Eryu Guan wrote:
-> [cc'ed btrfs list]
+On Mon, Oct 11, 2021 at 11:16:09AM +0100, Luís Henriques wrote:
+> On Mon, Oct 11, 2021 at 05:31:44PM +0800, Ming Lei wrote:
+> > On Mon, Oct 11, 2021 at 10:09:30AM +0100, Luís Henriques wrote:
+> > > On Sun, Oct 10, 2021 at 04:31:25PM +0800, Zorro Lang wrote:
+> > > > On Fri, Oct 01, 2021 at 06:11:49PM +0100, Luis Henriques wrote:
+> > > > > Hi!
+> > > > > 
+> > > > > I'm seeing generic/095 failing both with ext4 and xfs (but not on btrfs).
+> > > > > Here's what I'm getting:
+> > > > > 
+> > > > > # cat results/generic/095.out.bad 
+> > > > > QA output created by 095
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=51200, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=133120, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=92160, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=158720, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=513024, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=33792, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file2: Invalid argument: write offset=449536, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=45056, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=30720, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=222208, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: read offset=342016, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=177152, buflen=1024
+> > > > > fio: pid=4090, got signal=11
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=43008, buflen=1024
+> > > > > fio: io_u error on file /tmp/mnt/scratch/file1: Invalid argument: write offset=308224, buflen=1024
+> > > > > fio: pid=4086, got signal=11
+> > 
+> > The issue should be from generic/095 test itself, which run dio with bs=1k,
+> > but logical block size is 4k. I guess the test may work after you change
+> > bs to 4k in generic/095.
 > 
-> On Mon, Sep 27, 2021 at 03:20:18PM +0800, Ma Xinjian wrote:
-> > inode_cache is deprecated and will never appear in mount
-> > options; remove it entirely
-> 
-> Please also cc btrfs list in future patches for btrfs-specific tests.
-> 
-> And I'd like an ack from btrfs folks.
+> Ah, I see what you mean.  Ok, I've used the patch bellow and the test now
+> passes.  The patch changes the block size only for the DIO jobs, there are
+> other jobs where bs=1k is still used.  Do you think other jobs should be
+> changed as well?
 
-Acked-by: David Sterba <dsterba@suse.com>
+Only DIO job need aligned bs parameter. 
+
+
+thanks,
+Ming
+
