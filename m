@@ -2,96 +2,100 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E78EC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 16:36:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7861C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 16:46:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D966260F35
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 16:36:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A0ED960F3A
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Oct 2021 16:46:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232496AbhJKQi2 (ORCPT
+        id S231447AbhJKQsx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Oct 2021 12:38:28 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59932 "EHLO mail.kernel.org"
+        Mon, 11 Oct 2021 12:48:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38300 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232752AbhJKQiT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 11 Oct 2021 12:38:19 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1BAFA60F35;
-        Mon, 11 Oct 2021 16:36:19 +0000 (UTC)
+        id S229816AbhJKQsw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 11 Oct 2021 12:48:52 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9736E60F38;
+        Mon, 11 Oct 2021 16:46:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1633970179;
-        bh=IowoujM1u1a+rgjhf1c+jtd3N1yuDxJ57IOIuGjug3g=;
+        s=k20201202; t=1633970812;
+        bh=nKFa3KZD9Ikzexf/JYYr0UJazGcgdS80gG8MZEzgrC4=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=HwlXrATzMm5GvP/s8xLTRt4N6tyQ+flLY+RoRIst/jbsBevmqBqisb0Kzt5BVZmZM
-         DGa99j6ymRJBSTruNuYebgfJEhD4gOSqbL0uAkJt5FHNxSiQQNXn00qTDz7dWBvDgM
-         yyeB1GMtfZ/QPf0ByVZ3uHrWzwP/GGuOVTIYBET5pr4JmRJEuy1Vy8QoTgYbYLw/FI
-         UBI487RIriYnMSKSdswTR8YPrgm4Tv342ORNzBJhP191WLnyPx+ez0z6A7f0nChG4A
-         1oBle7OadvPmRBQbagV8KEFKb13b2FezQKeIaoTaM5iwcDI5xqZqGGzx0QfzLOZnaP
-         BxYkYhjaILPdg==
-Date:   Mon, 11 Oct 2021 09:36:18 -0700
+        b=fvhedpIvcNgVH8GjBf6zj/J5YkBN+WNELRGRuUFJ2E47In9u+hYQD0jdOtlO1Z3SA
+         k7GU+INf17U3tjq4sR/vLBbDFktobSybj0xNYtl5AbNct4Zwx4LTo/y2Hcqmrzdv2e
+         /Gy5VbNlz7YXNYg2RW+BMyVwRDYQcZAmIOyvUW2ecKSH2om1EvfcJU3GTNdoLK3cn+
+         ntPR2g3rM9gUHCKdFDfB2OsT5KjwGEvCDkqmewO5kKYNLrZHwV2/PxnL+88yO0T4x5
+         LiFbIpjGXXcco1p/a/5d2mE+0eUGo352x8lhAbhqnYxbbsU3T7AW2rpZ17FnfqM+8Y
+         dtlQ04o5aSJoQ==
+Date:   Mon, 11 Oct 2021 09:46:52 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Dave Chinner <david@fromorbit.com>
+To:     Anju T Sudhakar <anju@linux.vnet.ibm.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] fstests: groupfile generation needs force overwrite
-Message-ID: <20211011163618.GE24282@magnolia>
-References: <20211010230659.216166-1-david@fromorbit.com>
- <20211010230659.216166-3-david@fromorbit.com>
+Subject: Re: [PATCH 2/4] generic/594: Fix test failure for xfs on older
+ quota-tools
+Message-ID: <20211011164652.GF24282@magnolia>
+References: <20211011075552.196688-1-anju@linux.vnet.ibm.com>
+ <20211011075552.196688-3-anju@linux.vnet.ibm.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211010230659.216166-3-david@fromorbit.com>
+In-Reply-To: <20211011075552.196688-3-anju@linux.vnet.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 11, 2021 at 10:06:59AM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> Having built fstests as root as part of a run script, I get failures
-> then trying to run it as a user because of the group list
-> generation. The issue occurs because the group list files are owned
-> by root, and so I get an interactive prompt to overwrite them such
-> as:
-> 
-> Building btrfs
->  [GROUP] /home/dave/src/xfstests-dev/tests/btrfs/group.list
-> mv: replace 'group.list', overriding mode 0644 (rw-r--r--)? y
-> Building ceph
->  [GROUP] /home/dave/src/xfstests-dev/tests/ceph/group.list
-> mv: replace 'group.list', overriding mode 0644 (rw-r--r--)? y
-> Building cifs
->  [GROUP] /home/dave/src/xfstests-dev/tests/cifs/group.list
-> mv: replace 'group.list', overriding mode 0644 (rw-r--r--)? y
-> Building ext4
->  [GROUP] /home/dave/src/xfstests-dev/tests/ext4/group.list
-> ...
-> 
-> Use 'mv -f' to ignore such trivial issues so that the new group
-> lists are written correctly.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+On Mon, Oct 11, 2021 at 01:25:50PM +0530, Anju T Sudhakar wrote:
+> For xfs we need the quota-tools containing commit fdd774bf08e568
+> ("quota-tools: pass quota type to QCMD for Q_XFS_GETQSTAT")to run this
+> test. Otherwise this test will fail on xfs, as the grace time is not set
+> correctly. So check for the quota-tool with the required commit before
+> running this test on xfs.
 
-Oops, sorry I didn't catch this.
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+This is a regression test for a kernel bug where Q_XGETQSTAT[V] ignores
+the quota type that userspace specifies in the system call and instead
+returns information about the first enabled quotatype.  It just so
+happens that quota-tools /also/ had a bug where it would never send the
+user's quota type to the kernel, so nobody noticed the nested herp and
+derp.
+
+The test should probably have mentioned kernel commit 555b2c3da1fc
+("quota: honor quota type in Q_XGETQSTAT[V] calls") directly to make
+this more obvious.
 
 --D
 
+> Signed-off-by: Anju T Sudhakar <anju@linux.vnet.ibm.com>
 > ---
->  tools/mkgroupfile | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/generic/594 | 6 ++++++
+>  1 file changed, 6 insertions(+)
 > 
-> diff --git a/tools/mkgroupfile b/tools/mkgroupfile
-> index 634ec92c..3844e57d 100755
-> --- a/tools/mkgroupfile
-> +++ b/tools/mkgroupfile
-> @@ -24,7 +24,7 @@ cleanup() {
->  	test -z "$ngroupfile" && return
+> diff --git a/tests/generic/594 b/tests/generic/594
+> index 88f9a0dc..668c1fae 100755
+> --- a/tests/generic/594
+> +++ b/tests/generic/594
+> @@ -6,6 +6,8 @@
+>  #
+>  # Test per-type(user, group and project) filesystem quota timers, make sure
+>  # each of grace time can be set/get properly.
+> +# For xfs, you need a quota-tools containing commit fdd774bf08e568 for this
+> +# test to run properly- v4.06 should do.
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick quota
+> @@ -18,9 +20,13 @@ _begin_fstest auto quick quota
+>  _supported_fs generic
+>  _require_scratch
+>  _require_setquota_project
+> +version=$(setquota -V | head -n1 | cut -d" " -f4)
+>  # V4 XFS doesn't support to mount project and group quota together
+>  if [ "$FSTYP" = "xfs" ];then
+>  	_require_scratch_xfs_crc
+> +	if [ "$version" \< "4.06" ];then
+> +		_notrun "This test requires quota-tools 4.06 or greater"
+> +	fi
+>  fi
+>  _require_quota
 >  
->  	if [ $ret -eq 0 ]; then
-> -		mv "$ngroupfile" "$groupfile"
-> +		mv -f "$ngroupfile" "$groupfile"
->  	else
->  		rm -f "$ngroupfile"
->  	fi
 > -- 
-> 2.33.0
+> 2.24.1
 > 
