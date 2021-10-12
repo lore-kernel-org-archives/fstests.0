@@ -2,89 +2,76 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1695EC433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Oct 2021 13:49:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F177C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Oct 2021 14:28:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EAB7E60E9C
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Oct 2021 13:49:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6EBF56109E
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Oct 2021 14:28:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236962AbhJLNvR (ORCPT
+        id S237101AbhJLOaY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 12 Oct 2021 09:51:17 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:57682 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236678AbhJLNvR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 12 Oct 2021 09:51:17 -0400
+        Tue, 12 Oct 2021 10:30:24 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:33078 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237188AbhJLOaY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Oct 2021 10:30:24 -0400
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id F243F200AC
-        for <fstests@vger.kernel.org>; Tue, 12 Oct 2021 13:49:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1634046554; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=Z6s2ry0/rtwB2OWwRk9J5Suf0f80xA0Dal+R7ep6oAQ=;
-        b=oQ9ooyDj1qilyujVENPTAmdHctUJ7ep/LEhLV5T7lavp3WifYtmd9jsHGj6Wd4UArieMpi
-        HcBK2+jLcHjvJzFr8iDjGZDe1KyJLH9N2OSZrUmkMwuMwqtSSSVJlnKmkkEpLhGbQTyZ5d
-        xyDxyfSofdAZgq+jhLN7Ifbr1VBuOzE=
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 59DB0221AA;
+        Tue, 12 Oct 2021 14:28:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1634048891; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=j7rzgBoDd9669Tf6AFwWQEzH3g29Eiw5qpX/Qr4I+dA=;
+        b=WrV6tNZNcmrJEpIKjYl6qCH8SEqGY8vjj5ZNT+2fojpBTP7eUb7E4cuw6AGHytqG1eEgpG
+        hqomkQTSS8Om33sSrpqQj0yduKhXj52zifLhGubCGfN16LHpxoZa2v/Wn/GzRa4QKkoqv7
+        ZDBZGkDoUV/p4au7N4VkF1uZ6dkL+xg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1634048891;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=j7rzgBoDd9669Tf6AFwWQEzH3g29Eiw5qpX/Qr4I+dA=;
+        b=CoYNq9HTa17/PMJ472LgnpNIaMXv2xw56IieyOrHvdQ08xMHUgZwFOHDEJc7MwJapgYPO0
+        7V4C8o2+Lyh4LNAQ==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E0EE513B6F
-        for <fstests@vger.kernel.org>; Tue, 12 Oct 2021 13:49:14 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 3365113BEC;
+        Tue, 12 Oct 2021 14:28:11 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id ouuuNlqSZWGWcgAAMHmgww
-        (envelope-from <ailiop@suse.com>)
-        for <fstests@vger.kernel.org>; Tue, 12 Oct 2021 13:49:14 +0000
-From:   Anthony Iliopoulos <ailiop@suse.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] build: remove unused AC_PACKAGE_NEED_OPEN_BY_FSHANDLE macro
-Date:   Tue, 12 Oct 2021 15:50:57 +0200
-Message-Id: <20211012135057.25689-1-ailiop@suse.com>
-X-Mailer: git-send-email 2.33.0
+        id L8VSC3ubZWFvBwAAMHmgww
+        (envelope-from <ddiss@suse.de>); Tue, 12 Oct 2021 14:28:11 +0000
+Date:   Tue, 12 Oct 2021 16:28:10 +0200
+From:   David Disseldorp <ddiss@suse.de>
+To:     Anthony Iliopoulos <ailiop@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] build: remove unused AC_PACKAGE_NEED_OPEN_BY_FSHANDLE
+ macro
+Message-ID: <20211012162810.2e6b05c6@suse.de>
+In-Reply-To: <20211012135057.25689-1-ailiop@suse.com>
+References: <20211012135057.25689-1-ailiop@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Commit 5868405dce1d ("Sync up different copies of the m4 macros, noop
-change for this package.") introduced this macro, by the function was
-never really used by any test, remove it.
+On Tue, 12 Oct 2021 15:50:57 +0200, Anthony Iliopoulos wrote:
 
-Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
----
- m4/package_xfslibs.m4 | 14 --------------
- 1 file changed, 14 deletions(-)
+> Commit 5868405dce1d ("Sync up different copies of the m4 macros, noop
+> change for this package.") introduced this macro, by the function was
+Nit: s/by the/but the/ above. Looks fine otherwise...
+> never really used by any test, remove it.
+> 
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
 
-diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
-index 9be56e1103ac..1bfd955479b8 100644
---- a/m4/package_xfslibs.m4
-+++ b/m4/package_xfslibs.m4
-@@ -64,20 +64,6 @@ AC_DEFUN([AC_PACKAGE_NEED_LIBXFSINIT_LIBXFS],
-     AC_SUBST(libxfs)
-   ])
- 
--AC_DEFUN([AC_PACKAGE_NEED_OPEN_BY_FSHANDLE],
--  [ AC_CHECK_LIB(handle, open_by_fshandle,, [
--        echo
--        echo 'FATAL ERROR: could not find a current XFS handle library.'
--        echo 'Install or upgrade the XFS library package.'
--        echo 'Alternatively, run "make install-dev" from the xfsprogs source.'
--        exit 1
--    ])
--    libhdl="-lhandle"
--    test -f ${libexecdir}${libdirsuffix}/libhandle.la && \
--	libhdl="${libexecdir}${libdirsuffix}/libhandle.la"
--    AC_SUBST(libhdl)
--  ])
--
- AC_DEFUN([AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE],
-   [ AC_CHECK_LIB(handle, attr_list_by_handle,, [
-         echo
--- 
-2.33.0
-
+Reviewed-by: David Disseldorp <ddiss@suse.de>
