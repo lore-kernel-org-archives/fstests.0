@@ -2,91 +2,77 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2C5FC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Oct 2021 15:31:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C4DCC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 15 Oct 2021 18:37:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9BC1860EBB
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Oct 2021 15:31:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F6E960BD3
+	for <linux-fstests@archiver.kernel.org>; Fri, 15 Oct 2021 18:37:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231792AbhJNPdp (ORCPT
+        id S238031AbhJOSjR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Oct 2021 11:33:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54750 "EHLO
+        Fri, 15 Oct 2021 14:39:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231190AbhJNPdp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Oct 2021 11:33:45 -0400
-Received: from mail-qt1-x829.google.com (mail-qt1-x829.google.com [IPv6:2607:f8b0:4864:20::829])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2DF22C061753
-        for <fstests@vger.kernel.org>; Thu, 14 Oct 2021 08:31:40 -0700 (PDT)
-Received: by mail-qt1-x829.google.com with SMTP id z24so6073916qtv.9
-        for <fstests@vger.kernel.org>; Thu, 14 Oct 2021 08:31:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=NYhpjnJe3Ldv/p/ooJYD2dzTW/NkIazd2O5VT97PixQ=;
-        b=4yaidbKW+Ktrie9xc6IEgmq4y7t3HY94yHtAfCWZtkerxO/JKwLNlPA/I9/eRetLB0
-         7ikkSK9d4VTa/pUBBYqYp9uCbLCJ3uIAplIBzFMvCw6CmFbIW8TxTafn4zvOwgUnXtkS
-         q2tMM2fG7hlnPzHkbMYRjKz1p2QfLVOVFXso8x2ZmA02m9ZSOgWVHn1H/Gj76//MI+3K
-         bLD6MV5D4pp3rAAsmeFG6rve5R+UkIr4bZFpNW09b+KB2TiGUwmi6dR2E+M8OQsebWpa
-         9toP2n/9UnRrSobNnLoSnex/mt8jSZzwDb3DL2LEu5LU+wn6bILLBW4C5HXn3IJuW5DZ
-         uGxg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=NYhpjnJe3Ldv/p/ooJYD2dzTW/NkIazd2O5VT97PixQ=;
-        b=rLoE2HuUZSiO6DYn17SDpPyez/vQdUAZghxmKmE+KNm8oMh0B9Clw7FdYtxxnfAMRG
-         x5YWciXg768foJB0NEpF9JxAanXMw7yAm5uOlldqtPTzQev2D9JrF8fRmn6yLrZW2ymt
-         aig9mZN0oFR7ZI382Py5ZPkmbrbRI9we5aPHCUbWcWilIDRFuehuvCRUC5T82+tVlUIv
-         kqUhGI5N7aFAfaQP75+3/qr3arMfrDxgHnjzpiNg/gu+WU0CUuVFSIdBVhxnSiVbiI1W
-         S4ZfQz5nKoMpCbqJYgBdGQ/P6B8UHVa89Ntv/o6YA+sqi9QdSE11nUr1mMHeACZtbsj6
-         225Q==
-X-Gm-Message-State: AOAM531EkAYNg2hf2r7EiQ0DF3SGtkUgIQc3o/98SGm3cXrHARRHigb7
-        B50XNFsKYH1VrcvdXyFu8o0nqQ==
-X-Google-Smtp-Source: ABdhPJwrJQfOvT9dSBxfTojbH6s+nfajckVh1y3M4cpOd7mlQm5NUUpFruxcOHe1omJMx9T9fGoE9g==
-X-Received: by 2002:a05:622a:1652:: with SMTP id y18mr7407357qtj.226.1634225499277;
-        Thu, 14 Oct 2021 08:31:39 -0700 (PDT)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id q6sm1506854qtn.65.2021.10.14.08.31.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Oct 2021 08:31:38 -0700 (PDT)
-Date:   Thu, 14 Oct 2021 11:31:37 -0400
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Subject: Re: perf/001
-Message-ID: <YWhNWZrt/QMVOuWi@localhost.localdomain>
-References: <d236c364-3bf6-d404-e3c4-2d82b7db6355@oracle.com>
+        with ESMTP id S237457AbhJOSjQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Oct 2021 14:39:16 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DDC8C061570
+        for <fstests@vger.kernel.org>; Fri, 15 Oct 2021 11:37:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=NrspZEHYkiRmCXEyIfYSB3rb5fYYoHMgE/53/70YqiM=; b=BrnsfKjSwk9HE4rHQ9eAWs45FP
+        gBFCPsLvBAVRwdM9ZV3z0cKJ/Dbrtmke19Rdva/7xE3wiguMRjcZRWrsRMRcLltfZ4vGTSSNbM/Yq
+        zRH1RTwf0ok1qqg6Bnzumt1FSub/U2o3OupPgrdYgqRrs0NhygFTevRfUqSeTljl2Qj2EjIE2EzPB
+        v70b0IPmyHqNdaXNaC2GT6rEKJ8S06JsgtWp+aE5kZnZKX61VEZ590UiIg5WwGWESmwfku8HRGcrT
+        nWmUKbjwQFCkRlyqT8IS1JFqAbK62tI2dPsoA+uSNAdwEoLr9IhzYXjVMCWPjexsu1MYV8U2XLACe
+        1j96UKNA==;
+Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mbS3Q-009CqI-DT; Fri, 15 Oct 2021 18:35:55 +0000
+From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
+To:     fstests@vger.kernel.org
+Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
+Subject: [PATCH] common/rc: Include swap in memory size calculation
+Date:   Fri, 15 Oct 2021 19:35:34 +0100
+Message-Id: <20211015183534.2193978-1-willy@infradead.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <d236c364-3bf6-d404-e3c4-2d82b7db6355@oracle.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 13, 2021 at 03:39:07PM +0800, Anand Jain wrote:
-> 
-> perf/001 fails to update the SQL with the key trim_bw_bytes.
-> 
-> Traceback (most recent call last):
->   File "/xfstests-dev/src/perf/fio-insert-and-compare.py", line 31, in
-> <module>
->     result_data.insert_result(data)
->   File "/xfstests-dev/src/perf/ResultData.py", line 45, in insert_result
->     self._insert_obj('fio_jobs', job)
->   File "/xfstests-dev/src/perf/ResultData.py", line 37, in _insert_obj
->     cur.execute(cmd, tuple(values))
-> sqlite3.OperationalError: table fio_jobs has no column named trim_bw_bytes
-> 
-> I tried to add the missing keys (which are probably present only in the
-> current version of the fio) as below, but the error is still the same. Any
-> inputs, how to fix this?
-> 
+_free_memory_bytes() is used to determine whether it's reasonable to
+create a tmpfs of a particular size.  Since tmpfs can swap (and some of
+these tests are good for evaluating swapping), it makes sense to include
+the free swap as well as the free memory in the calculation.
 
-I think this was a failed experiment to add performance testing to xfstests, I
-think we should just rip it out.  Thanks,
+Use perl instead of awk because at least mawk will saturate at 2^31-1.
+gawk doesn't, but that kind of dependency is a bad thing to require.
+At least this eliminates a use of grep.
 
-Josef
+With this fixed, generic/273 generic/274 generic/275 generic/312
+generic/320 generic/466 all now pass on tmpfs instead of being skipped.
+
+Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 7f693d39..f84d3873 100644
+--- a/common/rc
++++ b/common/rc
+@@ -966,7 +966,7 @@ _scratch_pool_mkfs()
+ # Return the amount of free memory available on the system
+ _free_memory_bytes()
+ {
+-    free -b | grep ^Mem | awk '{print $4}'
++    free -b | perl -lane '$F[0] =~ /^[A-Z]/ and $total += $F[3]; END { print $total }'
+ }
+ 
+ _available_memory_bytes()
+-- 
+2.32.0
+
