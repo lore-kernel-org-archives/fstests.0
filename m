@@ -2,77 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C4DCC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 15 Oct 2021 18:37:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0F25C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 Oct 2021 02:15:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5F6E960BD3
-	for <linux-fstests@archiver.kernel.org>; Fri, 15 Oct 2021 18:37:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7BD19611F0
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 Oct 2021 02:15:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238031AbhJOSjR (ORCPT
+        id S239586AbhJPCRN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 15 Oct 2021 14:39:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57384 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237457AbhJOSjQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Oct 2021 14:39:16 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DDC8C061570
-        for <fstests@vger.kernel.org>; Fri, 15 Oct 2021 11:37:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:In-Reply-To:References;
-        bh=NrspZEHYkiRmCXEyIfYSB3rb5fYYoHMgE/53/70YqiM=; b=BrnsfKjSwk9HE4rHQ9eAWs45FP
-        gBFCPsLvBAVRwdM9ZV3z0cKJ/Dbrtmke19Rdva/7xE3wiguMRjcZRWrsRMRcLltfZ4vGTSSNbM/Yq
-        zRH1RTwf0ok1qqg6Bnzumt1FSub/U2o3OupPgrdYgqRrs0NhygFTevRfUqSeTljl2Qj2EjIE2EzPB
-        v70b0IPmyHqNdaXNaC2GT6rEKJ8S06JsgtWp+aE5kZnZKX61VEZ590UiIg5WwGWESmwfku8HRGcrT
-        nWmUKbjwQFCkRlyqT8IS1JFqAbK62tI2dPsoA+uSNAdwEoLr9IhzYXjVMCWPjexsu1MYV8U2XLACe
-        1j96UKNA==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mbS3Q-009CqI-DT; Fri, 15 Oct 2021 18:35:55 +0000
-From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
+        Fri, 15 Oct 2021 22:17:13 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:52422 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232812AbhJPCRN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Oct 2021 22:17:13 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1634350503;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=ayW4FikIYv7pKSxHa0gyFEFS/cEhZZPimmugtuvZHlg=;
+        b=UyOulFuq7BWyMKAH8ZWcAHg+QaQmxzcQomZMD7lVMowbcpSzpM+B5upKoH1EolW2Ic02ly
+        yQ6q4lXo0vFopeG1fJepxHFoH6BWcrYcr/Ew88+c6DU6JSebGSTchK+ZCTCaCAl2JZVcr0
+        H+8ar3rD946mMP3faBZq0u3BuoL/HJg=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-373-Eq8M0ZYoOi2pduk4ex1Hqg-1; Fri, 15 Oct 2021 22:15:02 -0400
+X-MC-Unique: Eq8M0ZYoOi2pduk4ex1Hqg-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 02D2D1006AA2
+        for <fstests@vger.kernel.org>; Sat, 16 Oct 2021 02:15:01 +0000 (UTC)
+Received: from zlang-laptop.redhat.com (ovpn-12-96.pek2.redhat.com [10.72.12.96])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 10D175C1C5
+        for <fstests@vger.kernel.org>; Sat, 16 Oct 2021 02:14:59 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
-Subject: [PATCH] common/rc: Include swap in memory size calculation
-Date:   Fri, 15 Oct 2021 19:35:34 +0100
-Message-Id: <20211015183534.2193978-1-willy@infradead.org>
-X-Mailer: git-send-email 2.31.1
+Subject: [PATCH] generic/648: dmerror must be unmounted
+Date:   Sat, 16 Oct 2021 10:14:56 +0800
+Message-Id: <20211016021456.3097323-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-_free_memory_bytes() is used to determine whether it's reasonable to
-create a tmpfs of a particular size.  Since tmpfs can swap (and some of
-these tests are good for evaluating swapping), it makes sense to include
-the free swap as well as the free memory in the calculation.
+Sometimes g/648 fail to unmount dmerror with this error:
 
-Use perl instead of awk because at least mawk will saturate at 2^31-1.
-gawk doesn't, but that kind of dependency is a bad thing to require.
-At least this eliminates a use of grep.
+   umount: /mnt/xfstests/scratch: target is busy.
 
-With this fixed, generic/273 generic/274 generic/275 generic/312
-generic/320 generic/466 all now pass on tmpfs instead of being skipped.
+Even worse, it will cause all later test cases fail as:
 
-Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+  mount: bad usage
+  Try 'mount --help' for more information.
+  check: failed to mount $SCRATCH_DEV using specified options
+  Interrupted!
+
+So we shouldn't _fail directly if dmerror_unmount fails, use a while
+loop to try to make sure it's unmounted.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/generic/648 | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 7f693d39..f84d3873 100644
---- a/common/rc
-+++ b/common/rc
-@@ -966,7 +966,7 @@ _scratch_pool_mkfs()
- # Return the amount of free memory available on the system
- _free_memory_bytes()
- {
--    free -b | grep ^Mem | awk '{print $4}'
-+    free -b | perl -lane '$F[0] =~ /^[A-Z]/ and $total += $F[3]; END { print $total }'
- }
- 
- _available_memory_bytes()
+diff --git a/tests/generic/648 b/tests/generic/648
+index 83dd111d..218f207b 100755
+--- a/tests/generic/648
++++ b/tests/generic/648
+@@ -104,7 +104,7 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
+ 		wait > /dev/null 2>&1
+ 		ps -e | grep fsstress > /dev/null 2>&1
+ 	done
+-	for ((i = 0; i < 10; i++)); do
++	for ((j = 0; j < 10; j++)); do
+ 		test -e "$snap_aliveflag" || break
+ 		sleep 1
+ 	done
+@@ -112,7 +112,11 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
+ 	# Mount again to replay log after loading working table, so we have a
+ 	# consistent fs after test.
+ 	$UMOUNT_PROG $loopmnt
+-	_dmerror_unmount || _fail "iteration $i scratch unmount failed"
++	_dmerror_unmount > /dev/null 2>&1
++	while [ $? -ne 0 ]; do
++		sleep 1
++		_dmerror_unmount > /dev/null 2>&1
++	done
+ 	_dmerror_load_working_table
+ 	if ! _dmerror_mount; then
+ 		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
 -- 
-2.32.0
+2.31.1
 
