@@ -2,239 +2,696 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C525C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Oct 2021 07:17:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99E7BC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Oct 2021 12:12:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DE996113D
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Oct 2021 07:17:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8021F61260
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Oct 2021 12:12:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229771AbhJTHTZ (ORCPT
+        id S230139AbhJTMOs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Oct 2021 03:19:25 -0400
-Received: from mx0a-00069f02.pphosted.com ([205.220.165.32]:10318 "EHLO
-        mx0a-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229846AbhJTHTY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Oct 2021 03:19:24 -0400
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 19K77Jlc018592;
-        Wed, 20 Oct 2021 07:17:09 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references :
- content-transfer-encoding : content-type : mime-version;
- s=corp-2021-07-09; bh=piOrrsspxOP2JId29Lq6xVrQopZe/DSk1F/PMEjxZN0=;
- b=buoXsC7Ysn3MTF4X0ffmNx2v0/U9QbPCxibLPM74n+hF8vI37yT+aDlDF7iyPf8Ar1cn
- JHEy2zSa6AcX69L5UYU0jXxxnlgYoKFK5sMOYad45MpkEYAM3ufDY3FbuTDQA7DpU/DI
- hUlAvhl0cj2JePLr74Y6LJcZPQIE8OQcpmXWrwuKP38YNoSS/hRvm+hTtbFzt+YBfHB6
- eQLtEgqCJE/0r+e3qULOUHAaZVw69QohDNcITjD9OA/UIaRoUbnyzX/DUfGUK4yiHNn3
- 7wKErEQBBFXE5eA1ByDW383hVTSuUAv8klFSB4h4pkE0oJG74HfaYvtL96wucpAE2ASH Tg== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by mx0b-00069f02.pphosted.com with ESMTP id 3bsruc78m9-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 20 Oct 2021 07:17:08 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 19K7BYVh022770;
-        Wed, 20 Oct 2021 07:17:07 GMT
-Received: from nam04-mw2-obe.outbound.protection.outlook.com (mail-mw2nam08lp2168.outbound.protection.outlook.com [104.47.73.168])
-        by userp3020.oracle.com with ESMTP id 3br8gtpe7k-2
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 20 Oct 2021 07:17:07 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=P77XoCnUaAWlzkDF6BTFIWqw0S8cWzQ2whgIo7E2o2H6M+UZTFPmR1aXX+vbP4VRW+HF4cd94w1cIGNZAGpmc3FqoRIKem1WcNVbEEdJBUeW3hhy1If0Jr2VIND1DYla093PMcp9kElSxc5g9TOTYVsrmEZ1DwlhVeue74xBKuJ1mBFaU5pHSLOW0Q1z1DVEosSCNimyUM5/ciPp6+RizADUm2S8stPQLfGJ49mn2Sp6dpwsrPHbZjD9DVUkSIiE7hdHRbQsghcxk70BQVKGB0jc4zLrXAWS5S9WeArFEDoqRoTI0Ayl6Y2Z1a4hRAoA5Ys0YafiO/8g9nDLI1Nowg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=piOrrsspxOP2JId29Lq6xVrQopZe/DSk1F/PMEjxZN0=;
- b=aQuF56uqDhZxbz/JKLulT5dBRSeyUosfOTidQv0Bw2c2ZUQme4dziDBdvEVisU4deLdjKHtVCNVR5DpnLmPYoa5cO7IrjO0uTSPKi0LrMBdRaH2+WrKJlVf52xw3pNJcFA5vSGn4j3fvE8z9hMdcVIft/k+BuHxys3NCEENM0SwDFO1oy3UEShwmdsnbM5Gbq82BmBtWHxt9RBNjJ8em35d0Sp+ticfyt4v+77WTGqCspWFenNlnmb/SVW/1ouome4oR3SQlao5Z1EHyLnUuWYDyceAylvG7f6flSrWAa4NyY6YBmEo3ec8MSWwhDj+wFyx2+3CkFp5qLF/7BqFWxg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=piOrrsspxOP2JId29Lq6xVrQopZe/DSk1F/PMEjxZN0=;
- b=jQ1tUqAMZpctZFh6svaiTd+JF69Tn99qdE+6UtcNOrtIVDctHjPUHmlVWP1nWFOyJNDyacOgkFSIv/g8uNWTaH62VgiueOYs8vdQVdqz7v7eEuPDiEEDZlk/l+2AKjHcm5URWS+0dOcWSWlTqKsstG1cqzo0WXKPvrqebhRTw4k=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=oracle.com;
-Received: from MN2PR10MB4128.namprd10.prod.outlook.com (2603:10b6:208:1d2::24)
- by MN2PR10MB4094.namprd10.prod.outlook.com (2603:10b6:208:11e::29) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4608.16; Wed, 20 Oct
- 2021 07:17:06 +0000
-Received: from MN2PR10MB4128.namprd10.prod.outlook.com
- ([fe80::49a5:5188:b83d:b6c9]) by MN2PR10MB4128.namprd10.prod.outlook.com
- ([fe80::49a5:5188:b83d:b6c9%7]) with mapi id 15.20.4608.018; Wed, 20 Oct 2021
- 07:17:06 +0000
-From:   Anand Jain <anand.jain@oracle.com>
+        Wed, 20 Oct 2021 08:14:48 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:38888 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230092AbhJTMOr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Oct 2021 08:14:47 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1634731953;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=i7DoPOGB9HqkUnoYPwDOeaSHiN6OAW2tTtcO07WCyDc=;
+        b=I6CHX2JooZr8sqGj9zcIbN+283RBc/rHmP/TpPWaHAOtq91ny/F7LUl3gjhY116qgx/+su
+        Y5kk2UNeaRJklrms6CpbteKZG82YPYY8hcX03n/PvFeuFhsJmYm921gC+YJkScz5Op9ENx
+        GV+ImjlmfjsfBuAgvfOAY5d2tNRWtko=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-318-eM4upT28N4ScN8YdO5IiNg-1; Wed, 20 Oct 2021 08:12:31 -0400
+X-MC-Unique: eM4upT28N4ScN8YdO5IiNg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id DF2EE10A8E01;
+        Wed, 20 Oct 2021 12:12:30 +0000 (UTC)
+Received: from localhost.localdomain (unknown [10.40.194.236])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 0021C5DD68;
+        Wed, 20 Oct 2021 12:12:29 +0000 (UTC)
+From:   Lukas Czerner <lczerner@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com
-Subject: [PATCH 3/3] btrfs/249: test btrfs filesystem usage command on missing seed device
-Date:   Wed, 20 Oct 2021 15:16:44 +0800
-Message-Id: <599618f8698efc64ef8e25e0cf1d97541927d8ac.1634713680.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <cover.1634713680.git.anand.jain@oracle.com>
-References: <cover.1634713680.git.anand.jain@oracle.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SI2PR01CA0044.apcprd01.prod.exchangelabs.com
- (2603:1096:4:193::8) To MN2PR10MB4128.namprd10.prod.outlook.com
- (2603:10b6:208:1d2::24)
+Cc:     linux-ext4@vger.kernel.org
+Subject: [PATCH v2] ext4: add test for all ext4/ext3/ext2 mount options
+Date:   Wed, 20 Oct 2021 14:12:26 +0200
+Message-Id: <20211020121226.15236-1-lczerner@redhat.com>
+In-Reply-To: <20211018130001.6440-1-lczerner@redhat.com>
+References: <20211018130001.6440-1-lczerner@redhat.com>
 MIME-Version: 1.0
-Received: from localhost.localdomain (39.109.140.76) by SI2PR01CA0044.apcprd01.prod.exchangelabs.com (2603:1096:4:193::8) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4608.15 via Frontend Transport; Wed, 20 Oct 2021 07:17:04 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: fa7be69c-5feb-43b5-14f1-08d993999f17
-X-MS-TrafficTypeDiagnostic: MN2PR10MB4094:
-X-Microsoft-Antispam-PRVS: <MN2PR10MB409453EA63ACFA4E4C9AE611E5BE9@MN2PR10MB4094.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: Ngrb1dCQvxsM017aqJG+ueDVQYKnFKte/AyXfFI/Ve5shYuenR9JIohh/xGbElX6VduQRavJnrBKLATWuHgX2rXnDF6CR9QOspehz2P6POaBCZUIOYHH3/J4j7qV5c61JCKRG2Gvw1TH+sHw5aoVWGLLDiBmKyh4T10AcJB+775SlAgZYuPLE2sKBbLtDj3VGuFsE/SLdxP4yhwtf/46XjUcNx0l7/8I4ezlOXKHeC7sSsfH08mhJQcLFwOU9rQUmur0ueFruwySLOHIhdCBLrYDU9Tdqat0InYdtBztSE3J5jCNMtpSe6KG7J3khpDkXDJF/iWfse0Bt5uGMvV1QUx6pT064qgn6N2Nfg8Kbf9ws30O8QmuGA+Uo04HVnob4Z8ccRpqlNAYUMplSuL9re/4ML9u0O+mEVfRvneCOLbvBlyAlMv1t0UKN8Co70E5HpdMU2KZb0qUZmwqFK/jeAuvlISzMAKLa+E6SIyYxT4nS/2gg+Xy4lJMV/nhOb59pihgGBwEIHQLoe1Hw0fTpyoWr3223VgqlERBnWtTAPlulWCBROd53KonvfDabBNVdmNGywTqhs2DHdtpbcb4b8KrAewDGMVr0Cox9k9rmJ+lltnq4V9lNRz2ugU9XV9QsTZId6SdRLfzQQ2V+dDrp0nTkCBvw5XOUZDlvUyixJleLSubBxyN6A4jEAuRs5dnfmth4eZvgVkEEpF+x0dVAQ==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(6506007)(6916009)(66476007)(86362001)(508600001)(38350700002)(26005)(83380400001)(6666004)(66556008)(2616005)(8936002)(44832011)(4326008)(36756003)(6512007)(38100700002)(5660300002)(956004)(6486002)(2906002)(316002)(52116002)(186003)(8676002)(66946007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?y8NHVdsn+MFhE+sWmPgmsF2Ycl5iJAOOHKKuablVAN4mT1VPxL1TdUMlDnY1?=
- =?us-ascii?Q?6GP1dULeNynd9B7W4ONydE0VZtP5gDws4lcjlcUKcikUFyYnVQKHs88M03nz?=
- =?us-ascii?Q?rQ6Od5lXRXZZ7xEnKXliWCIC4KgkjhBZPDggUCr3uGFWXF2QabUloG1UeG2o?=
- =?us-ascii?Q?73TW99Wu8sGpLDnCFb2QWFmeRFIUIaufdplcEaLMBoWwA6o9liooA7iu4jkO?=
- =?us-ascii?Q?gQe3Msh2KM50njyzcVQv7jM2zvIQ5Vp0dNTCQWGSLDocy4hSel6vwP9IglGl?=
- =?us-ascii?Q?S39ZcUhOmh5ce5URb66uzKzSvvM/3BYtf7dJVo4bmjpHEi8YHbkdLTAU8KSj?=
- =?us-ascii?Q?3pAp6q53pbCT/+F+NKv1AlSpEkYfo9pcfbPdmtw7d2FdatYMkkm8wZL0N6Mt?=
- =?us-ascii?Q?qPqHRnEQN8ma4CS8K1hXryubGXo0jjUF0AlRly5GrPPSjFA8YGlv2vSNRLys?=
- =?us-ascii?Q?cXrylagsRimw12urF9FDGI8IeNuZiKZ/sr5XeBlf6xLrmRjatID73nMLCPid?=
- =?us-ascii?Q?e6U34eNDMpkCPDfAqWYVwwxU5zqHY4K/0jnykNDyWkukfkf70zmgucd+S8o8?=
- =?us-ascii?Q?aY50dGyikSH2JBtM3ZEVDG1c/sMlnjsqnaybKjkv5ZtB0S3JypyBQvuYo1U2?=
- =?us-ascii?Q?uwkbIOCmykt/dJy2pVLBekjR1SrDCYJ+pHlPSBixQ+8cgN6RdGPFrVoDLOYz?=
- =?us-ascii?Q?X5OBGjg9LKYUYfVkiY1sdXZ63u6WIiK9ks/ZxJ4juhyRDqLNFCdcsBfIQKDA?=
- =?us-ascii?Q?ci79ESnxW95xSQ04TsempA67p0nWMwRdZyFcMVJ0xeUSgckDRkRoBdvnawmE?=
- =?us-ascii?Q?TCTCOy+9mzzTeroJ/6l/gqxLGyF7yfoI6IEdHxN+EUuGiaeil3iTyi9GNl/Z?=
- =?us-ascii?Q?o7Kp+OFJ96nk3dnQ/4eaSg5qq0s+2MFAFtDA4k+ukgaFJ0S86c3wmURVUGdQ?=
- =?us-ascii?Q?+UIop0NBf2705M8J2sd7cpCy7Kw5jw4pXYbWZqwRUEjTayKOSt2CqAfom87o?=
- =?us-ascii?Q?x3+1fryLJd80wBxWWZzycFHfQuqhcmmsLRq9acyzGtfL7rEc4kenntsiVrj7?=
- =?us-ascii?Q?9tnLqZGq7nneN+Pn9ZEYpATb4t5WnkVNjLTpyyA+cdUos1cMSUyyFoF9KrrQ?=
- =?us-ascii?Q?xJoeuQGvMExbhhFEZMxz6hs4yNF4xWlFgiQBkpNKdEEd12LWGFTvV6q0DnbT?=
- =?us-ascii?Q?kraF3BQfdahRGE7skryWQjVwACwcI4ivfHTPOfou666e9yPUXUR7/6MRA5w8?=
- =?us-ascii?Q?qrOzDpf1f2turc0F0MXJOILHen61jLM98k7z2NzfAtIYJuUArRAvAjCHl3CN?=
- =?us-ascii?Q?DOqMvXe1Fwp+HufiMiSlLoyN?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: fa7be69c-5feb-43b5-14f1-08d993999f17
-X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4128.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Oct 2021 07:17:05.9110
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: anand.jain@oracle.com
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR10MB4094
-X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10142 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 mlxscore=0 adultscore=0
- spamscore=0 phishscore=0 bulkscore=0 suspectscore=0 malwarescore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2109230001
- definitions=main-2110200039
-X-Proofpoint-ORIG-GUID: -ySGzVK1Ykz8JKs17vvrPhx5Zub4DxT1
-X-Proofpoint-GUID: -ySGzVK1Ykz8JKs17vvrPhx5Zub4DxT1
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If there is a missing seed device in a sprout, the btrfs filesystem usage
-command fails, which is fixed by the following patches:
+Add test to validate that all the ext4, ext3 and ext2 are properly
+recognized, validate and applied to avoid regressions as ext4 moves to
+the new mount API.
 
-  btrfs: sysfs add devinfo/fsid to retrieve fsid from the device
-  btrfs-progs: read fsid from the sysfs in device_is_seed
-
-Test if it works now after these patches in the kernel and in the
-btrfs-progs respectively.
-
-Suggested-by: Josef Bacik <josef@toxicpanda.com>
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+Signed-off-by: Lukas Czerner <lczerner@redhat.com>
 ---
- tests/btrfs/249     | 67 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/249.out |  2 ++
- 2 files changed, 69 insertions(+)
- create mode 100755 tests/btrfs/249
- create mode 100644 tests/btrfs/249.out
+v2: Move minimum kernel version requirement up to 5.12
+    Rewrite kernel_gte() to work correctly
 
-diff --git a/tests/btrfs/249 b/tests/btrfs/249
+ tests/ext4/053     | 611 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/053.out |   2 +
+ 2 files changed, 613 insertions(+)
+ create mode 100755 tests/ext4/053
+ create mode 100644 tests/ext4/053.out
+
+diff --git a/tests/ext4/053 b/tests/ext4/053
 new file mode 100755
-index 000000000000..f8f2f07052c6
+index 00000000..7163319f
 --- /dev/null
-+++ b/tests/btrfs/249
-@@ -0,0 +1,67 @@
++++ b/tests/ext4/053
+@@ -0,0 +1,611 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Anand Jain.  All Rights Reserved.
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
++# Copyright (c) 2021 Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>.
 +#
-+# FS QA Test 249
++# FS QA Test 053
 +#
-+# Validate if the command 'btrfs filesystem usage' works with missing seed
-+# device
-+# Steps:
-+#  Create a degraded raid1 seed device
-+#  Create a sprout filesystem (an rw device on top of a seed device)
-+#  Dump 'btrfs filesystem usage', check it didn't fail
++# Sanity check of ext4 mount options
 +#
-+# Tests btrfs-progs bug fixed by the kernel patch and a btrfs-prog patch
-+#   btrfs: sysfs add devinfo/fsid to retrieve fsid from the device
-+#   btrfs-progs: read fsid from the sysfs in device_is_seed
-+
 +. ./common/preamble
-+_begin_fstest auto quick seed volume
++_begin_fstest auto mount
 +
-+# Import common functions.
-+# . ./common/filter
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
 +
-+# real QA test starts here
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_scratch_dev_pool 3
-+_require_command "$WIPEFS_PROG" wipefs
-+_require_btrfs_forget_or_module_loadable
++_cleanup()
++{
++	cd /
++	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	if [ -n "$LOOP_LOGDEV" ];then
++		_destroy_loop_device $LOOP_LOGDEV 2>/dev/null
++	fi
++	rm -f $tmp.*
++}
 +
-+_scratch_dev_pool_get 2
-+# use the scratch devices as seed devices
-+seed_dev1=$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
-+seed_dev2=$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $2 }')
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
 +
-+# use the spare device as a sprout device
-+_spare_dev_get
-+sprout_dev=$SPARE_DEV
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
-+# create raid1 seed filesystem
-+_scratch_pool_mkfs "-draid1 -mraid1" >> $seqres.full 2>&1
-+$BTRFS_TUNE_PROG -S 1 $seed_dev1
-+$WIPEFS_PROG -a $seed_dev1 >> $seqres.full 2>&1
-+_btrfs_forget_or_module_reload
-+_mount -o degraded $seed_dev2 $SCRATCH_MNT >> $seqres.full 2>&1
++echo "Silence is golden."
 +
-+# create a sprout device
-+$BTRFS_UTIL_PROG device add -f $SPARE_DEV $SCRATCH_MNT >> $seqres.full 2>&1
++SIZE=$((1024 * 1024))	# 1GB in KB
++LOGSIZE=$((10 *1024))	# 10MB in KB
 +
-+# dump filesystem usage if it fails error goes to the bad.out file
-+$BTRFS_UTIL_PROG filesystem usage $SCRATCH_MNT >> $seqres.full
-+# also check for the error code
-+ret=$?
-+if [ $ret != 0 ]; then
-+	_fail "FAILED: btrfs filesystem usage, ret $ret"
-+fi
++_supported_fs ext2 ext3 ext4
++_require_scratch_size $SIZE
++_require_quota
++_require_loop
++_require_command "$TUNE2FS_PROG" tune2fs
++MKE2FS_PROG=$(type -P mke2fs)
++_require_command "$MKE2FS_PROG" mke2fs
 +
-+_scratch_unmount
-+_spare_dev_put
-+_scratch_dev_pool_put
++LOG=""
++print_log() {
++	LOG="$LOG $@"
++}
 +
-+echo "Silence is golden"
-+# success, all done
-+status=0
++KERNEL_VERSION=`uname -r | cut -d'.' -f1,2`
++KERNEL_MAJ=${KERNEL_VERSION%.*}
++KERNEL_MIN=${KERNEL_VERSION#*.}
++
++kernel_gte() {
++	major=${1%.*}
++	minor=${1#*.}
++
++	if [ $KERNEL_MAJ -gt $major ]; then
++		return 0
++	elif [[ $KERNEL_MAJ -eq $major && $KERNEL_MIN -ge $minor ]]; then
++		return 0
++	fi
++	return 1
++}
++
++
++# The aim here is to keep the mount options behaviour stable going forward
++# so there is not much point in testing older kernels.
++kernel_gte 5.12 || _notrun "This test is only relevant for kernel versions 5.12 and higher"
++
++IGNORED="remount,defaults,ignored,removed"
++CHECK_MINFO="lazytime,noatime,nodiratime,noexec,nosuid,ro"
++ERR=0
++
++test_mnt() {
++	findmnt -n $SCRATCH_DEV > /dev/null 2>&1
++	[ $? -ne 0 ] && return $?
++
++	if [ $# -eq 1 ]; then
++		OPTS=$1
++	elif [ $# -eq 2 ]; then
++		OPTS=$2
++	else
++		return 0
++	fi
++
++	print_log "checking \"$OPTS\" "
++	# test options in /proc/fs/ext4/dev/options
++	(
++	ret=0
++	IFS=','
++	for option in $OPTS; do
++		if echo $IGNORED | grep -w $option; then
++			continue
++		fi
++
++		[ $option = "noload" ] && option="norecovery"
++
++		if [[ $option = ^* ]]; then
++			expected=1
++		else
++			expected=0
++		fi
++		option=${option#^}
++
++		if echo $CHECK_MINFO | grep -w $option; then
++			findmnt -n -o OPTIONS $SCRATCH_DEV | grep $option
++			ret=$?
++		else
++			grep $option /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options
++			ret=$?
++		fi
++
++		if [ $ret -ne $expected ]; then
++			exit 1
++		fi
++	done
++	) > /dev/null 2>&1
++	return $?
++}
++
++fail() {
++	print_log "   FAILED"
++	ERR=$((ERR+1))
++	echo $LOG | tee -a $seqres.full
++	LOG=""
++}
++
++ok() {
++	print_log "   OK"
++	echo $LOG >> $seqres.full
++	LOG=""
++}
++
++simple_mount() {
++	_mount $* >> $seqres.full 2>&1
++}
++
++# $1 - can hold -n option, if it does argumetns are shifted
++# $1 - options to test
++# $2 - if provided it's the option string to check for
++do_mnt() {
++	device=$SCRATCH_DEV
++	# If -n argument is provided do not specify $SCRATCH_DEV
++	# usefull for remount
++	if [ "$1" == "-n" ]; then
++		unset device
++		shift
++	fi
++
++	if [ -z "$1" ]; then
++		simple_mount $device $SCRATCH_MNT
++		ret=$?
++	else
++		simple_mount -o $1 $device $SCRATCH_MNT
++		ret=$?
++	fi
++	if [ $ret -eq 0 ]; then
++		test_mnt $1 $2
++		ret=$?
++		[ $ret -ne 0 ] && print_log "(not found)"
++	else
++		print_log "(failed mount)"
++	fi
++
++	return $ret
++}
++
++not_mnt() {
++	# We don't need -t not not_ variant
++	if [ "$1" == "-t" ]; then
++		shift
++	fi
++
++	print_log "SHOULD FAIL mounting $fstype \"$1\" "
++	do_mnt $@
++	if [ $? -eq 0 ]; then
++		fail
++	else
++		ok
++	fi
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++}
++
++_mnt() {
++	print_log "mounting $fstype \"$1\" "
++	do_mnt $@
++	if [ $? -ne 0 ]; then
++		fail
++	else
++		ok
++	fi
++}
++
++mnt() {
++	# Do we need to run the tune2fs mount option test ?
++	t2fs=0
++	if [ "$1" == "-t" ]; then
++		t2fs=1
++		shift
++	fi
++
++	_mnt $*
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++
++	[ "$t2fs" -eq 0 ] && return
++
++	op_set=$1
++	if [ $# -eq 1 ]; then
++		check=$1
++	elif [ $# -eq 2 ]; then
++		check=$2
++	else
++		return 0
++	fi
++
++	# some options need translation for tune2fs
++	op_set=$(echo $op_set | sed -e 's/data=journal/journal_data/' \
++				    -e 's/data=ordered/journal_data_ordered/' \
++				    -e 's/data=writeback/journal_data_writeback/')
++	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
++	_mnt "defaults" $check
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++	if [ "$op_set" = ^* ]; then
++		op_set=${op_set#^}
++	else
++		op_set="^${op_set}"
++	fi
++	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
++}
++
++# $1 - options to mount with
++# $2 - options to remount with
++remount() {
++	# First do this specifying both dev and mnt
++	print_log "mounting $fstype \"$1\" "
++	do_mnt $1
++	[ $? -ne 0 ] && fail && return
++	print_log "remounting \"$2\" "
++	do_mnt remount,$2 $3
++	if [ $? -ne 0 ]; then
++		fail
++		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++		return
++	else
++		ok
++	fi
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++
++	# Now just specify mnt
++	print_log "mounting $fstype \"$1\" "
++	do_mnt $1
++	[ $? -ne 0 ] && fail && return
++	print_log "remounting (MNT ONLY) \"$2\" "
++	do_mnt -n remount,$2 $3
++	if [ $? -ne 0 ]; then
++		fail
++	else
++		ok
++	fi
++
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++}
++
++# $1 - options to mount with, or -r argument
++# $2 - options to remount with
++_not_remount() {
++	remount_only=0
++	# If -r is specified we're going to do remount only
++	if [ "$1" == "-r" ]; then
++		remount_only=1
++		# Dont need shift since first argument would
++		# have been consumed by mount anyway
++	fi
++
++	if [ $remount_only -eq 0 ]; then
++		print_log "mounting $fstype \"$1\" "
++		do_mnt $1
++		[ $? -ne 0 ] && fail && return
++	fi
++	print_log "SHOULD FAIL remounting $fstype \"$2\" "
++	do_mnt remount,$2 $3
++	if [ $? -eq 0 ]; then
++		fail
++	else
++		ok
++	fi
++
++	# Now just specify mnt
++	print_log "SHOULD FAIL remounting $fstype (MNT ONLY) \"$2\" "
++	do_mnt -n remount,$2 $3
++	if [ $? -eq 0 ]; then
++		fail
++	else
++		ok
++	fi
++}
++
++not_remount() {
++	_not_remount $*
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++}
++
++
++do_mkfs() {
++	$MKE2FS_PROG -T $fstype -Fq $* >> $seqres.full 2>&1 ||
++	_fail "mkfs failed - $MKFS_EXT4_PROG -Fq $* $SCRATCH_DEV"
++}
++
++not_ext2() {
++	if [[ $fstype == "ext2" ]]; then
++		not_$*
++	else
++		$*
++	fi
++}
++
++only_ext4() {
++	if [[ $fstype == "ext4" ]]; then
++		$*
++	else
++		not_$*
++	fi
++}
++
++# Create logdev for external journal
++LOOP_IMG=$tmp.logdev
++truncate -s ${LOGSIZE}k $LOOP_IMG
++LOOP_LOGDEV=`_create_loop_device $LOOP_IMG`
++majmin=`stat -c "%t:%T" $LOOP_LOGDEV`
++LOGDEV_DEVNUM=`echo "${majmin%:*}*2^8 + ${majmin#*:}" | bc`
++
++# Test all the extN file system supported by ext4 driver
++fstype=
++for fstype in ext2 ext3 ext4; do
++
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++	$UMOUNT_PROG $SCRATCH_DEV 2> /dev/null
++
++	do_mkfs $SCRATCH_DEV ${SIZE}k
++
++	# do we have fstype support ?
++	do_mnt
++	if [ $? -ne 0 ]; then
++		print_log "$fstype not supported. Skipping..."
++		ok
++		continue
++	fi
++	if [ ! -f /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options ]; then
++		print_log "$fstype not supported. Skipping..."
++		ok
++		continue
++	fi
++
++	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++
++	not_mnt failme
++	mnt
++	mnt bsddf
++	mnt minixdf
++	mnt grpid
++	mnt -t bsdgroups grpid
++	mnt nogrpid
++	mnt sysvgroups nogrpid
++	mnt resgid=1001
++	mnt resuid=1001
++	mnt sb=131072
++	mnt errors=continue
++	mnt errors=panic
++	mnt errors=remount-ro
++	mnt nouid32
++	mnt debug
++	mnt oldalloc removed
++	mnt orlov removed
++	mnt -t user_xattr
++	mnt nouser_xattr
++	mnt -t acl
++	not_ext2 mnt noload norecovery
++	mnt bh removed
++	mnt nobh removed
++	not_ext2 mnt commit=7
++	mnt min_batch_time=200
++	mnt max_batch_time=10000
++	only_ext4 mnt journal_checksum
++	only_ext4 mnt nojournal_checksum
++	only_ext4 mnt journal_async_commit,data=writeback
++	mnt abort ignored
++	not_ext2 mnt -t data=journal
++	not_ext2 mnt -t data=ordered
++	not_ext2 mnt -t data=writeback
++	not_ext2 mnt data_err=abort
++	not_ext2 mnt data_err=ignore ignored
++	mnt usrjquota=aquota.user,jqfmt=vfsv0
++	not_mnt usrjquota=aquota.user
++	mnt usrjquota= ignored
++	mnt grpjquota=aquota.group,jqfmt=vfsv0
++	not_mnt grpjquota=aquota.group
++	mnt grpjquota= ignored
++	mnt jqfmt=vfsold
++	mnt jqfmt=vfsv0
++	mnt jqfmt=vfsv1
++	mnt grpquota
++	mnt quota
++	mnt noquota
++	mnt usrquota
++	mnt grpquota
++	mnt barrier
++	mnt barrier=0 nobarrier
++	mnt barrier=1 barrier
++	mnt barrier=99 barrier
++	mnt -t nobarrier
++	mnt i_version
++	mnt stripe=512
++	only_ext4 mnt delalloc
++	only_ext4 mnt -t nodelalloc
++	mnt warn_on_error
++	mnt nowarn_on_error
++	not_mnt debug_want_extra_isize=512
++	mnt debug_want_extra_isize=32 ignored
++	mnt mblk_io_submit removed
++	mnt nomblk_io_submit removed
++	mnt -t block_validity
++	mnt noblock_validity
++	mnt inode_readahead_blks=16
++	not_ext2 mnt journal_ioprio=6 ignored
++	mnt auto_da_alloc=0 noauto_da_alloc
++	mnt auto_da_alloc=1 auto_da_alloc
++	mnt auto_da_alloc=95 auto_da_alloc
++	mnt auto_da_alloc
++	mnt noauto_da_alloc
++	only_ext4 mnt dioread_nolock
++	only_ext4 mnt nodioread_nolock
++	only_ext4 mnt dioread_lock nodioread_nolock
++	mnt -t discard
++	mnt nodiscard
++	mnt init_itable=20
++	mnt init_itable
++	mnt init_itable=0
++	mnt noinit_itable
++	mnt max_dir_size_kb=4096
++	mnt test_dummy_encryption
++	mnt test_dummy_encryption=v1
++	mnt test_dummy_encryption=v2
++	not_mnt test_dummy_encryption=v3
++	not_mnt test_dummy_encryption=
++	mnt inlinecrypt
++	mnt prefetch_block_bitmaps removed
++	mnt no_prefetch_block_bitmaps
++	# We don't currently have a way to know that the option has been
++	# applied, so comment it out for now. This should be fixed in the
++	# future.
++	#mnt mb_optimize_scan=0
++	#mnt mb_optimize_scan=1
++	#not_mnt mb_optimize_scan=9
++	#not_mnt mb_optimize_scan=
++	mnt nombcache
++	mnt no_mbcache nombcache
++	mnt check=none removed
++	mnt nocheck removed
++	mnt reservation removed
++	mnt noreservation removed
++	mnt journal=20 ignored
++	not_mnt nonsenseoption
++	not_mnt nonsenseoption=value
++
++	# generic mount options
++	mnt lazytime
++	mnt nolazytime ^lazytime
++	mnt noatime
++	mnt nodiratime
++	mnt noexec
++	mnt nosuid
++	mnt ro
++
++	# generic remount check
++	remount barrier nobarrier
++	remount nobarrier barrier
++	remount discard nodiscard
++	remount nodiscard discard
++
++	# dax mount options
++	simple_mount -o dax=always $SCRATCH_DEV $SCRATCH_MNT > /dev/null 2>&1
++	if [ $? -eq 0 ]; then
++		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++		mnt dax
++		mnt dax=always
++		mnt dax=never
++		mnt dax=inode
++
++		not_remount lazytime dax
++		not_remount dax=always dax=never
++
++		if [[ $fstype != "ext2" ]]; then
++			not_remount data=journal dax
++			not_remount data=journal dax=always
++			not_remount data=journal dax=never
++			not_remount data=journal dax=inode
++		fi
++	fi
++
++	# Quota remount check
++	remount grpquota usrquota
++	remount usrquota quota
++	remount usrquota usrjquota=q.u,jqfmt=vfsv0
++	remount grpquota grpjquota=q.g,jqfmt=vfsv0
++
++	not_remount usrquota grpjquota=q.g,jqfmt=vfsv0
++	not_remount grpquota usrjquota=q.u,jqfmt=vfsv0
++
++	remount quota usrjquota=q.u,jqfmt=vfsv0
++	not_remount quota grpjquota=q.g,jqfmt=vfsv0
++
++	remount usrjquota=q.u,jqfmt=vfsv0 grpjquota=q.g
++	not_remount usrjquota=q.u,jqfmt=vfsv0 usrjquota=q.ua
++	not_remount grpjquota=q.g,jqfmt=vfsv0 grpjquota=q.ga
++
++	remount usrjquota=q.u,jqfmt=vfsv0 usrquota usrjquota=q.u,jqfmt=vfsv0
++	remount grpjquota=q.g,jqfmt=vfsv0 grpquota grpjquota=q.g,jqfmt=vfsv0
++	not_remount usrjquota=q.u,jqfmt=vfsv0 grpquota
++	not_remount grpjquota=q.g,jqfmt=vfsv0 usrquota
++
++	remount grpjquota=q.g,jqfmt=vfsv0 grpjquota= ^grpjquota=
++	remount usrjquota=q.u,jqfmt=vfsv0 usrjquota= ^usrjquota=
++	remount grpjquota=q.g,usrjquota=q.u,jqfmt=vfsv0 grpjquota=,usrjquota= ^grpjquota=,^usrjquota=
++
++	remount jqfmt=vfsv0 grpjquota=q.g
++	remount jqfmt=vfsv0 usrjquota=q.u
++
++	if [[ $fstype != "ext2" ]]; then
++		remount noload data=journal norecovery
++		not_remount data=ordered data=journal
++		not_remount data=journal data=writeback
++		not_remount data=writeback data=ordered
++	fi
++
++	do_mkfs -O journal_dev $LOOP_LOGDEV ${LOGSIZE}k
++	do_mkfs -J device=$LOOP_LOGDEV $SCRATCH_DEV ${SIZE}k
++	mnt defaults
++	mnt journal_path=$LOOP_LOGDEV ignored
++	mnt journal_dev=$LOGDEV_DEVNUM ignored
++	not_mnt journal_path=${LOOP_LOGDEV}_nonexistent ignored
++	not_mnt journal_dev=123456 ignored
++	not_mnt journal_dev=999999999999999 ignored
++
++	do_mkfs -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
++	mnt prjquota
++
++	# test clearing/changing journalled quota when enabled
++	echo "== Testing active journalled quota" >> $seqres.full
++	_mnt prjquota,grpjquota=aquota.group,usrjquota=aquota.user,jqfmt=vfsv0
++
++	# Prepare and enable quota
++	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
++	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
++
++	_not_remount -r grpjquota=
++	_not_remount -r usrjquota=aaquota.user
++	_not_remount -r grpjquota=aaquota.group
++	_not_remount -r jqfmt=vfsv1
++	_not_remount -r noquota
++	_mnt remount,usrquota,grpquota ^usrquota,^grpquota
++	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++
++	# test clearing/changing quota when enabled
++	do_mkfs -E quotatype=^prjquota $SCRATCH_DEV ${SIZE}k
++	not_mnt prjquota
++	echo "== Testing active non-journalled quota" >> $seqres.full
++	_mnt grpquota,usrquota
++
++	# Prepare and enable quota
++	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
++	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
++
++	_not_remount -r noquota
++	_not_remount -r usrjquota=aquota.user
++	_not_remount -r grpjquota=aquota.group
++	_not_remount -r jqfmt=vfsv1
++	_mnt remount,grpjquota= grpquota,^grpjquota
++	_mnt remount,usrjquota= usrquota,^usrjquota
++	_mnt remount,usrquota,grpquota usrquota,grpquota
++	quotaoff -f $SCRATCH_MNT >> $seqres.full 2>&1
++	_mnt remount,noquota ^usrquota,^grpquota,quota
++	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++
++	# Quota feature
++	echo "== Testing quota feature " >> $seqres.full
++	do_mkfs -O quota -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
++	mnt usrjquota=aquota.user,jqfmt=vfsv0 ^usrjquota=
++	mnt grpjquota=aquota.user,jqfmt=vfsv0 ^grpjquota=
++	mnt jqfmt=vfsv1 ^jqfmt=
++	mnt prjquota
++	mnt usrquota
++	mnt grpquota
++	not_remount defaults usrjquota=aquota.user
++	not_remount defaults grpjquota=aquota.user
++	not_remount defaults jqfmt=vfsv1
++	remount defaults grpjquota=,usrjquota= ignored
++
++done #for fstype in ext2 ext3 ext4; do
++
++$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++echo "$ERR errors encountered" >> $seqres.full
++
++status=$ERR
 +exit
-diff --git a/tests/btrfs/249.out b/tests/btrfs/249.out
+diff --git a/tests/ext4/053.out b/tests/ext4/053.out
 new file mode 100644
-index 000000000000..b79a5dca8820
+index 00000000..d58db7e4
 --- /dev/null
-+++ b/tests/btrfs/249.out
++++ b/tests/ext4/053.out
 @@ -0,0 +1,2 @@
-+QA output created by 249
-+Silence is golden
++QA output created by 053
++Silence is golden.
 -- 
-2.27.0
+2.31.1
 
