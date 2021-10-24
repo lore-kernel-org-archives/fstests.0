@@ -2,56 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89B5FC433FE
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 02:29:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5589C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 12:05:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 58F8E60F21
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 02:29:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B916460ED4
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 12:05:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229767AbhJXCbe (ORCPT
+        id S229868AbhJXMHl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 23 Oct 2021 22:31:34 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:38205 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S231611AbhJXCbe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 23 Oct 2021 22:31:34 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 19O2T5xk006050
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 23 Oct 2021 22:29:06 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 269B515C34DD; Sat, 23 Oct 2021 22:29:05 -0400 (EDT)
-Date:   Sat, 23 Oct 2021 22:29:05 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Wang Yugui <wangyugui@e16-tech.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: Is generic/647 known failing test for btrfs?
-Message-ID: <YXTE8bHlL3zEBrW0@mit.edu>
-References: <YXQrjnZcqU8pmUOI@mit.edu>
- <20211024091701.8ED1.409509F4@e16-tech.com>
+        Sun, 24 Oct 2021 08:07:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:29780 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229867AbhJXMHl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Oct 2021 08:07:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1635077120;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Rqgd9X7XZxjbZs5pzhROD1vKcEkyjr8A2fIESeGfuTk=;
+        b=EGXdfjDt+r+vAXvpd/Y3GDVqqISHmfE/gWeOju/X9E7NfXf59JjjqdBcX1MYs0dPMu3kPP
+        3DWVM7f4xiAVjsdrTpKVF9K3fSD6YiuVI8nlnmUc+NvFItROSvdnnIbZ9p2cbpHEQ73mSj
+        LTKF3I9WIa8rdT23Up3dFYQkzT1sEEE=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-42-ZY3wEP_tOE6dBp4fWhfbsQ-1; Sun, 24 Oct 2021 08:05:18 -0400
+X-MC-Unique: ZY3wEP_tOE6dBp4fWhfbsQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 023985074B
+        for <fstests@vger.kernel.org>; Sun, 24 Oct 2021 12:05:18 +0000 (UTC)
+Received: from zlang-laptop.redhat.com (ovpn-12-80.pek2.redhat.com [10.72.12.80])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 1414460862
+        for <fstests@vger.kernel.org>; Sun, 24 Oct 2021 12:05:15 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v2] generic/648: dmerror must be unmounted
+Date:   Sun, 24 Oct 2021 20:05:12 +0800
+Message-Id: <20211024120512.2383377-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211024091701.8ED1.409509F4@e16-tech.com>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 24, 2021 at 09:17:02AM +0800, Wang Yugui wrote:
-> Hi,
-> 
-> Yes. It is a known problem of btrfs and others.
+Sometimes g/648 fail to unmount dmerror with this error:
 
-Hmmm, I haven't noticed a problem running generic/647 on ext4, xfs,
-f2fs, reiserfs, overlayfs, and vfat.  I do see the proposed iomap
-changes referenced in [1] which is a prereqsuite for [2]. but it
-appears that most other file systems (both thoes that do and don't use
-iomap) are able to pass generic/647 even without the iomap changes
-proposed in [1].
+   umount: /mnt/xfstests/scratch: target is busy.
 
-[1] https://lore.kernel.org/all/20210827164926.1726765-1-agruenba@redhat.com/
-[2] https://lore.kernel.org/linux-btrfs/20211023115852.2517.409509F4@e16-tech.com/T/
+Even worse, it will cause all later test cases fail as:
 
-					- Ted
+  mount: bad usage
+  Try 'mount --help' for more information.
+  check: failed to mount $SCRATCH_DEV using specified options
+  Interrupted!
+
+So we shouldn't _fail directly if dmerror_unmount fails, use a while
+loop to try to unmount it enough times.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+
+As Darrick's review point, V2 brings the "iteration XXX scratch
+unmount failed" _fail back.
+
+Thanks,
+Zorro
+
+ tests/generic/648 | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/tests/generic/648 b/tests/generic/648
+index 83dd111d..e5c743c5 100755
+--- a/tests/generic/648
++++ b/tests/generic/648
+@@ -104,7 +104,7 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
+ 		wait > /dev/null 2>&1
+ 		ps -e | grep fsstress > /dev/null 2>&1
+ 	done
+-	for ((i = 0; i < 10; i++)); do
++	for ((j = 0; j < 10; j++)); do
+ 		test -e "$snap_aliveflag" || break
+ 		sleep 1
+ 	done
+@@ -112,7 +112,21 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
+ 	# Mount again to replay log after loading working table, so we have a
+ 	# consistent fs after test.
+ 	$UMOUNT_PROG $loopmnt
+-	_dmerror_unmount || _fail "iteration $i scratch unmount failed"
++	is_unmounted=1
++	# We must unmount dmerror at here, or whole later testing will crash.
++	# So try to umount enough times, before we have no choice.
++	for ((j = 0; j < 100; j++)); do
++		sleep 1
++		_dmerror_unmount > $tmp.unmount.err 2>&1
++		if [ $? -eq 0 ];then
++			is_unmounted=0
++			break
++		fi
++	done
++	if [ $is_unmounted -ne 0 ];then
++		cat $tmp.unmount.err
++		_fail "iteration $i scratch unmount failed"
++	fi
+ 	_dmerror_load_working_table
+ 	if ! _dmerror_mount; then
+ 		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
+-- 
+2.31.1
+
