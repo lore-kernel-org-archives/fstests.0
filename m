@@ -2,114 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5589C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 12:05:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95B55C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 13:34:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B916460ED4
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 12:05:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A5AD60F9C
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Oct 2021 13:34:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229868AbhJXMHl (ORCPT
+        id S231597AbhJXNgj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 24 Oct 2021 08:07:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:29780 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229867AbhJXMHl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Oct 2021 08:07:41 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635077120;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=Rqgd9X7XZxjbZs5pzhROD1vKcEkyjr8A2fIESeGfuTk=;
-        b=EGXdfjDt+r+vAXvpd/Y3GDVqqISHmfE/gWeOju/X9E7NfXf59JjjqdBcX1MYs0dPMu3kPP
-        3DWVM7f4xiAVjsdrTpKVF9K3fSD6YiuVI8nlnmUc+NvFItROSvdnnIbZ9p2cbpHEQ73mSj
-        LTKF3I9WIa8rdT23Up3dFYQkzT1sEEE=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-42-ZY3wEP_tOE6dBp4fWhfbsQ-1; Sun, 24 Oct 2021 08:05:18 -0400
-X-MC-Unique: ZY3wEP_tOE6dBp4fWhfbsQ-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 023985074B
-        for <fstests@vger.kernel.org>; Sun, 24 Oct 2021 12:05:18 +0000 (UTC)
-Received: from zlang-laptop.redhat.com (ovpn-12-80.pek2.redhat.com [10.72.12.80])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1414460862
-        for <fstests@vger.kernel.org>; Sun, 24 Oct 2021 12:05:15 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH v2] generic/648: dmerror must be unmounted
-Date:   Sun, 24 Oct 2021 20:05:12 +0800
-Message-Id: <20211024120512.2383377-1-zlang@redhat.com>
+        Sun, 24 Oct 2021 09:36:39 -0400
+Received: from out20-194.mail.aliyun.com ([115.124.20.194]:38867 "EHLO
+        out20-194.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230301AbhJXNgi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Oct 2021 09:36:38 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07483197|-1;BR=01201311R111S28rulernew998_84748_2000303;CH=blue;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.02026-0.000258078-0.979482;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047202;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Lh.bWLy_1635082455;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Lh.bWLy_1635082455)
+          by smtp.aliyun-inc.com(10.147.41.138);
+          Sun, 24 Oct 2021 21:34:16 +0800
+Date:   Sun, 24 Oct 2021 21:34:15 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Ma Xinjian <xinjianx.ma@intel.com>
+Cc:     fstests@vger.kernel.org, Philip Li <philip.li@intel.com>,
+        kernel test robot <lkp@intel.com>,
+        linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] btrfs/091: remove noinode_cache option
+Message-ID: <YXVg1xoLIvwxcjbD@desktop>
+References: <20210927072019.46609-1-xinjianx.ma@intel.com>
+ <20210927072019.46609-2-xinjianx.ma@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210927072019.46609-2-xinjianx.ma@intel.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Sometimes g/648 fail to unmount dmerror with this error:
+On Mon, Sep 27, 2021 at 03:20:19PM +0800, Ma Xinjian wrote:
+> inode cache feature has been removed
+> 
+> Link: https://www.spinics.net/lists/linux-btrfs/msg107910.html
 
-   umount: /mnt/xfstests/scratch: target is busy.
+From above link, the inode cache feathre has been removed since v5.11
+kernel, which is relatively a recent kernel,  but old kernels may still
+need this noinode_cache mount option.  So we'd better to keep this
+check.
 
-Even worse, it will cause all later test cases fail as:
+We could add check for inode_cache option as well, and only check for
+noinode_cache when inode cache is supported.
 
-  mount: bad usage
-  Try 'mount --help' for more information.
-  check: failed to mount $SCRATCH_DEV using specified options
-  Interrupted!
+> Reported-by: kernel test robot <lkp@intel.com>
+> Signed-off-by: Ma Xinjian <xinjianx.ma@intel.com>
+> ---
+>  tests/btrfs/091 | 21 +--------------------
+>  1 file changed, 1 insertion(+), 20 deletions(-)
+> 
+> diff --git a/tests/btrfs/091 b/tests/btrfs/091
+> index 307289b1..f2cd00b2 100755
+> --- a/tests/btrfs/091
+> +++ b/tests/btrfs/091
+> @@ -23,21 +23,12 @@ _require_cp_reflink
+>  # use largest node/leaf size (64K) to allow the test to be run on arch with
+>  # page size > 4k.
+>  NODESIZE=65536
+> -SUPPORT_NOINODE_CACHE="yes"
+>  
+>  run_check _scratch_mkfs "--nodesize $NODESIZE"
+>  
+> -# inode cache will also take space in fs tree, disable them to get consistent
+> -# result.
+>  # discard error output since we will check return value manually.
+>  # also disable all compression, or output will mismatch with golden output
+> -_try_scratch_mount "-o noinode_cache,compress=no,compress-force=no" 2> /dev/null
+> -
+> -# Check for old kernel which doesn't support 'noinode_cache' mount option
+> -if [ $? -ne 0 ]; then
+> -	support_noinode_cache="no"
 
-So we shouldn't _fail directly if dmerror_unmount fails, use a while
-loop to try to unmount it enough times.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
-
-As Darrick's review point, V2 brings the "iteration XXX scratch
-unmount failed" _fail back.
+This seems like a type in the original code, it should be in upper case.
 
 Thanks,
-Zorro
+Eryu
 
- tests/generic/648 | 18 ++++++++++++++++--
- 1 file changed, 16 insertions(+), 2 deletions(-)
-
-diff --git a/tests/generic/648 b/tests/generic/648
-index 83dd111d..e5c743c5 100755
---- a/tests/generic/648
-+++ b/tests/generic/648
-@@ -104,7 +104,7 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
- 		wait > /dev/null 2>&1
- 		ps -e | grep fsstress > /dev/null 2>&1
- 	done
--	for ((i = 0; i < 10; i++)); do
-+	for ((j = 0; j < 10; j++)); do
- 		test -e "$snap_aliveflag" || break
- 		sleep 1
- 	done
-@@ -112,7 +112,21 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
- 	# Mount again to replay log after loading working table, so we have a
- 	# consistent fs after test.
- 	$UMOUNT_PROG $loopmnt
--	_dmerror_unmount || _fail "iteration $i scratch unmount failed"
-+	is_unmounted=1
-+	# We must unmount dmerror at here, or whole later testing will crash.
-+	# So try to umount enough times, before we have no choice.
-+	for ((j = 0; j < 100; j++)); do
-+		sleep 1
-+		_dmerror_unmount > $tmp.unmount.err 2>&1
-+		if [ $? -eq 0 ];then
-+			is_unmounted=0
-+			break
-+		fi
-+	done
-+	if [ $is_unmounted -ne 0 ];then
-+		cat $tmp.unmount.err
-+		_fail "iteration $i scratch unmount failed"
-+	fi
- 	_dmerror_load_working_table
- 	if ! _dmerror_mount; then
- 		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
--- 
-2.31.1
-
+> -	_scratch_mount
+> -fi
+> +_try_scratch_mount "-o compress=no,compress-force=no" 2> /dev/null
+>  
+>  _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv1
+>  _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv2
+> @@ -46,16 +37,6 @@ _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
+>  _run_btrfs_util_prog quota enable $SCRATCH_MNT
+>  _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+>  
+> -# if we don't support noinode_cache mount option, then we should double check
+> -# whether inode cache is enabled before executing the real test payload.
+> -if [ $SUPPORT_NOINODE_CACHE == "no" ]; then
+> -	EMPTY_SIZE=`$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | \
+> -		$SED_PROG -n '/[0-9]/p' | $AWK_PROG '{print $2}' | head -n1`
+> -	if [ $EMPTY_SIZE != $NODESIZE ]; then
+> -		_notrun "Kernel doesn't support to disable inode cache"
+> -	fi
+> -fi
+> -
+>  $XFS_IO_PROG -f -c "pwrite 0 256K" $SCRATCH_MNT/subv1/file1 | _filter_xfs_io
+>  cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv2/file1
+>  cp --reflink $SCRATCH_MNT/subv1/file1 $SCRATCH_MNT/subv3/file1
+> -- 
+> 2.20.1
