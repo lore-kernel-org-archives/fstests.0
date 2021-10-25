@@ -2,149 +2,85 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2000C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 13:01:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD436C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 13:06:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D974561039
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 13:01:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC07460F92
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 13:06:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233392AbhJYNDW (ORCPT
+        id S233412AbhJYNIl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 25 Oct 2021 09:03:22 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:28925 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233387AbhJYNDV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Oct 2021 09:03:21 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635166859;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=ZxtG0q9XZ9CoVKCRbL+ehUfbFkmT7EaPte/qKWaXens=;
-        b=A5OtJooOc1DndDw4f+UKF014u+fT9rviuEzQYH3uehkcjYq4s113efMevNOZWNjTeRIWmN
-        1asQKwwE0qd+BBK575BFxrSFMHCQxrT0kcBAREcqSSUJfE89deMDZZVFeEckxLhs7vgpZB
-        rg0UxGgGzVr7LIt6LYTK/F/4tDss3Lg=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-481-u2Egelu9NOG4NJo89lyOnA-1; Mon, 25 Oct 2021 09:00:56 -0400
-X-MC-Unique: u2Egelu9NOG4NJo89lyOnA-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D61C5100F943;
-        Mon, 25 Oct 2021 13:00:54 +0000 (UTC)
-Received: from bfoster.redhat.com (unknown [10.22.8.224])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 45AC8171FF;
-        Mon, 25 Oct 2021 13:00:54 +0000 (UTC)
-From:   Brian Foster <bfoster@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v2] tests/xfs: test COW writeback failure when overlapping non-shared blocks
-Date:   Mon, 25 Oct 2021 09:00:53 -0400
-Message-Id: <20211025130053.8343-1-bfoster@redhat.com>
+        Mon, 25 Oct 2021 09:08:41 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:44642 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233340AbhJYNIk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Oct 2021 09:08:40 -0400
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 7634821956;
+        Mon, 25 Oct 2021 13:06:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1635167177;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Toiu46mmGfiQkj8/qFED5wEjGPl2I54jligXy3Em5bk=;
+        b=aCppBY0Vbv0qmt5nmgdnUyzCTylV+tIFm6pcYs+d6W3wEB65HcS6JKzBpb6FwZEnA/OldR
+        EpY5YVVgD6CncgkGLnRYRxaesZ6IlBMrKRG6GLNFPjeALFS63MbrLIuD2Fy8IaNiWlb7nq
+        8on4emSP6J+rbfJzbjmdcy6uLVNguWc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1635167177;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Toiu46mmGfiQkj8/qFED5wEjGPl2I54jligXy3Em5bk=;
+        b=QvOlz2nEHM/9ZIdZRC2A359Z6JhKI8S5yyWEGZmA+fO2k4MVEkC3rcslhOrKddiZIiXms8
+        jz369hRm43pA8RDQ==
+Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
+        by relay2.suse.de (Postfix) with ESMTP id 66D13A3B8A;
+        Mon, 25 Oct 2021 13:06:17 +0000 (UTC)
+Received: by ds.suse.cz (Postfix, from userid 10065)
+        id 8C56FDA7A9; Mon, 25 Oct 2021 15:05:46 +0200 (CEST)
+Date:   Mon, 25 Oct 2021 15:05:46 +0200
+From:   David Sterba <dsterba@suse.cz>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Ma Xinjian <xinjianx.ma@intel.com>, fstests@vger.kernel.org,
+        Philip Li <philip.li@intel.com>,
+        kernel test robot <lkp@intel.com>,
+        linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] btrfs/091: remove noinode_cache option
+Message-ID: <20211025130546.GN20319@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+Mail-Followup-To: dsterba@suse.cz, Eryu Guan <guan@eryu.me>,
+        Ma Xinjian <xinjianx.ma@intel.com>, fstests@vger.kernel.org,
+        Philip Li <philip.li@intel.com>, kernel test robot <lkp@intel.com>,
+        linux-btrfs@vger.kernel.org
+References: <20210927072019.46609-1-xinjianx.ma@intel.com>
+ <20210927072019.46609-2-xinjianx.ma@intel.com>
+ <YXVg1xoLIvwxcjbD@desktop>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YXVg1xoLIvwxcjbD@desktop>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test that COW writeback that overlaps non-shared delalloc blocks
-does not leave around stale delalloc blocks on I/O failure. This
-triggers assert failures and free space accounting corruption on
-XFS.
+On Sun, Oct 24, 2021 at 09:34:15PM +0800, Eryu Guan wrote:
+> On Mon, Sep 27, 2021 at 03:20:19PM +0800, Ma Xinjian wrote:
+> > inode cache feature has been removed
+> > 
+> > Link: https://www.spinics.net/lists/linux-btrfs/msg107910.html
+> 
+> >From above link, the inode cache feathre has been removed since v5.11
+> kernel, which is relatively a recent kernel,  but old kernels may still
+> need this noinode_cache mount option.  So we'd better to keep this
+> check.
+> 
+> We could add check for inode_cache option as well, and only check for
+> noinode_cache when inode cache is supported.
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
-
-v2:
-- Explicitly set COW extent size hint.
-- Move to tests/xfs.
-- Various minor cleanups.
-v1: https://lore.kernel.org/fstests/20211021163959.1887011-1-bfoster@redhat.com/
-
- tests/xfs/999     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/999.out |  2 ++
- 2 files changed, 64 insertions(+)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
-
-diff --git a/tests/xfs/999 b/tests/xfs/999
-new file mode 100755
-index 00000000..f27972bc
---- /dev/null
-+++ b/tests/xfs/999
-@@ -0,0 +1,62 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 999
-+#
-+# Test that COW writeback that overlaps non-shared delalloc blocks does not
-+# leave around stale delalloc blocks on I/O failure. This triggers assert
-+# failures and free space accounting corruption on XFS.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick clone
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+# Import common functions.
-+. ./common/reflink
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_xfs_io_command "cowextsize"
-+_require_flakey_with_error_writes
-+
-+_scratch_mkfs >> $seqres.full
-+_init_flakey
-+_mount_flakey
-+
-+blksz=$(_get_file_block_size $SCRATCH_MNT)
-+
-+# Set the COW extent size hint to guarantee COW fork preallocation occurs over a
-+# bordering block offset.
-+$XFS_IO_PROG -c "cowextsize $((blksz * 2))" $SCRATCH_MNT >> $seqres.full
-+
-+# create two files that share a single block
-+$XFS_IO_PROG -fc "pwrite $blksz $blksz" $SCRATCH_MNT/file1 >> $seqres.full
-+_cp_reflink $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
-+
-+# Perform a buffered write across the shared and non-shared blocks. On XFS, this
-+# creates a COW fork extent that covers the shared block as well as the just
-+# created non-shared delalloc block. Fail the writeback to verify that all
-+# delayed allocation is cleaned up properly.
-+_load_flakey_table $FLAKEY_ERROR_WRITES
-+$XFS_IO_PROG -c "pwrite 0 $((blksz * 2))" \
-+	-c fsync $SCRATCH_MNT/file2 >> $seqres.full
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+
-+# Try a post-fail reflink and then unmount. Both of these are known to produce
-+# errors and/or assert failures on XFS if we trip over a stale delalloc block.
-+_cp_reflink $SCRATCH_MNT/file2 $SCRATCH_MNT/file3
-+_unmount_flakey
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-new file mode 100644
-index 00000000..88b69c4c
---- /dev/null
-+++ b/tests/xfs/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+fsync: Input/output error
--- 
-2.31.1
-
+I don't think we should keep the option support in the testsuite. There
+was deprecation period before actual removal from kernel and long before
+that we discouraged everybody from using it. There were known bugs and I
+don't think anybody cares for old kernels anyway.
