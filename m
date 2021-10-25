@@ -2,79 +2,534 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00073C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 03:24:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CB2EC4332F
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 08:07:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DA81960EBB
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 03:24:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21A6660EBD
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 08:07:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231998AbhJYD1J (ORCPT
+        id S231241AbhJYIJb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 24 Oct 2021 23:27:09 -0400
-Received: from mga14.intel.com ([192.55.52.115]:16109 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232008AbhJYD1J (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 24 Oct 2021 23:27:09 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10147"; a="229829394"
-X-IronPort-AV: E=Sophos;i="5.87,179,1631602800"; 
-   d="scan'208";a="229829394"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2021 20:24:41 -0700
-X-IronPort-AV: E=Sophos;i="5.87,179,1631602800"; 
-   d="scan'208";a="496594248"
-Received: from lihengzh-mobl1.ccr.corp.intel.com (HELO lkp-mouse.ccr.corp.intel.com) ([10.255.30.152])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2021 20:24:39 -0700
-From:   Zhu Yifei <yifeix.zhu@intel.com>
-To:     Eryu <guan@eryu.me>, fstests <fstests@vger.kernel.org>,
-        Philip Li <philip.li@intel.com>
-Cc:     Zhu Yifei <yifeix.zhu@intel.com>
-Subject: [PATCH v2 xfstests-dev] tests/btrfs/012: check size after mounted
-Date:   Mon, 25 Oct 2021 11:22:56 +0800
-Message-Id: <20211025032256.61557-1-yifeix.zhu@intel.com>
-X-Mailer: git-send-email 2.20.1
+        Mon, 25 Oct 2021 04:09:31 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:21971 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231195AbhJYIJ2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Oct 2021 04:09:28 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1635149226;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=u0pSYdVJlqgi/5SUwcHHMWDUbJR4+YeGDAQvzsjQgCQ=;
+        b=Yv1QiQ3XHwYiJg0jzQ7HABMMmF9TJvSwwrj3g//ZsLIb8DuLCDV7yUCxJV6mFEvZxRdNp6
+        UPiKFyA1Z2kNkPtUbutPVpS6QHcmlQSyB5BEld7zg5n0JS8r9cUtTtvOt7vUB4wHqwvACW
+        nE7VqwmhOQ28OqSOvF5oIMkc0w+AIVU=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-127-OZjZD23lNve4zrm3LJHGYg-1; Mon, 25 Oct 2021 04:07:02 -0400
+X-MC-Unique: OZjZD23lNve4zrm3LJHGYg-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D95B18026AD;
+        Mon, 25 Oct 2021 08:07:00 +0000 (UTC)
+Received: from work (unknown [10.40.192.132])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9B0505C1A1;
+        Mon, 25 Oct 2021 08:06:59 +0000 (UTC)
+Date:   Mon, 25 Oct 2021 10:06:57 +0200
+From:   Lukas Czerner <lczerner@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v2] ext4: add test for all ext4/ext3/ext2 mount options
+Message-ID: <20211025080657.kenrcvlykkysmsm5@work>
+References: <20211018130001.6440-1-lczerner@redhat.com>
+ <20211020121226.15236-1-lczerner@redhat.com>
+ <YXWKYG7gluz62MNb@desktop>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YXWKYG7gluz62MNb@desktop>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-move '_require_fs_space'  after mounted.
+On Mon, Oct 25, 2021 at 12:31:28AM +0800, Eryu Guan wrote:
+> On Wed, Oct 20, 2021 at 02:12:26PM +0200, Lukas Czerner wrote:
+> > Add test to validate that all the ext4, ext3 and ext2 are properly
+> > recognized, validate and applied to avoid regressions as ext4 moves to
+> > the new mount API.
+> > 
+> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> > ---
+> > v2: Move minimum kernel version requirement up to 5.12
+> >     Rewrite kernel_gte() to work correctly
+> 
+> fstests doesn't do version check but only actually try it and see if the
+> wanted feature is supported, so I want to avoid this kernel version
+> check as much as possible.
+> 
+> OTOH, I understand that there's no good way to tell if a mount option is
+> supported by current kernel, and it's not clear a mount failure is
+> caused by a regression or an unsupported mount option.
 
-==before patch==
-btrfs/012       [not run] This test requires at least 0GB free on /fs/scratch to run
+I understand that fstests doesn't do version checking and. But
+the fact of the matter is that it is needed for this test for the
+reasons you mentioned.
 
-==after patch==
-btrfs/012 189s ...  194s
-Ran: btrfs/012
-Passed all 1 tests
+> 
+> I'd like to see if anyone else has better ideas/suggestions.
 
-Signed-off-by: Zhu Yifei <yifeix.zhu@intel.com>
----
- tests/btrfs/012 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+So what's the goal here. Am I going to have to wait until someone comes
+up with a better suggestion ?
 
-diff --git a/tests/btrfs/012 b/tests/btrfs/012
-index 3040a655..29552b14 100755
---- a/tests/btrfs/012
-+++ b/tests/btrfs/012
-@@ -31,8 +31,6 @@ _require_command "$E2FSCK_PROG" e2fsck
- # ext4 does not support zoned block device
- _require_non_zoned_device "${SCRATCH_DEV}"
- 
--_require_fs_space $SCRATCH_MNT $(du -s /lib/modules/`uname -r` | ${AWK_PROG} '{print $1}')
--
- BLOCK_SIZE=`_get_block_size $TEST_DIR`
- 
- # Create & populate an ext4 filesystem
-@@ -41,6 +39,8 @@ $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
- # Manual mount so we don't use -t btrfs or selinux context
- mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
- 
-+_require_fs_space $SCRATCH_MNT $(du -s /lib/modules/`uname -r` | ${AWK_PROG} '{print $1}')
-+
- cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT
- _scratch_unmount
- 
--- 
-2.20.1
+> 
+> Some minor issues below.
+> 
+> > +_mnt() {
+> 
+> Local functions don't need the _ prefix, that's for common helpers.
+
+Ok, I can rename it.
+
+-Lukas
+
+> 
+> > +	print_log "mounting $fstype \"$1\" "
+> > +	do_mnt $@
+> > +	if [ $? -ne 0 ]; then
+> > +		fail
+> > +	else
+> > +		ok
+> > +	fi
+> > +}
+> > +
+> > +mnt() {
+> > +	# Do we need to run the tune2fs mount option test ?
+> > +	t2fs=0
+> > +	if [ "$1" == "-t" ]; then
+> > +		t2fs=1
+> > +		shift
+> > +	fi
+> > +
+> > +	_mnt $*
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +
+> > +	[ "$t2fs" -eq 0 ] && return
+> > +
+> > +	op_set=$1
+> > +	if [ $# -eq 1 ]; then
+> > +		check=$1
+> > +	elif [ $# -eq 2 ]; then
+> > +		check=$2
+> > +	else
+> > +		return 0
+> > +	fi
+> > +
+> > +	# some options need translation for tune2fs
+> > +	op_set=$(echo $op_set | sed -e 's/data=journal/journal_data/' \
+> > +				    -e 's/data=ordered/journal_data_ordered/' \
+> > +				    -e 's/data=writeback/journal_data_writeback/')
+> > +	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
+> > +	_mnt "defaults" $check
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +	if [ "$op_set" = ^* ]; then
+> > +		op_set=${op_set#^}
+> > +	else
+> > +		op_set="^${op_set}"
+> > +	fi
+> > +	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
+> > +}
+> > +
+> > +# $1 - options to mount with
+> > +# $2 - options to remount with
+> > +remount() {
+> > +	# First do this specifying both dev and mnt
+> > +	print_log "mounting $fstype \"$1\" "
+> > +	do_mnt $1
+> > +	[ $? -ne 0 ] && fail && return
+> > +	print_log "remounting \"$2\" "
+> > +	do_mnt remount,$2 $3
+> > +	if [ $? -ne 0 ]; then
+> > +		fail
+> > +		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +		return
+> > +	else
+> > +		ok
+> > +	fi
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +
+> > +	# Now just specify mnt
+> > +	print_log "mounting $fstype \"$1\" "
+> > +	do_mnt $1
+> > +	[ $? -ne 0 ] && fail && return
+> > +	print_log "remounting (MNT ONLY) \"$2\" "
+> > +	do_mnt -n remount,$2 $3
+> > +	if [ $? -ne 0 ]; then
+> > +		fail
+> > +	else
+> > +		ok
+> > +	fi
+> > +
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +}
+> > +
+> > +# $1 - options to mount with, or -r argument
+> > +# $2 - options to remount with
+> > +_not_remount() {
+> 
+> Same here.
+> 
+> Thanks,
+> Eryu
+> 
+> > +	remount_only=0
+> > +	# If -r is specified we're going to do remount only
+> > +	if [ "$1" == "-r" ]; then
+> > +		remount_only=1
+> > +		# Dont need shift since first argument would
+> > +		# have been consumed by mount anyway
+> > +	fi
+> > +
+> > +	if [ $remount_only -eq 0 ]; then
+> > +		print_log "mounting $fstype \"$1\" "
+> > +		do_mnt $1
+> > +		[ $? -ne 0 ] && fail && return
+> > +	fi
+> > +	print_log "SHOULD FAIL remounting $fstype \"$2\" "
+> > +	do_mnt remount,$2 $3
+> > +	if [ $? -eq 0 ]; then
+> > +		fail
+> > +	else
+> > +		ok
+> > +	fi
+> > +
+> > +	# Now just specify mnt
+> > +	print_log "SHOULD FAIL remounting $fstype (MNT ONLY) \"$2\" "
+> > +	do_mnt -n remount,$2 $3
+> > +	if [ $? -eq 0 ]; then
+> > +		fail
+> > +	else
+> > +		ok
+> > +	fi
+> > +}
+> > +
+> > +not_remount() {
+> > +	_not_remount $*
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +}
+> > +
+> > +
+> > +do_mkfs() {
+> > +	$MKE2FS_PROG -T $fstype -Fq $* >> $seqres.full 2>&1 ||
+> > +	_fail "mkfs failed - $MKFS_EXT4_PROG -Fq $* $SCRATCH_DEV"
+> > +}
+> > +
+> > +not_ext2() {
+> > +	if [[ $fstype == "ext2" ]]; then
+> > +		not_$*
+> > +	else
+> > +		$*
+> > +	fi
+> > +}
+> > +
+> > +only_ext4() {
+> > +	if [[ $fstype == "ext4" ]]; then
+> > +		$*
+> > +	else
+> > +		not_$*
+> > +	fi
+> > +}
+> > +
+> > +# Create logdev for external journal
+> > +LOOP_IMG=$tmp.logdev
+> > +truncate -s ${LOGSIZE}k $LOOP_IMG
+> > +LOOP_LOGDEV=`_create_loop_device $LOOP_IMG`
+> > +majmin=`stat -c "%t:%T" $LOOP_LOGDEV`
+> > +LOGDEV_DEVNUM=`echo "${majmin%:*}*2^8 + ${majmin#*:}" | bc`
+> > +
+> > +# Test all the extN file system supported by ext4 driver
+> > +fstype=
+> > +for fstype in ext2 ext3 ext4; do
+> > +
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +	$UMOUNT_PROG $SCRATCH_DEV 2> /dev/null
+> > +
+> > +	do_mkfs $SCRATCH_DEV ${SIZE}k
+> > +
+> > +	# do we have fstype support ?
+> > +	do_mnt
+> > +	if [ $? -ne 0 ]; then
+> > +		print_log "$fstype not supported. Skipping..."
+> > +		ok
+> > +		continue
+> > +	fi
+> > +	if [ ! -f /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options ]; then
+> > +		print_log "$fstype not supported. Skipping..."
+> > +		ok
+> > +		continue
+> > +	fi
+> > +
+> > +	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +
+> > +	not_mnt failme
+> > +	mnt
+> > +	mnt bsddf
+> > +	mnt minixdf
+> > +	mnt grpid
+> > +	mnt -t bsdgroups grpid
+> > +	mnt nogrpid
+> > +	mnt sysvgroups nogrpid
+> > +	mnt resgid=1001
+> > +	mnt resuid=1001
+> > +	mnt sb=131072
+> > +	mnt errors=continue
+> > +	mnt errors=panic
+> > +	mnt errors=remount-ro
+> > +	mnt nouid32
+> > +	mnt debug
+> > +	mnt oldalloc removed
+> > +	mnt orlov removed
+> > +	mnt -t user_xattr
+> > +	mnt nouser_xattr
+> > +	mnt -t acl
+> > +	not_ext2 mnt noload norecovery
+> > +	mnt bh removed
+> > +	mnt nobh removed
+> > +	not_ext2 mnt commit=7
+> > +	mnt min_batch_time=200
+> > +	mnt max_batch_time=10000
+> > +	only_ext4 mnt journal_checksum
+> > +	only_ext4 mnt nojournal_checksum
+> > +	only_ext4 mnt journal_async_commit,data=writeback
+> > +	mnt abort ignored
+> > +	not_ext2 mnt -t data=journal
+> > +	not_ext2 mnt -t data=ordered
+> > +	not_ext2 mnt -t data=writeback
+> > +	not_ext2 mnt data_err=abort
+> > +	not_ext2 mnt data_err=ignore ignored
+> > +	mnt usrjquota=aquota.user,jqfmt=vfsv0
+> > +	not_mnt usrjquota=aquota.user
+> > +	mnt usrjquota= ignored
+> > +	mnt grpjquota=aquota.group,jqfmt=vfsv0
+> > +	not_mnt grpjquota=aquota.group
+> > +	mnt grpjquota= ignored
+> > +	mnt jqfmt=vfsold
+> > +	mnt jqfmt=vfsv0
+> > +	mnt jqfmt=vfsv1
+> > +	mnt grpquota
+> > +	mnt quota
+> > +	mnt noquota
+> > +	mnt usrquota
+> > +	mnt grpquota
+> > +	mnt barrier
+> > +	mnt barrier=0 nobarrier
+> > +	mnt barrier=1 barrier
+> > +	mnt barrier=99 barrier
+> > +	mnt -t nobarrier
+> > +	mnt i_version
+> > +	mnt stripe=512
+> > +	only_ext4 mnt delalloc
+> > +	only_ext4 mnt -t nodelalloc
+> > +	mnt warn_on_error
+> > +	mnt nowarn_on_error
+> > +	not_mnt debug_want_extra_isize=512
+> > +	mnt debug_want_extra_isize=32 ignored
+> > +	mnt mblk_io_submit removed
+> > +	mnt nomblk_io_submit removed
+> > +	mnt -t block_validity
+> > +	mnt noblock_validity
+> > +	mnt inode_readahead_blks=16
+> > +	not_ext2 mnt journal_ioprio=6 ignored
+> > +	mnt auto_da_alloc=0 noauto_da_alloc
+> > +	mnt auto_da_alloc=1 auto_da_alloc
+> > +	mnt auto_da_alloc=95 auto_da_alloc
+> > +	mnt auto_da_alloc
+> > +	mnt noauto_da_alloc
+> > +	only_ext4 mnt dioread_nolock
+> > +	only_ext4 mnt nodioread_nolock
+> > +	only_ext4 mnt dioread_lock nodioread_nolock
+> > +	mnt -t discard
+> > +	mnt nodiscard
+> > +	mnt init_itable=20
+> > +	mnt init_itable
+> > +	mnt init_itable=0
+> > +	mnt noinit_itable
+> > +	mnt max_dir_size_kb=4096
+> > +	mnt test_dummy_encryption
+> > +	mnt test_dummy_encryption=v1
+> > +	mnt test_dummy_encryption=v2
+> > +	not_mnt test_dummy_encryption=v3
+> > +	not_mnt test_dummy_encryption=
+> > +	mnt inlinecrypt
+> > +	mnt prefetch_block_bitmaps removed
+> > +	mnt no_prefetch_block_bitmaps
+> > +	# We don't currently have a way to know that the option has been
+> > +	# applied, so comment it out for now. This should be fixed in the
+> > +	# future.
+> > +	#mnt mb_optimize_scan=0
+> > +	#mnt mb_optimize_scan=1
+> > +	#not_mnt mb_optimize_scan=9
+> > +	#not_mnt mb_optimize_scan=
+> > +	mnt nombcache
+> > +	mnt no_mbcache nombcache
+> > +	mnt check=none removed
+> > +	mnt nocheck removed
+> > +	mnt reservation removed
+> > +	mnt noreservation removed
+> > +	mnt journal=20 ignored
+> > +	not_mnt nonsenseoption
+> > +	not_mnt nonsenseoption=value
+> > +
+> > +	# generic mount options
+> > +	mnt lazytime
+> > +	mnt nolazytime ^lazytime
+> > +	mnt noatime
+> > +	mnt nodiratime
+> > +	mnt noexec
+> > +	mnt nosuid
+> > +	mnt ro
+> > +
+> > +	# generic remount check
+> > +	remount barrier nobarrier
+> > +	remount nobarrier barrier
+> > +	remount discard nodiscard
+> > +	remount nodiscard discard
+> > +
+> > +	# dax mount options
+> > +	simple_mount -o dax=always $SCRATCH_DEV $SCRATCH_MNT > /dev/null 2>&1
+> > +	if [ $? -eq 0 ]; then
+> > +		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+> > +		mnt dax
+> > +		mnt dax=always
+> > +		mnt dax=never
+> > +		mnt dax=inode
+> > +
+> > +		not_remount lazytime dax
+> > +		not_remount dax=always dax=never
+> > +
+> > +		if [[ $fstype != "ext2" ]]; then
+> > +			not_remount data=journal dax
+> > +			not_remount data=journal dax=always
+> > +			not_remount data=journal dax=never
+> > +			not_remount data=journal dax=inode
+> > +		fi
+> > +	fi
+> > +
+> > +	# Quota remount check
+> > +	remount grpquota usrquota
+> > +	remount usrquota quota
+> > +	remount usrquota usrjquota=q.u,jqfmt=vfsv0
+> > +	remount grpquota grpjquota=q.g,jqfmt=vfsv0
+> > +
+> > +	not_remount usrquota grpjquota=q.g,jqfmt=vfsv0
+> > +	not_remount grpquota usrjquota=q.u,jqfmt=vfsv0
+> > +
+> > +	remount quota usrjquota=q.u,jqfmt=vfsv0
+> > +	not_remount quota grpjquota=q.g,jqfmt=vfsv0
+> > +
+> > +	remount usrjquota=q.u,jqfmt=vfsv0 grpjquota=q.g
+> > +	not_remount usrjquota=q.u,jqfmt=vfsv0 usrjquota=q.ua
+> > +	not_remount grpjquota=q.g,jqfmt=vfsv0 grpjquota=q.ga
+> > +
+> > +	remount usrjquota=q.u,jqfmt=vfsv0 usrquota usrjquota=q.u,jqfmt=vfsv0
+> > +	remount grpjquota=q.g,jqfmt=vfsv0 grpquota grpjquota=q.g,jqfmt=vfsv0
+> > +	not_remount usrjquota=q.u,jqfmt=vfsv0 grpquota
+> > +	not_remount grpjquota=q.g,jqfmt=vfsv0 usrquota
+> > +
+> > +	remount grpjquota=q.g,jqfmt=vfsv0 grpjquota= ^grpjquota=
+> > +	remount usrjquota=q.u,jqfmt=vfsv0 usrjquota= ^usrjquota=
+> > +	remount grpjquota=q.g,usrjquota=q.u,jqfmt=vfsv0 grpjquota=,usrjquota= ^grpjquota=,^usrjquota=
+> > +
+> > +	remount jqfmt=vfsv0 grpjquota=q.g
+> > +	remount jqfmt=vfsv0 usrjquota=q.u
+> > +
+> > +	if [[ $fstype != "ext2" ]]; then
+> > +		remount noload data=journal norecovery
+> > +		not_remount data=ordered data=journal
+> > +		not_remount data=journal data=writeback
+> > +		not_remount data=writeback data=ordered
+> > +	fi
+> > +
+> > +	do_mkfs -O journal_dev $LOOP_LOGDEV ${LOGSIZE}k
+> > +	do_mkfs -J device=$LOOP_LOGDEV $SCRATCH_DEV ${SIZE}k
+> > +	mnt defaults
+> > +	mnt journal_path=$LOOP_LOGDEV ignored
+> > +	mnt journal_dev=$LOGDEV_DEVNUM ignored
+> > +	not_mnt journal_path=${LOOP_LOGDEV}_nonexistent ignored
+> > +	not_mnt journal_dev=123456 ignored
+> > +	not_mnt journal_dev=999999999999999 ignored
+> > +
+> > +	do_mkfs -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
+> > +	mnt prjquota
+> > +
+> > +	# test clearing/changing journalled quota when enabled
+> > +	echo "== Testing active journalled quota" >> $seqres.full
+> > +	_mnt prjquota,grpjquota=aquota.group,usrjquota=aquota.user,jqfmt=vfsv0
+> > +
+> > +	# Prepare and enable quota
+> > +	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
+> > +	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
+> > +
+> > +	_not_remount -r grpjquota=
+> > +	_not_remount -r usrjquota=aaquota.user
+> > +	_not_remount -r grpjquota=aaquota.group
+> > +	_not_remount -r jqfmt=vfsv1
+> > +	_not_remount -r noquota
+> > +	_mnt remount,usrquota,grpquota ^usrquota,^grpquota
+> > +	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+> > +
+> > +	# test clearing/changing quota when enabled
+> > +	do_mkfs -E quotatype=^prjquota $SCRATCH_DEV ${SIZE}k
+> > +	not_mnt prjquota
+> > +	echo "== Testing active non-journalled quota" >> $seqres.full
+> > +	_mnt grpquota,usrquota
+> > +
+> > +	# Prepare and enable quota
+> > +	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
+> > +	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
+> > +
+> > +	_not_remount -r noquota
+> > +	_not_remount -r usrjquota=aquota.user
+> > +	_not_remount -r grpjquota=aquota.group
+> > +	_not_remount -r jqfmt=vfsv1
+> > +	_mnt remount,grpjquota= grpquota,^grpjquota
+> > +	_mnt remount,usrjquota= usrquota,^usrjquota
+> > +	_mnt remount,usrquota,grpquota usrquota,grpquota
+> > +	quotaoff -f $SCRATCH_MNT >> $seqres.full 2>&1
+> > +	_mnt remount,noquota ^usrquota,^grpquota,quota
+> > +	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+> > +
+> > +	# Quota feature
+> > +	echo "== Testing quota feature " >> $seqres.full
+> > +	do_mkfs -O quota -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
+> > +	mnt usrjquota=aquota.user,jqfmt=vfsv0 ^usrjquota=
+> > +	mnt grpjquota=aquota.user,jqfmt=vfsv0 ^grpjquota=
+> > +	mnt jqfmt=vfsv1 ^jqfmt=
+> > +	mnt prjquota
+> > +	mnt usrquota
+> > +	mnt grpquota
+> > +	not_remount defaults usrjquota=aquota.user
+> > +	not_remount defaults grpjquota=aquota.user
+> > +	not_remount defaults jqfmt=vfsv1
+> > +	remount defaults grpjquota=,usrjquota= ignored
+> > +
+> > +done #for fstype in ext2 ext3 ext4; do
+> > +
+> > +$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+> > +echo "$ERR errors encountered" >> $seqres.full
+> > +
+> > +status=$ERR
+> > +exit
+> > diff --git a/tests/ext4/053.out b/tests/ext4/053.out
+> > new file mode 100644
+> > index 00000000..d58db7e4
+> > --- /dev/null
+> > +++ b/tests/ext4/053.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 053
+> > +Silence is golden.
+> > -- 
+> > 2.31.1
+> 
 
