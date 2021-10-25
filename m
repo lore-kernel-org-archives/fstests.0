@@ -2,128 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88320C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 10:35:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2000C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 13:01:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 664BD61090
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 10:35:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D974561039
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Oct 2021 13:01:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232832AbhJYKhy (ORCPT
+        id S233392AbhJYNDW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 25 Oct 2021 06:37:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42370 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231745AbhJYKhw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Oct 2021 06:37:52 -0400
-Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E061DC061745
-        for <fstests@vger.kernel.org>; Mon, 25 Oct 2021 03:35:30 -0700 (PDT)
-Received: by mail-qk1-x734.google.com with SMTP id bj31so11357519qkb.2
-        for <fstests@vger.kernel.org>; Mon, 25 Oct 2021 03:35:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=+4rCop3n3GBW7j7hetL/Hu4npvlr9cPmXrrgFTZYpTY=;
-        b=CMJQLGT/GkAWifLuOdbVKGZ0QYMBA3/Sf6izKKmcIHajaI+RE6p3XklOLgK/XifvbR
-         m8pjmZoZYjRUb6EAqwIgu9teJ6MxlGV3cUEwi9xxNZmLRhFhBhRsZzh0trm0rhCqgw2M
-         1kVqd/bUZZwLQFLPvaIcIaOqufmHWRCDcIDzREX22VdaLKysvWeJLtRs/wjIwj8sZQNB
-         xccgeBH8SnGQLKStU/tRRjxi7Xot+l+LFizYM005KygkR4gjus7SvHDg/sbaerK6ZGWr
-         A9TpeRyhipvp/nTCAEl9qLa58rFVfLk81nrKC3w5Q+/33iHKdssqwqZzNIgK2KO1R1S8
-         S/fg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=+4rCop3n3GBW7j7hetL/Hu4npvlr9cPmXrrgFTZYpTY=;
-        b=Zn85QcOULZVqLKfMSwX12bPoMSvVL9YyPftw5y58cGFQcCpyqTjzDJvd2YwhxwhJXs
-         CRD8QNNqmVVlBpQYFx8sw/iPO9ljb++fZ9mTMsyA8PUkCVor1YArDkkfGO9D9vtQHeXH
-         ceN59IXPwU7X6DHnrPuINfYuiEzWh9hp2cUf62NQamcztfQXCpdO3dnq/noKesarFpfm
-         PdtPxocVsUXQ4Zh46iD71YByTHOISfMr9REKu5Zqr/0wFpXXjgPA33Cbnn4kyNuAvmW3
-         00bylywoLVe2VRCFQtNV85/tlI8Moh5SxEwlrG8kIHHG3NDBsiKhf4N/JldVE57yQmsB
-         JC3Q==
-X-Gm-Message-State: AOAM531kxRkRTSixCXju/l0tRTLgDY6yWuv5Q/2sBRUawr8Sppp7T+1J
-        P3QAiPw2SA8OVDf7R65sq48+k8vB1Fe4xJgFw/S4yqBj
-X-Google-Smtp-Source: ABdhPJyHuY8wr6uiGi7ifkOQ3Rgc34sXLb6hodQSVfEQgff8G55J1reX8Su6uGe9T9wYgWPJCqQyN6skvxlS1kCB43M=
-X-Received: by 2002:a37:8287:: with SMTP id e129mr12908163qkd.415.1635158130161;
- Mon, 25 Oct 2021 03:35:30 -0700 (PDT)
+        Mon, 25 Oct 2021 09:03:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:28925 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233387AbhJYNDV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Oct 2021 09:03:21 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1635166859;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=ZxtG0q9XZ9CoVKCRbL+ehUfbFkmT7EaPte/qKWaXens=;
+        b=A5OtJooOc1DndDw4f+UKF014u+fT9rviuEzQYH3uehkcjYq4s113efMevNOZWNjTeRIWmN
+        1asQKwwE0qd+BBK575BFxrSFMHCQxrT0kcBAREcqSSUJfE89deMDZZVFeEckxLhs7vgpZB
+        rg0UxGgGzVr7LIt6LYTK/F/4tDss3Lg=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-481-u2Egelu9NOG4NJo89lyOnA-1; Mon, 25 Oct 2021 09:00:56 -0400
+X-MC-Unique: u2Egelu9NOG4NJo89lyOnA-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D61C5100F943;
+        Mon, 25 Oct 2021 13:00:54 +0000 (UTC)
+Received: from bfoster.redhat.com (unknown [10.22.8.224])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 45AC8171FF;
+        Mon, 25 Oct 2021 13:00:54 +0000 (UTC)
+From:   Brian Foster <bfoster@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH v2] tests/xfs: test COW writeback failure when overlapping non-shared blocks
+Date:   Mon, 25 Oct 2021 09:00:53 -0400
+Message-Id: <20211025130053.8343-1-bfoster@redhat.com>
 MIME-Version: 1.0
-References: <20211025032256.61557-1-yifeix.zhu@intel.com>
-In-Reply-To: <20211025032256.61557-1-yifeix.zhu@intel.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 25 Oct 2021 11:34:54 +0100
-Message-ID: <CAL3q7H4qhjMyiQ4hwX505V=U4wnkb-V2pEANhZYE2M4=FjArrg@mail.gmail.com>
-Subject: Re: [PATCH v2 xfstests-dev] tests/btrfs/012: check size after mounted
-To:     Zhu Yifei <yifeix.zhu@intel.com>
-Cc:     Eryu <guan@eryu.me>, fstests <fstests@vger.kernel.org>,
-        Philip Li <philip.li@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 25, 2021 at 4:26 AM Zhu Yifei <yifeix.zhu@intel.com> wrote:
->
-> move '_require_fs_space'  after mounted.
->
-> =3D=3Dbefore patch=3D=3D
-> btrfs/012       [not run] This test requires at least 0GB free on /fs/scr=
-atch to run
->
-> =3D=3Dafter patch=3D=3D
-> btrfs/012 189s ...  194s
-> Ran: btrfs/012
-> Passed all 1 tests
->
-> Signed-off-by: Zhu Yifei <yifeix.zhu@intel.com>
+Test that COW writeback that overlaps non-shared delalloc blocks
+does not leave around stale delalloc blocks on I/O failure. This
+triggers assert failures and free space accounting corruption on
+XFS.
 
-Looks good,
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+v2:
+- Explicitly set COW extent size hint.
+- Move to tests/xfs.
+- Various minor cleanups.
+v1: https://lore.kernel.org/fstests/20211021163959.1887011-1-bfoster@redhat.com/
 
-In the future, for any changes related to btrfs tests, can you also
-please cc linux-btrfs@vger.kernel.org?
+ tests/xfs/999     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |  2 ++
+ 2 files changed, 64 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
 
-Thanks.
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 00000000..f27972bc
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 999
++#
++# Test that COW writeback that overlaps non-shared delalloc blocks does not
++# leave around stale delalloc blocks on I/O failure. This triggers assert
++# failures and free space accounting corruption on XFS.
++#
++. ./common/preamble
++_begin_fstest auto quick clone
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++. ./common/reflink
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs xfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_io_command "cowextsize"
++_require_flakey_with_error_writes
++
++_scratch_mkfs >> $seqres.full
++_init_flakey
++_mount_flakey
++
++blksz=$(_get_file_block_size $SCRATCH_MNT)
++
++# Set the COW extent size hint to guarantee COW fork preallocation occurs over a
++# bordering block offset.
++$XFS_IO_PROG -c "cowextsize $((blksz * 2))" $SCRATCH_MNT >> $seqres.full
++
++# create two files that share a single block
++$XFS_IO_PROG -fc "pwrite $blksz $blksz" $SCRATCH_MNT/file1 >> $seqres.full
++_cp_reflink $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
++
++# Perform a buffered write across the shared and non-shared blocks. On XFS, this
++# creates a COW fork extent that covers the shared block as well as the just
++# created non-shared delalloc block. Fail the writeback to verify that all
++# delayed allocation is cleaned up properly.
++_load_flakey_table $FLAKEY_ERROR_WRITES
++$XFS_IO_PROG -c "pwrite 0 $((blksz * 2))" \
++	-c fsync $SCRATCH_MNT/file2 >> $seqres.full
++_load_flakey_table $FLAKEY_ALLOW_WRITES
++
++# Try a post-fail reflink and then unmount. Both of these are known to produce
++# errors and/or assert failures on XFS if we trip over a stale delalloc block.
++_cp_reflink $SCRATCH_MNT/file2 $SCRATCH_MNT/file3
++_unmount_flakey
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 00000000..88b69c4c
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++fsync: Input/output error
+-- 
+2.31.1
 
-> ---
->  tests/btrfs/012 | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> index 3040a655..29552b14 100755
-> --- a/tests/btrfs/012
-> +++ b/tests/btrfs/012
-> @@ -31,8 +31,6 @@ _require_command "$E2FSCK_PROG" e2fsck
->  # ext4 does not support zoned block device
->  _require_non_zoned_device "${SCRATCH_DEV}"
->
-> -_require_fs_space $SCRATCH_MNT $(du -s /lib/modules/`uname -r` | ${AWK_P=
-ROG} '{print $1}')
-> -
->  BLOCK_SIZE=3D`_get_block_size $TEST_DIR`
->
->  # Create & populate an ext4 filesystem
-> @@ -41,6 +39,8 @@ $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seqre=
-s.full 2>&1 || \
->  # Manual mount so we don't use -t btrfs or selinux context
->  mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
->
-> +_require_fs_space $SCRATCH_MNT $(du -s /lib/modules/`uname -r` | ${AWK_P=
-ROG} '{print $1}')
-> +
->  cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT
->  _scratch_unmount
->
-> --
-> 2.20.1
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
