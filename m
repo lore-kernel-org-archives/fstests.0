@@ -2,170 +2,93 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F9E6C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 15:04:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E43A0C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 20:17:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7B37661038
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 15:04:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC3CF61106
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 20:17:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230451AbhJ1PHY (ORCPT
+        id S230526AbhJ1UUH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Oct 2021 11:07:24 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33548 "EHLO mail.kernel.org"
+        Thu, 28 Oct 2021 16:20:07 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58368 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230406AbhJ1PHX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Oct 2021 11:07:23 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D301F60C51;
-        Thu, 28 Oct 2021 15:04:55 +0000 (UTC)
+        id S230323AbhJ1UUH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Oct 2021 16:20:07 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id AB58F61039;
+        Thu, 28 Oct 2021 20:17:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1635433496;
-        bh=xgRQHkU1FZq417TPUbX+pNTNoWsYhTW44LhIhUfRsZE=;
-        h=From:To:Cc:Subject:Date:From;
-        b=frWgzlm0PIHcL+kqPsPibDXLbHbVCnM0kzJvhDyQRPupCa8sBGSJgyPffcoeADHkt
-         RyD/pTrQUp67BFAstyNWuGkNLZuvp1PMqiB19LB2afkOs9eMFfx/vCO7A+DzYaiwey
-         zx81/nPZP4F4StY931EyQ4vYbNRGr+1Cp52Mhc8oXPbMlo7YiwORKZ+FHWqaaCRANZ
-         1PUapGfwuIUzb2mH7doAJKwzcHae+KW8mKhjSRMJybEnZon4UpXeaHS9NxugKRttkl
-         l9Hz7NBeyMnGtOOkboaa/aKdnGHXu8Xcoov1XEd79At/qDDRY41bOoDt2W+165y3d+
-         aVcDg2VbNgYIQ==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test direct IO write on NOCOW file when low on unallocated space
-Date:   Thu, 28 Oct 2021 16:04:33 +0100
-Message-Id: <c55a58aaab2ad3192166d334b7d72638b642713b.1635432856.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.33.0
+        s=k20201202; t=1635452259;
+        bh=zGAi+YEhMu16ZU3drkHCF97eDaflWxqwtB9a+yJ9xQ4=;
+        h=Date:From:To:Cc:Subject:From;
+        b=c2Z8jAsISArgkMWVYcVDwArDCaJL8LsYd39jPjce8ISfzCORvJ+xg8pxgMPW+VLsM
+         4i392aUZIqRMVbuAjsEPGtq+QJRrhLX3QNxTOBgsljaRCqttvv8WPuSO9lVyfDHLq6
+         B6dT3bl+/ZN0QxBsNtiV0PtWJW/r6ER46BZJ2bfJm+AOf2jgYoGuvLeRW36USQ+qcx
+         sn4kR4p6X9/VeZ865ryuHdY5ShtrBaT6kP37E8hjNqtraj+sdFuAQR4QOsHQ8L1Lhc
+         ZJxhzGC7N7/ATG/8BbD9d0zk6VVhPbfF2SUMBhniftecYvf+HzNdvCqAvlqiqhu0b3
+         0bhSMpHXVZkkA==
+Date:   Thu, 28 Oct 2021 13:17:39 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Brian Foster <bfoster@redhat.com>,
+        fstests <fstests@vger.kernel.org>
+Subject: [PATCH v2] dmflakey: fix environment-destroying mistakes in
+ _cleanup_flakey
+Message-ID: <20211028201739.GQ24282@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+From: Darrick J. Wong <djwong@kernel.org>
 
-Test that if we write to a range of a NOCOW file that has allocated
-extents and there is not enough available free space for allocating new
-data extents, the write succeeds. Test for direct IO and buffered IO
-writes.
+_cleanup_flakey can be called even when _init_flakey hasn't been called.
+For example, _require_flakey_with_error_writes does this.
 
-This currently fails on btrfs for the direct IO write scenario, only, but
-while at it also test a buffered IO write, to help prevent regressions in
-the future.
+Unfortunately, the patch to add support for external logs and rt devices
+will "reset" the SCRATCH_LOGDEV/SCRATCH_RTDEV variables without noticing
+that _init_flakey hasn't been called yet.  When this happens, those two
+variables will be set to the empty string, with the result that the rest
+of the test doesn't use those devices.
 
-The patch that fixes the direct IO case has the following subject:
+To fix this, only reset SCRATCH_LOGDEV/RTDEV to the "NON_FLAKEY" value
+if we actually set one.
 
- "btrfs: fix ENOSPC failure when attempting direct IO write into NOCOW range"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Fixes: 9c1f3149 ("dmflakey: support external log and realtime devices")
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 ---
- tests/btrfs/250     | 73 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/250.out | 18 +++++++++++
- 2 files changed, 91 insertions(+)
- create mode 100755 tests/btrfs/250
- create mode 100644 tests/btrfs/250.out
+v2: Add review, actually send to list this time
+v1: Note: I observed this problem when running Brian Foster's new test
+    "[PATCH v2] tests/xfs: test COW writeback failure when overlapping
+     non-shared blocks" with an external xfs log.
+---
+ common/dmflakey |   12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/tests/btrfs/250 b/tests/btrfs/250
-new file mode 100755
-index 00000000..fdfbafad
---- /dev/null
-+++ b/tests/btrfs/250
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 250
-+#
-+# Test that if we write to a range of a NOCOW file that has allocated extents
-+# and there is not enough available free space for allocating new data extents,
-+# the write succeeds. Test for direct IO and buffered IO writes.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick enospc
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_require_scratch
-+_require_chattr C
-+_require_odirect
-+
-+# Use a small fixed size filesystem so that it's quick to fill it up.
-+# Make sure the fs size is > 256M, so that the mixed block groups feature is
-+# not enabled by _scatch_mkfs_sized(), because we later want to not have more
-+# space available for allocating data extents but still have enough metadata
-+# space free for the file writes.
-+fs_size=$((1024 * 1024 * 1024)) # 1G
-+_scratch_mkfs_sized $fs_size >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create our test file with the NOCOW attribute set.
-+touch $SCRATCH_MNT/foobar
-+$CHATTR_PROG +C $SCRATCH_MNT/foobar
-+
-+# Now fill in all unallocated space with data for our test file.
-+# This will allocate a data block group that will be full and leave no (or a
-+# very small amount of) unallocated space in the device, so that it will not be
-+# possible to allocate a new block group later.
-+echo "Creating test file with initial data..."
-+$XFS_IO_PROG -c "pwrite -S 0xab -b 1M 0 900M" $SCRATCH_MNT/foobar | _filter_xfs_io
-+
-+# Now try a direct IO write against file range [0, 10M[.
-+# This should succeed since this is a NOCOW file and an extent for the range was
-+# previously allocated.
-+echo "Trying direct IO write over allocated space..."
-+$XFS_IO_PROG -d -c "pwrite -S 0xcd -b 10M 0 10M" $SCRATCH_MNT/foobar | _filter_xfs_io
-+
-+# Now try a buffered IO write against file range [10M, 20M[.
-+# This should also succeed since this is a NOCOW file and an extent for the range
-+# was previously allocated.
-+echo "Trying buffered IO write over allocated space..."
-+$XFS_IO_PROG -c "pwrite -S 0xef -b 10M 10M 10M" $SCRATCH_MNT/foobar | _filter_xfs_io
-+
-+# Unmount and mount again the filesystem to clear any data from our file from the
-+# page cache.
-+_scratch_cycle_mount
-+
-+# Now read the file and verify that all the writes we did before were durably
-+# persisted.
-+echo "File data after mounting again the filesystem:"
-+od -A d -t x1 $SCRATCH_MNT/foobar
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/250.out b/tests/btrfs/250.out
-new file mode 100644
-index 00000000..3912b70b
---- /dev/null
-+++ b/tests/btrfs/250.out
-@@ -0,0 +1,18 @@
-+QA output created by 250
-+Creating test file with initial data...
-+wrote 943718400/943718400 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Trying direct IO write over allocated space...
-+wrote 10485760/10485760 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Trying buffered IO write over allocated space...
-+wrote 10485760/10485760 bytes at offset 10485760
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File data after mounting again the filesystem:
-+0000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
-+*
-+10485760 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef
-+*
-+20971520 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-+*
-+943718400
--- 
-2.33.0
-
+diff --git a/common/dmflakey b/common/dmflakey
+index af4371a3..52da3b10 100644
+--- a/common/dmflakey
++++ b/common/dmflakey
+@@ -84,11 +84,15 @@ _cleanup_flakey()
+ 	test -n "$NON_FLAKEY_LOGDEV" && _dmsetup_remove flakey-logtest
+ 	test -n "$NON_FLAKEY_RTDEV" && _dmsetup_remove flakey-rttest
+ 
+-	SCRATCH_LOGDEV="$NON_FLAKEY_LOGDEV"
+-	unset NON_FLAKEY_LOGDEV
++	if [ -n "$NON_FLAKEY_LOGDEV" ]; then
++		SCRATCH_LOGDEV="$NON_FLAKEY_LOGDEV"
++		unset NON_FLAKEY_LOGDEV
++	fi
+ 
+-	SCRATCH_RTDEV="$NON_FLAKEY_RTDEV"
+-	unset NON_FLAKEY_RTDEV
++	if [ -n "$NON_FLAKEY_RTDEV" ]; then
++		SCRATCH_RTDEV="$NON_FLAKEY_RTDEV"
++		unset NON_FLAKEY_RTDEV
++	fi
+ }
+ 
+ # _load_flakey_table <table> [lockfs]
