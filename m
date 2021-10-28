@@ -2,108 +2,170 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC4C8C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 09:27:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F9E6C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 15:04:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6E1F61106
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 09:27:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B37661038
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Oct 2021 15:04:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230088AbhJ1J30 (ORCPT
+        id S230451AbhJ1PHY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Oct 2021 05:29:26 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:51520 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230110AbhJ1J3Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Oct 2021 05:29:24 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 4A0EA21965;
-        Thu, 28 Oct 2021 09:26:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1635413217; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=sARH1+K3kxCtvvc+56p5xImIuJXLsbAfH6YpMdCUwDA=;
-        b=LugoIGEpku6UAKGvTzmHgT6Sgjyz+EOf43gHqWEoj1Hu+AWfa+68dXBJbPOZQ9KWcuTqYr
-        SaWVMhko/nzy7bipSojiHMNrJbsilG4hPty9sYgvJW6iieeqi2yCTQdRu2N1/pkEUrzUY6
-        VsiP8hzzsVYk5FsCN3jXiQ4moBpiVEw=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id EC2A514093;
-        Thu, 28 Oct 2021 09:26:56 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id XI8RN+BsemFHXwAAMHmgww
-        (envelope-from <nborisov@suse.com>); Thu, 28 Oct 2021 09:26:56 +0000
-Subject: Re: [PATCH] btrfs: Test proper interaction between skip_balance and
- paused balance
-To:     fdmanana@gmail.com
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-References: <20211027135754.20101-1-nborisov@suse.com>
- <CAL3q7H66tOAu0qANiwimWcDZwhgMKQpO46qz+uR1FaF61Y8A0g@mail.gmail.com>
- <6f63dd3a-982f-6875-2e47-a091f8d8d96a@suse.com>
- <CAL3q7H6iZ8-YZPUmRsbvnaFwLA+NzU8-HBGNiT3GW618xNnRUA@mail.gmail.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Message-ID: <7d505716-f008-b508-7c47-654873dd4c79@suse.com>
-Date:   Thu, 28 Oct 2021 12:26:56 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        Thu, 28 Oct 2021 11:07:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:33548 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230406AbhJ1PHX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Oct 2021 11:07:23 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id D301F60C51;
+        Thu, 28 Oct 2021 15:04:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1635433496;
+        bh=xgRQHkU1FZq417TPUbX+pNTNoWsYhTW44LhIhUfRsZE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=frWgzlm0PIHcL+kqPsPibDXLbHbVCnM0kzJvhDyQRPupCa8sBGSJgyPffcoeADHkt
+         RyD/pTrQUp67BFAstyNWuGkNLZuvp1PMqiB19LB2afkOs9eMFfx/vCO7A+DzYaiwey
+         zx81/nPZP4F4StY931EyQ4vYbNRGr+1Cp52Mhc8oXPbMlo7YiwORKZ+FHWqaaCRANZ
+         1PUapGfwuIUzb2mH7doAJKwzcHae+KW8mKhjSRMJybEnZon4UpXeaHS9NxugKRttkl
+         l9Hz7NBeyMnGtOOkboaa/aKdnGHXu8Xcoov1XEd79At/qDDRY41bOoDt2W+165y3d+
+         aVcDg2VbNgYIQ==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test direct IO write on NOCOW file when low on unallocated space
+Date:   Thu, 28 Oct 2021 16:04:33 +0100
+Message-Id: <c55a58aaab2ad3192166d334b7d72638b642713b.1635432856.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H6iZ8-YZPUmRsbvnaFwLA+NzU8-HBGNiT3GW618xNnRUA@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Filipe Manana <fdmanana@suse.com>
 
+Test that if we write to a range of a NOCOW file that has allocated
+extents and there is not enough available free space for allocating new
+data extents, the write succeeds. Test for direct IO and buffered IO
+writes.
 
-On 28.10.21 г. 12:22, Filipe Manana wrote:
-> On Thu, Oct 28, 2021 at 10:17 AM Nikolay Borisov <nborisov@suse.com> wrote:
->>
->>
->>
->> On 28.10.21 г. 12:01, Filipe Manana wrote:
->>> On Wed, Oct 27, 2021 at 10:25 PM Nikolay Borisov <nborisov@suse.com> wrote:
->>
->> <snip>
->>
->>>> +if [[ ! -e /sys/fs/btrfs/$uuid/exclusive_operation ]]; then
->>>> +       _notrun "Requires btrfs exclusive operation support"
->>>> +fi
->>>
->>> Why is it required to have the sysfs export file for the exclusive operations?
->>> The test doesn't use the file at all, and exclusive operations exist
->>> for many years, unlike the sysfs file which is recent.
->>
->> Because the report mentioned the following error message being printed:
->>
->> ERROR: unable to start device add, another exclusive operation 'balance'
->> in progress
->>
->> And this comes from check_running_fs_exclop which got added as part of
->> the sysfs interface for exclusive ops.
-> 
-> Ok, so check_running_fs_exclop() is a btrfs-progs function.
-> 
-> But even before that, and the sysfs file was added, it was not
-> possible to do a device add while there's stopped balance, no?
+This currently fails on btrfs for the direct IO write scenario, only, but
+while at it also test a buffered IO write, to help prevent regressions in
+the future.
 
-Most probably yes. Ok I will remove this check then.
+The patch that fixes the direct IO case has the following subject:
 
+ "btrfs: fix ENOSPC failure when attempting direct IO write into NOCOW range"
 
-> 
->>
->>>
->>
->> <snip>
-> 
-> 
-> 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/250     | 73 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/250.out | 18 +++++++++++
+ 2 files changed, 91 insertions(+)
+ create mode 100755 tests/btrfs/250
+ create mode 100644 tests/btrfs/250.out
+
+diff --git a/tests/btrfs/250 b/tests/btrfs/250
+new file mode 100755
+index 00000000..fdfbafad
+--- /dev/null
++++ b/tests/btrfs/250
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 250
++#
++# Test that if we write to a range of a NOCOW file that has allocated extents
++# and there is not enough available free space for allocating new data extents,
++# the write succeeds. Test for direct IO and buffered IO writes.
++#
++. ./common/preamble
++_begin_fstest auto quick enospc
++
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs btrfs
++_require_scratch
++_require_chattr C
++_require_odirect
++
++# Use a small fixed size filesystem so that it's quick to fill it up.
++# Make sure the fs size is > 256M, so that the mixed block groups feature is
++# not enabled by _scatch_mkfs_sized(), because we later want to not have more
++# space available for allocating data extents but still have enough metadata
++# space free for the file writes.
++fs_size=$((1024 * 1024 * 1024)) # 1G
++_scratch_mkfs_sized $fs_size >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test file with the NOCOW attribute set.
++touch $SCRATCH_MNT/foobar
++$CHATTR_PROG +C $SCRATCH_MNT/foobar
++
++# Now fill in all unallocated space with data for our test file.
++# This will allocate a data block group that will be full and leave no (or a
++# very small amount of) unallocated space in the device, so that it will not be
++# possible to allocate a new block group later.
++echo "Creating test file with initial data..."
++$XFS_IO_PROG -c "pwrite -S 0xab -b 1M 0 900M" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now try a direct IO write against file range [0, 10M[.
++# This should succeed since this is a NOCOW file and an extent for the range was
++# previously allocated.
++echo "Trying direct IO write over allocated space..."
++$XFS_IO_PROG -d -c "pwrite -S 0xcd -b 10M 0 10M" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now try a buffered IO write against file range [10M, 20M[.
++# This should also succeed since this is a NOCOW file and an extent for the range
++# was previously allocated.
++echo "Trying buffered IO write over allocated space..."
++$XFS_IO_PROG -c "pwrite -S 0xef -b 10M 10M 10M" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Unmount and mount again the filesystem to clear any data from our file from the
++# page cache.
++_scratch_cycle_mount
++
++# Now read the file and verify that all the writes we did before were durably
++# persisted.
++echo "File data after mounting again the filesystem:"
++od -A d -t x1 $SCRATCH_MNT/foobar
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/250.out b/tests/btrfs/250.out
+new file mode 100644
+index 00000000..3912b70b
+--- /dev/null
++++ b/tests/btrfs/250.out
+@@ -0,0 +1,18 @@
++QA output created by 250
++Creating test file with initial data...
++wrote 943718400/943718400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Trying direct IO write over allocated space...
++wrote 10485760/10485760 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Trying buffered IO write over allocated space...
++wrote 10485760/10485760 bytes at offset 10485760
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File data after mounting again the filesystem:
++0000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
++*
++10485760 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef
++*
++20971520 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
++*
++943718400
+-- 
+2.33.0
+
