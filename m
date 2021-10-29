@@ -2,489 +2,552 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 884E5C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 15:48:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E979EC433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 18:48:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55CCE61183
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 15:48:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC1E760F4B
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 18:48:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229607AbhJ2PvI (ORCPT
+        id S230249AbhJ2Sui (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Oct 2021 11:51:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51400 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229527AbhJ2PvH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 29 Oct 2021 11:51:07 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0E94D60F9C;
-        Fri, 29 Oct 2021 15:48:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1635522519;
-        bh=FyENcjSVUo6+2Xnbq2uR2yj9fgaufDpbJmK1Hnb14gM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=f3ESkUMZymD4M2T36UQbn+SWhEKc2twG4eNurZHpU2z+Cy+tX5g+e+EJuPyOCZqEm
-         cReMxL3Bd4z8MHdFX0OcsHE/tZ5zqMZ5NfT3qX4bOahOfG1c3CHKQXC+6R4wBO8UDS
-         pkznb/mNU6Eb4KoyE/vNZeX0t+ikhdN3/3yWnhGW0MDLcr7c0dQyTMElr53/C/tLXM
-         1GEedSL3M0ziJ38wk7LmTP7vF/1PpZQzX5FIBXeBXT17fjZZo/VKLXt6qnljVCmpxT
-         VRc9H1sAuRlvqz23rIhLSFdD18QFAcoJfT42VBwIuPINbXizVuc4D5SmrjamYZIEtE
-         H4r8gzP7kUkIA==
-Date:   Fri, 29 Oct 2021 08:48:38 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 1/3] generic/138,139,140: fix the name for check file
-Message-ID: <20211029154838.GT24282@magnolia>
-References: <20211029065943.3556529-1-ruansy.fnst@fujitsu.com>
- <20211029065943.3556529-2-ruansy.fnst@fujitsu.com>
+        Fri, 29 Oct 2021 14:50:38 -0400
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:58504 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S230163AbhJ2Sui (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Oct 2021 14:50:38 -0400
+Received: from pps.filterd (m0001303.ppops.net [127.0.0.1])
+        by m0001303.ppops.net (8.16.1.2/8.16.1.2) with SMTP id 19THwQvp003698
+        for <fstests@vger.kernel.org>; Fri, 29 Oct 2021 11:48:09 -0700
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=facebook; bh=8dFH/NdS0RxWsBTwJz1DfxDRW3LptTAI0Jp2eLObE8o=;
+ b=oFz2LKXd5uK6jbQQ9WvRmJXFH2R++nWFqso28no4B1rAqyZg4A2Uc5kFxQ+knOd4wAAf
+ svuBU/YGk0bV+BEbIDO5MUzenTIIcfufeB/sMgzQscPgP15AacnMIag60MwthmBgeaEJ
+ LIh+soFeVYK7nSnXltnnL2niEKZ1CR3NeUk= 
+Received: from mail.thefacebook.com ([163.114.132.120])
+        by m0001303.ppops.net with ESMTP id 3c0b94nwfp-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+        for <fstests@vger.kernel.org>; Fri, 29 Oct 2021 11:47:55 -0700
+Received: from intmgw001.05.ash7.facebook.com (2620:10d:c085:208::f) by
+ mail.thefacebook.com (2620:10d:c085:11d::5) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.14; Fri, 29 Oct 2021 11:42:48 -0700
+Received: by devvm225.atn0.facebook.com (Postfix, from userid 425415)
+        id 89AC45BCDAB1; Fri, 29 Oct 2021 11:42:47 -0700 (PDT)
+From:   Stefan Roesch <shr@fb.com>
+To:     <fstests@vger.kernel.org>, <linux-btrfs@vger.kernel.org>,
+        <kernel-team@fb.com>
+CC:     <shr@fb.com>
+Subject: [PATCH v3] btrfs: Add new test for setting the chunk size.
+Date:   Fri, 29 Oct 2021 11:42:45 -0700
+Message-ID: <20211029184245.3623973-1-shr@fb.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211029065943.3556529-2-ruansy.fnst@fujitsu.com>
+Content-Transfer-Encoding: quoted-printable
+X-FB-Internal: Safe
+Content-Type: text/plain
+X-FB-Source: Intern
+X-Proofpoint-GUID: -D9L1sb0UsgbcJD2Ie-qtBM42-t9xnSS
+X-Proofpoint-ORIG-GUID: -D9L1sb0UsgbcJD2Ie-qtBM42-t9xnSS
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
+ definitions=2021-10-29_04,2021-10-29_01,2020-04-07_01
+X-Proofpoint-Spam-Details: rule=fb_default_notspam policy=fb_default score=0 mlxscore=0 suspectscore=0
+ priorityscore=1501 mlxlogscore=999 phishscore=0 bulkscore=0 clxscore=1015
+ spamscore=0 impostorscore=0 lowpriorityscore=0 adultscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2110150000
+ definitions=main-2110290103
+X-FB-Internal: deliver
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 29, 2021 at 02:59:41PM +0800, Shiyang Ruan wrote:
-> The original 'file3' is used to check if the result after operation on
-> file2 is correct.  So, rename it to be 'file2.chk' to make it easier to
-> understand.
-> 
-> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Summary:
 
-LGTM,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Add new testcase for testing the new btrfs sysfs knob to change the
+chunk size. The new knob uses /sys/fs/btrfs/<UUID>/allocation/<block
+type>/chunk_size.
 
---D
+The test case implements three different cases:
+- Test allocation with the default chunk size
+- Test allocation after increasing the chunk size
+- Test allocation when the free space is smaller than the chunk size.
 
-> ---
->  tests/generic/138     | 54 +++++++++++++++++++++----------------------
->  tests/generic/138.out |  8 +++----
->  tests/generic/139     | 54 +++++++++++++++++++++----------------------
->  tests/generic/139.out |  8 +++----
->  tests/generic/140     | 54 +++++++++++++++++++++----------------------
->  tests/generic/140.out |  8 +++----
->  6 files changed, 93 insertions(+), 93 deletions(-)
-> 
-> diff --git a/tests/generic/138 b/tests/generic/138
-> index 1037ed3e..d061ac34 100755
-> --- a/tests/generic/138
-> +++ b/tests/generic/138
-> @@ -35,37 +35,37 @@ echo "Create the original files"
->  blksz=65536
->  _pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file1 >> $seqres.full
->  _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-> -_pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file3 >> $seqres.full
-> +_pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file2.chk >> $seqres.full
->  _test_cycle_mount
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_test_dir
->  md5sum $testdir/file2 | _filter_test_dir
-> -md5sum $testdir/file3 | _filter_test_dir
-> +md5sum $testdir/file2.chk | _filter_test_dir
->  
-> -cmp -s $testdir/file1 $testdir/file2 || echo "Files 1-2 do not match"
-> -cmp -s $testdir/file1 $testdir/file3 || echo "Files 1-3 do not match"
-> -cmp -s $testdir/file2 $testdir/file3 || echo "Files 2-3 do not match"
-> +cmp -s $testdir/file1 $testdir/file2 || echo "file1 and file2 do not match"
-> +cmp -s $testdir/file1 $testdir/file2.chk || echo "file1 and file2.chk do not match"
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file1 and file2.chk do not match"
->  
->  echo "pagecache CoW the second file"
->  _pwrite_byte 0x62 0 17 $testdir/file2 >> $seqres.full
-> -_pwrite_byte 0x62 0 17 $testdir/file3 >> $seqres.full
-> +_pwrite_byte 0x62 0 17 $testdir/file2.chk >> $seqres.full
->  
->  _pwrite_byte 0x62 $((blksz * 16 - 34)) 17 $testdir/file2 >> $seqres.full
-> -_pwrite_byte 0x62 $((blksz * 16 - 34)) 17 $testdir/file3 >> $seqres.full
-> +_pwrite_byte 0x62 $((blksz * 16 - 34)) 17 $testdir/file2.chk >> $seqres.full
->  
->  _pwrite_byte 0x62 $((blksz * 48 - 8)) 17 $testdir/file2 >> $seqres.full
-> -_pwrite_byte 0x62 $((blksz * 48 - 8)) 17 $testdir/file3 >> $seqres.full
-> +_pwrite_byte 0x62 $((blksz * 48 - 8)) 17 $testdir/file2.chk >> $seqres.full
->  _test_cycle_mount
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_test_dir
->  md5sum $testdir/file2 | _filter_test_dir
-> -md5sum $testdir/file3 | _filter_test_dir
-> +md5sum $testdir/file2.chk | _filter_test_dir
->  
-> -cmp -s $testdir/file1 $testdir/file2 || echo "Files 1-2 do not match (intentional)"
-> -cmp -s $testdir/file1 $testdir/file3 || echo "Files 1-3 do not match (intentional)"
-> -cmp -s $testdir/file2 $testdir/file3 || echo "Files 2-3 do not match"
-> +cmp -s $testdir/file1 $testdir/file2 || echo "file1 and file2 do not match (intentional)"
-> +cmp -s $testdir/file1 $testdir/file2.chk || echo "file1 and file2.chk do not match (intentional)"
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk do not match"
->  
->  echo "Compare the CoW'd section to the before file"
->  _compare_range $testdir/file1 0 $testdir/file2 0 17 \
-> @@ -80,47 +80,47 @@ _compare_range  $testdir/file1 $((blksz * 48 - 8)) \
->         || echo "End sections do not match (intentional)"
->  
->  echo "Compare the CoW'd section to the after file"
-> -_compare_range $testdir/file2 0 $testdir/file3 0 17 \
-> +_compare_range $testdir/file2 0 $testdir/file2.chk 0 17 \
->         || echo "Start sections do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16 - 34)) \
-> -		$testdir/file3 $((blksz * 16 - 34)) 17 \
-> +		$testdir/file2.chk $((blksz * 16 - 34)) 17 \
->         || echo "Middle sections do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 48 - 8)) \
-> -		$testdir/file3 $((blksz * 48 - 8)) 17 \
-> +		$testdir/file2.chk $((blksz * 48 - 8)) 17 \
->         || echo "End sections do not match"
->  
->  echo "Compare the not CoW'd sections"
->  _compare_range $testdir/file1 18 $testdir/file2 18 17 \
-> -       || echo "Start sections of 1-2 do not match"
-> +       || echo "Start sections of file1 and file2 do not match"
->  
-> -_compare_range $testdir/file2 18 $testdir/file3 18 17 \
-> -       || echo "Start sections of 2-3 do not match"
-> +_compare_range $testdir/file2 18 $testdir/file2.chk 18 17 \
-> +       || echo "Start sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 16 - 17)) \
->  		$testdir/file2 $((blksz * 16 - 17)) 82 \
-> -       || echo "Middle sections of 1-2 do not match"
-> +       || echo "Middle sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16 - 17)) \
-> -		$testdir/file3 $((blksz * 16 - 17)) 82 \
-> -       || echo "Middle sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 16 - 17)) 82 \
-> +       || echo "Middle sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 48 - 108)) \
->  		$testdir/file2 $((blksz * 48 - 108)) 100 \
-> -       || echo "End sections of 1-2 do not match"
-> +       || echo "End sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 48 - 108)) \
-> -		$testdir/file3 $((blksz * 48 - 108)) 100 \
-> -       || echo "End sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 48 - 108)) 100 \
-> +       || echo "End sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 14)) \
->  		$testdir/file2 $((blksz * 14)) $blksz \
-> -       || echo "Untouched sections of 1-2 do not match"
-> +       || echo "Untouched sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 14)) \
-> -		$testdir/file3 $((blksz * 14)) $blksz \
-> -       || echo "Untouched sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 14)) $blksz \
-> +       || echo "Untouched sections of file2 and file2.chk do not match"
->  
->  # success, all done
->  status=0
-> diff --git a/tests/generic/138.out b/tests/generic/138.out
-> index b0cafabe..60cd876e 100644
-> --- a/tests/generic/138.out
-> +++ b/tests/generic/138.out
-> @@ -3,14 +3,14 @@ Create the original files
->  Compare files
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-138/file1
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-138/file2
-> -60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-138/file3
-> +60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-138/file2.chk
->  pagecache CoW the second file
->  Compare files
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-138/file1
->  4a879c2f322121f6f4b8ebede1909a7c  TEST_DIR/test-138/file2
-> -4a879c2f322121f6f4b8ebede1909a7c  TEST_DIR/test-138/file3
-> -Files 1-2 do not match (intentional)
-> -Files 1-3 do not match (intentional)
-> +4a879c2f322121f6f4b8ebede1909a7c  TEST_DIR/test-138/file2.chk
-> +file1 and file2 do not match (intentional)
-> +file1 and file2.chk do not match (intentional)
->  Compare the CoW'd section to the before file
->  Start sections do not match (intentional)
->  Middle sections do not match (intentional)
-> diff --git a/tests/generic/139 b/tests/generic/139
-> index 6422f66a..0bbc222c 100755
-> --- a/tests/generic/139
-> +++ b/tests/generic/139
-> @@ -36,37 +36,37 @@ echo "Create the original files"
->  blksz=65536
->  _pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file1 >> $seqres.full
->  _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-> -_pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file3 >> $seqres.full
-> +_pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file2.chk >> $seqres.full
->  _test_cycle_mount
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_test_dir
->  md5sum $testdir/file2 | _filter_test_dir
-> -md5sum $testdir/file3 | _filter_test_dir
-> +md5sum $testdir/file2.chk | _filter_test_dir
->  
-> -cmp -s $testdir/file1 $testdir/file2 || echo "Files 1-2 should match"
-> -cmp -s $testdir/file1 $testdir/file3 || echo "Files 1-3 should match"
-> -cmp -s $testdir/file2 $testdir/file3 || echo "Files 2-3 should match"
-> +cmp -s $testdir/file1 $testdir/file2 || echo "file1 and file2 should match"
-> +cmp -s $testdir/file1 $testdir/file2.chk || echo "file1 and file2.chk should match"
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk should match"
->  
->  echo "directio CoW the second file"
->  _pwrite_byte 0x62 0 $blksz $testdir/file2 -d >> $seqres.full
-> -_pwrite_byte 0x62 0 $blksz $testdir/file3 -d >> $seqres.full
-> +_pwrite_byte 0x62 0 $blksz $testdir/file2.chk -d >> $seqres.full
->  
->  _pwrite_byte 0x62 $((blksz * 16 - 512)) 512 $testdir/file2 -d >> $seqres.full
-> -_pwrite_byte 0x62 $((blksz * 16 - 512)) 512 $testdir/file3 -d >> $seqres.full
-> +_pwrite_byte 0x62 $((blksz * 16 - 512)) 512 $testdir/file2.chk -d >> $seqres.full
->  
->  _pwrite_byte 0x62 $((blksz * 48)) $blksz $testdir/file2 -d >> $seqres.full
-> -_pwrite_byte 0x62 $((blksz * 48)) $blksz $testdir/file3 -d >> $seqres.full
-> +_pwrite_byte 0x62 $((blksz * 48)) $blksz $testdir/file2.chk -d >> $seqres.full
->  _test_cycle_mount
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_test_dir
->  md5sum $testdir/file2 | _filter_test_dir
-> -md5sum $testdir/file3 | _filter_test_dir
-> +md5sum $testdir/file2.chk | _filter_test_dir
->  
-> -cmp -s $testdir/file1 $testdir/file2 || echo "Files 1-2 should not match (intentional)"
-> -cmp -s $testdir/file1 $testdir/file3 || echo "Files 1-3 should not match (intentional)"
-> -cmp -s $testdir/file2 $testdir/file3 || echo "Files 2-3 should match"
-> +cmp -s $testdir/file1 $testdir/file2 || echo "file1 and file2 should not match (intentional)"
-> +cmp -s $testdir/file1 $testdir/file2.chk || echo "file1 and file2.chk should not match (intentional)"
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk should match"
->  
->  echo "Compare the CoW'd section to the before file"
->  _compare_range $testdir/file1 0 $testdir/file2 0 $blksz \
-> @@ -81,46 +81,46 @@ _compare_range  $testdir/file1 $((blksz * 48 - 512)) \
->         || echo "End sections do not match (intentional)"
->  
->  echo "Compare the CoW'd section to the after file"
-> -_compare_range $testdir/file2 0 $testdir/file3 0 $blksz \
-> +_compare_range $testdir/file2 0 $testdir/file2.chk 0 $blksz \
->         || echo "Start sections do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16 - 512)) \
-> -		$testdir/file3 $((blksz * 16 - 512)) 512 \
-> +		$testdir/file2.chk $((blksz * 16 - 512)) 512 \
->         || echo "Middle sections do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 48 - 512)) \
-> -		$testdir/file3 $((blksz * 48 - 512)) $blksz \
-> +		$testdir/file2.chk $((blksz * 48 - 512)) $blksz \
->         || echo "End sections do not match"
->  
->  echo "Compare the not CoW'd sections"
->  _compare_range $testdir/file1 $blksz $testdir/file2 $blksz 512 \
-> -       || echo "Start sections of 1-2 do not match"
-> -_compare_range $testdir/file2 $blksz $testdir/file3 $blksz 512 \
-> -       || echo "Start sections of 2-3 do not match"
-> +       || echo "Start sections of file1 and file2 do not match"
-> +_compare_range $testdir/file2 $blksz $testdir/file2.chk $blksz 512 \
-> +       || echo "Start sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 16 - 1024)) \
->  		$testdir/file2 $((blksz * 16 - 1024)) 512 \
-> -       || echo "Middle sections of 1-2 do not match"
-> +       || echo "Middle sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16 - 1024)) \
-> -		$testdir/file3 $((blksz * 16 - 1024)) 512 \
-> -       || echo "Middle sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 16 - 1024)) 512 \
-> +       || echo "Middle sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 48 - 1024)) \
->  		$testdir/file2 $((blksz * 48 - 1024)) 512 \
-> -       || echo "End sections of 1-2 do not match"
-> +       || echo "End sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 48 - 1024)) \
-> -		$testdir/file3 $((blksz * 48 - 1024)) 512 \
-> -       || echo "End sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 48 - 1024)) 512 \
-> +       || echo "End sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 16)) \
->  		$testdir/file2 $((blksz * 16)) 512 \
-> -       || echo "Untouched sections of 1-2 do not match"
-> +       || echo "Untouched sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16)) \
-> -		$testdir/file3 $((blksz * 16)) 512 \
-> -       || echo "Untouched sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 16)) 512 \
-> +       || echo "Untouched sections of file2 and file2.chk do not match"
->  
->  # success, all done
->  status=0
-> diff --git a/tests/generic/139.out b/tests/generic/139.out
-> index 28d04f5f..56d6c9f9 100644
-> --- a/tests/generic/139.out
-> +++ b/tests/generic/139.out
-> @@ -3,14 +3,14 @@ Create the original files
->  Compare files
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-139/file1
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-139/file2
-> -60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-139/file3
-> +60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-139/file2.chk
->  directio CoW the second file
->  Compare files
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-139/file1
->  ff5626fb6c71b242d6b1a43de25c9a85  TEST_DIR/test-139/file2
-> -ff5626fb6c71b242d6b1a43de25c9a85  TEST_DIR/test-139/file3
-> -Files 1-2 should not match (intentional)
-> -Files 1-3 should not match (intentional)
-> +ff5626fb6c71b242d6b1a43de25c9a85  TEST_DIR/test-139/file2.chk
-> +file1 and file2 should not match (intentional)
-> +file1 and file2.chk should not match (intentional)
->  Compare the CoW'd section to the before file
->  Start sections do not match (intentional)
->  Middle sections do not match (intentional)
-> diff --git a/tests/generic/140 b/tests/generic/140
-> index 6cba5791..52cf07dc 100755
-> --- a/tests/generic/140
-> +++ b/tests/generic/140
-> @@ -35,37 +35,37 @@ echo "Create the original files"
->  blksz=65536
->  _pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file1 >> $seqres.full
->  _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-> -_pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file3 >> $seqres.full
-> +_pwrite_byte 0x61 0 $((blksz * 48 - 3)) $testdir/file2.chk >> $seqres.full
->  _test_cycle_mount
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_test_dir
->  md5sum $testdir/file2 | _filter_test_dir
-> -md5sum $testdir/file3 | _filter_test_dir
-> +md5sum $testdir/file2.chk | _filter_test_dir
->  
-> -cmp -s $testdir/file1 $testdir/file2 || echo "Files 1-2 do not match"
-> -cmp -s $testdir/file1 $testdir/file3 || echo "Files 1-3 do not match"
-> -cmp -s $testdir/file2 $testdir/file3 || echo "Files 2-3 do not match"
-> +cmp -s $testdir/file1 $testdir/file2 || echo "file1 and file2 do not match"
-> +cmp -s $testdir/file1 $testdir/file2.chk || echo "file1 and file2.chk do not match"
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk do not match"
->  
->  echo "mmap CoW the second file"
->  _mwrite_byte 0x62 0 17 $((blksz * 48 - 3)) $testdir/file2 >> $seqres.full
-> -_mwrite_byte 0x62 0 17 $((blksz * 48 - 3)) $testdir/file3 >> $seqres.full
-> +_mwrite_byte 0x62 0 17 $((blksz * 48 - 3)) $testdir/file2.chk >> $seqres.full
->  
->  _mwrite_byte 0x62 $((blksz * 16 - 34)) 17 $((blksz * 48 - 3)) $testdir/file2 >> $seqres.full
-> -_mwrite_byte 0x62 $((blksz * 16 - 34)) 17 $((blksz * 48 - 3)) $testdir/file3 >> $seqres.full
-> +_mwrite_byte 0x62 $((blksz * 16 - 34)) 17 $((blksz * 48 - 3)) $testdir/file2.chk >> $seqres.full
->  
->  _mwrite_byte 0x62 $((blksz * 48 - 20)) 17 $((blksz * 48 - 3)) $testdir/file2 >> $seqres.full
-> -_mwrite_byte 0x62 $((blksz * 48 - 20)) 17 $((blksz * 48 - 3)) $testdir/file3 >> $seqres.full
-> +_mwrite_byte 0x62 $((blksz * 48 - 20)) 17 $((blksz * 48 - 3)) $testdir/file2.chk >> $seqres.full
->  _test_cycle_mount
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_test_dir
->  md5sum $testdir/file2 | _filter_test_dir
-> -md5sum $testdir/file3 | _filter_test_dir
-> +md5sum $testdir/file2.chk | _filter_test_dir
->  
-> -cmp -s $testdir/file1 $testdir/file2 || echo "Files 1-2 do not match (intentional)"
-> -cmp -s $testdir/file1 $testdir/file3 || echo "Files 1-3 do not match (intentional)"
-> -cmp -s $testdir/file2 $testdir/file3 || echo "Files 2-3 do not match"
-> +cmp -s $testdir/file1 $testdir/file2 || echo "file1 and file2 do not match (intentional)"
-> +cmp -s $testdir/file1 $testdir/file2.chk || echo "file1 and file2.chk do not match (intentional)"
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk do not match"
->  
->  echo "Compare the CoW'd section to the before file"
->  _compare_range $testdir/file1 0 $testdir/file2 0 17 \
-> @@ -80,47 +80,47 @@ _compare_range  $testdir/file1 $((blksz * 48 - 20)) \
->         || echo "End sections do not match (intentional)"
->  
->  echo "Compare the CoW'd section to the after file"
-> -_compare_range $testdir/file2 0 $testdir/file3 0 17 \
-> +_compare_range $testdir/file2 0 $testdir/file2.chk 0 17 \
->         || echo "Start sections do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16 - 34)) \
-> -		$testdir/file3 $((blksz * 16 - 34)) 17 \
-> +		$testdir/file2.chk $((blksz * 16 - 34)) 17 \
->         || echo "Middle sections do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 48 - 20)) \
-> -		$testdir/file3 $((blksz * 48 - 20)) 17 \
-> +		$testdir/file2.chk $((blksz * 48 - 20)) 17 \
->         || echo "End sections do not match"
->  
->  echo "Compare the not CoW'd sections"
->  _compare_range $testdir/file1 18 $testdir/file2 18 17 \
-> -       || echo "Start sections of 1-2 do not match"
-> +       || echo "Start sections of file1 and file2 do not match"
->  
-> -_compare_range $testdir/file2 18 $testdir/file3 18 17 \
-> -       || echo "Start sections of 2-3 do not match"
-> +_compare_range $testdir/file2 18 $testdir/file2.chk 18 17 \
-> +       || echo "Start sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 16 - 17)) \
->  		$testdir/file2 $((blksz * 16 - 17)) 82 \
-> -       || echo "Middle sections of 1-2 do not match"
-> +       || echo "Middle sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 16 - 17)) \
-> -		$testdir/file3 $((blksz * 16 - 17)) 82 \
-> -       || echo "Middle sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 16 - 17)) 82 \
-> +       || echo "Middle sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 48 - 120)) \
->  		$testdir/file2 $((blksz * 48 - 120)) 100 \
-> -       || echo "End sections of 1-2 do not match"
-> +       || echo "End sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 48 - 120)) \
-> -		$testdir/file3 $((blksz * 48 - 120)) 100 \
-> -       || echo "End sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 48 - 120)) 100 \
-> +       || echo "End sections of file2 and file2.chk do not match"
->  
->  _compare_range  $testdir/file1 $((blksz * 14)) \
->  		$testdir/file2 $((blksz * 14)) $blksz \
-> -       || echo "Untouched sections of 1-2 do not match"
-> +       || echo "Untouched sections of file1 and file2 do not match"
->  
->  _compare_range  $testdir/file2 $((blksz * 14)) \
-> -		$testdir/file3 $((blksz * 14)) $blksz \
-> -       || echo "Untouched sections of 2-3 do not match"
-> +		$testdir/file2.chk $((blksz * 14)) $blksz \
-> +       || echo "Untouched sections of file2 and file2.chk do not match"
->  
->  # success, all done
->  status=0
-> diff --git a/tests/generic/140.out b/tests/generic/140.out
-> index 51a5b854..89389001 100644
-> --- a/tests/generic/140.out
-> +++ b/tests/generic/140.out
-> @@ -3,14 +3,14 @@ Create the original files
->  Compare files
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-140/file1
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-140/file2
-> -60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-140/file3
-> +60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-140/file2.chk
->  mmap CoW the second file
->  Compare files
->  60ebe700450b6015c17fa15cacb9493b  TEST_DIR/test-140/file1
->  795ecfd281dbda4916431376228e4187  TEST_DIR/test-140/file2
-> -795ecfd281dbda4916431376228e4187  TEST_DIR/test-140/file3
-> -Files 1-2 do not match (intentional)
-> -Files 1-3 do not match (intentional)
-> +795ecfd281dbda4916431376228e4187  TEST_DIR/test-140/file2.chk
-> +file1 and file2 do not match (intentional)
-> +file1 and file2.chk do not match (intentional)
->  Compare the CoW'd section to the before file
->  Start sections do not match (intentional)
->  Middle sections do not match (intentional)
-> -- 
-> 2.33.0
-> 
-> 
-> 
+Note: this test needs to force the allocation of space. It uses the
+/sys/fs/btrfs/<UUID>/allocation/<block type>/force_chunk_alloc knob.
+
+Testing:
+The test has been run with volumes of different sizes.
+
+Signed-off-by: Stefan Roesch <shr@fb.com>
+---
+V3: - removed tests for system block type.
+    - added failure case for system block type.
+    - renamed stripe_size to chunk_size
+V2: - added new functions to common/btrfs and use them in the new test
+      - _require_btrfs_sysfs_attr - Make sure btrfs supports a sysfs
+        setting
+      - _get_btrfs_sysfs_attr - Read sysfs value
+      - _set_btrfs_sysfs_attr - Write sysfs value
+    - create file system of required size with _scratch_mkfs_sized
+    - use shortened error message
+    - Remove last logging message
+---
+ common/btrfs        |  73 ++++++++++++
+ tests/btrfs/248     | 284 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/248.out |  12 ++
+ 3 files changed, 369 insertions(+)
+ create mode 100755 tests/btrfs/248
+ create mode 100644 tests/btrfs/248.out
+
+diff --git a/common/btrfs b/common/btrfs
+index ac880bdd..759a0054 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -445,3 +445,76 @@ _scratch_btrfs_is_zoned()
+ 	[ `_zone_type ${SCRATCH_DEV}` !=3D "none" ] && return 0
+ 	return 1
+ }
++
++# Print the content of /sys/fs/btrfs/$UUID/$ATTR
++#
++# All arguments are necessary, and in this order:
++#  - mnt: mount point name, e.g. $SCRATCH_MNT
++#  - attr: path name under /sys/fs/btrfs/$uuid/$attr
++#
++# Usage example:
++#   _get_btrfs_sysfs_attr /mnt/scratch allocation/data/stripe_size
++_get_btrfs_sysfs_attr()
++{
++	local mnt=3D$1
++	local attr=3D$2
++
++	if [ ! -e "$mnt" -o -z "$attr" ];then
++		_fail "Usage: _get_btrfs_sysfs_attr <mounted_directory> <attr>"
++	fi
++
++	local uuid=3D$(findmnt -n -o UUID ${mnt})
++	cat /sys/fs/btrfs/${uuid}/${attr}
++}
++
++# Write "content" into /sys/fs/btrfs/$UUID/$ATTR
++#
++# All arguments are necessary, and in this order:
++#  - mnt: mount point name, e.g. $SCRATCH_MNT
++#  - attr: path name under /sys/fs/btrfs/$uuid/$attr
++#  - content: the content of $attr
++#
++# Usage example:
++#   _set_btrfs_sysfs_attr /mnt/scratch allocation/data/chunk_size
++_set_btrfs_sysfs_attr()
++{
++	local mnt=3D$1
++	shift
++	local attr=3D$1
++	shift
++	local content=3D"$*"
++
++	if [ ! -e "$mnt" -o -z "$attr" -o -z "$content" ];then
++		_fail "Usage: _set_btrfs_sysfs_attr <mounted_directory> <attr> <conten=
+t>"
++	fi
++
++	local uuid=3D$(findmnt -n -o UUID ${mnt})
++	echo "$content" > /sys/fs/btrfs/${uuid}/${attr} 2>&1
++	if [ $? -ne 0 ]; then
++		_log_err "_set_btrfs_sysfs_attr cannot write ${attr}"
++	fi
++}
++
++# Verify if the sysfs entry in /sys/fs/btrfs/$UUID/$ATTR exists
++#
++# All arguments are necessary, and in this order:
++#  - mnt: mount point name, e.g. $SCRATCH_MNT
++#  - attr: path name under /sys/fs/btrfs/$uuid/$attr
++#
++# Usage example:
++#   _require_btrfs_sysfs_attr /mnt/scratch allocation/data/chunk_size
++_require_btrfs_sysfs_attr()
++{
++	local mnt=3D$1
++	local attr=3D$2
++
++	if [ ! -e "$mnt" -o -z "$attr" ];then
++		_fail "Usage: _get_btrfs_sysfs_attr <mounted_directory> <attr>"
++	fi
++
++	local uuid=3D$(findmnt -n -o UUID ${mnt})
++  	if [[ ! -e  /sys/fs/btrfs/${uuid}/${attr} ]]; then
++			_notrun "Btrfs does not support sysfs $attr"
++	fi
++}
++
+diff --git a/tests/btrfs/248 b/tests/btrfs/248
+new file mode 100755
+index 00000000..ae7e8039
+--- /dev/null
++++ b/tests/btrfs/248
+@@ -0,0 +1,284 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Facebook.  All Rights Reserved.
++#
++# FS QA Test 250
++#
++# Test the new /sys/fs/btrfs/<uuid>/allocation/<block-type>/chunk_size
++# setting. This setting allows the admin to change the chunk size
++# setting for the next allocation.
++#
++# Test 1:
++#   Allocate storage for all three block types (data, metadata and syste=
+m)
++#   with the default chunk size.
++#
++# Test 2:
++#   Set a new chunk size to double the default size and allocate space
++#   for all new block types with the new chunk size.
++#
++# Test 3:
++#   Pick an allocation size that is used in a loop and make sure the las=
+t
++#   allocation cannot be partially fullfilled.
++#
++# Note: Variable naming uses the following convention: if a variable nam=
+e
++#       ends in "_B" then its a byte value, if it ends in "_MB" then the
++#       value is in megabytes.
++#
++. ./common/preamble
++_begin_fstest auto
++
++test_file=3D"${TEST_DIR}/${seq}"
++seq=3D`basename $0`
++seqres=3D"${RESULT_DIR}/${seq}"
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -f "$test_file"
++}
++
++# Parse a size string which is in the format "XX.XXMib".
++#
++# Parameters:
++#   - (IN)    Block group type (Data, Metadata, System)
++#   - (INOUT) Variable to store block group size in MB
++#
++_parse_size_string() {
++	local SIZE=3D$(echo "$1" | awk 'match($0, /([0-9.]+)/) { print substr($=
+0, RSTART, RLENGTH) }')
++        eval $2=3D"${SIZE%.*}"
++}
++
++# Determine the size of the device in MB.
++#
++# Parameters:
++#   - (INOUT) Variable to store device size in MB
++#
++_device_size() {
++	btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid >> $seqres.full
++	local SIZE=3D$(btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid)
++	_parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
++	eval $1=3D${SIZE_ALLOC%.*}
++}
++
++# Determine the free space of a block group in MB.
++#
++# Parameters:
++#   - (INOUT) Variable to store free space in MB
++#
++_free_space() {
++	local SIZE=3D$(btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid)
++	_parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
++	_parse_size_string $(echo "${SIZE}" | awk '{print $6}') SIZE_USED
++	eval $1=3D$(expr ${SIZE_ALLOC} - ${SIZE_USED})
++}
++
++# Determine how much space in MB has been allocated to a block group.
++#
++# Parameters:
++#   - (IN)    Block group type (Data, Metadata, System)
++#   - (INOUT) Variable to store block group size in MB
++#
++_alloc_size() {
++	local SIZE_STRING=3D$(btrfs filesystem df ${SCRATCH_MNT} -m | grep  "$1=
+" | awk '{print $3}')
++	_parse_size_string ${SIZE_STRING} BLOCK_GROUP_SIZE
++        eval $2=3D"${BLOCK_GROUP_SIZE}"
++}
++
++. ./common/filter
++_supported_fs btrfs
++_require_test
++_require_scratch
++_require_btrfs_fs_sysfs
++
++# Delete log file if it exists.
++rm -f "${seqres}.full"
++
++# Make filesystem.
++_require_scratch_size $((10 * 1024 * 1024)) #kB
++_scratch_mkfs_sized $((10 * 1024 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++# Get UUID of device.
++UUID=3D"$(findmnt -n -o UUID ${SCRATCH_MNT})"
++echo "UUID =3D ${UUID}" >> ${seqres}.full
++
++# Check if there is sufficient sysfs support.
++_require_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/chunk_size
++_require_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/force_chunk=
+_alloc
++
++# Get free space.
++_free_space  FREE_SPACE_MB
++_device_size DEVICE_SIZE_MB
++
++echo "free space =3D ${FREE_SPACE_MB}MB" >> ${seqres}.full
++
++# Get chunk sizes.
++echo "Capture default chunk sizes."
++FIRST_DATA_CHUNK_SIZE_B=3D$(_get_btrfs_sysfs_attr ${SCRATCH_MNT} allocat=
+ion/data/chunk_size)
++FIRST_METADATA_CHUNK_SIZE_B=3D$(_get_btrfs_sysfs_attr ${SCRATCH_MNT} all=
+ocation/metadata/chunk_size)
++
++echo "Orig Data chunk size    =3D ${FIRST_DATA_CHUNK_SIZE_B}"     >> ${s=
+eqres}.full
++echo "Orig Metaata chunk size =3D ${FIRST_METADATA_CHUNK_SIZE_B}" >> ${s=
+eqres}.full
++
++INIT_ALLOC_SIZE_MB=3D$(expr \( ${FIRST_DATA_CHUNK_SIZE_B} + ${FIRST_META=
+DATA_CHUNK_SIZE_B} \) / 1024 / 1024)
++echo "Allocation size for initial allocation =3D ${INIT_ALLOC_SIZE_MB}MB=
+" >> $seqres.full
++
++#
++# Do first allocation with the default chunk sizes for the different blo=
+ck
++# types.
++#
++echo "First allocation."
++_alloc_size "Data"     DATA_SIZE_START_MB
++_alloc_size "Metadata" METADATA_SIZE_START_MB
++
++echo "Block group Data alloc size     =3D ${DATA_SIZE_START_MB}MB"     >=
+> $seqres.full
++echo "Block group Metadata alloc size =3D ${METADATA_SIZE_START_MB}MB" >=
+> $seqres.full
++
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/force_chunk_alloc 1
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/force_chunk_all=
+oc 1
++
++_alloc_size "Data"     FIRST_DATA_SIZE_MB
++_alloc_size "Metadata" FIRST_METADATA_SIZE_MB
++
++echo "First block group Data alloc size     =3D ${FIRST_DATA_SIZE_MB}MB"=
+     >> ${seqres}.full
++echo "First block group Metadata alloc size =3D ${FIRST_METADATA_SIZE_MB=
+}MB" >> ${seqres}.full
++
++_free_space FREE_SPACE_AFTER
++echo "Free space after first allocation =3D ${FREE_SPACE_AFTER}MB" >> ${=
+seqres}.full
++
++#
++# Do allocation with the doubled chunk sizes for the different block typ=
+es.
++#
++echo "Second allocation."
++SECOND_DATA_CHUNK_SIZE_B=3D$(expr ${FIRST_DATA_CHUNK_SIZE_B} \* 2)
++SECOND_METADATA_CHUNK_SIZE_B=3D$(expr ${FIRST_METADATA_CHUNK_SIZE_B} \* =
+2)
++
++echo "Second block group Data calc alloc size     =3D ${SECOND_DATA_CHUN=
+K_SIZE_B}"     >> $seqres.full
++echo "Second block group Metadata calc alloc size =3D ${SECOND_METADATA_=
+CHUNK_SIZE_B}" >> $seqres.full
++
++# Stripe size is limited to 10% of device size.
++if [[ ${SECOND_DATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* =
+1024 \* 1024 / 100) ]]; then
++	SECOND_DATA_CHUNK_SIZE_B=3D$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024=
+ \* 1024)
++fi
++if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10=
+ \* 1024 \* 1024 / 100) ]]; then
++	SECOND_METADATA_CHUNK_SIZE_B=3D$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* =
+1024 \* 1024)
++fi
++
++echo "Second block group Data alloc size     =3D ${SECOND_DATA_CHUNK_SIZ=
+E_B}"     >> $seqres.full
++echo "Second block group Metadata alloc size =3D ${SECOND_METADATA_CHUNK=
+_SIZE_B}" >> $seqres.full
++
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/chunk_size ${SECOND=
+_DATA_CHUNK_SIZE_B}
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/chunk_size ${SE=
+COND_METADATA_CHUNK_SIZE_B}
++
++SECOND_DATA_CHUNK_SIZE_READ_B=3D$(cat /sys/fs/btrfs/${UUID}/allocation/d=
+ata/chunk_size)
++SECOND_METADATA_CHUNK_SIZE_READ_B=3D$(cat /sys/fs/btrfs/${UUID}/allocati=
+on/metadata/chunk_size)
++
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/force_chunk_alloc 1
++echo "Allocated data chunk" >> $seqres.full
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/force_chunk_all=
+oc 1
++echo "Allocated metadata chunk" >> $seqres.full
++
++_alloc_size "Data"     SECOND_DATA_SIZE_MB
++_alloc_size "Metadata" SECOND_METADATA_SIZE_MB
++_alloc_size "System"   SECOND_SYSTEM_SIZE_MB
++
++echo "Calculate request size so last memory allocation cannot be complet=
+ely fullfilled."
++_free_space FREE_SPACE_MB
++
++# Find request size whose space allocation cannot be completely fullfill=
+ed.
++THIRD_DATA_CHUNK_SIZE_MB=3D$(expr 256)
++until [ ${THIRD_DATA_CHUNK_SIZE_MB} -gt $(expr 7 \* 1024) ]
++do
++	if [ $((FREE_SPACE_MB%THIRD_DATA_CHUNK_SIZE_MB)) -ne 0 ]; then
++	       break
++        fi
++	THIRD_DATA_CHUNK_SIZE_MB=3D$((THIRD_DATA_CHUNK_SIZE_MB+256))
++done
++
++if [[ ${THIRD_DATA_CHUNK_SIZE_MB} -eq $(expr 7 \* 1024) ]]; then
++	_fail "Cannot find allocation size for partial block allocation."
++fi
++
++THIRD_DATA_CHUNK_SIZE_B=3D$(expr ${THIRD_DATA_CHUNK_SIZE_MB} \* 1024 \* =
+1024)
++echo "Allocation size in mb    =3D ${THIRD_DATA_CHUNK_SIZE_MB}" >> ${seq=
+res}.full
++echo "Allocation size in bytes =3D ${THIRD_DATA_CHUNK_SIZE_B}"  >> ${seq=
+res}.full
++
++#
++# Do allocation until free space is exhausted.
++#
++echo "Third allocation."
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/chunk_size ${THIRD_=
+DATA_CHUNK_SIZE_B}
++
++_free_space FREE_SPACE_MB
++while [ $FREE_SPACE_MB -gt $THIRD_DATA_CHUNK_SIZE_MB ]
++do
++	_alloc_size "Data" THIRD_DATA_SIZE_MB
++	_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/force_chunk_alloc =
+1
++
++	_free_space FREE_SPACE_MB
++done
++
++_alloc_size "Data" FOURTH_DATA_SIZE_MB
++
++#
++# Force chunk allocation of system block tyep must fail.
++#
++echo "Force allocation of system block type must fail."
++_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/system/force_chunk_alloc=
+ 1 2>&1
++
++#
++# Verification of initial allocation.
++#
++echo "Verify first allocation."
++FIRST_DATA_CHUNK_SIZE_MB=3D$(expr ${FIRST_DATA_CHUNK_SIZE_B} / 1024 / 10=
+24)
++FIRST_METADATA_CHUNK_SIZE_MB=3D$(expr ${FIRST_METADATA_CHUNK_SIZE_B} / 1=
+024 / 1024)
++
++# if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne =
+$(expr ${FIRST_DATA_SIZE_MB}) ]]; then
++if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne ${=
+FIRST_DATA_SIZE_MB} ]]; then
++	_fail "tInitial data allocation not correct."
++fi
++
++if [[ $(expr ${FIRST_METADATA_CHUNK_SIZE_MB} + ${METADATA_SIZE_START_MB}=
+) -ne ${FIRST_METADATA_SIZE_MB} ]]; then
++	_fail "Initial metadata allocation not correct."
++fi
++
++#
++# Verification of second allocation.
++#
++echo "Verify second allocation."
++SECOND_DATA_CHUNK_SIZE_MB=3D$(expr ${SECOND_DATA_CHUNK_SIZE_B} / 1024 / =
+1024)
++SECOND_METADATA_CHUNK_SIZE_MB=3D$(expr ${SECOND_METADATA_CHUNK_SIZE_B} /=
+ 1024 / 1024)
++
++if [[ ${SECOND_DATA_CHUNK_SIZE_B} -ne ${SECOND_DATA_CHUNK_SIZE_READ_B} ]=
+]; then
++	_fail "Value written to allocation/data/chunk_size and read value are d=
+ifferent."
++fi
++
++if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -ne ${SECOND_METADATA_CHUNK_SIZE_R=
+EAD_B} ]]; then
++	_fail "Value written to allocation/metadata/chunk_size and read value a=
+re different."
++fi
++
++if [[ $(expr ${SECOND_DATA_CHUNK_SIZE_MB} + ${FIRST_DATA_SIZE_MB}) -ne $=
+{SECOND_DATA_SIZE_MB} ]]; then
++	_fail "Data allocation after chunk size change not correct."
++fi
++
++if [[ $(expr ${SECOND_METADATA_CHUNK_SIZE_MB} + ${FIRST_METADATA_SIZE_MB=
+}) -ne ${SECOND_METADATA_SIZE_MB} ]]; then
++	_fail "Metadata allocation after chunk size change not correct."
++fi
++
++#
++# Verification of third allocation.
++#
++echo "Verify third allocation."
++if [[ ${FREE_SPACE_MB} -gt ${THIRD_DATA_CHUNK_SIZE_MB} ]]; then
++	_fail "Free space after allocating over memlimit is too high."
++fi
++
++# The + 1 is required as 1MB is always kept as free space.
++if [[ $(expr ${THIRD_DATA_CHUNK_SIZE_MB} + ${THIRD_DATA_SIZE_MB} + 1) -l=
+e $(expr ${FOURTH_DATA_SIZE_MB}) ]]; then
++	_fail "Allocation until out of memory: last memory allocation size is n=
+ot correct."
++fi
++
++status=3D0
++exit
++
+diff --git a/tests/btrfs/248.out b/tests/btrfs/248.out
+new file mode 100644
+index 00000000..cac054a6
+--- /dev/null
++++ b/tests/btrfs/248.out
+@@ -0,0 +1,12 @@
++QA output created by 248
++Capture default chunk sizes.
++First allocation.
++Second allocation.
++Calculate request size so last memory allocation cannot be completely fu=
+llfilled.
++Third allocation.
++Force allocation of system block type must fail.
++_set_btrfs_sysfs_attr cannot write allocation/system/force_chunk_alloc
++(see /root/xfstests/results//btrfs/248.full for details)
++Verify first allocation.
++Verify second allocation.
++Verify third allocation.
+--=20
+2.30.2
+
