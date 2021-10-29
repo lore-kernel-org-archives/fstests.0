@@ -2,121 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E41BCC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 07:59:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0E92C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 08:50:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C4467610A0
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 07:59:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D69F361166
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Oct 2021 08:50:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232305AbhJ2IBn (ORCPT
+        id S231546AbhJ2IxW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Oct 2021 04:01:43 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:30985 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232221AbhJ2IBm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Oct 2021 04:01:42 -0400
-IronPort-Data: =?us-ascii?q?A9a23=3APxm5Oap8G6/tpq9m/qpU2+1GtGFeBmIEZxIvgKr?=
- =?us-ascii?q?LsJaIsI5as4F+vmAYWG3XafbfZ2bwc4gkO47j80JU65ODnIJkSQdprC0zQiMRo?=
- =?us-ascii?q?6IpJ/zDcB6oYHn6wu4v7a5fx5xHLIGGdajYd1eEzvuWGuWn/SYUOZ2gHOKmUbe?=
- =?us-ascii?q?cYHApHmeIdQ964f5ds79g6mJXqYjha++9kYuaT/z3YDdJ6RYtWo4nw/7rRCdUg?=
- =?us-ascii?q?RjHkGhwUmrSyhx8lAS2e3E9VPrzLEwqRpfyatE88uWSH44vwFwll1418SvBCvv?=
- =?us-ascii?q?9+lr6WkYMBLDPPwmSkWcQUK+n6vRAjnVqlP9la7xHMgEK49mKt4kZJNFlr4G5T?=
- =?us-ascii?q?xw4eKPKg/g1XQRaEj1lIOtN/7qvzX2X6JXNkh2cLyC1qxlpJARsVWECwc55Gn1?=
- =?us-ascii?q?D7uADAC4CYwrFhO+sxr+/DO52iawewGPDVG8Ekig4i2iHUrB9GtaeK5gmLORwh?=
- =?us-ascii?q?F8Y7v2i196HDybBVQdSUQ=3D=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AwCiHTK/F3KA1d/we1btuk+DkI+orL9Y04lQ7?=
- =?us-ascii?q?vn2ZKCYlFvBw8vrCoB1173HJYUkqMk3I9ergBEDiewK4yXcW2/hzAV7KZmCP11?=
- =?us-ascii?q?dAR7sSj7cKrQeBJwTOssZZ1YpFN5N1EcDMCzFB5vrS0U2VFMkBzbC8nJyVuQ?=
- =?us-ascii?q?=3D=3D?=
-X-IronPort-AV: E=Sophos;i="5.87,191,1631548800"; 
-   d="scan'208";a="116582431"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 29 Oct 2021 15:59:14 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id BDBA34D0F912
-        for <fstests@vger.kernel.org>; Fri, 29 Oct 2021 15:59:13 +0800 (CST)
-Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Fri, 29 Oct 2021 15:59:14 +0800
-Received: from irides.mr.mr.mr (10.167.225.141) by
- G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Fri, 29 Oct 2021 15:59:12 +0800
-From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-Subject: [PATCH v1.1 2/3] generic: fix description or typo in head comment
-Date:   Fri, 29 Oct 2021 15:59:10 +0800
-Message-ID: <20211029075910.3563132-1-ruansy.fnst@fujitsu.com>
-X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20211029065943.3556529-3-ruansy.fnst@fujitsu.com>
-References: <20211029065943.3556529-3-ruansy.fnst@fujitsu.com>
+        Fri, 29 Oct 2021 04:53:22 -0400
+Received: from mail1.bemta25.messagelabs.com ([195.245.230.5]:55646 "EHLO
+        mail1.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231510AbhJ2IxN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Oct 2021 04:53:13 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1635497444; i=@fujitsu.com;
+        bh=/fUUkCG4KILcfjVVsjJFd1CZYv5+RELEJvg3ij0heRI=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=Ib3mvwEBBVYkZ+PhwaIxwgxYxv3jMYt0HBPvMVM1lcheXpFQidQjAkJIKQYSFwrI6
+         YoxXcCTwCMjse/0iZi3z7VWjLKv+CfXHu7lZHqi76tRXzrH37/NTV9tRxgxU46LE+q
+         e76diqYTyCPVJgg3lh20YUkjxJYAMZtpPXKyfgle1qW1DXpYnn0cZESNcUqY9dowJN
+         pVzOCg1d/5pt3JTvSYRjAo+ReriJtSXZtVOVrH/RddlymHDZfvMDYU0j4HIYOBfcQY
+         ml9lJ9Nzln3HaRQoMUEvPeN8/iROFZEqNAOieNnEJVh52w8jAJHyHqgPxkys1hUse0
+         LCS5X2iVRocYg==
+Received: from [100.112.192.69] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-5.bemta.az-a.eu-west-1.aws.symcld.net id D9/A9-17094-4E5BB716; Fri, 29 Oct 2021 08:50:44 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrHIsWRWlGSWpSXmKPExsViZ8MxRffJ1up
+  Eg2fMFpef8FmcbtnLbrHrzw52B2aPTas62Tw+b5ILYIpizcxLyq9IYM24tvIPW8FH1orNNz4w
+  NjA2sXYxcnEICbxmlLi44x2Qwwnk7GGUmH9ACcRmE9CUeNa5gBnEFhEQl3i86BYTiM0skCGxo
+  esSWL2wgJFE36n/LF2MHBwsAqoStyangoR5BTwkzrx/AlYuIaAgMeXhe2aIuKDEyZlPWCDGSE
+  gcfPGCGaJGUeJSxzdGCLtCYtasNqYJjLyzkLTMQtKygJFpFaNFUlFmekZJbmJmjq6hgYGuoaG
+  RrqGlsa6RsYleYpVuol5qqW55anGJrqFeYnmxXnFlbnJOil5easkmRmDQpRQcfLWDceWbD3qH
+  GCU5mJREeX+urU4U4kvKT6nMSCzOiC8qzUktPsQow8GhJMG7eAtQTrAoNT21Ii0zBxgBMGkJD
+  h4lEd6cDUBp3uKCxNzizHSI1ClGXY7L1+ctYhZiycvPS5US570OMkMApCijNA9uBCwaLzHKSg
+  nzMjIwMAjxFKQW5WaWoMq/YhTnYFQS5uXdDDSFJzOvBG7TK6AjmICOYFaqADmiJBEhJdXAdHz
+  TxvyG4BDvbxe/dZXz7/smblZ9/djs4+IzQpiCPas+652L2nWx+YfkkcwN4d9iVRcY2+2eIl8Y
+  8+ZGRJxYa9vFptYAhrDElMaELB6fohcmLTrHDH+mRzRwfjQNyv/4ee01+1lnH/mby4S80bD9m
+  cfclLDd+l7cFn9d4861ccknd2/Jmsz8rvJNWLCYlf1zu/wrwUrLHs5zWz3L+bGgUN0K8y0bJz
+  gpLX/01CHu/J2pPxPXnnu08sXFV8lJc4N2Vj9MuHBzWnfHh5tKrKGLp00KlOoz/O4b2/7HYRH
+  z/srQqC2rly0wtqw6YDBLcy7nrQ8xDI2PucptXl15+S/2D89Lxh7XR/db03X//CzzVWIpzkg0
+  1GIuKk4EAJLUhc1BAwAA
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-7.tower-271.messagelabs.com!1635497443!2753!1
+X-Originating-IP: [62.60.8.148]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.81.4; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 32690 invoked from network); 29 Oct 2021 08:50:43 -0000
+Received: from unknown (HELO mailhost1.uk.fujitsu.com) (62.60.8.148)
+  by server-7.tower-271.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 29 Oct 2021 08:50:43 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 19T8oTI9015371
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL);
+        Fri, 29 Oct 2021 09:50:36 +0100
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.24; Fri, 29 Oct 2021 09:50:27 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <djwong@kernel.org>
+CC:     <fstests@vger.kernel.org>, <linux-xfs@vger.kernel.org>,
+        Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] xfs/126: Add a getxattr opeartion
+Date:   Fri, 29 Oct 2021 16:50:24 +0800
+Message-ID: <1635497424-8095-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: BDBA34D0F912.A1E27
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-==
-The word "ENSPC" is a typo too. So update this patch.
-==
+It is design to reproduce a deadlock on upstream kernel. It is introduced
+by kernel commit 07120f1abdff ("xfs: Add xfs_has_attr and subroutines").
 
-1. update description according to the current testcase
-2. "ENSPC" -> "ENOSPC" ,"an the end -> at the end"
-
-Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- tests/generic/155 | 3 +--
- tests/generic/269 | 2 +-
- tests/generic/270 | 4 ++--
- 3 files changed, 4 insertions(+), 5 deletions(-)
+ tests/xfs/126 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/generic/155 b/tests/generic/155
-index 2fe7894a..13292fbb 100755
---- a/tests/generic/155
-+++ b/tests/generic/155
-@@ -13,8 +13,7 @@
- #   - CoW all the rest of the blocks of the copies
- #   - Compare fs block usage to (2), (1), and (0)
- #
--# The main difference from 834 is that we use zero range, directio, and
--# mmap to mix things up a bit.
-+# The main difference from No. 154 is that we use zero range to execute CoW.
- #
- . ./common/preamble
- _begin_fstest auto quick clone zero
-diff --git a/tests/generic/269 b/tests/generic/269
-index d78b7463..838e696d 100755
---- a/tests/generic/269
-+++ b/tests/generic/269
-@@ -4,7 +4,7 @@
- #
- # FSQA Test No. 269
- #
--# Run fsstress and ENSPC hitters in parallel, check fs consistency an the end
-+# Run fsstress and ENOSPC hitters in parallel, check fs consistency at the end
- #
- . ./common/preamble
- _begin_fstest auto rw prealloc ioctl enospc stress
-diff --git a/tests/generic/270 b/tests/generic/270
-index 1fb5795a..8a6a2822 100755
---- a/tests/generic/270
-+++ b/tests/generic/270
-@@ -4,8 +4,8 @@
- #
- # FSQA Test No. 270
- #
--# Run fsstress and ENSPC hitters in parallel, check quota and 
--# fs consistency an the end
-+# Run fsstress and ENOSPC hitters in parallel, check quota and
-+# fs consistency at the end
- #
- . ./common/preamble
- _begin_fstest auto quota rw prealloc ioctl enospc stress
+diff --git a/tests/xfs/126 b/tests/xfs/126
+index c3a74b1c..9a77a60e 100755
+--- a/tests/xfs/126
++++ b/tests/xfs/126
+@@ -69,7 +69,7 @@ done
+ 
+ echo "+ mount image && modify xattr"
+ if _try_scratch_mount >> $seqres.full 2>&1; then
+-
++	getfattr "${SCRATCH_MNT}/attrfile" -n "user.x00000000" 2> /dev/null || _fail "modified corrupt xattr"
+ 	setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" 2> /dev/null && _fail "modified corrupt xattr"
+ 	umount "${SCRATCH_MNT}"
+ fi
 -- 
-2.33.0
-
-
+2.23.0
 
