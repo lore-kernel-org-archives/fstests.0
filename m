@@ -2,46 +2,46 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC86C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A512C433FE
+	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CDBAF60F58
-	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E43B660F58
+	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234465AbhKBPbO (ORCPT
+        id S234514AbhKBPbP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 2 Nov 2021 11:31:14 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57122 "EHLO
+        Tue, 2 Nov 2021 11:31:15 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:55786 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233684AbhKBPbN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 Nov 2021 11:31:13 -0400
+        by vger.kernel.org with ESMTP id S234407AbhKBPbO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Nov 2021 11:31:14 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635866918;
+        s=mimecast20190719; t=1635866919;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=CBj8e0bM4t5jzjI5MjwhBPSaYeww5szB2LUvOQn8dio=;
-        b=g4BHUD4zrH02q8g6w+FD4/YT14yZv30cQ+u0ZEK8JKBUZlFsa4SRk7DktZMcQFen0EoTQR
-        Az0yZqJYB0lVQu94YA38XKSwAsUsn+yxCPueKoFSktjzFmab78Z2sV2kdXZIZ8frpLKrDt
-        BVPGkxc4Tx+6LviNs0WuMg/GWRNsuic=
+        bh=t9snIIDkZY/bWfAH54U8CpRlywgDYIc+qdh8YwzrEzM=;
+        b=EU9pGPSfpiv7o4YkKAC5vUiSmVvrp30+pB/pLvT7gvSz3ytLaERaR3NxqnoMQ4EBsKmFgQ
+        KK00DqrpiAqfOOGggUW5cAMu2ml1+rm0NCMB1+HPPLArvacwvUMsB0zpchb+GQI/hgnwYf
+        VlnoysHosD+MAlav7ktAyFbCJEetIV4=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-273-SJBRo8FpPl-2_ZnOnzaeig-1; Tue, 02 Nov 2021 11:28:37 -0400
-X-MC-Unique: SJBRo8FpPl-2_ZnOnzaeig-1
+ us-mta-359-PuLZyPwkMV2inodwxfrHfg-1; Tue, 02 Nov 2021 11:28:38 -0400
+X-MC-Unique: PuLZyPwkMV2inodwxfrHfg-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 322A21923762
-        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:36 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3887280A5C1
+        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:37 +0000 (UTC)
 Received: from andromeda.lan (unknown [10.40.193.94])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8AC3A7092D
-        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:35 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 911A0694B6
+        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:36 +0000 (UTC)
 From:   Carlos Maiolino <cmaiolino@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH 1/2] common/rc: Enable _format_swapfile to return the swap size
-Date:   Tue,  2 Nov 2021 16:28:27 +0100
-Message-Id: <20211102152828.26895-2-cmaiolino@redhat.com>
+Subject: [PATCH 2/2] generic/643: Fix for 1k block sizes for ext2 and ext3
+Date:   Tue,  2 Nov 2021 16:28:28 +0100
+Message-Id: <20211102152828.26895-3-cmaiolino@redhat.com>
 In-Reply-To: <20211102152828.26895-1-cmaiolino@redhat.com>
 References: <20211102152828.26895-1-cmaiolino@redhat.com>
 MIME-Version: 1.0
@@ -51,57 +51,79 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Once the kernel is free to not map the full swap file during a swapon call,
-it can be useful to know the exact size of the swap area created during
-_format_swapfile().
+Currently this test fails on ext2 and ext3 filesystems using 1k block sizes,
+because we set the maximum swap size the kernel is allowed to map according to
+the mapping kernel created when enabling the original swap file.
 
-To achieve this, it is required to change _require_scratch_swapfile(), to drop
-the _format_swapfile() return value, otherwise, it will also have a return value
-that will end up in tests outputs causing tests to fail.
+But the translation from indirect block mapping to iomap extents associated with
+the page alignment requirements imposed by iomap_swapfile_add_extent(), causes
+this test to fail. The kernel end up mapping way less pages than the file
+actually has.
+After the file is extended by the test, the page alignment is not a problem
+anymore and the kernel can use the whole space available in the swapfile,
+written in its header, and this creates a variance bigger than what the current
+test allows, making the tolerance check within the test to fail.
 
-Tests using _format_swapfile() that do not require the swap file size do not
-need to be modified, as the return value will be simply ignored.
+Fix this by using the swap size recorded in the swapfile header (reported by
+mkswap), as the maximum swap size the kernel is allowed to map, instead of
+reading the swap size mapped by the kernel from /proc.
+Since the size hardcoded in the swapfile header is the limit allowed for the
+kernel to map as swap area, this is the real limit the kernel can't map beyond,
+and what this test should be checking for.
 
 Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
 ---
- common/rc | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ tests/generic/643 | 27 +++++++++------------------
+ 1 file changed, 9 insertions(+), 18 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 7f693d39..fb1f32e0 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2587,6 +2587,7 @@ _require_odirect()
- _format_swapfile() {
- 	local fname="$1"
- 	local sz="$2"
-+	local swap_log=""
+diff --git a/tests/generic/643 b/tests/generic/643
+index 7a1d3ec7..b7627743 100755
+--- a/tests/generic/643
++++ b/tests/generic/643
+@@ -36,34 +36,25 @@ _scratch_mount >> $seqres.full
+ # Assuming we're not borrowing a FAT16 partition from Windows 3.1, we need an
+ # unlikely enough name that we can grep /proc/swaps for this.
+ swapfile=$SCRATCH_MNT/386spart.par
+-_format_swapfile $swapfile 1m >> $seqres.full
++before_blocks=$(_format_swapfile $swapfile 1m)
  
- 	rm -f "$fname"
- 	touch "$fname"
-@@ -2595,8 +2596,11 @@ _format_swapfile() {
- 	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
- 	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
- 	# Ignore permission complaints on filesystems that don't support perms
--	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
--		grep -v "insecure permission"
-+	swap_log=$($MKSWAP_PROG "$fname" 2>&1 | grep -v "insecure permission")
-+	echo $swap_log >> $seqres.full
-+
-+	# return created swap size
-+	echo $swap_log | grep -oP '(?<=size = )\w+'
- }
+ page_size=$(getconf PAGE_SIZE)
  
- _swapon_file() {
-@@ -2628,7 +2632,7 @@ _require_scratch_swapfile()
- 	_scratch_mount
+-swapfile_blocks() {
+-	local swapfile="$1"
+-
+-	grep "$swapfile" /proc/swaps | awk '{print $3}'
+-}
+-
+-_swapon_file $swapfile
+-before_blocks=$(swapfile_blocks "$swapfile")
+-swapoff $swapfile
+-
+ # Extend the length of the swapfile but do not rewrite the header.
+ # The subsequent swapon should set up 1MB worth of blocks, not 2MB.
+ $XFS_IO_PROG -f -c 'pwrite 1m 1m' $swapfile >> $seqres.full
  
- 	# Minimum size for mkswap is 10 pages
--	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
-+	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
+ _swapon_file $swapfile
+-after_blocks=$(swapfile_blocks "$swapfile")
++after_blocks=$(grep "$swapfile" /proc/swaps | awk '{print $3}')
+ swapoff $swapfile
  
- 	# ext* has supported all variants of swap files since their
- 	# introduction, so swapon should not fail.
+-# Both swapon attempts should have found approximately the same number of
+-# blocks.  Unfortunately, mkswap and the kernel are a little odd -- the number
+-# of pages that mkswap writes into the swapfile header is one page less than
+-# the file size, and then the kernel itself doesn't always grab all the pages
+-# advertised in the header.  Hence we let the number of swap pages increase by
+-# two pages.  I'm looking at you, Mr. 64k pages on arm64...
++# The swapon attempt should have found approximately the same number of blocks
++# originally created by the mkswap.
++# Unfortunately, mkswap and the kernel are a little odd -- the number of pages
++# that mkswap writes into the swapfile header is one page less than the file
++# size, and then the kernel itself doesn't always grab all the pages advertised
++# in the header. Such cases include ext2 and ext3 with 1k block size and arm64
++# with its 64k pages. Hence we let the number of swap pages increase by two pages.
+ page_variance=$(( page_size / 512 ))
+ _within_tolerance "swap blocks" $after_blocks $before_blocks 0 $page_variance -v
+ 
 -- 
 2.31.1
 
