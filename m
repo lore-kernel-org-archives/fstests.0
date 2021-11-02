@@ -2,45 +2,48 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBBE3C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC86C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C08AA60F36
-	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CDBAF60F58
+	for <linux-fstests@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234385AbhKBPbN (ORCPT
+        id S234465AbhKBPbO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 2 Nov 2021 11:31:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:51447 "EHLO
+        Tue, 2 Nov 2021 11:31:14 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57122 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233684AbhKBPbM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 Nov 2021 11:31:12 -0400
+        by vger.kernel.org with ESMTP id S233684AbhKBPbN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Nov 2021 11:31:13 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635866917;
+        s=mimecast20190719; t=1635866918;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=yDeQfGqYNFCRAZFJK3ApwVseiOzNIbnwMmUU1R150fk=;
-        b=fppurOqSePuORTUTfw4lIeqAY2FhEHreiGiWuk3aF5K5kuue06HmKzYb7wILSAiDyzQeyV
-        lre9URwMDeW6VFNffIWT8F5koPhzyKALl8WMZh9CV5kos7GcXDNoAUSSenO7se1eRqT/7r
-        Tk/cmExO2KOOokIuVP3gVgjVp9RjqII=
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=CBj8e0bM4t5jzjI5MjwhBPSaYeww5szB2LUvOQn8dio=;
+        b=g4BHUD4zrH02q8g6w+FD4/YT14yZv30cQ+u0ZEK8JKBUZlFsa4SRk7DktZMcQFen0EoTQR
+        Az0yZqJYB0lVQu94YA38XKSwAsUsn+yxCPueKoFSktjzFmab78Z2sV2kdXZIZ8frpLKrDt
+        BVPGkxc4Tx+6LviNs0WuMg/GWRNsuic=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-560-xK0wUBhJNXKXXNLnCJhPwQ-1; Tue, 02 Nov 2021 11:28:36 -0400
-X-MC-Unique: xK0wUBhJNXKXXNLnCJhPwQ-1
+ us-mta-273-SJBRo8FpPl-2_ZnOnzaeig-1; Tue, 02 Nov 2021 11:28:37 -0400
+X-MC-Unique: SJBRo8FpPl-2_ZnOnzaeig-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4DD881397B02
-        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:35 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 322A21923762
+        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:36 +0000 (UTC)
 Received: from andromeda.lan (unknown [10.40.193.94])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8503E70871
-        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:34 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8AC3A7092D
+        for <fstests@vger.kernel.org>; Tue,  2 Nov 2021 15:28:35 +0000 (UTC)
 From:   Carlos Maiolino <cmaiolino@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH 0/2] xfstests: Fix generic/643 on ext2 and ext3
-Date:   Tue,  2 Nov 2021 16:28:26 +0100
-Message-Id: <20211102152828.26895-1-cmaiolino@redhat.com>
+Subject: [PATCH 1/2] common/rc: Enable _format_swapfile to return the swap size
+Date:   Tue,  2 Nov 2021 16:28:27 +0100
+Message-Id: <20211102152828.26895-2-cmaiolino@redhat.com>
+In-Reply-To: <20211102152828.26895-1-cmaiolino@redhat.com>
+References: <20211102152828.26895-1-cmaiolino@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
@@ -48,28 +51,57 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Currently, generic/643 test fails on ext2 and ext3 filesystems when using 1k
-block sizes.
-The failure itself happens due the mapping of indirect blocks to iomap extents
-and the aligment constraints imposed by iomap. Specific details are described in
-patch 2.
+Once the kernel is free to not map the full swap file during a swapon call,
+it can be useful to know the exact size of the swap area created during
+_format_swapfile().
 
-To fix the test, I modified it to use the swapfile size described in the swap
-header (patch 2), and to retrieve such information, at mkswap time, I modified
-the _format_swapfile() function, and I believe such modification requires its own
-patch (patch 1).
+To achieve this, it is required to change _require_scratch_swapfile(), to drop
+the _format_swapfile() return value, otherwise, it will also have a return value
+that will end up in tests outputs causing tests to fail.
 
-These changes have also been tested on 64k pages (both on arm and PPC) to ensure
-it doesn't break the test on such architectures.
+Tests using _format_swapfile() that do not require the swap file size do not
+need to be modified, as the return value will be simply ignored.
 
-Carlos Maiolino (2):
-  common/rc: Enable _format_swapfile to return the swap size
-  generic/643: Fix for 1k block sizes for ext2 and ext3
+Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+---
+ common/rc | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
- common/rc         | 10 +++++++---
- tests/generic/643 | 27 +++++++++------------------
- 2 files changed, 16 insertions(+), 21 deletions(-)
-
+diff --git a/common/rc b/common/rc
+index 7f693d39..fb1f32e0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2587,6 +2587,7 @@ _require_odirect()
+ _format_swapfile() {
+ 	local fname="$1"
+ 	local sz="$2"
++	local swap_log=""
+ 
+ 	rm -f "$fname"
+ 	touch "$fname"
+@@ -2595,8 +2596,11 @@ _format_swapfile() {
+ 	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
+ 	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
+ 	# Ignore permission complaints on filesystems that don't support perms
+-	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
+-		grep -v "insecure permission"
++	swap_log=$($MKSWAP_PROG "$fname" 2>&1 | grep -v "insecure permission")
++	echo $swap_log >> $seqres.full
++
++	# return created swap size
++	echo $swap_log | grep -oP '(?<=size = )\w+'
+ }
+ 
+ _swapon_file() {
+@@ -2628,7 +2632,7 @@ _require_scratch_swapfile()
+ 	_scratch_mount
+ 
+ 	# Minimum size for mkswap is 10 pages
+-	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
++	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
+ 
+ 	# ext* has supported all variants of swap files since their
+ 	# introduction, so swapon should not fail.
 -- 
 2.31.1
 
