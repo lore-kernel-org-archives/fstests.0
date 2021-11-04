@@ -2,126 +2,240 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E2ADC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Nov 2021 18:18:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9E71C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Nov 2021 00:56:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0F55B61058
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Nov 2021 18:18:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A08A560F9D
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Nov 2021 00:56:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229940AbhKCSVE (ORCPT
+        id S229893AbhKDA6u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 3 Nov 2021 14:21:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54916 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229787AbhKCSVA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Nov 2021 14:21:00 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF83FC061714
-        for <fstests@vger.kernel.org>; Wed,  3 Nov 2021 11:18:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=ljBswrtlsQwLqbcnDLYaUg5x1AcGrsr/mVGsp4CHIzI=; b=k1T6QQogzm5wxCk4ZxJfpg9zU9
-        qOevlMhc7VLapBIoQoCRYAqCL2hrLLYRdf2oI0FKeL1q50a59+PMY/57j2YOtVoKtssFZatZ1C55/
-        Md9pDlzFkBiwMM+2O3wCIXNHQgusAddZJZ4qQRrlJkXZZBWhxfSaQtmhzlPgHSOzqQt7j/USeV9V1
-        AaBsmSerm6SvEIFLgA6hDL3HkreoDJRVm8nEa+BIUCZSgGYiIJ2jbybZf1LHISwKFGOBYflc5XbKP
-        Qke1+yDoKS0ZK7BUYpj3fWvSPO7PpI07+kYElsfWtCaZfXnv8J5fJKKVjV2VduxfisWfOc8SmpUza
-        njfskz0Q==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1miKq6-006ALv-Rl; Wed, 03 Nov 2021 18:18:22 +0000
-Date:   Wed, 3 Nov 2021 11:18:22 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>, fdmanana@gmail.com
-Cc:     fstests@vger.kernel.org, Anthony Iliopoulos <ailiopoulos@suse.de>,
-        mcgrof@kernel.org
-Subject: Re: [PATCH] fsstress: improve error message on check_cwd() error
-Message-ID: <YYLSbnyxTTzLlGM/@bombadil.infradead.org>
-References: <20211101155559.3988492-1-mcgrof@kernel.org>
- <20211103162434.GX24282@magnolia>
+        Wed, 3 Nov 2021 20:58:50 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:57750 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229676AbhKDA6t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Nov 2021 20:58:49 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 5B6F321639;
+        Thu,  4 Nov 2021 00:56:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1635987371; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=5/X5/+kBq854gx+r5Fdj/nqyaaBASHeO0eyO2GZXwGY=;
+        b=SbCk9gKrFBaFdpTYZtbJAcNlwIIXPdpoKIb16vr5dwev4ELqghYSdlxJUpffpj+K3Gyd62
+        SBYYExJW+2p8e3CnTqUfXZURoRqtlzTQaPLsanx/ausfiHUBIDTuBjFa6jxza4/lXYAT4G
+        /IBLz6TiLgf2lvtfN+n/Is5tvo7N6o4=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8E21E13B9F;
+        Thu,  4 Nov 2021 00:56:10 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id ZYoTF6ovg2EUGAAAMHmgww
+        (envelope-from <wqu@suse.com>); Thu, 04 Nov 2021 00:56:10 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: make nospace_cache related test cases to work with latest v2 cache
+Date:   Thu,  4 Nov 2021 08:55:53 +0800
+Message-Id: <20211104005553.14485-1-wqu@suse.com>
+X-Mailer: git-send-email 2.33.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211103162434.GX24282@magnolia>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 03, 2021 at 09:24:34AM -0700, Darrick J. Wong wrote:
-> On Mon, Nov 01, 2021 at 08:55:59AM -0700, Luis Chamberlain wrote:
-> > I ran into an error with generic/083 with xfs due to check_cwd() but
-> > why it failed is not clear because there are two types of
-> > failures:
-> > 
-> >   o stat64() failed (likely -ENOMEM is my guess)
-> >   o the inode actually changed
-> > 
-> > Throw a bone out to developers so that in case en error does happen
-> > they know which rabbit hole to go down on.
-> 
-> <cough> word choice on those last three words...
+In the coming btrfs-progs v5.15 release, mkfs.btrfs will change to use
+v2 cache by default.
 
-Will fix thanks.
+However nospace_cache mount option will not work with v2 cache, as it
+will make v2 cache out of sync with on-disk used space.
 
-> > 
-> > Cc: Anthony Iliopoulos <ailiopoulos@suse.de>
-> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> > ---
-> >  ltp/fsstress.c | 15 ++++++++++++++-
-> >  1 file changed, 14 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > index 90ae432e..a576afea 100644
-> > --- a/ltp/fsstress.c
-> > +++ b/ltp/fsstress.c
-> > @@ -9,6 +9,7 @@
-> >  #include <sys/uio.h>
-> >  #include <stddef.h>
-> >  #include <stdbool.h>
-> > +#include <string.h>
-> >  #include "global.h"
-> >  
-> >  #ifdef HAVE_BTRFSUTIL_H
-> > @@ -943,9 +944,21 @@ check_cwd(void)
-> >  {
-> >  #ifdef DEBUG
-> >  	struct stat64	statbuf;
-> > +	int ret;
-> > +
-> > +	ret = stat64(".", &statbuf);
-> > +	if (ret !=0) {
-> 
-> Nit: space between '!=' and '0'.
+So mounting a btrfs with v2 cache using "nospace_cache" will make btrfs
+to reject the mount.
 
-OK.
+There are quite some test cases relying on nospace_cache to prevent v1
+cache to take up data space.
 
-> > +		fprintf(stderr, "fsstress: check_cwd stat64 failed with: %d (%s)\n",
-> > +			ret, strerror(ret));
-> 
-> ret is set to -1 on error, according to the manpage; to get the real
-> error you'd have to call strerror(errno) as the last arg, or be lazy
-> and:
+For that case, we can append "clear_cache" mount option to it, so that
+btrfs knows we do not only want to prevent cache from being created, but
+also want to clear any existing v2 cache.
 
-I don't want to be lazy here as this is a real issue.
+By this, we can keep those existing tests to do the same behavior for
+both v1 and v2 cache.
 
-> 		perror("fsstress check_cwd stat64");
-> 
-> > +		goto out;
-> > +	}
-> >  
-> > -	if (stat64(".", &statbuf) == 0 && statbuf.st_ino == top_ino)
-> > +	if (statbuf.st_ino == top_ino)
-> >  		return;
-> > +
-> > +	fprintf(stderr, "fsstress: check_cwd statbuf.st_ino (%lu) != top_ino (%lu)\n",
-> > +		statbuf.st_ino, top_ino);
-> 
-> This might want some explicit casting, since this can be defined as
-> anything between unsigned long to uint64_t, at least according to the
-> glibc headers on my system.
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/102 | 2 +-
+ tests/btrfs/140 | 2 +-
+ tests/btrfs/141 | 2 +-
+ tests/btrfs/142 | 2 +-
+ tests/btrfs/143 | 2 +-
+ tests/btrfs/151 | 2 +-
+ tests/btrfs/157 | 2 +-
+ tests/btrfs/158 | 2 +-
+ tests/btrfs/170 | 2 +-
+ tests/btrfs/199 | 5 ++++-
+ tests/btrfs/215 | 2 +-
+ 11 files changed, 14 insertions(+), 11 deletions(-)
 
-Um, Filipe had suggested something a bit different before. Can you guys
-decide and let me know your final preference ? :)
+diff --git a/tests/btrfs/102 b/tests/btrfs/102
+index e5a1b068..39c3ba37 100755
+--- a/tests/btrfs/102
++++ b/tests/btrfs/102
+@@ -22,7 +22,7 @@ _scratch_mkfs >>$seqres.full 2>&1
+ # Mount our filesystem without space caches enabled so that we do not get any
+ # space used from the initial data block group that mkfs creates (space caches
+ # used space from data block groups).
+-_scratch_mount "-o nospace_cache"
++_scratch_mount "-o nospace_cache,clear_cache"
+ 
+ # Need an fs with at least 2Gb to make sure mkfs.btrfs does not create an fs
+ # using mixed block groups (used both for data and metadata). We really need
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
+index 5a5f828c..e7a36927 100755
+--- a/tests/btrfs/140
++++ b/tests/btrfs/140
+@@ -62,7 +62,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ # -o nospace_cache makes sure data is written to the start position of the data
+ # chunk
+-_scratch_mount -o nospace_cache
++_scratch_mount -o nospace_cache,clear_cache
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
+index cf0979e9..bf559953 100755
+--- a/tests/btrfs/141
++++ b/tests/btrfs/141
+@@ -61,7 +61,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ # -o nospace_cache makes sure data is written to the start position of the data
+ # chunk
+-_scratch_mount -o nospace_cache
++_scratch_mount -o nospace_cache,clear_cache
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/142 b/tests/btrfs/142
+index 1318be0f..b2cc34a3 100755
+--- a/tests/btrfs/142
++++ b/tests/btrfs/142
+@@ -39,7 +39,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ # -o nospace_cache makes sure data is written to the start position of the data
+ # chunk
+-_scratch_mount -o nospace_cache,nodatasum
++_scratch_mount -o nospace_cache,nodatasum,clear_cache
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/143 b/tests/btrfs/143
+index 6736dcad..2f673ae2 100755
+--- a/tests/btrfs/143
++++ b/tests/btrfs/143
+@@ -46,7 +46,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ # -o nospace_cache makes sure data is written to the start position of the data
+ # chunk
+-_scratch_mount -o nospace_cache,nodatasum
++_scratch_mount -o nospace_cache,nodatasum,clear_cache
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/151 b/tests/btrfs/151
+index 099e85cc..e8bdc33c 100755
+--- a/tests/btrfs/151
++++ b/tests/btrfs/151
+@@ -32,7 +32,7 @@ _scratch_dev_pool_get 3
+ _scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
+ 
+ # we need an empty data chunk, so nospace_cache is required.
+-_scratch_mount -onospace_cache
++_scratch_mount -onospace_cache,clear_cache
+ 
+ # if data chunk is empty, 'btrfs device remove' can change raid1 to
+ # single.
+diff --git a/tests/btrfs/157 b/tests/btrfs/157
+index 0cfe3ce5..cd69cc16 100755
+--- a/tests/btrfs/157
++++ b/tests/btrfs/157
+@@ -66,7 +66,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ # -o nospace_cache makes sure data is written to the start position of the data
+ # chunk
+-_scratch_mount -o nospace_cache
++_scratch_mount -o nospace_cache,clear_cache
+ 
+ # [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" \
+diff --git a/tests/btrfs/158 b/tests/btrfs/158
+index ad374eba..1bc73450 100755
+--- a/tests/btrfs/158
++++ b/tests/btrfs/158
+@@ -58,7 +58,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ # -o nospace_cache makes sure data is written to the start position of the data
+ # chunk
+-_scratch_mount -o nospace_cache
++_scratch_mount -o nospace_cache,clear_cache
+ 
+ # [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" \
+diff --git a/tests/btrfs/170 b/tests/btrfs/170
+index 15382eb3..746170f4 100755
+--- a/tests/btrfs/170
++++ b/tests/btrfs/170
+@@ -29,7 +29,7 @@ _scratch_mkfs_sized $fs_size >>$seqres.full 2>&1
+ 
+ # Mount without space cache so that we can precisely fill all data space and
+ # unallocated space later (space cache v1 uses data block groups).
+-_scratch_mount "-o nospace_cache"
++_scratch_mount "-o nospace_cache,clear_cache"
+ 
+ # Create our test file and allocate 1826.25Mb of space for it.
+ # This will exhaust the existing data block group and all unallocated space on
+diff --git a/tests/btrfs/199 b/tests/btrfs/199
+index 6aca62f4..2369d52f 100755
+--- a/tests/btrfs/199
++++ b/tests/btrfs/199
+@@ -70,12 +70,15 @@ mkdir -p $loop_mnt
+ # - nospace_cache
+ #   Since v1 cache using DATA space, it can break data extent bytenr
+ #   continuousness.
++# - clear_cache
++#   v2 cache can't work with nospace_cache, so we workaround it by clearing
++#   all the space cache.
+ # - nodatasum
+ #   As there will be 1.5G data write, generating 1.5M csum.
+ #   Disabling datasum could reduce the margin caused by metadata to minimal
+ # - discard
+ #   What we're testing
+-_mount -o nospace_cache,nodatasum,discard $loop_dev $loop_mnt
++_mount -o nospace_cache,clear_cache,nodatasum,discard $loop_dev $loop_mnt
+ 
+ # Craft the following extent layout:
+ #         |  BG1 |      BG2        |       BG3            |
+diff --git a/tests/btrfs/215 b/tests/btrfs/215
+index fa622568..7f0986af 100755
+--- a/tests/btrfs/215
++++ b/tests/btrfs/215
+@@ -30,7 +30,7 @@ _require_non_zoned_device $SCRATCH_DEV
+ _scratch_mkfs > /dev/null
+ # disable freespace inode to ensure file is the first thing in the data
+ # blobk group
+-_scratch_mount -o nospace_cache
++_scratch_mount -o nospace_cache,clear_cache
+ 
+ pagesize=$(get_page_size)
+ blocksize=$(_get_block_size $SCRATCH_MNT)
+-- 
+2.33.0
 
-  Luis
