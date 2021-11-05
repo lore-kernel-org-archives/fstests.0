@@ -2,161 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DF2AC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:42:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D57BC433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:44:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2C2416127C
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:42:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 55CE46126A
+	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:44:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233887AbhKEQpS (ORCPT
+        id S233320AbhKEQrO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 5 Nov 2021 12:45:18 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57522 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233850AbhKEQpR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 Nov 2021 12:45:17 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2A7B361054;
-        Fri,  5 Nov 2021 16:42:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636130558;
-        bh=uTNZNLusc3c7LE2IppzbLNsKPg9tXipdfELTsxVhX9I=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=WEtNO3zXPI2YYjTmT6lhl5YUSO23CR7lru/jlaZwX8OTBeRb2miWZmUx79XPq3PLJ
-         sWyvFtY0e3jvSXwjOSghjp+1B+9KzNePZRYOr+v3i96i0NOUw9QTPz1bLyCwc+fihk
-         q503xWXgSKNeH8FiiqWaTrQ1S63hV+EJvkIQhSMlsi/1rQQTQsQ9qWF4MQONLuMWlW
-         L6WmB6vx3q0KKlBAiat/P6pcT1NirxyHcGzuUI7A7qMQEcvR6wdsH7sKQkRrxGCk0O
-         pKa0qc+nQsOU8PqVdeae5FBGkiXC3bS5Ktczcfw+Vb6jc4RzLGsEsldEZqju8HLOfD
-         ELqWcywg5Goig==
-Date:   Fri, 5 Nov 2021 09:42:37 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 4/5] generic/xxx: Add MMAP CoW test for 'delalloc' case
-Message-ID: <20211105164237.GF24282@magnolia>
-References: <20211105045222.157826-1-ruansy.fnst@fujitsu.com>
- <20211105045222.157826-5-ruansy.fnst@fujitsu.com>
+        Fri, 5 Nov 2021 12:47:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58456 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232930AbhKEQrN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 Nov 2021 12:47:13 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1041C061714
+        for <fstests@vger.kernel.org>; Fri,  5 Nov 2021 09:44:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=wURIXmk3AUnC0x0qS0l9Tw9ZxPN51nPPi0fBR2xhYL4=; b=47t+VQ97HZcNq9e2zTP9u1Y+hJ
+        64kWIj1NntCG6IGpmUvlsi5IZNA+jkXxjpSqDt1VYdjJJ7CIql89SnFkYkUNNW5hpxTbJeTXRvj1y
+        s8mG/nR0TULnsVeuTWZH3wPH/dX1pYR5R8QKVyaiAWAZbnwe1hBsoo9Ym8OVN7FiXxYr37cIJiM/k
+        6PvJ47tmnaCQdCNO6rT5oD6RWIvtMBjR/Ao546JoTl7kGYaIfBbLX11R3g4TMYWtjyHC4aCZHnFbF
+        BSs7TUTo51TAlk31NLCIVEtNwBqJ0ld9fcLd5lzDbuploz5RK//6j/Z7VqdtD/YF4eD55H8qVXNuC
+        l8IBtZIg==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mj2KP-00C0Az-HK; Fri, 05 Nov 2021 16:44:33 +0000
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     fstests@vger.kernel.org, fdmanana@gmail.com, djwong@kernel.org
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Anthony Iliopoulos <ailiopoulos@suse.de>
+Subject: [PATCH v3] fsstress: improve error message on check_cwd() error
+Date:   Fri,  5 Nov 2021 09:44:32 -0700
+Message-Id: <20211105164432.2860572-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211105045222.157826-5-ruansy.fnst@fujitsu.com>
+Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Nov 05, 2021 at 12:52:21PM +0800, Shiyang Ruan wrote:
-> Check what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-> the second block is delalloc.  (MMAP version of generic/222,227)
-> 
-> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-> ---
->  tests/generic/903     | 76 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/903.out |  6 ++++
->  2 files changed, 82 insertions(+)
->  create mode 100755 tests/generic/903
->  create mode 100644 tests/generic/903.out
-> 
-> diff --git a/tests/generic/903 b/tests/generic/903
-> new file mode 100755
-> index 00000000..c55c4c71
-> --- /dev/null
-> +++ b/tests/generic/903
-> @@ -0,0 +1,76 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. xxx
-> +#
-> +# See what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-> +# the second block is delalloc.  (MMAP version of generic/222,227)
-> +#
-> +# This test is dependent on the system page size, so we cannot use md5 in
-> +# the golden output; we can only compare to a check file.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick clone
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -rf $tmp.* $testdir
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +_require_scratch_reflink
-> +_require_xfs_io_command "falloc"
-> +
-> +pagesz=$(getconf PAGE_SIZE)
-> +blksz=$((pagesz / 4))
-> +
-> +echo "Format and mount"
-> +_scratch_mkfs_blocksized $blksz > $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +testdir=$SCRATCH_MNT/test-$seq
-> +mkdir $testdir
-> +
-> +real_blksz=$(_get_file_block_size $testdir)
-> +test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
-> +
-> +echo "Create the original files"
-> +_pwrite_byte 0x61 0 $pagesz $testdir/file1 >> $seqres.full
-> +
-> +$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2 >> $seqres.full
-> +$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2.chk >> $seqres.full
-> +
-> +_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 2)) $blksz >> $seqres.full
-> +_pwrite_byte 0x61 $((blksz * 2)) $blksz $testdir/file2.chk >> $seqres.full
-> +_scratch_cycle_mount
-> +
-> +echo "Compare files"
-> +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
-> +
-> +echo "CoW and unmount"
-> +_pwrite_byte 0x61 $blksz $blksz $testdir/file2 >> $seqres.full
-> +_pwrite_byte 0x61 $blksz $blksz $testdir/file2.chk >> $seqres.full
-> +
-> +_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2 >> $seqres.full
-> +_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2.chk >> $seqres.full
+I ran into an error with generic/083 with xfs due to check_cwd() but
+why it failed is not clear because there are two types of
+failures:
 
-Does this need to check the block mapping to make sure that blocks 1 and
-3 are actually delalloc reservations?  There are certain xfs configs
-(such as extent size hints) that disable delalloc.
+  o stat64() failed (likely -ENOMEM is my guess)
+  o the inode actually changed
 
---D
+Throw a bone out to developers so that in case en error does happen
+they know which rabbit hole to go into.
 
-> +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
-> +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2 >> $seqres.full
-> +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
-> +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2.chk >> $seqres.full
-> +_scratch_cycle_mount
-> +
-> +echo "Compare files"
-> +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
-> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/903.out b/tests/generic/903.out
-> new file mode 100644
-> index 00000000..cfeeb11c
-> --- /dev/null
-> +++ b/tests/generic/903.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 903
-> +Format and mount
-> +Create the original files
-> +Compare files
-> +CoW and unmount
-> +Compare files
-> -- 
-> 2.33.0
-> 
-> 
-> 
+Cc: Anthony Iliopoulos <ailiopoulos@suse.de>
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
+
+Changes on this v3:
+
+ o Minor nitpick on spaces
+ o Changed rabbit hole language
+ o enhanced stat64() error message to include errno as well
+ o cast things as suggested
+
+ ltp/fsstress.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 90ae432e..aab64f33 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -9,6 +9,7 @@
+ #include <sys/uio.h>
+ #include <stddef.h>
+ #include <stdbool.h>
++#include <string.h>
+ #include "global.h"
+ 
+ #ifdef HAVE_BTRFSUTIL_H
+@@ -943,9 +944,22 @@ check_cwd(void)
+ {
+ #ifdef DEBUG
+ 	struct stat64	statbuf;
++	int ret;
++
++	ret = stat64(".", &statbuf);
++	if (ret != 0) {
++		fprintf(stderr, "fsstress: check_cwd stat64() returned %d with errno: %d (%s)\n",
++			ret, errno, strerror(errno));
++		goto out;
++	}
+ 
+-	if (stat64(".", &statbuf) == 0 && statbuf.st_ino == top_ino)
++	if (statbuf.st_ino == top_ino)
+ 		return;
++
++	fprintf(stderr, "fsstress: check_cwd statbuf.st_ino (%llu) != top_ino (%llu)\n",
++		(unsigned long long) statbuf.st_ino,
++		(unsigned long long) top_ino);
++out:
+ 	assert(chdir(homedir) == 0);
+ 	fprintf(stderr, "fsstress: check_cwd failure\n");
+ 	abort();
+-- 
+2.33.0
+
