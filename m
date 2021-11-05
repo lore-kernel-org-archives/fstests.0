@@ -2,72 +2,72 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AEB4C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:40:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DF2AC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:42:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 41A4A6127A
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:40:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2C2416127C
+	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:42:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233366AbhKEQmx (ORCPT
+        id S233887AbhKEQpS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 5 Nov 2021 12:42:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57020 "EHLO mail.kernel.org"
+        Fri, 5 Nov 2021 12:45:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57522 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233079AbhKEQmx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 Nov 2021 12:42:53 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 318B96125F;
-        Fri,  5 Nov 2021 16:40:13 +0000 (UTC)
+        id S233850AbhKEQpR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 5 Nov 2021 12:45:17 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 2A7B361054;
+        Fri,  5 Nov 2021 16:42:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636130413;
-        bh=bzCD4eVZZE/N6wmU2caCdRXcz6eIpSdN1+PpfZvR1Kc=;
+        s=k20201202; t=1636130558;
+        bh=uTNZNLusc3c7LE2IppzbLNsKPg9tXipdfELTsxVhX9I=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=jvRd6DhTf86KM218tmhbxeGmgLxpkV8GYnMKEJzxKRIWEnXDARTK7sX+DTrcsu3W/
-         UULjHgcHkO5EOKif+4EuwG2W5om3GXRoblD3fIq06t1h4GyYfH0o6gP4Zj2tOX7HSd
-         tdWfg05HjNGKnWaFkmFqeoiGwiicjhiWOnK5BlwC83gH9bWToLxKpoZSOFVU+CjDND
-         x+Pt54N7LwqnL9wAibFArNPbqLgQUItQP0hjPkATrwcWFXFtcyGcyQvBcaMmlDjpU2
-         /ZTLVJkq9dDgzrASk3Ha4+SU2P4pig3CZUiHo9aDj1v9ZqcjY04Kn2aTBIod6P1X6G
-         Syv59GCD+q4Cg==
-Date:   Fri, 5 Nov 2021 09:40:12 -0700
+        b=WEtNO3zXPI2YYjTmT6lhl5YUSO23CR7lru/jlaZwX8OTBeRb2miWZmUx79XPq3PLJ
+         sWyvFtY0e3jvSXwjOSghjp+1B+9KzNePZRYOr+v3i96i0NOUw9QTPz1bLyCwc+fihk
+         q503xWXgSKNeH8FiiqWaTrQ1S63hV+EJvkIQhSMlsi/1rQQTQsQ9qWF4MQONLuMWlW
+         L6WmB6vx3q0KKlBAiat/P6pcT1NirxyHcGzuUI7A7qMQEcvR6wdsH7sKQkRrxGCk0O
+         pKa0qc+nQsOU8PqVdeae5FBGkiXC3bS5Ktczcfw+Vb6jc4RzLGsEsldEZqju8HLOfD
+         ELqWcywg5Goig==
+Date:   Fri, 5 Nov 2021 09:42:37 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 3/5] generic/xxx: Add MMAP CoW test for 'hole' case
-Message-ID: <20211105164012.GE24282@magnolia>
+Subject: Re: [PATCH v2 4/5] generic/xxx: Add MMAP CoW test for 'delalloc' case
+Message-ID: <20211105164237.GF24282@magnolia>
 References: <20211105045222.157826-1-ruansy.fnst@fujitsu.com>
- <20211105045222.157826-4-ruansy.fnst@fujitsu.com>
+ <20211105045222.157826-5-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211105045222.157826-4-ruansy.fnst@fujitsu.com>
+In-Reply-To: <20211105045222.157826-5-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Nov 05, 2021 at 12:52:20PM +0800, Shiyang Ruan wrote:
+On Fri, Nov 05, 2021 at 12:52:21PM +0800, Shiyang Ruan wrote:
 > Check what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-> the second block is a hole.  (MMAP version of generic/218,220)
+> the second block is delalloc.  (MMAP version of generic/222,227)
 > 
 > Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
 > ---
->  tests/generic/902     | 70 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/902.out |  6 ++++
->  2 files changed, 76 insertions(+)
->  create mode 100755 tests/generic/902
->  create mode 100644 tests/generic/902.out
+>  tests/generic/903     | 76 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/903.out |  6 ++++
+>  2 files changed, 82 insertions(+)
+>  create mode 100755 tests/generic/903
+>  create mode 100644 tests/generic/903.out
 > 
-> diff --git a/tests/generic/902 b/tests/generic/902
+> diff --git a/tests/generic/903 b/tests/generic/903
 > new file mode 100755
-> index 00000000..a0992fc8
+> index 00000000..c55c4c71
 > --- /dev/null
-> +++ b/tests/generic/902
-> @@ -0,0 +1,70 @@
+> +++ b/tests/generic/903
+> @@ -0,0 +1,76 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +#
 > +# FS QA Test No. xxx
 > +#
 > +# See what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-> +# the second block is a hole.  (MMAP version of generic/218,220)
+> +# the second block is delalloc.  (MMAP version of generic/222,227)
 > +#
 > +# This test is dependent on the system page size, so we cannot use md5 in
 > +# the golden output; we can only compare to a check file.
@@ -118,30 +118,23 @@ On Fri, Nov 05, 2021 at 12:52:20PM +0800, Shiyang Ruan wrote:
 > +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
 > +
 > +echo "CoW and unmount"
+> +_pwrite_byte 0x61 $blksz $blksz $testdir/file2 >> $seqres.full
+> +_pwrite_byte 0x61 $blksz $blksz $testdir/file2.chk >> $seqres.full
+> +
+> +_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2 >> $seqres.full
+> +_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2.chk >> $seqres.full
+
+Does this need to check the block mapping to make sure that blocks 1 and
+3 are actually delalloc reservations?  There are certain xfs configs
+(such as extent size hints) that disable delalloc.
+
+--D
+
 > +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
 > +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2 >> $seqres.full
 > +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
 > +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2.chk >> $seqres.full
 > +_scratch_cycle_mount
-
-One thing I noticed about the last two tests is that since you only
-write to the two shared blocks in the middle of the page, the fs could
-very well ignore the holes in the first and last block when it's
-handling the page fault.  XFS/iomap will (iirc) allocate those two holes
-at writeback time and flush the whole thing to disk, but that isn't a
-guaranteed behavior.
-
-So I think the point of this test is to make sure that COW does the
-right thing on a bs<ps filesystem such that the adjoining blocks don't
-end up with garbage in them, right?  And we don't care what allocation
-decisions the fs makes, so long as the read()able contents are what we
-expect, right?
-
-If that's correct,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
 > +
 > +echo "Compare files"
 > +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
@@ -150,13 +143,13 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/902.out b/tests/generic/902.out
+> diff --git a/tests/generic/903.out b/tests/generic/903.out
 > new file mode 100644
-> index 00000000..4fb8b6cb
+> index 00000000..cfeeb11c
 > --- /dev/null
-> +++ b/tests/generic/902.out
+> +++ b/tests/generic/903.out
 > @@ -0,0 +1,6 @@
-> +QA output created by 902
+> +QA output created by 903
 > +Format and mount
 > +Create the original files
 > +Compare files
