@@ -2,114 +2,146 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB0C8C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:50:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C22FDC433F5
+	for <linux-fstests@archiver.kernel.org>; Sat,  6 Nov 2021 01:58:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9157761245
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Nov 2021 16:50:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 925F460EC0
+	for <linux-fstests@archiver.kernel.org>; Sat,  6 Nov 2021 01:58:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232930AbhKEQwm (ORCPT
+        id S230369AbhKFCBA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 5 Nov 2021 12:52:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58712 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234043AbhKEQwm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 Nov 2021 12:52:42 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5D03D61037;
-        Fri,  5 Nov 2021 16:50:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636131002;
-        bh=tJ2wahvQcjofNAYH8EwWv9wUAgrOFo92qU0q6vMQIb0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lcTEw+xAYHgdX2G0QBR8EOdiXKMaz/xMA9CXdmr1B+9vezWc3IQrouo+Z5N26Iipi
-         qYun91ggu7Ew+S9NB1zXU8nWObY9ne/R6pORTKkygAgHopwcbivxBtCJ5nymDiRMbm
-         vgaAc6hlnsG7JWqZbSK5RtEI3h1/eIWIVK0WEuo8CkMaGd6NhCVjvkf1RDdzuZp0uw
-         3ImePgqg8tLgfw0twrgsF/UZXvY6jLG8BIrf2BqWp/vGxfgrPu1q6p7unipE4eg1S6
-         PrufgppmdW1Gwttz8FEyMKefah3U3d5v/ukcGoGzTSgTISSoh9cLBGqGyXNIxOiy2S
-         YoIg8Gx9TTYtQ==
-Date:   Fri, 5 Nov 2021 09:50:02 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     fstests@vger.kernel.org, fdmanana@gmail.com,
-        Anthony Iliopoulos <ailiopoulos@suse.de>
-Subject: Re: [PATCH v3] fsstress: improve error message on check_cwd() error
-Message-ID: <20211105165002.GH24282@magnolia>
-References: <20211105164432.2860572-1-mcgrof@kernel.org>
+        Fri, 5 Nov 2021 22:01:00 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:51367 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S230270AbhKFCBA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 Nov 2021 22:01:00 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1A61wEDt006670
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 5 Nov 2021 21:58:15 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 7BBDA15C00B9; Fri,  5 Nov 2021 21:58:14 -0400 (EDT)
+Date:   Fri, 5 Nov 2021 21:58:14 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        leah.rumancik@gmail.com
+Subject: xfs/076 takes a long long time testing with a realtime volume
+Message-ID: <YYXhNip3PctJAaDY@mit.edu>
+References: <YYVo8ZyKpy4Di0pK@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211105164432.2860572-1-mcgrof@kernel.org>
+In-Reply-To: <YYVo8ZyKpy4Di0pK@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Nov 05, 2021 at 09:44:32AM -0700, Luis Chamberlain wrote:
-> I ran into an error with generic/083 with xfs due to check_cwd() but
-> why it failed is not clear because there are two types of
-> failures:
-> 
->   o stat64() failed (likely -ENOMEM is my guess)
->   o the inode actually changed
-> 
-> Throw a bone out to developers so that in case en error does happen
-> they know which rabbit hole to go into.
-> 
-> Cc: Anthony Iliopoulos <ailiopoulos@suse.de>
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+After committing some exclusions into my test runner framework (see
+below), I tested a potential fix to xfs/076 which disables the
+real-time volume when creating the scratch volume.  Should I send it
+as a formal patch to fstests?
 
-LGTM,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+diff --git a/tests/xfs/076 b/tests/xfs/076
+index eac7410e..5628c08f 100755
+--- a/tests/xfs/076
++++ b/tests/xfs/076
+@@ -60,6 +60,7 @@ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fpunch"
+ _require_xfs_sparse_inodes
+ 
++unset SCRATCH_RTDEV
+ _scratch_mkfs "-d size=50m -m crc=1 -i sparse" |
+ 	_filter_mkfs > /dev/null 2> $tmp.mkfs
+ . $tmp.mkfs	# for isize
 
---D
+						- Ted
 
-> ---
-> 
-> Changes on this v3:
-> 
->  o Minor nitpick on spaces
->  o Changed rabbit hole language
->  o enhanced stat64() error message to include errno as well
->  o cast things as suggested
-> 
->  ltp/fsstress.c | 16 +++++++++++++++-
->  1 file changed, 15 insertions(+), 1 deletion(-)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 90ae432e..aab64f33 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -9,6 +9,7 @@
->  #include <sys/uio.h>
->  #include <stddef.h>
->  #include <stdbool.h>
-> +#include <string.h>
->  #include "global.h"
->  
->  #ifdef HAVE_BTRFSUTIL_H
-> @@ -943,9 +944,22 @@ check_cwd(void)
->  {
->  #ifdef DEBUG
->  	struct stat64	statbuf;
-> +	int ret;
-> +
-> +	ret = stat64(".", &statbuf);
-> +	if (ret != 0) {
-> +		fprintf(stderr, "fsstress: check_cwd stat64() returned %d with errno: %d (%s)\n",
-> +			ret, errno, strerror(errno));
-> +		goto out;
-> +	}
->  
-> -	if (stat64(".", &statbuf) == 0 && statbuf.st_ino == top_ino)
-> +	if (statbuf.st_ino == top_ino)
->  		return;
-> +
-> +	fprintf(stderr, "fsstress: check_cwd statbuf.st_ino (%llu) != top_ino (%llu)\n",
-> +		(unsigned long long) statbuf.st_ino,
-> +		(unsigned long long) top_ino);
-> +out:
->  	assert(chdir(homedir) == 0);
->  	fprintf(stderr, "fsstress: check_cwd failure\n");
->  	abort();
-> -- 
-> 2.33.0
-> 
+For why this is needed, see the commit description below:
+
+commit c41ae1cc0b21eafd2858541c0bc195f951c0726c
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Fri Nov 5 20:46:19 2021 -0400
+
+    test-appliance: exclude xfs/076 from the realtime configs
+    
+    The xfs/076 test takes two minutes on a normal xfs file system (e.g.,
+    a normal 4k block size file system).  However, when there is a
+    real-time volume attached, this test takes over 80 minutes.  The
+    reason for this seems to be because the test is spending a lot more
+    time failing to create files due to missing directories.  Compare:
+    
+    root@xfstests-2:~# ls -sh /results/xfs/results-4k/xfs/076.full
+    48K /results/xfs/results-4k/xfs/076.full
+    root@xfstests-2:~# ls -sh /tmp/realtime-076.full
+    25M /tmp/realtime-076.full
+    
+    and:
+    
+    root@xfstests-2:~# grep "cannot touch" /results/xfs/results-4k/xfs/076.full | wc -l
+    656
+    root@xfstests-2:~# grep "cannot touch" /tmp/realtime-076.full | wc -l
+    327664
+    
+    The failures from 076.full look like this:
+    
+    touch: cannot touch '/xt-vdc/offset.21473722368/25659': No space left on device
+    touch: cannot touch '/xt-vdc/offset.21473656832/0': No such file or directory
+    touch: cannot touch '/xt-vdc/offset.21473591296/0': No such file or directory
+    ...
+    touch: cannot touch '/xt-vdc/offset.196608/0': No such file or directory
+    touch: cannot touch '/xt-vdc/offset.131072/0': No such file or directory
+    touch: cannot touch '/xt-vdc/offset.65536/0': No such file or directory
+    touch: cannot touch '/xt-vdc/offset.0/0': No such file or directory
+    
+    What seems to be going on is that xfs/076 tries to create a small
+    scratch file system --- but when we attach a real-time volume this
+    balloons the available size of the file system.  Of course, that space
+    can't be used for normal files.  As a result, xfs/076 is incorrectly
+    estimating how many files it needs to create to fill the file system.
+    
+    I'm not sure what's the best way to fix this in the test; perhaps the
+    test should forcibly unset SCRATCH_RTDEV environment variable before
+    running _scratch_mkfs?  Anyway, for now, we'll just skip running
+    xfs/076 for the xfs/realtime* configs.
+    
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime.exclude b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime.exclude
+index a9acba9c..bafce552 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime.exclude
++++ b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime.exclude
+@@ -1,2 +1,7 @@
+ # Normal configurations don't support dax
+ -g dax
++
++# The xfs/076 test takes well over an hour (80 minutes using 100GB GCE
++# PD/SSD) when run with an external realtime device, which triggers
++# the ltm "test is stalled" failsafe which aborts the VM.
++xfs/076
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_28k_logdev.exclude b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_28k_logdev.exclude
+index a9acba9c..bafce552 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_28k_logdev.exclude
++++ b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_28k_logdev.exclude
+@@ -1,2 +1,7 @@
+ # Normal configurations don't support dax
+ -g dax
++
++# The xfs/076 test takes well over an hour (80 minutes using 100GB GCE
++# PD/SSD) when run with an external realtime device, which triggers
++# the ltm "test is stalled" failsafe which aborts the VM.
++xfs/076
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_logdev.exclude b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_logdev.exclude
+index a9acba9c..bafce552 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_logdev.exclude
++++ b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/realtime_logdev.exclude
+@@ -1,2 +1,7 @@
+ # Normal configurations don't support dax
+ -g dax
++
++# The xfs/076 test takes well over an hour (80 minutes using 100GB GCE
++# PD/SSD) when run with an external realtime device, which triggers
++# the ltm "test is stalled" failsafe which aborts the VM.
++xfs/076
