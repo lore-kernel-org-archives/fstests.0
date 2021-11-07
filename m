@@ -2,98 +2,91 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E108C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Nov 2021 13:14:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86AD8C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Nov 2021 13:31:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74F4C613B1
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Nov 2021 13:14:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5C4636135F
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Nov 2021 13:31:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232341AbhKGNRa (ORCPT
+        id S232441AbhKGNe3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 7 Nov 2021 08:17:30 -0500
-Received: from out20-50.mail.aliyun.com ([115.124.20.50]:55931 "EHLO
-        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231136AbhKGNR3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Nov 2021 08:17:29 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08580297|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0796134-0.00282019-0.917566;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.LosbhEQ_1636290885;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.LosbhEQ_1636290885)
-          by smtp.aliyun-inc.com(10.147.44.129);
-          Sun, 07 Nov 2021 21:14:45 +0800
-Date:   Sun, 7 Nov 2021 21:14:44 +0800
+        Sun, 7 Nov 2021 08:34:29 -0500
+Received: from out20-109.mail.aliyun.com ([115.124.20.109]:51751 "EHLO
+        out20-109.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230401AbhKGNe2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Nov 2021 08:34:28 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.3396402|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0539591-0.00124263-0.944798;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047204;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.Lose5zv_1636291903;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Lose5zv_1636291903)
+          by smtp.aliyun-inc.com(10.147.43.95);
+          Sun, 07 Nov 2021 21:31:44 +0800
+Date:   Sun, 7 Nov 2021 21:31:43 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Carlos Maiolino <cmaiolino@redhat.com>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] common/rc: Enable _format_swapfile to return the
- swap size
-Message-ID: <YYfRRO7RHkNyobxF@desktop>
-References: <20211102152828.26895-1-cmaiolino@redhat.com>
- <20211102152828.26895-2-cmaiolino@redhat.com>
+Subject: Re: [PATCH v2 0/5] generic: add a couple of MMAP CoW tests
+Message-ID: <YYfVP7HJDNGwo8p5@desktop>
+References: <20211105045222.157826-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211102152828.26895-2-cmaiolino@redhat.com>
+In-Reply-To: <20211105045222.157826-1-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 02, 2021 at 04:28:27PM +0100, Carlos Maiolino wrote:
-> Once the kernel is free to not map the full swap file during a swapon call,
-> it can be useful to know the exact size of the swap area created during
-> _format_swapfile().
+On Fri, Nov 05, 2021 at 12:52:17PM +0800, Shiyang Ruan wrote:
+> There is a set of CoW tests which is to 
+>   > Check what happens if we BufferedIO/DIO CoW blocks 2-4 of a page's worth
+>   > of blocks when the second block is a regular/unwritten/hole/delalloc/all
+>   > block.
+> I think a test of MMAP CoW is also needed for these kind of testsets.  So,
+> add MMAP CoW for each case.
 > 
-> To achieve this, it is required to change _require_scratch_swapfile(), to drop
-> the _format_swapfile() return value, otherwise, it will also have a return value
-> that will end up in tests outputs causing tests to fail.
-> 
-> Tests using _format_swapfile() that do not require the swap file size do not
-> need to be modified, as the return value will be simply ignored.
-> 
-> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
-> ---
->  common/rc | 10 +++++++---
->  1 file changed, 7 insertions(+), 3 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 7f693d39..fb1f32e0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2587,6 +2587,7 @@ _require_odirect()
->  _format_swapfile() {
->  	local fname="$1"
->  	local sz="$2"
-> +	local swap_log=""
->  
->  	rm -f "$fname"
->  	touch "$fname"
-> @@ -2595,8 +2596,11 @@ _format_swapfile() {
->  	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
->  	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
->  	# Ignore permission complaints on filesystems that don't support perms
-> -	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
-> -		grep -v "insecure permission"
-> +	swap_log=$($MKSWAP_PROG "$fname" 2>&1 | grep -v "insecure permission")
-> +	echo $swap_log >> $seqres.full
-> +
-> +	# return created swap size
-> +	echo $swap_log | grep -oP '(?<=size = )\w+'
+> Shiyang Ruan (5):
+>   generic/xxx: Add MMAP CoW test for 'regular' case
+>   generic/xxx: Add MMAP CoW test for 'unwritten' case
+>   generic/xxx: Add MMAP CoW test for 'hole' case
+>   generic/xxx: Add MMAP CoW test for 'delalloc' case
+>   generic/xxx: Add MMAP CoW test for 'all' case
 
-It's now returning the size of the swap space, it'd be better to add
-some comments before the helper to describe/explain the behavior.
+Thanks for all these tests!
+
+You could remove the 'xxx' part from patch summary, and for new tests
+you don't have to write the specific test seq number in summary,
+something like below is fine
+
+   generic: add mmap CoW test for 'regular' case
+
+As test seq number will always change on commit, there's no need to keep
+such a place holder.
 
 Thanks,
 Eryu
 
->  }
->  
->  _swapon_file() {
-> @@ -2628,7 +2632,7 @@ _require_scratch_swapfile()
->  	_scratch_mount
->  
->  	# Minimum size for mkswap is 10 pages
-> -	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
-> +	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
->  
->  	# ext* has supported all variants of swap files since their
->  	# introduction, so swapon should not fail.
+> 
+>  tests/generic/900     |  75 +++++++++++++++++++++++
+>  tests/generic/900.out |   6 ++
+>  tests/generic/901     |  76 ++++++++++++++++++++++++
+>  tests/generic/901.out |   6 ++
+>  tests/generic/902     |  70 ++++++++++++++++++++++
+>  tests/generic/902.out |   6 ++
+>  tests/generic/903     |  76 ++++++++++++++++++++++++
+>  tests/generic/903.out |   6 ++
+>  tests/generic/904     | 135 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/904.out |  82 +++++++++++++++++++++++++
+>  10 files changed, 538 insertions(+)
+>  create mode 100755 tests/generic/900
+>  create mode 100644 tests/generic/900.out
+>  create mode 100755 tests/generic/901
+>  create mode 100644 tests/generic/901.out
+>  create mode 100755 tests/generic/902
+>  create mode 100644 tests/generic/902.out
+>  create mode 100755 tests/generic/903
+>  create mode 100644 tests/generic/903.out
+>  create mode 100755 tests/generic/904
+>  create mode 100644 tests/generic/904.out
+> 
 > -- 
-> 2.31.1
+> 2.33.0
+> 
+> 
