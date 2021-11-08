@@ -2,178 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41090C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 14:29:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBCC3C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 14:49:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2AD5E610FF
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 14:29:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE50661360
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 14:49:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240468AbhKHObt (ORCPT
+        id S240611AbhKHOwI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Nov 2021 09:31:49 -0500
-Received: from smtp-out1.suse.de ([195.135.220.28]:52430 "EHLO
+        Mon, 8 Nov 2021 09:52:08 -0500
+Received: from smtp-out1.suse.de ([195.135.220.28]:54074 "EHLO
         smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239496AbhKHObs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 09:31:48 -0500
+        with ESMTP id S240636AbhKHOv6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 09:51:58 -0500
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 654DC218E0;
-        Mon,  8 Nov 2021 14:29:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1636381743; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=t/XNogeHhg7CLaeOwLlJhLXTQWzeodDuZScgLI/OWjs=;
-        b=G5VuPytTismwYtYgbRypuV8tUXN39a5b0AkATN03LX1pBOz++YbfdctHlwEqUo5K2/uCRa
-        4PUuOrb1bApypz9AIlkwjOCyCebjCfbfu0ZJ/kOpHBIr3amo4JV5AVOmevcCIaXZXYSxKb
-        HfSJ+wCdQmSSxlcvoxm/LtDV+zvzgmk=
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 387BC21B09;
+        Mon,  8 Nov 2021 14:49:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1636382948; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=4nNd18yl8naLVwzgnRVAYekH8A4vA0NXERSLlBDV9Nc=;
+        b=L+tWuzyfPBl9lBtgyAD0hV6SPf9F0vik8PH2qnev7P8a0IRz88pMWQWm8uw6uGwJsnG0Q8
+        5RAlKhDsihakZUYcNi4fJpU1r1DJ0HH3Uqa1Gy+4NToBOUitEmXY9Cp/Si/v5BM6YgNoyR
+        LG5Y0XwAOZcu0kkF37QqkeyLOvueMQo=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1636382948;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=4nNd18yl8naLVwzgnRVAYekH8A4vA0NXERSLlBDV9Nc=;
+        b=VqUCBrjEGJUTtvnkzu7Wa5eetxDhNCdDG39lkof2azWvpRBqk2eXjVA5NsmYo6Rrt2/Qd2
+        LbUEjjv2RVlQ/FBg==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 21F1213BA0;
-        Mon,  8 Nov 2021 14:29:03 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E350F13BA0;
+        Mon,  8 Nov 2021 14:49:07 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id GwW5BS80iWHmJgAAMHmgww
-        (envelope-from <nborisov@suse.com>); Mon, 08 Nov 2021 14:29:03 +0000
-From:   Nikolay Borisov <nborisov@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v3] btrfs: Test proper interaction between skip_balance and paused balance
-Date:   Mon,  8 Nov 2021 16:29:01 +0200
-Message-Id: <20211108142901.1003352-1-nborisov@suse.com>
-X-Mailer: git-send-email 2.25.1
+        id Ivi9NOM4iWFQMgAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 08 Nov 2021 14:49:07 +0000
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id 62754ccf;
+        Mon, 8 Nov 2021 14:49:07 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     Luis Chamberlain <mcgrof@suse.com>,
+        Anthony Iliopoulos <ailiop@suse.com>,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH] generic/528: take fs timestamps granularity into account in tolerance interval
+Date:   Mon,  8 Nov 2021 14:49:05 +0000
+Message-Id: <20211108144905.11515-1-lhenriques@suse.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Ensure a device can be added to a filesystem that has a paused balance
-operation and has been mounted with the 'skip_balance' mount option
+Filesystems timestamps granularity can cause spurious test failures:
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+  QA output created by 528
+  btime has value of 1635818936
+  btime is NOT in range 1635818937 .. 1635818942
+
+This test output makes it looks like $testfile was created *before* the
+'date' command was executed.  What really happen was that btime was
+truncated according to the granularity defined by filesystem (I've seen
+this with both ext4 and xfs, but I guess others are also affected).
+
+Since granularity can't be worse than a second, simply adjust the test
+tolerance interval by 1 second.
+
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
 ---
+ tests/generic/528 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-V3:
- * Added swapon to the list of exclusive ops
- * Use _spare_dev_get
- * Test balance resume via progs while balance is paused. I hit an assertion failure
- outside of xfstest while doing this sequence of steps so let's add it to
- ensure that's not regressed.
-
- tests/btrfs/049     | 92 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/049.out |  1 +
- 2 files changed, 93 insertions(+)
- create mode 100755 tests/btrfs/049
-
-diff --git a/tests/btrfs/049 b/tests/btrfs/049
-new file mode 100755
-index 000000000000..d01ef05e5ead
---- /dev/null
-+++ b/tests/btrfs/049
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 049
-+#
-+# Ensure that it's possible to add a device when we have a paused balance
-+# and the filesystem is mounted with skip_balance. The issue is fixed by a patch
-+# titled "btrfs: allow device add if balance is paused"
-+#
-+. ./common/preamble
-+_begin_fstest quick balance auto
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_require_scratch_swapfile
-+_require_scratch_dev_pool 3
-+
-+_scratch_dev_pool_get 2
-+_spare_dev_get
-+
-+swapfile="$SCRATCH_MNT/swap"
-+_scratch_pool_mkfs >/dev/null
-+_scratch_mount
-+_format_swapfile "$swapfile" $(($(get_page_size) * 10))
-+
-+check_exclusive_ops()
-+{
-+	$BTRFS_UTIL_PROG device remove 2 $SCRATCH_MNT &>/dev/null
-+	[ $? -ne 0 ] || _fail "Successfully removed device"
-+	$BTRFS_UTIL_PROG filesystem resize -5m $SCRATCH_MNT &> /dev/null
-+	[ $? -ne 0 ] || _fail "Successfully resized filesystem"
-+	$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT &> /dev/null
-+	[ $? -ne 0 ] || _fail "Successfully replaced device"
-+	swapon "$swapfile" &> /dev/null
-+	[ $? -ne 0 ] || _fail "Successfully enabled a swap file"
-+}
-+
-+uuid=$(findmnt -n -o UUID $SCRATCH_MNT)
-+
-+# Create some files on the so that balance doesn't complete instantly
-+args=`_scale_fsstress_args -z \
-+	-f write=10 -f creat=10 \
-+	-n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
-+echo "Run fsstress $args" >>$seqres.full
-+$FSSTRESS_PROG $args >/dev/null 2>&1
-+
-+# Start and pause balance to ensure it will be restored on remount
-+echo "Start balance" >>$seqres.full
-+_run_btrfs_balance_start --bg "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
-+[ $? -eq 0 ] || _fail "Balance not paused"
-+
-+# Exclusive ops should be blocked on manual pause of balance
-+check_exclusive_ops
-+
-+# Balance is now placed in paused state during mount
-+_scratch_cycle_mount "skip_balance"
-+
-+# Exclusive ops should be blocked on balance pause due to 'skip_balance'
-+check_exclusive_ops
-+
-+# Device add is the only allowed operation
-+$BTRFS_UTIL_PROG device add -K -f $SPARE_DEV "$SCRATCH_MNT"
-+
-+# Exclusive ops should still be blocked on account that balance is still paused
-+check_exclusive_ops
-+
-+# Should be possible to resume balance after device add
-+$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
-+[ $? -eq 0 ] || _fail "Couldn't resume balance after device add"
-+
-+# Add more files so that new balance won't fish immediately
-+$FSSTRESS_PROG $args >/dev/null 2>&1
-+
-+# Now pause->resume balance. This ensures balance paused is properly set in
-+# the kernel and won't trigger an assertion failure.
-+echo "Start balance" >>$seqres.full
-+_run_btrfs_balance_start --bg "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
-+[ $? -eq 0 ] || _fail "Balance not paused"
-+$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
-+[ $? -eq 0 ] || _fail "Balance can't be resumed via IOCTL"
-+
-+_spare_dev_put
-+_scratch_dev_pool_put
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
-index cb0061b33ff0..c69568ad9323 100644
---- a/tests/btrfs/049.out
-+++ b/tests/btrfs/049.out
-@@ -1 +1,2 @@
- QA output created by 049
-+Silence is golden
---
-2.17.1
-
+diff --git a/tests/generic/528 b/tests/generic/528
+index 24d1ee0e5ec7..a63827b1139b 100755
+--- a/tests/generic/528
++++ b/tests/generic/528
+@@ -41,7 +41,7 @@ btime=$(date +%s -d "$($XFS_IO_PROG -c "statx -v -m $STATX_BTIME" $testfile | \
+ 	grep 'stat.btime =' | cut -d '=' -f 2)")
+ test -n "$btime" || echo "error: did not see btime in output??"
+ 
+-_within_tolerance "btime" "$btime" "$now" 0 5 -v
++_within_tolerance "btime" "$btime" "$now" 1 5 -v
+ 
+ status=0
+ exit
