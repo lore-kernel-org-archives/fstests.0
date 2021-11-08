@@ -2,87 +2,117 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 622AEC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 17:15:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E1E3C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 17:18:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 38C43610A6
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 17:15:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EF4BC61178
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 17:18:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237357AbhKHRSW (ORCPT
+        id S238229AbhKHRUw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Nov 2021 12:18:22 -0500
-Received: from mail.kernel.org ([198.145.29.99]:46840 "EHLO mail.kernel.org"
+        Mon, 8 Nov 2021 12:20:52 -0500
+Received: from mail.kernel.org ([198.145.29.99]:47206 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235503AbhKHRSK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 8 Nov 2021 12:18:10 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 46DF5610A6;
-        Mon,  8 Nov 2021 17:15:26 +0000 (UTC)
+        id S229966AbhKHRUu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Nov 2021 12:20:50 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id DB03561178;
+        Mon,  8 Nov 2021 17:18:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636391726;
-        bh=uWB/U1dhz5NKKPiCZ81LWmEqI1Ba5Xp/lKd7grNYPFE=;
+        s=k20201202; t=1636391885;
+        bh=+WDW4Be1suFht0zC3mnSmRz2BI/lIZxA1DEVipn0jzk=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=FiCug0DhjFo7ZGu0uE3bHceLYTA/StTK0Yi0dsoE8xGVXS0C79eDyNV2YY5KMUhDb
-         qPiQL2+1UYdqeBQv0RnQPL7ep0Gx6+sGUWo9yuNmJYSFEFqWZYrVVtX7dHRS17cXzO
-         96PUuE04NyC5OCLZntlE62Anu+MXQHsHxoB2+UVKGBhTJmg+J39dVAcZ17iCEpL8fa
-         VMMNiI40w7L3hj/vUf2gzc+knS91uKwfFXEdu7e9xwu/ygeS8sKWRDyu1VVykoFYa1
-         qZZJV6f/gLTrcWx+UjuZRr/h/8V5EGYrLweQW3woMKzWmkBXmnEQ4wMClye7yGfgWU
-         H52jiUoBBvAkg==
-Date:   Mon, 8 Nov 2021 09:15:25 -0800
+        b=CoTNrkZJiQlpeviY6tGp3e5GWNP7KNc97k2QyQDqg35TBz8y/PK0L3YL081iiqBAY
+         butJEI+4dLSVU/GECdZV5rXaUI75wzsePyA3fHXuFgCuiSDbmpGcReMfhhUU2mo1bw
+         s6cbLIXKK56SfdC4x6msRS9IteklY4t0CnseprObx4pL3WI6mC71zNMVWDNNEvt1Dm
+         4Ikhj1M0tntxhdGBmH8Q296XT0trXsJvp3+WXZA/Wmow72WOHuHwG1NsQnzKgMnO7u
+         5K3OkhB48m9LP2l2EenViUUFzRGDiK1OIfCHCfr5MVN1NOZiN9sMkbMNS8qGTwL/ls
+         1jM45q9DTO/Eg==
+Date:   Mon, 8 Nov 2021 09:18:05 -0800
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-Cc:     fstests@vger.kernel.org, Luis Chamberlain <mcgrof@suse.com>,
-        Anthony Iliopoulos <ailiop@suse.com>
-Subject: Re: [PATCH] generic/528: take fs timestamps granularity into account
- in tolerance interval
-Message-ID: <20211108171525.GI24282@magnolia>
-References: <20211108144905.11515-1-lhenriques@suse.de>
+To:     Lukas Czerner <lczerner@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu,
+        guan@eryu.me
+Subject: Re: [PATCH 1/2] common/rc: add _require_kernel_config and
+ _has_kernel_config
+Message-ID: <20211108171805.GJ24282@magnolia>
+References: <20211108151916.27845-1-lczerner@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20211108144905.11515-1-lhenriques@suse.de>
+In-Reply-To: <20211108151916.27845-1-lczerner@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 08, 2021 at 02:49:05PM +0000, Luís Henriques wrote:
-> Filesystems timestamps granularity can cause spurious test failures:
+On Mon, Nov 08, 2021 at 04:19:15PM +0100, Lukas Czerner wrote:
+> Add _require_kernel_config() and _has_kernel_config() helpers to check
+> whether a specific kernel configuration is enabled on the kernel.
 > 
->   QA output created by 528
->   btime has value of 1635818936
->   btime is NOT in range 1635818937 .. 1635818942
+> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> ---
+>  common/config |  1 +
+>  common/rc     | 29 +++++++++++++++++++++++++++++
+>  2 files changed, 30 insertions(+)
 > 
-> This test output makes it looks like $testfile was created *before* the
-> 'date' command was executed.  What really happen was that btime was
-> truncated according to the granularity defined by filesystem (I've seen
-> this with both ext4 and xfs, but I guess others are also affected).
-> 
-> Since granularity can't be worse than a second, simply adjust the test
-> tolerance interval by 1 second.
+> diff --git a/common/config b/common/config
+> index 164381b7..e0a5c5df 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -226,6 +226,7 @@ export OPENSSL_PROG="$(type -P openssl)"
+>  export ACCTON_PROG="$(type -P accton)"
+>  export E2IMAGE_PROG="$(type -P e2image)"
+>  export BLKZONE_PROG="$(type -P blkzone)"
+> +export GZIP_PROG="$(type -P gzip)"
+>  
+>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>  # newer systems have udevadm command but older systems like RHEL5 don't.
+> diff --git a/common/rc b/common/rc
+> index 0d261184..84154868 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4703,6 +4703,35 @@ _require_names_are_bytes() {
+>          esac
+>  }
+>  
+> +_has_kernel_config()
+> +{
+> +	option=$1
+> +	uname=$(uname -r)
+> +	config_list="$KCONFIG_PATH
 
-/me wonders if that's still going to trip over vfat/ntfs, but as far as
-modern xfs/ext4/btrfs go, this should be sufficient.
+This new KCONFIG_PATH variable should be documented in the README.
 
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Otherwise, the logic looks solid.
 
 --D
 
-
-> Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> ---
->  tests/generic/528 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> +		     /proc/config.gz
+> +		     /lib/modules/$uname/build/.config
+> +		     /boot/config-$uname
+> +		     /lib/kernel/config-$uname"
+> +
+> +	for config in $config_list; do
+> +		[ ! -f $config ] && continue
+> +		[ $config = "/proc/config.gz" ] && break
+> +		grep -qE "^${option}=[my]" $config
+> +		return
+> +	done
+> +
+> +	[ ! -f $config ] && _notrun "Could not locate kernel config file"
+> +
+> +	# We can only get here with /proc/config.gz
+> +	_require_command "$GZIP_PROG" gzip
+> +	$GZIP_PROG -cd $config | grep -qE "^${option}=[my]"
+> +}
+> +
+> +_require_kernel_config()
+> +{
+> +	_has_kernel_config $1 || _notrun "Installed kernel not built with $1"
+> +}
+> +
+>  init_rc
+>  
+>  ################################################################################
+> -- 
+> 2.31.1
 > 
-> diff --git a/tests/generic/528 b/tests/generic/528
-> index 24d1ee0e5ec7..a63827b1139b 100755
-> --- a/tests/generic/528
-> +++ b/tests/generic/528
-> @@ -41,7 +41,7 @@ btime=$(date +%s -d "$($XFS_IO_PROG -c "statx -v -m $STATX_BTIME" $testfile | \
->  	grep 'stat.btime =' | cut -d '=' -f 2)")
->  test -n "$btime" || echo "error: did not see btime in output??"
->  
-> -_within_tolerance "btime" "$btime" "$now" 0 5 -v
-> +_within_tolerance "btime" "$btime" "$now" 1 5 -v
->  
->  status=0
->  exit
