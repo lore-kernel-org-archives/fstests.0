@@ -2,723 +2,2511 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AEB4C433FE
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 15:19:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B60FEC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 17:05:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 30F8661288
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 15:19:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 827E961502
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 17:05:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238716AbhKHPWP (ORCPT
+        id S239404AbhKHRIN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Nov 2021 10:22:15 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40092 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S238646AbhKHPWO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 10:22:14 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1636384769;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Q2lgOd2she9BKOWNPFTHtDl8FOnhsy1nvFWaxgcWj0I=;
-        b=W5LlA/gkSpGkHZvyb43a9VHRBHJt70dk76ovpCqOcZWp7iMObavDG9KRWVXZNr2slDhhLr
-        zzKCZgOA12ZpNsfIUYwWYJDBk0hkkG36myumLZsq+K2IIWZ1zGDYthfKVoTUifUZr+DnZP
-        7siEajNT+YkZdJYzVi+GdpeFh1g94aM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-470-rm1dGre8NzyURIbVzbhs-g-1; Mon, 08 Nov 2021 10:19:24 -0500
-X-MC-Unique: rm1dGre8NzyURIbVzbhs-g-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4C66F1054F92;
-        Mon,  8 Nov 2021 15:19:23 +0000 (UTC)
-Received: from localhost.localdomain (unknown [10.40.194.220])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0A1155C3E0;
-        Mon,  8 Nov 2021 15:19:21 +0000 (UTC)
-From:   Lukas Czerner <lczerner@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org, tytso@mit.edu, guan@eryu.me
-Subject: [PATCH v6 2/2] ext4: add test for all ext4/ext3/ext2 mount options
-Date:   Mon,  8 Nov 2021 16:19:16 +0100
-Message-Id: <20211108151916.27845-2-lczerner@redhat.com>
-In-Reply-To: <20211108151916.27845-1-lczerner@redhat.com>
-References: <20211108151916.27845-1-lczerner@redhat.com>
+        Mon, 8 Nov 2021 12:08:13 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44014 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239238AbhKHRIM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Nov 2021 12:08:12 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E238C61406;
+        Mon,  8 Nov 2021 17:05:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1636391128;
+        bh=FXLPNalVGdc1eJSGPqCRh3H1kXsObeaNd2DGrFvbezY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=VnwGqW8n50zMd2HXLOEnWuvfb3b8MGWXBoKl5OyX170qaMrA/iKsVfoHmpid/QDrJ
+         pvcdvGBFPrqG4GcUaKY2/2dfbaP8iEjrwy5j04yHgIHibasL0GypEcEx9FBr+M4Zq1
+         HSQPiCWxE4HXpKCBQ9w2PXS3dgdWl+ZEx0ebkFfy+KB6aYChOa2lKSoyPfflskxU9C
+         e8YizP/ADSj/p4HmxM3C1hCZ9+HKejC56QD8clDd1m9F5TLM1rHczqGOL6McxqQ5iW
+         aZYJI8U3ZJ2x12dXSAysrJ8OAgmYFTs32Jw6C6vMTXPnGiY0PEMOGv5IaSIV6PkuIs
+         grSMBXkUovrpg==
+Date:   Mon, 8 Nov 2021 09:05:27 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
+        xfs <linux-xfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v2] fsstress: run more than 2^32 operations
+Message-ID: <20211108170527.GW24307@magnolia>
+References: <20211103161206.GW24282@magnolia>
+ <YYfOnMc6mu3Bv/4e@desktop>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YYfOnMc6mu3Bv/4e@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add test to validate that all the ext4, ext3 and ext2 are properly
-recognized, validate and applied to avoid regressions as ext4 moves to
-the new mount API.
+On Sun, Nov 07, 2021 at 09:03:24PM +0800, Eryu Guan wrote:
+> On Wed, Nov 03, 2021 at 09:12:06AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Now that storage has gotten really really fast, we have to crank up
+> > TIME_FACTOR to amusingly huge values to do things such as 10-day soak
+> > testing.  "Un"fortunately, fsstress uses 'int' to count operations,
+> > which means we get close to maxing out the 2^31 limit on operations in
+> > fsstress.  Widen it to a long long value to take us to the heat death of
+> > the universe, like we did for fsx a while back. ;)
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> > v2: fix whitespace damage, add rvbs
+> 
+> Ah, I meant to reply to this v2 patch.. I fixed a compile warning on
+> commit
+> 
+> fsstress.c: In function 'subvol_delete_f':
+> fsstress.c:4970:16: warning: format '%d' expects argument of type 'int', but argument 3 has type 'opnum_t' {aka 'long long int'} [-Wformat=]
+>  4970 |    printf("%d:%d: subvol_delete - no subvolume\n", procid,
+>       |               ~^
+>       |                |
+>       |                int
+>       |               %lld
+>  4971 |           opno);
+>       |           ~~~~
+>       |           |
+>       |           opnum_t {aka long long int}
 
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
----
-V2: Move minimum kernel version requirement up to 5.12
-    Rewrite kernel_gte() to work correctly
-V3: Rename functions to not start with _
-V4: Check kernel config file to make sure the test works with
-    various kernel configuration
-V5: Check /proc/config.gz for kernel config location first
-V6: Move kernel configuration check into a separate patch
+Oops, I guess I didn't have the necessary btrfs libraries installed to
+build that part of fsstress.  Thank you very much for fixing that!
 
- tests/ext4/053     | 633 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/053.out |   2 +
- 2 files changed, 635 insertions(+)
- create mode 100755 tests/ext4/053
- create mode 100644 tests/ext4/053.out
+--D
 
-diff --git a/tests/ext4/053 b/tests/ext4/053
-new file mode 100755
-index 00000000..eaa02508
---- /dev/null
-+++ b/tests/ext4/053
-@@ -0,0 +1,633 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>.
-+#
-+# FS QA Test 053
-+#
-+# Sanity check of ext4 mount options
-+#
-+. ./common/preamble
-+_begin_fstest auto mount
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	if [ -n "$LOOP_LOGDEV" ];then
-+		_destroy_loop_device $LOOP_LOGDEV 2>/dev/null
-+	fi
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+echo "Silence is golden."
-+
-+SIZE=$((1024 * 1024))	# 1GB in KB
-+LOGSIZE=$((10 *1024))	# 10MB in KB
-+
-+_supported_fs ext2 ext3 ext4
-+_require_scratch_size $SIZE
-+_require_quota
-+_require_loop
-+_require_command "$TUNE2FS_PROG" tune2fs
-+MKE2FS_PROG=$(type -P mke2fs)
-+_require_command "$MKE2FS_PROG" mke2fs
-+_require_kernel_config CONFIG_QFMT_V2
-+
-+LOG=""
-+print_log() {
-+	LOG="$LOG $@"
-+}
-+
-+KERNEL_VERSION=`uname -r | cut -d'.' -f1,2`
-+KERNEL_MAJ=${KERNEL_VERSION%.*}
-+KERNEL_MIN=${KERNEL_VERSION#*.}
-+
-+kernel_gte() {
-+	major=${1%.*}
-+	minor=${1#*.}
-+
-+	if [ $KERNEL_MAJ -gt $major ]; then
-+		return 0
-+	elif [[ $KERNEL_MAJ -eq $major && $KERNEL_MIN -ge $minor ]]; then
-+		return 0
-+	fi
-+	return 1
-+}
-+
-+
-+# The aim here is to keep the mount options behaviour stable going forward
-+# so there is not much point in testing older kernels.
-+kernel_gte 5.12 || _notrun "This test is only relevant for kernel versions 5.12 and higher"
-+
-+IGNORED="remount,defaults,ignored,removed"
-+CHECK_MINFO="lazytime,noatime,nodiratime,noexec,nosuid,ro"
-+ERR=0
-+
-+test_mnt() {
-+	findmnt -n $SCRATCH_DEV > /dev/null 2>&1
-+	[ $? -ne 0 ] && return $?
-+
-+	if [ $# -eq 1 ]; then
-+		OPTS=$1
-+	elif [ $# -eq 2 ]; then
-+		OPTS=$2
-+	else
-+		return 0
-+	fi
-+
-+	print_log "checking \"$OPTS\" "
-+	# test options in /proc/fs/ext4/dev/options
-+	(
-+	ret=0
-+	IFS=','
-+	for option in $OPTS; do
-+		if echo $IGNORED | grep -w $option; then
-+			continue
-+		fi
-+
-+		[ $option = "noload" ] && option="norecovery"
-+
-+		if [[ $option = ^* ]]; then
-+			expected=1
-+		else
-+			expected=0
-+		fi
-+		option=${option#^}
-+
-+		if echo $CHECK_MINFO | grep -w $option; then
-+			findmnt -n -o OPTIONS $SCRATCH_DEV | grep $option
-+			ret=$?
-+		else
-+			grep $option /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options
-+			ret=$?
-+		fi
-+
-+		if [ $ret -ne $expected ]; then
-+			exit 1
-+		fi
-+	done
-+	) > /dev/null 2>&1
-+	return $?
-+}
-+
-+fail() {
-+	print_log "   FAILED"
-+	ERR=$((ERR+1))
-+	echo $LOG | tee -a $seqres.full
-+	LOG=""
-+}
-+
-+ok() {
-+	print_log "   OK"
-+	echo $LOG >> $seqres.full
-+	LOG=""
-+}
-+
-+simple_mount() {
-+	_mount $* >> $seqres.full 2>&1
-+}
-+
-+# $1 - can hold -n option, if it does argumetns are shifted
-+# $1 - options to test
-+# $2 - if provided it's the option string to check for
-+do_mnt() {
-+	device=$SCRATCH_DEV
-+	# If -n argument is provided do not specify $SCRATCH_DEV
-+	# usefull for remount
-+	if [ "$1" == "-n" ]; then
-+		unset device
-+		shift
-+	fi
-+
-+	if [ -z "$1" ]; then
-+		simple_mount $device $SCRATCH_MNT
-+		ret=$?
-+	else
-+		simple_mount -o $1 $device $SCRATCH_MNT
-+		ret=$?
-+	fi
-+	if [ $ret -eq 0 ]; then
-+		test_mnt $1 $2
-+		ret=$?
-+		[ $ret -ne 0 ] && print_log "(not found)"
-+	else
-+		print_log "(failed mount)"
-+	fi
-+
-+	return $ret
-+}
-+
-+not_mnt() {
-+	# We don't need -t not not_ variant
-+	if [ "$1" == "-t" ]; then
-+		shift
-+	fi
-+
-+	print_log "SHOULD FAIL mounting $fstype \"$1\" "
-+	do_mnt $@
-+	if [ $? -eq 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+}
-+
-+mnt_only() {
-+	print_log "mounting $fstype \"$1\" "
-+	do_mnt $@
-+	if [ $? -ne 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+}
-+
-+mnt() {
-+	# Do we need to run the tune2fs mount option test ?
-+	t2fs=0
-+	if [ "$1" == "-t" ]; then
-+		t2fs=1
-+		shift
-+	fi
-+
-+	mnt_only $*
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+
-+	[ "$t2fs" -eq 0 ] && return
-+
-+	op_set=$1
-+	if [ $# -eq 1 ]; then
-+		check=$1
-+	elif [ $# -eq 2 ]; then
-+		check=$2
-+	else
-+		return 0
-+	fi
-+
-+	# some options need translation for tune2fs
-+	op_set=$(echo $op_set | sed -e 's/data=journal/journal_data/' \
-+				    -e 's/data=ordered/journal_data_ordered/' \
-+				    -e 's/data=writeback/journal_data_writeback/')
-+	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
-+	mnt_only "defaults" $check
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+	if [ "$op_set" = ^* ]; then
-+		op_set=${op_set#^}
-+	else
-+		op_set="^${op_set}"
-+	fi
-+	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
-+}
-+
-+# $1 - options to mount with
-+# $2 - options to remount with
-+remount() {
-+	# First do this specifying both dev and mnt
-+	print_log "mounting $fstype \"$1\" "
-+	do_mnt $1
-+	[ $? -ne 0 ] && fail && return
-+	print_log "remounting \"$2\" "
-+	do_mnt remount,$2 $3
-+	if [ $? -ne 0 ]; then
-+		fail
-+		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+		return
-+	else
-+		ok
-+	fi
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+
-+	# Now just specify mnt
-+	print_log "mounting $fstype \"$1\" "
-+	do_mnt $1
-+	[ $? -ne 0 ] && fail && return
-+	print_log "remounting (MNT ONLY) \"$2\" "
-+	do_mnt -n remount,$2 $3
-+	if [ $? -ne 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+}
-+
-+# $1 - options to mount with, or -r argument
-+# $2 - options to remount with
-+not_remount_noumount() {
-+	remount_only=0
-+	# If -r is specified we're going to do remount only
-+	if [ "$1" == "-r" ]; then
-+		remount_only=1
-+		# Dont need shift since first argument would
-+		# have been consumed by mount anyway
-+	fi
-+
-+	if [ $remount_only -eq 0 ]; then
-+		print_log "mounting $fstype \"$1\" "
-+		do_mnt $1
-+		[ $? -ne 0 ] && fail && return
-+	fi
-+	print_log "SHOULD FAIL remounting $fstype \"$2\" "
-+	do_mnt remount,$2 $3
-+	if [ $? -eq 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+
-+	# Now just specify mnt
-+	print_log "SHOULD FAIL remounting $fstype (MNT ONLY) \"$2\" "
-+	do_mnt -n remount,$2 $3
-+	if [ $? -eq 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+}
-+
-+not_remount() {
-+	not_remount_noumount $*
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+}
-+
-+
-+do_mkfs() {
-+	$MKE2FS_PROG -T $fstype -Fq $* >> $seqres.full 2>&1 ||
-+	_fail "mkfs failed - $MKFS_EXT4_PROG -Fq $* $SCRATCH_DEV"
-+}
-+
-+not_ext2() {
-+	if [[ $fstype == "ext2" ]]; then
-+		not_$*
-+	else
-+		$*
-+	fi
-+}
-+
-+only_ext4() {
-+	if [[ $fstype == "ext4" ]]; then
-+		$*
-+	else
-+		not_$*
-+	fi
-+}
-+
-+# Create logdev for external journal
-+LOOP_IMG=$tmp.logdev
-+truncate -s ${LOGSIZE}k $LOOP_IMG
-+LOOP_LOGDEV=`_create_loop_device $LOOP_IMG`
-+majmin=`stat -c "%t:%T" $LOOP_LOGDEV`
-+LOGDEV_DEVNUM=`echo "${majmin%:*}*2^8 + ${majmin#*:}" | bc`
-+
-+# Test all the extN file system supported by ext4 driver
-+fstype=
-+for fstype in ext2 ext3 ext4; do
-+
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+	$UMOUNT_PROG $SCRATCH_DEV 2> /dev/null
-+
-+	do_mkfs $SCRATCH_DEV ${SIZE}k
-+
-+	# do we have fstype support ?
-+	do_mnt
-+	if [ $? -ne 0 ]; then
-+		print_log "$fstype not supported. Skipping..."
-+		ok
-+		continue
-+	fi
-+	if [ ! -f /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options ]; then
-+		print_log "$fstype not supported. Skipping..."
-+		ok
-+		continue
-+	fi
-+
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+
-+	not_mnt failme
-+	mnt
-+	mnt bsddf
-+	mnt minixdf
-+	mnt grpid
-+	mnt -t bsdgroups grpid
-+	mnt nogrpid
-+	mnt sysvgroups nogrpid
-+	mnt resgid=1001
-+	mnt resuid=1001
-+	mnt sb=131072
-+	mnt errors=continue
-+	mnt errors=panic
-+	mnt errors=remount-ro
-+	mnt nouid32
-+	mnt debug
-+	mnt oldalloc removed
-+	mnt orlov removed
-+	mnt -t user_xattr
-+	mnt nouser_xattr
-+
-+	if _has_kernel_config CONFIG_EXT4_FS_POSIX_ACL; then
-+		mnt -t acl
-+	else
-+		mnt -t acl ^acl
-+	fi
-+
-+	not_ext2 mnt noload norecovery
-+	mnt bh removed
-+	mnt nobh removed
-+	not_ext2 mnt commit=7
-+	mnt min_batch_time=200
-+	mnt max_batch_time=10000
-+	only_ext4 mnt journal_checksum
-+	only_ext4 mnt nojournal_checksum
-+	only_ext4 mnt journal_async_commit,data=writeback
-+	mnt abort ignored
-+	not_ext2 mnt -t data=journal
-+	not_ext2 mnt -t data=ordered
-+	not_ext2 mnt -t data=writeback
-+	not_ext2 mnt data_err=abort
-+	not_ext2 mnt data_err=ignore ignored
-+	mnt usrjquota=aquota.user,jqfmt=vfsv0
-+	not_mnt usrjquota=aquota.user
-+	mnt usrjquota= ignored
-+	mnt grpjquota=aquota.group,jqfmt=vfsv0
-+	not_mnt grpjquota=aquota.group
-+	mnt grpjquota= ignored
-+	mnt jqfmt=vfsold
-+	mnt jqfmt=vfsv0
-+	mnt jqfmt=vfsv1
-+	mnt grpquota
-+	mnt quota
-+	mnt noquota
-+	mnt usrquota
-+	mnt grpquota
-+	mnt barrier
-+	mnt barrier=0 nobarrier
-+	mnt barrier=1 barrier
-+	mnt barrier=99 barrier
-+	mnt -t nobarrier
-+	mnt i_version
-+	mnt stripe=512
-+	only_ext4 mnt delalloc
-+	only_ext4 mnt -t nodelalloc
-+	mnt warn_on_error
-+	mnt nowarn_on_error
-+	not_mnt debug_want_extra_isize=512
-+	mnt debug_want_extra_isize=32 ignored
-+	mnt mblk_io_submit removed
-+	mnt nomblk_io_submit removed
-+	mnt -t block_validity
-+	mnt noblock_validity
-+	mnt inode_readahead_blks=16
-+	not_ext2 mnt journal_ioprio=6 ignored
-+	mnt auto_da_alloc=0 noauto_da_alloc
-+	mnt auto_da_alloc=1 auto_da_alloc
-+	mnt auto_da_alloc=95 auto_da_alloc
-+	mnt auto_da_alloc
-+	mnt noauto_da_alloc
-+	only_ext4 mnt dioread_nolock
-+	only_ext4 mnt nodioread_nolock
-+	only_ext4 mnt dioread_lock nodioread_nolock
-+	mnt -t discard
-+	mnt nodiscard
-+	mnt init_itable=20
-+	mnt init_itable
-+	mnt init_itable=0
-+	mnt noinit_itable
-+	mnt max_dir_size_kb=4096
-+
-+	if _has_kernel_config CONFIG_FS_ENCRYPTION; then
-+		mnt test_dummy_encryption
-+		mnt test_dummy_encryption=v1
-+		mnt test_dummy_encryption=v2
-+		not_mnt test_dummy_encryption=v3
-+		not_mnt test_dummy_encryption=
-+	else
-+		mnt test_dummy_encryption ^test_dummy_encryption
-+		mnt test_dummy_encryption=v1 ^test_dummy_encryption=v1
-+		mnt test_dummy_encryption=v2 ^test_dummy_encryption=v2
-+		not_mnt test_dummy_encryption=v3
-+		not_mnt test_dummy_encryption=
-+	fi
-+
-+	if _has_kernel_config CONFIG_FS_ENCRYPTION_INLINE_CRYPT; then
-+		mnt inlinecrypt
-+	else
-+		mnt inlinecrypt ^inlinecrypt
-+	fi
-+
-+	mnt prefetch_block_bitmaps removed
-+	mnt no_prefetch_block_bitmaps
-+	# We don't currently have a way to know that the option has been
-+	# applied, so comment it out for now. This should be fixed in the
-+	# future.
-+	#mnt mb_optimize_scan=0
-+	#mnt mb_optimize_scan=1
-+	#not_mnt mb_optimize_scan=9
-+	#not_mnt mb_optimize_scan=
-+	mnt nombcache
-+	mnt no_mbcache nombcache
-+	mnt check=none removed
-+	mnt nocheck removed
-+	mnt reservation removed
-+	mnt noreservation removed
-+	mnt journal=20 ignored
-+	not_mnt nonsenseoption
-+	not_mnt nonsenseoption=value
-+
-+	# generic mount options
-+	mnt lazytime
-+	mnt nolazytime ^lazytime
-+	mnt noatime
-+	mnt nodiratime
-+	mnt noexec
-+	mnt nosuid
-+	mnt ro
-+
-+	# generic remount check
-+	remount barrier nobarrier
-+	remount nobarrier barrier
-+	remount discard nodiscard
-+	remount nodiscard discard
-+
-+	# dax mount options
-+	simple_mount -o dax=always $SCRATCH_DEV $SCRATCH_MNT > /dev/null 2>&1
-+	if [ $? -eq 0 ]; then
-+		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+		mnt dax
-+		mnt dax=always
-+		mnt dax=never
-+		mnt dax=inode
-+
-+		not_remount lazytime dax
-+		not_remount dax=always dax=never
-+
-+		if [[ $fstype != "ext2" ]]; then
-+			not_remount data=journal dax
-+			not_remount data=journal dax=always
-+			not_remount data=journal dax=never
-+			not_remount data=journal dax=inode
-+		fi
-+	fi
-+
-+	# Quota remount check
-+	remount grpquota usrquota
-+	remount usrquota quota
-+	remount usrquota usrjquota=q.u,jqfmt=vfsv0
-+	remount grpquota grpjquota=q.g,jqfmt=vfsv0
-+
-+	not_remount usrquota grpjquota=q.g,jqfmt=vfsv0
-+	not_remount grpquota usrjquota=q.u,jqfmt=vfsv0
-+
-+	remount quota usrjquota=q.u,jqfmt=vfsv0
-+	not_remount quota grpjquota=q.g,jqfmt=vfsv0
-+
-+	remount usrjquota=q.u,jqfmt=vfsv0 grpjquota=q.g
-+	not_remount usrjquota=q.u,jqfmt=vfsv0 usrjquota=q.ua
-+	not_remount grpjquota=q.g,jqfmt=vfsv0 grpjquota=q.ga
-+
-+	remount usrjquota=q.u,jqfmt=vfsv0 usrquota usrjquota=q.u,jqfmt=vfsv0
-+	remount grpjquota=q.g,jqfmt=vfsv0 grpquota grpjquota=q.g,jqfmt=vfsv0
-+	not_remount usrjquota=q.u,jqfmt=vfsv0 grpquota
-+	not_remount grpjquota=q.g,jqfmt=vfsv0 usrquota
-+
-+	remount grpjquota=q.g,jqfmt=vfsv0 grpjquota= ^grpjquota=
-+	remount usrjquota=q.u,jqfmt=vfsv0 usrjquota= ^usrjquota=
-+	remount grpjquota=q.g,usrjquota=q.u,jqfmt=vfsv0 grpjquota=,usrjquota= ^grpjquota=,^usrjquota=
-+
-+	remount jqfmt=vfsv0 grpjquota=q.g
-+	remount jqfmt=vfsv0 usrjquota=q.u
-+
-+	if [[ $fstype != "ext2" ]]; then
-+		remount noload data=journal norecovery
-+		not_remount data=ordered data=journal
-+		not_remount data=journal data=writeback
-+		not_remount data=writeback data=ordered
-+	fi
-+
-+	do_mkfs -O journal_dev $LOOP_LOGDEV ${LOGSIZE}k
-+	do_mkfs -J device=$LOOP_LOGDEV $SCRATCH_DEV ${SIZE}k
-+	mnt defaults
-+	mnt journal_path=$LOOP_LOGDEV ignored
-+	mnt journal_dev=$LOGDEV_DEVNUM ignored
-+	not_mnt journal_path=${LOOP_LOGDEV}_nonexistent ignored
-+	not_mnt journal_dev=123456 ignored
-+	not_mnt journal_dev=999999999999999 ignored
-+
-+	do_mkfs -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
-+	mnt prjquota
-+
-+	# test clearing/changing journalled quota when enabled
-+	echo "== Testing active journalled quota" >> $seqres.full
-+	mnt_only prjquota,grpjquota=aquota.group,usrjquota=aquota.user,jqfmt=vfsv0
-+
-+	# Prepare and enable quota
-+	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
-+	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+	not_remount_noumount -r grpjquota=
-+	not_remount_noumount -r usrjquota=aaquota.user
-+	not_remount_noumount -r grpjquota=aaquota.group
-+	not_remount_noumount -r jqfmt=vfsv1
-+	not_remount_noumount -r noquota
-+	mnt_only remount,usrquota,grpquota ^usrquota,^grpquota
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+
-+	# test clearing/changing quota when enabled
-+	do_mkfs -E quotatype=^prjquota $SCRATCH_DEV ${SIZE}k
-+	not_mnt prjquota
-+	echo "== Testing active non-journalled quota" >> $seqres.full
-+	mnt_only grpquota,usrquota
-+
-+	# Prepare and enable quota
-+	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
-+	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+	not_remount_noumount -r noquota
-+	not_remount_noumount -r usrjquota=aquota.user
-+	not_remount_noumount -r grpjquota=aquota.group
-+	not_remount_noumount -r jqfmt=vfsv1
-+	mnt_only remount,grpjquota= grpquota,^grpjquota
-+	mnt_only remount,usrjquota= usrquota,^usrjquota
-+	mnt_only remount,usrquota,grpquota usrquota,grpquota
-+	quotaoff -f $SCRATCH_MNT >> $seqres.full 2>&1
-+	mnt_only remount,noquota ^usrquota,^grpquota,quota
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+
-+	# Quota feature
-+	echo "== Testing quota feature " >> $seqres.full
-+	do_mkfs -O quota -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
-+	mnt usrjquota=aquota.user,jqfmt=vfsv0 ^usrjquota=
-+	mnt grpjquota=aquota.user,jqfmt=vfsv0 ^grpjquota=
-+	mnt jqfmt=vfsv1 ^jqfmt=
-+	mnt prjquota
-+	mnt usrquota
-+	mnt grpquota
-+	not_remount defaults usrjquota=aquota.user
-+	not_remount defaults grpjquota=aquota.user
-+	not_remount defaults jqfmt=vfsv1
-+	remount defaults grpjquota=,usrjquota= ignored
-+
-+done #for fstype in ext2 ext3 ext4; do
-+
-+$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+echo "$ERR errors encountered" >> $seqres.full
-+
-+status=$ERR
-+exit
-diff --git a/tests/ext4/053.out b/tests/ext4/053.out
-new file mode 100644
-index 00000000..d58db7e4
---- /dev/null
-+++ b/tests/ext4/053.out
-@@ -0,0 +1,2 @@
-+QA output created by 053
-+Silence is golden.
--- 
-2.31.1
-
+> 
+> Thanks,
+> Eryu
+> > ---
+> >  ltp/fsstress.c |  673 ++++++++++++++++++++++++++++----------------------------
+> >  1 file changed, 340 insertions(+), 333 deletions(-)
+> > 
+> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > index 90ae432e..b3f3d4a6 100644
+> > --- a/ltp/fsstress.c
+> > +++ b/ltp/fsstress.c
+> > @@ -147,7 +147,9 @@ typedef enum {
+> >  	OP_LAST
+> >  } opty_t;
+> >  
+> > -typedef void (*opfnc_t)(int, long);
+> > +typedef long long opnum_t;
+> > +
+> > +typedef void (*opfnc_t)(opnum_t, long);
+> >  
+> >  typedef struct opdesc {
+> >  	opty_t	op;
+> > @@ -213,67 +215,67 @@ struct print_string {
+> >  
+> >  #define XATTR_NAME_BUF_SIZE 18
+> >  
+> > -void	afsync_f(int, long);
+> > -void	allocsp_f(int, long);
+> > -void	aread_f(int, long);
+> > -void	attr_remove_f(int, long);
+> > -void	attr_set_f(int, long);
+> > -void	awrite_f(int, long);
+> > -void	bulkstat_f(int, long);
+> > -void	bulkstat1_f(int, long);
+> > -void	chown_f(int, long);
+> > -void	clonerange_f(int, long);
+> > -void	copyrange_f(int, long);
+> > -void	creat_f(int, long);
+> > -void	deduperange_f(int, long);
+> > -void	dread_f(int, long);
+> > -void	dwrite_f(int, long);
+> > -void	fallocate_f(int, long);
+> > -void	fdatasync_f(int, long);
+> > -void	fiemap_f(int, long);
+> > -void	freesp_f(int, long);
+> > -void	fsync_f(int, long);
+> > +void	afsync_f(opnum_t, long);
+> > +void	allocsp_f(opnum_t, long);
+> > +void	aread_f(opnum_t, long);
+> > +void	attr_remove_f(opnum_t, long);
+> > +void	attr_set_f(opnum_t, long);
+> > +void	awrite_f(opnum_t, long);
+> > +void	bulkstat_f(opnum_t, long);
+> > +void	bulkstat1_f(opnum_t, long);
+> > +void	chown_f(opnum_t, long);
+> > +void	clonerange_f(opnum_t, long);
+> > +void	copyrange_f(opnum_t, long);
+> > +void	creat_f(opnum_t, long);
+> > +void	deduperange_f(opnum_t, long);
+> > +void	dread_f(opnum_t, long);
+> > +void	dwrite_f(opnum_t, long);
+> > +void	fallocate_f(opnum_t, long);
+> > +void	fdatasync_f(opnum_t, long);
+> > +void	fiemap_f(opnum_t, long);
+> > +void	freesp_f(opnum_t, long);
+> > +void	fsync_f(opnum_t, long);
+> >  char	*gen_random_string(int);
+> > -void	getattr_f(int, long);
+> > -void	getdents_f(int, long);
+> > -void	getfattr_f(int, long);
+> > -void	link_f(int, long);
+> > -void	listfattr_f(int, long);
+> > -void	mkdir_f(int, long);
+> > -void	mknod_f(int, long);
+> > -void	mread_f(int, long);
+> > -void	mwrite_f(int, long);
+> > -void	punch_f(int, long);
+> > -void	zero_f(int, long);
+> > -void	collapse_f(int, long);
+> > -void	insert_f(int, long);
+> > -void	read_f(int, long);
+> > -void	readlink_f(int, long);
+> > -void	readv_f(int, long);
+> > -void	removefattr_f(int, long);
+> > -void	rename_f(int, long);
+> > -void	rnoreplace_f(int, long);
+> > -void	rexchange_f(int, long);
+> > -void	rwhiteout_f(int, long);
+> > -void	resvsp_f(int, long);
+> > -void	rmdir_f(int, long);
+> > -void	setattr_f(int, long);
+> > -void	setfattr_f(int, long);
+> > -void	setxattr_f(int, long);
+> > -void	snapshot_f(int, long);
+> > -void	splice_f(int, long);
+> > -void	stat_f(int, long);
+> > -void	subvol_create_f(int, long);
+> > -void	subvol_delete_f(int, long);
+> > -void	symlink_f(int, long);
+> > -void	sync_f(int, long);
+> > -void	truncate_f(int, long);
+> > -void	unlink_f(int, long);
+> > -void	unresvsp_f(int, long);
+> > -void	uring_read_f(int, long);
+> > -void	uring_write_f(int, long);
+> > -void	write_f(int, long);
+> > -void	writev_f(int, long);
+> > +void	getattr_f(opnum_t, long);
+> > +void	getdents_f(opnum_t, long);
+> > +void	getfattr_f(opnum_t, long);
+> > +void	link_f(opnum_t, long);
+> > +void	listfattr_f(opnum_t, long);
+> > +void	mkdir_f(opnum_t, long);
+> > +void	mknod_f(opnum_t, long);
+> > +void	mread_f(opnum_t, long);
+> > +void	mwrite_f(opnum_t, long);
+> > +void	punch_f(opnum_t, long);
+> > +void	zero_f(opnum_t, long);
+> > +void	collapse_f(opnum_t, long);
+> > +void	insert_f(opnum_t, long);
+> > +void	read_f(opnum_t, long);
+> > +void	readlink_f(opnum_t, long);
+> > +void	readv_f(opnum_t, long);
+> > +void	removefattr_f(opnum_t, long);
+> > +void	rename_f(opnum_t, long);
+> > +void	rnoreplace_f(opnum_t, long);
+> > +void	rexchange_f(opnum_t, long);
+> > +void	rwhiteout_f(opnum_t, long);
+> > +void	resvsp_f(opnum_t, long);
+> > +void	rmdir_f(opnum_t, long);
+> > +void	setattr_f(opnum_t, long);
+> > +void	setfattr_f(opnum_t, long);
+> > +void	setxattr_f(opnum_t, long);
+> > +void	snapshot_f(opnum_t, long);
+> > +void	splice_f(opnum_t, long);
+> > +void	stat_f(opnum_t, long);
+> > +void	subvol_create_f(opnum_t, long);
+> > +void	subvol_delete_f(opnum_t, long);
+> > +void	symlink_f(opnum_t, long);
+> > +void	sync_f(opnum_t, long);
+> > +void	truncate_f(opnum_t, long);
+> > +void	unlink_f(opnum_t, long);
+> > +void	unresvsp_f(opnum_t, long);
+> > +void	uring_read_f(opnum_t, long);
+> > +void	uring_write_f(opnum_t, long);
+> > +void	write_f(opnum_t, long);
+> > +void	writev_f(opnum_t, long);
+> >  char	*xattr_flag_to_string(int);
+> >  
+> >  opdesc_t	ops[] = {
+> > @@ -370,7 +372,7 @@ int		namerand;
+> >  int		nameseq;
+> >  int		nops;
+> >  int		nproc = 1;
+> > -int		operations = 1;
+> > +opnum_t		operations = 1;
+> >  unsigned int	idmodulo = XFS_IDMODULO_MAX;
+> >  unsigned int	attr_mask = ~0;
+> >  int		procid;
+> > @@ -525,7 +527,12 @@ int main(int argc, char **argv)
+> >  			loops = atoi(optarg);
+> >  			break;
+> >  		case 'n':
+> > -			operations = atoi(optarg);
+> > +			errno = 0;
+> > +			operations = strtoll(optarg, NULL, 0);
+> > +			if (errno) {
+> > +				perror(optarg);
+> > +				exit(1);
+> > +			}
+> >  			break;
+> >  		case 'o':
+> >  			logname = optarg;
+> > @@ -1105,10 +1112,10 @@ doproc(void)
+> >  	struct stat64	statbuf;
+> >  	char		buf[10];
+> >  	char		cmd[64];
+> > -	int		opno;
+> > +	opnum_t		opno;
+> >  	int		rval;
+> >  	opdesc_t	*p;
+> > -	int		dividend;
+> > +	long long	dividend;
+> >  
+> >  	dividend = (operations + execute_freq) / (execute_freq + 1);
+> >  	sprintf(buf, "p%x", procid);
+> > @@ -1130,7 +1137,7 @@ doproc(void)
+> >  	for (opno = 0; opno < operations; opno++) {
+> >  		if (execute_cmd && opno && opno % dividend == 0) {
+> >  			if (verbose)
+> > -				printf("%d: execute command %s\n", opno,
+> > +				printf("%lld: execute command %s\n", opno,
+> >  					execute_cmd);
+> >  			rval = system(execute_cmd);
+> >  			if (rval)
+> > @@ -1792,7 +1799,7 @@ show_ops(int flag, char *lead_str)
+> >  		/* Command line style */
+> >  		if (lead_str != NULL)
+> >  			printf("%s", lead_str);
+> > -		printf ("-z -s %ld -m %d -n %d -p %d \\\n", seed, idmodulo,
+> > +		printf ("-z -s %ld -m %d -n %lld -p %d \\\n", seed, idmodulo,
+> >  			operations, nproc);
+> >  	        for (p = ops; p < ops_end; p++)
+> >  		        if (p->freq > 0)
+> > @@ -1974,7 +1981,7 @@ void inode_info(char *str, size_t sz, struct stat64 *s, int verbose)
+> >  }
+> >  
+> >  void
+> > -afsync_f(int opno, long r)
+> > +afsync_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef AIO
+> >  	int		e;
+> > @@ -1988,7 +1995,7 @@ afsync_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE | FT_DIRm, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: afsync - no filename\n", procid, opno);
+> > +			printf("%d/%lld: afsync - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -1997,7 +2004,7 @@ afsync_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: afsync - open %s failed %d\n",
+> > +			printf("%d/%lld: afsync - open %s failed %d\n",
+> >  			       procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -2006,7 +2013,7 @@ afsync_f(int opno, long r)
+> >  	io_prep_fsync(&iocb, fd);
+> >  	if ((e = io_submit(io_ctx, 1, iocbs)) != 1) {
+> >  		if (v)
+> > -			printf("%d/%d: afsync - io_submit %s %d\n",
+> > +			printf("%d/%lld: afsync - io_submit %s %d\n",
+> >  			       procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -2014,7 +2021,7 @@ afsync_f(int opno, long r)
+> >  	}
+> >  	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
+> >  		if (v)
+> > -			printf("%d/%d: afsync - io_getevents failed %d\n",
+> > +			printf("%d/%lld: afsync - io_getevents failed %d\n",
+> >  			       procid, opno, e);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -2023,14 +2030,14 @@ afsync_f(int opno, long r)
+> >  
+> >  	e = event.res2;
+> >  	if (v)
+> > -		printf("%d/%d: afsync %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: afsync %s %d\n", procid, opno, f.path, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  #endif
+> >  }
+> >  
+> >  void
+> > -allocsp_f(int opno, long r)
+> > +allocsp_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -2045,7 +2052,7 @@ allocsp_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: allocsp - no filename\n", procid, opno);
+> > +			printf("%d/%lld: allocsp - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -2054,14 +2061,14 @@ allocsp_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: allocsp - open %s failed %d\n",
+> > +			printf("%d/%lld: allocsp - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: allocsp - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: allocsp - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -2076,7 +2083,7 @@ allocsp_f(int opno, long r)
+> >  	fl.l_len = 0;
+> >  	e = xfsctl(f.path, fd, XFS_IOC_ALLOCSP64, &fl) < 0 ? errno : 0;
+> >  	if (v) {
+> > -		printf("%d/%d: xfsctl(XFS_IOC_ALLOCSP64) %s%s %lld 0 %d\n",
+> > +		printf("%d/%lld: xfsctl(XFS_IOC_ALLOCSP64) %s%s %lld 0 %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, e);
+> >  	}
+> >  	free_pathname(&f);
+> > @@ -2085,7 +2092,7 @@ allocsp_f(int opno, long r)
+> >  
+> >  #ifdef AIO
+> >  void
+> > -do_aio_rw(int opno, long r, int flags)
+> > +do_aio_rw(opnum_t opno, long r, int flags)
+> >  {
+> >  	int64_t		align;
+> >  	char		*buf = NULL;
+> > @@ -2108,7 +2115,7 @@ do_aio_rw(int opno, long r, int flags)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: do_aio_rw - no filename\n", procid, opno);
+> > +			printf("%d/%lld: do_aio_rw - no filename\n", procid, opno);
+> >  		goto aio_out;
+> >  	}
+> >  	fd = open_path(&f, flags|O_DIRECT);
+> > @@ -2116,27 +2123,27 @@ do_aio_rw(int opno, long r, int flags)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_aio_rw - open %s failed %d\n",
+> > +			printf("%d/%lld: do_aio_rw - open %s failed %d\n",
+> >  			       procid, opno, f.path, e);
+> >  		goto aio_out;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_aio_rw - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: do_aio_rw - fstat64 %s failed %d\n",
+> >  			       procid, opno, f.path, errno);
+> >  		goto aio_out;
+> >  	}
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (!iswrite && stb.st_size == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_aio_rw - %s%s zero size\n", procid, opno,
+> > +			printf("%d/%lld: do_aio_rw - %s%s zero size\n", procid, opno,
+> >  			       f.path, st);
+> >  		goto aio_out;
+> >  	}
+> >  	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
+> >  		if (v)
+> >  			printf(
+> > -			"%d/%d: do_aio_rw - xfsctl(XFS_IOC_DIOINFO) %s%s return %d,"
+> > +			"%d/%lld: do_aio_rw - xfsctl(XFS_IOC_DIOINFO) %s%s return %d,"
+> >  			" fallback to stat()\n",
+> >  				procid, opno, f.path, st, errno);
+> >  		diob.d_mem = diob.d_miniosz = stb.st_blksize;
+> > @@ -2156,7 +2163,7 @@ do_aio_rw(int opno, long r, int flags)
+> >  	buf = memalign(diob.d_mem, len);
+> >  	if (!buf) {
+> >  		if (v)
+> > -			printf("%d/%d: do_aio_rw - memalign failed\n",
+> > +			printf("%d/%lld: do_aio_rw - memalign failed\n",
+> >  			       procid, opno);
+> >  		goto aio_out;
+> >  	}
+> > @@ -2174,20 +2181,20 @@ do_aio_rw(int opno, long r, int flags)
+> >  	}
+> >  	if ((e = io_submit(io_ctx, 1, iocbs)) != 1) {
+> >  		if (v)
+> > -			printf("%d/%d: %s - io_submit failed %d\n",
+> > +			printf("%d/%lld: %s - io_submit failed %d\n",
+> >  			       procid, opno, iswrite ? "awrite" : "aread", e);
+> >  		goto aio_out;
+> >  	}
+> >  	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
+> >  		if (v)
+> > -			printf("%d/%d: %s - io_getevents failed %d\n",
+> > +			printf("%d/%lld: %s - io_getevents failed %d\n",
+> >  			       procid, opno, iswrite ? "awrite" : "aread", e);
+> >  		goto aio_out;
+> >  	}
+> >  
+> >  	e = event.res != len ? event.res2 : 0;
+> >  	if (v)
+> > -		printf("%d/%d: %s %s%s [%lld,%d] %d\n",
+> > +		printf("%d/%lld: %s %s%s [%lld,%d] %d\n",
+> >  		       procid, opno, iswrite ? "awrite" : "aread",
+> >  		       f.path, st, (long long)off, (int)len, e);
+> >   aio_out:
+> > @@ -2201,7 +2208,7 @@ do_aio_rw(int opno, long r, int flags)
+> >  
+> >  #ifdef URING
+> >  void
+> > -do_uring_rw(int opno, long r, int flags)
+> > +do_uring_rw(opnum_t opno, long r, int flags)
+> >  {
+> >  	char		*buf = NULL;
+> >  	int		e;
+> > @@ -2224,7 +2231,7 @@ do_uring_rw(int opno, long r, int flags)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: do_uring_rw - no filename\n", procid, opno);
+> > +			printf("%d/%lld: do_uring_rw - no filename\n", procid, opno);
+> >  		goto uring_out;
+> >  	}
+> >  	fd = open_path(&f, flags);
+> > @@ -2232,27 +2239,27 @@ do_uring_rw(int opno, long r, int flags)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_uring_rw - open %s failed %d\n",
+> > +			printf("%d/%lld: do_uring_rw - open %s failed %d\n",
+> >  			       procid, opno, f.path, e);
+> >  		goto uring_out;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_uring_rw - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: do_uring_rw - fstat64 %s failed %d\n",
+> >  			       procid, opno, f.path, errno);
+> >  		goto uring_out;
+> >  	}
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (!iswrite && stb.st_size == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_uring_rw - %s%s zero size\n", procid, opno,
+> > +			printf("%d/%lld: do_uring_rw - %s%s zero size\n", procid, opno,
+> >  			       f.path, st);
+> >  		goto uring_out;
+> >  	}
+> >  	sqe = io_uring_get_sqe(&ring);
+> >  	if (!sqe) {
+> >  		if (v)
+> > -			printf("%d/%d: do_uring_rw - io_uring_get_sqe failed\n",
+> > +			printf("%d/%lld: do_uring_rw - io_uring_get_sqe failed\n",
+> >  			       procid, opno);
+> >  		goto uring_out;
+> >  	}
+> > @@ -2261,7 +2268,7 @@ do_uring_rw(int opno, long r, int flags)
+> >  	buf = malloc(len);
+> >  	if (!buf) {
+> >  		if (v)
+> > -			printf("%d/%d: do_uring_rw - malloc failed\n",
+> > +			printf("%d/%lld: do_uring_rw - malloc failed\n",
+> >  			       procid, opno);
+> >  		goto uring_out;
+> >  	}
+> > @@ -2279,18 +2286,18 @@ do_uring_rw(int opno, long r, int flags)
+> >  
+> >  	if ((e = io_uring_submit_and_wait(&ring, 1)) != 1) {
+> >  		if (v)
+> > -			printf("%d/%d: %s - io_uring_submit failed %d\n", procid, opno,
+> > +			printf("%d/%lld: %s - io_uring_submit failed %d\n", procid, opno,
+> >  			       iswrite ? "uring_write" : "uring_read", e);
+> >  		goto uring_out;
+> >  	}
+> >  	if ((e = io_uring_wait_cqe(&ring, &cqe)) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: %s - io_uring_wait_cqe failed %d\n", procid, opno,
+> > +			printf("%d/%lld: %s - io_uring_wait_cqe failed %d\n", procid, opno,
+> >  			       iswrite ? "uring_write" : "uring_read", e);
+> >  		goto uring_out;
+> >  	}
+> >  	if (v)
+> > -		printf("%d/%d: %s %s%s [%lld, %d(res=%d)] %d\n",
+> > +		printf("%d/%lld: %s %s%s [%lld, %d(res=%d)] %d\n",
+> >  		       procid, opno, iswrite ? "uring_write" : "uring_read",
+> >  		       f.path, st, (long long)off, (int)len, cqe->res, e);
+> >  	io_uring_cqe_seen(&ring, cqe);
+> > @@ -2305,7 +2312,7 @@ do_uring_rw(int opno, long r, int flags)
+> >  #endif
+> >  
+> >  void
+> > -aread_f(int opno, long r)
+> > +aread_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef AIO
+> >  	do_aio_rw(opno, r, O_RDONLY);
+> > @@ -2313,7 +2320,7 @@ aread_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -attr_remove_f(int opno, long r)
+> > +attr_remove_f(opnum_t opno, long r)
+> >  {
+> >  	char			*bufname;
+> >  	char			*bufend;
+> > @@ -2335,7 +2342,7 @@ attr_remove_f(int opno, long r)
+> >  		total = attr_list_count(buf, e);
+> >  	if (total == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: attr_remove - no attrs for %s\n",
+> > +			printf("%d/%lld: attr_remove - no attrs for %s\n",
+> >  				procid, opno, f.path);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -2356,7 +2363,7 @@ attr_remove_f(int opno, long r)
+> >  	if (aname == NULL) {
+> >  		if (v)
+> >  			printf(
+> > -			"%d/%d: attr_remove - name %d not found at %s\n",
+> > +			"%d/%lld: attr_remove - name %d not found at %s\n",
+> >  				procid, opno, which, f.path);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -2367,13 +2374,13 @@ attr_remove_f(int opno, long r)
+> >  		e = 0;
+> >  	check_cwd();
+> >  	if (v)
+> > -		printf("%d/%d: attr_remove %s %s %d\n",
+> > +		printf("%d/%lld: attr_remove %s %s %d\n",
+> >  			procid, opno, f.path, aname, e);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -attr_set_f(int opno, long r)
+> > +attr_set_f(opnum_t opno, long r)
+> >  {
+> >  	char		aname[10];
+> >  	char		*aval;
+> > @@ -2401,13 +2408,13 @@ attr_set_f(int opno, long r)
+> >  	check_cwd();
+> >  	free(aval);
+> >  	if (v)
+> > -		printf("%d/%d: attr_set %s %s %d\n", procid, opno, f.path,
+> > +		printf("%d/%lld: attr_set %s %s %d\n", procid, opno, f.path,
+> >  			aname, e);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -awrite_f(int opno, long r)
+> > +awrite_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef AIO
+> >  	do_aio_rw(opno, r, O_WRONLY);
+> > @@ -2415,7 +2422,7 @@ awrite_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -bulkstat_f(int opno, long r)
+> > +bulkstat_f(opnum_t opno, long r)
+> >  {
+> >  	int		count;
+> >  	int		fd;
+> > @@ -2440,13 +2447,13 @@ bulkstat_f(int opno, long r)
+> >  		total += count;
+> >  	free(t);
+> >  	if (verbose)
+> > -		printf("%d/%d: bulkstat nent %d total %lld\n",
+> > +		printf("%d/%lld: bulkstat nent %d total %lld\n",
+> >  			procid, opno, nent, (long long)total);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -bulkstat1_f(int opno, long r)
+> > +bulkstat1_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -2494,14 +2501,14 @@ bulkstat1_f(int opno, long r)
+> >          bsr.ocount=NULL;
+> >  	e = xfsctl(".", fd, XFS_IOC_FSBULKSTAT_SINGLE, &bsr) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: bulkstat1 %s ino %lld %d\n", 
+> > +		printf("%d/%lld: bulkstat1 %s ino %lld %d\n",
+> >  		       procid, opno, good?"real":"random",
+> >  		       verifiable_log ? -1LL : (long long)ino, e);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -chown_f(int opno, long r)
+> > +chown_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -2521,14 +2528,14 @@ chown_f(int opno, long r)
+> >  	e = lchown_path(&f, u, g) < 0 ? errno : 0;
+> >  	check_cwd();
+> >  	if (v)
+> > -		printf("%d/%d: chown %s %d/%d %d\n", procid, opno, f.path, (int)u, (int)g, e);
+> > +		printf("%d/%lld: chown %s %d/%d %d\n", procid, opno, f.path, (int)u, (int)g, e);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  /* reflink some arbitrary range of f1 to f2. */
+> >  void
+> >  clonerange_f(
+> > -	int			opno,
+> > +	opnum_t			opno,
+> >  	long			r)
+> >  {
+> >  #ifdef FICLONERANGE
+> > @@ -2555,7 +2562,7 @@ clonerange_f(
+> >  	init_pathname(&fpath1);
+> >  	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
+> >  		if (v1)
+> > -			printf("%d/%d: clonerange read - no filename\n",
+> > +			printf("%d/%lld: clonerange read - no filename\n",
+> >  				procid, opno);
+> >  		goto out_fpath1;
+> >  	}
+> > @@ -2563,7 +2570,7 @@ clonerange_f(
+> >  	init_pathname(&fpath2);
+> >  	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
+> >  		if (v2)
+> > -			printf("%d/%d: clonerange write - no filename\n",
+> > +			printf("%d/%lld: clonerange write - no filename\n",
+> >  				procid, opno);
+> >  		goto out_fpath2;
+> >  	}
+> > @@ -2574,7 +2581,7 @@ clonerange_f(
+> >  	check_cwd();
+> >  	if (fd1 < 0) {
+> >  		if (v1)
+> > -			printf("%d/%d: clonerange read - open %s failed %d\n",
+> > +			printf("%d/%lld: clonerange read - open %s failed %d\n",
+> >  				procid, opno, fpath1.path, e);
+> >  		goto out_fpath2;
+> >  	}
+> > @@ -2584,7 +2591,7 @@ clonerange_f(
+> >  	check_cwd();
+> >  	if (fd2 < 0) {
+> >  		if (v2)
+> > -			printf("%d/%d: clonerange write - open %s failed %d\n",
+> > +			printf("%d/%lld: clonerange write - open %s failed %d\n",
+> >  				procid, opno, fpath2.path, e);
+> >  		goto out_fd1;
+> >  	}
+> > @@ -2592,7 +2599,7 @@ clonerange_f(
+> >  	/* Get file stats */
+> >  	if (fstat64(fd1, &stat1) < 0) {
+> >  		if (v1)
+> > -			printf("%d/%d: clonerange read - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: clonerange read - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath1.path, errno);
+> >  		goto out_fd2;
+> >  	}
+> > @@ -2600,7 +2607,7 @@ clonerange_f(
+> >  
+> >  	if (fstat64(fd2, &stat2) < 0) {
+> >  		if (v2)
+> > -			printf("%d/%d: clonerange write - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: clonerange write - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath2.path, errno);
+> >  		goto out_fd2;
+> >  	}
+> > @@ -2643,7 +2650,7 @@ clonerange_f(
+> >  	ret = ioctl(fd2, FICLONERANGE, &fcr);
+> >  	e = ret < 0 ? errno : 0;
+> >  	if (v1 || v2) {
+> > -		printf("%d/%d: clonerange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
+> > +		printf("%d/%lld: clonerange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
+> >  			procid, opno,
+> >  			fpath1.path, inoinfo1, (long long)off1, (long long)len,
+> >  			fpath2.path, inoinfo2, (long long)off2, (long long)len);
+> > @@ -2667,7 +2674,7 @@ clonerange_f(
+> >  /* copy some arbitrary range of f1 to f2. */
+> >  void
+> >  copyrange_f(
+> > -	int			opno,
+> > +	opnum_t			opno,
+> >  	long			r)
+> >  {
+> >  #ifdef HAVE_COPY_FILE_RANGE
+> > @@ -2697,7 +2704,7 @@ copyrange_f(
+> >  	init_pathname(&fpath1);
+> >  	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
+> >  		if (v1)
+> > -			printf("%d/%d: copyrange read - no filename\n",
+> > +			printf("%d/%lld: copyrange read - no filename\n",
+> >  				procid, opno);
+> >  		goto out_fpath1;
+> >  	}
+> > @@ -2705,7 +2712,7 @@ copyrange_f(
+> >  	init_pathname(&fpath2);
+> >  	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
+> >  		if (v2)
+> > -			printf("%d/%d: copyrange write - no filename\n",
+> > +			printf("%d/%lld: copyrange write - no filename\n",
+> >  				procid, opno);
+> >  		goto out_fpath2;
+> >  	}
+> > @@ -2716,7 +2723,7 @@ copyrange_f(
+> >  	check_cwd();
+> >  	if (fd1 < 0) {
+> >  		if (v1)
+> > -			printf("%d/%d: copyrange read - open %s failed %d\n",
+> > +			printf("%d/%lld: copyrange read - open %s failed %d\n",
+> >  				procid, opno, fpath1.path, e);
+> >  		goto out_fpath2;
+> >  	}
+> > @@ -2726,7 +2733,7 @@ copyrange_f(
+> >  	check_cwd();
+> >  	if (fd2 < 0) {
+> >  		if (v2)
+> > -			printf("%d/%d: copyrange write - open %s failed %d\n",
+> > +			printf("%d/%lld: copyrange write - open %s failed %d\n",
+> >  				procid, opno, fpath2.path, e);
+> >  		goto out_fd1;
+> >  	}
+> > @@ -2734,7 +2741,7 @@ copyrange_f(
+> >  	/* Get file stats */
+> >  	if (fstat64(fd1, &stat1) < 0) {
+> >  		if (v1)
+> > -			printf("%d/%d: copyrange read - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: copyrange read - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath1.path, errno);
+> >  		goto out_fd2;
+> >  	}
+> > @@ -2742,7 +2749,7 @@ copyrange_f(
+> >  
+> >  	if (fstat64(fd2, &stat2) < 0) {
+> >  		if (v2)
+> > -			printf("%d/%d: copyrange write - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: copyrange write - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath2.path, errno);
+> >  		goto out_fd2;
+> >  	}
+> > @@ -2794,7 +2801,7 @@ copyrange_f(
+> >  	}
+> >  	e = ret < 0 ? errno : 0;
+> >  	if (v1 || v2) {
+> > -		printf("%d/%d: copyrange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
+> > +		printf("%d/%lld: copyrange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
+> >  			procid, opno,
+> >  			fpath1.path, inoinfo1,
+> >  			(long long)offset1, (long long)length,
+> > @@ -2823,7 +2830,7 @@ copyrange_f(
+> >  /* dedupe some arbitrary range of f1 to f2...fn. */
+> >  void
+> >  deduperange_f(
+> > -	int			opno,
+> > +	opnum_t			opno,
+> >  	long			r)
+> >  {
+> >  #ifdef FIDEDUPERANGE
+> > @@ -2854,7 +2861,7 @@ deduperange_f(
+> >  	fdr = malloc(nr * sizeof(struct file_dedupe_range_info) +
+> >  		     sizeof(struct file_dedupe_range));
+> >  	if (!fdr) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		return;
+> >  	}
+> > @@ -2863,41 +2870,41 @@ deduperange_f(
+> >  
+> >  	fpath = calloc(nr, sizeof(struct pathname));
+> >  	if (!fpath) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		goto out_fdr;
+> >  	}
+> >  
+> >  	stat = calloc(nr, sizeof(struct stat64));
+> >  	if (!stat) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		goto out_paths;
+> >  	}
+> >  
+> >  	info = calloc(nr, INFO_SZ);
+> >  	if (!info) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		goto out_stats;
+> >  	}
+> >  
+> >  	off = calloc(nr, sizeof(off64_t));
+> >  	if (!off) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		goto out_info;
+> >  	}
+> >  
+> >  	v = calloc(nr, sizeof(int));
+> >  	if (!v) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		goto out_offsets;
+> >  	}
+> >  	fd = calloc(nr, sizeof(int));
+> >  	if (!fd) {
+> > -		printf("%d/%d: line %d error %d\n",
+> > +		printf("%d/%lld: line %d error %d\n",
+> >  			procid, opno, __LINE__, errno);
+> >  		goto out_v;
+> >  	}
+> > @@ -2909,7 +2916,7 @@ deduperange_f(
+> >  
+> >  	if (!get_fname(FT_REGm, r, &fpath[0], NULL, NULL, &v[0])) {
+> >  		if (v[0])
+> > -			printf("%d/%d: deduperange read - no filename\n",
+> > +			printf("%d/%lld: deduperange read - no filename\n",
+> >  				procid, opno);
+> >  		goto out_pathnames;
+> >  	}
+> > @@ -2917,7 +2924,7 @@ deduperange_f(
+> >  	for (i = 1; i < nr; i++) {
+> >  		if (!get_fname(FT_REGm, random(), &fpath[i], NULL, NULL, &v[i])) {
+> >  			if (v[i])
+> > -				printf("%d/%d: deduperange write - no filename\n",
+> > +				printf("%d/%lld: deduperange write - no filename\n",
+> >  					procid, opno);
+> >  			goto out_pathnames;
+> >  		}
+> > @@ -2929,7 +2936,7 @@ deduperange_f(
+> >  	check_cwd();
+> >  	if (fd[0] < 0) {
+> >  		if (v[0])
+> > -			printf("%d/%d: deduperange read - open %s failed %d\n",
+> > +			printf("%d/%lld: deduperange read - open %s failed %d\n",
+> >  				procid, opno, fpath[0].path, e);
+> >  		goto out_pathnames;
+> >  	}
+> > @@ -2940,7 +2947,7 @@ deduperange_f(
+> >  		check_cwd();
+> >  		if (fd[i] < 0) {
+> >  			if (v[i])
+> > -				printf("%d/%d: deduperange write - open %s failed %d\n",
+> > +				printf("%d/%lld: deduperange write - open %s failed %d\n",
+> >  					procid, opno, fpath[i].path, e);
+> >  			goto out_fds;
+> >  		}
+> > @@ -2949,7 +2956,7 @@ deduperange_f(
+> >  	/* Get file stats */
+> >  	if (fstat64(fd[0], &stat[0]) < 0) {
+> >  		if (v[0])
+> > -			printf("%d/%d: deduperange read - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: deduperange read - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath[0].path, errno);
+> >  		goto out_fds;
+> >  	}
+> > @@ -2959,7 +2966,7 @@ deduperange_f(
+> >  	for (i = 1; i < nr; i++) {
+> >  		if (fstat64(fd[i], &stat[i]) < 0) {
+> >  			if (v[i])
+> > -				printf("%d/%d: deduperange write - fstat64 %s failed %d\n",
+> > +				printf("%d/%lld: deduperange write - fstat64 %s failed %d\n",
+> >  					procid, opno, fpath[i].path, errno);
+> >  			goto out_fds;
+> >  		}
+> > @@ -3015,7 +3022,7 @@ deduperange_f(
+> >  	ret = ioctl(fd[0], FIDEDUPERANGE, fdr);
+> >  	e = ret < 0 ? errno : 0;
+> >  	if (v[0]) {
+> > -		printf("%d/%d: deduperange from %s%s [%lld,%lld]",
+> > +		printf("%d/%lld: deduperange from %s%s [%lld,%lld]",
+> >  			procid, opno,
+> >  			fpath[0].path, &info[0], (long long)off[0],
+> >  			(long long)len);
+> > @@ -3029,7 +3036,7 @@ deduperange_f(
+> >  	for (i = 1; i < nr; i++) {
+> >  		e = fdr->info[i - 1].status < 0 ? fdr->info[i - 1].status : 0;
+> >  		if (v[i]) {
+> > -			printf("%d/%d: ...to %s%s [%lld,%lld]",
+> > +			printf("%d/%lld: ...to %s%s [%lld,%lld]",
+> >  				procid, opno,
+> >  				fpath[i].path, &info[i * INFO_SZ],
+> >  				(long long)off[i], (long long)len);
+> > @@ -3069,7 +3076,7 @@ deduperange_f(
+> >  }
+> >  
+> >  void
+> > -setxattr_f(int opno, long r)
+> > +setxattr_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef XFS_XFLAG_EXTSIZE
+> >  	struct fsxattr	fsx;
+> > @@ -3098,14 +3105,14 @@ setxattr_f(int opno, long r)
+> >  		e = xfsctl(f.path, fd, XFS_IOC_FSSETXATTR, &fsx);
+> >  	}
+> >  	if (v)
+> > -		printf("%d/%d: setxattr %s %u %d\n", procid, opno, f.path, p, e);
+> > +		printf("%d/%lld: setxattr %s %u %d\n", procid, opno, f.path, p, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  #endif
+> >  }
+> >  
+> >  void
+> > -splice_f(int opno, long r)
+> > +splice_f(opnum_t opno, long r)
+> >  {
+> >  	struct pathname		fpath1;
+> >  	struct pathname		fpath2;
+> > @@ -3132,7 +3139,7 @@ splice_f(int opno, long r)
+> >  	init_pathname(&fpath1);
+> >  	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
+> >  		if (v1)
+> > -			printf("%d/%d: splice read - no filename\n",
+> > +			printf("%d/%lld: splice read - no filename\n",
+> >  				procid, opno);
+> >  		goto out_fpath1;
+> >  	}
+> > @@ -3140,7 +3147,7 @@ splice_f(int opno, long r)
+> >  	init_pathname(&fpath2);
+> >  	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
+> >  		if (v2)
+> > -			printf("%d/%d: splice write - no filename\n",
+> > +			printf("%d/%lld: splice write - no filename\n",
+> >  				procid, opno);
+> >  		goto out_fpath2;
+> >  	}
+> > @@ -3151,7 +3158,7 @@ splice_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd1 < 0) {
+> >  		if (v1)
+> > -			printf("%d/%d: splice read - open %s failed %d\n",
+> > +			printf("%d/%lld: splice read - open %s failed %d\n",
+> >  				procid, opno, fpath1.path, e);
+> >  		goto out_fpath2;
+> >  	}
+> > @@ -3161,7 +3168,7 @@ splice_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd2 < 0) {
+> >  		if (v2)
+> > -			printf("%d/%d: splice write - open %s failed %d\n",
+> > +			printf("%d/%lld: splice write - open %s failed %d\n",
+> >  				procid, opno, fpath2.path, e);
+> >  		goto out_fd1;
+> >  	}
+> > @@ -3169,7 +3176,7 @@ splice_f(int opno, long r)
+> >  	/* Get file stats */
+> >  	if (fstat64(fd1, &stat1) < 0) {
+> >  		if (v1)
+> > -			printf("%d/%d: splice read - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: splice read - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath1.path, errno);
+> >  		goto out_fd2;
+> >  	}
+> > @@ -3177,7 +3184,7 @@ splice_f(int opno, long r)
+> >  
+> >  	if (fstat64(fd2, &stat2) < 0) {
+> >  		if (v2)
+> > -			printf("%d/%d: splice write - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: splice write - fstat64 %s failed %d\n",
+> >  				procid, opno, fpath2.path, errno);
+> >  		goto out_fd2;
+> >  	}
+> > @@ -3216,7 +3223,7 @@ splice_f(int opno, long r)
+> >  	/* Pipe initialize */
+> >  	if (pipe(filedes) < 0) {
+> >  		if (v1 || v2) {
+> > -			printf("%d/%d: splice - pipe failed %d\n",
+> > +			printf("%d/%lld: splice - pipe failed %d\n",
+> >  				procid, opno, errno);
+> >  			goto out_fd2;
+> >  		}
+> > @@ -3252,7 +3259,7 @@ splice_f(int opno, long r)
+> >  	else
+> >  		e = 0;
+> >  	if (v1 || v2) {
+> > -		printf("%d/%d: splice %s%s [%lld,%lld] -> %s%s [%lld,%lld] %d",
+> > +		printf("%d/%lld: splice %s%s [%lld,%lld] -> %s%s [%lld,%lld] %d",
+> >  			procid, opno,
+> >  			fpath1.path, inoinfo1, (long long)offset1, (long long)length,
+> >  			fpath2.path, inoinfo2, (long long)offset2, (long long)length, e);
+> > @@ -3276,7 +3283,7 @@ splice_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -creat_f(int opno, long r)
+> > +creat_f(opnum_t opno, long r)
+> >  {
+> >  	struct fsxattr	a;
+> >  	int		e;
+> > @@ -3311,7 +3318,7 @@ creat_f(int opno, long r)
+> >  	if (!e) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&f, fep);
+> > -			printf("%d/%d: creat - no filename from %s\n",
+> > +			printf("%d/%lld: creat - no filename from %s\n",
+> >  				procid, opno, f.path);
+> >  		}
+> >  		free_pathname(&f);
+> > @@ -3341,15 +3348,15 @@ creat_f(int opno, long r)
+> >  		close(fd);
+> >  	}
+> >  	if (v) {
+> > -		printf("%d/%d: creat %s x:%d %d %d\n", procid, opno, f.path,
+> > +		printf("%d/%lld: creat %s x:%d %d %d\n", procid, opno, f.path,
+> >  			extsize ? a.fsx_extsize : 0, e, e1);
+> > -		printf("%d/%d: creat add id=%d,parent=%d\n", procid, opno, id, parid);
+> > +		printf("%d/%lld: creat add id=%d,parent=%d\n", procid, opno, id, parid);
+> >  	}
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -dread_f(int opno, long r)
+> > +dread_f(opnum_t opno, long r)
+> >  {
+> >  	int64_t		align;
+> >  	char		*buf;
+> > @@ -3368,7 +3375,7 @@ dread_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: dread - no filename\n", procid, opno);
+> > +			printf("%d/%lld: dread - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -3377,14 +3384,14 @@ dread_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: dread - open %s failed %d\n",
+> > +			printf("%d/%lld: dread - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: dread - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: dread - fstat64 %s failed %d\n",
+> >  			       procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -3393,7 +3400,7 @@ dread_f(int opno, long r)
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (stb.st_size == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: dread - %s%s zero size\n", procid, opno,
+> > +			printf("%d/%lld: dread - %s%s zero size\n", procid, opno,
+> >  			       f.path, st);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -3402,7 +3409,7 @@ dread_f(int opno, long r)
+> >  	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
+> >  		if (v)
+> >  			printf(
+> > -			"%d/%d: dread - xfsctl(XFS_IOC_DIOINFO) %s%s return %d,"
+> > +			"%d/%lld: dread - xfsctl(XFS_IOC_DIOINFO) %s%s return %d,"
+> >  			" fallback to stat()\n",
+> >  				procid, opno, f.path, st, errno);
+> >  		diob.d_mem = diob.d_miniosz = stb.st_blksize;
+> > @@ -3428,14 +3435,14 @@ dread_f(int opno, long r)
+> >  	e = read(fd, buf, len) < 0 ? errno : 0;
+> >  	free(buf);
+> >  	if (v)
+> > -		printf("%d/%d: dread %s%s [%lld,%d] %d\n",
+> > +		printf("%d/%lld: dread %s%s [%lld,%d] %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, (int)len, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -dwrite_f(int opno, long r)
+> > +dwrite_f(opnum_t opno, long r)
+> >  {
+> >  	int64_t		align;
+> >  	char		*buf;
+> > @@ -3454,7 +3461,7 @@ dwrite_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: dwrite - no filename\n", procid, opno);
+> > +			printf("%d/%lld: dwrite - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -3463,14 +3470,14 @@ dwrite_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: dwrite - open %s failed %d\n",
+> > +			printf("%d/%lld: dwrite - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: dwrite - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: dwrite - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -3479,7 +3486,7 @@ dwrite_f(int opno, long r)
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: dwrite - xfsctl(XFS_IOC_DIOINFO)"
+> > +			printf("%d/%lld: dwrite - xfsctl(XFS_IOC_DIOINFO)"
+> >  				" %s%s return %d, fallback to stat()\n",
+> >  			       procid, opno, f.path, st, errno);
+> >  		diob.d_mem = diob.d_miniosz = stb.st_blksize;
+> > @@ -3508,7 +3515,7 @@ dwrite_f(int opno, long r)
+> >  	e = write(fd, buf, len) < 0 ? errno : 0;
+> >  	free(buf);
+> >  	if (v)
+> > -		printf("%d/%d: dwrite %s%s [%lld,%d] %d\n",
+> > +		printf("%d/%lld: dwrite %s%s [%lld,%d] %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, (int)len, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> > @@ -3531,7 +3538,7 @@ struct print_flags falloc_flags [] = {
+> >  #endif
+> >  
+> >  void
+> > -do_fallocate(int opno, long r, int mode)
+> > +do_fallocate(opnum_t opno, long r, int mode)
+> >  {
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  	int		e;
+> > @@ -3547,14 +3554,14 @@ do_fallocate(int opno, long r, int mode)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: do_fallocate - no filename\n", procid, opno);
+> > +			printf("%d/%lld: do_fallocate - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	fd = open_path(&f, O_RDWR);
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_fallocate - open %s failed %d\n",
+> > +			printf("%d/%lld: do_fallocate - open %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -3562,7 +3569,7 @@ do_fallocate(int opno, long r, int mode)
+> >  	check_cwd();
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_fallocate - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: do_fallocate - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -3585,7 +3592,7 @@ do_fallocate(int opno, long r, int mode)
+> >  	mode |= FALLOC_FL_KEEP_SIZE & random();
+> >  	e = fallocate(fd, mode, (loff_t)off, (loff_t)len) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: fallocate(%s) %s %st %lld %lld %d\n",
+> > +		printf("%d/%lld: fallocate(%s) %s %st %lld %lld %d\n",
+> >  		       procid, opno, translate_falloc_flags(mode),
+> >  		       f.path, st, (long long)off, (long long)len, e);
+> >  	free_pathname(&f);
+> > @@ -3594,7 +3601,7 @@ do_fallocate(int opno, long r, int mode)
+> >  }
+> >  
+> >  void
+> > -fallocate_f(int opno, long r)
+> > +fallocate_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  	do_fallocate(opno, r, 0);
+> > @@ -3602,7 +3609,7 @@ fallocate_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -fdatasync_f(int opno, long r)
+> > +fdatasync_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -3612,7 +3619,7 @@ fdatasync_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: fdatasync - no filename\n",
+> > +			printf("%d/%lld: fdatasync - no filename\n",
+> >  				procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -3622,14 +3629,14 @@ fdatasync_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: fdatasync - open %s failed %d\n",
+> > +			printf("%d/%lld: fdatasync - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	e = fdatasync(fd) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: fdatasync %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: fdatasync %s %d\n", procid, opno, f.path, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> > @@ -3646,7 +3653,7 @@ struct print_flags fiemap_flags[] = {
+> >  #endif
+> >  
+> >  void
+> > -fiemap_f(int opno, long r)
+> > +fiemap_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_LINUX_FIEMAP_H
+> >  	int		e;
+> > @@ -3663,7 +3670,7 @@ fiemap_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: fiemap - no filename\n", procid, opno);
+> > +			printf("%d/%lld: fiemap - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -3672,14 +3679,14 @@ fiemap_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: fiemap - open %s failed %d\n",
+> > +			printf("%d/%lld: fiemap - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: fiemap - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: fiemap - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -3691,7 +3698,7 @@ fiemap_f(int opno, long r)
+> >  			(blocks_to_map * sizeof(struct fiemap_extent)));
+> >  	if (!fiemap) {
+> >  		if (v)
+> > -			printf("%d/%d: malloc failed \n", procid, opno);
+> > +			printf("%d/%lld: malloc failed \n", procid, opno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> >  		return;
+> > @@ -3707,7 +3714,7 @@ fiemap_f(int opno, long r)
+> >  
+> >  	e = ioctl(fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
+> >  	if (v)
+> > -		printf("%d/%d: ioctl(FIEMAP) %s%s %lld %lld (%s) %d\n",
+> > +		printf("%d/%lld: ioctl(FIEMAP) %s%s %lld %lld (%s) %d\n",
+> >  		       procid, opno, f.path, st, (long long)fiemap->fm_start,
+> >  		       (long long) fiemap->fm_length,
+> >  		       translate_fiemap_flags(fiemap->fm_flags), e);
+> > @@ -3718,7 +3725,7 @@ fiemap_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -freesp_f(int opno, long r)
+> > +freesp_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -3733,7 +3740,7 @@ freesp_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: freesp - no filename\n", procid, opno);
+> > +			printf("%d/%lld: freesp - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -3742,14 +3749,14 @@ freesp_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: freesp - open %s failed %d\n",
+> > +			printf("%d/%lld: freesp - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: freesp - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: freesp - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -3764,14 +3771,14 @@ freesp_f(int opno, long r)
+> >  	fl.l_len = 0;
+> >  	e = xfsctl(f.path, fd, XFS_IOC_FREESP64, &fl) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: xfsctl(XFS_IOC_FREESP64) %s%s %lld 0 %d\n",
+> > +		printf("%d/%lld: xfsctl(XFS_IOC_FREESP64) %s%s %lld 0 %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -fsync_f(int opno, long r)
+> > +fsync_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -3781,7 +3788,7 @@ fsync_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE | FT_DIRm, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: fsync - no filename\n", procid, opno);
+> > +			printf("%d/%lld: fsync - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -3790,14 +3797,14 @@ fsync_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: fsync - open %s failed %d\n",
+> > +			printf("%d/%lld: fsync - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	e = fsync(fd) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: fsync %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: fsync %s %d\n", procid, opno, f.path, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> > @@ -3825,7 +3832,7 @@ gen_random_string(int len)
+> >  }
+> >  
+> >  void
+> > -getattr_f(int opno, long r)
+> > +getattr_f(opnum_t opno, long r)
+> >  {
+> >  	int		fd;
+> >  	int		e;
+> > @@ -3842,13 +3849,13 @@ getattr_f(int opno, long r)
+> >  
+> >  	e = ioctl(fd, FS_IOC_GETFLAGS, &fl);
+> >  	if (v)
+> > -		printf("%d/%d: getattr %s %u %d\n", procid, opno, f.path, fl, e);
+> > +		printf("%d/%lld: getattr %s %u %d\n", procid, opno, f.path, fl, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -getdents_f(int opno, long r)
+> > +getdents_f(opnum_t opno, long r)
+> >  {
+> >  	DIR		*dir;
+> >  	pathname_t	f;
+> > @@ -3861,7 +3868,7 @@ getdents_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (dir == NULL) {
+> >  		if (v)
+> > -			printf("%d/%d: getdents - can't open %s\n",
+> > +			printf("%d/%lld: getdents - can't open %s\n",
+> >  				procid, opno, f.path);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -3869,13 +3876,13 @@ getdents_f(int opno, long r)
+> >  	while (readdir64(dir) != NULL)
+> >  		continue;
+> >  	if (v)
+> > -		printf("%d/%d: getdents %s 0\n", procid, opno, f.path);
+> > +		printf("%d/%lld: getdents %s 0\n", procid, opno, f.path);
+> >  	free_pathname(&f);
+> >  	closedir(dir);
+> >  }
+> >  
+> >  void
+> > -getfattr_f(int opno, long r)
+> > +getfattr_f(opnum_t opno, long r)
+> >  {
+> >  	fent_t	        *fep;
+> >  	int		e;
+> > @@ -3889,7 +3896,7 @@ getfattr_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE | FT_ANYDIR, r, &f, NULL, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: getfattr - no filename\n", procid, opno);
+> > +			printf("%d/%lld: getfattr - no filename\n", procid, opno);
+> >  		goto out;
+> >  	}
+> >  	check_cwd();
+> > @@ -3906,7 +3913,7 @@ getfattr_f(int opno, long r)
+> >  
+> >  	e = generate_xattr_name(xattr_num, name, sizeof(name));
+> >  	if (e < 0) {
+> > -		printf("%d/%d: getfattr - file %s failed to generate xattr name: %d\n",
+> > +		printf("%d/%lld: getfattr - file %s failed to generate xattr name: %d\n",
+> >  		       procid, opno, f.path, e);
+> >  		goto out;
+> >  	}
+> > @@ -3914,7 +3921,7 @@ getfattr_f(int opno, long r)
+> >  	value_len = getxattr(f.path, name, NULL, 0);
+> >  	if (value_len < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: getfattr file %s name %s failed %d\n",
+> > +			printf("%d/%lld: getfattr file %s name %s failed %d\n",
+> >  			       procid, opno, f.path, name, errno);
+> >  		goto out;
+> >  	}
+> > @@ -3928,7 +3935,7 @@ getfattr_f(int opno, long r)
+> >  	value = malloc(value_len);
+> >  	if (!value) {
+> >  		if (v)
+> > -			printf("%d/%d: getfattr file %s failed to allocate buffer with %d bytes\n",
+> > +			printf("%d/%lld: getfattr file %s failed to allocate buffer with %d bytes\n",
+> >  			       procid, opno, f.path, value_len);
+> >  		goto out;
+> >  	}
+> > @@ -3936,7 +3943,7 @@ getfattr_f(int opno, long r)
+> >  	e = getxattr(f.path, name, value, value_len) < 0 ? errno : 0;
+> >  out_log:
+> >  	if (v)
+> > -		printf("%d/%d: getfattr file %s name %s value length %d %d\n",
+> > +		printf("%d/%lld: getfattr file %s name %s value length %d %d\n",
+> >  		       procid, opno, f.path, name, value_len, e);
+> >  out:
+> >  	free(value);
+> > @@ -3944,7 +3951,7 @@ getfattr_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -link_f(int opno, long r)
+> > +link_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -3960,7 +3967,7 @@ link_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_NOTDIR, r, &f, &flp, &fep_src, &v1)) {
+> >  		if (v1)
+> > -			printf("%d/%d: link - no file\n", procid, opno);
+> > +			printf("%d/%lld: link - no file\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -3975,7 +3982,7 @@ link_f(int opno, long r)
+> >  	if (!e) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&l, fep);
+> > -			printf("%d/%d: link - no filename from %s\n",
+> > +			printf("%d/%lld: link - no filename from %s\n",
+> >  				procid, opno, l.path);
+> >  		}
+> >  		free_pathname(&l);
+> > @@ -3987,16 +3994,16 @@ link_f(int opno, long r)
+> >  	if (e == 0)
+> >  		add_to_flist(flp - flist, id, parid, fep_src->xattr_counter);
+> >  	if (v) {
+> > -		printf("%d/%d: link %s %s %d\n", procid, opno, f.path, l.path,
+> > +		printf("%d/%lld: link %s %s %d\n", procid, opno, f.path, l.path,
+> >  			e);
+> > -		printf("%d/%d: link add id=%d,parent=%d\n", procid, opno, id, parid);
+> > +		printf("%d/%lld: link add id=%d,parent=%d\n", procid, opno, id, parid);
+> >  	}
+> >  	free_pathname(&l);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -listfattr_f(int opno, long r)
+> > +listfattr_f(opnum_t opno, long r)
+> >  {
+> >  	fent_t	        *fep;
+> >  	int		e;
+> > @@ -4008,7 +4015,7 @@ listfattr_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE | FT_ANYDIR, r, &f, NULL, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: listfattr - no filename\n", procid, opno);
+> > +			printf("%d/%lld: listfattr - no filename\n", procid, opno);
+> >  		goto out;
+> >  	}
+> >  	check_cwd();
+> > @@ -4016,14 +4023,14 @@ listfattr_f(int opno, long r)
+> >  	e = listxattr(f.path, NULL, 0);
+> >  	if (e < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: listfattr %s failed %d\n",
+> > +			printf("%d/%lld: listfattr %s failed %d\n",
+> >  			       procid, opno, f.path, errno);
+> >  		goto out;
+> >  	}
+> >  	buffer_len = e;
+> >  	if (buffer_len == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: listfattr %s - has no extended attributes\n",
+> > +			printf("%d/%lld: listfattr %s - has no extended attributes\n",
+> >  			       procid, opno, f.path);
+> >  		goto out;
+> >  	}
+> > @@ -4031,14 +4038,14 @@ listfattr_f(int opno, long r)
+> >  	buffer = malloc(buffer_len);
+> >  	if (!buffer) {
+> >  		if (v)
+> > -			printf("%d/%d: listfattr %s failed to allocate buffer with %d bytes\n",
+> > +			printf("%d/%lld: listfattr %s failed to allocate buffer with %d bytes\n",
+> >  			       procid, opno, f.path, buffer_len);
+> >  		goto out;
+> >  	}
+> >  
+> >  	e = listxattr(f.path, buffer, buffer_len) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: listfattr %s buffer length %d %d\n",
+> > +		printf("%d/%lld: listfattr %s buffer length %d %d\n",
+> >  		       procid, opno, f.path, buffer_len, e);
+> >  out:
+> >  	free(buffer);
+> > @@ -4046,7 +4053,7 @@ listfattr_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -mkdir_f(int opno, long r)
+> > +mkdir_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -4066,7 +4073,7 @@ mkdir_f(int opno, long r)
+> >  	if (!e) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&f, fep);
+> > -			printf("%d/%d: mkdir - no filename from %s\n",
+> > +			printf("%d/%lld: mkdir - no filename from %s\n",
+> >  				procid, opno, f.path);
+> >  		}
+> >  		free_pathname(&f);
+> > @@ -4077,14 +4084,14 @@ mkdir_f(int opno, long r)
+> >  	if (e == 0)
+> >  		add_to_flist(FT_DIR, id, parid, 0);
+> >  	if (v) {
+> > -		printf("%d/%d: mkdir %s %d\n", procid, opno, f.path, e);
+> > -		printf("%d/%d: mkdir add id=%d,parent=%d\n", procid, opno, id, parid);
+> > +		printf("%d/%lld: mkdir %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: mkdir add id=%d,parent=%d\n", procid, opno, id, parid);
+> >  	}
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -mknod_f(int opno, long r)
+> > +mknod_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -4104,7 +4111,7 @@ mknod_f(int opno, long r)
+> >  	if (!e) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&f, fep);
+> > -			printf("%d/%d: mknod - no filename from %s\n",
+> > +			printf("%d/%lld: mknod - no filename from %s\n",
+> >  				procid, opno, f.path);
+> >  		}
+> >  		free_pathname(&f);
+> > @@ -4115,8 +4122,8 @@ mknod_f(int opno, long r)
+> >  	if (e == 0)
+> >  		add_to_flist(FT_DEV, id, parid, 0);
+> >  	if (v) {
+> > -		printf("%d/%d: mknod %s %d\n", procid, opno, f.path, e);
+> > -		printf("%d/%d: mknod add id=%d,parent=%d\n", procid, opno, id, parid);
+> > +		printf("%d/%lld: mknod %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: mknod add id=%d,parent=%d\n", procid, opno, id, parid);
+> >  	}
+> >  	free_pathname(&f);
+> >  }
+> > @@ -4133,7 +4140,7 @@ struct print_flags mmap_flags[] = {
+> >  #endif
+> >  
+> >  void
+> > -do_mmap(int opno, long r, int prot)
+> > +do_mmap(opnum_t opno, long r, int prot)
+> >  {
+> >  #ifdef HAVE_SYS_MMAN_H
+> >  	char		*addr;
+> > @@ -4152,7 +4159,7 @@ do_mmap(int opno, long r, int prot)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: do_mmap - no filename\n", procid, opno);
+> > +			printf("%d/%lld: do_mmap - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -4161,14 +4168,14 @@ do_mmap(int opno, long r, int prot)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_mmap - open %s failed %d\n",
+> > +			printf("%d/%lld: do_mmap - open %s failed %d\n",
+> >  			       procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_mmap - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: do_mmap - fstat64 %s failed %d\n",
+> >  			       procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4177,7 +4184,7 @@ do_mmap(int opno, long r, int prot)
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (stb.st_size == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: do_mmap - %s%s zero size\n", procid, opno,
+> > +			printf("%d/%lld: do_mmap - %s%s zero size\n", procid, opno,
+> >  			       f.path, st);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4194,7 +4201,7 @@ do_mmap(int opno, long r, int prot)
+> >  	e = (addr == MAP_FAILED) ? errno : 0;
+> >  	if (e) {
+> >  		if (v)
+> > -			printf("%d/%d: do_mmap - mmap failed %s%s [%lld,%d,%s] %d\n",
+> > +			printf("%d/%lld: do_mmap - mmap failed %s%s [%lld,%d,%s] %d\n",
+> >  			       procid, opno, f.path, st, (long long)off,
+> >  			       (int)len, translate_mmap_flags(flags), e);
+> >  		free_pathname(&f);
+> > @@ -4219,7 +4226,7 @@ do_mmap(int opno, long r, int prot)
+> >  	sigbus_jmp = NULL;
+> >  
+> >  	if (v)
+> > -		printf("%d/%d: %s %s%s [%lld,%d,%s] %s\n",
+> > +		printf("%d/%lld: %s %s%s [%lld,%d,%s] %s\n",
+> >  		       procid, opno, (prot & PROT_WRITE) ? "mwrite" : "mread",
+> >  		       f.path, st, (long long)off, (int)len,
+> >  		       translate_mmap_flags(flags),
+> > @@ -4231,7 +4238,7 @@ do_mmap(int opno, long r, int prot)
+> >  }
+> >  
+> >  void
+> > -mread_f(int opno, long r)
+> > +mread_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_SYS_MMAN_H
+> >  	do_mmap(opno, r, PROT_READ);
+> > @@ -4239,7 +4246,7 @@ mread_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -mwrite_f(int opno, long r)
+> > +mwrite_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_SYS_MMAN_H
+> >  	do_mmap(opno, r, PROT_WRITE);
+> > @@ -4247,7 +4254,7 @@ mwrite_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -punch_f(int opno, long r)
+> > +punch_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  	do_fallocate(opno, r, FALLOC_FL_PUNCH_HOLE);
+> > @@ -4255,7 +4262,7 @@ punch_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -zero_f(int opno, long r)
+> > +zero_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  	do_fallocate(opno, r, FALLOC_FL_ZERO_RANGE);
+> > @@ -4263,7 +4270,7 @@ zero_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -collapse_f(int opno, long r)
+> > +collapse_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  	do_fallocate(opno, r, FALLOC_FL_COLLAPSE_RANGE);
+> > @@ -4271,7 +4278,7 @@ collapse_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -insert_f(int opno, long r)
+> > +insert_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  	do_fallocate(opno, r, FALLOC_FL_INSERT_RANGE);
+> > @@ -4279,7 +4286,7 @@ insert_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -read_f(int opno, long r)
+> > +read_f(opnum_t opno, long r)
+> >  {
+> >  	char		*buf;
+> >  	int		e;
+> > @@ -4295,7 +4302,7 @@ read_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: read - no filename\n", procid, opno);
+> > +			printf("%d/%lld: read - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -4304,14 +4311,14 @@ read_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: read - open %s failed %d\n",
+> > +			printf("%d/%lld: read - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: read - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: read - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4320,7 +4327,7 @@ read_f(int opno, long r)
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (stb.st_size == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: read - %s%s zero size\n", procid, opno,
+> > +			printf("%d/%lld: read - %s%s zero size\n", procid, opno,
+> >  			       f.path, st);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4334,14 +4341,14 @@ read_f(int opno, long r)
+> >  	e = read(fd, buf, len) < 0 ? errno : 0;
+> >  	free(buf);
+> >  	if (v)
+> > -		printf("%d/%d: read %s%s [%lld,%d] %d\n",
+> > +		printf("%d/%lld: read %s%s [%lld,%d] %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, (int)len, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -readlink_f(int opno, long r)
+> > +readlink_f(opnum_t opno, long r)
+> >  {
+> >  	char		buf[PATH_MAX];
+> >  	int		e;
+> > @@ -4351,19 +4358,19 @@ readlink_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_SYMm, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: readlink - no filename\n", procid, opno);
+> > +			printf("%d/%lld: readlink - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	e = readlink_path(&f, buf, PATH_MAX) < 0 ? errno : 0;
+> >  	check_cwd();
+> >  	if (v)
+> > -		printf("%d/%d: readlink %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: readlink %s %d\n", procid, opno, f.path, e);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -readv_f(int opno, long r)
+> > +readv_f(opnum_t opno, long r)
+> >  {
+> >  	char		*buf;
+> >  	int		e;
+> > @@ -4384,7 +4391,7 @@ readv_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: readv - no filename\n", procid, opno);
+> > +			printf("%d/%lld: readv - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -4393,14 +4400,14 @@ readv_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: readv - open %s failed %d\n",
+> > +			printf("%d/%lld: readv - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: readv - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: readv - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4409,7 +4416,7 @@ readv_f(int opno, long r)
+> >  	inode_info(st, sizeof(st), &stb, v);
+> >  	if (stb.st_size == 0) {
+> >  		if (v)
+> > -			printf("%d/%d: readv - %s%s zero size\n", procid, opno,
+> > +			printf("%d/%lld: readv - %s%s zero size\n", procid, opno,
+> >  			       f.path, st);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4434,7 +4441,7 @@ readv_f(int opno, long r)
+> >  	e = readv(fd, iov, iovcnt) < 0 ? errno : 0;
+> >  	free(buf);
+> >  	if (v)
+> > -		printf("%d/%d: readv %s%s [%lld,%d,%d] %d\n",
+> > +		printf("%d/%lld: readv %s%s [%lld,%d,%d] %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, (int)iovl,
+> >  		       iovcnt, e);
+> >  	free_pathname(&f);
+> > @@ -4442,7 +4449,7 @@ readv_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -removefattr_f(int opno, long r)
+> > +removefattr_f(opnum_t opno, long r)
+> >  {
+> >  	fent_t	        *fep;
+> >  	int		e;
+> > @@ -4454,7 +4461,7 @@ removefattr_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE | FT_ANYDIR, r, &f, NULL, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: removefattr - no filename\n", procid, opno);
+> > +			printf("%d/%lld: removefattr - no filename\n", procid, opno);
+> >  		goto out;
+> >  	}
+> >  	check_cwd();
+> > @@ -4471,14 +4478,14 @@ removefattr_f(int opno, long r)
+> >  
+> >  	e = generate_xattr_name(xattr_num, name, sizeof(name));
+> >  	if (e < 0) {
+> > -		printf("%d/%d: removefattr - file %s failed to generate xattr name: %d\n",
+> > +		printf("%d/%lld: removefattr - file %s failed to generate xattr name: %d\n",
+> >  		       procid, opno, f.path, e);
+> >  		goto out;
+> >  	}
+> >  
+> >  	e = removexattr(f.path, name) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: removefattr file %s name %s %d\n",
+> > +		printf("%d/%lld: removefattr file %s name %s %d\n",
+> >  		       procid, opno, f.path, name, e);
+> >  out:
+> >  	free_pathname(&f);
+> > @@ -4495,7 +4502,7 @@ struct print_flags renameat2_flags [] = {
+> >  	({translate_flags(mode, "|", renameat2_flags);})
+> >  
+> >  void
+> > -do_renameat2(int opno, long r, int mode)
+> > +do_renameat2(opnum_t opno, long r, int mode)
+> >  {
+> >  	fent_t		*dfep;
+> >  	int		e;
+> > @@ -4516,7 +4523,7 @@ do_renameat2(int opno, long r, int mode)
+> >  	which = (mode == RENAME_WHITEOUT) ? FT_DEVm : FT_ANYm;
+> >  	if (!get_fname(which, r, &f, &flp, &fep, &v1)) {
+> >  		if (v1)
+> > -			printf("%d/%d: rename - no source filename\n",
+> > +			printf("%d/%lld: rename - no source filename\n",
+> >  				procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -4532,7 +4539,7 @@ do_renameat2(int opno, long r, int mode)
+> >  		init_pathname(&newf);
+> >  		if (!get_fname(which, random(), &newf, NULL, &dfep, &v)) {
+> >  			if (v)
+> > -				printf("%d/%d: rename - no target filename\n",
+> > +				printf("%d/%lld: rename - no target filename\n",
+> >  					procid, opno);
+> >  			free_pathname(&newf);
+> >  			free_pathname(&f);
+> > @@ -4541,7 +4548,7 @@ do_renameat2(int opno, long r, int mode)
+> >  		if (which == FT_DIRm && (fents_ancestor_check(fep, dfep) ||
+> >  		    fents_ancestor_check(dfep, fep))) {
+> >  			if (v)
+> > -				printf("%d/%d: rename(REXCHANGE) %s and %s "
+> > +				printf("%d/%lld: rename(REXCHANGE) %s and %s "
+> >  					"have ancestor-descendant relationship\n",
+> >  					procid, opno, f.path, newf.path);
+> >  			free_pathname(&newf);
+> > @@ -4572,7 +4579,7 @@ do_renameat2(int opno, long r, int mode)
+> >  		if (!e) {
+> >  			if (v) {
+> >  				(void)fent_to_name(&f, dfep);
+> > -				printf("%d/%d: rename - no filename from %s\n",
+> > +				printf("%d/%lld: rename - no filename from %s\n",
+> >  					procid, opno, f.path);
+> >  			}
+> >  			free_pathname(&newf);
+> > @@ -4609,13 +4616,13 @@ do_renameat2(int opno, long r, int mode)
+> >  		}
+> >  	}
+> >  	if (v) {
+> > -		printf("%d/%d: rename(%s) %s to %s %d\n", procid,
+> > +		printf("%d/%lld: rename(%s) %s to %s %d\n", procid,
+> >  			opno, translate_renameat2_flags(mode), f.path,
+> >  			newf.path, e);
+> >  		if (e == 0) {
+> > -			printf("%d/%d: rename source entry: id=%d,parent=%d\n",
+> > +			printf("%d/%lld: rename source entry: id=%d,parent=%d\n",
+> >  				procid, opno, oldid, oldparid);
+> > -			printf("%d/%d: rename target entry: id=%d,parent=%d\n",
+> > +			printf("%d/%lld: rename target entry: id=%d,parent=%d\n",
+> >  				procid, opno, id, parid);
+> >  		}
+> >  	}
+> > @@ -4624,31 +4631,31 @@ do_renameat2(int opno, long r, int mode)
+> >  }
+> >  
+> >  void
+> > -rename_f(int opno, long r)
+> > +rename_f(opnum_t opno, long r)
+> >  {
+> >  	do_renameat2(opno, r, 0);
+> >  }
+> >  
+> >  void
+> > -rnoreplace_f(int opno, long r)
+> > +rnoreplace_f(opnum_t opno, long r)
+> >  {
+> >  	do_renameat2(opno, r, RENAME_NOREPLACE);
+> >  }
+> >  
+> >  void
+> > -rexchange_f(int opno, long r)
+> > +rexchange_f(opnum_t opno, long r)
+> >  {
+> >  	do_renameat2(opno, r, RENAME_EXCHANGE);
+> >  }
+> >  
+> >  void
+> > -rwhiteout_f(int opno, long r)
+> > +rwhiteout_f(opnum_t opno, long r)
+> >  {
+> >  	do_renameat2(opno, r, RENAME_WHITEOUT);
+> >  }
+> >  
+> >  void
+> > -resvsp_f(int opno, long r)
+> > +resvsp_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -4663,7 +4670,7 @@ resvsp_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: resvsp - no filename\n", procid, opno);
+> > +			printf("%d/%lld: resvsp - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -4672,14 +4679,14 @@ resvsp_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: resvsp - open %s failed %d\n",
+> > +			printf("%d/%lld: resvsp - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: resvsp - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: resvsp - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -4694,7 +4701,7 @@ resvsp_f(int opno, long r)
+> >  	fl.l_len = (off64_t)(random() % (1024 * 1024));
+> >  	e = xfsctl(f.path, fd, XFS_IOC_RESVSP64, &fl) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: xfsctl(XFS_IOC_RESVSP64) %s%s %lld %lld %d\n",
+> > +		printf("%d/%lld: xfsctl(XFS_IOC_RESVSP64) %s%s %lld %lld %d\n",
+> >  		       procid, opno, f.path, st,
+> >  			(long long)off, (long long)fl.l_len, e);
+> >  	free_pathname(&f);
+> > @@ -4702,7 +4709,7 @@ resvsp_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -rmdir_f(int opno, long r)
+> > +rmdir_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -4714,7 +4721,7 @@ rmdir_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_DIRm, r, &f, NULL, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: rmdir - no directory\n", procid, opno);
+> > +			printf("%d/%lld: rmdir - no directory\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -4726,16 +4733,16 @@ rmdir_f(int opno, long r)
+> >  		del_from_flist(FT_DIR, fep - flist[FT_DIR].fents);
+> >  	}
+> >  	if (v) {
+> > -		printf("%d/%d: rmdir %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: rmdir %s %d\n", procid, opno, f.path, e);
+> >  		if (e == 0)
+> > -			printf("%d/%d: rmdir del entry: id=%d,parent=%d\n",
+> > +			printf("%d/%lld: rmdir del entry: id=%d,parent=%d\n",
+> >  				procid, opno, oldid, oldparid);
+> >  	}
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -setattr_f(int opno, long r)
+> > +setattr_f(opnum_t opno, long r)
+> >  {
+> >  	int		fd;
+> >  	int		e;
+> > @@ -4753,13 +4760,13 @@ setattr_f(int opno, long r)
+> >  	fl = attr_mask & (uint)random();
+> >  	e = ioctl(fd, FS_IOC_SETFLAGS, &fl);
+> >  	if (v)
+> > -		printf("%d/%d: setattr %s %x %d\n", procid, opno, f.path, fl, e);
+> > +		printf("%d/%lld: setattr %s %x %d\n", procid, opno, f.path, fl, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -setfattr_f(int opno, long r)
+> > +setfattr_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -4774,7 +4781,7 @@ setfattr_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE | FT_ANYDIR, r, &f, NULL, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: setfattr - no filename\n", procid, opno);
+> > +			printf("%d/%lld: setfattr - no filename\n", procid, opno);
+> >  		goto out;
+> >  	}
+> >  	check_cwd();
+> > @@ -4810,13 +4817,13 @@ setfattr_f(int opno, long r)
+> >  	value = gen_random_string(value_len);
+> >  	if (!value && value_len > 0) {
+> >  		if (v)
+> > -			printf("%d/%d: setfattr - file %s failed to allocate value with %d bytes\n",
+> > +			printf("%d/%lld: setfattr - file %s failed to allocate value with %d bytes\n",
+> >  			       procid, opno, f.path, value_len);
+> >  		goto out;
+> >  	}
+> >  	e = generate_xattr_name(xattr_num, name, sizeof(name));
+> >  	if (e < 0) {
+> > -		printf("%d/%d: setfattr - file %s failed to generate xattr name: %d\n",
+> > +		printf("%d/%lld: setfattr - file %s failed to generate xattr name: %d\n",
+> >  		       procid, opno, f.path, e);
+> >  		goto out;
+> >  	}
+> > @@ -4825,7 +4832,7 @@ setfattr_f(int opno, long r)
+> >  	if (e == 0)
+> >  		fep->xattr_counter++;
+> >  	if (v)
+> > -		printf("%d/%d: setfattr file %s name %s flag %s value length %d: %d\n",
+> > +		printf("%d/%lld: setfattr file %s name %s flag %s value length %d: %d\n",
+> >  		       procid, opno, f.path, name, xattr_flag_to_string(flag),
+> >  		       value_len, e);
+> >  out:
+> > @@ -4834,7 +4841,7 @@ setfattr_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -snapshot_f(int opno, long r)
+> > +snapshot_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_BTRFSUTIL_H
+> >  	enum btrfs_util_error	e;
+> > @@ -4850,7 +4857,7 @@ snapshot_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_SUBVOLm, r, &f, NULL, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: snapshot - no subvolume\n", procid,
+> > +			printf("%d/%lld: snapshot - no subvolume\n", procid,
+> >  			       opno);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -4862,7 +4869,7 @@ snapshot_f(int opno, long r)
+> >  	if (!err) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&f, fep);
+> > -			printf("%d/%d: snapshot - no filename from %s\n",
+> > +			printf("%d/%lld: snapshot - no filename from %s\n",
+> >  			       procid, opno, f.path);
+> >  		}
+> >  		free_pathname(&f);
+> > @@ -4872,9 +4879,9 @@ snapshot_f(int opno, long r)
+> >  	if (e == BTRFS_UTIL_OK)
+> >  		add_to_flist(FT_SUBVOL, id, parid, 0);
+> >  	if (v) {
+> > -		printf("%d/%d: snapshot %s->%s %d(%s)\n", procid, opno,
+> > +		printf("%d/%lld: snapshot %s->%s %d(%s)\n", procid, opno,
+> >  		       f.path, newf.path, e, btrfs_util_strerror(e));
+> > -		printf("%d/%d: snapshot add id=%d,parent=%d\n", procid, opno,
+> > +		printf("%d/%lld: snapshot add id=%d,parent=%d\n", procid, opno,
+> >  		       id, parid);
+> >  	}
+> >  	free_pathname(&newf);
+> > @@ -4883,7 +4890,7 @@ snapshot_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -stat_f(int opno, long r)
+> > +stat_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -4893,19 +4900,19 @@ stat_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_ANYm, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: stat - no entries\n", procid, opno);
+> > +			printf("%d/%lld: stat - no entries\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	e = lstat64_path(&f, &stb) < 0 ? errno : 0;
+> >  	check_cwd();
+> >  	if (v)
+> > -		printf("%d/%d: stat %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: stat %s %d\n", procid, opno, f.path, e);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -subvol_create_f(int opno, long r)
+> > +subvol_create_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_BTRFSUTIL_H
+> >  	enum btrfs_util_error	e;
+> > @@ -4927,7 +4934,7 @@ subvol_create_f(int opno, long r)
+> >  	if (!err) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&f, fep);
+> > -			printf("%d/%d: subvol_create - no filename from %s\n",
+> > +			printf("%d/%lld: subvol_create - no filename from %s\n",
+> >  			       procid, opno, f.path);
+> >  		}
+> >  		free_pathname(&f);
+> > @@ -4937,9 +4944,9 @@ subvol_create_f(int opno, long r)
+> >  	if (e == BTRFS_UTIL_OK)
+> >  		add_to_flist(FT_SUBVOL, id, parid, 0);
+> >  	if (v) {
+> > -		printf("%d/%d: subvol_create %s %d(%s)\n", procid, opno,
+> > +		printf("%d/%lld: subvol_create %s %d(%s)\n", procid, opno,
+> >  		       f.path, e, btrfs_util_strerror(e));
+> > -		printf("%d/%d: subvol_create add id=%d,parent=%d\n", procid,
+> > +		printf("%d/%lld: subvol_create add id=%d,parent=%d\n", procid,
+> >  		       opno, id, parid);
+> >  	}
+> >  	free_pathname(&f);
+> > @@ -4947,7 +4954,7 @@ subvol_create_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -subvol_delete_f(int opno, long r)
+> > +subvol_delete_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef HAVE_BTRFSUTIL_H
+> >  	enum btrfs_util_error	e;
+> > @@ -4974,10 +4981,10 @@ subvol_delete_f(int opno, long r)
+> >  		del_from_flist(FT_SUBVOL, fep - flist[FT_SUBVOL].fents);
+> >  	}
+> >  	if (v) {
+> > -		printf("%d/%d: subvol_delete %s %d(%s)\n", procid, opno, f.path,
+> > +		printf("%d/%lld: subvol_delete %s %d(%s)\n", procid, opno, f.path,
+> >  		       e, btrfs_util_strerror(e));
+> >  		if (e == BTRFS_UTIL_OK)
+> > -			printf("%d/%d: subvol_delete del entry: id=%d,parent=%d\n",
+> > +			printf("%d/%lld: subvol_delete del entry: id=%d,parent=%d\n",
+> >  			       procid, opno, oldid, oldparid);
+> >  	}
+> >  	free_pathname(&f);
+> > @@ -4985,7 +4992,7 @@ subvol_delete_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -symlink_f(int opno, long r)
+> > +symlink_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -5008,7 +5015,7 @@ symlink_f(int opno, long r)
+> >  	if (!e) {
+> >  		if (v) {
+> >  			(void)fent_to_name(&f, fep);
+> > -			printf("%d/%d: symlink - no filename from %s\n",
+> > +			printf("%d/%lld: symlink - no filename from %s\n",
+> >  				procid, opno, f.path);
+> >  		}
+> >  		free_pathname(&f);
+> > @@ -5027,23 +5034,23 @@ symlink_f(int opno, long r)
+> >  		add_to_flist(FT_SYM, id, parid, 0);
+> >  	free(val);
+> >  	if (v) {
+> > -		printf("%d/%d: symlink %s %d\n", procid, opno, f.path, e);
+> > -		printf("%d/%d: symlink add id=%d,parent=%d\n", procid, opno, id, parid);
+> > +		printf("%d/%lld: symlink %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: symlink add id=%d,parent=%d\n", procid, opno, id, parid);
+> >  	}
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  /* ARGSUSED */
+> >  void
+> > -sync_f(int opno, long r)
+> > +sync_f(opnum_t opno, long r)
+> >  {
+> >  	sync();
+> >  	if (verbose)
+> > -		printf("%d/%d: sync\n", procid, opno);
+> > +		printf("%d/%lld: sync\n", procid, opno);
+> >  }
+> >  
+> >  void
+> > -truncate_f(int opno, long r)
+> > +truncate_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -5056,7 +5063,7 @@ truncate_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: truncate - no filename\n", procid, opno);
+> > +			printf("%d/%lld: truncate - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -5064,7 +5071,7 @@ truncate_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (e > 0) {
+> >  		if (v)
+> > -			printf("%d/%d: truncate - stat64 %s failed %d\n",
+> > +			printf("%d/%lld: truncate - stat64 %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> > @@ -5076,13 +5083,13 @@ truncate_f(int opno, long r)
+> >  	e = truncate64_path(&f, off) < 0 ? errno : 0;
+> >  	check_cwd();
+> >  	if (v)
+> > -		printf("%d/%d: truncate %s%s %lld %d\n", procid, opno, f.path,
+> > +		printf("%d/%lld: truncate %s%s %lld %d\n", procid, opno, f.path,
+> >  		       st, (long long)off, e);
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -unlink_f(int opno, long r)
+> > +unlink_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -5095,7 +5102,7 @@ unlink_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_NOTDIR, r, &f, &flp, &fep, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: unlink - no file\n", procid, opno);
+> > +			printf("%d/%lld: unlink - no file\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -5107,16 +5114,16 @@ unlink_f(int opno, long r)
+> >  		del_from_flist(flp - flist, fep - flp->fents);
+> >  	}
+> >  	if (v) {
+> > -		printf("%d/%d: unlink %s %d\n", procid, opno, f.path, e);
+> > +		printf("%d/%lld: unlink %s %d\n", procid, opno, f.path, e);
+> >  		if (e == 0)
+> > -			printf("%d/%d: unlink del entry: id=%d,parent=%d\n",
+> > +			printf("%d/%lld: unlink del entry: id=%d,parent=%d\n",
+> >  				procid, opno, oldid, oldparid);
+> >  	}
+> >  	free_pathname(&f);
+> >  }
+> >  
+> >  void
+> > -unresvsp_f(int opno, long r)
+> > +unresvsp_f(opnum_t opno, long r)
+> >  {
+> >  	int		e;
+> >  	pathname_t	f;
+> > @@ -5131,7 +5138,7 @@ unresvsp_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: unresvsp - no filename\n", procid, opno);
+> > +			printf("%d/%lld: unresvsp - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -5140,14 +5147,14 @@ unresvsp_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: unresvsp - open %s failed %d\n",
+> > +			printf("%d/%lld: unresvsp - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: unresvsp - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: unresvsp - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -5162,7 +5169,7 @@ unresvsp_f(int opno, long r)
+> >  	fl.l_len = (off64_t)(random() % (1 << 20));
+> >  	e = xfsctl(f.path, fd, XFS_IOC_UNRESVSP64, &fl) < 0 ? errno : 0;
+> >  	if (v)
+> > -		printf("%d/%d: xfsctl(XFS_IOC_UNRESVSP64) %s%s %lld %lld %d\n",
+> > +		printf("%d/%lld: xfsctl(XFS_IOC_UNRESVSP64) %s%s %lld %lld %d\n",
+> >  		       procid, opno, f.path, st,
+> >  			(long long)off, (long long)fl.l_len, e);
+> >  	free_pathname(&f);
+> > @@ -5170,7 +5177,7 @@ unresvsp_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -uring_read_f(int opno, long r)
+> > +uring_read_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef URING
+> >  	do_uring_rw(opno, r, O_RDONLY);
+> > @@ -5178,7 +5185,7 @@ uring_read_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -uring_write_f(int opno, long r)
+> > +uring_write_f(opnum_t opno, long r)
+> >  {
+> >  #ifdef URING
+> >  	do_uring_rw(opno, r, O_WRONLY);
+> > @@ -5186,7 +5193,7 @@ uring_write_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > -write_f(int opno, long r)
+> > +write_f(opnum_t opno, long r)
+> >  {
+> >  	char		*buf;
+> >  	int		e;
+> > @@ -5202,7 +5209,7 @@ write_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGm, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: write - no filename\n", procid, opno);
+> > +			printf("%d/%lld: write - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -5211,14 +5218,14 @@ write_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: write - open %s failed %d\n",
+> > +			printf("%d/%lld: write - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: write - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: write - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -5235,14 +5242,14 @@ write_f(int opno, long r)
+> >  	e = write(fd, buf, len) < 0 ? errno : 0;
+> >  	free(buf);
+> >  	if (v)
+> > -		printf("%d/%d: write %s%s [%lld,%d] %d\n",
+> > +		printf("%d/%lld: write %s%s [%lld,%d] %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, (int)len, e);
+> >  	free_pathname(&f);
+> >  	close(fd);
+> >  }
+> >  
+> >  void
+> > -writev_f(int opno, long r)
+> > +writev_f(opnum_t opno, long r)
+> >  {
+> >  	char		*buf;
+> >  	int		e;
+> > @@ -5263,7 +5270,7 @@ writev_f(int opno, long r)
+> >  	init_pathname(&f);
+> >  	if (!get_fname(FT_REGm, r, &f, NULL, NULL, &v)) {
+> >  		if (v)
+> > -			printf("%d/%d: writev - no filename\n", procid, opno);
+> > +			printf("%d/%lld: writev - no filename\n", procid, opno);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > @@ -5272,14 +5279,14 @@ writev_f(int opno, long r)
+> >  	check_cwd();
+> >  	if (fd < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: writev - open %s failed %d\n",
+> > +			printf("%d/%lld: writev - open %s failed %d\n",
+> >  				procid, opno, f.path, e);
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> >  	if (fstat64(fd, &stb) < 0) {
+> >  		if (v)
+> > -			printf("%d/%d: writev - fstat64 %s failed %d\n",
+> > +			printf("%d/%lld: writev - fstat64 %s failed %d\n",
+> >  				procid, opno, f.path, errno);
+> >  		free_pathname(&f);
+> >  		close(fd);
+> > @@ -5308,7 +5315,7 @@ writev_f(int opno, long r)
+> >  	free(buf);
+> >  	free(iov);
+> >  	if (v)
+> > -		printf("%d/%d: writev %s%s [%lld,%d,%d] %d\n",
+> > +		printf("%d/%lld: writev %s%s [%lld,%d,%d] %d\n",
+> >  		       procid, opno, f.path, st, (long long)off, (int)iovl,
+> >  		       iovcnt, e);
+> >  	free_pathname(&f);
