@@ -2,98 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBCC3C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 14:49:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 469B6C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 15:19:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AE50661360
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 14:49:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 345BB6115A
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 15:19:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240611AbhKHOwI (ORCPT
+        id S238746AbhKHPWM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Nov 2021 09:52:08 -0500
-Received: from smtp-out1.suse.de ([195.135.220.28]:54074 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240636AbhKHOv6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 09:51:58 -0500
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 387BC21B09;
-        Mon,  8 Nov 2021 14:49:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1636382948; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
+        Mon, 8 Nov 2021 10:22:12 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:57780 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S238697AbhKHPWK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 10:22:10 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1636384766;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding;
-        bh=4nNd18yl8naLVwzgnRVAYekH8A4vA0NXERSLlBDV9Nc=;
-        b=L+tWuzyfPBl9lBtgyAD0hV6SPf9F0vik8PH2qnev7P8a0IRz88pMWQWm8uw6uGwJsnG0Q8
-        5RAlKhDsihakZUYcNi4fJpU1r1DJ0HH3Uqa1Gy+4NToBOUitEmXY9Cp/Si/v5BM6YgNoyR
-        LG5Y0XwAOZcu0kkF37QqkeyLOvueMQo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1636382948;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=4nNd18yl8naLVwzgnRVAYekH8A4vA0NXERSLlBDV9Nc=;
-        b=VqUCBrjEGJUTtvnkzu7Wa5eetxDhNCdDG39lkof2azWvpRBqk2eXjVA5NsmYo6Rrt2/Qd2
-        LbUEjjv2RVlQ/FBg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        bh=VBQwVfthRqhBVsV02+PGFr06WW3g76O0Ft6JuXFnCiw=;
+        b=ZDu3WnJ8p8iArRv3+hmMM0hKiN4iFkb42w0rLCrob6B6tlLenv5iPp2iTDNyqDZynEhDzl
+        FyecMbHxfRDFuJCZFtq0ig0vaaIQ3X2D41EOlSjhv0ct1SYD+GpHaY42jx+mYJqYHRWEH+
+        oE4GNpQTTt2XPCaMm+Uj8quUnLVEpWI=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-560-4WGVZO6eNTS_TXQ_uvjWIw-1; Mon, 08 Nov 2021 10:19:22 -0500
+X-MC-Unique: 4WGVZO6eNTS_TXQ_uvjWIw-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E350F13BA0;
-        Mon,  8 Nov 2021 14:49:07 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id Ivi9NOM4iWFQMgAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Mon, 08 Nov 2021 14:49:07 +0000
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id 62754ccf;
-        Mon, 8 Nov 2021 14:49:07 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C602280A5CA;
+        Mon,  8 Nov 2021 15:19:21 +0000 (UTC)
+Received: from localhost.localdomain (unknown [10.40.194.220])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 622A55C3E0;
+        Mon,  8 Nov 2021 15:19:20 +0000 (UTC)
+From:   Lukas Czerner <lczerner@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     Luis Chamberlain <mcgrof@suse.com>,
-        Anthony Iliopoulos <ailiop@suse.com>,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH] generic/528: take fs timestamps granularity into account in tolerance interval
-Date:   Mon,  8 Nov 2021 14:49:05 +0000
-Message-Id: <20211108144905.11515-1-lhenriques@suse.de>
+Cc:     linux-ext4@vger.kernel.org, tytso@mit.edu, guan@eryu.me
+Subject: [PATCH 1/2] common/rc: add _require_kernel_config and _has_kernel_config
+Date:   Mon,  8 Nov 2021 16:19:15 +0100
+Message-Id: <20211108151916.27845-1-lczerner@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Filesystems timestamps granularity can cause spurious test failures:
+Add _require_kernel_config() and _has_kernel_config() helpers to check
+whether a specific kernel configuration is enabled on the kernel.
 
-  QA output created by 528
-  btime has value of 1635818936
-  btime is NOT in range 1635818937 .. 1635818942
-
-This test output makes it looks like $testfile was created *before* the
-'date' command was executed.  What really happen was that btime was
-truncated according to the granularity defined by filesystem (I've seen
-this with both ext4 and xfs, but I guess others are also affected).
-
-Since granularity can't be worse than a second, simply adjust the test
-tolerance interval by 1 second.
-
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Lukas Czerner <lczerner@redhat.com>
 ---
- tests/generic/528 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ common/config |  1 +
+ common/rc     | 29 +++++++++++++++++++++++++++++
+ 2 files changed, 30 insertions(+)
 
-diff --git a/tests/generic/528 b/tests/generic/528
-index 24d1ee0e5ec7..a63827b1139b 100755
---- a/tests/generic/528
-+++ b/tests/generic/528
-@@ -41,7 +41,7 @@ btime=$(date +%s -d "$($XFS_IO_PROG -c "statx -v -m $STATX_BTIME" $testfile | \
- 	grep 'stat.btime =' | cut -d '=' -f 2)")
- test -n "$btime" || echo "error: did not see btime in output??"
+diff --git a/common/config b/common/config
+index 164381b7..e0a5c5df 100644
+--- a/common/config
++++ b/common/config
+@@ -226,6 +226,7 @@ export OPENSSL_PROG="$(type -P openssl)"
+ export ACCTON_PROG="$(type -P accton)"
+ export E2IMAGE_PROG="$(type -P e2image)"
+ export BLKZONE_PROG="$(type -P blkzone)"
++export GZIP_PROG="$(type -P gzip)"
  
--_within_tolerance "btime" "$btime" "$now" 0 5 -v
-+_within_tolerance "btime" "$btime" "$now" 1 5 -v
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/rc b/common/rc
+index 0d261184..84154868 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4703,6 +4703,35 @@ _require_names_are_bytes() {
+         esac
+ }
  
- status=0
- exit
++_has_kernel_config()
++{
++	option=$1
++	uname=$(uname -r)
++	config_list="$KCONFIG_PATH
++		     /proc/config.gz
++		     /lib/modules/$uname/build/.config
++		     /boot/config-$uname
++		     /lib/kernel/config-$uname"
++
++	for config in $config_list; do
++		[ ! -f $config ] && continue
++		[ $config = "/proc/config.gz" ] && break
++		grep -qE "^${option}=[my]" $config
++		return
++	done
++
++	[ ! -f $config ] && _notrun "Could not locate kernel config file"
++
++	# We can only get here with /proc/config.gz
++	_require_command "$GZIP_PROG" gzip
++	$GZIP_PROG -cd $config | grep -qE "^${option}=[my]"
++}
++
++_require_kernel_config()
++{
++	_has_kernel_config $1 || _notrun "Installed kernel not built with $1"
++}
++
+ init_rc
+ 
+ ################################################################################
+-- 
+2.31.1
+
