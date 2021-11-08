@@ -2,99 +2,202 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AC16C433FE
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 04:37:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17FF5C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 06:18:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4A711610A5
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 04:37:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E985B61208
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 06:18:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236645AbhKHEkT (ORCPT
+        id S237698AbhKHGV1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 7 Nov 2021 23:40:19 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34166 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231463AbhKHEkS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 7 Nov 2021 23:40:18 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id E3D1261076;
-        Mon,  8 Nov 2021 04:37:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636346255;
-        bh=Pdd82xrVzMnfiWi2u+fTvK6TMnsM7+MLbMGx3FZWteg=;
-        h=From:To:Cc:Subject:Date:From;
-        b=meMzeIxb90AZ12Nr9C9Di6wPtrxB4uLZAQs3rQ5VXuSJMlF4gpUS4mZW0CGuZdgeA
-         lJjvodhnrAKwBIxYm3miQrO0RAjQ7bzEmfjlAq3H1uKOMTPhyVDdm7H0QyiddMWypj
-         5mNdbcpCV1HLZDQ3FzwWTxaJE36f+qNctPS9qWvUP14VQ2J7hxr59ncOASYhSj84Rf
-         MyzXIYMtq637NIAhjG+BJaQjh6I3NAsAAS6ntrqRP1VcfQT3rmFmgszqJpUW6pAKlB
-         LMiWCN8425XyTVEzVXe0OQYQ50L+RwFIZzbYkj1uQ7oCEcHxDi/ggghpE3HJYv5iha
-         e7hgzVfNg2Dfw==
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org, David Howells <dhowells@redhat.com>
-Subject: [PATCH] generic/574: remove invalid test of read completely past EOF
-Date:   Sun,  7 Nov 2021 20:36:20 -0800
-Message-Id: <20211108043620.155257-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.33.1
+        Mon, 8 Nov 2021 01:21:27 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:53554 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229807AbhKHGV0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 01:21:26 -0500
+IronPort-Data: =?us-ascii?q?A9a23=3AsjbVP67JXLZmJJWQdGwUcgxRtBHFchMFZxGqfqr?=
+ =?us-ascii?q?LsXjdYENShWcCy2UcWD+Gb/yCMGOjeNggPYvi9E5X78CBy95rSgE5pCpnJ55og?=
+ =?us-ascii?q?ZCbXIzGdC8cHM8zwvXrFRsht4NHAjX5BJhcokT0+1H9bdANkVEmjfvRH+OkV7a?=
+ =?us-ascii?q?eUsxMbVQMpBkJ2EsLd9ER0tYAbeiRW2thiPuqyyHtEAbNNw1cbgr435m+RCZH5?=
+ =?us-ascii?q?5wejt+3UmsWPpintHeG/5Uc4Ql2yauZdxMUSaEMdgK2qnqq8V23wo/Z109F5tK?=
+ =?us-ascii?q?NmbC9fFAIQ6LJIE6FjX8+t6qK20AE/3JtlP1gcqd0hUR/0l1lm/hr1dxLro32R?=
+ =?us-ascii?q?wEyIoXCheYcTwJFVSp5OMWq/ZeeeCfn7ZLJlRGun3zEhq8G4FsNFYEa5eFxDkl?=
+ =?us-ascii?q?N+OYeJTRLaQqM78q42662UfV3rtosIdOtP44FvHxkizbDAp4brTrrK0nRzYYAm?=
+ =?us-ascii?q?m5u2YYVRrCDD/f1oAFHNHzoCyCj8H9MYH7moNqVuw=3D=3D?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3Awwx7AqMZdnNnxcBcTiWjsMiBIKoaSvp037Eq?=
+ =?us-ascii?q?v3oBKyC9Ffbo7vxG/c5rsyMc5wx/ZJhNo6HlBEDEewK6yXcX2+cs1NWZMDUO0V?=
+ =?us-ascii?q?HAROoJgLcKgQeQfhEWndQ86U4PSdkcNDS9NzlHZNjBkXSFOudl0N+a67qpmOub?=
+ =?us-ascii?q?639sSDthY6Zm4xwRMHfhLmRGABlBGYEiFIeRou5Opz+bc3wRacihQlYfWeyrna?=
+ =?us-ascii?q?ywqLvWJQ4BGwU86BSDyReh6LvBGRCe2RsEFxNjqI1SiVT4rw=3D=3D?=
+X-IronPort-AV: E=Sophos;i="5.87,217,1631548800"; 
+   d="scan'208";a="117046224"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 08 Nov 2021 14:18:40 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 7F3F24D0D9D7;
+        Mon,  8 Nov 2021 14:18:34 +0800 (CST)
+Received: from G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Mon, 8 Nov 2021 14:18:36 +0800
+Received: from [10.167.216.64] (10.167.216.64) by
+ G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.23 via Frontend Transport; Mon, 8 Nov 2021 14:18:36 +0800
+Message-ID: <3487e0fd-4fb6-d8ea-c5bf-b2ee679f792d@fujitsu.com>
+Date:   Mon, 8 Nov 2021 14:18:34 +0800
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.0
+Subject: Re: [PATCH v2 2/5] generic/xxx: Add MMAP CoW test for 'unwritten'
+ case
+To:     "Darrick J. Wong" <djwong@kernel.org>
+CC:     <fstests@vger.kernel.org>
+References: <20211105045222.157826-1-ruansy.fnst@fujitsu.com>
+ <20211105045222.157826-3-ruansy.fnst@fujitsu.com>
+ <20211105162011.GD24282@magnolia>
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+In-Reply-To: <20211105162011.GD24282@magnolia>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
+X-yoursite-MailScanner-ID: 7F3F24D0D9D7.AF51A
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
 
-One of the test cases in generic/574 tests that if a file of length
-130999 has fs-verity enabled, and if bytes 131000..131071 (i.e. some
-bytes past EOF and in the same block as EOF) are corrupted with nonzero
-values, then reads of the corrupted part should fail with EIO.
 
-This isn't a valid test case, because reads that start at or past EOF
-are allowed to simply return 0 without doing any I/O.
+在 2021/11/6 0:20, Darrick J. Wong 写道:
+> On Fri, Nov 05, 2021 at 12:52:19PM +0800, Shiyang Ruan wrote:
+>> Check what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
+>> the second block is a unwritten block.  (MMAP version of generic/216,217)
+>>
+>> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+>> ---
+>>   tests/generic/901     | 76 +++++++++++++++++++++++++++++++++++++++++++
+>>   tests/generic/901.out |  6 ++++
+>>   2 files changed, 82 insertions(+)
+>>   create mode 100755 tests/generic/901
+>>   create mode 100644 tests/generic/901.out
+>>
+>> diff --git a/tests/generic/901 b/tests/generic/901
+>> new file mode 100755
+>> index 00000000..46459815
+>> --- /dev/null
+>> +++ b/tests/generic/901
+>> @@ -0,0 +1,76 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +#
+>> +# FS QA Test No. xxx
+>> +#
+>> +# See what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
+>> +# the second block is a unwritten block.  (MMAP version of generic/216,217)
+>> +#
+>> +# This test is dependent on the system page size, so we cannot use md5 in
+>> +# the golden output; we can only compare to a check file.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick clone
+>> +
+>> +# Override the default cleanup function.
+>> +_cleanup()
+>> +{
+>> +    cd /
+>> +    rm -rf $tmp.* $testdir
+>> +}
+> 
+> Oh, something I didn't notice with the previous patch -- this exact
+> _cleanup function is now provided by common/preamble as a default.  If
+> you don't have anything to add to the cleanup process, then you can omit
+> this definition.
 
-Therefore, don't run this test case.
+We created a testdir here but the default _cleanup doesn't remove it, so 
+I think this overrided cleanup is needed.
 
-This fixes a test failure caused by the kernel commit 8c8387ee3f55
-("mm: stop filemap_read() from grabbing a superfluous page").
+--
+Thanks,
+Ruan.
 
-Note that the other test cases for this same corrupted file remain
-valid, including testing that an error is reported during full file
-reads and during mmap "reads".  This is because the fs-verity Merkle
-tree is defined over full blocks, so the file's last block won't be
-readable if it contains corrupted (nonzero) bytes past EOF.  This may
-seem odd, but it's working as intended, especially considering that
-bytes past EOF in a file's last block are exposed to userspace in mmaps.
+> 
+> With that fixed,
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> 
+> --D
+> 
+> 
+>> +
+>> +# Import common functions.
+>> +. ./common/filter
+>> +. ./common/reflink
+>> +
+>> +# real QA test starts here
+>> +_require_scratch_reflink
+>> +_require_xfs_io_command "falloc"
+>> +
+>> +pagesz=$(getconf PAGE_SIZE)
+>> +blksz=$((pagesz / 4))
+>> +
+>> +echo "Format and mount"
+>> +_scratch_mkfs_blocksized $blksz > $seqres.full 2>&1
+>> +_scratch_mount >> $seqres.full 2>&1
+>> +
+>> +testdir=$SCRATCH_MNT/test-$seq
+>> +mkdir $testdir
+>> +
+>> +real_blksz=$(_get_file_block_size $testdir)
+>> +test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
+>> +
+>> +echo "Create the original files"
+>> +_pwrite_byte 0x61 0 $pagesz $testdir/file1 >> $seqres.full
+>> +
+>> +$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2 >> $seqres.full
+>> +$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2.chk >> $seqres.full
+>> +
+>> +$XFS_IO_PROG -f -c "falloc -k $blksz $blksz" $testdir/file2 >> $seqres.full
+>> +_pwrite_byte 0x00 $blksz $blksz $testdir/file2.chk >> $seqres.full
+>> +
+>> +$XFS_IO_PROG -f -c "falloc -k $((blksz * 3)) $blksz" $testdir/file2 >> $seqres.full
+>> +_pwrite_byte 0x00 $((blksz * 3)) $blksz $testdir/file2.chk >> $seqres.full
+>> +
+>> +_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 2)) $blksz >> $seqres.full
+>> +_pwrite_byte 0x61 $((blksz * 2)) $blksz $testdir/file2.chk >> $seqres.full
+>> +_scratch_cycle_mount
+>> +
+>> +echo "Compare files"
+>> +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
+>> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
+>> +
+>> +echo "CoW and unmount"
+>> +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
+>> +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2 >> $seqres.full
+>> +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
+>> +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2.chk >> $seqres.full
+>> +_scratch_cycle_mount
+>> +
+>> +echo "Compare files"
+>> +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
+>> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/generic/901.out b/tests/generic/901.out
+>> new file mode 100644
+>> index 00000000..07b9b433
+>> --- /dev/null
+>> +++ b/tests/generic/901.out
+>> @@ -0,0 +1,6 @@
+>> +QA output created by 901
+>> +Format and mount
+>> +Create the original files
+>> +Compare files
+>> +CoW and unmount
+>> +Compare files
+>> -- 
+>> 2.33.0
+>>
+>>
+>>
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/574     | 2 +-
- tests/generic/574.out | 2 --
- 2 files changed, 1 insertion(+), 3 deletions(-)
-
-diff --git a/tests/generic/574 b/tests/generic/574
-index df0ef95f..882baa21 100755
---- a/tests/generic/574
-+++ b/tests/generic/574
-@@ -106,7 +106,7 @@ corruption_test()
- 	dd if=$fsv_file bs=$FSV_BLOCK_SIZE iflag=direct status=none \
- 		of=/dev/null |& _filter_scratch
- 
--	if ! $is_merkle_tree; then
-+	if (( zap_offset < file_len )) && ! $is_merkle_tree; then
- 		echo "Validating corruption (reading just corrupted part)..."
- 		dd if=$fsv_file bs=1 skip=$zap_offset count=$zap_len \
- 			of=/dev/null status=none |& _filter_scratch
-diff --git a/tests/generic/574.out b/tests/generic/574.out
-index d43474c5..3c08d3e8 100644
---- a/tests/generic/574.out
-+++ b/tests/generic/574.out
-@@ -63,8 +63,6 @@ Validating corruption (reading full file)...
- md5sum: SCRATCH_MNT/file.fsv: Input/output error
- Validating corruption (direct I/O)...
- dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
--Validating corruption (reading just corrupted part)...
--dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
- Validating corruption (reading full file via mmap)...
- Bus error
- Validating corruption (reading just corrupted part via mmap)...
--- 
-2.33.1
 
