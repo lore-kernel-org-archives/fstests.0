@@ -2,209 +2,308 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE32CC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 06:33:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CF46C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 07:15:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AEE0C61055
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 06:33:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D547F61165
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Nov 2021 07:15:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232818AbhKHGgI (ORCPT
+        id S237311AbhKHHRn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Nov 2021 01:36:08 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:28361 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S230170AbhKHGgI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 01:36:08 -0500
-IronPort-Data: =?us-ascii?q?A9a23=3AF0MxvqwartdDWrYWsIx6t+cexCrEfRIJ4+MujC/?=
- =?us-ascii?q?XYbTApDkg0TEOmjBLWzuBPa2PZ2Wgc4xybdnk/EMP6MPWm4JmHQtv/xmBbVoQ9?=
- =?us-ascii?q?5OdWo7xwmQcns+qBpSaChohtq3yU/GYRCwPZiKa9kjF3oTJ9yEmjPjRHuWkUoY?=
- =?us-ascii?q?oBwgqLeNaYHZ44f5cs75h6mJYqYDR7zKl4bsekeWGULOW82Ic3lYv1k62gEgHU?=
- =?us-ascii?q?MIeF98vlgdWifhj5DcynpSOZX4VDfnZw3DQGuG4EgMmLtsvwo1V/kuBl/ssIti?=
- =?us-ascii?q?j1LjmcEwWWaOUNg+L4pZUc/H6xEEc+WppieBmXBYfQR4/ZzGhhc14zs5c85K2U?=
- =?us-ascii?q?hsBMLDOmfgGTl9TFCQW0ahuoeaYeSTh7pHDp6HBWz62qxl0N2k6P5If/OlfAmx?=
- =?us-ascii?q?U8/EcbjcXYXirifmqzamnUcFyick5asrmJoUSvjdn1z6xMBqMafgvWI2TvZkBg?=
- =?us-ascii?q?mh23ZsIQJ7jiwMiQWIHRHz9j9dnYz/70K4Dodo=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3A/l62qawfRHw7gP8VEZtNKrPwSb1zdoMgy1kn?=
- =?us-ascii?q?xilNoH1uEvBw+PrCoB1273XJYVUqOU3I++ruBEDoexq1nqKdibNhXotKNzOLhI?=
- =?us-ascii?q?LHFu9f0bc=3D?=
-X-IronPort-AV: E=Sophos;i="5.87,217,1631548800"; 
-   d="scan'208";a="117046758"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 08 Nov 2021 14:33:22 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 4225549F19C5;
-        Mon,  8 Nov 2021 14:33:18 +0800 (CST)
-Received: from G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Mon, 8 Nov 2021 14:33:20 +0800
-Received: from G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) by
- G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Mon, 8 Nov 2021 14:33:20 +0800
-Received: from [10.167.216.64] (10.167.216.64) by
- G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Mon, 8 Nov 2021 14:33:19 +0800
-Message-ID: <1d34c348-33e1-345a-2f4f-10b0ca2c42e5@fujitsu.com>
-Date:   Mon, 8 Nov 2021 14:33:17 +0800
+        Mon, 8 Nov 2021 02:17:43 -0500
+Received: from smtp-out2.suse.de ([195.135.220.29]:54028 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233226AbhKHHRn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 02:17:43 -0500
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id AB9821FD6D;
+        Mon,  8 Nov 2021 07:14:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1636355698; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=nXFdk5E3a14N2C+fKtiSynGZuZkFYH6U4Qf8FyEeqKc=;
+        b=KJU+DkF+qQJKxl9IBgqUJqpI3v0wHHtD1vC/B+bISQFGV3q9LCvHvE7DYEChN6PEoFzllM
+        C3ErPVpKQSKA82TM22A30rgvnlcmUOx+4xtTmin13LINDpIjDC72p/wcMzAKvDeBafAZYd
+        MBxM+tV8x2L2KFGlc71OpBEKTHfM3jA=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D5C0C1345F;
+        Mon,  8 Nov 2021 07:14:57 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id Y0M1KHHOiGEgOwAAMHmgww
+        (envelope-from <wqu@suse.com>); Mon, 08 Nov 2021 07:14:57 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH v2] fstests: btrfs: make nospace_cache related test cases to work with latest v2 cache
+Date:   Mon,  8 Nov 2021 15:14:40 +0800
+Message-Id: <20211108071440.25807-1-wqu@suse.com>
+X-Mailer: git-send-email 2.33.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.0
-Subject: Re: [PATCH v2 3/5] generic/xxx: Add MMAP CoW test for 'hole' case
-To:     "Darrick J. Wong" <djwong@kernel.org>
-CC:     <fstests@vger.kernel.org>
-References: <20211105045222.157826-1-ruansy.fnst@fujitsu.com>
- <20211105045222.157826-4-ruansy.fnst@fujitsu.com>
- <20211105164012.GE24282@magnolia>
-From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
-In-Reply-To: <20211105164012.GE24282@magnolia>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
-X-yoursite-MailScanner-ID: 4225549F19C5.ACF26
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+In the coming btrfs-progs v5.15 release, mkfs.btrfs will change to use
+v2 cache by default.
 
+However nospace_cache mount option will not work with v2 cache, as it
+would make v2 cache out of sync with on-disk used space.
 
-在 2021/11/6 0:40, Darrick J. Wong 写道:
-> On Fri, Nov 05, 2021 at 12:52:20PM +0800, Shiyang Ruan wrote:
->> Check what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
->> the second block is a hole.  (MMAP version of generic/218,220)
->>
->> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
->> ---
->>   tests/generic/902     | 70 +++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/902.out |  6 ++++
->>   2 files changed, 76 insertions(+)
->>   create mode 100755 tests/generic/902
->>   create mode 100644 tests/generic/902.out
->>
->> diff --git a/tests/generic/902 b/tests/generic/902
->> new file mode 100755
->> index 00000000..a0992fc8
->> --- /dev/null
->> +++ b/tests/generic/902
->> @@ -0,0 +1,70 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +#
->> +# FS QA Test No. xxx
->> +#
->> +# See what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
->> +# the second block is a hole.  (MMAP version of generic/218,220)
->> +#
->> +# This test is dependent on the system page size, so we cannot use md5 in
->> +# the golden output; we can only compare to a check file.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick clone
->> +
->> +# Override the default cleanup function.
->> +_cleanup()
->> +{
->> +    cd /
->> +    rm -rf $tmp.* $testdir
->> +}
->> +
->> +# Import common functions.
->> +. ./common/filter
->> +. ./common/reflink
->> +
->> +# real QA test starts here
->> +_require_scratch_reflink
->> +_require_xfs_io_command "falloc"
->> +
->> +pagesz=$(getconf PAGE_SIZE)
->> +blksz=$((pagesz / 4))
->> +
->> +echo "Format and mount"
->> +_scratch_mkfs_blocksized $blksz > $seqres.full 2>&1
->> +_scratch_mount >> $seqres.full 2>&1
->> +
->> +testdir=$SCRATCH_MNT/test-$seq
->> +mkdir $testdir
->> +
->> +real_blksz=$(_get_file_block_size $testdir)
->> +test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
->> +
->> +echo "Create the original files"
->> +_pwrite_byte 0x61 0 $pagesz $testdir/file1 >> $seqres.full
->> +
->> +$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2 >> $seqres.full
->> +$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2.chk >> $seqres.full
->> +
->> +_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 2)) $blksz >> $seqres.full
->> +_pwrite_byte 0x61 $((blksz * 2)) $blksz $testdir/file2.chk >> $seqres.full
->> +_scratch_cycle_mount
->> +
->> +echo "Compare files"
->> +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
->> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
->> +
->> +echo "CoW and unmount"
->> +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
->> +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2 >> $seqres.full
->> +$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
->> +    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2.chk >> $seqres.full
->> +_scratch_cycle_mount
-> 
-> One thing I noticed about the last two tests is that since you only
-> write to the two shared blocks in the middle of the page, the fs could
-> very well ignore the holes in the first and last block when it's
-> handling the page fault.  XFS/iomap will (iirc) allocate those two holes
-> at writeback time and flush the whole thing to disk, but that isn't a
-> guaranteed behavior.
+So mounting a btrfs with v2 cache using "nospace_cache" will make btrfs
+to reject the mount.
 
-I noticed this too.
+There are quite some test cases relying on nospace_cache to prevent v1
+cache to take up data space.
 
-> 
-> So I think the point of this test is to make sure that COW does the
-> right thing on a bs<ps filesystem such that the adjoining blocks don't
-> end up with garbage in them, right?  And we don't care what allocation
-> decisions the fs makes, so long as the read()able contents are what we
-> expect, right?
+For those test cases, we no longer need the "nospace_cache" mount option
+if the filesystem is already using v2 cache.
+Since v2 cache is using metadata space, it will no longer take up data
+space, thus no extra mount options for those test cases.
 
-Yes, this is the purpose of this set of tests, including BufferedIO, 
-DIO, MMAP operations.
+By this, we can keep those existing tests to run without problem for
+both v1 and v2 cache.
 
-> 
-> If that's correct,
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+Changelog:
+v2:
+- Introduce a new helper _scratch_no_v1_cache_opt() to generate needed
+  mount option
+  By this, it could be more future proof for extent-tree-v2
 
-Thanks.
+---
+ common/btrfs    | 9 +++++++++
+ tests/btrfs/102 | 2 +-
+ tests/btrfs/140 | 5 ++---
+ tests/btrfs/141 | 5 ++---
+ tests/btrfs/142 | 5 ++---
+ tests/btrfs/143 | 5 ++---
+ tests/btrfs/151 | 4 ++--
+ tests/btrfs/157 | 7 +++----
+ tests/btrfs/158 | 7 +++----
+ tests/btrfs/170 | 4 ++--
+ tests/btrfs/199 | 4 ++--
+ tests/btrfs/215 | 2 +-
+ 12 files changed, 31 insertions(+), 28 deletions(-)
 
-
---
-Ruan.
-
-> 
-> --D
-> 
->> +
->> +echo "Compare files"
->> +cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
->> +cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/generic/902.out b/tests/generic/902.out
->> new file mode 100644
->> index 00000000..4fb8b6cb
->> --- /dev/null
->> +++ b/tests/generic/902.out
->> @@ -0,0 +1,6 @@
->> +QA output created by 902
->> +Format and mount
->> +Create the original files
->> +Compare files
->> +CoW and unmount
->> +Compare files
->> -- 
->> 2.33.0
->>
->>
->>
-
+diff --git a/common/btrfs b/common/btrfs
+index ac880bdd..1ed82bb5 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -445,3 +445,12 @@ _scratch_btrfs_is_zoned()
+ 	[ `_zone_type ${SCRATCH_DEV}` != "none" ] && return 0
+ 	return 1
+ }
++
++_scratch_no_v1_cache_opt()
++{
++	if $BTRFS_UTIL_PROG inspect-internal dump-tree $SCRATCH_DEV |\
++	   grep -q "FREE_SPACE_TREE"; then
++		return
++	fi
++	echo -n "-onospace_cache"
++}
+diff --git a/tests/btrfs/102 b/tests/btrfs/102
+index e5a1b068..c1678b5d 100755
+--- a/tests/btrfs/102
++++ b/tests/btrfs/102
+@@ -22,7 +22,7 @@ _scratch_mkfs >>$seqres.full 2>&1
+ # Mount our filesystem without space caches enabled so that we do not get any
+ # space used from the initial data block group that mkfs creates (space caches
+ # used space from data block groups).
+-_scratch_mount "-o nospace_cache"
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ # Need an fs with at least 2Gb to make sure mkfs.btrfs does not create an fs
+ # using mixed block groups (used both for data and metadata). We really need
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
+index 5a5f828c..77d1cab9 100755
+--- a/tests/btrfs/140
++++ b/tests/btrfs/140
+@@ -60,9 +60,8 @@ echo "step 1......mkfs.btrfs" >>$seqres.full
+ mkfs_opts="-d raid1 -b 1G"
+ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+-# -o nospace_cache makes sure data is written to the start position of the data
+-# chunk
+-_scratch_mount -o nospace_cache
++# makes sure data is written to the start position of the data chunk
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
+index cf0979e9..9bde0977 100755
+--- a/tests/btrfs/141
++++ b/tests/btrfs/141
+@@ -59,9 +59,8 @@ _check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+ mkfs_opts="-d raid1 -b 1G"
+ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+-# -o nospace_cache makes sure data is written to the start position of the data
+-# chunk
+-_scratch_mount -o nospace_cache
++# make sure data is written to the start position of the data chunk
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/142 b/tests/btrfs/142
+index 1318be0f..ffe298d6 100755
+--- a/tests/btrfs/142
++++ b/tests/btrfs/142
+@@ -37,9 +37,8 @@ _check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+ mkfs_opts="-d raid1 -b 1G"
+ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+-# -o nospace_cache makes sure data is written to the start position of the data
+-# chunk
+-_scratch_mount -o nospace_cache,nodatasum
++# make sure data is written to the start position of the data chunk
++_scratch_mount -o nodatasum $(_scratch_no_v1_cache_opt)
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/143 b/tests/btrfs/143
+index 6736dcad..1f55cded 100755
+--- a/tests/btrfs/143
++++ b/tests/btrfs/143
+@@ -44,9 +44,8 @@ _check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+ mkfs_opts="-d raid1 -b 1G"
+ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+-# -o nospace_cache makes sure data is written to the start position of the data
+-# chunk
+-_scratch_mount -o nospace_cache,nodatasum
++# make sure data is written to the start position of the data chunk
++_scratch_mount -o nodatasum $(_scratch_no_v1_cache_opt)
+ 
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ 	_filter_xfs_io_offset
+diff --git a/tests/btrfs/151 b/tests/btrfs/151
+index 099e85cc..b343271f 100755
+--- a/tests/btrfs/151
++++ b/tests/btrfs/151
+@@ -31,8 +31,8 @@ _scratch_dev_pool_get 3
+ # create raid1 for data
+ _scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
+ 
+-# we need an empty data chunk, so nospace_cache is required.
+-_scratch_mount -onospace_cache
++# we need an empty data chunk, so need to disable v1 cache
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ # if data chunk is empty, 'btrfs device remove' can change raid1 to
+ # single.
+diff --git a/tests/btrfs/157 b/tests/btrfs/157
+index 0cfe3ce5..e779e33a 100755
+--- a/tests/btrfs/157
++++ b/tests/btrfs/157
+@@ -64,9 +64,8 @@ _check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+ mkfs_opts="-d raid6 -b 1G"
+ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+-# -o nospace_cache makes sure data is written to the start position of the data
+-# chunk
+-_scratch_mount -o nospace_cache
++# make sure data is written to the start position of the data chunk
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ # [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" \
+@@ -94,7 +93,7 @@ $XFS_IO_PROG -f -d -c "pwrite -S 0xbb $phy1 64K" $devpath1 > /dev/null
+ 
+ # step 3: read foobar to repair the bitrot
+ echo "step 3......repair the bitrot" >> $seqres.full
+-_scratch_mount -o nospace_cache
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ # read the 2nd stripe, i.e. [64K, 128K), to trigger repair
+ od -x -j 64K $SCRATCH_MNT/foobar
+diff --git a/tests/btrfs/158 b/tests/btrfs/158
+index ad374eba..52d67001 100755
+--- a/tests/btrfs/158
++++ b/tests/btrfs/158
+@@ -56,9 +56,8 @@ _check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+ mkfs_opts="-d raid6 -b 1G"
+ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+-# -o nospace_cache makes sure data is written to the start position of the data
+-# chunk
+-_scratch_mount -o nospace_cache
++# make sure data is written to the start position of the data chunk
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ # [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
+ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" \
+@@ -85,7 +84,7 @@ $XFS_IO_PROG -f -d -c "pwrite -S 0xbb $phy1 64K" $devpath1 > /dev/null
+ 
+ # step 3: scrub filesystem to repair the bitrot
+ echo "step 3......repair the bitrot" >> $seqres.full
+-_scratch_mount -o nospace_cache
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full 2>&1
+ 
+diff --git a/tests/btrfs/170 b/tests/btrfs/170
+index 15382eb3..3efe085d 100755
+--- a/tests/btrfs/170
++++ b/tests/btrfs/170
+@@ -27,9 +27,9 @@ _require_xfs_io_command "falloc" "-k"
+ fs_size=$((2 * 1024 * 1024 * 1024)) # 2Gb
+ _scratch_mkfs_sized $fs_size >>$seqres.full 2>&1
+ 
+-# Mount without space cache so that we can precisely fill all data space and
++# Mount without v1 cache so that we can precisely fill all data space and
+ # unallocated space later (space cache v1 uses data block groups).
+-_scratch_mount "-o nospace_cache"
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ # Create our test file and allocate 1826.25Mb of space for it.
+ # This will exhaust the existing data block group and all unallocated space on
+diff --git a/tests/btrfs/199 b/tests/btrfs/199
+index 6aca62f4..7fa678e7 100755
+--- a/tests/btrfs/199
++++ b/tests/btrfs/199
+@@ -67,7 +67,7 @@ loop_dev=$(_create_loop_device "$loop_file")
+ loop_mnt=$tmp/loop_mnt
+ 
+ mkdir -p $loop_mnt
+-# - nospace_cache
++# - _scratch_no_v1_cache_opt
+ #   Since v1 cache using DATA space, it can break data extent bytenr
+ #   continuousness.
+ # - nodatasum
+@@ -75,7 +75,7 @@ mkdir -p $loop_mnt
+ #   Disabling datasum could reduce the margin caused by metadata to minimal
+ # - discard
+ #   What we're testing
+-_mount -o nospace_cache,nodatasum,discard $loop_dev $loop_mnt
++_mount -o nodatasum,discard $(_scratch_no_v1_cache_opt) $loop_dev $loop_mnt
+ 
+ # Craft the following extent layout:
+ #         |  BG1 |      BG2        |       BG3            |
+diff --git a/tests/btrfs/215 b/tests/btrfs/215
+index fa622568..d62b2ff6 100755
+--- a/tests/btrfs/215
++++ b/tests/btrfs/215
+@@ -30,7 +30,7 @@ _require_non_zoned_device $SCRATCH_DEV
+ _scratch_mkfs > /dev/null
+ # disable freespace inode to ensure file is the first thing in the data
+ # blobk group
+-_scratch_mount -o nospace_cache
++_scratch_mount $(_scratch_no_v1_cache_opt)
+ 
+ pagesize=$(get_page_size)
+ blocksize=$(_get_block_size $SCRATCH_MNT)
+-- 
+2.33.0
 
