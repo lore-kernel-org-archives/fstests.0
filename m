@@ -2,57 +2,56 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4556C433FE
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FE8DC4332F
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A822461284
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1909C61284
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237201AbhKIDYK (ORCPT
+        id S236908AbhKIDYK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Mon, 8 Nov 2021 22:24:10 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:8149 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:51208 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S236908AbhKIDYG (ORCPT
+        with ESMTP id S237336AbhKIDYG (ORCPT
         <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 22:24:06 -0500
-IronPort-Data: =?us-ascii?q?A9a23=3AopCKqan/mIqnuJgLXYpTbK/o5gydJERdPkR7XQ2?=
- =?us-ascii?q?eYbTBsI5bp2QBn2cYCG3XM/jYa2r3e95wadjn9U8G6JSDndZgQQpk+CA2RRqmi?=
- =?us-ascii?q?+KfW43BcR2Y0wB+jyH7ZBs+qZ1YM7EsFehsJpPnjkrrYueJQUVUj/nSH+OlUL+?=
- =?us-ascii?q?cY0ideCc/IMsfoUM68wIGqt4w6TSJK1vlVeLa+6UzCnf8s9JHGj58B5a4lf9al?=
- =?us-ascii?q?K+aVAX0EbAJTasjUFf2zxH5BX+ETE27ByOQroJ8RoZWSwtfpYxV8F81/z91Yj+?=
- =?us-ascii?q?kur39NEMXQL/OJhXIgX1TM0SgqkEa4HVsjeBgb7xBAatUo2zhc9RZ0shEs4ehD?=
- =?us-ascii?q?wkvJbHklvkfUgVDDmd1OqguFLrveCHg6Z3KnhWZG5fr67A0ZK0sBqUW4fp6Gn1?=
- =?us-ascii?q?V3eIXJSpLbR2Zge+yhrWhRYFRam4LRCXwFNpH/Cg+kneCVrB7Ka0vip7ivbdwt?=
- =?us-ascii?q?ArcTOgUdRoGW/ckVA=3D=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3ArgGAIKqNqZcdcQidkYgkrZEaV5oXeYIsimQD?=
- =?us-ascii?q?101hICG9E/bo8/xG+c536faaslgssQ4b8+xoVJPgfZq+z+8R3WByB8bAYOCOgg?=
- =?us-ascii?q?LBQ72KhrGSoQEIdRefysdtkY9kc4VbTOb7FEVGi6/BizWQIpINx8am/cmT6dvj?=
- =?us-ascii?q?8w=3D=3D?=
+IronPort-Data: =?us-ascii?q?A9a23=3AShzNZ6oDQ3qOZI/w/oaoNzWeNBNeBmIEZxIvgKr?=
+ =?us-ascii?q?LsJaIsI5as4F+vmYeWGuEb67fYmX1c4snaYq/oBtUsMKDnIVhT1E9pX82QiMRo?=
+ =?us-ascii?q?6IpJ/zDcB6oYHn6wu4v7a5fx5xHLIGGdajYd1eEzvuWGuWn/SYUOZ2gHOKmUbe?=
+ =?us-ascii?q?dYnEpHGeIdQ964f5ds79g6mJXqYjha++9kYuaT/z3YDdJ6RYtWo4nw/7rRCdUg?=
+ =?us-ascii?q?RjHkGhwUmrSyhx8lAS2e3E9VPrzLEwqRpfyatE88uWSH44vwFwll1418SvBCvv?=
+ =?us-ascii?q?9+lr6WkYMBLDPPwmSkWcQUK+n6vRAjnVqlP9la7xHMgEK49mKt4kZJNFlr4G5T?=
+ =?us-ascii?q?xw4eKPKg/g1XQRaEj1lIOtN/7qvzX2X6JXMlxyfIiO8qxlpJARsVWECwc55Gn1?=
+ =?us-ascii?q?D7uADAC4CYwrFhO+sxr+/DO52iawewGPDVG8Ekig4i2iHUrB9GtaeK5gmLORwh?=
+ =?us-ascii?q?F8Y7v2i196EDybBVQdSUQ=3D=3D?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3A3N9QoKBOhc4tAo3lHemQ55DYdb4zR+YMi2TD?=
+ =?us-ascii?q?tnoBLSC9F/b0qynAppomPGDP4gr5NEtApTniAtjkfZq/z+8X3WB5B97LMzUO01?=
+ =?us-ascii?q?HYTr2Kg7GD/xTQXwX69sN4kZxrarVCDrTLZmRSvILX5xaZHr8brOW6zA=3D=3D?=
 X-IronPort-AV: E=Sophos;i="5.87,219,1631548800"; 
-   d="scan'208";a="117091907"
+   d="scan'208";a="117091908"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 09 Nov 2021 11:21:17 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id C1F0B4D10A0A
-        for <fstests@vger.kernel.org>; Tue,  9 Nov 2021 11:21:15 +0800 (CST)
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 1B0314D10A0B
+        for <fstests@vger.kernel.org>; Tue,  9 Nov 2021 11:21:16 +0800 (CST)
 Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Tue, 9 Nov 2021 11:21:14 +0800
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Tue, 9 Nov 2021 11:21:15 +0800
 Received: from irides.mr.mr.mr (10.167.225.141) by
  G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
  id 15.0.1497.23 via Frontend Transport; Tue, 9 Nov 2021 11:21:14 +0800
 From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
 To:     <fstests@vger.kernel.org>
-Subject: [PATCH v3 4/5] generic: add mmap CoW test for 'delalloc' case
-Date:   Tue, 9 Nov 2021 11:21:09 +0800
-Message-ID: <20211109032110.499427-5-ruansy.fnst@fujitsu.com>
+Subject: [PATCH v3 5/5] generic: add mmap CoW test for 'mixed' case
+Date:   Tue, 9 Nov 2021 11:21:10 +0800
+Message-ID: <20211109032110.499427-6-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.33.0
 In-Reply-To: <20211109032110.499427-1-ruansy.fnst@fujitsu.com>
 References: <20211109032110.499427-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: C1F0B4D10A0A.A03AE
+X-yoursite-MailScanner-ID: 1B0314D10A0B.AD8A5
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
@@ -60,29 +59,31 @@ List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 Check what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-the second block is delalloc.  (MMAP version of generic/222,227)
+the surrounding blocks vary between unwritten/regular/delalloc/hole.
+(MMAP version of generic/229,238)
 
 Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
 ---
- tests/generic/903     | 73 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/903.out |  6 ++++
- 2 files changed, 79 insertions(+)
- create mode 100755 tests/generic/903
- create mode 100644 tests/generic/903.out
+ tests/generic/904     | 132 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/904.out |  62 ++++++++++++++++++++
+ 2 files changed, 194 insertions(+)
+ create mode 100755 tests/generic/904
+ create mode 100644 tests/generic/904.out
 
-diff --git a/tests/generic/903 b/tests/generic/903
+diff --git a/tests/generic/904 b/tests/generic/904
 new file mode 100755
-index 00000000..7ab93bf7
+index 00000000..a11b4377
 --- /dev/null
-+++ b/tests/generic/903
-@@ -0,0 +1,73 @@
++++ b/tests/generic/904
+@@ -0,0 +1,132 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +#
 +# FS QA Test No. xxx
 +#
 +# See what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-+# the second block is delalloc.  (MMAP version of generic/222,227)
++# the surrounding blocks vary between unwritten/regular/delalloc/hole.
++# (MMAP version of generic/229,238)
 +#
 +# This test is dependent on the system page size, so we cannot use md5 in
 +# the golden output; we can only compare to a check file.
@@ -111,52 +112,166 @@ index 00000000..7ab93bf7
 +real_blksz=$(_get_file_block_size $testdir)
 +test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
 +
-+echo "Create the original files"
-+_pwrite_byte 0x61 0 $pagesz $testdir/file1 >> $seqres.full
++runtest() {
++	echo "runtest $1 $2"
++	b2=$1
++	b4=$2
++	dir=$3
 +
-+$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2.chk >> $seqres.full
++	echo "Create the original files"
++	mkdir -p $dir
++	_pwrite_byte 0x61 0 $pagesz $dir/file1 >> $seqres.full
 +
-+_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 2)) $blksz >> $seqres.full
-+_pwrite_byte 0x61 $((blksz * 2)) $blksz $testdir/file2.chk >> $seqres.full
-+_scratch_cycle_mount
++	$XFS_IO_PROG -f -c "truncate $pagesz" $dir/file2 >> $seqres.full
++	$XFS_IO_PROG -f -c "truncate $pagesz" $dir/file2.chk >> $seqres.full
 +
-+echo "Compare files"
-+cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
-+cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
++	case $b2 in
++	"regular")
++		_pwrite_byte 0x61 $blksz $blksz $dir/file2 >> $seqres.full
++		_pwrite_byte 0x61 $blksz $blksz $dir/file2.chk >> $seqres.full
++		;;
++	"unwritten")
++		$XFS_IO_PROG -f -c "falloc -k $blksz $blksz" $dir/file2 >> $seqres.full
++		_pwrite_byte 0x00 $blksz $blksz $dir/file2.chk >> $seqres.full
++		;;
++	"hole")
++		;;
++	esac
 +
-+echo "CoW and unmount"
-+_pwrite_byte 0x61 $blksz $blksz $testdir/file2 >> $seqres.full
-+_pwrite_byte 0x61 $blksz $blksz $testdir/file2.chk >> $seqres.full
++	case $b4 in
++	"regular")
++		_pwrite_byte 0x61 $((blksz * 3)) $blksz $dir/file2 >> $seqres.full
++		_pwrite_byte 0x61 $((blksz * 3)) $blksz $dir/file2.chk >> $seqres.full
++		;;
++	"unwritten")
++		$XFS_IO_PROG -f -c "falloc -k $((blksz * 3)) $blksz" $dir/file2 >> $seqres.full
++		_pwrite_byte 0x00 $((blksz * 3)) $blksz $dir/file2.chk >> $seqres.full
++		;;
++	"hole")
++		;;
++	esac
 +
-+_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2 >> $seqres.full
-+_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2.chk >> $seqres.full
++	_reflink_range $dir/file1 $blksz $dir/file2 $((blksz * 2)) $blksz >> $seqres.full
++	_pwrite_byte 0x61 $((blksz * 2)) $blksz $dir/file2.chk >> $seqres.full
++	_scratch_cycle_mount
 +
-+# make sure we actually got delalloc block
-+$FILEFRAG_PROG -v $testdir/file2 2>&1 | grep -q delalloc || \
-+	_notrun "test requires delayed allocation writes"
++	echo "Compare files"
++	cmp -s $dir/file1 $dir/file2 && echo "file1 and file2 should not match."
++	cmp -s $dir/file2 $dir/file2.chk || echo "file2 and file2.chk don't match."
 +
-+$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
-+    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
-+    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2.chk >> $seqres.full
-+_scratch_cycle_mount
++	echo "CoW and unmount"
++	if [ $b2 = "delalloc" ]; then
++		_pwrite_byte 0x61 $blksz $blksz $dir/file2 >> $seqres.full
++		_pwrite_byte 0x61 $blksz $blksz $dir/file2.chk >> $seqres.full
 +
-+echo "Compare files"
-+cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
-+cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
++		# make sure we actually got delalloc block
++		$FILEFRAG_PROG -v $dir/file2 2>&1 | grep -q delalloc || \
++			_notrun "test requires delayed allocation writes"
++	fi
++
++	if [ $b4 = "delalloc" ]; then
++		_pwrite_byte 0x61 $((blksz * 3)) $blksz $dir/file2 >> $seqres.full
++		_pwrite_byte 0x61 $((blksz * 3)) $blksz $dir/file2.chk >> $seqres.full
++
++		# make sure we actually got delalloc block
++		$FILEFRAG_PROG -v $dir/file2 2>&1 | grep -q delalloc || \
++			_notrun "test requires delayed allocation writes"
++	fi
++
++	$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
++        -c "pwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $dir/file2 >> $seqres.full
++	$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
++        -c "pwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $dir/file2.chk >> $seqres.full
++	_scratch_cycle_mount
++
++	echo "Compare files"
++	cmp -s $dir/file1 $dir/file2 && echo "file1 and file2 should not match."
++	cmp -s $dir/file2 $dir/file2.chk || echo "file2 and file2.chk don't match."
++}
++
++runtest regular delalloc "$testdir/r-d"
++runtest regular unwritten "$testdir/r-u"
++runtest regular hole "$testdir/r-h"
++
++runtest hole delalloc "$testdir/h-d"
++runtest hole unwritten "$testdir/h-u"
++runtest hole regular "$testdir/h-r"
++
++runtest unwritten delalloc "$testdir/u-d"
++runtest unwritten hole "$testdir/u-h"
++runtest unwritten regular "$testdir/u-r"
++
++runtest delalloc unwritten "$testdir/d-u"
++runtest delalloc hole "$testdir/d-h"
++runtest delalloc regular "$testdir/d-r"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/903.out b/tests/generic/903.out
+diff --git a/tests/generic/904.out b/tests/generic/904.out
 new file mode 100644
-index 00000000..cfeeb11c
+index 00000000..bc45481d
 --- /dev/null
-+++ b/tests/generic/903.out
-@@ -0,0 +1,6 @@
-+QA output created by 903
++++ b/tests/generic/904.out
+@@ -0,0 +1,62 @@
++QA output created by 904
 +Format and mount
++runtest regular delalloc
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest regular unwritten
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest regular hole
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest hole delalloc
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest hole unwritten
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest hole regular
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest unwritten delalloc
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest unwritten hole
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest unwritten regular
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest delalloc unwritten
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest delalloc hole
++Create the original files
++Compare files
++CoW and unmount
++Compare files
++runtest delalloc regular
 +Create the original files
 +Compare files
 +CoW and unmount
