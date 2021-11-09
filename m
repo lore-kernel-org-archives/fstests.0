@@ -2,161 +2,102 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 030D0C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 196BDC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D2D6F61288
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E91ED61284
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 03:21:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236956AbhKIDYE (ORCPT
+        id S237157AbhKIDYF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Nov 2021 22:24:04 -0500
+        Mon, 8 Nov 2021 22:24:05 -0500
 Received: from mail.cn.fujitsu.com ([183.91.158.132]:60417 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S231910AbhKIDYD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 22:24:03 -0500
-IronPort-Data: =?us-ascii?q?A9a23=3ATmG6X6ykcIiNZAmkVy56t+cexCrEfRIJ4+MujC/?=
- =?us-ascii?q?XYbTApD52hDBUyjcZXmzUOPzcZWfxft0kYYrl9UgE6pGGxtUxHQtv/xmBbVoQ9?=
- =?us-ascii?q?5OdWo7xwmQcns+qBpSaChohtq3yU/GYRCwPZiKa9kjF3oTJ9yEmjPjRHuukUYY?=
- =?us-ascii?q?oBwgqLeNaYHZ44f5cs75h6mJYqYDR7zKl4bsekeWGULOW82Ic3lYv1k62gEgHU?=
- =?us-ascii?q?MIeF98vlgdWifhj5DcynpSOZX4VDfnZw3DQGuG4EgMmLtsvwo1V/kuBl/ssIti?=
- =?us-ascii?q?j1LjmcEwWWaOUNg+L4pZUc/H6xEEc+WppieBmXBYfQR4/ZzGhhc14zs5c85K2U?=
- =?us-ascii?q?hsBMLDOmfgGTl9TFCQW0ahuoeaYeSnm4JTKp6HBWz62qxl0N2k6P5If/OlfAmx?=
- =?us-ascii?q?U8/EcbjcXYXirifmqzamnUcFyick5asrmJoUSvjdn1z6xMBqMafgvWI2TvZkBg?=
- =?us-ascii?q?mh23ZsIQJ7jiwMiQWIHRHz9j9dnYz/70K4Dodo=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3Avr4+5aFFRXTHaDrxpLqE1MeALOsnbusQ8zAX?=
- =?us-ascii?q?PiFKOHhom6mj+vxG88506faKslwssR0b+OxoW5PwJE80l6QFgrX5VI3KNGbbUQ?=
- =?us-ascii?q?CTXeNfBOXZowHIKmnX8+5x8eNaebFiNduYNzNHpPe/zA6mM9tI+rW6zJw=3D?=
+        with ESMTP id S236908AbhKIDYE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Nov 2021 22:24:04 -0500
+IronPort-Data: =?us-ascii?q?A9a23=3AqbiQWq3hrsN8GuLDnvbD5c9zkn2cJEfYwER7XOP?=
+ =?us-ascii?q?LsXnJhzsm1WACmGIdXWCAb/mJN2X9eox3Otmw8kNU6sfQm4c2QQE+nZ1PZygU8?=
+ =?us-ascii?q?JKaX7x1DatR0xu6d5SFFAQ+hyknQoGowPscEzmM+X9BDpC79SMljPjQF+KlYAL?=
+ =?us-ascii?q?5EnsZqTFMGX5JZS1Ly7ZRbr5A2bBVMivV0T/Ai5S31GyNh1aYBlkpB5er83uDi?=
+ =?us-ascii?q?hhdVAQw5TTSbdgT1LPXeuJ84Jg3fcldJFOgKmVY83LTegrN8F251juxExYFAdX?=
+ =?us-ascii?q?jnKv5c1ERX/jZOg3mZnh+AvDk20Yd4HdplPtT2Pk0MC+7jx2Tgtl308QLu5qrV?=
+ =?us-ascii?q?S8nI6/NhP8AFRJfFkmSOIUfoeCfcCHu6Zb7I0ruNiGEL+9VJE8tIYAD5v1fH25?=
+ =?us-ascii?q?D77obJSoLYxTFgPi5qI9X4MEEat8LdZGtZd1A/Co7i2yxMBrveribK42i2DOS9?=
+ =?us-ascii?q?G5YahhyIMvj?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AgrUGxKw6p5st7AjQ706tKrPwEL1zdoMgy1kn?=
+ =?us-ascii?q?xilNoH1uA6ilfqWV8cjzuiWbtN9vYhsdcLy7WZVoIkmskKKdg7NhXotKNTOO0A?=
+ =?us-ascii?q?SVxepZnOnfKlPbexHWx6p00KdMV+xEAsTsMF4St63HyTj9P9E+4NTvysyVuds?=
+ =?us-ascii?q?=3D?=
 X-IronPort-AV: E=Sophos;i="5.87,219,1631548800"; 
-   d="scan'208";a="117091901"
+   d="scan'208";a="117091902"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 09 Nov 2021 11:21:16 +0800
+  by heian.cn.fujitsu.com with ESMTP; 09 Nov 2021 11:21:17 +0800
 Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id C6D304D10A07;
-        Tue,  9 Nov 2021 11:21:14 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id 6ACC64D10A06
+        for <fstests@vger.kernel.org>; Tue,  9 Nov 2021 11:21:14 +0800 (CST)
 Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
  G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
  (TLS) id 15.0.1497.23; Tue, 9 Nov 2021 11:21:14 +0800
 Received: from irides.mr.mr.mr (10.167.225.141) by
  G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Tue, 9 Nov 2021 11:21:13 +0800
+ id 15.0.1497.23 via Frontend Transport; Tue, 9 Nov 2021 11:21:12 +0800
 From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
 To:     <fstests@vger.kernel.org>
-CC:     "Darrick J . Wong" <djwong@kernel.org>
-Subject: [PATCH v3 1/5] generic: add mmap CoW test for 'regular' case
-Date:   Tue, 9 Nov 2021 11:21:06 +0800
-Message-ID: <20211109032110.499427-2-ruansy.fnst@fujitsu.com>
+Subject: [PATCH v3 0/5] generic: add a couple of MMAP CoW tests
+Date:   Tue, 9 Nov 2021 11:21:05 +0800
+Message-ID: <20211109032110.499427-1-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20211109032110.499427-1-ruansy.fnst@fujitsu.com>
-References: <20211109032110.499427-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: C6D304D10A07.AE80F
+X-yoursite-MailScanner-ID: 6ACC64D10A06.AE3DE
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Check what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-the second block is a regular block.  (MMAP version of generic/205,206)
+There is a set of CoW tests which is to 
+  > Check what happens if we BufferedIO/DIO CoW blocks 2-4 of a page's worth
+  > of blocks when the second block is a regular/unwritten/hole/delalloc/mixed
+  > block.
+I think a test of MMAP CoW is also needed for these kind of testsets.  So,
+add MMAP CoW for each case.
 
-Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/generic/900     | 68 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  6 ++++
- 2 files changed, 74 insertions(+)
+Changes from V2:
+  - remove overrided _leanup() because these are tests on scratch device
+  - not run when delalloc block not acutally exists in cases contains 'delalloc'
+  - remove redundant tests in 'mixed' case
+==
+Shiyang Ruan (5):
+  generic: add mmap CoW test for 'regular' case
+  generic: add mmap CoW test for 'unwritten' case
+  generic: add mmap CoW test for 'hole' case
+  generic: add mmap CoW test for 'delalloc' case
+  generic: add mmap CoW test for 'mixed' case
+
+ tests/generic/900     |  68 ++++++++++++++++++++++
+ tests/generic/900.out |   6 ++
+ tests/generic/901     |  69 ++++++++++++++++++++++
+ tests/generic/901.out |   6 ++
+ tests/generic/902     |  63 ++++++++++++++++++++
+ tests/generic/902.out |   6 ++
+ tests/generic/903     |  73 +++++++++++++++++++++++
+ tests/generic/903.out |   6 ++
+ tests/generic/904     | 132 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/904.out |  62 ++++++++++++++++++++
+ 10 files changed, 491 insertions(+)
  create mode 100755 tests/generic/900
  create mode 100644 tests/generic/900.out
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
+ create mode 100755 tests/generic/902
+ create mode 100644 tests/generic/902.out
+ create mode 100755 tests/generic/903
+ create mode 100644 tests/generic/903.out
+ create mode 100755 tests/generic/904
+ create mode 100644 tests/generic/904.out
 
-diff --git a/tests/generic/900 b/tests/generic/900
-new file mode 100755
-index 00000000..bee3a785
---- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test No. xxx
-+#
-+# See what happens if we MMAP CoW blocks 2-4 of a page's worth of blocks when
-+# the second block is a regular block.  (MMAP version of generic/205,206)
-+#
-+# This test is dependent on the system page size, so we cannot use md5 in
-+# the golden output; we can only compare to a check file.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick clone
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_require_scratch_reflink
-+
-+pagesz=$(getconf PAGE_SIZE)
-+blksz=$((pagesz / 4))
-+
-+echo "Format and mount"
-+_scratch_mkfs_blocksized $blksz > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+real_blksz=$(_get_file_block_size $testdir)
-+test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
-+
-+echo "Create the original files"
-+_pwrite_byte 0x61 0 $pagesz $testdir/file1 >> $seqres.full
-+
-+$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -f -c "truncate $pagesz" $testdir/file2.chk >> $seqres.full
-+
-+_pwrite_byte 0x61 $blksz $blksz $testdir/file2 >> $seqres.full
-+_pwrite_byte 0x61 $blksz $blksz $testdir/file2.chk >> $seqres.full
-+
-+_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2 >> $seqres.full
-+_pwrite_byte 0x61 $((blksz * 3)) $blksz $testdir/file2.chk >> $seqres.full
-+
-+_reflink_range $testdir/file1 $blksz $testdir/file2 $((blksz * 2)) $blksz >> $seqres.full
-+_pwrite_byte 0x61 $((blksz * 2)) $blksz $testdir/file2.chk >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
-+cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
-+
-+echo "CoW and unmount"
-+$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
-+    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -f -c "mmap 0 $pagesz" \
-+    -c "mwrite -S 0x63 $((blksz + 17)) $((blksz * 3 - 34))" $testdir/file2.chk >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+cmp -s $testdir/file1 $testdir/file2 && echo "file1 and file2 should not match."
-+cmp -s $testdir/file2 $testdir/file2.chk || echo "file2 and file2.chk don't match."
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
-new file mode 100644
-index 00000000..2abfd789
---- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,6 @@
-+QA output created by 900
-+Format and mount
-+Create the original files
-+Compare files
-+CoW and unmount
-+Compare files
 -- 
 2.33.0
 
