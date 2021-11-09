@@ -2,160 +2,99 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13EFDC433FE
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:29:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE51C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:56:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E06EC611C8
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:29:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 505586128B
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:56:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239106AbhKIRby (ORCPT
+        id S241461AbhKIR6s (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Nov 2021 12:31:54 -0500
-Received: from mail.kernel.org ([198.145.29.99]:46144 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234677AbhKIRbx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Nov 2021 12:31:53 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 994566117A;
-        Tue,  9 Nov 2021 17:29:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636478947;
-        bh=vRdTn1I/sGttz8FW/LF/iULOXTjQjcbH1pNpnnH9NC8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MaYbrjtsWoWx9jHkpDSOzyVgF5WReg+xLsluTrdLp0TAFfyJqD7/9fZp6pJYTlfMK
-         pRvZf8BETLjC8as8+Vnk7x8MaFItdMaYDw/vAh5Na9qa/2J7dAXG9yxst4ftfQruTS
-         6DiU8IVzjcBfU627uvnRhrw1M08yl03YBlWi4ho1eyU1thgtZIuZhkEnVbxqnHTXbO
-         cmVQwwCRgq5aqO+ZHy3O+LPrOhWkXMfRpWgefPP0M3FxNXp1xBR60tTWpSutd6RrG2
-         vcAIy0TpoiN1G8AuZMsDAaTeeH4alxYgLDAX9zW3Q7kGQrFywGQHOyhGF7wD2cXNIy
-         fuwcrr23fndNA==
-Date:   Tue, 9 Nov 2021 09:29:07 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Lukas Czerner <lczerner@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v2 1/2] common/rc: add _require_kernel_config and
- _has_kernel_config
-Message-ID: <20211109172907.GM24282@magnolia>
-References: <20211108151916.27845-1-lczerner@redhat.com>
- <20211108210423.28980-1-lczerner@redhat.com>
- <20211108223132.GB24255@magnolia>
- <20211109090855.n3nceaez73laqvze@work>
+        Tue, 9 Nov 2021 12:58:48 -0500
+Received: from smtp-out1.suse.de ([195.135.220.28]:45070 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S241455AbhKIR6q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Nov 2021 12:58:46 -0500
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 0FC7421940;
+        Tue,  9 Nov 2021 17:55:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1636480558; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=SFKaA296PpTngwwYFam18NJoa6qaAmNM3higySL7Gfw=;
+        b=iGjZg8rr10Qh+Cx8lqQAHnULploqiauqGJgVGbxUvu6fHE6Ls6Oh3XEOSfe44wyZ1LQXvt
+        EgbmOxj/tXDFrwudtTMw55cQe+v4mm6n5vaNWdb4QL4CiUYx36R15eC/2hfmm5wRmnumUu
+        sSS0GdORT6y7tDNtdKUkCLI7SE+y5Q4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1636480558;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=SFKaA296PpTngwwYFam18NJoa6qaAmNM3higySL7Gfw=;
+        b=olLWN6/xNBjvbw4YzyNbokf+AL7RjSbHboTx1q8RmDffU7S7XQJChOCEAyx0O7ykkpW3eF
+        /0/tWbFTyHziR9CQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id CCE0413B1D;
+        Tue,  9 Nov 2021 17:55:57 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 3yjxLi22imENYAAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 09 Nov 2021 17:55:57 +0000
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id ac01af06;
+        Tue, 9 Nov 2021 17:55:57 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH] common/renameat2: use mktemp(1) to create temporary directory
+Date:   Tue,  9 Nov 2021 17:55:55 +0000
+Message-Id: <20211109175555.16795-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211109090855.n3nceaez73laqvze@work>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 09, 2021 at 10:28:43AM +0100, Lukas Czerner wrote:
-> On Mon, Nov 08, 2021 at 02:31:32PM -0800, Darrick J. Wong wrote:
-> > On Mon, Nov 08, 2021 at 10:04:23PM +0100, Lukas Czerner wrote:
-> > > Add _require_kernel_config() and _has_kernel_config() helpers to check
-> > > whether a specific kernel configuration is enabled on the kernel.
-> > > 
-> > > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> > > ---
-> > > v2: Document KCONFIG_PATH in README
-> > > 
-> > >  README        |  2 ++
-> > >  common/config |  1 +
-> > >  common/rc     | 29 +++++++++++++++++++++++++++++
-> > >  3 files changed, 32 insertions(+)
-> > > 
-> > > diff --git a/README b/README
-> > > index 63f0641a..e9284b22 100644
-> > > --- a/README
-> > > +++ b/README
-> > > @@ -129,6 +129,8 @@ Preparing system for tests:
-> > >                 xfs_check to check the filesystem.  As of August 2021,
-> > >                 xfs_repair finds all filesystem corruptions found by xfs_check,
-> > >                 and more, which means that xfs_check is no longer run by default.
-> > > +	     - Set KCONFIG_PATH to specify your preferred location of kernel
-> > > +	       config file.
-> > 
-> > The indentation here looks kind of off, but the core logic looks
-> > correct.
-> 
-> The file uses a mixture of tabs and spaces. In this case I used tabs,
-> the bullet point above uses spaces, that's why it looks kind of off in
-> the patch. Otherwise I used the same indentation as some other
-> bullet points so I don't think there is anything to fix in this patch.
+Instead of using $TEST_DIR/$$, use the _correct_ way to create temporary
+directories.  I've seen generic/626 failing with:
 
-LOL, so the last addition was from me?  Which added more inconsistent indent?
+  QA output created by 626
+  mkdir: cannot create directory '/media/test/471': File exists
+  Silence is golden
 
-HA.  Objection withdrawn. :D
+which was likely due to another test that used the same directory name and
+didn't do the clean-up.
 
-> > 
-> > With that fixed:
-> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> 
-> Thanks for the review.
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ common/renameat2 | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-NP.
-
---D
-
-> -Lukas
-> 
-> > 
-> > --D
-> > 
-> > >  
-> > >          - or add a case to the switch in common/config assigning
-> > >            these variables based on the hostname of your test
-> > > diff --git a/common/config b/common/config
-> > > index 164381b7..e0a5c5df 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -226,6 +226,7 @@ export OPENSSL_PROG="$(type -P openssl)"
-> > >  export ACCTON_PROG="$(type -P accton)"
-> > >  export E2IMAGE_PROG="$(type -P e2image)"
-> > >  export BLKZONE_PROG="$(type -P blkzone)"
-> > > +export GZIP_PROG="$(type -P gzip)"
-> > >  
-> > >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
-> > >  # newer systems have udevadm command but older systems like RHEL5 don't.
-> > > diff --git a/common/rc b/common/rc
-> > > index 0d261184..84154868 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -4703,6 +4703,35 @@ _require_names_are_bytes() {
-> > >          esac
-> > >  }
-> > >  
-> > > +_has_kernel_config()
-> > > +{
-> > > +	option=$1
-> > > +	uname=$(uname -r)
-> > > +	config_list="$KCONFIG_PATH
-> > > +		     /proc/config.gz
-> > > +		     /lib/modules/$uname/build/.config
-> > > +		     /boot/config-$uname
-> > > +		     /lib/kernel/config-$uname"
-> > > +
-> > > +	for config in $config_list; do
-> > > +		[ ! -f $config ] && continue
-> > > +		[ $config = "/proc/config.gz" ] && break
-> > > +		grep -qE "^${option}=[my]" $config
-> > > +		return
-> > > +	done
-> > > +
-> > > +	[ ! -f $config ] && _notrun "Could not locate kernel config file"
-> > > +
-> > > +	# We can only get here with /proc/config.gz
-> > > +	_require_command "$GZIP_PROG" gzip
-> > > +	$GZIP_PROG -cd $config | grep -qE "^${option}=[my]"
-> > > +}
-> > > +
-> > > +_require_kernel_config()
-> > > +{
-> > > +	_has_kernel_config $1 || _notrun "Installed kernel not built with $1"
-> > > +}
-> > > +
-> > >  init_rc
-> > >  
-> > >  ################################################################################
-> > > -- 
-> > > 2.31.1
-> > > 
-> > 
-> 
+diff --git a/common/renameat2 b/common/renameat2
+index 4d25d7cebf94..9737dff54a2b 100644
+--- a/common/renameat2
++++ b/common/renameat2
+@@ -105,14 +105,13 @@ _rename_tests()
+ _require_renameat2()
+ {
+ 	local flags=$1
+-	local rename_dir=$TEST_DIR/$$
++	local rename_dir=`mktemp -d -p $TEST_DIR`
+ 	local cmd=""
+ 
+ 	if test ! -x $here/src/renameat2; then
+ 		_notrun "renameat2 binary not found"
+ 	fi
+ 
+-	mkdir $rename_dir
+ 	touch $rename_dir/foo
+ 	case $flags in
+ 	"noreplace")
