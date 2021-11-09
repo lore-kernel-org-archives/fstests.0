@@ -2,115 +2,160 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC791C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:26:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13EFDC433FE
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:29:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A951E611BF
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:26:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E06EC611C8
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:29:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234989AbhKIR3E (ORCPT
+        id S239106AbhKIRby (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Nov 2021 12:29:04 -0500
-Received: from mail.kernel.org ([198.145.29.99]:45958 "EHLO mail.kernel.org"
+        Tue, 9 Nov 2021 12:31:54 -0500
+Received: from mail.kernel.org ([198.145.29.99]:46144 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S240407AbhKIR3D (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Nov 2021 12:29:03 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 947FD61027;
-        Tue,  9 Nov 2021 17:26:17 +0000 (UTC)
+        id S234677AbhKIRbx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 9 Nov 2021 12:31:53 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 994566117A;
+        Tue,  9 Nov 2021 17:29:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636478777;
-        bh=N/5+jE2wMVleliNrjMEDInq7YsgD5JVviIBfl+xljys=;
+        s=k20201202; t=1636478947;
+        bh=vRdTn1I/sGttz8FW/LF/iULOXTjQjcbH1pNpnnH9NC8=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=f5L7xN6a6ZeqbgcZJch+jfjeWWGhPtdjFcX8hY7ZQanaW114OCq1WuzxQAsUI/q9C
-         sDWFf87KT57FELTOqASTI39aNNEdzZcMvb2sAO7M/UUqK7rzDLhz4G50nCVDAc4xNl
-         TyAsL+x8lPSTb/zIIQNkSoNUnDAPqmcAMskp36cnfuRbbog59i2YJ4ZMOB3H8IkEm3
-         7ONjNNSP/+/Oj2iGfB/b8wkIpz3RR7ekB8ln31jJUcqudwhKc7XI6WRBMw3UYkLSbw
-         ZJLlh+/F749olIagwX6rgbyUIhg31u3wtSJnNtAmS4cKOStNjHJL04BECH4C1QAgrz
-         PV8SLZqWBEDGQ==
-Date:   Tue, 9 Nov 2021 09:26:17 -0800
+        b=MaYbrjtsWoWx9jHkpDSOzyVgF5WReg+xLsluTrdLp0TAFfyJqD7/9fZp6pJYTlfMK
+         pRvZf8BETLjC8as8+Vnk7x8MaFItdMaYDw/vAh5Na9qa/2J7dAXG9yxst4ftfQruTS
+         6DiU8IVzjcBfU627uvnRhrw1M08yl03YBlWi4ho1eyU1thgtZIuZhkEnVbxqnHTXbO
+         cmVQwwCRgq5aqO+ZHy3O+LPrOhWkXMfRpWgefPP0M3FxNXp1xBR60tTWpSutd6RrG2
+         vcAIy0TpoiN1G8AuZMsDAaTeeH4alxYgLDAX9zW3Q7kGQrFywGQHOyhGF7wD2cXNIy
+         fuwcrr23fndNA==
+Date:   Tue, 9 Nov 2021 09:29:07 -0800
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] generic/648: dmerror must be unmounted
-Message-ID: <20211109172617.GL24282@magnolia>
-References: <20211024120512.2383377-1-zlang@redhat.com>
+To:     Lukas Czerner <lczerner@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH v2 1/2] common/rc: add _require_kernel_config and
+ _has_kernel_config
+Message-ID: <20211109172907.GM24282@magnolia>
+References: <20211108151916.27845-1-lczerner@redhat.com>
+ <20211108210423.28980-1-lczerner@redhat.com>
+ <20211108223132.GB24255@magnolia>
+ <20211109090855.n3nceaez73laqvze@work>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211024120512.2383377-1-zlang@redhat.com>
+In-Reply-To: <20211109090855.n3nceaez73laqvze@work>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 24, 2021 at 08:05:12PM +0800, Zorro Lang wrote:
-> Sometimes g/648 fail to unmount dmerror with this error:
+On Tue, Nov 09, 2021 at 10:28:43AM +0100, Lukas Czerner wrote:
+> On Mon, Nov 08, 2021 at 02:31:32PM -0800, Darrick J. Wong wrote:
+> > On Mon, Nov 08, 2021 at 10:04:23PM +0100, Lukas Czerner wrote:
+> > > Add _require_kernel_config() and _has_kernel_config() helpers to check
+> > > whether a specific kernel configuration is enabled on the kernel.
+> > > 
+> > > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> > > ---
+> > > v2: Document KCONFIG_PATH in README
+> > > 
+> > >  README        |  2 ++
+> > >  common/config |  1 +
+> > >  common/rc     | 29 +++++++++++++++++++++++++++++
+> > >  3 files changed, 32 insertions(+)
+> > > 
+> > > diff --git a/README b/README
+> > > index 63f0641a..e9284b22 100644
+> > > --- a/README
+> > > +++ b/README
+> > > @@ -129,6 +129,8 @@ Preparing system for tests:
+> > >                 xfs_check to check the filesystem.  As of August 2021,
+> > >                 xfs_repair finds all filesystem corruptions found by xfs_check,
+> > >                 and more, which means that xfs_check is no longer run by default.
+> > > +	     - Set KCONFIG_PATH to specify your preferred location of kernel
+> > > +	       config file.
+> > 
+> > The indentation here looks kind of off, but the core logic looks
+> > correct.
 > 
->    umount: /mnt/xfstests/scratch: target is busy.
-> 
-> Even worse, it will cause all later test cases fail as:
-> 
->   mount: bad usage
->   Try 'mount --help' for more information.
->   check: failed to mount $SCRATCH_DEV using specified options
->   Interrupted!
-> 
-> So we shouldn't _fail directly if dmerror_unmount fails, use a while
-> loop to try to unmount it enough times.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> The file uses a mixture of tabs and spaces. In this case I used tabs,
+> the bullet point above uses spaces, that's why it looks kind of off in
+> the patch. Otherwise I used the same indentation as some other
+> bullet points so I don't think there is anything to fix in this patch.
 
-Looks good to me now,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+LOL, so the last addition was from me?  Which added more inconsistent indent?
+
+HA.  Objection withdrawn. :D
+
+> > 
+> > With that fixed:
+> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> 
+> Thanks for the review.
+
+NP.
 
 --D
 
-> ---
+> -Lukas
 > 
-> As Darrick's review point, V2 brings the "iteration XXX scratch
-> unmount failed" _fail back.
-> 
-> Thanks,
-> Zorro
-> 
->  tests/generic/648 | 18 ++++++++++++++++--
->  1 file changed, 16 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/generic/648 b/tests/generic/648
-> index 83dd111d..e5c743c5 100755
-> --- a/tests/generic/648
-> +++ b/tests/generic/648
-> @@ -104,7 +104,7 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
->  		wait > /dev/null 2>&1
->  		ps -e | grep fsstress > /dev/null 2>&1
->  	done
-> -	for ((i = 0; i < 10; i++)); do
-> +	for ((j = 0; j < 10; j++)); do
->  		test -e "$snap_aliveflag" || break
->  		sleep 1
->  	done
-> @@ -112,7 +112,21 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
->  	# Mount again to replay log after loading working table, so we have a
->  	# consistent fs after test.
->  	$UMOUNT_PROG $loopmnt
-> -	_dmerror_unmount || _fail "iteration $i scratch unmount failed"
-> +	is_unmounted=1
-> +	# We must unmount dmerror at here, or whole later testing will crash.
-> +	# So try to umount enough times, before we have no choice.
-> +	for ((j = 0; j < 100; j++)); do
-> +		sleep 1
-> +		_dmerror_unmount > $tmp.unmount.err 2>&1
-> +		if [ $? -eq 0 ];then
-> +			is_unmounted=0
-> +			break
-> +		fi
-> +	done
-> +	if [ $is_unmounted -ne 0 ];then
-> +		cat $tmp.unmount.err
-> +		_fail "iteration $i scratch unmount failed"
-> +	fi
->  	_dmerror_load_working_table
->  	if ! _dmerror_mount; then
->  		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
-> -- 
-> 2.31.1
+> > 
+> > --D
+> > 
+> > >  
+> > >          - or add a case to the switch in common/config assigning
+> > >            these variables based on the hostname of your test
+> > > diff --git a/common/config b/common/config
+> > > index 164381b7..e0a5c5df 100644
+> > > --- a/common/config
+> > > +++ b/common/config
+> > > @@ -226,6 +226,7 @@ export OPENSSL_PROG="$(type -P openssl)"
+> > >  export ACCTON_PROG="$(type -P accton)"
+> > >  export E2IMAGE_PROG="$(type -P e2image)"
+> > >  export BLKZONE_PROG="$(type -P blkzone)"
+> > > +export GZIP_PROG="$(type -P gzip)"
+> > >  
+> > >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+> > >  # newer systems have udevadm command but older systems like RHEL5 don't.
+> > > diff --git a/common/rc b/common/rc
+> > > index 0d261184..84154868 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -4703,6 +4703,35 @@ _require_names_are_bytes() {
+> > >          esac
+> > >  }
+> > >  
+> > > +_has_kernel_config()
+> > > +{
+> > > +	option=$1
+> > > +	uname=$(uname -r)
+> > > +	config_list="$KCONFIG_PATH
+> > > +		     /proc/config.gz
+> > > +		     /lib/modules/$uname/build/.config
+> > > +		     /boot/config-$uname
+> > > +		     /lib/kernel/config-$uname"
+> > > +
+> > > +	for config in $config_list; do
+> > > +		[ ! -f $config ] && continue
+> > > +		[ $config = "/proc/config.gz" ] && break
+> > > +		grep -qE "^${option}=[my]" $config
+> > > +		return
+> > > +	done
+> > > +
+> > > +	[ ! -f $config ] && _notrun "Could not locate kernel config file"
+> > > +
+> > > +	# We can only get here with /proc/config.gz
+> > > +	_require_command "$GZIP_PROG" gzip
+> > > +	$GZIP_PROG -cd $config | grep -qE "^${option}=[my]"
+> > > +}
+> > > +
+> > > +_require_kernel_config()
+> > > +{
+> > > +	_has_kernel_config $1 || _notrun "Installed kernel not built with $1"
+> > > +}
+> > > +
+> > >  init_rc
+> > >  
+> > >  ################################################################################
+> > > -- 
+> > > 2.31.1
+> > > 
+> > 
 > 
