@@ -2,99 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE51C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:56:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5A5EC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Nov 2021 03:21:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 505586128B
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Nov 2021 17:56:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE62C60FA0
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Nov 2021 03:21:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241461AbhKIR6s (ORCPT
+        id S230072AbhKJDXt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Nov 2021 12:58:48 -0500
-Received: from smtp-out1.suse.de ([195.135.220.28]:45070 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241455AbhKIR6q (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 Nov 2021 12:58:46 -0500
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 0FC7421940;
-        Tue,  9 Nov 2021 17:55:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1636480558; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=SFKaA296PpTngwwYFam18NJoa6qaAmNM3higySL7Gfw=;
-        b=iGjZg8rr10Qh+Cx8lqQAHnULploqiauqGJgVGbxUvu6fHE6Ls6Oh3XEOSfe44wyZ1LQXvt
-        EgbmOxj/tXDFrwudtTMw55cQe+v4mm6n5vaNWdb4QL4CiUYx36R15eC/2hfmm5wRmnumUu
-        sSS0GdORT6y7tDNtdKUkCLI7SE+y5Q4=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1636480558;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=SFKaA296PpTngwwYFam18NJoa6qaAmNM3higySL7Gfw=;
-        b=olLWN6/xNBjvbw4YzyNbokf+AL7RjSbHboTx1q8RmDffU7S7XQJChOCEAyx0O7ykkpW3eF
-        /0/tWbFTyHziR9CQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id CCE0413B1D;
-        Tue,  9 Nov 2021 17:55:57 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 3yjxLi22imENYAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 09 Nov 2021 17:55:57 +0000
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id ac01af06;
-        Tue, 9 Nov 2021 17:55:57 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH] common/renameat2: use mktemp(1) to create temporary directory
-Date:   Tue,  9 Nov 2021 17:55:55 +0000
-Message-Id: <20211109175555.16795-1-lhenriques@suse.de>
+        Tue, 9 Nov 2021 22:23:49 -0500
+Received: from mail1.bemta34.messagelabs.com ([195.245.231.3]:10204 "EHLO
+        mail1.bemta34.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230143AbhKJDXt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Nov 2021 22:23:49 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1636514461; i=@fujitsu.com;
+        bh=C6V232v0grE5gJcQuKaUK7OdgbIz87k71k71/VblZX4=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=f5AZ4vbj35j3VmImDsf5zxicBk4ub0vy6FuMLuE9y+Rd+p4V4YFrAawkG114853sZ
+         o7X81ltygkTSK89oiUo9jLspLxlDqqL0dV6s79zZ2sfr4b/eLEHbTIdISJMMWr2DXo
+         o16sQuHf9nw45bHAiiXzvq2Z1AC8+HMv6FNPBtf1z+aFdF9BjsuZ9ibb8D6ko51vIg
+         PamIu4PFd2n8ge7Zmhmc2V+XCcK69uSq6S9EYfmnMP0WhjUVeg6kwYAMF/A2cZmgUL
+         Rg8thivRG3+lBPnUPxxy7KivZLPKPD/op64kQeLregJ3+idngzEeL2M6fSUn1y75Iv
+         JJYy7wnZ1+BoA==
+Received: from [100.115.35.109] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-3.bemta.az-a.eu-west-2.aws.ess.symcld.net id 67/2F-01854-C9A3B816; Wed, 10 Nov 2021 03:21:00 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrGIsWRWlGSWpSXmKPExsViZ8MRqjvHqjv
+  R4GWzrsXplr3sDowenzfJBTBGsWbmJeVXJLBmNHbuYi64xV7RMXcnSwPjMbYuRi4OIYF2Jok/
+  324yQTh7GCVu75jH3sXIycEmoCnxrHMBM4gtIiAr8X/GaiYQm1lAXWL5pF9gtrCAgcSNyVPAb
+  BYBVYmjLdPBbF4BD4nzH6eA9UoIKEhMefieGSIuKHFy5hMWiDkSEgdfvICqUZS41PGNEcKukJ
+  g1q41pAiPvLCQts5C0LGBkWsVonVSUmZ5RkpuYmaNraGCga2hoqmtsqmtkYKKXWKWbqJdaqlu
+  eWlyia6SXWF6sl1pcrFdcmZuck6KXl1qyiREYZCnFymd2MH669E3vEKMkB5OSKO8Boe5EIb6k
+  /JTKjMTijPii0pzU4kOMMhwcShK8GyyAcoJFqempFWmZOcCAh0lLcPAoifBWg6R5iwsSc4sz0
+  yFSpxh1Od79XLyIWYglLz8vVUqcV98SqEgApCijNA9uBCz6LjHKSgnzMjIwMAjxFKQW5WaWoM
+  q/YhTnYFQS5o0GmcKTmVcCt+kV0BFMQEcc/NIOckRJIkJKqoHpwJTSlxsDN1X/a9y+zf29RO7
+  397tywvX99N815FfVssqb9PAu/9K188z2GT1MtrO6We8+e8D5tDZn1Xbmy1w5gRP+xnl9i927
+  bPed1ac41ukVPZnyaOJf2dvvXj7cxfK2q2fKV6EZt0UXq/07uEnkjIb+ptlCZdnBt747f75az
+  PWj7Vmz4Pk7d/74aB2RW56r8MZ36Y2n27x2nldV1rP7+SSrm/uF0M5PTdmXxPec6Yr+7bdSad
+  GCo9JSqp+vtbZ3fPs4M2lJwo3AOW7XX5zeczb7vNqN8F8Pr3vIuQefP5C9m4kjzFxMgWXzkXD
+  tZEEh+W2XRBi7uCRals3kXJ2fwH5L0GLf+uf223fIry9SYldiKc5INNRiLipOBADmLNg1OQMA
+  AA==
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-13.tower-565.messagelabs.com!1636514460!411521!1
+X-Originating-IP: [62.60.8.85]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.81.5; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 9758 invoked from network); 10 Nov 2021 03:21:00 -0000
+Received: from unknown (HELO mailhost4.uk.fujitsu.com) (62.60.8.85)
+  by server-13.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 10 Nov 2021 03:21:00 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost4.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 1AA3KtZn008634
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+        for <fstests@vger.kernel.org>; Wed, 10 Nov 2021 03:21:00 GMT
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.24; Wed, 10 Nov 2021 03:20:53 +0000
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] ext4/051: correct kernel commit
+Date:   Wed, 10 Nov 2021 11:21:13 +0800
+Message-ID: <1636514473-2107-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Instead of using $TEST_DIR/$$, use the _correct_ way to create temporary
-directories.  I've seen generic/626 failing with:
+ext4/051 fails on my test machine, but I can't find commit in e2fsprogs
+according to commit log that said it is a e2fsprog regression test.
+Actually, it is a kernel regression test.
+So remind user it is a kernel regression test and use correct fix kernel
+commit[1].
 
-  QA output created by 626
-  mkdir: cannot create directory '/media/test/471': File exists
-  Silence is golden
+[1]https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b2bbb92f
 
-which was likely due to another test that used the same directory name and
-didn't do the clean-up.
-
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- common/renameat2 | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ tests/ext4/051 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/common/renameat2 b/common/renameat2
-index 4d25d7cebf94..9737dff54a2b 100644
---- a/common/renameat2
-+++ b/common/renameat2
-@@ -105,14 +105,13 @@ _rename_tests()
- _require_renameat2()
- {
- 	local flags=$1
--	local rename_dir=$TEST_DIR/$$
-+	local rename_dir=`mktemp -d -p $TEST_DIR`
- 	local cmd=""
- 
- 	if test ! -x $here/src/renameat2; then
- 		_notrun "renameat2 binary not found"
- 	fi
- 
--	mkdir $rename_dir
- 	touch $rename_dir/foo
- 	case $flags in
- 	"noreplace")
+diff --git a/tests/ext4/051 b/tests/ext4/051
+index b4f56b08..d0e01465 100755
+--- a/tests/ext4/051
++++ b/tests/ext4/051
+@@ -5,8 +5,8 @@
+ # FS QA Test No. 051
+ #
+ # Test that tune2fs doesn't fail after ext4 shutdown
+-# Regression test for commit:
+-# e905fbe3fd0f ext4: Fix tune2fs checksum failure for mounted filesystem
++# Regression test for kernel commit:
++# b2bbb92f7042 ext4: fix e2fsprogs checksum failure for mounted filesystem
+ #
+ . ./common/preamble
+ _begin_fstest auto rw quick
+-- 
+2.23.0
+
