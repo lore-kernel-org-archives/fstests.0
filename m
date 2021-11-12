@@ -2,180 +2,199 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE749C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 11:19:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC08C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 17:23:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C30160F55
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 11:19:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C38EE60C41
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 17:23:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233994AbhKLLV6 (ORCPT
+        id S235340AbhKLR0N (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 12 Nov 2021 06:21:58 -0500
-Received: from mout.gmx.net ([212.227.17.21]:36229 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233883AbhKLLV4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 12 Nov 2021 06:21:56 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1636715941;
-        bh=LQt848926u9K6z7uSyjawdWGk+7+Ibi1hqPvmT9+JiQ=;
-        h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
-        b=BQH8ZiF/ZQ+fuafhg/2xgF5eBCvANbyVpbp03Yvoxgc85lyOeMpt1AQaRPaScfBcB
-         iBmBQJJM+EA+n7D8lHTtPyjkwQ+9FLFU1bnpQInqbtEg/qZbCtbTzzow4FYrOpo3Zn
-         VEkDEBO4feNjSoh1O/8eaSDI2QVaTSKtsQHGjgys=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MMGRK-1n1N2Y39DK-00JGzu; Fri, 12
- Nov 2021 12:19:01 +0100
-Message-ID: <c52e4c15-591e-aa7a-1d42-aa5c2a3c3958@gmx.com>
-Date:   Fri, 12 Nov 2021 19:18:57 +0800
+        Fri, 12 Nov 2021 12:26:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53402 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232231AbhKLR0N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Nov 2021 12:26:13 -0500
+Received: from mail-qt1-x834.google.com (mail-qt1-x834.google.com [IPv6:2607:f8b0:4864:20::834])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F7A9C061766
+        for <fstests@vger.kernel.org>; Fri, 12 Nov 2021 09:23:22 -0800 (PST)
+Received: by mail-qt1-x834.google.com with SMTP id c12so9111447qtd.5
+        for <fstests@vger.kernel.org>; Fri, 12 Nov 2021 09:23:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=x80ZsYZiRMe7lGDzinCxwHtmc2IuxrZ10F8z4YfMDmo=;
+        b=EtZmcX26BRljvVJt+zcKzeJsonnFIiCSbIqjigQdr3M1HnVPOZxBXmPuM7iSDlVJhY
+         UHfeD+0LQ4NP+07iCHJLqCMUCz7IbK6UQ4Ap7s52zcVk2qq9rYy/ldXn1Rz7KugI8nbc
+         zwXSISxfGv5FVid0LtRb9Pi3QyTbWP62ZHGZtpdUYwjPZqcn9zP1Wyl+H0bI2NpI7l+X
+         AXvDA6nYyacfsMq3JrIKphB+m1fT0Xpp/iuMP4UrknmZzQLMgy7t1VtF0ZcFDtmOVnTt
+         oIgRZ4owCfGFbk3x8/DdbwCx6wRgUW77Bpfd4zZXVQgIrQKARFX1Qj5fjXYEPI8hluPE
+         +PWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=x80ZsYZiRMe7lGDzinCxwHtmc2IuxrZ10F8z4YfMDmo=;
+        b=eYVenMssMrXCZjGOOopSBG/5Blp81SUis0YQp3f2o+WvrHuJ0ILm7Pi6iz94ZnSI2q
+         7lzo9K2xspMn4M/fO9z7xGD7QVCOsoXXepBPhdwnkSWzDGQr/Aib0iLETt+Gb9vGM4da
+         cFhXwhklVLNrvnHzP1YHyp7fQ98pCZt7Nw4D/qu4jEvmA+zecoddIhFqVp9PJ/ZNOaAF
+         TIknBlLPm+jymaobukxdjVFlney9GXsXExaGAGfL/zc6L4n+9cpJuC7KP99ucuRjQigS
+         KlwUYXSfESCScXYgh72ib3q6bfXH147wv3Ay2h0sQcrluUUfmetaqS3N7pYM5fSk0U81
+         fP6A==
+X-Gm-Message-State: AOAM53162xmvuKXDbXY1AlH2FVWjryWANCdJOz1DiaEBJGPfo19h11Ny
+        tgkhr3tu49/Y61xFdU/FPRDHzg==
+X-Google-Smtp-Source: ABdhPJwRUU6p/rtRZ3BsF2NwkM7TdkknS7yrCzj3uLzk8XiikFPVb5wGMB2J3kO7k60egfJkQVUEyQ==
+X-Received: by 2002:ac8:4117:: with SMTP id q23mr17944758qtl.390.1636737800828;
+        Fri, 12 Nov 2021 09:23:20 -0800 (PST)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id a38sm2018942qkp.80.2021.11.12.09.23.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Nov 2021 09:23:19 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH] fstests: detect btrfs compression and disable certain tests
+Date:   Fri, 12 Nov 2021 12:23:18 -0500
+Message-Id: <f2b314338ecd06ae734ff0f0537f0cdf247db8f6.1636737764.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.0
-Subject: Re: [PATCH] fstests: btrfs/049: add regression test for
- compress-force=lzo mount option
-Content-Language: en-US
-To:     fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-References: <20211112023535.21370-1-wqu@suse.com>
- <CAL3q7H4s=KqcwstvzV5GXCbfcyXASvtY5FbNYyEFoxW=ZtfeEA@mail.gmail.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-In-Reply-To: <CAL3q7H4s=KqcwstvzV5GXCbfcyXASvtY5FbNYyEFoxW=ZtfeEA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:E78s50iho+P/yjD7wqV2cL+veNDtvL5FIaEp4y6YgLdrzhziaM7
- 4aF0Xs/4bhWNIBPYYdi5TsJf1l2+leQCUB+2OFv4fzjbvCpHgvPXHkkVPFh9eNdPz0LAOUE
- 1zdGiJgQQeX2RZgUp8ILkgHEqU31Zu0LFXl+mt1z0SMJMwSOY31EYQtQJhNCgVDfIspVU9R
- 4dGIySTzGPfqQd9pMP0IQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:d3nxGOxovx8=:Ml+QEuQvIxBxy+4uwIikOt
- xvp5xpXxZWgMQUSgg78+o5eHtzMoTB0xo8rSqTX/0CJPWQf6fpgmio12ILI+xGwsmD/IfjrGW
- 9BCUUYQu3WlLvMJ8eNsK/16PoDvS7V/xmJsI5cQDagc76ItADawjdq8MMvauSkG21MNtzqKzx
- FmgXcDc5GAHypiRf7xA561rXY8//OLFzZDYA/UGcVPTzK6Sr7pYVsNORs6w02EcbGdg1rTnqd
- 0e7ohfNIglaULfMQy0MLN1g2Lyf+GJ5AcvA4GACUWNHUqPdEsd90z+FMsFbtJU0VRtG+Zm5Fu
- Pam2kb7dgT7UQbITxWb0EVkzDZuReXLvoZHub4UvIPmDOwXbo2ZOxV4Qybs6O1+o2mbTIy/Rm
- b4EmRgHYMPiF0DHJSFj4IHntjnucobhlbOei661y26Jp44Bx+LBNCEn8N7YVrwsfJD5xBVmJZ
- sJFlF3QiHRW/TxJceU3JDuW/RX62NlZNiSuxxxDb4IHktBvOh3398Iamu6XULBCrdlt7WsJ3V
- 2sQTcub07BwUE86gsKgZDrxjeHOBURH6xO5u/4pSg/Y5nRMP0MNQcnRhgUY/HNskMXn6EjqY9
- WpkxwqwbnwVyx8pRpfKeEMRUo5tvc2Kc2CujmVQ1p5AjG3BI/FQarOxYBM+NPhKqTnBNrBrht
- a+AqqDHDAkiPqaRbm4gTB3ktRibnjrLrUnMaCzjcadWzNLBMGTXOxFslzq2X/0Hr2I++Rh3rJ
- jLD5jxSDH+Tc+CsH3B5ILuIRaD0IYTUqilRdBdLJvfp3bytnX2IlFfxXZJhn6ZImdcA6KBDH8
- BHyjwjHZBC+l8aEbsDrYJVZ5g+lwrqfOnSGqqJwBhVH+kCTlGF7MHTGE3MuTYVyNdDqtaxxH7
- CEqJAN+mt7r6f82nfo1DzMF7HEVaiO8GTRgpelnQ51dhQZC953CGZ6XxXFLLXcfCiw7bgV48q
- hM85kdNLo4GG9jqrNAGlo6UDxrbf1i0CdrD+nykB5MnOhc6H0lwO9Kgvj0KlRoc2uDK4X8PYM
- J8bRjRuIxZxWUOOlO9zIs29uvMBlUXFXfhs1sSrNv29eKxuuxFHBVaL7xsd0ONHxIzl3ZugJQ
- TzrFXplbEm8tl0=
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Our nightly xfstests runs exposed a set of tests that always fail if we
+have compression enabled.  This is because compression obviously messes
+with the amount of data space allocated on disk, and these tests are
+testing either that quota is doing the correct thing, or that we're able
+to completely fill the file system.
 
+Add a helper to check to see if we have any of our compression related
+mount options set and simply _not_run for these specific tests.
 
-On 2021/11/12 18:51, Filipe Manana wrote:
-> On Fri, Nov 12, 2021 at 2:36 AM Qu Wenruo <wqu@suse.com> wrote:
->>
->> Since kernel commit d4088803f511 ("btrfs: subpage: make lzo_compress_pa=
-ges()
->> compatible"), lzo compression no longer respects the max compressed pag=
-e
->> limit, and can cause kernel crash.
->>
->> The fix is titled "btrfs: fix a out-of-boundary access for
->> copy_compressed_data_to_page()".
->>
->> This patch will add such regression test for compress-force=3Dlzo mount
->> option against incompressible data.
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->>   tests/btrfs/049     | 41 +++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/049.out |  1 +
->>   2 files changed, 42 insertions(+)
->>   create mode 100755 tests/btrfs/049
->>
->> diff --git a/tests/btrfs/049 b/tests/btrfs/049
->> new file mode 100755
->> index 00000000..5a73f738
->> --- /dev/null
->> +++ b/tests/btrfs/049
->> @@ -0,0 +1,41 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
->> +#
->> +# FS QA Test 049
->> +#
->> +# Test if btrfs will crash when compress-force=3Dlzo hits incompressib=
-le data
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick compress dangerous
->> +
->> +# Override the default cleanup function.
->> +# _cleanup()
->> +# {
->> +#      cd /
->> +#      rm -r -f $tmp.*
->> +# }
->> +
->> +# Import common functions.
->> +# . ./common/filter
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_require_scratch
->> +
->> +_scratch_mkfs >> $seqres.full
->> +_scratch_mount -o compress-force=3Dlzo
->> +
->> +$XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 4k" $SCRATCH_MNT/file > /=
-dev/null
->
-> While at it, instead of just having the minimum to trigger that
-> specific bug, it would also be good to:
->
-> 1) Try with zlib and zstd, instead of only lzo. This way it will help
-> more easily catch any future regression with those algorithms;
->
-> 2) Instead of redirecting to /dev/null and ignoring if we are actually
-> writing what we are supposed to do, can we verify that we write all
-> the bytes - i.e. that there's no short write?
->
-> 3) After unmount, we could also mount the fs again and check if we are
-> able to read exactly what we tried to write - that the write was
-> persisted and we're not reading from the page cache.
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ common/btrfs      | 10 ++++++++++
+ tests/btrfs/126   |  4 ++++
+ tests/btrfs/139   |  4 ++++
+ tests/btrfs/230   |  4 ++++
+ tests/btrfs/232   |  4 ++++
+ tests/generic/275 |  4 ++++
+ tests/generic/427 |  4 ++++
+ 7 files changed, 34 insertions(+)
 
-That would be a pretty good generic advice for all regression tests.
+diff --git a/common/btrfs b/common/btrfs
+index 2eab4b29..b4067121 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -113,6 +113,16 @@ _require_btrfs_fs_sysfs()
+ 
+ }
+ 
++_require_btrfs_no_compress()
++{
++	if [ "$FSTYP" != "btrfs" ]; then
++		return
++	fi
++
++	_scratch_mount_options | grep -q "compress"
++	[ $? -eq 0 ] && _notrun "This test requires no compression enabled"
++}
++
+ _check_btrfs_filesystem()
+ {
+ 	device=$1
+diff --git a/tests/btrfs/126 b/tests/btrfs/126
+index a13a0a6e..d9b638fd 100755
+--- a/tests/btrfs/126
++++ b/tests/btrfs/126
+@@ -19,6 +19,10 @@ _supported_fs btrfs
+ _require_scratch
+ _require_btrfs_qgroup_report
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_btrfs_no_compress
++
+ _scratch_mkfs >/dev/null
+ # Use enospc_debug mount option to trigger restrict space info check
+ _scratch_mount "-o enospc_debug"
+diff --git a/tests/btrfs/139 b/tests/btrfs/139
+index 7760182a..dcf85416 100755
+--- a/tests/btrfs/139
++++ b/tests/btrfs/139
+@@ -19,6 +19,10 @@ _supported_fs btrfs
+ # We at least need 2GB of free space on $SCRATCH_DEV
+ _require_scratch_size $((2 * 1024 * 1024))
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_btrfs_no_compress
++
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ 
+diff --git a/tests/btrfs/230 b/tests/btrfs/230
+index 2daacfbe..d431be50 100755
+--- a/tests/btrfs/230
++++ b/tests/btrfs/230
+@@ -17,6 +17,10 @@ _begin_fstest auto quick qgroup limit
+ 
+ _supported_fs btrfs
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_btrfs_no_compress
++
+ # Need at least 2GiB
+ _require_scratch_size $((2 * 1024 * 1024))
+ _scratch_mkfs > /dev/null 2>&1
+diff --git a/tests/btrfs/232 b/tests/btrfs/232
+index 8691a508..eca1bf41 100755
+--- a/tests/btrfs/232
++++ b/tests/btrfs/232
+@@ -33,6 +33,10 @@ writer()
+ 
+ _supported_fs btrfs
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_btrfs_no_compress
++
+ _require_scratch_size $((2 * 1024 * 1024))
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+diff --git a/tests/generic/275 b/tests/generic/275
+index bf0aa2b3..012bd45f 100755
+--- a/tests/generic/275
++++ b/tests/generic/275
+@@ -25,6 +25,10 @@ _cleanup()
+ _supported_fs generic
+ _require_scratch
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_btrfs_no_compress
++
+ echo "------------------------------"
+ echo "write until ENOSPC test"
+ echo "------------------------------"
+diff --git a/tests/generic/427 b/tests/generic/427
+index 0f99c1b2..2ebcbf43 100755
+--- a/tests/generic/427
++++ b/tests/generic/427
+@@ -22,6 +22,10 @@ _require_scratch
+ _require_test_program "feature"
+ _require_aiodio aio-dio-eof-race
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_btrfs_no_compress
++
+ # limit the filesystem size, to save the time of filling filesystem
+ _scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
+ _scratch_mount
+-- 
+2.26.3
 
-Would try to keep these advices in mind for all future tests.
-
-Thanks,
-Qu
->
-> Thanks.
->
->
->> +
->> +# With kernel commit d4088803f511 ("btrfs: subpage: make lzo_compress_=
-pages()
->> +# compatible"), the kernel would crash when writing back above data.
->> +_scratch_unmount
->> +
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
->> index cb0061b3..c69568ad 100644
->> --- a/tests/btrfs/049.out
->> +++ b/tests/btrfs/049.out
->> @@ -1 +1,2 @@
->>   QA output created by 049
->> +Silence is golden
->> --
->> 2.33.0
->>
->
->
