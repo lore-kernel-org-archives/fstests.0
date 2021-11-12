@@ -2,61 +2,61 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBE01C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 20:37:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A047C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 21:10:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D609760F36
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 20:37:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 47C6660F42
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Nov 2021 21:10:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232607AbhKLUkp (ORCPT
+        id S235733AbhKLVNY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 12 Nov 2021 15:40:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40396 "EHLO
+        Fri, 12 Nov 2021 16:13:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231968AbhKLUko (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 12 Nov 2021 15:40:44 -0500
-Received: from mail-qk1-x72c.google.com (mail-qk1-x72c.google.com [IPv6:2607:f8b0:4864:20::72c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89B14C061766
-        for <fstests@vger.kernel.org>; Fri, 12 Nov 2021 12:37:53 -0800 (PST)
-Received: by mail-qk1-x72c.google.com with SMTP id 193so10300577qkh.10
-        for <fstests@vger.kernel.org>; Fri, 12 Nov 2021 12:37:53 -0800 (PST)
+        with ESMTP id S235619AbhKLVNW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Nov 2021 16:13:22 -0500
+Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F98BC061766
+        for <fstests@vger.kernel.org>; Fri, 12 Nov 2021 13:10:30 -0800 (PST)
+Received: by mail-qt1-x830.google.com with SMTP id n15so9799081qta.0
+        for <fstests@vger.kernel.org>; Fri, 12 Nov 2021 13:10:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
         h=from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=E0mC8E0nVs+4PIAevDGFm/VHiYARiuJ41dU7KZkBaPw=;
-        b=KVaP/N/QrT5ENGGVLBNM2idWsODJquG7UmEHCTVFShbpBz54Ldg07DTTat6e5zUWcM
-         McvJ2oJR3xpVAYKbmFmW/rFezJv3T46fTJrrew9VGahkCnglzPo3WUnlyhQJQtTpDnRz
-         5fXK+Qr1xFqHefIvmnK5UJIi4+IXqF2ks5TQMBUkhIcpUUC7FDOcwzg9Ij3eQzjZjve0
-         vPXf0EmVH3xT4fg7WK14VDWY0s1sBr7hdRfTmCnWUwUM5MKwNH73yP6hJ08lLz8Swzod
-         kTlaRb5fATYuDcXDDbCIGjuzYu6//Rz8nnIzxPE8d5i8WlOLYRuF9TVm5fqmUdTKn9Um
-         TBAQ==
+        bh=/7DQrMaofDnA8zAUMO/Qm4x8IIEkSx3eDtzbWt8rQfo=;
+        b=e99ej0OvRxWLPOrHrElBNZizZ9CVI6vTO/s05d8fetx9DUf/j+/pnOTSIy7e5S/Fzo
+         x9ILC7odQv9IKTw3t/ZsdArdjfXr2OTLUkTRN60nD4QYYmLCVmZ44cMYOrSNp5Y+7/ZA
+         1dFtzw8wztTzkLkY5g+sHZbrXsGMsYjWlNzVq6e1wrXjrNKzi56rUt3ud5MLwly7IN1N
+         k8YCbFETgDrzpLdyDcqgHb5x/rNo9n+J+GaXjgc1g6sYF/UVcgPPYTdWhgpSmchI5HIS
+         k6oUde6EOt/6rm6UTZd4bx5Hyl6vSwcyW6ySsR803uRe/pXbLlMk7bBMOjy748lFvPxK
+         nlig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=E0mC8E0nVs+4PIAevDGFm/VHiYARiuJ41dU7KZkBaPw=;
-        b=TArSo2dLFQS0n8Mw44hR3c5B8FH4lsOTLDDbhubMFknwmVkhHHAKcFVv2m9oyBngDH
-         ASQWZUnIfLnuCxGDRFXbJHOoRQ6+NxvMFOQyyov0y51231FrisoBJnxiAgTKXqc8jThl
-         janNexmey8J78UZxoQlgQsSWJOdSqHXJpHBzRQTbc9EsLM1+PqywRiS6niIZByvKxBpr
-         Lw9G1mdmqrMUAkUi+BqxFgsaLAHD5hFuWJ+P6JHuqzwYbPz637jrAvRUA8fCVkskTuTn
-         XNEZL50LB5t4Ees+E/KRDkmPmptD1JmDfos7ylKpT0cA7Wtju/1WCxHpVnpDVLt1vb+F
-         V+8g==
-X-Gm-Message-State: AOAM531N+hOR2EJf6oeTFJdTXUGk7y8juTl81iatOrIsBq6JmF0w0Ztt
-        TGH5Ocs/27byMTyu+GFNx+ARHg==
-X-Google-Smtp-Source: ABdhPJx9lCGOWzFxvKztUOT7d5TKeXIzh2x0XayjyDs8xS5sLZpMKiU47GUZzUNqZsYWrY87XSHL4w==
-X-Received: by 2002:a05:620a:400f:: with SMTP id h15mr14700401qko.226.1636749472507;
-        Fri, 12 Nov 2021 12:37:52 -0800 (PST)
+        bh=/7DQrMaofDnA8zAUMO/Qm4x8IIEkSx3eDtzbWt8rQfo=;
+        b=Ld++3c2gq+tqTa3jTn90Pw7yVamMQv7dn91yJKT7QuomW2G6Y8kGSt/Yghf7axddud
+         jKg3ALnTVIUgVbAkdW0SBE2O48YrROlA14tqROQ7osgX30Hjhq7l3WVLuJX0mFbE83m3
+         sEtzzKL+rYt56Ntobl6BG59qWD+vNBO3vuvPyRItn9rhg7Ai4LCfUOXBS1Lb8yHJa9hS
+         boQgTEruH9xXTsifpbuLvS1qbrHWN6Hr/GZERoo3tUOoJ98YbTjVSIen4siu/WyxsTxk
+         +PgwHEg5s2NveUh30iFaQHB7rxkQumUnsYqud6vGkSjDKFHlPyHxrcxEjVoTjXDoyQgd
+         U57w==
+X-Gm-Message-State: AOAM532z+jW2rH3QNi5ikDq2oyTGuSy+NYV21tH/wK+/Dj1Sb1w6aJtD
+        aTwUqSjc+yk9dW3w6nUY05g7YD9SBiDvbQ==
+X-Google-Smtp-Source: ABdhPJzTLqNfWYuBb5YYlkb1YgeV5SP8SADSqlh2NzrtdC20V664lKOgBnGRyqxNT5YVMOrxga2kFw==
+X-Received: by 2002:a05:622a:449:: with SMTP id o9mr19223731qtx.158.1636751429114;
+        Fri, 12 Nov 2021 13:10:29 -0800 (PST)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id s8sm3452735qkp.17.2021.11.12.12.37.51
+        by smtp.gmail.com with ESMTPSA id a15sm3812012qtb.85.2021.11.12.13.10.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Nov 2021 12:37:51 -0800 (PST)
+        Fri, 12 Nov 2021 13:10:28 -0800 (PST)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
         fstests@vger.kernel.org
-Subject: [PATCH] fstests: print symbolic names for fiemap flags
-Date:   Fri, 12 Nov 2021 15:37:48 -0500
-Message-Id: <36864f7a8701651bd7c1734aa57cb520fbf34a49.1636749456.git.josef@toxicpanda.com>
+Subject: [PATCH] fstests: check if the scratch device is an lv device for certain tests
+Date:   Fri, 12 Nov 2021 16:10:27 -0500
+Message-Id: <e8889f411f37867d3740f623508fd2d3415b63ba.1636751413.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -64,80 +64,80 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-My nightly btrfs tests are failing on my configs with -o compress because the
-extents have FIEMAP_EXTENT_ENCODED set, which throws the golden output off.
-
-Fix this by changing the filter helper to spit out symbolic names for SHARED and
-LAST (these tests only care about SHARED).  Then change the golden output to
-match the new output of the filter.  With this patch my -o compress configs now
-pass these tests.
+I use lvm to carve up a large disk so I can run the btrfs raid related xfstests.
+However this messes with tests that try to greate lvm devices ontop of
+SCRATCH_DEV.  Handle this by adding a _require_scratch_nolvm helper to skip
+tests that are going to try and create lvm devices.
 
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- common/punch          | 16 +++++++++++++++-
- tests/generic/352.out |  4 ++--
- tests/generic/353.out |  8 ++++----
- 3 files changed, 21 insertions(+), 7 deletions(-)
+ common/rc         | 11 +++++++++++
+ tests/generic/081 |  2 +-
+ tests/generic/108 |  2 +-
+ tests/generic/459 |  2 +-
+ 4 files changed, 14 insertions(+), 3 deletions(-)
 
-diff --git a/common/punch b/common/punch
-index b6c337e7..b6b8a0b9 100644
---- a/common/punch
-+++ b/common/punch
-@@ -119,7 +119,21 @@ _filter_fiemap_flags()
- 			next;
- 		}
- 		$5 ~ /0x[[:xdigit:]]+/ {
--			print $1, $2, $5;
-+			flags = strtonum($5);
-+			flag_str = "none";
-+			set = 0;
-+
-+			if (and(flags, 0x2000)) {
-+				flag_str = "shared";
-+				set = 1;
-+			}
-+			if (and(flags, 0x1)) {
-+				if (set) {
-+					flag_str = flag_str"|";
-+				}
-+				flag_str = flag_str"last";
-+			}
-+			print $1, $2, flag_str
- 		}' |
- 	_coalesce_extents
+diff --git a/common/rc b/common/rc
+index 0d261184..c0fb11c6 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1676,6 +1676,17 @@ _require_scratch_nocheck()
+     rm -f ${RESULT_DIR}/require_scratch
  }
-diff --git a/tests/generic/352.out b/tests/generic/352.out
-index a87c5073..4ff66c21 100644
---- a/tests/generic/352.out
-+++ b/tests/generic/352.out
-@@ -1,5 +1,5 @@
- QA output created by 352
- wrote 131072/131072 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--0: [0..2097151]: 0x2000
--1: [2097152..2097407]: 0x2001
-+0: [0..2097151]: shared
-+1: [2097152..2097407]: shared|last
-diff --git a/tests/generic/353.out b/tests/generic/353.out
-index b7184a61..4f6e0b92 100644
---- a/tests/generic/353.out
-+++ b/tests/generic/353.out
-@@ -5,11 +5,11 @@ linked 65536/65536 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
- before sync:
- SCRATCH_MNT/file1
--0: [0..127]: 0x2001
-+0: [0..127]: shared|last
- SCRATCH_MNT/file2
--0: [0..127]: 0x2001
-+0: [0..127]: shared|last
- after sync:
- SCRATCH_MNT/file1
--0: [0..127]: 0x2001
-+0: [0..127]: shared|last
- SCRATCH_MNT/file2
--0: [0..127]: 0x2001
-+0: [0..127]: shared|last
+ 
++# we need the scratch device and it needs to not be an lvm device
++_require_scratch_nolvm()
++{
++	_require_scratch_nocheck
++
++	# This works if we don't have LVM, all we want is to skip if the scratch
++	# device is an lvm device.
++	$LVM_PROG lvdisplay $SCRATCH_DEV > /dev/null 2>&1
++	[ $? -eq 0 ] && _notrun "test requires a non-lvm scratch device"
++}
++
+ # we need the scratch device and it should be checked post test.
+ _require_scratch()
+ {
+diff --git a/tests/generic/081 b/tests/generic/081
+index 9f294c11..22ac94de 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -50,7 +50,7 @@ _cleanup()
+ # real QA test starts here
+ _supported_fs generic
+ _require_test
+-_require_scratch_nocheck
++_require_scratch_nolvm
+ _require_dm_target snapshot
+ _require_command $LVM_PROG lvm
+ 
+diff --git a/tests/generic/108 b/tests/generic/108
+index 6e1ea5b9..ad43269f 100755
+--- a/tests/generic/108
++++ b/tests/generic/108
+@@ -32,7 +32,7 @@ _cleanup()
+ 
+ # real QA test starts here
+ _supported_fs generic
+-_require_scratch_nocheck
++_require_scratch_nolvm
+ _require_block_device $SCRATCH_DEV
+ _require_scsi_debug
+ _require_command "$LVM_PROG" lvm
+diff --git a/tests/generic/459 b/tests/generic/459
+index 5b44e245..cda19e6e 100755
+--- a/tests/generic/459
++++ b/tests/generic/459
+@@ -39,7 +39,7 @@ _cleanup()
+ # This tests for filesystem lockup not consistency, so don't check for fs
+ # consistency after test
+ _supported_fs generic
+-_require_scratch_nocheck
++_require_scratch_nolvm
+ _require_dm_target thin-pool
+ _require_dm_target snapshot
+ _require_command $LVM_PROG lvm
 -- 
 2.26.3
 
