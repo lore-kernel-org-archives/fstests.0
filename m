@@ -2,136 +2,179 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3033AC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 Nov 2021 11:34:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F1D8C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 Nov 2021 12:06:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C1D161073
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 Nov 2021 11:34:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAA0D6044F
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 Nov 2021 12:06:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231656AbhKNLhS (ORCPT
+        id S233170AbhKNMJ3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 14 Nov 2021 06:37:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37772 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234302AbhKNLhR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 14 Nov 2021 06:37:17 -0500
-Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B94BC061746
-        for <fstests@vger.kernel.org>; Sun, 14 Nov 2021 03:34:23 -0800 (PST)
-Received: by mail-yb1-xb29.google.com with SMTP id i194so4359669yba.6
-        for <fstests@vger.kernel.org>; Sun, 14 Nov 2021 03:34:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:from:date:message-id:subject:to:cc
-         :content-transfer-encoding;
-        bh=GxHh7Xf9qDW0bNwOyf54n9RvWNxiu2gzljLfng7W7Hs=;
-        b=Hkx6kd5Y6wfnns03GA1SRCPIUTynBDX6QIPciZkEAA0GruDt8lQBtj5GBgFQfJZ7OT
-         P9DoxVMNlTvsOLY7u/xFKNpDLu+Ly8zLYLu0VFg5pR0PEbO6ONueZ2TOCUDSj7Zvxh7e
-         mGQCua1J+C3CNB+YPiG5OP1pjWmqAplI+8pjLmV9JDdDVtPCwU8KRIUSJj5SY2RLC7zf
-         o/195lJOXDLavNDJC9wp4p1oWu1j99gHdkydkGGb8AbXaP41KY+B8eCNcB+WCbLd9mTt
-         T1d5oB0k1bLZKaUVyzVAPCOwyMcaFd224SOKhP6ZGgDI16fKNDpbctGg85K59AAGlVj+
-         JrXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc
-         :content-transfer-encoding;
-        bh=GxHh7Xf9qDW0bNwOyf54n9RvWNxiu2gzljLfng7W7Hs=;
-        b=ZKQtVph9zmiq5RLlx+kYuOuYrJawPPix84yjzcnCrVSPKfFaDJ8TmRjwC42maldwvc
-         9WDt3yuj6ysFNQ4BpIhZbZAfGQhw+1ha5Z67p3NYN6/A6LbxkqQuZzX3mdImcHe6pfFL
-         MAis/b7nngVeQdLaW+b+fir64O/LXjG/OE+SYn2ffvm3WQBM0KcL1jRKBekgfQ+fIbA3
-         Dwn/jAi82TsbxLJ+M3xvs/HBvR2LBupdVdsdQ4iGJJ+ulnbSz1oNdmTDnLnog2qy+ajV
-         So+RsxHQWPE1qeMNi3dYHECaHqFPrwTfY8Q7YTHOF3NKMf/yd6Sy+sPbtyckN2FGAIKG
-         rplg==
-X-Gm-Message-State: AOAM532TGW3P9lw7Fl+5GdC7WpsnD+QCU0BBY2NrNM5SLZjvwC9whI74
-        m5jmLGGWHb+ISpwl+ACABNYLxIGk12+dmguRyjTHlc411xo=
-X-Google-Smtp-Source: ABdhPJyGZHs5rgx1gOehdPMuOR4IFQ14/WnWSSpdpkenE5zMj+yjrina8CPwTsKDpqajAclWDHY55Hq7TrNbk+6nEd4=
-X-Received: by 2002:a05:6902:1543:: with SMTP id r3mr34813421ybu.166.1636889662317;
- Sun, 14 Nov 2021 03:34:22 -0800 (PST)
+        Sun, 14 Nov 2021 07:09:29 -0500
+Received: from out20-39.mail.aliyun.com ([115.124.20.39]:40734 "EHLO
+        out20-39.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230267AbhKNMJ2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 Nov 2021 07:09:28 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436291|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00747111-0.0124616-0.980067;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.LseRfn2_1636891592;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.LseRfn2_1636891592)
+          by smtp.aliyun-inc.com(10.147.42.22);
+          Sun, 14 Nov 2021 20:06:32 +0800
+Date:   Sun, 14 Nov 2021 20:06:32 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Nikolay Borisov <nborisov@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v3] btrfs: Test proper interaction between skip_balance
+ and paused balance
+Message-ID: <YZD7yEhwsKRBm0IE@desktop>
+References: <20211108142901.1003352-1-nborisov@suse.com>
 MIME-Version: 1.0
-From:   Turritopsis Dohrnii Teo En Ming <ceo.teo.en.ming@gmail.com>
-Date:   Sun, 14 Nov 2021 19:34:19 +0800
-Message-ID: <CAMEJMGGyAQ=qOUdpZkHs1ZyaaVtbZ19Qs1w-jeMvMQ=YCaR-iw@mail.gmail.com>
-Subject: I discovered that Aruba Instant On 1930 24G 4SFP/SFP+ JL682A Switch
- is Running an Operating System with Linux Kernel 4.4.120!
-To:     fstests@vger.kernel.org
-Cc:     ceo@teo-en-ming-corp.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211108142901.1003352-1-nborisov@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Subject: I discovered that Aruba Instant On 1930 24G 4SFP/SFP+ JL682A
-Switch is Running an Operating System with Linux Kernel 4.4.120!
+On Mon, Nov 08, 2021 at 04:29:01PM +0200, Nikolay Borisov wrote:
+> Ensure a device can be added to a filesystem that has a paused balance
+> operation and has been mounted with the 'skip_balance' mount option
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> ---
+> 
+> V3:
+>  * Added swapon to the list of exclusive ops
+>  * Use _spare_dev_get
+>  * Test balance resume via progs while balance is paused. I hit an assertion failure
+>  outside of xfstest while doing this sequence of steps so let's add it to
+>  ensure that's not regressed.
+> 
+>  tests/btrfs/049     | 92 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/049.out |  1 +
+>  2 files changed, 93 insertions(+)
+>  create mode 100755 tests/btrfs/049
+> 
+> diff --git a/tests/btrfs/049 b/tests/btrfs/049
+> new file mode 100755
+> index 000000000000..d01ef05e5ead
+> --- /dev/null
+> +++ b/tests/btrfs/049
+> @@ -0,0 +1,92 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
+> +#
+> +# FS QA Test 049
+> +#
+> +# Ensure that it's possible to add a device when we have a paused balance
+> +# and the filesystem is mounted with skip_balance. The issue is fixed by a patch
+> +# titled "btrfs: allow device add if balance is paused"
 
-Good day from Singapore,
+After looking at the kernel patch, it looks more like a bug fix not a
+new feature, as adding device to a ENOSPC-but-paused balance seems to be
+the only reasonable way to finish the balance. If that's the case,
+there's no problem add this case that will fail on old kernels.
 
-I discovered that Aruba Instant On 1930 24G 4SFP/SFP+ JL682A Switch is
-Running an Operating System with Linux Kernel 4.4.120!
+> +#
+> +. ./common/preamble
+> +_begin_fstest quick balance auto
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_require_scratch_swapfile
+> +_require_scratch_dev_pool 3
+> +
+> +_scratch_dev_pool_get 2
+> +_spare_dev_get
+> +
+> +swapfile="$SCRATCH_MNT/swap"
+> +_scratch_pool_mkfs >/dev/null
+> +_scratch_mount
+> +_format_swapfile "$swapfile" $(($(get_page_size) * 10))
+> +
+> +check_exclusive_ops()
+> +{
+> +	$BTRFS_UTIL_PROG device remove 2 $SCRATCH_MNT &>/dev/null
+> +	[ $? -ne 0 ] || _fail "Successfully removed device"
+> +	$BTRFS_UTIL_PROG filesystem resize -5m $SCRATCH_MNT &> /dev/null
+> +	[ $? -ne 0 ] || _fail "Successfully resized filesystem"
+> +	$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT &> /dev/null
+> +	[ $? -ne 0 ] || _fail "Successfully replaced device"
+> +	swapon "$swapfile" &> /dev/null
+> +	[ $? -ne 0 ] || _fail "Successfully enabled a swap file"
+> +}
+> +
+> +uuid=$(findmnt -n -o UUID $SCRATCH_MNT)
 
-INTRODUCTION
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+$uuid is not used anywhere, can be removed?
 
-My name is Mr. Turritopsis Dohrnii Teo En Ming, 43 years old as of 14
-Nov 2021. I live in Singapore. Presently I am an IT Consultant with a
-Systems Integrator (SI)/computer firm in Singapore. I am also a Linux
-and open source software and information technology enthusiast.
+> +
+> +# Create some files on the so that balance doesn't complete instantly
 
-You can read my autobiography on my redundant blogs. The title of my
-autobiography is:
+You mean "on the device"?
 
-=E2=80=9CAutobiography of Singaporean Targeted Individual Mr. Turritopsis
-Dohrnii Teo En Ming (Very First Draft, Lots More to Add in Future)=E2=80=9D
+> +args=`_scale_fsstress_args -z \
+> +	-f write=10 -f creat=10 \
+> +	-n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
+> +echo "Run fsstress $args" >>$seqres.full
+> +$FSSTRESS_PROG $args >/dev/null 2>&1
+> +
+> +# Start and pause balance to ensure it will be restored on remount
+> +echo "Start balance" >>$seqres.full
+> +_run_btrfs_balance_start --bg "$SCRATCH_MNT"
+> +$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
+> +$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
+> +[ $? -eq 0 ] || _fail "Balance not paused"
+> +
+> +# Exclusive ops should be blocked on manual pause of balance
+> +check_exclusive_ops
+> +
+> +# Balance is now placed in paused state during mount
+> +_scratch_cycle_mount "skip_balance"
+> +
+> +# Exclusive ops should be blocked on balance pause due to 'skip_balance'
+> +check_exclusive_ops
+> +
+> +# Device add is the only allowed operation
+> +$BTRFS_UTIL_PROG device add -K -f $SPARE_DEV "$SCRATCH_MNT"
+> +
+> +# Exclusive ops should still be blocked on account that balance is still paused
+> +check_exclusive_ops
+> +
+> +# Should be possible to resume balance after device add
+> +$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
+> +[ $? -eq 0 ] || _fail "Couldn't resume balance after device add"
+> +
+> +# Add more files so that new balance won't fish immediately
+                                              ^^^^ finish ?
+> +$FSSTRESS_PROG $args >/dev/null 2>&1
+> +
+> +# Now pause->resume balance. This ensures balance paused is properly set in
+> +# the kernel and won't trigger an assertion failure.
+> +echo "Start balance" >>$seqres.full
+> +_run_btrfs_balance_start --bg "$SCRATCH_MNT"
+> +$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
+> +$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
+> +[ $? -eq 0 ] || _fail "Balance not paused"
+> +$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
+> +[ $? -eq 0 ] || _fail "Balance can't be resumed via IOCTL"
+> +
+> +_spare_dev_put
+> +_scratch_dev_pool_put
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
+> index cb0061b33ff0..c69568ad9323 100644
+> --- a/tests/btrfs/049.out
+> +++ b/tests/btrfs/049.out
+> @@ -1 +1,2 @@
+>  QA output created by 049
+> +Silence is golden
 
-Links to my redundant blogs (Blogger and WordPress) can be found in my
-email signature below. These are my main blogs.
+Ah, 049.out was forgotten to be removed by commit 668c859d37f2
+("btrfs/049: remove the test"), so it's reused here.
 
-I have three other redundant blogs, namely:
-
-https://teo-en-ming.tumblr.com/
-
-https://teo-en-ming.medium.com/
-
-https://teo-en-ming.livejournal.com/
-
-Future/subsequent versions of my autobiography will be published on my
-redundant blogs.
-
-My Blog Books (in PDF format) are also available for download on my
-redundant blogs.
-
-Over the years, I have published many guides, howtos, tutorials, and
-information technology articles on my redundant blogs. I hope that
-they are of use to information technology professionals.
-
-Thank you very much.
-
-
-
-
-
------BEGIN EMAIL SIGNATURE-----
-
-The Gospel for all Targeted Individuals (TIs):
-
-[The New York Times] Microwave Weapons Are Prime Suspect in Ills of
-U.S. Embassy Workers
-
-Link:
-https://www.nytimes.com/2018/09/01/science/sonic-attack-cuba-microwave.html
-
-***************************************************************************=
-*****************
-
-Singaporean Targeted Individual Mr. Turritopsis Dohrnii Teo En Ming's
-Academic Qualifications as at 14 Feb 2019 and refugee seeking attempts
-at the United Nations Refugee Agency Bangkok (21 Mar 2017), in Taiwan
-(5 Aug 2019) and Australia (25 Dec 2019 to 9 Jan 2020):
-
-[1] https://tdtemcerts.wordpress.com/
-
-[2] https://tdtemcerts.blogspot.sg/
-
-[3] https://www.scribd.com/user/270125049/Teo-En-Ming
-
------END EMAIL SIGNATURE-----
+Thanks,
+Eryu
