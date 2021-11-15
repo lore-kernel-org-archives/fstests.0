@@ -2,93 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3139CC433FE
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 20:59:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8009FC433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 21:00:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1368B61AF0
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 20:59:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 688E061B1E
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 21:00:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346775AbhKOVBx (ORCPT
+        id S240733AbhKOVCl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Nov 2021 16:01:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40280 "EHLO
+        Mon, 15 Nov 2021 16:02:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40930 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347479AbhKOTj7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 14:39:59 -0500
-Received: from mail-qk1-x735.google.com (mail-qk1-x735.google.com [IPv6:2607:f8b0:4864:20::735])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D253DC061229
-        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 11:33:15 -0800 (PST)
-Received: by mail-qk1-x735.google.com with SMTP id bk22so18053390qkb.6
-        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 11:33:15 -0800 (PST)
+        with ESMTP id S1347658AbhKOTlE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 14:41:04 -0500
+Received: from mail-qt1-x832.google.com (mail-qt1-x832.google.com [IPv6:2607:f8b0:4864:20::832])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4A68C0613B9
+        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 11:24:21 -0800 (PST)
+Received: by mail-qt1-x832.google.com with SMTP id m25so16612665qtq.13
+        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 11:24:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=GMcmCPPNkqZXuEK/w8V9ah5eSf6E1mq8BDWrVP/doXU=;
-        b=vQHvYM/HwFOME5YzsvaBFRKnZNLrr0JWRzo1y1VGk+o6rvRw+2uB6bVK94ns1hq2Rb
-         846cdeO3oDrUUCRDhW6R3cucon0l4REmuEgyr6R9IR5Rw7NtwdMnhSh43kuDcqCza6YK
-         QZTBtmdZaCJqv2ClhDqAX43QL3dBLGrdXNLeUnknVEW3IOymkghIQE6Nw3ly+YJ0GLzI
-         EjvYFQ8BJkWUlH0N0v0Zy09ZuMqTEoiOT1pl4ATbl0Gkh3EKPoO0Oc7nwc00GRrNbA0x
-         vR9lFYG3Ur1vU9uMXKw2pS/a970+SslJ8t7/aT3bURy6/ppLYsp49cQllnxFj/zPHmo4
-         RaUQ==
+        bh=QbetVAUo5OZxsQxnRG709OfZCVKW0qtMqw1TKeW/LHA=;
+        b=delKKYP1+D4hUsTSll3T5LvEMa8maz5tKRNduqMZie+6Ga4b3hiTJuZPKJGdsKsEnk
+         rTixg8tjhq+3YmhfS4hCIsqIzZNp5VxT5RjJzFj2Kgy19u8ddKDK8VCnXUFjPSMA0SVm
+         riDZ4LxrcMcSgvqZIwYNSa+yPqssqz1rLBmBxuWeb/oF5Q2/HIP1FYeQbK+leVXXkJHs
+         44ivJRV53aiBVzoHomTnoZp8NidhRpwRB9mf7zRb18JwdkqqGOlD/+dCcwhORR1U/7xh
+         JZFXzIEf12VygTQqgTJJUARBg+p8whEs7txXaA/20M7H3BVmjzSX/MaQ8wufYp08ur+1
+         ZtQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=GMcmCPPNkqZXuEK/w8V9ah5eSf6E1mq8BDWrVP/doXU=;
-        b=fjW5UidMtInQ+72QZ/t7Ny9vKj0eeVKjLguu+zRlcemymYNpDVcVOKK0CVbsSlPDhB
-         6poCvf0W1cSsbkQPINDzQo7tLkg2/EZXQq7ZqS5N3aVmGBTCQW1RCFruk/HqsUBSZrSP
-         vCcmyieT9UcdmoX/hT/oUa6n/bkxM6sC+l+fTRXluNH1PsbUwkMuTxvLWKljl2I+k1Ao
-         xwqGMJs1oSlQ2h362NrbJIhErLLywvZrTA/mrL90LMXNoPVAjuLCT1f9JuATmAOj/g/I
-         5l2CgxanHt8wc764Vfkcj3dh1LjYz4MjgVEDgtWplIosuYvmgnYCjAlJMoM0g9M+gG1X
-         IuaQ==
-X-Gm-Message-State: AOAM532sPfciLktq7dqPgZo53+eYq3v8s5rG9sbJ3GEZMfRnGnXu5QBU
-        inGOf0btlFORosxadJ8qsxYJpCyy/6b2PQ==
-X-Google-Smtp-Source: ABdhPJzyDUv1Dd4go1GgdAkSGeaMiOEHT0h/DtxXE5N/yA6e3BN4juWzgkDp9kWIliViAxunK+ti/A==
-X-Received: by 2002:a05:620a:1350:: with SMTP id c16mr1273828qkl.229.1637004795016;
-        Mon, 15 Nov 2021 11:33:15 -0800 (PST)
+        bh=QbetVAUo5OZxsQxnRG709OfZCVKW0qtMqw1TKeW/LHA=;
+        b=OsIoOLUvXhv1uDbMDvQTRGNZg/OjyiBvUyNfuZPUm3qTxXssFT615YZZDlAU9dfSJZ
+         dNugELYGsscRCcbms9Td6x8xi4xTOwAitERErt4itWsdGNicPvLboJqPuOozCixSsc3f
+         m8na7Y9kYNWY7Hlqs72NqvJFmwVOY3/HRhlCNcZ1Xni6AdvuQFMo1ms0gVme9wmwiIag
+         Sz+3jonfmX+2HBNZpiDFvLd9drcGi8OwT4Lf52O7wnWuw/h+ykuvH5hZNuBb+IZqDITE
+         vYmKZd9RihMoMu5gezTM6aPD5mOCLDlKdezyRlIQbU67A3OEUMDSXFEWC+vYY1R1PVae
+         h4VQ==
+X-Gm-Message-State: AOAM5311iuvfYDirimnhwmlcyq/Sma2Aa9/re5rfGhir0IMKr112HykL
+        5ji5RGpK8gCYQ/avbG2m6d61ALSEYTw/Ow==
+X-Google-Smtp-Source: ABdhPJzM9Fdn/HwpmHLZry3+gjCaloKCU7yjQIAbddFuil1BgOe+dgwh80XxMw5kv6hhC5l7qaBRRQ==
+X-Received: by 2002:ac8:7d47:: with SMTP id h7mr1507871qtb.188.1637004260740;
+        Mon, 15 Nov 2021 11:24:20 -0800 (PST)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id f10sm7616607qkp.135.2021.11.15.11.33.14
+        by smtp.gmail.com with ESMTPSA id i11sm1046560qko.116.2021.11.15.11.24.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Nov 2021 11:33:14 -0800 (PST)
-Date:   Mon, 15 Nov 2021 14:33:08 -0500
+        Mon, 15 Nov 2021 11:24:20 -0800 (PST)
+Date:   Mon, 15 Nov 2021 14:24:19 -0500
 From:   Josef Bacik <josef@toxicpanda.com>
-To:     Stefan Roesch <shr@fb.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com
-Subject: Re: [PATCH v4] btrfs: Add new test for setting the chunk size.
-Message-ID: <YZK19Gz87ymUw9mr@localhost.localdomain>
-References: <20211102212329.3708782-1-shr@fb.com>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH v4] fstests: btrfs: make nospace_cache related test cases
+ to work with latest v2 cache
+Message-ID: <YZKz4wQWo85vCROd@localhost.localdomain>
+References: <20211114125101.19751-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211102212329.3708782-1-shr@fb.com>
+In-Reply-To: <20211114125101.19751-1-wqu@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 02, 2021 at 02:23:29PM -0700, Stefan Roesch wrote:
-> Summary:
+On Sun, Nov 14, 2021 at 08:51:01PM +0800, Qu Wenruo wrote:
+> In the coming btrfs-progs v5.15 release, mkfs.btrfs will change to use
+> v2 cache by default.
 > 
-> Add new testcase for testing the new btrfs sysfs knob to change the
-> chunk size. The new knob uses /sys/fs/btrfs/<UUID>/allocation/<block
-> type>/chunk_size.
+> However nospace_cache mount option will not work with v2 cache, as it
+> would make v2 cache out of sync with on-disk used space.
 > 
-> The test case implements three different cases:
-> - Test allocation with the default chunk size
-> - Test allocation after increasing the chunk size
-> - Test allocation when the free space is smaller than the chunk size.
+> So mounting a btrfs with v2 cache using "nospace_cache" will make btrfs
+> to reject the mount.
 > 
-> Note: this test needs to force the allocation of space. It uses the
-> /sys/fs/btrfs/<UUID>/allocation/<block type>/force_chunk_alloc knob.
+> There are quite some test cases relying on nospace_cache to prevent v1
+> cache to take up data space.
 > 
-> Testing:
-> The test has been run with volumes of different sizes.
+> For those test cases, we no longer need the "nospace_cache" mount option
+> if the filesystem is already using v2 cache.
+> Since v2 cache is using metadata space, it will no longer take up data
+> space, thus no extra mount options for those test cases.
 > 
-> Signed-off-by: Stefan Roesch <shr@fb.com>
+> By this, we can keep those existing tests to run without problem for
+> both v1 and v2 cache.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
 Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-Thanks,
+Thanks, this explains a weird failure state that I've been seeing with btrfs/199
+writing into /tmp and filling everything, which causes the rest of the tests to
+fail.
 
 Josef
