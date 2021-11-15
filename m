@@ -2,216 +2,220 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19B63C43217
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 05:07:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8546BC433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 08:11:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E72FF63223
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 05:07:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 677986108D
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 08:11:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230017AbhKOFKh (ORCPT
+        id S229721AbhKOIO1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Nov 2021 00:10:37 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:20014 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229666AbhKOFKg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 00:10:36 -0500
-IronPort-Data: =?us-ascii?q?A9a23=3ArIERBa0b4A+fX5k/FvbD5eRzkn2cJEfYwER7XOP?=
- =?us-ascii?q?LsXnJ0Dp032YAzGBKDziEPfuIMGahf9x3YYWzo0MCuMPTz9A2QQE+nZ1PZygU8?=
- =?us-ascii?q?JKaX7x1DatR0xu6d5SFFAQ+hyknQoGowPscEzmM+X9BDpC79SMljPjRGuKmYAL?=
- =?us-ascii?q?5EnsZqTFMGX5JZS1Ly7ZRbr5A2bBVMivV0T/Ai5S31GyNh1aYBlkpB5er83uDi?=
- =?us-ascii?q?hhdVAQw5TTSbdgT1LPXeuJ84Jg3fcldJFOgKmVY83LTegrN8F251juxExYFAdX?=
- =?us-ascii?q?jnKv5c1ERX/jZOg3mZnh+AvDk20Yd4HdplPtT2Pk0MC+7jx2Tgtl308QLu5qrV?=
- =?us-ascii?q?S8nI6/NhP8AFRJfFkmSOIUfoeCbeSTg4Jz7I0ruNiGEL+9VJEw5IIQe0uJ2B3x?=
- =?us-ascii?q?es/UcKToEZBnFjOWzqJq1UfVhndg4BNfkMZlZuXx6yzzdS/E8Tvj+rw/ijTND9?=
- =?us-ascii?q?G5owJkQQrCFPIxEAQeDpS/oO3VnUmr7wrpn9AtwukTCTg=3D=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AELHmDq9gfTooupQrWOhuk+A8I+orL9Y04lQ7?=
- =?us-ascii?q?vn2YSXRuA66lfqeV7Y0mPH7P+VAssR4b9uxoVJPwJU80sKQFhrX5Xo3NYOCFgg?=
- =?us-ascii?q?eVxehZhOOIqVDd8m/Fh4tgPMxbE5SWZueAbmSSwfya3OCnKadc/PC3tLCvmfzF?=
- =?us-ascii?q?z2pgCSVja6Rb5Q9/DQqBe3cGPzVuNN4oEoaG/Mpbq36FcXQTVM6yAX4IRKztvN?=
- =?us-ascii?q?vO/aiWGyIuNlo27hWUlzO05PrfGxic5B0XVDRC2vMD3AH+4nTE2pk=3D?=
-X-IronPort-AV: E=Sophos;i="5.87,235,1631548800"; 
-   d="scan'208";a="117404798"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 15 Nov 2021 13:07:38 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id E695E4D1010E;
-        Mon, 15 Nov 2021 13:07:36 +0800 (CST)
-Received: from G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Mon, 15 Nov 2021 13:07:35 +0800
-Received: from [10.167.216.64] (10.167.216.64) by
- G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Mon, 15 Nov 2021 13:07:38 +0800
-Message-ID: <ad1fe7cc-480a-d6c1-266c-9f2153e710ab@fujitsu.com>
-Date:   Mon, 15 Nov 2021 13:07:36 +0800
+        Mon, 15 Nov 2021 03:14:27 -0500
+Received: from smtp-out2.suse.de ([195.135.220.29]:36744 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235879AbhKOIOZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 03:14:25 -0500
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 7A9221FD58;
+        Mon, 15 Nov 2021 08:11:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1636963887; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=ROAT3Nt0uLgstUr5q0WBksx4VbQLymO7IrIzSy0hUhU=;
+        b=U9/Udg4vjDCnvJCTf1/Zd9BAz7PU4xZPJnnpDCPBfScR325/coGQHx1za7n51yjL9g6NhF
+        XKNVLTc1UPJ9KrNPRhBT5mNYS1/dD2FqBir1UiM2q5DQUtGiVYkbj+wwIFcyFhGGgfxFdN
+        YZiRfJy2IDRX0MxEQ2VnE90MO2ARRn8=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 422A91348A;
+        Mon, 15 Nov 2021 08:11:27 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id FMQTDS8WkmG4YwAAMHmgww
+        (envelope-from <nborisov@suse.com>); Mon, 15 Nov 2021 08:11:27 +0000
+Subject: Re: [PATCH v3] btrfs: Test proper interaction between skip_balance
+ and paused balance
+To:     Eryu Guan <guan@eryu.me>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20211108142901.1003352-1-nborisov@suse.com>
+ <YZD7yEhwsKRBm0IE@desktop>
+From:   Nikolay Borisov <nborisov@suse.com>
+Message-ID: <e6ac686a-92c9-9de2-dcca-c865882784c5@suse.com>
+Date:   Mon, 15 Nov 2021 10:11:26 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.0
-Subject: Re: [PATCH 1/3] generic: add race test between reflink and mmap read
-To:     Eryu Guan <eguan@linux.alibaba.com>
-CC:     <fstests@vger.kernel.org>
-References: <20211115034108.1328167-1-ruansy.fnst@fujitsu.com>
- <20211115034108.1328167-2-ruansy.fnst@fujitsu.com>
- <20211115034807.GY60846@e18g06458.et15sqa>
-From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
-In-Reply-To: <20211115034807.GY60846@e18g06458.et15sqa>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+In-Reply-To: <YZD7yEhwsKRBm0IE@desktop>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-yoursite-MailScanner-ID: E695E4D1010E.A0B40
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
 
-在 2021/11/15 11:48, Eryu Guan 写道:
-> On Mon, Nov 15, 2021 at 11:41:06AM +0800, Shiyang Ruan wrote:
->> Test for races or FS corruption between reflink and mmap reading the
->> target file. (MMAP version of generic/164,165)
+On 14.11.21 г. 14:06, Eryu Guan wrote:
+> On Mon, Nov 08, 2021 at 04:29:01PM +0200, Nikolay Borisov wrote:
+>> Ensure a device can be added to a filesystem that has a paused balance
+>> operation and has been mounted with the 'skip_balance' mount option
 >>
->> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+>> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 >> ---
->>   common/reflink        | 11 +++++++
->>   tests/generic/930     | 72 +++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/930.out |  5 +++
->>   3 files changed, 88 insertions(+)
->>   create mode 100755 tests/generic/930
->>   create mode 100644 tests/generic/930.out
 >>
->> diff --git a/common/reflink b/common/reflink
->> index 85b586cb..215a8a48 100644
->> --- a/common/reflink
->> +++ b/common/reflink
->> @@ -186,6 +186,17 @@ _read_range() {
->>   	$XFS_IO_PROG $xfs_io_args -f -c "pread -q -v $offset $len" "$file" | cut -d ' ' -f '3-18'
->>   }
->>   
->> +# Prints a range of a file as a hex dump
->> +_mread_range() {
->> +	file="$1"
->> +	offset="$2"
->> +	len="$3"
->> +	xfs_io_args="$4"
->> +
->> +	$XFS_IO_PROG $xfs_io_args -f -c "mmap -rw 0 $((offset + len))" \
->> +		-c "mread -v $offset $len" "$file" | cut -d ' ' -f '3-18'
->> +}
->> +
->>   # Compare ranges of two files
->>   _compare_range() {
->>   	file1="$1"
->> diff --git a/tests/generic/930 b/tests/generic/930
+>> V3:
+>>  * Added swapon to the list of exclusive ops
+>>  * Use _spare_dev_get
+>>  * Test balance resume via progs while balance is paused. I hit an assertion failure
+>>  outside of xfstest while doing this sequence of steps so let's add it to
+>>  ensure that's not regressed.
+>>
+>>  tests/btrfs/049     | 92 +++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/049.out |  1 +
+>>  2 files changed, 93 insertions(+)
+>>  create mode 100755 tests/btrfs/049
+>>
+>> diff --git a/tests/btrfs/049 b/tests/btrfs/049
 >> new file mode 100755
->> index 00000000..c259ae45
+>> index 000000000000..d01ef05e5ead
 >> --- /dev/null
->> +++ b/tests/generic/930
->> @@ -0,0 +1,72 @@
+>> +++ b/tests/btrfs/049
+>> @@ -0,0 +1,92 @@
 >> +#! /bin/bash
 >> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
 >> +#
->> +# FS QA Test No. xxx
+>> +# FS QA Test 049
+>> +#
+>> +# Ensure that it's possible to add a device when we have a paused balance
+>> +# and the filesystem is mounted with skip_balance. The issue is fixed by a patch
+>> +# titled "btrfs: allow device add if balance is paused"
 > 
-> The test number in test should be 930 as well, otherwise I have to
-> manually edit it after applying & before running ./tools/mvtest, as
-> 'xxx' won't be matched & replaced by the mvtest script.
+> After looking at the kernel patch, it looks more like a bug fix not a
+> new feature, as adding device to a ENOSPC-but-paused balance seems to be
+> the only reasonable way to finish the balance. If that's the case,
+> there's no problem add this case that will fail on old kernels.
+
+*nod*
+
 > 
-> The same applies to other tests as well.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest quick balance auto
+>> +
+>> +# real QA test starts here
+>> +
+>> +_supported_fs btrfs
+>> +_require_scratch_swapfile
+>> +_require_scratch_dev_pool 3
+>> +
+>> +_scratch_dev_pool_get 2
+>> +_spare_dev_get
+>> +
+>> +swapfile="$SCRATCH_MNT/swap"
+>> +_scratch_pool_mkfs >/dev/null
+>> +_scratch_mount
+>> +_format_swapfile "$swapfile" $(($(get_page_size) * 10))
+>> +
+>> +check_exclusive_ops()
+>> +{
+>> +	$BTRFS_UTIL_PROG device remove 2 $SCRATCH_MNT &>/dev/null
+>> +	[ $? -ne 0 ] || _fail "Successfully removed device"
+>> +	$BTRFS_UTIL_PROG filesystem resize -5m $SCRATCH_MNT &> /dev/null
+>> +	[ $? -ne 0 ] || _fail "Successfully resized filesystem"
+>> +	$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT &> /dev/null
+>> +	[ $? -ne 0 ] || _fail "Successfully replaced device"
+>> +	swapon "$swapfile" &> /dev/null
+>> +	[ $? -ne 0 ] || _fail "Successfully enabled a swap file"
+>> +}
+>> +
+>> +uuid=$(findmnt -n -o UUID $SCRATCH_MNT)
+> 
+> $uuid is not used anywhere, can be removed?
 
-Ok.  I didn't know that...  I'll fix it.
+Sure, I'm sure I did but I guess fucked up during rebase.
 
+> 
+>> +
+>> +# Create some files on the so that balance doesn't complete instantly
+> 
+> You mean "on the device"?
 
---
-Thanks,
-Ruan.
+Yep.
 
+> 
+>> +args=`_scale_fsstress_args -z \
+>> +	-f write=10 -f creat=10 \
+>> +	-n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
+>> +echo "Run fsstress $args" >>$seqres.full
+>> +$FSSTRESS_PROG $args >/dev/null 2>&1
+>> +
+>> +# Start and pause balance to ensure it will be restored on remount
+>> +echo "Start balance" >>$seqres.full
+>> +_run_btrfs_balance_start --bg "$SCRATCH_MNT"
+>> +$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
+>> +$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
+>> +[ $? -eq 0 ] || _fail "Balance not paused"
+>> +
+>> +# Exclusive ops should be blocked on manual pause of balance
+>> +check_exclusive_ops
+>> +
+>> +# Balance is now placed in paused state during mount
+>> +_scratch_cycle_mount "skip_balance"
+>> +
+>> +# Exclusive ops should be blocked on balance pause due to 'skip_balance'
+>> +check_exclusive_ops
+>> +
+>> +# Device add is the only allowed operation
+>> +$BTRFS_UTIL_PROG device add -K -f $SPARE_DEV "$SCRATCH_MNT"
+>> +
+>> +# Exclusive ops should still be blocked on account that balance is still paused
+>> +check_exclusive_ops
+>> +
+>> +# Should be possible to resume balance after device add
+>> +$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
+>> +[ $? -eq 0 ] || _fail "Couldn't resume balance after device add"
+>> +
+>> +# Add more files so that new balance won't fish immediately
+>                                               ^^^^ finish ?
+
+Yes,
+
+>> +$FSSTRESS_PROG $args >/dev/null 2>&1
+>> +
+>> +# Now pause->resume balance. This ensures balance paused is properly set in
+>> +# the kernel and won't trigger an assertion failure.
+>> +echo "Start balance" >>$seqres.full
+>> +_run_btrfs_balance_start --bg "$SCRATCH_MNT"
+>> +$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
+>> +$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
+>> +[ $? -eq 0 ] || _fail "Balance not paused"
+>> +$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
+>> +[ $? -eq 0 ] || _fail "Balance can't be resumed via IOCTL"
+>> +
+>> +_spare_dev_put
+>> +_scratch_dev_pool_put
+>> +echo "Silence is golden"
+>> +status=0
+>> +exit
+>> diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
+>> index cb0061b33ff0..c69568ad9323 100644
+>> --- a/tests/btrfs/049.out
+>> +++ b/tests/btrfs/049.out
+>> @@ -1 +1,2 @@
+>>  QA output created by 049
+>> +Silence is golden
+> 
+> Ah, 049.out was forgotten to be removed by commit 668c859d37f2
+> ("btrfs/049: remove the test"), so it's reused here.
 > 
 > Thanks,
 > Eryu
 > 
->> +#
->> +# Test for races or FS corruption between reflink and mmap reading the
->> +# target file. (MMAP version of generic/164,165)
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto clone
->> +
->> +_register_cleanup "_cleanup" BUS
->> +
->> +# Import common functions.
->> +. ./common/filter
->> +. ./common/reflink
->> +
->> +# real QA test starts here
->> +_require_scratch_reflink
->> +_require_cp_reflink
->> +
->> +echo "Format and mount"
->> +_scratch_mkfs > $seqres.full 2>&1
->> +_scratch_mount >> $seqres.full 2>&1
->> +
->> +testdir=$SCRATCH_MNT/test-$seq
->> +finished_file=/tmp/finished
->> +rm -rf $finished_file
->> +mkdir $testdir
->> +
->> +loops=512
->> +nr_loops=$((loops - 1))
->> +blksz=65536
->> +
->> +echo "Initialize files"
->> +echo >> $seqres.full
->> +_pwrite_byte 0x61 0 $((loops * blksz)) $testdir/file1 >> $seqres.full
->> +_pwrite_byte 0x62 0 $((loops * blksz)) $testdir/file2 >> $seqres.full
->> +_cp_reflink $testdir/file1 $testdir/file3
->> +_scratch_cycle_mount
->> +
->> +fbytes() {
->> +	egrep -v '(61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61|62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62)'
->> +}
->> +
->> +reader() {
->> +	while [ ! -e $finished_file ]; do
->> +		_mread_range $testdir/file3 0 $((loops * blksz)) | fbytes
->> +	done
->> +}
->> +
->> +echo "Reflink and mmap reread the files!"
->> +reader &
->> +for i in `seq 1 2`; do
->> +	seq $nr_loops -1 0 | while read i; do
->> +		_reflink_range  $testdir/file1 $((i * blksz)) \
->> +				$testdir/file3 $((i * blksz)) $blksz >> $seqres.full
->> +		[ $? -ne 0 ] && break
->> +	done
->> +	seq $nr_loops -1 0 | while read i; do
->> +		_reflink_range  $testdir/file2 $((i * blksz)) \
->> +				$testdir/file3 $((i * blksz)) $blksz >> $seqres.full
->> +		[ $? -ne 0 ] && break
->> +	done
->> +done
->> +echo "Finished reflinking"
->> +touch $finished_file
->> +wait
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/generic/930.out b/tests/generic/930.out
->> new file mode 100644
->> index 00000000..f8e0a1a3
->> --- /dev/null
->> +++ b/tests/generic/930.out
->> @@ -0,0 +1,5 @@
->> +QA output created by 930
->> +Format and mount
->> +Initialize files
->> +Reflink and mmap reread the files!
->> +Finished reflinking
->> -- 
->> 2.33.0
->>
->>
-
-
