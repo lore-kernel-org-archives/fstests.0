@@ -2,220 +2,712 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8546BC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 08:11:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CD27C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:09:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 677986108D
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 08:11:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8831F61BFB
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:09:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229721AbhKOIO1 (ORCPT
+        id S231214AbhKOLMU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Nov 2021 03:14:27 -0500
-Received: from smtp-out2.suse.de ([195.135.220.29]:36744 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235879AbhKOIOZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 03:14:25 -0500
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 7A9221FD58;
-        Mon, 15 Nov 2021 08:11:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1636963887; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ROAT3Nt0uLgstUr5q0WBksx4VbQLymO7IrIzSy0hUhU=;
-        b=U9/Udg4vjDCnvJCTf1/Zd9BAz7PU4xZPJnnpDCPBfScR325/coGQHx1za7n51yjL9g6NhF
-        XKNVLTc1UPJ9KrNPRhBT5mNYS1/dD2FqBir1UiM2q5DQUtGiVYkbj+wwIFcyFhGGgfxFdN
-        YZiRfJy2IDRX0MxEQ2VnE90MO2ARRn8=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 422A91348A;
-        Mon, 15 Nov 2021 08:11:27 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id FMQTDS8WkmG4YwAAMHmgww
-        (envelope-from <nborisov@suse.com>); Mon, 15 Nov 2021 08:11:27 +0000
-Subject: Re: [PATCH v3] btrfs: Test proper interaction between skip_balance
- and paused balance
-To:     Eryu Guan <guan@eryu.me>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20211108142901.1003352-1-nborisov@suse.com>
- <YZD7yEhwsKRBm0IE@desktop>
-From:   Nikolay Borisov <nborisov@suse.com>
-Message-ID: <e6ac686a-92c9-9de2-dcca-c865882784c5@suse.com>
-Date:   Mon, 15 Nov 2021 10:11:26 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        Mon, 15 Nov 2021 06:12:20 -0500
+Received: from mail.kernel.org ([198.145.29.99]:40768 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S237692AbhKOLLc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Nov 2021 06:11:32 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id D4AE76140A;
+        Mon, 15 Nov 2021 11:08:33 +0000 (UTC)
+Date:   Mon, 15 Nov 2021 12:08:30 +0100
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     Eryu Guan <guan@eryu.me>, Christoph Hellwig <hch@lst.de>
+Cc:     Christian Brauner <brauner@kernel.org>,
+        linux-fsdevel@vger.kernel.org,
+        Seth Forshee <seth.forshee@digitalocean.com>,
+        stable@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] generic: test circular mappings
+Message-ID: <20211115110830.rjovyme34ur7mszk@wittgenstein>
+References: <20211109145713.1868404-1-brauner@kernel.org>
+ <20211109145713.1868404-2-brauner@kernel.org>
+ <YZEVb/7sTwScTsQ0@desktop>
 MIME-Version: 1.0
-In-Reply-To: <YZD7yEhwsKRBm0IE@desktop>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Disposition: inline
+In-Reply-To: <YZEVb/7sTwScTsQ0@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 14.11.21 г. 14:06, Eryu Guan wrote:
-> On Mon, Nov 08, 2021 at 04:29:01PM +0200, Nikolay Borisov wrote:
->> Ensure a device can be added to a filesystem that has a paused balance
->> operation and has been mounted with the 'skip_balance' mount option
->>
->> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
->> ---
->>
->> V3:
->>  * Added swapon to the list of exclusive ops
->>  * Use _spare_dev_get
->>  * Test balance resume via progs while balance is paused. I hit an assertion failure
->>  outside of xfstest while doing this sequence of steps so let's add it to
->>  ensure that's not regressed.
->>
->>  tests/btrfs/049     | 92 +++++++++++++++++++++++++++++++++++++++++++++
->>  tests/btrfs/049.out |  1 +
->>  2 files changed, 93 insertions(+)
->>  create mode 100755 tests/btrfs/049
->>
->> diff --git a/tests/btrfs/049 b/tests/btrfs/049
->> new file mode 100755
->> index 000000000000..d01ef05e5ead
->> --- /dev/null
->> +++ b/tests/btrfs/049
->> @@ -0,0 +1,92 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
->> +#
->> +# FS QA Test 049
->> +#
->> +# Ensure that it's possible to add a device when we have a paused balance
->> +# and the filesystem is mounted with skip_balance. The issue is fixed by a patch
->> +# titled "btrfs: allow device add if balance is paused"
+On Sun, Nov 14, 2021 at 09:55:59PM +0800, Eryu Guan wrote:
+> On Tue, Nov 09, 2021 at 03:57:13PM +0100, Christian Brauner wrote:
+> > From: Christian Brauner <christian.brauner@ubuntu.com>
+> > 
+> > This test makes sure that setattr behaves correctly on idmapped mounts
+> > that make use of circular mappings. Such mappings may e.g. be used to
+> > allow two users to share home directories through the same idmapped
+> > mount. The tests are explained in detail in code comments.
+> > 
+> > Cc: Seth Forshee <seth.forshee@digitalocean.com>
+> > Cc: Eryu Guan <guaneryu@gmail.com>
+> > Cc: Christoph Hellwig <hch@lst.de>
+> > Cc: fstests@vger.kernel.org
+> > CC: linux-fsdevel@vger.kernel.org
+> > Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 > 
-> After looking at the kernel patch, it looks more like a bug fix not a
-> new feature, as adding device to a ENOSPC-but-paused balance seems to be
-> the only reasonable way to finish the balance. If that's the case,
-> there's no problem add this case that will fail on old kernels.
+> Is this test known to fail with v5.15-rc7 kernel? I hit the following
+> failure:
+> 
+> +idmapped-mounts.c: 13585: setattr_fix - Operation not permitted - failure: change ownership
+> +idmapped-mounts.c: 13898: run_test - Success - failure: test that setattr works correctly
 
-*nod*
+Yep, that's expected to fail. This is a regression test. The associated
+fix is patch 1/2 in the series. I'm just waiting for Christoph to give
+the vfs part an ack before sending it to Linus later this week.
 
 > 
->> +#
->> +. ./common/preamble
->> +_begin_fstest quick balance auto
->> +
->> +# real QA test starts here
->> +
->> +_supported_fs btrfs
->> +_require_scratch_swapfile
->> +_require_scratch_dev_pool 3
->> +
->> +_scratch_dev_pool_get 2
->> +_spare_dev_get
->> +
->> +swapfile="$SCRATCH_MNT/swap"
->> +_scratch_pool_mkfs >/dev/null
->> +_scratch_mount
->> +_format_swapfile "$swapfile" $(($(get_page_size) * 10))
->> +
->> +check_exclusive_ops()
->> +{
->> +	$BTRFS_UTIL_PROG device remove 2 $SCRATCH_MNT &>/dev/null
->> +	[ $? -ne 0 ] || _fail "Successfully removed device"
->> +	$BTRFS_UTIL_PROG filesystem resize -5m $SCRATCH_MNT &> /dev/null
->> +	[ $? -ne 0 ] || _fail "Successfully resized filesystem"
->> +	$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT &> /dev/null
->> +	[ $? -ne 0 ] || _fail "Successfully replaced device"
->> +	swapon "$swapfile" &> /dev/null
->> +	[ $? -ne 0 ] || _fail "Successfully enabled a swap file"
->> +}
->> +
->> +uuid=$(findmnt -n -o UUID $SCRATCH_MNT)
-> 
-> $uuid is not used anywhere, can be removed?
+> If the bug has been fixed, it'd be better to document the commit that
+> fixed the issue in both commit log and test description.
 
-Sure, I'm sure I did but I guess fucked up during rebase.
+Once the fix is merged I'll include it.
 
 > 
->> +
->> +# Create some files on the so that balance doesn't complete instantly
-> 
-> You mean "on the device"?
+> And is there a "1/2" patch? I only see this "2/2" in mailing list.
 
-Yep.
+Yeah, there is but it is the vfs fix. It can be retrieved via b4.
 
 > 
->> +args=`_scale_fsstress_args -z \
->> +	-f write=10 -f creat=10 \
->> +	-n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
->> +echo "Run fsstress $args" >>$seqres.full
->> +$FSSTRESS_PROG $args >/dev/null 2>&1
->> +
->> +# Start and pause balance to ensure it will be restored on remount
->> +echo "Start balance" >>$seqres.full
->> +_run_btrfs_balance_start --bg "$SCRATCH_MNT"
->> +$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
->> +$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
->> +[ $? -eq 0 ] || _fail "Balance not paused"
->> +
->> +# Exclusive ops should be blocked on manual pause of balance
->> +check_exclusive_ops
->> +
->> +# Balance is now placed in paused state during mount
->> +_scratch_cycle_mount "skip_balance"
->> +
->> +# Exclusive ops should be blocked on balance pause due to 'skip_balance'
->> +check_exclusive_ops
->> +
->> +# Device add is the only allowed operation
->> +$BTRFS_UTIL_PROG device add -K -f $SPARE_DEV "$SCRATCH_MNT"
->> +
->> +# Exclusive ops should still be blocked on account that balance is still paused
->> +check_exclusive_ops
->> +
->> +# Should be possible to resume balance after device add
->> +$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
->> +[ $? -eq 0 ] || _fail "Couldn't resume balance after device add"
->> +
->> +# Add more files so that new balance won't fish immediately
->                                               ^^^^ finish ?
-
-Yes,
-
->> +$FSSTRESS_PROG $args >/dev/null 2>&1
->> +
->> +# Now pause->resume balance. This ensures balance paused is properly set in
->> +# the kernel and won't trigger an assertion failure.
->> +echo "Start balance" >>$seqres.full
->> +_run_btrfs_balance_start --bg "$SCRATCH_MNT"
->> +$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
->> +$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
->> +[ $? -eq 0 ] || _fail "Balance not paused"
->> +$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
->> +[ $? -eq 0 ] || _fail "Balance can't be resumed via IOCTL"
->> +
->> +_spare_dev_put
->> +_scratch_dev_pool_put
->> +echo "Silence is golden"
->> +status=0
->> +exit
->> diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
->> index cb0061b33ff0..c69568ad9323 100644
->> --- a/tests/btrfs/049.out
->> +++ b/tests/btrfs/049.out
->> @@ -1 +1,2 @@
->>  QA output created by 049
->> +Silence is golden
+> > ---
+> >  src/idmapped-mounts/idmapped-mounts.c | 434 +++++++++++++++++++++++++-
+> >  src/idmapped-mounts/utils.c           |  43 ++-
+> >  tests/generic/651                     |  27 ++
+> >  tests/generic/651.out                 |   2 +
+> >  4 files changed, 503 insertions(+), 3 deletions(-)
+> >  create mode 100755 tests/generic/651
+> >  create mode 100644 tests/generic/651.out
+> > 
+> > diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+> > index 83b7c89a..b803d171 100644
+> > --- a/src/idmapped-mounts/idmapped-mounts.c
+> > +++ b/src/idmapped-mounts/idmapped-mounts.c
+> > @@ -14,6 +14,7 @@
+> >  #include <linux/limits.h>
+> >  #include <linux/types.h>
+> >  #include <pthread.h>
+> > +#include <pwd.h>
+> >  #include <sched.h>
+> >  #include <stdbool.h>
+> >  #include <sys/fsuid.h>
+> > @@ -409,6 +410,23 @@ static inline bool switch_fsids(uid_t fsuid, gid_t fsgid)
+> >  	return true;
+> >  }
+> >  
+> > +static inline bool switch_resids(uid_t uid, gid_t gid)
+> > +{
+> > +	if (setresgid(gid, gid, gid))
+> > +		return log_errno(false, "failure: setregid");
+> > +
+> > +	if (setresuid(uid, uid, uid))
+> > +		return log_errno(false, "failure: setresuid");
+> > +
+> > +	if (setfsgid(-1) != gid)
+> > +		return log_errno(false, "failure: setfsgid(-1)");
+> > +
+> > +	if (setfsuid(-1) != uid)
+> > +		return log_errno(false, "failure: setfsuid(-1)");
+> > +
+> > +	return true;
+> > +}
+> > +
+> >  static inline bool switch_userns(int fd, uid_t uid, gid_t gid, bool drop_caps)
+> >  {
+> >  	if (setns(fd, CLONE_NEWUSER))
+> > @@ -636,6 +654,11 @@ __attribute__((unused)) static int print_r(int fd, const char *path)
+> >  
+> >  	return ret;
+> >  }
+> > +#else
+> > +__attribute__((unused)) static int print_r(int fd, const char *path)
+> > +{
+> > +	return 0;
+> > +}
+> >  #endif
+> >  
+> >  /* fd_to_fd - transfer data from one fd to another */
+> > @@ -13325,6 +13348,401 @@ out:
+> >  	return fret;
+> >  }
+> >  
+> > +#define USER1 "fsgqa"
+> > +#define USER2 "fsgqa2"
+> > +
+> > +/**
+> > + * lookup_ids - lookup uid and gid for a username
+> > + * @name: [in]  name of the user
+> > + * @uid:  [out] pointer to the user-ID
+> > + * @gid:  [out] pointer to the group-ID
+> > + *
+> > + * Lookup the uid and gid of a user.
+> > + *
+> > + * Return: On success, true is returned.
+> > + *         On error, false is returned.
+> > + */
+> > +static bool lookup_ids(const char *name, uid_t *uid, gid_t *gid)
+> > +{
+> > +	bool bret = false;
+> > +	struct passwd *pwentp = NULL;
+> > +	struct passwd pwent;
+> > +	char *buf;
+> > +	ssize_t bufsize;
+> > +	int ret;
+> > +
+> > +	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+> > +	if (bufsize < 0)
+> > +		bufsize = 1024;
+> > +
+> > +	buf = malloc(bufsize);
+> > +	if (!buf)
+> > +		return bret;
+> > +
+> > +	ret = getpwnam_r(name, &pwent, buf, bufsize, &pwentp);
+> > +	if (!ret && pwentp) {
+> > +		*uid = pwent.pw_uid;
+> > +		*gid = pwent.pw_gid;
+> > +		bret = true;
+> > +	}
+> > +
+> > +	free(buf);
+> > +	return bret;
+> > +}
+> > +
+> > +/**
+> > + * setattr_fix - test that setattr works correctly
+> > + *
+> > + * Test that ->setattr() works correctly for idmapped mounts with circular
+> > + * idmappings such as:
+> > + *
+> > + * b:1000:1001:1
+> > + * b:1001:1000:1
+> > + *
+> > + * Assume a directory /source with two files:
+> > + *
+> > + * /source/file1 | 1000:1000
+> > + * /source/file2 | 1001:1001
+> > + *
+> > + * and we create an idmapped mount of /source at /target with an idmapped of:
+> > + *
+> > + * mnt_userns:        1000:1001:1
+> > + *                    1001:1000:1
+> > + *
+> > + * In the idmapped mount file1 will be owned by uid 1001 and file2 by uid 1000:
+> > + *
+> > + * /target/file1 | 1001:1001
+> > + * /target/file2 | 1000:1000
+> > + *
+> > + * Because in essence the idmapped mount switches ownership for {g,u}id 1000
+> > + * and {g,u}id 1001.
+> > + *
+> > + * 1. A user with fs{g,u}id 1000 must be allowed to setattr /target/file2 from
+> > + *    {g,u}id 1000 in the idmapped mount to {g,u}id 1000.
+> > + * 2. A user with fs{g,u}id 1001 must be allowed to setattr /target/file1 from
+> > + *    {g,u}id 1001 in the idmapped mount to {g,u}id 1001.
+> > + * 3. A user with fs{g,u}id 1000 must fail to setattr /target/file1 from
+> > + *    {g,u}id 1001 in the idmapped mount to {g,u}id 1000.
+> > + *    This must fail with EPERM. The caller's fs{g,u}id doesn't match the
+> > + *    {g,u}id of the file.
+> > + * 4. A user with fs{g,u}id 1001 must fail to setattr /target/file2 from
+> > + *    {g,u}id 1000 in the idmapped mount to {g,u}id 1000.
+> > + *    This must fail with EPERM. The caller's fs{g,u}id doesn't match the
+> > + *    {g,u}id of the file.
+> > + * 5. Both, a user with fs{g,u}id 1000 and a user with fs{g,u}id 1001, must
+> > + *    fail to setattr /target/file1 owned by {g,u}id 1001 in the idmapped mount
+> > + *    and /target/file2 owned by {g,u}id 1000 in the idmapped mount to any
+> > + *    {g,u}id apart from {g,u}id 1000 or 1001 with EINVAL.
+> > + *    Only {g,u}id 1000 and 1001 have a mapping in the idmapped mount. Other
+> > + *    {g,u}id are unmapped.
+> > + */
+> > +static int setattr_fix(void)
+> > +{
+> > +	int fret = -1;
+> > +	int open_tree_fd = -EBADF;
+> > +	struct mount_attr attr = {
+> > +		.attr_set	= MOUNT_ATTR_IDMAP,
+> > +		.userns_fd	= -EBADF,
+> > +	};
+> > +	int ret;
+> > +	uid_t user1_uid, user2_uid;
+> > +	gid_t user1_gid, user2_gid;
+> > +	pid_t pid;
+> > +	struct list idmap;
+> > +	struct list *it_cur, *it_next;
+> > +
+> > +	if (!caps_supported())
+> > +		return 0;
+> > +
+> > +	list_init(&idmap);
+> > +
+> > +	if (!lookup_ids(USER1, &user1_uid, &user1_gid)) {
+> > +		log_stderr("failure: lookup_user");
+> > +		goto out;
+> > +	}
+> > +
+> > +	if (!lookup_ids(USER2, &user2_uid, &user2_gid)) {
+> > +		log_stderr("failure: lookup_user");
+> > +		goto out;
+> > +	}
+> > +
+> > +	log_debug("Found " USER1 " with uid(%d) and gid(%d) and " USER2 " with uid(%d) and gid(%d)",
+> > +		  user1_uid, user1_gid, user2_uid, user2_gid);
+> > +
+> > +	if (mkdirat(t_dir1_fd, DIR1, 0777)) {
+> > +		log_stderr("failure: mkdirat");
+> > +		goto out;
+> > +	}
+> > +
+> > +	if (mknodat(t_dir1_fd, DIR1 "/" FILE1, S_IFREG | 0644, 0)) {
+> > +		log_stderr("failure: mknodat");
+> > +		goto out;
+> > +	}
+> > +
+> > +	if (chown_r(t_mnt_fd, T_DIR1, user1_uid, user1_gid)) {
+> > +		log_stderr("failure: chown_r");
+> > +		goto out;
+> > +	}
+> > +
+> > +	if (mknodat(t_dir1_fd, DIR1 "/" FILE2, S_IFREG | 0644, 0)) {
+> > +		log_stderr("failure: mknodat");
+> > +		goto out;
+> > +	}
+> > +
+> > +	if (fchownat(t_dir1_fd, DIR1 "/" FILE2, user2_uid, user2_gid, AT_SYMLINK_NOFOLLOW)) {
+> > +		log_stderr("failure: fchownat");
+> > +		goto out;
+> > +	}
+> > +
+> > +	print_r(t_mnt_fd, T_DIR1);
+> > +
+> > +	/* u:1000:1001:1 */
+> > +	ret = add_map_entry(&idmap, user1_uid, user2_uid, 1, ID_TYPE_UID);
+> > +	if (ret) {
+> > +		log_stderr("failure: add_map_entry");
+> > +		goto out;
+> > +	}
+> > +
+> > +	/* u:1001:1000:1 */
+> > +	ret = add_map_entry(&idmap, user2_uid, user1_uid, 1, ID_TYPE_UID);
+> > +	if (ret) {
+> > +		log_stderr("failure: add_map_entry");
+> > +		goto out;
+> > +	}
+> > +
+> > +	/* g:1000:1001:1 */
+> > +	ret = add_map_entry(&idmap, user1_gid, user2_gid, 1, ID_TYPE_GID);
+> > +	if (ret) {
+> > +		log_stderr("failure: add_map_entry");
+> > +		goto out;
+> > +	}
+> > +
+> > +	/* g:1001:1000:1 */
+> > +	ret = add_map_entry(&idmap, user2_gid, user1_gid, 1, ID_TYPE_GID);
+> > +	if (ret) {
+> > +		log_stderr("failure: add_map_entry");
+> > +		goto out;
+> > +	}
+> > +
+> > +	attr.userns_fd = get_userns_fd_from_idmap(&idmap);
+> > +	if (attr.userns_fd < 0) {
+> > +		log_stderr("failure: get_userns_fd");
+> > +		goto out;
+> > +	}
+> > +
+> > +	open_tree_fd = sys_open_tree(t_dir1_fd, DIR1,
+> > +				     AT_NO_AUTOMOUNT |
+> > +				     AT_SYMLINK_NOFOLLOW |
+> > +				     OPEN_TREE_CLOEXEC |
+> > +				     OPEN_TREE_CLONE |
+> > +				     AT_RECURSIVE);
+> > +	if (open_tree_fd < 0) {
+> > +		log_stderr("failure: sys_open_tree");
+> > +		goto out;
+> > +	}
+> > +
+> > +	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
+> > +		log_stderr("failure: sys_mount_setattr");
+> > +		goto out;
+> > +	}
+> > +
+> > +	print_r(open_tree_fd, "");
+> > +
+> > +	pid = fork();
+> > +	if (pid < 0) {
+> > +		log_stderr("failure: fork");
+> > +		goto out;
+> > +	}
+> > +	if (pid == 0) {
+> > +		/* switch to {g,u}id 1001 */
+> > +		if (!switch_resids(user2_uid, user2_gid))
+> > +			die("failure: switch_resids");
+> > +
+> > +		/* drop all capabilities */
+> > +		if (!caps_down())
+> > +			die("failure: caps_down");
+> > +
+> > +		/*
+> > +		 * The {g,u}id 0 is not mapped in this idmapped mount so this
+> > +		 * needs to fail with EINVAL.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE1, 0, 0, AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EINVAL)
+> > +			die("failure: errno");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1001 must be allowed to change
+> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
+> > +		 * idmapped mount to {g,u}id 1001.
+> > +		 */
+> > +		if (fchownat(open_tree_fd, FILE1, user2_uid, user2_gid,
+> > +			     AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1001. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
+> > +				      user2_uid, user2_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1001 must not be allowed to change
+> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
+> > +		 * idmapped mount to {g,u}id 1000.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE1, user1_uid, user1_gid,
+> > +			      AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EPERM)
+> > +			die("failure: errno");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1001. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
+> > +				      user2_uid, user2_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1001 must not be allowed to change
+> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
+> > +		 * idmapped mount to {g,u}id 1000.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE2, user1_uid, user1_gid,
+> > +			      AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EPERM)
+> > +			die("failure: errno");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1000. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
+> > +				      user1_uid, user1_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1001 must not be allowed to change
+> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
+> > +		 * idmapped mount to {g,u}id 1001.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE2, user2_uid, user2_gid,
+> > +			      AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EPERM)
+> > +			die("failure: errno");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1000. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
+> > +				      user1_uid, user1_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		exit(EXIT_SUCCESS);
+> > +	}
+> > +	if (wait_for_pid(pid))
+> > +		goto out;
+> > +
+> > +	pid = fork();
+> > +	if (pid < 0) {
+> > +		log_stderr("failure: fork");
+> > +		goto out;
+> > +	}
+> > +	if (pid == 0) {
+> > +		/* switch to {g,u}id 1000 */
+> > +		if (!switch_resids(user1_uid, user1_gid))
+> > +			die("failure: switch_resids");
+> > +
+> > +		/* drop all capabilities */
+> > +		if (!caps_down())
+> > +			die("failure: caps_down");
+> > +
+> > +		/*
+> > +		 * The {g,u}id 0 is not mapped in this idmapped mount so this
+> > +		 * needs to fail with EINVAL.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE1, 0, 0, AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EINVAL)
+> > +			die("failure: errno");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1000 must be allowed to change
+> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
+> > +		 * idmapped mount to {g,u}id 1000.
+> > +		 */
+> > +		if (fchownat(open_tree_fd, FILE2, user1_uid, user1_gid,
+> > +			     AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1000. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
+> > +				      user1_uid, user1_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1000 must not be allowed to change
+> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
+> > +		 * idmapped mount to {g,u}id 1001.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE2, user2_uid, user2_gid,
+> > +			      AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EPERM)
+> > +			die("failure: errno");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1000. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
+> > +				      user1_uid, user1_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1000 must not be allowed to change
+> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
+> > +		 * idmapped mount to {g,u}id 1000.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE1, user1_uid, user1_gid,
+> > +			     AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EPERM)
+> > +			die("failure: errno");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1001. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
+> > +				      user2_uid, user2_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		/*
+> > +		 * A user with fs{g,u}id 1000 must not be allowed to change
+> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
+> > +		 * idmapped mount to {g,u}id 1001.
+> > +		 */
+> > +		if (!fchownat(open_tree_fd, FILE1, user2_uid, user2_gid,
+> > +			      AT_SYMLINK_NOFOLLOW))
+> > +			die("failure: change ownership");
+> > +		if (errno != EPERM)
+> > +			die("failure: errno");
+> > +
+> > +		/* Verify that the ownership is still {g,u}id 1001. */
+> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
+> > +				      user2_uid, user2_gid))
+> > +			die("failure: check ownership");
+> > +
+> > +		exit(EXIT_SUCCESS);
+> > +	}
+> > +	if (wait_for_pid(pid))
+> > +		goto out;
+> > +
+> > +	fret = 0;
+> > +	log_debug("Ran test");
+> > +out:
+> > +	safe_close(attr.userns_fd);
+> > +	safe_close(open_tree_fd);
+> > +
+> > +	list_for_each_safe(it_cur, &idmap, it_next) {
+> > +		list_del(it_cur);
+> > +		free(it_cur->elem);
+> > +		free(it_cur);
+> > +	}
+> > +
+> > +	return fret;
+> > +}
+> > +
+> >  static void usage(void)
+> >  {
+> >  	fprintf(stderr, "Description:\n");
+> > @@ -13342,6 +13760,7 @@ static void usage(void)
+> >  	fprintf(stderr, "--test-fscaps-regression     Run fscap regression tests\n");
+> >  	fprintf(stderr, "--test-nested-userns         Run nested userns idmapped mount testsuite\n");
+> >  	fprintf(stderr, "--test-btrfs                 Run btrfs specific idmapped mount testsuite\n");
+> > +	fprintf(stderr, "--test-setattr-fix           Run setattr regression tests\n");
+> >  
+> >  	_exit(EXIT_SUCCESS);
+> >  }
+> > @@ -13358,6 +13777,7 @@ static const struct option longopts[] = {
+> >  	{"test-fscaps-regression",	no_argument,		0,	'g'},
+> >  	{"test-nested-userns",		no_argument,		0,	'n'},
+> >  	{"test-btrfs",			no_argument,		0,	'b'},
+> > +	{"test-setattr-fix",		no_argument,		0,	'i'},
+> >  	{NULL,				0,			0,	  0},
+> >  };
+> >  
+> > @@ -13449,6 +13869,10 @@ struct t_idmapped_mounts t_btrfs[] = {
+> >  	{ btrfs_subvolume_lookup_user,					"test unprivileged subvolume lookup",								},
+> >  };
+> >  
+> > +struct t_idmapped_mounts t_setattr_fix[] = {
+> > +	{ setattr_fix,							"test that setattr works correctly",								},
+> > +};
+> > +
+> >  static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+> >  {
+> >  	int i;
+> > @@ -13487,7 +13911,8 @@ int main(int argc, char *argv[])
+> >  	int fret, ret;
+> >  	int index = 0;
+> >  	bool supported = false, test_btrfs = false, test_core = false,
+> > -	     test_fscaps_regression = false, test_nested_userns = false;
+> > +	     test_fscaps_regression = false, test_nested_userns = false,
+> > +	     test_setattr_fix = false;
+> >  
+> >  	while ((ret = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
+> >  		switch (ret) {
+> > @@ -13521,6 +13946,9 @@ int main(int argc, char *argv[])
+> >  		case 'e':
+> >  			t_device_scratch = optarg;
+> >  			break;
+> > +		case 'i':
+> > +			test_setattr_fix = true;
+> > +			break;
+> >  		case 'h':
+> >  			/* fallthrough */
+> >  		default:
+> > @@ -13609,6 +14037,10 @@ int main(int argc, char *argv[])
+> >  	if (test_btrfs && !run_test(t_btrfs, ARRAY_SIZE(t_btrfs)))
+> >  		goto out;
+> >  
+> > +	if (test_setattr_fix &&
+> > +	    !run_test(t_setattr_fix, ARRAY_SIZE(t_setattr_fix)))
+> > +		goto out;
+> > +
+> >  	fret = EXIT_SUCCESS;
+> >  
+> >  out:
+> > diff --git a/src/idmapped-mounts/utils.c b/src/idmapped-mounts/utils.c
+> > index c2afa8dc..faf06fcd 100644
+> > --- a/src/idmapped-mounts/utils.c
+> > +++ b/src/idmapped-mounts/utils.c
+> > @@ -183,6 +183,43 @@ static int map_ids_from_idmap(struct list *idmap, pid_t pid)
+> >  	return 0;
+> >  }
+> >  
+> > +#ifdef DEBUG_TRACE
+> > +static void __print_idmaps(pid_t pid, bool gid)
+> > +{
+> > +	char path_mapping[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
+> > +			  STRLITERALLEN("/_id_map") + 1];
+> > +	char *line = NULL;
+> > +	size_t len = 0;
+> > +	int ret;
+> > +	FILE *f;
+> > +
+> > +	ret = snprintf(path_mapping, sizeof(path_mapping), "/proc/%d/%cid_map",
+> > +		       pid, gid ? 'g' : 'u');
+> > +	if (ret < 0 || (size_t)ret >= sizeof(path_mapping))
+> > +		return;
+> > +
+> > +	f = fopen(path_mapping, "r");
+> > +	if (!f)
+> > +		return;
+> > +
+> > +	while ((ret = getline(&line, &len, f)) > 0)
+> > +		fprintf(stderr, "%s", line);
+> > +
+> > +	fclose(f);
+> > +	free(line);
+> > +}
+> > +
+> > +static void print_idmaps(pid_t pid)
+> > +{
+> > +	__print_idmaps(pid, false);
+> > +	__print_idmaps(pid, true);
+> > +}
+> > +#else
+> > +static void print_idmaps(pid_t pid)
+> > +{
+> > +}
+> > +#endif
+> > +
+> >  int get_userns_fd_from_idmap(struct list *idmap)
+> >  {
+> >  	int ret;
+> > @@ -199,10 +236,12 @@ int get_userns_fd_from_idmap(struct list *idmap)
+> >  		return ret;
+> >  
+> >  	ret = snprintf(path_ns, sizeof(path_ns), "/proc/%d/ns/user", pid);
+> > -	if (ret < 0 || (size_t)ret >= sizeof(path_ns))
+> > +	if (ret < 0 || (size_t)ret >= sizeof(path_ns)) {
+> >  		ret = -EIO;
+> > -	else
+> > +	} else {
+> >  		ret = open(path_ns, O_RDONLY | O_CLOEXEC | O_NOCTTY);
+> > +		print_idmaps(pid);
+> > +	}
+> >  
+> >  	(void)kill(pid, SIGKILL);
+> >  	(void)wait_for_pid(pid);
+> > diff --git a/tests/generic/651 b/tests/generic/651
+> > new file mode 100755
+> > index 00000000..49b288d0
+> > --- /dev/null
+> > +++ b/tests/generic/651
+> > @@ -0,0 +1,27 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Christian Brauner.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 651
+> > +#
+> > +# Test that setattr works correctly.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto attr cap idmapped mount perms
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +
+> > +_supported_fs generic
+> > +_require_idmapped_mounts
+> > +_require_test
 > 
-> Ah, 049.out was forgotten to be removed by commit 668c859d37f2
-> ("btrfs/049: remove the test"), so it's reused here.
+> This test also requires user 'fsgqa' and 'fsgqa2'
+> 
+> _require_user fsgqa
+> _require_user fsgqa2
 > 
 > Thanks,
 > Eryu
+> 
+> > +
+> > +echo "Silence is golden"
+> > +
+> > +$here/src/idmapped-mounts/idmapped-mounts --test-setattr-fix \
+> > +	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
+> > +
+> > +status=$?
+> > +exit
+> > diff --git a/tests/generic/651.out b/tests/generic/651.out
+> > new file mode 100644
+> > index 00000000..51d73665
+> > --- /dev/null
+> > +++ b/tests/generic/651.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 651
+> > +Silence is golden
+> > 
+> > base-commit: bae1d15f6421cbe99b3e2e134c39d50248e7c261
+> > -- 
+> > 2.30.2
 > 
