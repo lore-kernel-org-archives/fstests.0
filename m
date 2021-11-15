@@ -2,161 +2,240 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B96EDC4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:35:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E1C1C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 16:29:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A94E763214
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:35:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 51EB461AA2
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 16:29:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230444AbhKOLio (ORCPT
+        id S231466AbhKOQc3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Nov 2021 06:38:44 -0500
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:32972 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231366AbhKOLiH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 06:38:07 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1636976112; x=1668512112;
-  h=from:to:subject:date:message-id:references:
-   content-transfer-encoding:mime-version;
-  bh=R/SJz64dxgkcf9StrT2HWccLSB1mDl1dCZ/sUx/6Z5M=;
-  b=eTt/52O7OdSYfHYCaHy3Pva8Gpx8589i3i21aEIK3OEZueoWI6a6vOdl
-   AcR9LHR40wFCWgd22uabrzqjqIOWYdvtTZcHX01mdTzcAOfF6kB9QkRlp
-   snuLqflUp8K3H/YDGW0XHbiusKBopVGJ9oZFsDJnsJuLBO7V1iEcLAqgO
-   /odCMM10y17c8Z9+D6TJpUFAHTOYrLXB2uSuWqRx0x8lIDSZYaoKKF8FA
-   RXWYJLpkMhB56DpK3Cv2okb7KMG8XfR/qv1Wy0A/Z2r/1tO4D/NT2thIs
-   4Fczk6hKeLjpG+FFiAFM4Il6wFTaVGaJ5BeYMuhAwEftNtqc+EWuLuRH2
-   g==;
-X-IronPort-AV: E=Sophos;i="5.87,236,1631548800"; 
-   d="scan'208";a="289560432"
-Received: from mail-bn7nam10lp2104.outbound.protection.outlook.com (HELO NAM10-BN7-obe.outbound.protection.outlook.com) ([104.47.70.104])
-  by ob1.hgst.iphmx.com with ESMTP; 15 Nov 2021 19:34:25 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=fjxkjcre6KyvGx2nJdJ8/Uz7Cwy/dyuFQ5RhZHxhoyAAL84vlJ6LssamUW2HsTeSVSqZowfZKtZbO4bky6fuZ1A/Nahi96H4x+AgKqz+xvBSdfps+k7SZ7SYMTAlDS9hsv5x8DB8jFHaH/5SVJ9Tg5ydk0UYRSq21nLNnbg0cgcycUdERNon2YQ/LZjVpZ/m6pbCrXY8OCZc5WN7vFBIGeinLEaDD7u5NwHrqgNT7L97R6VopcGMzSc5r7ThlIdoI//5YQekUpICg4qUe3dsdeX8ix8m0+HK0ZKF1KCkGNRBBC8SDzTxhN+va4mWl7OMTnB6upIN/nCq7mOT1ivu7g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=hcz5rbJ/0VJ3xen9myBmg2Wz3A/5eWhEliPEQNMENyk=;
- b=Ydfr2Ijl2tyKn0IbCHJCOzJO7oWL8EWgT7FWXtW0CmHn2ma8jONH9DWy40ZilSYhgNhM8fe3ODlEz9oQC1mvUuMv1saF0WGwM5g5Y+ybdCuGi1U5CG6W9I36SiFqGxO9usZvGuM9TbTTU1cHVDi9I79lDeGyzPIEf2CsbsnojxpxrwowjZnWF+yK5wrMXJ99RdyU0kcefSneknUiJGH3lYNiiuBNkDP+MoY7yv1X8/H7Jdxy0jas8jIzTG3thwRlbVO2Tei6j/W9ExEyYA4gq0Z08T7hu93Pakhx64urNRtRHmyUCs3SIHjArIQBBGo5cK9z1fBSvj5CyFEMuTIjDA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+        Mon, 15 Nov 2021 11:32:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55402 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231215AbhKOQc2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 11:32:28 -0500
+Received: from mail-qv1-xf2e.google.com (mail-qv1-xf2e.google.com [IPv6:2607:f8b0:4864:20::f2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B5A4C061714
+        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 08:29:32 -0800 (PST)
+Received: by mail-qv1-xf2e.google.com with SMTP id i13so11725651qvm.1
+        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 08:29:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=hcz5rbJ/0VJ3xen9myBmg2Wz3A/5eWhEliPEQNMENyk=;
- b=k2NHwfF3Xu9aIDnSdsq8PFhwZr+O406ivXtNENVMzCkCiH6TQctzdSQCTZSiS8XA0Uzrgsix6MuBWcs8kLngiQZYZAqJDfEy6xTDmcdU96xCflwpN+ArEJshIKBGvjQPzPg/jxvJhVKPbF7E8fibuXMSEv77inQczmJ597zBWxs=
-Received: from PH0PR04MB7416.namprd04.prod.outlook.com (2603:10b6:510:12::17)
- by PH0PR04MB7221.namprd04.prod.outlook.com (2603:10b6:510:17::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.16; Mon, 15 Nov
- 2021 11:34:24 +0000
-Received: from PH0PR04MB7416.namprd04.prod.outlook.com
- ([fe80::3418:fa40:16a4:6e0c]) by PH0PR04MB7416.namprd04.prod.outlook.com
- ([fe80::3418:fa40:16a4:6e0c%3]) with mapi id 15.20.4690.027; Mon, 15 Nov 2021
- 11:34:24 +0000
-From:   Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-To:     Josef Bacik <josef@toxicpanda.com>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "kernel-team@fb.com" <kernel-team@fb.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] fstests: detect btrfs compression and disable certain
- tests
-Thread-Topic: [PATCH] fstests: detect btrfs compression and disable certain
- tests
-Thread-Index: AQHX1+oCKNB1i8rq50mGpr9HN69JRQ==
-Date:   Mon, 15 Nov 2021 11:34:24 +0000
-Message-ID: <PH0PR04MB7416B864F4F7FE9B6B6E39989B989@PH0PR04MB7416.namprd04.prod.outlook.com>
-References: <f2b314338ecd06ae734ff0f0537f0cdf247db8f6.1636737764.git.josef@toxicpanda.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: b89a9de5-8e65-42ae-2232-08d9a82be01d
-x-ms-traffictypediagnostic: PH0PR04MB7221:
-x-microsoft-antispam-prvs: <PH0PR04MB7221A4C7676227D339EE4C9B9B989@PH0PR04MB7221.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 7F7cSN/cyyWNa3KCYQofdylPt9CdE7bOEPslYuUwIJ2rDFURciXj3optUh/c0CbjU6lhDetyNqAPdwtszKH2/37PhN0IjLC7y/aXiPWIEiCquoPrUInqv/sVEfFNhhgcNEQ1otPzQ2yf0t+07RnbkDidcLMMt3LMEojLzbWwC3Dsu71sJJJUXYMr9UksA8C5stKkCCSv9Nnjb9C4ofhn0GUM51FBU9ifI6PwMBDX/PZnJkhDqfdwWp+hXHRtQBsVGaDCuRK9L2lBEJ9gLOkeGRQfKzQTt5DY8kTeIIcKYnkNVRfWsPqR8mNwPPhuoW9G/RMNxWyjXaMPQtWB40z8DmiVVCuUwkxnQODaQljAdK7hNI78tieO9SEZiopCgqKo6gl7MpEce9k9e2JXTJXVavKoPv+tqZZ4dxsWb1jwzY/U1eC6ydJXHkLP2qNzPjVCW2hQk4iQ5Y0uwsc7Yo8QlDutoUmwzhAj1flWUm3Mr/hzA1bKt9A+q3K7JxtRr8pfK+D2ArcROSE/5JwqeMYqeRrYWoZ/fDzoXHhkEeIJ+9pidDApDhfi6cnC7ntf63if7Fm+4y36CQ+gAVPeR1ifIPtjr2ujGJcKvgbdF23fCmi6cwYU2kmzGCoUrTvy2z9ynmXCeZpwpr6LL2qD2V3E0n0kbgCrWtqCN7PjtKwWPWH8DylmxbXC4dj6icF5rv1N9sc5Drmr8wsdkBsdeGDhwQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR04MB7416.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(66476007)(508600001)(76116006)(7696005)(64756008)(91956017)(53546011)(6506007)(66446008)(4744005)(316002)(66946007)(52536014)(2906002)(5660300002)(66556008)(33656002)(186003)(110136005)(83380400001)(9686003)(38100700002)(122000001)(55016002)(71200400001)(86362001)(8936002)(38070700005)(8676002)(82960400001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?Toov7AachjS/T62KIvHpxHVbtORACL3Uyp+5OQyJ6Pb27gruu4obgofOArJw?=
- =?us-ascii?Q?0c4IS8OsVkSXEKfxaWwfI0jEPOuyMurfslLHrfMOYjk6VWpUQxOwMPxttOEJ?=
- =?us-ascii?Q?iMv/qcnS88sp6aou+Y+OMXXS8IubUL9qPqpy6kv98u7EVOmH3mRw+Dg17uDU?=
- =?us-ascii?Q?55Rn2lw0cmCwVLVb7vnMaBdFKRlGQ2K/2VqWmof/4qOK3TyQRb055HV85qmU?=
- =?us-ascii?Q?wLeYno6qdv7eIR/+PP1kiMkIjKY4u0Qfb+gj/QK+O/SknPdYDIPQB2+4+r4L?=
- =?us-ascii?Q?4P1w/fPV09O7UKSxOeDPpc2L/rG99c1kNcm4taW61pLtNzwXVIjXs3nJquy3?=
- =?us-ascii?Q?H/wdvNuk3Ztos9usR2wTFyiBNv5C3yA0e8yt+e9RZG3BMCr4z3pzabk87rXH?=
- =?us-ascii?Q?ORvJ/BnXBB2+vBIuxYTEQ0x/EFxj2M+BjbMlX0UTYJ1s/tU3tIjaKDMd0S5+?=
- =?us-ascii?Q?9WnDb7ChDOxU3GyaD418o37HRU76hgJ0/O6wdw/jlKFZub5d1gWJdDbM0Q6K?=
- =?us-ascii?Q?+hKdICtg6LbOpsnB8t/Bcl/Tmh59nYUD9/ny6yOS8MoJ5XKlLhMZLDIBo/ql?=
- =?us-ascii?Q?6Ycv+6SLanvGiU1VnqGW+67FlAgLJVmRg9qOm8xHY7jCQXwlO0Xk/unsEtX0?=
- =?us-ascii?Q?am6MPlsFov8MqkZjpBQ/83xkjHJUp57FIjStESxC2RnNd6rv6xQdsMqSkubr?=
- =?us-ascii?Q?RQK+tDtSvgtrU80ePzn/JuxSvvNUpBv2bx/IL40Ui7c5Dx+7OQ/7awkFApiU?=
- =?us-ascii?Q?gr6xRtBSpC0iGu+8zAx0etq1VPVXaF/Iih6+Ot/SmnPL1XaavIElFWa4V0wT?=
- =?us-ascii?Q?/QnHoli/sFYZemOlzV5Uei4jw2kvrfrPxzrbIheumLFmhuM2NvTe49sE94t3?=
- =?us-ascii?Q?TNuPq/qwl0dB9tQgghRL0y053mbl+RVBkx9PVobDn6jpIj0yPfR5oIoSO9IA?=
- =?us-ascii?Q?onqfYhNiTZQNqvE9TlBOGCPrDF1ACYXea3a5poBIyVqwOyy1a+DgxpBEeV+5?=
- =?us-ascii?Q?abjW8qns7SpdxojqNmyVyWdhnFtqQKqVgVTzzW946pI1DJguHyNVeaGmRAhV?=
- =?us-ascii?Q?af00ukxCmqWV+aDVG15BRod9Qhm1M2u+CsFyV7FbPu6XMvwG5EvCfOdEHcGz?=
- =?us-ascii?Q?yXqqH40pNPOornUXCIZVijGsF29EMxX3c2Vv+HDi7dHKh+f/VYAF/hfcySff?=
- =?us-ascii?Q?ESShDh7St89JjXUQ6T0XtFvCjRLKmC1TZPyjCVFrSL/pguDtJwpzvoK99ypm?=
- =?us-ascii?Q?QtM2Hx5TtDiYZlpa+2RiL+aStASC+y7uaWemWyxj705DREwJhm/ulEh9d8MJ?=
- =?us-ascii?Q?7Q2QlC0N+vrdZjDN5Ykqr7Yk8gfTX9ElJmhynGaS0OrAmrKY5grgs84yU7R6?=
- =?us-ascii?Q?hBFgZnS218U1sQClZeNnJg+7M5ADrB1+jC/XfoV5RMppT4cLOcYGv3k3ul71?=
- =?us-ascii?Q?/N74FcXGUSSTBzva6svg4bBJgKNOLoa/+7C1d0H2bWodR5GFELdM3r4U8JPg?=
- =?us-ascii?Q?YyMBcwZCi2Y5CRESkpVT9AldNkuqNhyu6hUhWwbpzarBhNtSJzFDcRsEV/DY?=
- =?us-ascii?Q?Sy3rXZLGE8i1J1yqeaghIe3zFaYFnXPlQUDZCjG0krMpKNeNsP3BllcD3I/T?=
- =?us-ascii?Q?ffQ+j2niozGHUKCI+xRBafUZwdBDjGzZqHYd4CbGSvaqn+UUHUw5MD3NndeI?=
- =?us-ascii?Q?eIpeUOu0gGQlfREZeP3b3x++Fd+JLO7AHiRVxEekXX7wJhAUZKprQVEjSHoq?=
- =?us-ascii?Q?iee9q+syhMolcX4GOJOcVqHwgwj60DA=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=WaEDLAMokqQVn6hz+P4o6gJ8Q61jzPkaz/oYzxJDTys=;
+        b=SePy6n6kbkaDkGO2w0iqe7PNn/oRc8qD1R5l9Br24oxeD/Fz/GUjkyCxEBzaL2nH62
+         VUzB6Q4myps4wk61vpSLfYBrPFV1V6HORkB5lDbRzMyRD00be1+Q6CvsFGSkaqx8iNoV
+         F48zad0IWXk0A6riED8hT420jq6So9A9dookMg5zH/Io3FYRXLgmBHJYItN7AXxl3piH
+         8sQCCI3QM3RMEE98fFj3lrBWyw1egkuLnhhnW7Dr7CrRIUdFJ2QKuu03uIwchPGCOVUB
+         x5ynqBszXBtNtv4KFV8NvFQFFpd8dxcLmS9osBh0SIb9/FyLC5BkycsZ395AxF7jbrGu
+         dEYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=WaEDLAMokqQVn6hz+P4o6gJ8Q61jzPkaz/oYzxJDTys=;
+        b=7SuDt1l1xGTUhEwZaxM6waXhuKbSNi8Yvo04ZYWH1EVx66wC3QPoskQ38YggizSJW1
+         OkcnCSDzeW4v4aitY0KaYarnNipCAHpPHs9plsWAGDOYxUy+tZkY1iiZyVK6wBQ6QAso
+         b2gaciSNhbeRNA8O6Za304bPG8wT1haJbnBZjf0tknkfqlptvstHgGKqp8WDKmEM9Znw
+         rVSIh2D6TDIRBkQyHvf8/llWDzRd1kiTIgmEXHh2ayXo84akgcdI0utjAo2aG/dVp26Q
+         1FnHeUCWzYhUMZ2hCWihjXGGeyat3zJXU/Wuc3BTqgeOVTLqFqEO3zpJ7wAQjL9OFW1q
+         GPfA==
+X-Gm-Message-State: AOAM530gK6ENnyLn2Joze6jGjRsovNmGsJPSpJk9C8Y0cIMP/dKsyNsQ
+        jBx/ZcldOY45nTPBmrQntkqzn5DDL25SmQ==
+X-Google-Smtp-Source: ABdhPJz951TjnCKvz3DYZhAeG8uZxYqgf8PIM4AUgo/VRGLEm+mN5xXUadhhPju/USbLW7032oYxsA==
+X-Received: by 2002:a05:6214:f6c:: with SMTP id iy12mr4915712qvb.29.1636993771407;
+        Mon, 15 Nov 2021 08:29:31 -0800 (PST)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id n20sm3640516qkp.65.2021.11.15.08.29.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 15 Nov 2021 08:29:30 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        kernel-team@fb.com
+Subject: [PATCH v2] fstests: detect btrfs compression and disable certain tests
+Date:   Mon, 15 Nov 2021 11:29:29 -0500
+Message-Id: <c36805e06925606a10ca844a2fa2b30a3db07bdd.1636993704.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR04MB7416.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b89a9de5-8e65-42ae-2232-08d9a82be01d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Nov 2021 11:34:24.5247
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: sDKlXuEAegtcmKv4YjodjkV+N0v/W3QkP/SqVPhJfRGTQoFuJsLdvfJ98XJQGy1IfKwYOHeytrt6+H0LvXOX9CRV3iFdNoxR8Xaza7++/Mc=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR04MB7221
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 12/11/2021 18:23, Josef Bacik wrote:=0A=
-> Our nightly xfstests runs exposed a set of tests that always fail if we=
-=0A=
-> have compression enabled.  This is because compression obviously messes=
-=0A=
-> with the amount of data space allocated on disk, and these tests are=0A=
-> testing either that quota is doing the correct thing, or that we're able=
-=0A=
-> to completely fill the file system.=0A=
-> =0A=
-> Add a helper to check to see if we have any of our compression related=0A=
-> mount options set and simply _not_run for these specific tests.=0A=
-> =0A=
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>=0A=
-> ---=0A=
->  common/btrfs      | 10 ++++++++++=0A=
->  tests/btrfs/126   |  4 ++++=0A=
->  tests/btrfs/139   |  4 ++++=0A=
->  tests/btrfs/230   |  4 ++++=0A=
->  tests/btrfs/232   |  4 ++++=0A=
->  tests/generic/275 |  4 ++++=0A=
->  tests/generic/427 |  4 ++++=0A=
->  7 files changed, 34 insertions(+)=0A=
-=0A=
-btrfs/237 will also need this check I think.=0A=
+Our nightly xfstests runs exposed a set of tests that always fail if we
+have compression enabled.  This is because compression obviously messes
+with the amount of data space allocated on disk, and these tests are
+testing either that quota is doing the correct thing, or that we're able
+to completely fill the file system.
+
+Add a helper to check to see if we have any of our compression related
+mount options set and simply _not_run for these specific tests.
+
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+v1->v2:
+- added _require_no_compress(), made it call the btrfs helper for fstyp ==
+  btrfs, changed all the tests to use the generic helper instead.
+- added the require to btrfs/237
+
+ common/btrfs      |  7 +++++++
+ common/rc         | 11 +++++++++++
+ tests/btrfs/126   |  4 ++++
+ tests/btrfs/139   |  4 ++++
+ tests/btrfs/230   |  4 ++++
+ tests/btrfs/232   |  4 ++++
+ tests/btrfs/237   |  4 ++++
+ tests/generic/275 |  4 ++++
+ tests/generic/427 |  4 ++++
+ 9 files changed, 46 insertions(+)
+
+diff --git a/common/btrfs b/common/btrfs
+index 2eab4b29..8ce8d60c 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -113,6 +113,13 @@ _require_btrfs_fs_sysfs()
+ 
+ }
+ 
++_require_btrfs_no_compress()
++{
++	if _normalize_mount_options | grep -q "compress"; then
++		_notrun "This test requires no compression enabled"
++	fi
++}
++
+ _check_btrfs_filesystem()
+ {
+ 	device=$1
+diff --git a/common/rc b/common/rc
+index 0d261184..9a953a36 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1676,6 +1676,17 @@ _require_scratch_nocheck()
+     rm -f ${RESULT_DIR}/require_scratch
+ }
+ 
++_require_no_compress()
++{
++	case "$FSTYP" in
++	btrfs)
++		_require_btrfs_no_compress
++		;;
++	*)
++		;;
++	esac
++}
++
+ # we need the scratch device and it should be checked post test.
+ _require_scratch()
+ {
+diff --git a/tests/btrfs/126 b/tests/btrfs/126
+index a13a0a6e..2b0edb65 100755
+--- a/tests/btrfs/126
++++ b/tests/btrfs/126
+@@ -19,6 +19,10 @@ _supported_fs btrfs
+ _require_scratch
+ _require_btrfs_qgroup_report
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ _scratch_mkfs >/dev/null
+ # Use enospc_debug mount option to trigger restrict space info check
+ _scratch_mount "-o enospc_debug"
+diff --git a/tests/btrfs/139 b/tests/btrfs/139
+index 7760182a..c4b09f9f 100755
+--- a/tests/btrfs/139
++++ b/tests/btrfs/139
+@@ -19,6 +19,10 @@ _supported_fs btrfs
+ # We at least need 2GB of free space on $SCRATCH_DEV
+ _require_scratch_size $((2 * 1024 * 1024))
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ 
+diff --git a/tests/btrfs/230 b/tests/btrfs/230
+index 2daacfbe..46b0c636 100755
+--- a/tests/btrfs/230
++++ b/tests/btrfs/230
+@@ -17,6 +17,10 @@ _begin_fstest auto quick qgroup limit
+ 
+ _supported_fs btrfs
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ # Need at least 2GiB
+ _require_scratch_size $((2 * 1024 * 1024))
+ _scratch_mkfs > /dev/null 2>&1
+diff --git a/tests/btrfs/232 b/tests/btrfs/232
+index 8691a508..02c7e49d 100755
+--- a/tests/btrfs/232
++++ b/tests/btrfs/232
+@@ -33,6 +33,10 @@ writer()
+ 
+ _supported_fs btrfs
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ _require_scratch_size $((2 * 1024 * 1024))
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+diff --git a/tests/btrfs/237 b/tests/btrfs/237
+index 5994edf8..5168777e 100755
+--- a/tests/btrfs/237
++++ b/tests/btrfs/237
+@@ -24,6 +24,10 @@ _require_btrfs_command filesystem sync
+ _require_command "$BLKZONE_PROG" blkzone
+ _require_zoned_device "$SCRATCH_DEV"
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ get_data_bg()
+ {
+ 	$BTRFS_UTIL_PROG inspect-internal dump-tree -t CHUNK $SCRATCH_DEV |\
+diff --git a/tests/generic/275 b/tests/generic/275
+index bf0aa2b3..6189edca 100755
+--- a/tests/generic/275
++++ b/tests/generic/275
+@@ -25,6 +25,10 @@ _cleanup()
+ _supported_fs generic
+ _require_scratch
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ echo "------------------------------"
+ echo "write until ENOSPC test"
+ echo "------------------------------"
+diff --git a/tests/generic/427 b/tests/generic/427
+index 0f99c1b2..26385d36 100755
+--- a/tests/generic/427
++++ b/tests/generic/427
+@@ -22,6 +22,10 @@ _require_scratch
+ _require_test_program "feature"
+ _require_aiodio aio-dio-eof-race
+ 
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
+ # limit the filesystem size, to save the time of filling filesystem
+ _scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
+ _scratch_mount
+-- 
+2.26.3
+
