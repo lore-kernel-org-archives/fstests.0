@@ -2,98 +2,67 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8009FC433FE
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 21:00:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A268CC433FE
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Nov 2021 00:23:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 688E061B1E
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 21:00:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8FA1661407
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Nov 2021 00:23:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240733AbhKOVCl (ORCPT
+        id S1349579AbhKPA0M (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Nov 2021 16:02:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40930 "EHLO
+        Mon, 15 Nov 2021 19:26:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347658AbhKOTlE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 14:41:04 -0500
-Received: from mail-qt1-x832.google.com (mail-qt1-x832.google.com [IPv6:2607:f8b0:4864:20::832])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4A68C0613B9
-        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 11:24:21 -0800 (PST)
-Received: by mail-qt1-x832.google.com with SMTP id m25so16612665qtq.13
-        for <fstests@vger.kernel.org>; Mon, 15 Nov 2021 11:24:21 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=QbetVAUo5OZxsQxnRG709OfZCVKW0qtMqw1TKeW/LHA=;
-        b=delKKYP1+D4hUsTSll3T5LvEMa8maz5tKRNduqMZie+6Ga4b3hiTJuZPKJGdsKsEnk
-         rTixg8tjhq+3YmhfS4hCIsqIzZNp5VxT5RjJzFj2Kgy19u8ddKDK8VCnXUFjPSMA0SVm
-         riDZ4LxrcMcSgvqZIwYNSa+yPqssqz1rLBmBxuWeb/oF5Q2/HIP1FYeQbK+leVXXkJHs
-         44ivJRV53aiBVzoHomTnoZp8NidhRpwRB9mf7zRb18JwdkqqGOlD/+dCcwhORR1U/7xh
-         JZFXzIEf12VygTQqgTJJUARBg+p8whEs7txXaA/20M7H3BVmjzSX/MaQ8wufYp08ur+1
-         ZtQw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=QbetVAUo5OZxsQxnRG709OfZCVKW0qtMqw1TKeW/LHA=;
-        b=OsIoOLUvXhv1uDbMDvQTRGNZg/OjyiBvUyNfuZPUm3qTxXssFT615YZZDlAU9dfSJZ
-         dNugELYGsscRCcbms9Td6x8xi4xTOwAitERErt4itWsdGNicPvLboJqPuOozCixSsc3f
-         m8na7Y9kYNWY7Hlqs72NqvJFmwVOY3/HRhlCNcZ1Xni6AdvuQFMo1ms0gVme9wmwiIag
-         Sz+3jonfmX+2HBNZpiDFvLd9drcGi8OwT4Lf52O7wnWuw/h+ykuvH5hZNuBb+IZqDITE
-         vYmKZd9RihMoMu5gezTM6aPD5mOCLDlKdezyRlIQbU67A3OEUMDSXFEWC+vYY1R1PVae
-         h4VQ==
-X-Gm-Message-State: AOAM5311iuvfYDirimnhwmlcyq/Sma2Aa9/re5rfGhir0IMKr112HykL
-        5ji5RGpK8gCYQ/avbG2m6d61ALSEYTw/Ow==
-X-Google-Smtp-Source: ABdhPJzM9Fdn/HwpmHLZry3+gjCaloKCU7yjQIAbddFuil1BgOe+dgwh80XxMw5kv6hhC5l7qaBRRQ==
-X-Received: by 2002:ac8:7d47:: with SMTP id h7mr1507871qtb.188.1637004260740;
-        Mon, 15 Nov 2021 11:24:20 -0800 (PST)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id i11sm1046560qko.116.2021.11.15.11.24.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Nov 2021 11:24:20 -0800 (PST)
-Date:   Mon, 15 Nov 2021 14:24:19 -0500
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v4] fstests: btrfs: make nospace_cache related test cases
- to work with latest v2 cache
-Message-ID: <YZKz4wQWo85vCROd@localhost.localdomain>
-References: <20211114125101.19751-1-wqu@suse.com>
+        with ESMTP id S243278AbhKOUYW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 15:24:22 -0500
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7ABCCC061766;
+        Mon, 15 Nov 2021 12:21:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=u63uF+RkG65jAgm+d4IXszl9rbAfzv6AzCDviUl9T6g=; b=ugb+Z5mArdOrXSMBdLKaZnzMV5
+        91Pm5WPbPaeZtbtMfWagEa2r5yEJL9LItsae0KUpP6ybCqGY5IucKF4YgHuaxLjmLpnJCHFF7FeYs
+        RXeujw/2wkfA3CzVoxylfXMyMOTAF0ersST0sh+yhpyquWURVUIpp3ba45SqOWB9FKIFkKRgvmN1d
+        qtSMgCebAZkl6REhntyWpjqq02qUHLp3eNLc3REmv8RNnT1OdaSCrf2JtsZnkI3bxFe6ts8cXkodk
+        PZ313BAcrNrp5dPfyXog4S157kNq0Z3By5UdUUNULCNrdMklRoCmAbTWh7JgRVkkZQkMXaPbKEgYR
+        panMnCkg==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mmiTc-00H2JS-Su; Mon, 15 Nov 2021 20:21:16 +0000
+Date:   Mon, 15 Nov 2021 12:21:16 -0800
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Lucas De Marchi <lucas.demarchi@intel.com>
+Cc:     linux-modules@vger.kernel.org, live-patching@vger.kernel.org,
+        fstests@vger.kernel.org, linux-block@vger.kernel.org, hare@suse.de,
+        dgilbert@interlog.com, jeyu@kernel.org, osandov@fb.com,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 3/3] libkmod-module: add support for a patient module
+ removal option
+Message-ID: <YZLBPGtm2vF2DsTk@bombadil.infradead.org>
+References: <20210810051602.3067384-1-mcgrof@kernel.org>
+ <20210810051602.3067384-4-mcgrof@kernel.org>
+ <20210923085156.scmf5wxr2phc356b@ldmartin-desk2>
+ <YVJyIGXN/TR8zdU9@bombadil.infradead.org>
+ <20210929184810.adrqpsvlfybnc5qt@ldmartin-desk2>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211114125101.19751-1-wqu@suse.com>
+In-Reply-To: <20210929184810.adrqpsvlfybnc5qt@ldmartin-desk2>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Nov 14, 2021 at 08:51:01PM +0800, Qu Wenruo wrote:
-> In the coming btrfs-progs v5.15 release, mkfs.btrfs will change to use
-> v2 cache by default.
+On Wed, Sep 29, 2021 at 11:48:31AM -0700, Lucas De Marchi wrote:
+> > Sorry don't follow. And since I have one day before vacation, I suppose
+> > I won't get to this until I get back. But I'd be happy if you massage
+> > it as you see fit as you're used to the code base and I'm sure have
+> > a better idea of what likely is best for the library.
 > 
-> However nospace_cache mount option will not work with v2 cache, as it
-> would make v2 cache out of sync with on-disk used space.
 > 
-> So mounting a btrfs with v2 cache using "nospace_cache" will make btrfs
-> to reject the mount.
-> 
-> There are quite some test cases relying on nospace_cache to prevent v1
-> cache to take up data space.
-> 
-> For those test cases, we no longer need the "nospace_cache" mount option
-> if the filesystem is already using v2 cache.
-> Since v2 cache is using metadata space, it will no longer take up data
-> space, thus no extra mount options for those test cases.
-> 
-> By this, we can keep those existing tests to run without problem for
-> both v1 and v2 cache.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> sure, np. I will take a look as time permits.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Just a friendly poke.
 
-Thanks, this explains a weird failure state that I've been seeing with btrfs/199
-writing into /tmp and filling everything, which causes the rest of the tests to
-fail.
-
-Josef
+  Luis
