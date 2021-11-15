@@ -2,712 +2,144 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CD27C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:09:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C07BC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:18:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8831F61BFB
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:09:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1100163212
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Nov 2021 11:18:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231214AbhKOLMU (ORCPT
+        id S231214AbhKOLV2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Nov 2021 06:12:20 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40768 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237692AbhKOLLc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 Nov 2021 06:11:32 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D4AE76140A;
-        Mon, 15 Nov 2021 11:08:33 +0000 (UTC)
-Date:   Mon, 15 Nov 2021 12:08:30 +0100
-From:   Christian Brauner <christian.brauner@ubuntu.com>
-To:     Eryu Guan <guan@eryu.me>, Christoph Hellwig <hch@lst.de>
-Cc:     Christian Brauner <brauner@kernel.org>,
-        linux-fsdevel@vger.kernel.org,
-        Seth Forshee <seth.forshee@digitalocean.com>,
-        stable@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic: test circular mappings
-Message-ID: <20211115110830.rjovyme34ur7mszk@wittgenstein>
-References: <20211109145713.1868404-1-brauner@kernel.org>
- <20211109145713.1868404-2-brauner@kernel.org>
- <YZEVb/7sTwScTsQ0@desktop>
+        Mon, 15 Nov 2021 06:21:28 -0500
+Received: from de-smtp-delivery-102.mimecast.com ([194.104.109.102]:31555 "EHLO
+        de-smtp-delivery-102.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231544AbhKOLV1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Nov 2021 06:21:27 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=mimecast20200619;
+        t=1636975108;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=3I+ZA4HPKcB9JJ1lpe0ysmEUX4ZzajmJthU2etWC1vg=;
+        b=G6B7i+0MWDXPKPOpg9oy5os3+/z62mBGDLtDJOeZoPdSZneZ1yc4r/s0aGnoRxaNxwJccL
+        hTBaW1rejLFiwydvm8rg4mQSx37Wi1EV56FvPlayFuX8ZFckWOZZ3Vp8wfzAl0gFULHIA+
+        CQrGbyKDqjueC29srxvScUzRIdBwbdQ=
+Received: from EUR01-VE1-obe.outbound.protection.outlook.com
+ (mail-ve1eur01lp2056.outbound.protection.outlook.com [104.47.1.56]) (Using
+ TLS) by relay.mimecast.com with ESMTP id de-mta-3-jcg4Q2xHOieJNJ347WCSEg-1;
+ Mon, 15 Nov 2021 12:18:27 +0100
+X-MC-Unique: jcg4Q2xHOieJNJ347WCSEg-1
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VrKf3qrK4FabZn/A7lUDLIOgudI62RYC2Kv8fqXZ4PJXew1Vx7qvrHsF4d3Ir3MMmntPtrdfBgC7tb6Xw4uVZE1Ws2HDDHQ7GzYVbUKmUF3YYs1F5wk7YUKirpLyGte/Fr45DN4TOWU6QRPlP5Qa/dfIPTxiERj3EV8a9m7fMnvdRNDCeEQpZ43ow+U0wuQuGA9YAwk38OGmvTiGX3n6QviZbtBoF9DeW13Oh+hdYF9/twuaucdzR9kHaZeMIABeesDbLO6xsJvFFIFRwZ1qhQ7+kRUrDVVLDJwbqfemnr1LsiHjluI5qdwRxuzawvNFNAWNekWKVVmuVqMMRYW07A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=3I+ZA4HPKcB9JJ1lpe0ysmEUX4ZzajmJthU2etWC1vg=;
+ b=fGfcRpA6bnMq+47Q4tH/G1Z1OGNlqjroz2A4Slv7/dC6+I8Nb3nCvl4nVGZ1wZBZFqZlPRq71aUrmG7sHJNaZsOjcyGnhaiIlZgfGp3Y+Eb9Ebz2+1RcT74GojdvYO/PJ4FXxOu5GC5msnTvaL4ldDTcUBT3wlnIyoLSKvG4ThTomqgst3bIaYNWik5SSHp8gamqEsRoYFae9T+1oTGXXqhC8xAL3nizRr7jknEuboCKtSR4gGpAS82q+zrOkeBl2cdieab0R6zE0Uc+zZl6GafVz6J1F4SOV5sHGYSxUIziQwhu6FwiCjGVGUUHwKc2SivZOXxQaI83LHbSQPVdvQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=suse.com;
+Received: from AM9PR04MB8471.eurprd04.prod.outlook.com (2603:10a6:20b:416::22)
+ by AM9PR04MB8780.eurprd04.prod.outlook.com (2603:10a6:20b:40b::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.15; Mon, 15 Nov
+ 2021 11:18:26 +0000
+Received: from AM9PR04MB8471.eurprd04.prod.outlook.com
+ ([fe80::1dd6:884:8c6c:b6b3]) by AM9PR04MB8471.eurprd04.prod.outlook.com
+ ([fe80::1dd6:884:8c6c:b6b3%6]) with mapi id 15.20.4690.027; Mon, 15 Nov 2021
+ 11:18:26 +0000
+To:     fstests@vger.kernel.org
+From:   Radoslav Kolev <radoslav.kolev@suse.com>
+Subject: read only filesystem tests
+Message-ID: <e64129cb-dec9-f0bb-9a50-ede0a7b2aca6@suse.com>
+Date:   Mon, 15 Nov 2021 13:18:25 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: AS8PR07CA0030.eurprd07.prod.outlook.com
+ (2603:10a6:20b:451::9) To AM9PR04MB8471.eurprd04.prod.outlook.com
+ (2603:10a6:20b:416::22)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <YZEVb/7sTwScTsQ0@desktop>
+Received: from localhost.localdomain (78.83.141.197) by AS8PR07CA0030.eurprd07.prod.outlook.com (2603:10a6:20b:451::9) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4713.15 via Frontend Transport; Mon, 15 Nov 2021 11:18:26 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 12ff4fdf-9742-4f81-d3e9-08d9a829a518
+X-MS-TrafficTypeDiagnostic: AM9PR04MB8780:
+X-Microsoft-Antispam-PRVS: <AM9PR04MB878042ED7B4C2CCA44DF797AE0989@AM9PR04MB8780.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8273;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: MJLFgZJ+5eyL3dUcBaF4Ir4G6E+A/HLu8WzX0VXC89XtXfP2mjgkivpFhDcQrsjbur12fWhltVrlmwAIFjV/Ff5kXwd5NuBST3+4Sw2rfCfiD5cJCoVzDa+rHdlAU14lYQgy/UWm8wJ3sluWTo/djlAL+fSEuxLMhqmrcZdrR6krZUIyFlGLk8A1Dm3+swUSCB0c2aAvh/d+ojCmFP0UhhS3mIHUxsWDMZHSkoYURYiBqfmasTR4vERdVQXNOGadLhknlikkBG2E1uYIeZPt+069pvQzpZMKpCnMdCjmCmtRHHXuyNS2GSK0eNvUorVT4PwOUCvywXeN2UPJrIOtUIrc8buutMarJ/iB4CPHqZ75IrprfFdJtTGz8wtOhL5GaMvZXEGnJyUKSkbN7yiGeKt1ue7R6uYVnuhWhApk+3GYmQiCiT/P9RA45WFdpIrXnHIBEr3b7gRdgBGSUhiL08lTMG5zh5GCU+RNpk4IPJ95Wua4n62bGP1NAJNY1JMexgsMB0Tuuip4Ttyq51GWdt5409ed0gEHBgivcqfLFCksxELxRYg3GffltlCUklSLPn4P7337B9fMLPvJMVZHnBpiQeI89ArKbFTTgCeY2RIR7rwJxHPM09RVwqd+PZUrxDBDK6dWH7Z4+EopQfF8gieXmS8Iat/6v+Djy1yI+TaYOQG1jTfS7QOTCcnnc/z/w4CROo7LV4hTNNKmrjqjCb17zYuLCNSVE1/AhKNr1Zk=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM9PR04MB8471.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(8936002)(8676002)(3480700007)(316002)(44832011)(5660300002)(2906002)(6486002)(36756003)(31696002)(4744005)(6506007)(31686004)(508600001)(38100700002)(6916009)(66476007)(186003)(956004)(66946007)(86362001)(26005)(6512007)(2616005)(66556008)(45980500001)(43740500002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?Y2JnY2hJbXJNSlhmSitSTFVVMjVibHdzVUt5cnBFQURhRm1rckpFQlJ1WHVC?=
+ =?utf-8?B?TDFJb3R5TDQ1QlpzS1JNYldzUDcxZmtTRmJHTDJYZzEyZkFHeFI0ak5NQ3k0?=
+ =?utf-8?B?cnkxbmlVZlpMbHpCbTgxM1hGeG9MMlgvMFp1eVR0L3A0dXJwUjJ4VzhqM2oz?=
+ =?utf-8?B?bU45UW1mT2h3Q21zWGlhSVRQT3U0cDNYM3J0Nm5TVEl2aE05Qm9hS1I1RGJz?=
+ =?utf-8?B?ZTBLU1dPSUZjMklibmNCVEs4UlI1YWRwL00yR1lrZXhMbmNUMFNWMVlhQWFJ?=
+ =?utf-8?B?M3YxL3YvNDRpUGVwdXpKZk96ZU9rYmU3L3NMcmo0SUVwKzBUek81ZDgzL3da?=
+ =?utf-8?B?dGZ0QWFWemhCTWdGWDlxODk2OUhFdngveENVQWNIdVBmREJ3ckxQdTdXQlps?=
+ =?utf-8?B?KzlhYUp6RVVOSXIwZ3VBZmJCbDVrWFljTE5xakEvMkpKSmJDelA5c0Z2N3Zx?=
+ =?utf-8?B?UXlWeEJ1Rm5STkVRSDNXZEdWVHRvRFJ4KzVtMUJ1a21zT004b0dXVy9aTTRh?=
+ =?utf-8?B?Q1oxeGNleGhocmdMTWdwb0g0U09ncmF1RWRWbXp2emdySGFDM2JpNzlYT1RO?=
+ =?utf-8?B?WFZCbmVLZi84WWxxVUVjc2hyR3VCYW9hZU1FaVpJYWZBb0wvNE5EU2JhbEs0?=
+ =?utf-8?B?VC9zWWlFaDQrNXpzY1NNNXVZM2RRclA5VXpwL1EwWFdCS1JmeU44WWVSQWNm?=
+ =?utf-8?B?aS9DL1dnNTRlNGtVaDZLYVBFMTY2ZXdHKy83aldxMjhhcE4weDZHUGtCWU1B?=
+ =?utf-8?B?V2tHUlZBamlhUmtpdENuWHE2WFFWNXp3RXhVV3pjYjhPS3FsQkhxRXZVZUhD?=
+ =?utf-8?B?bjAvNkNzSkhXQjRxVTJFTEEvakswa2M4YkxHdmpuOC93clYxQy9uSFFENW9N?=
+ =?utf-8?B?eGxoT2d2YkVtWWd3bnNlWk1LSnhMQWV0MVVtVzc4czUxTm1kOU0xMjZrZjVq?=
+ =?utf-8?B?bU15UkZvcnYwUE5pb0hRRDVtclE0NHMyTEVTREo3Z2hqNk5JYW93UlQ5SUNy?=
+ =?utf-8?B?N1FVb0RnUWs0Q3dwOEhqQVg2TmxkbmJGRys1QnBXZjVyTEFsY0haeTdSMWNZ?=
+ =?utf-8?B?L2M1Umw4WGx3eFp1OFFoYU1CMXB3UU1jbXJYMk94MWFFMjdBbEt2cmc2RmJV?=
+ =?utf-8?B?bUQ5cGd6MlQyVFE2WG9TQmp3RW0xeGowRFp3eWpaY1YvQ3l6dzZUaGxuV1hJ?=
+ =?utf-8?B?MTI2UVdTNDhIUmREVHVPMTlSWnU3dEFYblMzdmNDY0tYY0txL1NYVTl1NFJs?=
+ =?utf-8?B?QVlPWXlXT3VWS1BXSDRnamEyOXF3VVlIS21Na1Z2U1hFQ3JqcVRXeTdPZVp4?=
+ =?utf-8?B?MGlOVzlSK2M1eTBSQ2phQkgvaDBaMUNXWFhxSi9KM3h4L0Fuekgwcm5OYmVG?=
+ =?utf-8?B?Tll3dCs3Z2JaSWl1NHU4RTRFVWVnVHJ5TW5lS3gwTllnTFY0ZjNEWkFPNnVq?=
+ =?utf-8?B?SCsxUTN3SUNRQWgzaEhmYktFM2Qxa0FNOVZLcXFvOERHRXQ3Tk82Y3VORlhJ?=
+ =?utf-8?B?YUV1dllYZlJtdTZ0eDBxVHJLZE5nU2MvbzRpeGFZam83OEtHWTlDSDMrQ0JG?=
+ =?utf-8?B?ZjlpZXMxYStPazFzdmdyRHZGaG5wY3ZvZW1INGt2WVNjcWNobVdkSGg2TkhI?=
+ =?utf-8?B?cDdJMmsxM1FLcVRGeWVVNmlvUG0yaGF6S3pXbzVSSEtvcGMyR0FpdVlsVGJa?=
+ =?utf-8?B?MTNFaVZXWTJkWm0wU2QwbnNRUVdULzFad2EyQXJZREVvZTNuVXRUTk5sN1pu?=
+ =?utf-8?B?K0w3OHRvWGc0V20vOVFmTi9nK2J6RlJDQ1g1NFZBRVlaRnUydXVLMmJQSjhZ?=
+ =?utf-8?B?c29ZZjZjT0p6VnpTNTdjek9Zbmo0eldBaVk1OCtPM1BCUzkwajkzUFNuN1lZ?=
+ =?utf-8?B?amhOVWpiVjhKUUkxNElaOEZSTUFLT0w4RnlXRmlXUk94Q1RoelJPZ0h1REJq?=
+ =?utf-8?B?QUN3alZTN0F4NVpSRzhjaHNiZ2Q2eXhrem5yOG9LOVN1bjZITGo5bUhsd2Q0?=
+ =?utf-8?B?WmU1RThtTUZYdmFHY0RQdU1mRGhIZStWMFVQYUQrZFFpd3RVVkUwZGdjZDJ1?=
+ =?utf-8?B?dW9oVUZ1Z2NyVWpvVEh5bm8wR3lsMUQ2NE16bjkrV1pkWTA1UnFXUDM5cWZy?=
+ =?utf-8?B?MklkQ2g2QW9PUi93NFdndjBnajFMc0tTcWgyUE0wSVBwMzFtRGN4dHI0aE8z?=
+ =?utf-8?Q?3eEGGOOa3WXn2+HL2V66P4g=3D?=
+X-OriginatorOrg: suse.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 12ff4fdf-9742-4f81-d3e9-08d9a829a518
+X-MS-Exchange-CrossTenant-AuthSource: AM9PR04MB8471.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Nov 2021 11:18:26.7684
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: kSn/MgAX5/t4V2hb72XKRWkKZbQoyId9J30KlWwhhVzyPL0Yp3jUU71hsdtZAF0KDJgx+Cw8c3U5r4PyCeWCGA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM9PR04MB8780
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Nov 14, 2021 at 09:55:59PM +0800, Eryu Guan wrote:
-> On Tue, Nov 09, 2021 at 03:57:13PM +0100, Christian Brauner wrote:
-> > From: Christian Brauner <christian.brauner@ubuntu.com>
-> > 
-> > This test makes sure that setattr behaves correctly on idmapped mounts
-> > that make use of circular mappings. Such mappings may e.g. be used to
-> > allow two users to share home directories through the same idmapped
-> > mount. The tests are explained in detail in code comments.
-> > 
-> > Cc: Seth Forshee <seth.forshee@digitalocean.com>
-> > Cc: Eryu Guan <guaneryu@gmail.com>
-> > Cc: Christoph Hellwig <hch@lst.de>
-> > Cc: fstests@vger.kernel.org
-> > CC: linux-fsdevel@vger.kernel.org
-> > Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
-> 
-> Is this test known to fail with v5.15-rc7 kernel? I hit the following
-> failure:
-> 
-> +idmapped-mounts.c: 13585: setattr_fix - Operation not permitted - failure: change ownership
-> +idmapped-mounts.c: 13898: run_test - Success - failure: test that setattr works correctly
+Hello,
 
-Yep, that's expected to fail. This is a regression test. The associated
-fix is patch 1/2 in the series. I'm just waiting for Christoph to give
-the vfs part an ack before sending it to Linus later this week.
+I am interested in read only filesystem tests, and more specifically 
+squashfs. I saw that ~2 year ago there was a patch set submitted, but 
+not accepted that added support for it with some feedback, that
+the tests are copied and double the maintenance burden, but sadly there 
+is no easy way to avoid that.
 
-> 
-> If the bug has been fixed, it'd be better to document the commit that
-> fixed the issue in both commit log and test description.
+What is the current mood about read only filesystem tests and fstests?
+Is this the right project to fill this need and is it worth it trying to 
+address some of the problems with the old squashfs patches?
 
-Once the fix is merged I'll include it.
+Best regards,
+Radoslav
 
-> 
-> And is there a "1/2" patch? I only see this "2/2" in mailing list.
-
-Yeah, there is but it is the vfs fix. It can be retrieved via b4.
-
-> 
-> > ---
-> >  src/idmapped-mounts/idmapped-mounts.c | 434 +++++++++++++++++++++++++-
-> >  src/idmapped-mounts/utils.c           |  43 ++-
-> >  tests/generic/651                     |  27 ++
-> >  tests/generic/651.out                 |   2 +
-> >  4 files changed, 503 insertions(+), 3 deletions(-)
-> >  create mode 100755 tests/generic/651
-> >  create mode 100644 tests/generic/651.out
-> > 
-> > diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-> > index 83b7c89a..b803d171 100644
-> > --- a/src/idmapped-mounts/idmapped-mounts.c
-> > +++ b/src/idmapped-mounts/idmapped-mounts.c
-> > @@ -14,6 +14,7 @@
-> >  #include <linux/limits.h>
-> >  #include <linux/types.h>
-> >  #include <pthread.h>
-> > +#include <pwd.h>
-> >  #include <sched.h>
-> >  #include <stdbool.h>
-> >  #include <sys/fsuid.h>
-> > @@ -409,6 +410,23 @@ static inline bool switch_fsids(uid_t fsuid, gid_t fsgid)
-> >  	return true;
-> >  }
-> >  
-> > +static inline bool switch_resids(uid_t uid, gid_t gid)
-> > +{
-> > +	if (setresgid(gid, gid, gid))
-> > +		return log_errno(false, "failure: setregid");
-> > +
-> > +	if (setresuid(uid, uid, uid))
-> > +		return log_errno(false, "failure: setresuid");
-> > +
-> > +	if (setfsgid(-1) != gid)
-> > +		return log_errno(false, "failure: setfsgid(-1)");
-> > +
-> > +	if (setfsuid(-1) != uid)
-> > +		return log_errno(false, "failure: setfsuid(-1)");
-> > +
-> > +	return true;
-> > +}
-> > +
-> >  static inline bool switch_userns(int fd, uid_t uid, gid_t gid, bool drop_caps)
-> >  {
-> >  	if (setns(fd, CLONE_NEWUSER))
-> > @@ -636,6 +654,11 @@ __attribute__((unused)) static int print_r(int fd, const char *path)
-> >  
-> >  	return ret;
-> >  }
-> > +#else
-> > +__attribute__((unused)) static int print_r(int fd, const char *path)
-> > +{
-> > +	return 0;
-> > +}
-> >  #endif
-> >  
-> >  /* fd_to_fd - transfer data from one fd to another */
-> > @@ -13325,6 +13348,401 @@ out:
-> >  	return fret;
-> >  }
-> >  
-> > +#define USER1 "fsgqa"
-> > +#define USER2 "fsgqa2"
-> > +
-> > +/**
-> > + * lookup_ids - lookup uid and gid for a username
-> > + * @name: [in]  name of the user
-> > + * @uid:  [out] pointer to the user-ID
-> > + * @gid:  [out] pointer to the group-ID
-> > + *
-> > + * Lookup the uid and gid of a user.
-> > + *
-> > + * Return: On success, true is returned.
-> > + *         On error, false is returned.
-> > + */
-> > +static bool lookup_ids(const char *name, uid_t *uid, gid_t *gid)
-> > +{
-> > +	bool bret = false;
-> > +	struct passwd *pwentp = NULL;
-> > +	struct passwd pwent;
-> > +	char *buf;
-> > +	ssize_t bufsize;
-> > +	int ret;
-> > +
-> > +	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-> > +	if (bufsize < 0)
-> > +		bufsize = 1024;
-> > +
-> > +	buf = malloc(bufsize);
-> > +	if (!buf)
-> > +		return bret;
-> > +
-> > +	ret = getpwnam_r(name, &pwent, buf, bufsize, &pwentp);
-> > +	if (!ret && pwentp) {
-> > +		*uid = pwent.pw_uid;
-> > +		*gid = pwent.pw_gid;
-> > +		bret = true;
-> > +	}
-> > +
-> > +	free(buf);
-> > +	return bret;
-> > +}
-> > +
-> > +/**
-> > + * setattr_fix - test that setattr works correctly
-> > + *
-> > + * Test that ->setattr() works correctly for idmapped mounts with circular
-> > + * idmappings such as:
-> > + *
-> > + * b:1000:1001:1
-> > + * b:1001:1000:1
-> > + *
-> > + * Assume a directory /source with two files:
-> > + *
-> > + * /source/file1 | 1000:1000
-> > + * /source/file2 | 1001:1001
-> > + *
-> > + * and we create an idmapped mount of /source at /target with an idmapped of:
-> > + *
-> > + * mnt_userns:        1000:1001:1
-> > + *                    1001:1000:1
-> > + *
-> > + * In the idmapped mount file1 will be owned by uid 1001 and file2 by uid 1000:
-> > + *
-> > + * /target/file1 | 1001:1001
-> > + * /target/file2 | 1000:1000
-> > + *
-> > + * Because in essence the idmapped mount switches ownership for {g,u}id 1000
-> > + * and {g,u}id 1001.
-> > + *
-> > + * 1. A user with fs{g,u}id 1000 must be allowed to setattr /target/file2 from
-> > + *    {g,u}id 1000 in the idmapped mount to {g,u}id 1000.
-> > + * 2. A user with fs{g,u}id 1001 must be allowed to setattr /target/file1 from
-> > + *    {g,u}id 1001 in the idmapped mount to {g,u}id 1001.
-> > + * 3. A user with fs{g,u}id 1000 must fail to setattr /target/file1 from
-> > + *    {g,u}id 1001 in the idmapped mount to {g,u}id 1000.
-> > + *    This must fail with EPERM. The caller's fs{g,u}id doesn't match the
-> > + *    {g,u}id of the file.
-> > + * 4. A user with fs{g,u}id 1001 must fail to setattr /target/file2 from
-> > + *    {g,u}id 1000 in the idmapped mount to {g,u}id 1000.
-> > + *    This must fail with EPERM. The caller's fs{g,u}id doesn't match the
-> > + *    {g,u}id of the file.
-> > + * 5. Both, a user with fs{g,u}id 1000 and a user with fs{g,u}id 1001, must
-> > + *    fail to setattr /target/file1 owned by {g,u}id 1001 in the idmapped mount
-> > + *    and /target/file2 owned by {g,u}id 1000 in the idmapped mount to any
-> > + *    {g,u}id apart from {g,u}id 1000 or 1001 with EINVAL.
-> > + *    Only {g,u}id 1000 and 1001 have a mapping in the idmapped mount. Other
-> > + *    {g,u}id are unmapped.
-> > + */
-> > +static int setattr_fix(void)
-> > +{
-> > +	int fret = -1;
-> > +	int open_tree_fd = -EBADF;
-> > +	struct mount_attr attr = {
-> > +		.attr_set	= MOUNT_ATTR_IDMAP,
-> > +		.userns_fd	= -EBADF,
-> > +	};
-> > +	int ret;
-> > +	uid_t user1_uid, user2_uid;
-> > +	gid_t user1_gid, user2_gid;
-> > +	pid_t pid;
-> > +	struct list idmap;
-> > +	struct list *it_cur, *it_next;
-> > +
-> > +	if (!caps_supported())
-> > +		return 0;
-> > +
-> > +	list_init(&idmap);
-> > +
-> > +	if (!lookup_ids(USER1, &user1_uid, &user1_gid)) {
-> > +		log_stderr("failure: lookup_user");
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (!lookup_ids(USER2, &user2_uid, &user2_gid)) {
-> > +		log_stderr("failure: lookup_user");
-> > +		goto out;
-> > +	}
-> > +
-> > +	log_debug("Found " USER1 " with uid(%d) and gid(%d) and " USER2 " with uid(%d) and gid(%d)",
-> > +		  user1_uid, user1_gid, user2_uid, user2_gid);
-> > +
-> > +	if (mkdirat(t_dir1_fd, DIR1, 0777)) {
-> > +		log_stderr("failure: mkdirat");
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (mknodat(t_dir1_fd, DIR1 "/" FILE1, S_IFREG | 0644, 0)) {
-> > +		log_stderr("failure: mknodat");
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (chown_r(t_mnt_fd, T_DIR1, user1_uid, user1_gid)) {
-> > +		log_stderr("failure: chown_r");
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (mknodat(t_dir1_fd, DIR1 "/" FILE2, S_IFREG | 0644, 0)) {
-> > +		log_stderr("failure: mknodat");
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (fchownat(t_dir1_fd, DIR1 "/" FILE2, user2_uid, user2_gid, AT_SYMLINK_NOFOLLOW)) {
-> > +		log_stderr("failure: fchownat");
-> > +		goto out;
-> > +	}
-> > +
-> > +	print_r(t_mnt_fd, T_DIR1);
-> > +
-> > +	/* u:1000:1001:1 */
-> > +	ret = add_map_entry(&idmap, user1_uid, user2_uid, 1, ID_TYPE_UID);
-> > +	if (ret) {
-> > +		log_stderr("failure: add_map_entry");
-> > +		goto out;
-> > +	}
-> > +
-> > +	/* u:1001:1000:1 */
-> > +	ret = add_map_entry(&idmap, user2_uid, user1_uid, 1, ID_TYPE_UID);
-> > +	if (ret) {
-> > +		log_stderr("failure: add_map_entry");
-> > +		goto out;
-> > +	}
-> > +
-> > +	/* g:1000:1001:1 */
-> > +	ret = add_map_entry(&idmap, user1_gid, user2_gid, 1, ID_TYPE_GID);
-> > +	if (ret) {
-> > +		log_stderr("failure: add_map_entry");
-> > +		goto out;
-> > +	}
-> > +
-> > +	/* g:1001:1000:1 */
-> > +	ret = add_map_entry(&idmap, user2_gid, user1_gid, 1, ID_TYPE_GID);
-> > +	if (ret) {
-> > +		log_stderr("failure: add_map_entry");
-> > +		goto out;
-> > +	}
-> > +
-> > +	attr.userns_fd = get_userns_fd_from_idmap(&idmap);
-> > +	if (attr.userns_fd < 0) {
-> > +		log_stderr("failure: get_userns_fd");
-> > +		goto out;
-> > +	}
-> > +
-> > +	open_tree_fd = sys_open_tree(t_dir1_fd, DIR1,
-> > +				     AT_NO_AUTOMOUNT |
-> > +				     AT_SYMLINK_NOFOLLOW |
-> > +				     OPEN_TREE_CLOEXEC |
-> > +				     OPEN_TREE_CLONE |
-> > +				     AT_RECURSIVE);
-> > +	if (open_tree_fd < 0) {
-> > +		log_stderr("failure: sys_open_tree");
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
-> > +		log_stderr("failure: sys_mount_setattr");
-> > +		goto out;
-> > +	}
-> > +
-> > +	print_r(open_tree_fd, "");
-> > +
-> > +	pid = fork();
-> > +	if (pid < 0) {
-> > +		log_stderr("failure: fork");
-> > +		goto out;
-> > +	}
-> > +	if (pid == 0) {
-> > +		/* switch to {g,u}id 1001 */
-> > +		if (!switch_resids(user2_uid, user2_gid))
-> > +			die("failure: switch_resids");
-> > +
-> > +		/* drop all capabilities */
-> > +		if (!caps_down())
-> > +			die("failure: caps_down");
-> > +
-> > +		/*
-> > +		 * The {g,u}id 0 is not mapped in this idmapped mount so this
-> > +		 * needs to fail with EINVAL.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE1, 0, 0, AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EINVAL)
-> > +			die("failure: errno");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1001 must be allowed to change
-> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
-> > +		 * idmapped mount to {g,u}id 1001.
-> > +		 */
-> > +		if (fchownat(open_tree_fd, FILE1, user2_uid, user2_gid,
-> > +			     AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1001. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
-> > +				      user2_uid, user2_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1001 must not be allowed to change
-> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
-> > +		 * idmapped mount to {g,u}id 1000.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE1, user1_uid, user1_gid,
-> > +			      AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EPERM)
-> > +			die("failure: errno");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1001. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
-> > +				      user2_uid, user2_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1001 must not be allowed to change
-> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
-> > +		 * idmapped mount to {g,u}id 1000.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE2, user1_uid, user1_gid,
-> > +			      AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EPERM)
-> > +			die("failure: errno");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1000. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
-> > +				      user1_uid, user1_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1001 must not be allowed to change
-> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
-> > +		 * idmapped mount to {g,u}id 1001.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE2, user2_uid, user2_gid,
-> > +			      AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EPERM)
-> > +			die("failure: errno");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1000. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
-> > +				      user1_uid, user1_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		exit(EXIT_SUCCESS);
-> > +	}
-> > +	if (wait_for_pid(pid))
-> > +		goto out;
-> > +
-> > +	pid = fork();
-> > +	if (pid < 0) {
-> > +		log_stderr("failure: fork");
-> > +		goto out;
-> > +	}
-> > +	if (pid == 0) {
-> > +		/* switch to {g,u}id 1000 */
-> > +		if (!switch_resids(user1_uid, user1_gid))
-> > +			die("failure: switch_resids");
-> > +
-> > +		/* drop all capabilities */
-> > +		if (!caps_down())
-> > +			die("failure: caps_down");
-> > +
-> > +		/*
-> > +		 * The {g,u}id 0 is not mapped in this idmapped mount so this
-> > +		 * needs to fail with EINVAL.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE1, 0, 0, AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EINVAL)
-> > +			die("failure: errno");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1000 must be allowed to change
-> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
-> > +		 * idmapped mount to {g,u}id 1000.
-> > +		 */
-> > +		if (fchownat(open_tree_fd, FILE2, user1_uid, user1_gid,
-> > +			     AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1000. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
-> > +				      user1_uid, user1_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1000 must not be allowed to change
-> > +		 * ownership of /target/file2 owned by {g,u}id 1000 in this
-> > +		 * idmapped mount to {g,u}id 1001.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE2, user2_uid, user2_gid,
-> > +			      AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EPERM)
-> > +			die("failure: errno");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1000. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE2, AT_SYMLINK_NOFOLLOW,
-> > +				      user1_uid, user1_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1000 must not be allowed to change
-> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
-> > +		 * idmapped mount to {g,u}id 1000.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE1, user1_uid, user1_gid,
-> > +			     AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EPERM)
-> > +			die("failure: errno");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1001. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
-> > +				      user2_uid, user2_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		/*
-> > +		 * A user with fs{g,u}id 1000 must not be allowed to change
-> > +		 * ownership of /target/file1 owned by {g,u}id 1001 in this
-> > +		 * idmapped mount to {g,u}id 1001.
-> > +		 */
-> > +		if (!fchownat(open_tree_fd, FILE1, user2_uid, user2_gid,
-> > +			      AT_SYMLINK_NOFOLLOW))
-> > +			die("failure: change ownership");
-> > +		if (errno != EPERM)
-> > +			die("failure: errno");
-> > +
-> > +		/* Verify that the ownership is still {g,u}id 1001. */
-> > +		if (!expected_uid_gid(open_tree_fd, FILE1, AT_SYMLINK_NOFOLLOW,
-> > +				      user2_uid, user2_gid))
-> > +			die("failure: check ownership");
-> > +
-> > +		exit(EXIT_SUCCESS);
-> > +	}
-> > +	if (wait_for_pid(pid))
-> > +		goto out;
-> > +
-> > +	fret = 0;
-> > +	log_debug("Ran test");
-> > +out:
-> > +	safe_close(attr.userns_fd);
-> > +	safe_close(open_tree_fd);
-> > +
-> > +	list_for_each_safe(it_cur, &idmap, it_next) {
-> > +		list_del(it_cur);
-> > +		free(it_cur->elem);
-> > +		free(it_cur);
-> > +	}
-> > +
-> > +	return fret;
-> > +}
-> > +
-> >  static void usage(void)
-> >  {
-> >  	fprintf(stderr, "Description:\n");
-> > @@ -13342,6 +13760,7 @@ static void usage(void)
-> >  	fprintf(stderr, "--test-fscaps-regression     Run fscap regression tests\n");
-> >  	fprintf(stderr, "--test-nested-userns         Run nested userns idmapped mount testsuite\n");
-> >  	fprintf(stderr, "--test-btrfs                 Run btrfs specific idmapped mount testsuite\n");
-> > +	fprintf(stderr, "--test-setattr-fix           Run setattr regression tests\n");
-> >  
-> >  	_exit(EXIT_SUCCESS);
-> >  }
-> > @@ -13358,6 +13777,7 @@ static const struct option longopts[] = {
-> >  	{"test-fscaps-regression",	no_argument,		0,	'g'},
-> >  	{"test-nested-userns",		no_argument,		0,	'n'},
-> >  	{"test-btrfs",			no_argument,		0,	'b'},
-> > +	{"test-setattr-fix",		no_argument,		0,	'i'},
-> >  	{NULL,				0,			0,	  0},
-> >  };
-> >  
-> > @@ -13449,6 +13869,10 @@ struct t_idmapped_mounts t_btrfs[] = {
-> >  	{ btrfs_subvolume_lookup_user,					"test unprivileged subvolume lookup",								},
-> >  };
-> >  
-> > +struct t_idmapped_mounts t_setattr_fix[] = {
-> > +	{ setattr_fix,							"test that setattr works correctly",								},
-> > +};
-> > +
-> >  static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
-> >  {
-> >  	int i;
-> > @@ -13487,7 +13911,8 @@ int main(int argc, char *argv[])
-> >  	int fret, ret;
-> >  	int index = 0;
-> >  	bool supported = false, test_btrfs = false, test_core = false,
-> > -	     test_fscaps_regression = false, test_nested_userns = false;
-> > +	     test_fscaps_regression = false, test_nested_userns = false,
-> > +	     test_setattr_fix = false;
-> >  
-> >  	while ((ret = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
-> >  		switch (ret) {
-> > @@ -13521,6 +13946,9 @@ int main(int argc, char *argv[])
-> >  		case 'e':
-> >  			t_device_scratch = optarg;
-> >  			break;
-> > +		case 'i':
-> > +			test_setattr_fix = true;
-> > +			break;
-> >  		case 'h':
-> >  			/* fallthrough */
-> >  		default:
-> > @@ -13609,6 +14037,10 @@ int main(int argc, char *argv[])
-> >  	if (test_btrfs && !run_test(t_btrfs, ARRAY_SIZE(t_btrfs)))
-> >  		goto out;
-> >  
-> > +	if (test_setattr_fix &&
-> > +	    !run_test(t_setattr_fix, ARRAY_SIZE(t_setattr_fix)))
-> > +		goto out;
-> > +
-> >  	fret = EXIT_SUCCESS;
-> >  
-> >  out:
-> > diff --git a/src/idmapped-mounts/utils.c b/src/idmapped-mounts/utils.c
-> > index c2afa8dc..faf06fcd 100644
-> > --- a/src/idmapped-mounts/utils.c
-> > +++ b/src/idmapped-mounts/utils.c
-> > @@ -183,6 +183,43 @@ static int map_ids_from_idmap(struct list *idmap, pid_t pid)
-> >  	return 0;
-> >  }
-> >  
-> > +#ifdef DEBUG_TRACE
-> > +static void __print_idmaps(pid_t pid, bool gid)
-> > +{
-> > +	char path_mapping[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
-> > +			  STRLITERALLEN("/_id_map") + 1];
-> > +	char *line = NULL;
-> > +	size_t len = 0;
-> > +	int ret;
-> > +	FILE *f;
-> > +
-> > +	ret = snprintf(path_mapping, sizeof(path_mapping), "/proc/%d/%cid_map",
-> > +		       pid, gid ? 'g' : 'u');
-> > +	if (ret < 0 || (size_t)ret >= sizeof(path_mapping))
-> > +		return;
-> > +
-> > +	f = fopen(path_mapping, "r");
-> > +	if (!f)
-> > +		return;
-> > +
-> > +	while ((ret = getline(&line, &len, f)) > 0)
-> > +		fprintf(stderr, "%s", line);
-> > +
-> > +	fclose(f);
-> > +	free(line);
-> > +}
-> > +
-> > +static void print_idmaps(pid_t pid)
-> > +{
-> > +	__print_idmaps(pid, false);
-> > +	__print_idmaps(pid, true);
-> > +}
-> > +#else
-> > +static void print_idmaps(pid_t pid)
-> > +{
-> > +}
-> > +#endif
-> > +
-> >  int get_userns_fd_from_idmap(struct list *idmap)
-> >  {
-> >  	int ret;
-> > @@ -199,10 +236,12 @@ int get_userns_fd_from_idmap(struct list *idmap)
-> >  		return ret;
-> >  
-> >  	ret = snprintf(path_ns, sizeof(path_ns), "/proc/%d/ns/user", pid);
-> > -	if (ret < 0 || (size_t)ret >= sizeof(path_ns))
-> > +	if (ret < 0 || (size_t)ret >= sizeof(path_ns)) {
-> >  		ret = -EIO;
-> > -	else
-> > +	} else {
-> >  		ret = open(path_ns, O_RDONLY | O_CLOEXEC | O_NOCTTY);
-> > +		print_idmaps(pid);
-> > +	}
-> >  
-> >  	(void)kill(pid, SIGKILL);
-> >  	(void)wait_for_pid(pid);
-> > diff --git a/tests/generic/651 b/tests/generic/651
-> > new file mode 100755
-> > index 00000000..49b288d0
-> > --- /dev/null
-> > +++ b/tests/generic/651
-> > @@ -0,0 +1,27 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Christian Brauner.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 651
-> > +#
-> > +# Test that setattr works correctly.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto attr cap idmapped mount perms
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +
-> > +_supported_fs generic
-> > +_require_idmapped_mounts
-> > +_require_test
-> 
-> This test also requires user 'fsgqa' and 'fsgqa2'
-> 
-> _require_user fsgqa
-> _require_user fsgqa2
-> 
-> Thanks,
-> Eryu
-> 
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +$here/src/idmapped-mounts/idmapped-mounts --test-setattr-fix \
-> > +	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
-> > +
-> > +status=$?
-> > +exit
-> > diff --git a/tests/generic/651.out b/tests/generic/651.out
-> > new file mode 100644
-> > index 00000000..51d73665
-> > --- /dev/null
-> > +++ b/tests/generic/651.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 651
-> > +Silence is golden
-> > 
-> > base-commit: bae1d15f6421cbe99b3e2e134c39d50248e7c261
-> > -- 
-> > 2.30.2
-> 
