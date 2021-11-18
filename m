@@ -2,101 +2,266 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 906BEC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 06:42:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D495DC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 13:53:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 67EB561B51
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 06:42:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B671461A6C
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 13:53:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243421AbhKRGph (ORCPT
+        id S231789AbhKRN4e (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 18 Nov 2021 01:45:37 -0500
-Received: from mail1.bemta34.messagelabs.com ([195.245.231.2]:6769 "EHLO
-        mail1.bemta34.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S243206AbhKRGpg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Nov 2021 01:45:36 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1637217756; i=@fujitsu.com;
-        bh=zoSpptanQtT22O/vKWtSE5bM4SwdX56ozl4UzeDLgmk=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=gZRjWGnegFvSbaeeapeoUiFgIa8OE+5ql9YoJMcJjGz7WQYLkzlzzD1TX06lqxn/8
-         1kFHzZf/R+zmd2KKtT7qGEx7EoB3lsuFWaBAPRaVFOAM+Ae72M120rCLSymPpX3+QM
-         Lji2pEBtPxn0Rb52AJ8aPJ20+JQ5Mp8UzbdZ4tyZI2jxDpQeU7tf7HYoKyj/pDKlyU
-         a33i4wsjuLRk0tHA04xflNPRTf6jYgv6eAanQJRfQE8J5miQMmO5Eq+BiDKNi+EUF6
-         ufK1wXPikLCqH92GL/kIwYkM7KHJ0Hd/J8VA2FwFF5abDznMBa0RIDHU99zFnq5zU0
-         1EAsCogtBBgQw==
-Received: from [100.115.36.91] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
-        by server-2.bemta.az-a.eu-west-2.aws.ess.symcld.net id A0/E3-16121-CD5F5916; Thu, 18 Nov 2021 06:42:36 +0000
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrEIsWRWlGSWpSXmKPExsViZ8MxSff216m
-  JBofWmlucbtnL7sDo8XmTXABjFGtmXlJ+RQJrxvXGKYwFs1kqbt6byNLAeIq5i5GLQ0jgEqPE
-  1jnr2SCcfUwS244uh8rsYZT4uGkRUIaTg01AU+JZ5wJmEFtEQFbi/4zVTCA2s4C6xPJJv8BsY
-  QETicv/P4HVswioSjw/9IWxi5GDg1fAU+Lw/UyQsISAgsSUh+/BxvAKCEqcnPmEBWKMhMTBFy
-  +YIWoUJS51fGOEsCskZs1qY4Kw1SSuntvEPIGRfxaS9llI2hcwMq1itE4qykzPKMlNzMzRNTQ
-  w0DU0NNU1NgJSJnqJVbqJeqmluuWpxSW6RnqJ5cV6qcXFesWVuck5KXp5qSWbGIFBmVKsULSD
-  cc7XH3qHGCU5mJREeWddmJooxJeUn1KZkVicEV9UmpNafIhRhoNDSYJX+QtQTrAoNT21Ii0zB
-  xghMGkJDh4lEV7+T0Bp3uKCxNzizHSI1ClGRSlxXhuQPgGQREZpHlwbLCovMcpKCfMyMjAwCP
-  EUpBblZpagyr9iFOdgVBLmNQeZwpOZVwI3/RXQYiagxbKXJ4MsLklESEk1ME3d3f+gZnHz6v7
-  fL6zyls4WvLjxQGDyqZ4DKgoH/j/cv2EGp4XC+oj3gvOZGXf0LOwVN164+aUI35fUXxeuMVVf
-  57ii7rfmyrU7l1elFtv5XjF7qvCkMEz2+gSLIvltH+PtSvknqmj+4dh5aJ260hnWxmbVbSGsv
-  OXHHx1fzrjBd6unQNOlLUVsDgxzTnvaK22Z5/bj9wG7po69+Tn71q1OmZ9jkfF+wfSKSSUvOJ
-  Sv/88VMWua9yGqzt3G984UGUWtlGoThlO9sVPOVO7/9mS9lXai53xFW3GXnSdmrOo4XGo+8/3
-  qRHsv1y0b8haaT/O+p7u8mPFftLf5D9afKgrLwo0sbwpYLvAqmi7Ja6rEUpyRaKjFXFScCADW
-  skD0RQMAAA==
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-13.tower-565.messagelabs.com!1637217755!1114876!1
-X-Originating-IP: [62.60.8.146]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.81.5; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 31160 invoked from network); 18 Nov 2021 06:42:35 -0000
-Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
-  by server-13.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 18 Nov 2021 06:42:35 -0000
-Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 860BF100475
-        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 06:42:35 +0000 (GMT)
-Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 7A076100440
-        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 06:42:35 +0000 (GMT)
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.24; Thu, 18 Nov 2021 06:42:17 +0000
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH] ext4/051: Add another kernel commit
-Date:   Thu, 18 Nov 2021 14:42:23 +0800
-Message-ID: <1637217743-31142-1-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
+        Thu, 18 Nov 2021 08:56:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35048 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231707AbhKRN4d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Nov 2021 08:56:33 -0500
+Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82771C061570
+        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 05:53:33 -0800 (PST)
+Received: by mail-qk1-x72e.google.com with SMTP id de30so6409354qkb.0
+        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 05:53:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=8qz6+Ffim0VtBrei6YUdaIwmE40FCDb0WturicHRCYQ=;
+        b=UsraMUZ/2+tgmZd7zNWR+NwjRnPOBSuasM1fLTPb23KFjTQlCGUi9o3x455D/Qg/oV
+         ZcAFJNZ/JZSvhLYdvsSevk6DGyZaVSNSac39joHFhOxvfvGCxKTXxU1l9tECgikyHWm+
+         YPbJ6CHvtppke0HwmMn8K7HvhnXnhkKC95JiVBarGOb5vE9WMJxqD79Yp4jiFv4/dG2f
+         Pgfw5qSjWG0aWbF+S6PKA+yXjmivtzvqdDjaTODHd8RP3ZUE1W8iNRnql2mVt27qlRBC
+         ywG6HEusGcaJfFhqlESPfzGSzBKrZD/TgZOAzJr8qeG4DwprJt1uetRHhHd1hsfxQvke
+         jM0Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=8qz6+Ffim0VtBrei6YUdaIwmE40FCDb0WturicHRCYQ=;
+        b=xbUlCLaoMEh0NXOkOqsg2meuky2wHPYezerrcVl1xv1Hsw7ie/NBMnDiVTGlZFvL5X
+         +tATm/Qm0XWPqo+bUo5JKyU2AWWMGZ1gBtOkKL8xP/ncE3uwJFfr5WTaNzKruQy9utrh
+         Adk4Z/qXCxF+KEzcP12JDbGF+DUMdU9+livHgoQSwG/TQE8tSeQmrGZ1+fJ1i+mIXAJ6
+         Ip309wjfc4RmVfoJA7dclB5wmgHQVkCvWPSs9C7HxZp06KVkvMogKXYcnxfs90WKk619
+         RVdwo7G9QpcZyxBlAuF0u75SdpTiHjFhrnjM92NZk6Qmf5+9m8aCajnwTYXYGtzDz7+C
+         UN1g==
+X-Gm-Message-State: AOAM532V6oI8jYtOIciqlewBfQA5rmVksgfJrmLTnpKIFvgfGXyQd1CN
+        J3A7qGbMyoDL13nEzS4yRCMtigK00IrHFQ==
+X-Google-Smtp-Source: ABdhPJwoYBBfeBcJfZTiumazakJGpXGF9KPeKxr4VFJ61H96lPeMSMe2fl7juwYbenDu4AVbecabLw==
+X-Received: by 2002:a05:620a:3dd:: with SMTP id r29mr10104586qkm.208.1637243612555;
+        Thu, 18 Nov 2021 05:53:32 -0800 (PST)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id b2sm1441190qtg.88.2021.11.18.05.53.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 18 Nov 2021 05:53:31 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH] fstests: redirect 'btrfs device add' output to seqres.full
+Date:   Thu, 18 Nov 2021 08:53:30 -0500
+Message-Id: <8578e51fc913f827757d70568b9b983f3af0ce88.1637243599.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- tests/ext4/051 | 1 +
- 1 file changed, 1 insertion(+)
+I updated btrfs-progs on all my test runners and started failing tests
+because I was getting the TRIM messages in the golden output.  There
+were fixes that went in recently to properly detect TRIM support which
+resulted in extra messages being printed.  Fix this by redirecting
+stdout to $seqres.full for all 'btrfs device add' calls.  If anything
+fails we'll still pollute the output, but normal status messages will
+get properly eaten.
 
-diff --git a/tests/ext4/051 b/tests/ext4/051
-index d0e01465..e4b63a32 100755
---- a/tests/ext4/051
-+++ b/tests/ext4/051
-@@ -6,6 +6,7 @@
- #
- # Test that tune2fs doesn't fail after ext4 shutdown
- # Regression test for kernel commit:
-+# 4274f516d4bc ext4: recalucate superblock checksum after updating free blocks/inodes
- # b2bbb92f7042 ext4: fix e2fsprogs checksum failure for mounted filesystem
- #
- . ./common/preamble
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/btrfs/161 | 3 ++-
+ tests/btrfs/162 | 6 ++++--
+ tests/btrfs/163 | 3 ++-
+ tests/btrfs/164 | 3 ++-
+ tests/btrfs/175 | 2 +-
+ tests/btrfs/176 | 2 +-
+ tests/btrfs/194 | 4 ++--
+ tests/btrfs/197 | 3 ++-
+ tests/btrfs/216 | 2 +-
+ tests/btrfs/218 | 2 +-
+ tests/btrfs/225 | 2 +-
+ tests/btrfs/238 | 2 +-
+ 12 files changed, 20 insertions(+), 14 deletions(-)
+
+diff --git a/tests/btrfs/161 b/tests/btrfs/161
+index 059b95ca..ed5b67fa 100755
+--- a/tests/btrfs/161
++++ b/tests/btrfs/161
+@@ -42,7 +42,8 @@ create_seed()
+ 
+ create_sprout()
+ {
+-	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >> \
++		$seqres.full
+ 	_scratch_unmount
+ 	run_check _mount $dev_sprout $SCRATCH_MNT
+ 	echo -- sprout --
+diff --git a/tests/btrfs/162 b/tests/btrfs/162
+index ba37ef0c..7680e1e4 100755
+--- a/tests/btrfs/162
++++ b/tests/btrfs/162
+@@ -45,7 +45,8 @@ create_seed()
+ create_sprout_seed()
+ {
+ 	run_check _mount $dev_seed $SCRATCH_MNT
+-	_run_btrfs_util_prog device add -f $dev_sprout_seed $SCRATCH_MNT
++	_run_btrfs_util_prog device add -f $dev_sprout_seed $SCRATCH_MNT >>\
++		$seqres.full
+ 	_scratch_unmount
+ 	$BTRFS_TUNE_PROG -S 1 $dev_sprout_seed
+ }
+@@ -53,7 +54,8 @@ create_sprout_seed()
+ create_next_sprout()
+ {
+ 	run_check _mount $dev_sprout_seed $SCRATCH_MNT
+-	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >>\
++		$seqres.full
+ 	_scratch_unmount
+ 	run_check _mount $dev_sprout $SCRATCH_MNT
+ 	echo -- sprout --
+diff --git a/tests/btrfs/163 b/tests/btrfs/163
+index 1dc081f1..59f0461b 100755
+--- a/tests/btrfs/163
++++ b/tests/btrfs/163
+@@ -58,7 +58,8 @@ create_seed()
+ 
+ add_sprout()
+ {
+-	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >>\
++		$seqres.full
+ 	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
+ 	_mount -o remount,rw $dev_sprout $SCRATCH_MNT
+ 	$XFS_IO_PROG -f -c "pwrite -S 0xcd 0 4M" $SCRATCH_MNT/foobar2 >\
+diff --git a/tests/btrfs/164 b/tests/btrfs/164
+index 3e69b35f..8fd6ab62 100755
+--- a/tests/btrfs/164
++++ b/tests/btrfs/164
+@@ -48,7 +48,8 @@ create_seed()
+ 
+ add_sprout()
+ {
+-	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >>\
++		$seqres.full
+ 	run_check mount -o rw,remount $dev_seed $SCRATCH_MNT
+ 	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
+ }
+diff --git a/tests/btrfs/175 b/tests/btrfs/175
+index 6f7832a5..dc6c1921 100755
+--- a/tests/btrfs/175
++++ b/tests/btrfs/175
+@@ -49,7 +49,7 @@ _scratch_mount
+ # device.
+ _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
+ scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $2 }')"
+-$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
+ swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
+ swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
+ 
+diff --git a/tests/btrfs/176 b/tests/btrfs/176
+index 8d624d5a..869cf2d8 100755
+--- a/tests/btrfs/176
++++ b/tests/btrfs/176
+@@ -30,7 +30,7 @@ echo "Remove device"
+ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount
+ _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
+-$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
+ swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
+ # We know the swap file is on device 1 because we added device 2 after it was
+ # already created.
+diff --git a/tests/btrfs/194 b/tests/btrfs/194
+index a994a429..2431692b 100755
+--- a/tests/btrfs/194
++++ b/tests/btrfs/194
+@@ -55,9 +55,9 @@ _scratch_mount
+ # Add and remove device in a loop, each iteration will increase devid by 2.
+ # So by 64 iterations, we will definitely hit that 122 limit.
+ for (( i = 0; i < 64; i++ )); do
+-	$BTRFS_UTIL_PROG device add -f $device_2 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG device add -f $device_2 $SCRATCH_MNT >> $seqres.full
+ 	$BTRFS_UTIL_PROG device del $device_1 $SCRATCH_MNT
+-	$BTRFS_UTIL_PROG device add -f $device_1 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG device add -f $device_1 $SCRATCH_MNT >> $seqres.full
+ 	$BTRFS_UTIL_PROG device del $device_2 $SCRATCH_MNT
+ done | grep -v 'Resetting device zone'
+ _scratch_dev_pool_put
+diff --git a/tests/btrfs/197 b/tests/btrfs/197
+index 597bc36f..22b37b4b 100755
+--- a/tests/btrfs/197
++++ b/tests/btrfs/197
+@@ -55,7 +55,8 @@ workout()
+ 	# don't test with the first device as auto fs check (_check_scratch_fs)
+ 	# picks the first device
+ 	device_1=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
+-	$BTRFS_UTIL_PROG device add -f "$device_1" "$TEST_DIR/$seq.mnt"
++	$BTRFS_UTIL_PROG device add -f "$device_1" "$TEST_DIR/$seq.mnt" >> \
++		$seqres.full
+ 
+ 	device_2=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
+ 	_mount -o degraded $device_2 $SCRATCH_MNT
+diff --git a/tests/btrfs/216 b/tests/btrfs/216
+index 38efa0f5..5d6cf902 100755
+--- a/tests/btrfs/216
++++ b/tests/btrfs/216
+@@ -28,7 +28,7 @@ _mkfs_dev $seed
+ $BTRFS_TUNE_PROG -S 1 $seed
+ _mount $seed $SCRATCH_MNT >> $seqres.full 2>&1
+ cat /proc/self/mounts | grep $seed >> $seqres.full
+-$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
++$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT >> $seqres.full
+ cat /proc/self/mounts | grep $sprout >> $seqres.full
+ 
+ # check if the show_devname() returns the sprout device instead of seed device.
+diff --git a/tests/btrfs/218 b/tests/btrfs/218
+index 5af54f3b..83ec785e 100755
+--- a/tests/btrfs/218
++++ b/tests/btrfs/218
+@@ -41,7 +41,7 @@ $BTRFS_TUNE_PROG -S 1 $dev_seed
+ 
+ # Mount the seed device and add the rw device
+ _mount -o ro $dev_seed $SCRATCH_MNT
+-_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >> $seqres.full
+ $BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_scratch_pool
+ _scratch_unmount
+ 
+diff --git a/tests/btrfs/225 b/tests/btrfs/225
+index 408c03d2..cfb64a34 100755
+--- a/tests/btrfs/225
++++ b/tests/btrfs/225
+@@ -48,7 +48,7 @@ $BTRFS_TUNE_PROG -S 1 $seed
+ 
+ # Mount the seed device and add the rw device
+ _mount -o ro $seed $SCRATCH_MNT
+-$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
++$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT >> $seqres.full
+ _scratch_unmount
+ 
+ # Now remount
+diff --git a/tests/btrfs/238 b/tests/btrfs/238
+index 2622f353..57245917 100755
+--- a/tests/btrfs/238
++++ b/tests/btrfs/238
+@@ -38,7 +38,7 @@ $BTRFS_TUNE_PROG -S 1 $seed
+ _mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
+ md5sum $SCRATCH_MNT/foo | _filter_scratch
+ 
+-$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
++$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT >> $seqres.full
+ _scratch_unmount
+ 
+ # Now remount writeable sprout device, create some data and run fstrim
 -- 
-2.23.0
+2.26.3
 
