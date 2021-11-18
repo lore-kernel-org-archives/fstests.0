@@ -2,61 +2,61 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D495DC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 13:53:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D705C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 14:53:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B671461A6C
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 13:53:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2EF4F61406
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Nov 2021 14:53:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231789AbhKRN4e (ORCPT
+        id S230024AbhKRO4X (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 18 Nov 2021 08:56:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35048 "EHLO
+        Thu, 18 Nov 2021 09:56:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49634 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231707AbhKRN4d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Nov 2021 08:56:33 -0500
-Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82771C061570
-        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 05:53:33 -0800 (PST)
-Received: by mail-qk1-x72e.google.com with SMTP id de30so6409354qkb.0
-        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 05:53:33 -0800 (PST)
+        with ESMTP id S229905AbhKRO4X (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Nov 2021 09:56:23 -0500
+Received: from mail-qv1-xf30.google.com (mail-qv1-xf30.google.com [IPv6:2607:f8b0:4864:20::f30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 374AAC06173E
+        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 06:53:23 -0800 (PST)
+Received: by mail-qv1-xf30.google.com with SMTP id bu11so4787037qvb.0
+        for <fstests@vger.kernel.org>; Thu, 18 Nov 2021 06:53:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
         h=from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=8qz6+Ffim0VtBrei6YUdaIwmE40FCDb0WturicHRCYQ=;
-        b=UsraMUZ/2+tgmZd7zNWR+NwjRnPOBSuasM1fLTPb23KFjTQlCGUi9o3x455D/Qg/oV
-         ZcAFJNZ/JZSvhLYdvsSevk6DGyZaVSNSac39joHFhOxvfvGCxKTXxU1l9tECgikyHWm+
-         YPbJ6CHvtppke0HwmMn8K7HvhnXnhkKC95JiVBarGOb5vE9WMJxqD79Yp4jiFv4/dG2f
-         Pgfw5qSjWG0aWbF+S6PKA+yXjmivtzvqdDjaTODHd8RP3ZUE1W8iNRnql2mVt27qlRBC
-         ywG6HEusGcaJfFhqlESPfzGSzBKrZD/TgZOAzJr8qeG4DwprJt1uetRHhHd1hsfxQvke
-         jM0Q==
+        bh=WvsCelSA9qojSBYYxQN9cQ7TeHm9LJ7pYSgc1zZBMbY=;
+        b=fhcMzhjJWeWJTEr7FUlp8X/fSYqoYdg7+gGr1HTto0Sq84d4ezjd/nnlCvsIZdrK+y
+         xRdS6H4fp0hg/G1CAK971DhJSao1VDBrWPn5bdqWQE4PoMO02UxC1qiB1yfpWF9zfrmd
+         7c5O+355h5UJzxfKshhW2ES2/VjUNePeN1jXQBqamjOB7pV7RBRltQ2NRktA6FNFfq7W
+         pBXVapCSIcVNFX3FDhUWn9suqtHNUHBChKi14dirlpgQ8hDdSiPsbphrlDNuyFSPlUR4
+         gCFgZZKg+iuJ2UlqRw5liVHCJF8Z531IBrs8gz97Du3XJqyAx//zCTZu9Bsa66mkBu4Z
+         rdWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=8qz6+Ffim0VtBrei6YUdaIwmE40FCDb0WturicHRCYQ=;
-        b=xbUlCLaoMEh0NXOkOqsg2meuky2wHPYezerrcVl1xv1Hsw7ie/NBMnDiVTGlZFvL5X
-         +tATm/Qm0XWPqo+bUo5JKyU2AWWMGZ1gBtOkKL8xP/ncE3uwJFfr5WTaNzKruQy9utrh
-         Adk4Z/qXCxF+KEzcP12JDbGF+DUMdU9+livHgoQSwG/TQE8tSeQmrGZ1+fJ1i+mIXAJ6
-         Ip309wjfc4RmVfoJA7dclB5wmgHQVkCvWPSs9C7HxZp06KVkvMogKXYcnxfs90WKk619
-         RVdwo7G9QpcZyxBlAuF0u75SdpTiHjFhrnjM92NZk6Qmf5+9m8aCajnwTYXYGtzDz7+C
-         UN1g==
-X-Gm-Message-State: AOAM532V6oI8jYtOIciqlewBfQA5rmVksgfJrmLTnpKIFvgfGXyQd1CN
-        J3A7qGbMyoDL13nEzS4yRCMtigK00IrHFQ==
-X-Google-Smtp-Source: ABdhPJwoYBBfeBcJfZTiumazakJGpXGF9KPeKxr4VFJ61H96lPeMSMe2fl7juwYbenDu4AVbecabLw==
-X-Received: by 2002:a05:620a:3dd:: with SMTP id r29mr10104586qkm.208.1637243612555;
-        Thu, 18 Nov 2021 05:53:32 -0800 (PST)
+        bh=WvsCelSA9qojSBYYxQN9cQ7TeHm9LJ7pYSgc1zZBMbY=;
+        b=q+1sa9hDvF1lBraQhtvv1XpuVl4eaBapVuJhvVOowscLp9RcpU2i9fWZEyEvrhhD94
+         /TdYjJeiEnE9JsTqIJpyBJbW6kKhagbGrqGRPLGRHbzTHGcMDPE9jAYksLN2nAH8UCek
+         amPbKVvTIiAbzpEzbzesveWg9gaskhFkqLIZCnDZPhw18QvoEHJ972/FQPgwc8ux1cY6
+         Sw20fWRyCYgtupwWMKoulAuU82KG1AQAqeYxu/s4+NBDbjV2LURkN2GUzEaYfSdjxOzf
+         fMv1AiVjTqGND3xFCT0iIwX+87y+X0TvMp+ZGKfh5ZKWUSS0eJGGFNvLhEqQrMfM5107
+         Qy5w==
+X-Gm-Message-State: AOAM533FoA+67GZy2wbanlOlFIm6prGuGjlY9tPomIxTlt6tlat0w+ib
+        v7zEroqD87baMPaw7UNYjU/0OA==
+X-Google-Smtp-Source: ABdhPJxogNm17rr8TKveROFcn2FSiS6C7qtDjvsZ1voP5LmLuGswtO5QEd0//ahhpAdznLdaW9524Q==
+X-Received: by 2002:ad4:446f:: with SMTP id s15mr64355224qvt.1.1637247202230;
+        Thu, 18 Nov 2021 06:53:22 -0800 (PST)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id b2sm1441190qtg.88.2021.11.18.05.53.31
+        by smtp.gmail.com with ESMTPSA id d13sm28823qkn.100.2021.11.18.06.53.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Nov 2021 05:53:31 -0800 (PST)
+        Thu, 18 Nov 2021 06:53:21 -0800 (PST)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
         fstests@vger.kernel.org
-Subject: [PATCH] fstests: redirect 'btrfs device add' output to seqres.full
-Date:   Thu, 18 Nov 2021 08:53:30 -0500
-Message-Id: <8578e51fc913f827757d70568b9b983f3af0ce88.1637243599.git.josef@toxicpanda.com>
+Subject: [PATCH v2] fstests: redirect 'btrfs device add' output to seqres.full
+Date:   Thu, 18 Nov 2021 09:53:20 -0500
+Message-Id: <bf24618b10a75719a23dda2f0a742bd322ec8d46.1637247167.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -74,19 +74,22 @@ get properly eaten.
 
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
+v1->v2:
+- I missed some of the device add calls in btrfs/176 somehow, fixed it.
+
  tests/btrfs/161 | 3 ++-
  tests/btrfs/162 | 6 ++++--
  tests/btrfs/163 | 3 ++-
  tests/btrfs/164 | 3 ++-
  tests/btrfs/175 | 2 +-
- tests/btrfs/176 | 2 +-
+ tests/btrfs/176 | 6 +++---
  tests/btrfs/194 | 4 ++--
  tests/btrfs/197 | 3 ++-
  tests/btrfs/216 | 2 +-
  tests/btrfs/218 | 2 +-
  tests/btrfs/225 | 2 +-
  tests/btrfs/238 | 2 +-
- 12 files changed, 20 insertions(+), 14 deletions(-)
+ 12 files changed, 22 insertions(+), 16 deletions(-)
 
 diff --git a/tests/btrfs/161 b/tests/btrfs/161
 index 059b95ca..ed5b67fa 100755
@@ -168,10 +171,10 @@ index 6f7832a5..dc6c1921 100755
  swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
  
 diff --git a/tests/btrfs/176 b/tests/btrfs/176
-index 8d624d5a..869cf2d8 100755
+index 8d624d5a..9a833575 100755
 --- a/tests/btrfs/176
 +++ b/tests/btrfs/176
-@@ -30,7 +30,7 @@ echo "Remove device"
+@@ -30,14 +30,14 @@ echo "Remove device"
  _scratch_mkfs >> $seqres.full 2>&1
  _scratch_mount
  _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
@@ -180,6 +183,23 @@ index 8d624d5a..869cf2d8 100755
  swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
  # We know the swap file is on device 1 because we added device 2 after it was
  # already created.
+ $BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
+ # Deleting/readding device 2 should still work.
+ $BTRFS_UTIL_PROG device delete "$scratch_dev2" "$SCRATCH_MNT"
+-$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
+ swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
+ # Deleting device 1 should work again after swapoff.
+ $BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT"
+@@ -48,7 +48,7 @@ echo "Replace device"
+ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount
+ _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
+-$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
+ swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
+ # Again, we know the swap file is on device 1.
+ $BTRFS_UTIL_PROG replace start -fB "$scratch_dev1" "$scratch_dev3" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
 diff --git a/tests/btrfs/194 b/tests/btrfs/194
 index a994a429..2431692b 100755
 --- a/tests/btrfs/194
