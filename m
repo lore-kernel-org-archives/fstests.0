@@ -2,359 +2,523 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A444C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 19 Nov 2021 23:04:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EEF8C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Nov 2021 14:43:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234928AbhKSXHi (ORCPT
+        id S238279AbhKUOqm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 19 Nov 2021 18:07:38 -0500
-Received: from de-smtp-delivery-102.mimecast.com ([194.104.109.102]:30023 "EHLO
-        de-smtp-delivery-102.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234878AbhKSXHh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 19 Nov 2021 18:07:37 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=mimecast20200619;
-        t=1637363073;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=KQHjyk/P9zDh9o8hF8aMCRt+NdddsZkfMMuv1P4edJU=;
-        b=Pa4VuwfHk8pwaHwN/YeIACOgMi2NI62GPRuyQEcujklYnXHctIviBQaoP2WX9+1HirHABY
-        FW3HpppXdticg6/7NiIyc8OivznN1ZGt01iUiURiIDyxgFLmej3aY42Hspzntz5Py4Voej
-        J1WQPWWASaSK3aLiNSdMll+PIe/KzfY=
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com
- (mail-vi1eur04lp2059.outbound.protection.outlook.com [104.47.14.59]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- de-mta-37-MydioqD8OR2WdydyeeQtwQ-1; Sat, 20 Nov 2021 00:04:32 +0100
-X-MC-Unique: MydioqD8OR2WdydyeeQtwQ-1
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=XyKJbHsZgfBOQ+F6r9zBikZfslVAl4w1NHzEZqFzyoWiA/ml0wcwlXOE+n4yawGzkLzMnRiBFjTQBj8bRYPLTcxFbjQGzNcy7BzvpQojIrHew/7PYwOPUSUZoDjYC9agaRcVODE6EUWwZLaaARetw2fy1fyqci12DvDoZTF5TEr/pcvvFxINcvZ02vGXb3C1EoxRfx9TVYYoQbdPo/rkh8Xt9i+hNq7vt9C+vhhoyD8PyXKv8PVPOHdn5DUlkwLhR/3Za8DTC88L0+CwVEKiK1/d2WAQp6kNiK1LfrKM1P0gFN7Af2wi/BdqyabNTfPsFXJx1FnV64P35unkNdHweQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=KQHjyk/P9zDh9o8hF8aMCRt+NdddsZkfMMuv1P4edJU=;
- b=fIkA3zDJbs9kkHGsRuhqWBU54bRw6crR+YEOoqCqsil6pMnIKs/stPu9Z00H8Xgz5qRa0K0YZI5BY67jwZWfKgxcN7C2lLjWVWLO1Gbu4SapEh2fOQ7sKkKgO5MkKPUmjvM3KP5pSogiIx79sNlhCkds8D3Zg6aPODx+kHcDicwFxeJklTQtnmRXNoJqti0ZR3wn7eh+NsZYxh1HflpL6xTKw0A8PzyFgaQuBMm8jE/ifBwSG9IidYrndWwNGLlTboVHpYU1dfvTKW42ypn8fFFKoWcq+lFczP36B4ZSiu0xjElNg1vyN71IE8xftIwpQa9B4JPxGV2eAaR24RKmng==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
- dkim=pass header.d=suse.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=suse.com;
-Received: from DB9PR04MB9426.eurprd04.prod.outlook.com (2603:10a6:10:36a::14)
- by DU2PR04MB8901.eurprd04.prod.outlook.com (2603:10a6:10:2e0::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4713.22; Fri, 19 Nov
- 2021 23:04:30 +0000
-Received: from DB9PR04MB9426.eurprd04.prod.outlook.com
- ([fe80::ed16:bc50:4079:9286]) by DB9PR04MB9426.eurprd04.prod.outlook.com
- ([fe80::ed16:bc50:4079:9286%8]) with mapi id 15.20.4690.027; Fri, 19 Nov 2021
- 23:04:30 +0000
-Message-ID: <7cf937ea-b0b3-ac42-308d-73fadd134b30@suse.com>
-Date:   Sat, 20 Nov 2021 07:04:16 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.1
-Subject: Re: [PATCH v2] fstests: redirect 'btrfs device add' output to
- seqres.full
-Content-Language: en-US
-To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com, fstests@vger.kernel.org
-References: <bf24618b10a75719a23dda2f0a742bd322ec8d46.1637247167.git.josef@toxicpanda.com>
-From:   Qu Wenruo <wqu@suse.com>
-In-Reply-To: <bf24618b10a75719a23dda2f0a742bd322ec8d46.1637247167.git.josef@toxicpanda.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: TYCPR01CA0041.jpnprd01.prod.outlook.com
- (2603:1096:405:1::29) To DB9PR04MB9426.eurprd04.prod.outlook.com
- (2603:10a6:10:36a::14)
+        Sun, 21 Nov 2021 09:46:42 -0500
+Received: from out20-37.mail.aliyun.com ([115.124.20.37]:52252 "EHLO
+        out20-37.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238079AbhKUOql (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Nov 2021 09:46:41 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0839433-0.000930811-0.915126;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047205;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.Lwf5Vvq_1637505814;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Lwf5Vvq_1637505814)
+          by smtp.aliyun-inc.com(10.147.41.143);
+          Sun, 21 Nov 2021 22:43:34 +0800
+Date:   Sun, 21 Nov 2021 22:43:34 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Stefan Roesch <shr@fb.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        kernel-team@fb.com
+Subject: Re: [PATCH v4] btrfs: Add new test for setting the chunk size.
+Message-ID: <YZpbFu9UZp6LyFks@desktop>
+References: <20211102212329.3708782-1-shr@fb.com>
 MIME-Version: 1.0
-Received: from [0.0.0.0] (45.77.180.217) by TYCPR01CA0041.jpnprd01.prod.outlook.com (2603:1096:405:1::29) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4713.21 via Frontend Transport; Fri, 19 Nov 2021 23:04:28 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: e195e3da-4e0f-4f15-d0e9-08d9abb0f181
-X-MS-TrafficTypeDiagnostic: DU2PR04MB8901:
-X-Microsoft-Antispam-PRVS: <DU2PR04MB89014D4AE80A02AE514F7A78D69C9@DU2PR04MB8901.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: CEPYHQ3XCPmlco+7ckqYAGeRX3hS4y+mI8KVAEtazKa04SkfMOiOLKaL1jy0/BBhld0M8IryI0DYw4RbsIA6IDhfYInwrrhKHTD+gShh7FG4e2xNpnd5AOM7km24G6mtplYDvZuJB9i5YVvaM7W294x+Lg8x6GO0rEaxbIsB/MDR0gEwsx6q1TfpkqjToS9OS20YogisdET5E7qU8BRNcr3c3u5Lr3D7SbeBqQUtb7BuCRAPn1fYzDVzgHEkce3e5GlUnO7MLkqDYlrgGLnW/jTMULxXDUr4/Y3YvSS5+t/eAG85onO/mhKANyWiBNkGl4CxLYiHEqqSw5FVYlml9a5Gi8rigJRH16wAhTAfGONnL2EAAjgYVBK5h+CCYW1aTVHacb7Lq8VWSaAGoHurPi73p7xDzmZTChgga8Ps/an6q2ny7RG8MWlB+DxXhoDOJ4WmpYP5P0zzDL8vHpQd5yy3i0UtcNhy416GFa+g1bx1+JoknJhDgsCExBp4We2u49d1IWU7f3/H0XnUMB+Wp06R7LiHSRsfULfkkaBrc5fs5ryMbg+jufIspt58Wk9Gj51BUqR66rnyXqxezdfrdoduPGoGZEGzoLvnvtm80NIPFEwh+38cUkJWNruEJXBF8LXPrkB9UMImwZi6OVpubh0+7IEhpXiH7M/uAZ3NzV0ZWQu//7uSUeu14MvxUMdx3UrnrS84AS4OwyjOz2LZP+6Qi9pIFQ+lQ47UobRhHV3TCxRixn8vODRrnUkY48jCNtPFPIM2oXKH11rZ28fCUg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB9PR04MB9426.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(38100700002)(508600001)(26005)(6486002)(2906002)(5660300002)(36756003)(6666004)(16576012)(956004)(316002)(53546011)(55236004)(8676002)(31696002)(8936002)(66946007)(31686004)(2616005)(186003)(66556008)(86362001)(6706004)(66476007)(83380400001)(78286007)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?SmNRczljcnBTTndGeDkzQVdPRW51eThqcFovNmEyNEo4QllDdndTZWUrMGw4?=
- =?utf-8?B?YnhRRU96WU12ZHBYTTk0eEpUVHJLelpTZkNjNzAweWhoV1VzeCtyZVVPYlB0?=
- =?utf-8?B?MGw4WDB4ZFNON1hZbnVkNlQvYzQzeGdJRnV5c01xVUgrS2tVS1V1YlZWRXBa?=
- =?utf-8?B?WGthSXZNOHVSZTE2ZlhzdGRyZ2wrbmlWa3hURWZSVmVrbmQvWVY0TWg3R2NE?=
- =?utf-8?B?OHFVR013L1VwS2lsSkcwa1FGdlFzOWdjdm83YkNYbGZPR2kzT1VtT1FrbXph?=
- =?utf-8?B?UGJlVGZlaHJGWTljeVJ5S0tQa0Z4bUhReUdZYlpNbVBlbEk2cXQ5OW40N2Vv?=
- =?utf-8?B?NTdFMnNXYU1DM3RjOVVnM3NpdU1SZ2ZBSHV5K210eEd6eWFEVEx5NWVaMTY5?=
- =?utf-8?B?YUhxZWl4bUdjc0tnU0k3MGM2VDhKNVlaQ0VFdEx5M0lXUHE4Tk56d20vcFNS?=
- =?utf-8?B?Nk5QM3FkUmJxNlVKTmJORmQvNFU0dWhmTFNGbjVhNG8xbElMRVREOGFldEQx?=
- =?utf-8?B?ZHN5TXpxQ3lVNmJVVm0xcTJTbFp2Vnl1cG0ycVpYK2g2V1hnaUVHRldBNTUv?=
- =?utf-8?B?OFFocWFVeFJrTE1nSUVOTG55emU1V3JTNllNZzF6TDBwMTZ4TEdnNmxGV0dy?=
- =?utf-8?B?SlhMOG9GclJldDI3bnl2UTNwWUZ2anZ4Y052RE1XSlFOQVlDN0tWTjZoempj?=
- =?utf-8?B?c3pRalRFZzJUQnc1VnR6ZDhQSFIvRVNBYTNHVXFEYWsrN3VyTDA4dmE1OXVP?=
- =?utf-8?B?ekZteHhBOEVJZTlLQXN4b3Z2blVBTHlWSW95Q0RtejdNM2NBUURueXpwTTRq?=
- =?utf-8?B?eUFvcWtPc3plRkE2c3pIVW82Sy90MVpMZVRsSnd5UUdEVTRkZzluMlVvNTlO?=
- =?utf-8?B?Y2NzQkpML0NXd0NzK2ZQMVZ6U2ZxUGtUTXlOZXEyYUQrbUhtZjBTWG1qNDVv?=
- =?utf-8?B?bUhxTGpNTURGYWdlaGx6WTN6bk9vcjY4bnV0SkxUT0xLcUZwNlZybEFtcjU4?=
- =?utf-8?B?bUE2Z3RFT212THl2SzIxU3YvQ3FsZjF2T0xDTkJwWkNuNTNjbDRzYXdPTWlT?=
- =?utf-8?B?RGtnWkw2NnE3ZVlPdTVHTE5HSm1sVms5QXk4d0tnZ0VveVdtamxjeENRNnlN?=
- =?utf-8?B?Y21YQjFPTkpiTm5uY1NyYlU0TmpiYUNjTEpsdkVidnFsaUlEQWJUTklpbi9M?=
- =?utf-8?B?b1ludUZTRStDbi9KbHRDbnNRT1pFYmErSVc0NkdTZ0JxYktjcXpMUlZ6V2xY?=
- =?utf-8?B?Tk1HaXhHZU40enBZVktIbXVmY05scUdlcG96QWxpb0tSQldENnVRaFBXMFFm?=
- =?utf-8?B?dVlTSHB0ckJqT2xnYnpEQTNUSFZKeWtocXlJRGZWLzV3Ui82UVBXeG55REdT?=
- =?utf-8?B?cUpjNzFoYTZHcWhWdXFyOHJBUktMdGd0blhFTnlITUhZam5Tc2pRZlhGRExa?=
- =?utf-8?B?MzkxRzkvM1pOTXJwTGVmdzM0Y2hrWWZ4SnJrdGlyRWw0Y0twTW1FRkNQZi9E?=
- =?utf-8?B?TWJvRGpOdFc2cGFWbThVTWNlVVIxYjJ6QmxRTXdWSXdtZGIyc1A5UHZqaDYv?=
- =?utf-8?B?RXhGN1ZIQUtBUlFpZHR0M1kwdVRuUkppOXVCazVQR05UclRpUktCNEdsZEw3?=
- =?utf-8?B?bTh0STM2SlBraHlvaGIzenpocnJ5eTQwa2Q0dk1QTnRLeVBCQzNFMkFYOUdB?=
- =?utf-8?B?c050dDZlR1hhL1lKNkJSTVFLZS93VnhONHBnb0VTb0FWdHc5T1V4TG5UaDlz?=
- =?utf-8?B?Q3MvaFRXOHhWU0E3STgrNmFFNm40TFFUc3puTk94M0R3MmVEenYvM0JFNHV2?=
- =?utf-8?B?UVlFMlVvSU1xVkt2Vmtta3J4dWgwMnVrTEVhYWpLQ1lLTmZUVXFYbW94WjRX?=
- =?utf-8?B?OEZyb3Fhbis0bDVwRmlDSExXayt1Ymt3MWZqSDdwdHYvcTFPa3Q1NE9vdGZD?=
- =?utf-8?B?YUdzWDhKTEZoQjBxYXYyT0JOYUc3VjMrRVJmSTZtSzJCZHJOcTNSZ1FhdW1t?=
- =?utf-8?B?WVdqaFlqckUwZ3dmWFVqbEJKcDhCN25zL0lUdHBpVmVSbGN3N1BEY0hJYXFE?=
- =?utf-8?B?RXZ1cURoc09aMnFHcStFVCsyaW1DR0hnRW92S1hRQnBzbHMrbHhMWDhJS3ln?=
- =?utf-8?Q?iRwg=3D?=
-X-OriginatorOrg: suse.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e195e3da-4e0f-4f15-d0e9-08d9abb0f181
-X-MS-Exchange-CrossTenant-AuthSource: DB9PR04MB9426.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Nov 2021 23:04:30.5340
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: F7Ha9g6F/pOw0VOLCQKHHVjnYonHitZFlcPrgsf/RD7uCTShRzs6kyQS1e4FQdOP
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DU2PR04MB8901
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211102212329.3708782-1-shr@fb.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 2021/11/18 22:53, Josef Bacik wrote:
-> I updated btrfs-progs on all my test runners and started failing tests
-> because I was getting the TRIM messages in the golden output.  There
-> were fixes that went in recently to properly detect TRIM support which
-> resulted in extra messages being printed.  Fix this by redirecting
-> stdout to $seqres.full for all 'btrfs device add' calls.  If anything
-> fails we'll still pollute the output, but normal status messages will
-> get properly eaten.
+On Tue, Nov 02, 2021 at 02:23:29PM -0700, Stefan Roesch wrote:
+> Summary:
 > 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> Add new testcase for testing the new btrfs sysfs knob to change the
+> chunk size. The new knob uses /sys/fs/btrfs/<UUID>/allocation/<block
+> type>/chunk_size.
+> 
+> The test case implements three different cases:
+> - Test allocation with the default chunk size
+> - Test allocation after increasing the chunk size
+> - Test allocation when the free space is smaller than the chunk size.
+> 
+> Note: this test needs to force the allocation of space. It uses the
+> /sys/fs/btrfs/<UUID>/allocation/<block type>/force_chunk_alloc knob.
+> 
+> Testing:
+> The test has been run with volumes of different sizes.
+> 
+> Signed-off-by: Stefan Roesch <shr@fb.com>
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+Sorry for the late review.. I noticed some other minor issues below.
+
+> ---
+> V4: - fixed indentation in common/btrfs
+>     - Removed UUID code, which is no longer necessary (provided
+>       by helper function)
+>     - Used new helper _get_btrfs_sysfs_attr
+>     - Direct output to /dev/null
+> V3: - removed tests for system block type.
+>     - added failure case for system block type.
+>     - renamed stripe_size to chunk_size
+> V2: - added new functions to common/btrfs and use them in the new test
+>       - _require_btrfs_sysfs_attr - Make sure btrfs supports a sysfs
+>         setting
+>       - _get_btrfs_sysfs_attr - Read sysfs value
+>       - _set_btrfs_sysfs_attr - Write sysfs value
+>     - create file system of required size with _scratch_mkfs_sized
+>     - use shortened error message
+>     - Remove last logging message
+> ---
+>  common/btrfs        |  73 ++++++++++++
+>  tests/btrfs/049     | 280 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/049.out |  11 ++
+>  3 files changed, 364 insertions(+)
+>  create mode 100755 tests/btrfs/049
+>  create mode 100644 tests/btrfs/049.out
+> 
+> diff --git a/common/btrfs b/common/btrfs
+> index ac880bdd..d6a7585d 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -445,3 +445,76 @@ _scratch_btrfs_is_zoned()
+>  	[ `_zone_type ${SCRATCH_DEV}` != "none" ] && return 0
+>  	return 1
+>  }
+> +
+> +# Print the content of /sys/fs/btrfs/$UUID/$ATTR
+> +#
+> +# All arguments are necessary, and in this order:
+> +#  - mnt: mount point name, e.g. $SCRATCH_MNT
+> +#  - attr: path name under /sys/fs/btrfs/$uuid/$attr
+> +#
+> +# Usage example:
+> +#   _get_btrfs_sysfs_attr /mnt/scratch allocation/data/stripe_size
+> +_get_btrfs_sysfs_attr()
+> +{
+> +	local mnt=$1
+> +	local attr=$2
+> +
+> +	if [ ! -e "$mnt" -o -z "$attr" ];then
+> +		_fail "Usage: _get_btrfs_sysfs_attr <mounted_directory> <attr>"
+> +	fi
+> +
+> +	local uuid=$(findmnt -n -o UUID ${mnt})
+> +	cat /sys/fs/btrfs/${uuid}/${attr}
+> +}
+> +
+> +# Write "content" into /sys/fs/btrfs/$UUID/$ATTR
+> +#
+> +# All arguments are necessary, and in this order:
+> +#  - mnt: mount point name, e.g. $SCRATCH_MNT
+> +#  - attr: path name under /sys/fs/btrfs/$uuid/$attr
+> +#  - content: the content of $attr
+> +#
+> +# Usage example:
+> +#   _set_btrfs_sysfs_attr /mnt/scratch allocation/data/chunk_size
+> +_set_btrfs_sysfs_attr()
+> +{
+> +	local mnt=$1
+> +	shift
+> +	local attr=$1
+> +	shift
+> +	local content="$*"
+> +
+> +	if [ ! -e "$mnt" -o -z "$attr" -o -z "$content" ];then
+> +		_fail "Usage: _set_btrfs_sysfs_attr <mounted_directory> <attr> <content>"
+> +	fi
+> +
+> +	local uuid=$(findmnt -n -o UUID ${mnt})
+> +	echo "$content" > /sys/fs/btrfs/${uuid}/${attr} 2>/dev/null
+> +	if [ $? -ne 0 ]; then
+> +		_dump_err "_set_btrfs_sysfs_attr cannot write ${attr}"
+> +	fi
+> +}
+
+It seems that above two functions are almost identical to the generic
+counter parts in common/rc, the only difference is _[gs]et_sysfs_attr()
+takes device as first arg and uses the short dev name not filesystem
+UUID.
+
+So I'm wondering if it's possible to extend _[gs]et_sysfs_attr() to
+support btrfs as well, i.e. we sill pass device as the first arg, and
+find uuid by dev if $FSTYP is btrfs, e.g.
+
+	local dname
+	case "$FSTYP" in
+	btrfs)
+		dname=$(findmnt -n -o UUID ${dev}) ;;
+	*)
+		dname=$(_short_dev $dev) ;;
+	esac
+
+> +
+> +# Verify if the sysfs entry in /sys/fs/btrfs/$UUID/$ATTR exists
+> +#
+> +# All arguments are necessary, and in this order:
+> +#  - mnt: mount point name, e.g. $SCRATCH_MNT
+> +#  - attr: path name under /sys/fs/btrfs/$uuid/$attr
+> +#
+> +# Usage example:
+> +#   _require_btrfs_sysfs_attr /mnt/scratch allocation/data/chunk_size
+> +_require_btrfs_sysfs_attr()
+> +{
+> +	local mnt=$1
+> +	local attr=$2
+> +
+> +	if [ ! -e "$mnt" -o -z "$attr" ];then
+> +		_fail "Usage: _get_btrfs_sysfs_attr <mounted_directory> <attr>"
+> +	fi
+> +
+> +	local uuid=$(findmnt -n -o UUID ${mnt})
+> +	if [[ ! -e  /sys/fs/btrfs/${uuid}/${attr} ]]; then
+> +		_notrun "Btrfs does not support sysfs $attr"
+> +	fi
+> +}
+
+I think this could be done by extending _require_fs_sysfs() in the same
+way.
+
+> +
+> diff --git a/tests/btrfs/049 b/tests/btrfs/049
+> new file mode 100755
+> index 00000000..780636ae
+> --- /dev/null
+> +++ b/tests/btrfs/049
+> @@ -0,0 +1,280 @@
+> +#!/bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Facebook.  All Rights Reserved.
+> +#
+> +# FS QA Test 250
+> +#
+> +# Test the new /sys/fs/btrfs/<uuid>/allocation/<block-type>/chunk_size
+> +# setting. This setting allows the admin to change the chunk size
+> +# setting for the next allocation.
+> +#
+> +# Test 1:
+> +#   Allocate storage for all three block types (data, metadata and system)
+> +#   with the default chunk size.
+> +#
+> +# Test 2:
+> +#   Set a new chunk size to double the default size and allocate space
+> +#   for all new block types with the new chunk size.
+> +#
+> +# Test 3:
+> +#   Pick an allocation size that is used in a loop and make sure the last
+> +#   allocation cannot be partially fullfilled.
+> +#
+> +# Note: Variable naming uses the following convention: if a variable name
+> +#       ends in "_B" then its a byte value, if it ends in "_MB" then the
+> +#       value is in megabytes.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto
+> +
+> +test_file="${TEST_DIR}/${seq}"
+> +seq=`basename $0`
+> +seqres="${RESULT_DIR}/${seq}"
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$test_file"
+> +}
+> +
+> +# Parse a size string which is in the format "XX.XXMib".
+> +#
+> +# Parameters:
+> +#   - (IN)    Block group type (Data, Metadata, System)
+> +#   - (INOUT) Variable to store block group size in MB
+> +#
+> +_parse_size_string() {
+
+Local functions don't need the leading underscore, the same applies to
+other local functions in this test (except _cleanup).
+
+> +	local SIZE=$(echo "$1" | awk 'match($0, /([0-9.]+)/) { print substr($0, RSTART, RLENGTH) }')
+
+Use $AWK_PROG instead of bare awk.
+
+> +        eval $2="${SIZE%.*}"
+> +}
+> +
+> +# Determine the size of the device in MB.
+> +#
+> +# Parameters:
+> +#   - (INOUT) Variable to store device size in MB
+> +#
+> +_device_size() {
+> +	btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid >> $seqres.full
+
+Use $BTRFS_UTIL_PROG instead of bare 'btrfs', also please use full
+subcommand instead of abbr. like 'fi'.
+
+> +	local SIZE=$(btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid)
+> +	_parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
+> +	eval $1=${SIZE_ALLOC%.*}
+> +}
+> +
+> +# Determine the free space of a block group in MB.
+> +#
+> +# Parameters:
+> +#   - (INOUT) Variable to store free space in MB
+> +#
+> +_free_space() {
+> +	local SIZE=$(btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid)
+> +	_parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
+> +	_parse_size_string $(echo "${SIZE}" | awk '{print $6}') SIZE_USED
+> +	eval $1=$(expr ${SIZE_ALLOC} - ${SIZE_USED})
+> +}
+> +
+> +# Determine how much space in MB has been allocated to a block group.
+> +#
+> +# Parameters:
+> +#   - (IN)    Block group type (Data, Metadata, System)
+> +#   - (INOUT) Variable to store block group size in MB
+> +#
+> +_alloc_size() {
+> +	local SIZE_STRING=$(btrfs filesystem df ${SCRATCH_MNT} -m | grep  "$1" | awk '{print $3}')
+> +	_parse_size_string ${SIZE_STRING} BLOCK_GROUP_SIZE
+> +        eval $2="${BLOCK_GROUP_SIZE}"
+> +}
+> +
+> +. ./common/filter
+> +_supported_fs btrfs
+> +_require_test
+> +_require_scratch
+> +_require_btrfs_fs_sysfs
+> +
+> +# Delete log file if it exists.
+> +rm -f "${seqres}.full"
+> +
+> +# Make filesystem.
+> +_require_scratch_size $((10 * 1024 * 1024)) #kB
+
+_scratch_mkfs_sized() will check for the required size and _notrun if
+dev is too small, so there's no need to call above _require rule.
+
+> +_scratch_mkfs_sized $((10 * 1024 * 1024 * 1024)) >> $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +# Check if there is sufficient sysfs support.
+> +_require_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/chunk_size
+> +_require_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/force_chunk_alloc
+> +
+> +# Get free space.
+> +_free_space  FREE_SPACE_MB
+> +_device_size DEVICE_SIZE_MB
+> +
+> +echo "free space = ${FREE_SPACE_MB}MB" >> ${seqres}.full
+> +
+> +# Get chunk sizes.
+> +echo "Capture default chunk sizes."
+> +FIRST_DATA_CHUNK_SIZE_B=$(_get_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/chunk_size)
+> +FIRST_METADATA_CHUNK_SIZE_B=$(_get_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/chunk_size)
+> +
+> +echo "Orig Data chunk size    = ${FIRST_DATA_CHUNK_SIZE_B}"     >> ${seqres}.full
+> +echo "Orig Metaata chunk size = ${FIRST_METADATA_CHUNK_SIZE_B}" >> ${seqres}.full
+> +
+> +INIT_ALLOC_SIZE_MB=$(expr \( ${FIRST_DATA_CHUNK_SIZE_B} + ${FIRST_METADATA_CHUNK_SIZE_B} \) / 1024 / 1024)
+> +echo "Allocation size for initial allocation = ${INIT_ALLOC_SIZE_MB}MB" >> $seqres.full
+> +
+> +#
+> +# Do first allocation with the default chunk sizes for the different block
+> +# types.
+> +#
+> +echo "First allocation."
+> +_alloc_size "Data"     DATA_SIZE_START_MB
+> +_alloc_size "Metadata" METADATA_SIZE_START_MB
+> +
+> +echo "Block group Data alloc size     = ${DATA_SIZE_START_MB}MB"     >> $seqres.full
+> +echo "Block group Metadata alloc size = ${METADATA_SIZE_START_MB}MB" >> $seqres.full
+> +
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/force_chunk_alloc 1
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/force_chunk_alloc 1
+> +
+> +_alloc_size "Data"     FIRST_DATA_SIZE_MB
+> +_alloc_size "Metadata" FIRST_METADATA_SIZE_MB
+> +
+> +echo "First block group Data alloc size     = ${FIRST_DATA_SIZE_MB}MB"     >> ${seqres}.full
+> +echo "First block group Metadata alloc size = ${FIRST_METADATA_SIZE_MB}MB" >> ${seqres}.full
+> +
+> +_free_space FREE_SPACE_AFTER
+> +echo "Free space after first allocation = ${FREE_SPACE_AFTER}MB" >> ${seqres}.full
+> +
+> +#
+> +# Do allocation with the doubled chunk sizes for the different block types.
+> +#
+> +echo "Second allocation."
+> +SECOND_DATA_CHUNK_SIZE_B=$(expr ${FIRST_DATA_CHUNK_SIZE_B} \* 2)
+> +SECOND_METADATA_CHUNK_SIZE_B=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} \* 2)
+> +
+> +echo "Second block group Data calc alloc size     = ${SECOND_DATA_CHUNK_SIZE_B}"     >> $seqres.full
+> +echo "Second block group Metadata calc alloc size = ${SECOND_METADATA_CHUNK_SIZE_B}" >> $seqres.full
+> +
+> +# Stripe size is limited to 10% of device size.
+> +if [[ ${SECOND_DATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* 1024 \* 1024 / 100) ]]; then
+> +	SECOND_DATA_CHUNK_SIZE_B=$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024 \* 1024)
+> +fi
+> +if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* 1024 \* 1024 / 100) ]]; then
+> +	SECOND_METADATA_CHUNK_SIZE_B=$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024 \* 1024)
+> +fi
+> +
+> +echo "Second block group Data alloc size     = ${SECOND_DATA_CHUNK_SIZE_B}"     >> $seqres.full
+> +echo "Second block group Metadata alloc size = ${SECOND_METADATA_CHUNK_SIZE_B}" >> $seqres.full
+> +
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/chunk_size ${SECOND_DATA_CHUNK_SIZE_B}
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/chunk_size ${SECOND_METADATA_CHUNK_SIZE_B}
+> +
+> +SECOND_DATA_CHUNK_SIZE_READ_B=$(_get_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/chunk_size)
+> +SECOND_METADATA_CHUNK_SIZE_READ_B=$(_get_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/chunk_size)
+> +
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/force_chunk_alloc 1
+> +echo "Allocated data chunk" >> $seqres.full
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/metadata/force_chunk_alloc 1
+> +echo "Allocated metadata chunk" >> $seqres.full
+> +
+> +_alloc_size "Data"     SECOND_DATA_SIZE_MB
+> +_alloc_size "Metadata" SECOND_METADATA_SIZE_MB
+> +_alloc_size "System"   SECOND_SYSTEM_SIZE_MB
+> +
+> +echo "Calculate request size so last memory allocation cannot be completely fullfilled."
+> +_free_space FREE_SPACE_MB
+> +
+> +# Find request size whose space allocation cannot be completely fullfilled.
+> +THIRD_DATA_CHUNK_SIZE_MB=$(expr 256)
+> +until [ ${THIRD_DATA_CHUNK_SIZE_MB} -gt $(expr 7 \* 1024) ]
+> +do
+
+Please unify the code style as
+
+until [ ... ]; do
+	<do something>
+done
+
+> +	if [ $((FREE_SPACE_MB%THIRD_DATA_CHUNK_SIZE_MB)) -ne 0 ]; then
+> +	       break
+> +        fi
+
+Mixed space and tab as indention above?
+
+> +	THIRD_DATA_CHUNK_SIZE_MB=$((THIRD_DATA_CHUNK_SIZE_MB+256))
+> +done
+> +
+> +if [[ ${THIRD_DATA_CHUNK_SIZE_MB} -eq $(expr 7 \* 1024) ]]; then
+> +	_fail "Cannot find allocation size for partial block allocation."
+> +fi
+> +
+> +THIRD_DATA_CHUNK_SIZE_B=$(expr ${THIRD_DATA_CHUNK_SIZE_MB} \* 1024 \* 1024)
+> +echo "Allocation size in mb    = ${THIRD_DATA_CHUNK_SIZE_MB}" >> ${seqres}.full
+> +echo "Allocation size in bytes = ${THIRD_DATA_CHUNK_SIZE_B}"  >> ${seqres}.full
+> +
+> +#
+> +# Do allocation until free space is exhausted.
+> +#
+> +echo "Third allocation."
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/chunk_size ${THIRD_DATA_CHUNK_SIZE_B}
+> +
+> +_free_space FREE_SPACE_MB
+> +while [ $FREE_SPACE_MB -gt $THIRD_DATA_CHUNK_SIZE_MB ]
+> +do
+> +	_alloc_size "Data" THIRD_DATA_SIZE_MB
+> +	_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/data/force_chunk_alloc 1
+> +
+> +	_free_space FREE_SPACE_MB
+> +done
+> +
+> +_alloc_size "Data" FOURTH_DATA_SIZE_MB
+> +
+> +#
+> +# Force chunk allocation of system block tyep must fail.
+> +#
+> +echo "Force allocation of system block type must fail."
+> +_set_btrfs_sysfs_attr ${SCRATCH_MNT} allocation/system/force_chunk_alloc 1 2>/dev/null
+> +
+> +#
+> +# Verification of initial allocation.
+> +#
+> +echo "Verify first allocation."
+> +FIRST_DATA_CHUNK_SIZE_MB=$(expr ${FIRST_DATA_CHUNK_SIZE_B} / 1024 / 1024)
+> +FIRST_METADATA_CHUNK_SIZE_MB=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} / 1024 / 1024)
+> +
+> +# if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne $(expr ${FIRST_DATA_SIZE_MB}) ]]; then
+> +if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne ${FIRST_DATA_SIZE_MB} ]]; then
+> +	_fail "tInitial data allocation not correct."
+
+No need to call _fail, we could just echo this message and it will break
+the golden image and fail the test. Also, dumping the expected and
+actual value to stdout may help debug failure.
+
+The same applies to other _fail calls below as well.
 
 Thanks,
-Qu
-> ---
-> v1->v2:
-> - I missed some of the device add calls in btrfs/176 somehow, fixed it.
-> 
->   tests/btrfs/161 | 3 ++-
->   tests/btrfs/162 | 6 ++++--
->   tests/btrfs/163 | 3 ++-
->   tests/btrfs/164 | 3 ++-
->   tests/btrfs/175 | 2 +-
->   tests/btrfs/176 | 6 +++---
->   tests/btrfs/194 | 4 ++--
->   tests/btrfs/197 | 3 ++-
->   tests/btrfs/216 | 2 +-
->   tests/btrfs/218 | 2 +-
->   tests/btrfs/225 | 2 +-
->   tests/btrfs/238 | 2 +-
->   12 files changed, 22 insertions(+), 16 deletions(-)
-> 
-> diff --git a/tests/btrfs/161 b/tests/btrfs/161
-> index 059b95ca..ed5b67fa 100755
-> --- a/tests/btrfs/161
-> +++ b/tests/btrfs/161
-> @@ -42,7 +42,8 @@ create_seed()
->   
->   create_sprout()
->   {
-> -	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-> +	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >> \
-> +		$seqres.full
->   	_scratch_unmount
->   	run_check _mount $dev_sprout $SCRATCH_MNT
->   	echo -- sprout --
-> diff --git a/tests/btrfs/162 b/tests/btrfs/162
-> index ba37ef0c..7680e1e4 100755
-> --- a/tests/btrfs/162
-> +++ b/tests/btrfs/162
-> @@ -45,7 +45,8 @@ create_seed()
->   create_sprout_seed()
->   {
->   	run_check _mount $dev_seed $SCRATCH_MNT
-> -	_run_btrfs_util_prog device add -f $dev_sprout_seed $SCRATCH_MNT
-> +	_run_btrfs_util_prog device add -f $dev_sprout_seed $SCRATCH_MNT >>\
-> +		$seqres.full
->   	_scratch_unmount
->   	$BTRFS_TUNE_PROG -S 1 $dev_sprout_seed
->   }
-> @@ -53,7 +54,8 @@ create_sprout_seed()
->   create_next_sprout()
->   {
->   	run_check _mount $dev_sprout_seed $SCRATCH_MNT
-> -	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-> +	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >>\
-> +		$seqres.full
->   	_scratch_unmount
->   	run_check _mount $dev_sprout $SCRATCH_MNT
->   	echo -- sprout --
-> diff --git a/tests/btrfs/163 b/tests/btrfs/163
-> index 1dc081f1..59f0461b 100755
-> --- a/tests/btrfs/163
-> +++ b/tests/btrfs/163
-> @@ -58,7 +58,8 @@ create_seed()
->   
->   add_sprout()
->   {
-> -	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-> +	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >>\
-> +		$seqres.full
->   	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
->   	_mount -o remount,rw $dev_sprout $SCRATCH_MNT
->   	$XFS_IO_PROG -f -c "pwrite -S 0xcd 0 4M" $SCRATCH_MNT/foobar2 >\
-> diff --git a/tests/btrfs/164 b/tests/btrfs/164
-> index 3e69b35f..8fd6ab62 100755
-> --- a/tests/btrfs/164
-> +++ b/tests/btrfs/164
-> @@ -48,7 +48,8 @@ create_seed()
->   
->   add_sprout()
->   {
-> -	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-> +	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >>\
-> +		$seqres.full
->   	run_check mount -o rw,remount $dev_seed $SCRATCH_MNT
->   	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
->   }
-> diff --git a/tests/btrfs/175 b/tests/btrfs/175
-> index 6f7832a5..dc6c1921 100755
-> --- a/tests/btrfs/175
-> +++ b/tests/btrfs/175
-> @@ -49,7 +49,7 @@ _scratch_mount
->   # device.
->   _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
->   scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $2 }')"
-> -$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-> +$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->   swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->   swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
->   
-> diff --git a/tests/btrfs/176 b/tests/btrfs/176
-> index 8d624d5a..9a833575 100755
-> --- a/tests/btrfs/176
-> +++ b/tests/btrfs/176
-> @@ -30,14 +30,14 @@ echo "Remove device"
->   _scratch_mkfs >> $seqres.full 2>&1
->   _scratch_mount
->   _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
-> -$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-> +$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->   swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->   # We know the swap file is on device 1 because we added device 2 after it was
->   # already created.
->   $BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
->   # Deleting/readding device 2 should still work.
->   $BTRFS_UTIL_PROG device delete "$scratch_dev2" "$SCRATCH_MNT"
-> -$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-> +$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->   swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
->   # Deleting device 1 should work again after swapoff.
->   $BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT"
-> @@ -48,7 +48,7 @@ echo "Replace device"
->   _scratch_mkfs >> $seqres.full 2>&1
->   _scratch_mount
->   _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
-> -$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-> +$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->   swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->   # Again, we know the swap file is on device 1.
->   $BTRFS_UTIL_PROG replace start -fB "$scratch_dev1" "$scratch_dev3" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
-> diff --git a/tests/btrfs/194 b/tests/btrfs/194
-> index a994a429..2431692b 100755
-> --- a/tests/btrfs/194
-> +++ b/tests/btrfs/194
-> @@ -55,9 +55,9 @@ _scratch_mount
->   # Add and remove device in a loop, each iteration will increase devid by 2.
->   # So by 64 iterations, we will definitely hit that 122 limit.
->   for (( i = 0; i < 64; i++ )); do
-> -	$BTRFS_UTIL_PROG device add -f $device_2 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG device add -f $device_2 $SCRATCH_MNT >> $seqres.full
->   	$BTRFS_UTIL_PROG device del $device_1 $SCRATCH_MNT
-> -	$BTRFS_UTIL_PROG device add -f $device_1 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG device add -f $device_1 $SCRATCH_MNT >> $seqres.full
->   	$BTRFS_UTIL_PROG device del $device_2 $SCRATCH_MNT
->   done | grep -v 'Resetting device zone'
->   _scratch_dev_pool_put
-> diff --git a/tests/btrfs/197 b/tests/btrfs/197
-> index 597bc36f..22b37b4b 100755
-> --- a/tests/btrfs/197
-> +++ b/tests/btrfs/197
-> @@ -55,7 +55,8 @@ workout()
->   	# don't test with the first device as auto fs check (_check_scratch_fs)
->   	# picks the first device
->   	device_1=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-> -	$BTRFS_UTIL_PROG device add -f "$device_1" "$TEST_DIR/$seq.mnt"
-> +	$BTRFS_UTIL_PROG device add -f "$device_1" "$TEST_DIR/$seq.mnt" >> \
-> +		$seqres.full
->   
->   	device_2=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
->   	_mount -o degraded $device_2 $SCRATCH_MNT
-> diff --git a/tests/btrfs/216 b/tests/btrfs/216
-> index 38efa0f5..5d6cf902 100755
-> --- a/tests/btrfs/216
-> +++ b/tests/btrfs/216
-> @@ -28,7 +28,7 @@ _mkfs_dev $seed
->   $BTRFS_TUNE_PROG -S 1 $seed
->   _mount $seed $SCRATCH_MNT >> $seqres.full 2>&1
->   cat /proc/self/mounts | grep $seed >> $seqres.full
-> -$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT >> $seqres.full
->   cat /proc/self/mounts | grep $sprout >> $seqres.full
->   
->   # check if the show_devname() returns the sprout device instead of seed device.
-> diff --git a/tests/btrfs/218 b/tests/btrfs/218
-> index 5af54f3b..83ec785e 100755
-> --- a/tests/btrfs/218
-> +++ b/tests/btrfs/218
-> @@ -41,7 +41,7 @@ $BTRFS_TUNE_PROG -S 1 $dev_seed
->   
->   # Mount the seed device and add the rw device
->   _mount -o ro $dev_seed $SCRATCH_MNT
-> -_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-> +_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT >> $seqres.full
->   $BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_scratch_pool
->   _scratch_unmount
->   
-> diff --git a/tests/btrfs/225 b/tests/btrfs/225
-> index 408c03d2..cfb64a34 100755
-> --- a/tests/btrfs/225
-> +++ b/tests/btrfs/225
-> @@ -48,7 +48,7 @@ $BTRFS_TUNE_PROG -S 1 $seed
->   
->   # Mount the seed device and add the rw device
->   _mount -o ro $seed $SCRATCH_MNT
-> -$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT >> $seqres.full
->   _scratch_unmount
->   
->   # Now remount
-> diff --git a/tests/btrfs/238 b/tests/btrfs/238
-> index 2622f353..57245917 100755
-> --- a/tests/btrfs/238
-> +++ b/tests/btrfs/238
-> @@ -38,7 +38,7 @@ $BTRFS_TUNE_PROG -S 1 $seed
->   _mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
->   md5sum $SCRATCH_MNT/foo | _filter_scratch
->   
-> -$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT >> $seqres.full
->   _scratch_unmount
->   
->   # Now remount writeable sprout device, create some data and run fstrim
-> 
+Eryu
 
+> +fi
+> +
+> +if [[ $(expr ${FIRST_METADATA_CHUNK_SIZE_MB} + ${METADATA_SIZE_START_MB}) -ne ${FIRST_METADATA_SIZE_MB} ]]; then
+> +	_fail "Initial metadata allocation not correct."
+> +fi
+> +
+> +#
+> +# Verification of second allocation.
+> +#
+> +echo "Verify second allocation."
+> +SECOND_DATA_CHUNK_SIZE_MB=$(expr ${SECOND_DATA_CHUNK_SIZE_B} / 1024 / 1024)
+> +SECOND_METADATA_CHUNK_SIZE_MB=$(expr ${SECOND_METADATA_CHUNK_SIZE_B} / 1024 / 1024)
+> +
+> +if [[ ${SECOND_DATA_CHUNK_SIZE_B} -ne ${SECOND_DATA_CHUNK_SIZE_READ_B} ]]; then
+> +	_fail "Value written to allocation/data/chunk_size and read value are different."
+> +fi
+> +
+> +if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -ne ${SECOND_METADATA_CHUNK_SIZE_READ_B} ]]; then
+> +	_fail "Value written to allocation/metadata/chunk_size and read value are different."
+> +fi
+> +
+> +if [[ $(expr ${SECOND_DATA_CHUNK_SIZE_MB} + ${FIRST_DATA_SIZE_MB}) -ne ${SECOND_DATA_SIZE_MB} ]]; then
+> +	_fail "Data allocation after chunk size change not correct."
+> +fi
+> +
+> +if [[ $(expr ${SECOND_METADATA_CHUNK_SIZE_MB} + ${FIRST_METADATA_SIZE_MB}) -ne ${SECOND_METADATA_SIZE_MB} ]]; then
+> +	_fail "Metadata allocation after chunk size change not correct."
+> +fi
+> +
+> +#
+> +# Verification of third allocation.
+> +#
+> +echo "Verify third allocation."
+> +if [[ ${FREE_SPACE_MB} -gt ${THIRD_DATA_CHUNK_SIZE_MB} ]]; then
+> +	_fail "Free space after allocating over memlimit is too high."
+> +fi
+> +
+> +# The + 1 is required as 1MB is always kept as free space.
+> +if [[ $(expr ${THIRD_DATA_CHUNK_SIZE_MB} + ${THIRD_DATA_SIZE_MB} + 1) -le $(expr ${FOURTH_DATA_SIZE_MB}) ]]; then
+> +	_fail "Allocation until out of memory: last memory allocation size is not correct."
+> +fi
+> +
+> +status=0
+> +exit
+> +
+> diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
+> new file mode 100644
+> index 00000000..ae99d6f0
+> --- /dev/null
+> +++ b/tests/btrfs/049.out
+> @@ -0,0 +1,11 @@
+> +QA output created by 049
+> +Capture default chunk sizes.
+> +First allocation.
+> +Second allocation.
+> +Calculate request size so last memory allocation cannot be completely fullfilled.
+> +Third allocation.
+> +Force allocation of system block type must fail.
+> +_set_btrfs_sysfs_attr cannot write allocation/system/force_chunk_alloc
+> +Verify first allocation.
+> +Verify second allocation.
+> +Verify third allocation.
+> -- 
+> 2.30.2
