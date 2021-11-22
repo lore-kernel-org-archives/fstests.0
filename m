@@ -2,98 +2,241 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A3F7C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Nov 2021 10:18:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8138CC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 22 Nov 2021 12:05:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235267AbhKVKVx (ORCPT
+        id S236711AbhKVMI1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Nov 2021 05:21:53 -0500
-Received: from out30-45.freemail.mail.aliyun.com ([115.124.30.45]:60469 "EHLO
-        out30-45.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234129AbhKVKVx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 Nov 2021 05:21:53 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R151e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04357;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=3;SR=0;TI=SMTPD_---0Uxg1LE6_1637576325;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0Uxg1LE6_1637576325)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Mon, 22 Nov 2021 18:18:45 +0800
-Date:   Mon, 22 Nov 2021 18:18:45 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     cmaiolino@redhat.com
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH V2 0/2] xfstests: Fix generic/643 on ext2 and ext3
-Message-ID: <20211122101845.GZ60846@e18g06458.et15sqa>
-References: <20211110124119.43974-1-cmaiolino@redhat.com>
- <20211122084917.qki4cortq5gumdzw@andromeda.lan>
+        Mon, 22 Nov 2021 07:08:27 -0500
+Received: from mail.kernel.org ([198.145.29.99]:38170 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230425AbhKVMI0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 22 Nov 2021 07:08:26 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9D09E604DA;
+        Mon, 22 Nov 2021 12:05:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1637582720;
+        bh=k7L7kJTtZWjzS42F/4DqwluBTvlVU3tFCHPcEMev10U=;
+        h=From:To:Cc:Subject:Date:From;
+        b=XQl3T7Spz4gJwgtQ4O3+wCOPACPTPX94G5J9ygnkYpS1U4wFt5Z1lzOOCRa5HLkNE
+         KI/e/Vip1nH2C0BXkF6jRaag/kx3QIkN3tu7y6MN8KpA4h0cvRTkhQtyFg9i/ScwyA
+         IbKf39Nxx4TDxsVNOdQNQ49qJcp99BdNPcDzPhpXY6C6qZV1zx8vTnqEoW1hRXdVEA
+         Q5J7gdJi6ZiaUCo0iaFy/TcyjjDwmiVVGsEHWFUqj3BIlPie3ItQF5+lMRqVvPE0ip
+         JVkfh5tXSAnF9IiD1cJRTg7K5opu59FB+gIkebxCPuqe4XFzW7Y494wACluMjHDDt3
+         iL1JA62l2sNmQ==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test balance and send running in parallel
+Date:   Mon, 22 Nov 2021 12:04:58 +0000
+Message-Id: <f0bab9b2c90444bcb2612d8e6d6d71c447c01179.1637582346.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211122084917.qki4cortq5gumdzw@andromeda.lan>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 22, 2021 at 09:49:17AM +0100, Carlos Maiolino wrote:
-> Ping.
+From: Filipe Manana <fdmanana@suse.com>
 
-I think this patchset has been applied and pushed to upstream in last
-week's update. Would you please check if you could see them after
-pulling the latest update?
+Test that send and balance can run in parallel, without failures and
+producing correct results.
 
-Thanks,
-Eryu
+Before kernel 5.3 it was possible to run both operations in parallel,
+however it was buggy and caused sporadic failures due to races, so it was
+disabled in kernel 5.3 by commit 9e967495e0e0ae ("Btrfs: prevent send
+failures and crashes due to concurrent relocation"). There is a now a
+patch that enables both operations to safely run in parallel, and it has
+the following subject:
 
-> 
-> > 
-> > This is the 2nd version of this series to fix test g/643.
-> > 
-> > This version ensures _format_swapfile helper returns the swap size in bytes
-> > every time (previous version returned it in a different unit, depending on the
-> > swap's size) and updates remaining users of _format_swapfile() to discard its
-> > return value.
-> > 
-> > This also slightly change patch 2, making g/643 to use swapon to retrieve swap
-> > size (more details in the patch's description).
-> > 
-> > Original cover-letter below.
-> > 
-> > 
-> > Currently, generic/643 test fails on ext2 and ext3 filesystems when using 1k
-> > block sizes.
-> > The failure itself happens due the mapping of indirect blocks to iomap extents
-> > and the aligment constraints imposed by iomap. Specific details are described in
-> > patch 2.
-> > 
-> > To fix the test, I modified it to use the swapfile size described in the swap
-> > header (patch 2), and to retrieve such information, at mkswap time, I modified
-> > the _format_swapfile() function, and I believe such modification requires its own
-> > patch (patch 1).
-> > 
-> > These changes have also been tested on 64k pages (both on arm and PPC) to ensure
-> > it doesn't break the test on such architectures.
-> > 
-> > Carlos Maiolino (2):
-> >   common/rc: Enable _format_swapfile to return the swap size
-> >   generic/643: Fix for 1k block sizes for ext2 and ext3
-> > 
-> >  common/rc         | 10 +++++++---
-> >  tests/btrfs/173   |  2 +-
-> >  tests/btrfs/174   |  2 +-
-> >  tests/btrfs/175   |  4 ++--
-> >  tests/btrfs/176   |  2 +-
-> >  tests/btrfs/177   |  2 +-
-> >  tests/generic/356 |  2 +-
-> >  tests/generic/357 |  2 +-
-> >  tests/generic/493 |  2 +-
-> >  tests/generic/494 |  2 +-
-> >  tests/generic/554 |  2 +-
-> >  tests/generic/569 |  2 +-
-> >  tests/generic/643 | 27 +++++++++------------------
-> >  13 files changed, 28 insertions(+), 33 deletions(-)
-> > 
-> > -- 
-> > 2.31.1
-> > 
-> 
-> -- 
-> Carlos
+    "btrfs: make send work with concurrent block group relocation"
+
+This also serves the purpose of testing a succession of incremental send
+operations, where we have a bunch of snapshots of the same subvolume and
+we keep doing an incremental send using the previous snapshot as the
+parent.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/251     | 159 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/251.out |   2 +
+ 2 files changed, 161 insertions(+)
+ create mode 100755 tests/btrfs/251
+ create mode 100644 tests/btrfs/251.out
+
+diff --git a/tests/btrfs/251 b/tests/btrfs/251
+new file mode 100755
+index 00000000..11dce424
+--- /dev/null
++++ b/tests/btrfs/251
+@@ -0,0 +1,159 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 251
++#
++# Test that send and balance can run in parallel, without failures and producing
++# correct results.
++#
++# Before kernel 5.3 it was possible to run both operations in parallel, however
++# it was buggy and caused sporadic failures due to races, so it was disabled in
++# kernel 5.3 by commit 9e967495e0e0ae ("Btrfs: prevent send failures and crashes
++# due to concurrent relocation"). There is a now a patch that enables both
++# operations to safely run in parallel, and it has the following subject:
++#
++#      "btrfs: make send work with concurrent block group relocation"
++#
++# This also serves the purpose of testing a succession of incremental send
++# operations, where we have a bunch of snapshots of the same subvolume and we
++# keep doing an incremental send using the previous snapshot as the parent.
++#
++. ./common/preamble
++_begin_fstest auto send balance
++
++_cleanup()
++{
++	if [ ! -z $balance_pid ]; then
++		kill $balance_pid &> /dev/null
++		wait $balance_pid
++	fi
++	cd /
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs btrfs
++# The size needed is variable as it depends on the specific randomized
++# operations from fsstress and on the value of $LOAD_FACTOR. But require
++# at least $LOAD_FACTOR * 6G, as we do the receive operations to the same
++# filesystem, do relocation and store snapshot checksums from fssum in the
++# filesystem as well (can be hundreds of megabytes for $LOAD_FACTOR > 3).
++_require_scratch_size $(($LOAD_FACTOR * 6 * 1024 * 1024))
++_require_fssum
++
++balance_loop()
++{
++	trap "wait; exit" SIGTERM
++
++	while true; do
++		_run_btrfs_balance_start $SCRATCH_MNT > /dev/null
++		[ $? -eq 0 ] || echo "Balance failed: $?"
++	done
++}
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++num_snapshots=$((10 + $LOAD_FACTOR * 2))
++avg_ops_per_snapshot=$((1000 * LOAD_FACTOR))
++total_fsstress_ops=$((num_snapshots * avg_ops_per_snapshot))
++
++data_subvol="$SCRATCH_MNT/data"
++snapshots_dir="$SCRATCH_MNT/snapshots"
++dest_dir="$SCRATCH_MNT/received"
++fssum_dir="$SCRATCH_MNT/fssum"
++
++mkdir -p "$snapshots_dir"
++mkdir -p "$dest_dir"
++mkdir -p "$fssum_dir"
++$BTRFS_UTIL_PROG subvolume create "$data_subvol" >> $seqres.full
++
++snapshot_cmd="$BTRFS_UTIL_PROG subvolume snapshot -r \"$data_subvol\""
++snapshot_cmd="$snapshot_cmd \"$snapshots_dir/snap_\`date +'%s%N'\`\""
++
++# Use a single fsstress process so that in case of a failure we can grab the seed
++# number from the .full log file and deterministically reproduce a failure.
++# Also disable subvolume and snapshot creation, since send is not recursive, so
++# it's pointless to have them.
++#
++echo "Running fsstress..." >> $seqres.full
++$FSSTRESS_PROG $FSSTRESS_AVOID -d "$data_subvol" -p 1 -w \
++	       -f subvol_create=0 -f subvol_delete=0 -f snapshot=0 \
++	       -x "$snapshot_cmd" -X $num_snapshots \
++	       -n $total_fsstress_ops >> $seqres.full
++
++snapshots=(`IFS=$'\n' ls -1 "$snapshots_dir"`)
++
++# Compute the checksums for every snapshot.
++for i in "${!snapshots[@]}"; do
++	snap="${snapshots_dir}/${snapshots[$i]}"
++	echo "Computing checksum for snapshot: ${snapshots[$i]}" >> $seqres.full
++	$FSSUM_PROG -A -f -w "${fssum_dir}/${i}.fssum" "$snap"
++done
++
++# Now leave a process constantly running balance.
++balance_loop &
++balance_pid=$!
++
++# Now send and receive all snapshots to our destination directory.
++# We send and receive from/to the same same filesystem using a pipe, because
++# this is the most stressful scenario and it could lead (and has lead to during
++# development) to deadlocks - the sending task blocking on a full pipe while
++# holding some lock, while the receiving side was not reading from the pipe
++# because it was waiting for a transaction commit, which could not happen due
++# to the lock held by the sending task.
++#
++for i in "${!snapshots[@]}"; do
++	snap="${snapshots_dir}/${snapshots[$i]}"
++
++	# For first snapshot we do a full incremental send, for all the others
++	# we do an incremental send, using the previous snapshot as the parent.
++	if [ $i -eq 0 ]; then
++		echo "Full send of the snapshot at: $snap" >> $seqres.full
++		$BTRFS_UTIL_PROG --quiet send "$snap" | \
++			$BTRFS_UTIL_PROG --quiet receive "$dest_dir"
++	else
++		echo "Incremental send of the snapshot at: $snap" >> $seqres.full
++		prev_snap="${snapshots_dir}/${snapshots[$i - 1]}"
++		$BTRFS_UTIL_PROG --quiet send -p "$prev_snap" "$snap" | \
++			$BTRFS_UTIL_PROG --quiet receive "$dest_dir"
++
++		# We don't need the previous snapshot anymore, so delete it.
++		# This makes balance not so slow and triggers the cleaner kthread
++		# to run and delete the snapshot tree in parallel, while we are
++		# also running balance and send/receive, adding additional test
++		# coverage and stress.
++		$BTRFS_UTIL_PROG subvolume delete "$prev_snap" >> $seqres.full
++	fi
++done
++
++# We are done with send/receive, send a signal to the balance job and verify
++# the snapshot checksums while it terminates. We do the wait at _cleanup() so
++# that we do some useful work while it terminates.
++kill $balance_pid
++
++# Now verify that received snapshots have the expected checksums.
++for i in "${!snapshots[@]}"; do
++	snap_csum="${fssum_dir}/${i}.fssum"
++	snap_copy="${dest_dir}/${snapshots[$i]}"
++
++	echo "Verifying checksum for snapshot at: $snap_copy" >> $seqres.full
++	# On success, fssum outputs only a single line with "OK" to stdout, and
++	# on error it outputs several lines to stdout. Since the number of
++	# snapshots in the test depends on $LOAD_FACTOR, filter out the success
++	# case, so we don't have a mismatch with the golden output in case we
++	# run with a non default $LOAD_FACTOR (default is 1). We only want the
++	# mismatch with the golden output in case there's a checksum failure.
++	$FSSUM_PROG -r "$snap_csum" "$snap_copy" | egrep -v '^OK$'
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/251.out b/tests/btrfs/251.out
+new file mode 100644
+index 00000000..e5cd36a9
+--- /dev/null
++++ b/tests/btrfs/251.out
+@@ -0,0 +1,2 @@
++QA output created by 251
++Silence is golden
+-- 
+2.33.0
+
