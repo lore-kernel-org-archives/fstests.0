@@ -2,58 +2,58 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C346C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Nov 2021 14:44:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7AE8C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Nov 2021 15:14:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238233AbhKWOsE (ORCPT
+        id S238022AbhKWPRf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Nov 2021 09:48:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38610 "EHLO
+        Tue, 23 Nov 2021 10:17:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234844AbhKWOsE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Nov 2021 09:48:04 -0500
-Received: from mail-qk1-x732.google.com (mail-qk1-x732.google.com [IPv6:2607:f8b0:4864:20::732])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 430D9C061574
-        for <fstests@vger.kernel.org>; Tue, 23 Nov 2021 06:44:56 -0800 (PST)
-Received: by mail-qk1-x732.google.com with SMTP id 193so22015741qkh.10
-        for <fstests@vger.kernel.org>; Tue, 23 Nov 2021 06:44:56 -0800 (PST)
+        with ESMTP id S234897AbhKWPRe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Nov 2021 10:17:34 -0500
+Received: from mail-qt1-x82d.google.com (mail-qt1-x82d.google.com [IPv6:2607:f8b0:4864:20::82d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7AC91C061574
+        for <fstests@vger.kernel.org>; Tue, 23 Nov 2021 07:14:26 -0800 (PST)
+Received: by mail-qt1-x82d.google.com with SMTP id p19so20074929qtw.12
+        for <fstests@vger.kernel.org>; Tue, 23 Nov 2021 07:14:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
         h=from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=PDdlONOAE1h3ZuTeUNBsJs1MthbapZ6EUSv6GscjLgs=;
-        b=T1KeWjmMH7HnX4teXNG1yWgxcS9LI2/SJZask7FJjCwq0ySy/Pj/TZHVk5/MfcQRWr
-         SGaEsX+JQ33buda2dcecyBnW+7R4GsfM1BuywHDvXSawTUqGtPnOZkaptD35ZTTgR8uB
-         zCFdTsMr42z1q68iqGI4LNYg9B2uYy0Y1l4EWKZWb3LJiBv953PTXPYPtS6CckmCFCKc
-         uDFtjJtudvuGXbc/MXi/MCwYOa5G3YDHZKTC1uLiFEQYGwRBPIlo5KjpecpAyQLrUPZ0
-         lL5kRO31yYEFYzl6hg5MEtA//ujO1JETiVfWY+KEjPPbUTnI79hfyTQXADY8KE18pexY
-         5D2w==
+        bh=gfmuL2rY+y7qUOGLyu4QCPd8HSrEHOjpKavwAQDrGfo=;
+        b=FA9122zacvuVvKLT6YPTlqWKUllXFigCcfkgePv0mjq5EFu26Khi4ggNXN5herShsT
+         m9/RF6pv4LDbeppg/5d2TnGk0xpAIzF7FrB5yEp4o/7UynYkI1m8Fz9DIvjFSrvdUj2U
+         qtm1DZnhRqncvkX2hvftV0qiHdLj2IbY1/FDuMcIN2gzJ5zQPemzHvqa5zpCO1h35C9K
+         doOolBub7U0yNBer1jbhlroCRUr31f6fEMHA/1PnFmTKmDKYOVheFsGHfvLo95SV3hPH
+         Kqi4hiaHS5lenCu8Zw7xE4ms6sCtcEBO+L5Km2Mr4/mhy8nx8hiOdzAe2h73++809jLH
+         DSzw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=PDdlONOAE1h3ZuTeUNBsJs1MthbapZ6EUSv6GscjLgs=;
-        b=kEdWfU5TPQ2V8eF26GptJ2sCAcBTEvVCZ8FIEezQIOpF+qmUQZVY0PjBDkuc7cfeq8
-         CxnjUjdGc9eiQOi3jtk6p6DldDQMfGtHUmLE5P/ATdx4Nzzs7dJh/0EItBYudKeI+LtS
-         7QCwHUyAg0B67wuRcyRfeUSPpNXlKF89r11fH8Psh+1ND5jvf3vBCTlrKuc/O5XHUynn
-         3K6Z0YV6PhuwNetOr25Zc35Cp+DXL+adIi6a/ceLK18i+OiRrXOE29L/QAAc1l0N7s4Q
-         DcjeoqGj/iwcfwTCoQQXcTQnZrH48DGQJOAHFZtVHbTJdidZCtPXWh0hyWEntix+2sJZ
-         sxEw==
-X-Gm-Message-State: AOAM532h8wOMfegWHgrJJ+zlCuOs2OH0l1f63cIuhbTzFHG6Klrz1HEp
-        hQFia7sopkGjsQyIJcbJ6wa7/Q==
-X-Google-Smtp-Source: ABdhPJxrFGaJ0hH1GW1I3ZP5+fvy/4Sv8Xtpl8PfM/KI6S7SQMbPhGX/6Yfco0AE59VndLwfwFeVsA==
-X-Received: by 2002:a05:620a:2484:: with SMTP id i4mr5077538qkn.184.1637678695282;
-        Tue, 23 Nov 2021 06:44:55 -0800 (PST)
+        bh=gfmuL2rY+y7qUOGLyu4QCPd8HSrEHOjpKavwAQDrGfo=;
+        b=Jw0+UTqLtOVPTcCHppD1Gf9HF1vlYrXF153MDeqGXr79hUb2+MjJo4TIKz+idj/1s2
+         dcQO0y6bqqcdi0gJFqJCbeS4V9Gm+F8G8wq5r6AINGB2f5XC9yNgOX/cFEo3oCS7uFUD
+         N4UD+PZ59Ep+WLrYVk3HZ8zfAZPjomZELRSTHB84s5dQDiJSGzTpE391aDOwcx0sB+ZZ
+         5OLptfns74modSpekoFOLLgpqS6mxu5EdldYAaHrBJjHi6viKE4uKL5nBgr3ga8+dWfL
+         eV1Bft1QIvIlKEoIMhRL2NQSBfCjypGbeXo09cavng5TMA0ykakYzCYbA5y4tGaoob1+
+         urIA==
+X-Gm-Message-State: AOAM530LUFqZOIwULLNVB5tpj9VsTtO/A6hTeD6QtD+bVUVb6o78hNPl
+        s0oQVqPuYAHoCAVfNLJ/sVPS2JKwcnitgQ==
+X-Google-Smtp-Source: ABdhPJwFQK9BCy1k1os3P4TWfGHAMQC4fNUehv0q65/H3i2FTOjN2+upRPkMZ0nj8sydZOfDg0dO9A==
+X-Received: by 2002:ac8:58d0:: with SMTP id u16mr7252710qta.150.1637680465594;
+        Tue, 23 Nov 2021 07:14:25 -0800 (PST)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id r26sm5867444qtm.67.2021.11.23.06.44.54
+        by smtp.gmail.com with ESMTPSA id z10sm6295325qtw.71.2021.11.23.07.14.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Nov 2021 06:44:54 -0800 (PST)
+        Tue, 23 Nov 2021 07:14:24 -0800 (PST)
 From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        kernel-team@fb.com
-Subject: [PATCH] fstests: test normal qgroup operations in a compress friendly way
-Date:   Tue, 23 Nov 2021 09:44:53 -0500
-Message-Id: <86cf6bb2f19f0681e1b7b9fd88774e517848be04.1637678662.git.josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH] fstests: generic/274: require no compress
+Date:   Tue, 23 Nov 2021 10:14:23 -0500
+Message-Id: <4360f78499ffdb15a1dfff9b9647c144842995b3.1637680452.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -61,159 +61,33 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We fail btrfs/022 with -o compress because we test qgroup limits for one
-of the variations.  However this test also tests rescan and a few other
-things that pass fine with compression enabled.  Handle this by using
-the _require_no_compress helper for btrfs/022, and then creating a new
-test that is a copy of 022 without the limit exceed test.  This will
-allow us to still be able to test the basic functionality with
-compression enabled, and keep us from failing the limit check.
+We hit spurious errors with generic/274 with compression on because we
+attempt to fill up the disk with small writes, and these writes end up
+taking up metadata space instead of data space.  Thus when we go to
+write into the preallocated area we get an ENOSPC, but from the metadata
+side and not the data side.  Simply skip this test if we have
+compression enabled.
 
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/btrfs/022     |   3 ++
- tests/btrfs/251     | 108 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/251.out |   2 +
- 3 files changed, 113 insertions(+)
- create mode 100755 tests/btrfs/251
- create mode 100644 tests/btrfs/251.out
+ tests/generic/274 | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/tests/btrfs/022 b/tests/btrfs/022
-index bfd6ac7f..e126e82a 100755
---- a/tests/btrfs/022
-+++ b/tests/btrfs/022
-@@ -16,6 +16,9 @@ _supported_fs btrfs
+diff --git a/tests/generic/274 b/tests/generic/274
+index 43fc2d3e..8c0e420e 100755
+--- a/tests/generic/274
++++ b/tests/generic/274
+@@ -30,6 +30,10 @@ _supported_fs generic
  _require_scratch
- _require_btrfs_qgroup_report
+ _require_xfs_io_command "falloc" "-k"
  
-+# This test requires specific data usage, skip if we have compression enabled
++# Compression can exhaust metadata space here for btrfs and cause spurious
++# failurs because we hit a metadata ENOSPC, skip if we have compression enabled
 +_require_no_compress
 +
- # Test to make sure we can actually turn it on and it makes sense
- _basic_test()
- {
-diff --git a/tests/btrfs/251 b/tests/btrfs/251
-new file mode 100755
-index 00000000..ba23cdce
---- /dev/null
-+++ b/tests/btrfs/251
-@@ -0,0 +1,108 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Facebook.  All Rights Reserved.
-+#
-+# FS QA Test No. 251
-+#
-+# Test the basic functionality of qgroups except for the limit enforcement,
-+# this is just btrfs/022 without the limit check so we can test it with
-+# compression enabled.
-+#
-+. ./common/preamble
-+_begin_fstest auto qgroup limit
-+
-+# Import common functions.
-+. ./common/filter
-+
-+_supported_fs btrfs
-+_require_scratch
-+_require_btrfs_qgroup_report
-+
-+# Test to make sure we can actually turn it on and it makes sense
-+_basic_test()
-+{
-+	echo "=== basic test ===" >> $seqres.full
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep $subvolid >> \
-+		$seqres.full 2>&1
-+	[ $? -eq 0 ] || _fail "couldn't find our subvols quota group"
-+	run_check $FSSTRESS_PROG -d $SCRATCH_MNT/a -w -p 1 -n 2000 \
-+		$FSSTRESS_AVOID
-+	_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT/a \
-+		$SCRATCH_MNT/b
-+
-+	# the shared values of both the original subvol and snapshot should
-+	# match
-+	a_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	a_shared=$(echo $a_shared | awk '{ print $2 }')
-+	echo "subvol a id=$subvolid" >> $seqres.full
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT b)
-+	echo "subvol b id=$subvolid" >> $seqres.full
-+	b_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	b_shared=$(echo $b_shared | awk '{ print $2 }')
-+	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT >> $seqres.full
-+	[ $b_shared -eq $a_shared ] || _fail "shared values don't match"
-+}
-+
-+#enable quotas, do some work, check our values and then rescan and make sure we
-+#come up with the same answer
-+_rescan_test()
-+{
-+	echo "=== rescan test ===" >> $seqres.full
-+	# first with a blank subvol
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	run_check $FSSTRESS_PROG -d $SCRATCH_MNT/a -w -p 1 -n 2000 \
-+		$FSSTRESS_AVOID
-+	sync
-+	output=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	echo "qgroup values before rescan: $output" >> $seqres.full
-+	refer=$(echo $output | awk '{ print $2 }')
-+	excl=$(echo $output | awk '{ print $3 }')
-+	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+	output=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	echo "qgroup values after rescan: $output" >> $seqres.full
-+	[ $refer -eq $(echo $output | awk '{ print $2 }') ] || \
-+		_fail "reference values don't match after rescan"
-+	[ $excl -eq $(echo $output | awk '{ print $3 }') ] || \
-+		_fail "exclusive values don't match after rescan"
-+}
-+
-+#basic noexceed limit testing
-+_limit_test_noexceed()
-+{
-+	echo "=== limit not exceed test ===" >> $seqres.full
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	_run_btrfs_util_prog qgroup limit 5M 0/$subvolid $SCRATCH_MNT
-+	_ddt of=$SCRATCH_MNT/a/file bs=4M count=1 >> $seqres.full 2>&1
-+	[ $? -eq 0 ] || _fail "should have been allowed to write"
-+}
-+
-+units=`_btrfs_qgroup_units`
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_basic_test
-+_scratch_unmount
-+_check_scratch_fs
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_rescan_test
-+_scratch_unmount
-+_check_scratch_fs
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_limit_test_noexceed
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/251.out b/tests/btrfs/251.out
-new file mode 100644
-index 00000000..e5cd36a9
---- /dev/null
-+++ b/tests/btrfs/251.out
-@@ -0,0 +1,2 @@
-+QA output created by 251
-+Silence is golden
+ echo "------------------------------"
+ echo "preallocation test"
+ echo "------------------------------"
 -- 
 2.26.3
 
