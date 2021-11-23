@@ -2,98 +2,180 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5701BC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Nov 2021 23:32:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA91BC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Nov 2021 01:36:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231902AbhKVXfx (ORCPT
+        id S229776AbhKWBjp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Nov 2021 18:35:53 -0500
-Received: from mout.gmx.net ([212.227.15.18]:45669 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231550AbhKVXfx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 22 Nov 2021 18:35:53 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1637623961;
-        bh=Z9/W77qsti5bD8UyDv7AfFg5JlsVhhtAmquSYjvbB80=;
-        h=X-UI-Sender-Class:Date:Subject:To:References:From:In-Reply-To;
-        b=FipZfZpJwxrVukhZTP6jOCrXlAdFGzuCDNA1yc6ZvbfTpUR1E6HMrrmIYYXfb+73k
-         /fc99nuYgH3Zoe/j7mX3+pHdmM7n9sae/rlPbmRAOGf+8O8H/Xe8IqivcPLCBle9UX
-         /SBSqRZ+aQLIZQUA+j5xpUDqbs6HIjBSwx0M1FO8=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx005
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MatRZ-1mErS73K9b-00cTTJ; Tue, 23
- Nov 2021 00:32:41 +0100
-Message-ID: <754fdf36-cc66-9a02-2e0b-e0fb54f65982@gmx.com>
-Date:   Tue, 23 Nov 2021 07:32:37 +0800
+        Mon, 22 Nov 2021 20:39:45 -0500
+Received: from szxga03-in.huawei.com ([45.249.212.189]:28167 "EHLO
+        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229484AbhKWBjp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 22 Nov 2021 20:39:45 -0500
+Received: from dggpemm500021.china.huawei.com (unknown [172.30.72.57])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4HymsL3764z8vYM;
+        Tue, 23 Nov 2021 09:34:46 +0800 (CST)
+Received: from dggpemm500002.china.huawei.com (7.185.36.229) by
+ dggpemm500021.china.huawei.com (7.185.36.109) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.20; Tue, 23 Nov 2021 09:36:36 +0800
+Received: from huawei.com (10.67.174.154) by dggpemm500002.china.huawei.com
+ (7.185.36.229) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.20; Tue, 23 Nov
+ 2021 09:36:35 +0800
+From:   "chenlongcl.chen@huawei.com" <chenlongcl.chen@huawei.com>
+To:     <fstests@vger.kernel.org>
+CC:     <tytso@mit.edu>, <chenlongcl.chen@huawei.com>
+Subject: [PATCH] ext4: verify ext4 when the starting block of index and leaf are inconsistent
+Date:   Tue, 23 Nov 2021 09:37:59 +0800
+Message-ID: <20211123013759.170012-1-chenlongcl.chen@huawei.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.1
-Subject: Re: [PATCH] fstests: btrfs/099: use the qgroupid for qgroup limit
-Content-Language: en-US
-To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com, fstests@vger.kernel.org
-References: <595829c06353ab12280513ab880bb742a2389bbe.1637614211.git.josef@toxicpanda.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-In-Reply-To: <595829c06353ab12280513ab880bb742a2389bbe.1637614211.git.josef@toxicpanda.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:l/IdmX5uEyiNwlS7bz3BSB20JEKmgkGUTxgH8hybNKx3fTyu/MV
- EI9anfbUKy5zfXThJ4kwwOB+QGDvc10RDfnIDeCRez2GmSeNUVX6F7kxpohwbWemOv2vplV
- N72YRU8qFpuGsyQ+LboeKIXZVKYioyRI7UrYnTPlwhPY1xsrY54xzLyTJlqwqbdx0ubPDzz
- ORlLvyhOlTQMYIHeAHfwQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:HTnUpxVhBM0=:Mb92FeDfo0QWVo9SakFDWx
- Dcr9K/U0L6a8qNgk1MIJAh4e/EFs8qCIktPRxGSLF+muPOJgKcpQ79EVTiX7DxTQttIrppVnP
- S7SCvgoQ+mmMQsNqWcu/mtNpafHc4vez5wb63SsrksDeR4VlmS0xP007PYsDiJryDmTjvX2A9
- e2ZdKApJlMrVWXeavudOw2Y1PHyYMqb0J5Uagc7iwrSSnUBMLkrVjN4g+/PRhrAKh+TpMc0oD
- 4DIEybZ4hRSI5TJQ/hLZ95eNHa48CuGOPPUeScVGMhnukDJMzKFhhLSyJDVPPr/+IiQwepyzC
- 9YHEKAYIwmaExhW9y6HQ50v/kDMjLNkUHfxFc+zo/6fKn/Hk4UkMhyTz7MEA3A7lfHRAnYtg0
- ZKgnEV4LK4SaoCwATshISk3SUMN6nbWm/8ggnJmTX6uTjyNptZW/zty7wSfbtHGzUxDpB8bfX
- 4nUSCaH/dRY6oStmxMdcE5pM4R/hqznSWQM2eZacl0ovCYlYzBpDc7qbdaP3e+ROhzYRLXwYW
- EtvK57TiGxEll9Snm7K/WMpK9CO0gOBokHJebfshV4eLID8yHGUlI+CodAW1eQcIe9yPkorcl
- UmjbG8qg9umzoJsB51dtHFFkrrNIIilV9h5l+adRoiRfQQ01A+yipDg6nm+O/+1lX0tPgr3kU
- iIrrJs56L0n9Pw77FX4HP0yF9hEDQMRbuS1ftHlgDO5/oPjrlvcOodJ1o2Ztm0v97BBI6BbuY
- uRjk5lOswgkVA/X87bWS+CSd/yeoCgEm3i3Qb743xnwZB/kXrrFzNfV1Xo3xdty4xHWp0KV3H
- DlHQPau5S9AUgacZrykTuSO076WjOsFq/ppPcBlFRRcVNcmdQhyc9Pol98+juyw0+c7BkG+k0
- 00W+yYULZ9Ub2uhA/oxymnpW+GkdbsXOQSNI2bWupzNfDOhdwOuIsEH+sex8U+ScsjfnItyo1
- DGI85nt6NCLIr/qjw4su2IC+Nne9dFJChmSB5SgTmr6utWotIrAqAcS6sYDRHw118CiOcs94M
- LCzmbD151hLW2hFJCT+8zI38A+BlwxAYshVz8ORlbLVnlMXKEJG38PJI2qrNBHejx5RuB/htv
- Yb7b8s2bNJ6p7U=
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.67.174.154]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ dggpemm500002.china.huawei.com (7.185.36.229)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: chenlong <chenlongcl.chen@huawei.com>
 
+Insert the extent entry in ext4_ext_insert_extent() (to be inserted at
+the beginning of the block). In the stage of updating the starting block
+number of the parent index block, an error happened
+in ext4_ext_correct_indexes()->ext4_ext_get_access(), which caused the
+index update of the parent index node to fail. The ext4_ext_insert_extent()
+function exits directly and does not roll back the extent entry of
+the leaf block. Eventually, the extent starting block numbers in
+the index block and leaf block are inconsistent, triggering bugon
 
-On 2021/11/23 04:50, Josef Bacik wrote:
-> A change to btrfs-progs uncovered a problem with btrfs/099, we weren't
-> specifying the qgroupid with the subvol id.  This technically worked
-> before but only by accident, and all other tests properly specify the
-> qgroupid for qgroup limit commands.  Fix this test to specify the
-> qgroupid, which will work with older versions of btrfs-progs and newer
-> ones as well.
->
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+This is a regression test for three kernel commit:
+1. 0f2f87d51aebc (ext4: prevent partial update of the extent blocks)
+2. 9c6e071913792 (ext4: check for inconsistent extents between index
+   and leaf block)
+3. 8dd27fecede55 (ext4: check for out-of-order index extents in
+   ext4_valid_extent_entries())
+---
+ tests/ext4/054     | 97 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/054.out |  2 +
+ 2 files changed, 99 insertions(+)
+ create mode 100755 tests/ext4/054
+ create mode 100644 tests/ext4/054.out
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+diff --git a/tests/ext4/054 b/tests/ext4/054
+new file mode 100755
+index 00000000..3d63f12f
+--- /dev/null
++++ b/tests/ext4/054
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Huawei.  All Rights Reserved.
++#
++# FS QA Test 054
++#
++# Regression test for kernel commit:
++# 1. 0f2f87d51aebc (ext4: prevent partial update of the extent blocks)
++# 2. 9c6e071913792 (ext4: check for inconsistent extents between index \
++#    and leaf block)
++# 3. 8dd27fecede55 (ext4: check for out-of-order index extents in \
++#    ext4_valid_extent_entries())
++
++. ./common/preamble
++_begin_fstest auto quick
++
++_cleanup()
++{
++    cd /
++    rm -f $tmp.*
++    $UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
++    rm -f ${IMG_FILE} > /dev/null 2>&1
++}
++
++# Import common functions
++. ./common/filter
++
++# real QA test starts here
++_supported_fs ext4
++_require_test
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "pwrite"
++_require_xfs_io_command "fsync"
++_require_xfs_io_command "fpunch"
++_require_command "$DEBUGFS_PROG" debugfs
++
++IMG_FILE=${SCRATCH_MNT}/$seq.fs
++IMG_MNT=${SCRATCH_MNT}/$seq.mnt
++TEST_FILE="${IMG_MNT}/testfile"
++
++fallocate -l 10M $IMG_FILE
++mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
++
++$MKFS_EXT4_PROG -F $IMG_FILE >> $seqres.full 2>&1 || _fail "mkfs failed"
++
++$MOUNT_PROG -t ${FSTYP} ${IMG_FILE} ${IMG_MNT} >/dev/null 2>&1 || \
++    _fail "mount failed"
++touch $TEST_FILE
++
++#
++# The following steps create an abnormal file system image and
++# create a file(testfile). The starting logic block of his second leaf
++# extent block is inconsistent with the starting logic block of the
++# second idx extent entry in the inode.
++# Level Entries       Logical      Physical Length Flags
++# 0/ 1   2/  2  5632 -  6527  2020            896
++#               ^^^^ 指向了leaf block
++# 1/ 1   1/ 15  5376 -  5439  7041 -  7104     64 Uninit
++# 1/ 1   2/ 15  5632 -  5695  7297 -  7360     64 Uninit
++#
++for i in {0..50}
++do
++    offset=$((1024 * 128 * i))
++    $XFS_IO_PROG -c "falloc $offset $((1024 * 64))" $TEST_FILE >> $seqres.full
++    offset=$((offset + 1024 * 64))
++    $XFS_IO_PROG -c "pwrite $offset $((1024 * 64))" $TEST_FILE >> $seqres.full
++    $XFS_IO_PROG -c "fsync" $TEST_FILE >> $seqres.full
++done
++
++$XFS_IO_PROG -c "fpunch $((1024 * 5376)) $((1024 * 256))" $TEST_FILE \
++        >> $seqres.full
++$XFS_IO_PROG -c "fsync" $TEST_FILE >> $seqres.full
++$XFS_IO_PROG -c "falloc $((1024 * 5376)) $((1024 * 64))" $TEST_FILE \
++        >> $seqres.full
++$XFS_IO_PROG -c "fsync" $TEST_FILE
++
++$UMOUNT_PROG ${IMG_MNT} || _fail "umount failed"
++
++$DEBUGFS_PROG -w -R "set_inode_field testfile block[6] 0x1600" $IMG_FILE \
++        2>>$seqres.full >> $seqres.full
++
++# Mount the file system and create a block at a location in the middle
++# of 5440-5632
++
++$MOUNT_PROG -t ${FSTYP} -o nodelalloc ${IMG_FILE} ${IMG_MNT} \
++        >/dev/null 2>&1 || _fail "mount failed"
++$XFS_IO_PROG -c "pwrite $((1024 * 5568)) $((1024 * 64))" $TEST_FILE \
++        2>>$seqres.full >> $seqres.full
++
++# If this BUG is not fixed, when the testcase is executed to this position,
++# the kernel will be BUG_ON immediately.
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/054.out b/tests/ext4/054.out
+new file mode 100644
+index 00000000..108fe4c9
+--- /dev/null
++++ b/tests/ext4/054.out
+@@ -0,0 +1,2 @@
++QA output created by 054
++Silence is golden
+-- 
+2.17.1
 
-Thanks,
-Qu
-
-> ---
->   tests/btrfs/099 | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/tests/btrfs/099 b/tests/btrfs/099
-> index 375cc2b9..f3a2002a 100755
-> --- a/tests/btrfs/099
-> +++ b/tests/btrfs/099
-> @@ -29,7 +29,7 @@ _scratch_mount
->   _require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
->
->   _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> -_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
-> +_run_btrfs_util_prog qgroup limit $FILESIZE 0/5 $SCRATCH_MNT
->
->   # loop 5 times without sync to ensure reserved space leak will happen
->   for i in `seq 1 5`; do
->
