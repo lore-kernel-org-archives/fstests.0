@@ -2,91 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67ADDC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 07:50:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA23DC433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 07:52:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234057AbhKYHxW (ORCPT
+        id S1348514AbhKYHzU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 25 Nov 2021 02:53:22 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:17619 "EHLO
+        Thu, 25 Nov 2021 02:55:20 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:61265 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S234555AbhKYHvR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 02:51:17 -0500
-IronPort-Data: =?us-ascii?q?A9a23=3Abc+7R6uWDcYAyQG/oNeDBy/i7OfnVEpcMUV32f8?=
- =?us-ascii?q?akzHdYEJGY0x3mmZJUWGCO/qOa2fwc4h1O47k/EgC75HVydNnTAJsri5gHilAw?=
- =?us-ascii?q?SbnLY7Hdx+vZUt+DSFioHpPtpxYMp+ZRCwNZie0SiyFb/6x8hGQ6YnSHuClUbe?=
- =?us-ascii?q?eZ3goLeNZYHxJZSxLyrdRbrFA0YDR7zOl4bsekuWHULOX82cc3lE8t8pvnChSU?=
- =?us-ascii?q?MHa41v0iLCRicdj5zcyn1FNZH4WyDrYw3HQGuG4FcbiLwrPIS3Qw4/Xw/stIov?=
- =?us-ascii?q?NfrfTeUtMTKPQPBSVlzxdXK3Kbhpq/3R0i/hkcqFHLxo/ZzahxridzP1XqJW2U?=
- =?us-ascii?q?hZvMKvXhMwTThtZDzpje6ZB/dcrJFDm6JPDnhWYLCCEL/JGSRte0Zcj0uhsHWx?=
- =?us-ascii?q?V6ecwNj8AdFaAiviwzbb9TfNj7vnPhuGD0Jg34ykmlG+GS619B82rfkkD3vcAt?=
- =?us-ascii?q?B9YuyyENaq2ixIlVAdS?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3ALtkaN69uYvXtXhm7cVxuk+D2I+orL9Y04lQ7?=
- =?us-ascii?q?vn2ZhyY0TiTS/Pre5cjztCWE7wr5N0tQ++xoVJPvfZr8z+8M3WBzB8bHYOCFgh?=
- =?us-ascii?q?rMEGlihbGSuAEIcheWnoVgPMxbAstD4arLYWSS4/ya3ODDKbwdKaG8gcaVbLvl?=
- =?us-ascii?q?vg1QpHpRBp2JUmxCZTqmLg=3D=3D?=
+        with ESMTP id S234384AbhKYHxU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 02:53:20 -0500
+IronPort-Data: =?us-ascii?q?A9a23=3ASAwUe6oadlD6ZoW2V0+Zv5jSEsBeBmIEZxIvgKr?=
+ =?us-ascii?q?LsJaIsI5as4F+vjBLWWqEaK2MajamftogYN6/9kgGu5/VytFkTAE/rH0wQiMRo?=
+ =?us-ascii?q?6IpJ/zDcB6oYHn6wu4v7a5fx5xHLIGGdajYd1eEzvuWGuWn/SYUOZ2gHOKmUbe?=
+ =?us-ascii?q?dYH0pHGeIdQ964f5ds79g6mJXqYjha++9kYuaT/z3YDdJ6RYtWo4nw/7rRCdUg?=
+ =?us-ascii?q?RjHkGhwUmrSyhx8lAS2e3E9VPrzLEwqRpfyatE88uWSH44vwFwll1418SvBCvv?=
+ =?us-ascii?q?9+lr6WkYMBLDPPwmSkWcQUK+n6vRAjnVqlP9la7xHMgEK49mKt4kZJNFlr4G5T?=
+ =?us-ascii?q?xw4eKPKg/g1XQRaEj1lIOtN/7qvzX2X6JXMnxyeLSSyqxlpJARsVWECwc55Gn1?=
+ =?us-ascii?q?D7uADAC4CYwrFhO+sxr+/DO52iawewGPDVG8Ekig4i2iHUrB9GtaeK5gmLORwh?=
+ =?us-ascii?q?F8Y7v2i196FDybBVQdSUQ=3D=3D?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3ArjkJb6ndWVWuUDvrw8dba3ysVe3pDfIC3DAb?=
+ =?us-ascii?q?v31ZSRFFG/FwWfrPoBxRviWE8Qr5OUtQ/uxoV5PwI080maQa3WAxB8bbYOCEgh?=
+ =?us-ascii?q?rNEGgB1/qG/9XgcxeOjdK1vJ0IG8ND4bbLfDtHZLHBjDVQfexA/DD8ysqVbJ/l?=
+ =?us-ascii?q?vhFQpF1RGttdBnxCZzpyryZNKzV7OQ=3D=3D?=
 X-IronPort-AV: E=Sophos;i="5.87,262,1631548800"; 
-   d="scan'208";a="117890673"
+   d="scan'208";a="117890676"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 25 Nov 2021 15:47:59 +0800
 Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 548204D138C6
-        for <fstests@vger.kernel.org>; Thu, 25 Nov 2021 15:47:57 +0800 (CST)
-Received: from G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Thu, 25 Nov 2021 15:47:56 +0800
+        by cn.fujitsu.com (Postfix) with ESMTP id 3CF574D138E2
+        for <fstests@vger.kernel.org>; Thu, 25 Nov 2021 15:47:59 +0800 (CST)
 Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
- G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) with Microsoft SMTP Server
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
  (TLS) id 15.0.1497.23; Thu, 25 Nov 2021 15:47:57 +0800
 Received: from irides.mr.mr.mr (10.167.225.141) by
  G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Thu, 25 Nov 2021 15:47:55 +0800
+ id 15.0.1497.23 via Frontend Transport; Thu, 25 Nov 2021 15:47:57 +0800
 From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
 To:     <fstests@vger.kernel.org>
-Subject: [PATCH v2 01/16] generic: add mmap CoW test for ranges of two shared files
-Date:   Thu, 25 Nov 2021 15:47:37 +0800
-Message-ID: <20211125074752.274176-2-ruansy.fnst@fujitsu.com>
+Subject: [PATCH v2 08/16] generic: add mmap CoW test for unwritten&source extents
+Date:   Thu, 25 Nov 2021 15:47:44 +0800
+Message-ID: <20211125074752.274176-9-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.34.0
 In-Reply-To: <20211125074752.274176-1-ruansy.fnst@fujitsu.com>
 References: <20211125074752.274176-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 548204D138C6.ADBB5
+X-yoursite-MailScanner-ID: 3CF574D138E2.A0BB9
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Ensuring that copy on write in mmap mode works when the CoW range originally
-covers multiple extents. (MMAP version of generic/185,183)
+Ensuring that copy on write in mmap mode to the source file when the CoW range
+covers unwritten and regular shared blocks.
+(MMAP version of generic/289,290)
 
 Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
 ---
- tests/generic/900     | 69 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out | 14 +++++++++
- 2 files changed, 83 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
+ tests/generic/907     | 62 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/907.out | 12 +++++++++
+ 2 files changed, 74 insertions(+)
+ create mode 100755 tests/generic/907
+ create mode 100644 tests/generic/907.out
 
-diff --git a/tests/generic/900 b/tests/generic/900
+diff --git a/tests/generic/907 b/tests/generic/907
 new file mode 100755
-index 00000000..de76cd00
+index 00000000..61c9293a
 --- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,69 @@
++++ b/tests/generic/907
+@@ -0,0 +1,62 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +#
-+# FS QA Test No. 900
++# FS QA Test No. 907
 +#
-+# Ensuring that copy on write in mmap mode works when the CoW
-+# range originally covers multiple extents. (MMAP version of generic/185,183)
-+#   - Create two files
-+#   - Reflink the odd blocks of the first file into a third file.
-+#   - Reflink the even blocks of the second file into the third file.
-+#   - mmap CoW across the halfway mark.
++# Ensuring that copy on write in mmap mode to the source file when the
++# CoW range covers unwritten and regular shared blocks.
++# (MMAP version of generic/289,290)
++#   - Create two files.
++#   - fallocate the first file.
++#   - Write the odd blocks of the first file.
++#   - Reflink the odd blocks of the first file into the second file.
++#   - mmap CoW the first file across the halfway mark, starting with the
++#     regular extent.
 +#   - Check that the files are now different where we say they're different.
 +#
 +. ./common/preamble
@@ -98,6 +99,7 @@ index 00000000..de76cd00
 +
 +# real QA test starts here
 +_require_scratch_reflink
++_require_xfs_io_command "falloc"
 +
 +echo "Format and mount"
 +_scratch_mkfs > $seqres.full 2>&1
@@ -110,61 +112,48 @@ index 00000000..de76cd00
 +blksz=65536
 +nr=64
 +filesize=$((blksz * nr))
-+_pwrite_byte 0x61 0 $filesize $testdir/file1 >> $seqres.full
-+_pwrite_byte 0x62 0 $filesize $testdir/file2 >> $seqres.full
-+seq 0 2 $((nr-1)) | while read f; do
-+	_reflink_range $testdir/file1 $((blksz * f)) $testdir/file3 $((blksz * f)) $blksz >> $seqres.full
-+	_pwrite_byte 0x61 $((blksz * f)) $blksz $testdir/file3.chk >> $seqres.full
-+done
-+seq 1 2 $((nr-1)) | while read f; do
-+	_reflink_range $testdir/file2 $((blksz * f)) $testdir/file3 $((blksz * f)) $blksz >> $seqres.full
-+	_pwrite_byte 0x62 $((blksz * f)) $blksz $testdir/file3.chk >> $seqres.full
-+done
++_sweave_reflink_unwritten $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
 +_scratch_cycle_mount
 +
 +echo "Compare files"
 +md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
 +md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
++md5sum $testdir/file1.chk | _filter_scratch
 +
 +echo "mmap CoW across the transition"
 +cowoff=$((filesize / 4))
 +cowsz=$((filesize / 2))
 +mmapsz=$((cowoff + cowsz))
-+_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file3 >> $seqres.full
-+_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file3.chk >> $seqres.full
++_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file1 >> $seqres.full
++_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file1.chk >> $seqres.full
 +_scratch_cycle_mount
 +
 +echo "Compare files"
 +md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
 +md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
++md5sum $testdir/file1.chk | _filter_scratch
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
+diff --git a/tests/generic/907.out b/tests/generic/907.out
 new file mode 100644
-index 00000000..b2569ab0
+index 00000000..c18b849c
 --- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,14 @@
-+QA output created by 900
++++ b/tests/generic/907.out
+@@ -0,0 +1,12 @@
++QA output created by 907
 +Format and mount
 +Create the original files
 +Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-900/file1
-+b83f9394092e15bdcda585cd8e776dc6  SCRATCH_MNT/test-900/file2
-+d3959a68638c50af07f0258e032cb554  SCRATCH_MNT/test-900/file3
-+d3959a68638c50af07f0258e032cb554  SCRATCH_MNT/test-900/file3.chk
++b8a8a88d4c143f79900c4b4e79aa3e37  SCRATCH_MNT/test-907/file1
++ce2023f765eba19677517c511886d5c9  SCRATCH_MNT/test-907/file3
++b8a8a88d4c143f79900c4b4e79aa3e37  SCRATCH_MNT/test-907/file1.chk
 +mmap CoW across the transition
 +Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-900/file1
-+b83f9394092e15bdcda585cd8e776dc6  SCRATCH_MNT/test-900/file2
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-900/file3
-+55968a95dfc0120df4e8485576514320  SCRATCH_MNT/test-900/file3.chk
++e8cf59797f0b3758c8878c368bb4cf7e  SCRATCH_MNT/test-907/file1
++ce2023f765eba19677517c511886d5c9  SCRATCH_MNT/test-907/file3
++e8cf59797f0b3758c8878c368bb4cf7e  SCRATCH_MNT/test-907/file1.chk
 -- 
 2.34.0
 
