@@ -2,165 +2,165 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE5CFC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 06:07:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58E13C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 07:50:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244237AbhKYGK7 (ORCPT
+        id S229709AbhKYHxM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 25 Nov 2021 01:10:59 -0500
-Received: from smtp-out1.suse.de ([195.135.220.28]:59216 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244689AbhKYGI7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 01:08:59 -0500
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 072A321954;
-        Thu, 25 Nov 2021 06:05:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1637820348; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=X4vA0OfeWuSH0twumEAJxx4/BG9Em1XrSJdcCIfFMOg=;
-        b=jLFzLWURpqxBTYmt+f7pQk/8T7U7rlMww0tbo34NT++bxRHqbTI+0oP03KEaBSALFpXHsE
-        rzALnkVvlkkiWaaof/7CBGu/pNR2da4cxwN09HQ72HNmNkzxMOlbRsuuw5Tk7MD+xwxAZJ
-        b3gSOH3/ix5g7QKVHGib4ucZKDKWbd8=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 19EFF13AE9;
-        Thu, 25 Nov 2021 06:05:46 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id Q3lPNLonn2HXXAAAMHmgww
-        (envelope-from <wqu@suse.com>); Thu, 25 Nov 2021 06:05:46 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH v3] fstests: btrfs/049: add regression test for compress-force mount options
-Date:   Thu, 25 Nov 2021 14:05:29 +0800
-Message-Id: <20211125060529.53289-1-wqu@suse.com>
+        Thu, 25 Nov 2021 02:53:12 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:61265 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S234057AbhKYHvM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 02:51:12 -0500
+IronPort-Data: =?us-ascii?q?A9a23=3Am3g1gKD0V0vxjRVW/zXhw5YqxClBgxIJ4g17XOL?=
+ =?us-ascii?q?fDQG51jwigjxTnGoYUGGHPKneNGCkLYpzbYWzpB5XuZGAx9UxeLYW3SszFioV8?=
+ =?us-ascii?q?6IpJjg4wn/YZnrUdouaJK5ex512huLocYZkERcwmj/3auK49CAmiPnRLlbBILW?=
+ =?us-ascii?q?s1h5ZFFYMpBgJ2UoLd94R2uaEsPDha++/kYqaT/73ZDdJ7wVJ3lc8sMpvnv/AU?=
+ =?us-ascii?q?MPa41v0tnRmDRxCUcS3e3M9VPrzLonpR5f0rxU9IwK0ewrD5OnREmLx9BFrBM6?=
+ =?us-ascii?q?nk6rgbwsBRbu60Qqm0yIQAvb9xEMZ4HFaPqUTbZLwbW9NljyPhME3xtNWqbS+V?=
+ =?us-ascii?q?AUoIrbR3u8aVnG0FgknZPIWqeeZfiLXXcu7iheun2HX6/t1EEwtIZYw5Ol6Gyd?=
+ =?us-ascii?q?N+OYeJTRLaQqM799aaprTpvJE35xldZe0ethE/CwI8N0QNt5+KbirfkkAzYYwM?=
+ =?us-ascii?q?O8Mu/1z?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AODZ8ua3KjOd84vEI+b7lHgqjBJwkLtp133Aq?=
+ =?us-ascii?q?2lEZdPWaSKylf4vEpoVj6faUskd3ZJhOo6HjBEDtex3hHL9OkPEs1NSZLW3bUQ?=
+ =?us-ascii?q?mTXeRfBYqL+UyaJ8SWzIc0vpuIGJIOa+EYemIXsS+V2miF+qwbquVviJrY49s2?=
+ =?us-ascii?q?k00dNz2CEJsM0+/FYTz1LnFL?=
+X-IronPort-AV: E=Sophos;i="5.87,262,1631548800"; 
+   d="scan'208";a="117890672"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 25 Nov 2021 15:47:59 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id D22A94D138C2
+        for <fstests@vger.kernel.org>; Thu, 25 Nov 2021 15:47:56 +0800 (CST)
+Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Thu, 25 Nov 2021 15:47:57 +0800
+Received: from irides.mr.mr.mr (10.167.225.141) by
+ G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.23 via Frontend Transport; Thu, 25 Nov 2021 15:47:55 +0800
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+Subject: [PATCH v2 00/16] generic: add some mmap CoW tests
+Date:   Thu, 25 Nov 2021 15:47:36 +0800
+Message-ID: <20211125074752.274176-1-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.34.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: D22A94D138C2.AFE99
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since kernel commit d4088803f511 ("btrfs: subpage: make lzo_compress_pages()
-compatible"), lzo compression no longer respects the max compressed page
-limit, and can cause kernel crash.
+Changes since v1:
+  - Replace 'xxx' in each header with real sequence number
+  - Combine two patchsets together because they both aim to add mmap tests
 
-The upstream fix is 6f019c0e0193 ("btrfs: fix a out-of-bound access in
-copy_compressed_data_to_page()").
+This series is to add missing mmap CoW tests in some sets of testcases:
+Set 1. CoW on shared blocks which are interleaving reflinked by two files.
+  - P1:            add mmap test
+Set 2. CoW a range covers shared blocks and multiple kind of unshared blocks of
+   the destination file.
+  - P2 ~ P6:       add mmap test
+Set 3. CoW a range covers shared blocks and multiple kind of unshared blocks of
+   the source file.
+  - P11, P12:      add missing buffered-io and direct-io test for mixed blocks
+  - P7 ~ P10, P13: add mmap test
+Set 4. races tests
+  - P14: race between reflink and mmap reading
+  - P15: race between mmap writing to and reflink source file
+  - P16: race between mmap writing to and reflink target file
 
-This patch will add such regression test for all possible compress-force
-mount options, including lzo, zstd and zlib.
 
-And since we're here, also make sure the content of the file matches
-after a mount cycle.
+Shiyang Ruan (16):
+  generic: add mmap CoW test for ranges of two shared files
+  generic: add mmap CoW test for regular&destination extents
+  generic: add mmap CoW test for unwritten&destination extents
+  generic: add mmap CoW test for holes&destination extents
+  generic: add mmap CoW test for delalloc&destination extents
+  generic: add mmap CoW test for mixed&destination extents
+  generic: add mmap CoW test for regular&source extents
+  generic: add mmap CoW test for unwritten&source extents
+  generic: add mmap CoW test for holes&source extents
+  generic: add mmap CoW test for delalloc&source extents
+  generic: add buffered-io CoW test for mixed&source extents
+  generic: add direct-io CoW test for mixed&source extents
+  generic: add mmap CoW test for mixed&source extents
+  generic: add race test between reflink and mmap read
+  generic: add race test that mmap write to source of reflink
+  generic: add race test that mmap write to target of reflink
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Also test zlib and zstd
-- Add file content verification check
-v3:
-- Use $tmp.good as a known good file source
-- Also make sure we didn't get short read for the good copy
----
- tests/btrfs/049     | 67 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/049.out |  6 ++++
- 2 files changed, 73 insertions(+)
- create mode 100755 tests/btrfs/049
+ common/reflink        | 74 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900     | 69 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out | 14 ++++++++
+ tests/generic/901     | 59 ++++++++++++++++++++++++++++++++++
+ tests/generic/901.out | 12 +++++++
+ tests/generic/902     | 59 ++++++++++++++++++++++++++++++++++
+ tests/generic/902.out | 12 +++++++
+ tests/generic/903     | 59 ++++++++++++++++++++++++++++++++++
+ tests/generic/903.out | 12 +++++++
+ tests/generic/904     | 61 +++++++++++++++++++++++++++++++++++
+ tests/generic/904.out | 12 +++++++
+ tests/generic/905     | 68 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/905.out | 12 +++++++
+ tests/generic/906     | 60 +++++++++++++++++++++++++++++++++++
+ tests/generic/906.out | 12 +++++++
+ tests/generic/907     | 62 ++++++++++++++++++++++++++++++++++++
+ tests/generic/907.out | 12 +++++++
+ tests/generic/908     | 62 ++++++++++++++++++++++++++++++++++++
+ tests/generic/908.out | 12 +++++++
+ tests/generic/909     | 64 +++++++++++++++++++++++++++++++++++++
+ tests/generic/909.out | 12 +++++++
+ tests/generic/910     | 66 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/910.out | 12 +++++++
+ tests/generic/911     | 66 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/911.out | 12 +++++++
+ tests/generic/912     | 67 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/912.out | 12 +++++++
+ tests/generic/913     | 72 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/913.out |  5 +++
+ tests/generic/914     | 64 +++++++++++++++++++++++++++++++++++++
+ tests/generic/914.out |  4 +++
+ tests/generic/915     | 64 +++++++++++++++++++++++++++++++++++++
+ tests/generic/915.out |  4 +++
+ 33 files changed, 1267 insertions(+)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
+ create mode 100755 tests/generic/902
+ create mode 100644 tests/generic/902.out
+ create mode 100755 tests/generic/903
+ create mode 100644 tests/generic/903.out
+ create mode 100755 tests/generic/904
+ create mode 100644 tests/generic/904.out
+ create mode 100755 tests/generic/905
+ create mode 100644 tests/generic/905.out
+ create mode 100755 tests/generic/906
+ create mode 100644 tests/generic/906.out
+ create mode 100755 tests/generic/907
+ create mode 100644 tests/generic/907.out
+ create mode 100755 tests/generic/908
+ create mode 100644 tests/generic/908.out
+ create mode 100755 tests/generic/909
+ create mode 100644 tests/generic/909.out
+ create mode 100755 tests/generic/910
+ create mode 100644 tests/generic/910.out
+ create mode 100755 tests/generic/911
+ create mode 100644 tests/generic/911.out
+ create mode 100755 tests/generic/912
+ create mode 100644 tests/generic/912.out
+ create mode 100755 tests/generic/913
+ create mode 100644 tests/generic/913.out
+ create mode 100755 tests/generic/914
+ create mode 100644 tests/generic/914.out
+ create mode 100755 tests/generic/915
+ create mode 100644 tests/generic/915.out
 
-diff --git a/tests/btrfs/049 b/tests/btrfs/049
-new file mode 100755
-index 00000000..c1f35dc9
---- /dev/null
-+++ b/tests/btrfs/049
-@@ -0,0 +1,67 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 049
-+#
-+# Test if btrfs will crash when using compress-force mount option against
-+# incompressible data
-+#
-+. ./common/preamble
-+_begin_fstest auto quick compress dangerous
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+ 	rm -r -f $tmp.*
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_scratch
-+
-+pagesize=$(get_page_size)
-+
-+# Read the content from urandom to a known safe location
-+$XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 $pagesize" "$tmp.good" > /dev/null
-+
-+# Make sure we didn't get short read
-+if [ $(_get_filesize "$tmp.good") != "$pagesize" ]; then
-+	_fail "Got a short read from /dev/urandom"
-+fi
-+
-+workload()
-+{
-+	local compression=$1
-+
-+	echo "=== Testing compress-force=$compression ==="
-+	_scratch_mkfs -s "$pagesize">> $seqres.full
-+	_scratch_mount -o compress-force="$compression"
-+	cp "$tmp.good" "$SCRATCH_MNT/$compression"
-+
-+	# When unpatched, compress-force=lzo would crash at data writeback
-+	_scratch_cycle_mount
-+
-+	# Make sure the content matches
-+	if [ "$(_md5_checksum $tmp.good)" != \
-+	     "$(_md5_checksum $SCRATCH_MNT/$compression)" ]; then
-+		_fail "Content of '$SCRATCH_MNT/file' mismatch with known good copy"
-+	else
-+		echo "OK"
-+	fi
-+	_scratch_unmount
-+}
-+
-+workload lzo
-+workload zstd
-+workload zlib
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
-index cb0061b3..41bffeaa 100644
---- a/tests/btrfs/049.out
-+++ b/tests/btrfs/049.out
-@@ -1 +1,7 @@
- QA output created by 049
-+=== Testing compress-force=lzo ===
-+OK
-+=== Testing compress-force=zstd ===
-+OK
-+=== Testing compress-force=zlib ===
-+OK
 -- 
 2.34.0
+
+
 
