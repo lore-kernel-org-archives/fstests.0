@@ -2,541 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3259AC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Nov 2021 21:12:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33995C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 05:15:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243890AbhKXVP6 (ORCPT
+        id S231465AbhKYFS6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Nov 2021 16:15:58 -0500
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:35088 "EHLO
-        mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S235268AbhKXVP5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Nov 2021 16:15:57 -0500
-Received: from pps.filterd (m0148460.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1AOJnWjA005894
-        for <fstests@vger.kernel.org>; Wed, 24 Nov 2021 13:12:46 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.com; h=from : to : cc : subject
- : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=facebook; bh=4B8wFcJFVZU1AlHudz3j1M/t5eGA05mKNy+EXxs2RvA=;
- b=GAMYlVCOPT524Jaa7oNcbw2mjJZedno3u/5Gm5oetRX25PzI+CWq8EGPxEdEXCwzU7Zb
- LPzhYuGXO8jF7OO8LyKKrSF2B2FT2HG6heQGK+RR4jYBXNRmWD5n2W+N0sd8seqvnuUH
- JSM+e4zDEwgldkTZekTK0s2Bnjh8/iaD55w= 
-Received: from maileast.thefacebook.com ([163.114.130.16])
-        by mx0a-00082601.pphosted.com with ESMTP id 3chje5vcds-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 24 Nov 2021 13:12:46 -0800
-Received: from intmgw006.03.ash8.facebook.com (2620:10d:c0a8:1b::d) by
- mail.thefacebook.com (2620:10d:c0a8:83::7) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Wed, 24 Nov 2021 13:12:45 -0800
-Received: by devvm225.atn0.facebook.com (Postfix, from userid 425415)
-        id 22E7A6DBB03D; Wed, 24 Nov 2021 13:12:44 -0800 (PST)
-From:   Stefan Roesch <shr@fb.com>
-To:     <fstests@vger.kernel.org>, <linux-btrfs@vger.kernel.org>,
-        <kernel-team@fb.com>
-CC:     <shr@fb.com>, Josef Bacik <josef@toxicpanda.com>
-Subject: [PATCH v6] btrfs: Add new test for setting the chunk size.
-Date:   Wed, 24 Nov 2021 13:12:30 -0800
-Message-ID: <20211124211230.410473-1-shr@fb.com>
-X-Mailer: git-send-email 2.30.2
+        Thu, 25 Nov 2021 00:18:58 -0500
+Received: from mail1.bemta32.messagelabs.com ([195.245.230.66]:29940 "EHLO
+        mail1.bemta32.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231580AbhKYFQ5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 00:16:57 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1637817226; i=@fujitsu.com;
+        bh=huh5ElQOAgUgRNm+HwInIZ1ibKay9qrpgDS+sDV4iLw=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=BDK0raia9hUjsvz3rOuEFtsc8VlS8LvhmhdoiYejxckWn/TZLm3WIVWZckAkBmW8e
+         AjRp7d3eyCI3+hFy/V3VUOSKKiVoY+iiw0TZbrKuk/VREG+uz2lrl+PG2qpFfXVI4D
+         nu5Dvwf5WbVswnFv7SZNUM+3YJhmOAGUj0lNj0AGkQJqxe1Ynec361s9ONBDD3bySE
+         9kOEYO8MwxT3YLI6SUZmSKadDL5zCnF5sDUVTN0RiBg1FthZhguQC816KBeb+ntYwm
+         koZUuFJOndYFVroS9tyfvE07v7Zr5ifPrAlKmyIrKtOj2tdugy2Kek5/7g9L9J+XZZ
+         tbP8gxUNydDgg==
+Received: from [100.115.1.54] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-4.bemta.az-a.eu-west-1.aws.ess.symcld.net id D0/EF-06911-98B1F916; Thu, 25 Nov 2021 05:13:45 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrCIsWRWlGSWpSXmKPExsViZ8MxSbdTen6
+  iwcLZihanW/ayOzB6fN4kF8AYxZqZl5RfkcCacezefvaCZq6KT92vWBsYj3B0MXJxCAlcYpR4
+  O20TM4Szj0li9dezTBDOHkaJd4cvsXYxcnKwCWhKPOtcwAxiiwjISvyfsZoJxGYWUJdYPukXm
+  C0s4C1xsA8iziKgKvFpWj+YzSvgIbHmwxFGEFtCQEFiysP3zBBxQYmTM5+wQMyRkDj44gUzRI
+  2ixKWOb1D1FRKzZrUxQdhqElfPbWKewMg/C0n7LCTtCxiZVjFaJRVlpmeU5CZm5ugaGhjoGhq
+  a6hrrGlpa6iVW6SbqpZbqlqcWl+ga6iWWF+ulFhfrFVfmJuek6OWllmxiBAZlSjHz8R2MU/p+
+  6h1ilORgUhLlDf4zL1GILyk/pTIjsTgjvqg0J7X4EKMMB4eSBO9lyfmJQoJFqempFWmZOcAIg
+  UlLcPAoifDaSAGleYsLEnOLM9MhUqcYjTkuX5+3iJnjdcvPHcxCLHn5ealS4ryBIKUCIKUZpX
+  lwg2CRe4lRVkqYl5GBgUGIpyC1KDezBFX+FaM4B6OSMK8MyBSezLwSuH2vgE5hAjqld89skFN
+  KEhFSUg1Mxk9/KnumiymbXvSoe2m22tRp1kchLaObZ72jr+7WNPnx7Onplc+W3/k/V+Bk0vXd
+  FywtJxmtSrpxqS/r78amVHbmih4T6Tu560WZeD6f/cHifKDJlXdZ07r+adWxjc7Ty1/1hta+u
+  b5bN2qxlNW5z5Xs2zZPPL+3Y9u7F83zjU5bBm3dZS8bNHNJVYPmV185vRdafJYO8Zkcmxe9nM
+  3KeWZe92xBr8QVpc93TdZsvVLz0mCHBEPYw/DL+q+dIju2u916d+TzBbUfPmWN3AcyHqod/dZ
+  k/DWMTT616U/YRvFnjXtevk/oynDe/CVwXpyBYPmemuS+e+cXXY5zDjWsfZK4oI9/9r/c87uZ
+  M1/UKLEUZyQaajEXFScCAD6wh71XAwAA
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-11.tower-591.messagelabs.com!1637817225!15584!1
+X-Originating-IP: [62.60.8.146]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.81.5; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 31985 invoked from network); 25 Nov 2021 05:13:45 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-11.tower-591.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 25 Nov 2021 05:13:45 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 1D14710046F
+        for <fstests@vger.kernel.org>; Thu, 25 Nov 2021 05:13:45 +0000 (GMT)
+Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 10141100463
+        for <fstests@vger.kernel.org>; Thu, 25 Nov 2021 05:13:45 +0000 (GMT)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.26; Thu, 25 Nov 2021 05:13:29 +0000
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2] xfs/126: Add a getxattr opeartion after corrupted xattr
+Date:   Thu, 25 Nov 2021 13:13:27 +0800
+Message-ID: <1637817207-2164-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-FB-Internal: Safe
 Content-Type: text/plain
-X-FB-Source: Intern
-X-Proofpoint-ORIG-GUID: uE9-wQc7PQ4YQUopb5gxH-fUvNz_Bjiv
-X-Proofpoint-GUID: uE9-wQc7PQ4YQUopb5gxH-fUvNz_Bjiv
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
- definitions=2021-11-24_06,2021-11-24_01,2020-04-07_01
-X-Proofpoint-Spam-Details: rule=fb_default_notspam policy=fb_default score=0 phishscore=0
- malwarescore=0 adultscore=0 lowpriorityscore=0 bulkscore=0 suspectscore=0
- priorityscore=1501 spamscore=0 impostorscore=0 clxscore=1015 mlxscore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2110150000 definitions=main-2111240105
-X-FB-Internal: deliver
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add new testcase for testing the new btrfs sysfs knob to change the
-chunk size. The new knob uses /sys/fs/btrfs/<UUID>/allocation/<block
-type>/chunk_size.
+It is design to reproduce a deadlock on upstream kernel. It is introduced by kernel
+commit 07120f1abdff ("xfs: Add xfs_has_attr and subroutines") and fixed by kernel
+commit a1de97fe296c ("xfs: Fix the free logic of state in xfs_attr_node_hasname")[1].
 
-The test case implements three different cases:
-- Test allocation with the default chunk size
-- Test allocation after increasing the chunk size
-- Test allocation when the free space is smaller than the chunk size.
+[1]https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=a1de97fe296c
 
-Note: this test needs to force the allocation of space. It uses the
-/sys/fs/btrfs/<UUID>/allocation/<block type>/force_chunk_alloc knob.
-
-Testing:
-The test has been run with volumes of different sizes.
-
-Signed-off-by: Stefan Roesch <shr@fb.com>
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
-V6: - renamed test case from 248 to 251
-    - use _require_fs_sysfs
-    - use device name in _get_fs_sysfs_attr and _set_fs_sysfs_attr
-V5: - Modify _get_fs_sysfs_attr and _set_fs_sysfs_attr to support btrfs
-    - Use _get_fs_sysfs_attr and _set_fs_sysfs_attr
-    - Remove _get_btrfs_sysfs_attr and _set_btrfs_fsysfs_attr
-    - Rename local functions to not use "_"
-    - use $AWK_PROG and $BTRFS_UTIL_PROG
-    - remove call to _require_scratch_size
-    - fixes for coding convention
-    - replace fail calls with echo
-V4: - fixed indentation in common/btrfs
-    - Removed UUID code, which is no longer necessary (provided
-      by helper function)
-    - Used new helper _get_btrfs_sysfs_attr
-    - Direct output to /dev/null
-V3: - removed tests for system block type.
-    - added failure case for system block type.
-    - renamed stripe_size to chunk_size
-V2: - added new functions to common/btrfs and use them in the new test
-      - _require_btrfs_sysfs_attr - Make sure btrfs supports a sysfs
-        setting
-      - _get_btrfs_sysfs_attr - Read sysfs value
-      - _set_btrfs_sysfs_attr - Write sysfs value
-    - create file system of required size with _scratch_mkfs_sized
-    - use shortened error message
-    - Remove last logging message
----
- common/rc           |  29 ++++-
- tests/btrfs/251     | 287 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/251.out |  11 ++
- 3 files changed, 323 insertions(+), 4 deletions(-)
- create mode 100755 tests/btrfs/251
- create mode 100644 tests/btrfs/251.out
+ tests/xfs/126 | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index 0a30a842..9522ba2e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4401,7 +4401,14 @@ run_fsx()
- _require_fs_sysfs()
- {
- 	local attr=3D$1
--	local dname=3D$(_short_dev $TEST_DEV)
-+	local dname
-+
-+	case "$FSTYP" in
-+	btrfs)
-+		dname=3D$(findmnt -n -o UUID $TEST_DEV) ;;
-+	*)
-+		dname=3D$(_short_dev $TEST_DEV) ;;
-+	esac
-=20
- 	if [ -z "$attr" -o -z "$dname" ];then
- 		_fail "Usage: _require_fs_sysfs <sysfs_attr_path>"
-@@ -4436,10 +4443,17 @@ _set_fs_sysfs_attr()
- 	local content=3D"$*"
-=20
- 	if [ ! -b "$dev" -o -z "$attr" -o -z "$content" ];then
--		_fail "Usage: _set_fs_sysfs_attr <mounted_device> <attr> <content>"
-+	 	_fail "Usage: _set_fs_sysfs_attr <mounted_device> <attr> <content>"
- 	fi
-=20
--	local dname=3D$(_short_dev $dev)
-+	local dname
-+	case "$FSTYP" in
-+	btrfs)
-+		dname=3D$(findmnt -n -o UUID ${dev}) ;;
-+	*)
-+		dname=3D$(_short_dev $dev) ;;
-+	esac
-+
- 	echo "$content" > /sys/fs/${FSTYP}/${dname}/${attr}
- }
-=20
-@@ -4460,7 +4474,14 @@ _get_fs_sysfs_attr()
- 		_fail "Usage: _get_fs_sysfs_attr <mounted_device> <attr>"
- 	fi
-=20
--	local dname=3D$(_short_dev $dev)
-+	local dname
-+	case "$FSTYP" in
-+	btrfs)
-+		dname=3D$(findmnt -n -o UUID ${dev}) ;;
-+	*)
-+		dname=3D$(_short_dev $dev) ;;
-+	esac
-+
- 	cat /sys/fs/${FSTYP}/${dname}/${attr}
- }
-=20
-diff --git a/tests/btrfs/251 b/tests/btrfs/251
-new file mode 100755
-index 00000000..b5c4b623
---- /dev/null
-+++ b/tests/btrfs/251
-@@ -0,0 +1,287 @@
-+#!/bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Facebook.  All Rights Reserved.
+diff --git a/tests/xfs/126 b/tests/xfs/126
+index c3a74b1c..5496f3d7 100755
+--- a/tests/xfs/126
++++ b/tests/xfs/126
+@@ -7,6 +7,10 @@
+ # Create and populate an XFS filesystem, corrupt a leaf xattr's data extent,
+ # then see how the kernel and xfs_repair deal with it.
+ #
++# It is also a regression test for kernel commit:
++# a1de97fe296c ("xfs: Fix the free logic of state in xfs_attr_node_hasname")
 +#
-+# FS QA Test 250
-+#
-+# Test the new /sys/fs/btrfs/<uuid>/allocation/<block-type>/chunk_size
-+# setting. This setting allows the admin to change the chunk size
-+# setting for the next allocation.
-+#
-+# Test 1:
-+#   Allocate storage for all three block types (data, metadata and syste=
-m)
-+#   with the default chunk size.
-+#
-+# Test 2:
-+#   Set a new chunk size to double the default size and allocate space
-+#   for all new block types with the new chunk size.
-+#
-+# Test 3:
-+#   Pick an allocation size that is used in a loop and make sure the las=
-t
-+#   allocation cannot be partially fullfilled.
-+#
-+# Note: Variable naming uses the following convention: if a variable nam=
-e
-+#       ends in "_B" then its a byte value, if it ends in "_MB" then the
-+#       value is in megabytes.
-+#
-+. ./common/preamble
-+_begin_fstest auto
 +
-+test_file=3D"${TEST_DIR}/${seq}"
-+seq=3D`basename $0`
-+seqres=3D"${RESULT_DIR}/${seq}"
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -f "$test_file"
-+}
-+
-+# Parse a size string which is in the format "XX.XXMib".
-+#
-+# Parameters:
-+#   - (IN)    Block group type (Data, Metadata, System)
-+#   - (INOUT) Variable to store block group size in MB
-+#
-+parse_size_string() {
-+	local SIZE=3D$(echo "$1" | $AWK_PROG 'match($0, /([0-9.]+)/) { print su=
-bstr($0, RSTART, RLENGTH) }')
-+        eval $2=3D"${SIZE%.*}"
-+}
-+
-+# Determine the size of the device in MB.
-+#
-+# Parameters:
-+#   - (INOUT) Variable to store device size in MB
-+#
-+device_size() {
-+	btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid >> $seqres.full
-+	local SIZE=3D$($BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes=
- | grep devid)
-+	parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
-+	eval $1=3D${SIZE_ALLOC%.*}
-+}
-+
-+# Determine the free space of a block group in MB.
-+#
-+# Parameters:
-+#   - (INOUT) Variable to store free space in MB
-+#
-+free_space() {
-+	local SIZE=3D$($BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes=
- | grep devid)
-+	parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
-+	parse_size_string $(echo "${SIZE}" | awk '{print $6}') SIZE_USED
-+	eval $1=3D$(expr ${SIZE_ALLOC} - ${SIZE_USED})
-+}
-+
-+# Determine how much space in MB has been allocated to a block group.
-+#
-+# Parameters:
-+#   - (IN)    Block group type (Data, Metadata, System)
-+#   - (INOUT) Variable to store block group size in MB
-+#
-+alloc_size() {
-+	local SIZE_STRING=3D$($BTRFS_UTIL_PROG filesystem df ${SCRATCH_MNT} -m =
-| grep  "$1" | awk '{print $3}')
-+	parse_size_string ${SIZE_STRING} BLOCK_GROUP_SIZE
-+        eval $2=3D"${BLOCK_GROUP_SIZE}"
-+}
-+
-+. ./common/filter
-+_supported_fs btrfs
-+_require_test
-+_require_scratch
-+_require_btrfs_fs_sysfs
-+
-+# Delete log file if it exists.
-+rm -f "${seqres}.full"
-+
-+# Make filesystem.
-+_scratch_mkfs_sized $((10 * 1024 * 1024 * 1024)) >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+# Check if there is sufficient sysfs support.
-+_require_fs_sysfs allocation/metadata/chunk_size
-+_require_fs_sysfs allocation/metadata/force_chunk_alloc
-+
-+# Get free space.
-+free_space  FREE_SPACE_MB
-+device_size DEVICE_SIZE_MB
-+
-+echo "free space =3D ${FREE_SPACE_MB}MB" >> ${seqres}.full
-+
-+# If device is a symbolic link, get block device.
-+SCRATCH_BDEV=3D${SCRATCH_DEV}
-+if [[ -h ${SCRATCH_DEV} ]]; then
-+	SCRATCH_BDEV=3D$(readlink -f $SCRATCH_DEV)
-+fi
-+
-+# Get chunk sizes.
-+echo "Capture default chunk sizes."
-+FIRST_DATA_CHUNK_SIZE_B=3D$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocatio=
-n/data/chunk_size)
-+FIRST_METADATA_CHUNK_SIZE_B=3D$(_get_fs_sysfs_attr ${SCRATCH_BDEV} alloc=
-ation/metadata/chunk_size)
-+
-+echo "Orig Data chunk size    =3D ${FIRST_DATA_CHUNK_SIZE_B}"     >> ${s=
-eqres}.full
-+echo "Orig Metaata chunk size =3D ${FIRST_METADATA_CHUNK_SIZE_B}" >> ${s=
-eqres}.full
-+
-+INIT_ALLOC_SIZE_MB=3D$(expr \( ${FIRST_DATA_CHUNK_SIZE_B} + ${FIRST_META=
-DATA_CHUNK_SIZE_B} \) / 1024 / 1024)
-+echo "Allocation size for initial allocation =3D ${INIT_ALLOC_SIZE_MB}MB=
-" >> $seqres.full
-+
-+#
-+# Do first allocation with the default chunk sizes for the different blo=
-ck
-+# types.
-+#
-+echo "First allocation."
-+alloc_size "Data"     DATA_SIZE_START_MB
-+alloc_size "Metadata" METADATA_SIZE_START_MB
-+
-+echo "Block group Data alloc size     =3D ${DATA_SIZE_START_MB}MB"     >=
-> $seqres.full
-+echo "Block group Metadata alloc size =3D ${METADATA_SIZE_START_MB}MB" >=
-> $seqres.full
-+
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/force_chunk_alloc=
- 1
-+
-+alloc_size "Data"     FIRST_DATA_SIZE_MB
-+alloc_size "Metadata" FIRST_METADATA_SIZE_MB
-+
-+echo "First block group Data alloc size     =3D ${FIRST_DATA_SIZE_MB}MB"=
-     >> ${seqres}.full
-+echo "First block group Metadata alloc size =3D ${FIRST_METADATA_SIZE_MB=
-}MB" >> ${seqres}.full
-+
-+free_space FREE_SPACE_AFTER
-+echo "Free space after first allocation =3D ${FREE_SPACE_AFTER}MB" >> ${=
-seqres}.full
-+
-+#
-+# Do allocation with the doubled chunk sizes for the different block typ=
-es.
-+#
-+echo "Second allocation."
-+SECOND_DATA_CHUNK_SIZE_B=3D$(expr ${FIRST_DATA_CHUNK_SIZE_B} \* 2)
-+SECOND_METADATA_CHUNK_SIZE_B=3D$(expr ${FIRST_METADATA_CHUNK_SIZE_B} \* =
-2)
-+
-+echo "Second block group Data calc alloc size     =3D ${SECOND_DATA_CHUN=
-K_SIZE_B}"     >> $seqres.full
-+echo "Second block group Metadata calc alloc size =3D ${SECOND_METADATA_=
-CHUNK_SIZE_B}" >> $seqres.full
-+
-+# Stripe size is limited to 10% of device size.
-+if [[ ${SECOND_DATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* =
-1024 \* 1024 / 100) ]]; then
-+	SECOND_DATA_CHUNK_SIZE_B=3D$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024=
- \* 1024)
-+fi
-+if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10=
- \* 1024 \* 1024 / 100) ]]; then
-+	SECOND_METADATA_CHUNK_SIZE_B=3D$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* =
-1024 \* 1024)
-+fi
-+
-+echo "Second block group Data alloc size     =3D ${SECOND_DATA_CHUNK_SIZ=
-E_B}"     >> $seqres.full
-+echo "Second block group Metadata alloc size =3D ${SECOND_METADATA_CHUNK=
-_SIZE_B}" >> $seqres.full
-+
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size ${SECOND_D=
-ATA_CHUNK_SIZE_B}
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size ${SECO=
-ND_METADATA_CHUNK_SIZE_B}
-+
-+SECOND_DATA_CHUNK_SIZE_READ_B=3D$(_get_fs_sysfs_attr ${SCRATCH_BDEV} all=
-ocation/data/chunk_size)
-+SECOND_METADATA_CHUNK_SIZE_READ_B=3D$(_get_fs_sysfs_attr ${SCRATCH_BDEV}=
- allocation/metadata/chunk_size)
-+
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-+echo "Allocated data chunk" >> $seqres.full
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/force_chunk_alloc=
- 1
-+echo "Allocated metadata chunk" >> $seqres.full
-+
-+alloc_size "Data"     SECOND_DATA_SIZE_MB
-+alloc_size "Metadata" SECOND_METADATA_SIZE_MB
-+alloc_size "System"   SECOND_SYSTEM_SIZE_MB
-+
-+echo "Calculate request size so last memory allocation cannot be complet=
-ely fullfilled."
-+free_space FREE_SPACE_MB
-+
-+# Find request size whose space allocation cannot be completely fullfill=
-ed.
-+THIRD_DATA_CHUNK_SIZE_MB=3D$(expr 256)
-+until [ ${THIRD_DATA_CHUNK_SIZE_MB} -gt $(expr 7 \* 1024) ]; do
-+	if [ $((FREE_SPACE_MB%THIRD_DATA_CHUNK_SIZE_MB)) -ne 0 ]; then
-+		break
-+        fi
-+	THIRD_DATA_CHUNK_SIZE_MB=3D$((THIRD_DATA_CHUNK_SIZE_MB+256))
-+done
-+
-+if [[ ${THIRD_DATA_CHUNK_SIZE_MB} -eq $(expr 7 \* 1024) ]]; then
-+	_fail "Cannot find allocation size for partial block allocation."
-+fi
-+
-+THIRD_DATA_CHUNK_SIZE_B=3D$(expr ${THIRD_DATA_CHUNK_SIZE_MB} \* 1024 \* =
-1024)
-+echo "Allocation size in mb    =3D ${THIRD_DATA_CHUNK_SIZE_MB}" >> ${seq=
-res}.full
-+echo "Allocation size in bytes =3D ${THIRD_DATA_CHUNK_SIZE_B}"  >> ${seq=
-res}.full
-+
-+#
-+# Do allocation until free space is exhausted.
-+#
-+echo "Third allocation."
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size ${THIRD_DA=
-TA_CHUNK_SIZE_B}
-+
-+free_space FREE_SPACE_MB
-+while [ $FREE_SPACE_MB -gt $THIRD_DATA_CHUNK_SIZE_MB ]
-+do
-+	alloc_size "Data" THIRD_DATA_SIZE_MB
-+	_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-+
-+	free_space FREE_SPACE_MB
-+done
-+
-+alloc_size "Data" FOURTH_DATA_SIZE_MB
-+
-+#
-+# Force chunk allocation of system block type must fail.
-+#
-+echo "Force allocation of system block type must fail."
-+_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/system/force_chunk_alloc 1=
- 2>/dev/null
-+if [ $? -ne 0 ]; then
-+	_dump_err "_set_fs_sysfs_attr cannot write allocation/system/force_chun=
-k_alloc"
-+fi
-+
-+#
-+# Verification of initial allocation.
-+#
-+echo "Verify first allocation."
-+FIRST_DATA_CHUNK_SIZE_MB=3D$(expr ${FIRST_DATA_CHUNK_SIZE_B} / 1024 / 10=
-24)
-+FIRST_METADATA_CHUNK_SIZE_MB=3D$(expr ${FIRST_METADATA_CHUNK_SIZE_B} / 1=
-024 / 1024)
-+
-+# if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne =
-$(expr ${FIRST_DATA_SIZE_MB}) ]]; then
-+if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne ${=
-FIRST_DATA_SIZE_MB} ]]; then
-+	echo "tInitial data allocation not correct."
-+fi
-+
-+if [[ $(expr ${FIRST_METADATA_CHUNK_SIZE_MB} + ${METADATA_SIZE_START_MB}=
-) -ne ${FIRST_METADATA_SIZE_MB} ]]; then
-+	echo "Initial metadata allocation not correct."
-+fi
-+
-+#
-+# Verification of second allocation.
-+#
-+echo "Verify second allocation."
-+SECOND_DATA_CHUNK_SIZE_MB=3D$(expr ${SECOND_DATA_CHUNK_SIZE_B} / 1024 / =
-1024)
-+SECOND_METADATA_CHUNK_SIZE_MB=3D$(expr ${SECOND_METADATA_CHUNK_SIZE_B} /=
- 1024 / 1024)
-+
-+if [[ ${SECOND_DATA_CHUNK_SIZE_B} -ne ${SECOND_DATA_CHUNK_SIZE_READ_B} ]=
-]; then
-+	echo "Value written to allocation/data/chunk_size and read value are di=
-fferent."
-+fi
-+
-+if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -ne ${SECOND_METADATA_CHUNK_SIZE_R=
-EAD_B} ]]; then
-+	echo "Value written to allocation/metadata/chunk_size and read value ar=
-e different."
-+fi
-+
-+if [[ $(expr ${SECOND_DATA_CHUNK_SIZE_MB} + ${FIRST_DATA_SIZE_MB}) -ne $=
-{SECOND_DATA_SIZE_MB} ]]; then
-+	echo "Data allocation after chunk size change not correct."
-+fi
-+
-+if [[ $(expr ${SECOND_METADATA_CHUNK_SIZE_MB} + ${FIRST_METADATA_SIZE_MB=
-}) -ne ${SECOND_METADATA_SIZE_MB} ]]; then
-+	echo "Metadata allocation after chunk size change not correct."
-+fi
-+
-+#
-+# Verification of third allocation.
-+#
-+echo "Verify third allocation."
-+if [[ ${FREE_SPACE_MB} -gt ${THIRD_DATA_CHUNK_SIZE_MB} ]]; then
-+	echo "Free space after allocating over memlimit is too high."
-+fi
-+
-+# The + 1 is required as 1MB is always kept as free space.
-+if [[ $(expr ${THIRD_DATA_CHUNK_SIZE_MB} + ${THIRD_DATA_SIZE_MB} + 1) -l=
-e $(expr ${FOURTH_DATA_SIZE_MB}) ]]; then
-+	echo "Allocation until out of memory: last memory allocation size is no=
-t correct."
-+fi
-+
-+status=3D0
-+exit
-+
-diff --git a/tests/btrfs/251.out b/tests/btrfs/251.out
-new file mode 100644
-index 00000000..bb7b45d8
---- /dev/null
-+++ b/tests/btrfs/251.out
-@@ -0,0 +1,11 @@
-+QA output created by 248
-+Capture default chunk sizes.
-+First allocation.
-+Second allocation.
-+Calculate request size so last memory allocation cannot be completely fu=
-llfilled.
-+Third allocation.
-+Force allocation of system block type must fail.
-+_set_fs_sysfs_attr cannot write allocation/system/force_chunk_alloc
-+Verify first allocation.
-+Verify second allocation.
-+Verify third allocation.
---=20
-2.30.2
+ . ./common/preamble
+ _begin_fstest fuzzers
+ 
+@@ -69,7 +73,7 @@ done
+ 
+ echo "+ mount image && modify xattr"
+ if _try_scratch_mount >> $seqres.full 2>&1; then
+-
++	getfattr "${SCRATCH_MNT}/attrfile" -n "user.x00000000" 2> /dev/null && _fail "got corrupt xattr"
+ 	setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" 2> /dev/null && _fail "modified corrupt xattr"
+ 	umount "${SCRATCH_MNT}"
+ fi
+-- 
+2.23.0
 
