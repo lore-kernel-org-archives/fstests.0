@@ -2,170 +2,75 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A32BC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 09:50:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7656C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Nov 2021 23:08:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354319AbhKYJxX (ORCPT
+        id S235260AbhKYXLt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 25 Nov 2021 04:53:23 -0500
-Received: from smtp-out1.suse.de ([195.135.220.28]:44986 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348499AbhKYJvX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 04:51:23 -0500
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 018BB21954;
-        Thu, 25 Nov 2021 09:48:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1637833691; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=8FD041QCw1V4laqSSeqkl7fLQ0waYbGBjG+MXZKCI2Q=;
-        b=oW5D0Zhq7hpNeyS3eoLQ0dxSVQnmDjiPOU58E/9sdjKRjqMoECB9yI+W77bGmNtvAyASW7
-        z2XpqZv74YrjfuGE4xPILc6pyM7bh0oTK5twVRuP7fc5wZNnzACt94R4OhA2XOJ5ES+dkv
-        ffTRKXWGMJxK1i5U34118vyU7yTT5Fs=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id B871713F80;
-        Thu, 25 Nov 2021 09:48:10 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 96mAKtpbn2HfLQAAMHmgww
-        (envelope-from <nborisov@suse.com>); Thu, 25 Nov 2021 09:48:10 +0000
-From:   Nikolay Borisov <nborisov@suse.com>
-To:     linux-btrfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v4] btrfs: Test proper interaction between skip_balance and paused balance
-Date:   Thu, 25 Nov 2021 11:48:09 +0200
-Message-Id: <20211125094809.813275-1-nborisov@suse.com>
-X-Mailer: git-send-email 2.25.1
+        Thu, 25 Nov 2021 18:11:49 -0500
+Received: from mail109.syd.optusnet.com.au ([211.29.132.80]:38159 "EHLO
+        mail109.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1345232AbhKYXJs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Nov 2021 18:09:48 -0500
+Received: from dread.disaster.area (pa49-195-103-97.pa.nsw.optusnet.com.au [49.195.103.97])
+        by mail109.syd.optusnet.com.au (Postfix) with ESMTPS id 13D81AD58E;
+        Fri, 26 Nov 2021 10:06:34 +1100 (AEDT)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1mqNp0-00DF41-NI; Fri, 26 Nov 2021 10:06:30 +1100
+Date:   Fri, 26 Nov 2021 10:06:30 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     Radoslav Kolev <radoslav.kolev@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: read only filesystem tests
+Message-ID: <20211125230630.GA3154935@dread.disaster.area>
+References: <e64129cb-dec9-f0bb-9a50-ede0a7b2aca6@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e64129cb-dec9-f0bb-9a50-ede0a7b2aca6@suse.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=61a016fb
+        a=fP9RlOTWD4uZJjPSFnn6Ew==:117 a=fP9RlOTWD4uZJjPSFnn6Ew==:17
+        a=kj9zAlcOel0A:10 a=vIxV3rELxO4A:10 a=7-415B0cAAAA:8
+        a=NfO7pO3n9gXHZUVxX2AA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Ensure a device can be added to a filesystem that has a paused balance
-operation and has been mounted with the 'skip_balance' mount option
+On Mon, Nov 15, 2021 at 01:18:25PM +0200, Radoslav Kolev wrote:
+> Hello,
+> 
+> I am interested in read only filesystem tests, and more specifically
+> squashfs. I saw that ~2 year ago there was a patch set submitted, but not
+> accepted that added support for it with some feedback, that
+> the tests are copied and double the maintenance burden, but sadly there is
+> no easy way to avoid that.
+> 
+> What is the current mood about read only filesystem tests and fstests?
+> Is this the right project to fill this need and is it worth it trying to
+> address some of the problems with the old squashfs patches?
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
+What sort of read only tests are you talking about? i.e. how does
+the initial filesystem state that the test is going to run on get
+generated? AFAICT you can't reuse any of the existing tests because
+they all require writing to the filesystem to create the initial
+test conditions. You can tell fsx/fsstress not do do modifying
+operations from the command line, so you can still run stress tests
+based on these on read-only filesystems.
 
-V4:
- * No longer use mount uuid
- * Some typos fixes
+There are definitely limits on what fstests can realistically
+exercise w.r.t. read-only filesystems.  That said, there is
+definitely scope for fstests to support read-only tests - just
+create a tests/read-only directory, a common/read-only include file
+and build the tests and infrastructure out from that. If the RO
+tests have their own test group definitions (e.g. 'check -g
+ro-auto'), then it won't impact on any of the existing read-write
+filesystem tests or test groupings.
 
- tests/btrfs/049     | 90 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/049.out |  1 +
- 2 files changed, 91 insertions(+)
- create mode 100755 tests/btrfs/049
+Cheers,
 
-diff --git a/tests/btrfs/049 b/tests/btrfs/049
-new file mode 100755
-index 000000000000..765b1de36699
---- /dev/null
-+++ b/tests/btrfs/049
-@@ -0,0 +1,90 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 049
-+#
-+# Ensure that it's possible to add a device when we have a paused balance
-+# and the filesystem is mounted with skip_balance. The issue is fixed by a patch
-+# titled "btrfs: allow device add if balance is paused"
-+#
-+. ./common/preamble
-+_begin_fstest quick balance auto
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_require_scratch_swapfile
-+_require_scratch_dev_pool 3
-+
-+_scratch_dev_pool_get 2
-+_spare_dev_get
-+
-+swapfile="$SCRATCH_MNT/swap"
-+_scratch_pool_mkfs >/dev/null
-+_scratch_mount
-+_format_swapfile "$swapfile" $(($(get_page_size) * 10))
-+
-+check_exclusive_ops()
-+{
-+	$BTRFS_UTIL_PROG device remove 2 $SCRATCH_MNT &>/dev/null
-+	[ $? -ne 0 ] || _fail "Successfully removed device"
-+	$BTRFS_UTIL_PROG filesystem resize -5m $SCRATCH_MNT &> /dev/null
-+	[ $? -ne 0 ] || _fail "Successfully resized filesystem"
-+	$BTRFS_UTIL_PROG replace start -B 2 $SPARE_DEV $SCRATCH_MNT &> /dev/null
-+	[ $? -ne 0 ] || _fail "Successfully replaced device"
-+	swapon "$swapfile" &> /dev/null
-+	[ $? -ne 0 ] || _fail "Successfully enabled a swap file"
-+}
-+
-+# Create some files on the so that balance doesn't complete instantly
-+args=`_scale_fsstress_args -z \
-+	-f write=10 -f creat=10 \
-+	-n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
-+echo "Run fsstress $args" >>$seqres.full
-+$FSSTRESS_PROG $args >/dev/null 2>&1
-+
-+# Start and pause balance to ensure it will be restored on remount
-+echo "Start balance" >>$seqres.full
-+_run_btrfs_balance_start --bg "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
-+[ $? -eq 0 ] || _fail "Balance not paused"
-+
-+# Exclusive ops should be blocked on manual pause of balance
-+check_exclusive_ops
-+
-+# Balance is now placed in paused state during mount
-+_scratch_cycle_mount "skip_balance"
-+
-+# Exclusive ops should be blocked on balance pause due to 'skip_balance'
-+check_exclusive_ops
-+
-+# Device add is the only allowed operation
-+$BTRFS_UTIL_PROG device add -K -f $SPARE_DEV "$SCRATCH_MNT"
-+
-+# Exclusive ops should still be blocked on account that balance is still paused
-+check_exclusive_ops
-+
-+# Should be possible to resume balance after device add
-+$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
-+[ $? -eq 0 ] || _fail "Couldn't resume balance after device add"
-+
-+# Add more files so that new balance won't fish immediately
-+$FSSTRESS_PROG $args >/dev/null 2>&1
-+
-+# Now pause->resume balance. This ensures balance paused is properly set in
-+# the kernel and won't trigger an assertion failure.
-+echo "Start balance" >>$seqres.full
-+_run_btrfs_balance_start --bg "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance pause "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG balance status "$SCRATCH_MNT" | grep -q paused
-+[ $? -eq 0 ] || _fail "Balance not paused"
-+$BTRFS_UTIL_PROG balance resume "$SCRATCH_MNT" &>/dev/null
-+[ $? -eq 0 ] || _fail "Balance can't be resumed via IOCTL"
-+
-+_spare_dev_put
-+_scratch_dev_pool_put
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
-index cb0061b33ff0..c69568ad9323 100644
---- a/tests/btrfs/049.out
-+++ b/tests/btrfs/049.out
-@@ -1 +1,2 @@
- QA output created by 049
-+Silence is golden
---
-2.17.1
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
