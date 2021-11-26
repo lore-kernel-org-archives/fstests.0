@@ -2,211 +2,96 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 606BBC43217
-	for <linux-fstests@archiver.kernel.org>; Fri, 26 Nov 2021 11:20:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 146D0C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 26 Nov 2021 23:30:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240123AbhKZLXW (ORCPT
+        id S232489AbhKZXdd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 26 Nov 2021 06:23:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50832 "EHLO
+        Fri, 26 Nov 2021 18:33:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230449AbhKZLVV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 26 Nov 2021 06:21:21 -0500
-Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C330C061A1C;
-        Fri, 26 Nov 2021 02:36:18 -0800 (PST)
-Received: by mail-qt1-x830.google.com with SMTP id n15so8629218qta.0;
-        Fri, 26 Nov 2021 02:36:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=qOmBd5sAFMW/ESv4nE3mMjgeYcilCBjK9OEfFwHt8kk=;
-        b=iqtSyHv9u+gm80IK3bhNTq/4s4Qd0XGnagZdv0QZk1VSvogSRQyTDKTEpRG2UlbTgb
-         0dG4NHZbaGfquUnyogOpw3NL7zbeKyIEiwWvvk8hph7bP2CWBsshG8Rw41VsMBEleZWC
-         lw5TeTn42BL9o++2syBuTklojO3litLvGxdEi/fdYpxlXtJ5OgdyTtj2Z2+IBXdWPO26
-         VmofZeJnFpsgw9Hl7YoG+1FjSOB3FbvWLYKprRgBHTZsy+r2o+YaToyEhsxj0bZprQIb
-         znRbqMUnaQ6NgJWQvE/Ov4YNcuWAq9uem1tCTtlCrw8tEQFGgosvwNRelWj0fIqTbFOJ
-         WC6Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=qOmBd5sAFMW/ESv4nE3mMjgeYcilCBjK9OEfFwHt8kk=;
-        b=OgOlY0tjKUheRNSF10xYvgbBS+x58Ya7oqhzPF6jYOheJOGlpkmfC7W3Q6T7mxLfqE
-         FiC3wrLgZSlVyop7XSQGisogTLCF9ZDBWhqOZJpTJCvetn+0hEQXoaI1MaXJdAIWVRlo
-         E1zkid2EbkcyUDxBphU7AZGGmponxaSWYPwDhHKSGdzWzFea1bkzJxIHleQnops/We1x
-         p+o4gsd5BizeTUxJkrXGcUQEP1EMEphLIZ+85MaDC3bQ4U8qdci2RtdsopLYwTnhPgLk
-         3b23l2I5rVuKeIzONfKnojIUM+Glbxbo1Vp/880hVch6EkPmmhQMETvhXkY1+R6z7fBs
-         Za0Q==
-X-Gm-Message-State: AOAM533hKfF1MJamCXZiejW9mmWThlO8fyYhuuY1yiYkX8/ILfvuI5Gx
-        j8Oqd4TmmCdO3+ACZ94+ReUmUPi02QFdkYAHkKA=
-X-Google-Smtp-Source: ABdhPJziCEHyqVwtF3ynWyhFAPnVMk5fHnZuKALJWa8d+LnpQpFO/aqBceS/q2rDTZ70hDYySj3TsAJFBnbXdjfk22g=
-X-Received: by 2002:ac8:5796:: with SMTP id v22mr22031235qta.304.1637922977475;
- Fri, 26 Nov 2021 02:36:17 -0800 (PST)
+        with ESMTP id S233555AbhKZXbd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 26 Nov 2021 18:31:33 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E8A8C061574
+        for <fstests@vger.kernel.org>; Fri, 26 Nov 2021 15:28:20 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 057846238B
+        for <fstests@vger.kernel.org>; Fri, 26 Nov 2021 23:28:19 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E0D3C004E1;
+        Fri, 26 Nov 2021 23:28:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1637969298;
+        bh=+WE6ZIfHPLcTUkIQ/s3kygfbZxXEllRHLOBm+pemHoY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=OjAccN6PXlyYFzxnGRKxKhC4wbq2AdRNQw2Uq9c0eRdBCcsCqJdE9hndxGzMJ4uDw
+         4S1+M/haM79pynFAqcnAalvQqCO/CIfjBMdcoixhyQ/r5poZ/dU2/UBt2OEWnR2Y76
+         BdVNXaA9xZLPXe/CqQ2BUE+XxDPIkTVdEdVYyMNx7wIem8/YecqpMA75IPWVWIdbEj
+         jeq/u0TPsjbtpqQ9JkHSE5b3LLu9bg7GVNcFPFy+qKssOlXyLbPoE8gajKoto4ksmZ
+         eGyUFB3XIF8jAAbHATZ3iNEjdg1mz46KlY1n3zymDlsiRr7qJ5YoNTBoCjUXT4V0rP
+         iCQCCu7p29AoQ==
+Date:   Fri, 26 Nov 2021 15:28:17 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2] xfs/126: Add a getxattr opeartion after corrupted
+ xattr
+Message-ID: <20211126232817.GA266000@magnolia>
+References: <1637817207-2164-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-References: <20211125060529.53289-1-wqu@suse.com>
-In-Reply-To: <20211125060529.53289-1-wqu@suse.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Fri, 26 Nov 2021 10:35:41 +0000
-Message-ID: <CAL3q7H6__G3D9x0_5VPpoypAst-O=v_ZO_3yrB_T5UsNBCTegA@mail.gmail.com>
-Subject: Re: [PATCH v3] fstests: btrfs/049: add regression test for
- compress-force mount options
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1637817207-2164-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Nov 26, 2021 at 10:26 AM Qu Wenruo <wqu@suse.com> wrote:
->
-> Since kernel commit d4088803f511 ("btrfs: subpage: make lzo_compress_page=
-s()
-> compatible"), lzo compression no longer respects the max compressed page
-> limit, and can cause kernel crash.
->
-> The upstream fix is 6f019c0e0193 ("btrfs: fix a out-of-bound access in
-> copy_compressed_data_to_page()").
->
-> This patch will add such regression test for all possible compress-force
-> mount options, including lzo, zstd and zlib.
->
-> And since we're here, also make sure the content of the file matches
-> after a mount cycle.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+On Thu, Nov 25, 2021 at 01:13:27PM +0800, Yang Xu wrote:
+> It is design to reproduce a deadlock on upstream kernel. It is introduced by kernel
+> commit 07120f1abdff ("xfs: Add xfs_has_attr and subroutines") and fixed by kernel
+> commit a1de97fe296c ("xfs: Fix the free logic of state in xfs_attr_node_hasname")[1].
+> 
+> [1]https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=a1de97fe296c
+
+NAK, this is a general fuzz test.  Please create a separate targeted
+regression test for the kernel bugfix so that you can control exactly
+which part of the attr leaf block gets corrupted so that the verifier
+will signal error.
+
+--D
+
+> 
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 > ---
-> Changelog:
-> v2:
-> - Also test zlib and zstd
-> - Add file content verification check
-> v3:
-> - Use $tmp.good as a known good file source
-> - Also make sure we didn't get short read for the good copy
-> ---
->  tests/btrfs/049     | 67 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/049.out |  6 ++++
->  2 files changed, 73 insertions(+)
->  create mode 100755 tests/btrfs/049
->
-> diff --git a/tests/btrfs/049 b/tests/btrfs/049
-> new file mode 100755
-> index 00000000..c1f35dc9
-> --- /dev/null
-> +++ b/tests/btrfs/049
-> @@ -0,0 +1,67 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
+>  tests/xfs/126 | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/126 b/tests/xfs/126
+> index c3a74b1c..5496f3d7 100755
+> --- a/tests/xfs/126
+> +++ b/tests/xfs/126
+> @@ -7,6 +7,10 @@
+>  # Create and populate an XFS filesystem, corrupt a leaf xattr's data extent,
+>  # then see how the kernel and xfs_repair deal with it.
+>  #
+> +# It is also a regression test for kernel commit:
+> +# a1de97fe296c ("xfs: Fix the free logic of state in xfs_attr_node_hasname")
 > +#
-> +# FS QA Test 049
-> +#
-> +# Test if btrfs will crash when using compress-force mount option agains=
-t
-> +# incompressible data
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick compress dangerous
 > +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -r -f $tmp.*
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_scratch
-> +
-> +pagesize=3D$(get_page_size)
-> +
-> +# Read the content from urandom to a known safe location
-> +$XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 $pagesize" "$tmp.good" > /d=
-ev/null
-> +
-> +# Make sure we didn't get short read
-
-s/read/write/
-
-> +if [ $(_get_filesize "$tmp.good") !=3D "$pagesize" ]; then
-> +       _fail "Got a short read from /dev/urandom"
-> +fi
-> +
-> +workload()
-> +{
-> +       local compression=3D$1
-> +
-> +       echo "=3D=3D=3D Testing compress-force=3D$compression =3D=3D=3D"
-> +       _scratch_mkfs -s "$pagesize">> $seqres.full
-> +       _scratch_mount -o compress-force=3D"$compression"
-> +       cp "$tmp.good" "$SCRATCH_MNT/$compression"
-> +
-> +       # When unpatched, compress-force=3Dlzo would crash at data writeb=
-ack
-> +       _scratch_cycle_mount
-> +
-> +       # Make sure the content matches
-> +       if [ "$(_md5_checksum $tmp.good)" !=3D \
-> +            "$(_md5_checksum $SCRATCH_MNT/$compression)" ]; then
-> +               _fail "Content of '$SCRATCH_MNT/file' mismatch with known=
- good copy"
-
-We could just 'echo' instead of '_fail' and let the test continue with
-the remaining compression algorithms.
-That's usually the approach preferred for fstests, _fail is for cases
-where the test can't proceed and must stop immediately.
-
-Anyway, those are two minor things that maybe Eryu can fixup when he
-picks the patch.
-So I won't ask you to send yet another version.
-
-Thanks!
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-
-> +       else
-> +               echo "OK"
-> +       fi
-> +       _scratch_unmount
-> +}
-> +
-> +workload lzo
-> +workload zstd
-> +workload zlib
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/049.out b/tests/btrfs/049.out
-> index cb0061b3..41bffeaa 100644
-> --- a/tests/btrfs/049.out
-> +++ b/tests/btrfs/049.out
-> @@ -1 +1,7 @@
->  QA output created by 049
-> +=3D=3D=3D Testing compress-force=3Dlzo =3D=3D=3D
-> +OK
-> +=3D=3D=3D Testing compress-force=3Dzstd =3D=3D=3D
-> +OK
-> +=3D=3D=3D Testing compress-force=3Dzlib =3D=3D=3D
-> +OK
-> --
-> 2.34.0
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+>  . ./common/preamble
+>  _begin_fstest fuzzers
+>  
+> @@ -69,7 +73,7 @@ done
+>  
+>  echo "+ mount image && modify xattr"
+>  if _try_scratch_mount >> $seqres.full 2>&1; then
+> -
+> +	getfattr "${SCRATCH_MNT}/attrfile" -n "user.x00000000" 2> /dev/null && _fail "got corrupt xattr"
+>  	setfattr -x "user.x00000000" "${SCRATCH_MNT}/attrfile" 2> /dev/null && _fail "modified corrupt xattr"
+>  	umount "${SCRATCH_MNT}"
+>  fi
+> -- 
+> 2.23.0
+> 
