@@ -2,69 +2,133 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A52FC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Nov 2021 14:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A37FFC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Nov 2021 15:00:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357837AbhK1OjA (ORCPT
+        id S237898AbhK1PDX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Nov 2021 09:39:00 -0500
-Received: from out20-99.mail.aliyun.com ([115.124.20.99]:34934 "EHLO
-        out20-99.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353175AbhK1OhA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 09:37:00 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07725649|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0149221-0.00481884-0.980259;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047204;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.M-fxwva_1638110021;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.M-fxwva_1638110021)
-          by smtp.aliyun-inc.com(10.147.41.138);
-          Sun, 28 Nov 2021 22:33:42 +0800
-Date:   Sun, 28 Nov 2021 22:33:41 +0800
+        Sun, 28 Nov 2021 10:03:23 -0500
+Received: from out20-86.mail.aliyun.com ([115.124.20.86]:56397 "EHLO
+        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1358002AbhK1PBX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 10:01:23 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0744185|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0620989-0.00326593-0.934635;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047208;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.M-gIZGW_1638111484;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.M-gIZGW_1638111484)
+          by smtp.aliyun-inc.com(10.147.44.145);
+          Sun, 28 Nov 2021 22:58:05 +0800
+Date:   Sun, 28 Nov 2021 22:58:04 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Lukas Czerner <lczerner@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] common/rc: set maximum label length for ext4
-Message-ID: <YaOTRYYkEwlbnvPb@desktop>
-References: <20211123101119.5112-1-lczerner@redhat.com>
+To:     Sun Ke <sunke32@huawei.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4: test for illegal memory access caused by quota
+ index information error
+Message-ID: <YaOY/GaQzMdCfrrR@desktop>
+References: <20211125080036.2211159-1-sunke32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211123101119.5112-1-lczerner@redhat.com>
+In-Reply-To: <20211125080036.2211159-1-sunke32@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 23, 2021 at 11:11:19AM +0100, Lukas Czerner wrote:
-> Set maximum label length for ext4 in _label_get_max() to be able to test
-> online file system label set/get ioctls.
+On Thu, Nov 25, 2021 at 04:00:36PM +0800, Sun Ke wrote:
+> The quota index information in the image is tampered, causing illegal
+> memory access.
+> It is a regression test for Kernel commit 9bf3d2033129 quota: check block
+> number when reading the block in quota file and commit d0e36a62bd4c
+> quota: correct error number in free_dqentry().
+> 
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> ---
+>  tests/ext4/054     | 36 ++++++++++++++++++++++++++++++++++++
+>  tests/ext4/054.out |  1 +
+>  2 files changed, 37 insertions(+)
+>  create mode 100755 tests/ext4/054
+>  create mode 100644 tests/ext4/054.out
+> 
+> diff --git a/tests/ext4/054 b/tests/ext4/054
+> new file mode 100755
+> index 00000000..286b5ecb
+> --- /dev/null
+> +++ b/tests/ext4/054
+> @@ -0,0 +1,36 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Huawei.  All Rights Reserved.
+> +#
+> +# FS QA Test 054
+> +#
+> +# Regression test for kernel
+> +# commit 9bf3d2033129 quota: check block number when reading the block in quota file
+> +# commit d0e36a62bd4c quota: correct error number in free_dqentry()
 
-Some background info included in commit log would be good, e.g. ext4
-didn't support get/set label ioctl but we're going to add that support
-in both kernel and e2fsprogs.
+Better to describe the test in test description as well, e.g. what's the
+bug and summarise how we're going to test it.
 
-And I noticed the kernel patch is still in review, and has no comments
-so far. So I'd like to wait and make sure the new ioctl will be accepted
-first.
+> +#
+> +# The test is based on a testcase from Zhang Yi <yi.zhang@huawei.com>.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto
+
+In 'quota' group as well
+
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_require_scratch
+> +_supported_fs ext4
+> +_require_user fsgqa
+> +_require_user fsgqa2
+
+_require_command "$DEBUGFS_PROG" debugfs
+
+and use $DEBUGFS_PRG in the test.
+
+> +
+> +_scratch_mkfs "-F -O quota -b 1024" > $seqres.full 2>&1
+
+Is 1k block size a required condition to reproduce the bug? Or the
+following debugfs command requires 1k fs?
+
+> +debugfs -w -R "zap_block -o 0 -l 1 -p 6 -f <3> 1" $SCRATCH_DEV >> $seqres.full 2>&1
+
+Some comments are welcomed to describe the detailed test steps, e.g.
+explain what's the purpose of this debugfs command.
+
+> +_scratch_mount >> $seqres.full 2>&1
+> +chown fsgqa:fsgqa $SCRATCH_MNT >> $seqres.full 2>&1
+> +touch $SCRATCH_MNT/foo >> $seqres.full 2>&1
+> +rm -f $SCRATCH_MNT/foo
+> +chown fsgqa2:fsgqa2 $SCRATCH_MNT >> $seqres.full 2>&1
+
+And why we need to chown fsgqa:fsgqa first and rm the file and chown to
+fsgqa2 later.
+
+> +
+> +umount $SCRATCH_MNT
+
+Is this required to trigger the bug? If not, this could be removed,
+SCRATCH_DEV will be umounted after each test.
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ext4/054.out b/tests/ext4/054.out
+> new file mode 100644
+> index 00000000..03e258bb
+> --- /dev/null
+> +++ b/tests/ext4/054.out
+> @@ -0,0 +1 @@
+> +QA output created by 054
+
+Need "Silence is golden" to indicate this test doesn't print any output.
 
 Thanks,
 Eryu
 
-> 
-> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> ---
->  common/rc | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 8e351f17..50d6d0bd 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4545,6 +4545,9 @@ _label_get_max()
->  	f2fs)
->  		echo 255
->  		;;
-> +	ext2|ext3|ext4)
-> +		echo 16
-> +		;;
->  	*)
->  		_notrun "$FSTYP does not define maximum label length"
->  		;;
 > -- 
-> 2.31.1
+> 2.13.6
