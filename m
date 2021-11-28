@@ -2,483 +2,209 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60841C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Nov 2021 15:57:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57FD9C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Nov 2021 16:17:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347248AbhK1QAy (ORCPT
+        id S1344157AbhK1QVA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Nov 2021 11:00:54 -0500
-Received: from out20-2.mail.aliyun.com ([115.124.20.2]:49479 "EHLO
-        out20-2.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244386AbhK1P6y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 10:58:54 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0933813-0.000950221-0.905668;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047213;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.M-hW5Qg_1638114935;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.M-hW5Qg_1638114935)
-          by smtp.aliyun-inc.com(10.147.40.26);
-          Sun, 28 Nov 2021 23:55:35 +0800
-Date:   Sun, 28 Nov 2021 23:55:35 +0800
+        Sun, 28 Nov 2021 11:21:00 -0500
+Received: from out20-3.mail.aliyun.com ([115.124.20.3]:33391 "EHLO
+        out20-3.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1358240AbhK1QTA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 11:19:00 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07437368|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0180182-0.000619724-0.981362;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047206;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.M-i-AXq_1638116141;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.M-i-AXq_1638116141)
+          by smtp.aliyun-inc.com(10.147.41.137);
+          Mon, 29 Nov 2021 00:15:41 +0800
+Date:   Mon, 29 Nov 2021 00:15:41 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Stefan Roesch <shr@fb.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com, Josef Bacik <josef@toxicpanda.com>
-Subject: Re: [PATCH v6] btrfs: Add new test for setting the chunk size.
-Message-ID: <YaOmdyoosHntNc5R@desktop>
-References: <20211124211230.410473-1-shr@fb.com>
+To:     "chenlongcl.chen@huawei.com" <chenlongcl.chen@huawei.com>
+Cc:     fstests@vger.kernel.org, tytso@mit.edu
+Subject: Re: [PATCH] ext4: verify ext4 when the starting block of index and
+ leaf are inconsistent
+Message-ID: <YaOrLVKnPMQbA6lQ@desktop>
+References: <20211123013759.170012-1-chenlongcl.chen@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20211124211230.410473-1-shr@fb.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20211123013759.170012-1-chenlongcl.chen@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 24, 2021 at 01:12:30PM -0800, Stefan Roesch wrote:
-> Add new testcase for testing the new btrfs sysfs knob to change the
-> chunk size. The new knob uses /sys/fs/btrfs/<UUID>/allocation/<block
-> type>/chunk_size.
+On Tue, Nov 23, 2021 at 09:37:59AM +0800, chenlongcl.chen@huawei.com wrote:
+> From: chenlong <chenlongcl.chen@huawei.com>
 > 
-> The test case implements three different cases:
-> - Test allocation with the default chunk size
-> - Test allocation after increasing the chunk size
-> - Test allocation when the free space is smaller than the chunk size.
+> Insert the extent entry in ext4_ext_insert_extent() (to be inserted at
+> the beginning of the block). In the stage of updating the starting block
+> number of the parent index block, an error happened
+> in ext4_ext_correct_indexes()->ext4_ext_get_access(), which caused the
+> index update of the parent index node to fail. The ext4_ext_insert_extent()
+> function exits directly and does not roll back the extent entry of
+> the leaf block. Eventually, the extent starting block numbers in
+> the index block and leaf block are inconsistent, triggering bugon
 > 
-> Note: this test needs to force the allocation of space. It uses the
-> /sys/fs/btrfs/<UUID>/allocation/<block type>/force_chunk_alloc knob.
-> 
-> Testing:
-> The test has been run with volumes of different sizes.
-> 
-> Signed-off-by: Stefan Roesch <shr@fb.com>
-> Reviewed-by: Josef Bacik <josef@toxicpanda.com>
-> ---
-> V6: - renamed test case from 248 to 251
->     - use _require_fs_sysfs
->     - use device name in _get_fs_sysfs_attr and _set_fs_sysfs_attr
-> V5: - Modify _get_fs_sysfs_attr and _set_fs_sysfs_attr to support btrfs
->     - Use _get_fs_sysfs_attr and _set_fs_sysfs_attr
->     - Remove _get_btrfs_sysfs_attr and _set_btrfs_fsysfs_attr
->     - Rename local functions to not use "_"
->     - use $AWK_PROG and $BTRFS_UTIL_PROG
->     - remove call to _require_scratch_size
->     - fixes for coding convention
->     - replace fail calls with echo
-> V4: - fixed indentation in common/btrfs
->     - Removed UUID code, which is no longer necessary (provided
->       by helper function)
->     - Used new helper _get_btrfs_sysfs_attr
->     - Direct output to /dev/null
-> V3: - removed tests for system block type.
->     - added failure case for system block type.
->     - renamed stripe_size to chunk_size
-> V2: - added new functions to common/btrfs and use them in the new test
->       - _require_btrfs_sysfs_attr - Make sure btrfs supports a sysfs
->         setting
->       - _get_btrfs_sysfs_attr - Read sysfs value
->       - _set_btrfs_sysfs_attr - Write sysfs value
->     - create file system of required size with _scratch_mkfs_sized
->     - use shortened error message
->     - Remove last logging message
-> ---
->  common/rc           |  29 ++++-
->  tests/btrfs/251     | 287 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/251.out |  11 ++
->  3 files changed, 323 insertions(+), 4 deletions(-)
->  create mode 100755 tests/btrfs/251
->  create mode 100644 tests/btrfs/251.out
-> 
-> diff --git a/common/rc b/common/rc
-> index 0a30a842..9522ba2e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4401,7 +4401,14 @@ run_fsx()
->  _require_fs_sysfs()
->  {
->  	local attr=$1
-> -	local dname=$(_short_dev $TEST_DEV)
-> +	local dname
-> +
-> +	case "$FSTYP" in
-> +	btrfs)
-> +		dname=$(findmnt -n -o UUID $TEST_DEV) ;;
-> +	*)
-> +		dname=$(_short_dev $TEST_DEV) ;;
-> +	esac
->  
->  	if [ -z "$attr" -o -z "$dname" ];then
->  		_fail "Usage: _require_fs_sysfs <sysfs_attr_path>"
-> @@ -4436,10 +4443,17 @@ _set_fs_sysfs_attr()
->  	local content="$*"
->  
->  	if [ ! -b "$dev" -o -z "$attr" -o -z "$content" ];then
-> -		_fail "Usage: _set_fs_sysfs_attr <mounted_device> <attr> <content>"
-> +	 	_fail "Usage: _set_fs_sysfs_attr <mounted_device> <attr> <content>"
+> This is a regression test for three kernel commit:
+> 1. 0f2f87d51aebc (ext4: prevent partial update of the extent blocks)
+> 2. 9c6e071913792 (ext4: check for inconsistent extents between index
+>    and leaf block)
+> 3. 8dd27fecede55 (ext4: check for out-of-order index extents in
+>    ext4_valid_extent_entries())
 
-What is this change? Seems it adds a space between the first two tabs,
-and causes git am to complain about whitespace damange.
+Missing Signed-off-by tag.
 
->  	fi
->  
-> -	local dname=$(_short_dev $dev)
-> +	local dname
-> +	case "$FSTYP" in
-> +	btrfs)
-> +		dname=$(findmnt -n -o UUID ${dev}) ;;
-> +	*)
-> +		dname=$(_short_dev $dev) ;;
-> +	esac
-> +
->  	echo "$content" > /sys/fs/${FSTYP}/${dname}/${attr}
->  }
->  
-> @@ -4460,7 +4474,14 @@ _get_fs_sysfs_attr()
->  		_fail "Usage: _get_fs_sysfs_attr <mounted_device> <attr>"
->  	fi
->  
-> -	local dname=$(_short_dev $dev)
-> +	local dname
-> +	case "$FSTYP" in
-> +	btrfs)
-> +		dname=$(findmnt -n -o UUID ${dev}) ;;
-> +	*)
-> +		dname=$(_short_dev $dev) ;;
-> +	esac
-> +
->  	cat /sys/fs/${FSTYP}/${dname}/${attr}
->  }
->  
-> diff --git a/tests/btrfs/251 b/tests/btrfs/251
+> ---
+>  tests/ext4/054     | 97 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/054.out |  2 +
+>  2 files changed, 99 insertions(+)
+>  create mode 100755 tests/ext4/054
+>  create mode 100644 tests/ext4/054.out
+> 
+> diff --git a/tests/ext4/054 b/tests/ext4/054
 > new file mode 100755
-> index 00000000..b5c4b623
+> index 00000000..3d63f12f
 > --- /dev/null
-> +++ b/tests/btrfs/251
-> @@ -0,0 +1,287 @@
-> +#!/bin/bash
+> +++ b/tests/ext4/054
+> @@ -0,0 +1,97 @@
+> +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Facebook.  All Rights Reserved.
+> +# Copyright (c) 2021 Huawei.  All Rights Reserved.
 > +#
-> +# FS QA Test 250
+> +# FS QA Test 054
 > +#
-> +# Test the new /sys/fs/btrfs/<uuid>/allocation/<block-type>/chunk_size
-> +# setting. This setting allows the admin to change the chunk size
-> +# setting for the next allocation.
-> +#
-> +# Test 1:
-> +#   Allocate storage for all three block types (data, metadata and system)
-> +#   with the default chunk size.
-> +#
-> +# Test 2:
-> +#   Set a new chunk size to double the default size and allocate space
-> +#   for all new block types with the new chunk size.
-> +#
-> +# Test 3:
-> +#   Pick an allocation size that is used in a loop and make sure the last
-> +#   allocation cannot be partially fullfilled.
-> +#
-> +# Note: Variable naming uses the following convention: if a variable name
-> +#       ends in "_B" then its a byte value, if it ends in "_MB" then the
-> +#       value is in megabytes.
-> +#
+> +# Regression test for kernel commit:
+> +# 1. 0f2f87d51aebc (ext4: prevent partial update of the extent blocks)
+> +# 2. 9c6e071913792 (ext4: check for inconsistent extents between index \
+> +#    and leaf block)
+> +# 3. 8dd27fecede55 (ext4: check for out-of-order index extents in \
+> +#    ext4_valid_extent_entries())
+> +
 > +. ./common/preamble
-> +_begin_fstest auto
+> +_begin_fstest auto quick
 > +
-> +test_file="${TEST_DIR}/${seq}"
-
-Seems it's not used in the test?
-
-> +seq=`basename $0`
-> +seqres="${RESULT_DIR}/${seq}"
-> +
-> +# Override the default cleanup function.
 > +_cleanup()
 > +{
-> +	cd /
-> +	rm -f "$test_file"
-
-Then there's no need to remove it in cleanup
-
+> +    cd /
+> +    rm -f $tmp.*
+> +    $UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
+> +    rm -f ${IMG_FILE} > /dev/null 2>&1
 > +}
 > +
-> +# Parse a size string which is in the format "XX.XXMib".
-> +#
-> +# Parameters:
-> +#   - (IN)    Block group type (Data, Metadata, System)
-> +#   - (INOUT) Variable to store block group size in MB
-> +#
-> +parse_size_string() {
-> +	local SIZE=$(echo "$1" | $AWK_PROG 'match($0, /([0-9.]+)/) { print substr($0, RSTART, RLENGTH) }')
-> +        eval $2="${SIZE%.*}"
-
-The above "eval" line uses spaces as indentions not tab.
-
-> +}
-> +
-> +# Determine the size of the device in MB.
-> +#
-> +# Parameters:
-> +#   - (INOUT) Variable to store device size in MB
-> +#
-> +device_size() {
-> +	btrfs fi show ${SCRATCH_MNT} --mbytes | grep devid >> $seqres.full
-> +	local SIZE=$($BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes | grep devid)
-> +	parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
-> +	eval $1=${SIZE_ALLOC%.*}
-> +}
-> +
-> +# Determine the free space of a block group in MB.
-> +#
-> +# Parameters:
-> +#   - (INOUT) Variable to store free space in MB
-> +#
-> +free_space() {
-> +	local SIZE=$($BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes | grep devid)
-> +	parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
-> +	parse_size_string $(echo "${SIZE}" | awk '{print $6}') SIZE_USED
-> +	eval $1=$(expr ${SIZE_ALLOC} - ${SIZE_USED})
-> +}
-> +
-> +# Determine how much space in MB has been allocated to a block group.
-> +#
-> +# Parameters:
-> +#   - (IN)    Block group type (Data, Metadata, System)
-> +#   - (INOUT) Variable to store block group size in MB
-> +#
-> +alloc_size() {
-> +	local SIZE_STRING=$($BTRFS_UTIL_PROG filesystem df ${SCRATCH_MNT} -m | grep  "$1" | awk '{print $3}')
-> +	parse_size_string ${SIZE_STRING} BLOCK_GROUP_SIZE
-> +        eval $2="${BLOCK_GROUP_SIZE}"
-> +}
-> +
+> +# Import common functions
 > +. ./common/filter
-> +_supported_fs btrfs
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
 > +_require_test
-> +_require_scratch
-> +_require_btrfs_fs_sysfs
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "pwrite"
+> +_require_xfs_io_command "fsync"
+> +_require_xfs_io_command "fpunch"
+> +_require_command "$DEBUGFS_PROG" debugfs
+> +
+> +IMG_FILE=${SCRATCH_MNT}/$seq.fs
+> +IMG_MNT=${SCRATCH_MNT}/$seq.mnt
 
-Looks like we could drop this require, as _require_fs_sysfs below
-ensures this requirement must be met.
+SCRATCH_DEV is not required nor mounted, so IMG_FILE and IMG_MNT are
+created on the root filesystem.
 
-> +
-> +# Delete log file if it exists.
-> +rm -f "${seqres}.full"
-> +
-> +# Make filesystem.
-> +_scratch_mkfs_sized $((10 * 1024 * 1024 * 1024)) >> $seqres.full 2>&1
+And I don't see why we need to loop back mount an fs image here, does
+_require_scratch_nocheck then use $SCRATCH_DEV directly work for you?
 
-Any reason we need a 10G filesystem? Some comments would be good.
+And if loop device is really needed, _require_loop should be added as
+well, and use $TEST_DIR to save the fs image and mnt dir, e.g.
 
-> +_scratch_mount >> $seqres.full 2>&1
+IMG_FILE=$TEST_DIR/$seq.fs
+IMG_MNT=$TEST_DIR/$seq.mnt
+
+and use _create_loop_device and _destroy_loop_device helpers.
+
+> +TEST_FILE="${IMG_MNT}/testfile"
 > +
-> +# Check if there is sufficient sysfs support.
-> +_require_fs_sysfs allocation/metadata/chunk_size
-> +_require_fs_sysfs allocation/metadata/force_chunk_alloc
+> +fallocate -l 10M $IMG_FILE
+
+$XFS_IO_PROG -c "falloc 0 10m" $IMG_FILE
+
+> +mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
 > +
-> +# Get free space.
-> +free_space  FREE_SPACE_MB
-> +device_size DEVICE_SIZE_MB
+> +$MKFS_EXT4_PROG -F $IMG_FILE >> $seqres.full 2>&1 || _fail "mkfs failed"
 > +
-> +echo "free space = ${FREE_SPACE_MB}MB" >> ${seqres}.full
-> +
-> +# If device is a symbolic link, get block device.
-> +SCRATCH_BDEV=${SCRATCH_DEV}
-> +if [[ -h ${SCRATCH_DEV} ]]; then
-> +	SCRATCH_BDEV=$(readlink -f $SCRATCH_DEV)
-> +fi
-> +
-> +# Get chunk sizes.
-> +echo "Capture default chunk sizes."
-> +FIRST_DATA_CHUNK_SIZE_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size)
-> +FIRST_METADATA_CHUNK_SIZE_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size)
-> +
-> +echo "Orig Data chunk size    = ${FIRST_DATA_CHUNK_SIZE_B}"     >> ${seqres}.full
-> +echo "Orig Metaata chunk size = ${FIRST_METADATA_CHUNK_SIZE_B}" >> ${seqres}.full
-> +
-> +INIT_ALLOC_SIZE_MB=$(expr \( ${FIRST_DATA_CHUNK_SIZE_B} + ${FIRST_METADATA_CHUNK_SIZE_B} \) / 1024 / 1024)
-> +echo "Allocation size for initial allocation = ${INIT_ALLOC_SIZE_MB}MB" >> $seqres.full
+> +$MOUNT_PROG -t ${FSTYP} ${IMG_FILE} ${IMG_MNT} >/dev/null 2>&1 || \
+> +    _fail "mount failed"
+
+If use $SCRATCH_DEV, above will simply be
+
+_scratch_mkfs >> $seqres.full 2>&1
+_scratch_mount 
+
+> +touch $TEST_FILE
 > +
 > +#
-> +# Do first allocation with the default chunk sizes for the different block
-> +# types.
+> +# The following steps create an abnormal file system image and
+> +# create a file(testfile). The starting logic block of his second leaf
+                                                          ^^^^ its ?
+
+> +# extent block is inconsistent with the starting logic block of the
+> +# second idx extent entry in the inode.
+> +# Level Entries       Logical      Physical Length Flags
+> +# 0/ 1   2/  2  5632 -  6527  2020            896
+> +#               ^^^^ 指向了leaf block
+                        ^^^^^ Use English please.
+
+> +# 1/ 1   1/ 15  5376 -  5439  7041 -  7104     64 Uninit
+> +# 1/ 1   2/ 15  5632 -  5695  7297 -  7360     64 Uninit
 > +#
-> +echo "First allocation."
-> +alloc_size "Data"     DATA_SIZE_START_MB
-> +alloc_size "Metadata" METADATA_SIZE_START_MB
-> +
-> +echo "Block group Data alloc size     = ${DATA_SIZE_START_MB}MB"     >> $seqres.full
-> +echo "Block group Metadata alloc size = ${METADATA_SIZE_START_MB}MB" >> $seqres.full
-> +
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/force_chunk_alloc 1
-> +
-> +alloc_size "Data"     FIRST_DATA_SIZE_MB
-> +alloc_size "Metadata" FIRST_METADATA_SIZE_MB
-> +
-> +echo "First block group Data alloc size     = ${FIRST_DATA_SIZE_MB}MB"     >> ${seqres}.full
-> +echo "First block group Metadata alloc size = ${FIRST_METADATA_SIZE_MB}MB" >> ${seqres}.full
-> +
-> +free_space FREE_SPACE_AFTER
-> +echo "Free space after first allocation = ${FREE_SPACE_AFTER}MB" >> ${seqres}.full
-> +
-> +#
-> +# Do allocation with the doubled chunk sizes for the different block types.
-> +#
-> +echo "Second allocation."
-> +SECOND_DATA_CHUNK_SIZE_B=$(expr ${FIRST_DATA_CHUNK_SIZE_B} \* 2)
-> +SECOND_METADATA_CHUNK_SIZE_B=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} \* 2)
-> +
-> +echo "Second block group Data calc alloc size     = ${SECOND_DATA_CHUNK_SIZE_B}"     >> $seqres.full
-> +echo "Second block group Metadata calc alloc size = ${SECOND_METADATA_CHUNK_SIZE_B}" >> $seqres.full
-> +
-> +# Stripe size is limited to 10% of device size.
-> +if [[ ${SECOND_DATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* 1024 \* 1024 / 100) ]]; then
-> +	SECOND_DATA_CHUNK_SIZE_B=$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024 \* 1024)
-> +fi
-> +if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* 1024 \* 1024 / 100) ]]; then
-> +	SECOND_METADATA_CHUNK_SIZE_B=$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024 \* 1024)
-> +fi
-> +
-> +echo "Second block group Data alloc size     = ${SECOND_DATA_CHUNK_SIZE_B}"     >> $seqres.full
-> +echo "Second block group Metadata alloc size = ${SECOND_METADATA_CHUNK_SIZE_B}" >> $seqres.full
-> +
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size ${SECOND_DATA_CHUNK_SIZE_B}
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size ${SECOND_METADATA_CHUNK_SIZE_B}
-> +
-> +SECOND_DATA_CHUNK_SIZE_READ_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size)
-> +SECOND_METADATA_CHUNK_SIZE_READ_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size)
-> +
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-> +echo "Allocated data chunk" >> $seqres.full
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/force_chunk_alloc 1
-> +echo "Allocated metadata chunk" >> $seqres.full
-> +
-> +alloc_size "Data"     SECOND_DATA_SIZE_MB
-> +alloc_size "Metadata" SECOND_METADATA_SIZE_MB
-> +alloc_size "System"   SECOND_SYSTEM_SIZE_MB
-> +
-> +echo "Calculate request size so last memory allocation cannot be completely fullfilled."
-> +free_space FREE_SPACE_MB
-> +
-> +# Find request size whose space allocation cannot be completely fullfilled.
-> +THIRD_DATA_CHUNK_SIZE_MB=$(expr 256)
-> +until [ ${THIRD_DATA_CHUNK_SIZE_MB} -gt $(expr 7 \* 1024) ]; do
-> +	if [ $((FREE_SPACE_MB%THIRD_DATA_CHUNK_SIZE_MB)) -ne 0 ]; then
-> +		break
-> +        fi
-> +	THIRD_DATA_CHUNK_SIZE_MB=$((THIRD_DATA_CHUNK_SIZE_MB+256))
-> +done
-> +
-> +if [[ ${THIRD_DATA_CHUNK_SIZE_MB} -eq $(expr 7 \* 1024) ]]; then
-> +	_fail "Cannot find allocation size for partial block allocation."
-> +fi
-> +
-> +THIRD_DATA_CHUNK_SIZE_B=$(expr ${THIRD_DATA_CHUNK_SIZE_MB} \* 1024 \* 1024)
-> +echo "Allocation size in mb    = ${THIRD_DATA_CHUNK_SIZE_MB}" >> ${seqres}.full
-> +echo "Allocation size in bytes = ${THIRD_DATA_CHUNK_SIZE_B}"  >> ${seqres}.full
-> +
-> +#
-> +# Do allocation until free space is exhausted.
-> +#
-> +echo "Third allocation."
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size ${THIRD_DATA_CHUNK_SIZE_B}
-> +
-> +free_space FREE_SPACE_MB
-> +while [ $FREE_SPACE_MB -gt $THIRD_DATA_CHUNK_SIZE_MB ]
+> +for i in {0..50}
 > +do
-> +	alloc_size "Data" THIRD_DATA_SIZE_MB
-> +	_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-> +
-> +	free_space FREE_SPACE_MB
+> +    offset=$((1024 * 128 * i))
+> +    $XFS_IO_PROG -c "falloc $offset $((1024 * 64))" $TEST_FILE >> $seqres.full
+> +    offset=$((offset + 1024 * 64))
+> +    $XFS_IO_PROG -c "pwrite $offset $((1024 * 64))" $TEST_FILE >> $seqres.full
+> +    $XFS_IO_PROG -c "fsync" $TEST_FILE >> $seqres.full
 > +done
 > +
-> +alloc_size "Data" FOURTH_DATA_SIZE_MB
+> +$XFS_IO_PROG -c "fpunch $((1024 * 5376)) $((1024 * 256))" $TEST_FILE \
+> +        >> $seqres.full
+> +$XFS_IO_PROG -c "fsync" $TEST_FILE >> $seqres.full
+> +$XFS_IO_PROG -c "falloc $((1024 * 5376)) $((1024 * 64))" $TEST_FILE \
+> +        >> $seqres.full
+> +$XFS_IO_PROG -c "fsync" $TEST_FILE
 > +
-> +#
-> +# Force chunk allocation of system block type must fail.
-> +#
-> +echo "Force allocation of system block type must fail."
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/system/force_chunk_alloc 1 2>/dev/null
-> +if [ $? -ne 0 ]; then
-> +	_dump_err "_set_fs_sysfs_attr cannot write allocation/system/force_chunk_alloc"
-> +fi
+> +$UMOUNT_PROG ${IMG_MNT} || _fail "umount failed"
+> +
+> +$DEBUGFS_PROG -w -R "set_inode_field testfile block[6] 0x1600" $IMG_FILE \
+> +        2>>$seqres.full >> $seqres.full
+> +
+> +# Mount the file system and create a block at a location in the middle
+> +# of 5440-5632
+> +
+> +$MOUNT_PROG -t ${FSTYP} -o nodelalloc ${IMG_FILE} ${IMG_MNT} \
 
-I don't think we need this check. We could just remove the
-"2 > /dev/null" part from the above _set_fs_sysfs_attr and it will print
-error message and break golden image on error.
+Please add comments to explain why nodelalloc is needed.
 
 Thanks,
 Eryu
 
+> +        >/dev/null 2>&1 || _fail "mount failed"
+> +$XFS_IO_PROG -c "pwrite $((1024 * 5568)) $((1024 * 64))" $TEST_FILE \
+> +        2>>$seqres.full >> $seqres.full
 > +
-> +#
-> +# Verification of initial allocation.
-> +#
-> +echo "Verify first allocation."
-> +FIRST_DATA_CHUNK_SIZE_MB=$(expr ${FIRST_DATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +FIRST_METADATA_CHUNK_SIZE_MB=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} / 1024 / 1024)
+> +# If this BUG is not fixed, when the testcase is executed to this position,
+> +# the kernel will be BUG_ON immediately.
 > +
-> +# if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne $(expr ${FIRST_DATA_SIZE_MB}) ]]; then
-> +if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne ${FIRST_DATA_SIZE_MB} ]]; then
-> +	echo "tInitial data allocation not correct."
-> +fi
+> +echo "Silence is golden"
 > +
-> +if [[ $(expr ${FIRST_METADATA_CHUNK_SIZE_MB} + ${METADATA_SIZE_START_MB}) -ne ${FIRST_METADATA_SIZE_MB} ]]; then
-> +	echo "Initial metadata allocation not correct."
-> +fi
-> +
-> +#
-> +# Verification of second allocation.
-> +#
-> +echo "Verify second allocation."
-> +SECOND_DATA_CHUNK_SIZE_MB=$(expr ${SECOND_DATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +SECOND_METADATA_CHUNK_SIZE_MB=$(expr ${SECOND_METADATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +
-> +if [[ ${SECOND_DATA_CHUNK_SIZE_B} -ne ${SECOND_DATA_CHUNK_SIZE_READ_B} ]]; then
-> +	echo "Value written to allocation/data/chunk_size and read value are different."
-> +fi
-> +
-> +if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -ne ${SECOND_METADATA_CHUNK_SIZE_READ_B} ]]; then
-> +	echo "Value written to allocation/metadata/chunk_size and read value are different."
-> +fi
-> +
-> +if [[ $(expr ${SECOND_DATA_CHUNK_SIZE_MB} + ${FIRST_DATA_SIZE_MB}) -ne ${SECOND_DATA_SIZE_MB} ]]; then
-> +	echo "Data allocation after chunk size change not correct."
-> +fi
-> +
-> +if [[ $(expr ${SECOND_METADATA_CHUNK_SIZE_MB} + ${FIRST_METADATA_SIZE_MB}) -ne ${SECOND_METADATA_SIZE_MB} ]]; then
-> +	echo "Metadata allocation after chunk size change not correct."
-> +fi
-> +
-> +#
-> +# Verification of third allocation.
-> +#
-> +echo "Verify third allocation."
-> +if [[ ${FREE_SPACE_MB} -gt ${THIRD_DATA_CHUNK_SIZE_MB} ]]; then
-> +	echo "Free space after allocating over memlimit is too high."
-> +fi
-> +
-> +# The + 1 is required as 1MB is always kept as free space.
-> +if [[ $(expr ${THIRD_DATA_CHUNK_SIZE_MB} + ${THIRD_DATA_SIZE_MB} + 1) -le $(expr ${FOURTH_DATA_SIZE_MB}) ]]; then
-> +	echo "Allocation until out of memory: last memory allocation size is not correct."
-> +fi
-> +
+> +# success, all done
 > +status=0
 > +exit
-> +
-> diff --git a/tests/btrfs/251.out b/tests/btrfs/251.out
+> diff --git a/tests/ext4/054.out b/tests/ext4/054.out
 > new file mode 100644
-> index 00000000..bb7b45d8
+> index 00000000..108fe4c9
 > --- /dev/null
-> +++ b/tests/btrfs/251.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 248
-> +Capture default chunk sizes.
-> +First allocation.
-> +Second allocation.
-> +Calculate request size so last memory allocation cannot be completely fullfilled.
-> +Third allocation.
-> +Force allocation of system block type must fail.
-> +_set_fs_sysfs_attr cannot write allocation/system/force_chunk_alloc
-> +Verify first allocation.
-> +Verify second allocation.
-> +Verify third allocation.
+> +++ b/tests/ext4/054.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 054
+> +Silence is golden
 > -- 
-> 2.30.2
+> 2.17.1
