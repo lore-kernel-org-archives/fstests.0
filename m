@@ -2,144 +2,85 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30667C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Nov 2021 15:15:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B7ADC433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Nov 2021 15:21:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358013AbhK1PTE (ORCPT
+        id S1358088AbhK1PZJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Nov 2021 10:19:04 -0500
-Received: from out20-1.mail.aliyun.com ([115.124.20.1]:44553 "EHLO
-        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1358015AbhK1PRE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 10:17:04 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0743744|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0484499-0.00328946-0.948261;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047202;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.M-gc1lN_1638112426;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.M-gc1lN_1638112426)
-          by smtp.aliyun-inc.com(10.147.42.241);
-          Sun, 28 Nov 2021 23:13:46 +0800
-Date:   Sun, 28 Nov 2021 23:13:46 +0800
+        Sun, 28 Nov 2021 10:25:09 -0500
+Received: from out20-99.mail.aliyun.com ([115.124.20.99]:53193 "EHLO
+        out20-99.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1358020AbhK1PXJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 10:23:09 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09741437|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.678633-0.0035936-0.317774;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.M-gzwuV_1638112790;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.M-gzwuV_1638112790)
+          by smtp.aliyun-inc.com(10.147.41.137);
+          Sun, 28 Nov 2021 23:19:51 +0800
+Date:   Sun, 28 Nov 2021 23:19:50 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Sun Ke <sunke32@huawei.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] ext4: test for illegal memory access caused by quota
- index information error
-Message-ID: <YaOcqudzWtouGZro@desktop>
-References: <20211125080036.2211159-1-sunke32@huawei.com>
- <YaOY/GaQzMdCfrrR@desktop>
+To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        kernel-team@fb.com
+Subject: Re: [PATCH] fstests: generic/260: don't fail for certain fstrim ops
+ on btrfs
+Message-ID: <YaOeFrS/wX43Qw5c@desktop>
+References: <175b1ef92bbd2a48e2efb80d0064ca91aab1402e.1637618880.git.josef@toxicpanda.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YaOY/GaQzMdCfrrR@desktop>
+In-Reply-To: <175b1ef92bbd2a48e2efb80d0064ca91aab1402e.1637618880.git.josef@toxicpanda.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Nov 28, 2021 at 10:58:04PM +0800, Eryu Guan wrote:
-> On Thu, Nov 25, 2021 at 04:00:36PM +0800, Sun Ke wrote:
-> > The quota index information in the image is tampered, causing illegal
-> > memory access.
-> > It is a regression test for Kernel commit 9bf3d2033129 quota: check block
-> > number when reading the block in quota file and commit d0e36a62bd4c
-> > quota: correct error number in free_dqentry().
-> > 
-> > Signed-off-by: Sun Ke <sunke32@huawei.com>
-> > ---
-> >  tests/ext4/054     | 36 ++++++++++++++++++++++++++++++++++++
-> >  tests/ext4/054.out |  1 +
-> >  2 files changed, 37 insertions(+)
-> >  create mode 100755 tests/ext4/054
-> >  create mode 100644 tests/ext4/054.out
-> > 
-> > diff --git a/tests/ext4/054 b/tests/ext4/054
-> > new file mode 100755
-> > index 00000000..286b5ecb
-> > --- /dev/null
-> > +++ b/tests/ext4/054
-> > @@ -0,0 +1,36 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Huawei.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 054
-> > +#
-> > +# Regression test for kernel
-> > +# commit 9bf3d2033129 quota: check block number when reading the block in quota file
-> > +# commit d0e36a62bd4c quota: correct error number in free_dqentry()
+On Mon, Nov 22, 2021 at 05:08:10PM -0500, Josef Bacik wrote:
+> We have always failed generic/260, because it tests to see if the file
+> system will reject a trim range that is above the reported fs size.
+> However for btrfs we will happily remap logical byte offsets within the
+> file system, so you can end up with bye offsets past the end of the
+> reported end of the file system.  Thus we do not fail these weird
+> ranges.  We also don't have the concept of allocation groups, so the
+> other test that tries to catch overflow doesn't apply to us either.  Fix
+> this by simply using an offset that will fail (once a related kernel
+> path is applied) for btrfs.  This will allow us to test the different
+> overflow cases that do apply to btrfs, and not muddy up test results by
+> giving us a false negative for the cases that do not apply to btrfs.
 > 
-> Better to describe the test in test description as well, e.g. what's the
-> bug and summarise how we're going to test it.
-> 
-> > +#
-> > +# The test is based on a testcase from Zhang Yi <yi.zhang@huawei.com>.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto
-> 
-> In 'quota' group as well
-> 
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_require_scratch
-> > +_supported_fs ext4
-> > +_require_user fsgqa
-> > +_require_user fsgqa2
-> 
-> _require_command "$DEBUGFS_PROG" debugfs
-> 
-> and use $DEBUGFS_PRG in the test.
-> 
-> > +
-> > +_scratch_mkfs "-F -O quota -b 1024" > $seqres.full 2>&1
-> 
-> Is 1k block size a required condition to reproduce the bug? Or the
-> following debugfs command requires 1k fs?
-> 
-> > +debugfs -w -R "zap_block -o 0 -l 1 -p 6 -f <3> 1" $SCRATCH_DEV >> $seqres.full 2>&1
+> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 
-Also, this corrupts the filesystem, and post-test fsck complains fs
-corruption.
-
-We need _require_scratch_nocheck instead of _require_scratch
+I'd like an ACK from btrfs folks as well.
 
 Thanks,
 Eryu
 
+> ---
+>  tests/generic/260 | 7 +++++++
+>  1 file changed, 7 insertions(+)
 > 
-> Some comments are welcomed to describe the detailed test steps, e.g.
-> explain what's the purpose of this debugfs command.
-> 
-> > +_scratch_mount >> $seqres.full 2>&1
-> > +chown fsgqa:fsgqa $SCRATCH_MNT >> $seqres.full 2>&1
-> > +touch $SCRATCH_MNT/foo >> $seqres.full 2>&1
-> > +rm -f $SCRATCH_MNT/foo
-> > +chown fsgqa2:fsgqa2 $SCRATCH_MNT >> $seqres.full 2>&1
-> 
-> And why we need to chown fsgqa:fsgqa first and rm the file and chown to
-> fsgqa2 later.
-> 
-> > +
-> > +umount $SCRATCH_MNT
-> 
-> Is this required to trigger the bug? If not, this could be removed,
-> SCRATCH_DEV will be umounted after each test.
-> 
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/ext4/054.out b/tests/ext4/054.out
-> > new file mode 100644
-> > index 00000000..03e258bb
-> > --- /dev/null
-> > +++ b/tests/ext4/054.out
-> > @@ -0,0 +1 @@
-> > +QA output created by 054
-> 
-> Need "Silence is golden" to indicate this test doesn't print any output.
-> 
-> Thanks,
-> Eryu
-> 
-> > -- 
-> > 2.13.6
+> diff --git a/tests/generic/260 b/tests/generic/260
+> index b15b4e57..b4d72e0f 100755
+> --- a/tests/generic/260
+> +++ b/tests/generic/260
+> @@ -31,6 +31,7 @@ fssize=$($DF_PROG -k | grep "$SCRATCH_MNT" | grep "$SCRATCH_DEV"  | awk '{print
+>  
+>  beyond_eofs=$(_math "$fssize*2048")
+>  max_64bit=$(_math "2^64 - 1")
+> +[ $FSTYP == "btrfs" ] && beyond_eofs=$max_64bit
+>  
+>  # All these tests should return EINVAL
+>  # since the start is beyond the end of
+> @@ -128,6 +129,12 @@ case $FSTYP in
+>  		len=$start
+>  		export MKFS_OPTIONS="-f -d agsize=$(_math "$agsize*$bsize") -b size=$bsize"
+>  		;;
+> +	btrfs)
+> +		# Btrfs doesn't care about any of this, just test max_64bit
+> +		# since it'll fail
+> +		start=$max_64bit
+> +		len=$(_math "$start / 2")
+> +		;;
+>  	*)
+>  		# (2^32-1) * 4096 * 65536 == 32bit max size * block size * ag size
+>  		start=$(_math "(2^32 - 1) * 4096 * 65536")
+> -- 
+> 2.26.3
