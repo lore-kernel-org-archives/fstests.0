@@ -2,159 +2,258 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE3B7C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Nov 2021 01:28:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8797C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Nov 2021 03:43:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232555AbhK2BcK (ORCPT
+        id S1376871AbhK2DqZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Nov 2021 20:32:10 -0500
-Received: from esa15.fujitsucc.c3s2.iphmx.com ([68.232.156.107]:1511 "EHLO
-        esa15.fujitsucc.c3s2.iphmx.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S238815AbhK2BaK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 20:30:10 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
-  t=1638149214; x=1669685214;
-  h=from:to:cc:subject:date:message-id:
-   content-transfer-encoding:mime-version;
-  bh=VDWw3EZ1lvOIx1xQk5zqOV92KhHMLpOPah+FAMCtp4I=;
-  b=cBV8vZfjTmLq34D4L8GG3EwPZQ/VBsYvKmSWpVDecFknbJs92KKo6dD0
-   BRhyND3U1lbERAOzMAcx0zPij5eo8Pe6urNFjEHOKD8ZCJN9jNfyE8xT0
-   8+oXX6XzlVYwRI8MiCK4JKFgOfq2wIfFlJqBSCl3RzSLhxnVMoyjcshmj
-   e9kIH/LVKhNA29xUEKB9wdCk/09R14xttXwhkamFFz3gnKDHZ6YPHFjrY
-   upkcrW0zBnKyv9zDFXGxC1A52cj1k1Ta5oupd8+mL4M6jthLLgRrBWDfI
-   lIXXIbyldVjfclgURRKxs+ZJJoCVkzTaFpd/+6WQRcawBFNDKXcQH+c0q
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10182"; a="44650897"
-X-IronPort-AV: E=Sophos;i="5.87,272,1631545200"; 
-   d="scan'208";a="44650897"
-Received: from mail-os0jpn01lp2107.outbound.protection.outlook.com (HELO JPN01-OS0-obe.outbound.protection.outlook.com) ([104.47.23.107])
-  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2021 10:26:52 +0900
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Wq59uS6Eeftp5x/AWaNfqY5Mb3nZ3fkCvhbh9utbmF54FBEtBH39Xd1IEsh7c1MxJ3x9dzSzZYR/EQEQPmOmvYJJQ5KD1PmAynoYE3zCXByXVM0jj3sA2a5+O7qi03pdiJYKeqZfAtDYFj3grBO9dDKpHN1ctGyu3zxZsooU4/sZ+9chFG778yfr/uF0HzwvlVEKf9oDpmGf2JW1b3h2Da5Zp64s/K+2LhH77/YBkqTQAW4vDBptoQeVmWE2zLJ51jdz0ZkO8hASPDo74IRIIeqkY1PpP1sKqk2S+wvPo3VWe25K1wuhwK2dW46QjRdiTbtPGN4A15a3l/MKJezAjQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=VDWw3EZ1lvOIx1xQk5zqOV92KhHMLpOPah+FAMCtp4I=;
- b=S1t89l75FzzodwAAXQXDKqpfyBISfiWd4SNDVZ1/pQIBg9cq4xzvuZoQOQ6A8ZfJi5bWoCRStQ7d+vbL5+2yOValP0YedQguT1cL4P8sBM0Q1oN4IIim6h8IJNDai83biHJD+f/dIGEH/jfR7sjNWnS0cL80B2RtZEcR8rhwrlhxtjvhOFXXoTJn3PCUFnKVewmmf3puoXeOp3G3IRI6IOrWuUdu10LACLP7QJ3mE91grk3kgWJRk1f+PDiihQPShiOAHum8xlQ/14X+8+2ckjPE519KUXCCdN8z0SBiyYzfW+dugnyQLeMbApm3Ro/mgq6RRF9c/FJzxAyiiyNf4A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
- dkim=pass header.d=fujitsu.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=fujitsu.onmicrosoft.com; s=selector2-fujitsu-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=VDWw3EZ1lvOIx1xQk5zqOV92KhHMLpOPah+FAMCtp4I=;
- b=pT9SSd30dkLRLRWR5apfAUby2hpyOZoGyY7Az9Z++UQn7aVpptoA3NhlzWaSgx9HlzROuh8Bb73SLGxlrqCh/Raf4yHEjXOphK4WipzG53QEGz101Vcxq2c5ryVsm3bBnLxre2EXXI+jYMdMCBUciGoDnSH7IIsnvthWcxQGvH4=
-Received: from OS3PR01MB7705.jpnprd01.prod.outlook.com (2603:1096:604:17c::12)
- by OS3PR01MB7334.jpnprd01.prod.outlook.com (2603:1096:604:148::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.20; Mon, 29 Nov
- 2021 01:26:48 +0000
-Received: from OS3PR01MB7705.jpnprd01.prod.outlook.com
- ([fe80::f435:c43f:4ecd:969e]) by OS3PR01MB7705.jpnprd01.prod.outlook.com
- ([fe80::f435:c43f:4ecd:969e%4]) with mapi id 15.20.4734.024; Mon, 29 Nov 2021
- 01:26:48 +0000
-From:   "suy.fnst@fujitsu.com" <suy.fnst@fujitsu.com>
-To:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-CC:     "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>,
-        "suy.fnst@fujitsu.com" <suy.fnst@fujitsu.com>
-Subject: [PATCH] fstests: generic/571: skip test if locktest -t on NFS returns
- EAGAIN
-Thread-Topic: [PATCH] fstests: generic/571: skip test if locktest -t on NFS
- returns EAGAIN
-Thread-Index: AQHX5L9++ugC2JlPXku1x/1AIxZKKg==
-Date:   Mon, 29 Nov 2021 01:26:48 +0000
-Message-ID: <OS3PR01MB77050F630296BA0D927AD63C89669@OS3PR01MB7705.jpnprd01.prod.outlook.com>
-Accept-Language: en-US, zh-CN
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-suggested_attachment_session_id: ad98ab68-ef58-4f05-bc9f-fda4b97fbddc
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=fujitsu.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 43c6e25e-d48f-4fba-7c49-08d9b2d7506d
-x-ms-traffictypediagnostic: OS3PR01MB7334:
-x-microsoft-antispam-prvs: <OS3PR01MB7334815332DFBDC78FE23CC989669@OS3PR01MB7334.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:220;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: CeA08Z6kUBwYlaiychpRAHBZ44Z+KzaFD2XDVbJlxE9jrErcVCjcoy1nGzIowE4nG80pNcigjKxq8yuCjGpK0bOUNYmh0Ni0+7wPtk8SPPnNNsOKdXz9svI5I5C+KJoWgYZESsxyxZdmnCp3w/Eb8VYsYP+pcHFbJzBSQGWIURXQYux8v1UhjU25CCXxWvNjR7AQqcxzMRaoNDGfP47sZTiCOjXxcqPNtxzLr/s2Pb5z8kXsMzrvdtVr9EAuiCraQ+cDkW4IrubZxZLNsoFhV4AQSRbV+j+Z24eGcyTMPji8pYUoMSGblggsZKUcTMmWeHLkn7S22RdwDDZnp+0JL9m0scmRAp5H7H6G/6bTqnP3uPIRAp3NkQETMk9Uw2uWQcKsd8g0R5GvT7fSEc8/BL9NvTGkn+qdPcek4r/2kXUoOVAth9v9FiNd4BujV6wXRO7IbFK85/REJTM37TUGOrS16K/1/+hfM0I+vWcNz13wrg+Ohj3Hs9abpmkuoOgLqWEXKAKIKfapRNMguiA2i/KZVIZOCDHtzkuTPST6klvk9crh9nVxXGR3ya9J8v3FJxIcTNVKLcsoKQ4cqI0Pi6PDgQJzBqh1tJRNZqnx1Vl2M6xpg9FFXibk4p1sFWp36i0h4rlv+XIcFPiVOPWTtCBzdQPruO4fGhmz6MPNNqFumrwlZwCLL+vof9rr7rMeiENjX902zPhuMWF1ZFVkuhIVSOkVvIIYDvsoNJH4Wvo=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OS3PR01MB7705.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(38070700005)(4326008)(55016003)(52536014)(5660300002)(54906003)(76116006)(450100002)(122000001)(508600001)(82960400001)(26005)(8676002)(38100700002)(6916009)(7696005)(6506007)(66476007)(66946007)(64756008)(66556008)(2906002)(107886003)(83380400001)(9686003)(91956017)(186003)(33656002)(71200400001)(86362001)(316002)(66446008)(85182001)(8936002)(41533002);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?gb2312?B?S0lLRmtSSlkxSVhkNFlZcjdUdytsdEhINmJLcUNYc1BTTDNGcEc0ZzhwU202?=
- =?gb2312?B?SkFFY3NyM2VGLzNRSHdjdG5IZnFhdGw0UFZhbnRZdnd6bllYVDM5WXBkUDY4?=
- =?gb2312?B?Z2JIbHBTcHNIdnpRS3d6TUtsN1VpZ05XaXNOcnB1VW1SVFBucTJnaFZCQlFD?=
- =?gb2312?B?U3lXN05oMDhuQWxERFhIRzR5NVptMVZWRW1rQUlORi90M25TS1RhcXVlZjlm?=
- =?gb2312?B?RVdzRERJK3ZwTVR5ZEhyZTdtYW9mUmJBclAzR3RJb0F3cm5KZUFkM053V1Zs?=
- =?gb2312?B?M2t4Rjl4aytnR1VPUlBYVkJwb0F5UjRlTXF1RmVvbmt3UUozODhLTjc5SDBH?=
- =?gb2312?B?MnNWUkVWdXkxY3hNbDdqZFdlTjRTOUQ1dkh3eXpxanJQbExHY1laOHpOU090?=
- =?gb2312?B?YitOeFRvMnZ1Z2tTNkVDMTZVeTd2MlR1Q0FBeGVSTkppUWhTZVdiOVRWcEpK?=
- =?gb2312?B?Y2VHQXpsZnlIb2JvREIrSlJtTUFibnduUXJkUlFiMHF0K1JwdjVKNG4yZDJa?=
- =?gb2312?B?aUxsNzZ1NDVENnN6TWFQOFp6V1BiczZ2VWVLd3ViVGxLcHJieWcwN2VGcTVx?=
- =?gb2312?B?eWhMUnRYM3pOdnl3WUYxREhnTFlMazFGNFNKRjEwY2llUE1GRWxpUFExT2RW?=
- =?gb2312?B?L3M5MTNQYkxmbkl5aEhuUVYzbXZsRGphaDB2aDFoNE04Rm5LakRmcVNNMDJh?=
- =?gb2312?B?OW5OZmg4MDluM3ZtSFIvbGVqYXVzbTRKZEQvVkFPc2Zsb0VNTHRRMTgxQUg3?=
- =?gb2312?B?bnNmNktoYjdpd0JnWWxpVTdrMDNrME5wNHBTbGpZUHhvL3hneTRhdnF5V1k5?=
- =?gb2312?B?QmUxTFVwRGlFUnllOHZJTzBEU2Z0RlFiUzZTdjc3UnpxWktaY3hIQWx1cHZT?=
- =?gb2312?B?RzRGQ2xZZEF6WFRvYTZhQzY3bzYxK3dLZXJ2T2toNUwxOUJ4enBSaUNqQ3pF?=
- =?gb2312?B?NnpIQm4zMkJjVUNRa21Va2s5YTJ5Uk5iaGswajk4aHllWGRGSmFoTUNBdEpi?=
- =?gb2312?B?ZTdFbUFKbllZVDBNRXEyYTJCYW1wOGY4YUgzdzA1a2RGSko2M2VwMThZZlRS?=
- =?gb2312?B?cktXN3U1dXA2T2FVVWpLTVdKbFJnVUY4Z2FsK2FCQldaU0VNN25UZmdrWDlz?=
- =?gb2312?B?ekpoT3Zka1V5emxITkxiZ2VkVDNzZ0dNay9tYTI4S3ZvMS9rQUdXcXN3elFC?=
- =?gb2312?B?OGk4SW1rSklqQU9nUzhndk9HUmFaWHczZkFwaHQ1MlhLUXdGUTNCTzlETWN1?=
- =?gb2312?B?d1B0cTlFTzh6QytFU0pPR1BUM3greW5acWdtUFlqS2tpK1ZGV2pvTHZYMDZt?=
- =?gb2312?B?ZDFSL1kwMmw2NmZoc0VNdTdOb2s5Z3JETEpiRlFiSlZPcFV5WUFlbmRJclRp?=
- =?gb2312?B?NnVSQWlXRW82YkYxOHZCMTNnQVUxNG5KZnllTCt0TVhHMGJscUswMlFiNWg5?=
- =?gb2312?B?alFpVTFzaHF6Qjk4TEpXSFBicFN3RGpTeVJxMGw3R25zS3lJcUJpQzgwcDhE?=
- =?gb2312?B?bWlHcmhyNnpuRHhCSXZQalBRUDR5MWhMSFNGZy9ka09pMXJSQ1VZdDlwMGV2?=
- =?gb2312?B?MldtL1R1TzlIaUxydEI3clVVNFU1aGtRVmxBS3RUSXZ0dVdnOGs5SWUrUmtC?=
- =?gb2312?B?NGUxenhxb2l2QU1JN2RxL2xKTm5QaXoyNHBBOXVKczBGUnVFZXI2Uzh1dU5n?=
- =?gb2312?B?cWNSNE44cWw3dURUR1E1bTJpQXNCMkRSYW04d3Fia2dEMVRhSXVuNndaWSt5?=
- =?gb2312?B?c0twUmRtblBEOUVYSGFVOFFDaUxiTE1MYlhpL0IyUUZybHdrM0JpZ01TOElt?=
- =?gb2312?B?Si81OXV2R3J4K0tDT3BZazdoT3lRN1ZPYkF0RnpUS3VxajNudGhHQUNoR3VZ?=
- =?gb2312?B?M2VBT3BMZ09vTFBRUWlOSDE5MW84QVN3cXlmNytjYkZzSnlzUFZNYmZDQmJY?=
- =?gb2312?B?dW5SSUVxNWo0K3cwOEhoUkRTSVpyTzZKc1JKNkdPV3p5eE5jcmpUT0ZwcEZ4?=
- =?gb2312?B?QTNiMElYMXluWGZyelFhaU5oRHpSMFNrcGFjZ2Z6WWpPWWh2dUxmZFJJWVZl?=
- =?gb2312?B?U21sWDRXZUFrbnBTYzRFeXJWVVhSeFNXdEh1YXRHWXBXNkxYbDF4REgvbnlX?=
- =?gb2312?B?ZnZsaTNodkQ5SWtIbXN5TnlOeFBTcUVqZWFWUC9wUERUWDc3cS9mOGFyUWps?=
- =?gb2312?B?akE9PQ==?=
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+        Sun, 28 Nov 2021 22:46:25 -0500
+Received: from szxga08-in.huawei.com ([45.249.212.255]:28115 "EHLO
+        szxga08-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1348683AbhK2DoZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Nov 2021 22:44:25 -0500
+Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.55])
+        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4J2WKJ6WSPz1DJcS;
+        Mon, 29 Nov 2021 11:38:28 +0800 (CST)
+Received: from dggpemm500002.china.huawei.com (7.185.36.229) by
+ dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.20; Mon, 29 Nov 2021 11:41:07 +0800
+Received: from [10.174.179.138] (10.174.179.138) by
+ dggpemm500002.china.huawei.com (7.185.36.229) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.20; Mon, 29 Nov 2021 11:41:06 +0800
+Subject: Re: [PATCH] ext4: verify ext4 when the starting block of index and
+ leaf are inconsistent
+To:     Eryu Guan <guan@eryu.me>
+CC:     <fstests@vger.kernel.org>, <tytso@mit.edu>
+References: <20211123013759.170012-1-chenlongcl.chen@huawei.com>
+ <YaOrLVKnPMQbA6lQ@desktop>
+From:   "Chenlong (H)" <chenlongcl.chen@huawei.com>
+Message-ID: <da284f39-76f6-8c1b-bb87-7ac535480906@huawei.com>
+Date:   Mon, 29 Nov 2021 11:41:06 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.2
 MIME-Version: 1.0
-X-OriginatorOrg: fujitsu.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: OS3PR01MB7705.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 43c6e25e-d48f-4fba-7c49-08d9b2d7506d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Nov 2021 01:26:48.5735
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 74RNBI7cBHNP8q9pJEQRxCnasaqZU40OSMiHg6gnfO5CbEqKVVFiBCRKTRstg0dOzyEzyU1ZcFjQ3TZ2Q9nl2g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3PR01MB7334
+In-Reply-To: <YaOrLVKnPMQbA6lQ@desktop>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.179.138]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ dggpemm500002.china.huawei.com (7.185.36.229)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-QXMga2VybmVsIGNvbW1pdCBlOTNhNWU5MzA2YTUgKCJORlN2NDogQWRkIHN1cHBvcnQgZm9yCmFw
-cGxpY2F0aW9uIGxlYXNlcyB1bmRlcnBpbm5lZCBieSBhIGRlbGVnYXRpb24iKSBkZXNjcmliZXMs
-Ck5GUyBub3cgc3VwcG9ydHMgZmlsZSBsZWFzZXMgb25seSBhZnRlciBkZWxlZ2F0aW9ucy4KSG93
-ZXZlciwgZnN0ZXN0cyBsYWNrcyBtYW55IE5GUyBmdW5jdGlvbmFsaXRpZXMgaW5jbHVkaW5nCmRl
-bGVnYXRpb24uCgpTbyBsZXQncyBza2lwIGdlbmVyaWMvNTcxIGlmIGxvY2t0ZXN0IC10IG9uIE5G
-UyByZXR1cm5zIEVBR0FJTgpiZWNhdXNlIG9mIGNvbW1pdCBkZjJjN2I5NTFmNDMgKCJORlN2NDog
-c2V0bGVhc2Ugc2hvdWxkIHJldHVybiBFQUdBSU4KaWYgbG9ja3MgYXJlIG5vdCBhdmFpbGFibGUi
-KS4KClNpZ25lZC1vZmYtYnk6IFN1IFl1ZSA8c3V5LmZuc3RAZnVqaXRzdS5jb20+Ci0tLQogY29t
-bW9uL3JjIHwgNSArKysrLQogMSBmaWxlIGNoYW5nZWQsIDQgaW5zZXJ0aW9ucygrKSwgMSBkZWxl
-dGlvbigtKQoKZGlmZiAtLWdpdCBhL2NvbW1vbi9yYyBiL2NvbW1vbi9yYwppbmRleCBjMGZiMTFj
-NjY5MmYuLjVkYTEyNzQ0MjQyYiAxMDA2NDQKLS0tIGEvY29tbW9uL3JjCisrKyBiL2NvbW1vbi9y
-YwpAQCAtMzk2Nyw3ICszOTY3LDEwIEBAIF9yZXF1aXJlX3Rlc3RfZmNudGxfc2V0bGVhc2UoKQog
-CV9yZXF1aXJlX3Rlc3RfcHJvZ3JhbSAibG9ja3Rlc3QiCiAJdG91Y2ggJFRFU1RfRElSL3NldGxl
-YXNlX3Rlc3RmaWxlCiAJJGhlcmUvc3JjL2xvY2t0ZXN0IC10ICRURVNUX0RJUi9zZXRsZWFzZV90
-ZXN0ZmlsZSA+L2Rldi9udWxsIDI+JjEKLQlbICQ/IC1lcSAyMiBdICYmIF9ub3RydW4gIlJlcXVp
-cmUgZmNudGwgc2V0bGVhc2Ugc3VwcG9ydCIKKwlsb2NhbCByZXQ9JD8KKwlbICRyZXQgLWVxIDIy
-IF0gJiYgX25vdHJ1biAiUmVxdWlyZSBmY250bCBzZXRsZWFzZSBzdXBwb3J0IgorCVsgIiRGU1RZ
-UCIgPT0gIm5mcyIgLWEgJHJldCAtZXEgMTEgXSAmJiBcCisJCV9ub3RydW4gIk5GUyByZXF1aXJl
-cyBkZWxlZ2F0aW9uIGJlZm9yZSBzZXRsZWFzZSIKIH0KIAogX3JlcXVpcmVfb2ZkX2xvY2tzKCkK
-LS0gCjIuMzAuMQoK
+
+
+On 2021/11/29 0:15, Eryu Guan wrote:
+> On Tue, Nov 23, 2021 at 09:37:59AM +0800, chenlongcl.chen@huawei.com wrote:
+>> From: chenlong <chenlongcl.chen@huawei.com>
+>>
+>> Insert the extent entry in ext4_ext_insert_extent() (to be inserted at
+>> the beginning of the block). In the stage of updating the starting block
+>> number of the parent index block, an error happened
+>> in ext4_ext_correct_indexes()->ext4_ext_get_access(), which caused the
+>> index update of the parent index node to fail. The ext4_ext_insert_extent()
+>> function exits directly and does not roll back the extent entry of
+>> the leaf block. Eventually, the extent starting block numbers in
+>> the index block and leaf block are inconsistent, triggering bugon
+>>
+>> This is a regression test for three kernel commit:
+>> 1. 0f2f87d51aebc (ext4: prevent partial update of the extent blocks)
+>> 2. 9c6e071913792 (ext4: check for inconsistent extents between index
+>>     and leaf block)
+>> 3. 8dd27fecede55 (ext4: check for out-of-order index extents in
+>>     ext4_valid_extent_entries())
+> 
+> Missing Signed-off-by tag.
+>
+
+Thanks for your review.
+I will add it in the V2 version.
+
+>> ---
+>>   tests/ext4/054     | 97 ++++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/ext4/054.out |  2 +
+>>   2 files changed, 99 insertions(+)
+>>   create mode 100755 tests/ext4/054
+>>   create mode 100644 tests/ext4/054.out
+>>
+>> diff --git a/tests/ext4/054 b/tests/ext4/054
+>> new file mode 100755
+>> index 00000000..3d63f12f
+>> --- /dev/null
+>> +++ b/tests/ext4/054
+>> @@ -0,0 +1,97 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2021 Huawei.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 054
+>> +#
+>> +# Regression test for kernel commit:
+>> +# 1. 0f2f87d51aebc (ext4: prevent partial update of the extent blocks)
+>> +# 2. 9c6e071913792 (ext4: check for inconsistent extents between index \
+>> +#    and leaf block)
+>> +# 3. 8dd27fecede55 (ext4: check for out-of-order index extents in \
+>> +#    ext4_valid_extent_entries())
+>> +
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +_cleanup()
+>> +{
+>> +    cd /
+>> +    rm -f $tmp.*
+>> +    $UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
+>> +    rm -f ${IMG_FILE} > /dev/null 2>&1
+>> +}
+>> +
+>> +# Import common functions
+>> +. ./common/filter
+>> +
+>> +# real QA test starts here
+>> +_supported_fs ext4
+>> +_require_test
+>> +_require_xfs_io_command "falloc"
+>> +_require_xfs_io_command "pwrite"
+>> +_require_xfs_io_command "fsync"
+>> +_require_xfs_io_command "fpunch"
+>> +_require_command "$DEBUGFS_PROG" debugfs
+>> +
+>> +IMG_FILE=${SCRATCH_MNT}/$seq.fs
+>> +IMG_MNT=${SCRATCH_MNT}/$seq.mnt
+> 
+> SCRATCH_DEV is not required nor mounted, so IMG_FILE and IMG_MNT are
+> created on the root filesystem.
+> 
+> And I don't see why we need to loop back mount an fs image here, does
+> _require_scratch_nocheck then use $SCRATCH_DEV directly work for you?
+> 
+> And if loop device is really needed, _require_loop should be added as
+> well, and use $TEST_DIR to save the fs image and mnt dir, e.g.
+> 
+> IMG_FILE=$TEST_DIR/$seq.fs
+> IMG_MNT=$TEST_DIR/$seq.mnt
+> 
+> and use _create_loop_device and _destroy_loop_device helpers.
+> 
+
+The original idea was to construct a damaged file system by
+creating a loop device. In fact, scratch_dev can also achieve
+the goal. In V2 version, it will be changed to scratch_dev.
+
+>> +TEST_FILE="${IMG_MNT}/testfile"
+>> +
+>> +fallocate -l 10M $IMG_FILE
+> 
+> $XFS_IO_PROG -c "falloc 0 10m" $IMG_FILE
+>
+
+use scratch_dev to test, no need to create img_file.
+
+>> +mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
+>> +
+>> +$MKFS_EXT4_PROG -F $IMG_FILE >> $seqres.full 2>&1 || _fail "mkfs failed"
+>> +
+>> +$MOUNT_PROG -t ${FSTYP} ${IMG_FILE} ${IMG_MNT} >/dev/null 2>&1 || \
+>> +    _fail "mount failed"
+> 
+> If use $SCRATCH_DEV, above will simply be
+> 
+> _scratch_mkfs >> $seqres.full 2>&1
+> _scratch_mount
+>
+
+no need to use loop device.
+
+>> +touch $TEST_FILE
+>> +
+>> +#
+>> +# The following steps create an abnormal file system image and
+>> +# create a file(testfile). The starting logic block of his second leaf
+>                                                            ^^^^ its ?
+>
+
+it is more appropriate to use its here.
+
+>> +# extent block is inconsistent with the starting logic block of the
+>> +# second idx extent entry in the inode.
+>> +# Level Entries       Logical      Physical Length Flags
+>> +# 0/ 1   2/  2  5632 -  6527  2020            896
+>> +#               ^^^^ 指向了leaf block
+>                          ^^^^^ Use English please.
+>
+
+sorry, i correct it.
+
+>> +# 1/ 1   1/ 15  5376 -  5439  7041 -  7104     64 Uninit
+>> +# 1/ 1   2/ 15  5632 -  5695  7297 -  7360     64 Uninit
+>> +#
+>> +for i in {0..50}
+>> +do
+>> +    offset=$((1024 * 128 * i))
+>> +    $XFS_IO_PROG -c "falloc $offset $((1024 * 64))" $TEST_FILE >> $seqres.full
+>> +    offset=$((offset + 1024 * 64))
+>> +    $XFS_IO_PROG -c "pwrite $offset $((1024 * 64))" $TEST_FILE >> $seqres.full
+>> +    $XFS_IO_PROG -c "fsync" $TEST_FILE >> $seqres.full
+>> +done
+>> +
+>> +$XFS_IO_PROG -c "fpunch $((1024 * 5376)) $((1024 * 256))" $TEST_FILE \
+>> +        >> $seqres.full
+>> +$XFS_IO_PROG -c "fsync" $TEST_FILE >> $seqres.full
+>> +$XFS_IO_PROG -c "falloc $((1024 * 5376)) $((1024 * 64))" $TEST_FILE \
+>> +        >> $seqres.full
+>> +$XFS_IO_PROG -c "fsync" $TEST_FILE
+>> +
+>> +$UMOUNT_PROG ${IMG_MNT} || _fail "umount failed"
+>> +
+>> +$DEBUGFS_PROG -w -R "set_inode_field testfile block[6] 0x1600" $IMG_FILE \
+>> +        2>>$seqres.full >> $seqres.full
+>> +
+>> +# Mount the file system and create a block at a location in the middle
+>> +# of 5440-5632
+>> +
+>> +$MOUNT_PROG -t ${FSTYP} -o nodelalloc ${IMG_FILE} ${IMG_MNT} \
+> 
+> Please add comments to explain why nodelalloc is needed.
+> 
+> Thanks,
+> Eryu
+>
+
+When the delalloc option is enabled when mounting, the block allocation
+will not be triggered when writing (the maximum waiting time is about
+30s). If nodellalloc is used, the block will be allocated when writing.
+The expected BUG_ON in this use case can be triggered immediately, and
+the test results can be quickly obtained.
+
+I will add comments in the V2 version.
+
+>> +        >/dev/null 2>&1 || _fail "mount failed"
+>> +$XFS_IO_PROG -c "pwrite $((1024 * 5568)) $((1024 * 64))" $TEST_FILE \
+>> +        2>>$seqres.full >> $seqres.full
+>> +
+>> +# If this BUG is not fixed, when the testcase is executed to this position,
+>> +# the kernel will be BUG_ON immediately.
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/ext4/054.out b/tests/ext4/054.out
+>> new file mode 100644
+>> index 00000000..108fe4c9
+>> --- /dev/null
+>> +++ b/tests/ext4/054.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 054
+>> +Silence is golden
+>> -- 
+>> 2.17.1
+> .
+> 
