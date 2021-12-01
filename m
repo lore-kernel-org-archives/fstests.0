@@ -2,245 +2,141 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36754C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Dec 2021 05:55:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7FA4C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Dec 2021 14:47:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230462AbhLAF6c (ORCPT
+        id S1350019AbhLAOuk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Dec 2021 00:58:32 -0500
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:29160 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229561AbhLAF6a (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Dec 2021 00:58:30 -0500
-Received: from pps.filterd (m0044010.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1B10XZ7X019077;
-        Tue, 30 Nov 2021 21:55:09 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=facebook;
- bh=aZD84onpFGMe1H9wG+xksCE1oR7U641aLa9OLJ16d28=;
- b=lyXGsz84TYJ7PvlV1BQDUEATJLtgqX2hwqXZA52ssX65ufE/Ja+nivP+Zm9856Y1O/9e
- bokf+VChzeN0SI5XaHYwFMnsJ+ele6ueqDOVuMj031rc6aM/ckgDzTj/WQirmFhsVaNU
- +b/V6tIg4+5+S5vU8vnEtcqgI9wfdeZgo8c= 
-Received: from mail.thefacebook.com ([163.114.132.120])
-        by mx0a-00082601.pphosted.com with ESMTP id 3cnd5uruex-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Tue, 30 Nov 2021 21:55:09 -0800
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (100.104.98.9) by
- o365-in.thefacebook.com (100.104.94.228) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Tue, 30 Nov 2021 21:55:08 -0800
+        Wed, 1 Dec 2021 09:50:40 -0500
+Received: from de-smtp-delivery-102.mimecast.com ([194.104.111.102]:33790 "EHLO
+        de-smtp-delivery-102.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1351271AbhLAOuA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Dec 2021 09:50:00 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=mimecast20200619;
+        t=1638369995;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=WPx4Rf0Ktqr8Z4HYPWj+koMbJp4/H9Ha2ws4HP8EfJM=;
+        b=cskWA0vnTg2t5J7nFDaDuXyR4ZueIE8hTs14vSkc8QzqK5Bpov3abEEBR1hnYyhk5kQuP6
+        PmGDuZV4OUCQVWkgrkj4GfyXflQhvaMqcvY60BAGPA6jiHmvhi8UcaYjS2+b0j1jsecOfl
+        S7e/afOSGjYQRjkwpa4KVvjt2G2v17s=
+Received: from EUR03-DB5-obe.outbound.protection.outlook.com
+ (mail-db5eur03lp2057.outbound.protection.outlook.com [104.47.10.57]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ de-mta-14-Q2GfGKXQNySkrVK2p2FSfQ-1; Wed, 01 Dec 2021 15:46:34 +0100
+X-MC-Unique: Q2GfGKXQNySkrVK2p2FSfQ-1
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=lbklrHeVcNEe5h8kObM/Z0hpci9QU/LeV5GI16n6UhzKYyske+AtH9261dlDJgkKIiLqazaR3K9EnIu6c+afCR+EUXRkTzUGWB/V+XenHJ/34Hv45/Z2+i1WA/Xm+M5r0RxxbEWO+DAkIYklJ+zBmgAsb0UWIOZz5BsCBWOXB92vK9nXtxF2nQ/9SzER7MmiTI2OOJ9UoJFIJTf5IOwOXreqCyH3QDXfab0uxTetlU4L6By56/XcJeRQ5ckOiEGCY/bHEbO8xDBt/6UdY3MXCTqyF/m5e4Gq/MvIBPyoF/EYH0q5jLVmQTbxNzQGGN3ScAfKtL9bwtqFUQ//chJ1fQ==
+ b=dPo5j+uZvXq2LlcEJ+w2p4NuAOQkaq/e6lQBjBLW0CpACwMJCfrSlwDyJi5R6nDdRA7cILQ4e3PZS5LmhBESYzAaB7losgXQ78ue52t/l7R3dd5FrZN9tH9RX2X54nrmLaZHJKEJY9XtkHxkWcug63CcQNrMc66yKkqNr52gq/m9aoDpZPGeXNFEZFEWz8bDJqrEJ0fMqc4xcTZg6SLxM3Yp37GyWLHexukvxqKv11uGLfGuMEoBNqIJXEMiOSKCTVyifQiMHRC8UjlSakIIcmhwxfS0qFfbFAEIzrWpSBj1BYavurzUq1+wtoMFTPTh0+27W+9Jv4goXCpbnJPJCw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=aZD84onpFGMe1H9wG+xksCE1oR7U641aLa9OLJ16d28=;
- b=T8v+8ZVTzo/avGWHq5EQzdV4HNDXMieAnPmFeOBkgeASswkA+E5WK0GmaiWEGVrdZ3SkBWYrEetXJYZtfNWvVYHaZYeMOYfh4NIERZj9Ewa+gvpAzQfV4wYLYR6UJN7GeTSGJUyT2wdIF32cZYrEv48hVAUJdomHZE3V68pltPuqRIyThCNObP/rXKrnITViLyqF4ZVPsniszs/6/BffLilykPuPCUhTQySqtsE/Zr38g7+1MvA94uXHisfoXikUBoToCrFEuWBqfusFbmhnlIoezj3tbThGJeUdoTaJS4GJEsRhE61eaMl2Cf3bGlDLdvIKlW919uP/B+ZUIwaS4g==
+ bh=Vkzd9Yx9rJwRIXvVwTNcoCxAQ9QQ189vdTyCQ4RbG4U=;
+ b=edsQTwODn5rd1S13i10IMQYC5CEDmjGT21pMVb/XNWqZqEuSjV3kX8kxh39r2s62sFQ6IOEAJ0zwbJlibtnQLuuxBFSSCLsLi2bsMho/yESBQiHLvhFA2J690XIzVTq7b/e6NoMHaEEL0owDBiFKLV6nayKw5mew+Q5RFZ9DD8w7WO5bpNM+BOmAn8cBSTMCCZQXeP9+P1nz9IqB/tMTGJvirph0cEpXQkbw6d4D4Z1P2cgQnLcJNiv68xpQ11RZd11vyDToaKn/q0u6Hsf4cB8WkajVfMdMBjPCsq76t5sehpVV3uY5xNdAI56kvg4WItMSeiK1mpJPgfHUcitjOg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fb.com; dmarc=pass action=none header.from=fb.com; dkim=pass
- header.d=fb.com; arc=none
-Received: from MW4PR15MB4410.namprd15.prod.outlook.com (2603:10b6:303:bf::10)
- by MWHPR15MB1485.namprd15.prod.outlook.com (2603:10b6:300:bd::23) with
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=suse.com;
+Received: from AM6PR04MB6630.eurprd04.prod.outlook.com (2603:10a6:20b:f4::33)
+ by AM6PR04MB4120.eurprd04.prod.outlook.com (2603:10a6:209:4b::11) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.23; Wed, 1 Dec
- 2021 05:55:02 +0000
-Received: from MW4PR15MB4410.namprd15.prod.outlook.com
- ([fe80::f8de:1089:be1d:7bf]) by MW4PR15MB4410.namprd15.prod.outlook.com
- ([fe80::f8de:1089:be1d:7bf%8]) with mapi id 15.20.4713.025; Wed, 1 Dec 2021
- 05:55:02 +0000
-Message-ID: <5e81c9a6-ed29-c678-d149-b9f4008aa737@fb.com>
-Date:   Tue, 30 Nov 2021 21:54:59 -0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0)
- Gecko/20100101 Thunderbird/91.3.0
-Subject: Re: [PATCH v1 1/2] fstress: add suport for using liburing setxattr
-Content-Language: en-US
-To:     Dave Chinner <david@fromorbit.com>
-CC:     <fstests@vger.kernel.org>, <kernel-team@fb.com>
-References: <20211129221542.2549306-1-shr@fb.com>
- <20211129221542.2549306-2-shr@fb.com>
- <20211130203344.GC3447530@dread.disaster.area>
-From:   Stefan Roesch <shr@fb.com>
-In-Reply-To: <20211130203344.GC3447530@dread.disaster.area>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: MWHPR21CA0026.namprd21.prod.outlook.com
- (2603:10b6:300:129::12) To MW4PR15MB4410.namprd15.prod.outlook.com
- (2603:10b6:303:bf::10)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.22; Wed, 1 Dec
+ 2021 14:46:32 +0000
+Received: from AM6PR04MB6630.eurprd04.prod.outlook.com
+ ([fe80::751c:876b:9fa7:9468]) by AM6PR04MB6630.eurprd04.prod.outlook.com
+ ([fe80::751c:876b:9fa7:9468%7]) with mapi id 15.20.4734.024; Wed, 1 Dec 2021
+ 14:46:32 +0000
+From:   An Long <lan@suse.com>
+To:     fstests@vger.kernel.org
+CC:     An Long <lan@suse.com>
+Subject: [PATCH] btrfs/099: Fix qgroupid issue
+Date:   Wed,  1 Dec 2021 22:46:10 +0800
+Message-ID: <20211201144610.26002-1-lan@suse.com>
+X-Mailer: git-send-email 2.31.1
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-ClientProxiedBy: HK2PR02CA0142.apcprd02.prod.outlook.com
+ (2603:1096:202:16::26) To AM6PR04MB6630.eurprd04.prod.outlook.com
+ (2603:10a6:20b:f4::33)
 MIME-Version: 1.0
-Received: from [IPV6:2620:10d:c085:21c8::14c4] (2620:10d:c090:400::5:8065) by MWHPR21CA0026.namprd21.prod.outlook.com (2603:10b6:300:129::12) with Microsoft SMTP Server (version=TLS1_2, cipher=) via Frontend Transport; Wed, 1 Dec 2021 05:55:01 +0000
+Received: from localhost (240e:304:4b83:59a0:6023:9568:82af:2c64) by HK2PR02CA0142.apcprd02.prod.outlook.com (2603:1096:202:16::26) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.11 via Frontend Transport; Wed, 1 Dec 2021 14:46:30 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 9360cf3e-aa27-4f3c-715c-08d9b48f1d7c
-X-MS-TrafficTypeDiagnostic: MWHPR15MB1485:
-X-Microsoft-Antispam-PRVS: <MWHPR15MB1485F38E7EDD4B506F99DEC4D8689@MWHPR15MB1485.namprd15.prod.outlook.com>
-X-FB-Source: Internal
-X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
+X-MS-Office365-Filtering-Correlation-Id: 61b0265b-d626-49c1-93c8-08d9b4d95d73
+X-MS-TrafficTypeDiagnostic: AM6PR04MB4120:
+X-Microsoft-Antispam-PRVS: <AM6PR04MB4120F42CF6BF83EDDC707590C6689@AM6PR04MB4120.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3044;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: sGYbEihB/x9dIA0ooDQSYfWCEy4Knlmc6bvi+yiPXqRzgXNIHFCrNANZCwIWjFD1Lkirk2Bcn3caEucY3T32CDW++faK8ZE25+hwUtbysj8/9HeRygrCX/KnVjOOFAGZQtHTS3+8zw0Pl2FFEXZI4x83jURjw98DoQbeeC3kRlNa496h/sgW4VHhQb6nhf0B6oUUBgR3AIYeMQ7BozNQtqZJDNii4YBc8xSn02ISHQNb/s0Ma1mr/1Ss54P7U3StHWbrGF7GiMAu5/yk44Ntm4lxNC1C2FVEz2ssfacbcaLcdyCiXMbL2J4CaBQn6khC3Kx49ufbV9D912guvKhhRaNWezPWS7XE8BRBXIb/OEKIVhFVlmEGehX3N9ekz1SM2zy3KLNcz60tfOJOdhQOD2/Q5qMuA+8dKHBJS6N7DnFbfbp3Sx8k+ircfG6ioTMrg3QeyQSayPf8NnJCTa1Gm+doGkT2xEd6F+R8KRFe9QHhk7hxOija/stRRUxNOqO2A7iHbnKA+9Ci0SgXvwvC71ltX7cQeaH0cNtFQMG0ldGwKcZd5CUeb5h/jM/KjhulDXZTRiVLJ4XmQ049reqswb8U7+QlW/XXu2L6RIUIlefCv9PNZ8SpUOsG+CyHXUz5yJh/j2cv4BZiraH4s9v99DweW3dlKa2rxgH0ssMogHRTBuH8nfD8UpXfmsdxp7MKJrdB1o8Vs/Kx2AFdF5v3A/yphzpR/DbEqwehcgFY/5U=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW4PR15MB4410.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(38100700002)(53546011)(31696002)(2616005)(316002)(6916009)(508600001)(83380400001)(5660300002)(66946007)(66476007)(36756003)(66556008)(4326008)(8936002)(8676002)(186003)(86362001)(2906002)(6486002)(31686004)(45980500001)(43740500002);DIR:OUT;SFP:1102;
+X-Microsoft-Antispam-Message-Info: kLu+6ck0FFPIQNRpr4jAHSmeZt9R37LIPYFKB1tOVXTD+ypfT7CRIDHOLmH0hAW6ch3xdWE14KmHN11luC1/6j1bF5/ijsiN7ai6hlvZ72HeO4jMReEi3Neh9+ZG5Vlz5GGVhNi/pzYEnsJTsVQfE5uYZffQiFzIzymJUMzstnjuae7ouUR/Cq3jYv8PN20EdZJSYSuzVbrKa8Y6V3AJFNp1S/DVqnfl3RkB0dQ9vZK5mAlLUd5Xl9aw2LsngH7EGd5dTvjltemPKMWx/C59qNujsaZkdpu5cQO/L20xrw3vTsdII8ZZ3wVMC0r78nZMLgo5PbvNVl9gcidl9d3HL7cOIFXewgd60BdFuRG3PY9OlIeJsb67E/5a8MMzIoUHjQJY8FL8P/PU7tF9EfD4kC9o9auEhWE72Of4iiqZha982Ie6TRxnGfDE+V4xjuGecPk+54bCze+lmqgtmfY3FNsqK785CLGfoDy3JOYX1F/TPw/WitLNOypQTMvdUvNven3xlScs3Wj1y28Yaom1TkY1OxMPCucvd+FGt3jLhOjnbLzezKbcjCR/iH06dpdxfvdF+ofA+DqeCvXwz2hO6zCtlg6dkMXWmvfZmW4aHIEYhEJC3qS7IY0dLa0ZRHFbddzXAKmvamvdl7X2Dp0+Bw==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM6PR04MB6630.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(107886003)(316002)(36756003)(8936002)(4744005)(66946007)(5660300002)(1076003)(83380400001)(66556008)(4326008)(8676002)(2906002)(66476007)(6916009)(6666004)(186003)(86362001)(38100700002)(6496006)(6486002)(2616005)(508600001);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?WTdNdW1hYk1vVUNjSm5pSDl4NEhEdkVJdjBBdzk2bnQ1RUlaSThFNVJoc3hM?=
- =?utf-8?B?ZCticGhTMlI2WDhPZFNXSE9KTCtLRlJhL0dtUFBaazM0V0JseW0vbWJiVW5w?=
- =?utf-8?B?azlYTDBNaTJaUk5jZnZ4NEp6ZmE3Ym8yUTdwTmV2ZXNNY29pSDFTT3BRY05C?=
- =?utf-8?B?aXRXbm5ZKzlTS083Sjd6YWZRMEhYZnRLNTFZeGxOSm42cmNIb0FxbzhreDdM?=
- =?utf-8?B?b29kbVp5MSswZTQzaWlqL0tYaGRZUjFJVEdlbm5pN2drOE1GaFFzVU5GYVl6?=
- =?utf-8?B?bDQ5emNLSkVhMnhnS1VZNStCTk1YanFkZkFnOUt3VzVtTjRLZWFEZjZDUkhB?=
- =?utf-8?B?SnlmazVldHFhTDRaZTl5N2o0dkliTU1rdEpkTDhRdGRnYVlEMHh0RG5NZVpJ?=
- =?utf-8?B?M0JMYnpPUEFJR0V2dDU3NjhQcnYrT3d5WXRVOWRsY0U5dTVzM2RPNnRXcUhz?=
- =?utf-8?B?NUtmQUFzVUY0UVFNTnRGZlZnWW1UTllNSk56eUJVamNocjcrME8yejNWb3I3?=
- =?utf-8?B?NzJqbFZzUnV6M3lOdStCaFh5ekNJSlhQcXJZOWgzT2Jvb08zb3oxVHRrVU9M?=
- =?utf-8?B?TEpidDZURXdGVmdzNmljMmM2TCtmdThqRGxjajNRbHhhMmxad1NUK25oL0M4?=
- =?utf-8?B?MG5PdU9yRktHNzE2YWhoOG9mS28rdnpHZXJjOGhxcDVabUw5MzFWekc2eG1o?=
- =?utf-8?B?Y1dBcTN2UzZsUnNhS1dDRjV0OUp5N0NzZjcvd0lINml3U2I3STFnSkx6cHlm?=
- =?utf-8?B?OWJqR2JUTjlsdmFiMHBYZUFNTjJXNm5DY2t1WVZpdzloTlYydWRYRDdzSEdM?=
- =?utf-8?B?OU5uU0FwL014Ynh2RDl5TVljVVY3Z1BjTDdKR29EdmlpSVRxRFo3RTFXT0I3?=
- =?utf-8?B?UFlEcU1rOVZGOWhkaDQ3SndNK1l0anVIaWNtdE5zODRpdkF2Nzk0N0xMbU1z?=
- =?utf-8?B?NlJTV3gzTzhhZUxHb3hZSDZ6eEJKNEFrVlZ1Y3A1bi9lc0FiWm95WmZTT3lX?=
- =?utf-8?B?ekZMdys2MG80d0Y2WlZxWGpJc1RYZFdmU3pweFdHd004ZWtxbFBEUGxtTWtO?=
- =?utf-8?B?Qk83QkRuRUZnK3ROQ0s1ZTFTbHV2eFpTNE9DVktsQmpyazZ4ejVFWklNaHNF?=
- =?utf-8?B?UFpWT1YwN1JCQ095Q3JsblRxY0Z0djY2TTFHaVIydzFZaHZjczd3UTZ5RFph?=
- =?utf-8?B?NGl3OWNtRDRrelJ0QWNRd1RCUEkrSmFFN29NbnFsNis1VkxZZ3lyaWd6S0p4?=
- =?utf-8?B?VXBqUEtPMmZOZThUVU5kdTFNSTBVZ0FaV2tiRUFoMTNyUlhhTHl1WmJRK1d5?=
- =?utf-8?B?RkRGRVdOWkQvQnNIcTZVUUM5a2lVY1FTU0V1eHN5a01KVGtYbHZrSEppNzhH?=
- =?utf-8?B?dHhIVkFZMFJkNmZuMm5NNyt2WlRHUTFZVE5rVWU0cDV3Y0VGMmQyc0NVbnlh?=
- =?utf-8?B?bDZFVTdOOE43YnAwUGxabldsQ3FwNlVud1FkMVdPTGdDbFYvQWQ0WDMvWEdk?=
- =?utf-8?B?K1JPOWNHazN0M1IxMlhXU2grZ3RSM3pHR3RnZzdyNlJIZ1FMak5OYWtRWmt6?=
- =?utf-8?B?VW1Ba2pVQWpMVEJVamFWVGNnWEREUkNNdG02L2N5WkRZNnRyaUhJN1lRTW5C?=
- =?utf-8?B?c3JPS0d0Rkpub1R4MFFvdXdhQVVPN1NRS3Z6QmphSHBwMGpPL3YyMmVtVWkz?=
- =?utf-8?B?UGhtMkJzQ201bW5kcDVIbTkrbWQyK3VGNVA2NmJmQjIyK2J6MzJMQ2J5bFVi?=
- =?utf-8?B?cXBBRi8yTkFqc1dTczFiOVZaOXAvMHRWcG5ubDEyeW1QK0RWY1VaNVZWNFRG?=
- =?utf-8?B?d0xxbmdxVDhJNmhPTkdPaUlCdnJUOHVEbXU5VGVEMGhXODRZQ3phZWVKUzQ5?=
- =?utf-8?B?OERLSi91VjJwOWcvcWM2RmNXaVppRVZOVnp6OEpVU1oyaXo3Q3JpNDQvZXhi?=
- =?utf-8?B?bnhRUmdqM1FpTnRuN1J5Ymg4U0dQdzFWWHlLaEVzME04cE9uT2ozN3c5S1Bm?=
- =?utf-8?B?TzViaXNib1JnTXRCcnlkSVZZQUxud2VMc0oybTBxbkZJb0l6N0pLaDhGMzVV?=
- =?utf-8?B?SzJuamNmMSt0WEhGZWVUQzRvajlhbTE0Z0pkQmRZYUsrbXBmaWJ2VnRZVWk0?=
- =?utf-8?Q?6xLamevD1ld57agE5L8wfA3QC?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9360cf3e-aa27-4f3c-715c-08d9b48f1d7c
-X-MS-Exchange-CrossTenant-AuthSource: MW4PR15MB4410.namprd15.prod.outlook.com
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?NG3h0B1/c2yc5BJBwb3zc7+3oh6HB0mx/zpzuuayjUsIo4OQAmctnBfx3Ufy?=
+ =?us-ascii?Q?y/HPjRqUbrzTe6LD5+p4ywLoyF+IW5qyCqYJZKMm+X9DXxU15mfK/Rpjpbxj?=
+ =?us-ascii?Q?XtEsU8zujZWOStgcjjE0rJsh5vGCrR0X3MVgJ0aetquphtaM01w/O5PhanVj?=
+ =?us-ascii?Q?DQSJJpUZJnYiExONG1PlTzc8xUZcAIgAqI59LG/xGz7BYymMotNKGje0dumU?=
+ =?us-ascii?Q?gqCaoEr1Sdsiek5LL2RryQ4pwkMaDmi0PT7U3ifetK70eu17e7lBnlgVVSQF?=
+ =?us-ascii?Q?HS4F34pIpMr0B1sU/elo9yf7Itu9Pjq5xnqIfkwTwSMTwBtLn2KlAQ4dMfR0?=
+ =?us-ascii?Q?alkubCJaDuvL5Qj9ZnzKBnr7uUTa3l2H9uUj/SBHJ6j3KeHXOvMpunkJr8oP?=
+ =?us-ascii?Q?RfFzSEo8Nolx4GYW1I7vdpko1hOURf8T5mf7YxGC6aou7PXTb/u74IWdbJbV?=
+ =?us-ascii?Q?akoJo9/MB0hcg3x1tLr8N+15LQA7EFvgtb9V56Z/MP80tuHKEu8F6vakKZgr?=
+ =?us-ascii?Q?1GlMhjpBwMuJgiDQRlh/ejCOkVGrKE2AKZw8FhqQ/C5Vi6hybqunMSq7N7Pz?=
+ =?us-ascii?Q?7mrXKcXPm82l7Jg1kclmiyBscgOzFC8ubGwrIFBc3rpDUFXHkfZD/I8wKn6O?=
+ =?us-ascii?Q?Zs0hM09Xckzn8EbIwt9FV3mzPXPavek0kZ9/7kxjpO7tFLrg2J73Y3jjIAj2?=
+ =?us-ascii?Q?GNtbRc+Tg6MKjU9WSgiQGYOqXUspTcHWmTAM7lzjLThjE9TQYNpr+J1iiRBx?=
+ =?us-ascii?Q?6+lMY8lLDpEQE59oBFOXHnu622NZ2t6qMb2Tcvp19nHwPIZP8mc0+HKQkU8o?=
+ =?us-ascii?Q?8Oh9QAzZV7rIMG5WcCw1f2pUjl/70jpQGsS6r5YFXg/t5TZqlXtndHw8Rn0g?=
+ =?us-ascii?Q?lGW+68hF7hPwUrxkKVYMTEastXLEfL6Hmh/kB7NqE4EDd/i+Dt5RBUJsPLJX?=
+ =?us-ascii?Q?wDrEdQSFvN86FTvuzF/VoNy1oCNRIe6yRTXdwA8Yee8IHH6WDV2j8LOqFMT4?=
+ =?us-ascii?Q?oDUt3xiBu278zPJVi56dSpTsQVmemKNsuA69IW2L0mEbuwyLyqKcEpkylhV2?=
+ =?us-ascii?Q?0hAqtkMGJELGCXcdEHlpDPfCF6Hz7xvVO2aPYkqK2v4Mh1ttcOQuhVnbc8Z+?=
+ =?us-ascii?Q?4tKkvAeJYTSLCAfxHT24TKjo+GYvtCii6bFmHG+jdZb7dYTXoE47qXMSvtSD?=
+ =?us-ascii?Q?rIvKOkdaSs2fuAnNGmCZcCN5f4FkV4cl4Cy9hwOgrDv9eyQIu6uRYRWrxoF6?=
+ =?us-ascii?Q?EpP8baecJU88kBTMxViB1e52AgDlZIiR42ksp79L1nWe68B+KzDhEU0ITnLQ?=
+ =?us-ascii?Q?hp8l4e7PnUl51VjN16/rz0ihtLVTyBmiEnu4eIDahxedYY65SJ6qQGDQiRmt?=
+ =?us-ascii?Q?TTDWNW1O0J+K0K3OclC7DR8/jc4xjoqeqb8Zjdw56qqebVaLxetBpZ7d7d4R?=
+ =?us-ascii?Q?pvMNWHAwi9S0jlVLd6BHIa+AxWshaJp2BGiWEGfw0pRCy3VLLnPBJr+6/5sI?=
+ =?us-ascii?Q?rQRTfckpYZrmUC83vevd+In2CjqyrWHgGET+39QJWZEP6jebzXHZh6/wBZdU?=
+ =?us-ascii?Q?j3+nCxMY8GSFjB2o4sCQGMAYa1XHh37dAHb+tDCymLO/cDfQBrLVe86dxuS+?=
+ =?us-ascii?Q?pr66ucstjtSeHq/ehKrX3mU=3D?=
+X-OriginatorOrg: suse.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 61b0265b-d626-49c1-93c8-08d9b4d95d73
+X-MS-Exchange-CrossTenant-AuthSource: AM6PR04MB6630.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Dec 2021 05:55:02.2432
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Dec 2021 14:46:32.2102
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 8ae927fe-1255-47a7-a2af-5f3a069daaa2
+X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: DC/R+LByI6KEe3Cwks/sdaArRzwItRskkb9Fp/Ohu4dDMEG+EyzY7W/ndbO0Keer
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR15MB1485
-X-OriginatorOrg: fb.com
-X-Proofpoint-GUID: fdUm1yQxL6Yt7xBQftlyCySt-4hicIf1
-X-Proofpoint-ORIG-GUID: fdUm1yQxL6Yt7xBQftlyCySt-4hicIf1
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
- definitions=2021-11-30_10,2021-11-28_01,2020-04-07_01
-X-Proofpoint-Spam-Details: rule=fb_default_notspam policy=fb_default score=0 suspectscore=0
- mlxlogscore=999 spamscore=0 impostorscore=0 phishscore=0 bulkscore=0
- lowpriorityscore=0 mlxscore=0 priorityscore=1501 clxscore=1011
- adultscore=0 malwarescore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2110150000 definitions=main-2112010033
-X-FB-Internal: deliver
+X-MS-Exchange-CrossTenant-UserPrincipalName: yxZq4HLQmHorqUSELoPUyHgXYyCBR5dIPevtN1FW+nRYd61Dyhar9Cog4ASvs7Rv
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM6PR04MB4120
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+The qgroup commands now accepts the level/id format. Use 0/subvolid to
+avoid invalid qgroupid error.
 
+Signed-off-by: An Long <lan@suse.com>
+---
+ tests/btrfs/099 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-On 11/30/21 12:33 PM, Dave Chinner wrote:
-> On Mon, Nov 29, 2021 at 02:15:41PM -0800, Stefan Roesch wrote:
->> Summary:
->>
->> Liburing added support for setxattr. This change adds
->> support for this this in fsstress when fsstress is built
->> with liburing support.
->>
->> Signed-off-by: Stefan Roesch <shr@fb.com>
->> ---
->>  ltp/fsstress.c | 43 ++++++++++++++++++++++++++++++++++++++++++-
->>  1 file changed, 42 insertions(+), 1 deletion(-)
->>
->> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
->> index 003e0e49..4a5c4afe 100644
->> --- a/ltp/fsstress.c
->> +++ b/ltp/fsstress.c
->> @@ -4779,6 +4779,43 @@ setattr_f(opnum_t opno, long r)
->>  	close(fd);
->>  }
->>  
->> +static int
->> +io_uring_setxattr(const char *path, const char *name, const void *value, size_t size,
->> +	  	  int flags)
->> +{
->> +	struct io_uring_sqe *sqe;
->> +	struct io_uring_cqe *cqe;
->> +	int ret;
->> +
->> +	sqe = io_uring_get_sqe(&ring);
->> +	if (!sqe) {
->> +		printf("io_uring_get_sqe failed\n");
->> +		ret = -1;
->> +		goto out;
->> +	}
->> +
->> +	io_uring_prep_setxattr(sqe, name, value, path, flags, size);
->> +
->> +	ret = io_uring_submit_and_wait(&ring, 1);
->> +	if (ret != 1) {
->> +		printf("io_uring_submit_and_wait failed, ret=%d\n", ret);
->> +		ret = -1;
->> +		goto out;
->> +    	}
->> +
->> +	ret = io_uring_wait_cqe(&ring, &cqe);
->> +	if (ret < 0) {
->> +		printf("io_uring_wait_cqe failed, ret=%d\n", ret);
->> +		goto out;
->> +	}
->> +
->> +	ret = cqe->res;
->> +	io_uring_cqe_seen(&ring, cqe);
->> +
->> +out:
->> +	return ret;
->> +}
->> +
->>  void
->>  setfattr_f(opnum_t opno, long r)
->>  {
->> @@ -4842,7 +4879,11 @@ setfattr_f(opnum_t opno, long r)
->>  		goto out;
->>  	}
->>  
->> -	e = setxattr(f.path, name, value, value_len, flag) < 0 ? errno : 0;
->> +	if (have_io_uring)
->> +		e = io_uring_setxattr(f.path, name, value, value_len, flag);
->> +	else
->> +		e = setxattr(f.path, name, value, value_len, flag) < 0 ? errno : 0;
-> 
-> While this is technically correct, it is architecturally wrong.
-> This replaces testing of the existing setxattr() syscall path on
-> systems that have io_uring enabled (which is most modern, upstream
-> test instances). That's a significant regression in test coverage,
-> especially given that most applications using xattrs do not use
-> io_uring...
-> 
-> The io_uring functionality should be added in the same way that
-> OP_URING_READ/OP_URING_WRITE were added. That is, new
-> operations were added in addition to the existing syscall based
-> OP_READ/OP_WRITE, OP_READV/OP_WRITEV and the AIO based versions
-> OP_AREAD/OP_AWRITE.
-> 
-> This way fsstress adds the io_uring mechanisms in addition to all
-> the normal syscall methods it already uses rather than replacing
-> them. This also allow io_uring operations to race with existing
-> syscall operations running the same operations on the same files
-> concurrently...
-> 
+diff --git a/tests/btrfs/099 b/tests/btrfs/099
+index 375cc2b9..f3a2002a 100755
+--- a/tests/btrfs/099
++++ b/tests/btrfs/099
+@@ -29,7 +29,7 @@ _scratch_mount
+ _require_fs_space $SCRATCH_MNT $(($FILESIZE * 2 / 1024))
+=20
+ _run_btrfs_util_prog quota enable $SCRATCH_MNT
+-_run_btrfs_util_prog qgroup limit $FILESIZE 5 $SCRATCH_MNT
++_run_btrfs_util_prog qgroup limit $FILESIZE 0/5 $SCRATCH_MNT
+=20
+ # loop 5 times without sync to ensure reserved space leak will happen
+ for i in `seq 1 5`; do
+--=20
+2.31.1
 
-Dave, thanks for the review. I sent out an updated version (v2) of the patch series
-that implements the changes as dedicated operations where the user can select what
-type of operation is preferred.
-
-> Cheers,
-> 
-> Dave.
-> 
