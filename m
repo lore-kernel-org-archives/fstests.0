@@ -2,166 +2,207 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79151C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Dec 2021 14:45:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39BD8C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Dec 2021 15:45:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234655AbhLBOtO (ORCPT
+        id S1359172AbhLBPtE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Dec 2021 09:49:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40368 "EHLO
+        Thu, 2 Dec 2021 10:49:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1358733AbhLBOsy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Dec 2021 09:48:54 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BE3FC06174A;
-        Thu,  2 Dec 2021 06:45:31 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id B57E4CE2301;
-        Thu,  2 Dec 2021 14:45:29 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51A35C53FCC;
-        Thu,  2 Dec 2021 14:45:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1638456327;
-        bh=Xfcfw3JWtrMV0Rf9FQxiXQT5spatfb8Gea2Kf++dZp4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sehmH91SePOwMIztFcj+oyAJERDwEipcKYQp6B+VvnyUWjv3bzKQxGWiMqjR8VzwY
-         5O8/witt8Iu7Mr3xKFkZAglvGFNji1Uvv3gL+TC7Oe2A2mn5h/sNLbaigRgPG/gc6q
-         vslHJaFmuOD4ZAEj75cyW3uX68GgiC4lYQjZLczNdUBFJUQw1l7cKuXkXVPmbUXUSI
-         PcUP3yAWxGgLudTWT8LG4Ycdh9I4UEX2+GQ7Red4G+qY8H8YWA+KP3RPuidJdg1CUs
-         bJzBTQjUryk7xYjD59sbLZX7JphVqvbQgJE6Im+zFcf7a+MohMN5l62fO4dm8RzJ0k
-         NY87si5m1u3oQ==
-Date:   Thu, 2 Dec 2021 14:45:24 +0000
-From:   Filipe Manana <fdmanana@kernel.org>
-To:     Josef Bacik <josef@toxicpanda.com>
+        with ESMTP id S1359159AbhLBPtA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Dec 2021 10:49:00 -0500
+Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 647BCC061759
+        for <fstests@vger.kernel.org>; Thu,  2 Dec 2021 07:45:38 -0800 (PST)
+Received: by mail-qv1-xf32.google.com with SMTP id b11so25313342qvm.7
+        for <fstests@vger.kernel.org>; Thu, 02 Dec 2021 07:45:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=iXhj9Dahb/XR7UJf3qPZ7hMpxbCT43vslMTNNGwBHaU=;
+        b=K2G8XPyaVebT7Ox/0ppsy0W2p9aU8hp7TAuAOSECXjWsG8KNY5Js1xRMvdLE9CMAY8
+         VjJ2egDvUa3L/4EZNCZLoUn/eS1GRT+nzNk52NM6wWKV2QLvSphDYkl2FACTu8Wo1QaR
+         aEKMZqAanOSU+0DBrPY5JWbJYaUZBXI4IWQ72iiek/dIMxaZfyDneUs9+tVWHBX1t8st
+         w4rBa8L6kJLULxVVmPbOFiE0+JKWgwfmWsouRt4yhRtH897hGRU0r3XeqUcyNb6phhS0
+         IyX+F/gaOjXi6IKgd208JtQKBh3G1Im8386NwBWCHWcvoDBSp2N6UdEkTJctjrL14ipY
+         OiAQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=iXhj9Dahb/XR7UJf3qPZ7hMpxbCT43vslMTNNGwBHaU=;
+        b=ARk51hqg6rMizid1biE2OXTgFqgR313G/eCfFn+mX9idmjkAnLew7qWPsnfk5uK+CG
+         B/4GWdEcjHcVJUnJ5R9YKv4WEPJGZxoFZAf9CMGizJk2uynw7zQUboP2HL/SRLiNEC66
+         KsOXZ0VnINuOm6NSQPTeCMLkkKRvTD+HfwSr+ZMHEUDLwTgK1MvcbQkQ8JPwTSpMKSm7
+         uGH0ut3BpfLQC7l7o+XOow7cI37bWN8IS1yylGBxvajwTlJ20aucvO26PwOnoJQOvCj7
+         Zd8ESJmfsbrTsEEs2aWn0zU/2XkVdaP0yAXDMBzKgYf8QERk2mTBK0Oox6yA3Z+xlH31
+         rB3g==
+X-Gm-Message-State: AOAM5336/H4gf/yV46Hk/Ux2GTzynKeVhvRHZ6uHKVg2VhzzqV4g1Sul
+        0MvNLHsdet68/l3Or/+Xi3nGuw==
+X-Google-Smtp-Source: ABdhPJwGWNeBSn9jbgb9oGSKd3xHsRx1lpgBwrXU1KR3M+WevqZptIgyCCdkdAjoQwCnh6h1OT5aVA==
+X-Received: by 2002:a05:6214:18c7:: with SMTP id cy7mr13586545qvb.0.1638459937321;
+        Thu, 02 Dec 2021 07:45:37 -0800 (PST)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id s11sm98645qki.95.2021.12.02.07.45.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Dec 2021 07:45:36 -0800 (PST)
+Date:   Thu, 2 Dec 2021 10:45:35 -0500
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     Filipe Manana <fdmanana@kernel.org>
 Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Subject: Re: [PATCH] fstests: UDEV_SETTLE_PROG before dmsetup create
-Message-ID: <YajcBNMm3dR4YI/N@debian9.Home>
+Message-ID: <YajqH1Njtqz0ZXF+@localhost.localdomain>
 References: <ebf63c27065c5fa676701184501353a9f2014832.1638382705.git.josef@toxicpanda.com>
+ <YajcBNMm3dR4YI/N@debian9.Home>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ebf63c27065c5fa676701184501353a9f2014832.1638382705.git.josef@toxicpanda.com>
+In-Reply-To: <YajcBNMm3dR4YI/N@debian9.Home>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 01, 2021 at 01:18:52PM -0500, Josef Bacik wrote:
-> We've been seeing transient errors with any test that uses a dm device
-> for the entirety of the time that we've been running nightly xfstests
-
-I have been having it on my tests vms since ever as well.
-It's really annoying, but fortunatelly it doesn't happen too often.
-
-> runs.  This turns out to be because sometimes we get EBUSY while trying
-> to create our new dm device.  Generally this is because the test comes
-> right after another test that messes with the dm device, and thus we
-> still have udev messing around with the device when DM tries to O_EXCL
-> the block device.
+On Thu, Dec 02, 2021 at 02:45:24PM +0000, Filipe Manana wrote:
+> On Wed, Dec 01, 2021 at 01:18:52PM -0500, Josef Bacik wrote:
+> > We've been seeing transient errors with any test that uses a dm device
+> > for the entirety of the time that we've been running nightly xfstests
 > 
-> Add a UDEV_SETTLE_PROG before creating the device to make sure we can
-> create our new dm device without getting this transient error.
-
-I suspect this might only make it seem the problem goes away but does not
-really fix it.
-
-I say that for 2 reasons:
-
-1) All tests that use dm end up calling _dmsetup_remove(), like through
-   _log_writes_remove() or _cleanup_flakey() for example. Normally those
-   are called in the _cleanup() function, which ensures it's done even if
-   the test fails for some reason.
-
-   So I don't understand why we need that UDEV_SETTLE_PROG at _dmsetup_create().
-
-   And I've seen the ebusy failure happen even when the previous tests did
-   not use any dm device;
-
-2) Some tests fail after creating the dm device and using it. For example
-   btrfs/206 often fails when it tries to fsck the filesystem:
-
-   btrfs/206 3s ... [failed, exit status 1]- output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/206.out.bad)
-        --- tests/btrfs/206.out     2020-10-16 23:13:46.554152652 +0100
-        +++ /home/fdmanana/git/hub/xfstests/results//btrfs/206.out.bad      2021-12-01 21:09:46.317632589 +0000
-        @@ -3,3 +3,5 @@
-        XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-        wrote 8192/8192 bytes at offset 0
-        XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-        +_check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
-        +(see /home/fdmanana/git/hub/xfstests/results//btrfs/206.full for details)
-        ...
-
-       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/206.out /home/fdmanana/git/hub/xfstests/results//btrfs/206.out.bad'  to see the entire diff)
-
-    In the .full file I got:
-
-    (...)
-    replaying 1239@11201: sector 2173408, size 16384, flags 0x10(METADATA)
-    replaying 1240@11234: sector 0, size 0, flags 0x1(FLUSH)
-    replaying 1241@11235: sector 128, size 4096, flags 0x12(FUA|METADATA)
-    _check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
-    *** fsck.btrfs output ***
-    ERROR: cannot open device '/dev/sdc': Device or resource busy
-    ERROR: cannot open file system
-    Opening filesystem to check...
-    *** end fsck.btrfs output
-    *** mount output ***
-
-   The ebusy failure is not when the test starts, but when somewhere in the middle
-   of the replay loop when it calls fsck, or when it ends and the fstests framework
-   calls fsck.
-
-   I've seen that with btrfs/172 too, which also uses dm logwrites in a similar way.
-
-So to me this suggests 2 things:
-
-1) Calling UDEV_SETTLE_PROG at _dmsetup_create() doesn't solve that problem with
-   btrfs/206 (and other tests) - the problem is fsck failing to open the scratch
-   device after it called _log_writes_remove() -> _dmsetup_remove(), and not a
-   failure to create the dm device;
-
-2) The problem is likely something missing at _dmsetup_remove(). Perhaps add
-   another UDEV_SETTLE_PROG there:
-
-   diff --git a/common/rc b/common/rc
-   index 8e351f17..22b34677 100644
-   --- a/common/rc
-   +++ b/common/rc
-   @@ -4563,6 +4563,7 @@ _dmsetup_remove()
-            $UDEV_SETTLE_PROG >/dev/null 2>&1
-            $DMSETUP_PROG remove "$@" >>$seqres.full 2>&1
-            $DMSETUP_PROG mknodes >/dev/null 2>&1
-    +       $UDEV_SETTLE_PROG >/dev/null 2>&1
-     }
- 
-    _dmsetup_create()
-
-  I can't say if that change to _dmsetup_remove() is correct, or what it's
-  needed, as I really haven't spent time trying to figure out why the issue
-  happens.
-
-    
-
-
+> I have been having it on my tests vms since ever as well.
+> It's really annoying, but fortunatelly it doesn't happen too often.
 > 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> ---
->  common/rc | 1 +
->  1 file changed, 1 insertion(+)
+
+Yeah before this change we'd fail ~6 tests on every configruation on every
+overnight run.  With this change we fail 0.  It's rare, but with our continual
+testing it happens sooooooo much.
+
+> > runs.  This turns out to be because sometimes we get EBUSY while trying
+> > to create our new dm device.  Generally this is because the test comes
+> > right after another test that messes with the dm device, and thus we
+> > still have udev messing around with the device when DM tries to O_EXCL
+> > the block device.
+> > 
+> > Add a UDEV_SETTLE_PROG before creating the device to make sure we can
+> > create our new dm device without getting this transient error.
 > 
-> diff --git a/common/rc b/common/rc
-> index 8e351f17..35e861ec 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4567,6 +4567,7 @@ _dmsetup_remove()
+> I suspect this might only make it seem the problem goes away but does not
+> really fix it.
+> 
+> I say that for 2 reasons:
+> 
+> 1) All tests that use dm end up calling _dmsetup_remove(), like through
+>    _log_writes_remove() or _cleanup_flakey() for example. Normally those
+>    are called in the _cleanup() function, which ensures it's done even if
+>    the test fails for some reason.
+> 
+>    So I don't understand why we need that UDEV_SETTLE_PROG at _dmsetup_create().
+> 
+>    And I've seen the ebusy failure happen even when the previous tests did
+>    not use any dm device;
+> 
+> 2) Some tests fail after creating the dm device and using it. For example
+>    btrfs/206 often fails when it tries to fsck the filesystem:
+> 
+>    btrfs/206 3s ... [failed, exit status 1]- output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/206.out.bad)
+>         --- tests/btrfs/206.out     2020-10-16 23:13:46.554152652 +0100
+>         +++ /home/fdmanana/git/hub/xfstests/results//btrfs/206.out.bad      2021-12-01 21:09:46.317632589 +0000
+>         @@ -3,3 +3,5 @@
+>         XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>         wrote 8192/8192 bytes at offset 0
+>         XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>         +_check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
+>         +(see /home/fdmanana/git/hub/xfstests/results//btrfs/206.full for details)
+>         ...
+> 
+>        (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/206.out /home/fdmanana/git/hub/xfstests/results//btrfs/206.out.bad'  to see the entire diff)
+> 
+>     In the .full file I got:
+> 
+>     (...)
+>     replaying 1239@11201: sector 2173408, size 16384, flags 0x10(METADATA)
+>     replaying 1240@11234: sector 0, size 0, flags 0x1(FLUSH)
+>     replaying 1241@11235: sector 128, size 4096, flags 0x12(FUA|METADATA)
+>     _check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
+>     *** fsck.btrfs output ***
+>     ERROR: cannot open device '/dev/sdc': Device or resource busy
+>     ERROR: cannot open file system
+>     Opening filesystem to check...
+>     *** end fsck.btrfs output
+>     *** mount output ***
+> 
+>    The ebusy failure is not when the test starts, but when somewhere in the middle
+>    of the replay loop when it calls fsck, or when it ends and the fstests framework
+>    calls fsck.
+> 
+>    I've seen that with btrfs/172 too, which also uses dm logwrites in a similar way.
+> 
+> So to me this suggests 2 things:
+> 
+> 1) Calling UDEV_SETTLE_PROG at _dmsetup_create() doesn't solve that problem with
+>    btrfs/206 (and other tests) - the problem is fsck failing to open the scratch
+>    device after it called _log_writes_remove() -> _dmsetup_remove(), and not a
+>    failure to create the dm device;
+> 
+> 2) The problem is likely something missing at _dmsetup_remove(). Perhaps add
+>    another UDEV_SETTLE_PROG there:
+> 
+>    diff --git a/common/rc b/common/rc
+>    index 8e351f17..22b34677 100644
+>    --- a/common/rc
+>    +++ b/common/rc
+>    @@ -4563,6 +4563,7 @@ _dmsetup_remove()
+>             $UDEV_SETTLE_PROG >/dev/null 2>&1
+>             $DMSETUP_PROG remove "$@" >>$seqres.full 2>&1
+>             $DMSETUP_PROG mknodes >/dev/null 2>&1
+>     +       $UDEV_SETTLE_PROG >/dev/null 2>&1
+>      }
 >  
->  _dmsetup_create()
->  {
-> +	$UDEV_SETTLE_PROG >/dev/null 2>&1
->  	$DMSETUP_PROG create "$@" >>$seqres.full 2>&1 || return 1
->  	$DMSETUP_PROG mknodes >/dev/null 2>&1
->  	$UDEV_SETTLE_PROG >/dev/null 2>&1
-> -- 
-> 2.26.3
+>     _dmsetup_create()
 > 
+>   I can't say if that change to _dmsetup_remove() is correct, or what it's
+>   needed, as I really haven't spent time trying to figure out why the issue
+>   happens.
+> 
+
+I actually tried a few iterations before I settled on this one, but I was only
+trying to reproduce the EBUSY when creating the flakey device, I hadn't seen it
+with fsck.  So I originally started with your change, but it didn't fix the
+problem.  Then I did both, UDEV_SETTLE at the end of remove and at the beginning
+of create and the problem went away, and then I removed the one from remove and
+the problem still was gone.
+
+But since I've made this change I also have been investigating another problem
+where we'll get EBUSY at mkfs time when we use SCRATCH_DEV_POOL.  I have a test
+patch in our staging branch to make sure it actuall fixes it, but I have to add
+this to the start of _scratch_pool_mkfs as well.
+
+It turns out that udev is doing this thing where it writes to
+/sys/block/whatever/uevent to make sure that a KOBJ_CHANGE event gets sent out
+for the device.
+
+This is racing with the test doing a mount.  So the mount gets O_EXCL, which
+means the uevent doesn't get emitted until umount.  This would explain what
+you're seeing, we umount, we get the KOBJ_CHANGE event once the O_EXCL is
+dropped, udev runs, and then fsck gets an EBUSY.
+
+This is a very long email to say that udev is causing spurious failures because
+of behavior I don't entirely understand.  We're going to need to sprinkle in
+UDEV_SETTLE_PROG in different places to kill all of these different scenarios.
+
+What do we think is best here?  Put UDEV_SETTLE_PROG at the start of any
+function that needs to do O_EXCL?  So this would mean
+
+_dmsetup_create
+_dmsetup_remove
+*_mkfs
+*_mount
+*_check
+
+That would be safest, and I can certainly do that.  My initial approach was just
+to do it where it was problematic, but the debugging I did yesterday around
+btrfs/223 failures and the fact that udev is queue'ing up events that get
+delivered at some point in the future makes it kind of hard to handle on a
+case-by-case basis.  Thanks,
+
+Josef
