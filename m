@@ -2,234 +2,258 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42596C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Dec 2021 14:50:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2C3CC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Dec 2021 16:45:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235431AbhLHOxo (ORCPT
+        id S237201AbhLHQsz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Dec 2021 09:53:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46392 "EHLO
+        Wed, 8 Dec 2021 11:48:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45406 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231620AbhLHOxn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Dec 2021 09:53:43 -0500
-Received: from mail-qk1-x735.google.com (mail-qk1-x735.google.com [IPv6:2607:f8b0:4864:20::735])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF1B8C061746
-        for <fstests@vger.kernel.org>; Wed,  8 Dec 2021 06:50:11 -0800 (PST)
-Received: by mail-qk1-x735.google.com with SMTP id de30so2203034qkb.0
-        for <fstests@vger.kernel.org>; Wed, 08 Dec 2021 06:50:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=uNoX3fEP/IMxmYMdv+lOHtwwYM6RNmuVfr/n4R24q7g=;
-        b=6jhpjP+ogTftGsSSHRPtKhvT8yotpA0lKoWElupVZnL0cOGzrfAN62xna0EkL6UPWY
-         LMY7AqEKKLUbUvSsdQFsWr+EKYyFkqhcu+bUIxFnPP5JSxKJ1x1+1VZkAncMtiS4MiQR
-         0D4GkbIIa2ur1eM7WhgzTG/TJvq+GoUMCw0c1+cRGEfEzgNppcoxwiSfW0GWo22B6Rd8
-         6IQCnWXAXgEoZ9vWw3097Dhez6dnryrhJzhsn/75+JRaVyL1rfpr+d38rkk0YQ9LxVhP
-         T/wwDEe5qKRn5NNHLr8DCVXuD3v/rGQVJaBmYqD/LMa9/I4A9QXgFL3Nn7Ibx8l+TODM
-         aTqw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=uNoX3fEP/IMxmYMdv+lOHtwwYM6RNmuVfr/n4R24q7g=;
-        b=Fy/ZOu5uM/nxboNVvY4KPMCqS6e7OBIP3einKi+dgzC4MidYJl57dWgSbHM+/MDWyY
-         oSVBQcwQDlwLPc7x9FcmwtgSTaU8MHPMbes3CTKpbubg//WAxchyepa/scyD8a53qN/N
-         ZJeZtsLeHyuebUPuB6vMYeRyUaV22I85KNp9KrHSScozrAFWEQhJpF+MvHU+k+eFli2C
-         WaGt5i/ohgdqtyl/Bea1q4u0SPWVH2ms+y9XyPr9EOUNaWqenS1kFheIttLPDhjfpvbi
-         y66iYVghMQI9p477U2pxkL7KDkGWxIfvj8kJPCluLDtG/rNb1Ufq9tmkg1ZE9VyjRkhv
-         dm1w==
-X-Gm-Message-State: AOAM530q4Ye7/Ls+BGHEqi2nKjm8SPzu80d4pMpSi6qd512uc5JKq2cQ
-        j2wRHkMiRaQDiHMabFZ+7Zh4CIQFYrhOhA==
-X-Google-Smtp-Source: ABdhPJxnLgrV+8e+1OWU0u/sx5uOuWU4vnVlyW/4GKBzGBtnI1biVn/90LUOY9tYhUKMWyQXeLO+fA==
-X-Received: by 2002:a05:620a:1416:: with SMTP id d22mr7013201qkj.6.1638975010919;
-        Wed, 08 Dec 2021 06:50:10 -0800 (PST)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id ay42sm1546103qkb.40.2021.12.08.06.50.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Dec 2021 06:50:10 -0800 (PST)
-Date:   Wed, 8 Dec 2021 09:50:09 -0500
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] btrfs/254: test cleaning up of the stale device
-Message-ID: <YbDGIWHVD4cmdZz0@localhost.localdomain>
-References: <c1c22a67c90f1b0b94ea3f99d6d6fd4a4d5d5473.1638953165.git.anand.jain@oracle.com>
+        with ESMTP id S237175AbhLHQsy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Dec 2021 11:48:54 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F67BC061746;
+        Wed,  8 Dec 2021 08:45:22 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 9F432CE2240;
+        Wed,  8 Dec 2021 16:45:20 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C2419C00446;
+        Wed,  8 Dec 2021 16:45:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1638981918;
+        bh=03bZNhGRjio/qartAV6+qsBHGxlIaIdeAeeGTTBZzNk=;
+        h=Date:From:To:Cc:Subject:From;
+        b=FaLQyr0OVrZm5Gg16FoD6bN3nRtRb/R8LHGwLEaPiqkLFhgcDVwUDDx6UcPgWnQ0v
+         /CiNZtR45aywCjS6oGMwL6PQsX7xThKWimF9u//+8JSS0Lg/Rdm7ANzZRanGevtUEp
+         OYK5lA6R/hC+joJfgv8MeTihAPUgDvybZn1aNNZLUZGTQlEpnwc+1g9GHsvXDv52Wv
+         y40nxqF+NMtxH95/BHvrmXys6+3xB+y1hzaQ8csTEHPV9WS01jeMqc9IsbqRNxb8hi
+         iKgHAawecYLmU50j7iv/dKsXIx4r23WMrBZkQVLWylCbKLkzWmnSxZ5+PNknuflz0g
+         WQOc3/Y93Z69w==
+Date:   Wed, 8 Dec 2021 08:45:18 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Subject: [PATCH] fsstress: consistently index the ops array by OP_ type
+Message-ID: <20211208164518.GA69210@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <c1c22a67c90f1b0b94ea3f99d6d6fd4a4d5d5473.1638953165.git.anand.jain@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 08, 2021 at 10:07:46PM +0800, Anand Jain wrote:
-> Recreating a new filesystem or adding a device to a mounted the filesystem
-> should remove the device entries under its previous fsid even when
-> confused with different device paths to the same device.
-> 
-> Fixed by the kernel patch (in the ml):
->   btrfs: harden identification of the stale device
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  tests/btrfs/254     | 110 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/254.out |   6 +++
->  2 files changed, 116 insertions(+)
->  create mode 100755 tests/btrfs/254
->  create mode 100644 tests/btrfs/254.out
-> 
-> diff --git a/tests/btrfs/254 b/tests/btrfs/254
-> new file mode 100755
-> index 000000000000..6c3414f73d15
-> --- /dev/null
-> +++ b/tests/btrfs/254
-> @@ -0,0 +1,110 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Anand Jain. All Rights Reserved.
-> +# Copyright (c) 2021 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test No. 254
-> +#
-> +# Test if the kernel can free the stale device entries.
-> +#
+From: Darrick J. Wong <djwong@kernel.org>
 
-Can you include the patch name here as well, it makes it easier when I'm
-rebasing our staging branch to figure out if I need to disable a new test for
-our overnight runs.
+A mismerge during a git rebase some time ago broke fsstress in my
+development tree, because it added OP_XCHGRANGE into the opt_y typedef
+definition at a different offset than the actual entry in the ops array.
+This broke the relationship ops[i].op == i.
+
+Since most of fsstress.c blindly assumes that it's ok to index the ops
+array by OP_ type, this off-by-one error meant that when I created an
+fstest with "-f unlink=1", it actually set the frequency of the adjacent
+operation (unresvsp) to 1.  I didn't notice this until I started to
+investigate how a filesystem created with "-z -f creat=4 -f unlink=4"
+could end up with 1.8 million files after 30 seconds.
+
+Eliminate the possibility for future screwups like this by using indexed
+array initializers.  This enables us to remove the separate op field in
+struct opdesc, for a minor savings of memory footprint and reduction in
+footgun opportunity.
+
+While we're at it, reformat the ops table to be more pleasing to the
+eye.
+
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ ltp/fsstress.c |  140 ++++++++++++++++++++++++++------------------------------
+ 1 file changed, 66 insertions(+), 74 deletions(-)
+
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 003e0e49..5f3126e6 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -153,7 +153,6 @@ typedef long long opnum_t;
+ typedef void (*opfnc_t)(opnum_t, long);
  
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +# Override the default cleanup function.
-> +node=$seq-test
-> +cleanup_dmdev()
-> +{
-> +	_dmsetup_remove $node
-> +}
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -rf $seq_mnt > /dev/null 2>&1
-> +	cleanup_dmdev
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/filter.btrfs
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_scratch_dev_pool 3
-> +_require_block_device $SCRATCH_DEV
-> +_require_dm_target linear
-> +_require_btrfs_forget_or_module_loadable
-> +_require_scratch_nocheck
-> +_require_command "$WIPEFS_PROG" wipefs
-> +
-> +_scratch_dev_pool_get 3
-> +
-> +setup_dmdev()
-> +{
-> +	# Some small size.
-> +	size=$((1024 * 1024 * 1024))
-> +	size_in_sector=$((size / 512))
-> +
-> +	table="0 $size_in_sector linear $SCRATCH_DEV 0"
-> +	_dmsetup_create $node --table "$table" || \
-> +		_fail "setup dm device failed"
-> +}
-> +
-> +# Use a known it is much easier to debug.
-> +uuid="--uuid 12345678-1234-1234-1234-123456789abc"
-> +lvdev=/dev/mapper/$node
-> +
-> +seq_mnt=$TEST_DIR/$seq.mnt
-> +mkdir -p $seq_mnt
-> +
-> +test_forget()
-> +{
-> +	setup_dmdev
-> +	dmdev=$(realpath $lvdev)
-> +
-> +	_mkfs_dev $uuid $dmdev
-> +
-> +	# Check if we can un-scan using the mapper device path.
-> +	$BTRFS_UTIL_PROG device scan --forget $lvdev
-> +
-> +	# Cleanup
-> +	$WIPEFS_PROG -a $lvdev > /dev/null 2>&1
-> +	$BTRFS_UTIL_PROG device scan --forget
-> +
-> +	cleanup_dmdev
-> +}
-> +
-> +test_add_device()
-> +{
-> +	setup_dmdev
-> +	dmdev=$(realpath $lvdev)
-> +	scratch_dev2=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-> +	scratch_dev3=$(echo $SCRATCH_DEV_POOL | awk '{print $3}')
-> +
-> +	_mkfs_dev $scratch_dev3
-> +	_mount $scratch_dev3 $seq_mnt
-> +
-> +	_mkfs_dev $uuid -draid1 -mraid1 $dmdev $scratch_dev2
-> +
-> +	# Add device should free the device under $uuid in the kernel.
-> +	$BTRFS_UTIL_PROG device add -f $lvdev $seq_mnt
-> +
-
-You need to redirect this to /dev/null, otherwise we get the TRIM message with
-newer btrfs-progs.
-
-> +	_mount -o degraded $scratch_dev2 $SCRATCH_MNT
-> +
-> +	# Check if the missing device is shown.
-> +	$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | \
-> +					_filter_btrfs_filesystem_show
-> +
-> +	$UMOUNT_PROG $seq_mnt
-> +	_scratch_unmount
-> +	cleanup_dmdev
-> +}
-> +
-> +test_forget
-> +test_add_device
-> +
-> +_scratch_dev_pool_put
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/254.out b/tests/btrfs/254.out
-> new file mode 100644
-> index 000000000000..20819cf5140c
-> --- /dev/null
-> +++ b/tests/btrfs/254.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 254
-> +Label: none  uuid: <UUID>
-> +	Total devices <NUM> FS bytes used <SIZE>
-> +	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-> +	*** Some devices missing
-
-I ran this on a box without your fix and I got this failure
-
-[root@xfstests2 xfstests-dev]# cat /xfstests-dev/results//kdave/btrfs/254.out.bad
-QA output created by 254
-ERROR: cannot unregister device '/dev/mapper/254-test': No such file or directory
-Label: none  uuid: <UUID>
-        Total devices <NUM> FS bytes used <SIZE>
-        devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-        *** Some devices missing
-
-Is this what you're expecting?  I was expecting to not see the "*** Some devices
-missing" part as well, but I guess that's the racier part?
-
-It does fail properly without the patch and pass with your patch, so as long as
-this is what you expect to see then I'm good with this part.  Thanks,
-
-Josef
+ typedef struct opdesc {
+-	opty_t	op;
+ 	char	*name;
+ 	opfnc_t	func;
+ 	int	freq;
+@@ -279,74 +278,74 @@ void	write_f(opnum_t, long);
+ void	writev_f(opnum_t, long);
+ char	*xattr_flag_to_string(int);
+ 
+-opdesc_t	ops[] = {
+-     /* { OP_ENUM, "name", function, freq, iswrite }, */
+-	{ OP_AFSYNC, "afsync", afsync_f, 0, 1 },
+-	{ OP_ALLOCSP, "allocsp", allocsp_f, 1, 1 },
+-	{ OP_AREAD, "aread", aread_f, 1, 0 },
+-	{ OP_ATTR_REMOVE, "attr_remove", attr_remove_f, /* 1 */ 0, 1 },
+-	{ OP_ATTR_SET, "attr_set", attr_set_f, /* 2 */ 0, 1 },
+-	{ OP_AWRITE, "awrite", awrite_f, 1, 1 },
+-	{ OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
+-	{ OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
+-	{ OP_CHOWN, "chown", chown_f, 3, 1 },
+-	{ OP_CLONERANGE, "clonerange", clonerange_f, 4, 1 },
+-	{ OP_COPYRANGE, "copyrange", copyrange_f, 4, 1 },
+-	{ OP_CREAT, "creat", creat_f, 4, 1 },
+-	{ OP_DEDUPERANGE, "deduperange", deduperange_f, 4, 1},
+-	{ OP_DREAD, "dread", dread_f, 4, 0 },
+-	{ OP_DWRITE, "dwrite", dwrite_f, 4, 1 },
+-	{ OP_FALLOCATE, "fallocate", fallocate_f, 1, 1 },
+-	{ OP_FDATASYNC, "fdatasync", fdatasync_f, 1, 1 },
+-	{ OP_FIEMAP, "fiemap", fiemap_f, 1, 1 },
+-	{ OP_FREESP, "freesp", freesp_f, 1, 1 },
+-	{ OP_FSYNC, "fsync", fsync_f, 1, 1 },
+-	{ OP_GETATTR, "getattr", getattr_f, 1, 0 },
+-	{ OP_GETDENTS, "getdents", getdents_f, 1, 0 },
++struct opdesc	ops[OP_LAST]	= {
++     /* [OP_ENUM]	   = {"name",	       function,	freq, iswrite }, */
++	[OP_AFSYNC]	   = {"afsync",	       afsync_f,	0, 1 },
++	[OP_ALLOCSP]	   = {"allocsp",       allocsp_f,	1, 1 },
++	[OP_AREAD]	   = {"aread",	       aread_f,		1, 0 },
++	[OP_ATTR_REMOVE]   = {"attr_remove",   attr_remove_f,	0, 1 },
++	[OP_ATTR_SET]	   = {"attr_set",      attr_set_f,	0, 1 },
++	[OP_AWRITE]	   = {"awrite",	       awrite_f,	1, 1 },
++	[OP_BULKSTAT]	   = {"bulkstat",      bulkstat_f,	1, 0 },
++	[OP_BULKSTAT1]	   = {"bulkstat1",     bulkstat1_f,	1, 0 },
++	[OP_CHOWN]	   = {"chown",	       chown_f,		3, 1 },
++	[OP_CLONERANGE]	   = {"clonerange",    clonerange_f,	4, 1 },
++	[OP_COPYRANGE]	   = {"copyrange",     copyrange_f,	4, 1 },
++	[OP_CREAT]	   = {"creat",	       creat_f,		4, 1 },
++	[OP_DEDUPERANGE]   = {"deduperange",   deduperange_f,	4, 1 },
++	[OP_DREAD]	   = {"dread",	       dread_f,		4, 0 },
++	[OP_DWRITE]	   = {"dwrite",	       dwrite_f,	4, 1 },
++	[OP_FALLOCATE]	   = {"fallocate",     fallocate_f,	1, 1 },
++	[OP_FDATASYNC]	   = {"fdatasync",     fdatasync_f,	1, 1 },
++	[OP_FIEMAP]	   = {"fiemap",	       fiemap_f,	1, 1 },
++	[OP_FREESP]	   = {"freesp",	       freesp_f,	1, 1 },
++	[OP_FSYNC]	   = {"fsync",	       fsync_f,		1, 1 },
++	[OP_GETATTR]	   = {"getattr",       getattr_f,	1, 0 },
++	[OP_GETDENTS]	   = {"getdents",      getdents_f,	1, 0 },
+ 	/* get extended attribute */
+-	{ OP_GETFATTR, "getfattr", getfattr_f, 1, 0 },
+-	{ OP_LINK, "link", link_f, 1, 1 },
++	[OP_GETFATTR]	   = {"getfattr",      getfattr_f,	1, 0 },
++	[OP_LINK]	   = {"link",	       link_f,		1, 1 },
+ 	/* list extent attributes */
+-	{ OP_LISTFATTR, "listfattr", listfattr_f, 1, 0 },
+-	{ OP_MKDIR, "mkdir", mkdir_f, 2, 1 },
+-	{ OP_MKNOD, "mknod", mknod_f, 2, 1 },
+-	{ OP_MREAD, "mread", mread_f, 2, 0 },
+-	{ OP_MWRITE, "mwrite", mwrite_f, 2, 1 },
+-	{ OP_PUNCH, "punch", punch_f, 1, 1 },
+-	{ OP_ZERO, "zero", zero_f, 1, 1 },
+-	{ OP_COLLAPSE, "collapse", collapse_f, 1, 1 },
+-	{ OP_INSERT, "insert", insert_f, 1, 1 },
+-	{ OP_READ, "read", read_f, 1, 0 },
+-	{ OP_READLINK, "readlink", readlink_f, 1, 0 },
+-	{ OP_READV, "readv", readv_f, 1, 0 },
++	[OP_LISTFATTR]	   = {"listfattr",     listfattr_f,	1, 0 },
++	[OP_MKDIR]	   = {"mkdir",	       mkdir_f,		2, 1 },
++	[OP_MKNOD]	   = {"mknod",	       mknod_f,		2, 1 },
++	[OP_MREAD]	   = {"mread",	       mread_f,		2, 0 },
++	[OP_MWRITE]	   = {"mwrite",	       mwrite_f,	2, 1 },
++	[OP_PUNCH]	   = {"punch",	       punch_f,		1, 1 },
++	[OP_ZERO]	   = {"zero",	       zero_f,		1, 1 },
++	[OP_COLLAPSE]	   = {"collapse",      collapse_f,	1, 1 },
++	[OP_INSERT]	   = {"insert",	       insert_f,	1, 1 },
++	[OP_READ]	   = {"read",	       read_f,		1, 0 },
++	[OP_READLINK]	   = {"readlink",      readlink_f,	1, 0 },
++	[OP_READV]	   = {"readv",	       readv_f,		1, 0 },
+ 	/* remove (delete) extended attribute */
+-	{ OP_REMOVEFATTR, "removefattr", removefattr_f, 1, 1 },
+-	{ OP_RENAME, "rename", rename_f, 2, 1 },
+-	{ OP_RNOREPLACE, "rnoreplace", rnoreplace_f, 2, 1 },
+-	{ OP_REXCHANGE, "rexchange", rexchange_f, 2, 1 },
+-	{ OP_RWHITEOUT, "rwhiteout", rwhiteout_f, 2, 1 },
+-	{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
+-	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
++	[OP_REMOVEFATTR]   = {"removefattr",   removefattr_f,	1, 1 },
++	[OP_RENAME]	   = {"rename",	       rename_f,	2, 1 },
++	[OP_RNOREPLACE]	   = {"rnoreplace",    rnoreplace_f,	2, 1 },
++	[OP_REXCHANGE]	   = {"rexchange",     rexchange_f,	2, 1 },
++	[OP_RWHITEOUT]	   = {"rwhiteout",     rwhiteout_f,	2, 1 },
++	[OP_RESVSP]	   = {"resvsp",	       resvsp_f,	1, 1 },
++	[OP_RMDIR]	   = {"rmdir",	       rmdir_f,		1, 1 },
+ 	/* set attribute flag (FS_IOC_SETFLAGS ioctl) */
+-	{ OP_SETATTR, "setattr", setattr_f, 0, 1 },
++	[OP_SETATTR]	   = {"setattr",       setattr_f,	0, 1 },
+ 	/* set extended attribute */
+-	{ OP_SETFATTR, "setfattr", setfattr_f, 2, 1 },
++	[OP_SETFATTR]	   = {"setfattr",      setfattr_f,	2, 1 },
+ 	/* set project id (XFS_IOC_FSSETXATTR ioctl) */
+-	{ OP_SETXATTR, "setxattr", setxattr_f, 1, 1 },
+-	{ OP_SNAPSHOT, "snapshot", snapshot_f, 1, 1 },
+-	{ OP_SPLICE, "splice", splice_f, 1, 1 },
+-	{ OP_STAT, "stat", stat_f, 1, 0 },
+-	{ OP_SUBVOL_CREATE, "subvol_create", subvol_create_f, 1, 1},
+-	{ OP_SUBVOL_DELETE, "subvol_delete", subvol_delete_f, 1, 1},
+-	{ OP_SYMLINK, "symlink", symlink_f, 2, 1 },
+-	{ OP_SYNC, "sync", sync_f, 1, 1 },
+-	{ OP_TRUNCATE, "truncate", truncate_f, 2, 1 },
+-	{ OP_UNLINK, "unlink", unlink_f, 1, 1 },
+-	{ OP_UNRESVSP, "unresvsp", unresvsp_f, 1, 1 },
+-	{ OP_URING_READ, "uring_read", uring_read_f, 1, 0 },
+-	{ OP_URING_WRITE, "uring_write", uring_write_f, 1, 1 },
+-	{ OP_WRITE, "write", write_f, 4, 1 },
+-	{ OP_WRITEV, "writev", writev_f, 4, 1 },
++	[OP_SETXATTR]	   = {"setxattr",      setxattr_f,	1, 1 },
++	[OP_SNAPSHOT]	   = {"snapshot",      snapshot_f,	1, 1 },
++	[OP_SPLICE]	   = {"splice",	       splice_f,	1, 1 },
++	[OP_STAT]	   = {"stat",	       stat_f,		1, 0 },
++	[OP_SUBVOL_CREATE] = {"subvol_create", subvol_create_f,	1, 1 },
++	[OP_SUBVOL_DELETE] = {"subvol_delete", subvol_delete_f,	1, 1 },
++	[OP_SYMLINK]	   = {"symlink",       symlink_f,	2, 1 },
++	[OP_SYNC]	   = {"sync",	       sync_f,		1, 1 },
++	[OP_TRUNCATE]	   = {"truncate",      truncate_f,	2, 1 },
++	[OP_UNLINK]	   = {"unlink",	       unlink_f,	1, 1 },
++	[OP_UNRESVSP]	   = {"unresvsp",      unresvsp_f,	1, 1 },
++	[OP_URING_READ]	   = {"uring_read",    uring_read_f,	1, 0 },
++	[OP_URING_WRITE]   = {"uring_write",   uring_write_f,	1, 1 },
++	[OP_WRITE]	   = {"write",	       write_f,		4, 1 },
++	[OP_WRITEV]	   = {"writev",	       writev_f,	4, 1 },
+ }, *ops_end;
+ 
+ flist_t	flist[FT_nft] = {
+@@ -1520,7 +1519,7 @@ make_freq_table(void)
+ 	freq_table_size = f;
+ 	for (p = ops, i = 0; p < ops_end; p++) {
+ 		for (f = 0; f < p->freq; f++, i++)
+-			freq_table[i] = p->op;
++			freq_table[i] = p - ops;
+ 	}
+ }
+ 
+@@ -1966,7 +1965,7 @@ opty_t btrfs_ops[] = {
+ void
+ non_btrfs_freq(const char *path)
+ {
+-	opdesc_t		*p;
++	int			i;
+ #ifdef HAVE_BTRFSUTIL_H
+ 	enum btrfs_util_error	e;
+ 
+@@ -1974,15 +1973,8 @@ non_btrfs_freq(const char *path)
+ 	if (e != BTRFS_UTIL_ERROR_NOT_BTRFS)
+ 		return;
+ #endif
+-	for (p = ops; p < ops_end; p++) {
+-		int i;
+-		for (i = 0; i < ARRAY_SIZE(btrfs_ops); i++) {
+-			if (p->op == btrfs_ops[i]) {
+-				p->freq = 0;
+-				break;
+-			}
+-		}
+-	}
++	for (i = 0; i < ARRAY_SIZE(btrfs_ops); i++)
++		ops[btrfs_ops[i]].freq = 0;
+ }
+ 
+ void inode_info(char *str, size_t sz, struct stat64 *s, int verbose)
