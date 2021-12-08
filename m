@@ -2,71 +2,68 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EE2AC433F5
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Dec 2021 16:04:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FF9BC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Dec 2021 12:53:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234627AbhLGQIL (ORCPT
+        id S233813AbhLHM5D (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Dec 2021 11:08:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40014 "EHLO
+        Wed, 8 Dec 2021 07:57:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234572AbhLGQIL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Dec 2021 11:08:11 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5973AC061574
-        for <fstests@vger.kernel.org>; Tue,  7 Dec 2021 08:04:41 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 240BFB817FC
-        for <fstests@vger.kernel.org>; Tue,  7 Dec 2021 16:04:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9701DC341C1;
-        Tue,  7 Dec 2021 16:04:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1638893078;
-        bh=sm/YeaJUFS74a8iDN2GkzR93Hl56Ptp0kqz5tCt9OYk=;
-        h=From:To:Cc:Subject:Date:From;
-        b=EE+rrsjULiBQqjHCJGxPZVFHU4WZvKtzt8eG6/qDnjcJ0Fy3mHPuCsALj1ROyFVTO
-         CHzCwXJVsTvIxjVZBhhlDZnSWEXisKVTXY+aspnJFxnIE0RmnO/dli0xZcRoaCjpHF
-         9SYeY7uryhfMxNWTWmZW8598TEIOErwwPmtCgxqZP/O+Xao86ZZbDvc2uDrx3IJsCP
-         fETz615qIjzggUT+k5owO2pI1O5T/xcGVUNTJfU5AeC92qxKySOsy2EIa7B/NUH2N/
-         e65gu+rFqj9m7MVc7vxXFXem5Z3UFii29FOpT/18au9Ve5n8dnTOPjRpMzhOJv4PpI
-         quV7JKUocPkiA==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     Luis Henriques <lhenriques@suse.de>
-Subject: [fstests PATCH] ceph: don't run tests if we can't set a custom layout
-Date:   Tue,  7 Dec 2021 11:04:37 -0500
-Message-Id: <20211207160437.184145-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.33.1
+        with ESMTP id S229751AbhLHM5D (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Dec 2021 07:57:03 -0500
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 066F2C061746;
+        Wed,  8 Dec 2021 04:53:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=XoLdah4Vhal5BMwdRxmj89JX830AjtudjkfO7UjNrhQ=; b=mb7VDEXoLh0hh3nq3LaUmRU/uJ
+        u+2Mx5oXT+8M6uZbP/70Zdtoxz58tkS8+Er8ZDFqnsmyYVv8M17wJXMUtrx4k9U+435bMBfTcjk9S
+        PWKLuuG3WlXXPcfNHRNtXJ7DWSB9bAtvbFDjlGLG4/7SCuYg/sKq0VTcQBl8BS8zZybrt0lnkz9cu
+        X+SPRH92tW3/Gp+hHdFU31w1SZPRGjXstBPYFMEttR9ybSQS/4XqO3KSmS/COf76KXom4Z2jtrSah
+        P/51STuBRXPFHBzLuoB000bO0Wv8u+jYzfSUHlSoMG0stvEQve68Sce7wLMTn6pDsJDW3K4ysoFlm
+        Tpcz2srQ==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1muwRv-00Cbun-AQ; Wed, 08 Dec 2021 12:53:31 +0000
+Date:   Wed, 8 Dec 2021 04:53:31 -0800
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Lucas De Marchi <lucas.demarchi@intel.com>
+Cc:     linux-modules@vger.kernel.org, live-patching@vger.kernel.org,
+        fstests@vger.kernel.org, linux-block@vger.kernel.org, hare@suse.de,
+        dgilbert@interlog.com, jeyu@kernel.org, osandov@fb.com,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 3/3] libkmod-module: add support for a patient module
+ removal option
+Message-ID: <YbCqy320/twxxCRb@bombadil.infradead.org>
+References: <20210810051602.3067384-1-mcgrof@kernel.org>
+ <20210810051602.3067384-4-mcgrof@kernel.org>
+ <20210923085156.scmf5wxr2phc356b@ldmartin-desk2>
+ <YVJyIGXN/TR8zdU9@bombadil.infradead.org>
+ <20210929184810.adrqpsvlfybnc5qt@ldmartin-desk2>
+ <YZLBPGtm2vF2DsTk@bombadil.infradead.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YZLBPGtm2vF2DsTk@bombadil.infradead.org>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Some of the coming fscrypt patches prohibit non-default layout changes.
-Skip running the tests that set custom layouts if setting the layout fails.
+On Mon, Nov 15, 2021 at 12:21:16PM -0800, Luis Chamberlain wrote:
+> On Wed, Sep 29, 2021 at 11:48:31AM -0700, Lucas De Marchi wrote:
+> > > Sorry don't follow. And since I have one day before vacation, I suppose
+> > > I won't get to this until I get back. But I'd be happy if you massage
+> > > it as you see fit as you're used to the code base and I'm sure have
+> > > a better idea of what likely is best for the library.
+> > 
+> > 
+> > sure, np. I will take a look as time permits.
+> 
+> Just a friendly poke.
 
-Cc: Luis Henriques <lhenriques@suse.de>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- common/ceph | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Just another friendy poke.
 
-diff --git a/common/ceph b/common/ceph
-index ca756dda8dd3..31b169af51b8 100644
---- a/common/ceph
-+++ b/common/ceph
-@@ -19,7 +19,7 @@ _ceph_create_file_layout()
- 	touch $fname
- 	$SETFATTR_PROG -n ceph.file.layout \
- 		-v "stripe_unit=$objsz stripe_count=1 object_size=$objsz" \
--		$fname
-+		$fname || _notrun "setting ceph.file.layout failed"
- }
- 
- # this test requires to access file capabilities through vxattr 'ceph.caps'.
--- 
-2.33.1
-
+  Luis
