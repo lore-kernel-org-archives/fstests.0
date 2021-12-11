@@ -2,92 +2,83 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81D2DC433F5
-	for <linux-fstests@archiver.kernel.org>; Sat, 11 Dec 2021 00:33:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D070C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 11 Dec 2021 00:34:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241568AbhLKAhI (ORCPT
+        id S244179AbhLKAh6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 10 Dec 2021 19:37:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57092 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237517AbhLKAhI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Dec 2021 19:37:08 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E5C1C061714
-        for <fstests@vger.kernel.org>; Fri, 10 Dec 2021 16:33:32 -0800 (PST)
+        Fri, 10 Dec 2021 19:37:58 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:56290 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237517AbhLKAh6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Dec 2021 19:37:58 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 3F718B82A17
-        for <fstests@vger.kernel.org>; Sat, 11 Dec 2021 00:33:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D2733C00446;
-        Sat, 11 Dec 2021 00:33:29 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 258C6B821CD
+        for <fstests@vger.kernel.org>; Sat, 11 Dec 2021 00:34:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E26C0C00446;
+        Sat, 11 Dec 2021 00:34:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1639182809;
-        bh=MMTSCtO1XEOJCLC+157GpyA6ILpLgSNuoL9rRnkHhgY=;
+        s=k20201202; t=1639182860;
+        bh=rvGeZ0ICKLJgM7GCRXgd0fL16T4XEgCs9dSpMHVdZvo=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=d6EXpiLIAGyYo1Av9Ic+duunCNrGdmzwUS7bhzU5k+NqbAVK3QlsBkHwvk79lW/i4
-         xtniIfmY6iGymTFVkSK2T6gj+VbfVkIlNN+0dqRB2UvBbZp5MLwNm9Xu21kx3XTPf1
-         7ys5Oj/bea5T18xJdM3M7yU4ei88TTImxcqPupfFoYxC8r4fDkCdaaYeMOG4jZkPsQ
-         U4cplEOA3/qrd57xjytugXS+U3HzrcTPZ7QysPQcCYIX6mg7gos4FZjuGJrHgmvwyB
-         /rg447H0ADhqsU/TekKA5FeQToKVF7tVmUpE4PW67hJXSfOYuSTeV+6sjGx6jzcB5D
-         L+XHrXLRxS0pg==
-Date:   Fri, 10 Dec 2021 16:33:29 -0800
+        b=R+r4SeGy4fAwMAc+wnycbabfNLBfHow04Ukl2HgULAIwXpOavJ2EiUdNPgINPUdD5
+         vO74Sw/drr14UmCsMLPaoxFbftmGD24XrJlYCmcp3nyEoXUXEhkGAmRAOU6nfu1i4o
+         4JS88m2Gc0TAoRM86cyUi7kbpYqLqXQ3diupD3BxOYUT2rqo4UybPOQ9Gj3w8XmXnC
+         WvVaMTUkndSPFY+bh1Qba1B6PuQkI+Mr/32VwYDjgE6YoXlNou+XtDhv3IoEpk8CFJ
+         rMIB3Leb3oVpOV9R90pCDrLY7rAKxeyiPbF+V5hlvnELY6N3WJuI663y7RRsSFQk7w
+         A4Y722SFoFiAQ==
+Date:   Fri, 10 Dec 2021 16:34:19 -0800
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 03/16] generic: add mmap CoW test for
- unwritten&destination extents
-Message-ID: <20211211003329.GD69210@magnolia>
+Subject: Re: [PATCH v2 04/16] generic: add mmap CoW test for
+ holes&destination extents
+Message-ID: <20211211003419.GE69210@magnolia>
 References: <20211125074752.274176-1-ruansy.fnst@fujitsu.com>
- <20211125074752.274176-4-ruansy.fnst@fujitsu.com>
+ <20211125074752.274176-5-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211125074752.274176-4-ruansy.fnst@fujitsu.com>
+In-Reply-To: <20211125074752.274176-5-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Nov 25, 2021 at 03:47:39PM +0800, Shiyang Ruan wrote:
+On Thu, Nov 25, 2021 at 03:47:40PM +0800, Shiyang Ruan wrote:
 > Ensuring that copy on write in mmap mode works when the CoW range originally
-> covers multiple extents, some unwritten, some not.
-> (MMAP version of generic/189,188)
+> covers multiple extents, some holes, some not.
+> (MMAP version of generic/191,190)
 > 
 > Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-
-At first I was a little concerned that _mwrite'ing file3.chk could
-result in us failing to notice a bug in the mmap write paths that hits
-both reflink and cow writes, but then I realized that this is one of
-those tests that encode the md5sum in the golden output, so of course
-we'd notice.  I think this looks good, so:
 
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
 > ---
->  tests/generic/902     | 59 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/902.out | 12 +++++++++
+>  tests/generic/903     | 59 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/903.out | 12 +++++++++
 >  2 files changed, 71 insertions(+)
->  create mode 100755 tests/generic/902
->  create mode 100644 tests/generic/902.out
+>  create mode 100755 tests/generic/903
+>  create mode 100644 tests/generic/903.out
 > 
-> diff --git a/tests/generic/902 b/tests/generic/902
+> diff --git a/tests/generic/903 b/tests/generic/903
 > new file mode 100755
-> index 00000000..457b039a
+> index 00000000..d0de3f26
 > --- /dev/null
-> +++ b/tests/generic/902
+> +++ b/tests/generic/903
 > @@ -0,0 +1,59 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +#
-> +# FS QA Test No. 902
+> +# FS QA Test No. 903
 > +#
 > +# Ensuring that copy on write in mmap mode works when the CoW
-> +# range originally covers multiple extents, some unwritten, some not.
-> +# (MMAP version of generic/189,188)
-> +#   - Create a file and fallocate a second file.
+> +# range originally covers multiple extents, some holes, some not.
+> +# (MMAP version of generic/191,190)
+> +#   - Create a file and truncate a second file.
 > +#   - Reflink the odd blocks of the first file into the second file.
 > +#   - mmap CoW across the halfway mark, starting with the unwritten extent.
 > +#   - Check that the files are now different where we say they're different.
@@ -114,7 +105,7 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > +blksz=65536
 > +nr=64
 > +filesize=$((blksz * nr))
-> +_weave_reflink_unwritten $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
+> +_weave_reflink_holes $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
 > +_scratch_cycle_mount
 > +
 > +echo "Compare files"
@@ -138,24 +129,24 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/902.out b/tests/generic/902.out
+> diff --git a/tests/generic/903.out b/tests/generic/903.out
 > new file mode 100644
-> index 00000000..bc951255
+> index 00000000..bf57acc7
 > --- /dev/null
-> +++ b/tests/generic/902.out
+> +++ b/tests/generic/903.out
 > @@ -0,0 +1,12 @@
-> +QA output created by 902
+> +QA output created by 903
 > +Format and mount
 > +Create the original files
 > +Compare files
-> +bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-902/file1
-> +fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-902/file3
-> +fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-902/file3.chk
+> +bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-903/file1
+> +fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-903/file3
+> +fa50dba51826899c372464a153cb2117  SCRATCH_MNT/test-903/file3.chk
 > +mmap CoW across the transition
 > +Compare files
-> +bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-902/file1
-> +09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-902/file3
-> +09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-902/file3.chk
+> +bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-903/file1
+> +09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-903/file3
+> +09101629908f9bdd5d178e7ce20bb1bb  SCRATCH_MNT/test-903/file3.chk
 > -- 
 > 2.34.0
 > 
