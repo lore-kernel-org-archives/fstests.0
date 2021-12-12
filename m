@@ -2,174 +2,73 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12D93C433EF
-	for <linux-fstests@archiver.kernel.org>; Sat, 11 Dec 2021 00:46:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BB7AC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Dec 2021 12:59:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345525AbhLKAuI (ORCPT
+        id S229867AbhLLM7J (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 10 Dec 2021 19:50:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59900 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345515AbhLKAuH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Dec 2021 19:50:07 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFD8AC061714
-        for <fstests@vger.kernel.org>; Fri, 10 Dec 2021 16:46:31 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 3747DCE2DDB
-        for <fstests@vger.kernel.org>; Sat, 11 Dec 2021 00:46:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BAD1C341C8;
-        Sat, 11 Dec 2021 00:46:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1639183588;
-        bh=5FQOm6KPZU6QfXesKrAOtgZTnDlhuVjPIJNLCxQz3jg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=HqHmWeJNJWGiULzlX+W+tvvYA9IcKMgh1zHyG2aTFM+ubKU9gcO8/iAvndaq7vDxk
-         Irq32Jd1VEsThnVugoeWDPVoqyNsIkfGG8DT/N8AyHdLQOsMj8CR5FFJRk3uBcKcV/
-         aj98nN3mgsYOmJ2SAmhrwpd7g8U4WsYOgUu1Y79b57vH3ca2IMJgtIy8yl4lTaJIMb
-         PcmHVI+zSSOfIVAUEZcjWZmrnxMaYbfim2xm4Xh31ITVaNJsuxsgAEUMu/lz9Si33T
-         hfGPRC1A5tkY74v9hOov20XxLFyu4/ik6V53r0LDr3M4tP9QKs1KUcLXV0HUjDB9oz
-         MmkVZilfEPmdw==
-Date:   Fri, 10 Dec 2021 16:46:28 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+        Sun, 12 Dec 2021 07:59:09 -0500
+Received: from out20-51.mail.aliyun.com ([115.124.20.51]:59561 "EHLO
+        out20-51.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229846AbhLLM7J (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 Dec 2021 07:59:09 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1839591|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.122253-0.00306347-0.874683;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047194;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.MAjk71u_1639313947;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MAjk71u_1639313947)
+          by smtp.aliyun-inc.com(10.147.41.137);
+          Sun, 12 Dec 2021 20:59:07 +0800
+Date:   Sun, 12 Dec 2021 20:59:07 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Luis Chamberlain <mcgrof@kernel.org>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 13/16] generic: add mmap CoW test for mixed&source
- extents
-Message-ID: <20211211004628.GN69210@magnolia>
-References: <20211125074752.274176-1-ruansy.fnst@fujitsu.com>
- <20211125074752.274176-14-ruansy.fnst@fujitsu.com>
- <20211207004040.GF8442@magnolia>
+Subject: Re: [PATCH] common/module: fix patient module remover when module is
+ not present
+Message-ID: <YbXyG4OPA2Yfw9/K@desktop>
+References: <20211115232834.4121190-1-mcgrof@kernel.org>
+ <YbOwrpa7SoJqErvZ@bombadil.infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211207004040.GF8442@magnolia>
+In-Reply-To: <YbOwrpa7SoJqErvZ@bombadil.infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 06, 2021 at 04:40:40PM -0800, Darrick J. Wong wrote:
-> On Thu, Nov 25, 2021 at 03:47:49PM +0800, Shiyang Ruan wrote:
-> > Ensuring that copy on write in buffered mode works when the CoW
-> > range originally covers multiple extents, mixed with reflinked, unwritten,
-> > hole, regular and delalloc blocks.
+On Fri, Dec 10, 2021 at 11:55:26AM -0800, Luis Chamberlain wrote:
+> Poke
+
+Sorry, it got lost from my to-review queue, applied now, thanks!
+
+Eryu
+
+> 
+> On Mon, Nov 15, 2021 at 03:28:34PM -0800, Luis Chamberlain wrote:
+> > When module is not present and the open coded patient module
+> > remover is called we'll end up in a loop which never ends.
+> > Fix this.
 > > 
-> > Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-> 
-> Looks ok,
-
-...with a _require_command $FILEFRAG_PROG filefrag added.
-
-(Serves me right for reviewing in backwards order.)
-
---D
-
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> 
-> --D
-> 
+> > I actually found this issue not in fstests, but when applying this
+> > open coded solution to blktests. In fstest we tend to only call
+> > module remove when we have a module loaded. blktests is different,
+> > and so I immediately spotted the issue there.
+> > 
+> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 > > ---
-> >  tests/generic/912     | 67 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/912.out | 12 ++++++++
-> >  2 files changed, 79 insertions(+)
-> >  create mode 100755 tests/generic/912
-> >  create mode 100644 tests/generic/912.out
+> >  common/module | 2 ++
+> >  1 file changed, 2 insertions(+)
 > > 
-> > diff --git a/tests/generic/912 b/tests/generic/912
-> > new file mode 100755
-> > index 00000000..4f0d94dd
-> > --- /dev/null
-> > +++ b/tests/generic/912
-> > @@ -0,0 +1,67 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +#
-> > +# FS QA Test No. 912
-> > +#
-> > +# Ensuring that copy on write in mmap mode works when the CoW
-> > +# range originally covers multiple extents, mixed with reflinked, unwritten,
-> > +# hole, regular and delalloc blocks.
-> > +#   - Create a file with the following repeating sequence of blocks:
-> > +#     1. reflinked
-> > +#     2. unwritten
-> > +#     3. hole
-> > +#     4. regular block
-> > +#     5. delalloc
-> > +#   - mmap CoW across the halfway mark, starting with the unwritten extent.
-> > +#   - Check that the files are now different where we say they're different.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick clone punch
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +. ./common/reflink
-> > +
-> > +# real QA test starts here
-> > +_require_scratch_reflink
-> > +_require_xfs_io_command "falloc"
-> > +_require_xfs_io_command "fpunch"
-> > +_require_cp_reflink
-> > +_require_odirect
-> > +
-> > +echo "Format and mount"
-> > +_scratch_mkfs > $seqres.full 2>&1
-> > +_scratch_mount >> $seqres.full 2>&1
-> > +
-> > +testdir=$SCRATCH_MNT/test-$seq
-> > +mkdir $testdir
-> > +
-> > +echo "Create the original files"
-> > +blksz=65536
-> > +nr=64
-> > +filesize=$((blksz * nr))
-> > +_sweave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-> > +_scratch_cycle_mount
-> > +
-> > +echo "Compare files"
-> > +md5sum $testdir/file1 | _filter_scratch
-> > +md5sum $testdir/file3 | _filter_scratch
-> > +md5sum $testdir/file1.chk | _filter_scratch
-> > +
-> > +echo "mmap CoW across the transition"
-> > +cowoff=$((filesize / 4))
-> > +cowsz=$((filesize / 2))
-> > +_sweave_reflink_rainbow_delalloc $blksz $nr $testdir/file1 >> $seqres.full
-> > +# now cow
-> > +mmapsz=$((cowoff + cowsz))
-> > +_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file1 >> $seqres.full
-> > +_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file1.chk >> $seqres.full
-> > +_scratch_cycle_mount
-> > +
-> > +echo "Compare files"
-> > +md5sum $testdir/file1 | _filter_scratch
-> > +md5sum $testdir/file3 | _filter_scratch
-> > +md5sum $testdir/file1.chk | _filter_scratch
-> > +
-> > +# success, all done
-> > +status=0
-> > diff --git a/tests/generic/912.out b/tests/generic/912.out
-> > new file mode 100644
-> > index 00000000..32f25a1d
-> > --- /dev/null
-> > +++ b/tests/generic/912.out
-> > @@ -0,0 +1,12 @@
-> > +QA output created by 912
-> > +Format and mount
-> > +Create the original files
-> > +Compare files
-> > +6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-912/file1
-> > +bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-912/file3
-> > +6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-912/file1.chk
-> > +mmap CoW across the transition
-> > +Compare files
-> > +26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-912/file1
-> > +bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-912/file3
-> > +26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-912/file1.chk
+> > diff --git a/common/module b/common/module
+> > index ead0f881..6efab71d 100644
+> > --- a/common/module
+> > +++ b/common/module
+> > @@ -180,6 +180,8 @@ _patient_rmmod()
+> >  				continue
+> >  			fi
+> >  			let max_tries=$max_tries-1
+> > +		else
+> > +			break
+> >  		fi
+> >  	done
+> >  
 > > -- 
-> > 2.34.0
-> > 
-> > 
+> > 2.33.0
 > > 
