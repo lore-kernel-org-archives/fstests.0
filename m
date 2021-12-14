@@ -2,35 +2,36 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4794C433F5
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3DEAC433EF
 	for <linux-fstests@archiver.kernel.org>; Tue, 14 Dec 2021 08:19:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231808AbhLNIT3 (ORCPT
+        id S231805AbhLNIT3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Tue, 14 Dec 2021 03:19:29 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:47274 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:23835 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S231805AbhLNIT2 (ORCPT
+        with ESMTP id S231788AbhLNIT2 (ORCPT
         <rfc822;fstests@vger.kernel.org>); Tue, 14 Dec 2021 03:19:28 -0500
-IronPort-Data: =?us-ascii?q?A9a23=3AiNk0Cak6yV9Eyw7NJLy5agbo5gyoJERdPkR7XQ2?=
- =?us-ascii?q?eYbTBsI5bp2RRnzFOXGDTaP/ZNjHzetkiao6/9hwP6MLRmNQwGwtv+CA2RRqmi?=
- =?us-ascii?q?+KfW43BcR2Y0wB+jyH7ZBs+qZ1YM7EsFehsJpPnjkrrYuiJQUVUj/nSH+OmUbK?=
- =?us-ascii?q?cY0ideCc/IMsfoUM68wIGqt4w6TSJK1vlVeLa+6UzCnf8s9JHGj58B5a4lf9al?=
- =?us-ascii?q?K+aVAX0EbAJTasjUFf2zxH5BX+ETE27ByOQroJ8RoZWSwtfpYxV8F81/z91Yj+?=
- =?us-ascii?q?kur39NEMXQL/OJhXIgX1TM0SgqkEa4HVsjeBgb7xBAatUo2zhc9RZ0shEs4ehD?=
- =?us-ascii?q?wkvJbHklvkfUgVDDmd1OqguFLrveCHv4ZPDkxKdG5fr67A0ZK0sBqUU+PlwB25?=
- =?us-ascii?q?m9vECLj0JKBeZiIqezqmnR/Jwnew9I8TxeoASoHdtyXfeF/lOfHxpa80m/vcBh?=
- =?us-ascii?q?HFp2J8IRq2YOqIkhfNUREyoS3Vy1p0/VfrSRNuVu0Q=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AObLHBaPNGQZLBcBcTv2jsMiBIKoaSvp037BL?=
- =?us-ascii?q?7TEUdfUxSKGlfq+V8sjzqiWftN98YhAdcLO7Scy9qBHnhP1ICOAqVN/MYOCMgh?=
- =?us-ascii?q?rLEGgN1+vf6gylMyj/28oY7q14bpV5YeeaMXFKyer8/ym0euxN/OW6?=
+IronPort-Data: =?us-ascii?q?A9a23=3AUCkaR6Bu1ntpoxVW/zXhw5YqxClBgxIJ4g17XOL?=
+ =?us-ascii?q?fBgjt1zxx0mAHymJJC2vQO6qCNDP9cohxbYXnox9XvJaAx9UxeLYW3SszFioV8?=
+ =?us-ascii?q?6IpJjg4wn/YZnrUdouaJK5ex512huLocYZkHhcwmj/3auK49CMlifnRLlbBILW?=
+ =?us-ascii?q?s1h5ZFFYMpBgJ2UoLd94R2uaEsPDha++/kYqaT/73ZDdJ7wVJ3lc8sMpvnv/AU?=
+ =?us-ascii?q?MPa41v0tnRmDRxCUcS3e3M9VPrzLonpR5f0rxU9IwK0ewrD5OnREmLx9BFrBM6?=
+ =?us-ascii?q?nk6rgbwsBRbu60Qqm0yIQAvb9xEMZ4HFaPqUTbZLwbW9NljyPhME3xtNWqbS+V?=
+ =?us-ascii?q?AUoIrbR3u8aVnG0FgknZP0Wp++bfiTXXcu7iheun2HX6/t1EEwtIZYw5Ol6Gyd?=
+ =?us-ascii?q?N+OYeJTRLaQqM799aaprTpvJE35xldZe0ethE/CwI8N0QNt5+KbirfkkAzYYwM?=
+ =?us-ascii?q?O8Mu/1z?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3ARL/9/Kuya+oRlwzJOhPRC4EA7skDStV00zEX?=
+ =?us-ascii?q?/kB9WHVpm62j5qSTdZEguCMc5wx+ZJheo7q90cW7IE80lqQFhLX5X43SPzUO0V?=
+ =?us-ascii?q?HARO5fBODZsl/d8kPFltJ15ONJdqhSLJnKB0FmsMCS2mKFOudl7N6Z0K3Av4vj?=
+ =?us-ascii?q?80s=3D?=
 X-IronPort-AV: E=Sophos;i="5.88,204,1635177600"; 
-   d="scan'208";a="118878473"
+   d="scan'208";a="118878474"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 14 Dec 2021 16:19:27 +0800
 Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id CCB674D144C5;
-        Tue, 14 Dec 2021 16:19:22 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id 20CA24D144C6
+        for <fstests@vger.kernel.org>; Tue, 14 Dec 2021 16:19:23 +0800 (CST)
 Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
  G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
  (TLS) id 15.0.1497.23; Tue, 14 Dec 2021 16:19:22 +0800
@@ -39,61 +40,75 @@ Received: from irides.mr.mr.mr (10.167.225.141) by
  id 15.0.1497.23 via Frontend Transport; Tue, 14 Dec 2021 16:19:21 +0800
 From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
 To:     <fstests@vger.kernel.org>
-CC:     <ruansy.fnst@fujitsu.com>, "Darrick J . Wong" <djwong@kernel.org>
-Subject: [PATCH v3 14/17] generic: add mmap CoW test for mixed&source extents
-Date:   Tue, 14 Dec 2021 16:19:11 +0800
-Message-ID: <20211214081914.2478122-15-ruansy.fnst@fujitsu.com>
+CC:     <ruansy.fnst@fujitsu.com>
+Subject: [PATCH v3 15/17] generic: add race test between reflink and mmap read
+Date:   Tue, 14 Dec 2021 16:19:12 +0800
+Message-ID: <20211214081914.2478122-16-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20211214081914.2478122-1-ruansy.fnst@fujitsu.com>
 References: <20211214081914.2478122-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: CCB674D144C5.A14B7
+X-yoursite-MailScanner-ID: 20CA24D144C6.A0065
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Ensuring that copy on write in mmap mode works when the CoW
-range originally covers multiple extents, mixed with reflinked, unwritten,
-hole, regular and delalloc blocks.
+Test for races or FS corruption between reflink and mmap reading the
+target file. (MMAP version of generic/164,165)
 
 Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/generic/912     | 66 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/912.out | 12 ++++++++
- 2 files changed, 78 insertions(+)
- create mode 100755 tests/generic/912
- create mode 100644 tests/generic/912.out
+ common/reflink        | 11 +++++++
+ tests/generic/913     | 72 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/913.out |  5 +++
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/generic/913
+ create mode 100644 tests/generic/913.out
 
-diff --git a/tests/generic/912 b/tests/generic/912
+diff --git a/common/reflink b/common/reflink
+index 68dbdedd..455260c6 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -186,6 +186,17 @@ _read_range() {
+ 	$XFS_IO_PROG $xfs_io_args -f -c "pread -q -v $offset $len" "$file" | cut -d ' ' -f '3-18'
+ }
+ 
++# Prints a range of a file as a hex dump
++_mread_range() {
++	file="$1"
++	offset="$2"
++	len="$3"
++	xfs_io_args="$4"
++
++	$XFS_IO_PROG $xfs_io_args -f -c "mmap -rw 0 $((offset + len))" \
++		-c "mread -v $offset $len" "$file" | cut -d ' ' -f '3-18'
++}
++
+ # Compare ranges of two files
+ _compare_range() {
+ 	file1="$1"
+diff --git a/tests/generic/913 b/tests/generic/913
 new file mode 100755
-index 00000000..83e08482
+index 00000000..f709c36c
 --- /dev/null
-+++ b/tests/generic/912
-@@ -0,0 +1,66 @@
++++ b/tests/generic/913
+@@ -0,0 +1,72 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +#
-+# FS QA Test No. 912
++# FS QA Test No. 913
 +#
-+# Ensuring that copy on write in mmap mode works when the CoW
-+# range originally covers multiple extents, mixed with reflinked, unwritten,
-+# hole, regular and delalloc blocks.
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - mmap CoW across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
++# Test for races or FS corruption between reflink and mmap reading the
++# target file. (MMAP version of generic/164,165)
 +#
 +. ./common/preamble
-+_begin_fstest auto quick clone punch
++_begin_fstest auto clone
++
++_register_cleanup "_cleanup" BUS
 +
 +# Import common functions.
 +. ./common/filter
@@ -101,64 +116,70 @@ index 00000000..83e08482
 +
 +# real QA test starts here
 +_require_scratch_reflink
-+_require_scratch_delalloc
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
++_require_cp_reflink
 +
 +echo "Format and mount"
 +_scratch_mkfs > $seqres.full 2>&1
 +_scratch_mount >> $seqres.full 2>&1
 +
 +testdir=$SCRATCH_MNT/test-$seq
++finished_file=/tmp/finished
++rm -rf $finished_file
 +mkdir $testdir
 +
-+echo "Create the original files"
++loops=512
++nr_loops=$((loops - 1))
 +blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+_sweave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++
++echo "Initialize files"
++echo >> $seqres.full
++_pwrite_byte 0x61 0 $((loops * blksz)) $testdir/file1 >> $seqres.full
++_pwrite_byte 0x62 0 $((loops * blksz)) $testdir/file2 >> $seqres.full
++_cp_reflink $testdir/file1 $testdir/file3
 +_scratch_cycle_mount
 +
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file1.chk | _filter_scratch
++fbytes() {
++	egrep -v '(61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61|62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62)'
++}
 +
-+echo "mmap CoW across the transition"
-+cowoff=$((filesize / 4))
-+cowsz=$((filesize / 2))
-+_sweave_reflink_rainbow_delalloc $blksz $nr $testdir/file1 >> $seqres.full
-+# now cow
-+mmapsz=$((cowoff + cowsz))
-+_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file1 >> $seqres.full
-+_mwrite_byte 0x63 $cowoff $cowsz $mmapsz $testdir/file1.chk >> $seqres.full
-+_scratch_cycle_mount
++reader() {
++	while [ ! -e $finished_file ]; do
++		_mread_range $testdir/file3 0 $((loops * blksz)) | fbytes
++	done
++}
 +
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file1.chk | _filter_scratch
++echo "Reflink and mmap reread the files!"
++reader &
++for i in `seq 1 2`; do
++	seq $nr_loops -1 0 | while read i; do
++		_reflink_range  $testdir/file1 $((i * blksz)) \
++				$testdir/file3 $((i * blksz)) $blksz >> $seqres.full
++		[ $? -ne 0 ] && break
++	done
++	seq $nr_loops -1 0 | while read i; do
++		_reflink_range  $testdir/file2 $((i * blksz)) \
++				$testdir/file3 $((i * blksz)) $blksz >> $seqres.full
++		[ $? -ne 0 ] && break
++	done
++done
++echo "Finished reflinking"
++touch $finished_file
++wait
 +
 +# success, all done
 +status=0
-diff --git a/tests/generic/912.out b/tests/generic/912.out
++exit
+diff --git a/tests/generic/913.out b/tests/generic/913.out
 new file mode 100644
-index 00000000..32f25a1d
+index 00000000..a34df6ce
 --- /dev/null
-+++ b/tests/generic/912.out
-@@ -0,0 +1,12 @@
-+QA output created by 912
++++ b/tests/generic/913.out
+@@ -0,0 +1,5 @@
++QA output created by 913
 +Format and mount
-+Create the original files
-+Compare files
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-912/file1
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-912/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-912/file1.chk
-+mmap CoW across the transition
-+Compare files
-+26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-912/file1
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-912/file3
-+26aa3a0749b867ec58363c8539ee5471  SCRATCH_MNT/test-912/file1.chk
++Initialize files
++Reflink and mmap reread the files!
++Finished reflinking
 -- 
 2.34.1
 
