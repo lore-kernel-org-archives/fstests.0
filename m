@@ -2,30 +2,30 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3678C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Dec 2021 17:04:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35593C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Dec 2021 03:54:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231282AbhLNREp (ORCPT
+        id S235623AbhLODyW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Dec 2021 12:04:45 -0500
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:34214 "EHLO
+        Tue, 14 Dec 2021 22:54:22 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:52997 "EHLO
         outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S231583AbhLNREo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Dec 2021 12:04:44 -0500
+        with ESMTP id S229453AbhLODyV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Dec 2021 22:54:21 -0500
 Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net [108.7.220.252])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1BEH4fEW025394
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1BF3sH4h003303
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 14 Dec 2021 12:04:42 -0500
+        Tue, 14 Dec 2021 22:54:18 -0500
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 7CF7715C00C8; Tue, 14 Dec 2021 12:04:41 -0500 (EST)
+        id 4EBF515C00C8; Tue, 14 Dec 2021 22:54:17 -0500 (EST)
 From:   "Theodore Ts'o" <tytso@mit.edu>
 To:     fstests@vger.kernel.org
-Cc:     "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] common/filter: add _filter_bash()
-Date:   Tue, 14 Dec 2021 12:04:38 -0500
-Message-Id: <20211214170438.16164-1-tytso@mit.edu>
+Cc:     "Theodore Ts'o" <tytso@mit.edu>, Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] ext4/033: remove a portion of the test assuming resize2fs would fail
+Date:   Tue, 14 Dec 2021 22:54:09 -0500
+Message-Id: <20211215035409.244674-1-tytso@mit.edu>
 X-Mailer: git-send-email 2.31.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -33,142 +33,52 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is needed to account for bash 5.1 adding line number annotation
-when a command like "bash -c /etc/passwd" fails, e.g., with
+The ext4/033 test tries to test if resize2fs would fail when resizing
+a file system to a size that the number of inodes exceeds the maximum
+allowed inode size, 2**32-1.  This no longer takes place as of
+e2fsprogs commit 623985ed7dd5 ("resize2fs: attempt to keep the # of
+inodes valid by removing the last bg") which will allow resizing a
+file system to 64TB by reducing the last block group so that file
+system will be 64TB - 128MB, which is close enough for government
+work.
 
-     bash: line 1: /etc/passwd: Permission denied
-
-instead of:
-
-     bash: /etc/passwd: Permission denied
-
+Reported-by: Eric Whitney <enwlinux@gmail.com>
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- common/filter     | 11 +++++++++++
- tests/generic/572 | 33 +++++++++++++++++++--------------
- 2 files changed, 30 insertions(+), 14 deletions(-)
+ tests/ext4/033     | 8 --------
+ tests/ext4/033.out | 1 -
+ 2 files changed, 9 deletions(-)
 
-diff --git a/common/filter b/common/filter
-index 2efbbd99..4b250e8b 100644
---- a/common/filter
-+++ b/common/filter
-@@ -661,5 +661,16 @@ _filter_quota_report()
- 		s|^(.*?) (\d+) (\d+) (\d+)|$1 @{[$2 * 1024 /'$bsize']} @{[$3 * 1024 /'$bsize']} @{[$4 * 1024 /'$bsize']}|'
- }
+diff --git a/tests/ext4/033 b/tests/ext4/033
+index 1bc14c03..0fd0ec90 100755
+--- a/tests/ext4/033
++++ b/tests/ext4/033
+@@ -66,14 +66,6 @@ _mount $DMHUGEDISK_DEV $SCRATCH_MNT
+ echo "Initial fs dump" >> $seqres.full
+ $DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
  
-+#
-+# Bash 5.1+ adds "line 1: " when printing an error running an executable
-+# for example, "bash -c /etc/passwd" will result in the error
-+# "bash: line 1: /etc/passwd: Permission denied" where as earlier
-+# versions of bash will omit the "line 1: " annotation.
-+#
-+_filter_bash()
-+{
-+	sed -e "s/^bash: line 1: /bash: /"
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/tests/generic/572 b/tests/generic/572
-index f131c7ed..cded9ac6 100755
---- a/tests/generic/572
-+++ b/tests/generic/572
-@@ -36,6 +36,11 @@ _scratch_mount
- fsv_orig_file=$SCRATCH_MNT/file
- fsv_file=$SCRATCH_MNT/file.fsv
- 
-+filter_output()
-+{
-+    _filter_bash | _filter_scratch
-+}
-+
- verify_data_readable()
- {
- 	local file=$1
-@@ -48,41 +53,41 @@ verify_data_unreadable()
- 	local file=$1
- 
- 	# try both reading just the first data block, and reading until EOF
--	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | _filter_scratch
--	md5sum $file |& _filter_scratch
-+	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | filter_output
-+	md5sum $file |& filter_output
- }
- 
- _fsv_scratch_begin_subtest "Enabling verity on file with verity already enabled fails with EEXIST"
- _fsv_create_enable_file $fsv_file
- echo "(trying again)"
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- 
- _fsv_scratch_begin_subtest "Enabling verity with invalid hash algorithm fails with EINVAL"
--_fsv_create_enable_file $fsv_file --hash-alg=257 |& _filter_scratch
-+_fsv_create_enable_file $fsv_file --hash-alg=257 |& filter_output
- verify_data_readable $fsv_file
- 
- _fsv_scratch_begin_subtest "Enabling verity with invalid block size fails with EINVAL"
--_fsv_create_enable_file $fsv_file --block-size=1 |& _filter_scratch
-+_fsv_create_enable_file $fsv_file --block-size=1 |& filter_output
- verify_data_readable $fsv_file
- 
- _fsv_scratch_begin_subtest "Enabling verity on directory fails with EISDIR"
- mkdir $SCRATCH_MNT/dir
--_fsv_enable $SCRATCH_MNT/dir |& _filter_scratch
-+_fsv_enable $SCRATCH_MNT/dir |& filter_output
- 
- _fsv_scratch_begin_subtest "Enabling verity with too-long salt fails with EMSGSIZE"
--_fsv_create_enable_file $fsv_file --salt=$(perl -e 'print "A" x 1000') |& _filter_scratch
-+_fsv_create_enable_file $fsv_file --salt=$(perl -e 'print "A" x 1000') |& filter_output
- verify_data_readable $fsv_file
- 
- _fsv_scratch_begin_subtest "Enabling verity on file on read-only filesystem fails with EROFS"
- echo foo > $fsv_file
- _scratch_remount ro
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- _scratch_remount rw
- 
- _fsv_scratch_begin_subtest "Enabling verity on file open for writing fails with ETXTBSY"
- echo foo > $fsv_file
- exec 3<> $fsv_file
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- exec 3<&-
- verify_data_readable $fsv_file
- 
-@@ -103,7 +108,7 @@ dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
- start_time=$(date +%s)
- $FSVERITY_PROG enable $fsv_file &
- sleep 0.5
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- kill %1
- wait
- 
-@@ -112,11 +117,11 @@ _fsv_create_enable_file $fsv_file >> $seqres.full
- echo "* reading"
- $XFS_IO_PROG -r $fsv_file -c ''
- echo "* xfs_io writing, should be O_RDWR"
--$XFS_IO_PROG $fsv_file -c '' |& _filter_scratch
-+$XFS_IO_PROG $fsv_file -c '' |& filter_output
- echo "* bash >>, should be O_APPEND"
--bash -c "echo >> $fsv_file" |& _filter_scratch
-+bash -c "echo >> $fsv_file" |& filter_output
- echo "* bash >, should be O_WRONLY|O_CREAT|O_TRUNC"
--bash -c "echo > $fsv_file" |& _filter_scratch
-+bash -c "echo > $fsv_file" |& filter_output
- 
- _fsv_scratch_begin_subtest "verity file can be read"
- _fsv_create_enable_file $fsv_file >> $seqres.full
-@@ -160,7 +165,7 @@ _get_filesize $fsv_file
- 
- _fsv_scratch_begin_subtest "Trying to measure non-verity file fails with ENODATA"
- echo foo > $fsv_file
--_fsv_measure $fsv_file |& _filter_scratch
-+_fsv_measure $fsv_file |& filter_output
- verify_data_readable $fsv_file
- 
- # Test files <= 1 block in size.  These are a bit of a special case since there
+-# This should fail, s_inodes_count would just overflow!
+-echo "Resizing to inode limit + 1..."
+-$RESIZE2FS_PROG $DMHUGEDISK_DEV $((limit_groups*group_blocks)) >> $seqres.full 2>&1
+-if [ $? -eq 0 ]; then
+-	echo "Resizing succeeded but it should fail!"
+-	exit
+-fi
+-
+ # This should succeed, we are maxing out inodes
+ echo "Resizing to max group count..."
+ $RESIZE2FS_PROG $DMHUGEDISK_DEV $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
+diff --git a/tests/ext4/033.out b/tests/ext4/033.out
+index 24c251cb..183a7492 100644
+--- a/tests/ext4/033.out
++++ b/tests/ext4/033.out
+@@ -1,6 +1,5 @@
+ QA output created by 033
+ Figure out block size
+ Format huge device
+-Resizing to inode limit + 1...
+ Resizing to max group count...
+ Resizing to device size...
 -- 
 2.31.0
 
