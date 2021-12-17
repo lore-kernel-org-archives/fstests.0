@@ -2,112 +2,225 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CB24C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Dec 2021 04:21:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A48E3C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Dec 2021 15:19:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229908AbhLQEVE (ORCPT
+        id S238073AbhLQPTc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Dec 2021 23:21:04 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:25103 "EHLO
+        Fri, 17 Dec 2021 10:19:32 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:49304 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232885AbhLQEUt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Dec 2021 23:20:49 -0500
+        by vger.kernel.org with ESMTP id S238059AbhLQPTb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Dec 2021 10:19:31 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1639714845;
+        s=mimecast20190719; t=1639754371;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=kUcCnZRWUCvBA3e+Dn6K4wl951aJesp9uOPECzTolc0=;
-        b=VUgqVSHo3bgzHmmY8xbnB0jEo2oiPabJLC6ENriyMpjIbaDvPen1d65rDBefnAi2btqoql
-        kSpQJkT+D5PKCO4ic9CP4w0iynSQmYyIw4H3IsfrbQgZ1m0qjt8HpqCD6e9pRjMKuo6MRF
-        0aV09uKlss532/55+cDjGHrJNUjSIHU=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=FBLdE8bsCqycR7of+qjPKj1NVmuyyCql81OV2j5bOUg=;
+        b=jVdtHTN1/7lziMw7GjRFLhisZkbTBqcTcbk2VeHXw1+gDiG7QWUe/CISzwFKTsvuIiPeT5
+        H4Yq34CK6ohm+yjnrVDJ+mg9uNqJBVKamfo74r61KlVnrNlwYrCORAYYQKrBr5G18lq/dZ
+        64fS89m+NTuefe5bcNHcIP/bJyNLXlY=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-522-EV4YiIoNOwG3ABm1wMp8Kg-1; Thu, 16 Dec 2021 23:20:44 -0500
-X-MC-Unique: EV4YiIoNOwG3ABm1wMp8Kg-1
-Received: by mail-pj1-f69.google.com with SMTP id o21-20020a17090a9f9500b001b105598e71so855840pjp.6
-        for <fstests@vger.kernel.org>; Thu, 16 Dec 2021 20:20:44 -0800 (PST)
+ us-mta-618-XDdPEQfXNyWe2ysMUx9VWw-1; Fri, 17 Dec 2021 10:19:30 -0500
+X-MC-Unique: XDdPEQfXNyWe2ysMUx9VWw-1
+Received: by mail-qt1-f197.google.com with SMTP id v17-20020a05622a131100b002aea167e24aso2826048qtk.5
+        for <fstests@vger.kernel.org>; Fri, 17 Dec 2021 07:19:30 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=kUcCnZRWUCvBA3e+Dn6K4wl951aJesp9uOPECzTolc0=;
-        b=8M/mOu7tPIdrASUzt0wJkGbvB/xnVLhJcLYrLI8XxYQtkJMvkp6JZWkQ2X5fS2Xcin
-         hlPz4XMTBzHL67Ny7BCa6tV3xiix3qh6tjG/qyhzhNCJOhHpvHuCCsSVtlsIiNU7vn/l
-         1U83Nf9flqSfLDYkzNFFZNKxDf6SUE5nn5yR7uy1rJkdhjAMyeKH0M1btNXYtOeFer/7
-         wEwjnLjtZYWDgKUi4QJcDbpdKmA98Df2R94N9e5hmdLHI2sC8F/mYJiUgWh4bQQmmgi3
-         xSbDfV8lALXvXPKehaEdSjBF8h3iGmWGudG1GvNM3Ip47TEf1iXbWgD4xl3hb3Y3ldAB
-         JREQ==
-X-Gm-Message-State: AOAM531yV7s4NyR2QjILjv08HdKNzK0xbkREkBSRDcbLGqXnp8IbvtDP
-        bVO5QEKCV18KxHJCYL3R6qMYO412I/Dd/8cj1VDhrdX39pJSRvjVgNYVJ95IiFIkCRkO5ozd7gs
-        xXjm+k8HWlstBs0BaTQ==
-X-Received: by 2002:aa7:8b18:0:b0:4a7:ef66:3b6d with SMTP id f24-20020aa78b18000000b004a7ef663b6dmr1331449pfd.13.1639714843046;
-        Thu, 16 Dec 2021 20:20:43 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJyr/OamZEzaD+a+MB0SuVs0PKMw8CoLyuFNFW9o6+0vs9wWuUpvVvcffxETI3X4WchZ/Z9aCQ==
-X-Received: by 2002:aa7:8b18:0:b0:4a7:ef66:3b6d with SMTP id f24-20020aa78b18000000b004a7ef663b6dmr1331426pfd.13.1639714842726;
-        Thu, 16 Dec 2021 20:20:42 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 145sm6778286pgd.0.2021.12.16.20.20.41
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=FBLdE8bsCqycR7of+qjPKj1NVmuyyCql81OV2j5bOUg=;
+        b=SKUpXFZ6tX/T1ilDWHtkFK+sbAKT8qMsAgAHyk68sXdL2EKEeVkWJV1u7RbejtHfy1
+         CFAaMiW3TDCo6kvdqZebAzFilg0wDh47J9DkRjC7+TSjrVeteaTeLGC4BLrhmmPXPWCN
+         VpyJ4DQRNBipJb1XopgDjO7PTdR9Gvpe2TtgzcuVH+jn1TeD2hrgm3qMAL9U9KI8FBqo
+         Nv61osP4cn6tqML8kTdqlIyLT/zCsrA1vtniY9GA6cN/tKU64B0DLwFh3o1aJoL3JxSR
+         DrRndr0TM3zMtiKBvZeAMFtyvjAUP63AF1JD6h0GccjL4KwETCFibpUjifw1WwmExxEu
+         ZcYw==
+X-Gm-Message-State: AOAM530y0sadPmu9GmX2zTJeoraHUoSji+eOb3wFOAUgQiXJ+8K6nVHM
+        aZSTJJgynYa2mUq7Uz9a+K6JLIe2Olo2Zf5xEaR3jBvhJqabozHlp/UaTwY/wtGWlPIA7pbbQJK
+        MiM+dJr7vBby+o5F0UQ==
+X-Received: by 2002:a05:622a:43:: with SMTP id y3mr2725688qtw.192.1639754369440;
+        Fri, 17 Dec 2021 07:19:29 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyQf4GqqZEwIb0GxO71WMO3B14BoaDe3t1g7si9XJP1R4CwkGyHvLq4jlVJengxhWZgoDzjaQ==
+X-Received: by 2002:a05:622a:43:: with SMTP id y3mr2725667qtw.192.1639754369165;
+        Fri, 17 Dec 2021 07:19:29 -0800 (PST)
+Received: from bfoster (c-24-61-119-116.hsd1.ma.comcast.net. [24.61.119.116])
+        by smtp.gmail.com with ESMTPSA id x24sm4686630qkm.135.2021.12.17.07.19.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Dec 2021 20:20:42 -0800 (PST)
-Date:   Fri, 17 Dec 2021 12:20:38 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Stefan Roesch <shr@fb.com>
-Cc:     fstests@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH v4 0/2] Add support for using liburing xattr
-Message-ID: <20211217042038.d4qif7z2rsk56joz@zlang-mailbox>
-Mail-Followup-To: Stefan Roesch <shr@fb.com>, fstests@vger.kernel.org,
-        kernel-team@fb.com
-References: <20211216184319.851514-1-shr@fb.com>
+        Fri, 17 Dec 2021 07:19:28 -0800 (PST)
+Date:   Fri, 17 Dec 2021 10:19:27 -0500
+From:   Brian Foster <bfoster@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] tests/xfs: test COW writeback failure when
+ overlapping non-shared blocks
+Message-ID: <Ybyqf6OPsFt/X73C@bfoster>
+References: <20211025130053.8343-1-bfoster@redhat.com>
+ <20211117180105.GP24282@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211216184319.851514-1-shr@fb.com>
+In-Reply-To: <20211117180105.GP24282@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Dec 16, 2021 at 10:43:17AM -0800, Stefan Roesch wrote:
-> This adds support for using the xattr implementation in liburing.
+On Wed, Nov 17, 2021 at 10:01:05AM -0800, Darrick J. Wong wrote:
+> On Mon, Oct 25, 2021 at 09:00:53AM -0400, Brian Foster wrote:
+> > Test that COW writeback that overlaps non-shared delalloc blocks
+> > does not leave around stale delalloc blocks on I/O failure. This
+> > triggers assert failures and free space accounting corruption on
+> > XFS.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > ---
+> > 
+> > v2:
+> > - Explicitly set COW extent size hint.
+> > - Move to tests/xfs.
+> > - Various minor cleanups.
+> > v1: https://lore.kernel.org/fstests/20211021163959.1887011-1-bfoster@redhat.com/
+> > 
+> >  tests/xfs/999     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/999.out |  2 ++
+> >  2 files changed, 64 insertions(+)
+> >  create mode 100755 tests/xfs/999
+> >  create mode 100644 tests/xfs/999.out
+> > 
+> > diff --git a/tests/xfs/999 b/tests/xfs/999
+> > new file mode 100755
+> > index 00000000..f27972bc
+> > --- /dev/null
+> > +++ b/tests/xfs/999
+> > @@ -0,0 +1,62 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 999
+> > +#
+> > +# Test that COW writeback that overlaps non-shared delalloc blocks does not
+> > +# leave around stale delalloc blocks on I/O failure. This triggers assert
+> > +# failures and free space accounting corruption on XFS.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick clone
+> > +
+> > +_cleanup()
+> > +{
+> > +	_cleanup_flakey
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/reflink
+> > +. ./common/dmflakey
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_scratch_reflink
+> > +_require_cp_reflink
+> > +_require_xfs_io_command "cowextsize"
+> > +_require_flakey_with_error_writes
+> > +
+> > +_scratch_mkfs >> $seqres.full
+> > +_init_flakey
+> > +_mount_flakey
+> > +
+> > +blksz=$(_get_file_block_size $SCRATCH_MNT)
+> > +
+> > +# Set the COW extent size hint to guarantee COW fork preallocation occurs over a
+> > +# bordering block offset.
+> > +$XFS_IO_PROG -c "cowextsize $((blksz * 2))" $SCRATCH_MNT >> $seqres.full
+> > +
+> > +# create two files that share a single block
+> > +$XFS_IO_PROG -fc "pwrite $blksz $blksz" $SCRATCH_MNT/file1 >> $seqres.full
+> > +_cp_reflink $SCRATCH_MNT/file1 $SCRATCH_MNT/file2
+> > +
+> > +# Perform a buffered write across the shared and non-shared blocks. On XFS, this
+> > +# creates a COW fork extent that covers the shared block as well as the just
+> > +# created non-shared delalloc block. Fail the writeback to verify that all
+> > +# delayed allocation is cleaned up properly.
+> > +_load_flakey_table $FLAKEY_ERROR_WRITES
+> > +$XFS_IO_PROG -c "pwrite 0 $((blksz * 2))" \
+> > +	-c fsync $SCRATCH_MNT/file2 >> $seqres.full
+> > +_load_flakey_table $FLAKEY_ALLOW_WRITES
 > 
-> Patch 1: fstress: add suport for using liburing setxattr
->   Uses the liburing setxattr implementation in fsstress.
+> Hmm.  So I've been running this test in my djwong-dev tree and hit this
+> last night:
 > 
-> Patch 2: fstress: add suport for using liburing getxattr
->   Uses the liburing getxattr implementation in fsstress.
+> --- xfs/999.out
+> +++ xfs/999.out.bad
+> @@ -1,2 +1,3 @@
+>  QA output created by 999
+> -fsync: Input/output error
+> +stat: Input/output error
+> +cp: failed to access '/opt/file3': Input/output error
 > 
-> There are two additional patch series related to this:
-> - io_uring: add xattr support
-> - liburing: add xattr support
+> Digging into the kernel log, I see this happen:
 > 
-> ---
-> V4: - fix a whitespace/tab issue
-> V3: - Rebased patch series.
-> V2: - Introduce dedicated functions for uring getxattr and
->       uring setxattr, so they are not automatically linked
->       in if liburing is available.
+> [10240.821719] XFS (dm-0): Mounting V5 Filesystem
+> [10240.855461] XFS (dm-0): Ending clean mount
+> [10240.857030] XFS (dm-0): Quotacheck needed: Please wait.
+> [10240.860095] XFS (dm-0): Quotacheck: Done.
+> [10240.977055] XFS (dm-0): log I/O error -5
+> [10240.977459] XFS (dm-0): Log I/O Error (0x2) detected at xlog_ioend_work+0x5f/0xb0 [xfs] (fs/xfs/xfs_log.c:1377).  Shutting down filesystem.
+> [10240.978682] XFS (dm-0): Please unmount the filesystem and rectify the problem(s)
+> [10241.044886] XFS (dm-0): Unmounting Filesystem
 > 
-> *** BLURB HERE ***
+> I guess the log tried to checkpoint for the brief window where the
+> flakey table was enabled, and shut down the whole fs?  I don't have any
+> good ideas for how to solve this, though.
 > 
-> Stefan Roesch (2):
->   fstress: add suport for using liburing setxattr
->   fstress: add suport for using liburing getxattr
+> Hm.  What if you did something like:
+> 
+> $XFS_IO_PROG -c 'pwrite...' $SCRATCH_MNT/file2
+> _load_flakey_table $FLAKEY_ERROR_WRITES
+> $XFS_IO_PROG -c 'sync_range -wa' $SCRATCH_MNT/file2
+> +_load_flakey_table $FLAKEY_ALLOW_WRITES
+> 
 
-The code logic of this patchset looks good to me. But just notice that the
-subject should be "fsstress", not "fstress", you can ask if Eryu would like
-to help to change that when he merge the patch :-D
+I notice that sync_range doesn't combine options like that even though
+the underlying flags can be combined for the syscall. That aside, I
+suspect a combination of an fsync on the earlier reflink command and a
+couple sync_range calls here (to achieve the intended behavior above) is
+probably the best option to try and avoid this. That seems to preserve
+the intended behavior of the test and I don't see any spurious failures
+in a couple hundred or so iterations.. (granted I don't know how
+reproducible that was in the first place).
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Brian
 
+> to constrain the window in which disk write will fail?  Seeing as s_f_r
+> doesn't actually tell the fs to flush its own metadata or anything.
 > 
->  ltp/fsstress.c | 122 ++++++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 116 insertions(+), 6 deletions(-)
+> (Yikes, did I finally find a use for sync_file_range??)
 > 
+> --D
 > 
-> base-commit: 13dd19cee4298ffc323737029ca36f70f52f88e9
-> -- 
-> 2.30.2
+> > +
+> > +# Try a post-fail reflink and then unmount. Both of these are known to produce
+> > +# errors and/or assert failures on XFS if we trip over a stale delalloc block.
+> > +_cp_reflink $SCRATCH_MNT/file2 $SCRATCH_MNT/file3
+> > +_unmount_flakey
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> > new file mode 100644
+> > index 00000000..88b69c4c
+> > --- /dev/null
+> > +++ b/tests/xfs/999.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 999
+> > +fsync: Input/output error
+> > -- 
+> > 2.31.1
+> > 
 > 
 
