@@ -2,90 +2,178 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 435E2C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Dec 2021 15:16:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A004C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Dec 2021 16:02:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235980AbhLSPQs (ORCPT
+        id S230182AbhLSQCf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Dec 2021 10:16:48 -0500
-Received: from out20-38.mail.aliyun.com ([115.124.20.38]:43933 "EHLO
-        out20-38.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230483AbhLSPQr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Dec 2021 10:16:47 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08229033|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.401277-0.00339108-0.595332;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047207;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.MJd0uxL_1639927005;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MJd0uxL_1639927005)
-          by smtp.aliyun-inc.com(10.147.40.26);
-          Sun, 19 Dec 2021 23:16:45 +0800
-Date:   Sun, 19 Dec 2021 23:16:45 +0800
+        Sun, 19 Dec 2021 11:02:35 -0500
+Received: from out20-74.mail.aliyun.com ([115.124.20.74]:49519 "EHLO
+        out20-74.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233228AbhLSQCb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Dec 2021 11:02:31 -0500
+X-Alimail-AntiSpam: AC=PASS;BC=0.07436319|-1;BR=01201311R141ee;CH=green;DM=|CONTINUE|false|;DS=SPAM|spam_education_ad|0.858081-0.00123852-0.14068;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.MJftpyG_1639929748;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MJftpyG_1639929748)
+          by smtp.aliyun-inc.com(10.147.42.16);
+          Mon, 20 Dec 2021 00:02:29 +0800
+Date:   Mon, 20 Dec 2021 00:02:28 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org, Eric Whitney <enwlinux@gmail.com>
-Subject: Re: [PATCH] ext4/033: remove a portion of the test assuming
- resize2fs would fail
-Message-ID: <Yb9M3aIb9cJGIJaB@desktop>
-References: <20211215035409.244674-1-tytso@mit.edu>
+To:     Stefan Roesch <shr@fb.com>
+Cc:     fstests@vger.kernel.org, kernel-team@fb.com
+Subject: Re: [PATCH v4 1/2] fstress: add suport for using liburing setxattr
+Message-ID: <Yb9XlIZkjnBlHmGZ@desktop>
+References: <20211216184319.851514-1-shr@fb.com>
+ <20211216184319.851514-2-shr@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20211215035409.244674-1-tytso@mit.edu>
+In-Reply-To: <20211216184319.851514-2-shr@fb.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Dec 14, 2021 at 10:54:09PM -0500, Theodore Ts'o wrote:
-> The ext4/033 test tries to test if resize2fs would fail when resizing
-> a file system to a size that the number of inodes exceeds the maximum
-> allowed inode size, 2**32-1.  This no longer takes place as of
-> e2fsprogs commit 623985ed7dd5 ("resize2fs: attempt to keep the # of
-> inodes valid by removing the last bg") which will allow resizing a
-> file system to 64TB by reducing the last block group so that file
-> system will be 64TB - 128MB, which is close enough for government
-> work.
+On Thu, Dec 16, 2021 at 10:43:18AM -0800, Stefan Roesch wrote:
+> Summary:
 > 
-> Reported-by: Eric Whitney <enwlinux@gmail.com>
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> Liburing added support for setxattr. This change adds
+> support for this this in fsstress when fsstress is built
+> with liburing support.
+> 
+> Signed-off-by: Stefan Roesch <shr@fb.com>
 > ---
->  tests/ext4/033     | 8 --------
->  tests/ext4/033.out | 1 -
->  2 files changed, 9 deletions(-)
+>  ltp/fsstress.c | 59 ++++++++++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 57 insertions(+), 2 deletions(-)
 > 
-> diff --git a/tests/ext4/033 b/tests/ext4/033
-> index 1bc14c03..0fd0ec90 100755
-> --- a/tests/ext4/033
-> +++ b/tests/ext4/033
-> @@ -66,14 +66,6 @@ _mount $DMHUGEDISK_DEV $SCRATCH_MNT
->  echo "Initial fs dump" >> $seqres.full
->  $DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 5f3126e6..48d93436 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -145,12 +145,14 @@ typedef enum {
+>  	OP_URING_WRITE,
+>  	OP_WRITE,
+>  	OP_WRITEV,
+> +	OP_URING_SETXATTR,
+>  	OP_LAST
+>  } opty_t;
 >  
-> -# This should fail, s_inodes_count would just overflow!
-> -echo "Resizing to inode limit + 1..."
-> -$RESIZE2FS_PROG $DMHUGEDISK_DEV $((limit_groups*group_blocks)) >> $seqres.full 2>&1
-> -if [ $? -eq 0 ]; then
-> -	echo "Resizing succeeded but it should fail!"
-> -	exit
-> -fi
+>  typedef long long opnum_t;
+>  
+>  typedef void (*opfnc_t)(opnum_t, long);
+> +typedef int (*setxattr_cbk)(const char *, const char *, const void *, size_t, int);
+>  
+>  typedef struct opdesc {
+>  	char	*name;
+> @@ -276,6 +278,7 @@ void	uring_read_f(opnum_t, long);
+>  void	uring_write_f(opnum_t, long);
+>  void	write_f(opnum_t, long);
+>  void	writev_f(opnum_t, long);
+> +void	uring_setxattr_f(opnum_t, long);
 
-This portion of test is the key of the original regression test, if
-we're going to remove this part, does it make sense to remove ext4/033
-completely?
+Order it by name?
+
+>  char	*xattr_flag_to_string(int);
+>  
+>  struct opdesc	ops[OP_LAST]	= {
+> @@ -346,6 +349,7 @@ struct opdesc	ops[OP_LAST]	= {
+>  	[OP_URING_WRITE]   = {"uring_write",   uring_write_f,	1, 1 },
+>  	[OP_WRITE]	   = {"write",	       write_f,		4, 1 },
+>  	[OP_WRITEV]	   = {"writev",	       writev_f,	4, 1 },
+> +	[OP_URING_SETXATTR] = {"uring_setxattr", uring_setxattr_f, 1, 1 },
+
+Make it aligned with other ops as well?
+
+>  }, *ops_end;
+>  
+>  flist_t	flist[FT_nft] = {
+> @@ -4771,8 +4775,45 @@ setattr_f(opnum_t opno, long r)
+>  	close(fd);
+>  }
+>  
+> +static int
+> +io_uring_setxattr(const char *path, const char *name, const void *value, size_t size,
+> +	  	 int flags)
+
+Space before tab in above line.
+
+> +{
+> +	struct io_uring_sqe *sqe;
+> +	struct io_uring_cqe *cqe;
+> +	int ret;
+> +
+> +	sqe = io_uring_get_sqe(&ring);
+> +	if (!sqe) {
+> +		printf("io_uring_get_sqe failed\n");
+> +		ret = -1;
+> +		goto out;
+> +	}
+> +
+> +	io_uring_prep_setxattr(sqe, name, value, path, flags, size);
+
+Seems we have to wait for the liburing patches go in first, otherwise
+we'll hit compile error.
+
+> +
+> +	ret = io_uring_submit_and_wait(&ring, 1);
+> +	if (ret != 1) {
+> +		printf("io_uring_submit_and_wait failed, ret=%d\n", ret);
+> +		ret = -1;
+> +		goto out;
+> +    	}
+
+Space before tab in above line.
 
 Thanks,
 Eryu
 
-> -
->  # This should succeed, we are maxing out inodes
->  echo "Resizing to max group count..."
->  $RESIZE2FS_PROG $DMHUGEDISK_DEV $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
-> diff --git a/tests/ext4/033.out b/tests/ext4/033.out
-> index 24c251cb..183a7492 100644
-> --- a/tests/ext4/033.out
-> +++ b/tests/ext4/033.out
-> @@ -1,6 +1,5 @@
->  QA output created by 033
->  Figure out block size
->  Format huge device
-> -Resizing to inode limit + 1...
->  Resizing to max group count...
->  Resizing to device size...
+> +
+> +	ret = io_uring_wait_cqe(&ring, &cqe);
+> +	if (ret < 0) {
+> +		printf("io_uring_wait_cqe failed, ret=%d\n", ret);
+> +		goto out;
+> +	}
+> +
+> +	ret = cqe->res;
+> +	io_uring_cqe_seen(&ring, cqe);
+> +
+> +out:
+> +	return ret;
+> +}
+> +
+>  void
+> -setfattr_f(opnum_t opno, long r)
+> +setfattr_f_cbk(opnum_t opno, long r, setxattr_cbk cbk)
+>  {
+>  	int		e;
+>  	pathname_t	f;
+> @@ -4834,7 +4875,7 @@ setfattr_f(opnum_t opno, long r)
+>  		goto out;
+>  	}
+>  
+> -	e = setxattr(f.path, name, value, value_len, flag) < 0 ? errno : 0;
+> +	e = cbk(f.path, name, value, value_len, flag) < 0 ? errno : 0;
+>  	if (e == 0)
+>  		fep->xattr_counter++;
+>  	if (v)
+> @@ -4846,6 +4887,20 @@ out:
+>  	free_pathname(&f);
+>  }
+>  
+> +void
+> +uring_setxattr_f(opnum_t opno, long r)
+> +{
+> +#ifdef URING
+> +	setfattr_f_cbk(opno, r, io_uring_setxattr);
+> +#endif
+> +}
+> +
+> +void
+> +setfattr_f(opnum_t opno, long r)
+> +{
+> +	setfattr_f_cbk(opno, r, setxattr);
+> +}
+> +
+>  void
+>  snapshot_f(opnum_t opno, long r)
+>  {
 > -- 
-> 2.31.0
+> 2.30.2
