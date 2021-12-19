@@ -2,103 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B8BDC433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Dec 2021 02:34:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 74058C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Dec 2021 02:59:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229550AbhLSCe1 (ORCPT
+        id S230334AbhLSC7L (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 18 Dec 2021 21:34:27 -0500
-Received: from ams.source.kernel.org ([145.40.68.75]:42268 "EHLO
-        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229459AbhLSCe0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 18 Dec 2021 21:34:26 -0500
+        Sat, 18 Dec 2021 21:59:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44824 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229804AbhLSC7K (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 18 Dec 2021 21:59:10 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E7F9C061574
+        for <fstests@vger.kernel.org>; Sat, 18 Dec 2021 18:59:10 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id BE82DB80BA6
-        for <fstests@vger.kernel.org>; Sun, 19 Dec 2021 02:34:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F72BC36AE2;
-        Sun, 19 Dec 2021 02:34:24 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 40D35B80B6E
+        for <fstests@vger.kernel.org>; Sun, 19 Dec 2021 02:59:09 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A7B51C36AE2;
+        Sun, 19 Dec 2021 02:59:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1639881264;
-        bh=pO2Kurb4pD6WUb7yD0jKlEUNvpaT//v62r2l0Yo1Se4=;
+        s=k20201202; t=1639882748;
+        bh=nFjL8nWN07WrwuonhnKO2ijLyr/p7TKZQq/zHfXyN7U=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=eNOzei8LdC+OYUmzuSLMlPnlPXGw/E3bhUf+f3Anw2sCgw0ypVS+Nd1gVq3GdS7b6
-         gFNjIOdpdyfKUdAKB6JspmZmFJ5zsAX1XkcHkitGTGsyAEma46phfZo4ZvVhysa9PI
-         orPZWoc+Z1RzfqQBlVAPPsd/lqVhZpWvfS94VXhtawDVJ+3ishnpvYyAG/y4zFKPkK
-         8mLoZ5Cp79pviNOd19D+EhSFeqCF6q6fl/M1qpbw6wbO6eZwaBsI31sBTqzFioxOhQ
-         xcSc/lDj0966fhpz4EYoXICz3t6rD5jYlE3cnHEwb+Z5+fESVZuvpgZ1M3fLBkR3Sj
-         LAUZWNHWWYj9g==
-Date:   Sat, 18 Dec 2021 20:34:22 -0600
+        b=YeM05h+TTD84rHw9cb/6AK6JvFCZLtdjwyTDyJHiBOf2ad8o2cb9+yadmoJZ1oxjr
+         yqGrTUC2nVdiihDy3OlCnzgqDBDk4FiV0ebeJG3CcXYgr9wllhXbNjtW4Ai/p0aFcp
+         PPZP+DO2dTKx0+8CDS6I4E1v0tjkR+c/VbN5ghmlAw6sUcoKycG7B46kVC4CZoFeuP
+         ERJcV92/87Oaz5CKsFADdOhJAuiQ7yFNeC2NTTSpA0Am22sntfpIBDflqWXNs+RKBa
+         PeafwPMQgynAvNgq1eUPRnhdtWijDDlEilJ3EzmRJi6dT/M8UBZtUSb3S51UYNlKGX
+         BUwoPs+9bl4aA==
+Date:   Sat, 18 Dec 2021 20:59:05 -0600
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common/filter: add _filter_bash()
-Message-ID: <Yb6aLm5L+C7H3Z9P@quark.localdomain>
-References: <20211214170438.16164-1-tytso@mit.edu>
- <YbqOO74Lfer5h33Y@sol.localdomain>
- <Yb4V/GBZDjcXK9qo@mit.edu>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org, guan@eryu.me,
+        Luis Henriques <lhenriques@suse.de>
+Subject: Re: [PATCH] common/rc, ceph: skip ceph/001-ceph/003 if
+ test_dummy_encryption is enabled
+Message-ID: <Yb6f+Qn0gQQoQDfX@quark.localdomain>
+References: <20211216124752.13768-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Yb4V/GBZDjcXK9qo@mit.edu>
+In-Reply-To: <20211216124752.13768-1-jlayton@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Dec 18, 2021 at 12:10:20PM -0500, Theodore Ts'o wrote:
-> On Wed, Dec 15, 2021 at 04:54:19PM -0800, Eric Biggers wrote:
-> > 
-> > Doesn't this happen with any shell command passed to -c, not just commands that
-> > run an executable?  In the commands below which are causing the problem, it is
-> > actually the 'echo' built-in being used, not an executable.
+On Thu, Dec 16, 2021 at 07:47:52AM -0500, Jeff Layton wrote:
+> Some tests on ceph require changing the layout of new files, which is
+> forbidden when the files are encrypted. Skip these tests if the
+> test_dummy_encryption mount option is being used.
 > 
-> Well.... it happens with all executables and *some* built-in commands
-> which returns an error.  (See the postscript for a case where the line
-> number is printed.)  In the case of an error opening the redirected
-> standard output, such as permission denied, the difference does occur:
+> Generalize the _exclude_scratch_mount_option code and add a new
+> _exclude_test_mount_option call as well. Call the new function from the
+> ceph tests that should exclude test_dummy_encryption.
 > 
-> Compare:
+> Cc: Luis Henriques <lhenriques@suse.de>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  common/rc      | 18 ++++++++++++++----
+>  tests/ceph/001 |  1 +
+>  tests/ceph/002 |  1 +
+>  tests/ceph/003 |  1 +
+>  4 files changed, 17 insertions(+), 4 deletions(-)
 > 
-> % schroot -c buster-amd64 -- bash -c "echo foo >> /bin/bash"
-> bash: /bin/bash: Permission denied
-> % schroot -c buster-amd64 -- bash --version
-> GNU bash, version 5.0.3(1)-release (x86_64-pc-linux-gnu)
-> Copyright (C) 2019 Free Software Foundation, Inc.
-> ...
-> 
-> with
-> 
-> % schroot -c bullseye-amd64 -- bash -c "echo foo >> /bin/bash"
-> bash: line 1: /bin/bash: Permission denied
-> % schroot -c bullseye-amd64 -- bash --version
-> GNU bash, version 5.1.4(1)-release (x86_64-pc-linux-gnu)
-> ...
-> 
-> I just used the example of "bash -c /etc/passwd" because it was
-> simpler, and because it would be easy to verify regardless of whether
-> the command was executed as root or not.  For example:
-> 
-> % schroot -c bullseye-amd64 -u root -- bash -c "echo foo >> /bin/bash"
-> 
-> would have succeeded (and corrupted /bin/bash in my chroot :-).
+> diff --git a/common/rc b/common/rc
+> index 7973ceb5fdf8..312ebea8fb57 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3844,14 +3844,14 @@ _require_cloner()
+>  # "opt1 opt2 opt3"
+>  _normalize_mount_options()
+>  {
+> -	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
+> +	echo "$1" | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
+>  }
 
-A good example that doesn't involve an executable would be
+Doesn't this break the call to _normalize_mount_options() in common/btrfs?
 
-	bash -c "echo foo > /"
+>  
+> -# skip test if MOUNT_OPTIONS contains the given strings
+> +# skip test if $2 contains the given strings in $1
+>  # Both dax and dax=always are excluded if dax or dax=always is passed
+> -_exclude_scratch_mount_option()
+> +_exclude_mount_option()
+>  {
+> -	local mnt_opts=$(_normalize_mount_options)
+> +	local mnt_opts=$(_normalize_mount_options "$2")
+>  
+>  	while [ $# -gt 0 ]; do
+>  		local pattern=$1
+> @@ -3864,6 +3864,16 @@ _exclude_scratch_mount_option()
+>  	done
+>  }
 
-... since that command redirection will always fail.
-
-> I suppose I could have used the "schroot -c ..." example in the commit
-> description, but that's a debian-specific command, and I chose to err
-> on the side of something simpler and easier to replicate.
-> 
-> If Eryu would prefer, I can resend with a modified commit description,
-> or he can feel free to edit the commit description with the above
-> example if he thinks it's clearer.
-
-I'm more concerned about the misleading comment above _filter_bash(), not the
-commit message which is less important.  Anyway, it's not too important, but I
-thought it was worth pointing out.
+This function already uses all positional arguments, so using $2 isn't valid.
 
 - Eric
