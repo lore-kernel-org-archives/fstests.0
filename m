@@ -2,77 +2,71 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA46DC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Dec 2021 08:48:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62EA0C433FE
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Dec 2021 23:48:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234071AbhLUIsz (ORCPT
+        id S244950AbhLWXsz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 21 Dec 2021 03:48:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51654 "EHLO
+        Thu, 23 Dec 2021 18:48:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57240 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233569AbhLUIsy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Dec 2021 03:48:54 -0500
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41CD7C061574;
-        Tue, 21 Dec 2021 00:48:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=5sNRK7eak2tna64oFZaxQtUv30cBHlHdDha2g9J+6XE=; b=akbQMUgNdDQpa6emCnYiLroiEO
-        NeCw+yt7z3/+UEQkkBfJzEeHH7rdyG1KvDLCKRWx8ZvLeUC0c5nDFYIjv4kTuzVKEel8CQ6GBWrDJ
-        KpURrzLBLdCu4PadpP1ERk4QRCRw5NqcXDl9u7UqVLUWrU/m8OImS8wPLX5BZS3PVyd/rAVZVdcGl
-        gX0/puxTRQIlGYW1Ox8MqXhnB8DIpppqF0mkAL/twThymucKliTaimCUiDZeBkXi/ib/tsr8+Arvr
-        YVo8s4at+wsufH7ureeF4wOD9LkgK32HMDfOzcFu5KPMUO+ZK/sYu+mUE3nzTr51qJekCsZ/GWfTK
-        z9n/L31A==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mzapF-005yRg-Se; Tue, 21 Dec 2021 08:48:49 +0000
-Date:   Tue, 21 Dec 2021 00:48:49 -0800
-From:   Christoph Hellwig <hch@infradead.org>
-To:     NeilBrown <neilb@suse.de>
-Cc:     Anna Schumaker <anna.schumaker@netapp.com>,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        Chuck Lever <chuck.lever@oracle.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Mel Gorman <mgorman@suse.de>,
-        Christoph Hellwig <hch@infradead.org>,
-        David Howells <dhowells@redhat.com>,
-        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
-        linux-mm@kvack.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 00/18 V2] Repair SWAP-over-NFS
-Message-ID: <YcGU8W6+hEfRAVY9@infradead.org>
-References: <163969801519.20885.3977673503103544412.stgit@noble.brown>
- <CAFX2Jfn8jER-aV_ttiAe1tkh8f+m=5-whEBTWbHO1uVwf=B4bw@mail.gmail.com>
- <163994803576.25899.6298619065481174544@noble.neil.brown.name>
+        with ESMTP id S245079AbhLWXsy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Dec 2021 18:48:54 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BB49C061401
+        for <fstests@vger.kernel.org>; Thu, 23 Dec 2021 15:48:54 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C0A4461FAE
+        for <fstests@vger.kernel.org>; Thu, 23 Dec 2021 23:48:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5D60C36AE5;
+        Thu, 23 Dec 2021 23:48:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1640303332;
+        bh=RREHQ+APOcdBN1OK1ZMIbazv86HlW3MS7ekxQo839LA=;
+        h=From:To:Cc:Subject:Date:From;
+        b=hcXPBzQRdN9w4IlAaf/3xaQBSHWVbQS4Z8e4MnsTlPaa5kiB9EU3NY6yT5rFwpXGF
+         adwaNeVtTZSahqubxS8JGFrUkBCM5ggQ6RA8kmQ92+r01/ZnGC8VCQu6L3kLXQdWOH
+         +wVCodu1Juh5+Zaqi9dMM7L1lGoSZ+0mnWZLjnfZ1Zxlgt1SQwDE5+9V0edjnoA+6I
+         0tPyk/zbTucsJtnbBzeRbTn1VwlhTyCzVOTWcmK3jTAeupikrgTVc8ZJRjWRkktgnR
+         0HHb5uFRGZxaHRGrfbAeKU+GXs+Wpc3iEDKtwPiFYmVBehkBE/ITX0IJauJOPONF6y
+         Hjlb5uEVpIQ6g==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org
+Subject: [xfstests-bld PATCH] setup-buildchroot: make sure chroot dir is given mode 0755
+Date:   Thu, 23 Dec 2021 17:47:59 -0600
+Message-Id: <20211223234759.173181-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <163994803576.25899.6298619065481174544@noble.neil.brown.name>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 20, 2021 at 08:07:15AM +1100, NeilBrown wrote:
-> > Thanks for fixing swap-over-NFS! Looks like it passes all the
-> > swap-related xfstests except for generic/357 on NFS v4.2. This test
-> > checks that we get -EINVAL on a reflinked swapfile, but I'm not sure
-> > if there is a way to check for that on the client side but if you have
-> > any ideas it would be nice to get that test passing while you're at
-> > it!
-> 
-> Thanks for testing!.
-> I think that testing that swap fails on a reflinked file is bogus.  This
-> isn't an important part of the API, it is just an internal
-> implementation detail.
-> I certainly understand that it could be problematic implementing swap on
-> a reflinked file within XFS and it is perfectly acceptable to fail such
-> a request.  But if one day someone decided to implement it - should that
-> be seen as a regression?
+From: Eric Biggers <ebiggers@google.com>
 
-Yes, there is really no fundamental reason not to support swap to
-reflinked files, especially for NFS.  We'll need some kind of opt-in/out
-for this test.
+Make setup-buildchroot work when the umask is set to 0077.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ setup-buildchroot | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/setup-buildchroot b/setup-buildchroot
+index cdeb7fd..6c87d4d 100755
+--- a/setup-buildchroot
++++ b/setup-buildchroot
+@@ -569,7 +569,7 @@ run_in_chroot()
+ 
+ create_chroot()
+ {
+-    mkdir -p "$CHROOT_DIR"
++    mkdir -p -m0755 "$CHROOT_DIR"
+ 
+     test -z "${PROXY}" || export http_proxy=${PROXY}
+     if ! run_cmd debootstrap --arch "$DEBIAN_ARCH" ${QEMU:+--foreign} \
+-- 
+2.34.1
+
