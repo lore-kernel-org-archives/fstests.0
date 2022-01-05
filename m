@@ -2,118 +2,69 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AD92C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jan 2022 19:53:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3309FC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jan 2022 20:04:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243746AbiAETx4 (ORCPT
+        id S243815AbiAEUEU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Jan 2022 14:53:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60188 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243691AbiAETx4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 14:53:56 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91549C061245;
-        Wed,  5 Jan 2022 11:53:55 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 57788B81D80;
-        Wed,  5 Jan 2022 19:53:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F1129C36AE9;
-        Wed,  5 Jan 2022 19:53:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641412433;
-        bh=lWr2cB5qglyVtDBeJfrqVb8y8AHtTR8Xt/KNVLh0bK4=;
-        h=Date:From:To:Cc:Subject:From;
-        b=KpE/iGpPl5H5U5FARXZh0CHz6fOAjmaKu637J/TnFRHcUSnsZlPH9sie7Xi2SJ83o
-         TNAL1igOW0dKqE7RzIos90aaWfHzIGbeyPbu9RpSkPLqMucfjlISjm6yRPHefMACuL
-         Ua5WSbfyLo4KSspsp2CxqwjxVQORWxDOvuRKfgXcp+No3ogJcRBHKByOaifvHPJZzP
-         nF36cvO7JL4pqm8Qb1ow1CP2K6vFdUd5GVYOtOuZ3zUfclvUoBlh/BjpNJcCuRLmEg
-         5MT/hQv2ztJ0qDh8c91Hy5jUh1exmSpa1ZZeCz8vcw7V+djC/dXf6FqaOull8g3eat
-         X0REYscsV2/1Q==
-Date:   Wed, 5 Jan 2022 11:53:52 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Christoph Hellwig <hch@infradead.org>,
-        "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
-        xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: [PATCH] xfs/220: fix quotarm syscall test
-Message-ID: <20220105195352.GM656707@magnolia>
+        Wed, 5 Jan 2022 15:04:20 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:57159 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S243887AbiAEUDH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 15:03:07 -0500
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net [108.7.220.252])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 205K2wpv004394
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 5 Jan 2022 15:02:59 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 3A6E215C00E1; Wed,  5 Jan 2022 15:02:58 -0500 (EST)
+Date:   Wed, 5 Jan 2022 15:02:58 -0500
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     guan@eryu.me, fstests@vger.kernel.org,
+        Ext4 Developers List <linux-ext4@vger.kernel.org>,
+        Eric Whitney <enwlinux@gmail.com>
+Subject: Re: [PATCH] ext4/033: test EXT4_IOC_RESIZE_FS by calling the ioctl
+ directly
+Message-ID: <YdX5csi2qZjS1KOt@mit.edu>
+References: <Yb9M3aIb9cJGIJaB@desktop>
+ <20211220204059.2248577-1-tytso@mit.edu>
+ <20220105155743.6knpj4zsbmy62uwj@zlang-mailbox>
+ <20220105160619.r66lacgq7b7ucyuk@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20220105160619.r66lacgq7b7ucyuk@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Jan 06, 2022 at 12:06:19AM +0800, Zorro Lang wrote:
+> > This patch looks good to me, I just want to ask if we'd better to try to include
+> > ext2fs/ext2fs.h at here? And of course, check it in configure.ac.
+> > The EXT4_IOC_RESIZE_FS looks like defined in ext2fs/ext2_fs.h which comes from
+> > e2fsprogs-devel package. I can't find this definition from kernel-hearders package.
+> > As you're the expert of this part, please correct me if it's wrong :)
 
-In commit 6ba125c9, we tried to adjust this fstest to deal with the
-removal of the ability to turn off quota accounting via the Q_XQUOTAOFF
-system call.
+We're not depending on ext2fs/ext2_fs.h and hence the e2fsprogs-devel
+(or libext2fs-dev package if you're using Debian/Ubuntu) anywhere else
+in the xfstests-dev.  It's not like the code points for
+EXT4_IOC_RESIZE_FS are going to change, so we just use constructs
+like:
 
-Unfortunately, the changes made to this test make it nonfunctional on
-those newer kernels, since the Q_XQUOTARM command returns EINVAL if
-quota accounting is turned on, and the changes filter out the EINVAL
-error string.
+#ifndef EXT4_IOC_RESIZE_FS
+#define EXT4_IOC_RESIZE_FS           _IOW('f', 16, __u64)
+#endif
 
-Doing this wasn't /incorrect/, because, very narrowly speaking, the
-intent of this test is to guard against Q_XQUOTARM returning ENOSYS when
-quota has been enabled.  However, this also means that we no longer test
-Q_XQUOTARM's ability to truncate the quota files at all.
+in xfstests-dev/src/*.c as needed.
 
-So, fix this test to deal with the loss of quotaoff in the same way that
-the others do -- if accounting is still enabled after the 'off' command,
-cycle the mount so that Q_XQUOTARM actually truncates the files.
+There's no real upside in adding a dependency which makes it harder
+for developers to compile xfstests.  (Trivia note: I created
+xfstests-bld several years ago because back then, Debian didn't
+include some of the internal header files from xfsprogs which xfstests
+needed.)
 
-While we're at it, enhance the test to check that XQUOTARM actually
-truncated the quota files.
+Cheers,
 
-Fixes: 6ba125c9 ("xfs/220: avoid failure when disabling quota accounting is not supported")
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/xfs/220 |   28 +++++++++++++++++++++-------
- 1 file changed, 21 insertions(+), 7 deletions(-)
-
-diff --git a/tests/xfs/220 b/tests/xfs/220
-index 241a7abd..cfa90d3a 100755
---- a/tests/xfs/220
-+++ b/tests/xfs/220
-@@ -52,14 +52,28 @@ _scratch_mkfs_xfs >/dev/null 2>&1
- # mount  with quotas enabled
- _scratch_mount -o uquota
- 
--# turn off quota and remove space allocated to the quota files
-+# turn off quota accounting...
-+$XFS_QUOTA_PROG -x -c off $SCRATCH_DEV
-+
-+# ...but if the kernel doesn't support turning off accounting, remount with
-+# noquota option to turn it off...
-+if $XFS_QUOTA_PROG -x -c 'state -u' $SCRATCH_DEV | grep -q 'Accounting: ON'; then
-+	_scratch_unmount
-+	_scratch_mount -o noquota
-+fi
-+
-+before_freesp=$(_get_available_space $SCRATCH_MNT)
-+
-+# ...and remove space allocated to the quota files
- # (this used to give wrong ENOSYS returns in 2.6.31)
--#
--# The sed expression below replaces a notrun to cater for kernels that have
--# removed the ability to disable quota accounting at runtime.  On those
--# kernel this test is rather useless, and in a few years we can drop it.
--$XFS_QUOTA_PROG -x -c off -c remove $SCRATCH_DEV 2>&1 | \
--	sed -e '/XFS_QUOTARM: Invalid argument/d'
-+$XFS_QUOTA_PROG -x -c remove $SCRATCH_DEV
-+
-+# Make sure we actually freed the space used by dquot 0
-+after_freesp=$(_get_available_space $SCRATCH_MNT)
-+if [ $before_freesp -ge $after_freesp ]; then
-+	echo "before: $before_freesp; after: $after_freesp" >> $seqres.full
-+	echo "expected more free space after Q_XQUOTARM"
-+fi
- 
- # and unmount again
- _scratch_unmount
+						- Ted
