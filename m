@@ -2,254 +2,162 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 252D0C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jan 2022 16:06:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E2F9C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jan 2022 16:19:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241829AbiAEQG2 (ORCPT
+        id S241896AbiAEQTN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Jan 2022 11:06:28 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:37674 "EHLO
+        Wed, 5 Jan 2022 11:19:13 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:32188 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S241820AbiAEQG1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 11:06:27 -0500
+        by vger.kernel.org with ESMTP id S241888AbiAEQTM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 11:19:12 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1641398786;
+        s=mimecast20190719; t=1641399552;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=ItrNi7nBE5FeKRqv+QK7/Bdntj0mIeCNoOwi5mxeq2E=;
-        b=XvwilLhRxPK8nCrCfkQN50vuZiAPpIoyFganOEgeH6Omg5t2r/adasZmKSg4Ox3dkdaUlk
-        t5PrgpCxEkzb7yAVrB1owpL93MEvfBrUjwNaQtVfDyT15HUR89mbJXKvjBIVQezpKXY3aE
-        4OyXZ79s1qSR8L8baEfZbDAHBOuAv4I=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=R57nPR5upCf+llF7MYV/PDGEv/CLCFGVlA6W9s8i/a4=;
+        b=ZbAW5euocaThC6jCQ3qYz7zDKtrvasUuhMn34HBuTFLzFbsYqj/RzBfJhRvp57rJi3qRtg
+        N8Rf34PTIXxoQjILC3iC0kA/GmbPUrUgh+W74Acki4VbG6DWEBSuX1prZ70411zZNVJ+Ba
+        jD51ADPnV/kWH0VvzYlzXyCf+7G/PC8=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-279-Iv1R5d4SP4OBxCLR92-4Nw-1; Wed, 05 Jan 2022 11:06:25 -0500
-X-MC-Unique: Iv1R5d4SP4OBxCLR92-4Nw-1
-Received: by mail-pf1-f200.google.com with SMTP id c74-20020a621c4d000000b004bbfc8d62d5so13323066pfc.18
-        for <fstests@vger.kernel.org>; Wed, 05 Jan 2022 08:06:25 -0800 (PST)
+ us-mta-634-_SCiNAPGNG2xFC2yQc1g4A-1; Wed, 05 Jan 2022 11:19:10 -0500
+X-MC-Unique: _SCiNAPGNG2xFC2yQc1g4A-1
+Received: by mail-pj1-f70.google.com with SMTP id r1-20020a17090a438100b001b1906bd90cso2825948pjg.2
+        for <fstests@vger.kernel.org>; Wed, 05 Jan 2022 08:19:10 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:subject:message-id:mail-followup-to
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=ItrNi7nBE5FeKRqv+QK7/Bdntj0mIeCNoOwi5mxeq2E=;
-        b=alybzb7Q2R/R3q++vx9EpxWK5xyvKHPxHwUAI6Wrf3hGitDMcHhzBUk5wNVGzlxig+
-         JuoorrJRnTT5FwFe1l/4enfj6Cw92Ui4euw1fY43MK7m9/dS/YdO7/BuW6QOXiIYaj/T
-         6sioJcuXtJkhnSCuST0V2sKzEcDRPyO+PhqVh+SwyoGDmqVxYUwZYMz2zl2xa5FZG2Jy
-         Hp4FeXiqzZN8LznpItmhBk9GIhN1LFwDAU/81A60iu3o/GQTiVIyP9wFteBBIZQCR3sO
-         b8ulmjGPeYi9+7dgd/C1z69p8vCO+/Ad++blrl63oy2bHZD+GxxI1JWSJxNZsoz0cu4k
-         GB+Q==
-X-Gm-Message-State: AOAM533s6gow+wxQizcW0Hq+hPNOHr4ll4eqQOdjFUR00KTI0dReScZa
-        nd6SQ69lQ/LZoJO/BD6u+kuIMSD17+0h09WuMvf2SwaXsPOEltCn8PVu6d2mToOwmuwC7+QOdzr
-        G2ZDITCTElWuGTXtgqw==
-X-Received: by 2002:a17:90b:4a51:: with SMTP id lb17mr4911529pjb.118.1641398784242;
-        Wed, 05 Jan 2022 08:06:24 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxKPvAnwz+GsJmphWfHx0J4a0GlUNN/ZgiOBT+JFvqtTGcwHkJ51T1TVKSL5T43rfs0RIoSSQ==
-X-Received: by 2002:a17:90b:4a51:: with SMTP id lb17mr4911502pjb.118.1641398783922;
-        Wed, 05 Jan 2022 08:06:23 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=R57nPR5upCf+llF7MYV/PDGEv/CLCFGVlA6W9s8i/a4=;
+        b=narMmeMqI7/d6nJWH+JfjWINm8mVqL+/88FR48rfSz4PbVQ5k9Kk4bJ1uRLAbUQkZR
+         4r5okinowLIygCUk/EPdbOB8W6JLoNxS+Wpw/+nYLiWm7UX88u/PP0ZFgGBpnsrUSYvp
+         S5NLiUD2AtYdFsiE/JFKGVsZX77Rm18siC6kIZXC5JFsVqvjAkceVaaq/B5fsBymZWVy
+         I5yZxf4BKW+lqUjbdCBLoh/CJUfHrYez0kL2gwRNjf3NBNGzH1nNE5oTrskeGEp7jFiL
+         P6Nazfg3JyZadcoEYQNxY+hzPIFvYAXsULXgJ0zyVuM0c6y94ou4b9XmMF9zfTVPGGGL
+         KYQA==
+X-Gm-Message-State: AOAM533uve+TEC143WItqFxWncwxF7woyuF1hcQcjPxhEFHWK9wXFjQE
+        NTqmPft/YwLHEYZ3S8su2P7sttG66sKsEot5TPADFp4vtsIvK/MDSdtNyO5yVFImzOfVZfBJY39
+        EAoOnWASwa0Q58J7fHQ==
+X-Received: by 2002:a17:902:d2d2:b0:148:f7d1:6315 with SMTP id n18-20020a170902d2d200b00148f7d16315mr54714371plc.10.1641399549645;
+        Wed, 05 Jan 2022 08:19:09 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJx01CiTilCs9vArJjp6dZhXBX9Fv7h1Hsl3LB64aXN7BSAhl9m+FNC9cKvlxHTmpy3qYICjoQ==
+X-Received: by 2002:a17:902:d2d2:b0:148:f7d1:6315 with SMTP id n18-20020a170902d2d200b00148f7d16315mr54714352plc.10.1641399549311;
+        Wed, 05 Jan 2022 08:19:09 -0800 (PST)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id h7sm47136896pfc.152.2022.01.05.08.06.21
+        by smtp.gmail.com with ESMTPSA id c24sm21606687pgm.67.2022.01.05.08.19.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Jan 2022 08:06:23 -0800 (PST)
-Date:   Thu, 6 Jan 2022 00:06:19 +0800
+        Wed, 05 Jan 2022 08:19:09 -0800 (PST)
+Date:   Thu, 6 Jan 2022 00:19:05 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>, guan@eryu.me,
-        fstests@vger.kernel.org,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>,
-        Eric Whitney <enwlinux@gmail.com>
-Subject: Re: [PATCH] ext4/033: test EXT4_IOC_RESIZE_FS by calling the ioctl
- directly
-Message-ID: <20220105160619.r66lacgq7b7ucyuk@zlang-mailbox>
-Mail-Followup-To: Theodore Ts'o <tytso@mit.edu>, guan@eryu.me,
-        fstests@vger.kernel.org,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>,
-        Eric Whitney <enwlinux@gmail.com>
-References: <Yb9M3aIb9cJGIJaB@desktop>
- <20211220204059.2248577-1-tytso@mit.edu>
- <20220105155743.6knpj4zsbmy62uwj@zlang-mailbox>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] xfs/014: try a few times to create speculative
+ preallocations
+Message-ID: <20220105161905.jaobft32wosjy3fv@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        xfs <linux-xfs@vger.kernel.org>
+References: <20220104020417.GB31566@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220105155743.6knpj4zsbmy62uwj@zlang-mailbox>
+In-Reply-To: <20220104020417.GB31566@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 05, 2022 at 11:57:43PM +0800, Zorro Lang wrote:
-> On Mon, Dec 20, 2021 at 03:40:59PM -0500, Theodore Ts'o wrote:
-> > E2fsprogs commits 4ea80d031c7e ("resize2fs: adjust new size of the
-> > file system to allow a successful resize") and 50088b1996cc
-> > ("resize2fs: attempt to keep the # of inodes valid by removing the
-> > last bg") will automatically reduce the requested new size of the file
-> > system by up to a single block group to avoid overflowing the 32-bit
-> > inode count.   This interferes with ext4/033's test of kernel commit
-> > 4f2f76f75143 ("ext4: Forbid overflowing inode count when # resizing".)
-> > 
-> > Address this by creating a new test program, ext4_resize which calls
-> > the EXT4_IOC_RESIZE_FS ioctl directly so we can correctly test the
-> > kernel's online resize code.
-> > 
-> > Reported-by: Eric Whitney <enwlinux@gmail.com>
-> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > ---
-> >  .gitignore        |  1 +
-> >  src/Makefile      |  2 +-
-> >  src/ext4_resize.c | 50 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/ext4/033    | 16 ++++++++++-----
-> >  4 files changed, 63 insertions(+), 6 deletions(-)
-> >  create mode 100644 src/ext4_resize.c
-> > 
-> > diff --git a/.gitignore b/.gitignore
-> > index 9e6d2fd5..65b93307 100644
-> > --- a/.gitignore
-> > +++ b/.gitignore
-> > @@ -77,6 +77,7 @@ tags
-> >  /src/dirperf
-> >  /src/dirstress
-> >  /src/e4compact
-> > +/src/ext4_resize
-> >  /src/fault
-> >  /src/feature
-> >  /src/fiemap-tester
-> > diff --git a/src/Makefile b/src/Makefile
-> > index 25ab061d..1737ed0e 100644
-> > --- a/src/Makefile
-> > +++ b/src/Makefile
-> > @@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> >  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
-> >  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
-> >  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
-> > -	detached_mounts_propagation
-> > +	detached_mounts_propagation ext4_resize
-> >  
-> >  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
-> >  	      btrfs_crc32c_forged_name.py
-> > diff --git a/src/ext4_resize.c b/src/ext4_resize.c
-> > new file mode 100644
-> > index 00000000..1ac51e6f
-> > --- /dev/null
-> > +++ b/src/ext4_resize.c
-> > @@ -0,0 +1,50 @@
-> > +// SPDX-License-Identifier: GPL-2.0
-> > +
-> > +/*
-> > + * Test program which uses the raw ext4 resize_fs ioctl directly.
-> > + */
-> > +
-> > +#include <stdio.h>
-> > +#include <fcntl.h>
-> > +#include <errno.h>
-> > +#include <unistd.h>
-> > +#include <stdint.h>
-> > +#include <stdlib.h>
-> > +#include <sys/ioctl.h>
-> > +#include <sys/mount.h>
-> > +
-> > +typedef unsigned long long __u64;
-> > +
-> > +#ifndef EXT4_IOC_RESIZE_FS
-> > +#define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
-> > +#endif
+On Mon, Jan 03, 2022 at 06:04:17PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> This patch looks good to me, I just want to ask if we'd better to try to include
-> ext2fs/ext2fs.h at here? And of course, check it in configure.ac.
-> The EXT4_IOC_RESIZE_FS looks like defined in ext2fs/ext2_fs.h which comes from
-> e2fsprogs-devel package. I can't find this definition from kernel-hearders package.
-> As you're the expert of this part, please correct me if it's wrong :)
+> This test checks that speculative file preallocations are transferred to
+> threads writing other files when space is low.  Since we have background
+> threads to clear those preallocations, it's possible that the test
+> program might not get a speculative preallocation on the first try.
+> 
+> This problem has become more pronounced since the introduction of
+> background inode inactivation since userspace no longer has direct
+> control over the timing of file blocks being released from unlinked
+> files.  As a result, the author has seen an increase in sporadic
+> warnings from this test about speculative preallocations not appearing.
+> 
+> Therefore, modify the function to try up to five times to create the
+> speculative preallocation before emitting warnings that then cause
+> golden output failures.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/014 |   41 +++++++++++++++++++++++++----------------
+>  1 file changed, 25 insertions(+), 16 deletions(-)
+> 
+> diff --git a/tests/xfs/014 b/tests/xfs/014
+> index a605b359..1f0ebac3 100755
+> --- a/tests/xfs/014
+> +++ b/tests/xfs/014
+> @@ -33,27 +33,36 @@ _cleanup()
+>  # failure.
+>  _spec_prealloc_file()
+>  {
+> -	file=$1
+> +	local file=$1
+> +	local prealloc_size=0
+> +	local i=0
+>  
+> -	rm -f $file
+> +	# Now that we have background garbage collection processes that can be
+> +	# triggered by low space/quota conditions, it's possible that we won't
+> +	# succeed in creating a speculative preallocation on the first try.
+> +	for ((tries = 0; tries < 5 && prealloc_size == 0; tries++)); do
+> +		rm -f $file
+>  
+> -	# a few file extending open-write-close cycles should be enough to
+> -	# trigger the fs to retain preallocation. write 256k in 32k intervals to
+> -	# be sure
+> -	for i in $(seq 0 32768 262144); do
+> -		$XFS_IO_PROG -f -c "pwrite $i 32k" $file >> $seqres.full
+> +		# a few file extending open-write-close cycles should be enough
+> +		# to trigger the fs to retain preallocation. write 256k in 32k
+> +		# intervals to be sure
+> +		for i in $(seq 0 32768 262144); do
+> +			$XFS_IO_PROG -f -c "pwrite $i 32k" $file >> $seqres.full
+> +		done
+> +
+> +		# write a 4k aligned amount of data to keep the calculations
+> +		# simple
+> +		$XFS_IO_PROG -c "pwrite 0 128m" $file >> $seqres.full
+> +
+> +		size=`_get_filesize $file`
+> +		blocks=`stat -c "%b" $file`
+> +		blocksize=`stat -c "%B" $file`
+> +
+> +		prealloc_size=$((blocks * blocksize - size))
 
-Oh, I just noticed that this patch has been merged. I have no idea why this email become
-*unread* status in my mutt, cause I thought it's a new patch. Please ignore this review.
+So we only try same pwrite operations 5 times, and only check the prealloc_size after 5
+times done? Should we break from this loop once prealloc_size > 0?
 
+Thanks,
+Zorro
+
+>  	done
+>  
+> -	# write a 4k aligned amount of data to keep the calculations simple
+> -	$XFS_IO_PROG -c "pwrite 0 128m" $file >> $seqres.full
+> -
+> -	size=`_get_filesize $file`
+> -	blocks=`stat -c "%b" $file`
+> -	blocksize=`stat -c "%B" $file`
+> -
+> -	prealloc_size=$((blocks * blocksize - size))
+>  	if [ $prealloc_size -eq 0 ]; then
+> -		echo "Warning: No speculative preallocation for $file." \
+> +		echo "Warning: No speculative preallocation for $file after $tries iterations." \
+>  			"Check use of the allocsize= mount option."
+>  	fi
+>  
 > 
-> Thanks,
-> Zorro
-> 
-> > +
-> > +int main(int argc, char **argv)
-> > +{
-> > +	__u64	new_size;
-> > +	int	error, fd;
-> > +	char	*tmp = NULL;
-> > +
-> > +	if (argc != 3) {
-> > +		fputs("insufficient arguments\n", stderr);
-> > +		return 1;
-> > +	}
-> > +	fd = open(argv[1], O_RDONLY);
-> > +	if (!fd) {
-> > +		perror(argv[1]);
-> > +		return 1;
-> > +	}
-> > +
-> > +	new_size = strtoull(argv[2], &tmp, 10);
-> > +	if ((errno) || (*tmp != '\0')) {
-> > +		fprintf(stderr, "%s: invalid new size\n", argv[0]);
-> > +		return 1;
-> > +	}
-> > +
-> > +	error = ioctl(fd, EXT4_IOC_RESIZE_FS, &new_size);
-> > +	if (error < 0) {
-> > +		perror("EXT4_IOC_RESIZE_FS");
-> > +		return 1;
-> > +	}
-> > +	return 0;
-> > +}
-> > diff --git a/tests/ext4/033 b/tests/ext4/033
-> > index 1bc14c03..22041a17 100755
-> > --- a/tests/ext4/033
-> > +++ b/tests/ext4/033
-> > @@ -5,7 +5,8 @@
-> >  # FS QA Test 033
-> >  #
-> >  # Test s_inodes_count overflow for huge filesystems. This bug was fixed
-> > -# by commit "ext4: Forbid overflowing inode count when resizing".
-> > +# by commit 4f2f76f75143 ("ext4: Forbid overflowing inode count when
-> > +# resizing".)
-> >  #
-> >  . ./common/preamble
-> >  _begin_fstest auto ioctl resize
-> > @@ -28,7 +29,9 @@ _supported_fs ext4
-> >  _require_scratch_nocheck
-> >  _require_dmhugedisk
-> >  _require_dumpe2fs
-> > -_require_command "$RESIZE2FS_PROG" resize2fs
-> > +_require_test_program ext4_resize
-> > +
-> > +EXT4_RESIZE=$here/src/ext4_resize
-> >  
-> >  # Figure out whether device is large enough
-> >  devsize=$(blockdev --getsize64 $SCRATCH_DEV)
-> > @@ -68,7 +71,8 @@ $DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
-> >  
-> >  # This should fail, s_inodes_count would just overflow!
-> >  echo "Resizing to inode limit + 1..."
-> > -$RESIZE2FS_PROG $DMHUGEDISK_DEV $((limit_groups*group_blocks)) >> $seqres.full 2>&1
-> > +echo $EXT4_RESIZE $SCRATCH_MNT $((limit_groups*group_blocks)) >> $seqres.full 2>&1
-> > +$EXT4_RESIZE $SCRATCH_MNT $((limit_groups*group_blocks)) >> $seqres.full 2>&1
-> >  if [ $? -eq 0 ]; then
-> >  	echo "Resizing succeeded but it should fail!"
-> >  	exit
-> > @@ -76,7 +80,8 @@ fi
-> >  
-> >  # This should succeed, we are maxing out inodes
-> >  echo "Resizing to max group count..."
-> > -$RESIZE2FS_PROG $DMHUGEDISK_DEV $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
-> > +echo $EXT4_RESIZE $SCRATCH_MNT $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
-> > +$EXT4_RESIZE $SCRATCH_MNT $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
-> >  if [ $? -ne 0 ]; then
-> >  	echo "Resizing failed!"
-> >  	exit
-> > @@ -87,7 +92,8 @@ $DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
-> >  
-> >  # This should fail, s_inodes_count would overflow by quite a bit!
-> >  echo "Resizing to device size..."
-> > -$RESIZE2FS_PROG $DMHUGEDISK_DEV >> $seqres.full 2>&1
-> > +echo $EXT4_RESIZE $SCRATCH_MNT $(((limit_groups + 16)*group_blocks)) >> $seqres.full 2>&1
-> > +$EXT4_RESIZE $SCRATCH_MNT $(((limit_groups + 16)*group_blocks)) >> $seqres.full 2>&1
-> >  if [ $? -eq 0 ]; then
-> >  	echo "Resizing succeeded but it should fail!"
-> >  	exit
-> > -- 
-> > 2.31.0
-> > 
 
