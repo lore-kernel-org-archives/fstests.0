@@ -2,192 +2,249 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9714AC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jan 2022 06:03:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E559C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jan 2022 15:57:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237605AbiAEGDf (ORCPT
+        id S241771AbiAEP55 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Jan 2022 01:03:35 -0500
-Received: from mx0a-00069f02.pphosted.com ([205.220.165.32]:44518 "EHLO
-        mx0a-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236299AbiAEGDe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 01:03:34 -0500
-Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 204Nio7o008994;
-        Wed, 5 Jan 2022 06:03:32 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : content-transfer-encoding : content-type :
- mime-version; s=corp-2021-07-09;
- bh=pap8EWGye9Q18KMZV7/9Mqerz7iyqAm+MeDbeE+hbHI=;
- b=Wudt/76Rb7hQLg8SRIkfIMmhB/F/CUl1VcffcJawONabcuo2POzorF6F0DNB0BB5zqCv
- lGd5moirWIa9ZySUZyOWuBvxWTbDEC4WzyPTp+desWDursHpS2EccgTEuv9CEwwy9qsh
- ZB7prKSa5eOK7VyBmNlCxJ9xg8+/2FuGRQVYj6cree32SFkpAr79JkA+0YxI49jsSu3n
- UnBk+4TmyKtJ31c3EA892GD0gb7BquHNk3G4f2JwOvkz+b4/zyVjQvTsVr6zhPHSMmen
- /ZbZO6EmGuFQJgigiqyHN4CKc3vXYBwn8a0etOqk5iTGKDzHW5fIVUBdehl+c1j74Rwa Tg== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by mx0b-00069f02.pphosted.com with ESMTP id 3dc9d935ma-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 05 Jan 2022 06:03:32 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 20561kgq063936;
-        Wed, 5 Jan 2022 06:03:30 GMT
-Received: from nam02-dm3-obe.outbound.protection.outlook.com (mail-dm3nam07lp2048.outbound.protection.outlook.com [104.47.56.48])
-        by userp3030.oracle.com with ESMTP id 3dac2xr0jh-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 05 Jan 2022 06:03:30 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=A1FRqvi+FgpSXH/XnCFxZguAN7STXtjLynfJXuxuQypluVDpPKTp7vSu5ncp13ny7hZT3auvQ/fk9aV9fDwal93Hgna3Hc+zSlC4eyGkh4rCgZPPASusRShc5F3atrvlL7iIZM+USxaNzX1kMHGevKahdLNFELGmGjpv4YZZMU9lQ9iCghBNfVvQxOXIZsC+Km6WvY7d0xJvNyvGHS2sHAeRMavB++UPHPGT02WHuR1IJRj+zyqFidoKrhaGkEK7ke9w7xLrG4lGMd/6vRUAltJyiyRtQoFD4V5yj1h/Fl9zMe8xU7DQ3UwqV2Zu/a/ISE2kDQde5SvTnvsTBUZpew==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pap8EWGye9Q18KMZV7/9Mqerz7iyqAm+MeDbeE+hbHI=;
- b=BHKVu/SgoKijf0JjawYMYJnP5IuCkNuUENsqXFTu/VvrghxHPKn+qrdB90S7O9yvizEfzA8sWzSF+TozKiOZOc5V60B/hcUNo7Dc2fPryTt0dBHUyzuMCz3YcZhm/iczDGju6WIWBpld5CUuKLMSw4vJhmhjHsw1sFOaQr+hhmQ+O0Z2Gk9kpJjP0F5b+e8MFA6Qz8xLmgcLVO2kZ7LdvmhPmzbybNl/sjBT6gflgJ9Byt2BuBfOobjK7pZk9p4jR9Gbi+t2VBvM21fcVIFiQbT4yNpdONa9EZ50bYO5ahDDZovvHzdmW7dgeFsSDFJjhybXPX6Zglt0KDC7JIRI/A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=pap8EWGye9Q18KMZV7/9Mqerz7iyqAm+MeDbeE+hbHI=;
- b=pooBsEpmxLSmeI0kcIqqC4XmjrsX6fbbFqrA7GAbvbsYYETJTBQGkokW+CAVgrIjpyAvZZ1jK250GYv1biMk1L2RT7zfixipBtPa0ymfmGktFVi+GtKsLHAcVYtP7MSpwwOuAQzbny53fn5wagj/Ud7nXvT4yf90szXpVKemcvo=
-Received: from MN2PR10MB4128.namprd10.prod.outlook.com (2603:10b6:208:1d2::24)
- by MN2PR10MB4368.namprd10.prod.outlook.com (2603:10b6:208:1d6::24) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4844.15; Wed, 5 Jan
- 2022 06:03:28 +0000
-Received: from MN2PR10MB4128.namprd10.prod.outlook.com
- ([fe80::f450:87d2:4d68:5e00]) by MN2PR10MB4128.namprd10.prod.outlook.com
- ([fe80::f450:87d2:4d68:5e00%8]) with mapi id 15.20.4844.016; Wed, 5 Jan 2022
- 06:03:28 +0000
-From:   Anand Jain <anand.jain@oracle.com>
-To:     guan@eryu.me, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH] btrfs/254: fix non-unique fsid issue
-Date:   Wed,  5 Jan 2022 14:03:20 +0800
-Message-Id: <71f90a1e3f89e2d22e3681cc8373bb08a814865d.1641356220.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.33.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SGXP274CA0021.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b8::33)
- To MN2PR10MB4128.namprd10.prod.outlook.com (2603:10b6:208:1d2::24)
+        Wed, 5 Jan 2022 10:57:57 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:34909 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S241757AbiAEP5x (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 10:57:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1641398273;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=CH3EhoBQaWd3kqc9tnFbgtaIJ9RzdHtafLpYunEyA7E=;
+        b=EoO9GPMvOFrLn8SELs7V7kdOiGPLnWLoFAMjB302TE+zTeEfa9eg9tYjZu+tNIB4dzHcPN
+        rmamcJcjI78Un+Tjr9rb8BU5eB/tDRyVD5w185Ehdz8qYoLkYRy5HMnEGwYw1S4U2dNTTc
+        bUdTCv4SaN92VaXLLygwYCzjR3779cI=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-250-JxOY4Kc7PoGY8uoYKMECVA-1; Wed, 05 Jan 2022 10:57:50 -0500
+X-MC-Unique: JxOY4Kc7PoGY8uoYKMECVA-1
+Received: by mail-pg1-f198.google.com with SMTP id s13-20020a63214d000000b00341b713315cso13383385pgm.6
+        for <fstests@vger.kernel.org>; Wed, 05 Jan 2022 07:57:49 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=CH3EhoBQaWd3kqc9tnFbgtaIJ9RzdHtafLpYunEyA7E=;
+        b=5QsWz8xeWP8wxfxK7cze+asNSvEiSsX05KpddusxEnzzopGYUzlnOPwkyTYKDoYB9j
+         DIIgTp9+MLXqPPRk7caWAjgy3nijfF80iR5PYJ0eR1IQ3WVaE/NeP3VpT9AR1hMrvhAw
+         U6FnEsgTZA0vV3Gby2COB1lcqI9b4Brfgu6HZwsVEdTW6NvrXzfZSs2CC/8Mq1WmD200
+         jxdxNvW+CdWOITBuoQPCbp8IKNyyKsisgmxTuxHe5KjcEyHMVtEaXtoyOQC/dY9xqPs5
+         pOL4r4sYms1mJ92JG+0mcxbtwAY4IhxUzZ9XICMzMJSODUm0i/uqhPEd/Kp6QU/SdhHZ
+         ThZw==
+X-Gm-Message-State: AOAM5338Cvmg5BWJVL5v9vOI/6BvSrJ8R71lqRpSHAJJLN41WWnEvv/9
+        hWHpO6ea24aw3nRlKDrCpLhXS0+9glrYPKjy/aP6jPRGTUUqPuiQNv3GdvOM2FgcuO+SzG9uxuD
+        HrwdjegKPSXu4fTCEOA==
+X-Received: by 2002:a17:90b:3907:: with SMTP id ob7mr4802050pjb.176.1641398268783;
+        Wed, 05 Jan 2022 07:57:48 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJzcExbiuTXIdVISXSv7S3d5/tfNDTvl3B31jdNXawQurM1oWKCrT9JhfRBRTMJqZfaIxBe7Qg==
+X-Received: by 2002:a17:90b:3907:: with SMTP id ob7mr4802020pjb.176.1641398268474;
+        Wed, 05 Jan 2022 07:57:48 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id g16sm44241605pfv.159.2022.01.05.07.57.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 05 Jan 2022 07:57:48 -0800 (PST)
+Date:   Wed, 5 Jan 2022 23:57:43 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     guan@eryu.me, fstests@vger.kernel.org,
+        Ext4 Developers List <linux-ext4@vger.kernel.org>,
+        Eric Whitney <enwlinux@gmail.com>
+Subject: Re: [PATCH] ext4/033: test EXT4_IOC_RESIZE_FS by calling the ioctl
+ directly
+Message-ID: <20220105155743.6knpj4zsbmy62uwj@zlang-mailbox>
+Mail-Followup-To: Theodore Ts'o <tytso@mit.edu>, guan@eryu.me,
+        fstests@vger.kernel.org,
+        Ext4 Developers List <linux-ext4@vger.kernel.org>,
+        Eric Whitney <enwlinux@gmail.com>
+References: <Yb9M3aIb9cJGIJaB@desktop>
+ <20211220204059.2248577-1-tytso@mit.edu>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 1833962c-ec80-4107-08eb-08d9d01117f9
-X-MS-TrafficTypeDiagnostic: MN2PR10MB4368:EE_
-X-Microsoft-Antispam-PRVS: <MN2PR10MB43689C25FA14C6D2580D8E50E54B9@MN2PR10MB4368.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:8273;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: XDBR454+lqK3iZGtzVXQJq1Fr07SOeRAbglSiC7QCqzdYAfnUv6ve165W7igBvOgfghCYQTJhMNf3Onic/h/Y0FWiFbSZ/37Euxb5uHfA/4U+SDLyCArDYiDn+XcfdAewsIdrZOizOUDRRkff6IvHsGrLqqVzcTIQx6SNHjHBJnR0UJlnFBaKpfdeGJn+g4Kms7mgfKZUlgtgtJnwTK6bMje9gnz7iBUBS7m+HMocbI1ePcFExGNl7ixAB9FwmJLpMAx5dBWUCLROPXHcm+mwLmoBK4LV1XvMVR182H2WX0hCl/Rxhva2G9r977NlcJidZdUPDMRN6amQHxEp4X3nUIGex8WCPc5ymdfywUlKet1r2bogV08BwXexRWphgnQVXl3h3vhkOTrpvrxxUeRsg7QoPo1PUE6pgUPo6EG4LDOSz40+wiE5GIeB2Uwk0yncJEgpumpcP3AS+KJycJJFKDqmpVsvRuTqm88ECmRhNzk4G94Y/RWEqW3fwi31knIHhoIxzWrYfQfpaOBSHBe6NMQB5A+aDk5EC9DuLBY4pUOOu34dCz043ofhs1l7scuEFl+Ml2IJ1/JZe5KRVjVGtwveFqQsea2SZ1HxNC2yq+HckE1FkkVqkTDfJcjenOXCNChHSK2DGwZcEL61pYYjQ==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(66476007)(66946007)(83380400001)(2906002)(6512007)(8676002)(6506007)(5660300002)(66556008)(6666004)(38100700002)(316002)(8936002)(2616005)(6486002)(186003)(36756003)(86362001)(44832011)(508600001)(4326008)(26005);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?qqdDlyRDUd6aJPm8aenpNOPxJot9OK+TDrplCGnX9O/6Ee5lZFeC27mCLbcY?=
- =?us-ascii?Q?hKM2d0doreojBvjdUFx7Ca4j4wntpy6OSpgF87XGiVJKEYoDUNBCFAW8bdcS?=
- =?us-ascii?Q?NynryaAsjjdftHJAmbF1RvtbS0s5qt/8xaE98cNm+cfhka8uDFkUtohKNxjm?=
- =?us-ascii?Q?dwX34olTZJ8VHbS39hiiUcDfeWuVBfnrpPSo9dlrQ8AU1bwW4Za2nCjNO5+s?=
- =?us-ascii?Q?y3YLl9jSBnClkhrCEBaEYpxtCU146zTZdUoOd7onDdVKq4371F8AhggfdlCs?=
- =?us-ascii?Q?X4VF680CX4y2uWhc+48nBA+BQ5yvkiZuw7A9Bz9+jxcdt3epqpLTeMnzeCt3?=
- =?us-ascii?Q?eOTJMDXpwgjMK3DwkYAeY076W9BYE3mk4txK+PXtjF69ZVXTqwZfizfGepfd?=
- =?us-ascii?Q?7zUHTYDGVWLWDXurIGZtg+SiYVgeUfzuZVTimi0EmTmV8GFFS1xxf3hpiLXU?=
- =?us-ascii?Q?Qcq7YABNZVa9/j2qlmXfgDYzqseAb5+fQNqpArRoomA8GTtg+pMFDZApDgGC?=
- =?us-ascii?Q?zb1s1CEdgi8BPvLeCf44FEhdMEWNgvymVLijf55ljIbVjliTMki8c+jFm4sa?=
- =?us-ascii?Q?6vVUcaTLlmhMDMTcftVnQdpQeZtjw/2NXMM+Y+usnz8Dn4+XaRljP/5RKks9?=
- =?us-ascii?Q?57VuRecc7lP7ZdAno9kwYyZGaqbNNgBAp23ydChTzVTsQN5tWJJBJD6snZkY?=
- =?us-ascii?Q?HYi6VdSGmYer7nWQR/JgHwgzLtD9QUirNMJjf7AMMsRa6IhkWF5Ksape635S?=
- =?us-ascii?Q?j1NBXkbh7C3gwxAMp0QNKZlapDU4pSibjwiwx1HYFsYJ6Tz+fnYtF2XUQj2U?=
- =?us-ascii?Q?7fLusZO8nna3r4/MWTrqdb3xIVO6+v8BKRl9GGR+OF1w5FL3F6aj4T1n+cYo?=
- =?us-ascii?Q?wie04o2wctXG8xQ4Ej223JXHB9BDB9TMBEXpXQFch0o4DVg50xMdHwZ5j2qb?=
- =?us-ascii?Q?mbW15IKkzQ8OtEFBdcKOzQRiv7zFF0yXIEWq14ilrJgqrhPozlNpNvNxPu2z?=
- =?us-ascii?Q?W+Cf444wP2N7VDL8KD79pS7wnqwL95gleqq94BLc+2wLBaDdA4jTGjkG0ccV?=
- =?us-ascii?Q?li9J8rKRbkCVHdr8M0uf8S0wxrWrel0hCjbZSzx0MukXYuxlx+uxYNOBajXO?=
- =?us-ascii?Q?vX4pppnvoBJyFF3P/QvTzOLvQ2UU+LdzgSHkWqYf6z1Vz2e1arCAVoENqM6k?=
- =?us-ascii?Q?ByG4/GHk3UpueAwgZSWOVk81SVqv54qsp2cgZ96vLnY3YrT8A3uzbr08I2BZ?=
- =?us-ascii?Q?unEczvhsNF2cmLwdyJpSEscqRyAoyjtL+rox+mkzKdTdoqu1Mm47V2kQ1O/y?=
- =?us-ascii?Q?pep9cDAIQr/oviuUOTcZwKGsHLumtV1F3AAHEF2OUegb0XNhugz3EoylpAOe?=
- =?us-ascii?Q?0Up7PADdFkkNauaopvMMfjgrPgzV5ezI5Py5h2GSA2Z6bAIMU7/6RWio6igq?=
- =?us-ascii?Q?33a8jeR9oWbINSBzVCe9oDleRxSwKqIEDbeGHes6U/CSBULoj9zTww4qtwsZ?=
- =?us-ascii?Q?MOJXtJDeahX5+jxRw2ETYAW+LqoTeQbEXid5xBk67XaHRt+ahCNGNaWSJ8VB?=
- =?us-ascii?Q?0LVSVrBOOt2F8C0RwR+afupKDW0d3J+pLIzjUb/YqmO/Gy3qIXrHLJF8I7qZ?=
- =?us-ascii?Q?CepXbEa07GK+rXJJ0j4JJsc=3D?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1833962c-ec80-4107-08eb-08d9d01117f9
-X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4128.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Jan 2022 06:03:28.6271
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: NQUOedzLT6Yq3dVR4p0o0LtNDZqb1JOoREMRK0WQpQrcQIWXGwf5iqAdbUI7Y5b7eBbqiZtxoi9n9aWj3igptg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR10MB4368
-X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10217 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 mlxlogscore=999 mlxscore=0
- suspectscore=0 spamscore=0 phishscore=0 malwarescore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2110150000
- definitions=main-2201050041
-X-Proofpoint-ORIG-GUID: J0J2UChLXaGxcZwGoXssaHiR6gAjn6MH
-X-Proofpoint-GUID: J0J2UChLXaGxcZwGoXssaHiR6gAjn6MH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211220204059.2248577-1-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test case needs two scratch fs. For debugging purposes, a fsid is
-kept known. However, mkfs-btrfs has a stringent and inconsistent
-approach, to check if that fsid is already present on any of the other
-disks in the system. (This does not apply to the virtual devices in the
-system).
+On Mon, Dec 20, 2021 at 03:40:59PM -0500, Theodore Ts'o wrote:
+> E2fsprogs commits 4ea80d031c7e ("resize2fs: adjust new size of the
+> file system to allow a successful resize") and 50088b1996cc
+> ("resize2fs: attempt to keep the # of inodes valid by removing the
+> last bg") will automatically reduce the requested new size of the file
+> system by up to a single block group to avoid overflowing the 32-bit
+> inode count.   This interferes with ext4/033's test of kernel commit
+> 4f2f76f75143 ("ext4: Forbid overflowing inode count when # resizing".)
+> 
+> Address this by creating a new test program, ext4_resize which calls
+> the EXT4_IOC_RESIZE_FS ioctl directly so we can correctly test the
+> kernel's online resize code.
+> 
+> Reported-by: Eric Whitney <enwlinux@gmail.com>
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  .gitignore        |  1 +
+>  src/Makefile      |  2 +-
+>  src/ext4_resize.c | 50 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/033    | 16 ++++++++++-----
+>  4 files changed, 63 insertions(+), 6 deletions(-)
+>  create mode 100644 src/ext4_resize.c
+> 
+> diff --git a/.gitignore b/.gitignore
+> index 9e6d2fd5..65b93307 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -77,6 +77,7 @@ tags
+>  /src/dirperf
+>  /src/dirstress
+>  /src/e4compact
+> +/src/ext4_resize
+>  /src/fault
+>  /src/feature
+>  /src/fiemap-tester
+> diff --git a/src/Makefile b/src/Makefile
+> index 25ab061d..1737ed0e 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> -	detached_mounts_propagation
+> +	detached_mounts_propagation ext4_resize
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py
+> diff --git a/src/ext4_resize.c b/src/ext4_resize.c
+> new file mode 100644
+> index 00000000..1ac51e6f
+> --- /dev/null
+> +++ b/src/ext4_resize.c
+> @@ -0,0 +1,50 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +/*
+> + * Test program which uses the raw ext4 resize_fs ioctl directly.
+> + */
+> +
+> +#include <stdio.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <unistd.h>
+> +#include <stdint.h>
+> +#include <stdlib.h>
+> +#include <sys/ioctl.h>
+> +#include <sys/mount.h>
+> +
+> +typedef unsigned long long __u64;
+> +
+> +#ifndef EXT4_IOC_RESIZE_FS
+> +#define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
+> +#endif
 
-To avoid running into the non-unique fsid found error, remove the known
-fsid.
+This patch looks good to me, I just want to ask if we'd better to try to include
+ext2fs/ext2fs.h at here? And of course, check it in configure.ac.
+The EXT4_IOC_RESIZE_FS looks like defined in ext2fs/ext2_fs.h which comes from
+e2fsprogs-devel package. I can't find this definition from kernel-hearders package.
+As you're the expert of this part, please correct me if it's wrong :)
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/254 | 9 ++++-----
- 1 file changed, 4 insertions(+), 5 deletions(-)
+Thanks,
+Zorro
 
-diff --git a/tests/btrfs/254 b/tests/btrfs/254
-index b70b9d165897..2f3ae50f2e3e 100755
---- a/tests/btrfs/254
-+++ b/tests/btrfs/254
-@@ -11,7 +11,7 @@
- #	btrfs: harden identification of the stale device
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick volume
- 
- # Override the default cleanup function.
- node=$seq-test
-@@ -55,7 +55,6 @@ setup_dmdev()
- }
- 
- # Use a known it is much easier to debug.
--uuid="--uuid 12345678-1234-1234-1234-123456789abc"
- lvdev=/dev/mapper/$node
- 
- seq_mnt=$TEST_DIR/$seq.mnt
-@@ -66,7 +65,7 @@ test_forget()
- 	setup_dmdev
- 	dmdev=$(realpath $lvdev)
- 
--	_mkfs_dev $uuid $dmdev
-+	_mkfs_dev $dmdev
- 
- 	# Check if we can un-scan using the mapper device path.
- 	$BTRFS_UTIL_PROG device scan --forget $lvdev
-@@ -88,9 +87,9 @@ test_add_device()
- 	_mkfs_dev $scratch_dev3
- 	_mount $scratch_dev3 $seq_mnt
- 
--	_mkfs_dev $uuid -draid1 -mraid1 $lvdev $scratch_dev2
-+	_mkfs_dev -draid1 -mraid1 $lvdev $scratch_dev2
- 
--	# Add device should free the device under $uuid in the kernel.
-+	# Added device should free the stale device in the kernel.
- 	$BTRFS_UTIL_PROG device add -f $dmdev $seq_mnt > /dev/null 2>&1
- 
- 	_mount -o degraded $scratch_dev2 $SCRATCH_MNT
--- 
-2.33.1
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	__u64	new_size;
+> +	int	error, fd;
+> +	char	*tmp = NULL;
+> +
+> +	if (argc != 3) {
+> +		fputs("insufficient arguments\n", stderr);
+> +		return 1;
+> +	}
+> +	fd = open(argv[1], O_RDONLY);
+> +	if (!fd) {
+> +		perror(argv[1]);
+> +		return 1;
+> +	}
+> +
+> +	new_size = strtoull(argv[2], &tmp, 10);
+> +	if ((errno) || (*tmp != '\0')) {
+> +		fprintf(stderr, "%s: invalid new size\n", argv[0]);
+> +		return 1;
+> +	}
+> +
+> +	error = ioctl(fd, EXT4_IOC_RESIZE_FS, &new_size);
+> +	if (error < 0) {
+> +		perror("EXT4_IOC_RESIZE_FS");
+> +		return 1;
+> +	}
+> +	return 0;
+> +}
+> diff --git a/tests/ext4/033 b/tests/ext4/033
+> index 1bc14c03..22041a17 100755
+> --- a/tests/ext4/033
+> +++ b/tests/ext4/033
+> @@ -5,7 +5,8 @@
+>  # FS QA Test 033
+>  #
+>  # Test s_inodes_count overflow for huge filesystems. This bug was fixed
+> -# by commit "ext4: Forbid overflowing inode count when resizing".
+> +# by commit 4f2f76f75143 ("ext4: Forbid overflowing inode count when
+> +# resizing".)
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto ioctl resize
+> @@ -28,7 +29,9 @@ _supported_fs ext4
+>  _require_scratch_nocheck
+>  _require_dmhugedisk
+>  _require_dumpe2fs
+> -_require_command "$RESIZE2FS_PROG" resize2fs
+> +_require_test_program ext4_resize
+> +
+> +EXT4_RESIZE=$here/src/ext4_resize
+>  
+>  # Figure out whether device is large enough
+>  devsize=$(blockdev --getsize64 $SCRATCH_DEV)
+> @@ -68,7 +71,8 @@ $DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
+>  
+>  # This should fail, s_inodes_count would just overflow!
+>  echo "Resizing to inode limit + 1..."
+> -$RESIZE2FS_PROG $DMHUGEDISK_DEV $((limit_groups*group_blocks)) >> $seqres.full 2>&1
+> +echo $EXT4_RESIZE $SCRATCH_MNT $((limit_groups*group_blocks)) >> $seqres.full 2>&1
+> +$EXT4_RESIZE $SCRATCH_MNT $((limit_groups*group_blocks)) >> $seqres.full 2>&1
+>  if [ $? -eq 0 ]; then
+>  	echo "Resizing succeeded but it should fail!"
+>  	exit
+> @@ -76,7 +80,8 @@ fi
+>  
+>  # This should succeed, we are maxing out inodes
+>  echo "Resizing to max group count..."
+> -$RESIZE2FS_PROG $DMHUGEDISK_DEV $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
+> +echo $EXT4_RESIZE $SCRATCH_MNT $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
+> +$EXT4_RESIZE $SCRATCH_MNT $(((limit_groups-1)*group_blocks)) >> $seqres.full 2>&1
+>  if [ $? -ne 0 ]; then
+>  	echo "Resizing failed!"
+>  	exit
+> @@ -87,7 +92,8 @@ $DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
+>  
+>  # This should fail, s_inodes_count would overflow by quite a bit!
+>  echo "Resizing to device size..."
+> -$RESIZE2FS_PROG $DMHUGEDISK_DEV >> $seqres.full 2>&1
+> +echo $EXT4_RESIZE $SCRATCH_MNT $(((limit_groups + 16)*group_blocks)) >> $seqres.full 2>&1
+> +$EXT4_RESIZE $SCRATCH_MNT $(((limit_groups + 16)*group_blocks)) >> $seqres.full 2>&1
+>  if [ $? -eq 0 ]; then
+>  	echo "Resizing succeeded but it should fail!"
+>  	exit
+> -- 
+> 2.31.0
+> 
 
