@@ -2,110 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27243C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 02:35:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41949C433FE
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 11:23:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344849AbiAFCfP (ORCPT
+        id S238417AbiAFLXT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Jan 2022 21:35:15 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:39814 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1344824AbiAFCfN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 21:35:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1641436513;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=9Y6ec7tc6YZuXAfW6QQgoyFOZoDzPiYpbd5lseRhA/0=;
-        b=YaoWMv7Ur9WISpJxgNDIWYZ8sbJE1cv7NIPIgckYelS23BnjTamv8x9wls2Suheab/mLiF
-        uoFVi2afNBSsHK3jz3LdNrm/y9MgCP1NG0ILrfSgDFdR/pgW/cyWasJovnpeen2Tb62LLO
-        UcAGH+b8uriZvycYz9BMdO5BMN4QEBs=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-66-hJhrq8L0PNCHRngD3R47Ew-1; Wed, 05 Jan 2022 21:35:11 -0500
-X-MC-Unique: hJhrq8L0PNCHRngD3R47Ew-1
-Received: by mail-pl1-f198.google.com with SMTP id t3-20020a170902bc4300b00149074b1606so458234plz.13
-        for <fstests@vger.kernel.org>; Wed, 05 Jan 2022 18:35:11 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=9Y6ec7tc6YZuXAfW6QQgoyFOZoDzPiYpbd5lseRhA/0=;
-        b=rNyX1yG25zJcgzm//2jxOS4oSiilFbE6nj4CxDfRCVM5cxxAJyGGM1yOviujGsnTPF
-         f/GfPq3ODvgfts4vFGs0GvITIjTc2OFTcZE6VPgRpvY9i1qgcWnKwmODhA6YGxt64uBg
-         oWFYp1lFSXd/ptKGx9R+mgiIqEky6tNLyrw/Tkea8eIgZpJ3+ZlT5Cix5SCvmnaYBliK
-         5Qu3hHuw7m7szzDOnzltzrQkeHTvZLl/YIzCzzTUz0bUn9khsY2oMSd+h18vZcjDuqEc
-         O09EVSUg0oO5LihkB7u/EssGhiqD2PMq3+56eRGp0qVY3CCsQ/YFA3mZo+R6hSA9Pl4B
-         lKWQ==
-X-Gm-Message-State: AOAM531DJHq/DSne8nakUEWIYU9AHIWVOgBkVN097xnabLbdNBaZKOrL
-        LCCxzgfNiJ2d9BFjUKy1LH1viYDN6doWV+SdmvR+tnJzAnQKbarcqm5HLv7OPnC4W1sN5PszMlf
-        ikj76WpWR0Uk/VA+3yQ==
-X-Received: by 2002:a17:902:bc4c:b0:149:ed05:3027 with SMTP id t12-20020a170902bc4c00b00149ed053027mr1574784plz.174.1641436510655;
-        Wed, 05 Jan 2022 18:35:10 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJyk2jZ0XLeQTU8c6nWJu02JeFt7+zVZQhYLaNw5nuVuhFEUXxNky72D+ipciYJDt9y1cHffvg==
-X-Received: by 2002:a17:902:bc4c:b0:149:ed05:3027 with SMTP id t12-20020a170902bc4c00b00149ed053027mr1574760plz.174.1641436510324;
-        Wed, 05 Jan 2022 18:35:10 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j17sm387009pfu.77.2022.01.05.18.35.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Jan 2022 18:35:10 -0800 (PST)
-Date:   Thu, 6 Jan 2022 10:35:06 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>
-Subject: Re: [PATCH] ext4/033: test EXT4_IOC_RESIZE_FS by calling the ioctl
- directly
-Message-ID: <20220106023506.kwpzkqdpv6hozygk@zlang-mailbox>
-Mail-Followup-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>
-References: <Yb9M3aIb9cJGIJaB@desktop>
- <20211220204059.2248577-1-tytso@mit.edu>
- <20220105155743.6knpj4zsbmy62uwj@zlang-mailbox>
- <20220105160619.r66lacgq7b7ucyuk@zlang-mailbox>
- <YdX5csi2qZjS1KOt@mit.edu>
+        Thu, 6 Jan 2022 06:23:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43462 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238405AbiAFLXT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jan 2022 06:23:19 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24F36C061245
+        for <fstests@vger.kernel.org>; Thu,  6 Jan 2022 03:23:19 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 854F561AA9
+        for <fstests@vger.kernel.org>; Thu,  6 Jan 2022 11:23:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7DAE1C36AE3;
+        Thu,  6 Jan 2022 11:23:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641468197;
+        bh=LzqywcFucefNs1IfVDpVC9fBqeGBYW6TSztB6sUzrTc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=X3o+U5/0iBLiHeyQ3kJ4IDIcZeFcmnaczf1twPgMbVYbjbjNiTnVrfV7AWujQBoI1
+         pCDrgBnnaNl2L9w75v1u5pibXlx85dwT4uQCCsLtU3GiF05K9tgBrfIulOKblciRp/
+         lNgyjEmPUmiw6Iv0srj8hWwZvgIVTBA5dJuV0SDOWPlybcCcz+q7JfouC+ndw2Ymly
+         Y8lPI+89YUuMrT3rkn14tuYpCtBDyL4inpJYPSKhePi7gaG2rBAew1jVekkd39yGlW
+         WIEt/MhNu0R+hGttYMgViUZDJ4exu4nfaOydBU2XY8ds8i33s/PEmDktfl4Nwriwho
+         kY3+nzP2ls69A==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     guan@eryu.me, zlang@redhat.com
+Subject: [PATCH v2] common: handle ceph's new mount syntax
+Date:   Thu,  6 Jan 2022 06:23:16 -0500
+Message-Id: <20220106112316.6790-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.33.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YdX5csi2qZjS1KOt@mit.edu>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 05, 2022 at 03:02:58PM -0500, Theodore Ts'o wrote:
-> On Thu, Jan 06, 2022 at 12:06:19AM +0800, Zorro Lang wrote:
-> > > This patch looks good to me, I just want to ask if we'd better to try to include
-> > > ext2fs/ext2fs.h at here? And of course, check it in configure.ac.
-> > > The EXT4_IOC_RESIZE_FS looks like defined in ext2fs/ext2_fs.h which comes from
-> > > e2fsprogs-devel package. I can't find this definition from kernel-hearders package.
-> > > As you're the expert of this part, please correct me if it's wrong :)
-> 
-> We're not depending on ext2fs/ext2_fs.h and hence the e2fsprogs-devel
-> (or libext2fs-dev package if you're using Debian/Ubuntu) anywhere else
-> in the xfstests-dev.  It's not like the code points for
-> EXT4_IOC_RESIZE_FS are going to change, so we just use constructs
-> like:
-> 
-> #ifndef EXT4_IOC_RESIZE_FS
-> #define EXT4_IOC_RESIZE_FS           _IOW('f', 16, __u64)
-> #endif
-> 
-> in xfstests-dev/src/*.c as needed.
-> 
-> There's no real upside in adding a dependency which makes it harder
-> for developers to compile xfstests.  (Trivia note: I created
-> xfstests-bld several years ago because back then, Debian didn't
-> include some of the internal header files from xfsprogs which xfstests
-> needed.)
+Cephfs is introducing a new mount device syntax. Fix the fstests
+infrastructure to handle the new syntax correctly.
 
-Thanks for your kindly explanation.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ common/config |  8 ++++++++
+ common/rc     | 34 ++++++++++++++++++++++++++++++++--
+ 2 files changed, 40 insertions(+), 2 deletions(-)
 
-> 
-> Cheers,
-> 
-> 						- Ted
-> 
+v2: more rigorous check for ceph mount device in _check_device
+
+diff --git a/common/config b/common/config
+index e0a5c5df58ff..2b357746476b 100644
+--- a/common/config
++++ b/common/config
+@@ -537,6 +537,14 @@ _check_device()
+ 		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+ 		# tmpfs doesn't use mount source, ignore
+ 		;;
++	ceph)
++		# ceph has two different possible syntaxes for mount devices. The
++		# network URL check above catches the legacy syntax. Check for the
++		# new-style syntax here.
++		if ( echo $dev | grep -qEv "=/" ); then
++			_fatal "common/config: $name ($dev) is not a valid ceph mount string"
++		fi
++		;;
+ 	overlay)
+ 		if [ ! -d "$dev" ]; then
+ 			_fatal "common/config: $name ($dev) is not a directory for overlay"
+diff --git a/common/rc b/common/rc
+index 7973ceb5fdf8..4fa0b818d840 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1592,7 +1592,7 @@ _require_scratch_nocheck()
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+ 		fi
+ 		;;
+-	nfs*|ceph)
++	nfs*)
+ 		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+ 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+ 			_notrun "this test requires a valid \$SCRATCH_DEV"
+@@ -1601,6 +1601,21 @@ _require_scratch_nocheck()
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+ 		fi
+ 		;;
++	ceph)
++		if [ -z "$SCRATCH_DEV" ]; then
++			_notrun "this test requires a valid \$SCRATCH_DEV"
++		fi
++		echo $SCRATCH_DEV | grep -q "=/" > /dev/null 2>&1
++		if [ "$?" != "0" ]; then
++			echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
++			if [ "$?" != "0" ]; then
++				_notrun "this test requires a valid \$SCRATCH_DEV"
++			fi
++		fi
++		if [ ! -d "$SCRATCH_MNT" ]; then
++			_notrun "this test requires a valid \$SCRATCH_MNT"
++		fi
++		;;
+ 	pvfs2)
+ 		echo $SCRATCH_DEV | grep -q "://" > /dev/null 2>&1
+ 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+@@ -1770,7 +1785,7 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
+-	nfs*|ceph)
++	nfs*)
+ 		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+ 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+ 			_notrun "this test requires a valid \$TEST_DEV"
+@@ -1779,6 +1794,21 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
++	ceph)
++		if [ -z "$TEST_DEV" ]; then
++			_notrun "this test requires a valid \$TEST_DEV"
++		fi
++		echo $TEST_DEV | grep -q "=/" > /dev/null 2>&1
++		if [ "$?" != "0" ]; then
++			echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
++			if [ "$?" != "0" ]; then
++				_notrun "this test requires a valid \$TEST_DEV"
++			fi
++		fi
++		if [ ! -d "$TEST_DIR" ]; then
++			_notrun "this test requires a valid \$TEST_DIR"
++		fi
++		;;
+ 	cifs)
+ 		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+ 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+-- 
+2.33.1
 
