@@ -2,163 +2,189 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB110C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 17:03:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FC76C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 17:10:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241490AbiAFRDX (ORCPT
+        id S230051AbiAFRKF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Jan 2022 12:03:23 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:56678 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241426AbiAFRDW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jan 2022 12:03:22 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6429D61D06;
-        Thu,  6 Jan 2022 17:03:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE6F6C36AEB;
-        Thu,  6 Jan 2022 17:03:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641488601;
-        bh=IcdanTKYrkbmH9+14ArDnUPPgrvybugmDr2La5xce+4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=js+D5ZoqLwAKxO08Vk4mn2zIKfvzSkcTcy8Hg8XiZXF7CRJokIR0VoFc/AcZBIcqf
-         2dNGHPUVNk9W2Irme9nJFyXET/7biu8fyoOpJ59P+72yHoozL8Gfvvb+o80EpYarJ6
-         rfgZVO3xTCU+Ax4biwFsH+4tbor6sAv/ixGro11RvVHJQgdBLFto/Uv60KNVbA0ape
-         tnirNO9hZs3xzLBkcsJcjhw+tnr5J7SQbvJgBk9rOClYJekObDt5pppPwX4rQhJE+k
-         DrYfhJKjqgWQaaPEyUVESyxmFHCLpkEjlajce2FWYY+DJRAyQIX90Tx+0vHiiGlC06
-         IrCnHy2IA4ecA==
-Date:   Thu, 6 Jan 2022 09:03:21 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs/220: fix quotarm syscall test
-Message-ID: <20220106170321.GO656707@magnolia>
-References: <20220105195352.GM656707@magnolia>
- <61D64732.3030505@fujitsu.com>
- <61D64C1C.1090602@fujitsu.com>
+        Thu, 6 Jan 2022 12:10:05 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:53720 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229666AbiAFRKE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jan 2022 12:10:04 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1641489004;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=FtHPZ+t7FGvgx4+3WhHYt+boiwVYHmbXyEBphPMnxoA=;
+        b=CV/vWp1WkO151QnZxWcbyR6VPyYRwCVJNQ/dz1M3HMYSjxMEBwLe0/mM/NXK9O5ifQHRaS
+        yb7TYOP7Y/sNMJWFmF1kBocngNVyL5azSfo6PWaB1ZJj1xIcnkjHIZiQk7cTEmExKG0Kss
+        LN1boOoQrBWuPPjcXh+/CBJaL41Ss/Q=
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
+ [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-237-5mzQ2kdePAiGnmxkLcuysA-1; Thu, 06 Jan 2022 12:10:02 -0500
+X-MC-Unique: 5mzQ2kdePAiGnmxkLcuysA-1
+Received: by mail-pg1-f200.google.com with SMTP id l6-20020a633e06000000b0034006440151so2049577pga.23
+        for <fstests@vger.kernel.org>; Thu, 06 Jan 2022 09:10:01 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=FtHPZ+t7FGvgx4+3WhHYt+boiwVYHmbXyEBphPMnxoA=;
+        b=X+Y4eVJ1f9s659A+4rh7euXJXpcEnIOUB4yHV1Fll4CvpO4MjhKaoXWjM8NCu2rTfB
+         ryBKE768NL1v5MAMR8YSFh5BGRRAR0HhuIbylVR39NvM5FZr1jLXVbZdqyQi0fvKwIlY
+         hPh9hsvYT4XV8ZimAG+PGIzTIUDVXlOywNK9LEgcYaHBFCIYu7UTKnDil1J2DiZ3/YbF
+         Pghgc2NHTALHY0zPga/z4ghfhc9WasCFcII2SR/lvDP1SNeWZxg6RtuffJyXG7jSq51v
+         wu5/Ooj3LWV6c7JTvcOfsJeIS+AjnCiQZOnyeSkIfWO5oULgx6uaEY/iR9/KHk+YI/Zb
+         2+yw==
+X-Gm-Message-State: AOAM530cyOhKo3txEiDRKunxzzlMvmHuikslkWLHziJkeq2mhou+mTzX
+        lASiXZ4xRxbexD+sybylhVnawe3rACLyQwj98HQrGiA0ItVvoIphlvCNMMmk1ACSWcn27v+ZN8j
+        q4cOB1x1MyhIvMElajw==
+X-Received: by 2002:a17:902:dac7:b0:148:ea85:af4d with SMTP id q7-20020a170902dac700b00148ea85af4dmr59060556plx.131.1641489000772;
+        Thu, 06 Jan 2022 09:10:00 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyVRoJhaUUApKFBlDf/qUgKKr2e5LvunD4LoCcNyp2GpoLCnIspxSe/vudJB0TwN06z75aYJg==
+X-Received: by 2002:a17:902:dac7:b0:148:ea85:af4d with SMTP id q7-20020a170902dac700b00148ea85af4dmr59060528plx.131.1641489000443;
+        Thu, 06 Jan 2022 09:10:00 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y37sm2483294pga.78.2022.01.06.09.09.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 06 Jan 2022 09:10:00 -0800 (PST)
+Date:   Fri, 7 Jan 2022 01:09:56 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH v2] common: handle ceph's new mount syntax
+Message-ID: <20220106170956.f7bxe265wghmbqbh@zlang-mailbox>
+Mail-Followup-To: Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org,
+        guan@eryu.me
+References: <20220106112316.6790-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <61D64C1C.1090602@fujitsu.com>
+In-Reply-To: <20220106112316.6790-1-jlayton@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 06, 2022 at 01:55:01AM +0000, xuyang2018.jy@fujitsu.com wrote:
-> on 2022/1/6 9:34, xuyang2018.jy@fujitsu.com wrote:
-> > on 2022/1/6 3:53, Darrick J. Wong wrote:
-> >> From: Darrick J. Wong<djwong@kernel.org>
-> >>
-> >> In commit 6ba125c9, we tried to adjust this fstest to deal with the
-> >> removal of the ability to turn off quota accounting via the Q_XQUOTAOFF
-> >> system call.
-> >>
-> >> Unfortunately, the changes made to this test make it nonfunctional on
-> >> those newer kernels, since the Q_XQUOTARM command returns EINVAL if
-> >> quota accounting is turned on, and the changes filter out the EINVAL
-> >> error string.
-> >>
-> >> Doing this wasn't /incorrect/, because, very narrowly speaking, the
-> >> intent of this test is to guard against Q_XQUOTARM returning ENOSYS when
-> >> quota has been enabled.  However, this also means that we no longer test
-> >> Q_XQUOTARM's ability to truncate the quota files at all.
-> >>
-> >> So, fix this test to deal with the loss of quotaoff in the same way that
-> >> the others do -- if accounting is still enabled after the 'off' command,
-> >> cycle the mount so that Q_XQUOTARM actually truncates the files.
-> >>
-> >> While we're at it, enhance the test to check that XQUOTARM actually
-> >> truncated the quota files.
-> >>
-> >> Fixes: 6ba125c9 ("xfs/220: avoid failure when disabling quota accounting is not supported")
-> >> Signed-off-by: Darrick J. Wong<djwong@kernel.org>
-> >> ---
-> >>    tests/xfs/220 |   28 +++++++++++++++++++++-------
-> >>    1 file changed, 21 insertions(+), 7 deletions(-)
-> >>
-> >> diff --git a/tests/xfs/220 b/tests/xfs/220
-> >> index 241a7abd..cfa90d3a 100755
-> >> --- a/tests/xfs/220
-> >> +++ b/tests/xfs/220
-> >> @@ -52,14 +52,28 @@ _scratch_mkfs_xfs>/dev/null 2>&1
-> >>    # mount  with quotas enabled
-> >>    _scratch_mount -o uquota
-> >>
-> >> -# turn off quota and remove space allocated to the quota files
-> >> +# turn off quota accounting...
-> >> +$XFS_QUOTA_PROG -x -c off $SCRATCH_DEV
-> >> +
-> >> +# ...but if the kernel doesn't support turning off accounting, remount with
-> >> +# noquota option to turn it off...
-> >> +if $XFS_QUOTA_PROG -x -c 'state -u' $SCRATCH_DEV | grep -q 'Accounting: ON'; then
-> >> +	_scratch_unmount
-> >> +	_scratch_mount -o noquota
-> >> +fi
-> >> +
-> >> +before_freesp=$(_get_available_space $SCRATCH_MNT)
-> >> +
-> >> +# ...and remove space allocated to the quota files
-> >>    # (this used to give wrong ENOSYS returns in 2.6.31)
-> >> -#
-> >> -# The sed expression below replaces a notrun to cater for kernels that have
-> >> -# removed the ability to disable quota accounting at runtime.  On those
-> >> -# kernel this test is rather useless, and in a few years we can drop it.
-> >> -$XFS_QUOTA_PROG -x -c off -c remove $SCRATCH_DEV 2>&1 | \
-> >> -	sed -e '/XFS_QUOTARM: Invalid argument/d'
-> >> +$XFS_QUOTA_PROG -x -c remove $SCRATCH_DEV
-> >> +
-> >> +# Make sure we actually freed the space used by dquot 0
-> >> +after_freesp=$(_get_available_space $SCRATCH_MNT)
-> >> +if [ $before_freesp -ge $after_freesp ]; then
-> >> +	echo "before: $before_freesp; after: $after_freesp">>   $seqres.full
-> > I prefer to move this info outside the if. So even case pass, I still
-> > can see the difference in seqres.full.
-> >> +	echo "expected more free space after Q_XQUOTARM"
-> > Do you forget to add this into 220.out?
-> Sorry, _get_available_space is designed for free space. I misunderstand it.
+On Thu, Jan 06, 2022 at 06:23:16AM -0500, Jeff Layton wrote:
+> Cephfs is introducing a new mount device syntax. Fix the fstests
+> infrastructure to handle the new syntax correctly.
 > 
-> Just one nit, can we move the $seqres.full code outside the if?
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  common/config |  8 ++++++++
+>  common/rc     | 34 ++++++++++++++++++++++++++++++++--
+>  2 files changed, 40 insertions(+), 2 deletions(-)
 > 
-> after_freesp=$(_get_available_space $SCRATCH_MNT)
-> delta=$(($after_freesp - $before_freesp))
-> echo "before_freesp: $before_freesp; after_freesp: $after_freesp, delta:
-> $delta" >> $seqres.full
-> if [ $delta -le 0 ]; then
->         echo "expected more free space after Q_XQUOTARM"
-> fi
+> v2: more rigorous check for ceph mount device in _check_device
+> 
+> diff --git a/common/config b/common/config
+> index e0a5c5df58ff..2b357746476b 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -537,6 +537,14 @@ _check_device()
+>  		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+>  		# tmpfs doesn't use mount source, ignore
+>  		;;
+> +	ceph)
+> +		# ceph has two different possible syntaxes for mount devices. The
+> +		# network URL check above catches the legacy syntax. Check for the
+> +		# new-style syntax here.
+> +		if ( echo $dev | grep -qEv "=/" ); then
+> +			_fatal "common/config: $name ($dev) is not a valid ceph mount string"
+> +		fi
+> +		;;
 
-Yes, I'll do that.
+I have not objection with this, if the maintainer prefer:
 
---D
+-       if [ -b "$dev" ] || ( echo $dev | grep -qE ":|//" ); then
++       if [ -b "$dev" ] || ( echo $dev | grep -qE ":|//|=/" ); then
+                # block device or a network url
+                return 0
+        fi
 
-> Best Regards
-> Yang Xu
-> > 
-> > 
-> > Also, I try this patch and add some output about delta.
-> > It seems before_value greater than after value.
-> > 
-> >    #Make sure we actually freed the space used by dquot 0
-> > after_freesp=$(_get_available_space $SCRATCH_MNT)
-> > delta=$(($before_freesp - $after_freesp))
-> > echo "before: $before_freesp; after: $after_freesp, delta: $delta">>
-> > $seqres.full
-> > if [ $delta -ge 0 ]; then
-> >           echo "expected more free space after Q_XQUOTARM"
-> > fi
-> > 
-> > MOUNT_OPTIONS =  -o defaults
-> > before: 21280804864; after: 21280808960, delta: -4096
-> > 
-> > 
-> > Best Regards
-> > Yang Xu
-> >> +fi
-> >>
-> >>    # and unmount again
-> >>    _scratch_unmount
+>  	overlay)
+>  		if [ ! -d "$dev" ]; then
+>  			_fatal "common/config: $name ($dev) is not a directory for overlay"
+> diff --git a/common/rc b/common/rc
+> index 7973ceb5fdf8..4fa0b818d840 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1592,7 +1592,7 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> -	nfs*|ceph)
+> +	nfs*)
+>  		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+>  			_notrun "this test requires a valid \$SCRATCH_DEV"
+> @@ -1601,6 +1601,21 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> +	ceph)
+> +		if [ -z "$SCRATCH_DEV" ]; then
+> +			_notrun "this test requires a valid \$SCRATCH_DEV"
+> +		fi
+> +		echo $SCRATCH_DEV | grep -q "=/" > /dev/null 2>&1
+> +		if [ "$?" != "0" ]; then
+> +			echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+> +			if [ "$?" != "0" ]; then
+
+Why not combine two "if condition" into one, likes:
+  echo $SCRATCH_DEV | grep -Eq "=/|:/" >/dev/null 2>&1
+  if [ "$?" != "0" ] ....
+
+(Sorry I didn't metion this last time...)
+
+Same below:
+ 
+> +				_notrun "this test requires a valid \$SCRATCH_DEV"
+> +			fi
+> +		fi
+> +		if [ ! -d "$SCRATCH_MNT" ]; then
+> +			_notrun "this test requires a valid \$SCRATCH_MNT"
+> +		fi
+> +		;;
+>  	pvfs2)
+>  		echo $SCRATCH_DEV | grep -q "://" > /dev/null 2>&1
+>  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+> @@ -1770,7 +1785,7 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> -	nfs*|ceph)
+> +	nfs*)
+>  		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+>  			_notrun "this test requires a valid \$TEST_DEV"
+> @@ -1779,6 +1794,21 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> +	ceph)
+> +		if [ -z "$TEST_DEV" ]; then
+> +			_notrun "this test requires a valid \$TEST_DEV"
+> +		fi
+> +		echo $TEST_DEV | grep -q "=/" > /dev/null 2>&1
+> +		if [ "$?" != "0" ]; then
+> +			echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+> +			if [ "$?" != "0" ]; then
+> +				_notrun "this test requires a valid \$TEST_DEV"
+> +			fi
+> +		fi
+> +		if [ ! -d "$TEST_DIR" ]; then
+> +			_notrun "this test requires a valid \$TEST_DIR"
+> +		fi
+> +		;;
+>  	cifs)
+>  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+>  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+> -- 
+> 2.33.1
+> 
+
