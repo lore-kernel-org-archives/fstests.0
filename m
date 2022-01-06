@@ -2,42 +2,43 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41949C433FE
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 11:23:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1C1FC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 13:30:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238417AbiAFLXT (ORCPT
+        id S239524AbiAFNay (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Jan 2022 06:23:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43462 "EHLO
+        Thu, 6 Jan 2022 08:30:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238405AbiAFLXT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jan 2022 06:23:19 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24F36C061245
-        for <fstests@vger.kernel.org>; Thu,  6 Jan 2022 03:23:19 -0800 (PST)
+        with ESMTP id S230323AbiAFNay (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jan 2022 08:30:54 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD114C061245
+        for <fstests@vger.kernel.org>; Thu,  6 Jan 2022 05:30:53 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 854F561AA9
-        for <fstests@vger.kernel.org>; Thu,  6 Jan 2022 11:23:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7DAE1C36AE3;
-        Thu,  6 Jan 2022 11:23:17 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 72BF5B8214F
+        for <fstests@vger.kernel.org>; Thu,  6 Jan 2022 13:30:52 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ABA01C36AE3;
+        Thu,  6 Jan 2022 13:30:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641468197;
-        bh=LzqywcFucefNs1IfVDpVC9fBqeGBYW6TSztB6sUzrTc=;
+        s=k20201202; t=1641475851;
+        bh=g5XINOTeJvNQh2KkS+WnSfJlGd1e0FGR+fr43LLsLMM=;
         h=From:To:Cc:Subject:Date:From;
-        b=X3o+U5/0iBLiHeyQ3kJ4IDIcZeFcmnaczf1twPgMbVYbjbjNiTnVrfV7AWujQBoI1
-         pCDrgBnnaNl2L9w75v1u5pibXlx85dwT4uQCCsLtU3GiF05K9tgBrfIulOKblciRp/
-         lNgyjEmPUmiw6Iv0srj8hWwZvgIVTBA5dJuV0SDOWPlybcCcz+q7JfouC+ndw2Ymly
-         Y8lPI+89YUuMrT3rkn14tuYpCtBDyL4inpJYPSKhePi7gaG2rBAew1jVekkd39yGlW
-         WIEt/MhNu0R+hGttYMgViUZDJ4exu4nfaOydBU2XY8ds8i33s/PEmDktfl4Nwriwho
-         kY3+nzP2ls69A==
+        b=YWux+OQNnE8+iqQ9+8hIaCTlzyy2LQ1Nc26TNA7bRZdCm4MXrFAx596+X17wddal1
+         IZMQ47+TdgdvdTB37bDbGVsz7bRORuGxlSg+W74v4uUQmfjD0eY6IilYnM2jmPaQX7
+         hd+gfDhIkXahXs8y9PjtBw45tRVWFIw9QIDk++03BxpfWhl10oWjr8UvaUzPzbnivF
+         /ulcPeFUkLuN3UJlfKH8F1s4orz2I3nYWnSktsh3+NvUUBeybjh3d+7iqQuHhNIerC
+         y5p60cUoxmJa+dVy8MWpiqVPfC1utG1ZtWVQLecqayOcD+120NbX5wMc8Ma7MMtSfY
+         W/8Jrm2748jKA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     guan@eryu.me, zlang@redhat.com
-Subject: [PATCH v2] common: handle ceph's new mount syntax
-Date:   Thu,  6 Jan 2022 06:23:16 -0500
-Message-Id: <20220106112316.6790-1-jlayton@kernel.org>
+Cc:     guan@eryu.me, Luis Henriques <lhenriques@suse.de>,
+        Eric Biggers <ebiggers@kernel.org>
+Subject: [PATCH v2] common/rc, ceph: skip ceph/001-ceph/003 if test_dummy_encryption is enabled
+Date:   Thu,  6 Jan 2022 08:30:49 -0500
+Message-Id: <20220106133049.68171-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.33.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -45,102 +46,147 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Cephfs is introducing a new mount device syntax. Fix the fstests
-infrastructure to handle the new syntax correctly.
+Some tests on ceph require changing the layout of new files, which is
+forbidden when the files are encrypted. Skip these tests if the
+test_dummy_encryption mount option is being used.
 
+Generalize the _exclude_scratch_mount_option code and add a new
+_exclude_test_mount_option call as well. Call the new function from the
+ceph tests that should exclude test_dummy_encryption.
+
+Cc: Luis Henriques <lhenriques@suse.de>
+Cc: Eric Biggers <ebiggers@kernel.org>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- common/config |  8 ++++++++
- common/rc     | 34 ++++++++++++++++++++++++++++++++--
- 2 files changed, 40 insertions(+), 2 deletions(-)
+ common/btrfs   |  2 +-
+ common/rc      | 28 +++++++++++++++++++---------
+ tests/ceph/001 |  1 +
+ tests/ceph/002 |  1 +
+ tests/ceph/003 |  1 +
+ 5 files changed, 23 insertions(+), 10 deletions(-)
 
-v2: more rigorous check for ceph mount device in _check_device
+Thanks to Eric and Luis for review so far!
 
-diff --git a/common/config b/common/config
-index e0a5c5df58ff..2b357746476b 100644
---- a/common/config
-+++ b/common/config
-@@ -537,6 +537,14 @@ _check_device()
- 		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
- 		# tmpfs doesn't use mount source, ignore
- 		;;
-+	ceph)
-+		# ceph has two different possible syntaxes for mount devices. The
-+		# network URL check above catches the legacy syntax. Check for the
-+		# new-style syntax here.
-+		if ( echo $dev | grep -qEv "=/" ); then
-+			_fatal "common/config: $name ($dev) is not a valid ceph mount string"
-+		fi
-+		;;
- 	overlay)
- 		if [ ! -d "$dev" ]; then
- 			_fatal "common/config: $name ($dev) is not a directory for overlay"
+v2: fix argument handling in _exclude_mount_option
+    fix _require_btrfs_no_compress
+    ensure _normalize_mount_options callers pass correct argument
+    
+diff --git a/common/btrfs b/common/btrfs
+index fe5985663ab4..4afe81eb2dfb 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -115,7 +115,7 @@ _require_btrfs_fs_sysfs()
+ 
+ _require_btrfs_no_compress()
+ {
+-	if _normalize_mount_options | grep -q "compress"; then
++	if _normalize_mount_options "$MOUNT_OPTIONS" | grep -q "compress"; then
+ 		_notrun "This test requires no compression enabled"
+ 	fi
+ }
 diff --git a/common/rc b/common/rc
-index 7973ceb5fdf8..4fa0b818d840 100644
+index 341abc9a0d02..0c985d0f2952 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1592,7 +1592,7 @@ _require_scratch_nocheck()
- 			_notrun "this test requires a valid \$SCRATCH_MNT"
+@@ -2039,7 +2039,7 @@ _require_sane_bdev_flush()
+ # Returns 0 if DAX will be used, 1 if DAX is not going to be used.
+ __scratch_uses_fsdax()
+ {
+-	local ops=$(_normalize_mount_options)
++	local ops=$(_normalize_mount_options "$MOUNT_OPTIONS")
+ 
+ 	echo $ops | egrep -qw "dax(=always| |$)" && return 0
+ 	echo $ops | grep -qw "dax=never" && return 1
+@@ -3718,7 +3718,7 @@ _has_metadata_journaling()
+ 			return 1
+ 		}
+ 		# ext4 might not load a journal
+-		if _normalize_mount_options | grep -qw "noload"; then
++		if _normalize_mount_options "$MOUNT_OPTIONS" | grep -qw "noload"; then
+ 			echo "mount option \"noload\" not allowed in this test"
+ 			return 1
  		fi
- 		;;
--	nfs*|ceph)
-+	nfs*)
- 		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
- 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
- 			_notrun "this test requires a valid \$SCRATCH_DEV"
-@@ -1601,6 +1601,21 @@ _require_scratch_nocheck()
- 			_notrun "this test requires a valid \$SCRATCH_MNT"
- 		fi
- 		;;
-+	ceph)
-+		if [ -z "$SCRATCH_DEV" ]; then
-+			_notrun "this test requires a valid \$SCRATCH_DEV"
-+		fi
-+		echo $SCRATCH_DEV | grep -q "=/" > /dev/null 2>&1
-+		if [ "$?" != "0" ]; then
-+			echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
-+			if [ "$?" != "0" ]; then
-+				_notrun "this test requires a valid \$SCRATCH_DEV"
-+			fi
-+		fi
-+		if [ ! -d "$SCRATCH_MNT" ]; then
-+			_notrun "this test requires a valid \$SCRATCH_MNT"
-+		fi
-+		;;
- 	pvfs2)
- 		echo $SCRATCH_DEV | grep -q "://" > /dev/null 2>&1
- 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-@@ -1770,7 +1785,7 @@ _require_test()
- 			_notrun "this test requires a valid \$TEST_DIR"
- 		fi
- 		;;
--	nfs*|ceph)
-+	nfs*)
- 		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
- 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
- 			_notrun "this test requires a valid \$TEST_DEV"
-@@ -1779,6 +1794,21 @@ _require_test()
- 			_notrun "this test requires a valid \$TEST_DIR"
- 		fi
- 		;;
-+	ceph)
-+		if [ -z "$TEST_DEV" ]; then
-+			_notrun "this test requires a valid \$TEST_DEV"
-+		fi
-+		echo $TEST_DEV | grep -q "=/" > /dev/null 2>&1
-+		if [ "$?" != "0" ]; then
-+			echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
-+			if [ "$?" != "0" ]; then
-+				_notrun "this test requires a valid \$TEST_DEV"
-+			fi
-+		fi
-+		if [ ! -d "$TEST_DIR" ]; then
-+			_notrun "this test requires a valid \$TEST_DIR"
-+		fi
-+		;;
- 	cifs)
- 		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
- 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+@@ -3882,20 +3882,20 @@ _require_cloner()
+ 		_notrun "cloner binary not present at $CLONER_PROG"
+ }
+ 
+-# Normalize mount options from global $MOUNT_OPTIONS
+-# Convert options like "-o opt1,opt2 -oopt3" to
+-# "opt1 opt2 opt3"
++# Normalize mount options from the option string in $1
++# Convert options like "-o opt1,opt2 -oopt3" to "opt1 opt2 opt3"
+ _normalize_mount_options()
+ {
+-	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
++	echo "$1" | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
+ }
+ 
+-# skip test if MOUNT_OPTIONS contains the given strings
++# skip test if $1 contains the given strings in trailing arguments
+ # Both dax and dax=always are excluded if dax or dax=always is passed
+-_exclude_scratch_mount_option()
++_exclude_mount_option()
+ {
+-	local mnt_opts=$(_normalize_mount_options)
++	local mnt_opts=$(_normalize_mount_options "$1")
+ 
++	shift
+ 	while [ $# -gt 0 ]; do
+ 		local pattern=$1
+ 		echo "$pattern" | egrep -q "dax(=always|$)" && \
+@@ -3907,6 +3907,16 @@ _exclude_scratch_mount_option()
+ 	done
+ }
+ 
++_exclude_scratch_mount_option()
++{
++	_exclude_mount_option "$MOUNT_OPTIONS" $@
++}
++
++_exclude_test_mount_option()
++{
++	_exclude_mount_option "$TEST_FS_MOUNT_OPTS" $@
++}
++
+ _require_atime()
+ {
+ 	_exclude_scratch_mount_option "noatime"
+diff --git a/tests/ceph/001 b/tests/ceph/001
+index c00de308fd95..5a828567d500 100755
+--- a/tests/ceph/001
++++ b/tests/ceph/001
+@@ -22,6 +22,7 @@ _begin_fstest auto quick copy_range
+ _supported_fs ceph
+ 
+ _require_xfs_io_command "copy_range"
++_exclude_test_mount_option "test_dummy_encryption"
+ _require_attrs
+ _require_test
+ 
+diff --git a/tests/ceph/002 b/tests/ceph/002
+index 9bc728fd2e18..ac3d65b529bd 100755
+--- a/tests/ceph/002
++++ b/tests/ceph/002
+@@ -30,6 +30,7 @@ _begin_fstest auto quick copy_range
+ _supported_fs ceph
+ 
+ _require_xfs_io_command "copy_range"
++_exclude_test_mount_option "test_dummy_encryption"
+ _require_attrs
+ _require_test
+ 
+diff --git a/tests/ceph/003 b/tests/ceph/003
+index faedb48cfeea..2d6cb393b3f6 100755
+--- a/tests/ceph/003
++++ b/tests/ceph/003
+@@ -18,6 +18,7 @@ _begin_fstest auto quick copy_range
+ _supported_fs ceph
+ 
+ _require_xfs_io_command "copy_range"
++_exclude_test_mount_option "test_dummy_encryption"
+ _require_attrs
+ _require_test
+ 
 -- 
 2.33.1
 
