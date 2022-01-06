@@ -2,179 +2,181 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB1DBC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 02:14:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07B18C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jan 2022 02:32:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344639AbiAFCOv (ORCPT
+        id S1344750AbiAFCcY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Jan 2022 21:14:51 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:46374 "EHLO
+        Wed, 5 Jan 2022 21:32:24 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:43515 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1344638AbiAFCOt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 21:14:49 -0500
+        by vger.kernel.org with ESMTP id S1344793AbiAFCcW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jan 2022 21:32:22 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1641435288;
+        s=mimecast20190719; t=1641436342;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=fpilRAELkTYshRvM1TKA4gs3hMC4IL7G7fCKIGY67JA=;
-        b=IHk/0AZ0EinrKMZPAvfwVofjdJ4fsOln/xlydsDLZ98K9kh75JhMiQ+9JLh74kzD2Qj3Es
-        rBsSgESowrCLllvdfA0MayErlvEvuJBb1e3tDHVuHnu2GjxY93lhxWMzmxYu211bh/+0wp
-        OOJv0BJHRsuo86d0cyOAh5HWklEpfT4=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=72ZM+Bjzlyer4Mk2goDFDUOOU+Q9dWdnBOMKDSFLS+I=;
+        b=G/xHPzIxwbKbmCds6XYoJOUa+cpqytqcvGCz2up7NUIEJ0wLiEzAM473pq19W8BAOSJTDh
+        GosTtPOT5xlrmEGMLxOMF2kr86I0GbBA81JrGJ0p4+z3D5eLNd/M81SpbpmY86HRPalNxt
+        l7ZQUPpQJj39UFBG8vmcrLy8ElKu62U=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-639-BjG6ebw-P7iIPQqLefSxvg-1; Wed, 05 Jan 2022 21:14:47 -0500
-X-MC-Unique: BjG6ebw-P7iIPQqLefSxvg-1
-Received: by mail-pg1-f198.google.com with SMTP id j186-20020a636ec3000000b00340c5f3a0cbso650398pgc.0
-        for <fstests@vger.kernel.org>; Wed, 05 Jan 2022 18:14:47 -0800 (PST)
+ us-mta-610-uYfTHB7POteZcjM2HqvUMw-1; Wed, 05 Jan 2022 21:32:20 -0500
+X-MC-Unique: uYfTHB7POteZcjM2HqvUMw-1
+Received: by mail-pj1-f70.google.com with SMTP id x3-20020a17090a8a8300b001b290d558f0so714043pjn.6
+        for <fstests@vger.kernel.org>; Wed, 05 Jan 2022 18:32:20 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=fpilRAELkTYshRvM1TKA4gs3hMC4IL7G7fCKIGY67JA=;
-        b=XuWj+amKSPi4tOM90YHFOIueNC3sAxhZmcCWTAOOfMM3iJib4w6nATuuDYAqBtHDci
-         jtVeZXOn0X7mawsVzvzoUeVpUbK2y1k8qlI+xzKcHtMSZU5DSMBx3FZJrQ6XF69f9mDu
-         ME9CVhLBlmLp7kKb8ex9KSzonfVE+KWNl8UEnNxYKMcKxeMIZPKxbh6zrpPJeNVw0osB
-         3Q59bzYHEu+ia23L9JEStpv6ISjKDGuO0641tXBUvJem2bSvYnohm6WFNLz+S8tqSKVM
-         GAe9InLtP8UjW4ymKgtvn8GEpP8pqRMgGN63P3VuLjvbzpLkc0MhBCNQwBFfWl8pK9G5
-         2KVQ==
-X-Gm-Message-State: AOAM532jB+KSOAJI62dw6ojIdj0FhXGjYaoQqNd5Iny+px2hTwoXSTn7
-        PdD22dBXXNJE/zSC6IXNUbQ4FGbi+a7bloFGM6Koou7TfVbzZFuCW91xFUEWZCzcCjWIeA4BUmh
-        ts2Sb6W9Ly3tsW5pPMQ==
-X-Received: by 2002:a63:b914:: with SMTP id z20mr50969637pge.496.1641435285907;
-        Wed, 05 Jan 2022 18:14:45 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwHT1lIKdJE5529qcsXWW4ywSwMBscFPhXvLzEkivxrXb+uofcS4PvpK3mjucmiYkk/3KLdXg==
-X-Received: by 2002:a63:b914:: with SMTP id z20mr50969620pge.496.1641435285545;
-        Wed, 05 Jan 2022 18:14:45 -0800 (PST)
+        bh=72ZM+Bjzlyer4Mk2goDFDUOOU+Q9dWdnBOMKDSFLS+I=;
+        b=hsuu8/bUyRiCqXK/Rl0ffJP96il5RFahM5mRlsBDn97cyImZxIfBZOg6DuBJQccfJT
+         RJhBzNwo4b970IEpH+MlXJbRah9VGh7STGcpACwzfHYNnzw0PT9MQb0ws7s+LHluSCtm
+         yuGociCIjxgsRof80OgrZeSi8fI5eIYCTRUW71+NfQbQFdIrJRgrCnEovzmBxJCx1rVQ
+         mkJPHF/YyH9xL79foNqdZDvJVo4uKEOPvFsg5kwvMVeM3SVbDN7ZexwFM86OJb999uN5
+         VKiRutxX57xE6t824unzxMKAa4BOJxSQqnF57KWkLKZkrTWluULzwSjrWqfQaLs5HdSv
+         u7gQ==
+X-Gm-Message-State: AOAM5321q+95p5P2fZPvvAXE5F+MNC/U8hBomsWiaJFcFdrzNaERyGLf
+        M2HP572R+AADPgETcbvM5U/KgMUfLI2+ipQOhrkMMdvVtYdPE1oZHuhbbbm2s3ksWqwx4/RVoaG
+        0K5EcAU4eeBjj1iIFyQ==
+X-Received: by 2002:a05:6a00:21cd:b0:4bc:35e8:eaea with SMTP id t13-20020a056a0021cd00b004bc35e8eaeamr35534795pfj.23.1641436339490;
+        Wed, 05 Jan 2022 18:32:19 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyt3MmHk4xB4qVNsPRY7Ru83m5RVIjyUucDeI/biMwxFhRYA7+0uu7srVAh9ATzaqfdAKHTfg==
+X-Received: by 2002:a05:6a00:21cd:b0:4bc:35e8:eaea with SMTP id t13-20020a056a0021cd00b004bc35e8eaeamr35534772pfj.23.1641436339071;
+        Wed, 05 Jan 2022 18:32:19 -0800 (PST)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id y126sm352487pfy.40.2022.01.05.18.14.43
+        by smtp.gmail.com with ESMTPSA id b6sm386803pfm.170.2022.01.05.18.32.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Jan 2022 18:14:45 -0800 (PST)
-Date:   Thu, 6 Jan 2022 10:14:41 +0800
+        Wed, 05 Jan 2022 18:32:18 -0800 (PST)
+Date:   Thu, 6 Jan 2022 10:32:15 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] xfs/014: try a few times to create speculative
- preallocations
-Message-ID: <20220106021441.dcdcvfi6i376tlpr@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        xfs <linux-xfs@vger.kernel.org>
-References: <20220104020417.GB31566@magnolia>
- <20220105161905.jaobft32wosjy3fv@zlang-mailbox>
- <20220105190957.GJ656707@magnolia>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH] common: handle ceph's new mount syntax
+Message-ID: <20220106023215.ok76dzmnstqeevth@zlang-mailbox>
+Mail-Followup-To: Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org,
+        guan@eryu.me
+References: <20220105173013.172424-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220105190957.GJ656707@magnolia>
+In-Reply-To: <20220105173013.172424-1-jlayton@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 05, 2022 at 11:09:57AM -0800, Darrick J. Wong wrote:
-> On Thu, Jan 06, 2022 at 12:19:05AM +0800, Zorro Lang wrote:
-> > On Mon, Jan 03, 2022 at 06:04:17PM -0800, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > This test checks that speculative file preallocations are transferred to
-> > > threads writing other files when space is low.  Since we have background
-> > > threads to clear those preallocations, it's possible that the test
-> > > program might not get a speculative preallocation on the first try.
-> > > 
-> > > This problem has become more pronounced since the introduction of
-> > > background inode inactivation since userspace no longer has direct
-> > > control over the timing of file blocks being released from unlinked
-> > > files.  As a result, the author has seen an increase in sporadic
-> > > warnings from this test about speculative preallocations not appearing.
-> > > 
-> > > Therefore, modify the function to try up to five times to create the
-> > > speculative preallocation before emitting warnings that then cause
-> > > golden output failures.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/xfs/014 |   41 +++++++++++++++++++++++++----------------
-> > >  1 file changed, 25 insertions(+), 16 deletions(-)
-> > > 
-> > > diff --git a/tests/xfs/014 b/tests/xfs/014
-> > > index a605b359..1f0ebac3 100755
-> > > --- a/tests/xfs/014
-> > > +++ b/tests/xfs/014
-> > > @@ -33,27 +33,36 @@ _cleanup()
-> > >  # failure.
-> > >  _spec_prealloc_file()
-> > >  {
-> > > -	file=$1
-> > > +	local file=$1
-> > > +	local prealloc_size=0
-> > > +	local i=0
-> > >  
-> > > -	rm -f $file
-> > > +	# Now that we have background garbage collection processes that can be
-> > > +	# triggered by low space/quota conditions, it's possible that we won't
-> > > +	# succeed in creating a speculative preallocation on the first try.
-> > > +	for ((tries = 0; tries < 5 && prealloc_size == 0; tries++)); do
-> > > +		rm -f $file
-> > >  
-> > > -	# a few file extending open-write-close cycles should be enough to
-> > > -	# trigger the fs to retain preallocation. write 256k in 32k intervals to
-> > > -	# be sure
-> > > -	for i in $(seq 0 32768 262144); do
-> > > -		$XFS_IO_PROG -f -c "pwrite $i 32k" $file >> $seqres.full
-> > > +		# a few file extending open-write-close cycles should be enough
-> > > +		# to trigger the fs to retain preallocation. write 256k in 32k
-> > > +		# intervals to be sure
-> > > +		for i in $(seq 0 32768 262144); do
-> > > +			$XFS_IO_PROG -f -c "pwrite $i 32k" $file >> $seqres.full
-> > > +		done
-> > > +
-> > > +		# write a 4k aligned amount of data to keep the calculations
-> > > +		# simple
-> > > +		$XFS_IO_PROG -c "pwrite 0 128m" $file >> $seqres.full
-> > > +
-> > > +		size=`_get_filesize $file`
-> > > +		blocks=`stat -c "%b" $file`
-> > > +		blocksize=`stat -c "%B" $file`
-> > > +
-> > > +		prealloc_size=$((blocks * blocksize - size))
-> > 
-> > So we only try same pwrite operations 5 times, and only check the prealloc_size after 5
-> > times done? Should we break from this loop once prealloc_size > 0?
+On Wed, Jan 05, 2022 at 12:30:13PM -0500, Jeff Layton wrote:
+> Cephfs is introducing a new mount device syntax. Fix the fstests
+> infrastructure to handle the new syntax correctly.
 > 
-> The second clause of the for loop tests for that, does it not?
-
-Oh, yes, sorry I missed the "&& prealloc_size == 0", I thought you just gave it 5 tries :)
-So this patch is good to me.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  common/config |  2 +-
+>  common/rc     | 34 ++++++++++++++++++++++++++++++++--
+>  2 files changed, 33 insertions(+), 3 deletions(-)
 > 
-> --D
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > >  	done
-> > >  
-> > > -	# write a 4k aligned amount of data to keep the calculations simple
-> > > -	$XFS_IO_PROG -c "pwrite 0 128m" $file >> $seqres.full
-> > > -
-> > > -	size=`_get_filesize $file`
-> > > -	blocks=`stat -c "%b" $file`
-> > > -	blocksize=`stat -c "%B" $file`
-> > > -
-> > > -	prealloc_size=$((blocks * blocksize - size))
-> > >  	if [ $prealloc_size -eq 0 ]; then
-> > > -		echo "Warning: No speculative preallocation for $file." \
-> > > +		echo "Warning: No speculative preallocation for $file after $tries iterations." \
-> > >  			"Check use of the allocsize= mount option."
-> > >  	fi
-> > >  
-> > > 
-> > 
+> diff --git a/common/config b/common/config
+> index e0a5c5df58ff..be97436b0857 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -533,7 +533,7 @@ _check_device()
+>  	fi
+>  
+>  	case "$FSTYP" in
+> -	9p|tmpfs|virtiofs)
+> +	9p|tmpfs|virtiofs|ceph)
+>  		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+>  		# tmpfs doesn't use mount source, ignore
+
+Better to add a comment to explain why add *ceph* at here, especially others
+all have explanation. But I think you might still want to check
+if it's a network url, not only just skip the checking directly. Except it's
+similar with virtiofs use plain strings. As there's below checking in
+_check_device() function:
+
+        if [ -b "$dev" ] || ( echo $dev | grep -qE ":|//" ); then
+                # block device or a network url
+                return 0
+        fi
+
+Can `grep -qE ":|=|//"` or something else help you through this checking?
+I'm not familar with cephfs, so just ask if it's as you wish.
+
+Thanks,
+Zorro
+
+>  		;;
+> diff --git a/common/rc b/common/rc
+> index 7973ceb5fdf8..4fa0b818d840 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1592,7 +1592,7 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> -	nfs*|ceph)
+> +	nfs*)
+>  		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+>  			_notrun "this test requires a valid \$SCRATCH_DEV"
+> @@ -1601,6 +1601,21 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> +	ceph)
+> +		if [ -z "$SCRATCH_DEV" ]; then
+> +			_notrun "this test requires a valid \$SCRATCH_DEV"
+> +		fi
+> +		echo $SCRATCH_DEV | grep -q "=/" > /dev/null 2>&1
+> +		if [ "$?" != "0" ]; then
+> +			echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+> +			if [ "$?" != "0" ]; then
+> +				_notrun "this test requires a valid \$SCRATCH_DEV"
+> +			fi
+> +		fi
+> +		if [ ! -d "$SCRATCH_MNT" ]; then
+> +			_notrun "this test requires a valid \$SCRATCH_MNT"
+> +		fi
+> +		;;
+>  	pvfs2)
+>  		echo $SCRATCH_DEV | grep -q "://" > /dev/null 2>&1
+>  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+> @@ -1770,7 +1785,7 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> -	nfs*|ceph)
+> +	nfs*)
+>  		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+>  			_notrun "this test requires a valid \$TEST_DEV"
+> @@ -1779,6 +1794,21 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> +	ceph)
+> +		if [ -z "$TEST_DEV" ]; then
+> +			_notrun "this test requires a valid \$TEST_DEV"
+> +		fi
+> +		echo $TEST_DEV | grep -q "=/" > /dev/null 2>&1
+> +		if [ "$?" != "0" ]; then
+> +			echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+> +			if [ "$?" != "0" ]; then
+> +				_notrun "this test requires a valid \$TEST_DEV"
+> +			fi
+> +		fi
+> +		if [ ! -d "$TEST_DIR" ]; then
+> +			_notrun "this test requires a valid \$TEST_DIR"
+> +		fi
+> +		;;
+>  	cifs)
+>  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+>  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+> -- 
+> 2.33.1
 > 
 
