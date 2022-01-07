@@ -2,166 +2,222 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE07DC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Jan 2022 03:15:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50A6AC433FE
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Jan 2022 10:28:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344826AbiAGDPj (ORCPT
+        id S237382AbiAGK2f (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Jan 2022 22:15:39 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:54971 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1344803AbiAGDPj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jan 2022 22:15:39 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1641525338;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+        Fri, 7 Jan 2022 05:28:35 -0500
+Received: from smtp-out2.suse.de ([195.135.220.29]:55686 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237286AbiAGK2e (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jan 2022 05:28:34 -0500
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 78C0E1F39C;
+        Fri,  7 Jan 2022 10:28:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1641551313; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=aqzZTa+JQFvA8R9AeQ6h5DuZs//ibMJjBKMuhX77VD4=;
-        b=OIgoiGboaZ/1i2NwvjNgEJyrCDx13spWTVrX77mbyLx8HybHiYcxypOfQzwP/j/vLa6+Jp
-        h1aeNQzKyl4/nSZbPeGFY5pQU33x411JMbB+OEicXi1AwNY835bJHYHTYAA4NM0dUsX4IO
-        3cEG+MHyoS7DZqncifx9QT9FRWG4Hfk=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-262-v6cGJzq0NU--0njzWXDofA-1; Thu, 06 Jan 2022 22:15:37 -0500
-X-MC-Unique: v6cGJzq0NU--0njzWXDofA-1
-Received: by mail-pg1-f198.google.com with SMTP id c75-20020a63354e000000b003408e4153d1so2972375pga.9
-        for <fstests@vger.kernel.org>; Thu, 06 Jan 2022 19:15:37 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=aqzZTa+JQFvA8R9AeQ6h5DuZs//ibMJjBKMuhX77VD4=;
-        b=g39chIAd3RWXFGILdgOKu+E4Z/KBnqXjEoWN9N/bbogMW3Qhqvuj5jHkAYOps/ukOt
-         K0sYs1ATDBN7yZZ014fto8KEh86uJeo8+Tm+8SL3TbfOeo1HIXxkTjGYrDHZpcg0pOLT
-         E0HNsJNu4XQYwjk5A8xUJVcCX/Di3DsXpLOlvcAI20QDE2wJX8GpBEtVXbc8IqXJewN3
-         IUplgw1ePIWsZr7yKm0TMrHZ4LyXbUGbk+VdpPqBf/iNujY7KojYRFdd+k94+blVQ6UE
-         L/XC3sedaBWXefpngzfqc2RZiBZzpM58INZm7T7c/kbtI/eStHF4jqDw3TO9krl4NBW/
-         U+OQ==
-X-Gm-Message-State: AOAM533lz2At0bxS/2BVyDkVMCYdpygIE1hT5oBtI5W7UXnRYfqnQQ6F
-        ZC1TfcGq6q5YUibvv/i9AYc9DKmg/1wogiuWYFPQc7w7vi/Ly1Vjwxpm7nLUkjSFW2fxB94vL56
-        GpuXc+dmuUt3lGb+8fw==
-X-Received: by 2002:a17:902:830b:b0:149:5f4d:e178 with SMTP id bd11-20020a170902830b00b001495f4de178mr58682461plb.152.1641525336145;
-        Thu, 06 Jan 2022 19:15:36 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJzvaxDe7qQsz2Unby2MBbYWZvhbegaIe9r5eYUM40Cl4El0h5Y0bJ/Yg0rfKDsFpbjsz+v4ng==
-X-Received: by 2002:a17:902:830b:b0:149:5f4d:e178 with SMTP id bd11-20020a170902830b00b001495f4de178mr58682443plb.152.1641525335834;
-        Thu, 06 Jan 2022 19:15:35 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id h4sm3903562pfi.79.2022.01.06.19.15.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Jan 2022 19:15:35 -0800 (PST)
-Date:   Fri, 7 Jan 2022 11:15:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
+        bh=uu/L2qmMze//Y3QmnRzg39hlXYoYVclcV8IqeDAU0lY=;
+        b=2DouOU08CLUZDVPNshWwUlTTHfSelv5InqXb/EnbLyiidMgt/nGo2F2YcGvXJAvZgtdLLO
+        miXniI9kTRtONzlOEcF8ncot2LY9rP8Z55jk8asKtqxej2aTrn9QfVkfCrAJwoztm1zTbV
+        kZMb66r+LwgLPE5zdX2/5Ov9t0g5Nmc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1641551313;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=uu/L2qmMze//Y3QmnRzg39hlXYoYVclcV8IqeDAU0lY=;
+        b=wN8vD8HQ+IZbVSPr0h8EjkESb6QW+zZkxUVFboYZnFvF6OH+XLVrvQqb/x72M8oGQBCFSX
+        YQXw/z9xJW5BA9Dw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1482D13CBA;
+        Fri,  7 Jan 2022 10:28:33 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id Y0d4AdEV2GEnbwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Fri, 07 Jan 2022 10:28:33 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 97d7f6e9;
+        Fri, 7 Jan 2022 10:28:40 +0000 (UTC)
+Date:   Fri, 7 Jan 2022 10:28:40 +0000
+From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
 To:     Jeff Layton <jlayton@kernel.org>
-Cc:     fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v3] common: handle ceph's new mount syntax
-Message-ID: <20220107031531.isbacu7kijxojpcg@zlang-mailbox>
-Mail-Followup-To: Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org,
-        guan@eryu.me
-References: <20220106175426.86522-1-jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org, guan@eryu.me,
+        Eric Biggers <ebiggers@kernel.org>
+Subject: Re: [PATCH v2] common/rc, ceph: skip ceph/001-ceph/003 if
+ test_dummy_encryption is enabled
+Message-ID: <YdgV2LSDO6ezQegm@suse.de>
+References: <20220106133049.68171-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20220106175426.86522-1-jlayton@kernel.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220106133049.68171-1-jlayton@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 06, 2022 at 12:54:26PM -0500, Jeff Layton wrote:
-> Cephfs is introducing a new mount device syntax. Fix the fstests
-> infrastructure to handle the new syntax correctly.
+On Thu, Jan 06, 2022 at 08:30:49AM -0500, Jeff Layton wrote:
+> Some tests on ceph require changing the layout of new files, which is
+> forbidden when the files are encrypted. Skip these tests if the
+> test_dummy_encryption mount option is being used.
 > 
-> Cc: Zorro Lang <zlang@redhat.com>
+> Generalize the _exclude_scratch_mount_option code and add a new
+> _exclude_test_mount_option call as well. Call the new function from the
+> ceph tests that should exclude test_dummy_encryption.
+> 
+> Cc: Luis Henriques <lhenriques@suse.de>
+> Cc: Eric Biggers <ebiggers@kernel.org>
 > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+
+Looks good to me!  Feel free to add my
+
+Reviewed-by: Luis Henriques <lhenriques@suse.de>
+
+Cheers,
+--
+Luís
+
 > ---
-
-It looks good to me now.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  common/config |  8 ++++++++
->  common/rc     | 22 ++++++++++++++++++++--
->  2 files changed, 28 insertions(+), 2 deletions(-)
+>  common/btrfs   |  2 +-
+>  common/rc      | 28 +++++++++++++++++++---------
+>  tests/ceph/001 |  1 +
+>  tests/ceph/002 |  1 +
+>  tests/ceph/003 |  1 +
+>  5 files changed, 23 insertions(+), 10 deletions(-)
 > 
-> v2: more rigorous check for ceph mount device in _check_device
-> v3: consolidate multiple grep commands into single regex
+> Thanks to Eric and Luis for review so far!
 > 
-> diff --git a/common/config b/common/config
-> index e0a5c5df58ff..2b357746476b 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -537,6 +537,14 @@ _check_device()
->  		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
->  		# tmpfs doesn't use mount source, ignore
->  		;;
-> +	ceph)
-> +		# ceph has two different possible syntaxes for mount devices. The
-> +		# network URL check above catches the legacy syntax. Check for the
-> +		# new-style syntax here.
-> +		if ( echo $dev | grep -qEv "=/" ); then
-> +			_fatal "common/config: $name ($dev) is not a valid ceph mount string"
-> +		fi
-> +		;;
->  	overlay)
->  		if [ ! -d "$dev" ]; then
->  			_fatal "common/config: $name ($dev) is not a directory for overlay"
+> v2: fix argument handling in _exclude_mount_option
+>     fix _require_btrfs_no_compress
+>     ensure _normalize_mount_options callers pass correct argument
+>     
+> diff --git a/common/btrfs b/common/btrfs
+> index fe5985663ab4..4afe81eb2dfb 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -115,7 +115,7 @@ _require_btrfs_fs_sysfs()
+>  
+>  _require_btrfs_no_compress()
+>  {
+> -	if _normalize_mount_options | grep -q "compress"; then
+> +	if _normalize_mount_options "$MOUNT_OPTIONS" | grep -q "compress"; then
+>  		_notrun "This test requires no compression enabled"
+>  	fi
+>  }
 > diff --git a/common/rc b/common/rc
-> index f8afd93d656c..c087875a4251 100644
+> index 341abc9a0d02..0c985d0f2952 100644
 > --- a/common/rc
 > +++ b/common/rc
-> @@ -1592,7 +1592,7 @@ _require_scratch_nocheck()
->  			_notrun "this test requires a valid \$SCRATCH_MNT"
+> @@ -2039,7 +2039,7 @@ _require_sane_bdev_flush()
+>  # Returns 0 if DAX will be used, 1 if DAX is not going to be used.
+>  __scratch_uses_fsdax()
+>  {
+> -	local ops=$(_normalize_mount_options)
+> +	local ops=$(_normalize_mount_options "$MOUNT_OPTIONS")
+>  
+>  	echo $ops | egrep -qw "dax(=always| |$)" && return 0
+>  	echo $ops | grep -qw "dax=never" && return 1
+> @@ -3718,7 +3718,7 @@ _has_metadata_journaling()
+>  			return 1
+>  		}
+>  		# ext4 might not load a journal
+> -		if _normalize_mount_options | grep -qw "noload"; then
+> +		if _normalize_mount_options "$MOUNT_OPTIONS" | grep -qw "noload"; then
+>  			echo "mount option \"noload\" not allowed in this test"
+>  			return 1
 >  		fi
->  		;;
-> -	nfs*|ceph)
-> +	nfs*)
->  		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
->  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
->  			_notrun "this test requires a valid \$SCRATCH_DEV"
-> @@ -1601,6 +1601,15 @@ _require_scratch_nocheck()
->  			_notrun "this test requires a valid \$SCRATCH_MNT"
->  		fi
->  		;;
-> +	ceph)
-> +		echo $SCRATCH_DEV | grep -qE "=/|:/" > /dev/null 2>&1
-> +		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-> +			_notrun "this test requires a valid \$SCRATCH_DEV"
-> +		fi
-> +		if [ ! -d "$SCRATCH_MNT" ]; then
-> +			_notrun "this test requires a valid \$SCRATCH_MNT"
-> +		fi
-> +		;;
->  	pvfs2)
->  		echo $SCRATCH_DEV | grep -q "://" > /dev/null 2>&1
->  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
-> @@ -1783,7 +1792,7 @@ _require_test()
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
->  		;;
-> -	nfs*|ceph)
-> +	nfs*)
->  		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
->  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
->  			_notrun "this test requires a valid \$TEST_DEV"
-> @@ -1792,6 +1801,15 @@ _require_test()
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
->  		;;
-> +	ceph)
-> +		echo $TEST_DEV | grep -qE "=/|:/" > /dev/null 2>&1
-> +		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
-> +			_notrun "this test requires a valid \$TEST_DEV"
-> +		fi
-> +		if [ ! -d "$TEST_DIR" ]; then
-> +			_notrun "this test requires a valid \$TEST_DIR"
-> +		fi
-> +		;;
->  	cifs)
->  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
->  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+> @@ -3882,20 +3882,20 @@ _require_cloner()
+>  		_notrun "cloner binary not present at $CLONER_PROG"
+>  }
+>  
+> -# Normalize mount options from global $MOUNT_OPTIONS
+> -# Convert options like "-o opt1,opt2 -oopt3" to
+> -# "opt1 opt2 opt3"
+> +# Normalize mount options from the option string in $1
+> +# Convert options like "-o opt1,opt2 -oopt3" to "opt1 opt2 opt3"
+>  _normalize_mount_options()
+>  {
+> -	echo $MOUNT_OPTIONS | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
+> +	echo "$1" | sed -n 's/-o\s*\(\S*\)/\1/gp'| sed 's/,/ /g'
+>  }
+>  
+> -# skip test if MOUNT_OPTIONS contains the given strings
+> +# skip test if $1 contains the given strings in trailing arguments
+>  # Both dax and dax=always are excluded if dax or dax=always is passed
+> -_exclude_scratch_mount_option()
+> +_exclude_mount_option()
+>  {
+> -	local mnt_opts=$(_normalize_mount_options)
+> +	local mnt_opts=$(_normalize_mount_options "$1")
+>  
+> +	shift
+>  	while [ $# -gt 0 ]; do
+>  		local pattern=$1
+>  		echo "$pattern" | egrep -q "dax(=always|$)" && \
+> @@ -3907,6 +3907,16 @@ _exclude_scratch_mount_option()
+>  	done
+>  }
+>  
+> +_exclude_scratch_mount_option()
+> +{
+> +	_exclude_mount_option "$MOUNT_OPTIONS" $@
+> +}
+> +
+> +_exclude_test_mount_option()
+> +{
+> +	_exclude_mount_option "$TEST_FS_MOUNT_OPTS" $@
+> +}
+> +
+>  _require_atime()
+>  {
+>  	_exclude_scratch_mount_option "noatime"
+> diff --git a/tests/ceph/001 b/tests/ceph/001
+> index c00de308fd95..5a828567d500 100755
+> --- a/tests/ceph/001
+> +++ b/tests/ceph/001
+> @@ -22,6 +22,7 @@ _begin_fstest auto quick copy_range
+>  _supported_fs ceph
+>  
+>  _require_xfs_io_command "copy_range"
+> +_exclude_test_mount_option "test_dummy_encryption"
+>  _require_attrs
+>  _require_test
+>  
+> diff --git a/tests/ceph/002 b/tests/ceph/002
+> index 9bc728fd2e18..ac3d65b529bd 100755
+> --- a/tests/ceph/002
+> +++ b/tests/ceph/002
+> @@ -30,6 +30,7 @@ _begin_fstest auto quick copy_range
+>  _supported_fs ceph
+>  
+>  _require_xfs_io_command "copy_range"
+> +_exclude_test_mount_option "test_dummy_encryption"
+>  _require_attrs
+>  _require_test
+>  
+> diff --git a/tests/ceph/003 b/tests/ceph/003
+> index faedb48cfeea..2d6cb393b3f6 100755
+> --- a/tests/ceph/003
+> +++ b/tests/ceph/003
+> @@ -18,6 +18,7 @@ _begin_fstest auto quick copy_range
+>  _supported_fs ceph
+>  
+>  _require_xfs_io_command "copy_range"
+> +_exclude_test_mount_option "test_dummy_encryption"
+>  _require_attrs
+>  _require_test
+>  
 > -- 
 > 2.33.1
 > 
-
