@@ -2,181 +2,136 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5528AC433EF
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Jan 2022 12:43:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5F1CC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 Jan 2022 14:04:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232249AbiAIMnY (ORCPT
+        id S235757AbiAIOEo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 Jan 2022 07:43:24 -0500
-Received: from out20-37.mail.aliyun.com ([115.124.20.37]:50103 "EHLO
-        out20-37.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229474AbiAIMnX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jan 2022 07:43:23 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07440847|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0702499-0.030879-0.898871;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047192;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.MYuCmTY_1641732200;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MYuCmTY_1641732200)
-          by smtp.aliyun-inc.com(10.147.41.187);
-          Sun, 09 Jan 2022 20:43:21 +0800
-Date:   Sun, 9 Jan 2022 20:43:20 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Chen Long <chenlongcl.chen@huawei.com>
-Cc:     fstests@vger.kernel.org, richard@nod.at
-Subject: Re: [PATCH] ubifs: add test for race between listxattr and setxatr
-Message-ID: <YdrYaH7PImqW1WVB@desktop>
-References: <20220108022431.71751-1-chenlongcl.chen@huawei.com>
+        Sun, 9 Jan 2022 09:04:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46344 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229922AbiAIOEn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jan 2022 09:04:43 -0500
+Received: from mail-wr1-x42c.google.com (mail-wr1-x42c.google.com [IPv6:2a00:1450:4864:20::42c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9251AC06173F
+        for <fstests@vger.kernel.org>; Sun,  9 Jan 2022 06:04:43 -0800 (PST)
+Received: by mail-wr1-x42c.google.com with SMTP id s1so21757458wra.6
+        for <fstests@vger.kernel.org>; Sun, 09 Jan 2022 06:04:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=nkVlqncG9q9xHgNAS9iQQcJbjTsUZq0P2IowS8A9HP4=;
+        b=Bl6dhAfsx5FhUn6efUTgQn4HWI7inILstX4p7KEiSq+eJONPbjiz71Ni9bdkvtM+gF
+         htZKcywZJFsHGZe6QyuRrPDlTuymR8kcu/RIQJcRkCCMRzgNMzm6zJdfa4FaX/5Rga8v
+         hBTyDkmYV3DvoS+X7wb70hZOqfgvko5eZPIfg5MRbEaO1U4QcIRuJI6lGfhUJeT10kVj
+         7IpuCooyfyqg//Kx2TKIT2rPqlh0+kfiygr/pBsTcEdSP1JATk9xRXsTgUBFUkbtzWBU
+         60Bkp4cVFm19TT2dbg+tzIDTrDAbLbUvtGtQaqF23JZrnJC3HGeKo8rI4xZL5ySUx3Po
+         FgAw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=nkVlqncG9q9xHgNAS9iQQcJbjTsUZq0P2IowS8A9HP4=;
+        b=LVppcgjFAarQugTFFxX7ABNMrrj1CjUSfUzhrQCabP+T2hLtA7JmMU+d5zx7omFXxx
+         DiOmVNT9fdjGytlNHvvTsgSVTf/q5/JIXxnezjrhkhi8aHldYBEGaWH96+OaySHWZdlP
+         yUA5MTWCcgEANt7SCS4rD3kWIzPj+g9P0/ngCICdua2h10QEVAJLX6aN2AaixFxOMZ74
+         fPeI3srMtMbPmnl5LMmhPLy/v6L3mmoc5UC1A3g1dpY1aV37IBxrjTOn0vznDJottsma
+         j4m6OtOgq9ouijQaSqtrReZb/AbaamSosw6wVlbTSSuaY007Od52UkCOH6/ivjYerVek
+         T8qg==
+X-Gm-Message-State: AOAM530rXxDs8elAo2nnGU/TZSd8ELYTJKBl0IhP7s/o1o1sBOqumJlO
+        NBM4KeMlJRQAgz6DyepLUMqdJn8Qf2U=
+X-Google-Smtp-Source: ABdhPJwsb2FhEHa8Wnx1siZkqGKzlocdT8NaVXk2Cl4C0BaMkppa3wcgfVcFBorGSrxLs/S/whzZWg==
+X-Received: by 2002:a05:6000:2cc:: with SMTP id o12mr63371727wry.285.1641737081730;
+        Sun, 09 Jan 2022 06:04:41 -0800 (PST)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id s22sm4254358wmc.1.2022.01.09.06.04.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 09 Jan 2022 06:04:40 -0800 (PST)
+Message-ID: <61daeb78.1c69fb81.92670.eeb5@mx.google.com>
+Date:   Sun, 09 Jan 2022 22:04:37 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to c61c1e2f4cad
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="hQNsnYH4flUl"
 Content-Disposition: inline
-In-Reply-To: <20220108022431.71751-1-chenlongcl.chen@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jan 08, 2022 at 10:24:31AM +0800, Chen Long wrote:
-> Add reproducer for a bug on ubifs where listxattr() copies
-> the newly created xattr names regardless of the remaining
-> buffer size, fails the assertion of used buffer size, and
-> may corrupt buffer memory.
-> 
-> This is a regression test for three kernel commit:
-> 1. f4e3634a3b642 (ubifs: Fix races between xattr_{set|get} and
-> 	listxattr operations)
-> 2. 819f9ab430a44 (ubifs: Remove ui_mutex in ubifs_xattr_get and
-> 	change_xattr)
 
-Only two commits listed above, but description mentioned 'three' kernel
-commits. Missed one commit or should s/three/the/ ?
+--hQNsnYH4flUl
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-And I don't see any ubifs-specific setups or tests, I think it's
-possible to make it a generic test.
+Hi all,
 
-> 
-> Signed-off-by: Chen Long <chenlongcl.chen@huawei.com>
-> ---
->  tests/ubifs/001      | 54 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/ubifs/001.out  |  2 ++
->  tests/ubifs/Makefile | 24 ++++++++++++++++++++
->  3 files changed, 80 insertions(+)
->  create mode 100755 tests/ubifs/001
->  create mode 100644 tests/ubifs/001.out
->  create mode 100644 tests/ubifs/Makefile
-> 
-> diff --git a/tests/ubifs/001 b/tests/ubifs/001
-> new file mode 100755
-> index 00000000..1e9a4de2
-> --- /dev/null
-> +++ b/tests/ubifs/001
-> @@ -0,0 +1,54 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Huawei.  All Rights Reserved.
-> +#
-> +# FS QA Test 001
-> +#
-> +# Regression test for kernel commit:
-> +# 1. f4e3634a3b642 (ubifs: Fix races between xattr_{set|get} and
-> +#	listxattr operations)
-> +# 2. 819f9ab430a44 (ubifs: Remove ui_mutex in ubifs_xattr_get and
-> +#	change_xattr)
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick attr
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -r -f $tmp.*
-> +}
+The master branch of the xfstests repository at:
 
-Use tab for indention, not spaces.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-And this _cleanup() function is the same as the default one, so you
-don't need to override it.
-
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_fs ubifs
-> +_require_test
-> +_require_attrs
-> +
-> +target=$TEST_DIR/$seq
-> +touch $target
-> +
-> +# start a background listxattr
-> +runfile="$tmp.listxattr"
-> +touch $runfile
-> +while [ -e $runfile ]; do
-> +    ${GETFATTR_PROG} $target >/dev/null 2>&1
-> +done &
-> +
-> +# add new xattr continuously
-> +largename=`for i in $(seq 0 128); do echo -n a; done`
-
-Don't have to loop for 129 times, perl could do it as
-
-largename=`$PERL_PROG -e 'print "a"x129;'`
-
-> +for i in $(seq 0 99); do
-
-for i in {0..99}; do
-
-which could avoid forking a new process :)
-
-> +    ${SETFATTR_PROG} -n user.${largename}.$i -v $i $target
-> +done
+have just been updated. This update supports ceph's new mount syntax and
+removes xfs/107, which is identified as a long-broken test. And you may want to
+remove xfs/107 from your skip list as well, in case the seq number got reused
+and skipped wrong test.
 
 Thanks,
 Eryu
 
-> +
-> +rm -f $runfile
-> +wait > /dev/null 2>&1
-> +rm -f $target
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ubifs/001.out b/tests/ubifs/001.out
-> new file mode 100644
-> index 00000000..88678b8e
-> --- /dev/null
-> +++ b/tests/ubifs/001.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 001
-> +Silence is golden
-> diff --git a/tests/ubifs/Makefile b/tests/ubifs/Makefile
-> new file mode 100644
-> index 00000000..b464b22b
-> --- /dev/null
-> +++ b/tests/ubifs/Makefile
-> @@ -0,0 +1,24 @@
-> +#
-> +# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-> +#
-> +
-> +TOPDIR = ../..
-> +include $(TOPDIR)/include/builddefs
-> +include $(TOPDIR)/include/buildgrouplist
-> +
-> +GENERIC_DIR = generic
-> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GENERIC_DIR)
-> +DIRT = group.list
-> +
-> +default: $(DIRT)
-> +
-> +include $(BUILDRULES)
-> +
-> +install:
-> +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> +	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> +
-> +# Nothing.
-> +install-dev install-lib:
-> -- 
-> 2.17.1
+The new head of the master branch is commit:
+
+c61c1e2f4cad ceph/001-003: skip if test_dummy_encryption is enabled
+
+New commits:
+
+Anand Jain (1):
+      [8b9922c8a41a] btrfs/254: fix non-unique fsid issue
+
+Darrick J. Wong (2):
+      [4feb867219a7] xfs/107: remove long-broken test
+      [c0fd323596c5] xfs/014: try a few times to create speculative preallocations
+
+Jeff Layton (2):
+      [424b0975184a] common: handle ceph's new mount syntax
+      [c61c1e2f4cad] ceph/001-003: skip if test_dummy_encryption is enabled
+
+
+Code Diffstat:
+
+ common/btrfs      |    2 +-
+ common/config     |    8 +
+ common/rc         |   50 +-
+ tests/btrfs/254   |    9 +-
+ tests/ceph/001    |    1 +
+ tests/ceph/002    |    1 +
+ tests/ceph/003    |    1 +
+ tests/xfs/014     |   45 +-
+ tests/xfs/107     |  129 -----
+ tests/xfs/107.out | 1550 -----------------------------------------------------
+ 10 files changed, 82 insertions(+), 1714 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--hQNsnYH4flUl
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmHa60EACgkQJlKqKVyP
+52M8BhAAmdaWAc/UFwPQyUfMSUUM5ycdaj2cfubfo6hhP3WU2sm5WN3ZoRlKa9Xw
+PvxXZEAgW/ecqMiaOuuPP+Runv5+EAyvBLdu1Ty/f4h3kBTSg+h5AwakHhebqbyv
+2JSCAavFXXVRd8idkx2PjuW3pXSYKxSQ9bighLY69+Me2VTah1oADdvQsZT+Rn6H
+E+dqXIX2/amF7+rE7Ev3aS5V+5eDN8mlfBDoJf/VF2yB2JDc83GAAJqi/AqXNZQu
+1QncGfW05oiSeKOyqDcGUPMnRiju7pzWiu1xQIWsp01459HSmBIiOlp6kjDSxXcR
+vH80HtA1iqT0mgc9dngu+Ra8ApNxCfJOAXc3BaRJp2thQ7yoaYODMznN+n+1B0ED
+efjqk7FHM27sFwZR4mLla0mIT9vSNGfOH/kVnC5RVYM9zWdgpyBoyNruoNhArbKx
+W0hBC0JfF42D60MPJ4qTWNXmhtMms6ovgtvVq3EuG0S+bYc+TaDiOerbkvGgtUrO
+lZ39DcKDFZI0Madugy0jImJ/nw35jRnoQrZW+Zt6vNzh4OzeUjUMbytGRdn6DnM2
+XVbkHtsGMAOmM3SHfefHjfC8ouL5hG64YTMqRfTbeAppiyDVfc62XYP3ZGHixdbs
+dPBOfipPgg60JLOF7SX9Ja+oYMxe001pPiPYRe0m/wICax2FbmE=
+=oEXp
+-----END PGP SIGNATURE-----
+
+--hQNsnYH4flUl--
