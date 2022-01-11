@@ -2,216 +2,207 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21619C43219
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 Jan 2022 03:36:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11317C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 Jan 2022 18:55:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347194AbiAKDgG (ORCPT
+        id S1350127AbiAKSzU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 Jan 2022 22:36:06 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:44859 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1347471AbiAKDe6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jan 2022 22:34:58 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1641872097;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=nbxMTo82mSwgu9LrK3Z8l7p328XxVSTeLoc0Bezsp4Y=;
-        b=NDwNV9Rjgn4o59baFxIZgHkbE0Y2kurYwYN83WrmZ77I2GHViyWXUmZ99OYPqtXOerP5F5
-        UD0JttLkHsTF3tL5w0ls581fMzLrEO47d4JvlsGiaOSHiO04uimFKQiCWscGLJlC91KRCu
-        YF121W2tFJ+xEEdEmrnucEFq3oJNImM=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-490-uLzQyp-aNkSkEmRABfBtiQ-1; Mon, 10 Jan 2022 22:34:56 -0500
-X-MC-Unique: uLzQyp-aNkSkEmRABfBtiQ-1
-Received: by mail-pl1-f199.google.com with SMTP id p15-20020a170903248f00b0014a16f4fdcaso3013250plw.6
-        for <fstests@vger.kernel.org>; Mon, 10 Jan 2022 19:34:56 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=nbxMTo82mSwgu9LrK3Z8l7p328XxVSTeLoc0Bezsp4Y=;
-        b=iaCvScmlTDKCzDxxt6oO3U0RfHugtVg6ze801l/2yWB/JPlYOFerE/DgXCi3JycPhl
-         VLmPj+geAVsvAZjqPJfhJPWfCBzZLBdGMIi/gXGjqGvbueoW43LqDXnmsN7g54d9swJG
-         QVm3/vcJbwSot4RbszePP9yoc1/UIhE7t3klooPgVFBpZ256UFMSxaISXjwMoiuktqEF
-         jGONb1SvarPPbRs2WqVD7/v4HZYfqC/0ImTPpAeNHtbDxfk04osIqAsFyxpivBHitkDx
-         CaXCV/XGIi/DDi24UgACO0ejnCkD+xcqazW7JHwreEYbeP6KF2+CtaLzmwGhZvsSre23
-         LYJw==
-X-Gm-Message-State: AOAM532yLrjoUQ+W5oKBDzCw5I4+LrQ8yYZr2PaY4TWXe9+1Y7wEQvUd
-        faPElAPc5rtoyAL8OCs78sLTYqMMD1gm+dwFi6CczO6zff5vjMN8ICo3O2h4WxAbKdgF8SPVBqu
-        cCx8jVMGYbnVO4sv8iA==
-X-Received: by 2002:a63:e64a:: with SMTP id p10mr2392779pgj.331.1641872094982;
-        Mon, 10 Jan 2022 19:34:54 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxrKLOMmv6XcPUK2OHJgESZOn9cw3iVB1zU4IMDqubJP+anN1Himl6CZd9a0SjEA/WXq/XwTg==
-X-Received: by 2002:a63:e64a:: with SMTP id p10mr2392768pgj.331.1641872094532;
-        Mon, 10 Jan 2022 19:34:54 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id p50sm5164025pfw.51.2022.01.10.19.34.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Jan 2022 19:34:54 -0800 (PST)
-Date:   Tue, 11 Jan 2022 11:34:50 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Chen Long <chenlongcl.chen@huawei.com>
-Cc:     fstests@vger.kernel.org, richard@nod.at
-Subject: Re: [PATCH] ubifs: add test for race between listxattr and setxatr
-Message-ID: <20220111033450.7grsstpebmol4lor@zlang-mailbox>
-Mail-Followup-To: Chen Long <chenlongcl.chen@huawei.com>,
-        fstests@vger.kernel.org, richard@nod.at
-References: <20220108022431.71751-1-chenlongcl.chen@huawei.com>
+        Tue, 11 Jan 2022 13:55:20 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:52864 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1350251AbiAKSzU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jan 2022 13:55:20 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 70ED7B81A3C
+        for <fstests@vger.kernel.org>; Tue, 11 Jan 2022 18:55:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19465C36AEF;
+        Tue, 11 Jan 2022 18:55:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641927317;
+        bh=s7JZ1wwQDt1g6JiGVWdprSNsaclg2O3QzJZj7Q3jSPM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=SCEs2sR2jcT+k0Fn1KutUL8JXwWZgYqy/Ur7ndiOZVP6XlXtCci/gSNw6weoGK41k
+         CeaASM9JWvT5kLoLNTEyDtTKQBUtdZqkIaHG7EpquxVNaS6mYwm7IT2Gh1Huion+1D
+         lQqzEg+eElSWxxxNV0iLB1ZePLDUKKd8LDk+wsF8dqPdKaP9X0L7wcRqOhW6Ky1jcJ
+         7nd2ueXMZVpmRY196qKN+sMcwJ9Fve4GsuDGX5JoYkF2DdvqhCTkZpM7E08UlCM98n
+         fZVqzDe0xfr9BI+zPttckM6RyO80nEjte5JjWtvbv2+3A3D3tCMm/u9vuWUQeGTeRB
+         2s8niNm4kcGXw==
+Date:   Tue, 11 Jan 2022 10:55:16 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3 15/17] generic: add race test between reflink and mmap
+ read
+Message-ID: <20220111185516.GF31566@magnolia>
+References: <20211214081914.2478122-1-ruansy.fnst@fujitsu.com>
+ <20211214081914.2478122-16-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220108022431.71751-1-chenlongcl.chen@huawei.com>
+In-Reply-To: <20211214081914.2478122-16-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jan 08, 2022 at 10:24:31AM +0800, Chen Long wrote:
-> Add reproducer for a bug on ubifs where listxattr() copies
-> the newly created xattr names regardless of the remaining
-> buffer size, fails the assertion of used buffer size, and
-> may corrupt buffer memory.
-> 
-> This is a regression test for three kernel commit:
-> 1. f4e3634a3b642 (ubifs: Fix races between xattr_{set|get} and
-> 	listxattr operations)
-> 2. 819f9ab430a44 (ubifs: Remove ui_mutex in ubifs_xattr_get and
-> 	change_xattr)
-> 
-> Signed-off-by: Chen Long <chenlongcl.chen@huawei.com>
+On Tue, Dec 14, 2021 at 04:19:12PM +0800, Shiyang Ruan wrote:
+> Test for races or FS corruption between reflink and mmap reading the
+> target file. (MMAP version of generic/164,165)
+
+Hi, now that this test has been running for a couple of weeks, I have
+observed periodic false positives from this test:
+
+QA output created by 670
+Format and mount
+Initialize files
+Reflink and mmap reread the files!
+00001000:  61 61 61 61 61 61 61 61 62 62 62 62 62 62 62 62 aaaabbbb
+Finished reflinking
+
+I suspect that if the _mread_range of file3 races with the page cache
+invalidation that FICLONERANGE performs, it is possible that the mread
+dump will contain a mix of 0x61 and 0x62.  Looking at mread_f, it looks
+like it does a byte-at-a-time copy of the mmap...
+
+	if (rflag) {
+		for (tmp = length - 1, c = 0; tmp >= 0; tmp--, c = 1) {
+			*bp = *(((char *)mapping->addr) + dumpoffset + tmp);
+			cnt++;
+
+...which is a sufficient window for the page cache mapping to get
+invalidated such that the mread will block on the page fault until the
+reflink operation finishes.
+
+I think the solution here is to adjust the egrep regexp above to find
+any line that does /not/ contain a's or b's, since (in principle) the
+reflink could run fast enough that every byte read hits a pgae fault.
+What do you think?
+
+--D
+
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
 > ---
->  tests/ubifs/001      | 54 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/ubifs/001.out  |  2 ++
->  tests/ubifs/Makefile | 24 ++++++++++++++++++++
->  3 files changed, 80 insertions(+)
->  create mode 100755 tests/ubifs/001
->  create mode 100644 tests/ubifs/001.out
->  create mode 100644 tests/ubifs/Makefile
+>  common/reflink        | 11 +++++++
+>  tests/generic/913     | 72 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/913.out |  5 +++
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/generic/913
+>  create mode 100644 tests/generic/913.out
 > 
-> diff --git a/tests/ubifs/001 b/tests/ubifs/001
+> diff --git a/common/reflink b/common/reflink
+> index 68dbdedd..455260c6 100644
+> --- a/common/reflink
+> +++ b/common/reflink
+> @@ -186,6 +186,17 @@ _read_range() {
+>  	$XFS_IO_PROG $xfs_io_args -f -c "pread -q -v $offset $len" "$file" | cut -d ' ' -f '3-18'
+>  }
+>  
+> +# Prints a range of a file as a hex dump
+> +_mread_range() {
+> +	file="$1"
+> +	offset="$2"
+> +	len="$3"
+> +	xfs_io_args="$4"
+> +
+> +	$XFS_IO_PROG $xfs_io_args -f -c "mmap -rw 0 $((offset + len))" \
+> +		-c "mread -v $offset $len" "$file" | cut -d ' ' -f '3-18'
+> +}
+> +
+>  # Compare ranges of two files
+>  _compare_range() {
+>  	file1="$1"
+> diff --git a/tests/generic/913 b/tests/generic/913
 > new file mode 100755
-> index 00000000..1e9a4de2
+> index 00000000..f709c36c
 > --- /dev/null
-> +++ b/tests/ubifs/001
-> @@ -0,0 +1,54 @@
+> +++ b/tests/generic/913
+> @@ -0,0 +1,72 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Huawei.  All Rights Reserved.
 > +#
-> +# FS QA Test 001
+> +# FS QA Test No. 913
 > +#
-> +# Regression test for kernel commit:
-> +# 1. f4e3634a3b642 (ubifs: Fix races between xattr_{set|get} and
-> +#	listxattr operations)
-> +# 2. 819f9ab430a44 (ubifs: Remove ui_mutex in ubifs_xattr_get and
-> +#	change_xattr)
+> +# Test for races or FS corruption between reflink and mmap reading the
+> +# target file. (MMAP version of generic/164,165)
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick attr
+> +_begin_fstest auto clone
 > +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -r -f $tmp.*
-> +}
+> +_register_cleanup "_cleanup" BUS
 > +
 > +# Import common functions.
 > +. ./common/filter
-> +. ./common/attr
+> +. ./common/reflink
 > +
 > +# real QA test starts here
-> +_supported_fs ubifs
-
-From the whole test case, I don't think it's an ubifs special case. So we can
-make it to be a generic case.
-
-> +_require_test
-> +_require_attrs
+> +_require_scratch_reflink
+> +_require_cp_reflink
 > +
-> +target=$TEST_DIR/$seq
-> +touch $target
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
 > +
-> +# start a background listxattr
-> +runfile="$tmp.listxattr"
-> +touch $runfile
-> +while [ -e $runfile ]; do
-
-We might can explain at here, that if run getfattr without "-n" option,
-it uses listxattr system call, or it uses getxattr system call. It's
-the code logic of getfattr.c
-
-        if (opt_name)
-                err = print_attribute(path, opt_name, &header_printed);
-        else
-                err = list_attributes(path, &header_printed);
-
-> +    ${GETFATTR_PROG} $target >/dev/null 2>&1
-
-JFYI: There's a wrapper of ${GETFATTR_PROG} _getfattr().
-But if you filter all output of getfattr, I think it's fine to use
-${GETFATTR_PROG} directly :)
-
-> +done &
+> +testdir=$SCRATCH_MNT/test-$seq
+> +finished_file=/tmp/finished
+> +rm -rf $finished_file
+> +mkdir $testdir
 > +
-> +# add new xattr continuously
-> +largename=`for i in $(seq 0 128); do echo -n a; done`
-> +for i in $(seq 0 99); do
-> +    ${SETFATTR_PROG} -n user.${largename}.$i -v $i $target
+> +loops=512
+> +nr_loops=$((loops - 1))
+> +blksz=65536
+> +
+> +echo "Initialize files"
+> +echo >> $seqres.full
+> +_pwrite_byte 0x61 0 $((loops * blksz)) $testdir/file1 >> $seqres.full
+> +_pwrite_byte 0x62 0 $((loops * blksz)) $testdir/file2 >> $seqres.full
+> +_cp_reflink $testdir/file1 $testdir/file3
+> +_scratch_cycle_mount
+> +
+> +fbytes() {
+> +	egrep -v '(61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61|62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62)'
+> +}
+> +
+> +reader() {
+> +	while [ ! -e $finished_file ]; do
+> +		_mread_range $testdir/file3 0 $((loops * blksz)) | fbytes
+> +	done
+> +}
+> +
+> +echo "Reflink and mmap reread the files!"
+> +reader &
+> +for i in `seq 1 2`; do
+> +	seq $nr_loops -1 0 | while read i; do
+> +		_reflink_range  $testdir/file1 $((i * blksz)) \
+> +				$testdir/file3 $((i * blksz)) $blksz >> $seqres.full
+> +		[ $? -ne 0 ] && break
+> +	done
+> +	seq $nr_loops -1 0 | while read i; do
+> +		_reflink_range  $testdir/file2 $((i * blksz)) \
+> +				$testdir/file3 $((i * blksz)) $blksz >> $seqres.full
+> +		[ $? -ne 0 ] && break
+> +	done
 > +done
+> +echo "Finished reflinking"
+> +touch $finished_file
+> +wait
 > +
-> +rm -f $runfile
-> +wait > /dev/null 2>&1
-> +rm -f $target
-> +
-> +echo "Silence is golden"
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/ubifs/001.out b/tests/ubifs/001.out
+> diff --git a/tests/generic/913.out b/tests/generic/913.out
 > new file mode 100644
-> index 00000000..88678b8e
+> index 00000000..a34df6ce
 > --- /dev/null
-> +++ b/tests/ubifs/001.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 001
-> +Silence is golden
-> diff --git a/tests/ubifs/Makefile b/tests/ubifs/Makefile
-> new file mode 100644
-> index 00000000..b464b22b
-> --- /dev/null
-> +++ b/tests/ubifs/Makefile
-> @@ -0,0 +1,24 @@
-> +#
-> +# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-> +#
-> +
-> +TOPDIR = ../..
-> +include $(TOPDIR)/include/builddefs
-> +include $(TOPDIR)/include/buildgrouplist
-> +
-> +GENERIC_DIR = generic
-> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GENERIC_DIR)
-> +DIRT = group.list
-> +
-> +default: $(DIRT)
-> +
-> +include $(BUILDRULES)
-> +
-> +install:
-> +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> +	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> +
-> +# Nothing.
-> +install-dev install-lib:
-
-Make this case to be a generic case, will avoid doing this :)
-
+> +++ b/tests/generic/913.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 913
+> +Format and mount
+> +Initialize files
+> +Reflink and mmap reread the files!
+> +Finished reflinking
 > -- 
-> 2.17.1
+> 2.34.1
 > 
-
+> 
+> 
