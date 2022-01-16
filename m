@@ -2,74 +2,136 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B074C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Jan 2022 22:38:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F445C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 16 Jan 2022 04:51:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229912AbiANWig (ORCPT
+        id S229905AbiAPEvf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Jan 2022 17:38:36 -0500
-Received: from ams.source.kernel.org ([145.40.68.75]:42406 "EHLO
-        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229556AbiANWig (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jan 2022 17:38:36 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id AECADB821BA;
-        Fri, 14 Jan 2022 22:38:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5D593C36AE7;
-        Fri, 14 Jan 2022 22:38:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642199913;
-        bh=ijVuTQxRWTj2v8H8MrXjMe3pE+tTFzhwXrDNYUJqfO8=;
-        h=Date:From:To:Cc:Subject:From;
-        b=gjN94l29jr69J6uiK9B27MyjKyKUqOdRDu56g7yfm02puDeBeBLrjrqdM42puIp19
-         EyQRuKj7y60oroOJWI8Mk1slW6ojXQyJsTAMlTWGhTx0ICYyGRr6fPUQ8kyn1YEoRs
-         jUrsdznEZ/BP44nX7KbPPVLikPBQ3rx/9AWCLPHOkpZ9Mqxl6oaGWx1okwn6yvSDR4
-         n5nJ6VxZmLzcoJRDKcedP8dR0ENEXUWqYYsbKF5r2n8mXJXQSOTzdInhKXtaebNKRY
-         AdmSAAh4QqR2JJoG2wiLgtR0b8NBO/P+AtSnpf8p3NexMMBgqMzDkWY0M1a94ZyTAS
-         dxjahjqvyAk0Q==
-Date:   Fri, 14 Jan 2022 14:38:32 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     guaneryu@gmail.com
-Cc:     xuyang2018.jy@fujitsu.com, Theodore Ts'o <tytso@mit.edu>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: [PATCHSET 9/8] unwritten_sync: convert XFS_IOC_FREESP64 to ftruncate
-Message-ID: <20220114223832.GB90398@magnolia>
+        Sat, 15 Jan 2022 23:51:35 -0500
+Received: from out20-98.mail.aliyun.com ([115.124.20.98]:47593 "EHLO
+        out20-98.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229748AbiAPEvf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 15 Jan 2022 23:51:35 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07442486|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0292042-0.00315104-0.967645;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047201;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Mdlujxx_1642308693;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Mdlujxx_1642308693)
+          by smtp.aliyun-inc.com(10.147.40.233);
+          Sun, 16 Jan 2022 12:51:33 +0800
+Date:   Sun, 16 Jan 2022 12:51:32 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 1/2] idmapped-mounts: add fs_allow_idmap() helper
+Message-ID: <YeOkVHBnpkQRQlIR@desktop>
+References: <20220113132421.865002-1-brauner@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20220113132421.865002-1-brauner@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Jan 13, 2022 at 02:24:20PM +0100, Christian Brauner wrote:
+> Move the check whether the underlying filesystem supports idmapped
+> mounts into a separate helper. We will use it in the following patch to
+> make it possible to always run all tests that don't require idmapped
+> mounts.
+> 
+> Cc: Seth Forshee <sforshee@digitalocean.com>
+> Cc: Eryu Guan <guaneryu@gmail.com>
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: fstests@vger.kernel.org
+> Signed-off-by: Christian Brauner <brauner@kernel.org>
+> ---
+>  src/idmapped-mounts/idmapped-mounts.c | 57 ++++++++++++++-------------
+>  1 file changed, 30 insertions(+), 27 deletions(-)
+> 
+> diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+> index da690779..a78a901f 100644
+> --- a/src/idmapped-mounts/idmapped-mounts.c
+> +++ b/src/idmapped-mounts/idmapped-mounts.c
+> @@ -13907,6 +13907,35 @@ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+>  	return true;
+>  }
+>  
+> +static bool fs_allow_idmap(void)
+> +{
+> +	int ret;
+> +	int open_tree_fd = -EBADF;
+> +	struct mount_attr attr = {
+> +		.attr_set	= MOUNT_ATTR_IDMAP,
+> +		.userns_fd	= -EBADF,
+> +	};
+> +
+> +	/* Changing mount properties on a detached mount. */
+> +	attr.userns_fd = get_userns_fd(0, 1000, 1);
+> +	if (attr.userns_fd < 0)
+> +		exit(EXIT_FAILURE);
 
-This ioctl will be dropped soon, so port the program to use ftruncate,
-which does the same thing.
+IMHO, it'd be better to return false here and let caller decide if we
+should exit or not.
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- src/unwritten_sync.c |    9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+Thanks,
+Eryu
 
-diff --git a/src/unwritten_sync.c b/src/unwritten_sync.c
-index ebdc8248..45ac7df9 100644
---- a/src/unwritten_sync.c
-+++ b/src/unwritten_sync.c
-@@ -92,10 +92,11 @@ main(int argc, char *argv[])
- 
- 		print_getbmapx(file, fd, 0, 0);
- 
--		flock.l_whence = 0;
--		flock.l_start= 0;
--		flock.l_len = 0;
--		xfsctl(file, fd, XFS_IOC_FREESP64, &flock);
-+		if (ftruncate(fd, 0)) {
-+			perror("ftruncate");
-+			exit(1);
-+		}
-+
- 		print_getbmapx(file, fd, 0, 0);
- 		close(fd);
- 	}
+> +
+> +	open_tree_fd = sys_open_tree(t_mnt_fd, "",
+> +				     AT_EMPTY_PATH | AT_NO_AUTOMOUNT |
+> +				     AT_SYMLINK_NOFOLLOW | OPEN_TREE_CLOEXEC |
+> +				     OPEN_TREE_CLONE);
+> +	if (open_tree_fd < 0)
+> +		ret = -1;
+> +	else
+> +		ret = sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr,
+> +					sizeof(attr));
+> +	close(open_tree_fd);
+> +	close(attr.userns_fd);
+> +
+> +	return ret == 0;
+> +}
+> +
+>  int main(int argc, char *argv[])
+>  {
+>  	int fret, ret;
+> @@ -13987,34 +14016,8 @@ int main(int argc, char *argv[])
+>  	 * idmapped mounts.
+>  	 */
+>  	if (supported) {
+> -		int open_tree_fd = -EBADF;
+> -		struct mount_attr attr = {
+> -			.attr_set	= MOUNT_ATTR_IDMAP,
+> -			.userns_fd	= -EBADF,
+> -		};
+> -
+> -		/* Changing mount properties on a detached mount. */
+> -		attr.userns_fd	= get_userns_fd(0, 1000, 1);
+> -		if (attr.userns_fd < 0)
+> +		if (!fs_allow_idmap())
+>  			exit(EXIT_FAILURE);
+> -
+> -		open_tree_fd = sys_open_tree(t_mnt_fd, "",
+> -					     AT_EMPTY_PATH |
+> -					     AT_NO_AUTOMOUNT |
+> -					     AT_SYMLINK_NOFOLLOW |
+> -					     OPEN_TREE_CLOEXEC |
+> -					     OPEN_TREE_CLONE);
+> -		if (open_tree_fd < 0)
+> -			ret = -1;
+> -		else
+> -			ret = sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr));
+> -
+> -		close(open_tree_fd);
+> -		close(attr.userns_fd);
+> -
+> -		if (ret)
+> -			exit(EXIT_FAILURE);
+> -
+>  		exit(EXIT_SUCCESS);
+>  	}
+>  
+> 
+> base-commit: c61c1e2f4cad89d4f900eaef173616b309228110
+> -- 
+> 2.32.0
