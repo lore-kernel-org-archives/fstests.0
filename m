@@ -2,156 +2,163 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7E36C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Jan 2022 17:16:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3715FC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Jan 2022 17:20:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241427AbiAQRQF (ORCPT
+        id S236687AbiAQRUe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Jan 2022 12:16:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48082 "EHLO
+        Mon, 17 Jan 2022 12:20:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49620 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243853AbiAQRN0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 12:13:26 -0500
+        with ESMTP id S243333AbiAQRTx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 12:19:53 -0500
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 454A5C08EAC7;
-        Mon, 17 Jan 2022 09:08:16 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BFE8C061762;
+        Mon, 17 Jan 2022 09:15:19 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 05FE9B81145;
-        Mon, 17 Jan 2022 17:08:15 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4A048C36AED;
-        Mon, 17 Jan 2022 17:08:13 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 34FC5B81055;
+        Mon, 17 Jan 2022 17:15:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE730C36AE7;
+        Mon, 17 Jan 2022 17:15:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642439293;
-        bh=COzUYc5wJLvsEu/y3i0UR2TngCDt1U/NbVEU6lJk3DM=;
+        s=k20201202; t=1642439716;
+        bh=75yaY9Pq+ooKGV7+JWC4GaaZxOsupv8TErb7SGe5Be8=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=cLCRRNrHeCB7kJMdD21rHzFsS5yn2Zkh8b33WRxbkELzdFzfqXlE3VV4ajQUOGle3
-         MfKrJns+KRfHYkBkcJr0Lw2l3tXeKJt+0xpYvx4VT/Dbxn7Ifr+cIOtq/i7pflEQ8P
-         lRfLBuUhke7CGFB3mTyERahhnN1gIHshbFmASxVo1v9PlHukeEnE9N6JjHIYIIIkou
-         9+txNpcZBvJ4QYuxqV3EL6qttVUolZaExyhSw6NhdJdVjlzQSuWlmLV20CxSMgXW6w
-         z95HD+moutHheEpSswsZGy3rQGVc+/4gjbM535nBgU/nB8ZuSnWlpwQbu0rBm0WFIG
-         zuqNwaTwO1GkQ==
-Date:   Mon, 17 Jan 2022 17:08:11 +0000
-From:   Filipe Manana <fdmanana@kernel.org>
-To:     Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Naohiro Aota <naohiro.aota@wdc.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>
-Subject: Re: [PATCH] btrfs/255: add test for quota disable in parallel with
- balance
-Message-ID: <YeWie0i4ltdLPkdf@debian9.Home>
-References: <20220117005705.956931-1-shinichiro.kawasaki@wdc.com>
+        b=rOqpWlri+5u0q36NWqyagJf4U9uI1RAeKxX289WmRmKepyBrXZubbm2I7ihVZB/lH
+         KtLFEyZp95T2fzjloGQMlhFnu80Zl2PjAoA+7VRwQl1BN98VLnRMCpwaccd/bXJaen
+         TuLdYH7JNolEy9QjsJ+pXeTzxCYVrWlaH1yIvxKBTtetdCZpMGiipjyYqx5hnWNSps
+         Z088CgXjLCNdZeDYR6BILuH6J/tNHz1RQdku5B31qity0z7qpFs51hXrtDMUH9D0Qw
+         WdGHaedhhMGhka34XgMYpQ19WKt/DlEKb3RgAkOLPf5NkEXX7KEE3RFwyAAly91DJI
+         C+s6HH/E0kxsQ==
+Date:   Mon, 17 Jan 2022 09:15:16 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 7/8] iogen: upgrade to fallocate
+Message-ID: <20220117171516.GB13514@magnolia>
+References: <164193780808.3008286.598879710489501860.stgit@magnolia>
+ <164193784690.3008286.8689130816813600863.stgit@magnolia>
+ <YePCz96eXSb66ppd@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220117005705.956931-1-shinichiro.kawasaki@wdc.com>
+In-Reply-To: <YePCz96eXSb66ppd@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 17, 2022 at 09:57:05AM +0900, Shin'ichiro Kawasaki wrote:
-> Test quota disable during btrfs balance and confirm it does not cause
-> kernel hang. This is a regression test for the problem reported to
-> linux-btrfs list [1]. The hang was recreated using the test case and
-> memory backed null_blk device with 5GB size as the scratch device.
+On Sun, Jan 16, 2022 at 03:01:35PM +0800, Eryu Guan wrote:
+> On Tue, Jan 11, 2022 at 01:50:46PM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Update this utility to use fallocate to preallocate/reserve space to a
+> > file so that we're not so dependent on legacy XFS ioctls.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  ltp/iogen.c |   32 ++++++++++++++++++++++----------
+> >  1 file changed, 22 insertions(+), 10 deletions(-)
+> > 
+> > 
+> > diff --git a/ltp/iogen.c b/ltp/iogen.c
+> > index 2b6644d5..6c2c1534 100644
+> > --- a/ltp/iogen.c
+> > +++ b/ltp/iogen.c
+> > @@ -928,7 +928,15 @@ bozo!
+> >  		   fd, f.l_whence, (long long)f.l_start, (long long)f.l_len);*/
+> >  
+> >  	    /* non-zeroing reservation */
+> > -#ifdef XFS_IOC_RESVSP
+> > +#if defined(HAVE_FALLOCATE)
+> > +	    if (fallocate(fd, 0, 0, nbytes) == -1) {
 > 
-> [1] https://lore.kernel.org/linux-btrfs/20220115053012.941761-1-shinichiro.kawasaki@wdc.com/
+> Seems this is not a identical replacement for XFS_IOC_RESVSP (is that
+> what we want here?), as fallocate(2) here zeros space and change i_size
+> as well.
+
+Doh, you're right, the second parameter should follow what the kernel
+does and specify FALLOC_FL_KEEP_SIZE.  I'll fix that and resubmit.
+Thanks for taking the rest of the series. :)
+
+--D
+
+> And from xfsctl(3), after XFS_IOC_RESVSP "The blocks are allocated, but
+> not zeroed, and the file size does not change." And the comments above
+> indicates "non-zeroing reservation" as well.
 > 
-> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> ---
->  tests/btrfs/255     | 42 ++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/255.out |  2 ++
->  2 files changed, 44 insertions(+)
->  create mode 100755 tests/btrfs/255
->  create mode 100644 tests/btrfs/255.out
+> If identical replacement is not required, we could drop "non-zeroing"
+> part, but add FALLOC_FL_KEEP_SIZE?
 > 
-> diff --git a/tests/btrfs/255 b/tests/btrfs/255
-> new file mode 100755
-> index 00000000..16b682ca
-> --- /dev/null
-> +++ b/tests/btrfs/255
-> @@ -0,0 +1,42 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Western Digital Corporation or its affiliates.
-> +#
-> +# FS QA Test No. btrfs/255
-> +#
-> +# Confirm that disabling quota during balance does not hang
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto qgroup
-
-Should have "balance" as well.
-
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_scratch
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Fill 40% of the device or 2GB
-> +fill_percent=40
-> +max_fillsize=$((2*1024*1024*1024))
-
-If the test requires some minimum size, than it should call
-
-   _require_scratch_size <size in KB>
-
-Also please make it a bit more readable by adding a single space before
-and after each *, i.e. 2 * 1024 * 1024 ... instead of 2*1024*1024.
-
-> +
-> +devsize=$(($(_get_device_size $SCRATCH_DEV) * 512))
-> +fillsize=$((devsize * fill_percent / 100))
-> +((fillsize > max_fillsize)) && fillsize=$max_fillsize
-> +
-> +fs=$((4096*1024))
-
-Same here.
-
-> +for ((i=0; i * fs < fillsize; i++)); do
-
-And here (i = 0 vs i=0).
-
-> +	dd if=/dev/zero of=$SCRATCH_MNT/file.$i bs=$fs count=1 \
-> +	   >> $seqres.full 2>&1
-> +done
-> +echo 3 > /proc/sys/vm/drop_caches
-
-Why the drop_caches? Please add a comment explaining why it is needed.
-
-> +
-> +# Run btrfs balance and quota enable/disable in parallel
-> +_run_btrfs_balance_start $SCRATCH_MNT >> $seqres.full &
-> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-> +$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
-
-This seems very timing sensitive.
-It would be a better stress test if we do the enable/disable in a loop,
-say 10 or 20 iterations, while another process keeps running balance in
-parallel and then is killed after the main process finishes the loop of
-enable/disable quotas.
-
-Thanks.
-
-> +wait
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/255.out b/tests/btrfs/255.out
-> new file mode 100644
-> index 00000000..7eefb828
-> --- /dev/null
-> +++ b/tests/btrfs/255.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 255
-> +Silence is golden
-> -- 
-> 2.33.1
+> Thanks,
+> Eryu
 > 
+> > +		fprintf(stderr,
+> > +			"iogen%s:  Could not fallocate %d bytes in file %s: %s (%d)\n",
+> > +			TagName, nbytes, path, SYSERR, errno);
+> > +		close(fd);
+> > +		return -1;
+> > +	    }
+> > +#elif defined(XFS_IOC_RESVSP)
+> >  	    if( xfsctl( path, fd, XFS_IOC_RESVSP, &f ) == -1) {
+> >  		fprintf(stderr,
+> >  			"iogen%s:  Could not xfsctl(XFS_IOC_RESVSP) %d bytes in file %s: %s (%d)\n",
+> > @@ -936,8 +944,7 @@ bozo!
+> >  		close(fd);
+> >  		return -1;
+> >  	    }
+> > -#else
+> > -#ifdef F_RESVSP
+> > +#elif defined(F_RESVSP)
+> >  	    if( fcntl( fd, F_RESVSP, &f ) == -1) {
+> >  		fprintf(stderr,
+> >  			"iogen%s:  Could not fcntl(F_RESVSP) %d bytes in file %s: %s (%d)\n",
+> > @@ -946,8 +953,7 @@ bozo!
+> >  		return -1;
+> >  	    }
+> >  #else
+> > -bozo!
+> > -#endif
+> > +# error Dont know how to reserve space!
+> >  #endif
+> >  	}
+> >  
+> > @@ -962,7 +968,15 @@ bozo!
+> >  		    (long long)f.l_len);*/
+> >  
+> >  	    /* zeroing reservation */
+> > -#ifdef XFS_IOC_ALLOCSP
+> > +#if defined(HAVE_FALLOCATE)
+> > +	    if (fallocate(fd, 0, sbuf.st_size, nbytes - sbuf.st_size) == -1) {
+> > +		fprintf(stderr,
+> > +			"iogen%s:  Could not fallocate %d bytes in file %s: %s (%d)\n",
+> > +			TagName, nbytes, path, SYSERR, errno);
+> > +		close(fd);
+> > +		return -1;
+> > +	    }
+> > +#elif defined(XFS_IOC_ALLOCSP)
+> >  	    if( xfsctl( path, fd, XFS_IOC_ALLOCSP, &f ) == -1) {
+> >  		fprintf(stderr,
+> >  			"iogen%s:  Could not xfsctl(XFS_IOC_ALLOCSP) %d bytes in file %s: %s (%d)\n",
+> > @@ -970,8 +984,7 @@ bozo!
+> >  		close(fd);
+> >  		return -1;
+> >  	    }
+> > -#else
+> > -#ifdef F_ALLOCSP
+> > +#elif defined(F_ALLOCSP)
+> >  	    if ( fcntl(fd, F_ALLOCSP, &f) < 0) {
+> >  		fprintf(stderr,
+> >  			"iogen%s:  Could not fcntl(F_ALLOCSP) %d bytes in file %s: %s (%d)\n",
+> > @@ -980,8 +993,7 @@ bozo!
+> >  		return -1;
+> >  	    }
+> >  #else
+> > -bozo!
+> > -#endif
+> > +# error Dont know how to (pre)allocate space!
+> >  #endif
+> >  	}
+> >  #endif
