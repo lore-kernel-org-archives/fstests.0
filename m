@@ -2,155 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 697BCC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 16 Jan 2022 15:38:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F964C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Jan 2022 00:57:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233472AbiAPPik (ORCPT
+        id S236647AbiAQA5H (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 16 Jan 2022 10:38:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45104 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233304AbiAPPih (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 Jan 2022 10:38:37 -0500
-Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83A4EC061574
-        for <fstests@vger.kernel.org>; Sun, 16 Jan 2022 07:38:37 -0800 (PST)
-Received: by mail-wm1-x332.google.com with SMTP id v123so15452313wme.2
-        for <fstests@vger.kernel.org>; Sun, 16 Jan 2022 07:38:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=WNuOR2FXz0viX5mTWsjxnYi14dRhXlnyZgndOnSAmuc=;
-        b=eLjstgevTuU4wMdKEmD/PJWYeSubyJeo3tdQx2lEEnT8hVjMSAv+SUIy0gk0QA+iPh
-         zJ0PsWmD6ehG6PoVWx5L+xV4+WXDE8Vgy/Ach+48HDgJi3um61tJEH0jojaV6jjuiOxO
-         Hnh5FrMmZ+xrjBgtIbUgrnQ1j0UgGJNbufYxaOMWt88CHtVwxma527z6Yk/BiyyYlpuI
-         t0Sz8kcjXRgRPPIOHpfJ439n9gYdFXySlMg/4vMJYgcZGHRkvsPKJMFhVsn2sUdNBlkz
-         y1iCZeGJOsB6FStCx64dNL7o5TiuzkJy9zj5COSJzMKCgIrwZVWXVMe10b2MFony7cn9
-         LvBA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=WNuOR2FXz0viX5mTWsjxnYi14dRhXlnyZgndOnSAmuc=;
-        b=zYCuWgKNRNkFTn/gmusC7Vu0u6IhiYcgi+HolY5/l9yjv2u2vQE/kQjAGbNNfZGkXA
-         fIe7hBKaoN7RdL13oxYd7v53CoYKTr90YJq0PVYxqjpD6LoC0ijNdsoWNmTSESyEhK4F
-         VrD77G++Xe+CdbYBCsPUZ3T6pYpE256dWIcfGWaPDTMMTGGZbnUhkEJUbOa6/WqfJpd0
-         4/ImysQUZy/0cUdq3HMJjck77mmYSZlym4j7RU3LprRm6mY807s39Htv40vmvXQMM7cH
-         kFf7Pp2gqfVCJqbqg2w9c66LaNu2YJnB6islZ1MSqTEmjsZp80jsXcF9+mUKN2eMUs+D
-         7E2g==
-X-Gm-Message-State: AOAM53226B3xAXufQsHmQaprdBi7P45ylfwCjFRgZz9kPct1OVNu6O9O
-        CQHyP+ibwbqK9ZoEkkPh2Pl7rHF9syA=
-X-Google-Smtp-Source: ABdhPJzIAW0UNWole4tjB3uHCBKwzxgmxSjAkOpP40f4NgfNvzbjAUs8foesyO7W6rCNLnwIwvoBvg==
-X-Received: by 2002:a1c:a9c2:: with SMTP id s185mr23355886wme.164.1642347515821;
-        Sun, 16 Jan 2022 07:38:35 -0800 (PST)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id l31sm11639232wms.1.2022.01.16.07.38.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 16 Jan 2022 07:38:34 -0800 (PST)
-Message-ID: <61e43bfa.1c69fb81.b7718.97e2@mx.google.com>
-Date:   Sun, 16 Jan 2022 23:38:31 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
+        Sun, 16 Jan 2022 19:57:07 -0500
+Received: from esa1.hgst.iphmx.com ([68.232.141.245]:58141 "EHLO
+        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236646AbiAQA5G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Jan 2022 19:57:06 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1642381026; x=1673917026;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=W9uaJiom+9DVVRRSdntg/b/+yHB13yV0L0N0eumFGKs=;
+  b=FBZoHlCHwD0iNdJVRahzZfwAmq648LI+sL3lAfgKo08UYGXRvmVcDS4D
+   brAtIn9Y1XKsynCwUU+sRkjMjJdhNaAx2t4LgZ1NYL/ctrtAnndJIzBXY
+   dc9Qbwl2F3EVsMzd8WJHhu6odf2rOCZj2Xm5d0qT3Eh6fKiRLfL7ehj79
+   i7376H7t/2bLFIkPJsGkIXEkI1SvEBQCAWhZt73CiY9EU0O/X3VrGsRFl
+   uti0wXbb+KBZi8yJJV04IujFSvMzPA5a3Uf6W8685fpukhZ9wtcHiOFg3
+   oqlA77d/VhKwL3DsdssHHdlK8m1TzxbbCPzcCxyfoOGQmTk1PhrKQVsZ+
+   w==;
+X-IronPort-AV: E=Sophos;i="5.88,294,1635177600"; 
+   d="scan'208";a="302472793"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 17 Jan 2022 08:57:06 +0800
+IronPort-SDR: Dl0Y5EyBo36N2f8zwlciVKNZPGI9srpntOpLMqyMvQlyb3BP2bhGKoc2K8AGjZ6aV1+TdLKN5D
+ +lmmLopItqtoqjZvE4N/+5HmHOKnXJ8wr6aQJmwl9MbQwGL6VdPMMd2jYAhbWj6AyJp/4tzEwJ
+ p2pFiHXSlkooIgtejBUxq6aB752Iy03Fq7AVKyzHmmVQnM9vvAiV4ewc7fmts86WDoCnxuMiEg
+ ZFme4xcLwxwdFNXM61n+m1vqy6R55yX+pE2z4wz6m52+AuJd2VuYhRBXOnfYJfz4qHX3v1uE7f
+ er7Q+fHrUBb4KC6699v1V0kL
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jan 2022 16:29:22 -0800
+IronPort-SDR: oxYTvc/6Z4kPhA2wRIzfw0c7yFW/WUrpzuxh1bgLt3oiL+gkqVp1DsAZs2Bb+ko0Qn+QkOCtef
+ m0R0mPct5G4MSoyCoBoW3C7Gsw9VEPW4whDLZDplgrMDhKg+9Jt5RmdqWYvCOeNLtPz6oG/oPP
+ 0cbGUmYfrI8kBx5ffKXUN9Jazq84p35JsuIFo6rvBI7NffVXswXZH7zhM3pZ7+EnB7azshQ8AG
+ oUvTej36fCYMzU6pIVSIMfRlDOgEHXXkDkk2AFgx5boKd6dHrIk6q/yMPGzGgf/lehz+FNU3Ky
+ qKM=
+WDCIronportException: Internal
+Received: from shindev.dhcp.fujisawa.hgst.com (HELO shindev.fujisawa.hgst.com) ([10.149.52.173])
+  by uls-op-cesaip02.wdc.com with ESMTP; 16 Jan 2022 16:57:06 -0800
+From:   Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to bec9f2cc9d7a
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
+        Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Subject: [PATCH] btrfs/255: add test for quota disable in parallel with balance
+Date:   Mon, 17 Jan 2022 09:57:05 +0900
+Message-Id: <20220117005705.956931-1-shinichiro.kawasaki@wdc.com>
+X-Mailer: git-send-email 2.33.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="GFI3Rhnk2pDW"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Test quota disable during btrfs balance and confirm it does not cause
+kernel hang. This is a regression test for the problem reported to
+linux-btrfs list [1]. The hang was recreated using the test case and
+memory backed null_blk device with 5GB size as the scratch device.
 
---GFI3Rhnk2pDW
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+[1] https://lore.kernel.org/linux-btrfs/20220115053012.941761-1-shinichiro.kawasaki@wdc.com/
 
-Hi all,
+Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+---
+ tests/btrfs/255     | 42 ++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/255.out |  2 ++
+ 2 files changed, 44 insertions(+)
+ create mode 100755 tests/btrfs/255
+ create mode 100644 tests/btrfs/255.out
 
-The master branch of the xfstests repository at:
+diff --git a/tests/btrfs/255 b/tests/btrfs/255
+new file mode 100755
+index 00000000..16b682ca
+--- /dev/null
++++ b/tests/btrfs/255
+@@ -0,0 +1,42 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Western Digital Corporation or its affiliates.
++#
++# FS QA Test No. btrfs/255
++#
++# Confirm that disabling quota during balance does not hang
++#
++. ./common/preamble
++_begin_fstest auto qgroup
++
++# real QA test starts here
++_supported_fs btrfs
++_require_scratch
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++# Fill 40% of the device or 2GB
++fill_percent=40
++max_fillsize=$((2*1024*1024*1024))
++
++devsize=$(($(_get_device_size $SCRATCH_DEV) * 512))
++fillsize=$((devsize * fill_percent / 100))
++((fillsize > max_fillsize)) && fillsize=$max_fillsize
++
++fs=$((4096*1024))
++for ((i=0; i * fs < fillsize; i++)); do
++	dd if=/dev/zero of=$SCRATCH_MNT/file.$i bs=$fs count=1 \
++	   >> $seqres.full 2>&1
++done
++echo 3 > /proc/sys/vm/drop_caches
++
++# Run btrfs balance and quota enable/disable in parallel
++_run_btrfs_balance_start $SCRATCH_MNT >> $seqres.full &
++$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
++$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
++wait
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/255.out b/tests/btrfs/255.out
+new file mode 100644
+index 00000000..7eefb828
+--- /dev/null
++++ b/tests/btrfs/255.out
+@@ -0,0 +1,2 @@
++QA output created by 255
++Silence is golden
+-- 
+2.33.1
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update contains some bugfixes and improvements,
-mainly for xfs and idmapped mount tests. There's also one new xfs case, which
-should pass with latest v5.16 kernel.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-bec9f2cc9d7a unwritten_sync: convert XFS_IOC_FREESP64 to ftruncate
-
-New commits:
-
-Christian Brauner (3):
-      [b3c31bd3ab60] idmapped-mounts: remove redundant fchownat() call in setgid tests
-      [7edd45acf142] idmapped-mounts: add more explanations to setgid tests
-      [9100066c2034] idmapped-mounts: add missing ownership comparisons to setgid tests
-
-Darrick J. Wong (7):
-      [3f79f632b073] common/rc: fix unicode checker detection in xfs_scrub
-      [3925a4ec9d47] xfs/220: fix quotarm syscall test
-      [9ecf4cbf3c37] xfs: test fixes for new 5.17 behaviors
-      [c2a8e177817e] xfs: regression test for allocsp handing out stale disk contents
-      [a32fb1bb5661] fsx: add support for XFS_IOC_ALLOCSP
-      [479b5b5786db] alloc: upgrade to fallocate
-      [bec9f2cc9d7a] unwritten_sync: convert XFS_IOC_FREESP64 to ftruncate
-
-Qu Wenruo (1):
-      [94232f08cb9c] btrfs/011: continue the test if we failed to cancel the replace
-
-Shiyang Ruan (1):
-      [26d2df0ee39a] generic/670: allow _mread_range() races with reflink_range()
-
-Theodore Ts'o (1):
-      [db4dfa826d7a] common/rc: fix _check_xfs_scrub_does_unicode on newer versions of libc-bin
-
-
-Code Diffstat:
-
- .gitignore                            |   1 +
- common/rc                             |  19 ++++--
- common/xfs                            |  12 ++++
- ltp/fsx.c                             | 110 +++++++++++++++++++++++++++++++-
- src/Makefile                          |   2 +-
- src/alloc.c                           |  66 +++++++++++++++----
- src/allocstale.c                      | 117 ++++++++++++++++++++++++++++++++++
- src/idmapped-mounts/idmapped-mounts.c |  62 ++++++++++++++++--
- src/unwritten_sync.c                  |   9 +--
- tests/btrfs/011                       |  16 ++++-
- tests/generic/670                     |   5 +-
- tests/xfs/107                         |  57 +++++++++++++++++
- tests/xfs/107.out                     |   2 +
- tests/xfs/130                         |   6 +-
- tests/xfs/130.out                     |   1 +
- tests/xfs/220                         |  30 +++++++--
- tests/xfs/308                         |   5 +-
- tests/xfs/308.out                     |   2 -
- 18 files changed, 475 insertions(+), 47 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---GFI3Rhnk2pDW
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmHkO9IACgkQJlKqKVyP
-52PjQw/+MHMJh6hafMRnpq/mKsZMulAtILVchCFvngiRmQ6gLLCAlI2VM2r0Wfd5
-4yZCkeWJG/bJWfb+iw4fWPsBfsxUPxCRkrAKwR/IOzmjOdbwpA6/++pcPi2fMDwf
-l86OqbbLTcOQZ9tUTUUx2/vDOGO2+X8sXYemy6/Jl3clZwVUUY4kNSG7oIc1a1bf
-17ZSEMjQN57kvi1z4pFsBf1SUIumwNPVnbFvb6FqzdOmXir+InNspE0GICPjnYn3
-1pHvvACuWzB32VJHHqHW6woNE5jNL8+STWAnFFblLyykp59H5Jx8Kj54kypaqiZI
-ZLAIvR4UHmsuzqzYebcVsvkGVwX4rTOydwuVoFFJQttMhutntq6dY5/GI+dA5K+1
-ssxUA2nLALhsVgwV0AiMMG3M512MlKIZOhHN1yRtFW54veEKpjTBBY/GR94FdNlr
-stnH088fZGUf7lp+DjdPizI90GzxoSogSdFaN+P7vOXiWEOIqiMituyba1lEoAnj
-oMxgLo7Ix/c7ZFCLEEQ8l2Xg6k9fbSR2pEfkCnPRETsxdf4f+Y4FjD377QBvr4xY
-PfDWFdalKLH21G1XOPt0q3wro0HSvIjdX1j3kEL+ABzybsZmJt0kc/FfAwjO9n6V
-O6dSR4jpqtIJdzpFl8Q+yi0CC1gnA5+KMf4O1YK9eU/HUC/VTa4=
-=3E6b
------END PGP SIGNATURE-----
-
---GFI3Rhnk2pDW--
