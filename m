@@ -2,87 +2,156 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85239C43217
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Jan 2022 17:16:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7E36C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Jan 2022 17:16:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242153AbiAQRQE (ORCPT
+        id S241427AbiAQRQF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Jan 2022 12:16:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48032 "EHLO
+        Mon, 17 Jan 2022 12:16:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241427AbiAQRNW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 12:13:22 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2B6AC0617BA
-        for <fstests@vger.kernel.org>; Mon, 17 Jan 2022 09:07:59 -0800 (PST)
+        with ESMTP id S243853AbiAQRN0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 12:13:26 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 454A5C08EAC7;
+        Mon, 17 Jan 2022 09:08:16 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 60585611D9
-        for <fstests@vger.kernel.org>; Mon, 17 Jan 2022 17:07:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BF706C36AEC;
-        Mon, 17 Jan 2022 17:07:58 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 05FE9B81145;
+        Mon, 17 Jan 2022 17:08:15 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4A048C36AED;
+        Mon, 17 Jan 2022 17:08:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642439278;
-        bh=otxc99klB8vz6DUKqEdXx30h0VUfYMtyCP2bI4UGy9Y=;
+        s=k20201202; t=1642439293;
+        bh=COzUYc5wJLvsEu/y3i0UR2TngCDt1U/NbVEU6lJk3DM=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=mEG5xkNfii8CLMVUGSuV6vxGNolLFZtp8g7FDVaYRIQxr4WumCLUEDXbr7eFl1M9B
-         mdGY8yBuVHwVzklXbWdPwI2kMYSNyh+xdvgRwH8X+hJ/u0K4mEJ9zxERWxA8OXmJOC
-         +VuF8N1hxBToYggyNLCfGwOvIMNuGT3NueLk9Yn8L2J48JVrkveDQkSuR0eNumTkId
-         ecOR1i5r36lLVmcdIlXFOuTJDqOcdGSp5+1Km+j8ykt4NXl0qX4kn0ie+/25rJGsXK
-         jQDMArBeYIliqA8cAnFK5ATH8SjWtdYdiGBSUVUSd8IEgrd25+ZfrN8DL9eUecNYKX
-         w2LBDlQHkFjAQ==
-Date:   Mon, 17 Jan 2022 09:07:58 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull
- call
-Message-ID: <20220117170758.GA13514@magnolia>
-References: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        b=cLCRRNrHeCB7kJMdD21rHzFsS5yn2Zkh8b33WRxbkELzdFzfqXlE3VV4ajQUOGle3
+         MfKrJns+KRfHYkBkcJr0Lw2l3tXeKJt+0xpYvx4VT/Dbxn7Ifr+cIOtq/i7pflEQ8P
+         lRfLBuUhke7CGFB3mTyERahhnN1gIHshbFmASxVo1v9PlHukeEnE9N6JjHIYIIIkou
+         9+txNpcZBvJ4QYuxqV3EL6qttVUolZaExyhSw6NhdJdVjlzQSuWlmLV20CxSMgXW6w
+         z95HD+moutHheEpSswsZGy3rQGVc+/4gjbM535nBgU/nB8ZuSnWlpwQbu0rBm0WFIG
+         zuqNwaTwO1GkQ==
+Date:   Mon, 17 Jan 2022 17:08:11 +0000
+From:   Filipe Manana <fdmanana@kernel.org>
+To:     Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>
+Subject: Re: [PATCH] btrfs/255: add test for quota disable in parallel with
+ balance
+Message-ID: <YeWie0i4ltdLPkdf@debian9.Home>
+References: <20220117005705.956931-1-shinichiro.kawasaki@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
+In-Reply-To: <20220117005705.956931-1-shinichiro.kawasaki@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 17, 2022 at 03:36:54PM +0800, Yang Xu wrote:
-> On my test machine, ext4/033 fails even use the non-overflow size.
-> It reports invalid new size when using strtoull because errno is 1.
+On Mon, Jan 17, 2022 at 09:57:05AM +0900, Shin'ichiro Kawasaki wrote:
+> Test quota disable during btrfs balance and confirm it does not cause
+> kernel hang. This is a regression test for the problem reported to
+> linux-btrfs list [1]. The hang was recreated using the test case and
+> memory backed null_blk device with 5GB size as the scratch device.
 > 
-> As man-pages said "Since  strtoul()  can legitimately return 0 or ULONG_MAX
-> (ULLONG_MAX for strtoull()) on both success and failure, the calling program
-> should set errno to 0 before the call, and then determine if an error occurred
-> by checking whether errno has a nonzero value after the call".
+> [1] https://lore.kernel.org/linux-btrfs/20220115053012.941761-1-shinichiro.kawasaki@wdc.com/
 > 
-> So add a step to set errno to 0 before strtoull call.
-> 
-> Fixes: 92b9c0dedace ("ext4/033: test EXT4_IOC_RESIZE_FS by calling the ioctl directly")
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-
-Looks good,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
+> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 > ---
->  src/ext4_resize.c | 1 +
->  1 file changed, 1 insertion(+)
+>  tests/btrfs/255     | 42 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/255.out |  2 ++
+>  2 files changed, 44 insertions(+)
+>  create mode 100755 tests/btrfs/255
+>  create mode 100644 tests/btrfs/255.out
 > 
-> diff --git a/src/ext4_resize.c b/src/ext4_resize.c
-> index 1ac51e6f..39e16529 100644
-> --- a/src/ext4_resize.c
-> +++ b/src/ext4_resize.c
-> @@ -35,6 +35,7 @@ int main(int argc, char **argv)
->  		return 1;
->  	}
->  
-> +	errno = 0;
->  	new_size = strtoull(argv[2], &tmp, 10);
->  	if ((errno) || (*tmp != '\0')) {
->  		fprintf(stderr, "%s: invalid new size\n", argv[0]);
+> diff --git a/tests/btrfs/255 b/tests/btrfs/255
+> new file mode 100755
+> index 00000000..16b682ca
+> --- /dev/null
+> +++ b/tests/btrfs/255
+> @@ -0,0 +1,42 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Western Digital Corporation or its affiliates.
+> +#
+> +# FS QA Test No. btrfs/255
+> +#
+> +# Confirm that disabling quota during balance does not hang
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto qgroup
+
+Should have "balance" as well.
+
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_require_scratch
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Fill 40% of the device or 2GB
+> +fill_percent=40
+> +max_fillsize=$((2*1024*1024*1024))
+
+If the test requires some minimum size, than it should call
+
+   _require_scratch_size <size in KB>
+
+Also please make it a bit more readable by adding a single space before
+and after each *, i.e. 2 * 1024 * 1024 ... instead of 2*1024*1024.
+
+> +
+> +devsize=$(($(_get_device_size $SCRATCH_DEV) * 512))
+> +fillsize=$((devsize * fill_percent / 100))
+> +((fillsize > max_fillsize)) && fillsize=$max_fillsize
+> +
+> +fs=$((4096*1024))
+
+Same here.
+
+> +for ((i=0; i * fs < fillsize; i++)); do
+
+And here (i = 0 vs i=0).
+
+> +	dd if=/dev/zero of=$SCRATCH_MNT/file.$i bs=$fs count=1 \
+> +	   >> $seqres.full 2>&1
+> +done
+> +echo 3 > /proc/sys/vm/drop_caches
+
+Why the drop_caches? Please add a comment explaining why it is needed.
+
+> +
+> +# Run btrfs balance and quota enable/disable in parallel
+> +_run_btrfs_balance_start $SCRATCH_MNT >> $seqres.full &
+> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+> +$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
+
+This seems very timing sensitive.
+It would be a better stress test if we do the enable/disable in a loop,
+say 10 or 20 iterations, while another process keeps running balance in
+parallel and then is killed after the main process finishes the loop of
+enable/disable quotas.
+
+Thanks.
+
+> +wait
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/255.out b/tests/btrfs/255.out
+> new file mode 100644
+> index 00000000..7eefb828
+> --- /dev/null
+> +++ b/tests/btrfs/255.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 255
+> +Silence is golden
 > -- 
-> 2.23.0
+> 2.33.1
 > 
