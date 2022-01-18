@@ -2,161 +2,370 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76CD1C35263
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 03:06:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BB05C43217
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 03:39:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349365AbiARDGn (ORCPT
+        id S1346572AbiARDjv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Jan 2022 22:06:43 -0500
-Received: from esa18.fujitsucc.c3s2.iphmx.com ([216.71.158.38]:50450 "EHLO
-        esa18.fujitsucc.c3s2.iphmx.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1349912AbiARCuo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 21:50:44 -0500
-X-Greylist: delayed 430 seconds by postgrey-1.27 at vger.kernel.org; Mon, 17 Jan 2022 21:50:44 EST
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
-  t=1642474245; x=1674010245;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=aDuyeRvGi676jAEW4djYl8mPTO35xOT7jCDXs2njqpg=;
-  b=s0I2IQuRpi0lY3V2i7sP+aq0xXQDf1eY4iyg/5sxOrfqht2jf0R1xjWw
-   ngNk80O/khGCA/ul35RBgbNGYJ19FR0HEFo9afmDqsbf4YVAEMBDIIF7e
-   UqGrUdCTrxRr9eyYX17TF7E8HdWzTH4hlNOIqASRkk/Pxw/XMCpLGrlaw
-   lLWEDtkgh1oCbFDfv1swWfQC1lszZYkh6Fhpa0TIjmXHCj/+iRPIHvolZ
-   2PYyK0QqNOySMDl1YsfiISWP7JdrYbaoUp5+UpP1xvsGw5AYKIltB9goL
-   y8kzqxbVZF62KzyOauJoErq1kh8USebNfjjc9qhpxfJWQgBynyoz62yY2
-   A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10230"; a="48778688"
-X-IronPort-AV: E=Sophos;i="5.88,296,1635174000"; 
-   d="scan'208";a="48778688"
-Received: from mail-tycjpn01lp2171.outbound.protection.outlook.com (HELO JPN01-TYC-obe.outbound.protection.outlook.com) ([104.47.23.171])
-  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jan 2022 11:43:29 +0900
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=UpD30U8TMWGlE8mXYzhBtD8WGwVhnybPCgICFqs/ZVAjgUYDrIODqEgODWrDtKJTUJCmaHgdCph4PPPQbBePErDKqt1zZk66fIeyX6dkK8VwD5OrHDhuMjX8By9QnYo/dNOu6ylrfJtDbeoXM1K7nTYvkm5xl5sUqFxMQECREKCOa/4LXC4LQHjqy2VH0NBWz1NBbe/oWJFetaOOghbvQ6C+DS9YeSLNt5HH5xDz1HwQKvgx36/R3GPJ/FWbW9Rb4sUY+DKKjExBPIzN0XLhtVjv8zgb/9rz3EL951UgUPEAYuh2ldG2A74Yx+7bHz+kdD+zaGqxD0uQyDstD2baOw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=aDuyeRvGi676jAEW4djYl8mPTO35xOT7jCDXs2njqpg=;
- b=gPBkr8Ct5rxxdXtJLWAwZ7CI7EiXyQA7IQie7ggkuKj4sjqxx6c7BM2xNCrJZIPzNnlsSeTnsny79DtzHQikr8Ry0czCdvRStco9XyuVwqo6fyo+ZB7+iGgGvXUwWp9EHlAa7E9q+LyvoalUvoZTSCbf74MJv4DD9jcwMrhRDZ1653LUViiVDKv8Wa6PE+mubU/5A1nwJrCLCGln8zp5FaimZS7TOX4qfpHFwBNOqjpGFy+GzXiF7PJOA/drixRaVWBSYdKE3XMNlphtZ3lAE7sy0aXe2sEvvrXpzoiVfmRsIyC+oEbQUx1YUZoAGc1G5UtczfGPeSEmxbr9clQhsg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
- dkim=pass header.d=fujitsu.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=fujitsu.onmicrosoft.com; s=selector2-fujitsu-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=aDuyeRvGi676jAEW4djYl8mPTO35xOT7jCDXs2njqpg=;
- b=HXRQ6LyroB/chv74HJwuXM7geg7ajQAYMhW0og7apMzkVKqQz/oFic1wRNNAUzyzj8mRBpPil2cPtL+Pq2/Tim179jK0vVnAPmYr0BZto7Rq6bL2sOm3/SExs3fyszWSA85akXb/dsXPBWmev+o3AuQoZundhzZebpiHBp5VdWA=
-Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com (2603:1096:404:10d::20)
- by TYAPR01MB4031.jpnprd01.prod.outlook.com (2603:1096:404:c8::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4888.12; Tue, 18 Jan
- 2022 02:43:26 +0000
-Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com
- ([fe80::c954:50fd:21b5:1c8f]) by TY2PR01MB4427.jpnprd01.prod.outlook.com
- ([fe80::c954:50fd:21b5:1c8f%5]) with mapi id 15.20.4888.014; Tue, 18 Jan 2022
- 02:43:26 +0000
-From:   "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull
- call
-Thread-Topic: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull
- call
-Thread-Index: AQHYC3T1GUs88bXDK0iuG+0P5NW4eaxoEG4AgAADSIA=
-Date:   Tue, 18 Jan 2022 02:43:26 +0000
-Message-ID: <61E6298D.80006@fujitsu.com>
-References: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <YeYmzJG5M0y9BcMc@mit.edu>
-In-Reply-To: <YeYmzJG5M0y9BcMc@mit.edu>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=fujitsu.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: d21a6a4b-f796-4b1b-a935-08d9da2c4d58
-x-ms-traffictypediagnostic: TYAPR01MB4031:EE_
-x-microsoft-antispam-prvs: <TYAPR01MB4031D2D8683EEA311FA3C4BCFD589@TYAPR01MB4031.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:3968;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: CKXIHqVBZPoQWDRFYVb1ELTobb/xLhxvzG2VPeUQjTWMGKaoYyvhDdFMxnuOYbZRShXGJJju4HyjHczTdZLPteEhpVrCURCM7gO+fdncc1n4ouOILYkDyq+MyyG3RbDZ7p+DdBPQzvid867+S3gqF4oSVfend7TNK9ZvbF2akGkOUUHwItBrMH+vPTTgJVLmXwJ1/A5HYKu44qPl3e7c0Lqx3gj4yd0ucGsjwZZA9V4fqu6rEKOxdhbMbiz9RQlz16Lm39m/PI1J16MlskzU33dytZvlBLX1IL/vLh6GmTSR69dIMwFXUbtqH+vi0KRqODxIekZpkJ9ZchAvT06MRWGuA7n9Zd9RFCjHPpYPEXy126ua3I5QO1CcEOhsY+gDL3vrvaD0HZh6yr1OU0ilcFZINR3RUMkU0q4CcBifwHEYsUtZ8clU0DJOkx7cPkZ84uss+qLQCFqlE/rtSvtwit0xbbbcyIqUPJ5EDbxJCVM4OewoMF5P6Tzqa7OkPznY6KutsqAjUPw+URM3oDYCQS8ZocWH511O81OjnP4AYigs/W+sw9w+g714G7QRVMIMXSvTE85ZHClSqdJbTgetPxoUr5AG9cVAL92IN+6sSFxmQsuIF9jZc18SJGsjOtir/A0YX2SDrifacwm/9Lp5PadmOCLe5OjjDbbK+umN69FlYPSNuCmE2FY1QdL/wA/7frNI+Eo/arOaeI+fUhoQww==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB4427.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(2906002)(8676002)(508600001)(8936002)(6506007)(4744005)(86362001)(26005)(91956017)(76116006)(66556008)(2616005)(66446008)(5660300002)(66946007)(64756008)(85182001)(186003)(316002)(6486002)(66476007)(6916009)(4326008)(6512007)(122000001)(71200400001)(83380400001)(33656002)(38070700005)(38100700002)(36756003)(82960400001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?gb2312?B?WGxzRmcvbUUyMzZtdjNTMzA4WEQrZEw2MWEwZkQvV2NFcEVaNmFwa3FpYkE3?=
- =?gb2312?B?RWJJOGpqOTd2UWRLZldJakJXSGtzbmNOTjA3T3daUUNwcjhZSTc4RnJaMzQ1?=
- =?gb2312?B?dlBMeHdOMTVJUTRnWnF6OFVteSsxa2JjYVUxT2pqT3VEMytTcUJRNUFHQjVJ?=
- =?gb2312?B?SWxHWXBqNjZtelNzaVZlTlAyMklkQmsyL2MzVUgrbVc3TmVGaTJOamhra2RR?=
- =?gb2312?B?dmNHRmxVMHg0QVplL1U1aVhyY3B0YUhIOWRrWjRpaTI1eVA2bzlzdkdqUXZD?=
- =?gb2312?B?dUpSK1ZIV2krdlJOY2l2OWZHTTYyeWhkRUxEakV6NlNtcTh4NURnNXlUVG8r?=
- =?gb2312?B?Z0VIb3lvaFgzZVovV3B5aW1BUjFzc3FFRVpXZFZOZml1WFo2V3hPK21ISXEv?=
- =?gb2312?B?QUpNNHA2SlgrOHdyQ2p5WDJxcGw3dlFSNGw5N2VwZ0dCUUlLbFJCeThmSnBE?=
- =?gb2312?B?ZW1NdXFld1dWN0xsNXl5OE9rSC9rYW1mSEVNZlh0enl1MGZzZ0VZTkZ1aVRp?=
- =?gb2312?B?cDhtb2hlY2JBVm83WFRYa2VVNTdGS3RUUnB3SDFib2JEZG9hd0JsQmFHUGlQ?=
- =?gb2312?B?eFRaenkwK2k0bjg3MTdJd0RTS051L2J1QitGV1V5eE5TcXJsTU10K2w4Nk9U?=
- =?gb2312?B?dFhVNW1iUXpzK0JhblBpd1RaSko5dHdKL2tNSGdzeXdOQnF5a0dBbmcxMFkv?=
- =?gb2312?B?eVdNZFMyUDNCb3lqU2dNdlkyMjlVMWx0TVFpWEloZUhWaE4wSUZ1SjVOKzJS?=
- =?gb2312?B?TGVhY29kYU9LaU5lbGZ1WlFXMGt6VmE5QlFTWjhadWVmS2VsTWxvd041WFBH?=
- =?gb2312?B?K2xkTUM3OXcxaXh4ZEhMcXRVUU5MUS91d3RLSGFuMW13Q0Ryb28wZDFMWUsz?=
- =?gb2312?B?M3ZpMUVVZDNmTXNPZVNKTmx5NHRtOWFKWUxMdnJFcWdsdG9RTVJZMis5bkhv?=
- =?gb2312?B?Zi8ySUFNSTRNekpNRnROL3VpazlmR3FEVjNKb2xZN09vdlpIQmtwZTVXTDJu?=
- =?gb2312?B?K214ZDVDUzB5d0pWSmtDV0dJR0JmVEUxK3d0WEJiaHNnOXR1bmNBRC9Fb3h0?=
- =?gb2312?B?WFlLN3gwYVFJMlJ0QlZTM2pHYnErMnRwaEZ3VWNLdm5YS1FuUUhiMEFybzBI?=
- =?gb2312?B?RUpkK3F6dU1sRFhuSGkrWExFRnNwell3VXZ3bHBuVUYyTlA3dWRERjVKaTZ4?=
- =?gb2312?B?UXRXNjhWSUIyQkZPK3dkWUlyNXV3RVJpN3NHcGRpWklJM2IvM1VBYldVTmNy?=
- =?gb2312?B?V0ZYZ25tVkZ1Z3RGb09HWjcrQWREUmlZT3ZxQnNUREc3WDZLWnZoaVhvVkIx?=
- =?gb2312?B?bmVFOGk3VE8yY1RDV1UzUGVDcEhBSzRkKytnSlRuVGRaSk50ZHE5RVU5cW1T?=
- =?gb2312?B?dkNNdERiaXJCRU1UZUJsanNwMlZMc0NLQk5UM2h4NEdERDRqcXZoOENYdHhP?=
- =?gb2312?B?a2tLL0RoMHNxTlFEcGxPTHpBS0crQjZqNlhYc3hGWHFjWE0zREZieDJLVGo5?=
- =?gb2312?B?WDYrTW4wYnVMMXhiSXBJR1VQeG5Ra0RoWGQ2OEcrbSttRWJrRVMwbXdKMTQ0?=
- =?gb2312?B?enhaWVByVUdpdFJaYTRJS3c3K2tIek5Gdi9rVjRZM0pGdXFibXNIVkFLSkNn?=
- =?gb2312?B?K0RKY3poM2JHWXJVYlJJUVZCRUp6Rlp6NGdLSlZZS0Z6aVM4Qk5Bc2VNMXJZ?=
- =?gb2312?B?ZXVPZ3NzaUVxQjRZYUttLzZDT0xORnMrNXR2WExHTzFtQU5KR0d5SUZQRnBn?=
- =?gb2312?B?eDdiblNVTWtnRzA3ZDlkUHpaRUZtdE92bzJlY0wyMmsvWjBpK2hEVjhpZ1dN?=
- =?gb2312?B?V2hpcXVOTGFwNnhBR1YrbFFPVGJKaFlYWnhYUE9ZUG95eGxwY01mUFRJZjlu?=
- =?gb2312?B?MWRjT2VxZW9adTFqQ0NNSUNxeVAybXo5L3lEL3BvNlo2RXVOMWJTQTNFTENE?=
- =?gb2312?B?RCtlaVdZdklZZG1xeWVucDlaV0J6TEhtV0V1TmFqdWFwdC9aVEVKOW9MSlp2?=
- =?gb2312?B?MTVHcmZ0eG1wTVRGUmgya2ZzdHFPVklEaFZ2dUhMbGxDVXpJK2x6TEVjY2VZ?=
- =?gb2312?B?OE15eGN5QVFSelRMTnRxb2dOZHg1Y054M0lWTENQcWN3OXdMUkpNWUJabENa?=
- =?gb2312?B?RDRzWEcxQVNkMlBaV1NNUEhNMy92ZjZBRmpBR3JIdE9vbnR2OC9ZMFNjdHpZ?=
- =?gb2312?B?em12a1lYTTVFdTNCRFlTajRKYkpjK01SYnBpVUJCSXNrbE5jRndKdDRLMU9y?=
- =?gb2312?Q?khYm7ATwUJlyep1+QIC98FVodKJlGgsrhSRHby/U9Q=3D?=
-Content-Type: text/plain; charset="gb2312"
-Content-ID: <AA8199EA90CD4E439B5FC71F531A89E7@jpnprd01.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        Mon, 17 Jan 2022 22:39:51 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:25660 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1343551AbiARDho (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 22:37:44 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1642477063;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=HtrFK4RpRuENp2Dmqi07OLXOe5povRJjJwGqONpQsfA=;
+        b=JSd7IUPAVVdRvEjPm6Na5Mno35unXGPgll6lwnvgsEAkNH9lTuGhaC66VNtok9UxH2st9T
+        MDcm7zv6b9Hd6NFb3kb8gBRQHQi3cHr/bXsdu716wKol6fQ274+WkkMe5MSbpgXgjlO65c
+        bsVDy/yZ5nLcVRyoPK8prqni1gk1eD0=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-176-yHYPho9jPvyKJFOUXp5lkg-1; Mon, 17 Jan 2022 22:37:42 -0500
+X-MC-Unique: yHYPho9jPvyKJFOUXp5lkg-1
+Received: by mail-pg1-f199.google.com with SMTP id q3-20020a638c43000000b0034c9c0fb2d2so1070548pgn.22
+        for <fstests@vger.kernel.org>; Mon, 17 Jan 2022 19:37:41 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=HtrFK4RpRuENp2Dmqi07OLXOe5povRJjJwGqONpQsfA=;
+        b=CiEaHNca2X6rOcGJ5aMjCgnT1RlCo2SCe/wq9/UeMS8XRydUWR4ekCtzpoqYOo26SS
+         DQwuNUcr4tm1klh2gBbtsG6P9dACOWMSAZ5c0cIGs8YGFwU/XRSbr9KwW3Pya12a8psr
+         bPkcipPM/wJVN+bXx0P1wPJ0fFteQspVk+M5XAknOxxjm4ttx2lf57EnxFDHueAtN88b
+         KTjY2IpkGgjS91vcWJOddmfIp0Re5M5o6Kc8PnMFmm5BSWjNf3uZsH47wiyctyrd3m1+
+         Dewsz82rCP32nsbZH8KqDyWnrZkrgrTrK+H0E535XQoc2rKsKYaLhAu69k2FobXx/yAu
+         pJ2Q==
+X-Gm-Message-State: AOAM533BT0guaeLyqYV/j8sCrDDqmn6FX8+pf0ZtwbCGsX2+a9LqJVTk
+        B+B+I4sjRDs7TU+LzmqXLWToRyYkhcyI6ZENADOpK8GMOS/z3sNmzBCcvQ2CTIlcrxD+S8SqKHj
+        77GP9fqdpV5ti6H2+QA==
+X-Received: by 2002:a63:4554:: with SMTP id u20mr21494671pgk.463.1642477060879;
+        Mon, 17 Jan 2022 19:37:40 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJy1US3v2+dhYcMF2d0RaMWmZ9YUX0sgC8lSImrFnhuFC38KFGU/VTiQtsKkaMedJFVpKa5Gaw==
+X-Received: by 2002:a63:4554:: with SMTP id u20mr21494632pgk.463.1642477060354;
+        Mon, 17 Jan 2022 19:37:40 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id e5sm682808pjr.53.2022.01.17.19.37.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Jan 2022 19:37:39 -0800 (PST)
+Date:   Tue, 18 Jan 2022 11:37:35 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 5/8] xfs: regression test for allocsp handing out stale
+ disk contents
+Message-ID: <20220118033735.kva56rre5iahnnnc@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, guaneryu@gmail.com,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+References: <164193780808.3008286.598879710489501860.stgit@magnolia>
+ <164193783590.3008286.3623476203965250828.stgit@magnolia>
 MIME-Version: 1.0
-X-OriginatorOrg: fujitsu.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB4427.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: d21a6a4b-f796-4b1b-a935-08d9da2c4d58
-X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jan 2022 02:43:26.0239
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: grVujkX82icR8I2b2gxLRXuZcKyTSpnBkhKWorygLZIV8nOvcGY6PdLwpr79PQpaLO8UUE8LgcfDpJXzWStHOHILiiSfILBWngHSAMotKIY=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4031
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <164193783590.3008286.3623476203965250828.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-b24gMjAyMi8xLzE4IDEwOjMyLCBUaGVvZG9yZSBUcydvIHdyb3RlOg0KPiBPbiBNb24sIEphbiAx
-NywgMjAyMiBhdCAwMzozNjo1NFBNICswODAwLCBZYW5nIFh1IHdyb3RlOg0KPj4gT24gbXkgdGVz
-dCBtYWNoaW5lLCBleHQ0LzAzMyBmYWlscyBldmVuIHVzZSB0aGUgbm9uLW92ZXJmbG93IHNpemUu
-DQo+PiBJdCByZXBvcnRzIGludmFsaWQgbmV3IHNpemUgd2hlbiB1c2luZyBzdHJ0b3VsbCBiZWNh
-dXNlIGVycm5vIGlzIDEuDQo+Pg0KPj4gQXMgbWFuLXBhZ2VzIHNhaWQgIlNpbmNlICBzdHJ0b3Vs
-KCkgIGNhbiBsZWdpdGltYXRlbHkgcmV0dXJuIDAgb3IgVUxPTkdfTUFYDQo+PiAoVUxMT05HX01B
-WCBmb3Igc3RydG91bGwoKSkgb24gYm90aCBzdWNjZXNzIGFuZCBmYWlsdXJlLCB0aGUgY2FsbGlu
-ZyBwcm9ncmFtDQo+PiBzaG91bGQgc2V0IGVycm5vIHRvIDAgYmVmb3JlIHRoZSBjYWxsLCBhbmQg
-dGhlbiBkZXRlcm1pbmUgaWYgYW4gZXJyb3Igb2NjdXJyZWQNCj4+IGJ5IGNoZWNraW5nIHdoZXRo
-ZXIgZXJybm8gaGFzIGEgbm9uemVybyB2YWx1ZSBhZnRlciB0aGUgY2FsbCIuDQo+Pg0KPj4gU28g
-YWRkIGEgc3RlcCB0byBzZXQgZXJybm8gdG8gMCBiZWZvcmUgc3RydG91bGwgY2FsbC4NCj4+DQo+
-PiBGaXhlczogOTJiOWMwZGVkYWNlICgiZXh0NC8wMzM6IHRlc3QgRVhUNF9JT0NfUkVTSVpFX0ZT
-IGJ5IGNhbGxpbmcgdGhlIGlvY3RsIGRpcmVjdGx5IikNCj4+IFNpZ25lZC1vZmYtYnk6IFlhbmcg
-WHU8eHV5YW5nMjAxOC5qeUBmdWppdHN1LmNvbT4NCj4NCj4gUmV2aWV3ZWQtYnk6IFRoZW9kb3Jl
-IFRzJ288dHl0c29AbWl0LmVkdT4NCj4NCj4gWW91J3JlIHJpZ2h0IG9mIGNvdXJzZSwgYnV0IG91
-dCBvZiBjdXJpb3NpdHksIHdoaWNoIEMgbGlicmFyeSBhcmUgeW91DQo+IHVzaW5nPw0KSSB1c2Ug
-Z2xpYmMtMi4zNC4NCg0KQmVzdCBSZWdhcmRzDQpZYW5nIFh1DQo+DQo+IAkJCQkJCS0gVGVkDQo=
+On Tue, Jan 11, 2022 at 01:50:35PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Add a regression test to check that XFS_IOC_ALLOCSP isn't handing out
+> stale disk blocks for preallocation.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+
+Hi Darrick,
+
+This case is easily failed on some multi-striped storage[1]. The full output
+as [2], the out.bad output as [3].
+
+Thanks,
+Zorro
+
+[1]
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 xxx-xxxxx-xx 5.14.0-xxx #1 SMP PREEMPT Fri Jan 14 09:24:44 UTC 2022
+MKFS_OPTIONS  -- -f -m crc=1,finobt=1,rmapbt=0,reflink=1,bigtime=1,inobtcount=1 -i sparse=1 /dev/sda4
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda4 /mnt/xfstests/scratch
+
+xfs/832	_check_xfs_filesystem: filesystem on /dev/sda4 is inconsistent (r)
+(see /var/lib/xfstests/results//xfs/832.full for details)
+- output mismatch (see /var/lib/xfstests/results//xfs/832.out.bad)
+    --- tests/xfs/832.out	2022-01-15 22:18:35.175245791 -0500
+    +++ /var/lib/xfstests/results//xfs/832.out.bad	2022-01-15 22:20:46.630697627 -0500
+    @@ -1,2 +1,3 @@
+     QA output created by 832
+    +ioctl: No space left on device
+     Silence is golden
+    ...
+    (Run 'diff -u /var/lib/xfstests/tests/xfs/832.out /var/lib/xfstests/results//xfs/832.out.bad'  to see the entire diff)
+Ran: xfs/832
+Failures: xfs/832
+Failed 1 of 1 tests
+
+[2]
+wrote 33554432/33554432 bytes at offset 0
+32 MiB, 4 ops; 0.1368 sec (233.848 MiB/sec and 29.2310 ops/sec)
+meta-data=/dev/sda4              isize=512    agcount=1, agsize=4112 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1
+data     =                       bsize=4096   blocks=4112, imaxpct=25
+         =                       sunit=16     swidth=32 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=1872, version=2
+         =                       sectsz=512   sunit=16 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+Setting up 4096 runs for block size 4096
+_check_xfs_filesystem: filesystem on /dev/sda4 is inconsistent (r)
+*** xfs_repair -n output ***
+Phase 1 - find and verify superblock...
+Only one AG detected - cannot validate filesystem geometry.
+Use the -o force_geometry option to proceed.
+*** end xfs_repair output
+...
+
+[3]
+QA output created by 832
+ioctl: No space left on device
+Silence is golden
+
+
+>  .gitignore        |    1 
+>  src/Makefile      |    2 -
+>  src/allocstale.c  |  117 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/832     |   56 +++++++++++++++++++++++++
+>  tests/xfs/832.out |    2 +
+>  5 files changed, 177 insertions(+), 1 deletion(-)
+>  create mode 100644 src/allocstale.c
+>  create mode 100755 tests/xfs/832
+>  create mode 100644 tests/xfs/832.out
+> 
+> 
+> diff --git a/.gitignore b/.gitignore
+> index 65b93307..ba0c572b 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -56,6 +56,7 @@ tags
+>  # src/ binaries
+>  /src/af_unix
+>  /src/alloc
+> +/src/allocstale
+>  /src/append_reader
+>  /src/append_writer
+>  /src/attr_replace_test
+> diff --git a/src/Makefile b/src/Makefile
+> index 1737ed0e..111ce1d9 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -18,7 +18,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+>  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+>  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+> -	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault
+> +	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale
+>  
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/allocstale.c b/src/allocstale.c
+> new file mode 100644
+> index 00000000..6253fe4c
+> --- /dev/null
+> +++ b/src/allocstale.c
+> @@ -0,0 +1,117 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (C) 2022 Oracle.  All Rights Reserved.
+> + * Author: Darrick J. Wong <djwong@kernel.org>
+> + *
+> + * Test program to try to trip over XFS_IOC_ALLOCSP mapping stale disk blocks
+> + * into a file.
+> + */
+> +#include <xfs/xfs.h>
+> +#include <stdlib.h>
+> +#include <stdio.h>
+> +#include <unistd.h>
+> +#include <sys/types.h>
+> +#include <sys/stat.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <unistd.h>
+> +#include <string.h>
+> +
+> +#ifndef XFS_IOC_ALLOCSP
+> +# define XFS_IOC_ALLOCSP	_IOW ('X', 10, struct xfs_flock64)
+> +#endif
+> +
+> +int
+> +main(
+> +	int		argc,
+> +	char		*argv[])
+> +{
+> +	struct stat	sb;
+> +	char		*buf, *zeroes;
+> +	unsigned long	i;
+> +	unsigned long	iterations;
+> +	int		fd, ret;
+> +
+> +	if (argc != 3) {
+> +		fprintf(stderr, "Usage: %s filename iterations\n", argv[0]);
+> +		return 1;
+> +	}
+> +
+> +	errno = 0;
+> +	iterations = strtoul(argv[2], NULL, 0);
+> +	if (errno) {
+> +		perror(argv[2]);
+> +		return 1;
+> +	}
+> +
+> +	fd = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0600);
+> +	if (fd < 0) {
+> +		perror(argv[1]);
+> +		return 1;
+> +	}
+> +
+> +	ret = fstat(fd, &sb);
+> +	if (ret) {
+> +		perror(argv[1]);
+> +		return 1;
+> +	}
+> +
+> +	buf = malloc(sb.st_blksize);
+> +	if (!buf) {
+> +		perror("pread buffer");
+> +		return 1;
+> +	}
+> +
+> +	zeroes = calloc(1, sb.st_blksize);
+> +	if (!zeroes) {
+> +		perror("zeroes buffer");
+> +		return 1;
+> +	}
+> +
+> +	for (i = 1; i <= iterations; i++) {
+> +		struct xfs_flock64	arg = { };
+> +		ssize_t			read_bytes;
+> +		off_t			offset = sb.st_blksize * i;
+> +
+> +		/* Ensure the last block of the file is a hole... */
+> +		ret = ftruncate(fd, offset - 1);
+> +		if (ret) {
+> +			perror("truncate");
+> +			return 1;
+> +		}
+> +
+> +		/*
+> +		 * ...then use ALLOCSP to allocate the last block in the file.
+> +		 * An unpatched kernel neglects to mark the new mapping
+> +		 * unwritten or to zero the ondisk block, so...
+> +		 */
+> +		arg.l_whence = SEEK_SET;
+> +		arg.l_start = offset;
+> +		ret = ioctl(fd, XFS_IOC_ALLOCSP, &arg);
+> +		if (ret < 0) {
+> +			perror("ioctl");
+> +			return 1;
+> +		}
+> +
+> +		/* ... we can read old disk contents here. */
+> +		read_bytes = pread(fd, buf, sb.st_blksize,
+> +						offset - sb.st_blksize);
+> +		if (read_bytes < 0) {
+> +			perror(argv[1]);
+> +			return 1;
+> +		}
+> +		if (read_bytes != sb.st_blksize) {
+> +			fprintf(stderr, "%s: short read of %zd bytes\n",
+> +					argv[1], read_bytes);
+> +			return 1;
+> +		}
+> +
+> +		if (memcmp(zeroes, buf, sb.st_blksize) != 0) {
+> +			fprintf(stderr, "%s: found junk near offset %zd!\n",
+> +					argv[1], offset - sb.st_blksize);
+> +			return 2;
+> +		}
+> +	}
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/xfs/832 b/tests/xfs/832
+> new file mode 100755
+> index 00000000..3820ff8c
+> --- /dev/null
+> +++ b/tests/xfs/832
+> @@ -0,0 +1,56 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 832
+> +#
+> +# Regression test for commit:
+> +#
+> +# 983d8e60f508 ("xfs: map unwritten blocks in XFS_IOC_{ALLOC,FREE}SP just like fallocate")
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick prealloc
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_require_test
+> +_require_scratch
+> +
+> +size_mb=32
+> +# Write a known pattern to the disk so that we can detect stale disk blocks
+> +# being mapped into the file.  In the test author's experience, the bug will
+> +# reproduce within the first 500KB's worth of ALLOCSP calls, so running up
+> +# to 16MB should suffice.
+> +$XFS_IO_PROG -d -c "pwrite -S 0x58 -b 8m 0 ${size_mb}m" $SCRATCH_DEV > $seqres.full
+> +MKFS_OPTIONS="-K $MKFS_OPTIONS" _scratch_mkfs_sized $((size_mb * 1048576)) >> $seqres.full
+> +
+> +_scratch_mount
+> +
+> +# Force the file to be created on the data device, which we pre-initialized
+> +# with a known pattern.  The bug exists in the generic bmap code, so the choice
+> +# of backing device does not matter, and ignoring the rt device gets us out of
+> +# needing to detect things like rt extent size.
+> +_xfs_force_bdev data $SCRATCH_MNT
+> +testfile=$SCRATCH_MNT/a
+> +
+> +# Allow the test program to expand the file to consume half the free space.
+> +blksz=$(_get_file_block_size $SCRATCH_MNT)
+> +iterations=$(( (size_mb / 2) * 1048576 / blksz))
+> +echo "Setting up $iterations runs for block size $blksz" >> $seqres.full
+> +
+> +# Run reproducer program and dump file contents if we see stale data.  Full
+> +# details are in the source for the C program, but in a nutshell we run ALLOCSP
+> +# one block at a time to see if it'll give us blocks full of 'X'es.
+> +$here/src/allocstale $testfile $iterations
+> +res=$?
+> +test $res -eq 2 && od -tx1 -Ad -c $testfile
+> +
+> +# success, all done
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/xfs/832.out b/tests/xfs/832.out
+> new file mode 100644
+> index 00000000..bb8a6c12
+> --- /dev/null
+> +++ b/tests/xfs/832.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 832
+> +Silence is golden
+> 
+
