@@ -2,142 +2,110 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D6F1C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 05:57:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57585C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 11:23:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239742AbiARF5Y (ORCPT
+        id S239376AbiARLX3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Jan 2022 00:57:24 -0500
-Received: from esa3.hgst.iphmx.com ([216.71.153.141]:20729 "EHLO
-        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235645AbiARF5X (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 00:57:23 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1642485443; x=1674021443;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=lFe1rKRuJ3zJN4xQhiSz6eCA+PrB7GkMfSaZIMgBOWE=;
-  b=TIcpJ0K/4emkUeW0dgQ/B3owpgeiaZreW0/29K03Uy0blZFmBwLKV+26
-   XNl2ChsGqRTg2NhH29KLcY+zxYEEjy/5fLM8sga/gIymlkNWXj5upEAIR
-   1pTa+tOgMjN0G6/ro2SEYE1ZYD77+2TLVvKJ3WqZ3mi+uHUnvr8bJvVp8
-   jvlbU1d18iZ3jkMPyesZvOnpZua7TejtoslCNaKT6bIKBodp/epUwGg/k
-   jSTZ5lci7z3c6xWZdakkLLLFBJU8eOloIoJb3rMsqNiYCjR7d/Vho0mlA
-   /WDyBMNLj+1Mw0twoikclHytsmbMQbn/ovY2Vx0g10ydxWsbPPhmqTnGI
-   A==;
-X-IronPort-AV: E=Sophos;i="5.88,296,1635177600"; 
-   d="scan'208";a="195505198"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Jan 2022 13:57:23 +0800
-IronPort-SDR: bD6X3d7zPDMQaK0lz75xcVQYWIHdbPytUzgtHVZHunDrTM91BUzb8Z/6GvWD1FmQQDYI4KHgtD
- RoVT1qjd7OkvvGPKsBW8GZbLpv/mW3YeX8A2N7ArJWu6gj3Oa1uRMK28h8khJrpBZoPp8KsP2z
- r63Ogw3IFaIQdIE/+kwvMBjPtICuxQfQuxGWqV00RA41yZIU/6L7qz6PB/91brWjGVVxwkgnZe
- +sYo3kqShnjO000xKE8eCSTbpAmp0IsAhfL0cgOFFZBtiDdClx6HmZ8nptQZVeXNCPjIacSWs6
- DSXfr7+aaR+cO4CQDk5fWyPm
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2022 21:30:55 -0800
-IronPort-SDR: G75JaiD6ADqsBSq0BooDzYpM4nEpY3KYBOD76DY1++NF+M9z8+UBAdwFDgGXBOBMusMyT3eyVA
- AroAMJmPEaoCR3E+SlV3jZxBmCgNB54A+zwyVoVl/tk+F2LOtT0mr/l9K0Brv5VB/94EMOIE+m
- U997fH49zq0BRHmDYW4ruRpg1z5liXpk77kipYnqx+HVmGZSeFzGcuTjn3fjKqX1iDkbUYEiYf
- g8r4cL4gBN1M62p17uMKU+J30tNzQr0CJQh7hW+t8aFnDC15BtvBjn0Evjh3+GSVmSeaaHY9bc
- hVI=
-WDCIronportException: Internal
-Received: from shindev.dhcp.fujisawa.hgst.com (HELO shindev.fujisawa.hgst.com) ([10.149.52.173])
-  by uls-op-cesaip01.wdc.com with ESMTP; 17 Jan 2022 21:57:22 -0800
-From:   Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: [PATCH v2] btrfs/255: add test for quota disable in parallel with balance
-Date:   Tue, 18 Jan 2022 14:57:21 +0900
-Message-Id: <20220118055721.982596-1-shinichiro.kawasaki@wdc.com>
-X-Mailer: git-send-email 2.33.1
+        Tue, 18 Jan 2022 06:23:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41830 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231157AbiARLX2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 06:23:28 -0500
+Received: from mail-oo1-xc2a.google.com (mail-oo1-xc2a.google.com [IPv6:2607:f8b0:4864:20::c2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DC57C061574
+        for <fstests@vger.kernel.org>; Tue, 18 Jan 2022 03:23:28 -0800 (PST)
+Received: by mail-oo1-xc2a.google.com with SMTP id p11-20020a4adfcb000000b002dd4a3e84beso5841308ood.4
+        for <fstests@vger.kernel.org>; Tue, 18 Jan 2022 03:23:28 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=iDwZ7XuZWYQPFU0R7LfxkEApJ4+8HOKg09sERdeGhnM=;
+        b=JmsnrU0LxtcDD/O2k2w+tnWn51sUnTIq+uELmEMNnB5VhcExI/Wqc+pIXfpg+zkE1G
+         ObMvYQMBw4uw08AkwxJIZOjRZsWNCM04lZ8+NBMjlTH0DPDTRyIlmrVlmdyYz3MOxaZk
+         VVhTEecQu5zdNRAsGSf6+y8tN+FrF9a9ckiQ83pXVK2xG3n+IB2c2ARKUKF60SmL/9N+
+         8PBZcgXyX0LovEhEPwYoYoqcmDafmyQRvDoZBCyiQlT/ZWeCno/GTwbasz4JrNwg+K21
+         78afYJoLuUmkQbCyDBjkzeGcz6gBqMuKS91lAqzKtQ3437ztVQNshEMlu0WrXpXuXLB2
+         yDMA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=iDwZ7XuZWYQPFU0R7LfxkEApJ4+8HOKg09sERdeGhnM=;
+        b=Orj2YcBimlhG3JaABOg3ZBQWudffiStDCGyVmCeXlyMPnfscAszmxiG3FRVzovKxDk
+         PMPUjnKEEtlpMtpOn9heHngDDBhTimvJ3J1Gdx7FYcxEdnIJUARxPZS3JDO/46fnYQC1
+         iVPAEKyW+c2kZYg2rK1waVNvsy12TxyKGmUVS3KfycttzjQanX1NPXbdQQvbnOJXiDnJ
+         faZTJgMsLPBi8HWbti60EyPcXsS48f9uCyfhryg2z/dR8BObhacWeRmrIKii+x8morJR
+         rPBCqoyLRvVIkPfViCajgrS+PFpVNxTrTA71ccTP48T1XD1nU5viDsMr3ys6+V9z926J
+         b12g==
+X-Gm-Message-State: AOAM530UD4hEfrJlyqUXfUz0FlNDrxqe3PgD0qB0/r/s+0+0Z+Pl5cYS
+        oFBwADzycpXU+Qh2bujAVHwdDg==
+X-Google-Smtp-Source: ABdhPJx73K7W5fLXomQaZZXJOZlgueYohejotrFA4w9EmtMFsRyR0xopMq+j/HbU1Vdgh752eqrJCg==
+X-Received: by 2002:a4a:c44b:: with SMTP id h11mr17855190ooq.54.1642505007923;
+        Tue, 18 Jan 2022 03:23:27 -0800 (PST)
+Received: from ?IPV6:2804:431:c7cb:989a:d7f1:4df2:e2ef:5281? ([2804:431:c7cb:989a:d7f1:4df2:e2ef:5281])
+        by smtp.gmail.com with ESMTPSA id p24sm6823716oto.32.2022.01.18.03.23.26
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 18 Jan 2022 03:23:27 -0800 (PST)
+Message-ID: <eef02950-b7c2-8ab8-1e19-165383fa99b9@linaro.org>
+Date:   Tue, 18 Jan 2022 08:23:25 -0300
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull
+ call
+Content-Language: en-US
+To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        Theodore Ts'o <tytso@mit.edu>,
+        "fweimer@redhat.com" <fweimer@redhat.com>
+Cc:     "libc-alpha@sourceware.org" <libc-alpha@sourceware.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+References: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <YeYmzJG5M0y9BcMc@mit.edu> <61E6298D.80006@fujitsu.com>
+ <YeY6Uh8I7RlsCicw@mit.edu> <61E64FED.2010906@fujitsu.com>
+From:   Adhemerval Zanella <adhemerval.zanella@linaro.org>
+In-Reply-To: <61E64FED.2010906@fujitsu.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test quota disable during btrfs balance and confirm it does not cause
-kernel hang. This is a regression test for the problem reported to
-linux-btrfs list [1]. The hang was recreated using the test case and
-memory backed null_blk device with 5GB size as the scratch device.
+  
 
-[1] https://lore.kernel.org/linux-btrfs/20220115053012.941761-1-shinichiro.kawasaki@wdc.com/
+On 18/01/2022 02:27, xuyang2018.jy--- via Libc-alpha wrote:
+> on 2022/1/18 11:56, Theodore Ts'o wrote:
+>> On Tue, Jan 18, 2022 at 02:43:26AM +0000, xuyang2018.jy@fujitsu.com wrote:
+>>>> You're right of course, but out of curiosity, which C library are you
+>>>> using?
+>>> I use glibc-2.34.
+>>
+>> Hmm, ok.  I'm using glibc 2.31, and in this particular program, errno
+>> shouldn't have been set by any prior system call.  I'm guessing maybe
+>> it was something in crt0 which ended up setting errno?
+> It maybe a glibc bug.
+> I cc glibc mailing list and see whether they have met this problem.
+> 
+> @Florian
+> 
+> Now, I use glibc-2.34 and run the following program[1] but the errno is 
+> not 0 in the beginning. So is this a known bug on glibc-2.34(Theodore 
+> doesn't meet this problem on glicb-2.31)?
+> 
+> [1]https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/src/ext4_resize.c
 
-Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
----
-Changes from v1:
-* Put more stress by repeating quota enable/disable and btrfs balance
-* Reflected other comments on the list
+The errno should be only set on a failure, no function shall set errno
+to 0 (it is a POSIX definition which glibc adheres).  The application
+need to explicitly set errno to 0 before the function call to check if 
+an error occurs.
 
- tests/btrfs/255     | 45 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/255.out |  2 ++
- 2 files changed, 47 insertions(+)
- create mode 100755 tests/btrfs/255
- create mode 100644 tests/btrfs/255.out
+So you need to do:
 
-diff --git a/tests/btrfs/255 b/tests/btrfs/255
-new file mode 100755
-index 00000000..32f00f42
---- /dev/null
-+++ b/tests/btrfs/255
-@@ -0,0 +1,45 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Western Digital Corporation or its affiliates.
-+#
-+# FS QA Test No. btrfs/255
-+#
-+# Confirm that disabling quota during balance does not hang
-+#
-+. ./common/preamble
-+_begin_fstest auto qgroup balance
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_scratch
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Fill 40% of the device or 2GB
-+fill_percent=40
-+max_fillsize=$((2 * 1024 * 1024 * 1024))
-+
-+devsize=$(($(_get_device_size $SCRATCH_DEV) * 512))
-+fillsize=$((devsize * fill_percent / 100))
-+((fillsize > max_fillsize)) && fillsize=$max_fillsize
-+
-+fs=$((4096 * 1024))
-+for ((i = 0; i * fs < fillsize; i++)); do
-+	dd if=/dev/zero of=$SCRATCH_MNT/file.$i bs=$fs count=1 \
-+	   >> $seqres.full 2>&1
-+done
-+
-+# Run btrfs balance and quota enable/disable in parallel
-+_btrfs_stress_balance $SCRATCH_MNT >> $seqres.full &
-+balance_pid=$!
-+echo $balance_pid >> $seqres.full
-+for ((i = 0; i < 20; i++)); do
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
-+done
-+kill $balance_pid &> /dev/null
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/255.out b/tests/btrfs/255.out
-new file mode 100644
-index 00000000..7eefb828
---- /dev/null
-+++ b/tests/btrfs/255.out
-@@ -0,0 +1,2 @@
-+QA output created by 255
-+Silence is golden
--- 
-2.33.1
+  errno = 0
+  new_size = strtoull(argv[2], &tmp, 10);
+  if ((errno) || (*tmp != '\0')) {
+    ...
+  }
 
