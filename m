@@ -2,355 +2,357 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D853C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 13:37:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8419EC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 13:40:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241467AbiARNhX (ORCPT
+        id S242582AbiARNko (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Jan 2022 08:37:23 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:49154 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239194AbiARNhV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 08:37:21 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B15C06148E
-        for <fstests@vger.kernel.org>; Tue, 18 Jan 2022 13:37:20 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B329DC00446;
-        Tue, 18 Jan 2022 13:37:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642513040;
-        bh=CJDK1V6KbLi6WhjYrLaCfWv3bvWmo+wwzvN8N6y1SQI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ivUVr4ley8RN8eWV5FZnXd1M4cL4w69zjClfwYMt21S3tiN3OWY7mtK9jyEfiTuJ6
-         5DP6CY3MUyVI2VOhYt3KGJdeDTC+aLb3sSMRmH6xoso4iXG/Hnl8W6AidEqzHKmPyp
-         8jrT6+dxJYt60I4v2rJRgk1DXdSM+GLvBSAQcG9nLOusWzC0gm845q0kc5WfdLjwuq
-         tnnEdvipt3M77fGM0AUwN9HQsaDaOEX7Wggyy3HyAuxQ7cUJNDgZ82Fv1lOBKpJrO+
-         SW5XcZ7JN6PbjI0vaxrhc5ye6kOMk1oA+FEB/MCuuPz7nm8Tnz5BUmYq7UYnOfQihp
-         yYQ9bb30P6RcA==
-Date:   Tue, 18 Jan 2022 14:37:11 +0100
-From:   Christian Brauner <brauner@kernel.org>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
+        Tue, 18 Jan 2022 08:40:44 -0500
+Received: from out30-54.freemail.mail.aliyun.com ([115.124.30.54]:60015 "EHLO
+        out30-54.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S242424AbiARNko (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 08:40:44 -0500
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R211e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04400;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=7;SR=0;TI=SMTPD_---0V2CgJGn_1642513240;
+Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0V2CgJGn_1642513240)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Tue, 18 Jan 2022 21:40:41 +0800
+Date:   Tue, 18 Jan 2022 21:40:40 +0800
+From:   Eryu Guan <eguan@linux.alibaba.com>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        Christoph Hellwig <hch@lst.de>,
         Seth Forshee <sforshee@digitalocean.com>,
         Eryu Guan <guaneryu@gmail.com>
 Subject: Re: [PATCH 2/2] idmapped-mounts: always run generic vfs tests
-Message-ID: <20220118133711.w6bndojpa3pasgys@wittgenstein>
+Message-ID: <20220118134040.GA12255@e18g06458.et15sqa>
 References: <20220113132421.865002-1-brauner@kernel.org>
  <20220113132421.865002-2-brauner@kernel.org>
  <YeOkkS8Vj41dTjvS@desktop>
+ <20220118133711.w6bndojpa3pasgys@wittgenstein>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YeOkkS8Vj41dTjvS@desktop>
+In-Reply-To: <20220118133711.w6bndojpa3pasgys@wittgenstein>
+User-Agent: Mutt/1.5.21 (2010-09-15)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jan 16, 2022 at 12:52:33PM +0800, Eryu Guan wrote:
-> On Thu, Jan 13, 2022 at 02:24:21PM +0100, Christian Brauner wrote:
-> > Make it possible to always run all the tests in the testsuite that don't
-> > require idmapped mounts. Now all filesystems can benefit from the
-> > generic vfs tests that we currently implement. This means setgid
-> > inheritance and other tests will be run for all filesystems not matter
-> > if they support idmapped mounts or not.
+On Tue, Jan 18, 2022 at 02:37:11PM +0100, Christian Brauner wrote:
+> On Sun, Jan 16, 2022 at 12:52:33PM +0800, Eryu Guan wrote:
+> > On Thu, Jan 13, 2022 at 02:24:21PM +0100, Christian Brauner wrote:
+> > > Make it possible to always run all the tests in the testsuite that don't
+> > > require idmapped mounts. Now all filesystems can benefit from the
+> > > generic vfs tests that we currently implement. This means setgid
+> > > inheritance and other tests will be run for all filesystems not matter
+> > > if they support idmapped mounts or not.
+> > > 
+> > > Cc: Seth Forshee <sforshee@digitalocean.com>
+> > > Cc: Eryu Guan <guaneryu@gmail.com>
+> > > Cc: Christoph Hellwig <hch@lst.de>
+> > > Cc: fstests@vger.kernel.org
+> > > Signed-off-by: Christian Brauner <brauner@kernel.org>
+> > > ---
+> > >  src/idmapped-mounts/idmapped-mounts.c | 184 ++++++++++++++------------
+> > >  tests/generic/633                     |   1 -
+> > >  2 files changed, 98 insertions(+), 87 deletions(-)
+> > > 
+> > > diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+> > > index a78a901f..5f304108 100644
+> > > --- a/src/idmapped-mounts/idmapped-mounts.c
+> > > +++ b/src/idmapped-mounts/idmapped-mounts.c
+> > > @@ -125,6 +125,9 @@ int t_dir1_fd;
+> > >  /* temporary buffer */
+> > >  char t_buf[PATH_MAX];
+> > >  
+> > > +/* whether the underlying filesystem supports idmapped mounts */
+> > > +bool t_fs_allow_idmap;
+> > > +
+> > >  static void stash_overflowuid(void)
+> > >  {
+> > >  	int fd;
+> > > @@ -2867,10 +2870,7 @@ out:
+> > >  static int fscaps(void)
+> > >  {
+> > >  	int fret = -1;
+> > > -	int file1_fd = -EBADF;
+> > > -	struct mount_attr attr = {
+> > > -		.attr_set = MOUNT_ATTR_IDMAP,
+> > > -	};
+> > > +	int file1_fd = -EBADF, fd_userns = -EBADF;
+> > >  	pid_t pid;
+> > >  
+> > >  	file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+> > > @@ -2884,8 +2884,8 @@ static int fscaps(void)
+> > >  		return 0;
+> > >  
+> > >  	/* Changing mount properties on a detached mount. */
+> > > -	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> > > -	if (attr.userns_fd < 0) {
+> > > +	fd_userns = get_userns_fd(0, 10000, 10000);
+> > > +	if (fd_userns < 0) {
+> > >  		log_stderr("failure: get_userns_fd");
+> > >  		goto out;
+> > >  	}
+> > > @@ -2901,7 +2901,7 @@ static int fscaps(void)
+> > >  		goto out;
+> > >  	}
+> > >  	if (pid == 0) {
+> > > -		if (!switch_userns(attr.userns_fd, 0, 0, false))
+> > > +		if (!switch_userns(fd_userns, 0, 0, false))
+> > >  			die("failure: switch_userns");
+> > >  
+> > >  		/*
+> > > @@ -2949,7 +2949,7 @@ static int fscaps(void)
+> > >  		goto out;
+> > >  	}
+> > >  	if (pid == 0) {
+> > > -		if (!switch_userns(attr.userns_fd, 0, 0, false))
+> > > +		if (!switch_userns(fd_userns, 0, 0, false))
+> > >  			die("failure: switch_userns");
+> > >  
+> > >  		if (!expected_dummy_vfs_caps_uid(file1_fd, 0))
+> > > @@ -2977,8 +2977,8 @@ static int fscaps(void)
+> > >  	fret = 0;
+> > >  	log_debug("Ran test");
+> > >  out:
+> > > -	safe_close(attr.userns_fd);
+> > >  	safe_close(file1_fd);
+> > > +	safe_close(fd_userns);
+> > >  
+> > >  	return fret;
+> > >  }
+> > > @@ -13783,95 +13783,96 @@ static const struct option longopts[] = {
+> > >  
+> > >  struct t_idmapped_mounts {
+> > >  	int (*test)(void);
+> > > +	bool require_fs_allow_idmap;
+> > >  	const char *description;
+> > >  } basic_suite[] = {
+> > > -	{ acls,								"posix acls on regular mounts",									},
+> > > -	{ create_in_userns,						"create operations in user namespace",								},
+> > > -	{ device_node_in_userns,					"device node in user namespace",								},
+> > > -	{ expected_uid_gid_idmapped_mounts,				"expected ownership on idmapped mounts",							},
+> > > -	{ fscaps,							"fscaps on regular mounts",									},
+> > > -	{ fscaps_idmapped_mounts,					"fscaps on idmapped mounts",									},
+> > > -	{ fscaps_idmapped_mounts_in_userns,				"fscaps on idmapped mounts in user namespace",							},
+> > > -	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings",			},
+> > > -	{ fsids_mapped,							"mapped fsids",											},
+> > > -	{ fsids_unmapped,						"unmapped fsids",										},
+> > > -	{ hardlink_crossing_mounts,					"cross mount hardlink",										},
+> > > -	{ hardlink_crossing_idmapped_mounts,				"cross idmapped mount hardlink",								},
+> > > -	{ hardlink_from_idmapped_mount,					"hardlinks from idmapped mounts",								},
+> > > -	{ hardlink_from_idmapped_mount_in_userns,			"hardlinks from idmapped mounts in user namespace",						},
+> > > +	{ acls,								true,	"posix acls on regular mounts",									},
+> > > +	{ create_in_userns,						true,	"create operations in user namespace",								},
+> > > +	{ device_node_in_userns,					true,	"device node in user namespace",								},
+> > > +	{ expected_uid_gid_idmapped_mounts,				true,	"expected ownership on idmapped mounts",							},
+> > > +	{ fscaps,							false,	"fscaps on regular mounts",									},
+> > > +	{ fscaps_idmapped_mounts,					true,	"fscaps on idmapped mounts",									},
+> > > +	{ fscaps_idmapped_mounts_in_userns,				true,	"fscaps on idmapped mounts in user namespace",							},
+> > > +	{ fscaps_idmapped_mounts_in_userns_separate_userns,		true,	"fscaps on idmapped mounts in user namespace with different id mappings",			},
+> > > +	{ fsids_mapped,							true,	"mapped fsids",											},
+> > > +	{ fsids_unmapped,						true,	"unmapped fsids",										},
+> > > +	{ hardlink_crossing_mounts,					false,	"cross mount hardlink",										},
+> > > +	{ hardlink_crossing_idmapped_mounts,				true,	"cross idmapped mount hardlink",								},
+> > > +	{ hardlink_from_idmapped_mount,					true,	"hardlinks from idmapped mounts",								},
+> > > +	{ hardlink_from_idmapped_mount_in_userns,			true,	"hardlinks from idmapped mounts in user namespace",						},
+> > >  #ifdef HAVE_LIBURING_H
+> > > -	{ io_uring,							"io_uring",											},
+> > > -	{ io_uring_userns,						"io_uring in user namespace",									},
+> > > -	{ io_uring_idmapped,						"io_uring from idmapped mounts",								},
+> > > -	{ io_uring_idmapped_userns,					"io_uring from idmapped mounts in user namespace",						},
+> > > -	{ io_uring_idmapped_unmapped,					"io_uring from idmapped mounts with unmapped ids",						},
+> > > -	{ io_uring_idmapped_unmapped_userns,				"io_uring from idmapped mounts with unmapped ids in user namespace",				},
+> > > +	{ io_uring,							false,	"io_uring",											},
+> > > +	{ io_uring_userns,						false,	"io_uring in user namespace",									},
+> > > +	{ io_uring_idmapped,						true,	"io_uring from idmapped mounts",								},
+> > > +	{ io_uring_idmapped_userns,					true,	"io_uring from idmapped mounts in user namespace",						},
+> > > +	{ io_uring_idmapped_unmapped,					true,	"io_uring from idmapped mounts with unmapped ids",						},
+> > > +	{ io_uring_idmapped_unmapped_userns,				true,	"io_uring from idmapped mounts with unmapped ids in user namespace",				},
+> > >  #endif
+> > > -	{ protected_symlinks,						"following protected symlinks on regular mounts",						},
+> > > -	{ protected_symlinks_idmapped_mounts,				"following protected symlinks on idmapped mounts",						},
+> > > -	{ protected_symlinks_idmapped_mounts_in_userns,			"following protected symlinks on idmapped mounts in user namespace",				},
+> > > -	{ rename_crossing_mounts,					"cross mount rename",										},
+> > > -	{ rename_crossing_idmapped_mounts,				"cross idmapped mount rename",									},
+> > > -	{ rename_from_idmapped_mount,					"rename from idmapped mounts",									},
+> > > -	{ rename_from_idmapped_mount_in_userns,				"rename from idmapped mounts in user namespace",						},
+> > > -	{ setattr_truncate,						"setattr truncate",										},
+> > > -	{ setattr_truncate_idmapped,					"setattr truncate on idmapped mounts",								},
+> > > -	{ setattr_truncate_idmapped_in_userns,				"setattr truncate on idmapped mounts in user namespace",					},
+> > > -	{ setgid_create,						"create operations in directories with setgid bit set",						},
+> > > -	{ setgid_create_idmapped,					"create operations in directories with setgid bit set on idmapped mounts",			},
+> > > -	{ setgid_create_idmapped_in_userns,				"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
+> > > -	{ setid_binaries,						"setid binaries on regular mounts",								},
+> > > -	{ setid_binaries_idmapped_mounts,				"setid binaries on idmapped mounts",								},
+> > > -	{ setid_binaries_idmapped_mounts_in_userns,			"setid binaries on idmapped mounts in user namespace",						},
+> > > -	{ setid_binaries_idmapped_mounts_in_userns_separate_userns,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
+> > > -	{ sticky_bit_unlink,						"sticky bit unlink operations on regular mounts",						},
+> > > -	{ sticky_bit_unlink_idmapped_mounts,				"sticky bit unlink operations on idmapped mounts",						},
+> > > -	{ sticky_bit_unlink_idmapped_mounts_in_userns,			"sticky bit unlink operations on idmapped mounts in user namespace",				},
+> > > -	{ sticky_bit_rename,						"sticky bit rename operations on regular mounts",						},
+> > > -	{ sticky_bit_rename_idmapped_mounts,				"sticky bit rename operations on idmapped mounts",						},
+> > > -	{ sticky_bit_rename_idmapped_mounts_in_userns,			"sticky bit rename operations on idmapped mounts in user namespace",				},
+> > > -	{ symlink_regular_mounts,					"symlink from regular mounts",									},
+> > > -	{ symlink_idmapped_mounts,					"symlink from idmapped mounts",									},
+> > > -	{ symlink_idmapped_mounts_in_userns,				"symlink from idmapped mounts in user namespace",						},
+> > > -	{ threaded_idmapped_mount_interactions,				"threaded operations on idmapped mounts",							},
+> > > +	{ protected_symlinks,						false,	"following protected symlinks on regular mounts",						},
+> > > +	{ protected_symlinks_idmapped_mounts,				true,	"following protected symlinks on idmapped mounts",						},
+> > > +	{ protected_symlinks_idmapped_mounts_in_userns,			true,	"following protected symlinks on idmapped mounts in user namespace",				},
+> > > +	{ rename_crossing_mounts,					false,	"cross mount rename",										},
+> > > +	{ rename_crossing_idmapped_mounts,				true,	"cross idmapped mount rename",									},
+> > > +	{ rename_from_idmapped_mount,					true,	"rename from idmapped mounts",									},
+> > > +	{ rename_from_idmapped_mount_in_userns,				true,	"rename from idmapped mounts in user namespace",						},
+> > > +	{ setattr_truncate,						false,	"setattr truncate",										},
+> > > +	{ setattr_truncate_idmapped,					true,	"setattr truncate on idmapped mounts",								},
+> > > +	{ setattr_truncate_idmapped_in_userns,				true,	"setattr truncate on idmapped mounts in user namespace",					},
+> > > +	{ setgid_create,						false,	"create operations in directories with setgid bit set",						},
+> > > +	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
+> > > +	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
+> > > +	{ setid_binaries,						false,	"setid binaries on regular mounts",								},
+> > > +	{ setid_binaries_idmapped_mounts,				true,	"setid binaries on idmapped mounts",								},
+> > > +	{ setid_binaries_idmapped_mounts_in_userns,			true,	"setid binaries on idmapped mounts in user namespace",						},
+> > > +	{ setid_binaries_idmapped_mounts_in_userns_separate_userns,	true,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
+> > > +	{ sticky_bit_unlink,						false,	"sticky bit unlink operations on regular mounts",						},
+> > > +	{ sticky_bit_unlink_idmapped_mounts,				true,	"sticky bit unlink operations on idmapped mounts",						},
+> > > +	{ sticky_bit_unlink_idmapped_mounts_in_userns,			true,	"sticky bit unlink operations on idmapped mounts in user namespace",				},
+> > > +	{ sticky_bit_rename,						false,	"sticky bit rename operations on regular mounts",						},
+> > > +	{ sticky_bit_rename_idmapped_mounts,				true,	"sticky bit rename operations on idmapped mounts",						},
+> > > +	{ sticky_bit_rename_idmapped_mounts_in_userns,			true,	"sticky bit rename operations on idmapped mounts in user namespace",				},
+> > > +	{ symlink_regular_mounts,					false,	"symlink from regular mounts",									},
+> > > +	{ symlink_idmapped_mounts,					true,	"symlink from idmapped mounts",									},
+> > > +	{ symlink_idmapped_mounts_in_userns,				true,	"symlink from idmapped mounts in user namespace",						},
+> > > +	{ threaded_idmapped_mount_interactions,				true,	"threaded operations on idmapped mounts",							},
+> > >  };
+> > >  
+> > >  struct t_idmapped_mounts fscaps_in_ancestor_userns[] = {
+> > > -	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
+> > > +	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	true,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
+> > >  };
+> > >  
+> > >  struct t_idmapped_mounts t_nested_userns[] = {
+> > > -	{ nested_userns,						"test that nested user namespaces behave correctly when attached to idmapped mounts",		},
+> > > +	{ nested_userns,						true,	"test that nested user namespaces behave correctly when attached to idmapped mounts",		},
+> > >  };
+> > >  
+> > >  struct t_idmapped_mounts t_btrfs[] = {
+> > > -	{ btrfs_subvolumes_fsids_mapped,				"test subvolumes with mapped fsids",								},
+> > > -	{ btrfs_subvolumes_fsids_mapped_userns,				"test subvolumes with mapped fsids inside user namespace",					},
+> > > -	{ btrfs_subvolumes_fsids_mapped_user_subvol_rm_allowed,		"test subvolume deletion with user_subvol_rm_allowed mount option",				},
+> > > -	{ btrfs_subvolumes_fsids_mapped_userns_user_subvol_rm_allowed,	"test subvolume deletion with user_subvol_rm_allowed mount option inside user namespace",	},
+> > > -	{ btrfs_subvolumes_fsids_unmapped,				"test subvolumes with unmapped fsids",								},
+> > > -	{ btrfs_subvolumes_fsids_unmapped_userns,			"test subvolumes with unmapped fsids inside user namespace",					},
+> > > -	{ btrfs_snapshots_fsids_mapped,					"test snapshots with mapped fsids",								},
+> > > -	{ btrfs_snapshots_fsids_mapped_userns,				"test snapshots with mapped fsids inside user namespace",					},
+> > > -	{ btrfs_snapshots_fsids_mapped_user_subvol_rm_allowed,		"test snapshots deletion with user_subvol_rm_allowed mount option",				},
+> > > -	{ btrfs_snapshots_fsids_mapped_userns_user_subvol_rm_allowed,	"test snapshots deletion with user_subvol_rm_allowed mount option inside user namespace",	},
+> > > -	{ btrfs_snapshots_fsids_unmapped,				"test snapshots with unmapped fsids",								},
+> > > -	{ btrfs_snapshots_fsids_unmapped_userns,			"test snapshots with unmapped fsids inside user namespace",					},
+> > > -	{ btrfs_delete_by_spec_id,					"test subvolume deletion by spec id",								},
+> > > -	{ btrfs_subvolumes_setflags_fsids_mapped,			"test subvolume flags with mapped fsids",							},
+> > > -	{ btrfs_subvolumes_setflags_fsids_mapped_userns,		"test subvolume flags with mapped fsids inside user namespace",					},
+> > > -	{ btrfs_subvolumes_setflags_fsids_unmapped,			"test subvolume flags with unmapped fsids",							},
+> > > -	{ btrfs_subvolumes_setflags_fsids_unmapped_userns,		"test subvolume flags with unmapped fsids inside user namespace",				},
+> > > -	{ btrfs_snapshots_setflags_fsids_mapped,			"test snapshots flags with mapped fsids",							},
+> > > -	{ btrfs_snapshots_setflags_fsids_mapped_userns,			"test snapshots flags with mapped fsids inside user namespace",					},
+> > > -	{ btrfs_snapshots_setflags_fsids_unmapped,			"test snapshots flags with unmapped fsids",							},
+> > > -	{ btrfs_snapshots_setflags_fsids_unmapped_userns,		"test snapshots flags with unmapped fsids inside user namespace",				},
+> > > -	{ btrfs_subvolume_lookup_user,					"test unprivileged subvolume lookup",								},
+> > > +	{ btrfs_subvolumes_fsids_mapped,				true,	"test subvolumes with mapped fsids",								},
+> > > +	{ btrfs_subvolumes_fsids_mapped_userns,				true, 	"test subvolumes with mapped fsids inside user namespace",					},
+> > > +	{ btrfs_subvolumes_fsids_mapped_user_subvol_rm_allowed,		true, 	"test subvolume deletion with user_subvol_rm_allowed mount option",				},
+> > > +	{ btrfs_subvolumes_fsids_mapped_userns_user_subvol_rm_allowed,	true, 	"test subvolume deletion with user_subvol_rm_allowed mount option inside user namespace",	},
+> > > +	{ btrfs_subvolumes_fsids_unmapped,				true, 	"test subvolumes with unmapped fsids",								},
+> > > +	{ btrfs_subvolumes_fsids_unmapped_userns,			true, 	"test subvolumes with unmapped fsids inside user namespace",					},
+> > > +	{ btrfs_snapshots_fsids_mapped,					true, 	"test snapshots with mapped fsids",								},
+> > > +	{ btrfs_snapshots_fsids_mapped_userns,				true, 	"test snapshots with mapped fsids inside user namespace",					},
+> > > +	{ btrfs_snapshots_fsids_mapped_user_subvol_rm_allowed,		true, 	"test snapshots deletion with user_subvol_rm_allowed mount option",				},
+> > > +	{ btrfs_snapshots_fsids_mapped_userns_user_subvol_rm_allowed,	true, 	"test snapshots deletion with user_subvol_rm_allowed mount option inside user namespace",	},
+> > > +	{ btrfs_snapshots_fsids_unmapped,				true, 	"test snapshots with unmapped fsids",								},
+> > > +	{ btrfs_snapshots_fsids_unmapped_userns,			true, 	"test snapshots with unmapped fsids inside user namespace",					},
+> > > +	{ btrfs_delete_by_spec_id,					true, 	"test subvolume deletion by spec id",								},
+> > > +	{ btrfs_subvolumes_setflags_fsids_mapped,			true, 	"test subvolume flags with mapped fsids",							},
+> > > +	{ btrfs_subvolumes_setflags_fsids_mapped_userns,		true, 	"test subvolume flags with mapped fsids inside user namespace",					},
+> > > +	{ btrfs_subvolumes_setflags_fsids_unmapped,			true, 	"test subvolume flags with unmapped fsids",							},
+> > > +	{ btrfs_subvolumes_setflags_fsids_unmapped_userns,		true, 	"test subvolume flags with unmapped fsids inside user namespace",				},
+> > > +	{ btrfs_snapshots_setflags_fsids_mapped,			true, 	"test snapshots flags with mapped fsids",							},
+> > > +	{ btrfs_snapshots_setflags_fsids_mapped_userns,			true, 	"test snapshots flags with mapped fsids inside user namespace",					},
+> > > +	{ btrfs_snapshots_setflags_fsids_unmapped,			true, 	"test snapshots flags with unmapped fsids",							},
+> > > +	{ btrfs_snapshots_setflags_fsids_unmapped_userns,		true, 	"test snapshots flags with unmapped fsids inside user namespace",				},
+> > > +	{ btrfs_subvolume_lookup_user,					true, 	"test unprivileged subvolume lookup",								},
+> > >  };
+> > >  
+> > >  /* Test for commit 968219708108 ("fs: handle circular mappings correctly"). */
+> > >  struct t_idmapped_mounts t_setattr_fix_968219708108[] = {
+> > > -	{ setattr_fix_968219708108,					"test that setattr works correctly",								},
+> > > +	{ setattr_fix_968219708108,					true,	"test that setattr works correctly",								},
+> > >  };
+> > >  
+> > >  static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+> > > @@ -13883,6 +13884,15 @@ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+> > >  		int ret;
+> > >  		pid_t pid;
+> > >  
+> > > +		/*
+> > > +		 * If the underlying filesystems does not support idmapped
+> > > +		 * mounts only run vfs generic tests.
+> > > +		 */
+> > > +		if (t->require_fs_allow_idmap && !t_fs_allow_idmap) {
+> > > +			log_debug("Skipping test %s", t->description);
+> > > +			continue;
+> > > +		}
+> > > +
+> > >  		test_setup();
+> > >  
+> > >  		pid = fork();
+> > > @@ -14011,13 +14021,15 @@ int main(int argc, char *argv[])
+> > >  	if (t_mnt_fd < 0)
+> > >  		die("failed to open %s", t_mountpoint_scratch);
+> > >  
+> > > -	/*
+> > > -	 * Caller just wants to know whether the filesystem we're on supports
+> > > -	 * idmapped mounts.
+> > > -	 */
+> > > +	t_fs_allow_idmap = fs_allow_idmap();
+> > >  	if (supported) {
+> > > -		if (!fs_allow_idmap())
+> > > +		/*
+> > > +		 * Caller just wants to know whether the filesystem we're on
+> > > +		 * supports idmapped mounts.
+> > > +		 */
+> > > +		if (!t_fs_allow_idmap)
+> > >  			exit(EXIT_FAILURE);
+> > > +
+> > >  		exit(EXIT_SUCCESS);
+> > >  	}
+> > >  
+> > > diff --git a/tests/generic/633 b/tests/generic/633
+> > > index 67501177..38280647 100755
+> > > --- a/tests/generic/633
+> > > +++ b/tests/generic/633
+> > > @@ -15,7 +15,6 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
+> > >  # real QA test starts here
+> > >  
+> > >  _supported_fs generic
+> > > -_require_idmapped_mounts
 > > 
-> > Cc: Seth Forshee <sforshee@digitalocean.com>
-> > Cc: Eryu Guan <guaneryu@gmail.com>
-> > Cc: Christoph Hellwig <hch@lst.de>
-> > Cc: fstests@vger.kernel.org
-> > Signed-off-by: Christian Brauner <brauner@kernel.org>
-> > ---
-> >  src/idmapped-mounts/idmapped-mounts.c | 184 ++++++++++++++------------
-> >  tests/generic/633                     |   1 -
-> >  2 files changed, 98 insertions(+), 87 deletions(-)
-> > 
-> > diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-> > index a78a901f..5f304108 100644
-> > --- a/src/idmapped-mounts/idmapped-mounts.c
-> > +++ b/src/idmapped-mounts/idmapped-mounts.c
-> > @@ -125,6 +125,9 @@ int t_dir1_fd;
-> >  /* temporary buffer */
-> >  char t_buf[PATH_MAX];
-> >  
-> > +/* whether the underlying filesystem supports idmapped mounts */
-> > +bool t_fs_allow_idmap;
-> > +
-> >  static void stash_overflowuid(void)
-> >  {
-> >  	int fd;
-> > @@ -2867,10 +2870,7 @@ out:
-> >  static int fscaps(void)
-> >  {
-> >  	int fret = -1;
-> > -	int file1_fd = -EBADF;
-> > -	struct mount_attr attr = {
-> > -		.attr_set = MOUNT_ATTR_IDMAP,
-> > -	};
-> > +	int file1_fd = -EBADF, fd_userns = -EBADF;
-> >  	pid_t pid;
-> >  
-> >  	file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, 0644);
-> > @@ -2884,8 +2884,8 @@ static int fscaps(void)
-> >  		return 0;
-> >  
-> >  	/* Changing mount properties on a detached mount. */
-> > -	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> > -	if (attr.userns_fd < 0) {
-> > +	fd_userns = get_userns_fd(0, 10000, 10000);
-> > +	if (fd_userns < 0) {
-> >  		log_stderr("failure: get_userns_fd");
-> >  		goto out;
-> >  	}
-> > @@ -2901,7 +2901,7 @@ static int fscaps(void)
-> >  		goto out;
-> >  	}
-> >  	if (pid == 0) {
-> > -		if (!switch_userns(attr.userns_fd, 0, 0, false))
-> > +		if (!switch_userns(fd_userns, 0, 0, false))
-> >  			die("failure: switch_userns");
-> >  
-> >  		/*
-> > @@ -2949,7 +2949,7 @@ static int fscaps(void)
-> >  		goto out;
-> >  	}
-> >  	if (pid == 0) {
-> > -		if (!switch_userns(attr.userns_fd, 0, 0, false))
-> > +		if (!switch_userns(fd_userns, 0, 0, false))
-> >  			die("failure: switch_userns");
-> >  
-> >  		if (!expected_dummy_vfs_caps_uid(file1_fd, 0))
-> > @@ -2977,8 +2977,8 @@ static int fscaps(void)
-> >  	fret = 0;
-> >  	log_debug("Ran test");
-> >  out:
-> > -	safe_close(attr.userns_fd);
-> >  	safe_close(file1_fd);
-> > +	safe_close(fd_userns);
-> >  
-> >  	return fret;
-> >  }
-> > @@ -13783,95 +13783,96 @@ static const struct option longopts[] = {
-> >  
-> >  struct t_idmapped_mounts {
-> >  	int (*test)(void);
-> > +	bool require_fs_allow_idmap;
-> >  	const char *description;
-> >  } basic_suite[] = {
-> > -	{ acls,								"posix acls on regular mounts",									},
-> > -	{ create_in_userns,						"create operations in user namespace",								},
-> > -	{ device_node_in_userns,					"device node in user namespace",								},
-> > -	{ expected_uid_gid_idmapped_mounts,				"expected ownership on idmapped mounts",							},
-> > -	{ fscaps,							"fscaps on regular mounts",									},
-> > -	{ fscaps_idmapped_mounts,					"fscaps on idmapped mounts",									},
-> > -	{ fscaps_idmapped_mounts_in_userns,				"fscaps on idmapped mounts in user namespace",							},
-> > -	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings",			},
-> > -	{ fsids_mapped,							"mapped fsids",											},
-> > -	{ fsids_unmapped,						"unmapped fsids",										},
-> > -	{ hardlink_crossing_mounts,					"cross mount hardlink",										},
-> > -	{ hardlink_crossing_idmapped_mounts,				"cross idmapped mount hardlink",								},
-> > -	{ hardlink_from_idmapped_mount,					"hardlinks from idmapped mounts",								},
-> > -	{ hardlink_from_idmapped_mount_in_userns,			"hardlinks from idmapped mounts in user namespace",						},
-> > +	{ acls,								true,	"posix acls on regular mounts",									},
-> > +	{ create_in_userns,						true,	"create operations in user namespace",								},
-> > +	{ device_node_in_userns,					true,	"device node in user namespace",								},
-> > +	{ expected_uid_gid_idmapped_mounts,				true,	"expected ownership on idmapped mounts",							},
-> > +	{ fscaps,							false,	"fscaps on regular mounts",									},
-> > +	{ fscaps_idmapped_mounts,					true,	"fscaps on idmapped mounts",									},
-> > +	{ fscaps_idmapped_mounts_in_userns,				true,	"fscaps on idmapped mounts in user namespace",							},
-> > +	{ fscaps_idmapped_mounts_in_userns_separate_userns,		true,	"fscaps on idmapped mounts in user namespace with different id mappings",			},
-> > +	{ fsids_mapped,							true,	"mapped fsids",											},
-> > +	{ fsids_unmapped,						true,	"unmapped fsids",										},
-> > +	{ hardlink_crossing_mounts,					false,	"cross mount hardlink",										},
-> > +	{ hardlink_crossing_idmapped_mounts,				true,	"cross idmapped mount hardlink",								},
-> > +	{ hardlink_from_idmapped_mount,					true,	"hardlinks from idmapped mounts",								},
-> > +	{ hardlink_from_idmapped_mount_in_userns,			true,	"hardlinks from idmapped mounts in user namespace",						},
-> >  #ifdef HAVE_LIBURING_H
-> > -	{ io_uring,							"io_uring",											},
-> > -	{ io_uring_userns,						"io_uring in user namespace",									},
-> > -	{ io_uring_idmapped,						"io_uring from idmapped mounts",								},
-> > -	{ io_uring_idmapped_userns,					"io_uring from idmapped mounts in user namespace",						},
-> > -	{ io_uring_idmapped_unmapped,					"io_uring from idmapped mounts with unmapped ids",						},
-> > -	{ io_uring_idmapped_unmapped_userns,				"io_uring from idmapped mounts with unmapped ids in user namespace",				},
-> > +	{ io_uring,							false,	"io_uring",											},
-> > +	{ io_uring_userns,						false,	"io_uring in user namespace",									},
-> > +	{ io_uring_idmapped,						true,	"io_uring from idmapped mounts",								},
-> > +	{ io_uring_idmapped_userns,					true,	"io_uring from idmapped mounts in user namespace",						},
-> > +	{ io_uring_idmapped_unmapped,					true,	"io_uring from idmapped mounts with unmapped ids",						},
-> > +	{ io_uring_idmapped_unmapped_userns,				true,	"io_uring from idmapped mounts with unmapped ids in user namespace",				},
-> >  #endif
-> > -	{ protected_symlinks,						"following protected symlinks on regular mounts",						},
-> > -	{ protected_symlinks_idmapped_mounts,				"following protected symlinks on idmapped mounts",						},
-> > -	{ protected_symlinks_idmapped_mounts_in_userns,			"following protected symlinks on idmapped mounts in user namespace",				},
-> > -	{ rename_crossing_mounts,					"cross mount rename",										},
-> > -	{ rename_crossing_idmapped_mounts,				"cross idmapped mount rename",									},
-> > -	{ rename_from_idmapped_mount,					"rename from idmapped mounts",									},
-> > -	{ rename_from_idmapped_mount_in_userns,				"rename from idmapped mounts in user namespace",						},
-> > -	{ setattr_truncate,						"setattr truncate",										},
-> > -	{ setattr_truncate_idmapped,					"setattr truncate on idmapped mounts",								},
-> > -	{ setattr_truncate_idmapped_in_userns,				"setattr truncate on idmapped mounts in user namespace",					},
-> > -	{ setgid_create,						"create operations in directories with setgid bit set",						},
-> > -	{ setgid_create_idmapped,					"create operations in directories with setgid bit set on idmapped mounts",			},
-> > -	{ setgid_create_idmapped_in_userns,				"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
-> > -	{ setid_binaries,						"setid binaries on regular mounts",								},
-> > -	{ setid_binaries_idmapped_mounts,				"setid binaries on idmapped mounts",								},
-> > -	{ setid_binaries_idmapped_mounts_in_userns,			"setid binaries on idmapped mounts in user namespace",						},
-> > -	{ setid_binaries_idmapped_mounts_in_userns_separate_userns,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
-> > -	{ sticky_bit_unlink,						"sticky bit unlink operations on regular mounts",						},
-> > -	{ sticky_bit_unlink_idmapped_mounts,				"sticky bit unlink operations on idmapped mounts",						},
-> > -	{ sticky_bit_unlink_idmapped_mounts_in_userns,			"sticky bit unlink operations on idmapped mounts in user namespace",				},
-> > -	{ sticky_bit_rename,						"sticky bit rename operations on regular mounts",						},
-> > -	{ sticky_bit_rename_idmapped_mounts,				"sticky bit rename operations on idmapped mounts",						},
-> > -	{ sticky_bit_rename_idmapped_mounts_in_userns,			"sticky bit rename operations on idmapped mounts in user namespace",				},
-> > -	{ symlink_regular_mounts,					"symlink from regular mounts",									},
-> > -	{ symlink_idmapped_mounts,					"symlink from idmapped mounts",									},
-> > -	{ symlink_idmapped_mounts_in_userns,				"symlink from idmapped mounts in user namespace",						},
-> > -	{ threaded_idmapped_mount_interactions,				"threaded operations on idmapped mounts",							},
-> > +	{ protected_symlinks,						false,	"following protected symlinks on regular mounts",						},
-> > +	{ protected_symlinks_idmapped_mounts,				true,	"following protected symlinks on idmapped mounts",						},
-> > +	{ protected_symlinks_idmapped_mounts_in_userns,			true,	"following protected symlinks on idmapped mounts in user namespace",				},
-> > +	{ rename_crossing_mounts,					false,	"cross mount rename",										},
-> > +	{ rename_crossing_idmapped_mounts,				true,	"cross idmapped mount rename",									},
-> > +	{ rename_from_idmapped_mount,					true,	"rename from idmapped mounts",									},
-> > +	{ rename_from_idmapped_mount_in_userns,				true,	"rename from idmapped mounts in user namespace",						},
-> > +	{ setattr_truncate,						false,	"setattr truncate",										},
-> > +	{ setattr_truncate_idmapped,					true,	"setattr truncate on idmapped mounts",								},
-> > +	{ setattr_truncate_idmapped_in_userns,				true,	"setattr truncate on idmapped mounts in user namespace",					},
-> > +	{ setgid_create,						false,	"create operations in directories with setgid bit set",						},
-> > +	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
-> > +	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
-> > +	{ setid_binaries,						false,	"setid binaries on regular mounts",								},
-> > +	{ setid_binaries_idmapped_mounts,				true,	"setid binaries on idmapped mounts",								},
-> > +	{ setid_binaries_idmapped_mounts_in_userns,			true,	"setid binaries on idmapped mounts in user namespace",						},
-> > +	{ setid_binaries_idmapped_mounts_in_userns_separate_userns,	true,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
-> > +	{ sticky_bit_unlink,						false,	"sticky bit unlink operations on regular mounts",						},
-> > +	{ sticky_bit_unlink_idmapped_mounts,				true,	"sticky bit unlink operations on idmapped mounts",						},
-> > +	{ sticky_bit_unlink_idmapped_mounts_in_userns,			true,	"sticky bit unlink operations on idmapped mounts in user namespace",				},
-> > +	{ sticky_bit_rename,						false,	"sticky bit rename operations on regular mounts",						},
-> > +	{ sticky_bit_rename_idmapped_mounts,				true,	"sticky bit rename operations on idmapped mounts",						},
-> > +	{ sticky_bit_rename_idmapped_mounts_in_userns,			true,	"sticky bit rename operations on idmapped mounts in user namespace",				},
-> > +	{ symlink_regular_mounts,					false,	"symlink from regular mounts",									},
-> > +	{ symlink_idmapped_mounts,					true,	"symlink from idmapped mounts",									},
-> > +	{ symlink_idmapped_mounts_in_userns,				true,	"symlink from idmapped mounts in user namespace",						},
-> > +	{ threaded_idmapped_mount_interactions,				true,	"threaded operations on idmapped mounts",							},
-> >  };
-> >  
-> >  struct t_idmapped_mounts fscaps_in_ancestor_userns[] = {
-> > -	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
-> > +	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	true,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
-> >  };
-> >  
-> >  struct t_idmapped_mounts t_nested_userns[] = {
-> > -	{ nested_userns,						"test that nested user namespaces behave correctly when attached to idmapped mounts",		},
-> > +	{ nested_userns,						true,	"test that nested user namespaces behave correctly when attached to idmapped mounts",		},
-> >  };
-> >  
-> >  struct t_idmapped_mounts t_btrfs[] = {
-> > -	{ btrfs_subvolumes_fsids_mapped,				"test subvolumes with mapped fsids",								},
-> > -	{ btrfs_subvolumes_fsids_mapped_userns,				"test subvolumes with mapped fsids inside user namespace",					},
-> > -	{ btrfs_subvolumes_fsids_mapped_user_subvol_rm_allowed,		"test subvolume deletion with user_subvol_rm_allowed mount option",				},
-> > -	{ btrfs_subvolumes_fsids_mapped_userns_user_subvol_rm_allowed,	"test subvolume deletion with user_subvol_rm_allowed mount option inside user namespace",	},
-> > -	{ btrfs_subvolumes_fsids_unmapped,				"test subvolumes with unmapped fsids",								},
-> > -	{ btrfs_subvolumes_fsids_unmapped_userns,			"test subvolumes with unmapped fsids inside user namespace",					},
-> > -	{ btrfs_snapshots_fsids_mapped,					"test snapshots with mapped fsids",								},
-> > -	{ btrfs_snapshots_fsids_mapped_userns,				"test snapshots with mapped fsids inside user namespace",					},
-> > -	{ btrfs_snapshots_fsids_mapped_user_subvol_rm_allowed,		"test snapshots deletion with user_subvol_rm_allowed mount option",				},
-> > -	{ btrfs_snapshots_fsids_mapped_userns_user_subvol_rm_allowed,	"test snapshots deletion with user_subvol_rm_allowed mount option inside user namespace",	},
-> > -	{ btrfs_snapshots_fsids_unmapped,				"test snapshots with unmapped fsids",								},
-> > -	{ btrfs_snapshots_fsids_unmapped_userns,			"test snapshots with unmapped fsids inside user namespace",					},
-> > -	{ btrfs_delete_by_spec_id,					"test subvolume deletion by spec id",								},
-> > -	{ btrfs_subvolumes_setflags_fsids_mapped,			"test subvolume flags with mapped fsids",							},
-> > -	{ btrfs_subvolumes_setflags_fsids_mapped_userns,		"test subvolume flags with mapped fsids inside user namespace",					},
-> > -	{ btrfs_subvolumes_setflags_fsids_unmapped,			"test subvolume flags with unmapped fsids",							},
-> > -	{ btrfs_subvolumes_setflags_fsids_unmapped_userns,		"test subvolume flags with unmapped fsids inside user namespace",				},
-> > -	{ btrfs_snapshots_setflags_fsids_mapped,			"test snapshots flags with mapped fsids",							},
-> > -	{ btrfs_snapshots_setflags_fsids_mapped_userns,			"test snapshots flags with mapped fsids inside user namespace",					},
-> > -	{ btrfs_snapshots_setflags_fsids_unmapped,			"test snapshots flags with unmapped fsids",							},
-> > -	{ btrfs_snapshots_setflags_fsids_unmapped_userns,		"test snapshots flags with unmapped fsids inside user namespace",				},
-> > -	{ btrfs_subvolume_lookup_user,					"test unprivileged subvolume lookup",								},
-> > +	{ btrfs_subvolumes_fsids_mapped,				true,	"test subvolumes with mapped fsids",								},
-> > +	{ btrfs_subvolumes_fsids_mapped_userns,				true, 	"test subvolumes with mapped fsids inside user namespace",					},
-> > +	{ btrfs_subvolumes_fsids_mapped_user_subvol_rm_allowed,		true, 	"test subvolume deletion with user_subvol_rm_allowed mount option",				},
-> > +	{ btrfs_subvolumes_fsids_mapped_userns_user_subvol_rm_allowed,	true, 	"test subvolume deletion with user_subvol_rm_allowed mount option inside user namespace",	},
-> > +	{ btrfs_subvolumes_fsids_unmapped,				true, 	"test subvolumes with unmapped fsids",								},
-> > +	{ btrfs_subvolumes_fsids_unmapped_userns,			true, 	"test subvolumes with unmapped fsids inside user namespace",					},
-> > +	{ btrfs_snapshots_fsids_mapped,					true, 	"test snapshots with mapped fsids",								},
-> > +	{ btrfs_snapshots_fsids_mapped_userns,				true, 	"test snapshots with mapped fsids inside user namespace",					},
-> > +	{ btrfs_snapshots_fsids_mapped_user_subvol_rm_allowed,		true, 	"test snapshots deletion with user_subvol_rm_allowed mount option",				},
-> > +	{ btrfs_snapshots_fsids_mapped_userns_user_subvol_rm_allowed,	true, 	"test snapshots deletion with user_subvol_rm_allowed mount option inside user namespace",	},
-> > +	{ btrfs_snapshots_fsids_unmapped,				true, 	"test snapshots with unmapped fsids",								},
-> > +	{ btrfs_snapshots_fsids_unmapped_userns,			true, 	"test snapshots with unmapped fsids inside user namespace",					},
-> > +	{ btrfs_delete_by_spec_id,					true, 	"test subvolume deletion by spec id",								},
-> > +	{ btrfs_subvolumes_setflags_fsids_mapped,			true, 	"test subvolume flags with mapped fsids",							},
-> > +	{ btrfs_subvolumes_setflags_fsids_mapped_userns,		true, 	"test subvolume flags with mapped fsids inside user namespace",					},
-> > +	{ btrfs_subvolumes_setflags_fsids_unmapped,			true, 	"test subvolume flags with unmapped fsids",							},
-> > +	{ btrfs_subvolumes_setflags_fsids_unmapped_userns,		true, 	"test subvolume flags with unmapped fsids inside user namespace",				},
-> > +	{ btrfs_snapshots_setflags_fsids_mapped,			true, 	"test snapshots flags with mapped fsids",							},
-> > +	{ btrfs_snapshots_setflags_fsids_mapped_userns,			true, 	"test snapshots flags with mapped fsids inside user namespace",					},
-> > +	{ btrfs_snapshots_setflags_fsids_unmapped,			true, 	"test snapshots flags with unmapped fsids",							},
-> > +	{ btrfs_snapshots_setflags_fsids_unmapped_userns,		true, 	"test snapshots flags with unmapped fsids inside user namespace",				},
-> > +	{ btrfs_subvolume_lookup_user,					true, 	"test unprivileged subvolume lookup",								},
-> >  };
-> >  
-> >  /* Test for commit 968219708108 ("fs: handle circular mappings correctly"). */
-> >  struct t_idmapped_mounts t_setattr_fix_968219708108[] = {
-> > -	{ setattr_fix_968219708108,					"test that setattr works correctly",								},
-> > +	{ setattr_fix_968219708108,					true,	"test that setattr works correctly",								},
-> >  };
-> >  
-> >  static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
-> > @@ -13883,6 +13884,15 @@ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
-> >  		int ret;
-> >  		pid_t pid;
-> >  
-> > +		/*
-> > +		 * If the underlying filesystems does not support idmapped
-> > +		 * mounts only run vfs generic tests.
-> > +		 */
-> > +		if (t->require_fs_allow_idmap && !t_fs_allow_idmap) {
-> > +			log_debug("Skipping test %s", t->description);
-> > +			continue;
-> > +		}
-> > +
-> >  		test_setup();
-> >  
-> >  		pid = fork();
-> > @@ -14011,13 +14021,15 @@ int main(int argc, char *argv[])
-> >  	if (t_mnt_fd < 0)
-> >  		die("failed to open %s", t_mountpoint_scratch);
-> >  
-> > -	/*
-> > -	 * Caller just wants to know whether the filesystem we're on supports
-> > -	 * idmapped mounts.
-> > -	 */
-> > +	t_fs_allow_idmap = fs_allow_idmap();
-> >  	if (supported) {
-> > -		if (!fs_allow_idmap())
-> > +		/*
-> > +		 * Caller just wants to know whether the filesystem we're on
-> > +		 * supports idmapped mounts.
-> > +		 */
-> > +		if (!t_fs_allow_idmap)
-> >  			exit(EXIT_FAILURE);
-> > +
-> >  		exit(EXIT_SUCCESS);
-> >  	}
-> >  
-> > diff --git a/tests/generic/633 b/tests/generic/633
-> > index 67501177..38280647 100755
-> > --- a/tests/generic/633
-> > +++ b/tests/generic/633
-> > @@ -15,7 +15,6 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
-> >  # real QA test starts here
-> >  
-> >  _supported_fs generic
-> > -_require_idmapped_mounts
+> > Removed by accident or is it intentional?
 > 
-> Removed by accident or is it intentional?
+> This is intentional. After this patch the binary - when asked to execute
+> the core test-suite - will detect whether the underlying filesystem
+> supports idmapped mounts. If it doesn't then it will skip all tests that
+> require idmapped mounts and therefore only execute the fully vfs generic
+> tests. I'll add a comment about it in the commit message.
 
-This is intentional. After this patch the binary - when asked to execute
-the core test-suite - will detect whether the underlying filesystem
-supports idmapped mounts. If it doesn't then it will skip all tests that
-require idmapped mounts and therefore only execute the fully vfs generic
-tests. I'll add a comment about it in the commit message.
+But _require_idmapped_mounts also requires the test binary exists,
+without this rule test fails if we forget to compile idmapped-mount test
+binary in src dir.
+
+Then we need this I think
+
+_require_test_program idmapped-mounts/idmapped-mounts
+
+Thanks,
+Eryu
