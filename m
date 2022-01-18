@@ -2,83 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 857E5C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 14:02:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77F39C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 14:13:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244593AbiAROCQ (ORCPT
+        id S243975AbiARONh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Jan 2022 09:02:16 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:23624 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S244509AbiAROCP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 09:02:15 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1642514534;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=aseNuAEU4MfGH9/zhC0kgmCKIT6DQ1Y52t+zCSQKPog=;
-        b=VrD9lJO9Dwr4gzPGqGowb1o/YD6xvPLeWCWa6C85c5JNVeKfplbjJVPMPfi0QYZmwEgywG
-        ydcJDGSBh58J2RwNapcWWJVRzHRuNZMX9FeUvgNIO2p3XNsy6My2ZGzI+a+KQhSp2usy5/
-        5H/K4tfknSsIBkhF5AevwSBtq00+7NQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-602-Zy4FNwm3MNu8KxWWjw3yEQ-1; Tue, 18 Jan 2022 09:02:13 -0500
-X-MC-Unique: Zy4FNwm3MNu8KxWWjw3yEQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Tue, 18 Jan 2022 09:13:37 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:37818 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233774AbiARONg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 09:13:36 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EF7B5101C7A2;
-        Tue, 18 Jan 2022 14:02:11 +0000 (UTC)
-Received: from oldenburg.str.redhat.com (unknown [10.39.192.198])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id DD26F78AB5;
-        Tue, 18 Jan 2022 14:02:10 +0000 (UTC)
-From:   Florian Weimer <fweimer@redhat.com>
-To:     "xuyang2018.jy--- via Libc-alpha" <libc-alpha@sourceware.org>
-Cc:     Theodore Ts'o <tytso@mit.edu>,
-        "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull call
-References: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
-        <YeYmzJG5M0y9BcMc@mit.edu> <61E6298D.80006@fujitsu.com>
-        <YeY6Uh8I7RlsCicw@mit.edu> <61E64FED.2010906@fujitsu.com>
-Date:   Tue, 18 Jan 2022 15:02:09 +0100
-In-Reply-To: <61E64FED.2010906@fujitsu.com> (xuyang2018.jy's message of "Tue,
-        18 Jan 2022 05:27:10 +0000")
-Message-ID: <87r195i1lq.fsf@oldenburg.str.redhat.com>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.2 (gnu/linux)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 490856149C
+        for <fstests@vger.kernel.org>; Tue, 18 Jan 2022 14:13:36 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E6ABC00446;
+        Tue, 18 Jan 2022 14:13:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1642515215;
+        bh=i9NVtAsWwW7RB4YYMTfkADaB2G8ircntcHtYD5DaIBA=;
+        h=From:To:Cc:Subject:Date:From;
+        b=uA5xJxU2g/QMHREdqKqh0DeIHvHRPVint10UcLk7A4kc1l1XvKzKa+p5xUwEOstnx
+         03058SnugRFaB8WArrkQl1u9+unHCIf8IRNgQkDT2AfqLisDfujC8+59/M0YIIkp7n
+         Et8IxTvYii7eAAQeI/LPzKgwlTDkoG9E8qRL5m6EvzcrckbRpE2L1bUFtfWzeYyALf
+         rRN4ucv9E755PAGJ/AZMiL86gDB4TSxms+GxsYnu8NClwdwUoNj+kE6EF1eRcL+hc3
+         Sh+fyF4mrMtTAIfT11skEK3jd875b9snHuKwxFM2gAwaYrtsTCbHinKENwjsFcesoD
+         88HMCLx5rFnDg==
+From:   Christian Brauner <brauner@kernel.org>
+To:     fstests@vger.kernel.org, Eryu Guan <guan@eryu.me>
+Cc:     Christoph Hellwig <hch@lst.de>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Christian Brauner <brauner@kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>
+Subject: [PATCH v2 1/2] idmapped-mounts: add fs_allow_idmap() helper
+Date:   Tue, 18 Jan 2022 15:13:23 +0100
+Message-Id: <20220118141324.1500160-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2892; h=from:subject; bh=i9NVtAsWwW7RB4YYMTfkADaB2G8ircntcHtYD5DaIBA=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSQ+O/VbKOPATqGe82+VdmaIF/AZvZz/yjGsmM9w84nCdNHa grwnHaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABN55crIsCOzvs7423J1LWOP9Xyy61 2z5G8KO65rl/FlCj8725VvHsM/Tb5Hc8oeztMWEE9880fp8YLki3Mj7WKvV3Bt2GE53TCUGQA=
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-* xuyang2018.jy:
+Move the check whether the underlying filesystem supports idmapped
+mounts into a separate helper. We will use it in the following patch to
+make it possible to always run all tests that don't require idmapped
+mounts.
 
-> on 2022/1/18 11:56, Theodore Ts'o wrote:
->> On Tue, Jan 18, 2022 at 02:43:26AM +0000, xuyang2018.jy@fujitsu.com wrote:
->>>> You're right of course, but out of curiosity, which C library are you
->>>> using?
->>> I use glibc-2.34.
->>
->> Hmm, ok.  I'm using glibc 2.31, and in this particular program, errno
->> shouldn't have been set by any prior system call.  I'm guessing maybe
->> it was something in crt0 which ended up setting errno?
-> It maybe a glibc bug.
-> I cc glibc mailing list and see whether they have met this problem.
->
-> @Florian
->
-> Now, I use glibc-2.34 and run the following program[1] but the errno is 
-> not 0 in the beginning. So is this a known bug on glibc-2.34(Theodore 
-> doesn't meet this problem on glicb-2.31)?
->
-> [1]https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/src/ext4_resize.c
+Link: https://lore.kernel.org/r/20220113132421.865002-1-brauner@kernel.org
+Cc: Seth Forshee <sforshee@digitalocean.com>
+Cc: Eryu Guan <guaneryu@gmail.com>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
+Signed-off-by: Christian Brauner <brauner@kernel.org>
+---
+/* v2 */
+- Eryu Guan <guaneryu@gmail.com>:
+  - Don't call exit() in new fs_allow_idmap() helper. Instead, return
+    and the caller decide whether to call exit() or not.
+---
+ src/idmapped-mounts/idmapped-mounts.c | 57 ++++++++++++++-------------
+ 1 file changed, 30 insertions(+), 27 deletions(-)
 
-I'm not aware of this issue.  Could you run strace or strace -k to see
-where the failing system call is coming from?  Thanks.
+diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+index a5c0a983..fc305606 100644
+--- a/src/idmapped-mounts/idmapped-mounts.c
++++ b/src/idmapped-mounts/idmapped-mounts.c
+@@ -13955,6 +13955,35 @@ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+ 	return true;
+ }
+ 
++static bool fs_allow_idmap(void)
++{
++	int ret;
++	int open_tree_fd = -EBADF;
++	struct mount_attr attr = {
++		.attr_set	= MOUNT_ATTR_IDMAP,
++		.userns_fd	= -EBADF,
++	};
++
++	/* Changing mount properties on a detached mount. */
++	attr.userns_fd = get_userns_fd(0, 1000, 1);
++	if (attr.userns_fd < 0)
++		return false;
++
++	open_tree_fd = sys_open_tree(t_mnt_fd, "",
++				     AT_EMPTY_PATH | AT_NO_AUTOMOUNT |
++				     AT_SYMLINK_NOFOLLOW | OPEN_TREE_CLOEXEC |
++				     OPEN_TREE_CLONE);
++	if (open_tree_fd < 0)
++		ret = -1;
++	else
++		ret = sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr,
++					sizeof(attr));
++	close(open_tree_fd);
++	close(attr.userns_fd);
++
++	return ret == 0;
++}
++
+ int main(int argc, char *argv[])
+ {
+ 	int fret, ret;
+@@ -14035,34 +14064,8 @@ int main(int argc, char *argv[])
+ 	 * idmapped mounts.
+ 	 */
+ 	if (supported) {
+-		int open_tree_fd = -EBADF;
+-		struct mount_attr attr = {
+-			.attr_set	= MOUNT_ATTR_IDMAP,
+-			.userns_fd	= -EBADF,
+-		};
+-
+-		/* Changing mount properties on a detached mount. */
+-		attr.userns_fd	= get_userns_fd(0, 1000, 1);
+-		if (attr.userns_fd < 0)
++		if (!fs_allow_idmap())
+ 			exit(EXIT_FAILURE);
+-
+-		open_tree_fd = sys_open_tree(t_mnt_fd, "",
+-					     AT_EMPTY_PATH |
+-					     AT_NO_AUTOMOUNT |
+-					     AT_SYMLINK_NOFOLLOW |
+-					     OPEN_TREE_CLOEXEC |
+-					     OPEN_TREE_CLONE);
+-		if (open_tree_fd < 0)
+-			ret = -1;
+-		else
+-			ret = sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr));
+-
+-		close(open_tree_fd);
+-		close(attr.userns_fd);
+-
+-		if (ret)
+-			exit(EXIT_FAILURE);
+-
+ 		exit(EXIT_SUCCESS);
+ 	}
+ 
 
-Florian
+base-commit: bec9f2cc9d7ad86a9bf2a602529bc20667fcfe88
+-- 
+2.32.0
 
