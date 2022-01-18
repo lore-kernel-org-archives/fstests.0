@@ -2,251 +2,162 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51F8FC433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 04:41:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BA04C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Jan 2022 05:27:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234551AbiARElm (ORCPT
+        id S229540AbiARF1Q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Jan 2022 23:41:42 -0500
-Received: from esa1.hgst.iphmx.com ([68.232.141.245]:44419 "EHLO
-        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233953AbiARElm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jan 2022 23:41:42 -0500
+        Tue, 18 Jan 2022 00:27:16 -0500
+Received: from esa11.fujitsucc.c3s2.iphmx.com ([216.71.156.121]:9892 "EHLO
+        esa11.fujitsucc.c3s2.iphmx.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229510AbiARF1P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jan 2022 00:27:15 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1642480902; x=1674016902;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
+  t=1642483635; x=1674019635;
   h=from:to:cc:subject:date:message-id:references:
    in-reply-to:content-id:content-transfer-encoding:
    mime-version;
-  bh=OHTWMfdXtGy7V5UN1qghKXn0O7uUDhxizBV43CAk5g8=;
-  b=KabODWB6/bagfbkf7XPrRK+xvIDvY/ZbX1j2fb+hzbd9ASnyTsPYgudW
-   HEspFUzQxmPmUd8eeqjX3BKHyXyDgEqZdWs9Imh90R1u55984DQA29b73
-   5HweRvJtJD7vo47fueVMuiU4kBdkojruBSLiJ1dfmWkmghExzGZ5z9JYn
-   kjZUWsrkaJgBYSjQ9FnwnOlrGFoIKRlDVeVB0EJoORm33ete7noTkeQEK
-   MVtNB1GCq0uPoypiIm3brR1bisfGnU/mOkF+Ybaqt9q4XWNQL0BpEeD9K
-   E8wQ5RqMSu8+barWBuOydi30lwS3lx/xy1k02Z4GAB2vR92vQGWfG7EXN
-   g==;
-X-IronPort-AV: E=Sophos;i="5.88,296,1635177600"; 
-   d="scan'208";a="302571689"
-Received: from mail-dm6nam08lp2047.outbound.protection.outlook.com (HELO NAM04-DM6-obe.outbound.protection.outlook.com) ([104.47.73.47])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Jan 2022 12:41:40 +0800
+  bh=PQAf+dITBPlqRxmPtMYFG4bYVMhnaitdpLFpCVhpfMg=;
+  b=N5MbLTOx7Dh4xMLhZL44GSZR6Vux1zd97tw3gah5FrCOxhDEhwrlP524
+   BaiLxpAzyoQFFr2JSIQfaBgw3VoNIkLuWT7agkwxD5RJxtGnWMqBUoVOf
+   E549hoh40Eboyly4VznZ36cXbmyGcCzWB/Bq8g+XbQPinVaq0jRD6nDzm
+   lE2EMWBr/ZCxutD0BV5+gHrorCVcbNq5o70bgGOesqnrWm8WadIFCSTfF
+   FsBulaU6ocWk6mbkWA/H/iYUuSVsZUBPnPNfTZzBJtv4lLiuWdiGHCSE7
+   F2TNIEoWfi5ympOvV+rRnwKIyV5R/KC2CxOd4y/rH+GnHf4sn8Yhr8whQ
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10230"; a="48122251"
+X-IronPort-AV: E=Sophos;i="5.88,296,1635174000"; 
+   d="scan'208";a="48122251"
+Received: from mail-tycjpn01lp2170.outbound.protection.outlook.com (HELO JPN01-TYC-obe.outbound.protection.outlook.com) ([104.47.23.170])
+  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jan 2022 14:27:12 +0900
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=D/asTnPi6DhzXPh5MnQOowZjvgvDzsel5W/9KYnX7UYk8f79srB6EVgRQn7gsXRYxJEBm/nQ+3/S9U1tO0vSA5Qo5MkTmr9QAMsPKaOZ+aQT1WLoKxIOsyBPRs/qi0jDsnF97ckTYIY3SbtmR2BKH7I7+me5gM+1GIbQWl4D4q9f3MIh2VjM+rx1L30/wQTN6z6bqJ2L2KVFtqqk7Wdp0tDw0In7FFQsuoPf9S1graWMAYqIepXAy/Up4h/08EN8wW3uZDw92/Q8/c0gIyE4J+N/g8YtdgPkOjguB7znmqfGG3ZQE+lsEkuLc9pP0c2+SokvlTPoXCau9e4yQSTbXw==
+ b=NPJRfH/NWkVrBXOuAl8kivItyoa2rso4xvPqKElgEE4ZBKROwbEnqnb/r7Y1Ic4nbz1kUpR6ovU33R1c3lNaT49lt9rR9/TUQgUW026hoSeDX4I6vzDbVqwA7fHw2Sk8k9zsteOQA7IQCSQ2MpL81C7JvbhSqLt92dw6bJDh1jFaf8DW+3vX7h47Y2J0qBNp9EjzyBBTbAmltrhNJU5sk6YEftPpLaVpRT2HVV03Ah17PrheVsNAk8mvMK1SUqOrpogey47bPXllAJuzhbbe/x3lhQ9lqPjQuPlG5HdKm9TUYPXuGIp+mLqBzH8EsEl7B4HBsA76/UJr2DRZanZgZA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oxZL7Bx76XIYfd2jk/RJhnHtxpb/zsbhofybMn4gxiQ=;
- b=AGhdHkUaYL9WqVyMG8dhQPiSd099/FJeulY7BrJaLv6cqZQsvWFe9iY2fd0ZXhEvmG/Gv1QeC33YPjcake2sKt0vej/amvX//frz8ZSuc0rK6b1ojazDHiYFoZgG96SgWRv47ALAg5AI/HadinlDe+Ir/Aq7vv7rQLcOoA0Sgg5XTXCgZ9LWtp7n5GfzJHPsrjGBOO23Jvck2tVxlFmtGaeErnGXD/+j+EQjc0jxDjVErJGLsyALoNAGExwbrpcvMMwyRePQ2rUyUK1g6bms17EPx7wHUJWErlLl8lm8CGucDp4gH0hAQe9jLWVIP5G1VPOjyzrLfT9WXUxfRBHQxw==
+ bh=PQAf+dITBPlqRxmPtMYFG4bYVMhnaitdpLFpCVhpfMg=;
+ b=UYN01COqQDZ+VxEQvIw0slAWDXoNPD8gBW7bH5hLuoU7WxIss2rrSj7iU3XMJ/s1Rph36QfvcCnfMa02alX+x7cozqbvVePeXZi/+pGFovFLj66LPBysr/z7WWDfaCDED9f6ybd+FxnkYKjDLASlXYf8fgQzPGqmDLY+LJYWUWkzmzwebtfJjJkT6BncdyrBBvahTGYlDdBY7JJ49ASv1Rd+MerKzCizmvFG4vgRQb92knT08bTDAnWNAtNnr/93fN981FHL5wvvFkPBN+HOIA95SrvTrBEQ5hIL1bttA8FdHxba4SZtw21q9rGBviayBEWTuUDmFksu9hYc4KXikw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+ smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
+ dkim=pass header.d=fujitsu.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ d=fujitsu.onmicrosoft.com; s=selector2-fujitsu-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oxZL7Bx76XIYfd2jk/RJhnHtxpb/zsbhofybMn4gxiQ=;
- b=YaDapwr5OltZoXENn6IMLSiCjq29RWIqN35Whbn7EpkET40wDF8nCYlWIcwgh0i97WJtBmLjJRD2nhWhnnFN0ck9yY3OZQg2KB3VzEZbB2oLDHetr2E547ap5XT+k4wh/zOegMKKUzrTcCQS7wGYeZ4kK+eXxcOTmTc4OJNS+/s=
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com (2603:10b6:8:f::6) by
- SJ0PR04MB7472.namprd04.prod.outlook.com (2603:10b6:a03:294::16) with
+ bh=PQAf+dITBPlqRxmPtMYFG4bYVMhnaitdpLFpCVhpfMg=;
+ b=NBUwwHAjBmXf6XpTI+Vw+6TJc3XjSpuvJ4nKUbW6lEk+hqkMVSAkpLeieR9b7/+KpjKIEgXEpdr3FKbyxdkUgPn4esDD/iAO76N0bB0Hh30m6Lt0krvol3h1VaZ5lc/R2qieJAGRLr8mTtbA+fm+swl0DJkYlZ1VNvHPr8uL1KU=
+Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com (2603:1096:404:10d::20)
+ by OSZPR01MB7892.jpnprd01.prod.outlook.com (2603:1096:604:1b8::13) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4888.10; Tue, 18 Jan
- 2022 04:41:37 +0000
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::f908:8d4e:89be:32cd]) by DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::f908:8d4e:89be:32cd%7]) with mapi id 15.20.4888.014; Tue, 18 Jan 2022
- 04:41:37 +0000
-From:   Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-To:     Filipe Manana <fdmanana@kernel.org>
+ 2022 05:27:10 +0000
+Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com
+ ([fe80::c954:50fd:21b5:1c8f]) by TY2PR01MB4427.jpnprd01.prod.outlook.com
+ ([fe80::c954:50fd:21b5:1c8f%5]) with mapi id 15.20.4888.014; Tue, 18 Jan 2022
+ 05:27:10 +0000
+From:   "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
+To:     Theodore Ts'o <tytso@mit.edu>,
+        "fweimer@redhat.com" <fweimer@redhat.com>
 CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        Naohiro Aota <Naohiro.Aota@wdc.com>,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>
-Subject: Re: [PATCH] btrfs/255: add test for quota disable in parallel with
- balance
-Thread-Topic: [PATCH] btrfs/255: add test for quota disable in parallel with
- balance
-Thread-Index: AQHYCz0qWOQ0vGk3ZkWwy4Gt62uqQ6xncyKAgADBvQA=
-Date:   Tue, 18 Jan 2022 04:41:37 +0000
-Message-ID: <20220118044136.vlud4jkq6u4bql6q@shindev>
-References: <20220117005705.956931-1-shinichiro.kawasaki@wdc.com>
- <YeWie0i4ltdLPkdf@debian9.Home>
-In-Reply-To: <YeWie0i4ltdLPkdf@debian9.Home>
-Accept-Language: en-US
+        "libc-alpha@sourceware.org" <libc-alpha@sourceware.org>
+Subject: Re: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull
+ call
+Thread-Topic: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull
+ call
+Thread-Index: AQHYC3T1GUs88bXDK0iuG+0P5NW4eaxoEG4AgAADSICAABP+AIAAGcGA
+Date:   Tue, 18 Jan 2022 05:27:10 +0000
+Message-ID: <61E64FED.2010906@fujitsu.com>
+References: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <YeYmzJG5M0y9BcMc@mit.edu> <61E6298D.80006@fujitsu.com>
+ <YeY6Uh8I7RlsCicw@mit.edu>
+In-Reply-To: <YeY6Uh8I7RlsCicw@mit.edu>
+Accept-Language: zh-CN, en-US
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
+ header.d=none;dmarc=none action=none header.from=fujitsu.com;
 x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 28264d10-66b7-4aae-576f-08d9da3ccff4
-x-ms-traffictypediagnostic: SJ0PR04MB7472:EE_
-x-microsoft-antispam-prvs: <SJ0PR04MB747206F4433FB4D8746C40B1ED589@SJ0PR04MB7472.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
+x-ms-office365-filtering-correlation-id: 959e703d-ee9c-49be-8e7e-08d9da432d15
+x-ms-traffictypediagnostic: OSZPR01MB7892:EE_
+x-microsoft-antispam-prvs: <OSZPR01MB7892AB2EB9169BFE6EB3597EFD589@OSZPR01MB7892.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:3826;
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: J/PZDubbfE8PwuKlaHPYux3FIPtr1ZR+LHqnvgpjuE8jEknBEU6qxKL4xsd4KNGltWX1zQRZOy6Jvrjjx40LdVSYbv52EzAAbDX1cUM6F2SXQGDpV7OBCWJ2xKyZ341pWfqpX7EVil/POqDcdf9HcJjAd07PU2hr0GDVvuvlE5PfqNHHUylHb4m9pSZ62xdJBM9eDQgVQD66eQtRQKsUufCkjZjowM6WXiyvsJn+LjahEh8zcC3GQ4Pri3Os8kC/OD+JrajI9SxiiikSXFSlE4PvR/Vhc8IeEKqO3hXIhDd2lpLmBpbPzzG7L/C6edwgnG3AeuVlo6reFUDKvFj9/m68ZO5/Dqlxff/UE7+Lhfoi83Huxxgs/WwL0MYfsT50G3asoS7/ML6d1ejSfjKNh3KMAPg3iIi6kDqg3+dreJcLckkJ1EwyQUoy5izpmePYv4qNRf7ZonCh48Ok3UamtRKRvSCxG/urm0prqp465mdgNjNHSZl1yCnpgsguL4lN88f2ggJ9p2oA3w8euGf6pluL7asNR/mon3GT5bN6AdVPUL2G6+OeloosbihaDg+ugg6/D+UtwkSDot+kyGfnBy6EQ1DxY3AXjsG/edNiMD67B63XSoZ9phgnwaKostjcSkB4QHat+pOg5g/+ne5/4DcRhPz3GAq+XID1S3s+uu2ygvQ5TWwR6aM210d/ZOLKtF6qakqFjoIO2r4JiDMWKIXGcRl6AUaQ8Avg8I490y88qwS1YN7wzbaVqAnIovAqUGUIrHf5vWIkJLDTO/Hxwd6vA8HJ31PGo/naAvWS/xQ=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM8PR04MB8037.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(7916004)(366004)(8676002)(6506007)(2906002)(66946007)(33716001)(54906003)(5660300002)(44832011)(508600001)(186003)(86362001)(122000001)(316002)(82960400001)(38100700002)(71200400001)(76116006)(83380400001)(66476007)(8936002)(91956017)(66446008)(1076003)(66556008)(64756008)(6512007)(9686003)(6486002)(6916009)(4326008)(966005)(38070700005)(26005)(15650500001);DIR:OUT;SFP:1102;
+x-microsoft-antispam-message-info: FIqcqwnCMbfdBv95BS+w//8JvFbq0SVPQCv+YMBzSqvPnJ3uKADHxJI2VMTYqNSKdPS0S7yykEda1PdojTl4sijR6xvv6paApgZYbZdGsdzsDD4yJPB3QKAVqt1db99blVKY9vpJiVZoGZLMcYi66lYJH40vLKl7eot4dOpbMLeiHFsR1cNcqdL5l1bOOs5xnTSFUMXRSZXGpUSPtXfEMRM5+K7Sj3lnRJMlrvb301P6KHBimF2D0l5FX3hZvLNENtzGF5vDGkSugDgxp44HB/K/jJr824BTymw+KR56iVOMGBLlOBGjKVXBbF2OKLp7+WFnKwmz2qPBmfogrMXZQ08wEX9fScdRCu/CRSICM5qMlycmknB6OGmgx5hwRKmVrpX568zHNhOeQ8sRji3rS3MraRLmkCGQxzjApZJmxKSsbuc5mOHY2Qfy3Etbc/MZ+Bhac1gIRv6RIMeg/E/waUaI3iJR10D/CVmU3IH1tmV2JrbtAAfKi/SCeMTIJ9DkB7HAQeS1chcFdgVjR9DYKLi0r30dFBQaCdaCr0xdlLGs0AuS2V93VHmsXcg6eruMoN9Ad/E3XsG6Uj+bvFVXhzN8E7T2OkkPRCYNZMlfbkjo+6XXFI9ieg4AQos6VJEXD7u5pulMoRceEbuWdXZEss1e56PskL0fDVsTIoBmekH5m4NkxkMJLPXGAzDp21oWfnk79gu4ukeLz0b08w7wNDAF/Tw0w5/obmdLDAnBwQzGO4cSLCQV8BCQOqV5AuUcip53t7D9T4h9UlUh5E/tAMEbo9+jeT1nNZUhQ9kyo/o=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB4427.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(38070700005)(4326008)(6506007)(2906002)(4744005)(186003)(8676002)(54906003)(5660300002)(110136005)(26005)(2616005)(91956017)(86362001)(316002)(8936002)(66946007)(122000001)(66556008)(33656002)(6512007)(82960400001)(66446008)(64756008)(66476007)(38100700002)(36756003)(85182001)(87266011)(71200400001)(508600001)(6486002)(76116006);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?080ix/N2aDFPOG/mCYYMscVEIkcBzqSn/hV6T0OhW7/7ZPEggM8XEZKBHwIS?=
- =?us-ascii?Q?my/90Tx358eFnK+4VI8PTsF2vLSAjZcrx9EO4/TiUwyv7wHyxSD300LqOtGF?=
- =?us-ascii?Q?cPK79a/44jdT+VeM0OozayJZzjgNXr3dS9alMfJtV7rUMQEBBlDCQcOj2hGQ?=
- =?us-ascii?Q?ql67be357+Uun67LJdAWKa//vo8In/tVmKFslUWhiY2+kc1Mc56kDdxMUCAh?=
- =?us-ascii?Q?mJgHNZ1t9k0+ctOBRhMD+KQJvAC0x1Flx3G7KUNLIuEQYAiOSCX+rh+xLd5f?=
- =?us-ascii?Q?AWVA6i27JSHWz8bTRvFyVp9+BCXqoivYVlCos627A9IJRUZSnmR7qTQf4l9f?=
- =?us-ascii?Q?lV3c7qhumliM8WitP4jtVR7huruBbUKuEWHW+t2xFQXyOlLiVf3K7GvI4xFF?=
- =?us-ascii?Q?BO4jREGuMI0Yc8GYcJ0e1FHx3kdGeNwpypvolI3VFbakd087zUZ8IKaGJ0YL?=
- =?us-ascii?Q?/8flfIJKOp1Zh0VWFcsyj3a6drphxv/FjJYf0yQroqxC1/jLE2vu4ONQyVul?=
- =?us-ascii?Q?zgmPZTjXoUzy01YwQkZMDC2AioUVs0JZm3904dbAKJxwTDjFtapSRUZHF5J3?=
- =?us-ascii?Q?ReThCecRx4iBkmZ/B800974SVBv6ibGax0NcE4qSvcu4z67TZfxYIrsF3+WI?=
- =?us-ascii?Q?PZ949dxjYguRBJK+uRhIoMc8XEHaM5ZX7KelRLRKMl+vtX8AvlZJim4BBXeb?=
- =?us-ascii?Q?jS0ASUibiggprwDf72DCtyXZrji7vGACtXeu7Cy22H1XLGnhLtM/D6vznczN?=
- =?us-ascii?Q?IbO3HxHm8qEt+BxWXF1PK6VNHly3Mf7kKB+2qyF/tz5r1rEkXfXiiVjfaKsq?=
- =?us-ascii?Q?RUi9iyKVT3n8HGBlDt5jI8TvET/CDH6ipPG3XQz2a6HNN/GVK7Gp6EICDvY2?=
- =?us-ascii?Q?1EE+3hDNxWR0m3ccHvb3AO9yr3dAd1fbaS13ZxVhCanOXKJVta5KAkes0H3s?=
- =?us-ascii?Q?5UrcTZ8IQ4Xa8m0MO7771M9N9GZju0sbjIawlBrmgG3pLOKnT6k5PXX3Td1c?=
- =?us-ascii?Q?SXfVvigUfjb1OhiXYoMwAwOp7U/wgd9T6jZ4Tnen13XHUs2Z7JbNsAkqUaTM?=
- =?us-ascii?Q?RJUPZScRHNgCYVNr0dWnpXvbrjiPGTr/m4fZSF98NfrlpHF24jFE0r/4suKt?=
- =?us-ascii?Q?uR5Vkjk1acrPmQWT3fZbAOYEU3dcK8R9gmfPDFP16rRKMDldMfgMpnJdKJdT?=
- =?us-ascii?Q?cyBQWuYNERDU3wk0rKowESEAKnRagbriujcwbdGXmRIID2lTrqeL8obxkeNC?=
- =?us-ascii?Q?oDqR26xR3ZmsPu8pkRb2o8I8O50pSiJCamkBVKOsW353XIl+Cu/YzaRhlXEF?=
- =?us-ascii?Q?ZGnLLIs/FRvibyG8qlhZFZKtUYUWPrMsxWrcdhCqIvT1VUomQNQY1G74a3fu?=
- =?us-ascii?Q?VRgExyiXyKK1tu/saBdZxvzToBZ6Ip8DA737+zz+HqUt6J1icDf7RuJiIPBW?=
- =?us-ascii?Q?HRGpSkMptn3ZcH8L4aNPJJpN9YIDoqmtNWxjT9HkuYQAsE1R44GmRuxJ012n?=
- =?us-ascii?Q?uIRWu2Lw1Sof2NKq09D+pLKFepPoJwBRbP68g32i4C2Bd7JiqoT+v2kbNov2?=
- =?us-ascii?Q?5AWpPF7EbXqCs+nmrCsgDW9nPnbp0eHMemgzLtnv4X2nBFnJ/lge+sTImOb1?=
- =?us-ascii?Q?FyW3nR78LQK5l72wfVUjyV/KzldXcTixguM8au9kch5TYHVwDXK+eDQA5Xzx?=
- =?us-ascii?Q?RU/vMRV82Esp+8US6+bFG7KahkY=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <C7FF0C3B77DD2145A85D89455E699267@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+x-ms-exchange-antispam-messagedata-0: =?gb2312?B?ZkRMT3dwUENjSFdTczh0NVFVWWcvc21VcWV3WVptckhsUGZkalNkcVVETjNN?=
+ =?gb2312?B?V05rc3RkT0tHWlU1N00rRWZoZXRzU3FUNzZ6bWxWU3NOQlJoWnVFK2JNMSs2?=
+ =?gb2312?B?ZTk2enlqTDN2VkpFUTFZU0RlRXExQy9qWlY2U2tWM245alJiWG5JOU15THBq?=
+ =?gb2312?B?TldUY1pINklzMXBtRlZVeVN4WVRiTG5QREFGcG9OcCtvNXhzSGZXd1NONWRv?=
+ =?gb2312?B?ekFKUmpOWTMycTVLaXBLbTh0U2Z2RUpNcld4VHE2SFVKUnlpQmVvQnkzbW54?=
+ =?gb2312?B?ZVA3bXhsbHhYK0FoSDJlS1NsMStBaG9qZ1plRU9RMGhoTHdZZHdGMUFsS3Qv?=
+ =?gb2312?B?R09FOXZHSlp4TkNGa3U0K3lCaEcvTjYycXBQRHErbXI4aEtqVUhIWDg0dXQ4?=
+ =?gb2312?B?MnNUcXZhOE9xbzhSVVpsdUpGc0QwcktQQXBzb3lwOFZUeFd4UkYwTE11ZVhF?=
+ =?gb2312?B?d2VFck55azNtR0lCQXA3Y05sMDNuK0xlSXpJWGhqZWFJTEFBbkhpZ2Y5K2dl?=
+ =?gb2312?B?KzA4cko5ZWNZb2RQUjFmQkk4OFBSWmZ4WmdmR1grQk92MVFkUkpEaXBPQmdE?=
+ =?gb2312?B?ZHZGVXJOL094Ykh6Y3czZzdxaWlFK3VNYUdPWGt6NjBSOE4rNmw3elVGZ2dV?=
+ =?gb2312?B?MzR4NmZVSnJvcXF4SVExdDM3cU91dFVRTm1kVkRQM3NLSFJ6SldjNzRNdTFS?=
+ =?gb2312?B?YWlGUVdISFhUUEYwOUQzYXZpT1BkRFZrSi9WcklxSkJ4VWdKbi9xUlhHUjQ3?=
+ =?gb2312?B?SW80ZkM1bUxlRlowNXpvQ1dSWGpzbDBzbWUrMWlaWEw2UkhrQUUzQW9YRGEw?=
+ =?gb2312?B?UFZNYWQzWXJjcFFuckhISXFpSmk0TEJXUWtVNXUvNExEWjkyQTUwVVp3ajYx?=
+ =?gb2312?B?UGY4dDI5ck1yOGtPMGcvZkZxTXBaUnVGN0dyZ3Jzck1jbUtPcUxmM3hUUmZu?=
+ =?gb2312?B?Z1FNNlZFUm5Pa3RCaGVQamxScnBjdmwxUGYyeW1ETk1SZVh1OGlTSVpRWWE2?=
+ =?gb2312?B?Mm5VQlNVUGlYZG1JaVVLcmROQUhubWgvVEZZVFJPK3dvRnU0UzlNTEZpU0F4?=
+ =?gb2312?B?dDVsallnNG90TGJKbk9qU2xmN0tWbDM1U0UxUEMxcTBsa2hteUk4MlBFQ2NK?=
+ =?gb2312?B?WWhhcEs0Tk1TaENESjVFckh6ajM4bUVndVdnU28wWVZNUzlWV21EVXZjYmht?=
+ =?gb2312?B?T2N5emRvY2p4ZDZmNG5mSmNGTVNCWXhRcUdiN3d5UnMrNWpTKzBvZUMxcnUz?=
+ =?gb2312?B?TnRwd2VIMCtEd20rUTBYaEkxUUo5VUxFaGZBL25OY3NpS3Y5UzMySzJaU3Vy?=
+ =?gb2312?B?dVBkMmplL0JkRy9GZFpVcHBiOVUwUXFvRjlqT0Rvc000TGl0clhndGwzWmIy?=
+ =?gb2312?B?L3BOcTNLTWR0NGhMZnFoamdEVEVCN0twenlkcjRJL2dZSFJWcHVXOG9EbVNF?=
+ =?gb2312?B?aUtYVjhKNlZYUjN3NEVyYXZMd1FBTnRiQi9HbnVwZEpZckxwZGJxK2R0ZlJN?=
+ =?gb2312?B?ak9zTWRNaW5pUllXQWdTZ0UyQmVIUmVJMndDcU1lNE5WV256emJCUVJZRzJ3?=
+ =?gb2312?B?UFBnRjlIYmNhd0Fpd1VyUDVMWnlxakg4b2ZFRjNBRlE3QWR1Z2YyZU8xdkdm?=
+ =?gb2312?B?THhjcmo3SysxbnAxbTNGQXNnS0dINEQxT29jL2M3QWx5VnJRMFBKRDgvTzZW?=
+ =?gb2312?B?SmNXN05PZTE2YkpMeFNVc3RhdG1SUE5TeHowbzFhZ01xNTk3YUZkYU8vbHMw?=
+ =?gb2312?B?NHAzM1NFWEVQczVrNFhkTmN3dVZzV3JxYmFFTG1YQm4zaEtSb3NnbW91eWxh?=
+ =?gb2312?B?TXVaZkE1QzlwYXFFTm52QzVoY25uUTNLblNlUUF5SlQvd3hjdVNGZFFVQzJ1?=
+ =?gb2312?B?eGg0a0tFa1phb3hiUmlCc2FtVTFUQ252Zmx3VkxteFdobk00TG1yRkc5TE10?=
+ =?gb2312?B?bWtRTXdLK2xHd1pHaXdyVlRvM1FaYWJyMU54bzVsd0FCZ2xZR1EySUlETjFv?=
+ =?gb2312?B?dlVseHVUcWoxd3BoZWJlZlh3ak1UaS9DQWxCNG16QTkyQ0YxWjMzQXFCaXZs?=
+ =?gb2312?B?bmpydncvQWhuZVVYeEdWQ2F4WTVpeURRRHdDamRPV21IUW11eThVa3YvVldS?=
+ =?gb2312?B?bzlRdnN2NHNFdHJLMjNXZUIxNHlHTG1xOEs4a1FXTXdMUXZ5dWZsTFUzUk5i?=
+ =?gb2312?B?em5Ibi9qUW0yUmFtZ2VsdWxjMC9TbU0wcTlpenBoYXpFNlhsM3JPbmgzcnM1?=
+ =?gb2312?Q?Kj4ka0cAqToKehJaLy6L/cqGz58SV4tIMeDbNzUwRQ=3D?=
+Content-Type: text/plain; charset="gb2312"
+Content-ID: <FF9358396A0FE845AA651CDCF22AE6E3@jpnprd01.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
+X-OriginatorOrg: fujitsu.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM8PR04MB8037.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 28264d10-66b7-4aae-576f-08d9da3ccff4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jan 2022 04:41:37.0645
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB4427.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 959e703d-ee9c-49be-8e7e-08d9da432d15
+X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jan 2022 05:27:10.3062
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 5+SZYVCRb27nyKbs3eGXGNQ6WVu7T+PdseRptugIQ4z6vmsAYvSaP/ogpJLdSPQTfPujhRawV9Kv4OGx1Eo3TSTj24/D6Swcqnz9Q0Xwods=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR04MB7472
+X-MS-Exchange-CrossTenant-userprincipalname: ZRvZX3w6Ez0WhdRFVjgMeGzG7nvfiafPx7yaoyXB9I8dq1tmtZR7KPm8/3I+2nwNrU0kZDPcUBbYRYfTWM5B/U8hZfT5KtfJlvui3HOnilc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSZPR01MB7892
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Filipe, thank you for your review.
-
-On Jan 17, 2022 / 17:08, Filipe Manana wrote:
-> On Mon, Jan 17, 2022 at 09:57:05AM +0900, Shin'ichiro Kawasaki wrote:
-> > Test quota disable during btrfs balance and confirm it does not cause
-> > kernel hang. This is a regression test for the problem reported to
-> > linux-btrfs list [1]. The hang was recreated using the test case and
-> > memory backed null_blk device with 5GB size as the scratch device.
-> >=20
-> > [1] https://lore.kernel.org/linux-btrfs/20220115053012.941761-1-shinich=
-iro.kawasaki@wdc.com/
-> >=20
-> > Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> > ---
-> >  tests/btrfs/255     | 42 ++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/255.out |  2 ++
-> >  2 files changed, 44 insertions(+)
-> >  create mode 100755 tests/btrfs/255
-> >  create mode 100644 tests/btrfs/255.out
-> >=20
-> > diff --git a/tests/btrfs/255 b/tests/btrfs/255
-> > new file mode 100755
-> > index 00000000..16b682ca
-> > --- /dev/null
-> > +++ b/tests/btrfs/255
-> > @@ -0,0 +1,42 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 Western Digital Corporation or its affiliates.
-> > +#
-> > +# FS QA Test No. btrfs/255
-> > +#
-> > +# Confirm that disabling quota during balance does not hang
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto qgroup
->=20
-> Should have "balance" as well.
-
-Yes, will add it.
-
->=20
-> > +
-> > +# real QA test starts here
-> > +_supported_fs btrfs
-> > +_require_scratch
-> > +
-> > +_scratch_mkfs >> $seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +# Fill 40% of the device or 2GB
-> > +fill_percent=3D40
-> > +max_fillsize=3D$((2*1024*1024*1024))
->=20
-> If the test requires some minimum size, than it should call
->=20
->    _require_scratch_size <size in KB>
-
-This test case does not have its specific minimum size requirement. The han=
-g
-was observed even with a device which has btrfs minimum size 109MB.
-
->=20
-> Also please make it a bit more readable by adding a single space before
-> and after each *, i.e. 2 * 1024 * 1024 ... instead of 2*1024*1024.
->=20
-> > +
-> > +devsize=3D$(($(_get_device_size $SCRATCH_DEV) * 512))
-> > +fillsize=3D$((devsize * fill_percent / 100))
-> > +((fillsize > max_fillsize)) && fillsize=3D$max_fillsize
-> > +
-> > +fs=3D$((4096*1024))
->=20
-> Same here.
->=20
-> > +for ((i=3D0; i * fs < fillsize; i++)); do
->=20
-> And here (i =3D 0 vs i=3D0).
-
-Will reflect the comments above.
-
->=20
-> > +	dd if=3D/dev/zero of=3D$SCRATCH_MNT/file.$i bs=3D$fs count=3D1 \
-> > +	   >> $seqres.full 2>&1
-> > +done
-> > +echo 3 > /proc/sys/vm/drop_caches
->=20
-> Why the drop_caches? Please add a comment explaining why it is needed.
-
-I've noticed that this drop cache is not required. I referred btrfs/115 for
-quota enable/disable test which has the drop_cache, and added it to this ne=
-w
-test case without clear reason. The hang can be recreated without this
-drop_cache. Will remove it.
-
->=20
-> > +
-> > +# Run btrfs balance and quota enable/disable in parallel
-> > +_run_btrfs_balance_start $SCRATCH_MNT >> $seqres.full &
-> > +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-> > +$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
->=20
-> This seems very timing sensitive.
-> It would be a better stress test if we do the enable/disable in a loop,
-> say 10 or 20 iterations, while another process keeps running balance in
-> parallel and then is killed after the main process finishes the loop of
-> enable/disable quotas.
-
-Thanks. Will implement this idea to v2.
-
---=20
-Best Regards,
-Shin'ichiro Kawasaki=
+b24gMjAyMi8xLzE4IDExOjU2LCBUaGVvZG9yZSBUcydvIHdyb3RlOg0KPiBPbiBUdWUsIEphbiAx
+OCwgMjAyMiBhdCAwMjo0MzoyNkFNICswMDAwLCB4dXlhbmcyMDE4Lmp5QGZ1aml0c3UuY29tIHdy
+b3RlOg0KPj4+IFlvdSdyZSByaWdodCBvZiBjb3Vyc2UsIGJ1dCBvdXQgb2YgY3VyaW9zaXR5LCB3
+aGljaCBDIGxpYnJhcnkgYXJlIHlvdQ0KPj4+IHVzaW5nPw0KPj4gSSB1c2UgZ2xpYmMtMi4zNC4N
+Cj4NCj4gSG1tLCBvay4gIEknbSB1c2luZyBnbGliYyAyLjMxLCBhbmQgaW4gdGhpcyBwYXJ0aWN1
+bGFyIHByb2dyYW0sIGVycm5vDQo+IHNob3VsZG4ndCBoYXZlIGJlZW4gc2V0IGJ5IGFueSBwcmlv
+ciBzeXN0ZW0gY2FsbC4gIEknbSBndWVzc2luZyBtYXliZQ0KPiBpdCB3YXMgc29tZXRoaW5nIGlu
+IGNydDAgd2hpY2ggZW5kZWQgdXAgc2V0dGluZyBlcnJubz8NCkl0IG1heWJlIGEgZ2xpYmMgYnVn
+Lg0KSSBjYyBnbGliYyBtYWlsaW5nIGxpc3QgYW5kIHNlZSB3aGV0aGVyIHRoZXkgaGF2ZSBtZXQg
+dGhpcyBwcm9ibGVtLg0KDQpARmxvcmlhbg0KDQpOb3csIEkgdXNlIGdsaWJjLTIuMzQgYW5kIHJ1
+biB0aGUgZm9sbG93aW5nIHByb2dyYW1bMV0gYnV0IHRoZSBlcnJubyBpcyANCm5vdCAwIGluIHRo
+ZSBiZWdpbm5pbmcuIFNvIGlzIHRoaXMgYSBrbm93biBidWcgb24gZ2xpYmMtMi4zNChUaGVvZG9y
+ZSANCmRvZXNuJ3QgbWVldCB0aGlzIHByb2JsZW0gb24gZ2xpY2ItMi4zMSk/DQoNClsxXWh0dHBz
+Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9mcy94ZnMveGZzdGVzdHMtZGV2LmdpdC90cmVlL3Ny
+Yy9leHQ0X3Jlc2l6ZS5jDQoNCkJlc3QgUmVnYXJkcw0KWWFuZyBYdQ0KPg0KPiAJCQkJCQktIFRl
+ZA0K
