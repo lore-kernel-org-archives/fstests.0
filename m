@@ -2,64 +2,147 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C692C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Jan 2022 08:24:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 545C7C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Jan 2022 10:39:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349382AbiASIYE (ORCPT
+        id S1353262AbiASKjT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Jan 2022 03:24:04 -0500
-Received: from mail-out.m-online.net ([212.18.0.10]:56884 "EHLO
-        mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349923AbiASIYE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jan 2022 03:24:04 -0500
-Received: from frontend01.mail.m-online.net (unknown [192.168.8.182])
-        by mail-out.m-online.net (Postfix) with ESMTP id 4JdzFF3YPyz1sF5C;
-        Wed, 19 Jan 2022 09:24:01 +0100 (CET)
-Received: from localhost (dynscan1.mnet-online.de [192.168.6.70])
-        by mail.m-online.net (Postfix) with ESMTP id 4JdzFF2MGJz1qqkD;
-        Wed, 19 Jan 2022 09:24:01 +0100 (CET)
-X-Virus-Scanned: amavisd-new at mnet-online.de
-Received: from mail.mnet-online.de ([192.168.8.182])
-        by localhost (dynscan1.mail.m-online.net [192.168.6.70]) (amavisd-new, port 10024)
-        with ESMTP id PcLP-pvQgxJv; Wed, 19 Jan 2022 09:24:00 +0100 (CET)
-X-Auth-Info: VsrE9BWSiI+5lITepI872j6mp4mTr9XqXyeTS4EWrl0oejnqR3n4vvNwlkQdHfaS
-Received: from igel.home (ppp-46-244-165-91.dynamic.mnet-online.de [46.244.165.91])
+        Wed, 19 Jan 2022 05:39:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49036 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240089AbiASKjT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jan 2022 05:39:19 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22490C061574;
+        Wed, 19 Jan 2022 02:39:19 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.mnet-online.de (Postfix) with ESMTPSA;
-        Wed, 19 Jan 2022 09:24:00 +0100 (CET)
-Received: by igel.home (Postfix, from userid 1000)
-        id 068582C029B; Wed, 19 Jan 2022 09:23:59 +0100 (CET)
-From:   Andreas Schwab <schwab@linux-m68k.org>
-To:     xuyang2018.jy@fujitsu.com
-Cc:     Theodore Ts'o <tytso@mit.edu>,
-        "fweimer@redhat.com" <fweimer@redhat.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "libc-alpha@sourceware.org" <libc-alpha@sourceware.org>
-Subject: Re: [PATCH] src/ext4_resize.c: set errno to 0 before the strtoull call
-References: <1642405014-3287-1-git-send-email-xuyang2018.jy@fujitsu.com>
-        <YeYmzJG5M0y9BcMc@mit.edu> <61E6298D.80006@fujitsu.com>
-        <YeY6Uh8I7RlsCicw@mit.edu> <61E64FED.2010906@fujitsu.com>
-        <87fspl6s44.fsf@igel.home> <61E772A4.3030608@fujitsu.com>
-X-Yow:  I just bought FLATBUSH from MICKEY MANTLE!
-Date:   Wed, 19 Jan 2022 09:23:59 +0100
-In-Reply-To: <61E772A4.3030608@fujitsu.com> (xuyang2018.'s message of "Wed, 19
-        Jan 2022 02:07:30 +0000")
-Message-ID: <87a6fs876o.fsf@igel.home>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/28.0.91 (gnu/linux)
+        by ams.source.kernel.org (Postfix) with ESMTPS id D75A9B81982;
+        Wed, 19 Jan 2022 10:39:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 29F24C340E1;
+        Wed, 19 Jan 2022 10:39:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1642588756;
+        bh=sUU1m66ucS+EJS/ZuOggW83BO9GEKPEHJ9OLL/hJ67M=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Bot20V0fxHv8Sx6EV3J7dC5IbTU8VZUX5u9u1q6AynmDcGYgHBgZwVlpYNs/BS8d+
+         uRNapC7od+1qfdgRJs3yRyGpZhfbRAB3Eb3qvh07vGemb+sYrKQLm23nPrQOJX42af
+         UWYWPNT3ll27Yq0glKZV7TuQxOtfNCqxO2BBlYILCQZbRT6hXFWnW2YfX8lsJPRVkm
+         SR5VwxUrCdSiylm1YpL6L7Pfp4Bjr9DA8uBfC3EOZZP1fpGEO++tixJyr7Vn3ZgKNC
+         5osgBZxZkKAV3FWtp9PdwlD8s0tOGn169oAOFyhpA31OI0Oy/bNk8L/6Weweh41jRJ
+         PAWJMiPaLNVJg==
+Date:   Wed, 19 Jan 2022 10:39:09 +0000
+From:   Filipe Manana <fdmanana@kernel.org>
+To:     Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>
+Subject: Re: [PATCH v3] btrfs/255: add test for quota disable in parallel
+ with balance
+Message-ID: <YefqTctnGSbORJpy@debian9.Home>
+References: <20220119022531.990072-1-shinichiro.kawasaki@wdc.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220119022531.990072-1-shinichiro.kawasaki@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Jan 19 2022, xuyang2018.jy@fujitsu.com wrote:
+On Wed, Jan 19, 2022 at 11:25:31AM +0900, Shin'ichiro Kawasaki wrote:
+> Test quota disable during btrfs balance and confirm it does not cause
+> kernel hang. This is a regression test for the problem reported to
+> linux-btrfs list [1]. The hang was recreated using the test case and
+> memory backed null_blk device with 5GB size as the scratch device.
+> 
+> [1] https://lore.kernel.org/linux-btrfs/20220115053012.941761-1-shinichiro.kawasaki@wdc.com/
+> 
+> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 
-> I just tried, the errno is 1 before open syscall.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Worksforme.
+Looks good now, thanks.
 
--- 
-Andreas Schwab, schwab@linux-m68k.org
-GPG Key fingerprint = 7578 EB47 D4E5 4D69 2510  2552 DF73 E780 A9DA AEC1
-"And now for something completely different."
+> ---
+> Changes from v2:
+> * Added wait for balance operation finish
+> 
+> Changes from v1:
+> * Put more stress by repeating quota enable/disable and btrfs balance
+> * Reflected other comments on the list
+> 
+>  tests/btrfs/255     | 50 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/255.out |  2 ++
+>  2 files changed, 52 insertions(+)
+>  create mode 100755 tests/btrfs/255
+>  create mode 100644 tests/btrfs/255.out
+> 
+> diff --git a/tests/btrfs/255 b/tests/btrfs/255
+> new file mode 100755
+> index 00000000..74aa9769
+> --- /dev/null
+> +++ b/tests/btrfs/255
+> @@ -0,0 +1,50 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Western Digital Corporation or its affiliates.
+> +#
+> +# FS QA Test No. btrfs/255
+> +#
+> +# Confirm that disabling quota during balance does not hang
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto qgroup balance
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_require_scratch
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Fill 40% of the device or 2GB
+> +fill_percent=40
+> +max_fillsize=$((2 * 1024 * 1024 * 1024))
+> +
+> +devsize=$(($(_get_device_size $SCRATCH_DEV) * 512))
+> +fillsize=$((devsize * fill_percent / 100))
+> +((fillsize > max_fillsize)) && fillsize=$max_fillsize
+> +
+> +fs=$((4096 * 1024))
+> +for ((i = 0; i * fs < fillsize; i++)); do
+> +	dd if=/dev/zero of=$SCRATCH_MNT/file.$i bs=$fs count=1 \
+> +	   >> $seqres.full 2>&1
+> +done
+> +
+> +# Run btrfs balance and quota enable/disable in parallel
+> +_btrfs_stress_balance $SCRATCH_MNT >> $seqres.full &
+> +balance_pid=$!
+> +echo $balance_pid >> $seqres.full
+> +for ((i = 0; i < 20; i++)); do
+> +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+> +	$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
+> +done
+> +kill $balance_pid &> /dev/null
+> +wait
+> +# wait for the balance operation to finish
+> +while ps aux | grep "balance start" | grep -qv grep; do
+> +	sleep 1
+> +done
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/255.out b/tests/btrfs/255.out
+> new file mode 100644
+> index 00000000..7eefb828
+> --- /dev/null
+> +++ b/tests/btrfs/255.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 255
+> +Silence is golden
+> -- 
+> 2.33.1
+> 
