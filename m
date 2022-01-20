@@ -2,153 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E727C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jan 2022 10:20:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EE63C43219
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jan 2022 11:05:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359810AbiATKUz (ORCPT
+        id S230263AbiATLFX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Jan 2022 05:20:55 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40121 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232937AbiATKUz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jan 2022 05:20:55 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1642674054;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=gdoMznUoQshM/tm/E+npk4KemjnJfvqDAHaONy/08JA=;
-        b=HKTDRJ5+FvFonIl+R42ZNVjpcDnBFPrM+4CxzpIXeL9M+EVESJEfnYCZjxmTzSoyKjd9nW
-        c5v3GjGWx8Gb0GhC/cjKRo9rgOxjKhUcEu+N8OMRXI38OzN2OlNjozuI5FsEpOxIVcqwlG
-        xjVREOU1kvsS6nuCpyYTZ+8x94NP96I=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-56-v1pGC8SZMyK2CSp7e8szrw-1; Thu, 20 Jan 2022 05:20:51 -0500
-X-MC-Unique: v1pGC8SZMyK2CSp7e8szrw-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1A89D104FC17;
-        Thu, 20 Jan 2022 10:20:35 +0000 (UTC)
-Received: from localhost.localdomain (unknown [10.40.194.242])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 635CE752B0;
-        Thu, 20 Jan 2022 10:20:34 +0000 (UTC)
-From:   Lukas Czerner <lczerner@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org
-Subject: [PATCH] ext4/053: Test remount without changing mount options
-Date:   Thu, 20 Jan 2022 11:20:25 +0100
-Message-Id: <20220120102025.42735-1-lczerner@redhat.com>
+        Thu, 20 Jan 2022 06:05:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41304 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230386AbiATLE7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jan 2022 06:04:59 -0500
+Received: from mail-ua1-x936.google.com (mail-ua1-x936.google.com [IPv6:2607:f8b0:4864:20::936])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E8BCC061401
+        for <fstests@vger.kernel.org>; Thu, 20 Jan 2022 03:04:59 -0800 (PST)
+Received: by mail-ua1-x936.google.com with SMTP id w21so10075537uan.7
+        for <fstests@vger.kernel.org>; Thu, 20 Jan 2022 03:04:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=devo.com; s=google;
+        h=mime-version:from:date:message-id:subject:to
+         :content-transfer-encoding;
+        bh=bn7mqHIi6Rs0C9Fu2E6W0TZYU8fmzSKBgsdNjYJlIMc=;
+        b=MsJpcvm4zlUeH7gl6cAY0hr4RGy9pit7m0tBRzXYigsJYj88eA3wp/IIT7VdBfp9hX
+         /ognALq5GcsofU/M5MRL/IGRtEBSxpb0c9PXeVrVznxjqccW6Kos4oy5SkxqsFsuyxCK
+         wvhacNfrJvKtTB9eki8M3UppIzzwtCGVDF/fu8SxHvpy8HT0r7+qD8xuAKIBfBhJZpL9
+         hLKEH4UHJpqrpJaTTFAhWybRPvsgcGLMYYsKiYUgBbpgoMmNgJzPewA22LhouS/ru2Mt
+         zRdcGrZ08cajkxSTqj2sLcVmLpmfS1BHMCuJkF7fyt883H/JDKccwNN/j5sgFNajwa0B
+         4VjQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to
+         :content-transfer-encoding;
+        bh=bn7mqHIi6Rs0C9Fu2E6W0TZYU8fmzSKBgsdNjYJlIMc=;
+        b=5qCTbvwzMRggVKKqLkSTO468fxqkh7A8Vai/5fm+AHwcZ/MDI0kt0AdBm3cYZ3/YRR
+         s4Ud9VJ44N4+8nf3zrCmZTJmw9OEUrFwhGWfUaUYbSZ8oyv0fhHbR/yvl/6tOK2ELc2W
+         ntEKlvEjC401akNbqLaivHwbqwN0ldjxSRpFeWzGH+Gm2eQl8cLsvLDtkN0f6ndqW3fs
+         68XBMXn8LLSQFArqvkzi1YCWzdJE+YaDgljP+qaN2g9L+CKTQx/Iky/8XZa7bs/8wapk
+         BqUTH6DjTtKFTGiLgzB4RHwTYSLrWAZNoOdsMaCDqjQHgDTzfyD5yYCZRDMbraTbgvdP
+         ZQNA==
+X-Gm-Message-State: AOAM530yQjzuLswjhGyZ/1JtHRIIrAoWa3t0OFUXPEtEsrGAcYnJKgRK
+        B2ZaTFpttVD6LOSMiLzojcMK87yPKc4SG0ZXRAbTt/K6xfsLg6WQvlrRfmWIHsx/wkZlakDwe6x
+        6T2LZ0t1qeiIzULZ/2gDAVzF627mfwKlV+i67
+X-Google-Smtp-Source: ABdhPJwBgCLkEEuyRQijjJ4fBU75UxFYzUI42MF8zZA+pIVEOm3/JNOuRQ+tgLT72avQCeQHKx0Ms4eaF9GkHLyQvAg=
+X-Received: by 2002:ab0:6f13:: with SMTP id r19mr7455426uah.132.1642676698425;
+ Thu, 20 Jan 2022 03:04:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+From:   Andrea Tomassetti <andrea.tomassetti@devo.com>
+Date:   Thu, 20 Jan 2022 12:04:47 +0100
+Message-ID: <CAG2S0o-wJc-2_wm=35mE5Lt0e4idXwb3g5ezc9=LdWrLHfRM_Q@mail.gmail.com>
+Subject: xfs/311 test pass but leave block device unusable
+To:     fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-With the recent ext4 mount api change we discovered a bugs that weren't
-caught by this test. It was triggered by remounting the file system
-either with the same mount options, or without specifying any mount
-options at all. In this case we would expect the original mount options
-to remain the same, however this was either not the case, or the remount
-failed.
+Hi all,
+I was using the (x)fstest utility on the Kernel 5.11 to try to
+reproduce some xfs-related issues:
+  INFO: task xfs-conv/dm-3:1360 blocked for more than 120 seconds.
+  Workqueue: xfs-conv/dm-3 xfs_end_io [xfs]
+   Call Trace:
+    __schedule+0x44c/0x8a0
+    schedule+0x4f/0xc0
+    xlog_grant_head_wait+0xb5/0x1a0 [xfs]
+    xlog_grant_head_check+0xe1/0x100 [xfs]
 
-Add a remount test after a regular mount. Remount once with specifying
-the original mount option and remount second time without specifying
-anything. Test the active options after each test.
+When I realized that xfs test n. 311 was passing correctly but every
+further attempt to use the block device (e.g. mount it) was failing.
+The issue is reproducible after reboot.
 
-Additionally include all the combinations of data= options in the
-remount test for the sake of completeness.
+Test passed:
+  ./check xfs/311
+  FSTYP         -- xfs (non-debug)
+  PLATFORM      -- Linux/x86_64 test 5.11.0-1021-aws
+#22~20.04.2-Ubuntu SMP Wed Oct 27 21:27:13 UTC 2021
+  MKFS_OPTIONS  -- -f /dev/xvdz
+  MOUNT_OPTIONS -- /dev/xvdz /home/test/z
 
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
----
- tests/ext4/053 | 57 +++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 56 insertions(+), 1 deletion(-)
+  xfs/311 25s ...  25s
+  Ran: xfs/311
+  Passed all 1 tests
 
-diff --git a/tests/ext4/053 b/tests/ext4/053
-index eaa02508..e1e79592 100755
---- a/tests/ext4/053
-+++ b/tests/ext4/053
-@@ -77,6 +77,10 @@ kernel_gte 5.12 || _notrun "This test is only relevant for kernel versions 5.12
- 
- IGNORED="remount,defaults,ignored,removed"
- CHECK_MINFO="lazytime,noatime,nodiratime,noexec,nosuid,ro"
-+
-+# List of options that can't be used for remount even if the argument
-+# is not changed
-+CANT_REMOUNT="defaults,remount,abort,journal_path,journal_dev,usrjquota,grpjquota,jqfmt"
- ERR=0
- 
- test_mnt() {
-@@ -170,6 +174,54 @@ do_mnt() {
- 		print_log "(failed mount)"
- 	fi
- 
-+	if [ $ret -ne 0 ] || [ -z "$1" ]; then
-+		return $ret
-+	fi
-+
-+	# Skip options that can't be remounted even if the argument
-+	# is not changed
-+	(
-+	IFS=','
-+	for option in $1; do
-+		opt=${option%=*}
-+		if echo $CANT_REMOUNT | grep -w $opt; then
-+			exit 1
-+		fi
-+		# Skip the remount if we have data=journal on ext3 because
-+		# it will set nodioread_nolock which is not supported on ext3
-+		# hence remount will fail. Yes it is broken.
-+		if [[ $fstype == "ext3" ]] && [[ $option == "data=journal" ]]; then
-+			exit 1
-+		fi
-+	done
-+	) > /dev/null 2>&1
-+	[ $? -eq 1 ] && return 0
-+	print_log "(going to remount options $1)"
-+
-+	# Just remount with original mnt options, don't add anything at all
-+	simple_mount -o remount,$1 $SCRATCH_MNT
-+	ret=$?
-+	if [ $ret -eq 0 ]; then
-+		test_mnt $1 $2
-+		ret=$?
-+		[ $ret -ne 0 ] && print_log "(not found after remount)"
-+	else
-+		print_log "(failed remount)"
-+	fi
-+
-+	[ $ret -ne 0 ] && return $ret
-+
-+	# Plain remount without specifying any mount options
-+	simple_mount -o remount $SCRATCH_MNT
-+	ret=$?
-+	if [ $ret -eq 0 ]; then
-+		test_mnt $1 $2
-+		ret=$?
-+		[ $ret -ne 0 ] && print_log "(not found after plain remount)"
-+	else
-+		print_log "(failed plain remount)"
-+	fi
-+
- 	return $ret
- }
- 
-@@ -556,8 +608,11 @@ for fstype in ext2 ext3 ext4; do
- 
- 	if [[ $fstype != "ext2" ]]; then
- 		remount noload data=journal norecovery
--		not_remount data=ordered data=journal
-+		not_remount data=journal data=ordered
- 		not_remount data=journal data=writeback
-+		not_remount data=ordered data=journal
-+		not_remount data=ordered data=writeback
-+		not_remount data=writeback data=journal
- 		not_remount data=writeback data=ordered
- 	fi
- 
--- 
-2.31.1
+Fail:
+  # mount /dev/xvdz /home/test/z/
+    mount: /home/test/z: /dev/xvdz already mounted or mount point busy.
+    [ 2222.028417] /dev/xvdz: Can't open blockdev
+
+lsof does not show anything that is using either /dev/xvdz or /home/test/z
+
+Any idea why is this happening?
+
+The `xlog_grant_head_wait` race issue has been resolved in a later
+Kernel version, am I right?
+
+Best regards,
+Andrea
+
+--=20
+
+
+
+
+
+
+
+The contents of this email are confidential. If the reader of this=20
+message is not the intended recipient, you are hereby notified that any=20
+dissemination, distribution or copying of this communication is strictly=20
+prohibited. If you have received this communication in error, please notify=
+=20
+us immediately by replying to this message and deleting it from your=20
+computer. Thank you.=C2=A0Devo, Inc; arco@devo.com <mailto:arco@devo.com>;=
+=C2=A0=C2=A0
+Calle Est=C3=A9banez Calder=C3=B3n 3-5, 5th Floor. Madrid, Spain 28020
 
