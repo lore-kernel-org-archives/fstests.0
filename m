@@ -2,90 +2,153 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89DDDC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jan 2022 00:49:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E727C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jan 2022 10:20:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345135AbiATAtr (ORCPT
+        id S1359810AbiATKUz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Jan 2022 19:49:47 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:47480 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357980AbiATAtp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jan 2022 19:49:45 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        Thu, 20 Jan 2022 05:20:55 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40121 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232937AbiATKUz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jan 2022 05:20:55 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1642674054;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=gdoMznUoQshM/tm/E+npk4KemjnJfvqDAHaONy/08JA=;
+        b=HKTDRJ5+FvFonIl+R42ZNVjpcDnBFPrM+4CxzpIXeL9M+EVESJEfnYCZjxmTzSoyKjd9nW
+        c5v3GjGWx8Gb0GhC/cjKRo9rgOxjKhUcEu+N8OMRXI38OzN2OlNjozuI5FsEpOxIVcqwlG
+        xjVREOU1kvsS6nuCpyYTZ+8x94NP96I=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-56-v1pGC8SZMyK2CSp7e8szrw-1; Thu, 20 Jan 2022 05:20:51 -0500
+X-MC-Unique: v1pGC8SZMyK2CSp7e8szrw-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0040361529;
-        Thu, 20 Jan 2022 00:49:44 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58FD6C004E1;
-        Thu, 20 Jan 2022 00:49:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642639784;
-        bh=nmWTlKQBQfT3gKCNY9A5s22AhfewmRLot2G8joSGE60=;
-        h=Date:From:To:Cc:Subject:From;
-        b=nZQCYbeX5WD6XVqSB7hrnGIEmOd25Vihjsw/zlpGGgk8cMp5ZayiZWNHyNwQKP5Hj
-         DGeRV0Fi8q7RDm7O6s2DqWiF//2hlTMoi0SzL+tdlD5QK9c5sCMSJEdwf6pMVyUthm
-         NAAFsdhEcNIlIOSZx7P8L1ToOaXDoWt4ABNh+s/Bf9NTxVmjRATZQxvJmx1RFuyWn4
-         3xqPAvG4wj/gXAX8iv2ZJ//M9/pzPVFbGwbu96wTJxQnfHjeRWQhJ5JSSCHqcZfPFI
-         2oSuQ1c5Sf347ohuXr+EpLMbxbMJm188ESgRpvAt1KcmD4Kb/CTGjrU7L46QDyKwbS
-         /PIS3+1+KD/MQ==
-Date:   Wed, 19 Jan 2022 16:49:44 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs/107: fix formatting failures
-Message-ID: <20220120004944.GD13514@magnolia>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1A89D104FC17;
+        Thu, 20 Jan 2022 10:20:35 +0000 (UTC)
+Received: from localhost.localdomain (unknown [10.40.194.242])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 635CE752B0;
+        Thu, 20 Jan 2022 10:20:34 +0000 (UTC)
+From:   Lukas Czerner <lczerner@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org
+Subject: [PATCH] ext4/053: Test remount without changing mount options
+Date:   Thu, 20 Jan 2022 11:20:25 +0100
+Message-Id: <20220120102025.42735-1-lczerner@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+With the recent ext4 mount api change we discovered a bugs that weren't
+caught by this test. It was triggered by remounting the file system
+either with the same mount options, or without specifying any mount
+options at all. In this case we would expect the original mount options
+to remain the same, however this was either not the case, or the remount
+failed.
 
-Zorro Lang reported that the _scratch_mkfs_sized call in the new xfs/107
-fstest sometimes fails on more exotic storage due to insufficient log
-size on account of raid stripes, etc.   These are side effects of the
-filesystem being too small.
+Add a remount test after a regular mount. Remount once with specifying
+the original mount option and remount second time without specifying
+anything. Test the active options after each test.
 
-Change the filesystem size to 256M to avoid these problems, and change
-the allocstale parameters to use the same file size (16M) as before.
-Given that ALLOCSP produces stale disk contents pretty quickly this
-shouldn't affect the test runtime too much.
+Additionally include all the combinations of data= options in the
+remount test for the sake of completeness.
 
-Reported-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Lukas Czerner <lczerner@redhat.com>
 ---
- tests/xfs/107 |   10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ tests/ext4/053 | 57 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 56 insertions(+), 1 deletion(-)
 
-diff --git a/tests/xfs/107 b/tests/xfs/107
-index 6034dbc2..577094b2 100755
---- a/tests/xfs/107
-+++ b/tests/xfs/107
-@@ -22,7 +22,10 @@ _require_test
- _require_scratch
- _require_test_program allocstale
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index eaa02508..e1e79592 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -77,6 +77,10 @@ kernel_gte 5.12 || _notrun "This test is only relevant for kernel versions 5.12
  
--size_mb=32
-+# Create a 256MB filesystem to avoid running into mkfs problems with too-small
-+# filesystems.
-+size_mb=256
+ IGNORED="remount,defaults,ignored,removed"
+ CHECK_MINFO="lazytime,noatime,nodiratime,noexec,nosuid,ro"
 +
- # Write a known pattern to the disk so that we can detect stale disk blocks
- # being mapped into the file.  In the test author's experience, the bug will
- # reproduce within the first 500KB's worth of ALLOCSP calls, so running up
-@@ -39,9 +42,10 @@ _scratch_mount
- _xfs_force_bdev data $SCRATCH_MNT
- testfile=$SCRATCH_MNT/a
++# List of options that can't be used for remount even if the argument
++# is not changed
++CANT_REMOUNT="defaults,remount,abort,journal_path,journal_dev,usrjquota,grpjquota,jqfmt"
+ ERR=0
  
--# Allow the test program to expand the file to consume half the free space.
-+# Allow the test program to expand the file to 32MB.  If we can't find any
-+# stale blocks at that point, the kernel has probably been patched.
- blksz=$(_get_file_block_size $SCRATCH_MNT)
--iterations=$(( (size_mb / 2) * 1048576 / blksz))
-+iterations=$(( (size_mb / 16) * 1048576 / blksz))
- echo "Setting up $iterations runs for block size $blksz" >> $seqres.full
+ test_mnt() {
+@@ -170,6 +174,54 @@ do_mnt() {
+ 		print_log "(failed mount)"
+ 	fi
  
- # Run reproducer program and dump file contents if we see stale data.  Full
++	if [ $ret -ne 0 ] || [ -z "$1" ]; then
++		return $ret
++	fi
++
++	# Skip options that can't be remounted even if the argument
++	# is not changed
++	(
++	IFS=','
++	for option in $1; do
++		opt=${option%=*}
++		if echo $CANT_REMOUNT | grep -w $opt; then
++			exit 1
++		fi
++		# Skip the remount if we have data=journal on ext3 because
++		# it will set nodioread_nolock which is not supported on ext3
++		# hence remount will fail. Yes it is broken.
++		if [[ $fstype == "ext3" ]] && [[ $option == "data=journal" ]]; then
++			exit 1
++		fi
++	done
++	) > /dev/null 2>&1
++	[ $? -eq 1 ] && return 0
++	print_log "(going to remount options $1)"
++
++	# Just remount with original mnt options, don't add anything at all
++	simple_mount -o remount,$1 $SCRATCH_MNT
++	ret=$?
++	if [ $ret -eq 0 ]; then
++		test_mnt $1 $2
++		ret=$?
++		[ $ret -ne 0 ] && print_log "(not found after remount)"
++	else
++		print_log "(failed remount)"
++	fi
++
++	[ $ret -ne 0 ] && return $ret
++
++	# Plain remount without specifying any mount options
++	simple_mount -o remount $SCRATCH_MNT
++	ret=$?
++	if [ $ret -eq 0 ]; then
++		test_mnt $1 $2
++		ret=$?
++		[ $ret -ne 0 ] && print_log "(not found after plain remount)"
++	else
++		print_log "(failed plain remount)"
++	fi
++
+ 	return $ret
+ }
+ 
+@@ -556,8 +608,11 @@ for fstype in ext2 ext3 ext4; do
+ 
+ 	if [[ $fstype != "ext2" ]]; then
+ 		remount noload data=journal norecovery
+-		not_remount data=ordered data=journal
++		not_remount data=journal data=ordered
+ 		not_remount data=journal data=writeback
++		not_remount data=ordered data=journal
++		not_remount data=ordered data=writeback
++		not_remount data=writeback data=journal
+ 		not_remount data=writeback data=ordered
+ 	fi
+ 
+-- 
+2.31.1
+
