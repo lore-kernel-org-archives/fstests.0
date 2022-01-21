@@ -2,127 +2,240 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01E5EC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 Jan 2022 02:41:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6609C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 Jan 2022 10:20:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348469AbiAUClV (ORCPT
+        id S1379958AbiAUKUi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Jan 2022 21:41:21 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:25293 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1348457AbiAUClU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jan 2022 21:41:20 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1642732879;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=CJuReAjF5j37uF8H9Pf27hboT1IaAGGe94dxkufb4lU=;
-        b=Sm0aVzsADdvAoDDKjw2rN6cR3Qyb/a1OpN6z8FcTKlkV9s+ahYxPS3PQ7+blyD2NP2bB08
-        ik8w7hSUqGWISUqO/OTgBJig39LvK3o01CWwmWAb+Li4bcD5JTJ+Y/CdtNUne0BoJq0Fd3
-        DuRdT9e29QIyVcroJ62ujOkS8KzG41o=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-135-sWjsTUcPOOyf89z1Ti21Xg-1; Thu, 20 Jan 2022 21:41:18 -0500
-X-MC-Unique: sWjsTUcPOOyf89z1Ti21Xg-1
-Received: by mail-pg1-f197.google.com with SMTP id f18-20020a63dc52000000b0034d062c66a0so3818618pgj.17
-        for <fstests@vger.kernel.org>; Thu, 20 Jan 2022 18:41:17 -0800 (PST)
+        Fri, 21 Jan 2022 05:20:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44470 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1379976AbiAUKUf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jan 2022 05:20:35 -0500
+Received: from mail-vk1-xa34.google.com (mail-vk1-xa34.google.com [IPv6:2607:f8b0:4864:20::a34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ABEFC061401
+        for <fstests@vger.kernel.org>; Fri, 21 Jan 2022 02:20:35 -0800 (PST)
+Received: by mail-vk1-xa34.google.com with SMTP id w5so5251077vke.12
+        for <fstests@vger.kernel.org>; Fri, 21 Jan 2022 02:20:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=devo.com; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=Xc60qWdmYkDcmqCepJSEgw8PLIa0merprBFuDOJts7k=;
+        b=OYEe9BgniFj9zA5VFJqqOYmJJ1xEoaeSGsyzLdiPo6u0NflaySG4Q2Q46iPF4FKE6+
+         2n1QpOJiILQrjv1jzAqD7U/mHb1AORjYk/0jfkuGb2U6aKEBen2r991+6f8plQMF7lN7
+         R6sK2kwIoZo3YKO9HCExkhMfSknqWsBkQ2II9lfgTzrvzQHtNHXNqWX777oL7915v6ME
+         VsQKCE0oW5Jfpmrx1OtGkFt+YiJEl4GCZrNZEWzDF7U7f+JsP6MfABRKV1tm9OOgob+X
+         8zxLksMwJGuIR09PXwa4RWQjx4+/EJ5WwCEBb1lL1nN6YM23tkyCDjHiKRoRq91v1RPg
+         MPxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=CJuReAjF5j37uF8H9Pf27hboT1IaAGGe94dxkufb4lU=;
-        b=fEwpb3YAz51WfqFBgokCYeQP1qcy67MSbhXe0QQIZ9QPY/sUv2FcFEhBoBJQAnllgp
-         NG138GTU71v9a/1IoEKmyRoPsJbAzGiazUJpXooW6jtjpCYqbZoZtMDFWg9WvaXnRpQD
-         7nrM6COox7F38P8tqIVk7F0+G3dQJ8JumLvBsT/uvXe7vXO84sL+QFNyxMzg4yDRn8RE
-         vRGL7NQE/6NqLmcMPlUS1CNK3uo2cCvtjDnb4CTgNJxqBXHKZ5+DSLxpINC6eoiGpGn2
-         VW1SUhSrDUXOcEXbHbMRxMCAcm22bTN+s3ASQxFAZtVfuO75EKHz0X6ZIqz2XHLhTQAx
-         fStg==
-X-Gm-Message-State: AOAM5338HLrK4bmKuNFlkR27WfKEpuTlHmz90/bq+S3NI2TyRiGDi77A
-        MiSP87pCSP6AyjykD+HTpYWZmxJo4ilu/O4Iblt5jwvzo77AOqj6z5sFlvG4fyBzwOpPejHl2R+
-        SNky/3sN1EVc3DIyWdA==
-X-Received: by 2002:a17:903:22c3:b0:14a:8cf0:63b2 with SMTP id y3-20020a17090322c300b0014a8cf063b2mr2171107plg.148.1642732876728;
-        Thu, 20 Jan 2022 18:41:16 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwhDEkci/WSXrYGMjS1HSlOBYjql3A58Ey37K00wlqsbIg+aptp5BJM26kb2L1I6YHHBpUxag==
-X-Received: by 2002:a17:903:22c3:b0:14a:8cf0:63b2 with SMTP id y3-20020a17090322c300b0014a8cf063b2mr2171093plg.148.1642732876383;
-        Thu, 20 Jan 2022 18:41:16 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 14sm10033141pjh.45.2022.01.20.18.41.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Jan 2022 18:41:15 -0800 (PST)
-Date:   Fri, 21 Jan 2022 10:41:11 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/107: fix formatting failures
-Message-ID: <20220121024111.5q5yebvml2x4ur2u@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20220120004944.GD13514@magnolia>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=Xc60qWdmYkDcmqCepJSEgw8PLIa0merprBFuDOJts7k=;
+        b=KK7x8AckPHItFWUuMEroaMPfqGyRA5BFcG/+f0gJxQBQuz/RoAiplzIfpdlsUSikaN
+         1GJuFLmdk1gZqSavYsAxDw+LR5yuqorvVZpI8mG3LyU/nOzMEbrddl2y0DLDwtbj6LRI
+         ljdPPNVk6q7ch6PHgMc1ixpOlnzCpDQ1bT+U0LzYonND3sxnXtsqviqLukDSz/fzJoJM
+         mq5UATaAOrUwDpJk1u6fujxEwC4Y0BjqRmCTdzmhrkHUH/bhjeB0JMFsw6eNPiqYCZG/
+         GLGmpx3qlpJAUUn8NSCNnD5iDI8C1w8yjOpHEVc9WANXwj9A2MU5nrofHvdAiX+g921B
+         0ERA==
+X-Gm-Message-State: AOAM531gjoq5JKMVxxYGBGvw1hWhspiYDp77p/70Hd8sz3eQxdyNJaAX
+        4Foa1dWeu0UHC4LAaMbtowsnOhEAMgXJTzRD4/2VePBiYCeJ8NjNz+01rca5PLWhB7bm3dM8919
+        WlEj5aFOM/rtc+El302wToJLSBQ==
+X-Google-Smtp-Source: ABdhPJxsU7WoDrzdWVPq2kcRV0Waoqs0yeb/sYDOXLRrYiiMFcxB3w7lJQ4us8XU0F2yD7/8ysTwNGs5yCEvPWWTKpU=
+X-Received: by 2002:a05:6122:8c6:: with SMTP id 6mr1310834vkg.5.1642760434439;
+ Fri, 21 Jan 2022 02:20:34 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220120004944.GD13514@magnolia>
+References: <CAG2S0o-wJc-2_wm=35mE5Lt0e4idXwb3g5ezc9=LdWrLHfRM_Q@mail.gmail.com>
+ <20220120180228.GE13514@magnolia>
+In-Reply-To: <20220120180228.GE13514@magnolia>
+From:   Andrea Tomassetti <andrea.tomassetti@devo.com>
+Date:   Fri, 21 Jan 2022 11:20:23 +0100
+Message-ID: <CAG2S0o8GZCa0jYuryr7q+woEnjSZJDxton5xnSpNDp4fWH-WgA@mail.gmail.com>
+Subject: Re: xfs/311 test pass but leave block device unusable
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 19, 2022 at 04:49:44PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Zorro Lang reported that the _scratch_mkfs_sized call in the new xfs/107
-> fstest sometimes fails on more exotic storage due to insufficient log
-> size on account of raid stripes, etc.   These are side effects of the
-> filesystem being too small.
-> 
-> Change the filesystem size to 256M to avoid these problems, and change
-> the allocstale parameters to use the same file size (16M) as before.
-> Given that ALLOCSP produces stale disk contents pretty quickly this
-> shouldn't affect the test runtime too much.
-> 
-> Reported-by: Zorro Lang <zlang@redhat.com>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+On Thu, Jan 20, 2022 at 7:02 PM Darrick J. Wong <djwong@kernel.org> wrote:
+>
+> [cc xfs list]
+>
+> On Thu, Jan 20, 2022 at 12:04:47PM +0100, Andrea Tomassetti wrote:
+> > Hi all,
+> > I was using the (x)fstest utility on the Kernel 5.11 to try to
+> > reproduce some xfs-related issues:
+> >   INFO: task xfs-conv/dm-3:1360 blocked for more than 120 seconds.
+> >   Workqueue: xfs-conv/dm-3 xfs_end_io [xfs]
+> >    Call Trace:
+> >     __schedule+0x44c/0x8a0
+> >     schedule+0x4f/0xc0
+> >     xlog_grant_head_wait+0xb5/0x1a0 [xfs]
+> >     xlog_grant_head_check+0xe1/0x100 [xfs]
+>
+> Threads are stuck waiting for log space; can you post the full dmesg?
+> And the xfs_info output of the test device?
+>
 
-Oh, I didn't notice that the xfs/107 has been merged :-P
-This patch is good to me, and it fixes two "data/log space too small"
-issues on my side.
+I think I maybe didn't expose correctly the problems. I mentioned two
+separated issues:
+  1. The thread stuck problem, to which the dmesg refers to. It is
+happening to us in production and we're trying to replicate it in a
+test environment but without any success at the moment.
+  2. While I was using xfstests, in the hope it could replicate the
+problem, I stepped into the buggy behaviour of the test n. 311. And I
+wanted to report this to you (and maybe get some advice on the
+production's problem that is affecting us)
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+I hope I made myself clear, sorry for the misunderstanding.
 
->  tests/xfs/107 |   10 +++++++---
->  1 file changed, 7 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/xfs/107 b/tests/xfs/107
-> index 6034dbc2..577094b2 100755
-> --- a/tests/xfs/107
-> +++ b/tests/xfs/107
-> @@ -22,7 +22,10 @@ _require_test
->  _require_scratch
->  _require_test_program allocstale
->  
-> -size_mb=32
-> +# Create a 256MB filesystem to avoid running into mkfs problems with too-small
-> +# filesystems.
-> +size_mb=256
-> +
->  # Write a known pattern to the disk so that we can detect stale disk blocks
->  # being mapped into the file.  In the test author's experience, the bug will
->  # reproduce within the first 500KB's worth of ALLOCSP calls, so running up
-> @@ -39,9 +42,10 @@ _scratch_mount
->  _xfs_force_bdev data $SCRATCH_MNT
->  testfile=$SCRATCH_MNT/a
->  
-> -# Allow the test program to expand the file to consume half the free space.
-> +# Allow the test program to expand the file to 32MB.  If we can't find any
-> +# stale blocks at that point, the kernel has probably been patched.
->  blksz=$(_get_file_block_size $SCRATCH_MNT)
-> -iterations=$(( (size_mb / 2) * 1048576 / blksz))
-> +iterations=$(( (size_mb / 16) * 1048576 / blksz))
->  echo "Setting up $iterations runs for block size $blksz" >> $seqres.full
->  
->  # Run reproducer program and dump file contents if we see stale data.  Full
-> 
+Here the full dmesg, about the production's issue:
+
+  [Thu Dec 23 17:13:56 2021] INFO: task xfs-conv/dm-3:1360 blocked for
+more than 120 seconds.
+  [Thu Dec 23 17:13:56 2021]       Not tainted 5.11.0-1020-aws
+#21~20.04.2-Ubuntu
+  [Thu Dec 23 17:13:56 2021] "echo 0 >
+/proc/sys/kernel/hung_task_timeout_secs" disables this message.
+  [Thu Dec 23 17:13:56 2021] task:xfs-conv/dm-3   state:D stack:    0
+pid: 1360 ppid:     2 flags:0x00004000
+  [Thu Dec 23 17:13:56 2021] Workqueue: xfs-conv/dm-3 xfs_end_io [xfs]
+  [Thu Dec 23 17:13:56 2021] Call Trace:
+  [Thu Dec 23 17:13:56 2021]  __schedule+0x44c/0x8a0
+  [Thu Dec 23 17:13:56 2021]  schedule+0x4f/0xc0
+  [Thu Dec 23 17:13:56 2021]  xlog_grant_head_wait+0xb5/0x1a0 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xlog_grant_head_check+0xe1/0x100 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xfs_log_reserve+0xc2/0x1c0 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xfs_trans_reserve+0x1ca/0x210 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xfs_trans_alloc+0xd7/0x190 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xfs_iomap_write_unwritten+0x125/0x2e0 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xfs_end_ioend+0xdb/0x120 [xfs]
+  [Thu Dec 23 17:13:56 2021]  xfs_end_io+0xb7/0xe0 [xfs]
+  [Thu Dec 23 17:13:56 2021]  process_one_work+0x220/0x3c0
+  [Thu Dec 23 17:13:56 2021]  rescuer_thread+0x2ca/0x3b0
+  [Thu Dec 23 17:13:56 2021]  ? worker_thread+0x3f0/0x3f0
+  [Thu Dec 23 17:13:56 2021]  kthread+0x12b/0x150
+  [Thu Dec 23 17:13:56 2021]  ? set_kthread_struct+0x40/0x40
+  [Thu Dec 23 17:13:56 2021]  ret_from_fork+0x22/0x30
+
+> > When I realized that xfs test n. 311 was passing correctly but every
+> > further attempt to use the block device (e.g. mount it) was failing.
+> > The issue is reproducible after reboot.
+> >
+> > Test passed:
+> >   ./check xfs/311
+> >   FSTYP         -- xfs (non-debug)
+> >   PLATFORM      -- Linux/x86_64 test 5.11.0-1021-aws
+> > #22~20.04.2-Ubuntu SMP Wed Oct 27 21:27:13 UTC 2021
+> >   MKFS_OPTIONS  -- -f /dev/xvdz
+> >   MOUNT_OPTIONS -- /dev/xvdz /home/test/z
+> >
+> >   xfs/311 25s ...  25s
+> >   Ran: xfs/311
+> >   Passed all 1 tests
+> >
+> > Fail:
+> >   # mount /dev/xvdz /home/test/z/
+> >     mount: /home/test/z: /dev/xvdz already mounted or mount point busy.
+> >     [ 2222.028417] /dev/xvdz: Can't open blockdev
+> >
+> > lsof does not show anything that is using either /dev/xvdz or /home/tes=
+t/z
+> >
+> > Any idea why is this happening?
+>
+> xfs-conv handles unwritten extent conversion after writeback, so I would
+> speculate (without dmesg data) that everyone got wedged trying to start
+> a transaction, and the log is blocked up for whatever reason.
+>
+
+I run the test xfs/311 with the Kernel v5.13 and the behaviour is the
+same as with the 5.11: after running it the disk becomes unusable.
+
+Trying to rerun the test, after the first successful run, leads to:
+
+  FSTYP         -- xfs (non-debug)
+  PLATFORM      -- Linux/x86_64 test 5.11.0-1021-aws
+#22~20.04.2-Ubuntu SMP Wed Oct 27 21:27:13 UTC 2021
+  MKFS_OPTIONS  -- -f /dev/xvdz
+  MOUNT_OPTIONS -- /dev/xvdz /home/test/z
+
+  our local _scratch_mkfs routine ...
+  mkfs.xfs: cannot open /dev/xvdz: Device or resource busy
+  check: failed to mkfs $SCRATCH_DEV using specified options
+  Interrupted!
+  Passed all 0 tests
+
+with no errors in dmesg.
+
+xfs_info /dev/xvdz
+meta-data=3D/dev/xvdz              isize=3D512    agcount=3D4, agsize=3D327=
+68000 blks
+         =3D                       sectsz=3D512   attr=3D2, projid32bit=3D1
+         =3D                       crc=3D1        finobt=3D1, sparse=3D1, r=
+mapbt=3D0
+         =3D                       reflink=3D1
+data     =3D                       bsize=3D4096   blocks=3D131072000, imaxp=
+ct=3D25
+         =3D                       sunit=3D0      swidth=3D0 blks
+naming   =3Dversion 2              bsize=3D4096   ascii-ci=3D0, ftype=3D1
+log      =3Dinternal log           bsize=3D4096   blocks=3D64000, version=
+=3D2
+         =3D                       sectsz=3D512   sunit=3D0 blks, lazy-coun=
+t=3D1
+realtime =3Dnone                   extsz=3D4096   blocks=3D0, rtextents=3D0
+
+> > The `xlog_grant_head_wait` race issue has been resolved in a later
+> > Kernel version, am I right?
+>
+> Beats me.
+>
+> > Best regards,
+> > Andrea
+> >
+> > --
+> >
+> >
+> >
+> >
+> >
+> >
+> >
+> > The contents of this email are confidential. If the reader of this
+>
+> Not anymore they aren't.
+>
+> --D
+>
+> > message is not the intended recipient, you are hereby notified that any
+> > dissemination, distribution or copying of this communication is strictl=
+y
+> > prohibited. If you have received this communication in error, please no=
+tify
+> > us immediately by replying to this message and deleting it from your
+> > computer. Thank you. Devo, Inc; arco@devo.com <mailto:arco@devo.com>;
+> > Calle Est=C3=A9banez Calder=C3=B3n 3-5, 5th Floor. Madrid, Spain 28020
+> >
+
+--=20
+
+
+
+
+
+
+
+The contents of this email are confidential. If the reader of this=20
+message is not the intended recipient, you are hereby notified that any=20
+dissemination, distribution or copying of this communication is strictly=20
+prohibited. If you have received this communication in error, please notify=
+=20
+us immediately by replying to this message and deleting it from your=20
+computer. Thank you.=C2=A0Devo, Inc; arco@devo.com <mailto:arco@devo.com>;=
+=C2=A0=C2=A0
+Calle Est=C3=A9banez Calder=C3=B3n 3-5, 5th Floor. Madrid, Spain 28020
 
