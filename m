@@ -2,240 +2,147 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6609C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 Jan 2022 10:20:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B0A0C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 Jan 2022 11:57:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1379958AbiAUKUi (ORCPT
+        id S245468AbiAUL5H (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 21 Jan 2022 05:20:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44470 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1379976AbiAUKUf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jan 2022 05:20:35 -0500
-Received: from mail-vk1-xa34.google.com (mail-vk1-xa34.google.com [IPv6:2607:f8b0:4864:20::a34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ABEFC061401
-        for <fstests@vger.kernel.org>; Fri, 21 Jan 2022 02:20:35 -0800 (PST)
-Received: by mail-vk1-xa34.google.com with SMTP id w5so5251077vke.12
-        for <fstests@vger.kernel.org>; Fri, 21 Jan 2022 02:20:35 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=devo.com; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=Xc60qWdmYkDcmqCepJSEgw8PLIa0merprBFuDOJts7k=;
-        b=OYEe9BgniFj9zA5VFJqqOYmJJ1xEoaeSGsyzLdiPo6u0NflaySG4Q2Q46iPF4FKE6+
-         2n1QpOJiILQrjv1jzAqD7U/mHb1AORjYk/0jfkuGb2U6aKEBen2r991+6f8plQMF7lN7
-         R6sK2kwIoZo3YKO9HCExkhMfSknqWsBkQ2II9lfgTzrvzQHtNHXNqWX777oL7915v6ME
-         VsQKCE0oW5Jfpmrx1OtGkFt+YiJEl4GCZrNZEWzDF7U7f+JsP6MfABRKV1tm9OOgob+X
-         8zxLksMwJGuIR09PXwa4RWQjx4+/EJ5WwCEBb1lL1nN6YM23tkyCDjHiKRoRq91v1RPg
-         MPxw==
+        Fri, 21 Jan 2022 06:57:07 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:23064 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233354AbiAUL5G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jan 2022 06:57:06 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1642766225;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type;
+        bh=9uZUpsMApXfUGRKNr04C2LXHbJMcKPYyutvQE6ZEilU=;
+        b=IvVBcNHduJ5+V9wFHEOY0Z2IfT6wKBU2Cluh9+2ar/EffULpgl6EVtil58PZiM83foGGHr
+        17B5bwnP7dxJf87PirzK6X9dLfKEfRVXhrtTCOpwOSgSUwUiZAjFXySwS0w2F0Z9LkJw/R
+        94ETyL5KQqyyFSpiBWCX5rLIGX75M14=
+Received: from mail-lf1-f72.google.com (mail-lf1-f72.google.com
+ [209.85.167.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-81-XoDb9Hg1Mj2bQThtyjbSFA-1; Fri, 21 Jan 2022 06:57:03 -0500
+X-MC-Unique: XoDb9Hg1Mj2bQThtyjbSFA-1
+Received: by mail-lf1-f72.google.com with SMTP id e15-20020a05651236cf00b00435bdd5b67eso2413319lfs.12
+        for <fstests@vger.kernel.org>; Fri, 21 Jan 2022 03:57:03 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=Xc60qWdmYkDcmqCepJSEgw8PLIa0merprBFuDOJts7k=;
-        b=KK7x8AckPHItFWUuMEroaMPfqGyRA5BFcG/+f0gJxQBQuz/RoAiplzIfpdlsUSikaN
-         1GJuFLmdk1gZqSavYsAxDw+LR5yuqorvVZpI8mG3LyU/nOzMEbrddl2y0DLDwtbj6LRI
-         ljdPPNVk6q7ch6PHgMc1ixpOlnzCpDQ1bT+U0LzYonND3sxnXtsqviqLukDSz/fzJoJM
-         mq5UATaAOrUwDpJk1u6fujxEwC4Y0BjqRmCTdzmhrkHUH/bhjeB0JMFsw6eNPiqYCZG/
-         GLGmpx3qlpJAUUn8NSCNnD5iDI8C1w8yjOpHEVc9WANXwj9A2MU5nrofHvdAiX+g921B
-         0ERA==
-X-Gm-Message-State: AOAM531gjoq5JKMVxxYGBGvw1hWhspiYDp77p/70Hd8sz3eQxdyNJaAX
-        4Foa1dWeu0UHC4LAaMbtowsnOhEAMgXJTzRD4/2VePBiYCeJ8NjNz+01rca5PLWhB7bm3dM8919
-        WlEj5aFOM/rtc+El302wToJLSBQ==
-X-Google-Smtp-Source: ABdhPJxsU7WoDrzdWVPq2kcRV0Waoqs0yeb/sYDOXLRrYiiMFcxB3w7lJQ4us8XU0F2yD7/8ysTwNGs5yCEvPWWTKpU=
-X-Received: by 2002:a05:6122:8c6:: with SMTP id 6mr1310834vkg.5.1642760434439;
- Fri, 21 Jan 2022 02:20:34 -0800 (PST)
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+        bh=9uZUpsMApXfUGRKNr04C2LXHbJMcKPYyutvQE6ZEilU=;
+        b=KgHiwpp0+PVeocYpiof5n1eBRU8gHq19pezTjfJmkC2GSn7nQCTMapoiM85Q4zSVPs
+         qqZYphhctYk3/QnA/n83PXEZvTOGFRQV8lw5DEDTrMXdgHMpoPSgisoOSUSDcDcnXZMz
+         4nHGr2xbt+VLcqmOsFc87H8CHkjHlIiiJJKCZseS973R649YJzkXr+cqCDBpcI7kB8A8
+         4n/B2h3To5KVCfuGMf2ZqFg3yx684S33MLuCzl8N0/qfB+M4/rfq6VhO+nDx6KuCQKL7
+         zlswnyoS+5Cn9zD1iPrypF2zZaRGzfkVHzRCm3RDkYbxouQxWA7hXCD7Zh5J1rAhLzgP
+         JLzA==
+X-Gm-Message-State: AOAM531Va9uaHrnzbcQOgjMLZOjSfBAaL92jFY0xyOIB1VZdid0eg/s0
+        qxtSGr0/1IYjK5ZUf+jzADwft7rpIgryB1Icg8xyOm2qQTutRNPClyZkEpAT6IN4UkTCpicw8e1
+        YdATcdHjQ1ITXlT4dZJO6VNiSYT7u3XMM2Q==
+X-Received: by 2002:a05:651c:4c8:: with SMTP id e8mr2816459lji.29.1642766221853;
+        Fri, 21 Jan 2022 03:57:01 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJxS/Wf7lvMQhEJMwtmBdv1otjGJU7JCU3NC+Lz8wEp/b/wYnoXa9gXEATfdjLV1I03sNvugaq9DAxej2xnrWys=
+X-Received: by 2002:a05:651c:4c8:: with SMTP id e8mr2816449lji.29.1642766221629;
+ Fri, 21 Jan 2022 03:57:01 -0800 (PST)
 MIME-Version: 1.0
-References: <CAG2S0o-wJc-2_wm=35mE5Lt0e4idXwb3g5ezc9=LdWrLHfRM_Q@mail.gmail.com>
- <20220120180228.GE13514@magnolia>
-In-Reply-To: <20220120180228.GE13514@magnolia>
-From:   Andrea Tomassetti <andrea.tomassetti@devo.com>
-Date:   Fri, 21 Jan 2022 11:20:23 +0100
-Message-ID: <CAG2S0o8GZCa0jYuryr7q+woEnjSZJDxton5xnSpNDp4fWH-WgA@mail.gmail.com>
-Subject: Re: xfs/311 test pass but leave block device unusable
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+From:   Rishabh Dave <ridave@redhat.com>
+Date:   Fri, 21 Jan 2022 17:26:50 +0530
+Message-ID: <CA+jMu4Q5cx5+G7jtrNT3RL8gi6nUB6ZikP1ztFUjTQUh6ojLrA@mail.gmail.com>
+Subject: adding support for ceph-fuse
+To:     fstests@vger.kernel.org
+Content-Type: multipart/mixed; boundary="0000000000001706af05d61651b3"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 20, 2022 at 7:02 PM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> [cc xfs list]
->
-> On Thu, Jan 20, 2022 at 12:04:47PM +0100, Andrea Tomassetti wrote:
-> > Hi all,
-> > I was using the (x)fstest utility on the Kernel 5.11 to try to
-> > reproduce some xfs-related issues:
-> >   INFO: task xfs-conv/dm-3:1360 blocked for more than 120 seconds.
-> >   Workqueue: xfs-conv/dm-3 xfs_end_io [xfs]
-> >    Call Trace:
-> >     __schedule+0x44c/0x8a0
-> >     schedule+0x4f/0xc0
-> >     xlog_grant_head_wait+0xb5/0x1a0 [xfs]
-> >     xlog_grant_head_check+0xe1/0x100 [xfs]
->
-> Threads are stuck waiting for log space; can you post the full dmesg?
-> And the xfs_info output of the test device?
->
+--0000000000001706af05d61651b3
+Content-Type: text/plain; charset="UTF-8"
 
-I think I maybe didn't expose correctly the problems. I mentioned two
-separated issues:
-  1. The thread stuck problem, to which the dmesg refers to. It is
-happening to us in production and we're trying to replicate it in a
-test environment but without any success at the moment.
-  2. While I was using xfstests, in the hope it could replicate the
-problem, I stepped into the buggy behaviour of the test n. 311. And I
-wanted to report this to you (and maybe get some advice on the
-production's problem that is affecting us)
+Hi,
 
-I hope I made myself clear, sorry for the misunderstanding.
+Currently tests from xfstests-dev can be executed against CephFS
+mounted using the kernel but not mounted using FUSE. This is so
+because right now xfstests-dev doesn't know how to mount CephFS with
+FUSE.
 
-Here the full dmesg, about the production's issue:
+I've written a patch (attached to this e-mail) that adds the ability
+to xfstests-dev to mount CephFS with FUSE as well. I've tested the
+patch against Ceph's master branch. The patch works fine IMO because
+after applying the patch I could run tests against kernel-mounted as
+well as FUSE-mounted CephFS.
 
-  [Thu Dec 23 17:13:56 2021] INFO: task xfs-conv/dm-3:1360 blocked for
-more than 120 seconds.
-  [Thu Dec 23 17:13:56 2021]       Not tainted 5.11.0-1020-aws
-#21~20.04.2-Ubuntu
-  [Thu Dec 23 17:13:56 2021] "echo 0 >
-/proc/sys/kernel/hung_task_timeout_secs" disables this message.
-  [Thu Dec 23 17:13:56 2021] task:xfs-conv/dm-3   state:D stack:    0
-pid: 1360 ppid:     2 flags:0x00004000
-  [Thu Dec 23 17:13:56 2021] Workqueue: xfs-conv/dm-3 xfs_end_io [xfs]
-  [Thu Dec 23 17:13:56 2021] Call Trace:
-  [Thu Dec 23 17:13:56 2021]  __schedule+0x44c/0x8a0
-  [Thu Dec 23 17:13:56 2021]  schedule+0x4f/0xc0
-  [Thu Dec 23 17:13:56 2021]  xlog_grant_head_wait+0xb5/0x1a0 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xlog_grant_head_check+0xe1/0x100 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xfs_log_reserve+0xc2/0x1c0 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xfs_trans_reserve+0x1ca/0x210 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xfs_trans_alloc+0xd7/0x190 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xfs_iomap_write_unwritten+0x125/0x2e0 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xfs_end_ioend+0xdb/0x120 [xfs]
-  [Thu Dec 23 17:13:56 2021]  xfs_end_io+0xb7/0xe0 [xfs]
-  [Thu Dec 23 17:13:56 2021]  process_one_work+0x220/0x3c0
-  [Thu Dec 23 17:13:56 2021]  rescuer_thread+0x2ca/0x3b0
-  [Thu Dec 23 17:13:56 2021]  ? worker_thread+0x3f0/0x3f0
-  [Thu Dec 23 17:13:56 2021]  kthread+0x12b/0x150
-  [Thu Dec 23 17:13:56 2021]  ? set_kthread_struct+0x40/0x40
-  [Thu Dec 23 17:13:56 2021]  ret_from_fork+0x22/0x30
+I am not sure about the review process for xfstests-dev, please let me
+know if the patches need to be uploaded elsewhere. Thanks in advance.
 
-> > When I realized that xfs test n. 311 was passing correctly but every
-> > further attempt to use the block device (e.g. mount it) was failing.
-> > The issue is reproducible after reboot.
-> >
-> > Test passed:
-> >   ./check xfs/311
-> >   FSTYP         -- xfs (non-debug)
-> >   PLATFORM      -- Linux/x86_64 test 5.11.0-1021-aws
-> > #22~20.04.2-Ubuntu SMP Wed Oct 27 21:27:13 UTC 2021
-> >   MKFS_OPTIONS  -- -f /dev/xvdz
-> >   MOUNT_OPTIONS -- /dev/xvdz /home/test/z
-> >
-> >   xfs/311 25s ...  25s
-> >   Ran: xfs/311
-> >   Passed all 1 tests
-> >
-> > Fail:
-> >   # mount /dev/xvdz /home/test/z/
-> >     mount: /home/test/z: /dev/xvdz already mounted or mount point busy.
-> >     [ 2222.028417] /dev/xvdz: Can't open blockdev
-> >
-> > lsof does not show anything that is using either /dev/xvdz or /home/tes=
-t/z
-> >
-> > Any idea why is this happening?
->
-> xfs-conv handles unwritten extent conversion after writeback, so I would
-> speculate (without dmesg data) that everyone got wedged trying to start
-> a transaction, and the log is blocked up for whatever reason.
->
+Regards,
+- Rishabh
 
-I run the test xfs/311 with the Kernel v5.13 and the behaviour is the
-same as with the 5.11: after running it the disk becomes unusable.
+--0000000000001706af05d61651b3
+Content-Type: text/x-patch; charset="US-ASCII"; name="add-ceph-fuse-support-final.patch"
+Content-Disposition: attachment; 
+	filename="add-ceph-fuse-support-final.patch"
+Content-Transfer-Encoding: base64
+Content-ID: <f_kyocd2f00>
+X-Attachment-Id: f_kyocd2f00
 
-Trying to rerun the test, after the first successful run, leads to:
-
-  FSTYP         -- xfs (non-debug)
-  PLATFORM      -- Linux/x86_64 test 5.11.0-1021-aws
-#22~20.04.2-Ubuntu SMP Wed Oct 27 21:27:13 UTC 2021
-  MKFS_OPTIONS  -- -f /dev/xvdz
-  MOUNT_OPTIONS -- /dev/xvdz /home/test/z
-
-  our local _scratch_mkfs routine ...
-  mkfs.xfs: cannot open /dev/xvdz: Device or resource busy
-  check: failed to mkfs $SCRATCH_DEV using specified options
-  Interrupted!
-  Passed all 0 tests
-
-with no errors in dmesg.
-
-xfs_info /dev/xvdz
-meta-data=3D/dev/xvdz              isize=3D512    agcount=3D4, agsize=3D327=
-68000 blks
-         =3D                       sectsz=3D512   attr=3D2, projid32bit=3D1
-         =3D                       crc=3D1        finobt=3D1, sparse=3D1, r=
-mapbt=3D0
-         =3D                       reflink=3D1
-data     =3D                       bsize=3D4096   blocks=3D131072000, imaxp=
-ct=3D25
-         =3D                       sunit=3D0      swidth=3D0 blks
-naming   =3Dversion 2              bsize=3D4096   ascii-ci=3D0, ftype=3D1
-log      =3Dinternal log           bsize=3D4096   blocks=3D64000, version=
-=3D2
-         =3D                       sectsz=3D512   sunit=3D0 blks, lazy-coun=
-t=3D1
-realtime =3Dnone                   extsz=3D4096   blocks=3D0, rtextents=3D0
-
-> > The `xlog_grant_head_wait` race issue has been resolved in a later
-> > Kernel version, am I right?
->
-> Beats me.
->
-> > Best regards,
-> > Andrea
-> >
-> > --
-> >
-> >
-> >
-> >
-> >
-> >
-> >
-> > The contents of this email are confidential. If the reader of this
->
-> Not anymore they aren't.
->
-> --D
->
-> > message is not the intended recipient, you are hereby notified that any
-> > dissemination, distribution or copying of this communication is strictl=
-y
-> > prohibited. If you have received this communication in error, please no=
-tify
-> > us immediately by replying to this message and deleting it from your
-> > computer. Thank you. Devo, Inc; arco@devo.com <mailto:arco@devo.com>;
-> > Calle Est=C3=A9banez Calder=C3=B3n 3-5, 5th Floor. Madrid, Spain 28020
-> >
-
---=20
-
-
-
-
-
-
-
-The contents of this email are confidential. If the reader of this=20
-message is not the intended recipient, you are hereby notified that any=20
-dissemination, distribution or copying of this communication is strictly=20
-prohibited. If you have received this communication in error, please notify=
-=20
-us immediately by replying to this message and deleting it from your=20
-computer. Thank you.=C2=A0Devo, Inc; arco@devo.com <mailto:arco@devo.com>;=
-=C2=A0=C2=A0
-Calle Est=C3=A9banez Calder=C3=B3n 3-5, 5th Floor. Madrid, Spain 28020
+ZGlmZiAtLWdpdCBhL2NvbW1vbi9jb25maWcgYi9jb21tb24vY29uZmlnCmluZGV4IGUwYTVjNWRm
+Li4xODZlMGU5YSAxMDA2NDQKLS0tIGEvY29tbW9uL2NvbmZpZworKysgYi9jb21tb24vY29uZmln
+CkBAIC01NDcsNiArNTQ3LDggQEAgX2NoZWNrX2RldmljZSgpCiAJCQlfZmF0YWwgImNvbW1vbi9j
+b25maWc6ICRuYW1lICgkZGV2KSBpcyBub3QgYSBjaGFyYWN0ZXIgZGV2aWNlIgogCQlmaQogCQk7
+OworCWNlcGgtZnVzZSkKKwkJOzsKIAkqKQogCQlfZmF0YWwgImNvbW1vbi9jb25maWc6ICRuYW1l
+ICgkZGV2KSBpcyBub3QgYSBibG9jayBkZXZpY2Ugb3IgYSBuZXR3b3JrIGZpbGVzeXN0ZW0iCiAJ
+ZXNhYwpkaWZmIC0tZ2l0IGEvY29tbW9uL3JjIGIvY29tbW9uL3JjCmluZGV4IDc5NzNjZWI1Li5h
+NTg5MzVhZiAxMDA2NDQKLS0tIGEvY29tbW9uL3JjCisrKyBiL2NvbW1vbi9yYwpAQCAtNDQ2LDEw
+ICs0NDYsMTQgQEAgX3NjcmF0Y2hfc2h1dGRvd25faGFuZGxlKCkKIAogX3Rlc3RfbW91bnQoKQog
+ewotICAgIGlmIFsgIiRGU1RZUCIgPT0gIm92ZXJsYXkiIF07IHRoZW4KKyAgICBpZiBbICIkRlNU
+WVAiID09ICJjZXBoLWZ1c2UiIF07IHRoZW4KKyAgICAgICAgJENFUEhfRlVTRV9CSU5fUEFUSCAk
+VEVTVF9GU19NT1VOVF9PUFRTICRURVNUX0RJUiAyPiAvZGV2L251bGwKKyAgICAgICAgcmV0dXJu
+ICQ/CisgICAgZWxpZiBbICIkRlNUWVAiID09ICJvdmVybGF5IiBdOyB0aGVuCiAgICAgICAgIF9v
+dmVybGF5X3Rlc3RfbW91bnQgJCoKICAgICAgICAgcmV0dXJuICQ/CiAgICAgZmkKKwogICAgIF90
+ZXN0X29wdGlvbnMgbW91bnQKICAgICBfbW91bnQgLXQgJEZTVFlQICRURVNUX09QVElPTlMgJFRF
+U1RfRlNfTU9VTlRfT1BUUyAkU0VMSU5VWF9NT1VOVF9PUFRJT05TICQqICRURVNUX0RFViAkVEVT
+VF9ESVIKIH0KQEAgLTEzODYsNyArMTM5MCw4IEBAIF9mc190eXBlKCkKICAgICAjIGhhdmUgdG8g
+Ym90aGVyIHdpdGggdGhpcyBxdWlyay4KICAgICAjCiAgICAgX2RmX2RldmljZSAkMSB8ICRBV0tf
+UFJPRyAneyBwcmludCAkMiB9JyB8IFwKLSAgICAgICAgc2VkIC1lICdzL25mczQvbmZzLycgLWUg
+J3MvZnVzZS5nbHVzdGVyZnMvZ2x1c3RlcmZzLycKKyAgICAgICAgc2VkIC1lICdzL25mczQvbmZz
+LycgLWUgJ3MvZnVzZS5nbHVzdGVyZnMvZ2x1c3RlcmZzLycgXAorICAgICAgICAgICAgLWUgJ3Mv
+ZnVzZS5jZXBoLWZ1c2UvY2VwaC1mdXNlLycKIH0KIAogIyByZXR1cm4gdGhlIEZTIG1vdW50IG9w
+dGlvbnMgb2YgYSBtb3VudGVkIGRldmljZQpAQCAtMTUzNSw2ICsxNTQwLDI0IEBAIF9zdXBwb3J0
+ZWRfZnMoKQogICAgIF9ub3RydW4gIm5vdCBzdWl0YWJsZSBmb3IgdGhpcyBmaWxlc3lzdGVtIHR5
+cGU6ICRGU1RZUCIKIH0KIAorX2NoZWNrX2lmX2Rldl9hbHJlYWR5X21vdW50ZWQoKQoreworCWxv
+Y2FsIGRldj0kMQorCWxvY2FsIG1udD0kMgorCisJIyBmaW5kICRkZXYgYXMgdGhlIHNvdXJjZSwg
+YW5kIHByaW50IHJlc3VsdCBpbiAiJGRldiAkbW50IiBmb3JtYXQKKwlsb2NhbCBtb3VudF9yZWM9
+YGZpbmRtbnQgLXJuY3YgLVMgJGRldiAtbyBTT1VSQ0UsVEFSR0VUYAorCVsgLW4gIiRtb3VudF9y
+ZWMiIF0gfHwgcmV0dXJuIDEgIyAxID0gbm90IG1vdW50ZWQKKworCSMgaWYgaXQncyBtb3VudGVk
+LCBtYWtlIHN1cmUgaXRzIG9uICRtbnQKKwlpZiBbICIkbW91bnRfcmVjIiAhPSAiJGRldiAkbW50
+IiBdOyB0aGVuCisJCWVjaG8gIiRkZXZuYW1lPSRkZXYgaXMgbW91bnRlZCBidXQgbm90IG9uICRt
+bnRuYW1lPSRtbnQgLSBhYm9ydGluZyIKKwkJZWNobyAiQWxyZWFkeSBtb3VudGVkIHJlc3VsdDoi
+CisJCWVjaG8gJG1vdW50X3JlYworCQlyZXR1cm4gMiAjIDIgPSBtb3VudGVkIG9uIHdyb25nIG1u
+dAorCWZpCit9CisKICMgY2hlY2sgaWYgYSBGUyBvbiBhIGRldmljZSBpcyBtb3VudGVkCiAjIGlm
+IHNvLCB2ZXJpZnkgdGhhdCBpdCBpcyBtb3VudGVkIG9uIG1vdW50IHBvaW50CiAjIGlmIGZzdHlw
+ZSBpcyBnaXZlbiBhcyBhcmd1bWVudCwgdmVyaWZ5IHRoYXQgaXQgaXMgYWxzbwpAQCAtMTU0OCwx
+NiArMTU3MSwxNCBAQCBfY2hlY2tfbW91bnRlZF9vbigpCiAJbG9jYWwgbW50PSQ0CiAJbG9jYWwg
+dHlwZT0kNQogCi0JIyBmaW5kICRkZXYgYXMgdGhlIHNvdXJjZSwgYW5kIHByaW50IHJlc3VsdCBp
+biAiJGRldiAkbW50IiBmb3JtYXQKLQlsb2NhbCBtb3VudF9yZWM9YGZpbmRtbnQgLXJuY3YgLVMg
+JGRldiAtbyBTT1VSQ0UsVEFSR0VUYAotCVsgLW4gIiRtb3VudF9yZWMiIF0gfHwgcmV0dXJuIDEg
+IyAxID0gbm90IG1vdW50ZWQKKwkjIHRoaXMgY2hlY2sgZG9lc24ndCB3b3JrIG9uIGNlcGgtZnVz
+ZQorCWlmIFsgIiRkZXYiICE9ICJjZXBoLWZ1c2UiIF07IHRoZW4KKwkJX2NoZWNrX2lmX2Rldl9h
+bHJlYWR5X21vdW50ZWQgJGRldiAkbW50CisJCWRldl9hbHJlYWR5X21vdW50ZWQ9JD8KIAotCSMg
+aWYgaXQncyBtb3VudGVkLCBtYWtlIHN1cmUgaXRzIG9uICRtbnQKLQlpZiBbICIkbW91bnRfcmVj
+IiAhPSAiJGRldiAkbW50IiBdOyB0aGVuCi0JCWVjaG8gIiRkZXZuYW1lPSRkZXYgaXMgbW91bnRl
+ZCBidXQgbm90IG9uICRtbnRuYW1lPSRtbnQgLSBhYm9ydGluZyIKLQkJZWNobyAiQWxyZWFkeSBt
+b3VudGVkIHJlc3VsdDoiCi0JCWVjaG8gJG1vdW50X3JlYwotCQlyZXR1cm4gMiAjIDIgPSBtb3Vu
+dGVkIG9uIHdyb25nIG1udAorCQlpZiBbICRkZXZfYWxyZWFkeV9tb3VudGVkIC1uZSAwIF07IHRo
+ZW4KKwkJCXJldHVybiAkZGV2X2FscmVhZHlfbW91bnRlZAorCQlmaQogCWZpCiAKIAlpZiBbIC1u
+ICIkdHlwZSIgLWEgImBfZnNfdHlwZSAkZGV2YCIgIT0gIiR0eXBlIiBdOyB0aGVuCkBAIC0xNzc5
+LDYgKzE4MDAsOCBAQCBfcmVxdWlyZV90ZXN0KCkKIAkJCV9ub3RydW4gInRoaXMgdGVzdCByZXF1
+aXJlcyBhIHZhbGlkIFwkVEVTVF9ESVIiCiAJCWZpCiAJCTs7CisJY2VwaC1mdXNlKQorCQk7Owog
+CWNpZnMpCiAJCWVjaG8gJFRFU1RfREVWIHwgZ3JlcCAtcSAiLy8iID4gL2Rldi9udWxsIDI+JjEK
+IAkJaWYgWyAteiAiJFRFU1RfREVWIiAtbyAiJD8iICE9ICIwIiBdOyB0aGVuCkBAIC0zMTEyLDcg
+KzMxMzUsNyBAQCBfY2hlY2tfdGVzdF9mcygpCiAgICAgdmlydGlvZnMpCiAJIyBubyB3YXkgdG8g
+Y2hlY2sgY29uc2lzdGVuY3kgZm9yIHZpcnRpb2ZzCiAJOzsKLSAgICBjZXBoKQorICAgIGNlcGh8
+Y2VwaC1mdXNlKQogCSMgbm8gd2F5IHRvIGNoZWNrIGNvbnNpc3RlbmN5IGZvciBDZXBoRlMKIAk7
+OwogICAgIGdsdXN0ZXJmcykK
+--0000000000001706af05d61651b3--
 
