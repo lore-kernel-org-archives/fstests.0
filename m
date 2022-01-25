@@ -2,69 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96246C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 Jan 2022 03:54:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26616C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 Jan 2022 06:09:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351272AbiAYDy2 (ORCPT
+        id S235719AbiAYGJA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Jan 2022 22:54:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45986 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1318607AbiAYDGd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jan 2022 22:06:33 -0500
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B963C061A81;
-        Mon, 24 Jan 2022 15:21:08 -0800 (PST)
-Received: by mail-pj1-x1036.google.com with SMTP id n16-20020a17090a091000b001b46196d572so717381pjn.5;
-        Mon, 24 Jan 2022 15:21:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=9eUsbBSutM1lBuLU7dAKTs07j7eGXAZ+4bo5/dxVc74=;
-        b=MgBud9+uVemvmsL8Z6AceYLsDylgGBN06Nv8AhlbDdkc6YAvatV4TS+c0RoN2zxGGZ
-         dWc5geZpWwBGz0CnJ/8hg25SqcH5wJ8Z0J/jcBEFFjq2WrKBWk5q40C5lRONTB/yXT9H
-         O1JVRcaVN8aEdWZDisTayXA7hOudhOk96puqJPROeCkzDyxDFEsTLKJqJh99Ve2mg5N+
-         NVLgxTDUi4khQ8Soo/IRZeNqNpMpBZvsYCzswmhL17rAnt0CSDlHnE+oddMYfj3sR1SX
-         Kqt9zbejJLbM5KsFmoxcdbnj39mCakgvMkI7lD3QTNm+NxL+gSrYSvJ8ZydcEVqm70Y7
-         9HPw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=9eUsbBSutM1lBuLU7dAKTs07j7eGXAZ+4bo5/dxVc74=;
-        b=lLAHtnZ8ENP1GBqDPXS0yOcRZIrY+9IimJTOVEYDt7rgeh2jOHWe7EjK3FrkGzM+vs
-         mzvlGhZ53WOCLXTNKvJUQ6wb9H+bI57zz1omVSgk1OtWXNlnhpb8RcQ3hM45qABEd5vm
-         eqF6HPOlDrWE0NxdIyqPdgKTMJGrp/l5yKHzIB2pKDSf66/hRMNZ4AZWzrj7c/oWi5pm
-         +mU7TYGTzIPyH9pMFEAMbmutWbh00wIrEAs7OB0LeDEwXl40I/ZptmGOJdtPn/vVUJK0
-         bvM8dwNSpcRx+5xEZLFeTzm05biGJDWlteKnOiAMEdxP5jItfVLow3ogMPd75X24Ity2
-         klWQ==
-X-Gm-Message-State: AOAM533vAFnaFZ8JfFMZ6ZJG9xCCT5MgKswo5tbbgrk9GTNNTScv084A
-        KB/oE1gpFNPo/ihewxwKEAT1RiW4p97/Rw==
-X-Google-Smtp-Source: ABdhPJxXblgfhhTrKXc/lvfVBUzKbQ0WSaSc4mRirdkAGKVGCIRrJ4Bv3gDgvdgK1K5mRvoABSdWFw==
-X-Received: by 2002:a17:902:d883:b0:14a:4ba5:6e72 with SMTP id b3-20020a170902d88300b0014a4ba56e72mr16784773plz.27.1643066468049;
-        Mon, 24 Jan 2022 15:21:08 -0800 (PST)
-Received: from google.com ([2601:647:4701:18d0:ec80:a45b:502a:bda8])
-        by smtp.gmail.com with ESMTPSA id nu15sm400304pjb.5.2022.01.24.15.21.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Jan 2022 15:21:07 -0800 (PST)
-Date:   Mon, 24 Jan 2022 15:21:05 -0800
-From:   Leah Rumancik <leah.rumancik@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
-        xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] generic/273: use _get_file_block_size
-Message-ID: <Ye8zQ4d1FAIvk4Oy@google.com>
-References: <20220124183735.GJ13563@magnolia>
+        Tue, 25 Jan 2022 01:09:00 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:53386 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S238580AbiAYGCb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jan 2022 01:02:31 -0500
+Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 20P5km0G006273;
+        Tue, 25 Jan 2022 06:02:13 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=lCToaLxbJRfZkhhxLYTey5wBBBigPwYEHa3c6ZYVMDw=;
+ b=hfhehMiWjPw2QJn95hAlEXBxWqelvmqNpVlvj0NXsiWAyAe2jn3ixwuUj94Gyug483Hv
+ QrZ8FvXgKARYm5fkc4eNsvVMqSLsvPLxXa7qa3Ktlzk2/UkDRfNZTaiZJTCIvpX86T6R
+ ZDQfhIY0t3VW9AJyMTX549/sx7W54S6dSOA+YqbxCyK5Dd+8N4LDHhdo8J2jDhnT/Q9I
+ Nqd78z7IY7WT73W6CDuxfLoCPD+ubQvjgqvEmbpqzpXfNMkT7UJSWcJcAt660VDJj+cp
+ Sd2vpAi0fvV3NqCOvy412Z2MZQYDD51GRrohbOfpNIXlyZ3lfgXeA/mdSfamkMsUguI6 cQ== 
+Received: from ppma06fra.de.ibm.com (48.49.7a9f.ip4.static.sl-reverse.com [159.122.73.72])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3dtbc0g91q-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 25 Jan 2022 06:02:12 +0000
+Received: from pps.filterd (ppma06fra.de.ibm.com [127.0.0.1])
+        by ppma06fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 20P5xIt9030603;
+        Tue, 25 Jan 2022 06:02:10 GMT
+Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
+        by ppma06fra.de.ibm.com with ESMTP id 3dr96j9h1w-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 25 Jan 2022 06:02:10 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 20P6281e41615870
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 25 Jan 2022 06:02:08 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 086994C044;
+        Tue, 25 Jan 2022 06:02:08 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 6A3CF4C052;
+        Tue, 25 Jan 2022 06:02:07 +0000 (GMT)
+Received: from localhost (unknown [9.43.18.116])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue, 25 Jan 2022 06:02:07 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org
+Cc:     Zhang Yi <yi.zhang@huawei.com>, tytso@mit.edu,
+        Jan Kara <jack@suse.cz>, chenlong <chenlongcl.chen@huawei.com>,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [RFC 0/1] ext4/054: Should we remove auto and quick group?
+Date:   Tue, 25 Jan 2022 11:32:01 +0530
+Message-Id: <cover.1643089143.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.31.1
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: oJuTaWRAlKvEh3S4roz2tQMXk4yTpitq
+X-Proofpoint-GUID: oJuTaWRAlKvEh3S4roz2tQMXk4yTpitq
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220124183735.GJ13563@magnolia>
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.62.513
+ definitions=2022-01-25_01,2022-01-24_02,2021-12-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 clxscore=1011
+ priorityscore=1501 bulkscore=0 mlxlogscore=706 suspectscore=0
+ malwarescore=0 phishscore=0 adultscore=0 lowpriorityscore=0 spamscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2201110000 definitions=main-2201250040
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Applied and confirmed this fixes generic/273 for realtime 28k
-extent sizes for me.
+Hello Zhang/Ted,
 
-Reviewed-by: Leah Rumancik <leah.rumancik@gmail.com>
+Looks like the issue fixed by patches at [1], were observed with fault injection
+testing and with errors=continue mount option. But were not cc'd to stable.
+
+Do you think those should be cc'd to stable tree?
+
+Meanwhile, I was thinking we should anyway remove auto and quick group from this
+test as it could trigger a bug on in older kernel targets. Thoughts?
+
+
+[1]: https://lore.kernel.org/all/20210908120850.4012324-1-yi.zhang@huawei.com/
+
+Ritesh Harjani (1):
+  ext4/054: Remove auto and quick group
+
+ tests/ext4/054 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--
+2.31.1
+
