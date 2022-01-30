@@ -2,90 +2,72 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A6DAC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 Jan 2022 04:56:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8AF3AC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 Jan 2022 09:18:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242412AbiA3E4t (ORCPT
+        id S1354445AbiA3JSW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 29 Jan 2022 23:56:49 -0500
-Received: from ams.source.kernel.org ([145.40.68.75]:48008 "EHLO
-        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235132AbiA3E4r (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 29 Jan 2022 23:56:47 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 8CE4CB82807
-        for <fstests@vger.kernel.org>; Sun, 30 Jan 2022 04:56:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2A647C340E4;
-        Sun, 30 Jan 2022 04:56:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1643518605;
-        bh=mTjtIZLB3msD0kfKTRjER28wco9oHNw8KVZdSQ9faNQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=JOKAIpGTJczsPK1T6JQJYlJwlbgUYWBmL0L0X+mApLQPsWrw7pBMraP5JKIu4ISuE
-         yw3i5mJAi7yRnoTyYdb6pahAEHZWBYCN2ru6pL3HAgvmgtDMzHsAKyBcm6iqN/MeVf
-         fVhm4YmnuW2/JiVX+qlC7y8U1dli4W5Y1uxc4yEghhtiSa8G2J6HJrR/hRjsGO146i
-         k0Yml6MP3xpgg/vcdFDH9AtTiBpIIge9n6diNet96VPbXAxDCNlD12105eJjj5kj0E
-         FLnfFV/b1cdPZVkMhLT8lzaA3YLbOUpsfTJ6RkJPy/i/KUJgGpT/D35HKcBmFpM/+k
-         EwFGipRUPKDGA==
-Date:   Sat, 29 Jan 2022 20:56:44 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] fsx: disable allocsp_calls if -F is specified
-Message-ID: <20220130045644.GP13563@magnolia>
-References: <20220129044431.1404283-1-zlang@redhat.com>
+        Sun, 30 Jan 2022 04:18:22 -0500
+Received: from szxga02-in.huawei.com ([45.249.212.188]:17832 "EHLO
+        szxga02-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1345429AbiA3JSU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 Jan 2022 04:18:20 -0500
+Received: from kwepemi500011.china.huawei.com (unknown [172.30.72.56])
+        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4JmlvC2KYxz9sP2;
+        Sun, 30 Jan 2022 17:16:55 +0800 (CST)
+Received: from kwepemm600010.china.huawei.com (7.193.23.86) by
+ kwepemi500011.china.huawei.com (7.221.188.124) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.21; Sun, 30 Jan 2022 17:18:18 +0800
+Received: from huawei.com (10.175.127.227) by kwepemm600010.china.huawei.com
+ (7.193.23.86) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.21; Sun, 30 Jan
+ 2022 17:18:17 +0800
+From:   Sun Ke <sunke32@huawei.com>
+To:     <fstests@vger.kernel.org>, <guan@eryu.me>
+CC:     <chao@kernel.org>, <sunke32@huawei.com>
+Subject: [PATCH] common/attr: _acl_get_max echo 532 for f2fs
+Date:   Sun, 30 Jan 2022 17:28:58 +0800
+Message-ID: <20220130092858.1260210-1-sunke32@huawei.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220129044431.1404283-1-zlang@redhat.com>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.127.227]
+X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+ kwepemm600010.china.huawei.com (7.193.23.86)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jan 29, 2022 at 12:44:31PM +0800, Zorro Lang wrote:
-> As the fsx.c source code says:
->   int     fallocate_calls = 1;            /* -F flag disables */
->   int     allocsp_calls = 1;              /* -F flag disables */
-> 
-> The allocsp_calls and fallocate_calls should be disabled, if the -F
-> option is specified. But current fsx forgets to disable allocsp_calls
-> as is documented.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi Darrick,
-> 
-> Please help to take a look. I'm not sure if you'd like to disable
-> allocsp_calls by -F flag, or just copied that line then forgot to
-> change the F to another ?
+Run generic/026 on f2fs, the diff:
 
-Nah, that's ... fine.  Thanks for fixing this.  I hate ALLOCSP. :)
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+    -chacl: cannot set access acl on "largeaclfile": Argument list too long
+    +Wrong ACL count - 532 != 531
 
---D
+The ACL_MAX_ENTRIES depend on MAX_VALUE_LEN(inode), MAX_VALUE_LEN(inode) I got
+by printk is 4244, so I think the ACL_MAX_ENTRIES should be
+(4244 - 20) / 8 + 4 =532.
 
+Signed-off-by: Sun Ke <sunke32@huawei.com>
+---
+ common/attr | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Thanks,
-> Zorro
-> 
->  ltp/fsx.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 520e53a2..3ee37fe8 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -2835,6 +2835,7 @@ main(int argc, char **argv)
->  			break;
->  		case 'F':
->  			fallocate_calls = 0;
-> +			allocsp_calls = 0;
->  			break;
->  		case 'K':
->  			keep_size_calls = 0;
-> -- 
-> 2.31.1
-> 
+diff --git a/common/attr b/common/attr
+index 35682d7c..56ac5cca 100644
+--- a/common/attr
++++ b/common/attr
+@@ -28,7 +28,7 @@ _acl_get_max()
+ 	f2fs)
+ 		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
+ 		if [ $? -eq 0 ]; then
+-			echo 531
++			echo 532
+ 		else
+ 			echo 506
+ 		fi
+-- 
+2.13.6
+
