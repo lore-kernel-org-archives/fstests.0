@@ -2,180 +2,100 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B0E9C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Jan 2022 20:47:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B28C4C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Jan 2022 20:47:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229657AbiAaUrJ (ORCPT
+        id S242023AbiAaUrR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Jan 2022 15:47:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39244 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344296AbiAaUq2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Jan 2022 15:46:28 -0500
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB5E5C061714
-        for <fstests@vger.kernel.org>; Mon, 31 Jan 2022 12:46:28 -0800 (PST)
-Received: by mail-pl1-x62e.google.com with SMTP id u11so13540392plh.13
-        for <fstests@vger.kernel.org>; Mon, 31 Jan 2022 12:46:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=+BsN29vy50mQ0rcfufEYwcAhhrHDPt+P7YFUglKY9Ds=;
-        b=NP1Miv1XqZHNNVJnYWhU3y0QZ5mm3+IM/s7ffE7vxxHdfG+O+MejSqx5VCUdQs+HWQ
-         zV3CUOZdBt+TmVv4pxza86qYXQUwO8w2VFAsVBnoXrAQWicVyOo+snzpieC36du4LCrk
-         iY/hepaMTVqGB+Jo3JwQeCjCCi0Xw0kkeAqlA=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=+BsN29vy50mQ0rcfufEYwcAhhrHDPt+P7YFUglKY9Ds=;
-        b=bQaHjI+I7JGNmObnD0K8FQn1nfmi/+Z8oUfgoKjwasPCVjzTxMkcf5Q35BcUTqmwLs
-         T9q4391iB+t81UV+SQHjlBk0MTiXyjZ41UcCO5tMr9sbWwH+gkSLqzcZiLgUYb7Rdi7q
-         yZpwUd1083/0rgesEHZGA0zea6IdiTwar5rUkWc/Etb13wuOdNc5CVIOrgTATIlGgnrP
-         3hbbl4E2f5jO8fxM3WowrGf3hWXr+Honqll3Y8hhTTkiL64D39BcDvNhmj+gU6IOvhbj
-         v5Vel5ia4A8FQ58qB7LSYxz6JrtaxOQ9IxfrlhZ42OiOGj2cAnHCv5KU4PEplmg0hUjy
-         /8pg==
-X-Gm-Message-State: AOAM531NHWPXnqQ0/add84OhcgNzCAxjLBThLVBFjHYDb3HgNqgVUGxC
-        O3LCA+hUVBxNjMOCEGEM6+cj9A==
-X-Google-Smtp-Source: ABdhPJyJBMWnDx/3gahqXRSRXLulliMQHWttPKN7aRTD1ZMbdG4c5/xeR3hmw/6ZEfG1jFNLUFOYiw==
-X-Received: by 2002:a17:902:6a83:: with SMTP id n3mr22115880plk.139.1643661988093;
-        Mon, 31 Jan 2022 12:46:28 -0800 (PST)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id e2sm12576165pgr.52.2022.01.31.12.46.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Jan 2022 12:46:27 -0800 (PST)
-Date:   Mon, 31 Jan 2022 12:46:27 -0800
-From:   Kees Cook <keescook@chromium.org>
-To:     Christian Brauner <brauner@kernel.org>
-Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
-        Ariadne Conill <ariadne@dereferenced.org>,
-        Rich Felker <dalias@libc.org>,
-        Michael Kerrisk <mtk.manpages@gmail.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Matthew Wilcox <willy@infradead.org>,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/633: adapt execveat() invocations
-Message-ID: <202201311245.0B2126B468@keescook>
-References: <20220131171023.2836753-1-brauner@kernel.org>
+        Mon, 31 Jan 2022 15:47:17 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40546 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1348454AbiAaUqe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Jan 2022 15:46:34 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1643661994;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=nlHslKz1cGxHLBwn88wZKDWe9MiG6x7ySEZHx4PfzqQ=;
+        b=OYDp8czA8UcxZ8DOcSeY6Ob7Jw4w3H3SOcZCxmGNVHuN1ZHpknvrNf9Y3HgZ9NyzcwEAEm
+        zbof09hLA5ZNXVzBgK9UboIhuV+xL0TJFejjGv2TYO/HXbH1YkOUU8qTgSOS0GzZb+E1rN
+        K6COIEEuYKckwuoSibeOWrGit87MAfY=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-208-YnzQenGqORC08BwzFxuxjA-1; Mon, 31 Jan 2022 15:46:31 -0500
+X-MC-Unique: YnzQenGqORC08BwzFxuxjA-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 01AED1091DA0;
+        Mon, 31 Jan 2022 20:46:30 +0000 (UTC)
+Received: from work (unknown [10.40.194.245])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 00FDA46975;
+        Mon, 31 Jan 2022 20:46:28 +0000 (UTC)
+Date:   Mon, 31 Jan 2022 21:46:25 +0100
+From:   Lukas Czerner <lczerner@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] common/rc: set maximum label length for ext4
+Message-ID: <20220131204625.eimkrccyp4lqit57@work>
+References: <20211123101119.5112-1-lczerner@redhat.com>
+ <20220131170700.GA8288@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220131171023.2836753-1-brauner@kernel.org>
+In-Reply-To: <20220131170700.GA8288@magnolia>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 31, 2022 at 06:10:23PM +0100, Christian Brauner wrote:
-> There's a push by Ariadne to enforce that argv[0] cannot be NULL. So far
-> we've allowed this. Fix the execveat() invocations to set argv[0] to the
-> name of the file we're about to execute.
+On Mon, Jan 31, 2022 at 09:07:00AM -0800, Darrick J. Wong wrote:
+> On Tue, Nov 23, 2021 at 11:11:19AM +0100, Lukas Czerner wrote:
+> > Set maximum label length for ext4 in _label_get_max() to be able to test
+> > online file system label set/get ioctls.
+> > 
+> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> > ---
+> >  common/rc | 3 +++
+> >  1 file changed, 3 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 8e351f17..50d6d0bd 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -4545,6 +4545,9 @@ _label_get_max()
+> >  	f2fs)
+> >  		echo 255
+> >  		;;
+> > +	ext2|ext3|ext4)
+> > +		echo 16
+> 
+> After reviewing the ext4 ondisk format, 16 is the correct value.
+> 
+> Though I wonder, what actually prevents generic/492 from running on old
+> kernels without GETLABEL support?
 
-To be clear, these tests are also trying to launch set-id binaries with
-argc == 0, so narrowing the kernel check to only set-id binaries
-wouldn't help here, yes?
+_require_xfs_io_command "label"
 
--Kees
+should take care of that. This is why I though it was no problem to get
+this change in early.
+
+-Lukas
 
 > 
-> Cc: Ariadne Conill <ariadne@dereferenced.org>
-> Cc: Kees Cook <keescook@chromium.org>
-> Cc: Rich Felker <dalias@libc.org>
-> Cc: Eryu Guan <guaneryu@gmail.com>
-> Cc: Michael Kerrisk <mtk.manpages@gmail.com>
-> Cc: Andrew Morton <akpm@linux-foundation.org>
-> Cc: Matthew Wilcox <willy@infradead.org>
-> Cc: fstests@vger.kernel.org
-> Cc: linux-fsdevel@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org
-> Link: https://lore.kernel.org/lkml/20220127000724.15106-1-ariadne@dereferenced.org
-> Signed-off-by: Christian Brauner <brauner@kernel.org>
-> ---
->  src/idmapped-mounts/idmapped-mounts.c | 16 ++++++++--------
->  1 file changed, 8 insertions(+), 8 deletions(-)
+> Either way this patch is ok, so...
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > 
-> diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-> index 4cf6c3bb..76b559ae 100644
-> --- a/src/idmapped-mounts/idmapped-mounts.c
-> +++ b/src/idmapped-mounts/idmapped-mounts.c
-> @@ -3598,7 +3598,7 @@ static int setid_binaries(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		if (!expected_uid_gid(t_dir1_fd, FILE1, 0, 5000, 5000))
-> @@ -3726,7 +3726,7 @@ static int setid_binaries_idmapped_mounts(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 15000, 15000))
-> @@ -3865,7 +3865,7 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		if (!switch_userns(attr.userns_fd, 0, 0, false))
-> @@ -3924,7 +3924,7 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		if (!caps_supported()) {
-> @@ -3992,7 +3992,7 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		if (!switch_userns(attr.userns_fd, 0, 0, false))
-> @@ -4150,7 +4150,7 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		userns_fd = get_userns_fd(0, 10000, 10000);
-> @@ -4214,7 +4214,7 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		userns_fd = get_userns_fd(0, 10000, 10000);
-> @@ -4286,7 +4286,7 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
->  			NULL,
->  		};
->  		static char *argv[] = {
-> -			NULL,
-> +			"",
->  		};
->  
->  		userns_fd = get_userns_fd(0, 10000, 10000);
+> --D
 > 
-> base-commit: d8dee1222ecdfa1cff1386a61248e587eb3b275d
-> -- 
-> 2.32.0
+> > +		;;
+> >  	*)
+> >  		_notrun "$FSTYP does not define maximum label length"
+> >  		;;
+> > -- 
+> > 2.31.1
+> > 
 > 
 
--- 
-Kees Cook
