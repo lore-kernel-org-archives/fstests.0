@@ -2,117 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B050C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 Jan 2022 15:07:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92FE1C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Jan 2022 09:43:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347326AbiA3PH0 (ORCPT
+        id S238826AbiAaJnD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 30 Jan 2022 10:07:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35724 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347340AbiA3PH0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 Jan 2022 10:07:26 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C974C061714
-        for <fstests@vger.kernel.org>; Sun, 30 Jan 2022 07:07:25 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        Mon, 31 Jan 2022 04:43:03 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:44625 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S238819AbiAaJnC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Jan 2022 04:43:02 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1643622182;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=fM0hWX1Hvc4K9LjDrBo1FgLahCr8ka4rEYWLjkOURK0=;
+        b=JvR4yn6XukDQu8raK9QrfnoByoM7OntOHvUa1RQXFle0ondcDieCz7WFDz/n1+JXBLvMeq
+        h3XSVe7ttNyw8HhsHmHvuqxfx+EeZh4e3jUFr6YE/iUOCLKCP8KHqeRJUgd1gakaJ1AZjT
+        +NzreRlCkUtGx/ENc3EE8ow/XsjEPKI=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-251-t6e8Hm-VPp-FTjA7OIFswA-1; Mon, 31 Jan 2022 04:43:00 -0500
+X-MC-Unique: t6e8Hm-VPp-FTjA7OIFswA-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 58DFDCE0F5A
-        for <fstests@vger.kernel.org>; Sun, 30 Jan 2022 15:07:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 114C3C340E4;
-        Sun, 30 Jan 2022 15:07:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1643555241;
-        bh=klFqchxKLw4hTxGaeFm119hrvJki1R7D+mAOGUs4QWc=;
-        h=Date:Subject:To:References:From:In-Reply-To:From;
-        b=kDtPv6F1826BenDXsTvtuMiga4Np4RZlJY3O7Yy2QbV9RJZ2J85wxs2tzwMRAt03b
-         xO0cMFaZ8sO/kFB4kicIXzPsHB5v1zv9iKLcV5yirA5uI3HvaL0wQNmKaNchbEywo3
-         tWqXX5QPMa5vufBOXeB6w0LcLr893wlj5et7DGPIihyRgPoZWPokPtJOdOZbg6MKtU
-         rbQbdTLpJqkYe9AAdi9ordhFGPwXX6T6hjewWdYzJIeq4oy0s9CJS5cPn0TQpy3WEc
-         lW7p3eGOZGoL0y0UkCHDqjG4Q9BpJZGx/7t7w1lVgzxwqWoO+EJ+llQ35+i7/6t1yQ
-         O0h8Ow0it/J+w==
-Message-ID: <6dbebe97-b29d-ede4-79cf-4d66b2d44c01@kernel.org>
-Date:   Sun, 30 Jan 2022 23:07:17 +0800
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D61C346860;
+        Mon, 31 Jan 2022 09:42:58 +0000 (UTC)
+Received: from work (unknown [10.40.194.245])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id F082E62D75;
+        Mon, 31 Jan 2022 09:42:57 +0000 (UTC)
+Date:   Mon, 31 Jan 2022 10:42:56 +0100
+From:   Lukas Czerner <lczerner@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] common/rc: set maximum label length for ext4
+Message-ID: <20220131094256.zfdsbzda5abtufvw@work>
+References: <20211123101119.5112-1-lczerner@redhat.com>
+ <YaOTRYYkEwlbnvPb@desktop>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.4.0
-Subject: Re: [PATCH] common/attr: _acl_get_max echo 532 for f2fs
-Content-Language: en-US
-To:     Sun Ke <sunke32@huawei.com>, fstests@vger.kernel.org, guan@eryu.me
-References: <20220130092858.1260210-1-sunke32@huawei.com>
-From:   Chao Yu <chao@kernel.org>
-In-Reply-To: <20220130092858.1260210-1-sunke32@huawei.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YaOTRYYkEwlbnvPb@desktop>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2022/1/30 17:28, Sun Ke wrote:
-> Run generic/026 on f2fs, the diff:
+On Sun, Nov 28, 2021 at 10:33:41PM +0800, Eryu Guan wrote:
+> On Tue, Nov 23, 2021 at 11:11:19AM +0100, Lukas Czerner wrote:
+> > Set maximum label length for ext4 in _label_get_max() to be able to test
+> > online file system label set/get ioctls.
 > 
->      -chacl: cannot set access acl on "largeaclfile": Argument list too long
->      +Wrong ACL count - 532 != 531
+> Some background info included in commit log would be good, e.g. ext4
+> didn't support get/set label ioctl but we're going to add that support
+> in both kernel and e2fsprogs.
 > 
-> The ACL_MAX_ENTRIES depend on MAX_VALUE_LEN(inode), MAX_VALUE_LEN(inode) I got
-> by printk is 4244, so I think the ACL_MAX_ENTRIES should be
-> (4244 - 20) / 8 + 4 =532.
+> And I noticed the kernel patch is still in review, and has no comments
+> so far. So I'd like to wait and make sure the new ioctl will be accepted
+> first.
 > 
-> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> Thanks,
+> Eryu
 
-FYI:
+It's upstream now, can we have this change in so that it can be tested?
 
-https://patchwork.kernel.org/project/fstests/patch/20170428131307.3384-1-chao@kernel.org/
+Thanks!
+-Lukas
 
-I've update the patch based on Jaegeuk's comments, however, I forgot to send it to
-mailing list, so could you please check revised one below?
+> 
+> > 
+> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> > ---
+> >  common/rc | 3 +++
+> >  1 file changed, 3 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 8e351f17..50d6d0bd 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -4545,6 +4545,9 @@ _label_get_max()
+> >  	f2fs)
+> >  		echo 255
+> >  		;;
+> > +	ext2|ext3|ext4)
+> > +		echo 16
+> > +		;;
+> >  	*)
+> >  		_notrun "$FSTYP does not define maximum label length"
+> >  		;;
+> > -- 
+> > 2.31.1
+> 
 
- From 68965c837fd04795064b352589e3f7005e6d75f5 Mon Sep 17 00:00:00 2001
-From: Chao Yu <chao@kernel.org>
-Date: Fri, 28 Apr 2017 20:51:11 +0800
-Subject: [PATCH v2] attr: adbjust acl_max of f2fs
-
-f2fs has set inline_xattr as a default option, and introduced a new option
-named 'noinline_xattr' for disabling default inline_xattr option. So in
-_acl_get_max we need to check 'noinline_xattr' string in fs option,
-otherwise we may select the wrong max acl number since we always found
-the string 'inline_xattr' in fs option.
-
-Additionally, f2fs has changed disk layout of xattr block a bit, so will
-contain one more entry in both inline and noinline xattr inode, this patch
-will modify the max acl number to adjust it.
-
-Signed-off-by: Chao Yu <chao@kernel.org>
----
-v2:
-- adjust the config for old kernel as well.
-  common/attr | 11 ++++++++---
-  1 file changed, 8 insertions(+), 3 deletions(-)
-
-diff --git a/common/attr b/common/attr
-index 35682d7c..6377a936 100644
---- a/common/attr
-+++ b/common/attr
-@@ -26,11 +26,16 @@ _acl_get_max()
-  		echo 8191
-  		;;
-  	f2fs)
--		_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
-+		_fs_options $TEST_DEV | grep "noinline_xattr" >/dev/null 2>&1
-  		if [ $? -eq 0 ]; then
--			echo 531
-+			echo 507
-  		else
--			echo 506
-+			_fs_options $TEST_DEV | grep "inline_xattr" >/dev/null 2>&1
-+			if [ $? -eq 0 ]; then
-+				echo 532
-+			else
-+				echo 507
-+			fi
-  		fi
-  		;;
-  	bcachefs)
--- 
-2.32.0
