@@ -2,65 +2,69 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9287CC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Feb 2022 13:31:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54798C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Feb 2022 15:15:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238678AbiBANbK (ORCPT
+        id S239482AbiBAPPZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Feb 2022 08:31:10 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:60626 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238606AbiBANbK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Feb 2022 08:31:10 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BFD4C61550;
-        Tue,  1 Feb 2022 13:31:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90227C340EE;
-        Tue,  1 Feb 2022 13:31:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1643722269;
-        bh=4Hph1Xspv1ZkBJhPuwT67fnUqWYd5t9uCiDybIaGUJI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=LXUmP9MiVd67nqDGuae58r7bJ5ejkFSOGKd4+N9JgzF0S+BWzjj1G64KlMu7llkFh
-         WbzkUyO/Vy/W++5wS+Wy7SLK2DMtU1ZtsCblfCmtvp4KwEAagyfv1E3y+aNPLhUQA/
-         1XPXHa6zZc+BxDs7pYe1AyWSs/qSZa3vmrgobYtjhXMeN2tPSeqmVFxzDi6D6kDzo1
-         H2bf9+JafqhAi4GQauDEoVFvsNrABolF5aXfsHNUOhmHeZU4u+FfT48hew7GdHKtWP
-         X/22bL0bI/y1Dexb/orSimKzOIcLCiC6mkCAtQ3cpnydGrAdpHGnqONbLuj0PptcJy
-         9YSNw79E3WcHA==
-Date:   Tue, 1 Feb 2022 14:31:03 +0100
-From:   Christian Brauner <brauner@kernel.org>
-To:     Kees Cook <keescook@chromium.org>
-Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
-        Ariadne Conill <ariadne@dereferenced.org>,
-        Rich Felker <dalias@libc.org>,
-        Michael Kerrisk <mtk.manpages@gmail.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Matthew Wilcox <willy@infradead.org>,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/633: adapt execveat() invocations
-Message-ID: <20220201133103.bnqplswevdsdsjfv@wittgenstein>
-References: <20220131171023.2836753-1-brauner@kernel.org>
- <202201311245.0B2126B468@keescook>
+        Tue, 1 Feb 2022 10:15:25 -0500
+Received: from smtp-out2.suse.de ([195.135.220.29]:51396 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229472AbiBAPPZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Feb 2022 10:15:25 -0500
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out2.suse.de (Postfix) with ESMTP id 525041F37C;
+        Tue,  1 Feb 2022 15:15:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1643728524;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=6YoaT3q9zQvaL7F+aDTPKfjQjX5NFoogmkMzzYICYbE=;
+        b=tmMkqrLE7g2PjrgLCdGvJX/bLxS6TWaa1emKvmRID0yCxCe3tMCYOKh6/rXQKwOwDZYFjl
+        R2upL2fP50GXInIYCkMWIthek3ZhXVxGrchDUmyMqSrnAFCPny9IPCZAl1TuQw416i7y22
+        3R/jSB0PjcjArthzMhKzC8l4H3rhRWU=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1643728524;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=6YoaT3q9zQvaL7F+aDTPKfjQjX5NFoogmkMzzYICYbE=;
+        b=FQf492xXK0a8SwvEPCXTba18DIDNZKtdCrRIsEXUGMjQ4Rj0t0+wq+/jQuuzXUbOgeaEZo
+        CS5yf3hNg0INeIDA==
+Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
+        by relay2.suse.de (Postfix) with ESMTP id 4B66EA3B83;
+        Tue,  1 Feb 2022 15:15:24 +0000 (UTC)
+Received: by ds.suse.cz (Postfix, from userid 10065)
+        id 52927DA7A9; Tue,  1 Feb 2022 16:14:40 +0100 (CET)
+Date:   Tue, 1 Feb 2022 16:14:40 +0100
+From:   David Sterba <dsterba@suse.cz>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] btrfs: add test case to verify that btrfs won't waste
+ IO/CPU to defrag compressed extents already at their max size
+Message-ID: <20220201151439.GR14046@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+Mail-Followup-To: dsterba@suse.cz, Qu Wenruo <wqu@suse.com>,
+        fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+References: <20220127055306.30252-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <202201311245.0B2126B468@keescook>
+In-Reply-To: <20220127055306.30252-1-wqu@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 31, 2022 at 12:46:27PM -0800, Kees Cook wrote:
-> On Mon, Jan 31, 2022 at 06:10:23PM +0100, Christian Brauner wrote:
-> > There's a push by Ariadne to enforce that argv[0] cannot be NULL. So far
-> > we've allowed this. Fix the execveat() invocations to set argv[0] to the
-> > name of the file we're about to execute.
-> 
-> To be clear, these tests are also trying to launch set-id binaries with
-> argc == 0, so narrowing the kernel check to only set-id binaries
-> wouldn't help here, yes?
+On Thu, Jan 27, 2022 at 01:53:06PM +0800, Qu Wenruo wrote:
+> There is a long existing bug in btrfs defrag code that it will always
+> try to defrag compressed extents, even they are already at max capacity.
 
-Yes, that wouldn't help.
-The new approach of mutating argv { NULL } into { "", NULL } is better.
+As commended under the patch, this not considered a bug, because the
+defrag ioctl is expected to reshuffle the extents, with or without
+compression and improving the compression ratio if asked to recompress
+with hither level. What is not perfect is the kernel side that could try
+harder to merge extents into bigger contiguous chunks, but as long as
+the compression is involved it's not possible to decide if the extents
+should be skipped or not.
