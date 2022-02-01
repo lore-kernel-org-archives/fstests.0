@@ -2,100 +2,65 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B28C4C433FE
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Jan 2022 20:47:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9287CC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Feb 2022 13:31:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242023AbiAaUrR (ORCPT
+        id S238678AbiBANbK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Jan 2022 15:47:17 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40546 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1348454AbiAaUqe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Jan 2022 15:46:34 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1643661994;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=nlHslKz1cGxHLBwn88wZKDWe9MiG6x7ySEZHx4PfzqQ=;
-        b=OYDp8czA8UcxZ8DOcSeY6Ob7Jw4w3H3SOcZCxmGNVHuN1ZHpknvrNf9Y3HgZ9NyzcwEAEm
-        zbof09hLA5ZNXVzBgK9UboIhuV+xL0TJFejjGv2TYO/HXbH1YkOUU8qTgSOS0GzZb+E1rN
-        K6COIEEuYKckwuoSibeOWrGit87MAfY=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-208-YnzQenGqORC08BwzFxuxjA-1; Mon, 31 Jan 2022 15:46:31 -0500
-X-MC-Unique: YnzQenGqORC08BwzFxuxjA-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Tue, 1 Feb 2022 08:31:10 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:60626 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238606AbiBANbK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Feb 2022 08:31:10 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 01AED1091DA0;
-        Mon, 31 Jan 2022 20:46:30 +0000 (UTC)
-Received: from work (unknown [10.40.194.245])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 00FDA46975;
-        Mon, 31 Jan 2022 20:46:28 +0000 (UTC)
-Date:   Mon, 31 Jan 2022 21:46:25 +0100
-From:   Lukas Czerner <lczerner@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] common/rc: set maximum label length for ext4
-Message-ID: <20220131204625.eimkrccyp4lqit57@work>
-References: <20211123101119.5112-1-lczerner@redhat.com>
- <20220131170700.GA8288@magnolia>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BFD4C61550;
+        Tue,  1 Feb 2022 13:31:09 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90227C340EE;
+        Tue,  1 Feb 2022 13:31:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1643722269;
+        bh=4Hph1Xspv1ZkBJhPuwT67fnUqWYd5t9uCiDybIaGUJI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=LXUmP9MiVd67nqDGuae58r7bJ5ejkFSOGKd4+N9JgzF0S+BWzjj1G64KlMu7llkFh
+         WbzkUyO/Vy/W++5wS+Wy7SLK2DMtU1ZtsCblfCmtvp4KwEAagyfv1E3y+aNPLhUQA/
+         1XPXHa6zZc+BxDs7pYe1AyWSs/qSZa3vmrgobYtjhXMeN2tPSeqmVFxzDi6D6kDzo1
+         H2bf9+JafqhAi4GQauDEoVFvsNrABolF5aXfsHNUOhmHeZU4u+FfT48hew7GdHKtWP
+         X/22bL0bI/y1Dexb/orSimKzOIcLCiC6mkCAtQ3cpnydGrAdpHGnqONbLuj0PptcJy
+         9YSNw79E3WcHA==
+Date:   Tue, 1 Feb 2022 14:31:03 +0100
+From:   Christian Brauner <brauner@kernel.org>
+To:     Kees Cook <keescook@chromium.org>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        Ariadne Conill <ariadne@dereferenced.org>,
+        Rich Felker <dalias@libc.org>,
+        Michael Kerrisk <mtk.manpages@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Matthew Wilcox <willy@infradead.org>,
+        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic/633: adapt execveat() invocations
+Message-ID: <20220201133103.bnqplswevdsdsjfv@wittgenstein>
+References: <20220131171023.2836753-1-brauner@kernel.org>
+ <202201311245.0B2126B468@keescook>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20220131170700.GA8288@magnolia>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+In-Reply-To: <202201311245.0B2126B468@keescook>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 31, 2022 at 09:07:00AM -0800, Darrick J. Wong wrote:
-> On Tue, Nov 23, 2021 at 11:11:19AM +0100, Lukas Czerner wrote:
-> > Set maximum label length for ext4 in _label_get_max() to be able to test
-> > online file system label set/get ioctls.
-> > 
-> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> > ---
-> >  common/rc | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 8e351f17..50d6d0bd 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -4545,6 +4545,9 @@ _label_get_max()
-> >  	f2fs)
-> >  		echo 255
-> >  		;;
-> > +	ext2|ext3|ext4)
-> > +		echo 16
+On Mon, Jan 31, 2022 at 12:46:27PM -0800, Kees Cook wrote:
+> On Mon, Jan 31, 2022 at 06:10:23PM +0100, Christian Brauner wrote:
+> > There's a push by Ariadne to enforce that argv[0] cannot be NULL. So far
+> > we've allowed this. Fix the execveat() invocations to set argv[0] to the
+> > name of the file we're about to execute.
 > 
-> After reviewing the ext4 ondisk format, 16 is the correct value.
-> 
-> Though I wonder, what actually prevents generic/492 from running on old
-> kernels without GETLABEL support?
+> To be clear, these tests are also trying to launch set-id binaries with
+> argc == 0, so narrowing the kernel check to only set-id binaries
+> wouldn't help here, yes?
 
-_require_xfs_io_command "label"
-
-should take care of that. This is why I though it was no problem to get
-this change in early.
-
--Lukas
-
-> 
-> Either way this patch is ok, so...
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> 
-> --D
-> 
-> > +		;;
-> >  	*)
-> >  		_notrun "$FSTYP does not define maximum label length"
-> >  		;;
-> > -- 
-> > 2.31.1
-> > 
-> 
-
+Yes, that wouldn't help.
+The new approach of mutating argv { NULL } into { "", NULL } is better.
