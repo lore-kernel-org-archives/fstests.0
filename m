@@ -2,136 +2,151 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE4EEC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Feb 2022 04:29:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 530D0C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Feb 2022 07:38:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244098AbiBBE3t (ORCPT
+        id S238801AbiBBHie (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Feb 2022 23:29:49 -0500
-Received: from smtp-out2.suse.de ([195.135.220.29]:42250 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232908AbiBBE3s (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Feb 2022 23:29:48 -0500
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 8C1BB1F380
-        for <fstests@vger.kernel.org>; Wed,  2 Feb 2022 04:29:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1643776187; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=WfD6RIBs9wAu0X2u9QVf8Mwucbv4JxXviP4Pu4GhSv8=;
-        b=FXc94HsOhdOzt46851u4Mv5rSMV0zR4W/xRfqyKvS/lvc33tUHScIhUQOgHnWMx4l/yiWU
-        STCiLWg7CFUcl1GxxxZthT1WxM/lB/wQWsxJSNFYbM+IMO+hWOxKydWYuqzO6K3Pzq6S7/
-        F/sRb9y0KZX+3dz8kAAZCeVhodGU0Ok=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E22A413B8A
-        for <fstests@vger.kernel.org>; Wed,  2 Feb 2022 04:29:46 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id kujsKroI+mFBVAAAMHmgww
-        (envelope-from <wqu@suse.com>)
-        for <fstests@vger.kernel.org>; Wed, 02 Feb 2022 04:29:46 +0000
-From:   Qu Wenruo <wqu@suse.com>
+        Wed, 2 Feb 2022 02:38:34 -0500
+Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:58740 "EHLO
+        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231256AbiBBHie (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Feb 2022 02:38:34 -0500
+Received: from dread.disaster.area (pa49-180-69-7.pa.nsw.optusnet.com.au [49.180.69.7])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 71F7E62C033
+        for <fstests@vger.kernel.org>; Wed,  2 Feb 2022 18:38:32 +1100 (AEDT)
+Received: from discord.disaster.area ([192.168.253.110])
+        by dread.disaster.area with esmtp (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nFADn-00774h-7H
+        for fstests@vger.kernel.org; Wed, 02 Feb 2022 18:38:31 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.95)
+        (envelope-from <david@fromorbit.com>)
+        id 1nFADn-003aBI-3h
+        for fstests@vger.kernel.org;
+        Wed, 02 Feb 2022 18:38:31 +1100
+From:   Dave Chinner <david@fromorbit.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH] src/fssum: use newer EVP_* interface to replace deprecated MD5_* interace
-Date:   Wed,  2 Feb 2022 12:29:29 +0800
-Message-Id: <8093f1fb417c961791e2cb5b1b4ef7919c80cf4c.1643776132.git.wqu@suse.com>
-X-Mailer: git-send-email 2.35.0
+Subject: [PATCH] fstest: add more tests to the metadump group
+Date:   Wed,  2 Feb 2022 18:38:31 +1100
+Message-Id: <20220202073831.854055-1-david@fromorbit.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=61fa34f8
+        a=NB+Ng1P8A7U24Uo7qoRq4Q==:117 a=NB+Ng1P8A7U24Uo7qoRq4Q==:17
+        a=oGFeUVbbRNcA:10 a=20KFwNOVAAAA:8 a=wopq05uW3E7KPXx9n6wA:9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-In OpenSSL 3.0, MD_Init/Update/Final() interfaces are marked deprecated,
-and we have to go EVP_DigestInit/Update/Final() instead.
+From: Dave Chinner <dchinner@redhat.com>
 
-Personally I'm not a fan of this, especially the new EVP_MD_CTX
-structure can no longer be stack allocated, thus we have to dynamically
-allocate and free EVP_MD_CTX in sum_init() and sum_free().
+Because they use metadump and I want to test metadump more easily.
 
-Hopes this is proper way to go and would solve the problem until OpenSSL
-chooses to change their interface again.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- src/fssum.c | 23 +++++++++++++++++++++++
- src/md5.h   |  2 +-
- 2 files changed, 24 insertions(+), 1 deletion(-)
+ tests/xfs/129 | 2 +-
+ tests/xfs/234 | 2 +-
+ tests/xfs/253 | 2 +-
+ tests/xfs/284 | 2 +-
+ tests/xfs/291 | 2 +-
+ tests/xfs/336 | 2 +-
+ tests/xfs/432 | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/src/fssum.c b/src/fssum.c
-index 3d97a70bf02f..390bfde02c7d 100644
---- a/src/fssum.c
-+++ b/src/fssum.c
-@@ -48,7 +48,11 @@ struct excludes {
- };
+diff --git a/tests/xfs/129 b/tests/xfs/129
+index df977552..90887d54 100755
+--- a/tests/xfs/129
++++ b/tests/xfs/129
+@@ -9,7 +9,7 @@
+ # said block.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick clone
++_begin_fstest auto quick clone metadump
  
- typedef struct _sum {
-+#ifdef HAVE_OPENSSL
-+	EVP_MD_CTX	*ctx;
-+#else
- 	MD5_CTX 	md5;
-+#endif
- 	unsigned char	out[16];
- } sum_t;
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/234 b/tests/xfs/234
+index a61681ab..6ff2f228 100755
+--- a/tests/xfs/234
++++ b/tests/xfs/234
+@@ -9,7 +9,7 @@
+ # said block.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rmap punch
++_begin_fstest auto quick rmap punch metadump
  
-@@ -175,19 +179,38 @@ alloc(size_t sz)
- void
- sum_init(sum_t *cs)
- {
-+#ifdef HAVE_OPENSSL
-+	cs->ctx = EVP_MD_CTX_new();
-+	if (!cs->ctx) {
-+		fprintf(stderr, "evp md ctx allocation failed\n");
-+		exit(-1);
-+	}
-+	EVP_DigestInit(cs->ctx, EVP_md5());
-+#else
- 	MD5_Init(&cs->md5);
-+#endif
- }
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/253 b/tests/xfs/253
+index a96a2c17..1899ce52 100755
+--- a/tests/xfs/253
++++ b/tests/xfs/253
+@@ -18,7 +18,7 @@
+ # that is already in use (and no other name is available to use).
+ #
+ . ./common/preamble
+-_begin_fstest auto quick
++_begin_fstest auto quick metadump
  
- void
- sum_fini(sum_t *cs)
- {
-+#ifdef HAVE_OPENSSL
-+	EVP_DigestFinal(cs->ctx, cs->out, NULL);
-+	EVP_MD_CTX_free(cs->ctx);
-+	cs->ctx = NULL;
-+#else
- 	MD5_Final(cs->out, &cs->md5);
-+#endif
- }
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/284 b/tests/xfs/284
+index 9d75bcec..fa7bfdd0 100755
+--- a/tests/xfs/284
++++ b/tests/xfs/284
+@@ -8,7 +8,7 @@
+ # on mounted XFS to make sure they refuse to proceed.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick dump copy db mkfs repair
++_begin_fstest auto quick dump copy db mkfs repair metadump
  
- void
- sum_add(sum_t *cs, void *buf, int size)
- {
-+#ifdef HAVE_OPENSSL
-+	EVP_DigestUpdate(cs->ctx, buf, size);
-+#else
- 	MD5_Update(&cs->md5, buf, size);
-+#endif
- }
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/291 b/tests/xfs/291
+index bbc6f2b9..6d5e247e 100755
+--- a/tests/xfs/291
++++ b/tests/xfs/291
+@@ -7,7 +7,7 @@
+ # Test xfs_repair on fragmented multi-block dir2 fs
+ #
+ . ./common/preamble
+-_begin_fstest auto repair
++_begin_fstest auto repair metadump
  
- void
-diff --git a/src/md5.h b/src/md5.h
-index 2da44bf355a3..07c03ca304df 100644
---- a/src/md5.h
-+++ b/src/md5.h
-@@ -24,7 +24,7 @@
-  */
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/336 b/tests/xfs/336
+index 279830b5..6592419d 100755
+--- a/tests/xfs/336
++++ b/tests/xfs/336
+@@ -7,7 +7,7 @@
+ # Exercise metadump on realtime rmapbt preservation.
+ #
+ . ./common/preamble
+-_begin_fstest auto rmap realtime
++_begin_fstest auto rmap realtime metadump
  
- #ifdef HAVE_OPENSSL
--#include <openssl/md5.h>
-+#include <openssl/evp.h>
- #elif !defined(_MD5_H)
- #define _MD5_H
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/432 b/tests/xfs/432
+index 40cb2474..86012f0b 100755
+--- a/tests/xfs/432
++++ b/tests/xfs/432
+@@ -14,7 +14,7 @@
+ # threshold to 2^21 blocks, make sure we never do that again.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick dir metadata
++_begin_fstest auto quick dir metadata metadump
  
+ # Override the default cleanup function.
+ _cleanup()
 -- 
-2.35.0
+2.33.0
 
