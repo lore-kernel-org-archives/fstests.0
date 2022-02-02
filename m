@@ -2,106 +2,270 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24CDBC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Feb 2022 08:46:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E3AEC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Feb 2022 09:52:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241552AbiBBIqt (ORCPT
+        id S245624AbiBBJwW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Feb 2022 03:46:49 -0500
-Received: from mout.gmx.net ([212.227.17.20]:34183 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239242AbiBBIqt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Feb 2022 03:46:49 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1643791606;
-        bh=hg/Ci5eyqz24rfvcwWvY/bNMwHdZN0MQY8sYoL+kO94=;
-        h=X-UI-Sender-Class:Date:Subject:To:References:From:In-Reply-To;
-        b=RSVkPpfBk/MboolgYogSOX8AtJk9hfcPBpaHeVy5aFkTUHLgy3rm87FhPo6mANn+m
-         Cz3NTdfetYtz9+KfQkryCZmeQTj6EVJyhiAckckMuJsgGf5G03LvU5kS2vnoBWXKNI
-         XmmkvZrDqSUzgczp+gv31NyIYmutkW456NGv8vOo=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MvbG2-1mP04Z1nT4-00sg5z; Wed, 02
- Feb 2022 09:46:46 +0100
-Message-ID: <b8e7550b-75df-94e0-8af0-1b86ca5b1749@gmx.com>
-Date:   Wed, 2 Feb 2022 16:46:42 +0800
+        Wed, 2 Feb 2022 04:52:22 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:59782 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232671AbiBBJwW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Feb 2022 04:52:22 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id D1DE5B8305A;
+        Wed,  2 Feb 2022 09:52:20 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9FC82C004E1;
+        Wed,  2 Feb 2022 09:52:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1643795539;
+        bh=zTsakfmHfwgjvVmFqIUX9q0PunPtBXLCKRNOE0Dd9zk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=K4ZTLIXJcvnLRb+oi3YWXv9DVqGid8uBcr4p1QQHUTB5xeD3j9I1Ceo1M/5T2uMpN
+         SqUz28iMfVn8Q3vnh9FHQW764mR9ILKSCI+PsgvBjap7V0t/2jO74NTnJMuSk3N4/B
+         DazbZ8AgWPC46NJs9ZofcgrqTMj5AMxR+5u1z11I60kT9gewlpSDsKG8FmKOkYJ/Hq
+         FAcF73UVSB+jaeb54uUzrcEGD40ZD30ywjF4b5NQGjtxaUdh27r83cvNepSeIJVCf/
+         s27meK1UOrtygs913uq39GkzKvSy1L3ewxSEmi3NmbYTHITETBwCAfpiKbPek7ZM8v
+         GA00RpncKXbhA==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
+Cc:     Ariadne Conill <ariadne@dereferenced.org>,
+        Kees Cook <keescook@chromium.org>,
+        Rich Felker <dalias@libc.org>,
+        Michael Kerrisk <mtk.manpages@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Matthew Wilcox <willy@infradead.org>,
+        David Laight <David.Laight@ACULAB.COM>,
+        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Christian Brauner <brauner@kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>
+Subject: [PATCH] generic/633: pass non-empty argv with execveat()
+Date:   Wed,  2 Feb 2022 10:52:09 +0100
+Message-Id: <20220202095209.2953458-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.1
-Subject: Re: [PATCH] btrfs: add test case to verify that btrfs won't waste
- IO/CPU to defrag compressed extents already at their max size
-Content-Language: en-US
-To:     dsterba@suse.cz, Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-References: <20220127055306.30252-1-wqu@suse.com>
- <20220201151439.GR14046@twin.jikos.cz>
- <9d3b5405-2d76-dd2e-1b1b-a404d3cb4db1@gmx.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-In-Reply-To: <9d3b5405-2d76-dd2e-1b1b-a404d3cb4db1@gmx.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:8o0BdUPbgsAgShR1rM+0QiaHyXzEuqbaLpUgVg0FcfyYpS2kxSi
- bdWuGNSsGGhXU4yVUX79wh9Ao7pfBYihkwJaEzgOoQX1ii5lcKERW7E9dd9xdB/w3XRr7Ps
- 9pYh/6U8qnCvLAidtUOT2+YCEN+kUci2zBKCeQroNrqGV/hVQulD/KgCqQiKLrHXQFBCSc8
- e1cu8vVQ8UzxEnmAfDVsw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:BPahAysbkOU=:FBK+DHMsH1DGUBwbboyhLS
- lfYFhdKpwgLi9yPayIubcf5tokI3sluTyQT6mDVA+RiNh34FX/mv4lpoGmrV26CnG3lU5NkDy
- V/+4Zix1nmRrkl3AVv2cO2ChGgJtCTCYGnuk17LRkzsnVzy83njt8d3aeaaXbuaQdS/tp5b0+
- Qg0Nkc6n4ia0TuyF42yJGoWkLCvyClwU8uRyNbvTIy5NlnSP7eFLgS3t4hqEhv9VvgYDSTNiM
- B8HHC1kNAliMiygHUGbqSk4Iiu51ds1djJ/9MrOuPTKWILQvr71zfDQgjHKoNagxjtTAXQ2QX
- U7FbA4QEYPRTPQkGPpEw9OKa1YLkzxM1BAkiqD8Rxhivyq/7f+hh0+r11zDw20VTFCZ8eZ75f
- Ho/Qk1DaV719QoIq8HzG57icNy7wR0V4JFY77QhZCK/28Ag/fs0Qq4koJjQ/yfXlfEnmB2VSt
- 8A6rLFSr2oMpHZ38vtFjIIADqE8SnBtDa4a/8Kv7DwaqLDJliPc6ZNWcO/EWKsW7jnSeikZW8
- s1OojkbX+tn7unvnQI2JKUBZMLuyd0t5lwGaH3sCKR5Orzu8zzyn4lb6jC7Pgfq3JKxx5nu0O
- Fnel+YbQVR8+L4OPAaNiDhw57KPraB+dfsVhzfmMmuYxEsWkBIGKujxQNje0JkQgGDJMP0Qj1
- Dj3MbVzLbAlZo7W1O4M8mRa0Nq5H7/jPGPAckjIHHHQV3OOmqUHL7Y0pZ2m7+Ec9z+eqyqbSB
- oolxT5xzrW9mi5UX/s1nSN/rRC8hTv6GvQHNelRQt4l+ud9ZfiNHp+9Q7TGG8hSPBq6r7ua41
- aXE3IqAbSvEbu2NW5tj7hMWq+0WZj5mO39CORaMzIfdezv1ycEGoNT0nwqIW9Mm/fGYvaixny
- 3/bDWmLadZ0PiP5fXaC0Eg8tiwn1PiMdDNHK+6xRmyfug7Nri2qT76hb8o5LsGq8AXAOEe46A
- jBwPvqMfe09YxIdx8dO4whym+J43rs/wITtQI2DBoyXGcpYJhCvGR3SpazLkzAnfizKoyxvaZ
- UUBjla7cNGVfjtXo+3okCpfei9l30Sr6Y2PAaE44cxnX9wDYT/+XPJdcK5n2fh/N8ObwOZiZB
- DW+tOEXY7mSDP8=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6733; h=from:subject; bh=zTsakfmHfwgjvVmFqIUX9q0PunPtBXLCKRNOE0Dd9zk=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMST+CjE9/+d32OF1jkdXGokpT/smUPZ6trRC9xlHb+O9bZbV 7KwJHaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABN5k8HwV+rRk0jPYI9Nq+WksiZ7hb JlnhW/Wm3mOnODblOoRLDdQ4b/WYEin+92vOB5VL7lttPX2fVvhCQl+WOfKVUy8t6u/F/PCQA=
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+So far the kernel allowed passing an empty argv. Given that there's now
+a push to restrict the kernel in that regard make sure we pass at least
+one argument with argv.
 
+Cc: Ariadne Conill <ariadne@dereferenced.org>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Rich Felker <dalias@libc.org>
+Cc: Eryu Guan <guaneryu@gmail.com>
+Cc: Michael Kerrisk <mtk.manpages@gmail.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Matthew Wilcox <willy@infradead.org>
+Cc: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Link: https://lore.kernel.org/lkml/20220127000724.15106-1-ariadne@dereferenced.org
+Signed-off-by: Christian Brauner <brauner@kernel.org>
+---
+/* v2 */
+- Make sure argv array is NULL terminated. I fired the first patch too
+  quickly.
+- Take the chance and remove the repeated argv open-coding and move it
+  directly into the execveat helper and rename it to reflect the fact
+  that it's not just a simple syscall wrapper anymore.
+---
+ src/idmapped-mounts/idmapped-mounts.c | 65 +++++++++------------------
+ 1 file changed, 22 insertions(+), 43 deletions(-)
 
-On 2022/2/2 08:07, Qu Wenruo wrote:
->
->
-> On 2022/2/1 23:14, David Sterba wrote:
->> On Thu, Jan 27, 2022 at 01:53:06PM +0800, Qu Wenruo wrote:
->>> There is a long existing bug in btrfs defrag code that it will always
->>> try to defrag compressed extents, even they are already at max capacit=
-y.
->>
->> As commended under the patch, this not considered a bug, because the
->> defrag ioctl is expected to reshuffle the extents, with or without
->> compression and improving the compression ratio if asked to recompress
->> with hither level. What is not perfect is the kernel side that could tr=
-y
->> harder to merge extents into bigger contiguous chunks, but as long as
->> the compression is involved it's not possible to decide if the extents
->> should be skipped or not.
->
-> What I can do is to add extra test to make sure if "btrfs fi defrag -c"
-> always defrag the file no matter whatever.
->
-> To me, these two factors don't conflict with each other at all.
+diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+index 4cf6c3bb..5bab19a9 100644
+--- a/src/idmapped-mounts/idmapped-mounts.c
++++ b/src/idmapped-mounts/idmapped-mounts.c
+@@ -695,11 +695,14 @@ static int fd_to_fd(int from, int to)
+ 	return 0;
+ }
+ 
+-static int sys_execveat(int fd, const char *path, char **argv, char **envp,
+-			int flags)
++static int do_execveat(int fd, const char *path, char **envp)
+ {
+ #ifdef __NR_execveat
+-	return syscall(__NR_execveat, fd, path, argv, envp, flags);
++	static char *argv_empty[] = {
++		"",
++		NULL,
++	};
++	return syscall(__NR_execveat, fd, path, argv_empty, envp, 0);
+ #else
+ 	errno = ENOSYS;
+ 	return -1;
+@@ -3597,15 +3600,12 @@ static int setid_binaries(void)
+ 			"EXPECTED_EGID=5000",
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		if (!expected_uid_gid(t_dir1_fd, FILE1, 0, 5000, 5000))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(t_dir1_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(t_dir1_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -3725,15 +3725,12 @@ static int setid_binaries_idmapped_mounts(void)
+ 			"EXPECTED_EGID=15000",
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 15000, 15000))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -3864,9 +3861,6 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
+ 			"EXPECTED_EGID=5000",
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+@@ -3874,8 +3868,8 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 5000, 5000))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -3923,9 +3917,6 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
+ 			"EXPECTED_EGID=0",
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		if (!caps_supported()) {
+ 			log_debug("skip: capability library not installed");
+@@ -3938,8 +3929,8 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 0))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -3991,9 +3982,6 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
+ 			NULL,
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		if (!switch_userns(attr.userns_fd, 0, 0, false))
+ 			die("failure: switch_userns");
+@@ -4007,8 +3995,8 @@ static int setid_binaries_idmapped_mounts_in_userns(void)
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, t_overflowuid, t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -4149,9 +4137,6 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
+ 			"EXPECTED_EGID=5000",
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		userns_fd = get_userns_fd(0, 10000, 10000);
+ 		if (userns_fd < 0)
+@@ -4163,8 +4148,8 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 5000, 5000))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -4213,9 +4198,6 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
+ 			"EXPECTED_EGID=0",
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		userns_fd = get_userns_fd(0, 10000, 10000);
+ 		if (userns_fd < 0)
+@@ -4232,8 +4214,8 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 0))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
+@@ -4285,9 +4267,6 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
+ 			NULL,
+ 			NULL,
+ 		};
+-		static char *argv[] = {
+-			NULL,
+-		};
+ 
+ 		userns_fd = get_userns_fd(0, 10000, 10000);
+ 		if (userns_fd < 0)
+@@ -4305,8 +4284,8 @@ static int setid_binaries_idmapped_mounts_in_userns_separate_userns(void)
+ 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, t_overflowuid, t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 
+-		sys_execveat(open_tree_fd, FILE1, argv, envp, 0);
+-		die("failure: sys_execveat");
++		do_execveat(open_tree_fd, FILE1, envp);
++		die("failure: do_execveat");
+ 
+ 		exit(EXIT_FAILURE);
+ 	}
 
-Here comes the new test to make sure "btrfs fi defrag -c" can do what it
-should do:
-https://patchwork.kernel.org/project/linux-btrfs/patch/20220202083158.6826=
-2-1-wqu@suse.com/
+base-commit: d8dee1222ecdfa1cff1386a61248e587eb3b275d
+-- 
+2.32.0
 
-And of course, current (with the max capacity check) kernel can pass
-both tests without problem, proving those two aspects are not in
-conflict at all.
-
-Thanks,
-Qu
-
->
-> Thanks,
-> Qu
