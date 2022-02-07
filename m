@@ -2,51 +2,51 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 651EBC43217
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Feb 2022 07:15:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC62EC433FE
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Feb 2022 07:16:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233110AbiBGHPN (ORCPT
+        id S233577AbiBGHPO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Feb 2022 02:15:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45902 "EHLO
+        Mon, 7 Feb 2022 02:15:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238603AbiBGG4z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Feb 2022 01:56:55 -0500
+        with ESMTP id S238419AbiBGG4r (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Feb 2022 01:56:47 -0500
 Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22B6EC043181;
-        Sun,  6 Feb 2022 22:56:54 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14BE6C043184;
+        Sun,  6 Feb 2022 22:56:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1644217014; x=1675753014;
+  t=1644217006; x=1675753006;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=PmOAO/z/5SQRJrAaX0rjm1/SDaYQLCQkeqzLnW4Z6gk=;
-  b=Zc9Bb2JQ2mD/1RrbfaXULEHaRFxbDpUhxdp5avSkNmioTTM2CTB3pDXB
-   vR9AdvpeJDelWCMohY+ty7mMV9tTESKeGRDLo0I2PlO9a1mcIeNpMVsZh
-   k6UE1hN3SDsL0ZnfneUy7UwUTxHs2VXNOJp9buyPqEN7njmeI6Y+s1R2u
-   F2Ln5ZsCJE/ZimfozdufRnVt2O00mPGDi4YMh+PLIDwbH0Q2MNzBwPqVv
-   PJaDYg/b9LdRyfrC29H4+9pbVo8/Geq+R+7OAoSZWuTUHTEyB3g4fSsh4
-   K2y7a+VUQCn6K54eexMyDMK0pUVSHFRwB2A8fusJYH8qfCPY+MAX4U69q
+  bh=TUe9FJuEf7BWKrxSIxqPYK0eG0nCVdO3BScCuHtRrAI=;
+  b=Ym+CDPpvZ5IzH5rFIajaYudXMjwDKGMM9kHbLc0gXPOVfXP39ZaTAtBu
+   FJJV3sE3yJJXckoyXDPtNJ3a1VbLIHaKRfndfSOY6a9Bm9igWeZrzEWrB
+   Bvkb2r9BMES35OZp6moF8pIWZkszfZyiq0e0fp4TPGi6gAE/Gfb6vXmyo
+   qQAYBepoyawWMTl/9GQo4GQ3aDQWOpxzBMS54ZlOPGYJmTpdVfLWm1CKW
+   5yaW6Xmb6Mk7aiH8SEMgoA1yZwdLzCruzMjtqb1Prnf8CMcmwRLLHQ/jv
+   w9uH1toR7LwNCS7wlpXsJWiXf/FtADh8oHG7cK4xsi00NjAz6lNOaVzqo
    A==;
 X-IronPort-AV: E=Sophos;i="5.88,349,1635177600"; 
-   d="scan'208";a="192305063"
+   d="scan'208";a="192305057"
 Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Feb 2022 14:55:50 +0800
-IronPort-SDR: r9932kn+f4XOEzku5Flek6+HFtzQc+8HL+uc3Mwj4k3AoR7t3uIqYKz75WhmKTLnp/0lFImHkI
- IDlWcy0JWXKhbs92gMFpgNLAatAc9qebkeqV80212Q9AVDc0f63bgyW/doz0owoRTKDS13slfl
- ED/nKvydEV3tk/1+hIZkF6kipoNp+NmkM2bJlYocMamIbGZrxaZucjg8sr6DIi7cY6X4apYYEs
- DsWojXKKPT26Ui6yDalliQ4vsZfGADH7S+PguUk+OcMfSOfiHN9aN25q0ipBpJBCI6vtCPl2Zy
- iUSu+9j5/x0pkoAFT5Jh8n9R
+  by ob1.hgst.iphmx.com with ESMTP; 07 Feb 2022 14:55:43 +0800
+IronPort-SDR: 2MREi+8FS5XRvb3YPDJ5j/wO3grSW6mB+2WMcjsGBY/pQaU3yzAmoeNbV3Pj2+i2qlaofwk7e8
+ 76r8KZmpc8++CoxqPpiG/eAph4ERjp+COLKBhG0aS1fzXtm7cktlJi7IfF6idMTg7I0IU5k3Af
+ Xr25E67rV/6U+5ljJ1o/8mL+HfKLjoD8gunqZX5FB01CzP9h6KMhdQvgVcsseCvD5bUsEl/RFp
+ O0EXiKOZ2Wdwcs06SSKQwrRVcHqnar9oWn295Y+0sl7TQ0o5/2oWA0c4E7l5h9LcYRjhZR98IT
+ sHQf/4rnabU5nSbbXQa4B3d4
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Feb 2022 22:28:52 -0800
-IronPort-SDR: r8QQtUb9+zVVEQp3oSLE4cpDzRuok5hPjxlAL9Eb1Pz5tM2Z7zejavee8SQH57O5ZBbdhjKPhf
- Zh8qpfV5RPdCEg51HImkRuSlzoJig7m/auj+plV/nzomwAMpW1kF8UQ0GdtBvygfWXKOVcroD+
- 6GLDqJqZWNVtMAgEZBNy4JPC0nNPY1TNwoXZ8NWzEeGWisO52ZwOM14vJ8FbgsP1VRVLU0Ir65
- OObTMBuRjWbNwYKLKvb+yH/D7KMgjsreFcNOdzEN9zj+wO4ZWWU4gPOqTWjNPUhmjLCNOoAEP9
- ei0=
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Feb 2022 22:28:45 -0800
+IronPort-SDR: e1JXFxzveIsv04C7p2hz7i13/BR9GkuZBcQITXqrNrhqTj1THm4SleplX5Eb1I400adAe5aLTE
+ KaGJNw1tq/uHEGLXPQA8OJuDs5uNz+yK9dKVroSpuebwODf5+DadFfDkZpQ4Vte2NkeuRXhw2S
+ YHdbQsE3cWDcS/RpS3audoHqSV8wA9gEhzhheDfOKnpESz1nP6bwcxooaN2G9HHjmy6/P5qpmq
+ JhK1QOCFpedTTAzZf2DO1IRFK/hFo0Ie+RRfKHvpaHqmLebUGpkZ8IKyLowwQwwgQtrZR+8+hI
+ xXE=
 WDCIronportException: Internal
 Received: from shindev.dhcp.fujisawa.hgst.com (HELO shindev.fujisawa.hgst.com) ([10.149.52.173])
-  by uls-op-cesaip01.wdc.com with ESMTP; 06 Feb 2022 22:55:50 -0800
+  by uls-op-cesaip01.wdc.com with ESMTP; 06 Feb 2022 22:55:44 -0800
 From:   Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Cc:     linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
@@ -54,9 +54,9 @@ Cc:     linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
         Johannes Thumshirn <johannes.thumshirn@wdc.com>,
         Damien Le Moal <damien.lemoal@opensource.wdc.com>,
         Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Subject: [PATCH 6/7] common: move _xfs_filter_mkfs from common/filter to common/xfs
-Date:   Mon,  7 Feb 2022 15:55:40 +0900
-Message-Id: <20220207065541.232685-7-shinichiro.kawasaki@wdc.com>
+Subject: [PATCH 1/7] common/rc: fix btrfs mixed mode usage in _scratch_mkfs_sized
+Date:   Mon,  7 Feb 2022 15:55:35 +0900
+Message-Id: <20220207065541.232685-2-shinichiro.kawasaki@wdc.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20220207065541.232685-1-shinichiro.kawasaki@wdc.com>
 References: <20220207065541.232685-1-shinichiro.kawasaki@wdc.com>
@@ -66,132 +66,38 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The helper function _xfs_filter_mkfs works only for xfs. Move it from
-common/filter to common/xfs. Also remove useless lines for other
-filesystems.
+The helper function _scratch_mkfs_sized needs a couple of improvements
+for btrfs. At first, the function adds --mixed option to mkfs.btrfs when
+the filesystem size is smaller then 256MiB, but this threshold is no
+longer correct and it should be 109MiB. Secondly, the --mixed option
+shall not be specified to mkfs.btrfs for zoned devices, since zoned
+devices does not allow mixing metadata blocks and data blocks.
 
 Suggested-by: Naohiro Aota <naohiro.aota@wdc.com>
 Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 ---
- common/filter | 53 ---------------------------------------------------
- common/xfs    | 43 +++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 43 insertions(+), 53 deletions(-)
+ common/rc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/common/filter b/common/filter
-index 24fd0650..7c71be4f 100644
---- a/common/filter
-+++ b/common/filter
-@@ -115,59 +115,6 @@ _filter_date()
- 	-e 's/[A-Z][a-z][a-z] [A-z][a-z][a-z]  *[0-9][0-9]* [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [0-9][0-9][0-9][0-9]$/DATE/'
- }
- 
--# prints filtered output on stdout, values (use eval) on stderr
--# Non XFS filesystems always return a 4k block size and a 256 byte inode.
--_xfs_filter_mkfs()
--{
--    case $FSTYP in
--    xfs)
--	;;
--    *)
--	cat - >/dev/null
--	perl -e 'print STDERR "dbsize=4096\nisize=256\n"'
--	return ;;
--    esac
--
--    echo "_fs_has_crcs=0" >&2
--    set -
--    perl -ne '
--    if (/^meta-data=([\w,|\/.-]+)\s+isize=(\d+)\s+agcount=(\d+), agsize=(\d+) blks/) {
--	print STDERR "ddev=$1\nisize=$2\nagcount=$3\nagsize=$4\n";
--	print STDOUT "meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks\n";
--    }
--    if (/^\s+=\s+sectsz=(\d+)\s+attr=(\d+)/) {
--        print STDERR "sectsz=$1\nattr=$2\n";
--    }
--    if (/^\s+=\s+crc=(\d)/) {
--        print STDERR "_fs_has_crcs=$1\n";
--    }
--    if (/^data\s+=\s+bsize=(\d+)\s+blocks=(\d+), imaxpct=(\d+)/) {
--	print STDERR "dbsize=$1\ndblocks=$2\nimaxpct=$3\n";
--	print STDOUT "data     = bsize=XXX blocks=XXX, imaxpct=PCT\n";
--    }
--    if (/^\s+=\s+sunit=(\d+)\s+swidth=(\d+) blks/) {
--        print STDERR "sunit=$1\nswidth=$2\nunwritten=1\n";
--	print STDOUT "         = sunit=XXX swidth=XXX, unwritten=X\n";
--    }
--    if (/^naming\s+=version\s+(\d+)\s+bsize=(\d+)/) {
--	print STDERR "dirversion=$1\ndirbsize=$2\n";
--	print STDOUT "naming   =VERN bsize=XXX\n";
--    }
--    if (/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+),\s+version=(\d+)/ ||
--	/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+)/) {
--	print STDERR "ldev=\"$1\"\nlbsize=$2\nlblocks=$3\nlversion=$4\n";
--	print STDOUT "log      =LDEV bsize=XXX blocks=XXX\n";
--    }
--    if (/^\s+=\s+sectsz=(\d+)\s+sunit=(\d+) blks/) {
--	print STDERR "logsectsz=$1\nlogsunit=$2\n\n";
--    }
--    if (/^realtime\s+=([\w|\/.-]+)\s+extsz=(\d+)\s+blocks=(\d+), rtextents=(\d+)/) {
--	print STDERR "rtdev=$1\nrtextsz=$2\nrtblocks=$3\nrtextents=$4\n";
--	print STDOUT "realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX\n";
--    }'
--}
--
--
- # prints the bits we care about in growfs
- # 
- _filter_growfs()
-diff --git a/common/xfs b/common/xfs
-index 3435c706..a3da25dd 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1275,3 +1275,46 @@ _require_scratch_xfs_bigtime()
- 		_notrun "bigtime feature not advertised on mount?"
- 	_scratch_unmount
- }
-+
-+# prints filtered output on stdout, values (use eval) on stderr
-+# Non XFS filesystems always return a 4k block size and a 256 byte inode.
-+_xfs_filter_mkfs()
-+{
-+    echo "_fs_has_crcs=0" >&2
-+    set -
-+    perl -ne '
-+    if (/^meta-data=([\w,|\/.-]+)\s+isize=(\d+)\s+agcount=(\d+), agsize=(\d+) blks/) {
-+	print STDERR "ddev=$1\nisize=$2\nagcount=$3\nagsize=$4\n";
-+	print STDOUT "meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks\n";
-+    }
-+    if (/^\s+=\s+sectsz=(\d+)\s+attr=(\d+)/) {
-+        print STDERR "sectsz=$1\nattr=$2\n";
-+    }
-+    if (/^\s+=\s+crc=(\d)/) {
-+        print STDERR "_fs_has_crcs=$1\n";
-+    }
-+    if (/^data\s+=\s+bsize=(\d+)\s+blocks=(\d+), imaxpct=(\d+)/) {
-+	print STDERR "dbsize=$1\ndblocks=$2\nimaxpct=$3\n";
-+	print STDOUT "data     = bsize=XXX blocks=XXX, imaxpct=PCT\n";
-+    }
-+    if (/^\s+=\s+sunit=(\d+)\s+swidth=(\d+) blks/) {
-+        print STDERR "sunit=$1\nswidth=$2\nunwritten=1\n";
-+	print STDOUT "         = sunit=XXX swidth=XXX, unwritten=X\n";
-+    }
-+    if (/^naming\s+=version\s+(\d+)\s+bsize=(\d+)/) {
-+	print STDERR "dirversion=$1\ndirbsize=$2\n";
-+	print STDOUT "naming   =VERN bsize=XXX\n";
-+    }
-+    if (/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+),\s+version=(\d+)/ ||
-+	/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+)/) {
-+	print STDERR "ldev=\"$1\"\nlbsize=$2\nlblocks=$3\nlversion=$4\n";
-+	print STDOUT "log      =LDEV bsize=XXX blocks=XXX\n";
-+    }
-+    if (/^\s+=\s+sectsz=(\d+)\s+sunit=(\d+) blks/) {
-+	print STDERR "logsectsz=$1\nlogsunit=$2\n\n";
-+    }
-+    if (/^realtime\s+=([\w|\/.-]+)\s+extsz=(\d+)\s+blocks=(\d+), rtextents=(\d+)/) {
-+	print STDERR "rtdev=$1\nrtextsz=$2\nrtblocks=$3\nrtextents=$4\n";
-+	print STDOUT "realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX\n";
-+    }'
-+}
+diff --git a/common/rc b/common/rc
+index b3289de9..eb2493d1 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1075,10 +1075,10 @@ _scratch_mkfs_sized()
+ 		;;
+ 	btrfs)
+ 		local mixed_opt=
+-		# minimum size that's needed without the mixed option.
+-		# Ref: btrfs-prog: btrfs_min_dev_size()
+-		# Non mixed mode is also the default option.
+-		(( fssize < $((256 * 1024 *1024)) )) && mixed_opt='--mixed'
++		# Mixed option is required when the filesystem size is small and
++		# the device is not zoned. Ref: btrfs-progs: btrfs_min_dev_size()
++		(( fssize < $((109 * 1024 * 1024)) )) &&
++			! _scratch_btrfs_is_zoned && mixed_opt='--mixed'
+ 		$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
+ 		;;
+ 	jfs)
 -- 
 2.34.1
 
