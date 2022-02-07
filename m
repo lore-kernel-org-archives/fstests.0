@@ -2,176 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6ADBC433FE
-	for <linux-fstests@archiver.kernel.org>; Sat,  5 Feb 2022 14:29:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF048C43219
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Feb 2022 05:58:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355500AbiBEO32 (ORCPT
+        id S239521AbiBGF5S (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 5 Feb 2022 09:29:28 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:13740 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1380134AbiBEO31 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 5 Feb 2022 09:29:27 -0500
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 215DQNjl021802;
-        Sat, 5 Feb 2022 14:29:27 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=foYX60cfFPgyXzRx97URzzhS+rlh07CUJw4hGmMnd6A=;
- b=jb3INu2TzCAjMK+zN2htAx75UCsWp02GGogPTb+VC5NtXg6OqVcVFPEux+LT/AadDbA6
- kiZ56UT7H06yJHT0M5lM3akP+0aCj538iPuPlOpv5qRYpR6FM9Mt1eCLDsDhhnzz7p05
- MuyQYPZvbqYOtshLSX50edjA7wb90b1Lt408hKnXCLhg+oD1RGkNHmMAHf7CcSNLxJ+9
- M0aclwGcB+eiM11AK0bbWao09bJ8hvqXmhj2QfRWhDhI2/DAzyRgGACHS7dt2BP1Qz14
- KtLztjY4WzNGrUwiBzTD8sLVmwBJs5ilN2iSlSRvn1lX69q8wMYwEWBYq7nKnhNUuwyl Iw== 
-Received: from ppma04ams.nl.ibm.com (63.31.33a9.ip4.static.sl-reverse.com [169.51.49.99])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3e1en89tec-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 05 Feb 2022 14:29:26 +0000
-Received: from pps.filterd (ppma04ams.nl.ibm.com [127.0.0.1])
-        by ppma04ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 215ERalO032508;
-        Sat, 5 Feb 2022 14:29:25 GMT
-Received: from b06avi18878370.portsmouth.uk.ibm.com (b06avi18878370.portsmouth.uk.ibm.com [9.149.26.194])
-        by ppma04ams.nl.ibm.com with ESMTP id 3e1gv8j7uf-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 05 Feb 2022 14:29:25 +0000
-Received: from d06av21.portsmouth.uk.ibm.com (d06av21.portsmouth.uk.ibm.com [9.149.105.232])
-        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 215ETLUq44892462
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sat, 5 Feb 2022 14:29:21 GMT
-Received: from d06av21.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id D48415204F;
-        Sat,  5 Feb 2022 14:29:21 +0000 (GMT)
-Received: from localhost (unknown [9.43.12.205])
-        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTP id F251A5204E;
-        Sat,  5 Feb 2022 14:29:20 +0000 (GMT)
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-To:     fstests <fstests@vger.kernel.org>
-Cc:     linux-ext4@vger.kernel.org, Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: [PATCHv1 4/4] ext4/058: Add shutdown recovery test with fast_commit
-Date:   Sat,  5 Feb 2022 19:58:54 +0530
-Message-Id: <6f55546f021fac9b35ae07d4323f4aba00baad95.1644070604.git.riteshh@linux.ibm.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <cover.1644070604.git.riteshh@linux.ibm.com>
-References: <cover.1644070604.git.riteshh@linux.ibm.com>
+        Mon, 7 Feb 2022 00:57:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56890 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1350023AbiBGDLG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Feb 2022 22:11:06 -0500
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBF2CC061A73;
+        Sun,  6 Feb 2022 19:11:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1644203465; x=1675739465;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=dqFAptI4CAvK6M8wR+plx0XzaNREix5nWvG4orfRMAg=;
+  b=XpvkIudmsVwYXdfvRVxrEu3YI9mg2Tp/0r7mkkWgvbkPayzMFBccPi8J
+   2hI3Wj/ynKAXTYVvF11qPRvv/Slbe7dlTDCGq54miL58QSp/BYDHx9tNL
+   ZpGO62dnX+6nlfihJxiG4r3gnylekQ6+pm8wgGBx6ueXhmO7RB61NqbC0
+   hb986S+jBDvKx4PeUUMx16QhbCr/4eg5DigZ3P6YThIM9Q3RTLbHaKyCi
+   v8QRtekxAAed2Kl9suIRrR8L2o/B2ha5iyWRBvzwZmUavrZIqV1MvPZVN
+   FZPNUlRvlnL9yu+C1SPmKkO9bUQkgR+JHKKrnFHd9OmHFbnbmAaQ4vFl1
+   A==;
+X-IronPort-AV: E=Sophos;i="5.88,348,1635177600"; 
+   d="scan'208";a="304195997"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 07 Feb 2022 11:10:02 +0800
+IronPort-SDR: SdOoGQzB2Zm48iE5HGZVuZb2pRxbnhkRHh5soKkyDrvBmM8kIWM87T3DRCkBwMnEhPfS5E7fB4
+ 8SJVOhq231bRoc3ajO+W/kicQB1Hw5v5yQFVhArBXPG4MlvpyNU6Ux6Sy6jjFbsdoHmuQiTigI
+ 1UqOwraOtnS3ydG07MuXgjcBVqswTYcW2E1CSUeeaSxadFE4eRUtXa5JIYwgZimqDgh1LZOfaP
+ i2yHJbfExoUbsnB0ydYINWKW8R2IHXtDQTTCHA35xuGVY2tkUgC+MPl+3tbZzIR/kTdarQisxS
+ zzjzimXuk+DYK0J51cZE0mad
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Feb 2022 18:41:53 -0800
+IronPort-SDR: SPduAgPqpHjDHi4kbUW4++2yG6CydfIH0z+JM0CoyBFWYpKHkL333gEEPc4u5BSct9Ambige/H
+ ShtjhnhUCR7JkbHpzn6KeZiZieYRls7iebq1Tm1Od+0Mbx0NTcZmITNwuSPBK5K9NMedUSxa2n
+ Tv/IViTSdoiJxTiCF4yXbSb6X6PLdbJ/bXyXBbKZYl4aMRGNX+PPiww6npn+Pp/ujaNsEMkB5U
+ KPvzgKy9uwqiES6TxvrRvIP3wWQW8J0XzXWO8md3F5xOpzSNAq+MYYVWa09bGNYt7ByOoHP0WT
+ WXM=
+WDCIronportException: Internal
+Received: from shindev.dhcp.fujisawa.hgst.com (HELO shindev.fujisawa.hgst.com) ([10.149.52.173])
+  by uls-op-cesaip01.wdc.com with ESMTP; 06 Feb 2022 19:10:02 -0800
+From:   Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc:     Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
+        Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Subject: [PATCH 3/7] ext4/021: check _scratch_mkfs_sized return code
+Date:   Mon,  7 Feb 2022 12:09:54 +0900
+Message-Id: <20220207030958.230618-4-shinichiro.kawasaki@wdc.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20220207030958.230618-1-shinichiro.kawasaki@wdc.com>
+References: <20220207030958.230618-1-shinichiro.kawasaki@wdc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: iFg6-LsGGO1xqf6iGh6AJ6J9w_1HSL_K
-X-Proofpoint-ORIG-GUID: iFg6-LsGGO1xqf6iGh6AJ6J9w_1HSL_K
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.62.513
- definitions=2022-02-05_10,2022-02-03_01,2021-12-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 phishscore=0
- malwarescore=0 bulkscore=0 mlxscore=0 adultscore=0 clxscore=1015
- lowpriorityscore=0 suspectscore=0 priorityscore=1501 spamscore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2201110000 definitions=main-2202050095
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-In certain cases fast_commit may not delete the range during replay
-phase (after sudden FS shutdown) due to some operations which depends on
-inode->i_size (which during replay of an inode with fast_commit could be
-0 for sometime). This fstest tests such scenario with fast_commit in
-ext4.
+The test cases ext4/021 calls _scratch_mkfs before _scratch_mkfs_sized,
+and does not check return code of _scratch_mkfs_sized. Even if
+_scratch_mkfs_sized failed, _scratch_mount after it cannot detect the
+sized mkfs failure because _scratch_mkfs already created a file system
+on the device. This results in unexpected test condition.
 
-This test case is based on the test case shared via Xin Yin.
+To avoid the unexpected test condition, check return code of
+_scratch_mkfs_sized.
 
-Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+Suggested-by: Naohiro Aota <naohiro.aota@wdc.com>
+Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 ---
- tests/ext4/058     | 66 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/058.out |  7 +++++
- 2 files changed, 73 insertions(+)
- create mode 100755 tests/ext4/058
- create mode 100644 tests/ext4/058.out
+ tests/ext4/021 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/ext4/058 b/tests/ext4/058
-new file mode 100755
-index 00000000..4d70f483
---- /dev/null
-+++ b/tests/ext4/058
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 IBM.  All Rights Reserved.
-+#
-+# FS QA Test 058
-+#
-+# Tests fast_commit feature of ext4 as fixed in below commit
-+# 0b5b5a62b945a141: ext4: use ext4_ext_remove_space() for fast commit replay delete range
-+# (Based on test case shared by Xin Yin <yinxin.x@bytedance.com>)
-+#
-+. ./common/preamble
-+_begin_fstest auto shutdown quick log recoveryloop
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+   _scratch_unmount > /dev/null 2>&1
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/punch
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs ext4
-+_require_scratch
-+_require_scratch_ext4_feature "fast_commit"
-+
-+t1=$SCRATCH_MNT/foo
-+t2=$SCRATCH_MNT/bar
-+
-+$MKFS_EXT4_PROG -F -O 64bit,fast_commit $SCRATCH_DEV 512m >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+bs=$(_get_block_size $SCRATCH_MNT)
-+
-+# create and write data to t1
-+$XFS_IO_PROG -f -c "pwrite 0 $((100*$bs))" $t1 | _filter_xfs_io
-+
-+# fzero certain range in between with -k
-+$XFS_IO_PROG -c "fzero -k  $((40*$bs)) $((20*$bs))" $t1 | _filter_xfs_io
-+
-+# create and fsync a new file t2
-+$XFS_IO_PROG -f -c "fsync" $t2
-+
-+# fpunch within the i_size of a file
-+$XFS_IO_PROG -c "fpunch $((30*$bs)) $((20*$bs))" $t1
-+
-+# fsync t1 to trigger fast_commit operation
-+$XFS_IO_PROG -c "fsync" $t1
-+
-+# shutdown FS now for replay of FC to kick in next mount
-+_scratch_shutdown -v >> $seqres.full 2>&1
-+
-+_scratch_cycle_mount
-+
-+# check fiemap reported is valid or not
-+$XFS_IO_PROG -c "fiemap -v" $t1 | _filter_fiemap_flags $bs
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/058.out b/tests/ext4/058.out
-new file mode 100644
-index 00000000..98359e01
---- /dev/null
-+++ b/tests/ext4/058.out
-@@ -0,0 +1,7 @@
-+QA output created by 058
-+wrote 409600/409600 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0: [0..29]: none
-+1: [30..49]: hole
-+2: [50..59]: unwritten
-+3: [60..99]: nonelast
+diff --git a/tests/ext4/021 b/tests/ext4/021
+index 62768c60..a9277abf 100755
+--- a/tests/ext4/021
++++ b/tests/ext4/021
+@@ -24,7 +24,7 @@ _scratch_unmount
+ 
+ # With 4k block size, this amounts to 10M FS instance.
+ fssize=$((2560 * $blocksize))
+-_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
++_scratch_mkfs_sized $fssize >> $seqres.full 2>&1 || _fail "mkfs failed"
+ _require_metadata_journaling $SCRATCH_DEV
+ 
+ offset=0
 -- 
-2.31.1
+2.34.1
 
