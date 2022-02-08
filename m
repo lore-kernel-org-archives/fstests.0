@@ -2,87 +2,74 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D22DC3526E
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Feb 2022 22:26:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08440C41535
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Feb 2022 22:26:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1386890AbiBHW0n (ORCPT
+        id S1386479AbiBHW0o (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Feb 2022 17:26:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46010 "EHLO
+        Tue, 8 Feb 2022 17:26:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1387064AbiBHVwh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Feb 2022 16:52:37 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EC0EC0612B8;
-        Tue,  8 Feb 2022 13:52:36 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id ED677614EB;
-        Tue,  8 Feb 2022 21:52:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 133F7C004E1;
-        Tue,  8 Feb 2022 21:52:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1644357155;
-        bh=VXbZjYDEqN9ULt87WdyZtFJceSjSJJOJcbbd/1DikoY=;
-        h=From:To:Cc:Subject:Date:From;
-        b=PZWWhvYtkX7mqgpYW5mL5AeabHp9IOzwS6j25RVdLemuGD97QQPh1O3JQn+4ziOtL
-         wWmLueo1y6jVNP6FTVt16Mm2bmIVs95fpXH4Wm6/kyeB8gUpSQyTTYBUDpq2Cg3kMx
-         rVWJiJaiCXRgnpQKS4CQRMHRDRi8V6KRLLcfaA8rq3eUJIIBhQO9ATv3npK8hkpZKz
-         ilNJUw2ydCDPlt4NFlDqA61SbgQYknRjb2MihERuCkJVf2zWsrAQFCZJg0SswlbZ1m
-         sITkLiPDBAQ2g9ie9OkJufSygJTeSQBB8G6qHSIAmi/kVHjiBAE+Gv9rW4rUgYAlpQ
-         INxNYSb2lKCsw==
-From:   Anna Schumaker <anna@kernel.org>
+        with ESMTP id S1387002AbiBHVlB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Feb 2022 16:41:01 -0500
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 028E0C0612B8
+        for <fstests@vger.kernel.org>; Tue,  8 Feb 2022 13:41:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=AMAff7Ltb0TpLwc7cBBUrjBDnZpH074xhuLooaelVAk=; b=ykH0iXcppTbgM1EH5vOv7o2shm
+        vMpdbi+tz3frSWsCcFA65XuwvU3e8CEIuhcdr6gEmYbUmrsyGEWON0It2jki9jPBtkTwR1YcDGH4l
+        NEhNc6V/iXXCR+sR8oPjfNfFkccFiv2lKsQ7rs6MS4ew5Yre5dtxrP20MQys0Cvn9Pz5CsPZ1Z8Vc
+        GUYGobZIFcpojfsojn9qbzmSxs+QMfly1S5Cq2OgXQOXtPflpO2mW4khuqi/kNjQRSFaNv97VKnSq
+        KfMDzhT0qXm/pCPvOI5XmwFrLziZ/TJLn73sPzZiZIkB7+yLJ5ZqTU716Sj8gdArVz0ufAcywnvHp
+        ZJkp7yoA==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1nHYEN-00Fcyt-M4; Tue, 08 Feb 2022 21:40:59 +0000
+From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org
-Subject: [PATCH 0/4] Improvements for NFS
-Date:   Tue,  8 Feb 2022 16:52:28 -0500
-Message-Id: <20220208215232.491780-1-anna@kernel.org>
-X-Mailer: git-send-email 2.35.1
+Cc:     Luis Chamberlain <mcgrof@kernel.org>
+Subject: [RFC] Makefile: add check target to run shellcheck
+Date:   Tue,  8 Feb 2022 13:40:58 -0800
+Message-Id: <20220208214058.3724721-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Anna Schumaker <Anna.Schumaker@Netapp.com>
+shellcheck can be used to allow us to create a sanity check
+on shell scripts and also build a consistent set of rules.
+Although I actually find some annoying, consistancy is better
+than no consitancy check at all. This is inspired by blktests'
+own adoption of it and how it has found minor issues.
 
-This is a collection of fixes that I've had in my private xfstests
-instance on my NFS client VM for testing.
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
+ Makefile | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
- I've been using the "-R xunit" option lately, so the first patch fixes up 
-the PLATFORM and CHECK_OPTIONS output in the resulting xunit file. I
-wouldn't be surprised if there is a better way to do this, so please let
-me know!
-
-The second patch moves a very long running test (generic/531) out of the
-quick group because I'm tired of killing it after a half hour. Maybe
-it's quick on non networked filesystems, though? I had some other ideas
-on how to fix my issue that I included in the patch description.
-
-The last two patches add some extra checks for functionality that NFS
-doesn't support, otherwise the tests are getting marked as "failed" with
-"whatever isn't supposted" in the test output log. After these patches
-the tests are simply skipped.
-
-Thoughts?
-
-Anna
-
-
-Anna Schumaker (4):
-  check: Export CHECK_OPTIONS and PLATFORM for Xunit Reporting
-  generic/531: Move test from 'quick' group to 'stress'
-  generic/578: Test that filefrag is supported before running
-  generic/633: Check if idmapped mounts are supported before running
-
- check             |  2 ++
- common/rc         | 14 ++++++++++++++
- tests/generic/531 |  2 +-
- tests/generic/578 |  2 +-
- tests/generic/633 |  1 +
- 5 files changed, 19 insertions(+), 2 deletions(-)
-
+diff --git a/Makefile b/Makefile
+index f6f91a4d..a83e6879 100644
+--- a/Makefile
++++ b/Makefile
+@@ -99,6 +99,13 @@ else
+ 	$(Q)$(MAKE) $(MAKEOPTS) $(SRCTAR)
+ endif
+ 
++# We use shellcheck for sanity and consistency. Consistency is better than
++# not having any.
++check:
++	shellcheck -x -f gcc check new common/* \
++                tests/*/[0-9]*[0-9]
++.PHONY: check
++
+ $(SRCTAR) : default
+ 	$(Q)git archive --prefix=$(PKG_NAME)-$(PKG_VERSION)/ --format=tar \
+ 	  v$(PKG_VERSION) > $(PKG_NAME)-$(PKG_VERSION).tar
 -- 
-2.35.1
+2.34.1
 
