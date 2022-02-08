@@ -2,85 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14B2CC38A2B
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Feb 2022 22:26:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A21BC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Feb 2022 22:52:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1387067AbiBHW0r (ORCPT
+        id S234727AbiBHWwo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Feb 2022 17:26:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46040 "EHLO
+        Tue, 8 Feb 2022 17:52:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52210 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1387069AbiBHVwj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Feb 2022 16:52:39 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14FE5C0612B8;
-        Tue,  8 Feb 2022 13:52:39 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 67D5CCE1C9B;
-        Tue,  8 Feb 2022 21:52:37 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8E913C340EE;
-        Tue,  8 Feb 2022 21:52:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1644357155;
-        bh=e2FM1V1/4GHLdTXW9RpgJI03OpLLahT/Clg2E6le/10=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=poNWY/0HwItxg3uLd/DJwy3Epe1guC1sb9SZsJ8ORMxYUgCjiD2WoY+ufGDx6GGDJ
-         O1BuHJh5tkDSJmlD+0WqEPOWTtmAuM+nVKfimhorM8EtDJqoUiS/vuoB84sSbwChLe
-         RnXLyl9I4cNUY1Ci08CwQPce9OyHsnDT09j/UKHKlCDuht+RZG2Rp7fjExuGQbWRG6
-         KLwfauqHZ9/NILCUiHg/XBvfIUiWQQUU17MDVVohrQyJJSQkprw/8itFDXpmMYXMM7
-         j/LCikKLIJy/1OWX5pV3ROkQ+ryT4SaYAHCnvmlRzDHZvFCN9xVvM2LQ+YjIa2VOop
-         QU7FENANL0JeQ==
-From:   Anna Schumaker <anna@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org
-Subject: [PATCH 1/4] check: Export CHECK_OPTIONS and PLATFORM for Xunit Reporting
-Date:   Tue,  8 Feb 2022 16:52:29 -0500
-Message-Id: <20220208215232.491780-2-anna@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220208215232.491780-1-anna@kernel.org>
-References: <20220208215232.491780-1-anna@kernel.org>
+        with ESMTP id S232088AbiBHWwi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Feb 2022 17:52:38 -0500
+Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 55AFDE00E1F9
+        for <fstests@vger.kernel.org>; Tue,  8 Feb 2022 14:40:51 -0800 (PST)
+Received: from compute2.internal (compute2.nyi.internal [10.202.2.46])
+        by mailout.nyi.internal (Postfix) with ESMTP id 608305C0198;
+        Tue,  8 Feb 2022 17:34:47 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute2.internal (MEProxy); Tue, 08 Feb 2022 17:34:47 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
+        :content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm3; bh=JoRj4KWGRRiDl7x/HIg/xpnWE1dDQsbDkYCgUu
+        piVa0=; b=wd1s1fSKrA8BETJ2QjQ2vdhDB5CuPwalpNhJ/4LPx/Y4uWRmMAuZ5G
+        Pph2S/mn0YJ/eQVu+3M8XQW7Zyvw5Yx8ZVIo+J/nTbkqZ7xbIx6+bKt05yI+2JzZ
+        O0EOktEsAiEljbUNWfdXVDdtctwgkLhohzT6hcgSAbvH1T0/8QMJXeeyzyaMIFmI
+        xWgGrKzuV2UfO3IsTk5N3dpVHSHEhdEuiqfZcbXPBcb45XDtUZzLOeVpWG5mNHPh
+        hQ21wXgrpJjHXYhsmM6fY5DBCv5WD4rpQK3YHKBW/dJfD7JMttbwSjQU6+k6AnkN
+        KcQ+0d6TsLfq1FnaLIFG49K11RA7pbYw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:from:from
+        :in-reply-to:in-reply-to:message-id:mime-version:references
+        :reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=JoRj4KWGRRiDl7x/H
+        Ig/xpnWE1dDQsbDkYCgUupiVa0=; b=GlM2R7HBnt1AtgQH0nr4xz6zTLej54Oz/
+        cfa/zdGVMdDrMaD/HR3oqbGXC/CujgK2ww5pDdlg+FQ4Cz7G5concmN7BDcSSn+D
+        P8tyTdL7teREWvRpYT05J9WXAcn8w4vXGriC3s46Ww5qGiwHSUVpgBDghNqPecg5
+        o5Gj0Y3wCTumiLljXOjlOeyz5tSbcTOErtfF38fD2vW9rEQXK0OsQ9WeDC3QTqs2
+        f5Z2XMyOojN7oJJvliOX3hmn3g/gsWenmjpnuU9JKnYfuoi3AXxgBsmYrwxYBX8f
+        j54St8s/J0hwQszTioAyGn8gOJENa2cQNCgFhzuCcPgJJKibeKsyQ==
+X-ME-Sender: <xms:B_ACYtwQjlNPKnFofg9QFUni6U3QH7ToBWH7asa0YQrsGxOA0KNQCA>
+    <xme:B_ACYtTxaNFiFD91DVxiNeIIfUmmtYTvtxBw_x1bhBuIuuLILP0pDyzouj2c3SYSg
+    W0XSktT7KmrkLKtI7Y>
+X-ME-Received: <xmr:B_ACYnXHwzEURgV2ZmCXrEGrr5Fhn4-CVfV3OV5JYk8BXIBa-FhlhU-_-ZkE8uPizuMBsxjvlcstCLWJ0crbAlSt_SQRKg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvvddrheejgdduheekucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepfffhvffukfhfgggtuggjsehttdertddttddvnecuhfhrohhmpeeuohhrihhs
+    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhephe
+    duveelkeeiteelveeiuefhudehtdeigfehkeeffeegledvueevgefgudeuveefnecuvehl
+    uhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepsghorhhishessg
+    hurhdrihho
+X-ME-Proxy: <xmx:B_ACYvh2TrDvK7BYX8E_r28VBoPny9bujbMtvVpAJr5kXewFuCaa1g>
+    <xmx:B_ACYvA7L4nVc-3q6RHhtl-1k0eZSSGooLc6PqzmAMxUHqtUDlnJrA>
+    <xmx:B_ACYoLBHLs8KUrGfERTHcFAsQ30G50aK-KWVJZDdG2GP99OkqyfOg>
+    <xmx:B_ACYmMVV5aluu7zqoW2BLrnsFXxZiKStT-gyyaq-2weNClqklz3XA>
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 8 Feb 2022 17:34:46 -0500 (EST)
+Date:   Tue, 8 Feb 2022 14:34:45 -0800
+From:   Boris Burkov <boris@bur.io>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, kernel-team@fb.com
+Subject: Re: [PATCH v5 0/4] tests for btrfs fsverity
+Message-ID: <YgLwBeFkkYK15j1+@zen>
+References: <cover.1631558495.git.boris@bur.io>
+ <YgHTeMETyYlatbuM@sol.localdomain>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YgHTeMETyYlatbuM@sol.localdomain>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Anna Schumaker <Anna.Schumaker@Netapp.com>
+On Mon, Feb 07, 2022 at 06:20:40PM -0800, Eric Biggers wrote:
+> On Mon, Sep 13, 2021 at 11:44:33AM -0700, Boris Burkov wrote:
+> > This patchset provides tests for fsverity support in btrfs.
+> > 
+> > It includes modifications for generic tests to pass with btrfs as well
+> > as new tests.
+> > 
+> 
+> Hi Boris, there's been no activity on this patchset in a while.  Are you
+> planning to keep working on it?  I'd like to see it finished so that I can start
+> including btrfs in the fs-verity testing I do.
 
-I found that running ./check by hand with Xunit reporting enabled caused
-the PLATFORM variable to be unset, and the CHECK_OPTIONS was the default
-"-g auto" instead of the "-g quick" that I also passed in. This patch
-sets both variables so Xunit reporting is accurate.
+Hi Eric,
 
-Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
----
-Maybe there is a better way to do this? If so please let me know!
----
- check | 2 ++
- 1 file changed, 2 insertions(+)
+Sorry for not following through on this. I just lost momentum and got
+carried off focusing on other more pressing things. I do want to get
+this (and the verity kill-switch I started and abandoned...) in, and
+will make time to do so soon.
 
-diff --git a/check b/check
-index a08631213cbb..c8a38345123a 100755
---- a/check
-+++ b/check
-@@ -273,6 +273,7 @@ _prepare_test_list()
- }
- 
- # Process command arguments first.
-+export CHECK_OPTIONS="$*"
- while [ $# -gt 0 ]; do
- 	case "$1" in
- 	-\? | -h | --help) usage ;;
-@@ -360,6 +361,7 @@ if ! . ./common/rc; then
- 	echo "check: failed to source common/rc"
- 	exit 1
- fi
-+export PLATFORM=$(_full_platform_details)
- 
- if [ -n "$subdir_xfile" ]; then
- 	for d in $SRC_GROUPS $FSTYP; do
--- 
-2.35.1
+Hopefully this week, but if not, then definitely next week.
 
+Thanks for following up,
+Boris
+
+> 
+> - Eric
