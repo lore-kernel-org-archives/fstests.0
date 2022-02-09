@@ -2,231 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81F80C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Feb 2022 08:18:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 163ADC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Feb 2022 12:34:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236906AbiBIISx (ORCPT
+        id S233210AbiBIMeH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Feb 2022 03:18:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58518 "EHLO
+        Wed, 9 Feb 2022 07:34:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236188AbiBIISu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Feb 2022 03:18:50 -0500
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BBBCC0613CA;
-        Wed,  9 Feb 2022 00:18:54 -0800 (PST)
+        with ESMTP id S230481AbiBIMeG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Feb 2022 07:34:06 -0500
+X-Greylist: delayed 62 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 09 Feb 2022 04:34:10 PST
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1057DC0613CA;
+        Wed,  9 Feb 2022 04:34:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1644394735; x=1675930735;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=IjZwl3C/jtPiF0fEZLVP6o/fEYzXBj7cfmTzmNv5PiQ=;
-  b=eRo31NhbMX10kD5amlyE5HXbKOwoKYFlHsYtOzg/HvRsz9D98RG+/5MT
-   YS+mX7WPEN1nYgWChSSaD8ShSj8RJInL9ZdZDUhQ7JAZSmOirxtxoNfO8
-   4AIla1i1PzRnQkFNXHeN5KBArZF8ysMXjn8TElTTAbFtSIeBmaWTGOj29
-   pVQCoSxj1o3fjl12DbG88NAHKPXN3riazV05mZrbhARie2kJBEh8kHG5c
-   5+Q0mOro4awW2VN3GroSaxmBxpR4iJ9PVBiFpRHNPvom+Q4b+6cBdgpdF
-   PxEgUtlOzjzCcFsPAD/27LJGuMK2lbGcTxh9lvrvLi7YBoKC8gIL7x3nf
+  t=1644410049; x=1675946049;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=48PiMc7tS+uhyadGRCXdVN/7TsrSH6CeIxMbS1nuv/4=;
+  b=YSwLI1SSD+bU9HJCGBB2jtKQ8OtswOLx16DmmuvtVb82khuo7Pkvzpsx
+   VioRL0p9+CIAguKmEXuwu5E4UYTj6ndLYfkssGMQw3K08QLxhpvD29LVK
+   KkRXAfY9BXOQeAtJu4SKV+80EE2ljqg6g7BhedMRUWLmx4pPVZD/FY1Ys
+   oQ7rN305THIRhs2QkpgBjd1g8lKypYijmQHDr3GTo2M1Nv0OxoPMqaV5s
+   ZQMqLiy6UUPtQ962KnzNFE1GSZlCSxoo9Xro2KMLZgITxDDlAam1dTNTW
+   U1Fq9wOATTq8R9LtBzbhR/4zqVFh8zMWoqUCET6eT/93OsFoU5tJUun29
    Q==;
 X-IronPort-AV: E=Sophos;i="5.88,355,1635177600"; 
-   d="scan'208";a="193471669"
-Received: from mail-bn8nam12lp2172.outbound.protection.outlook.com (HELO NAM12-BN8-obe.outbound.protection.outlook.com) ([104.47.55.172])
-  by ob1.hgst.iphmx.com with ESMTP; 09 Feb 2022 16:18:54 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=CkdtEJnCM1NYhIPTFtZODvIXnTrO5nyhoV6otMvo49v9OrqVQ0tgWs6DUrlqQmIWlGiRZwpG3mu9lm3P9takrbV5cuYu8cwPJTnS2l5klC2awr1Qd8Fv+LLCqFPP2FcGDndJsUQYMvhgMZLe8ugWHLhoxdnWXDVCEMbrWlAY2MDebwsf4wxKGtpW1O89fcPTrPr50kGLwDJHZjZRgIn/gfrFef5tcOt7QY+3ftKb7gJEY4n41ZKqa/YQ3PIbAj679HNd97mYxp2pdfz2XespJVxafUCKXZPkI/Nqj2x5pujFrN0KB4UIR/4kyZXx4+uwbdkoyo/o/Wvb9NBcY00EGg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=WBKmyEu5mg2hA8989cPG9yfPPJxyuobwRByAiUxQCB8=;
- b=i26TaV5xbEh9LcXG4JNy9QqqN2LVJ1WEcrPhZO6VE+oK/6V8i0gQsrOsChn3QuStPQ+ufWubYBs2OWWaDn9yfkregBQmjyIA7DdPZ3EZ4VMLMhfyPocif6pUbzbm0S/YEIF0vK0oU3RuXHc7vl/RsfxnnRjxdrxDxwemHjBXhoUPUc1evp5Bdy4037uKj77uf4O+BElpdoyj7cgH9WuiJDsKjw154A9rdFrNnKfy4fRIJvZI2yFs90bA7PpdMAAd0gQx4TcB6UUj1iZrQn/XpkpymoPbO0J1izwTmdME39JKpKQFzn6Voubimu1mFp1nCtvDv1/jN417B08i7ixpqg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=WBKmyEu5mg2hA8989cPG9yfPPJxyuobwRByAiUxQCB8=;
- b=HwZvIC1io/n1lDfdTlDyxyGzE3OtwYu2qJo/+n41TcTwoHqul49hXnro4XEiuVdydfxhXMbEWtlDcul/ZzfamQX9nTA+PXX3FHhbPlhAJ1tlyGnfiSa2vadLX3jRolNwb6bAUemaKjwQ73vnRYox5LAPwgjGAUQp3ZrYzF+BDQo=
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com (2603:10b6:8:f::6) by
- BN8PR04MB6017.namprd04.prod.outlook.com (2603:10b6:408:53::27) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4975.11; Wed, 9 Feb 2022 08:18:50 +0000
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::8c78:3992:975a:f89]) by DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::8c78:3992:975a:f89%6]) with mapi id 15.20.4951.019; Wed, 9 Feb 2022
- 08:18:50 +0000
-From:   Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>,
-        Naohiro Aota <Naohiro.Aota@wdc.com>,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>
-Subject: Re: [PATCH 5/7] common: rename _filter_mkfs to _xfs_filter_mkfs
-Thread-Topic: [PATCH 5/7] common: rename _filter_mkfs to _xfs_filter_mkfs
-Thread-Index: AQHYG+/CBPelkf6NS0GNBGeElFDeDqyKZC0AgAACzICAAHx7gA==
-Date:   Wed, 9 Feb 2022 08:18:50 +0000
-Message-ID: <20220209081849.32avg2g6x6bc7juj@shindev>
-References: <20220207065541.232685-1-shinichiro.kawasaki@wdc.com>
- <20220207065541.232685-6-shinichiro.kawasaki@wdc.com>
- <20220209004316.GE8288@magnolia> <20220209005317.GE8338@magnolia>
-In-Reply-To: <20220209005317.GE8338@magnolia>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 208515c7-7138-47e9-b6a7-08d9eba4cdaf
-x-ms-traffictypediagnostic: BN8PR04MB6017:EE_
-x-microsoft-antispam-prvs: <BN8PR04MB60175D662BDCA7860BAF1E5AED2E9@BN8PR04MB6017.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:10000;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: HbE16zG6jW0mNKtTLC8KLDIWaMBAh31iwOnzKPkag46cOUyDMy2hI/yqda4pyHTM3t+x5+CfrH/Cd3G75lx6kqRf6gTeNM2h3LIoZ95uTLnJEcq5tyRj/aErAHxSEcri/ZbRrJWDCbpWlSs1md2OW9xnsk0gPqs1Carnx2srE6kCsjRcGi++i3ezE+BXPiT/z+lZxppeLkyixABfHs0J7h+nWtqWiMJtUm6qAI+n24RE6hJbVPbAwNqymmNkQRcMUs+w4u4ox//H7pFvk7N3+vwpVRdAzASa3DWyrdi1nrAxRT5PdEiQ+I8Fyb1R2K3I9x70IoOI25UxXda8qgC0RqFGJUVrg2Vh1f17eXCJTGS8GisDhzIq+Gg/uKfqSsqmqJKdYChK88GnQna+HfL1uqsGmGVP7wwyluXBIYzgc+ESm/YIGyu8ijpBUD2CQwHjczJo1QRjCJmdZb57znp3WOSMSqhTjy9LyxJu7EVNlMaxbwDwnWDqqlaVNuMaMK8mR4dSy/BpsH7XwW8ZfkeBuOTqwJpXXvcNwxbV/QVm7Di6JrqSk0FlTUET1/kpGSjMwyZ1W+RabPBZpoCIPBwVQ1wWqVAWaiAaZa23TroTjpR5jYnBnlNwjeJ5jh+jH+aEZvwKPMmMJ3irofTXRJcpinnEDMwJkaE5u8YH/KyZF+GSe9Uryj2N56QQVOzsVF028r+4pTdMPNRNI62rJpktpg==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM8PR04MB8037.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(7916004)(4636009)(366004)(86362001)(38100700002)(38070700005)(122000001)(33716001)(71200400001)(8936002)(44832011)(5660300002)(66946007)(508600001)(6506007)(91956017)(54906003)(316002)(6916009)(64756008)(4326008)(6512007)(66446008)(66476007)(66556008)(8676002)(76116006)(6486002)(82960400001)(1076003)(83380400001)(26005)(186003)(2906002)(9686003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?GxeJO/fcNjlAQCtGvuVKdq8NPpqCyCelBoFjBSvUdqK2iY+p1Gu7mFVAexRv?=
- =?us-ascii?Q?BVBtWlQs/y5yOnAjnwg5FOGY7YYhROpWpNKHP6KQUpHmX1QWok81OMxNXrbR?=
- =?us-ascii?Q?y4+GGvKov0NbqOIdRIbydYQ/aFWuR04ZIbg8cs/DdsVNwYnsbRre7+xNHXKM?=
- =?us-ascii?Q?tjzgZQlOgpZO04E6GZ3bxjtlhbxHcRkwk9iIDlYCKBw6R2LnnPpGqKPVThv+?=
- =?us-ascii?Q?ERuu9ScJkP1M20Pgxs1r8pBL45Av7ppouw6a00VyaxLZmMVbXE90YNnETjf0?=
- =?us-ascii?Q?qHKcGgII2FcyyQcgUL0zn6pylJNMIiY5jboT9wZ4qag2UXm05YbCjOEJX/SH?=
- =?us-ascii?Q?XbCJKrFnwN1t8lmrvOF+XDdCO2VOPZbuHNU3H4fCY7rKo8M87zNFg08t+L7X?=
- =?us-ascii?Q?mh7q54BeZwbjJMe1SELhIt1z7ikTQWH1vKpHHWpgDSD5YaSwhsTRc9FJTddj?=
- =?us-ascii?Q?1Ajt5SUG6JB5ni3xQFpZOasSHnmGjCVp8PnCIdH/VQyBG4tM/RpmkeAbpqmj?=
- =?us-ascii?Q?4iraRzsEbUWp41r1gB+UtFNfu7NVcfREWBuFn169oAjtds4qWEbLAeC/KVqr?=
- =?us-ascii?Q?kJ2gyWczDgy0cFK8w31tr9UhOJmtZ+e6R4xfsS69M1VriFdRekDD1igh4sUm?=
- =?us-ascii?Q?lkXxGxfsUK61HadornLkHX0zilNFcQeTwzguwI3lmGM8AS2IiuiwHHDbEFoe?=
- =?us-ascii?Q?OEnfcz6urHFwa2yFpmSJK1u12SUv/UhTqpwLTEBhUw1goLvtT3TOJZPbVVov?=
- =?us-ascii?Q?qv9jmd9dbAk0t0uoTVKRjStHwOwCycBg7NDlxflmY8QA9tuHqMELAI4B47ei?=
- =?us-ascii?Q?Q7+4rb3M2SXtnoJVyhTMPeNvWxUnLw8wWXCa2B6PGaao0CWCPlfDyLCBhE9b?=
- =?us-ascii?Q?KVQRdVsAKjmYfVVwnd8tLv7wcbMmjPsIfcgkS3rgsr3YJOOl6b1b5mwFvyvo?=
- =?us-ascii?Q?csf66THcITgeukR34CsqkgiunBvtZ9yT5KdhDXQXhd3O9EBirJnYws1CUvM0?=
- =?us-ascii?Q?p48OA5OXiGVO3dmx/icAWZbLEXuc4+ZS3TucEw/3UUi7etsV4wbboZcchD63?=
- =?us-ascii?Q?5CPXRvqw+0dSuXYbteHRlExpb++yUtNY7nB2RH/i78SfnGml516zqmJIrCVy?=
- =?us-ascii?Q?qyakPfr5bpygxQWgO2mrbRuuaeYkoWkgDnUPaBYhrSsm9ABX+DAoRReWsxlj?=
- =?us-ascii?Q?3ybBFH5mFe3HIX8LMPH1rAfJZQ7CxeZcvEkwL1o+Iwbhn8kYe5nSTYdzaQU+?=
- =?us-ascii?Q?ufsq8Fi8gkXYQ7pmEQ6aN/tKreyZoikiTVMMF1WpiaqdjbFZ+uuLzcwcqxRQ?=
- =?us-ascii?Q?VxcFplHTTlqHAYpoCzi30xK12jcsgTk15XBVQvghip2Hv3nxWA7YKGbqycQi?=
- =?us-ascii?Q?DhTnp1rkrCRUFRhPcRH5uZKLivVlARD3R9GmoqRMKwFHQGugR/YSZebwf5wf?=
- =?us-ascii?Q?MhAiVFQmZuvLNNTce1QYCZwdF0lLhBpzUmk4PGYVH9bv1KRn8XKhd5iLvyor?=
- =?us-ascii?Q?zwYsq9zY/+0A8DWd1Vjm8Q2pgeXrd9TqV1DgoJAM2pInwXYpcv9XnzQCRDMq?=
- =?us-ascii?Q?g+P1PRaJemeKp7Fs5+7fHoGavoYQZxwz1XLyHEYh8EpMF6dXdlxKovBVLCfD?=
- =?us-ascii?Q?N/65zjVAib8fsqwAcWCkX7vGkF2UJlzZHTvSq0bJheVTxDVvX3kTwq4yA8C9?=
- =?us-ascii?Q?xesVisM4J+7wlCsgdjDoYx2n+k0=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <2472D23298DD754A9C5984E92A7EAF85@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+   d="scan'208";a="197322991"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 09 Feb 2022 20:33:05 +0800
+IronPort-SDR: 8b37qy//8WlPxCjG9uNltytZZ+g976mf+fdtkszmA6aNDpvA295Tae9CNS4yMVvPwSR+gMKf/f
+ tkFXZf9qY9kjMRaNXG8oIWsNUMK0u4GlRaEv4LIjoArJHfb0StWbQMDELdKZ0reH4RrYlC7EoP
+ qNgTvqPedpERz806Kjuefdwx85fKfkCVAPEWZLdJhSDGrNouTkuzEMKTOWpgTi+rsFExjAf3Lt
+ /RO1LhaLqrTDFYstioKUbMa/Th4bGLwM+zJDpymN77MA65OZv7tVwylgHXIWDXcg39C/cDqPvs
+ hQl2iQnqdhSGr2XeCBRJY2V5
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Feb 2022 04:04:55 -0800
+IronPort-SDR: RtNunWEvnoR1A15hq9F2kEkvXhqDaCXxAmBpgts/HqWXl1b2/KlKWCVWMs7I6B77iM88/p4kBX
+ hHZ1CRJebCHZqShbrC2CRykl74vupc8vPYrFdBUv7ld5PEoF4sjZjN1IZ4O3tRKdbJJUin8kz0
+ gL16MxlF+n0WojcUcZucOiG15Gw7o4qjldQ2S61RAMG8BE29QDqBnX8mO1N3oeZ77xwjseCGJa
+ 9J0vA/YvHYAUmijMHnIa3JzjFACLUH9RqCM1AFza9tHk2MLbESd41SXS+cII1ADcUjWcyendZn
+ MF8=
+WDCIronportException: Internal
+Received: from shindev.dhcp.fujisawa.hgst.com (HELO shindev.fujisawa.hgst.com) ([10.149.52.173])
+  by uls-op-cesaip02.wdc.com with ESMTP; 09 Feb 2022 04:33:06 -0800
+From:   Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
+        Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Subject: [PATCH v2 0/6] fstests: fix _scratch_mkfs_sized failure handling
+Date:   Wed,  9 Feb 2022 21:32:59 +0900
+Message-Id: <20220209123305.253038-1-shinichiro.kawasaki@wdc.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM8PR04MB8037.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 208515c7-7138-47e9-b6a7-08d9eba4cdaf
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Feb 2022 08:18:50.6707
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: AV7d3naGLdfW29S66NTYZnR1WktizzxLaJaD0refmR8mSikAxZ8VnmUSNvspF7Hw1AvR8g8DYEKGKk+i6g0fSkemgTlooNK3sFldKI58dso=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN8PR04MB6017
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Feb 08, 2022 / 16:53, Darrick J. Wong wrote:
-> On Tue, Feb 08, 2022 at 04:43:16PM -0800, Darrick J. Wong wrote:
-> > On Mon, Feb 07, 2022 at 03:55:39PM +0900, Shin'ichiro Kawasaki wrote:
-> > > The helper function works only for xfs and used only for xfs except
-> > > generic/204. Rename the function to clearly indicate that the functio=
-n
-> > > is only for xfs.
-> > >=20
-> > > Suggested-by: Naohiro Aota <naohiro.aota@wdc.com>
-> > > Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> >=20
-> > <snip the diffstat>
-> >=20
-> > > diff --git a/common/attr b/common/attr
-> > > index 35682d7c..964c790a 100644
-> > > --- a/common/attr
-> > > +++ b/common/attr
-> > > @@ -13,7 +13,7 @@ _acl_get_max()
-> > >  		# CRC format filesystems have much larger ACL counts. The actual
-> > >  		# number is into the thousands, but testing that meany takes too
-> > >  		# long, so just test well past the old limit of 25.
-> > > -		$XFS_INFO_PROG $TEST_DIR | _filter_mkfs > /dev/null 2> $tmp.info
-> > > +		$XFS_INFO_PROG $TEST_DIR | _xfs_filter_mkfs > /dev/null 2> $tmp.in=
-fo
-> > >  		. $tmp.info
-> > >  		rm $tmp.info
-> > >  		if [ $_fs_has_crcs -eq 0 ]; then
-> > > diff --git a/common/filter b/common/filter
-> > > index c3db7a56..24fd0650 100644
-> > > --- a/common/filter
-> > > +++ b/common/filter
-> > > @@ -117,7 +117,7 @@ _filter_date()
-> > > =20
-> > >  # prints filtered output on stdout, values (use eval) on stderr
-> > >  # Non XFS filesystems always return a 4k block size and a 256 byte i=
-node.
-> > > -_filter_mkfs()
-> > > +_xfs_filter_mkfs()
-> > >  {
-> > >      case $FSTYP in
-> > >      xfs)
-> > > diff --git a/common/xfs b/common/xfs
-> >=20
-> > This renames the generic function to be "only for xfs" but it leaves th=
-e
-> > non-XFS bits.  Those bits are /really/ problematic (hardcoded
-> > isize=3D256 and dbsize=3D4096?  Seriously??) and themselves were introd=
-uced
-> > in commit a4d5b247 ("xfstests: Make 204 work with different block and
-> > inode sizes.") oh wow.
-> >=20
-> > I'm sorry that someone left this a mess, but let's try to make it easy
-> > to clean up all the other filesystems, please.  Specifically, could you
-> > please:
-> >=20
-> > 1. Hoist the XFS-specific code from _filter_mkfs into a new
-> >    helper _xfs_filter_mkfs() in common/xfs?
->=20
-> UGH.  I pressed <Send>, not <Save>.  Picking up from where I left off:
->=20
-> 2. Make the generic _filter_mkfs function call the XFS-specific one,
-> ala:
->=20
-> _filter_mkfs()
-> {
->     case $FSTYP in
->     xfs)
-> 	_xfs_filter_mkfs "$@"
-> 	;;
->     *)
-> 	cat - >/dev/null
-> 	perl -e 'print STDERR "dbsize=3D4096\nisize=3D256\n"'
-> 	return ;;
->     esac
-> }
->=20
-> This way you don't have to make a gigantic treewide change, and we can
-> start to make this function work properly for filesystems that have the
-> ability to do an offline geometry dump (aka dumpe2fs for ext*).
+When generic/204 is run for btrfs-zoned filesystem on zoned block devices with
+GB size order, it takes very long time to complete. The test case creates 115MiB
+filesystem on the scratch device and fills files in it within decent run time.
+However, with btrfs-zoned condition, the test case creates filesystem as large
+as the device size and it takes very long time to fill it all. Three causes were
+identified for the long run time, and this series addresses them.
 
-Thank you for the comment. My thought was a rather negative one: I assumed =
-that
-_filter_mkfs would not support other filesystems than xfs. I will add a pat=
-ch
-in v2 series based on your suggestion above, expecting that _filter_mkfs wi=
-ll
-support other filesystems in the future.
+The first cause is mixed mode option that _scratch_mkfs_sized helper function
+adds to mkfs.btrfs. This option was added for both regular btrfs and
+zoned-btrfs. However, zoned-btrfs does not support mixed mode. The mkfs with
+mixed mode fails and results in _scratch_mkfs_sized failure. The mixed mode
+shall not be specified for btrfs-zoned filesystem.
 
---=20
-Best Regards,
-Shin'ichiro Kawasaki=
+The second cause is unnecessary call of the _scratch_mkfs helper function in the
+test case generic/204. This helper function is called to obtain data block size
+and i-node size. However, these numbers can be obtained from _scratch_mkfs_sized
+call. The _scratch_mkfs function call shall be removed.
+
+The third cause is no check of return code from _scratch_mkfs_sized. The test
+case generic/204 calls both _scratch_mkfs and _scratch_mkfs_sized, and does not
+check return code from them. If _scratch_mkfs succeeds and _scratch_mkfs_sized
+fails, the scratch device still has valid filesystem created by _scratch_mkfs.
+Following test workload can be executed without failure, but the filesystem
+does not have the size specified for _scratch_mkfs_sized. The return code of
+_scratch_mkfs_sized shall be checked to catch the mkfs failure. This problem
+exists not only in generic/204, but also in other test cases which call both
+_scratch_mkfs and _scratch_mkfs_sized.
+
+In this series, the first patch addresses the first cause, and the second patch
+addresses the second cause. These two patches fix the test case generic/204.
+Following three patches address the third cause, and fix other test cases than
+generic/204.
+
+The last patch is an additional clean up of the helper function _filter_mkfs.
+During this fix work, it was misunderstood that this function were xfs unique.
+To clarify it can be extended to other filesystems, factor out xfs unique part.
+
+Changes from v1:
+* Added 2nd patch which removes _scratch_mkfs call from generic/204
+* Added 6th patch which factors out xfs unique part from _filter_mkfs
+* Dropped 3 patches which had renamed _filter_mkfs to _xfs_filter_mkfs
+* Dropped generic/204 hunk from the 3rd patch
+
+Shin'ichiro Kawasaki (6):
+  common/rc: fix btrfs mixed mode usage in _scratch_mkfs_sized
+  generic/204: remove unnecessary _scratch_mkfs call
+  generic/{171,172,173,174}: check _scratch_mkfs_sized return code
+  ext4/021: check _scratch_mkfs_sized return code
+  xfs/015: check _scratch_mkfs_sized return code
+  common: factor out xfs unique part from _filter_mkfs
+
+ common/filter     | 40 +---------------------------------------
+ common/rc         |  8 ++++----
+ common/xfs        | 41 +++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/021    |  2 +-
+ tests/generic/171 |  2 +-
+ tests/generic/172 |  2 +-
+ tests/generic/173 |  2 +-
+ tests/generic/174 |  2 +-
+ tests/generic/204 |  6 +-----
+ tests/xfs/015     |  2 +-
+ 10 files changed, 53 insertions(+), 54 deletions(-)
+
+-- 
+2.34.1
+
