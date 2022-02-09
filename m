@@ -2,84 +2,81 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49213C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Feb 2022 22:26:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C4A2C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Feb 2022 22:26:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235466AbiBIW0o (ORCPT
+        id S233593AbiBIW0u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Feb 2022 17:26:44 -0500
-Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:55578 "EHLO
+        Wed, 9 Feb 2022 17:26:50 -0500
+Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:55580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235491AbiBIW0Q (ORCPT
+        with ESMTP id S235498AbiBIW0Q (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 9 Feb 2022 17:26:16 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C556BE01645B
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2D6AE01116F
         for <fstests@vger.kernel.org>; Wed,  9 Feb 2022 14:26:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-        Content-Type:MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:
-        To:From:Reply-To:Content-ID:Content-Description;
-        bh=7Il0Euxol344BZBPASZC2uXMSVMFlhzRHesNoHCtBJ4=; b=X8bkqfV6ZJilQy7Rbb0/U2EUzf
-        2NLH8LtB/f27hKCe0IGwAQHNXQTAGL2QAmMc30USAE2pV+mFj3wJ5K4yu1dVvHNGObYwCT0lbRes9
-        gdK4qU8OqCnJRLBuFDrauPF0n0LYNSn748LEGDvsdoxEuVSzD5BfS0Pbhxf6zw0vKa0uPWasfbweC
-        IyNWwC0f31qCF8ZDwHoBXGCh9Vo0+atVAS719Wa0n4AyC+FKmPtsgTmB6Ogf6oJkwHsXMt1ovN/Xn
-        1G6cZpbgiq+yTDIkV4vX4N63GVmn+CitSrNZVfxjbirvSjw1LiIIrQ1DBoodqZu8u3FfKPCCLsyFc
-        3FTj4ckw==;
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
+        Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=ZTgnqvtdkvlTfSC9yQnBs/hw5PlvXbpJWCFkbdyEgE8=; b=c6WKwhhZSU2l3m+V50xm8IyG+b
+        cmwb/AMZHQteAug4nECQW96nN+BcHW+8PdV9GcWnAHrWyJcjBxnvvhEp21BJx+qWWA3Vo4eS70yvG
+        gZACBAzUKlh93wEZLciPBxL4iNXAbB6LhCdWaDJhW0FmhYc3yLpaBOSY6EIY1n8DS++4+1tJ0mW7S
+        GWGx92PjNeHgP/97Xx1SISHggtdwYO6yhqxYiafamOQWbh1yVqe0mSrY5BdLyEZ0qarmEHqDwSDFh
+        6FF/szEhxXskyJMMJylxAemEkAopzvLho7hs4x+gsW9OGfsyGbJOs1xuQyEb0LCRXlDuM6M8iIetJ
+        QhSMKNow==;
 Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nHvPj-001q7H-GC; Wed, 09 Feb 2022 22:26:15 +0000
+        id 1nHvPj-001q7U-IL; Wed, 09 Feb 2022 22:26:15 +0000
 From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     raymond.barbiero.dev@gmail.com
 Cc:     fstests@vger.kernel.org, jack@suse.cz, mgorman@techsingularity.net,
         dave@stgolabs.net, Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH 24/25] libiscsi: fix compile warning on data types
-Date:   Wed,  9 Feb 2022 14:26:09 -0800
-Message-Id: <20220209222610.438470-25-mcgrof@kernel.org>
+Subject: [PATCH 25/25] smb: fix compilation and disable warning on deprecated-declarations
+Date:   Wed,  9 Feb 2022 14:26:10 -0800
+Message-Id: <20220209222610.438470-26-mcgrof@kernel.org>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20220209222610.438470-1-mcgrof@kernel.org>
 References: <20220209222610.438470-1-mcgrof@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This fixes this compilation warning:
-
-libiscsi.c: In function ‘iscsi_write10’:
-libiscsi.c:119:40: warning: pointer targets in passing argument 4 of
-‘iscsi_write10_sync’ differ in signedness [-Wpointer-sign]
-  119 |                                        data, xferlen*512, 512,
-      |                                        ^~~~
-      |                                        |
-      |                                        char *
-In file included from libiscsi.c:26:
-/usr/include/iscsi/iscsi.h:1200:35: note: expected ‘unsigned char *’ but
-argument is of type ‘char *’
- 1200 |                    unsigned char *data, uint32_t datalen, int
-      blocksize,
-      |                    ~~~~~~~~~~~~~~~^~~~
-   CC
+smb.c hasn't been updated in a while, so disable
+warning on deprecated-declarations for now. An smb
+eager beaver can go fix this.
 
 Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 ---
- libiscsi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Makefile.in | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/libiscsi.c b/libiscsi.c
-index 3bc5771..128a7d5 100644
---- a/libiscsi.c
-+++ b/libiscsi.c
-@@ -99,7 +99,7 @@ static void iscsi_write10(struct dbench_op *op)
- 	uint32_t xferlen = op->params[1];	
- 	int fua = op->params[2];
- 	unsigned int data_size=1024*1024;
--	char data[data_size];
-+	unsigned char data[data_size];
+diff --git a/Makefile.in b/Makefile.in
+index 43890d2..a1b6645 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -21,6 +21,8 @@ CFLAGS+=`pkg-config --cflags libtirpc`
+ CFLAGS+=-Wimplicit-fallthrough=2
+ CFLAGS_RPCGEN=-Wno-unused-variable
+ CFLAGS_RPCGEN+=-Wno-cast-function-type
++SMBCFLAGS=-Wno-deprecated-declarations
++SMBCFLAGS+=`pkg-config --cflags smbclient`
+ LIBS+=`pkg-config --libs libtirpc`
+ EXEEXT=@EXEEXT@
  
- 	sd = op->child->private;
+@@ -68,6 +70,10 @@ libnfs.o: libnfs.c libnfs.h mount.h nfs.h
+ 	$(NQ) '   CC    ' $@
+ 	$(Q)gcc -g $(CFLAGS) -c libnfs.c -o $@
  
++smb.o: smb.c dbench.h
++	$(NQ) '   CC    ' $@
++	$(Q)$(CC) -c $(CPPFLAGS) $(CFLAGS) $(SMBCFLAGS) -o $@ $<
++
+ mount.h: mount.x
+ 	$(NQ) ' RPCGEN  ' $@
+ 	$(Q)rpcgen -h mount.x > mount.h
 -- 
 2.34.1
 
