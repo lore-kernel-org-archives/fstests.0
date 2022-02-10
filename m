@@ -2,185 +2,80 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC553C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Feb 2022 22:32:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6261C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Feb 2022 09:44:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236002AbiBIWce (ORCPT
+        id S230084AbiBJJo3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Feb 2022 17:32:34 -0500
-Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:45900 "EHLO
+        Thu, 10 Feb 2022 04:44:29 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:34118 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236016AbiBIWcd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Feb 2022 17:32:33 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EEDAE018E6C;
-        Wed,  9 Feb 2022 14:32:36 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        with ESMTP id S238958AbiBJJo1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Feb 2022 04:44:27 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA6411A7
+        for <fstests@vger.kernel.org>; Thu, 10 Feb 2022 01:44:28 -0800 (PST)
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 6551E21115;
+        Thu, 10 Feb 2022 09:44:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1644486267; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=0ZDW2KO3KlHZeJHcinhfxi5llxVHeLurRBqjji6YcGs=;
+        b=JCUcnidQqvE4NChxrYZDebCazifozaJcnzrJodkR3jybun5mu1n9dD9cgJdZKfCAlgIgda
+        0mux7AHLMhUChBneynT/mgXYY0iClQ7DvsFamLHW6bJwd+tF98vIEWINOCDVng4s/JNXMb
+        Fkp3RY9CE0KJhfGg2W8cpe1/7MMD8CE=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1644486267;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=0ZDW2KO3KlHZeJHcinhfxi5llxVHeLurRBqjji6YcGs=;
+        b=Is33JS4qGiQX9Yqm/b80SaN6cudXnFvQGNE9oRe7OhtZk/GvOoEcSX/932EuC/7qjKmbqm
+        D7/e/r6bXME6TuBw==
+Received: from quack3.suse.cz (unknown [10.163.28.18])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9CC6A61C64;
-        Wed,  9 Feb 2022 22:32:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E045FC340E7;
-        Wed,  9 Feb 2022 22:32:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1644445955;
-        bh=iywApMrpIqPa/lElQVWJWYEVMYp0khUm5qZOGk4U5/E=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=mCyQW1bRQ5EVAoRvMj9Vu6cJ5h96jqnHL4d20JMzDM8yDnxeCQMAuWA/T+y5xV+9M
-         WZi/nkb7E1v53NMKBW4tKU/9Ha/ZJt4f7dV407E+aCquVBIPPy8A/9MOCNSeO6U+ny
-         Nwz5LmDK2FZ7dEnCTZEwlDw7BsoDPWogq0vQ3HckJvZSsCRuU2ns8R2PHAlOqbkWc+
-         7pgRRWGRZHLDYP7tT9RLeivzL3wJixO9pe+DtRWlTUF8ue9kpOeglIKUpxUDRKbkrO
-         ElFdewRU0Ccvt+ky08Lckp463KpAQydcwj7UzKgmUllduzy521QbYcxvGKUiT6z28e
-         KH/EW3YDJ9jhQ==
-Date:   Wed, 9 Feb 2022 14:32:34 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Naohiro Aota <naohiro.aota@wdc.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>
-Subject: Re: [PATCH v2 6/6] common: factor out xfs unique part from
- _filter_mkfs
-Message-ID: <20220209223234.GH8313@magnolia>
-References: <20220209123305.253038-1-shinichiro.kawasaki@wdc.com>
- <20220209123305.253038-7-shinichiro.kawasaki@wdc.com>
+        by relay2.suse.de (Postfix) with ESMTPS id E0D8DA3B8C;
+        Thu, 10 Feb 2022 09:44:26 +0000 (UTC)
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+        id 96EEAA05BC; Thu, 10 Feb 2022 10:44:26 +0100 (CET)
+Date:   Thu, 10 Feb 2022 10:44:26 +0100
+From:   Jan Kara <jack@suse.cz>
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     raymond.barbiero.dev@gmail.com, fstests@vger.kernel.org,
+        jack@suse.cz, mgorman@techsingularity.net, dave@stgolabs.net
+Subject: Re: [PATCH 0/4] dbench: few enhancements from mmtests
+Message-ID: <20220210094426.wbm2malmzvkxq4j6@quack3.lan>
+References: <20220209221849.434616-1-mcgrof@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220209123305.253038-7-shinichiro.kawasaki@wdc.com>
+In-Reply-To: <20220209221849.434616-1-mcgrof@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 09, 2022 at 09:33:05PM +0900, Shin'ichiro Kawasaki wrote:
-> Most of the code in the function _filter_mkfs is xfs unique. This is
-> misleading that the function would be dedicated for xfs. Clean up the
-> function by factoring out xfs unique part to _xfs_filter_mkfs in
-> common/xfs. While at the same time, fix indent in _xfs_filter_mkfs to be
-> consistent with other functions in common/xfs.
+On Wed 09-02-22 14:18:45, Luis Chamberlain wrote:
+> mmtests [0] also uses dbench, and they actually carry 4 patch delta
+> for years. These patches are useful and should not interfere
+> with existing uses, so just merge these.
 > 
-> Suggested-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-
-Thanks!!
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
-> ---
->  common/filter | 40 +---------------------------------------
->  common/xfs    | 41 +++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 42 insertions(+), 39 deletions(-)
+> As noted before, I've put all this and a few of my own fixes
+> into my own git tree [1] and I'll be extending dbench there as well
+> as I see its not up to date and even debian has dropped packaging
+> it as it doesn't compile anymore. The one on my tree compiles more
+> than fine now. I'll send a few other fixes after this set.
 > 
-> diff --git a/common/filter b/common/filter
-> index c3db7a56..257227c2 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -121,53 +121,15 @@ _filter_mkfs()
->  {
->      case $FSTYP in
->      xfs)
-> +	_xfs_filter_mkfs "$@"
->  	;;
->      *)
->  	cat - >/dev/null
->  	perl -e 'print STDERR "dbsize=4096\nisize=256\n"'
->  	return ;;
->      esac
-> -
-> -    echo "_fs_has_crcs=0" >&2
-> -    set -
-> -    perl -ne '
-> -    if (/^meta-data=([\w,|\/.-]+)\s+isize=(\d+)\s+agcount=(\d+), agsize=(\d+) blks/) {
-> -	print STDERR "ddev=$1\nisize=$2\nagcount=$3\nagsize=$4\n";
-> -	print STDOUT "meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks\n";
-> -    }
-> -    if (/^\s+=\s+sectsz=(\d+)\s+attr=(\d+)/) {
-> -        print STDERR "sectsz=$1\nattr=$2\n";
-> -    }
-> -    if (/^\s+=\s+crc=(\d)/) {
-> -        print STDERR "_fs_has_crcs=$1\n";
-> -    }
-> -    if (/^data\s+=\s+bsize=(\d+)\s+blocks=(\d+), imaxpct=(\d+)/) {
-> -	print STDERR "dbsize=$1\ndblocks=$2\nimaxpct=$3\n";
-> -	print STDOUT "data     = bsize=XXX blocks=XXX, imaxpct=PCT\n";
-> -    }
-> -    if (/^\s+=\s+sunit=(\d+)\s+swidth=(\d+) blks/) {
-> -        print STDERR "sunit=$1\nswidth=$2\nunwritten=1\n";
-> -	print STDOUT "         = sunit=XXX swidth=XXX, unwritten=X\n";
-> -    }
-> -    if (/^naming\s+=version\s+(\d+)\s+bsize=(\d+)/) {
-> -	print STDERR "dirversion=$1\ndirbsize=$2\n";
-> -	print STDOUT "naming   =VERN bsize=XXX\n";
-> -    }
-> -    if (/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+),\s+version=(\d+)/ ||
-> -	/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+)/) {
-> -	print STDERR "ldev=\"$1\"\nlbsize=$2\nlblocks=$3\nlversion=$4\n";
-> -	print STDOUT "log      =LDEV bsize=XXX blocks=XXX\n";
-> -    }
-> -    if (/^\s+=\s+sectsz=(\d+)\s+sunit=(\d+) blks/) {
-> -	print STDERR "logsectsz=$1\nlogsunit=$2\n\n";
-> -    }
-> -    if (/^realtime\s+=([\w|\/.-]+)\s+extsz=(\d+)\s+blocks=(\d+), rtextents=(\d+)/) {
-> -	print STDERR "rtdev=$1\nrtextsz=$2\nrtblocks=$3\nrtextents=$4\n";
-> -	print STDOUT "realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX\n";
-> -    }'
->  }
->  
-> -
->  # prints the bits we care about in growfs
->  # 
->  _filter_growfs()
-> diff --git a/common/xfs b/common/xfs
-> index 713e9fe7..053b6189 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1275,3 +1275,44 @@ _require_scratch_xfs_bigtime()
->  		_notrun "bigtime feature not advertised on mount?"
->  	_scratch_unmount
->  }
-> +
-> +_xfs_filter_mkfs()
-> +{
-> +	echo "_fs_has_crcs=0" >&2
-> +	set -
-> +	perl -ne '
-> +	if (/^meta-data=([\w,|\/.-]+)\s+isize=(\d+)\s+agcount=(\d+), agsize=(\d+) blks/) {
-> +		print STDERR "ddev=$1\nisize=$2\nagcount=$3\nagsize=$4\n";
-> +		print STDOUT "meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks\n";
-> +	}
-> +	if (/^\s+=\s+sectsz=(\d+)\s+attr=(\d+)/) {
-> +		print STDERR "sectsz=$1\nattr=$2\n";
-> +	}
-> +	if (/^\s+=\s+crc=(\d)/) {
-> +		print STDERR "_fs_has_crcs=$1\n";
-> +	}
-> +	if (/^data\s+=\s+bsize=(\d+)\s+blocks=(\d+), imaxpct=(\d+)/) {
-> +		print STDERR "dbsize=$1\ndblocks=$2\nimaxpct=$3\n";
-> +		print STDOUT "data     = bsize=XXX blocks=XXX, imaxpct=PCT\n";
-> +	}
-> +	if (/^\s+=\s+sunit=(\d+)\s+swidth=(\d+) blks/) {
-> +		print STDERR "sunit=$1\nswidth=$2\nunwritten=1\n";
-> +		print STDOUT "         = sunit=XXX swidth=XXX, unwritten=X\n";
-> +	}
-> +	if (/^naming\s+=version\s+(\d+)\s+bsize=(\d+)/) {
-> +		print STDERR "dirversion=$1\ndirbsize=$2\n";
-> +		print STDOUT "naming   =VERN bsize=XXX\n";
-> +	}
-> +	if (/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+),\s+version=(\d+)/ ||
-> +		/^log\s+=(internal log|[\w|\/.-]+)\s+bsize=(\d+)\s+blocks=(\d+)/) {
-> +		print STDERR "ldev=\"$1\"\nlbsize=$2\nlblocks=$3\nlversion=$4\n";
-> +		print STDOUT "log      =LDEV bsize=XXX blocks=XXX\n";
-> +	}
-> +	if (/^\s+=\s+sectsz=(\d+)\s+sunit=(\d+) blks/) {
-> +		print STDERR "logsectsz=$1\nlogsunit=$2\n\n";
-> +	}
-> +	if (/^realtime\s+=([\w|\/.-]+)\s+extsz=(\d+)\s+blocks=(\d+), rtextents=(\d+)/) {
-> +		print STDERR "rtdev=$1\nrtextsz=$2\nrtblocks=$3\nrtextents=$4\n";
-> +		print STDOUT "realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX\n";
-> +	}'
-> +}
-> -- 
-> 2.34.1
+> Mel, feel free to drop those patches if you want to use my tree :)
 > 
+> For lack of a mailing list for dbench, I'm freeloading off of fstests
+> as it uses dbench as well.
+
+Cool that someone started maintaining dbench ;). Thanks!
+
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
