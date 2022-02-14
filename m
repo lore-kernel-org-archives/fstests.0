@@ -2,180 +2,280 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07DE2C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Feb 2022 17:50:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DDF0C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Feb 2022 05:25:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233106AbiBMRuu (ORCPT
+        id S233249AbiBNFZn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Feb 2022 12:50:50 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:50388 "EHLO
+        Mon, 14 Feb 2022 00:25:43 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237519AbiBMRuu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Feb 2022 12:50:50 -0500
-Received: from mail-wm1-x331.google.com (mail-wm1-x331.google.com [IPv6:2a00:1450:4864:20::331])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F4075A0AE
-        for <fstests@vger.kernel.org>; Sun, 13 Feb 2022 09:50:44 -0800 (PST)
-Received: by mail-wm1-x331.google.com with SMTP id v129so8378425wme.2
-        for <fstests@vger.kernel.org>; Sun, 13 Feb 2022 09:50:43 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=z6jwv/Zo5Tz+dkqUrzQLPYhkLu/AVfHAqx/6Is7LrOY=;
-        b=OwGb0BZhRchZqP+M8HGHgEPP0cD34AuBFV4R/IFS2rlC0MPy8VsqYzadw3tU/oPYPN
-         hPfgHxxfZ/4z0HEE/VnIyZU1Qsz5W9Qre04skWkhu7Q8Da94kh4i5rB+EzmKDJx8aF2l
-         q7r9vKhbk49skEHBpm60gBG0WRs9kRiHJaJoBeS/FvMz5KYzd+vPLJ+5gOBpN9kVuqH3
-         54BYKPGKfN8hgznSnfjItbX716qMvnqTBrxBjNQZbJTFO8OS7X/io1nGUol1eRXyJCC3
-         culzS/2PoKyxr7lG99cLS1h3tLpcWTYpQ4mo5gl/54CbyiT9CaTOjQ5rJMP/Mzy1/aiA
-         WNqQ==
+        with ESMTP id S229781AbiBNFZl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Feb 2022 00:25:41 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BE70F4E395
+        for <fstests@vger.kernel.org>; Sun, 13 Feb 2022 21:25:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1644816332;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=kEEclPPTGW24yM/9beA7UxY5afGC/ppzkZfaV5b/wNY=;
+        b=CHV8S6F+PDwnoq3eGsnWHethsm8c0z4wodx/VuWzFa4aQVqi3669VU9uwN/fb7FaaqXLV6
+        x6NVZK8Egq8uON/EGPYAjG5SwvwmX5jFRHNctSgk11GoNz1GXazTWqajzGpb9P+m2+4zSE
+        NP2Rf6PoOOGgZnctztOPCy3gf35FUw8=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-326-G9Ar-4oqNYu2A5EdeE7NiA-1; Mon, 14 Feb 2022 00:25:27 -0500
+X-MC-Unique: G9Ar-4oqNYu2A5EdeE7NiA-1
+Received: by mail-pf1-f198.google.com with SMTP id i7-20020a626d07000000b004e07b61362bso7796925pfc.6
+        for <fstests@vger.kernel.org>; Sun, 13 Feb 2022 21:25:26 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=z6jwv/Zo5Tz+dkqUrzQLPYhkLu/AVfHAqx/6Is7LrOY=;
-        b=0OMBsEUuAyjPAmKw8SmsFCzgGR0WB1GetRLWBNDdZurRcZXRrV/nPMMPqfbs26BD1h
-         QhhiMa+NEEeTNfCGiynn0pkIaO2S37qoV9jf0fRb9Tnw9AZDhRe0r4S1EaO7ppqME/OT
-         ozEXo6h3uGONUubJ831RPPuJpbVqJsz8UeEirz2cusOBkprnDut7PSzV8VtZ0I53VmWJ
-         xLCJkABr0he9AVO+ZOvdDRTfSwXjc9F6BtrWP1BMZTT0R2Di+nk5Dv5XJ9ZNJqRSZ3Ha
-         pLUVWG6D3VlX2/02HYpRCT3Owqrsv/8v2jmCO2uXJ04wbNWgT5vrJ7CdYkgnBsOMDWfz
-         SUyw==
-X-Gm-Message-State: AOAM530RlDi5To7gISXeY1RCHwQUtYU9GzNpOaU8dakVT2PyO3+JS2ts
-        qBrSL8CXmxrPPNxe6jK5p6Bh1EgKH5I=
-X-Google-Smtp-Source: ABdhPJzDiL/Q6cLiadLbbnh0w9OwcXCYTPMxyE+o4ijUJdy1U9euArEgaSGTJLYVSfn9a3/yXsaSmg==
-X-Received: by 2002:a1c:7712:: with SMTP id t18mr8067306wmi.145.1644774642109;
-        Sun, 13 Feb 2022 09:50:42 -0800 (PST)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id i6sm29907370wry.33.2022.02.13.09.50.40
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=kEEclPPTGW24yM/9beA7UxY5afGC/ppzkZfaV5b/wNY=;
+        b=EdzvEgSKt8AWtJSK3CnP5NsRuBSVXirbA0p/V6UHDQhoKsV0Va6eWRm99k/okvk86K
+         PKuHuRG8DWHd8frKK4mgOp2J1CDumPEAyndBNrJe0pPiAhVA65xtc8EdnNhtp4gIaZv2
+         tcvk6TB8FZCdBieJmIXVAbOC2Qea2nWk6/6VV/3NPwkzDuzROR4Bfvks+YiHXweb2sTQ
+         jbL8nYhEo/CdOT+Vsxmkdcwj5RDCMFnSbQCYDue7bVliL5TXqYjD0+qCGMxAMMMk5Y79
+         xQwtXMmXXpiuppOV6IPDgwvLXZGEmZKEd91jwhQqZ/ZzQwqfojjnD+fQgLFDix5djj6m
+         hUPA==
+X-Gm-Message-State: AOAM530a69z7SMwtzgegsD9eIYFa/RB5lwb6TdXAd/yLG2z14LLzJt90
+        Hm1+H9km7mBOTku0Bc6HX/TwfAV6C+ymJPtVRoWhrGsUciEjB2bHScVCbQuzFDs2H+f0z4ls2+H
+        LZrU9k5fvaoQR6oeX1w==
+X-Received: by 2002:a17:902:a9c2:: with SMTP id b2mr12674475plr.168.1644816325605;
+        Sun, 13 Feb 2022 21:25:25 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJwaJxU8p3llHpbropd+XEkVXoyEJWyRclTvlyym7sKDijzVo1NR0QqGqV+aM+FnD5QYm0BlEg==
+X-Received: by 2002:a17:902:a9c2:: with SMTP id b2mr12674444plr.168.1644816325084;
+        Sun, 13 Feb 2022 21:25:25 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id n2sm12991813pjp.56.2022.02.13.21.25.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 13 Feb 2022 09:50:41 -0800 (PST)
-Message-ID: <620944f1.1c69fb81.bad98.c790@mx.google.com>
-Date:   Mon, 14 Feb 2022 01:50:37 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to b91862aa4c95
+        Sun, 13 Feb 2022 21:25:24 -0800 (PST)
+Date:   Mon, 14 Feb 2022 13:25:19 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eric Sandeen <sandeen@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test xfsdump when an inode < root inode is present
+Message-ID: <20220214052519.xsmxb4d7mjcv2xod@zlang-mailbox>
+Mail-Followup-To: Eric Sandeen <sandeen@redhat.com>,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <1644522177-8908-1-git-send-email-sandeen@redhat.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="t510VFY6gWB8"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <1644522177-8908-1-git-send-email-sandeen@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Thu, Feb 10, 2022 at 01:42:57PM -0600, Eric Sandeen wrote:
+> This tests a longstanding bug where xfsdumps are not properly
+> created when an inode is present on the filesytsem which has
+> a lower number than the root inode.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
 
---t510VFY6gWB8
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Hi Eric,
 
-Hi all,
+Thanks for this patch! That's a good idea to get a inode number less than
+root inode, at least I don't know a better one :)
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. There're 7 new tests added in this update, including 4
-btrfs tests and and 3 generic tests. The rest commits are normal bug fixes.
-
-And currently three of the new tests fail with btrfs with latest v5.17-rc3
-kernel, generic/673 may expose a new bug in btrfs, and the fixes for
-btrfs/25[79] are proposed & pending.
-
-Due to the Lunar New Year holidy, I've accumulated a pile of review backlogs. I
-think I've picked up all patches from January and a small part of patches from
-February that have been reviewed.
-
-So please resend if I missed any patche from Jan., and be patient if you sent
-patches in this month :)
+The source code looks good to me, just two problems as below:
+1) The mkfs might output some warning as [0], so better to filter them all.
+2) After merging this patch (got a warning [1], that's fine:), build xfstests
+   failed as [2]. By debuging, I found that your xfs/543 file miss executable
+   bit [3]. By giving it '+x' permission, `make` passed.
 
 Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-b91862aa4c95 btrfs: verify "btrfs filesystem defragment -c" behavior
-
-New commits:
-
-Anthony Iliopoulos (2):
-      [6bd65c707208] common/rc: fix group detection regex to strictly match required name
-      [9017f3b63b50] common/dump: add explicit requirement for specific users and groups
-
-Darrick J. Wong (3):
-      [67f35c96a2d1] generic/273: use _get_file_block_size
-      [705d9aff1d28] generic: test suid/sgid behavior with reflink and dedupe
-      [290e6c83e8d8] fstests: skip tests that require XFS_IOC_ALLOCSP
-
-Dave Chinner (1):
-      [a245d8b81584] fstests: add more tests to the metadump group
-
-Lukas Czerner (1):
-      [394c20991779] common/rc: set maximum label length for ext4
-
-Qu Wenruo (4):
-      [d8639e1632ab] btrfs: defrag with regular and preallocated extents
-      [8925b0290ffe] btrfs: autodefrag with regular and hole extents
-      [bf49b2cde6d6] btrfs: defrag with compressed extents
-      [b91862aa4c95] btrfs: verify "btrfs filesystem defragment -c" behavior
-
-Theodore Ts'o (1):
-      [ccbbd09981c7] common: handle old versions of modprobe which don't support --help
-
-Zorro Lang (1):
-      [cd99a4999bfb] fsx: disable allocsp_calls if -F is specified
+Zorro
 
 
-Code Diffstat:
 
- common/btrfs          |  16 +++++
- common/config         |   2 +-
- common/dump           |   5 ++
- common/rc             |  27 ++++++++-
- ltp/fsstress.c        |   4 ++
- ltp/fsx.c             |   1 +
- tests/btrfs/257       |  76 ++++++++++++++++++++++++
- tests/btrfs/257.out   |   2 +
- tests/btrfs/258       |  80 +++++++++++++++++++++++++
- tests/btrfs/258.out   |   2 +
- tests/btrfs/259       |  57 ++++++++++++++++++
- tests/btrfs/259.out   |   2 +
- tests/btrfs/260       | 158 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/260.out   |   2 +
- tests/generic/273     |   4 +-
- tests/generic/673     | 107 ++++++++++++++++++++++++++++++++++
- tests/generic/673.out |  49 ++++++++++++++++
- tests/generic/674     | 117 +++++++++++++++++++++++++++++++++++++
- tests/generic/674.out |  49 ++++++++++++++++
- tests/generic/675     |  70 ++++++++++++++++++++++
- tests/generic/675.out |  13 +++++
- tests/xfs/107         |   1 +
- tests/xfs/129         |   2 +-
- tests/xfs/234         |   2 +-
- tests/xfs/253         |   2 +-
- tests/xfs/284         |   2 +-
- tests/xfs/291         |   2 +-
- tests/xfs/336         |   2 +-
- tests/xfs/432         |   2 +-
- 29 files changed, 845 insertions(+), 13 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
+[0]
+# diff -u /home/xfstests-dev/tests/xfs/543.out /home/xfstests-dev/results//xfs/543.out.bad
+@@ -1,4 +1,8 @@
+ QA output created by 543
++mkfs.xfs: Specified data stripe unit 1024 is not the same as the volume stripe unit 512
++mkfs.xfs: Specified data stripe width 1024 is not the same as the volume stripe width 512
++log stripe unit (524288 bytes) is too large (maximum is 256KiB)
++log stripe unit adjusted to 32KiB
+...
 
---t510VFY6gWB8
-Content-Type: application/pgp-signature; name="signature.asc"
+[1]
+# git am /tmp/1.patch
+Applying: xfs: test xfsdump when an inode < root inode is present
+.git/rebase-apply/patch:107: trailing whitespace.
+xfsrestore: dump description:
+warning: 1 line adds whitespace errors.
 
------BEGIN PGP SIGNATURE-----
+[2]
+# make
+...
+Building xfs
+ [GROUP] /home/xfstests-dev/tests/xfs/group.list
+gmake[3]: *** [../../include/buildgrouplist:8: group.list] Error 1
+gmake[2]: *** [../include/buildrules:31: xfs] Error 2
+gmake[1]: *** [include/buildrules:31: tests] Error 2
+make: *** [Makefile:51: default] Error 2
 
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmIJRMAACgkQJlKqKVyP
-52Mh4RAAwaAcpDuEFOEKmexyfEWLDgjKkvCHvlwe31r5beLkjpTXQreVoUzvBUVh
-pOtbYc72lRkInU8vbDXbYk9V79+t4zxeRTDw8Ka/KT/mzMcKXtcCce2eUuvEq1vk
-UGvIiSrnZ0fVXTR69MoFLC59RUTzhyXFQLaVUP2htIqqXckJNh6KVCp0zCW7FPsd
-5Lb8BTpFssUmQiWYfjePHWK0rKaxTpaQtS5Xgm6O/Yp0Pqcdnv0GwXUekZqCGoCp
-+2Vfvg7udCt39nJGDlF4+7sFUMyHDhDf4w+IWl9URFQlqrN1BHTKM59bI9pjsQ2G
-LIGsX2FayF2knbzR6NUdTGxsIFDIGx0sLHivD4bn+AyMW11HyGOOA/3/gFNiRYyL
-mI4SBlxPQE4KnsIS6vOUEtDn/vCkAV2doG9VfKaHhGWfYyU67t6UAJhSvudVdkEm
-2zemEqsX+JIZ4EbI7TreErmTCILMEgZTFR6VwQYZDU8EFhRZUDdena67Fj7L5jv1
-ZtxRqGtzFBaZYd1M+GAXa8SCbkg8ffN2/4vd9irybj/G1AgYxbau6z5yC5P+9lE+
-GWUcmw4MwYhj3ErbpUOjhVFuY+dSUz7phTl0LId79QzY4Az2C0YdfjxkFnvFTIN9
-4GB1ohRSofaAnUrfsTpv+dVqmvEgnRpjvCDuFTn0bn+dyeGLY4g=
-=xP70
------END PGP SIGNATURE-----
+[3]
+# git ls-files -s tests/xfs/54*
+100755 55484dd3310cde1e7b26e01d0e6b97e492e14fb5 0       tests/xfs/540
+100644 094f0f63dd6ce685ec2c467f3f0eea0f9532124e 0       tests/xfs/540.out
+100755 ae2fd819d5f089cfa64ff9fee299bb59b0ea6c71 0       tests/xfs/541
+100644 d056f0532b7c5734488c84ad6f8e1592e1c794dc 0       tests/xfs/541.out
+100755 5c45eed7cdabfcb42ce1e797ac47f5f0cee55146 0       tests/xfs/542
+100644 0a0fbd524b9f699267816775b1cb2bb53ae309e9 0       tests/xfs/542.out
+100644 f75f8da3ad7ad8971dade88eb8e7bcecb2a62125 0       tests/xfs/543      <===
+100644 a5224aaf082dbdfb6c92050a25aa0ca09c045b89 0       tests/xfs/543.out
 
---t510VFY6gWB8--
+>  common/dump       |  1 +
+>  tests/xfs/543     | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/543.out | 47 +++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 111 insertions(+)
+>  create mode 100644 tests/xfs/543
+>  create mode 100644 tests/xfs/543.out
+> 
+> diff --git a/common/dump b/common/dump
+> index 3c4029f..09a0ebc 100644
+> --- a/common/dump
+> +++ b/common/dump
+> @@ -214,6 +214,7 @@ _require_tape()
+>  
+>  _wipe_fs()
+>  {
+> +    [[ "$WIPE_FS" = "no" ]] && return
+>      _require_scratch
+>  
+>      _scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> diff --git a/tests/xfs/543 b/tests/xfs/543
+> new file mode 100644
+> index 0000000..f75f8da
+> --- /dev/null
+> +++ b/tests/xfs/543
+> @@ -0,0 +1,63 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Red Hat, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 543
+> +#
+> +# Create a filesystem which contains an inode with a lower number
+> +# than the root inode. Ensure that xfsdump/xfsrestore handles this.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick dump
+> +
+> +# Import common functions.
+> +. ./common/dump
+> +
+> +_supported_fs xfs
+> +_require_scratch
+> +
+> +# A large stripe unit will put the root inode out quite far
+> +# due to alignment, leaving free blocks ahead of it.
+> +_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full
+> +
+> +# Mounting /without/ a stripe should allow inodes to be allocated
+> +# in lower free blocks, without the stripe alignment.
+> +_scratch_mount -o sunit=0,swidth=0
+> +
+> +root_inum=$(stat -c %i $SCRATCH_MNT)
+> +
+> +# Consume space after the root inode so that the blocks before
+> +# root look "close" for the next inode chunk allocation
+> +$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
+> +
+> +# And make a bunch of inodes until we (hopefully) get one lower
+> +# than root, in a new inode chunk.
+> +echo "root_inum: $root_inum" >> $seqres.full
+> +for i in $(seq 0 4096) ; do
+> +	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
+> +	touch $fname
+> +	inum=$(stat -c "%i" $fname)
+> +	[[ $inum -lt $root_inum ]] && break
+> +done
+> +
+> +echo "created: $inum" >> $seqres.full
+> +
+> +[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
+> +
+> +# Now try a dump and restore. Cribbed from xfs/068
+> +WIPE_FS="no"
+> +_create_dumpdir_stress
+> +
+> +echo -n "Before: " >> $seqres.full
+> +_count_dumpdir_files | tee $tmp.before >> $seqres.full
+> +
+> +# filter out the file count, it changes as fsstress adds new operations
+> +_do_dump_restore | sed -e "/entries processed$/s/[0-9][0-9]*/NUM/g"
+> +
+> +echo -n "After: " >> $seqres.full
+> +_count_restoredir_files | tee $tmp.after >> $seqres.full
+> +diff -u $tmp.before $tmp.after
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/543.out b/tests/xfs/543.out
+> new file mode 100644
+> index 0000000..a5224aa
+> --- /dev/null
+> +++ b/tests/xfs/543.out
+> @@ -0,0 +1,47 @@
+> +QA output created by 543
+> +Creating directory system to dump using fsstress.
+> +
+> +-----------------------------------------------
+> +fsstress : -f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10
+> +-----------------------------------------------
+> +xfsdump|xfsrestore ...
+> +xfsdump  -s DUMP_SUBDIR - SCRATCH_MNT | xfsrestore  - RESTORE_DIR
+> +xfsrestore: using file dump (drive_simple) strategy
+> +xfsrestore: searching media for dump
+> +xfsrestore: examining media file 0
+> +xfsrestore: dump description: 
+> +xfsrestore: hostname: HOSTNAME
+> +xfsrestore: mount point: SCRATCH_MNT
+> +xfsrestore: volume: SCRATCH_DEV
+> +xfsrestore: session time: TIME
+> +xfsrestore: level: 0
+> +xfsrestore: session label: ""
+> +xfsrestore: media label: ""
+> +xfsrestore: file system ID: ID
+> +xfsrestore: session id: ID
+> +xfsrestore: media ID: ID
+> +xfsrestore: searching media for directory dump
+> +xfsrestore: reading directories
+> +xfsrestore: NUM directories and NUM entries processed
+> +xfsrestore: directory post-processing
+> +xfsrestore: restoring non-directory files
+> +xfsrestore: restore complete: SECS seconds elapsed
+> +xfsrestore: Restore Status: SUCCESS
+> +xfsdump: using file dump (drive_simple) strategy
+> +xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
+> +xfsdump: dump date: DATE
+> +xfsdump: session id: ID
+> +xfsdump: session label: ""
+> +xfsdump: ino map <PHASES>
+> +xfsdump: ino map construction complete
+> +xfsdump: estimated dump size: NUM bytes
+> +xfsdump: /var/xfsdump/inventory created
+> +xfsdump: creating dump session media file 0 (media 0, file 0)
+> +xfsdump: dumping ino map
+> +xfsdump: dumping directories
+> +xfsdump: dumping non-directory files
+> +xfsdump: ending media file
+> +xfsdump: media file size NUM bytes
+> +xfsdump: dump size (non-dir files) : NUM bytes
+> +xfsdump: dump complete: SECS seconds elapsed
+> +xfsdump: Dump Status: SUCCESS
+> -- 
+> 1.8.3.1
+> 
+
