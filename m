@@ -2,212 +2,146 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E9D0C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Feb 2022 14:32:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB799C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Feb 2022 14:55:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235048AbiBPOc5 (ORCPT
+        id S235246AbiBPOzt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Feb 2022 09:32:57 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:58596 "EHLO
+        Wed, 16 Feb 2022 09:55:49 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:58684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235068AbiBPOcz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Feb 2022 09:32:55 -0500
-Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADD9CC7C18;
-        Wed, 16 Feb 2022 06:32:41 -0800 (PST)
-Received: by mail-qk1-x734.google.com with SMTP id q4so425860qki.11;
-        Wed, 16 Feb 2022 06:32:41 -0800 (PST)
+        with ESMTP id S232406AbiBPOzp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Feb 2022 09:55:45 -0500
+Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A629E1F6B8A;
+        Wed, 16 Feb 2022 06:55:31 -0800 (PST)
+Received: by mail-qv1-xf36.google.com with SMTP id x3so2315961qvd.8;
+        Wed, 16 Feb 2022 06:55:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=/Ce3VvaXMKyJjbauhbe+va+fjMOD3i63CuQtk8aVVzA=;
-        b=QQuYBXcTqL8jR43f+hSyiVl6MUM5tMjR1Gh+DT66Ffq9iTKHLk9+eV+ajvVUo2L94b
-         Zj0x0DUOn+8K1rSs5kPQBlaNpq4jSXwDB066xEke2+hp1EHg7CMpzfU1JCAryg8xgJR6
-         71gaMGgz/Fccu9AKsNUBorIDWr21pVV4LjMfHkVTxYeXVD70Xm16c0ktABPBhtdehFyb
-         QDGKSknXXFUf6hiY41C/lMnRYrdkwTDJ9E2bDtuLD1RnRZlWLOFe8IHPyVwBycWw7Enr
-         WAig4jGT9oUKk7lIwMv9kEHR6bM/SL0EgPJNBHfmMWMZskxcrlhuqOWf6qaHVmUuiKqu
-         5QXQ==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=yJ4BKoDTgpBeh9Yya190I1Dqz9YT3SLMArUe9t7BrEg=;
+        b=JSQgXF8ZAt4V84HAckwAZv9Qrc+7c65S8ggyalVlczRsN7fgG/BgLpxlb7hNwpDE/z
+         /7WAl3HEDXuE8iCm8hzsMltXsIZUeqXLLZMLK5SujMTFqRcXQD8Imoh8TqXKJ4kCIt5b
+         Nh0QRBoMQZpubyCNmxDB/GcANAETBAbgcTbXxbP9K3lpaBpz5TfTD1OMnNYGl1TA2ihB
+         9M1bhP8eO1pDMIKyQsysQtJcY2e/pzApKjuNZUw0JC+HYwyPW/p+zSlWmoSj5opMwUBs
+         +IEck4pLG178gYIqYhkM/tvasbClK++od8ZMPQ40o5eHys8wC6ixjTmqkY9vabxiyEPF
+         M93w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=/Ce3VvaXMKyJjbauhbe+va+fjMOD3i63CuQtk8aVVzA=;
-        b=pFd9zXiJbfCZZjaet0wJ3oBPrRBo7cQKOsmCz0juepPPR8UKocAjAuYCtcfwaOz+KY
-         yE5hcs2a68EHEo2EfMrAMDEWT9V8x3Mqzk1JAwSnrQiHeORBCd2yBrw/XJE6aEK9qwnU
-         B1WXjAyhTRyCltjweHxsu6HfLLKwX1Q4GfGRUJ6uVW4INTb0yFgr+mEAtuksD/cy2hJB
-         szB1Dthdpis6o4BcOo8ZFwOqqd5bXuT2UefurEDAr6CJ3kY2C44qLKEyulj9uPeOc+wY
-         Y0v16LUEkk4KausmlTOzYIihsXadK7ISklDyccYVPB+ywQexK3CgUOPZ2ryChDf2hhkH
-         54MA==
-X-Gm-Message-State: AOAM530kfO3hCXnaWZa+E0R18CCR5mZqSXDIyC3FEmYSRJAkdAyBraSM
-        AAvCgYALxYxXu4Zl3kLVclKYaCtKNA==
-X-Google-Smtp-Source: ABdhPJwAd4Le7Szv3MOLcIfUms6TOyjq6Q5YwDeBj/VYYclF3YCWQt/o+LPUp7cEJnY7AMa5ZIKQNQ==
-X-Received: by 2002:a37:ad06:0:b0:4e1:2d6e:8bd7 with SMTP id f6-20020a37ad06000000b004e12d6e8bd7mr1392217qkm.668.1645021960632;
-        Wed, 16 Feb 2022 06:32:40 -0800 (PST)
-Received: from gabell (209-6-122-159.s2973.c3-0.arl-cbr1.sbo-arl.ma.cable.rcncustomer.com. [209.6.122.159])
-        by smtp.gmail.com with ESMTPSA id a14sm21866729qtb.92.2022.02.16.06.32.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Feb 2022 06:32:40 -0800 (PST)
-Date:   Wed, 16 Feb 2022 09:32:38 -0500
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=yJ4BKoDTgpBeh9Yya190I1Dqz9YT3SLMArUe9t7BrEg=;
+        b=Dyk6+ivM7G0udsVUucbntEjnB371fmyuSlP3WFmk0BfpRfy4iPJxEmtiUb+H9hWfqR
+         i1iIX3q0UJXSdiERMiVgf2coRUd6mSWDMadYkhEfSTwACDJch2W0Vz03fvlsAZX29yPA
+         0+ws0P/8eXS+USl/Q2DIbvo8rJnRg+wKIDoRjM+4lJHePktKCxLnxz8obII08DoHon96
+         IoOUkkuyTuQBThRXlebRnZ5NUNmN7Rjpm9xrEfyI1w9Xig6nPqM3HdRzXmtLNp9Ga3Fq
+         zBU7vJhKnaIBn97cJOEtsAD2ne2bOWBF/K9UtkNllK7+X6DIfwPhlT6nTcDYlEsIZKvZ
+         VGoQ==
+X-Gm-Message-State: AOAM533xeX19deLo3RdDmJqik+SpwWl7VlkoNlcGB8id/9GyuSRIlYX2
+        jNnckahegMlr4e6f6bYlks9lKVgjrA==
+X-Google-Smtp-Source: ABdhPJyc/n0OGgUMfkcq8Wu2gJnrPfli9jVP4dS6sDNijwx8HMXjW1I9ldQGuQQ0wI+OJXcNGnSPSw==
+X-Received: by 2002:ad4:4341:0:b0:42c:4b82:c16b with SMTP id q1-20020ad44341000000b0042c4b82c16bmr2038591qvs.73.1645023330646;
+        Wed, 16 Feb 2022 06:55:30 -0800 (PST)
+Received: from localhost (209-6-122-159.s2973.c3-0.arl-cbr1.sbo-arl.ma.cable.rcncustomer.com. [209.6.122.159])
+        by smtp.gmail.com with UTF8SMTPSA id w19sm16451212qkp.6.2022.02.16.06.55.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 16 Feb 2022 06:55:30 -0800 (PST)
 From:   Masayoshi Mizuma <msys.mizuma@gmail.com>
-To:     fstests@vger.kernel.org,
+To:     fstests@vger.kernel.org
+Cc:     Masayoshi Mizuma <msys.mizuma@gmail.com>,
         Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
         linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test xfsdump with bind-mounted filesystem
-Message-ID: <Yg0LBnCaT4rWbVLG@gabell>
-References: <20220214203409.10309-1-msys.mizuma@gmail.com>
- <20220216070701.ykfrl2nslh7m3qjm@zlang-mailbox>
+Subject: [PATCH v2] xfs: test xfsdump with bind-mounted filesystem
+Date:   Wed, 16 Feb 2022 09:55:20 -0500
+Message-Id: <20220216145520.33677-1-msys.mizuma@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220216070701.ykfrl2nslh7m3qjm@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 16, 2022 at 03:07:01PM +0800, Zorro Lang wrote:
-> On Mon, Feb 14, 2022 at 03:34:09PM -0500, Masayoshi Mizuma wrote:
-> > From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-> > 
-> > commit 25195eb ("xfsdump: handle bind mount target") introduced
-> > a bug of xfsdump which doesn't store the files to the dump file
-> > correctly when the root inode number is changed.
-> > 
-> > The commit 25195eb is reverted, and commit 0717c1c ("xfsdump: intercept
-> > bind mount targets") which is in xfsdump v3.1.10 fixes the bug to reject
-> > the filesystem if it's bind-mounted.
-> > 
-> > Test that xfsdump can reject the bind-mounted filesystem.
-> > 
-> > Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-> > ---
-> >  tests/xfs/544     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/544.out |  2 ++
-> >  2 files changed, 65 insertions(+)
-> >  create mode 100755 tests/xfs/544
-> >  create mode 100644 tests/xfs/544.out
-> > 
-> > diff --git a/tests/xfs/544 b/tests/xfs/544
-> > new file mode 100755
-> > index 00000000..1d586ebc
-> > --- /dev/null
-> > +++ b/tests/xfs/544
-> > @@ -0,0 +1,63 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
-> > +#
-> > +# FS QA Test 544
-> > +#
-> > +# Regression test for commit:
-> > +# 0717c1c ("xfsdump: intercept bind mount targets")
-> > +
-> > +. ./common/preamble
-> > +_begin_fstest auto dump
-> > +
-> > +_cleanup()
-> > +{
-> > +	_cleanup_dump
-> 
-> Is this really needed?
-> 
-> > +	cd /
-> > +	rm -r -f $tmp.*
-> > +	$UMOUNT_PROG $mntpnt2 2> /dev/null
-> > +	rmdir $mntpnt1/dir 2> /dev/null
-> > +	$UMOUNT_PROG $mntpnt1 2> /dev/null
-> > +	rmdir $mntpnt2 2> /dev/null
-> > +	rmdir $mntpnt1 2> /dev/null
-> > +	[ -n "$loopdev" ] && _destroy_loop_device $loopdev
-> > +	rm -f "$TEST_DIR"/fsfile
-> > +}
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +. ./common/dump
-> > +
-> > +# real QA test starts here
-> > +
-> > +_supported_fs xfs
-> > +
-> > +mntpnt1=$TEST_DIR/MNT1
-> > +mntpnt2=$TEST_DIR/MNT2
-> > +
-> > +
-> > +# Set up
-> > +$MKFS_XFS_PROG -s size=4096 -b size=4096 \
-> > +	-dfile,name=$TEST_DIR/fsfile,size=8649728b,sunit=1024,swidth=2048 \
-> > +	>> $seqres.full 2>&1 || _fail "mkfs failed"
-> 
-> Are "-s size=4096 -b size=4096 -d sunit=1024,swidth=2048" necessary? If so, better
-> to add comments to explain why they're needed.
-> 
-> > +
-> > +loopdev=$(_create_loop_device "$TEST_DIR"/fsfile)
-> 
-> Is loopdev necessary? If you need mkfs, can we just use SCRATCH_DEV, and bind $SCRATCH_MNT/someonedir
-> on $TEST_DIR/someonedir ? E.g:
-> 
-> _cleanup()
-> {
-> 	$UMOUNT_PROG $TEST_DIR/dest 2> /dev/null
-> 	cd /
-> 	rm -r -f $tmp.*
-> }
-> 
-> _scratch_mkfs > $seqres.full
-> _scratch_mount
-> mkdir $SCRATCH_MNT/src
-> mkdir $TEST_DIR/dest
-> $MOUNT_PROG --bind $SCRATCH_MNT/src $TEST_DIR/dest || _fail "Bind mount failed"
-> $XFSDUMP_PROG -L session -M test -f $tmp.dump $TEST_DIR/dest >> $seqres.full 2>&1 && \
-> 	echo "dump with bind-mounted should be failed, but passed."
-> 
-> echo "Silence is golden"
-> ...
-> 
-> If you don't need mkfs, you can use $TEST_DIR (e.g. $TEST_DIR/src and $TEST_DIR/dest) to
-> be bind mount source and target. Due to this case just trys to test xfsdump a bind mount,
-> and make sure dump failed as expected. Am I right?
+From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
 
-Thank you for pointing it out! Yes, you're right.
-I'll remove the unnecessary parts and post the v2.
+commit 25195eb ("xfsdump: handle bind mount target") introduced
+a bug of xfsdump which doesn't store the files to the dump file
+correctly when the root inode number is changed.
 
-Thanks!
-Masa
+The commit 25195eb is reverted, and commit 0717c1c ("xfsdump: intercept
+bind mount targets") which is in xfsdump v3.1.10 fixes the bug to reject
+the filesystem if it's bind-mounted.
 
-> 
-> Thanks,
-> Zorro
-> 
-> > +
-> > +mkdir $mntpnt1 >> $seqres.full 2>&1 || _fail "mkdir \"$mntpnt1\" failed"
-> > +
-> > +_mount $loopdev $mntpnt1
-> > +mkdir $mntpnt1/dir >> $seqres.full 2>&1 || _fail "mkdir \"$mntpnt1/dir\" failed"
-> > +mkdir $mntpnt2 >> $seqres.full 2>&1 || _fail "mkdir \"$mntpnt2\" failed"
-> > +
-> > +
-> > +# Test
-> > +echo "*** dump with bind-mounted test ***" >> $seqres.full
-> > +
-> > +mount -o bind $mntpnt1/dir $mntpnt2
-> > +
-> > +$XFSDUMP_PROG -L session -M test -f $tmp.dump $mntpnt2 \
-> > +	>> $seqres.full 2>&1 && echo "dump with bind-mounted should be failed, but passed."
-> > +
-> > +echo "Silence is golden"
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/544.out b/tests/xfs/544.out
-> > new file mode 100644
-> > index 00000000..fc7ebff3
-> > --- /dev/null
-> > +++ b/tests/xfs/544.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 544
-> > +Silence is golden
-> > -- 
-> > 2.31.1
-> > 
-> 
+Test that xfsdump can reject the bind-mounted filesystem.
+
+Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+---
+ tests/xfs/544     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/544.out |  2 ++
+ 2 files changed, 47 insertions(+)
+ create mode 100755 tests/xfs/544
+ create mode 100644 tests/xfs/544.out
+
+diff --git a/tests/xfs/544 b/tests/xfs/544
+new file mode 100755
+index 00000000..11b9713e
+--- /dev/null
++++ b/tests/xfs/544
+@@ -0,0 +1,45 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
++#
++# FS QA Test 544
++#
++# Regression test for commit:
++# 0717c1c ("xfsdump: intercept bind mount targets")
++
++. ./common/preamble
++_begin_fstest auto dump
++
++_cleanup()
++{
++	_cleanup_dump
++	cd /
++	rm -r -f $tmp.*
++	$UMOUNT_PROG $TEST_DIR/dest 2> /dev/null
++	rmdir $TEST_DIR/src 2> /dev/null
++	rmdir $TEST_DIR/dest 2> /dev/null
++}
++
++# Import common functions.
++. ./common/filter
++. ./common/dump
++
++# real QA test starts here
++
++_supported_fs xfs
++
++# Setup
++mkdir $TEST_DIR/src
++mkdir $TEST_DIR/dest
++
++# Test
++echo "*** dump with bind-mounted test ***" >> $seqres.full
++
++$MOUNT_PROG --bind $TEST_DIR/src $TEST_DIR/dest || _fail "Bind mount failed"
++
++$XFSDUMP_PROG -L session -M test -f $tmp.dump $TEST_DIR/dest \
++	>> $seqres.full 2>&1 && echo "dump with bind-mounted should be failed, but passed."
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/xfs/544.out b/tests/xfs/544.out
+new file mode 100644
+index 00000000..fc7ebff3
+--- /dev/null
++++ b/tests/xfs/544.out
+@@ -0,0 +1,2 @@
++QA output created by 544
++Silence is golden
+-- 
+2.31.1
+
