@@ -2,214 +2,84 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9506BC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Feb 2022 07:08:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97CF0C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Feb 2022 09:24:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229630AbiBPHIU (ORCPT
+        id S232192AbiBPJY5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Feb 2022 02:08:20 -0500
-Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:39486 "EHLO
+        Wed, 16 Feb 2022 04:24:57 -0500
+Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:40248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229617AbiBPHIO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Feb 2022 02:08:14 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4D1A826AC0
-        for <fstests@vger.kernel.org>; Tue, 15 Feb 2022 23:07:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1644995229;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=r9Eoz077WzDH1ilTxjcZfZBXYiekY8+r8h43XOO9apM=;
-        b=OLpgCvSHKps7tJeJ9h0foeCxlqwhuxzacnyChgYwv/PpPLRoyug9tDJbPEon8SY5jG50IJ
-        qJyGOXf5mYESyiqpE2uvcFuHNj1uABvCz9RnRjkRX0qbYnYbmbCQttXjaqZesrXXOzsksp
-        oVfcGKgHLx84rwwQFVTOwy/e+GJIJT0=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-245-BLkeWM_mOzGw3u69ujGO8A-1; Wed, 16 Feb 2022 02:07:08 -0500
-X-MC-Unique: BLkeWM_mOzGw3u69ujGO8A-1
-Received: by mail-pg1-f200.google.com with SMTP id l11-20020a65560b000000b003658a2d3589so782096pgs.4
-        for <fstests@vger.kernel.org>; Tue, 15 Feb 2022 23:07:08 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=r9Eoz077WzDH1ilTxjcZfZBXYiekY8+r8h43XOO9apM=;
-        b=ko9pfF0YCNiTZ1vfUNhlmRrRGOFgViZQAJg2k8tVQyFcBfZ5QgUhcaN3U7oY8fw+Um
-         +/NhqPXQzNB8j8vGFS6OiNEsEk1O+j9B+uwdQ3hzt3ZoZruxLqBYFNdvjQR16BW0EDIM
-         OqZh9nWJj0r2jnZvPZgwJQRmN4y4kJ0F8FJ5zMYIBp4O7JidaoOytOLedeQGgIgbT03f
-         s/CFxKzHNmFRQ4EaCj3pajzPZkKXBr75GDREcyETEF1PeA5O8je9sctpY/ScljZiggHR
-         KCTVGWlVc8y8bOxaLU2NSIkfgdklGDsHXPGR8mB7oGCVriPTQ2KBkdyrlOc8iBfb9XGZ
-         eKQA==
-X-Gm-Message-State: AOAM531+jNtIO8YEOpg/ML51a1wdQdaW2o95v7GrraxkbgDXs9Ap2VdW
-        Pv1W+rvaMyH9n+PZTwbl5IVBl736cyAsNpaLIpvrFuS+bdpM3Z2hLQ8IkPSPn/SVLERbO8lq43A
-        FKDVAIuL+7NCVgPQBUA==
-X-Received: by 2002:a17:902:d705:b0:14e:e5a2:1b34 with SMTP id w5-20020a170902d70500b0014ee5a21b34mr1269951ply.88.1644995227193;
-        Tue, 15 Feb 2022 23:07:07 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxhf7n22kGCM6RKgnXUMQ5yU6L4aLzY2xm1ke5OatXy3I0mv3GAJcHrsDeS8d2yA6zI8tKQ+Q==
-X-Received: by 2002:a17:902:d705:b0:14e:e5a2:1b34 with SMTP id w5-20020a170902d70500b0014ee5a21b34mr1269928ply.88.1644995226871;
-        Tue, 15 Feb 2022 23:07:06 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id my4sm8129298pjb.13.2022.02.15.23.07.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Feb 2022 23:07:06 -0800 (PST)
-Date:   Wed, 16 Feb 2022 15:07:01 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Masayoshi Mizuma <msys.mizuma@gmail.com>
-Cc:     fstests@vger.kernel.org,
-        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test xfsdump with bind-mounted filesystem
-Message-ID: <20220216070701.ykfrl2nslh7m3qjm@zlang-mailbox>
-Mail-Followup-To: Masayoshi Mizuma <msys.mizuma@gmail.com>,
-        fstests@vger.kernel.org, Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
-        linux-xfs@vger.kernel.org
-References: <20220214203409.10309-1-msys.mizuma@gmail.com>
+        with ESMTP id S232198AbiBPJY4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Feb 2022 04:24:56 -0500
+X-Greylist: delayed 601 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 16 Feb 2022 01:24:37 PST
+Received: from localhost (ip5886566d.dynamic.kabel-deutschland.de [88.134.86.109])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C4E39245FE2;
+        Wed, 16 Feb 2022 01:24:37 -0800 (PST)
+Received: by localhost (Postfix, from userid 0)
+        id 948A0A88F; Wed, 16 Feb 2022 10:04:53 +0100 (CET)
+From:   Gabriel Niebler <gniebler@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Gabriel Niebler <gniebler@suse.com>
+Subject: [PATCH] fstests: fix btrfs/255 to fail on deadlock
+Date:   Wed, 16 Feb 2022 10:03:40 +0100
+Message-Id: <20220216090340.2241-1-gniebler@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220214203409.10309-1-msys.mizuma@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Feb 14, 2022 at 03:34:09PM -0500, Masayoshi Mizuma wrote:
-> From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-> 
-> commit 25195eb ("xfsdump: handle bind mount target") introduced
-> a bug of xfsdump which doesn't store the files to the dump file
-> correctly when the root inode number is changed.
-> 
-> The commit 25195eb is reverted, and commit 0717c1c ("xfsdump: intercept
-> bind mount targets") which is in xfsdump v3.1.10 fixes the bug to reject
-> the filesystem if it's bind-mounted.
-> 
-> Test that xfsdump can reject the bind-mounted filesystem.
-> 
-> Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-> ---
->  tests/xfs/544     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/544.out |  2 ++
->  2 files changed, 65 insertions(+)
->  create mode 100755 tests/xfs/544
->  create mode 100644 tests/xfs/544.out
-> 
-> diff --git a/tests/xfs/544 b/tests/xfs/544
-> new file mode 100755
-> index 00000000..1d586ebc
-> --- /dev/null
-> +++ b/tests/xfs/544
-> @@ -0,0 +1,63 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
-> +#
-> +# FS QA Test 544
-> +#
-> +# Regression test for commit:
-> +# 0717c1c ("xfsdump: intercept bind mount targets")
-> +
-> +. ./common/preamble
-> +_begin_fstest auto dump
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_dump
+In its current implementation, the test btrfs/255 would hang forever
+on any kernel w/o patch "btrfs: fix deadlock between quota disable
+and qgroup rescan worker", rather than failing, as it should.
+Fix this by introducing generous timeouts.
 
-Is this really needed?
+Signed-off-by: Gabriel Niebler <gniebler@suse.com>
+---
+ tests/btrfs/255 | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
 
-> +	cd /
-> +	rm -r -f $tmp.*
-> +	$UMOUNT_PROG $mntpnt2 2> /dev/null
-> +	rmdir $mntpnt1/dir 2> /dev/null
-> +	$UMOUNT_PROG $mntpnt1 2> /dev/null
-> +	rmdir $mntpnt2 2> /dev/null
-> +	rmdir $mntpnt1 2> /dev/null
-> +	[ -n "$loopdev" ] && _destroy_loop_device $loopdev
-> +	rm -f "$TEST_DIR"/fsfile
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/dump
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +
-> +mntpnt1=$TEST_DIR/MNT1
-> +mntpnt2=$TEST_DIR/MNT2
-> +
-> +
-> +# Set up
-> +$MKFS_XFS_PROG -s size=4096 -b size=4096 \
-> +	-dfile,name=$TEST_DIR/fsfile,size=8649728b,sunit=1024,swidth=2048 \
-> +	>> $seqres.full 2>&1 || _fail "mkfs failed"
-
-Are "-s size=4096 -b size=4096 -d sunit=1024,swidth=2048" necessary? If so, better
-to add comments to explain why they're needed.
-
-> +
-> +loopdev=$(_create_loop_device "$TEST_DIR"/fsfile)
-
-Is loopdev necessary? If you need mkfs, can we just use SCRATCH_DEV, and bind $SCRATCH_MNT/someonedir
-on $TEST_DIR/someonedir ? E.g:
-
-_cleanup()
-{
-	$UMOUNT_PROG $TEST_DIR/dest 2> /dev/null
-	cd /
-	rm -r -f $tmp.*
-}
-
-_scratch_mkfs > $seqres.full
-_scratch_mount
-mkdir $SCRATCH_MNT/src
-mkdir $TEST_DIR/dest
-$MOUNT_PROG --bind $SCRATCH_MNT/src $TEST_DIR/dest || _fail "Bind mount failed"
-$XFSDUMP_PROG -L session -M test -f $tmp.dump $TEST_DIR/dest >> $seqres.full 2>&1 && \
-	echo "dump with bind-mounted should be failed, but passed."
-
-echo "Silence is golden"
-...
-
-If you don't need mkfs, you can use $TEST_DIR (e.g. $TEST_DIR/src and $TEST_DIR/dest) to
-be bind mount source and target. Due to this case just trys to test xfsdump a bind mount,
-and make sure dump failed as expected. Am I right?
-
-Thanks,
-Zorro
-
-> +
-> +mkdir $mntpnt1 >> $seqres.full 2>&1 || _fail "mkdir \"$mntpnt1\" failed"
-> +
-> +_mount $loopdev $mntpnt1
-> +mkdir $mntpnt1/dir >> $seqres.full 2>&1 || _fail "mkdir \"$mntpnt1/dir\" failed"
-> +mkdir $mntpnt2 >> $seqres.full 2>&1 || _fail "mkdir \"$mntpnt2\" failed"
-> +
-> +
-> +# Test
-> +echo "*** dump with bind-mounted test ***" >> $seqres.full
-> +
-> +mount -o bind $mntpnt1/dir $mntpnt2
-> +
-> +$XFSDUMP_PROG -L session -M test -f $tmp.dump $mntpnt2 \
-> +	>> $seqres.full 2>&1 && echo "dump with bind-mounted should be failed, but passed."
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/544.out b/tests/xfs/544.out
-> new file mode 100644
-> index 00000000..fc7ebff3
-> --- /dev/null
-> +++ b/tests/xfs/544.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 544
-> +Silence is golden
-> -- 
-> 2.31.1
-> 
+diff --git a/tests/btrfs/255 b/tests/btrfs/255
+index 7e70944a..4c779458 100755
+--- a/tests/btrfs/255
++++ b/tests/btrfs/255
+@@ -14,6 +14,7 @@ _begin_fstest auto qgroup balance
+ 
+ # real QA test starts here
+ _supported_fs btrfs
++_require_command "$TIMEOUT_PROG" timeout
+ _require_scratch
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+@@ -37,15 +38,23 @@ done
+ _btrfs_stress_balance $SCRATCH_MNT >> $seqres.full &
+ balance_pid=$!
+ echo $balance_pid >> $seqres.full
++timeout=$((30 * 60))
+ for ((i = 0; i < 20; i++)); do
+-	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+-	$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
++	$TIMEOUT_PROG -s KILL ${timeout}s $BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
++	[ $? -eq 0 ] || _fail "quota enable timed out"
++	$TIMEOUT_PROG -s KILL ${timeout}s $BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
++	[ $? -eq 0 ] || _fail "quota disable timed out"
+ done
+ kill $balance_pid &> /dev/null
+-wait
++
+ # wait for the balance operation to finish
++elapsed=0
+ while ps aux | grep "balance start" | grep -qv grep; do
++	if [ $elapsed -gt $timeout ]; then
++		_fail "balance not finished after $timeout seconds"
++	fi
+ 	sleep 1
++	elapsed=$(( ++elapsed ))
+ done
+ 
+ echo "Silence is golden"
+-- 
+2.35.1
 
