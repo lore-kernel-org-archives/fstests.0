@@ -2,599 +2,140 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8A19C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Feb 2022 15:10:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A30CC433FE
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Feb 2022 19:03:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235378AbiBPPKO (ORCPT
+        id S237987AbiBPTEB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Feb 2022 10:10:14 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:49600 "EHLO
+        Wed, 16 Feb 2022 14:04:01 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:43522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233894AbiBPPKO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Feb 2022 10:10:14 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CDA020BCE9;
-        Wed, 16 Feb 2022 07:10:01 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S237986AbiBPTEA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Feb 2022 14:04:00 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07FA613D575
+        for <fstests@vger.kernel.org>; Wed, 16 Feb 2022 11:03:46 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 9CCEAB81F19;
-        Wed, 16 Feb 2022 15:09:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4364CC004E1;
-        Wed, 16 Feb 2022 15:09:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1645024198;
-        bh=GHVaJveWmDjBMZ7xg4UU2ecHkOgd2vl0isTo4bIg9h0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=M7bLQ1H7OPp7VLKBjus/zM1dVvUxKkFd1dyEDRmYekBUuaHvdmg/BNX/9ir/ljDGv
-         NG4CH5KDumtvj9oZnqjbQhNKzn+jT4m79r82uEtXJENyVrTqQdGwl73JUX4jxzgFN/
-         DHKpFmxkek6aBXxegT/4OBgTRPzkUdrsAW7AW3+k3guY3NGE5Ft3gcICKQ9yOVuCnk
-         2qR7BFXbarkB++UbG/2UMSiQ1tB0/llY2KAqzDCmTrkQHMjlYMUq2VjvHPIzVHEDe3
-         dsMbH5gPMOngrZKeetFCmYGU+e88zpICkaD+cFVkUXFCb9v+UuPsSLqb7zMibQprF0
-         9f7OD/UmOzFFQ==
-Received: by mail-qv1-f47.google.com with SMTP id n6so2378862qvk.13;
-        Wed, 16 Feb 2022 07:09:58 -0800 (PST)
-X-Gm-Message-State: AOAM531bWDmOMRYZUn+mW+L05rDzwdrSbdKG7IIWh6toetwPjjgdYOwH
-        PxCjPWnX7VYwv0F5ZeKgEKXz2HIP556zdZs/CTo=
-X-Google-Smtp-Source: ABdhPJxCSRPgDhTUcFgD7yH2bYr+gnUjrJXEeZaCpLgRQ2RQBbOfByGDXwbhLJyTiX1daK0Xqe6cXBS0aiiMamVLvPQ=
-X-Received: by 2002:a0c:c78b:0:b0:430:88a0:eeb0 with SMTP id
- k11-20020a0cc78b000000b0043088a0eeb0mr455706qvj.89.1645024197261; Wed, 16 Feb
- 2022 07:09:57 -0800 (PST)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id A56721F37D
+        for <fstests@vger.kernel.org>; Wed, 16 Feb 2022 19:03:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1645038225; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=/0VYcbA4HLOSJl66eHG5EU3/z1nVBItuJsB+/8s/6FU=;
+        b=nRXXT4hhYYgAJ4OIC2eDx5A70nl3EpeAca3J6wrlREEqQdoP+OyOqk+yD4dlIW/fnlHSht
+        nBI0xKZT4BOZVVtFnXWPrsPpnh+rq83LvRkB1PTjMGnm2mMk900HrrS6ENaoyK5gulylmO
+        qQ6sRRxoA/W82peXLF6KPv6hWioriGw=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 914E513B49
+        for <fstests@vger.kernel.org>; Wed, 16 Feb 2022 19:03:45 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id v3EvI5FKDWJqEwAAMHmgww
+        (envelope-from <ailiop@suse.com>)
+        for <fstests@vger.kernel.org>; Wed, 16 Feb 2022 19:03:45 +0000
+From:   Anthony Iliopoulos <ailiop@suse.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] btrfs: add support for capturing metadumps of corrupted fses
+Date:   Wed, 16 Feb 2022 20:03:34 +0100
+Message-Id: <20220216190334.25213-1-ailiop@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-References: <164316310323.2594527.8578672050751235563.stgit@magnolia>
- <164316310910.2594527.6072232851001636761.stgit@magnolia> <20220127012701.GD13540@magnolia>
-In-Reply-To: <20220127012701.GD13540@magnolia>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Wed, 16 Feb 2022 15:09:20 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H47iNQ=Wmk83WcGB-KBJVOEtR9+qGczzCeXJ9Y2KCV25Q@mail.gmail.com>
-Message-ID: <CAL3q7H47iNQ=Wmk83WcGB-KBJVOEtR9+qGczzCeXJ9Y2KCV25Q@mail.gmail.com>
-Subject: Re: [PATCH v1.1 1/2] generic: test suid/sgid behavior with reflink
- and dedupe
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eryu Guan <guaneryu@gmail.com>, xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 27, 2022 at 9:01 AM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> From: Darrick J. Wong <djwong@kernel.org>
->
-> Make sure that we drop the setuid and setgid bits any time reflink or
-> dedupe change the file contents.
->
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
-> v2: drop the congruent oplen checks, that was a mismerge
-> ---
->  tests/generic/950     |  107 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/950.out |   49 +++++++++++++++++++++
->  tests/generic/951     |  117 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/951.out |   49 +++++++++++++++++++++
->  tests/generic/952     |   70 +++++++++++++++++++++++++++++
->  tests/generic/952.out |   13 +++++
->  6 files changed, 405 insertions(+)
->  create mode 100755 tests/generic/950
->  create mode 100644 tests/generic/950.out
->  create mode 100755 tests/generic/951
->  create mode 100644 tests/generic/951.out
->  create mode 100755 tests/generic/952
->  create mode 100644 tests/generic/952.out
->
-> diff --git a/tests/generic/950 b/tests/generic/950
-> new file mode 100755
-> index 00000000..a7398cb5
-> --- /dev/null
-> +++ b/tests/generic/950
-> @@ -0,0 +1,107 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 950
-> +#
-> +# Functional test for dropping suid and sgid bits as part of a reflink.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto clone quick
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_user
-> +_require_scratch_reflink
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +chmod a+rw $SCRATCH_MNT/
-> +
-> +setup_testfile() {
-> +       rm -f $SCRATCH_MNT/a $SCRATCH_MNT/b
-> +       _pwrite_byte 0x58 0 1m $SCRATCH_MNT/a >> $seqres.full
-> +       _pwrite_byte 0x57 0 1m $SCRATCH_MNT/b >> $seqres.full
-> +       chmod a+r $SCRATCH_MNT/b
-> +       sync
-> +}
-> +
-> +commit_and_check() {
-> +       local user="$1"
-> +
-> +       md5sum $SCRATCH_MNT/a | _filter_scratch
-> +       stat -c '%a %A %n' $SCRATCH_MNT/a | _filter_scratch
-> +
-> +       local cmd="$XFS_IO_PROG -c 'reflink $SCRATCH_MNT/b 0 0 1m' $SCRATCH_MNT/a"
-> +       if [ -n "$user" ]; then
-> +               su - "$user" -c "$cmd" >> $seqres.full
-> +       else
-> +               $SHELL -c "$cmd" >> $seqres.full
-> +       fi
-> +
-> +       _scratch_cycle_mount
-> +       md5sum $SCRATCH_MNT/a | _filter_scratch
-> +       stat -c '%a %A %n' $SCRATCH_MNT/a | _filter_scratch
-> +
-> +       # Blank line in output
-> +       echo
-> +}
-> +
+Add the capability to capture btrfs metadumps when filesystem checks
+fail, so that they can be used for further debugging. This is useful for
+tests that _require_test and/or _require_scratch for which filesystem
+checkers will run after a test completes and may occasionally pick up
+inconsistencies.
 
-Hi Darrick,
+Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+---
+ README        |  4 ++--
+ common/btrfs  | 15 +++++++++++++++
+ common/config |  1 +
+ common/rc     |  3 +++
+ 4 files changed, 21 insertions(+), 2 deletions(-)
 
-> +# Commit to a non-exec file by an unprivileged user clears suid but leaves
-> +# sgid.
-> +echo "Test 1 - qa_user, non-exec file"
-> +setup_testfile
-> +chmod a+rws $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
+diff --git a/README b/README
+index e9284b229eca..9f01aa10d61a 100644
+--- a/README
++++ b/README
+@@ -110,8 +110,8 @@ Preparing system for tests:
+              - Set TEST_FS_MODULE_RELOAD=1 to unload the module and reload
+                it between test invocations.  This assumes that the name of
+                the module is the same as FSTYP.
+-             - Set DUMP_CORRUPT_FS=1 to record metadata dumps of XFS or ext*
+-               filesystems if a filesystem check fails.
++             - Set DUMP_CORRUPT_FS=1 to record metadata dumps of XFS, ext* or
++               btrfs filesystems if a filesystem check fails.
+              - Set DUMP_COMPRESSOR to a compression program to compress
+                metadumps of filesystems.  This program must accept '-f' and the
+                name of a file to compress; and it must accept '-d -f -k' and
+diff --git a/common/btrfs b/common/btrfs
+index 5de926dd9bfa..32d02bf2b3ce 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -155,6 +155,11 @@ _check_btrfs_filesystem()
+ 	fi
+ 	rm -f $tmp.fsck
+ 
++	if [ $ok -eq 0 ] && [ "$DUMP_CORRUPT_FS" = "1" ]; then
++		local flatdev="$(basename "$device")"
++		_btrfs_metadump "$device" "$seqres.$flatdev.check.md" >>$seqres.full
++	fi
++
+ 	if [ $ok -eq 0 ]; then
+ 		echo "*** mount output ***"		>>$seqres.full
+ 		_mount					>>$seqres.full
+@@ -496,3 +501,13 @@ _require_btrfs_support_sectorsize()
+ 	grep -wq $sectorsize /sys/fs/btrfs/features/supported_sectorsizes || \
+ 		_notrun "sectorsize $sectorsize is not supported"
+ }
++
++_btrfs_metadump()
++{
++	local device="$1"
++	local dumpfile="$2"
++
++	test -n "$BTRFS_IMAGE_PROG" || _fail "btrfs-image not installed"
++	$BTRFS_IMAGE_PROG "$device" "$dumpfile"
++	[ -n "$DUMP_COMPRESSOR" ] && $DUMP_COMPRESSOR -f "$dumpfile" &> /dev/null
++}
+diff --git a/common/config b/common/config
+index 0566ab4a963e..121ba000279f 100644
+--- a/common/config
++++ b/common/config
+@@ -227,6 +227,7 @@ export ACCTON_PROG="$(type -P accton)"
+ export E2IMAGE_PROG="$(type -P e2image)"
+ export BLKZONE_PROG="$(type -P blkzone)"
+ export GZIP_PROG="$(type -P gzip)"
++export BTRFS_IMAGE_PROG="$(type -P btrfs-image)"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/rc b/common/rc
+index de60fb7b0677..e2d3d72a00f6 100644
+--- a/common/rc
++++ b/common/rc
+@@ -642,6 +642,9 @@ _metadump_dev() {
+ 	test "$DUMP_CORRUPT_FS" = 1 || return 0
+ 
+ 	case "$FSTYP" in
++	btrfs)
++		_btrfs_metadump $device $dumpfile
++		;;
+ 	ext*)
+ 		_ext4_metadump $device $dumpfile $compressopt
+ 		;;
+-- 
+2.35.1
 
-So this test fails on btrfs, and after taking a look at it, I'm not
-sure if this expected result is xfs specific or not.
-
-On btrfs we get sgid cleared:
-
-     310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-     6666 -rwSrwSrw- SCRATCH_MNT/a
-     3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-    -2666 -rw-rwSrw- SCRATCH_MNT/a
-    +666 -rw-rw-rw- SCRATCH_MNT/a
-
-This happens because at btrfs_setattr() we use setattr_copy() to
-change the inode's ->i_mode.
-I see that xfs does not use it, instead it manipulates ->i_mode
-directly with xfs_setattr_mode().
-
-At setattr_copy() we get the sgid removed:
-
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/attr.c?h=v5.17-rc4#n241
-
-Testing this with buffered writes instead of reflink, to see how xfs,
-btrfs and ext4 behave:
-
-#!/bin/bash
-
-DEV=/dev/sdj
-MNT=/mnt/sdj
-XFS_IO=/home/fdmanana/xfsprogs/sbin/xfs_io
-
-mkfs.btrfs -f $DEV >/dev/null
-#mkfs.ext4 -F $DEV >/dev/null
-#mkfs.xfs -f $DEV >/dev/null
-mount $DEV $MNT
-
-$XFS_IO -f -c "pwrite -S 0xab 0 128K" $MNT/foo >/dev/null
-chmod a+rws $MNT/foo
-
-echo "Inode mode before: $(stat -c '%a %A %n' $MNT/foo)"
-
-cmd="$XFS_IO -c 'pwrite -S 0xcd 64K 4K' $MNT/foo"
-su - fsgqa -c "$cmd" >/dev/null
-
-echo "Inode mode after:  $(stat -c '%a %A %n' $MNT/foo)"
-
-umount $DEV
-
-btrfs and ext4 give the same result, as both use the setattr_copy()
-from generic code, where sgid gets removed:
-
-Inode mode before: 6666 -rwSrwSrw- /mnt/sdj/foo
-Inode mode after:  666 -rw-rw-rw- /mnt/sdj/foo
-
-xfs gives the same behaviour as this test expects for reflinks, sgid
-is preserved:
-
-Inode mode before: 6666 -rwSrwSrw- /mnt/sdj/foo
-Inode mode after:  2666 -rw-rwSrw- /mnt/sdj/foo
-
-So I wonder if this is a behaviour that can be fs specific, if xfs is
-behaving incorrectly, or the generic code, setattr_copy(), is not
-correct.
-Any thoughts?
-
-Thanks.
-
-
-
-
-
-> +
-> +# Commit to a group-exec file by an unprivileged user clears suid and sgid.
-> +echo "Test 2 - qa_user, group-exec file"
-> +setup_testfile
-> +chmod g+x,a+rws $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a user-exec file by an unprivileged user clears suid but not sgid.
-> +echo "Test 3 - qa_user, user-exec file"
-> +setup_testfile
-> +chmod u+x,a+rws,g-x $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a all-exec file by an unprivileged user clears suid and sgid.
-> +echo "Test 4 - qa_user, all-exec file"
-> +setup_testfile
-> +chmod a+rwxs $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a non-exec file by root clears suid but leaves sgid.
-> +echo "Test 5 - root, non-exec file"
-> +setup_testfile
-> +chmod a+rws $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# Commit to a group-exec file by root clears suid and sgid.
-> +echo "Test 6 - root, group-exec file"
-> +setup_testfile
-> +chmod g+x,a+rws $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# Commit to a user-exec file by root clears suid but not sgid.
-> +echo "Test 7 - root, user-exec file"
-> +setup_testfile
-> +chmod u+x,a+rws,g-x $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# Commit to a all-exec file by root clears suid and sgid.
-> +echo "Test 8 - root, all-exec file"
-> +setup_testfile
-> +chmod a+rwxs $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/950.out b/tests/generic/950.out
-> new file mode 100644
-> index 00000000..b42e4931
-> --- /dev/null
-> +++ b/tests/generic/950.out
-> @@ -0,0 +1,49 @@
-> +QA output created by 950
-> +Test 1 - qa_user, non-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +2666 -rw-rwSrw- SCRATCH_MNT/a
-> +
-> +Test 2 - qa_user, group-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +676 -rw-rwxrw- SCRATCH_MNT/a
-> +
-> +Test 3 - qa_user, user-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +2766 -rwxrwSrw- SCRATCH_MNT/a
-> +
-> +Test 4 - qa_user, all-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +777 -rwxrwxrwx SCRATCH_MNT/a
-> +
-> +Test 5 - root, non-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +
-> +Test 6 - root, group-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +
-> +Test 7 - root, user-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +
-> +Test 8 - root, all-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +
-> diff --git a/tests/generic/951 b/tests/generic/951
-> new file mode 100755
-> index 00000000..8484f225
-> --- /dev/null
-> +++ b/tests/generic/951
-> @@ -0,0 +1,117 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 951
-> +#
-> +# Functional test for dropping suid and sgid bits as part of a deduplication.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto clone quick
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_user
-> +_require_scratch_reflink
-> +_require_xfs_io_command dedupe
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +chmod a+rw $SCRATCH_MNT/
-> +
-> +setup_testfile() {
-> +       rm -f $SCRATCH_MNT/a $SCRATCH_MNT/b
-> +       _pwrite_byte 0x58 0 1m $SCRATCH_MNT/a >> $seqres.full
-> +       _pwrite_byte 0x58 0 1m $SCRATCH_MNT/b >> $seqres.full
-> +       chmod a+r $SCRATCH_MNT/b
-> +       sync
-> +}
-> +
-> +commit_and_check() {
-> +       local user="$1"
-> +
-> +       md5sum $SCRATCH_MNT/a | _filter_scratch
-> +       stat -c '%a %A %n' $SCRATCH_MNT/a | _filter_scratch
-> +
-> +       local before_freesp=$(_get_available_space $SCRATCH_MNT)
-> +
-> +       local cmd="$XFS_IO_PROG -c 'dedupe $SCRATCH_MNT/b 0 0 1m' $SCRATCH_MNT/a"
-> +       if [ -n "$user" ]; then
-> +               su - "$user" -c "$cmd" >> $seqres.full
-> +       else
-> +               $SHELL -c "$cmd" >> $seqres.full
-> +       fi
-> +
-> +       _scratch_cycle_mount
-> +       md5sum $SCRATCH_MNT/a | _filter_scratch
-> +       stat -c '%a %A %n' $SCRATCH_MNT/a | _filter_scratch
-> +
-> +       local after_freesp=$(_get_available_space $SCRATCH_MNT)
-> +
-> +       echo "before: $before_freesp; after: $after_freesp" >> $seqres.full
-> +       if [ $after_freesp -le $before_freesp ]; then
-> +               echo "expected more free space after dedupe"
-> +       fi
-> +
-> +       # Blank line in output
-> +       echo
-> +}
-> +
-> +# Commit to a non-exec file by an unprivileged user clears suid but leaves
-> +# sgid.
-> +echo "Test 1 - qa_user, non-exec file"
-> +setup_testfile
-> +chmod a+rws $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a group-exec file by an unprivileged user clears suid and sgid.
-> +echo "Test 2 - qa_user, group-exec file"
-> +setup_testfile
-> +chmod g+x,a+rws $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a user-exec file by an unprivileged user clears suid but not sgid.
-> +echo "Test 3 - qa_user, user-exec file"
-> +setup_testfile
-> +chmod u+x,a+rws,g-x $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a all-exec file by an unprivileged user clears suid and sgid.
-> +echo "Test 4 - qa_user, all-exec file"
-> +setup_testfile
-> +chmod a+rwxs $SCRATCH_MNT/a
-> +commit_and_check "$qa_user"
-> +
-> +# Commit to a non-exec file by root clears suid but leaves sgid.
-> +echo "Test 5 - root, non-exec file"
-> +setup_testfile
-> +chmod a+rws $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# Commit to a group-exec file by root clears suid and sgid.
-> +echo "Test 6 - root, group-exec file"
-> +setup_testfile
-> +chmod g+x,a+rws $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# Commit to a user-exec file by root clears suid but not sgid.
-> +echo "Test 7 - root, user-exec file"
-> +setup_testfile
-> +chmod u+x,a+rws,g-x $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# Commit to a all-exec file by root clears suid and sgid.
-> +echo "Test 8 - root, all-exec file"
-> +setup_testfile
-> +chmod a+rwxs $SCRATCH_MNT/a
-> +commit_and_check
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/951.out b/tests/generic/951.out
-> new file mode 100644
-> index 00000000..f7099ea2
-> --- /dev/null
-> +++ b/tests/generic/951.out
-> @@ -0,0 +1,49 @@
-> +QA output created by 951
-> +Test 1 - qa_user, non-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +
-> +Test 2 - qa_user, group-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +
-> +Test 3 - qa_user, user-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +
-> +Test 4 - qa_user, all-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +
-> +Test 5 - root, non-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6666 -rwSrwSrw- SCRATCH_MNT/a
-> +
-> +Test 6 - root, group-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6676 -rwSrwsrw- SCRATCH_MNT/a
-> +
-> +Test 7 - root, user-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6766 -rwsrwSrw- SCRATCH_MNT/a
-> +
-> +Test 8 - root, all-exec file
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> +6777 -rwsrwsrwx SCRATCH_MNT/a
-> +
-> diff --git a/tests/generic/952 b/tests/generic/952
-> new file mode 100755
-> index 00000000..86443dcc
-> --- /dev/null
-> +++ b/tests/generic/952
-> @@ -0,0 +1,70 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 952
-> +#
-> +# Functional test for dropping suid and sgid capabilities as part of a reflink.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto clone quick
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_user
-> +_require_command "$GETCAP_PROG" getcap
-> +_require_command "$SETCAP_PROG" setcap
-> +_require_scratch_reflink
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +chmod a+rw $SCRATCH_MNT/
-> +
-> +setup_testfile() {
-> +       rm -f $SCRATCH_MNT/a $SCRATCH_MNT/b
-> +       _pwrite_byte 0x58 0 1m $SCRATCH_MNT/a >> $seqres.full
-> +       _pwrite_byte 0x57 0 1m $SCRATCH_MNT/b >> $seqres.full
-> +       chmod a+rwx $SCRATCH_MNT/a $SCRATCH_MNT/b
-> +       $SETCAP_PROG cap_setgid,cap_setuid+ep $SCRATCH_MNT/a
-> +       sync
-> +}
-> +
-> +commit_and_check() {
-> +       local user="$1"
-> +
-> +       stat -c '%a %A %n' $SCRATCH_MNT/a | _filter_scratch
-> +       _getcap -v $SCRATCH_MNT/a | _filter_scratch
-> +
-> +       local cmd="$XFS_IO_PROG -c 'reflink $SCRATCH_MNT/b 0 0 1m' $SCRATCH_MNT/a"
-> +       if [ -n "$user" ]; then
-> +               su - "$user" -c "$cmd" >> $seqres.full
-> +       else
-> +               $SHELL -c "$cmd" >> $seqres.full
-> +       fi
-> +
-> +       stat -c '%a %A %n' $SCRATCH_MNT/a | _filter_scratch
-> +       _getcap -v $SCRATCH_MNT/a | _filter_scratch
-> +
-> +       # Blank line in output
-> +       echo
-> +}
-> +
-> +# Commit by an unprivileged user clears capability bits.
-> +echo "Test 1 - qa_user"
-> +setup_testfile
-> +commit_and_check "$qa_user"
-> +
-> +# Commit by root leaves capability bits.
-> +echo "Test 2 - root"
-> +setup_testfile
-> +commit_and_check
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/952.out b/tests/generic/952.out
-> new file mode 100644
-> index 00000000..eac9e76a
-> --- /dev/null
-> +++ b/tests/generic/952.out
-> @@ -0,0 +1,13 @@
-> +QA output created by 952
-> +Test 1 - qa_user
-> +777 -rwxrwxrwx SCRATCH_MNT/a
-> +SCRATCH_MNT/a cap_setgid,cap_setuid=ep
-> +777 -rwxrwxrwx SCRATCH_MNT/a
-> +SCRATCH_MNT/a
-> +
-> +Test 2 - root
-> +777 -rwxrwxrwx SCRATCH_MNT/a
-> +SCRATCH_MNT/a cap_setgid,cap_setuid=ep
-> +777 -rwxrwxrwx SCRATCH_MNT/a
-> +SCRATCH_MNT/a
-> +
