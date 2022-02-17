@@ -2,61 +2,169 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4DAEC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Feb 2022 08:13:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 555E8C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Feb 2022 12:14:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235716AbiBQINY (ORCPT
+        id S239609AbiBQMOy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Feb 2022 03:13:24 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:39302 "EHLO
+        Thu, 17 Feb 2022 07:14:54 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:60018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237139AbiBQINR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Feb 2022 03:13:17 -0500
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CB361408F;
-        Thu, 17 Feb 2022 00:13:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=MKddAxvR3DVk8W8n64+95ExqskCi1xkJSKR1SJCsL1U=; b=MAYBG/zhPbiffNY7Ezk4TsQ8s9
-        AQQDBYLz7ssEil/nEFhalLlCFlHKiwchSi/QOFznkxgD0K77IQZvSmdwutNxO/Cl/gPEVHuyrrTMC
-        u/Xvj+8BcQlNIfy+feGdAd/0zWDcczi02c7WEzlGZ2jI3I1gB39l2dCBWZ/0KVgqoVB72i7CTIsa1
-        CriF7E6ZbNci1cLxFo8VW+PdtHczCTIKFH9zji8wWTrxnDPvveB/MyGIS9WjhBkoG0yQQfwXPaHku
-        VqW6unSccjNd/y9VDPsExKfsKT3mfGa49Mfn4yZZw3Y2SGLtLha+Y106B6McXvhElA3pM82Mid1TS
-        UJ3RNDGA==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nKbuP-009NfT-1U; Thu, 17 Feb 2022 08:13:01 +0000
-Date:   Thu, 17 Feb 2022 00:13:01 -0800
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Lucas De Marchi <lucas.de.marchi@gmail.com>
-Cc:     Lucas De Marchi <lucas.demarchi@intel.com>,
-        linux-modules <linux-modules@vger.kernel.org>,
-        live-patching@vger.kernel.org, fstests@vger.kernel.org,
-        linux-block@vger.kernel.org, hare@suse.de, dgilbert@interlog.com,
-        Jessica Yu <jeyu@kernel.org>, osandov@fb.com,
-        lkml <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v2 0/3] kmod: add patient module removal support
-Message-ID: <Yg4Djc+vqRbMFRto@bombadil.infradead.org>
-References: <20210810051602.3067384-1-mcgrof@kernel.org>
- <YUIwKUXc7YbVAqut@bombadil.infradead.org>
- <CAKi4VAKbN31hqfg5EHZO=T_Hdkv3uhzarFLuEZO4b5Zm+TF77Q@mail.gmail.com>
+        with ESMTP id S240319AbiBQMOv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Feb 2022 07:14:51 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F00BF2A415C;
+        Thu, 17 Feb 2022 04:14:36 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8D4E361841;
+        Thu, 17 Feb 2022 12:14:36 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17125C340EF;
+        Thu, 17 Feb 2022 12:14:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1645100076;
+        bh=UI/c2nBsz4de9WVyPBOeW45FXWa8u0QnnhBKRJ3Ry3Y=;
+        h=From:To:Cc:Subject:Date:From;
+        b=ENdKX19gEspXpPzQK545EneyG0NPrymOdBZxH+og1H/ccIsNgVEgntub4s1n5N5P/
+         IAWd2RNjk4Z2WFC4reL4k5wEALo7SuwHXFXQq0SSsZRhR7fThko4p2mvcGXoh+uT4S
+         3Xt58l/zDu96ZzndXFLDacYyGetJjYGW4jBFwz1LEWqXud1HLbDVPOl1n5odmylS4r
+         4jtOhwDPIzemchZPVvpbCEhl2zpH5rE6i9FQtxAHtrLK0N8HGtrnKGE24lvxWmbjja
+         /9hYbwveQ1Nq/H9gfc5JfOW0kLSyM5GbKWbv3F2sYHEtALD+S7W/53UPnJ5IRFH31D
+         p+76Qh8SVspyA==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test log replay after fsync of file with prealloc extents beyond eof
+Date:   Thu, 17 Feb 2022 12:14:21 +0000
+Message-Id: <abbc821350c8ef515e0a0317b5cbd64e3c5b81ab.1645099449.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAKi4VAKbN31hqfg5EHZO=T_Hdkv3uhzarFLuEZO4b5Zm+TF77Q@mail.gmail.com>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 20, 2021 at 10:51:46PM -0700, Lucas De Marchi wrote:
-> On Wed, Sep 15, 2021 at 10:41 AM Luis Chamberlain <mcgrof@kernel.org> wrote:
-> >
-> > *Friendly poke*
-> 
-> Sorry for the delay. Let me take a look in detail tomorrow.
+From: Filipe Manana <fdmanana@suse.com>
 
-*Friendly poke*
+Test that after a full fsync of a file with preallocated extents beyond
+the file's size, if a power failure happens, the preallocated extents
+still exist after we mount the filesystem.
 
-  Luis
+This test currently fails and there is a patch for btrfs that fixes this
+issue and has the following subject:
+
+  "btrfs: fix lost prealloc extents beyond eof after full fsync"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/261     | 79 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/261.out | 10 ++++++
+ 2 files changed, 89 insertions(+)
+ create mode 100755 tests/btrfs/261
+ create mode 100644 tests/btrfs/261.out
+
+diff --git a/tests/btrfs/261 b/tests/btrfs/261
+new file mode 100755
+index 00000000..8275e6a5
+--- /dev/null
++++ b/tests/btrfs/261
+@@ -0,0 +1,79 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 261
++#
++# Test that after a full fsync of a file with preallocated extents beyond the
++# file's size, if a power failure happens, the preallocated extents still exist
++# after we mount the filesystem.
++#
++. ./common/preamble
++_begin_fstest auto quick log prealloc
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++. ./common/punch
++
++# real QA test starts here
++
++_supported_fs btrfs
++_require_scratch
++_require_dm_target flakey
++_require_xfs_io_command "falloc" "-k"
++_require_xfs_io_command "fiemap"
++_require_odirect
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test file with many file extent items, so that they span several
++# leaves of metadata, even if the node/page size is 64K. We use direct IO and
++# not fsync/O_SYNC because it's both faster and it avoids clearing the full sync
++# flag from the inode - we want the fsync below to trigger the slow full sync
++# code path.
++$XFS_IO_PROG -f -d -c "pwrite -b 4K 0 16M" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now add two preallocated extents to our file without extending the file's size.
++# One right at i_size, and another further beyond, leaving a gap between the two
++# prealloc extents.
++$XFS_IO_PROG -c "falloc -k 16M 1M" $SCRATCH_MNT/foo
++$XFS_IO_PROG -c "falloc -k 20M 1M" $SCRATCH_MNT/foo
++
++# Make sure everything is durably persisted and the transaction is committed.
++# This makes all created extents to have a generation lower than the generation
++# of the transaction used by the next write and fsync.
++sync
++
++# Now overwrite only the first extent, which will result in modifying only the
++# first leaf of metadata for our inode. Then fsync it. This fsync will use the
++# slow code path (inode full sync bit is set) because it's the first fsync since
++# the inode was created/loaded.
++$XFS_IO_PROG -c "pwrite 0 4K" -c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Simulate a power failure and then mount again the filesystem to replay the log
++# tree.
++_flakey_drop_and_remount
++
++# After the power failure we expect that the preallocated extents, beyond the
++# inode's i_size, still exist.
++echo "List of extents after power failure:"
++$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap
++
++_unmount_flakey
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/261.out b/tests/btrfs/261.out
+new file mode 100644
+index 00000000..e9cfe1e8
+--- /dev/null
++++ b/tests/btrfs/261.out
+@@ -0,0 +1,10 @@
++QA output created by 261
++wrote 16777216/16777216 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++List of extents after power failure:
++0: [0..32767]: data
++1: [32768..34815]: unwritten
++2: [34816..40959]: hole
++3: [40960..43007]: unwritten
+-- 
+2.33.0
+
