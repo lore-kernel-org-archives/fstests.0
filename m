@@ -2,245 +2,93 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E5E2C433EF
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Feb 2022 07:22:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA09DC433FE
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Feb 2022 08:55:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241618AbiBSHWp (ORCPT
+        id S236390AbiBSI4I (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 19 Feb 2022 02:22:45 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:42538 "EHLO
+        Sat, 19 Feb 2022 03:56:08 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:37722 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229737AbiBSHWm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 19 Feb 2022 02:22:42 -0500
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF09F210;
-        Fri, 18 Feb 2022 23:22:23 -0800 (PST)
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 21J6kcNX031374;
-        Sat, 19 Feb 2022 07:22:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=i17v2TBaJyPAijg3EoGR7ou740fw0QYQ0vDWkvLww3s=;
- b=K/9CBarxfl4M9S9uI3BnyxEJqRwGHNW4Lv+uHFsNe41vSRz8UXQ0DFmfDQ84it310JNx
- B3O/i9n3syMIDWMcTv7WGnX05MDp8krzZTCW6SgEjb0yHO8CUK29EORySOSLZkpRnuUt
- GiJrngMe+N16vyFaQKnzUG8G3maUTxnTUBRit/7FykktvhkNRdS3ofNLtj49V3oiMVhn
- fMfVXrRDK6VWFKVpk4HBocCf/DG99OMz9eLtZsifYARwzv9HsnwbVTZ1PVJEf+RRt7sf
- tkZcqg7w+V+Sy48d2ONh56LXMmGxhDd7iq2IGakT26qFpAF6oy9MCmRCR5tis72KAF98 yg== 
-Received: from ppma03ams.nl.ibm.com (62.31.33a9.ip4.static.sl-reverse.com [169.51.49.98])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3eauk00g98-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 19 Feb 2022 07:22:23 +0000
-Received: from pps.filterd (ppma03ams.nl.ibm.com [127.0.0.1])
-        by ppma03ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 21J7C4KB000920;
-        Sat, 19 Feb 2022 07:22:21 GMT
-Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
-        by ppma03ams.nl.ibm.com with ESMTP id 3ear68gt0k-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 19 Feb 2022 07:22:21 +0000
-Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
-        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 21J7MHnn33358140
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sat, 19 Feb 2022 07:22:17 GMT
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 3237FAE045;
-        Sat, 19 Feb 2022 07:22:17 +0000 (GMT)
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 9DB36AE051;
-        Sat, 19 Feb 2022 07:22:14 +0000 (GMT)
-Received: from localhost (unknown [9.43.86.157])
-        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Sat, 19 Feb 2022 07:22:13 +0000 (GMT)
-Date:   Sat, 19 Feb 2022 12:52:11 +0530
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-To:     Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 2/2] ext4: Test to ensure resize with sparse_super2 is
- handled correctly
-Message-ID: <20220219072211.lmp64ntxmrcz7sua@riteshh-domain>
-References: <cover.1644217569.git.ojaswin@linux.ibm.com>
- <aead63bfa6cca5a8a1c8225075f48a29d06df1ae.1644217569.git.ojaswin@linux.ibm.com>
+        with ESMTP id S230333AbiBSI4I (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 19 Feb 2022 03:56:08 -0500
+X-Greylist: delayed 543 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 19 Feb 2022 00:55:47 PST
+Received: from eu-shark1.inbox.eu (eu-shark1.inbox.eu [195.216.236.81])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B2D3C9926;
+        Sat, 19 Feb 2022 00:55:47 -0800 (PST)
+Received: from eu-shark1.inbox.eu (localhost [127.0.0.1])
+        by eu-shark1-out.inbox.eu (Postfix) with ESMTP id 602A46C0073B;
+        Sat, 19 Feb 2022 10:46:43 +0200 (EET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=inbox.eu; s=20140211;
+        t=1645260403; bh=x2IqM3rwY6UxdZw1mh9cnsrSbRnGQ1NRGSoumt9GeF8=;
+        h=References:From:To:Cc:Subject:Date:In-reply-to:Message-ID:
+         Content-Type:X-ESPOL:from:date:to:cc;
+        b=qBRVp4O7j3qJBmnvMKrWgNfY/koP4YDle4CEUxIRVdPKMCbouznzYn7qULOmDDbYS
+         W8EO9W+e8gXqSabjgfnrs++4IbEUKqNluvC9/VY0LNvLKEV8VA06cimLCfGNFrZ0W8
+         LM1NxghciLzcQpHGs9UJ/+VfeRYSCXCKSR9Hhu2E=
+Received: from localhost (localhost [127.0.0.1])
+        by eu-shark1-in.inbox.eu (Postfix) with ESMTP id 4FCC76C00736;
+        Sat, 19 Feb 2022 10:46:43 +0200 (EET)
+Received: from eu-shark1.inbox.eu ([127.0.0.1])
+        by localhost (eu-shark1.inbox.eu [127.0.0.1]) (spamfilter, port 35)
+        with ESMTP id Vmb7lF0202yH; Sat, 19 Feb 2022 10:46:43 +0200 (EET)
+Received: from mail.inbox.eu (eu-pop1 [127.0.0.1])
+        by eu-shark1-in.inbox.eu (Postfix) with ESMTP id E7FAA6C0073A;
+        Sat, 19 Feb 2022 10:46:42 +0200 (EET)
+References: <20220208215232.491780-1-anna@kernel.org>
+ <20220208215232.491780-5-anna@kernel.org>
+User-agent: mu4e 1.7.0; emacs 27.2
+From:   Su Yue <l@damenly.su>
+To:     Anna Schumaker <anna@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+Subject: Re: [PATCH 4/4] generic/633: Check if idmapped mounts are supported
+ before running
+Date:   Sat, 19 Feb 2022 16:40:09 +0800
+In-reply-to: <20220208215232.491780-5-anna@kernel.org>
+Message-ID: <wnhr451v.fsf@damenly.su>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aead63bfa6cca5a8a1c8225075f48a29d06df1ae.1644217569.git.ojaswin@linux.ibm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: NQ4iIT_KtCQwjsvVDMUCB_JIKZ70-eMB
-X-Proofpoint-ORIG-GUID: NQ4iIT_KtCQwjsvVDMUCB_JIKZ70-eMB
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.62.513
- definitions=2022-02-19_02,2022-02-18_01,2021-12-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 bulkscore=0
- malwarescore=0 mlxlogscore=999 clxscore=1015 lowpriorityscore=0
- adultscore=0 impostorscore=0 mlxscore=0 priorityscore=1501 phishscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2201110000 definitions=main-2202190044
+Content-Type: text/plain; format=flowed
+X-Virus-Scanned: OK
+X-ESPOL: 6NpmlYxOGzysiV+lRWenZQs2rylXXenn5ea+0QNbnX/mQl2JBCgRI2663TM2UR7LszwX
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 22/02/07 01:55PM, Ojaswin Mujoo wrote:
-> Kernel currently doesn't support resize of EXT4 mounted
-> with sparse_super2 option enabled. Earlier, it used to leave the resize
-> incomplete and the fs would be left in an inconsistent state, however commit
-> b1489186cc83[1] fixed this to avoid the fs corruption by clearly returning
-> -ENOTSUPP.
->
-> Test to ensure that kernel handles resizing with sparse_super2 correctly. Run
-> resize for multiple iterations because this leads to kernel crash due to
-> fs corruption, which we want to detect.
->
-> Related commit in mainline:
->
-> [1] commit b1489186cc8391e0c1e342f9fbc3eedf6b944c61
->
-> 	ext4: add check to prevent attempting to resize an fs with sparse_super2
 
-Thanks for the patch. Few nits below.
+On Tue 08 Feb 2022 at 16:52, Anna Schumaker <anna@kernel.org> 
+wrote:
 
+> From: Anna Schumaker <Anna.Schumaker@Netapp.com>
 >
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> This appears to have been missed when the test was added.
+>
+It's removed on purpose to also verify idmapped mounts unrelated 
+tests.
+
+Generic/633 fails on NFS because of setgid inheritance behavior of 
+NFS.
+Already reported it to the community[1].
+
+[1]: 
+https://lore.kernel.org/linux-nfs/OS3PR01MB770539462BE3E7959DAF8B5789389@OS3PR01MB7705.jpnprd01.prod.outlook.com/T/#u
+
+--
+Su
+> Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
 > ---
->  tests/ext4/056     | 102 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/056.out |   2 +
->  2 files changed, 104 insertions(+)
->  create mode 100755 tests/ext4/056
->  create mode 100644 tests/ext4/056.out
+>  tests/generic/633 | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> diff --git a/tests/ext4/056 b/tests/ext4/056
-> new file mode 100755
-> index 00000000..9185621d
-> --- /dev/null
-> +++ b/tests/ext4/056
-> @@ -0,0 +1,102 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 IBM. All Rights Reserved.
-> +#
-> +# We don't currently support resize of EXT4 filesystems mounted
-> +# with sparse_super2 option enabled. Earlier, kernel used to leave the resize
-> +# incomplete and the fs would be left into an incomplete state, however commit
-> +# b1489186cc83 fixed this to avoid the fs corruption by clearly returning
-> +# -ENOTSUPP.
-> +#
-> +# This test ensures that kernel handles resizing with sparse_super2 correctly
-> +#
-> +# Related commit in mainline:
-> +#
-> +# commit b1489186cc8391e0c1e342f9fbc3eedf6b944c61
-> +# ext4: add check to prevent attempting to resize an fs with sparse_super2
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto ioctl resize quick
-> +
-> +# real QA test starts here
-> +
-> +INITIAL_FS_SIZE=1G
-> +RESIZED_FS_SIZE=$((2*1024*1024*1024))  # 2G
-> +ONLINE_RESIZE_BLOCK_LIMIT=$((256*1024*1024))
-> +
-> +_supported_fs ext4
-> +_require_scratch_size $(($RESIZED_FS_SIZE/1024))
-> +_require_test_program "ext4_resize"
-> +
-> +_log()
-> +{
-> +	echo "$seq: $*" >> $seqres.full 2>&1
-> +}
-> +
-> +do_resize()
-> +{
-> +
-> +	$MKFS_PROG `_scratch_mkfs_options -t ext4 -E resize=$ONLINE_RESIZE_BLOCK_LIMIT \
-> +		-O sparse_super2` $INITIAL_FS_SIZE >> $seqres.full 2>&1 \
-> +		|| _fail "$MKFS_PROG failed. Exiting"
-> +
-> +	_scratch_mount || _fail "Failed to mount scratch partition. Exiting"
-> +
-> +	BS=$(_get_block_size $SCRATCH_MNT)
-> +	NEW_BLOCKS=$(($RESIZED_FS_SIZE/$BS))
-> +
-> +	local RESIZE_RET
-> +	local EOPNOTSUPP=95
-> +
-> +	$here/src/ext4_resize $SCRATCH_MNT $NEW_BLOCKS >> $seqres.full 2>&1
-> +	RESIZE_RET=$?
-> +
-> +	# Use $RESIZE_RET for logging
-> +	if [ $RESIZE_RET = 0 ]
-> +	then
-> +		_log "Resizing succeeded but FS might still be corrupt."
-
-IMO, this above logs is not required. Putting iteration count is more than
-enough. You could log more info if the resize fails. But above log is somewhat
-confusing to me.
-
-
-> +	elif [ $RESIZE_RET = $EOPNOTSUPP ]
-> +	then
-> +		_log "Resize operation not supported with sparse_super2"
-> +		_log "Threw expected error $RESIZE_RET (EOPNOTSUPP)"
-
-If it fails with EOPNOTSUPP, do we still need to iterate in do_resize()
-8 times?
-
-> +
-> +	else
-> +		_log "Output of resize = $RESIZE_RET. Expected $EOPNOTSUPP (EOPNOTSUPP)"
-> +		_log "You might be missing kernel patch b1489186cc83"
-
-Not sure if we should pin point to a particular patch in this case.
-It could be that we add some features later and then some of those doesn't again
-support resize feature where it should return EOPNOTSUPP, but this test could
-capture that. So, I feel above may not be required.
-
-> +	fi
-> +
-> +	# unount after ioctl sometimes fails with "device busy" so add a small delay
-> +	sleep 0.1
-
-Let's not add this sleep for EOPNOTSUPP case.
-
-> +
-> +	_scratch_unmount >> $seqres.full 2>&1 || _fail "$UMOUNT_PROG failed. Exiting"
-> +}
-> +
-> +run_test()
-> +{
-> +	local FSCK_RET
-> +	local ITERS=8
-> +
-> +	for i in $(seq 1 $ITERS)
-> +	do
-> +		_log "----------- Iteration: $i ------------"
-> +		do_resize
-> +	done
-> +
-> +	_log "-------- Iterations Complete ---------"
-> +	_log "Checking if FS is in consistent state"
-> +	_check_scratch_fs
-> +	FSCK_RET=$?
-> +
-> +	return $FSCK_RET
-> +}
-> +
-> +run_test
-> +status=$?
-> +
-> +if [ "$status" -eq "0" ]
-> +then
-> +	echo "Test Succeeded!" | tee -a $seqres.full
-> +fi
-> +
-> +exit
-> diff --git a/tests/ext4/056.out b/tests/ext4/056.out
-> new file mode 100644
-> index 00000000..41706284
-> --- /dev/null
-> +++ b/tests/ext4/056.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 056
-> +Test Succeeded!
-> --
-> 2.27.0
+> diff --git a/tests/generic/633 b/tests/generic/633
+> index 382806471223..6750117735f7 100755
+> --- a/tests/generic/633
+> +++ b/tests/generic/633
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick atime attr cap 
+> idmapped io_uring mount perms rw unlink
+>  # real QA test starts here
 >
+>  _supported_fs generic
+> +_require_idmapped_mounts
+>  _require_test
+>
+>  echo "Silence is golden"
