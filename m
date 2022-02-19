@@ -2,116 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59C63C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Feb 2022 10:46:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CB15C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Feb 2022 07:12:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233996AbiBRKq4 (ORCPT
+        id S236314AbiBSHMy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 18 Feb 2022 05:46:56 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:36516 "EHLO
+        Sat, 19 Feb 2022 02:12:54 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:57270 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234107AbiBRKqz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Feb 2022 05:46:55 -0500
-Received: from mx0a-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38A4513F77;
-        Fri, 18 Feb 2022 02:46:39 -0800 (PST)
-Received: from pps.filterd (m0098420.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 21IAH6kA011920;
-        Fri, 18 Feb 2022 10:46:38 GMT
+        with ESMTP id S236984AbiBSHMx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 19 Feb 2022 02:12:53 -0500
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42A66427D6;
+        Fri, 18 Feb 2022 23:12:35 -0800 (PST)
+Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 21J6Aswh022573;
+        Sat, 19 Feb 2022 07:12:35 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=pp1; bh=3QfnBNbtvsfT/us+WXyaCCapfpJQssFblYdRiMLuHIg=;
- b=ihqVEVsTR9wyULIitza+4g9YyomRkRgxOa7WFHC5ny7sqBwZGxwBXZ0qZFD+Z5Qube4H
- ZHld0NIXZHV7wp9/G3J1BfKplKIxyyIQ8XwigTcL+7aAkP+vY7T+1MsF1R6aaLbIPGHw
- nXz2mN61O25pzNX3wEiJI+uYEebAH1011kWqyCQxSy1ACqeFSJn14RgdsEH++2YZZohY
- ic7SG7/IUzN8LsysRc+O22b4K5Nfo7IPlG7ABTbFBmy0CyqgR29ZdJPiEBVxbI+4Yyz8
- ZUsYF7/0qVUp1nub7+fBrWjuPRhmMwcAH6fSGBzpSgSRhnFOsJSoG28T8NlBvPzTn7gD lg== 
-Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3ea9jqgj9p-1
+ subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=pp1; bh=InDdrb2T70Jylv7UEtN08N+EnU+K0Gftexg0r6m2N/4=;
+ b=srs8WLIlbbzffaWBHGuNJJzNpOF+gqU9mXb4PvuGHqufhZ96LYC8GWVA7PsVl7p/EXjA
+ nb6jDlFSvMEfGnoYVHexmqueXoH1kf5K20LxGsCB/4488JhnF5b3k7XdWHIxwZvodITo
+ qLlx47AQSG4GvkjtIr7Ng9DFcSTcOTuSBXpv/93j3LRbgHfjY8YVLgMyjLQBgr2wfeYJ
+ gsbkJ4rG6vhzN5r4eMnu/9HQUla6DA5H7izgXH4sv4gs/m6bvmG5jyzZ3R0cDIeiYRVg
+ /21GAe8mod4KTzXMqpiEVJcFFl5AapaLDu+erdV+V99cQ96nFoT9Bush4b/ZRfatQmCS NA== 
+Received: from ppma04ams.nl.ibm.com (63.31.33a9.ip4.static.sl-reverse.com [169.51.49.99])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3ear4f2vum-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 18 Feb 2022 10:46:38 +0000
-Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
-        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 21IAbwvU011111;
-        Fri, 18 Feb 2022 10:46:36 GMT
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
-        by ppma06ams.nl.ibm.com with ESMTP id 3e645khdt1-1
+        Sat, 19 Feb 2022 07:12:34 +0000
+Received: from pps.filterd (ppma04ams.nl.ibm.com [127.0.0.1])
+        by ppma04ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 21J7COoA004900;
+        Sat, 19 Feb 2022 07:12:32 GMT
+Received: from b06avi18878370.portsmouth.uk.ibm.com (b06avi18878370.portsmouth.uk.ibm.com [9.149.26.194])
+        by ppma04ams.nl.ibm.com with ESMTP id 3ear68gq1k-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 18 Feb 2022 10:46:36 +0000
+        Sat, 19 Feb 2022 07:12:32 +0000
 Received: from d06av21.portsmouth.uk.ibm.com (d06av21.portsmouth.uk.ibm.com [9.149.105.232])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 21IAkXMK43581848
+        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 21J7CTCD46793024
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 18 Feb 2022 10:46:33 GMT
+        Sat, 19 Feb 2022 07:12:29 GMT
 Received: from d06av21.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 915C95207A;
-        Fri, 18 Feb 2022 10:46:33 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.119.232])
-        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTPS id 4B7D052077;
-        Fri, 18 Feb 2022 10:46:32 +0000 (GMT)
-Date:   Fri, 18 Feb 2022 16:16:22 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Cc:     riteshh@linux.ibm.com
-Subject: Re: [PATCH 0/2] tests/ext4: Ensure resizes with sparse_super2 are
- handled correctly
-Message-ID: <Yg94/kUaJ05/7JwL@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+        by IMSVA (Postfix) with ESMTP id 28F545204F;
+        Sat, 19 Feb 2022 07:12:29 +0000 (GMT)
+Received: from localhost (unknown [9.43.86.157])
+        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTP id EA4AF5204E;
+        Sat, 19 Feb 2022 07:12:27 +0000 (GMT)
+Date:   Sat, 19 Feb 2022 12:42:25 +0530
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 1/2] src/ext4_resize.c: Refactor code and ensure accurate
+ errno is returned
+Message-ID: <20220219071225.mi5hutyxds7xn3io@riteshh-domain>
 References: <cover.1644217569.git.ojaswin@linux.ibm.com>
+ <a64b4c4d199b822fe72bf4c3752b61e0dc0f3e19.1644217569.git.ojaswin@linux.ibm.com>
+MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cover.1644217569.git.ojaswin@linux.ibm.com>
+In-Reply-To: <a64b4c4d199b822fe72bf4c3752b61e0dc0f3e19.1644217569.git.ojaswin@linux.ibm.com>
 X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: C80NW8ApAbLBP_VWXSprgYGVvf0YkYvI
-X-Proofpoint-ORIG-GUID: C80NW8ApAbLBP_VWXSprgYGVvf0YkYvI
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
-MIME-Version: 1.0
+X-Proofpoint-ORIG-GUID: GuzLcICkbC_aK_Rw1Pon5NAGyc5vqNek
+X-Proofpoint-GUID: GuzLcICkbC_aK_Rw1Pon5NAGyc5vqNek
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.62.513
- definitions=2022-02-18_04,2022-02-18_01,2021-12-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 malwarescore=0
- spamscore=0 phishscore=0 mlxlogscore=727 mlxscore=0 bulkscore=0
- impostorscore=0 priorityscore=1501 adultscore=0 suspectscore=0
- lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2201110000 definitions=main-2202180067
+ definitions=2022-02-19_02,2022-02-18_01,2021-12-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxlogscore=999
+ spamscore=0 malwarescore=0 suspectscore=0 bulkscore=0 priorityscore=1501
+ impostorscore=0 clxscore=1015 mlxscore=0 adultscore=0 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2201110000
+ definitions=main-2202190044
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hello,
+On 22/02/07 01:55PM, Ojaswin Mujoo wrote:
+> The current implementation of ext4_resize returned 1 whenever
+> there was an error. Modify this to return the correct error code.
+> This is important for tests that rely on correct error reporting, by
+> the kernel, for ext4 resize functionality.
+>
+> Additionaly, perform some code cleanup.
 
-Just wanted to send a gentle reminder to look into this patchset and let
-me know if anyone has any suggestions or review comments. 
+Thanks for fixing the error return codes. This looks good to me.
 
-Thank you for your time,
-Ojaswin
+Feel free to add -
+Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
 
-On Mon, Feb 07, 2022 at 01:55:32PM +0530, Ojaswin Mujoo wrote:
-> As detailed in the patch [1], kernel currently does not support resizes
-> with sparse_super2 enabled.  Before the above patch, if we used the
-> EXT4_IOC_RESIZE_FS ioctl directly, wiht sparse_super2 enabled, the
-> kernel used to still try the resize and ultimatley leave the fs in an
-> inconsistent state. This also led to corruption and kernel BUGs.
-> 
-> This patchset adds a test for ext4 to ensure that the kernel handles
-> resizes with sparse_super2 correctly, and returns -EOPNOTSUPP. 
-> 
-> Summary:
-> 
-> Patch 1: Fix the src/ext4_resize.c script to return accurate error codes.
-> Patch 2: Add the ext4 test for checking resize functionality
-> 
-> [1]
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b1489186cc8391e0c1e342f9fbc3eedf6b944c61
-> 
-> Ojaswin Mujoo (2):
->   src/ext4_resize.c: Refactor code and ensure accurate errno is returned
->   ext4: Test to ensure resize with sparse_super2 is handled correctly
-> 
->  src/ext4_resize.c  |  46 +++++++++++++-------
->  tests/ext4/056     | 102 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/056.out |   2 +
->  3 files changed, 136 insertions(+), 14 deletions(-)
->  create mode 100755 tests/ext4/056
->  create mode 100644 tests/ext4/056.out
-> 
-> -- 
-> 2.27.0
-> 
+Stats on running this stats on my dev machine
+
+<on old kernels>
+===================
+qemu@qemu:~/src/tools/xfstests-dev$ sudo ./check -s ext4_4k ext4/056
+SECTION       -- ext4_4k
+FSTYP         -- ext4
+PLATFORM      -- Linux/ppc64le qemu 5.4.0-100-generic #113-Ubuntu SMP Thu Feb 3 18:43:11 UTC 2022
+MKFS_OPTIONS  -- -I 256 -O 64bit -F -b 4096 /dev/loop10
+MOUNT_OPTIONS -- -o data=ordered /dev/loop10 /mnt1/scratch
+
+ext4/056        [failed, exit status 1]- output mismatch (see /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/056.out.bad)
+    --- tests/ext4/056.out      2022-02-19 06:55:22.233659113 +0000
+    +++ /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/056.out.bad     2022-02-19 06:57:48.931542566 +0000
+    @@ -1,2 +1,3 @@
+     QA output created by 056
+    -Test Succeeded!
+    +_check_generic_filesystem: filesystem on /dev/loop10 is inconsistent
+    +(see /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/056.full for details)
+    ...
+    (Run 'diff -u /home/qemu/src/tools/xfstests-dev/tests/ext4/056.out /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/056.out.bad'  to see the entire diff)
+Ran: ext4/056
+Failures: ext4/056
+Failed 1 of 1 tests
+
+SECTION       -- ext4_4k
+=========================
+Ran: ext4/056
+Failures: ext4/056
+Failed 1 of 1 tests
+
+<on 5.16.0-rc4>
+===================
+qemu@qemu:~/src/tools/xfstests-dev$ sudo ./check -s ext4_4k -i 10 ext4/056
+SECTION       -- ext4_4k
+FSTYP         -- ext4
+PLATFORM      -- Linux/ppc64le qemu 5.16.0-rc4+ #6 SMP Sat Jan 29 22:07:24 UTC 2022
+MKFS_OPTIONS  -- -I 256 -O 64bit -F -b 4096 /dev/loop10
+MOUNT_OPTIONS -- -o data=ordered /dev/loop10 /mnt1/scratch
+
+ext4/056 9s ...  11s
+Ran: ext4/056
+Passed all 1 tests
+
+-ritesh
