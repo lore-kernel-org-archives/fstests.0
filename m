@@ -2,380 +2,90 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECBD0C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 20 Feb 2022 16:49:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9253AC433FE
+	for <linux-fstests@archiver.kernel.org>; Sun, 20 Feb 2022 17:00:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236005AbiBTQt5 (ORCPT
+        id S238715AbiBTRAx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 20 Feb 2022 11:49:57 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:47070 "EHLO
+        Sun, 20 Feb 2022 12:00:53 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:39790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235584AbiBTQt5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Feb 2022 11:49:57 -0500
-Received: from out20-87.mail.aliyun.com (out20-87.mail.aliyun.com [115.124.20.87])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CF854D9FB
-        for <fstests@vger.kernel.org>; Sun, 20 Feb 2022 08:49:34 -0800 (PST)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.223268-0.0100572-0.766675;FP=14414701850030055120|1|1|2|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.MsossuG_1645375770;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MsossuG_1645375770)
-          by smtp.aliyun-inc.com(10.147.40.7);
-          Mon, 21 Feb 2022 00:49:31 +0800
-Date:   Mon, 21 Feb 2022 00:49:30 +0800
+        with ESMTP id S244302AbiBTRAv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Feb 2022 12:00:51 -0500
+Received: from out20-99.mail.aliyun.com (out20-99.mail.aliyun.com [115.124.20.99])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37ED2527E8;
+        Sun, 20 Feb 2022 09:00:27 -0800 (PST)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08295915|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0260975-0.00210438-0.971798;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047201;MF=guan@eryu.me;NM=1;PH=DS;RN=8;RT=8;SR=0;TI=SMTPD_---.MsrOLZg_1645376423;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MsrOLZg_1645376423)
+          by smtp.aliyun-inc.com(33.13.245.115);
+          Mon, 21 Feb 2022 01:00:24 +0800
+Date:   Mon, 21 Feb 2022 01:00:23 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Jan Kara <jack@suse.cz>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/673: Add test for seekdir
-Message-ID: <YhJxGmyHga4zc6ZH@desktop>
-References: <20220204175657.8500-1-jack@suse.cz>
+To:     Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>
+Subject: Re: [PATCH v3 1/6] common/rc: fix btrfs mixed mode usage in
+ _scratch_mkfs_sized
+Message-ID: <YhJzp/dnfixk/nMn@desktop>
+References: <20220218073156.2179803-1-shinichiro.kawasaki@wdc.com>
+ <20220218073156.2179803-2-shinichiro.kawasaki@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220204175657.8500-1-jack@suse.cz>
+In-Reply-To: <20220218073156.2179803-2-shinichiro.kawasaki@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Feb 04, 2022 at 06:56:57PM +0100, Jan Kara wrote:
-> Add test checking functionality of seekdir. We check whether seekdir
-> gets us back to the directory entry it should and also whether seeking
-> to random positions does not crash the filesystem.
-> 
-> Unlike test generic/310 which also tests seeking, this test checks both
-> glibc readdir() function as well as getdents64() syscall directly. This
-> is because glibc readdir() implementation does a lot of caching and
-> processing internally thus hiding kernel from some possible problems.
-> Also test wider range of random offsets to have better chance of
-> hitting out of bound accesses or other bugs.
-> 
-> Signed-off-by: Jan Kara <jack@suse.cz>
-> ---
->  src/Makefile          |   2 +-
->  src/t_readdir_3.c     | 239 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/673     |  41 ++++++++
->  tests/generic/673.out |   2 +
->  4 files changed, 283 insertions(+), 1 deletion(-)
->  create mode 100644 src/t_readdir_3.c
->  create mode 100755 tests/generic/673
->  create mode 100644 tests/generic/673.out
-> 
-> diff --git a/src/Makefile b/src/Makefile
-> index 111ce1d90fe6..4d9e02b74d13 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
->  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
->  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
-> -	detached_mounts_propagation ext4_resize
-> +	detached_mounts_propagation ext4_resize t_readdir_3
->  
->  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->  	      btrfs_crc32c_forged_name.py
-> diff --git a/src/t_readdir_3.c b/src/t_readdir_3.c
-> new file mode 100644
-> index 000000000000..804138971dcd
-> --- /dev/null
-> +++ b/src/t_readdir_3.c
-> @@ -0,0 +1,239 @@
-> +#define _LARGEFILE64_SOURCE
-> +#include <unistd.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <dirent.h>
-> +#include <fcntl.h>
-> +#include <limits.h>
-> +#include <errno.h>
-> +#include <stdint.h>
-> +#include <sys/stat.h>
-> +#include <sys/types.h>
-> +#include <sys/syscall.h>
-> +
-> +/* Our own declaration taken from the kernel since glibc does not have it... */
-> +struct linux_dirent64 {
-> +	uint64_t	d_ino;
-> +	int64_t		d_off;
-> +	unsigned short	d_reclen;
-> +	unsigned char	d_type;
-> +	char		d_name[];
-> +};
-> +
-> +#define MIN_NAME_LEN 8
-> +#define MAX_NAME_LEN 70
-> +
-> +static DIR *dir;
-> +static int dfd;
-> +static int ignore_error;
-> +
-> +struct dir_ops {
-> +	loff_t (*getpos)(void);
-> +	void (*setpos)(loff_t pos);
-> +	void (*getentry)(struct dirent *entry);
-> +};
-> +
-> +static off64_t libc_getpos(void)
-> +{
-> +	return telldir(dir);
-> +}
-> +
-> +static void libc_setpos(off64_t pos)
-> +{
-> +	seekdir(dir, pos);
-> +}
-> +
-> +static void libc_getentry(struct dirent *entry)
-> +{
-> +	struct dirent *ret;
-> +
-> +	errno = 0;
-> +	ret = readdir(dir);
-> +	if (!ret) {
-> +		if (errno == 0) {
-> +			fprintf(stderr, "Unexpected EOF while reading dir.\n");
-> +			exit(1);
-> +		}
-> +		if (ignore_error)
-> +			return;
-> +		perror("readdir");
-> +		exit(1);
-> +	}
-> +	memcpy(entry, ret, sizeof(struct dirent));
-> +}
-> +
-> +static off64_t kernel_getpos(void)
-> +{
-> +	return lseek64(dfd, 0, SEEK_CUR);
-> +}
-> +
-> +static void kernel_setpos(off64_t pos)
-> +{
-> +	lseek64(dfd, pos, SEEK_SET);
-> +}
-> +
-> +static void kernel_getentry(struct dirent *entry)
-> +{
-> +	char dirbuf[NAME_MAX + 1 + sizeof(struct linux_dirent64)];
-> +	struct linux_dirent64 *lentry = (struct linux_dirent64 *)dirbuf;
-> +	int ret;
-> +
-> +	ret = syscall(SYS_getdents64, dfd, lentry, sizeof(dirbuf));
-> +	if (ret < 0) {
-> +		if (ignore_error)
-> +			return;
-> +		perror("getdents64");
-> +		exit(1);
-> +	}
-> +	if (ret == 0) {
-> +		fprintf(stderr, "Unexpected EOF while reading dir.\n");
-> +		exit(1);
-> +	}
-> +	entry->d_ino = lentry->d_ino;
-> +	entry->d_off = lentry->d_off;
-> +	entry->d_reclen = lentry->d_reclen;
-> +	entry->d_type = lentry->d_type;
-> +	strcpy(entry->d_name, lentry->d_name);
-> +}
-> +
-> +struct dir_ops libc_ops = {
-> +	.getpos = libc_getpos,
-> +	.setpos = libc_setpos,
-> +	.getentry = libc_getentry,
-> +};
-> +
-> +struct dir_ops kernel_ops = {
-> +	.getpos = kernel_getpos,
-> +	.setpos = kernel_setpos,
-> +	.getentry = kernel_getentry,
-> +};
-> +
-> +static void create_dir(char *dir, int count)
-> +{
-> +	int i, j, len;
-> +	char namebuf[MAX_NAME_LEN];
-> +	int dfd, fd;
-> +
-> +	dfd = open(dir, O_RDONLY | O_DIRECTORY);
-> +	if (dfd < 0) {
-> +		perror("Cannot open dir");
-> +		exit(1);
-> +	}
-> +	for (i = 0; i < count; i++) {
-> +		len = random() % (MAX_NAME_LEN - MIN_NAME_LEN) + MIN_NAME_LEN;
-> +		for (j = 0; j < len; j++)
-> +			namebuf[j] = random() % 26 + 'a';
-> +		namebuf[len] = 0;
-> +
-> +		fd = openat(dfd, namebuf, O_RDWR | O_CREAT | O_EXCL, 0644);
-> +		if (fd < 0) {
-> +			if (errno == EEXIST) {
-> +				/* Try again */
-> +				i--;
-> +				continue;
-> +			}
-> +			perror("File creation failed");
-> +			exit(1);
-> +		}
-> +		close(fd);
-> +	}
-> +	close(dfd);
-> +}
-> +
-> +static void test(int count, struct dir_ops *ops)
-> +{
-> +	struct dirent *dbuf;
-> +	struct dirent entry;
-> +	loff_t *pbuf;
-> +	loff_t dpos, maxpos = 0;
-> +	int i, pos;
-> +
-> +	dbuf = calloc(count, sizeof(struct dirent));
-> +	pbuf = calloc(count, sizeof(loff_t));
-> +	if (!dbuf || !pbuf) {
-> +		fprintf(stderr, "Out of memory for buffers.\n");
-> +		exit(1);
-> +	}
-> +
-> +	for (i = 0; i < count; i++) {
-> +		pbuf[i] = ops->getpos();
-> +		if (pbuf[i] > maxpos)
-> +			maxpos = pbuf[i];
-> +		ops->getentry(dbuf + i);
-> +		ops->setpos(dbuf[i].d_off);
-> +	}
-> +
-> +	for (i = 0; i < count; i++) {
-> +		pos = random() % count;
-> +		ops->setpos(pbuf[pos]);
-> +		ops->getentry(&entry);
-> +		if (dbuf[pos].d_ino != entry.d_ino ||
-> +		    dbuf[pos].d_type != entry.d_type ||
-> +		    strcmp(dbuf[pos].d_name, entry.d_name)) {
-> +			fprintf(stderr,
-> +				"Mismatch in dir entry %u at pos %llu\n", pos,
-> +				(unsigned long long)pbuf[pos]);
-> +			
-> +			exit(1);
-> +		}
-> +	}
-> +	puts("Reading valid entries passed.");
-> +
-> +	ignore_error = 1;
-> +	for (i = 0; i < count; i++) {
-> +		dpos = random() % maxpos;
-> +		ops->setpos(dpos);
-> +		/*
-> +		 * We don't care about the result but the kernel should not
-> + 		 * crash.
-> +		 */
-> +		ops->getentry(&entry);
-> +	}
-> +	ignore_error = 0;
-> +
-> +	puts("Reading random positions passed.");
-> +	free(dbuf);
-> +	free(pbuf);
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	int count;
-> +	unsigned long seed;
-> +
-> +	if (argc != 4) {
-> +		fprintf(stderr, "Usage: t_seekdir_3 <dir> <count> <seed>\n");
-> +		return 1;
-> +	}
-> +
-> +	count = atoi(argv[2]);
-> +	seed = atol(argv[3]);
-> +
-> +	srandom(seed);
-> +
-> +	create_dir(argv[1], count);
-> +
-> +	puts("Testing readdir...");
-> +	dir = opendir(argv[1]);
-> +	if (!dir) {
-> +		perror("Cannot open dir");
-> +		exit(1);
-> +	}
-> +	test(count, &libc_ops);
-> +	closedir(dir);
-> +	dir = NULL;
-> +
-> +	puts("Testing getdents...");
-> +	dfd = open(argv[1], O_DIRECTORY | O_RDONLY);
-> +	if (dfd < 0) {
-> +		perror("Cannot open dir");
-> +		exit(1);
-> +	}
-> +	test(count, &kernel_ops);
-> +	close(dfd);
-> +	dfd = 0;
-> +	fprintf(stderr, "All tests passed\n");
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/673 b/tests/generic/673
-> new file mode 100755
-> index 000000000000..f6dea54db1a6
-> --- /dev/null
-> +++ b/tests/generic/673
-> @@ -0,0 +1,41 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 YOUR NAME HERE.  All Rights Reserved.
+On Fri, Feb 18, 2022 at 04:31:51PM +0900, Shin'ichiro Kawasaki wrote:
+> The helper function _scratch_mkfs_sized needs a couple of improvements
+> for btrfs. At first, the function adds --mixed option to mkfs.btrfs when
+> the filesystem size is smaller then 256MiB, but this threshold is no
+> longer correct and it should be 109MiB. Secondly, the --mixed option
 
-I forgot this in my first email, "YOUR NAME HERE" should be updated
-accordingly as well.
+I'm wondering if this 256M -> 109M change was made just recently or was
+made on old kernel.
+
+If it was changed just recently, say 5.14 kernel, I suspect that tests
+will fail on kernels prior to that change.
+
+But if this change was made on some acient kernels, say 4.10, then I
+think we're fine with this patch.
 
 Thanks,
 Eryu
 
-> +#
-> +# FS QA Test 673
-> +#
-> +# Test that filesystem properly handles seeking in directory both to valid
-> +# and invalid positions.
-> +#
-> +# This is a regression test for a48fc69fe658 ("udf: Fix crash after seekdir")
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +dir=$TEST_DIR/$seq-dir
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	rm -rf $dir
-> +}
-> +
-> +# Import common functions.
-> +# . ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_test
-> +
-> +files=4000
-> +seed=$RANDOM
-> +
-> +mkdir $dir
-> +echo "Using seed $seed" >> $seqres.full
-> +$here/src/t_readdir_3 $dir $files $seed >> $seqres.full
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/673.out b/tests/generic/673.out
-> new file mode 100644
-> index 000000000000..e038de2ca346
-> --- /dev/null
-> +++ b/tests/generic/673.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 673
-> +All tests passed
+> shall not be specified to mkfs.btrfs for zoned devices, since zoned
+> devices does not allow mixing metadata blocks and data blocks.
+> 
+> Suggested-by: Naohiro Aota <naohiro.aota@wdc.com>
+> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+> Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> ---
+>  common/rc | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index de60fb7b..74d2d8bd 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1075,10 +1075,10 @@ _scratch_mkfs_sized()
+>  		;;
+>  	btrfs)
+>  		local mixed_opt=
+> -		# minimum size that's needed without the mixed option.
+> -		# Ref: btrfs-prog: btrfs_min_dev_size()
+> -		# Non mixed mode is also the default option.
+> -		(( fssize < $((256 * 1024 *1024)) )) && mixed_opt='--mixed'
+> +		# Mixed option is required when the filesystem size is small and
+> +		# the device is not zoned. Ref: btrfs-progs: btrfs_min_dev_size()
+> +		(( fssize < $((109 * 1024 * 1024)) )) &&
+> +			! _scratch_btrfs_is_zoned && mixed_opt='--mixed'
+>  		$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
+>  		;;
+>  	jfs)
 > -- 
-> 2.31.1
+> 2.34.1
