@@ -2,366 +2,380 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52366C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 20 Feb 2022 16:28:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECBD0C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 20 Feb 2022 16:49:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232995AbiBTQ3K (ORCPT
+        id S236005AbiBTQt5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 20 Feb 2022 11:29:10 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33340 "EHLO
+        Sun, 20 Feb 2022 11:49:57 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:47070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235473AbiBTQ3J (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Feb 2022 11:29:09 -0500
-Received: from out20-15.mail.aliyun.com (out20-15.mail.aliyun.com [115.124.20.15])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 198924A93E;
-        Sun, 20 Feb 2022 08:28:46 -0800 (PST)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0519192-0.00123839-0.946842;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047204;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.MsqHRkl_1645374524;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MsqHRkl_1645374524)
-          by smtp.aliyun-inc.com(10.147.42.253);
-          Mon, 21 Feb 2022 00:28:44 +0800
-Date:   Mon, 21 Feb 2022 00:28:44 +0800
+        with ESMTP id S235584AbiBTQt5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Feb 2022 11:49:57 -0500
+Received: from out20-87.mail.aliyun.com (out20-87.mail.aliyun.com [115.124.20.87])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CF854D9FB
+        for <fstests@vger.kernel.org>; Sun, 20 Feb 2022 08:49:34 -0800 (PST)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.223268-0.0100572-0.766675;FP=14414701850030055120|1|1|2|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.MsossuG_1645375770;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.MsossuG_1645375770)
+          by smtp.aliyun-inc.com(10.147.40.7);
+          Mon, 21 Feb 2022 00:49:31 +0800
+Date:   Mon, 21 Feb 2022 00:49:30 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Stefan Roesch <shr@fb.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        kernel-team@fb.com
-Subject: Re: [PATCH v1] btrfs: Add new test for setting the chunk size.
-Message-ID: <YhJsPGWCt0MYbA+8@desktop>
-References: <20220208193252.500915-1-shr@fb.com>
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/673: Add test for seekdir
+Message-ID: <YhJxGmyHga4zc6ZH@desktop>
+References: <20220204175657.8500-1-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220208193252.500915-1-shr@fb.com>
+In-Reply-To: <20220204175657.8500-1-jack@suse.cz>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 08, 2022 at 11:32:52AM -0800, Stefan Roesch wrote:
-> Add new testcase for testing the new btrfs sysfs knob to change the
-> chunk size. The new knob uses /sys/fs/btrfs/<UUID>/allocation/<block
-> type>/chunk_size.
+On Fri, Feb 04, 2022 at 06:56:57PM +0100, Jan Kara wrote:
+> Add test checking functionality of seekdir. We check whether seekdir
+> gets us back to the directory entry it should and also whether seeking
+> to random positions does not crash the filesystem.
 > 
-> The test case implements three different cases:
-> - Test allocation with the default chunk size
-> - Test allocation after increasing the chunk size
-> - Test allocation when the free space is smaller than the chunk size.
+> Unlike test generic/310 which also tests seeking, this test checks both
+> glibc readdir() function as well as getdents64() syscall directly. This
+> is because glibc readdir() implementation does a lot of caching and
+> processing internally thus hiding kernel from some possible problems.
+> Also test wider range of random offsets to have better chance of
+> hitting out of bound accesses or other bugs.
 > 
-> Note: this test needs to force the allocation of space. It uses the
-> /sys/fs/btrfs/<UUID>/allocation/<block type>/force_chunk_alloc knob.
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
+>  src/Makefile          |   2 +-
+>  src/t_readdir_3.c     | 239 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/673     |  41 ++++++++
+>  tests/generic/673.out |   2 +
+>  4 files changed, 283 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_readdir_3.c
+>  create mode 100755 tests/generic/673
+>  create mode 100644 tests/generic/673.out
 > 
-> Testing:
-> The test has been run with volumes of different sizes.
-> 
-> Signed-off-by: Stefan Roesch <shr@fb.com>
+> diff --git a/src/Makefile b/src/Makefile
+> index 111ce1d90fe6..4d9e02b74d13 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> -	detached_mounts_propagation ext4_resize
+> +	detached_mounts_propagation ext4_resize t_readdir_3
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py
+> diff --git a/src/t_readdir_3.c b/src/t_readdir_3.c
+> new file mode 100644
+> index 000000000000..804138971dcd
+> --- /dev/null
+> +++ b/src/t_readdir_3.c
+> @@ -0,0 +1,239 @@
+> +#define _LARGEFILE64_SOURCE
+> +#include <unistd.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <dirent.h>
+> +#include <fcntl.h>
+> +#include <limits.h>
+> +#include <errno.h>
+> +#include <stdint.h>
+> +#include <sys/stat.h>
+> +#include <sys/types.h>
+> +#include <sys/syscall.h>
+> +
+> +/* Our own declaration taken from the kernel since glibc does not have it... */
+> +struct linux_dirent64 {
+> +	uint64_t	d_ino;
+> +	int64_t		d_off;
+> +	unsigned short	d_reclen;
+> +	unsigned char	d_type;
+> +	char		d_name[];
+> +};
+> +
+> +#define MIN_NAME_LEN 8
+> +#define MAX_NAME_LEN 70
+> +
+> +static DIR *dir;
+> +static int dfd;
+> +static int ignore_error;
+> +
+> +struct dir_ops {
+> +	loff_t (*getpos)(void);
+> +	void (*setpos)(loff_t pos);
+> +	void (*getentry)(struct dirent *entry);
+> +};
+> +
+> +static off64_t libc_getpos(void)
+> +{
+> +	return telldir(dir);
+> +}
+> +
+> +static void libc_setpos(off64_t pos)
+> +{
+> +	seekdir(dir, pos);
+> +}
+> +
+> +static void libc_getentry(struct dirent *entry)
+> +{
+> +	struct dirent *ret;
+> +
+> +	errno = 0;
+> +	ret = readdir(dir);
+> +	if (!ret) {
+> +		if (errno == 0) {
+> +			fprintf(stderr, "Unexpected EOF while reading dir.\n");
+> +			exit(1);
+> +		}
+> +		if (ignore_error)
+> +			return;
+> +		perror("readdir");
+> +		exit(1);
+> +	}
+> +	memcpy(entry, ret, sizeof(struct dirent));
+> +}
+> +
+> +static off64_t kernel_getpos(void)
+> +{
+> +	return lseek64(dfd, 0, SEEK_CUR);
+> +}
+> +
+> +static void kernel_setpos(off64_t pos)
+> +{
+> +	lseek64(dfd, pos, SEEK_SET);
+> +}
+> +
+> +static void kernel_getentry(struct dirent *entry)
+> +{
+> +	char dirbuf[NAME_MAX + 1 + sizeof(struct linux_dirent64)];
+> +	struct linux_dirent64 *lentry = (struct linux_dirent64 *)dirbuf;
+> +	int ret;
+> +
+> +	ret = syscall(SYS_getdents64, dfd, lentry, sizeof(dirbuf));
+> +	if (ret < 0) {
+> +		if (ignore_error)
+> +			return;
+> +		perror("getdents64");
+> +		exit(1);
+> +	}
+> +	if (ret == 0) {
+> +		fprintf(stderr, "Unexpected EOF while reading dir.\n");
+> +		exit(1);
+> +	}
+> +	entry->d_ino = lentry->d_ino;
+> +	entry->d_off = lentry->d_off;
+> +	entry->d_reclen = lentry->d_reclen;
+> +	entry->d_type = lentry->d_type;
+> +	strcpy(entry->d_name, lentry->d_name);
+> +}
+> +
+> +struct dir_ops libc_ops = {
+> +	.getpos = libc_getpos,
+> +	.setpos = libc_setpos,
+> +	.getentry = libc_getentry,
+> +};
+> +
+> +struct dir_ops kernel_ops = {
+> +	.getpos = kernel_getpos,
+> +	.setpos = kernel_setpos,
+> +	.getentry = kernel_getentry,
+> +};
+> +
+> +static void create_dir(char *dir, int count)
+> +{
+> +	int i, j, len;
+> +	char namebuf[MAX_NAME_LEN];
+> +	int dfd, fd;
+> +
+> +	dfd = open(dir, O_RDONLY | O_DIRECTORY);
+> +	if (dfd < 0) {
+> +		perror("Cannot open dir");
+> +		exit(1);
+> +	}
+> +	for (i = 0; i < count; i++) {
+> +		len = random() % (MAX_NAME_LEN - MIN_NAME_LEN) + MIN_NAME_LEN;
+> +		for (j = 0; j < len; j++)
+> +			namebuf[j] = random() % 26 + 'a';
+> +		namebuf[len] = 0;
+> +
+> +		fd = openat(dfd, namebuf, O_RDWR | O_CREAT | O_EXCL, 0644);
+> +		if (fd < 0) {
+> +			if (errno == EEXIST) {
+> +				/* Try again */
+> +				i--;
+> +				continue;
+> +			}
+> +			perror("File creation failed");
+> +			exit(1);
+> +		}
+> +		close(fd);
+> +	}
+> +	close(dfd);
+> +}
+> +
+> +static void test(int count, struct dir_ops *ops)
+> +{
+> +	struct dirent *dbuf;
+> +	struct dirent entry;
+> +	loff_t *pbuf;
+> +	loff_t dpos, maxpos = 0;
+> +	int i, pos;
+> +
+> +	dbuf = calloc(count, sizeof(struct dirent));
+> +	pbuf = calloc(count, sizeof(loff_t));
+> +	if (!dbuf || !pbuf) {
+> +		fprintf(stderr, "Out of memory for buffers.\n");
+> +		exit(1);
+> +	}
+> +
+> +	for (i = 0; i < count; i++) {
+> +		pbuf[i] = ops->getpos();
+> +		if (pbuf[i] > maxpos)
+> +			maxpos = pbuf[i];
+> +		ops->getentry(dbuf + i);
+> +		ops->setpos(dbuf[i].d_off);
+> +	}
+> +
+> +	for (i = 0; i < count; i++) {
+> +		pos = random() % count;
+> +		ops->setpos(pbuf[pos]);
+> +		ops->getentry(&entry);
+> +		if (dbuf[pos].d_ino != entry.d_ino ||
+> +		    dbuf[pos].d_type != entry.d_type ||
+> +		    strcmp(dbuf[pos].d_name, entry.d_name)) {
+> +			fprintf(stderr,
+> +				"Mismatch in dir entry %u at pos %llu\n", pos,
+> +				(unsigned long long)pbuf[pos]);
+> +			
+> +			exit(1);
+> +		}
+> +	}
+> +	puts("Reading valid entries passed.");
+> +
+> +	ignore_error = 1;
+> +	for (i = 0; i < count; i++) {
+> +		dpos = random() % maxpos;
+> +		ops->setpos(dpos);
+> +		/*
+> +		 * We don't care about the result but the kernel should not
+> + 		 * crash.
+> +		 */
+> +		ops->getentry(&entry);
+> +	}
+> +	ignore_error = 0;
+> +
+> +	puts("Reading random positions passed.");
+> +	free(dbuf);
+> +	free(pbuf);
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	int count;
+> +	unsigned long seed;
+> +
+> +	if (argc != 4) {
+> +		fprintf(stderr, "Usage: t_seekdir_3 <dir> <count> <seed>\n");
+> +		return 1;
+> +	}
+> +
+> +	count = atoi(argv[2]);
+> +	seed = atol(argv[3]);
+> +
+> +	srandom(seed);
+> +
+> +	create_dir(argv[1], count);
+> +
+> +	puts("Testing readdir...");
+> +	dir = opendir(argv[1]);
+> +	if (!dir) {
+> +		perror("Cannot open dir");
+> +		exit(1);
+> +	}
+> +	test(count, &libc_ops);
+> +	closedir(dir);
+> +	dir = NULL;
+> +
+> +	puts("Testing getdents...");
+> +	dfd = open(argv[1], O_DIRECTORY | O_RDONLY);
+> +	if (dfd < 0) {
+> +		perror("Cannot open dir");
+> +		exit(1);
+> +	}
+> +	test(count, &kernel_ops);
+> +	close(dfd);
+> +	dfd = 0;
+> +	fprintf(stderr, "All tests passed\n");
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/generic/673 b/tests/generic/673
+> new file mode 100755
+> index 000000000000..f6dea54db1a6
+> --- /dev/null
+> +++ b/tests/generic/673
+> @@ -0,0 +1,41 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 YOUR NAME HERE.  All Rights Reserved.
 
-I think this test had been committed as btrfs/253, would you please
-double check?
+I forgot this in my first email, "YOUR NAME HERE" should be updated
+accordingly as well.
 
 Thanks,
 Eryu
 
-> ---
->  tests/btrfs/257     | 273 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/257.out |  10 ++
->  2 files changed, 283 insertions(+)
->  create mode 100755 tests/btrfs/257
->  create mode 100644 tests/btrfs/257.out
-> 
-> diff --git a/tests/btrfs/257 b/tests/btrfs/257
-> new file mode 100755
-> index 00000000..00a099a5
-> --- /dev/null
-> +++ b/tests/btrfs/257
-> @@ -0,0 +1,273 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Facebook.  All Rights Reserved.
 > +#
-> +# FS QA Test 257
+> +# FS QA Test 673
 > +#
-> +# Test the new /sys/fs/btrfs/<uuid>/allocation/<block-type>/chunk_size
-> +# setting. This setting allows the admin to change the chunk size
-> +# setting for the next allocation.
+> +# Test that filesystem properly handles seeking in directory both to valid
+> +# and invalid positions.
 > +#
-> +# Test 1:
-> +#   Allocate storage for all three block types (data, metadata and system)
-> +#   with the default chunk size.
-> +#
-> +# Test 2:
-> +#   Set a new chunk size to double the default size and allocate space
-> +#   for all new block types with the new chunk size.
-> +#
-> +# Test 3:
-> +#   Pick an allocation size that is used in a loop and make sure the last
-> +#   allocation cannot be partially fullfilled.
-> +#
-> +# Note: Variable naming uses the following convention: if a variable name
-> +#       ends in "_B" then its a byte value, if it ends in "_MB" then the
-> +#       value is in megabytes.
+> +# This is a regression test for a48fc69fe658 ("udf: Fix crash after seekdir")
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto
+> +_begin_fstest auto quick
 > +
-> +seq=`basename $0`
-> +seqres="${RESULT_DIR}/${seq}"
+> +dir=$TEST_DIR/$seq-dir
 > +
-> +# Parse a size string which is in the format "XX.XXMib".
-> +#
-> +# Parameters:
-> +#   - (IN)    Block group type (Data, Metadata, System)
-> +#   - (INOUT) Variable to store block group size in MB
-> +#
-> +parse_size_string() {
-> +	local SIZE=$(echo "$1" | $AWK_PROG 'match($0, /([0-9.]+)/) { print substr($0, RSTART, RLENGTH) }')
-> +	eval $2="${SIZE%.*}"
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	rm -rf $dir
 > +}
 > +
-> +# Determine the size of the device in MB.
-> +#
-> +# Parameters:
-> +#   - (INOUT) Variable to store device size in MB
-> +#
-> +device_size() {
-> +	$BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes | grep devid >> $seqres.full
-> +	local SIZE=$($BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes | grep devid)
-> +	parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
-> +	eval $1=${SIZE_ALLOC%.*}
-> +}
+> +# Import common functions.
+> +# . ./common/filter
 > +
-> +# Determine the free space of a block group in MB.
-> +#
-> +# Parameters:
-> +#   - (INOUT) Variable to store free space in MB
-> +#
-> +free_space() {
-> +	local SIZE=$($BTRFS_UTIL_PROG filesystem show ${SCRATCH_MNT} --mbytes | grep devid)
-> +	parse_size_string $(echo "${SIZE}" | awk '{print $4}') SIZE_ALLOC
-> +	parse_size_string $(echo "${SIZE}" | awk '{print $6}') SIZE_USED
-> +	eval $1=$(expr ${SIZE_ALLOC} - ${SIZE_USED})
-> +}
+> +# real QA test starts here
 > +
-> +# Determine how much space in MB has been allocated to a block group.
-> +#
-> +# Parameters:
-> +#   - (IN)    Block group type (Data, Metadata, System)
-> +#   - (INOUT) Variable to store block group size in MB
-> +#
-> +alloc_size() {
-> +	local SIZE_STRING=$($BTRFS_UTIL_PROG filesystem df ${SCRATCH_MNT} -m | grep  "$1" | awk '{print $3}')
-> +	parse_size_string ${SIZE_STRING} BLOCK_GROUP_SIZE
-> +	eval $2="${BLOCK_GROUP_SIZE}"
-> +}
-> +
-> +. ./common/filter
-> +_supported_fs btrfs
+> +# Modify as appropriate.
+> +_supported_fs generic
 > +_require_test
-> +_require_scratch
 > +
-> +# Delete log file if it exists.
-> +rm -f "${seqres}.full"
+> +files=4000
+> +seed=$RANDOM
 > +
-> +# Make filesystem. 10GB is needed to test different chunk sizes for
-> +# metadata and data and the default size for volumes > 5GB is different.
-> +_scratch_mkfs_sized $((10 * 1024 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
+> +mkdir $dir
+> +echo "Using seed $seed" >> $seqres.full
+> +$here/src/t_readdir_3 $dir $files $seed >> $seqres.full
 > +
-> +# Check if there is sufficient sysfs support.
-> +_require_fs_sysfs allocation/metadata/chunk_size
-> +_require_fs_sysfs allocation/metadata/force_chunk_alloc
-> +
-> +# Get free space.
-> +free_space  FREE_SPACE_MB
-> +device_size DEVICE_SIZE_MB
-> +
-> +echo "free space = ${FREE_SPACE_MB}MB" >> ${seqres}.full
-> +
-> +# If device is a symbolic link, get block device.
-> +SCRATCH_BDEV=$(_real_dev $SCRATCH_DEV)
-> +
-> +# Get chunk sizes.
-> +echo "Capture default chunk sizes."
-> +FIRST_DATA_CHUNK_SIZE_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size)
-> +FIRST_METADATA_CHUNK_SIZE_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size)
-> +
-> +echo "Orig Data chunk size    = ${FIRST_DATA_CHUNK_SIZE_B}"     >> ${seqres}.full
-> +echo "Orig Metaata chunk size = ${FIRST_METADATA_CHUNK_SIZE_B}" >> ${seqres}.full
-> +
-> +INIT_ALLOC_SIZE_MB=$(expr \( ${FIRST_DATA_CHUNK_SIZE_B} + ${FIRST_METADATA_CHUNK_SIZE_B} \) / 1024 / 1024)
-> +echo "Allocation size for initial allocation = ${INIT_ALLOC_SIZE_MB}MB" >> $seqres.full
-> +
-> +#
-> +# Do first allocation with the default chunk sizes for the different block
-> +# types.
-> +#
-> +echo "First allocation."
-> +alloc_size "Data"     DATA_SIZE_START_MB
-> +alloc_size "Metadata" METADATA_SIZE_START_MB
-> +
-> +echo "Block group Data alloc size     = ${DATA_SIZE_START_MB}MB"     >> $seqres.full
-> +echo "Block group Metadata alloc size = ${METADATA_SIZE_START_MB}MB" >> $seqres.full
-> +
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/force_chunk_alloc 1
-> +
-> +alloc_size "Data"     FIRST_DATA_SIZE_MB
-> +alloc_size "Metadata" FIRST_METADATA_SIZE_MB
-> +
-> +echo "First block group Data alloc size     = ${FIRST_DATA_SIZE_MB}MB"     >> ${seqres}.full
-> +echo "First block group Metadata alloc size = ${FIRST_METADATA_SIZE_MB}MB" >> ${seqres}.full
-> +
-> +free_space FREE_SPACE_AFTER
-> +echo "Free space after first allocation = ${FREE_SPACE_AFTER}MB" >> ${seqres}.full
-> +
-> +#
-> +# Do allocation with the doubled chunk sizes for the different block types.
-> +#
-> +echo "Second allocation."
-> +SECOND_DATA_CHUNK_SIZE_B=$(expr ${FIRST_DATA_CHUNK_SIZE_B} \* 2)
-> +SECOND_METADATA_CHUNK_SIZE_B=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} \* 2)
-> +
-> +echo "Second block group Data calc alloc size     = ${SECOND_DATA_CHUNK_SIZE_B}"     >> $seqres.full
-> +echo "Second block group Metadata calc alloc size = ${SECOND_METADATA_CHUNK_SIZE_B}" >> $seqres.full
-> +
-> +# Stripe size is limited to 10% of device size.
-> +if [[ ${SECOND_DATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* 1024 \* 1024 / 100) ]]; then
-> +	SECOND_DATA_CHUNK_SIZE_B=$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024 \* 1024)
-> +fi
-> +if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -gt $(expr ${DEVICE_SIZE_MB} \* 10 \* 1024 \* 1024 / 100) ]]; then
-> +	SECOND_METADATA_CHUNK_SIZE_B=$(expr ${DEVICE_SIZE_MB} \* 10 / 100 \* 1024 \* 1024)
-> +fi
-> +
-> +echo "Second block group Data alloc size     = ${SECOND_DATA_CHUNK_SIZE_B}"     >> $seqres.full
-> +echo "Second block group Metadata alloc size = ${SECOND_METADATA_CHUNK_SIZE_B}" >> $seqres.full
-> +
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size ${SECOND_DATA_CHUNK_SIZE_B}
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size ${SECOND_METADATA_CHUNK_SIZE_B}
-> +
-> +SECOND_DATA_CHUNK_SIZE_READ_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size)
-> +SECOND_METADATA_CHUNK_SIZE_READ_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size)
-> +
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-> +echo "Allocated data chunk" >> $seqres.full
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/force_chunk_alloc 1
-> +echo "Allocated metadata chunk" >> $seqres.full
-> +
-> +alloc_size "Data"     SECOND_DATA_SIZE_MB
-> +alloc_size "Metadata" SECOND_METADATA_SIZE_MB
-> +alloc_size "System"   SECOND_SYSTEM_SIZE_MB
-> +
-> +echo "Calculate request size so last memory allocation cannot be completely fullfilled."
-> +free_space FREE_SPACE_MB
-> +
-> +# Find request size whose space allocation cannot be completely fullfilled.
-> +THIRD_DATA_CHUNK_SIZE_MB=$(expr 256)
-> +until [ ${THIRD_DATA_CHUNK_SIZE_MB} -gt $(expr 7 \* 1024) ]; do
-> +	if [ $((FREE_SPACE_MB%THIRD_DATA_CHUNK_SIZE_MB)) -ne 0 ]; then
-> +		break
-> +	fi
-> +	THIRD_DATA_CHUNK_SIZE_MB=$((THIRD_DATA_CHUNK_SIZE_MB+256))
-> +done
-> +
-> +if [[ ${THIRD_DATA_CHUNK_SIZE_MB} -eq $(expr 7 \* 1024) ]]; then
-> +	_fail "Cannot find allocation size for partial block allocation."
-> +fi
-> +
-> +THIRD_DATA_CHUNK_SIZE_B=$(expr ${THIRD_DATA_CHUNK_SIZE_MB} \* 1024 \* 1024)
-> +echo "Allocation size in mb    = ${THIRD_DATA_CHUNK_SIZE_MB}" >> ${seqres}.full
-> +echo "Allocation size in bytes = ${THIRD_DATA_CHUNK_SIZE_B}"  >> ${seqres}.full
-> +
-> +#
-> +# Do allocation until free space is exhausted.
-> +#
-> +echo "Third allocation."
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size ${THIRD_DATA_CHUNK_SIZE_B}
-> +
-> +free_space FREE_SPACE_MB
-> +while [ $FREE_SPACE_MB -gt $THIRD_DATA_CHUNK_SIZE_MB ]
-> +do
-> +	alloc_size "Data" THIRD_DATA_SIZE_MB
-> +	_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/force_chunk_alloc 1
-> +
-> +	free_space FREE_SPACE_MB
-> +done
-> +
-> +alloc_size "Data" FOURTH_DATA_SIZE_MB
-> +
-> +#
-> +# Force chunk allocation of system block type must fail.
-> +#
-> +echo "Force allocation of system block type must fail."
-> +_set_fs_sysfs_attr ${SCRATCH_BDEV} allocation/system/force_chunk_alloc 1 2>/dev/null
-> +
-> +#
-> +# Verification of initial allocation.
-> +#
-> +echo "Verify first allocation."
-> +FIRST_DATA_CHUNK_SIZE_MB=$(expr ${FIRST_DATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +FIRST_METADATA_CHUNK_SIZE_MB=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +
-> +# if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne $(expr ${FIRST_DATA_SIZE_MB}) ]]; then
-> +if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne ${FIRST_DATA_SIZE_MB} ]]; then
-> +	echo "tInitial data allocation not correct."
-> +fi
-> +
-> +if [[ $(expr ${FIRST_METADATA_CHUNK_SIZE_MB} + ${METADATA_SIZE_START_MB}) -ne ${FIRST_METADATA_SIZE_MB} ]]; then
-> +	echo "Initial metadata allocation not correct."
-> +fi
-> +
-> +#
-> +# Verification of second allocation.
-> +#
-> +echo "Verify second allocation."
-> +SECOND_DATA_CHUNK_SIZE_MB=$(expr ${SECOND_DATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +SECOND_METADATA_CHUNK_SIZE_MB=$(expr ${SECOND_METADATA_CHUNK_SIZE_B} / 1024 / 1024)
-> +
-> +if [[ ${SECOND_DATA_CHUNK_SIZE_B} -ne ${SECOND_DATA_CHUNK_SIZE_READ_B} ]]; then
-> +	echo "Value written to allocation/data/chunk_size and read value are different."
-> +fi
-> +
-> +if [[ ${SECOND_METADATA_CHUNK_SIZE_B} -ne ${SECOND_METADATA_CHUNK_SIZE_READ_B} ]]; then
-> +	echo "Value written to allocation/metadata/chunk_size and read value are different."
-> +fi
-> +
-> +if [[ $(expr ${SECOND_DATA_CHUNK_SIZE_MB} + ${FIRST_DATA_SIZE_MB}) -ne ${SECOND_DATA_SIZE_MB} ]]; then
-> +	echo "Data allocation after chunk size change not correct."
-> +fi
-> +
-> +if [[ $(expr ${SECOND_METADATA_CHUNK_SIZE_MB} + ${FIRST_METADATA_SIZE_MB}) -ne ${SECOND_METADATA_SIZE_MB} ]]; then
-> +	echo "Metadata allocation after chunk size change not correct."
-> +fi
-> +
-> +#
-> +# Verification of third allocation.
-> +#
-> +echo "Verify third allocation."
-> +if [[ ${FREE_SPACE_MB} -gt ${THIRD_DATA_CHUNK_SIZE_MB} ]]; then
-> +	echo "Free space after allocating over memlimit is too high."
-> +fi
-> +
-> +# The + 1 is required as 1MB is always kept as free space.
-> +if [[ $(expr ${THIRD_DATA_CHUNK_SIZE_MB} + ${THIRD_DATA_SIZE_MB} + 1) -le $(expr ${FOURTH_DATA_SIZE_MB}) ]]; then
-> +	echo "Allocation until out of memory: last memory allocation size is not correct."
-> +fi
-> +
+> +# success, all done
 > +status=0
 > +exit
-> +
-> diff --git a/tests/btrfs/257.out b/tests/btrfs/257.out
+> diff --git a/tests/generic/673.out b/tests/generic/673.out
 > new file mode 100644
-> index 00000000..49be3b16
+> index 000000000000..e038de2ca346
 > --- /dev/null
-> +++ b/tests/btrfs/257.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 257
-> +Capture default chunk sizes.
-> +First allocation.
-> +Second allocation.
-> +Calculate request size so last memory allocation cannot be completely fullfilled.
-> +Third allocation.
-> +Force allocation of system block type must fail.
-> +Verify first allocation.
-> +Verify second allocation.
-> +Verify third allocation.
-> 
-> base-commit: d8dee1222ecdfa1cff1386a61248e587eb3b275d
+> +++ b/tests/generic/673.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 673
+> +All tests passed
 > -- 
-> 2.30.2
+> 2.31.1
