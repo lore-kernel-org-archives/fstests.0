@@ -2,81 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CADAC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Feb 2022 10:38:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB46EC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Feb 2022 17:51:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231295AbiBVKic (ORCPT
+        id S234140AbiBVRvb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Feb 2022 05:38:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41750 "EHLO
+        Tue, 22 Feb 2022 12:51:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230313AbiBVKib (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Feb 2022 05:38:31 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9ED2148931
-        for <fstests@vger.kernel.org>; Tue, 22 Feb 2022 02:38:05 -0800 (PST)
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id 885D821117;
-        Tue, 22 Feb 2022 10:38:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1645526284; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=GtDxVv37uxGwBGxY0+IkJefz1uW3cHnt/RqW/D8QhVo=;
-        b=XB3d+7hPgfbnjcW+0jdTTNFKzcq8+uBBjzrRSODfXYFU55kIVYUHnYX4R100sokr2nnPZT
-        DfzNkJTHiIqfGOmFz1s9Xyn9eRLPheUP9HV6EGmjiOMzwg7bzTEtmZcVBYhAf4JOE3GtBr
-        z7L4akHthp7bKcdpwKieWl0lN1fVzUA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1645526284;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=GtDxVv37uxGwBGxY0+IkJefz1uW3cHnt/RqW/D8QhVo=;
-        b=eCE9Hc/ynOEu25MoCJjNvWr/PPiHhTkcu37GspW5b1WcUZUEiyhhVFxRD0rvsdVz53ZZDp
-        zgG3hzlxFGZsJvBw==
-Received: from quack3.suse.cz (unknown [10.100.200.198])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id 7D5A4A3B81;
-        Tue, 22 Feb 2022 10:38:04 +0000 (UTC)
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-        id 4D322A0606; Tue, 22 Feb 2022 11:38:04 +0100 (CET)
-Date:   Tue, 22 Feb 2022 11:38:04 +0100
-From:   Jan Kara <jack@suse.cz>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/673: Add test for seekdir
-Message-ID: <20220222103804.4a7uhuzibhu5x7md@quack3.lan>
-References: <20220204175657.8500-1-jack@suse.cz>
- <YhJxGmyHga4zc6ZH@desktop>
+        with ESMTP id S234336AbiBVRva (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Feb 2022 12:51:30 -0500
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2A9116FDC7;
+        Tue, 22 Feb 2022 09:51:04 -0800 (PST)
+Received: from pps.filterd (m0127361.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 21MHJu0g027294;
+        Tue, 22 Feb 2022 17:51:04 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=j2lxBEKXj31SxcbAozEFxIXgEqDLIsmOwAI5PHFvBrQ=;
+ b=fvKCKcqs5IFtnrqKI28DD8O2HVNIZfrW2gsV8VOS1OQZ4ntWJsMNjvZuO2o2gMRMo1JO
+ AYgcgVRGXr5o828YGBYtRyOQfjncAWUZmPFpqV8nLp3dAhrpDuhvpRUJq6onk1zv7lJh
+ 1GUTj+9v0yZmYtIeqVorl6uc9CNvt8yWghAKrJH7fUsTUtFl3xVtSsaD5yygFE7P72rH
+ 1vFyvw/054c9SLO0qsnG70vJG+kK2UAIn29x0RhFUf2qAMK3/dDF5YBky+IhbqjsJVFN
+ CzGjxo+hI76d98LInpjwBwjxuuylgJ4ocwihVazB+/LVinoRWvpN1ai1lI4HitGWCMS0 jQ== 
+Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3ed1ctp0fa-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 22 Feb 2022 17:51:03 +0000
+Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
+        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 21MHlOeF024753;
+        Tue, 22 Feb 2022 17:51:02 GMT
+Received: from b06cxnps3074.portsmouth.uk.ibm.com (d06relay09.portsmouth.uk.ibm.com [9.149.109.194])
+        by ppma06ams.nl.ibm.com with ESMTP id 3eaqtj4xky-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 22 Feb 2022 17:51:01 +0000
+Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
+        by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 21MHowjf9765136
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 22 Feb 2022 17:50:58 GMT
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 8ABB0A404D;
+        Tue, 22 Feb 2022 17:50:58 +0000 (GMT)
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 3FDA2A4051;
+        Tue, 22 Feb 2022 17:50:57 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.41.242])
+        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue, 22 Feb 2022 17:50:56 +0000 (GMT)
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Cc:     riteshh@linux.ibm.com
+Subject: [PATCH v2 0/2] tests/ext4: Ensure resizes with sparse_super2 are handled correctly
+Date:   Tue, 22 Feb 2022 23:20:51 +0530
+Message-Id: <cover.1645549521.git.ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.27.0
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: LVVQGbPP0LaQ4kADcsZwuNRpcgxm10Q_
+X-Proofpoint-GUID: LVVQGbPP0LaQ4kADcsZwuNRpcgxm10Q_
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YhJxGmyHga4zc6ZH@desktop>
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.62.513
+ definitions=2022-02-22_05,2022-02-21_02,2021-12-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0
+ priorityscore=1501 mlxscore=0 clxscore=1015 impostorscore=0
+ lowpriorityscore=0 adultscore=0 phishscore=0 spamscore=0 mlxlogscore=570
+ malwarescore=0 suspectscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.12.0-2201110000 definitions=main-2202220107
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon 21-02-22 00:49:30, Eryu Guan wrote:
-> On Fri, Feb 04, 2022 at 06:56:57PM +0100, Jan Kara wrote:
-> > diff --git a/tests/generic/673 b/tests/generic/673
-> > new file mode 100755
-> > index 000000000000..f6dea54db1a6
-> > --- /dev/null
-> > +++ b/tests/generic/673
-> > @@ -0,0 +1,41 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 YOUR NAME HERE.  All Rights Reserved.
-> 
-> I forgot this in my first email, "YOUR NAME HERE" should be updated
-> accordingly as well.
+As detailed in the patch [1], kernel currently does not support resizes
+with sparse_super2 enabled.  Before the above patch, if we used the
+EXT4_IOC_RESIZE_FS ioctl directly, wiht sparse_super2 enabled, the
+kernel used to still try the resize and ultimatley leave the fs in an
+inconsistent state. This also led to corruption and kernel BUGs.
 
-Thanks for review! Updated version sent (just forgot to add v2 to the
-subject).
+This patchset adds a test for ext4 to ensure that the kernel handles
+resizes with sparse_super2 correctly, and returns -EOPNOTSUPP. 
 
-								Honza
+Summary:
+
+  Patch 1: Fix the src/ext4_resize.c script to return accurate error
+           codes.
+  Patch 2: Add the ext4 test for checking resize functionality
+
+Changes since v1 [2]
+
+  *  In patch 2, don't iterate if the expected errno is returned
+  *  Code cleanup and additional comments for clarity (also see extra
+     note in patch 2)
+  *  No changes in patch 1
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b1489186cc8391e0c1e342f9fbc3eedf6b944c61
+[2] https://lore.kernel.org/fstests/cover.1644217569.git.ojaswin@linux.ibm.com/ 
+
+Ojaswin Mujoo (2):
+  src/ext4_resize.c: Refactor code and ensure accurate errno is returned
+  ext4: Test to ensure resize with sparse_super2 is handled correctly
+
+ src/ext4_resize.c  |  46 +++++++++++++------
+ tests/ext4/056     | 108 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/056.out |   2 +
+ 3 files changed, 142 insertions(+), 14 deletions(-)
+ create mode 100755 tests/ext4/056
+ create mode 100644 tests/ext4/056.out
 
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.27.0
+
