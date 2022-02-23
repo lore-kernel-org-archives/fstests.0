@@ -2,117 +2,81 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE50CC4332F
-	for <linux-fstests@archiver.kernel.org>; Wed, 23 Feb 2022 16:57:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E311BC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Feb 2022 17:15:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243069AbiBWQ6G (ORCPT
+        id S243328AbiBWRPp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 23 Feb 2022 11:58:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46640 "EHLO
+        Wed, 23 Feb 2022 12:15:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243084AbiBWQ57 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 23 Feb 2022 11:57:59 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA99825E5;
-        Wed, 23 Feb 2022 08:57:30 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 61FE76006F;
-        Wed, 23 Feb 2022 16:57:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE159C340E7;
-        Wed, 23 Feb 2022 16:57:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1645635449;
-        bh=F2OZITzbPLjglp+oG3kfzs+cx9PZX0CEj4yGVLb5+do=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=XfusfLeTlhVEvrTrfhIPLapiFJ/Sq4KD8Gv9SpX81LYxhFBVAGqMZC88Nt4YdcP5Y
-         jO/M8r+C6tUPy/wkrxQh6zwDZBU5TJoOSigGrbwMlFWdv3Oq4wfJbM06Ayyav+piRu
-         I8WVPs6SD7TeykGpFwgCf/cxAHJr8/ZOxhgMlyJkABchGuuajMN5cegfr/t30+gR2r
-         oGfJIyrp5c/zp2zX1spqw6bGr69506Z9e1Gg3mhh6i22PG7sXS4O89LSOcRJou8GHf
-         Wc2M5F/sUed5F0ZJarW/AU1Ti7aO2p1RlNKFdHqS3rnFgZ7iHiLHF/DvSgJkHWMq0n
-         W68+FkQSdrlVA==
-Date:   Wed, 23 Feb 2022 08:57:29 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Anna Schumaker <anna@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
-Subject: Re: [PATCH 3/4] generic/578: Test that filefrag is supported before
- running
-Message-ID: <20220223165729.GH8288@magnolia>
-References: <20220208215232.491780-1-anna@kernel.org>
- <20220208215232.491780-4-anna@kernel.org>
+        with ESMTP id S241445AbiBWRPo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 23 Feb 2022 12:15:44 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F959C4B;
+        Wed, 23 Feb 2022 09:15:17 -0800 (PST)
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 0CEE5210DB;
+        Wed, 23 Feb 2022 17:15:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1645636516;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=drRZ4RI3au+FeOyd3RQe4hd3VHT1iM+JJ0axNcietxM=;
+        b=OISwRtmS4YwegylXiAcu/csQVzSZm5Jyfh+UYN+dfYU7J676mZTnhkfrLi6+BMtBs/d1sF
+        JhAL8EC10EfooGEiAkTjlzu/XZ1NyBZEjTc2ctjLbxV1iAHtfY6ymwqb9O8+36Z44gWZR7
+        hkh582myLYd4uvC4hzmfPm/cGTxbeiE=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1645636516;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=drRZ4RI3au+FeOyd3RQe4hd3VHT1iM+JJ0axNcietxM=;
+        b=qbdnGCGZSREbfU81DzhUVI6bAQBS1z8maeazzi+rMpuK97oWSnMfwVwBd5x8dUWJdZ0ME7
+        jJEisWaykD0FsaBg==
+Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
+        by relay2.suse.de (Postfix) with ESMTP id 049DEA3B84;
+        Wed, 23 Feb 2022 17:15:15 +0000 (UTC)
+Received: by ds.suse.cz (Postfix, from userid 10065)
+        id C33D9DA7F7; Wed, 23 Feb 2022 18:11:26 +0100 (CET)
+Date:   Wed, 23 Feb 2022 18:11:26 +0100
+From:   David Sterba <dsterba@suse.cz>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Gabriel Niebler <gniebler@suse.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] fstests: fix btrfs/255 to fail on deadlock
+Message-ID: <20220223171126.GQ12643@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+Mail-Followup-To: dsterba@suse.cz, Eryu Guan <guan@eryu.me>,
+        Gabriel Niebler <gniebler@suse.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+References: <20220216100535.4231-1-gniebler@suse.com>
+ <YhJ1VwUqPWkgPx2V@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220208215232.491780-4-anna@kernel.org>
+In-Reply-To: <YhJ1VwUqPWkgPx2V@desktop>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 08, 2022 at 04:52:31PM -0500, Anna Schumaker wrote:
-> From: Anna Schumaker <Anna.Schumaker@Netapp.com>
+On Mon, Feb 21, 2022 at 01:07:35AM +0800, Eryu Guan wrote:
+> On Wed, Feb 16, 2022 at 11:05:35AM +0100, Gabriel Niebler wrote:
+> > In its current implementation, the test btrfs/255 would hang forever
+> > on any kernel w/o patch "btrfs: fix deadlock between quota disable
+> > and qgroup rescan worker", rather than failing, as it should.
+> > Fix this by introducing generous timeouts.
+> > 
+> > Signed-off-by: Gabriel Niebler <gniebler@suse.com>
 > 
-> NFS does not support FIBMAP/FIEMAP, so the check for non-shared extents
-> on NFS v4.2 always fails with the message: "FIBMAP/FIEMAP unsupported".
-> I added the _require_filefrag check for NFS and other filesystems that
-> don't have FIEMAP or FIBMAP support.
+> If deadlock was already triggered, I don't think killing the userspace
+> program with timeout will help, as the kernel already deadlocked, and
+> filesystem and/or device can't be used by next test either.
 > 
-> Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
-> ---
->  common/rc         | 14 ++++++++++++++
->  tests/generic/578 |  2 +-
->  2 files changed, 15 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index b3289de985d8..73d17da9430e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4673,6 +4673,20 @@ _require_inode_limits()
->  	fi
->  }
->  
-> +_require_filefrag()
-> +{
-> +	_require_command "$FILEFRAG_PROG" filefrag
-> +
-> +	local file="$TEST_DIR/filefrag_testfile"
-> +
-> +	echo "XX" > $file
+> I think we should just exclude the test when running tests on unpatched
+> kernel.
 
-Nit: You might want to rm -f $file before echoing into it, just in case
-some future knave ;) sets up that pathname to point to a named pipe or
-something that will hang fstests...
-
-> +	${FILEFRAG_PROG} $file 2>&1 | grep -q "FIBMAP/FIEMAP[[:space:]]*unsupported"
-> +	if [ $? -eq 0 ]; then
-
-...and rm it again here to avoid leaving test files around.
-
-Otherwise this looks ok to me.
-
---D
-
-> +		_notrun "FIBMAP/FIEMAP not supported by this filesystem"
-> +	fi
-> +	rm -f $file
-> +}
-> +
->  _require_filefrag_options()
->  {
->  	_require_command "$FILEFRAG_PROG" filefrag
-> diff --git a/tests/generic/578 b/tests/generic/578
-> index 01929a280f8c..64c813032cf8 100755
-> --- a/tests/generic/578
-> +++ b/tests/generic/578
-> @@ -23,7 +23,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs generic
->  _require_test_program "mmap-write-concurrent"
-> -_require_command "$FILEFRAG_PROG" filefrag
-> +_require_filefrag
->  _require_test_reflink
->  _require_cp_reflink
->  
-> -- 
-> 2.35.1
-> 
+I don't see a way how to detect it at runtime, or do you mean to use the
+expunge files?
