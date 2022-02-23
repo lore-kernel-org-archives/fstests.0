@@ -2,98 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25091C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 23 Feb 2022 12:12:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08F19C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Feb 2022 16:54:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236749AbiBWMNR (ORCPT
+        id S243040AbiBWQy5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 23 Feb 2022 07:13:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46528 "EHLO
+        Wed, 23 Feb 2022 11:54:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235525AbiBWMNR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 23 Feb 2022 07:13:17 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB37D9AD86;
-        Wed, 23 Feb 2022 04:12:49 -0800 (PST)
+        with ESMTP id S231601AbiBWQyz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 23 Feb 2022 11:54:55 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 980E234679;
+        Wed, 23 Feb 2022 08:54:27 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 7A1D7B81F09;
-        Wed, 23 Feb 2022 12:12:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 200DFC340E7;
-        Wed, 23 Feb 2022 12:12:47 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3612660EE8;
+        Wed, 23 Feb 2022 16:54:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9AE37C340E7;
+        Wed, 23 Feb 2022 16:54:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1645618367;
-        bh=L8t9CItoBz7aAv46NoemG9ez6m9l783jUKZLOc4kQWE=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=Hn59DPsxhurR4DMyTcvNE+00oMwS/G9oxXlzwND/w03DMlMoTtlZLlHW080d8A488
-         h+ntQ3c4nrcEV+fMwtK4wYANXAf4QEItbUAx+TzTL3eFud8dctwaTumED7b/RjNEye
-         I/HOr5QlBzli0tB+7MXNbSg14yG3i7+6Gp85V31ZCpG92PBKF0NLgQOuHLDF+8ObPh
-         i2SV+uScqxPAcGjp162XuDvi3upjxl0sqQkBPzT38zZRlbm6jX5q1X4VAbTqCPq2Ow
-         Ln4TX+uzqQXgf4NHuiOcwjtOXMkpwi3F8+qgxYTl809u6WsiqtnINGCOAsq06PpIdB
-         LCTUOSiX1JZhg==
-Received: by mail-qk1-f179.google.com with SMTP id g24so4136378qkl.3;
-        Wed, 23 Feb 2022 04:12:47 -0800 (PST)
-X-Gm-Message-State: AOAM530tX+at6joj9a1s8L5f0LZc+FqK1jTJKjFE4fFm9R9x9rSHtH5K
-        M9RVhWnL1angLdXrr3dNpi8N3HtK7QIMGl9iMpI=
-X-Google-Smtp-Source: ABdhPJx+dvgZWvXr2FCskA76tagYYsUPwzBwqiRxyIeFlZ6q+J5wIEIGTJIaN0KB3O2+PWsgLLTitlazxrE/JPrBJ5U=
-X-Received: by 2002:a37:aa02:0:b0:47e:826e:7d4e with SMTP id
- t2-20020a37aa02000000b0047e826e7d4emr18216848qke.9.1645618366093; Wed, 23 Feb
- 2022 04:12:46 -0800 (PST)
+        s=k20201202; t=1645635266;
+        bh=fRt6ngPHr4dSfvKDSZaXi7eaExmontbrmd22ISaBEd8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=bAgGz2tFZK+WZ0b3t4Lv3NDsUf6BRrfqyjWdCyoApRuIQi70WgKJT/05vECbCgMic
+         VUNKw2aq210h7lZQyt8J12CDq7V2xXEzyQsbzVrgRs6uG457MUw3oWQCHkLATHt3iI
+         Q5rOljeo5RKg9P4pP5Q9sb8ztXsHlQT/V4B3kp5dv4fuvZSPG13V0uz1q5TzylFYi8
+         x+J3O5UWBJGMDRbERxw/YdjT26TewWA/TgPds0NGo2aM2eWq5zy1VQxpaohwvugmxi
+         fMw3Mn/ewOUU5lgGJbgB4wzQe8tZPO2K7hoXpcHqxcOhZTAf4+FLH8yKxFGYtQbug4
+         JV/yzQpfC2Cug==
+Date:   Wed, 23 Feb 2022 08:54:26 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Anna Schumaker <anna@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+Subject: Re: [PATCH 2/4] generic/531: Move test from 'quick' group to 'stress'
+Message-ID: <20220223165426.GG8288@magnolia>
+References: <20220208215232.491780-1-anna@kernel.org>
+ <20220208215232.491780-3-anna@kernel.org>
 MIME-Version: 1.0
-References: <abbc821350c8ef515e0a0317b5cbd64e3c5b81ab.1645099449.git.fdmanana@suse.com>
- <20220222234432.GF3061737@dread.disaster.area>
-In-Reply-To: <20220222234432.GF3061737@dread.disaster.area>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Wed, 23 Feb 2022 12:12:10 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H41wY_GWStRUxuOWwPcgqX9zx-WZxEySaRAUrMtcE666w@mail.gmail.com>
-Message-ID: <CAL3q7H41wY_GWStRUxuOWwPcgqX9zx-WZxEySaRAUrMtcE666w@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test log replay after fsync of file with prealloc
- extents beyond eof
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220208215232.491780-3-anna@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 22, 2022 at 11:44 PM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Thu, Feb 17, 2022 at 12:14:21PM +0000, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test that after a full fsync of a file with preallocated extents beyond
-> > the file's size, if a power failure happens, the preallocated extents
-> > still exist after we mount the filesystem.
-> >
-> > This test currently fails and there is a patch for btrfs that fixes this
-> > issue and has the following subject:
-> >
-> >   "btrfs: fix lost prealloc extents beyond eof after full fsync"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> >  tests/btrfs/261     | 79 +++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/261.out | 10 ++++++
->
-> What is btrfs specific about this test?
+On Tue, Feb 08, 2022 at 04:52:30PM -0500, Anna Schumaker wrote:
+> From: Anna Schumaker <Anna.Schumaker@Netapp.com>
+> 
+> The comment up top says this is a stress test, so at the very least it
+> should be added to this group. As for removing it from the quick group,
+> making this test variable on the number of CPUs means this test could
+> take a very long time to finish (I'm unsure exactly how long on NFS v4.1
+> because I usually kill it after a half hour or so)
+> 
+> Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+> ---
+> I have thought of two alternatives to this patch that would work for me:
+>   1) Could we add an _unsupported_fs function which is the opposite of
+>      _supported_fs to prevent tests from running on specific filesystems?
+>   2) Would it be okay to check if $FSTYP == "nfs" when setting nr_cpus,
+>      and set it to 1 instead? Perhaps through a function in common/rc
+>      that other tests can use if they scale work based on cpu-count?
 
-The comments that explain the steps are very btrfs specific.
-Without them it would be hard to understand why the test uses that
-specific file size, block size, mention of the btrfs inode's full sync
-bit, etc.
+How about we create a function to estimate fs threading scalability?
+There are probably (simple) filesystems out there with a Big Filesystem
+Lock that won't benefit from more CPUs pounding on it...
 
-Some years ago, when you maintained fstests, you complained once about
-this type of "too btrfs specific" comments on generic tests.
+# Estimate how many writer threads we should start to stress test this
+# type of filesystem.
+_estimate_threading_factor() {
+	case "$FSTYP" in
+	"nfs")
+		echo 1;;
+	*)
+		echo $((2 * $(getconf _NPROCESSORS_ONLN) ));;
+	esac
+}
+
+and later:
+
+nr_cpus=$(_estimate_threading_factor)
+
+Once something like this is landed, we can customize for each FSTYP.  I
+suspect that XFS on spinning rust might actually want "2" here, not
+nr_cpus*2, given the sporadic complaints about this test taking much
+longer for a few people.
+
+> ---
+>  tests/generic/531 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/531 b/tests/generic/531
+> index 5e84ca977b44..62e3cac92423 100755
+> --- a/tests/generic/531
+> +++ b/tests/generic/531
+> @@ -12,7 +12,7 @@
+>  # Use every CPU possible to stress the filesystem.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick unlink
+> +_begin_fstest auto stress unlink
+
+As for this change itself,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
 
 
->
-> Cheers,
->
-> Dave.
->
-> --
-> Dave Chinner
-> david@fromorbit.com
+>  testfile=$TEST_DIR/$seq.txt
+>  
+>  # Import common functions.
+> -- 
+> 2.35.1
+> 
