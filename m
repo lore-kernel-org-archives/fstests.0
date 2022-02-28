@@ -2,133 +2,262 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E795DC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Feb 2022 03:41:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5013DC433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 28 Feb 2022 07:48:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230103AbiB1Dmb (ORCPT
+        id S233371AbiB1Htd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Feb 2022 22:42:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52144 "EHLO
+        Mon, 28 Feb 2022 02:49:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32910 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229877AbiB1Dmb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Feb 2022 22:42:31 -0500
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16D0C5A5A5
-        for <fstests@vger.kernel.org>; Sun, 27 Feb 2022 19:41:53 -0800 (PST)
-Received: from kwepemi100013.china.huawei.com (unknown [172.30.72.56])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4K6R374Pd5zBrKD;
-        Mon, 28 Feb 2022 11:40:03 +0800 (CST)
-Received: from kwepemm600010.china.huawei.com (7.193.23.86) by
- kwepemi100013.china.huawei.com (7.221.188.136) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.21; Mon, 28 Feb 2022 11:41:50 +0800
-Received: from huawei.com (10.175.127.227) by kwepemm600010.china.huawei.com
- (7.193.23.86) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.21; Mon, 28 Feb
- 2022 11:41:50 +0800
-From:   Sun Ke <sunke32@huawei.com>
-To:     <fstests@vger.kernel.org>, <guan@eryu.me>
-CC:     <chao@kernel.org>, <jaegeuk@kernel.org>,
-        <linux-f2fs-devel@lists.sourceforge.net>, <sunke32@huawei.com>
-Subject: [PATCH] generic/066: attr1 is still there after log replay on f2fs
-Date:   Mon, 28 Feb 2022 11:57:19 +0800
-Message-ID: <20220228035719.4102745-1-sunke32@huawei.com>
-X-Mailer: git-send-email 2.31.1
+        with ESMTP id S229664AbiB1Htd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Feb 2022 02:49:33 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D74A3D1D2;
+        Sun, 27 Feb 2022 23:48:54 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EF7A861043;
+        Mon, 28 Feb 2022 07:48:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 36E95C340F2;
+        Mon, 28 Feb 2022 07:48:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1646034533;
+        bh=84bv7nDGRm4EoyqglFFRf2Xya8YKAEQz0KiwKkw4xVM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=utMiDQsQ1zWE8d2K5XMsIcV0mXAyxA5HImWiMC75BpL4YOh5e99Lp2EFXqoSsbK/H
+         b8iRLL6ndVks9aOSa6UOI5mpBckOv+luzUiCwMY/1Pj+MmHLS7LPERD+/34FUWp6Qk
+         XncIkuWCa2G1bZzSmQL3ZPOQV++rO553HUKYShf9h98g0F4QJsDQga24kJgtC7vdbO
+         xuWzqxyi411sycjzMrjRYhv1YRgPZhG55oEydFAKTMKMXD171fqiwaW9xg5v7ch0EJ
+         W83k4d1edanaN7odfZcvb2lgLO/2gKLEf36KvFRRaLJfB9blRLmQC1oR4E0QZoPxHd
+         yxFHx1SsEXQKg==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Subject: [RFC PATCH 1/8] fscrypt-crypt-util: use an explicit --direct-key option
+Date:   Sun, 27 Feb 2022 23:47:15 -0800
+Message-Id: <20220228074722.77008-2-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220228074722.77008-1-ebiggers@kernel.org>
+References: <20220228074722.77008-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.127.227]
-X-ClientProxiedBy: dggems706-chm.china.huawei.com (10.3.19.183) To
- kwepemm600010.china.huawei.com (7.193.23.86)
-X-CFilter-Loop: Reflected
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The test fail on f2fs:
-     xattr names and values after second fsync log replay:
-     # file: SCRATCH_MNT/foobar
-    +user.attr1="val1"
-     user.attr3="val3"
+From: Eric Biggers <ebiggers@google.com>
 
-attr1 is still there after log replay.
-I guess it is f2fs's special feature to improve the performance.
+Make fscrypt-crypt-util use an option --direct-key to specify the use of
+the DIRECT_KEY method for key derivation and IV generation.  Previously,
+this method was implicitly detected via --mode-num being given without
+either --iv-ino-lblk-64 or --iv-ino-lblk-32.
 
-Signed-off-by: Sun Ke <sunke32@huawei.com>
+The benefit of this change is that it makes the various options to
+fscrypt-crypt-util behave more consistently.  --direct-key,
+--iv-ino-lblk-64, and --iv-ino-lblk-32 now all work similarly (they
+select a key derivation and IV generation method); likewise, --mode-num,
+--file-nonce, --inode-number, and --fs-uuid now all work similarly (they
+provide information that key derivation and IV generation may need).
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
+ common/encrypt           | 10 ++++----
+ src/fscrypt-crypt-util.c | 52 ++++++++++++++++++++++++----------------
+ 2 files changed, 36 insertions(+), 26 deletions(-)
 
-Is it a BUG on f2fs?
- .gitignore                                 |  1 +
- tests/generic/066                          |  3 +++
- tests/generic/066.cfg                      |  1 +
- tests/generic/{066.out => 066.out.default} |  0
- tests/generic/066.out.f2fs                 | 11 +++++++++++
- 5 files changed, 16 insertions(+)
- create mode 100644 tests/generic/066.cfg
- rename tests/generic/{066.out => 066.out.default} (100%)
- create mode 100644 tests/generic/066.out.f2fs
-
-diff --git a/.gitignore b/.gitignore
-index 65b93307..135742f5 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -194,6 +194,7 @@ tags
- /src/perf/*.pyc
+diff --git a/common/encrypt b/common/encrypt
+index f90c4ef0..2cf02ca0 100644
+--- a/common/encrypt
++++ b/common/encrypt
+@@ -842,27 +842,25 @@ _verify_ciphertext_for_encryption_policy()
  
- # Symlinked files
-+/tests/generic/066.out
- /tests/generic/035.out
- /tests/generic/050.out
- /tests/xfs/033.out
-diff --git a/tests/generic/066 b/tests/generic/066
-index 105a7acd..524dc82d 100755
---- a/tests/generic/066
-+++ b/tests/generic/066
-@@ -17,6 +17,7 @@
- #
- #  Btrfs: remove deleted xattrs on fsync log replay
- #
-+seqfull=$0
- . ./common/preamble
- _begin_fstest auto quick attr metadata log
+ 	set_encpolicy_args+=" -c $contents_mode_num"
+ 	set_encpolicy_args+=" -n $filenames_mode_num"
++	crypt_util_contents_args+=" --mode-num=$contents_mode_num"
++	crypt_util_filename_args+=" --mode-num=$filenames_mode_num"
  
-@@ -32,6 +33,8 @@ _cleanup()
- . ./common/dmflakey
- . ./common/attr
+ 	if (( policy_version > 1 )); then
+ 		set_encpolicy_args+=" -v 2"
+ 		crypt_util_args+=" --kdf=HKDF-SHA512"
+ 		if (( policy_flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
+-			crypt_util_args+=" --mode-num=$contents_mode_num"
++			crypt_util_args+=" --direct-key"
+ 		elif (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 )); then
+ 			crypt_util_args+=" --iv-ino-lblk-64"
+-			crypt_util_contents_args+=" --mode-num=$contents_mode_num"
+-			crypt_util_filename_args+=" --mode-num=$filenames_mode_num"
+ 		elif (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32 )); then
+ 			crypt_util_args+=" --iv-ino-lblk-32"
+-			crypt_util_contents_args+=" --mode-num=$contents_mode_num"
+-			crypt_util_filename_args+=" --mode-num=$filenames_mode_num"
+ 		fi
+ 	else
+ 		if (( policy_flags & ~FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
+ 			_fail "unsupported flags for v1 policy: $policy_flags"
+ 		fi
+ 		if (( policy_flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
+-			crypt_util_args+=" --kdf=none"
++			crypt_util_args+=" --direct-key --kdf=none"
+ 		else
+ 			crypt_util_args+=" --kdf=AES-128-ECB"
+ 		fi
+diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
+index 03cc3c4a..022ff7bd 100644
+--- a/src/fscrypt-crypt-util.c
++++ b/src/fscrypt-crypt-util.c
+@@ -64,6 +64,8 @@ static void usage(FILE *fp)
+ "  --block-size=BLOCK_SIZE     Encrypt each BLOCK_SIZE bytes independently.\n"
+ "                                Default: 4096 bytes\n"
+ "  --decrypt                   Decrypt instead of encrypt\n"
++"  --direct-key                Use the format where the IVs include the file\n"
++"                                nonce and the same key is shared across files.\n"
+ "  --file-nonce=NONCE          File's nonce as a 32-character hex string\n"
+ "  --fs-uuid=UUID              The filesystem UUID as a 32-character hex string.\n"
+ "                                Required for --iv-ino-lblk-32 and\n"
+@@ -76,11 +78,10 @@ static void usage(FILE *fp)
+ "                                32-bit variant.\n"
+ "  --iv-ino-lblk-64            Use the format where the IVs include the inode\n"
+ "                                number and the same key is shared across files.\n"
+-"                                Requires --kdf=HKDF-SHA512, --fs-uuid,\n"
+-"                                --inode-number, and --mode-num.\n"
+ "  --kdf=KDF                   Key derivation function to use: AES-128-ECB,\n"
+ "                                HKDF-SHA512, or none.  Default: none\n"
+-"  --mode-num=NUM              Derive per-mode key using mode number NUM\n"
++"  --mode-num=NUM              The encryption mode number.  This may be required\n"
++"                                for key derivation, depending on other options.\n"
+ "  --padding=PADDING           If last block is partial, zero-pad it to next\n"
+ "                                PADDING-byte boundary.  Default: BLOCK_SIZE\n"
+ 	, fp);
+@@ -1790,6 +1791,7 @@ struct key_and_iv_params {
+ 	u8 mode_num;
+ 	u8 file_nonce[FILE_NONCE_SIZE];
+ 	bool file_nonce_specified;
++	bool direct_key;
+ 	bool iv_ino_lblk_64;
+ 	bool iv_ino_lblk_32;
+ 	u64 block_number;
+@@ -1835,7 +1837,7 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 			   u8 *real_key, size_t real_key_size,
+ 			   union fscrypt_iv *iv)
+ {
+-	bool file_nonce_in_iv = false;
++	int iv_methods = 0;
+ 	struct aes_key aes_key;
+ 	u8 info[8 + 1 + 1 + UUID_SIZE] = "fscrypt";
+ 	size_t infolen = 8;
+@@ -1848,11 +1850,22 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 	/* Overridden later for iv_ino_lblk_{64,32} */
+ 	iv->block_number = cpu_to_le64(params->block_number);
  
-+# Select appropriate golden output based on fstype
-+_link_out_file
- # real QA test starts here
- _supported_fs generic
- _require_scratch
-diff --git a/tests/generic/066.cfg b/tests/generic/066.cfg
-new file mode 100644
-index 00000000..c25641be
---- /dev/null
-+++ b/tests/generic/066.cfg
-@@ -0,0 +1 @@
-+f2fs: f2fs
-diff --git a/tests/generic/066.out b/tests/generic/066.out.default
-similarity index 100%
-rename from tests/generic/066.out
-rename to tests/generic/066.out.default
-diff --git a/tests/generic/066.out.f2fs b/tests/generic/066.out.f2fs
-new file mode 100644
-index 00000000..8fc58693
---- /dev/null
-+++ b/tests/generic/066.out.f2fs
-@@ -0,0 +1,11 @@
-+QA output created by 066
-+xattr names and values after first fsync log replay:
-+# file: SCRATCH_MNT/foobar
-+user.attr1="val1"
-+user.attr3="val3"
+-	if (params->iv_ino_lblk_64 || params->iv_ino_lblk_32) {
++	iv_methods += params->direct_key;
++	iv_methods += params->iv_ino_lblk_64;
++	iv_methods += params->iv_ino_lblk_32;
++	if (iv_methods > 1)
++		die("Conflicting IV methods specified");
++	if (iv_methods != 0 && params->kdf == KDF_AES_128_ECB)
++		die("--kdf=AES-128-ECB is incompatible with IV method options");
 +
-+xattr names and values after second fsync log replay:
-+# file: SCRATCH_MNT/foobar
-+user.attr1="val1"
-+user.attr3="val3"
-+
++	if (params->direct_key) {
++		if (!params->file_nonce_specified)
++			die("--direct-key requires file nonce");
++		if (params->kdf != KDF_NONE && params->mode_num == 0)
++			die("--direct-key with KDF requires --mode-num");
++	} else if (params->iv_ino_lblk_64 || params->iv_ino_lblk_32) {
+ 		const char *opt = params->iv_ino_lblk_64 ? "--iv-ino-lblk-64" :
+ 							   "--iv-ino-lblk-32";
+-		if (params->iv_ino_lblk_64 && params->iv_ino_lblk_32)
+-			die("--iv-ino-lblk-64 and --iv-ino-lblk-32 are mutually exclusive");
+ 		if (params->kdf != KDF_HKDF_SHA512)
+ 			die("%s requires --kdf=HKDF-SHA512", opt);
+ 		if (!params->fs_uuid_specified)
+@@ -1869,16 +1882,11 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 
+ 	switch (params->kdf) {
+ 	case KDF_NONE:
+-		if (params->mode_num != 0)
+-			die("--mode-num isn't supported with --kdf=none");
+ 		memcpy(real_key, params->master_key, real_key_size);
+-		file_nonce_in_iv = true;
+ 		break;
+ 	case KDF_AES_128_ECB:
+ 		if (!params->file_nonce_specified)
+-			die("--file-nonce is required with --kdf=AES-128-ECB");
+-		if (params->mode_num != 0)
+-			die("--mode-num isn't supported with --kdf=AES-128-ECB");
++			die("--kdf=AES-128-ECB requires --file-nonce");
+ 		STATIC_ASSERT(FILE_NONCE_SIZE == AES_128_KEY_SIZE);
+ 		ASSERT(real_key_size % AES_BLOCK_SIZE == 0);
+ 		aes_setkey(&aes_key, params->file_nonce, AES_128_KEY_SIZE);
+@@ -1887,7 +1895,10 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 				    &real_key[i]);
+ 		break;
+ 	case KDF_HKDF_SHA512:
+-		if (params->iv_ino_lblk_64) {
++		if (params->direct_key) {
++			info[infolen++] = HKDF_CONTEXT_DIRECT_KEY;
++			info[infolen++] = params->mode_num;
++		} else if (params->iv_ino_lblk_64) {
+ 			info[infolen++] = HKDF_CONTEXT_IV_INO_LBLK_64_KEY;
+ 			info[infolen++] = params->mode_num;
+ 			memcpy(&info[infolen], params->fs_uuid, UUID_SIZE);
+@@ -1903,17 +1914,13 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 				cpu_to_le32(hash_inode_number(params) +
+ 					    params->block_number);
+ 			iv->inode_number = 0;
+-		} else if (params->mode_num != 0) {
+-			info[infolen++] = HKDF_CONTEXT_DIRECT_KEY;
+-			info[infolen++] = params->mode_num;
+-			file_nonce_in_iv = true;
+ 		} else if (params->file_nonce_specified) {
+ 			info[infolen++] = HKDF_CONTEXT_PER_FILE_ENC_KEY;
+ 			memcpy(&info[infolen], params->file_nonce,
+ 			       FILE_NONCE_SIZE);
+ 			infolen += FILE_NONCE_SIZE;
+ 		} else {
+-			die("With --kdf=HKDF-SHA512, at least one of --file-nonce and --mode-num must be specified");
++			die("--kdf=HKDF-SHA512 requires --file-nonce or --iv-ino-lblk-*");
+ 		}
+ 		hkdf_sha512(params->master_key, params->master_key_size,
+ 			    NULL, 0, info, infolen, real_key, real_key_size);
+@@ -1922,7 +1929,7 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 		ASSERT(0);
+ 	}
+ 
+-	if (file_nonce_in_iv && params->file_nonce_specified)
++	if (params->direct_key)
+ 		memcpy(iv->nonce, params->file_nonce, FILE_NONCE_SIZE);
+ }
+ 
+@@ -1930,6 +1937,7 @@ enum {
+ 	OPT_BLOCK_NUMBER,
+ 	OPT_BLOCK_SIZE,
+ 	OPT_DECRYPT,
++	OPT_DIRECT_KEY,
+ 	OPT_FILE_NONCE,
+ 	OPT_FS_UUID,
+ 	OPT_HELP,
+@@ -1945,6 +1953,7 @@ static const struct option longopts[] = {
+ 	{ "block-number",    required_argument, NULL, OPT_BLOCK_NUMBER },
+ 	{ "block-size",      required_argument, NULL, OPT_BLOCK_SIZE },
+ 	{ "decrypt",         no_argument,       NULL, OPT_DECRYPT },
++	{ "direct-key",      no_argument,       NULL, OPT_DIRECT_KEY },
+ 	{ "file-nonce",      required_argument, NULL, OPT_FILE_NONCE },
+ 	{ "fs-uuid",         required_argument, NULL, OPT_FS_UUID },
+ 	{ "help",            no_argument,       NULL, OPT_HELP },
+@@ -1999,6 +2008,9 @@ int main(int argc, char *argv[])
+ 		case OPT_DECRYPT:
+ 			decrypting = true;
+ 			break;
++		case OPT_DIRECT_KEY:
++			params.direct_key = true;
++			break;
+ 		case OPT_FILE_NONCE:
+ 			if (hex2bin(optarg, params.file_nonce, FILE_NONCE_SIZE)
+ 			    != FILE_NONCE_SIZE)
 -- 
-2.13.6
+2.35.1
 
