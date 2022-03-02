@@ -2,297 +2,139 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50C4DC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Mar 2022 11:12:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF824C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Mar 2022 11:34:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238343AbiCBLNP (ORCPT
+        id S238899AbiCBLfC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Mar 2022 06:13:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47482 "EHLO
+        Wed, 2 Mar 2022 06:35:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45178 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229973AbiCBLNN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2022 06:13:13 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75400F45;
-        Wed,  2 Mar 2022 03:12:28 -0800 (PST)
+        with ESMTP id S229744AbiCBLfC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2022 06:35:02 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C57D9027C;
+        Wed,  2 Mar 2022 03:34:19 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 815D961778;
-        Wed,  2 Mar 2022 11:12:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 15B2CC004E1;
-        Wed,  2 Mar 2022 11:12:26 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id ED398617F4;
+        Wed,  2 Mar 2022 11:34:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C88FC004E1;
+        Wed,  2 Mar 2022 11:34:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1646219547;
-        bh=skhphHZ0bF9qW6dVL/iqfew+kSqJHgCS/eY+3ZwZplM=;
-        h=From:To:Cc:Subject:Date:From;
-        b=Nkb/LptGY/Bo1EhuKzJ8jwkO6VzXutiAI3790owl81nVrHtCLOxDhybZmztTde4i+
-         aHDNpIwlCGjn549ZSJccYDcEiS1XjctFI284cNAq1+wJ530zlPkK/t9hIuP0YwwnOW
-         o5A10dj5k4/F9Bp1wSBSF8LVTscSvY6CCrG+bX/+6LKdOmenwqgGZMadgZ5e/nDEFG
-         hGrici8BoyRJmqlBIahqu36W8NTZhuo1gzWPM4cUvzulXtviovIXxNNMHQL4SV1eiL
-         zVvEuyZN1jaNhwobslsCRCvxProxhJvOl0g0lDTGVDs+LgPldrfX+lD8R+qT+nx60q
-         5Du9T9BqSbEDg==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: add a test for reading multiple extents with io_uring
-Date:   Wed,  2 Mar 2022 11:12:19 +0000
-Message-Id: <2f4b119ea888a91aabbe8026ced165ab0fe38139.1646219188.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.33.0
+        s=k20201202; t=1646220858;
+        bh=EUbAbOtbKbHb53s+BZeDl0ZucskqRbpaz8tEIyg8WGY=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=VFgfn7kjiyGmPFTrOYc+0UMvyI3vcMjW4m9alGwMer8RwdckJnAUQInKbvWaD1RXv
+         IO329MsuDrH3FV3641ojryruKA0DNRK9gTrvmlnZmV33qRZuOhUuul6ErGL9zdAdkV
+         5gFnGWBx3AP3uE5qXxd4CyM+XP7xpzycoZ7WFB3OSSS6+IzE3ReXiipLsgSf9+Shbh
+         tfxUekOczTtyH9xD6Z/k9yOvKLxSnjpg5uBQd4VxHShOxKbG+KdEa5jWv0HsUKjrRV
+         Iet5C4wYsL1EFCM0wlviGypMaIDGYE4PA6chJcuVAS2r2q4wDjmzXAUv+LCaQPIByP
+         zANE/uZ2qCHmg==
+Received: by mail-qt1-f177.google.com with SMTP id f18so1306816qtb.3;
+        Wed, 02 Mar 2022 03:34:18 -0800 (PST)
+X-Gm-Message-State: AOAM532sEm8mJRinHjlrhgrDBAUb93LazqK5NFgxJonpNj3egXOuLs+0
+        UqeBE/zdo3NhNxrsrNSyA7tedoWFRCtLBtRaMQA=
+X-Google-Smtp-Source: ABdhPJzoSFphQumTK4OAYtEDTEQGn6c6w8jiIuSeSfZuDDiETrr+UEzJ0vkTa506qOU6HmmbWnt/26+ousx0vnQIuX0=
+X-Received: by 2002:a05:622a:110:b0:2dd:461a:6126 with SMTP id
+ u16-20020a05622a011000b002dd461a6126mr23718961qtw.379.1646220857301; Wed, 02
+ Mar 2022 03:34:17 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <abbc821350c8ef515e0a0317b5cbd64e3c5b81ab.1645099449.git.fdmanana@suse.com>
+ <20220222234432.GF3061737@dread.disaster.area> <CAL3q7H41wY_GWStRUxuOWwPcgqX9zx-WZxEySaRAUrMtcE666w@mail.gmail.com>
+ <20220224022128.GK3061737@dread.disaster.area>
+In-Reply-To: <20220224022128.GK3061737@dread.disaster.area>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Wed, 2 Mar 2022 11:33:41 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7=4g3W7J4=9=rN2FodWr387+9eSzvUYyLVnz3tRv0CFw@mail.gmail.com>
+Message-ID: <CAL3q7H7=4g3W7J4=9=rN2FodWr387+9eSzvUYyLVnz3tRv0CFw@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test log replay after fsync of file with prealloc
+ extents beyond eof
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Thu, Feb 24, 2022 at 2:21 AM Dave Chinner <david@fromorbit.com> wrote:
+>
+> On Wed, Feb 23, 2022 at 12:12:10PM +0000, Filipe Manana wrote:
+> > On Tue, Feb 22, 2022 at 11:44 PM Dave Chinner <david@fromorbit.com> wrote:
+> > >
+> > > On Thu, Feb 17, 2022 at 12:14:21PM +0000, fdmanana@kernel.org wrote:
+> > > > From: Filipe Manana <fdmanana@suse.com>
+> > > >
+> > > > Test that after a full fsync of a file with preallocated extents beyond
+> > > > the file's size, if a power failure happens, the preallocated extents
+> > > > still exist after we mount the filesystem.
+> > > >
+> > > > This test currently fails and there is a patch for btrfs that fixes this
+> > > > issue and has the following subject:
+> > > >
+> > > >   "btrfs: fix lost prealloc extents beyond eof after full fsync"
+> > > >
+> > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > > ---
+> > > >  tests/btrfs/261     | 79 +++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/btrfs/261.out | 10 ++++++
+> > >
+> > > What is btrfs specific about this test?
+> >
+> > The comments that explain the steps are very btrfs specific.
+> > Without them it would be hard to understand why the test uses that
+> > specific file size, block size, mention of the btrfs inode's full sync
+> > bit, etc.
+>
+> But the behaviour and layout should end up being the same for all
+> filesystems, right?
 
-Test doing a read, with io_uring, over a file range that includes multiple
-extents. The read operation triggers page faults when accessing all pages
-of the read buffer except for the pages corresponding to the first extent.
-We want to check that the operation results in reading all the extents and
-that it returns the correct data.
+Right.
 
-This is motivated by an issue found with MariaDB when using io_uring and
-running on btrfs. There's a patch for btrfs to address the issue and it
-has the following subject:
+>
+> We have plenty of generic tests that are designed with a
+> specific configuration on a specific filesystem to reproduce a bug
+> seen on that filesystem, but as long as all filesystems should be
+> expected to behave the same way, it's a generic test.
+>
+> AFAICT, the behaviour described and exercised by the test should be
+> the same for all filesystems that support preallocation beyond EOF.
+> Hence it isn't btrfs specific behaviour being exercised, just a
+> reproducing a bug where btrfs deviates from the correct behaviour
+> that should be consistent across all filesystems.
+>
+> > Some years ago, when you maintained fstests, you complained once about
+> > this type of "too btrfs specific" comments on generic tests.
+>
+> I can change my mind if I want. Besides, I'm looking at this new
+> test purely on it's own merits so past discussions aren't really
+> relevant. Maybe you didn't understand the context under which I was
+> considering a patch to be "too fs specific" rather than generic.
+>
+> There's a big difference between "only btrfs will behave this way"
+> and "all filesystems should get the same result, but btrfs sometimes
+> fails to get that results in this specific case".  The former should
+> be a btrfs-only test, the latter should be a generic test.
+>
+> Which class this test falls into is exactly what I'm asking here -
+> should all filesystems get the same result, or is successful
+> result encoded in the golden output behaviour that only btrfs will
+> ever produce?
 
- "btrfs: fallback to blocking mode when doing async dio over multiple extents"
+As far as I know, all filesystems supporting fallocate should behave
+the same way.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- .gitignore             |   1 +
- src/uring_read_fault.c | 150 +++++++++++++++++++++++++++++++++++++++++
- tests/generic/676      |  41 +++++++++++
- tests/generic/676.out  |   2 +
- 4 files changed, 194 insertions(+)
- create mode 100644 src/uring_read_fault.c
- create mode 100755 tests/generic/676
- create mode 100644 tests/generic/676.out
+Ok, I can move into the generic group.
 
-diff --git a/.gitignore b/.gitignore
-index ba0c572b..a5309d52 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -168,6 +168,7 @@ tags
- /src/truncfile
- /src/unwritten_mmap
- /src/unwritten_sync
-+/src/uring_read_fault
- /src/usemem
- /src/writemod
- /src/writev_on_pagefault
-diff --git a/src/uring_read_fault.c b/src/uring_read_fault.c
-new file mode 100644
-index 00000000..9fb86c47
---- /dev/null
-+++ b/src/uring_read_fault.c
-@@ -0,0 +1,150 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
-+ */
-+
-+/*
-+ * Create a file with 4 extents, each with a size matching the page size.
-+ * Then allocate a buffer to read all extents with io_uring, using O_DIRECT and
-+ * IOCB_NOWAIT. Before doing the read with io_uring, access the first page of
-+ * the read buffer to fault it in, so that during the read we only trigger page
-+ * faults when accessing the other pages (mapping to 2nd, 3rd and 4th extents).
-+ */
-+
-+/* Get the O_DIRECT definition. */
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <unistd.h>
-+#include <fcntl.h>
-+#include <errno.h>
-+#include <string.h>
-+#include <liburing.h>
-+
-+int main(int argc, char *argv[])
-+{
-+	struct io_uring ring;
-+	struct io_uring_sqe *sqe;
-+	struct io_uring_cqe *cqe;
-+	struct iovec iovec;
-+	int fd;
-+	long pagesize;
-+	void *write_buf;
-+	void *read_buf;
-+	ssize_t ret;
-+	int i;
-+
-+	if (argc != 2) {
-+		fprintf(stderr, "Use: %s <file path>\n", argv[0]);
-+		return 1;
-+	}
-+
-+	fd = open(argv[1], O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
-+	if (fd == -1) {
-+		fprintf(stderr, "Failed to create file %s: %s (errno %d)\n",
-+			argv[1], strerror(errno), errno);
-+		return 1;
-+	}
-+
-+	pagesize = sysconf(_SC_PAGE_SIZE);
-+	if (pagesize == -1) {
-+		fprintf(stderr, "Failed to get page size: %s (errno %d)\n",
-+			strerror(errno), errno);
-+		return 1;
-+	}
-+
-+	ret = posix_memalign(&write_buf, pagesize, 4 * pagesize);
-+	if (ret) {
-+		fprintf(stderr, "Failed to allocate write buffer\n");
-+		return 1;
-+	}
-+
-+	memset(write_buf, 0xab, pagesize);
-+	memset(write_buf + pagesize, 0xcd, pagesize);
-+	memset(write_buf + 2 * pagesize, 0xef, pagesize);
-+	memset(write_buf + 3 * pagesize, 0x73, pagesize);
-+
-+	/* Create the 4 extents, each with a size matching page size. */
-+	for (i = 0; i < 4; i++) {
-+		ret = pwrite(fd, write_buf + i * pagesize, pagesize,
-+			     i * pagesize);
-+		if (ret != pagesize) {
-+			fprintf(stderr,
-+				"Write failure, ret = %ld errno %d (%s)\n",
-+				ret, errno, strerror(errno));
-+			return 1;
-+		}
-+		ret = fsync(fd);
-+		if (ret != 0) {
-+			fprintf(stderr, "Fsync failure: %s (errno %d)\n",
-+				strerror(errno), errno);
-+			return 1;
-+		}
-+	}
-+
-+	close(fd);
-+	fd = open(argv[1], O_RDONLY | O_DIRECT);
-+	if (fd == -1) {
-+		fprintf(stderr,
-+			"Failed to open file %s: %s (errno %d)",
-+			argv[1], strerror(errno), errno);
-+		return 1;
-+	}
-+
-+	ret = posix_memalign(&read_buf, pagesize, 4 * pagesize);
-+	if (ret) {
-+		fprintf(stderr, "Failed to allocate read buffer\n");
-+		return 1;
-+	}
-+
-+	/*
-+	 * Fault in only the first page of the read buffer.
-+	 * We want to trigger a page fault for the 2nd page of the read buffer
-+	 * during the read operation with io_uring (O_DIRECT and IOCB_NOWAIT).
-+	 */
-+	memset(read_buf, 0, 1);
-+
-+	ret = io_uring_queue_init(1, &ring, 0);
-+	if (ret != 0) {
-+		fprintf(stderr, "Failed to creating io_uring queue\n");
-+		return 1;
-+	}
-+
-+	sqe = io_uring_get_sqe(&ring);
-+	if (!sqe) {
-+		fprintf(stderr, "Failed to get io_uring sqe\n");
-+		return 1;
-+	}
-+
-+	iovec.iov_base = read_buf;
-+	iovec.iov_len = 4 * pagesize;
-+	io_uring_prep_readv(sqe, fd, &iovec, 1, 0);
-+
-+	ret = io_uring_submit_and_wait(&ring, 1);
-+	if (ret != 1) {
-+		fprintf(stderr, "Failed at io_uring_submit_and_wait()\n");
-+		return 1;
-+	}
-+
-+	ret = io_uring_wait_cqe(&ring, &cqe);
-+	if (ret < 0) {
-+		fprintf(stderr, "Failed at io_uring_wait_cqe()\n");
-+		return 1;
-+	}
-+
-+	if (cqe->res != (4 * pagesize))
-+		fprintf(stderr, "Unexpected cqe->res, got %d expected %ld\n",
-+			cqe->res, 4 * pagesize);
-+
-+	if (memcmp(read_buf, write_buf, 4 * pagesize) != 0)
-+		fprintf(stderr,
-+			"Unexpected mismatch between read and write buffers\n");
-+
-+	io_uring_cqe_seen(&ring, cqe);
-+	io_uring_queue_exit(&ring);
-+
-+	return 0;
-+}
-diff --git a/tests/generic/676 b/tests/generic/676
-new file mode 100755
-index 00000000..0472c9c2
---- /dev/null
-+++ b/tests/generic/676
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 676
-+#
-+# Test doing a read, with io_uring, over a file range that includes multiple
-+# extents. The read operation triggers page faults when accessing all pages of
-+# the read buffer except for the pages corresponding to the first extent.
-+# Then verify that the operation results in reading all the extents and returns
-+# the correct data.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick io_uring
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -f $TEST_DIR/uring_read_fault.tmp
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_require_test
-+_require_odirect
-+_require_io_uring
-+_require_test_program uring_read_fault
-+
-+$here/src/uring_read_fault $TEST_DIR/uring_read_fault.tmp
-+
-+echo "Silence is golden"
-+
-+status=$?
-+exit
-diff --git a/tests/generic/676.out b/tests/generic/676.out
-new file mode 100644
-index 00000000..d305660f
---- /dev/null
-+++ b/tests/generic/676.out
-@@ -0,0 +1,2 @@
-+QA output created by 676
-+Silence is golden
--- 
-2.33.0
+Thanks.
 
+>
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
