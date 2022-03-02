@@ -2,139 +2,200 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF824C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Mar 2022 11:34:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1576EC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Mar 2022 12:10:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238899AbiCBLfC (ORCPT
+        id S241450AbiCBMK6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Mar 2022 06:35:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45178 "EHLO
+        Wed, 2 Mar 2022 07:10:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229744AbiCBLfC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2022 06:35:02 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C57D9027C;
-        Wed,  2 Mar 2022 03:34:19 -0800 (PST)
+        with ESMTP id S241678AbiCBMK5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2022 07:10:57 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F29DA9A69;
+        Wed,  2 Mar 2022 04:10:13 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id ED398617F4;
-        Wed,  2 Mar 2022 11:34:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C88FC004E1;
-        Wed,  2 Mar 2022 11:34:18 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 4BB38B81FAD;
+        Wed,  2 Mar 2022 12:10:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 980D9C340F1;
+        Wed,  2 Mar 2022 12:10:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1646220858;
-        bh=EUbAbOtbKbHb53s+BZeDl0ZucskqRbpaz8tEIyg8WGY=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=VFgfn7kjiyGmPFTrOYc+0UMvyI3vcMjW4m9alGwMer8RwdckJnAUQInKbvWaD1RXv
-         IO329MsuDrH3FV3641ojryruKA0DNRK9gTrvmlnZmV33qRZuOhUuul6ErGL9zdAdkV
-         5gFnGWBx3AP3uE5qXxd4CyM+XP7xpzycoZ7WFB3OSSS6+IzE3ReXiipLsgSf9+Shbh
-         tfxUekOczTtyH9xD6Z/k9yOvKLxSnjpg5uBQd4VxHShOxKbG+KdEa5jWv0HsUKjrRV
-         Iet5C4wYsL1EFCM0wlviGypMaIDGYE4PA6chJcuVAS2r2q4wDjmzXAUv+LCaQPIByP
-         zANE/uZ2qCHmg==
-Received: by mail-qt1-f177.google.com with SMTP id f18so1306816qtb.3;
-        Wed, 02 Mar 2022 03:34:18 -0800 (PST)
-X-Gm-Message-State: AOAM532sEm8mJRinHjlrhgrDBAUb93LazqK5NFgxJonpNj3egXOuLs+0
-        UqeBE/zdo3NhNxrsrNSyA7tedoWFRCtLBtRaMQA=
-X-Google-Smtp-Source: ABdhPJzoSFphQumTK4OAYtEDTEQGn6c6w8jiIuSeSfZuDDiETrr+UEzJ0vkTa506qOU6HmmbWnt/26+ousx0vnQIuX0=
-X-Received: by 2002:a05:622a:110:b0:2dd:461a:6126 with SMTP id
- u16-20020a05622a011000b002dd461a6126mr23718961qtw.379.1646220857301; Wed, 02
- Mar 2022 03:34:17 -0800 (PST)
-MIME-Version: 1.0
-References: <abbc821350c8ef515e0a0317b5cbd64e3c5b81ab.1645099449.git.fdmanana@suse.com>
- <20220222234432.GF3061737@dread.disaster.area> <CAL3q7H41wY_GWStRUxuOWwPcgqX9zx-WZxEySaRAUrMtcE666w@mail.gmail.com>
- <20220224022128.GK3061737@dread.disaster.area>
-In-Reply-To: <20220224022128.GK3061737@dread.disaster.area>
+        s=k20201202; t=1646223011;
+        bh=QLsOJeODj+q8W7S4HcQFcV5280qXF1sZAOj6kcgqeHs=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=rQBV0i9BejuzcrxIkxKIPEbU7O9tpBm0Ps7d7I5RpMvB2nAX/zgXkPGTIaklzLGBo
+         5AuT0kpNrxDebIRlUH/fnjrR5DoCbVr6MAY04kk89efYjLRP64r8f5JicOhS/70lVB
+         pLgMKcAB5RVenes1Xcfhdl2HoTi4O+kx+BO8nw+AT8EvK5G8af5gfkDMg6Yf1YIOQK
+         5QbG89TsEgJLab0r7tVaDzhcMKrt7Ip5tA571cD/lArr9hHmK0FdYlD5HpxmoghJJQ
+         irBMfsgDLv/2wxnEiM6QWsdt/7Ch26ajbFj4XmypFRQMC2rJGjnUDp506Im41bMGGe
+         nJ13YMQLUubvw==
+Date:   Wed, 2 Mar 2022 12:10:08 +0000
 From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Wed, 2 Mar 2022 11:33:41 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H7=4g3W7J4=9=rN2FodWr387+9eSzvUYyLVnz3tRv0CFw@mail.gmail.com>
-Message-ID: <CAL3q7H7=4g3W7J4=9=rN2FodWr387+9eSzvUYyLVnz3tRv0CFw@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test log replay after fsync of file with prealloc
- extents beyond eof
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
+To:     Sidong Yang <realwakka@gmail.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+        "dsterba@suse.cz" <dsterba@suse.cz>
+Subject: Re: [PATCH] btrfs: add test for enable/disable quota and
+ create/destroy qgroup repeatedly
+Message-ID: <Yh9eoC1FwfNK5kXn@debian9.Home>
+References: <20220301151930.1315-1-realwakka@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220301151930.1315-1-realwakka@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 24, 2022 at 2:21 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Wed, Feb 23, 2022 at 12:12:10PM +0000, Filipe Manana wrote:
-> > On Tue, Feb 22, 2022 at 11:44 PM Dave Chinner <david@fromorbit.com> wrote:
-> > >
-> > > On Thu, Feb 17, 2022 at 12:14:21PM +0000, fdmanana@kernel.org wrote:
-> > > > From: Filipe Manana <fdmanana@suse.com>
-> > > >
-> > > > Test that after a full fsync of a file with preallocated extents beyond
-> > > > the file's size, if a power failure happens, the preallocated extents
-> > > > still exist after we mount the filesystem.
-> > > >
-> > > > This test currently fails and there is a patch for btrfs that fixes this
-> > > > issue and has the following subject:
-> > > >
-> > > >   "btrfs: fix lost prealloc extents beyond eof after full fsync"
-> > > >
-> > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > > ---
-> > > >  tests/btrfs/261     | 79 +++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/btrfs/261.out | 10 ++++++
-> > >
-> > > What is btrfs specific about this test?
-> >
-> > The comments that explain the steps are very btrfs specific.
-> > Without them it would be hard to understand why the test uses that
-> > specific file size, block size, mention of the btrfs inode's full sync
-> > bit, etc.
->
-> But the behaviour and layout should end up being the same for all
-> filesystems, right?
+On Tue, Mar 01, 2022 at 03:19:30PM +0000, Sidong Yang wrote:
+> Test enabling/disable quota and creating/destroying qgroup repeatedly
+> in asynchronous and confirm it does not cause kernel hang. This is a
 
-Right.
+in asynchronous -> in parallel
 
->
-> We have plenty of generic tests that are designed with a
-> specific configuration on a specific filesystem to reproduce a bug
-> seen on that filesystem, but as long as all filesystems should be
-> expected to behave the same way, it's a generic test.
->
-> AFAICT, the behaviour described and exercised by the test should be
-> the same for all filesystems that support preallocation beyond EOF.
-> Hence it isn't btrfs specific behaviour being exercised, just a
-> reproducing a bug where btrfs deviates from the correct behaviour
-> that should be consistent across all filesystems.
->
-> > Some years ago, when you maintained fstests, you complained once about
-> > this type of "too btrfs specific" comments on generic tests.
->
-> I can change my mind if I want. Besides, I'm looking at this new
-> test purely on it's own merits so past discussions aren't really
-> relevant. Maybe you didn't understand the context under which I was
-> considering a patch to be "too fs specific" rather than generic.
->
-> There's a big difference between "only btrfs will behave this way"
-> and "all filesystems should get the same result, but btrfs sometimes
-> fails to get that results in this specific case".  The former should
-> be a btrfs-only test, the latter should be a generic test.
->
-> Which class this test falls into is exactly what I'm asking here -
-> should all filesystems get the same result, or is successful
-> result encoded in the golden output behaviour that only btrfs will
-> ever produce?
+> regression test for the problem reported to linux-btrfs list [1].
 
-As far as I know, all filesystems supporting fallocate should behave
-the same way.
+It's worth mentioning the deadlock only happens starting with kernel 5.17-rc3.
 
-Ok, I can move into the generic group.
+> 
+> The hang was recreated using the test case and fixed by kernel patch
+> titled
+> 
+>   btrfs: qgroup: fix deadlock between rescan worker and remove qgroup
+> 
+> [1] https://lore.kernel.org/linux-btrfs/20220228014340.21309-1-realwakka@gmail.com/
+> 
+> Signed-off-by: Sidong Yang <realwakka@gmail.com>
 
-Thanks.
+In addition to Shinichiro's comments...
 
->
-> Cheers,
->
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
+> ---
+>  tests/btrfs/262     | 54 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/262.out |  2 ++
+>  2 files changed, 56 insertions(+)
+>  create mode 100755 tests/btrfs/262
+>  create mode 100644 tests/btrfs/262.out
+> 
+> diff --git a/tests/btrfs/262 b/tests/btrfs/262
+> new file mode 100755
+> index 00000000..9be380f9
+> --- /dev/null
+> +++ b/tests/btrfs/262
+> @@ -0,0 +1,54 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 YOUR NAME HERE.  All Rights Reserved.
+> +#
+> +# FS QA Test 262
+> +#
+> +# Test the deadlock between qgroup and quota commands
+
+The test description should be a lot more clear.
+
+"the deadlock" is vague a gives the wrong idea we only ever had a single
+deadlock related to qgroups. "qgroup and quota commands" is confusing,
+and "qgroup" and "quota" are pretty much synonyms, and it should mention
+which commands.
+
+Plus what we want to test is that we can run some qgroup operations in
+parallel without triggering a deadlock, crash, etc.
+
+Perhaps something like:
+
+"""
+Test that running qgroup enable, create, destroy and disable commands in
+parallel does not result in a deadlock, a crash or any filesystem
+inconsistency.
+"""
+
+
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto qgroup
+
+Can also be added to the "quick" group. It takes 1 second in my slowest vm.
+
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +
+> +_require_scratch
+> +
+> +# Run command that enable/disable quota and create/destroy qgroup asynchronously
+
+With the more clear test description above, this can go away.
+
+> +qgroup_deadlock_test()
+> +{
+> +	_scratch_mkfs > /dev/null 2>&1
+> +	_scratch_mount
+> +	echo "=== qgroup deadlock test ===" >> $seqres.full
+
+There's no point in echoing this message to the .full file, it provides no
+value at all, as testing that is all that this testcase does.
+
+> +
+> +	pids=()
+> +	for ((i = 0; i < 200; i++)); do
+> +		$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT 2>> $seqres.full &
+> +		pids+=($!)
+> +		$BTRFS_UTIL_PROG qgroup create 1/0 $SCRATCH_MNT 2>> $seqres.full &
+> +		pids+=($!)
+> +		$BTRFS_UTIL_PROG qgroup destroy 1/0 $SCRATCH_MNT 2>> $seqres.full &
+> +		pids+=($!)
+> +		$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT 2>> $seqres.full &
+> +		pids+=($!)		
+> +	done
+> +
+> +	for pid in "${pids[@]}"; do
+> +		wait $pid
+> +	done
+
+As pointed before by Shinichiro, a simple 'wait' here is enough, no need to
+keep track of the PIDs.
+
+> +
+> +	_scratch_unmount
+> +	_check_scratch_fs
+
+Not needed, the fstests framework automatically runs 'btrfs check' when a test
+finishes. Doing this explicitly is only necessary when we need to do several
+mount/unmount operations and want to check the fs is fine after each unmount
+and before the next mount.
+
+> +}
+> +
+> +qgroup_deadlock_test
+
+There's no point in putting all the test code in a function, as the function
+is only called once.
+
+Otherwise it looks good, and the test works as advertised, it triggers a
+deadlock on 5.17-rc3+ kernel and passes on a patched kernel.
+
+Thanks for converting the reproducer into a test case.
+
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/262.out b/tests/btrfs/262.out
+> new file mode 100644
+> index 00000000..404badc3
+> --- /dev/null
+> +++ b/tests/btrfs/262.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 262
+> +Silence is golden
+> -- 
+> 2.25.1
+> 
