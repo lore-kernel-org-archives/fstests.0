@@ -2,208 +2,297 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54B1EC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Mar 2022 08:24:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50C4DC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Mar 2022 11:12:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232868AbiCBIZg (ORCPT
+        id S238343AbiCBLNP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Mar 2022 03:25:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36468 "EHLO
+        Wed, 2 Mar 2022 06:13:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47482 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239870AbiCBIZe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2022 03:25:34 -0500
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78EBFB82D2;
-        Wed,  2 Mar 2022 00:24:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1646209491; x=1677745491;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=vM3XGAbfZPv7es4Pqmjx3o7OJSrdDcP45nSEYKxhBAs=;
-  b=k3UZkqMDLmuAlGP26WH/0sEPOpyGpCZl/lvagujg//hfEAE3hZd0CT9o
-   y+nfky+uwFkANG53P4c+eWlWIbp3ywkb+LcFVRraCAIzv9KadEdTdm/TG
-   9Arv2PSjlnIXFcEUxJ4rNghaGZLs82Xei9aD0d7TxF+LX6hGhxqZ2khh4
-   Fz3/6TS6Z+OEEQ6HGc28LPjpbDkjypmt8kIx7whnk+HWR2aZnPQB50DrK
-   1ZiUcqaIMjYoWtcKP2uQFluXe9SvIKYZ8ixvNJSj0KB0WiNea8t2Bs6HW
-   l95/5gT5MAIDYAcokgX/GrB0FNp3vqG8JMBiu7B3Ukr36T+2+2ePw564q
-   A==;
-X-IronPort-AV: E=Sophos;i="5.90,148,1643644800"; 
-   d="scan'208";a="193201281"
-Received: from mail-bn8nam08lp2044.outbound.protection.outlook.com (HELO NAM04-BN8-obe.outbound.protection.outlook.com) ([104.47.74.44])
-  by ob1.hgst.iphmx.com with ESMTP; 02 Mar 2022 16:24:49 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=A1m2Iw9a5E1vivhQHUh0qseiYSSIyHsZMQrrBd6RuB6CrZ0wxFBWnHRKHQ1Jbeq783WIc6fgDFcFRYuLLEdMWO4i/IUdg7SOkVESD0dVGzd9XpfMfAtY3FOIxxqT9EMJF0SlzDW1ZBun1CfpPsm4SzpYyogDKDRCgw8rmyT5EAbjRqn5niASkX7IuQnPBApGNSpW3hIeRhyc6Sdd3C7NZ4LAkllTHTJv2nV45TIlTPrkDOQfvjbGRQ1q6KA8TUjUZAmJkHtwuMjg0SNxO8hagsRPr0BNiacl2mVFxH/gwjVaBUXJWnh7JU1P9i9JzO3PO52prX2w+wurL8zfpuy2ng==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=19PYWme8HSGmn4RCgrIVW2AaZPuHqa1AnuRVhSLvfP8=;
- b=XvyLAbtnh6/uhIOaNyyXSFJPRA+tCqPGs8sXvRxzi6UOndbP1JwhStHIYoDUO7RfNSRzNoe+bflJKcFvX+7XUsoZPs+NAoj5KZPDowvUzKsUp9tt8zGsMSOhHpETQIMk4YqFZl2xKJYbMd8uO1wxPRs8cWrkx6N1XdhFVCG7YgqJDk0IwIlcmCkKxeZ5af/01/1iKhjKyjYR775l+3idxGGMaM3gZ3qxoIpx18pgBbYOOytgb5j4ehu6S6aeD2F5Qmon5lSFbpUNMotZOUNimTAkDzUaU9IcMPAwJwXtItOZ3lPG1JWV8NhjcTO9mxs+n8YmjlV9DXJG1lB67MMQCA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=19PYWme8HSGmn4RCgrIVW2AaZPuHqa1AnuRVhSLvfP8=;
- b=C5GqLhwLJHpfejFcJf4DK+44WIbm0eyGbzD38LJ1WllBLRFrwlgs0segs+a/xBX+zyex7ikEe9Vl+FcAX0hA7h1k4SttvJu2O8TY78NFEMSPhJqOmcNY++EgabxKNWJoyFkCmckJ93rcfzJqi8HZ+mY+fx2CRUMdg+e4uUV/EFY=
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com (2603:10b6:8:f::6) by
- DM5PR04MB0843.namprd04.prod.outlook.com (2603:10b6:3:f9::17) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5017.25; Wed, 2 Mar 2022 08:24:48 +0000
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::b13a:2b9b:b0a2:d17]) by DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::b13a:2b9b:b0a2:d17%8]) with mapi id 15.20.5017.027; Wed, 2 Mar 2022
- 08:24:48 +0000
-From:   Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-To:     Sidong Yang <realwakka@gmail.com>
-CC:     "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        Filipe Manana <fdmanana@kernel.org>,
-        "dsterba@suse.cz" <dsterba@suse.cz>
-Subject: Re: [PATCH] btrfs: add test for enable/disable quota and
- create/destroy qgroup repeatedly
-Thread-Topic: [PATCH] btrfs: add test for enable/disable quota and
- create/destroy qgroup repeatedly
-Thread-Index: AQHYLX/HTsdi+5TEU02xRSwX5mWddayrhSYAgAAc5YCAACDpgA==
-Date:   Wed, 2 Mar 2022 08:24:48 +0000
-Message-ID: <20220302082447.qetrvidwqlqkungi@shindev>
-References: <20220301151930.1315-1-realwakka@gmail.com>
- <20220302044334.ojz2crbcc6eapvex@shindev> <20220302062659.GA1852@realwakka>
-In-Reply-To: <20220302062659.GA1852@realwakka>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 51f66d85-5ea1-45b3-0818-08d9fc261d78
-x-ms-traffictypediagnostic: DM5PR04MB0843:EE_
-x-microsoft-antispam-prvs: <DM5PR04MB0843F7E397F6DAF80E949410ED039@DM5PR04MB0843.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: P+R7vUTr7S4+ErIdB8hm8BJeywxUPTbyHbJ0KFtSNA/XpNwzDpNZ3Bd03Ms/R0XvU8jlGR2yoiY7Tj/MgzcXN+ghDr8zfsZcmqOJ9KK7pujqvYIix1/0fPcem3tXuCguUPUZOpRBoxfTIN3c+kvboh+/saynFq1VZJ7iUdpTbspIHcnMG6fgxw1leys2OxogWlH4qgbvZqGXvqWc42RULk8Ixwfv6xOWhBvm0qwymKYSzBlGhwWtyEd8yYsB/zKlPZEdjYn+DyBxC9Azsh1lh98PkUnblr0kCJBCdW5467/axPJA5NDH1CvDeLBdzPO/3zf9sSdvPuEZef+g2qpUs5pH2TGYxFAvRw8OxmbQwO8fFegztDoa/dPhCajYwImo+JxWvrXUqv/vqq5rGTAPI9b8utfDwYir7wjDKzcJFeMKcL1Sq5HQVJRR1mJf2I0dd5nqLqvS+qZZIH2qn5TaWrp2Sg1y6CftzSPtxIhihMmhDUENzGixYiZKMyCyM4d38QfefLGZ/HzZ4f0QJz2I14oe1+YeKIohIarPK+zBnMBWXcdjaZlhmI0ehCJ/+x78sY+3l3Kzk2wFq0cJiMhTDeMylBDDgKkf9U4xtf/OsZqUE7kLlDywMnhMwRvF+erkKksdi3Rty/sYklZC9bFy36uRJFiFpdgwzO+QfL/S9eZeZkgTxtucXVeQad/YOPytl8AfxQC5F+PhpiikW0WlPYainELp4kKGKLHXtn45rAFLJ17odSSleGKK0c+tEvP1Ce+SMz7HwH5x+Qeq0JR+J+EtMcag6mEHgj0gi9vcLTnUsHvdsWAKv8rl2NA7s8F/D3lITAJH9FNr42SyUEYRaA==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM8PR04MB8037.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(7916004)(4636009)(366004)(6486002)(966005)(38100700002)(82960400001)(6506007)(6916009)(33716001)(71200400001)(83380400001)(508600001)(122000001)(54906003)(8936002)(44832011)(316002)(6512007)(86362001)(1076003)(9686003)(5660300002)(3716004)(38070700005)(26005)(186003)(8676002)(64756008)(66476007)(66446008)(76116006)(66556008)(66946007)(15650500001)(91956017)(2906002)(4326008);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?XEkYU/q4oytnzfD54SAJKARmSmqMEiQTBbYNRjLRSNbKWRTTd++PG6wUU9eQ?=
- =?us-ascii?Q?ghwINUU36VL4xOCC5HDSIbIFQ4AKkTq6VEqTVf+FQlQUjLTihdSjdCFHewnK?=
- =?us-ascii?Q?vzCcQcR8yGR4/Yf9i/cg57/G0tScAiiL3a7dMEERC0rJidnOXJi1/omuRVqJ?=
- =?us-ascii?Q?J9mb5YQeodfwY+2+byO7bn7D1iNQQLBHYx4p6qM3JAWRq7aoAITpbrQdiCvS?=
- =?us-ascii?Q?gnNlQzLUSJav6qM1yDWzdeoGW/6FE4kmiRGAZn86Jkn/8GSo1MSvrxXhuJV1?=
- =?us-ascii?Q?KebPwEw+j8Wnb0Gdf6wAZsnapUC5knb3pShWiWzkK43rG0HIaWUiBNJQea1g?=
- =?us-ascii?Q?9c2+R6RdabrzravrFsshMypB1KdhQE5bmiBPHhmsT1eftgXuD7R5j2Xj/qnl?=
- =?us-ascii?Q?ni7SYi6YhBbmldXxAc6lywPisBNuPxWzSYmku0CYoM56Cbni275NVFuqMAmM?=
- =?us-ascii?Q?5oHF0TiEg8FM2UbHHftL15UJm1We3ilTHQpg7IjUQ0wZ+23SGqtd8st8N2zI?=
- =?us-ascii?Q?kfpICDFBK2uE1i+I+Ijy0x766Izh6YpH0CFJA9UggEzGFRU62fdvDGhkOMkD?=
- =?us-ascii?Q?9+UpH2kytzTLsdUWrlaDZthbxTGL1TWO+8ZBzKPd8ObjIu35UYSqRK79i57r?=
- =?us-ascii?Q?G21n7xx+8OR9HI+BgpV10YVE9h3sCtsg7JbYqDzZjJ/YqI6LpuXQ3ltdzZA3?=
- =?us-ascii?Q?AYzExSORug0WD0Bd2fyZ64UmHdKfwgqG5sljhN43IIHM6X2RWNdTEVuJuTu7?=
- =?us-ascii?Q?1eKuV8Z+ExMX66UnpkmxljCYd2d6EoQ1Cf+srsoZrP3nq/4/uM7DlVNApTjF?=
- =?us-ascii?Q?WHZUGzKlRYhh2MbQo/jVmrmUXbMKZZDvrkCj6FUFIfQBM0rRTKpUbwfwttwI?=
- =?us-ascii?Q?afg7QIqbChEfpyvuFWXEyPiqYE2T+NxGyXFguogTG+Id9RzVNw+uBrpQFx3d?=
- =?us-ascii?Q?OuEtgLW+VNMnpC8eNhw/QgB8ghAKIZrUzd+L2YDn4ICucrIOxwe5P3uFg20X?=
- =?us-ascii?Q?193NtBnudFShQHG50F3denDF90prplV5AS5NWcP2PtWQOsluNUvwyDAlECyx?=
- =?us-ascii?Q?WtU40ODe3nv3F+G9BSPq+96We5ZPelV5EV6AGBmDqK85LzaB/OWup5VNhsTW?=
- =?us-ascii?Q?FbvF+wnDgwL+HPBYKqNH88rsNW2gaZom0TeeqFOEbuHUk2jPXiyHdWOqgUN5?=
- =?us-ascii?Q?pSKDYNj/s3PxXuabpVOwO8W9m47/7BPplurOLzBR1wa5QF0im6HS7NMNvF+T?=
- =?us-ascii?Q?pkXPO4e/3Fccr/D3VXdBr44Cc1TPQviA1wrxnRWDsd+OVjMJU4oTxcsGNe8P?=
- =?us-ascii?Q?X9YoSlpaOnLf4mzZwh8W92MywtYCEkEjbugYpL4qwpanuOvuGl/lCstBiZH5?=
- =?us-ascii?Q?93a0CQxC4ZSgaIXXV6pkaDNTXDvArxIVmqRQIXm5R6Pc0v7cxW9PrLnBUXb8?=
- =?us-ascii?Q?hKg0uTKUZbufOFauVhPtkomuYpx1fndTeAE4SANIbXGNaRkGR1QQupRLyTCq?=
- =?us-ascii?Q?wbmrF1SKxyR8ULLv48blmV9ZQQvMIyFtuAME7w20g5SgI2n32NPPjTNmWa8p?=
- =?us-ascii?Q?FQFepOKaOfKwokwOGhDIlahSDEY75S2vchJ7Huf0k8+AxZSFJQoz58fPZL8W?=
- =?us-ascii?Q?tc5sNF5ba/ePS/bHmizvp7WQVtryvtt/sXD68cvmoH6cRCJxTakdsWjGLdtu?=
- =?us-ascii?Q?u8Ufs5ETHOJhbmi993/7TD2UP3w=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <A6915EC4DBE75D448FFD769DEE2D9DBC@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S229973AbiCBLNN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Mar 2022 06:13:13 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75400F45;
+        Wed,  2 Mar 2022 03:12:28 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 815D961778;
+        Wed,  2 Mar 2022 11:12:28 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 15B2CC004E1;
+        Wed,  2 Mar 2022 11:12:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1646219547;
+        bh=skhphHZ0bF9qW6dVL/iqfew+kSqJHgCS/eY+3ZwZplM=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Nkb/LptGY/Bo1EhuKzJ8jwkO6VzXutiAI3790owl81nVrHtCLOxDhybZmztTde4i+
+         aHDNpIwlCGjn549ZSJccYDcEiS1XjctFI284cNAq1+wJ530zlPkK/t9hIuP0YwwnOW
+         o5A10dj5k4/F9Bp1wSBSF8LVTscSvY6CCrG+bX/+6LKdOmenwqgGZMadgZ5e/nDEFG
+         hGrici8BoyRJmqlBIahqu36W8NTZhuo1gzWPM4cUvzulXtviovIXxNNMHQL4SV1eiL
+         zVvEuyZN1jaNhwobslsCRCvxProxhJvOl0g0lDTGVDs+LgPldrfX+lD8R+qT+nx60q
+         5Du9T9BqSbEDg==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: add a test for reading multiple extents with io_uring
+Date:   Wed,  2 Mar 2022 11:12:19 +0000
+Message-Id: <2f4b119ea888a91aabbe8026ced165ab0fe38139.1646219188.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM8PR04MB8037.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 51f66d85-5ea1-45b3-0818-08d9fc261d78
-X-MS-Exchange-CrossTenant-originalarrivaltime: 02 Mar 2022 08:24:48.2060
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: RzAbi9KCaNuo0w4kbRWkt1nFTgDHsyiiAuxPenxmI2/lFPEYS7pph9/bCepsaL2vu9Mt79sz7TYzoZire6e4zfDV57RLSohfDuzrqBFgtzA=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR04MB0843
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mar 02, 2022 / 06:26, Sidong Yang wrote:
-> On Wed, Mar 02, 2022 at 04:43:35AM +0000, Shinichiro Kawasaki wrote:
->=20
-> Hi, Shinichiro.
->=20
-> Thanks for reply!
->=20
-> > Hi Sidong,
-> >=20
-> > I tried this patch and observed that it recreates the hang and confirms=
- the fix.
-> > Thanks. Here's my comments for improvements.
-> >=20
-> > On Mar 01, 2022 / 15:19, Sidong Yang wrote:
-> > > Test enabling/disable quota and creating/destroying qgroup repeatedly
-> >=20
-> > nit: gerund (...ing) and base form are mixed. Base form would be the be=
-tter to
-> > be same as the code comment.
->=20
-> Yeah, 'disable' should be disabling.
-> >=20
-> > > in asynchronous and confirm it does not cause kernel hang. This is a
-> > > regression test for the problem reported to linux-btrfs list [1].
-> > >=20
-> > > The hang was recreated using the test case and fixed by kernel patch
-> > > titled
-> > >=20
-> > >   btrfs: qgroup: fix deadlock between rescan worker and remove qgroup
-> > >=20
-> > > [1] https://lore.kernel.org/linux-btrfs/20220228014340.21309-1-realwa=
-kka@gmail.com/
-> > >=20
-> > > Signed-off-by: Sidong Yang <realwakka@gmail.com>
-> > > ---
+From: Filipe Manana <fdmanana@suse.com>
 
-(snip)
+Test doing a read, with io_uring, over a file range that includes multiple
+extents. The read operation triggers page faults when accessing all pages
+of the read buffer except for the pages corresponding to the first extent.
+We want to check that the operation results in reading all the extents and
+that it returns the correct data.
 
-> > > +	done
-> > > +
-> > > +	for pid in "${pids[@]}"; do
-> > > +		wait $pid
-> > > +	done
-> >=20
-> > I think simple "wait" command does what the for loop does.
->=20
-> I didn't know that "wait" command with no parameter waits all background
-> processes to finish. So it seems that we don't need pids it can be
-> deleted. Thanks.
->=20
-> Actually I've been agony about this. Does it needs timeout? When I tried
-> to command like this "timeout 10s wait", This command couldn't be
-> executed becase "wait" command is not binary. How can I insert timeout?
+This is motivated by an issue found with MariaDB when using io_uring and
+running on btrfs. There's a patch for btrfs to address the issue and it
+has the following subject:
 
-I think recent discussion on the list is a good reference [1]. A patch was
-posted to add timeout to btrfs/255.
+ "btrfs: fallback to blocking mode when doing async dio over multiple extents"
 
-More importantly, it was discussed that such timeout of user space program =
-will
-not help. Eryu pointed out that once "the kernel already deadlocked, and
-filesystem and/or device can't be used by next test either". IMHO, your new=
- case
-will not require timeout either with same reasoning.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ .gitignore             |   1 +
+ src/uring_read_fault.c | 150 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/676      |  41 +++++++++++
+ tests/generic/676.out  |   2 +
+ 4 files changed, 194 insertions(+)
+ create mode 100644 src/uring_read_fault.c
+ create mode 100755 tests/generic/676
+ create mode 100644 tests/generic/676.out
 
-[1] https://lore.kernel.org/fstests/20220223171126.GQ12643@twin.jikos.cz/T/=
-#me349d62ff367a0a6a28076bdd5b89263fc8109c0
+diff --git a/.gitignore b/.gitignore
+index ba0c572b..a5309d52 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -168,6 +168,7 @@ tags
+ /src/truncfile
+ /src/unwritten_mmap
+ /src/unwritten_sync
++/src/uring_read_fault
+ /src/usemem
+ /src/writemod
+ /src/writev_on_pagefault
+diff --git a/src/uring_read_fault.c b/src/uring_read_fault.c
+new file mode 100644
+index 00000000..9fb86c47
+--- /dev/null
++++ b/src/uring_read_fault.c
+@@ -0,0 +1,150 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
++ */
++
++/*
++ * Create a file with 4 extents, each with a size matching the page size.
++ * Then allocate a buffer to read all extents with io_uring, using O_DIRECT and
++ * IOCB_NOWAIT. Before doing the read with io_uring, access the first page of
++ * the read buffer to fault it in, so that during the read we only trigger page
++ * faults when accessing the other pages (mapping to 2nd, 3rd and 4th extents).
++ */
++
++/* Get the O_DIRECT definition. */
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <errno.h>
++#include <string.h>
++#include <liburing.h>
++
++int main(int argc, char *argv[])
++{
++	struct io_uring ring;
++	struct io_uring_sqe *sqe;
++	struct io_uring_cqe *cqe;
++	struct iovec iovec;
++	int fd;
++	long pagesize;
++	void *write_buf;
++	void *read_buf;
++	ssize_t ret;
++	int i;
++
++	if (argc != 2) {
++		fprintf(stderr, "Use: %s <file path>\n", argv[0]);
++		return 1;
++	}
++
++	fd = open(argv[1], O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
++	if (fd == -1) {
++		fprintf(stderr, "Failed to create file %s: %s (errno %d)\n",
++			argv[1], strerror(errno), errno);
++		return 1;
++	}
++
++	pagesize = sysconf(_SC_PAGE_SIZE);
++	if (pagesize == -1) {
++		fprintf(stderr, "Failed to get page size: %s (errno %d)\n",
++			strerror(errno), errno);
++		return 1;
++	}
++
++	ret = posix_memalign(&write_buf, pagesize, 4 * pagesize);
++	if (ret) {
++		fprintf(stderr, "Failed to allocate write buffer\n");
++		return 1;
++	}
++
++	memset(write_buf, 0xab, pagesize);
++	memset(write_buf + pagesize, 0xcd, pagesize);
++	memset(write_buf + 2 * pagesize, 0xef, pagesize);
++	memset(write_buf + 3 * pagesize, 0x73, pagesize);
++
++	/* Create the 4 extents, each with a size matching page size. */
++	for (i = 0; i < 4; i++) {
++		ret = pwrite(fd, write_buf + i * pagesize, pagesize,
++			     i * pagesize);
++		if (ret != pagesize) {
++			fprintf(stderr,
++				"Write failure, ret = %ld errno %d (%s)\n",
++				ret, errno, strerror(errno));
++			return 1;
++		}
++		ret = fsync(fd);
++		if (ret != 0) {
++			fprintf(stderr, "Fsync failure: %s (errno %d)\n",
++				strerror(errno), errno);
++			return 1;
++		}
++	}
++
++	close(fd);
++	fd = open(argv[1], O_RDONLY | O_DIRECT);
++	if (fd == -1) {
++		fprintf(stderr,
++			"Failed to open file %s: %s (errno %d)",
++			argv[1], strerror(errno), errno);
++		return 1;
++	}
++
++	ret = posix_memalign(&read_buf, pagesize, 4 * pagesize);
++	if (ret) {
++		fprintf(stderr, "Failed to allocate read buffer\n");
++		return 1;
++	}
++
++	/*
++	 * Fault in only the first page of the read buffer.
++	 * We want to trigger a page fault for the 2nd page of the read buffer
++	 * during the read operation with io_uring (O_DIRECT and IOCB_NOWAIT).
++	 */
++	memset(read_buf, 0, 1);
++
++	ret = io_uring_queue_init(1, &ring, 0);
++	if (ret != 0) {
++		fprintf(stderr, "Failed to creating io_uring queue\n");
++		return 1;
++	}
++
++	sqe = io_uring_get_sqe(&ring);
++	if (!sqe) {
++		fprintf(stderr, "Failed to get io_uring sqe\n");
++		return 1;
++	}
++
++	iovec.iov_base = read_buf;
++	iovec.iov_len = 4 * pagesize;
++	io_uring_prep_readv(sqe, fd, &iovec, 1, 0);
++
++	ret = io_uring_submit_and_wait(&ring, 1);
++	if (ret != 1) {
++		fprintf(stderr, "Failed at io_uring_submit_and_wait()\n");
++		return 1;
++	}
++
++	ret = io_uring_wait_cqe(&ring, &cqe);
++	if (ret < 0) {
++		fprintf(stderr, "Failed at io_uring_wait_cqe()\n");
++		return 1;
++	}
++
++	if (cqe->res != (4 * pagesize))
++		fprintf(stderr, "Unexpected cqe->res, got %d expected %ld\n",
++			cqe->res, 4 * pagesize);
++
++	if (memcmp(read_buf, write_buf, 4 * pagesize) != 0)
++		fprintf(stderr,
++			"Unexpected mismatch between read and write buffers\n");
++
++	io_uring_cqe_seen(&ring, cqe);
++	io_uring_queue_exit(&ring);
++
++	return 0;
++}
+diff --git a/tests/generic/676 b/tests/generic/676
+new file mode 100755
+index 00000000..0472c9c2
+--- /dev/null
++++ b/tests/generic/676
+@@ -0,0 +1,41 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 676
++#
++# Test doing a read, with io_uring, over a file range that includes multiple
++# extents. The read operation triggers page faults when accessing all pages of
++# the read buffer except for the pages corresponding to the first extent.
++# Then verify that the operation results in reading all the extents and returns
++# the correct data.
++#
++. ./common/preamble
++_begin_fstest auto quick io_uring
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -f $TEST_DIR/uring_read_fault.tmp
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs generic
++_require_test
++_require_odirect
++_require_io_uring
++_require_test_program uring_read_fault
++
++$here/src/uring_read_fault $TEST_DIR/uring_read_fault.tmp
++
++echo "Silence is golden"
++
++status=$?
++exit
+diff --git a/tests/generic/676.out b/tests/generic/676.out
+new file mode 100644
+index 00000000..d305660f
+--- /dev/null
++++ b/tests/generic/676.out
+@@ -0,0 +1,2 @@
++QA output created by 676
++Silence is golden
+-- 
+2.33.0
 
---=20
-Best Regards,
-Shin'ichiro Kawasaki=
