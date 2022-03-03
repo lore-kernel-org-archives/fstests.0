@@ -2,151 +2,65 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33CDEC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Mar 2022 11:40:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EB7FC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Mar 2022 13:28:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232317AbiCCLlP (ORCPT
+        id S231368AbiCCN3P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Mar 2022 06:41:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47024 "EHLO
+        Thu, 3 Mar 2022 08:29:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229929AbiCCLlO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Mar 2022 06:41:14 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D50FA5419E;
-        Thu,  3 Mar 2022 03:40:28 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S230204AbiCCN3P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Mar 2022 08:29:15 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D261A88B05
+        for <fstests@vger.kernel.org>; Thu,  3 Mar 2022 05:28:29 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 850FFB82502;
-        Thu,  3 Mar 2022 11:40:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57CA3C004E1;
-        Thu,  3 Mar 2022 11:40:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1646307626;
-        bh=jANP81KBlGd9yJk8XpMl1DOaqoU7a5GCzy2wa6Kbtj0=;
-        h=From:To:Cc:Subject:Date:From;
-        b=e6Tt1thOJ/v3M3d5j+GFcnYR8VVk8tZa53P0GCoyC5EQJilynUT6LQoT3acChnRvM
-         +QCEraq6W1pKLmHJtDPcA07/mCd1NKEBGevoyiFwzdUEInSvzCueEA0SEfrlDWEXK6
-         DWsosmebQ/8z6tU6ehR3caxFqKNjzDv5D0d5fhK4lbB/bS1sEXiyzKfzxon3d/oray
-         R93SHwOpF9VDt9Phvn43OUxBLTIY31w+9FtRuC9xq0LOFhRzcsyoLniiojhlool6s7
-         ns50mmgTqF6680WxXS7uuapg8QDy6OVfBjJUkwiZQAAoUvOFhB4Sf/djDlodZIlX2n
-         kuC9ic81kL9tw==
-From:   fdmanana@kernel.org
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 91FE21F38B;
+        Thu,  3 Mar 2022 13:28:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1646314108; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=5S79lcFj5BBsWIQrY0Dtie6Mlcedekp8KsLEGvm10sg=;
+        b=FtOuUrFQ6N5MaaeWPyzF0JNBMb7nJZtEPTnzBlmTsj7gf7X1C5hgVZpDhkzU6jXRqN3cCs
+        wNK4FQuK/AUyhgw0wnqXGIJDa2ciA7ep+adnW3wl1KciNQoK8o4XhP8FgWvQqZolDrSY1C
+        xPHGzdeE4/EVvhvhfV82Twqvz/zg0lE=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6482113C23;
+        Thu,  3 Mar 2022 13:28:28 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id IsfDFnzCIGKHWwAAMHmgww
+        (envelope-from <gniebler@suse.com>); Thu, 03 Mar 2022 13:28:28 +0000
+From:   Gabriel Niebler <gniebler@suse.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: move test case btrfs/261 into the generic group
-Date:   Thu,  3 Mar 2022 11:40:21 +0000
-Message-Id: <69cac173b34bdb3135ffa12ecbf690029ca3c513.1646307523.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.33.0
+Cc:     Gabriel Niebler <gniebler@suse.com>
+Subject: [PATCH 0/4] README: Fix setup, btrfs and distro info
+Date:   Thu,  3 Mar 2022 14:28:00 +0100
+Message-Id: <20220303132804.4151-1-gniebler@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+The README had some incorrect environment setup information in the quick start
+section and some outdated info related to btrfs testing.
 
-The test case btrfs/261, part from its comments, doesn't really exercise
-any behaviour that is btrfs specific, so, as Dave Chinner pointed out, it
-can be moved into the generic group.
+This patchset fixes that, while also adding some more distro specfic setup info.
 
-This change moves that test into the generic group and slightly adjust the
-comments to make it clear which parts are btrfs specific.
+Gabriel Niebler (4):
+  README: Fix environment setup quick start
+  README: Adjust and add btrfs testing information
+  README: Add command to install required packages on SUSE
+  README: Fix indentation to be consistent
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/{btrfs/261 => generic/677}         | 35 ++++++++++++++----------
- tests/{btrfs/261.out => generic/677.out} |  2 +-
- 2 files changed, 22 insertions(+), 15 deletions(-)
- rename tests/{btrfs/261 => generic/677} (60%)
- rename tests/{btrfs/261.out => generic/677.out} (93%)
-
-diff --git a/tests/btrfs/261 b/tests/generic/677
-similarity index 60%
-rename from tests/btrfs/261
-rename to tests/generic/677
-index 8275e6a5..1d4eaa53 100755
---- a/tests/btrfs/261
-+++ b/tests/generic/677
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
- #
--# FS QA Test 261
-+# FS QA Test 677
- #
- # Test that after a full fsync of a file with preallocated extents beyond the
- # file's size, if a power failure happens, the preallocated extents still exist
-@@ -25,7 +25,7 @@ _cleanup()
- 
- # real QA test starts here
- 
--_supported_fs btrfs
-+_supported_fs generic
- _require_scratch
- _require_dm_target flakey
- _require_xfs_io_command "falloc" "-k"
-@@ -39,11 +39,16 @@ _require_metadata_journaling $SCRATCH_DEV
- _init_flakey
- _mount_flakey
- 
--# Create our test file with many file extent items, so that they span several
--# leaves of metadata, even if the node/page size is 64K. We use direct IO and
--# not fsync/O_SYNC because it's both faster and it avoids clearing the full sync
--# flag from the inode - we want the fsync below to trigger the slow full sync
--# code path.
-+# Create our test file with many extents.
-+# On btrfs this results in having multiple leaves of metadata full of file
-+# extent items, a condition necessary to trigger the original bug.
-+#
-+# We use direct IO here because:
-+#
-+# 1) It's faster then doing fsync after each buffered write;
-+#
-+# 2) For btrfs, the first fsync would clear the inode's full sync runtime flag,
-+#    and we want the fsync below to trigger the full fsync code path of btrfs.
- $XFS_IO_PROG -f -d -c "pwrite -b 4K 0 16M" $SCRATCH_MNT/foo | _filter_xfs_io
- 
- # Now add two preallocated extents to our file without extending the file's size.
-@@ -52,15 +57,17 @@ $XFS_IO_PROG -f -d -c "pwrite -b 4K 0 16M" $SCRATCH_MNT/foo | _filter_xfs_io
- $XFS_IO_PROG -c "falloc -k 16M 1M" $SCRATCH_MNT/foo
- $XFS_IO_PROG -c "falloc -k 20M 1M" $SCRATCH_MNT/foo
- 
--# Make sure everything is durably persisted and the transaction is committed.
--# This makes all created extents to have a generation lower than the generation
--# of the transaction used by the next write and fsync.
-+# Make sure everything is durably persisted.
-+# On btrfs this commits the current transaction and it makes all the created
-+# extents to have a generation lower than the generation of the transaction used
-+# by the next write and fsync.
- sync
- 
--# Now overwrite only the first extent, which will result in modifying only the
--# first leaf of metadata for our inode. Then fsync it. This fsync will use the
--# slow code path (inode full sync bit is set) because it's the first fsync since
--# the inode was created/loaded.
-+# Now overwrite only the first extent.
-+# On btrfs, due to COW (both data and metadata), that results in modifying only
-+# the first leaf of metadata for our inode (we replace a file extent item and
-+# update the inode item). Then fsync it. On btrfs this fsync will use the slow
-+# code path because it's the first fsync since the inode was created/loaded.
- $XFS_IO_PROG -c "pwrite 0 4K" -c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
- 
- # Simulate a power failure and then mount again the filesystem to replay the log
-diff --git a/tests/btrfs/261.out b/tests/generic/677.out
-similarity index 93%
-rename from tests/btrfs/261.out
-rename to tests/generic/677.out
-index e9cfe1e8..4c91a0dd 100644
---- a/tests/btrfs/261.out
-+++ b/tests/generic/677.out
-@@ -1,4 +1,4 @@
--QA output created by 261
-+QA output created by 677
- wrote 16777216/16777216 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
- wrote 4096/4096 bytes at offset 0
--- 
-2.33.0
-
+ README | 40 +++++++++++++++++++++++++---------------
+ 1 file changed, 25 insertions(+), 15 deletions(-)
