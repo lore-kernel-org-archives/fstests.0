@@ -2,119 +2,137 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B59ACC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 13:04:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BE69C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 13:15:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347033AbiCHNE6 (ORCPT
+        id S233002AbiCHNQD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Mar 2022 08:04:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44528 "EHLO
+        Tue, 8 Mar 2022 08:16:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347028AbiCHNE6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 08:04:58 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0630DEEE;
-        Tue,  8 Mar 2022 05:04:01 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 7D44B1F396;
-        Tue,  8 Mar 2022 13:04:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1646744640; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=8ci3oFk/T/lPASeA/KfnjlxY0+i1knzS5vYQBEQE/Vk=;
-        b=PvNjdvC+67OqklDEGgDWuxkMHzHsXTGbXScyEzDrYKGaKGtsZ4Q3PnhFtPpRnAz2vEHwzP
-        n+ewB7yXNIK/lnSwS6wmFmysyiSU2YrypcwgMQ0HXIWeJbdH4KdDOFsox1sp6yVEc/ARN+
-        JDvKcUQvGpooG3f5tc5Qi/ghQ+FfcDc=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 97CF113CA6;
-        Tue,  8 Mar 2022 13:03:59 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id mlWgGD9UJ2KpEgAAMHmgww
-        (envelope-from <wqu@suse.com>); Tue, 08 Mar 2022 13:03:59 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH] common/btrfs: don't skip the test if BTRFS_PROFILE_CONFIGS contains unsupported profile
-Date:   Tue,  8 Mar 2022 21:03:42 +0800
-Message-Id: <2684eb3da262f10c546a464850d063954a7250ae.1646744615.git.wqu@suse.com>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S229635AbiCHNQC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 08:16:02 -0500
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FB6C28E20
+        for <fstests@vger.kernel.org>; Tue,  8 Mar 2022 05:15:05 -0800 (PST)
+Received: from kwepemi500012.china.huawei.com (unknown [172.30.72.54])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4KCbKM6gQ5zbc37;
+        Tue,  8 Mar 2022 21:10:15 +0800 (CST)
+Received: from kwepemm600010.china.huawei.com (7.193.23.86) by
+ kwepemi500012.china.huawei.com (7.221.188.12) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.21; Tue, 8 Mar 2022 21:15:03 +0800
+Received: from [10.174.178.31] (10.174.178.31) by
+ kwepemm600010.china.huawei.com (7.193.23.86) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.21; Tue, 8 Mar 2022 21:15:03 +0800
+Subject: Re: [PATCH] generic/066: attr1 is still there after log replay on
+ f2fs
+To:     <fstests@vger.kernel.org>, <guan@eryu.me>
+CC:     <chao@kernel.org>, <jaegeuk@kernel.org>,
+        <linux-f2fs-devel@lists.sourceforge.net>
+References: <20220228035719.4102745-1-sunke32@huawei.com>
+From:   Sun Ke <sunke32@huawei.com>
+Message-ID: <bc2d3921-083f-d867-4213-eee05bd6c1cb@huawei.com>
+Date:   Tue, 8 Mar 2022 21:15:02 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.1
 MIME-Version: 1.0
+In-Reply-To: <20220228035719.4102745-1-sunke32@huawei.com>
+Content-Type: text/plain; charset="gbk"; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.178.31]
+X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
+ kwepemm600010.china.huawei.com (7.193.23.86)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[BUG]
-Sometimes the tester wants to use $BTRFS_PROFILE_CONFIGS to limit the
-tests to certain profiles.
+Friendly ping...
 
-This is especially useful for btrfs subpage tests, as we don't yet
-support RAID56 for it yet.
-
-But unfortunately, if we specify $BTRFS_PROFILE_CONFIGS with the
-following content:
-
- export BTRFS_PROFILE_CONFIGS="single:single dup:single raid0:raid0 \
-			       raid1:raid1 raid10:raid10"
-
-A lot of tests will not run, like:
-
-  btrfs/064 30s ... [not run] Profile dup not supported for replace
-  btrfs/065 26s ... [not run] Profile dup not supported for replace
-  btrfs/066 27s ...  14s
-  btrfs/069 25s ... [not run] Profile dup not supported for replace
-  btrfs/070 59s ... [not run] Profile dup not supported for replace
-  btrfs/071 25s ... [not run] Profile dup not supported for replace
-
-[CAUSE]
-Those test cases uses _btrfs_get_profile_configs() to grab the profiles
-which support given workload (like replace/repace-missing).
-
-But _btrfs_get_profile_configs() will behave different based on whether
-BTRFS_PROFILE_CONFIGS is defined.
-
-If not defined, it goes with default profiles, and just skip those
-unsupported.
-This is what we want.
-
-But if the environment variable is defined, it will not run if there is
-any unsupported profile in it.
-
-[FIX]
-Unify the behaivor by always skip the unsupported profiles, no matter if
-$BTRFS_PROFILE_CONFIGS is defined or not.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- common/btrfs | 8 +-------
- 1 file changed, 1 insertion(+), 7 deletions(-)
-
-diff --git a/common/btrfs b/common/btrfs
-index 670d9d1f2b09..ac597ca465a1 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -258,13 +258,7 @@ _btrfs_get_profile_configs()
- 
- 		for unsupp in "${unsupported[@]}"; do
- 			if [ "${profiles[0]}" == "$unsupp" -o "${profiles[1]}" == "$unsupp" ]; then
--			     if [ -z "$BTRFS_PROFILE_CONFIGS" ]; then
--				     # For the default config, just omit it.
--				     supported=false
--			     else
--				     # For user-provided config, don't run the test.
--				     _notrun "Profile $unsupp not supported for $1"
--			     fi
-+				supported=false
- 			fi
- 		done
- 		if "$supported"; then
--- 
-2.35.1
-
+ÔÚ 2022/2/28 11:57, Sun Ke Ð´µÀ:
+> The test fail on f2fs:
+>       xattr names and values after second fsync log replay:
+>       # file: SCRATCH_MNT/foobar
+>      +user.attr1="val1"
+>       user.attr3="val3"
+>
+> attr1 is still there after log replay.
+> I guess it is f2fs's special feature to improve the performance.
+>
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> ---
+>
+> Is it a BUG on f2fs?
+>   .gitignore                                 |  1 +
+>   tests/generic/066                          |  3 +++
+>   tests/generic/066.cfg                      |  1 +
+>   tests/generic/{066.out => 066.out.default} |  0
+>   tests/generic/066.out.f2fs                 | 11 +++++++++++
+>   5 files changed, 16 insertions(+)
+>   create mode 100644 tests/generic/066.cfg
+>   rename tests/generic/{066.out => 066.out.default} (100%)
+>   create mode 100644 tests/generic/066.out.f2fs
+>
+> diff --git a/.gitignore b/.gitignore
+> index 65b93307..135742f5 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -194,6 +194,7 @@ tags
+>   /src/perf/*.pyc
+>   
+>   # Symlinked files
+> +/tests/generic/066.out
+>   /tests/generic/035.out
+>   /tests/generic/050.out
+>   /tests/xfs/033.out
+> diff --git a/tests/generic/066 b/tests/generic/066
+> index 105a7acd..524dc82d 100755
+> --- a/tests/generic/066
+> +++ b/tests/generic/066
+> @@ -17,6 +17,7 @@
+>   #
+>   #  Btrfs: remove deleted xattrs on fsync log replay
+>   #
+> +seqfull=$0
+>   . ./common/preamble
+>   _begin_fstest auto quick attr metadata log
+>   
+> @@ -32,6 +33,8 @@ _cleanup()
+>   . ./common/dmflakey
+>   . ./common/attr
+>   
+> +# Select appropriate golden output based on fstype
+> +_link_out_file
+>   # real QA test starts here
+>   _supported_fs generic
+>   _require_scratch
+> diff --git a/tests/generic/066.cfg b/tests/generic/066.cfg
+> new file mode 100644
+> index 00000000..c25641be
+> --- /dev/null
+> +++ b/tests/generic/066.cfg
+> @@ -0,0 +1 @@
+> +f2fs: f2fs
+> diff --git a/tests/generic/066.out b/tests/generic/066.out.default
+> similarity index 100%
+> rename from tests/generic/066.out
+> rename to tests/generic/066.out.default
+> diff --git a/tests/generic/066.out.f2fs b/tests/generic/066.out.f2fs
+> new file mode 100644
+> index 00000000..8fc58693
+> --- /dev/null
+> +++ b/tests/generic/066.out.f2fs
+> @@ -0,0 +1,11 @@
+> +QA output created by 066
+> +xattr names and values after first fsync log replay:
+> +# file: SCRATCH_MNT/foobar
+> +user.attr1="val1"
+> +user.attr3="val3"
+> +
+> +xattr names and values after second fsync log replay:
+> +# file: SCRATCH_MNT/foobar
+> +user.attr1="val1"
+> +user.attr3="val3"
+> +
