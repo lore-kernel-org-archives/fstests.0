@@ -2,127 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97262C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 10:16:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B59ACC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Mar 2022 13:04:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345761AbiCHKRi (ORCPT
+        id S1347033AbiCHNE6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Mar 2022 05:17:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50516 "EHLO
+        Tue, 8 Mar 2022 08:04:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345760AbiCHKRg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 05:17:36 -0500
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71C0742EC8;
-        Tue,  8 Mar 2022 02:16:39 -0800 (PST)
-Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 2289dNhQ032405;
-        Tue, 8 Mar 2022 10:16:39 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=pp1; bh=RsFA/k1GhLsgH0gA+uxs2PxF13w2tO4hI2UNmEaIDdA=;
- b=jrEnxwUxom9xeDwI3wh4yOQ4QvrDpC67IgT97F/T+03mCQhyP19UHhGjYYtZl3jjQ69U
- 75aTvB37Vpytq9qTVtMEIv5EcbmKEvmHopmmJ7lTtfp0W2QD6ew7uaPBiDxQ79uXVqyd
- x0g6eaWlIMdY05RgdqKX5MISDgztYLBqfUM7igcOgckmmPSs3+A9HPRlPDTZisvuAMtt
- qJW52sJwISQ7pSXCO7tvp4iAImrF2h0a7Z693GBxqATAIcVKuk/jDDB9bg+OOXvuEWzZ
- kDd6H9sflCj/foLnCW5sje8NVoM7besQpjOhjb2zDMfBzQF8zOIZZThBjd7arnHsds8V Uw== 
-Received: from ppma04fra.de.ibm.com (6a.4a.5195.ip4.static.sl-reverse.com [149.81.74.106])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3enxryymdc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 08 Mar 2022 10:16:38 +0000
-Received: from pps.filterd (ppma04fra.de.ibm.com [127.0.0.1])
-        by ppma04fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 228ADKxq005708;
-        Tue, 8 Mar 2022 10:16:36 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma04fra.de.ibm.com with ESMTP id 3ekyg9641k-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 08 Mar 2022 10:16:36 +0000
-Received: from d06av24.portsmouth.uk.ibm.com (d06av24.portsmouth.uk.ibm.com [9.149.105.60])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 228AGXJb48365968
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 8 Mar 2022 10:16:33 GMT
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 2071342047;
-        Tue,  8 Mar 2022 10:16:33 +0000 (GMT)
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id A9B474203F;
-        Tue,  8 Mar 2022 10:16:31 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.83.182])
-        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Tue,  8 Mar 2022 10:16:31 +0000 (GMT)
-Date:   Tue, 8 Mar 2022 15:46:28 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Cc:     riteshh@linux.ibm.com
-Subject: Re: [PATCH v2 0/2] tests/ext4: Ensure resizes with sparse_super2 are
- handled correctly
-Message-ID: <Yics/N8zx8PgVhhr@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
-References: <cover.1645549521.git.ojaswin@linux.ibm.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <cover.1645549521.git.ojaswin@linux.ibm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: IyfPMr3C8xEkvGZRfo2M-U0AWmsNmrSl
-X-Proofpoint-ORIG-GUID: IyfPMr3C8xEkvGZRfo2M-U0AWmsNmrSl
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+        with ESMTP id S1347028AbiCHNE6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Mar 2022 08:04:58 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0630DEEE;
+        Tue,  8 Mar 2022 05:04:01 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 7D44B1F396;
+        Tue,  8 Mar 2022 13:04:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1646744640; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=8ci3oFk/T/lPASeA/KfnjlxY0+i1knzS5vYQBEQE/Vk=;
+        b=PvNjdvC+67OqklDEGgDWuxkMHzHsXTGbXScyEzDrYKGaKGtsZ4Q3PnhFtPpRnAz2vEHwzP
+        n+ewB7yXNIK/lnSwS6wmFmysyiSU2YrypcwgMQ0HXIWeJbdH4KdDOFsox1sp6yVEc/ARN+
+        JDvKcUQvGpooG3f5tc5Qi/ghQ+FfcDc=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 97CF113CA6;
+        Tue,  8 Mar 2022 13:03:59 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id mlWgGD9UJ2KpEgAAMHmgww
+        (envelope-from <wqu@suse.com>); Tue, 08 Mar 2022 13:03:59 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH] common/btrfs: don't skip the test if BTRFS_PROFILE_CONFIGS contains unsupported profile
+Date:   Tue,  8 Mar 2022 21:03:42 +0800
+Message-Id: <2684eb3da262f10c546a464850d063954a7250ae.1646744615.git.wqu@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-08_03,2022-03-04_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 impostorscore=0
- bulkscore=0 mlxlogscore=461 clxscore=1015 adultscore=0 spamscore=0
- suspectscore=0 malwarescore=0 mlxscore=0 lowpriorityscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2202240000 definitions=main-2203080053
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Greetings,
+[BUG]
+Sometimes the tester wants to use $BTRFS_PROFILE_CONFIGS to limit the
+tests to certain profiles.
 
-Just a gentle reminder to kindly let me know if any changes are 
-needed in this patchset.
+This is especially useful for btrfs subpage tests, as we don't yet
+support RAID56 for it yet.
 
-Thank you,
-Ojaswin
+But unfortunately, if we specify $BTRFS_PROFILE_CONFIGS with the
+following content:
 
-On Tue, Feb 22, 2022 at 11:20:51PM +0530, Ojaswin Mujoo wrote:
-> As detailed in the patch [1], kernel currently does not support resizes
-> with sparse_super2 enabled.  Before the above patch, if we used the
-> EXT4_IOC_RESIZE_FS ioctl directly, wiht sparse_super2 enabled, the
-> kernel used to still try the resize and ultimatley leave the fs in an
-> inconsistent state. This also led to corruption and kernel BUGs.
-> 
-> This patchset adds a test for ext4 to ensure that the kernel handles
-> resizes with sparse_super2 correctly, and returns -EOPNOTSUPP. 
-> 
-> Summary:
-> 
->   Patch 1: Fix the src/ext4_resize.c script to return accurate error
->            codes.
->   Patch 2: Add the ext4 test for checking resize functionality
-> 
-> Changes since v1 [2]
-> 
->   *  In patch 2, don't iterate if the expected errno is returned
->   *  Code cleanup and additional comments for clarity (also see extra
->      note in patch 2)
->   *  No changes in patch 1
-> 
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=b1489186cc8391e0c1e342f9fbc3eedf6b944c61
-> [2] https://lore.kernel.org/fstests/cover.1644217569.git.ojaswin@linux.ibm.com/ 
-> 
-> Ojaswin Mujoo (2):
->   src/ext4_resize.c: Refactor code and ensure accurate errno is returned
->   ext4: Test to ensure resize with sparse_super2 is handled correctly
-> 
->  src/ext4_resize.c  |  46 +++++++++++++------
->  tests/ext4/056     | 108 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/056.out |   2 +
->  3 files changed, 142 insertions(+), 14 deletions(-)
->  create mode 100755 tests/ext4/056
->  create mode 100644 tests/ext4/056.out
-> 
-> -- 
-> 2.27.0
-> 
+ export BTRFS_PROFILE_CONFIGS="single:single dup:single raid0:raid0 \
+			       raid1:raid1 raid10:raid10"
+
+A lot of tests will not run, like:
+
+  btrfs/064 30s ... [not run] Profile dup not supported for replace
+  btrfs/065 26s ... [not run] Profile dup not supported for replace
+  btrfs/066 27s ...  14s
+  btrfs/069 25s ... [not run] Profile dup not supported for replace
+  btrfs/070 59s ... [not run] Profile dup not supported for replace
+  btrfs/071 25s ... [not run] Profile dup not supported for replace
+
+[CAUSE]
+Those test cases uses _btrfs_get_profile_configs() to grab the profiles
+which support given workload (like replace/repace-missing).
+
+But _btrfs_get_profile_configs() will behave different based on whether
+BTRFS_PROFILE_CONFIGS is defined.
+
+If not defined, it goes with default profiles, and just skip those
+unsupported.
+This is what we want.
+
+But if the environment variable is defined, it will not run if there is
+any unsupported profile in it.
+
+[FIX]
+Unify the behaivor by always skip the unsupported profiles, no matter if
+$BTRFS_PROFILE_CONFIGS is defined or not.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ common/btrfs | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/common/btrfs b/common/btrfs
+index 670d9d1f2b09..ac597ca465a1 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -258,13 +258,7 @@ _btrfs_get_profile_configs()
+ 
+ 		for unsupp in "${unsupported[@]}"; do
+ 			if [ "${profiles[0]}" == "$unsupp" -o "${profiles[1]}" == "$unsupp" ]; then
+-			     if [ -z "$BTRFS_PROFILE_CONFIGS" ]; then
+-				     # For the default config, just omit it.
+-				     supported=false
+-			     else
+-				     # For user-provided config, don't run the test.
+-				     _notrun "Profile $unsupp not supported for $1"
+-			     fi
++				supported=false
+ 			fi
+ 		done
+ 		if "$supported"; then
+-- 
+2.35.1
+
