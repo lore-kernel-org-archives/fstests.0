@@ -2,116 +2,178 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2E97C433FE
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Mar 2022 16:21:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13BC0C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Mar 2022 01:06:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349942AbiCKQWF (ORCPT
+        id S233317AbiCMBHo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 11 Mar 2022 11:22:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56172 "EHLO
+        Sat, 12 Mar 2022 20:07:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36766 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350091AbiCKQWC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 Mar 2022 11:22:02 -0500
-Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8574D1D17A5
-        for <fstests@vger.kernel.org>; Fri, 11 Mar 2022 08:20:59 -0800 (PST)
-Received: by mail-qt1-x833.google.com with SMTP id g7so1021089qtg.7
-        for <fstests@vger.kernel.org>; Fri, 11 Mar 2022 08:20:59 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
-         :content-transfer-encoding;
-        bh=kCYIhViP+XSeAfiACXplInyBsYNkNRkbi7wV2i5KgZc=;
-        b=0Q8IEBJ1wTteiopE2BhexmMj37SdGE6TmjB5KyzrwXQSDaBB8H0Z7C1tWcahj3Mrkt
-         cBZxO5fx2d3a5C4dwfmRdaya63/G5TsW9C38A8bAfGBfHqdq3SaRFXii3s/JmZ7tvWCg
-         xPKxllJf+8ESqjsiRJsxfR7CHbbaca3zhIt8ybqyue6zFlFfbxzg8nPj1j7vHxMD+kHe
-         OJnYfTiF78Ge5sQjK29dNKI8EpqNN9AkCA4ykeesK9S7EAI3rW6NPipPemf61bv8JaK7
-         ubAkQCOo8oTuEhIxXDVkTirMqpwXWTFRHLZA3HGloyJ1qxVYBfhi3mKq4YiwUocjsD38
-         NC/w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=kCYIhViP+XSeAfiACXplInyBsYNkNRkbi7wV2i5KgZc=;
-        b=NWXwLuU+/YL0471b9TfeGtCxznji4KGt3vmWILOtEKdAS8w26DA7pVZ2xkiXb61U+k
-         JpJLeE0dxni2InrD2IHxw9yiuIwDSSCIrHKQMa5RbUoxjK3KT8UA2UqnRf/3l8ADbRZD
-         veaqYqYn4Rm5Gsb2V6tIftA61X3nqK4ka2SjdRG8YMs1/vsnBWbSloIk6ylkVFi8TjMG
-         FBmGILhc1kKMOo9eD0JQWG39Ew+/zw0MlG3M6xRm0WSMGPHAzjCmavCQJO823hizJAUx
-         j1k4im83AC2MRzKRVMwIu5DcqfJA5rTGhywTBo9v4XOkuF68ioxaax377yfkPumcTThG
-         mm4g==
-X-Gm-Message-State: AOAM531Hhp8bRqP2+cTVB8J4u7B/iC0mn5QKWRnmb0eLvY0Qs1wx/LY8
-        VBis1WoEufoA7D0yg2o8f7fS8tIFK3n1LFj4
-X-Google-Smtp-Source: ABdhPJyIcgkjhclg/axQKN4+9wHTipWKdIzim5UdcmgIHqm9xHwc2IB8LD/4ev+vEN7jgWVnXogdeg==
-X-Received: by 2002:ac8:130c:0:b0:2dd:d52d:325 with SMTP id e12-20020ac8130c000000b002ddd52d0325mr9069325qtj.376.1647015658240;
-        Fri, 11 Mar 2022 08:20:58 -0800 (PST)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id c35-20020a05620a26a300b0067d4eed36desm2769758qkp.130.2022.03.11.08.20.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 11 Mar 2022 08:20:57 -0800 (PST)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: [PATCH 2/2] fstests: btrfs/029: delete the cross vfsmount checks
-Date:   Fri, 11 Mar 2022 11:20:54 -0500
-Message-Id: <e7af5d9833d0bd1cf58a03c8fbec874a141d728a.1647015560.git.josef@toxicpanda.com>
-X-Mailer: git-send-email 2.26.3
-In-Reply-To: <cover.1647015560.git.josef@toxicpanda.com>
-References: <cover.1647015560.git.josef@toxicpanda.com>
+        with ESMTP id S231147AbiCMBHn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 12 Mar 2022 20:07:43 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AF51145E38;
+        Sat, 12 Mar 2022 17:06:37 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 9F46C60DC6;
+        Sun, 13 Mar 2022 01:06:36 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3B1EC340F3;
+        Sun, 13 Mar 2022 01:06:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647133596;
+        bh=xSWwMaATSOlo0tZ18wM2im1YC+0I7XtkCleyPTUOXE4=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=KIbbAyZlVUwPQlgZ4+NSZ/FEnOTksBOI1IV1qg2wxSAhHNaVp9mj6GZXgsvEsWyAf
+         Ajbu+dLoAOCn9e/oe01r8n+XXKlaZbiaiDU/U1hEsko8WWbg7D2LqsDR8CbspxN8vX
+         GHbCks97u3Mls0XG5oVRPJBYlGPzx7MGXieQr2HVS4R0Ki1jyPavi72zdSPCNjtgay
+         QqyPulnAaIkVcKByCReAEj+zZgiKTVWsI+pQdLLtHfr8ryT6RsAlSHq5lxP+hm4Y7s
+         G4q8hBSrZyl0eGiYqqfmduUEsYPKpN3u8AvIx/QjCkQxQzvUPyuhhfypZYd6UmcxOX
+         MSTMzhpV+8Fog==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [PATCH v2 3/5] fscrypt-crypt-util: add support for dumping key identifier
+Date:   Sat, 12 Mar 2022 17:05:57 -0800
+Message-Id: <20220313010559.545995-4-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220313010559.545995-1-ebiggers@kernel.org>
+References: <20220313010559.545995-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We now allow cross vfsmount reflinks, remove this portion of the test
-from btrfs/029.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+Add an option to fscrypt-crypt-util to make it compute the key
+identifier for the given key.  This will allow testing the correctness
+of the filesystem's key identifier computation.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/btrfs/029     | 9 +--------
- tests/btrfs/029.out | 6 ------
- 2 files changed, 1 insertion(+), 14 deletions(-)
+ src/fscrypt-crypt-util.c | 51 ++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 46 insertions(+), 5 deletions(-)
 
-diff --git a/tests/btrfs/029 b/tests/btrfs/029
-index 1bdbc951..26ca8938 100755
---- a/tests/btrfs/029
-+++ b/tests/btrfs/029
-@@ -5,8 +5,7 @@
- # FS QA Test No. 029
- #
- # Check if creating a sparse copy ("reflink") of a file on btrfs
--# expectedly fails when it's done between different filesystems or
--# different mount points of the same filesystem.
-+# expectedly fails when it's done between different filesystems.
- #
- # For both situations, these actions are executed:
- #    - Copy a file with the reflink=auto option.
-@@ -59,12 +58,6 @@ _create_reflinks()
- echo "test reflinks across different devices"
- _create_reflinks $SCRATCH_MNT/original $reflink_test_dir/copy
+diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
+index 124eb23f..ffb9534d 100644
+--- a/src/fscrypt-crypt-util.c
++++ b/src/fscrypt-crypt-util.c
+@@ -46,7 +46,7 @@
+ static void usage(FILE *fp)
+ {
+ 	fputs(
+-"Usage: " PROGRAM_NAME " [OPTION]... CIPHER MASTER_KEY\n"
++"Usage: " PROGRAM_NAME " [OPTION]... [CIPHER | --dump-key-identifier] MASTER_KEY\n"
+ "\n"
+ "Utility for verifying fscrypt-encrypted data.  This program encrypts\n"
+ "(or decrypts) the data on stdin using the given CIPHER with the given\n"
+@@ -66,6 +66,8 @@ static void usage(FILE *fp)
+ "  --decrypt                   Decrypt instead of encrypt\n"
+ "  --direct-key                Use the format where the IVs include the file\n"
+ "                                nonce and the same key is shared across files.\n"
++"  --dump-key-identifier       Instead of encrypting/decrypting data, just\n"
++"                                compute and dump the key identifier.\n"
+ "  --file-nonce=NONCE          File's nonce as a 32-character hex string\n"
+ "  --fs-uuid=UUID              The filesystem UUID as a 32-character hex string.\n"
+ "                                Required for --iv-ino-lblk-32 and\n"
+@@ -1949,11 +1951,38 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
+ 	generate_iv(params, iv);
+ }
  
--echo "test reflinks across different mountpoints of same device"
--rm -rf $reflink_test_dir/*
--_mount $SCRATCH_DEV $reflink_test_dir
--_create_reflinks $SCRATCH_MNT/original $reflink_test_dir/copy
--$UMOUNT_PROG $reflink_test_dir
--
- # success, all done
- status=0
- exit
-diff --git a/tests/btrfs/029.out b/tests/btrfs/029.out
-index f1c88780..93044342 100644
---- a/tests/btrfs/029.out
-+++ b/tests/btrfs/029.out
-@@ -5,9 +5,3 @@ reflink=auto:
- 42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/test-029/copy
- reflink=always:
- cp reflink failed
--test reflinks across different mountpoints of same device
--reflink=auto:
--42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/original
--42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/test-029/copy
--reflink=always:
--cp reflink failed
++static void do_dump_key_identifier(const struct key_and_iv_params *params)
++{
++	u8 info[9] = "fscrypt";
++	u8 key_identifier[16];
++	int i;
++
++	info[8] = HKDF_CONTEXT_KEY_IDENTIFIER;
++
++	if (params->kdf != KDF_HKDF_SHA512)
++		die("--dump-key-identifier requires --kdf=HKDF-SHA512");
++	hkdf_sha512(params->master_key, params->master_key_size,
++		    NULL, 0, info, sizeof(info),
++		    key_identifier, sizeof(key_identifier));
++
++	for (i = 0; i < sizeof(key_identifier); i++)
++		printf("%02x", key_identifier[i]);
++}
++
++static void parse_master_key(const char *arg, struct key_and_iv_params *params)
++{
++	params->master_key_size = hex2bin(arg, params->master_key,
++					  MAX_KEY_SIZE);
++	if (params->master_key_size < 0)
++		die("Invalid master_key: %s", arg);
++}
++
+ enum {
+ 	OPT_BLOCK_NUMBER,
+ 	OPT_BLOCK_SIZE,
+ 	OPT_DECRYPT,
+ 	OPT_DIRECT_KEY,
++	OPT_DUMP_KEY_IDENTIFIER,
+ 	OPT_FILE_NONCE,
+ 	OPT_FS_UUID,
+ 	OPT_HELP,
+@@ -1970,6 +1999,7 @@ static const struct option longopts[] = {
+ 	{ "block-size",      required_argument, NULL, OPT_BLOCK_SIZE },
+ 	{ "decrypt",         no_argument,       NULL, OPT_DECRYPT },
+ 	{ "direct-key",      no_argument,       NULL, OPT_DIRECT_KEY },
++	{ "dump-key-identifier", no_argument,   NULL, OPT_DUMP_KEY_IDENTIFIER },
+ 	{ "file-nonce",      required_argument, NULL, OPT_FILE_NONCE },
+ 	{ "fs-uuid",         required_argument, NULL, OPT_FS_UUID },
+ 	{ "help",            no_argument,       NULL, OPT_HELP },
+@@ -1986,6 +2016,7 @@ int main(int argc, char *argv[])
+ {
+ 	size_t block_size = 4096;
+ 	bool decrypting = false;
++	bool dump_key_identifier = false;
+ 	struct key_and_iv_params params;
+ 	size_t padding = 0;
+ 	const struct fscrypt_cipher *cipher;
+@@ -2027,6 +2058,9 @@ int main(int argc, char *argv[])
+ 		case OPT_DIRECT_KEY:
+ 			params.direct_key = true;
+ 			break;
++		case OPT_DUMP_KEY_IDENTIFIER:
++			dump_key_identifier = true;
++			break;
+ 		case OPT_FILE_NONCE:
+ 			if (hex2bin(optarg, params.file_nonce, FILE_NONCE_SIZE)
+ 			    != FILE_NONCE_SIZE)
+@@ -2074,6 +2108,15 @@ int main(int argc, char *argv[])
+ 	argc -= optind;
+ 	argv += optind;
+ 
++	if (dump_key_identifier) {
++		if (argc != 1) {
++			usage(stderr);
++			return 2;
++		}
++		parse_master_key(argv[0], &params);
++		do_dump_key_identifier(&params);
++		return 0;
++	}
+ 	if (argc != 2) {
+ 		usage(stderr);
+ 		return 2;
+@@ -2087,10 +2130,8 @@ int main(int argc, char *argv[])
+ 		die("Block size of %zu bytes is too small for cipher %s",
+ 		    block_size, cipher->name);
+ 
+-	params.master_key_size = hex2bin(argv[1], params.master_key,
+-					 MAX_KEY_SIZE);
+-	if (params.master_key_size < 0)
+-		die("Invalid master_key: %s", argv[1]);
++	parse_master_key(argv[1], &params);
++
+ 	if (params.master_key_size < cipher->keysize)
+ 		die("Master key is too short for cipher %s", cipher->name);
+ 
 -- 
-2.26.3
+2.35.1
 
