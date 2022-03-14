@@ -2,64 +2,137 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F7A7C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Mar 2022 04:37:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9730DC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Mar 2022 10:41:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229587AbiCNEih (ORCPT
+        id S238138AbiCNKm2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Mar 2022 00:38:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57204 "EHLO
+        Mon, 14 Mar 2022 06:42:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233024AbiCNEih (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Mar 2022 00:38:37 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 36C9838D8D;
-        Sun, 13 Mar 2022 21:37:28 -0700 (PDT)
-Received: from dread.disaster.area (pa49-186-150-27.pa.vic.optusnet.com.au [49.186.150.27])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 6F39510E400D;
-        Mon, 14 Mar 2022 15:37:25 +1100 (AEDT)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nTcSS-005EJ7-SD; Mon, 14 Mar 2022 15:37:24 +1100
-Date:   Mon, 14 Mar 2022 15:37:24 +1100
-From:   Dave Chinner <david@fromorbit.com>
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] fstests: delete the cross-vfsmount reflink tests
-Message-ID: <20220314043724.GP661808@dread.disaster.area>
-References: <cover.1647015560.git.josef@toxicpanda.com>
- <3c6801168d8f7fd1bd2ae47f9a823d9c28a35422.1647015560.git.josef@toxicpanda.com>
+        with ESMTP id S234173AbiCNKm1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Mar 2022 06:42:27 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA2C13EA92;
+        Mon, 14 Mar 2022 03:41:17 -0700 (PDT)
+Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 22E8a3U8011989;
+        Mon, 14 Mar 2022 10:41:17 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=CWAf8f5TJCbQpdwIz0ofQ9Dva67XSRgREsrrNLuwR9c=;
+ b=klV9G+whGYzATWcvlvJ+tJNC2VIlxd+vsF5+qJdKS96KQrLV+jZTFRX1KRRmLLC3jS0R
+ +36EX2xsnn7jfK64QiwvpAHQeQ/rxfPp4UFw3XfeHppYsSHD6W750YZI2y2rSDN13KPG
+ +NFaToHJSA5EoiT53C+FVZ/0rOQYbC1jYjwIqMUzQJI53xD+Mtp9wBGQ+Iqmah4EyubH
+ rQtRIjGnpqldEMzATxOW5Ic/StmAzn1vbE5+dUUy8Z1f7uAPUDr4V7ad73RT4behrR0y
+ k9y0/Jz89jDUfkTbuTPmMI3iiWdrpgdWE78n3S5Jz5MxixN6aa68RkrTVEqNcwkao1U+ bg== 
+Received: from ppma04fra.de.ibm.com (6a.4a.5195.ip4.static.sl-reverse.com [149.81.74.106])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3es5kmqf47-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 14 Mar 2022 10:41:17 +0000
+Received: from pps.filterd (ppma04fra.de.ibm.com [127.0.0.1])
+        by ppma04fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 22EAbQ2Q027535;
+        Mon, 14 Mar 2022 10:41:14 GMT
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+        by ppma04fra.de.ibm.com with ESMTP id 3erk58kc7h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 14 Mar 2022 10:41:14 +0000
+Received: from d06av25.portsmouth.uk.ibm.com (d06av25.portsmouth.uk.ibm.com [9.149.105.61])
+        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 22EAfBI743844076
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 14 Mar 2022 10:41:12 GMT
+Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 4B4C311C6E8;
+        Mon, 14 Mar 2022 10:32:12 +0000 (GMT)
+Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id D897311C6C7;
+        Mon, 14 Mar 2022 10:32:10 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.29.85])
+        by d06av25.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon, 14 Mar 2022 10:32:10 +0000 (GMT)
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     riteshh@linux.ibm.com, linux-ext4@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] ext4/053: Add support for testing mb_optimize_scan
+Date:   Mon, 14 Mar 2022 16:02:07 +0530
+Message-Id: <5b0d252484cbe973c2df0c677cb47b30012b0db1.1647253313.git.ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3c6801168d8f7fd1bd2ae47f9a823d9c28a35422.1647015560.git.josef@toxicpanda.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=622ec686
-        a=sPqof0Mm7fxWrhYUF33ZaQ==:117 a=sPqof0Mm7fxWrhYUF33ZaQ==:17
-        a=kj9zAlcOel0A:10 a=o8Y5sQTvuykA:10 a=maIFttP_AAAA:8 a=7-415B0cAAAA:8
-        a=qc-lFo39poi8ebtawUsA:9 a=CjuIK1q_8ugA:10 a=qR24C9TJY6iBuJVj_x8Y:22
-        a=biEYGPWJfzWAr4FL6Ov7:22
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: Jofw897RvP4hcS-2YBWXAd3cvoNMdPUR
+X-Proofpoint-GUID: Jofw897RvP4hcS-2YBWXAd3cvoNMdPUR
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-14_04,2022-03-14_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ suspectscore=0 adultscore=0 spamscore=0 phishscore=0 lowpriorityscore=0
+ mlxscore=0 bulkscore=0 malwarescore=0 mlxlogscore=921 impostorscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2203140065
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 11, 2022 at 11:20:53AM -0500, Josef Bacik wrote:
-> Cross vfsmount reflink's are now allowed, the patch is in linux-next and
-> will go to linus soon.  Remove these tests so nobody freaks out when
-> they start failing.
-> 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+Add support to test the mb_optimize_scan mount option.
+Since its value is not reflected in the "options" file in proc,
+use "mb_structs_summary" to verify its value.
 
-Shouldn't these tests be converted to test that cross-vfsmount
-reflinks now actually work?
+Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+---
+ tests/ext4/053 | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
 
-i.e. it's all well and good to remove tests of behaviour we no
-longer enforce, but to then not test the new behaviour we allow is
-actually working properly....
-
-Cheers,
-
-Dave.
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index e1e79592..bd92002f 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -100,6 +100,7 @@ test_mnt() {
+ 	(
+ 	ret=0
+ 	IFS=','
++	proc_path="/proc/fs/ext4/$(_short_dev $SCRATCH_DEV)"
+ 	for option in $OPTS; do
+ 		if echo $IGNORED | grep -w $option; then
+ 			continue
+@@ -114,11 +115,16 @@ test_mnt() {
+ 		fi
+ 		option=${option#^}
+ 
+-		if echo $CHECK_MINFO | grep -w $option; then
++		if [[ $option =~ ^mb_optimize_scan=.*$ ]]; then
++			# mb_optimize_scan needs special handling
++			expected=${option#*=}
++			ret=$(cat $proc_path/mb_structs_summary | grep "optimize_scan" \
++				| awk '{ print $2 }')
++		elif echo $CHECK_MINFO | grep -w $option; then
+ 			findmnt -n -o OPTIONS $SCRATCH_DEV | grep $option
+ 			ret=$?
+ 		else
+-			grep $option /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options
++			grep $option $proc_path/options
+ 			ret=$?
+ 		fi
+ 
+@@ -526,13 +532,10 @@ for fstype in ext2 ext3 ext4; do
+ 
+ 	mnt prefetch_block_bitmaps removed
+ 	mnt no_prefetch_block_bitmaps
+-	# We don't currently have a way to know that the option has been
+-	# applied, so comment it out for now. This should be fixed in the
+-	# future.
+-	#mnt mb_optimize_scan=0
+-	#mnt mb_optimize_scan=1
+-	#not_mnt mb_optimize_scan=9
+-	#not_mnt mb_optimize_scan=
++	mnt mb_optimize_scan=0
++	mnt mb_optimize_scan=1
++	not_mnt mb_optimize_scan=9
++	not_mnt mb_optimize_scan=
+ 	mnt nombcache
+ 	mnt no_mbcache nombcache
+ 	mnt check=none removed
 -- 
-Dave Chinner
-david@fromorbit.com
+2.27.0
+
