@@ -2,216 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32082C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Mar 2022 12:00:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FF3DC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Mar 2022 14:29:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348129AbiCOMBw (ORCPT
+        id S1349174AbiCOOaY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Mar 2022 08:01:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36180 "EHLO
+        Tue, 15 Mar 2022 10:30:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348128AbiCOMBv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Mar 2022 08:01:51 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7EFA52B31;
-        Tue, 15 Mar 2022 05:00:39 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id A25A91F391;
-        Tue, 15 Mar 2022 12:00:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1647345638; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=69C8m+2kMy+wXHvAY++o/bQMj/PPOmUYdZehTfuze6Y=;
-        b=NwdbHFZ1B7sogFEWdlZerRLDIWGwa1QWji6icvFsRRMZ1nqOsIVqSOtASyPLR4hKQ/YSqC
-        0DI6YsQi6GcQwMP4jnrFoqR0w/NPUVbYJ6sw7d/EBAmuD1xyLNIwj7aEx6QWcw8Nx/UszB
-        eb+BX0cwb3L/TWbRne67TNi6+yMFyCM=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 87EAF13B59;
-        Tue, 15 Mar 2022 12:00:37 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 6Gj9E+V/MGKHRgAAMHmgww
-        (envelope-from <wqu@suse.com>); Tue, 15 Mar 2022 12:00:37 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] btrfs: test that autdodefrag does not rewrite single extents
-Date:   Tue, 15 Mar 2022 20:00:20 +0800
-Message-Id: <20220315120020.68874-1-wqu@suse.com>
-X-Mailer: git-send-email 2.35.1
-MIME-Version: 1.0
+        with ESMTP id S1349168AbiCOOaV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Mar 2022 10:30:21 -0400
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1851454FA5;
+        Tue, 15 Mar 2022 07:29:08 -0700 (PDT)
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 22FEBntF025147;
+        Tue, 15 Mar 2022 14:29:08 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=Gp5DiJeUrH8zW1k2ACTM5dIm57d7tSl3Rc4KMsW70y4=;
+ b=Z5nLS2BM5wGVTrDAFhHoL4PbntbnaobbnomJnxS+4QbvymHYasRku6ZXCYp8mTX5gXuk
+ l550+0vo5fqrlDUfEcbZo1yQBGN3LxtjnfFnQqyhF7PSEM/TZUMSfVc4ydgp/0uCN4XG
+ CSVb1uGsl28Px1KHJO+33wyLQ3dojUrwfNaeIcJmJFDXNSEc+nSvJDj3OF5e+DtON40n
+ GGCrh74HgdFPZ5oLGvioPzuxGP9OxnA1O/LAWFaOzXM8RmLMBZNZkGIJ/+I7rv5Z6hNn
+ bnZjBAMs3XEFVwaFuw2dxqTQm2MSZjxoBn6PToo77jfikEu6GGOpuVIhMY6rgyHWX6iA VA== 
+Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3etvbm8eqg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 15 Mar 2022 14:29:08 +0000
+Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
+        by ppma05fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 22FERUJG015197;
+        Tue, 15 Mar 2022 14:29:06 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma05fra.de.ibm.com with ESMTP id 3erk58nu10-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 15 Mar 2022 14:29:06 +0000
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 22FET4Bk45875638
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 15 Mar 2022 14:29:04 GMT
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id E758AA4060;
+        Tue, 15 Mar 2022 14:29:03 +0000 (GMT)
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 55B99A405C;
+        Tue, 15 Mar 2022 14:29:03 +0000 (GMT)
+Received: from localhost (unknown [9.43.32.151])
+        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue, 15 Mar 2022 14:29:02 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     fstests <fstests@vger.kernel.org>
+Cc:     linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [PATCHv2 0/4] generic: Add some tests around journal replay/recoveryloop
+Date:   Tue, 15 Mar 2022 19:58:55 +0530
+Message-Id: <cover.1647342932.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.31.1
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: kYFfgd5CwRRV6r-FWWWeEJFZD0GNw14T
+X-Proofpoint-ORIG-GUID: kYFfgd5CwRRV6r-FWWWeEJFZD0GNw14T
 Content-Transfer-Encoding: 8bit
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+MIME-Version: 1.0
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-15_03,2022-03-15_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 adultscore=0
+ priorityscore=1501 clxscore=1015 phishscore=0 mlxlogscore=924
+ lowpriorityscore=0 malwarescore=0 spamscore=0 impostorscore=0
+ suspectscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2203150092
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-There is a report that btrfs autodefrag is defragging extents which only
-have one single sector.
+Hello,
 
-Such defragging will not reduce the number of extents, but only waste
-IO.
+Sending v2 with tests/ext4/ converted to tests/generic/
+(although I had not received any review comments on v1).
+It seems all of the tests which I had sent in v1 are not ext4 specific anyways.
+So in v2, I have made those into tests/generic/.
 
-The fix for it is titled:
+These are some of the tests which when tested with ext4 fast_commit feature
+w/o kernel fixes, could cause tests failures and/or KASAN bug (generic/486).
 
-  btrfs: avoid defragging extents whose next extents are not targets
+I gave these tests a run with default xfs, btrfs and f2fs configs (along with
+ext4). No surprises observed.
 
-Here we add a test case, which will create an inode with the following
-layout:
+[v1]: https://lore.kernel.org/all/cover.1644070604.git.riteshh@linux.ibm.com/
 
-  0                16K   20K                  64K
-  |<-- Extent A -->|<-B->|<----- Extent C --->|
-  |Gen 7           |Gen 9|Gen 7               |
+Ritesh Harjani (4):
+  generic/468: Add another falloc test entry
+  common/punch: Add block_size argument to _filter_fiemap_**
+  generic/676: Add a new shutdown recovery test
+  generic/677: Add a test to check unwritten extents tracking
 
-And we trigger autodefrag with newer_than = 8, which means it will only
-defrag extents newer than or equal to generation 8.
+ common/punch          | 12 +++++---
+ tests/generic/468     |  4 +++
+ tests/generic/468.out |  2 ++
+ tests/generic/676     | 72 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/676.out |  7 +++++
+ tests/generic/677     | 64 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/677.out |  6 ++++
+ 7 files changed, 162 insertions(+), 5 deletions(-)
+ create mode 100755 tests/generic/676
+ create mode 100644 tests/generic/676.out
+ create mode 100755 tests/generic/677
+ create mode 100644 tests/generic/677.out
 
-Currently only Extent B meets the condition, but it can not be merged
-with Extent A nor Extent C, as they don't meet the generation 
-requirement.
-
-Unpatched kernel will defrag only Extent B, resulting no change in
-fragmentation, while costs extra IO.
-
-Patched kernel will not defrag anything.
-
-Although this is still not the ideal case, as we can defrag the whole
-64K range, but that's not what autodefrag can do with its generation 
-limitation.
-
-And such "perfect" defrag can cause way more IO than some users can
-stand.
-
-At least we should not only defrag extent B.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
----
-Changelog:
-v2:
-- Use short and less confusing subject
-- Remove unused _cleanup() override
-- End every sentence with punctuation in comments
-- Remove unnecessary -f option for xfs_io
-- Fix the spell of "generation"
----
- tests/btrfs/262     | 92 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/262.out |  2 +
- 2 files changed, 94 insertions(+)
- create mode 100755 tests/btrfs/262
- create mode 100644 tests/btrfs/262.out
-
-diff --git a/tests/btrfs/262 b/tests/btrfs/262
-new file mode 100755
-index 00000000..a25a588a
---- /dev/null
-+++ b/tests/btrfs/262
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 262
-+#
-+# Make sure btrfs autodefrag will not defrag ranges which won't reduce
-+# defragmentation.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick defrag
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_scratch
-+_require_xfs_io_command "fiemap" "ranged"
-+
-+# Needs fixed 4K sector size, or the file layout will not match the expected
-+# result.
-+_require_btrfs_support_sectorsize 4096
-+
-+_scratch_mkfs >> $seqres.full
-+
-+_scratch_mount -o noautodefrag
-+
-+# Create the initial layout, with a large 64K extent for later fragments.
-+$XFS_IO_PROG -f -c "pwrite 0 64K" -c sync "$SCRATCH_MNT/foobar" >> $seqres.full
-+
-+# Need to bump the generation by one, as autodefrag uses the last modified
-+# generation of a subvolume. Without this generation bump, autodefrag will
-+# defrag the whole file, not only the new write.
-+touch "$SCRATCH_MNT/trash"
-+sync
-+
-+# Remount to autodefrag.
-+_scratch_remount autodefrag
-+
-+# Write a new sector, which should trigger autodefrag.
-+$XFS_IO_PROG -c "pwrite 16K 4K" -c sync "$SCRATCH_MNT/foobar" >> $seqres.full
-+
-+echo "=== File extent layout before autodefrag ===" >> $seqres.full
-+$XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foobar" >> $seqres.full
-+
-+old_csum=$(_md5_checksum "$SCRATCH_MNT/foobar")
-+old_ext_0=$(_get_file_extent_sector "$SCRATCH_MNT/foobar" 0)
-+old_ext_16k=$(_get_file_extent_sector "$SCRATCH_MNT/foobar" 16384)
-+old_ext_20k=$(_get_file_extent_sector "$SCRATCH_MNT/foobar" 20480)
-+
-+# Trigger autodefrag.
-+_scratch_remount commit=1
-+sleep 3
-+# Make sure the defragged range reach disk.
-+sync
-+
-+echo "=== File extent layout after autodefrag ===" >> $seqres.full
-+$XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foobar" >> $seqres.full
-+
-+new_csum=$(_md5_checksum "$SCRATCH_MNT/foobar")
-+new_ext_0=$(_get_file_extent_sector "$SCRATCH_MNT/foobar" 0)
-+new_ext_16k=$(_get_file_extent_sector "$SCRATCH_MNT/foobar" 16384)
-+new_ext_20k=$(_get_file_extent_sector "$SCRATCH_MNT/foobar" 20480)
-+
-+# For extent at offset 0 and 20K, they are older than the target generation,
-+# thus they should not be defragged.
-+if [ "$new_ext_0" != "$old_ext_0" ]; then
-+	echo "extent at offset 0 got defragged"
-+fi
-+if [ "$new_ext_20k" != "$old_ext_20k" ]; then
-+	echo "extent at offset 20K got defragged"
-+fi
-+
-+# For extent at offset 4K, it's a single sector, and its adjacent extents
-+# are not targets, thus it should not be defragged.
-+if [ "$new_ext_16k" != "$old_ext_16k" ]; then
-+	echo "extent at offset 16K got defragged"
-+fi
-+
-+# Defrag should not change file content.
-+if [ "$new_csum" != "$old_csum" ]; then
-+	echo "file content changed"
-+fi
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/262.out b/tests/btrfs/262.out
-new file mode 100644
-index 00000000..404badc3
---- /dev/null
-+++ b/tests/btrfs/262.out
-@@ -0,0 +1,2 @@
-+QA output created by 262
-+Silence is golden
--- 
-2.34.1
+--
+2.31.1
 
