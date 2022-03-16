@@ -2,214 +2,169 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 629EEC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Mar 2022 04:08:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86049C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Mar 2022 15:43:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243311AbiCPEJL (ORCPT
+        id S1356839AbiCPPog (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Mar 2022 00:09:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56398 "EHLO
+        Wed, 16 Mar 2022 11:44:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44138 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbiCPEJK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Mar 2022 00:09:10 -0400
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EDA1AE58
-        for <fstests@vger.kernel.org>; Tue, 15 Mar 2022 21:07:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1647403675; x=1678939675;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=/PMfjlVvbqFXHk9hdvCTnKR6clORZ3CTAaq5pVxzJdw=;
-  b=I6y/jgteix1X7WvgcL1Fj01j2mLmNvTYaQLzIJ7vw4V/YXFxVTbhW3zY
-   6+P0GTMtPSr80NgWgMvYohJZ5UPRhWuB/EUC9SDlJvMmK2juqdE7nBxPW
-   XmM2pE98uVPiLlNp9OZkoArEY6B0qMuaWMkPHbl2Z1YrFmv4HNRnlhcA8
-   76Ac6wQnrwdMI6CnPvuNXzqE4Cnyufekdn4ksYIzlY416kauRzuU7s4BR
-   4sQEO7jTUpiBoqX6GTQc7+UCU3UnTTMBNCAPHss5yICyKPyM6zHCuBsDE
-   CATvP6JrrFu02fNQPlGvbXxKVf7BrDZWaj5nBqcF9kXURdSvYJ6lGL7gz
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.90,185,1643644800"; 
-   d="scan'208";a="307421766"
-Received: from mail-bn7nam10lp2101.outbound.protection.outlook.com (HELO NAM10-BN7-obe.outbound.protection.outlook.com) ([104.47.70.101])
-  by ob1.hgst.iphmx.com with ESMTP; 16 Mar 2022 12:07:54 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=FeAhsZOmRCEIfBK6kFsm5lXOY75e5HkEvp83zLX6P9HNz5Fcg13iV572iTKvovPFI9N/o5qAto0swLMaah+LGYjFzP92t/VQL+fKZFGpT+e3baWnrRHPfocvS4MCLUMk4xQP4HhG4OPi/5WrJh6CMmdKOIv/nzl7wwiRdZBut1joEBqiqGroetS5IsOJWZw+ahRcX8Np5srSOC7YVQqgvZz3zxNz9DlyHT+6AeS2N1iIcJpgXIKd0YJ6J9aEYeUra8SGDbt+TA/08DHRViYolzZGE4zngWxBwss9TQ36IDYz8P+11vxxibnnFIfvtu/w5ksN0XVGqR8wC5p9h0HOdw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+phQPVTBH3TflhY9UwBg4STFRg1UlYb7hlXVXSTyleE=;
- b=C2DLOP26RosFS6kfCjG51ky4xGKT6JJdW1M8San3ZXBzThDmPsne8WmI0cPin/dO98QFHQGm5Vd7HyfHoiHVw7Phn0JPd9bzdWSOUSMoQXnRHo3y/4DHUIEjWrz7j1JMBGFwNGUlOIzeXp9KELaxfbpsGJFems7zEjFgg0oDHoE3czmoSWw+4RZSZQu3yNImyuBhsS+FLMdDLjJq3ArwoxELi0n8Pf5L7pnVIKOowlMkpaOvRbCLlN0ibdyCUejdTP2BGOkYMVRaMeBZVtTxv2PjEJd8inYRC5nOis3BUGbEpDrmwAiSEp/9KQmey6aunppQk9fEBUiAgA2t/EU+Qw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+phQPVTBH3TflhY9UwBg4STFRg1UlYb7hlXVXSTyleE=;
- b=VYXeuxmk7e+GRQO2HWnN/xeXQHCNds2EBVhZWIzbNYqnw4nTrgoskEoOVT1ZbBoxcmfPgwBVKR8yJoa54muzTRUTP63liJfk0DVxezmmbcCFmGjdYOpruAp10OBMsoWHpdlqhYuJJ4gOxUjAOcxdYUmBJzbd+WzgjcAbDN2H0Dc=
-Received: from SJ0PR04MB7776.namprd04.prod.outlook.com (2603:10b6:a03:300::11)
- by BYAPR04MB5237.namprd04.prod.outlook.com (2603:10b6:a03:c4::30) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5061.22; Wed, 16 Mar
- 2022 04:07:49 +0000
-Received: from SJ0PR04MB7776.namprd04.prod.outlook.com
- ([fe80::8d96:4526:8820:de4f]) by SJ0PR04MB7776.namprd04.prod.outlook.com
- ([fe80::8d96:4526:8820:de4f%5]) with mapi id 15.20.5081.014; Wed, 16 Mar 2022
- 04:07:48 +0000
-From:   Naohiro Aota <Naohiro.Aota@wdc.com>
-To:     Pankaj Raghav <p.raghav@samsung.com>
+        with ESMTP id S239553AbiCPPof (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Mar 2022 11:44:35 -0400
+Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEC7C10FE3
+        for <fstests@vger.kernel.org>; Wed, 16 Mar 2022 08:43:18 -0700 (PDT)
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20220316154312euoutp01b03c18a01575f3885187ec1429407006~c5ts0Nx_h0032700327euoutp015
+        for <fstests@vger.kernel.org>; Wed, 16 Mar 2022 15:43:12 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20220316154312euoutp01b03c18a01575f3885187ec1429407006~c5ts0Nx_h0032700327euoutp015
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1647445392;
+        bh=y8lf4lyJiZ2IzG3+NA1XO1gGw4Od7lhdz1eIhl5cbYA=;
+        h=Date:Subject:To:CC:From:In-Reply-To:References:From;
+        b=XAU/EUTQDmg6CAV9eQwItFANzlGi8ZyB9jyGkBaBMvdkD5moPJIWo4mn4a8SMgGTG
+         0gE82ufUwHDcDVeyO6vsEbazqZmzMsm6YP91zt1knkH65WQS6lfdGDeV0PMFLkwKyn
+         ofI3TTe9I2uthn6DvhOwlMSFMBJpiIJQ1msiOTzA=
+Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
+        eucas1p1.samsung.com (KnoxPortal) with ESMTP id
+        20220316154312eucas1p17389252df8ac1c6b5215686a5e38b6be~c5tso_0C_2320723207eucas1p1f;
+        Wed, 16 Mar 2022 15:43:12 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+        eusmges2new.samsung.com (EUCPMTA) with SMTP id D6.91.09887.09502326; Wed, 16
+        Mar 2022 15:43:12 +0000 (GMT)
+Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20220316154312eucas1p2030ff670b1240809ab8b1737fb5d497f~c5tsREQVy1026510265eucas1p2v;
+        Wed, 16 Mar 2022 15:43:12 +0000 (GMT)
+Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
+        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220316154312eusmtrp17033ef3a2ebc54fc2459e8d61c5eaeb4~c5tsQadiW2562225622eusmtrp1w;
+        Wed, 16 Mar 2022 15:43:12 +0000 (GMT)
+X-AuditID: cbfec7f4-471ff7000000269f-b2-623205907b4a
+Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
+        eusmgms1.samsung.com (EUCPMTA) with SMTP id 94.03.09522.09502326; Wed, 16
+        Mar 2022 15:43:12 +0000 (GMT)
+Received: from CAMSVWEXC01.scsc.local (unknown [106.1.227.71]) by
+        eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
+        20220316154312eusmtip16432a94cf789ac3c0c2d1ee4e619c2bd~c5tsHceIl1786617866eusmtip17;
+        Wed, 16 Mar 2022 15:43:12 +0000 (GMT)
+Received: from [192.168.8.130] (106.210.248.179) by CAMSVWEXC01.scsc.local
+        (2002:6a01:e347::6a01:e347) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
+        Wed, 16 Mar 2022 15:43:10 +0000
+Message-ID: <74e35575-cd2c-07b7-396a-086fc1da2822@samsung.com>
+Date:   Wed, 16 Mar 2022 16:43:09 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+        Thunderbird/91.5.0
+Subject: Re: [PATCH] btrfs/237: Use zone cap instead of zone size in
+ fill_size and rest calculation
+Content-Language: en-US
+To:     Naohiro Aota <Naohiro.Aota@wdc.com>
 CC:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
         "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
         Luis Chamberlain <mcgrof@kernel.org>,
-        =?iso-8859-1?Q?Javier_Gonz=E1lez?= <javier.gonz@samsung.com>,
+        =?UTF-8?Q?Javier_Gonz=c3=a1lez?= <javier.gonz@samsung.com>,
         Damien Le Moal <damien.lemoal@opensource.wdc.com>,
         Pankaj Raghav <pankydev8@gmail.com>,
         Kanchan Joshi <joshiiitr@gmail.com>,
         Adam Manzanares <a.manzanares@samsung.com>
-Subject: Re: [PATCH] btrfs/237: Use zone cap instead of zone size in fill_size
- and rest calculation
-Thread-Topic: [PATCH] btrfs/237: Use zone cap instead of zone size in
- fill_size and rest calculation
-Thread-Index: AQHYOKnio3xkIXTIeEChqO7JHW68UazBZXcA
-Date:   Wed, 16 Mar 2022 04:07:48 +0000
-Message-ID: <20220316040748.j5olvwr4qqpmvqgr@naota-xeon>
+From:   Pankaj Raghav <p.raghav@samsung.com>
+In-Reply-To: <20220316040748.j5olvwr4qqpmvqgr@naota-xeon>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [106.210.248.179]
+X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
+        CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347)
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprHKsWRmVeSWpSXmKPExsWy7djP87oTWI2SDHr2qlr8Pnue2eJ0y152
+        i79d95gszr89zGRxY8JTRouJxzezWqy5+ZTFgd1j56y77B6bVnWyeexsvc/q8XmTnEf7gW6m
+        ANYoLpuU1JzMstQifbsEroy3c/UKOvgrVlxcxtrA2MTTxcjBISFgIrH8i2AXIxeHkMAKRon5
+        jw6xQThfGCVOLvrLCuF8BnJOXgPKcIJ1tN6ZwQ6RWM4o0bL9JDtIAqxq14sciMRuRomFx/ax
+        giR4BewkLm9oZwaxWQRUJSa/6GeHiAtKnJz5hAXEFhWIkHh55C8TiC0skCrx7GsbWD2zgLjE
+        rSfzweIiAuoSH58eBbuPWeA/k8SlZ7PZQZ5gE9CSaOwEm8kpYCnR9eA9G0SvpkTr9t/sELa8
+        xPa3c5ghPlCW6Lz6iAnCrpVYe+wM2DcSAs2cEm1bmlggAeMisWqWPESNsMSr41vYIWwZidOT
+        e1gg6vsZJaa2/GGCcGYwSvQc3swE0Wwt0XcmB6LBUeL/vVlQM/kkbrwVhLiHT2LStunMExhV
+        ZyEFxSwkL89C8sIsJC8sYGRZxSieWlqcm55abJSXWq5XnJhbXJqXrpecn7uJEZiETv87/mUH
+        4/JXH/UOMTJxMB5ilOBgVhLhPfNCP0mINyWxsiq1KD++qDQntfgQozQHi5I4b3LmhkQhgfTE
+        ktTs1NSC1CKYLBMHp1QDk1hH0PkArRThBUH7xF5mKm/MP7M6feL8zSEagVuilFdqZjTcWCr1
+        buP5m1evekr+FwjQa1730m53WV5JjO0JuZdcb6KeTVNySp8xS8FNI9Z6Z3KTrufT3E+d28N+
+        WZpV+2a2TjQWLuBSfntA2i5zzaUcKc8trrUBb3Y5br/Qm922/kbnJ+4wyznbrk2YaZnBycd4
+        WUbJavbx2lAZxr03rCV/PU9c+Te1Kj62KbeJZ9nv3qSl58KdRQ41BjefUPDJkrztvmNO5T6Z
+        4zaHy9KWm+7psp+2f6L2jzl7Hr36ePWIxbZs3vXNy91qDKy7E8sNVjw+0PtbbE7O+aOtB29/
+        4Djy8escHa343ZWbbTKKlViKMxINtZiLihMBgYWXNLEDAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrEIsWRmVeSWpSXmKPExsVy+t/xu7oTWI2SDC6+47H4ffY8s8Xplr3s
+        Fn+77jFZnH97mMnixoSnjBYTj29mtVhz8ymLA7vHzll32T02repk89jZep/V4/MmOY/2A91M
+        AaxRejZF+aUlqQoZ+cUltkrRhhZGeoaWFnpGJpZ6hsbmsVZGpkr6djYpqTmZZalF+nYJehlv
+        5+oVdPBXrLi4jLWBsYmni5GTQ0LARKL1zgx2EFtIYCmjxNSD2hBxGYlPVz6yQ9jCEn+udbF1
+        MXIB1XxklHh6aAozRMNuRol595NBbF4BO4nLG9rB4iwCqhKTX/SzQ8QFJU7OfMICYosKREi0
+        LYPoFRZIlbi2dy0jiM0sIC5x68l8JhBbREBd4uPTo2DLmAX+Mklc7P7DArFsD6PE3GsuXYwc
+        HGwCWhKNnWDzOQUsJboevGeDmKMp0br9NzuELS+x/e0cZogHlCU6rz5igrBrJV7d3804gVF0
+        FpLzZiE5YxaSUbOQjFrAyLKKUSS1tDg3PbfYUK84Mbe4NC9dLzk/dxMjMHK3Hfu5eQfjvFcf
+        9Q4xMnEwHmKU4GBWEuE980I/SYg3JbGyKrUoP76oNCe1+BCjKTCMJjJLiSbnA1NHXkm8oZmB
+        qaGJmaWBqaWZsZI4r2dBR6KQQHpiSWp2ampBahFMHxMHp1QD0wZh5X33jHWfnBB3S98Va+zJ
+        uXfONN/5qutSq74YO8qsnb3p37oJs9/XzL31d5Pu7uyoh+Z3yjx/bd8jr5a16tBjd/unbA+a
+        hB49S+Zom795YtzzFF37b9Hz10Y4ikiKSty1ajSa/5DnFtu9VxfvHvJ455Nf43Ur41uKzifn
+        tKJexpZNzLwL7a882+VnKFB0cILTzs/OW65c5za22+jPsXvzsjrDnQ8SGIO/rLFh/lZ97skr
+        uwcy2+eej20qnpyXctZ3t0X2xi1dQidThNtLt6+v+dgofnLG8wNCKusmq/3U/PzH8fOHw99M
+        HgiWPGP2m5FhrcY+MTlOROpwr+z0rY5bNku9lguP1VGIrpuTGq3EUpyRaKjFXFScCAA4ORbC
+        ZQMAAA==
+X-CMS-MailID: 20220316154312eucas1p2030ff670b1240809ab8b1737fb5d497f
+X-Msg-Generator: CA
+X-RootMTR: 20220315201834eucas1p14717bdbd666dd59b2ef4c86f42bfeb90
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20220315201834eucas1p14717bdbd666dd59b2ef4c86f42bfeb90
 References: <CGME20220315201834eucas1p14717bdbd666dd59b2ef4c86f42bfeb90@eucas1p1.samsung.com>
- <20220315201756.18829-1-p.raghav@samsung.com>
-In-Reply-To: <20220315201756.18829-1-p.raghav@samsung.com>
-Accept-Language: ja-JP, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 08f5e480-b35a-468f-0dba-08da07028895
-x-ms-traffictypediagnostic: BYAPR04MB5237:EE_
-x-microsoft-antispam-prvs: <BYAPR04MB523766CE798848CAFA443FBC8C119@BYAPR04MB5237.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: BKSeDMQjoPTE2GThPwqZlQp0Jw9i9Lo/FdIdVvkEJ71zbH8Z+FvKQUz8Y949UfuSeOtWGuqj1O7pswNE1LOBjjhi5dctAND7IMqlaRTNbqKjWeDPzrFl7O6nc5z3sDWYxcXMWRmnsMrtBLt0ILqu3kDyY2/T3UrtSQnfPWAHzNPQAlDE/KjJJxXknKRz3CgutjO0UoKsMGWMXQszQxbohgwxChmoYw/qJyvJm9fwmQXED2PtkMFWmS4Y3aewYDpLx3wCAaM3h4xy6//bzjmPJvEUcRT4yxowomzhpzeneLUWfnaCMf4DJH5wsRtOQVSmThriUr1WKOy1fcILEbtEYMK3l4P2pVcyPr8ggHpR7CRi2jHI4LE1D77lwVKIGDHy362X2lj0GGuEV95UtGLxbVIZ8do9EVAA7F0GZWLSgiMkPaEtM39+AGslnzdrOWl9DmnYeaWRncw0PozLhqL76qOAmT+SHao3+6hEWKC42jEvG1Gu9hUg6rE7S1vI6xapIEvBSwQuK62thr1Uf5Y9y06kQRCGOBOL/GeoYwiEie3j8h6t/dJUda29Fn0IusDts0quScQuRyDkYSnPfe+pZx9shW3G1XLzWqVeH3xbVwGc3z1k+5H61mBdiOnuM8mZfNelcwWuexd9ZZ/YGj113UozXb2Qg73beWFn742t+/48s5X4x2PpeNQag2zrd64wp7rNBB5WKVZ7O3O/C0tQnA==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR04MB7776.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(7916004)(366004)(6512007)(9686003)(6506007)(33716001)(54906003)(82960400001)(316002)(6916009)(508600001)(71200400001)(86362001)(6486002)(122000001)(26005)(186003)(1076003)(38070700005)(38100700002)(83380400001)(66476007)(66946007)(66446008)(2906002)(64756008)(8676002)(66556008)(76116006)(8936002)(5660300002)(4326008)(91956017);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?zk527QjJQKLzOttpn5FzoABuRlRTK8j6TaLkxE9cXZb64J2PTGseRf76Fz?=
- =?iso-8859-1?Q?tVlLpXabmiveQP5L/ocnfPGOhzu4xE+imZD+kia7vlSnPDlabgY3fOnQF5?=
- =?iso-8859-1?Q?kloi45JtEOUno2+QLx2DHH87gO9OyUIvePRgEaq7ufzTVL0Eh2F3lyMsQL?=
- =?iso-8859-1?Q?kYAv2NuPc0LYPP/z+AX3QIPHAzOhIV5BxU49+FfESlfl03GdZXBe80MZG8?=
- =?iso-8859-1?Q?CkW4WX610m7tl1Zwz0sRBzC84sk96dXBKbGWdga2Jep4GPOGxE4mrvLkQc?=
- =?iso-8859-1?Q?n4fu08TI0r0A94+7Xp2ytyIxf3p8c23pnA9KRc2bClFIuvxEVGlCXfOEbk?=
- =?iso-8859-1?Q?PyG2NO8Vj8uN5WmgH7rRkxtSHksNzciqoYNe/vgFXIj20Hwf+Mwm1WwJ3z?=
- =?iso-8859-1?Q?pHrV055CRbjZ8IY0nIRj2Z3W5M82wnW6RuR85TX/uEvI6F8QXIv+6JtuVF?=
- =?iso-8859-1?Q?xA+F+s0h8w4C0PSGz2mQUDNIKHx/r7tcR1qeQ05i9i1gW2awJ0VmzjkKoE?=
- =?iso-8859-1?Q?yHr3FEROL2Uk9YrCB4/WpZSb5f5GHP6tS6He8RtgEyjsYo83s+0zz3z5Qp?=
- =?iso-8859-1?Q?A9yHRP1kdFLykuMAouUxTxbaqTCQZx4mO4ZWYhhTnse397IS7iUgwc9jKl?=
- =?iso-8859-1?Q?HwQ95jQ0cu0v8k4IVFt7LLzI0y5nowqR/RuW7H70AMde+3AEzrgUYrm22W?=
- =?iso-8859-1?Q?v4D/TBjcLKeV8NFyfYpAYVFPgK6eOj0l2GftyumIGqLJ4poM/WNcEARDQq?=
- =?iso-8859-1?Q?C+OfITq39H5uuLB6ROf7qJBgCrkTqwnxOAGwHIVD/jxCLkNj4J3GkvrjJQ?=
- =?iso-8859-1?Q?xC60VO3J6u+VlSei05t2f8P3/dsZkSxSlNaopY3ypnTUpW4KVuKzeduyu3?=
- =?iso-8859-1?Q?FHO3IHYOItJvh8fKmLLfJRgX8Mi/zsD7XT4XQN9AiBRZ80zBArth4TizTP?=
- =?iso-8859-1?Q?aRbB4RuYfzOiqV6Kn9fuM1SoTH0Pcd+nEJ/rfr4I+hLnGWKH85nagT2iwT?=
- =?iso-8859-1?Q?hIpP5nAmi7LPNtfwT3hrCySKnQk1+m3pJtr0NWnh5z7NeSjTqjKTx7fNkH?=
- =?iso-8859-1?Q?lJKa0/8TpRgBER4tieuFo8JSmhzbn6MmiVjfNkyY9yGpSf3uazUj30Tx+H?=
- =?iso-8859-1?Q?6ElM03XJRmET4jeSWBq7V49UNYgAXsX4Ei41rd84IzQ9rl3Eqll69rOSFu?=
- =?iso-8859-1?Q?STz6y99UhFtEvMIdK92qbzGrfsqYwYqkn62EQOP0pLnkTwTy/qwlcSxgr6?=
- =?iso-8859-1?Q?2ILI7c/gZQZ+hBnjPkxZL8WII7QiWCefrjxWS2OeuVTThVy+7F28FgByEb?=
- =?iso-8859-1?Q?kczUuKuPyLCEJwTrUsBlNnEZ3v9afStOiHQOvfUqpppbC5Ch7PrZCEg2Cb?=
- =?iso-8859-1?Q?hDkBusyiCVgOsfNsw6EAkRGdKPdTVZhhPvzQ2WLFv9tOkS3NocUy5zyl8E?=
- =?iso-8859-1?Q?I1KWfeewm6iEJju/F5IUAr2FZKJol/vGwXWtIcqbn/k3lL0cqRLD0MeAYy?=
- =?iso-8859-1?Q?Xkj+AYicXTIrncexxFTeiPVmsvFWhanq9t3Q+CUq+kKQ=3D=3D?=
-Content-Type: text/plain; charset="iso-8859-1"
-Content-ID: <06B1E8EB2ECCA545AFCB793D0DEE1FC5@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
-MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SJ0PR04MB7776.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 08f5e480-b35a-468f-0dba-08da07028895
-X-MS-Exchange-CrossTenant-originalarrivaltime: 16 Mar 2022 04:07:48.7895
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: TfeSe+it8PArpQM89VMI+/gAA2z+qsXSzAgCRI7INezWY0CeFIu3b/hKnK1QKsPHEYTEIWuTezdjAhYteePbEg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR04MB5237
+        <20220315201756.18829-1-p.raghav@samsung.com>
+        <20220316040748.j5olvwr4qqpmvqgr@naota-xeon>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 15, 2022 at 09:17:56PM +0100, Pankaj Raghav wrote:
-> This test will break when zone capacity !=3D zone size because the
-> calculation of the size to be filled is done using zone_size instead of
-> the actual capacity available per zone. Fix it by using zone capacity.
->=20
-> The support to extract zone capacity was added to blkzone only from
-> version 2.37. So zcap will be used only when the blkzone version is
-> greater or equal to 2.37.
->=20
-> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> ---
->  tests/btrfs/237 | 20 +++++++++++++++++---
->  1 file changed, 17 insertions(+), 3 deletions(-)
->=20
-> diff --git a/tests/btrfs/237 b/tests/btrfs/237
-> index 96940549..6d3fe2f2 100755
-> --- a/tests/btrfs/237
-> +++ b/tests/btrfs/237
-> @@ -36,7 +36,21 @@ get_data_bg()
->  }
-> =20
->  zonesize=3D$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/chunk_secto=
-rs)
-> -zonesize=3D$((zonesize << 9))
-> +size=3D$((zonesize << 9))
-> +
-> +# blkzone supports printing zone cap only after version 2.37
-> +_blkzone_req_major_ver=3D2
-> +_blkzone_req_minor_ver=3D37
-> +blkzone_ver=3D$($BLKZONE_PROG --version | cut -d " " -f 4 | cut -d "-" -=
-f 1)
-> +blkzone_ver=3D( ${blkzone_ver//./ } )
-> +blkzone_major_ver=3D${blkzone_ver[0]}
-> +blkzone_minor_ver=3D${blkzone_ver[1]}
-> +if [[ $blkzone_major_ver -ge $_blkzone_req_major_ver &&\
-> +	$blkzone_minor_ver -ge $_blkzone_req_minor_ver ]]; then
+Hi Naohiro,
 
-I'd like to have it as a helper.
+On 2022-03-16 05:07, Naohiro Aota wrote:
+>> +# blkzone supports printing zone cap only after version 2.37
+>> +_blkzone_req_major_ver=2
+>> +_blkzone_req_minor_ver=37
+>> +blkzone_ver=$($BLKZONE_PROG --version | cut -d " " -f 4 | cut -d "-" -f 1)
+>> +blkzone_ver=( ${blkzone_ver//./ } )
+>> +blkzone_major_ver=${blkzone_ver[0]}
+>> +blkzone_minor_ver=${blkzone_ver[1]}
+>> +if [[ $blkzone_major_ver -ge $_blkzone_req_major_ver &&\
+>> +	$blkzone_minor_ver -ge $_blkzone_req_minor_ver ]]; then
+> 
+> I'd like to have it as a helper.
+> 
+> Or, how about adding a filter and a wrapper function to add a "cap"
+> filed whose value equal to the zone size for the old version (like
+> with _getcap() and _filter_getcap())? Then, we can just call:
+>   zonecap=$(_blkzone_report ... | grep -Po "cap ([0x\d]+)+" | cut -d ' ' -f 2)
+>   size=$((zonecap << 9))
+> 
+That is a good idea. I will give it a shot. Thanks.
 
-Or, how about adding a filter and a wrapper function to add a "cap"
-filed whose value equal to the zone size for the old version (like
-with _getcap() and _filter_getcap())? Then, we can just call:
+>> +	zonecap=$($BLKZONE_PROG report -c 1 $SCRATCH_DEV |\
+>> +		grep -Po "cap ([0x\d]+)+" | cut -d ' ' -f 2)
+> 
+> But still, zone capacity can vary for each zone. So, we need to read
+> the capacity of a zone where the data BG resides on.
+> 
+Do we support variable zone capacity in Linux? IIRC variable zone sizes
+are definitely not supported but I am not sure about variable zone capacity.
 
-  zonecap=3D$(_blkzone_report ... | grep -Po "cap ([0x\d]+)+" | cut -d ' ' =
--f 2)
-  size=3D$((zonecap << 9))
+But even if we do support, I see that the zone 5 (old_data_zone) and
+zone 6 (new_data_zone) during the test and what if the new_data_zone
+(zone 6) has a smaller cap than old_data_zone (zone 5)?
+The main question: Is there a way to deterministically tell where the
+data BG will reside and where it will relocate before we start the test
+with variable capacity?
 
-> +	zonecap=3D$($BLKZONE_PROG report -c 1 $SCRATCH_DEV |\
-> +		grep -Po "cap ([0x\d]+)+" | cut -d ' ' -f 2)
+My first look indicates that adding variable zone capacity will make the
+test a bit more complex and I am not sure if it is worth the effort if
+there are no use cases for it.
+Let me know your thoughts.
 
-But still, zone capacity can vary for each zone. So, we need to read
-the capacity of a zone where the data BG resides on.
-
-> +	size=3D$((zonecap << 9))
-> +fi
-> =20
->  _scratch_mkfs >/dev/null 2>&1
->  _scratch_mount -o commit=3D1 # 1s commit time to speed up test
-> @@ -53,8 +67,8 @@ reclaim_threshold=3D75
->  echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
->  fill_percent=3D$((reclaim_threshold + 2))
->  rest_percent=3D$((90 - fill_percent)) # make sure we're not creating a n=
-ew BG
-> -fill_size=3D$((zonesize * fill_percent / 100))
-> -rest=3D$((zonesize * rest_percent / 100))
-> +fill_size=3D$((size * fill_percent / 100))
-> +rest=3D$((size * rest_percent / 100))
-> =20
->  # step 1, fill FS over $fillsize
->  $XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test1 >> $seqre=
-s.full
-> --=20
-> 2.25.1
-> =
+-- 
+Regards,
+Pankaj
