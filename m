@@ -2,79 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE12CC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 15:11:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8AE78C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 15:30:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231846AbiCQPNF (ORCPT
+        id S232972AbiCQPcB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Mar 2022 11:13:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55930 "EHLO
+        Thu, 17 Mar 2022 11:32:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34122 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229753AbiCQPNE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 11:13:04 -0400
+        with ESMTP id S233590AbiCQPb6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 11:31:58 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9476F204CB6
-        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 08:11:48 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 069FC16F6C9
+        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 08:30:42 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id EA415B81EF7
-        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 15:11:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 81373C340E9;
-        Thu, 17 Mar 2022 15:11:45 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A23B4B81E9E
+        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 15:30:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3CFFFC340E9;
+        Thu, 17 Mar 2022 15:30:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647529905;
-        bh=itekjf7O77o7RFNvbuVkGZWG5P7JlvLKygy4+al0bzc=;
+        s=k20201202; t=1647531039;
+        bh=jy5dEzn4W48+SuYJlXWRLJLpmT9jqdShmETR3Ac17TY=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=cnv5HNabJUdot2R/3rS/VMg+x38L6swEtzi3mZf1F7eCe1MXF8UT6a9t6URPriD2u
-         mZl34XN75PX7egrKRUUYQWdcLKL9ZHAKDnzCStagpyYYH3/TWbkNMA3eDiR8ynZg/2
-         O6Vayyy5Jzo2oFMjtqb7/gbTSlReP+qZs6Ybe4SMCVi/QD2zL/PtP1uO4BNpFSEiXE
-         QPyXSaNCdeRPlACAiUWTBapHbUjBOgp8ZO/e6LxPf5Wej6dLDWGEsNYkEQquektell
-         bq6ghOvJRu/Sm8fbE1FV/s00j4BSz9X1jx2gWqmKJ1PAsTwD2Fr84fr2s9984cO5XK
-         aQFURjUgF/rXQ==
-Date:   Thu, 17 Mar 2022 08:11:44 -0700
+        b=Cy4QNj2hIHWlul80m1+7XnNk85ce1xSRWGkmJ59FC9UPrXsUnIRD8Bmyn2xvWZvAO
+         aCcq0yyjeYUZRjANuGF96/iRsjAgzr8GmwR1AQi1PJTUjItPs49gSXeZhK4WX1dR7F
+         Aj6DaKxAz4KKUNTTKOfH2XebEGsJb9Nsbr/B7A8xm9MxsEGJkYfdAywC6tMdMYhGU1
+         kfRgrkkK5M+aqxoiqIRepZUwJ2C6Ufu9I1RZUo8J6PwUEpWXr/1cZLRz3RXlbTfHTZ
+         qHe2Balve9fURKxjKLEl/OO/215wDazH2ox9UKm2MBsQUKHkw2c8SCxInGALLAhSvE
+         JaOlKrImhMayg==
+Date:   Thu, 17 Mar 2022 08:30:38 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     bxue@redhat.com
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v1 1/2] generic/674: check for dedupe support on scratch
- fs
-Message-ID: <20220317151144.GG8200@magnolia>
+Subject: Re: [PATCH v1 2/2] generic/513,675: check for security namespace
+ support
+Message-ID: <20220317153038.GH8200@magnolia>
 References: <20220317100842.1237893-1-bxue@redhat.com>
- <20220317100842.1237893-2-bxue@redhat.com>
+ <20220317100842.1237893-3-bxue@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220317100842.1237893-2-bxue@redhat.com>
+In-Reply-To: <20220317100842.1237893-3-bxue@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 17, 2022 at 06:08:41PM +0800, bxue@redhat.com wrote:
+On Thu, Mar 17, 2022 at 06:08:42PM +0800, bxue@redhat.com wrote:
 > From: Boyang Xue <bxue@redhat.com>
 > 
-> Signed-off-by: Boyang Xue <bxue@redhat.com>
-> ---
->  tests/generic/674 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/674 b/tests/generic/674
-> index bf0bcffb..7e5e4e29 100755
-> --- a/tests/generic/674
-> +++ b/tests/generic/674
-> @@ -19,6 +19,7 @@ _begin_fstest auto clone quick
->  _supported_fs generic
->  _require_user
->  _require_scratch_reflink
-> +_require_scratch_dedupe
 
-I think you could replace the _require_scratch_reflink with
-_require_scratch_dedupe here, right?  I probably copypasta'd this.
+Er... what does this patch do, and why?
 
 --D
 
->  _require_xfs_io_command dedupe
+> Signed-off-by: Boyang Xue <bxue@redhat.com>
+> ---
+>  tests/generic/513 | 2 ++
+>  tests/generic/675 | 2 ++
+>  2 files changed, 4 insertions(+)
+> 
+> diff --git a/tests/generic/513 b/tests/generic/513
+> index dc082787..6e897fa0 100755
+> --- a/tests/generic/513
+> +++ b/tests/generic/513
+> @@ -12,10 +12,12 @@ _begin_fstest auto quick clone
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/attr
 >  
->  _scratch_mkfs >> $seqres.full
+>  # real QA test starts here
+>  _supported_fs generic
+>  _require_scratch_reflink
+> +_require_attrs security
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+>  
+> diff --git a/tests/generic/675 b/tests/generic/675
+> index 23b7e545..311860dc 100755
+> --- a/tests/generic/675
+> +++ b/tests/generic/675
+> @@ -12,12 +12,14 @@ _begin_fstest auto clone quick
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/attr
+>  
+>  # real QA test starts here
+>  
+>  # Modify as appropriate.
+>  _supported_fs generic
+>  _require_user
+> +_require_attrs security
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+>  _require_scratch_reflink
 > -- 
 > 2.27.0
 > 
