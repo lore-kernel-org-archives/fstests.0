@@ -2,185 +2,176 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1194C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 15:34:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75D90C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 16:31:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235900AbiCQPfW (ORCPT
+        id S233707AbiCQQdL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Mar 2022 11:35:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46150 "EHLO
+        Thu, 17 Mar 2022 12:33:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58150 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235902AbiCQPfU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 11:35:20 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 426B21788EA;
-        Thu, 17 Mar 2022 08:34:04 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D47196198B;
-        Thu, 17 Mar 2022 15:34:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4705FC340E9;
-        Thu, 17 Mar 2022 15:34:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647531243;
-        bh=C/yT/HGXHL23Va0VOxdINOTO8wNiWWY7OegmtFxLKTs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=dU40bk5w82m4Os/E1Zrf9YR6Z+c/y7qvB9qMgw7xxK5k2560m0snFqtJO4wL26fCM
-         +8/QklEj0xUMpycU2HeZjHhhv2hrk4p3SGhUBn5//lxx5BCdD0xDafu4+A/yw77c7Y
-         iWJN8LuHs5+HFeuRFPKz1Nuk7s02oN8iZ9vd5SDGZvRGqkd4Au2u3VYy2WJQuPw9YF
-         h5tjJfnZulNPF1ivsY4CF0T6g8KNsij0+ecOEERFzIXbBqVR9e/WI4oEGruuRIYsCM
-         coLFEMXjmV7vwMHE38xuTswz98KGDD23wFAcOjevLDGasXiGXMzZa9Sr4u19f/xUw6
-         Lb9IO+Sdhr7Ag==
-Date:   Thu, 17 Mar 2022 08:34:02 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test fallocate against a file range with a mix of
- holes and extents
-Message-ID: <20220317153402.GI8200@magnolia>
-References: <4db70a749eaf214025dd944df5b231f4c317e13e.1647529329.git.fdmanana@suse.com>
+        with ESMTP id S236581AbiCQQdK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 12:33:10 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 92DB5216A48
+        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 09:31:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1647534712;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=CakZBq0bUnsQ2+1MdHu4Pwk4y6WgfLQKs7fgMBbunzM=;
+        b=VofkvcBDP43Gc9M1TOb7E5O9mGVInM7r2yruxbzAntCxVgGiufJudjGJr8fnyHTO+hAUcs
+        13JBrBzn6Z+qwfpoLVRFRQnEy2LaIRhFaGnb06QnmAPMSpN5pl7tShAMFyrcbas7EJPi0w
+        0+eU0EvsBVJ5iPyNyEPDhxwwI9Wij+I=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-220-03i2PuN6PSWsvm1EkN4glA-1; Thu, 17 Mar 2022 12:31:51 -0400
+X-MC-Unique: 03i2PuN6PSWsvm1EkN4glA-1
+Received: by mail-pj1-f71.google.com with SMTP id om8-20020a17090b3a8800b001c68e7ccd5fso1050065pjb.9
+        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 09:31:50 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=CakZBq0bUnsQ2+1MdHu4Pwk4y6WgfLQKs7fgMBbunzM=;
+        b=rITOHj6zi3B2aB1TTQHzvSWSUFUD+V/87xoJ5NO/1sUdbrRhVtTX5ErxIqz0wAbjlS
+         kcUdnX9inCH1R3dUIM3CuP6DNyhxTDWM8XPE2qeKFMos/KrW+UHwVkyrnNDwAbE0U91Z
+         h+zmHJDvbrpS9YS9yKvkwFWPgVUtdl4XJ4e/tXv7eYdW4ljEdayU7GN5AcgavHdQ3U/m
+         ga4c/k6/56bqr3RMzFs2geCwmlucJdL94ObFZpwzwB80Upjyf/GnhkdTYZilQVFGuxB9
+         23ljpOipSmVopfcNScxyxzcaKElJ9/d/ffk2FdFXsa66PcXSbF6aXfM2VKMl7llO80R2
+         egwg==
+X-Gm-Message-State: AOAM530pbc9tcBH/dzsVoMgvEVpUFiLxSE4CYystHR94bpAWseaO+SiF
+        OI0naUs3AYGyIy5PGqJUKpojpceNnzHbv/fjnjchT+QAdNyqRThDCCFWjJoJKSkGSkjk6cCINRv
+        bls2toncLGz6Xh8WQc0XhozX36GZ1WAbJxg==
+X-Received: by 2002:a05:6a00:781:b0:4f4:2a:2d89 with SMTP id g1-20020a056a00078100b004f4002a2d89mr5292310pfu.13.1647534709437;
+        Thu, 17 Mar 2022 09:31:49 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxTKsafp0FtVN/dNsZm65ThTeuDWkvXitOciQzFXB4OakAbNTWCGvH+f/oPUvPeTmJqxclUTIj9zEKXGFhc/ck=
+X-Received: by 2002:a05:6a00:781:b0:4f4:2a:2d89 with SMTP id
+ g1-20020a056a00078100b004f4002a2d89mr5292284pfu.13.1647534709145; Thu, 17 Mar
+ 2022 09:31:49 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4db70a749eaf214025dd944df5b231f4c317e13e.1647529329.git.fdmanana@suse.com>
+References: <20220317100842.1237893-1-bxue@redhat.com> <20220317100842.1237893-3-bxue@redhat.com>
+ <20220317153038.GH8200@magnolia>
+In-Reply-To: <20220317153038.GH8200@magnolia>
+From:   Boyang Xue <bxue@redhat.com>
+Date:   Fri, 18 Mar 2022 00:31:38 +0800
+Message-ID: <CAHLe9YZQjukAP80yP_qHFF_6bDBVOd+CBbPAqUjYz9CTSsrDXg@mail.gmail.com>
+Subject: Re: [PATCH v1 2/2] generic/513,675: check for security namespace support
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 17, 2022 at 03:03:40PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that if we call fallocate against a file range that has a mix of holes
-> and written extents, the fallocate succeeds if the filesystem has enough free
-> space to allocate extents for the holes.
-> 
-> This currently fails on btrfs and is fixed by a patch that has the subject:
-> 
->   "btrfs: only reserve the needed data space amount during fallocate"
-> 
-> There's nothing that is really specific to btrfs in the test case, and the
-> same test passes on ext4 and f2fs for example. But it fails on xfs, and
-> after some discussion with Darrick, it seems it's due to technical reasons
-> that would require a significant effort to xfs's implementation, and at
-> the moment there isn't enough motivation to do such change. The relevent
-> thread is at:
-> 
->    https://lore.kernel.org/linux-btrfs/20220315164011.GF8241@magnolia/
-> 
-> So for the time being, make the test btrfs specific.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/btrfs/261     | 58 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/261.out | 20 ++++++++++++++++
->  2 files changed, 78 insertions(+)
->  create mode 100755 tests/btrfs/261
->  create mode 100644 tests/btrfs/261.out
-> 
-> diff --git a/tests/btrfs/261 b/tests/btrfs/261
-> new file mode 100755
-> index 00000000..e7e9f15e
-> --- /dev/null
-> +++ b/tests/btrfs/261
-> @@ -0,0 +1,58 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test 261
-> +#
-> +# Test that if we call fallocate against a large file range that is nearly full
-> +# with written extents, the fallocate succeeds and allocates unwritten extents
-> +# for the holes in the range.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick prealloc
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/punch
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs btrfs
+(Resend due to previous email being rejected. Sorry)
 
-Or make this a generic test and add:
+Hi Darrick,
 
-test $FSTYP == "xfs"  && _notrun "xfs doesn't work that way lol"
+I find the problem when I run xfstests generic/513,675 on nfs
 
-> +_require_scratch
-> +_require_xfs_io_command "falloc"
-> +_require_xfs_io_command "fiemap"
-> +
-> +rm -f $seqres.full
-> +
-> +# Create a 1G filesystem.
-> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Create a file with a size of 600M and two holes, each with a size of 1M and
-> +# at file ranges [200, 201M[ and [401M, 402M[.
-> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 200M" \
-> +                -c "pwrite -S 0xcd 201M 200M" \
-> +                -c "pwrite -S 0xef 402M 198M" \
-> +		$SCRATCH_MNT/foobar | _filter_xfs_io
-> +
-> +# Now call fallocate against the whole file range.
-> +# It should succeed, because only 2M of data space needs to be allocated,
-> +# and not 600M (which isn't available since our fs has a size of 1G).
-> +$XFS_IO_PROG -c "falloc 0 600M" $SCRATCH_MNT/foobar
-> +
-> +# Unmount and mount again the filesystem. We want to veriy that the fallocate
+```
+FSTYP         -- nfs
+PLATFORM      -- Linux/x86_64 kvm103 5.14.0-71.el9.x86_64 #1 SMP
+PREEMPT Tue Mar 8 17:49:53 EST 2022
+MKFS_OPTIONS  -- localhost:/scratch_TMP
+MOUNT_OPTIONS -- -o vers=4.2 -o context=system_u:object_r:root_t:s0
+localhost:/scratch_TMP /scratch
 
-'verify'
+generic/513     - output mismatch (see
+/root/repo_xfstests/results//generic/513.out.bad)
+    --- tests/generic/513.out   2022-03-09 05:26:45.450331405 -0500
+    +++ /root/repo_xfstests/results//generic/513.out.bad
+2022-03-17 09:34:17.190818281 -0400
+    @@ -1,2 +1,18 @@
+     QA output created by 513
+    +Failed to set capabilities on file '/scratch/bar' (Operation not supported)
+```
 
-Other than those two things, this test looks sound to me.
+So nfs doesn't support capabilities, I think we should run a check and
+not run the test on filesystems like nfs that don't support it.
+I find the file capabilities are implemented by using "security
+attribute namespace", and running "_require_attrs security" can do the
+check.
+After applying this patch, running generic/513, 675 on nfs will be like
 
---D
+```
+FSTYP         -- nfs
+PLATFORM      -- Linux/x86_64 kvm103 5.14.0-71.el9.x86_64 #1 SMP
+PREEMPT Tue Mar 8 17:49:53 EST 2022
+MKFS_OPTIONS  -- localhost:/scratch_TMP
+MOUNT_OPTIONS -- -o vers=4.2 -o context=system_u:object_r:root_t:s0
+localhost:/scratch_TMP /scratch
 
-> +# results were persisted and that all the file metadata and data on disk are
-> +# also correct.
-> +_scratch_cycle_mount
-> +
-> +echo -n "Number of unwritten extents in the file: "
-> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap | \
-> +    grep 'unwritten' | wc -l
-> +
-> +# Verify we don't have any corruption caused by the fallocate.
-> +echo "File content after fallocate:"
-> +od -A d -t x1 $SCRATCH_MNT/foobar
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/261.out b/tests/btrfs/261.out
-> new file mode 100644
-> index 00000000..db7f0d6d
-> --- /dev/null
-> +++ b/tests/btrfs/261.out
-> @@ -0,0 +1,20 @@
-> +QA output created by 261
-> +wrote 209715200/209715200 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 209715200/209715200 bytes at offset 210763776
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 207618048/207618048 bytes at offset 421527552
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Number of unwritten extents in the file: 2
-> +File content after fallocate:
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +209715200 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> +*
-> +210763776 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
-> +*
-> +420478976 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> +*
-> +421527552 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef
-> +*
-> +629145600
-> -- 
-> 2.33.0
-> 
+generic/513     [not run] attr namespace security not supported by
+this filesystem type: nfs
+generic/675     [not run] attr namespace security not supported by
+this filesystem type: nfs
+Ran: generic/513 generic/675
+Not run: generic/513 generic/675
+Passed all 2 tests
+```
+
+Thanks,
+Boyang
+
+
+On Thu, Mar 17, 2022 at 11:30 PM Darrick J. Wong <djwong@kernel.org> wrote:
+>
+> On Thu, Mar 17, 2022 at 06:08:42PM +0800, bxue@redhat.com wrote:
+> > From: Boyang Xue <bxue@redhat.com>
+> >
+>
+> Er... what does this patch do, and why?
+>
+> --D
+>
+> > Signed-off-by: Boyang Xue <bxue@redhat.com>
+> > ---
+> >  tests/generic/513 | 2 ++
+> >  tests/generic/675 | 2 ++
+> >  2 files changed, 4 insertions(+)
+> >
+> > diff --git a/tests/generic/513 b/tests/generic/513
+> > index dc082787..6e897fa0 100755
+> > --- a/tests/generic/513
+> > +++ b/tests/generic/513
+> > @@ -12,10 +12,12 @@ _begin_fstest auto quick clone
+> >  # Import common functions.
+> >  . ./common/filter
+> >  . ./common/reflink
+> > +. ./common/attr
+> >
+> >  # real QA test starts here
+> >  _supported_fs generic
+> >  _require_scratch_reflink
+> > +_require_attrs security
+> >  _require_command "$GETCAP_PROG" getcap
+> >  _require_command "$SETCAP_PROG" setcap
+> >
+> > diff --git a/tests/generic/675 b/tests/generic/675
+> > index 23b7e545..311860dc 100755
+> > --- a/tests/generic/675
+> > +++ b/tests/generic/675
+> > @@ -12,12 +12,14 @@ _begin_fstest auto clone quick
+> >  # Import common functions.
+> >  . ./common/filter
+> >  . ./common/reflink
+> > +. ./common/attr
+> >
+> >  # real QA test starts here
+> >
+> >  # Modify as appropriate.
+> >  _supported_fs generic
+> >  _require_user
+> > +_require_attrs security
+> >  _require_command "$GETCAP_PROG" getcap
+> >  _require_command "$SETCAP_PROG" setcap
+> >  _require_scratch_reflink
+> > --
+> > 2.27.0
+> >
+>
+
