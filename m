@@ -2,194 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF3E8C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 12:28:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7427C433FE
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 14:38:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232006AbiCQMaI (ORCPT
+        id S235154AbiCQOj3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Mar 2022 08:30:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55092 "EHLO
+        Thu, 17 Mar 2022 10:39:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51086 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229941AbiCQMaH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 08:30:07 -0400
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D235D3AF0
-        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 05:28:50 -0700 (PDT)
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20220317122844euoutp01a9d54087b854f9336f64c45353e0f961~dKtMKd-4q0328603286euoutp01T
-        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 12:28:44 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20220317122844euoutp01a9d54087b854f9336f64c45353e0f961~dKtMKd-4q0328603286euoutp01T
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1647520124;
-        bh=JlqLJs4LlaB+KRi9rUa/r/6pHZFZg0438y9KmWjhM80=;
-        h=From:To:Cc:Subject:Date:References:From;
-        b=m3g7CXM0UJk22PqIdV5gn2A8OkJfJxkuNIA2vPyKRHNRhK2AmiBm03T55Lz5RlGRH
-         1yIXfegINHjR1P7Rxz1T1aNcZmNBJwvLAu6UQbAd1fD/gbVqnKY22hxLFDGhZXC43S
-         99SVfFi9tIiYv7MzqWEOCMS6r+XUzH40piXwNsGE=
-Received: from eusmges1new.samsung.com (unknown [203.254.199.242]) by
-        eucas1p2.samsung.com (KnoxPortal) with ESMTP id
-        20220317122843eucas1p256184e721594a2fb27db881e11f15eff~dKtLWZ6z20378703787eucas1p2d;
-        Thu, 17 Mar 2022 12:28:43 +0000 (GMT)
-Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
-        eusmges1new.samsung.com (EUCPMTA) with SMTP id FB.34.10009.B7923326; Thu, 17
-        Mar 2022 12:28:43 +0000 (GMT)
-Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
-        eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-        20220317122843eucas1p1d01a061e25bd7bfaaf912780c011ffdd~dKtK2c4210445904459eucas1p1Z;
-        Thu, 17 Mar 2022 12:28:43 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20220317122843eusmtrp1c7001784988016264b14b59c3f84bf15~dKtK1p8hW0717407174eusmtrp1I;
-        Thu, 17 Mar 2022 12:28:43 +0000 (GMT)
-X-AuditID: cbfec7f2-e7fff70000002719-53-6233297b08bb
-Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
-        eusmgms2.samsung.com (EUCPMTA) with SMTP id C7.76.09404.B7923326; Thu, 17
-        Mar 2022 12:28:43 +0000 (GMT)
-Received: from localhost (unknown [106.210.248.227]) by eusmtip1.samsung.com
-        (KnoxPortal) with ESMTPA id
-        20220317122842eusmtip1151f5dd898d45fb5b3b298ce9250f230~dKtKgfJ9W2394923949eusmtip1t;
-        Thu, 17 Mar 2022 12:28:42 +0000 (GMT)
-From:   Pankaj Raghav <p.raghav@samsung.com>
-To:     Naohiro Aota <Naohiro.Aota@wdc.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-        fstests@vger.kernel.org
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        =?UTF-8?q?Javier=20Gonz=C3=A1lez?= <javier.gonz@samsung.com>,
-        Pankaj Raghav <pankydev8@gmail.com>,
-        Kanchan Joshi <joshiiitr@gmail.com>,
-        Adam Manzanares <a.manzanares@samsung.com>,
-        Pankaj Raghav <p.raghav@samsung.com>
-Subject: [PATCH v2] btrfs/237: Use zone cap instead of zone size in
- fill_size and rest calculation
-Date:   Thu, 17 Mar 2022 13:28:39 +0100
-Message-Id: <20220317122839.44404-1-p.raghav@samsung.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S234010AbiCQOj2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 10:39:28 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EE0582726
+        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 07:38:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1647527884;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=ytWkLUJlQ5JfxdSa9h1h3zvU2Toa1USYumwSF8WoJ/Q=;
+        b=YOjQDTQ3ng6y9wz7dn0BwsYJ+paScQeLO9efBkQd38ijab7wcw1Lyb9dOLOqT0cplk7SyC
+        l8gmNdZlvPf0yapUXgnIZhKdqHWHbZ31qZPlj/xUJeme5SE8vM+EwyZhLROCj64Apj/f6C
+        7Trly9/vGO8IF2349tIh2aRX8TkK/PU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-577-F31jEcr_MaKNjJO0UCtaNQ-1; Thu, 17 Mar 2022 10:38:02 -0400
+X-MC-Unique: F31jEcr_MaKNjJO0UCtaNQ-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 6B7AF1066542
+        for <fstests@vger.kernel.org>; Thu, 17 Mar 2022 14:38:02 +0000 (UTC)
+Received: from work (unknown [10.40.193.231])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id DB205C26E85;
+        Thu, 17 Mar 2022 14:38:01 +0000 (UTC)
+Date:   Thu, 17 Mar 2022 15:37:59 +0100
+From:   Lukas Czerner <lczerner@redhat.com>
+To:     Andrey Albershteyn <aalbersh@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4/053: check that remount with abort makes fs
+ read-only
+Message-ID: <20220317143759.trcyjacqj6zt2s3v@work>
+References: <20220310111810.14543-1-aalbersh@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrEKsWRmVeSWpSXmKPExsWy7djP87rVmsZJBpvXqltMP6xo8fvseWaL
-        0y172S0e3/nMbvG36x6Txfm3h5ksbkx4ymgx8fhmVovPS1vYLdbcfMriwOWxc9Zddo9NqzrZ
-        PHa23mf16NuyitHj8yY5j/YD3UwBbFFcNimpOZllqUX6dglcGVOmb2IuWCRWsafzFGMD42Sh
-        LkYODgkBE4nGS85djFwcQgIrGCVe/jnMBuF8YZR4sv0GI4TzmVGitec1cxcjJ1jHosNnWUBs
-        IYHljBItzcwQ9ktGidPfPEGmsgloSTR2soP0ioBM3b74OFg9s0AHk8T1F8EgtrBAisSPo82s
-        IDaLgKpES08bO4jNK2ApcejVLkaIXfISMy99h4oLSpyc+QRqjrxE89bZzCALJAT2cEgcOP+O
-        DaLBReLeyWXsELawxKvjW6BsGYnTk3tYIBr6GSWmtvxhgnBmMEr0HN7MBAkMa4m+MzkgJrOA
-        psT6XfoQvY4SPw98Z4Go4JO48VYQ4gY+iUnbpjNDhHklOtqEIKqVJHb+fAK1VULictMcFgjb
-        Q+LM4oVskKCKldiyeyPzBEaFWUg+m4Xks1kINyxgZF7FKJ5aWpybnlpsmJdarlecmFtcmpeu
-        l5yfu4kRmIxO/zv+aQfj3Fcf9Q4xMnEwHmKU4GBWEuE980I/SYg3JbGyKrUoP76oNCe1+BCj
-        NAeLkjhvcuaGRCGB9MSS1OzU1ILUIpgsEwenVAOTU/CWcuZ2w08Nyb4z/ZfOPbLm1doz0XeD
-        k29srzOKyFVvVFglp2bkVF1l4qdTJ7Dld9sC8abjX336fLfmfPnNeJbT37nek0Wvl+GJjV8z
-        +1UrHo7TNX+i4oVist6fn3jfMtPs5y6Zz32xvQscDl/NPWRrHNKm51x4Oy075IxJtZzzgU07
-        7Qy/iS5l0z6/IOJHjMvsi3FZFumCcoePWLyKOuTULhgVySAxc/6zbXNfvNeQm6K/+eY+Ttl9
-        vRHmyzhs02rNZv9a88bFp9Z7xol5LSs8wi28Mt9ujM2pe93x4aQAwz3d3t+en2pmCLx/PVF2
-        8Wbjo0Zd/79bci1Ldbn5s22e7+yU2ZtkQyI3vVBiKc5INNRiLipOBAA2qZqvtQMAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrDLMWRmVeSWpSXmKPExsVy+t/xu7rVmsZJBqvesFpMP6xo8fvseWaL
-        0y172S0e3/nMbvG36x6Txfm3h5ksbkx4ymgx8fhmVovPS1vYLdbcfMriwOWxc9Zddo9NqzrZ
-        PHa23mf16NuyitHj8yY5j/YD3UwBbFF6NkX5pSWpChn5xSW2StGGFkZ6hpYWekYmlnqGxuax
-        VkamSvp2NimpOZllqUX6dgl6GVOmb2IuWCRWsafzFGMD42ShLkZODgkBE4lFh8+ydDFycQgJ
-        LGWUmHH4DyNEQkLi9sImKFtY4s+1LjaIoueMEk1L97B2MXJwsAloSTR2soPERQRWMUqsv/SB
-        CcRhFuhhknjzYDVYt7BAksT7vT+ZQWwWAVWJlp42dhCbV8BS4tCrXVAb5CVmXvoOFReUODnz
-        CQuIzQwUb946m3kCI98sJKlZSFILGJlWMYqklhbnpucWG+kVJ+YWl+al6yXn525iBEbDtmM/
-        t+xgXPnqo94hRiYOxkOMEhzMSiK8Z17oJwnxpiRWVqUW5ccXleakFh9iNAW6byKzlGhyPjAe
-        80riDc0MTA1NzCwNTC3NjJXEeT0LOhKFBNITS1KzU1MLUotg+pg4OKUamMQ0pa5nXS/mWuRq
-        6/X859kW9kxmF5XNa62PdPTy3Jk+SeBbTtbBc3PnWPd4pf8/cjtqr9GXXKaqhJnZ/h5vVrCU
-        fWjfVNlt09THoDYl4kj0ojVbXmxfJBLtmKrb8FtBRrrNirksnuPtqYlL7q6aGv1l5TT5Re4F
-        b35uEN1+3/WguGJc/MnHQeYz+P92vFcJiTPYWsX0fqK7GLu9Y3Twlwfvjj1RC5e1XLMl9wO7
-        hob4+cf+5+6xO/RNWm28YZH8+w/HK+4FR686Ok8opPuoJ1+mhdveqT/kXv2bk6tze8bBLVvv
-        Pz60al2B+QE96yJ/uXCX6tAQNc4fLeVTu+fyGyydFli0XfRNoFsb95v6ECWW4oxEQy3mouJE
-        ACyOx8YPAwAA
-X-CMS-MailID: 20220317122843eucas1p1d01a061e25bd7bfaaf912780c011ffdd
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20220317122843eucas1p1d01a061e25bd7bfaaf912780c011ffdd
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20220317122843eucas1p1d01a061e25bd7bfaaf912780c011ffdd
-References: <CGME20220317122843eucas1p1d01a061e25bd7bfaaf912780c011ffdd@eucas1p1.samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220310111810.14543-1-aalbersh@redhat.com>
+X-Scanned-By: MIMEDefang 2.85 on 10.11.54.8
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test will break when zone capacity != zone size because the
-calculation of the size to be filled is done using zone_size instead of
-the actual capacity available per zone. Fix it by using zone capacity.
+Hi Andrey,
 
-As a zoned device can have variable capacity, use the capacity from zone 5
-as it is the first data block group.
+sorry I haven't notice it earlier. Feel free to cc me next time.
 
-The support to extract zone capacity was added to blkzone only from
-version 2.37. So zcap will be used only when the blkzone version is
-greater or equal to 2.37.
+On Thu, Mar 10, 2022 at 12:18:11PM +0100, Andrey Albershteyn wrote:
+> The 6e47a3cc68fc ("ext4: get rid of super block and sbi from
+> handle_mount_ops()") broke abort mount option. That problem was not
+> detected by ext4/053.
+> 
+> This addition test checks that during aborted remount, filesystem
+> switches into read-only state (enabled by ext4_handle_error()
+> causing mount to fail).
+> 
+> Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
+> ---
+>  tests/ext4/053 | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/tests/ext4/053 b/tests/ext4/053
+> index e1e79592..38f162a9 100755
+> --- a/tests/ext4/053
+> +++ b/tests/ext4/053
+> @@ -360,6 +360,10 @@ not_remount() {
+>  	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+>  }
+>  
+> +mnt_not_remount() {
+> +	do_mnt
+> +	not_remount -r $@
 
-Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
----
-Changes since v1:
-- Add a filter that can append a 'cap' column for blkzone version <2.37
-  (Naohiro)
-- Extract the capacity from the zone on which the test is performed as a
-  zoned device can have variable zone capacity(Naohiro)
+So you're only checking whether the remount failed with abort, but there
+are more reasons for it to fail. Maybe we should also check the file
+system is actually read only?
 
- common/filter   | 12 ++++++++++++
- tests/btrfs/237 | 13 ++++++++-----
- 2 files changed, 20 insertions(+), 5 deletions(-)
+-Lukas
 
-diff --git a/common/filter b/common/filter
-index 257227c2..5acd57dd 100644
---- a/common/filter
-+++ b/common/filter
-@@ -634,5 +634,17 @@ _filter_bash()
- 	sed -e "s/^bash: line 1: /bash: /"
- }
- 
-+#
-+#blkzone report added zone capacity to be printed from v2.37.
-+#This filter will add an extra column 'cap' with the same value of
-+#'len'(zone size) for blkzone version < 2.37
-+#
-+#Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
-+#After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000 ..
-+_filter_blkzone_report()
-+{
-+	$AWK_PROG -F "," 'BEGIN{OFS=",";} $3 !~ /cap/ {$2=$2","$2;} {print;}' | sed -e 's/len/cap/2'
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/tests/btrfs/237 b/tests/btrfs/237
-index 96940549..33a0d81d 100755
---- a/tests/btrfs/237
-+++ b/tests/btrfs/237
-@@ -35,9 +35,6 @@ get_data_bg()
- 		grep -Eo "CHUNK_ITEM [[:digit:]]+" | cut -d ' ' -f 2
- }
- 
--zonesize=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/chunk_sectors)
--zonesize=$((zonesize << 9))
--
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount -o commit=1 # 1s commit time to speed up test
- 
-@@ -49,12 +46,18 @@ if [[ "$uuid" == "" ]]; then
- 	exit 1
- fi
- 
-+data_bg_zone_idx=5
-+size=$($BLKZONE_PROG report -c $data_bg_zone_idx $SCRATCH_DEV | tail -1 |\
-+	_filter_blkzone_report |\
-+	grep -Po "cap ([0x\d]+)+" | cut -d ' ' -f 2)
-+size=$((size << 9))
-+
- reclaim_threshold=75
- echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
- fill_percent=$((reclaim_threshold + 2))
- rest_percent=$((90 - fill_percent)) # make sure we're not creating a new BG
--fill_size=$((zonesize * fill_percent / 100))
--rest=$((zonesize * rest_percent / 100))
-+fill_size=$((size * fill_percent / 100))
-+rest=$((size * rest_percent / 100))
- 
- # step 1, fill FS over $fillsize
- $XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test1 >> $seqres.full
--- 
-2.25.1
+> +}
+>  
+>  do_mkfs() {
+>  	$MKE2FS_PROG -T $fstype -Fq $* >> $seqres.full 2>&1 ||
+> @@ -450,6 +454,7 @@ for fstype in ext2 ext3 ext4; do
+>  	only_ext4 mnt nojournal_checksum
+>  	only_ext4 mnt journal_async_commit,data=writeback
+>  	mnt abort ignored
+> +	mnt_not_remount abort ignored
+>  	not_ext2 mnt -t data=journal
+>  	not_ext2 mnt -t data=ordered
+>  	not_ext2 mnt -t data=writeback
+> -- 
+> 2.27.0
+> 
 
