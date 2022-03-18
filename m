@@ -2,211 +2,250 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A1B5C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Mar 2022 23:24:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2768FC433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Mar 2022 07:54:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229688AbiCQXZi (ORCPT
+        id S233369AbiCRH4O (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Mar 2022 19:25:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52020 "EHLO
+        Fri, 18 Mar 2022 03:56:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229522AbiCQXZh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Mar 2022 19:25:37 -0400
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD28728AC7B;
-        Thu, 17 Mar 2022 16:24:19 -0700 (PDT)
-Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 22HLYD7P024696;
-        Thu, 17 Mar 2022 23:24:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : subject :
- date : message-id : content-type : content-transfer-encoding :
- mime-version; s=corp-2021-07-09;
- bh=rPHQPFP1op/SZHHTw7OjhY8lM7fXzmzw35x9mcn5VQc=;
- b=q33wsvrO5qxjGDQlEH5Ul8xC2zcm7AKQ7DhWOphA8bP5Dj4A7ws+us6MSdaAOFtqL2Tc
- iVi9s1M92cKp9C/mepoZ7rRKtmpCBfuiTexbwDZcy9AJL00Dr8sjytqc1CUjnsR4AaYM
- kSv1ERjyxbPpPCIiuBO1+cH3O5sOd5Vgf1qsOVSh/RjZq/RSYHKhFghJUsxMVQzil1wX
- TN34nOJbdC3U+X/8oF4ptiuqfWhBT27V+CRr0lSBy80WTAKCD2latqwSayXe3L4qnGY7
- mgdTUvuOB32Tw84uiGBDx1yJmWbWeULdYL6f6bV1wEmGghhrqFxIiM7pEnbJL2g0KgES 0w== 
-Received: from aserp3030.oracle.com ([141.146.126.71])
-        by mx0b-00069f02.pphosted.com with ESMTP id 3et5s6tthv-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 17 Mar 2022 23:24:18 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 22HNGqWS031456;
-        Thu, 17 Mar 2022 23:24:17 GMT
-Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2171.outbound.protection.outlook.com [104.47.57.171])
-        by aserp3030.oracle.com with ESMTP id 3et64u35qb-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 17 Mar 2022 23:24:17 +0000
+        with ESMTP id S231319AbiCRH4O (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Mar 2022 03:56:14 -0400
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BE7116E213
+        for <fstests@vger.kernel.org>; Fri, 18 Mar 2022 00:54:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1647590092; x=1679126092;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=vHmcQCDgIg/euyPfaq2uNvO+Hbu+TaU2coU1bTSiz2Y=;
+  b=AMKnp7OlfxyS14N4n0EBNfYMzXvMzjEKuTo9PdsxHZ2FbasxZMzPxu1A
+   BnAEsX27OtBmhkZq1p2P476yTg/UAlGqumzL91JrGy7yqih18IUF5Fh8z
+   SUlUrDycwg+S8pF7sy0c2y6XP8CH3PesSfTckERy8ifRKgG5/M561Of0n
+   RpaA5mqR3GHCj3S8sUwonRGf9rchjtRwuG1LPhH496HFMv0WgxivePUC0
+   ecsVG12BshzT76z+mvLrJmxNQv45nKCauaDOLeJ5uxN/7VbM9Bzugns+i
+   gA4Uvx3XGYadZDXxHDsjce7MSg7AegYw4ODlvK6LcX2uK1zmgDY608SmO
+   g==;
+X-IronPort-AV: E=Sophos;i="5.90,191,1643644800"; 
+   d="scan'208";a="195684743"
+Received: from mail-sn1anam02lp2049.outbound.protection.outlook.com (HELO NAM02-SN1-obe.outbound.protection.outlook.com) ([104.47.57.49])
+  by ob1.hgst.iphmx.com with ESMTP; 18 Mar 2022 15:54:51 +0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=adHaFGSDQxRBe7dLrqIET9QBcV5AwPElfPskZ56nAx6Hck276NzZkGsVfg55sl2Qom7lsTrxiKbhqbr410qfMz9ihsktTvHi9ZXvA0CMR4YI9obboG2UcpcUlyZti/irxBMgA83gFjnHTB03Bya/W4yRKgECgJ9i1396uTXsEwTLRVpDXCbH594JtYePv6HS/lEAnZwq/26B9dAiquyBkuVlu4mP1dbBQVYlZbEpkrMZBr7QtLYhZvfFjheKnFGxXPfysjLBVGg6iZYEA9JIKLh7/37W//vxUbwQW0kluwD2Pf/VFodfdk1OdyU9ttmT/RuOMvvIwvwDMQkXCOSNcQ==
+ b=J5l2pDkVXBtiiEebWcV9/ziJDnlcRBBDEAXaep1RCU41r7VydARf7NbfpLVNlrts12S687K2wtB/r+wqv0Zl/SBKWsAqddiHh6Z0yQSmtZXXwHR3TU2QUcZT7SWPBPqbNuNN/u7xZTBLp6hzrDQQ10g6xLJ5m2FSxfem1tW1O7peD0R/j0P1UTsuVXRvJ/l94X9+aVOq0Vzu/QIvwHhYGgY5fes7CLPBGLLBSznXSnoiFc1R5q1vtS9+sTmBMKEpvvXtK1mJ3kRbY18XChb+nA2LLsYRPPvS4bb94eaY21qJMNLQaLZZYsPwQYXELCLOPat8UbD0tOw1oXHzbT11vg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=rPHQPFP1op/SZHHTw7OjhY8lM7fXzmzw35x9mcn5VQc=;
- b=WQtm6uvD5pQIn/pa2bMGwY+CEhmK4e/Q5AKlHJXhR5mGAGg1pEAs2xF84LbFXfXFd83MsU6KmfDn1sq8XLN11vdH9mBF5FNURfjXJLTWwiR29IAZ7PI+CwnpwdASprstY0UR5ITqxeqp7w2MIOGGdgFOHiOuD2HihOKpgloBc+J1V5lSA3nCCqEuvfnShMrIJx15S274Hb/Fn2kkFXroMoN53eUKuYiMprANMyVwNGgWVMzkggkjHklQ/g+59UifqTjpvenTT3iuRhXIrr2tIhF0diQuc1y1LnfOyg//r0BG1L+EDpWNYwKQObsGwdokwBILlEukR3hcP6UT899r7w==
+ bh=W29x8OZMsqOUE5fepkA1dAa5h/3ZYmqsTI315G6pL10=;
+ b=jvxZvEZAlGKPd//o6cFroYnwsn4gN59zhMrNxwzHP+0+9scQg2cHMYV/ONw2R6/24BNgcMdvZ1l0yAMENL4alWDfS5veNEnYxvphPuc4GLbCNSzIOUC9mTgZnRMbSxWv+D0XgrG0nhi0lXmog135JvvF+Ffjnw5aNiXdTIReEq6sONNn5jxyvpamjvLI19MeiQBwg0OK37qM6l1xsXsT2bvwHm5OQZybfXnmt/YpilWYLXPAngOrNlbnDZbf4KLts7OlxlUnls/3NKYf4Wo+4N/Hv/1dEB070b9qfKyfLPG+tVEmvaAEHiAjSCVAbPadvk8lXKAd3EAaLXhkn/k4aw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=rPHQPFP1op/SZHHTw7OjhY8lM7fXzmzw35x9mcn5VQc=;
- b=gboJE1I+Q7qAvwjgiUPSgWw8Krqt236dzuqgCME3mn3YRHss5RjAjbnCdvstatvh5/DfW/pS4zPzjlRAEoQegonG2cC9OR9he5JJb20POHRwAb4Oyw9rY3exBlUmrjE/gSF65cfM/F3hDr/85nKQz110V+NC0gAR+CV1OR1j8tE=
-Received: from DS7PR10MB5327.namprd10.prod.outlook.com (2603:10b6:5:3b1::15)
- by BYAPR10MB2951.namprd10.prod.outlook.com (2603:10b6:a03:84::16) with
+ bh=W29x8OZMsqOUE5fepkA1dAa5h/3ZYmqsTI315G6pL10=;
+ b=VraubbtFb+yHMw0wXIP3LC3gGIwujcD2O+1ybrIp3F73TOIfZYOS1STYQAOXFXsH9MA3NLuv8T+184sYGdS/xUbRLL8rREVfhtRd1lnpd2PTSQyhFD+psus6eJBsRGgbVBWEMZHgADXHAu4kbJByheWRYE3LcllTv2xDO6rfDH0=
+Received: from SJ0PR04MB7776.namprd04.prod.outlook.com (2603:10b6:a03:300::11)
+ by MW4PR04MB7236.namprd04.prod.outlook.com (2603:10b6:303:7d::16) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5081.14; Thu, 17 Mar
- 2022 23:24:15 +0000
-Received: from DS7PR10MB5327.namprd10.prod.outlook.com
- ([fe80::d9b9:bcca:5560:bbee]) by DS7PR10MB5327.namprd10.prod.outlook.com
- ([fe80::d9b9:bcca:5560:bbee%8]) with mapi id 15.20.5081.017; Thu, 17 Mar 2022
- 23:24:15 +0000
-From:   Catherine Hoang <catherine.hoang@oracle.com>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH v1] xfs/019: extend protofile test
-Date:   Thu, 17 Mar 2022 23:24:08 +0000
-Message-Id: <20220317232408.202636-1-catherine.hoang@oracle.com>
-X-Mailer: git-send-email 2.25.1
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: BLAPR03CA0017.namprd03.prod.outlook.com
- (2603:10b6:208:32b::22) To DS7PR10MB5327.namprd10.prod.outlook.com
- (2603:10b6:5:3b1::15)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5081.14; Fri, 18 Mar
+ 2022 07:54:50 +0000
+Received: from SJ0PR04MB7776.namprd04.prod.outlook.com
+ ([fe80::8d96:4526:8820:de4f]) by SJ0PR04MB7776.namprd04.prod.outlook.com
+ ([fe80::8d96:4526:8820:de4f%5]) with mapi id 15.20.5081.018; Fri, 18 Mar 2022
+ 07:54:50 +0000
+From:   Naohiro Aota <Naohiro.Aota@wdc.com>
+To:     Pankaj Raghav <p.raghav@samsung.com>
+CC:     Damien Le Moal <damien.lemoal@opensource.wdc.com>,
+        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        =?iso-8859-1?Q?Javier_Gonz=E1lez?= <javier.gonz@samsung.com>,
+        Pankaj Raghav <pankydev8@gmail.com>,
+        Kanchan Joshi <joshiiitr@gmail.com>,
+        Adam Manzanares <a.manzanares@samsung.com>
+Subject: Re: [PATCH v2] btrfs/237: Use zone cap instead of zone size in
+ fill_size and rest calculation
+Thread-Topic: [PATCH v2] btrfs/237: Use zone cap instead of zone size in
+ fill_size and rest calculation
+Thread-Index: AQHYOfqObn2ZwWKzeUi+twUUxPGDSazExusA
+Date:   Fri, 18 Mar 2022 07:54:49 +0000
+Message-ID: <20220318075448.ansaa57hy5k3jkge@naota-xeon>
+References: <CGME20220317122843eucas1p1d01a061e25bd7bfaaf912780c011ffdd@eucas1p1.samsung.com>
+ <20220317122839.44404-1-p.raghav@samsung.com>
+In-Reply-To: <20220317122839.44404-1-p.raghav@samsung.com>
+Accept-Language: ja-JP, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 62ddf825-16b6-4df7-eeb9-08da08b4943b
+x-ms-traffictypediagnostic: MW4PR04MB7236:EE_
+x-microsoft-antispam-prvs: <MW4PR04MB7236000746AC3CAC70C8AE428C139@MW4PR04MB7236.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: vWkpT0aMZrPI9vrIY8nr8wN7LSn+E+vRzUidID0t/tzz+YpY3ZioyNym1QJd4zz/ZzraK9T8x/efnOjKx1UlwiajCA3xVM1D2Gl5AEMIP185X6OELDcIwNfPoLsi3HVHNHAt7QuNe3ZuRWu9h0nLNcX/PKXQ8I6BQoyDmV+GYExx8NF4MWT5XDW5x2UT/2kHysxZEGHWCrX8xmxjFsz6XnKlv7S+JFQPwW7VA5uGOMkjJS0WXdEyqvVPJz2IpzQbjuWR2P1D7XX1+RSRq4R5OkWOUuAxR/cN23V24DbjypvNv1HLDmRW7p1vknThrMRahbOSAt7naYaFoWSa5fZV4OPT4mhVVIijC0zM1X3VVwjykPVDv+8l0HLi0AkWQqqj543JcrYHF/rCTpm0LrcCeavRGtoJVRS60e4RIJWzF985JWzIjXFdgZWC14Lj2uooYYyZaLGFKlPMCg4/ivmJzsZwRRrZmZJnbrtFq7VMSSo9IEpq1LspICVKxiQbAy8jQutUDl9bi8hRtHT+2naGz8RX8ZGpuMTaeP1VnYwTpS0XOmwYbeDSd1LsCD/Du0yLnNWxSu/Gxmb71hsnCmLfBILtd2wfJtE9Rm/XQ2HILqlVx2gTbyMbBKFSA8mk+H11WyT/zTjgObPylS15CDD3dk4HyGvEgdkTBtXbgjq4NERD7dqHF5Bs3YWgytRCldJ0w3cyPW9/bjn2LrbIVwo40A==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR04MB7776.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(7916004)(4636009)(366004)(122000001)(71200400001)(316002)(8936002)(66556008)(64756008)(66446008)(8676002)(66946007)(66476007)(91956017)(76116006)(4326008)(38100700002)(83380400001)(2906002)(5660300002)(54906003)(6916009)(508600001)(6506007)(33716001)(9686003)(6512007)(186003)(86362001)(82960400001)(38070700005)(26005)(6486002)(1076003);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?OPfdv1zEIN5FJ9CLbLSEP7+MpludIqeAt/fjnL7R8KF85U3H47zPn4+5WA?=
+ =?iso-8859-1?Q?VfNjV+jag2JsYTpIo5hXITdj8LG2SHScb6yTq8sb+OGPQWRe7eJuSaTeS/?=
+ =?iso-8859-1?Q?PUyYsZ6ooanpWL4ebHNYw13UiiCmOnCOEOcS8U0nc9qsHOelqNkHE+tn8R?=
+ =?iso-8859-1?Q?3Lh991kkG3xpzE+6ZB8TT+RWEIkWtKW4IPcjn2U03dGvvJ4a9bbnCNH1ae?=
+ =?iso-8859-1?Q?xiSeWvnuPWW0I7utlwPq+EUuNIhKKdDE4mazej7F+6EJX51HjwY2HZgHWt?=
+ =?iso-8859-1?Q?oK3ahsdxskeaagPUbxKIVDWArcrQofiS4ml1rboQTDCNnnf/7wqAU0UrIH?=
+ =?iso-8859-1?Q?nch/J663yXcFMSyuQAGiiwBuFfNKpywt+gb337HZ/skSaFVV4bDhdlskmY?=
+ =?iso-8859-1?Q?CS0Djm6jqVTCDmDtXdE8Nc74MJcw+chqP4GkjtpHY5aJZ4gr0U458dZg5b?=
+ =?iso-8859-1?Q?4OYRki41AVFnI/t8QDhPAsEumfh7Fee2b0tErQaI5Jare2bfisNYRvNzHt?=
+ =?iso-8859-1?Q?H/svUSUAeC0YdS3n4tn/bPDgPJF0w1DmxTZBUx2qnXAUkyOho1nZ7AhBes?=
+ =?iso-8859-1?Q?kulapfBW7H4eKPxqpYdA39le971yrYU2M/v2M1Mc27CSP7lQB8o3WTlCDS?=
+ =?iso-8859-1?Q?n2J4uom6OakMr2o5Nhvg2nVPtR/8Rq67Uoh6ML/qVGVNVAR5a5JBFVRAK7?=
+ =?iso-8859-1?Q?y/JUZnK9LahynDu0sun/foUOb2xPT7/+I9ea/XuN7JylambdkVbNMoxTPN?=
+ =?iso-8859-1?Q?5IXDVdSClHRJ0mjSMkK5rSxcIdxB9BzlucM/IYJTO1JgOGpyMwN1HmdEo8?=
+ =?iso-8859-1?Q?tqOkLOpnxnjUXwn1OoJsKi1JSyJhZFCSq6MqXH5w2uP7YeOsgd4JBmpBvK?=
+ =?iso-8859-1?Q?RACrUHELl3NIR1MmcOKRuICotbTjQ6Csvwqq057UKc7aV1G124QQ8MtMb6?=
+ =?iso-8859-1?Q?fiSKfFmMMo90Ef76cgXKBHLc5uRr7S/In/MtbRK8LZqzfB1KipykDkJr0A?=
+ =?iso-8859-1?Q?mMQrMszCq1Q2TiRhBTqqgKU+JBeSIxnrXimLRYCbcSmRab+5H5aBOOCjEV?=
+ =?iso-8859-1?Q?9Qk5GOG6PpDQ5vlNkPg0MXYS8H4SrGmXwwe3Qw6XUHLQ+vZwMC4IAQjejV?=
+ =?iso-8859-1?Q?S/Y5BBa9P3Xq1jxVIk1/xi5oTVxYAX06DOSsKNc5TtyaTA1q8gjKS3OjuC?=
+ =?iso-8859-1?Q?7LvhQHY6gkWaWxTzfNPq7c2vLLpgUWSr+eOHMijHwwCqLDWHJ1YcL+Xs6Z?=
+ =?iso-8859-1?Q?loZ+FKCcvi3SaIphfs0UvLjzV+fJikVPHo/wNT85HcqdRyLMQrqRqJCcqX?=
+ =?iso-8859-1?Q?SlvNRnPmq4PAvVWM+zMceB6Eu9N+lKaqpBvE80K4v9T8sRYXr+rA4IbuGS?=
+ =?iso-8859-1?Q?9L7dKY4G81hW9quFoXXE8uMYZ9ErVSIjlt8Vg82xhmwPkDdMazNMuJJb51?=
+ =?iso-8859-1?Q?NOP070C9iQr9dr6PrVjcNTa7DqPsZ81B9Qc+TihcDdNDnSRA/2TP5FFiuN?=
+ =?iso-8859-1?Q?1opwc2wTDaCDwpTjzMOle6StvqSad0XPDK/p5F9T9aqQ=3D=3D?=
+Content-Type: text/plain; charset="iso-8859-1"
+Content-ID: <BCF7501129F4694B945724BE7ECFC958@namprd04.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 780fd391-6f85-4448-471c-08da086d4095
-X-MS-TrafficTypeDiagnostic: BYAPR10MB2951:EE_
-X-Microsoft-Antispam-PRVS: <BYAPR10MB29512C32F7E8705A80C79B7E89129@BYAPR10MB2951.namprd10.prod.outlook.com>
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: gWwMnoVC8aZqAtxQLij/JnRA5mVQPiT6cnhsu7vfL+nGv7aq1rsTfiafLOxPKUyimEZOEU6p/zaeBodgNZ8TOQKBNi+2qt2VsyWeynCdaS7n8cDIuBSKMFMU/m9KlWAJWezj+djlHsY4W3sYV1AycGqnKIKSthOTkXZ3fPRgDq88byLscJkzDlcXvlOrTiKU15L+HrvBTdtzIxxnnQm+2LCQOP2dAlBTUUOyuXJCS8LGMa9a+L7ywv8Nz+6+yq/jb6VDg378mpL4F68xkZVrmmTQVzjFE3AgtEhwVaH7MX4OYxd5xNU+dAjs+ZMxrcC6ka3PWtQZ9tVT7Jx4ir/uSZdWKXj6UQm8ZDPQ6DLOPmkze2Dk7MDNFNSls3OO2yc6NR0LlLKIUyTeWbrrqHJSxTZSg2pvqUCx3B49sdE/iy2tELlgJgBg7SQSFeTMpfn/9UW+A6wH1puVdPnjkZLkQGzso86mo8CYHEWfL93WqXWce+tqDOauZC2hPhoxRWsRudPwtMzDR5tQklCHXWkcZ+qPGEiDUHz2+XTyzZeFOa8jikyNVctylpsvMm9KE1brbrxT34acuf9CicaiVmiKSfz/POljaDX0+9aU0Gk08xrtdWiR36fYhvicztI/fFdctkfbWmL/3xyfbjjR2CdWvmIsv4a2RARWf53CVYOe0cMrGQ2T94zPoipLl0b+JSODwqtgeYB6R5YOpX71N9a6TQ==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DS7PR10MB5327.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(366004)(2906002)(86362001)(508600001)(83380400001)(6486002)(38350700002)(316002)(2616005)(5660300002)(6666004)(44832011)(6512007)(36756003)(6506007)(52116002)(66946007)(66556008)(66476007)(8676002)(26005)(186003)(8936002)(1076003)(450100002)(38100700002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?a2prbXZmclp4K0xkdmVlWEpPcytrYndzUXVBd1NSZG40ajV3MWs1NlhlUmZh?=
- =?utf-8?B?OXY1ZTlpdEpiaWlGVy9xNHAyOS80c0N1RGFGelJiUDRMSDFVYnJBeUdPVERu?=
- =?utf-8?B?Vkt4QzA1d3h3L2dMNi8rSWs0eTZmUlhmd3JqQ21KY1F3a0hZN0FLOEZ0c1A1?=
- =?utf-8?B?VEk3YktmNmRiRXpiUUxpd2pZbVgvVGk1cUZjSDNhV0pBanBSRGFZQ3F6MnBE?=
- =?utf-8?B?bmFuMkQ5OFNKcjh3UmlFSGRQTUx2RlJ0YTZ2S3lyQzl2dDgyTUhPcnJlMlpl?=
- =?utf-8?B?SjVkMzJ3UFFzOGIrU3U2ejJnODFNME1PY0lIS3BQTHEwcEhLOENDMjVMajE0?=
- =?utf-8?B?UTlxYXZnNWthQjFBYkhUaVRGT3Zla3dERXVYZW5Na1FSeUpYbjRaa2pHU0Jl?=
- =?utf-8?B?Ujh3VEhpZmRGSW9mTWo0WWFMVUhvVVlqSWN6MUFud04xcWpVOWd1ODUyZTV6?=
- =?utf-8?B?Q3ZnSWZmME12UCs5YU1uMmU2VG1rUDVUOFAwWnJJcnkrZU0xaGdFcjdBK2RE?=
- =?utf-8?B?d2NUZ2lQbG8xTnNzRTFsWXpHL1poTG5LdFZpejczckVPWFJ0bktQTG5CWXJn?=
- =?utf-8?B?SlZMMm1ENVZ0VGp1d1B4YUh1Sm5kRGNRWE1JMFdBeUFleHVVbUU1YTVwM3do?=
- =?utf-8?B?b0xZNldobzB0eWFIT3UwZEFCU0lFWWpwN25wUFhrMTVMeHNjdHFmNEsvR0Nr?=
- =?utf-8?B?Vk12QkY5c0laMFNlaVZUd01YY3RES2ZwSlJXREdQbWlQNUpkcmlMUVp4US9z?=
- =?utf-8?B?d3Ezb3JFRDBhSk03ZTRZYlphSnp3WHUwQTZaVDBpSVpadXdOSkNWMW1GTHhj?=
- =?utf-8?B?VmpHMVhZc2RCVUJXdE5nN1hZWWFoTzNUTWc2enFFbWg3ZkpBUHdiOEJ3UXE5?=
- =?utf-8?B?ZzcrRXMyc0NIQlJZRUtteUVOZFh3dm9jVTZRcWU3cDFzWSt3TU5ObmJGaHdT?=
- =?utf-8?B?MFRycHorRGtkYUM1ZHNkWk5jRE11U1RSaTlKZUFQbUhwUnV2L09MdUJYZ0Nq?=
- =?utf-8?B?Zi9Id1FOVGFoSW1wUUQ0a3lhTWRDTEl2Rlo5eEZZSDF1czEwQm5nUlAwN1lW?=
- =?utf-8?B?RUtVb3czL2F3bGZZTTJCY3pBSTExOXNSdGhaQzFHQ253SXJ6VE82dlN2RldU?=
- =?utf-8?B?dnNqYVVvL3p4Qit0TGRBVkEvM3pxbjRSRUh2Rk44Snh6ajhldDBmZk9nSTJp?=
- =?utf-8?B?Z1IrRElUUlp3b2oyVE81NDYxUXJWaWVROHQ2YlR2L1hGRnJiNG50bGVCTU5p?=
- =?utf-8?B?WlVFazAzRUNrcXpvbUNvTWNZVTFhUUIrTFRkOHZuYk5RdHV4blQrYWdMSVpw?=
- =?utf-8?B?MU5Ia3NweVQ3U2dXY1NCaTFRQXJTZUg3Wnl6RE1UM1dPVFpVdm92UXluQjFP?=
- =?utf-8?B?REE1Q21YdUxaY3gzTmlRUFNFTEx6djR0c1hZOU0wV25BMjE0cEp1Mk1OaGVt?=
- =?utf-8?B?UWUvajBVY1R0QzhBYlRSQk4vQjFYWHJ0Mks4RmwyVGxNR2lPN281MTlsNUpK?=
- =?utf-8?B?WFFXaGF6SHBLUkFoWE04c01xUXdaOTFmTFVYeS90K3NsKzh5WTdpWWxmWTdY?=
- =?utf-8?B?MDJiaHdaaGNLbnhhbUtIemViYWw4RVNEQ3FzV216V2llQWpkWnJkR1pIa3Bj?=
- =?utf-8?B?RmdqS1lJVmZjb0Y5cHNtazhVZ2dJVTdzWXRnL3BhUVpFblNWY1dWMnAwSmxW?=
- =?utf-8?B?YmpaTVY0VFZaT0ZFSnd5bTZFQmN0VjdjcmlIVXcydVNRK2xCQmdqdzBMMXVP?=
- =?utf-8?B?Zmdackg5eEhuSlVrL2YxQ0RIYUc1OWtkbUVWSE1kTTU2MktRN3h4aHhRQ25x?=
- =?utf-8?B?RUZhcnNWRWxsTjI2ZGZ2QWFvL2dBcGdpY1VaN0Z2MlpFaUZmNzB4akVoUTR1?=
- =?utf-8?B?dWF2MHU1d20yL1FyK3dQV0lzZUEzREZNNWRRUjN5amZBbEVIbURFYTg1TCtV?=
- =?utf-8?B?RVUvQytvMSthQytaQVRUemdxTXhoYnZGS2RhWTBWTDFKbUhHVUtxN21ZalNI?=
- =?utf-8?B?cDd4RWxleGhRPT0=?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 780fd391-6f85-4448-471c-08da086d4095
-X-MS-Exchange-CrossTenant-AuthSource: DS7PR10MB5327.namprd10.prod.outlook.com
+X-OriginatorOrg: wdc.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Mar 2022 23:24:15.6828
+X-MS-Exchange-CrossTenant-AuthSource: SJ0PR04MB7776.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 62ddf825-16b6-4df7-eeb9-08da08b4943b
+X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Mar 2022 07:54:49.9643
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: C+GFbLiugo4OfnGLYepqnBhfEjjGiVVb7DLMbuvaMzHWANrbptFUjoAPrabO1811TIMGME98VGkQ1QJOiKeGm2AX3Qy0PFoqqlx54gcdVro=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR10MB2951
-X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10289 signatures=693715
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 bulkscore=0 phishscore=0
- suspectscore=0 mlxscore=0 adultscore=0 spamscore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2202240000
- definitions=main-2203170128
-X-Proofpoint-GUID: nvZvTUocifybEdKsbNn6wdBK7dJ4_DxK
-X-Proofpoint-ORIG-GUID: nvZvTUocifybEdKsbNn6wdBK7dJ4_DxK
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: fsljlfPy3HKjNbPUNNTMKCUNb7UiIMloe/3WSV1F9AkD4q+VOSr5AcD57VAbmwStzSgJmZafNx8orO4eZYUgig==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR04MB7236
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test creates an xfs filesystem and verifies that the filesystem
-matches what is specified by the protofile.
+On Thu, Mar 17, 2022 at 01:28:39PM +0100, Pankaj Raghav wrote:
+> This test will break when zone capacity !=3D zone size because the
+> calculation of the size to be filled is done using zone_size instead of
+> the actual capacity available per zone. Fix it by using zone capacity.
+>=20
+> As a zoned device can have variable capacity, use the capacity from zone =
+5
+> as it is the first data block group.
+>=20
+> The support to extract zone capacity was added to blkzone only from
+> version 2.37. So zcap will be used only when the blkzone version is
+> greater or equal to 2.37.
+>=20
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> ---
+> Changes since v1:
+> - Add a filter that can append a 'cap' column for blkzone version <2.37
+>   (Naohiro)
+> - Extract the capacity from the zone on which the test is performed as a
+>   zoned device can have variable zone capacity(Naohiro)
+>=20
+>  common/filter   | 12 ++++++++++++
+>  tests/btrfs/237 | 13 ++++++++-----
+>  2 files changed, 20 insertions(+), 5 deletions(-)
+>=20
+> diff --git a/common/filter b/common/filter
+> index 257227c2..5acd57dd 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -634,5 +634,17 @@ _filter_bash()
+>  	sed -e "s/^bash: line 1: /bash: /"
+>  }
+> =20
+> +#
+> +#blkzone report added zone capacity to be printed from v2.37.
+> +#This filter will add an extra column 'cap' with the same value of
+> +#'len'(zone size) for blkzone version < 2.37
+> +#
+> +#Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
+> +#After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000 ..
+    ^- nit: need a space after '#'
 
-This patch extends the current test to check that a protofile can specify
-setgid mode on directories. Also, check that the created symlink isn’t
-broken.
+> +_filter_blkzone_report()
+> +{
+> +	$AWK_PROG -F "," 'BEGIN{OFS=3D",";} $3 !~ /cap/ {$2=3D$2","$2;} {print;=
+}' | sed -e 's/len/cap/2'
+> +}
+> +
+>  # make sure this script returns success
+>  /bin/true
+> diff --git a/tests/btrfs/237 b/tests/btrfs/237
+> index 96940549..33a0d81d 100755
+> --- a/tests/btrfs/237
+> +++ b/tests/btrfs/237
+> @@ -35,9 +35,6 @@ get_data_bg()
+>  		grep -Eo "CHUNK_ITEM [[:digit:]]+" | cut -d ' ' -f 2
+>  }
+> =20
+> -zonesize=3D$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/chunk_secto=
+rs)
+> -zonesize=3D$((zonesize << 9))
+> -
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_mount -o commit=3D1 # 1s commit time to speed up test
+> =20
+> @@ -49,12 +46,18 @@ if [[ "$uuid" =3D=3D "" ]]; then
+>  	exit 1
+>  fi
+> =20
+> +data_bg_zone_idx=3D5
 
-Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
----
- tests/xfs/019     |  6 ++++++
- tests/xfs/019.out | 12 +++++++++++-
- 2 files changed, 17 insertions(+), 1 deletion(-)
+Hmm. Yeah, it's currently there. But, I'd hesitate to use that like a
+constant number.
 
-diff --git a/tests/xfs/019 b/tests/xfs/019
-index 3dfd5408..535b7af1 100755
---- a/tests/xfs/019
-+++ b/tests/xfs/019
-@@ -73,6 +73,10 @@ $
- setuid -u-666 0 0 $tempfile
- setgid --g666 0 0 $tempfile
- setugid -ug666 0 0 $tempfile
-+directory_setgid d-g755 3 2
-+file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5 ---755 3 1 $tempfile
-+$
-+: back in the root
- block_device b--012 3 1 161 162 
- char_device c--345 3 1 177 178
- pipe p--670 0 0
-@@ -114,6 +118,8 @@ _verify_fs()
- 		| xargs $here/src/lstat64 | _filter_stat)
- 	diff -q $SCRATCH_MNT/bigfile $tempfile.2 \
- 		|| _fail "bigfile corrupted"
-+	diff -q $SCRATCH_MNT/symlink $tempfile.2 \
-+		|| _fail "symlink broken"
- 
- 	echo "*** unmount FS"
- 	_full "umount"
-diff --git a/tests/xfs/019.out b/tests/xfs/019.out
-index 19614d9d..8584f593 100644
---- a/tests/xfs/019.out
-+++ b/tests/xfs/019.out
-@@ -7,7 +7,7 @@ Wrote 2048.00Kb (value 0x2c)
-  File: "."
-  Size: <DSIZE> Filetype: Directory
-  Mode: (0777/drwxrwxrwx) Uid: (3) Gid: (1)
--Device: <DEVICE> Inode: <INODE> Links: 3 
-+Device: <DEVICE> Inode: <INODE> Links: 4 
- 
-  File: "./bigfile"
-  Size: 2097152 Filetype: Regular File
-@@ -54,6 +54,16 @@ Device: <DEVICE> Inode: <INODE> Links: 1
-  Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
- Device: <DEVICE> Inode: <INODE> Links: 1 
- 
-+ File: "./directory_setgid"
-+ Size: <DSIZE> Filetype: Directory
-+ Mode: (2755/drwxr-sr-x) Uid: (3) Gid: (2)
-+Device: <DEVICE> Inode: <INODE> Links: 2 
-+
-+ File: "./directory_setgid/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5"
-+ Size: 5 Filetype: Regular File
-+ Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (2)
-+Device: <DEVICE> Inode: <INODE> Links: 1 
-+
-  File: "./pipe"
-  Size: 0 Filetype: Fifo File
-  Mode: (0670/frw-rwx---) Uid: (0) Gid: (0)
--- 
-2.25.1
+Instead, how about querying "btrfs inspect-internal" like in
+get_data_bg() do? E.g, like this:
 
+# Assumes SINGLE data profile
+btrfs inspect-internal dump-tree -t CHUNK $SCRATCH_DEV | grep -A 4 CHUNK_IT=
+EM |\
+	grep -A 3 'type DATA\|SINGLE' |\
+	grep -Eo 'offset [[:digit:]]+'| cut -d ' ' -f 2
+
+This command dumps the location of data BG in a byte unit.
+
+Then, we can calculate the sector number and can supply it to "blkzone
+report -o".
+
+> +size=3D$($BLKZONE_PROG report -c $data_bg_zone_idx $SCRATCH_DEV | tail -=
+1 |\
+> +	_filter_blkzone_report |\
+> +	grep -Po "cap ([0x\d]+)+" | cut -d ' ' -f 2)
+> +size=3D$((size << 9))
+> +
+>  reclaim_threshold=3D75
+>  echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
+>  fill_percent=3D$((reclaim_threshold + 2))
+>  rest_percent=3D$((90 - fill_percent)) # make sure we're not creating a n=
+ew BG
+> -fill_size=3D$((zonesize * fill_percent / 100))
+> -rest=3D$((zonesize * rest_percent / 100))
+> +fill_size=3D$((size * fill_percent / 100))
+> +rest=3D$((size * rest_percent / 100))
+> =20
+>  # step 1, fill FS over $fillsize
+>  $XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test1 >> $seqre=
+s.full
+> --=20
+> 2.25.1
+> =
