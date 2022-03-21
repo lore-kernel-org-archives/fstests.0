@@ -2,101 +2,111 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54C6DC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Mar 2022 20:22:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3ADFC433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Mar 2022 22:59:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351651AbiCUUYL (ORCPT
+        id S231149AbiCUXA0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Mar 2022 16:24:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36860 "EHLO
+        Mon, 21 Mar 2022 19:00:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353363AbiCUUXC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2022 16:23:02 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4D40DBD36
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 13:21:34 -0700 (PDT)
+        with ESMTP id S232036AbiCUW6A (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2022 18:58:00 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53D99474EDB
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 15:37:15 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 808156116C
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 20:21:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D873FC340E8;
-        Mon, 21 Mar 2022 20:21:33 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DE0056157D
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 22:13:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3CEE3C340E8;
+        Mon, 21 Mar 2022 22:13:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647894093;
-        bh=uTFGItyroxvOa054l9iD6e7+BCQL/zHHCypA19UKfZg=;
+        s=k20201202; t=1647900817;
+        bh=ZsN2oDQzRl6MOGBdqpR5d0rngeEVJlKk7l+6evdZdcs=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sDqEEwyKevliAX77Fd7RtqjvTKf31ygKW5/Z2AZpdOiCmGiulwH+P05sGWk73i+ZY
-         mMOWWtqCA56uIGurSoeH8chOtCOWVPZ2OJRWEJ5fv9JwxkUmDdhJR4Uk6DdPLvKYDw
-         eop2Oi18XNLLJXYh9ZEE/UVXilOz/S9r0HDm6MfCOFjX7EgmTEEFOAXGRF8xXVrykU
-         6rHw2ZjEqgOV8WP0k7w+EknFlIDHAC4mjwrNs+iV4MSzsc4StYxOyl/DZi15/CSniu
-         NxFcZVO9FzIxtMXFaeLXWtuJWXKeiRPUfjFoX1fT48sLa0JuGz8/JRV9PTmBCVFjJu
-         oS4uyao2L4Uzg==
-Date:   Mon, 21 Mar 2022 13:21:33 -0700
+        b=g+V9IlcEaEEALFoHoUmCtiu/xWXHwVsJRmq+c7Uy2fJHIXNwGhs94aWcyd5QDOf7A
+         xnwpGrNGy+dmVYN4c1RD62mY6s6XT+mUx8u6oJidBsCj44jA/U3Y2KKRmg5WHRI3wn
+         D61rS62sk5MtDB9tg1pGx6Thq5DGUwd8ua3HyvdzaXZ0ohs6NgIRzxPkuXZ2R63kh5
+         Tz80gczccmF1fsQs9aBJmLY8CZLLkcWgLfZpU5nUaOMKzTqiYS9qkY6Lz9BwUfGZCn
+         67xm06kArUsgOsPXhLA9Q2dIpWis0mE8ShnuDX3GowdHP4S0ceOMe7uedwqsRnbizG
+         t2krPgxBNXLOw==
+Date:   Mon, 21 Mar 2022 15:13:36 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Nitesh Shetty <nj.shetty@samsung.com>
-Cc:     fstests@vger.kernel.org, nitheshshetty@gmail.com,
-        p.raghav@samsung.com, joshi.k@samsung.com, arnav.dawn@samsung.com,
-        mcgrof@kernel.org
-Subject: Re: [PATCH] generic/108: use sysfs values for logical,physical block
- size in scsi_debug
-Message-ID: <20220321202133.GJ8200@magnolia>
-References: <CGME20220301213455epcas5p30ff48390a70523f4bc3d99de0027d3bd@epcas5p3.samsung.com>
- <20220301212947.28660-1-nj.shetty@samsung.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>,
+        Eric Sandeen <sandeen@sandeen.net>,
+        Amir Goldstein <amir73il@gmail.com>
+Subject: Re: maintainership of fstests
+Message-ID: <20220321221336.GM8241@magnolia>
+References: <Yjdmj0lVqCbbbjW8@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220301212947.28660-1-nj.shetty@samsung.com>
+In-Reply-To: <Yjdmj0lVqCbbbjW8@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 02, 2022 at 02:59:47AM +0530, Nitesh Shetty wrote:
-> scsi_debug device used for test, is created with assumption of 512 bytes
-> logical and physical block size.
-> This causes error in lvcreate step, when SCRATCH_DEV device lba is not
-> 512 bytes. This can be solved by reading block size from sysfs of device.
-> If sysfs is missing fallback to 512 bytes as default.
+On Mon, Mar 21, 2022 at 01:38:23AM +0800, Eryu Guan wrote:
+> Hi folks,
 > 
-> Signed-off-by: Nitesh Shetty <nj.shetty@samsung.com>
-> ---
->  tests/generic/108 | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
+> It's almost 6 years since I've taken the maintainership of fstests, and
+> I tried my best to keep the pace of weekly update, or at least bi-weekly
+> update due to something like public holidays.
 > 
-> diff --git a/tests/generic/108 b/tests/generic/108
-> index ad43269f..db0e9bd0 100755
-> --- a/tests/generic/108
-> +++ b/tests/generic/108
-> @@ -42,8 +42,11 @@ _require_non_zoned_device $SCRATCH_DEV
->  lvname=lv_$seq
->  vgname=vg_$seq
->  
-> +physical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/physical_block_size)
-> +logical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/logical_block_size)
+> But it's been a month since last fstests update due to my personal
+> urgent issues, and some patches got no review for more than one month.
+> So I think it's time to re-consider the maintainership of fstests.
+> 
+> I will have less spare time in the foreseeable future, as I have to
+> spend more time on my family, so it's hard to keep the weekly update
+> pace. And six years is a long time, I think it's time to have a new
+> maintainer.
 
-This causes a regression if $SCRATCH_DEV is not a raw block device:
+Thank you for your service for all that time! :)
 
-# SCRATCH_DEV=/dev/sda4 ./check generic/108
-...
---- generic/108.out
-+++ generic/108.out.bad
-@@ -1,2 +1,4 @@
- QA output created by 108
-+cat: /sys/block/sda4/queue/physical_block_size: No such file or directory
-+cat: /sys/block/sda4/queue/logical_block_size: No such file or directory
- fsync: Input/output error
+> Or we could go to the group-maintain way? As Darrick mentioned before
+> (for xfs not fstests, if I recall correctly). Then we need a new primary
+> maintainer :)
+> 
+> What do you think?
+
+Splitting responsibility for maintenance doesn't seem like a huge step
+to me -- for fs-specific tests, we need the developers for that fs to
+review test changes.  Review for tests/generic/ can be done by the
+fs{devel,*} community at large, much as it is done now.
+
+The /difficult/ part, I think, is handling things like treewide
+reorganizations, and integration testing the test suite.  That, I think,
+is what really requires a primary maintainer who has broader visibility
+into what's going on.
+
+That primary maintainer also has to have time to run a build-and-test
+farm of all the major fstests clients (ext*, xfs, btrfs, overlay, nfs,
+what else?) to make sure that new code doesn't break existing
+filesystems' ability to test themselves.
+
+Granted, (speaking only for XFS, probably btrfs, and maybe even ext*),
+we seem to notice regressions pretty fast when we download the weekly
+release, so I think the primary maintainer's focus probably ought to be
+more towards the non-mainstream Linux filesystems.
+
+Also: over the past 6 years, I have /really/ enjoyed the fact that
+fstests has small releases every 1-2 weeks as opposed to larger
+infrequent drops.  It's a relief not to have to chase a merge window
+like I do for the kernel.  Thank you a bunch for keeping that going!
 
 --D
 
-> +
->  # _get_scsi_debug_dev returns a scsi debug device with 128M in size by default
-> -SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 300`
-> +SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
->  test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
->  echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
->  
+FYI: It's Spring Break here in the US, so you might not get much of a
+response for a week or two.
+
 > 
-> base-commit: 2ea74ba4e70b546279896e2a733c8c7f4b206193
-> -- 
-> 2.25.1
+> Thanks,
+> Eryu
 > 
+> P.S.
+> I'll keep the maintainer role and do the review & update as usual until
+> all things settle down.
