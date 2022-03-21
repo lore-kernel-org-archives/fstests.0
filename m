@@ -2,96 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B55CC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Mar 2022 15:01:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F23B9C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Mar 2022 16:19:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349749AbiCUPCg (ORCPT
+        id S1348272AbiCUQVL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Mar 2022 11:02:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37776 "EHLO
+        Mon, 21 Mar 2022 12:21:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234542AbiCUPCf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2022 11:02:35 -0400
-Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8E051517EB
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 08:01:05 -0700 (PDT)
-IronPort-Data: =?us-ascii?q?A9a23=3AXJYgwajyWfZPQvMZ83P4OHm5X161fBIKZh0ujC4?=
- =?us-ascii?q?5NGQNrF6WrkUHymAbXmHVOf2MamH8eN1xPovkoUtS7ZLTm4cxQAdlqXw8FHgiR?=
- =?us-ascii?q?ejtX4rAdhiqV8+xwmwvdGo+toNGLICowPkcFhcwnT/wdOixxZVA/fvQHOCkUra?=
- =?us-ascii?q?dYnkZqTJME0/NtzoywobVvaY42bBVMyvV0T/Di5W31G2NglaYAUpIg063ky6Di?=
- =?us-ascii?q?dyp0N8uUvPSUtgQ1LPWvyF94JvyvshdJVOgKmVfNrbSq+ouUNiEEm3lExcFUrt?=
- =?us-ascii?q?Jk57wdAsEX7zTIROTzHFRXsBOgDAb/mprjPl9b6FaNC+7iB3Q9zx14M9QvJqrW?=
- =?us-ascii?q?EEnOLbQsOoAURhECDw4NqpDkFPCCSHl65zPkhCYIhMAxN0rVinaJ7Yw9P1rDHp?=
- =?us-ascii?q?S7tQGJz0XKBOOneS7xPS8UOYEuyiJBKEHJ6tG4jc5k26fVq1gHPj+r2zxzYcw9?=
- =?us-ascii?q?F8NagpmRJ4yv/YkVAc=3D?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AGub0d65j/BotHTKoiQPXwPTXdLJyesId70hD?=
- =?us-ascii?q?6qkRc20wTiX8ra2TdZsguyMc9wx6ZJhNo7G90cq7MBbhHPxOkOos1N6ZNWGIhI?=
- =?us-ascii?q?LCFvAB0WKN+V3dMhy73utc+IMlSKJmFeD3ZGIQse/KpCW+DPYsqePqzJyV?=
-X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
-   d="scan'208";a="122845569"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 21 Mar 2022 23:01:04 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id DD4B44D169E7
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 23:00:59 +0800 (CST)
-Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Mon, 21 Mar 2022 23:01:01 +0800
-Received: from [10.167.201.3] (10.167.201.3) by
- G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Mon, 21 Mar 2022 23:00:58 +0800
-Message-ID: <4abf66f4-2101-db09-f1c1-4c70668038d3@fujitsu.com>
-Date:   Mon, 21 Mar 2022 23:00:59 +0800
+        with ESMTP id S1344109AbiCUQVL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2022 12:21:11 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B7D86A76FF
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 09:19:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1647879584;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=duXdjnBYf9YEk9BuxAA2Hs4ESRQYXPg8LXJqkSPUTic=;
+        b=c7Iv3UQTHqVEFOVcdpQdCP+ilBhtLz6pX/QD6hS7Qpn6rwHVAIkrPdyL4qwmMDRYsqHrRh
+        SF6ItmLf4vTEA3ig0jiIbLoacy+bKqC8rf6DXpz500jrIrQHAs4An+IOrYEPywk8E9HNak
+        h70I92i1RcveDZcB+edMbXmBA6O/Ew8=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-571-WuKfpvlOP_2Ri0E2JsiwzQ-1; Mon, 21 Mar 2022 12:19:42 -0400
+X-MC-Unique: WuKfpvlOP_2Ri0E2JsiwzQ-1
+Received: by mail-qk1-f198.google.com with SMTP id w200-20020a3762d1000000b0067d2149318dso10120507qkb.1
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 09:19:42 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=duXdjnBYf9YEk9BuxAA2Hs4ESRQYXPg8LXJqkSPUTic=;
+        b=40h4Pcu9jIt6ccYiuAK3Otd0IeRamsQHYLAOXUwgTOwPB6m4ds0ifx/yda1lFbM3gO
+         Ymb/MTsyjKAiaKBdWfOfRGsVDML9x/J16DslvVoAPTORkGhMVj00zLzG38e1Mw5QAjQv
+         Q/Ub28h68vIzDOQPSqJgjZRosjYxBK6qbUP66CJiuGlcKKATHySm2NwU07zzLRT4x3rj
+         trqvRWT0PNoL1vN7OIMnWQgwb8yO/Q3YYDm82dkLxtJdR6IvRk2AV3B5FvcS7Yj8sN0D
+         mUwZtB/1FO4FaORMsv9FNvf0uZ5yYJl4clwJhoZsOO3BlnPBAllM8DWdhJVe/GvFU9JX
+         Jfbg==
+X-Gm-Message-State: AOAM533fIyikK//k4ObwtrMYw57bLYkg2+WE+uUJkqE7X00kKU6ISpDe
+        enXygVsbsKghiqRPH6rkEmJ6QSKM7983uRV2pwJ5Ne61i/5pdDhI0S3Nus+RTGoMjDWEha5cXxf
+        b4/kdoODfrjCStOaHUA==
+X-Received: by 2002:ae9:e602:0:b0:67d:3e65:4a65 with SMTP id z2-20020ae9e602000000b0067d3e654a65mr12919829qkf.613.1647879581616;
+        Mon, 21 Mar 2022 09:19:41 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzaeq2ACKJW5sigkXKBeV8Kf6PK+cBxiCDv9o1D/TZl8OByFEv5gH4GZ3kZq3ADXroLAhbmIQ==
+X-Received: by 2002:ae9:e602:0:b0:67d:3e65:4a65 with SMTP id z2-20020ae9e602000000b0067d3e654a65mr12919803qkf.613.1647879581172;
+        Mon, 21 Mar 2022 09:19:41 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id t1-20020a05620a0b0100b0067d3ac00982sm7765448qkg.57.2022.03.21.09.19.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Mar 2022 09:19:40 -0700 (PDT)
+Date:   Tue, 22 Mar 2022 00:19:35 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: maintainership of fstests
+Message-ID: <20220321161935.46g3n22wbv5bfnyq@zlang-mailbox>
+Mail-Followup-To: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
+References: <Yjdmj0lVqCbbbjW8@desktop>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [RFC PATCH 0/3] xfs: add memory failure tests for dax mode
-To:     <fstests@vger.kernel.org>
-References: <20220311151816.2174870-1-ruansy.fnst@fujitsu.com>
-From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
-In-Reply-To: <20220311151816.2174870-1-ruansy.fnst@fujitsu.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-yoursite-MailScanner-ID: DD4B44D169E7.A2B2D
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yjdmj0lVqCbbbjW8@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-ping...  any comments?
+On Mon, Mar 21, 2022 at 01:38:23AM +0800, Eryu Guan wrote:
+> Hi folks,
+> 
+> It's almost 6 years since I've taken the maintainership of fstests, and
+> I tried my best to keep the pace of weekly update, or at least bi-weekly
+> update due to something like public holidays.
+> 
+> But it's been a month since last fstests update due to my personal
+> urgent issues, and some patches got no review for more than one month.
+> So I think it's time to re-consider the maintainership of fstests.
+> 
+> I will have less spare time in the foreseeable future, as I have to
+> spend more time on my family, so it's hard to keep the weekly update
+> pace. And six years is a long time, I think it's time to have a new
+> maintainer.
 
-在 2022/3/11 23:18, Shiyang Ruan 写道:
-> This patchset is to verify whether memory failure mechanism still works
-> with the dax-rmap feature[1].  With this feature, dax and reflink can be
-> used together[2].  So, we also test it for reflinked files in filesystem
-> mounted with dax option.
-> 
-> [1] https://lore.kernel.org/linux-xfs/20220227120747.711169-1-ruansy.fnst@fujitsu.com/
-> [2] https://lore.kernel.org/linux-xfs/20210928062311.4012070-1-ruansy.fnst@fujitsu.com/
-> 
-> Shiyang Ruan (3):
->    xfs: add memory failure test for dax mode
->    xfs: add memory failure test for dax&reflink mode
->    xfs: add memory failure test for partly-reflinked&dax file
-> 
->   .gitignore                      |   1 +
->   src/Makefile                    |   3 +-
->   src/t_mmap_cow_memory_failure.c | 154 ++++++++++++++++++++++++++++++++
->   tests/xfs/900                   |  48 ++++++++++
->   tests/xfs/900.out               |   9 ++
->   tests/xfs/901                   |  49 ++++++++++
->   tests/xfs/901.out               |   9 ++
->   tests/xfs/902                   |  52 +++++++++++
->   tests/xfs/902.out               |   9 ++
->   9 files changed, 333 insertions(+), 1 deletion(-)
->   create mode 100644 src/t_mmap_cow_memory_failure.c
->   create mode 100755 tests/xfs/900
->   create mode 100644 tests/xfs/900.out
->   create mode 100755 tests/xfs/901
->   create mode 100644 tests/xfs/901.out
->   create mode 100755 tests/xfs/902
->   create mode 100644 tests/xfs/902.out
-> 
+Hi Eryu,
 
+By thinking about it a while, I get up my courage to apply this job, although I
+know I'm not the best one can handle this job. Just this project is really
+useful for my team. Nearly from I joined Red Hat, my jobs started to around the
+xfstests. It's a great testsuit, which can cover most of our testing. I felt
+relieved when you toke this maintainer, and admired your courage at that time,
+that really helps us a lot. No matter what you decide, thanks again for all your
+help, as previous colleague, as friend.
+
+Thanks,
+Zorro
+
+> 
+> Or we could go to the group-maintain way? As Darrick mentioned before
+> (for xfs not fstests, if I recall correctly). Then we need a new primary
+> maintainer :)
+> 
+> What do you think?
+> 
+> Thanks,
+> Eryu
+> 
+> P.S.
+> I'll keep the maintainer role and do the review & update as usual until
+> all things settle down.
+> 
 
