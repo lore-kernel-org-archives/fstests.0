@@ -2,116 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F23B9C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Mar 2022 16:19:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54C6DC433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Mar 2022 20:22:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348272AbiCUQVL (ORCPT
+        id S1351651AbiCUUYL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Mar 2022 12:21:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51280 "EHLO
+        Mon, 21 Mar 2022 16:24:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344109AbiCUQVL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2022 12:21:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B7D86A76FF
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 09:19:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1647879584;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=duXdjnBYf9YEk9BuxAA2Hs4ESRQYXPg8LXJqkSPUTic=;
-        b=c7Iv3UQTHqVEFOVcdpQdCP+ilBhtLz6pX/QD6hS7Qpn6rwHVAIkrPdyL4qwmMDRYsqHrRh
-        SF6ItmLf4vTEA3ig0jiIbLoacy+bKqC8rf6DXpz500jrIrQHAs4An+IOrYEPywk8E9HNak
-        h70I92i1RcveDZcB+edMbXmBA6O/Ew8=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-571-WuKfpvlOP_2Ri0E2JsiwzQ-1; Mon, 21 Mar 2022 12:19:42 -0400
-X-MC-Unique: WuKfpvlOP_2Ri0E2JsiwzQ-1
-Received: by mail-qk1-f198.google.com with SMTP id w200-20020a3762d1000000b0067d2149318dso10120507qkb.1
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 09:19:42 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=duXdjnBYf9YEk9BuxAA2Hs4ESRQYXPg8LXJqkSPUTic=;
-        b=40h4Pcu9jIt6ccYiuAK3Otd0IeRamsQHYLAOXUwgTOwPB6m4ds0ifx/yda1lFbM3gO
-         Ymb/MTsyjKAiaKBdWfOfRGsVDML9x/J16DslvVoAPTORkGhMVj00zLzG38e1Mw5QAjQv
-         Q/Ub28h68vIzDOQPSqJgjZRosjYxBK6qbUP66CJiuGlcKKATHySm2NwU07zzLRT4x3rj
-         trqvRWT0PNoL1vN7OIMnWQgwb8yO/Q3YYDm82dkLxtJdR6IvRk2AV3B5FvcS7Yj8sN0D
-         mUwZtB/1FO4FaORMsv9FNvf0uZ5yYJl4clwJhoZsOO3BlnPBAllM8DWdhJVe/GvFU9JX
-         Jfbg==
-X-Gm-Message-State: AOAM533fIyikK//k4ObwtrMYw57bLYkg2+WE+uUJkqE7X00kKU6ISpDe
-        enXygVsbsKghiqRPH6rkEmJ6QSKM7983uRV2pwJ5Ne61i/5pdDhI0S3Nus+RTGoMjDWEha5cXxf
-        b4/kdoODfrjCStOaHUA==
-X-Received: by 2002:ae9:e602:0:b0:67d:3e65:4a65 with SMTP id z2-20020ae9e602000000b0067d3e654a65mr12919829qkf.613.1647879581616;
-        Mon, 21 Mar 2022 09:19:41 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzaeq2ACKJW5sigkXKBeV8Kf6PK+cBxiCDv9o1D/TZl8OByFEv5gH4GZ3kZq3ADXroLAhbmIQ==
-X-Received: by 2002:ae9:e602:0:b0:67d:3e65:4a65 with SMTP id z2-20020ae9e602000000b0067d3e654a65mr12919803qkf.613.1647879581172;
-        Mon, 21 Mar 2022 09:19:41 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id t1-20020a05620a0b0100b0067d3ac00982sm7765448qkg.57.2022.03.21.09.19.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 21 Mar 2022 09:19:40 -0700 (PDT)
-Date:   Tue, 22 Mar 2022 00:19:35 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: maintainership of fstests
-Message-ID: <20220321161935.46g3n22wbv5bfnyq@zlang-mailbox>
-Mail-Followup-To: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
-References: <Yjdmj0lVqCbbbjW8@desktop>
+        with ESMTP id S1353363AbiCUUXC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Mar 2022 16:23:02 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4D40DBD36
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 13:21:34 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 808156116C
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 20:21:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D873FC340E8;
+        Mon, 21 Mar 2022 20:21:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647894093;
+        bh=uTFGItyroxvOa054l9iD6e7+BCQL/zHHCypA19UKfZg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=sDqEEwyKevliAX77Fd7RtqjvTKf31ygKW5/Z2AZpdOiCmGiulwH+P05sGWk73i+ZY
+         mMOWWtqCA56uIGurSoeH8chOtCOWVPZ2OJRWEJ5fv9JwxkUmDdhJR4Uk6DdPLvKYDw
+         eop2Oi18XNLLJXYh9ZEE/UVXilOz/S9r0HDm6MfCOFjX7EgmTEEFOAXGRF8xXVrykU
+         6rHw2ZjEqgOV8WP0k7w+EknFlIDHAC4mjwrNs+iV4MSzsc4StYxOyl/DZi15/CSniu
+         NxFcZVO9FzIxtMXFaeLXWtuJWXKeiRPUfjFoX1fT48sLa0JuGz8/JRV9PTmBCVFjJu
+         oS4uyao2L4Uzg==
+Date:   Mon, 21 Mar 2022 13:21:33 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Nitesh Shetty <nj.shetty@samsung.com>
+Cc:     fstests@vger.kernel.org, nitheshshetty@gmail.com,
+        p.raghav@samsung.com, joshi.k@samsung.com, arnav.dawn@samsung.com,
+        mcgrof@kernel.org
+Subject: Re: [PATCH] generic/108: use sysfs values for logical,physical block
+ size in scsi_debug
+Message-ID: <20220321202133.GJ8200@magnolia>
+References: <CGME20220301213455epcas5p30ff48390a70523f4bc3d99de0027d3bd@epcas5p3.samsung.com>
+ <20220301212947.28660-1-nj.shetty@samsung.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Yjdmj0lVqCbbbjW8@desktop>
+In-Reply-To: <20220301212947.28660-1-nj.shetty@samsung.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Mar 21, 2022 at 01:38:23AM +0800, Eryu Guan wrote:
-> Hi folks,
+On Wed, Mar 02, 2022 at 02:59:47AM +0530, Nitesh Shetty wrote:
+> scsi_debug device used for test, is created with assumption of 512 bytes
+> logical and physical block size.
+> This causes error in lvcreate step, when SCRATCH_DEV device lba is not
+> 512 bytes. This can be solved by reading block size from sysfs of device.
+> If sysfs is missing fallback to 512 bytes as default.
 > 
-> It's almost 6 years since I've taken the maintainership of fstests, and
-> I tried my best to keep the pace of weekly update, or at least bi-weekly
-> update due to something like public holidays.
+> Signed-off-by: Nitesh Shetty <nj.shetty@samsung.com>
+> ---
+>  tests/generic/108 | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 > 
-> But it's been a month since last fstests update due to my personal
-> urgent issues, and some patches got no review for more than one month.
-> So I think it's time to re-consider the maintainership of fstests.
-> 
-> I will have less spare time in the foreseeable future, as I have to
-> spend more time on my family, so it's hard to keep the weekly update
-> pace. And six years is a long time, I think it's time to have a new
-> maintainer.
+> diff --git a/tests/generic/108 b/tests/generic/108
+> index ad43269f..db0e9bd0 100755
+> --- a/tests/generic/108
+> +++ b/tests/generic/108
+> @@ -42,8 +42,11 @@ _require_non_zoned_device $SCRATCH_DEV
+>  lvname=lv_$seq
+>  vgname=vg_$seq
+>  
+> +physical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/physical_block_size)
+> +logical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/logical_block_size)
 
-Hi Eryu,
+This causes a regression if $SCRATCH_DEV is not a raw block device:
 
-By thinking about it a while, I get up my courage to apply this job, although I
-know I'm not the best one can handle this job. Just this project is really
-useful for my team. Nearly from I joined Red Hat, my jobs started to around the
-xfstests. It's a great testsuit, which can cover most of our testing. I felt
-relieved when you toke this maintainer, and admired your courage at that time,
-that really helps us a lot. No matter what you decide, thanks again for all your
-help, as previous colleague, as friend.
+# SCRATCH_DEV=/dev/sda4 ./check generic/108
+...
+--- generic/108.out
++++ generic/108.out.bad
+@@ -1,2 +1,4 @@
+ QA output created by 108
++cat: /sys/block/sda4/queue/physical_block_size: No such file or directory
++cat: /sys/block/sda4/queue/logical_block_size: No such file or directory
+ fsync: Input/output error
 
-Thanks,
-Zorro
+--D
 
+> +
+>  # _get_scsi_debug_dev returns a scsi debug device with 128M in size by default
+> -SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 300`
+> +SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
+>  test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
+>  echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+>  
 > 
-> Or we could go to the group-maintain way? As Darrick mentioned before
-> (for xfs not fstests, if I recall correctly). Then we need a new primary
-> maintainer :)
+> base-commit: 2ea74ba4e70b546279896e2a733c8c7f4b206193
+> -- 
+> 2.25.1
 > 
-> What do you think?
-> 
-> Thanks,
-> Eryu
-> 
-> P.S.
-> I'll keep the maintainer role and do the review & update as usual until
-> all things settle down.
-> 
-
