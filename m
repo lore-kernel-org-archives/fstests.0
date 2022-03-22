@@ -2,147 +2,141 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83001C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Mar 2022 12:20:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3AA5C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Mar 2022 12:30:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234817AbiCVMVz (ORCPT
+        id S233537AbiCVMbj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Mar 2022 08:21:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55520 "EHLO
+        Tue, 22 Mar 2022 08:31:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234828AbiCVMVx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 08:21:53 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A46C16D1BB
-        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 05:20:25 -0700 (PDT)
+        with ESMTP id S232851AbiCVMbi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 08:31:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7F9FA6D867
+        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 05:30:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1647951624;
+        s=mimecast20190719; t=1647952210;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Ml5Wyh9lK0i95XVHZN4mud+3Otf/lNzb5i0mSIJTmJU=;
-        b=MlE88q8xMBvOtXW5+YAb8D/d4erHxAdYoDWQuPOHfLNvn9XvwmDvhDbCM2fCc52bQ9W2Ib
-        bUXHd3ubl7ZGTkzXFizg4NvQAhJkUX/2tt/w2dYCDVwJtuJSZ450HF1B4LI+I6QnVLpftk
-        iFkBm8EZvBPqj9qBeiSxbhQh04tY9hI=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=Q4fyTMt+/hnFdg3QhE8O9mOg9d9S2TtFp5FYsUNQZTs=;
+        b=a7AboP4Rw30eLR+RBbIX8DhGsK9kOIJB6WLqRVd8brKCdS3/xYVhev6kT2hyG9V/QdbMiM
+        aN3pcbs5HJw/ARAzIZRV3mBLH4nRyqjG9V5O9LYkSmllQU4vx4IWK3sz6ApbIsJfNVx3Td
+        b9Hgw8Q73T4Q5NwXbB6p+bfFo0Ollk0=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-261-oHevQoMFOxCPA5dqhU7YXw-1; Tue, 22 Mar 2022 08:20:23 -0400
-X-MC-Unique: oHevQoMFOxCPA5dqhU7YXw-1
-Received: by mail-qv1-f72.google.com with SMTP id cl19-20020a05621404f300b0044103143211so8193061qvb.10
-        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 05:20:23 -0700 (PDT)
+ us-mta-640-Qqpp086KO0izfS3Q__gdjA-1; Tue, 22 Mar 2022 08:30:09 -0400
+X-MC-Unique: Qqpp086KO0izfS3Q__gdjA-1
+Received: by mail-qv1-f69.google.com with SMTP id r2-20020a056214068200b00440e24889e6so11527790qvz.23
+        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 05:30:09 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=Ml5Wyh9lK0i95XVHZN4mud+3Otf/lNzb5i0mSIJTmJU=;
-        b=RWz8eIop7kRDdzbtTcVzj+RyxkTnlhxru3Wky6DYpRRXrMV1vzdmEhEtBxRU/8Cl44
-         o+/FXRCzZ4uUxRNyzU6vpNAyWjfBzljfwbriwNJ5Sn1KTtayR3ACIgJOjTKsJRishpEh
-         IE2S+CRI5DMPAbWKAak6QnzJhKQecAbFd++JSx7hUn1M5qBEW48OTpyakHvqOCq/YMXG
-         9hZGzWE5soVcN2Aeh8lKVAK90ZkPeLdZvWjTqooQowjSE87uIJmZorD7FBy/UdQMrEaR
-         lrVf/FCzKB0ZMBwuEiSIIWuZ8lAqeqBQpz3mt9KsyOfZkzDklP6Z5qrTmHn6WLJKCsp1
-         33Qw==
-X-Gm-Message-State: AOAM531U72tl78s4myWXkJXgqhjJnSbqEg1iOSDB4bF5bYyozgQVMCat
-        CySpGnMIAAOntp2Eas5aURqRNDfuChwZJl1APJgy+fW+ytVHoNwQ2HobA0Q6nFsAOPzwW98q0KG
-        sDAPMhRtriAzo+IT2vQ==
-X-Received: by 2002:ac8:5c09:0:b0:2e1:a64d:6f89 with SMTP id i9-20020ac85c09000000b002e1a64d6f89mr19782405qti.452.1647951622829;
-        Tue, 22 Mar 2022 05:20:22 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJx/iaitxYmV69gcKzbiPMF5rrIuwDtb15LvasMDOzWF5d0Zvxut2JbC597FVUmtMNHGuujoAg==
-X-Received: by 2002:ac8:5c09:0:b0:2e1:a64d:6f89 with SMTP id i9-20020ac85c09000000b002e1a64d6f89mr19782387qti.452.1647951622542;
-        Tue, 22 Mar 2022 05:20:22 -0700 (PDT)
+        bh=Q4fyTMt+/hnFdg3QhE8O9mOg9d9S2TtFp5FYsUNQZTs=;
+        b=bSMBXs91tVBK8GcztZ4wDOLLZsV6v2lD1r9Q0TI5r26ididPdRKF6agAUNut6S7BBI
+         ONi8JtfNfnimcO0P14u7YH2PpW4jn6E4KYycNuGtoMkP3vfPE3nSQUneELaoj2r1wiDN
+         0UTG0XuurXtKYAD1qaL+oIuzL5tDJYxgsmY6dfB6x9SPty9f9FGufXoE4CGd5Fagq8Bl
+         ncbf4KD9PBaWWxL93Fw4UfgNr6lbYFpMdNpAksiSewtrJNy/G1eX6qgobBPVrShZhiiW
+         4ApcSqKDzcawW9ykplRUIGbjgqUOy4FQwJ8AEhQvp1wkSwgopfS/kmgkGy45D5WsNwSG
+         DdOQ==
+X-Gm-Message-State: AOAM533Y+QVfrlzE2chLN9WT6Szhe9+WQsa3Ohs4wQ+OAivnGPKnJ/5E
+        D91z5YSQM4jDdHNeHgbOC+exoY8uJKYg/QhyWM6uFfhweEevRe3cl39rS/Y8ePi2TB4eFn8ZWC8
+        MtZ/BCVzaY+OF5hZ7DA==
+X-Received: by 2002:ac8:5fcf:0:b0:2e1:ebd9:3e38 with SMTP id k15-20020ac85fcf000000b002e1ebd93e38mr19760732qta.149.1647952208545;
+        Tue, 22 Mar 2022 05:30:08 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJy9qPPkKeJMz1xeRUDKkJWJkcVtINL7tzfXcsFe325ulKtGLmRGvtx7wujWCrOaBXKc6vWlHA==
+X-Received: by 2002:ac8:5fcf:0:b0:2e1:ebd9:3e38 with SMTP id k15-20020ac85fcf000000b002e1ebd93e38mr19760710qta.149.1647952208270;
+        Tue, 22 Mar 2022 05:30:08 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id bm21-20020a05620a199500b0067d5e6c7bd8sm8865811qkb.56.2022.03.22.05.20.19
+        by smtp.gmail.com with ESMTPSA id 84-20020a370957000000b0067e4c1c8889sm7005287qkj.80.2022.03.22.05.30.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Mar 2022 05:20:22 -0700 (PDT)
-Date:   Tue, 22 Mar 2022 20:20:15 +0800
+        Tue, 22 Mar 2022 05:30:07 -0700 (PDT)
+Date:   Tue, 22 Mar 2022 20:30:02 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests@vger.kernel.org, djwong@kernel.org,
-        roman.penyaev@profitbricks.com
-Subject: Re: [PATCH 1/2] xfstests: replace hexdump with od command
-Message-ID: <20220322122015.7zd3qgdvvhmefa2y@zlang-mailbox>
+Cc:     fstests@vger.kernel.org, djwong@kernel.org
+Subject: Re: [PATCH 2/2] fstests: test dirty pipe vulnerability issue of
+ CVE-2022-0847
+Message-ID: <20220322123002.3azabmqxrfoz27bx@zlang-mailbox>
 Mail-Followup-To: Dave Chinner <david@fromorbit.com>,
-        fstests@vger.kernel.org, djwong@kernel.org,
-        roman.penyaev@profitbricks.com
+        fstests@vger.kernel.org, djwong@kernel.org
 References: <20220321110341.1323882-1-zlang@redhat.com>
- <20220321110341.1323882-2-zlang@redhat.com>
- <20220322052259.GC1609613@dread.disaster.area>
+ <20220321110341.1323882-3-zlang@redhat.com>
+ <20220322053555.GD1609613@dread.disaster.area>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220322052259.GC1609613@dread.disaster.area>
+In-Reply-To: <20220322053555.GD1609613@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 22, 2022 at 04:22:59PM +1100, Dave Chinner wrote:
-> On Mon, Mar 21, 2022 at 07:03:40PM +0800, Zorro Lang wrote:
-> > The "od" is one of the most fundamental commands in GNU/Linux and
-> > most Unix-like systems. So we nearly always can count on it, don't
-> > need to check if it's installed.
-> > 
-> > The "hexdump" isn't such fundamental as "od", some systems don't
-> > install it by default. And as "od" nearly can replace all functions
-> > of "hexdump", so let's use an unified command "od" to do the hexdump
-> > job in fstests cases.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+On Tue, Mar 22, 2022 at 04:35:55PM +1100, Dave Chinner wrote:
+> On Mon, Mar 21, 2022 at 07:03:41PM +0800, Zorro Lang wrote:
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 00000000..2488e455
+> > --- /dev/null
+> > +++ b/tests/generic/999
+> > @@ -0,0 +1,54 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 999
+> > +#
+> > +# Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
+> > +# uninitialized  "pipe_buffer.flags" variable, which fixed by:
+> > +#   9d2231c5d74e ("lib/iov_iter: initialize "flags" in new pipe_buffer")
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	rm -f $TEST_DIR/testfile.$seq
+> > +}
 > 
-> Looks good.
-> 
-> Reviewed-by: Dave Chinner <dchinner@redhat.com>
-> 
-> > ---
-> > 
-> > Hi,
-> > 
-> > As Dave and Darrick suggested, I did this change, I've tested most of cases,
-> > except f2fs/001 and ceph/002, but I think they're good. And I used "od"
-> > command directly in generic/404 and generic/042 for their special reason.
-> 
-> That generic/404 usage is ... strange. Why record md5sums of the
-> encoded hexdump output of the file when you can just run md5sum on
-> the file directly and get the same information?  i.e.
-> 
-> > diff --git a/tests/generic/404 b/tests/generic/404
-> > index f1e8b0a8..939692eb 100755
-> > --- a/tests/generic/404
-> > +++ b/tests/generic/404
-> > @@ -110,7 +110,7 @@ for (( block=3; block<=500; block++ )); do
-> >  	# or blocks are in correct order, this commit:
-> >  	#   2b3864b32403 ("ext4: do not polute the extents cache while shifting extents")
-> >  	#
-> > -	md5=`hexdump -e '16/1 "%_p" "\n"' $testfile | md5sum`
-> > +	md5=`od -An -c $testfile | md5sum`
-> >  	printf "#%d %s\n" "$block" "$md5"
-> 
-> Why isn't this just:
-> 
-> -	md5=`hexdump -e '16/1 "%_p" "\n"' $testfile | md5sum`
-> -	printf "#%d %s\n" "$block" "$md5"
-> +	echo -n "#$block "
-> +	md5sum $testfile | _filter_test_dir
+> Just leave the test file lying around so this can use the default
+> cleanup method. The test device is supposed to gather random
+> cruft as tests run....
 
-Yes, I thought about that too, but I can't be sure about it, so tried to keep
-the logic of original code. If the original author doesn't have some special
-reason, I'd like to change it as this way (cc roman.penyaev@profitbricks.com).
-
-And for the generic/042:
--       if hexdump -v -e '/1 "%02X "' $file | grep -q "CD"; then
-+       if od -An -tx1 -v $file | grep -q "CD"; then
-
-I don't know what that "-v" option is needed (cc Darrick). I thought it might just
-waste the time of grep running ?
+Got that, I'll keep this file, and turn to use default _cleanup.
 
 > 
-> Seperate patch, perhaps?
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_user
+> > +_require_chmod
+> > +_require_test_program "splice2pipe"
+> > +
+> > +localfile=$TEST_DIR/testfile.$seq
+> 
+> .... and remove the file here as part of test setup with:
+> 
+> rm -f $localfile
 
-Sure, if no one object that, I'll change them in separated patch.
+Just curious, I've used xfs_io "-t" option to truncate $localfile before testing:
+$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile
+
+Can that instead of the "rm -f $localfile" ?
+
+(As both patches need to change, I'd like to change the 1st patch's g/404 in next
+version patch together, if no objection)
 
 Thanks,
 Zorro
 
+> 
+> Otherwise looks fine.
 > 
 > Cheers,
 > 
