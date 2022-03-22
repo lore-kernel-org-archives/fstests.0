@@ -2,291 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D8DC433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Mar 2022 07:16:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDF10C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Mar 2022 08:31:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237329AbiCVHRg (ORCPT
+        id S231169AbiCVIco (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Mar 2022 03:17:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59060 "EHLO
+        Tue, 22 Mar 2022 04:32:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43650 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237344AbiCVHRf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 03:17:35 -0400
+        with ESMTP id S229706AbiCVIcm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 04:32:42 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 618A2280
-        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 00:16:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A621426AFF
+        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 01:31:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1647933367;
+        s=mimecast20190719; t=1647937874;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=c/FBRcy+huZE69c5xi3jUZeE1RQ+k0XlKCnqgEAjnHQ=;
-        b=V8rPumBBl5Q0TPDsNv9XA22HxviRA/fI0hntfwYuJ/h+g+8VyslElpsbxJDBdcfjNFVEcV
-        duAw7UtV1ewdNN0UMds3cMqiL7A+z61750wc/jYin3wfU0sN+zmU4HhJo8WnAkQDLjk1+N
-        7qemMWLzYG2YX86hbrTNm03CXiQHGCM=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=7oBxhg8aIAR2ARBpYoSCpoyNGBILORRZh8hHyLPMtaE=;
+        b=YypGqln4F6xfIDqn7Xzy0rC2fgvsQnzKbxpyAg+squvg8alVXCOqmArri6FnU+QqDYcRyv
+        EiSMyf/pyvKaYbYkKoMbOasxDiEY5GRu08XSKtYAbo5WRIZscnNZGBBLjXKvOZEgYHg+/W
+        hMyDY4UwW4GpPVdu72kjneHJM5qzzcA=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-8-aXPUTr6wNZiHCG3B9NMM2g-1; Tue, 22 Mar 2022 03:16:06 -0400
-X-MC-Unique: aXPUTr6wNZiHCG3B9NMM2g-1
-Received: by mail-qk1-f199.google.com with SMTP id c19-20020a05620a0cf300b005f17891c015so11228656qkj.18
-        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 00:16:06 -0700 (PDT)
+ us-mta-460-2UhqhxlnMHeS7OWdO_xrBA-1; Tue, 22 Mar 2022 04:31:13 -0400
+X-MC-Unique: 2UhqhxlnMHeS7OWdO_xrBA-1
+Received: by mail-qk1-f200.google.com with SMTP id f11-20020a05620a20cb00b0067b3fedce10so11324833qka.15
+        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 01:31:13 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=c/FBRcy+huZE69c5xi3jUZeE1RQ+k0XlKCnqgEAjnHQ=;
-        b=OC98yA/8+0d+Vr8CI4LQ7ljULqdol2y8rc6U9WiaqT147wc1erypa6pkPm3GTMI+dK
-         Ueu3sngN+O/VTRiEZN6wUsIKezO44r5U/wq3u4UUxoCyyrcyZnTxuro8Ei5Spr2ffpXb
-         0B0cO5D9TOMCWPFOqCDHZRzwb1JPs7BJ34jI6ExmcgUwMMdsZiNAGeQhrmAq+8TAtYMe
-         UL4wyCGPDbahaPRe54aTU0MWIBBVXLdRapFkOb+ZpSc4TLPZrotO0nuxbnMwr3zuLskm
-         lXjKfSMKn+LDtng3WzTRkYDHs5LcXM7yQxQ7TL+UFBu76h/bLTmvkYeRrn6h28/31X4C
-         QBDA==
-X-Gm-Message-State: AOAM533TfpyoxnfjPZ0UtgGliSaa36Bl6KbC3SQSz/hl/X8qhu6UUCg+
-        Mo7A1EzAKhZV/8c+vUqNdP6y7B9N7C2BJAbAjlYCp/SbFoFfnWPloaJuFKyEIJXXHVRw9KZ0dy5
-        lcx6S6Yyyl/5Z/r5hjg==
-X-Received: by 2002:a37:b983:0:b0:67e:c0d2:c3ca with SMTP id j125-20020a37b983000000b0067ec0d2c3camr278715qkf.749.1647933365341;
-        Tue, 22 Mar 2022 00:16:05 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxRxjtfelMddTXjRRLqZmUuEMnBFZ5mAmlvL9fae1Ph1bC9jLzIywe/oKgswQWRkJhvne3c1Q==
-X-Received: by 2002:a37:b983:0:b0:67e:c0d2:c3ca with SMTP id j125-20020a37b983000000b0067ec0d2c3camr278704qkf.749.1647933364857;
-        Tue, 22 Mar 2022 00:16:04 -0700 (PDT)
+        bh=7oBxhg8aIAR2ARBpYoSCpoyNGBILORRZh8hHyLPMtaE=;
+        b=4fCHraFFOifMJFt1RqMCcet2QfUv7ZvOYgeuvxcTwz4m6jBDHIPVSFPiKc6IPIF36U
+         jG9be1D8pjqI4C/RNEnV2UMaeb061I19z39+dij5+g6eK1+EKZ5tJvy04WcPW4xmm6/b
+         HMblZpbxRa9HuAAkHfhR0v9awQ3xX2H5LTOHj9musq9amvV4g8boX9ER10YGXjAYBWl6
+         4fKRcawq/k2eKd0eOoOpRSYK0Q8sspuYY33jTWb9V/CkSgOtpenoCmUek1U4t2Yx+AgF
+         +TiKZ9LvBcGERIfH9Ij7PtP9kGXHs3jSvahzGiWWjeaWdvP3H+JICSKfljtXR+3ONjdy
+         Q9jg==
+X-Gm-Message-State: AOAM532hjGFdm6WYooYy5Jz8sCUDdLsing/b6zA0RXNxUjwcmDRWEvuE
+        qEFurqLyE1IwMlVgEQ0YB01qz5Kz9RVnE0/CLIkyG5R4bXSZg/oEVh7Au3NpIWtAYIost7miHLo
+        vfy+7ZuccLJt7PZXXRQ==
+X-Received: by 2002:ac8:5894:0:b0:2e1:c997:a61e with SMTP id t20-20020ac85894000000b002e1c997a61emr19089555qta.388.1647937872715;
+        Tue, 22 Mar 2022 01:31:12 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJx3Mv04gNlalayh5uzmjWMTDVoEos4zzLcNCEsG1/nOpq2iBwMbdw8BxKQZUuCfPVtTpptO4w==
+X-Received: by 2002:ac8:5894:0:b0:2e1:c997:a61e with SMTP id t20-20020ac85894000000b002e1c997a61emr19089547qta.388.1647937872475;
+        Tue, 22 Mar 2022 01:31:12 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id w3-20020a05622a190300b002e1f084d84bsm11502557qtc.50.2022.03.22.00.16.02
+        by smtp.gmail.com with ESMTPSA id g21-20020ac85815000000b002e06e2623a7sm13588073qtg.0.2022.03.22.01.31.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Mar 2022 00:16:04 -0700 (PDT)
-Date:   Tue, 22 Mar 2022 15:15:56 +0800
+        Tue, 22 Mar 2022 01:31:11 -0700 (PDT)
+Date:   Tue, 22 Mar 2022 16:31:05 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 6/4] xfs/17[035]: fix intermittent failures when
- filesystem metadata gets large
-Message-ID: <20220322071556.6iajo57ilyalwfdi@zlang-mailbox>
+Subject: Re: [PATCH 5/4] xfs/076: only create files on the data device
+Message-ID: <20220322083104.nh7uqcrm2fgbuycl@zlang-mailbox>
 Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
         linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 References: <164740140348.3371628.12967562090320741592.stgit@magnolia>
- <20220316221326.GF8200@magnolia>
+ <20220316221232.GE8200@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220316221326.GF8200@magnolia>
+In-Reply-To: <20220316221232.GE8200@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 16, 2022 at 03:13:26PM -0700, Darrick J. Wong wrote:
+On Wed, Mar 16, 2022 at 03:12:32PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> These tests check that the filestreams allocator never shares an AG
-> across multiple streams when there's plenty of space in the filesystem.
-> Recent increases in metadata overhead for newer features (e.g. bigger
-> logs due to reflink) can throw this off, so add another AG to the
-> formatted filesystem to encourage it to avoid the AG with the log.
+> This test checks that filesystems with sparse inode support can continue
+> to allocate inodes when free space gets fragmented.  Inodes only exist
+> on the data device, so we need to ensure that realtime is not enabled on
+> the filesystem so that the rt metadata doesn't mess with the inode usage
+> percentage and cause a test failure.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
 
-
-
->  common/filestreams |    2 +-
->  tests/xfs/170      |   16 +++++++++++-----
->  tests/xfs/170.out  |    8 ++++----
->  tests/xfs/171      |   16 ++++++++++++----
->  tests/xfs/171.out  |    8 ++++----
->  tests/xfs/173      |   16 ++++++++++++----
->  tests/xfs/173.out  |    8 ++++----
-
-Looks good to me, and test passed after merging this patch. Just one
-tiny question, the subject is "xfs/17[035]: ...", if "17[035]" mean
-170, 173 and 175, but the files you changed are 170, 171 and 173 as
-above :)
+Looks good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-
-
->  7 files changed, 48 insertions(+), 26 deletions(-)
+>  tests/xfs/076 |   13 +++++++++++--
+>  1 file changed, 11 insertions(+), 2 deletions(-)
 > 
-> diff --git a/common/filestreams b/common/filestreams
-> index 8165effe..62acb47c 100644
-> --- a/common/filestreams
-> +++ b/common/filestreams
-> @@ -80,7 +80,7 @@ _check_for_dupes()
+> diff --git a/tests/xfs/076 b/tests/xfs/076
+> index eac7410e..8eef1367 100755
+> --- a/tests/xfs/076
+> +++ b/tests/xfs/076
+> @@ -55,12 +55,21 @@ _alloc_inodes()
 >  
->  _test_streams() {
+>  # real QA test starts here
 >  
-> -	echo "# testing $* ...."
-> +	echo "# testing $* ...." | tee -a $seqres.full
->  	local agcount="$1"
->  	local agsize="$2" # in MB
->  	local stream_count="$3"
-> diff --git a/tests/xfs/170 b/tests/xfs/170
-> index 5e622d24..b9ead341 100755
-> --- a/tests/xfs/170
-> +++ b/tests/xfs/170
-> @@ -25,11 +25,17 @@ _check_filestreams_support || _notrun "filestreams not available"
->  # test small stream, multiple I/O per file, 30s timeout
->  _set_stream_timeout_centisecs 3000
+> -_require_scratch
+> +if [ -n "$SCRATCH_RTDEV" ]; then
+> +	# ./check won't know we unset SCRATCH_RTDEV
+> +	_require_scratch_nocheck
+> +else
+> +	_require_scratch
+> +fi
+>  _require_xfs_io_command "falloc"
+>  _require_xfs_io_command "fpunch"
+>  _require_xfs_sparse_inodes
 >  
-> -# test streams does a mkfs and mount
-> -_test_streams 8 22 4 8 3 0 0
-> -_test_streams 8 22 4 8 3 1 0
-> -_test_streams 8 22 4 8 3 0 1
-> -_test_streams 8 22 4 8 3 1 1
-> +# This test checks that the filestreams allocator never allocates space in any
-> +# given AG into more than one stream when there's plenty of space on the
-> +# filesystem.  Newer feature sets (e.g. reflink) have increased the size of
-> +# the log for small filesystems, so we make sure there's one more AG than
-> +# filestreams to encourage the allocator to skip whichever AG owns the log.
-> +#
-> +# Exercise 9x 22MB AGs, 4 filestreams, 8 files per stream, and 3MB per file.
-> +_test_streams 9 22 4 8 3 0 0
-> +_test_streams 9 22 4 8 3 1 0
-> +_test_streams 9 22 4 8 3 0 1
-> +_test_streams 9 22 4 8 3 1 1
+> -_scratch_mkfs "-d size=50m -m crc=1 -i sparse" |
+> +# Disable the scratch rt device to avoid test failures relating to the rt
+> +# bitmap consuming all the free space in our small data device.
+> +unset SCRATCH_RTDEV
+> +
+> +_scratch_mkfs "-d size=50m -m crc=1 -i sparse" | tee -a $seqres.full |
+>  	_filter_mkfs > /dev/null 2> $tmp.mkfs
+>  . $tmp.mkfs	# for isize
 >  
->  status=0
->  exit
-> diff --git a/tests/xfs/170.out b/tests/xfs/170.out
-> index e71515e9..16dcb795 100644
-> --- a/tests/xfs/170.out
-> +++ b/tests/xfs/170.out
-> @@ -1,20 +1,20 @@
->  QA output created by 170
-> -# testing 8 22 4 8 3 0 0 ....
-> +# testing 9 22 4 8 3 0 0 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 8 22 4 8 3 1 0 ....
-> +# testing 9 22 4 8 3 1 0 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 8 22 4 8 3 0 1 ....
-> +# testing 9 22 4 8 3 0 1 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 8 22 4 8 3 1 1 ....
-> +# testing 9 22 4 8 3 1 1 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
-> diff --git a/tests/xfs/171 b/tests/xfs/171
-> index 4412fe2f..f93b6011 100755
-> --- a/tests/xfs/171
-> +++ b/tests/xfs/171
-> @@ -29,10 +29,18 @@ _check_filestreams_support || _notrun "filestreams not available"
->  # 100 = 78.1% full, should reliably succeed
->  _set_stream_timeout_centisecs 12000
->  
-> -_test_streams 64 16 8 100 1 1 0
-> -_test_streams 64 16 8 100 1 1 1
-> -_test_streams 64 16 8 100 1 0 0
-> -_test_streams 64 16 8 100 1 0 1
-> +# This test tries to get close to the exact point at which the filestreams
-> +# allocator will start to allocate space from some AG into more than one
-> +# stream.  Newer feature sets (e.g. reflink) have increased the size of the log
-> +# for small filesystems, so we make sure there's one more AG than filestreams
-> +# to encourage the allocator to skip whichever AG owns the log.
-> +#
-> +# This test exercises 64x 16MB AGs, 8 filestreams, 100 files per stream, and
-> +# 1MB per file.
-> +_test_streams 65 16 8 100 1 1 0
-> +_test_streams 65 16 8 100 1 1 1
-> +_test_streams 65 16 8 100 1 0 0
-> +_test_streams 65 16 8 100 1 0 1
->  
->  status=0
->  exit
-> diff --git a/tests/xfs/171.out b/tests/xfs/171.out
-> index 89407cb2..73f73c90 100644
-> --- a/tests/xfs/171.out
-> +++ b/tests/xfs/171.out
-> @@ -1,20 +1,20 @@
->  QA output created by 171
-> -# testing 64 16 8 100 1 1 0 ....
-> +# testing 65 16 8 100 1 1 0 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 64 16 8 100 1 1 1 ....
-> +# testing 65 16 8 100 1 1 1 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 64 16 8 100 1 0 0 ....
-> +# testing 65 16 8 100 1 0 0 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 64 16 8 100 1 0 1 ....
-> +# testing 65 16 8 100 1 0 1 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
-> diff --git a/tests/xfs/173 b/tests/xfs/173
-> index bce6ac51..6b18d919 100755
-> --- a/tests/xfs/173
-> +++ b/tests/xfs/173
-> @@ -26,10 +26,18 @@ _check_filestreams_support || _notrun "filestreams not available"
->  # be less than or equal to half the AG count so we don't run out of AGs.
->  _set_stream_timeout_centisecs 12000
->  
-> -_test_streams 64 16 33 8 2 1 1 fail
-> -_test_streams 64 16 32 8 2 0 1
-> -_test_streams 64 16 33 8 2 0 0 fail
-> -_test_streams 64 16 32 8 2 1 0
-> +# This test checks the exact point at which the filestreams allocator will
-> +# start to allocate space from some AG into more than one stream.  Newer
-> +# feature sets (e.g. reflink) have increased the size of the log for small
-> +# filesystems, so we make sure there's one more AG than filestreams to
-> +# encourage the allocator to skip whichever AG owns the log.
-> +#
-> +# Exercise 65x 16MB AGs, 32/33 filestreams, 8 files per stream, and 2MB per
-> +# file.
-> +_test_streams 65 16 34 8 2 1 1 fail
-> +_test_streams 65 16 32 8 2 0 1
-> +_test_streams 65 16 34 8 2 0 0 fail
-> +_test_streams 65 16 32 8 2 1 0
->  
->  status=0
->  exit
-> diff --git a/tests/xfs/173.out b/tests/xfs/173.out
-> index 21493057..705c352a 100644
-> --- a/tests/xfs/173.out
-> +++ b/tests/xfs/173.out
-> @@ -1,20 +1,20 @@
->  QA output created by 173
-> -# testing 64 16 33 8 2 1 1 fail ....
-> +# testing 65 16 34 8 2 1 1 fail ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + expected failure, matching AGs
-> -# testing 64 16 32 8 2 0 1 ....
-> +# testing 65 16 32 8 2 0 1 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + passed, streams are in seperate AGs
-> -# testing 64 16 33 8 2 0 0 fail ....
-> +# testing 65 16 34 8 2 0 0 fail ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
->  + expected failure, matching AGs
-> -# testing 64 16 32 8 2 1 0 ....
-> +# testing 65 16 32 8 2 1 0 ....
->  # streaming
->  # sync AGs...
->  # checking stream AGs...
 > 
 
