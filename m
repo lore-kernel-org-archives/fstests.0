@@ -2,191 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96F65C433FE
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Mar 2022 05:14:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 126EAC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Mar 2022 05:23:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236694AbiCVFPg (ORCPT
+        id S236685AbiCVFYb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Mar 2022 01:15:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43534 "EHLO
+        Tue, 22 Mar 2022 01:24:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236658AbiCVFPd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 01:15:33 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8B8C263B1
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 22:14:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1647926044;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=hYTlbXTjgH3vKFtj13uZH7n+ak7Y8QVfZ3xE+Nn/wfI=;
-        b=P3mJzg/f+R61/vcoZEerAVgVzNkaq2E644XgwvnuZNPhLmTtaD7xUJHP9UNastcIwSzc7e
-        aIcU58xz9HCdEeytIgDx4bbutI25QNiUgkVq9Pn8FkNUEkBaXcWdLz1T5H9N5+8M7BHb9g
-        ymiUsXWXaUvt/uUWZZK9LaZgLlibcA8=
-Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
- [209.85.128.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-630-81VCmUGfN2e3w57ANaJHJA-1; Tue, 22 Mar 2022 01:14:02 -0400
-X-MC-Unique: 81VCmUGfN2e3w57ANaJHJA-1
-Received: by mail-wm1-f69.google.com with SMTP id r64-20020a1c2b43000000b0038b59eb1940so687406wmr.0
-        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 22:14:02 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=hYTlbXTjgH3vKFtj13uZH7n+ak7Y8QVfZ3xE+Nn/wfI=;
-        b=sUsHMOntnHJJ5BZMMy5f6qGoGIxx80wt27dolVdMeqwErpTIqGK2JDcY+sKYr2To8V
-         S1UnRenmgXRax9qeN+MeXTUANfWS5cu0YHeCJplFbzeunsNEfELQ9tvShVsSFzVK/wZF
-         B6FfSWUnC/rKkNZcq2SXKlXDSXbWbqKkb+CyzQcq6ZBGzLiK5KBBnzq861f60cnmXV2l
-         CHrP/yjFqfm58+v/Vv42PfflVCFazdF8paTpgHzyTo4bgV2M12MsNTZnWnCRk44MAc1/
-         iJrqwTzU4wKbVQPusUOuAAaBGeIkWH1/vJrnSFFatuUxICSoGoDsIls9ud3EjV5HbvcK
-         okpg==
-X-Gm-Message-State: AOAM530uFmhp6HnjGsSJAQj7gtiMMa2yWv7ALhDgFbgoAXlKjjg3AqZA
-        Isp9DtNWE6XNctcXcUkSifNgKPtaF7wZ293am+7DfpTue9XuvBPrjRwjMt5fi8sJNpiV+r1TsRd
-        lEw4kLcKkzRRamsgTiw==
-X-Received: by 2002:a5d:47a7:0:b0:203:d1b4:8f6 with SMTP id 7-20020a5d47a7000000b00203d1b408f6mr21554668wrb.36.1647926041317;
-        Mon, 21 Mar 2022 22:14:01 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyXV1kV4RPyUpZoIjm1rybY94jMsV/9CqdxkTOfpNay7noAAgkcxisQu42cyIUrdnGAu6+uPg==
-X-Received: by 2002:a5d:47a7:0:b0:203:d1b4:8f6 with SMTP id 7-20020a5d47a7000000b00203d1b408f6mr21554654wrb.36.1647926041002;
-        Mon, 21 Mar 2022 22:14:01 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id k35-20020a05600c1ca300b0038ca38626c0sm1026796wms.16.2022.03.21.22.13.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 21 Mar 2022 22:14:00 -0700 (PDT)
-Date:   Tue, 22 Mar 2022 13:13:54 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] xfs/420: fix occasional test failures due to
- pagecache readahead
-Message-ID: <20220322051354.yys6zipuxjfvkkgn@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-References: <164740140348.3371628.12967562090320741592.stgit@magnolia>
- <164740142033.3371628.11850774504699213977.stgit@magnolia>
+        with ESMTP id S236658AbiCVFYa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 01:24:30 -0400
+Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6A9F12AF2
+        for <fstests@vger.kernel.org>; Mon, 21 Mar 2022 22:23:02 -0700 (PDT)
+Received: from dread.disaster.area (pa49-186-150-27.pa.vic.optusnet.com.au [49.186.150.27])
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id A91D210E4CB8;
+        Tue, 22 Mar 2022 16:23:00 +1100 (AEDT)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nWWyx-008OSE-Cn; Tue, 22 Mar 2022 16:22:59 +1100
+Date:   Tue, 22 Mar 2022 16:22:59 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, djwong@kernel.org
+Subject: Re: [PATCH 1/2] xfstests: replace hexdump with od command
+Message-ID: <20220322052259.GC1609613@dread.disaster.area>
+References: <20220321110341.1323882-1-zlang@redhat.com>
+ <20220321110341.1323882-2-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <164740142033.3371628.11850774504699213977.stgit@magnolia>
+In-Reply-To: <20220321110341.1323882-2-zlang@redhat.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=62395d35
+        a=sPqof0Mm7fxWrhYUF33ZaQ==:117 a=sPqof0Mm7fxWrhYUF33ZaQ==:17
+        a=kj9zAlcOel0A:10 a=o8Y5sQTvuykA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
+        a=gaCFx0GJ2BoOlcL2CtsA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 15, 2022 at 08:30:20PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Mar 21, 2022 at 07:03:40PM +0800, Zorro Lang wrote:
+> The "od" is one of the most fundamental commands in GNU/Linux and
+> most Unix-like systems. So we nearly always can count on it, don't
+> need to check if it's installed.
 > 
-> Every now and then, this test fails with this golden output:
+> The "hexdump" isn't such fundamental as "od", some systems don't
+> install it by default. And as "od" nearly can replace all functions
+> of "hexdump", so let's use an unified command "od" to do the hexdump
+> job in fstests cases.
 > 
-> --- xfs/420.out
-> +++ xfs/420.out.bad
-> @@ -29,7 +29,7 @@
->  Whence Result
->  DATA   0
->  HOLE   131072
-> -DATA   196608
-> +DATA   192512
->  HOLE   262144
->  Compare files
->  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-Looks like this part easy to cause `git am` misunderstanding[1], Hmm...
-any method to deal with that?
+Looks good.
 
-[1]
-Applying: xfs/420: fix occasional test failures due to pagecache readahead
-error: 420.out: does not exist in index
-Patch failed at 0001 xfs/420: fix occasional test failures due to pagecache readahead
-hint: Use 'git am --show-current-patch=diff' to see the failed patch
-When you have resolved this problem, run "git am --continue".
-If you prefer to skip this patch, run "git am --skip" instead.
-To restore the original branch and stop patching, run "git am --abort".
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
 
-> 
-> Curiously, the file checksums always match, and it's not *forbidden* for
-> the page cache to have a page backing an unwritten extent that hasn't
-> been written.
-> 
-> The condition that this test cares about is that block 3 (192k-256k) are
-> reported by SEEK_DATA as data even if the data fork has a hole and the
-> COW fork has an unwritten extent.  Matthew Wilcox thinks this is a side
-> effect of readahead.
-> 
-> To fix this occasional false failure, call SEEK_DATA and SEEK_HOLE only
-> on the offsets that we care about.
-> 
-> Suggested-by: Matthew Wilcox <willy@infradead.org>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/xfs/420 |   33 +++++++++++++++++++++------------
->  1 file changed, 21 insertions(+), 12 deletions(-)
 > 
+> Hi,
 > 
-> diff --git a/tests/xfs/420 b/tests/xfs/420
-> index 12b17588..d38772c9 100755
-> --- a/tests/xfs/420
-> +++ b/tests/xfs/420
-> @@ -50,6 +50,24 @@ _scratch_mount >> $seqres.full 2>&1
->  testdir=$SCRATCH_MNT/test-$seq
->  mkdir $testdir
->  
-> +# pagecache readahead can sometimes cause extra pages to be inserted into the
-> +# file mapping where we have an unwritten extent in the COW fork.  Call lseek
-> +# on each $blksz offset that interests us (as opposed to the whole file) so
-> +# that these extra pages are not disclosed.
-> +#
-> +# The important thing we're testing is that SEEK_DATA reports block 3 as data
-> +# when the COW fork has an unwritten mapping and the data fork has a hole.
-> +exercise_lseek() {
-> +	echo "Seek holes and data in file1"
-> +	$XFS_IO_PROG -c "seek -d 0" $testdir/file1
-> +	$XFS_IO_PROG -c "seek -h $((2 * blksz))" $testdir/file1 | sed -e '/Whence/d'
-> +	echo "Seek holes and data in file2"
-> +	$XFS_IO_PROG -c "seek -d 0" $testdir/file2
-> +	$XFS_IO_PROG -c "seek -h $((2 * blksz))" $testdir/file2 | sed -e '/Whence/d'
-> +	$XFS_IO_PROG -c "seek -d $((3 * blksz))" $testdir/file2 | sed -e '/Whence/d'
-> +	$XFS_IO_PROG -c "seek -h $((4 * blksz))" $testdir/file2 | sed -e '/Whence/d'
-> +}
-> +
->  blksz=65536
->  nr=8
->  filesize=$((blksz * nr))
-> @@ -83,10 +101,7 @@ $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
->  $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
->  $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
->  
-> -echo "Seek holes and data in file1"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-> -echo "Seek holes and data in file2"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-> +exercise_lseek
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_scratch
-> @@ -102,10 +117,7 @@ $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
->  $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
->  $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
->  
-> -echo "Seek holes and data in file1"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-> -echo "Seek holes and data in file2"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-> +exercise_lseek
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_scratch
-> @@ -121,10 +133,7 @@ $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
->  $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
->  $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
->  
-> -echo "Seek holes and data in file1"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-> -echo "Seek holes and data in file2"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-> +exercise_lseek
->  
->  echo "Compare files"
->  md5sum $testdir/file1 | _filter_scratch
-> 
+> As Dave and Darrick suggested, I did this change, I've tested most of cases,
+> except f2fs/001 and ceph/002, but I think they're good. And I used "od"
+> command directly in generic/404 and generic/042 for their special reason.
 
+That generic/404 usage is ... strange. Why record md5sums of the
+encoded hexdump output of the file when you can just run md5sum on
+the file directly and get the same information?  i.e.
+
+> diff --git a/tests/generic/404 b/tests/generic/404
+> index f1e8b0a8..939692eb 100755
+> --- a/tests/generic/404
+> +++ b/tests/generic/404
+> @@ -110,7 +110,7 @@ for (( block=3; block<=500; block++ )); do
+>  	# or blocks are in correct order, this commit:
+>  	#   2b3864b32403 ("ext4: do not polute the extents cache while shifting extents")
+>  	#
+> -	md5=`hexdump -e '16/1 "%_p" "\n"' $testfile | md5sum`
+> +	md5=`od -An -c $testfile | md5sum`
+>  	printf "#%d %s\n" "$block" "$md5"
+
+Why isn't this just:
+
+-	md5=`hexdump -e '16/1 "%_p" "\n"' $testfile | md5sum`
+-	printf "#%d %s\n" "$block" "$md5"
++	echo -n "#$block "
++	md5sum $testfile | _filter_test_dir
+
+Seperate patch, perhaps?
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
