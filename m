@@ -2,156 +2,274 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1331C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 23 Mar 2022 02:44:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB86DC433FE
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Mar 2022 03:07:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241386AbiCWCqN (ORCPT
+        id S232058AbiCWDIi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Mar 2022 22:46:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39462 "EHLO
+        Tue, 22 Mar 2022 23:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241385AbiCWCqL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 22:46:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 85D0B6FA27
-        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 19:44:42 -0700 (PDT)
+        with ESMTP id S231314AbiCWDIi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Mar 2022 23:08:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BBBD070879
+        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 20:07:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1648003481;
+        s=mimecast20190719; t=1648004825;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=iqZJTiI3Axj6oVewHbRkIIjJ5aF5iBnJmE5907yPAVc=;
-        b=AbNJsvsFXtB7iAs5/0a8eUK3/UlnDxGG3wdhj6fpNXureVcQe4nVfKZ8aFAiIyW9pgHNob
-        Xc90TjUl8RWpGG5SOfBoSDM94QRHywanAjhkZxiXCvwlCpVHq7PE+6JdkDdDgkMTVvBJDF
-        PEpiKVYZEG8OyhpmBRsp141Qybz7CoI=
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
- [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=PRLIGhRIzRWp0EW+2x2uQlxVZBsyaMC4COEjifcFBXI=;
+        b=hh62ozpgurvN/iaKgc3+DhCbZ8IYvvBBnOrBrDvQ4ktorPJ4JSLeVwjgTzL/y0L00ZNpe0
+        2uy2NwqKF1RfA3W0bc3VlxIGIY7R1/xwODVgbdWJ/Fed+OC22loTL3DVCJd2jKw1pjB7vD
+        2xZshONrD1lB1RE/xgIfgw7oES8VTHs=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-651-6dogD_9eN3iWoOKLoFd9Cw-1; Tue, 22 Mar 2022 22:44:39 -0400
-X-MC-Unique: 6dogD_9eN3iWoOKLoFd9Cw-1
-Received: by mail-qv1-f69.google.com with SMTP id cf13-20020a05621403ed00b004412de7b1ffso287877qvb.19
-        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 19:44:39 -0700 (PDT)
+ us-mta-46-4NRnl9hkNviYmgulB0uPNg-1; Tue, 22 Mar 2022 23:07:04 -0400
+X-MC-Unique: 4NRnl9hkNviYmgulB0uPNg-1
+Received: by mail-pf1-f197.google.com with SMTP id t66-20020a625f45000000b004fabd8f5cc1so319392pfb.11
+        for <fstests@vger.kernel.org>; Tue, 22 Mar 2022 20:07:04 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=iqZJTiI3Axj6oVewHbRkIIjJ5aF5iBnJmE5907yPAVc=;
-        b=jcw1xol5/YjKjs2JzBOkMqXkvf4rsOFJC8ZTine7AlMexzfABJAMqdmJ77yK7pb1Kk
-         8RRRQJ/cAc3Xl0NbrIWDRtLumPMjSp284lDRt6231a+3pJME5gY2A6D9BX5YchKhcBTe
-         8oVNdIzh3ouhY6vFJbG0fiK9p5ziSTVnSaCz23k8M5adtZcmjR7/CT9xyt7KymwqRZpc
-         O3OBPkk3iz49SXshAtN1UP+N8eQ1ptyBbqlOI/wGvJLcXO7kktkmBFzdq9/MkB/rnTyY
-         piuvAztgzdK/9Z1u8QiOC6SY/Vr7AHiXeDHo+PuDicRQS7DslrR3aJPK3PGussxg5kzR
-         sUrA==
-X-Gm-Message-State: AOAM531MW97jQ2Qf0Qk6OI56IFXHpLaZMNq40b/ObIidbSUOvsaG/W52
-        etnBSUhQPWhsSApt9nU58V17/joDNILTBnFr3VpIM1Kt83zXGyw8spq4BylQLYzaS7vvBkEN81+
-        s+Z4gU0oWCbKW8S1EZw==
-X-Received: by 2002:a37:9fca:0:b0:67e:5b65:8031 with SMTP id i193-20020a379fca000000b0067e5b658031mr12790651qke.168.1648003479351;
-        Tue, 22 Mar 2022 19:44:39 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyHcICZGirl5M3aoPOGEaZiiXCpjLSKyxtk4rktLVG9tkMm18HlEpj+QHcPEb0NPHD9KopUWQ==
-X-Received: by 2002:a37:9fca:0:b0:67e:5b65:8031 with SMTP id i193-20020a379fca000000b0067e5b658031mr12790641qke.168.1648003479030;
-        Tue, 22 Mar 2022 19:44:39 -0700 (PDT)
+        bh=PRLIGhRIzRWp0EW+2x2uQlxVZBsyaMC4COEjifcFBXI=;
+        b=Bvv6BGpg8oT+ormGhhiHjgLnZONIb9SeJz0bFmJQzWCqkPYxrIsobvhuxUlqQAWJmd
+         1S/UWYYKe8xSTGExeC35yqQQsJksHM864t61y0/DESjsfi2ZICo+u88hM5Il40TY1S+4
+         34DvDUgLEXUA1cAi75I060puqu2tJAcb43K47oH1aWMX0vT3r81qnPjc0x7haJolPazQ
+         YM44cQ/+bTzdsYZ9bkD2CJW0NIxT05lbDz0wpqN9O2e/nvTGeM5pc43ETZx14XlsoOYM
+         d0YN4xW2Jl+SGZ0BzF+4ITj+YoVuTLU5g0j8BRVwqjXIqm8BwszHDcjLq7m1XVzyg6dp
+         Kdgw==
+X-Gm-Message-State: AOAM533YWo3jhoFP4nQ2IQSSns8cN0esj+LerItAZAQ4jcTlGpC9BeIF
+        WJ/Jv5d29R/KxwoeU81Z6RLn/N7wCl3codgfm8E52cCCP9rsnBcvMVtlHYDPrnneJDeL1OEjCVL
+        XQ1S+uDFJ6maD+uB++w==
+X-Received: by 2002:a17:90b:4d88:b0:1c7:3d39:34c5 with SMTP id oj8-20020a17090b4d8800b001c73d3934c5mr8833945pjb.20.1648004822876;
+        Tue, 22 Mar 2022 20:07:02 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxbeyLyr5cugwEv0XS5E5bn0B/ngiBFkFTaVRzJjJ8wlyzFH3nFl8XRXTyG7xoDtsdb05KLKw==
+X-Received: by 2002:a17:90b:4d88:b0:1c7:3d39:34c5 with SMTP id oj8-20020a17090b4d8800b001c73d3934c5mr8833929pjb.20.1648004822553;
+        Tue, 22 Mar 2022 20:07:02 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id h8-20020ac87d48000000b002e1c6faae9csm15167579qtb.28.2022.03.22.19.44.36
+        by smtp.gmail.com with ESMTPSA id pj9-20020a17090b4f4900b001c744034e7csm4359658pjb.2.2022.03.22.20.06.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Mar 2022 19:44:38 -0700 (PDT)
-Date:   Wed, 23 Mar 2022 10:44:32 +0800
+        Tue, 22 Mar 2022 20:07:01 -0700 (PDT)
+Date:   Wed, 23 Mar 2022 11:06:57 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] xfs: make sure syncfs(2) passes back
- super_operations.sync_fs errors
-Message-ID: <20220323024432.44wf2xhpv3z55txp@zlang-mailbox>
+Subject: Re: [PATCH 2/2] generic: ensure we drop suid after fallocate
+Message-ID: <20220323030657.5al7wlxsvjzybbg3@zlang-mailbox>
 Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
         linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 References: <164740142940.3371809.12686819717405148022.stgit@magnolia>
- <164740143497.3371809.2959237196772812909.stgit@magnolia>
+ <164740144051.3371809.17116490105069526891.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <164740143497.3371809.2959237196772812909.stgit@magnolia>
+In-Reply-To: <164740144051.3371809.17116490105069526891.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 15, 2022 at 08:30:35PM -0700, Darrick J. Wong wrote:
+On Tue, Mar 15, 2022 at 08:30:40PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> This is a regression test to make sure that nonzero error returns from
-> a filesystem's ->sync_fs implementation are actually passed back to
-> userspace when the call stack involves syncfs(2).
+> fallocate changes file contents, so make sure that we drop privileges
+> and file capabilities after each fallocate operation.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/xfs/839     |   42 ++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/839.out |    2 ++
->  2 files changed, 44 insertions(+)
->  create mode 100755 tests/xfs/839
->  create mode 100644 tests/xfs/839.out
+>  tests/generic/834     |  129 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/834.out |   33 +++++++++++++
+>  tests/generic/835     |  129 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/835.out |   33 +++++++++++++
+>  tests/generic/836     |  129 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/836.out |   33 +++++++++++++
+>  tests/generic/837     |  129 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/837.out |   33 +++++++++++++
+>  tests/generic/838     |  129 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/838.out |   33 +++++++++++++
+>  tests/generic/839     |   79 ++++++++++++++++++++++++++++++
+>  tests/generic/839.out |   13 +++++
+>  12 files changed, 902 insertions(+)
+>  create mode 100755 tests/generic/834
+>  create mode 100644 tests/generic/834.out
+>  create mode 100755 tests/generic/835
+>  create mode 100644 tests/generic/835.out
+>  create mode 100755 tests/generic/836
+>  create mode 100644 tests/generic/836.out
+>  create mode 100755 tests/generic/837
+>  create mode 100644 tests/generic/837.out
+>  create mode 100755 tests/generic/838
+>  create mode 100644 tests/generic/838.out
+>  create mode 100755 tests/generic/839
+>  create mode 100755 tests/generic/839.out
 > 
 > 
-> diff --git a/tests/xfs/839 b/tests/xfs/839
+> diff --git a/tests/generic/834 b/tests/generic/834
 > new file mode 100755
-> index 00000000..9bfe93ef
+> index 00000000..27552221
 > --- /dev/null
-> +++ b/tests/xfs/839
-> @@ -0,0 +1,42 @@
+> +++ b/tests/generic/834
+> @@ -0,0 +1,129 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 834
+> +#
+> +# Functional test for dropping suid and sgid bits as part of a fallocate.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto clone quick
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.* $junk_dir
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_user
+> +_require_test
+> +verb=falloc
+> +_require_xfs_io_command $verb
+> +
+> +_require_congruent_file_oplen $TEST_DIR 65536
+      ^^
+
+Is it a Darrick's unpublic secret weapon:)
+
+> +
+> +junk_dir=$TEST_DIR/$seq
+> +junk_file=$junk_dir/a
+> +mkdir -p $junk_dir/
+> +chmod a+rw $junk_dir/
+> +
+
+[snip] ...
+
+> diff --git a/tests/generic/839 b/tests/generic/839
+> new file mode 100755
+> index 00000000..a1e23916
+> --- /dev/null
+> +++ b/tests/generic/839
+> @@ -0,0 +1,79 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
 > +#
 > +# FS QA Test No. 839
 > +#
-> +# Regression test for kernel commits:
-> +#
-> +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_fs")
-> +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
-> +#
-> +# During a code inspection, I noticed that sync_filesystem ignores the return
-> +# value of the ->sync_fs calls that it makes.  sync_filesystem, in turn is used
-> +# by the syncfs(2) syscall to persist filesystem changes to disk.  This means
-> +# that syncfs(2) does not capture internal filesystem errors that are neither
-> +# visible from the block device (e.g. media error) nor recorded in s_wb_err.
-> +# XFS historically returned 0 from ->sync_fs even if there were log failures,
-> +# so that had to be corrected as well.
-> +#
-> +# The kernel commits above fix this problem, so this test tries to trigger the
-> +# bug by using the shutdown ioctl on a clean, freshly mounted filesystem in the
-> +# hope that the EIO generated as a result of the filesystem being shut down is
-> +# only visible via ->sync_fs.
+> +# Functional test for dropping capability bits as part of an fallocate.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick shutdown
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_require_xfs_io_command syncfs
-> +_require_scratch_nocheck
-> +_require_scratch_shutdown
+> +_begin_fstest auto fiexchange swapext quick
+                        ^^         ^^
 
-Can this case be a generic case, with the help of _require_scratch_shutdown
-and _require_xfs_io_command?
+I think we don't have these two group names currently, this will cause failure.
+You can register them if you need :)
 
 Thanks,
 Zorro
 
 > +
-> +# Reuse the fs formatted when we checked for the shutdown ioctl, and don't
-> +# bother checking the filesystem afterwards since we never wrote anything.
-> +_scratch_mount
-> +$XFS_IO_PROG -x -c 'shutdown -f ' -c syncfs $SCRATCH_MNT
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.* $junk_dir
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_user
+> +_require_command "$GETCAP_PROG" getcap
+> +_require_command "$SETCAP_PROG" setcap
+> +_require_xfs_io_command falloc
+> +_require_test
+> +
+> +_require_congruent_file_oplen $TEST_DIR 65536
+> +
+> +junk_dir=$TEST_DIR/$seq
+> +junk_file=$junk_dir/a
+> +mkdir -p $junk_dir/
+> +chmod a+rw $junk_dir/
+> +
+> +setup_testfile() {
+> +	rm -f $junk_file
+> +	touch $junk_file
+> +	chmod a+rwx $junk_file
+> +	$SETCAP_PROG cap_setgid,cap_setuid+ep $junk_file
+> +	sync
+> +}
+> +
+> +commit_and_check() {
+> +	local user="$1"
+> +
+> +	stat -c '%a %A %n' $junk_file | _filter_test_dir
+> +	_getcap -v $junk_file | _filter_test_dir
+> +
+> +	local cmd="$XFS_IO_PROG -c 'falloc 0 64k' $junk_file"
+> +	if [ -n "$user" ]; then
+> +		su - "$user" -c "$cmd" >> $seqres.full
+> +	else
+> +		$SHELL -c "$cmd" >> $seqres.full
+> +	fi
+> +
+> +	stat -c '%a %A %n' $junk_file | _filter_test_dir
+> +	_getcap -v $junk_file | _filter_test_dir
+> +
+> +	# Blank line in output
+> +	echo
+> +}
+> +
+> +# Commit by an unprivileged user clears capability bits.
+> +echo "Test 1 - qa_user"
+> +setup_testfile
+> +commit_and_check "$qa_user"
+> +
+> +# Commit by root leaves capability bits.
+> +echo "Test 2 - root"
+> +setup_testfile
+> +commit_and_check
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/839.out b/tests/xfs/839.out
-> new file mode 100644
-> index 00000000..f275cdcc
+> diff --git a/tests/generic/839.out b/tests/generic/839.out
+> new file mode 100755
+> index 00000000..f571cd26
 > --- /dev/null
-> +++ b/tests/xfs/839.out
-> @@ -0,0 +1,2 @@
+> +++ b/tests/generic/839.out
+> @@ -0,0 +1,13 @@
 > +QA output created by 839
-> +syncfs: Input/output error
+> +Test 1 - qa_user
+> +777 -rwxrwxrwx TEST_DIR/839/a
+> +TEST_DIR/839/a cap_setgid,cap_setuid=ep
+> +777 -rwxrwxrwx TEST_DIR/839/a
+> +TEST_DIR/839/a
+> +
+> +Test 2 - root
+> +777 -rwxrwxrwx TEST_DIR/839/a
+> +TEST_DIR/839/a cap_setgid,cap_setuid=ep
+> +777 -rwxrwxrwx TEST_DIR/839/a
+> +TEST_DIR/839/a
+> +
 > 
 
