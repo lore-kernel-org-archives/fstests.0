@@ -2,191 +2,146 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 006B9C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 23 Mar 2022 16:09:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3105C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Mar 2022 16:53:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238539AbiCWQKi (ORCPT
+        id S239286AbiCWQyn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 23 Mar 2022 12:10:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48586 "EHLO
+        Wed, 23 Mar 2022 12:54:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238404AbiCWQKi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 23 Mar 2022 12:10:38 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E5533982C;
-        Wed, 23 Mar 2022 09:09:08 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S239310AbiCWQym (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 23 Mar 2022 12:54:42 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6086121E26
+        for <fstests@vger.kernel.org>; Wed, 23 Mar 2022 09:53:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id E7B20210F4;
-        Wed, 23 Mar 2022 16:09:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1648051746; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=2IxN7z4Sowx/xzRwzK7+Dz4IqTH5apCK98k/xw/792U=;
-        b=IzlWM6Z33nCChekfuT91r1CRDrJqIn/RZpZzB5RprlEkjVOeBHk+JJDwzSnbs+e6igAyj3
-        mGIB58F/Y8wWGUkH+449prECjd1pCNCNxNhn0U7m3I/cMzeAS+WBwrSj6pfEQd+rdUiYSv
-        Zu9a19NlRQ+fQ+95ueKKoCYJEdWgEdQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1648051746;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=2IxN7z4Sowx/xzRwzK7+Dz4IqTH5apCK98k/xw/792U=;
-        b=BeNQbJ5WtwrNPNXWqI2QNFjDeM8PSbLUkfoBhOgzzOiiaJmGjzVVTrIly9EG9Z0UOfz2tK
-        i6zboW2FTwcXzVAw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8E3C212FC5;
-        Wed, 23 Mar 2022 16:09:06 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 9/myHyJGO2IMfgAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Wed, 23 Mar 2022 16:09:06 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 48c22cc6;
-        Wed, 23 Mar 2022 16:09:26 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH] ceph/001: add extra check for remote object copies
-Date:   Wed, 23 Mar 2022 16:09:25 +0000
-Message-Id: <20220323160925.7142-1-lhenriques@suse.de>
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1D6E7B81FB1
+        for <fstests@vger.kernel.org>; Wed, 23 Mar 2022 16:53:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1C56C340E8;
+        Wed, 23 Mar 2022 16:53:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1648054389;
+        bh=UlY3D5hGte+BJ+GpbqIYbrh4/xplXTgy6lCUV3lDZ3k=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=bju6+MLdT9CIxo7YCFvMXdNgr7M213KKri6VuDz7ti/0ZELESLy/9MqkJBVg6BNqT
+         ZbmRRMqHFegb8zQRsWsjLuZc7MS5Pyt+eD5Jg8cyUsdJbsdIkZIT+mSqpXgh+P2g6Y
+         O9bRXJtfZzQ6rcm6pXvp1oG8+rY+/VdqfkB4CSWFUupoDPWlLxnLI6fYtlzXHXnyoG
+         4Lf8tUdUj9TdEJhJzMcwoXPR7tcZ08CmnzeAmn6i5evA0PoqPCRwcpKfIbdOO7bfP8
+         yJLKt2B2LswXD9z/SrXwa3oFRXUD4r+u3VrKUs6pQnQ0ESgFrWAAffHC3C2PMweoug
+         dhCpR4oAtOz9w==
+Date:   Wed, 23 Mar 2022 09:53:09 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Nitesh Shetty <nj.shetty@samsung.com>
+Cc:     fstests@vger.kernel.org, nitheshshetty@gmail.com
+Subject: Re: [PATCH] generic/108: use sysfs values for logical,physical block
+ size in scsi_debug
+Message-ID: <20220323165309.GQ8200@magnolia>
+References: <CGME20220301213455epcas5p30ff48390a70523f4bc3d99de0027d3bd@epcas5p3.samsung.com>
+ <20220301212947.28660-1-nj.shetty@samsung.com>
+ <20220321202133.GJ8200@magnolia>
+ <20220322082629.GA32722@test-zns>
+ <20220322160756.GM8200@magnolia>
+ <20220323120718.GC19899@test-zns>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220323120718.GC19899@test-zns>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Ceph kernel client now has a facility to check stats for certain operations.
-One of these operations is the 'copyfrom', the operation that is used to offload
-to the OSDs the copy of objects from, for example, the copy_file_range()
-syscall.
+On Wed, Mar 23, 2022 at 05:37:18PM +0530, Nitesh Shetty wrote:
+> On Tue, Mar 22, 2022 at 09:07:56AM -0700, Darrick J. Wong wrote:
+> > On Tue, Mar 22, 2022 at 01:56:29PM +0530, Nitesh Shetty wrote:
+> > >  Mon, Mar 21, 2022 at 01:21:33PM -0700, Darrick J. Wong wrote:
+> > > > On Wed, Mar 02, 2022 at 02:59:47AM +0530, Nitesh Shetty wrote:
+> > > > > scsi_debug device used for test, is created with assumption of 512 bytes
+> > > > > logical and physical block size.
+> > > > > This causes error in lvcreate step, when SCRATCH_DEV device lba is not
+> > > > > 512 bytes. This can be solved by reading block size from sysfs of device.
+> > > > > If sysfs is missing fallback to 512 bytes as default.
+> > > > > 
+> > > > > Signed-off-by: Nitesh Shetty <nj.shetty@samsung.com>
+> > > > > ---
+> > > > >  tests/generic/108 | 5 ++++-
+> > > > >  1 file changed, 4 insertions(+), 1 deletion(-)
+> > > > > 
+> > > > > diff --git a/tests/generic/108 b/tests/generic/108
+> > > > > index ad43269f..db0e9bd0 100755
+> > > > > --- a/tests/generic/108
+> > > > > +++ b/tests/generic/108
+> > > > > @@ -42,8 +42,11 @@ _require_non_zoned_device $SCRATCH_DEV
+> > > > >  lvname=lv_$seq
+> > > > >  vgname=vg_$seq
+> > > > >  
+> > > > > +physical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/physical_block_size)
+> > > > > +logical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/logical_block_size)
+> > > > 
+> > > > This causes a regression if $SCRATCH_DEV is not a raw block device:
+> > > > 
+> > > Acked, I was testing for NVMe device, missed out sda sysfs.
+> > > Let me see, if I can use other sysfs/utility to get block size of device.
+> > > 
+> > > Also I see many 4k LBA tests failing mainly because of setup failure in
+> > > format command. This is not actually test failure, rather setup failure.
+> > > So what do you suggest for those type of tests?
+> > 
+> > Ideally, fix the ones that can be fixed, and _notrun the rest.
+> > 
+> 
+> Sure, will send a different patchset.
+> 
+> > > Should I put them in not run status or just report to community so that
+> > > person with relevant expertise can add a fix?
+> > 
+> > For this specific problem I suggest creating a function that finds the
+> > /sys/block/XXX path for any given block device or partition, and then
+> > update all the open coded logic to use it.  Something like:
+> > 
+> > # Map a block device to its counterpart in sysfs
+> > _sysfs_block() {
+> > 	local dev="$1"
+> > 	local shortdev="$(_short_dev "$dev")"
+> > 
+> > 	# Full block devices are simple
+> > 	local ret="/sys/block/$shortdev"
+> > 	if [ -e "$ret" ]; then
+> > 		readlink -m "$ret"
+> > 		return 0
+> > 	fi
+> > 
+> > 	# Partitions are a little trickier
+> > 	ret="/sys/class/block/$shortdev"
+> > 	if [ -e "$ret/partition" ]; then
+> > 		readlink -m "$ret/.."
+> > 		return 0
+> > 	fi
+> > 
+> > 	# ???
+> > 	return 1
+> > }
+> > 
+> > sysfsb=$(_sysfs_block $SCRATCH_DEV)
+> > physical=$(cat $sysfsb/queue/physical_block_size)
+> > 
+> > --D
+> >
+> 
+> As a alternate, using blockdev utility might reduce and simplify the
+> changes required. how about below changes ?
+> 
+> -physical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/physical_block_size)
+> -logical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/logical_block_size)
+> +physical=`blockdev --getpbsz $SCRATCH_DEV`
+> +logical=`blockdev --getss $SCRATCH_DEV`
 
-This patch changes ceph/001 to add an extra check to verify that the copies
-performed by the test are _really_ remote copies and not simple read+write
-operations.
+Good idea! :)
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
- common/ceph    | 10 ++++++++
- tests/ceph/001 | 66 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 76 insertions(+)
+--D
 
-diff --git a/common/ceph b/common/ceph
-index ca756dda8dd3..d6f24df177e7 100644
---- a/common/ceph
-+++ b/common/ceph
-@@ -28,3 +28,13 @@ _require_ceph_vxattr_caps()
- 	$GETFATTR_PROG -n "ceph.caps" $TEST_DIR >/dev/null 2>&1 \
- 	  || _notrun "ceph.caps vxattr not supported"
- }
-+
-+_ceph_get_cluster_fsid()
-+{
-+	$GETFATTR_PROG --only-values -n "ceph.cluster_fsid" $TEST_DIR 2>/dev/null
-+}
-+
-+_ceph_get_client_id()
-+{
-+	$GETFATTR_PROG --only-values -n "ceph.client_id" $TEST_DIR 2>/dev/null
-+}
-diff --git a/tests/ceph/001 b/tests/ceph/001
-index 5a828567d500..7970ce352bab 100755
---- a/tests/ceph/001
-+++ b/tests/ceph/001
-@@ -30,6 +30,10 @@ workdir=$TEST_DIR/test-$seq
- rm -rf $workdir
- mkdir $workdir
- 
-+cluster_fsid=$(_ceph_get_cluster_fsid)
-+client_id=$(_ceph_get_client_id)
-+metrics_dir="$DEBUGFS_MNT/ceph/$cluster_fsid.$client_id/metrics"
-+
- check_range()
- {
- 	local file=$1
-@@ -40,8 +44,68 @@ check_range()
- 	[ $? -eq 0 ] && echo "file $file is not '$val' in [ $off0 $off1 ]"
- }
- 
-+#
-+# The metrics file has the following fields:
-+#   1. item
-+#   2. total
-+#   3. avg_sz(bytes)
-+#   4. min_sz(bytes)
-+#   5. max_sz(bytes)
-+#   6. total_sz(bytes)
-+get_copyfrom_total_copies()
-+{
-+	local total=0
-+
-+	if [ -d $metrics_dir ]; then
-+		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 2)
-+	fi
-+	echo $total
-+}
-+get_copyfrom_total_size()
-+{
-+	local total=0
-+
-+	if [ -d $metrics_dir ]; then
-+		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 6)
-+	fi
-+	echo $total
-+}
-+
-+# This function checks that the metrics file has the expected values for number
-+# of remote object copies and the total size of the copies.  For this, it
-+# expects a input:
-+#   $1 - initial number copies in metrics file (field 'total')
-+#   $2 - initial total size in bytes in metrics file (field 'total_sz')
-+#   $3 - object size used for copies
-+#   $4 - number of remote objects copied
-+check_copyfrom_metrics()
-+{
-+	local c0=$1
-+	local s0=$2
-+	local objsz=$3
-+	local copies=$4
-+	local c1=$(get_copyfrom_total_copies)
-+	local s1=$(get_copyfrom_total_size)
-+	local sum
-+
-+	if [ ! -d $metrics_dir ]; then
-+		return # skip metrics check if debugfs isn't mounted
-+	fi
-+
-+	sum=$(($c0+$copies))
-+	if [ $sum -ne $c1 ]; then
-+		echo "Wrong number of remote copies.  Expected $sum, got $c1"
-+	fi
-+	sum=$(($s0+$copies*$objsz))
-+	if [ $sum -ne $s1 ]; then
-+		echo "Wrong size of remote copies.  Expected $sum, got $s1"
-+	fi
-+}
-+
- run_copy_range_tests()
- {
-+	total_copies=$(get_copyfrom_total_copies)
-+	total_size=$(get_copyfrom_total_size)
- 	objsz=$1
- 	halfobj=$(($objsz / 2))
- 	file="$workdir/file-$objsz"
-@@ -203,6 +267,8 @@ run_copy_range_tests()
- 	check_range $dest $(($objsz * 2 + $halfobj)) $objsz 63
- 	check_range $dest $(($objsz * 3 + $halfobj)) $halfobj 64
- 
-+	# Confirm that we've done a total of 24 object copies
-+	check_copyfrom_metrics $total_copies $total_size $objsz 24
- }
- 
- echo "Object size: 65536" # CEPH_MIN_STRIPE_UNIT
+> --Nitesh Shetty
+
+
