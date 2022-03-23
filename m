@@ -2,235 +2,139 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73C7CC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Mar 2022 05:31:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C301C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Mar 2022 05:54:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242499AbiCXFdV (ORCPT
+        id S237199AbiCXF42 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Mar 2022 01:33:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42330 "EHLO
+        Thu, 24 Mar 2022 01:56:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37588 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347608AbiCXFdU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2022 01:33:20 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1990D939D3;
-        Wed, 23 Mar 2022 22:31:49 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9BBFF60B9F;
-        Thu, 24 Mar 2022 05:31:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F2ADCC340ED;
-        Thu, 24 Mar 2022 05:31:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648099908;
-        bh=os3bm1B2+FNVW3MQRQJTczNi5tPtYTNSYb1u5n5+Apw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=hH8hJWP0lJsoooAnsNX6zSq+ru8/kCxQ3oPMdMR+x0uCk72onSADEaP3uTuMklLKk
-         87aVKBPtJ6o62+R73lvWg+JluUygONSnk5/tTAguXpF+d35PiASgWRuM0XwJlhVs6s
-         SmA5N4hpRq5Mk9g13ZGU/izk6bAMDM39WT6E+smdOI+9/wTI1JxPtGn8y4Cq+dH+jM
-         n2boLHvF3DHaItvXLr8OdYfjRdetVC727I8utvSlWUctlnLMf/wxDVTLDVCRrzS7/V
-         c4x0YYwwmSKaxjwEaa4yE2iMVaEa1aiiaOYNeXP60HT7sVZuKRCyDqeFnOi6YJMdCA
-         1JDZC5IaizckA==
-Date:   Wed, 23 Mar 2022 22:31:47 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     LKML <linux-kernel@vger.kernel.org>, lkp@lists.01.org,
-        lkp@intel.com, xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Oliver Sang <oliver.sang@intel.com>
-Subject: Re: [xfs]  1fc3f2c3c9: xfstests.xfs.529.fail
-Message-ID: <20220324053147.GR8224@magnolia>
-References: <20220322135402.GB32582@xsang-OptiPlex-9020>
- <20220322162733.GP8241@magnolia>
- <20220323070834.GB16885@xsang-OptiPlex-9020>
+        with ESMTP id S232029AbiCXF41 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2022 01:56:27 -0400
+Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC91F811BA
+        for <fstests@vger.kernel.org>; Wed, 23 Mar 2022 22:54:55 -0700 (PDT)
+Received: from epcas5p1.samsung.com (unknown [182.195.41.39])
+        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20220324055451epoutp04ec1c43a17bb5a0e78fe5f5578a776b54~fO2SGusMK3018130181epoutp04W
+        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 05:54:51 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20220324055451epoutp04ec1c43a17bb5a0e78fe5f5578a776b54~fO2SGusMK3018130181epoutp04W
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1648101291;
+        bh=arVDzRfLe1n1Y/d4pmjBjwef1ydwdOZHUtuA2NIq/kI=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=QIOt09rliyCYK5p1Tg2x1ACAiDcka5Ifes2GNGf2Pgm41HEav8hKB16+c1vAl3Rod
+         MjgDP04+O6Zv9L2+OCxuxDYkvchz4RmmUHEaNnFK7hBs9Qmm4bEpZKTDV9qSh2ORqz
+         teHHql5OhdmiveX0Hd1Qk40gClMpg++j+5yNtP7I=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+        epcas5p4.samsung.com (KnoxPortal) with ESMTP id
+        20220324055450epcas5p496fdf598a29397ed9ed319eac2e47cc6~fO2QxuoT_2626226262epcas5p4i;
+        Thu, 24 Mar 2022 05:54:50 +0000 (GMT)
+Received: from epsmges5p3new.samsung.com (unknown [182.195.38.178]) by
+        epsnrtp2.localdomain (Postfix) with ESMTP id 4KPDvQ18j8z4x9Py; Thu, 24 Mar
+        2022 05:54:42 +0000 (GMT)
+Received: from epcas5p2.samsung.com ( [182.195.41.40]) by
+        epsmges5p3new.samsung.com (Symantec Messaging Gateway) with SMTP id
+        80.CF.05590.C970C326; Thu, 24 Mar 2022 14:54:36 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
+        20220323181155epcas5p4892cb43ae57077d34f56baa848f152ce~fFQjA8Odn0612606126epcas5p4K;
+        Wed, 23 Mar 2022 18:11:55 +0000 (GMT)
+Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220323181155epsmtrp126b6027b71573c6060bf40cfb7b1b2dc~fFQjANq6Q2763527635epsmtrp1l;
+        Wed, 23 Mar 2022 18:11:55 +0000 (GMT)
+X-AuditID: b6c32a4b-739ff700000015d6-1c-623c079c7313
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        60.EC.03370.BE26B326; Thu, 24 Mar 2022 03:11:55 +0900 (KST)
+Received: from test-zns.sa.corp.samsungelectronics.net (unknown
+        [107.110.206.5]) by epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20220323181154epsmtip21dc5c8c3d284394b6762216cc86847a9~fFQhjSb7t2395923959epsmtip2f;
+        Wed, 23 Mar 2022 18:11:54 +0000 (GMT)
+From:   Nitesh Shetty <nj.shetty@samsung.com>
+To:     fstests@vger.kernel.org
+Cc:     nitheshshetty@gmail.com, p.raghav@samsung.com, joshi.k@samsung.com,
+        arnav.dawn@samsung.com, mcgrof@kernel.org,
+        Nitesh Shetty <nj.shetty@samsung.com>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Wang Yugui <wangyugui@e16-tech.com>
+Subject: [PATCH] generic/108: use blockdev utility to calculate physical and
+ logical block size
+Date:   Wed, 23 Mar 2022 23:36:43 +0530
+Message-Id: <20220323180643.29164-1-nj.shetty@samsung.com>
+X-Mailer: git-send-email 2.35.1.500.gb896f729e2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220323070834.GB16885@xsang-OptiPlex-9020>
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFupik+LIzCtJLcpLzFFi42LZdlhTQ3cOu02SQXeXmsWem59ZLS4/4bM4
+        3bKX3eLo/7dsFjcmPGW02PGkkdFi2+/5zBafl7awWzyY94XdgdNj9bM5TB47Z91l99i0qpPN
+        o2/LKkaPz5vkAlijsm0yUhNTUosUUvOS81My89JtlbyD453jTc0MDHUNLS3MlRTyEnNTbZVc
+        fAJ03TJzgO5RUihLzCkFCgUkFhcr6dvZFOWXlqQqZOQXl9gqpRak5BSYFOgVJ+YWl+al6+Wl
+        llgZGhgYmQIVJmRn9Bx5zV7wkL3izv+b7A2Md9m6GDk5JARMJN6+62bvYuTiEBLYzSjR0DmZ
+        BcL5xCjR86OJGcL5zChx6Oo1oAwHWMu1RzoQ8V2MErfm/oZqb2WSmLdyIRtIEZuAtsTp/xwg
+        K0QEpCU+9d8DW8cs8JpR4tpMKRBbWCBRYtaCHkYQm0VAVWLW9RZmEJtXwErix5TtjBC79CX6
+        7wtChAUlTs58wgIxRl6ieetsZogP7rFL3JrvCWG7SFy7cx7qM2GJV8e3sEPYUhIv+9vAzpQQ
+        6GaU+HHmPhOEM4NRonlCM1SHvcTFPX+ZQBYzC2hKrN+lDxGWlZh6ah0TxGI+id7fT5gg4rwS
+        O+bB2MoSa9YvgBojKXHteyOU7SGxvHcBK8hIIYFYiVPzNScwys9C8s4sJO/MQli8gJF5FaNk
+        akFxbnpqsWmBcV5qOTxak/NzNzGCE6WW9w7GRw8+6B1iZOJgPMQowcGsJMJ7/7J1khBvSmJl
+        VWpRfnxRaU5q8SFGU2AQT2SWEk3OB6bqvJJ4QxNLAxMzMzMTS2MzQyVx3lPpGxKFBNITS1Kz
+        U1MLUotg+pg4OKUamEovOaQ5RScZbpvW+eFkwj4GKQ0Jzdc7Alb+6xV/aqFiEpVsV2Ky9ljT
+        0iTdGxrdCkYvlsrysmnO8bgnLdn3dl3T1Q+TmE9MPPR51xfryORNu/kYTtyN/zGHX67KlmXl
+        zDXaYmmCF0ruGpu3L1qwYO9724jdDWLC1U+DnjlIH1SYk/0zoVMz/5Oluv7dmC98z7JTr+b8
+        +5a/ktM0yfeTTCB3vPrdEOFnRl0XtmjpMqrYBpZwGZmXMbqxph0N4VhW3Nb5UP5Xmdj+ZWl7
+        ppt0+pTc+bTS8a2DrBTbhVVXGC9P5jjwN/uGh+n1lmOzUrc4qVwLaL2RpuP2cP3WyYH3IhaX
+        t5Ue7DJd4dhzNIZZiaU4I9FQi7moOBEAGrzDch0EAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrGLMWRmVeSWpSXmKPExsWy7bCSvO7rJOskg0n95hZ7bn5mtbj8hM/i
+        dMtedouj/9+yWdyY8JTRYseTRkaLbb/nM1t8XtrCbvFg3hd2B06P1c/mMHnsnHWX3WPTqk42
+        j74tqxg9Pm+SC2CN4rJJSc3JLEst0rdL4MroOfKaveAhe8Wd/zfZGxjvsnUxcnBICJhIXHuk
+        08XIxSEksINR4vrHiexdjJxAcUmJZX+PMEPYwhIr/z1nhyhqZpK4+GgZO0gzm4C2xOn/HCA1
+        IgLSEp/677GB1DALfGaUmDBjJ1izsEC8xLonX1hBbBYBVYlZ11vA4rwCVhI/pmxnhDhCX6L/
+        viBEWFDi5MwnLCA2s4C8RPPW2cwTGPlmIUnNQpJawMi0ilEytaA4Nz232LDAKC+1XK84Mbe4
+        NC9dLzk/dxMjOGi1tHYw7ln1Qe8QIxMH4yFGCQ5mJRHexR/Mk4R4UxIrq1KL8uOLSnNSiw8x
+        SnOwKInzXug6GS8kkJ5YkpqdmlqQWgSTZeLglGpgmuW0jCv03x6j3xfvrmfJiXTmn783sERP
+        6WZPLJdphFrtjyYb36Oyto0Xoo5+l14pL7TNcWn8lb+uM3Oubf4dfqAv9Kobc6SCqXFXfAbz
+        lXv1E47+PZh7x8gyrvSK98l+s9bmM3/s5z6MO7u9t3CfzAn2iSyMkceXG6hNWVU5Ozrham9d
+        TsXlJsHO4O3Lvy7O0cl//Gzyz4PpTaqH4pkvXZQ53uKWx/ZLPelU5/kOGym7Cc4X3r6X3Syc
+        tC9vyWlV7djzOw70MZ99feCgq6/lpit3CjwPLJeb9841qOP87PMHlvGWlzb7FV8P220pdPbJ
+        i95niZ0LNrWlfLq8mV3wP3ellenObf+i+mqZs+KmK7EUZyQaajEXFScCAJktFDXJAgAA
+X-CMS-MailID: 20220323181155epcas5p4892cb43ae57077d34f56baa848f152ce
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: REQ_APPROVE
+CMS-TYPE: 105P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20220323181155epcas5p4892cb43ae57077d34f56baa848f152ce
+References: <CGME20220323181155epcas5p4892cb43ae57077d34f56baa848f152ce@epcas5p4.samsung.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[add chandan to cc since he wrote the extent count checking patches]
+Reading sysfs to get physical and logical block fails,
+if SCRATCH_DEV is partitioned device.
 
-On Wed, Mar 23, 2022 at 03:08:34PM +0800, Oliver Sang wrote:
-> hi, Darrick,
-> 
-> On Tue, Mar 22, 2022 at 09:27:33AM -0700, Darrick J. Wong wrote:
-> > On Tue, Mar 22, 2022 at 09:54:02PM +0800, kernel test robot wrote:
-> > > 
-> > > 
-> > > Greeting,
-> > > 
-> > > FYI, we noticed the following commit (built with gcc-9):
-> > > 
-> > > commit: 1fc3f2c3c928c88654d4716af5cc4dee07b3a1c4 ("xfs: only free posteof blocks on first close")
-> > > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git vectorized-scrub
-> > > 
-> > > in testcase: xfstests
-> > > version: xfstests-x86_64-1de1db8-1_20220217
-> > > with following parameters:
-> > > 
-> > > 	disk: 4HDD
-> > > 	fs: xfs
-> > > 	test: xfs-group-52
-> > > 	ucode: 0x21
-> > > 
-> > > test-description: xfstests is a regression test suite for xfs and other files ystems.
-> > > test-url: git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> > > 
-> > > 
-> > > on test machine: 4 threads 1 sockets Intel(R) Core(TM) i3-3220 CPU @ 3.30GHz with 8G memory
-> > > 
-> > > caused below changes (please refer to attached dmesg/kmsg for entire log/backtrace):
-> > > 
-> > > 
-> > > If you fix the issue, kindly add following tag
-> > > Reported-by: kernel test robot <oliver.sang@intel.com>
-> > > 
-> > 
-> > Could you export DIFF_LENGTH=0 in the test environment so that we get
-> > the full diff here, please?
-> 
-> the full diff is as below (also attached dmesg, full log, log for 529 in case
-> helpful):
-> 
-> xfs/529 [failed, exit status 1]- output mismatch (see /lkp/benchmarks/xfstests/results//xfs/529.out.bad)
->     --- tests/xfs/529.out       2022-02-17 11:55:00.000000000 +0000
->     +++ /lkp/benchmarks/xfstests/results//xfs/529.out.bad       2022-03-23 06:18:39.815036267 +0000
->     @@ -4,21 +4,4 @@
->      Inject reduce_max_iextents error tag
->      Create fragmented file
->      Verify $testfile's extent count
->     -Disable reduce_max_iextents error tag
->     -* Fallocate unwritten extents
->     -Inject reduce_max_iextents error tag
->     -Fallocate fragmented file
->     -Verify $testfile's extent count
->     -Disable reduce_max_iextents error tag
->     -* Directio write
->     -Inject reduce_max_iextents error tag
->     -Create fragmented file via directio writes
->     -Verify $testfile's extent count
->     -Disable reduce_max_iextents error tag
->     -* Extend quota inodes
->     -Consume free space
->     -Create fragmented filesystem
->     -Inject reduce_max_iextents error tag
->     -Inject bmap_alloc_minlen_extent error tag
->     -Extend uquota file
->     -Verify uquota inode's extent count
->     +Extent count overflow check failed: nextents = 15
+Signed-off-by: Nitesh Shetty <nj.shetty@samsung.com>
+Reported-by: Darrick J. Wong <djwong@kernel.org>
+Reported-by: Wang Yugui <wangyugui@e16-tech.com>
+---
+ tests/generic/108 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Hey Chandan, could you take a look at this, please?
-
---D
-
-> 
-> 
-> > 
-> > --D
-> > 
-
-
-> 2022-03-23 06:18:24 export TEST_DIR=/fs/sdb1
-> 2022-03-23 06:18:24 export TEST_DEV=/dev/sdb1
-> 2022-03-23 06:18:24 export FSTYP=xfs
-> 2022-03-23 06:18:24 export SCRATCH_MNT=/fs/scratch
-> 2022-03-23 06:18:24 mkdir /fs/scratch -p
-> 2022-03-23 06:18:24 export SCRATCH_DEV=/dev/sdb4
-> 2022-03-23 06:18:24 export SCRATCH_LOGDEV=/dev/sdb2
-> 2022-03-23 06:18:24 export SCRATCH_XFS_LIST_METADATA_FIELDS=u3.sfdir3.hdr.parent.i4
-> 2022-03-23 06:18:24 export SCRATCH_XFS_LIST_FUZZ_VERBS=random
-> DIFF_LENGTH=
-> 0
-> END
-> 2022-03-23 06:18:24 sed "s:^:xfs/:" //lkp/benchmarks/xfstests/tests/xfs-group-52
-> 2022-03-23 06:18:24 ./check xfs/520 xfs/522 xfs/523 xfs/524 xfs/525 xfs/526 xfs/527 xfs/529
-> FSTYP         -- xfs (debug)
-> PLATFORM      -- Linux/x86_64 lkp-ivb-d05 5.17.0-rc8-00340-g1fc3f2c3c928 #1 SMP Mon Mar 21 07:17:57 CST 2022
-> MKFS_OPTIONS  -- -f /dev/sdb4
-> MOUNT_OPTIONS -- /dev/sdb4 /fs/scratch
-> 
-> xfs/520	 3s
-> xfs/522	[not run] need configuration file support in mkfs.xfs
-> xfs/523	[not run] need configuration file support in mkfs.xfs
-> xfs/524	[not run] need configuration file support in mkfs.xfs
-> xfs/525	[not run] need configuration file support in mkfs.xfs
-> xfs/526	[not run] need configuration file support in mkfs.xfs
-> xfs/527	 2s
-> xfs/529	[failed, exit status 1]- output mismatch (see /lkp/benchmarks/xfstests/results//xfs/529.out.bad)
->     --- tests/xfs/529.out	2022-02-17 11:55:00.000000000 +0000
->     +++ /lkp/benchmarks/xfstests/results//xfs/529.out.bad	2022-03-23 06:18:39.815036267 +0000
->     @@ -4,21 +4,4 @@
->      Inject reduce_max_iextents error tag
->      Create fragmented file
->      Verify $testfile's extent count
->     -Disable reduce_max_iextents error tag
->     -* Fallocate unwritten extents
->     -Inject reduce_max_iextents error tag
->     -Fallocate fragmented file
->     -Verify $testfile's extent count
->     -Disable reduce_max_iextents error tag
->     -* Directio write
->     -Inject reduce_max_iextents error tag
->     -Create fragmented file via directio writes
->     -Verify $testfile's extent count
->     -Disable reduce_max_iextents error tag
->     -* Extend quota inodes
->     -Consume free space
->     -Create fragmented filesystem
->     -Inject reduce_max_iextents error tag
->     -Inject bmap_alloc_minlen_extent error tag
->     -Extend uquota file
->     -Verify uquota inode's extent count
->     +Extent count overflow check failed: nextents = 15
-> Ran: xfs/520 xfs/522 xfs/523 xfs/524 xfs/525 xfs/526 xfs/527 xfs/529
-> Not run: xfs/522 xfs/523 xfs/524 xfs/525 xfs/526
-> Failures: xfs/529
-> Failed 1 of 8 tests
-> 
-
-> meta-data=/dev/sdb4              isize=512    agcount=4, agsize=32768 blks
->          =                       sectsz=4096  attr=2, projid32bit=1
->          =                       crc=1        finobt=1, sparse=1, rmapbt=0
->          =                       reflink=0
-> data     =                       bsize=4096   blocks=131072, imaxpct=25
->          =                       sunit=0      swidth=0 blks
-> naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> log      =internal log           bsize=4096   blocks=1605, version=2
->          =                       sectsz=4096  sunit=1 blks, lazy-count=1
-> realtime =none                   extsz=4096   blocks=0, rtextents=0
-> wrote 4096/4096 bytes at offset 0
-> 4 KiB, 1 ops; 0.0185 sec (216.099 KiB/sec and 54.0249 ops/sec)
-> wrote 4096/4096 bytes at offset 8192
-> 4 KiB, 1 ops; 0.0157 sec (253.888 KiB/sec and 63.4719 ops/sec)
-> wrote 4096/4096 bytes at offset 16384
-> 4 KiB, 1 ops; 0.0158 sec (251.620 KiB/sec and 62.9050 ops/sec)
-> wrote 4096/4096 bytes at offset 24576
-> 4 KiB, 1 ops; 0.0160 sec (248.648 KiB/sec and 62.1620 ops/sec)
-> wrote 4096/4096 bytes at offset 32768
-> 4 KiB, 1 ops; 0.0160 sec (249.423 KiB/sec and 62.3558 ops/sec)
-> wrote 4096/4096 bytes at offset 40960
-> 4 KiB, 1 ops; 0.0158 sec (251.604 KiB/sec and 62.9010 ops/sec)
-> wrote 4096/4096 bytes at offset 49152
-> 4 KiB, 1 ops; 0.0161 sec (247.755 KiB/sec and 61.9387 ops/sec)
-> wrote 4096/4096 bytes at offset 57344
-> 4 KiB, 1 ops; 0.0159 sec (250.878 KiB/sec and 62.7195 ops/sec)
-> pwrite: File too large
-> pwrite: File too large
-> pwrite: File too large
-> pwrite: File too large
-> pwrite: File too large
-> pwrite: File too large
-> pwrite: File too large
-
-> QA output created by 529
-> Format and mount fs
-> * Delalloc to written extent conversion
-> Inject reduce_max_iextents error tag
-> Create fragmented file
-> Verify $testfile's extent count
-> Extent count overflow check failed: nextents = 15
+diff --git a/tests/generic/108 b/tests/generic/108
+index db0e9bd0..efe66ba5 100755
+--- a/tests/generic/108
++++ b/tests/generic/108
+@@ -42,8 +42,8 @@ _require_non_zoned_device $SCRATCH_DEV
+ lvname=lv_$seq
+ vgname=vg_$seq
+ 
+-physical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/physical_block_size)
+-logical=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/logical_block_size)
++physical=`blockdev --getpbsz $SCRATCH_DEV`
++logical=`blockdev --getss $SCRATCH_DEV`
+ 
+ # _get_scsi_debug_dev returns a scsi debug device with 128M in size by default
+ SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
+-- 
+2.25.1
 
