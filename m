@@ -2,179 +2,147 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C07CC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Mar 2022 20:24:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D780C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Mar 2022 21:38:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353378AbiCXU0N (ORCPT
+        id S238753AbiCXVk3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Mar 2022 16:26:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48634 "EHLO
+        Thu, 24 Mar 2022 17:40:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44132 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347507AbiCXU0M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2022 16:26:12 -0400
-Received: from mail-qv1-xf29.google.com (mail-qv1-xf29.google.com [IPv6:2607:f8b0:4864:20::f29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4799B6E4A
-        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 13:24:39 -0700 (PDT)
-Received: by mail-qv1-xf29.google.com with SMTP id kd21so1738019qvb.6
-        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 13:24:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
-         :content-transfer-encoding;
-        bh=k61841+rsGfDmVsNao06UICtoAksEtwqkR900e6cGEE=;
-        b=77cQ7v1RqFu0/DFodNlZXoOK61GN3xP7Fo+XTU8SJSSLNvWeTpGhcgw8nSoZSaGcKO
-         dIX6DVgJbUDt9YAwJPjaO1pwYzmgS3UvjOH0anV7z3K2OWh8yc0J88ryDzhPzrRdAahY
-         aVl3XVXx7AuwBngUG5X3zMHryr5Qd2Li6lnEq+eR2AQzRhVNxRR3KyQMVFBIpMxCoGIT
-         rdzqCD7ei4KvC9CVEhHPZW6PeCPoHUDmIgtStDCV6e7YZa1SxYVr4R2ziK7Fwqib8YNQ
-         9wyilWruW1GCMpH0f/hrA6o9gZ7T/cqoUTH8ptmw5e60DUdOeQQk4TltUCZOJMR9AEkm
-         WIQw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=k61841+rsGfDmVsNao06UICtoAksEtwqkR900e6cGEE=;
-        b=FkGdI1H+XdnchbTk1UR+XbFTEvBdGimV2pZW/QwW6mo+tMFLYETWPdP6fOzBtjADmw
-         bztpQetmDxvMRIAp7ew5hmIZuHRPgQzvX0hwLSABi/E7Q8lWzi4n1Y+eYIvf6wnPjjUH
-         t0tVJb/qfu1P09dNJulE+XtIDTub21NCvJBLUMXSdlA0c2OKnQT4g5hOs3x2VJ6QXqCI
-         ilH/uGqP1QuhzAQtVi7yZtBAPO+njJWWARgXeB/FzhjJmc7Ibkm2BEO223LMBwH4j/iv
-         fPy6PEsMzT2LyQh4pyZlXnb00I0LVMO+WDTU3QGpzB18mv7u1bmHIcGqpok5/2nhdTXF
-         LUng==
-X-Gm-Message-State: AOAM533RcjNmYbAKQR2teNSDAbxpzjIPSdNvCz9wPiWFH1GBxOL3Bm7/
-        +F/zrPUB2rBy5n1tnSPNsTkZ+09wluhj8Q==
-X-Google-Smtp-Source: ABdhPJwMJNFp4U3OVJEBP6kOkuHyeu+BKXVXuq5C2IEcXOosctMMQ4E252XyE/zx7tcnPpMPOhmk7Q==
-X-Received: by 2002:a05:6214:21e4:b0:441:248a:9823 with SMTP id p4-20020a05621421e400b00441248a9823mr5747052qvj.35.1648153478941;
-        Thu, 24 Mar 2022 13:24:38 -0700 (PDT)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id q8-20020a05622a04c800b002e06d7c1eabsm3142437qtx.16.2022.03.24.13.24.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Mar 2022 13:24:38 -0700 (PDT)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH 3/3] fstests: btrfs/029: change the cross vfsmount reflink test
-Date:   Thu, 24 Mar 2022 16:24:34 -0400
-Message-Id: <381ad867bdd09a98b5fdad0534fc5fb2b235ece7.1648153387.git.josef@toxicpanda.com>
-X-Mailer: git-send-email 2.26.3
-In-Reply-To: <cover.1648153387.git.josef@toxicpanda.com>
-References: <cover.1648153387.git.josef@toxicpanda.com>
+        with ESMTP id S1354221AbiCXVk2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2022 17:40:28 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 789983F336;
+        Thu, 24 Mar 2022 14:38:56 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 146E061359;
+        Thu, 24 Mar 2022 21:38:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 69088C340EC;
+        Thu, 24 Mar 2022 21:38:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1648157935;
+        bh=hhZo3GBcB74rH01qnpUvnw8P4Cw1qTVWAZJxRx0FaJI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=QimPqtIAlf2ZRLLVVbgMci528d5A5qRtyHKSfdhjOSey9Cn8m9oukBqwXdSjGVBzs
+         c1rR1dKHA7+0KFYCYDtLBwp8uOU9zrjibcR+yJOAVbyoiVdhUvJ5GT7tx5e+OLPwCt
+         PvsN78nv4263oACADUYWhTis7oniV45ASnUrMn24Xq4bm5cxUqjqqlCDHvMWZthKv+
+         f5ubfpm1LRYBMECbwh0YIu9k6TANnZ7t0aQT4q1C5ONSzFcGxidyMnvf9pIQw5T0Vn
+         duiJPJtnQLcNfZOKzSmtfHxFVuoUiC6ruiCRO6LHCB91wxetUjr6Vhmq1z0GOe7ahS
+         I/qARFyY/Q4Ug==
+Date:   Thu, 24 Mar 2022 14:38:54 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 1/2] xfs: make sure syncfs(2) passes back
+ super_operations.sync_fs errors
+Message-ID: <20220324213854.GS8200@magnolia>
+References: <164740142940.3371809.12686819717405148022.stgit@magnolia>
+ <164740143497.3371809.2959237196772812909.stgit@magnolia>
+ <20220323024432.44wf2xhpv3z55txp@zlang-mailbox>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220323024432.44wf2xhpv3z55txp@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We now allow cross vfsmount reflinks, change this test to make sure we pass the
-cross-vfsmount reflink.
+[adding tytso for the ext4 question]
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- tests/btrfs/029     | 60 ++++++++++++++++++++++++++-------------------
- tests/btrfs/029.out |  3 ++-
- 2 files changed, 37 insertions(+), 26 deletions(-)
+On Wed, Mar 23, 2022 at 10:44:32AM +0800, Zorro Lang wrote:
+> On Tue, Mar 15, 2022 at 08:30:35PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > This is a regression test to make sure that nonzero error returns from
+> > a filesystem's ->sync_fs implementation are actually passed back to
+> > userspace when the call stack involves syncfs(2).
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/xfs/839     |   42 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/839.out |    2 ++
+> >  2 files changed, 44 insertions(+)
+> >  create mode 100755 tests/xfs/839
+> >  create mode 100644 tests/xfs/839.out
+> > 
+> > 
+> > diff --git a/tests/xfs/839 b/tests/xfs/839
+> > new file mode 100755
+> > index 00000000..9bfe93ef
+> > --- /dev/null
+> > +++ b/tests/xfs/839
+> > @@ -0,0 +1,42 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 839
+> > +#
+> > +# Regression test for kernel commits:
+> > +#
+> > +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_fs")
+> > +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
+> > +#
+> > +# During a code inspection, I noticed that sync_filesystem ignores the return
+> > +# value of the ->sync_fs calls that it makes.  sync_filesystem, in turn is used
+> > +# by the syncfs(2) syscall to persist filesystem changes to disk.  This means
+> > +# that syncfs(2) does not capture internal filesystem errors that are neither
+> > +# visible from the block device (e.g. media error) nor recorded in s_wb_err.
+> > +# XFS historically returned 0 from ->sync_fs even if there were log failures,
+> > +# so that had to be corrected as well.
+> > +#
+> > +# The kernel commits above fix this problem, so this test tries to trigger the
+> > +# bug by using the shutdown ioctl on a clean, freshly mounted filesystem in the
+> > +# hope that the EIO generated as a result of the filesystem being shut down is
+> > +# only visible via ->sync_fs.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick shutdown
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_require_xfs_io_command syncfs
+> > +_require_scratch_nocheck
+> > +_require_scratch_shutdown
+> 
+> Can this case be a generic case, with the help of _require_scratch_shutdown
+> and _require_xfs_io_command?
 
-diff --git a/tests/btrfs/029 b/tests/btrfs/029
-index 1bdbc951..94886788 100755
---- a/tests/btrfs/029
-+++ b/tests/btrfs/029
-@@ -5,14 +5,15 @@
- # FS QA Test No. 029
- #
- # Check if creating a sparse copy ("reflink") of a file on btrfs
--# expectedly fails when it's done between different filesystems or
--# different mount points of the same filesystem.
-+# expectedly fails when it's done between different filesystems but
-+# not for different mount points of the same filesystem.
- #
- # For both situations, these actions are executed:
- #    - Copy a file with the reflink=auto option.
- #      A normal copy should be created.
- #    - Copy a file with the reflink=always option. Should result in
--#      error.
-+#      error for different file systems, but succeed for the same fs
-+#      but different mount points.
- #
- . ./common/preamble
- _begin_fstest auto quick clone
-@@ -31,38 +32,47 @@ _require_cp_reflink
- reflink_test_dir=$TEST_DIR/test-$seq
- rm -rf $reflink_test_dir
- mkdir $reflink_test_dir
-+orig_file=$SCRATCH_MNT/original
-+copy_file=$reflink_test_dir/copy
- 
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
--$XFS_IO_PROG -f -c 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/original >> $seqres.full
-+$XFS_IO_PROG -f -c 'pwrite -S 0x61 0 9000' $orig_file >> $seqres.full
- 
--_create_reflinks()
--{
--    # auto reflink, should fall back to non-reflink
--    rm -rf $2
--    echo "reflink=auto:"
--    cp --reflink=auto $1 $2
--    md5sum $1 | _filter_testdir_and_scratch
--    md5sum $2 | _filter_testdir_and_scratch
--
--    # always reflink, should fail outright
--    rm -rf $2
--    echo "reflink=always:"
--    cp --reflink=always $1 $2 >> $seqres.full 2>&1 || echo "cp reflink failed"
-+echo "test reflinks across different devices"
-+# auto reflink, should fall back to non-reflink
-+rm -rf $copy_file
-+echo "reflink=auto:"
-+cp --reflink=auto $orig_file $copy_file
-+md5sum $orig_file | _filter_testdir_and_scratch
-+md5sum $copy_file | _filter_testdir_and_scratch
- 
--    # The failed target gets created with zero sizes by cp(1) version 8.32. But
--    # in older cp(1) version 8.30 target file is not created when the
--    # cp --reflink=always fails.
--    ls $2 >> $seqres.full 2>&1
--}
-+# always reflink, should fail outright
-+rm -rf $copy_file
-+echo "reflink=always:"
-+cp --reflink=always $orig_file $copy_file >> $seqres.full 2>&1 || echo "cp reflink failed"
- 
--echo "test reflinks across different devices"
--_create_reflinks $SCRATCH_MNT/original $reflink_test_dir/copy
-+# The failed target gets created with zero sizes by cp(1) version 8.32. But in
-+# older cp(1) version 8.30 target file is not created when the cp
-+# --reflink=always fails.
-+ls $copy_file >> $seqres.full 2>&1
- 
- echo "test reflinks across different mountpoints of same device"
- rm -rf $reflink_test_dir/*
- _mount $SCRATCH_DEV $reflink_test_dir
--_create_reflinks $SCRATCH_MNT/original $reflink_test_dir/copy
-+
-+echo "reflink=auto:"
-+cp --reflink=auto $orig_file $copy_file
-+md5sum $orig_file | _filter_testdir_and_scratch
-+md5sum $copy_file | _filter_testdir_and_scratch
-+
-+# always reflink, should fail outright
-+rm -rf $copy_file
-+echo "reflink=always:"
-+cp --reflink=always $orig_file $copy_file >> $seqres.full 2>&1 || echo "cp reflink failed"
-+md5sum $orig_file | _filter_testdir_and_scratch
-+md5sum $copy_file | _filter_testdir_and_scratch
-+
- $UMOUNT_PROG $reflink_test_dir
- 
- # success, all done
-diff --git a/tests/btrfs/029.out b/tests/btrfs/029.out
-index f1c88780..c4971fcb 100644
---- a/tests/btrfs/029.out
-+++ b/tests/btrfs/029.out
-@@ -10,4 +10,5 @@ reflink=auto:
- 42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/original
- 42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/test-029/copy
- reflink=always:
--cp reflink failed
-+42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/original
-+42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/test-029/copy
--- 
-2.26.3
+I'm not sure.  Of the three filesystems that both have a ->sync_fs
+function and implement FS_IOC_SHUTDOWN, xfs and f2fs look like they
+passes errors like they should.
 
+ext4 is another story -- curiously, if the fs is shut down, it'll return
+0 and it doesn't check the return value of dquot_writeback_dquots.  I
+don't remember enough of ext to know if that's deliberate or merely an
+age-old artifact of the Bad Old Days when that whole code path didn't
+care about errors.
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> > +
+> > +# Reuse the fs formatted when we checked for the shutdown ioctl, and don't
+> > +# bother checking the filesystem afterwards since we never wrote anything.
+> > +_scratch_mount
+> > +$XFS_IO_PROG -x -c 'shutdown -f ' -c syncfs $SCRATCH_MNT
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/839.out b/tests/xfs/839.out
+> > new file mode 100644
+> > index 00000000..f275cdcc
+> > --- /dev/null
+> > +++ b/tests/xfs/839.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 839
+> > +syncfs: Input/output error
+> > 
+> 
