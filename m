@@ -2,86 +2,122 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 299D5C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Mar 2022 20:24:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEB92C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Mar 2022 20:24:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353372AbiCXU0J (ORCPT
+        id S1353375AbiCXU0K (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Mar 2022 16:26:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48360 "EHLO
+        Thu, 24 Mar 2022 16:26:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352330AbiCXU0I (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2022 16:26:08 -0400
-Received: from mail-qt1-x831.google.com (mail-qt1-x831.google.com [IPv6:2607:f8b0:4864:20::831])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61B91B6E4A
-        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 13:24:36 -0700 (PDT)
-Received: by mail-qt1-x831.google.com with SMTP id v2so4912425qtc.5
-        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 13:24:36 -0700 (PDT)
+        with ESMTP id S1352330AbiCXU0J (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Mar 2022 16:26:09 -0400
+Received: from mail-qv1-xf2c.google.com (mail-qv1-xf2c.google.com [IPv6:2607:f8b0:4864:20::f2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64AD9B8209
+        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 13:24:37 -0700 (PDT)
+Received: by mail-qv1-xf2c.google.com with SMTP id e22so4639970qvf.9
+        for <fstests@vger.kernel.org>; Thu, 24 Mar 2022 13:24:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:subject:date:message-id:mime-version
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
          :content-transfer-encoding;
-        bh=tc3+R/94N4tFej/EltBdhN0pP3IZVz1tkHnLAp4dta8=;
-        b=Ogx0zwDRzzJ305+wleB9D8gRUdHh+60mxuxKEbbf3BuRFNZ1ddVqFKDBwo6eNad3Ba
-         59RbUPRycv6oDsBqo0GOtrRMS+GIdfR9KQLXayVe/4RjYDPZ6BR0oTbGWyPmUgodW7aN
-         g5lln1i7nHzLAKeTxZz9OElD93SllgDJJccZNWwfpuaAuHllXSI7brrsdeC7ITGPqX+3
-         U0dL7jCElNdTfvYUbi9TWMK3n6/kQNiNyQhcOaOxrwWCzQdnDGSArCGw9+HBabCvN8kq
-         pVGSdvqGh3ujHJTW+nwsF5F3SQgt8sXP5lJvGiCroONgjwrKtJgWS9KIjed+X+HEvtUM
-         a+vA==
+        bh=sjeEY3jU8Vd8c3eGSWQ+xXynaeCzBMPJrqgJf3Ui0uw=;
+        b=XwdUfPPF7D4EilCq/hxEWlbMSlHYkJhpnl7qmWRP6lToI5fAtH1+IEOcplvRe9UnaR
+         d7iHoUv9DMb0EdFsg6CGQpyFr+sqsIQZPea4EiW6wrJ8koO7mOTQkS1UHcxDAup8eptk
+         ecjkqrm7Uz6nJKOKMwhtD5FC1qPr0vlQIWvXFpUz+7ZgM7mguHD9niidmCibTkeIb7/5
+         SjHn3uMwUr3vOwzQJuewd/Z8oIkysGHI1zzCR7LEN+t6/WKri0LnXbTmkKcJnZbsN56E
+         7QzZ3Wbn+fCN+KmO4M6kJH9WZymm92WB92y2U9lk7z8v4DPvnAHLAtJzejL7bxdO4Ah9
+         ic+Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=tc3+R/94N4tFej/EltBdhN0pP3IZVz1tkHnLAp4dta8=;
-        b=NXiBQml61gC6azImawz96uND9yMVxcqf5K7y/+AN82gZxaqytnMBdFLCUsfE6Y48yQ
-         +OlSZuxEkNLuwiClNK1pMLZbibUAl4xvcpdb84rcCxUjJH5zx+P7o/jjK3BX32SfG32S
-         7eTOoVjHQqGhS4muvmoelIsHTWGJ+OqwXghE8KQpfhnqVmv5MK8dPJHHkHZlyig/tklU
-         7Xwjk7NKDLSSCNk31FvJzXNrBlpOb1KJn5DnCr+tjwEkaadzawn0W49wcUptasiJ+31H
-         m+pyh9DoYOZwXTxs6k0z3Px9pOX3dq5P4IX0SbcpbCAuuiQED/5Ev7nmrdt4ScUiDJJQ
-         JoIA==
-X-Gm-Message-State: AOAM530etLsbTJ7iF8UdkfFkIK+H0ZCxwvIH6fCWXXhkGZ+qqf/enMXK
-        UIZQt8gY5cWyKXIqIJ2Yr26r3w==
-X-Google-Smtp-Source: ABdhPJzedp2ksl687hl6eN+upVupIgfIMYbzOkmelJ4/Dlk+QfC2HDyhtPlpXOrNooQuGwe7Os2o6Q==
-X-Received: by 2002:a05:622a:1102:b0:2e1:d3f9:ffa7 with SMTP id e2-20020a05622a110200b002e1d3f9ffa7mr6261051qty.506.1648153475295;
-        Thu, 24 Mar 2022 13:24:35 -0700 (PDT)
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=sjeEY3jU8Vd8c3eGSWQ+xXynaeCzBMPJrqgJf3Ui0uw=;
+        b=V+vL6GfYIstk3f2Nt/wvC6ApT64CZCeFx8qfM52f4EFPK6JIKXANzVaQ90tBwzPiUe
+         TcKwpc54lEVd45H1sgWCfcq1/DfeK93NLDXJwxVMl2WqAcYaki2r/k5oOugYpRzDNibX
+         c5FcdxAKzSI3O+2m1+tyfy+3/1oiafKH6lN73m6qD3zBR1iER16tvWUeGeoJLSlxe6vc
+         E8zeKjRqNxjTqdLqJzlIrqMYOf4TPUUbJ2BZnEHpSX2zM/flpKH/dF+fxTlGpFELCfO8
+         W+kNL5EMIzEk/kbONTSqnfmsCW2+YQUsiflyPOexHR4b/CCIkTjML5LhEtz+1IL9L1b0
+         jMJA==
+X-Gm-Message-State: AOAM530UIdvlKMTq023La3y6aKoQILOe6nmdKEPApyGPKZvN5ynlP3he
+        /jicCQ9o+whjmHnRN/WsCGiWXQ==
+X-Google-Smtp-Source: ABdhPJxXqUG/e8ozJuntQgLya/Sp5Np1j7ozmlfJjxOy/TAGLqCw8tW5uJavmrZZPyUe1fn47k3RNw==
+X-Received: by 2002:a05:6214:20a4:b0:441:43c7:eb85 with SMTP id 4-20020a05621420a400b0044143c7eb85mr5890323qvd.5.1648153476516;
+        Thu, 24 Mar 2022 13:24:36 -0700 (PDT)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id h24-20020a37de18000000b0067ec1f8670fsm1980879qkj.119.2022.03.24.13.24.34
+        by smtp.gmail.com with ESMTPSA id l7-20020a37f507000000b0047b528ef416sm2000486qkk.93.2022.03.24.13.24.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Mar 2022 13:24:34 -0700 (PDT)
+        Thu, 24 Mar 2022 13:24:36 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH 0/3] fstests: cross-vfsmount reflink changes
-Date:   Thu, 24 Mar 2022 16:24:31 -0400
-Message-Id: <cover.1648153387.git.josef@toxicpanda.com>
+Subject: [PATCH 1/3] fstests: generic/373: change test to validate cross-vfsmount reflink
+Date:   Thu, 24 Mar 2022 16:24:32 -0400
+Message-Id: <57a8ad46edcacf08778b16c9eadb603a1638bf17.1648153387.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.3
+In-Reply-To: <cover.1648153387.git.josef@toxicpanda.com>
+References: <cover.1648153387.git.josef@toxicpanda.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hello,
+We now allow cross-vfsmount reflinks so change the test to validate that
+cross-vfsmount reflinks work.
 
-We now allow cross-vfsmount reflinks, so adjust the tests that test to validate
-that these operations aren't allowed to validate that they are in fact allowed
-now.  I've run this through our staging tree to validate that they pass on all
-of our configurations.  Thanks,
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/generic/373     | 8 ++++----
+ tests/generic/373.out | 2 +-
+ 2 files changed, 5 insertions(+), 5 deletions(-)
 
-Josef
-
-Josef Bacik (3):
-  fstests: generic/373: change test to validate cross-vfsmount reflink
-  fstests: generic/374: validate cross-vfsmount dedupe
-  fstests: btrfs/029: change the cross vfsmount reflink test
-
- tests/btrfs/029       | 60 +++++++++++++++++++++++++------------------
- tests/btrfs/029.out   |  3 ++-
- tests/generic/373     |  8 +++---
- tests/generic/373.out |  2 +-
- tests/generic/374     |  5 ++--
- tests/generic/374.out |  3 ++-
- 6 files changed, 47 insertions(+), 34 deletions(-)
-
+diff --git a/tests/generic/373 b/tests/generic/373
+index 2f68b24f..e85308c7 100755
+--- a/tests/generic/373
++++ b/tests/generic/373
+@@ -4,7 +4,7 @@
+ #
+ # FS QA Test No. 373
+ #
+-# Check that cross-mountpoint reflink doesn't work.
++# Check that cross-mountpoint reflink works.
+ #
+ . ./common/preamble
+ _begin_fstest auto quick clone
+@@ -49,17 +49,17 @@ $MOUNT_PROG --bind $SCRATCH_MNT $otherdir
+ echo "Create file"
+ _pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
+ 
+-filter_md5()
++filter_otherdir()
+ {
+ 	_filter_scratch | sed -e "s,$otherdir,OTHER_DIR,g"
+ }
+ 
+ echo "Reflink one file to another"
+-_cp_reflink $testdir/file $othertestdir/otherfiles 2>&1 | filter_md5
++_cp_reflink $testdir/file $othertestdir/otherfile 2>&1 | filter_otherdir
+ 
+ echo "Check output"
+ md5sum $testdir/file | _filter_scratch
+-test -e $othertestdir/otherfile && echo "otherfile should not exist"
++md5sum $othertestdir/otherfile | filter_otherdir
+ 
+ echo "Unmount otherdir"
+ $UMOUNT_PROG $otherdir
+diff --git a/tests/generic/373.out b/tests/generic/373.out
+index 60f280fc..51f5c62b 100644
+--- a/tests/generic/373.out
++++ b/tests/generic/373.out
+@@ -3,7 +3,7 @@ Format and mount
+ Mount otherdir
+ Create file
+ Reflink one file to another
+-cp: failed to clone 'OTHER_DIR/test-373/otherfiles' from 'SCRATCH_MNT/test-373/file': Invalid cross-device link
+ Check output
+ 2d61aa54b58c2e94403fb092c3dbc027  SCRATCH_MNT/test-373/file
++2d61aa54b58c2e94403fb092c3dbc027  OTHER_DIR/test-373/otherfile
+ Unmount otherdir
 -- 
 2.26.3
 
