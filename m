@@ -2,161 +2,211 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23B95C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Mar 2022 08:26:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6134AC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Mar 2022 10:20:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244563AbiCYI15 (ORCPT
+        id S1350920AbiCYKVm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 25 Mar 2022 04:27:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55654 "EHLO
+        Fri, 25 Mar 2022 06:21:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354548AbiCYI1u (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Mar 2022 04:27:50 -0400
+        with ESMTP id S237867AbiCYKVl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Mar 2022 06:21:41 -0400
 Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2FC5CC535
-        for <fstests@vger.kernel.org>; Fri, 25 Mar 2022 01:26:16 -0700 (PDT)
-Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
-        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20220325082613euoutp01dfcbf5ae32b559acd4b67f6aa08cfb00~fkjuR8HAP1479414794euoutp01T
-        for <fstests@vger.kernel.org>; Fri, 25 Mar 2022 08:26:13 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20220325082613euoutp01dfcbf5ae32b559acd4b67f6aa08cfb00~fkjuR8HAP1479414794euoutp01T
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E826B6929B
+        for <fstests@vger.kernel.org>; Fri, 25 Mar 2022 03:20:04 -0700 (PDT)
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20220325101959euoutp01bf8dff00355b26e24351611a39083305~fmHD-0FmN0938809388euoutp01g
+        for <fstests@vger.kernel.org>; Fri, 25 Mar 2022 10:19:59 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20220325101959euoutp01bf8dff00355b26e24351611a39083305~fmHD-0FmN0938809388euoutp01g
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1648196773;
-        bh=Ut0jZrVoS5Wru1rFgBM4dpyQO8YUwjuLmHMhA6ECROw=;
-        h=Date:Subject:To:CC:From:In-Reply-To:References:From;
-        b=iyp/+WKZ9Gjc1zE9BP1d73sf2rUPOxMwokpxmYRsMq33dgvhhdf8KK+oMWoEgZ4W+
-         cGWP6us/lsb3dnkVkK4X98n5vaQ6LoZpUJQttHnnDDQqYtjMhMzTneymAkPVt6zqPc
-         niTY7Bzx0cJMIkVkR7NGz7pMy1NjkehBBuzfD3pM=
-Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
+        s=mail20170921; t=1648203599;
+        bh=ou0R/4Q5mItbZASn1V3RQNSQA9DIbeoTHZ08kdcCV/4=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=dkhEipevyPmtjeW/gt/AfupRF87RHOOBXce7v8Mu/eKn9hjcA3N0Nz4dbL0lhkgQ1
+         P8vIcQxt5XMlSw0PmjT7swAOYRTYVPiiv5f31Y/uvIjUJJKJ+PxDm8YRsGTCDXB9F4
+         HPmz3oPky8yq85ppdlAStl+0+yQGglR1kRr0NKO0=
+Received: from eusmges1new.samsung.com (unknown [203.254.199.242]) by
         eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-        20220325082612eucas1p1b013e7b75ca69d383667318635ac64d2~fkjuEN4vo0623406234eucas1p17;
-        Fri, 25 Mar 2022 08:26:12 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-        eusmges2new.samsung.com (EUCPMTA) with SMTP id A4.94.09887.4AC7D326; Fri, 25
-        Mar 2022 08:26:12 +0000 (GMT)
-Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
-        eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-        20220325082612eucas1p1d321a67001cbe8789ac157e8ef0f3c9a~fkjtsDi3G2748027480eucas1p1U;
-        Fri, 25 Mar 2022 08:26:12 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-        eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
-        20220325082612eusmtrp2bd9ae795eb2f177879c73e3d271f4c86~fkjtq9YL60065200652eusmtrp2Y;
-        Fri, 25 Mar 2022 08:26:12 +0000 (GMT)
-X-AuditID: cbfec7f4-45bff7000000269f-9c-623d7ca4b2d8
-Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
-        eusmgms2.samsung.com (EUCPMTA) with SMTP id 6B.FE.09404.4AC7D326; Fri, 25
-        Mar 2022 08:26:12 +0000 (GMT)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-        eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
-        20220325082612eusmtip1b7423738f0c5fd71a62c41a4f296287d~fkjteOQUI1646416464eusmtip1M;
-        Fri, 25 Mar 2022 08:26:12 +0000 (GMT)
-Received: from [192.168.8.130] (106.210.248.55) by CAMSVWEXC02.scsc.local
-        (2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
-        Fri, 25 Mar 2022 08:26:06 +0000
-Message-ID: <be8f9576-35f2-52b0-a75c-b65b192f82b8@samsung.com>
-Date:   Fri, 25 Mar 2022 09:26:05 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
-        Thunderbird/91.7.0
-Subject: Re: [PATCH v3] btrfs/237: Use zone cap instead of zone size in
- fill_size and rest calculation
-Content-Language: en-US
-To:     Naohiro Aota <Naohiro.Aota@wdc.com>,
-        Pankaj Raghav <pankydev8@gmail.com>
-CC:     Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        =?UTF-8?Q?Javier_Gonz=c3=a1lez?= <javier.gonz@samsung.com>,
-        Kanchan Joshi <joshiiitr@gmail.com>,
-        Adam Manzanares <a.manzanares@samsung.com>
+        20220325101959eucas1p1a1b27899fdb41dc60ce678706edd32b6~fmHDnue2O3004830048eucas1p1S;
+        Fri, 25 Mar 2022 10:19:59 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+        eusmges1new.samsung.com (EUCPMTA) with SMTP id 40.3F.10009.F479D326; Fri, 25
+        Mar 2022 10:19:59 +0000 (GMT)
+Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20220325101958eucas1p27ba0d39fb5134959ee74728b74a16c20~fmHDKfJtM1264412644eucas1p2F;
+        Fri, 25 Mar 2022 10:19:58 +0000 (GMT)
+Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
+        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220325101958eusmtrp190ec97d0085b1603fae5927ee8e72f8e~fmHDJt6SP2163521635eusmtrp1d;
+        Fri, 25 Mar 2022 10:19:58 +0000 (GMT)
+X-AuditID: cbfec7f2-e7fff70000002719-0f-623d974fbd2c
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+        eusmgms1.samsung.com (EUCPMTA) with SMTP id DF.B2.09522.E479D326; Fri, 25
+        Mar 2022 10:19:58 +0000 (GMT)
+Received: from localhost (unknown [106.210.248.55]) by eusmtip2.samsung.com
+        (KnoxPortal) with ESMTPA id
+        20220325101958eusmtip2c710543d27f48a95321d4dac630da9d6~fmHC3dYne3135631356eusmtip2W;
+        Fri, 25 Mar 2022 10:19:58 +0000 (GMT)
 From:   Pankaj Raghav <p.raghav@samsung.com>
-In-Reply-To: <20220325050017.xh4p736vv6y3wjtu@naota-xeon>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [106.210.248.55]
-X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
-        CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrEKsWRmVeSWpSXmKPExsWy7djPc7pLamyTDFZtNLP4ffY8s8Xplr3s
-        Fn+77jFZnH97mMnixoSnjBYTj29mtVhz8ymLA7vHzll32T02repk89jZep/V4/MmOY/2A91M
-        AaxRXDYpqTmZZalF+nYJXBl7D69nLVjPWTFx7my2BsYL7F2MnBwSAiYSX89/Z+xi5OIQEljB
-        KPHpdAcrhPOFUWLKjVY2COczo8SPholwLRc/X2CGSCxnlGhqWckEV9Xb9haqZRejxJabL9lA
-        WngF7CTmdc9lBbFZBFQl3jS2MkHEBSVOznzCAmKLCkRI/Lr1CGyFsECGxJkjK8DqmQXEJW49
-        mQ9WLyLgI7F68iSwa5kFrjFJHPm8DCjBwcEmoCXR2AnWyylgKbHk1UIWiF5Nidbtv9khbHmJ
-        7W/nMEO8oCRx7flTFgi7VuLUlltgH0gINHNKHDjexwaRcJFYvWoRVJGwxKvjW6D+l5H4v3M+
-        VEM/o8TUlj9QzgxGiZ7Dm8EukhCwlug7kwPR4Cjx8OpsFogwn8SNt4IQB/FJTNo2nXkCo+os
-        pLCYheTnWUh+mIXkhwWMLKsYxVNLi3PTU4uN8lLL9YoTc4tL89L1kvNzNzECk9Hpf8e/7GBc
-        /uqj3iFGJg7GQ4wSHMxKIrz3L1snCfGmJFZWpRblxxeV5qQWH2KU5mBREudNztyQKCSQnliS
-        mp2aWpBaBJNl4uCUamDyUrV8Wx7Nn6B3LfHAjLS2pjTJvdfnLTnwf/WWRfeZHZ/ZC2d0i/1f
-        l8rpqXM9dO7P5uVNz/7+Zcu+d/G+5zRW2b1LmXZaZ002lfyevr9yz0HVtJ17HYyf5AQbJWZm
-        Kb+1bPLen/biYHgo21y99WzCySsuveWL9IvnVdST1VD1NlJ3bFPgSZW//eylsNmJmGXapw4G
-        vP/2IIPRx+Ds2wfvr8i+ifSVvev3udXpkty3ltDjWseaReUXL/+zZFKH5yqB5upf94QX2ies
-        4r767a7EvwMN5hOrk2elZovd+nhyTW/yCdF13/0OJuc7JqhNeb+nWL6l5tfaErO/Indrk/9P
-        +CPWazmjMbM806WDK1SJpTgj0VCLuag4EQAbFpdNtQMAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrKIsWRmVeSWpSXmKPExsVy+t/xu7pLamyTDI5fk7T4ffY8s8Xplr3s
-        Fn+77jFZnH97mMnixoSnjBYTj29mtVhz8ymLA7vHzll32T02repk89jZep/V4/MmOY/2A91M
-        AaxRejZF+aUlqQoZ+cUltkrRhhZGeoaWFnpGJpZ6hsbmsVZGpkr6djYpqTmZZalF+nYJehl7
-        D69nLVjPWTFx7my2BsYL7F2MnBwSAiYSFz9fYO5i5OIQEljKKNG0+BVUQkbi05WPULawxJ9r
-        XWwQRR8ZJdon/2KEcHYxSvR3/WcCqeIVsJOY1z2XFcRmEVCVeNPYChUXlDg58wkLiC0qECGx
-        bNdUMFtYIEPizJEVYPXMAuISt57MB6sXEfCRWD15EtgCZoFrTBJHPi8DSwgJ7GGUuH7EsYuR
-        g4NNQEuisRPsOk4BS4klrxayQMzRlGjd/psdwpaX2P52DjPEB0oS154/ZYGwayU+/33GOIFR
-        dBaS82YhOWMWklGzkIxawMiyilEktbQ4Nz232EivODG3uDQvXS85P3cTIzB+tx37uWUH48pX
-        H/UOMTJxMB5ilOBgVhLhvX/ZOkmINyWxsiq1KD++qDQntfgQoykwjCYyS4km5wMTSF5JvKGZ
-        gamhiZmlgamlmbGSOK9nQUeikEB6YklqdmpqQWoRTB8TB6dUA5OepmzlKc6rik+P//TwDLwY
-        s6S8RzTizo/Z859bsvgc4ZwtwvNyr6Q183Sj9eYJPia7eK2dL16N6brhk/yqskrkgKhAUYub
-        3UemxqN9Elmh1alXkz82Tl/w/MXXHRlrZkpq72VY0JGzO/XC+zd/PJ9eV/+xNGDN6R1rb32q
-        08gvEZ01f+Fmy71Niam18nxeD/X/eIRe+DlZ3Mws7/iHuOfVbHKTAmy9fhdayb+qyrnqeyFg
-        UlzItWgz8w+r55ZUBSdsE32yKXbyRQ7mhCP58b2frsTutxDr3HnSd9ebStZWtzPnOOcnTlQ+
-        Nf+8xlPZKIGdxz2mz76xY+ERmQy7nASTiUXZ7Z8+ba8P8b66e7ISS3FGoqEWc1FxIgB3Fk5U
-        aAMAAA==
-X-CMS-MailID: 20220325082612eucas1p1d321a67001cbe8789ac157e8ef0f3c9a
+To:     Naohiro Aota <Naohiro.Aota@wdc.com>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        fstests@vger.kernel.org
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        =?UTF-8?q?Javier=20Gonz=C3=A1lez?= <javier.gonz@samsung.com>,
+        Pankaj Raghav <pankydev8@gmail.com>,
+        Kanchan Joshi <joshiiitr@gmail.com>,
+        Adam Manzanares <a.manzanares@samsung.com>,
+        Pankaj Raghav <p.raghav@samsung.com>
+Subject: [PATCH v4] btrfs/237: Use zone cap instead of zone size in
+ fill_size and rest calculation
+Date:   Fri, 25 Mar 2022 11:19:08 +0100
+Message-Id: <20220325101908.127071-1-p.raghav@samsung.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrEKsWRmVeSWpSXmKPExsWy7djP87r+022TDBoe8VtMP6xo8fvseWaL
+        0y172S0e3/nMbvG36x6Txfm3h5ksbkx4ymgx8fhmVovPS1vYLdbcfMriwOWxc9Zddo9NqzrZ
+        PHa23mf16NuyitHj8yY5j/YD3UwBbFFcNimpOZllqUX6dglcGafuXGUr+CxV8au7ib2B8Yto
+        FyMnh4SAicS/X/NYQGwhgRWMErP2V3UxcgHZXxglWra0MEM4nxklZh7fwtrFyAHWseWrD0R8
+        OaNEx5YdLBDOC0aJ7Q9+soMUsQloSTR2soPERUCmbl98HGwFs0AHk8T1F8EgtrBAisT+Z2uZ
+        QGwWAVWJQ0s+soLYvAJWEh82LGaHOE9eYual7+wQcUGJkzOfQM2Rl2jeOhvsOgmBIxwS3Y1r
+        oRpcJPbcAUmA2MISr45vgYrLSJye3MMC0dDPKDG15Q8ThDODUaLn8GYmiN+sJfrO5ICYzAKa
+        Eut36UP0Okpc3vce6ns+iRtvBSFu4JOYtG06M0SYV6KjTQiiWkli588nUFslJC43zWGBKPGQ
+        mNwfCQnoWInj5/4zTmBUmIXksVlIHpuFcMICRuZVjOKppcW56anFhnmp5XrFibnFpXnpesn5
+        uZsYgcno9L/jn3Ywzn31Ue8QIxMH4yFGCQ5mJRHe+5etk4R4UxIrq1KL8uOLSnNSiw8xSnOw
+        KInzJmduSBQSSE8sSc1OTS1ILYLJMnFwSjUwTbh2K23aqqTTDMxKmxbsOF3KY/tixTuv89Ll
+        u760hj8ULD918GLFhMjLx38odG26uEnucc3aQBn9uLYv2zO+tcxa17PeR1XzP0Od/HkGzo7K
+        Js8wyT/5H26+326vt+7i+i8cR6TWFips11c9d6pDfcGTC8uETdMYIzYq7mhhjbr+45khf5WT
+        mNbmaYGW+4rTv+47/4J/3dGdTX63i+rcth78U6t5k+uni93UWf6f1qYqT9iqUbp65smI9kVC
+        lRt5fAq9Ayw5K/cpOVd41fU8XDL3e5dAWbnOtcJlxwvcfpXM4ljacLFUeEH/ec1TiZ/sZzx4
+        YpJvy1Kz+LRuinmhal7v2nWaBfPqNnlXT54SrcRSnJFoqMVcVJwIAIdZvTq1AwAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrNLMWRmVeSWpSXmKPExsVy+t/xe7p+022TDJp+6FhMP6xo8fvseWaL
+        0y172S0e3/nMbvG36x6Txfm3h5ksbkx4ymgx8fhmVovPS1vYLdbcfMriwOWxc9Zddo9NqzrZ
+        PHa23mf16NuyitHj8yY5j/YD3UwBbFF6NkX5pSWpChn5xSW2StGGFkZ6hpYWekYmlnqGxuax
+        VkamSvp2NimpOZllqUX6dgl6GafuXGUr+CxV8au7ib2B8YtoFyMHh4SAicSWrz5djFwcQgJL
+        GSX2vHjM1sXICRSXkLi9sIkRwhaW+HOtiw2i6BmjxNxDn9lAmtkEtCQaO9lB4iICqxgl1l/6
+        wATiMAv0MEm8ebAarFtYIElixs05zCA2i4CqxKElH1lBbF4BK4kPGxazQ2yQl5h56Ts7RFxQ
+        4uTMJywgNjNQvHnrbOYJjHyzkKRmIUktYGRaxSiSWlqcm55bbKhXnJhbXJqXrpecn7uJERgL
+        24793LyDcd6rj3qHGJk4GA8xSnAwK4nw3r9snSTEm5JYWZValB9fVJqTWnyI0RTovonMUqLJ
+        +cBozCuJNzQzMDU0MbM0MLU0M1YS5/Us6EgUEkhPLEnNTk0tSC2C6WPi4JRqYOIzE8hMfXhd
+        cB6r6dxJjYyPjouV7+wUEpcqO5dee3bJLP6reuEBWxb3MK+t+6B0JWzLOV4xpe4FKnrXTqwL
+        +XD/1TzdtEqjtYrci07JSKmLNNs0ujyR2tAhxFFVtOHwtralpu8f95VxdW0/JjMpTHjTpS5t
+        kXPsavyrDjBxLbj1oO1P19fVziHbe8r/HptqeGqOmZui2QO5Ra8DttgfltzzrSfPc2Jdf2G5
+        1r3I+bFna7b8468M6UifGOJxO1b9CX+5gumfHGfbyTt9bzyLW/JpStHP5yvPXG/KPLxq+QX9
+        T2q1c6+JiL+8v2G2nci2/Yv0i19Pjd6hLht/e2J+xDkJK551NtVaN5fnBakV/ldiKc5INNRi
+        LipOBACVUK4+DgMAAA==
+X-CMS-MailID: 20220325101958eucas1p27ba0d39fb5134959ee74728b74a16c20
 X-Msg-Generator: CA
-X-RootMTR: 20220325050027eucas1p13068f112ed6aedec1da1c45ec9f2acc2
+Content-Type: text/plain; charset="utf-8"
+X-RootMTR: 20220325101958eucas1p27ba0d39fb5134959ee74728b74a16c20
 X-EPHeader: CA
 CMS-TYPE: 201P
-X-CMS-RootMailID: 20220325050027eucas1p13068f112ed6aedec1da1c45ec9f2acc2
-References: <20220321115848.30397-1-p.raghav@samsung.com>
-        <CGME20220325050027eucas1p13068f112ed6aedec1da1c45ec9f2acc2@eucas1p1.samsung.com>
-        <20220325050017.xh4p736vv6y3wjtu@naota-xeon>
+X-CMS-RootMailID: 20220325101958eucas1p27ba0d39fb5134959ee74728b74a16c20
+References: <CGME20220325101958eucas1p27ba0d39fb5134959ee74728b74a16c20@eucas1p2.samsung.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+This test will break when zone capacity != zone size because the
+calculation of the size to be filled is done using zone_size instead of
+the actual capacity available per zone. Fix it by using zone capacity.
 
+As a zoned device can have variable capacity, use the btrfs utility to
+get the zone capacity from the first data block group that the test will
+be performed on.
 
-On 2022-03-25 06:00, Naohiro Aota wrote:
->>  
->> +start_data_bg_phy=$(get_data_bg_physical)
->> +start_data_bg_phy=$((data_bg_zone >> 9))
-> 
-> start_data_bg_phy=$((start_data_bg_phy >> 9)) ?
-> 
-Oops. I fixed this in my test machine but forgot to put these while
-sending my patch. Thanks.
->> +
->> +size=$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV |\
->> +	_filter_blkzone_report |\
->> +	grep -Po "cap ([0x\d]+)+" | cut -d ' ' -f 2)
-> 
-> The pattern should be "cap 0x[[:xdigit:]]+" as it is hexadecimal. I
-> missed this point before.
-> 
-I will fix it up.
->> +size=$((size << 9))
->> +
->>  reclaim_threshold=75
->>  echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
->>  fill_percent=$((reclaim_threshold + 2))
->>  rest_percent=$((90 - fill_percent)) # make sure we're not creating a new BG
->> -fill_size=$((zonesize * fill_percent / 100))
->> -rest=$((zonesize * rest_percent / 100))
->> +fill_size=$((size * fill_percent / 100))
->> +rest=$((size * rest_percent / 100))
->>  
->>  # step 1, fill FS over $fillsize
->>  $XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test1 >> $seqres.full
->> -- 
->> 2.25.1
+The support to extract zone capacity was added to blkzone only from
+version 2.37. So zcap will be used only when the blkzone version is
+greater or equal to 2.37.
 
+Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+---
+Changes since v1:
+- Add a filter that can append a 'cap' column for blkzone version <2.37
+  (Naohiro)
+- Extract the capacity from the zone on which the test is performed as a
+  zoned device can have variable zone capacity(Naohiro)
+
+Changes since v2:
+- Use btrfs inspect-internal utility to find the first data zone address
+instead of hardcoding. (Naohiro)
+
+Changes since v3:
+- Change 0x(\d)+ to 0x[[xdigit]]+ (Naohiro)
+
+ common/filter   | 13 +++++++++++++
+ tests/btrfs/237 | 21 +++++++++++++++++----
+ 2 files changed, 30 insertions(+), 4 deletions(-)
+
+diff --git a/common/filter b/common/filter
+index 257227c2..5fe86756 100644
+--- a/common/filter
++++ b/common/filter
+@@ -634,5 +634,18 @@ _filter_bash()
+ 	sed -e "s/^bash: line 1: /bash: /"
+ }
+ 
++#
++# blkzone report added zone capacity to be printed from v2.37.
++# This filter will add an extra column 'cap' with the same value of
++# 'len'(zone size) for blkzone version < 2.37
++#
++# Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
++# After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000 ..
++_filter_blkzone_report()
++{
++	$AWK_PROG -F "," 'BEGIN{OFS=",";} $3 !~ /cap/ {$2=$2","$2;} {print;}' |\
++	sed -e 's/len/cap/2'
++}
++
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/btrfs/237 b/tests/btrfs/237
+index 96940549..f96031d5 100755
+--- a/tests/btrfs/237
++++ b/tests/btrfs/237
+@@ -35,8 +35,13 @@ get_data_bg()
+ 		grep -Eo "CHUNK_ITEM [[:digit:]]+" | cut -d ' ' -f 2
+ }
+ 
+-zonesize=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/queue/chunk_sectors)
+-zonesize=$((zonesize << 9))
++get_data_bg_physical()
++{
++	# Assumes SINGLE data profile
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t CHUNK $SCRATCH_DEV |\
++		grep -A 4 CHUNK_ITEM | grep -A 3 'type DATA\|SINGLE' |\
++	        grep -Eo 'offset [[:digit:]]+'| cut -d ' ' -f 2
++}
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount -o commit=1 # 1s commit time to speed up test
+@@ -49,12 +54,20 @@ if [[ "$uuid" == "" ]]; then
+ 	exit 1
+ fi
+ 
++start_data_bg_phy=$(get_data_bg_physical)
++start_data_bg_phy=$((start_data_bg_phy >> 9))
++
++size=$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV |\
++	_filter_blkzone_report |\
++	grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
++size=$((size << 9))
++
+ reclaim_threshold=75
+ echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
+ fill_percent=$((reclaim_threshold + 2))
+ rest_percent=$((90 - fill_percent)) # make sure we're not creating a new BG
+-fill_size=$((zonesize * fill_percent / 100))
+-rest=$((zonesize * rest_percent / 100))
++fill_size=$((size * fill_percent / 100))
++rest=$((size * rest_percent / 100))
+ 
+ # step 1, fill FS over $fillsize
+ $XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test1 >> $seqres.full
 -- 
-Regards,
-Pankaj
+2.25.1
+
