@@ -2,144 +2,106 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C95BC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 29 Mar 2022 11:34:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4503FC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 29 Mar 2022 11:35:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235896AbiC2LgC (ORCPT
+        id S232269AbiC2LhO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 29 Mar 2022 07:36:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38234 "EHLO
+        Tue, 29 Mar 2022 07:37:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43994 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234229AbiC2LgB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Mar 2022 07:36:01 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C014B27CED;
-        Tue, 29 Mar 2022 04:34:14 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id gp15-20020a17090adf0f00b001c7cd11b0b3so1754691pjb.3;
-        Tue, 29 Mar 2022 04:34:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=xJxDL1SNTaKnpVlTXGlfkqsJg1j05V/c8caKh7MyTzc=;
-        b=erLq8z3hz7HGoGBev359f2q+e7U2gr6L+kklmARvKRjQheIINCWiRuhZKkpYNps42n
-         9SjECMP0G46mJnNRt0sLYxpUbtJnYzde8fKpKacmVeFCYNvZ7vfL/odEf9gkxEyKhwDF
-         /6Qvle4mQ5Op1/kgkydkvfwxJCU29mvqAuUYf3oDI8Q40rBxqQ4OBHyyIQ4e00imXIDY
-         jdZbIID6ftYlr82O8sRL7UnuxlCpDoolsvgYg6pFmcZ+WosLSuVwrVFs2LfSgcCd8lRL
-         kfuMaE/t4wwSajfHNheZz63pfv0Xc45VAR4y6y3GDczV2DiQ0mKJtt3c39lNXlEGuaug
-         bg4g==
+        with ESMTP id S229938AbiC2LhN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Mar 2022 07:37:13 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8B28D24F34
+        for <fstests@vger.kernel.org>; Tue, 29 Mar 2022 04:35:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1648553729;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=fXnHPC+OiAPJne+tGozvsjs7kjdnSbS+ytsK3cyFZ6I=;
+        b=Q38OFR+yxiOgBtwK0MYxq+XNPz+ZWzg79Ii33X9DniI7BlwolZfSeRa5jK+abhtgMj7kCK
+        seNAxDiBVzp/1rSsktox7CMyQWoNUNMN0tbkahaZjobFoMCZJVIVj9IQKzpzdyp8EddXWl
+        7Y5V3T2jJmYjodD4mzlyh9pOq1A4PSk=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-29-fyi2BSXEP2iyo5FUcdrWlg-1; Tue, 29 Mar 2022 07:35:27 -0400
+X-MC-Unique: fyi2BSXEP2iyo5FUcdrWlg-1
+Received: by mail-pl1-f200.google.com with SMTP id n12-20020a1709026a8c00b001538f557d52so7483292plk.2
+        for <fstests@vger.kernel.org>; Tue, 29 Mar 2022 04:35:27 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=xJxDL1SNTaKnpVlTXGlfkqsJg1j05V/c8caKh7MyTzc=;
-        b=OsK0l1/gmTF7iDo64S7BdSVVTrqMaivuSEpq5k/s/V2KAH/BkDTzzMnrarJ5HCvXqh
-         i2Dv9a9GA0/A0jp+88UDczC7SP3qKb7bbS6rbrkSO9RlmmiJI0n/jHcujqyVQOtRj/Cc
-         0WZRoQfmvnocH76AOHDKkwnwBTFzg8TXiyuXrJ8MuyUZMNbN1ZmT/Jd2ThDeUTCXf8er
-         xn6Op1KOuDpxl2tZgZ2aEaf7mvcwedaeA+muxPfvDx6xKrCkY7zXzY6kICsdc+mJpQro
-         hZu9jhLUwCivUVCNqUT6vgLbzIQrS7lF9+c/GNkAwH0/KaX8TK0BliGZvUWyjs1SeQbi
-         +/1w==
-X-Gm-Message-State: AOAM533/0RXaFsCSZnnPOvo5WDKITdh40tVdybDp9+sLBXomlolU1d1z
-        VGC+sVWbYSnUvhlO4xGMCII=
-X-Google-Smtp-Source: ABdhPJx2J2LYEPEANmokpjnwVxL0LJByJY/4p/IcAzKhusLMbMW468vj/8WLD4vwS8kuj13BKPpodw==
-X-Received: by 2002:a17:90a:9f0b:b0:1c6:a876:4157 with SMTP id n11-20020a17090a9f0b00b001c6a8764157mr4058159pjp.173.1648553654183;
-        Tue, 29 Mar 2022 04:34:14 -0700 (PDT)
-Received: from localhost ([122.179.46.149])
-        by smtp.gmail.com with ESMTPSA id p13-20020a056a000b4d00b004faecee6e89sm18987908pfo.208.2022.03.29.04.34.13
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :content-transfer-encoding:in-reply-to;
+        bh=fXnHPC+OiAPJne+tGozvsjs7kjdnSbS+ytsK3cyFZ6I=;
+        b=rgvyVt8c3hdlSP3XBu6QqEbOsi+xnxBJX/BRel2xsekxVK56vqDi5hKaNjhTHjWr90
+         sDwTg+sLW72tVwvTjO0lWU/kf/y2FjwIxcmRLLsI1Hq1bEbLdU2N2CaEnRski9gLpU6e
+         mTebUa8tZTaWjZ+cv/QDlZcCP94w500GEOWUeIxG+OFuZk3EMIGTUxMD+bVDjzU+MrO0
+         KTkepkuAM7VcZFI0jXw3c0bpZiZOMTpFJsrV1P6hxmQ9I6vBplpfnGUB4hWD1WBQYfG+
+         JZZye699yXNpcTX80YBzNHXCyKX5G9nR0h2jEcp8iZ5TOeqhRoPLsQhKcSGUp4BkK27F
+         2bTA==
+X-Gm-Message-State: AOAM533IvIzrkFp4QyaWg9NtG+kfQeAUjOmQXzKyLTgJc44okyelZInF
+        S2/5WkfUD402l1E9XZFhP9eLeq6OZxWeAp0BTJaJHJw+QRpgcLR1hAiCxbpijM6bBVSPIFrlqTc
+        cJgSSq1UcaCArilDR2Q==
+X-Received: by 2002:a17:902:f60f:b0:151:4f66:55b4 with SMTP id n15-20020a170902f60f00b001514f6655b4mr30260824plg.127.1648553726760;
+        Tue, 29 Mar 2022 04:35:26 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwGIGN1kc+AvF47Zmrdit0XSRKlJyqSob62Po8PI4qDXOkVyGrYZGOIGqZWX3a6aYlU5BlfUw==
+X-Received: by 2002:a17:902:f60f:b0:151:4f66:55b4 with SMTP id n15-20020a170902f60f00b001514f6655b4mr30260809plg.127.1648553726370;
+        Tue, 29 Mar 2022 04:35:26 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id o3-20020a056a0015c300b004fb24adc4b8sm13179711pfu.159.2022.03.29.04.35.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 29 Mar 2022 04:34:13 -0700 (PDT)
-Date:   Tue, 29 Mar 2022 17:04:11 +0530
-From:   Ritesh Harjani <ritesh.list@gmail.com>
+        Tue, 29 Mar 2022 04:35:25 -0700 (PDT)
+Date:   Tue, 29 Mar 2022 19:35:21 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Ritesh Harjani <riteshh@linux.ibm.com>,
-        fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCHv2 4/4] generic/677: Add a test to check unwritten extents
- tracking
-Message-ID: <20220329113411.ov6efsdyvbfa4xul@riteshh-domain>
-References: <cover.1647342932.git.riteshh@linux.ibm.com>
- <37d65f1026f2fc1f2d13ab54980de93f4fa34c46.1647342932.git.riteshh@linux.ibm.com>
- <20220315165607.GD8200@magnolia>
+Cc:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "liuyd.fnst@fujitsu.com" <liuyd.fnst@fujitsu.com>
+Subject: Re: [Question] About allocsp_calls not implemented
+Message-ID: <20220329113521.56ks64wanu5kreur@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "liuyd.fnst@fujitsu.com" <liuyd.fnst@fujitsu.com>
+References: <1b0b8627-0d30-018b-4a98-b69f5a8033f1@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20220315165607.GD8200@magnolia>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <1b0b8627-0d30-018b-4a98-b69f5a8033f1@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 22/03/15 09:56AM, Darrick J. Wong wrote:
-> On Tue, Mar 15, 2022 at 07:58:59PM +0530, Ritesh Harjani wrote:
-> > With these sequence of operation (in certain cases like with ext4 fast_commit)
-> > could miss to track unwritten extents during replay phase
-> > (after sudden FS shutdown).
-> >
-> > This fstest adds a test case to test this.
-> >
-> > 5e4d0eba1ccaf19f
-> > ext4: fix fast commit may miss tracking range for FALLOC_FL_ZERO_RANGE
-> >
-> > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> > ---
-> >  tests/generic/677     | 64 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/677.out |  6 ++++
-> >  2 files changed, 70 insertions(+)
-> >  create mode 100755 tests/generic/677
-> >  create mode 100644 tests/generic/677.out
-> >
-> > diff --git a/tests/generic/677 b/tests/generic/677
-> > new file mode 100755
-> > index 00000000..e316763a
-> > --- /dev/null
-> > +++ b/tests/generic/677
-> > @@ -0,0 +1,64 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 IBM Corporation.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 677
-> > +#
-> > +# Test below sequence of operation which (w/o below kernel patch) in case of
-> > +# ext4 with fast_commit may misss to track unwritten extents.
-> > +# commit 5e4d0eba1ccaf19f
-> > +# ext4: fix fast commit may miss tracking range for FALLOC_FL_ZERO_RANGE
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick log shutdown recoveryloop
-> > +
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -r -f $tmp.*
-> > +}
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +. ./common/punch
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_require_scratch
-> > +_require_xfs_io_command "fzero"
-> > +_require_xfs_io_command "fiemap"
-> > +
-> > +t1=$SCRATCH_MNT/t1
-> > +
-> > +_scratch_mkfs > $seqres.full 2>&1
-> > +
-> > +_scratch_mount >> $seqres.full 2>&1
-> > +
-> > +bs=$(_get_block_size $SCRATCH_MNT)
->
-> Same comments about blocksize, group names, and
-> _require_scratch_shutdown as the last patch.
+On Tue, Mar 29, 2022 at 09:59:02AM +0000, liuyd.fnst@fujitsu.com wrote:
+> Hi, all.
+> 
+> We noticed below tests failed due to fsx issue introduced by a32fb1bb 
+> fsx: add support for XFS_IOC_ALLOCSP.
+> 
+> generic/075  generic/091  generic/112  generic/127  generic/263
+> 
+> The log shows "do_allocsp: allocsp: Function not implemented".
 
-Sure, I will fix blocksize and _require_scratch_shutdown part.
-I have added my thoughts above group names in previous patch.
+Hmm... Darrick, I think we'd better to disable IOC_ALLOCSP operation
+in fsx.c by default, and use another option to allow user to enable it
+if they need. Or use another option to disable it, leave -F for fallocate
+only.
 
-Thanks for reviewing this.
+What do you think?
 
--ritesh
+Thanks,
+Zorro
+
+> 
+> 
+> The error has been around for a while so I want to know whether upstream 
+> has got this info. As of now, we revert cd99a499 and a32fb1bb to test.
+> 
+> -- 
+> Best Regards.
+> Yiding Liu
+
