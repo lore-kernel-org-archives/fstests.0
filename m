@@ -2,131 +2,283 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8B15C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Mar 2022 04:57:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91A9FC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Mar 2022 05:25:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241835AbiC3E7P (ORCPT
+        id S241180AbiC3F1F (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Mar 2022 00:59:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56822 "EHLO
+        Wed, 30 Mar 2022 01:27:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41746 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236198AbiC3E7O (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2022 00:59:14 -0400
+        with ESMTP id S238902AbiC3F1E (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2022 01:27:04 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7812D433A3
-        for <fstests@vger.kernel.org>; Tue, 29 Mar 2022 21:57:30 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 74E6A1960B7
+        for <fstests@vger.kernel.org>; Tue, 29 Mar 2022 22:25:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1648616249;
+        s=mimecast20190719; t=1648617918;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=8w2xTmeDVVw4A4jlAeHkNcGTN7E05rfGVtYfTifR1e4=;
-        b=UN/GQ5h+E4Ap/0YyYTIytxrGa2kAu2TTVSUYWLTy91RGVtyjygzagBpXN949/VagnnvbjH
-        xteQkUGqAVz4jVCR9oAqpoh1hCQSJsiFlSKl0jvyw6Wj98ibNhiWRvZThYyGz32V12oX6O
-        IFXjz9W1ShX/ZSNwvbI7QfICTyJA7vY=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=nNU7qm119KAVCILlkW2SxuatqcY9GoDAWrhsNfooFgo=;
+        b=HtxTgZEA9OgLfy54kRbfoNYUOrcTupXAnIK0E7a/eo2NqIACu3qrsM9QLLtc9tswPcUFPO
+        vSOsV9azKaaU1b52gp6bCzXuiJZVkmzL5uHtjr1/ot+1mRWz3c0YZpK16a0Ykf50LACmyl
+        AaPFRXCGIEO6f2uk/7kB72I0bU2p3eE=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-375-UrELTUXfMbqvo-B9HEVLng-1; Wed, 30 Mar 2022 00:57:26 -0400
-X-MC-Unique: UrELTUXfMbqvo-B9HEVLng-1
-Received: by mail-pj1-f69.google.com with SMTP id oj16-20020a17090b4d9000b001c7552b7546so824475pjb.8
-        for <fstests@vger.kernel.org>; Tue, 29 Mar 2022 21:57:26 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :content-transfer-encoding:in-reply-to;
-        bh=8w2xTmeDVVw4A4jlAeHkNcGTN7E05rfGVtYfTifR1e4=;
-        b=sELws0pvbp2xiQar2+VmuSbFP0EBCe9PCof5qR0mrSB5c1kBTJxQRVHulR4qWn+WOu
-         LALBTQfdawnYPzh2TFO7WzJmkA6iuPsvPjPMn4jLYUMEUE+QWdyIB0BhYXUOFsEDsub2
-         JapH/lL6quoVUAmVERanFSnzp2BJYzIf0lgj5kj18+5pONkd3eoijTKgrv1Eu6JwF7bh
-         8wV3+VX7wk/wVcJckI4yC7cd2YT9pveyKVhtlxr+je935pjrwYW9iZXrB+UtmDsEOvQ1
-         qMKpvZM7L0Z42vGeIwCC8IESCv+XhVg2L1GU79OZvU/jZOi7RRMvSJymn0JaRpa3Jpdv
-         4pCw==
-X-Gm-Message-State: AOAM533mdZTD9JcvxhFyGWxVNH1vXAOi/yfycKuVoCyVsfEpkcWBJtFm
-        JzzI+DnBWt1cPOdJG0XxYiHnx9gPgVkXPyX+UzQW0u9M1EEMEChkcag55yICTxcb7oZM6dCArbx
-        ALZoR1RHLSAjPbffhcQ==
-X-Received: by 2002:a17:90a:578c:b0:1c9:e362:d109 with SMTP id g12-20020a17090a578c00b001c9e362d109mr2926079pji.237.1648616245577;
-        Tue, 29 Mar 2022 21:57:25 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJx0efyJDlNiSYasPmTneP7z01hNflccHzzNpU4AB/julmTQPFG9D+1ezLQgrKF9Yy3Yau3B1A==
-X-Received: by 2002:a17:90a:578c:b0:1c9:e362:d109 with SMTP id g12-20020a17090a578c00b001c9e362d109mr2926051pji.237.1648616245154;
-        Tue, 29 Mar 2022 21:57:25 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g1-20020a17090adac100b001c67cedd84esm4548427pjx.42.2022.03.29.21.57.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 29 Mar 2022 21:57:24 -0700 (PDT)
-Date:   Wed, 30 Mar 2022 12:57:18 +0800
+ us-mta-275-Arobl42vMi6BqHVQukq_XQ-1; Wed, 30 Mar 2022 01:25:15 -0400
+X-MC-Unique: Arobl42vMi6BqHVQukq_XQ-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 827D780029D;
+        Wed, 30 Mar 2022 05:25:14 +0000 (UTC)
+Received: from zlang-laptop.redhat.com (ovpn-13-144.pek2.redhat.com [10.72.13.144])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 6DF84C15D7B;
+        Wed, 30 Mar 2022 05:25:12 +0000 (UTC)
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "liuyd.fnst@fujitsu.com" <liuyd.fnst@fujitsu.com>
-Subject: Re: [Question] About allocsp_calls not implemented
-Message-ID: <20220330045718.wqrarqorslzaeks5@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "liuyd.fnst@fujitsu.com" <liuyd.fnst@fujitsu.com>
-References: <1b0b8627-0d30-018b-4a98-b69f5a8033f1@fujitsu.com>
- <20220329113521.56ks64wanu5kreur@zlang-mailbox>
- <20220329201421.GF27713@magnolia>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org, liuyd.fnst@fujitsu.com,
+        djwong@kernel.org
+Subject: [PATCH] fsx: remove XFS_IOC_ALLOCSP operation entirely
+Date:   Wed, 30 Mar 2022 13:25:06 +0800
+Message-Id: <20220330052506.650390-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220329201421.GF27713@magnolia>
+X-Scanned-By: MIMEDefang 2.85 on 10.11.54.8
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 29, 2022 at 01:14:21PM -0700, Darrick J. Wong wrote:
-> On Tue, Mar 29, 2022 at 07:35:21PM +0800, Zorro Lang wrote:
-> > On Tue, Mar 29, 2022 at 09:59:02AM +0000, liuyd.fnst@fujitsu.com wrote:
-> > > Hi, all.
-> > > 
-> > > We noticed below tests failed due to fsx issue introduced by a32fb1bb 
-> > > fsx: add support for XFS_IOC_ALLOCSP.
-> > > 
-> > > generic/075  generic/091  generic/112  generic/127  generic/263
-> > > 
-> > > The log shows "do_allocsp: allocsp: Function not implemented".
-> > 
-> > Hmm... Darrick, I think we'd better to disable IOC_ALLOCSP operation
-> > in fsx.c by default, and use another option to allow user to enable it
-> > if they need. Or use another option to disable it, leave -F for fallocate
-> > only.
-> > 
-> > What do you think?
-> 
-> I'd remove ALLOCSP support from fsx entirely.
+Due to XFS_IOC_ALLOCSP is nearly retired from linux xfs, and the
+ALLOCSP testing in fsx easily trigger errors. So compare with
+disable it by default, I'd like to remove it entirely. So this
+patch revert two patches:
+cd99a499 ("fsx: disable allocsp_calls if -F is specified")
+a32fb1bb ("fsx: add support for XFS_IOC_ALLOCSP")
 
-OK... So we took a roundabout way and back :) I have no objection to
-revert it, due to it cause some of my testing has to use "fsx -F" to
-continue.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-I'll revert two related commits:
-Revert "fsx: add support for XFS_IOC_ALLOCSP"
-Revert "fsx: disable allocsp_calls if -F is specified"
+Hi,
 
-I'll combine them into one patch, and send out to review. To check what
-others think about that :)
+As we talked in:
+https://lore.kernel.org/fstests/20220330045718.wqrarqorslzaeks5@zlang-mailbox/T/#t
+
+We have two choices:
+1) Disable ALLOCSP from fsx by default, and give it another option to enable it
+   manually if someone need it.
+2) Remove the ALLOCSP support from fsx entirely
+
+As Darrick's suggestion, this patch choose the 2nd one. Please review and feel
+free to tell me if you have other suggestions.
 
 Thanks,
 Zorro
 
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > 
-> > > The error has been around for a while so I want to know whether upstream 
-> > > has got this info. As of now, we revert cd99a499 and a32fb1bb to test.
-> > > 
-> > > -- 
-> > > Best Regards.
-> > > Yiding Liu
-> > 
-> 
+ ltp/fsx.c | 111 +-----------------------------------------------------
+ 1 file changed, 2 insertions(+), 109 deletions(-)
+
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 3ee37fe8..12c2cc33 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -111,7 +111,6 @@ enum {
+ 	OP_CLONE_RANGE,
+ 	OP_DEDUPE_RANGE,
+ 	OP_COPY_RANGE,
+-	OP_ALLOCSP,
+ 	OP_MAX_FULL,
+ 
+ 	/* integrity operations */
+@@ -166,7 +165,6 @@ int	randomoplen = 1;		/* -O flag disables it */
+ int	seed = 1;			/* -S flag */
+ int     mapped_writes = 1;              /* -W flag disables */
+ int     fallocate_calls = 1;            /* -F flag disables */
+-int     allocsp_calls = 1;		/* -F flag disables */
+ int     keep_size_calls = 1;            /* -K flag disables */
+ int     punch_hole_calls = 1;           /* -H flag disables */
+ int     zero_range_calls = 1;           /* -z flag disables */
+@@ -270,7 +268,6 @@ static const char *op_names[] = {
+ 	[OP_DEDUPE_RANGE] = "dedupe_range",
+ 	[OP_COPY_RANGE] = "copy_range",
+ 	[OP_FSYNC] = "fsync",
+-	[OP_ALLOCSP] = "allocsp",
+ };
+ 
+ static const char *op_name(int operation)
+@@ -413,15 +410,6 @@ logdump(void)
+ 			if (overlap)
+ 				prt("\t******WWWW");
+ 			break;
+-		case OP_ALLOCSP:
+-			down = lp->args[1] < lp->args[2];
+-			prt("ALLOCSP  %s\tfrom 0x%x to 0x%x",
+-			    down ? "DOWN" : "UP", lp->args[2], lp->args[1]);
+-			overlap = badoff >= lp->args[1 + !down] &&
+-				  badoff < lp->args[1 + !!down];
+-			if (overlap)
+-				prt("\t******NNNN");
+-			break;
+ 		case OP_FALLOCATE:
+ 			/* 0: offset 1: length 2: where alloced */
+ 			prt("FALLOC   0x%x thru 0x%x\t(0x%x bytes) ",
+@@ -1707,51 +1695,6 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+ }
+ #endif
+ 
+-#ifdef XFS_IOC_ALLOCSP
+-/* allocsp is an old Irix ioctl that either truncates or does extending preallocaiton */
+-void
+-do_allocsp(unsigned new_size)
+-{
+-	struct xfs_flock64	fl;
+-
+-	if (new_size > biggest) {
+-		biggest = new_size;
+-		if (!quiet && testcalls > simulatedopcount)
+-			prt("allocsping to largest ever: 0x%x\n", new_size);
+-	}
+-
+-	log4(OP_ALLOCSP, 0, new_size, FL_NONE);
+-
+-	if (new_size > file_size)
+-		memset(good_buf + file_size, '\0', new_size - file_size);
+-	file_size = new_size;
+-
+-	if (testcalls <= simulatedopcount)
+-		return;
+-
+-	if ((progressinterval && testcalls % progressinterval == 0) ||
+-	    (debug && (monitorstart == -1 || monitorend == -1 ||
+-		      new_size <= monitorend)))
+-		prt("%lld allocsp\tat 0x%x\n", testcalls, new_size);
+-
+-	fl.l_whence = SEEK_SET;
+-	fl.l_start = new_size;
+-	fl.l_len = 0;
+-
+-	if (ioctl(fd, XFS_IOC_ALLOCSP, &fl) == -1) {
+-	        prt("allocsp: 0x%x\n", new_size);
+-		prterr("do_allocsp: allocsp");
+-		report_failure(161);
+-	}
+-}
+-#else
+-void
+-do_allocsp(unsigned new_isize)
+-{
+-	return;
+-}
+-#endif
+-
+ #ifdef HAVE_LINUX_FALLOC_H
+ /* fallocate is basically a no-op unless extending, then a lot like a truncate */
+ void
+@@ -2097,8 +2040,6 @@ test(void)
+ 		if (fallocate_calls && size && keep_size_calls)
+ 			keep_size = random() % 2;
+ 		break;
+-	case OP_ALLOCSP:
+-		break;
+ 	case OP_ZERO_RANGE:
+ 		if (zero_range_calls && size && keep_size_calls)
+ 			keep_size = random() % 2;
+@@ -2125,12 +2066,6 @@ have_op:
+ 		if (!mapped_writes)
+ 			op = OP_WRITE;
+ 		break;
+-	case OP_ALLOCSP:
+-		if (!allocsp_calls) {
+-			log4(OP_FALLOCATE, 0, size, FL_SKIPPED);
+-			goto out;
+-		}
+-		break;
+ 	case OP_FALLOCATE:
+ 		if (!fallocate_calls) {
+ 			log4(OP_FALLOCATE, offset, size, FL_SKIPPED);
+@@ -2206,10 +2141,6 @@ have_op:
+ 		dotruncate(size);
+ 		break;
+ 
+-	case OP_ALLOCSP:
+-		do_allocsp(size);
+-		break;
+-
+ 	case OP_FALLOCATE:
+ 		TRIM_OFF_LEN(offset, size, maxfilelen);
+ 		do_preallocate(offset, size, keep_size);
+@@ -2339,8 +2270,8 @@ usage(void)
+ "	-U: Use the IO_URING system calls, -U excludes -A\n"
+  #endif
+ "	-D startingop: debug output starting at specified operation\n"
+-#if defined(HAVE_LINUX_FALLOC_H) || defined(XFS_IOC_ALLOCSP)
+-"	-F: Do not use fallocate (preallocation) or XFS_IOC_ALLOCSP calls\n"
++#ifdef HAVE_LINUX_FALLOC_H
++"	-F: Do not use fallocate (preallocation) calls\n"
+ #endif
+ #ifdef FALLOC_FL_PUNCH_HOLE
+ "	-H: Do not use punch hole calls\n"
+@@ -2656,41 +2587,6 @@ __test_fallocate(int mode, const char *mode_str)
+ #endif
+ }
+ 
+-int
+-test_allocsp()
+-{
+-#ifdef XFS_IOC_ALLOCSP
+-	struct xfs_flock64	fl;
+-	int			ret = 0;
+-
+-	if (lite)
+-		return 0;
+-
+-	fl.l_whence = SEEK_SET;
+-	fl.l_start = 1;
+-	fl.l_len = 0;
+-
+-	ret = ioctl(fd, XFS_IOC_ALLOCSP, &fl);
+-	if (ret == -1 && (errno == ENOTTY || errno == EOPNOTSUPP)) {
+-		if (!quiet)
+-			fprintf(stderr,
+-				"main: filesystem does not support "
+-				"XFS_IOC_ALLOCSP, disabling!\n");
+-		return 0;
+-	}
+-
+-	ret = ftruncate(fd, file_size);
+-	if (ret) {
+-		warn("main: ftruncate");
+-		exit(132);
+-	}
+-
+-	return 1;
+-#else
+-	return 0;
+-#endif
+-}
+-
+ static struct option longopts[] = {
+ 	{"replay-ops", required_argument, 0, 256},
+ 	{"record-ops", optional_argument, 0, 255},
+@@ -2835,7 +2731,6 @@ main(int argc, char **argv)
+ 			break;
+ 		case 'F':
+ 			fallocate_calls = 0;
+-			allocsp_calls = 0;
+ 			break;
+ 		case 'K':
+ 			keep_size_calls = 0;
+@@ -3077,8 +2972,6 @@ main(int argc, char **argv)
+ 
+ 	if (fallocate_calls)
+ 		fallocate_calls = test_fallocate(0);
+-	if (allocsp_calls)
+-		allocsp_calls = test_allocsp(0);
+ 	if (keep_size_calls)
+ 		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
+ 	if (punch_hole_calls)
+-- 
+2.31.1
 
