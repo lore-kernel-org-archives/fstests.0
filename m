@@ -2,57 +2,39 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78676C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Mar 2022 11:10:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BA3CC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Mar 2022 11:38:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241630AbiC3LMK (ORCPT
+        id S244774AbiC3LkV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Mar 2022 07:12:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60664 "EHLO
+        Wed, 30 Mar 2022 07:40:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51370 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238637AbiC3LMJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2022 07:12:09 -0400
-Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 941A46A420
-        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 04:10:23 -0700 (PDT)
-Received: by mail-qk1-x729.google.com with SMTP id b189so16274907qkf.11
-        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 04:10:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=VaAdu7g2smZB44B/uGIuCqNPuaIoEiGQ+23y9etq6ck=;
-        b=oeviuU8ZyR0TyUeJmRWpwh1iRxpp8KwtlG5vK03Kmj66QmIGXXYyvDlNMUF0SiDoOV
-         sA0d81nEONEREako8AcIJE06I9+KZ0hpC54f1x4OJXMqvIgbsk6iCt0NXfy9/mwjMrXu
-         94qoDNmlCwMFbpVG4oLwOmDbkHc3qr+p6YE6KtcyYdcU6Hlp+wVFGYwop77j7jpx/Xue
-         A6wjvGALEnaSWwZ0d81R4QYJv/sEzW1bEf0WWWSsZfFfxbGnyEHRCL5AYDEg4pfGgz4R
-         m5s2sicLmTJSqVk92zUHHCT0IUsTt3V6r3+b3PpCVAdTx0Vsb2v5IlNy9N8osj6/ssHu
-         +RqQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=VaAdu7g2smZB44B/uGIuCqNPuaIoEiGQ+23y9etq6ck=;
-        b=ZJr4A0zWAQ35vvzRNg9JGNjJbzRlUPZecjA8G2RHRko0t7mYmITpzOKU1fOBegZ4/3
-         X7da1dDCXK2a3TsBOhGqy0x6Nv0AHO7/NxKi/kBVfpGopvakgXgYs+2i3J19APgJLY+f
-         ydPrrY9IavKRbuoc+wZS/xzJBco7346uS/Th21FMQNyIjoCvIuwOJ8BN542dai3lpz37
-         qrXbd3KhqQTf74WF1Qo28CfWTjKKILrFF9RORZJk4zHiasjCPlNuf5g6vU33hwlN2Qc9
-         qC9MQZFJHUhWvMQ3aI0EpoUXtCCQgpo0+JnA5KB/P8pVnrO889irHcZjOVdBVpLwXgfI
-         c42w==
-X-Gm-Message-State: AOAM531UvpaOfG897p1exZkihJH6JI2SKQDvaIuE1VLiCu/W9Yk2syZd
-        8/r47zwZmV/aLbb0s1wR1SRKEvJzFHa8agdrob0=
-X-Google-Smtp-Source: ABdhPJy4cGcad8qU6V0a1+pzpdiZbuWuPIEulKPQ50bM2aCSrCcUha+LJiGxoZjLCKM76HpSCrBJjh9EpOWKwMQzUOw=
-X-Received: by 2002:a37:c15:0:b0:67e:37f2:e691 with SMTP id
- 21-20020a370c15000000b0067e37f2e691mr23517088qkm.722.1648638622450; Wed, 30
- Mar 2022 04:10:22 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220330102409.1290850-1-brauner@kernel.org> <20220330102409.1290850-21-brauner@kernel.org>
-In-Reply-To: <20220330102409.1290850-21-brauner@kernel.org>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 30 Mar 2022 14:10:11 +0300
-Message-ID: <CAOQ4uxid3vxXpxL25XNp7OWy9OjumHtSm7Zw3TEXO5_UHFRjnA@mail.gmail.com>
-Subject: Re: [PATCH v2] common: allow to run all tests on idmapped mounts
-To:     Christian Brauner <brauner@kernel.org>
+        with ESMTP id S238138AbiC3LkS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2022 07:40:18 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80F5A26548
+        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 04:38:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 3609CB81BBA
+        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 11:38:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66C3BC340EC;
+        Wed, 30 Mar 2022 11:38:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1648640310;
+        bh=HqRQKxGRs5vKjPfLs33mXd5JmoEqV0tfXslTiVpCb4M=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=glVXEKHNAFlsKPtLwJ3JWq4cbvFQ/epbTKisAQNmWO8aPVesgBfnqBG42qjDyVoyV
+         dSExUZVoQUvcCQJWCSKmEYOuWdJF3ebUbSL6mqvnxmY0UOCw2VrAj6o+lI1loDbWjN
+         ZPmqjzj9f87OhwJLDneS3qU0zbvqTLJ6QpHONIJmHjg5esZ0DsmhTM6ZSiljVJj4VM
+         aidqopDGw8Z7WNADaPKlBUpcWe8CfOetddg9xOrXGMRiJiUsUjwmz17VDSQKRQLI5F
+         Hw1Azifi4PcR+m7JEQcRntRCerNAR71eDdr2MxRNv3tXdsIXEwotYvA6H7SZcYcthQ
+         A7MzL5LMAf7cw==
+Date:   Wed, 30 Mar 2022 13:38:24 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
 Cc:     Miklos Szeredi <mszeredi@redhat.com>, Eryu Guan <guan@eryu.me>,
         fstests <fstests@vger.kernel.org>,
         Christoph Hellwig <hch@lst.de>,
@@ -62,81 +44,75 @@ Cc:     Miklos Szeredi <mszeredi@redhat.com>, Eryu Guan <guan@eryu.me>,
         Seth Forshee <sforshee@digitalocean.com>,
         Luca Bocassi <luca.boccassi@microsoft.com>,
         Lennart Poettering <mzxreary@0pointer.de>,
-        =?UTF-8?Q?St=C3=A9phane_Graber?= <stgraber@ubuntu.com>,
+        =?utf-8?B?U3TDqXBoYW5l?= Graber <stgraber@ubuntu.com>,
         Eryu Guan <guaneryu@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH v2] common: allow to run all tests on idmapped mounts
+Message-ID: <20220330113824.3vbjsi4zxsoh5nfx@wittgenstein>
+References: <20220330102409.1290850-1-brauner@kernel.org>
+ <20220330102409.1290850-21-brauner@kernel.org>
+ <CAOQ4uxid3vxXpxL25XNp7OWy9OjumHtSm7Zw3TEXO5_UHFRjnA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxid3vxXpxL25XNp7OWy9OjumHtSm7Zw3TEXO5_UHFRjnA@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 30, 2022 at 1:26 PM Christian Brauner <brauner@kernel.org> wrote:
->
-> In addition to the generic and filesystem-specific idmapped mount
-> testsuites that already exist upstream today add simple infrastructure
-> so any test can be run on idmapped mounts simply by setting
-> IDMAPPED_MOUNTS=true in the config file or section. The main user for
-> now will be overlay to verify it works correctly on idmapped mounts.
->
+On Wed, Mar 30, 2022 at 02:10:11PM +0300, Amir Goldstein wrote:
+> On Wed, Mar 30, 2022 at 1:26 PM Christian Brauner <brauner@kernel.org> wrote:
+> >
+> > In addition to the generic and filesystem-specific idmapped mount
+> > testsuites that already exist upstream today add simple infrastructure
+> > so any test can be run on idmapped mounts simply by setting
+> > IDMAPPED_MOUNTS=true in the config file or section. The main user for
+> > now will be overlay to verify it works correctly on idmapped mounts.
+> >
+> 
+> It is not clear from this message how IDMAPPED_MOUNTS=true affects
+> non -overlay runs and the answer is complicated:
+> 
+> You handled the majority of cases using _test_mount and _scratch_mount
+> but there are still many tests that open code _mount and some helpers
+> like _dmthin_mount that are used quite often.
 
-It is not clear from this message how IDMAPPED_MOUNTS=true affects
-non -overlay runs and the answer is complicated:
+I verified that actually for testing overlay. _dmthin_mount is used in 8
+tests (btrfs/196, generic/347, generic/405, generic/455, generic/457,
+generic/470, generic/482, generic/500). None of them were run in a
+regular testrun on the 5.17 base kernel.
+Direct _mount calls in the generic/ testsuite are 8 (generic/042,
+generic/081, generic/108, generic/361, generic/459, generic/563,
+generic/620, geneirc/649).
+Again, none of them were run in a regular testrun on the 5.17 base
+kernel. Let alone that for most of them conversion to be tested on
+idmapped mounts didn't make sense.
 
-You handled the majority of cases using _test_mount and _scratch_mount
-but there are still many tests that open code _mount and some helpers
-like _dmthin_mount that are used quite often.
+> 
+> So either document that IDMAPPED_MOUNTS=true will idmapp the
+> fs mounts whenever it can as best effort, or restrict the use of
+> IDMAPPED_MOUNTS=true with OVERLAY=true for now.
 
-So either document that IDMAPPED_MOUNTS=true will idmapp the
-fs mounts whenever it can as best effort, or restrict the use of
-IDMAPPED_MOUNTS=true with OVERLAY=true for now.
+Just to clarify, the test patch will be upstreamed independently. It is
+included here so people can run xfstests right away if they are
+interested.
 
-> Cc: Eryu Guan <guaneryu@gmail.com>
-> Cc: Christoph Hellwig <hch@lst.de>
-> Cc: <fstests@vger.kernel.org>
-> Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-> ---
->  common/config  |  1 +
->  common/overlay |  2 ++
->  common/rc      | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 53 insertions(+)
->
-> diff --git a/common/config b/common/config
-> index 479e50d1..1033b890 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -647,6 +647,7 @@ _overlay_config_override()
->         # Set fsck options, use default if user not set directly.
->         export FSCK_OPTIONS="$OVERLAY_FSCK_OPTIONS"
->         [ -z "$FSCK_OPTIONS" ] && _fsck_opts
-> +       export IDMAPPED_MOUNTS="$IDMAPPED_MOUNTS"
+The infrastructure is completely generic so every filesystem that
+supports idmapped mounts can simply run all of their tests idmapped. But
+there will be corner-cases. For example, xfs doesn't allow bulkstat on
+idmapped mounts because it is a filesystem wide operation, i.e. you can
+retrieve information for any inode in the filesystem so the operation
+cannot be scoped reasonably under a single mount. So xfstests testing
+bulkstat will fail as it's blocked. Similar for some btrfs ioctl()s.
 
-This is odd.
+We could of course restrict this testmode to -overlay for which we know
+things work correctly but that I don't like that as this means that
+people won't start using it and so we won't see issues unless someone
+sits down and goes through all 750+ tests and figures out for each
+individual one why it fails the way it fails.
 
-The purpose of _overlay_config_override() and _overlay_config_restore()
-is to allow different configurations for the base layers and for the overlay.
-This will be relevant when you implement idmapping for the overlay itself -
-you would want to test all combinations of idmapped layers/overlay.
+I'd rather not restrict the generic infrastructure so people can run and
+report failures and we can fix them up or block them as we detect them.
+So I'd rather just point that out in the commit message, I think.
 
-So this should be:
-       export OVERLAY_IDMAPPED_LAYERS="$IDMAPPED_MOUNTS"
-       export IDMAPPED_MOUNTS="$OVERLAY_IDMAPPED_MOUNTS"
-
-And I think it would be simpler and better understood to open code the check
-if the var in callers like this:
-
-[ $OVERLAY_IDMAPPED_LAYERS ] || _idmapped_mount $dev $mnt
-
-and not inside _idmapped_mount()
-It will may it easier for you to implement _overlay_mount() in the future.
-
-To clarify, your test setup to test idmapped overlay layers would not
-change, you would still set IDMAPPED_MOUNTS=true in config file
-as described in commit message because as README.overlay tries to
-explain, with ./check -overlay
-MOUNT_OPTIONS= refers to the layers and
-OVERLAY_MOUNT_OPTIONS= refers to the overlay
-
-I guess adding the IDMAPPED_MOUNTS=true to README.overlay
-multi section config example wouldn't hurt.
-
-Thanks,
-Amir.
+In any case, the tests will be upstreamed in parallel but separate from
+this series. :)
