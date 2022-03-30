@@ -2,336 +2,193 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCBFAC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Mar 2022 16:56:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CBFEC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Mar 2022 22:29:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349098AbiC3Q6L (ORCPT
+        id S1351540AbiC3Wap (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Mar 2022 12:58:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57702 "EHLO
+        Wed, 30 Mar 2022 18:30:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349108AbiC3Q5t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2022 12:57:49 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0F85135AB8
-        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 09:56:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1648659363;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=6YCGKgNwC7x1VRfVxkPWovZ4yaH9FlPWZCFQhWQWNL8=;
-        b=eqg2lq7X1Vs7DR2w1GH9EHyOjSjl+wmiyjhyVYc6y1XYhgVbvCultA0pwsXbIaFIpLJ911
-        fmvZHMBkbX4lIyar2tZh58VTR3nAwIxZHHlVu79q00G0Zw6RT345lnDn1pZr1k/lbplVuM
-        VmQ6S6RoGoSc5zYvEPAsXZTCdJXeL0c=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-221-tu_E6-RwOTud492M_CVBig-1; Wed, 30 Mar 2022 12:56:01 -0400
-X-MC-Unique: tu_E6-RwOTud492M_CVBig-1
-Received: by mail-pf1-f198.google.com with SMTP id p187-20020a6229c4000000b004fb57adf76fso5837165pfp.2
-        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 09:56:01 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=6YCGKgNwC7x1VRfVxkPWovZ4yaH9FlPWZCFQhWQWNL8=;
-        b=7p1OBpWzYevuGpF9AAAB5rq3KDl4PnilWduEBwIPfM7PI0aFstck6B5ZF8i0rw4oH1
-         2eihdiUH5EVIivrZEBzT3wywoiUSCttfSxr4JMDM5ftz/yo/9ASPoZsNyppaysbcSCrp
-         dSGXXCSh8NEV7kv1RTV+gcfRB0sm+3ear7nPknOAc6RCbXky+V+VeMl1tYt5i5zXblNy
-         eX+tIa6sxY1Z509IZf4wd7ok2pgtcUNgqrc0rmsuBkJAeX+q7t56MKEbSrA4wFLLbVtW
-         qTVYG1fCcdODCj1nkqeJLPSMNar2L0BOybOLwSuPIVj6ZYavKFNQH9lff5TuqTpJ/Zbv
-         ks4w==
-X-Gm-Message-State: AOAM532HbNLefUpNAvjRlQwM4wvGnFzToE7BWLae7eLNlXCXiIs2uxFU
-        abk8O3IqI+LmFWPGE0mhTMeZXywhmNVnvMcTvpSBTeFdFdgdnU4FL7BfmBnbWkwx/uPKh6k3PY4
-        6IZSJdUJVlcuUZRxYJw==
-X-Received: by 2002:a17:90b:4012:b0:1c9:ba31:5364 with SMTP id ie18-20020a17090b401200b001c9ba315364mr513443pjb.98.1648659355779;
-        Wed, 30 Mar 2022 09:55:55 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxMDQe5Z1C1LJNIBuk0hhZd5aEBzPp6uSL02ZAT4jloyz7NUpIdZ7b1HUWI7qOLg5oTTqeJ+Q==
-X-Received: by 2002:a17:90b:4012:b0:1c9:ba31:5364 with SMTP id ie18-20020a17090b401200b001c9ba315364mr513406pjb.98.1648659355371;
-        Wed, 30 Mar 2022 09:55:55 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id z20-20020aa78894000000b004fb11506899sm20044506pfe.139.2022.03.30.09.55.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Mar 2022 09:55:54 -0700 (PDT)
-Date:   Thu, 31 Mar 2022 00:55:50 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        liuyd.fnst@fujitsu.com
-Subject: Re: [PATCH] fsx: remove XFS_IOC_ALLOCSP operation entirely
-Message-ID: <20220330165550.f2iya5wffhmxndwa@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        liuyd.fnst@fujitsu.com
-References: <20220330052506.650390-1-zlang@redhat.com>
- <20220330155200.GH27690@magnolia>
+        with ESMTP id S236716AbiC3Wao (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Mar 2022 18:30:44 -0400
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DEE95AA5F
+        for <fstests@vger.kernel.org>; Wed, 30 Mar 2022 15:28:58 -0700 (PDT)
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 22ULS0iJ027896;
+        Wed, 30 Mar 2022 22:28:55 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : references : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2021-07-09;
+ bh=GHZLb8mg1RPJjVedMI9XZNfatEnw6ReU9VS9EULuatI=;
+ b=tPStftEqQabIrGfAtZiCDgUF3TG3XOmCYGCn+prFzOwJk6pROFcBY0UNQ4O5XxH0kovx
+ vmioX1J4+ZatUF59fWAKHZcjb+89Vjob0z8SiOB8+3dBKWulNrj2tSle4vjvu8olbZzO
+ ZaGFyLKXLimzqN88vxDhC8cJ+ilgF+JuiDWmLzvYy8tWE+eQqFUO1ZE42WIR/A2Zlk9E
+ r/eFGT9Rm0NRerlt7nQwMgHO0ilHFx/BhVjqZXqpNX6nKMCmLHlD9F+GAS+0+lfjLXi9
+ aLFhPxQCU85i7Ja/+1vR4gZyhmizlHQuacQVPm5Tqo+s8taqbBOLp0yDwY5rjHvBdD/b AA== 
+Received: from aserp3030.oracle.com ([141.146.126.71])
+        by mx0b-00069f02.pphosted.com with ESMTP id 3f1sm2juu0-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 30 Mar 2022 22:28:55 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 22UMHPhZ077736;
+        Wed, 30 Mar 2022 22:28:54 GMT
+Received: from nam10-bn7-obe.outbound.protection.outlook.com (mail-bn7nam10lp2105.outbound.protection.outlook.com [104.47.70.105])
+        by aserp3030.oracle.com with ESMTP id 3f1rv8fue1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 30 Mar 2022 22:28:54 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=f6na3D3L5LkV9rC/7U9FptldSgLCw1exoPrNQGK2obSduZb2AQr0IQ30jTaQEe0tNiDFRi8O0SoPKIJV0oBPlDXctvFaZznIMz6OoLQcVTDt9/jXBOWMkX4mPf2fL5f2BOTWFOA6fkP3nFm+yJXmZNoGQbQc1Np14Foqq0tcP1taQgyR26/3SKj+vssX2SKmMWElEhIUWrpZLNwvZoIplMbpYYWt0ln4f7uF6iYPcITYHC7kfuFODUe/AmB8ok9kW9bM4ALMLBCX+eHzl5FV++etn/Plm0nWjy8I8QOP44zRsX6dlQkl1oGp2+m47QgPtMmOObMqYgoZBQfjXtVhoQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=GHZLb8mg1RPJjVedMI9XZNfatEnw6ReU9VS9EULuatI=;
+ b=f7h4IFjDkqwssOCL2/7twMeOev8u0689UtCT11wVRPqk10s1tKXGo/Xhr/yU0vKnEwugLoaJL1PGbwLRHD9EYL6P6aF+MKWkCVrQPU93I+kmczX/sTQjfLd24oH4UHBJjbgv7+xB/0VDlJyAFl3Gh6gQFqOV7ne2cLA6rCm0Pd45IayiU0fG0q6Nq5C4fogNw1uS3IFhdIlRtFmkHW+ejnPMNKJtBaw/Zy+ZGH5CUXdp+y1/MvQXoWto4iTvKPouux5gsSXIZNaJer6/3tTpjKUuRBDtkQUbe2qPFWHsqK5j8WVFl4hTkQPkf7OO9y4CrWKyvtru15u5H7zsBBco9A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=GHZLb8mg1RPJjVedMI9XZNfatEnw6ReU9VS9EULuatI=;
+ b=XTZNqX4toVKmRAbET+5F2NPP1r3DZtlqx4sSVgex46dCqQJDhONdRiHQ6MgunB/LPDPuILAjb7GRjbiirR1McclYiCfkhHoMxIeTU3OefHUswPY/xkR3mAI9+rZgXlMYYxkxlTgcwjwUNOXxRrMfCVsr7Yy2z9GzMRriLRTK11g=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by BYAPR10MB3158.namprd10.prod.outlook.com (2603:10b6:a03:15d::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5123.16; Wed, 30 Mar
+ 2022 22:28:52 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::54da:72:aa08:9a8e]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::54da:72:aa08:9a8e%6]) with mapi id 15.20.5123.016; Wed, 30 Mar 2022
+ 22:28:52 +0000
+Message-ID: <9cdff0dc-0bf9-47ed-0598-f782daa8f2e8@oracle.com>
+Date:   Thu, 31 Mar 2022 06:28:43 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH] btrfs: drop no-op count=$(( count-- ))
+Content-Language: en-US
+To:     David Disseldorp <ddiss@suse.de>, fstests@vger.kernel.org
+References: <20220330114540.1539-1-ddiss@suse.de>
+From:   Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <20220330114540.1539-1-ddiss@suse.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SG2PR03CA0122.apcprd03.prod.outlook.com
+ (2603:1096:4:91::26) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220330155200.GH27690@magnolia>
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 963c68e9-a7b5-4ec9-7f45-08da129cab00
+X-MS-TrafficTypeDiagnostic: BYAPR10MB3158:EE_
+X-Microsoft-Antispam-PRVS: <BYAPR10MB3158D77C0884A8668D77F264E51F9@BYAPR10MB3158.namprd10.prod.outlook.com>
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 5F5rwbyRWiik8heWAVXJVrCNZBeN1Yu+5mfXz79GLM3wWYrU3kv7EEJ1FXGP+NdQ47CoyiyZfjcwyyN/+oboiGTE2WwkqPbns8BcG9DB/dRafpb1VXvWdtFjE4pif5cl5u4TEboeGKxLdQPuGQloMq3v39hErhhKvDXJo/re/7T+KZ0z9DykfaR6CcVgYqWJtSMlNb+yyhDM1PmA3iC++JoO6HuH7PVDWWztee/GvIzQyYci+m8k70sRI1JjWOrsZMJCcJ6nabdBzEvS/eniPRMGHn8ofZ64UT6NemgBC50rqA1czElUxXiT7VbIK3bk+0fHxpXB4sTFVUWaq4aZFeE0Fr5+RUXInBV1Fy4WlF6IgwhFsukGGcDETR6GXLvIYCNboTilb0eQhwvj31dEU3l6pijRar6d9c9a1PqzexL8Janr2JcdI5EQ34hVD5WX8cWUDpYRO0qouEK8fUmFD7IM33Bl5lnRQUL7GIO9lFhjhzzHq2ILw+qbmGIyBtWGtLzS/3Hd6YzFEXFp7xXZYUU0Ov+1onGaGBLGJhgcEN5M/CybRw1DrEsCbvqfchClOlisqhBIiZUe9Srwk6tkzfJb450rjFIVE/rM6/7IkD2xOVdzmQvXipPVtC4+RwqdP5HBaQ/FuoFoYtIpHMNG2JHHREuOgTmrbGaktgByJWCt7g472tGMDe0us5078lADZvar5IXKXMFiGlvzaem6wi5csYI2nBMCv7dd9J6krSY=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(366004)(38100700002)(316002)(83380400001)(53546011)(508600001)(6506007)(6666004)(6512007)(2616005)(26005)(186003)(66556008)(8676002)(66476007)(6486002)(2906002)(8936002)(66946007)(36756003)(44832011)(31696002)(5660300002)(31686004)(86362001)(43740500002)(45980500001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?d0szemswZFkzR1N5cHRZQnpLOXc4UVo3RG5HTUh3Y3R1djA4dWRlN1RtUEhT?=
+ =?utf-8?B?aGlGVFl0Qi8yREE4WTNqUGZUUlFnV0xteUs2cFhXZ09wTURQejg3MGFQaDZP?=
+ =?utf-8?B?T1JpanV4UC81UWlPRWRUL2RKOTlzcjN3b01rMWNrWFZKWmRyVGJ0ZVM1SzNv?=
+ =?utf-8?B?c3VMaDJ5SVNOOU5ORjRTUmJ2VERRR0EvT0pvZC8wdURJdW5LOEo4WDhVaDhv?=
+ =?utf-8?B?eUZXdVA1OTRSWFR4MC9JZmxEVUJIRVQ1Yld1WTk2YW0rdFZKbEpUZEpNM3FC?=
+ =?utf-8?B?bU5lY2pIQXJIbGNteWNWMFNzOWw4YzJpdEJwU3Z2WGcwNjQ2RnovSUhBckhv?=
+ =?utf-8?B?bjZvQzFZYUNXVm9XQTkxSk9qNzRqQU93N1B0bTYxVis2UXRyS0JuOHVVUUNI?=
+ =?utf-8?B?emNQWnlheHV0ZmRNRE82dElGQnFKZlJRRzdVT0s5eE1PbHZqbzJ0QnJzMWwz?=
+ =?utf-8?B?em11dExUOEhUaktMRXYxU2dHMC9VM1FWVngydHMyZG1CR0F5Q0d3TGVJV1k5?=
+ =?utf-8?B?aFV1MnVZdEloRUFzQ1g2VUdKNzQ0MjlSZlBBb1UxeDIxWkRWRmhVbnRtRHFl?=
+ =?utf-8?B?LzVSWWNSREFGVjgyQ0VNc21IaE1TOUxKV0pTWlhiOFBURzhvVklPaUxkclk2?=
+ =?utf-8?B?VENsakxtZnNET2l2UGVLNEFyQWV0MkZWWnRiRGxlUFZzTE1oeHBNT21HRHVH?=
+ =?utf-8?B?ZVhZb1FGRmRPN0Z2VzNQSC9PSWZDYlJKSWhGbnZ0aGhYUUl2WjE4UFMyL3pX?=
+ =?utf-8?B?QlI2RWZ2YzViWGpBcHdkSVdIZXdhYnUzY2JpbUZ1TmFRQkJPMVRkSFBOb2o5?=
+ =?utf-8?B?QTV2U3VvYWdHbDQ3dHE3ZmI0ZzB2M3U2N3duNTkxaUlBYkRMdmhJRzkvUG9m?=
+ =?utf-8?B?THkxQlNWUkEzd1ZMdFVKY0NsUUtoQzBza21mUEJHNkN0N1JkOHVSSm53bzhC?=
+ =?utf-8?B?ZFRvNnZxbU1va0dYUDlKUFVTLzdXd1hZNTFSY2RCUWp3WkZHb0piNlRWSlVX?=
+ =?utf-8?B?K0xucytXQ0huelB3b2h6Y1NpTG5naXEwTy9vL2JDWExCUU9tcDN2REhVR3ZU?=
+ =?utf-8?B?TmNkZkhRcFEvckpZanFXL245MzJHVXE3U0VjMTA2SGw2ZWYxOFBSLy85VzRx?=
+ =?utf-8?B?OFJaVFgvazBmYWIyUW1FSUNFTS9sQ216aFVQWWdEUGxhTkxGdXBqVTkvWENa?=
+ =?utf-8?B?Y1RITVBmQXZTQnhDWUlkb0NDS28ramEvb1pWWlhVMTc1Wnd3N3VCSFZkbHZx?=
+ =?utf-8?B?cFFtRmV0d2lNcXNNYk9DcGxGUmxTcnVtbWRkdlRGNkZ1VjJSblprNEtmQjVp?=
+ =?utf-8?B?WXRBVTRnSXA2OHRIV2ZZNi9tSmFFQ0VYTnIxbDIvRllMRnIxSmFWZG4xSkRT?=
+ =?utf-8?B?Z2JDRmhYOWkwSTN5MC93K3lVUWg0VzB6Nm50QzhiQ1ZHTVRnbkRzc294QUxB?=
+ =?utf-8?B?RzVHWHkrNzMzK2FRclZGZWs5MnpHaGZ3SnJreSsybC9iZEtJd0QxODloMEVa?=
+ =?utf-8?B?OFhlY0NZb2NuYmRIdGZUV3IzT0p3Njg4VVFySERUMWRwU0RnbnkveitKU21w?=
+ =?utf-8?B?ai9FTVRKSGY3N256RWczbE51N3B1ZVVDclNOeTgyTlp6amtxeVJoMXpWWDdI?=
+ =?utf-8?B?RDRCNTFiL3dDSnBzODFzUm04UDZ0T1JTczhLbXhQd0cydk8vSTk2YStMMnYv?=
+ =?utf-8?B?dFVtSFlGL3oyVnhTR1FzZFRWUGFqTWg3MVl1WVZFY0xDODg0UlFCUlZkcGZj?=
+ =?utf-8?B?d1d4ckFKVnpMVGovNDZ1ejFYRk5sbTFOS0xIUkIreDRGc1VjT1l4ZXBmcisx?=
+ =?utf-8?B?dEp1OCtFcjFZTHNKOU1qK0RBYzZtTzJ3b29TVkVPbUZrandtSC9aaWlZbmw3?=
+ =?utf-8?B?a0RqQTBiUGFDVndnNUI2a1RrSXN4NVl0RS9MRlpqR001UGl6YkhWVXlpaUJo?=
+ =?utf-8?B?RUozRW83bXkyUEV5dkJvekdwblIwYWFDODhCQ2JVVDhBbThlaUhUM29USDNY?=
+ =?utf-8?B?akdYZWd0d1VOUitYVlQrMnlvSGJ6ZU5kMXhoVFlTODg1VWVidVIvZ1hoNlpr?=
+ =?utf-8?B?WnNROHoyZWpXdXBwL2FFU1RzdjcwcStmVjNYY1Y0VmRsaEtKc3pnVTRMUUg5?=
+ =?utf-8?B?bWw4K3FjSzRsYXNEa09zTDl5VThnRU93SWRNWDlWMkZLeHArNENnSEJJOEZ5?=
+ =?utf-8?B?MEN3Mis4bXlqMVpnT05sb2VxbURuR21UelBZL1dTZG9mSDkwQXNGNm55TXo5?=
+ =?utf-8?B?Qi9DajBGVzFsc3cycmN1U3dRNFkwN0hIaXdGM3BtS0hwWXlVTHZialhyRmxw?=
+ =?utf-8?B?TzF3empZajZuSlVHUHFxK3B6V0ZUb3FGSWQzNitrYjhkckQ4NkVtNW9vV2ox?=
+ =?utf-8?Q?MGU2AEzi7hIbdmT0=3D?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 963c68e9-a7b5-4ec9-7f45-08da129cab00
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Mar 2022 22:28:52.4792
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9/steuhq7qfHNi/goz5XowVKznjRn9NZUVmeh/hp8t5QhyLTOZkubIeCbB/+/A9rWvTZ1UxQEsF+P8AnVZsJDw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR10MB3158
+X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10302 signatures=695566
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 spamscore=0
+ adultscore=0 mlxscore=0 phishscore=0 bulkscore=0 suspectscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2203300108
+X-Proofpoint-ORIG-GUID: WHPuIyekeHJXPjjkEP5xmOMfiZXpyqo1
+X-Proofpoint-GUID: WHPuIyekeHJXPjjkEP5xmOMfiZXpyqo1
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 30, 2022 at 08:52:00AM -0700, Darrick J. Wong wrote:
-> On Wed, Mar 30, 2022 at 01:25:06PM +0800, Zorro Lang wrote:
-> > Due to XFS_IOC_ALLOCSP is nearly retired from linux xfs, and the
-> > ALLOCSP testing in fsx easily trigger errors. So compare with
-> > disable it by default, I'd like to remove it entirely. So this
-> > patch revert two patches:
-> > cd99a499 ("fsx: disable allocsp_calls if -F is specified")
-> > a32fb1bb ("fsx: add support for XFS_IOC_ALLOCSP")
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> 
-> Hmm.  fsstress and iogen also use ALLOCSP/FREESP, so perhaps they should
-> also get cleaned out?  I guess the difference here is that fsx errors
-> out if the call fails, whereas the other two have some ability to try
-> alternate means. <shrug>
-> 
-> *oh* Now I realize why there was a complaint about this -- I added that
-> allocsp_calls variable to guard against the case where fsx is built with
-> old uapi headers but run on a new kernel, but nowhere do we actually
-> gate ALLOCSP usage with allocsp_calls.
 
-Yes, it is! Compare with fsstress, if we test on filesystems which don't support
-IOC_ALLOCSP. We have to use "-F" option, but "-F" will disable "fallocate" either,
-that's not what we want.
+Thanks for the fix.
 
-But fsstress won't fail even if allocsp_f() fails. We can talk about if fsstress
-need to remove IOC_ALLOCSP. But for fsx, better to disable it by default at
-least(and use another option to enable it), or remove it as you suggested :)
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
-> 
-> Anyway, ALLOCSP was broken for decades and is now gone, so:
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> 
-> --D
-> 
-> > ---
-> > 
-> > Hi,
-> > 
-> > As we talked in:
-> > https://lore.kernel.org/fstests/20220330045718.wqrarqorslzaeks5@zlang-mailbox/T/#t
-> > 
-> > We have two choices:
-> > 1) Disable ALLOCSP from fsx by default, and give it another option to enable it
-> >    manually if someone need it.
-> > 2) Remove the ALLOCSP support from fsx entirely
-> > 
-> > As Darrick's suggestion, this patch choose the 2nd one. Please review and feel
-> > free to tell me if you have other suggestions.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >  ltp/fsx.c | 111 +-----------------------------------------------------
-> >  1 file changed, 2 insertions(+), 109 deletions(-)
-> > 
-> > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > index 3ee37fe8..12c2cc33 100644
-> > --- a/ltp/fsx.c
-> > +++ b/ltp/fsx.c
-> > @@ -111,7 +111,6 @@ enum {
-> >  	OP_CLONE_RANGE,
-> >  	OP_DEDUPE_RANGE,
-> >  	OP_COPY_RANGE,
-> > -	OP_ALLOCSP,
-> >  	OP_MAX_FULL,
-> >  
-> >  	/* integrity operations */
-> > @@ -166,7 +165,6 @@ int	randomoplen = 1;		/* -O flag disables it */
-> >  int	seed = 1;			/* -S flag */
-> >  int     mapped_writes = 1;              /* -W flag disables */
-> >  int     fallocate_calls = 1;            /* -F flag disables */
-> > -int     allocsp_calls = 1;		/* -F flag disables */
-> >  int     keep_size_calls = 1;            /* -K flag disables */
-> >  int     punch_hole_calls = 1;           /* -H flag disables */
-> >  int     zero_range_calls = 1;           /* -z flag disables */
-> > @@ -270,7 +268,6 @@ static const char *op_names[] = {
-> >  	[OP_DEDUPE_RANGE] = "dedupe_range",
-> >  	[OP_COPY_RANGE] = "copy_range",
-> >  	[OP_FSYNC] = "fsync",
-> > -	[OP_ALLOCSP] = "allocsp",
-> >  };
-> >  
-> >  static const char *op_name(int operation)
-> > @@ -413,15 +410,6 @@ logdump(void)
-> >  			if (overlap)
-> >  				prt("\t******WWWW");
-> >  			break;
-> > -		case OP_ALLOCSP:
-> > -			down = lp->args[1] < lp->args[2];
-> > -			prt("ALLOCSP  %s\tfrom 0x%x to 0x%x",
-> > -			    down ? "DOWN" : "UP", lp->args[2], lp->args[1]);
-> > -			overlap = badoff >= lp->args[1 + !down] &&
-> > -				  badoff < lp->args[1 + !!down];
-> > -			if (overlap)
-> > -				prt("\t******NNNN");
-> > -			break;
-> >  		case OP_FALLOCATE:
-> >  			/* 0: offset 1: length 2: where alloced */
-> >  			prt("FALLOC   0x%x thru 0x%x\t(0x%x bytes) ",
-> > @@ -1707,51 +1695,6 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
-> >  }
-> >  #endif
-> >  
-> > -#ifdef XFS_IOC_ALLOCSP
-> > -/* allocsp is an old Irix ioctl that either truncates or does extending preallocaiton */
-> > -void
-> > -do_allocsp(unsigned new_size)
-> > -{
-> > -	struct xfs_flock64	fl;
-> > -
-> > -	if (new_size > biggest) {
-> > -		biggest = new_size;
-> > -		if (!quiet && testcalls > simulatedopcount)
-> > -			prt("allocsping to largest ever: 0x%x\n", new_size);
-> > -	}
-> > -
-> > -	log4(OP_ALLOCSP, 0, new_size, FL_NONE);
-> > -
-> > -	if (new_size > file_size)
-> > -		memset(good_buf + file_size, '\0', new_size - file_size);
-> > -	file_size = new_size;
-> > -
-> > -	if (testcalls <= simulatedopcount)
-> > -		return;
-> > -
-> > -	if ((progressinterval && testcalls % progressinterval == 0) ||
-> > -	    (debug && (monitorstart == -1 || monitorend == -1 ||
-> > -		      new_size <= monitorend)))
-> > -		prt("%lld allocsp\tat 0x%x\n", testcalls, new_size);
-> > -
-> > -	fl.l_whence = SEEK_SET;
-> > -	fl.l_start = new_size;
-> > -	fl.l_len = 0;
-> > -
-> > -	if (ioctl(fd, XFS_IOC_ALLOCSP, &fl) == -1) {
-> > -	        prt("allocsp: 0x%x\n", new_size);
-> > -		prterr("do_allocsp: allocsp");
-> > -		report_failure(161);
-> > -	}
-> > -}
-> > -#else
-> > -void
-> > -do_allocsp(unsigned new_isize)
-> > -{
-> > -	return;
-> > -}
-> > -#endif
-> > -
-> >  #ifdef HAVE_LINUX_FALLOC_H
-> >  /* fallocate is basically a no-op unless extending, then a lot like a truncate */
-> >  void
-> > @@ -2097,8 +2040,6 @@ test(void)
-> >  		if (fallocate_calls && size && keep_size_calls)
-> >  			keep_size = random() % 2;
-> >  		break;
-> > -	case OP_ALLOCSP:
-> > -		break;
-> >  	case OP_ZERO_RANGE:
-> >  		if (zero_range_calls && size && keep_size_calls)
-> >  			keep_size = random() % 2;
-> > @@ -2125,12 +2066,6 @@ have_op:
-> >  		if (!mapped_writes)
-> >  			op = OP_WRITE;
-> >  		break;
-> > -	case OP_ALLOCSP:
-> > -		if (!allocsp_calls) {
-> > -			log4(OP_FALLOCATE, 0, size, FL_SKIPPED);
-> > -			goto out;
-> > -		}
-> > -		break;
-> >  	case OP_FALLOCATE:
-> >  		if (!fallocate_calls) {
-> >  			log4(OP_FALLOCATE, offset, size, FL_SKIPPED);
-> > @@ -2206,10 +2141,6 @@ have_op:
-> >  		dotruncate(size);
-> >  		break;
-> >  
-> > -	case OP_ALLOCSP:
-> > -		do_allocsp(size);
-> > -		break;
-> > -
-> >  	case OP_FALLOCATE:
-> >  		TRIM_OFF_LEN(offset, size, maxfilelen);
-> >  		do_preallocate(offset, size, keep_size);
-> > @@ -2339,8 +2270,8 @@ usage(void)
-> >  "	-U: Use the IO_URING system calls, -U excludes -A\n"
-> >   #endif
-> >  "	-D startingop: debug output starting at specified operation\n"
-> > -#if defined(HAVE_LINUX_FALLOC_H) || defined(XFS_IOC_ALLOCSP)
-> > -"	-F: Do not use fallocate (preallocation) or XFS_IOC_ALLOCSP calls\n"
-> > +#ifdef HAVE_LINUX_FALLOC_H
-> > +"	-F: Do not use fallocate (preallocation) calls\n"
-> >  #endif
-> >  #ifdef FALLOC_FL_PUNCH_HOLE
-> >  "	-H: Do not use punch hole calls\n"
-> > @@ -2656,41 +2587,6 @@ __test_fallocate(int mode, const char *mode_str)
-> >  #endif
-> >  }
-> >  
-> > -int
-> > -test_allocsp()
-> > -{
-> > -#ifdef XFS_IOC_ALLOCSP
-> > -	struct xfs_flock64	fl;
-> > -	int			ret = 0;
-> > -
-> > -	if (lite)
-> > -		return 0;
-> > -
-> > -	fl.l_whence = SEEK_SET;
-> > -	fl.l_start = 1;
-> > -	fl.l_len = 0;
-> > -
-> > -	ret = ioctl(fd, XFS_IOC_ALLOCSP, &fl);
-> > -	if (ret == -1 && (errno == ENOTTY || errno == EOPNOTSUPP)) {
-> > -		if (!quiet)
-> > -			fprintf(stderr,
-> > -				"main: filesystem does not support "
-> > -				"XFS_IOC_ALLOCSP, disabling!\n");
-> > -		return 0;
-> > -	}
-> > -
-> > -	ret = ftruncate(fd, file_size);
-> > -	if (ret) {
-> > -		warn("main: ftruncate");
-> > -		exit(132);
-> > -	}
-> > -
-> > -	return 1;
-> > -#else
-> > -	return 0;
-> > -#endif
-> > -}
-> > -
-> >  static struct option longopts[] = {
-> >  	{"replay-ops", required_argument, 0, 256},
-> >  	{"record-ops", optional_argument, 0, 255},
-> > @@ -2835,7 +2731,6 @@ main(int argc, char **argv)
-> >  			break;
-> >  		case 'F':
-> >  			fallocate_calls = 0;
-> > -			allocsp_calls = 0;
-> >  			break;
-> >  		case 'K':
-> >  			keep_size_calls = 0;
-> > @@ -3077,8 +2972,6 @@ main(int argc, char **argv)
-> >  
-> >  	if (fallocate_calls)
-> >  		fallocate_calls = test_fallocate(0);
-> > -	if (allocsp_calls)
-> > -		allocsp_calls = test_allocsp(0);
-> >  	if (keep_size_calls)
-> >  		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
-> >  	if (punch_hole_calls)
-> > -- 
-> > 2.31.1
-> > 
-> 
 
+
+
+On 30/03/2022 19:45, David Disseldorp wrote:
+> This line doesn't result in a changed count value. The tests don't
+> appear to rely on a decremented value, so remove the line.
+> 
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> ---
+>   tests/btrfs/124 | 1 -
+>   tests/btrfs/125 | 1 -
+>   2 files changed, 2 deletions(-)
+> 
+> diff --git a/tests/btrfs/124 b/tests/btrfs/124
+> index e8d77aaa..3d8141a1 100755
+> --- a/tests/btrfs/124
+> +++ b/tests/btrfs/124
+> @@ -74,7 +74,6 @@ _scratch_mount >> $seqres.full 2>&1
+>   _run_btrfs_util_prog filesystem show
+>   dd if=/dev/zero of="$SCRATCH_MNT"/tf1 bs=$bs count=1 \
+>   					>>$seqres.full 2>&1
+> -count=$(( count-- ))
+>   echo "unmount" >> $seqres.full
+>   echo "clean btrfs ko" >> $seqres.full
+>   _scratch_unmount
+> diff --git a/tests/btrfs/125 b/tests/btrfs/125
+> index 44ba49ec..b58f2aa2 100755
+> --- a/tests/btrfs/125
+> +++ b/tests/btrfs/125
+> @@ -80,7 +80,6 @@ dd if=/dev/zero of="$SCRATCH_MNT"/tf1 bs=$bs count=1 \
+>   					>>$seqres.full 2>&1
+>   _run_btrfs_util_prog filesystem show
+>   _run_btrfs_util_prog filesystem df $SCRATCH_MNT
+> -count=$(( count-- ))
+>   
+>   #-------------degraded-init-------------------
+>   echo >> $seqres.full
