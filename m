@@ -2,118 +2,81 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA6DCC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Mar 2022 11:41:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD5BAC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Mar 2022 12:01:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232706AbiCaLnZ (ORCPT
+        id S235759AbiCaMCo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Mar 2022 07:43:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50070 "EHLO
+        Thu, 31 Mar 2022 08:02:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48754 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232698AbiCaLnY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2022 07:43:24 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6DC2166E16
-        for <fstests@vger.kernel.org>; Thu, 31 Mar 2022 04:41:36 -0700 (PDT)
+        with ESMTP id S235646AbiCaMCd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2022 08:02:33 -0400
+Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA33E1C3487;
+        Thu, 31 Mar 2022 04:59:34 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 76D25B820C2
-        for <fstests@vger.kernel.org>; Thu, 31 Mar 2022 11:41:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0F9FFC340ED;
-        Thu, 31 Mar 2022 11:41:30 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id DEB37CE21B6;
+        Thu, 31 Mar 2022 11:59:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CCDE0C340EE;
+        Thu, 31 Mar 2022 11:59:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648726894;
-        bh=oOxz922AA2TBs0/v24wFJ/a7T+ppVceKL/0nw2l3504=;
+        s=k20201202; t=1648727970;
+        bh=X/62zgO2a7m9QlrGXnUaLeuznCrRfbtM873zyn3nPhM=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=CvZcMcttdBKXJFd7xhsewYOdCVE9lsiY5Ry5HrTvyBWzdZ9Lzj8wwVB3oPj3q/tAw
-         zYIdleb9r8Inda6mNTReMcoe/EL+zVraqCbXI5/AgBgb2fN8h/X3C0P/KNIIwHxMo4
-         uIdNBnPt4scktrut5QjsugNjMnR3bB+HzlHV9/CDLOue1uCcXgpKb9I1l3oYuzsVL1
-         hRl/oAFC5pAM+uVbiTYNLmdyXMiFugqEGyL0iXb65g8PuFDYm9KJhPAZrlToRPp7sF
-         utQWtuWPmZB4DitwrN71ETEqcDOJC855vQxa70dF51WVlKh5RGIvRdDDNqhaTF3HBH
-         9uKEFV/tuDdAw==
-Date:   Thu, 31 Mar 2022 13:41:28 +0200
+        b=uZieT0LutnWeBrckZS4nPn5IdTRZipjaHEwYjTjKczphDX9ML17QgLeOj0f2Vpxk6
+         ooNtR6x58Ba/Z87h24SCVwj5YKwotbML/nR1ZYUhKoDj5JJFk4LOOf8AVrsG8cC4jg
+         W2b76ybFXE02y05uiDvU3X3/xnRNYVlm/+2Uf2OeWnZlIla2gJBy6lAltwqF6a9pjo
+         Po1zQNmOl2SVW5BK41g/DI5+x7EhCWy1neZuInPuWjF3qnbnAAkLKZi8TNqIPMDJCG
+         13AMDR1RP159JxUsyGwkJ+S2w1YYdH5BvIYIE6FR4EFhh0Jn62w+0tk/qg98EmVn4x
+         cJUjaiqQq72nw==
+Date:   Thu, 31 Mar 2022 13:59:25 +0200
 From:   Christian Brauner <brauner@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Miklos Szeredi <mszeredi@redhat.com>, Eryu Guan <guan@eryu.me>,
-        fstests <fstests@vger.kernel.org>,
-        Christoph Hellwig <hch@lst.de>,
-        Aleksa Sarai <cyphar@cyphar.com>,
-        Giuseppe Scrivano <gscrivan@redhat.com>,
-        Rodrigo Campos Catelin <rodrigo@sdfg.com.ar>,
-        Seth Forshee <sforshee@digitalocean.com>,
-        Luca Bocassi <luca.boccassi@microsoft.com>,
-        Lennart Poettering <mzxreary@0pointer.de>,
-        =?utf-8?B?U3TDqXBoYW5l?= Graber <stgraber@ubuntu.com>,
-        Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3] common: allow to run all tests on idmapped mounts
-Message-ID: <20220331114128.6j7lnp2h6f5ip4rf@wittgenstein>
-References: <20220331112318.1377494-1-brauner@kernel.org>
- <20220331112318.1377494-21-brauner@kernel.org>
- <CAOQ4uxj-EndoH7ZT=sWRJ4VpXDXW4AyrFYByug7bYqria7LMPw@mail.gmail.com>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     david@fromorbit.com, djwong@kernel.org,
+        linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v1 1/2] idmapped-mounts: Add mknodat operation in setgid
+ test
+Message-ID: <20220331115925.5tausqdavg7xmqyv@wittgenstein>
+References: <1648718902-2319-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxj-EndoH7ZT=sWRJ4VpXDXW4AyrFYByug7bYqria7LMPw@mail.gmail.com>
+In-Reply-To: <1648718902-2319-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 02:35:55PM +0300, Amir Goldstein wrote:
-> On Thu, Mar 31, 2022 at 2:25 PM Christian Brauner <brauner@kernel.org> wrote:
-> >
-> > In addition to the generic and filesystem-specific idmapped mount
-> > testsuites that already exist upstream today add simple infrastructure
-> > so any test can be run on idmapped mounts simply by setting
-> > IDMAPPED_MOUNTS=true in the config file or section. The main user for
-> > now will be overlay to verify it works correctly on idmapped mounts.
-> >
-> > Note that the infrastructure is completely generic so every filesystem that
-> > supports idmapped mounts can simply run all of their tests idmapped. But
-> > note that not all ways to create a mount have been converted yet. That
-> > includes e.g. _dmthin_mount and direct calls to _mount in various tests.
-> >
-> > In addition, there will be corner-cases. For example, xfs doesn't allow
-> > bulkstat on idmapped mounts because it is a filesystem wide operation,
-> > i.e. you can retrieve information for any inode in the filesystem so the
-> > operation cannot be scoped reasonably under a single mount. So xfstests
-> > testing bulkstat will fail as it's blocked. Similar for some btrfs
-> > ioctl()s.
-> >
-> > While we could of course restrict this testmode to -overlay for which we
-> > know things work correctly we should not do this. It would mean that
-> > people won't start using it and so we won't see issues unless someone
-> > sits down and goes through more than 1000 tests and figures out for each
-> > individual one whether it needs to be skipped or not.
-> >
-> > So instead allow this mode but for all filesystems so people can start
-> > running and reporting failures and we can fix them up or block them as
-> > we detect them.
-> >
-> > Cc: Amir Goldstein <amir73il@gmail.com>
-> > Cc: Eryu Guan <guaneryu@gmail.com>
-> > Cc: Christoph Hellwig <hch@lst.de>
-> > Cc: <fstests@vger.kernel.org>
-> > Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-> > ---
-> > /* v2 */
-> > unchanged
-> >
-> > /* v3 */
-> > - Amir Goldstein <amir73il@gmail.com>:
-> >   - Add more detailed explanation about the current state and
-> >     expectations of the newly added IDMAPPED_MOUNTS support.
+On Thu, Mar 31, 2022 at 05:28:21PM +0800, Yang Xu wrote:
+> Since mknodat can create file, we should also check whether strip S_ISGID.
+> Also add new helper caps_down_fsetid to drop CAP_FSETID because strip S_ISGID
+> depond on this cap and keep other cap(ie CAP_MKNOD) because create character device
+> needs it when using mknod.
 > 
-> Please document the new envvar in README with a *short* disclaimer
-> about expectations with and without -overlay and please add an [idmapped]
-> section to the multi section config example in README.overlay.
+> Only test mknod with character device in setgid_create function because the another
+> two functions will hit EPERM error.
+
+Fwiw, it's not allowed to create devices in userns as that would be a
+massive attack vector. But it is possible since 5.<some version> to
+create whiteouts in userns for the sake of overlayfs. So iirc that
+creating a whiteout is just passing 0 as dev_t:
+
+mknodat(t_dir1_fd, CHRDEV1, S_IFCHR | S_ISGID | 0755, 0)
+
+but you'd need to detect whether the kernel allows this and skip the
+test on EPERM when it is a userns test.
+
 > 
-> Sorry if I wasn't clear about what better documentation of expectations
-> the text in the commit message is important but is no replacement for
-> documentation.
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> ---
 
-Will do. Since I'm upstreaming the patch separately I will hold off on
-resending because of this. Instead I'll start upstreaming this in
-parallel.
+Sidenote: I really need to rename the test binary to something other
+than idmapped-mounts.c as this tests a lot of generic vfs stuff that has
+nothing to do with them.
 
-Thanks!
+In any case, I pulled and tested this:
+
+Tested-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
