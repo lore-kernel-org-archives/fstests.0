@@ -2,89 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCA7EC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Mar 2022 12:10:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FC90C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Mar 2022 12:54:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235904AbiCaMM1 (ORCPT
+        id S233762AbiCaM4Y (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Mar 2022 08:12:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48856 "EHLO
+        Thu, 31 Mar 2022 08:56:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235892AbiCaMMV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2022 08:12:21 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1494A1E6EB4;
-        Thu, 31 Mar 2022 05:10:35 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A5B0A617A0;
-        Thu, 31 Mar 2022 12:10:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 779C5C340F3;
-        Thu, 31 Mar 2022 12:10:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648728634;
-        bh=63vYKZFhfF6Rn0H9HhtdO0e/OL7FnACVb7bdzaeN0gE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ZgutmsuPVlxE3cohcoQNq8tqmykYhio2ghJZCnOgew75Pka24NJoqYEK3mzU61QAU
-         2jucZwf0kcA/jfKhYcZW+y0dpZxEiHiTd1E/7DL9WmDIk9QZbL60F0WckBDY4rzo/D
-         UROWU0I+3gXUPU5HChhehVajsyHNZPLChb+lwa2gZkLQQJPGx8EK+L1FA0xnV4Dq0o
-         4cQnRDXuv+cfeN4w0H8HogX6LJZEc+n0mS2Saf+r+FUAStSMeG3XVat2VM5wa23xTV
-         TrAIPpUi0ehi+jr0zTDvtWyiA3BIarjWhe5pW5g0V20mjduPMyhzuWof+qQWpGJwnh
-         LwN/OSz4jYY8g==
-Date:   Thu, 31 Mar 2022 14:10:29 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     david@fromorbit.com, djwong@kernel.org,
-        linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v1 1/2] idmapped-mounts: Add mknodat operation in setgid
- test
-Message-ID: <20220331121029.r6lcwbejdd243f5r@wittgenstein>
-References: <1648718902-2319-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <20220331115925.5tausqdavg7xmqyv@wittgenstein>
+        with ESMTP id S232332AbiCaM4X (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2022 08:56:23 -0400
+Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5715516BF95;
+        Thu, 31 Mar 2022 05:54:36 -0700 (PDT)
+Received: by mail-pf1-x42e.google.com with SMTP id f3so20708865pfe.2;
+        Thu, 31 Mar 2022 05:54:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=aoMV8SVyn+aPeWyMiwW1EjR7hxG7FkQIb96AQXZmcwk=;
+        b=EbdT1yJOJEpA1JUFN3k8oObzwmnqHNgkDj1NDl1aApXJPwbUsWD6CS8E8fR2K/NwwT
+         /x5I/DU3/kF2wxoHxWHbbwsfQlRez7zZ3dtccvYZU8I4yJeDe5GmS4LlWO8WJNnPDHxG
+         keS4Nf6q7G2R5YiFe6fmq2RnTfxDPcCyT92jwd5/1Io5kaBFcvoMOzME2AhV+4Dlb2gb
+         wX5Kv1haKSHSRbdsEojQuIPwwwxFtTk+sKgmoBtxgOiYnfcnOWI87WxfTE3Y5zFtxI5t
+         sZcpmGT/NU1Sio00Jer3JJWA8WLvD5o55/zcq6Uki6+qu3K7UjYJuOvpCVLbxOSzqGlm
+         lLcg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=aoMV8SVyn+aPeWyMiwW1EjR7hxG7FkQIb96AQXZmcwk=;
+        b=wmMdtDa4UsLHWG+GyAsn3GKBII318k7kvknUrv1TaDrus9njpVLeNYp5/8fbIVuqoM
+         UhSrmIyyIdpiffBFqBXT6lbMZMDbZb9iJSzOFCbjqQw1kXLjgLlEbtzjsE1TbVmNpfZB
+         bQSV2tTGnO40j0gCltyIJOrnO8FWRoZ3jxhDCrIhefmwG3yc7ENrop23ioIHHNpVHdTb
+         rfK7NXLD/vCATOGt4vDfXBfrtgYJGk9G5QcDoORNLXm9c8f+95Y3T79LMmu6Ws4B/6oe
+         dHQCz9u9YKDqOlSGO2yqyqFzM97Uxm1eYzz5GJg9c/zrZhGRI7yXX03lhWbj4vRxrYc/
+         k4Mg==
+X-Gm-Message-State: AOAM532UqWgVI7+etrtPk+/+D7qCF0bDqVk4Z41wPR3Snn5F1CQRjRwo
+        8Gd/5wwfV+ngr5KYqW0FxqwekwN6Okw=
+X-Google-Smtp-Source: ABdhPJwNuA4rsY6Up/Ixoi+nsdK/+7DxTpDFj4WAdBh6rHEIkEdvGfjw/t8KSVg7aoGWMXMLFeUEnw==
+X-Received: by 2002:a63:4d15:0:b0:37f:f622:fe0f with SMTP id a21-20020a634d15000000b0037ff622fe0fmr10624993pgb.68.1648731275708;
+        Thu, 31 Mar 2022 05:54:35 -0700 (PDT)
+Received: from localhost ([2406:7400:63:7e03:b065:1995:217b:6619])
+        by smtp.gmail.com with ESMTPSA id 22-20020a17090a019600b001c6457e1760sm9780194pjc.21.2022.03.31.05.54.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 31 Mar 2022 05:54:35 -0700 (PDT)
+From:   Ritesh Harjani <ritesh.list@gmail.com>
+To:     fstests <fstests@vger.kernel.org>
+Cc:     linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Ritesh Harjani <ritesh.list@gmail.com>
+Subject: [PATCHv3 0/4] generic: Add some tests around journal replay/recoveryloop
+Date:   Thu, 31 Mar 2022 18:24:19 +0530
+Message-Id: <cover.1648730443.git.ritesh.list@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20220331115925.5tausqdavg7xmqyv@wittgenstein>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 01:59:25PM +0200, Christian Brauner wrote:
-> On Thu, Mar 31, 2022 at 05:28:21PM +0800, Yang Xu wrote:
-> > Since mknodat can create file, we should also check whether strip S_ISGID.
-> > Also add new helper caps_down_fsetid to drop CAP_FSETID because strip S_ISGID
-> > depond on this cap and keep other cap(ie CAP_MKNOD) because create character device
-> > needs it when using mknod.
-> > 
-> > Only test mknod with character device in setgid_create function because the another
-> > two functions will hit EPERM error.
-> 
-> Fwiw, it's not allowed to create devices in userns as that would be a
-> massive attack vector. But it is possible since 5.<some version> to
-> create whiteouts in userns for the sake of overlayfs. So iirc that
-> creating a whiteout is just passing 0 as dev_t:
-> 
-> mknodat(t_dir1_fd, CHRDEV1, S_IFCHR | S_ISGID | 0755, 0)
-> 
-> but you'd need to detect whether the kernel allows this and skip the
-> test on EPERM when it is a userns test.
+Hello,
 
-Oh, iirc Eryu usually prefers if we don't just extend existing tests but
-add new tests so as not to introduce regressions. So instead of adding
-this into the existings tests you _could_ add them as new separate 
+The ext4 fast_commit kernel fix has landed into mainline tree [1].
+In this v3, I have addressed review comments from Darrick.
+Does this looks good to be picked up?
 
-struct t_idmapped_mounts t_setgid[] = {
-};
+I have tested ext4 1k, 4k (w & w/o fast_commit). Also tested other FS with
+default configs (like xfs, btrfs, f2fs). No surprises were seen.
 
-set of tests and add a new command line switch:
+[1]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=bfdc502a4a4c058bf4cbb1df0c297761d528f54d
 
---test-setgid
+-ritesh
 
-and create a new
+Changelogs:
+===========
 
-generic/67*
+v2 => v3
+=========
+1. Addressed review comments from Darrick.
+2. Rebased to latest master.
 
-for it. You can use:
-d17a88e90956 ("generic: test idmapped mount circular mappings")
-as a template for what I mean.
+v1 => v2
+=========
+Sending v2 with tests/ext4/ converted to tests/generic/
+(although I had not received any review comments on v1).
+It seems all of the tests which I had sent in v1 are not ext4 specific anyways.
+So in v2, I have made those into tests/generic/.
+
+Summary
+=========
+These are some of the tests which when tested with ext4 fast_commit feature
+w/o kernel fixes, could cause tests failures and/or KASAN bug (generic/486).
+
+I gave these tests a run with default xfs, btrfs and f2fs configs (along with
+ext4). No surprises observed.
+
+[v2]: https://lore.kernel.org/all/cover.1647342932.git.riteshh@linux.ibm.com/
+[v1]: https://lore.kernel.org/all/cover.1644070604.git.riteshh@linux.ibm.com/
+
+
+Ritesh Harjani (4):
+  generic/468: Add another falloc test entry
+  common/punch: Add block_size argument to _filter_fiemap_**
+  generic/678: Add a new shutdown recovery test
+  generic/679: Add a test to check unwritten extents tracking
+
+ common/punch          |  9 +++---
+ tests/generic/468     |  8 +++++
+ tests/generic/468.out |  2 ++
+ tests/generic/678     | 72 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/678.out |  7 +++++
+ tests/generic/679     | 65 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/679.out |  6 ++++
+ 7 files changed, 165 insertions(+), 4 deletions(-)
+ create mode 100755 tests/generic/678
+ create mode 100644 tests/generic/678.out
+ create mode 100755 tests/generic/679
+ create mode 100644 tests/generic/679.out
+
+--
+2.31.1
+
