@@ -2,109 +2,128 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2D10C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Mar 2022 09:04:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DD75C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Mar 2022 09:29:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233476AbiCaJGU (ORCPT
+        id S234140AbiCaJaq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Mar 2022 05:06:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36612 "EHLO
+        Thu, 31 Mar 2022 05:30:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232196AbiCaJGL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2022 05:06:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCA4039F
-        for <fstests@vger.kernel.org>; Thu, 31 Mar 2022 02:04:22 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S234159AbiCaJag (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Mar 2022 05:30:36 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4390203A63;
+        Thu, 31 Mar 2022 02:28:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1648718888; i=@fujitsu.com;
+        bh=Ws9HhmWwP1sg/MJi353iJBVOr7t8+QgQ8rvucPbJZgE=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=Dj1ROLcc6zW264WS/lCGttVW2wkgzvcUgWeG27Qq7o7TZYZXB86lxhiogVpvEQSH8
+         yp5m0esA8nHQ3WAbt6xRULH1qv3+eTfhwQYR7ptd9K5fo/GjWnxjS2E1jH9Da8tD+J
+         i2eNo7FLBSe/34mwH0ytshQpqEUwnqIf/GXrbEUYSnthr4FU7xhh4rEAs+FKilBL4m
+         PHFuMZeOXDeIdqLWZ4cZca62wWK39ltqnz+JJ4HVA3jsjJSfRjtP/HiEGpfb8b7rKi
+         Ktmew8/0TDLmU0cXQqWBNgufnsYBtLYCfKd6YUPk7PIfBOVPTUuJmDi5SEF23HfSPV
+         uH5DDdGYUkTYg==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrMIsWRWlGSWpSXmKPExsViZ8ORqKtR4pp
+  ksGwyh8Xrw58YLbYcu8docfkJn8Xplr3sFnv2nmRxYPU4tUjCY9OqTjaPz5vkApijWDPzkvIr
+  Elgzfs58zFiwk6Ni6vL7rA2MvexdjJwcQgJbGCVm/MiGsBcwSfzosehi5AKy9zBKrD9+iQUkw
+  SagKfGscwEziC0i4CLxbf9fNhCbWSBFouF8E2MXIweHsICPxIQP1SBhFgFVibkdW5lAbF4BD4
+  krXVdYQWwJAQWJKQ/fg43hFPCU+LZpPTNIqxBQzbRbgRDlghInZz5hgZguIXHwxQtmiFZFiUs
+  d3xgh7AqJWbPamCBsNYmr5zYxT2AUnIWkfRaS9gWMTKsYrZOKMtMzSnITM3N0DQ0MdA0NTXWN
+  TXSNDC30Eqt0E/VSS3XLU4tLdI30EsuL9VKLi/WKK3OTc1L08lJLNjECwz6lWOnWDsYNq37qH
+  WKU5GBSEuV1CnBNEuJLyk+pzEgszogvKs1JLT7EKMPBoSTBW18AlBMsSk1PrUjLzAHGIExago
+  NHSYQ3FCTNW1yQmFucmQ6ROsWoKCXOO7sQKCEAksgozYNrg8X9JUZZKWFeRgYGBiGegtSi3Mw
+  SVPlXjOIcjErCvFeLgKbwZOaVwE1/BbSYCWhx3WNHkMUliQgpqQam/nLuj6dyzmv9nbXl52Ym
+  vduH1R/LyMncj7x4IKT2ofqfvfZvDkUsvhGx8orUsc0xHlHMvAoZlzXFH3R+vhb/T+nj1r2dn
+  5LNehdsTUmtSnl7qkXyPE+yyGnhRZkPX9gUzHRoT8//87vAiTEuQ1Bs8aT8Z6fW9xaci1g/cU
+  LvNrE/7zI99VQW333uz9nn89617aTIp6SL+/zOGr/SmLF+RtwRXq3K9Z8YbvJsWO75LlJi8cS
+  lCzS+3kqereF/a/HenjVPFiTv0YzhLVGdlViZ8lmvT/iD87mn7bN6vpa8CH7hMOFlmZ5Fdqa2
+  xf/rwnyb3p6N4udf8GSqSvfdhVs3559LWaHr6yWwZ+nfk/OPBSuxFGckGmoxFxUnAgCbulbVd
+  gMAAA==
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-32.tower-565.messagelabs.com!1648718887!166249!1
+X-Originating-IP: [62.60.8.97]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.85.5; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 14123 invoked from network); 31 Mar 2022 09:28:08 -0000
+Received: from unknown (HELO n03ukasimr01.n03.fujitsu.local) (62.60.8.97)
+  by server-32.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 31 Mar 2022 09:28:08 -0000
+Received: from n03ukasimr01.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTP id 4E26B1001AE;
+        Thu, 31 Mar 2022 10:28:07 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 78BF961976
-        for <fstests@vger.kernel.org>; Thu, 31 Mar 2022 09:04:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D2274C340F0;
-        Thu, 31 Mar 2022 09:04:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648717461;
-        bh=QYXO3g/0hapkdZLGuOjgNn5qKfcPopkNlM6jbRgyIQE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MxnLs6h9vkXW4td/CJrtM9YPzyrWvPJkcOncfj1riHO0hJwhw2I49og5apIhCQPbH
-         l0mUsol8JPi/UsO+mAHhfh/nZyeqzkJ3u0cE7lfyhvJ2qW4ZvyvBYGk+zU6o8twJV3
-         fwjXehqGgcv4eio2ERauVHE3L28nUOpXW+jmlQ9+TmV7SgyEg9F4nF8yxpUu33bgVM
-         fjRiW+u5gZHF5WfVjNHO+Rndr4AtcG2i/j/MEuuuzksYx9lki33V423DKsU8keM5as
-         K+wBT/L9uJq6ytQhw2kqTvWRWaL3ZjQLFiuGOcXnO/LlQRVZxg7mxplwPdE6jMPDd4
-         CLmZoddv6udKA==
-Date:   Thu, 31 Mar 2022 11:04:18 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Jan Kara <jack@suse.cz>
-Cc:     Christian Brauner <christian.brauner@ubuntu.com>,
-        fstests@vger.kernel.org
-Subject: Re: generic/633 failing without CONFIG_USER_NS
-Message-ID: <20220331090418.nr3ykkn2hethgzfy@wittgenstein>
-References: <20220331082846.b4vccc3rb7lmojxs@quack3.lan>
- <20220331090051.jwrttmkol6wlv272@wittgenstein>
+        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTPS id BC0301001B1;
+        Thu, 31 Mar 2022 10:28:06 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Thu, 31 Mar 2022 10:28:00 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <david@fromorbit.com>, <brauner@kernel.org>, <djwong@kernel.org>
+CC:     <linux-fsdevel@vger.kernel.org>, <fstests@vger.kernel.org>,
+        Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v1 2/2] idmapped-mounts: Add umask before test setgid_create
+Date:   Thu, 31 Mar 2022 17:28:22 +0800
+Message-ID: <1648718902-2319-2-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <1648718902-2319-1-git-send-email-xuyang2018.jy@fujitsu.com>
+References: <1648718902-2319-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20220331090051.jwrttmkol6wlv272@wittgenstein>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 11:00:51AM +0200, Christian Brauner wrote:
-> On Thu, Mar 31, 2022 at 10:28:46AM +0200, Jan Kara wrote:
-> > Hello,
-> > 
-> > I have noticed that when I build a kernel without CONFIG_USER_NS,
-> > generic/633 is failing. This is because despite it properly detects
-> > idmapped mounts are not supported, it still tries to execute some tests
-> > (such as fscaps test) and they rely on bits of user namespace support (e.g.
-> > /proc/<pid>/ns/user existing). I could hack some additional support check
-> > into the test but then I figured I'm not sure whether all the tests are OK
-> > to skip without CONFIG_USER_NS or whether there are not some more subtle
-> > dependencies... So I'm asking here :).
-> 
-> Hey Jan,
-> 
-> Thank your for detecting and reporting this. So the only ones we can
-> reasonably run are the ones that don't require idmapped mount support
-> and of this the actual subset that should be runnable without userns is:
-> 
-> { hardlink_crossing_mounts,					false,	"cross mount hardlink",										},
-> { io_uring,							false,	"io_uring",											},
-> { protected_symlinks,						false,	"following protected symlinks on regular mounts",						},
-> { rename_crossing_mounts,					false,	"cross mount rename",										},
-> { setattr_truncate,						false,	"setattr truncate",										},
-> { setgid_create,						false,	"create operations in directories with setgid bit set",						},
-> { setid_binaries,						false,	"setid binaries on regular mounts",								},
-> { sticky_bit_unlink,						false,	"sticky bit unlink operations on regular mounts",						},
-> { sticky_bit_rename,						false,	"sticky bit rename operations on regular mounts",						},
-> { symlink_regular_mounts,					false,	"symlink from regular mounts",									},
-> 
-> I think currently we're doing:
-> 
-> struct t_idmapped_mounts {
-> 	int (*test)(void);
-> 	bool require_fs_allow_idmap;
-> 	const char *description;
-> };
-> 
-> which defines
-> bool require_fs_allow_idmap
-> which gets set for each test and then we can skip or execute tests
-> depending on whether or not they require that.
-> 
-> One possible way to deal with the userns thing in there might be to make
-> this a flags argument:
-> 
-> unsigned int required_flags;
-> 
-> then
-> 
-> #define T_REQUIRE_IDMAPPED_MOUNTS (0 << 1)
-> #define T_REQUIRE_USERNS (0 << 2)
+Since stipping S_SIGID should check S_IXGRP, so umask it to check whether
+works well.
 
-Well ok, usually when I'm not temporarily insane I tend to use:
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+If we enable acl on parent directory, then umask is useless, maybe we
+also add setfacl on parent directory because we may change the order
+about strip S_ISGID and posix_acl setup. Any idea?
 
-#define T_REQUIRE_IDMAPPED_MOUNTS (1U << 0)
-#define T_REQUIRE_USERNS (1U << 1)
+ src/idmapped-mounts/idmapped-mounts.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Sorry about that.
+diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+index 1e2f3904..30292426 100644
+--- a/src/idmapped-mounts/idmapped-mounts.c
++++ b/src/idmapped-mounts/idmapped-mounts.c
+@@ -7843,6 +7843,7 @@ static int setgid_create(void)
+ 	int file1_fd = -EBADF;
+ 	pid_t pid;
+ 
++	umask(S_IXGRP);
+ 	if (!caps_supported())
+ 		return 0;
+ 
+@@ -8040,6 +8041,8 @@ static int setgid_create_idmapped(void)
+ 	};
+ 	pid_t pid;
+ 
++	umask(S_IXGRP);
++
+ 	if (!caps_supported())
+ 		return 0;
+ 
+@@ -8166,6 +8169,7 @@ static int setgid_create_idmapped_in_userns(void)
+ 	};
+ 	pid_t pid;
+ 
++	umask(S_IXGRP);
+ 	if (!caps_supported())
+ 		return 0;
+ 
+-- 
+2.27.0
+
