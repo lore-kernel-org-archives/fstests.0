@@ -2,102 +2,111 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D555CC433FE
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Apr 2022 17:04:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBFEBC433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Apr 2022 18:12:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348568AbiDARGo (ORCPT
+        id S240995AbiDASOJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Apr 2022 13:06:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35944 "EHLO
+        Fri, 1 Apr 2022 14:14:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237726AbiDARGo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 13:06:44 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 922F31760CE;
-        Fri,  1 Apr 2022 10:04:54 -0700 (PDT)
+        with ESMTP id S1345818AbiDASOJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 14:14:09 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B4E315D052;
+        Fri,  1 Apr 2022 11:12:18 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 3EA30B82467;
-        Fri,  1 Apr 2022 17:04:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC926C340EE;
-        Fri,  1 Apr 2022 17:04:51 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id E0EF2B824FA;
+        Fri,  1 Apr 2022 18:12:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68DE5C340F3;
+        Fri,  1 Apr 2022 18:12:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648832691;
-        bh=0+VAgkyZsAfzerjupYvsh5/ynaJVm494B61k58jmz/Q=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=H0aa9JLyIMcPmWEX8M3RdAdwtx1EtHvdYP5FwXmlHc7qmBG2732B7zNx5TIc6EtgI
-         Pc7qW8MmB4Mhk3gP+8sfBEsxDsQmuoET4D5fCRP+de0t6tpa1gA4DCrT+gcF+0MkQ0
-         ReaAEgeidkVipSUD4YdheFgmWHiFzZABamul4zUGgPvwiMa5HOCYIAtMcMN0ZEElcO
-         LzXCTY6URMe0DM4SgOTEIgFEhRboseb483v9aP+Q5YWuaDKabwBEIOQtUSJDTBZPNU
-         Y0omddpE2mOt9xdAjAQIeSkAI4Yg5//W0vwRbfFmfjAFztzpMexWEFrS/NSynZ3Qbz
-         Ni4IzIn8xpySw==
-Date:   Fri, 1 Apr 2022 10:04:51 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Ritesh Harjani <ritesh.list@gmail.com>,
-        fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCHv3 0/4] generic: Add some tests around journal
- replay/recoveryloop
-Message-ID: <20220401170451.GB27665@magnolia>
-References: <cover.1648730443.git.ritesh.list@gmail.com>
- <20220331145906.2onnohv2bbg3ye6j@zlang-mailbox>
- <20220331161911.7d5dlqfwm2kngnjk@riteshh-domain>
- <20220331165335.mzx3gfc3uqeeg3sz@riteshh-domain>
- <20220401053047.ic4cbsembj6eoibm@zlang-mailbox>
+        s=k20201202; t=1648836735;
+        bh=grIjrsg6ZaNJWlQOiis/6gjq6uV+6k53H9SWQ4iaHnw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=AJaUXeZat8fgS1zapL9Zl3sD5SO/nfEw5iFuKZEub3pcMaxR2uauMzmcpxj0pD/4j
+         poT20TXqfYrBo0ozzCHAFWTZ4IESFrJ8EMht5fIvReT+j/9hcIUYkP6k1h3xgyVNLY
+         iF7T0OgWkUej0nU452Ser4Usa1yXA4THW6bDGyFFozzqGxshwVHBDrKWzXideORlIy
+         ucXZC7iyBTLDFeFZxP6ZdnAd2UcL18phPtiEyIBH4kg3xB4JZgK+TClB4fVTa/cAeg
+         X8Tx8hHkCWPku6KWTTOJSs5J9ZdiqbwuUjy4w2suKcFzgd5vdVhBghgnPK+yLbHscK
+         tFMz0A3wecHCg==
+Date:   Fri, 1 Apr 2022 18:12:14 +0000
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
+Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH] common/encrypt: allow the use of 'fscrypt:' as key prefix
+Message-ID: <YkdAfpN/YzAm18pl@gmail.com>
+References: <20220401104553.32036-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20220401053047.ic4cbsembj6eoibm@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220401104553.32036-1-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 01, 2022 at 01:30:47PM +0800, Zorro Lang wrote:
-> On Thu, Mar 31, 2022 at 10:23:35PM +0530, Ritesh Harjani wrote:
-> > On 22/03/31 09:49PM, Ritesh Harjani wrote:
-> > > On 22/03/31 10:59PM, Zorro Lang wrote:
-> > > > On Thu, Mar 31, 2022 at 06:24:19PM +0530, Ritesh Harjani wrote:
-> > > > > Hello,
-> > > >
-> > > > Hi,
-> > > >
-> > > > Your below patches looks like not pure text format, they might contain
-> > > > binary character or some special characers, looks like the "^M" [1].
-> > 
-> > Sorry to bother you. But here is what I tried.
-> > 1. Download the mbx file using b4 am. I didn't see any such character ("^M") in
-> >    the patches.
-> > 2. Saved the patch using mutt. Again didn't see such character while doing
-> > 	cat -A /patch/to/patch
-> > 3. Downloaded the mail using eml format from webmail. Here I do see this
-> >    character appended. But that happens not just for my patch, but for all
-> >    other patches too.
-> > 
-> > So could this be related to the way you are downloading these patches.
-> > Please let me know, if I need to resend these patches again? Because, I don't
-> > see this behavior at my end. But I would happy to correct it, if that's not the
-> > case.
+On Fri, Apr 01, 2022 at 11:45:53AM +0100, Luís Henriques wrote:
+> fscrypt keys have used the $FSTYP as prefix.  However this format is being
+> deprecated -- newer kernels already allow the usage of the generic
+> 'fscrypt:' prefix for ext4 and f2fs.  This patch allows the usage of this
+> new prefix for testing filesystems that have never supported the old
+> format, but keeping the $FSTYP prefix for filesystems that support it, so
+> that old kernels can be tested.
 > 
-> Hmm... weird, When I tried to open your patch emails, my mutt show me:
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
+>  common/encrypt | 38 +++++++++++++++++++++++++++-----------
+>  1 file changed, 27 insertions(+), 11 deletions(-)
 > 
->   [-- application/octet-stream is unsupported (use 'v' to view this part) --]
-> 
-> Then I have to input 'v' to see the patch content. I'm not sure what's wrong,
-> this's the 2nd time I hit this "octet-stream is unsupported" issue yesterday.
-> 
-> Hi Darrick, or any other forks, can you open above 4 patches normally? If that's
-> only my personal issue, I'll check my side.
+> diff --git a/common/encrypt b/common/encrypt
+> index f90c4ef05a3f..897c97e0f6fa 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -250,6 +250,27 @@ _num_to_hex()
+>  	fi
+>  }
+>  
+> +# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key descriptor
+> +# hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6 and later) also allow
+> +# the common key prefix "fscrypt:" in addition to their filesystem-specific key
+> +# prefix ("ext4:", "f2fs:").  It would be nice to use the common key prefix, but
+> +# for now use the filesystem- specific prefix for these 2 filesystems to make it
+> +# possible to test older kernels, and the "fscrypt" prefix for anything else.
+> +_get_fs_keyprefix()
+> +{
+> +	local prefix=""
+> +
+> +	case $FSTYP in
+> +	ext4|f2fs|ubifs)
+> +		prefix="$FSTYP"
+> +		;;
+> +	*)
+> +		prefix="fscrypt"
+> +		;;
+> +	esac
+> +	echo $prefix
+> +}
 
-There's no application/octet anywhere in the email that I received.
-Has your IT department gone rogue^W^Wincreased value-add again?
+ubifs can use the "fscrypt" prefix, since there was never a kernel that
+supported ubifs encryption but not the "fscrypt" prefix.  Also, the "prefix"
+local variable is unnecessary.  So:
 
---D
+	case $FSTYP in
+	ext4|f2fs)
+		echo $FSTYP
+		;;
+	*)
+		echo fscrypt
+		;;
+	esac
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > -ritesh
-> > 
-> 
+Otherwise, this patch looks fine if we want to keep supporting testing kernels
+older than 4.8.  However, since 4.4 is no longer a supported LTS kernel, perhaps
+this is no longer needed and we could just always use "fscrypt"?  I'm not sure
+what xfstests's policy on old kernels is.
+
+- Eric
