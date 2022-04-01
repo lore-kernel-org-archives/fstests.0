@@ -2,54 +2,55 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBFEBC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Apr 2022 18:12:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72A06C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Apr 2022 20:47:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240995AbiDASOJ (ORCPT
+        id S1352604AbiDAUs5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Apr 2022 14:14:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39290 "EHLO
+        Fri, 1 Apr 2022 16:48:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49028 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345818AbiDASOJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 14:14:09 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B4E315D052;
-        Fri,  1 Apr 2022 11:12:18 -0700 (PDT)
+        with ESMTP id S229891AbiDAUs5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 16:48:57 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1431B1AA481;
+        Fri,  1 Apr 2022 13:47:06 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E0EF2B824FA;
-        Fri,  1 Apr 2022 18:12:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68DE5C340F3;
-        Fri,  1 Apr 2022 18:12:15 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6C10E619F4;
+        Fri,  1 Apr 2022 20:47:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55574C340EC;
+        Fri,  1 Apr 2022 20:47:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648836735;
-        bh=grIjrsg6ZaNJWlQOiis/6gjq6uV+6k53H9SWQ4iaHnw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=AJaUXeZat8fgS1zapL9Zl3sD5SO/nfEw5iFuKZEub3pcMaxR2uauMzmcpxj0pD/4j
-         poT20TXqfYrBo0ozzCHAFWTZ4IESFrJ8EMht5fIvReT+j/9hcIUYkP6k1h3xgyVNLY
-         iF7T0OgWkUej0nU452Ser4Usa1yXA4THW6bDGyFFozzqGxshwVHBDrKWzXideORlIy
-         ucXZC7iyBTLDFeFZxP6ZdnAd2UcL18phPtiEyIBH4kg3xB4JZgK+TClB4fVTa/cAeg
-         X8Tx8hHkCWPku6KWTTOJSs5J9ZdiqbwuUjy4w2suKcFzgd5vdVhBghgnPK+yLbHscK
-         tFMz0A3wecHCg==
-Date:   Fri, 1 Apr 2022 18:12:14 +0000
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH] common/encrypt: allow the use of 'fscrypt:' as key prefix
-Message-ID: <YkdAfpN/YzAm18pl@gmail.com>
-References: <20220401104553.32036-1-lhenriques@suse.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
+        s=k20201202; t=1648846025;
+        bh=sPjBLIoOm312lKnub3ir9KU7wXeyd1MqZRKyHSlIOiw=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=u7ppwrARKkhJ61I5YHqz2LpqUFCEnw+hj+Zy5we8kt54OYHaPdgSH/JA5UEDIfZNU
+         RlSeNpbpDRGGXhv52PgbJ6erfJbfUPCp+XsOwlFI4n/wKw+LcRTN5+MPxvFFtb3sAc
+         sgLwLFmzNow0anxzUgGbb5UNrl8nFyUQzB3guJMQd0tUVPpvJhBTb8Pm8NI1/i+Wfk
+         W6sjZxvGVlKeuz4t2w/UZPX2dldXqy/J6OnkaY2ilVkBG0bpm8HImfV2y0TCxpz+j5
+         sAouAG5cA+biFgVuTCN9Wwr4jPHDxrxoRXJZEZVhil4GYOkqiV2p23cGa671HMC2nE
+         9wGq5q8/KHb2A==
+Message-ID: <91184ff91ad2a5dc4e537294cade1409bbb8ad39.camel@kernel.org>
+Subject: Re: [PATCH] common/encrypt: allow the use of 'fscrypt:' as key
+ prefix
+From:   Jeff Layton <jlayton@kernel.org>
+To:     =?ISO-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org
+Date:   Fri, 01 Apr 2022 16:47:03 -0400
 In-Reply-To: <20220401104553.32036-1-lhenriques@suse.de>
+References: <20220401104553.32036-1-lhenriques@suse.de>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.42.4 (3.42.4-1.fc35) 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 01, 2022 at 11:45:53AM +0100, Luís Henriques wrote:
+On Fri, 2022-04-01 at 11:45 +0100, Luís Henriques wrote:
 > fscrypt keys have used the $FSTYP as prefix.  However this format is being
 > deprecated -- newer kernels already allow the usage of the generic
 > 'fscrypt:' prefix for ext4 and f2fs.  This patch allows the usage of this
@@ -90,23 +91,56 @@ On Fri, Apr 01, 2022 at 11:45:53AM +0100, Luís Henriques wrote:
 > +	esac
 > +	echo $prefix
 > +}
+> +
+>  # Add the specified raw encryption key to the session keyring, using the
+>  # specified key descriptor.
+>  _add_session_encryption_key()
+> @@ -268,18 +289,11 @@ _add_session_encryption_key()
+>  	#	};
+>  	#
+>  	# The kernel ignores 'mode' but requires that 'size' be 64.
+> -	#
+> -	# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key
+> -	# descriptor hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6
+> -	# and later) also allow the common key prefix "fscrypt:" in addition to
+> -	# their filesystem-specific key prefix ("ext4:", "f2fs:").  It would be
+> -	# nice to use the common key prefix, but for now use the filesystem-
+> -	# specific prefix to make it possible to test older kernels...
+> -	#
+>  	local mode=$(_num_to_hex 0 4)
+>  	local size=$(_num_to_hex 64 4)
+> +	local prefix=$(_get_fs_keyprefix)
+>  	echo -n -e "${mode}${raw}${size}" |
+> -		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
+> +		$KEYCTL_PROG padd logon $prefix:$keydesc @s >>$seqres.full
+>  }
+>  
+>  #
+> @@ -302,7 +316,8 @@ _generate_session_encryption_key()
+>  _unlink_session_encryption_key()
+>  {
+>  	local keydesc=$1
+> -	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+> +	local prefix=$(_get_fs_keyprefix)
+> +	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
+>  	$KEYCTL_PROG unlink $keyid >>$seqres.full
+>  }
+>  
+> @@ -310,7 +325,8 @@ _unlink_session_encryption_key()
+>  _revoke_session_encryption_key()
+>  {
+>  	local keydesc=$1
+> -	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+> +	local prefix=$(_get_fs_keyprefix)
+> +	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
+>  	$KEYCTL_PROG revoke $keyid >>$seqres.full
+>  }
+>  
 
-ubifs can use the "fscrypt" prefix, since there was never a kernel that
-supported ubifs encryption but not the "fscrypt" prefix.  Also, the "prefix"
-local variable is unnecessary.  So:
+For the record, without this patch in place, generic/397 hangs when
+tested against the current ceph+fscrypt pile. With this, the test
+passes.
 
-	case $FSTYP in
-	ext4|f2fs)
-		echo $FSTYP
-		;;
-	*)
-		echo fscrypt
-		;;
-	esac
-
-Otherwise, this patch looks fine if we want to keep supporting testing kernels
-older than 4.8.  However, since 4.4 is no longer a supported LTS kernel, perhaps
-this is no longer needed and we could just always use "fscrypt"?  I'm not sure
-what xfstests's policy on old kernels is.
-
-- Eric
+Cheers,
+-- 
+Jeff Layton <jlayton@kernel.org>
