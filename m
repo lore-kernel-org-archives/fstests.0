@@ -2,145 +2,156 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72A06C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Apr 2022 20:47:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72920C433FE
+	for <linux-fstests@archiver.kernel.org>; Sat,  2 Apr 2022 00:57:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352604AbiDAUs5 (ORCPT
+        id S230101AbiDBA7P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Apr 2022 16:48:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49028 "EHLO
+        Fri, 1 Apr 2022 20:59:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59064 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229891AbiDAUs5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 16:48:57 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1431B1AA481;
-        Fri,  1 Apr 2022 13:47:06 -0700 (PDT)
+        with ESMTP id S229560AbiDBA7O (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 20:59:14 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B10D200967;
+        Fri,  1 Apr 2022 17:57:24 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6C10E619F4;
-        Fri,  1 Apr 2022 20:47:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55574C340EC;
-        Fri,  1 Apr 2022 20:47:05 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id F2ED260C42;
+        Sat,  2 Apr 2022 00:57:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4FCB5C3410F;
+        Sat,  2 Apr 2022 00:57:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648846025;
-        bh=sPjBLIoOm312lKnub3ir9KU7wXeyd1MqZRKyHSlIOiw=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=u7ppwrARKkhJ61I5YHqz2LpqUFCEnw+hj+Zy5we8kt54OYHaPdgSH/JA5UEDIfZNU
-         RlSeNpbpDRGGXhv52PgbJ6erfJbfUPCp+XsOwlFI4n/wKw+LcRTN5+MPxvFFtb3sAc
-         sgLwLFmzNow0anxzUgGbb5UNrl8nFyUQzB3guJMQd0tUVPpvJhBTb8Pm8NI1/i+Wfk
-         W6sjZxvGVlKeuz4t2w/UZPX2dldXqy/J6OnkaY2ilVkBG0bpm8HImfV2y0TCxpz+j5
-         sAouAG5cA+biFgVuTCN9Wwr4jPHDxrxoRXJZEZVhil4GYOkqiV2p23cGa671HMC2nE
-         9wGq5q8/KHb2A==
-Message-ID: <91184ff91ad2a5dc4e537294cade1409bbb8ad39.camel@kernel.org>
-Subject: Re: [PATCH] common/encrypt: allow the use of 'fscrypt:' as key
- prefix
-From:   Jeff Layton <jlayton@kernel.org>
-To:     =?ISO-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>,
-        Eric Biggers <ebiggers@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org
-Date:   Fri, 01 Apr 2022 16:47:03 -0400
-In-Reply-To: <20220401104553.32036-1-lhenriques@suse.de>
-References: <20220401104553.32036-1-lhenriques@suse.de>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-1.fc35) 
+        s=k20201202; t=1648861042;
+        bh=IFDwE594DCzQsjq0x5FHSp+rW4qKz3sHzkIG9fgrfmE=;
+        h=Date:From:To:Cc:Subject:From;
+        b=WtWvxvjafEr07RE05fbUzMD/naoKD8oMvA61OaHALbc7kwo+VzC9L1Q/eq8cKIsQQ
+         jVb7f8Yfl4RQyqqEf4neU43Kt5IhSv40x5EsOKjuykOyh8x5nGGb/MC8QHrOp35bzI
+         BYsUp/9beLuYdAsF1Y5y7TxW9BD3XArifUmUC18S3cHW7KSyqqqFHrGQ+ujEII9EUW
+         xgM8BlYRn5X4NGrub7RLxaUCK8cI7fS3K6Of8MrVJTFHnObWISL9ghgqTUzsVPbB+H
+         tPNO6U3pUDSRZ95s/jlS+kkfjVUCETp5s/VmX1j62o+iNWaZYRpiwjZ+WViMrjSp8I
+         V6Y1axZFWigAQ==
+Date:   Fri, 1 Apr 2022 17:57:21 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org,
+        david@fromorbit.com, linux-kernel@vger.kernel.org,
+        sandeen@sandeen.net, hch@lst.de, fstests <fstests@vger.kernel.org>
+Subject: [GIT PULL] xfs: bug fixes for 5.18-rc1
+Message-ID: <20220402005721.GO27690@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, 2022-04-01 at 11:45 +0100, Luís Henriques wrote:
-> fscrypt keys have used the $FSTYP as prefix.  However this format is being
-> deprecated -- newer kernels already allow the usage of the generic
-> 'fscrypt:' prefix for ext4 and f2fs.  This patch allows the usage of this
-> new prefix for testing filesystems that have never supported the old
-> format, but keeping the $FSTYP prefix for filesystems that support it, so
-> that old kernels can be tested.
-> 
-> Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> ---
->  common/encrypt | 38 +++++++++++++++++++++++++++-----------
->  1 file changed, 27 insertions(+), 11 deletions(-)
-> 
-> diff --git a/common/encrypt b/common/encrypt
-> index f90c4ef05a3f..897c97e0f6fa 100644
-> --- a/common/encrypt
-> +++ b/common/encrypt
-> @@ -250,6 +250,27 @@ _num_to_hex()
->  	fi
->  }
->  
-> +# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key descriptor
-> +# hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6 and later) also allow
-> +# the common key prefix "fscrypt:" in addition to their filesystem-specific key
-> +# prefix ("ext4:", "f2fs:").  It would be nice to use the common key prefix, but
-> +# for now use the filesystem- specific prefix for these 2 filesystems to make it
-> +# possible to test older kernels, and the "fscrypt" prefix for anything else.
-> +_get_fs_keyprefix()
-> +{
-> +	local prefix=""
-> +
-> +	case $FSTYP in
-> +	ext4|f2fs|ubifs)
-> +		prefix="$FSTYP"
-> +		;;
-> +	*)
-> +		prefix="fscrypt"
-> +		;;
-> +	esac
-> +	echo $prefix
-> +}
-> +
->  # Add the specified raw encryption key to the session keyring, using the
->  # specified key descriptor.
->  _add_session_encryption_key()
-> @@ -268,18 +289,11 @@ _add_session_encryption_key()
->  	#	};
->  	#
->  	# The kernel ignores 'mode' but requires that 'size' be 64.
-> -	#
-> -	# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key
-> -	# descriptor hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6
-> -	# and later) also allow the common key prefix "fscrypt:" in addition to
-> -	# their filesystem-specific key prefix ("ext4:", "f2fs:").  It would be
-> -	# nice to use the common key prefix, but for now use the filesystem-
-> -	# specific prefix to make it possible to test older kernels...
-> -	#
->  	local mode=$(_num_to_hex 0 4)
->  	local size=$(_num_to_hex 64 4)
-> +	local prefix=$(_get_fs_keyprefix)
->  	echo -n -e "${mode}${raw}${size}" |
-> -		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
-> +		$KEYCTL_PROG padd logon $prefix:$keydesc @s >>$seqres.full
->  }
->  
->  #
-> @@ -302,7 +316,8 @@ _generate_session_encryption_key()
->  _unlink_session_encryption_key()
->  {
->  	local keydesc=$1
-> -	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-> +	local prefix=$(_get_fs_keyprefix)
-> +	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
->  	$KEYCTL_PROG unlink $keyid >>$seqres.full
->  }
->  
-> @@ -310,7 +325,8 @@ _unlink_session_encryption_key()
->  _revoke_session_encryption_key()
->  {
->  	local keydesc=$1
-> -	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-> +	local prefix=$(_get_fs_keyprefix)
-> +	local keyid=$($KEYCTL_PROG search @s logon $prefix:$keydesc)
->  	$KEYCTL_PROG revoke $keyid >>$seqres.full
->  }
->  
+Hi Linus,
 
-For the record, without this patch in place, generic/397 hangs when
-tested against the current ceph+fscrypt pile. With this, the test
-passes.
+Please pull this second branch containing more bug fixes for XFS for
+5.18-rc1.  This branch fixes multiple problems in the reserve pool
+sizing functions: an incorrect free space calculation, a pointless
+infinite loop, and even more braindamage that could result in the pool
+being overfilled.  The pile of patches from Dave fix myriad races and
+UAF bugs in the log recovery code that much to our mutual surprise
+nobody's tripped over.  Dave also fixed a performance optimization that
+had turned into a regression.
 
-Cheers,
--- 
-Jeff Layton <jlayton@kernel.org>
+Dave Chinner is taking over as XFS maintainer starting Sunday and
+lasting until 5.19-rc1 is tagged so that I can focus on starting a
+massive design review for the (feature complete after five years) online
+repair feature.  From then on, he and I will be moving XFS to a
+co-maintainership model by trading duties every other release.
+
+NOTE: I hope very strongly that the other pieces of the (X)FS ecosystem
+(fstests and xfsprogs) will make similar changes to spread their
+maintenance load.
+
+As usual, I did a test-merge with upstream master as of a few minutes
+ago.  Stephen Rothwell reported a merge conflict[1] with the "drop async
+cache flushes" patch, which I think you can resolve by deleting
+xfs_flush_bdev_async_endio and xfs_flush_bdev_async no matter what their
+contents.  At least, it worked for me.
+
+Please let me know if you encounter any problems.  At worst, we can
+rebase the branch against -rc1 and resubmit.
+
+--D
+
+[1] https://lore.kernel.org/linux-xfs/20220331090047.7c6f2e1e@canb.auug.org.au/T/#u
+
+The following changes since commit 01728b44ef1b714756607be0210fbcf60c78efce:
+
+  xfs: xfs_is_shutdown vs xlog_is_shutdown cage fight (2022-03-20 08:59:50 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git tags/xfs-5.18-merge-4
+
+for you to fetch changes up to 919edbadebe17a67193533f531c2920c03e40fa4:
+
+  xfs: drop async cache flushes from CIL commits. (2022-03-29 18:22:02 -0700)
+
+----------------------------------------------------------------
+Bug fixes for 5.18:
+- Fix an incorrect free space calculation in xfs_reserve_blocks that
+  could lead to a request for free blocks that will never succeed.
+- Fix a hang in xfs_reserve_blocks caused by an infinite loop and the
+  incorrect free space calculation.
+- Fix yet a third problem in xfs_reserve_blocks where multiple racing
+  threads can overfill the reserve pool.
+- Fix an accounting error that lead to us reporting reserved space as
+  "available".
+- Fix a race condition during abnormal fs shutdown that could cause UAF
+  problems when memory reclaim and log shutdown try to clean up inodes.
+- Fix a bug where log shutdown can race with unmount to tear down the
+  log, thereby causing UAF errors.
+- Disentangle log and filesystem shutdown to reduce confusion.
+- Fix some confusion in xfs_trans_commit such that a race between
+  transaction commit and filesystem shutdown can cause unlogged dirty
+  inode metadata to be committed, thereby corrupting the filesystem.
+- Remove a performance optimization in the log as it was discovered that
+  certain storage hardware handle async log flushes so poorly as to
+  cause serious performance regressions.  Recent restructuring of other
+  parts of the logging code mean that no performance benefit is seen on
+  hardware that handle it well.
+
+----------------------------------------------------------------
+Darrick J. Wong (6):
+      xfs: document the XFS_ALLOC_AGFL_RESERVE constant
+      xfs: don't include bnobt blocks when reserving free block pool
+      xfs: remove infinite loop when reserving free block pool
+      xfs: always succeed at setting the reserve pool size
+      xfs: fix overfilling of reserve pool
+      xfs: don't report reserved bnobt space as available
+
+Dave Chinner (8):
+      xfs: aborting inodes on shutdown may need buffer lock
+      xfs: shutdown in intent recovery has non-intent items in the AIL
+      xfs: run callbacks before waking waiters in xlog_state_shutdown_callbacks
+      xfs: log shutdown triggers should only shut down the log
+      xfs: xfs_do_force_shutdown needs to block racing shutdowns
+      xfs: xfs_trans_commit() path must check for log shutdown
+      xfs: shutdown during log recovery needs to mark the log shutdown
+      xfs: drop async cache flushes from CIL commits.
+
+ fs/xfs/libxfs/xfs_alloc.c |  28 ++++++--
+ fs/xfs/libxfs/xfs_alloc.h |   1 -
+ fs/xfs/xfs_bio_io.c       |  35 ----------
+ fs/xfs/xfs_fsops.c        |  60 ++++++++---------
+ fs/xfs/xfs_icache.c       |   2 +-
+ fs/xfs/xfs_inode.c        |   2 +-
+ fs/xfs/xfs_inode_item.c   | 164 +++++++++++++++++++++++++++++++++++++---------
+ fs/xfs/xfs_inode_item.h   |   1 +
+ fs/xfs/xfs_linux.h        |   2 -
+ fs/xfs/xfs_log.c          | 109 ++++++++++++++++--------------
+ fs/xfs/xfs_log_cil.c      |  46 +++++--------
+ fs/xfs/xfs_log_priv.h     |  14 +++-
+ fs/xfs/xfs_log_recover.c  |  56 ++++++----------
+ fs/xfs/xfs_mount.c        |   3 +-
+ fs/xfs/xfs_mount.h        |  15 +++++
+ fs/xfs/xfs_super.c        |   3 +-
+ fs/xfs/xfs_trans.c        |  48 +++++++++-----
+ fs/xfs/xfs_trans_ail.c    |   8 +--
+ 18 files changed, 348 insertions(+), 249 deletions(-)
