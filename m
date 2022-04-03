@@ -2,141 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1840FC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Apr 2022 08:19:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6091C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Apr 2022 23:28:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354759AbiDCIVt (ORCPT
+        id S1376661AbiDCXaX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Apr 2022 04:21:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33686 "EHLO
+        Sun, 3 Apr 2022 19:30:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236636AbiDCIVt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Apr 2022 04:21:49 -0400
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2913329CA1;
-        Sun,  3 Apr 2022 01:19:56 -0700 (PDT)
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 2337dVhh022873;
-        Sun, 3 Apr 2022 08:19:56 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=pp1; bh=n8Q7DA80igswd9mKAp6vBJFB4q5UOuHLBoqeTfO1Ctk=;
- b=gDyF5rQ2ib8eNg8fH9ZoGZuEfkquZb3vVu2VuQv99Dg/JPJNoNTSyjAjd/ZOiiiZW3PM
- 4yhjKbGmGAXznBJOm9N2p2F63c7ZYOZI44/buCKFesySB6rdrYXW/vEM49b7jBHpNj6a
- cd1QzX8lGPtJaMiFp4ED1b44WgqUUM0Yx93UCrhtAXgYizrOM0fdOX12gHFulbHHXmD3
- hbB7wtUhBA6eqzHi83LJJilT1MTWGsS+cShQliWoVJ+D9/7pfXowg+rR37leKfjMWZJC
- +9D0n6leGi+AfQmrC+KpiT/TWwhzhGCVL7CaY2CxDl4avCmCkB+pQfcLEc2nHnyWYuD2 vg== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3f6yycwsha-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 03 Apr 2022 08:19:55 +0000
-Received: from m0098410.ppops.net (m0098410.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 2338FKq6022242;
-        Sun, 3 Apr 2022 08:19:55 GMT
-Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3f6yycwsgu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 03 Apr 2022 08:19:55 +0000
-Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
-        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 2338Iu8Y032137;
-        Sun, 3 Apr 2022 08:19:53 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma06ams.nl.ibm.com with ESMTP id 3f6drhhpem-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 03 Apr 2022 08:19:52 +0000
-Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 2338Joar34603374
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 3 Apr 2022 08:19:50 GMT
-Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 6BD65A4053;
-        Sun,  3 Apr 2022 08:19:50 +0000 (GMT)
-Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 46C4CA404D;
-        Sun,  3 Apr 2022 08:19:48 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.26.20])
-        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Sun,  3 Apr 2022 08:19:47 +0000 (GMT)
-Date:   Sun, 3 Apr 2022 13:49:35 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+        with ESMTP id S1376657AbiDCXaV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Apr 2022 19:30:21 -0400
+Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B5C81766A;
+        Sun,  3 Apr 2022 16:28:25 -0700 (PDT)
+Received: from dread.disaster.area (pa49-180-43-123.pa.nsw.optusnet.com.au [49.180.43.123])
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 7775210E553B;
+        Mon,  4 Apr 2022 09:28:24 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nb9dv-00DRzz-77; Mon, 04 Apr 2022 09:28:23 +1000
+Date:   Mon, 4 Apr 2022 09:28:23 +1000
+From:   Dave Chinner <david@fromorbit.com>
 To:     Ritesh Harjani <ritesh.list@gmail.com>
-Cc:     fstests@vger.kernel.org, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <YklYl/Nea05Mjz32@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
-References: <20220401055713.634842-1-ojaswin@linux.ibm.com>
- <20220401095436.oxdq2duhuudx2c4r@riteshh-domain>
+Cc:     fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: Re: [PATCHv3 1/4] generic/468: Add another falloc test entry
+Message-ID: <20220403232823.GS1609613@dread.disaster.area>
+References: <cover.1648730443.git.ritesh.list@gmail.com>
+ <75f4c780e8402a8f993cb987e85a31e4895f13de.1648730443.git.ritesh.list@gmail.com>
+MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220401095436.oxdq2duhuudx2c4r@riteshh-domain>
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: d_z1ElZTzukMh5DY99dB0AqSXB1ZUb8z
-X-Proofpoint-GUID: 26IUSAXUqtZrLwa6Lo3HzGuf0ucLKEOb
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
-MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-04-02_13,2022-03-31_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- malwarescore=0 suspectscore=0 bulkscore=0 adultscore=0 mlxscore=0
- spamscore=0 clxscore=1015 mlxlogscore=993 impostorscore=0 phishscore=0
- lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2202240000 definitions=main-2204030051
+In-Reply-To: <75f4c780e8402a8f993cb987e85a31e4895f13de.1648730443.git.ritesh.list@gmail.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=624a2d98
+        a=MV6E7+DvwtTitA3W+3A2Lw==:117 a=MV6E7+DvwtTitA3W+3A2Lw==:17
+        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=VnNF1IyMAAAA:8 a=VwQbUJbxAAAA:8
+        a=7-415B0cAAAA:8 a=pcpTcb-Ldv-4dz7pLwMA:9 a=CjuIK1q_8ugA:10
+        a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 01, 2022 at 03:24:36PM +0530, Ritesh Harjani wrote:
-> On 22/04/01 11:27AM, Ojaswin Mujoo wrote:
-> > A recent ext4 patch discussed [1] that some devices (eg LVMs) can
-> > have a discard granularity as big as 42MB which makes it larger
-> > than the group size of ext4 FS with 1k BS. This causes the FITRIM
-> > IOCTL to fail on filesystems like ext4.
-> >
-> > This case was not correctly handle by "_require_batched_discard" as
-> > it incorrectly interpreted the FITRIM failure as fs not supporting
-> > the IOCTL. This caused the tests like generic/260 to incorectly
-> > report "not run" instead of "failed" in case of large discard
-> > granularity.
+On Thu, Mar 31, 2022 at 06:24:20PM +0530, Ritesh Harjani wrote:
+> From: Ritesh Harjani <riteshh@linux.ibm.com>
 > 
-> Ok, I looked at fstrim code and it does print [1]
-> "the discard operation is not supported" in case of rc == 1.
-> And if rc != 0 it will always returns EXIT_FAILURE.
+> Add another falloc test entry which could hit a kernel bug
+> with ext4 fast_commit feature w/o below kernel commit [1].
 > 
-> So this patch looks good to me. Feel free to add:
+> <log>
+> [  410.888496][ T2743] BUG: KASAN: use-after-free in ext4_mb_mark_bb+0x26a/0x6c0
+> [  410.890432][ T2743] Read of size 8 at addr ffff888171886000 by task mount/2743
 > 
-> Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> This happens when falloc -k size is huge which spans across more than
+> 1 flex block group in ext4. This causes a bug in fast_commit replay
+> code which is fixed by kernel commit at [1].
+> 
+> [1]: https://git.kernel.org/pub/scm/linux/kernel/git/tytso/ext4.git/commit/?h=dev&id=bfdc502a4a4c058bf4cbb1df0c297761d528f54d
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> ---
+>  tests/generic/468     | 8 ++++++++
+>  tests/generic/468.out | 2 ++
+>  2 files changed, 10 insertions(+)
+> 
+> diff --git a/tests/generic/468 b/tests/generic/468
+> index 95752d3b..5e73cff9 100755
+> --- a/tests/generic/468
+> +++ b/tests/generic/468
+> @@ -34,6 +34,13 @@ _scratch_mkfs >/dev/null 2>&1
+>  _require_metadata_journaling $SCRATCH_DEV
+>  _scratch_mount
+>  
+> +# blocksize and fact are used in the last case of the fsync/fdatasync test.
+> +# This is mainly trying to test recovery operation in case where the data
+> +# blocks written, exceeds the default flex group size (32768*4096*16) in ext4.
+> +blocks=32768
+> +blocksize=4096
 
-Thank you for the review Ritesh.
-> 
-> 
-> Although it will be good to check if we can add a generic test case
-> using maybe lvm or dm device, where this device could report large
-> discard_granularity for actually excercising this code path
-> (rather then changing kernel code to test it).
-You are correct, as I was not able to simulate a device with disc gran
-of 40MB+ I tested this by hard coding the granularity in the kernel. 
+Block size can change based on mkfs parameters. You should extract
+this dynamically from the filesystem the test is being run on.
 
-That being said, I would appreciate if anyone has any insights on using 
-LVM/DM to get that high a granularity so I can test it more accurately.
+> +fact=18
 
-Regards,
-Ojaswin
-> 
-> -ritesh
-> 
-> [1]: https://github.com/util-linux/util-linux/blob/master/sys-utils/fstrim.c
-> 
-> >
-> > Fix "_require_batched_discard" to use a more accurate method
-> > to determine if discard is supported.
-> >
-> > [1] commit 173b6e383d2
-> >     ext4: avoid trim error on fs with small groups
-> >
-> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > ---
-> >  common/rc | 8 +++++++-
-> >  1 file changed, 7 insertions(+), 1 deletion(-)
-> >
+What is "fact" supposed to mean?
+
+Indeed, wouldn't this simply be better as something like:
+
+larger_than_ext4_fg_size=$((32768 * $blksize * 18))
+
+And then
+
+>  testfile=$SCRATCH_MNT/testfile
+>  
+>  # check inode metadata after shutdown
+> @@ -85,6 +92,7 @@ for i in fsync fdatasync; do
+>  	test_falloc $i "-k " 1024
+>  	test_falloc $i "-k " 4096
+>  	test_falloc $i "-k " 104857600
+> +	test_falloc $i "-k " $(($blocks*$blocksize*$fact))
+
+	test_falloc $i "-k " $larger_than_ext4_fg_size
+
+And just scrub all the sizes from the golden output?
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
