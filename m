@@ -2,145 +2,141 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63DB8C433F5
-	for <linux-fstests@archiver.kernel.org>; Sat,  2 Apr 2022 03:40:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1840FC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Apr 2022 08:19:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235843AbiDBDmn (ORCPT
+        id S1354759AbiDCIVt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Apr 2022 23:42:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55290 "EHLO
+        Sun, 3 Apr 2022 04:21:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234262AbiDBDml (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Apr 2022 23:42:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DEB9B1066FA
-        for <fstests@vger.kernel.org>; Fri,  1 Apr 2022 20:40:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1648870845;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Gu7qS08tngVh1IJLv0SxMOra4HDD0LqwyzU+ZdcmWCM=;
-        b=MNEk4Km/SDNBfXIALX/sToZWZ5eNFpWB0xtPwPEMSCNeTZbgnVifrJ0fKtdTc+GaFIsr05
-        HlE6Zrt9PAmf5WyxNQJGUQRP18cxchMhNRnY40BCbSxgsPdUlpYzAu151nX+7KO23KgSK/
-        9Q4u17UFVJCmIx66zEoz5onTPLUuHu0=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-171-xs5CaLfHOIiKKOFvD3YrRg-1; Fri, 01 Apr 2022 23:40:44 -0400
-X-MC-Unique: xs5CaLfHOIiKKOFvD3YrRg-1
-Received: by mail-pf1-f199.google.com with SMTP id k7-20020aa79727000000b004fdc86d9b79so2573245pfg.8
-        for <fstests@vger.kernel.org>; Fri, 01 Apr 2022 20:40:44 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=Gu7qS08tngVh1IJLv0SxMOra4HDD0LqwyzU+ZdcmWCM=;
-        b=kOiQt/piSv+aSfxvIwQ8LdeIhdX3LGeIaiU4Eg7R6PHLxuZWaav6RyYvjsGiE8/+5T
-         /JMIJK5HVs1qH8hlxrutZJjGqoJP8kfKCUfCIgU20OkJRi0SuDr6I//OJbrS9bVBEjzM
-         KAsjiGji4hMISXdZH9ScgbcsR4b/r2QXJS19Bpduc8744gl6z7PapX+3v5FOocaG2g/k
-         AUCFND6DBSZrqwfVZ2N25uI5U9AAZcOKef2qaxLAeeYCrqhpwJbJlitQ7WDlQylin4iX
-         JXZU4jsq4u0izlkYvHMlDfNbGD2BIYFdo9PnbeYreEWGWOLNxhay6MXCSe6XxqxdqrJs
-         yhyw==
-X-Gm-Message-State: AOAM532ksUatp1fKBhruSIpmNPTePeLzXAIcKtVah3L5AaLwwDDCghWr
-        11t1cDEjRkE+wzaFA2V/FRqmNppDLuP59wYJqe8OB2DLAmSOtw7rScA7ZEkC7Y2LMes5uwOeOj4
-        dwDgkXs7qz98g0y+PHw==
-X-Received: by 2002:a63:b24b:0:b0:398:9894:b8be with SMTP id t11-20020a63b24b000000b003989894b8bemr16579713pgo.108.1648870843391;
-        Fri, 01 Apr 2022 20:40:43 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyQwSGKJLPaTExWl3PP1Fr9ox7Pr4m6DphuAOi7YCJetMf0Hx1BViK5U8xSQADFa/RA0oXLCA==
-X-Received: by 2002:a63:b24b:0:b0:398:9894:b8be with SMTP id t11-20020a63b24b000000b003989894b8bemr16579702pgo.108.1648870843047;
-        Fri, 01 Apr 2022 20:40:43 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j3-20020a056a00234300b004faabba358fsm4476346pfj.14.2022.04.01.20.40.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Apr 2022 20:40:42 -0700 (PDT)
-Date:   Sat, 2 Apr 2022 11:40:37 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Ritesh Harjani <ritesh.list@gmail.com>,
-        fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, ojaswin@linux.ibm.com
-Subject: Re: [PATCHv3 0/4] generic: Add some tests around journal
- replay/recoveryloop
-Message-ID: <20220402034037.rkrgxbjfqcs4sjvd@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        Ritesh Harjani <ritesh.list@gmail.com>,
-        fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, ojaswin@linux.ibm.com
-References: <cover.1648730443.git.ritesh.list@gmail.com>
- <20220331145906.2onnohv2bbg3ye6j@zlang-mailbox>
- <20220331161911.7d5dlqfwm2kngnjk@riteshh-domain>
- <20220331165335.mzx3gfc3uqeeg3sz@riteshh-domain>
- <20220401053047.ic4cbsembj6eoibm@zlang-mailbox>
- <20220401170451.GB27665@magnolia>
-MIME-Version: 1.0
+        with ESMTP id S236636AbiDCIVt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Apr 2022 04:21:49 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2913329CA1;
+        Sun,  3 Apr 2022 01:19:56 -0700 (PDT)
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 2337dVhh022873;
+        Sun, 3 Apr 2022 08:19:56 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
+ subject : message-id : references : content-type : in-reply-to :
+ mime-version; s=pp1; bh=n8Q7DA80igswd9mKAp6vBJFB4q5UOuHLBoqeTfO1Ctk=;
+ b=gDyF5rQ2ib8eNg8fH9ZoGZuEfkquZb3vVu2VuQv99Dg/JPJNoNTSyjAjd/ZOiiiZW3PM
+ 4yhjKbGmGAXznBJOm9N2p2F63c7ZYOZI44/buCKFesySB6rdrYXW/vEM49b7jBHpNj6a
+ cd1QzX8lGPtJaMiFp4ED1b44WgqUUM0Yx93UCrhtAXgYizrOM0fdOX12gHFulbHHXmD3
+ hbB7wtUhBA6eqzHi83LJJilT1MTWGsS+cShQliWoVJ+D9/7pfXowg+rR37leKfjMWZJC
+ +9D0n6leGi+AfQmrC+KpiT/TWwhzhGCVL7CaY2CxDl4avCmCkB+pQfcLEc2nHnyWYuD2 vg== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3f6yycwsha-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sun, 03 Apr 2022 08:19:55 +0000
+Received: from m0098410.ppops.net (m0098410.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 2338FKq6022242;
+        Sun, 3 Apr 2022 08:19:55 GMT
+Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3f6yycwsgu-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sun, 03 Apr 2022 08:19:55 +0000
+Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
+        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 2338Iu8Y032137;
+        Sun, 3 Apr 2022 08:19:53 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma06ams.nl.ibm.com with ESMTP id 3f6drhhpem-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sun, 03 Apr 2022 08:19:52 +0000
+Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 2338Joar34603374
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sun, 3 Apr 2022 08:19:50 GMT
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 6BD65A4053;
+        Sun,  3 Apr 2022 08:19:50 +0000 (GMT)
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 46C4CA404D;
+        Sun,  3 Apr 2022 08:19:48 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.26.20])
+        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
+        Sun,  3 Apr 2022 08:19:47 +0000 (GMT)
+Date:   Sun, 3 Apr 2022 13:49:35 +0530
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To:     Ritesh Harjani <ritesh.list@gmail.com>
+Cc:     fstests@vger.kernel.org, riteshh@linux.ibm.com,
+        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] common/rc: Modify _require_batched_discard to improve
+ test coverage
+Message-ID: <YklYl/Nea05Mjz32@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+References: <20220401055713.634842-1-ojaswin@linux.ibm.com>
+ <20220401095436.oxdq2duhuudx2c4r@riteshh-domain>
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220401170451.GB27665@magnolia>
+In-Reply-To: <20220401095436.oxdq2duhuudx2c4r@riteshh-domain>
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: d_z1ElZTzukMh5DY99dB0AqSXB1ZUb8z
+X-Proofpoint-GUID: 26IUSAXUqtZrLwa6Lo3HzGuf0ucLKEOb
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+MIME-Version: 1.0
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-04-02_13,2022-03-31_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ malwarescore=0 suspectscore=0 bulkscore=0 adultscore=0 mlxscore=0
+ spamscore=0 clxscore=1015 mlxlogscore=993 impostorscore=0 phishscore=0
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2204030051
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 01, 2022 at 10:04:51AM -0700, Darrick J. Wong wrote:
-> On Fri, Apr 01, 2022 at 01:30:47PM +0800, Zorro Lang wrote:
-> > On Thu, Mar 31, 2022 at 10:23:35PM +0530, Ritesh Harjani wrote:
-> > > On 22/03/31 09:49PM, Ritesh Harjani wrote:
-> > > > On 22/03/31 10:59PM, Zorro Lang wrote:
-> > > > > On Thu, Mar 31, 2022 at 06:24:19PM +0530, Ritesh Harjani wrote:
-> > > > > > Hello,
-> > > > >
-> > > > > Hi,
-> > > > >
-> > > > > Your below patches looks like not pure text format, they might contain
-> > > > > binary character or some special characers, looks like the "^M" [1].
-> > > 
-> > > Sorry to bother you. But here is what I tried.
-> > > 1. Download the mbx file using b4 am. I didn't see any such character ("^M") in
-> > >    the patches.
-> > > 2. Saved the patch using mutt. Again didn't see such character while doing
-> > > 	cat -A /patch/to/patch
-> > > 3. Downloaded the mail using eml format from webmail. Here I do see this
-> > >    character appended. But that happens not just for my patch, but for all
-> > >    other patches too.
-> > > 
-> > > So could this be related to the way you are downloading these patches.
-> > > Please let me know, if I need to resend these patches again? Because, I don't
-> > > see this behavior at my end. But I would happy to correct it, if that's not the
-> > > case.
-> > 
-> > Hmm... weird, When I tried to open your patch emails, my mutt show me:
-> > 
-> >   [-- application/octet-stream is unsupported (use 'v' to view this part) --]
-> > 
-> > Then I have to input 'v' to see the patch content. I'm not sure what's wrong,
-> > this's the 2nd time I hit this "octet-stream is unsupported" issue yesterday.
-> > 
-> > Hi Darrick, or any other forks, can you open above 4 patches normally? If that's
-> > only my personal issue, I'll check my side.
+On Fri, Apr 01, 2022 at 03:24:36PM +0530, Ritesh Harjani wrote:
+> On 22/04/01 11:27AM, Ojaswin Mujoo wrote:
+> > A recent ext4 patch discussed [1] that some devices (eg LVMs) can
+> > have a discard granularity as big as 42MB which makes it larger
+> > than the group size of ext4 FS with 1k BS. This causes the FITRIM
+> > IOCTL to fail on filesystems like ext4.
+> >
+> > This case was not correctly handle by "_require_batched_discard" as
+> > it incorrectly interpreted the FITRIM failure as fs not supporting
+> > the IOCTL. This caused the tests like generic/260 to incorectly
+> > report "not run" instead of "failed" in case of large discard
+> > granularity.
 > 
-> There's no application/octet anywhere in the email that I received.
-> Has your IT department gone rogue^W^Wincreased value-add again?
-
-Thanks Darrick and Ojaswin! I'll check with our IT department. But it's weird, only
-this patchset and 2 of another patch[1](it's sent 3 times) has this problem, I see
-all other patches normally. And Ritesh, sorry for taking your time to check it :-D
-
-Thanks,
-Zorro
-
-[1]
-[PATCH v2] generic/674: replace _require_scratch_reflink with _require_scratch_dedupe
-
+> Ok, I looked at fstrim code and it does print [1]
+> "the discard operation is not supported" in case of rc == 1.
+> And if rc != 0 it will always returns EXIT_FAILURE.
 > 
-> --D
+> So this patch looks good to me. Feel free to add:
 > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > -ritesh
-> > > 
-> > 
-> 
+> Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
 
+Thank you for the review Ritesh.
+> 
+> 
+> Although it will be good to check if we can add a generic test case
+> using maybe lvm or dm device, where this device could report large
+> discard_granularity for actually excercising this code path
+> (rather then changing kernel code to test it).
+You are correct, as I was not able to simulate a device with disc gran
+of 40MB+ I tested this by hard coding the granularity in the kernel. 
+
+That being said, I would appreciate if anyone has any insights on using 
+LVM/DM to get that high a granularity so I can test it more accurately.
+
+Regards,
+Ojaswin
+> 
+> -ritesh
+> 
+> [1]: https://github.com/util-linux/util-linux/blob/master/sys-utils/fstrim.c
+> 
+> >
+> > Fix "_require_batched_discard" to use a more accurate method
+> > to determine if discard is supported.
+> >
+> > [1] commit 173b6e383d2
+> >     ext4: avoid trim error on fs with small groups
+> >
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> > ---
+> >  common/rc | 8 +++++++-
+> >  1 file changed, 7 insertions(+), 1 deletion(-)
+> >
