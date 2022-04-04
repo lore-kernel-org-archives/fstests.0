@@ -2,166 +2,152 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65BC5C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Apr 2022 23:43:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9CF1C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon,  4 Apr 2022 09:48:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376706AbiDCXpQ (ORCPT
+        id S1354684AbiDDJuc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Apr 2022 19:45:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36062 "EHLO
+        Mon, 4 Apr 2022 05:50:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376705AbiDCXpP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Apr 2022 19:45:15 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 722462E9CC;
-        Sun,  3 Apr 2022 16:43:20 -0700 (PDT)
-Received: from dread.disaster.area (pa49-180-43-123.pa.nsw.optusnet.com.au [49.180.43.123])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id A710653435A;
-        Mon,  4 Apr 2022 09:43:19 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nb9sM-00DSAi-2u; Mon, 04 Apr 2022 09:43:18 +1000
-Date:   Mon, 4 Apr 2022 09:43:18 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Ritesh Harjani <ritesh.list@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: Re: [PATCHv3 4/4] generic/679: Add a test to check unwritten extents
- tracking
-Message-ID: <20220403234318.GU1609613@dread.disaster.area>
-References: <cover.1648730443.git.ritesh.list@gmail.com>
- <c9a40292799a83e52924b7b748701b3b0aa31c46.1648730443.git.ritesh.list@gmail.com>
+        with ESMTP id S1354620AbiDDJua (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 4 Apr 2022 05:50:30 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6959338B;
+        Mon,  4 Apr 2022 02:48:31 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id CB69D1F383;
+        Mon,  4 Apr 2022 09:48:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1649065709; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=XYKyuHWgBcNpYQldkCNyaN6h5hkH+B1Z/4mvpos8ICE=;
+        b=y0sx+ke5D0ANL7IlqR4fDnqzXCALPotFvk0w59B/VU1s5fjN9KlM9usfrG9snb91mDIwZt
+        E/nfPmP39a8X7xXfazNpRJJCUkJdTM8q4QNuMC2B50n/tmdEpdA33swCORyVJw6tTEhFiK
+        opMa5b/i803cZUhLvYEUyGwD8hNfsq4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1649065709;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=XYKyuHWgBcNpYQldkCNyaN6h5hkH+B1Z/4mvpos8ICE=;
+        b=ned7fJBKyrAAyV9Fu90j1XN0Za9dPjcuHkhb57+KNixbk3fs5Jn59ao0frXjP8ZNw4Gqe7
+        L4T3OJis5dg8k1CA==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7116612FC5;
+        Mon,  4 Apr 2022 09:48:29 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id E+BtGO2+SmK2LgAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 04 Apr 2022 09:48:29 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id c663538d;
+        Mon, 4 Apr 2022 08:55:27 +0000 (UTC)
+From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH] common/encrypt: allow the use of 'fscrypt:' as key prefix
+References: <20220401104553.32036-1-lhenriques@suse.de>
+        <YkdAfpN/YzAm18pl@gmail.com>
+Date:   Mon, 04 Apr 2022 09:55:27 +0100
+In-Reply-To: <YkdAfpN/YzAm18pl@gmail.com> (Eric Biggers's message of "Fri, 1
+        Apr 2022 18:12:14 +0000")
+Message-ID: <874k39b534.fsf@brahms.olymp>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c9a40292799a83e52924b7b748701b3b0aa31c46.1648730443.git.ritesh.list@gmail.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=624a3117
-        a=MV6E7+DvwtTitA3W+3A2Lw==:117 a=MV6E7+DvwtTitA3W+3A2Lw==:17
-        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=VnNF1IyMAAAA:8 a=7-415B0cAAAA:8
-        a=OHNP50dCb2NrX2JaUOMA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 06:24:23PM +0530, Ritesh Harjani wrote:
-> From: Ritesh Harjani <riteshh@linux.ibm.com>
-> 
-> With these sequence of operation (in certain cases like with ext4 fast_commit)
-> could miss to track unwritten extents during replay phase
-> (after sudden FS shutdown).
-> 
-> This fstest adds a test case to test this.
-> 
-> 5e4d0eba1ccaf19f
-> ext4: fix fast commit may miss tracking range for FALLOC_FL_ZERO_RANGE
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> ---
->  tests/generic/679     | 65 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/679.out |  6 ++++
->  2 files changed, 71 insertions(+)
->  create mode 100755 tests/generic/679
->  create mode 100644 tests/generic/679.out
-> 
-> diff --git a/tests/generic/679 b/tests/generic/679
-> new file mode 100755
-> index 00000000..4f35a9cd
-> --- /dev/null
-> +++ b/tests/generic/679
-> @@ -0,0 +1,65 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 IBM Corporation.  All Rights Reserved.
-> +#
-> +# FS QA Test 679
-> +#
-> +# Test below sequence of operation which (w/o below kernel patch) in case of
-> +# ext4 with fast_commit may misss to track unwritten extents.
-> +# commit 5e4d0eba1ccaf19f
-> +# ext4: fix fast commit may miss tracking range for FALLOC_FL_ZERO_RANGE
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick log shutdown recoveryloop
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
+Eric Biggers <ebiggers@kernel.org> writes:
 
-Same as default.
+> On Fri, Apr 01, 2022 at 11:45:53AM +0100, Lu=C3=ADs Henriques wrote:
+>> fscrypt keys have used the $FSTYP as prefix.  However this format is bei=
+ng
+>> deprecated -- newer kernels already allow the usage of the generic
+>> 'fscrypt:' prefix for ext4 and f2fs.  This patch allows the usage of this
+>> new prefix for testing filesystems that have never supported the old
+>> format, but keeping the $FSTYP prefix for filesystems that support it, so
+>> that old kernels can be tested.
+>>=20
+>> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
+>> ---
+>>  common/encrypt | 38 +++++++++++++++++++++++++++-----------
+>>  1 file changed, 27 insertions(+), 11 deletions(-)
+>>=20
+>> diff --git a/common/encrypt b/common/encrypt
+>> index f90c4ef05a3f..897c97e0f6fa 100644
+>> --- a/common/encrypt
+>> +++ b/common/encrypt
+>> @@ -250,6 +250,27 @@ _num_to_hex()
+>>  	fi
+>>  }
+>>=20=20
+>> +# Keys are named $FSTYP:KEYDESC where KEYDESC is the 16-character key d=
+escriptor
+>> +# hex string.  Newer kernels (ext4 4.8 and later, f2fs 4.6 and later) a=
+lso allow
+>> +# the common key prefix "fscrypt:" in addition to their filesystem-spec=
+ific key
+>> +# prefix ("ext4:", "f2fs:").  It would be nice to use the common key pr=
+efix, but
+>> +# for now use the filesystem- specific prefix for these 2 filesystems t=
+o make it
+>> +# possible to test older kernels, and the "fscrypt" prefix for anything=
+ else.
+>> +_get_fs_keyprefix()
+>> +{
+>> +	local prefix=3D""
+>> +
+>> +	case $FSTYP in
+>> +	ext4|f2fs|ubifs)
+>> +		prefix=3D"$FSTYP"
+>> +		;;
+>> +	*)
+>> +		prefix=3D"fscrypt"
+>> +		;;
+>> +	esac
+>> +	echo $prefix
+>> +}
+>
+> ubifs can use the "fscrypt" prefix, since there was never a kernel that
+> supported ubifs encryption but not the "fscrypt" prefix.  Also, the "pref=
+ix"
+> local variable is unnecessary.  So:
+>
+> 	case $FSTYP in
+> 	ext4|f2fs)
+> 		echo $FSTYP
+> 		;;
+> 	*)
+> 		echo fscrypt
+> 		;;
+> 	esac
+>
+> Otherwise, this patch looks fine if we want to keep supporting testing ke=
+rnels
+> older than 4.8.  However, since 4.4 is no longer a supported LTS kernel, =
+perhaps
+> this is no longer needed and we could just always use "fscrypt"?  I'm not=
+ sure
+> what xfstests's policy on old kernels is.
 
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/punch
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_scratch
-> +_require_xfs_io_command "fzero"
-> +_require_xfs_io_command "fiemap"
-> +_require_scratch_shutdown
-> +
-> +t1=$SCRATCH_MNT/t1
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +bs=$(_get_file_block_size $SCRATCH_MNT)
-> +
-> +# create and write data to t1
-> +$XFS_IO_PROG -f -c "pwrite 0 $((100*$bs))" $t1 | _filter_xfs_io_numbers
-> +
-> +# fsync t1
-> +$XFS_IO_PROG -c "fsync" $t1
-> +
-> +# fzero certain range in between
-> +$XFS_IO_PROG -c "fzero -k  $((40*$bs)) $((20*$bs))" $t1
-> +
-> +# fsync t1
-> +$XFS_IO_PROG -c "fsync" $t1
-> +
-> +# shutdown FS now for replay of journal to kick during next mount
-> +_scratch_shutdown -v >> $seqres.full 2>&1
-> +
-> +_scratch_cycle_mount
-> +
-> +# check fiemap reported is valid or not
-> +$XFS_IO_PROG -c "fiemap -v" $t1 | _filter_fiemap_flags $bs
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/679.out b/tests/generic/679.out
-> new file mode 100644
-> index 00000000..4d3c3377
-> --- /dev/null
-> +++ b/tests/generic/679.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 679
-> +wrote XXXX/XXXX bytes at offset XXXX
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +0: [0..39]: none
-> +1: [40..59]: unwritten
-> +2: [60..99]: nonelast
-
-This is a subset of the the previous test, and looks like it should
-be tested first before adding the second file and punch operation
-the previous test adds to this write/zero operations. IOWs, they
-look like they could easily be combined into a single test without
-losing anything except having an extra test that has to be run...
+Thank you for your feedback.  I'll resend the patch with your changes.  I
+am, of course, OK dropping support for older kernels on fstests, but I'll
+leave that decision for the maintainers; if anyone thinks that support
+should be dropped, I can send another version of the patch doing that.
 
 Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+--=20
+Lu=C3=ADs
