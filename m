@@ -2,77 +2,67 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEB3AC4321E
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 04:01:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6910BC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 04:02:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230491AbiDFEDr (ORCPT
+        id S231915AbiDFEDx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:03:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38978 "EHLO
+        Wed, 6 Apr 2022 00:03:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1581720AbiDEXkl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Apr 2022 19:40:41 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEE931CABF4;
-        Tue,  5 Apr 2022 15:00:57 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net [108.7.220.252])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 235M0lKB028891
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 5 Apr 2022 18:00:48 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 6D78A15C3EB6; Tue,  5 Apr 2022 18:00:47 -0400 (EDT)
-Date:   Tue, 5 Apr 2022 18:00:47 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Ritesh Harjani <ritesh.list@gmail.com>
-Cc:     Dave Chinner <david@fromorbit.com>,
-        fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: Re: [PATCHv3 1/4] generic/468: Add another falloc test entry
-Message-ID: <Yky8DzTNiYovRbHb@mit.edu>
-References: <cover.1648730443.git.ritesh.list@gmail.com>
- <75f4c780e8402a8f993cb987e85a31e4895f13de.1648730443.git.ritesh.list@gmail.com>
- <20220403232823.GS1609613@dread.disaster.area>
- <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
+        with ESMTP id S1573208AbiDESR5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Apr 2022 14:17:57 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0084EF087;
+        Tue,  5 Apr 2022 11:15:57 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 54562B81F75;
+        Tue,  5 Apr 2022 18:15:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 084D6C385A4;
+        Tue,  5 Apr 2022 18:15:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649182555;
+        bh=grVOlI0gDn9zG4TjD5iKDe9tR2JypV1oh7YQii31Iuk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Fnkvmzqbb0B/XQwwWGVpd59Ws2GnuaDI1TiSd1CW9rRk0TSfLtInY+/ECFhOFXwL7
+         PLNgWV85mznPUOvgJKyQs8KCgigWtMOIF4TmxmDvBAJSqoiPTTcQLrFeEMfyuB6erY
+         kpY3ZCMR6DA0pQLwO1SnMADaEC2/i9s/OSysv5Sw0HzqDxNmx5/LXs+y0c7tFJdWUr
+         qfSAB8j8mbh8j/PhI7w8p8yBGzVdN4+XdQFJeC2HGyIIleMWWpX9AGvVStrJpLfehG
+         8PYSHD/vFFqGZnOpNv4bZD+SqonrKNj5BUcNanM3TdIBx6Hq2oB9Nhpj2FSKNN4MYe
+         B/X2Px+NNAjSQ==
+Date:   Tue, 5 Apr 2022 18:15:53 +0000
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
+Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v3] common/encrypt: allow the use of 'fscrypt:' as key
+ prefix
+Message-ID: <YkyHWXKySNU00XB6@gmail.com>
+References: <20220405094633.17285-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220405094633.17285-1-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 05, 2022 at 04:36:03PM +0530, Ritesh Harjani wrote:
-> > > +# blocksize and fact are used in the last case of the fsync/fdatasync test.
-> > > +# This is mainly trying to test recovery operation in case where the data
-> > > +# blocks written, exceeds the default flex group size (32768*4096*16) in ext4.
-> > > +blocks=32768
-> > > +blocksize=4096
-> >
-> > Block size can change based on mkfs parameters. You should extract
-> > this dynamically from the filesystem the test is being run on.
-> >
+On Tue, Apr 05, 2022 at 10:46:33AM +0100, Luís Henriques wrote:
+> fscrypt keys have used the $FSTYP as prefix.  However this format is being
+> deprecated and newer kernels are expected to use the generic 'fscrypt:'
+> prefix instead.  This patch adds support for this new prefix, and only
+> uses $FSTYP on filesystems that didn't initially supported it, i.e. ext4 and
+> f2fs.  This will allow old kernels to be tested.
 > 
-> Yes, but we still have kept just 4096 because, anything bigger than that like
-> 65536 might require a bigger disk size itself to test. The overall size
-> requirement of the disk will then become ~36G (32768 * 65536 * 18)
-> Hence I went ahead with 4096 which is good enough for testing.
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
+>  common/encrypt | 36 +++++++++++++++++++++++++-----------
+>  1 file changed, 25 insertions(+), 11 deletions(-)
+> 
 
-What if the block size is *smaller*?  For example, I run an ext4/1k
-configuration (which is how I test block size > page size on x86 VM's :-).
+Reviewed-by: Eric Biggers <ebiggers@google.com>
 
-> But sure, I will add a comment explaining why we have hardcoded it to 4096
-> so that others don't get confused. Larger than this size disk anyway doesn't get
-> tested much right?
-
-At $WORK we use a 100GB disk by default when running xfstests, and I
-wouldn't be surprised if theree are other folks who might use larger
-disk sizes.
-
-Maybe test to see whether the scratch disk is too small for the given
-parameters and if so skip the test using _notrun?
-
-							- Ted
+- Eric
