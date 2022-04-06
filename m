@@ -2,120 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7863C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 08:34:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 067FBC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 15:03:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349349AbiDFIgM (ORCPT
+        id S235586AbiDFPFb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Apr 2022 04:36:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50446 "EHLO
+        Wed, 6 Apr 2022 11:05:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1386180AbiDFIeK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Apr 2022 04:34:10 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 567853A7ABF;
-        Tue,  5 Apr 2022 21:05:11 -0700 (PDT)
-Received: from dread.disaster.area (pa49-186-233-190.pa.vic.optusnet.com.au [49.186.233.190])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 0ACAE534493;
-        Wed,  6 Apr 2022 14:05:10 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nbwuq-00EJao-I2; Wed, 06 Apr 2022 14:05:08 +1000
-Date:   Wed, 6 Apr 2022 14:05:08 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Ritesh Harjani <ritesh.list@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
+        with ESMTP id S235518AbiDFPFT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Apr 2022 11:05:19 -0400
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8EC92BC556;
+        Wed,  6 Apr 2022 04:56:23 -0700 (PDT)
+Received: by mail-pj1-x102e.google.com with SMTP id u14so2369033pjj.0;
+        Wed, 06 Apr 2022 04:56:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=Mhb5v8ZlAjtIYtRSgbIBYSL5zw8//91EorDOso/oqKM=;
+        b=T1igHYq49tyKF1mXnppF0r/g/mOyOn99siFKBxiOHNL9xBP0seeNlEC9YbSNKMtjXo
+         nCAWoGmbKX7ZxkOGQVznvzpB3s4vHZ0mUYKArLQkbvaNKJe/u0lRXGMRqYmnKOLM0aNk
+         aEPoFyK6TXTcm+ss2ggLqSkdAnRTw8U2nxUFNx7EfecHOUFPd6zsAKzolpTgN5oNjBoq
+         tgk8ILd4FwJqe7PajwDnZH74VS6AoLaiXD19/kuqExzGgniT0G+PB/0/Tz87hYmLxoCp
+         fXEjGlwNbxVl1o7uAcvfyk8ehK98rF0GOSgeZRbKme3SpV1Dp9x4R5UsDp0WVBwdnhTG
+         b6QA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Mhb5v8ZlAjtIYtRSgbIBYSL5zw8//91EorDOso/oqKM=;
+        b=SO5O+WKGmYeko0limcSxTeDVc+fBK987U7miiUh6iapyrQPxS+Zy8GrAL/6s2M4bgy
+         JT3Med2Mrskn87EHxZwq865bQOgvOSV96jBmvLHB9XSXWRBqnBC19bbtKrlMFlb0wbk4
+         Fncs/O4yD2QG4X78dNTF8Qw0Kp9vsTWUikF24d3nk0ELpt2XYjjH7Ypj6ClhC2gGQY+Z
+         1Ph3RxFssX3BbTRMbwOVUtKL3pDRG4hsrRPN3Zy+GyGHiybbETQkujL3lbHCpxj3UrFs
+         bgDfXuTQhMZDINJbha/egk+cgYk2iJ8WTSjfp696mkCHy+1m5mc0pt6t5kIzE5cvNgzV
+         JtRQ==
+X-Gm-Message-State: AOAM530ovTNZPPJfeKBpLIyGU993Vu2NeToKjFRahBF7onq9GXYfiUJG
+        J8nJIyG/wyiO+j4xmrLORmU=
+X-Google-Smtp-Source: ABdhPJyFqeI4muFCF/W8J1lCNU83TK67ifvbNjJFfcuyNQFjiLcMSWPyOmoXEpPv3EdFqDHCSxAAXQ==
+X-Received: by 2002:a17:90a:3b47:b0:1ca:7075:124e with SMTP id t7-20020a17090a3b4700b001ca7075124emr9573106pjf.209.1649245971236;
+        Wed, 06 Apr 2022 04:52:51 -0700 (PDT)
+Received: from localhost ([2406:7400:63:b4e6:5967:b872:39cd:bdb9])
+        by smtp.gmail.com with ESMTPSA id c63-20020a624e42000000b004fa9ee41b7bsm18641751pfb.217.2022.04.06.04.52.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Apr 2022 04:52:50 -0700 (PDT)
+Date:   Wed, 6 Apr 2022 17:22:46 +0530
+From:   Ritesh Harjani <ritesh.list@gmail.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Dave Chinner <david@fromorbit.com>,
+        fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
         linux-fsdevel@vger.kernel.org,
         "Darrick J . Wong" <djwong@kernel.org>,
         Ritesh Harjani <riteshh@linux.ibm.com>
 Subject: Re: [PATCHv3 1/4] generic/468: Add another falloc test entry
-Message-ID: <20220406040508.GC1609613@dread.disaster.area>
+Message-ID: <20220406115246.qzsexi24uvfu3mjp@riteshh-domain>
 References: <cover.1648730443.git.ritesh.list@gmail.com>
  <75f4c780e8402a8f993cb987e85a31e4895f13de.1648730443.git.ritesh.list@gmail.com>
  <20220403232823.GS1609613@dread.disaster.area>
  <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
+ <Yky8DzTNiYovRbHb@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=624d1176
-        a=bHAvQTfMiaNt/bo4vVGwyA==:117 a=bHAvQTfMiaNt/bo4vVGwyA==:17
-        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=VnNF1IyMAAAA:8 a=VwQbUJbxAAAA:8
-        a=7-415B0cAAAA:8 a=YONGHUKn3BUHUCDE1yQA:9 a=CjuIK1q_8ugA:10
-        a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <Yky8DzTNiYovRbHb@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 05, 2022 at 04:36:03PM +0530, Ritesh Harjani wrote:
-> On 22/04/04 09:28AM, Dave Chinner wrote:
-> > On Thu, Mar 31, 2022 at 06:24:20PM +0530, Ritesh Harjani wrote:
-> > > From: Ritesh Harjani <riteshh@linux.ibm.com>
+On 22/04/05 06:00PM, Theodore Ts'o wrote:
+> On Tue, Apr 05, 2022 at 04:36:03PM +0530, Ritesh Harjani wrote:
+> > > > +# blocksize and fact are used in the last case of the fsync/fdatasync test.
+> > > > +# This is mainly trying to test recovery operation in case where the data
+> > > > +# blocks written, exceeds the default flex group size (32768*4096*16) in ext4.
+> > > > +blocks=32768
+> > > > +blocksize=4096
 > > >
-> > > Add another falloc test entry which could hit a kernel bug
-> > > with ext4 fast_commit feature w/o below kernel commit [1].
+> > > Block size can change based on mkfs parameters. You should extract
+> > > this dynamically from the filesystem the test is being run on.
 > > >
-> > > <log>
-> > > [  410.888496][ T2743] BUG: KASAN: use-after-free in ext4_mb_mark_bb+0x26a/0x6c0
-> > > [  410.890432][ T2743] Read of size 8 at addr ffff888171886000 by task mount/2743
-> > >
-> > > This happens when falloc -k size is huge which spans across more than
-> > > 1 flex block group in ext4. This causes a bug in fast_commit replay
-> > > code which is fixed by kernel commit at [1].
-> > >
-> > > [1]: https://git.kernel.org/pub/scm/linux/kernel/git/tytso/ext4.git/commit/?h=dev&id=bfdc502a4a4c058bf4cbb1df0c297761d528f54d
-> > >
-> > > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> > > ---
-> > >  tests/generic/468     | 8 ++++++++
-> > >  tests/generic/468.out | 2 ++
-> > >  2 files changed, 10 insertions(+)
-> > >
-> > > diff --git a/tests/generic/468 b/tests/generic/468
-> > > index 95752d3b..5e73cff9 100755
-> > > --- a/tests/generic/468
-> > > +++ b/tests/generic/468
-> > > @@ -34,6 +34,13 @@ _scratch_mkfs >/dev/null 2>&1
-> > >  _require_metadata_journaling $SCRATCH_DEV
-> > >  _scratch_mount
-> > >
-> > > +# blocksize and fact are used in the last case of the fsync/fdatasync test.
-> > > +# This is mainly trying to test recovery operation in case where the data
-> > > +# blocks written, exceeds the default flex group size (32768*4096*16) in ext4.
-> > > +blocks=32768
-> > > +blocksize=4096
 > >
-> > Block size can change based on mkfs parameters. You should extract
-> > this dynamically from the filesystem the test is being run on.
-> >
-> 
-> Yes, but we still have kept just 4096 because, anything bigger than that like
-> 65536 might require a bigger disk size itself to test. The overall size
-> requirement of the disk will then become ~36G (32768 * 65536 * 18)
-> Hence I went ahead with 4096 which is good enough for testing.
+> > Yes, but we still have kept just 4096 because, anything bigger than that like
+> > 65536 might require a bigger disk size itself to test. The overall size
+> > requirement of the disk will then become ~36G (32768 * 65536 * 18)
+> > Hence I went ahead with 4096 which is good enough for testing.
+>
+> What if the block size is *smaller*?  For example, I run an ext4/1k
+> configuration (which is how I test block size > page size on x86 VM's :-).
 
-If the test setup doesn't have a disk large enough, then the test
-should be skipped. That's what '_require_scratch_size' is for.
+For 1k bs, this test can still reproduce the problem. Because the given size
+will easily overflow the required number of blocks in 1K case.
 
-i.e. _require_scratch_size $larger_than_ext4_fg_size
+>
+> > But sure, I will add a comment explaining why we have hardcoded it to 4096
+> > so that others don't get confused. Larger than this size disk anyway doesn't get
+> > tested much right?
+>
+> At $WORK we use a 100GB disk by default when running xfstests, and I
+> wouldn't be surprised if theree are other folks who might use larger
+> disk sizes.
 
-Will do that check once we've calculated the size needed.
+Ohk, sure. Thanks for the info.
 
-> But sure, I will add a comment explaining why we have hardcoded it to 4096
-> so that others don't get confused. Larger than this size disk anyway doesn't get
-> tested much right?
+>
+> Maybe test to see whether the scratch disk is too small for the given
+> parameters and if so skip the test using _notrun?
+>
 
-You shouldn't be constricting the test based on assumptions about
-test configurations. If someone decides to test 64k block size, then
-they can size their devices appropriately for the configuration they
-want to test.  If a 64kB block size filesystem can overrun the
-on-disk structure and fail, then the test should exercise that and
-fail appropriately.
+Yes, I think I got the point. I will make the changes accordingly.
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+-ritesh
