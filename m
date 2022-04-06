@@ -2,67 +2,120 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6910BC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 04:02:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7863C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 08:34:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231915AbiDFEDx (ORCPT
+        id S1349349AbiDFIgM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:03:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34186 "EHLO
+        Wed, 6 Apr 2022 04:36:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573208AbiDESR5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Apr 2022 14:17:57 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0084EF087;
-        Tue,  5 Apr 2022 11:15:57 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 54562B81F75;
-        Tue,  5 Apr 2022 18:15:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 084D6C385A4;
-        Tue,  5 Apr 2022 18:15:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649182555;
-        bh=grVOlI0gDn9zG4TjD5iKDe9tR2JypV1oh7YQii31Iuk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Fnkvmzqbb0B/XQwwWGVpd59Ws2GnuaDI1TiSd1CW9rRk0TSfLtInY+/ECFhOFXwL7
-         PLNgWV85mznPUOvgJKyQs8KCgigWtMOIF4TmxmDvBAJSqoiPTTcQLrFeEMfyuB6erY
-         kpY3ZCMR6DA0pQLwO1SnMADaEC2/i9s/OSysv5Sw0HzqDxNmx5/LXs+y0c7tFJdWUr
-         qfSAB8j8mbh8j/PhI7w8p8yBGzVdN4+XdQFJeC2HGyIIleMWWpX9AGvVStrJpLfehG
-         8PYSHD/vFFqGZnOpNv4bZD+SqonrKNj5BUcNanM3TdIBx6Hq2oB9Nhpj2FSKNN4MYe
-         B/X2Px+NNAjSQ==
-Date:   Tue, 5 Apr 2022 18:15:53 +0000
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v3] common/encrypt: allow the use of 'fscrypt:' as key
- prefix
-Message-ID: <YkyHWXKySNU00XB6@gmail.com>
-References: <20220405094633.17285-1-lhenriques@suse.de>
+        with ESMTP id S1386180AbiDFIeK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Apr 2022 04:34:10 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 567853A7ABF;
+        Tue,  5 Apr 2022 21:05:11 -0700 (PDT)
+Received: from dread.disaster.area (pa49-186-233-190.pa.vic.optusnet.com.au [49.186.233.190])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 0ACAE534493;
+        Wed,  6 Apr 2022 14:05:10 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nbwuq-00EJao-I2; Wed, 06 Apr 2022 14:05:08 +1000
+Date:   Wed, 6 Apr 2022 14:05:08 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Ritesh Harjani <ritesh.list@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: Re: [PATCHv3 1/4] generic/468: Add another falloc test entry
+Message-ID: <20220406040508.GC1609613@dread.disaster.area>
+References: <cover.1648730443.git.ritesh.list@gmail.com>
+ <75f4c780e8402a8f993cb987e85a31e4895f13de.1648730443.git.ritesh.list@gmail.com>
+ <20220403232823.GS1609613@dread.disaster.area>
+ <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220405094633.17285-1-lhenriques@suse.de>
+In-Reply-To: <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=624d1176
+        a=bHAvQTfMiaNt/bo4vVGwyA==:117 a=bHAvQTfMiaNt/bo4vVGwyA==:17
+        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=VnNF1IyMAAAA:8 a=VwQbUJbxAAAA:8
+        a=7-415B0cAAAA:8 a=YONGHUKn3BUHUCDE1yQA:9 a=CjuIK1q_8ugA:10
+        a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 05, 2022 at 10:46:33AM +0100, Luís Henriques wrote:
-> fscrypt keys have used the $FSTYP as prefix.  However this format is being
-> deprecated and newer kernels are expected to use the generic 'fscrypt:'
-> prefix instead.  This patch adds support for this new prefix, and only
-> uses $FSTYP on filesystems that didn't initially supported it, i.e. ext4 and
-> f2fs.  This will allow old kernels to be tested.
+On Tue, Apr 05, 2022 at 04:36:03PM +0530, Ritesh Harjani wrote:
+> On 22/04/04 09:28AM, Dave Chinner wrote:
+> > On Thu, Mar 31, 2022 at 06:24:20PM +0530, Ritesh Harjani wrote:
+> > > From: Ritesh Harjani <riteshh@linux.ibm.com>
+> > >
+> > > Add another falloc test entry which could hit a kernel bug
+> > > with ext4 fast_commit feature w/o below kernel commit [1].
+> > >
+> > > <log>
+> > > [  410.888496][ T2743] BUG: KASAN: use-after-free in ext4_mb_mark_bb+0x26a/0x6c0
+> > > [  410.890432][ T2743] Read of size 8 at addr ffff888171886000 by task mount/2743
+> > >
+> > > This happens when falloc -k size is huge which spans across more than
+> > > 1 flex block group in ext4. This causes a bug in fast_commit replay
+> > > code which is fixed by kernel commit at [1].
+> > >
+> > > [1]: https://git.kernel.org/pub/scm/linux/kernel/git/tytso/ext4.git/commit/?h=dev&id=bfdc502a4a4c058bf4cbb1df0c297761d528f54d
+> > >
+> > > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> > > ---
+> > >  tests/generic/468     | 8 ++++++++
+> > >  tests/generic/468.out | 2 ++
+> > >  2 files changed, 10 insertions(+)
+> > >
+> > > diff --git a/tests/generic/468 b/tests/generic/468
+> > > index 95752d3b..5e73cff9 100755
+> > > --- a/tests/generic/468
+> > > +++ b/tests/generic/468
+> > > @@ -34,6 +34,13 @@ _scratch_mkfs >/dev/null 2>&1
+> > >  _require_metadata_journaling $SCRATCH_DEV
+> > >  _scratch_mount
+> > >
+> > > +# blocksize and fact are used in the last case of the fsync/fdatasync test.
+> > > +# This is mainly trying to test recovery operation in case where the data
+> > > +# blocks written, exceeds the default flex group size (32768*4096*16) in ext4.
+> > > +blocks=32768
+> > > +blocksize=4096
+> >
+> > Block size can change based on mkfs parameters. You should extract
+> > this dynamically from the filesystem the test is being run on.
+> >
 > 
-> Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> ---
->  common/encrypt | 36 +++++++++++++++++++++++++-----------
->  1 file changed, 25 insertions(+), 11 deletions(-)
-> 
+> Yes, but we still have kept just 4096 because, anything bigger than that like
+> 65536 might require a bigger disk size itself to test. The overall size
+> requirement of the disk will then become ~36G (32768 * 65536 * 18)
+> Hence I went ahead with 4096 which is good enough for testing.
 
-Reviewed-by: Eric Biggers <ebiggers@google.com>
+If the test setup doesn't have a disk large enough, then the test
+should be skipped. That's what '_require_scratch_size' is for.
 
-- Eric
+i.e. _require_scratch_size $larger_than_ext4_fg_size
+
+Will do that check once we've calculated the size needed.
+
+> But sure, I will add a comment explaining why we have hardcoded it to 4096
+> so that others don't get confused. Larger than this size disk anyway doesn't get
+> tested much right?
+
+You shouldn't be constricting the test based on assumptions about
+test configurations. If someone decides to test 64k block size, then
+they can size their devices appropriately for the configuration they
+want to test.  If a 64kB block size filesystem can overrun the
+on-disk structure and fail, then the test should exercise that and
+fail appropriately.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
