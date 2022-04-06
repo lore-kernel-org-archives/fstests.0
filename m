@@ -2,145 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29368C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 15:05:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EA00C4332F
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Apr 2022 20:12:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235620AbiDFPHV (ORCPT
+        id S234074AbiDFUOf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Apr 2022 11:07:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36556 "EHLO
+        Wed, 6 Apr 2022 16:14:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43592 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235571AbiDFPHH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Apr 2022 11:07:07 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D88E6537782;
-        Wed,  6 Apr 2022 05:00:55 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id gt4so2315745pjb.4;
-        Wed, 06 Apr 2022 05:00:55 -0700 (PDT)
+        with ESMTP id S235818AbiDFUN2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Apr 2022 16:13:28 -0400
+Received: from mail-pf1-x431.google.com (mail-pf1-x431.google.com [IPv6:2607:f8b0:4864:20::431])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 526B9219ACF
+        for <fstests@vger.kernel.org>; Wed,  6 Apr 2022 11:08:32 -0700 (PDT)
+Received: by mail-pf1-x431.google.com with SMTP id bo5so3190740pfb.4
+        for <fstests@vger.kernel.org>; Wed, 06 Apr 2022 11:08:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=KGic0+TD/qOzfTQcCu/HayvB0cjWqsZOmin9mmy3mFw=;
-        b=luPNnM5+sAGkLrogyd3ELTJCIkfu3AcHZ+rumOdIWZN6dkturZ7aBf4yd6uxuQpMwx
-         GJek9II8ldcpwS5HKJWPIMEy5zOWfdxrN6c0FBVMfQ8tRXbuFT1V7Q1b8tkmb9D8LAhP
-         uT1MsNgkLvjYJtBZLpIbs2uFcIzQrsvCik/Cqqq54cdeC9bnnnPKWIrSc7W62llWG5mQ
-         Tln/IZ160BSoUs7AXcOIvHcTtn2xo8l5m1272P0O8nMvqvJpQmARwXfPk8nleUcvzyjS
-         ayl9noWSBf6fQcpLBnjUK/nhzk6SCve4gmSHUDvnKwCIGn4TwPTLhVq8Hi7VT8qGHjrC
-         z2aw==
+        h=date:from:to:subject:message-id:mime-version:content-disposition;
+        bh=MS05tRFBmXvcuR8TxPOeThX9zUILwksExKqE5Z8Dyeo=;
+        b=CM0i7rZYNboPcxd74POrUKalzqDh0t0rmblP1vTb/zZMDDqu2n/BTiga5UPLJ8ksEd
+         nAy8MKFll7lSUkKdMV9XEL9vkoWsBVFER5oJBi1VMjavH0l4EDXcHVN4S08qp2zrEthY
+         24zsm9+LB8sq2X5Kv685ASsUSXF/w4b7+UH1rXyk5L/h7S2MhJZZSDCZetYcD8HG2R9W
+         FBbPXLuN2ViTbfwvOTAg+lRnsj+lksun1bfg8moBdAMKgcvYde7YaUE+slZid1EYLoMl
+         Pg0dB9p8/WwmJNYKQN2WS5o1qOXKpwGht+Z9BPzsG/Ll/sL4UYY21/g/pMoTBvD5KfvJ
+         0g2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=KGic0+TD/qOzfTQcCu/HayvB0cjWqsZOmin9mmy3mFw=;
-        b=4oDbF7vgRA86xVMN/Ry6rV1TKL5SJoQ/FZgjEruAIgGEw9xrBPqGbo8yFHME5LfG+t
-         7nx19a3vcjNa2/6YutpnU5k9MOLrXwH5T9M+s6k+dGyT/jhneV0G+DPhTiLMR+DNmCIK
-         WAGzP+kGFYmMMbzLSj4LQvxX5FSJzx1IB3WrO2nj3AmnhxkqsJ5mIkn5UD9JQktZ6aKX
-         RRXdfOLrHawJQjsb5vawt0jF4hWh80PSwA/qAKkgyeNMxDybcq7XEMPr//hgKAEUiu41
-         Ds5TQOO+EC3ZxhW72tplpf3z12vFQmfUYqSaYcYSSx+zMYXu6JJrFPIe219LaigLWq/w
-         +uNw==
-X-Gm-Message-State: AOAM531Rb8TPFuMoSP7TxiO4LSCs4c5Ep1TxFs8I4KJ5tHCDVMGYK4ST
-        cH2LuDk7ldKdnpNzlWTfReSPQRQI0YjE7w==
-X-Google-Smtp-Source: ABdhPJxN3YRC5NSYbWqRcPJkpW8LPWFVapL007bFLK3IcOb4kTkdBxvbBmVoAy4mijJ87urjEho01A==
-X-Received: by 2002:a17:902:7c8c:b0:156:5651:1d51 with SMTP id y12-20020a1709027c8c00b0015656511d51mr8368897pll.107.1649246189591;
-        Wed, 06 Apr 2022 04:56:29 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
+         :content-disposition;
+        bh=MS05tRFBmXvcuR8TxPOeThX9zUILwksExKqE5Z8Dyeo=;
+        b=aY26eSADKauI5nNvTIPR1zhliC7oDWy3ih1jSZUJ7HSP7ZBL+gl6O1jF/2HCBS/TZ4
+         bfxqt4wNPjcsPWDVg7bzhcKirs2/UPh8YwIq2tcV2LutZ91GWV+OHeyj+NCMUv4290Cm
+         9Y/bw/w/58Rt0oLa+PCxLnw640cN0C3MlzlW5qLOsKEWFLlEFqxYvJr7Wz6EjuyjSQL8
+         n4qHY42ZTeEvVtNC4SHQQbBVxG1iUFnZxcrjlrKyOdrTjFHRobp839MJp6Nom4sUBDjW
+         hyxFP5Zl3HYN26x4LZ0GxR3+VpYziIJWb0BdxL99udCRcviY3nsGQNjvIkBMjOajQylU
+         hOyQ==
+X-Gm-Message-State: AOAM533AqidOSCssqgH+tYrZ96wmnAIYjs5bEEqA9N6yhbKfk52it6uH
+        /+lotA91RhCo1a+k2FdvMxA=
+X-Google-Smtp-Source: ABdhPJzREmFIkYPEDQgsSmmw6+xLABiM/Oy9rHLM2+9/VH6cXWvxm72Qh0ktlgv1l6MCJjNz5oh+XA==
+X-Received: by 2002:a63:dc44:0:b0:381:5720:88a5 with SMTP id f4-20020a63dc44000000b00381572088a5mr8196934pgj.219.1649268511389;
+        Wed, 06 Apr 2022 11:08:31 -0700 (PDT)
 Received: from localhost ([2406:7400:63:b4e6:5967:b872:39cd:bdb9])
-        by smtp.gmail.com with ESMTPSA id d16-20020a056a00245000b004f7728a4346sm20072842pfj.79.2022.04.06.04.56.28
+        by smtp.gmail.com with ESMTPSA id s2-20020a17090a1c0200b001c994db1960sm7234891pjs.10.2022.04.06.11.08.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Apr 2022 04:56:29 -0700 (PDT)
-Date:   Wed, 6 Apr 2022 17:26:25 +0530
+        Wed, 06 Apr 2022 11:08:30 -0700 (PDT)
+Date:   Wed, 6 Apr 2022 23:38:26 +0530
 From:   Ritesh Harjani <ritesh.list@gmail.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: Re: [PATCHv3 1/4] generic/468: Add another falloc test entry
-Message-ID: <20220406115625.3a2fzn3je7s43xtt@riteshh-domain>
-References: <cover.1648730443.git.ritesh.list@gmail.com>
- <75f4c780e8402a8f993cb987e85a31e4895f13de.1648730443.git.ritesh.list@gmail.com>
- <20220403232823.GS1609613@dread.disaster.area>
- <20220405110603.qqxyivpo4vzj5tlt@riteshh-domain>
- <20220406040508.GC1609613@dread.disaster.area>
+To:     Eric Biggers <ebiggers@kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: "Operation not permitted" message with "-g encrypt" in xfstests
+Message-ID: <20220406180826.6wdjr3zwzedstbft@riteshh-domain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220406040508.GC1609613@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 22/04/06 02:05PM, Dave Chinner wrote:
-> On Tue, Apr 05, 2022 at 04:36:03PM +0530, Ritesh Harjani wrote:
-> > On 22/04/04 09:28AM, Dave Chinner wrote:
-> > > On Thu, Mar 31, 2022 at 06:24:20PM +0530, Ritesh Harjani wrote:
-> > > > From: Ritesh Harjani <riteshh@linux.ibm.com>
-> > > >
-> > > > Add another falloc test entry which could hit a kernel bug
-> > > > with ext4 fast_commit feature w/o below kernel commit [1].
-> > > >
-> > > > <log>
-> > > > [  410.888496][ T2743] BUG: KASAN: use-after-free in ext4_mb_mark_bb+0x26a/0x6c0
-> > > > [  410.890432][ T2743] Read of size 8 at addr ffff888171886000 by task mount/2743
-> > > >
-> > > > This happens when falloc -k size is huge which spans across more than
-> > > > 1 flex block group in ext4. This causes a bug in fast_commit replay
-> > > > code which is fixed by kernel commit at [1].
-> > > >
-> > > > [1]: https://git.kernel.org/pub/scm/linux/kernel/git/tytso/ext4.git/commit/?h=dev&id=bfdc502a4a4c058bf4cbb1df0c297761d528f54d
-> > > >
-> > > > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> > > > ---
-> > > >  tests/generic/468     | 8 ++++++++
-> > > >  tests/generic/468.out | 2 ++
-> > > >  2 files changed, 10 insertions(+)
-> > > >
-> > > > diff --git a/tests/generic/468 b/tests/generic/468
-> > > > index 95752d3b..5e73cff9 100755
-> > > > --- a/tests/generic/468
-> > > > +++ b/tests/generic/468
-> > > > @@ -34,6 +34,13 @@ _scratch_mkfs >/dev/null 2>&1
-> > > >  _require_metadata_journaling $SCRATCH_DEV
-> > > >  _scratch_mount
-> > > >
-> > > > +# blocksize and fact are used in the last case of the fsync/fdatasync test.
-> > > > +# This is mainly trying to test recovery operation in case where the data
-> > > > +# blocks written, exceeds the default flex group size (32768*4096*16) in ext4.
-> > > > +blocks=32768
-> > > > +blocksize=4096
-> > >
-> > > Block size can change based on mkfs parameters. You should extract
-> > > this dynamically from the filesystem the test is being run on.
-> > >
-> >
-> > Yes, but we still have kept just 4096 because, anything bigger than that like
-> > 65536 might require a bigger disk size itself to test. The overall size
-> > requirement of the disk will then become ~36G (32768 * 65536 * 18)
-> > Hence I went ahead with 4096 which is good enough for testing.
->
-> If the test setup doesn't have a disk large enough, then the test
-> should be skipped. That's what '_require_scratch_size' is for.
->
-> i.e. _require_scratch_size $larger_than_ext4_fg_size
->
-> Will do that check once we've calculated the size needed.
+Hello,
 
-Sure.
+Needed some help on "encrypt" group tests in fstests.
 
->
-> > But sure, I will add a comment explaining why we have hardcoded it to 4096
-> > so that others don't get confused. Larger than this size disk anyway doesn't get
-> > tested much right?
->
-> You shouldn't be constricting the test based on assumptions about
-> test configurations. If someone decides to test 64k block size, then
-> they can size their devices appropriately for the configuration they
-> want to test.  If a 64kB block size filesystem can overrun the
-> on-disk structure and fail, then the test should exercise that and
-> fail appropriately.
+so when I run "./check -g encrypt". All my tests (ext4) fails with
+"keyctl_session_to_parent: Operation not permitted" print.
 
-Sure Dave. Got the point. I will try and make the changes, such that
-test doesn't assume any particular user test configuration. And be generic as
-much as possible so that we could hit the issue we are aiming via this test.
+for e.g.
+qemu-> sudo ./check -s ext4_4k tests/ext4/024
+SECTION       -- ext4_4k
+FSTYP         -- ext4
+PLATFORM      -- Linux/x86_64 qemu 5.17.0-rc5+ #25 SMP PREEMPT Tue Apr 5 14:10:07 CDT 2022
+MKFS_OPTIONS  -- -I 256 -O 64bit -F -b 4096 /dev/loop3
+MOUNT_OPTIONS -- -o data=ordered /dev/loop3 /mnt1/scratch
 
+ext4/024 1s ... - output mismatch (see /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/024.out.bad)
+    --- tests/ext4/024.out      2022-03-30 21:07:38.117980201 +0000
+    +++ /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/024.out.bad     2022-04-06 17:49:25.653513710 +0000
+    @@ -1,2 +1,3 @@
+     QA output created by 024
+    +keyctl_session_to_parent: Operation not permitted
+     Didn't crash!
+    ...
+    (Run 'diff -u /home/qemu/src/tools/xfstests-dev/tests/ext4/024.out /home/qemu/src/tools/xfstests-dev/results//ext4_4k/ext4/024.out.bad'  to see the entire diff)
+Ran: ext4/024
+Failures: ext4/024
+Failed 1 of 1 tests
+
+SECTION       -- ext4_4k
+=========================
+Ran: ext4/024
+Failures: ext4/024
+Failed 1 of 1 tests
+
+
+On further investigation what I notice is -
+
+When I run below command in qemu "sudo keyctl new_session" (which I think is
+also done by _new_session_keyring()), it returns "Operation not permitted"
+
+i.e.
+qemu-> sudo keyctl new_session
+keyctl_session_to_parent: Operation not permitted
+
+Is this because there is already some existing session or something?
+So when I do "sudo keyctl show", I see below.
+
+qemu-> sudo keyctl show
+Session Keyring
+ 699777301 --alswrv   1000  1000  keyring: _ses
+  63328941 ---lswrv   1000 65534   \_ keyring: _uid.1000
+
+Could you please help with what am I missing here?
+So for now I ran with the tests with below diff, which ignores this operation
+not permitted print message. With this all the tests passes.
+
+diff --git a/common/encrypt b/common/encrypt
+index f90c4ef0..a0920664 100644
+--- a/common/encrypt
++++ b/common/encrypt
+@@ -203,7 +203,7 @@ TEST_KEY_IDENTIFIER="69b2f6edeee720cce0577937eb8a6751"
+ # the session keyring scoped to the lifetime of the test script.
+ _new_session_keyring()
+ {
+-       $KEYCTL_PROG new_session >>$seqres.full
++       $KEYCTL_PROG new_session >>$seqres.full 2>&1
+ }
+
+ # Generate a key descriptor (16 character hex string)
+
+But is there anything else which I should check to confirm "-g encrypt" tests
+actually gets excercised?
+
+Also, do you know why this "operation not permitted" error while running with sudo?
+Do I need to change anything at my end? Or does this needs fixing at fstests level?
+
+I agree by spending more time in understanding the encryption stack and how it
+is interacting with different kernel subsystems, I should be able to figure this
+out. But I assumed, that this test should ideally run out of box, if not then there
+is something very basic I am missing. I needed this for testing some basic cleanup
+work which I am doing in ext4 related to CONFIG_FS_ENCRYPTION.
+And wanted to make sure I test those changes against "-g encrypt" in fstests.
+
+Please feel free to point me to the doc which I can refer for more information
+about this.
+
+Thanks for your help!
 -ritesh
