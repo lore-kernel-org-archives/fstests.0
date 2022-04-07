@@ -2,427 +2,276 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 751AAC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu,  7 Apr 2022 11:11:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED3A6C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  7 Apr 2022 11:23:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229748AbiDGLNY (ORCPT
+        id S236450AbiDGLZv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 7 Apr 2022 07:13:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36480 "EHLO
+        Thu, 7 Apr 2022 07:25:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232102AbiDGLNX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Apr 2022 07:13:23 -0400
-Received: from mail1.bemta36.messagelabs.com (mail1.bemta36.messagelabs.com [85.158.142.113])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08ACD16592;
-        Thu,  7 Apr 2022 04:11:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1649329880; i=@fujitsu.com;
-        bh=FJuR1EOUMji0eqnLNa4QcheQalD0sFicovpWA0I+gTs=;
-        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-         MIME-Version:Content-Type;
-        b=dsAV8imnrLDfC/bm5GAmBJnxGCV4q42EoIqr9/IzoXmY2J50u1Z3xxuvFcUTLEJht
-         wb6L2k9Ksp6SF+Fexr6jABMecSPcNgdq0PwqVO5cw+qQ9gAFNYcRnb6CJGoElWyYZW
-         PheKSYaT6IUleRWMoUB4TcEl5yPduSZNzYF1y6gFGOJihrVyyWgnD27FsykIN7dd+j
-         sXi3+Tss39sxm+hRamhyHQ0plVTYmH043w7FMYdCs/QtigAOEwQgQPYq2H+KEcGqol
-         2j5EgKNE43PBbbi+0UTHZatY0bWVSk1z6OlQfq1/ev3inLcdj7x8HT1b7Z0LUfF2O1
-         69Xy0B9BddrZw==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrBIsWRWlGSWpSXmKPExsViZ8ORqHv9mF+
-  SwblJKhavD39itNhy7B6jxeUnfBanW/ayW+zZe5LFgdXj1CIJj02rOtk8Pm+SC2COYs3MS8qv
-  SGDN+D91N2vBgYiKt49vsDcwnvHoYuTkEBLYwijR+S6ri5ELyF7AJDF7y3omCGc3o8SFx3PYQ
-  arYBDQlnnUuYAaxRQRcJL7t/8sGYjMLpEg0nG9iBLGFBSIlls+7wgpiswioSCztPAYW5xXwkN
-  h14ylYvYSAgsSUh+/B5nAKeErcffydDeIKD4nmGzOg6gUlTs58wgIxX0Li4IsXzBC9ihKXOr4
-  xQtgVErNmtTFB2GoSV89tYp7AKDgLSfssJO0LGJlWMdomFWWmZ5TkJmbm6BoaGOgaGprqmpnp
-  WprpJVbpJuqlluomp+aVFCUCZfUSy4v1UouL9Yorc5NzUvTyUks2MQIjIKXYKWEH46O+n3qHG
-  CU5mJREeRt2+iUJ8SXlp1RmJBZnxBeV5qQWH2KU4eBQkuBNPAKUEyxKTU+tSMvMAUYjTFqCg0
-  dJhPfoYaA0b3FBYm5xZjpE6hSjopQ47/ujQAkBkERGaR5cGywBXGKUlRLmZWRgYBDiKUgtys0
-  sQZV/xSjOwagkzCsOTCdCPJl5JXDTXwEtZgJaXHfQF2RxSSJCSqqBqdBi/5/kJWtMTutWNr94
-  UP7+iFHJC35zTgkOleJzkoazbPd97ZzbqbSsaYGJav7TggXc77LtlFTv/t3oWrFg5ckdtZ2CA
-  SZcViIiV9al3NrS1Mqj9MPP6kHLLEWNiCV1bor6XpJZPxr8nrGmqAlrpk9Y/uE9s4SJxHmdgp
-  K/Z2tyj/d9Pu1edvide7CK3O2P51eu0A4Tvp+r+u3GjjneeuU16zW6FSZ+W1i3PU/Q6qCYqWH
-  UgbcfZpXd/hjPNmFb9L5e6y7u81pPY3dlPmB9Udu869EZPpZFDO/W/38kKbXCvXKxzMZXDKFb
-  Yp6/njVzg+NT3nmNKxTFv1xaUhH1juX3jPXMuyRi79Ys7H+rocRSnJFoqMVcVJwIAB1wATp7A
-  wAA
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-25.tower-528.messagelabs.com!1649329879!1667!1
-X-Originating-IP: [62.60.8.97]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.85.5; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 9134 invoked from network); 7 Apr 2022 11:11:19 -0000
-Received: from unknown (HELO n03ukasimr01.n03.fujitsu.local) (62.60.8.97)
-  by server-25.tower-528.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 7 Apr 2022 11:11:19 -0000
-Received: from n03ukasimr01.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTP id 027EA100199;
-        Thu,  7 Apr 2022 12:11:19 +0100 (BST)
-Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        with ESMTP id S244774AbiDGLZq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Apr 2022 07:25:46 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AC022F3B2
+        for <fstests@vger.kernel.org>; Thu,  7 Apr 2022 04:23:46 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTPS id CFFA1100190;
-        Thu,  7 Apr 2022 12:11:18 +0100 (BST)
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Thu, 7 Apr 2022 12:11:12 +0100
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <david@fromorbit.com>, <brauner@kernel.org>, <djwong@kernel.org>
-CC:     <linux-fsdevel@vger.kernel.org>, <fstests@vger.kernel.org>,
-        Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v2 6/6] idmapped-mounts: Add open with O_TMPFILE operation in setgid test
-Date:   Thu, 7 Apr 2022 20:09:35 +0800
-Message-ID: <1649333375-2599-6-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
-References: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        by ams.source.kernel.org (Postfix) with ESMTPS id 8A9CDB82731
+        for <fstests@vger.kernel.org>; Thu,  7 Apr 2022 11:23:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 708F3C385A0;
+        Thu,  7 Apr 2022 11:23:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649330623;
+        bh=NcVW91kom9isPLi64uIHTp/40atrcBpwkSVW6QdsWGE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=Fkby8a8vMxvyftLTucgf51uqiwkmq6nJp5tfTAKP1qvbWWrsffp4O9UplqvRTK/fh
+         U/HE3HNndgEOnvb7MX6RDRvL3/zefi+Tw1Cj8mSbX963y/ha8HZ51Pm+pQDQn4itMN
+         H+G/brmoGkOwyeYQz/lA+MFQ91K9JCrArj9IKZRsn7iXAE+JDYayC1so+W9ttlt0Ap
+         tcUvrJnKErLJd8T47/NMOH76ShrrxZPHfw8c/efhOIROZWZYnYNb0UpoJpr6/gQC/s
+         nuwSzxnFOeHnIL5j6v7voZYXNxRpEgoH3K4pkykc2KFrkd5p7sD062T3PJ9yLvsn7m
+         vLOOqcLoDfclA==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>,
+        Miklos Szeredi <mszeredi@redhat.com>, Eryu Guan <guan@eryu.me>,
+        fstests@vger.kernel.org
+Cc:     Christian Brauner <brauner@kernel.org>,
+        Christoph Hellwig <hch@lst.de>,
+        Aleksa Sarai <cyphar@cyphar.com>,
+        Giuseppe Scrivano <gscrivan@redhat.com>,
+        Rodrigo Campos Catelin <rodrigo@sdfg.com.ar>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Luca Bocassi <luca.boccassi@microsoft.com>,
+        Lennart Poettering <mzxreary@0pointer.de>,
+        =?UTF-8?q?St=C3=A9phane=20Graber?= <stgraber@ubuntu.com>,
+        Eryu Guan <guaneryu@gmail.com>
+Subject: [PATCH v5] common: allow to run all tests on idmapped mounts
+Date:   Thu,  7 Apr 2022 13:21:57 +0200
+Message-Id: <20220407112157.1775081-21-brauner@kernel.org>
+X-Mailer: git-send-email 2.32.0
+In-Reply-To: <20220407112157.1775081-1-brauner@kernel.org>
+References: <20220407112157.1775081-1-brauner@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
-X-Virus-Scanned: ClamAV using ClamSMTP
+X-Developer-Signature: v=1; a=openpgp-sha256; l=7720; h=from:subject; bh=NcVW91kom9isPLi64uIHTp/40atrcBpwkSVW6QdsWGE=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMST5nfQLc20+Ybtk7cU+llMf0mbwnj0hYDj95s+/SsrynhwP 3bwfdpSyMIhxMciKKbI4tJuEyy3nqdhslKkBM4eVCWQIAxenAExk8R5GhnPbrK/ocCzsjcsoZz10Iu TDsgXTHrkt6NgtnNp0ffp2uT8Mf2W+S7gf8Nt08ZNJc+fPjYdV/NZ/zmbIkfue0NJdtcvxPCMA
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since we can create temp file by using O_TMPFILE flag and filesystem driver also
-has this api, we should also check this operation whether strip S_ISGID.
+In addition to the generic and filesystem-specific idmapped mount
+testsuites that already exist upstream today add simple infrastructure
+so any test can be run on idmapped mounts simply by setting
+IDMAPPED_MOUNTS=true in the config file or section. The main user for
+now will be overlay to verify it works correctly on idmapped mounts.
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+Note that the infrastructure is completely generic so every filesystem that
+supports idmapped mounts can simply run all of their tests idmapped. But
+note that not all ways to create a mount have been converted yet. That
+includes e.g. _dmthin_mount and direct calls to _mount in various tests.
+
+In addition, there will be corner-cases. For example, xfs doesn't allow
+bulkstat on idmapped mounts because it is a filesystem wide operation,
+i.e. you can retrieve information for any inode in the filesystem so the
+operation cannot be scoped reasonably under a single mount. So xfstests
+testing bulkstat will fail as it's blocked. Similar for some btrfs
+ioctl()s.
+
+While we could of course restrict this testmode to -overlay for which we
+know things work correctly we should not do this. It would mean that
+people won't start using it and so we won't see issues unless someone
+sits down and goes through more than 1000 tests and figures out for each
+individual one whether it needs to be skipped or not.
+
+So instead allow this mode but for all filesystems so people can start
+running and reporting failures and we can fix them up or block them as
+we detect them.
+
+Cc: Eryu Guan <guaneryu@gmail.com>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: <fstests@vger.kernel.org>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
 ---
- src/idmapped-mounts/idmapped-mounts.c | 155 +++++++++++++++++++++++++-
- 1 file changed, 154 insertions(+), 1 deletion(-)
+/* v2 */
+unchanged
 
-diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 8f292228..362b8820 100644
---- a/src/idmapped-mounts/idmapped-mounts.c
-+++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -337,6 +337,24 @@ out:
- 	return fret;
+/* v3 */
+- Amir Goldstein <amir73il@gmail.com>:
+  - Add more detailed explanation about the current state and
+    expectations of the newly added IDMAPPED_MOUNTS support.
+
+/* v4 */
+- Amir Goldstein <amir73il@gmail.com>:
+  - Document new IDMAPPED_MOUNTS env variable in README and add an
+    [idmapped] section to README.overlay.
+
+/* v5 */
+- Amir Goldstein <amir73il@gmail.com>:
+  - Remove unneeded line in _overlay_config_restore.
+---
+ README         |  5 +++++
+ README.overlay |  6 +++++-
+ common/config  |  1 +
+ common/overlay |  2 ++
+ common/rc      | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 63 insertions(+), 1 deletion(-)
+
+diff --git a/README b/README
+index 9f01aa10..0f98035c 100644
+--- a/README
++++ b/README
+@@ -78,6 +78,11 @@ Preparing system for tests:
+ 	     - setenv TEST_LOGDEV "device for test-fs external log"
+              - setenv TEST_RTDEV "device for test-fs realtime data"
+              - if TEST_LOGDEV and/or TEST_RTDEV, these will always be used.
++             - set IDMAPPED_MOUNTS=true to run all tests on top of idmapped
++               mounts. While this option is supported for all filesystems
++               currently only -overlay is expected to run without issues. For
++               other filesystems additional patches and fixes to the test suite
++               might be needed.
+              - if SCRATCH_LOGDEV and/or SCRATCH_RTDEV, the USE_EXTERNAL
+                environment variable set to "yes" will enable their use.
+              - setenv DIFF_LENGTH "number of diff lines to print from a failed test",
+diff --git a/README.overlay b/README.overlay
+index 39e25ada..ec4671c3 100644
+--- a/README.overlay
++++ b/README.overlay
+@@ -31,7 +31,8 @@ partly supported with './check -overlay'. Only multi-section files that
+ do not change FSTYP and MKFS_OPTIONS can be safely used with -overlay.
+ 
+ For example, the following multi-section config file can be used to
+-run overlay tests on the same base fs, but with different mount options:
++run overlay tests on the same base fs, but with different mount options, and on
++top of idmapped mounts:
+ 
+  [xfs]
+  TEST_DEV=/dev/sda5
+@@ -46,6 +47,9 @@ run overlay tests on the same base fs, but with different mount options:
+  OVERLAY_MOUNT_OPTIONS="-o redirect_dir=off"
+  OVERLAY_FSCK_OPTIONS="-n -o redirect_dir=off"
+ 
++ [idmapped]
++ IDMAPPED_MOUNTS=true
++
+ In the example above, MOUNT_OPTIONS will be used to mount the base scratch fs,
+ TEST_FS_MOUNT_OPTS will be used to mount the base test fs,
+ OVERLAY_MOUNT_OPTIONS will be used to mount both test and scratch overlay and
+diff --git a/common/config b/common/config
+index 479e50d1..1033b890 100644
+--- a/common/config
++++ b/common/config
+@@ -647,6 +647,7 @@ _overlay_config_override()
+ 	# Set fsck options, use default if user not set directly.
+ 	export FSCK_OPTIONS="$OVERLAY_FSCK_OPTIONS"
+ 	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
++	export IDMAPPED_MOUNTS="$IDMAPPED_MOUNTS"
  }
  
-+static bool openat_tmpfile_supported(int dirfd)
+ _overlay_config_restore()
+diff --git a/common/overlay b/common/overlay
+index 1ca37e29..fff67ba1 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -73,6 +73,7 @@ _overlay_base_mount()
+ 
+ 	if [ -z "$dev" -o -z "$mnt" ] || \
+ 		_check_mounted_on $devname $dev $mntname $mnt; then
++		_idmapped_mount $dev $mnt
+ 		# no base fs or already mounted
+ 		return 0
+ 	elif [ $? -ne 1 ]; then
+@@ -81,6 +82,7 @@ _overlay_base_mount()
+ 	fi
+ 
+ 	_mount $* $dev $mnt
++	_idmapped_mount $dev $mnt
+ }
+ 
+ _overlay_base_test_mount()
+diff --git a/common/rc b/common/rc
+index faf54ef9..5090cbf8 100644
+--- a/common/rc
++++ b/common/rc
+@@ -334,6 +334,7 @@ _try_scratch_mount()
+ 		return $?
+ 	fi
+ 	_mount -t $FSTYP `_scratch_mount_options $*`
++	_idmapped_mount $SCRATCH_DEV $SCRATCH_MNT
+ }
+ 
+ # mount scratch device with given options and _fail if mount fails
+@@ -444,6 +445,53 @@ _scratch_shutdown_handle()
+ 	fi
+ }
+ 
++_move_mount()
 +{
-+	int fd = -1;
++	local mnt=$1
++	local tmp=$2
 +
-+	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+	if (fd == -1) {
-+		if (errno == ENOTSUP)
-+			return false;
-+		else
-+			return log_errno(false, "failure: create");
-+	}
-+
-+	if (close(fd))
-+		log_stderr("failure: close");
-+
-+	return true;
++	# Replace $mnt with $tmp. Use a temporary bind-mount because
++	# mount --move will fail with certain mount propagation layouts.
++	$UMOUNT_PROG $mnt || _fail "Failed to unmount $mnt"
++	_mount --bind $tmp $mnt || _fail "Failed to bind-mount $tmp to $mnt"
++	$UMOUNT_PROG $tmp || _fail "Failed to unmount $tmp"
++	rmdir $tmp
 +}
 +
- /* __expected_uid_gid - check whether file is owned by the provided uid and gid */
- static bool __expected_uid_gid(int dfd, const char *path, int flags,
- 			       uid_t expected_uid, gid_t expected_gid, bool log)
-@@ -7841,7 +7859,10 @@ static int setgid_create(void)
++_idmapped_mount()
++{
++	[ "$IDMAPPED_MOUNTS" = "true" ] || return 0
++
++	local dev=$1
++	local mnt=$2
++	local status=0
++	local tmp=`mktemp -d`
++
++	local mount_rec=`findmnt -rncv -S $dev -o OPTIONS`
++	if [[ "$mount_rec" == *"idmapped"* ]]; then
++		return 0
++	fi
++
++	# We create an idmapped mount where {g,u}id 0 writes to disk as
++	# {g,u}id 10000000 and $(id -u fsgqa) + 10000000. We change ownership
++        # of $mnt so {g,u} id 0 can actually create objects in there.
++	chown 10000000:10000000 $mnt || return 1
++	$here/src/idmapped-mounts/mount-idmapped \
++		--map-mount b:10000000:0:100000000000 \
++		$mnt $tmp
++	if [ $? -ne 0 ]; then
++		rmdir $tmp
++		return 1
++	fi
++
++	# The next call ensures we don't end up stacking an idmapped mount on
++	# top of the original mount. Instead we fully replace the original
++	# mount with the idmapped mount. This will not just allow a clean mount
++        # layout it also makes unmount and remounting way simpler.
++	_move_mount $mnt $tmp
++	return $?
++}
++
+ _test_mount()
  {
- 	int fret = -1;
- 	int file1_fd = -EBADF;
-+	int tmpfile_fd = -EBADF;
- 	pid_t pid;
-+	bool supported = false;
-+	char path[PATH_MAX];
+     if [ "$FSTYP" == "overlay" ]; then
+@@ -452,6 +500,7 @@ _test_mount()
+     fi
+     _test_options mount
+     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
++    _idmapped_mount $TEST_DEV $TEST_DIR
+ }
  
- 	if (!caps_supported())
- 		return 0;
-@@ -7866,6 +7887,8 @@ static int setgid_create(void)
- 		goto out;
- 	}
- 
-+	supported = openat_tmpfile_supported(t_dir1_fd);
-+
- 	pid = fork();
- 	if (pid < 0) {
- 		log_stderr("failure: fork");
-@@ -7883,9 +7906,24 @@ static int setgid_create(void)
- 		if (!is_setgid(t_dir1_fd, FILE1, 0))
- 			die("failure: is_setgid");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(t_dir1_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
-+			if (linkat(AT_FDCWD, path, t_dir1_fd, FILE2, AT_SYMLINK_FOLLOW))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (!is_setgid(t_dir1_fd, FILE2, 0))
-+				die("failure: is_setgid");
-+		}
-+
- 		/* create directory */
- 		if (mkdirat(t_dir1_fd, DIR1, 0000))
--			die("failure: create");
-+			die("failure: mkdirat");
- 
- 		/* Directories always inherit the setgid bit. */
- 		if (!is_setgid(t_dir1_fd, DIR1, 0))
-@@ -7908,6 +7946,9 @@ static int setgid_create(void)
- 		if (!expected_uid_gid(t_dir1_fd, FILE1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-+		if (supported && !expected_uid_gid(t_dir1_fd, FILE2, 0, 0, 0))
-+			die("failure: check ownership");
-+
- 		if (!expected_uid_gid(t_dir1_fd, DIR1 "/" FILE1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-@@ -7920,6 +7961,9 @@ static int setgid_create(void)
- 		if (unlinkat(t_dir1_fd, FILE1, 0))
- 			die("failure: delete");
- 
-+		if (supported && unlinkat(t_dir1_fd, FILE2, 0))
-+			die("failure: delete");
-+
- 		if (unlinkat(t_dir1_fd, DIR1 "/" FILE1, 0))
- 			die("failure: delete");
- 
-@@ -7957,6 +8001,21 @@ static int setgid_create(void)
- 		if (is_setgid(t_dir1_fd, FILE1, 0))
- 			die("failure: is_setgid");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(t_dir1_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
-+			if (linkat(AT_FDCWD, path, t_dir1_fd, FILE2, AT_SYMLINK_FOLLOW))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(t_dir1_fd, FILE2, 0))
-+				die("failure: is_setgid");
-+		}
-+
- 		/* create directory */
- 		if (mkdirat(t_dir1_fd, DIR1, 0000))
- 			die("failure: create");
-@@ -7992,6 +8051,9 @@ static int setgid_create(void)
- 		if (!expected_uid_gid(t_dir1_fd, FILE1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-+		if (supported && !expected_uid_gid(t_dir1_fd, FILE2, 0, 0, 0))
-+			die("failure: check ownership");
-+
- 		/*
- 		 * In setgid directories newly created directories always
- 		 * inherit the gid from the parent directory. Verify that the
-@@ -8009,6 +8071,9 @@ static int setgid_create(void)
- 		if (unlinkat(t_dir1_fd, FILE1, 0))
- 			die("failure: delete");
- 
-+		if (supported && unlinkat(t_dir1_fd, FILE2, 0))
-+			die("failure: delete");
-+
- 		if (unlinkat(t_dir1_fd, DIR1 "/" FILE1, 0))
- 			die("failure: delete");
- 
-@@ -8083,7 +8148,10 @@ static int setgid_create_idmapped(void)
- 	struct mount_attr attr = {
- 		.attr_set = MOUNT_ATTR_IDMAP,
- 	};
-+	int tmpfile_fd = -EBADF;
- 	pid_t pid;
-+	bool supported = false;
-+	char path[PATH_MAX];
- 
- 	if (!caps_supported())
- 		return 0;
-@@ -8131,6 +8199,7 @@ static int setgid_create_idmapped(void)
- 		goto out;
- 	}
- 
-+	supported = openat_tmpfile_supported(open_tree_fd);
- 	pid = fork();
- 	if (pid < 0) {
- 		log_stderr("failure: fork");
-@@ -8151,6 +8220,21 @@ static int setgid_create_idmapped(void)
- 		if (is_setgid(open_tree_fd, FILE1, 0))
- 			die("failure: is_setgid");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
-+			if (linkat(AT_FDCWD, path, open_tree_fd, FILE2, AT_SYMLINK_FOLLOW))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(open_tree_fd, FILE2, 0))
-+				die("failure: is_setgid");
-+		}
-+
- 		/* create directory */
- 		if (mkdirat(open_tree_fd, DIR1, 0000))
- 			die("failure: create");
-@@ -8173,6 +8257,9 @@ static int setgid_create_idmapped(void)
- 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 10000, 10000))
- 			die("failure: check ownership");
- 
-+		if (supported && !expected_uid_gid(open_tree_fd, FILE2, 0, 10000, 10000))
-+			die("failure: check ownership");
-+
- 		/*
- 		 * In setgid directories newly created directories always
- 		 * inherit the gid from the parent directory. Verify that the
-@@ -8254,7 +8341,10 @@ static int setgid_create_idmapped_in_userns(void)
- 	struct mount_attr attr = {
- 		.attr_set = MOUNT_ATTR_IDMAP,
- 	};
-+	int tmpfile_fd = -EBADF;
- 	pid_t pid;
-+	bool supported = false;
-+	char path[PATH_MAX];
- 
- 	if (!caps_supported())
- 		return 0;
-@@ -8302,6 +8392,7 @@ static int setgid_create_idmapped_in_userns(void)
- 		goto out;
- 	}
- 
-+	supported = openat_tmpfile_supported(open_tree_fd);
- 	pid = fork();
- 	if (pid < 0) {
- 		log_stderr("failure: fork");
-@@ -8322,6 +8413,21 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (!is_setgid(open_tree_fd, FILE1, 0))
- 			die("failure: is_setgid");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
-+			if (linkat(AT_FDCWD, path, open_tree_fd, FILE2, AT_SYMLINK_FOLLOW))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (!is_setgid(open_tree_fd, FILE2, 0))
-+				die("failure: is_setgid");
-+		}
-+
- 		/* create directory */
- 		if (mkdirat(open_tree_fd, DIR1, 0000))
- 			die("failure: create");
-@@ -8346,6 +8452,9 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-+		if (supported && !expected_uid_gid(open_tree_fd, FILE2, 0, 0, 0))
-+			die("failure: check ownership");
-+
- 		if (!expected_uid_gid(open_tree_fd, DIR1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-@@ -8357,6 +8466,8 @@ static int setgid_create_idmapped_in_userns(void)
- 
- 		if (unlinkat(open_tree_fd, FILE1, 0))
- 			die("failure: delete");
-+		if (supported && unlinkat(open_tree_fd, FILE2, 0))
-+			die("failure: delete");
- 		if (unlinkat(open_tree_fd, DIR1 "/" FILE1, 0))
- 			die("failure: delete");
- 		if (unlinkat(open_tree_fd, CHRDEV1, 0))
-@@ -8410,6 +8521,21 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (is_setgid(open_tree_fd, FILE1, 0))
- 			die("failure: is_setgid");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
-+			if (linkat(AT_FDCWD, path, open_tree_fd, FILE2, AT_SYMLINK_FOLLOW))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(open_tree_fd, FILE2, 0))
-+				die("failure: is_setgid");
-+		}
-+
- 		/* create directory */
- 		if (mkdirat(open_tree_fd, DIR1, 0000))
- 			die("failure: create");
-@@ -8446,6 +8572,9 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 1000))
- 			die("failure: check ownership");
- 
-+		if (supported && !expected_uid_gid(open_tree_fd, FILE2, 0, 0, 1000))
-+			die("failure: check ownership");
-+
- 		/*
- 		 * In setgid directories newly created directories always
- 		 * inherit the gid from the parent directory. Verify that the
-@@ -8463,6 +8592,9 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (unlinkat(open_tree_fd, FILE1, 0))
- 			die("failure: delete");
- 
-+		if (supported && unlinkat(open_tree_fd, FILE2, 0))
-+			die("failure: delete");
-+
- 		if (unlinkat(open_tree_fd, DIR1 "/" FILE1, 0))
- 			die("failure: delete");
- 
-@@ -8515,6 +8647,21 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (is_setgid(open_tree_fd, FILE1, 0))
- 			die("failure: is_setgid");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
-+			if (linkat(AT_FDCWD, path, open_tree_fd, FILE2, AT_SYMLINK_FOLLOW))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(open_tree_fd, FILE2, 0))
-+				die("failure: is_setgid");
-+		}
-+
- 		/* create directory */
- 		if (mkdirat(open_tree_fd, DIR1, 0000))
- 			die("failure: create");
-@@ -8546,6 +8693,9 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-+		if (supported && !expected_uid_gid(open_tree_fd, FILE2, 0, 0, 0))
-+			die("failure: check ownership");
-+
- 		if (!expected_uid_gid(open_tree_fd, DIR1, 0, 0, 0))
- 			die("failure: check ownership");
- 
-@@ -8558,6 +8708,9 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (unlinkat(open_tree_fd, FILE1, 0))
- 			die("failure: delete");
- 
-+		if (supported && unlinkat(open_tree_fd, FILE2, 0))
-+			die("failure: delete");
-+
- 		if (unlinkat(open_tree_fd, DIR1 "/" FILE1, 0))
- 			die("failure: delete");
- 
+ _test_unmount()
+@@ -3007,6 +3056,7 @@ _mount_or_remount_rw()
+ 	if [ $USE_REMOUNT -eq 0 ]; then
+ 		if [ "$FSTYP" != "overlay" ]; then
+ 			_mount -t $FSTYP $mount_opts $device $mountpoint
++			_idmapped_mount $device $mountpoint
+ 		else
+ 			_overlay_mount $device $mountpoint
+ 		fi
 -- 
-2.27.0
+2.32.0
 
