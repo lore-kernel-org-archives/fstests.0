@@ -2,408 +2,194 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CA90C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu,  7 Apr 2022 06:27:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 192EAC433FE
+	for <linux-fstests@archiver.kernel.org>; Thu,  7 Apr 2022 11:09:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241100AbiDGG3t (ORCPT
+        id S244665AbiDGLLh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 7 Apr 2022 02:29:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42646 "EHLO
+        Thu, 7 Apr 2022 07:11:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57830 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241128AbiDGG3n (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Apr 2022 02:29:43 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4B251F6F1E;
-        Wed,  6 Apr 2022 23:27:41 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S233754AbiDGLLf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Apr 2022 07:11:35 -0400
+Received: from mail1.bemta32.messagelabs.com (mail1.bemta32.messagelabs.com [195.245.230.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CB3580218;
+        Thu,  7 Apr 2022 04:09:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1649329773; i=@fujitsu.com;
+        bh=NuHVxQHpxDDRq2/DGuIil8FquoffInn7KefBlaR0cfw=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=bw1bhqK0hvGtvKJjdOEVD6+gtvbWgDImIR20XWFGc5ZJ9hZGBDg8X5YGzQL3T3xXz
+         SwdqN/cSycuZsRkOF7aeoxmcYvvRGNODdstxIN2cnBLOby/gS+yttgf4Zhpw2sS+Ul
+         c1lywcinj0+/SqG1+cHfYlX/SqpxbYTfErgovpN5BLLbc0h6wKlojegRhEkxtaZPGP
+         uGGOhV81Gn/s6LcGMRyR5JxQWPvdqBekddqpJJrXOaEEoQSEGZLrgnZQOGGt2PjM2x
+         K85WfvnKXqAGqnWlOqDW9QS244wEy8f649HY7Bb1MiTVp7HThm2SAJhO1vi9S7TAoz
+         /1nWdrARqz9ew==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrGIsWRWlGSWpSXmKPExsViZ8MxSTfnmF+
+  SwdOZphavD39itNhy7B6jxeUnfBanW/ayW+zZe5LFgdXj1CIJj02rOtk8Pm+SC2COYs3MS8qv
+  SGDN6Dr2j63gqmjF5vvzmRoYG4S6GLk4hAS2MEqs+biOFcJZwCSxf/ZVFghnN6PEtiu3gRxOD
+  jYBTYlnnQuYQWwRAReJb/v/soHYzAIpEg3nmxhBbGGBGInts36zg9gsAioS91sPg9XzCnhI7P
+  2/GywuIaAgMeXhe7A4p4CnxN3H38HmCAHVNN+YwQhRLyhxcuYTFoj5EhIHX7xghuhVlLjU8Y0
+  Rwq6QmDWrjQnCVpO4em4T8wRGwVlI2mchaV/AyLSK0SqpKDM9oyQ3MTNH19DAQNfQ0FTXRNfI
+  2FIvsUo3US+1VLc8tbhE11AvsbxYL7W4WK+4Mjc5J0UvL7VkEyMw+FOKWd7vYGzq+6l3iFGSg
+  0lJlLdhp1+SEF9SfkplRmJxRnxRaU5q8SFGGQ4OJQnexCNAOcGi1PTUirTMHGAkwqQlOHiURH
+  iPHgZK8xYXJOYWZ6ZDpE4xKkqJ8+YdBUoIgCQySvPg2mDRf4lRVkqYl5GBgUGIpyC1KDezBFX
+  +FaM4B6OSMK8GyBSezLwSuOmvgBYzAS2uO+gLsrgkESEl1cDkMttL/UmHtq9Y8Jvvs/8+PfhI
+  KaBIY13Goj9p0VKzNq8pS7H225ovXu16XfnfoR+yPz7/VT9sLDPhbdvFpwd29b6cUeo8w/Uti
+  +XZvO3XMt48O1t8IfNx9azQYo9bX5iqp+Q5PKnk2tEZvr/f4vd9oe9dnrXzXfTNP7RvbYkx+D
+  b7/ws3ni/38/llOi7P2W3vHjS1ToyBR/gPq9FWhkf/D/7LXLhDPOiqX7uFz/ekO15nOMouuL7
+  dcKz77+TWCSc25x9hLMoK/ehjv+bBH+fLv0se/HV5mVamVcXj2H/v0UllNb9SIYb6J8827OU6
+  qN0f0fiYcfqlVUoqBxdvNki+5b7wZo9gwem43s5zOxYJKLEUZyQaajEXFScCACMYXCl5AwAA
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-19.tower-591.messagelabs.com!1649329772!1296!1
+X-Originating-IP: [62.60.8.146]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.85.5; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 24241 invoked from network); 7 Apr 2022 11:09:32 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-19.tower-591.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 7 Apr 2022 11:09:32 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 62D49100441;
+        Thu,  7 Apr 2022 12:09:32 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 269E7B826BA;
-        Thu,  7 Apr 2022 06:27:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B0024C385A0;
-        Thu,  7 Apr 2022 06:27:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649312858;
-        bh=xcdVpo6ltGZLhmyOE7gv5pmYl+o/OML94L3IQrWg6M0=;
-        h=From:To:Cc:Subject:Date:From;
-        b=TrqfLsDAi5O/ZKeYHpuE5IKOv1UCFrADMaO6Waj4fhgoVa2r82/NTiwWgDeIlJolf
-         FoOJ2rnya0UmwpvF8igZn3zwZxjdHpdomLZ7wQRW3kl975EpTdPog/oq0IfkqvHNXJ
-         BonDl1dRITa7BR0nWM3Zvtzs7SKN0BhW6L526aZQqiPEWcuFN1kRrmLAppw4aKgygv
-         Sml2Tq6kwnZKSmd4XQ4+2O12uXGk1TElJ4yLnwvvOzpOjC7iBatUxcRUJ96zl6pqKa
-         z0hOkBMSlD9agBDwgE4/UwGN2UyeUxHAFZyDqeMoASt1TSG8Ja8lLV6bVNyyqzZ0Ig
-         WG+a6iljQ04dQ==
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org,
-        Ritesh Harjani <ritesh.list@gmail.com>
-Subject: [xfstests PATCH] common/encrypt: use a sub-keyring within the session keyring
-Date:   Wed,  6 Apr 2022 23:26:21 -0700
-Message-Id: <20220407062621.346777-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.35.1
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 5589F100468;
+        Thu,  7 Apr 2022 12:09:32 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Thu, 7 Apr 2022 12:09:24 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <david@fromorbit.com>, <brauner@kernel.org>, <djwong@kernel.org>
+CC:     <linux-fsdevel@vger.kernel.org>, <fstests@vger.kernel.org>,
+        Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2 4/6] idmapped-mounts: Add umask(S_IXGRP) wrapper for setgid_create* cases
+Date:   Thu, 7 Apr 2022 20:09:33 +0800
+Message-ID: <1649333375-2599-4-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
+References: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+Since stipping S_SIGID should check S_IXGRP, so umask it to check whether
+works well.
 
-Make the encryption tests create and use a named keyring "xfstests" in
-the session keyring that the tests happen to be running under, rather
-than replace the session keyring using 'keyctl new_session'.
-Unfortunately, the latter doesn't work when the session keyring is owned
-by a non-root user, which (depending on the Linux distro) can happen if
-xfstests is run in a sudo "session" rather than in a real root session.
-
-This isn't a great solution, as the lifetime of the keyring will no
-longer be tied to the tests as it should be, but it should work.  The
-alternative would be the weird hack of making the 'check' script
-re-execute itself using something like 'keyctl session - $0 $@'.
-
-Reported-by: Ritesh Harjani <ritesh.list@gmail.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- common/encrypt    | 55 ++++++++++++++++++++++++++++++++++-------------
- tests/ext4/024    |  2 +-
- tests/generic/397 |  2 +-
- tests/generic/398 |  2 +-
- tests/generic/399 |  2 +-
- tests/generic/419 |  2 +-
- tests/generic/421 |  2 +-
- tests/generic/429 |  2 +-
- tests/generic/435 |  2 +-
- tests/generic/440 |  2 +-
- tests/generic/576 |  2 +-
- tests/generic/593 | 13 +++++------
- 12 files changed, 57 insertions(+), 31 deletions(-)
+ src/idmapped-mounts/idmapped-mounts.c | 66 +++++++++++++++++++++++++++
+ 1 file changed, 66 insertions(+)
 
-diff --git a/common/encrypt b/common/encrypt
-index f90c4ef0..69faf641 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -121,7 +121,7 @@ _require_encryption_policy_support()
- 		local keyspec=$(_add_enckey $mnt "$raw_key" | awk '{print $NF}')
- 	else
- 		_require_command "$KEYCTL_PROG" keyctl
--		_new_session_keyring
-+		_init_session_keyring
- 		local keyspec=$(_generate_session_encryption_key)
- 	fi
- 	if _set_encpolicy $dir $keyspec $set_encpolicy_args \
-@@ -138,7 +138,7 @@ _require_encryption_policy_support()
- 		_notrun "encryption policy '$set_encpolicy_args' is unusable; probably missing kernel crypto API support"
- 	fi
- 	if (( policy_version <= 1 )); then
--		$KEYCTL_PROG clear @s
-+		$KEYCTL_PROG clear $TEST_KEYRING_ID
- 	fi
- 	rm -r $dir
+diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+index d2638c64..d6769f08 100644
+--- a/src/idmapped-mounts/idmapped-mounts.c
++++ b/src/idmapped-mounts/idmapped-mounts.c
+@@ -8031,6 +8031,27 @@ out:
+ 	return fret;
  }
-@@ -199,11 +199,30 @@ TEST_KEY_DESCRIPTOR="0000111122223333"
- # Key identifier: HKDF-SHA512(key=$TEST_RAW_KEY, salt="", info="fscrypt\0\x01")
- TEST_KEY_IDENTIFIER="69b2f6edeee720cce0577937eb8a6751"
  
--# Give the invoking shell a new session keyring.  This makes any keys we add to
--# the session keyring scoped to the lifetime of the test script.
--_new_session_keyring()
-+# This is the ID of the keyring that was created by _init_session_keyring().
-+# You must call _init_session_keyring() before using this.
-+TEST_KEYRING_ID=
++static int setgid_create_umask(void)
++{
++	pid_t pid;
 +
-+# Create a test keyring within the session keyring.  Keys added to this keyring
-+# will be available within the test script and all its subprocesses.  If the
-+# test keyring already exists, then it is replaced.
-+#
-+# This used to use 'keyctl new_session' to replace the session keyring itself.
-+# However, that doesn't work if a non-root user owns the session keyring.
-+_init_session_keyring()
- {
--	$KEYCTL_PROG new_session >>$seqres.full
-+	TEST_KEYRING_ID=$($KEYCTL_PROG newring xfstests @s)
-+	if [ -z "$TEST_KEYRING_ID" ]; then
-+		_fail "Failed to create test keyring in session keyring"
-+	fi
++	umask(S_IXGRP);
++	pid = fork();
++	if (pid < 0)
++		die("failure: fork");
++
++	if (pid == 0) {
++		if (setgid_create())
++			die("failure: setgid");
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		return -1;
++	else
++		return 0;
 +}
 +
-+# Check that _init_session_keyring() has been called.
-+_check_session_keyring()
+ static int setgid_create_idmapped(void)
+ {
+ 	int fret = -1;
+@@ -8157,6 +8178,27 @@ out:
+ 	return fret;
+ }
+ 
++static int setgid_create_idmapped_umask(void)
 +{
-+	if [ -z "$TEST_KEYRING_ID" ]; then
-+		_fail "_init_session_keyring() must be called before using the test keyring"
-+	fi
- }
- 
- # Generate a key descriptor (16 character hex string)
-@@ -257,6 +276,8 @@ _add_session_encryption_key()
- 	local keydesc=$1
- 	local raw=$2
- 
-+	_check_session_keyring
++	pid_t pid;
 +
- 	#
- 	# Add the key to the session keyring.  The required structure is:
- 	#
-@@ -279,14 +300,14 @@ _add_session_encryption_key()
- 	local mode=$(_num_to_hex 0 4)
- 	local size=$(_num_to_hex 64 4)
- 	echo -n -e "${mode}${raw}${size}" |
--		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
-+		$KEYCTL_PROG padd logon $FSTYP:$keydesc $TEST_KEYRING_ID \
-+			>>$seqres.full
- }
- 
- #
- # Generate a random encryption key, add it to the session keyring, and print out
- # the resulting key descriptor (example: "8bf798e1a494e1ec").  Requires the
--# keyctl program.  It's assumed the caller has already set up a test-scoped
--# session keyring using _new_session_keyring.
-+# keyctl program and that _init_session_keyring() has been called.
- #
- _generate_session_encryption_key()
- {
-@@ -301,16 +322,18 @@ _generate_session_encryption_key()
- # Unlink an encryption key from the session keyring, given its key descriptor.
- _unlink_session_encryption_key()
- {
-+	_check_session_keyring
- 	local keydesc=$1
--	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-+	local keyid=$($KEYCTL_PROG search $TEST_KEYRING_ID logon $FSTYP:$keydesc)
- 	$KEYCTL_PROG unlink $keyid >>$seqres.full
- }
- 
- # Revoke an encryption key from the session keyring, given its key descriptor.
- _revoke_session_encryption_key()
- {
-+	_check_session_keyring
- 	local keydesc=$1
--	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
-+	local keyid=$($KEYCTL_PROG search $TEST_KEYRING_ID logon $FSTYP:$keydesc)
- 	$KEYCTL_PROG revoke $keyid >>$seqres.full
- }
- 
-@@ -429,6 +452,8 @@ _add_fscrypt_provisioning_key()
- 	local type=$2
- 	local raw=$3
- 
-+	_check_session_keyring
++	umask(S_IXGRP);
++	pid = fork();
++	if (pid < 0)
++		die("failure: fork");
 +
- 	# The format of the key payload must be:
- 	#
- 	#	struct fscrypt_provisioning_key_payload {
-@@ -440,7 +465,7 @@ _add_fscrypt_provisioning_key()
- 	local type_hex=$(_num_to_hex $type 4)
- 	local reserved=$(_num_to_hex 0 4)
- 	echo -n -e "${type_hex}${reserved}${raw}" |
--		$KEYCTL_PROG padd fscrypt-provisioning "$desc" @s
-+		$KEYCTL_PROG padd fscrypt-provisioning "$desc" $TEST_KEYRING_ID
++	if (pid == 0) {
++		if (setgid_create_idmapped())
++			die("failure: setgid");
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		return -1;
++	else
++		return 0;
++}
++
+ static int setgid_create_idmapped_in_userns(void)
+ {
+ 	int fret = -1;
+@@ -8492,6 +8534,27 @@ out:
+ 	return fret;
  }
  
- # Retrieve the encryption nonce of the given inode as a hex string.  The nonce
-@@ -604,7 +629,7 @@ _require_get_ciphertext_filename_support()
- 		_require_command "$DUMP_F2FS_PROG" dump.f2fs
- 		_require_command "$KEYCTL_PROG" keyctl
- 		_scratch_mount
--		_new_session_keyring
-+		_init_session_keyring
++static int setgid_create_idmapped_in_userns_umask(void)
++{
++	pid_t pid;
++
++	umask(S_IXGRP);
++	pid = fork();
++	if (pid < 0)
++		die("failure: fork");
++
++	if (pid == 0) {
++		if (setgid_create_idmapped_in_userns())
++			die("failure: setgid");
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		return -1;
++	else
++		return 0;
++}
++
+ #define PTR_TO_INT(p) ((int)((intptr_t)(p)))
+ #define INT_TO_PTR(u) ((void *)((intptr_t)(u)))
  
- 		local keydesc=$(_generate_session_encryption_key)
- 		local dir=$SCRATCH_MNT/test.${FUNCNAME[0]}
-@@ -615,7 +640,7 @@ _require_get_ciphertext_filename_support()
- 		local inode=$(stat -c %i $file)
+@@ -14100,8 +14163,11 @@ struct t_idmapped_mounts t_setattr_fix_968219708108[] = {
  
- 		_scratch_unmount
--		$KEYCTL_PROG clear @s
-+		$KEYCTL_PROG clear $TEST_KEYRING_ID
+ struct t_idmapped_mounts t_setgid[] = {
+ 	{ setgid_create,						false,	"create operations in directories with setgid bit set",						},
++	{ setgid_create_umask,						false,	"create operations in directories with setgid bit set by umask(S_IXGRP)",			},
+ 	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
++	{ setgid_create_idmapped_umask,					true,	"create operations in directories with setgid bit set on idmapped mounts by umask(S_IXGRP)",	},
+ 	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
++	{ setgid_create_idmapped_in_userns_umask,			true,   "create operations in directories with setgid bit set on idmapped mounts in user namespace by umask(S_IXGRP)",	},
+ };
  
- 		# 255-character filename should result in 340 base64 characters.
- 		if ! $DUMP_F2FS_PROG -i $inode $SCRATCH_DEV \
-@@ -899,7 +924,7 @@ _verify_ciphertext_for_encryption_policy()
- 				| awk '{print $NF}')
- 	else
- 		local keyspec=$(_generate_key_descriptor)
--		_new_session_keyring
-+		_init_session_keyring
- 		_add_session_encryption_key $keyspec $raw_key
- 	fi
- 	local raw_key_hex=$(echo "$raw_key" | tr -d '\\x')
-diff --git a/tests/ext4/024 b/tests/ext4/024
-index 116adca9..11b335f0 100755
---- a/tests/ext4/024
-+++ b/tests/ext4/024
-@@ -18,7 +18,7 @@ _supported_fs ext4
- _require_scratch_encryption
- _require_command "$KEYCTL_PROG" keyctl
- 
--_new_session_keyring
-+_init_session_keyring
- 
- #
- # Create an encrypted file whose size is not a multiple of the filesystem block
-diff --git a/tests/generic/397 b/tests/generic/397
-index 5ff65cd9..6c03f274 100755
---- a/tests/generic/397
-+++ b/tests/generic/397
-@@ -23,7 +23,7 @@ _require_symlinks
- _require_scratch_encryption
- _require_command "$KEYCTL_PROG" keyctl
- 
--_new_session_keyring
-+_init_session_keyring
- 
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
-diff --git a/tests/generic/398 b/tests/generic/398
-index 506513c1..e2cbad54 100755
---- a/tests/generic/398
-+++ b/tests/generic/398
-@@ -24,7 +24,7 @@ _supported_fs generic
- _require_scratch_encryption
- _require_renameat2 exchange
- 
--_new_session_keyring
-+_init_session_keyring
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
- 
-diff --git a/tests/generic/399 b/tests/generic/399
-index 55f07ae5..a5aa7107 100755
---- a/tests/generic/399
-+++ b/tests/generic/399
-@@ -30,7 +30,7 @@ _require_symlinks
- _require_command "$XZ_PROG" xz
- _require_command "$KEYCTL_PROG" keyctl
- 
--_new_session_keyring
-+_init_session_keyring
- 
- #
- # Set up a small filesystem containing an encrypted directory.  64 MB is enough
-diff --git a/tests/generic/419 b/tests/generic/419
-index 6be7865c..5d56d64f 100755
---- a/tests/generic/419
-+++ b/tests/generic/419
-@@ -24,7 +24,7 @@ _require_scratch_encryption
- _require_command "$KEYCTL_PROG" keyctl
- _require_renameat2 exchange
- 
--_new_session_keyring
-+_init_session_keyring
- 
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
-diff --git a/tests/generic/421 b/tests/generic/421
-index 04462d17..0c4fa8e3 100755
---- a/tests/generic/421
-+++ b/tests/generic/421
-@@ -20,7 +20,7 @@ _supported_fs generic
- _require_scratch_encryption
- _require_command "$KEYCTL_PROG" keyctl
- 
--_new_session_keyring
-+_init_session_keyring
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
- 
-diff --git a/tests/generic/429 b/tests/generic/429
-index 558e93ca..2cf12316 100755
---- a/tests/generic/429
-+++ b/tests/generic/429
-@@ -35,7 +35,7 @@ _require_test_program "t_encrypted_d_revalidate"
- # Set up an encrypted directory
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
--_new_session_keyring
-+_init_session_keyring
- keydesc=$(_generate_key_descriptor)
- raw_key=$(_generate_raw_encryption_key)
- mkdir $SCRATCH_MNT/edir
-diff --git a/tests/generic/435 b/tests/generic/435
-index 031e43cc..bb1cbb62 100755
---- a/tests/generic/435
-+++ b/tests/generic/435
-@@ -29,7 +29,7 @@ _require_command "$KEYCTL_PROG" keyctl
- 
- # set up an encrypted directory
- 
--_new_session_keyring
-+_init_session_keyring
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
- mkdir $SCRATCH_MNT/edir
-diff --git a/tests/generic/440 b/tests/generic/440
-index f445a386..5850a8fe 100755
---- a/tests/generic/440
-+++ b/tests/generic/440
-@@ -25,7 +25,7 @@ _require_symlinks
- _require_command "$KEYCTL_PROG" keyctl
- 
- # Set up an encryption-capable filesystem and an encryption key.
--_new_session_keyring
-+_init_session_keyring
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
- keydesc=$(_generate_key_descriptor)
-diff --git a/tests/generic/576 b/tests/generic/576
-index 82fbdd71..3ef04953 100755
---- a/tests/generic/576
-+++ b/tests/generic/576
-@@ -38,7 +38,7 @@ edir=$SCRATCH_MNT/edir
- fsv_file=$edir/file.fsv
- 
- # Set up an encrypted directory.
--_new_session_keyring
-+_init_session_keyring
- keydesc=$(_generate_session_encryption_key)
- mkdir $edir
- _set_encpolicy $edir $keydesc
-diff --git a/tests/generic/593 b/tests/generic/593
-index f0610c57..2dda5d76 100755
---- a/tests/generic/593
-+++ b/tests/generic/593
-@@ -20,7 +20,7 @@ _supported_fs generic
- _require_scratch_encryption -v 2
- _require_command "$KEYCTL_PROG" keyctl
- 
--_new_session_keyring
-+_init_session_keyring
- _scratch_mkfs_encrypted &>> $seqres.full
- _scratch_mount
- _require_add_enckey_by_key_id $SCRATCH_MNT
-@@ -113,25 +113,26 @@ echo -e "\n# keyctl_read() doesn't work on fscrypt-provisioning keys"
- keyid=$(_add_fscrypt_provisioning_key desc $FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR \
- 	"$TEST_RAW_KEY")
- $KEYCTL_PROG read $keyid
--$KEYCTL_PROG unlink $keyid @s
-+$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
- 
- echo -e "\n# Only keys with the correct fscrypt_provisioning_key_payload::type field can be added"
- echo "# ... keyring key is v1, filesystem wants v2 key"
- keyid=$(_add_fscrypt_provisioning_key desc $FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR \
- 	"$TEST_RAW_KEY")
- $XFS_IO_PROG -c "add_enckey -k $keyid" $SCRATCH_MNT
--$KEYCTL_PROG unlink $keyid @s
-+$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
- 
- echo "# ... keyring key is v2, filesystem wants v1 key"
- keyid=$(_add_fscrypt_provisioning_key desc $FSCRYPT_KEY_SPEC_TYPE_IDENTIFIER \
- 	"$TEST_RAW_KEY")
- $XFS_IO_PROG -c "add_enckey -k $keyid -d $TEST_KEY_DESCRIPTOR" $SCRATCH_MNT
--$KEYCTL_PROG unlink $keyid @s
-+$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
- 
- echo -e "\n# Only keys of type fscrypt-provisioning can be added"
--keyid=$(head -c 64 /dev/urandom | $KEYCTL_PROG padd logon foo:desc @s)
-+keyid=$(head -c 64 /dev/urandom | \
-+	$KEYCTL_PROG padd logon foo:desc $TEST_KEYRING_ID)
- $XFS_IO_PROG -c "add_enckey -k $keyid" $SCRATCH_MNT
--$KEYCTL_PROG unlink $keyid @s
-+$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
- 
- # success, all done
- status=0
-
-base-commit: 1ae79d2ecdac6f9ad94a660eca3d7586e34d7d6b
+ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
 -- 
-2.35.1
+2.27.0
 
