@@ -2,73 +2,77 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA05FC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu,  7 Apr 2022 11:09:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C790C433FE
+	for <linux-fstests@archiver.kernel.org>; Thu,  7 Apr 2022 11:10:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233605AbiDGLLn (ORCPT
+        id S234198AbiDGLMm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 7 Apr 2022 07:11:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58312 "EHLO
+        Thu, 7 Apr 2022 07:12:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33724 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233757AbiDGLLl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Apr 2022 07:11:41 -0400
-Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA7584C79C;
-        Thu,  7 Apr 2022 04:09:41 -0700 (PDT)
+        with ESMTP id S236691AbiDGLMl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Apr 2022 07:12:41 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86EF32AC9;
+        Thu,  7 Apr 2022 04:10:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1649329780; i=@fujitsu.com;
-        bh=HYwCKl4z98TADFdf0eWLoI2P43SeKLX0xz+CWJSnsIY=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=GDwpLOmkAdnLl0HmUWfWoOAqSoaSyys7G5q3RI+b1p2zSN4Upun3bcBpv51yIZj0C
-         Xv2RCAVvfsOoQWTMZtZ10Smhy9xMwZiy6Lu0L/DCQ9CQpBIsz57wBbQXu+WAEwAsYh
-         rT2Jm71WpVx9L9p/yPIuirI380cjwKnSoiorCsARxwb8cI6u67dRSiG/vhpH5uI1ky
-         5bRJNawFaJ6jMFOlZcoj5UUu9JtXBL+hkTD+cst04FA5RJrA6AdXaFz7AQ6WygXVOK
-         CZr0NfVgpwn0FnaTyiZ98w/zDIgvi+hDQLHLHj1dbO4H5Aay0zYEh4RdeEMyXbOoQL
-         sDAyVmibR6IdA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrLIsWRWlGSWpSXmKPExsViZ8MxSTfnmF+
-  SwZc/uhavD39itNhy7B6jxeUnfBanW/ayW+zZe5LFgdXj1CIJj02rOtk8Pm+SC2COYs3MS8qv
-  SGDN2LZtD3PBPrWKlgmd7A2MU+W7GLk4hAS2MErsO72WtYuRE8hZwCSxZ2YURGI3o8TK3bvZQ
-  RJsApoSzzoXMIPYIgIuEt/2/2UDsZkFUiQazjcxgtjCAh4St9sPsoDYLAIqEremH2cCsXmB4o
-  2zroHVSwgoSEx5+J4ZIi4ocXLmExaIORISB1+8YIaoUZS41PGNEcKukJg1q40JwlaTuHpuE/M
-  ERv5ZSNpnIWlfwMi0itEqqSgzPaMkNzEzR9fQwEDX0NBU19hI19BEL7FKN1EvtVS3PLW4RNdI
-  L7G8WC+1uFivuDI3OSdFLy+1ZBMjMJRTihX4djA2r/qpd4hRkoNJSZS3YadfkhBfUn5KZUZic
-  UZ8UWlOavEhRhkODiUJ3sQjQDnBotT01Iq0zBxgXMGkJTh4lER4jx4GSvMWFyTmFmemQ6ROMS
-  pKifPmHQVKCIAkMkrz4NpgsXyJUVZKmJeRgYFBiKcgtSg3swRV/hWjOAejkjCvBsgUnsy8Erj
-  pr4AWMwEtrjvoC7K4JBEhJdXAZLPn7K51frErZzyYyG0aHVVgYVTF+o5r34py7cmz3xYnZRue
-  M3x/Lygl/uu/Cb2zSrTrHr67p3D8ik+tVdfHuMjL6dsrhO2uiHvv3pt7LJ7z56q5BYl5dpNyH
-  b9rXf3DOf8Jd1JCzrKDctsPHRCo7RdZGrI5t3np36yv8ssSWt8J6vUs8iiM5rJLDyvpc5DL5E
-  7WeJ9Qb1D35p2QZeXhmKbuOBmnn/wGC7v2dFY+ttthyNZuf8FWSjh0UlHzd+sv6oIKD3lu2iZ
-  lPA3MWKj38T3vdbZdRcnXrzNbebHunSI8KcZ92+RDKRuUZUQ7eOKDdrtv6TVeckWAu6bj+lS7
-  W//m3WeIe5fg8lqpap0SS3FGoqEWc1FxIgA22TCYYAMAAA==
+        s=170520fj; t=1649329839; i=@fujitsu.com;
+        bh=ldhkgmh+x9ZpMfMk06uXxU34VsAmVCDbQY1Nmni+etc=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=P1yWJ2VP5MkWzkR3pmxIuQtm2awSGXdvgA1klDsZeVi5y9zcTIhr2q0BIXhGoFayC
+         PAtye1qM22+ezPnV7MCvejXrXiShJnpKURFv4EUe1w1s6YwQqMtsEQdcLXsoKDyshV
+         7ssfLhDN26oAOjP7l/xfx9H5CWBPLrKzcGtNg+y8nTvUHhJpUpDBRkc/MG3UvzGGDU
+         DdS4neIqS7N6HlioL/LyR6aoqNY6QIq3jWTzR+3hkJdOKivSKpnRmV+l0dO/blIHXz
+         hy32cQ5Gr0B3utIU264tgVh1t+WamoYvqr4ngIbTpL91cpMz99ZgwXaKMKCW9byLwS
+         4FHaGA5SgEDNQ==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrGIsWRWlGSWpSXmKPExsViZ8MxSXfdMb8
+  kgwtX1CxeH/7EaLHl2D1Gi8tP+CxOt+xlt9iz9ySLA6vHqUUSHptWdbJ5fN4kF8AcxZqZl5Rf
+  kcCa0XxmI2NBl2zF6YkXmRoYt0p0MXJyCAlsYZSYfq+8i5ELyF7AJHF90h4mCGc3o8TujlvMI
+  FVsApoSzzoXgNkiAi4S3/b/ZQOxmQVSJBrONzGC2MICcRIrf8wAs1kEVCTW/NwNZvMKeEgs27
+  kbrF5CQEFiysP3YHM4BTwl7j7+zgZxhYdE840ZUPWCEidnPmGBmC8hcfDFC2aIXkWJSx3fGCH
+  sColZs9qYIGw1iavnNjFPYBSchaR9FpL2BYxMqxitk4oy0zNKchMzc3QNDQx0DQ1NdY1NdQ1N
+  LPUSq3QT9VJLdctTi0t0jfQSy4v1UouL9Yorc5NzUvTyUks2MQKDP6VYeeoOxtOrfuodYpTkY
+  FIS5W3Y6ZckxJeUn1KZkVicEV9UmpNafIhRhoNDSYI38QhQTrAoNT21Ii0zBxiJMGkJDh4lEd
+  6jh4HSvMUFibnFmekQqVOMilLivO+PAiUEQBIZpXlwbbDov8QoKyXMy8jAwCDEU5BalJtZgir
+  /ilGcg1FJmFccmEqEeDLzSuCmvwJazAS0uO6gL8jikkSElFQDU2KxR1bN/tSiXddeP5zzoEXk
+  +zK1c5+Pd7q8iNywYdGr6yd7SyRaff/rbHFJ2mOz7q3XnF97v5fdWvxJ/uq0+omh7xR49ngdF
+  N1qsm+C3+UKIWvFiuD6dX6xG2zZfyQeXX/+8fkHnoGS7sZTTGcmnP/Qcd7Y71K0yyftmYdClr
+  UVXsrxspq30zL3ifnBd3GNOyv31vt6qnu8fyDaa1x28P/fj4lfGv7e5at4I+4d11lb92DZx/o
+  DP+e/uvzoycEK3+dWzzZK/t0y9Xh/4oqCIG9u7nCjCUlezzikNCdd837abvnux3nfENMNXn+e
+  rn54co5H11Z3/iRe7S92N2YmyRXZl4rlxHe+XbjCVWjC914lluKMREMt5qLiRAALVClxeQMAA
+  A==
 X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-12.tower-565.messagelabs.com!1649329772!1412!1
+X-Msg-Ref: server-20.tower-565.messagelabs.com!1649329838!1459!1
 X-Originating-IP: [62.60.8.146]
 X-SYMC-ESS-Client-Auth: outbound-route-from=pass
 X-StarScan-Received: 
 X-StarScan-Version: 9.85.5; banners=-,-,-
 X-VirusChecked: Checked
-Received: (qmail 28980 invoked from network); 7 Apr 2022 11:09:32 -0000
+Received: (qmail 3257 invoked from network); 7 Apr 2022 11:10:38 -0000
 Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
-  by server-12.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 7 Apr 2022 11:09:32 -0000
+  by server-20.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 7 Apr 2022 11:10:38 -0000
 Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 4B61C100464;
-        Thu,  7 Apr 2022 12:09:32 +0100 (BST)
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 3F275100468;
+        Thu,  7 Apr 2022 12:10:38 +0100 (BST)
 Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 3DE37100441;
-        Thu,  7 Apr 2022 12:09:32 +0100 (BST)
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 31C03100451;
+        Thu,  7 Apr 2022 12:10:38 +0100 (BST)
 Received: from localhost.localdomain (10.167.220.84) by
  R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Thu, 7 Apr 2022 12:09:09 +0100
+ (TLS) id 15.0.1497.32; Thu, 7 Apr 2022 12:10:17 +0100
 From:   Yang Xu <xuyang2018.jy@fujitsu.com>
 To:     <david@fromorbit.com>, <brauner@kernel.org>, <djwong@kernel.org>
 CC:     <linux-fsdevel@vger.kernel.org>, <fstests@vger.kernel.org>,
         Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v2 1/6] idmapped-mount: split setgid test from test-core
-Date:   Thu, 7 Apr 2022 20:09:30 +0800
-Message-ID: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2 5/6] idmapped-mounts: Add setfacl(S_IXGRP) wrapper for setgid_create* cases
+Date:   Thu, 7 Apr 2022 20:09:34 +0800
+Message-ID: <1649333375-2599-5-git-send-email-xuyang2018.jy@fujitsu.com>
 X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
+References: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [10.167.220.84]
@@ -79,132 +83,125 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since we plan to increase setgid test covertage, it will find new bug
-, so add a new test group test-setgid is better.
-
-Also add a new test case to test test-setgid instead of miss it.
+Since stipping S_SIGID should check S_IXGRP, so using sefacl to umask it to
+check whether works well.
 
 Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- src/idmapped-mounts/idmapped-mounts.c | 19 +++++++++++++++----
- tests/generic/999                     | 26 ++++++++++++++++++++++++++
- tests/generic/999.out                 |  2 ++
- 3 files changed, 43 insertions(+), 4 deletions(-)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
+ src/idmapped-mounts/idmapped-mounts.c | 75 +++++++++++++++++++++++++++
+ 1 file changed, 75 insertions(+)
 
 diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 4cf6c3bb..dff6820f 100644
+index d6769f08..8f292228 100644
 --- a/src/idmapped-mounts/idmapped-mounts.c
 +++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -13809,6 +13809,7 @@ static void usage(void)
- 	fprintf(stderr, "--test-nested-userns                Run nested userns idmapped mount testsuite\n");
- 	fprintf(stderr, "--test-btrfs                        Run btrfs specific idmapped mount testsuite\n");
- 	fprintf(stderr, "--test-setattr-fix-968219708108     Run setattr regression tests\n");
-+	fprintf(stderr, "--test-setgid                       Run setgid create tests\n");
- 
- 	_exit(EXIT_SUCCESS);
+@@ -8052,6 +8052,30 @@ static int setgid_create_umask(void)
+ 		return 0;
  }
-@@ -13826,6 +13827,7 @@ static const struct option longopts[] = {
- 	{"test-nested-userns",			no_argument,		0,	'n'},
- 	{"test-btrfs",				no_argument,		0,	'b'},
- 	{"test-setattr-fix-968219708108",	no_argument,		0,	'i'},
-+	{"test-setgid",				no_argument,		0,	'j'},
- 	{NULL,					0,			0,	  0},
- };
  
-@@ -13866,9 +13868,6 @@ struct t_idmapped_mounts {
- 	{ setattr_truncate,						false,	"setattr truncate",										},
- 	{ setattr_truncate_idmapped,					true,	"setattr truncate on idmapped mounts",								},
- 	{ setattr_truncate_idmapped_in_userns,				true,	"setattr truncate on idmapped mounts in user namespace",					},
--	{ setgid_create,						false,	"create operations in directories with setgid bit set",						},
--	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
--	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
- 	{ setid_binaries,						false,	"setid binaries on regular mounts",								},
- 	{ setid_binaries_idmapped_mounts,				true,	"setid binaries on idmapped mounts",								},
- 	{ setid_binaries_idmapped_mounts_in_userns,			true,	"setid binaries on idmapped mounts in user namespace",						},
-@@ -13923,6 +13922,12 @@ struct t_idmapped_mounts t_setattr_fix_968219708108[] = {
- 	{ setattr_fix_968219708108,					true,	"test that setattr works correctly",								},
- };
- 
-+struct t_idmapped_mounts t_setgid[] = {
-+	{ setgid_create,						false,	"create operations in directories with setgid bit set",						},
-+	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
-+	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
-+};
++static int setgid_create_acl(void)
++{
++	pid_t pid;
 +
- static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
++	snprintf(t_buf, sizeof(t_buf), "setfacl -d -m u::rwx,g::rw,o::rwx %s/%s", t_mountpoint, T_DIR1);
++	if (system(t_buf))
++		die("failure: system");
++
++	pid = fork();
++	if (pid < 0)
++		die("failure: fork");
++
++	if (pid == 0) {
++		if (setgid_create())
++			die("failure: setgid");
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		return -1;
++	else
++		return 0;
++}
++
+ static int setgid_create_idmapped(void)
  {
- 	int i;
-@@ -14000,7 +14005,7 @@ int main(int argc, char *argv[])
- 	int index = 0;
- 	bool supported = false, test_btrfs = false, test_core = false,
- 	     test_fscaps_regression = false, test_nested_userns = false,
--	     test_setattr_fix_968219708108 = false;
-+	     test_setattr_fix_968219708108 = false, test_setgid = false;
+ 	int fret = -1;
+@@ -8199,6 +8223,30 @@ static int setgid_create_idmapped_umask(void)
+ 		return 0;
+ }
  
- 	while ((ret = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
- 		switch (ret) {
-@@ -14037,6 +14042,9 @@ int main(int argc, char *argv[])
- 		case 'i':
- 			test_setattr_fix_968219708108 = true;
- 			break;
-+		case 'j':
-+			test_setgid = true;
-+			break;
- 		case 'h':
- 			/* fallthrough */
- 		default:
-@@ -14106,6 +14114,9 @@ int main(int argc, char *argv[])
- 		      ARRAY_SIZE(t_setattr_fix_968219708108)))
- 		goto out;
++static int setgid_create_idmapped_acl(void)
++{
++	pid_t pid;
++
++	snprintf(t_buf, sizeof(t_buf), "setfacl -d -m u::rwx,g::rw,o::rwx %s/%s", t_mountpoint, T_DIR1);
++	if (system(t_buf))
++		die("failure: system");
++
++	pid = fork();
++	if (pid < 0)
++		die("failure: fork");
++
++	if (pid == 0) {
++		if (setgid_create_idmapped())
++			die("failure: setgid");
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		return -1;
++	else
++		return 0;
++}
++
+ static int setgid_create_idmapped_in_userns(void)
+ {
+ 	int fret = -1;
+@@ -8555,6 +8603,30 @@ static int setgid_create_idmapped_in_userns_umask(void)
+ 		return 0;
+ }
  
-+	if (test_setgid && !run_test(t_setgid, ARRAY_SIZE(t_setgid)))
-+		goto out;
++static int setgid_create_idmapped_in_userns_acl(void)
++{
++	pid_t pid;
 +
- 	fret = EXIT_SUCCESS;
++	snprintf(t_buf, sizeof(t_buf), "setfacl -d -m u::rwx,g::rw,o::rwx %s/%s", t_mountpoint, T_DIR1);
++	if (system(t_buf))
++		die("failure: system");
++
++	pid = fork();
++	if (pid < 0)
++		die("failure: fork");
++
++	if (pid == 0) {
++		if (setgid_create_idmapped_in_userns())
++			die("failure: setgid_create");
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		return -1;
++	else
++		return 0;
++}
++
+ #define PTR_TO_INT(p) ((int)((intptr_t)(p)))
+ #define INT_TO_PTR(u) ((void *)((intptr_t)(u)))
  
- out:
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 00000000..46a34804
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 FUJITSU LIMITED. All rights reserved
-+#
-+# FS QA Test 999
-+#
-+# Test that setgid bit behave correctly.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick cap idmapped mount perms rw
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_require_test
-+
-+echo "Silence is golden"
-+
-+$here/src/idmapped-mounts/idmapped-mounts --test-setgid --device "$TEST_DEV" \
-+	--mount "$TEST_DIR" --fstype "$FSTYP"
-+
-+status=$?
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 00000000..3b276ca8
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
+@@ -14164,10 +14236,13 @@ struct t_idmapped_mounts t_setattr_fix_968219708108[] = {
+ struct t_idmapped_mounts t_setgid[] = {
+ 	{ setgid_create,						false,	"create operations in directories with setgid bit set",						},
+ 	{ setgid_create_umask,						false,	"create operations in directories with setgid bit set by umask(S_IXGRP)",			},
++	{ setgid_create_acl,						false,	"create operations in directories with setgid bit set by setfacl(S_IXGRP)",			},
+ 	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
+ 	{ setgid_create_idmapped_umask,					true,	"create operations in directories with setgid bit set on idmapped mounts by umask(S_IXGRP)",	},
++	{ setgid_create_idmapped_acl,					true,	"create operations in directories with setgid bit set on idmapped mounts by setfacl(S_IXGRP)",	},
+ 	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
+ 	{ setgid_create_idmapped_in_userns_umask,			true,   "create operations in directories with setgid bit set on idmapped mounts in user namespace by umask(S_IXGRP)",	},
++	{ setgid_create_idmapped_in_userns_acl,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace by setfacl(S_IXGRP)",},
+ };
+ 
+ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
 -- 
 2.27.0
 
