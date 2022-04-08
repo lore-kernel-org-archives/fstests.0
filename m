@@ -2,133 +2,209 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04BB0C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Apr 2022 10:34:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81CD1C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Apr 2022 17:09:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234515AbiDHKgL (ORCPT
+        id S234680AbiDHRLE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Apr 2022 06:36:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38522 "EHLO
+        Fri, 8 Apr 2022 13:11:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46178 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234580AbiDHKgE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Apr 2022 06:36:04 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 618E035DD8;
-        Fri,  8 Apr 2022 03:34:01 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S231322AbiDHRLD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Apr 2022 13:11:03 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 973D4FFF66
+        for <fstests@vger.kernel.org>; Fri,  8 Apr 2022 10:08:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1649437738;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=8Su7Zqp9VbuppjomnYRpDpVcC1p6fHHYKDULtx5+etk=;
+        b=TMRkT0AReGD/qmAmu/mdgWxNpAg93/VooJHzh8hqoIcHBrjNbf08gMGWh5jDz9F7AEoEJV
+        ZWWJHWNhnq5XRTe7nWuW98qoNvTIPeBPS8PaDz9SLVN+07bnu3nd6NLia7VIkmuuyRaf2+
+        JvselCBHsQ3iwzdmlV1iuKYeXpRmJQU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-589-9ePI9cqJPFO0Vi4UARFPgg-1; Fri, 08 Apr 2022 13:08:57 -0400
+X-MC-Unique: 9ePI9cqJPFO0Vi4UARFPgg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BC76661F1C;
-        Fri,  8 Apr 2022 10:34:00 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1574C385A1;
-        Fri,  8 Apr 2022 10:33:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649414040;
-        bh=R2y6C4RKRIkqHrX5HzDxzEdmeBfbdg0sMDotWCgU6xE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=mkTOguwLOcVENUNClGNjsu6kmC+p3CwizYIhpw81bJvpV0+PGgW+gOJ7iRTs9ssVv
-         OO0cp0qFUlw31ncXq8IR3CbNRkuvj1D//MO8MRewy/y+UlyUf0DdO8hQWJFAyq2jss
-         1xT/S3z06eHyETASC7a1Fn+qyil6HL/acI8xsfPS0fDgKWuokvrZXh2OC15XlGCZWu
-         2iHtKsN3YTtuQ5+XOt//DpFFa7xpterdmiFaWKesQkjszb8otlUzrTQzyvlRWg0S4O
-         P8YHkqV6dGUfUqRm52qddRYQGlYTMvPBMDQdTe/nAiObH+ZV3E7R94LXaDTJRlh0eM
-         e7hjIRgOW3DTA==
-Date:   Fri, 8 Apr 2022 12:33:55 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-Cc:     "david@fromorbit.com" <david@fromorbit.com>,
-        "djwong@kernel.org" <djwong@kernel.org>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2 1/6] idmapped-mount: split setgid test from test-core
-Message-ID: <20220408103355.pvxtosootmp5twqs@wittgenstein>
-References: <1649333375-2599-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <20220407125509.ammsotnbrimbqjbo@wittgenstein>
- <624F9C07.80808@fujitsu.com>
- <625019FD.2030606@fujitsu.com>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 56CA2811E80
+        for <fstests@vger.kernel.org>; Fri,  8 Apr 2022 17:08:57 +0000 (UTC)
+Received: from zlang-laptop.redhat.com (ovpn-12-61.pek2.redhat.com [10.72.12.61])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 1AB272024CC6
+        for <fstests@vger.kernel.org>; Fri,  8 Apr 2022 17:08:55 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v2] xfs: test xfsdump when an inode < root inode is present
+Date:   Sat,  9 Apr 2022 01:08:47 +0800
+Message-Id: <20220408170847.1088522-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <625019FD.2030606@fujitsu.com>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.78 on 10.11.54.4
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 08, 2022 at 10:17:34AM +0000, xuyang2018.jy@fujitsu.com wrote:
-> on 2022/4/8 9:20, xuyang2018.jy@fujitsu.com wrote:
-> > on 2022/4/7 20:55, Christian Brauner wrote:
-> >> On Thu, Apr 07, 2022 at 08:09:30PM +0800, Yang Xu wrote:
-> >>> Since we plan to increase setgid test covertage, it will find new bug
-> >>> , so add a new test group test-setgid is better.
-> >>>
-> >>> Also add a new test case to test test-setgid instead of miss it.
-> >>>
-> >>> Signed-off-by: Yang Xu<xuyang2018.jy@fujitsu.com>
-> >>> ---
-> >>>    src/idmapped-mounts/idmapped-mounts.c | 19 +++++++++++++++----
-> >>>    tests/generic/999                     | 26 ++++++++++++++++++++++++++
-> >>>    tests/generic/999.out                 |  2 ++
-> >>
-> >> I actually didn't mean to split out the existing setgid tests. I mean
-> >> adding new ones for the test-cases you're adding. But how you did it
-> >> works for me too and is a bit nicer. I don't have a strong opinion so as
-> >> long as Dave and Darrick are fine with it then this seems good to me.
-> > Ok, let's listen ..
-> When I write v3, I add mknodat patch as 1st patch and tmpfile as 2nd 
-> patch(by using a file doesn't under DIR1 directory, so I don't need to 
-> concern about xfs_irix_sgid_inherit_enabled), errno reset to 0 as 3st 
-> patch. It seems this way can't introduce the new failure for generic/633.
+From: Eric Sandeen <sandeen@redhat.com>
 
-Sure.
+This tests a longstanding bug where xfsdumps are not properly
+created when an inode is present on the filesytsem which has
+a lower number than the root inode.
 
-> 
-> So I will add a new group for umask and acl and add new case for them 
-> instead of split setgid case from test-core group.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-Yes. What I'd expect to see is something like:
+Friendly ping for reviewing.
 
-struct t_idmapped_mounts t_setgid_umask[] = {
-	{ setgid_create_umask,						false,	"blabla",     },
-	{ setgid_create_umask_idmapped,					true,	"blabla",     },
-	{ setgid_create_umask_idmapped_in_userns,			true,	"blabla",     },
-};
+Thanks,
+Zorro
 
-struct t_idmapped_mounts t_setgid_acl[] = {
-	{ setgid_create_acl,						false,	"blabla",	},
-	{ setgid_create_acl_idmapped,					true,	"blabla",	},
-	{ setgid_create_acl_idmapped_in_userns,				true,	"blabla",	},
-};
+ common/dump       |  1 +
+ tests/xfs/543     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/543.out | 47 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 111 insertions(+)
+ create mode 100755 tests/xfs/543
+ create mode 100644 tests/xfs/543.out
 
-and two command line switches:
+diff --git a/common/dump b/common/dump
+index ea16d442..ab48cd13 100644
+--- a/common/dump
++++ b/common/dump
+@@ -219,6 +219,7 @@ _require_tape()
+ 
+ _wipe_fs()
+ {
++    [[ "$WIPE_FS" = "no" ]] && return
+     _require_scratch
+ 
+     _scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+diff --git a/tests/xfs/543 b/tests/xfs/543
+new file mode 100755
+index 00000000..4e3c823a
+--- /dev/null
++++ b/tests/xfs/543
+@@ -0,0 +1,63 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Red Hat, Inc. All Rights Reserved.
++#
++# FS QA Test 543
++#
++# Create a filesystem which contains an inode with a lower number
++# than the root inode. Ensure that xfsdump/xfsrestore handles this.
++#
++. ./common/preamble
++_begin_fstest auto quick dump
++
++# Import common functions.
++. ./common/dump
++
++_supported_fs xfs
++_require_scratch
++
++# A large stripe unit will put the root inode out quite far
++# due to alignment, leaving free blocks ahead of it.
++_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1
++
++# Mounting /without/ a stripe should allow inodes to be allocated
++# in lower free blocks, without the stripe alignment.
++_scratch_mount -o sunit=0,swidth=0
++
++root_inum=$(stat -c %i $SCRATCH_MNT)
++
++# Consume space after the root inode so that the blocks before
++# root look "close" for the next inode chunk allocation
++$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
++
++# And make a bunch of inodes until we (hopefully) get one lower
++# than root, in a new inode chunk.
++echo "root_inum: $root_inum" >> $seqres.full
++for i in $(seq 0 4096) ; do
++	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
++	touch $fname
++	inum=$(stat -c "%i" $fname)
++	[[ $inum -lt $root_inum ]] && break
++done
++
++echo "created: $inum" >> $seqres.full
++
++[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
++
++# Now try a dump and restore. Cribbed from xfs/068
++WIPE_FS="no"
++_create_dumpdir_stress
++
++echo -n "Before: " >> $seqres.full
++_count_dumpdir_files | tee $tmp.before >> $seqres.full
++
++# filter out the file count, it changes as fsstress adds new operations
++_do_dump_restore | sed -e "/entries processed$/s/[0-9][0-9]*/NUM/g"
++
++echo -n "After: " >> $seqres.full
++_count_restoredir_files | tee $tmp.after >> $seqres.full
++diff -u $tmp.before $tmp.after
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/543.out b/tests/xfs/543.out
+new file mode 100644
+index 00000000..a5224aaf
+--- /dev/null
++++ b/tests/xfs/543.out
+@@ -0,0 +1,47 @@
++QA output created by 543
++Creating directory system to dump using fsstress.
++
++-----------------------------------------------
++fsstress : -f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10
++-----------------------------------------------
++xfsdump|xfsrestore ...
++xfsdump  -s DUMP_SUBDIR - SCRATCH_MNT | xfsrestore  - RESTORE_DIR
++xfsrestore: using file dump (drive_simple) strategy
++xfsrestore: searching media for dump
++xfsrestore: examining media file 0
++xfsrestore: dump description: 
++xfsrestore: hostname: HOSTNAME
++xfsrestore: mount point: SCRATCH_MNT
++xfsrestore: volume: SCRATCH_DEV
++xfsrestore: session time: TIME
++xfsrestore: level: 0
++xfsrestore: session label: ""
++xfsrestore: media label: ""
++xfsrestore: file system ID: ID
++xfsrestore: session id: ID
++xfsrestore: media ID: ID
++xfsrestore: searching media for directory dump
++xfsrestore: reading directories
++xfsrestore: NUM directories and NUM entries processed
++xfsrestore: directory post-processing
++xfsrestore: restoring non-directory files
++xfsrestore: restore complete: SECS seconds elapsed
++xfsrestore: Restore Status: SUCCESS
++xfsdump: using file dump (drive_simple) strategy
++xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
++xfsdump: dump date: DATE
++xfsdump: session id: ID
++xfsdump: session label: ""
++xfsdump: ino map <PHASES>
++xfsdump: ino map construction complete
++xfsdump: estimated dump size: NUM bytes
++xfsdump: /var/xfsdump/inventory created
++xfsdump: creating dump session media file 0 (media 0, file 0)
++xfsdump: dumping ino map
++xfsdump: dumping directories
++xfsdump: dumping non-directory files
++xfsdump: ending media file
++xfsdump: media file size NUM bytes
++xfsdump: dump size (non-dir files) : NUM bytes
++xfsdump: dump complete: SECS seconds elapsed
++xfsdump: Dump Status: SUCCESS
+-- 
+2.31.1
 
---test-setgid-umask
---test-setgid-acl
-
-and two tests:
-
-generic/<idx>
-generic/<idx + 1>
-
-where one of them calls:
-
---test-setgid-umask
-
-and the other one:
-
---test-setgid-acl
-
-That's roughly how I think it should work. But if you have a better
-approach, please propose it.
-
-> 
-> ps: I doubt whether I need to send two patch sets(one is about 
-> mknodat,tmpfile,errno, the another is about umask,acl,new case).
-> What do you think about this?
-
-I think a single patch _series_ with multiple patches:
-1. errno bugfix
-2. mknodat()
-3. tmpfile()
-4. umask & new test case for it as sm like generic/<idx>
-4. acl & new test case for it as sm like generic/<idx + 1>
-
-Christian
