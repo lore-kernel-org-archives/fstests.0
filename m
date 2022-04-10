@@ -2,632 +2,406 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1A30C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Apr 2022 15:38:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09C68C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Apr 2022 15:49:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243194AbiDJPlE (ORCPT
+        id S234532AbiDJPv2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Apr 2022 11:41:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41420 "EHLO
+        Sun, 10 Apr 2022 11:51:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240176AbiDJPlC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Apr 2022 11:41:02 -0400
-Received: from out20-2.mail.aliyun.com (out20-2.mail.aliyun.com [115.124.20.2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08558286E4
-        for <fstests@vger.kernel.org>; Sun, 10 Apr 2022 08:38:49 -0700 (PDT)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0385549-0.00130575-0.960139;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047209;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.NNqt5sH_1649605126;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.NNqt5sH_1649605126)
-          by smtp.aliyun-inc.com(33.45.69.145);
-          Sun, 10 Apr 2022 23:38:47 +0800
-Date:   Sun, 10 Apr 2022 23:38:46 +0800
+        with ESMTP id S240295AbiDJPv1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Apr 2022 11:51:27 -0400
+Received: from out20-50.mail.aliyun.com (out20-50.mail.aliyun.com [115.124.20.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63061B19;
+        Sun, 10 Apr 2022 08:49:13 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07914598|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.275279-0.00293119-0.721789;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.NNr5z-S_1649605749;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.NNr5z-S_1649605749)
+          by smtp.aliyun-inc.com(33.45.47.205);
+          Sun, 10 Apr 2022 23:49:09 +0800
+Date:   Sun, 10 Apr 2022 23:49:09 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Andrey Albershteyn <aalbersh@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/152: add tests for -L/-U parameters for dump/report
-Message-ID: <YlL6Bv5jrFGbDeg0@desktop>
-References: <20220328224013.147827-1-aalbersh@redhat.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        Ritesh Harjani <ritesh.list@gmail.com>
+Subject: Re: [xfstests PATCH] common/encrypt: use a sub-keyring within the
+ session keyring
+Message-ID: <YlL8deEu4llJHZVa@desktop>
+References: <20220407062621.346777-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220328224013.147827-1-aalbersh@redhat.com>
+In-Reply-To: <20220407062621.346777-1-ebiggers@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 29, 2022 at 12:40:13AM +0200, Andrey Albershteyn wrote:
-> These parameters define ID range of users/groups/projects to show.
-> This patch adds more test for wider coverage (e.g. empty range, full
-> range, open range).
+On Wed, Apr 06, 2022 at 11:26:21PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
-> ---
+> Make the encryption tests create and use a named keyring "xfstests" in
+> the session keyring that the tests happen to be running under, rather
+> than replace the session keyring using 'keyctl new_session'.
+> Unfortunately, the latter doesn't work when the session keyring is owned
+> by a non-root user, which (depending on the Linux distro) can happen if
+> xfstests is run in a sudo "session" rather than in a real root session.
 > 
-> The patch has trailing whitespaces. This is due to the modification of 152.out.
-> The output of 'xfs_quota' is not fully cleared from trailing whitespaces.
+> This isn't a great solution, as the lifetime of the keyring will no
+> longer be tied to the tests as it should be, but it should work.  The
+> alternative would be the weird hack of making the 'check' script
+> re-execute itself using something like 'keyctl session - $0 $@'.
 > 
-> This is mainly regression test in relation to the patch [1].
-> 
-> [1]: https://lore.kernel.org/all/20220328222503.146496-1-aalbersh@redhat.com/
+> Reported-by: Ritesh Harjani <ritesh.list@gmail.com>
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-I'd be better to add a new test for targeted regression test, otherwise
-a test passed previously starts to fail and might be treated as a
-regression.
+This patch conflicts with patch "common/encrypt: allow the use of
+'fscrypt:' as key prefix", which has been applied in my local tree.
+Would you please rebase & resend this one?
 
 Thanks,
 Eryu
 
-> 
 > ---
->  tests/xfs/152     |  65 +++++++---
->  tests/xfs/152.out | 300 +++++++++++++++++++++++++++++++++++++++++++++-
->  2 files changed, 346 insertions(+), 19 deletions(-)
+>  common/encrypt    | 55 ++++++++++++++++++++++++++++++++++-------------
+>  tests/ext4/024    |  2 +-
+>  tests/generic/397 |  2 +-
+>  tests/generic/398 |  2 +-
+>  tests/generic/399 |  2 +-
+>  tests/generic/419 |  2 +-
+>  tests/generic/421 |  2 +-
+>  tests/generic/429 |  2 +-
+>  tests/generic/435 |  2 +-
+>  tests/generic/440 |  2 +-
+>  tests/generic/576 |  2 +-
+>  tests/generic/593 | 13 +++++------
+>  12 files changed, 57 insertions(+), 31 deletions(-)
 > 
-> diff --git a/tests/xfs/152 b/tests/xfs/152
-> index 129d9c06..936cc3fa 100755
-> --- a/tests/xfs/152
-> +++ b/tests/xfs/152
-> @@ -50,6 +50,9 @@ gqid=`id -g fsgqa`
->  uqid2=`id -u fsgqa2`
->  gqid2=`id -g fsgqa2`
->  
-> +[ $uqid -ge $uqid2 ] &&
-> +	_notrun "ID of fsgqa ($uqid) expected to be lower than fsgqa3 ($uqid2)"
-> +
->  pqid=10
->  cat >$tmp.projects <<EOF
->  $pqid:$SCRATCH_MNT
-> @@ -102,6 +105,11 @@ filter_quot()
->  		| sed -e '/#[0-9]*/s/#[0-9]*/#ID/g'
+> diff --git a/common/encrypt b/common/encrypt
+> index f90c4ef0..69faf641 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -121,7 +121,7 @@ _require_encryption_policy_support()
+>  		local keyspec=$(_add_enckey $mnt "$raw_key" | awk '{print $NF}')
+>  	else
+>  		_require_command "$KEYCTL_PROG" keyctl
+> -		_new_session_keyring
+> +		_init_session_keyring
+>  		local keyspec=$(_generate_session_encryption_key)
+>  	fi
+>  	if _set_encpolicy $dir $keyspec $set_encpolicy_args \
+> @@ -138,7 +138,7 @@ _require_encryption_policy_support()
+>  		_notrun "encryption policy '$set_encpolicy_args' is unusable; probably missing kernel crypto API support"
+>  	fi
+>  	if (( policy_version <= 1 )); then
+> -		$KEYCTL_PROG clear @s
+> +		$KEYCTL_PROG clear $TEST_KEYRING_ID
+>  	fi
+>  	rm -r $dir
 >  }
+> @@ -199,11 +199,30 @@ TEST_KEY_DESCRIPTOR="0000111122223333"
+>  # Key identifier: HKDF-SHA512(key=$TEST_RAW_KEY, salt="", info="fscrypt\0\x01")
+>  TEST_KEY_IDENTIFIER="69b2f6edeee720cce0577937eb8a6751"
 >  
-> +filter_dump()
-> +{
-> +	_filter_scratch | sed -E '/^[0-9]+/s/^[0-9]+/#ID/g'
+> -# Give the invoking shell a new session keyring.  This makes any keys we add to
+> -# the session keyring scoped to the lifetime of the test script.
+> -_new_session_keyring()
+> +# This is the ID of the keyring that was created by _init_session_keyring().
+> +# You must call _init_session_keyring() before using this.
+> +TEST_KEYRING_ID=
+> +
+> +# Create a test keyring within the session keyring.  Keys added to this keyring
+> +# will be available within the test script and all its subprocesses.  If the
+> +# test keyring already exists, then it is replaced.
+> +#
+> +# This used to use 'keyctl new_session' to replace the session keyring itself.
+> +# However, that doesn't work if a non-root user owns the session keyring.
+> +_init_session_keyring()
+>  {
+> -	$KEYCTL_PROG new_session >>$seqres.full
+> +	TEST_KEYRING_ID=$($KEYCTL_PROG newring xfstests @s)
+> +	if [ -z "$TEST_KEYRING_ID" ]; then
+> +		_fail "Failed to create test keyring in session keyring"
+> +	fi
 > +}
 > +
->  filter_report()
->  {
->  	_filter_quota | grep -v "^root \|^\#0 " \
-> @@ -122,6 +130,20 @@ filter_state()
->  			    -e '/max warnings:/d'
->  }
->  
-> +set_quota_limit()
+> +# Check that _init_session_keyring() has been called.
+> +_check_session_keyring()
 > +{
-> +	local bs=$1
-> +	local bh=$2
-> +	local is=$3
-> +	local ih=$4
-> +	local user=$5
-> +
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +			-c "limit -$type bsoft=$bs bhard=$bh $user" \
-> +			-c "limit -$type isoft=$is ihard=$ih $user" \
-> +			$SCRATCH_MNT
-> +}
-> +
->  test_quot()
->  {
->  	local opt="$*"
-> @@ -153,16 +175,9 @@ test_quota()
->  
->  test_limit()
->  {
-> -	local bs=$1
-> -	local bh=$2
-> -	local is=$3
-> -	local ih=$4
-> -
-> -	echo "checking limit command (type=$type, bsoft=$bs, bhard=$bh, isoft=$is, ihard=$ih)"
-> -	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -			-c "limit -$type bsoft=$bs bhard=$bh fsgqa" \
-> -			-c "limit -$type isoft=$is ihard=$ih fsgqa" \
-> -			$SCRATCH_MNT
-> +	echo "checking limit command (type=$type, bsoft=$1, bhard=$2,"\
-> +			"isoft=$3, ihard=$4)"
-> +	set_quota_limit $@
->  
->  	# let the timer day transition happen
->  	sleep 2
-> @@ -217,11 +232,14 @@ test_state()
->  
->  test_dump()
->  {
-> +	local opt="$*"
-> +
->  	echo "checking dump command (type=$type)"
->  	rm -f $tmp.backup 2>>/dev/null
->  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -			-c "dump -$type -f $tmp.backup" \
-> +			-c "dump -$type $opt -f $tmp.backup" \
->  			$SCRATCH_MNT | _filter_scratch
-> +	cat $tmp.backup | filter_dump
+> +	if [ -z "$TEST_KEYRING_ID" ]; then
+> +		_fail "_init_session_keyring() must be called before using the test keyring"
+> +	fi
 >  }
 >  
->  test_restore()
-> @@ -270,14 +288,31 @@ test_xfs_quota()
->  	echo "quota remount"; qmount_idmapped
->  	echo ; test_quot
->  	echo ; test_timer
-> -	echo ; test_limit 512k 2048k 10 20
-> +	echo ; test_limit 512k 2048k 10 20 $id
+>  # Generate a key descriptor (16 character hex string)
+> @@ -257,6 +276,8 @@ _add_session_encryption_key()
+>  	local keydesc=$1
+>  	local raw=$2
+>  
+> +	_check_session_keyring
 > +
-> +	# we need two users with quota to test -L/-U options
-> +	set_quota_limit 1024k 4096k 10 20 $id2
+>  	#
+>  	# Add the key to the session keyring.  The required structure is:
+>  	#
+> @@ -279,14 +300,14 @@ _add_session_encryption_key()
+>  	local mode=$(_num_to_hex 0 4)
+>  	local size=$(_num_to_hex 64 4)
+>  	echo -n -e "${mode}${raw}${size}" |
+> -		$KEYCTL_PROG padd logon $FSTYP:$keydesc @s >>$seqres.full
+> +		$KEYCTL_PROG padd logon $FSTYP:$keydesc $TEST_KEYRING_ID \
+> +			>>$seqres.full
+>  }
+>  
+>  #
+>  # Generate a random encryption key, add it to the session keyring, and print out
+>  # the resulting key descriptor (example: "8bf798e1a494e1ec").  Requires the
+> -# keyctl program.  It's assumed the caller has already set up a test-scoped
+> -# session keyring using _new_session_keyring.
+> +# keyctl program and that _init_session_keyring() has been called.
+>  #
+>  _generate_session_encryption_key()
+>  {
+> @@ -301,16 +322,18 @@ _generate_session_encryption_key()
+>  # Unlink an encryption key from the session keyring, given its key descriptor.
+>  _unlink_session_encryption_key()
+>  {
+> +	_check_session_keyring
+>  	local keydesc=$1
+> -	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+> +	local keyid=$($KEYCTL_PROG search $TEST_KEYRING_ID logon $FSTYP:$keydesc)
+>  	$KEYCTL_PROG unlink $keyid >>$seqres.full
+>  }
+>  
+>  # Revoke an encryption key from the session keyring, given its key descriptor.
+>  _revoke_session_encryption_key()
+>  {
+> +	_check_session_keyring
+>  	local keydesc=$1
+> -	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+> +	local keyid=$($KEYCTL_PROG search $TEST_KEYRING_ID logon $FSTYP:$keydesc)
+>  	$KEYCTL_PROG revoke $keyid >>$seqres.full
+>  }
+>  
+> @@ -429,6 +452,8 @@ _add_fscrypt_provisioning_key()
+>  	local type=$2
+>  	local raw=$3
+>  
+> +	_check_session_keyring
 > +
-> +	echo "dump options test"
->  	echo ; test_dump
-> +	echo "-L option"; test_dump -L $id
-> +	echo "-U option"; test_dump -U $id
-> +	echo "-L/-U options (one element range)"; test_dump -L $id -U $id
-> +	echo "-L/-U options (multiple elements range)"; test_dump -L $id -U $id2
-> +	echo "-L/-U options (empty range)"; test_dump -L $id2 -U $id
-> +	echo "-L/-U options (full range)"; test_dump -L 0 -U 0
+>  	# The format of the key payload must be:
+>  	#
+>  	#	struct fscrypt_provisioning_key_payload {
+> @@ -440,7 +465,7 @@ _add_fscrypt_provisioning_key()
+>  	local type_hex=$(_num_to_hex $type 4)
+>  	local reserved=$(_num_to_hex 0 4)
+>  	echo -n -e "${type_hex}${reserved}${raw}" |
+> -		$KEYCTL_PROG padd fscrypt-provisioning "$desc" @s
+> +		$KEYCTL_PROG padd fscrypt-provisioning "$desc" $TEST_KEYRING_ID
+>  }
 >  
-> -	# report options test
->  	echo "report options test"
->  	echo ; test_report
->  	echo "-N option"; test_report -N
-> -	echo "-L -U options"; test_report -L $id -U $id
-> +	echo "-L options"; test_report -L $id
-> +	echo "-U options"; test_report -U $id
-> +	echo "-L/-U options (one element range)"; test_report -L $id -U $id
-> +	echo "-L/-U options (multiple elements range)"; test_report -L $id -U $id2
-> +	echo "-L/-U options (empty range)"; test_report -L $id2 -U $id
-> +	echo "-L/-U options (full range)"; test_report -L 0 -U 0
-> +	# reset quotas for second user as we don't need them anymore
-> +	set_quota_limit 0 0 0 0 $id2
->  	echo "-t option"; test_report -t
->  	echo "-n option"; test_report -n
->  	echo "-h option"; test_report -h
-> @@ -307,7 +342,7 @@ test_xfs_quota()
+>  # Retrieve the encryption nonce of the given inode as a hex string.  The nonce
+> @@ -604,7 +629,7 @@ _require_get_ciphertext_filename_support()
+>  		_require_command "$DUMP_F2FS_PROG" dump.f2fs
+>  		_require_command "$KEYCTL_PROG" keyctl
+>  		_scratch_mount
+> -		_new_session_keyring
+> +		_init_session_keyring
 >  
->  	# off and remove test
->  	echo "off and remove test"
-> -	echo ; test_limit 100m 100m 100 100
-> +	echo ; test_limit 100m 100m 100 100 $id
->  	echo ; test_quota -N
->  	echo ; test_off
->  	echo ; test_state
-> diff --git a/tests/xfs/152.out b/tests/xfs/152.out
-> index b663b096..5aeed7d7 100644
-> --- a/tests/xfs/152.out
-> +++ b/tests/xfs/152.out
-> @@ -11,8 +11,41 @@ SCRATCH_DEV (SCRATCH_MNT) User:
->  checking timer command (type=u)
+>  		local keydesc=$(_generate_session_encryption_key)
+>  		local dir=$SCRATCH_MNT/test.${FUNCNAME[0]}
+> @@ -615,7 +640,7 @@ _require_get_ciphertext_filename_support()
+>  		local inode=$(stat -c %i $file)
 >  
->  checking limit command (type=u, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
-> +dump options test
+>  		_scratch_unmount
+> -		$KEYCTL_PROG clear @s
+> +		$KEYCTL_PROG clear $TEST_KEYRING_ID
 >  
->  checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L option
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-U option
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (one element range)
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (multiple element range)
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L/-U options (empty range)
-> +checking dump command (type=u)
-> +-L/-U options (full range)
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
->  report options test
+>  		# 255-character filename should result in 340 base64 characters.
+>  		if ! $DUMP_F2FS_PROG -i $inode $SCRATCH_DEV \
+> @@ -899,7 +924,7 @@ _verify_ciphertext_for_encryption_policy()
+>  				| awk '{print $NF}')
+>  	else
+>  		local keyspec=$(_generate_key_descriptor)
+> -		_new_session_keyring
+> +		_init_session_keyring
+>  		_add_session_encryption_key $keyspec $raw_key
+>  	fi
+>  	local raw_key_hex=$(echo "$raw_key" | tr -d '\\x')
+> diff --git a/tests/ext4/024 b/tests/ext4/024
+> index 116adca9..11b335f0 100755
+> --- a/tests/ext4/024
+> +++ b/tests/ext4/024
+> @@ -18,7 +18,7 @@ _supported_fs ext4
+>  _require_scratch_encryption
+>  _require_command "$KEYCTL_PROG" keyctl
 >  
->  checking report command (type=u)
-> @@ -21,18 +54,57 @@ User quota on SCRATCH_MNT (SCRATCH_DEV)
->  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> -_new_session_keyring
+> +_init_session_keyring
 >  
->  -N option
->  checking report command (type=u)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L options
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  #
+>  # Create an encrypted file whose size is not a multiple of the filesystem block
+> diff --git a/tests/generic/397 b/tests/generic/397
+> index 5ff65cd9..6c03f274 100755
+> --- a/tests/generic/397
+> +++ b/tests/generic/397
+> @@ -23,7 +23,7 @@ _require_symlinks
+>  _require_scratch_encryption
+>  _require_command "$KEYCTL_PROG" keyctl
 >  
-> --L -U options
-> +-U options
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (one element range)
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (multiple element range)
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L/-U options (empty range)
-> +checking report command (type=u)
-> +-L/-U options (full range)
->  checking report command (type=u)
->  User quota on SCRATCH_MNT (SCRATCH_DEV)
->   Blocks Inodes 
->  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> -_new_session_keyring
+> +_init_session_keyring
 >  
->  -t option
->  checking report command (type=u)
-> @@ -151,6 +223,7 @@ checking restore command (type=u)
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> diff --git a/tests/generic/398 b/tests/generic/398
+> index 506513c1..e2cbad54 100755
+> --- a/tests/generic/398
+> +++ b/tests/generic/398
+> @@ -24,7 +24,7 @@ _supported_fs generic
+>  _require_scratch_encryption
+>  _require_renameat2 exchange
 >  
->  checking report command (type=u)
->  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> -_new_session_keyring
+> +_init_session_keyring
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
 >  
+> diff --git a/tests/generic/399 b/tests/generic/399
+> index 55f07ae5..a5aa7107 100755
+> --- a/tests/generic/399
+> +++ b/tests/generic/399
+> @@ -30,7 +30,7 @@ _require_symlinks
+>  _require_command "$XZ_PROG" xz
+>  _require_command "$KEYCTL_PROG" keyctl
 >  
->  checking state command (type=u)
-> @@ -174,8 +247,41 @@ SCRATCH_DEV (SCRATCH_MNT) User:
->  checking timer command (type=u)
+> -_new_session_keyring
+> +_init_session_keyring
 >  
->  checking limit command (type=u, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
-> +dump options test
+>  #
+>  # Set up a small filesystem containing an encrypted directory.  64 MB is enough
+> diff --git a/tests/generic/419 b/tests/generic/419
+> index 6be7865c..5d56d64f 100755
+> --- a/tests/generic/419
+> +++ b/tests/generic/419
+> @@ -24,7 +24,7 @@ _require_scratch_encryption
+>  _require_command "$KEYCTL_PROG" keyctl
+>  _require_renameat2 exchange
 >  
->  checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L option
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-U option
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (one element range)
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (multiple element range)
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L/-U options (empty range)
-> +checking dump command (type=u)
-> +-L/-U options (full range)
-> +checking dump command (type=u)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
->  report options test
+> -_new_session_keyring
+> +_init_session_keyring
 >  
->  checking report command (type=u)
-> @@ -184,18 +290,57 @@ User quota on SCRATCH_MNT (SCRATCH_DEV)
->  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> diff --git a/tests/generic/421 b/tests/generic/421
+> index 04462d17..0c4fa8e3 100755
+> --- a/tests/generic/421
+> +++ b/tests/generic/421
+> @@ -20,7 +20,7 @@ _supported_fs generic
+>  _require_scratch_encryption
+>  _require_command "$KEYCTL_PROG" keyctl
 >  
->  -N option
->  checking report command (type=u)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L options
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> -_new_session_keyring
+> +_init_session_keyring
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
 >  
-> --L -U options
-> +-U options
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (one element range)
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (multiple element range)
-> +checking report command (type=u)
-> +User quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L/-U options (empty range)
-> +checking report command (type=u)
-> +-L/-U options (full range)
->  checking report command (type=u)
->  User quota on SCRATCH_MNT (SCRATCH_DEV)
->   Blocks Inodes 
->  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> diff --git a/tests/generic/429 b/tests/generic/429
+> index 558e93ca..2cf12316 100755
+> --- a/tests/generic/429
+> +++ b/tests/generic/429
+> @@ -35,7 +35,7 @@ _require_test_program "t_encrypted_d_revalidate"
+>  # Set up an encrypted directory
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+> -_new_session_keyring
+> +_init_session_keyring
+>  keydesc=$(_generate_key_descriptor)
+>  raw_key=$(_generate_raw_encryption_key)
+>  mkdir $SCRATCH_MNT/edir
+> diff --git a/tests/generic/435 b/tests/generic/435
+> index 031e43cc..bb1cbb62 100755
+> --- a/tests/generic/435
+> +++ b/tests/generic/435
+> @@ -29,7 +29,7 @@ _require_command "$KEYCTL_PROG" keyctl
 >  
->  -t option
->  checking report command (type=u)
-> @@ -314,6 +459,7 @@ checking restore command (type=u)
+>  # set up an encrypted directory
 >  
->  checking report command (type=u)
->  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> -_new_session_keyring
+> +_init_session_keyring
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+>  mkdir $SCRATCH_MNT/edir
+> diff --git a/tests/generic/440 b/tests/generic/440
+> index f445a386..5850a8fe 100755
+> --- a/tests/generic/440
+> +++ b/tests/generic/440
+> @@ -25,7 +25,7 @@ _require_symlinks
+>  _require_command "$KEYCTL_PROG" keyctl
 >  
+>  # Set up an encryption-capable filesystem and an encryption key.
+> -_new_session_keyring
+> +_init_session_keyring
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+>  keydesc=$(_generate_key_descriptor)
+> diff --git a/tests/generic/576 b/tests/generic/576
+> index 82fbdd71..3ef04953 100755
+> --- a/tests/generic/576
+> +++ b/tests/generic/576
+> @@ -38,7 +38,7 @@ edir=$SCRATCH_MNT/edir
+>  fsv_file=$edir/file.fsv
 >  
->  checking state command (type=u)
-> @@ -337,8 +483,41 @@ SCRATCH_DEV (SCRATCH_MNT) Group:
->  checking timer command (type=g)
+>  # Set up an encrypted directory.
+> -_new_session_keyring
+> +_init_session_keyring
+>  keydesc=$(_generate_session_encryption_key)
+>  mkdir $edir
+>  _set_encpolicy $edir $keydesc
+> diff --git a/tests/generic/593 b/tests/generic/593
+> index f0610c57..2dda5d76 100755
+> --- a/tests/generic/593
+> +++ b/tests/generic/593
+> @@ -20,7 +20,7 @@ _supported_fs generic
+>  _require_scratch_encryption -v 2
+>  _require_command "$KEYCTL_PROG" keyctl
 >  
->  checking limit command (type=g, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
-> +dump options test
+> -_new_session_keyring
+> +_init_session_keyring
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+>  _require_add_enckey_by_key_id $SCRATCH_MNT
+> @@ -113,25 +113,26 @@ echo -e "\n# keyctl_read() doesn't work on fscrypt-provisioning keys"
+>  keyid=$(_add_fscrypt_provisioning_key desc $FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR \
+>  	"$TEST_RAW_KEY")
+>  $KEYCTL_PROG read $keyid
+> -$KEYCTL_PROG unlink $keyid @s
+> +$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
 >  
->  checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L option
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-U option
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (one element range)
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (multiple element range)
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L/-U options (empty range)
-> +checking dump command (type=g)
-> +-L/-U options (full range)
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
->  report options test
+>  echo -e "\n# Only keys with the correct fscrypt_provisioning_key_payload::type field can be added"
+>  echo "# ... keyring key is v1, filesystem wants v2 key"
+>  keyid=$(_add_fscrypt_provisioning_key desc $FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR \
+>  	"$TEST_RAW_KEY")
+>  $XFS_IO_PROG -c "add_enckey -k $keyid" $SCRATCH_MNT
+> -$KEYCTL_PROG unlink $keyid @s
+> +$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
 >  
->  checking report command (type=g)
-> @@ -347,18 +526,57 @@ Group quota on SCRATCH_MNT (SCRATCH_DEV)
->  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  echo "# ... keyring key is v2, filesystem wants v1 key"
+>  keyid=$(_add_fscrypt_provisioning_key desc $FSCRYPT_KEY_SPEC_TYPE_IDENTIFIER \
+>  	"$TEST_RAW_KEY")
+>  $XFS_IO_PROG -c "add_enckey -k $keyid -d $TEST_KEY_DESCRIPTOR" $SCRATCH_MNT
+> -$KEYCTL_PROG unlink $keyid @s
+> +$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
 >  
->  -N option
->  checking report command (type=g)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L options
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  echo -e "\n# Only keys of type fscrypt-provisioning can be added"
+> -keyid=$(head -c 64 /dev/urandom | $KEYCTL_PROG padd logon foo:desc @s)
+> +keyid=$(head -c 64 /dev/urandom | \
+> +	$KEYCTL_PROG padd logon foo:desc $TEST_KEYRING_ID)
+>  $XFS_IO_PROG -c "add_enckey -k $keyid" $SCRATCH_MNT
+> -$KEYCTL_PROG unlink $keyid @s
+> +$KEYCTL_PROG unlink $keyid $TEST_KEYRING_ID
 >  
-> --L -U options
-> +-U options
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (one element range)
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (multiple element range)
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L/-U options (empty range)
-> +checking report command (type=g)
-> +-L/-U options (full range)
->  checking report command (type=g)
->  Group quota on SCRATCH_MNT (SCRATCH_DEV)
->   Blocks Inodes 
->  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
->  
->  -t option
->  checking report command (type=g)
-> @@ -477,6 +695,7 @@ checking restore command (type=g)
->  
->  checking report command (type=g)
->  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
->  
->  
->  checking state command (type=g)
-> @@ -500,8 +719,41 @@ SCRATCH_DEV (SCRATCH_MNT) Group:
->  checking timer command (type=g)
->  
->  checking limit command (type=g, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
-> +dump options test
->  
->  checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L option
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-U option
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (one element range)
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +-L/-U options (multiple element range)
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
-> +-L/-U options (empty range)
-> +checking dump command (type=g)
-> +-L/-U options (full range)
-> +checking dump command (type=g)
-> +fs = SCRATCH_DEV
-> +#ID          1024    4096      10      20
-> +fs = SCRATCH_DEV
-> +#ID          2048    8192      10      20
->  report options test
->  
->  checking report command (type=g)
-> @@ -510,18 +762,57 @@ Group quota on SCRATCH_MNT (SCRATCH_DEV)
->  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
->  
->  -N option
->  checking report command (type=g)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L options
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
->  
-> --L -U options
-> +-U options
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (one element range)
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +
-> +-L/-U options (multiple element range)
-> +checking report command (type=g)
-> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
-> + Blocks Inodes 
-> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
-> +---------- -------------------------------------------------- -------------------------------------------------- 
-> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
-> +
-> +-L/-U options (empty range)
-> +checking report command (type=g)
-> +-L/-U options (full range)
->  checking report command (type=g)
->  Group quota on SCRATCH_MNT (SCRATCH_DEV)
->   Blocks Inodes 
->  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
->  ---------- -------------------------------------------------- -------------------------------------------------- 
->  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
-> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
->  
->  -t option
->  checking report command (type=g)
-> @@ -640,6 +931,7 @@ checking restore command (type=g)
->  
->  checking report command (type=g)
->  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
-> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
->  
->  
->  checking state command (type=g)
+>  # success, all done
+>  status=0
+> 
+> base-commit: 1ae79d2ecdac6f9ad94a660eca3d7586e34d7d6b
 > -- 
-> 2.27.0
+> 2.35.1
