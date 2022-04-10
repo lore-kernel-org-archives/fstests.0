@@ -2,172 +2,632 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D673CC433FE
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Apr 2022 15:15:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1A30C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Apr 2022 15:38:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242773AbiDJPR1 (ORCPT
+        id S243194AbiDJPlE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Apr 2022 11:17:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56912 "EHLO
+        Sun, 10 Apr 2022 11:41:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41420 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241765AbiDJPR1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Apr 2022 11:17:27 -0400
-Received: from out20-73.mail.aliyun.com (out20-73.mail.aliyun.com [115.124.20.73])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFAC629806;
-        Sun, 10 Apr 2022 08:15:15 -0700 (PDT)
-X-Alimail-AntiSpam: AC=PASS;BC=0.07440088|-1;BR=01201311R131ee;CH=green;DM=|CONTINUE|false|;DS=SPAM|spam_education_ad|0.99198-5.60615e-05-0.00796419;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047187;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.NNqAZEd_1649603711;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.NNqAZEd_1649603711)
-          by smtp.aliyun-inc.com(33.37.72.134);
-          Sun, 10 Apr 2022 23:15:12 +0800
-Date:   Sun, 10 Apr 2022 23:15:11 +0800
+        with ESMTP id S240176AbiDJPlC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Apr 2022 11:41:02 -0400
+Received: from out20-2.mail.aliyun.com (out20-2.mail.aliyun.com [115.124.20.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08558286E4
+        for <fstests@vger.kernel.org>; Sun, 10 Apr 2022 08:38:49 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0385549-0.00130575-0.960139;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047209;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.NNqt5sH_1649605126;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.NNqt5sH_1649605126)
+          by smtp.aliyun-inc.com(33.45.69.145);
+          Sun, 10 Apr 2022 23:38:47 +0800
+Date:   Sun, 10 Apr 2022 23:38:46 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>,
-        jlayton@kernel.org
-Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH] ceph/001: add extra check for remote object copies
-Message-ID: <YlL0f7DBVysxxbew@desktop>
-References: <20220323160925.7142-1-lhenriques@suse.de>
+To:     Andrey Albershteyn <aalbersh@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/152: add tests for -L/-U parameters for dump/report
+Message-ID: <YlL6Bv5jrFGbDeg0@desktop>
+References: <20220328224013.147827-1-aalbersh@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220323160925.7142-1-lhenriques@suse.de>
+In-Reply-To: <20220328224013.147827-1-aalbersh@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Jeff,
-
-On Wed, Mar 23, 2022 at 04:09:25PM +0000, Luís Henriques wrote:
-> Ceph kernel client now has a facility to check stats for certain operations.
-> One of these operations is the 'copyfrom', the operation that is used to offload
-> to the OSDs the copy of objects from, for example, the copy_file_range()
-> syscall.
+On Tue, Mar 29, 2022 at 12:40:13AM +0200, Andrey Albershteyn wrote:
+> These parameters define ID range of users/groups/projects to show.
+> This patch adds more test for wider coverage (e.g. empty range, full
+> range, open range).
 > 
-> This patch changes ceph/001 to add an extra check to verify that the copies
-> performed by the test are _really_ remote copies and not simple read+write
-> operations.
+> Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
+> ---
 > 
-> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> The patch has trailing whitespaces. This is due to the modification of 152.out.
+> The output of 'xfs_quota' is not fully cleared from trailing whitespaces.
+> 
+> This is mainly regression test in relation to the patch [1].
+> 
+> [1]: https://lore.kernel.org/all/20220328222503.146496-1-aalbersh@redhat.com/
 
-Would you please help review this cephfs test? Thanks!
+I'd be better to add a new test for targeted regression test, otherwise
+a test passed previously starts to fail and might be treated as a
+regression.
 
+Thanks,
 Eryu
 
-> ---
->  common/ceph    | 10 ++++++++
->  tests/ceph/001 | 66 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 76 insertions(+)
 > 
-> diff --git a/common/ceph b/common/ceph
-> index ca756dda8dd3..d6f24df177e7 100644
-> --- a/common/ceph
-> +++ b/common/ceph
-> @@ -28,3 +28,13 @@ _require_ceph_vxattr_caps()
->  	$GETFATTR_PROG -n "ceph.caps" $TEST_DIR >/dev/null 2>&1 \
->  	  || _notrun "ceph.caps vxattr not supported"
->  }
-> +
-> +_ceph_get_cluster_fsid()
-> +{
-> +	$GETFATTR_PROG --only-values -n "ceph.cluster_fsid" $TEST_DIR 2>/dev/null
-> +}
-> +
-> +_ceph_get_client_id()
-> +{
-> +	$GETFATTR_PROG --only-values -n "ceph.client_id" $TEST_DIR 2>/dev/null
-> +}
-> diff --git a/tests/ceph/001 b/tests/ceph/001
-> index 5a828567d500..7970ce352bab 100755
-> --- a/tests/ceph/001
-> +++ b/tests/ceph/001
-> @@ -30,6 +30,10 @@ workdir=$TEST_DIR/test-$seq
->  rm -rf $workdir
->  mkdir $workdir
+> ---
+>  tests/xfs/152     |  65 +++++++---
+>  tests/xfs/152.out | 300 +++++++++++++++++++++++++++++++++++++++++++++-
+>  2 files changed, 346 insertions(+), 19 deletions(-)
+> 
+> diff --git a/tests/xfs/152 b/tests/xfs/152
+> index 129d9c06..936cc3fa 100755
+> --- a/tests/xfs/152
+> +++ b/tests/xfs/152
+> @@ -50,6 +50,9 @@ gqid=`id -g fsgqa`
+>  uqid2=`id -u fsgqa2`
+>  gqid2=`id -g fsgqa2`
 >  
-> +cluster_fsid=$(_ceph_get_cluster_fsid)
-> +client_id=$(_ceph_get_client_id)
-> +metrics_dir="$DEBUGFS_MNT/ceph/$cluster_fsid.$client_id/metrics"
+> +[ $uqid -ge $uqid2 ] &&
+> +	_notrun "ID of fsgqa ($uqid) expected to be lower than fsgqa3 ($uqid2)"
 > +
->  check_range()
+>  pqid=10
+>  cat >$tmp.projects <<EOF
+>  $pqid:$SCRATCH_MNT
+> @@ -102,6 +105,11 @@ filter_quot()
+>  		| sed -e '/#[0-9]*/s/#[0-9]*/#ID/g'
+>  }
+>  
+> +filter_dump()
+> +{
+> +	_filter_scratch | sed -E '/^[0-9]+/s/^[0-9]+/#ID/g'
+> +}
+> +
+>  filter_report()
 >  {
->  	local file=$1
-> @@ -40,8 +44,68 @@ check_range()
->  	[ $? -eq 0 ] && echo "file $file is not '$val' in [ $off0 $off1 ]"
+>  	_filter_quota | grep -v "^root \|^\#0 " \
+> @@ -122,6 +130,20 @@ filter_state()
+>  			    -e '/max warnings:/d'
 >  }
 >  
-> +#
-> +# The metrics file has the following fields:
-> +#   1. item
-> +#   2. total
-> +#   3. avg_sz(bytes)
-> +#   4. min_sz(bytes)
-> +#   5. max_sz(bytes)
-> +#   6. total_sz(bytes)
-> +get_copyfrom_total_copies()
+> +set_quota_limit()
 > +{
-> +	local total=0
+> +	local bs=$1
+> +	local bh=$2
+> +	local is=$3
+> +	local ih=$4
+> +	local user=$5
 > +
-> +	if [ -d $metrics_dir ]; then
-> +		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 2)
-> +	fi
-> +	echo $total
-> +}
-> +get_copyfrom_total_size()
-> +{
-> +	local total=0
-> +
-> +	if [ -d $metrics_dir ]; then
-> +		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 6)
-> +	fi
-> +	echo $total
+> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> +			-c "limit -$type bsoft=$bs bhard=$bh $user" \
+> +			-c "limit -$type isoft=$is ihard=$ih $user" \
+> +			$SCRATCH_MNT
 > +}
 > +
-> +# This function checks that the metrics file has the expected values for number
-> +# of remote object copies and the total size of the copies.  For this, it
-> +# expects a input:
-> +#   $1 - initial number copies in metrics file (field 'total')
-> +#   $2 - initial total size in bytes in metrics file (field 'total_sz')
-> +#   $3 - object size used for copies
-> +#   $4 - number of remote objects copied
-> +check_copyfrom_metrics()
-> +{
-> +	local c0=$1
-> +	local s0=$2
-> +	local objsz=$3
-> +	local copies=$4
-> +	local c1=$(get_copyfrom_total_copies)
-> +	local s1=$(get_copyfrom_total_size)
-> +	local sum
-> +
-> +	if [ ! -d $metrics_dir ]; then
-> +		return # skip metrics check if debugfs isn't mounted
-> +	fi
-> +
-> +	sum=$(($c0+$copies))
-> +	if [ $sum -ne $c1 ]; then
-> +		echo "Wrong number of remote copies.  Expected $sum, got $c1"
-> +	fi
-> +	sum=$(($s0+$copies*$objsz))
-> +	if [ $sum -ne $s1 ]; then
-> +		echo "Wrong size of remote copies.  Expected $sum, got $s1"
-> +	fi
-> +}
-> +
->  run_copy_range_tests()
+>  test_quot()
 >  {
-> +	total_copies=$(get_copyfrom_total_copies)
-> +	total_size=$(get_copyfrom_total_size)
->  	objsz=$1
->  	halfobj=$(($objsz / 2))
->  	file="$workdir/file-$objsz"
-> @@ -203,6 +267,8 @@ run_copy_range_tests()
->  	check_range $dest $(($objsz * 2 + $halfobj)) $objsz 63
->  	check_range $dest $(($objsz * 3 + $halfobj)) $halfobj 64
+>  	local opt="$*"
+> @@ -153,16 +175,9 @@ test_quota()
 >  
-> +	# Confirm that we've done a total of 24 object copies
-> +	check_copyfrom_metrics $total_copies $total_size $objsz 24
+>  test_limit()
+>  {
+> -	local bs=$1
+> -	local bh=$2
+> -	local is=$3
+> -	local ih=$4
+> -
+> -	echo "checking limit command (type=$type, bsoft=$bs, bhard=$bh, isoft=$is, ihard=$ih)"
+> -	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> -			-c "limit -$type bsoft=$bs bhard=$bh fsgqa" \
+> -			-c "limit -$type isoft=$is ihard=$ih fsgqa" \
+> -			$SCRATCH_MNT
+> +	echo "checking limit command (type=$type, bsoft=$1, bhard=$2,"\
+> +			"isoft=$3, ihard=$4)"
+> +	set_quota_limit $@
+>  
+>  	# let the timer day transition happen
+>  	sleep 2
+> @@ -217,11 +232,14 @@ test_state()
+>  
+>  test_dump()
+>  {
+> +	local opt="$*"
+> +
+>  	echo "checking dump command (type=$type)"
+>  	rm -f $tmp.backup 2>>/dev/null
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> -			-c "dump -$type -f $tmp.backup" \
+> +			-c "dump -$type $opt -f $tmp.backup" \
+>  			$SCRATCH_MNT | _filter_scratch
+> +	cat $tmp.backup | filter_dump
 >  }
 >  
->  echo "Object size: 65536" # CEPH_MIN_STRIPE_UNIT
+>  test_restore()
+> @@ -270,14 +288,31 @@ test_xfs_quota()
+>  	echo "quota remount"; qmount_idmapped
+>  	echo ; test_quot
+>  	echo ; test_timer
+> -	echo ; test_limit 512k 2048k 10 20
+> +	echo ; test_limit 512k 2048k 10 20 $id
+> +
+> +	# we need two users with quota to test -L/-U options
+> +	set_quota_limit 1024k 4096k 10 20 $id2
+> +
+> +	echo "dump options test"
+>  	echo ; test_dump
+> +	echo "-L option"; test_dump -L $id
+> +	echo "-U option"; test_dump -U $id
+> +	echo "-L/-U options (one element range)"; test_dump -L $id -U $id
+> +	echo "-L/-U options (multiple elements range)"; test_dump -L $id -U $id2
+> +	echo "-L/-U options (empty range)"; test_dump -L $id2 -U $id
+> +	echo "-L/-U options (full range)"; test_dump -L 0 -U 0
+>  
+> -	# report options test
+>  	echo "report options test"
+>  	echo ; test_report
+>  	echo "-N option"; test_report -N
+> -	echo "-L -U options"; test_report -L $id -U $id
+> +	echo "-L options"; test_report -L $id
+> +	echo "-U options"; test_report -U $id
+> +	echo "-L/-U options (one element range)"; test_report -L $id -U $id
+> +	echo "-L/-U options (multiple elements range)"; test_report -L $id -U $id2
+> +	echo "-L/-U options (empty range)"; test_report -L $id2 -U $id
+> +	echo "-L/-U options (full range)"; test_report -L 0 -U 0
+> +	# reset quotas for second user as we don't need them anymore
+> +	set_quota_limit 0 0 0 0 $id2
+>  	echo "-t option"; test_report -t
+>  	echo "-n option"; test_report -n
+>  	echo "-h option"; test_report -h
+> @@ -307,7 +342,7 @@ test_xfs_quota()
+>  
+>  	# off and remove test
+>  	echo "off and remove test"
+> -	echo ; test_limit 100m 100m 100 100
+> +	echo ; test_limit 100m 100m 100 100 $id
+>  	echo ; test_quota -N
+>  	echo ; test_off
+>  	echo ; test_state
+> diff --git a/tests/xfs/152.out b/tests/xfs/152.out
+> index b663b096..5aeed7d7 100644
+> --- a/tests/xfs/152.out
+> +++ b/tests/xfs/152.out
+> @@ -11,8 +11,41 @@ SCRATCH_DEV (SCRATCH_MNT) User:
+>  checking timer command (type=u)
+>  
+>  checking limit command (type=u, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
+> +dump options test
+>  
+>  checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L option
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-U option
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (one element range)
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (multiple element range)
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L/-U options (empty range)
+> +checking dump command (type=u)
+> +-L/-U options (full range)
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+>  report options test
+>  
+>  checking report command (type=u)
+> @@ -21,18 +54,57 @@ User quota on SCRATCH_MNT (SCRATCH_DEV)
+>  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -N option
+>  checking report command (type=u)
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L options
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+> --L -U options
+> +-U options
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (one element range)
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (multiple element range)
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L/-U options (empty range)
+> +checking report command (type=u)
+> +-L/-U options (full range)
+>  checking report command (type=u)
+>  User quota on SCRATCH_MNT (SCRATCH_DEV)
+>   Blocks Inodes 
+>  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -t option
+>  checking report command (type=u)
+> @@ -151,6 +223,7 @@ checking restore command (type=u)
+>  
+>  checking report command (type=u)
+>  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  
+>  checking state command (type=u)
+> @@ -174,8 +247,41 @@ SCRATCH_DEV (SCRATCH_MNT) User:
+>  checking timer command (type=u)
+>  
+>  checking limit command (type=u, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
+> +dump options test
+>  
+>  checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L option
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-U option
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (one element range)
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (multiple element range)
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L/-U options (empty range)
+> +checking dump command (type=u)
+> +-L/-U options (full range)
+> +checking dump command (type=u)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+>  report options test
+>  
+>  checking report command (type=u)
+> @@ -184,18 +290,57 @@ User quota on SCRATCH_MNT (SCRATCH_DEV)
+>  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -N option
+>  checking report command (type=u)
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L options
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+> --L -U options
+> +-U options
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (one element range)
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (multiple element range)
+> +checking report command (type=u)
+> +User quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L/-U options (empty range)
+> +checking report command (type=u)
+> +-L/-U options (full range)
+>  checking report command (type=u)
+>  User quota on SCRATCH_MNT (SCRATCH_DEV)
+>   Blocks Inodes 
+>  User ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -t option
+>  checking report command (type=u)
+> @@ -314,6 +459,7 @@ checking restore command (type=u)
+>  
+>  checking report command (type=u)
+>  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  
+>  checking state command (type=u)
+> @@ -337,8 +483,41 @@ SCRATCH_DEV (SCRATCH_MNT) Group:
+>  checking timer command (type=g)
+>  
+>  checking limit command (type=g, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
+> +dump options test
+>  
+>  checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L option
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-U option
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (one element range)
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (multiple element range)
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L/-U options (empty range)
+> +checking dump command (type=g)
+> +-L/-U options (full range)
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+>  report options test
+>  
+>  checking report command (type=g)
+> @@ -347,18 +526,57 @@ Group quota on SCRATCH_MNT (SCRATCH_DEV)
+>  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -N option
+>  checking report command (type=g)
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L options
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+> --L -U options
+> +-U options
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (one element range)
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (multiple element range)
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L/-U options (empty range)
+> +checking report command (type=g)
+> +-L/-U options (full range)
+>  checking report command (type=g)
+>  Group quota on SCRATCH_MNT (SCRATCH_DEV)
+>   Blocks Inodes 
+>  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -t option
+>  checking report command (type=g)
+> @@ -477,6 +695,7 @@ checking restore command (type=g)
+>  
+>  checking report command (type=g)
+>  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  
+>  checking state command (type=g)
+> @@ -500,8 +719,41 @@ SCRATCH_DEV (SCRATCH_MNT) Group:
+>  checking timer command (type=g)
+>  
+>  checking limit command (type=g, bsoft=512k, bhard=2048k, isoft=10, ihard=20)
+> +dump options test
+>  
+>  checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L option
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-U option
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (one element range)
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +-L/-U options (multiple element range)
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+> +-L/-U options (empty range)
+> +checking dump command (type=g)
+> +-L/-U options (full range)
+> +checking dump command (type=g)
+> +fs = SCRATCH_DEV
+> +#ID          1024    4096      10      20
+> +fs = SCRATCH_DEV
+> +#ID          2048    8192      10      20
+>  report options test
+>  
+>  checking report command (type=g)
+> @@ -510,18 +762,57 @@ Group quota on SCRATCH_MNT (SCRATCH_DEV)
+>  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -N option
+>  checking report command (type=g)
+>  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L options
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+> --L -U options
+> +-U options
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (one element range)
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +
+> +-L/-U options (multiple element range)
+> +checking report command (type=g)
+> +Group quota on SCRATCH_MNT (SCRATCH_DEV)
+> + Blocks Inodes 
+> +Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+> +---------- -------------------------------------------------- -------------------------------------------------- 
+> +#ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+> +
+> +-L/-U options (empty range)
+> +checking report command (type=g)
+> +-L/-U options (full range)
+>  checking report command (type=g)
+>  Group quota on SCRATCH_MNT (SCRATCH_DEV)
+>   Blocks Inodes 
+>  Group ID Used Soft Hard Warn/Grace Used Soft Hard Warn/ Grace 
+>  ---------- -------------------------------------------------- -------------------------------------------------- 
+>  #ID 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
+> +#ID 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  -t option
+>  checking report command (type=g)
+> @@ -640,6 +931,7 @@ checking restore command (type=g)
+>  
+>  checking report command (type=g)
+>  fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
+> +fsgqa2 0 1024 4096 00 [--------] 0 10 20 00 [--------]
+>  
+>  
+>  checking state command (type=g)
+> -- 
+> 2.27.0
