@@ -2,80 +2,122 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DC4BC433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Apr 2022 16:08:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 449B2C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Apr 2022 16:15:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240443AbiDJQKY (ORCPT
+        id S237757AbiDJQRv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Apr 2022 12:10:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48790 "EHLO
+        Sun, 10 Apr 2022 12:17:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230406AbiDJQKX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Apr 2022 12:10:23 -0400
-Received: from out20-15.mail.aliyun.com (out20-15.mail.aliyun.com [115.124.20.15])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4719E5DE61;
-        Sun, 10 Apr 2022 09:08:12 -0700 (PDT)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08045354|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.123095-0.000502195-0.876403;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047204;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.NNrBXRH_1649606889;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.NNrBXRH_1649606889)
-          by smtp.aliyun-inc.com(33.40.23.6);
-          Mon, 11 Apr 2022 00:08:09 +0800
-Date:   Mon, 11 Apr 2022 00:08:08 +0800
+        with ESMTP id S236321AbiDJQRv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Apr 2022 12:17:51 -0400
+Received: from out20-61.mail.aliyun.com (out20-61.mail.aliyun.com [115.124.20.61])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01C0A60CF4
+        for <fstests@vger.kernel.org>; Sun, 10 Apr 2022 09:15:39 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.2192227|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.248951-0.00491397-0.746135;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=7;RT=7;SR=0;TI=SMTPD_---.NNrO4LK_1649607336;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.NNrO4LK_1649607336)
+          by smtp.aliyun-inc.com(33.37.75.176);
+          Mon, 11 Apr 2022 00:15:36 +0800
+Date:   Mon, 11 Apr 2022 00:15:36 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [RFC PATCH 0/3] xfs: add memory failure tests for dax mode
-Message-ID: <YlMA6Nb4Azx7nTuZ@desktop>
-References: <20220311151816.2174870-1-ruansy.fnst@fujitsu.com>
- <4abf66f4-2101-db09-f1c1-4c70668038d3@fujitsu.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        Dave Chinner <david@fromorbit.com>,
+        Eric Sandeen <sandeen@sandeen.net>,
+        Amir Goldstein <amir73il@gmail.com>, zlang@redhat.com
+Subject: Re: maintainership of fstests
+Message-ID: <YlMCqJj3Mllobfj4@desktop>
+References: <Yjdmj0lVqCbbbjW8@desktop>
+ <20220321221336.GM8241@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <4abf66f4-2101-db09-f1c1-4c70668038d3@fujitsu.com>
+In-Reply-To: <20220321221336.GM8241@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Mar 21, 2022 at 11:00:59PM +0800, Shiyang Ruan wrote:
-> ping...  any comments?
+On Mon, Mar 21, 2022 at 03:13:36PM -0700, Darrick J. Wong wrote:
+> On Mon, Mar 21, 2022 at 01:38:23AM +0800, Eryu Guan wrote:
+> > Hi folks,
+> > 
+> > It's almost 6 years since I've taken the maintainership of fstests, and
+> > I tried my best to keep the pace of weekly update, or at least bi-weekly
+> > update due to something like public holidays.
+> > 
+> > But it's been a month since last fstests update due to my personal
+> > urgent issues, and some patches got no review for more than one month.
+> > So I think it's time to re-consider the maintainership of fstests.
+> > 
+> > I will have less spare time in the foreseeable future, as I have to
+> > spend more time on my family, so it's hard to keep the weekly update
+> > pace. And six years is a long time, I think it's time to have a new
+> > maintainer.
+> 
+> Thank you for your service for all that time! :)
+> 
+> > Or we could go to the group-maintain way? As Darrick mentioned before
+> > (for xfs not fstests, if I recall correctly). Then we need a new primary
+> > maintainer :)
+> > 
+> > What do you think?
+> 
+> Splitting responsibility for maintenance doesn't seem like a huge step
+> to me -- for fs-specific tests, we need the developers for that fs to
+> review test changes.  Review for tests/generic/ can be done by the
+> fs{devel,*} community at large, much as it is done now.
 
-Sorry for the DELAY.. The tests look fine to me overall, but I'd like
-xfs folks to take a look at them as well.
+Agreed.
+
+> 
+> The /difficult/ part, I think, is handling things like treewide
+> reorganizations, and integration testing the test suite.  That, I think,
+> is what really requires a primary maintainer who has broader visibility
+> into what's going on.
+
+Agreed.
+
+> 
+> That primary maintainer also has to have time to run a build-and-test
+> farm of all the major fstests clients (ext*, xfs, btrfs, overlay, nfs,
+> what else?) to make sure that new code doesn't break existing
+> filesystems' ability to test themselves.
+
+Yes, that's what I did when I was at RH, I ran regression tests on all
+major filesystems and on all major arches (x86_64 ppc64(le) aarch64)
+before pushing new patches to git repo to make sure the new release is
+in good shape.
+
+And that's the problem for me now, as I don't have such machine resource
+anymore.. And that's what Zorro has now :)
+
+> 
+> Granted, (speaking only for XFS, probably btrfs, and maybe even ext*),
+> we seem to notice regressions pretty fast when we download the weekly
+> release, so I think the primary maintainer's focus probably ought to be
+> more towards the non-mainstream Linux filesystems.
+> 
+> Also: over the past 6 years, I have /really/ enjoyed the fact that
+> fstests has small releases every 1-2 weeks as opposed to larger
+> infrequent drops.  It's a relief not to have to chase a merge window
+> like I do for the kernel.  Thank you a bunch for keeping that going!
+
+Thanks for all the help and reviews all these years!
 
 Thanks,
 Eryu
 
 > 
-> 在 2022/3/11 23:18, Shiyang Ruan 写道:
-> > This patchset is to verify whether memory failure mechanism still works
-> > with the dax-rmap feature[1].  With this feature, dax and reflink can be
-> > used together[2].  So, we also test it for reflinked files in filesystem
-> > mounted with dax option.
-> > 
-> > [1] https://lore.kernel.org/linux-xfs/20220227120747.711169-1-ruansy.fnst@fujitsu.com/
-> > [2] https://lore.kernel.org/linux-xfs/20210928062311.4012070-1-ruansy.fnst@fujitsu.com/
-> > 
-> > Shiyang Ruan (3):
-> >    xfs: add memory failure test for dax mode
-> >    xfs: add memory failure test for dax&reflink mode
-> >    xfs: add memory failure test for partly-reflinked&dax file
-> > 
-> >   .gitignore                      |   1 +
-> >   src/Makefile                    |   3 +-
-> >   src/t_mmap_cow_memory_failure.c | 154 ++++++++++++++++++++++++++++++++
-> >   tests/xfs/900                   |  48 ++++++++++
-> >   tests/xfs/900.out               |   9 ++
-> >   tests/xfs/901                   |  49 ++++++++++
-> >   tests/xfs/901.out               |   9 ++
-> >   tests/xfs/902                   |  52 +++++++++++
-> >   tests/xfs/902.out               |   9 ++
-> >   9 files changed, 333 insertions(+), 1 deletion(-)
-> >   create mode 100644 src/t_mmap_cow_memory_failure.c
-> >   create mode 100755 tests/xfs/900
-> >   create mode 100644 tests/xfs/900.out
-> >   create mode 100755 tests/xfs/901
-> >   create mode 100644 tests/xfs/901.out
-> >   create mode 100755 tests/xfs/902
-> >   create mode 100644 tests/xfs/902.out
-> > 
+> --D
 > 
+> FYI: It's Spring Break here in the US, so you might not get much of a
+> response for a week or two.
+> 
+> > 
+> > Thanks,
+> > Eryu
+> > 
+> > P.S.
+> > I'll keep the maintainer role and do the review & update as usual until
+> > all things settle down.
