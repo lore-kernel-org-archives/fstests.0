@@ -2,121 +2,86 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1396C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Apr 2022 05:31:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE832C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Apr 2022 05:47:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238489AbiDKFdy (ORCPT
+        id S236947AbiDKFtb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Apr 2022 01:33:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49712 "EHLO
+        Mon, 11 Apr 2022 01:49:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244764AbiDKFdx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Apr 2022 01:33:53 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 777D129C82
-        for <fstests@vger.kernel.org>; Sun, 10 Apr 2022 22:31:38 -0700 (PDT)
+        with ESMTP id S244783AbiDKFta (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Apr 2022 01:49:30 -0400
+Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 3BF1D2CE18
+        for <fstests@vger.kernel.org>; Sun, 10 Apr 2022 22:47:16 -0700 (PDT)
 Received: from dread.disaster.area (pa49-186-233-190.pa.vic.optusnet.com.au [49.186.233.190])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id C2B3153DA3C;
-        Mon, 11 Apr 2022 15:31:37 +1000 (AEST)
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id A4B6410CF5F4;
+        Mon, 11 Apr 2022 15:47:15 +1000 (AEST)
 Received: from dave by dread.disaster.area with local (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1ndmeF-00GJem-HT; Mon, 11 Apr 2022 15:31:35 +1000
-Date:   Mon, 11 Apr 2022 15:31:35 +1000
+        id 1ndmtO-00GJor-Fd; Mon, 11 Apr 2022 15:47:14 +1000
+Date:   Mon, 11 Apr 2022 15:47:14 +1000
 From:   Dave Chinner <david@fromorbit.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] xfs: test xfsdump when an inode < root inode is
- present
-Message-ID: <20220411053135.GH1609613@dread.disaster.area>
-References: <20220408170847.1088522-1-zlang@redhat.com>
- <20220409040056.GA14099@magnolia>
- <20220410121103.wk2hgixq57dogzah@zlang-mailbox>
+To:     David Disseldorp <ddiss@suse.de>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] common/attr: reduce MAX_ATTRVAL_SIZE for NFS
+Message-ID: <20220411054714.GI1609613@dread.disaster.area>
+References: <20220408191943.27655-1-ddiss@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220410121103.wk2hgixq57dogzah@zlang-mailbox>
+In-Reply-To: <20220408191943.27655-1-ddiss@suse.de>
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6253bd39
+X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=6253c0e3
         a=bHAvQTfMiaNt/bo4vVGwyA==:117 a=bHAvQTfMiaNt/bo4vVGwyA==:17
-        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
-        a=GMwFSGjYRNBZMOYGfdsA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=7-415B0cAAAA:8
+        a=uYpj7rBFHCEEPe85gyYA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 10, 2022 at 08:11:03PM +0800, Zorro Lang wrote:
-> On Fri, Apr 08, 2022 at 09:00:56PM -0700, Darrick J. Wong wrote:
-> > On Sat, Apr 09, 2022 at 01:08:47AM +0800, Zorro Lang wrote:
-> > > From: Eric Sandeen <sandeen@redhat.com>
-> > > 
-> > > This tests a longstanding bug where xfsdumps are not properly
-> > > created when an inode is present on the filesytsem which has
-> > > a lower number than the root inode.
-> > > 
-> > > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > Friendly ping for reviewing.
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  common/dump       |  1 +
-> > >  tests/xfs/543     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/543.out | 47 +++++++++++++++++++++++++++++++++++
-> > >  3 files changed, 111 insertions(+)
-> > >  create mode 100755 tests/xfs/543
-> > >  create mode 100644 tests/xfs/543.out
-> > > 
-> > > diff --git a/common/dump b/common/dump
-> > > index ea16d442..ab48cd13 100644
-> > > --- a/common/dump
-> > > +++ b/common/dump
-> > > @@ -219,6 +219,7 @@ _require_tape()
-> > >  
-> > >  _wipe_fs()
-> > >  {
-> > > +    [[ "$WIPE_FS" = "no" ]] && return
-> > 
-> > Is WIPE_FS intended as a general means to prevent wipefs -a between
-> > tests?  If so, it ought to be in the README.
+On Fri, Apr 08, 2022 at 09:19:43PM +0200, David Disseldorp wrote:
+> When testing against an NFS export backed by a Btrfs filesystem,
+> generic/020 may fail, e.g.
 > 
-> Actually I don't know how to if I should say WIPE_FS means to prevent
-> wipefs -a between tests. Due to:
+>   --- /xfstests/tests/generic/020.out
+>   +++ /xfstests/results/generic/020.out.bad
+>   @@ -47,9 +47,13 @@
+>    user.snrub="fish2\012"
 > 
-> 1) We have a _wipe_fs() in common/dump[1], it's very old, and it only
-> try to make a new xfs, although it calls wipe "fs"... And it's only used
-> for tests/xfs/* cases to call _create_dumpdir_*() function.
+>    *** really long value
+>   -0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>   -*
+>   -ATTRSIZE
+>   +attr_set: No space left on device
+>   +Could not set "long_attr" for <TESTFILE>
+>   +attr_get: No data available
+>   +Could not get "long_attr" for <TESTFILE>
+>   +0000000
+>   +attr_remove: No data available
+>   +Could not remove "long_attr" for <TESTFILE>
 > 
-> 2) Then we have _try_wipe_scratch_devs() in common/rc [2], which calls
-> _try_wipe_scratch_xfs() in common/xfs [3] (which is newer), it's only
-> used in ./check script now.
-> 
-> So I'm wondering if we'd better to change the _wipe_fs() to:
-> _wipe_dump()
-> {
-> 	[[ "$WIPE_DUMP" = "no" ]] && return
-> 	_require_scratch
-> 
-> 	_try_wipe_scratch_devs >>$seqres.full
-> 	_scratch_mount >>$seqres.full
-> }
-> 
-> What do you think?
+> This is due to the MAX_ATTRVAL_SIZE=65536 setting for NFS, which exceeds
+> the Btrfs (and XFS) limit of MAX_ATTRVAL_SIZE=64. Change NFS to use this
+> lower bound value.
 
-common/dump::_wipe_fs() is effectively just _scratch_mkfs() followed
-by mounting it. It does not need to exist at all.
+I think that what XFS/UDF/BTRFS set here is bogus.
 
-The test(s) need to have run _require_scratch() in it's setup, it
-shouldn't be hidden deep inside random functions that fill the
-scratch device.
+There is *one* test - generic/020 - that uses MAX_ATTRS and
+MAX_ATTRVAL_SIZE, and  it uses MAX_ATTRVAL_SIZE as a byte count.
 
-They should also run scratch_mkfs/mount themselves to prep the
-scratch device, and then _wipe_fs() can go away entirely.
+Which means for those 3 filesytems, the correct value for them is
+65536, not 64....
 
-And the new test simply calls the function to populate the scratch
-device at the place where you want to preserve the previous contents
-of the scratch device without first running scratch_mkfs....
+This looks like it was broken back when the test was made generic
+- the dd command before this used a bs=1024, so a maz size of 64
+would have been correct. Except the dd command also go changed to
+use bs=1, which meant 64 bytes....
+
+So, yeah, the test got "broken" for XFS back in 2012 and so the
+correct fix here is to change (at least) XFS and btrfs to have a
+MAX_ATTRVAL_SIZE=65536....
 
 Cheers,
 
