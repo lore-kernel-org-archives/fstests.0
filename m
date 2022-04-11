@@ -2,94 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DDC2C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Apr 2022 22:29:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BBF1C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Apr 2022 22:37:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350446AbiDKWbx (ORCPT
+        id S232475AbiDKWkM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Apr 2022 18:31:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33230 "EHLO
+        Mon, 11 Apr 2022 18:40:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47302 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239752AbiDKWbr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Apr 2022 18:31:47 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id AABEB1EC4A
-        for <fstests@vger.kernel.org>; Mon, 11 Apr 2022 15:29:32 -0700 (PDT)
-Received: from dread.disaster.area (pa49-186-233-190.pa.vic.optusnet.com.au [49.186.233.190])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 6E36A10C777B;
-        Tue, 12 Apr 2022 08:29:30 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1ne2XJ-00Gb2R-Mj; Tue, 12 Apr 2022 08:29:29 +1000
-Date:   Tue, 12 Apr 2022 08:29:29 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     David Disseldorp <ddiss@suse.de>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common/attr: reduce MAX_ATTRVAL_SIZE for NFS
-Message-ID: <20220411222929.GJ1609613@dread.disaster.area>
-References: <20220408191943.27655-1-ddiss@suse.de>
- <20220411054714.GI1609613@dread.disaster.area>
- <20220411105752.2b11cb15@suse.de>
+        with ESMTP id S1349179AbiDKWkL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Apr 2022 18:40:11 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 888D82E9FC;
+        Mon, 11 Apr 2022 15:37:56 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3031361783;
+        Mon, 11 Apr 2022 22:37:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 81F00C385A4;
+        Mon, 11 Apr 2022 22:37:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649716675;
+        bh=CKm7Pg4qG2X/1DTjoTgvcXN4zl4yjMqz4X0OeGA117Y=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=FJCXf5O8ujtvG1jmqCWZDRLU1ojKxpoF62dnvk42XyOZObIBC2ig+XmDHOGt+uQ+i
+         Oxp5uQxs0GtIT3jr2dSUSNju9v3mt3MjweVEsLGqFTT9IgJ0JwLpy021FmBug9rS0u
+         cZzlLKte/zR1S7E7d7EXaPi03kvGVEd1OWz2AAqvPmSa+lsniuG4/vcE6xihnPb1XV
+         +7RPPESnReSdja90g8MxHm80f3adyMfaMAVcALvkxBJOks0kkikhQXqsoLYLGdB5U+
+         saqiYuQpLSx5ce1OuIfc6NODarHuRCnnSNGwjGEyYpM6ehsNUYZoEJKBxu6yZVTV3F
+         c3CJD1sFnABtQ==
+Date:   Mon, 11 Apr 2022 15:37:54 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        brauner@kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] common/rc: fix _try_scratch_mount() and _test_mount()
+ when mount fails
+Message-ID: <20220411223754.GB16774@magnolia>
+References: <0ab59504aef01776ab58f9f92c55e86bf1c75424.1649685964.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220411105752.2b11cb15@suse.de>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6254abcb
-        a=bHAvQTfMiaNt/bo4vVGwyA==:117 a=bHAvQTfMiaNt/bo4vVGwyA==:17
-        a=kj9zAlcOel0A:10 a=z0gMJWrwH1QA:10 a=7-415B0cAAAA:8
-        a=IRvuVu1dM5Lj-LG_Pa8A:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <0ab59504aef01776ab58f9f92c55e86bf1c75424.1649685964.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 11, 2022 at 10:57:52AM +0200, David Disseldorp wrote:
-> Thanks for the review, Dave...
+On Mon, Apr 11, 2022 at 03:08:38PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> On Mon, 11 Apr 2022 15:47:14 +1000, Dave Chinner wrote:
+> After the recent commit 4a7b35d7a76cd9 ("common: allow to run all tests
+> on idmapped mounts"), some test that use _try_scratch_mount started to
+> fail. For example:
 > 
-> > > This is due to the MAX_ATTRVAL_SIZE=65536 setting for NFS, which exceeds
-> > > the Btrfs (and XFS) limit of MAX_ATTRVAL_SIZE=64. Change NFS to use this
-> > > lower bound value.  
-> > 
-> > I think that what XFS/UDF/BTRFS set here is bogus.
-> > 
-> > There is *one* test - generic/020 - that uses MAX_ATTRS and
-> > MAX_ATTRVAL_SIZE, and  it uses MAX_ATTRVAL_SIZE as a byte count.
-> > 
-> > Which means for those 3 filesytems, the correct value for them is
-> > 65536, not 64....
-> > 
-> > This looks like it was broken back when the test was made generic
-> > - the dd command before this used a bs=1024, so a maz size of 64
-> > would have been correct. Except the dd command also go changed to
-> > use bs=1, which meant 64 bytes....
-> > 
-> > So, yeah, the test got "broken" for XFS back in 2012 and so the
-> > correct fix here is to change (at least) XFS and btrfs to have a
-> > MAX_ATTRVAL_SIZE=65536....
+> $ ./check btrfs/131 btrfs/220
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 debian9 5.17.0-rc8-btrfs-next-114 (...)
+> MKFS_OPTIONS  -- /dev/sdc
+> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
 > 
-> I'll change XFS over to use a 64K bytes limit. It looks like we'll need
-> a separate special case for Btrfs, as the size limit also takes the attr
-> name length into account:
+> btrfs/131 2s ... - output mismatch (see .../results//btrfs/131.out.bad)
+>     --- tests/btrfs/131.out	2020-06-10 19:29:03.818519162 +0100
+>     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/131.out.bad (...)
+>     @@ -6,8 +6,6 @@
+>      Disabling free space cache and enabling free space tree
+>      free space tree is enabled
+>      Trying to mount without free space tree
+>     -mount failed
+>     -mount failed
+>      Mounting existing free space tree
+>      free space tree is enabled
+>     ...
+>     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/131.out ...
+> btrfs/220 7s ... - output mismatch (see .../results//btrfs/220.out.bad)
+>     --- tests/btrfs/220.out	2020-10-16 23:13:46.802162554 +0100
+>     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/220.out.bad (...)
+>     @@ -1,2 +1,32 @@
+>      QA output created by 220
+>     +Option fragment=invalid should fail to mount
+>     +umount: /home/fdmanana/btrfs-tests/scratch_1: not mounted.
+>     +Option nologreplay should fail to mount
+>     +umount: /home/fdmanana/btrfs-tests/scratch_1: not mounted.
+>     +Option norecovery should fail to mount
+>     +umount: /home/fdmanana/btrfs-tests/scratch_1: not mounted.
+>     ...
+>     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/220.out ...
+> Ran: btrfs/131 btrfs/220
+> Failures: btrfs/131 btrfs/220
+> Failed 2 of 2 tests
 > 
->  79 int btrfs_setxattr(struct btrfs_trans_handle *trans, struct inode *inode,
->  80                    const char *name, const void *value, size_t size, int flags)
->  81 {
->  ...
->  91         if (name_len + size > BTRFS_MAX_XATTR_SIZE(root->fs_info))
->  92                 return -ENOSPC;
+> The reason is that if _try_scratch_mount() fails to mount the filesystem,
+> we don't return the failure, instead we call _idmapped_mount(), which
+> can succeed and make _try_scratch_mount() return 0 (success). The same
+> happens for _test_mount(), however a quick search revealed no tests
+> currently relying on the return value of _test_mount().
 > 
-> BTRFS_MAX_XATTR_SIZE() is also 16K by default on my test system. Given
-> that this is for generic/020 only, my plan is to turn the existing
-> MAX_ATTRVAL_SIZE logic into a helper function.
+> So fix that by making _try_scratch_mount() return immediately if it gets
+> a mount failure. Also do the same for _test_mount().
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Sounds good! Can you do the same with MAX_ATTRS, too? It's a g/020
-only value, too.
+Aha, that's why the test cloud reported a 4% test failure rate.
 
-Cheers,
+Well, this fixes things, so:
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+--D
+
+> ---
+>  common/rc | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 17629801..37d18599 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -329,11 +329,15 @@ _supports_filetype()
+>  # mount scratch device with given options but don't check mount status
+>  _try_scratch_mount()
+>  {
+> +	local mount_ret
+> +
+>  	if [ "$FSTYP" == "overlay" ]; then
+>  		_overlay_scratch_mount $*
+>  		return $?
+>  	fi
+>  	_mount -t $FSTYP `_scratch_mount_options $*`
+> +	mount_ret=$?
+> +	[ $mount_ret -ne 0 ] && return $mount_ret
+>  	_idmapped_mount $SCRATCH_DEV $SCRATCH_MNT
+>  }
+>  
+> @@ -494,12 +498,16 @@ _idmapped_mount()
+>  
+>  _test_mount()
+>  {
+> +    local mount_ret
+> +
+>      if [ "$FSTYP" == "overlay" ]; then
+>          _overlay_test_mount $*
+>          return $?
+>      fi
+>      _test_options mount
+>      _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> +    mount_ret=$?
+> +    [ $mount_ret -ne 0 ] && return $mount_ret
+>      _idmapped_mount $TEST_DEV $TEST_DIR
+>  }
+>  
+> -- 
+> 2.35.1
+> 
