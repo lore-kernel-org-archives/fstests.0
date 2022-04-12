@@ -2,184 +2,153 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5379C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Apr 2022 17:17:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04A5FC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Apr 2022 17:29:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358092AbiDLRTz (ORCPT
+        id S1358174AbiDLRcD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 12 Apr 2022 13:19:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43086 "EHLO
+        Tue, 12 Apr 2022 13:32:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1358080AbiDLRTw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 12 Apr 2022 13:19:52 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 02EED51E60
-        for <fstests@vger.kernel.org>; Tue, 12 Apr 2022 10:17:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1649783852;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=rMKYxn0CO5u8O7kh/hfqyhlcuQeH0sO+Eo2BmHtqcCY=;
-        b=ZGWfr2grBBOgafciC5rJyWzeq3auIcQxDr9ABPGujXnTx5B1cydbsfivJ726I71yYS47xN
-        RR+zfChe8YJBVTAFGXFKMKnh5z2pEHy9whp9APhXAXr1J4lZX6paleQTpPnAlai6bclp5r
-        5fgQPQkb0QCWFt4ZArBBcYr7aeBRFCU=
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
- [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-292-1IgePv4iNWSSpKtBFsYEqA-1; Tue, 12 Apr 2022 13:17:30 -0400
-X-MC-Unique: 1IgePv4iNWSSpKtBFsYEqA-1
-Received: by mail-qk1-f200.google.com with SMTP id u6-20020a05620a430600b0069c0f5ad4e2so5056249qko.2
-        for <fstests@vger.kernel.org>; Tue, 12 Apr 2022 10:17:30 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=rMKYxn0CO5u8O7kh/hfqyhlcuQeH0sO+Eo2BmHtqcCY=;
-        b=07YoImZErnOJRhhvhyuk04HElBXOZK/qvsT0kVF2uh7svXZc+4Iun12qlTek6a45WL
-         SZVlDkViWSC66wbBvzXOfqOvveNguDL0FOuf5KHvxOByK84RHX8fn0oqi7Ndg14Zsoyu
-         S5d5rnYbj62GS+1a+Ud5OzcLiIN+G7xXXPzwuWGS0kUOP2eR2P7AuBcXJzp7O1MQHWju
-         KGKJKkus7GWY3K0KdYFpPs8FhviAkTZVRIrc47GzXIb2MjcaoSA4O+gZZ0hSFu9bQXyM
-         D8Uro24DHTCZqfhDz+MwK0ahcE1fr1lY6RlIj165WgodU3fN8n9nu74qBQm5p0vVWrfb
-         bMHw==
-X-Gm-Message-State: AOAM5314ogYWnOWg51Wl8DK+wK7bGRNULyPsGvzL5yAQkYMIOPtIFzFc
-        14So0HDv/tm/sjOava/s3SwCunamb5nuqUXwCC7NCS0V4hqKzYB4eQMIvFWEmK4XqzcKEslZTzk
-        ncKTpmurlG3FZkLy+1Q==
-X-Received: by 2002:a05:620a:248a:b0:69c:437e:4ea9 with SMTP id i10-20020a05620a248a00b0069c437e4ea9mr2025604qkn.10.1649783849685;
-        Tue, 12 Apr 2022 10:17:29 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzepXyAWM9FzabWnsyRbaG6czO9LEgDUi//UedTfrasHEdzeNTE/aO0X5G75YF0HwAZYm4yhw==
-X-Received: by 2002:a05:620a:248a:b0:69c:437e:4ea9 with SMTP id i10-20020a05620a248a00b0069c437e4ea9mr2025588qkn.10.1649783849384;
-        Tue, 12 Apr 2022 10:17:29 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id i18-20020ac85c12000000b002eea9d556c9sm4872152qti.20.2022.04.12.10.17.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Apr 2022 10:17:28 -0700 (PDT)
-Date:   Wed, 13 Apr 2022 01:17:23 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] generic: test that linking into a directory fails
- with EDQUOT
-Message-ID: <20220412171723.owphga4kmx3im7zv@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+        with ESMTP id S1358132AbiDLRbt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Apr 2022 13:31:49 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64EF15C863;
+        Tue, 12 Apr 2022 10:28:55 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E8DB7619D9;
+        Tue, 12 Apr 2022 17:28:54 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F6BEC385A1;
+        Tue, 12 Apr 2022 17:28:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649784534;
+        bh=892eiTQnFOscJejq2H7a/GrwClHcPXnANs6NWcesbUg=;
+        h=Date:From:To:Subject:References:In-Reply-To:From;
+        b=gL/73OGlnqtnxVdHpBsBHXg9TnZ6v8QeBtUT/tG5d865unM/pS9XG0lVGKKtvuIDQ
+         ZtYv8niD6t5z9MeYr8CmOCAesGOMMXBMqG+eIipN2aCbMZTyO3lb3PwxHJCo58ekRM
+         1P2b/nIK9rww84UjgxTyy7GWID+7lApjvzmTFaC4rJfmf6M/fooQrRccGXYjnTeHLa
+         IgLkx3FqVaMh70vdOOGcRjQylT+PKrS26KH7Sij7ODACzwKKY4EXtBsrQvGAJlJurc
+         EIuq1XkNlFcIA+NQeMVAFOtV9JOkqpYEh2Kn6+FA8pPlW/8OAxCSVfZNXNFtJQ0t+V
+         Z2Z3gUe/DjrOQ==
+Date:   Tue, 12 Apr 2022 10:28:53 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/4] xfs: make sure syncfs(2) passes back
+ super_operations.sync_fs errors
+Message-ID: <20220412172853.GG16799@magnolia>
 References: <164971767143.169983.12905331894414458027.stgit@magnolia>
- <164971768834.169983.11537125892654404197.stgit@magnolia>
+ <164971767699.169983.772317637668809854.stgit@magnolia>
+ <20220412093727.5zsuh7mucv2wlwgm@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <164971768834.169983.11537125892654404197.stgit@magnolia>
+In-Reply-To: <20220412093727.5zsuh7mucv2wlwgm@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 11, 2022 at 03:54:48PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Apr 12, 2022 at 05:37:27PM +0800, Zorro Lang wrote:
+> On Mon, Apr 11, 2022 at 03:54:37PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > This is a regression test to make sure that nonzero error returns from
+> > a filesystem's ->sync_fs implementation are actually passed back to
+> > userspace when the call stack involves syncfs(2).
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/xfs/839     |   42 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/839.out |    2 ++
+> >  2 files changed, 44 insertions(+)
+> >  create mode 100755 tests/xfs/839
+> >  create mode 100644 tests/xfs/839.out
+> > 
+> > 
+> > diff --git a/tests/xfs/839 b/tests/xfs/839
 > 
-> Add a regression test to make sure that unprivileged userspace linking
-> into a directory fails with EDQUOT when the directory quota limits have
-> been exceeded.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/generic/832     |   67 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/832.out |    3 ++
->  2 files changed, 70 insertions(+)
->  create mode 100755 tests/generic/832
->  create mode 100644 tests/generic/832.out
-> 
-> 
-> diff --git a/tests/generic/832 b/tests/generic/832
-> new file mode 100755
-> index 00000000..1190b795
-> --- /dev/null
-> +++ b/tests/generic/832
-> @@ -0,0 +1,67 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 832
-> +#
-> +# Ensure that unprivileged userspace hits EDQUOT while linking files into a
-> +# directory when the directory's quota limits have been exceeded.
-> +#
-> +# Regression test for commit:
-> +#
-> +# 871b9316e7a7 ("xfs: reserve quota for dir expansion when linking/unlinking files")
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick quota
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_quota
-> +_require_user
-> +_require_scratch
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_qmount_option usrquota
-> +_qmount
-> +
-> +blocksize=$(_get_block_size $SCRATCH_MNT)
-> +scratchdir=$SCRATCH_MNT/dir
-> +scratchfile=$SCRATCH_MNT/file
-> +mkdir $scratchdir
-> +touch $scratchfile
-> +
-> +# Create a 2-block directory for our 1-block quota limit
-> +total_size=$((blocksize * 2))
-> +dirents=$((total_size / 255))
-> +
-> +for ((i = 0; i < dirents; i++)); do
-> +	name=$(printf "x%0254d" $i)
-> +	ln $scratchfile $scratchdir/$name
-> +done
-> +
-> +# Set a low quota hardlimit for an unprivileged uid and chown the files to it
-> +echo "set up quota" >> $seqres.full
-> +setquota -u $qa_user 0 "$((blocksize / 1024))" 0 0 $SCRATCH_MNT
-> +chown $qa_user $scratchdir $scratchfile
-> +repquota -upn $SCRATCH_MNT >> $seqres.full
-> +
-> +# Fail at appending the directory as qa_user to ensure quota enforcement works
-> +echo "fail quota" >> $seqres.full
-> +for ((i = 0; i < dirents; i++)); do
-> +	name=$(printf "y%0254d" $i)
-> +	su - "$qa_user" -c "ln $scratchfile $scratchdir/$name" 2>&1 | \
+> This case looks good to me. Just one question, is it possible to be a generic
+> case? From the code logic, it doesn't use xfs specified operations, but I'm
+> not sure if other filesystems would like to treat sync_fs return value as XFS.
 
-All looks good to me. Only one question about this "su -". Is the "-" necessary?
-I checked all cases in fstests, no one use "--login" when try to su to $qa_user.
-I'm not sure if "login $qa_user" will affect the testing, I just know it affect
-environment variables.
+Other filesystems (ext4 in particular) haven't been fixed to make
+->sync_fs return error codes when the fs has been shut down via
+FS_IOC_SHUTDOWN.  We'll get there eventually, but for now I'd like to
+get this under test for XFS since we've applied those fixes.
 
-Thanks,
-Zorro
-
-> +		_filter_scratch | sed -e 's/y[0-9]*/yXXX/g'
-> +	test "${PIPESTATUS[0]}" -ne 0 && break
-> +done
-> +repquota -upn $SCRATCH_MNT >> $seqres.full
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/generic/832.out b/tests/generic/832.out
-> new file mode 100644
-> index 00000000..593afe8b
-> --- /dev/null
-> +++ b/tests/generic/832.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 832
-> +ln: failed to create hard link 'SCRATCH_MNT/dir/yXXX': Disk quota exceeded
-> +Silence is golden
+> > new file mode 100755
+> > index 00000000..9bfe93ef
+> > --- /dev/null
+> > +++ b/tests/xfs/839
+> > @@ -0,0 +1,42 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 839
+> > +#
+> > +# Regression test for kernel commits:
+> > +#
+> > +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_fs")
+> > +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
 > 
+> BTW, after this change, now can I assume that sync(2) flushes all data and metadata
+> to underlying disk, if it returns 0.
 
+Yes.
+
+> Sorry, really confused on what these sync things
+> really guarantee :)
+
+No worries -- the history of the sync variants has been very messy and
+confusing even to people on fsdevel.
+
+--D
+
+> 
+> Thanks,
+> Zorro
+> 
+> > +#
+> > +# During a code inspection, I noticed that sync_filesystem ignores the return
+> > +# value of the ->sync_fs calls that it makes.  sync_filesystem, in turn is used
+> > +# by the syncfs(2) syscall to persist filesystem changes to disk.  This means
+> > +# that syncfs(2) does not capture internal filesystem errors that are neither
+> > +# visible from the block device (e.g. media error) nor recorded in s_wb_err.
+> > +# XFS historically returned 0 from ->sync_fs even if there were log failures,
+> > +# so that had to be corrected as well.
+> > +#
+> > +# The kernel commits above fix this problem, so this test tries to trigger the
+> > +# bug by using the shutdown ioctl on a clean, freshly mounted filesystem in the
+> > +# hope that the EIO generated as a result of the filesystem being shut down is
+> > +# only visible via ->sync_fs.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick shutdown
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_require_xfs_io_command syncfs
+> > +_require_scratch_nocheck
+> > +_require_scratch_shutdown
+> > +
+> > +# Reuse the fs formatted when we checked for the shutdown ioctl, and don't
+> > +# bother checking the filesystem afterwards since we never wrote anything.
+> > +_scratch_mount
+> > +$XFS_IO_PROG -x -c 'shutdown -f ' -c syncfs $SCRATCH_MNT
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/839.out b/tests/xfs/839.out
+> > new file mode 100644
+> > index 00000000..f275cdcc
+> > --- /dev/null
+> > +++ b/tests/xfs/839.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 839
+> > +syncfs: Input/output error
+> > 
+> 
