@@ -2,144 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E75C8C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 18:23:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA0C1C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 23:27:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232456AbiDMSZq (ORCPT
+        id S233812AbiDMX3m (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Apr 2022 14:25:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43084 "EHLO
+        Wed, 13 Apr 2022 19:29:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45254 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237599AbiDMSZp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 14:25:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2F1425006C
-        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 11:23:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1649874203;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=9lgnmBmciW2lq2Wz2KNbzk9pNp34wGGm9lnhfQal6pE=;
-        b=c15gfoZvZiW9p1fxXS8bWX00f26T5dB6euthU2QlGOlVPBu/8YenB1cfoXeqc2ES2LDrL3
-        rd3BtPTuBVQKPfjf17vfCuajoSsQprQ0vnh7ls2yC/LD1HLloHm6rPTRDwwmp0i998iOvl
-        9z1gPJr/FBPCGxhhn8oj7oZnyWF2B/Q=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-425-37KnVdfiNuGVxJr5lNIlXA-1; Wed, 13 Apr 2022 14:23:22 -0400
-X-MC-Unique: 37KnVdfiNuGVxJr5lNIlXA-1
-Received: by mail-qk1-f198.google.com with SMTP id ay14-20020a05620a178e00b0069a9c319c64so1712986qkb.3
-        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 11:23:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=9lgnmBmciW2lq2Wz2KNbzk9pNp34wGGm9lnhfQal6pE=;
-        b=u7gqBy5vuxTInS46CHEHPH8RCVs/su5oqX0jimTLxW3cx7WAryHo9BF0mqfCcXIeYB
-         6Ns7ohY8YDcGXUP3IA7Ns3VS2HmCf4YozpC1XBN27AzM41Mj5RRTIWxd9M6Su0T2WNYc
-         STeLqIaD8evabTR/w5uwT8i30Ea3qBQEupwvvKx0ZsuG1Gom1fWxxGDICkcEOw/FPll7
-         0PsoAPs7mVVpY/83GURmDbP9jf804/DtTvBawoEE9eyRy6vBvPoABUzjtVazrV1EcYL/
-         FXjClwcf+eIVcuz7l4QEmM48Bx3xw8+y3GWXoSprG//4aLVP2lZ4DP+iHlhCmbTgopXp
-         rADQ==
-X-Gm-Message-State: AOAM5306O24Cp5elQpYNevJPptT2a7dDeiTQ6Dm4EmkSNGsOoXIt4h/d
-        mLJOazZ9dhrkANRHA/o9NxaXiewyhKc3lXsf1v+EIvuHLJxDXUkaQI9OyCSO1hBNB+r7IE5P/EH
-        IXoxWZGaZyKJFs6o84g==
-X-Received: by 2002:a05:620a:29d0:b0:680:9c1a:557a with SMTP id s16-20020a05620a29d000b006809c1a557amr7682815qkp.646.1649874201016;
-        Wed, 13 Apr 2022 11:23:21 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzCn2khQiDonjfLl9vGxiN/oxjzSDzqNMc6Ce8aesfGx67ikSSSU6uEItwFb7n1+JqH1V1sBA==
-X-Received: by 2002:a05:620a:29d0:b0:680:9c1a:557a with SMTP id s16-20020a05620a29d000b006809c1a557amr7682803qkp.646.1649874200721;
-        Wed, 13 Apr 2022 11:23:20 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id p28-20020a05620a15fc00b0069c28de43casm4942331qkm.102.2022.04.13.11.23.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Apr 2022 11:23:19 -0700 (PDT)
-Date:   Thu, 14 Apr 2022 02:23:14 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] xfs/187: don't rely on FSCOUNTS for free space data
-Message-ID: <20220413182314.bfk55f4axio5amc7@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-References: <164971765670.169895.10730350919455923432.stgit@magnolia>
- <164971766238.169895.2389864738831855587.stgit@magnolia>
- <20220412084716.vwljkrc7bpnzl75z@zlang-mailbox>
- <20220412171156.GF16799@magnolia>
+        with ESMTP id S232430AbiDMX3l (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 19:29:41 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6B751D305
+        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 16:27:18 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 51CA6B827AC
+        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 23:27:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E43B6C385A3;
+        Wed, 13 Apr 2022 23:27:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649892436;
+        bh=PQCqej5jndD60bHgymLcXcwE1yEIkLXFWs21cjzP+MM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=fNV/YYl6IXt1EMm3SQALfepp6QyFIucvNbCbeQ0zkCpPrClmn4rCA3f5oKyTHbl6+
+         YSi04ClnPwY5+i7/Iyqfpl3C9voKUxSXAyUnZCoy73xbWlgpAHVZYFUZ0Jbj/jTKKK
+         TEeeeKgId+2H4HuFHHAXJTchHuDW9miMUqXBP2/GZf9wUi4s98rSVAa/VKquuFgNBt
+         CCn8WCnt+scfmN6Z4G1hAcuQq6kR3y5Pi32E9VPNp+gp9BK9xiNaXHwRl4k27CVysh
+         nQhAcyIaFYYIlkuSjdleEpYdZ7h11S1kHRAgXqAvkc6/agqQABIvPahMbX+JAs0hqq
+         6lPEZgsNnIr8A==
+Date:   Wed, 13 Apr 2022 16:27:15 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Dave Chinner <david@fromorbit.com>,
+        David Disseldorp <ddiss@suse.de>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH] generic/019: kill background processes on interrupt
+Message-ID: <20220413232715.GC16774@magnolia>
+References: <20220411054833.2157779-1-david@fromorbit.com>
+ <20220412145942.0a268875@suse.de>
+ <20220412142500.ubkbw2fvbxowzo5p@zlang-mailbox>
+ <20220413002656.GL1609613@dread.disaster.area>
+ <CAOQ4uxi_YY2fBTAoQz4W_jOFvySUWGG0UFhtKjptgiiM1jg7Bg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220412171156.GF16799@magnolia>
+In-Reply-To: <CAOQ4uxi_YY2fBTAoQz4W_jOFvySUWGG0UFhtKjptgiiM1jg7Bg@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 12, 2022 at 10:11:56AM -0700, Darrick J. Wong wrote:
-> On Tue, Apr 12, 2022 at 04:47:16PM +0800, Zorro Lang wrote:
-> > On Mon, Apr 11, 2022 at 03:54:22PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Currently, this test relies on the XFS_IOC_FSCOUNTS ioctl to return
-> > > accurate free space information.  It doesn't.  Convert it to use statfs,
-> > > which uses the accurate versions of the percpu counters.  Obviously,
-> > > this only becomes a problem when we convert the free rtx count to use
-> > > (sloppier) percpu counters instead of the (more precise and previously
-> > > buggy) ondisk superblock counts.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/xfs/187 |    2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > 
-> > > diff --git a/tests/xfs/187 b/tests/xfs/187
-> > > index 1929e566..a9dfb30a 100755
-> > > --- a/tests/xfs/187
-> > > +++ b/tests/xfs/187
-> > > @@ -135,7 +135,7 @@ punch_off=$((bigfile_sz - frag_sz))
-> > >  $here/src/punch-alternating $SCRATCH_MNT/bigfile -o $((punch_off / fsbsize)) -i $((rtextsize_blks * 2)) -s $rtextsize_blks
-> > >  
-> > >  # Make sure we have some free rtextents.
-> > > -free_rtx=$($XFS_IO_PROG -c 'statfs' $SCRATCH_MNT | grep counts.freertx | awk '{print $3}')
-> > > +free_rtx=$($XFS_IO_PROG -c 'statfs' $SCRATCH_MNT | grep statfs.f_bavail | awk '{print $3}')
-> > 
-> > Do you mean the "cnt->freertx = mp->m_sb.sb_frextents" in xfs_fs_counts() isn't
-> > right?
+On Wed, Apr 13, 2022 at 10:13:35AM +0300, Amir Goldstein wrote:
+> On Wed, Apr 13, 2022 at 4:53 AM Dave Chinner <david@fromorbit.com> wrote:
+> >
+> > On Tue, Apr 12, 2022 at 10:25:00PM +0800, Zorro Lang wrote:
+> > > On Tue, Apr 12, 2022 at 02:59:42PM +0200, David Disseldorp wrote:
+> > > > On Mon, 11 Apr 2022 15:48:33 +1000, Dave Chinner wrote:
+> > > >
+> > > > > From: Dave Chinner <dchinner@redhat.com>
+> > > > >
+> > > > > If you ctrl-c generic/019, it leaves fsstress processes running.
+> > > > > Kill them in the cleanup function so that they don't have to be
+> > > > > manually killed after interrupting the test.
+> > > > >
+> > > > > While touching the _cleanup() function, make it do everything that
+> > > > > the generic _cleanup function it overrides does and fix the
+> > > > > indenting.
+> > > > >
+> > > > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > > > > ---
+> > > > >  tests/generic/019 | 6 ++++--
+> > > > >  1 file changed, 4 insertions(+), 2 deletions(-)
+> > > > >
+> > > > > diff --git a/tests/generic/019 b/tests/generic/019
+> > > > > index db56dac1..cda107f4 100755
+> > > > > --- a/tests/generic/019
+> > > > > +++ b/tests/generic/019
+> > > > > @@ -53,8 +53,10 @@ stop_fail_scratch_dev()
+> > > > >  # Override the default cleanup function.
+> > > > >  _cleanup()
+> > > > >  {
+> > > > > -    disallow_fail_make_request
+> > > > > -    rm -f $tmp.*
+> > > > > + kill $fs_pid $fio_pid &> /dev/null
+> > > > > + disallow_fail_make_request
+> > > > > + cd /
+> > > > > + rm -r -f $tmp.*
+> > > > >  }
+> > > > >
+> > > > >  RUN_TIME=$((20+10*$TIME_FACTOR))
+> > > >
+> > > > Might be worth unset'ing the "fs_pid" and "fio_pid" variables after the
+> > > > wait, but should be fine as-is:
+> > >
+> > > I agree. Better to avoid killing other system processes. Or how about this place
+> > > does (avoid killing system useful processes):
+> > > $KILLALL_PROG -q $FSSTRESS_PROG
+> > > $KILLALL_PROG -q $FIO_PROG
+> > >
+> > > Another picky question is, do we need to use a while loop checking, until the
+> > > processes really get killed? :)
+> >
+> > Do we really need to paint the bikeshed over how best to kill a
+> > process? I don't have time to do that, this is just a drive-by fix
+> > that works for me....
+> >
 > 
-> Correct -- prior to the patches introduced here:
-> https://lore.kernel.org/linux-xfs/164961485474.70555.18228016043917319266.stgit@magnolia/T/#t
+> This is not a kind response to reviewers.
+> Does a "drive-by fix" get exempt from the review process?
+> The review comments are legit even if they could be dismissed
+> on technical grounds, because the risk of pid wraparound is quite low.
 > 
-> The kernel would account actual ondisk rt extent usage *and* in-memory
-> transaction reservations in mp->m_sb.sb_frextents, which meant that one
-> thread calling xfs_log_sb racing with another thread allocating space on
-> the rt volume would write the wrong sb_frextents value to disk, which
-> corrupts the superblock counters.
-> 
-> The fix for that is to separate the two uses into separate counters --
-> now mp->m_sb.sb_frextents tracks the ondisk usage, and mp->m_frextents
-> also includes tx reservations.  m_frextents is a percpu counter, which
-> means that we won't be able to rely on it for a precise accounting after
-> the series is merged.  Hence the switch to statfs, which does use the
-> slow-but-accurate percpu_counter_sum method.
+> I don't think this is about "bikeshed over how best to kill a process"
+> I think this is about how to have better test cleanup practices.
 
-Thanks for your detailed explanation, so it's about this patch:
-[PATCH 3/3] xfs: use a separate frextents counter for rt extent reservations
+I agree, but this is a broad treewide cleanup, which itself is a
+separate project that shouldn't hold up this quick cleanup...
 
-It's good to me, it would be better if we can add more content (as above) into commit log.
+> It would have been nice to have better isolation by having fstests
+> run a test without a control group and cleanup the control group
+> processes after the test if someone wants to take on this task.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+...because there are quite a few places (particularly anything that runs
+fsx/fsstress/iogen for fun) where we kick off a group of background
+processes and later require a reliable way to shoot them all down.
+Fixing all that in a consistent way is a *much* bigger task than what
+Dave is trying to accomplish here.
+
+The current "scheme" is that ./check will run each test in its own
+systemd scope (if available) to try to improve the reliability of test
+program cleanup if the _cleanup method itself fails to kill all the
+child tasks.  This isn't foolproof because some people refuse to use
+systemd, and the systemd tools themselves can't do a whole lot about
+processes stuck in D state.
+
+In the ideal world, whoever takes on cleaning up process cleanup
+probably ought to figure out a more general solution, or at least
+investigate it more thoroughly than I did to decide if it's worth
+reimplementing process control group control via bash script for people
+who do not use systemd.
+
+Does anyone want to take on this task?
+
+> I personally prefer the pattern of dedicated cleanup trap for aborting the test
+> like generic/251 that leaves the generic _cleanup on EXIT instead of
+> duplicating _cleanup (which generic/251 also duplicate incorrectly),
+> but no strong feeling about that, so as a "drive-by fix" you may add:
+> 
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+
+For this patch,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
 
 > 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > >  if [ $free_rtx -eq 0 ]; then
-> > >  	echo "Expected fragmented free rt space, found none."
-> > >  fi
-> > > 
-> > 
-> 
-
+> Thanks,
+> Amir.
