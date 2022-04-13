@@ -2,252 +2,222 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57752C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 15:44:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14947C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 16:23:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231983AbiDMPqg (ORCPT
+        id S235536AbiDMQ0R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Apr 2022 11:46:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60312 "EHLO
+        Wed, 13 Apr 2022 12:26:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47672 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229983AbiDMPqe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 11:46:34 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 679D453B7C
-        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 08:44:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1649864652;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=oxZdvs0VmpSsHUDqQuZgTQd2vsFm6VB9blHUa5yc41E=;
-        b=XBG7yoEZn3PFd0WBZLOqaDViQsnHsgksei8j+6MCJnhEDweXnDVXZjXj7g8WgVBrBzB3Zc
-        1bCAtlZKR0MkU0qjrAFHednhZtgJ1tbns4TSZ5emTENpQwZFg54HUZ8MF4gA65V90TJj6v
-        nnVOVAJRerFhXUgHbIgvrlhnFiCGWFM=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-648-0HEj0bAZPsybFId5aPjBBg-1; Wed, 13 Apr 2022 11:44:10 -0400
-X-MC-Unique: 0HEj0bAZPsybFId5aPjBBg-1
-Received: by mail-qt1-f197.google.com with SMTP id f22-20020ac840d6000000b002dd4d87de21so1484192qtm.23
-        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 08:44:10 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=oxZdvs0VmpSsHUDqQuZgTQd2vsFm6VB9blHUa5yc41E=;
-        b=ZoUOZb9ch7Qok8jIiYUtCHeOs71RAD1aSsNNnZANbl4znREyFcvixyHziSliPwMIYn
-         Up/R988gd3mww5VmZXTBIWdSC6frIzH1SvJCzj07Xhjpt4Xd3JpUJgoLIPr3KA9GBGJr
-         ingWkno7K9wWuAj9lqdE8fQQZOfHcibKiOjEYa073mbqTEPabO49Uz42I5VPbz2wLELz
-         K9CVOA8/VldDo/N5xXVEuATXlInqqRgHzbc/V3x1l2nnbtAOB8rbQlVhgjwJ0cLDjGx0
-         ehmtaWIR4zuzSfIi616Vrp+wsiFBOs27pIushHZ3qyB+aNDy1dAlqHxLuUOWUtKLIRln
-         FR4w==
-X-Gm-Message-State: AOAM533+3y3bGoOsoDMJMO8ERY6fNMCw7EWHT20JbsLNuzi9Q7SC8lqY
-        oTLtPF/5YBqlpa5DeB5mzLpGhT42SzDQV3cCIsPdPQ20M5Iox1TOCANgaXgQLfOkoizQli2Kr7z
-        sNC0G/aMc7JDZ3Pp3HA==
-X-Received: by 2002:ad4:5634:0:b0:444:4843:1b6f with SMTP id cb20-20020ad45634000000b0044448431b6fmr12989935qvb.6.1649864649258;
-        Wed, 13 Apr 2022 08:44:09 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz4v6llDaXqMU0ZBKQmS618JbJtkhiTaWVq0axFMoH2yOJssiSEovSA/c93WE4+JdeyfKKb6A==
-X-Received: by 2002:ad4:5634:0:b0:444:4843:1b6f with SMTP id cb20-20020ad45634000000b0044448431b6fmr12989909qvb.6.1649864648963;
-        Wed, 13 Apr 2022 08:44:08 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id b3-20020a05620a270300b0069c5f9304e6sm557692qkp.48.2022.04.13.08.44.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Apr 2022 08:44:07 -0700 (PDT)
-Date:   Wed, 13 Apr 2022 23:44:01 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH 2/4] generic: ensure we drop suid after fallocate
-Message-ID: <20220413154401.vun2usvgwlfers2r@zlang-mailbox>
-Mail-Followup-To: Amir Goldstein <amir73il@gmail.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-References: <164971767143.169983.12905331894414458027.stgit@magnolia>
- <164971768254.169983.13280225265874038241.stgit@magnolia>
- <20220412115205.d6jjudlkxs72vezd@zlang-mailbox>
- <CAOQ4uxiDW6=qgWtH8uHkOmAyZBR7vfgwgt-DA_Rn0QVihQZQLw@mail.gmail.com>
+        with ESMTP id S231865AbiDMQ0Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 12:26:16 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DC4F2E083;
+        Wed, 13 Apr 2022 09:23:54 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2E16CB82595;
+        Wed, 13 Apr 2022 16:23:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE30BC385A4;
+        Wed, 13 Apr 2022 16:23:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649867031;
+        bh=LwjIMdi2kmjgYiucJtnPmoWomm0qvLgSuC5QQ95UgVI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nS9ShLTCZozkAEs5XfpoH4GJH8hfyNcKD7O1GVZZmo65BpmCYKPZG/njwTr+9Fysq
+         gnfu0Kqo93daiU2zQeWUqUVUd9vVqjoQZDbG1u5jGv454e1Iif7ww8hI9LI6aYqcBd
+         NQgGZzasoBg/TyGOAFETyci9pnE5a9bZIYlxZQBQjT2ybFj/hD+BnU9QF1hErqsbX1
+         Hv9oHH2AXThf2uX/bMQQtu9Viobob4BCGurkDw2KuGXxmfYKL4EjoQKuByesVanmXQ
+         ZcuaV9pNtTGLAiyWgExwU8U+tCrrknSCpuVAg+xFT8XBs2XHUls3M6B1u9a4UHIsEj
+         LoiR3wA/zWAZw==
+Date:   Wed, 13 Apr 2022 09:23:51 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Matthew Wilcox <willy@infradead.org>
+Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Subject: Re: generic/068 crash on 5.18-rc2?
+Message-ID: <20220413162351.GA205970@magnolia>
+References: <20220413033425.GM16799@magnolia>
+ <YlbjOPEQP66gc1WQ@casper.infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxiDW6=qgWtH8uHkOmAyZBR7vfgwgt-DA_Rn0QVihQZQLw@mail.gmail.com>
+In-Reply-To: <YlbjOPEQP66gc1WQ@casper.infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 13, 2022 at 10:58:41AM +0300, Amir Goldstein wrote:
-> On Wed, Apr 13, 2022 at 1:18 AM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Mon, Apr 11, 2022 at 03:54:42PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > >
-> > > fallocate changes file contents, so make sure that we drop privileges
-> > > and file capabilities after each fallocate operation.
-> > >
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/generic/834     |  127 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/834.out |   33 +++++++++++++
-> > >  tests/generic/835     |  127 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/835.out |   33 +++++++++++++
-> > >  tests/generic/836     |  127 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/836.out |   33 +++++++++++++
-> > >  tests/generic/837     |  127 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/837.out |   33 +++++++++++++
-> > >  tests/generic/838     |  127 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/838.out |   33 +++++++++++++
-> > >  tests/generic/839     |   77 ++++++++++++++++++++++++++++++
-> > >  tests/generic/839.out |   13 +++++
-> > >  12 files changed, 890 insertions(+)
-> > >  create mode 100755 tests/generic/834
-> > >  create mode 100644 tests/generic/834.out
-> > >  create mode 100755 tests/generic/835
-> > >  create mode 100644 tests/generic/835.out
-> > >  create mode 100755 tests/generic/836
-> > >  create mode 100644 tests/generic/836.out
-> > >  create mode 100755 tests/generic/837
-> > >  create mode 100644 tests/generic/837.out
-> > >  create mode 100755 tests/generic/838
-> > >  create mode 100644 tests/generic/838.out
-> > >  create mode 100755 tests/generic/839
-> > >  create mode 100755 tests/generic/839.out
-> > >
-> > >
-> > > diff --git a/tests/generic/834 b/tests/generic/834
-> > > new file mode 100755
-> > > index 00000000..9302137b
-> > > --- /dev/null
-> > > +++ b/tests/generic/834
-> > > @@ -0,0 +1,127 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 834
-> > > +#
-> > > +# Functional test for dropping suid and sgid bits as part of a fallocate.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto clone quick
-> > > +
-> > > +# Override the default cleanup function.
-> > > +_cleanup()
-> > > +{
-> > > +     cd /
-> > > +     rm -r -f $tmp.* $junk_dir
-> > > +}
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +. ./common/reflink
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# Modify as appropriate.
-> > > +_supported_fs xfs btrfs ext4
-> >
-> > So we have more cases will break downstream XFS testing :)
+On Wed, Apr 13, 2022 at 03:50:32PM +0100, Matthew Wilcox wrote:
+> On Tue, Apr 12, 2022 at 08:34:25PM -0700, Darrick J. Wong wrote:
+> > Hmm.  Two nights in a row I've seen the following crash.  Has anyone
+> > else seen this, or should I keep digging?  This is a fairly boring
+> > x86_64 VM with a XFS v5 filesystem + rmapbt.
 > 
-> Funny you should mention that.
-> I was going to propose an RFC for something like:
+> I have not seen this before.  I test with:
+> MKFS_OPTIONS  -- -f -m reflink=1,rmapbt=1 -i sparse=1 -b size=1024 /dev/sdc
 > 
-> _fixed_by_kernel_commit fbe7e5200365 "xfs: fallocate() should call
-> file_modified()"
+> Maybe I should try a 4096 byte block size.
 > 
-> The first thing that could be done with this standard annotation is print a
-> hint on failure, like LTP does:
+> > mm/filemap.c:1653 is the BUG in:
+> > 
+> > void folio_end_writeback(struct folio *folio)
+> > {
+> > 	/*
+> > 	 * folio_test_clear_reclaim() could be used here but it is an
+> > 	 * atomic operation and overkill in this particular case.
+> > 	 * Failing to shuffle a folio marked for immediate reclaim is
+> > 	 * too mild a gain to justify taking an atomic operation penalty
+> > 	 * at the end of every folio writeback.
+> > 	 */
+> > 	if (folio_test_reclaim(folio)) {
+> > 		folio_clear_reclaim(folio);
+> > 		folio_rotate_reclaimable(folio);
+> > 	}
+> > 
+> > 	/*
+> > 	 * Writeback does not hold a folio reference of its own, relying
+> > 	 * on truncation to wait for the clearing of PG_writeback.
+> > 	 * But here we must make sure that the folio is not freed and
+> > 	 * reused before the folio_wake().
+> > 	 */
+> > 	folio_get(folio);
+> > 	if (!__folio_end_writeback(folio))
+> > >>>>		BUG();
 > 
-> HINT: You _MAY_ be missing kernel fixes:
+> Grr, that should have been a VM_BUG_ON_FOLIO(1, folio) so we get useful
+> information about the folio (like whether it has an iop, or what order
+> the folio is).  Can you make that change and try to reproduce?
 > 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=fbe7e5200365
+> What's going on here is that we've called folio_end_writeback() on a
+> folio which does not have the writeback flag set.  That _should_ be
+> impossible, hence the use of BUG().  Either we've called
+> folio_end_writeback() twice on the same folio, or we neglected to set
+> the writeback flag on the folio.  I don't immediately see why either
+> of those two things would happen.
 
-I think it's not difficult to implement this behavior in xfstests. Generally if
-a case covers a known bug, we record the patch commit in case description.
+Ok, will do.
 
-As my habit, if a test case fails, I'd like to read the case source code
-directly, to get more details about the failure, and check if there's a known
-issue(commit id) covered by that. If there is, check if the kernel I'm testing
-contains this commit.
+An ARM VM also tripped over this last night (64k pages, 4k fsblocksize)
+and it had even more to say:
 
-From my experience, if a case fails as it's expect, that's easy to find out,
-if the comments is good. Print a hint will help, but won't help much I think,
-due to the hint is just a guess, we still need to read source code or do more
-testing to make sure that, when we hit a failure first time. But most of time
-we always hit unexpected failures, that takes longer time to check.
+run fstests generic/068 at 2022-04-12 20:49:17
+spectre-v4 mitigation disabled by command-line option
+XFS (sda2): Mounting V5 Filesystem
+XFS (sda2): Ending clean mount
+XFS (sda3): Mounting V5 Filesystem
+XFS (sda3): Ending clean mount
+XFS (sda3): Quotacheck needed: Please wait.
+XFS (sda3): Quotacheck: Done.
+------------[ cut here ]------------
+WARNING: CPU: 0 PID: 1214302 at fs/iomap/buffered-io.c:1020 iomap_finish_ioend+0x29c/0x37c
+Modules linked in: dm_zero ext2 dm_delay xfs dm_snapshot ext4 mbcache jbd2 dm_log_writes dm_thin_pool dm_persistent_data dm_bio_prison dm_bufio dm_flakey libcrc32c xt_REDIRECT iptable_nat nf_nat nf_conntrack nf_defrag_ipv6 nf_defrag_ipv4 ip6t_REJECT nf_reject_ipv6 ipt_REJECT nf_reject_ipv4 rpcsec_gss_krb5 auth_rpcgss xt_tcpudp ip_set_hash_ip ip_set_hash_net xt_set ip_set_hash_mac ip_set nfnetlink crct10dif_ce bfq ip6table_filter ip6_tables iptable_filter sch_fq_codel efivarfs ip_tables x_tables overlay nfsv4 [last unloaded: scsi_debug]
+CPU: 0 PID: 1214302 Comm: 0:4 Tainted: G        W         5.18.0-rc2-djwa #rc2 541bf598c49d4450e32c1bfc9b8fb32b7009548e
+Hardware name: QEMU KVM Virtual Machine, BIOS 1.5.1 06/16/2021
+Workqueue: xfs-conv/sda3 xfs_end_io [xfs]
+pstate: 20401005 (nzCv daif +PAN -UAO -TCO -DIT +SSBS BTYPE=--)
+pc : iomap_finish_ioend+0x29c/0x37c
+lr : iomap_finish_ioend+0x19c/0x37c
+sp : fffffe000f08fc20
+x29: fffffe000f08fc20 x28: 0000000000040000 x27: 0000000000010000
+x26: ffffffff00775040 x25: 0000000000000000 x24: 0000000000000001
+x23: fffffc00e1014cc0 x22: fffffc01a44fac40 x21: 0000000000000000
+x20: 0000000000000000 x19: 0000000000000001 x18: 0000000000000000
+x17: 620000006b290000 x16: 4dae6b4802000000 x15: 0000000000000000
+x14: 0000000000000000 x13: 0000000000000000 x12: 0000000000000000
+x11: 0000000000000000 x10: 0000000000001ae0 x9 : fffffe00088ebff4
+x8 : fffffe01f6840000 x7 : fffffe0008fe92f0 x6 : 0000000000000387
+x5 : 00000000f0000000 x4 : 0000000000000000 x3 : 0000000000010000
+x2 : fffffc00e2623e80 x1 : 000000000000000d x0 : 0000000000000008
+Call trace:
+ iomap_finish_ioend+0x29c/0x37c
+ iomap_finish_ioends+0x80/0x130
+ xfs_end_ioend+0x68/0x164 [xfs ccff30bab1b631f6755d8bbcebc428122f4b51e0]
+ xfs_end_io+0xcc/0x12c [xfs ccff30bab1b631f6755d8bbcebc428122f4b51e0]
+ process_one_work+0x1e8/0x480
+ worker_thread+0x7c/0x430
+ kthread+0x108/0x114
+ ret_from_fork+0x10/0x20
+---[ end trace 0000000000000000 ]---
+------------[ cut here ]------------
 
-> 
-> The second thing to be done is that downstream testers could use a script
-> to auto-generate an expunge list for their test kernel, if they don't care about
-> testing known issues, only regressions.
+I tracked that assertion to:
 
-In my testing on RHEL (downstream), I record and update known issues, include known
-failures and panic/hang issues (need to skip) for each RHEL release. Before running
-xfstests, I try to get a skip list for a specified RHEL/kernel version. Then compare
-with its known failures after testing done, to decide if a failure is known/unknown.
-Also I created version tags for my redhat internal xfstests repo, for some downstream
-of downstream kernel testing (likes Z-stream testing) can use fixed xfstests version.
+static void iomap_finish_folio_write(struct inode *inode, struct folio *folio,
+		size_t len, int error)
+{
+	struct iomap_page *iop = to_iomap_page(folio);
 
-Some known issue format I record as below[1], a bash script will help to parse it and
-compare with testing results. It's only for our internal use, due to I think it's too
-crude to be shared :-P
+	if (error) {
+		folio_set_error(folio);
+		mapping_set_error(inode->i_mapping, error);
+	}
 
-[1]
-$ cat known_results/$distro/xfs/145.json 
-[
-    {
-        "DESCRIPTION": "bz19483*** XFS: Assertion failed: dqp->q_res_bcount >= be64_to_cpu(dqp->q_core.d_bcount)",
-        "FS": ["xfs"],
-        "DMESG": "Assertion failed: dqp->q_res_bcount >= be64_to_cpu\\(dqp->q_core.d_bcount\\)",
-        "FIXED": true
-    }
-]
-$ cat known_results/$distro/generic/417.json 
-[
-    {
-        "DESCRIPTION": "bz16255*** (<1%): XFS corruption attribute entry #0 in attr block 0, inode 674 is INCOMPLETE",
-        "FS": ["xfs"],
-        "ARCH": ["ppc64le"],
-        "OUTBAD": "_check_xfs_filesystem.*inconsistent",
-        "FULL": "attribute entry.*in attr block.*, inode.*is INCOMPLETE"
-    }
-]
+>>>>	WARN_ON_ONCE(i_blocks_per_folio(inode, folio) > 1 && !iop);
+	WARN_ON_ONCE(iop && atomic_read(&iop->write_bytes_pending) <= 0);
 
-> 
-> I hope that with the new maintainship you will also take the opportunity
-> to make fstests more friendly to downstream kernel testers.
-> 
-> > All cases looks good, but according to the custom, all generic cases use
-> > "_supported_fs generic", if you have 1+ specified filesystems, maybe
-> > "tests/shared/*" is better?
-> >
-> 
-> I think we should stay away from tests/shared for as much as possible and
-> use it only for very specific fs behaviors.
+	if (!iop || atomic_sub_and_test(len, &iop->write_bytes_pending))
+		folio_end_writeback(folio);
+}
 
-I prefer generic testing too :)
+...before it also tripped over the same BUG at mm/filemap.c:1653.
 
-> 
-> What in the behavior of fallocate() and setgid makes it so special that it needs
-> to be restricted to "xfs btrfs ext4" and not treated as a bug for other fs?
-> I suspect that it might be difficult or impossible to change that behavior in
-> network filesystems?
+--D
 
-I'm not sure what other filesystems think about this behavior. If this's a standard
-or most common behavior, I hope it can be a generic test (then let other fs maintainers
-worry about their new testing failure:-P). Likes generic/673 was written for XFS,
-then btrfs found failure, then btrfs said XFS should follow VFS as btrfs does :)
-
-> 
-> When facing a similar dilemma in the past we ended up with a whitelist
-> _fstyp_has_non_default_seek_data_hole(), but not sure we need to resort to that.
-> 
-> Thanks,
-> Amir.
-> 
-
+> > 
+> > 
+> > --D
+> > 
+> > run fstests generic/068 at 2022-04-12 17:57:11
+> > XFS (sda3): Mounting V5 Filesystem
+> > XFS (sda3): Ending clean mount
+> > XFS (sda4): Mounting V5 Filesystem
+> > XFS (sda4): Ending clean mount
+> > ------------[ cut here ]------------
+> > kernel BUG at mm/filemap.c:1653!
+> > invalid opcode: 0000 [#1] PREEMPT SMP
+> > CPU: 0 PID: 1349866 Comm: 0:116 Tainted: G        W         5.18.0-rc2-djwx #rc2 19cc48221d47ada6c8e5859639b6a0946c9a3777
+> > Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS ?-20171121_152543-x86-ol7-builder-01.us.oracle.com-4.el7.1 04/01/2014
+> > Workqueue: xfs-conv/sda4 xfs_end_io [xfs]
+> > RIP: 0010:folio_end_writeback+0x79/0x80
+> > Code: d2 75 1d f0 ff 4d 34 74 0e 5d c3 f0 80 67 02 fb e8 ac 29 01 00 eb ad 48 89 ef 5d e9 a1 0f 01 00 48 89 ee e8 b9 e8 01 00 eb d9 <0f> 0b 0f 1f 44 00 00 0f 1f 44 00 00 53 48 89 fb e8 62 f7 ff ff 48
+> > RSP: 0018:ffffc9000286fd50 EFLAGS: 00010246
+> > RAX: 0000000000000000 RBX: ffffea0007376840 RCX: 000000000000000c
+> > RDX: ffff88810d2de000 RSI: ffffffff81e55f0b RDI: ffff88810d2de000
+> > RBP: ffffea0007376840 R08: ffffea000b82c308 R09: ffffea000b82c308
+> > R10: 0000000000000001 R11: 000000000000000c R12: 0000000000000000
+> > R13: 000000000000c000 R14: 0000000000000005 R15: 0000000000000001
+> > FS:  0000000000000000(0000) GS:ffff88843fc00000(0000) knlGS:0000000000000000
+> > CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> > CR2: 00007f5b067d0000 CR3: 000000010d1bb000 CR4: 00000000001506b0
+> > Call Trace:
+> >  <TASK>
+> >  iomap_finish_ioend+0x19e/0x560
+> >  iomap_finish_ioends+0x69/0x100
+> >  xfs_end_ioend+0x5a/0x160 [xfs 513857e2ae300a835ce1fbd8065a84dc5382e649]
+> >  xfs_end_io+0xb1/0xf0 [xfs 513857e2ae300a835ce1fbd8065a84dc5382e649]
+> >  process_one_work+0x1df/0x3c0
+> >  ? rescuer_thread+0x3b0/0x3b0
+> >  worker_thread+0x53/0x3b0
+> >  ? rescuer_thread+0x3b0/0x3b0
+> >  kthread+0xea/0x110
+> >  ? kthread_complete_and_exit+0x20/0x20
+> >  ret_from_fork+0x1f/0x30
+> >  </TASK>
+> > Modules linked in: dm_snapshot dm_bufio dm_zero dm_flakey xfs libcrc32c xt_REDIRECT iptable_nat nf_nat nf_conntrack nf_defrag_ipv6 nf_defrag_ipv4 ip6t_REJECT nf_reject_ipv6 ipt_REJECT nf_reject_ipv4 auth_rpcgss oid_registry xt_tcpudp ip_set_hash_ip ip_set_hash_net xt_set ip_set_hash_mac ip_set nfnetlink ip6table_filter ip6_tables iptable_filter bfq sch_fq_codel ip_tables x_tables overlay nfsv4 af_packet [last unloaded: scsi_debug]
+> > Dumping ftrace buffer:
+> >    (ftrace buffer empty)
+> > ---[ end trace 0000000000000000 ]---
+> > RIP: 0010:folio_end_writeback+0x79/0x80
+> > Code: d2 75 1d f0 ff 4d 34 74 0e 5d c3 f0 80 67 02 fb e8 ac 29 01 00 eb ad 48 89 ef 5d e9 a1 0f 01 00 48 89 ee e8 b9 e8 01 00 eb d9 <0f> 0b 0f 1f 44 00 00 0f 1f 44 00 00 53 48 89 fb e8 62 f7 ff ff 48
+> > RSP: 0018:ffffc9000286fd50 EFLAGS: 00010246
+> > RAX: 0000000000000000 RBX: ffffea0007376840 RCX: 000000000000000c
+> > RDX: ffff88810d2de000 RSI: ffffffff81e55f0b RDI: ffff88810d2de000
+> > RBP: ffffea0007376840 R08: ffffea000b82c308 R09: ffffea000b82c308
+> > R10: 0000000000000001 R11: 000000000000000c R12: 0000000000000000
+> > R13: 000000000000c000 R14: 0000000000000005 R15: 0000000000000001
+> > FS:  0000000000000000(0000) GS:ffff88843fc00000(0000) knlGS:0000000000000000
+> > CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> > CR2: 00007f4b94008278 CR3: 0000000101ac9000 CR4: 00000000001506b0
+> > 
