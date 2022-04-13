@@ -2,136 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D60BC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 07:13:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 455A9C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 07:49:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233259AbiDMHQI (ORCPT
+        id S233425AbiDMHvo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Apr 2022 03:16:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57788 "EHLO
+        Wed, 13 Apr 2022 03:51:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43972 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230027AbiDMHQH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 03:16:07 -0400
-Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F4AC35247
-        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 00:13:47 -0700 (PDT)
-Received: by mail-qv1-xf2b.google.com with SMTP id e22so952166qvf.9
-        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 00:13:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=cO+Byhu0G7BUlPSIhFKwCZ82UaOsZif8yjZglQ39Fmw=;
-        b=Ad5piIdTRI4s+cgw4MRSlTmMqcpV5mstlu1KfLS6SwyIcV5YWe3thPpp5OmBOvPOMY
-         Ptq2nrvT/e9T7jWFnlq33ofN1KNpNGefVV1RVnIYdkeaREm2JRhv5z4on9vi2vRAyTbR
-         n1BW/fu3V5FEN7off8r5YNzH9UgxfEcj+miTvH2efMjftcqjLnqC3OOsuImoi3rMwPX0
-         2+6jLbVBhLl4fy9QHlZciNVVvwYpeArF9IpGwWf3HYUIINqPyswthAW0IY7+v/JVG/WD
-         z4kHstt5Oq+dzW9G2gUKPRTM8nmYO0vQfHO/6MaMFkpAMwkKsasJTfmN8mHv/l5couXh
-         RSYQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=cO+Byhu0G7BUlPSIhFKwCZ82UaOsZif8yjZglQ39Fmw=;
-        b=B2d4fV5PikFXWr8vK3I7fZW0u5d+YEA5OVilxDHULCgRSMmZ6IZ7/p+z5JrXfdzCON
-         a24UXXxYySXjsdvWi6v7R/pnqlVeBx18NSQWgpWpsfSE5ltLGRYqTup0/D245AWPIG7J
-         SiHyanoDFC0A+QS7uUQ4fSlw6VL+5E/gj6NAqWBKOWG5dvmRUARyQJaYPFwPvEXN28Tg
-         r3Mq8aCBjbMSLuazIn3ay160u1UgyDhQWO2CPkWBI2jF1uZXQJjlDPE4WLal9DC842TL
-         mT1+Tmwt8arsI3ieMXsFiIA0XEyQ149/z8FmFIfEaIfdpfNsQX7JHmUix5DesRfZGu9C
-         uXlA==
-X-Gm-Message-State: AOAM532d0XI9sgDd/pL9UNgGvPIwc/Rv/+Y4WWmg2ulKrGyjhYEXjeml
-        UZgDHLuWaEERnP7Gq04wSrj4jSCggQ1xcuXmWUdjOKl8Fhs=
-X-Google-Smtp-Source: ABdhPJz4pZ63uitj90AlIBo4oAjXVCJ3NVwliILquG3N8zSmAueOdQ3+dNqBoYOdf58IizuEC6Aw4qe23Zye2WgunoY=
-X-Received: by 2002:a05:6214:1c83:b0:443:6749:51f8 with SMTP id
- ib3-20020a0562141c8300b00443674951f8mr33792184qvb.74.1649834026704; Wed, 13
- Apr 2022 00:13:46 -0700 (PDT)
+        with ESMTP id S233408AbiDMHvm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 03:51:42 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 739FA25B
+        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 00:49:21 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 154CE6152B
+        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 07:49:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BED65C385A3;
+        Wed, 13 Apr 2022 07:49:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1649836160;
+        bh=Z49xQzK6kXvOom3beN2dL+PoC/ySrrhNfbUfOEZSKxQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=cQkz/tF0E7svGRWJU8QQvdQUyzu8Mq7zqGPthvPo3N5MNpwCEUBQ/HuWOZoizWLb7
+         jZNjylCWPuovhomGPh1uATSM4bIa47u2HBTy20grV0QAfBSLTNMoMFHSn+xgQarVVC
+         H4MQsA24Qdxevv8y20u1ZrOzgu6sHE42FmpYJhJRQLxBy1Si7K4imgLdR0fS+7KmO6
+         GlXr+jeXe5ZJmq6glIPdep168Eqi6NvJaTqxq+hgiu5jUV0k3HskRroDrPUCqPI1WS
+         1goNdZwo9BDZoHHEf6otI5+rzm1dVHpfxL2m63d9lEgg8soV6Qj96bIG29ri8DbM94
+         vqw3BV2GlHqEg==
+Date:   Wed, 13 Apr 2022 09:49:10 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>,
+        Miklos Szeredi <mszeredi@redhat.com>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        Christoph Hellwig <hch@lst.de>,
+        Aleksa Sarai <cyphar@cyphar.com>,
+        Giuseppe Scrivano <gscrivan@redhat.com>,
+        Rodrigo Campos Catelin <rodrigo@sdfg.com.ar>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Luca Bocassi <luca.boccassi@microsoft.com>,
+        Lennart Poettering <mzxreary@0pointer.de>,
+        =?utf-8?B?U3TDqXBoYW5l?= Graber <stgraber@ubuntu.com>,
+        Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v5] common: allow to run all tests on idmapped mounts
+Message-ID: <20220413074910.rwoi4njgsgt4ogxe@wittgenstein>
+References: <20220407112157.1775081-1-brauner@kernel.org>
+ <20220407112157.1775081-21-brauner@kernel.org>
 MIME-Version: 1.0
-References: <20220411054833.2157779-1-david@fromorbit.com> <20220412145942.0a268875@suse.de>
- <20220412142500.ubkbw2fvbxowzo5p@zlang-mailbox> <20220413002656.GL1609613@dread.disaster.area>
-In-Reply-To: <20220413002656.GL1609613@dread.disaster.area>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 13 Apr 2022 10:13:35 +0300
-Message-ID: <CAOQ4uxi_YY2fBTAoQz4W_jOFvySUWGG0UFhtKjptgiiM1jg7Bg@mail.gmail.com>
-Subject: Re: [PATCH] generic/019: kill background processes on interrupt
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     David Disseldorp <ddiss@suse.de>, fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220407112157.1775081-21-brauner@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 13, 2022 at 4:53 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Tue, Apr 12, 2022 at 10:25:00PM +0800, Zorro Lang wrote:
-> > On Tue, Apr 12, 2022 at 02:59:42PM +0200, David Disseldorp wrote:
-> > > On Mon, 11 Apr 2022 15:48:33 +1000, Dave Chinner wrote:
-> > >
-> > > > From: Dave Chinner <dchinner@redhat.com>
-> > > >
-> > > > If you ctrl-c generic/019, it leaves fsstress processes running.
-> > > > Kill them in the cleanup function so that they don't have to be
-> > > > manually killed after interrupting the test.
-> > > >
-> > > > While touching the _cleanup() function, make it do everything that
-> > > > the generic _cleanup function it overrides does and fix the
-> > > > indenting.
-> > > >
-> > > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > > > ---
-> > > >  tests/generic/019 | 6 ++++--
-> > > >  1 file changed, 4 insertions(+), 2 deletions(-)
-> > > >
-> > > > diff --git a/tests/generic/019 b/tests/generic/019
-> > > > index db56dac1..cda107f4 100755
-> > > > --- a/tests/generic/019
-> > > > +++ b/tests/generic/019
-> > > > @@ -53,8 +53,10 @@ stop_fail_scratch_dev()
-> > > >  # Override the default cleanup function.
-> > > >  _cleanup()
-> > > >  {
-> > > > -    disallow_fail_make_request
-> > > > -    rm -f $tmp.*
-> > > > + kill $fs_pid $fio_pid &> /dev/null
-> > > > + disallow_fail_make_request
-> > > > + cd /
-> > > > + rm -r -f $tmp.*
-> > > >  }
-> > > >
-> > > >  RUN_TIME=$((20+10*$TIME_FACTOR))
-> > >
-> > > Might be worth unset'ing the "fs_pid" and "fio_pid" variables after the
-> > > wait, but should be fine as-is:
-> >
-> > I agree. Better to avoid killing other system processes. Or how about this place
-> > does (avoid killing system useful processes):
-> > $KILLALL_PROG -q $FSSTRESS_PROG
-> > $KILLALL_PROG -q $FIO_PROG
-> >
-> > Another picky question is, do we need to use a while loop checking, until the
-> > processes really get killed? :)
->
-> Do we really need to paint the bikeshed over how best to kill a
-> process? I don't have time to do that, this is just a drive-by fix
-> that works for me....
->
+On Thu, Apr 07, 2022 at 01:21:57PM +0200, Christian Brauner wrote:
+> In addition to the generic and filesystem-specific idmapped mount
+> testsuites that already exist upstream today add simple infrastructure
+> so any test can be run on idmapped mounts simply by setting
+> IDMAPPED_MOUNTS=true in the config file or section. The main user for
+> now will be overlay to verify it works correctly on idmapped mounts.
+> 
+> Note that the infrastructure is completely generic so every filesystem that
+> supports idmapped mounts can simply run all of their tests idmapped. But
+> note that not all ways to create a mount have been converted yet. That
+> includes e.g. _dmthin_mount and direct calls to _mount in various tests.
+> 
+> In addition, there will be corner-cases. For example, xfs doesn't allow
+> bulkstat on idmapped mounts because it is a filesystem wide operation,
+> i.e. you can retrieve information for any inode in the filesystem so the
+> operation cannot be scoped reasonably under a single mount. So xfstests
+> testing bulkstat will fail as it's blocked. Similar for some btrfs
+> ioctl()s.
+> 
+> While we could of course restrict this testmode to -overlay for which we
+> know things work correctly we should not do this. It would mean that
+> people won't start using it and so we won't see issues unless someone
+> sits down and goes through more than 1000 tests and figures out for each
+> individual one whether it needs to be skipped or not.
+> 
+> So instead allow this mode but for all filesystems so people can start
+> running and reporting failures and we can fix them up or block them as
+> we detect them.
+> 
+> Cc: Eryu Guan <guaneryu@gmail.com>
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: <fstests@vger.kernel.org>
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+> ---
 
-This is not a kind response to reviewers.
-Does a "drive-by fix" get exempt from the review process?
-The review comments are legit even if they could be dismissed
-on technical grounds, because the risk of pid wraparound is quite low.
+Hey Miklos,
+hey Amir,
 
-I don't think this is about "bikeshed over how best to kill a process"
-I think this is about how to have better test cleanup practices.
-It would have been nice to have better isolation by having fstests
-run a test without a control group and cleanup the control group
-processes after the test if someone wants to take on this task.
+Just a quick update: Please note that this commit is now available in
+upstream xfstests already as of last Sunday:
 
-I personally prefer the pattern of dedicated cleanup trap for aborting the test
-like generic/251 that leaves the generic _cleanup on EXIT instead of
-duplicating _cleanup (which generic/251 also duplicate incorrectly),
-but no strong feeling about that, so as a "drive-by fix" you may add:
+https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=4a7b35d7a76cd993ad7a62fd180e00589c73ac4b
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+which means xfstests can run on the whole patchset directly.
 
-Thanks,
-Amir.
+Thanks!
+Christian
