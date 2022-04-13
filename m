@@ -2,187 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80213C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 07:59:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71DCCC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Apr 2022 08:07:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231876AbiDMIBx (ORCPT
+        id S230518AbiDMIKF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Apr 2022 04:01:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54728 "EHLO
+        Wed, 13 Apr 2022 04:10:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233279AbiDMIBw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 04:01:52 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DAA76573;
-        Wed, 13 Apr 2022 00:59:31 -0700 (PDT)
+        with ESMTP id S233140AbiDMIKE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 04:10:04 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97F3C2E9C2;
+        Wed, 13 Apr 2022 01:07:43 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 1CD0CB8214B;
-        Wed, 13 Apr 2022 07:59:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 86647C385A3;
-        Wed, 13 Apr 2022 07:59:27 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2F50C6176A;
+        Wed, 13 Apr 2022 08:07:43 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5D273C385A3;
+        Wed, 13 Apr 2022 08:07:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649836768;
-        bh=A+0QhTb4tsaXpARwo/xm9FkE0+cQh1YGBZRkYZK1bgo=;
+        s=k20201202; t=1649837262;
+        bh=TR5TOj+uquiYvhqOuy8mg9E7JyxFciDpah6gIYT+RCg=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Jm74QOXOj0GPzUqqljV6YyZToQWrqkH5GbZIJu3zOy69s3UrPFAcLSe6YTIye6kdU
-         YPZLcDSSLO1zYvEH9qK4MLp0dfHti+PG35wnSD+BUPHDhYyHWEv2ous26ILfTmiQYs
-         0bJclth4nOsuXOBsYFBp2mldD3jy9OK1CaY3RtGviqUplAjOYbz/VwaTWB7FuE3vJT
-         psXzn5trlqld6eS1yiy35kAl1oCc+9K4AQd7k6E2Ehr9KnVCzYwtQj9hKiZ+gSRKhl
-         9jlXxDfIGvAOiNW5vfpB/gt4qtODWKxmzUM4RJIu5tCqay0mmd0TEtUwKiGLOoXSmn
-         mjWB4FgOzkEqA==
-Date:   Wed, 13 Apr 2022 09:59:25 +0200
+        b=uLXe0jlL+clTajczhNm8PBGeZGu9MezrckDFfNHhAfDVlPn/Jg55k4rQte52RMTgF
+         F28eszbIzwUv7mPzCJM3EDArt3UtncRgwKdP//bNQbdUKvEFVRlwm5dP/6JnriJBB9
+         sqyAiHu8/zYAqH6ZeR1cIzoAogXIwvGRdG8JSwQLg5UfSmzF82Hkn2LJJ/8G0i158n
+         oGEZTwZxdEmVU9u+JXb6lhvSeGrNZdqbo04e9j2U0aoZ2oto0MzR86NSf+EADs6FN0
+         RRmHXnvLQC+ORozs6DAC/VePfMMHlGgRTDqIis0O9AQ7IjDNv5vN33BEgHuIRpKAOz
+         4JIK3rgnBWQxw==
+Date:   Wed, 13 Apr 2022 10:07:33 +0200
 From:   Christian Brauner <brauner@kernel.org>
 To:     Yang Xu <xuyang2018.jy@fujitsu.com>
 Cc:     david@fromorbit.com, djwong@kernel.org,
         linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v3 2/5] idmapped-mounts: Add mknodat operation in setgid
- test
-Message-ID: <20220413075925.f52jcurkieorm2df@wittgenstein>
+Subject: Re: [PATCH v3 3/5] idmapped-mounts: Add open with O_TMPFILE
+ operation in setgid test
+Message-ID: <20220413080733.6sz3tssi4wo3jc67@wittgenstein>
 References: <1649763226-2329-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <1649763226-2329-2-git-send-email-xuyang2018.jy@fujitsu.com>
+ <1649763226-2329-3-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <1649763226-2329-2-git-send-email-xuyang2018.jy@fujitsu.com>
+In-Reply-To: <1649763226-2329-3-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 12, 2022 at 07:33:43PM +0800, Yang Xu wrote:
-> Since mknodat can create file, we should also check whether strip S_ISGID.
-> Also add new helper caps_down_fsetid to drop CAP_FSETID because strip S_ISGID
-> depend on this cap and keep other cap(ie CAP_MKNOD) because create character
-> device needs it when using mknod.
+On Tue, Apr 12, 2022 at 07:33:44PM +0800, Yang Xu wrote:
+> Since we can create temp file by using O_TMPFILE flag and filesystem driver also
+> has this api, we should also check this operation whether strip S_ISGID.
 > 
-> Only test mknodat with character device in setgid_create function and the another
-> two functions test mknodat with whiteout device.
-> 
-> Since kernel commit a3c751a50 ("vfs: allow unprivileged whiteout creation") in
-> v5.8-rc1, we can create whiteout device in userns test. Since kernel 5.12, mount_setattr
-> and MOUNT_ATTR_IDMAP was supported, we don't need to detect kernel whether allow
-> unprivileged whiteout creation. Using fs_allow_idmap as a proxy is safe.
-> 
-> Tested-by: Christian Brauner (Microsoft)<brauner@kernel.org>
-> Reviewed-by: Christian Brauner (Microsoft)<brauner@kernel.org>
+> Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
 > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 > ---
->  src/idmapped-mounts/idmapped-mounts.c | 219 +++++++++++++++++++++++++-
->  1 file changed, 213 insertions(+), 6 deletions(-)
+>  src/idmapped-mounts/idmapped-mounts.c | 148 ++++++++++++++++++++++++++
+>  1 file changed, 148 insertions(+)
 > 
 > diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-> index 8e6405c5..617f56e0 100644
+> index 617f56e0..02f91558 100644
 > --- a/src/idmapped-mounts/idmapped-mounts.c
 > +++ b/src/idmapped-mounts/idmapped-mounts.c
-> @@ -241,6 +241,34 @@ static inline bool caps_supported(void)
->  	return ret;
+> @@ -51,6 +51,7 @@
+>  #define FILE1_RENAME "file1_rename"
+>  #define FILE2 "file2"
+>  #define FILE2_RENAME "file2_rename"
+> +#define FILE3 "file3"
+>  #define DIR1 "dir1"
+>  #define DIR2 "dir2"
+>  #define DIR3 "dir3"
+> @@ -337,6 +338,24 @@ out:
+>  	return fret;
 >  }
 >  
-> +static int caps_down_fsetid(void)
+> +static bool openat_tmpfile_supported(int dirfd)
 > +{
-> +	bool fret = false;
-> +#ifdef HAVE_SYS_CAPABILITY_H
-> +	cap_t caps = NULL;
-> +	cap_value_t cap = CAP_FSETID;
-> +	int ret = -1;
+> +	int fd = -1;
 > +
-> +	caps = cap_get_proc();
-> +	if (!caps)
-> +		goto out;
+> +	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
+> +	if (fd == -1) {
+> +		if (errno == ENOTSUP)
+> +			return false;
+> +		else
+> +			return log_errno(false, "failure: create");
+> +	}
 > +
-> +	ret = cap_set_flag(caps, CAP_EFFECTIVE, 1, &cap, 0);
-> +	if (ret)
-> +		goto out;
+> +	if (close(fd))
+> +		log_stderr("failure: close");
 > +
-> +	ret = cap_set_proc(caps);
-> +	if (ret)
-> +		goto out;
-> +
-> +	fret = true;
-> +
-> +out:
-> +	cap_free(caps);
-> +#endif
-> +	return fret;
+> +	return true;
 > +}
 > +
->  /* caps_down - lower all effective caps */
->  static int caps_down(void)
+>  /* __expected_uid_gid - check whether file is owned by the provided uid and gid */
+>  static bool __expected_uid_gid(int dfd, const char *path, int flags,
+>  			       uid_t expected_uid, gid_t expected_gid, bool log)
+> @@ -7841,7 +7860,10 @@ static int setgid_create(void)
 >  {
-> @@ -7805,8 +7833,8 @@ out_unmap:
->  #endif /* HAVE_LIBURING_H */
+>  	int fret = -1;
+>  	int file1_fd = -EBADF;
+> +	int tmpfile_fd = -EBADF;
+>  	pid_t pid;
+> +	bool supported = false;
+> +	char path[PATH_MAX];
 >  
->  /* The following tests are concerned with setgid inheritance. These can be
-> - * filesystem type specific. For xfs, if a new file or directory is created
-> - * within a setgid directory and irix_sgid_inhiert is set then inherit the
-> + * filesystem type specific. For xfs, if a new file or directory or node is
-> + * created within a setgid directory and irix_sgid_inhiert is set then inherit the
->   * setgid bit if the caller is in the group of the directory.
->   */
->  static int setgid_create(void)
-> @@ -7863,18 +7891,44 @@ static int setgid_create(void)
->  		if (!is_setgid(t_dir1_fd, DIR1, 0))
->  			die("failure: is_setgid");
->  
-> +		/* create a special file via mknodat() vfs_create */
-> +		if (mknodat(t_dir1_fd, FILE2, S_IFREG | S_ISGID | S_IXGRP, 0))
-> +			die("failure: mknodat");
-> +
-> +		if (!is_setgid(t_dir1_fd, FILE2, 0))
-> +			die("failure: is_setgid");
-> +
-> +		/* create a character device via mknodat() vfs_mknod */
-> +		if (mknodat(t_dir1_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, makedev(5, 1)))
-> +			die("failure: mknodat");
-> +
-> +		if (!is_setgid(t_dir1_fd, CHRDEV1, 0))
-> +			die("failure: is_setgid");
-> +
->  		if (!expected_uid_gid(t_dir1_fd, FILE1, 0, 0, 0))
->  			die("failure: check ownership");
->  
->  		if (!expected_uid_gid(t_dir1_fd, DIR1, 0, 0, 0))
->  			die("failure: check ownership");
->  
-> +		if (!expected_uid_gid(t_dir1_fd, FILE2, 0, 0, 0))
-> +			die("failure: check ownership");
-> +
-> +		if (!expected_uid_gid(t_dir1_fd, CHRDEV1, 0, 0, 0))
-> +			die("failure: check ownership");
-> +
->  		if (unlinkat(t_dir1_fd, FILE1, 0))
->  			die("failure: delete");
->  
->  		if (unlinkat(t_dir1_fd, DIR1, AT_REMOVEDIR))
->  			die("failure: delete");
->  
-> +		if (unlinkat(t_dir1_fd, FILE2, 0))
-> +			die("failure: delete");
-> +
-> +		if (unlinkat(t_dir1_fd, CHRDEV1, 0))
-> +			die("failure: delete");
-> +
->  		exit(EXIT_SUCCESS);
+>  	if (!caps_supported())
+>  		return 0;
+> @@ -7866,6 +7888,8 @@ static int setgid_create(void)
+>  		goto out;
 >  	}
->  	if (wait_for_pid(pid))
-> @@ -7889,8 +7943,8 @@ static int setgid_create(void)
->  		if (!switch_ids(0, 10000))
->  			die("failure: switch_ids");
 >  
-> -		if (!caps_down())
-> -			die("failure: caps_down");
-> +		if (!caps_down_fsetid())
-> +			die("failure: caps_down_fsetid");
+> +	supported = openat_tmpfile_supported(t_dir1_fd);
+> +
+>  	pid = fork();
+>  	if (pid < 0) {
+>  		log_stderr("failure: fork");
+> @@ -7929,6 +7953,25 @@ static int setgid_create(void)
+>  		if (unlinkat(t_dir1_fd, CHRDEV1, 0))
+>  			die("failure: delete");
 >  
->  		/* create regular file via open() */
->  		file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
-> @@ -7917,6 +7971,19 @@ static int setgid_create(void)
->  				die("failure: is_setgid");
->  		}
+> +		/* create tmpfile via filesystem tmpfile api */
+> +		if (supported) {
+> +			tmpfile_fd = openat(t_dir1_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
+> +			if (tmpfile_fd < 0)
+> +				die("failure: create");
+> +			/* link the temporary file into the filesystem, making it permanent */
+> +			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
+> +			if (linkat(AT_FDCWD, path, t_dir1_fd, FILE3, AT_SYMLINK_FOLLOW))
+> +				die("failure: linkat");
 
-Please see my comment on the earlier thread:
-https://lore.kernel.org/linux-fsdevel/20220407134009.s4shhomfxjz5cf5r@wittgenstein
+Fwiw, I don't think you need that snprintf() dance as you should be able
+to use AT_EMPTY_PATH:
 
-The same issue still exists afaict, i.e. you're not handling the irix
-case.
+if (linkat(fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
+
+for this.
