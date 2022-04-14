@@ -2,121 +2,79 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8531BC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Apr 2022 19:36:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46CA4C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Apr 2022 23:42:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231545AbiDNTjF (ORCPT
+        id S236256AbiDNXom (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Apr 2022 15:39:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32854 "EHLO
+        Thu, 14 Apr 2022 19:44:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41636 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235993AbiDNTjE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Apr 2022 15:39:04 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A03E9ECB3E;
-        Thu, 14 Apr 2022 12:36:38 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 5610AB82922;
-        Thu, 14 Apr 2022 19:36:37 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13748C385A5;
-        Thu, 14 Apr 2022 19:36:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649964996;
-        bh=q8+ZV5+hnyVUldAPUj6twn2XRjhodl/FgTVPB/Udg1U=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=loADvxJDMvMkUXQw02eeRUZIGzz9KzznYJyUgC8aMqSGRtgj41yex4rfTcXpxdh9b
-         gsAoWvyJtkdL/KLrXOb4QTbUcrn9xczGLku06myQJC0d/2zFdqohya0G28u6Q8WuZi
-         xjI8brAXDHN5RPyM0GrY2L5qpmEno/wsfS5puFuUXrGlZ0DUalCVSu0Eswkc+ywNsq
-         GitQ4W1nGbA6cHOlMLThrTbZpv4tWPDR7F1xrabFyWLyNiMuRWFe3eiOVdKbySUJgV
-         x3VPfUgncDdka4ue9PtlA0rRg7glAWjPPOaQsPa/SYTsC3F6JUTw0jG20WfnMoLM9T
-         gQnRxw0lrQ0Lw==
-Date:   Thu, 14 Apr 2022 12:36:35 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs/216: handle larger log sizes
-Message-ID: <20220414193635.GA17025@magnolia>
-References: <164971769710.170109.8985299417765876269.stgit@magnolia>
- <164971771391.170109.16368399851366024102.stgit@magnolia>
- <20220413174400.kvbihaz6bcsgz4hy@zlang-mailbox>
- <20220414015149.GD16774@magnolia>
- <20220414192531.56hn4igvgqikdryf@zlang-mailbox>
+        with ESMTP id S245048AbiDNXol (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Apr 2022 19:44:41 -0400
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55D58B3DD4
+        for <fstests@vger.kernel.org>; Thu, 14 Apr 2022 16:42:15 -0700 (PDT)
+Received: by mail-lj1-x231.google.com with SMTP id h11so7888540ljb.2
+        for <fstests@vger.kernel.org>; Thu, 14 Apr 2022 16:42:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ff/ENWcfq5/EpyiuEKyW/jvSsOfzdN8NGcP540mzsXM=;
+        b=Y80DtRQZSdhb4o3pj6hWms0Y8m3YBxHpUmyuAz1o5NqsRBV3GOCe1tQbd0FxY9X/SI
+         YV+tTd1WCMUXSHud0FpJtFyVasN3LORpsDbU8Zs4B/WZofaX2k+X3tf+TUjcufyOtHil
+         DHR1wRELo8hg+8tS3kFMF65j3vk2mxLJSH1+IHci522mWclOTGayRmwf02spL7W8nUi7
+         zmhXwpii8I37eElUuBoGnklgiN7zJfiKtRaCiO3VgcT4ksx4l1KyCp5VpKLc5knt6cbi
+         BSlOkmYEdp9jC4WgS7WJXlTfIethFCMOzve93Vdud5VaPcpnEkEDRtaS8WSQAcMgdpOf
+         P7ng==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ff/ENWcfq5/EpyiuEKyW/jvSsOfzdN8NGcP540mzsXM=;
+        b=UO3DKb/8n9I0RKjOROwQoa+IcefKwBzlEijZThITt52BxuJWe9MaA+9vUB2vTWxymF
+         MOKqmeEzYi94EpHz+AKd2KMKcCSnIFIYN1YQgLNLyHdhoLJoAyeN3rRFeGM4toqTEe6n
+         PTtxaD71JHzESI0YMq1J2cTSi6QfdQlcQHg0ull6koUrP5UYR0JZw0L47J4NKv0PxHQs
+         XkGBuu0r5ynYxytuTQMCyyD9uneOT3hA2heb47XNtlK43kL+WZhVrg8Rr/NoVEzU1ja3
+         taTfo8Wzj/ZA6Zj1x6CRD3irxAQ3q4KUktqYyiYwSILikn2avkyxD1sS/hSkWSDFgLo+
+         48FA==
+X-Gm-Message-State: AOAM531P5UuFrc6z5fPfrUfBDIqsRC1fmwxCjm28F+2CS393KdDtGgC8
+        vPxoS68ANEjtjM/sZfN7Ba0=
+X-Google-Smtp-Source: ABdhPJxaQHyKGVX4NgQkfWxmDmRqUGCtdjQCR88fhAR3tKAi+qlthjTLgOf13DQ+oUhleKSAVlKvCA==
+X-Received: by 2002:a05:651c:160b:b0:24d:a0fa:26cc with SMTP id f11-20020a05651c160b00b0024da0fa26ccmr1812947ljq.150.1649979733496;
+        Thu, 14 Apr 2022 16:42:13 -0700 (PDT)
+Received: from 5950x.telewell.oy (dxw3k4yf2tnxwyp6sg02y-3.rev.dnainternet.fi. [2001:14ba:9cae:8c00:9682:e720:334f:2fac])
+        by smtp.gmail.com with ESMTPSA id q17-20020a2e8751000000b00244beaacef1sm127548ljj.18.2022.04.14.16.42.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 Apr 2022 16:42:12 -0700 (PDT)
+From:   Kari Argillander <kari.argillander@gmail.com>
+X-Google-Original-From: Kari Argillander <kari.argillander@fidelix.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Kari Argillander <kari.argillander@fidelix.com>,
+        fstests@vger.kernel.org
+Subject: [xfstests-bld PATCH 0/2] Make ntfs3 more usable
+Date:   Fri, 15 Apr 2022 02:42:18 +0300
+Message-Id: <20220414234220.627320-1-kari.argillander@fidelix.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220414192531.56hn4igvgqikdryf@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 15, 2022 at 03:25:31AM +0800, Zorro Lang wrote:
-> On Wed, Apr 13, 2022 at 06:51:49PM -0700, Darrick J. Wong wrote:
-> > On Thu, Apr 14, 2022 at 01:44:00AM +0800, Zorro Lang wrote:
-> > > On Mon, Apr 11, 2022 at 03:55:13PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > mkfs will soon refuse to format a log smaller than 64MB, so update this
-> > > > test to reflect the new log sizing calculations.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
-> > > >  tests/xfs/216.out |   14 +++++++-------
-> > > >  1 file changed, 7 insertions(+), 7 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/tests/xfs/216.out b/tests/xfs/216.out
-> > > > index cbd7b652..3c12085f 100644
-> > > > --- a/tests/xfs/216.out
-> > > > +++ b/tests/xfs/216.out
-> > > > @@ -1,10 +1,10 @@
-> > > >  QA output created by 216
-> > > > -fssize=1g log      =internal log           bsize=4096   blocks=2560, version=2
-> > > > -fssize=2g log      =internal log           bsize=4096   blocks=2560, version=2
-> > > > -fssize=4g log      =internal log           bsize=4096   blocks=2560, version=2
-> > > > -fssize=8g log      =internal log           bsize=4096   blocks=2560, version=2
-> > > > -fssize=16g log      =internal log           bsize=4096   blocks=2560, version=2
-> > > > -fssize=32g log      =internal log           bsize=4096   blocks=4096, version=2
-> > > > -fssize=64g log      =internal log           bsize=4096   blocks=8192, version=2
-> > > > +fssize=1g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > +fssize=2g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > +fssize=4g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > +fssize=8g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > +fssize=16g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > +fssize=32g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > +fssize=64g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > 
-> > > So this will break downstream kernel testing too, except it follows this new
-> > > xfs behavior change. Is it possible to get the minimal log size, then help to
-> > > avoid the failure (if it won't mess up the code:)?
-> > 
-> > Hmm.  I suppose we could do a .out.XXX switcheroo type thing, though I
-> > don't know of a good way to detect which mkfs behavior you've got.
-> 
-> Don't need to take much time to handle it :) How about use a specified filter function,
-> filter all log blocks number <= 16384, if the number of blocks=$number <= 16384, transform
-> it to blocks=* or what anything else do you like ?
-> 
-> I think we don't really care how much the log size less than 64M, right? Just hope it
-> works (can be mounted and read/write)?
+Add ntfs3 kernel configs and disable tests which hangs at the moment.
 
-<shrug> Well I already reworked this patch to create 216.out.64mblog and
-216.out.classic, and symlink them to 216.out as appropriate given the
-log size for a 512m log format, since it probably *is* a good idea to
-make sure older mkfs doesn't stray.
+Kari Argillander (2):
+  test-appliance: Add exclude file for ntfs3
+  kernel-configs: add ntfs3 to current 5.15 configs
 
---D
+ kernel-configs/x86_64-config-5.15                       | 3 +++
+ kernel-configs/x86_64-perf-config-5.15                  | 3 +++
+ kvm-xfstests/test-appliance/files/root/fs/ntfs3/exclude | 8 ++++++++
+ 3 files changed, 14 insertions(+)
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/ntfs3/exclude
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > 
-> > > >  fssize=128g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > >  fssize=256g log      =internal log           bsize=4096   blocks=32768, version=2
-> > > > 
-> > > 
-> > 
-> 
+-- 
+2.35.1
+
