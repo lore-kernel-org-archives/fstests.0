@@ -2,97 +2,90 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25746C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Apr 2022 01:51:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A41DBC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Apr 2022 02:34:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232409AbiDNByR (ORCPT
+        id S239346AbiDNChU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Apr 2022 21:54:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44888 "EHLO
+        Wed, 13 Apr 2022 22:37:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235553AbiDNByR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 21:54:17 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 893D6222B7;
-        Wed, 13 Apr 2022 18:51:53 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 44204B8276C;
-        Thu, 14 Apr 2022 01:51:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F2F96C385A3;
-        Thu, 14 Apr 2022 01:51:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649901111;
-        bh=cDuWSp3LrK/aQkhD5BlNGXQ8Vq3HM0xWBv1SIl0modU=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=lvGHlEU7NVc6kMbvSXwfUsiURDnwR5BRhplzttRaOYeZmiOdZYvUDIJOo3V8sl3Np
-         mozM3scy1yJjnO2pMoO1bf/tfGBKHhKmPS+4xXoCLt5ToO3LNFyuN1bwg7SPtE0IJs
-         qUnqiHeBqtHV//DHHBWJCfY/tu1MDGmmoj3nuxUxvRw1FF9qWe85I0+cU9Tb2Krshj
-         IjKPUOe/fuEKH2NKZwQPNm3zMLkx1HZ77fP5Auh1P104XdTmCFYhszAiQq9WyI6TI8
-         dT+UKJBfEagDgJxGVw0GgVIcX1e1+E+Za/Y7ZswBA0564LqFrmMhpkl9mz6Yit6FUn
-         cHatkGYLnlw0Q==
-Date:   Wed, 13 Apr 2022 18:51:49 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs/216: handle larger log sizes
-Message-ID: <20220414015149.GD16774@magnolia>
-References: <164971769710.170109.8985299417765876269.stgit@magnolia>
- <164971771391.170109.16368399851366024102.stgit@magnolia>
- <20220413174400.kvbihaz6bcsgz4hy@zlang-mailbox>
+        with ESMTP id S239519AbiDNChT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Apr 2022 22:37:19 -0400
+Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A54F618381
+        for <fstests@vger.kernel.org>; Wed, 13 Apr 2022 19:34:54 -0700 (PDT)
+IronPort-Data: =?us-ascii?q?A9a23=3Awi+8NqjqBubkR3aIHIkLqz9NX161fRIKZh0ujC4?=
+ =?us-ascii?q?5NGQNrF6WrkUBzWVKWWCGb6uCajPyfNp2bYri8x4OucTRnNBkGwY5+3w8FHgiR?=
+ =?us-ascii?q?ejtX4rAdhiqV8+xwmwvdGo+toNGLICowPkcFhcwnT/wdOixxZVA/fvQHOCkUra?=
+ =?us-ascii?q?dYnkZqTJME0/NtzoywobVvaY42bBVMyvV0T/Di5W31G2NglaYAUpIg063ky6Di?=
+ =?us-ascii?q?dyp0N8uUvPSUtgQ1LPWvyF94JvyvshdJVOgKmVfNrbSq+ouUNiEEm3lExcFUrt?=
+ =?us-ascii?q?Jk57wdAsEX7zTIROTzHFRXsBOgDAb/mprjPl9b6FaNC+7iB3Q9zx14NFMqI28D?=
+ =?us-ascii?q?wkvJbHklvkfUgVDDmd1OqguFLrveCLk7JDOnhKdG5fr67A0ZK0sBqUW4fp6Gn1?=
+ =?us-ascii?q?V3eIXJSpLbR2Zge+yhrWhRYFRam4LRCXwFNpH/Cg+kneCVrB7Ka0vip7ivbdwt?=
+ =?us-ascii?q?ArcTOgXdRoGW/ckVA=3D=3D?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3A8iizUqG9wBz0avFNpLqEAseALOsnbusQ8zAX?=
+ =?us-ascii?q?P0AYc31om6uj5qeTdZUgpHnJYVkqKRIdcLy7V5VoIkmskaKdg7NhX4tKNTOO0A?=
+ =?us-ascii?q?DDQe1fBODZowEIdReRygck79YET0FhMqyLMXFKydb9/BKjE8sthP2O8KWTj+/Y?=
+ =?us-ascii?q?yHt3JDsaE51I3kNoDBqBCE1qSE1jDZo9LpCV4c1KvH6OYnISB/7LfUUtbqzSoc?=
+ =?us-ascii?q?HRjpL6bVojDx4j0gOHijSl8/rbPnGjr24jbw8=3D?=
+X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
+   d="scan'208";a="123545973"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 14 Apr 2022 10:34:53 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id AA22B4D1716B
+        for <fstests@vger.kernel.org>; Thu, 14 Apr 2022 10:34:50 +0800 (CST)
+Received: from G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Thu, 14 Apr 2022 10:34:50 +0800
+Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
+ G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Thu, 14 Apr 2022 10:34:50 +0800
+Received: from fedora.g08.fujitsu.local (10.167.223.59) by
+ G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.23 via Frontend Transport; Thu, 14 Apr 2022 10:34:48 +0800
+From:   Liu Yiding <liuyd.fnst@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Liu Yiding <liuyd.fnst@fujitsu.com>
+Subject: [PATCH] common/rc: Skip virtiofs when _require_exportfs
+Date:   Thu, 14 Apr 2022 10:34:47 +0800
+Message-ID: <20220414023447.1575844-1-liuyd.fnst@fujitsu.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220413174400.kvbihaz6bcsgz4hy@zlang-mailbox>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: AA22B4D1716B.AF0EC
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: liuyd.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 14, 2022 at 01:44:00AM +0800, Zorro Lang wrote:
-> On Mon, Apr 11, 2022 at 03:55:13PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > mkfs will soon refuse to format a log smaller than 64MB, so update this
-> > test to reflect the new log sizing calculations.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/216.out |   14 +++++++-------
-> >  1 file changed, 7 insertions(+), 7 deletions(-)
-> > 
-> > 
-> > diff --git a/tests/xfs/216.out b/tests/xfs/216.out
-> > index cbd7b652..3c12085f 100644
-> > --- a/tests/xfs/216.out
-> > +++ b/tests/xfs/216.out
-> > @@ -1,10 +1,10 @@
-> >  QA output created by 216
-> > -fssize=1g log      =internal log           bsize=4096   blocks=2560, version=2
-> > -fssize=2g log      =internal log           bsize=4096   blocks=2560, version=2
-> > -fssize=4g log      =internal log           bsize=4096   blocks=2560, version=2
-> > -fssize=8g log      =internal log           bsize=4096   blocks=2560, version=2
-> > -fssize=16g log      =internal log           bsize=4096   blocks=2560, version=2
-> > -fssize=32g log      =internal log           bsize=4096   blocks=4096, version=2
-> > -fssize=64g log      =internal log           bsize=4096   blocks=8192, version=2
-> > +fssize=1g log      =internal log           bsize=4096   blocks=16384, version=2
-> > +fssize=2g log      =internal log           bsize=4096   blocks=16384, version=2
-> > +fssize=4g log      =internal log           bsize=4096   blocks=16384, version=2
-> > +fssize=8g log      =internal log           bsize=4096   blocks=16384, version=2
-> > +fssize=16g log      =internal log           bsize=4096   blocks=16384, version=2
-> > +fssize=32g log      =internal log           bsize=4096   blocks=16384, version=2
-> > +fssize=64g log      =internal log           bsize=4096   blocks=16384, version=2
-> 
-> So this will break downstream kernel testing too, except it follows this new
-> xfs behavior change. Is it possible to get the minimal log size, then help to
-> avoid the failure (if it won't mess up the code:)?
+open_by_handle_at(2) is not supported by virtio-fs.
+Reference:
+https://gitlab.com/virtio-fs/qemu/-/issues/10
 
-Hmm.  I suppose we could do a .out.XXX switcheroo type thing, though I
-don't know of a good way to detect which mkfs behavior you've got.
+Signed-off-by: Liu Yiding <liuyd.fnst@fujitsu.com>
+---
+ common/rc | 2 ++
+ 1 file changed, 2 insertions(+)
 
---D
+diff --git a/common/rc b/common/rc
+index 17629801..5617afc1 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3587,6 +3587,8 @@ _require_freeze()
+ _require_exportfs()
+ {
+ 	_require_test_program "open_by_handle"
++	[ $FSTYP == "virtiofs" ] && \
++		_notrun "$FSTYP doesn't support open_by_handle_at(2)"
+ 	mkdir -p "$TEST_DIR"/exportfs_test
+ 	$here/src/open_by_handle -c "$TEST_DIR"/exportfs_test 2>&1 \
+ 		|| _notrun "$FSTYP does not support NFS export"
+-- 
+2.31.1
 
-> 
-> >  fssize=128g log      =internal log           bsize=4096   blocks=16384, version=2
-> >  fssize=256g log      =internal log           bsize=4096   blocks=32768, version=2
-> > 
-> 
+
+
