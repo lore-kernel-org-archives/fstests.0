@@ -2,184 +2,86 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E71F3C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 15 Apr 2022 11:53:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07515C433FE
+	for <linux-fstests@archiver.kernel.org>; Fri, 15 Apr 2022 13:42:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352727AbiDOLzw (ORCPT
+        id S1354099AbiDONpS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 15 Apr 2022 07:55:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51144 "EHLO
+        Fri, 15 Apr 2022 09:45:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236334AbiDOLzw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Apr 2022 07:55:52 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ABCCA27C0;
-        Fri, 15 Apr 2022 04:53:24 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id BD801B82C41;
-        Fri, 15 Apr 2022 11:53:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 092BCC385A5;
-        Fri, 15 Apr 2022 11:53:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650023601;
-        bh=jhkF3tVBl7jIZs5cgBtmYhJC0qLpSqyjnYjj8g67Rg0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=niwXtS6U4KwVg+zXiPd+eFy7phcu40nxoCELTCkKhG9WLjECHuQBxNs4tlZdn/fMl
-         +eKyyaX1+vCtyq2fK765AgnF7XKw7sr+yqH3pKy0R5OjBBHCJ6aQ70q7grXdboOfZS
-         uIyoNMl2v8/4ozsAlypNJ3zN6WLM1p5GiudE1oAy8Yg9qdUnNk47MNlb/D+C/yo09y
-         eySrN9As1Emtz0LV9qC4rxJnfUC8T6FyBjcLQnsvJgSFYHyr58cZjGTvTRHEpoDdW8
-         bZCKA+7HeUTaOBXcbHFBa3QmeX93gA5meslmv/ZbEw+Q/AtpOVPmeHZ9OZXMb8baYK
-         2cg1s9BaZ3XJw==
-Message-ID: <2ddf7fd69e03409b0a868e0e3ff21f1491cb41ae.camel@kernel.org>
-Subject: Re: [PATCH] ceph/001: add extra check for remote object copies
-From:   Jeff Layton <jlayton@kernel.org>
-To:     =?ISO-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org
-Date:   Fri, 15 Apr 2022 07:53:19 -0400
-In-Reply-To: <20220323160925.7142-1-lhenriques@suse.de>
-References: <20220323160925.7142-1-lhenriques@suse.de>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-2.fc35) 
+        with ESMTP id S1354129AbiDONpQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Apr 2022 09:45:16 -0400
+Received: from mail-qv1-xf30.google.com (mail-qv1-xf30.google.com [IPv6:2607:f8b0:4864:20::f30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 232BEBA339;
+        Fri, 15 Apr 2022 06:42:46 -0700 (PDT)
+Received: by mail-qv1-xf30.google.com with SMTP id y19so6500166qvk.5;
+        Fri, 15 Apr 2022 06:42:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=R3T86T3mCsBpnlO1XOLs16Pr1tJsd/No9WFwt9RP4yg=;
+        b=X5/Q+yG0eSVrgSVa/dmxW8h9EEVkHIKGfSywOT9oRB2ph0W0kt3lajQPp957ZEvDmO
+         dxQDAgGvEDD0+cwjrNz+LchIr9R4EN+HKWZLayUzaKu3jhjKa0+o9XYdckbTAnLEmqmV
+         r+mupjQkUiACem3YTQzgMG6tEukwPHtVAoUZCY+QvaM0qoMtVEDd5B/LJXNu+K+++av0
+         OFVLyRYJ3nahi9NLnt+IB/kALFT+s017CCh777OZm5xKB4qjIP9FN2pCKdPmubdtF+de
+         2MH6QJ95uTHvzD8Ozco+WNz7VJCGGrvVRNWo3V4MC2dCei45oYg9RTillz94FFifUdt9
+         31nA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=R3T86T3mCsBpnlO1XOLs16Pr1tJsd/No9WFwt9RP4yg=;
+        b=OWLd0f1A3nwlrcHoTSebUqqNBoGB5ep8EMhSg3w8kUYs0DvsXE6n04JaGZU667nUO2
+         JVtGHkugFNv3dMRD0wMpjAQkduEwURruC77CwEpcnmQWkpwzt/7xJXIA5LE0pVIccCsV
+         raMQhXvkByVUVlFntYWfEF7jZkOn+AZMJFwAFOn/BD40lHtuUMgXWdNti2mbBsO7LqSl
+         6uokcAxhqH5u8Qc71adxNQDmz8Look52RIy+7DqgKfrSGIflg4VCaHHzY8EuOim/d3oh
+         CE3ZwdMRRC6sYnYEayS/RlITRu5pVz1NzjvdcoJeteckvJnBeE3DQOawX7HHxHcMGKi7
+         F3mw==
+X-Gm-Message-State: AOAM531k60UZhQso/gotivx0JtheA3NrvISuvqYiP1pkYrYSKPg5jyQW
+        7+9x//h/i9p289hrW78t7QKbk7B+OcXTXkF1uQk=
+X-Google-Smtp-Source: ABdhPJxQqaqiwphhhhCgWuHuODg9rdk6PU9vi+qIMlSU2vMdFy3aO443UJ7xrZtPVvllkVK+BxJU2O/SRuvKINQfqlk=
+X-Received: by 2002:ad4:4ee6:0:b0:446:3ad0:e26b with SMTP id
+ dv6-20020ad44ee6000000b004463ad0e26bmr1521774qvb.12.1650030165152; Fri, 15
+ Apr 2022 06:42:45 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <164971767143.169983.12905331894414458027.stgit@magnolia>
+ <164971768254.169983.13280225265874038241.stgit@magnolia> <20220412115205.d6jjudlkxs72vezd@zlang-mailbox>
+ <CAOQ4uxiDW6=qgWtH8uHkOmAyZBR7vfgwgt-DA_Rn0QVihQZQLw@mail.gmail.com>
+ <20220413154401.vun2usvgwlfers2r@zlang-mailbox> <20220414155007.GC17014@magnolia>
+ <20220414191017.jmv7jmwwhfy2n75z@zlang-mailbox>
+In-Reply-To: <20220414191017.jmv7jmwwhfy2n75z@zlang-mailbox>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Fri, 15 Apr 2022 16:42:33 +0300
+Message-ID: <CAOQ4uxgSmxaOHCj1RdCOX2p1Zmu5enkc4f_fkOLC_muPiMk=PA@mail.gmail.com>
+Subject: Re: [PATCH 2/4] generic: ensure we drop suid after fallocate
+To:     "Darrick J. Wong" <djwong@kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, 2022-03-23 at 16:09 +0000, Luís Henriques wrote:
-> Ceph kernel client now has a facility to check stats for certain operations.
-> One of these operations is the 'copyfrom', the operation that is used to offload
-> to the OSDs the copy of objects from, for example, the copy_file_range()
-> syscall.
-> 
-> This patch changes ceph/001 to add an extra check to verify that the copies
-> performed by the test are _really_ remote copies and not simple read+write
-> operations.
-> 
-> Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> ---
->  common/ceph    | 10 ++++++++
->  tests/ceph/001 | 66 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 76 insertions(+)
-> 
-> diff --git a/common/ceph b/common/ceph
-> index ca756dda8dd3..d6f24df177e7 100644
-> --- a/common/ceph
-> +++ b/common/ceph
-> @@ -28,3 +28,13 @@ _require_ceph_vxattr_caps()
->  	$GETFATTR_PROG -n "ceph.caps" $TEST_DIR >/dev/null 2>&1 \
->  	  || _notrun "ceph.caps vxattr not supported"
->  }
-> +
-> +_ceph_get_cluster_fsid()
-> +{
-> +	$GETFATTR_PROG --only-values -n "ceph.cluster_fsid" $TEST_DIR 2>/dev/null
-> +}
-> +
-> +_ceph_get_client_id()
-> +{
-> +	$GETFATTR_PROG --only-values -n "ceph.client_id" $TEST_DIR 2>/dev/null
-> +}
-> diff --git a/tests/ceph/001 b/tests/ceph/001
-> index 5a828567d500..7970ce352bab 100755
-> --- a/tests/ceph/001
-> +++ b/tests/ceph/001
-> @@ -30,6 +30,10 @@ workdir=$TEST_DIR/test-$seq
->  rm -rf $workdir
->  mkdir $workdir
->  
-> +cluster_fsid=$(_ceph_get_cluster_fsid)
-> +client_id=$(_ceph_get_client_id)
-> +metrics_dir="$DEBUGFS_MNT/ceph/$cluster_fsid.$client_id/metrics"
-> +
->  check_range()
->  {
->  	local file=$1
-> @@ -40,8 +44,68 @@ check_range()
->  	[ $? -eq 0 ] && echo "file $file is not '$val' in [ $off0 $off1 ]"
->  }
->  
-> +#
-> +# The metrics file has the following fields:
-> +#   1. item
-> +#   2. total
-> +#   3. avg_sz(bytes)
-> +#   4. min_sz(bytes)
-> +#   5. max_sz(bytes)
-> +#   6. total_sz(bytes)
-> +get_copyfrom_total_copies()
-> +{
-> +	local total=0
-> +
-> +	if [ -d $metrics_dir ]; then
-> +		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 2)
+> Hi Darrick, that's another story, you don't need to worry about that in this case :)
+> I'd like to ack this patch, but hope to move it from generic/ to shared/ . Maybe
+> Eryu can help to move it, or I can do that after I get the push permission.
+>
+> The reason why I intend moving it to shared is:
+> Although we are trying to get rid of tests/shared/, but the tests/shared/ still help to
+> remind us what cases are still not real generic cases. We'll try to help all shared
+> cases to be generic. When the time is ready, I'd like to move this case to generic/
+> and change _supported_fs from "xfs btrfs ext4" to "generic".
+>
 
-Some older kernels didn't keep copyfrom stats, but any kernel that has a
-$metrics_dir should have stats for copyfrom. This should be fine.
+Sorry, but I have to object to this move.
+I do not think that is what tests/shared should be used for.
 
-> +	fi
-> +	echo $total
-> +}
-> +get_copyfrom_total_size()
-> +{
-> +	local total=0
-> +
-> +	if [ -d $metrics_dir ]; then
-> +		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 6)
-> +	fi
-> +	echo $total
-> +}
-> +
-> +# This function checks that the metrics file has the expected values for number
-> +# of remote object copies and the total size of the copies.  For this, it
-> +# expects a input:
-> +#   $1 - initial number copies in metrics file (field 'total')
-> +#   $2 - initial total size in bytes in metrics file (field 'total_sz')
-> +#   $3 - object size used for copies
-> +#   $4 - number of remote objects copied
-> +check_copyfrom_metrics()
-> +{
-> +	local c0=$1
-> +	local s0=$2
-> +	local objsz=$3
-> +	local copies=$4
-> +	local c1=$(get_copyfrom_total_copies)
-> +	local s1=$(get_copyfrom_total_size)
-> +	local sum
-> +
-> +	if [ ! -d $metrics_dir ]; then
-> +		return # skip metrics check if debugfs isn't mounted
-> +	fi
-> +
-> +	sum=$(($c0+$copies))
-> +	if [ $sum -ne $c1 ]; then
-> +		echo "Wrong number of remote copies.  Expected $sum, got $c1"
-> +	fi
-> +	sum=$(($s0+$copies*$objsz))
-> +	if [ $sum -ne $s1 ]; then
-> +		echo "Wrong size of remote copies.  Expected $sum, got $s1"
-> +	fi
-> +}
-> +
->  run_copy_range_tests()
->  {
-> +	total_copies=$(get_copyfrom_total_copies)
-> +	total_size=$(get_copyfrom_total_size)
->  	objsz=$1
->  	halfobj=$(($objsz / 2))
->  	file="$workdir/file-$objsz"
-> @@ -203,6 +267,8 @@ run_copy_range_tests()
->  	check_range $dest $(($objsz * 2 + $halfobj)) $objsz 63
->  	check_range $dest $(($objsz * 3 + $halfobj)) $halfobj 64
->  
-> +	# Confirm that we've done a total of 24 object copies
-> +	check_copyfrom_metrics $total_copies $total_size $objsz 24
->  }
->  
->  echo "Object size: 65536" # CEPH_MIN_STRIPE_UNIT
+My preferences are:
+1. _suppoted_fs generic && _require_xfs_io_command "finsert"
+2. _suppoted_fs generic
+3. _supported_fs xfs btrfs ext4 (without moving to tests/shared)
 
-LGTM
-
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Thanks,
+Amir.
