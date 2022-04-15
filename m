@@ -2,118 +2,127 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4315CC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 15 Apr 2022 15:05:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85AF7C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 15 Apr 2022 15:10:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354811AbiDOPHz (ORCPT
+        id S1350436AbiDOPMm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 15 Apr 2022 11:07:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52922 "EHLO
+        Fri, 15 Apr 2022 11:12:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57262 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354853AbiDOPHc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Apr 2022 11:07:32 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3E2FE96;
-        Fri, 15 Apr 2022 08:05:02 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 8A42DCE2F02;
-        Fri, 15 Apr 2022 15:05:00 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EDD9FC385A6;
-        Fri, 15 Apr 2022 15:04:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650035099;
-        bh=AwOoNkYD+52+J9w5NV6uJMgTfYsdXalIqNx6hE/JtVE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=LYML4mH8PWSUd9Oz2pDtLzjnlEVHNUwjrASbiktaAYhF2VCpmjTDPF9yU66z1GINN
-         fMdExsH+DwxLR+lSgg+P9vYayVaZjdqMhDGiIHLZEM2WKUgXlbXsAeAQdKTJavZnEU
-         t+ergMsK3tesV5XsI+HhaRLBL49UrBVQkk4DjPu7rfXzniiTV8aQh27gWl72ycKZBe
-         GQeUwb8KkRR9bxt7D/hvsDcS811wd3BNTgVDiVdJsLwlaC4tyLR8M9LSe/CD4yuiAh
-         svmR2NVlkzTqEWVxkhtZ/DS86Rn7jYTAbuZt0Ga/w4XlY5rKKGnZ+pGzqnppCJ/ct7
-         nQGuH5/GiYdMw==
-Date:   Fri, 15 Apr 2022 08:04:58 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     guaneryu@gmail.com, zlang@redhat.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: [PATCH v1.1 3/3] xfs/216: handle larger log sizes
-Message-ID: <20220415150458.GB17025@magnolia>
-References: <164971769710.170109.8985299417765876269.stgit@magnolia>
- <164971771391.170109.16368399851366024102.stgit@magnolia>
+        with ESMTP id S237460AbiDOPMm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Apr 2022 11:12:42 -0400
+Received: from mail-qt1-x82e.google.com (mail-qt1-x82e.google.com [IPv6:2607:f8b0:4864:20::82e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B13D85BF3;
+        Fri, 15 Apr 2022 08:10:10 -0700 (PDT)
+Received: by mail-qt1-x82e.google.com with SMTP id r25so6100734qtp.8;
+        Fri, 15 Apr 2022 08:10:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=SBjy86iuVh8fFOP01G4Xo2Z7vyppTHMdZeNJghULRH8=;
+        b=QQnoITYHIwvLmdni4JXE8DQDurcuBVf+FKEU3k5/Dac1DZ3juYc4TLWJnY3ZgfstcN
+         5eQ0zoVW5zOx69uj4+wNhR/zenJ34WPDngvetanIIarIjNRk0t9b8PnwZuVjX6LYO/9S
+         +z6EM4HGgzyjldg1ktqf+qstxfJdZXa8LBcZ2egSWtUe4LNI2eBdKvrav3qU8/6CsN/U
+         hsiWcb/l1M7iLgNoOlTLr4ydUTz96b6WdtrzQc0uM3ZuUfhtCir+aVqSqxVTcM6aCn1Z
+         dN6Y4uFgwHG3DQvQUIOG00MFfduyfe7dEFCHWg7v2Oywd9vyB2da4+3I+ZY4nitxAC/i
+         m7Hw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=SBjy86iuVh8fFOP01G4Xo2Z7vyppTHMdZeNJghULRH8=;
+        b=efeqIjuKxlc27f9lGHVyiZCcXGd0uu7t/gdSpzBzcrqyyFo2W2TpEuIAlA2SmCpYMP
+         i8qPM2ip2tz47miFKxtpCXamtCi9y7p4n2LlzWdGcDXi8dDnwGAlUeC7uyAENLhk8jNe
+         fZNXa4vJy/cbtSuGhq05JocNVFcrmaQKM6nkDg13iimO5KAW6urCz5l5LsKethtTGKOw
+         92H94HTIIqDBy9Ivu0zYEvQryl0VOcQJ0BrUhsH5sQJRAKpzVoLhEHvrcpBQ0mXIrOA6
+         UFSfmunZWOEfy6PWFJL6Qox3+X0VXh4T4jVGTX/EpReBfL9LMDJ51NL+BaaNKAG7TkKl
+         WN6A==
+X-Gm-Message-State: AOAM5328bSsBIMXNf1Tl9UWBtzAwW9NvSHjifZLRdeqRmc986BLdtd4s
+        QoSIUcoAUC9EIG4wGIiGEBg=
+X-Google-Smtp-Source: ABdhPJzTJJSYmVmn+qcF1PGV/6IqqwCaf1NHTwY2erfwmzhq0DIxwvJkB7ZWvLivzi3dkhgR9awdXg==
+X-Received: by 2002:a05:622a:64b:b0:2e1:cbc3:c9ff with SMTP id a11-20020a05622a064b00b002e1cbc3c9ffmr5667138qtb.226.1650035409586;
+        Fri, 15 Apr 2022 08:10:09 -0700 (PDT)
+Received: from debian-BULLSEYE-live-builder-AMD64 (c-73-60-226-25.hsd1.nh.comcast.net. [73.60.226.25])
+        by smtp.gmail.com with ESMTPSA id b126-20020a37b284000000b0069a11927e57sm2491007qkf.101.2022.04.15.08.10.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 Apr 2022 08:10:09 -0700 (PDT)
+Date:   Fri, 15 Apr 2022 11:10:07 -0400
+From:   Eric Whitney <enwlinux@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eric Whitney <enwlinux@gmail.com>, fstests@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] common/filter: extend _filter_xfs_io to match -nan
+Message-ID: <YlmKz6i8YXR0yk9P@debian-BULLSEYE-live-builder-AMD64>
+References: <20220414142258.761835-1-enwlinux@gmail.com>
+ <20220414152949.GA17014@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <164971771391.170109.16368399851366024102.stgit@magnolia>
+In-Reply-To: <20220414152949.GA17014@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-mkfs will soon refuse to format a log smaller than 64MB, so update this
-test to reflect the new log sizing calculations.
+* Darrick J. Wong <djwong@kernel.org>:
+> On Thu, Apr 14, 2022 at 10:22:58AM -0400, Eric Whitney wrote:
+> > When run on ext4 with sufficiently fast x86_64 hardware, generic/130
+> > sometimes fails because xfs_io can report rate values as -nan:
+> > 0.000000 bytes, 0 ops; 0.0000 sec (-nan bytes/sec and -nan ops/sec)
+> > 
+> > _filter_xfs_io matches the strings 'inf' or 'nan', but not '-nan'.  In
+> > that case it fails to convert the actual output to a normalized form
+> > matching generic/130's golden output.  Extend the regular expression
+> > used to match xfs_io's output to fix this.
+> > 
+> > Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+> > ---
+> >  common/filter | 6 +++---
+> >  1 file changed, 3 insertions(+), 3 deletions(-)
+> > 
+> > diff --git a/common/filter b/common/filter
+> > index 5fe86756..5b20e848 100644
+> > --- a/common/filter
+> > +++ b/common/filter
+> > @@ -168,9 +168,9 @@ common_line_filter()
+> >  
+> >  _filter_xfs_io()
+> >  {
+> > -    # Apart from standard numeric values, we also filter out 'inf' and 'nan'
+> > -    # which can result from division in some cases
+> > -    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([infa0-9/.]* [EPGMKiBbytes]*\/sec and [infa0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
+> > +    # Apart from standard numeric values, we also filter out 'inf', 'nan', and
+> > +    # '-nan' which can result from division in some cases
+> > +    sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([infa0-9/.-]* [EPGMKiBbytes]*\/sec and [infa0-9/.-]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
+> 
+> /me squints at this regular expression and /thinks/ its ok.
+> 
+> Took me a while to figure out "infa" tho. :P
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/xfs/216             |   19 +++++++++++++++++++
- tests/xfs/216.out.64mblog |   10 ++++++++++
- tests/xfs/216.out.classic |    0 
- 3 files changed, 29 insertions(+)
- create mode 100644 tests/xfs/216.out.64mblog
- rename tests/xfs/{216.out => 216.out.classic} (100%)
+Hi Darrick:
 
-diff --git a/tests/xfs/216 b/tests/xfs/216
-index c3697db7..ebae8979 100755
---- a/tests/xfs/216
-+++ b/tests/xfs/216
-@@ -29,6 +29,23 @@ $MKFS_XFS_PROG 2>&1 | grep -q rmapbt && \
- $MKFS_XFS_PROG 2>&1 | grep -q reflink && \
- 	loop_mkfs_opts="$loop_mkfs_opts -m reflink=0"
- 
-+# Decide which golden output file we're using.  Starting with mkfs.xfs 5.15,
-+# the default minimum log size was raised to 64MB for all cases, so we detect
-+# that by test-formatting with a 512M filesystem.  This is a little handwavy,
-+# but it's the best we can do.
-+choose_golden_output() {
-+	local seqfull=$1
-+	local file=$2
-+
-+	if $MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-+			-d name=$file,size=512m $loop_mkfs_opts | \
-+			grep -q 'log.*blocks=16384'; then
-+		ln -f -s $seqfull.out.64mblog $seqfull.out
-+	else
-+		ln -f -s $seqfull.out.classic $seqfull.out
-+	fi
-+}
-+
- _do_mkfs()
- {
- 	for i in $*; do
-@@ -43,6 +60,8 @@ _do_mkfs()
- # make large holey file
- $XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
- 
-+choose_golden_output $0 $LOOP_DEV
-+
- #make loopback mount dir
- mkdir $LOOP_MNT
- 
-diff --git a/tests/xfs/216.out.64mblog b/tests/xfs/216.out.64mblog
-new file mode 100644
-index 00000000..3c12085f
---- /dev/null
-+++ b/tests/xfs/216.out.64mblog
-@@ -0,0 +1,10 @@
-+QA output created by 216
-+fssize=1g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=2g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=4g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=8g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=16g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=32g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=64g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=128g log      =internal log           bsize=4096   blocks=16384, version=2
-+fssize=256g log      =internal log           bsize=4096   blocks=32768, version=2
-diff --git a/tests/xfs/216.out b/tests/xfs/216.out.classic
-similarity index 100%
-rename from tests/xfs/216.out
-rename to tests/xfs/216.out.classic
+Yeah, me too.  I initially thought that string would not match 'nan', but
+then discovered bracket expressions after having not used sed in a very long
+time.  It's a sloppy match - it'll recognize fan0 as well as 'inf' or 'nan',
+etc. - and I guess the idea is that's good enough for filtering expected output
+from xfs_io while being concise.  The sed documentation suggests that a '-' on
+the beginning or end of the bracket expression will be treated literally, and
+not as a metacharacter (part of a range), so we should be good there.
+
+> 
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+Thanks very much for your review!
+
+Eric
+
+> 
+> --D
+> 
+> >  }
+> >  
+> >  # Also filter out the offset part of xfs_io output
+> > -- 
+> > 2.30.2
+> > 
