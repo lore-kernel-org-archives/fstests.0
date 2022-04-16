@@ -2,156 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8F48C433F5
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 Apr 2022 13:35:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C70AC433F5
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 Apr 2022 14:02:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232068AbiDPNiB (ORCPT
+        id S232165AbiDPOEm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 16 Apr 2022 09:38:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46104 "EHLO
+        Sat, 16 Apr 2022 10:04:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230237AbiDPNiA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Apr 2022 09:38:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A906C3CFF9
-        for <fstests@vger.kernel.org>; Sat, 16 Apr 2022 06:35:28 -0700 (PDT)
+        with ESMTP id S231854AbiDPOEl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 16 Apr 2022 10:04:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8ECBA29CB2
+        for <fstests@vger.kernel.org>; Sat, 16 Apr 2022 07:02:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1650116127;
+        s=mimecast20190719; t=1650117728;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=jH3MPUHJAECXXZSY9edmQYka6fuZCzm0XaNcA8qkX9g=;
-        b=C7Cp2gThtjGzktWGGO8T0vB868rAG/sBVaX7PT5MdEBQ7ZWwsiHS42onTStU75+g8ObGO4
-        R+8rlk0nb293cdm29RoueqGKxP1qcjbPGJsgQ8KyEXjpM3gEwOT3PtTBY/Z6QipjVZwNpm
-        vyaxEqmEKVANJivbLPO01FbufNrqJLg=
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
- [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=2eab5pwpVUUNnvTqv8Y5HjsonUzluxIv5EMk3f51C5w=;
+        b=dHn+Jv41mYWn8tKl0nqXjNyDD5ZHU2kVWhG1M0ToflkICDt5GaA3RcDBb5XndF6Mnhwh8X
+        54bNs7sdBN2idHvL2cKrH/oWn3WBT34/6hgHr7FkFryOek2HXFUIJ3ovJZQ+cVKksDfL0j
+        elY1PT0qk38YuEWFqvQkvUj34QhUb7Q=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-227-9TSDsy7kNISHRoNP_SR4tA-1; Sat, 16 Apr 2022 09:35:26 -0400
-X-MC-Unique: 9TSDsy7kNISHRoNP_SR4tA-1
-Received: by mail-qv1-f70.google.com with SMTP id t10-20020ad45bca000000b0044457d2bab0so8697786qvt.22
-        for <fstests@vger.kernel.org>; Sat, 16 Apr 2022 06:35:26 -0700 (PDT)
+ us-mta-586-hD7uVXITPH65vFxf7eBUbQ-1; Sat, 16 Apr 2022 10:02:06 -0400
+X-MC-Unique: hD7uVXITPH65vFxf7eBUbQ-1
+Received: by mail-qk1-f200.google.com with SMTP id l20-20020a05620a28d400b0069c63137970so6404264qkp.10
+        for <fstests@vger.kernel.org>; Sat, 16 Apr 2022 07:02:06 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=jH3MPUHJAECXXZSY9edmQYka6fuZCzm0XaNcA8qkX9g=;
-        b=JQwYdeO4uGhvAcngDSJ6UIUg1unuHlnE0bp3ZdzQoavQVe2sdR2dN/O4duOqSQ4+qS
-         54bTlawZLbzTCqtva8V8a5Yvguf9H9p4ejxTsfT/Dc1yXG1/+L9oWTf0Xth24tqesM8R
-         YnAAPNFMfS1ke4SDfzePZzqA7Kr8LeNE5aH9QUXP46q9We9xrmbWiRcK3x9pkkcbsBMg
-         Fq2jQIzPjDsm6tFPwm2KAylIfY1zwzIXJtJSrq7SS7jNOpbAbdJhytES7bdZajyCyqKi
-         rkLgKay7FXS1P56mhgIJE4boDGA9P/9vWt4lUZcCW3Na5hQ0X+stASMbt0Opstn/IMrJ
-         lyrg==
-X-Gm-Message-State: AOAM5328kysxVHcaL1TaVU/UL9tF5tozxcBUeNZBt08F981reyJG0Q++
-        u15k1NWk9+6KObEjR6sTASzriAWCpvyEYN/DoTA9jODTLOYOz71FAMZpH/vAvp2V7VeZiE6Fy9W
-        Hp2oeM8W7zGxK+abQHg==
-X-Received: by 2002:a05:620a:2946:b0:69e:7d37:2229 with SMTP id n6-20020a05620a294600b0069e7d372229mr762614qkp.604.1650116125099;
-        Sat, 16 Apr 2022 06:35:25 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJws5RbNvmNzSoc/ulOPm6TdZSOpo8NCY/E8VfWCA9+8BQc08jY17/lbJ9+zLUT0Hh3cdNJSfg==
-X-Received: by 2002:a05:620a:2946:b0:69e:7d37:2229 with SMTP id n6-20020a05620a294600b0069e7d372229mr762607qkp.604.1650116124829;
-        Sat, 16 Apr 2022 06:35:24 -0700 (PDT)
+        bh=2eab5pwpVUUNnvTqv8Y5HjsonUzluxIv5EMk3f51C5w=;
+        b=AQV1KLsKpDi0+CGknmHtEAa+PIpfMSYpTT/la14NckvCOWxXg4ffI1Yxk9d4u+qgx+
+         WT2vouwJBXHUSC02tbfPrQjPROZXP5MUf1FcgWiCF+z1l2cHF3EkSYFpaZ8GQuOO3gy8
+         iorwtf5Df+qzRbgcfXeNEd5oA4T3d0c6wbKjQwJt/Lsz7q3wOYWH2MGetybcrGCjE9A2
+         OZunkCR7tdZ68/LZn7KSzEZfVNQgdlFrtGqZkdSxDguCPP6v/MpZ7wSV1qclJMgh0+Oe
+         vFGawcyFWWzv0l4NFIZwGp+BXNM5Oo5th56ULHe3msc6ujhPjT1dr4Nwe8C0KLtKt9sl
+         7RyQ==
+X-Gm-Message-State: AOAM531/6i2uU3H0R5YSoa7/fUhocy4kJOJauNL1qqSW731WyD7msPBw
+        sA9fGqIRRA6eAXL80ABtVhS6amSiZPpOt9bevJdD21qjRv23QFpevv+2Z/UbK6WLqmb+xo77fXB
+        dY5TqK9C73OxQKzJYBg==
+X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id g4-20020a0562141cc400b0043535c3f0f1mr2401748qvd.0.1650117726305;
+        Sat, 16 Apr 2022 07:02:06 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxX7IeQg3xMoqw8YuJ6Itf74oCrikUpbeQlIA1f2CIP4lkHJsYefEPmiHZLustH25+zgUzhEw==
+X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id g4-20020a0562141cc400b0043535c3f0f1mr2401733qvd.0.1650117726082;
+        Sat, 16 Apr 2022 07:02:06 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id u5-20020a05622a198500b002f1f02b7465sm2169705qtc.17.2022.04.16.06.35.21
+        by smtp.gmail.com with ESMTPSA id y25-20020a05620a09d900b0069e82fb9310sm236237qky.15.2022.04.16.07.02.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 16 Apr 2022 06:35:24 -0700 (PDT)
-Date:   Sat, 16 Apr 2022 21:35:18 +0800
+        Sat, 16 Apr 2022 07:02:05 -0700 (PDT)
+Date:   Sat, 16 Apr 2022 22:01:58 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v1.1 3/3] xfs/216: handle larger log sizes
-Message-ID: <20220416133518.sxow73joph3f7h7v@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-References: <164971769710.170109.8985299417765876269.stgit@magnolia>
- <164971771391.170109.16368399851366024102.stgit@magnolia>
- <20220415150458.GB17025@magnolia>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Subject: Re: [PATCH 2/4] generic: ensure we drop suid after fallocate
+Message-ID: <20220416140158.fd7jjle5aeomg6cp@zlang-mailbox>
+Mail-Followup-To: Amir Goldstein <amir73il@gmail.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+References: <164971767143.169983.12905331894414458027.stgit@magnolia>
+ <164971768254.169983.13280225265874038241.stgit@magnolia>
+ <20220412115205.d6jjudlkxs72vezd@zlang-mailbox>
+ <CAOQ4uxiDW6=qgWtH8uHkOmAyZBR7vfgwgt-DA_Rn0QVihQZQLw@mail.gmail.com>
+ <20220413154401.vun2usvgwlfers2r@zlang-mailbox>
+ <20220414155007.GC17014@magnolia>
+ <20220414191017.jmv7jmwwhfy2n75z@zlang-mailbox>
+ <CAOQ4uxgSmxaOHCj1RdCOX2p1Zmu5enkc4f_fkOLC_muPiMk=PA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220415150458.GB17025@magnolia>
+In-Reply-To: <CAOQ4uxgSmxaOHCj1RdCOX2p1Zmu5enkc4f_fkOLC_muPiMk=PA@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 15, 2022 at 08:04:58AM -0700, Darrick J. Wong wrote:
-> mkfs will soon refuse to format a log smaller than 64MB, so update this
-> test to reflect the new log sizing calculations.
+On Fri, Apr 15, 2022 at 04:42:33PM +0300, Amir Goldstein wrote:
+> > Hi Darrick, that's another story, you don't need to worry about that in this case :)
+> > I'd like to ack this patch, but hope to move it from generic/ to shared/ . Maybe
+> > Eryu can help to move it, or I can do that after I get the push permission.
+> >
+> > The reason why I intend moving it to shared is:
+> > Although we are trying to get rid of tests/shared/, but the tests/shared/ still help to
+> > remind us what cases are still not real generic cases. We'll try to help all shared
+> > cases to be generic. When the time is ready, I'd like to move this case to generic/
+> > and change _supported_fs from "xfs btrfs ext4" to "generic".
+> >
 > 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/xfs/216             |   19 +++++++++++++++++++
->  tests/xfs/216.out.64mblog |   10 ++++++++++
->  tests/xfs/216.out.classic |    0 
->  3 files changed, 29 insertions(+)
->  create mode 100644 tests/xfs/216.out.64mblog
->  rename tests/xfs/{216.out => 216.out.classic} (100%)
+> Sorry, but I have to object to this move.
+> I do not think that is what tests/shared should be used for.
 > 
-> diff --git a/tests/xfs/216 b/tests/xfs/216
-> index c3697db7..ebae8979 100755
-> --- a/tests/xfs/216
-> +++ b/tests/xfs/216
-> @@ -29,6 +29,23 @@ $MKFS_XFS_PROG 2>&1 | grep -q rmapbt && \
->  $MKFS_XFS_PROG 2>&1 | grep -q reflink && \
->  	loop_mkfs_opts="$loop_mkfs_opts -m reflink=0"
->  
-> +# Decide which golden output file we're using.  Starting with mkfs.xfs 5.15,
-> +# the default minimum log size was raised to 64MB for all cases, so we detect
-> +# that by test-formatting with a 512M filesystem.  This is a little handwavy,
-> +# but it's the best we can do.
-> +choose_golden_output() {
-> +	local seqfull=$1
-> +	local file=$2
-> +
-> +	if $MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> +			-d name=$file,size=512m $loop_mkfs_opts | \
-> +			grep -q 'log.*blocks=16384'; then
-> +		ln -f -s $seqfull.out.64mblog $seqfull.out
-> +	else
-> +		ln -f -s $seqfull.out.classic $seqfull.out
-> +	fi
+> My preferences are:
+> 1. _suppoted_fs generic && _require_xfs_io_command "finsert"
 
-Actually there's a old common function in common/rc named _link_out_file(),
-xfstests generally use it to deal with multiple .out files. It would be
-better to keep in step with common helpers, but your "ln" command
-isn't wrong :)
+There is:
+"verb=finsert
+ _require_xfs_io_command $verb"
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+This patch has not only one case, different cases test different mode of fallocate,
+and I think Darrick has given them different _require_xfs_io_command.
 
-> +}
-> +
->  _do_mkfs()
->  {
->  	for i in $*; do
-> @@ -43,6 +60,8 @@ _do_mkfs()
->  # make large holey file
->  $XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
->  
-> +choose_golden_output $0 $LOOP_DEV
-> +
->  #make loopback mount dir
->  mkdir $LOOP_MNT
->  
-> diff --git a/tests/xfs/216.out.64mblog b/tests/xfs/216.out.64mblog
-> new file mode 100644
-> index 00000000..3c12085f
-> --- /dev/null
-> +++ b/tests/xfs/216.out.64mblog
-> @@ -0,0 +1,10 @@
-> +QA output created by 216
-> +fssize=1g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=2g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=4g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=8g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=16g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=32g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=64g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=128g log      =internal log           bsize=4096   blocks=16384, version=2
-> +fssize=256g log      =internal log           bsize=4096   blocks=32768, version=2
-> diff --git a/tests/xfs/216.out b/tests/xfs/216.out.classic
-> similarity index 100%
-> rename from tests/xfs/216.out
-> rename to tests/xfs/216.out.classic
+> 2. _suppoted_fs generic
+> 3. _supported_fs xfs btrfs ext4 (without moving to tests/shared)
+
+There's not any generic cases write like this, only shared cases like that. My personal
+opinion is *(2)* or make it shared if it insists "_supported_fs xfs btrfs ext4" (then
+will move it back to generic and "_suppoted_fs generic" when Darrick think it's time).
+
+Thanks,
+Zorro
+
+> 
+> Thanks,
+> Amir.
 > 
 
