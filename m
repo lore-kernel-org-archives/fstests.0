@@ -2,218 +2,179 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87127C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Apr 2022 16:03:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2A1FC433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Apr 2022 16:40:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234355AbiDQQGG (ORCPT
+        id S233208AbiDQQm2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Apr 2022 12:06:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38086 "EHLO
+        Sun, 17 Apr 2022 12:42:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58242 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230246AbiDQQGG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Apr 2022 12:06:06 -0400
-Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 170D3647A
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 09:03:30 -0700 (PDT)
-Received: by mail-wm1-x32e.google.com with SMTP id h186-20020a1c21c3000000b0038ccb70e239so142771wmh.3
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 09:03:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=bYgXSBMSWEUzQHGCkjJhwUjqvHy4V2/zu2Y1PBWO47Y=;
-        b=d7O1lXZlVA5z8M7/J5wBUNT3b0YX2fq/atvKc88IG4FloL6xCf63h6rIB67pwj5V+O
-         Pqm7HEoVmhsJMZEZCg5MhAYzwlJ2QpJYjeRgvE+FRolCgmqSPRDpSGi18hMjpVtlAWFi
-         cOD5Z3Fhcre3tKld8ds/nXmjIDHa5IKUMysu4jW19wS3I56Uqnb89XkpfvvkwCbhSnEG
-         BolA0XT7JO5bgQqrqeGyngovbw/s112z51T9KvE/Jz6Xi4TVImKT2TCVhY8Iqzc6gUU6
-         r67O5YbSmpK9YOK/Wuv8fQlgnXGH9gyRLOwhIZBvHTZd8BbHsAwkLuASmxNY9yejsTyw
-         kg3A==
+        with ESMTP id S234422AbiDQQm1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Apr 2022 12:42:27 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 646F7BFB
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 09:39:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1650213589;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=DXFuVGrx+rL9QRAWxNQqLS632uUFF41hQXIR2/QjV4Y=;
+        b=H36aSyJup7lyM2CVCf6VR+2u+U/Xs/9K3panN9oE1RjgUN/7WLS+HgN7VeLkib5i1ublze
+        ZzdXTFRiLIbzyOk6yXa8z/pDwpr3Jwh8cNI0XkiQNk+4HljvarH8PGWAeDlYsT5kzsq5FH
+        3Idu0S4meKBA0rD4hVr1GFkmWXBZ2bk=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-111-2yZcawlsOGW_d0C6qJ4iNw-1; Sun, 17 Apr 2022 12:39:47 -0400
+X-MC-Unique: 2yZcawlsOGW_d0C6qJ4iNw-1
+Received: by mail-qk1-f198.google.com with SMTP id u6-20020a05620a430600b0069c0f5ad4e2so8885228qko.2
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 09:39:47 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=bYgXSBMSWEUzQHGCkjJhwUjqvHy4V2/zu2Y1PBWO47Y=;
-        b=SC87Ae8yK38J05QCDRytOvxUDnGbvHQ9M77IliYkxJJWO213mIcUL55U6NhfLlVqFW
-         e+V3TfTPEl75j+8ipBf8csmo0+tcZ2rInaZKDOUaGrvHPLQouS+t3FBQxUTdEqa2f3mn
-         GcTzR//wJ02Uj7Y993HVChq8NVXUMrd54dg8psu1k/iQAGNE4sObSvL3HhodWMnJ0j3U
-         fsiEBccPUxOJg3mw24CgO1eWmYlBtdYAtyicLon3Xce+QrZboLLLvwh9j9ufW78RZwxn
-         lf0DMc14JKdplUsos3koMHMR7yj5Nak56zBRN7QK7JOCK70KpFRq8ZR4QA/G/a7Jri+/
-         vnIA==
-X-Gm-Message-State: AOAM5303FZZY6n7QwclG9mfgiVRToJEM2BidBGZX4OydDm7+rp0XErHk
-        v22mIww56Yih+sx9oKhippQhS4TezII=
-X-Google-Smtp-Source: ABdhPJzrhX2FNlKCAnNx0VPr+drywW9nBWwQMi1TZ+KuP406Xn0KdgIP5Vwhl41XFeZ+nGUqQe0PGg==
-X-Received: by 2002:a7b:c5d6:0:b0:381:4127:84d3 with SMTP id n22-20020a7bc5d6000000b00381412784d3mr11506509wmk.24.1650211408322;
-        Sun, 17 Apr 2022 09:03:28 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id bi26-20020a05600c3d9a00b0038ed39dbf00sm10475334wmb.0.2022.04.17.09.03.26
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=DXFuVGrx+rL9QRAWxNQqLS632uUFF41hQXIR2/QjV4Y=;
+        b=5XiyQJ4m3hUpHlX1P+7qixsAXScIHMCRuvuQpZK3Vtq82GXkCzPI9wD9Po2IxTaUed
+         9Os3UEJF+i6y7GbUjoIscrEmzfRs5cmRPjbD/b/6G7TzhqmnHsCUyOVh96edQvF9gOeQ
+         0z6/rxdNXx0kVQYlC3b+yx08hvn+HI/hpabAXDTbJfWjCXzKhUB9btZm2zzSap4K+zPV
+         pen/3s1iuRZHyqqJH3LXfhG5Cf5Sg1j4922BuaAg9yXd2aS+TWldEwojeYjePqUNGj1W
+         Ef93ZpQEqsgeTV8kZF2J595q9aikIk1cbxMp3KAVxHF8R7NO7iNSkzSXXjKylZU67jHY
+         CeHA==
+X-Gm-Message-State: AOAM532l16rbhqN+4aJFN1uz0eClXTT+Gpx2Bzp4Lqkkl3t07EhwL1bd
+        Ua04ilwNLBy4PN/8rynSOXl/QHpjHRBoNQBHhtfYlZLPAA37BN0EMO2iTg9DwbjKdyIbx9i8fIU
+        mGztaK1HWn1qeAvla3g==
+X-Received: by 2002:a05:6214:f6f:b0:441:3a32:d6dd with SMTP id iy15-20020a0562140f6f00b004413a32d6ddmr5859460qvb.106.1650213587205;
+        Sun, 17 Apr 2022 09:39:47 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzaMnBsjbqN6hfeUu7GB34e13EgBJb+3SFHoIooSuECCax+3EdE4gbdqVeiEZKsW1VTgUJ3dg==
+X-Received: by 2002:a05:6214:f6f:b0:441:3a32:d6dd with SMTP id iy15-20020a0562140f6f00b004413a32d6ddmr5859442qvb.106.1650213586898;
+        Sun, 17 Apr 2022 09:39:46 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id n8-20020ac85a08000000b002f1fc230725sm988330qta.31.2022.04.17.09.39.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Apr 2022 09:03:27 -0700 (PDT)
-Message-ID: <625c3a4f.1c69fb81.8064a.a089@mx.google.com>
-Date:   Mon, 18 Apr 2022 00:03:24 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to fbc6486be09c
+        Sun, 17 Apr 2022 09:39:46 -0700 (PDT)
+Date:   Mon, 18 Apr 2022 00:39:40 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v1.1 3/3] xfs/216: handle larger log sizes
+Message-ID: <20220417163940.rzjnwdpftntjuotg@zlang-mailbox>
+Mail-Followup-To: Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+References: <164971769710.170109.8985299417765876269.stgit@magnolia>
+ <164971771391.170109.16368399851366024102.stgit@magnolia>
+ <20220415150458.GB17025@magnolia>
+ <20220416133518.sxow73joph3f7h7v@zlang-mailbox>
+ <YlwnR1SvEiNussG3@desktop>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="QiRzngJrxP1N"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <YlwnR1SvEiNussG3@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, Apr 17, 2022 at 10:42:15PM +0800, Eryu Guan wrote:
+> On Sat, Apr 16, 2022 at 09:35:18PM +0800, Zorro Lang wrote:
+> > On Fri, Apr 15, 2022 at 08:04:58AM -0700, Darrick J. Wong wrote:
+> > > mkfs will soon refuse to format a log smaller than 64MB, so update this
+> > > test to reflect the new log sizing calculations.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > >  tests/xfs/216             |   19 +++++++++++++++++++
+> > >  tests/xfs/216.out.64mblog |   10 ++++++++++
+> > >  tests/xfs/216.out.classic |    0 
+> > >  3 files changed, 29 insertions(+)
+> > >  create mode 100644 tests/xfs/216.out.64mblog
+> > >  rename tests/xfs/{216.out => 216.out.classic} (100%)
+> > > 
+> > > diff --git a/tests/xfs/216 b/tests/xfs/216
+> > > index c3697db7..ebae8979 100755
+> > > --- a/tests/xfs/216
+> > > +++ b/tests/xfs/216
+> > > @@ -29,6 +29,23 @@ $MKFS_XFS_PROG 2>&1 | grep -q rmapbt && \
+> > >  $MKFS_XFS_PROG 2>&1 | grep -q reflink && \
+> > >  	loop_mkfs_opts="$loop_mkfs_opts -m reflink=0"
+> > >  
+> > > +# Decide which golden output file we're using.  Starting with mkfs.xfs 5.15,
+> > > +# the default minimum log size was raised to 64MB for all cases, so we detect
+> > > +# that by test-formatting with a 512M filesystem.  This is a little handwavy,
+> > > +# but it's the best we can do.
+> > > +choose_golden_output() {
+> > > +	local seqfull=$1
+> > > +	local file=$2
+> > > +
+> > > +	if $MKFS_XFS_PROG -f -b size=4096 -l version=2 \
+> > > +			-d name=$file,size=512m $loop_mkfs_opts | \
+> > > +			grep -q 'log.*blocks=16384'; then
+> > > +		ln -f -s $seqfull.out.64mblog $seqfull.out
+> > > +	else
+> > > +		ln -f -s $seqfull.out.classic $seqfull.out
+> > > +	fi
+> > 
+> > Actually there's a old common function in common/rc named _link_out_file(),
+> > xfstests generally use it to deal with multiple .out files. It would be
+> > better to keep in step with common helpers, but your "ln" command
+> > isn't wrong :)
+> 
+> I added tests/xfs/216.cfg file and updated test to use
+> _link_out_file_named().
 
---QiRzngJrxP1N
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Thanks! Sorry have to trouble you, my request to kernel.org is still blocking.
 
-Hi all,
+`_link_out_file_named $seqfull.out 64mblog` is equal to
+`_link_out_file 64mblog`
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. And again, most of the commits in this update are
-random bug-fixes. There're three new generic tests added as well, and they
-should all pass on latest v5.18-rc2 kernel (and latest xfsprogs for xfs).
-
-And you may already see the discussions on the new maintainership in list,
-Zorro Lang will step on the new maintainer role, and we're going through the
-transfer right now. We'll send another announce email when all things done.
+So the later one might be enough. Anyway, both are good to me!
 
 Thanks,
-Eryu
+Zorro
 
-The new head of the master branch is commit:
+> 
+> > 
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> 
+> Thanks!
+> Eryu
+> 
+> > 
+> > > +}
+> > > +
+> > >  _do_mkfs()
+> > >  {
+> > >  	for i in $*; do
+> > > @@ -43,6 +60,8 @@ _do_mkfs()
+> > >  # make large holey file
+> > >  $XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
+> > >  
+> > > +choose_golden_output $0 $LOOP_DEV
+> > > +
+> > >  #make loopback mount dir
+> > >  mkdir $LOOP_MNT
+> > >  
+> > > diff --git a/tests/xfs/216.out.64mblog b/tests/xfs/216.out.64mblog
+> > > new file mode 100644
+> > > index 00000000..3c12085f
+> > > --- /dev/null
+> > > +++ b/tests/xfs/216.out.64mblog
+> > > @@ -0,0 +1,10 @@
+> > > +QA output created by 216
+> > > +fssize=1g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=2g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=4g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=8g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=16g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=32g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=64g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=128g log      =internal log           bsize=4096   blocks=16384, version=2
+> > > +fssize=256g log      =internal log           bsize=4096   blocks=32768, version=2
+> > > diff --git a/tests/xfs/216.out b/tests/xfs/216.out.classic
+> > > similarity index 100%
+> > > rename from tests/xfs/216.out
+> > > rename to tests/xfs/216.out.classic
+> > > 
+> 
 
-fbc6486be09c generic: test that renaming into a directory fails with EDQUOT
-
-New commits:
-
-Darrick J. Wong (7):
-      [c025dcf35b47] xfs/507: add test to auto group
-      [d7ac035cfeec] xfs/187: don't rely on FSCOUNTS for free space data
-      [86e537edb41d] common/rc: let xfs_scrub tell us about its unicode checker
-      [82047ce7cd46] xfs: test mkfs.xfs config file stack corruption issues
-      [e75da9ebde72] xfs/216: handle larger log sizes
-      [48029933892b] generic: test that linking into a directory fails with EDQUOT
-      [fbc6486be09c] generic: test that renaming into a directory fails with EDQUOT
-
-Dave Chinner (1):
-      [b560e18c6216] generic/019: kill background processes on interrupt
-
-David Disseldorp (4):
-      [73aa648ce176] generic/020: move MAX_ATTRS and MAX_ATTRVAL_SIZE logic
-      [dc76e4ec19a8] generic/020: add and use _attr_get_max()
-      [a59e1f79f4e5] generic/020: fix max_attrval_size for XFS, UDF, Btrfs and NFS
-      [9c6b2ebe2b6b] generic/020: fix max_attrval_size output filter
-
-Eric Biggers (1):
-      [16676f2f2c3b] common/encrypt: use a sub-keyring within the session keyring
-
-Eric Whitney (1):
-      [ca53ba1e74eb] common/filter: extend _filter_xfs_io to match -nan
-
-Filipe Manana (1):
-      [c4cefb1c5ecd] common/rc: fix _try_scratch_mount() and _test_mount() when mount fails
-
-Liu Yiding (1):
-      [d26e6be1290c] common/rc: Skip virtiofs when _require_exportfs
-
-Luís Henriques (1):
-      [0ab8b3ac61ff] ceph/001: add extra check for remote object copies
-
-Zorro Lang (2):
-      [daa0c0146c7d] fstests: replace hexdump with od command
-      [0b11a5ecb8e5] fstests: test dirty pipe vulnerability issue of CVE-2022-0847
-
-
-Code Diffstat:
-
- .gitignore                             |   1 +
- common/attr                            |  75 ---
- common/ceph                            |  10 +
- common/encrypt                         |  55 +-
- common/filter                          |   6 +-
- common/rc                              |  40 ++
- src/Makefile                           |   2 +-
- src/splice2pipe.c                      | 158 ++++++
- tests/ceph/001                         |  66 +++
- tests/ceph/002                         |   2 +-
- tests/ceph/002.out                     |   8 +-
- tests/ext4/024                         |   2 +-
- tests/f2fs/001                         |   4 +-
- tests/f2fs/001.out                     |  16 +-
- tests/generic/019                      |   8 +-
- tests/generic/020                      | 116 +++-
- tests/generic/020.out                  |   2 +-
- tests/generic/029                      |  12 +-
- tests/generic/029.out                  |  68 +--
- tests/generic/030                      |  12 +-
- tests/generic/030.out                  |  48 +-
- tests/generic/031                      |   4 +-
- tests/generic/031.out                  |  16 +-
- tests/generic/032                      |   2 +-
- tests/generic/032.out                  |   4 +-
- tests/generic/033                      |   2 +-
- tests/generic/033.out                  |   4 +-
- tests/generic/042                      |   4 +-
- tests/generic/086                      |   2 +-
- tests/generic/086.out                  |  14 +-
- tests/generic/397                      |   2 +-
- tests/generic/398                      |   2 +-
- tests/generic/399                      |   2 +-
- tests/generic/404                      |   2 +-
- tests/generic/404.out                  | 996 ++++++++++++++++-----------------
- tests/generic/419                      |   2 +-
- tests/generic/421                      |   2 +-
- tests/generic/429                      |   2 +-
- tests/generic/435                      |   2 +-
- tests/generic/440                      |   2 +-
- tests/generic/536                      |   4 +-
- tests/generic/567                      |   4 +-
- tests/generic/567.out                  |  16 +-
- tests/generic/576                      |   2 +-
- tests/generic/593                      |  13 +-
- tests/generic/612                      |   4 +-
- tests/generic/612.out                  |   8 +-
- tests/generic/639                      |   2 +-
- tests/generic/639.out                  |   4 +-
- tests/generic/680                      |  48 ++
- tests/generic/680.out                  |   9 +
- tests/generic/681                      |  67 +++
- tests/generic/681.out                  |   3 +
- tests/generic/682                      |  71 +++
- tests/generic/682.out                  |   3 +
- tests/xfs/187                          |   2 +-
- tests/xfs/216                          |  19 +
- tests/xfs/216.cfg                      |   2 +
- tests/xfs/216.out.64mblog              |  10 +
- tests/xfs/{216.out => 216.out.classic} |   0
- tests/xfs/507                          |   6 +-
- tests/xfs/543                          |  68 +++
- tests/xfs/543.out                      |   2 +
- 63 files changed, 1390 insertions(+), 754 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---QiRzngJrxP1N
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmJcOfgACgkQJlKqKVyP
-52M/2w//a8ISaKk0mJZKhvCh612nLxkr4/qIAcT3awtfBXf9eFGOVWvxY8bfToQM
-47aZzKU0+oVYoEfBYgV/qCWTMkcicJCvlzIPfSTXMw+Z+6ax+TdF9QhMmpgqKSRL
-PiEWkn2LJma7mMuhbCUpkWjqg+V3nMEvFaYOUgV0p+okMXR39Bvx1akQPP9ZS7Zr
-1KtEBv6XAo5ncMCWUul61SSi2P4INPV20AEILdL9baYfQCThFFDFuTNLkcBOPzTC
-DZ+bnE2wFUv0tl4JdnztudQND+BFewDLYm+txh48rhhCTEOFAOGbNhAsRNzRi7US
-6tnbWg3PuCpMbvKBd9VnelmsypgIEoiQx6anplD+JOrP5X9bS4gwfTAob19Alv9c
-w8mY+3J3dBh3BZngufJRzKwfWFUY4LD1noFjhKP5RTRDCv6I2YOvX7wWyRhbxL1R
-Bo2cHe3pizdw4e4fSZq1S+Utx0OsTkaZV5qYoe2BHtybwO5D6CceAT5/PoxFmCBq
-karK/JxWpfuyihDaapUV3A4QfrTy5VkOC39YgSqW0TGAdUryFr1UYjKL93rMDtNQ
-+xcHZCpCzTxlft1JGhsJqv5HPYjp6N5ETJGP3LkyE9oro3QDgqrHIQloVZs38bWN
-Qww9u3nq6qSAYogcc7B6oIh/P//E8ZhmIlQ6mz9GQTf1jmGBJu0=
-=weoC
------END PGP SIGNATURE-----
-
---QiRzngJrxP1N--
