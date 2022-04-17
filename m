@@ -2,138 +2,191 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCD2EC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Apr 2022 17:40:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34E7CC433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Apr 2022 17:40:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234631AbiDQRnG (ORCPT
+        id S234632AbiDQRnK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Apr 2022 13:43:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54202 "EHLO
+        Sun, 17 Apr 2022 13:43:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231321AbiDQRnF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Apr 2022 13:43:05 -0400
+        with ESMTP id S231321AbiDQRnK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Apr 2022 13:43:10 -0400
 Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D765A2ED6F
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 10:40:28 -0700 (PDT)
-Received: by mail-wr1-x429.google.com with SMTP id r13so16265926wrr.9
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 10:40:28 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10C262ED6F
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 10:40:34 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id b19so16256439wrh.11
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 10:40:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Y1micQICcO+8J/NuzCiw/BJXQmRmH489XmrXaxQYAGo=;
-        b=jNaZ/hefVQaJRPB5a4srfhZf/FIzjuqGTbBJeb2p+OSI6hqClqAvkELU0nM5I5r5PM
-         MHcozvW+jp3+obacAu4ed9rbvcEWAges9ClNguzYZIAVbwlXj8ftaUMyt0Z7CQUVeMx8
-         Nf8Lz5nRO//bFgpafuV3fqC8Q3sWQ2hUl2GPV27mZJIkt1hVxS1c4JRaKGC/NH8ldK6+
-         /VdGfuJ+8y5DsTsscX3To2V2FGWHUAVqLzuNwp33EyMe1QPkkWtsdl6Zwmtnu/M9F91q
-         QRKlyZl9/H10Jibp9qBqpxNYmVtoRepgNvpaeGH42aFy5htktqi1LoIRhZorAYlRqa7L
-         ZGQg==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=eSa78drSzm6KpbK46mMi5jkh3oVF8i6BsUFWxwRiicQ=;
+        b=JAaRwRkOsEy/qSY+TIpwIjo7n3UjDR+tJ/TnzvOXCbl8chGrvGdcXRNj/pnM2c91xS
+         n7klnBV8S8YNn+e9JpVMQpCa6kIZKGEFmCvg6f83qoPZq1+CQA8TrhydbO+sfVD3VYLE
+         2wshIFCXAq6QwcAI8UVQ6SY++hUCDnYvySIuDxSW5fTtcwouzfXcQLFKOBxKFfNK1m7G
+         OajjUhqJLkMinksRbMfqzF1IVq78rYtcyeU0WYMx3HTGymKdgvmWMAFULkTapeHPyC4a
+         X9QuiVO/R/ETNsYs3FlO9NKLd3fLaW3G9ib3XC4hnXhU9mb7VFwvS4oTBcONOEYZZP7C
+         zllw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Y1micQICcO+8J/NuzCiw/BJXQmRmH489XmrXaxQYAGo=;
-        b=gZStKPLnoBBla1piN/DvxSIOnugxQGP0JWVBSe25l0j6qEie/XMW+BiJbk6XIwYAC5
-         N+qxiYFmypwXeMqjs+OuGlh1YYkgXFvmDRPosF9POrnJTSPNAFspJaIanQkyWjz9tVM0
-         KkxC7RJtaQ79nKvGPwpi5ccX8DL5ckcLwVVps4cm8+yf6llO6XmAa7PVg/9Y14JUMCqT
-         6tyiU8e8Uce6WqZo+B7ArzWrYRsxOPwDxi4Qp8mKWWv8T3/Tv6fYF89b6WCnp4qr0JYV
-         PBEcj+zmIXd0o2YGNqeo3z6TzCN4GcwVwjDdv8+ezPwERnYl7u2iW1KjK6me47sw2p+s
-         c5oA==
-X-Gm-Message-State: AOAM531fRRnsfK+lrRTn6tOfk4P/XoPL2BH0K/An4U+QOQDRteVb5R53
-        k+jL884nrd2IzKB4fqs8apU=
-X-Google-Smtp-Source: ABdhPJyoZ1o/n6WcjwGDvyuzTj4FwGeqVx9WtPYzq1GFtec/RtWRhS+QBqGMEl6kl8Dx+b6uNxLr0w==
-X-Received: by 2002:a05:6000:230:b0:209:87ac:4cf5 with SMTP id l16-20020a056000023000b0020987ac4cf5mr5820761wrz.80.1650217227335;
-        Sun, 17 Apr 2022 10:40:27 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=eSa78drSzm6KpbK46mMi5jkh3oVF8i6BsUFWxwRiicQ=;
+        b=rBes1dNujSHYsElPdWPUrIbApDAmgwfbk8XkH4P+6geeiEryjjUGjeWA6cELDa9H9E
+         QsvlY+Zfpf0v55XgrNmyzegJPi/VyD2Hm5nSNU1leWsE6mgajtAOcORifo1DtDk+RrVP
+         IEaJluUlQBUd7LAoMpICKSb7RHMJnc9DxZkT/PW5JeebxTyTZ9fwAHVBvzbPZ9H0fDHM
+         y7PR5fJgMNaxKGvBMIXx9OzMpLdulGsEEeiNYOXKMlAfgUU5c9e7lvZIFar1inUFAzUe
+         +fyQiG/WY7O20YMBrg5nKtLgmR7go9PdrFgZ+e5BC1+6LPtAl/NMmJUBxMJKqvzq/Jwt
+         8fxw==
+X-Gm-Message-State: AOAM531f3uPBDaEqUyBdnE29Q75IpvgBukQEGJZXjGVwGpJxpJGU8Ai9
+        LbujhAuy1XDyfSFuloZnN7EoprVUYPM=
+X-Google-Smtp-Source: ABdhPJzEuJjYXxo3WiSRuLid2Ij7pN5QZyNG+weTYJoUegKOwZ78jx/ZE+HLV1gFq4Cf8UtF/zR/ag==
+X-Received: by 2002:adf:de81:0:b0:207:a65c:d895 with SMTP id w1-20020adfde81000000b00207a65cd895mr5919147wrl.647.1650217232660;
+        Sun, 17 Apr 2022 10:40:32 -0700 (PDT)
 Received: from localhost.localdomain ([5.29.13.154])
-        by smtp.gmail.com with ESMTPSA id v18-20020adfc5d2000000b0020589b76704sm9108564wrg.70.2022.04.17.10.40.25
+        by smtp.gmail.com with ESMTPSA id v18-20020adfc5d2000000b0020589b76704sm9108564wrg.70.2022.04.17.10.40.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Apr 2022 10:40:26 -0700 (PDT)
+        Sun, 17 Apr 2022 10:40:32 -0700 (PDT)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Eryu Guan <guaneryu@gmail.com>, Zorro Lang <zlang@redhat.com>
 Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
         Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
-Subject: [PATCH 0/3] Annonate fstests with possible reasons for failure
-Date:   Sun, 17 Apr 2022 20:40:20 +0300
-Message-Id: <20220417174023.3244263-1-amir73il@gmail.com>
+Subject: [PATCH 1/3] common: support black listing fs in _supported_fs()
+Date:   Sun, 17 Apr 2022 20:40:21 +0300
+Message-Id: <20220417174023.3244263-2-amir73il@gmail.com>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220417174023.3244263-1-amir73il@gmail.com>
+References: <20220417174023.3244263-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-In a perfect worlds, tests are expected to pass, but we do not live in a
-perfect world.
+For example:
+_supported_fs ^xfs
 
-In reality, fstests are often merged before a fix is merged to Linus'
-tree or before a fix to all fs is available [1][2].
+There is no need to specify "generic" when using a block list
+"all other fs are supported" is implied.
 
-We all know that day when we pull fstests upstream branch and get a
-bunch of new test failures.
+Converted some generic tests that open code this condition without
+emitting a meaningful reason.
 
-This series [3] adds several new ways to annotate tests to provide some
-hints for testers about which tests are expected to pass on which fs
-and or which kernel versions:
+More generic test like generic/186,187 could use a block list, but
+were not converted because they emit some meaningful reason:
+  _notrun "Can't fragment free space on btrfs."
 
- _fixed_by_kernel_commit
- _known_issue_before_kernel
- _known_issue_on_fs
-
-And a new run option SKIP_KNOWN_ISSUES=yes.
-
-These annotation and run option are inspired by a similar feature in LTP.
-
-These annotation could be used by testers to auto-generate expunge list
-for testing stable kernels from the information in _fixed_by_kernel_commit
-and _known_issue_before_kernel. This trivial task is left is an excercise.
-
-Thanks,
-Amir.
-
-[1] https://lore.kernel.org/fstests/20220412172853.GG16799@magnolia/
-[2] https://lore.kernel.org/fstests/20220414155007.GC17014@magnolia/
-[3] https://github.com/amir73il/xfstests/commits/hints
-
-Amir Goldstein (3):
-  common: support black listing fs in _supported_fs()
-  common: print hints for reasons of test failures
-  common: add run option to skip tests for known issues
-
- README            |  2 ++
- check             | 10 ++++++++-
- common/preamble   |  2 +-
- common/rc         | 54 ++++++++++++++++++++++++++++++++++++++++-------
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/rc         | 30 ++++++++++++++++++++----------
  tests/generic/500 |  3 +--
  tests/generic/631 |  3 +--
  tests/generic/679 |  3 +--
- tests/overlay/009 |  3 +++
- tests/overlay/010 |  3 +++
- tests/overlay/014 |  2 ++
- tests/overlay/016 |  4 +++-
- tests/overlay/017 |  4 +++-
- tests/overlay/018 |  4 +++-
- tests/overlay/020 |  3 +++
- tests/overlay/022 |  2 ++
- tests/overlay/029 |  2 ++
- tests/overlay/038 |  2 ++
- tests/overlay/041 |  2 ++
- tests/overlay/042 |  3 +++
- tests/overlay/043 |  4 +++-
- tests/overlay/044 |  4 +++-
- tests/overlay/054 |  3 +++
- tests/overlay/055 |  3 +++
- tests/overlay/061 |  2 ++
- tests/overlay/063 |  3 +++
- tests/overlay/065 |  4 ++++
- tests/overlay/067 |  3 +++
- tests/overlay/070 |  4 +++-
- tests/overlay/071 |  4 +++-
- tests/overlay/072 |  2 ++
- tests/overlay/074 |  5 +++++
- tests/overlay/077 |  5 +++++
- tests/overlay/078 |  1 +
- 33 files changed, 135 insertions(+), 23 deletions(-)
+ 4 files changed, 23 insertions(+), 16 deletions(-)
 
+diff --git a/common/rc b/common/rc
+index 17629801..1d37dcbd 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1572,19 +1572,29 @@ _fail()
+ 
+ # tests whether $FSTYP is one of the supported filesystems for a test
+ #
+-_supported_fs()
++_check_supported_fs()
+ {
+-    local f
++	local res=1
++	local f
+ 
+-    for f
+-    do
+-	if [ "$f" = "$FSTYP" -o "$f" = "generic" ]
+-	then
+-	    return
+-	fi
+-    done
++	for f; do
++		# ^FS means black listed fs
++		if [ "$f" = "^$FSTYP" ]; then
++			return 1
++		elif [ "$f" = "generic" ] || [[ "$f" == "^"* ]]; then
++			# ^FS implies "generic ^FS"
++			res=0
++		elif [ "$f" = "$FSTYP" ]; then
++			return 0
++		fi
++	done
++	return $res
++}
+ 
+-    _notrun "not suitable for this filesystem type: $FSTYP"
++_supported_fs()
++{
++	_check_supported_fs $* || \
++		_notrun "not suitable for this filesystem type: $FSTYP"
+ }
+ 
+ # check if a FS on a device is mounted
+diff --git a/tests/generic/500 b/tests/generic/500
+index 0be59934..bc84d219 100755
+--- a/tests/generic/500
++++ b/tests/generic/500
+@@ -35,7 +35,6 @@ _cleanup()
+ . ./common/dmthin
+ 
+ # real QA test starts here
+-_supported_fs generic
+ _require_scratch_nocheck
+ _require_dm_target thin-pool
+ 
+@@ -43,7 +42,7 @@ _require_dm_target thin-pool
+ # and since we've filled the thinp device it'll return EIO, which will make
+ # btrfs flip read only, making it fail this test when it just won't work right
+ # for us in the first place.
+-test $FSTYP == "btrfs"  && _notrun "btrfs doesn't work that way lol"
++_supported_fs ^btrfs
+ 
+ # Require underlying device support discard
+ _scratch_mkfs >>$seqres.full 2>&1
+diff --git a/tests/generic/631 b/tests/generic/631
+index 4996bce7..219f7a05 100755
+--- a/tests/generic/631
++++ b/tests/generic/631
+@@ -36,10 +36,9 @@ _cleanup()
+ . ./common/attr
+ 
+ # real QA test starts here
+-_supported_fs generic
+ _require_scratch
+ _require_attrs trusted
+-test "$FSTYP" = "overlay" && _notrun "Test does not apply to overlayfs."
++_supported_fs ^overlay
+ _require_extra_fs overlay
+ 
+ _scratch_mkfs >> $seqres.full
+diff --git a/tests/generic/679 b/tests/generic/679
+index 440f0c08..c32d42b9 100755
+--- a/tests/generic/679
++++ b/tests/generic/679
+@@ -17,7 +17,6 @@ _begin_fstest auto quick prealloc
+ 
+ # real QA test starts here
+ 
+-_supported_fs generic
+ _require_scratch
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fiemap"
+@@ -26,7 +25,7 @@ _require_xfs_io_command "fiemap"
+ #
+ #   https://lore.kernel.org/linux-btrfs/20220315164011.GF8241@magnolia/
+ #
+-[ $FSTYP == "xfs" ] && _notrun "test not valid for xfs"
++_supported_fs ^xfs
+ 
+ rm -f $seqres.full
+ 
 -- 
 2.35.1
 
