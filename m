@@ -2,179 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2A1FC433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Apr 2022 16:40:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCD2EC433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Apr 2022 17:40:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233208AbiDQQm2 (ORCPT
+        id S234631AbiDQRnG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Apr 2022 12:42:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58242 "EHLO
+        Sun, 17 Apr 2022 13:43:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234422AbiDQQm1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Apr 2022 12:42:27 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 646F7BFB
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 09:39:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1650213589;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=DXFuVGrx+rL9QRAWxNQqLS632uUFF41hQXIR2/QjV4Y=;
-        b=H36aSyJup7lyM2CVCf6VR+2u+U/Xs/9K3panN9oE1RjgUN/7WLS+HgN7VeLkib5i1ublze
-        ZzdXTFRiLIbzyOk6yXa8z/pDwpr3Jwh8cNI0XkiQNk+4HljvarH8PGWAeDlYsT5kzsq5FH
-        3Idu0S4meKBA0rD4hVr1GFkmWXBZ2bk=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-111-2yZcawlsOGW_d0C6qJ4iNw-1; Sun, 17 Apr 2022 12:39:47 -0400
-X-MC-Unique: 2yZcawlsOGW_d0C6qJ4iNw-1
-Received: by mail-qk1-f198.google.com with SMTP id u6-20020a05620a430600b0069c0f5ad4e2so8885228qko.2
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 09:39:47 -0700 (PDT)
+        with ESMTP id S231321AbiDQRnF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Apr 2022 13:43:05 -0400
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D765A2ED6F
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 10:40:28 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id r13so16265926wrr.9
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 10:40:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Y1micQICcO+8J/NuzCiw/BJXQmRmH489XmrXaxQYAGo=;
+        b=jNaZ/hefVQaJRPB5a4srfhZf/FIzjuqGTbBJeb2p+OSI6hqClqAvkELU0nM5I5r5PM
+         MHcozvW+jp3+obacAu4ed9rbvcEWAges9ClNguzYZIAVbwlXj8ftaUMyt0Z7CQUVeMx8
+         Nf8Lz5nRO//bFgpafuV3fqC8Q3sWQ2hUl2GPV27mZJIkt1hVxS1c4JRaKGC/NH8ldK6+
+         /VdGfuJ+8y5DsTsscX3To2V2FGWHUAVqLzuNwp33EyMe1QPkkWtsdl6Zwmtnu/M9F91q
+         QRKlyZl9/H10Jibp9qBqpxNYmVtoRepgNvpaeGH42aFy5htktqi1LoIRhZorAYlRqa7L
+         ZGQg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=DXFuVGrx+rL9QRAWxNQqLS632uUFF41hQXIR2/QjV4Y=;
-        b=5XiyQJ4m3hUpHlX1P+7qixsAXScIHMCRuvuQpZK3Vtq82GXkCzPI9wD9Po2IxTaUed
-         9Os3UEJF+i6y7GbUjoIscrEmzfRs5cmRPjbD/b/6G7TzhqmnHsCUyOVh96edQvF9gOeQ
-         0z6/rxdNXx0kVQYlC3b+yx08hvn+HI/hpabAXDTbJfWjCXzKhUB9btZm2zzSap4K+zPV
-         pen/3s1iuRZHyqqJH3LXfhG5Cf5Sg1j4922BuaAg9yXd2aS+TWldEwojeYjePqUNGj1W
-         Ef93ZpQEqsgeTV8kZF2J595q9aikIk1cbxMp3KAVxHF8R7NO7iNSkzSXXjKylZU67jHY
-         CeHA==
-X-Gm-Message-State: AOAM532l16rbhqN+4aJFN1uz0eClXTT+Gpx2Bzp4Lqkkl3t07EhwL1bd
-        Ua04ilwNLBy4PN/8rynSOXl/QHpjHRBoNQBHhtfYlZLPAA37BN0EMO2iTg9DwbjKdyIbx9i8fIU
-        mGztaK1HWn1qeAvla3g==
-X-Received: by 2002:a05:6214:f6f:b0:441:3a32:d6dd with SMTP id iy15-20020a0562140f6f00b004413a32d6ddmr5859460qvb.106.1650213587205;
-        Sun, 17 Apr 2022 09:39:47 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzaMnBsjbqN6hfeUu7GB34e13EgBJb+3SFHoIooSuECCax+3EdE4gbdqVeiEZKsW1VTgUJ3dg==
-X-Received: by 2002:a05:6214:f6f:b0:441:3a32:d6dd with SMTP id iy15-20020a0562140f6f00b004413a32d6ddmr5859442qvb.106.1650213586898;
-        Sun, 17 Apr 2022 09:39:46 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id n8-20020ac85a08000000b002f1fc230725sm988330qta.31.2022.04.17.09.39.44
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Y1micQICcO+8J/NuzCiw/BJXQmRmH489XmrXaxQYAGo=;
+        b=gZStKPLnoBBla1piN/DvxSIOnugxQGP0JWVBSe25l0j6qEie/XMW+BiJbk6XIwYAC5
+         N+qxiYFmypwXeMqjs+OuGlh1YYkgXFvmDRPosF9POrnJTSPNAFspJaIanQkyWjz9tVM0
+         KkxC7RJtaQ79nKvGPwpi5ccX8DL5ckcLwVVps4cm8+yf6llO6XmAa7PVg/9Y14JUMCqT
+         6tyiU8e8Uce6WqZo+B7ArzWrYRsxOPwDxi4Qp8mKWWv8T3/Tv6fYF89b6WCnp4qr0JYV
+         PBEcj+zmIXd0o2YGNqeo3z6TzCN4GcwVwjDdv8+ezPwERnYl7u2iW1KjK6me47sw2p+s
+         c5oA==
+X-Gm-Message-State: AOAM531fRRnsfK+lrRTn6tOfk4P/XoPL2BH0K/An4U+QOQDRteVb5R53
+        k+jL884nrd2IzKB4fqs8apU=
+X-Google-Smtp-Source: ABdhPJyoZ1o/n6WcjwGDvyuzTj4FwGeqVx9WtPYzq1GFtec/RtWRhS+QBqGMEl6kl8Dx+b6uNxLr0w==
+X-Received: by 2002:a05:6000:230:b0:209:87ac:4cf5 with SMTP id l16-20020a056000023000b0020987ac4cf5mr5820761wrz.80.1650217227335;
+        Sun, 17 Apr 2022 10:40:27 -0700 (PDT)
+Received: from localhost.localdomain ([5.29.13.154])
+        by smtp.gmail.com with ESMTPSA id v18-20020adfc5d2000000b0020589b76704sm9108564wrg.70.2022.04.17.10.40.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Apr 2022 09:39:46 -0700 (PDT)
-Date:   Mon, 18 Apr 2022 00:39:40 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v1.1 3/3] xfs/216: handle larger log sizes
-Message-ID: <20220417163940.rzjnwdpftntjuotg@zlang-mailbox>
-Mail-Followup-To: Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-References: <164971769710.170109.8985299417765876269.stgit@magnolia>
- <164971771391.170109.16368399851366024102.stgit@magnolia>
- <20220415150458.GB17025@magnolia>
- <20220416133518.sxow73joph3f7h7v@zlang-mailbox>
- <YlwnR1SvEiNussG3@desktop>
+        Sun, 17 Apr 2022 10:40:26 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>, Zorro Lang <zlang@redhat.com>
+Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
+Subject: [PATCH 0/3] Annonate fstests with possible reasons for failure
+Date:   Sun, 17 Apr 2022 20:40:20 +0300
+Message-Id: <20220417174023.3244263-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YlwnR1SvEiNussG3@desktop>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 17, 2022 at 10:42:15PM +0800, Eryu Guan wrote:
-> On Sat, Apr 16, 2022 at 09:35:18PM +0800, Zorro Lang wrote:
-> > On Fri, Apr 15, 2022 at 08:04:58AM -0700, Darrick J. Wong wrote:
-> > > mkfs will soon refuse to format a log smaller than 64MB, so update this
-> > > test to reflect the new log sizing calculations.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/xfs/216             |   19 +++++++++++++++++++
-> > >  tests/xfs/216.out.64mblog |   10 ++++++++++
-> > >  tests/xfs/216.out.classic |    0 
-> > >  3 files changed, 29 insertions(+)
-> > >  create mode 100644 tests/xfs/216.out.64mblog
-> > >  rename tests/xfs/{216.out => 216.out.classic} (100%)
-> > > 
-> > > diff --git a/tests/xfs/216 b/tests/xfs/216
-> > > index c3697db7..ebae8979 100755
-> > > --- a/tests/xfs/216
-> > > +++ b/tests/xfs/216
-> > > @@ -29,6 +29,23 @@ $MKFS_XFS_PROG 2>&1 | grep -q rmapbt && \
-> > >  $MKFS_XFS_PROG 2>&1 | grep -q reflink && \
-> > >  	loop_mkfs_opts="$loop_mkfs_opts -m reflink=0"
-> > >  
-> > > +# Decide which golden output file we're using.  Starting with mkfs.xfs 5.15,
-> > > +# the default minimum log size was raised to 64MB for all cases, so we detect
-> > > +# that by test-formatting with a 512M filesystem.  This is a little handwavy,
-> > > +# but it's the best we can do.
-> > > +choose_golden_output() {
-> > > +	local seqfull=$1
-> > > +	local file=$2
-> > > +
-> > > +	if $MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> > > +			-d name=$file,size=512m $loop_mkfs_opts | \
-> > > +			grep -q 'log.*blocks=16384'; then
-> > > +		ln -f -s $seqfull.out.64mblog $seqfull.out
-> > > +	else
-> > > +		ln -f -s $seqfull.out.classic $seqfull.out
-> > > +	fi
-> > 
-> > Actually there's a old common function in common/rc named _link_out_file(),
-> > xfstests generally use it to deal with multiple .out files. It would be
-> > better to keep in step with common helpers, but your "ln" command
-> > isn't wrong :)
-> 
-> I added tests/xfs/216.cfg file and updated test to use
-> _link_out_file_named().
+In a perfect worlds, tests are expected to pass, but we do not live in a
+perfect world.
 
-Thanks! Sorry have to trouble you, my request to kernel.org is still blocking.
+In reality, fstests are often merged before a fix is merged to Linus'
+tree or before a fix to all fs is available [1][2].
 
-`_link_out_file_named $seqfull.out 64mblog` is equal to
-`_link_out_file 64mblog`
+We all know that day when we pull fstests upstream branch and get a
+bunch of new test failures.
 
-So the later one might be enough. Anyway, both are good to me!
+This series [3] adds several new ways to annotate tests to provide some
+hints for testers about which tests are expected to pass on which fs
+and or which kernel versions:
+
+ _fixed_by_kernel_commit
+ _known_issue_before_kernel
+ _known_issue_on_fs
+
+And a new run option SKIP_KNOWN_ISSUES=yes.
+
+These annotation and run option are inspired by a similar feature in LTP.
+
+These annotation could be used by testers to auto-generate expunge list
+for testing stable kernels from the information in _fixed_by_kernel_commit
+and _known_issue_before_kernel. This trivial task is left is an excercise.
 
 Thanks,
-Zorro
+Amir.
 
-> 
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> 
-> Thanks!
-> Eryu
-> 
-> > 
-> > > +}
-> > > +
-> > >  _do_mkfs()
-> > >  {
-> > >  	for i in $*; do
-> > > @@ -43,6 +60,8 @@ _do_mkfs()
-> > >  # make large holey file
-> > >  $XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
-> > >  
-> > > +choose_golden_output $0 $LOOP_DEV
-> > > +
-> > >  #make loopback mount dir
-> > >  mkdir $LOOP_MNT
-> > >  
-> > > diff --git a/tests/xfs/216.out.64mblog b/tests/xfs/216.out.64mblog
-> > > new file mode 100644
-> > > index 00000000..3c12085f
-> > > --- /dev/null
-> > > +++ b/tests/xfs/216.out.64mblog
-> > > @@ -0,0 +1,10 @@
-> > > +QA output created by 216
-> > > +fssize=1g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=2g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=4g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=8g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=16g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=32g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=64g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=128g log      =internal log           bsize=4096   blocks=16384, version=2
-> > > +fssize=256g log      =internal log           bsize=4096   blocks=32768, version=2
-> > > diff --git a/tests/xfs/216.out b/tests/xfs/216.out.classic
-> > > similarity index 100%
-> > > rename from tests/xfs/216.out
-> > > rename to tests/xfs/216.out.classic
-> > > 
-> 
+[1] https://lore.kernel.org/fstests/20220412172853.GG16799@magnolia/
+[2] https://lore.kernel.org/fstests/20220414155007.GC17014@magnolia/
+[3] https://github.com/amir73il/xfstests/commits/hints
+
+Amir Goldstein (3):
+  common: support black listing fs in _supported_fs()
+  common: print hints for reasons of test failures
+  common: add run option to skip tests for known issues
+
+ README            |  2 ++
+ check             | 10 ++++++++-
+ common/preamble   |  2 +-
+ common/rc         | 54 ++++++++++++++++++++++++++++++++++++++++-------
+ tests/generic/500 |  3 +--
+ tests/generic/631 |  3 +--
+ tests/generic/679 |  3 +--
+ tests/overlay/009 |  3 +++
+ tests/overlay/010 |  3 +++
+ tests/overlay/014 |  2 ++
+ tests/overlay/016 |  4 +++-
+ tests/overlay/017 |  4 +++-
+ tests/overlay/018 |  4 +++-
+ tests/overlay/020 |  3 +++
+ tests/overlay/022 |  2 ++
+ tests/overlay/029 |  2 ++
+ tests/overlay/038 |  2 ++
+ tests/overlay/041 |  2 ++
+ tests/overlay/042 |  3 +++
+ tests/overlay/043 |  4 +++-
+ tests/overlay/044 |  4 +++-
+ tests/overlay/054 |  3 +++
+ tests/overlay/055 |  3 +++
+ tests/overlay/061 |  2 ++
+ tests/overlay/063 |  3 +++
+ tests/overlay/065 |  4 ++++
+ tests/overlay/067 |  3 +++
+ tests/overlay/070 |  4 +++-
+ tests/overlay/071 |  4 +++-
+ tests/overlay/072 |  2 ++
+ tests/overlay/074 |  5 +++++
+ tests/overlay/077 |  5 +++++
+ tests/overlay/078 |  1 +
+ 33 files changed, 135 insertions(+), 23 deletions(-)
+
+-- 
+2.35.1
 
