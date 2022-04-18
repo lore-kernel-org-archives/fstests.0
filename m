@@ -2,126 +2,274 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E220C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 05:27:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91EE6C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 05:45:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231215AbiDRF3p (ORCPT
+        id S229516AbiDRFrw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Apr 2022 01:29:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59760 "EHLO
+        Mon, 18 Apr 2022 01:47:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229478AbiDRF3l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 01:29:41 -0400
-Received: from mail-qt1-x82d.google.com (mail-qt1-x82d.google.com [IPv6:2607:f8b0:4864:20::82d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0068012ADA
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 22:26:44 -0700 (PDT)
-Received: by mail-qt1-x82d.google.com with SMTP id f14so966383qtq.1
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 22:26:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=/b8FS3yxOoIx5u9AhYza/WgumV0+OqzND5muTmAogKU=;
-        b=U2dReivUq3ZRJbfCPUtJr6T7IDzhy+HvbaUmYYidrQGGFWzeX19kIuNhFqnh/UM6TJ
-         SDX7Tyw3/6qL04dDr5RoF8Rtoe0Ke6YflDo3LddKsbckwWTaTDLjEktL3NpuSyXemoZM
-         UJXZgn0Hd/fs7A0D7EoricZm3DwYrUHyCs0xaOCKCCEEpc558364rK6omUIRzWxnjNjV
-         rgqiC74y5HAlRxaJkYjJ//3t5T8UB/eGdhqoAthgES3Mqje8y7KsNH8+bEH6fyYMA6BV
-         rS791F1D53PjQ542GF2+Qbo1Y/TtB+XDuhYb4EP6u32DSqe1Munjw72IWL1tNlv8Xnap
-         rm5A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=/b8FS3yxOoIx5u9AhYza/WgumV0+OqzND5muTmAogKU=;
-        b=5ZbEGSybZgjn7+0e25JrkVw763h5IO1vQ/AQ/MEZQijSjRPr1b/MAQMUCVngK2KaYW
-         q2/zppSPA2blqHQKb1R7GlD9Owqcf17m3kB706dMN0h/KEftllRD56Mq1FIiXvXpslHo
-         GJRRjWPIB5RfrU+LllsscTV0FuySFkjJn2oevG+LP6ShL8rjryVfvbF+dbhl4ElhsqC6
-         /8B7qGCe4SiOogiqXoofN5s7xiiQwjN2uFm0AhsbrimLFLh9eaU4zK5t1o57g/OXUdkV
-         XewIKuhSBP/+fly1b7j7eyYrYo0PppfxhuWelbg05nnw/HlUpoLoHMCQYelmKvo5awe/
-         ymNQ==
-X-Gm-Message-State: AOAM53112K5/gCsQMWLc3durgf4BAeXJl9WtlS59ZL6/VV92GcRVQvsJ
-        WN5BFrqu1VZKQAPDMFcUoy8Q24SlBEIVKXP2oPUhqw5KH8w=
-X-Google-Smtp-Source: ABdhPJzD8UrP9tLAMivLD3eeb3wt8pZTUEolv4KACD6VstEq9d1KPJQsXVTKVokIBlwBtdQivMDwAW0gAnDpR8+NUsU=
-X-Received: by 2002:ac8:5dcb:0:b0:2e1:ce48:c186 with SMTP id
- e11-20020ac85dcb000000b002e1ce48c186mr6131559qtx.2.1650259604142; Sun, 17 Apr
- 2022 22:26:44 -0700 (PDT)
+        with ESMTP id S232257AbiDRFru (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 01:47:50 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26FE2FD34;
+        Sun, 17 Apr 2022 22:45:12 -0700 (PDT)
+Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 23I4mrQB011852;
+        Mon, 18 Apr 2022 05:45:12 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
+ subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=pp1; bh=siYszzMsP0pOV5c2PL9cf3FSnweWtrxfQV5lwWoKc7g=;
+ b=eJ6Pcr39bhyAlsbaJaGlwNhjKKf7DgGEhbVxmM/jnLMq/5uK9Ear098nT8iHVisR19px
+ sTm9B5QliU1V8m1/O2zzx1kYxCctM78o388gPFCMCdX8MKhlKFlkUEKLzl+sK7rzD220
+ cBTsuXHkQoTCXSiNvvOC1wiRHkI3g8g1swwxiCSxBk0Y3RTVRu5BBVdNzr23C10QFx4V
+ hlVttIN5Q/v6e1dWurcKGwpilGq/5R5ObO8JY/3IP1OdN4h8bX78j1ew85UhSUYsUB0V
+ 6S2iXlg3qv4Fu5TwtNu2IMVTm9Du1PPGe9OS7uusUTZzhp5j0Nuzb2RSVwk2/n9fvnTb jg== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3fg7d6csnb-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 18 Apr 2022 05:45:11 +0000
+Received: from m0098404.ppops.net (m0098404.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 23I5R7sH005843;
+        Mon, 18 Apr 2022 05:45:11 GMT
+Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3fg7d6csmv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 18 Apr 2022 05:45:11 +0000
+Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
+        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 23I5NmsV022724;
+        Mon, 18 Apr 2022 05:45:09 GMT
+Received: from b06cxnps4075.portsmouth.uk.ibm.com (d06relay12.portsmouth.uk.ibm.com [9.149.109.197])
+        by ppma06ams.nl.ibm.com with ESMTP id 3ffn2hta3t-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 18 Apr 2022 05:45:08 +0000
+Received: from d06av24.portsmouth.uk.ibm.com (mk.ibm.com [9.149.105.60])
+        by b06cxnps4075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 23I5j6bL29360422
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 18 Apr 2022 05:45:06 GMT
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id A0FE942047;
+        Mon, 18 Apr 2022 05:45:06 +0000 (GMT)
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 12B3242042;
+        Mon, 18 Apr 2022 05:45:05 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.71.87])
+        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
+        Mon, 18 Apr 2022 05:45:04 +0000 (GMT)
+Date:   Mon, 18 Apr 2022 11:15:01 +0530
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        riteshh@linux.ibm.com
+Subject: Re: [PATCH v2 2/2] ext4: Test to ensure resize with sparse_super2 is
+ handled correctly
+Message-ID: <Ylz63bzfrTwcKKDK@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+References: <cover.1645549521.git.ojaswin@linux.ibm.com>
+ <30fa381cac3dcc03b6fae4b9db5bf6c9a01f7bf6.1645549521.git.ojaswin@linux.ibm.com>
+ <YlKzHqkZ1GjuIcc9@desktop>
 MIME-Version: 1.0
-References: <20220417174023.3244263-1-amir73il@gmail.com> <20220417174023.3244263-3-amir73il@gmail.com>
- <20220418045226.tjzfcerypfmwybh6@zlang-mailbox>
-In-Reply-To: <20220418045226.tjzfcerypfmwybh6@zlang-mailbox>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 18 Apr 2022 08:26:33 +0300
-Message-ID: <CAOQ4uxign3xse8nQeE7OHz8=99igQir-EM0Tga4G_5uii1PvVw@mail.gmail.com>
-Subject: Re: [PATCH 2/3] common: print hints for reasons of test failures
-To:     Amir Goldstein <amir73il@gmail.com>,
-        Eryu Guan <guaneryu@gmail.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YlKzHqkZ1GjuIcc9@desktop>
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: taeF1MFrIUX3Wlhva-uYt0baUjNP6lRo
+X-Proofpoint-GUID: fTAwdcVHZIQpfUWCfWwYzycNXj_KVe1v
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
+ definitions=2022-04-18_02,2022-04-15_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0
+ lowpriorityscore=0 impostorscore=0 mlxlogscore=999 phishscore=0
+ clxscore=1015 spamscore=0 malwarescore=0 priorityscore=1501 mlxscore=0
+ adultscore=0 suspectscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.12.0-2202240000 definitions=main-2204180032
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 18, 2022 at 7:52 AM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Sun, Apr 17, 2022 at 08:40:22PM +0300, Amir Goldstein wrote:
-> > Introduce helpers _known_issue_before_kernel() and
-> > _fixed_by_kernel_commit() that can be used to hint testers why a test
-> > might be failing and aid in auto-generating of expunge lists for
-> > downstream kernel testing.
-> >
-> > Annotate fix kernel commits for some overlayfs tests and fix kernel
-> > version for some overlayfs tests testing for legacy behavior whose
-> > fixes are not likely to be backported to stable kernels.
-> >
-> > This is modeled after LTP's 'make filter-known-fails' and
-> > print_failure_hints() using struct tst_tag annotations.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+On Sun, Apr 10, 2022 at 06:36:14PM +0800, Eryu Guan wrote:
+> On Tue, Feb 22, 2022 at 11:20:53PM +0530, Ojaswin Mujoo wrote:
+> > Kernel currently doesn't support resize of EXT4 mounted
+> > with sparse_super2 option enabled. Earlier, it used to leave the resize
+> > incomplete and the fs would be left in an inconsistent state, however commit
+> > b1489186cc83[1] fixed this to avoid the fs corruption by clearly returning
+> > -EOPNOTSUPP.
+> > 
+> > Test to ensure that kernel handles resizing with sparse_super2 correctly. Run
+> > resize for multiple iterations because this sometimes leads to kernel crash due
+> > to fs corruption, which we want to detect.
+> > 
+> > Related commit in mainline:
+> > 
+> > [1] commit b1489186cc8391e0c1e342f9fbc3eedf6b944c61
+> > 
+> > 	ext4: add check to prevent attempting to resize an fs with sparse_super2
+> > 
+> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 > > ---
->
-> The _fixed_by_kernel_commit is fine, just not all cases for kernel patch,
-> some of them cover patch from userspace packages. So you might change it
-> to _fixed_by_upstream_commit, then let its arguments point out the commit
-> from which upstream project.
->
+> > 
+> > I would like to add a few comments on the approach followed in this
+> > test:
+> > 
+> > 1. So although we check the return codes of the resize operation for
+> > 	 proper logging, the test is only considered to be passed if fsck
+> > 	 passes after the resize. This is because resizing a patched kernel
+> > 	 always keeps the fs consistent whereas resizing on unpatched kernel
+> > 	 always corrupts the fs. 
+> > 
+> > 2. I've noticed that running mkfs + resize multiple times on unpatched
+> > 	 kernel sometimes results in KASAN reporting use-after-free. Hence, if
+> > 	 we detect the kernel is unpatched (doesn't return EOPNOTSUPP on
+> > 	 resize) we continue iterating to capture this. In this case, we don't
+> > 	 run fsck in each iteration but run it only after all iterations are
+> > 	 complete because _check_scratch_fs exits the test if it fails.
+> > 
+> > 3. In case we detect patched kernel, we stop iterating, and run fsck to
+> > 	 confirm success 
+> > 
+> >  tests/ext4/056     | 108 +++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/056.out |   2 +
+> >  2 files changed, 110 insertions(+)
+> >  create mode 100755 tests/ext4/056
+> >  create mode 100644 tests/ext4/056.out
+> > 
+> > diff --git a/tests/ext4/056 b/tests/ext4/056
+> > new file mode 100755
+> > index 00000000..0f275dea
+> > --- /dev/null
+> > +++ b/tests/ext4/056
+> > @@ -0,0 +1,108 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 IBM. All Rights Reserved.
+> > +#
+> > +# We don't currently support resize of EXT4 filesystems mounted
+> > +# with sparse_super2 option enabled. Earlier, kernel used to leave the resize
+> > +# incomplete and the fs would be left into an incomplete state, however commit
+> > +# b1489186cc83[1] fixed this to avoid the fs corruption by clearly returning
+> > +# -ENOTSUPP.
+> > +#
+> > +# This test ensures that kernel handles resizing with sparse_super2 correctly
+> > +#
+> > +# Related commit in mainline:
+> > +#
+> > +# [1] commit b1489186cc8391e0c1e342f9fbc3eedf6b944c61
+> > +# 	ext4: add check to prevent attempting to resize an fs with sparse_super2
+> > +#
+> > +
+> > +. ./common/preamble
+> > +_begin_fstest auto ioctl resize quick
+> > +
+> > +# real QA test starts here
+> > +
+> > +INITIAL_FS_SIZE=1G
+> > +RESIZED_FS_SIZE=$((2*1024*1024*1024))  # 2G
+> > +ONLINE_RESIZE_BLOCK_LIMIT=$((256*1024*1024))
+> > +
+> > +STOP_ITER=255   # Arbitrary return code
+> > +
+> > +_supported_fs ext4
+> > +_require_scratch_size $(($RESIZED_FS_SIZE/1024))
+> > +_require_test_program "ext4_resize"
+> > +
+> > +log()
+> > +{
+> > +	echo "$seq: $*" >> $seqres.full 2>&1
+> > +}
+> > +
+> > +do_resize()
+> > +{
+> > +	_mkfs_dev -E resize=$ONLINE_RESIZE_BLOCK_LIMIT -O sparse_super2 \
+> > +		$SCRATCH_DEV $INITIAL_FS_SIZE >> $seqres.full 2>&1 \
+> > +		|| _fail "$MKFS_PROG failed. Exiting"
+> > +
+> > +	_scratch_mount || _fail "Failed to mount scratch partition. Exiting"
+> > +
+> > +	local BS=$(_get_block_size $SCRATCH_MNT)
+> > +	local REQUIRED_BLOCKS=$(($RESIZED_FS_SIZE/$BS))
+> > +
+> > +	local RESIZE_RET
+> > +	local EOPNOTSUPP=95
+> > +
+> > +	log "Resizing FS"
+> > +	$here/src/ext4_resize $SCRATCH_MNT $REQUIRED_BLOCKS >> $seqres.full 2>&1
+> > +	RESIZE_RET=$?
+> > +
+> > +	# Test appears to be successful. Stop iterating and confirm if FS is
+> > +	# consistent.
+> > +	if [ $RESIZE_RET = $EOPNOTSUPP ]
+> > +	then
+> > +		log "Resize operation not supported with sparse_super2"
+> > +		log "Threw expected error $RESIZE_RET (EOPNOTSUPP)"
+> > +		return $STOP_ITER
+> > +	fi
+> > +
+> > +	# Test appears to be unsuccessful. Most probably, the fs is corrupt,
+> > +	# iterate a few more times to further stress test this.
+> > +	log "Something is wrong. Output of resize = $RESIZE_RET. \
+> > +		Expected $EOPNOTSUPP (EOPNOTSUPP)"
+> > +
+> > +	# unmount after ioctl sometimes fails with "device busy" so add a small
+> > +	# delay
+> > +	sleep 0.2
+> > +	_scratch_unmount >> $seqres.full 2>&1 \
+> > +		|| _fail "$UMOUNT_PROG failed. Exiting"
+> > +}
+> > +
+> > +run_test()
+> > +{
+> > +	local FSCK_RET
+> > +	local ITERS=8
+> > +	local RET=0
+> > +
+> > +	for i in $(seq 1 $ITERS)
+> > +	do
+> > +		log "----------- Iteration: $i ------------"
+> > +		do_resize
+> > +		RET=$?
+> > +
+> > +		[ "$RET" = "$STOP_ITER" ] && break
+> > +	done
+> > +
+> > +	log "-------- Iterations Complete ---------"
+> > +	log "Checking if FS is in consistent state"
+> > +	_check_scratch_fs
+> 
+> _check_scratch_fs will exit the test on failure and print error message,
+> which will break the golden image, so there's no need to check fsck ret.
+> 
+> > +	FSCK_RET=$?
+> > +
+> > +	[ "$FSCK_RET" -ne "0" ] && \
+> > +		echo "fs corrupt. Check $seqres.full for more details"
+> > +
+> > +	return $FSCK_RET
+> 
+> So I removed above hunk on commit.
+> 
+> Thanks for the test! And my apology to the HUGE delay on review..
+No worries Eryu, thanks a lot for the review :)
 
-I thought about it too and I agree we should have _fixed_by_upstream_commit
-In fact, LTP tests are annotated like this: {"linux-git", "8edc6e1688fc"}.
-
-But I decided that even if and when we add _fixed_by_upstream_commit
-we had better leave the wrapper _fixed_by_kernel_commit for brevity
-because it is by far going to be the most used annotation.
-I can add this helper now or it could be added later.
-
-> The _known_issue_before_kernel() is a little ... hard to say. If it's only
-> for one base line of a project (e.g. mainline), then it make sense. But if
-> for lots of downstream projects, the version number will not totally
-> different. Some downstream projects might backport lots of upstream patches,
-> without change its base verion.
->
-> If it's just used as a hint output, then it more likes a weak version of
-> _fixed_by_kernel_commit. When we can't make sure a case cover which specified
-> commits, then we use a big version number directly.
->
-> If it doesn't aim to be a hint output simply, then we face the problem I
-> said above, it just can be used for versions from one base line of a project.
-
-That's exactly what it is. A hint.
-Note that I used the release tag as the argument,
-so the only difference from _fixed_by_kernel_commit is the hint text.
-could have also used:
-  _fixed_by_kernel_commit v4.19 "overlayfs stacked file operations"
-Anyway, if one is testing a downstream kernel and sees a hint like this:
-
-You _MAY_ be missing a kernel fix...
-You _MAY_ be hit by a known issue on kernel < ...
-
-All it is is a hint. Same as in LTP, which is used to test downstream kernels.
-
-And if downstream kernel did backport the fix or the entire feature,
-then there is a good chance that the test will pass and hint would not be
-displayed at all.
-
-Thanks,
-Amir.
+Regards,
+Ojaswin
+> 
+> Thanks,
+> Eryu
+> 
+> > +}
+> > +
+> > +echo "Silence is golden"
+> > +run_test
+> > +status=$?
+> > +
+> > +exit
+> > diff --git a/tests/ext4/056.out b/tests/ext4/056.out
+> > new file mode 100644
+> > index 00000000..6142fcd2
+> > --- /dev/null
+> > +++ b/tests/ext4/056.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 056
+> > +Silence is golden
+> > -- 
+> > 2.27.0
