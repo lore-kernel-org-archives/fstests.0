@@ -2,193 +2,143 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69E5CC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 17:04:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA654C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 17:07:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346817AbiDRRGu (ORCPT
+        id S245741AbiDRRKV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Apr 2022 13:06:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50428 "EHLO
+        Mon, 18 Apr 2022 13:10:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346818AbiDRRGr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 13:06:47 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2E39B2F3A8
-        for <fstests@vger.kernel.org>; Mon, 18 Apr 2022 10:04:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1650301447;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=WCo/QGFLBjQLX8Ek75RyAerrNZArOWt6dKMzwwveb5s=;
-        b=Fn/w45Uq0i7koSoOY3gBzmH6IJWWwGbXsvAVaniGo82spL0LhJWuFgY4EVXAAjW7EV6+Zv
-        C9gL+UAqBe3MTIQ/L8FOuJV1ExhZIosiMhFAHkKlX8ig07x7h0mMj4gKQcmnQhh0tuBMZy
-        or4xMy3V9pwoMVqlZckxhzVNtnuBZZ0=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-610-HXyen8LSNduKblo7SR30nA-1; Mon, 18 Apr 2022 13:04:04 -0400
-X-MC-Unique: HXyen8LSNduKblo7SR30nA-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S238480AbiDRRKV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 13:10:21 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 243C0201B2
+        for <fstests@vger.kernel.org>; Mon, 18 Apr 2022 10:07:41 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id CE5CD833962;
-        Mon, 18 Apr 2022 17:04:03 +0000 (UTC)
-Received: from zlang-laptop.redhat.com (ovpn-12-143.pek2.redhat.com [10.72.12.143])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 739E740D2826;
-        Mon, 18 Apr 2022 17:04:01 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org, david@fromorbit.com, sandeen@redhat.com
-Subject: [PATCH v3 2/2] xfs: test xfsdump when an inode < root inode is present
-Date:   Tue, 19 Apr 2022 01:03:26 +0800
-Message-Id: <20220418170326.425762-3-zlang@redhat.com>
-In-Reply-To: <20220418170326.425762-1-zlang@redhat.com>
-References: <20220418170326.425762-1-zlang@redhat.com>
+        by ams.source.kernel.org (Postfix) with ESMTPS id CC124B80E5B
+        for <fstests@vger.kernel.org>; Mon, 18 Apr 2022 17:07:39 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BCE9C385A7;
+        Mon, 18 Apr 2022 17:07:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1650301658;
+        bh=RAWsL6aVod1FKyjzsv4EUfwmOU5Z/edFDiU9+E2XAaA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=b8j7Y7qypgYjkqfSZaWiToH2369MysSG/Fm58MGvGoco5UFdFGblJsozWV4yUzfUt
+         grjVlU2faatVKCoixr+YM2sOIUMXmkwwQHdyi0lioiSNgX/7BTHAixud06Wd7fMD3y
+         uoLpQ+AdcNUoLON1F9eBIDrbpJzowdUsOR4NBhh4xhPINIfTLHY+ZDUub62Ul3aRvb
+         GELT1pqMY5xJuGyjGt/2HBw+Pb4dGuF8PagKeyBZ14sCHaWg4ztBLsKlRVeZfYQIA/
+         D2JZ6/RO7KcaH48upAMJIVOkoWkn8ZKcuvX0fy9J9+lJ+BAXPc5Qu0XRZ/JCOE4jR4
+         scR66db+KluYA==
+Date:   Mon, 18 Apr 2022 10:07:37 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH] generic/019: kill background processes on interrupt
+Message-ID: <20220418170737.GE17014@magnolia>
+References: <20220411054833.2157779-1-david@fromorbit.com>
+ <20220412145942.0a268875@suse.de>
+ <20220412142500.ubkbw2fvbxowzo5p@zlang-mailbox>
+ <20220413002656.GL1609613@dread.disaster.area>
+ <20220414162544.kiesx5muc5ddtbzd@zlang-mailbox>
+ <20220414191643.5udsx6kdarlumyfn@zlang-mailbox>
+ <CAOQ4uxhA7pnfRE6sSQkKOAJRDP1WmNWZBj7T_THQEjYrD7SaxQ@mail.gmail.com>
+ <20220416141126.wwzvkzyzbvjczfae@zlang-mailbox>
+ <CAOQ4uxg8G1AkcyzpALy8Nc7duuENCYatLOqY9vF6PL5maM4NWg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.11.54.2
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxg8G1AkcyzpALy8Nc7duuENCYatLOqY9vF6PL5maM4NWg@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Sandeen <sandeen@redhat.com>
+On Sat, Apr 16, 2022 at 08:13:59PM +0300, Amir Goldstein wrote:
+> On Sat, Apr 16, 2022 at 5:11 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Sat, Apr 16, 2022 at 12:20:22PM +0300, Amir Goldstein wrote:
+> > > On Fri, Apr 15, 2022 at 12:56 PM Zorro Lang <zlang@redhat.com> wrote:
+> > > >
+> > > > On Fri, Apr 15, 2022 at 12:25:44AM +0800, Zorro Lang wrote:
+> > > > > On Wed, Apr 13, 2022 at 10:26:56AM +1000, Dave Chinner wrote:
+> > > > > > On Tue, Apr 12, 2022 at 10:25:00PM +0800, Zorro Lang wrote:
+> > > > > > > On Tue, Apr 12, 2022 at 02:59:42PM +0200, David Disseldorp wrote:
+> > > > > > > > On Mon, 11 Apr 2022 15:48:33 +1000, Dave Chinner wrote:
+> > > > > > > >
+> > > > > > > > > From: Dave Chinner <dchinner@redhat.com>
+> > > > > > > > >
+> > > > > > > > > If you ctrl-c generic/019, it leaves fsstress processes running.
+> > > > > > > > > Kill them in the cleanup function so that they don't have to be
+> > > > > > > > > manually killed after interrupting the test.
+> > > > > > > > >
+> > > > > > > > > While touching the _cleanup() function, make it do everything that
+> > > > > > > > > the generic _cleanup function it overrides does and fix the
+> > > > > > > > > indenting.
+> > > > > > > > >
+> > > > > > > > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > > > > > > > > ---
+> > > > > > > > >  tests/generic/019 | 6 ++++--
+> > > > > > > > >  1 file changed, 4 insertions(+), 2 deletions(-)
+> > > > > > > > >
+> > > > > > > > > diff --git a/tests/generic/019 b/tests/generic/019
+> > > > > > > > > index db56dac1..cda107f4 100755
+> > > > > > > > > --- a/tests/generic/019
+> > > > > > > > > +++ b/tests/generic/019
+> > > > > > > > > @@ -53,8 +53,10 @@ stop_fail_scratch_dev()
+> > > > > > > > >  # Override the default cleanup function.
+> > > > > > > > >  _cleanup()
+> > > > > > > > >  {
+> > > > > > > > > -    disallow_fail_make_request
+> > > > > > > > > -    rm -f $tmp.*
+> > > > > > > > > +     kill $fs_pid $fio_pid &> /dev/null
+> > > > > > > > > +     disallow_fail_make_request
+> > > > > > > > > +     cd /
+> > > > > > > > > +     rm -r -f $tmp.*
+> > > > > > > > >  }
+> > > > > > > > >
+> > > > > > > > >  RUN_TIME=$((20+10*$TIME_FACTOR))
+> > > > > > > >
+> > > > > > > > Might be worth unset'ing the "fs_pid" and "fio_pid" variables after the
+> > > > > > > > wait, but should be fine as-is:
+> > > > > > >
+> > > > > > > I agree. Better to avoid killing other system processes. Or how about this place
+> > > > > > > does (avoid killing system useful processes):
+> > > > > > > $KILLALL_PROG -q $FSSTRESS_PROG
+> > > > > > > $KILLALL_PROG -q $FIO_PROG
+> > > > > > >
+> > > > > > > Another picky question is, do we need to use a while loop checking, until the
+> > > > > > > processes really get killed? :)
+> > > > > >
+> > > > > > Do we really need to paint the bikeshed over how best to kill a
+> > > > > > process? I don't have time to do that, this is just a drive-by fix
+> > > > > > that works for me....
+> > > > >
+> > > > > Sure Dave:) The while loop checking is a little picky, I just ask what do you think, no
+> > > > > objection if you don't like that. Due to quick cleanup and exit is a good reason too.
+> > > > >
+> > > > > I think it might be worth doing "$KILLALL_PROG -q $FSSTRESS_PROG $FIO_PROG" at least, to
+> > > > > avoid killing other processes might be useful.
+> > >
+> > > That has much more likelihood to kill processes not spawn by the test
+> > > then pid wraparound.
+> >
+> > Yes, you're right. But generally we don't run xfstests with other testing, to avoid other
+> > testing break dmesg checking of xfstests. (Is there a way to help different process get
+> > independent dmesg out? If there's, I'm very glad to know how to do that, then I can run
+> > xfstests concurrently in one system:)
+> >
+> > Anyway, we can choose another way -- "unset'ing the "fs_pid" and "fio_pid" variables
+> > after the wait", both are fine to me.
+> >
+> 
+> Fine by me
 
-This tests a longstanding bug where xfsdumps are not properly
-created when an inode is present on the filesytsem which has
-a lower number than the root inode.
+The change to clear the fs_pid/fio_pid variables was not correct and now
+causes generic/019 to fail.  I'll send a patch shortly.
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/999     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/999.out | 47 +++++++++++++++++++++++++++++++++++
- 2 files changed, 109 insertions(+)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
+--D
 
-diff --git a/tests/xfs/999 b/tests/xfs/999
-new file mode 100755
-index 00000000..9b1f7f5b
---- /dev/null
-+++ b/tests/xfs/999
-@@ -0,0 +1,62 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Red Hat, Inc. All Rights Reserved.
-+#
-+# FS QA Test No. 999
-+#
-+# Create a filesystem which contains an inode with a lower number
-+# than the root inode. Ensure that xfsdump/xfsrestore handles this.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick dump
-+
-+# Import common functions.
-+. ./common/dump
-+
-+_supported_fs xfs
-+_require_scratch
-+
-+# A large stripe unit will put the root inode out quite far
-+# due to alignment, leaving free blocks ahead of it.
-+_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1
-+
-+# Mounting /without/ a stripe should allow inodes to be allocated
-+# in lower free blocks, without the stripe alignment.
-+_scratch_mount -o sunit=0,swidth=0
-+
-+root_inum=$(stat -c %i $SCRATCH_MNT)
-+
-+# Consume space after the root inode so that the blocks before
-+# root look "close" for the next inode chunk allocation
-+$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
-+
-+# And make a bunch of inodes until we (hopefully) get one lower
-+# than root, in a new inode chunk.
-+echo "root_inum: $root_inum" >> $seqres.full
-+for i in $(seq 0 4096) ; do
-+	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
-+	touch $fname
-+	inum=$(stat -c "%i" $fname)
-+	[[ $inum -lt $root_inum ]] && break
-+done
-+
-+echo "created: $inum" >> $seqres.full
-+
-+[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
-+
-+# Now try a dump and restore. Cribbed from xfs/068
-+_create_dumpdir_stress
-+
-+echo -n "Before: " >> $seqres.full
-+_count_dumpdir_files | tee $tmp.before >> $seqres.full
-+
-+# filter out the file count, it changes as fsstress adds new operations
-+_do_dump_restore | sed -e "/entries processed$/s/[0-9][0-9]*/NUM/g"
-+
-+echo -n "After: " >> $seqres.full
-+_count_restoredir_files | tee $tmp.after >> $seqres.full
-+diff -u $tmp.before $tmp.after
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-new file mode 100644
-index 00000000..f6ab75d2
---- /dev/null
-+++ b/tests/xfs/999.out
-@@ -0,0 +1,47 @@
-+QA output created by 999
-+Creating directory system to dump using fsstress.
-+
-+-----------------------------------------------
-+fsstress : -f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10
-+-----------------------------------------------
-+xfsdump|xfsrestore ...
-+xfsdump  -s DUMP_SUBDIR - SCRATCH_MNT | xfsrestore  - RESTORE_DIR
-+xfsrestore: using file dump (drive_simple) strategy
-+xfsrestore: searching media for dump
-+xfsrestore: examining media file 0
-+xfsrestore: dump description: 
-+xfsrestore: hostname: HOSTNAME
-+xfsrestore: mount point: SCRATCH_MNT
-+xfsrestore: volume: SCRATCH_DEV
-+xfsrestore: session time: TIME
-+xfsrestore: level: 0
-+xfsrestore: session label: ""
-+xfsrestore: media label: ""
-+xfsrestore: file system ID: ID
-+xfsrestore: session id: ID
-+xfsrestore: media ID: ID
-+xfsrestore: searching media for directory dump
-+xfsrestore: reading directories
-+xfsrestore: NUM directories and NUM entries processed
-+xfsrestore: directory post-processing
-+xfsrestore: restoring non-directory files
-+xfsrestore: restore complete: SECS seconds elapsed
-+xfsrestore: Restore Status: SUCCESS
-+xfsdump: using file dump (drive_simple) strategy
-+xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
-+xfsdump: dump date: DATE
-+xfsdump: session id: ID
-+xfsdump: session label: ""
-+xfsdump: ino map <PHASES>
-+xfsdump: ino map construction complete
-+xfsdump: estimated dump size: NUM bytes
-+xfsdump: /var/xfsdump/inventory created
-+xfsdump: creating dump session media file 0 (media 0, file 0)
-+xfsdump: dumping ino map
-+xfsdump: dumping directories
-+xfsdump: dumping non-directory files
-+xfsdump: ending media file
-+xfsdump: media file size NUM bytes
-+xfsdump: dump size (non-dir files) : NUM bytes
-+xfsdump: dump complete: SECS seconds elapsed
-+xfsdump: Dump Status: SUCCESS
--- 
-2.31.1
-
+> Thanks,
+> Amir.
