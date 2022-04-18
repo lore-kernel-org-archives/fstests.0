@@ -2,187 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8982FC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 05:05:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E220C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 05:27:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229962AbiDRFIK (ORCPT
+        id S231215AbiDRF3p (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Apr 2022 01:08:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38466 "EHLO
+        Mon, 18 Apr 2022 01:29:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236588AbiDRFIJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 01:08:09 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 34EE6B7F7
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 22:05:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1650258331;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=AaJubL/awWlezeUmiIM6Q3PJD9+BpcOS/loxKeyEPYQ=;
-        b=TRTL91qrqc26nkmhApM73tCp99pKtzeyWzeFvPCbDDV9ASwguzdiXnba5an+nV+JWwXK0a
-        sSbxsgn1XgknymyVQMVtIn8fD30L1nkxa+EdQH+OJtPdDH1P0U1a7Gt3iTwYv6W90AjQfL
-        vu5iidI9BoZ+pI9Xul1J0APHuxNB8Fw=
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
- [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-606-WSqM0OkgORWH1h4PaY9eZg-1; Mon, 18 Apr 2022 01:05:27 -0400
-X-MC-Unique: WSqM0OkgORWH1h4PaY9eZg-1
-Received: by mail-qt1-f198.google.com with SMTP id t20-20020a05622a01d400b002f1f4b6d6d0so1973685qtw.21
-        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 22:05:27 -0700 (PDT)
+        with ESMTP id S229478AbiDRF3l (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 01:29:41 -0400
+Received: from mail-qt1-x82d.google.com (mail-qt1-x82d.google.com [IPv6:2607:f8b0:4864:20::82d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0068012ADA
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 22:26:44 -0700 (PDT)
+Received: by mail-qt1-x82d.google.com with SMTP id f14so966383qtq.1
+        for <fstests@vger.kernel.org>; Sun, 17 Apr 2022 22:26:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=/b8FS3yxOoIx5u9AhYza/WgumV0+OqzND5muTmAogKU=;
+        b=U2dReivUq3ZRJbfCPUtJr6T7IDzhy+HvbaUmYYidrQGGFWzeX19kIuNhFqnh/UM6TJ
+         SDX7Tyw3/6qL04dDr5RoF8Rtoe0Ke6YflDo3LddKsbckwWTaTDLjEktL3NpuSyXemoZM
+         UJXZgn0Hd/fs7A0D7EoricZm3DwYrUHyCs0xaOCKCCEEpc558364rK6omUIRzWxnjNjV
+         rgqiC74y5HAlRxaJkYjJ//3t5T8UB/eGdhqoAthgES3Mqje8y7KsNH8+bEH6fyYMA6BV
+         rS791F1D53PjQ542GF2+Qbo1Y/TtB+XDuhYb4EP6u32DSqe1Munjw72IWL1tNlv8Xnap
+         rm5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=AaJubL/awWlezeUmiIM6Q3PJD9+BpcOS/loxKeyEPYQ=;
-        b=F7OjJ9cBo6q4KOjK/9T55KlPmCqf8LhYSr1efhX5L/Dwb6QbaxTK3LKM9qX4DfBO8Z
-         gV7y3FWQZg72fIdUn4FlGGNU6cSrHBvVNp60YsAX5FREXwVjnYWq9Eh0YUSPQo6V/LSe
-         uulF57xx68MeBDTG1exj1h+H67hr5W0Ag0iUwt+SjXyiTgHW2Yss9XbtrQgYVwxN953g
-         mw9U5QIFrEhOhEyYIAw+nOyjAmjKMkyQzNYVMWUZPmk9s20TuRsTKq7Bwj1/FanQ8/cy
-         lPnEF+dahloJplKYD3+xsAZO9jFbeTWY5oALpx9AIYVbUkcqwAUn3P/7VbDIHiKp87nY
-         ZCQA==
-X-Gm-Message-State: AOAM532udt9nCnrkuYSUmDraXugGRqONjFgDJNBZTLpyrNWq6NgoGN6o
-        t3wpy74A0iRhAPmjTYfoZ3vC7HugRgU9+dMcyXt+yRhiX0XyhEJHveEYvM1cu/w5lEFCCJZRqog
-        C10lHeiBL+V8KZiM0sQ==
-X-Received: by 2002:a37:6412:0:b0:69e:68cf:d889 with SMTP id y18-20020a376412000000b0069e68cfd889mr5392690qkb.443.1650258327047;
-        Sun, 17 Apr 2022 22:05:27 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwCbRUmbvnaUxQKssKz6NB2Bf8OlWReTcFCNp6wAGcPJwvpDN92/L8afti0dZLxbHaTZ7r/rQ==
-X-Received: by 2002:a37:6412:0:b0:69e:68cf:d889 with SMTP id y18-20020a376412000000b0069e68cfd889mr5392680qkb.443.1650258326808;
-        Sun, 17 Apr 2022 22:05:26 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g9-20020ac85d49000000b002f1fbe305e7sm1863324qtx.80.2022.04.17.22.05.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Apr 2022 22:05:26 -0700 (PDT)
-Date:   Mon, 18 Apr 2022 13:05:20 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] common: add run option to skip tests for known issues
-Message-ID: <20220418050520.h4ufi2qwz6ozpczp@zlang-mailbox>
-Mail-Followup-To: Amir Goldstein <amir73il@gmail.com>,
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=/b8FS3yxOoIx5u9AhYza/WgumV0+OqzND5muTmAogKU=;
+        b=5ZbEGSybZgjn7+0e25JrkVw763h5IO1vQ/AQ/MEZQijSjRPr1b/MAQMUCVngK2KaYW
+         q2/zppSPA2blqHQKb1R7GlD9Owqcf17m3kB706dMN0h/KEftllRD56Mq1FIiXvXpslHo
+         GJRRjWPIB5RfrU+LllsscTV0FuySFkjJn2oevG+LP6ShL8rjryVfvbF+dbhl4ElhsqC6
+         /8B7qGCe4SiOogiqXoofN5s7xiiQwjN2uFm0AhsbrimLFLh9eaU4zK5t1o57g/OXUdkV
+         XewIKuhSBP/+fly1b7j7eyYrYo0PppfxhuWelbg05nnw/HlUpoLoHMCQYelmKvo5awe/
+         ymNQ==
+X-Gm-Message-State: AOAM53112K5/gCsQMWLc3durgf4BAeXJl9WtlS59ZL6/VV92GcRVQvsJ
+        WN5BFrqu1VZKQAPDMFcUoy8Q24SlBEIVKXP2oPUhqw5KH8w=
+X-Google-Smtp-Source: ABdhPJzD8UrP9tLAMivLD3eeb3wt8pZTUEolv4KACD6VstEq9d1KPJQsXVTKVokIBlwBtdQivMDwAW0gAnDpR8+NUsU=
+X-Received: by 2002:ac8:5dcb:0:b0:2e1:ce48:c186 with SMTP id
+ e11-20020ac85dcb000000b002e1ce48c186mr6131559qtx.2.1650259604142; Sun, 17 Apr
+ 2022 22:26:44 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220417174023.3244263-1-amir73il@gmail.com> <20220417174023.3244263-3-amir73il@gmail.com>
+ <20220418045226.tjzfcerypfmwybh6@zlang-mailbox>
+In-Reply-To: <20220418045226.tjzfcerypfmwybh6@zlang-mailbox>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Mon, 18 Apr 2022 08:26:33 +0300
+Message-ID: <CAOQ4uxign3xse8nQeE7OHz8=99igQir-EM0Tga4G_5uii1PvVw@mail.gmail.com>
+Subject: Re: [PATCH 2/3] common: print hints for reasons of test failures
+To:     Amir Goldstein <amir73il@gmail.com>,
         Eryu Guan <guaneryu@gmail.com>,
         "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
-References: <20220417174023.3244263-1-amir73il@gmail.com>
- <20220417174023.3244263-4-amir73il@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220417174023.3244263-4-amir73il@gmail.com>
+        Luis Chamberlain <mcgrof@kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 17, 2022 at 08:40:23PM +0300, Amir Goldstein wrote:
-> Some tests are written before a fix is merged upstream and some tests
-> are written without a known available fix at all. Such is the case with
-> test overlay/061.
-> 
-> Introduce a helper _known_issues_on_fs() which can be used to document
-> this situation and print a hint on failure.
-> The helper supports specifying specifc fs with the known issue for
-> generic tests as well as the notation ^FS1 ^FS2 to indicate a known issue
-> on all filesystems expect for FS1 FS2.
-> 
-> Setting the variable SKIP_KNOWN_ISSUES=yes, will cause all tests
-> annotated as known issues for the tested fs to be skipped.
-> 
-> A future improvement may provide a run option to skip tests based on
-> _known_issues_before_kernel when running the tests on an older kernel
-> version.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  README            |  2 ++
->  common/rc         | 16 +++++++++++++++-
->  tests/overlay/061 |  2 ++
->  3 files changed, 19 insertions(+), 1 deletion(-)
-> 
-> diff --git a/README b/README
-> index 7da66cb6..8abc3840 100644
-> --- a/README
-> +++ b/README
-> @@ -241,6 +241,8 @@ Misc:
->     this option is supported for all filesystems currently only -overlay is
->     expected to run without issues. For other filesystems additional patches
->     and fixes to the test suite might be needed.
-> + - set SKIP_KNOWN_ISSUES=yes to skip tests for bug without a known fix.
-> +   Those tests are annotated with _known_issue_on_fs helper.
->  
->  ______________________
->  USING THE FSQA SUITE
-> diff --git a/common/rc b/common/rc
-> index 2e9dc408..3cf60a7e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1597,8 +1597,23 @@ _supported_fs()
->  		_notrun "not suitable for this filesystem type: $FSTYP"
->  }
->  
-> +_known_issue_on_fs()
-> +{
-> +	# Only "supported" fs have the known issue
-> +	_check_supported_fs $* || return
-> +
-> +	if [ "$SKIP_KNOWN_ISSUES" = "yes" ]; then
-> +		_notrun "known issue for this filesystem type: $FSTYP"
-> +	fi
-> +
-> +	echo "HINT: You _MAY_ be hit by a known issue for filesystem type $FSTYP." >> $seqres.hints
-> +	echo >> $seqres.hints
-> +}
-> +
->  _known_issue_before_kernel()
->  {
-> +	# TODO: don't run if $SKIP_KNOWN_ISSUES and kernel version < $1
-> +
+On Mon, Apr 18, 2022 at 7:52 AM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Sun, Apr 17, 2022 at 08:40:22PM +0300, Amir Goldstein wrote:
+> > Introduce helpers _known_issue_before_kernel() and
+> > _fixed_by_kernel_commit() that can be used to hint testers why a test
+> > might be failing and aid in auto-generating of expunge lists for
+> > downstream kernel testing.
+> >
+> > Annotate fix kernel commits for some overlayfs tests and fix kernel
+> > version for some overlayfs tests testing for legacy behavior whose
+> > fixes are not likely to be backported to stable kernels.
+> >
+> > This is modeled after LTP's 'make filter-known-fails' and
+> > print_failure_hints() using struct tst_tag annotations.
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+>
+> The _fixed_by_kernel_commit is fine, just not all cases for kernel patch,
+> some of them cover patch from userspace packages. So you might change it
+> to _fixed_by_upstream_commit, then let its arguments point out the commit
+> from which upstream project.
+>
 
-As I said in last patch review, it's only for one kernel base line, it might cause
-downstream kernel testing can't run a case, even if it had backported the patches.
+I thought about it too and I agree we should have _fixed_by_upstream_commit
+In fact, LTP tests are annotated like this: {"linux-git", "8edc6e1688fc"}.
 
->  	echo "HINT: You _MAY_ be hit by a known issue on kernel version < $1." >> $seqres.hints
->  	echo >> $seqres.hints
->  }
-> @@ -4929,7 +4944,6 @@ _require_kernel_config()
->  	_has_kernel_config $1 || _notrun "Installed kernel not built with $1"
->  }
->  
-> -
->  init_rc
->  
->  ################################################################################
-> diff --git a/tests/overlay/061 b/tests/overlay/061
-> index b80cf5a0..36be3391 100755
-> --- a/tests/overlay/061
-> +++ b/tests/overlay/061
-> @@ -22,6 +22,8 @@ _begin_fstest posix copyup
->  
->  # real QA test starts here
->  _supported_fs overlay
-> +_known_issue_on_fs overlay
+But I decided that even if and when we add _fixed_by_upstream_commit
+we had better leave the wrapper _fixed_by_kernel_commit for brevity
+because it is by far going to be the most used annotation.
+I can add this helper now or it could be added later.
 
-If it's a overlay case, it's absolutely cover an overlay known issue at first.
-Even if it hit a mm or underlying fs bug, the _known_issue_on_fs is helpless
-for that.
+> The _known_issue_before_kernel() is a little ... hard to say. If it's only
+> for one base line of a project (e.g. mainline), then it make sense. But if
+> for lots of downstream projects, the version number will not totally
+> different. Some downstream projects might backport lots of upstream patches,
+> without change its base verion.
+>
+> If it's just used as a hint output, then it more likes a weak version of
+> _fixed_by_kernel_commit. When we can't make sure a case cover which specified
+> commits, then we use a big version number directly.
+>
+> If it doesn't aim to be a hint output simply, then we face the problem I
+> said above, it just can be used for versions from one base line of a project.
 
-I can understand above 2 patches, but this patch looks weird to me. We can
-give a hint to downstream testing (from upstream commit side). But deal with
-known issues, that's another story. I'd like to let testers from different
-downstream kernels to deal with their known issues checking by themselves,
-don't depend on upstream fstests for all.
+That's exactly what it is. A hint.
+Note that I used the release tag as the argument,
+so the only difference from _fixed_by_kernel_commit is the hint text.
+could have also used:
+  _fixed_by_kernel_commit v4.19 "overlayfs stacked file operations"
+Anyway, if one is testing a downstream kernel and sees a hint like this:
+
+You _MAY_ be missing a kernel fix...
+You _MAY_ be hit by a known issue on kernel < ...
+
+All it is is a hint. Same as in LTP, which is used to test downstream kernels.
+
+And if downstream kernel did backport the fix or the entire feature,
+then there is a good chance that the test will pass and hint would not be
+displayed at all.
 
 Thanks,
-Zorro
-
-> +
->  _require_scratch
->  _require_xfs_io_command "open"
->  
-> -- 
-> 2.35.1
-> 
-
+Amir.
