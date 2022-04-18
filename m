@@ -2,212 +2,102 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 457A4C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 09:31:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BA51C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Apr 2022 10:04:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231675AbiDRJdh (ORCPT
+        id S233200AbiDRKGj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Apr 2022 05:33:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51356 "EHLO
+        Mon, 18 Apr 2022 06:06:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231566AbiDRJdg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 05:33:36 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6491916584;
-        Mon, 18 Apr 2022 02:30:58 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 18A821F37C;
-        Mon, 18 Apr 2022 09:30:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1650274257; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=/p70JFD0Fe7lmvydjy4d/JjnOV5bQGWMkZUGN/+A1VE=;
-        b=qTVZyheto8t/95lo3lMqz8Wv41solwW3qvEfK588AoXkMqbXZ3jP192tVqw+Lr6CBy/fnZ
-        H4kaizJQA2fuiPxKryXuRHaiEHOAbUvSJJ0LaKvOjZnrudi1B93dCXblbKhxX6G7jK+YDk
-        iPG0HgV5u5ts3cRagZogWQBZPLtnMsU=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1650274257;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=/p70JFD0Fe7lmvydjy4d/JjnOV5bQGWMkZUGN/+A1VE=;
-        b=5H4XC0lXKvuhuPrPq9BQ7t4TKBMb4CoPQVtJsGYGkRHA5a5sS4X+kASv5vatbO8gvfqiiD
-        i0Xzg9Saro78mrCg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id B4BFA13A9B;
-        Mon, 18 Apr 2022 09:30:56 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id bw5hKNAvXWKAAQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Mon, 18 Apr 2022 09:30:56 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 70b712ec;
-        Mon, 18 Apr 2022 09:31:24 +0000 (UTC)
-Date:   Mon, 18 Apr 2022 10:31:24 +0100
-From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] ceph/001: add extra check for remote object copies
-Message-ID: <Yl0v7LNQ2tH6vwoR@suse.de>
-References: <20220323160925.7142-1-lhenriques@suse.de>
- <2ddf7fd69e03409b0a868e0e3ff21f1491cb41ae.camel@kernel.org>
+        with ESMTP id S229464AbiDRKGi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Apr 2022 06:06:38 -0400
+Received: from mail-qt1-x835.google.com (mail-qt1-x835.google.com [IPv6:2607:f8b0:4864:20::835])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A1B917A84
+        for <fstests@vger.kernel.org>; Mon, 18 Apr 2022 03:03:59 -0700 (PDT)
+Received: by mail-qt1-x835.google.com with SMTP id bb21so792500qtb.3
+        for <fstests@vger.kernel.org>; Mon, 18 Apr 2022 03:03:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=I0YKtm3gh+WXO1p1Hd10glyeotwvydOCNnVtwUJHcHQ=;
+        b=Kzq8fHWEASSTgysB8OUEGYKetGDjMmgSYv1ZO+010OyLF6SSS4FkCO1jMoGxDK/Mjs
+         UMpbKREgImSKwDNKp5ghv+mZIIGbv2RVbcX717O/hvsmCmbl4lgnT3LF+3h8+r/uACQM
+         Rbl8hbrl0YnCsYENTNtgh1hr84shXRtigBIZSivFYh8L7qRyZE2cWAs9pR4YEVf3ziVi
+         xnx/sPeIyztnUtLNasXkUgKvEGOJhEQQeZyC4v7wsJJxpt65+a9M4jg4RnIL1kJrchNK
+         JBIriXqkRJd+1lFkEureYin2203lZM63FdWSD8i45gVoH+HCE8OoOcLL49VZWlvtyH0n
+         Vxfw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=I0YKtm3gh+WXO1p1Hd10glyeotwvydOCNnVtwUJHcHQ=;
+        b=hvIg07amnlF54AYUBsTXsNW1t1Q0tZI0NkA7SxTy74jqn1fnC4FulJ7qSx+LrYyt60
+         x0iDoOmN/3D271x0kzvZAH6XvHbimArfLmbrGlJP+jA8X7tH5wCnqRS9qpFOuPJ4R/ii
+         uIC3I5z7dtfj/wa59hHgTs42pvoCE/WJ4MVWjpnEZmxZr60Krn5Bw+z/3hhfeenyDpdW
+         cPHtg0hL48kh/7i3xd1uSMCRFXlMpKHTLVCgMp3XIj9YnuFS7LBe8mJ/EkBzVHJO0Dpx
+         fNqY/QcGndug/OF4IzMeUTlYpGhOryDXAG483kdVZ1iklUXtwWWVGlzcFf9npvyX5iXw
+         T+hg==
+X-Gm-Message-State: AOAM530nFayrU6CK6fdqsJTeU9D5a73rPtwCdO8KUUW4wx+fI0Napg+A
+        0PdVTvauRmN6PF0jjUQJYCGSQZ31CnJ0vL/tfvg=
+X-Google-Smtp-Source: ABdhPJx9nR5PJIhi11XWdTbvCqEUxdtlRLjnJLtTpqvrQA11oLqvK1B+YdY+4zi2oeU17FH3Jodj88zkiFtI3Ama8ew=
+X-Received: by 2002:ac8:5dcb:0:b0:2e1:ce48:c186 with SMTP id
+ e11-20020ac85dcb000000b002e1ce48c186mr6566118qtx.2.1650276238308; Mon, 18 Apr
+ 2022 03:03:58 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <2ddf7fd69e03409b0a868e0e3ff21f1491cb41ae.camel@kernel.org>
+References: <20220417174023.3244263-1-amir73il@gmail.com> <20220417174023.3244263-4-amir73il@gmail.com>
+ <20220418050520.h4ufi2qwz6ozpczp@zlang-mailbox> <CAOQ4uxiRA9pY1LEC8EBizYnOO1k=15dXKLsO6VdVOPwx3JN91w@mail.gmail.com>
+ <20220418090609.34ynpe2fbi4ptxgp@zlang-mailbox>
+In-Reply-To: <20220418090609.34ynpe2fbi4ptxgp@zlang-mailbox>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Mon, 18 Apr 2022 13:03:46 +0300
+Message-ID: <CAOQ4uxiUPQ7vGwtv5FhhwmRpGTB2ULPSTPwvxDwak8bnmeiDmw@mail.gmail.com>
+Subject: Re: [PATCH 3/3] common: add run option to skip tests for known issues
+To:     Amir Goldstein <amir73il@gmail.com>,
+        Eryu Guan <guaneryu@gmail.com>,
+        "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 15, 2022 at 07:53:19AM -0400, Jeff Layton wrote:
-> On Wed, 2022-03-23 at 16:09 +0000, Luís Henriques wrote:
-> > Ceph kernel client now has a facility to check stats for certain operations.
-> > One of these operations is the 'copyfrom', the operation that is used to offload
-> > to the OSDs the copy of objects from, for example, the copy_file_range()
-> > syscall.
-> > 
-> > This patch changes ceph/001 to add an extra check to verify that the copies
-> > performed by the test are _really_ remote copies and not simple read+write
-> > operations.
-> > 
-> > Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> > ---
-> >  common/ceph    | 10 ++++++++
-> >  tests/ceph/001 | 66 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 76 insertions(+)
-> > 
-> > diff --git a/common/ceph b/common/ceph
-> > index ca756dda8dd3..d6f24df177e7 100644
-> > --- a/common/ceph
-> > +++ b/common/ceph
-> > @@ -28,3 +28,13 @@ _require_ceph_vxattr_caps()
-> >  	$GETFATTR_PROG -n "ceph.caps" $TEST_DIR >/dev/null 2>&1 \
-> >  	  || _notrun "ceph.caps vxattr not supported"
-> >  }
-> > +
-> > +_ceph_get_cluster_fsid()
-> > +{
-> > +	$GETFATTR_PROG --only-values -n "ceph.cluster_fsid" $TEST_DIR 2>/dev/null
-> > +}
-> > +
-> > +_ceph_get_client_id()
-> > +{
-> > +	$GETFATTR_PROG --only-values -n "ceph.client_id" $TEST_DIR 2>/dev/null
-> > +}
-> > diff --git a/tests/ceph/001 b/tests/ceph/001
-> > index 5a828567d500..7970ce352bab 100755
-> > --- a/tests/ceph/001
-> > +++ b/tests/ceph/001
-> > @@ -30,6 +30,10 @@ workdir=$TEST_DIR/test-$seq
-> >  rm -rf $workdir
-> >  mkdir $workdir
-> >  
-> > +cluster_fsid=$(_ceph_get_cluster_fsid)
-> > +client_id=$(_ceph_get_client_id)
-> > +metrics_dir="$DEBUGFS_MNT/ceph/$cluster_fsid.$client_id/metrics"
-> > +
-> >  check_range()
-> >  {
-> >  	local file=$1
-> > @@ -40,8 +44,68 @@ check_range()
-> >  	[ $? -eq 0 ] && echo "file $file is not '$val' in [ $off0 $off1 ]"
-> >  }
-> >  
-> > +#
-> > +# The metrics file has the following fields:
-> > +#   1. item
-> > +#   2. total
-> > +#   3. avg_sz(bytes)
-> > +#   4. min_sz(bytes)
-> > +#   5. max_sz(bytes)
-> > +#   6. total_sz(bytes)
-> > +get_copyfrom_total_copies()
-> > +{
-> > +	local total=0
-> > +
-> > +	if [ -d $metrics_dir ]; then
-> > +		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 2)
-> 
-> Some older kernels didn't keep copyfrom stats, but any kernel that has a
-> $metrics_dir should have stats for copyfrom. This should be fine.
-> 
-> > +	fi
-> > +	echo $total
-> > +}
-> > +get_copyfrom_total_size()
-> > +{
-> > +	local total=0
-> > +
-> > +	if [ -d $metrics_dir ]; then
-> > +		total=$(grep copyfrom $metrics_dir/size | tr -s '[:space:]' | cut -d ' ' -f 6)
-> > +	fi
-> > +	echo $total
-> > +}
-> > +
-> > +# This function checks that the metrics file has the expected values for number
-> > +# of remote object copies and the total size of the copies.  For this, it
-> > +# expects a input:
-> > +#   $1 - initial number copies in metrics file (field 'total')
-> > +#   $2 - initial total size in bytes in metrics file (field 'total_sz')
-> > +#   $3 - object size used for copies
-> > +#   $4 - number of remote objects copied
-> > +check_copyfrom_metrics()
-> > +{
-> > +	local c0=$1
-> > +	local s0=$2
-> > +	local objsz=$3
-> > +	local copies=$4
-> > +	local c1=$(get_copyfrom_total_copies)
-> > +	local s1=$(get_copyfrom_total_size)
-> > +	local sum
-> > +
-> > +	if [ ! -d $metrics_dir ]; then
-> > +		return # skip metrics check if debugfs isn't mounted
-> > +	fi
-> > +
-> > +	sum=$(($c0+$copies))
-> > +	if [ $sum -ne $c1 ]; then
-> > +		echo "Wrong number of remote copies.  Expected $sum, got $c1"
-> > +	fi
-> > +	sum=$(($s0+$copies*$objsz))
-> > +	if [ $sum -ne $s1 ]; then
-> > +		echo "Wrong size of remote copies.  Expected $sum, got $s1"
-> > +	fi
-> > +}
-> > +
-> >  run_copy_range_tests()
-> >  {
-> > +	total_copies=$(get_copyfrom_total_copies)
-> > +	total_size=$(get_copyfrom_total_size)
-> >  	objsz=$1
-> >  	halfobj=$(($objsz / 2))
-> >  	file="$workdir/file-$objsz"
-> > @@ -203,6 +267,8 @@ run_copy_range_tests()
-> >  	check_range $dest $(($objsz * 2 + $halfobj)) $objsz 63
-> >  	check_range $dest $(($objsz * 3 + $halfobj)) $halfobj 64
-> >  
-> > +	# Confirm that we've done a total of 24 object copies
-> > +	check_copyfrom_metrics $total_copies $total_size $objsz 24
-> >  }
-> >  
-> >  echo "Object size: 65536" # CEPH_MIN_STRIPE_UNIT
-> 
-> LGTM
-> 
-> Reviewed-by: Jeff Layton <jlayton@kernel.org>
+> > > I can understand above 2 patches, but this patch looks weird to me. We can
+> > > give a hint to downstream testing (from upstream commit side). But deal with
+> > > known issues, that's another story. I'd like to let testers from different
+> > > downstream kernels to deal with their known issues checking by themselves,
+> > > don't depend on upstream fstests for all.
+> > >
+> >
+> > Not sure I understand your point.
+>
+> Oh, sorry I didn't explain that clearly. I mean patch [1/3] and [2/3] can be improved
+> by more talking, but [3/3] is not reasonable for me.
+>
+> Let's see what's the purpose of _known_issue_on_fs():
+>
+> 1) If it trys to work for upstream mainline:
+> As a hint, it can be replaced by known commit output [2/3]. As a forcibly "_notrun" to a fs,
+> it can be replaced by _supported_fs ^$someonefs with a proper comment [1/3]. As a test driven
+> tool... no, I don't like to make xfstests to be place which developers used to record/update/
+> remind their "planning to do/fix", they can record them in other place :)
+>
+> 2) If it trys to help downstream testing:
+> It's really helpless for downstream testing, except downstream testers maintain their
+> own xfstests, and change `_known_issue_on_fs xxx` for themselves. But as a downstream
+> tester, I'd like to maintain our known issues (known failures and skip list) by
+> ourselves in another place, not in xfstests inside.
+>
+> Anyway, let's see reviewpoint from others too :)
+>
 
-Thanks, Jeff!
+I understand your POV and agree that the value of _known_issue_on_fs
+is questionable, so I don't mind dropping patch 3/3.
 
-Cheers,
---
-Luís
+Regarding overlay/061, it is not really a problem, I was just using it as
+an example. I had already addressed the issue of this test by commit
+fdb69864 overlay/061: remove from auto and quick groups
+
+Thanks,
+Amir.
