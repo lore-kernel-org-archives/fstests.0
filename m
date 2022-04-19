@@ -2,202 +2,775 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74BA7C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Apr 2022 18:04:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A0D9C4321E
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Apr 2022 18:23:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356171AbiDSSGx (ORCPT
+        id S1357141AbiDSSZ4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Apr 2022 14:06:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45000 "EHLO
+        Tue, 19 Apr 2022 14:25:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37220 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356170AbiDSSGw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Apr 2022 14:06:52 -0400
+        with ESMTP id S1357817AbiDSSXu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Apr 2022 14:23:50 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 89A3C3B57A
-        for <fstests@vger.kernel.org>; Tue, 19 Apr 2022 11:04:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7683F45533
+        for <fstests@vger.kernel.org>; Tue, 19 Apr 2022 11:17:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1650391447;
+        s=mimecast20190719; t=1650392223;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=SaIhc02kGZohQLz7V4Fs3AiJ+MUejdnViZfnkpg6UMI=;
-        b=fgk6ogJ1yfg7BPuS5dYRX2IO0x6G8Tn4VMprEwQtSQVsTRpGFChhkFg2vYQu2zj5SrtoD4
-        QeEt7dRwRg+pxCADLHTWPg2WMSizFt6n42COc7WBpmIJttdoK4qlYl48kASJbr2fv+tjXy
-        Y6E41cMCW+cJiUFlU9/Yy09Sezzaqj0=
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
- [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=mZMU64lLJz+DLIoQPpg8tp7U3zbnZPeU5GfMSx9OKtc=;
+        b=aCFLz0b98nM1w/f+9yqGCMvauG7V3WY0xu0BvL2OWLdhWGi/RNxAJb+FzcS0StkPqjJ4wK
+        F6TQ1+RB9tzoNCG87viArYtIWpQ37yb55IdPhJ+O3vIHz66rM28VFIt/tmnEjxdOl77igZ
+        uwhrilw0l6pCghlF8ew3XeSA2khpTaM=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-490-ku-Lb9T2Peq323G_QUXXIA-1; Tue, 19 Apr 2022 14:04:04 -0400
-X-MC-Unique: ku-Lb9T2Peq323G_QUXXIA-1
-Received: by mail-qk1-f197.google.com with SMTP id u6-20020a05620a430600b0069c0f5ad4e2so13035299qko.2
-        for <fstests@vger.kernel.org>; Tue, 19 Apr 2022 11:04:04 -0700 (PDT)
+ us-mta-474-sfuFCmgENyObhEz5N5GRYg-1; Tue, 19 Apr 2022 14:17:02 -0400
+X-MC-Unique: sfuFCmgENyObhEz5N5GRYg-1
+Received: by mail-qt1-f197.google.com with SMTP id e5-20020ac85985000000b002e217abd72fso11070302qte.9
+        for <fstests@vger.kernel.org>; Tue, 19 Apr 2022 11:17:02 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
-         :references:user-agent:mime-version:content-transfer-encoding;
-        bh=SaIhc02kGZohQLz7V4Fs3AiJ+MUejdnViZfnkpg6UMI=;
-        b=qoM9IDE5e0eJdlm4vSTYHQ8XQj0I7DWBYDyNzpTCz9RyFaEuDLtIuwRjz45c+4pnfJ
-         EL1qaEPN2g8APabjIUSVr1LHkLBVcIMZJIJl8jyatwZrqI5VbfmyWDac6DIQuLHHpWab
-         9j4/cibrkKUEk3DnuuiGZuBRlruyzpMRNmllUcbOmX+fwYqPm2dyLitHVBQIRVhMClON
-         aR1vqtQEUN9Q+2lFON64VRF0rbNc3XVODrB87HVQi2a9eUd2BkKLeCVPip9kMNCHSC5L
-         fo1tIMUzFfNcLkes4otuu1RIupMBDhGagIzZjxiwgp9/mTVMMV6+mO1X3fxDpAgK72yd
-         RxDg==
-X-Gm-Message-State: AOAM531vEhKTe4tiJZqd/q3XnLuzkMQXX1cr59JndpVDp2K4S19GRPew
-        VvThWINUwoe9RZ/vmfQ5xzY5hVjiRl2mKSZd4Lrw2j/j0dz8p2kJo6qyQMaY6v4MNG15Boi6w6k
-        6fdisA++F4JZFc0eITg==
-X-Received: by 2002:a37:a78d:0:b0:69e:be50:a6c4 with SMTP id q135-20020a37a78d000000b0069ebe50a6c4mr3515684qke.61.1650391443761;
-        Tue, 19 Apr 2022 11:04:03 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwikYa4Gy453kL7FGQ/CgHSV+hHSnCTS1ZTRsjiSb1YuQK694jCZJhdq+AxRxBB7QuptX0hGw==
-X-Received: by 2002:a37:a78d:0:b0:69e:be50:a6c4 with SMTP id q135-20020a37a78d000000b0069ebe50a6c4mr3515668qke.61.1650391443481;
-        Tue, 19 Apr 2022 11:04:03 -0700 (PDT)
-Received: from [192.168.1.3] (68-20-15-154.lightspeed.rlghnc.sbcglobal.net. [68.20.15.154])
-        by smtp.gmail.com with ESMTPSA id w3-20020a376203000000b0069e9a4568f9sm333762qkb.125.2022.04.19.11.04.02
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=mZMU64lLJz+DLIoQPpg8tp7U3zbnZPeU5GfMSx9OKtc=;
+        b=y06REX6uO49V1lQARvLeHlRb7a8cyKyQpKtRMDHLmhQK+W9e8qhxDk7L0tudvNqIAd
+         m+yTfo6pZZBqMTfW7jlRcoNn2PqkmNVrwZT9qLWlLD/SYj6pobNgtyjF3K/TT7sFMMBN
+         ihQ1Ht2/0cMuswh1L3FgjzAqScdBuKQTXqMOycJUalPYxV0P1gpTLSMvhtsiQlQABEO9
+         TByvOYS2FKtBFlPG0hQ4eLYkN8RV5F46UhbJYOSWl9peERPeh8rtM8I91Qswr93O0MnB
+         w+Swvy8mheyFaN2QaWQawwZSyJo/YvTlxlp7Q5192zVkvkygHesuKRLlQnTvCbvN1BWE
+         GaHg==
+X-Gm-Message-State: AOAM532PQF3A/AtyFn2Xoz3XIemCfGJpTOXMqc0pDBvgL9zAVnr5nf7E
+        mEOoclZz/DPCco14hIJ173j1m73DPW8Et8SD7EaPlsp5o31rD774wJ1piWq0TYiha24frwRxtHV
+        NRSi4yJYgNHTWPab/PQ==
+X-Received: by 2002:a05:6214:21af:b0:443:e253:61fa with SMTP id t15-20020a05621421af00b00443e25361famr12621485qvc.31.1650392221698;
+        Tue, 19 Apr 2022 11:17:01 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwoBfGLTIn9506U6AF4wkuByJTZxz4IyyPBElNbgdAKxCWezo3/cDmpzuPjibk4ihwPnLrfkw==
+X-Received: by 2002:a05:6214:21af:b0:443:e253:61fa with SMTP id t15-20020a05621421af00b00443e25361famr12621470qvc.31.1650392221392;
+        Tue, 19 Apr 2022 11:17:01 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id f16-20020a05622a105000b002ed4688f116sm418137qte.86.2022.04.19.11.16.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 19 Apr 2022 11:04:02 -0700 (PDT)
-Message-ID: <b80030d5be5158115dd71cb953701e86d9fc5621.camel@redhat.com>
-Subject: Re: [PATCH] cephfs: add ceph-fuse suport for ceph-fuse
-From:   Jeff Layton <jlayton@redhat.com>
-To:     Rishabh Dave <ridave@redhat.com>, fstests@vger.kernel.org
-Cc:     rishabhddave@gmail.com
-Date:   Tue, 19 Apr 2022 14:04:02 -0400
-In-Reply-To: <20220419175811.602126-1-ridave@redhat.com>
-References: <20220419175811.602126-1-ridave@redhat.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.42.4 (3.42.4-2.fc35) 
+        Tue, 19 Apr 2022 11:17:00 -0700 (PDT)
+Date:   Wed, 20 Apr 2022 02:16:54 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        david@fromorbit.com, sandeen@redhat.com
+Subject: Re: [PATCH v3 1/2] fstests: remove _wipe_fs from dump testing
+ entirely
+Message-ID: <20220419181654.nhhrsreqrbzvwzau@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        david@fromorbit.com, sandeen@redhat.com
+References: <20220418170326.425762-1-zlang@redhat.com>
+ <20220418170326.425762-2-zlang@redhat.com>
+ <20220419155630.GJ17025@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220419155630.GJ17025@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, 2022-04-19 at 23:28 +0530, Rishabh Dave wrote:
-> Currently tests in xfstests-dev can be executed against CephFS only by
-> mounting CephFS using kernel driver. Attempting to run tests against
-> CephFS using FUSE doesn't work because xfstests-dev would remount CephFS
-> using kernel. This patch adds the ability for xfstest-dev code to mount
-> CephFS using FUSE.
+On Tue, Apr 19, 2022 at 08:56:30AM -0700, Darrick J. Wong wrote:
+> On Tue, Apr 19, 2022 at 01:03:25AM +0800, Zorro Lang wrote:
+> > The _wipe_fs function in common/dump is a historical remnant of
+> > xfstests, it's easy to cause confusion now. Now xfstests tend to
+> > call `require_scratch && scratch_mkfs && scratch_mount` in each case
+> > itself, we don't need to use a function to do that specially, so
+> > remove _wipe_fs entirely.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  common/dump   | 17 -----------------
+> >  tests/xfs/022 |  3 +++
+> >  tests/xfs/023 |  3 +++
+> >  tests/xfs/024 |  3 +++
+> >  tests/xfs/025 |  3 +++
+> >  tests/xfs/026 |  3 +++
+> >  tests/xfs/027 |  3 +++
+> >  tests/xfs/028 |  7 +++----
+> >  tests/xfs/035 |  3 +++
+> >  tests/xfs/036 |  3 +++
+> >  tests/xfs/037 |  3 +++
+> >  tests/xfs/038 |  3 +++
+> >  tests/xfs/039 |  3 +++
+> >  tests/xfs/043 |  5 ++++-
+> >  tests/xfs/046 |  3 +++
+> >  tests/xfs/047 |  7 +++----
+> >  tests/xfs/055 |  4 ++++
+> >  tests/xfs/056 |  3 +++
+> >  tests/xfs/059 |  3 +++
+> >  tests/xfs/060 |  3 +++
+> >  tests/xfs/061 |  3 +++
+> >  tests/xfs/063 |  3 +++
+> >  tests/xfs/064 |  3 +++
+> >  tests/xfs/065 |  3 ++-
+> >  tests/xfs/066 |  3 +++
+> >  tests/xfs/068 |  3 +++
+> >  tests/xfs/266 |  3 +++
+> >  tests/xfs/267 |  4 +++-
+> >  tests/xfs/268 |  4 +++-
+> >  tests/xfs/281 |  4 +++-
+> >  tests/xfs/282 |  4 +++-
+> >  tests/xfs/283 |  4 +++-
+> >  tests/xfs/296 |  4 ++--
+> >  tests/xfs/301 |  2 ++
+> >  tests/xfs/302 |  3 ++-
+> >  35 files changed, 100 insertions(+), 35 deletions(-)
+> > 
+> > diff --git a/common/dump b/common/dump
+> > index ea16d442..6de7dab4 100644
+> > --- a/common/dump
+> > +++ b/common/dump
+> > @@ -217,14 +217,6 @@ _require_tape()
+> >      _set_variable
+> >  }
+> >  
+> > -_wipe_fs()
+> > -{
+> > -    _require_scratch
+> > -
+> > -    _scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > -    _scratch_mount >>$seqres.full
+> > -}
+> > -
+> >  #
+> >  # Cleanup created dirs and files
+> >  # Called by trap
+> > @@ -289,7 +281,6 @@ _create_dumpdir_stress_num()
+> >      echo "Creating directory system to dump using fsstress."
+> >  
+> >      _count=$1
+> > -    _wipe_fs
 > 
-> Fixes: https://tracker.ceph.com/issues/55354
-> Signed-off-by: Rishabh Dave <ridave@redhat.com>
-> ---
->  common/config |  2 ++
->  common/rc     | 46 ++++++++++++++++++++++++++++++++++------------
->  2 files changed, 36 insertions(+), 12 deletions(-)
+> The _create_dumpdir* helpers no longer format and mount the filesystem?
+> What about the case of xfs/035 where we write an fs, dump it, create
+> *another* fs, dump that, and restore the second dump?  The scratch fs no
+> longer gets reformatted, AFAICT.
+
+Oh, I didn't notice that xfs/035 has another _create_dumpdir_fill2. How about
+mkfs and mount SCRATCH_DEV again, before calling _create_dumpdir_fill2:
+  _scratch_unmount
+  _scratch_mkfs_xfs >>$seqres.full
+  _scratch_mount
+
+It might be also clear that the case re-create fs before _create_dumpdir_*.
+I'll fix that in next version.
+
 > 
-> diff --git a/common/config b/common/config
-> index 1033b890..efcf12e9 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -556,6 +556,8 @@ _check_device()
->  			_fatal "common/config: $name ($dev) is not a character device"
->  		fi
->  		;;
-> +	ceph-fuse)
-> +		;;
->  	*)
->  		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
->  	esac
-> diff --git a/common/rc b/common/rc
-> index 553ae350..868b3ddd 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -500,10 +500,14 @@ _test_mount()
->  {
->      local mount_ret
->  
-> -    if [ "$FSTYP" == "overlay" ]; then
-> +    if [ "$FSTYP" == "ceph-fuse" ]; then
-> +        $CEPH_FUSE_BIN_PATH $TEST_FS_MOUNT_OPTS $TEST_DIR 2> /dev/null
-> +        return $?
-> +    elif [ "$FSTYP" == "overlay" ]; then
->          _overlay_test_mount $*
->          return $?
->      fi
-> +
->      _test_options mount
->      _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
->      mount_ret=$?
-> @@ -1446,7 +1450,8 @@ _fs_type()
->      # have to bother with this quirk.
->      #
->      _df_device $1 | $AWK_PROG '{ print $2 }' | \
-> -        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
-> +        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/' \
-> +            -e 's/fuse.ceph-fuse/ceph-fuse/'
->  }
->  
->  # return the FS mount options of a mounted device
-> @@ -1595,6 +1600,24 @@ _supported_fs()
->      _notrun "not suitable for this filesystem type: $FSTYP"
->  }
->  
-> +_check_if_dev_already_mounted()
-> +{
-> +	local dev=$1
-> +	local mnt=$2
-> +
-> +	# find $dev as the source, and print result in "$dev $mnt" format
-> +	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
-> +	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
-> +
-> +	# if it's mounted, make sure its on $mnt
-> +	if [ "$mount_rec" != "$dev $mnt" ]; then
-> +		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
-> +		echo "Already mounted result:"
-> +		echo $mount_rec
-> +		return 2 # 2 = mounted on wrong mnt
-> +	fi
-> +}
-> +
->  # check if a FS on a device is mounted
->  # if so, verify that it is mounted on mount point
->  # if fstype is given as argument, verify that it is also
-> @@ -1608,16 +1631,14 @@ _check_mounted_on()
->  	local mnt=$4
->  	local type=$5
->  
-> -	# find $dev as the source, and print result in "$dev $mnt" format
-> -	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
-> -	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
-> +	# this check doesn't work on ceph-fuse
-> +	if [ "$dev" != "ceph-fuse" ]; then
-> +		_check_if_dev_already_mounted $dev $mnt
-> +		dev_already_mounted=$?
->  
+> I think it's appropriate to move the _require_scratch to into the
+> calling tests themselves, but I think the mkfs+mount should replace the
+> _wipe_fs calls in all these helper functions.
 
-Shouldn't there be a "fi" above?
+I think the _create_dumpdir_* isn't necessary to be run on a clean filesystem
+which just be mkfs. If a case need a clean filesystem, how about let them clean
+it by themselves clearly :)
 
-> -	# if it's mounted, make sure its on $mnt
-> -	if [ "$mount_rec" != "$dev $mnt" ]; then
-> -		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
-> -		echo "Already mounted result:"
-> -		echo $mount_rec
-> -		return 2 # 2 = mounted on wrong mnt
-> +		if [ $dev_already_mounted -ne 0 ]; then
-> +			return $dev_already_mounted
-> +		fi
->  	fi
->  
->  	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
-> @@ -1869,6 +1890,7 @@ _require_test()
->  		if [ ! -d "$TEST_DIR" ]; then
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
-> +	ceph-fuse)
->  		;;
->  	cifs)
->  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
-> @@ -3204,7 +3226,7 @@ _check_test_fs()
->      virtiofs)
->  	# no way to check consistency for virtiofs
->  	;;
-> -    ceph)
-> +    ceph|ceph-fuse)
->  	# no way to check consistency for CephFS
->  	;;
->      glusterfs)
+Thanks,
+Zorro
 
--- 
-Jeff Layton <jlayton@redhat.com>
+> 
+> --D
+> 
+> >  
+> >      _param="-f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10"
+> >      rm -rf $dump_dir
+> > @@ -567,7 +558,6 @@ End-of-File
+> >  
+> >  _create_dumpdir_largefile()
+> >  {
+> > -    _wipe_fs
+> >      mkdir -p $dump_dir || _fail "cannot mkdir \"$dump_dir\""
+> >      _largesize=4294967297
+> >      _largefile=$dump_dir/largefile
+> > @@ -579,7 +569,6 @@ _create_dumpdir_largefile()
+> >  
+> >  _create_dumpdir_fill()
+> >  {
+> > -    _wipe_fs
+> >      _mk_fillconfig1
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> > @@ -587,7 +576,6 @@ _create_dumpdir_fill()
+> >  
+> >  _create_dumpdir_fill2()
+> >  {
+> > -    _wipe_fs
+> >      _mk_fillconfig2
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> > @@ -595,7 +583,6 @@ _create_dumpdir_fill2()
+> >  
+> >  _create_dumpdir_fill_perm()
+> >  {
+> > -    _wipe_fs
+> >      _mk_fillconfig_perm
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> > @@ -603,7 +590,6 @@ _create_dumpdir_fill_perm()
+> >  
+> >  _create_dumpdir_fill_ea()
+> >  {
+> > -    _wipe_fs
+> >      _mk_fillconfig_ea
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> > @@ -615,7 +601,6 @@ _create_dumpdir_fill_ea()
+> >  #
+> >  _create_dumpdir_fill_multi()
+> >  {
+> > -    _wipe_fs
+> >      _mk_fillconfig_multi
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> > @@ -720,7 +705,6 @@ End-of-File
+> >  
+> >  _create_dumpdir_symlinks()
+> >  {
+> > -    _wipe_fs
+> >      _mk_symlink_config
+> >      _do_create_dump_symlinks
+> >      _stable_fs
+> > @@ -771,7 +755,6 @@ _modify_level()
+> >  _create_dumpdir_hardlinks()
+> >  {
+> >      _numsets=$1
+> > -    _wipe_fs
+> >      echo "Creating directory system of hardlinks to incrementally dump."
+> >  
+> >      mkdir -p $dump_dir || _fail "cannot mkdir \"$dump_dir\""
+> > diff --git a/tests/xfs/022 b/tests/xfs/022
+> > index 9334bc41..2f011b28 100755
+> > --- a/tests/xfs/022
+> > +++ b/tests/xfs/022
+> > @@ -29,6 +29,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  # note: fsstress uses an endian dependent random number generator, running this
+> >  # will produce different output for big/little endian machines.
+> > diff --git a/tests/xfs/023 b/tests/xfs/023
+> > index 1ff406a6..f6f6503a 100755
+> > --- a/tests/xfs/023
+> > +++ b/tests/xfs/023
+> > @@ -28,6 +28,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_hard
+> >  _do_dump_sub
+> > diff --git a/tests/xfs/024 b/tests/xfs/024
+> > index a277c83f..83a8882c 100755
+> > --- a/tests/xfs/024
+> > +++ b/tests/xfs/024
+> > @@ -26,6 +26,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  # ensure file/dir timestamps precede dump timestamp
+> >  sleep 2
+> > diff --git a/tests/xfs/025 b/tests/xfs/025
+> > index b7a5b3bb..bafe82d7 100755
+> > --- a/tests/xfs/025
+> > +++ b/tests/xfs/025
+> > @@ -26,6 +26,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_hard
+> >  _do_dump_min
+> > diff --git a/tests/xfs/026 b/tests/xfs/026
+> > index 29ebb5aa..fba385dc 100755
+> > --- a/tests/xfs/026
+> > +++ b/tests/xfs/026
+> > @@ -24,6 +24,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill
+> >  _do_dump_file
+> > diff --git a/tests/xfs/027 b/tests/xfs/027
+> > index a0dcf8b3..16cd203d 100755
+> > --- a/tests/xfs/027
+> > +++ b/tests/xfs/027
+> > @@ -24,6 +24,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill
+> >  _do_dump_restore
+> > diff --git a/tests/xfs/028 b/tests/xfs/028
+> > index b7c9d16b..1ff9d7d2 100755
+> > --- a/tests/xfs/028
+> > +++ b/tests/xfs/028
+> > @@ -24,10 +24,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > -
+> > -# wipe test dir clean first
+> > -# so dump can be real quick
+> > -_wipe_fs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  #
+> >  # Create 5 dumps
+> > diff --git a/tests/xfs/035 b/tests/xfs/035
+> > index 03cb7a76..d23cca95 100755
+> > --- a/tests/xfs/035
+> > +++ b/tests/xfs/035
+> > @@ -25,6 +25,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_hard
+> >  _do_dump -L $seq.1
+> > diff --git a/tests/xfs/036 b/tests/xfs/036
+> > index 191345c5..73eb7cd5 100755
+> > --- a/tests/xfs/036
+> > +++ b/tests/xfs/036
+> > @@ -25,6 +25,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $RMT_IRIXTAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_soft
+> >  _do_dump_min -o -F
+> > diff --git a/tests/xfs/037 b/tests/xfs/037
+> > index b3fbbedd..b19ba9e9 100755
+> > --- a/tests/xfs/037
+> > +++ b/tests/xfs/037
+> > @@ -24,6 +24,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $RMT_TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_soft
+> >  _do_dump_min -o -F
+> > diff --git a/tests/xfs/038 b/tests/xfs/038
+> > index 633c51e0..397c354d 100755
+> > --- a/tests/xfs/038
+> > +++ b/tests/xfs/038
+> > @@ -24,6 +24,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $RMT_TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_hard
+> >  _do_dump
+> > diff --git a/tests/xfs/039 b/tests/xfs/039
+> > index e3a98921..d54e9975 100755
+> > --- a/tests/xfs/039
+> > +++ b/tests/xfs/039
+> > @@ -25,6 +25,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $RMT_IRIXTAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_soft
+> >  _do_dump -o -F
+> > diff --git a/tests/xfs/043 b/tests/xfs/043
+> > index 5b198dde..415ed16e 100755
+> > --- a/tests/xfs/043
+> > +++ b/tests/xfs/043
+> > @@ -26,7 +26,10 @@ _cleanup()
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> >  
+> > -_require_tape $TAPE_DEV 
+> > +_require_tape $TAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  _erase_hard
+> >  _do_dump_sub
+> > diff --git a/tests/xfs/046 b/tests/xfs/046
+> > index 94d1c051..48daff87 100755
+> > --- a/tests/xfs/046
+> > +++ b/tests/xfs/046
+> > @@ -22,6 +22,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_symlinks
+> >  _do_dump_file
+> > diff --git a/tests/xfs/047 b/tests/xfs/047
+> > index f83a2c94..6d0dc5f7 100755
+> > --- a/tests/xfs/047
+> > +++ b/tests/xfs/047
+> > @@ -22,10 +22,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > -
+> > -# wipe test dir clean first
+> > -# so dump can be real quick
+> > -_wipe_fs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  #
+> >  # Create 5 dumps
+> > diff --git a/tests/xfs/055 b/tests/xfs/055
+> > index 1e3ba6ac..c6ecae3d 100755
+> > --- a/tests/xfs/055
+> > +++ b/tests/xfs/055
+> > @@ -25,6 +25,10 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_tape $RMT_TAPE_USER@$RMT_IRIXTAPE_DEV
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> > +
+> >  _create_dumpdir_fill
+> >  _erase_soft
+> >  _do_dump -o -F
+> > diff --git a/tests/xfs/056 b/tests/xfs/056
+> > index 4ee473f6..f742f419 100755
+> > --- a/tests/xfs/056
+> > +++ b/tests/xfs/056
+> > @@ -25,6 +25,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill_perm
+> >  _do_dump_file
+> > diff --git a/tests/xfs/059 b/tests/xfs/059
+> > index 4bbfb5f5..515ef2a4 100755
+> > --- a/tests/xfs/059
+> > +++ b/tests/xfs/059
+> > @@ -26,6 +26,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_multi_stream
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill_multi
+> >  _do_dump_multi_file --multi 4
+> > diff --git a/tests/xfs/060 b/tests/xfs/060
+> > index 4b15c6c2..0c0dc981 100755
+> > --- a/tests/xfs/060
+> > +++ b/tests/xfs/060
+> > @@ -26,6 +26,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_multi_stream
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill_multi
+> >  _do_dump_multi_file --multi 4
+> > diff --git a/tests/xfs/061 b/tests/xfs/061
+> > index c5d4a2d1..0b20cc30 100755
+> > --- a/tests/xfs/061
+> > +++ b/tests/xfs/061
+> > @@ -24,6 +24,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  # src/dumpfile based on dumping from
+> >  # _create_dumpdir_fill_perm (small dump)
+> > diff --git a/tests/xfs/063 b/tests/xfs/063
+> > index 2d1d2cbc..660b300f 100755
+> > --- a/tests/xfs/063
+> > +++ b/tests/xfs/063
+> > @@ -26,6 +26,9 @@ _cleanup()
+> >  _supported_fs xfs
+> >  
+> >  _require_attrs trusted user
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  # create files with EAs
+> >  _create_dumpdir_fill_ea
+> > diff --git a/tests/xfs/064 b/tests/xfs/064
+> > index e4e713cd..a81b226b 100755
+> > --- a/tests/xfs/064
+> > +++ b/tests/xfs/064
+> > @@ -36,6 +36,9 @@ _ls_size_filter()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_hardlinks 9
+> >  
+> > diff --git a/tests/xfs/065 b/tests/xfs/065
+> > index 0df7477f..8485dee6 100755
+> > --- a/tests/xfs/065
+> > +++ b/tests/xfs/065
+> > @@ -70,7 +70,8 @@ _scratch_unmount
+> >  # files and directories
+> >  #
+> >  
+> > -_wipe_fs
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  mkdir -p $dump_dir || _fail "cannot mkdir \"$dump_dir\""
+> >  cd $dump_dir
+> >  
+> > diff --git a/tests/xfs/066 b/tests/xfs/066
+> > index 5f0a74e3..2c369ad7 100755
+> > --- a/tests/xfs/066
+> > +++ b/tests/xfs/066
+> > @@ -24,6 +24,7 @@ _cleanup()
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> >  _require_test
+> > +_require_scratch
+> >  
+> >  _my_stat_filter()
+> >  {
+> > @@ -37,6 +38,8 @@ else
+> >  	_notrun "Installed libc doesn't correctly handle setrlimit/ftruncate64"
+> >  fi
+> >  
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_largefile
+> >  echo "ls dumpdir/largefile"
+> >  stat $dump_dir/largefile | _my_stat_filter
+> > diff --git a/tests/xfs/068 b/tests/xfs/068
+> > index 103466c3..f80b53e5 100755
+> > --- a/tests/xfs/068
+> > +++ b/tests/xfs/068
+> > @@ -28,6 +28,9 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_stress_num 4096
+> >  
+> > diff --git a/tests/xfs/266 b/tests/xfs/266
+> > index 549fff3b..eeca8822 100755
+> > --- a/tests/xfs/266
+> > +++ b/tests/xfs/266
+> > @@ -50,12 +50,15 @@ filter_cumulative_quota_updates() {
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > +_require_scratch
+> >  
+> >  $XFSDUMP_PROG -h 2>&1 | grep -q -e -D
+> >  if [ $? -ne 0 ]; then
+> >      _notrun "requires xfsdump -D"
+> >  fi
+> >  
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  _create_dumpdir_fill
+> >  # ensure file/dir timestamps precede dump timestamp
+> >  sleep 2
+> > diff --git a/tests/xfs/267 b/tests/xfs/267
+> > index 62d39aba..89b968be 100755
+> > --- a/tests/xfs/267
+> > +++ b/tests/xfs/267
+> > @@ -34,7 +34,6 @@ _create_files()
+> >  biggg		41943040	$nobody	$nobody  777    attr1 some_text1  root
+> >  End-of-File
+> >  
+> > -    _wipe_fs
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> >  }
+> > @@ -48,6 +47,9 @@ _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> >  _require_attrs trusted
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_files
+> >  _erase_hard
+> > diff --git a/tests/xfs/268 b/tests/xfs/268
+> > index b1dd312d..8c991fba 100755
+> > --- a/tests/xfs/268
+> > +++ b/tests/xfs/268
+> > @@ -37,7 +37,6 @@ bigg1		12582912	$nobody	$nobody  777    attr1 some_text1  root
+> >  bigg2		12582912	$nobody	$nobody  777    attr2 some_text2  user
+> >  End-of-File
+> >  
+> > -    _wipe_fs
+> >      _do_create_dumpdir_fill
+> >      _stable_fs
+> >  }
+> > @@ -51,6 +50,9 @@ _supported_fs xfs
+> >  
+> >  _require_tape $TAPE_DEV
+> >  _require_attrs trusted user
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_files
+> >  _erase_hard
+> > diff --git a/tests/xfs/281 b/tests/xfs/281
+> > index ea114761..6b148a94 100755
+> > --- a/tests/xfs/281
+> > +++ b/tests/xfs/281
+> > @@ -22,8 +22,10 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > -
+> >  _require_legacy_v2_format
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill
+> >  
+> > diff --git a/tests/xfs/282 b/tests/xfs/282
+> > index 07a4623a..50303b08 100755
+> > --- a/tests/xfs/282
+> > +++ b/tests/xfs/282
+> > @@ -24,8 +24,10 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > -
+> >  _require_legacy_v2_format
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill
+> >  # ensure file/dir timestamps precede dump timestamp
+> > diff --git a/tests/xfs/283 b/tests/xfs/283
+> > index 47fd4c3a..59ea5f3b 100755
+> > --- a/tests/xfs/283
+> > +++ b/tests/xfs/283
+> > @@ -24,8 +24,10 @@ _cleanup()
+> >  
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> > -
+> >  _require_legacy_v2_format
+> > +_require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  _create_dumpdir_fill
+> >  # ensure file/dir timestamps precede dump timestamp
+> > diff --git a/tests/xfs/296 b/tests/xfs/296
+> > index 4eaf049b..efd303e2 100755
+> > --- a/tests/xfs/296
+> > +++ b/tests/xfs/296
+> > @@ -28,8 +28,8 @@ _supported_fs xfs
+> >  _require_scratch
+> >  _require_command "$SETCAP_PROG" setcap
+> >  _require_command "$GETCAP_PROG" getcap
+> > -
+> > -_wipe_fs
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  mkdir -p $dump_dir
+> >  echo test > $dump_dir/testfile
+> > diff --git a/tests/xfs/301 b/tests/xfs/301
+> > index d44533d6..71ec1420 100755
+> > --- a/tests/xfs/301
+> > +++ b/tests/xfs/301
+> > @@ -27,6 +27,8 @@ _cleanup()
+> >  # Modify as appropriate.
+> >  _supported_fs xfs
+> >  _require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  # Extended attributes
+> >  attr_name=attrname
+> > diff --git a/tests/xfs/302 b/tests/xfs/302
+> > index 6587a6e6..2e16890c 100755
+> > --- a/tests/xfs/302
+> > +++ b/tests/xfs/302
+> > @@ -26,9 +26,10 @@ _cleanup()
+> >  # Modify as appropriate.
+> >  _supported_fs xfs
+> >  _require_scratch
+> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> > +_scratch_mount
+> >  
+> >  echo "Silence is golden."
+> > -_wipe_fs
+> >  mkdir $dump_dir >> $seqres.full 2>&1 || _fail "mkdir \"$dump_dir\" failed"
+> >  for i in `seq 1 4`; do
+> >  	$XFS_IO_PROG -f -c "truncate 1t" $dump_dir/sparsefile$i \
+> > -- 
+> > 2.31.1
+> > 
+> 
 
