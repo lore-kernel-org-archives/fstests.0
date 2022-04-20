@@ -2,42 +2,42 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBE74C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Apr 2022 18:08:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FF11C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Apr 2022 22:07:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1380330AbiDTSKy (ORCPT
+        id S1350833AbiDTWJr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Apr 2022 14:10:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36370 "EHLO
+        Wed, 20 Apr 2022 18:09:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230469AbiDTSKx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Apr 2022 14:10:53 -0400
+        with ESMTP id S241241AbiDTWJr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Apr 2022 18:09:47 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A43F3EB94;
-        Wed, 20 Apr 2022 11:08:07 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A34B61902A;
+        Wed, 20 Apr 2022 15:06:59 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BCB8161ACE;
-        Wed, 20 Apr 2022 18:08:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 23B8DC385A4;
-        Wed, 20 Apr 2022 18:08:06 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 49676619C5;
+        Wed, 20 Apr 2022 22:06:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98F09C385A0;
+        Wed, 20 Apr 2022 22:06:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650478086;
-        bh=BtEavGAYaFygVq8iIGiatAQRY8CX6oossQfQE1hoHY0=;
+        s=k20201202; t=1650492418;
+        bh=OdNdMzb4XhNLLN+k+g/9VKCF49+kjEFYqOhZ8WGLHok=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=B6hJMiefc/J0uzwb3hwis3nfa4BiVhbuKNw9FecUuaN7pFy5tAOSzbS7mBShxOwbS
-         HawPosmFaWHMQfh9DAkR/v8ghjvhbLTnulZfOAgTz/bY+Ek/Asx/sVuzyExU3Cz4I5
-         5zK6/o396qNwfYvtx58jrRNmMBElIrKTy9jlcvIHedqpzO8R305trS5o08XA25sube
-         H9n/LjVZv8UNbPNGkg2jP+CP26Ue2eugQ6bl7VoCvHEyo7iYFWnxF/tiaLGQeA4lyp
-         uzxGfiS9BPj1OEGQTiUY4LTuVBsJE42Q4X4ELmfN4X6AdIdvQtF9BCBblulIhWu4PK
-         CISLHcQaRjhJw==
-Date:   Wed, 20 Apr 2022 11:08:05 -0700
+        b=BaJG/pOiGueVhKDwZL3TV+Kk9fdhdoZzYYdUtRuNkiehw//Ea5fLCPFWa3U+uH2M1
+         VvmozQ0Chv9g9Y1be36NLFfPsJKPvGYq3TPNlxdh35viGZUKA+ToWa2ewMSZFgi0kF
+         9KI3HF39wpadhGVlc4V9LhlqM0zOpAvS/+EUNztuS/56oQl0FsfF5TmxsV26ti/7d8
+         tKD9OoJGN9rsFjzuOGb8LCvtpcydbpN9TeImuT6s8kgqQinzBp2YC+aU6t4WXDXblF
+         Bj01iQVazNxxTceQiBKNC0L6JOSyt7m+zQHlcoUfwoYnSFKDwEmkyX2mwK8PBVdtpg
+         8RUJj+Tc8mdIA==
+Date:   Wed, 20 Apr 2022 15:06:57 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Zorro Lang <zlang@redhat.com>
 Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 Subject: Re: [PATCH 4/4] fstests: test xfs swapext log replay
-Message-ID: <20220420180805.GZ17025@magnolia>
+Message-ID: <20220420220657.GA17025@magnolia>
 References: <20220420083653.1031631-1-zlang@redhat.com>
  <20220420083653.1031631-5-zlang@redhat.com>
 MIME-Version: 1.0
@@ -65,10 +65,7 @@ On Wed, Apr 20, 2022 at 04:36:53PM +0800, Zorro Lang wrote:
 > 
 > I think it's time to bring it back to talk again. If it's a case issue, I'll fix.
 > If it's a bug, means this case is good to merge.
-
-Uhoh.  So ... did you write this as a regression test for dc1baa715bbf
-and then discovered that it uncovered another problem?
-
+> 
 > Thanks,
 > Zorro
 > 
@@ -125,18 +122,20 @@ and then discovered that it uncovered another problem?
 > +	fi
 > +	$XFS_IO_PROG -f -d -c "pwrite $i $dbsize" $localfile >> $seqres.full
 > +done
-
-I wonder if you could use what _scratch_xfs_populate does to create
-S_IFREG.FMT_BTREE instead of open-coding it, but I bet this test
-predates that... :)
-
-Anyway, this looks fine but I want to go try it to see what happens.
-
---D
-
 > +
 > +# Make a data fork owner change log
 > +$XFS_FSR_PROG -v -d $localfile >> $seqres.full 2>&1
+
+Hmm, so I tried this, and found that it fails (as expected) on
+-mrmapbt=0 configs with my 5.18-merge branch.
+
+Weirdly, when I tried it with my djwong-dev branch, fsr failed the
+XFS_IOC_SWAPEXT with -22 (EINVAL) ... but this program doesn't detect
+that, so it "passed".  I even popped all the patches off, but that
+didn't change anything.... weird.  I'll keep looking.
+
+--D
+
 > +
 > +# Truncate the file to 0, and change the inode format to extent, then shutdown
 > +# the fs to keep the XFS_ILOG_DOWNER flag
