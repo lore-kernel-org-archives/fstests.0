@@ -2,123 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCA3CC433FE
-	for <linux-fstests@archiver.kernel.org>; Sat, 23 Apr 2022 01:00:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 042CBC433F5
+	for <linux-fstests@archiver.kernel.org>; Sat, 23 Apr 2022 07:18:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229941AbiDWBDA (ORCPT
+        id S231749AbiDWHVI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Apr 2022 21:03:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41036 "EHLO
+        Sat, 23 Apr 2022 03:21:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59650 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229785AbiDWBC7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Apr 2022 21:02:59 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B30D5527C9;
-        Fri, 22 Apr 2022 18:00:03 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 4FB80B83344;
-        Sat, 23 Apr 2022 01:00:02 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0332C385A4;
-        Sat, 23 Apr 2022 01:00:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650675601;
-        bh=3L5PJgdEy97z+D+D0QAwn839C0O1ozkKJYjxHicbAqg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=gUVj69+/VZcfRYpID6zkGH9kH8dsghdv7gMri0/JwevJnXBtqjgVJgUxcN3vriRsU
-         Fb5eqIcPLj5CeL3cJPOMkr1Y1h3VZueWo7XFxpB9cFil1oP8DTzL8e2zbEj5sQN2nF
-         7Hrpn05NhxF7foFFT73x+VhvwddvvhPClaPm2OlJYsnkQuSs/PKxyR92IVqo6gEWwv
-         oKVD5w+NYdnmSUAR4dlCbi3wXRr4zv1xJRUSgPh6m715Aw8OKK6PL2RzB2SVK6GQkQ
-         5D+ZaqdqrNoCuUf5ITmmg21ppcfCpKB2WtvIlZbs91RseZ7oXs0p/iJ8C6f8WrZg6h
-         3G1OkYwnFOcCQ==
-Date:   Fri, 22 Apr 2022 17:59:51 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Boris Burkov <boris@bur.io>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH v8 2/5] common/verity: support btrfs in generic fsverity
- tests
-Message-ID: <YmNPhzTpoE9jIU4D@sol.localdomain>
-References: <cover.1647461985.git.boris@bur.io>
- <9c64fbf9ad37dc84a31caf91762edd64b33d59db.1647461985.git.boris@bur.io>
- <YjN7Dc9aTD2FHTTO@gmail.com>
- <YmM54bCgX6Kz2XVX@zen>
+        with ESMTP id S229569AbiDWHVH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 23 Apr 2022 03:21:07 -0400
+Received: from mail-qk1-x733.google.com (mail-qk1-x733.google.com [IPv6:2607:f8b0:4864:20::733])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55717136969
+        for <fstests@vger.kernel.org>; Sat, 23 Apr 2022 00:18:11 -0700 (PDT)
+Received: by mail-qk1-x733.google.com with SMTP id b189so7354321qkf.11
+        for <fstests@vger.kernel.org>; Sat, 23 Apr 2022 00:18:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=7OqGgYlGfepEOKbVK88f2uuHwYT388FEjHefIxWyV7Q=;
+        b=T7VoPKwqneFRu7hoZI1OMmQO+oRC7Nda/8abLF8TB2XjNoSzIQRaXP+9yE/6wuNgpL
+         YYxhBobtk6Rd/ilu2sbpJFuD0c2EvxQXGL/J/UB1LE0FFd4869jx91TmsfCH1Mj6Uoyp
+         qXVHsXFQEJ+Gquvjl0cHzlpoRKbdJrvMdHAKczsTp2Cf0S8OCV024Wq/cI6ZrCpGWJEQ
+         hGrpVHk4Kpg4wNHdY1q5A/inFcK105uBpFLn04l09g4LdxdW2YAEVOv0C5PWil+bpD7M
+         tFS9bOyxXV556nFz0JAtM9N/rCF1susmpoCv6Ym0YlXxaHp3jm4VhTPPvPgTCiGa4Psl
+         iwVg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=7OqGgYlGfepEOKbVK88f2uuHwYT388FEjHefIxWyV7Q=;
+        b=v81KNqPWQU/ilurgd6ykcM8lF0VnHVrnY6JArqdxlN67uEzuR2CgTYDxQX3P1XYfr0
+         pk8CZnB4PWx3NFnaEiPYqJ9VmVbT91nPYkcvLbShaU6azb//+18fHx6U7v+lhZ2+p85Z
+         43klW+P4PZkQGsrKzLj5HVUNhbzcaiwDVAOZBmNhdyUsZzFPT3sf2oGGRHTKQ+MHK3fL
+         tyC/rbU02z3g1GQ+x+AggJZhn7tCsYBY3ONuxcGkpk6/NkLtMA5z4F7D3SIGsV7+EiC7
+         aRyYh3mJCr3bHnjtPYHH1exNt4dDupANNf0eZdHRQr3lUfddHp4jhT47+wS2A1yLPAlI
+         9gUw==
+X-Gm-Message-State: AOAM532bI/81EnoV4GhVOxCqNnHSdLLFQhbovoU+I3qOYbZQSZvSFs8x
+        jCOyLdi0e1WwBLuwI0ihXk9UQ+TkvcIKuGLBUvQ=
+X-Google-Smtp-Source: ABdhPJxl1hoYQkwKLmAZtCEb2G4hCKNfuEuQGc9qUSpINS0H7Mw3iFAqJkuzXByryaWpxMH2cSOd8JV11MQOTLakSNI=
+X-Received: by 2002:a05:620a:1aa9:b0:69e:e20e:7961 with SMTP id
+ bl41-20020a05620a1aa900b0069ee20e7961mr4845995qkb.19.1650698290430; Sat, 23
+ Apr 2022 00:18:10 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YmM54bCgX6Kz2XVX@zen>
+References: <20220419131423.2367795-1-brauner@kernel.org> <20220420175221.2502964-1-brauner@kernel.org>
+ <20220421054120.suxfy3y7za3mgkkg@zlang-mailbox> <20220421085942.GR1609613@dread.disaster.area>
+ <20220421153513.frp7xdbejsoawews@zlang-mailbox> <20220421153717.GA27435@lst.de>
+ <20220421155320.agny6epqti2tcmit@wittgenstein>
+In-Reply-To: <20220421155320.agny6epqti2tcmit@wittgenstein>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sat, 23 Apr 2022 10:17:59 +0300
+Message-ID: <CAOQ4uxhNskcDAuguYYkkvwrwFSw2A_s+MpJj6WcsguOSUSE7mg@mail.gmail.com>
+Subject: Re: [PATCH] generic: add test for tmpfs POSIX ACLs
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     Christoph Hellwig <hch@lst.de>, Dave Chinner <david@fromorbit.com>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Peter Jin <peter@peterjin.org>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 22, 2022 at 04:27:29PM -0700, Boris Burkov wrote:
-> On Thu, Mar 17, 2022 at 06:16:45PM +0000, Eric Biggers wrote:
-> > On Wed, Mar 16, 2022 at 01:25:12PM -0700, Boris Burkov wrote:
-> > > generic/572-579 have tests for fsverity. Now that btrfs supports
-> > > fsverity, make these tests function as well. For a majority of the tests
-> > > that pass, simply adding the case to mkfs a btrfs filesystem with no
-> > > extra options is sufficient.
-> > > 
-> > > However, generic/574 has tests for corrupting the merkle tree itself.
-> > > Since btrfs uses a different scheme from ext4 and f2fs for storing this
-> > > data, the existing logic for corrupting it doesn't work out of the box.
-> > > Adapt it to properly corrupt btrfs merkle items.
-> > > 
-> > > 576 does not run because btrfs does not support transparent encryption.
-> > > 
-> > > This test relies on the btrfs implementation of fsverity in the patch:
-> > > btrfs: initial fsverity support
-> > > 
-> > > and on btrfs-corrupt-block for corruption in the patches titled:
-> > > btrfs-progs: corrupt generic item data with btrfs-corrupt-block
-> > > btrfs-progs: expand corrupt_file_extent in btrfs-corrupt-block
-> > > 
-> > > Signed-off-by: Boris Burkov <boris@bur.io>
-> > > ---
-> > >  common/btrfs  |  5 +++++
-> > >  common/config |  1 +
-> > >  common/verity | 23 +++++++++++++++++++++++
-> > >  3 files changed, 29 insertions(+)
-> > 
-> > Reviewed-by: Eric Biggers <ebiggers@google.com>
-> > 
-> > - Eric
-> 
-> Eric,
-> 
-> Unfortunately, I think I found a more serious problem with the
-> compatibility of generic/574 and btrfs while working on testing the
-> enable/disable sysctls.
-> 
-> I realized that I had forgotten to customize the mount options for btrfs
-> to use "nodatasum" and as a result, this test was passing for btrfs
-> inappropriately, since we were getting EIOs for failing data checksums,
-> not verity checks.
-> 
-> I fixed the mount option issue only to realize that some of the test
-> cases make assumptions that don't apply to btrfs. For example:
-> "corruption_test 130999 131000 72"
-> 
-> Btrfs zeros pages past EOF in readpage before they make it to the user
-> via read or mmap, and the fsverity check is done at that point, so
-> corrupting the disk past EOF does not cause a verity failure (or get
-> leaked to the user) but it does cause csum failures since those are done
-> on bios, like verity checks in ext4. I verified that removing that
-> zeroing in readpage makes the test case pass.
-> 
-> Do you have a preference for how I might fix this? My first thought is
-> to try to factor out any such test cases into a new test with a new
-> requires clause that btrfs fails but ext4/f2fs pass, kind of like what
-> we did for the EFBIG test for future FSes that might not logically
-> address the Merkle tree in the past-EOF space.
+On Thu, Apr 21, 2022 at 9:05 PM Christian Brauner <brauner@kernel.org> wrote:
+>
+> On Thu, Apr 21, 2022 at 05:37:17PM +0200, Christoph Hellwig wrote:
+> > On Thu, Apr 21, 2022 at 11:35:13PM +0800, Zorro Lang wrote:
+> > > Sure, I won't do that wilfully, just try to ask how we can improve this
+> > > huge and 'keep growing' idmapped-mounts.c, not tend to remove the whole
+> > > idmapped-mount testing coverage :)
+> >
+> > It might just be time to split that file up into a few ones if there
+> > is a sensible split.  I'll let Christian think about that, though.
+>
+> Yep, I agree. I think we need to at least rename it to reflect is vfs
+> generic nature and then split it into separate test binaries.
+> I'll think about a good approach.
 
-The reason that an error is expected for corruption past EOF in the block
-containing EOF, is to ensure that the bad data isn't visible via mmap reads.  If
-that's not a problem for btrfs due to it always zeroing the part past EOF, I
-think it would be fine to change that test case (specifically the one with
-parameters "corruption_test 130999 131000 72") to just try a mmap read of the
-whole EOF block, and check that it either fails with an error *or* returns
-zeroes.  I don't think that an entirely new test script would be warranted.
+The majority of test cases still do require_fs_allow_idmap and from
+those who don't, most of them are variants for test cases that run
+with and without idmapped mounts and possibly also in_userns.
 
-- Eric
+And this new test case is no exception - there is still idmapping
+involved, just not idmapped-mounts.
+
+However you decide to break it up and/or rename the test binary
+(I am not sure you must split the binary - only the source files),
+I think we need to be more consistent about the groups that the tests
+that run this binary are in.
+
+'perms' group is adequate, but adding to the 'idmapped' group and
+maybe also to a new 'userns' group would be useful.
+
+BTW, the tests that use src/nsexec should also belong to the userns
+group as does overlay/020, the only test that uses the 'unshare' tool.
+
+Thanks,
+Amir.
