@@ -2,148 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D7FFC433F5
-	for <linux-fstests@archiver.kernel.org>; Sat, 23 Apr 2022 11:07:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E955C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Apr 2022 06:23:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232383AbiDWLKb (ORCPT
+        id S238366AbiDXG0q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 23 Apr 2022 07:10:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50826 "EHLO
+        Sun, 24 Apr 2022 02:26:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234616AbiDWLKa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 23 Apr 2022 07:10:30 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64892113CB4
-        for <fstests@vger.kernel.org>; Sat, 23 Apr 2022 04:07:33 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 1C234B80B1E
-        for <fstests@vger.kernel.org>; Sat, 23 Apr 2022 11:07:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C728C385A5;
-        Sat, 23 Apr 2022 11:07:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650712050;
-        bh=mfKlXfNx8yZ+TkrvWcai1o2GZfWhMshfuHZBmydAJL0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Qq0r4aMMwTfB9wvreLupIM/4DMJd2M69YHCUMMsUTaq7hLVoLhWuxurHR878BQ9lz
-         c3nAPKiZWm4qIfl4q0bHdOZPP099VukD3mpQo+69rpeNXkz4OWufPl71YP0fOwetKd
-         z35woY2lk3c+xzhz5pjMMRh3Nah2M9yZmQs80hZtUHFA2Fjjdb7DIzKAIARArJRNfo
-         9SDPPOTo5MVokwX0584SpSY6xTsYPkW6a5yJ0UCeW4s9txyRpN8Gf5NC4bQbwWMGpO
-         an4Pny64aU7Pq+YDlXpqZRpT0GkKjT1brCufNTAK9IG2uDC12SMYD65R+U6G1fa48J
-         YzMtlXxqsGKJA==
-Date:   Sat, 23 Apr 2022 13:07:25 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Christoph Hellwig <hch@lst.de>, Dave Chinner <david@fromorbit.com>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Seth Forshee <sforshee@digitalocean.com>,
-        Peter Jin <peter@peterjin.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] generic: add test for tmpfs POSIX ACLs
-Message-ID: <20220423110725.62w7kqot5wmalpt5@wittgenstein>
-References: <20220419131423.2367795-1-brauner@kernel.org>
- <20220420175221.2502964-1-brauner@kernel.org>
- <20220421054120.suxfy3y7za3mgkkg@zlang-mailbox>
- <20220421085942.GR1609613@dread.disaster.area>
- <20220421153513.frp7xdbejsoawews@zlang-mailbox>
- <20220421153717.GA27435@lst.de>
- <20220421155320.agny6epqti2tcmit@wittgenstein>
- <CAOQ4uxhNskcDAuguYYkkvwrwFSw2A_s+MpJj6WcsguOSUSE7mg@mail.gmail.com>
+        with ESMTP id S238362AbiDXG0o (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Apr 2022 02:26:44 -0400
+Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E80E17BF8A
+        for <fstests@vger.kernel.org>; Sat, 23 Apr 2022 23:23:43 -0700 (PDT)
+Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.57])
+        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4KmJ1W4mwMzGny8;
+        Sun, 24 Apr 2022 14:21:03 +0800 (CST)
+Received: from huawei.com (10.175.127.227) by dggpeml500020.china.huawei.com
+ (7.185.36.88) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Sun, 24 Apr
+ 2022 14:23:37 +0800
+From:   Baokun Li <libaokun1@huawei.com>
+To:     <zlang@redhat.com>, <guaneryu@gmail.com>, <fstests@vger.kernel.org>
+CC:     <libaokun1@huawei.com>, <yukuai3@huawei.com>
+Subject: [RFC] common: overlay support tmpfs
+Date:   Sun, 24 Apr 2022 14:37:51 +0800
+Message-ID: <20220424063751.1067376-1-libaokun1@huawei.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhNskcDAuguYYkkvwrwFSw2A_s+MpJj6WcsguOSUSE7mg@mail.gmail.com>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.127.227]
+X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
+ dggpeml500020.china.huawei.com (7.185.36.88)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Apr 23, 2022 at 10:17:59AM +0300, Amir Goldstein wrote:
-> On Thu, Apr 21, 2022 at 9:05 PM Christian Brauner <brauner@kernel.org> wrote:
-> >
-> > On Thu, Apr 21, 2022 at 05:37:17PM +0200, Christoph Hellwig wrote:
-> > > On Thu, Apr 21, 2022 at 11:35:13PM +0800, Zorro Lang wrote:
-> > > > Sure, I won't do that wilfully, just try to ask how we can improve this
-> > > > huge and 'keep growing' idmapped-mounts.c, not tend to remove the whole
-> > > > idmapped-mount testing coverage :)
-> > >
-> > > It might just be time to split that file up into a few ones if there
-> > > is a sensible split.  I'll let Christian think about that, though.
-> >
-> > Yep, I agree. I think we need to at least rename it to reflect is vfs
-> > generic nature and then split it into separate test binaries.
-> > I'll think about a good approach.
-> 
-> The majority of test cases still do require_fs_allow_idmap and from
-> those who don't, most of them are variants for test cases that run
-> with and without idmapped mounts and possibly also in_userns.
+xfstests support overlay+tmpfs
 
-Just to clarify a few points in more detail to expand on the "grossly
-misnamed" theme:
+```local.config.example
+export FSTYP=tmpfs
+export TEST_DEV=tmpfs_test
+export TEST_DIR=/tmp/test
+export TEST_FS_MOUNT_OPTS="-t tmpfs"
+export SCRATCH_DEV=tmpfs_scratch
+export SCRATCH_MNT=/tmp/scratch
+export MOUNT_OPTIONS="-t tmpfs"
+```
+Run `./check -overlay tests` to execute test case on overlay+tmpfs.
 
-Given that this started out as a dedicated testsuite to provide almost
-obsessive testing of idmapped mounts the majority of tests is of course
-about idmapped mounts. It'd be rather concerning if it wasn't, in
-addition to also being misnamed.
+Signed-off-by: Baokun Li <libaokun1@huawei.com>
+---
+ common/config | 4 ++--
+ common/rc     | 7 ++++++-
+ 2 files changed, 8 insertions(+), 3 deletions(-)
 
-But to put numbers to it, we do have 74 test functions that each have a
-separate theme. Spread across the 74 test functions we do have ~120 test
-cases (Basically each fork() invocation in each of those 74 test
-functions can be considered a separate test case.).
+diff --git a/common/config b/common/config
+index 1033b890..3dc047e8 100644
+--- a/common/config
++++ b/common/config
+@@ -614,7 +614,7 @@ _overlay_config_override()
+ 	#    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
+ 	#    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
+ 	#    overlayfs base and mount dirs inside base fs mount.
+-	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
++	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || [ "$FSTYP" == tmpfs ] || return 0
+ 
+ 	# Config file may specify base fs type, but we obay -overlay flag
+ 	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+@@ -634,7 +634,7 @@ _overlay_config_override()
+ 	export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+ 	export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
+ 
+-	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
++	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+ 
+ 	# Store original base fs vars
+ 	export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
+diff --git a/common/rc b/common/rc
+index 553ae350..12498189 100644
+--- a/common/rc
++++ b/common/rc
+@@ -834,13 +834,18 @@ _scratch_mkfs()
+ 	local mkfs_status
+ 
+ 	case $FSTYP in
+-	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
++	nfs*|cifs|ceph|glusterfs|pvfs2|9p|virtiofs)
+ 		# unable to re-create this fstyp, just remove all files in
+ 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+ 		# created in previous runs
+ 		_scratch_cleanup_files
+ 		return $?
+ 		;;
++	overlay)
++		[ ! "$OVL_BASE_FSTYP" == tmpfs ] || return 0
++		_scratch_cleanup_files
++		return $?
++		;;
+ 	tmpfs)
+ 		# do nothing for tmpfs
+ 		return 0
+-- 
+2.31.1
 
-Of these 74 test functions we do have 12 generic vfs test functions,
-i.e. test functions that are not concerned with idmapped mounts.
-
-Just going by the number of test functions, not actual test cases that's
-almost 20% of the test suite concerned with generic vfs behavior.
-
-Plus, there's additional patchsets that extend the generic behavior
-which brings in another ~4-8 additional generic test functions with
-multiple test cases. And people will keep adding to it.
-
-> 
-> And this new test case is no exception - there is still idmapping
-> involved, just not idmapped-mounts.
-
-The point was that there's a decent number of tests that aren't
-concerned with idmapped mounts. And this new test-case is only relevant
-for tmpfs mounted in a non-initial userns. So I'm not sure what this is
-trying to say.
-
-The argument is simply that there is a non-trivial number of tests that
-are not concerned with idmapped mounts. But the name of the test binary
-does imply that it is only concerned with idmapped mounts when it
-clearly isn't. So it is misnamed at this point causing understandable
-confusion.
-
-Iow, given that I and others have to respond to a patch or add a comment
-in the commit message of a patch to remind people that the thing they're
-patching doesn't just do what it says on the tin, we should probably
-rename it or do something else to improve the situation.
-
-It'd be concerning to have a can labeled "tomato soup" but to then
-discover that is also has spaghetti in it. That might be a nice suprise
-but I'd still better put it on the label. :)
-
-That's beside the point that the source file is 15k+ LOC strong which is
-just obscene. :)
-
-> 
-> However you decide to break it up and/or rename the test binary
-> (I am not sure you must split the binary - only the source files),
-
-Rename we must imho; but I haven't yet decided whether or not we really
-should use separate binaries. I think I'd make that dependent on whether
-or not a good generic name can be found. :)
-
-> I think we need to be more consistent about the groups that the tests
-> that run this binary are in.
-> 
-> 'perms' group is adequate, but adding to the 'idmapped' group and
-> maybe also to a new 'userns' group would be useful.
-> 
-> BTW, the tests that use src/nsexec should also belong to the userns
-> group as does overlay/020, the only test that uses the 'unshare' tool.
-
-Good points.
