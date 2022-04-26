@@ -2,42 +2,44 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C81F1C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Apr 2022 05:18:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D59C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Apr 2022 05:29:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242241AbiDZFVq (ORCPT
+        id S232505AbiDZFcp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Apr 2022 01:21:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55756 "EHLO
+        Tue, 26 Apr 2022 01:32:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236396AbiDZFVp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 01:21:45 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6AE715838
-        for <fstests@vger.kernel.org>; Mon, 25 Apr 2022 22:18:34 -0700 (PDT)
+        with ESMTP id S231786AbiDZFco (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 01:32:44 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCA4B12AD6
+        for <fstests@vger.kernel.org>; Mon, 25 Apr 2022 22:29:34 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id DA732B81C0E
-        for <fstests@vger.kernel.org>; Tue, 26 Apr 2022 05:18:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 61286C385A4;
-        Tue, 26 Apr 2022 05:18:31 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5933F60F1F
+        for <fstests@vger.kernel.org>; Tue, 26 Apr 2022 05:29:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F335C385A4;
+        Tue, 26 Apr 2022 05:29:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650950311;
-        bh=gJlk7ywYl8c5kZE7ypRKn/6LPIMAPUT1/obRnQ01Sw4=;
+        s=k20201202; t=1650950973;
+        bh=r6yWKQhQXBt6CNv29EIfWOzxd5ND4uaEIIUlXLSPUSo=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=LsQE/RwSFhlADVjI3jk703HxPeLF5u8qw1ZhJtxDgEaLu2s/HaFdYAEBgrU80V4r1
-         Ts/ELNoutVQBYuMZJgEO1wyr/6jpXO/Xce7bQ+P188RDtBbQ5w7faDq8tSB8EhYZFT
-         UmIsHn9uMcTptrXOfXDTvDz5jm3cE3MnLgU22gMcRseaMmcBLj1+VYmEOR47mmIGQs
-         TPObL2O3EECfZD2l7ZJ/WGTUWjor7T3S3ROeGyDwPbSBilIU4WBZ0xzJ9sc9nuiYEm
-         r8b3UuqeH6Pgioo85MblgQJK54wFltmOWSqCo0kaHXiC/nJlcodzI5hWO6zQIxLx1C
-         MXPpdcAQXzrvQ==
-Date:   Mon, 25 Apr 2022 22:18:30 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        b=EUSDdUCpgbtxLoRC1r8L99QHKojWmFLvDBwFT4wTDiA6XUb73PTN4E0AN9TyN2FCa
+         eHq/B5DvBIzyY9wdeVUE8DnMta6f7VQBnXGmdRMX4/Lix3RTY1Msgnr/VyQAqObd6T
+         NQrcMcU8wpE/iAJyqQznmXcHHluH51sXkIi9VD/hIMQD4rM0QukVA8g+Azk/LedIiP
+         c3YLnHf0RDSVkT+uhkQdCuiSoth+DpaNE87ixjBln6pFDr1U+gW1x/p30ydwXwkC6H
+         Fx21Rv57vzRbWRmh0R3A7PY3lSZzYD/yTlYmTRXWxHHiOvh9sQpWNPc/wU8wgX2bhB
+         7H+B/LDqX3ghA==
+Date:   Tue, 26 Apr 2022 13:29:28 +0800
+From:   Zorro Lang <zlang@kernel.org>
 To:     Eric Sandeen <sandeen@redhat.com>
-Cc:     fstests@vger.kernel.org, zlang@kernel.org, david@fromorbit.com
+Cc:     fstests@vger.kernel.org, djwong@kernel.org, david@fromorbit.com
 Subject: Re: [PATCH] fstests: remove xfs/144
-Message-ID: <20220426051830.GI17059@magnolia>
+Message-ID: <20220426052928.tzcpujagipsurm4h@zlang-mailbox>
+Mail-Followup-To: Eric Sandeen <sandeen@redhat.com>,
+        fstests@vger.kernel.org, djwong@kernel.org, david@fromorbit.com
 References: <1650950094-18453-1-git-send-email-sandeen@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -59,12 +61,17 @@ On Tue, Apr 26, 2022 at 12:14:53AM -0500, Eric Sandeen wrote:
 > which removed this functionality, remove this test.
 > 
 > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
 > ---
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+And as we've talked, I'll write a new one case:
+2022-04-14 23:26 < sandeen> so you're suggesting that another test which exceeds soft quota with many writes is a good idea, and would have caught the quota warning /limit/ problem - right?
+2022-04-14 23:26 < sandeen> that sounds reasonable to me
+
+Thanks,
+Zorro
+
 >  tests/xfs/144     | 128 ---------------------------------------------
 >  tests/xfs/144.out | 151 ------------------------------------------------------
 >  2 files changed, 279 deletions(-)
