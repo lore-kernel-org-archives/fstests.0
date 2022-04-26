@@ -2,373 +2,255 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D59C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Apr 2022 05:29:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 74C9CC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Apr 2022 06:24:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232505AbiDZFcp (ORCPT
+        id S237772AbiDZG1W (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Apr 2022 01:32:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37266 "EHLO
+        Tue, 26 Apr 2022 02:27:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231786AbiDZFco (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 01:32:44 -0400
+        with ESMTP id S233942AbiDZG1V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 02:27:21 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCA4B12AD6
-        for <fstests@vger.kernel.org>; Mon, 25 Apr 2022 22:29:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2988F1229E3;
+        Mon, 25 Apr 2022 23:24:15 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5933F60F1F
-        for <fstests@vger.kernel.org>; Tue, 26 Apr 2022 05:29:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F335C385A4;
-        Tue, 26 Apr 2022 05:29:32 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B2E5961336;
+        Tue, 26 Apr 2022 06:24:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 64ED9C385A0;
+        Tue, 26 Apr 2022 06:24:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650950973;
-        bh=r6yWKQhQXBt6CNv29EIfWOzxd5ND4uaEIIUlXLSPUSo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=EUSDdUCpgbtxLoRC1r8L99QHKojWmFLvDBwFT4wTDiA6XUb73PTN4E0AN9TyN2FCa
-         eHq/B5DvBIzyY9wdeVUE8DnMta6f7VQBnXGmdRMX4/Lix3RTY1Msgnr/VyQAqObd6T
-         NQrcMcU8wpE/iAJyqQznmXcHHluH51sXkIi9VD/hIMQD4rM0QukVA8g+Azk/LedIiP
-         c3YLnHf0RDSVkT+uhkQdCuiSoth+DpaNE87ixjBln6pFDr1U+gW1x/p30ydwXwkC6H
-         Fx21Rv57vzRbWRmh0R3A7PY3lSZzYD/yTlYmTRXWxHHiOvh9sQpWNPc/wU8wgX2bhB
-         7H+B/LDqX3ghA==
-Date:   Tue, 26 Apr 2022 13:29:28 +0800
+        s=k20201202; t=1650954254;
+        bh=oBGzozlfGdoefzvo4o2VgjZakYj4nO8/IRv+9s2WxLM=;
+        h=From:To:Cc:Subject:Date:From;
+        b=b+rwiIjZvp9XG1ctgJA2mccjYLB8G83irGYJUTAaH29ypa/hMBfEuue3Z/oB10GUO
+         ArWMoqw1VozvxVyLMrGrpiu1R7lLCCEoH64JJvMug1vYqYHYd+2bUvDRZcGvE6ltsM
+         kOGOA8t6joEMnTz/qDqX0v+QOqNTPx9SiLQmGLc1ht/9fEGeXv+lIVGGdHbsKBZ7xp
+         ePwVro9q8cC4GNoVWVl3xi+Ot2ucC3dmf6KJS5fwISuzlAB/GK/N4FRUY+9koUVcTi
+         mgADj/35EX1Uli4XXkCJKWWs05hma/F9+IR1FQGWrbye3qp+qOjwOcRhN9A8cGcGgg
+         4yZSztsP/Ystg==
 From:   Zorro Lang <zlang@kernel.org>
-To:     Eric Sandeen <sandeen@redhat.com>
-Cc:     fstests@vger.kernel.org, djwong@kernel.org, david@fromorbit.com
-Subject: Re: [PATCH] fstests: remove xfs/144
-Message-ID: <20220426052928.tzcpujagipsurm4h@zlang-mailbox>
-Mail-Followup-To: Eric Sandeen <sandeen@redhat.com>,
-        fstests@vger.kernel.org, djwong@kernel.org, david@fromorbit.com
-References: <1650950094-18453-1-git-send-email-sandeen@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH] fsstress: remove ALLOCSP and FREESP operations entirely
+Date:   Tue, 26 Apr 2022 14:24:11 +0800
+Message-Id: <20220426062411.3119027-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1650950094-18453-1-git-send-email-sandeen@redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 26, 2022 at 12:14:53AM -0500, Eric Sandeen wrote:
-> This test was designed to validate the quota warning limit, which in
-> theory was supposed to migrate from a soft quota to hard enforcement
-> after a certain number of warnings. However, the xfs kernel commit
-> which incremented the warning counter was reverted; see:
-> 
-> xfs: revert "xfs: actually bump warning counts when we send warnings"
-> 
-> in the kernel tree for an explanation of why. Due to that revert,
-> which removed this functionality, remove this test.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
+From: Zorro Lang <zlang@redhat.com>
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Due to upstream linux has removed ALLOCSP/FREESP ioctls by commit:
+4d1b97f9ce7c0 ("xfs: kill the XFS_IOC_{ALLOC,FREE}SP* ioctls"), so
+let's remove ALLOCSP/FREESP testing from fsstress, to avoid more
+mismatch problems.
 
-And as we've talked, I'll write a new one case:
-2022-04-14 23:26 < sandeen> so you're suggesting that another test which exceeds soft quota with many writes is a good idea, and would have caught the quota warning /limit/ problem - right?
-2022-04-14 23:26 < sandeen> that sounds reasonable to me
+Due to g/070 specified "-f allocsp" and "-f freesp=0", so remove
+these two lines too.
 
-Thanks,
-Zorro
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ ltp/fsstress.c    | 117 ----------------------------------------------
+ tests/generic/070 |   2 -
+ 2 files changed, 119 deletions(-)
 
->  tests/xfs/144     | 128 ---------------------------------------------
->  tests/xfs/144.out | 151 ------------------------------------------------------
->  2 files changed, 279 deletions(-)
->  delete mode 100755 tests/xfs/144
->  delete mode 100644 tests/xfs/144.out
-> 
-> diff --git a/tests/xfs/144 b/tests/xfs/144
-> deleted file mode 100755
-> index 5abec9a..0000000
-> --- a/tests/xfs/144
-> +++ /dev/null
-> @@ -1,128 +0,0 @@
-> -#! /bin/bash
-> -# SPDX-License-Identifier: GPL-2.0-or-later
-> -# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> -#
-> -# FS QA Test No. 144
-> -#
-> -# Check that quota softlimit warnings work the way they should.  This means
-> -# that we can disobey the softlimit up to warnlimit times before it turns into
-> -# hard(er) enforcement.  This is a functional test for quota warnings, but
-> -# since the functionality has been broken for decades, this is also a
-> -# regression test for commit 4b8628d57b72 ("xfs: actually bump warning counts
-> -# when we send warnings").
-> -
-> -. ./common/preamble
-> -_begin_fstest auto quick quota
-> -
-> -# Import common functions.
-> -. ./common/filter
-> -. ./common/quota
-> -
-> -# real QA test starts here
-> -_supported_fs xfs
-> -_require_xfs_quota
-> -_require_scratch
-> -
-> -exercise() {
-> -	_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
-> -	cat $tmp.mkfs >>$seqres.full
-> -
-> -	# keep the blocksize and data size for dd later
-> -	. $tmp.mkfs
-> -
-> -	_qmount
-> -
-> -	_qsetup $1
-> -
-> -	echo "Using type=$type id=$id" >>$seqres.full
-> -
-> -	echo
-> -	echo "*** report initial settings" | tee -a $seqres.full
-> -	$XFS_QUOTA_PROG -x \
-> -		-c "limit -$type isoft=3 ihard=500000 $id" \
-> -		-c "warn -$type -i -d 13" \
-> -		$SCRATCH_DEV
-> -	$XFS_QUOTA_PROG -x \
-> -		-c "state -$type" >> $seqres.full
-> -	$XFS_QUOTA_PROG -x \
-> -		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> -		_filter_quota_report | LC_COLLATE=POSIX sort -ru
-> -
-> -	echo
-> -	echo "*** push past the soft inode limit" | tee -a $seqres.full
-> -	_file_as_id $SCRATCH_MNT/softok1 $id $type $bsize 0
-> -	_file_as_id $SCRATCH_MNT/softok2 $id $type $bsize 0
-> -	_file_as_id $SCRATCH_MNT/softok3 $id $type $bsize 0
-> -	_file_as_id $SCRATCH_MNT/softwarn1 $id $type $bsize 0
-> -	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> -		_filter_quota_report | LC_COLLATE=POSIX sort -ru
-> -
-> -	echo
-> -	echo "*** push further past the soft inode limit" | tee -a $seqres.full
-> -	for warn_nr in $(seq 2 5); do
-> -		_file_as_id $SCRATCH_MNT/softwarn$warn_nr $id $type $bsize 0
-> -	done
-> -	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> -		_filter_quota_report | LC_COLLATE=POSIX sort -ru
-> -
-> -	echo
-> -	echo "*** push past the soft inode warning limit" | tee -a $seqres.full
-> -	for warn_nr in $(seq 6 15); do
-> -		_file_as_id $SCRATCH_MNT/softwarn$warn_nr $id $type $bsize 0
-> -	done
-> -	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> -		_filter_quota_report | LC_COLLATE=POSIX sort -ru
-> -
-> -	echo
-> -	echo "*** unmount"
-> -	_scratch_unmount
-> -}
-> -
-> -_scratch_mkfs > $seqres.full
-> -_scratch_mount >> $seqres.full
-> -
-> -chmod a+rwx $SCRATCH_MNT $seqres.full	# arbitrary users will write here
-> -bsize=$(_get_file_block_size $SCRATCH_MNT)
-> -_scratch_unmount
-> -
-> -cat >$tmp.projects <<EOF
-> -1:$SCRATCH_MNT
-> -EOF
-> -
-> -cat >$tmp.projid <<EOF
-> -root:0
-> -scratch:1
-> -EOF
-> -
-> -projid_file="$tmp.projid"
-> -
-> -echo "*** user"
-> -_qmount_option "uquota"
-> -exercise u
-> -
-> -echo "*** group"
-> -_qmount_option "gquota"
-> -exercise g
-> -
-> -echo "*** uqnoenforce"
-> -_qmount_option "uqnoenforce"
-> -exercise uno
-> -
-> -echo "*** gqnoenforce"
-> -_qmount_option "gqnoenforce"
-> -exercise gno
-> -
-> -echo "*** pquota"
-> -_qmount_option "pquota"
-> -exercise p
-> -
-> -echo "*** pqnoenforce"
-> -_qmount_option "pqnoenforce"
-> -exercise pno
-> -
-> -# success, all done
-> -status=0
-> -exit
-> diff --git a/tests/xfs/144.out b/tests/xfs/144.out
-> deleted file mode 100644
-> index 963eb80..0000000
-> --- a/tests/xfs/144.out
-> +++ /dev/null
-> @@ -1,151 +0,0 @@
-> -QA output created by 144
-> -*** user
-> -meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> -data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> -         = sunit=XXX swidth=XXX, unwritten=X
-> -naming   =VERN bsize=XXX
-> -log      =LDEV bsize=XXX blocks=XXX
-> -realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> -
-> -*** report initial settings
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 4 3 500000 01 [7 days] 0 0 0 00 [--------]
-> -
-> -*** push further past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 8 3 500000 05 [7 days] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode warning limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 16 3 500000 13 [7 days] 0 0 0 00 [--------]
-> -
-> -*** unmount
-> -*** group
-> -meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> -data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> -         = sunit=XXX swidth=XXX, unwritten=X
-> -naming   =VERN bsize=XXX
-> -log      =LDEV bsize=XXX blocks=XXX
-> -realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> -
-> -*** report initial settings
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 4 3 500000 01 [7 days] 0 0 0 00 [--------]
-> -
-> -*** push further past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 8 3 500000 05 [7 days] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode warning limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 16 3 500000 13 [7 days] 0 0 0 00 [--------]
-> -
-> -*** unmount
-> -*** uqnoenforce
-> -meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> -data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> -         = sunit=XXX swidth=XXX, unwritten=X
-> -naming   =VERN bsize=XXX
-> -log      =LDEV bsize=XXX blocks=XXX
-> -realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> -
-> -*** report initial settings
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 4 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push further past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 8 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode warning limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 18 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** unmount
-> -*** gqnoenforce
-> -meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> -data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> -         = sunit=XXX swidth=XXX, unwritten=X
-> -naming   =VERN bsize=XXX
-> -log      =LDEV bsize=XXX blocks=XXX
-> -realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> -
-> -*** report initial settings
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 4 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push further past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 8 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode warning limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 18 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** unmount
-> -*** pquota
-> -meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> -data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> -         = sunit=XXX swidth=XXX, unwritten=X
-> -naming   =VERN bsize=XXX
-> -log      =LDEV bsize=XXX blocks=XXX
-> -realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> -
-> -*** report initial settings
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 4 3 500000 02 [7 days] 0 0 0 00 [--------]
-> -
-> -*** push further past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 8 3 500000 06 [7 days] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode warning limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 15 3 500000 13 [7 days] 0 0 0 00 [--------]
-> -
-> -*** unmount
-> -*** pqnoenforce
-> -meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> -data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> -         = sunit=XXX swidth=XXX, unwritten=X
-> -naming   =VERN bsize=XXX
-> -log      =LDEV bsize=XXX blocks=XXX
-> -realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> -
-> -*** report initial settings
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 4 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push further past the soft inode limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 8 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** push past the soft inode warning limit
-> -[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
-> -[NAME] 0 0 0 00 [--------] 18 3 500000 00 [--------] 0 0 0 00 [--------]
-> -
-> -*** unmount
-> -- 
-> 1.8.3.1
-> 
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 23188467..b395bc4d 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -86,7 +86,6 @@ static int renameat2(int dfd1, const char *path1,
+ 
+ typedef enum {
+ 	OP_AFSYNC,
+-	OP_ALLOCSP,
+ 	OP_AREAD,
+ 	OP_ATTR_REMOVE,
+ 	OP_ATTR_SET,
+@@ -103,7 +102,6 @@ typedef enum {
+ 	OP_FALLOCATE,
+ 	OP_FDATASYNC,
+ 	OP_FIEMAP,
+-	OP_FREESP,
+ 	OP_FSYNC,
+ 	OP_GETATTR,
+ 	OP_GETDENTS,
+@@ -216,7 +214,6 @@ struct print_string {
+ #define XATTR_NAME_BUF_SIZE 18
+ 
+ void	afsync_f(opnum_t, long);
+-void	allocsp_f(opnum_t, long);
+ void	aread_f(opnum_t, long);
+ void	attr_remove_f(opnum_t, long);
+ void	attr_set_f(opnum_t, long);
+@@ -233,7 +230,6 @@ void	dwrite_f(opnum_t, long);
+ void	fallocate_f(opnum_t, long);
+ void	fdatasync_f(opnum_t, long);
+ void	fiemap_f(opnum_t, long);
+-void	freesp_f(opnum_t, long);
+ void	fsync_f(opnum_t, long);
+ char	*gen_random_string(int);
+ void	getattr_f(opnum_t, long);
+@@ -281,7 +277,6 @@ char	*xattr_flag_to_string(int);
+ struct opdesc	ops[OP_LAST]	= {
+      /* [OP_ENUM]	   = {"name",	       function,	freq, iswrite }, */
+ 	[OP_AFSYNC]	   = {"afsync",	       afsync_f,	0, 1 },
+-	[OP_ALLOCSP]	   = {"allocsp",       allocsp_f,	1, 1 },
+ 	[OP_AREAD]	   = {"aread",	       aread_f,		1, 0 },
+ 	[OP_ATTR_REMOVE]   = {"attr_remove",   attr_remove_f,	0, 1 },
+ 	[OP_ATTR_SET]	   = {"attr_set",      attr_set_f,	0, 1 },
+@@ -298,7 +293,6 @@ struct opdesc	ops[OP_LAST]	= {
+ 	[OP_FALLOCATE]	   = {"fallocate",     fallocate_f,	1, 1 },
+ 	[OP_FDATASYNC]	   = {"fdatasync",     fdatasync_f,	1, 1 },
+ 	[OP_FIEMAP]	   = {"fiemap",	       fiemap_f,	1, 1 },
+-	[OP_FREESP]	   = {"freesp",	       freesp_f,	1, 1 },
+ 	[OP_FSYNC]	   = {"fsync",	       fsync_f,		1, 1 },
+ 	[OP_GETATTR]	   = {"getattr",       getattr_f,	1, 0 },
+ 	[OP_GETDENTS]	   = {"getdents",      getdents_f,	1, 0 },
+@@ -2042,62 +2036,6 @@ afsync_f(opnum_t opno, long r)
+ #endif
+ }
+ 
+-void
+-allocsp_f(opnum_t opno, long r)
+-{
+-#ifdef XFS_IOC_ALLOCSP64
+-	int		e;
+-	pathname_t	f;
+-	int		fd;
+-	struct xfs_flock64	fl;
+-	int64_t		lr;
+-	off64_t		off;
+-	struct stat64	stb;
+-	int		v;
+-	char		st[1024];
+-
+-	init_pathname(&f);
+-	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+-		if (v)
+-			printf("%d/%lld: allocsp - no filename\n", procid, opno);
+-		free_pathname(&f);
+-		return;
+-	}
+-	fd = open_path(&f, O_RDWR);
+-	e = fd < 0 ? errno : 0;
+-	check_cwd();
+-	if (fd < 0) {
+-		if (v)
+-			printf("%d/%lld: allocsp - open %s failed %d\n",
+-				procid, opno, f.path, e);
+-		free_pathname(&f);
+-		return;
+-	}
+-	if (fstat64(fd, &stb) < 0) {
+-		if (v)
+-			printf("%d/%lld: allocsp - fstat64 %s failed %d\n",
+-				procid, opno, f.path, errno);
+-		free_pathname(&f);
+-		close(fd);
+-		return;
+-	}
+-	inode_info(st, sizeof(st), &stb, v);
+-	lr = ((int64_t)random() << 32) + random();
+-	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
+-	off %= maxfsize;
+-	fl.l_whence = SEEK_SET;
+-	fl.l_start = off;
+-	fl.l_len = 0;
+-	e = xfsctl(f.path, fd, XFS_IOC_ALLOCSP64, &fl) < 0 ? errno : 0;
+-	if (v) {
+-		printf("%d/%lld: xfsctl(XFS_IOC_ALLOCSP64) %s%s %lld 0 %d\n",
+-		       procid, opno, f.path, st, (long long)off, e);
+-	}
+-	free_pathname(&f);
+-	close(fd);
+-#endif
+-}
+-
+ #ifdef AIO
+ void
+ do_aio_rw(opnum_t opno, long r, int flags)
+@@ -3732,61 +3670,6 @@ fiemap_f(opnum_t opno, long r)
+ #endif
+ }
+ 
+-void
+-freesp_f(opnum_t opno, long r)
+-{
+-#ifdef XFS_IOC_FREESP64
+-	int		e;
+-	pathname_t	f;
+-	int		fd;
+-	struct xfs_flock64	fl;
+-	int64_t		lr;
+-	off64_t		off;
+-	struct stat64	stb;
+-	int		v;
+-	char		st[1024];
+-
+-	init_pathname(&f);
+-	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+-		if (v)
+-			printf("%d/%lld: freesp - no filename\n", procid, opno);
+-		free_pathname(&f);
+-		return;
+-	}
+-	fd = open_path(&f, O_RDWR);
+-	e = fd < 0 ? errno : 0;
+-	check_cwd();
+-	if (fd < 0) {
+-		if (v)
+-			printf("%d/%lld: freesp - open %s failed %d\n",
+-				procid, opno, f.path, e);
+-		free_pathname(&f);
+-		return;
+-	}
+-	if (fstat64(fd, &stb) < 0) {
+-		if (v)
+-			printf("%d/%lld: freesp - fstat64 %s failed %d\n",
+-				procid, opno, f.path, errno);
+-		free_pathname(&f);
+-		close(fd);
+-		return;
+-	}
+-	inode_info(st, sizeof(st), &stb, v);
+-	lr = ((int64_t)random() << 32) + random();
+-	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
+-	off %= maxfsize;
+-	fl.l_whence = SEEK_SET;
+-	fl.l_start = off;
+-	fl.l_len = 0;
+-	e = xfsctl(f.path, fd, XFS_IOC_FREESP64, &fl) < 0 ? errno : 0;
+-	if (v)
+-		printf("%d/%lld: xfsctl(XFS_IOC_FREESP64) %s%s %lld 0 %d\n",
+-		       procid, opno, f.path, st, (long long)off, e);
+-	free_pathname(&f);
+-	close(fd);
+-#endif
+-}
+-
+ void
+ fsync_f(opnum_t opno, long r)
+ {
+diff --git a/tests/generic/070 b/tests/generic/070
+index 678344fa..8a134f80 100755
+--- a/tests/generic/070
++++ b/tests/generic/070
+@@ -29,8 +29,6 @@ _require_attrs
+ 
+ FSSTRESS_ARGS=`_scale_fsstress_args \
+ 	-d $TEST_DIR/fsstress \
+-	-f allocsp=0 \
+-	-f freesp=0 \
+ 	-f bulkstat=0 \
+ 	-f bulkstat1=0 \
+ 	-f resvsp=0 \
+-- 
+2.31.1
+
