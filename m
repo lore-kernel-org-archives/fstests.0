@@ -2,117 +2,136 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6779C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 08:40:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B3EEC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 14:33:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359486AbiD0InN (ORCPT
+        id S238178AbiD0OhC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Apr 2022 04:43:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41244 "EHLO
+        Wed, 27 Apr 2022 10:37:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1359487AbiD0InM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 04:43:12 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC1F66EC42
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 01:40:00 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S238251AbiD0Ogx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 10:36:53 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B283B2711;
+        Wed, 27 Apr 2022 07:33:41 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 728E1B82535
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 08:39:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B1CBC385A9;
-        Wed, 27 Apr 2022 08:39:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651048798;
-        bh=huGgbIC1Um/TXpnRmp03N+JgFFdo5T9OJ7aWe+vAARw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=u1ENqKkZGLD5SIpY1W4J6wc3EcEyhVSSTUDUXZj4WDvQXwRN23W6iljVAWJXXvvrk
-         uw8eCXcdxZbKUhZDD2enEwT6VgjwroUsADMP1qPvBNpQkJjjcrrjxtxL62vSkTZQdA
-         qAUMTQbrqntoQ+AICcx//R8qDgAseiLKnKHq3OKZen/nXK60X3MF0az4uEouecsPA0
-         QfPTTQEWooaTLoY3Wd/JWuh/A6+Raxc7iL6DlpJQttxNwIk8I3tK3ViWVCL7D670x3
-         Q4iqlDLgO0ewCNJrwHoUqe7AOXu5cGTVnYTkrAor4Tsl4ta59g5KLG8lu49BduvR99
-         An6QRnZa2j/bQ==
-Date:   Wed, 27 Apr 2022 16:39:43 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     Rishabh Dave <ridave@redhat.com>
-Cc:     fstests@vger.kernel.org, jlayton@redhat.com, rishabhddave@gmail.com
-Subject: Re: [PATCH] cephfs: add ceph-fuse suport for ceph-fuse
-Message-ID: <20220427083943.rc4alejvbl2wbw2z@zlang-mailbox>
-Mail-Followup-To: Rishabh Dave <ridave@redhat.com>, fstests@vger.kernel.org,
-        jlayton@redhat.com, rishabhddave@gmail.com
-References: <20220419175811.602126-1-ridave@redhat.com>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 6B8011F74E;
+        Wed, 27 Apr 2022 14:33:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1651070020; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=TJGsd2vyilOxS/TRuC7c7/caltdCv/57VqwYPzi41Tg=;
+        b=lhM7tFJuqzatgjsp+j6/7cDkxgvELkcagCYKDxKj3RcCaQX0c+2HbTDGXAKHsU0ug1a9j7
+        sSI0h5NS18mnImzCu5Kjvd+EplF/CB/yTu3vlm5tlfgur24uaGR71VZHRsja9BJEZE74sg
+        htRS91GSO82Lo3S1JaI9/8y3TnWnMCk=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1651070020;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=TJGsd2vyilOxS/TRuC7c7/caltdCv/57VqwYPzi41Tg=;
+        b=Bjy6l+MU8vi8U+DhE9EYPKtTH1Bc6e27aR5X/SNaFin1vbxBClndadkW1LrszYLN2I/008
+        juLh1TjYYFLCJmCQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0524E13A39;
+        Wed, 27 Apr 2022 14:33:39 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id VobyOUNUaWKJeQAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Wed, 27 Apr 2022 14:33:39 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 5ea18923;
+        Wed, 27 Apr 2022 14:34:10 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>
+Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH] ceph/005: verify correct statfs behaviour with quotas
+Date:   Wed, 27 Apr 2022 15:34:09 +0100
+Message-Id: <20220427143409.987-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220419175811.602126-1-ridave@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 19, 2022 at 11:28:11PM +0530, Rishabh Dave wrote:
-> Currently tests in xfstests-dev can be executed against CephFS only by
-> mounting CephFS using kernel driver. Attempting to run tests against
-> CephFS using FUSE doesn't work because xfstests-dev would remount CephFS
-> using kernel. This patch adds the ability for xfstest-dev code to mount
-> CephFS using FUSE.
-> 
-> Fixes: https://tracker.ceph.com/issues/55354
-> Signed-off-by: Rishabh Dave <ridave@redhat.com>
-> ---
->  common/config |  2 ++
->  common/rc     | 46 ++++++++++++++++++++++++++++++++++------------
->  2 files changed, 36 insertions(+), 12 deletions(-)
-> 
-> diff --git a/common/config b/common/config
-> index 1033b890..efcf12e9 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -556,6 +556,8 @@ _check_device()
->  			_fatal "common/config: $name ($dev) is not a character device"
->  		fi
->  		;;
-> +	ceph-fuse)
-> +		;;
->  	*)
->  		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
->  	esac
-> diff --git a/common/rc b/common/rc
-> index 553ae350..868b3ddd 100644
-> --- a/common/rc
-> +++ b/common/rc
+When using a directory with 'max_bytes' quota as a base for a mount,
+statfs shall use that 'max_bytes' value as the total disk size.  That
+value shall be used even when using subdirectory as base for the mount.
 
-[snip]
+A bug was found where, when this subdirectory also had a 'max_files'
+quota, the real filesystem size would be returned instead of the parent
+'max_bytes' quota value.  This test case verifies this bug is fixed.
 
->  
->  	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
-> @@ -1869,6 +1890,7 @@ _require_test()
->  		if [ ! -d "$TEST_DIR" ]; then
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/005.out |  2 ++
+ 2 files changed, 42 insertions(+)
+ create mode 100755 tests/ceph/005
+ create mode 100644 tests/ceph/005.out
 
-This place missed a ";;", it'll cause all cases fail directly when they try to
-". common/rc". As this patch has been RVB, I'll fix it when I merge it. But better
-to give a patch a mimimum test before sending (except it's simple enough:), to make
-sure it won't break the most fundamental things at least, it's hard for me to test
-all fs that fstests supports before merging, Thanks for understanding :)
-
-Thanks,
-Zorro
-
-
-> +	ceph-fuse)
->  		;;
->  	cifs)
->  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
-> @@ -3204,7 +3226,7 @@ _check_test_fs()
->      virtiofs)
->  	# no way to check consistency for virtiofs
->  	;;
-> -    ceph)
-> +    ceph|ceph-fuse)
->  	# no way to check consistency for CephFS
->  	;;
->      glusterfs)
-> -- 
-> 2.34.1
-> 
+diff --git a/tests/ceph/005 b/tests/ceph/005
+new file mode 100755
+index 000000000000..0763a235a677
+--- /dev/null
++++ b/tests/ceph/005
+@@ -0,0 +1,40 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 005
++#
++# Make sure statfs reports correct total size when:
++# 1. using a directory with 'max_byte' quota as base for a mount
++# 2. using a subdirectory of the above directory with 'max_files' quota
++#
++. ./common/preamble
++_begin_fstest auto quick quota
++
++_supported_fs generic
++_require_scratch
++
++_scratch_mount
++mkdir -p $SCRATCH_MNT/quota-dir/subdir
++
++# set quotas
++quota=$((1024*10000))
++$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-dir
++$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-dir/subdir
++_scratch_unmount
++
++SCRATCH_DEV=$SCRATCH_DEV/quota-dir _scratch_mount
++total=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $2}'`
++SCRATCH_DEV=$SCRATCH_DEV/quota-dir _scratch_unmount
++[ $total -eq 8192 ] || _fail "Incorrect statfs for quota-dir: $total"
++
++SCRATCH_DEV=$SCRATCH_DEV/quota-dir/subdir _scratch_mount
++total=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $2}'`
++SCRATCH_DEV=$SCRATCH_DEV/quota-dir/subdir _scratch_unmount
++[ $total -eq 8192 ] || _fail "Incorrect statfs for quota-dir/subdir: $total"
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ceph/005.out b/tests/ceph/005.out
+new file mode 100644
+index 000000000000..a5027f127cf0
+--- /dev/null
++++ b/tests/ceph/005.out
+@@ -0,0 +1,2 @@
++QA output created by 005
++Silence is golden
