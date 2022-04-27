@@ -2,149 +2,333 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 115DBC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 17:19:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C1D1C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 18:06:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238449AbiD0RWq (ORCPT
+        id S244610AbiD0SJj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Apr 2022 13:22:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37466 "EHLO
+        Wed, 27 Apr 2022 14:09:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57140 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234530AbiD0RWp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 13:22:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4F090443E5
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 10:19:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651079971;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=y5+61Xho4ruc/mGDpb6uPTGctxk7ATFvHl1w70e5hFQ=;
-        b=NERVnE9T4YF7BeXBCOuU/GDDKKtywRODcMYIUtDKLLuUAwQecKFFhcgzECvtdqyUqZcIFd
-        Y2XVCXhEoYnbnk5kkc9CgXOevog7o884Q7us7XAk7o94nyijiOOQbOsoFZD325mX8WAizM
-        +maMjdXsPRtRednzvaLtFGHdMU4GgZA=
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
- [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-442-KotmY17TPJOuzFWUOZ6xsA-1; Wed, 27 Apr 2022 13:19:30 -0400
-X-MC-Unique: KotmY17TPJOuzFWUOZ6xsA-1
-Received: by mail-qk1-f200.google.com with SMTP id u129-20020a372e87000000b0069f8a79378eso1595949qkh.5
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 10:19:30 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=y5+61Xho4ruc/mGDpb6uPTGctxk7ATFvHl1w70e5hFQ=;
-        b=p7TMRTT1g0wZt7P7Pazot0Juh+NhrTY+wZ9rjP8NH9XMP5bau5FCgWSfo8yoiKk/UI
-         sm0ZQWsapfh6XJhcY+BbyiGg0yc/zt2tkTJFRflqWCmiNAeqq/wvZOPoP5er4RoscdkF
-         +FhMjKrLaJi9R/JEoPWkKvpCUlyAU+hCmXxygV6G6Wa7fV5QcbSu2VkEeqZ6bSYnI6Oh
-         1bQRJSRUvb97A74G3jYg/oW9brmKOuo/5hb/dYG7WQ8ML+TSeKBr861K6s+ECuNE3QJc
-         lY/X/6LslTQgSCfNy+jZXgcrQpZKB5+klgxglZZ6aFTLsjUvdg/t+HBRXERmtzAONGj2
-         /yOw==
-X-Gm-Message-State: AOAM532TIPa5SQ4gHW/G4HYmvsJTVAZiiXmM4gCeyeHRg7xv80HmrrOn
-        7e80Kmfqasm2u2LXgLR5v7xePwFzUXzaOpua/xrtaaeKO5JAVN+hkhzJSsIBlRuI1/6uisFRTQr
-        hU61i6JjrRxUfi5LLrw==
-X-Received: by 2002:ad4:5bc7:0:b0:44c:57f4:207c with SMTP id t7-20020ad45bc7000000b0044c57f4207cmr20582633qvt.2.1651079969377;
-        Wed, 27 Apr 2022 10:19:29 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzScr5ywRfDMSwSnYERGH1fJlYGy4WBKGRGEQpOw3Vbwve0jd/EePxavXGUfyVvuu20Z3iVvA==
-X-Received: by 2002:ad4:5bc7:0:b0:44c:57f4:207c with SMTP id t7-20020ad45bc7000000b0044c57f4207cmr20582617qvt.2.1651079969099;
-        Wed, 27 Apr 2022 10:19:29 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g4-20020ac87d04000000b002e06b4674a1sm10896850qtb.61.2022.04.27.10.19.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Apr 2022 10:19:28 -0700 (PDT)
-Date:   Thu, 28 Apr 2022 01:19:23 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
+        with ESMTP id S244674AbiD0SJD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 14:09:03 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18F6F522D5
+        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 11:05:50 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 75CAD61EBA
+        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 18:05:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C553FC385A7;
+        Wed, 27 Apr 2022 18:05:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651082749;
+        bh=7XdXcZ1Wn75KS1+mjDpyo/SkEx4SFfMo9HjCeBIwyAQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Wrq6HsJv/gUJeMNaSBMAiT/bQHpxxqfZ43gFUoC0+LsRCEN6COmU+C2XP8mDZkK/k
+         F8E7xnUELS/FlMURlPrE7TMGGffoTMy1aNXl1glT398kujAL9ExH2vYHoq9yk/NAxA
+         WESUWukuIFxiEL+UX6hY81/cSbPA2ELLRGM9KluJBfWDu/3dklG2SJzZf4WvEgaZ4N
+         lE9jvvceHnCIvQI6jhnODlXgF07BLOt9NdgLSJV1bb4BUa0rOsL421YLBroYnwDRpZ
+         qNGoHT8epQE899WNiFLGVpQ1oaA/b4LC26nmZugLqtL1Xhb5izBQDDawGNUda0ebF1
+         vpa9KyM1g6FtQ==
+Date:   Wed, 27 Apr 2022 11:05:49 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] ext4/054,ext4/055: don't run when using DAX
-Message-ID: <20220427171923.ab2duujwkljyatyv@zlang-mailbox>
-Mail-Followup-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
-References: <20220427005209.4188220-1-tytso@mit.edu>
- <20220427080540.o7tu3nz6g5ch6xpt@zlang-mailbox>
- <YmlY5NhDodhRRpkU@mit.edu>
+Subject: Re: [PATCH 1/3] xfs: add memory failure test for dax mode
+Message-ID: <20220427180549.GK17014@magnolia>
+References: <20220311151816.2174870-1-ruansy.fnst@fujitsu.com>
+ <20220311151816.2174870-2-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YmlY5NhDodhRRpkU@mit.edu>
+In-Reply-To: <20220311151816.2174870-2-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 27, 2022 at 10:53:24AM -0400, Theodore Ts'o wrote:
-> On Wed, Apr 27, 2022 at 04:05:40PM +0800, Zorro Lang wrote:
-> > 
-> > "The DAX code currently only supports files with a block size equal to your
-> > kernel's PAGE_SIZE" [1], so I suppose any cases with smaller blocksize (< pagesize)
-> > should "_exclude_scratch_mount_option dax".
-> > 
-> > And if this supposition is right, we'd better do "skipping dax testing if blocksize
-> > is less than pagesize" in a common helper. Good news is we have _scratch_mkfs_blocksized.
-> > So how about do:
-> >   if [ $blocksize < $pagesize ];then
-> >       _exclude_scratch_mount_option dax
-> >   fi
-> > in _scratch_mkfs_blocksized? then let ext4/054 and ext4/055 turn to use _scratch_mkfs_blocksized.
+On Fri, Mar 11, 2022 at 11:18:14PM +0800, Shiyang Ruan wrote:
+> Make sure memory failure mechanism works when filesystem is mounted with
+> dax option.
 > 
-> That's a good thing to and it would work for ext4/054 and ext/022
-> (which already uses "_exclude_scratch_mount_option dax" and
-> "_scratch_mkfs").  However, a number of other tests, including
-> ext4/055 and ext4/035 need to give additional parameters to mfks, such
-> as "-O quota" or "-E resize=262144".
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> ---
+>  .gitignore                      |   1 +
+>  src/Makefile                    |   3 +-
+>  src/t_mmap_cow_memory_failure.c | 154 ++++++++++++++++++++++++++++++++
+>  tests/xfs/900                   |  48 ++++++++++
+>  tests/xfs/900.out               |   9 ++
+>  5 files changed, 214 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_mmap_cow_memory_failure.c
+>  create mode 100755 tests/xfs/900
+>  create mode 100644 tests/xfs/900.out
 > 
-> So _scratch_mkfs_blocksized isn't always going to work for tests in
-> ext4/* where we often are passing ext4-specific mkfs options to
-> mkfs.ext4.
+> diff --git a/.gitignore b/.gitignore
+> index ba0c572b..1d26b28a 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -146,6 +146,7 @@ tags
+>  /src/t_holes
+>  /src/t_immutable
+>  /src/t_mmap_collision
+> +/src/t_mmap_cow_memory_failure
+>  /src/t_mmap_cow_race
+>  /src/t_mmap_dio
+>  /src/t_mmap_fallocate
+> diff --git a/src/Makefile b/src/Makefile
+> index 111ce1d9..d702e200 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -18,7 +18,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+>  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+>  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+> -	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale
+> +	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+> +	t_mmap_cow_memory_failure
+>  
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/t_mmap_cow_memory_failure.c b/src/t_mmap_cow_memory_failure.c
+> new file mode 100644
+> index 00000000..e2266ced
+> --- /dev/null
+> +++ b/src/t_mmap_cow_memory_failure.c
+> @@ -0,0 +1,154 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/* Copyright (c) 2022 Fujitsu Corporation. */
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <libgen.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <semaphore.h>
+> +#include <sys/mman.h>
+> +#include <sys/wait.h>
+> +#include <sys/sem.h>
+> +#include <time.h>
+> +#include <unistd.h>
+> +
+> +#define KiB(a) ((a)*1024)
+> +#define MiB(a) (KiB(a)*1024)
+> +
+> +sem_t *sem;
+> +
+> +void sigbus_handler(int signal)
+> +{
+> +	printf("Process is killed by signal: %d\n", signal);
+> +	sem_post(sem);
+> +}
+> +
+> +void mmap_read_file(char *filename, off_t offset, size_t size)
+> +{
+> +	int fd;
+> +	char *map, *dummy;
+> +	struct timespec ts;
+> +
+> +	fd = open(filename, O_RDWR);
+> +	map = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, offset);
+> +	dummy = malloc(size);
+> +
+> +	/* make sure page fault happens */
+> +	memcpy(dummy, map, size);
+> +
+> +	/* ready */
+> +	sem_post(sem);
+> +
+> +	usleep(200000);
+> +
+> +	clock_gettime(CLOCK_REALTIME, &ts);
+> +	ts.tv_sec += 3;
+> +	/* wait for injection done */
+> +	sem_timedwait(sem, &ts);
+> +
+> +	free(dummy);
+> +	munmap(map, size);
+> +	close(fd);
+> +}
+> +
+> +void mmap_read_file_then_posion(char *filename, off_t offset, size_t size,
+
+Nit: "poison", not "posion".
+
+With that nit fixed,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
+> +		off_t posionOffset, size_t posionSize)
+> +{
+> +	int fd, error;
+> +	char *map, *dummy;
+> +
+> +	/* wait for parent preparation done */
+> +	sem_wait(sem);
+> +
+> +	fd = open(filename, O_RDWR);
+> +	map = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, offset);
+> +	dummy = malloc(size);
+> +
+> +	/* make sure page fault happens */
+> +	memcpy(dummy, map, size);
+> +
+> +	printf("Inject posion...\n");
+> +	error = madvise(map + posionOffset, posionSize, MADV_HWPOISON);
+> +	if (error)
+> +		printf("madvise() has fault: %d, errno: %d\n", error, errno);
+> +
+> +	free(dummy);
+> +	munmap(map, size);
+> +	close(fd);
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	char *pReadFile = NULL, *pPosionFile = NULL;
+> +	/* mmap range, in unit of 4KiB */
+> +	size_t mmapSize = KiB(4);
+> +	off_t mmapOffset = 0;
+> +	/* posion range, in unit of 4KiB */
+> +	size_t posionSize = KiB(4);
+> +	off_t posionOffset = 0;
+> +	int c;
+> +	pid_t pid;
+> +
+> +	while ((c = getopt(argc, argv, "o::s::O::S::R:P:")) != -1) {
+> +		switch (c) {
+> +		// mmap offset, in unit of 4KiB
+> +		case 'o':
+> +			mmapOffset = atoi(optarg) * KiB(4);
+> +			break;
+> +		// mmap size
+> +		case 's':
+> +			mmapSize = atoi(optarg) * KiB(4);
+> +			break;
+> +		// madvice offset
+> +		case 'O':
+> +			posionOffset = atoi(optarg) * KiB(4);
+> +			break;
+> +		// madvice size
+> +		case 'S':
+> +			posionSize = atoi(optarg) * KiB(4);
+> +			break;
+> +		// filename for mmap read
+> +		case 'R':
+> +			pReadFile = optarg;
+> +			break;
+> +		// filename for posion read
+> +		case 'P':
+> +			pPosionFile = optarg;
+> +			break;
+> +		default:
+> +			printf("Unknown option: %c\n", c);
+> +			exit(1);
+> +		}
+> +	}
+> +
+> +	if (!pReadFile || !pPosionFile) {
+> +		printf("Usage: \n"
+> +		       "  %s [-o mmapOffset] [-s mmapSize] [-O mmapOffset] [-S mmapSize] -R readFile -P posionFile\n",
+> +				basename(argv[0]));
+> +		exit(0);
+> +	}
+> +	if (posionSize < mmapSize)
+> +		mmapSize = posionSize;
+> +
+> +	// fork and mmap files
+> +	pid = fork();
+> +	if (pid == 0) {
+> +		/* handle SIGBUS */
+> +		signal(SIGBUS, sigbus_handler);
+> +		sem = sem_open("sync", O_CREAT, 0666, 0);
+> +
+> +		/* mread & do memory failure on posion file */
+> +		mmap_read_file_then_posion(pPosionFile, mmapOffset, mmapSize,
+> +				posionOffset, posionSize);
+> +
+> +		sem_close(sem);
+> +	} else {
+> +		sem = sem_open("sync", O_CREAT, 0666, 0);
+> +
+> +		/* mread read file, wait for child process to be killed */
+> +		mmap_read_file(pReadFile, mmapOffset, mmapSize);
+> +		sem_close(sem);
+> +	}
+> +	exit(0);
+> +}
+> diff --git a/tests/xfs/900 b/tests/xfs/900
+> new file mode 100755
+> index 00000000..51529db5
+> --- /dev/null
+> +++ b/tests/xfs/900
+> @@ -0,0 +1,48 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# FS QA Test No. 900
+> +#
+> +# Test memory failure mechanism when dax enabled
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick dax
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_require_check_dmesg
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +_require_xfs_scratch_rmapbt
+> +_require_scratch_dax_mountopt "dax"
+> +_require_test_program "t_mmap_cow_memory_failure"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount "-o dax" >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
+> +
+> +echo "Create the original files"
+> +filesize=65536
+> +_pwrite_byte 0x61 0 $filesize $testdir/testfile >> $seqres.full
+> +_scratch_cycle_mount "dax"
+> +
+> +echo "Inject memory failure (1 page)"
+> +# create two processes:
+> +#  process1: mread 4k to cause page fault, and wait
+> +#  process2: mread 4k to cause page fault, then inject posion on this 4k page
+> +$here/src/t_mmap_cow_memory_failure -s1 -S1 -R $testdir/testfile -P $testdir/testfile
+> +
+> +echo "Inject memory failure (2 pages)"
+> +$here/src/t_mmap_cow_memory_failure -s2 -S2 -R $testdir/testfile -P $testdir/testfile
+> +
+> +_check_dmesg_for "Sending SIGBUS to t_mmap_cow_memo" || echo "Memory failure didn't kill the process"
+> +_check_dmesg_for "recovery action for dax page: Recovered" || echo "Failured page didn't recovered"
+> +
+> +# success, all done
+> +status=0
+> diff --git a/tests/xfs/900.out b/tests/xfs/900.out
+> new file mode 100644
+> index 00000000..d861bf1f
+> --- /dev/null
+> +++ b/tests/xfs/900.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 900
+> +Format and mount
+> +Create the original files
+> +Inject memory failure (1 page)
+> +Inject posion...
+> +Process is killed by signal: 7
+> +Inject memory failure (2 pages)
+> +Inject posion...
+> +Process is killed by signal: 7
+> -- 
+> 2.35.1
 > 
-> So I can add your suggestion to _scratch_mkfs_blocksized, and use that
-> for ext4/054, but it's not going to be a solution for ext4/055.
-
-I just noticed that _scratch_mkfs_sized() and _scratch_mkfs_blocksized() both use
-_scratch_mkfs_xfs for XFS, I'm wondering if ext4 would like to use _scratch_mkfs_ext4()
-or even use _scratch_mkfs() directly in these two functions. Then you can do something
-likes:
-  MKFS_OPTIONS="$MKFS_OPTIONS -F -O quota"
-  _scratch_mkfs_blocksized 1024
-or:
-  MKFS_OPTIONS="$MKFS_OPTIONS -F -O quota" _scratch_mkfs_blocksized 1024
-
-Hmm... that might look a little ugly... it's doesn't matter if we write as:
-  _exclude_scratch_mount_option dax
-  _scratch_mkfs "-F -O quota -b 1024"
-
-We just provide a helper to avoid someone forget 'dax', I don't object someone would
-like to "exclude dax" by explicit method :) So if you don't have much time to do this
-change, you can just do what you said above, then I'll take another time/chance to
-change _scratch_mkfs_* things.
-
-Maybe we should think about let all _scratch_mkfs_*[1] helpers use _scratch_mkfs
-consistently. But that will change and affect too many things. I don't want to break
-fundamental code too much, might be better to let each fs help to change and test
-that bit by bit, when they need :)
-
-Thanks,
-Zorro
-
-
-$ grep -rs _scratch_mkfs_.*() common/
-common/casefold:_scratch_mkfs_casefold()
-common/casefold:_scratch_mkfs_casefold_strict()
-common/encrypt:_scratch_mkfs_encrypted()
-common/encrypt:_scratch_mkfs_sized_encrypted()
-common/encrypt:_scratch_mkfs_stable_inodes_encrypted()
-common/verity:_scratch_mkfs_verity()
-common/verity:_scratch_mkfs_encrypted_verity()
-common/rc:_scratch_mkfs_options()
-common/rc:_scratch_mkfs_sized()
-common/rc:_scratch_mkfs_geom()
-common/rc:_scratch_mkfs_blocksized()
-common/rc:_scratch_mkfs_richacl()
-
 > 
-> Cheers,
 > 
-> 						- Ted
-> 
-
