@@ -2,145 +2,117 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35C74C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 08:06:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6779C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 08:40:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345753AbiD0IJX (ORCPT
+        id S1359486AbiD0InN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Apr 2022 04:09:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49710 "EHLO
+        Wed, 27 Apr 2022 04:43:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1359408AbiD0IJB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 04:09:01 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 89208B871
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 01:05:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651046748;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=uG2V/WA0WBDQP7RakIlijzfJe0G0K3WMFVV0MG5B8HY=;
-        b=icIF5Y19fD4rSmRq0Nk3wuhnw9A/HdZDp3FZPn6N/y/e1Km1BB4oW4rw3oZ1gA8ZsjZb89
-        I/F13nyRtRpqZL/+eruu3taX4ZMKt+LpxmTEdl7dy3PylsaMEDSZGxTl9zVuo/OqdkYHEB
-        zTE+SNn82gjPqSM2eHqPDdDCdp62PXg=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-533-mqq5eaNIO4utAESYOE5Vjw-1; Wed, 27 Apr 2022 04:05:46 -0400
-X-MC-Unique: mqq5eaNIO4utAESYOE5Vjw-1
-Received: by mail-qt1-f197.google.com with SMTP id f22-20020ac840d6000000b002dd4d87de21so607756qtm.23
-        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 01:05:46 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=uG2V/WA0WBDQP7RakIlijzfJe0G0K3WMFVV0MG5B8HY=;
-        b=sSQ+0k/4T0YofNUsovRhFU0W7q6/1RO2jTYA6E8O9ZzodJ2VGwy1WNwxozLejbLwzI
-         D8TDzybrgOU1ej6nOCVzeH6k/FnXeBB/Epk18XbvgcZxdojA+4/tv5CWUMDmLelIUhDw
-         +o9uGKxyvfec7tZ1l/DH7dknsiKru27L6JHFCQgFqaEOm3c7hq2gfGNzvFlkx+B4K0Wc
-         YyR6dYCe7/h6bSelhxcnoAp/p5H4ulOGOVZ/uuOXh7M0fPg5xBdoAFaD5D5Gz++Gan91
-         svKvwaxGZ2FKFwbUmF2pOxCd34oNFGEZWDePPMiSEsJXzJJuQOj+sa5cUiKQm9vxAHBQ
-         1WIQ==
-X-Gm-Message-State: AOAM531S3wSVqpyFzkM0v9TMAsWVRk1qfte+L7YSgsYkapZQC5+V/TSq
-        s3DJcUb8q4lYNeSr3SZG3MevY0ut+jBT5kLT5sQgwOOIhKUO8+bE2OR4ozRtWJHYoWB3YLgyQ+N
-        o0Zm8UmzEGdUu8C/vxw==
-X-Received: by 2002:a05:6214:2266:b0:456:2c5a:b45f with SMTP id gs6-20020a056214226600b004562c5ab45fmr13812409qvb.24.1651046745977;
-        Wed, 27 Apr 2022 01:05:45 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz+U4dffUVTv+Vx2Ke5RGMQ1g1/6fkSOKAdDpzQF93PB8QlsFhGWKTCSRRXeZXR7wpYoIXk/w==
-X-Received: by 2002:a05:6214:2266:b0:456:2c5a:b45f with SMTP id gs6-20020a056214226600b004562c5ab45fmr13812401qvb.24.1651046745751;
-        Wed, 27 Apr 2022 01:05:45 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c10-20020ae9e20a000000b0069f88d14596sm1045926qkc.97.2022.04.27.01.05.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Apr 2022 01:05:45 -0700 (PDT)
-Date:   Wed, 27 Apr 2022 16:05:40 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] ext4/054,ext4/055: don't run when using DAX
-Message-ID: <20220427080540.o7tu3nz6g5ch6xpt@zlang-mailbox>
-Mail-Followup-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
-References: <20220427005209.4188220-1-tytso@mit.edu>
+        with ESMTP id S1359487AbiD0InM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 04:43:12 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC1F66EC42
+        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 01:40:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 728E1B82535
+        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 08:39:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B1CBC385A9;
+        Wed, 27 Apr 2022 08:39:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651048798;
+        bh=huGgbIC1Um/TXpnRmp03N+JgFFdo5T9OJ7aWe+vAARw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=u1ENqKkZGLD5SIpY1W4J6wc3EcEyhVSSTUDUXZj4WDvQXwRN23W6iljVAWJXXvvrk
+         uw8eCXcdxZbKUhZDD2enEwT6VgjwroUsADMP1qPvBNpQkJjjcrrjxtxL62vSkTZQdA
+         qAUMTQbrqntoQ+AICcx//R8qDgAseiLKnKHq3OKZen/nXK60X3MF0az4uEouecsPA0
+         QfPTTQEWooaTLoY3Wd/JWuh/A6+Raxc7iL6DlpJQttxNwIk8I3tK3ViWVCL7D670x3
+         Q4iqlDLgO0ewCNJrwHoUqe7AOXu5cGTVnYTkrAor4Tsl4ta59g5KLG8lu49BduvR99
+         An6QRnZa2j/bQ==
+Date:   Wed, 27 Apr 2022 16:39:43 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     Rishabh Dave <ridave@redhat.com>
+Cc:     fstests@vger.kernel.org, jlayton@redhat.com, rishabhddave@gmail.com
+Subject: Re: [PATCH] cephfs: add ceph-fuse suport for ceph-fuse
+Message-ID: <20220427083943.rc4alejvbl2wbw2z@zlang-mailbox>
+Mail-Followup-To: Rishabh Dave <ridave@redhat.com>, fstests@vger.kernel.org,
+        jlayton@redhat.com, rishabhddave@gmail.com
+References: <20220419175811.602126-1-ridave@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220427005209.4188220-1-tytso@mit.edu>
+In-Reply-To: <20220419175811.602126-1-ridave@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 26, 2022 at 08:52:09PM -0400, Theodore Ts'o wrote:
-> The ext4/054 and ext4/055 tests create a scratch file system with a 1k
-> block size.  This is not compatible with mounting with the DAX option,
-> which requires a block size equal to the page size (which is 4k on
-> x86).
+On Tue, Apr 19, 2022 at 11:28:11PM +0530, Rishabh Dave wrote:
+> Currently tests in xfstests-dev can be executed against CephFS only by
+> mounting CephFS using kernel driver. Attempting to run tests against
+> CephFS using FUSE doesn't work because xfstests-dev would remount CephFS
+> using kernel. This patch adds the ability for xfstest-dev code to mount
+> CephFS using FUSE.
 > 
-> Also, the ext4/054 test doesn't use the test device, so remove the
-> _require_test declaration.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> Fixes: https://tracker.ceph.com/issues/55354
+> Signed-off-by: Rishabh Dave <ridave@redhat.com>
 > ---
+>  common/config |  2 ++
+>  common/rc     | 46 ++++++++++++++++++++++++++++++++++------------
+>  2 files changed, 36 insertions(+), 12 deletions(-)
+> 
+> diff --git a/common/config b/common/config
+> index 1033b890..efcf12e9 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -556,6 +556,8 @@ _check_device()
+>  			_fatal "common/config: $name ($dev) is not a character device"
+>  		fi
+>  		;;
+> +	ceph-fuse)
+> +		;;
+>  	*)
+>  		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
+>  	esac
+> diff --git a/common/rc b/common/rc
+> index 553ae350..868b3ddd 100644
+> --- a/common/rc
+> +++ b/common/rc
 
-Hi Ted,
+[snip]
 
-Thanks for point out this issue. I got a little question about this patch,
-feel free to correct me if that's wrong.
+>  
+>  	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+> @@ -1869,6 +1890,7 @@ _require_test()
+>  		if [ ! -d "$TEST_DIR" ]; then
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
 
-"The DAX code currently only supports files with a block size equal to your
-kernel's PAGE_SIZE" [1], so I suppose any cases with smaller blocksize (< pagesize)
-should "_exclude_scratch_mount_option dax".
-
-And if this supposition is right, we'd better do "skipping dax testing if blocksize
-is less than pagesize" in a common helper. Good news is we have _scratch_mkfs_blocksized.
-So how about do:
-  if [ $blocksize < $pagesize ];then
-      _exclude_scratch_mount_option dax
-  fi
-in _scratch_mkfs_blocksized? then let ext4/054 and ext4/055 turn to use _scratch_mkfs_blocksized.
+This place missed a ";;", it'll cause all cases fail directly when they try to
+". common/rc". As this patch has been RVB, I'll fix it when I merge it. But better
+to give a patch a mimimum test before sending (except it's simple enough:), to make
+sure it won't break the most fundamental things at least, it's hard for me to test
+all fs that fstests supports before merging, Thanks for understanding :)
 
 Thanks,
 Zorro
 
 
-[1]
-https://www.kernel.org/doc/Documentation/filesystems/dax.txt
-
->  tests/ext4/054 | 2 +-
->  tests/ext4/055 | 3 ++-
->  2 files changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/ext4/054 b/tests/ext4/054
-> index 9a11719f..6c722f32 100755
-> --- a/tests/ext4/054
-> +++ b/tests/ext4/054
-> @@ -19,8 +19,8 @@ _begin_fstest auto quick dangerous_fuzzers
->  
->  # real QA test starts here
->  _supported_fs ext4
-> -_require_test
->  _require_scratch_nocheck
-> +_exclude_scratch_mount_option dax
->  _require_xfs_io_command "falloc"
->  _require_xfs_io_command "pwrite"
->  _require_xfs_io_command "fsync"
-> diff --git a/tests/ext4/055 b/tests/ext4/055
-> index 8f466f1b..1ae42b89 100755
-> --- a/tests/ext4/055
-> +++ b/tests/ext4/055
-> @@ -17,8 +17,9 @@
->  _begin_fstest auto quota
->  
->  # real QA test starts here
-> -_require_scratch_nocheck
->  _supported_fs ext4
-> +_require_scratch_nocheck
-> +_exclude_scratch_mount_option dax
->  _require_user fsgqa
->  _require_user fsgqa2
->  _require_command "$DEBUGFS_PROG" debugfs
+> +	ceph-fuse)
+>  		;;
+>  	cifs)
+>  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+> @@ -3204,7 +3226,7 @@ _check_test_fs()
+>      virtiofs)
+>  	# no way to check consistency for virtiofs
+>  	;;
+> -    ceph)
+> +    ceph|ceph-fuse)
+>  	# no way to check consistency for CephFS
+>  	;;
+>      glusterfs)
 > -- 
-> 2.31.0
+> 2.34.1
 > 
-
