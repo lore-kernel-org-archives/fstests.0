@@ -2,264 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B510CC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 03:35:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83668C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 06:22:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357321AbiD0Di7 (ORCPT
+        id S1358072AbiD0GZ5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Apr 2022 23:38:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42626 "EHLO
+        Wed, 27 Apr 2022 02:25:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357578AbiD0Dit (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 23:38:49 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C4CD2DA86;
-        Tue, 26 Apr 2022 20:35:37 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id A9684B824AA;
-        Wed, 27 Apr 2022 03:35:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55742C385A7;
-        Wed, 27 Apr 2022 03:35:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651030534;
-        bh=Q3/VObuXH2e6mabLQ2B2Jf49QVs6XPTgN/y8amMXlco=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lSWRgivLGfx0LKk6dP+goIrb6+ALcnbbxBtIX9BgL2Si1IhRC5VxwZmg+k/zSATVB
-         lNEqrzzwNkynPu/UdBR40o97hSfrWXQ7RI1NsjmnXI3kF2YnocU7Ix1ggtjhNTOOZ7
-         VVKXFY4TGnF49PrKkKPX1qrRRQUCGGRg57klPF4irvsyB1+/oINckfBqE7AYZST/K6
-         p38KIGgaX2pv4D5cuTDeQM2d/nz2xig6CXyD8Jk5Jgm1r/YQ4OraSD7rDC1C/7jh9L
-         a/dX7W1DLWI3zim+g/0X/5kg6YEOvLop4FvjWPfrn1F6xVmsHkl/hKMvUhbFpCNKBW
-         Jj5UH6weBMy0Q==
-Date:   Tue, 26 Apr 2022 20:35:33 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] fsstress: remove ALLOCSP and FREESP operations entirely
-Message-ID: <20220427033533.GJ17014@magnolia>
-References: <20220426062411.3119027-1-zlang@kernel.org>
+        with ESMTP id S229813AbiD0GZ5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 02:25:57 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 975C28E18A
+        for <fstests@vger.kernel.org>; Tue, 26 Apr 2022 23:22:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1651040566;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=2pLpD2XwOpuIFeAdnMHjXovEesIMLj0zcDPFKt27Fzc=;
+        b=ZTvpx+viAgxHebwdKiOlQzdI2Je9II3Yges1ZQLtxilbu+krNW2USmMOT6NCvQ5b0LRPMj
+        msOIBqW76omfupLYMoTB2SRJKg1d7olZWZ8cC8TKeyZEA/pyaYSAfOPyKQBhtix4gApLZq
+        uYwP3lUPeVAGKVu3J1XVX1RH4QRV688=
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
+ [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-593-TlTuP8kDPxmVJCzmU788Yg-1; Wed, 27 Apr 2022 02:22:45 -0400
+X-MC-Unique: TlTuP8kDPxmVJCzmU788Yg-1
+Received: by mail-qt1-f198.google.com with SMTP id e6-20020ac86706000000b002f1f8ec1f63so512438qtp.5
+        for <fstests@vger.kernel.org>; Tue, 26 Apr 2022 23:22:45 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=2pLpD2XwOpuIFeAdnMHjXovEesIMLj0zcDPFKt27Fzc=;
+        b=7DLmxrXqEnVV0lx4GrNfVhlNb8O5z9K72vR7OWrwzZ2phVGLLVPM2BFYZCuB+dgpzd
+         +xzhZ/7GfDnXNd/GDayD68c2YCRO3vihrUcKm8xsgftND9A5cQS1DL7smpvfMMeJZrRN
+         rgfzhTPr87FKMm7inNyiXo8VhGLvBoy0/mcvhPRFXrVzXkSL/lpg+gaG4iKZwfmZtEzz
+         34rmdVEgXF9bG85aZiaDHu8nE3d+uvVrV2c9s5o502wUNvUpkUqQ7F4TWFy9RfyQZ7DN
+         uigertnZZ29jEwfkzYSLhweRftG7eMmNLlbiRJ1TFXzXs8baGQJSrE5OipLNedgb2cWj
+         kc9Q==
+X-Gm-Message-State: AOAM531Ybvmtq2M+tFDu4Q7prrCUgAIkFIRqDVu96Sl+u0I6QCjCcuHJ
+        mAD5hd7u7Pi8Rdm3WwHBQUsZJKMztDzXVfxoFTdYbb38/yGjbQHN3qDCg9nt9oFyWzJ2VLngd0L
+        19JvpjBGgchusXLy4lg==
+X-Received: by 2002:a05:620a:f03:b0:67e:1e38:4a0 with SMTP id v3-20020a05620a0f0300b0067e1e3804a0mr15410435qkl.86.1651040564749;
+        Tue, 26 Apr 2022 23:22:44 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxoxbqf/EbUWqSDAh9cCEgxClMpvd0H6hi4x0GRD+e8EFnP9vA23kQorzMbeRv4KZRSNYXmrg==
+X-Received: by 2002:a05:620a:f03:b0:67e:1e38:4a0 with SMTP id v3-20020a05620a0f0300b0067e1e3804a0mr15410425qkl.86.1651040564530;
+        Tue, 26 Apr 2022 23:22:44 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id 19-20020a05620a079300b0069eb4c4e007sm7333581qka.29.2022.04.26.23.22.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Apr 2022 23:22:43 -0700 (PDT)
+Date:   Wed, 27 Apr 2022 14:22:38 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     linux-xfs@vger.kernel.org
+Cc:     fstests@vger.kernel.org, Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Subject: Re: [RFC PATCH 0/3] xfs: add memory failure tests for dax mode
+Message-ID: <20220427062238.dkgkuzyh3ho2oirt@zlang-mailbox>
+Mail-Followup-To: linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        Shiyang Ruan <ruansy.fnst@fujitsu.com>
+References: <20220311151816.2174870-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220426062411.3119027-1-zlang@kernel.org>
+In-Reply-To: <20220311151816.2174870-1-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 26, 2022 at 02:24:11PM +0800, Zorro Lang wrote:
-> From: Zorro Lang <zlang@redhat.com>
+On Fri, Mar 11, 2022 at 11:18:13PM +0800, Shiyang Ruan wrote:
+> This patchset is to verify whether memory failure mechanism still works
+> with the dax-rmap feature[1].  With this feature, dax and reflink can be
+> used together[2].  So, we also test it for reflinked files in filesystem
+> mounted with dax option.
 > 
-> Due to upstream linux has removed ALLOCSP/FREESP ioctls by commit:
-> 4d1b97f9ce7c0 ("xfs: kill the XFS_IOC_{ALLOC,FREE}SP* ioctls"), so
-> let's remove ALLOCSP/FREESP testing from fsstress, to avoid more
-> mismatch problems.
+> [1] https://lore.kernel.org/linux-xfs/20220227120747.711169-1-ruansy.fnst@fujitsu.com/
+> [2] https://lore.kernel.org/linux-xfs/20210928062311.4012070-1-ruansy.fnst@fujitsu.com/
 > 
-> Due to g/070 specified "-f allocsp" and "-f freesp=0", so remove
-> these two lines too.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> Shiyang Ruan (3):
+>   xfs: add memory failure test for dax mode
+>   xfs: add memory failure test for dax&reflink mode
+>   xfs: add memory failure test for partly-reflinked&dax file
 
-Hooray!!!
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+This patchset hang here for long time, the cases looks fine, can anyone familiar with
+DAX+XFS help to give it a double checking/reviewing :)
 
---D
+Thanks,
+Zorro
 
-> ---
->  ltp/fsstress.c    | 117 ----------------------------------------------
->  tests/generic/070 |   2 -
->  2 files changed, 119 deletions(-)
 > 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 23188467..b395bc4d 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -86,7 +86,6 @@ static int renameat2(int dfd1, const char *path1,
->  
->  typedef enum {
->  	OP_AFSYNC,
-> -	OP_ALLOCSP,
->  	OP_AREAD,
->  	OP_ATTR_REMOVE,
->  	OP_ATTR_SET,
-> @@ -103,7 +102,6 @@ typedef enum {
->  	OP_FALLOCATE,
->  	OP_FDATASYNC,
->  	OP_FIEMAP,
-> -	OP_FREESP,
->  	OP_FSYNC,
->  	OP_GETATTR,
->  	OP_GETDENTS,
-> @@ -216,7 +214,6 @@ struct print_string {
->  #define XATTR_NAME_BUF_SIZE 18
->  
->  void	afsync_f(opnum_t, long);
-> -void	allocsp_f(opnum_t, long);
->  void	aread_f(opnum_t, long);
->  void	attr_remove_f(opnum_t, long);
->  void	attr_set_f(opnum_t, long);
-> @@ -233,7 +230,6 @@ void	dwrite_f(opnum_t, long);
->  void	fallocate_f(opnum_t, long);
->  void	fdatasync_f(opnum_t, long);
->  void	fiemap_f(opnum_t, long);
-> -void	freesp_f(opnum_t, long);
->  void	fsync_f(opnum_t, long);
->  char	*gen_random_string(int);
->  void	getattr_f(opnum_t, long);
-> @@ -281,7 +277,6 @@ char	*xattr_flag_to_string(int);
->  struct opdesc	ops[OP_LAST]	= {
->       /* [OP_ENUM]	   = {"name",	       function,	freq, iswrite }, */
->  	[OP_AFSYNC]	   = {"afsync",	       afsync_f,	0, 1 },
-> -	[OP_ALLOCSP]	   = {"allocsp",       allocsp_f,	1, 1 },
->  	[OP_AREAD]	   = {"aread",	       aread_f,		1, 0 },
->  	[OP_ATTR_REMOVE]   = {"attr_remove",   attr_remove_f,	0, 1 },
->  	[OP_ATTR_SET]	   = {"attr_set",      attr_set_f,	0, 1 },
-> @@ -298,7 +293,6 @@ struct opdesc	ops[OP_LAST]	= {
->  	[OP_FALLOCATE]	   = {"fallocate",     fallocate_f,	1, 1 },
->  	[OP_FDATASYNC]	   = {"fdatasync",     fdatasync_f,	1, 1 },
->  	[OP_FIEMAP]	   = {"fiemap",	       fiemap_f,	1, 1 },
-> -	[OP_FREESP]	   = {"freesp",	       freesp_f,	1, 1 },
->  	[OP_FSYNC]	   = {"fsync",	       fsync_f,		1, 1 },
->  	[OP_GETATTR]	   = {"getattr",       getattr_f,	1, 0 },
->  	[OP_GETDENTS]	   = {"getdents",      getdents_f,	1, 0 },
-> @@ -2042,62 +2036,6 @@ afsync_f(opnum_t opno, long r)
->  #endif
->  }
->  
-> -void
-> -allocsp_f(opnum_t opno, long r)
-> -{
-> -#ifdef XFS_IOC_ALLOCSP64
-> -	int		e;
-> -	pathname_t	f;
-> -	int		fd;
-> -	struct xfs_flock64	fl;
-> -	int64_t		lr;
-> -	off64_t		off;
-> -	struct stat64	stb;
-> -	int		v;
-> -	char		st[1024];
-> -
-> -	init_pathname(&f);
-> -	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> -		if (v)
-> -			printf("%d/%lld: allocsp - no filename\n", procid, opno);
-> -		free_pathname(&f);
-> -		return;
-> -	}
-> -	fd = open_path(&f, O_RDWR);
-> -	e = fd < 0 ? errno : 0;
-> -	check_cwd();
-> -	if (fd < 0) {
-> -		if (v)
-> -			printf("%d/%lld: allocsp - open %s failed %d\n",
-> -				procid, opno, f.path, e);
-> -		free_pathname(&f);
-> -		return;
-> -	}
-> -	if (fstat64(fd, &stb) < 0) {
-> -		if (v)
-> -			printf("%d/%lld: allocsp - fstat64 %s failed %d\n",
-> -				procid, opno, f.path, errno);
-> -		free_pathname(&f);
-> -		close(fd);
-> -		return;
-> -	}
-> -	inode_info(st, sizeof(st), &stb, v);
-> -	lr = ((int64_t)random() << 32) + random();
-> -	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-> -	off %= maxfsize;
-> -	fl.l_whence = SEEK_SET;
-> -	fl.l_start = off;
-> -	fl.l_len = 0;
-> -	e = xfsctl(f.path, fd, XFS_IOC_ALLOCSP64, &fl) < 0 ? errno : 0;
-> -	if (v) {
-> -		printf("%d/%lld: xfsctl(XFS_IOC_ALLOCSP64) %s%s %lld 0 %d\n",
-> -		       procid, opno, f.path, st, (long long)off, e);
-> -	}
-> -	free_pathname(&f);
-> -	close(fd);
-> -#endif
-> -}
-> -
->  #ifdef AIO
->  void
->  do_aio_rw(opnum_t opno, long r, int flags)
-> @@ -3732,61 +3670,6 @@ fiemap_f(opnum_t opno, long r)
->  #endif
->  }
->  
-> -void
-> -freesp_f(opnum_t opno, long r)
-> -{
-> -#ifdef XFS_IOC_FREESP64
-> -	int		e;
-> -	pathname_t	f;
-> -	int		fd;
-> -	struct xfs_flock64	fl;
-> -	int64_t		lr;
-> -	off64_t		off;
-> -	struct stat64	stb;
-> -	int		v;
-> -	char		st[1024];
-> -
-> -	init_pathname(&f);
-> -	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> -		if (v)
-> -			printf("%d/%lld: freesp - no filename\n", procid, opno);
-> -		free_pathname(&f);
-> -		return;
-> -	}
-> -	fd = open_path(&f, O_RDWR);
-> -	e = fd < 0 ? errno : 0;
-> -	check_cwd();
-> -	if (fd < 0) {
-> -		if (v)
-> -			printf("%d/%lld: freesp - open %s failed %d\n",
-> -				procid, opno, f.path, e);
-> -		free_pathname(&f);
-> -		return;
-> -	}
-> -	if (fstat64(fd, &stb) < 0) {
-> -		if (v)
-> -			printf("%d/%lld: freesp - fstat64 %s failed %d\n",
-> -				procid, opno, f.path, errno);
-> -		free_pathname(&f);
-> -		close(fd);
-> -		return;
-> -	}
-> -	inode_info(st, sizeof(st), &stb, v);
-> -	lr = ((int64_t)random() << 32) + random();
-> -	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-> -	off %= maxfsize;
-> -	fl.l_whence = SEEK_SET;
-> -	fl.l_start = off;
-> -	fl.l_len = 0;
-> -	e = xfsctl(f.path, fd, XFS_IOC_FREESP64, &fl) < 0 ? errno : 0;
-> -	if (v)
-> -		printf("%d/%lld: xfsctl(XFS_IOC_FREESP64) %s%s %lld 0 %d\n",
-> -		       procid, opno, f.path, st, (long long)off, e);
-> -	free_pathname(&f);
-> -	close(fd);
-> -#endif
-> -}
-> -
->  void
->  fsync_f(opnum_t opno, long r)
->  {
-> diff --git a/tests/generic/070 b/tests/generic/070
-> index 678344fa..8a134f80 100755
-> --- a/tests/generic/070
-> +++ b/tests/generic/070
-> @@ -29,8 +29,6 @@ _require_attrs
->  
->  FSSTRESS_ARGS=`_scale_fsstress_args \
->  	-d $TEST_DIR/fsstress \
-> -	-f allocsp=0 \
-> -	-f freesp=0 \
->  	-f bulkstat=0 \
->  	-f bulkstat1=0 \
->  	-f resvsp=0 \
+>  .gitignore                      |   1 +
+>  src/Makefile                    |   3 +-
+>  src/t_mmap_cow_memory_failure.c | 154 ++++++++++++++++++++++++++++++++
+>  tests/xfs/900                   |  48 ++++++++++
+>  tests/xfs/900.out               |   9 ++
+>  tests/xfs/901                   |  49 ++++++++++
+>  tests/xfs/901.out               |   9 ++
+>  tests/xfs/902                   |  52 +++++++++++
+>  tests/xfs/902.out               |   9 ++
+>  9 files changed, 333 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_mmap_cow_memory_failure.c
+>  create mode 100755 tests/xfs/900
+>  create mode 100644 tests/xfs/900.out
+>  create mode 100755 tests/xfs/901
+>  create mode 100644 tests/xfs/901.out
+>  create mode 100755 tests/xfs/902
+>  create mode 100644 tests/xfs/902.out
+> 
 > -- 
-> 2.31.1
+> 2.35.1
 > 
+> 
+> 
+
