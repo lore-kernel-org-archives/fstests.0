@@ -2,136 +2,69 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B3EEC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 14:33:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 633D4C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 14:53:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238178AbiD0OhC (ORCPT
+        id S238742AbiD0O4i (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Apr 2022 10:37:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42282 "EHLO
+        Wed, 27 Apr 2022 10:56:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238251AbiD0Ogx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 10:36:53 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B283B2711;
-        Wed, 27 Apr 2022 07:33:41 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 6B8011F74E;
-        Wed, 27 Apr 2022 14:33:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1651070020; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=TJGsd2vyilOxS/TRuC7c7/caltdCv/57VqwYPzi41Tg=;
-        b=lhM7tFJuqzatgjsp+j6/7cDkxgvELkcagCYKDxKj3RcCaQX0c+2HbTDGXAKHsU0ug1a9j7
-        sSI0h5NS18mnImzCu5Kjvd+EplF/CB/yTu3vlm5tlfgur24uaGR71VZHRsja9BJEZE74sg
-        htRS91GSO82Lo3S1JaI9/8y3TnWnMCk=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1651070020;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=TJGsd2vyilOxS/TRuC7c7/caltdCv/57VqwYPzi41Tg=;
-        b=Bjy6l+MU8vi8U+DhE9EYPKtTH1Bc6e27aR5X/SNaFin1vbxBClndadkW1LrszYLN2I/008
-        juLh1TjYYFLCJmCQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0524E13A39;
-        Wed, 27 Apr 2022 14:33:39 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id VobyOUNUaWKJeQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Wed, 27 Apr 2022 14:33:39 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 5ea18923;
-        Wed, 27 Apr 2022 14:34:10 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>
-Cc:     ceph-devel@vger.kernel.org, fstests@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH] ceph/005: verify correct statfs behaviour with quotas
-Date:   Wed, 27 Apr 2022 15:34:09 +0100
-Message-Id: <20220427143409.987-1-lhenriques@suse.de>
+        with ESMTP id S238741AbiD0O4i (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Apr 2022 10:56:38 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42A6A47051
+        for <fstests@vger.kernel.org>; Wed, 27 Apr 2022 07:53:27 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net [108.7.220.252])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 23RErOvc027011
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 27 Apr 2022 10:53:25 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 4DEE715C3EA1; Wed, 27 Apr 2022 10:53:24 -0400 (EDT)
+Date:   Wed, 27 Apr 2022 10:53:24 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4/054,ext4/055: don't run when using DAX
+Message-ID: <YmlY5NhDodhRRpkU@mit.edu>
+References: <20220427005209.4188220-1-tytso@mit.edu>
+ <20220427080540.o7tu3nz6g5ch6xpt@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220427080540.o7tu3nz6g5ch6xpt@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When using a directory with 'max_bytes' quota as a base for a mount,
-statfs shall use that 'max_bytes' value as the total disk size.  That
-value shall be used even when using subdirectory as base for the mount.
+On Wed, Apr 27, 2022 at 04:05:40PM +0800, Zorro Lang wrote:
+> 
+> "The DAX code currently only supports files with a block size equal to your
+> kernel's PAGE_SIZE" [1], so I suppose any cases with smaller blocksize (< pagesize)
+> should "_exclude_scratch_mount_option dax".
+> 
+> And if this supposition is right, we'd better do "skipping dax testing if blocksize
+> is less than pagesize" in a common helper. Good news is we have _scratch_mkfs_blocksized.
+> So how about do:
+>   if [ $blocksize < $pagesize ];then
+>       _exclude_scratch_mount_option dax
+>   fi
+> in _scratch_mkfs_blocksized? then let ext4/054 and ext4/055 turn to use _scratch_mkfs_blocksized.
 
-A bug was found where, when this subdirectory also had a 'max_files'
-quota, the real filesystem size would be returned instead of the parent
-'max_bytes' quota value.  This test case verifies this bug is fixed.
+That's a good thing to and it would work for ext4/054 and ext/022
+(which already uses "_exclude_scratch_mount_option dax" and
+"_scratch_mkfs").  However, a number of other tests, including
+ext4/055 and ext4/035 need to give additional parameters to mfks, such
+as "-O quota" or "-E resize=262144".
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
- tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
- tests/ceph/005.out |  2 ++
- 2 files changed, 42 insertions(+)
- create mode 100755 tests/ceph/005
- create mode 100644 tests/ceph/005.out
+So _scratch_mkfs_blocksized isn't always going to work for tests in
+ext4/* where we often are passing ext4-specific mkfs options to
+mkfs.ext4.
 
-diff --git a/tests/ceph/005 b/tests/ceph/005
-new file mode 100755
-index 000000000000..0763a235a677
---- /dev/null
-+++ b/tests/ceph/005
-@@ -0,0 +1,40 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 005
-+#
-+# Make sure statfs reports correct total size when:
-+# 1. using a directory with 'max_byte' quota as base for a mount
-+# 2. using a subdirectory of the above directory with 'max_files' quota
-+#
-+. ./common/preamble
-+_begin_fstest auto quick quota
-+
-+_supported_fs generic
-+_require_scratch
-+
-+_scratch_mount
-+mkdir -p $SCRATCH_MNT/quota-dir/subdir
-+
-+# set quotas
-+quota=$((1024*10000))
-+$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-dir
-+$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-dir/subdir
-+_scratch_unmount
-+
-+SCRATCH_DEV=$SCRATCH_DEV/quota-dir _scratch_mount
-+total=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $2}'`
-+SCRATCH_DEV=$SCRATCH_DEV/quota-dir _scratch_unmount
-+[ $total -eq 8192 ] || _fail "Incorrect statfs for quota-dir: $total"
-+
-+SCRATCH_DEV=$SCRATCH_DEV/quota-dir/subdir _scratch_mount
-+total=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $2}'`
-+SCRATCH_DEV=$SCRATCH_DEV/quota-dir/subdir _scratch_unmount
-+[ $total -eq 8192 ] || _fail "Incorrect statfs for quota-dir/subdir: $total"
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ceph/005.out b/tests/ceph/005.out
-new file mode 100644
-index 000000000000..a5027f127cf0
---- /dev/null
-+++ b/tests/ceph/005.out
-@@ -0,0 +1,2 @@
-+QA output created by 005
-+Silence is golden
+So I can add your suggestion to _scratch_mkfs_blocksized, and use that
+for ext4/054, but it's not going to be a solution for ext4/055.
+
+Cheers,
+
+						- Ted
