@@ -2,202 +2,83 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88247C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Apr 2022 22:40:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D4D0C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Apr 2022 00:52:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355914AbiDZWnh (ORCPT
+        id S1356539AbiD0Azb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Apr 2022 18:43:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49290 "EHLO
+        Tue, 26 Apr 2022 20:55:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355909AbiDZWng (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 18:43:36 -0400
-Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2D3314096;
-        Tue, 26 Apr 2022 15:40:27 -0700 (PDT)
-Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
-        by mailout.nyi.internal (Postfix) with ESMTP id 531905C0164;
-        Tue, 26 Apr 2022 18:40:27 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute1.internal (MEProxy); Tue, 26 Apr 2022 18:40:27 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
-        :content-transfer-encoding:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm1; t=1651012827; x=1651099227; bh=I+
-        HxmkzZNhZ0P3kPMHejig53XLe7o7IFnigO5Hnymis=; b=dD5voST/UNPV3LAvqm
-        9YFkDYbX/aUWFcvPheEKOB9ZesQWvlj58+IiWZRtxd1QaRkQk3JaiHN9PI8Dy+9j
-        eB3RDd1Ftkh97dfpVyWZnFYuK9CYmeAP7LeUmHIqjFz2UuwEyWw1/Jx22QX6WuGC
-        qMtuV7UMyBjN25ZtcWAkrRAvvx+t2pgHPLhTUdf2DhzMqeJPoyDU7MfmPztWwNwj
-        boiQCoPDSIJEgaRKQ2bx2d5Te0AC71+KDZhYOn1qDuwYfGwMaf5KnI1iE4P2qxMb
-        AwDVTdcwghlpPiVh46MyJxTmXQ/lxO0U6kNOoHRyXQ08VGMdPriofvMHEks8p8eq
-        j2Iw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:date:date
-        :from:from:in-reply-to:in-reply-to:message-id:mime-version
-        :references:reply-to:sender:subject:subject:to:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=
-        1651012827; x=1651099227; bh=I+HxmkzZNhZ0P3kPMHejig53XLe7o7IFnig
-        O5Hnymis=; b=LwFgGjVq0k+hb1XkNxidvjbI/g1kz0XShklE4qfDjS8mh38w/pt
-        oHrVmFb7Ba7VfJWgF2+lYXwvf70RTmRKIpH0LakWwHxKQCi9/+vrwkMDEgDcajGh
-        Hrx/GO4OCVzP8H1GA/B2aK9cpdIDpwLb58lmDgJ0MoSEanZApwrtzECHv9VM5PKZ
-        Ngl8F3/psUE8XYHS/oWAafr78nlsPfUjqnPljP+CItLGFIxs/N1mliepHCOyXD9e
-        HqzWHei7AAd0rNOf2derMPLJ3ZLtuCNsxcDPisHmW2c4Qz7lSWdK6DsqpIniBr9Q
-        xJ+PNfz3Z0OnrpWVhhIpQJ8XEHvj7EqbhZg==
-X-ME-Sender: <xms:23RoYkpX7aaMhPLNqPKUIyjwjP1LKyUYoIYuODXOV5-nEp5i5cmlIw>
-    <xme:23RoYqrCqDsmYk8XRVav1b-xiTnXI3ts6SCd3Egv9ztsVuiKRh2UmefWTdctvgNMN
-    weq36tnUeOou1Xn0XA>
-X-ME-Received: <xmr:23RoYpP21939iUrWdZ0Mbct8G3X-nkpQaRcYMJc8SvZQnEzLwM70ybzDU1QtfKvZmCTqcC30kwysL8dmZpwH7HiJyBQVRw>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrudeggddufecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffojghfggfgsedtkeertd
-    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
-    oheqnecuggftrfgrthhtvghrnhepieeuffeuvdeiueejhfehiefgkeevudejjeejffevvd
-    ehtddufeeihfekgeeuheelnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
-    rghilhhfrhhomhepsghorhhishessghurhdrihho
-X-ME-Proxy: <xmx:23RoYr5644pLsXLXZBUmO5_OjZOYdhRZV-ZU4ibc-2uchP2kpM_Jsw>
-    <xmx:23RoYj67jarRgCzK4AfCxZmJjp4uIUx8IME_IVOVDi0KjW5r0yArXQ>
-    <xmx:23RoYrgJodbh2IIZbqWXrB2NG05mvpEIoXJTCYjbG7S7S7Rlhpq-tg>
-    <xmx:23RoYjGyUVIqUGjaX3o376xSga6eewBSKg7Bu1xieAgWyW97gMU0Hw>
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 26 Apr 2022 18:40:26 -0400 (EDT)
-From:   Boris Burkov <boris@bur.io>
-To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: [PATCH v9 5/5] generic: test fs-verity EFBIG scenarios
-Date:   Tue, 26 Apr 2022 15:40:16 -0700
-Message-Id: <b79c0fe9c23a5911943f797dedb25f28f1759f73.1651012461.git.boris@bur.io>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <cover.1651012461.git.boris@bur.io>
-References: <cover.1651012461.git.boris@bur.io>
+        with ESMTP id S1356541AbiD0Azb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Apr 2022 20:55:31 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 882EE13DC5
+        for <fstests@vger.kernel.org>; Tue, 26 Apr 2022 17:52:18 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net [108.7.220.252])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 23R0qFnh016528
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 26 Apr 2022 20:52:15 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 29B4D15C3EA1; Tue, 26 Apr 2022 20:52:15 -0400 (EDT)
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     fstests@vger.kernel.org
+Cc:     "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] ext4/054,ext4/055: don't run when using DAX
+Date:   Tue, 26 Apr 2022 20:52:09 -0400
+Message-Id: <20220427005209.4188220-1-tytso@mit.edu>
+X-Mailer: git-send-email 2.31.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs, ext4, and f2fs cache the Merkle tree past EOF, which restricts
-the maximum file size beneath the normal maximum. Test the logic in
-those filesystems against files with sizes near the maximum.
+The ext4/054 and ext4/055 tests create a scratch file system with a 1k
+block size.  This is not compatible with mounting with the DAX option,
+which requires a block size equal to the page size (which is 4k on
+x86).
 
-To work properly, this does require some understanding of the practical
-but not standardized layout of the Merkle tree. This is a bit unpleasant
-and could make the test incorrect in the future, if the implementation
-changes. On the other hand, it feels quite useful to test this tricky
-edge case. It could perhaps be made more generic by adding some ioctls
-to let the file system communicate the maximum file size for a verity
-file or some information about the storage of the Merkle tree.
+Also, the ext4/054 test doesn't use the test device, so remove the
+_require_test declaration.
 
-Signed-off-by: Boris Burkov <boris@bur.io>
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- common/verity         | 11 ++++++++
- tests/generic/690     | 64 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/690.out |  7 +++++
- 3 files changed, 82 insertions(+)
- create mode 100755 tests/generic/690
- create mode 100644 tests/generic/690.out
+ tests/ext4/054 | 2 +-
+ tests/ext4/055 | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/common/verity b/common/verity
-index 8cde2737..657af8aa 100644
---- a/common/verity
-+++ b/common/verity
-@@ -347,3 +347,14 @@ _fsv_scratch_corrupt_merkle_tree()
- 		;;
- 	esac
- }
-+
-+_require_fsverity_max_file_size_limit()
-+{
-+	case $FSTYP in
-+	btrfs|ext4|f2fs)
-+		;;
-+	*)
-+		_notrun "$FSTYP does not store verity data past EOF; no special file size limit"
-+		;;
-+	esac
-+}
-diff --git a/tests/generic/690 b/tests/generic/690
-new file mode 100755
-index 00000000..afdd95f2
---- /dev/null
-+++ b/tests/generic/690
-@@ -0,0 +1,64 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Facebook, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 690
-+#
-+# fs-verity requires the filesystem to decide how it stores the Merkle tree,
-+# which can be quite large.
-+# It is convenient to treat the Merkle tree as past EOF, and ext4, f2fs, and
-+# btrfs do so in at least some fashion. This leads to an edge case where a
-+# large file can be under the file system file size limit, but trigger EFBIG
-+# on enabling fs-verity. Test enabling verity on some large files to exercise
-+# EFBIG logic for filesystems with fs-verity specific limits.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick verity
-+
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/verity
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_test
-+_require_math
-+_require_scratch_verity
-+_require_fsverity_max_file_size_limit
-+
-+_scratch_mkfs_verity &>> $seqres.full
-+_scratch_mount
-+
-+fsv_file=$SCRATCH_MNT/file.fsv
-+
-+max_sz=$(_get_max_file_size)
-+_fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-+truncate -s $max_sz $fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+# The goal of this second test is to make a big enough file that we trip the
-+# EFBIG codepath, but not so big that we hit it immediately when writing the
-+# first Merkle leaf.
-+#
-+# The Merkle tree is stored with the leaf node level (L0) last, but it is
-+# written first.  To get an interesting overflow, we need the maximum file size
-+# (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
-+# don't have to write many blocks before getting an error.
-+#
-+# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
-+# padding, L0 is 1/128 of the file size while the other levels in total are
-+# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
-+# ignoring padding, for L0 start exactly at MAX, the file size must be s such
-+# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
-+# where MAX occurs *near* the start of L0 rather than *at* the start, we can
-+# just subtract an overestimate of the padding: 64K after the file contents,
-+# then 4K per level, where the consideration of 8 levels is sufficient.
-+sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
-+_fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
-+truncate -s $sz $fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/690.out b/tests/generic/690.out
-new file mode 100644
-index 00000000..a3e2b9b9
---- /dev/null
-+++ b/tests/generic/690.out
-@@ -0,0 +1,7 @@
-+QA output created by 690
-+
-+# way too big: fail on first merkle block
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
-+
-+# still too big: fail on first invalid merkle block
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
+diff --git a/tests/ext4/054 b/tests/ext4/054
+index 9a11719f..6c722f32 100755
+--- a/tests/ext4/054
++++ b/tests/ext4/054
+@@ -19,8 +19,8 @@ _begin_fstest auto quick dangerous_fuzzers
+ 
+ # real QA test starts here
+ _supported_fs ext4
+-_require_test
+ _require_scratch_nocheck
++_exclude_scratch_mount_option dax
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "pwrite"
+ _require_xfs_io_command "fsync"
+diff --git a/tests/ext4/055 b/tests/ext4/055
+index 8f466f1b..1ae42b89 100755
+--- a/tests/ext4/055
++++ b/tests/ext4/055
+@@ -17,8 +17,9 @@
+ _begin_fstest auto quota
+ 
+ # real QA test starts here
+-_require_scratch_nocheck
+ _supported_fs ext4
++_require_scratch_nocheck
++_exclude_scratch_mount_option dax
+ _require_user fsgqa
+ _require_user fsgqa2
+ _require_command "$DEBUGFS_PROG" debugfs
 -- 
-2.35.1
+2.31.0
 
