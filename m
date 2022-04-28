@@ -2,93 +2,131 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA991C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Apr 2022 15:13:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0F5DC433FE
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Apr 2022 15:16:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348911AbiD1PQX (ORCPT
+        id S1348917AbiD1PTk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Apr 2022 11:16:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36796 "EHLO
+        Thu, 28 Apr 2022 11:19:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42088 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345202AbiD1PQW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2022 11:16:22 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6696169CC7;
-        Thu, 28 Apr 2022 08:13:08 -0700 (PDT)
+        with ESMTP id S1348918AbiD1PTj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Apr 2022 11:19:39 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7885CAC07B
+        for <fstests@vger.kernel.org>; Thu, 28 Apr 2022 08:16:24 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id F357661F3B;
-        Thu, 28 Apr 2022 15:13:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5245FC385A0;
-        Thu, 28 Apr 2022 15:13:07 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2E046B82E10
+        for <fstests@vger.kernel.org>; Thu, 28 Apr 2022 15:16:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F1DFC385AE;
+        Thu, 28 Apr 2022 15:16:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651158787;
-        bh=YmTzsyBY8wtMBLxETN1cWIZCKSqnwg+rGNvlGsrNoc0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=WgbzYEkF+5VS7YeIcjrKMKLt02iYGJOuQgApJcM2oiZZ2gSxsotTBDOBun6IJQ8SA
-         txER8pf7+XI+eFwA4hcKLOXotuSWA/Zwc3RrY4jFVvmni9rSt0HXQ+s4do6r07KjmF
-         ek4qDMyUopzWNrjVHlIotvvxplq5Yh0/TQv/WEwJhEskhTLtsc9a55Qs3Wygi4h+ox
-         eGKlO70Ho8eMms1P6Japbr12qP9xl3ODFBhlI/XB4fhFuNpPRbsmRgMH9uFu0kOSph
-         Nowi0xWumCtxhi5dj7Sqv5QuFJNj7Ji7xUH3VjAIeqfurX6xf67JMja6glUIcqqZWC
-         fWF59YJ5NCH+A==
-Date:   Thu, 28 Apr 2022 08:13:06 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: add some missing _require_loop's
-Message-ID: <20220428151306.GO17014@magnolia>
-References: <bd80e5861da3f901428ea66f271f8c4f267c4c23.1651158291.git.josef@toxicpanda.com>
+        s=k20201202; t=1651158981;
+        bh=v1Y0woGORpxDzlfzYsuT0ijazid3WZKg402aYP+9x7E=;
+        h=From:To:Cc:Subject:Date:From;
+        b=It/g6mRvidl9aVc5fntX2D97qMNUNYJbrLBCUQpgxw/W8HOG6/Q6zmnmlkypy+mgb
+         5OZBR0jNAkGxrKLaU3tYiDDsJNcloY6YSIOIAubKWyFGPcrX2grSYarF/LcmaIPhIy
+         rwPnDEYh50h7P0/U/8l632q0eZCB9un7vqh+ic0cmHtzsCnQNCv8Gt4jDT9j1j0WC5
+         RTDSrcgDPEAfdjF9h6KutNxDl96vO9J8SmQ6UM61LmwJwv6fAs/ZTZ4urbjf9bNXyC
+         RCYAZbmrlZ7PORLpZ9igtiRIynSzekyOymQPcRSj4jcE/EFxeqjhHbjP34aNuZyhWA
+         qTEJtWs3l6E4Q==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Eryu Guan <guaneryu@gmail.com>, Zorro Lang <zlang@redhat.com>,
+        fstests <fstests@vger.kernel.org>
+Cc:     "Christian Brauner (Microsoft)" <brauner@kernel.org>,
+        Dave Chinner <david@fromorbit.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>, Jan Kara <jack@suse.cz>,
+        "Darrick J. Wong" <djwong@kernel.org>
+Subject: [PATCH 00/11] rename & split tests
+Date:   Thu, 28 Apr 2022 17:15:48 +0200
+Message-Id: <20220428151559.947144-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bd80e5861da3f901428ea66f271f8c4f267c4c23.1651158291.git.josef@toxicpanda.com>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3530; h=from:subject; bh=EXBxyyX1NlnS+wveYEBWWrb4XAjMdw8VCuCTcdVwjHI=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSRlrV94bcl6vqCO7qW+b2+V1y44kBfCGBPP4/70jd6GVDbd ussGHaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABMJ3MfwV2CedCSb0q6NWdWnqqdFme qLLNkgE3E4aXLqsgdyPydpKjH8MzNT/dajUL/ETGGWtPnGH/L/pjQ9n+5qeG/2jx2TFpk9ZAIA
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 28, 2022 at 11:05:00AM -0400, Josef Bacik wrote:
-> Got a new box running overnight fstests and noticed a couple of failures
-> because I forgot to enable loop device support.  Fix these two tests to
-> have _require_loop so they don't fail if there's no loop device support.
-> 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
 
-Yep, these both use loop mounts.
+Hey everyone,
 
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+As announced multiple times already we need to rename and split the
+idmapped mount testsuite into separate source files and also give it a
+better name to reflect the fact that it covers a lot more than just
+idmapped mounts.
 
---D
+I have decided against compiling different binaries for now. Instead we
+compile a single vfstest binary that can be called with various command
+line switches to run the various test suites. This is not different than
+what we did for the idmapped-mounts binary. Of course, nothing prevents
+us from using multiple binaries in the future.
 
-> ---
->  tests/btrfs/012   | 1 +
->  tests/generic/648 | 1 +
->  2 files changed, 2 insertions(+)
-> 
-> diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> index 29552b14..60461a34 100755
-> --- a/tests/btrfs/012
-> +++ b/tests/btrfs/012
-> @@ -30,6 +30,7 @@ _require_command "$MKFS_EXT4_PROG" mkfs.ext4
->  _require_command "$E2FSCK_PROG" e2fsck
->  # ext4 does not support zoned block device
->  _require_non_zoned_device "${SCRATCH_DEV}"
-> +_require_loop
->  
->  BLOCK_SIZE=`_get_block_size $TEST_DIR`
->  
-> diff --git a/tests/generic/648 b/tests/generic/648
-> index e5c743c5..d7bf5697 100755
-> --- a/tests/generic/648
-> +++ b/tests/generic/648
-> @@ -39,6 +39,7 @@ _require_scratch_reflink
->  _require_cp_reflink
->  _require_dm_target error
->  _require_command "$KILLALL_PROG" "killall"
-> +_require_loop
->  
->  echo "Silence is golden."
->  
-> -- 
-> 2.26.3
-> 
+Note that this will have a conflict with Jan's series at:
+https://lore.kernel.org/fstests/20220425131809.qzjrah7cw67mzzcw@zlang-mailbox/T/#m47d8da68ef1aff250918398e8d2228729a6acf97
+
+If this patch series here is acceptable I'd pick up Jan's patch and
+apply it on top of mine as rebasing will introduce too many conflicts.
+
+Thanks!
+Christian
+
+Christian Brauner (11):
+  src: rename idmapped-mounts folder
+  src/vfs: rename idmapped-mounts.c file
+  vfstest: rename struct t_idmapped_mounts
+  utils: add missing global.h include
+  utils: add struct vfstest_info
+  utils: move helpers into utils
+  missing: move sys_execveat() to missing.h
+  utils: add struct test_suite
+  vfstests: split idmapped mount tests into separate suite
+  vfstest: split out btrfs idmapped mounts test
+  vfstest: split out remaining idmapped mount tests
+
+ .gitignore                                    |     4 +-
+ common/rc                                     |    32 +-
+ src/Makefile                                  |     2 +-
+ src/detached_mounts_propagation.c             |     2 +-
+ src/feature.c                                 |     2 +-
+ src/idmapped-mounts/utils.c                   |   425 -
+ src/idmapped-mounts/utils.h                   |   130 -
+ src/{idmapped-mounts => vfs}/Makefile         |    14 +-
+ src/vfs/btrfs-idmapped-mounts.c               |  3854 +++++
+ src/vfs/btrfs-idmapped-mounts.h               |    15 +
+ .../idmapped-mounts.c                         | 11865 ++++------------
+ src/vfs/idmapped-mounts.h                     |    17 +
+ src/{idmapped-mounts => vfs}/missing.h        |    11 +
+ src/{idmapped-mounts => vfs}/mount-idmapped.c |     0
+ src/vfs/utils.c                               |  1003 ++
+ src/vfs/utils.h                               |   364 +
+ src/vfs/vfstest.c                             |  1952 +++
+ tests/btrfs/245                               |     2 +-
+ tests/generic/633                             |     2 +-
+ tests/generic/644                             |     2 +-
+ tests/generic/645                             |     2 +-
+ tests/generic/656                             |     2 +-
+ tests/xfs/152                                 |     4 +-
+ tests/xfs/153                                 |     2 +-
+ 24 files changed, 9952 insertions(+), 9756 deletions(-)
+ delete mode 100644 src/idmapped-mounts/utils.c
+ delete mode 100644 src/idmapped-mounts/utils.h
+ rename src/{idmapped-mounts => vfs}/Makefile (59%)
+ create mode 100644 src/vfs/btrfs-idmapped-mounts.c
+ create mode 100644 src/vfs/btrfs-idmapped-mounts.h
+ rename src/{idmapped-mounts => vfs}/idmapped-mounts.c (50%)
+ create mode 100644 src/vfs/idmapped-mounts.h
+ rename src/{idmapped-mounts => vfs}/missing.h (93%)
+ rename src/{idmapped-mounts => vfs}/mount-idmapped.c (100%)
+ create mode 100644 src/vfs/utils.c
+ create mode 100644 src/vfs/utils.h
+ create mode 100644 src/vfs/vfstest.c
+
+-- 
+2.32.0
+
