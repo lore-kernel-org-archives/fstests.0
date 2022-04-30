@@ -2,264 +2,325 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE3E4C433F5
-	for <linux-fstests@archiver.kernel.org>; Sat, 30 Apr 2022 19:09:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4327CC433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 30 Apr 2022 19:22:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236235AbiD3TMu (ORCPT
+        id S236970AbiD3TZW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 30 Apr 2022 15:12:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59512 "EHLO
+        Sat, 30 Apr 2022 15:25:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229617AbiD3TMt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 30 Apr 2022 15:12:49 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5156F8E1AA
-        for <fstests@vger.kernel.org>; Sat, 30 Apr 2022 12:09:25 -0700 (PDT)
+        with ESMTP id S233453AbiD3TZW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Apr 2022 15:25:22 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D58AA1116F;
+        Sat, 30 Apr 2022 12:21:56 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id ACF86CE0025
-        for <fstests@vger.kernel.org>; Sat, 30 Apr 2022 19:09:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7BC56C385A7;
-        Sat, 30 Apr 2022 19:09:21 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 85189B807EE;
+        Sat, 30 Apr 2022 19:21:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 10FD2C385AA;
+        Sat, 30 Apr 2022 19:21:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651345761;
-        bh=OYLEcpSbDBnte4K+NbTqQysCz6aGv7crQWxWqjz93rs=;
-        h=Date:From:To:Subject:From;
-        b=T+rQg6bXSWVjvjLXHLrEl/zmpw+efkwjMjVpjbLJE4eiEE85oNo8tfhY39aELw9/R
-         odASuoERMAECLbAvAjNGVEHxey4CamVKRElK128Vlgfpnfu9Wc1e0B154F0VbHJhmZ
-         jkmzDzYpDEs2tGTMbIjQebFjWFim9GtWtPMvGIvFZo395gfDPlWnLo+Yuzz+2mUN+o
-         WG8Dy9qiwsoBpYOH4UxloiTehYNfaQkgM2sAxElcK34kFyKcSb4Xf5mmjJlv/gKFfZ
-         OFUFKcclKpi/O1Q6AqkNbA2QfgbJ/rnPn40Kg8KpeA+IQs3wmJKUKlnA+fEiNntPMI
-         EIC2mHunqs22Q==
-Date:   Sun, 01 May 2022 03:09:13 +0800
-From:   Zorro Lang <zlang@kernel.org>
+        s=k20201202; t=1651346514;
+        bh=nX1uiu7ILFDh2m6ItjnZSs4OJrSqppdj7AGMW93Sbjc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=RYu3J+EItbIUAXPJxDV2VaWoI2ED/jS/kKoTTEyDPc564hbe1lPawBWMmqMINfshO
+         IHRnS3wW1UtQO5Lseqp/cmqNx9iaVwpKTTZpf7l5xX/6rW/b8uekU7ZERwvvYMb/6A
+         LLdsdQcaUiMA1Cp81oXyHupxpPi4oqFiaFLG/SBPCVb1m3MZUjuRbvWYezonV9sWjZ
+         wkZaJze2RZst76PfeI+COhWo/GbAD3aNXtMeIp0U0fIdj5BXi9jXOlmyF+hlSvLpr6
+         p+hh/SATZ2t98L7JWiFoiQfgckpCuqHzSEBgkypQYnuNMbSX2M6ha8oKfsQj6P5FkR
+         /PbsTm3vwRoGw==
+From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to bb04d577435d
+Cc:     Lukas Czerner <lczerner@redhat.com>, linux-ext4@vger.kernel.org
+Subject: [xfstests PATCH] ext4/053: fix the rejected mount option testing
+Date:   Sat, 30 Apr 2022 12:21:30 -0700
+Message-Id: <20220430192130.131842-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.36.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="VGdgslCgeMyO"
-Content-Disposition: inline
-Message-Id: <20220430190921.7BC56C385A7@smtp.kernel.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Eric Biggers <ebiggers@google.com>
 
---VGdgslCgeMyO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+'not_mnt OPTIONS' seems to have been intended to test that the
+filesystem cannot be mounted at all with the given OPTIONS, meaning that
+the mount fails as opposed to the options being ignored.  However, this
+doesn't actually work, as shown by the fact that the test case 'not_mnt
+test_dummy_encryption=v3' is passing in the !CONFIG_FS_ENCRYPTION case.
+Actually ext4 ignores this mount option when !CONFIG_FS_ENCRYPTION.
+(The ext4 behavior might be changed, but that is besides the point.)
 
-Hi all,
+The problem is that the do_mnt() helper function is being misused in a
+context where a mount failure is expected, and it does some additional
+remount tests that don't make sense in that context.  So if the mount
+unexpectedly succeeds, then one of these later tests can still "fail",
+causing the unexpected success to be shadowed by a later failure, which
+causes the overall test case to pass since it expects a failure.
 
-The for-next branch of the xfstests repository at:
+Fix this by reworking not_mnt() and not_remount_noumount() to use
+simple_mount() in cases where they are expecting a failure.  Also fix
+up some of the naming and calling conventions to be less confusing.
+Finally, make sure to test that remounting fails too, not just mounting.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/ext4/053 | 148 ++++++++++++++++++++++++++-----------------------
+ 1 file changed, 78 insertions(+), 70 deletions(-)
 
-has just been updated and tagged for a v2022.05.01 release.
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index e1e79592..bf6e3f6b 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -225,6 +225,9 @@ do_mnt() {
+ 	return $ret
+ }
+ 
++# Test that mounting or remounting with the specified mount option(s) fails
++# (meaning that the mount or remount fails, as opposed to the mount option(s)
++# just being ignored).
+ not_mnt() {
+ 	# We don't need -t not not_ variant
+ 	if [ "$1" == "-t" ]; then
+@@ -232,13 +235,21 @@ not_mnt() {
+ 	fi
+ 
+ 	print_log "SHOULD FAIL mounting $fstype \"$1\" "
+-	do_mnt $@
+-	if [ $? -eq 0 ]; then
++	if simple_mount -o $1 $SCRATCH_DEV $SCRATCH_MNT; then
++		print_log "(mount unexpectedly succeeded)"
+ 		fail
+-	else
+-		ok
++		$UMOUNT_PROG $SCRATCH_MNT
++		return
+ 	fi
+-	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++	ok
++
++	if ! simple_mount $SCRATCH_DEV $SCRATCH_MNT; then
++		print_log "(normal mount unexpectedly failed)"
++		fail
++		return
++	fi
++	not_remount $1
++	$UMOUNT_PROG $SCRATCH_MNT
+ }
+ 
+ mnt_only() {
+@@ -321,43 +332,40 @@ remount() {
+ 	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
+ }
+ 
+-# $1 - options to mount with, or -r argument
+-# $2 - options to remount with
+-not_remount_noumount() {
+-	remount_only=0
+-	# If -r is specified we're going to do remount only
+-	if [ "$1" == "-r" ]; then
+-		remount_only=1
+-		# Dont need shift since first argument would
+-		# have been consumed by mount anyway
+-	fi
+-
+-	if [ $remount_only -eq 0 ]; then
+-		print_log "mounting $fstype \"$1\" "
+-		do_mnt $1
+-		[ $? -ne 0 ] && fail && return
+-	fi
+-	print_log "SHOULD FAIL remounting $fstype \"$2\" "
+-	do_mnt remount,$2 $3
+-	if [ $? -eq 0 ]; then
++# Test that the filesystem cannot be remounted with option(s) $1 (meaning that
++# the remount fails, as opposed to the mount option(s) just being ignored).  The
++# filesystem must already be mounted, and it is not unmounted afterwards.
++not_remount() {
++	print_log "SHOULD FAIL remounting $fstype \"$1\" "
++	# Try specifying both dev and mnt.
++	if simple_mount -o remount,$1 $SCRATCH_DEV $SCRATCH_MNT; then
++		print_log "(remount unexpectedly succeeded)"
+ 		fail
+-	else
+-		ok
++		return
+ 	fi
++	ok
+ 
+-	# Now just specify mnt
+-	print_log "SHOULD FAIL remounting $fstype (MNT ONLY) \"$2\" "
+-	do_mnt -n remount,$2 $3
+-	if [ $? -eq 0 ]; then
++	# Try specifying mnt only.
++	print_log "SHOULD FAIL remounting $fstype (MNT ONLY) \"$1\" "
++	if simple_mount -o remount,$1 $SCRATCH_MNT; then
++		print_log "(remount unexpectedly succeeded)"
+ 		fail
+-	else
+-		ok
++		return
+ 	fi
++	ok
+ }
+ 
+-not_remount() {
+-	not_remount_noumount $*
+-	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
++# Mount the filesystem with option(s) $1, then test that it cannot be remounted
++# with option(s) $2 (meaning that the remount fails, as opposed to the mount
++# option(s) just being ignored).
++mnt_then_not_remount() {
++	print_log "mounting $fstype \"$1\" "
++	if ! do_mnt $1; then
++		fail
++		return
++	fi
++	not_remount $2
++	$UMOUNT_PROG $SCRATCH_MNT
+ }
+ 
+ 
+@@ -514,7 +522,7 @@ for fstype in ext2 ext3 ext4; do
+ 		mnt test_dummy_encryption ^test_dummy_encryption
+ 		mnt test_dummy_encryption=v1 ^test_dummy_encryption=v1
+ 		mnt test_dummy_encryption=v2 ^test_dummy_encryption=v2
+-		not_mnt test_dummy_encryption=v3
++		mnt test_dummy_encryption=v3 ^test_dummy_encryption=v3
+ 		not_mnt test_dummy_encryption=
+ 	fi
+ 
+@@ -567,14 +575,14 @@ for fstype in ext2 ext3 ext4; do
+ 		mnt dax=never
+ 		mnt dax=inode
+ 
+-		not_remount lazytime dax
+-		not_remount dax=always dax=never
++		mnt_then_not_remount lazytime dax
++		mnt_then_not_remount dax=always dax=never
+ 
+ 		if [[ $fstype != "ext2" ]]; then
+-			not_remount data=journal dax
+-			not_remount data=journal dax=always
+-			not_remount data=journal dax=never
+-			not_remount data=journal dax=inode
++			mnt_then_not_remount data=journal dax
++			mnt_then_not_remount data=journal dax=always
++			mnt_then_not_remount data=journal dax=never
++			mnt_then_not_remount data=journal dax=inode
+ 		fi
+ 	fi
+ 
+@@ -584,20 +592,20 @@ for fstype in ext2 ext3 ext4; do
+ 	remount usrquota usrjquota=q.u,jqfmt=vfsv0
+ 	remount grpquota grpjquota=q.g,jqfmt=vfsv0
+ 
+-	not_remount usrquota grpjquota=q.g,jqfmt=vfsv0
+-	not_remount grpquota usrjquota=q.u,jqfmt=vfsv0
++	mnt_then_not_remount usrquota grpjquota=q.g,jqfmt=vfsv0
++	mnt_then_not_remount grpquota usrjquota=q.u,jqfmt=vfsv0
+ 
+ 	remount quota usrjquota=q.u,jqfmt=vfsv0
+-	not_remount quota grpjquota=q.g,jqfmt=vfsv0
++	mnt_then_not_remount quota grpjquota=q.g,jqfmt=vfsv0
+ 
+ 	remount usrjquota=q.u,jqfmt=vfsv0 grpjquota=q.g
+-	not_remount usrjquota=q.u,jqfmt=vfsv0 usrjquota=q.ua
+-	not_remount grpjquota=q.g,jqfmt=vfsv0 grpjquota=q.ga
++	mnt_then_not_remount usrjquota=q.u,jqfmt=vfsv0 usrjquota=q.ua
++	mnt_then_not_remount grpjquota=q.g,jqfmt=vfsv0 grpjquota=q.ga
+ 
+ 	remount usrjquota=q.u,jqfmt=vfsv0 usrquota usrjquota=q.u,jqfmt=vfsv0
+ 	remount grpjquota=q.g,jqfmt=vfsv0 grpquota grpjquota=q.g,jqfmt=vfsv0
+-	not_remount usrjquota=q.u,jqfmt=vfsv0 grpquota
+-	not_remount grpjquota=q.g,jqfmt=vfsv0 usrquota
++	mnt_then_not_remount usrjquota=q.u,jqfmt=vfsv0 grpquota
++	mnt_then_not_remount grpjquota=q.g,jqfmt=vfsv0 usrquota
+ 
+ 	remount grpjquota=q.g,jqfmt=vfsv0 grpjquota= ^grpjquota=
+ 	remount usrjquota=q.u,jqfmt=vfsv0 usrjquota= ^usrjquota=
+@@ -608,12 +616,12 @@ for fstype in ext2 ext3 ext4; do
+ 
+ 	if [[ $fstype != "ext2" ]]; then
+ 		remount noload data=journal norecovery
+-		not_remount data=journal data=ordered
+-		not_remount data=journal data=writeback
+-		not_remount data=ordered data=journal
+-		not_remount data=ordered data=writeback
+-		not_remount data=writeback data=journal
+-		not_remount data=writeback data=ordered
++		mnt_then_not_remount data=journal data=ordered
++		mnt_then_not_remount data=journal data=writeback
++		mnt_then_not_remount data=ordered data=journal
++		mnt_then_not_remount data=ordered data=writeback
++		mnt_then_not_remount data=writeback data=journal
++		mnt_then_not_remount data=writeback data=ordered
+ 	fi
+ 
+ 	do_mkfs -O journal_dev $LOOP_LOGDEV ${LOGSIZE}k
+@@ -621,9 +629,9 @@ for fstype in ext2 ext3 ext4; do
+ 	mnt defaults
+ 	mnt journal_path=$LOOP_LOGDEV ignored
+ 	mnt journal_dev=$LOGDEV_DEVNUM ignored
+-	not_mnt journal_path=${LOOP_LOGDEV}_nonexistent ignored
+-	not_mnt journal_dev=123456 ignored
+-	not_mnt journal_dev=999999999999999 ignored
++	not_mnt journal_path=${LOOP_LOGDEV}_nonexistent
++	not_mnt journal_dev=123456
++	not_mnt journal_dev=999999999999999
+ 
+ 	do_mkfs -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
+ 	mnt prjquota
+@@ -636,11 +644,11 @@ for fstype in ext2 ext3 ext4; do
+ 	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
+ 	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
+ 
+-	not_remount_noumount -r grpjquota=
+-	not_remount_noumount -r usrjquota=aaquota.user
+-	not_remount_noumount -r grpjquota=aaquota.group
+-	not_remount_noumount -r jqfmt=vfsv1
+-	not_remount_noumount -r noquota
++	not_remount grpjquota=
++	not_remount usrjquota=aaquota.user
++	not_remount grpjquota=aaquota.group
++	not_remount jqfmt=vfsv1
++	not_remount noquota
+ 	mnt_only remount,usrquota,grpquota ^usrquota,^grpquota
+ 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+ 
+@@ -654,10 +662,10 @@ for fstype in ext2 ext3 ext4; do
+ 	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
+ 	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
+ 
+-	not_remount_noumount -r noquota
+-	not_remount_noumount -r usrjquota=aquota.user
+-	not_remount_noumount -r grpjquota=aquota.group
+-	not_remount_noumount -r jqfmt=vfsv1
++	not_remount noquota
++	not_remount usrjquota=aquota.user
++	not_remount grpjquota=aquota.group
++	not_remount jqfmt=vfsv1
+ 	mnt_only remount,grpjquota= grpquota,^grpjquota
+ 	mnt_only remount,usrjquota= usrquota,^usrjquota
+ 	mnt_only remount,usrquota,grpquota usrquota,grpquota
+@@ -674,9 +682,9 @@ for fstype in ext2 ext3 ext4; do
+ 	mnt prjquota
+ 	mnt usrquota
+ 	mnt grpquota
+-	not_remount defaults usrjquota=aquota.user
+-	not_remount defaults grpjquota=aquota.user
+-	not_remount defaults jqfmt=vfsv1
++	mnt_then_not_remount defaults usrjquota=aquota.user
++	mnt_then_not_remount defaults grpjquota=aquota.user
++	mnt_then_not_remount defaults jqfmt=vfsv1
+ 	remount defaults grpjquota=,usrjquota= ignored
+ 
+ done #for fstype in ext2 ext3 ext4; do
 
-This's the first time for me to release a new fstests version. I just got the
-maintaining job from Eryu. Thanks Eryu, for his long time contribution and help
-to fstests project!
+base-commit: fbc6486be09c93a68d3863ebf7e3ed851fc4721c
+-- 
+2.36.0
 
-As you can see, I just updated on a new branch. From now on, I make two changes
-for later fstests release:
-
-1) A new offical branch -- for-next
-
-You might notice that fstests has two old enough remote branches named
-origin/mmap-truncate and origin/upstream-queue, it's been ~10 years we never
-touched these two branches, so I've removed them after talking with other
-maintainers.
-
-After remove these two branches, I create a new 'for-next' branch. I'll merge
-and push new patches to "for-next" branch at first, and leave one (maybe more,
-sometimes) week "Soak period" to the for-next release. I'll test new patches
-before push them, but it's hard for me to test all things which fstests support.
-So I decide to leave about one week to let other users use it. Welcome more
-using and testing on this branch, and find big issues as soon as better. That's
-what the for-next branch aims to.
-
-If there's big regression on for-next branch, I will fix on for-next branch and
-push it next time. If there's not big regression issue, I'll merge for-next
-to master and push master, then update and push new for-next release too.
-
-For example, as below, this week I pushed for-next R1', next time I'll push
-for-next R2' and master R1. Next next time will be for-next R3' and master R2,
-and so on... If there's a big regression issue on R3', I will try to fix it in
-next R4', and master branch has to wait one more week to merge and push R4.
-
-                                           (fix regression)
-  for-next ----> R1' ----> R2' -----> R3' -----------------> R4' -----> R5'
-     ^           |         |                                 |
-     | (fork)    | (merge) | (merge)                         | (merge)
-     |           V         V                                 V
-  master   ----> R1 -----> R2 -----------------------------> R4
-  (orig)
-
-So if you prefer latest fstests, or contributing fstests, please use for-next.
-Or you can keep using master branch.
-
-And of course, there might be some topic(/unstable/temporary) branches appear,
-those branches might be rebase / reset / delete ... so don't rely on them too
-much.
-
-2) Push signed version tag for new release.
-
-I start to push singed (by me) version tag each time I push to for-next branch.
-The version format is "v$(date +%Y.%m.%d)", e.g. "v2022.05.01".
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-bb04d577435d fstests: add some missing _require_loop's
-
-New commits (N=New case, U=Update, D=Delete case):
-
-Christian Brauner (1):
-(N)      [31c01ce18f73] generic: add test for tmpfs POSIX ACLs
-
-Chung-Chiang Cheng (1):
-(N)      [987700db300d] fstests: btrfs: test setting compression via xattr on nodatacow files
-
-Darrick J. Wong (4):
-(U)      [af8aeeea48d0] xfs/019: fix golden output for files created in setgid dir
-(U)      [ad5f89ef3013] generic/019: fix incorrect unset statements
-(N)      [7f27a290aca8] xfs: make sure syncfs(2) passes back super_operations.sync_fs errors
-(N)      [e81417a0964a] generic: ensure we drop suid after fallocate
-
-Eric Sandeen (2):
-(N)      [80a82f6926fa] xfs: test xfsdump when an inode < root inode is present
-(D)      [7753e08d22e9] fstests: remove xfs/144
-
-Jan Kara (2):
-(U)      [858a19c5e9b0] idmapped_mounts: Prepare for support for more features
-(U)      [95c10ab90c28] generic/633: Avoid failure without CONFIG_USER_NS
-
-Josef Bacik (1):
-(U)      [bb04d577435d] fstests: add some missing _require_loop's
-
-Murphy Zhou (1):
-(U)      [0fd8e26141f5] chown: fix ownership format string
-
-Rishabh Dave (1):
-(U)      [1dac95cb0d6e] cephfs: add ceph-fuse suport for ceph-fuse
-
-Theodore Ts'o (1):
-(U)      [5528f7843b1a] generic/681, generic/682: add debugging information to $seqreq.full
-
-Yang Xu (1):
-(U)      [298f60c81a93] generic/673: Add separate sgid stripping sub-tests
-
-Zorro Lang (2):
-(U)      [380ee98d92e6] fstests: remove _wipe_fs from dump testing entirely
-(U)      [ab47e281b70f] fsstress: remove ALLOCSP and FREESP operations entirely
-
-
-Code Diffstat:
-
- common/config                         |   2 +
- common/dump                           |  23 +--
- common/rc                             |  47 +++++--
- ltp/fsstress.c                        | 117 ----------------
- src/idmapped-mounts/idmapped-mounts.c | 257 +++++++++++++++++++++++++++-------
- tests/btrfs/012                       |   1 +
- tests/btrfs/264                       |  91 ++++++++++++
- tests/btrfs/264.out                   |  11 ++
- tests/generic/019                     |   4 +-
- tests/generic/070                     |   2 -
- tests/generic/099                     |   4 +-
- tests/generic/237                     |   2 +-
- tests/generic/318                     |   2 +-
- tests/generic/380                     |   2 +-
- tests/generic/597                     |   6 +-
- tests/generic/598                     |   6 +-
- tests/generic/648                     |   1 +
- tests/generic/673                     |  37 ++++-
- tests/generic/673.out                 |  24 ++++
- tests/generic/681                     |   4 +
- tests/generic/682                     |   4 +
- tests/generic/683                     | 127 +++++++++++++++++
- tests/generic/683.out                 |  33 +++++
- tests/generic/684                     | 127 +++++++++++++++++
- tests/generic/684.out                 |  33 +++++
- tests/generic/685                     | 127 +++++++++++++++++
- tests/generic/685.out                 |  33 +++++
- tests/generic/686                     | 127 +++++++++++++++++
- tests/generic/686.out                 |  33 +++++
- tests/generic/687                     | 127 +++++++++++++++++
- tests/generic/687.out                 |  33 +++++
- tests/generic/688                     |  77 ++++++++++
- tests/generic/688.out                 |  13 ++
- tests/generic/689                     |  33 +++++
- tests/generic/689.out                 |   2 +
- tests/xfs/019                         |   3 +-
- tests/xfs/019.out                     |   2 +-
- tests/xfs/022                         |   3 +
- tests/xfs/023                         |   3 +
- tests/xfs/024                         |   3 +
- tests/xfs/025                         |   3 +
- tests/xfs/026                         |   3 +
- tests/xfs/027                         |   3 +
- tests/xfs/028                         |   7 +-
- tests/xfs/035                         |   7 +
- tests/xfs/036                         |   3 +
- tests/xfs/037                         |   3 +
- tests/xfs/038                         |   3 +
- tests/xfs/039                         |   3 +
- tests/xfs/043                         |   5 +-
- tests/xfs/046                         |   3 +
- tests/xfs/047                         |   7 +-
- tests/xfs/055                         |   4 +
- tests/xfs/056                         |   3 +
- tests/xfs/059                         |   3 +
- tests/xfs/060                         |   3 +
- tests/xfs/061                         |   3 +
- tests/xfs/063                         |   3 +
- tests/xfs/064                         |   3 +
- tests/xfs/065                         |   3 +-
- tests/xfs/066                         |   3 +
- tests/xfs/068                         |   3 +
- tests/xfs/144                         | 128 -----------------
- tests/xfs/144.out                     | 151 --------------------
- tests/xfs/266                         |   3 +
- tests/xfs/267                         |   4 +-
- tests/xfs/268                         |   4 +-
- tests/xfs/281                         |   4 +-
- tests/xfs/282                         |   4 +-
- tests/xfs/283                         |   4 +-
- tests/xfs/296                         |   4 +-
- tests/xfs/301                         |   2 +
- tests/xfs/302                         |   3 +-
- tests/xfs/545                         |  62 ++++++++
- tests/xfs/545.out                     |  47 +++++++
- tests/xfs/546                         |  43 ++++++
- tests/xfs/546.out                     |   2 +
- 77 files changed, 1611 insertions(+), 521 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---VGdgslCgeMyO
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmJthscACgkQlNbPkfr2
-tMzpbBAAlTj4S8RVddSq3P6t03sJboJEvOAnk3BpmzSZF2zpKcqe8DXf6uYtBKQD
-z6fQa5csYAkSQJeMTMgdv9UF0O/KNYvtB3QzTUqZNU+mPZuCNLelL1lgFURz/Ir7
-gibLbyBUDf8T1G+omw+ikyFdTK0K0inz69nL5LH5tC+l8wX/peElVJdRAu+v/UK3
-1KEUlj3tflr6gLUiTtp0J7LuadGJJciG6EOdD4dCdGIsDqKw0h58jQwkbo66Uxk6
-cueWKKFrVl8BVLyOcRxDn19AB1hHAqgAlyxi1zJHLTkt/3zxif7H+6hEzY9isvWO
-TbN5U81EY8sXQy4V7pwSus5Gswb5CQe4FfKqeYj6YNnzxtuGbYTDP/D1oFGF6fI2
-TIIBCw5vAC0Ukcc0jliThvc7MIx6iSo6FdwEdzhOGlTpchWuEJgC04nMKD/hsXAe
-E9ZWBSC1FAzxCGidmBF4HujK+L9Q77JToyzMcWaTzIqCpG2nNyJXKRcAMEXtmyKv
-5au2SaIGNBNBSg+jdqA+vX/7/8Vh556RSNnJsx7B36aNhz+8M6S+GapCemxTNjC8
-/IwszifF4dp4QaiOdvJ6KvTwmuZEOyWcQY0bQ9PPvLjua+5OkIxTWp3O/Jq0w1tx
-rJCkvmrpPMypFWrVyNA4ATEj2LZA+EeJjdiyKF4lg4ZOgH/iULA=
-=24CZ
------END PGP SIGNATURE-----
-
---VGdgslCgeMyO--
