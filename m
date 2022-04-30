@@ -2,107 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3379DC433EF
-	for <linux-fstests@archiver.kernel.org>; Sat, 30 Apr 2022 03:44:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45AF2C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 30 Apr 2022 17:58:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1382163AbiD3Drh (ORCPT
+        id S243991AbiD3SBj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Apr 2022 23:47:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57916 "EHLO
+        Sat, 30 Apr 2022 14:01:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346101AbiD3Drf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Apr 2022 23:47:35 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79E83D3478;
-        Fri, 29 Apr 2022 20:44:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=71R9XH5yVaDQhBaSEWsIsrB/I87XgzXqtUttxLlkDN8=; b=RvjQvYRtkTbHgE6mZYaoNE/ybY
-        lJWGsZLQbdrBY60qxCvfB06x08gEPiz0hpATD1SLYXWzVgqiUSSd0nq1SwSqskyJppwEa/j241s5i
-        kKCOBtSJboxY9u0JnGyvS9MERpRozYRm8t/H9njU+S6zY9ERMcjJbB4HvYN7WB6KVUjEwuPZm74TZ
-        RmVmKQF4HrNMqAKwWXnN4ZVyckviIGLb3a8lfX2pX8S+YbUT6a/FwruWY+HxY3k77h2dnRSdnA9gt
-        clGAOzQFjdSBhau7xnqBw+v/Qg7c2eUXZP4DJjCTGoWwyytoqXiYZ0uIBgxGAgdz5Vvz6SKrQcQNx
-        4r+pHrgA==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nke1f-00D33c-Ez; Sat, 30 Apr 2022 03:44:07 +0000
-Date:   Sat, 30 Apr 2022 04:44:07 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     Brian Foster <bfoster@redhat.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>
-Subject: Re: generic/068 crash on 5.18-rc2?
-Message-ID: <Ymywh003c+Hd4Zu9@casper.infradead.org>
-References: <20220413033425.GM16799@magnolia>
- <YlbjOPEQP66gc1WQ@casper.infradead.org>
- <20220418174747.GF17025@magnolia>
- <20220422215943.GC17025@magnolia>
- <Ymq4brjhBcBvcfIs@bfoster>
+        with ESMTP id S243938AbiD3SBi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Apr 2022 14:01:38 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97AE7939ED;
+        Sat, 30 Apr 2022 10:58:15 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 33B3461022;
+        Sat, 30 Apr 2022 17:58:15 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7D855C385AA;
+        Sat, 30 Apr 2022 17:58:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651341494;
+        bh=RuvtmLXYu7k3oxdQeuy8TIHBtPj7lj1z/+j84m4s41I=;
+        h=From:To:Cc:Subject:Date:From;
+        b=jzaK44e/VDrPECBTBVUKIEpLxbI50b4YxKrd9z8/HdBsEAB+sp57ZfrertI7eW3By
+         ISfo3iD/A09JamCO9VMMpD4OIccpvxVxr2iVYWTIlyvDuh+0ShC3b3U1T+uxzonPh2
+         BFJ6XmrEbqzMHlyEZTpip8YwfP2I9yiFxeATEUFj8IM1lWbFJBrGwijXH6ns8TqIC1
+         UEXquTL2YO2QGus2psCl4O4AozPeK2NIUqtIURuNhV5VZPrmUyIkEVCNU/nqU7AUdw
+         DUmNY/0oZhG7Hju7hD0Cy0f3T4P05xxZIS5/yWmc8mBeZBwiWcPKdzg3p13fxsb97H
+         BgkMLMYG1Qpvw==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: [xfstests-bld PATCH] test-appliance: remove convenience fstab entries
+Date:   Sat, 30 Apr 2022 10:57:33 -0700
+Message-Id: <20220430175733.110401-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.36.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Ymq4brjhBcBvcfIs@bfoster>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 28, 2022 at 11:53:18AM -0400, Brian Foster wrote:
-> The above is the variant of generic/068 failure I was reproducing and
-> used to bisect [1]. With some additional tracing added to ioend
-> completion, what I'm seeing is that the bio_for_each_folio_all() bvec
-> iteration basically seems to go off the rails. What happens more
-> specifically is that at some point during the loop, bio_next_folio()
-> actually lands into the second page of the just processed folio instead
-> of the actual next folio (i.e. as if it's walking to the next page from
-> the head page of the folio instead of to the next 16k folio). I suspect
-> completion is racing with some form of truncation/reclaim/invalidation
-> here, what exactly I don't know, that perhaps breaks down the folio and
-> renders the iteration (bio_next_folio() -> folio_next()) unsafe. To test
-> that theory, I open coded and modified the loop to something like the
-> following:
-> 
->                 for (bio_first_folio(&fi, bio, 0); fi.folio; ) {
->                         f = fi.folio;
->                         l = fi.length;
->                         bio_next_folio(&fi, bio);
->                         iomap_finish_folio_write(inode, f, l, error);
->                         folio_count++;
->                 }
-> 
-> ... to avoid accessing folio metadata after writeback is cleared on it
-> and this seems to make the problem disappear (so far, I'll need to let
-> this spin for a while longer to be completely confident in that).
+From: Eric Biggers <ebiggers@google.com>
 
-_Oh_.
+Fstab entries for the xfstests filesystems interfere with xfstests
+because they change the behavior of 'mount -o remount MOUNTPOINT' to
+remount relative to the mount options from the fstab rather than the
+actual mount options.  For example:
 
-It's not even a terribly weird race, then.  It's just this:
+With fstab:
+	$ mount -o lazytime /dev/vdc /vdc
+	$ mount -o remount /vdc
+	$ findmnt /vdc
+	TARGET SOURCE   FSTYPE OPTIONS
+	/vdc   /dev/vdc ext4   rw,relatime
 
-CPU 0				CPU 1
-				truncate_inode_partial_folio()
-				folio_wait_writeback();
-bio_next_folio(&fi, bio)
-iomap_finish_folio_write(fi.folio)
-folio_end_writeback(folio)
-				split_huge_page()
-bio_next_folio()
-... oops, now we only walked forward one page instead of the entire folio.
+Without fstab:
+	$ rm /etc/fstab
+	$ mount -o lazytime /dev/vdc /vdc
+	$ mount -o remount /vdc
+	$ findmnt /vdc
+	TARGET SOURCE   FSTYPE OPTIONS
+	/vdc   /dev/vdc ext4   rw,relatime,lazytime
 
-So ... I think we can fix this with:
+So the lazytime option was lost on remount due to the fstab.  This
+happens with other mount options too; lazytime is just an example.
 
-+++ b/include/linux/bio.h
-@@ -290,7 +290,8 @@ static inline void bio_next_folio(struct folio_iter *fi, struct bio *bio)
- {
-        fi->_seg_count -= fi->length;
-        if (fi->_seg_count) {
--               fi->folio = folio_next(fi->folio);
-+               fi->folio = (struct folio *)folio_page(fi->folio,
-+                               (fi->offset + fi->length) / PAGE_SIZE);
-                fi->offset = 0;
-                fi->length = min(folio_size(fi->folio), fi->_seg_count);
-        } else if (fi->_i + 1 < bio->bi_vcnt) {
+This breaks xfstest ext4/053.
 
-(I do not love this, have not even compiled it; it's late.  We may be
-better off just storing next_folio inside the folio_iter).
+Remove the fstab entries, as they were only needed to make it slightly
+easier to manually mount filesystems in an interactive shell.  So 'mount
+/vdc' will no longer work, but 'mount /dev/vdc /vdc' will still work.
+
+Alternatively we could make xfstests always use
+'mount --options-source=mtab' instead of just 'mount', but xfstests
+calls 'mount' in a bunch of different places.  We could still do it
+anyway, though; let me know if that would be preferred.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ kvm-xfstests/test-appliance/files/etc/fstab | 15 ++-------------
+ 1 file changed, 2 insertions(+), 13 deletions(-)
+
+diff --git a/kvm-xfstests/test-appliance/files/etc/fstab b/kvm-xfstests/test-appliance/files/etc/fstab
+index fbd0c69..4a6395d 100644
+--- a/kvm-xfstests/test-appliance/files/etc/fstab
++++ b/kvm-xfstests/test-appliance/files/etc/fstab
+@@ -7,18 +7,7 @@ debugfs		/sys/kernel/debug debugfs defaults	0	0
+ v_tmp		/vtmp	9p	trans=virtio,version=9p2000.L,msize=262144,nofail,x-systemd.device-timeout=1	0	0
+ /dev/rootfs	/	ext4    noatime 0 1
+ 
+-# Convenience entries for interactive mounting (e.g. 'mount /vdb')
+-/dev/vdb	/vdb	auto	defaults,noauto		0	0
+-/dev/vdc	/vdc	auto	defaults,noauto		0	0
+-/dev/vdd	/vdd	auto	defaults,noauto		0	0
+-/dev/vde	/vde	auto	defaults,noauto		0	0
+-/dev/vdf	/vdf	auto	defaults,noauto		0	0
+ /dev/vdg	/results auto	defaults		0	2
+-/dev/vdi	/vdi	auto	defaults,noauto		0	0
+-/dev/vdj	/vdj	auto	defaults,noauto		0	0
+ 
+-localhost:/test	/mnt/test nfs 	defaults,noauto		0	0
+-localhost:/scratch /mnt/scratch nfs defaults,noauto	0	0
+-
+-/vdc/scratch	/scratch none	defaults,noauto,bind	0	0
+-/vdc/test	/test	 none	defaults,noauto,bind	0	0
++# Don't include entries for the xfstests filesystems (/vdb, /vdc, etc.) here, as
++# they interfere with xfstests by changing the behavior of 'mount -o remount'.
+-- 
+2.36.0
+
