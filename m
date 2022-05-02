@@ -2,77 +2,59 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BB8BC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 May 2022 23:26:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA9E7C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 May 2022 03:59:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239721AbiEAX32 (ORCPT
+        id S230191AbiEBEDW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 May 2022 19:29:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55816 "EHLO
+        Mon, 2 May 2022 00:03:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229449AbiEAX31 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 May 2022 19:29:27 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB89CB877;
-        Sun,  1 May 2022 16:25:59 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id A9ECBB80B55;
-        Sun,  1 May 2022 23:25:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28A4FC385AA;
-        Sun,  1 May 2022 23:25:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651447557;
-        bh=IzlkBaID+yqzckMbyFJ/v3HtDSN7Zh502N2RUOzye0s=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=XnO4e7DKqT2ZsM8Af133H5G4PxU9pkA7aWwvu16c9exjCWd2iCiSoy3igHOgWv58T
-         KXR1C1PqyYw/dSEmFsgnXo0XkqAIaSyKnR29DwxV8RlfihnV2i/OZBX1FWHgSYTe02
-         1e6YIiwgyrkR7uBdzmCaRjfpmq8bUEWQo2tq9d3eRtGdoSAYo09zZUMWoz0hNk5dyi
-         O658IYNQHbys+E13tXmPl2256gwrLOhdbU9fcKAkBauraxa4Xrapsqv+GOkujM8/Ff
-         i8mPrKdyBzHzsKDE7RXAbqE12b7yB/TfhVSbWCQQiPMDCPuYBxg+Nz8D5YGvl9Zrpd
-         l2vdwWRc3UVIQ==
-Date:   Sun, 1 May 2022 16:25:53 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Boris Burkov <boris@bur.io>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH v9 5/5] generic: test fs-verity EFBIG scenarios
-Message-ID: <Ym8XATu0MLOWGefF@sol.localdomain>
-References: <cover.1651012461.git.boris@bur.io>
- <b79c0fe9c23a5911943f797dedb25f28f1759f73.1651012461.git.boris@bur.io>
+        with ESMTP id S229849AbiEBEDV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 May 2022 00:03:21 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B673F18E2E;
+        Sun,  1 May 2022 20:59:53 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net [108.7.220.252])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 2423xeW1026463
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sun, 1 May 2022 23:59:41 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 58AF115C3ECD; Sun,  1 May 2022 23:59:40 -0400 (EDT)
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     "Theodore Ts'o" <tytso@mit.edu>, fstests@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [xfstests-bld PATCH] test-appliance: remove convenience fstab entries
+Date:   Sun,  1 May 2022 23:59:35 -0400
+Message-Id: <165146396605.790141.6548436162681770266.b4-ty@mit.edu>
+X-Mailer: git-send-email 2.31.0
+In-Reply-To: <20220430175733.110401-1-ebiggers@kernel.org>
+References: <20220430175733.110401-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b79c0fe9c23a5911943f797dedb25f28f1759f73.1651012461.git.boris@bur.io>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 26, 2022 at 03:40:16PM -0700, Boris Burkov wrote:
-> btrfs, ext4, and f2fs cache the Merkle tree past EOF, which restricts
-> the maximum file size beneath the normal maximum. Test the logic in
-> those filesystems against files with sizes near the maximum.
+On Sat, 30 Apr 2022 10:57:33 -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> To work properly, this does require some understanding of the practical
-> but not standardized layout of the Merkle tree. This is a bit unpleasant
-> and could make the test incorrect in the future, if the implementation
-> changes. On the other hand, it feels quite useful to test this tricky
-> edge case. It could perhaps be made more generic by adding some ioctls
-> to let the file system communicate the maximum file size for a verity
-> file or some information about the storage of the Merkle tree.
+> Fstab entries for the xfstests filesystems interfere with xfstests
+> because they change the behavior of 'mount -o remount MOUNTPOINT' to
+> remount relative to the mount options from the fstab rather than the
+> actual mount options.  For example:
 > 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
->  common/verity         | 11 ++++++++
->  tests/generic/690     | 64 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/690.out |  7 +++++
->  3 files changed, 82 insertions(+)
->  create mode 100755 tests/generic/690
->  create mode 100644 tests/generic/690.out
+> [...]
 
-Unchanged from v8 which I had given R-b for:
+Applied, thanks!
 
-Reviewed-by: Eric Biggers <ebiggers@google.com>
+[1/1] test-appliance: remove convenience fstab entries
+      commit: d396dac653c99e46e4234d9600c6e2b0de433fdd
 
-- Eric
+Best regards,
+-- 
+Theodore Ts'o <tytso@mit.edu>
