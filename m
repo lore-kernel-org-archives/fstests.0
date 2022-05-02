@@ -2,130 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D372C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 May 2022 04:04:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34E52C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 May 2022 12:18:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232237AbiEBEH7 (ORCPT
+        id S236220AbiEBMWA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 2 May 2022 00:07:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46814 "EHLO
+        Mon, 2 May 2022 08:22:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229849AbiEBEH6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 May 2022 00:07:58 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0525D5F76
-        for <fstests@vger.kernel.org>; Sun,  1 May 2022 21:04:30 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 54F43B81052
-        for <fstests@vger.kernel.org>; Mon,  2 May 2022 04:04:29 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2BFEEC385AC;
-        Mon,  2 May 2022 04:04:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651464268;
-        bh=Y0hLPz+SZ8OOdgi4ouyQoERSroZ7/zMuvB66GchBY7k=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=KPIVz4MEc4IYg4YsW1GD/cJNWY+lzpwFOLfKrkBZc16mADPUczJ0AmlcimrN1gZgd
-         psE+izoj6gMPV1MFs5DcprP+JZb/Rj939sWMUIw5FwdWKf8c7zWkjb93mUhKUwsbls
-         57arhRmYytbQdFCH1agecez3nYUzZqsZ+CimUZs6GMQf888MbYkBCp1Bwvq8nOf/y2
-         W+nLBFhI/yRgL2hXh0T+wSVylP19b5J7sYfho1alzeSnGSfonEkCCKD0aMUVKU1NvK
-         zRdOVbtcvp7A+WZaSmS9ixzoYlpGAnSEkGSFMix9kuGwlM0hz88NRO102z0Y1BOQEx
-         G//YexFrJ+36Q==
-Date:   Mon, 2 May 2022 12:04:22 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     Amir Goldstein <amir73il@gmail.com>
-Subject: Re: [PATCH v2 0/2] Annonate fstests with possible reasons for failure
-Message-ID: <20220502040422.fhtbl6fqhq53ucpc@zlang-mailbox>
-Mail-Followup-To: fstests@vger.kernel.org,
-        Amir Goldstein <amir73il@gmail.com>
-References: <20220419125637.2502181-1-amir73il@gmail.com>
+        with ESMTP id S233608AbiEBMV7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 May 2022 08:21:59 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 1CC1C15FC5
+        for <fstests@vger.kernel.org>; Mon,  2 May 2022 05:18:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1651493909;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=/MPF4SlHJTSwOs9uq+qeW8/MK0NYqARQeWoIqaF+luw=;
+        b=TEQNmI59tZ+844qLGOZQSWoJg6GnynsXa4fIg/g7f96V+ewyCe1v6v3QlD60dc8paEaXMU
+        qzZbOmqAicJNphPlPYLSuCAgQ46LAPT2huP65xFgXmPFkBtwxPZ6nHTAnfBQcHdX6TxLOC
+        GlYRwXrgLSddBWVhEatYzvtuyGk/62c=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-549-NNgqUZMVNn2iJ5GPZSt-ew-1; Mon, 02 May 2022 08:18:28 -0400
+X-MC-Unique: NNgqUZMVNn2iJ5GPZSt-ew-1
+Received: by mail-qv1-f72.google.com with SMTP id d13-20020a05621421cd00b0045a99874ae5so281450qvh.14
+        for <fstests@vger.kernel.org>; Mon, 02 May 2022 05:18:28 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=/MPF4SlHJTSwOs9uq+qeW8/MK0NYqARQeWoIqaF+luw=;
+        b=4R7dsEJcGx4oSNBgSeXBHtfOnHcqn8uhREPklS+FK/56QEDY8filsUx0qmxnZSbcLi
+         Lo0kzLqUi23rM8AV3R7BiThiY9ij98g/LhGxMDxljWkXNXGEmsJz6LZ8F0wqdqom/QRp
+         ZF86WunC7XvdCEZL6jeuKU9/dfdsBRJ1EpYDXRctzC6xHN02lglJOqsnlPWyXjDb9FWU
+         tc0fQ26LnseoyremGVUsrqveNmEh509j7skMUvag+jKt1cA23skZV/mkhjsSq9UN5hHB
+         vyO6cGLkgYFbvOzUg3PmJ+FSfmqzN8PlaaEn79PyQ6ZbNtlH+U0XUG4lj8gHAZWO8UQK
+         GS8g==
+X-Gm-Message-State: AOAM533xNRMB71iax8+6TYEPcjLiah8O2r++PWLgEUBGApxDrZvQafMh
+        PoNbHXaC9+qJlNWk5cQO4YVDh6yktAscgpb1sLZpVoj/YWDVKXscHndXENjP8Ms/2VW4mjlhrM/
+        LVxz7+SngplpAS6+rkA==
+X-Received: by 2002:a05:622a:1211:b0:2f2:167:55dc with SMTP id y17-20020a05622a121100b002f2016755dcmr9756401qtx.105.1651493907288;
+        Mon, 02 May 2022 05:18:27 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwkMF9lcc6DS6FBWLWUIVap+Xc5D8aaV20ZYaG7Q/z0wEek99nyXbS8Zkj7RgwqXcS5qEOKUg==
+X-Received: by 2002:a05:622a:1211:b0:2f2:167:55dc with SMTP id y17-20020a05622a121100b002f2016755dcmr9756380qtx.105.1651493907034;
+        Mon, 02 May 2022 05:18:27 -0700 (PDT)
+Received: from bfoster (c-24-61-119-116.hsd1.ma.comcast.net. [24.61.119.116])
+        by smtp.gmail.com with ESMTPSA id c5-20020ac86605000000b002f39b99f6a0sm4038090qtp.58.2022.05.02.05.18.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 May 2022 05:18:26 -0700 (PDT)
+Date:   Mon, 2 May 2022 08:18:24 -0400
+From:   Brian Foster <bfoster@redhat.com>
+To:     Matthew Wilcox <willy@infradead.org>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Subject: Re: generic/068 crash on 5.18-rc2?
+Message-ID: <Ym/MEBfa0szil3hW@bfoster>
+References: <20220413033425.GM16799@magnolia>
+ <YlbjOPEQP66gc1WQ@casper.infradead.org>
+ <20220418174747.GF17025@magnolia>
+ <20220422215943.GC17025@magnolia>
+ <Ymq4brjhBcBvcfIs@bfoster>
+ <Ymywh003c+Hd4Zu9@casper.infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220419125637.2502181-1-amir73il@gmail.com>
+In-Reply-To: <Ymywh003c+Hd4Zu9@casper.infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 19, 2022 at 03:56:35PM +0300, Amir Goldstein wrote:
-> Zorro,
+On Sat, Apr 30, 2022 at 04:44:07AM +0100, Matthew Wilcox wrote:
+> On Thu, Apr 28, 2022 at 11:53:18AM -0400, Brian Foster wrote:
+> > The above is the variant of generic/068 failure I was reproducing and
+> > used to bisect [1]. With some additional tracing added to ioend
+> > completion, what I'm seeing is that the bio_for_each_folio_all() bvec
+> > iteration basically seems to go off the rails. What happens more
+> > specifically is that at some point during the loop, bio_next_folio()
+> > actually lands into the second page of the just processed folio instead
+> > of the actual next folio (i.e. as if it's walking to the next page from
+> > the head page of the folio instead of to the next 16k folio). I suspect
+> > completion is racing with some form of truncation/reclaim/invalidation
+> > here, what exactly I don't know, that perhaps breaks down the folio and
+> > renders the iteration (bio_next_folio() -> folio_next()) unsafe. To test
+> > that theory, I open coded and modified the loop to something like the
+> > following:
+> > 
+> >                 for (bio_first_folio(&fi, bio, 0); fi.folio; ) {
+> >                         f = fi.folio;
+> >                         l = fi.length;
+> >                         bio_next_folio(&fi, bio);
+> >                         iomap_finish_folio_write(inode, f, l, error);
+> >                         folio_count++;
+> >                 }
+> > 
+> > ... to avoid accessing folio metadata after writeback is cleared on it
+> > and this seems to make the problem disappear (so far, I'll need to let
+> > this spin for a while longer to be completely confident in that).
 > 
-> This series adresses your review comments on v1.
-> Specifically, I dropped the controversial patch #3 and the
-> SKIP_KNOWN_ISSUES run option.
+> _Oh_.
 > 
-> To clarify, multiple annotations could be used in each test,
-> for example:
->  _fixed_by_kernel_commit 09889695864 xfs: foo
->  _fixed_by_kernel_commit 46464565465 ext4: bar
->  _fixed_by_git_commit e2fsprogs 62464626 e2fs: baz
->  _fixed_in_version xfsprogs v5.15
+> It's not even a terribly weird race, then.  It's just this:
 > 
-> On test failure, all the hints will be printed to output as *possible*
-> reason for failure.
+> CPU 0				CPU 1
+> 				truncate_inode_partial_folio()
+> 				folio_wait_writeback();
+> bio_next_folio(&fi, bio)
+> iomap_finish_folio_write(fi.folio)
+> folio_end_writeback(folio)
+> 				split_huge_page()
+> bio_next_folio()
+> ... oops, now we only walked forward one page instead of the entire folio.
 > 
-> These annotation and printed hints are inspired by a similar LTP feature.
-> 
-> These annotation could be used by testers to auto-generate expunge list
-> for testing stable kernels from the information in _fixed_by_kernel_commit
-> and _fixed_in_kernel_version. This trivial task is left is an excercise.
 
-I've reviewed V1 patchset, and keep V2 2 weeks here to get more review points.
-if there's not objection or suggestion, I'll merge this change in next fstests
-release.
+Yep, though once I noticed and turned on the mm_page_free tracepoint, it
+looked like it was actually the I/O completion path breaking down the
+compound folio:
 
-Thanks,
-Zorro
+   kworker/10:1-440     [010] .....   355.369899: iomap_finish_ioend: 1090: bio 00000000bc8445c7 index 192 fi (00000000dc8c03bd 0 16384 32768 27)
+   ...
+    kworker/10:1-440     [010] .....   355.369905: mm_page_free: page=00000000dc8c03bd pfn=0x182190 order=2
+    kworker/10:1-440     [010] .....   355.369907: iomap_finish_ioend: 1090: bio 00000000bc8445c7 index 1 fi (00000000f8b5d9b3 0 4096 16384 27)
 
+I take that to mean the truncate path executes while the completion side
+holds a reference, folio_end_writeback() ends up dropping the last
+reference, falls into the free/split path and the iteration breaks from
+there. Same idea either way, I think.
+
+Brian
+
+> So ... I think we can fix this with:
 > 
-> Thanks,
-> Amir.
+> +++ b/include/linux/bio.h
+> @@ -290,7 +290,8 @@ static inline void bio_next_folio(struct folio_iter *fi, struct bio *bio)
+>  {
+>         fi->_seg_count -= fi->length;
+>         if (fi->_seg_count) {
+> -               fi->folio = folio_next(fi->folio);
+> +               fi->folio = (struct folio *)folio_page(fi->folio,
+> +                               (fi->offset + fi->length) / PAGE_SIZE);
+>                 fi->offset = 0;
+>                 fi->length = min(folio_size(fi->folio), fi->_seg_count);
+>         } else if (fi->_i + 1 < bio->bi_vcnt) {
 > 
-> Changes since v1:
-> - Rename s/_known_issue_before_kernel/_fixed_in_kernel_version (zlang)
-> - Add generic helpers for non-kernel fixes (zlang)
-> - Drop _known_issue_on_fs (zlang)
-> - Clarify multiple hints are allowed (tytso)
+> (I do not love this, have not even compiled it; it's late.  We may be
+> better off just storing next_folio inside the folio_iter).
 > 
-> Amir Goldstein (2):
->   common: support black listing fs in _supported_fs()
->   common: print hints for reasons of test failures
-> 
->  check             | 10 ++++++++-
->  common/preamble   |  2 +-
->  common/rc         | 57 +++++++++++++++++++++++++++++++++++++++--------
->  tests/generic/500 |  3 +--
->  tests/generic/631 |  3 +--
->  tests/generic/679 |  3 +--
->  tests/overlay/009 |  3 +++
->  tests/overlay/010 |  3 +++
->  tests/overlay/014 |  2 ++
->  tests/overlay/016 |  4 +++-
->  tests/overlay/017 |  4 +++-
->  tests/overlay/018 |  4 +++-
->  tests/overlay/020 |  3 +++
->  tests/overlay/022 |  2 ++
->  tests/overlay/029 |  2 ++
->  tests/overlay/038 |  2 ++
->  tests/overlay/041 |  2 ++
->  tests/overlay/042 |  3 +++
->  tests/overlay/043 |  4 +++-
->  tests/overlay/044 |  4 +++-
->  tests/overlay/054 |  3 +++
->  tests/overlay/055 |  3 +++
->  tests/overlay/063 |  3 +++
->  tests/overlay/065 |  4 ++++
->  tests/overlay/067 |  3 +++
->  tests/overlay/070 |  4 +++-
->  tests/overlay/071 |  4 +++-
->  tests/overlay/072 |  2 ++
->  tests/overlay/074 |  5 +++++
->  tests/overlay/077 |  5 +++++
->  tests/overlay/078 |  1 +
->  31 files changed, 133 insertions(+), 24 deletions(-)
-> 
-> -- 
-> 2.25.1
-> 
+
