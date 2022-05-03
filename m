@@ -2,177 +2,159 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A967FC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 May 2022 10:58:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A3F1C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  3 May 2022 17:25:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234581AbiECLBo (ORCPT
+        id S240310AbiECR3M (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 3 May 2022 07:01:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39454 "EHLO
+        Tue, 3 May 2022 13:29:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234603AbiECLBm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 May 2022 07:01:42 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 454C536E25;
-        Tue,  3 May 2022 03:58:00 -0700 (PDT)
+        with ESMTP id S240280AbiECR3L (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 May 2022 13:29:11 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7800A19C2F;
+        Tue,  3 May 2022 10:25:37 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 2FEC5B81D73;
-        Tue,  3 May 2022 10:57:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CEFF9C385A9;
-        Tue,  3 May 2022 10:57:55 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2A69160AC7;
+        Tue,  3 May 2022 17:25:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 85AADC385A4;
+        Tue,  3 May 2022 17:25:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651575476;
-        bh=RRLox75KOpyt9vFVOhFnBvdrBeKlfISKxs1owxx6W9Y=;
-        h=From:To:Cc:Subject:Date:From;
-        b=GFRnSICe/IR40gx7RvWW8BUbLzLWfUOSF8xOvIynUPX/hNHtrRnOYpH+RHCuZDIk9
-         D4svzLk5PzoOLPTuLAVg0KXH9XLlgsXDubf3YVb1FCtfMi3seySYJG/49MyggyyRG5
-         8VQSIB0rMggpXu3yqLkfJbHwQ1OLe40W5lmEGmJOoLkh5qlLJRLeQoMUxAESzRzoc8
-         SUKSVobLV4qyUIel3ZdwOgd5DT3v0S1h+YAwMuLNZ9ZP1RthqOGoiXyg6dZfr6emkF
-         jHRGj1StPSihpK7Clz6R1zr/EiJyNNWPw2maMQiZU1qqy1gugmzcnad4KFHpEkRBsG
-         /a1/BGJXJbabA==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, zlang@kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: [Resend PATCH] generic: test fsync of directory with renamed symlink
-Date:   Tue,  3 May 2022 11:57:49 +0100
-Message-Id: <8f06924cda35f9a5e22c1c188eb46205dd50491f.1651573756.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.35.1
+        s=k20201202; t=1651598733;
+        bh=uNKAeqEOh8fNnMTpMlt8M9p0oqkxM2ZLM7Va2DHfz9Q=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=OhpmMh5TM6YB4/nvbNh3XJD0JSbcJd9paDT4sry9pirufKH+U1e/9YGhfPs7WEoyK
+         7PY/kR196s0xDkQTqbPOGyrw1bQmhSz82jgQO8Lrk++XcOcOdwM3Ziu2JHKtDA9AAL
+         YFUME/WkqUodWlSBxgcPK3Vkgpvs9+lbslJIfWav3obaCWhO9RvOyEoHL9ieVI1/TD
+         GgGTLZcPYD7PHTYECdHgwnRNqNWxD+AcbPOToNyy01yaJKMoflUq3InUug7/wzXgwx
+         dOT4G+RF8EtPm8oanWhSijRQUwxBnTiSkZdChdYnD5x4H5oYh/CIIOcMEwu9izT6hs
+         +/3M25Voemw5Q==
+Date:   Tue, 3 May 2022 10:25:32 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Matthew Wilcox <willy@infradead.org>
+Cc:     Brian Foster <bfoster@redhat.com>, xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Subject: Re: generic/068 crash on 5.18-rc2?
+Message-ID: <20220503172532.GA8265@magnolia>
+References: <20220413033425.GM16799@magnolia>
+ <YlbjOPEQP66gc1WQ@casper.infradead.org>
+ <20220418174747.GF17025@magnolia>
+ <20220422215943.GC17025@magnolia>
+ <Ymq4brjhBcBvcfIs@bfoster>
+ <Ymywh003c+Hd4Zu9@casper.infradead.org>
+ <Ym2szx2S3ontYsBf@casper.infradead.org>
+ <Ym/McFNCTzmsLBak@bfoster>
+ <20220503032534.GC8297@magnolia>
+ <YnCwBVdmg3IiGhfD@casper.infradead.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YnCwBVdmg3IiGhfD@casper.infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, May 03, 2022 at 05:31:01AM +0100, Matthew Wilcox wrote:
+> On Mon, May 02, 2022 at 08:25:34PM -0700, Darrick J. Wong wrote:
+> > On Mon, May 02, 2022 at 08:20:00AM -0400, Brian Foster wrote:
+> > > On Sat, Apr 30, 2022 at 10:40:31PM +0100, Matthew Wilcox wrote:
+> > > > On Sat, Apr 30, 2022 at 04:44:07AM +0100, Matthew Wilcox wrote:
+> > > > > (I do not love this, have not even compiled it; it's late.  We may be
+> > > > > better off just storing next_folio inside the folio_iter).
+> > > > 
+> > > > Does anyone have a preference for fixing this between Option A:
+> > > > 
+> > > 
+> > > After seeing the trace in my previous mail and several thousand
+> > > successful iterations of the test hack, I had reworked it into this
+> > > (which survived weekend testing until it ran into some other XFS problem
+> > > that looks unrelated):
+> > > 
+> > > diff --git a/include/linux/bio.h b/include/linux/bio.h
+> > > index 278cc81cc1e7..aa820e09978e 100644
+> > > --- a/include/linux/bio.h
+> > > +++ b/include/linux/bio.h
+> > > @@ -269,6 +269,7 @@ struct folio_iter {
+> > >  	size_t offset;
+> > >  	size_t length;
+> > >  	/* private: for use by the iterator */
+> > > +	struct folio *_next;
+> > >  	size_t _seg_count;
+> > >  	int _i;
+> > >  };
+> > > @@ -279,6 +280,7 @@ static inline void bio_first_folio(struct folio_iter *fi, struct bio *bio,
+> > >  	struct bio_vec *bvec = bio_first_bvec_all(bio) + i;
+> > >  
+> > >  	fi->folio = page_folio(bvec->bv_page);
+> > > +	fi->_next = folio_next(fi->folio);
+> > >  	fi->offset = bvec->bv_offset +
+> > >  			PAGE_SIZE * (bvec->bv_page - &fi->folio->page);
+> > >  	fi->_seg_count = bvec->bv_len;
+> > > @@ -290,13 +292,15 @@ static inline void bio_next_folio(struct folio_iter *fi, struct bio *bio)
+> > >  {
+> > >  	fi->_seg_count -= fi->length;
+> > >  	if (fi->_seg_count) {
+> > > -		fi->folio = folio_next(fi->folio);
+> > > +		fi->folio = fi->_next;
+> > > +		fi->_next = folio_next(fi->folio);
+> > >  		fi->offset = 0;
+> > >  		fi->length = min(folio_size(fi->folio), fi->_seg_count);
+> > >  	} else if (fi->_i + 1 < bio->bi_vcnt) {
+> > >  		bio_first_folio(fi, bio, fi->_i + 1);
+> > >  	} else {
+> > >  		fi->folio = NULL;
+> > > +		fi->_next = NULL;
+> > >  	}
+> > >  }
+> > > 
+> > > So FWIW, that is just to say that I find option A to be cleaner and more
+> > > readable.
+> > 
+> > Me too.  I'll queue up the usual nightly tests with that patch added and
+> > we'll see how that does.
+> 
+> I've just pushed essentially that patch to my for-next tree in case
+> anybody does any testing with that.  I'll give it a couple of days
+> before creating a folio-5.18f tag and asking Linus to pull the first two
+> commits on
+> 
+> git://git.infradead.org/users/willy/pagecache.git for-next
+> 
+> That is, commits
+> 
+> 1a4c97e2dd5b ("block: Do not call folio_next() on an unreferenced folio")
+> 095099da208b ("mm/readahead: Fix readahead with large folios")
 
-Test that if we fsync a directory, create a symlink inside it, rename
-the symlink, fsync again the directory and then power fail, after the
-filesystem is mounted again, the symlink exists with the new name and
-it has the correct content.
+Hmm.  Well, I added 1a4c97 to my tree last night, and it seems to have
+cleared up all but two of the problems I saw with the for-next branch.
 
-This currently fails on btrfs, because the symlink ends up empty (which
-is illegal on Linux), but it is fixed by kernel commit:
+generic/388 still fails (40 minutes in) with:
 
-    d0e64a981fd841 ("btrfs: always log symlinks in full mode")
+WARN_ON_ONCE(atomic_read(&iop->write_bytes_pending));
+VM_BUG_ON_FOLIO(i_blocks_per_folio(inode, folio) > 1 && !iop, folio);
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+Which I think is the same problem where the fs goes down, XFS throws an
+error back to iomap_do_writepages, and it tries to discard a folio that
+already had writeback running on it.
 
-Resending as this was missed on the last update.
-No changes, only rebased on the current 'for-next' branch.
+There's also the same problem I reported a few days ago in xfs/501
+on a 64k-page ARM64 VM where:
 
- tests/generic/690     | 89 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/690.out |  2 +
- 2 files changed, 91 insertions(+)
- create mode 100755 tests/generic/690
- create mode 100644 tests/generic/690.out
+run fstests xfs/501 at 2022-05-02 21:17:31
+XFS: Assertion failed: IS_ALIGNED((unsigned long)lv->lv_buf, sizeof(uint64_t)), file: fs/xfs/xfs_log_cil.c, line: 430
+XFS: Assertion failed: IS_ALIGNED((unsigned long)buf, sizeof(uint64_t)), file: fs/xfs/xfs_log.c, line: 137
+XFS: Assertion failed: IS_ALIGNED((unsigned long)buf, sizeof(uint64_t)), file: fs/xfs/xfs_log.c, line: 137
 
-diff --git a/tests/generic/690 b/tests/generic/690
-new file mode 100755
-index 00000000..0bf47dd7
---- /dev/null
-+++ b/tests/generic/690
-@@ -0,0 +1,89 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 690
-+#
-+# Test that if we fsync a directory, create a symlink inside it, rename the
-+# symlink, fsync again the directory and then power fail, after the filesystem
-+# is mounted again, the symlink exists with the new name and it has the correct
-+# content.
-+#
-+# On btrfs this used to result in the symlink being empty (i_size 0), and it was
-+# fixed by kernel commit:
-+#
-+#    d0e64a981fd841 ("btrfs: always log symlinks in full mode")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_require_scratch
-+_require_symlinks
-+_require_dm_target flakey
-+
-+rm -f $seqres.full
-+
-+# f2fs doesn't support fs-op level transaction functionality, so it has no way
-+# to persist all metadata updates in one transaction. We have to use its mount
-+# option "fastboot" so that it triggers a metadata checkpoint to persist all
-+# metadata updates that happen before a fsync call. Without this, after the
-+# last fsync in the test, the symlink named "baz" will not exist.
-+if [ $FSTYP = "f2fs" ]; then
-+	export MOUNT_OPTIONS="-o fastboot $MOUNT_OPTIONS"
-+fi
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Create our test directory.
-+mkdir $SCRATCH_MNT/testdir
-+
-+# Commit the current transaction and persist the directory.
-+sync
-+
-+# Create a file in the test directory, so that the next fsync on the directory
-+# actually does something (it logs the directory).
-+echo -n > $SCRATCH_MNT/testdir/foo
-+
-+# Fsync the directory.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir
-+
-+# Now create a symlink inside the test directory.
-+ln -s $SCRATCH_MNT/testdir/foo $SCRATCH_MNT/testdir/bar
-+
-+# Rename the symlink.
-+mv $SCRATCH_MNT/testdir/bar $SCRATCH_MNT/testdir/baz
-+
-+# Fsync again the directory.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir
-+
-+# Simulate a power failure and then mount again the filesystem to replay the
-+# journal/log.
-+_flakey_drop_and_remount
-+
-+# The symlink should exist, with the name "baz" and its content must be
-+# "$SCRATCH_MNT/testdir/foo".
-+[ -L $SCRATCH_MNT/testdir/baz ] || echo "symlink 'baz' is missing"
-+echo "symlink content: $(readlink $SCRATCH_MNT/testdir/baz | _filter_scratch)"
-+
-+_unmount_flakey
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/690.out b/tests/generic/690.out
-new file mode 100644
-index 00000000..84be1247
---- /dev/null
-+++ b/tests/generic/690.out
-@@ -0,0 +1,2 @@
-+QA output created by 690
-+symlink content: SCRATCH_MNT/testdir/foo
--- 
-2.35.1
+But I think that's a new bug that came in with all the log buffer
+alignment changes in the 5.19 branch.
 
+Oh.  My tree still had the "disable large folios" patch in it.  I guess
+the "successful" results are mostly invalid then.
+
+--D
+
+> (more than happy to update anything about those patches)
