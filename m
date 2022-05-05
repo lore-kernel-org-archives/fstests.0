@@ -2,211 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D189C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 May 2022 18:46:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 166A3C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 May 2022 19:38:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383945AbiEESuB (ORCPT
+        id S1355244AbiEETl6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 5 May 2022 14:50:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54668 "EHLO
+        Thu, 5 May 2022 15:41:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54644 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1384872AbiEEStf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 5 May 2022 14:49:35 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2B625F25F;
-        Thu,  5 May 2022 11:43:47 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 94B45B82C69;
-        Thu,  5 May 2022 18:43:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3C75AC385A8;
-        Thu,  5 May 2022 18:43:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651776225;
-        bh=6W1eXQOdlVJV8X0yFS+MoQWFAi5AHCOkA0HvXnqAKuY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=unL1ExwTqgEZ8XG9TpUNxmZiXrl/ElIi1XSrIqVTA4sXFav4Nld6Zx7nlVAiYSOAx
-         v49lUbB9s7z2nGI/ub6e2uUrqseUI3OZSHGthU7aDqyhSi8Zl0o+InHvXPhwk8Ah//
-         HVxV/A8AQel07XtoJtwXJ8fyoK0zqI5Y9URzJHgyleeI0X8Ya++TJHvRKlrDjJZkXC
-         8cpn7QY0CsP7Jsi9xOgS9zHhLEeyTb+9JaJgiwmd5WIDDcn0ZZtMlFGPhYJU8NZDI+
-         pG1YOOGWCpqSonow87SK8fUkSh/Oc1ESTKzenMRGAfX+LYUj7uA1Ejxii8umNbmZqW
-         Q3OCrNdSCgmpg==
-Date:   Thu, 5 May 2022 11:43:44 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] generic: soft quota limits testing within grace time
-Message-ID: <20220505184344.GL27195@magnolia>
-References: <20220505182555.370074-1-zlang@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220505182555.370074-1-zlang@kernel.org>
+        with ESMTP id S240224AbiEETl4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 May 2022 15:41:56 -0400
+Received: from mail-ua1-x949.google.com (mail-ua1-x949.google.com [IPv6:2607:f8b0:4864:20::949])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C0915D5F0
+        for <fstests@vger.kernel.org>; Thu,  5 May 2022 12:38:16 -0700 (PDT)
+Received: by mail-ua1-x949.google.com with SMTP id s14-20020ab02bce000000b0035d45862725so2258233uar.22
+        for <fstests@vger.kernel.org>; Thu, 05 May 2022 12:38:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20210112;
+        h=date:message-id:mime-version:subject:from:to:cc;
+        bh=uOhzFELe9XcvDyHeZG2QQDQ+Oiwi9529KFSTzUwC/rE=;
+        b=Di8i3ZORhuFulS8R9aXEI2b4ziCwlM2CdfoBg5SyfXZXodGlsiUu71gYO/ofHxMZTx
+         6sYePsyj3QvLb7M15kCLZRN5uW/YpKsw2QQcCo40+KXUvA5FEYCfdPJ0wsGIhhDDvLu7
+         g/ajVvTl0dG0KSnrQhFn/tG6Zh0eZSaGuKvqbZHjGw7+FnXsY1lqTNwAB+ms6hbhZQAN
+         jKcmgIK/VwOeBnqwET7r0uRG/2MXhwxBg+IFmJy1sQdEEliKsDPwV0mkOjKbGMvEdq8U
+         6ZCWus8vL/33ZP0UcQKuxENY3xMUGO3aZmImsiiTg9aMq71O1MhPfOB1PulJKo0QgQZl
+         DXSg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
+        bh=uOhzFELe9XcvDyHeZG2QQDQ+Oiwi9529KFSTzUwC/rE=;
+        b=4r8VBtQ7I15qlnvuoMywIFxwR3D0rSApFJkW/9IPIUq69UCcDuWaBs7aRUAMHPdJG9
+         P63auTHDAlScU13gAZRklmTbxr+rDgGGymF6H3/lvp4hvZPT4wj0GiFuvIvdqFOAPJj3
+         tPKvzJOEIu5tme+8OrWadW2PCgavJ1kXsljUSj7FjCywJ5x6J0rOe4/I50ffIrpdgBNU
+         0gYfiA+myEztWbIC/ZHmlOYRWWuQlsDjNu25dPAfRqQaz3pqeS1opj5dWvrplfm4GZQi
+         1bCWWwqGGEm3Imu73vQ8QE0OtbleDK0r/CDz4w9xrMgTiizo67wKrEnHPkdjC8PX216o
+         KiSg==
+X-Gm-Message-State: AOAM533Xz0MneOCxmJf7HfwI8XpRFL4ZK1h2p8GoPv6LXDkf+EE1IkOH
+        vJFESqaUdLgiEAQXN7RW4eGlmG+opQjl7mR4AX9k4ggCxTOvZAf25PC8fP9QaGoup3q9YTlfm64
+        4FTUFeO3ZGhKXxe4+BxM/VjL8mVp7mw+jwoznG8R1R1sg0sBB0ni5cXX0pI4t
+X-Google-Smtp-Source: ABdhPJx4WlGanrj4R4a78WVzwX3713ktjxcBqxSoaOpWaIGT8quc+g5IDVjbMImH6nTrhjpzpB3Z362j6g==
+X-Received: from nhuck.c.googlers.com ([fda3:e722:ac3:cc00:14:4d90:c0a8:39cc])
+ (user=nhuck job=sendgmr) by 2002:a05:6122:dd:b0:34e:c5cc:f6e1 with SMTP id
+ h29-20020a05612200dd00b0034ec5ccf6e1mr7604044vkc.12.1651779495715; Thu, 05
+ May 2022 12:38:15 -0700 (PDT)
+Date:   Thu,  5 May 2022 14:38:07 -0500
+Message-Id: <20220505193809.579026-1-nhuck@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.36.0.512.ge40c2bad7a-goog
+Subject: [RFC PATCH v2 0/2] generic: test HCTR2 filename encryption
+From:   Nathan Huckleberry <nhuck@google.com>
+To:     fstests@vger.kernel.org
+Cc:     Eric Biggers <ebiggers@kernel.org>,
+        Sami Tolvanen <samitolvanen@google.com>,
+        Nathan Huckleberry <nhuck@google.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 06, 2022 at 02:25:55AM +0800, Zorro Lang wrote:
-> After soft limits are exceeded, within the grace time, fs quota should
-> allow more space allocation before exceeding hard limits, even if
-> allocating many small files.
-> 
-> This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
-> warning counts when we send warnings"). And will help to expose later
-> behavior changes on this side.
+This patchset is not intended to be accepted yet.  It is reliant on HCTR2
+support in the kernel which has not yet been accepted.  See the HCTR2 patchset
+here: https://lore.kernel.org/all/20220504001823.2483834-1-nhuck@google.com/
 
-Isn't this already covered by generic/230?
+HCTR2 is a new wide-block encryption mode that can used for filename encryption
+in fscrypt.  This patchset adds a reference implementation of HCTR2 to the
+fscrypt testing utility and adds tests for filename encryption with HCTR2.
 
---D
+More information on HCTR2 can be found here: "Length-preserving encryption with
+HCTR2": https://ia.cr/2021/1441
 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/generic/690     | 125 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/690.out |   2 +
->  2 files changed, 127 insertions(+)
->  create mode 100755 tests/generic/690
->  create mode 100644 tests/generic/690.out
-> 
-> diff --git a/tests/generic/690 b/tests/generic/690
-> new file mode 100755
-> index 00000000..b1d055dc
-> --- /dev/null
-> +++ b/tests/generic/690
-> @@ -0,0 +1,125 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 690
-> +#
-> +# Make sure filesystem quota works well, after soft limits are exceeded. The
-> +# fs quota should allow more space allocation before exceeding hard limits
-> +# and with in grace time.
-> +#
-> +# But different with other similar testing, this case trys to write many small
-> +# files, to cover bc37e4fb5cac (xfs: revert "xfs: actually bump warning counts
-> +# when we send warnings"). If there's a behavior change in one day, this case
-> +# might help to detect that too.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quota
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	restore_project
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +# Import common functions.
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_scratch
-> +_require_quota
-> +_require_user
-> +_require_group
-> +
-> +create_project()
-> +{
-> +	rm -rf $SCRATCH_MNT/t
-> +	mkdir $SCRATCH_MNT/t
-> +	$XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
-> +	chmod ugo+rwx $SCRATCH_MNT/t/
-> +
-> +	rm -f $tmp.projects $tmp.projid
-> +	if [ -f /etc/projects ];then
-> +		cat /etc/projects > $tmp.projects
-> +	fi
-> +	if [ -f /etc/projid ];then
-> +		cat /etc/projid > $tmp.projid
-> +	fi
-> +
-> +	cat >/etc/projects <<EOF
-> +100:$SCRATCH_MNT/t
-> +EOF
-> +	cat >/etc/projid <<EOF
-> +$qa_user:100
-> +EOF
-> +	PROJECT_CHANGED=1
-> +}
-> +
-> +restore_project()
-> +{
-> +	if [ "$PROJECT_CHANGED" = "1" ];then
-> +		rm -f /etc/projects /etc/projid
-> +		if [ -f $tmp.projects ];then
-> +			cat $tmp.projects > /etc/projects
-> +		fi
-> +		if [ -f $tmp.projid ];then
-> +			cat $tmp.projid > /etc/projid
-> +		fi
-> +	fi
-> +}
-> +
-> +# Make sure the kernel supports project quota
-> +_scratch_mkfs >$seqres.full 2>&1
-> +_scratch_enable_pquota
-> +_qmount_option "prjquota"
-> +_qmount
-> +_require_prjquota $SCRATCH_DEV
-> +
-> +exercise()
-> +{
-> +	local type=$1
-> +	local file=$SCRATCH_MNT/testfile
-> +
-> +	echo "= Test type=$type quota =" >>$seqres.full
-> +	_scratch_unmount
-> +	_scratch_mkfs >>$seqres.full 2>&1
-> +	if [ "$1" = "P" ];then
-> +		_scratch_enable_pquota
-> +	fi
-> +	_qmount
-> +	if [ "$1" = "P" ];then
-> +		create_project
-> +		file=$SCRATCH_MNT/t/testfile
-> +	fi
-> +
-> +	setquota -${type} $qa_user 1M 500M 0 0 $SCRATCH_MNT
-> +	setquota -${type} -t 86400 86400 $SCRATCH_MNT
-> +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
-> +	# Exceed the soft quota limit a bit at first
-> +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full 2>&1
-> +	# Write more data more times under soft quota limit exhausted condition,
-> +	# but not reach hard limit. To make sure the it won't trigger EDQUOT.
-> +	for ((i=1; i<=100; i++));do
-> +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full 2>&1
-> +		if [ $? -ne 0 ];then
-> +			log "Unexpected error (type=$type)!"
-> +			break
-> +		fi
-> +	done
-> +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
-> +}
-> +
-> +_qmount_option "usrquota"
-> +exercise u
-> +_qmount_option "grpquota"
-> +exercise g
-> +_qmount_option "prjquota"
-> +exercise P
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/690.out b/tests/generic/690.out
-> new file mode 100644
-> index 00000000..6f3723e3
-> --- /dev/null
-> +++ b/tests/generic/690.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 690
-> +Silence is golden
-> -- 
-> 2.31.1
-> 
+Changes in v2:
+* Use POLYVAL multiplication directly instead of using GHASH trick
+* Split reference implementation and tests into two patches
+* Remove v1 policy tests
+* Various small style fixes
+
+Nathan Huckleberry (2):
+  fscrypt-crypt-util: add HCTR2 reference implementation
+  generic: add tests for fscrypt policies with HCTR2
+
+ common/encrypt           |   2 +
+ src/fscrypt-crypt-util.c | 338 ++++++++++++++++++++++++++++++++-------
+ tests/generic/900        |  24 +++
+ tests/generic/900.out    |   6 +
+ tests/generic/901        |  26 +++
+ tests/generic/901.out    |   6 +
+ tests/generic/902        |  26 +++
+ tests/generic/902.out    |   6 +
+ 8 files changed, 377 insertions(+), 57 deletions(-)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
+ create mode 100755 tests/generic/902
+ create mode 100644 tests/generic/902.out
+
+-- 
+2.36.0.512.ge40c2bad7a-goog
+
