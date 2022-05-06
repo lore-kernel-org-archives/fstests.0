@@ -2,102 +2,287 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCBBDC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 15:33:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CC24C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 16:02:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348163AbiEFPgz (ORCPT
+        id S1443325AbiEFQGH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 May 2022 11:36:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53296 "EHLO
+        Fri, 6 May 2022 12:06:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37626 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1390409AbiEFPg2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 11:36:28 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 37EA76EB07
-        for <fstests@vger.kernel.org>; Fri,  6 May 2022 08:32:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651851150;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=xPKkraI1M2m4ob6FeFqSeP6IpwTvfgtBu6QJp90rz3k=;
-        b=Ig9Unt/ABIux47E6bKPn7az5a60OrUIE41NKF5abopnu5AECzheT6ZvzAdXXE55zGsKaGn
-        DznYwwZm7wOjt+qSxWuZUf9jrtXkokhYLNn8KKNlWk553rq7NCyOQEkT+eJKl5iq69zC5K
-        l3AT1mSYbkmBjlQdTKd6KNclpqF0M8w=
-Received: from mail-lj1-f197.google.com (mail-lj1-f197.google.com
- [209.85.208.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-575-p6lbJsJeOh2abbkw8jCqpg-1; Fri, 06 May 2022 11:32:29 -0400
-X-MC-Unique: p6lbJsJeOh2abbkw8jCqpg-1
-Received: by mail-lj1-f197.google.com with SMTP id m6-20020a2eb6c6000000b002509fdb1dbaso517642ljo.1
-        for <fstests@vger.kernel.org>; Fri, 06 May 2022 08:32:28 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=xPKkraI1M2m4ob6FeFqSeP6IpwTvfgtBu6QJp90rz3k=;
-        b=agXE2jey920gQqoQFRMn5AO+YEIDlmLaoDTB4XWVrquE2OquuWCL9NQCJ7iGYc5CC5
-         EmambCLsVHu74vPaFyCfQ40B/6YumDhmlCFQLmvcRLB33e6O/4Cu1ilzTjo/2MexT99s
-         OR3UbCo+6uqe++4s996SdUInAHWpTtEqcCy5pwDjfO50dqdswHRrwRMMJkUwOo/ucGgy
-         oOahuSbeE6oaZPIpME9QIEQidJWfQkoINWudo9zaownrxzQHrJqei/iEcN+5YyU8FDE3
-         IvtrWVQawgho9UEv8Dd7qKWRmr1cItSZKTv1yu8xGODyj6QT/fDrYlshAJTpmmR7qA4e
-         /SFQ==
-X-Gm-Message-State: AOAM532EvYWy/Vk43I5k4qv0+lCYl6EzEa/dMHQdFTXn236gcO0VS4CQ
-        IHZuae455wrssQjhUB/WD+kRibgYpkYFnF3N/r9T2YwJ9830pIjEq9qFO8in2bqSPX41t2llzE3
-        H8M+KAuvOhJBSUtBH3AYtoS48hXNQMryjOw==
-X-Received: by 2002:a2e:a550:0:b0:250:5ae3:c172 with SMTP id e16-20020a2ea550000000b002505ae3c172mr2253241ljn.265.1651851147456;
-        Fri, 06 May 2022 08:32:27 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwoH1bjIO290aW/xsqlSAGQZafrMdwUaHEKfEkJHSrtU56Ta9NQlM1MBlrdGPtZtoB7giQ6fkDjLa2bz+dWILI=
-X-Received: by 2002:a2e:a550:0:b0:250:5ae3:c172 with SMTP id
- e16-20020a2ea550000000b002505ae3c172mr2253237ljn.265.1651851147214; Fri, 06
- May 2022 08:32:27 -0700 (PDT)
+        with ESMTP id S1443321AbiEFQGE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 12:06:04 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DEED869CCB;
+        Fri,  6 May 2022 09:02:19 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 91B46B832EB;
+        Fri,  6 May 2022 16:02:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 34871C385A9;
+        Fri,  6 May 2022 16:02:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651852937;
+        bh=QXH+OPuHJNMDOY/M5AGaVhF+yHNv7bwLrQ8jZlJq8SU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=N5jQnI92MTvTl0J8tJsIYNgfnvgzuwfZI5WcU6U6T1N2C4/bru2hwmoWtPTmX285E
+         oRlsHMnJmIg551VHmN1BYheA4uezOqSx4vB/VYqbixZT3XAY0Tobj3LYJmChuLr0bx
+         0VcXj6W86305GWC68bEmY2koLCHtosbhL8YZrQ/81JBLzlKYkBOUTYGGNkEOqHDh4j
+         ef79tJYj7HWwim+mq7L7gzPhmzFGHE8//y6gKSc1VrdYYWzulIRhBlZ/m6w7nx238C
+         Sc/upbGRA+4gPb+nSkm7MNnbFxK5/n+Du6nDUuX2ezbTAJJiLZoLiCdpfcw3u2SroB
+         p6m63bnGsJgEA==
+Date:   Fri, 6 May 2022 09:02:16 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Chandan Babu R <chandan.babu@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs/533: Delete test since directory's extent count can
+ never overflow
+Message-ID: <20220506160216.GN27195@magnolia>
+References: <20220506095746.1014345-1-chandan.babu@oracle.com>
 MIME-Version: 1.0
-References: <20220419175811.602126-1-ridave@redhat.com> <20220427083943.rc4alejvbl2wbw2z@zlang-mailbox>
-In-Reply-To: <20220427083943.rc4alejvbl2wbw2z@zlang-mailbox>
-From:   Rishabh Dave <ridave@redhat.com>
-Date:   Fri, 6 May 2022 21:02:16 +0530
-Message-ID: <CA+jMu4SnQdwOYa9Gz6CFG7-=XgyP-D43w+7-bynCSZuv2b=fVQ@mail.gmail.com>
-Subject: Re: [PATCH] cephfs: add ceph-fuse suport for ceph-fuse
-To:     Rishabh Dave <ridave@redhat.com>, fstests@vger.kernel.org,
-        Jeff Layton <jlayton@redhat.com>,
-        Rishabh Dave <rishabhddave@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220506095746.1014345-1-chandan.babu@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, 27 Apr 2022 at 14:18, Zorro Lang <zlang@kernel.org> wrote:
->
-> > diff --git a/common/rc b/common/rc
-> > index 553ae350..868b3ddd 100644
-> > --- a/common/rc
-> > +++ b/common/rc
->
-> [snip]
->
-> >
-> >       if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
-> > @@ -1869,6 +1890,7 @@ _require_test()
-> >               if [ ! -d "$TEST_DIR" ]; then
-> >                       _notrun "this test requires a valid \$TEST_DIR"
-> >               fi
->
-> This place missed a ";;", it'll cause all cases fail directly when they try to
-> ". common/rc". As this patch has been RVB, I'll fix it when I merge it. But better
-> to give a patch a mimimum test before sending (except it's simple enough:), to make
-> sure it won't break the most fundamental things at least, it's hard for me to test
-> all fs that fstests supports before merging, Thanks for understanding :)
->
+On Fri, May 06, 2022 at 03:27:46PM +0530, Chandan Babu R wrote:
+> The maximum file size that can be represented by the data fork extent counter
+> in the worst case occurs when all extents are 1 block in length and each block
+> is 1KB in size.
+> 
+> With XFS_MAX_EXTCNT_DATA_FORK_SMALL representing maximum extent count and with
+> 1KB sized blocks, a file can reach upto,
+> (2^31) * 1KB = 2TB
+> 
+> This is much larger than the theoretical maximum size of a directory
+> i.e. XFS_DIR2_SPACE_SIZE * 3 = ~96GB.
+> 
+> Since a directory can never overflow its data fork extent counter, the xfs
+> kernel driver removed code which checked for such a situation before any
+> directory modification operation could be executed. Instead, the kernel driver
+> verifies the sanity of directory's data fork extent counter when the inode is
+> read from disk.
+> 
+> This commit removes the test xfs/533 due to the reasons mentioned above.
+> 
+> Signed-off-by: Chandan Babu R <chandan.babu@oracle.com>
 
-Sorry for the inconvenience. I guess I made a last minute error
-because normally I test my patch against CephFS. Should I be running
-more tests, besides just this one? Please let me know if so because I
-am new to xfstests-dev.
+Yeah, all this functionality is being removed from 5.19, so the test
+is no longer needed.
 
-I've resent my patch under subject "[PATCH test] common: add support
-for ceph-fuse". It should've been [PATCH v2] since it's a newer
-version of this patch but I guess I made a mistake while running "git
-send-email" (I'm new to it).
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Thanks for the patch review!
+--D
 
+> ---
+>  tests/xfs/533     | 170 ----------------------------------------------
+>  tests/xfs/533.out |  17 -----
+>  2 files changed, 187 deletions(-)
+>  delete mode 100755 tests/xfs/533
+>  delete mode 100644 tests/xfs/533.out
+> 
+> diff --git a/tests/xfs/533 b/tests/xfs/533
+> deleted file mode 100755
+> index b85b5298..00000000
+> --- a/tests/xfs/533
+> +++ /dev/null
+> @@ -1,170 +0,0 @@
+> -#! /bin/bash
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2021 Chandan Babu R.  All Rights Reserved.
+> -#
+> -# FS QA Test 533
+> -#
+> -# Verify that XFS does not cause inode fork's extent count to overflow when
+> -# adding/removing directory entries.
+> -. ./common/preamble
+> -_begin_fstest auto quick dir hardlink symlink
+> -
+> -# Import common functions.
+> -. ./common/filter
+> -. ./common/inject
+> -. ./common/populate
+> -
+> -# real QA test starts here
+> -
+> -_supported_fs xfs
+> -_require_scratch
+> -_require_xfs_debug
+> -_require_test_program "punch-alternating"
+> -_require_xfs_io_error_injection "reduce_max_iextents"
+> -_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
+> -
+> -_scratch_mkfs_sized $((1024 * 1024 * 1024)) | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
+> -. $tmp.mkfs
+> -
+> -# Filesystems with directory block size greater than one FSB will not be tested,
+> -# since "7 (i.e. XFS_DA_NODE_MAXDEPTH + 1 data block + 1 free block) * 2 (fsb
+> -# count) = 14" is greater than the pseudo max extent count limit of 10.
+> -# Extending the pseudo max limit won't help either.  Consider the case where 1
+> -# FSB is 1k in size and 1 dir block is 64k in size (i.e. fsb count = 64). In
+> -# this case, the pseudo max limit has to be greater than 7 * 64 = 448 extents.
+> -if (( $dirbsize > $dbsize )); then
+> -	_notrun "Directory block size ($dirbsize) is larger than FSB size ($dbsize)"
+> -fi
+> -
+> -echo "Format and mount fs"
+> -_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
+> -_scratch_mount >> $seqres.full
+> -
+> -# Disable realtime inherit flag (if any) on root directory so that space on data
+> -# device gets fragmented rather than realtime device.
+> -_xfs_force_bdev data $SCRATCH_MNT
+> -
+> -echo "Consume free space"
+> -fillerdir=$SCRATCH_MNT/fillerdir
+> -nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
+> -nr_free_blks=$((nr_free_blks * 90 / 100))
+> -
+> -_fill_fs $((dbsize * nr_free_blks)) $fillerdir $dbsize 0 >> $seqres.full 2>&1
+> -
+> -echo "Create fragmented filesystem"
+> -for dentry in $(ls -1 $fillerdir/); do
+> -	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
+> -done
+> -
+> -echo "Inject reduce_max_iextents error tag"
+> -_scratch_inject_error reduce_max_iextents 1
+> -
+> -echo "Inject bmap_alloc_minlen_extent error tag"
+> -_scratch_inject_error bmap_alloc_minlen_extent 1
+> -
+> -dent_len=255
+> -
+> -echo "* Create directory entries"
+> -
+> -testdir=$SCRATCH_MNT/testdir
+> -mkdir $testdir
+> -
+> -nr_dents=$((dbsize * 20 / dent_len))
+> -for i in $(seq 1 $nr_dents); do
+> -	dentry="$(printf "%0255d" $i)"
+> -	touch ${testdir}/$dentry >> $seqres.full 2>&1 || break
+> -done
+> -
+> -echo "Verify directory's extent count"
+> -nextents=$(_xfs_get_fsxattr nextents $testdir)
+> -if (( $nextents > 10 )); then
+> -	echo "Extent count overflow check failed: nextents = $nextents"
+> -	exit 1
+> -fi
+> -
+> -rm -rf $testdir
+> -
+> -echo "* Rename: Populate destination directory"
+> -
+> -dstdir=$SCRATCH_MNT/dstdir
+> -mkdir $dstdir
+> -
+> -nr_dents=$((dirbsize * 20 / dent_len))
+> -
+> -echo "Populate \$dstdir by moving new directory entries"
+> -for i in $(seq 1 $nr_dents); do
+> -	dentry="$(printf "%0255d" $i)"
+> -	dentry=${SCRATCH_MNT}/${dentry}
+> -	touch $dentry || break
+> -	mv $dentry $dstdir >> $seqres.full 2>&1 || break
+> -done
+> -
+> -rm $dentry
+> -
+> -echo "Verify \$dstdir's extent count"
+> -
+> -nextents=$(_xfs_get_fsxattr nextents $dstdir)
+> -if (( $nextents > 10 )); then
+> -	echo "Extent count overflow check failed: nextents = $nextents"
+> -	exit 1
+> -fi
+> -
+> -rm -rf $dstdir
+> -
+> -echo "* Create multiple hard links to a single file"
+> -
+> -testdir=$SCRATCH_MNT/testdir
+> -mkdir $testdir
+> -
+> -testfile=$SCRATCH_MNT/testfile
+> -touch $testfile
+> -
+> -nr_dents=$((dirbsize * 20 / dent_len))
+> -
+> -echo "Create multiple hardlinks"
+> -for i in $(seq 1 $nr_dents); do
+> -	dentry="$(printf "%0255d" $i)"
+> -	ln $testfile ${testdir}/${dentry} >> $seqres.full 2>&1 || break
+> -done
+> -
+> -rm $testfile
+> -
+> -echo "Verify directory's extent count"
+> -nextents=$(_xfs_get_fsxattr nextents $testdir)
+> -if (( $nextents > 10 )); then
+> -	echo "Extent count overflow check failed: nextents = $nextents"
+> -	exit 1
+> -fi
+> -
+> -rm -rf $testdir
+> -
+> -echo "* Create multiple symbolic links to a single file"
+> -
+> -testdir=$SCRATCH_MNT/testdir
+> -mkdir $testdir
+> -
+> -testfile=$SCRATCH_MNT/testfile
+> -touch $testfile
+> -
+> -nr_dents=$((dirbsize * 20 / dent_len))
+> -
+> -echo "Create multiple symbolic links"
+> -for i in $(seq 1 $nr_dents); do
+> -	dentry="$(printf "%0255d" $i)"
+> -	ln -s $testfile ${testdir}/${dentry} >> $seqres.full 2>&1 || break;
+> -done
+> -
+> -rm $testfile
+> -
+> -echo "Verify directory's extent count"
+> -nextents=$(_xfs_get_fsxattr nextents $testdir)
+> -if (( $nextents > 10 )); then
+> -	echo "Extent count overflow check failed: nextents = $nextents"
+> -	exit 1
+> -fi
+> -
+> -rm -rf $testdir
+> -
+> -# success, all done
+> -status=0
+> -exit
+> diff --git a/tests/xfs/533.out b/tests/xfs/533.out
+> deleted file mode 100644
+> index c3cbe2e0..00000000
+> --- a/tests/xfs/533.out
+> +++ /dev/null
+> @@ -1,17 +0,0 @@
+> -QA output created by 533
+> -Format and mount fs
+> -Consume free space
+> -Create fragmented filesystem
+> -Inject reduce_max_iextents error tag
+> -Inject bmap_alloc_minlen_extent error tag
+> -* Create directory entries
+> -Verify directory's extent count
+> -* Rename: Populate destination directory
+> -Populate $dstdir by moving new directory entries
+> -Verify $dstdir's extent count
+> -* Create multiple hard links to a single file
+> -Create multiple hardlinks
+> -Verify directory's extent count
+> -* Create multiple symbolic links to a single file
+> -Create multiple symbolic links
+> -Verify directory's extent count
+> -- 
+> 2.30.2
+> 
