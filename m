@@ -2,60 +2,60 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18AA0C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 15:05:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C2E1C4167B
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 15:21:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376610AbiEFPIs (ORCPT
+        id S1442810AbiEFPZB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 May 2022 11:08:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33934 "EHLO
+        Fri, 6 May 2022 11:25:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48308 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352071AbiEFPIr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 11:08:47 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5EFA96B09C
-        for <fstests@vger.kernel.org>; Fri,  6 May 2022 08:05:04 -0700 (PDT)
+        with ESMTP id S1442679AbiEFPZA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 11:25:00 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 228666D1A4
+        for <fstests@vger.kernel.org>; Fri,  6 May 2022 08:21:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651849503;
+        s=mimecast20190719; t=1651850475;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding;
-        bh=NN88GW9sXNuu5jk7PMF3rd+RPSE7PSgFZpN3yKjIt7Q=;
-        b=UKQTseVrKm5NfGtueRkF6ANnFgBBk+ZZSW/5OHSTz2LM954dVs0UGlaweO3rpSicRSNhIN
-        +RAfK5zG7d2Th9c+oHhSumngxYrFIRuysxQ8sWBxdrMuGuParHBI+t34LzUn9nAOecS+h8
-        8Oj+LA0pddI7RPp5e0lRwMw5ZzCdCJg=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=siNzHncwKTrwK5vwByRD6HY2oc+hv5wNepzBYpx2LN8=;
+        b=GNoIvwJmVL8Fm0E21JOQm9p/jLVeydl+5H8LiOG1YzeMysv7W19ypp9b/X7sS5MuBVwk8j
+        z8qZyD/hWntL9amhSvO5aRoxqutz0e5sclWBxwviCmGm5j+L+Mqo9Uy+BrMv8y1uxxR28V
+        xykDhxU+XMLA9pFI3GQ/BzaER0uF3II=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-372-wLhwKOEtPOu3zxSce2TfXw-1; Fri, 06 May 2022 11:05:02 -0400
-X-MC-Unique: wLhwKOEtPOu3zxSce2TfXw-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+ us-mta-627-3BtYFcyLOJacdPBdy776Sg-1; Fri, 06 May 2022 11:21:14 -0400
+X-MC-Unique: 3BtYFcyLOJacdPBdy776Sg-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1C2CE8FB77A;
-        Fri,  6 May 2022 15:02:14 +0000 (UTC)
-Received: from p50.redhat.com (unknown [10.74.16.75])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 573EDC15E71;
-        Fri,  6 May 2022 15:02:12 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 85ECE3C1022E;
+        Fri,  6 May 2022 15:21:14 +0000 (UTC)
+Received: from p50.redhat.com (unknown [10.74.16.90])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 76CC74010A18;
+        Fri,  6 May 2022 15:21:12 +0000 (UTC)
 From:   Rishabh Dave <ridave@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     jlayton@redhat.com, rishabhddave@gmail.com,
         Rishabh Dave <ridave@redhat.com>
-Subject: [PATCHv2] cephfs: add ceph-fuse suport for ceph-fuse
-Date:   Fri,  6 May 2022 20:31:42 +0530
-Message-Id: <20220506150141.333929-1-ridave@redhat.com>
+Subject: [PATCH v2] common: add support for ceph-fuse
+Date:   Fri,  6 May 2022 20:50:51 +0530
+Message-Id: <20220506152050.334884-1-ridave@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.85 on 10.11.54.8
+X-Scanned-By: MIMEDefang 2.84 on 10.11.54.2
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 Currently tests in xfstests-dev can be executed against CephFS only by
-mounting CephFS using kernel driver. Attempting to run tests against
-CephFS using FUSE doesn't work because xfstests-dev would remount CephFS
-using kernel. This patch adds the ability for xfstest-dev code to mount
-CephFS using FUSE.
+mounting CephFS using kernel driver. Attempting to run these tests
+against CephFS using FUSE doesn't work because xfstests-dev would
+remount CephFS using kernel. This patch adds the ability for xfstest-dev
+code to mount CephFS using FUSE.
 
 Fixes: https://tracker.ceph.com/issues/55354
 Signed-off-by: Rishabh Dave <ridave@redhat.com>
