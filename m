@@ -2,367 +2,178 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B783AC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 09:58:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18AA0C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 15:05:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1390746AbiEFKCF (ORCPT
+        id S1376610AbiEFPIs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 May 2022 06:02:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43228 "EHLO
+        Fri, 6 May 2022 11:08:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236473AbiEFKCE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 06:02:04 -0400
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5239756FBC;
-        Fri,  6 May 2022 02:58:22 -0700 (PDT)
-Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 2468sC9O030007;
-        Fri, 6 May 2022 09:58:21 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : content-transfer-encoding : content-type :
- mime-version; s=corp-2021-07-09;
- bh=2fQlTPDRDrJItV/WuYbMIEpIMCyXqLh3cw3z5W/tLxs=;
- b=cpBVS0l2YNAhoH342beajA9xvV1vVd21w+tEvXmXYJ9eu536LgLhrSs5TenFiIiu+TiD
- QEHFnKeDiTsfz3EBFzmWeUjpObuHQQGE1PF/A78AW6iMs5Ve+8HrIstTTz3i48epcWb+
- f7ANJg7oSa4ZlyZHbIYJh5c/QCHUOVYDBv8nYQ9AInX+1yh1rIcvc+I9pQBvaVK4vb0z
- yyLbNVW3X4Gz9M+kuYTPUTOm+xtT64V6palKgL67CbmYJ1XBzrBNlSuw/TbDM2C5xZmp
- iCWjeM9F3Tme7q4nkFHyyV9Bxqez9e+meRLfeZNKVo0C36j1i2+1v7BAZ4yZcKspsUz8 +w== 
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3fruq0ns8g-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 06 May 2022 09:58:21 +0000
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.16.1.2/8.16.1.2) with SMTP id 2469usqL024125;
-        Fri, 6 May 2022 09:58:20 GMT
-Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2040.outbound.protection.outlook.com [104.47.66.40])
-        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com with ESMTP id 3fus904yec-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 06 May 2022 09:58:20 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=KDqN6uOdUTMScCrSr9pxQdzmqz/EJPpExLfCGAvC30XO5YrrHhrvtKCuJysp1uxud+mGvFfnUlIDV21kZmGFrOMao3ACQ7lC4ao9kUFc7DykM4L9UpZt8TknG/MGjA9JpltfKqohBKO9dAbOWn6kTPg7C7G3jU1yJEG3YJeyo5Uw/we1fxbIRztkoCO865Mwze35nGS3dW7Gtod/Zh1DdtFUbPddNsHhjGMhuy/rfAiq9kbSd9fz4+kWzYqBUEDFRJ7wm0HEL9yaAlOAQCbbZh/f/JSlGRJfU/PaAMiuncvsZR87it6SaNbtSeJAqEzLpROWo5LGph6a9fuNvLdVmw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=2fQlTPDRDrJItV/WuYbMIEpIMCyXqLh3cw3z5W/tLxs=;
- b=kMY0QolLZENIitU46BxGMjw1iFTL1UOEzF8h4Q3sXReVl1H33hIxC7mdZI7umoL6qhQttvpsTpz48eDA49oXkVsYtskSGfdKIEtRCRl5e77KCx+CeOcKChznTPrjw4xYKahEm4KoXPVyT5WBYkvxGYvjTKm+GEv5rLlAJvrLuyJ1V/wsw1YEhpbOb3MUSkJacsi2aeku2ta85uetFHi8b4/NuGASBVO7RK2CmeA6GTgUrB8Qwep1oR1/eXsOrxi7jj2z/9OP2WFEDPKDQDJ7YVF/4DDN/UxybLaJfciu1y6SdOCWOcKoUUJSIs+SI75iDFBRGr7LC9m/hWQIfvv5MQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=2fQlTPDRDrJItV/WuYbMIEpIMCyXqLh3cw3z5W/tLxs=;
- b=dcliOKjFnUOpMfWj2DV9s9zLC1bIBtGOV4c8y9o5J+Jw7L/jEMMwAHlAONcwAY34gSQkM3oUqOgJbLVpZMsJ8klz2IGMsKpbVbIPx1wRoaQz8AhM2g6kynnSWAWQcwG5V38mFyD7RryFTN1RTxQnn8lRYoDcOrl4Xv9YT+PqlCQ=
-Received: from SA2PR10MB4587.namprd10.prod.outlook.com (2603:10b6:806:114::12)
- by BLAPR10MB4995.namprd10.prod.outlook.com (2603:10b6:208:333::24) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5227.20; Fri, 6 May
- 2022 09:58:17 +0000
-Received: from SA2PR10MB4587.namprd10.prod.outlook.com
- ([fe80::7d41:aa0f:80cf:ea15]) by SA2PR10MB4587.namprd10.prod.outlook.com
- ([fe80::7d41:aa0f:80cf:ea15%6]) with mapi id 15.20.5206.026; Fri, 6 May 2022
- 09:58:17 +0000
-From:   Chandan Babu R <chandan.babu@oracle.com>
+        with ESMTP id S1352071AbiEFPIr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 11:08:47 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5EFA96B09C
+        for <fstests@vger.kernel.org>; Fri,  6 May 2022 08:05:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1651849503;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=NN88GW9sXNuu5jk7PMF3rd+RPSE7PSgFZpN3yKjIt7Q=;
+        b=UKQTseVrKm5NfGtueRkF6ANnFgBBk+ZZSW/5OHSTz2LM954dVs0UGlaweO3rpSicRSNhIN
+        +RAfK5zG7d2Th9c+oHhSumngxYrFIRuysxQ8sWBxdrMuGuParHBI+t34LzUn9nAOecS+h8
+        8Oj+LA0pddI7RPp5e0lRwMw5ZzCdCJg=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-372-wLhwKOEtPOu3zxSce2TfXw-1; Fri, 06 May 2022 11:05:02 -0400
+X-MC-Unique: wLhwKOEtPOu3zxSce2TfXw-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1C2CE8FB77A;
+        Fri,  6 May 2022 15:02:14 +0000 (UTC)
+Received: from p50.redhat.com (unknown [10.74.16.75])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 573EDC15E71;
+        Fri,  6 May 2022 15:02:12 +0000 (UTC)
+From:   Rishabh Dave <ridave@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     Chandan Babu R <chandan.babu@oracle.com>, linux-xfs@vger.kernel.org
-Subject: [PATCH] xfs/533: Delete test since directory's extent count can never overflow
-Date:   Fri,  6 May 2022 15:27:46 +0530
-Message-Id: <20220506095746.1014345-1-chandan.babu@oracle.com>
-X-Mailer: git-send-email 2.30.2
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: TYAPR01CA0010.jpnprd01.prod.outlook.com (2603:1096:404::22)
- To SA2PR10MB4587.namprd10.prod.outlook.com (2603:10b6:806:114::12)
+Cc:     jlayton@redhat.com, rishabhddave@gmail.com,
+        Rishabh Dave <ridave@redhat.com>
+Subject: [PATCHv2] cephfs: add ceph-fuse suport for ceph-fuse
+Date:   Fri,  6 May 2022 20:31:42 +0530
+Message-Id: <20220506150141.333929-1-ridave@redhat.com>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 887c3271-28e0-4d21-425c-08da2f46f1a0
-X-MS-TrafficTypeDiagnostic: BLAPR10MB4995:EE_
-X-Microsoft-Antispam-PRVS: <BLAPR10MB4995374AC94AE4F8D517D586F6C59@BLAPR10MB4995.namprd10.prod.outlook.com>
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: rQal0eM6LxAjYe3UAchY05oPNZOA068KNACTa4iil6K4hwF0PT/dMuoqLDjj6z1nhebnZVNrOB6VTiuJf212g9CT59jNF9oUm3A4O9A+yLPy0e1ifDez8ovXBFiT3ZF0LgCTDrVCfCPclgBITv7Uj3DRT+3fmPf7PDPHj96c11RD6Wpb+X6LqXSjEVQPKNed0CaQPE7gr4diCxFRY1m/8lMPoh/WOBY9YaNDCuekEGRyoZgOGDQKDisL0z5o4jEo7HVchQdBg7xU/rF0PbbJhp0y9l2DOAtMq6PH3RLBMLqFNXlZiFsQ5UaTQlNA4Yl7X6GHRo+c6aEjCm1mB145In5UqQ1t8zJqGOn65Gaob7iQj5tCViPHwLcVNpsikbZeRJPJ9iGz24GPplaeo2Df4HKu0h/rrnbbG6SAannvkJ4YW35lQker+QgFvdXDbY7XNsdVJPvzGsdi5EnoIJISoXnqPKlTQ4FJ9gSQcLFqQxWZcPzNsGZE7V/7mKULEpXKt73i6oo3zgdStsnVGvXitSjVKmJ5DYbnCSycBLP38vkuleMLU9ozQoiQnOgNXom9omXDilDcxy4SHRFYHrwvicnJNd330AVW2KF/mb/zt24Kz6Fr6dvaU+H6yPGSK8TpwCBGd8IriXYpjkro2lOA/o/eLs2MSQ+UYPGzIly64JRGTayV598vQj0YOMrRh5MY366YPEw6ZWCg0z68b4UHHQ==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA2PR10MB4587.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(366004)(6506007)(450100002)(83380400001)(66946007)(66556008)(66476007)(8936002)(86362001)(8676002)(4326008)(6486002)(5660300002)(508600001)(38100700002)(38350700002)(6666004)(2906002)(52116002)(1076003)(36756003)(316002)(6916009)(2616005)(186003)(26005)(6512007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?3TtQ8eG7DXBcNsgW+vOsPyToOTJiy5XpXAiy9v6UoPHd2D2cSy3TwZDx70Mz?=
- =?us-ascii?Q?i9BNnpK8kxWVj/WxxiIRuEODby2vvux9R36IZap5uAT9lsaSajNt9ty4RGlc?=
- =?us-ascii?Q?X5SrIlZK0V8tMPd5kPsphy3o3YIUdlU/+jddry088vxIsnfMVEOJXo7FQ2jU?=
- =?us-ascii?Q?a0Z5Z/EOWhS6eHxqVu0QbgtT0rnhsR3vndAgFTedqKN0hhjICOOlonn2IQiw?=
- =?us-ascii?Q?Ugkz27fDLXjTXR9Lqibkvx7u0dgLsU0Na/my1fNawcNiokpTEWkZIfXF9tbL?=
- =?us-ascii?Q?WZt6euCNoGGx/pOM9UcUsH858EZPhK+F5xWdxUP7eWXDzC2+eReMcOf/LOz0?=
- =?us-ascii?Q?kSjY51gxfiU24BiMEfSYdRWkX/U5L7otTJnQwe+ntWSFXn0nczaM/Nrn/D0y?=
- =?us-ascii?Q?qW3a67Uy7e+ThuY23wGNbNcvQfma1FwSPZyr2BIDp7HRC9hNt7GC2B9mcJ4i?=
- =?us-ascii?Q?811vsQttfnCVTD8IfGgI+DfmzYEgz0moVBF19rkjFnbb68y0y4qSLTK436Kr?=
- =?us-ascii?Q?5CAaN0oRcDeGi3cevN2qbBYHU5W6rO0r8jpmeCwycjn/blaGtbHJaPAqzD/A?=
- =?us-ascii?Q?BGBr/n6PIwwNpR1LZ7BpKNCcyTe7AGwpy6IRP8NvLgvcrz22TU9V1RGVD35T?=
- =?us-ascii?Q?i3IEUFOaCh13rWa5c0a2I8uGMBL4qk1MK8opxcvSL9PDnOCTMPIywXYLf7cP?=
- =?us-ascii?Q?ZanESPi+EtyguSimlKVSiJqNnxUvTCAsWq56e+LTsX6ewnRi6eK09s0y3B3C?=
- =?us-ascii?Q?o9Lpqr4rNwnWQE6mBuXT/L4gi9HnziXFC4W3GPKyyX2Evo8CQvKxsPt2YfWB?=
- =?us-ascii?Q?rJuXyfjvLXgKzoWzJ9DYIrGThIBny7ZHm4Sbd7Tr5jY+YhY5IwsB7ObwV/PO?=
- =?us-ascii?Q?nzkBIDV1zjzpNyoT+7IqxfkUZBpNtZvny1yZoCA9NUO2vg5KHF1GXEVYoJUE?=
- =?us-ascii?Q?DVIDRNsSLtWs7cwDzpDLtm7fSri0VOc/vJnClYQ0Kb/WW42g1YLdEVu7vj9H?=
- =?us-ascii?Q?Cc20YZQJDNSt6tM+chgNeFwogQRyVx9FWBdO/NXNLT3O0hnOLUjDlTtU5hCX?=
- =?us-ascii?Q?XTiEznoGHacFyRd7y0FiqF0VxMO+Nc2X5C6Cw2aYX6s3cTgbZaeG+M8o4L70?=
- =?us-ascii?Q?EZFUQukV5ymABMTZ1VjBpmfvi1HwP1OE7rDJlVSJYYcb6axkxAKKhihCwLok?=
- =?us-ascii?Q?MGS0UW/ulcVGGYcgBrTcou+zQ1TKqm+d524C7uw0MUcLDWywmeRcEcug5MSm?=
- =?us-ascii?Q?/l5X6NsJ8SuKg+1Bg8Numw4js1vuX0gEvsxQWk3Bzfh2JYfqom7j+xjKZLSe?=
- =?us-ascii?Q?s7dZhRFLLoGr54WetIUV0xKHQqf0Px6uUkjqS2tX3P8ypB6lfS79p5ChFVzh?=
- =?us-ascii?Q?uzzc0W9XASmrlvWDFuVJzYow73HKqR/l4HXgftiON9yGiGXqYZUxu5EKft7d?=
- =?us-ascii?Q?9/A18pQ00SaymCJLc95GfhV0uiDQKByTRsDWORQf5LvNGuzEIZ+U+yMUDwSB?=
- =?us-ascii?Q?kquLmacx6oP3/EM/zP1stdnyVcmkFpD5xJMkLzCm2EX6cji+KIUu86qhm8G5?=
- =?us-ascii?Q?ZMaJ8w1habLq4WHo2PCSjSitoEX8czLif7VzghV8X1LKCm8bm2ZUJcME4iYf?=
- =?us-ascii?Q?GSw3X/iIi81+CgYsm49X6jGEWI5xOoY97RjmJXmqPc/M5hykzFYpA72NVXc5?=
- =?us-ascii?Q?RneM3uQkPTTwrrv4qG/NxOgrHHXqYyp6RMBuKufTiZYfFUcypLJT3YowHoqr?=
- =?us-ascii?Q?XcqG2hkqxLos+CiIHfIsglRrHzeGECw=3D?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 887c3271-28e0-4d21-425c-08da2f46f1a0
-X-MS-Exchange-CrossTenant-AuthSource: SA2PR10MB4587.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 May 2022 09:58:17.7030
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: EY5tQj7r9w/UgMMo+Ak00kt5TNhNAJ7C/04JxbgwW9Nlrz3JPr6sDpl98HFE+ZkRNBGjSzp3BFsIabUmH/qAMQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR10MB4995
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.486,18.0.858
- definitions=2022-05-06_03:2022-05-05,2022-05-06 signatures=0
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 suspectscore=0
- mlxlogscore=999 adultscore=0 mlxscore=0 spamscore=0 malwarescore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2202240000 definitions=main-2205060055
-X-Proofpoint-ORIG-GUID: OWWkr2cQ1wZRSe7inAniQWq9fM5kNHIr
-X-Proofpoint-GUID: OWWkr2cQ1wZRSe7inAniQWq9fM5kNHIr
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.85 on 10.11.54.8
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The maximum file size that can be represented by the data fork extent counter
-in the worst case occurs when all extents are 1 block in length and each block
-is 1KB in size.
+Currently tests in xfstests-dev can be executed against CephFS only by
+mounting CephFS using kernel driver. Attempting to run tests against
+CephFS using FUSE doesn't work because xfstests-dev would remount CephFS
+using kernel. This patch adds the ability for xfstest-dev code to mount
+CephFS using FUSE.
 
-With XFS_MAX_EXTCNT_DATA_FORK_SMALL representing maximum extent count and with
-1KB sized blocks, a file can reach upto,
-(2^31) * 1KB = 2TB
-
-This is much larger than the theoretical maximum size of a directory
-i.e. XFS_DIR2_SPACE_SIZE * 3 = ~96GB.
-
-Since a directory can never overflow its data fork extent counter, the xfs
-kernel driver removed code which checked for such a situation before any
-directory modification operation could be executed. Instead, the kernel driver
-verifies the sanity of directory's data fork extent counter when the inode is
-read from disk.
-
-This commit removes the test xfs/533 due to the reasons mentioned above.
-
-Signed-off-by: Chandan Babu R <chandan.babu@oracle.com>
+Fixes: https://tracker.ceph.com/issues/55354
+Signed-off-by: Rishabh Dave <ridave@redhat.com>
 ---
- tests/xfs/533     | 170 ----------------------------------------------
- tests/xfs/533.out |  17 -----
- 2 files changed, 187 deletions(-)
- delete mode 100755 tests/xfs/533
- delete mode 100644 tests/xfs/533.out
+ common/config |  2 ++
+ common/rc     | 47 +++++++++++++++++++++++++++++++++++------------
+ 2 files changed, 37 insertions(+), 12 deletions(-)
 
-diff --git a/tests/xfs/533 b/tests/xfs/533
-deleted file mode 100755
-index b85b5298..00000000
---- a/tests/xfs/533
-+++ /dev/null
-@@ -1,170 +0,0 @@
--#! /bin/bash
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2021 Chandan Babu R.  All Rights Reserved.
--#
--# FS QA Test 533
--#
--# Verify that XFS does not cause inode fork's extent count to overflow when
--# adding/removing directory entries.
--. ./common/preamble
--_begin_fstest auto quick dir hardlink symlink
--
--# Import common functions.
--. ./common/filter
--. ./common/inject
--. ./common/populate
--
--# real QA test starts here
--
--_supported_fs xfs
--_require_scratch
--_require_xfs_debug
--_require_test_program "punch-alternating"
--_require_xfs_io_error_injection "reduce_max_iextents"
--_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
--
--_scratch_mkfs_sized $((1024 * 1024 * 1024)) | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
--. $tmp.mkfs
--
--# Filesystems with directory block size greater than one FSB will not be tested,
--# since "7 (i.e. XFS_DA_NODE_MAXDEPTH + 1 data block + 1 free block) * 2 (fsb
--# count) = 14" is greater than the pseudo max extent count limit of 10.
--# Extending the pseudo max limit won't help either.  Consider the case where 1
--# FSB is 1k in size and 1 dir block is 64k in size (i.e. fsb count = 64). In
--# this case, the pseudo max limit has to be greater than 7 * 64 = 448 extents.
--if (( $dirbsize > $dbsize )); then
--	_notrun "Directory block size ($dirbsize) is larger than FSB size ($dbsize)"
--fi
--
--echo "Format and mount fs"
--_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
--_scratch_mount >> $seqres.full
--
--# Disable realtime inherit flag (if any) on root directory so that space on data
--# device gets fragmented rather than realtime device.
--_xfs_force_bdev data $SCRATCH_MNT
--
--echo "Consume free space"
--fillerdir=$SCRATCH_MNT/fillerdir
--nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
--nr_free_blks=$((nr_free_blks * 90 / 100))
--
--_fill_fs $((dbsize * nr_free_blks)) $fillerdir $dbsize 0 >> $seqres.full 2>&1
--
--echo "Create fragmented filesystem"
--for dentry in $(ls -1 $fillerdir/); do
--	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
--done
--
--echo "Inject reduce_max_iextents error tag"
--_scratch_inject_error reduce_max_iextents 1
--
--echo "Inject bmap_alloc_minlen_extent error tag"
--_scratch_inject_error bmap_alloc_minlen_extent 1
--
--dent_len=255
--
--echo "* Create directory entries"
--
--testdir=$SCRATCH_MNT/testdir
--mkdir $testdir
--
--nr_dents=$((dbsize * 20 / dent_len))
--for i in $(seq 1 $nr_dents); do
--	dentry="$(printf "%0255d" $i)"
--	touch ${testdir}/$dentry >> $seqres.full 2>&1 || break
--done
--
--echo "Verify directory's extent count"
--nextents=$(_xfs_get_fsxattr nextents $testdir)
--if (( $nextents > 10 )); then
--	echo "Extent count overflow check failed: nextents = $nextents"
--	exit 1
--fi
--
--rm -rf $testdir
--
--echo "* Rename: Populate destination directory"
--
--dstdir=$SCRATCH_MNT/dstdir
--mkdir $dstdir
--
--nr_dents=$((dirbsize * 20 / dent_len))
--
--echo "Populate \$dstdir by moving new directory entries"
--for i in $(seq 1 $nr_dents); do
--	dentry="$(printf "%0255d" $i)"
--	dentry=${SCRATCH_MNT}/${dentry}
--	touch $dentry || break
--	mv $dentry $dstdir >> $seqres.full 2>&1 || break
--done
--
--rm $dentry
--
--echo "Verify \$dstdir's extent count"
--
--nextents=$(_xfs_get_fsxattr nextents $dstdir)
--if (( $nextents > 10 )); then
--	echo "Extent count overflow check failed: nextents = $nextents"
--	exit 1
--fi
--
--rm -rf $dstdir
--
--echo "* Create multiple hard links to a single file"
--
--testdir=$SCRATCH_MNT/testdir
--mkdir $testdir
--
--testfile=$SCRATCH_MNT/testfile
--touch $testfile
--
--nr_dents=$((dirbsize * 20 / dent_len))
--
--echo "Create multiple hardlinks"
--for i in $(seq 1 $nr_dents); do
--	dentry="$(printf "%0255d" $i)"
--	ln $testfile ${testdir}/${dentry} >> $seqres.full 2>&1 || break
--done
--
--rm $testfile
--
--echo "Verify directory's extent count"
--nextents=$(_xfs_get_fsxattr nextents $testdir)
--if (( $nextents > 10 )); then
--	echo "Extent count overflow check failed: nextents = $nextents"
--	exit 1
--fi
--
--rm -rf $testdir
--
--echo "* Create multiple symbolic links to a single file"
--
--testdir=$SCRATCH_MNT/testdir
--mkdir $testdir
--
--testfile=$SCRATCH_MNT/testfile
--touch $testfile
--
--nr_dents=$((dirbsize * 20 / dent_len))
--
--echo "Create multiple symbolic links"
--for i in $(seq 1 $nr_dents); do
--	dentry="$(printf "%0255d" $i)"
--	ln -s $testfile ${testdir}/${dentry} >> $seqres.full 2>&1 || break;
--done
--
--rm $testfile
--
--echo "Verify directory's extent count"
--nextents=$(_xfs_get_fsxattr nextents $testdir)
--if (( $nextents > 10 )); then
--	echo "Extent count overflow check failed: nextents = $nextents"
--	exit 1
--fi
--
--rm -rf $testdir
--
--# success, all done
--status=0
--exit
-diff --git a/tests/xfs/533.out b/tests/xfs/533.out
-deleted file mode 100644
-index c3cbe2e0..00000000
---- a/tests/xfs/533.out
-+++ /dev/null
-@@ -1,17 +0,0 @@
--QA output created by 533
--Format and mount fs
--Consume free space
--Create fragmented filesystem
--Inject reduce_max_iextents error tag
--Inject bmap_alloc_minlen_extent error tag
--* Create directory entries
--Verify directory's extent count
--* Rename: Populate destination directory
--Populate $dstdir by moving new directory entries
--Verify $dstdir's extent count
--* Create multiple hard links to a single file
--Create multiple hardlinks
--Verify directory's extent count
--* Create multiple symbolic links to a single file
--Create multiple symbolic links
--Verify directory's extent count
+diff --git a/common/config b/common/config
+index 1033b890..efcf12e9 100644
+--- a/common/config
++++ b/common/config
+@@ -556,6 +556,8 @@ _check_device()
+ 			_fatal "common/config: $name ($dev) is not a character device"
+ 		fi
+ 		;;
++	ceph-fuse)
++		;;
+ 	*)
+ 		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
+ 	esac
+diff --git a/common/rc b/common/rc
+index 553ae350..a8252c7f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -500,10 +500,14 @@ _test_mount()
+ {
+     local mount_ret
+ 
+-    if [ "$FSTYP" == "overlay" ]; then
++    if [ "$FSTYP" == "ceph-fuse" ]; then
++        $CEPH_FUSE_BIN_PATH $TEST_FS_MOUNT_OPTS $TEST_DIR 2> /dev/null
++        return $?
++    elif [ "$FSTYP" == "overlay" ]; then
+         _overlay_test_mount $*
+         return $?
+     fi
++
+     _test_options mount
+     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+     mount_ret=$?
+@@ -1446,7 +1450,8 @@ _fs_type()
+     # have to bother with this quirk.
+     #
+     _df_device $1 | $AWK_PROG '{ print $2 }' | \
+-        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
++        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/' \
++            -e 's/fuse.ceph-fuse/ceph-fuse/'
+ }
+ 
+ # return the FS mount options of a mounted device
+@@ -1595,6 +1600,24 @@ _supported_fs()
+     _notrun "not suitable for this filesystem type: $FSTYP"
+ }
+ 
++_check_if_dev_already_mounted()
++{
++	local dev=$1
++	local mnt=$2
++
++	# find $dev as the source, and print result in "$dev $mnt" format
++	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
++	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
++
++	# if it's mounted, make sure its on $mnt
++	if [ "$mount_rec" != "$dev $mnt" ]; then
++		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
++		echo "Already mounted result:"
++		echo $mount_rec
++		return 2 # 2 = mounted on wrong mnt
++	fi
++}
++
+ # check if a FS on a device is mounted
+ # if so, verify that it is mounted on mount point
+ # if fstype is given as argument, verify that it is also
+@@ -1608,16 +1631,14 @@ _check_mounted_on()
+ 	local mnt=$4
+ 	local type=$5
+ 
+-	# find $dev as the source, and print result in "$dev $mnt" format
+-	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
+-	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
++	# this check doesn't work on ceph-fuse
++	if [ "$dev" != "ceph-fuse" ]; then
++		_check_if_dev_already_mounted $dev $mnt
++		dev_already_mounted=$?
+ 
+-	# if it's mounted, make sure its on $mnt
+-	if [ "$mount_rec" != "$dev $mnt" ]; then
+-		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
+-		echo "Already mounted result:"
+-		echo $mount_rec
+-		return 2 # 2 = mounted on wrong mnt
++		if [ $dev_already_mounted -ne 0 ]; then
++			return $dev_already_mounted
++		fi
+ 	fi
+ 
+ 	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+@@ -1870,6 +1891,8 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
++	ceph-fuse)
++		;;
+ 	cifs)
+ 		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+ 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+@@ -3204,7 +3227,7 @@ _check_test_fs()
+     virtiofs)
+ 	# no way to check consistency for virtiofs
+ 	;;
+-    ceph)
++    ceph|ceph-fuse)
+ 	# no way to check consistency for CephFS
+ 	;;
+     glusterfs)
 -- 
-2.30.2
+2.34.1
 
