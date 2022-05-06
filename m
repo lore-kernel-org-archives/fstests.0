@@ -2,178 +2,102 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C2E1C4167B
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 15:21:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCBBDC433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 May 2022 15:33:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1442810AbiEFPZB (ORCPT
+        id S1348163AbiEFPgz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 May 2022 11:25:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48308 "EHLO
+        Fri, 6 May 2022 11:36:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1442679AbiEFPZA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 11:25:00 -0400
+        with ESMTP id S1390409AbiEFPg2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 May 2022 11:36:28 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 228666D1A4
-        for <fstests@vger.kernel.org>; Fri,  6 May 2022 08:21:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 37EA76EB07
+        for <fstests@vger.kernel.org>; Fri,  6 May 2022 08:32:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651850475;
+        s=mimecast20190719; t=1651851150;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=siNzHncwKTrwK5vwByRD6HY2oc+hv5wNepzBYpx2LN8=;
-        b=GNoIvwJmVL8Fm0E21JOQm9p/jLVeydl+5H8LiOG1YzeMysv7W19ypp9b/X7sS5MuBVwk8j
-        z8qZyD/hWntL9amhSvO5aRoxqutz0e5sclWBxwviCmGm5j+L+Mqo9Uy+BrMv8y1uxxR28V
-        xykDhxU+XMLA9pFI3GQ/BzaER0uF3II=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=xPKkraI1M2m4ob6FeFqSeP6IpwTvfgtBu6QJp90rz3k=;
+        b=Ig9Unt/ABIux47E6bKPn7az5a60OrUIE41NKF5abopnu5AECzheT6ZvzAdXXE55zGsKaGn
+        DznYwwZm7wOjt+qSxWuZUf9jrtXkokhYLNn8KKNlWk553rq7NCyOQEkT+eJKl5iq69zC5K
+        l3AT1mSYbkmBjlQdTKd6KNclpqF0M8w=
+Received: from mail-lj1-f197.google.com (mail-lj1-f197.google.com
+ [209.85.208.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-627-3BtYFcyLOJacdPBdy776Sg-1; Fri, 06 May 2022 11:21:14 -0400
-X-MC-Unique: 3BtYFcyLOJacdPBdy776Sg-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 85ECE3C1022E;
-        Fri,  6 May 2022 15:21:14 +0000 (UTC)
-Received: from p50.redhat.com (unknown [10.74.16.90])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 76CC74010A18;
-        Fri,  6 May 2022 15:21:12 +0000 (UTC)
-From:   Rishabh Dave <ridave@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     jlayton@redhat.com, rishabhddave@gmail.com,
-        Rishabh Dave <ridave@redhat.com>
-Subject: [PATCH v2] common: add support for ceph-fuse
-Date:   Fri,  6 May 2022 20:50:51 +0530
-Message-Id: <20220506152050.334884-1-ridave@redhat.com>
+ us-mta-575-p6lbJsJeOh2abbkw8jCqpg-1; Fri, 06 May 2022 11:32:29 -0400
+X-MC-Unique: p6lbJsJeOh2abbkw8jCqpg-1
+Received: by mail-lj1-f197.google.com with SMTP id m6-20020a2eb6c6000000b002509fdb1dbaso517642ljo.1
+        for <fstests@vger.kernel.org>; Fri, 06 May 2022 08:32:28 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=xPKkraI1M2m4ob6FeFqSeP6IpwTvfgtBu6QJp90rz3k=;
+        b=agXE2jey920gQqoQFRMn5AO+YEIDlmLaoDTB4XWVrquE2OquuWCL9NQCJ7iGYc5CC5
+         EmambCLsVHu74vPaFyCfQ40B/6YumDhmlCFQLmvcRLB33e6O/4Cu1ilzTjo/2MexT99s
+         OR3UbCo+6uqe++4s996SdUInAHWpTtEqcCy5pwDjfO50dqdswHRrwRMMJkUwOo/ucGgy
+         oOahuSbeE6oaZPIpME9QIEQidJWfQkoINWudo9zaownrxzQHrJqei/iEcN+5YyU8FDE3
+         IvtrWVQawgho9UEv8Dd7qKWRmr1cItSZKTv1yu8xGODyj6QT/fDrYlshAJTpmmR7qA4e
+         /SFQ==
+X-Gm-Message-State: AOAM532EvYWy/Vk43I5k4qv0+lCYl6EzEa/dMHQdFTXn236gcO0VS4CQ
+        IHZuae455wrssQjhUB/WD+kRibgYpkYFnF3N/r9T2YwJ9830pIjEq9qFO8in2bqSPX41t2llzE3
+        H8M+KAuvOhJBSUtBH3AYtoS48hXNQMryjOw==
+X-Received: by 2002:a2e:a550:0:b0:250:5ae3:c172 with SMTP id e16-20020a2ea550000000b002505ae3c172mr2253241ljn.265.1651851147456;
+        Fri, 06 May 2022 08:32:27 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwoH1bjIO290aW/xsqlSAGQZafrMdwUaHEKfEkJHSrtU56Ta9NQlM1MBlrdGPtZtoB7giQ6fkDjLa2bz+dWILI=
+X-Received: by 2002:a2e:a550:0:b0:250:5ae3:c172 with SMTP id
+ e16-20020a2ea550000000b002505ae3c172mr2253237ljn.265.1651851147214; Fri, 06
+ May 2022 08:32:27 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.11.54.2
+References: <20220419175811.602126-1-ridave@redhat.com> <20220427083943.rc4alejvbl2wbw2z@zlang-mailbox>
+In-Reply-To: <20220427083943.rc4alejvbl2wbw2z@zlang-mailbox>
+From:   Rishabh Dave <ridave@redhat.com>
+Date:   Fri, 6 May 2022 21:02:16 +0530
+Message-ID: <CA+jMu4SnQdwOYa9Gz6CFG7-=XgyP-D43w+7-bynCSZuv2b=fVQ@mail.gmail.com>
+Subject: Re: [PATCH] cephfs: add ceph-fuse suport for ceph-fuse
+To:     Rishabh Dave <ridave@redhat.com>, fstests@vger.kernel.org,
+        Jeff Layton <jlayton@redhat.com>,
+        Rishabh Dave <rishabhddave@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Currently tests in xfstests-dev can be executed against CephFS only by
-mounting CephFS using kernel driver. Attempting to run these tests
-against CephFS using FUSE doesn't work because xfstests-dev would
-remount CephFS using kernel. This patch adds the ability for xfstest-dev
-code to mount CephFS using FUSE.
+On Wed, 27 Apr 2022 at 14:18, Zorro Lang <zlang@kernel.org> wrote:
+>
+> > diff --git a/common/rc b/common/rc
+> > index 553ae350..868b3ddd 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+>
+> [snip]
+>
+> >
+> >       if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+> > @@ -1869,6 +1890,7 @@ _require_test()
+> >               if [ ! -d "$TEST_DIR" ]; then
+> >                       _notrun "this test requires a valid \$TEST_DIR"
+> >               fi
+>
+> This place missed a ";;", it'll cause all cases fail directly when they try to
+> ". common/rc". As this patch has been RVB, I'll fix it when I merge it. But better
+> to give a patch a mimimum test before sending (except it's simple enough:), to make
+> sure it won't break the most fundamental things at least, it's hard for me to test
+> all fs that fstests supports before merging, Thanks for understanding :)
+>
 
-Fixes: https://tracker.ceph.com/issues/55354
-Signed-off-by: Rishabh Dave <ridave@redhat.com>
----
- common/config |  2 ++
- common/rc     | 47 +++++++++++++++++++++++++++++++++++------------
- 2 files changed, 37 insertions(+), 12 deletions(-)
+Sorry for the inconvenience. I guess I made a last minute error
+because normally I test my patch against CephFS. Should I be running
+more tests, besides just this one? Please let me know if so because I
+am new to xfstests-dev.
 
-diff --git a/common/config b/common/config
-index 1033b890..efcf12e9 100644
---- a/common/config
-+++ b/common/config
-@@ -556,6 +556,8 @@ _check_device()
- 			_fatal "common/config: $name ($dev) is not a character device"
- 		fi
- 		;;
-+	ceph-fuse)
-+		;;
- 	*)
- 		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
- 	esac
-diff --git a/common/rc b/common/rc
-index 553ae350..a8252c7f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -500,10 +500,14 @@ _test_mount()
- {
-     local mount_ret
- 
--    if [ "$FSTYP" == "overlay" ]; then
-+    if [ "$FSTYP" == "ceph-fuse" ]; then
-+        $CEPH_FUSE_BIN_PATH $TEST_FS_MOUNT_OPTS $TEST_DIR 2> /dev/null
-+        return $?
-+    elif [ "$FSTYP" == "overlay" ]; then
-         _overlay_test_mount $*
-         return $?
-     fi
-+
-     _test_options mount
-     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-     mount_ret=$?
-@@ -1446,7 +1450,8 @@ _fs_type()
-     # have to bother with this quirk.
-     #
-     _df_device $1 | $AWK_PROG '{ print $2 }' | \
--        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
-+        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/' \
-+            -e 's/fuse.ceph-fuse/ceph-fuse/'
- }
- 
- # return the FS mount options of a mounted device
-@@ -1595,6 +1600,24 @@ _supported_fs()
-     _notrun "not suitable for this filesystem type: $FSTYP"
- }
- 
-+_check_if_dev_already_mounted()
-+{
-+	local dev=$1
-+	local mnt=$2
-+
-+	# find $dev as the source, and print result in "$dev $mnt" format
-+	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
-+	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
-+
-+	# if it's mounted, make sure its on $mnt
-+	if [ "$mount_rec" != "$dev $mnt" ]; then
-+		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
-+		echo "Already mounted result:"
-+		echo $mount_rec
-+		return 2 # 2 = mounted on wrong mnt
-+	fi
-+}
-+
- # check if a FS on a device is mounted
- # if so, verify that it is mounted on mount point
- # if fstype is given as argument, verify that it is also
-@@ -1608,16 +1631,14 @@ _check_mounted_on()
- 	local mnt=$4
- 	local type=$5
- 
--	# find $dev as the source, and print result in "$dev $mnt" format
--	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
--	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
-+	# this check doesn't work on ceph-fuse
-+	if [ "$dev" != "ceph-fuse" ]; then
-+		_check_if_dev_already_mounted $dev $mnt
-+		dev_already_mounted=$?
- 
--	# if it's mounted, make sure its on $mnt
--	if [ "$mount_rec" != "$dev $mnt" ]; then
--		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
--		echo "Already mounted result:"
--		echo $mount_rec
--		return 2 # 2 = mounted on wrong mnt
-+		if [ $dev_already_mounted -ne 0 ]; then
-+			return $dev_already_mounted
-+		fi
- 	fi
- 
- 	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
-@@ -1870,6 +1891,8 @@ _require_test()
- 			_notrun "this test requires a valid \$TEST_DIR"
- 		fi
- 		;;
-+	ceph-fuse)
-+		;;
- 	cifs)
- 		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
- 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
-@@ -3204,7 +3227,7 @@ _check_test_fs()
-     virtiofs)
- 	# no way to check consistency for virtiofs
- 	;;
--    ceph)
-+    ceph|ceph-fuse)
- 	# no way to check consistency for CephFS
- 	;;
-     glusterfs)
--- 
-2.34.1
+I've resent my patch under subject "[PATCH test] common: add support
+for ceph-fuse". It should've been [PATCH v2] since it's a newer
+version of this patch but I guess I made a mistake while running "git
+send-email" (I'm new to it).
+
+Thanks for the patch review!
 
