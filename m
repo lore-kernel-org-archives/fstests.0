@@ -2,95 +2,105 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CD63C433EF
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 11:40:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7E2FC433F5
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 12:01:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1446276AbiEGLo1 (ORCPT
+        id S1446310AbiEGMFJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 07:44:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37286 "EHLO
+        Sat, 7 May 2022 08:05:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50408 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231339AbiEGLo0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 07:44:26 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E543A62CB;
-        Sat,  7 May 2022 04:40:39 -0700 (PDT)
+        with ESMTP id S1352692AbiEGMFH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 08:05:07 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A345A13E30
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 05:01:20 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id D841BB80CF3;
-        Sat,  7 May 2022 11:40:37 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 05E2EC385A9;
-        Sat,  7 May 2022 11:40:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3FC5A6119A
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 12:01:20 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE09CC385A9;
+        Sat,  7 May 2022 12:01:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651923636;
-        bh=Kstf+5Om1UpV7wYBMz+qFHCkqVdczsiGFaKAy2n9be0=;
+        s=k20201202; t=1651924879;
+        bh=tz5gjrV3IP/2C5UY1aY0vS/CbsfLFFnyv4LJbqF41jc=;
         h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=qPJ/MbbS8diXXRz5VxTvh87oHXjFAjBAulaeK91lyE592xP7KsymNJ8uJy5Zo5WNl
-         y1w8uTwX1QVUWuHH1EKOB7qa7jJnBz00u6bBTBuy6rTN2hNIz1+yMlDG9biI2VzTxN
-         f0mNkyoe0FF9fmlABVlzjmq7SX8v5/+4RsOaDdyV7o6Dp1EhETAeacc4/A9ayQ14vJ
-         jMfW/Sf+x1YQm6hAHgXU4oHIlBVL1CG0PwD5mmizO2V03NwHsrqEBSKDp8utc5rimW
-         NVOAlqigzplRtNrmtoihp913bvAyV9EfpEJVWQG51xppqDd7AUywji8Len+QIR2kDy
-         r8oIkf33b6fyQ==
-Date:   Sat, 7 May 2022 13:40:32 +0200
+        b=p6QbubxOJ8XxqjZEpZ8mKIr3QlwD2G0qgcCwAEvW1m6lPj7Gd1trgHadzVcwAS31K
+         xo53gN2r9pWOe1pe3/LCbs1ZtYR1IOsy8jzBYejPdDIgzdp1r2O9LWshIBo6YFBQSH
+         /gosU5Dtu2/W+YRg4OL5Bmkee3FDlZC3pqLAP8Yuf7rVPOQGnKZHhJBp8QBv95sgqa
+         o5b29/UPuEXIUxYQJTu+wri3njMQQN3G3U/LF8JLKWq53spdvH6X48uEmB+wO5zEQ3
+         WrCEPhIGPTkjwo0LcmWmVWkH4LWTwt17aPpn7dg4yDIeH2wBRLASnqAh/6BaHETbs+
+         YpXHvsLoBwwxQ==
+Date:   Sat, 7 May 2022 14:01:15 +0200
 From:   Christian Brauner <brauner@kernel.org>
-To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
-        "david@fromorbit.com" <david@fromorbit.com>,
-        "djwong@kernel.org" <djwong@kernel.org>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v3 1/5] idmapped-mounts: Reset errno to zero after detect
- fs_allow_idmap
-Message-ID: <20220507114032.za7ejzgh2bspz6kv@wittgenstein>
-References: <1649763226-2329-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <6275DAB9.5030700@fujitsu.com>
- <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
+To:     fstests <fstests@vger.kernel.org>, Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH 00/11] rename & split tests
+Message-ID: <20220507120115.uxapve3zwciwugdv@wittgenstein>
+References: <20220428151559.947144-1-brauner@kernel.org>
+ <20220501114643.ypif3dzglroqlce4@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
+In-Reply-To: <20220501114643.ypif3dzglroqlce4@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, May 07, 2022 at 04:52:09PM +0800, Zorro Lang wrote:
-> On Sat, May 07, 2022 at 01:33:33AM +0000, xuyang2018.jy@fujitsu.com wrote:
-> > Hi Zorro
+On Sun, May 01, 2022 at 07:46:43PM +0800, Zorro Lang wrote:
+> On Thu, Apr 28, 2022 at 05:15:48PM +0200, Christian Brauner wrote:
+> > From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
 > > 
-> > Since  Christian doesn't send  a new patchset(for rename idmap-mount)
-> > based on lastest xfstests, should I send a v4 patch for the following
-> > patches today?
-> > "idmapped-mounts: Reset errno to zero after detect fs_allow_idmap"
-> > " idmapped-mounts: Add mknodat operation in setgid test"
-> > "idmapped-mounts: Add open with O_TMPFILE operation in setgid test"
+> > Hey everyone,
 > > 
-> > So you can merge these three patches if you plan to announce a new
-> > xfstests version in this weekend.
+> > As announced multiple times already we need to rename and split the
+> > idmapped mount testsuite into separate source files and also give it a
+> > better name to reflect the fact that it covers a lot more than just
+> > idmapped mounts.
 > > 
-> > What do you think about it?
+> > I have decided against compiling different binaries for now. Instead we
+> > compile a single vfstest binary that can be called with various command
+> > line switches to run the various test suites. This is not different than
+> > what we did for the idmapped-mounts binary. Of course, nothing prevents
+> > us from using multiple binaries in the future.
+> > 
+> > Note that this will have a conflict with Jan's series at:
+> > https://lore.kernel.org/fstests/20220425131809.qzjrah7cw67mzzcw@zlang-mailbox/T/#m47d8da68ef1aff250918398e8d2228729a6acf97
 > 
-> Sure, you can send V4 of patch 1/5 ～ 3/5 (base on latest for-next branch
-> please), as they have been reviewed and tested. Christian's patch (about
-> refactor idmapped testing) might need more review, he just sent it out to
-> get some review points I think (cc Christian).
-
-LSFMM happened last week so with travel and conference there simply was
-no time to rebase. It should be ready for merging once rebased.
-
+> Hi Christian,
 > 
-> If you'd like to catch up the release of this weekend, please send your
-> v4 patch ASAP. Due to I need time to do regression test before pushing.
-> It'll wait for next week if too late.
+> Thanks for your patches! But even without above conflict patches, I still can't
+> merge your patchset, failures as below [1].
 
-Rebasing the patchset is _massively_ painful which is why in the cover
-letter to it I requested that patches which is why I requested
-that currently pending patchsets that touch the same code please be
-applied on top of it. (I'm happy to apply them manually on top of my
-branch.)
+Hi Zorro!
 
-In any case, I'll have a rebased version ready on Monday (If there's no
-urgent issues I have to address somewhere else that I missed during
-travel.)
+The fstests list has a limit on how large a single patch can be in terms
+of number of lines (10.000, I believe). Since this patchset contains
+patches that change about 10.000 lines the fstests list drops those
+patches. I ran into this issue before when we added the testsuite in the
+first place but it has never been fixed.
+
+The consequence of this is that b4 is missing patches since they are on
+no list. This becomes more obvious if you use b4's quilt option which
+creates a folder with individual patches:
+
+  0001_src_rename_idmapped_mounts_folder.patch
+  0002_src_vfs_rename_idmapped_mounts_c_file.patch
+  0003_vfstest_rename_struct_t_idmapped_mounts.patch
+  0004_utils_add_missing_global_h_include.patch
+  0006_utils_move_helpers_into_utils.patch
+  0007_missing_move_sys_execveat_to_missing_h.patch
+  0008_utils_add_struct_test_suite.patch
+  0011_vfstest_split_out_remaining_idmapped_mount_tests.patch
+  series
+
+so this is missing patches 9 and 10...
+
+> May you rebase your patches on latest fstests for-next branch, and send out
+> again? As Christoph Hellwig has Acked your patchset, we'd better to make it
+
+I think we will have the same problem, i.e., patches will not be on the
+list since they are too large and so b4 won't work. To work around this
+I'll give you a signed tag to pull from in the cover letter.
 
 Christian
