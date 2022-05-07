@@ -2,144 +2,180 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7440C433F5
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 12:27:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9E21C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 12:50:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231705AbiEGMau (ORCPT
+        id S233337AbiEGMyX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 08:30:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35686 "EHLO
+        Sat, 7 May 2022 08:54:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52558 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1384733AbiEGMap (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 08:30:45 -0400
+        with ESMTP id S233617AbiEGMyV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 08:54:21 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 777A63DA6B
-        for <fstests@vger.kernel.org>; Sat,  7 May 2022 05:26:58 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 64FF7E0AD
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 05:50:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651926417;
+        s=mimecast20190719; t=1651927829;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=t4+dYLAG02stwqQPLlW+dyXHUvNyUyia86wRiZi589s=;
-        b=V8xSqt2om0S4vujzcJA8BQ5wShTB2EtNVGJkOL3G0ZHKxGfID705ptrOIGLkdyccCqNIgd
-        dTIj0MmFmJsjeuXWpRAzcqyrAL3w8Th3FRysYQbTe2/NxlV4Ac3MKtLRhtsvYv8sILAiq6
-        Q4e1JIarLaEeplct2wO/kgTLLD3YqEk=
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
- [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=X96ihtFmQESa7ZeL681lFM+HhsabV81QBSKYbSCNCng=;
+        b=hBX/axxj0Kbksb0o/nn56sDnyAILDu9llJF1DLOjnDq5YsfNoDKt/6Yk2sbpJo14TVxfoI
+        Efy0VIr5UXc+3jGq4KYjxO/vXvo8SgvSqWz/4aUIumWMCIh4AiHiNB1vaj37hUWyNaBB1H
+        89CP42JNP6/kLHHAtpjjGIjbk7kDHgw=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-393-f-eCK3I3OOigfZc9wPYThA-1; Sat, 07 May 2022 08:26:56 -0400
-X-MC-Unique: f-eCK3I3OOigfZc9wPYThA-1
-Received: by mail-qv1-f70.google.com with SMTP id kj4-20020a056214528400b0044399a9bb4cso7974773qvb.15
-        for <fstests@vger.kernel.org>; Sat, 07 May 2022 05:26:56 -0700 (PDT)
+ us-mta-187-32wBVjqGMFqUHZcxCumuDw-1; Sat, 07 May 2022 08:50:28 -0400
+X-MC-Unique: 32wBVjqGMFqUHZcxCumuDw-1
+Received: by mail-qt1-f197.google.com with SMTP id d13-20020ac85acd000000b002f3be21793dso5677204qtd.12
+        for <fstests@vger.kernel.org>; Sat, 07 May 2022 05:50:28 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
-         :content-transfer-encoding:in-reply-to;
-        bh=t4+dYLAG02stwqQPLlW+dyXHUvNyUyia86wRiZi589s=;
-        b=JbGRRJWBFdJUUXYaxQeIncQHO8vHj//hoMn0o3VYL3aajKsqQpZcy1KQtSIL1YZhVU
-         O9Z8KzbcwdSoypTyCd1pamF5LGjHGwdX4o5Y1t1S5uSQrT4jpoAdbfK5s7zz2ZRU9Ltt
-         KorbJhkfWQ7ma40N9fdsO3HGO8z5R8ZYAnBjzg/JG+ZGAhgldhbTavJV9NEvHC0oc6Vh
-         HTw2fYj2EOLBYqdP83u6D3Qd7sYpCUSMIvIwrJSoe1QFyB9uAj7YDxVb+UjfYXR5gSDC
-         /fCTFI2/lgioQrlfGfFaSQfl7cfgs4jZ8XjrbUOHsst4Ku6TPmjFPDtz1nTWgAWDTOgu
-         L81Q==
-X-Gm-Message-State: AOAM532GpNNNkGts71pA7d4DRvgF6RvgzTj1OhSJRfTXwB/5yGfj/3to
-        KZI0GG9c+QWA3RGB1gptkdcFuCYq41jOqTYezrX3aUCigStPdY1OA62A5L1q7E9/3NBsMspPZMX
-        0sY+Adm12xyukNmz/bg==
-X-Received: by 2002:ac8:5bd5:0:b0:2f3:b654:694d with SMTP id b21-20020ac85bd5000000b002f3b654694dmr7030512qtb.435.1651926415815;
-        Sat, 07 May 2022 05:26:55 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxLfIZo5FGr8KN6oBnh0aJ4xtGpFQU6VqGeZ8V9zz19d4uro3J2m/5wT+lMQ6dQ4XflVWGPUQ==
-X-Received: by 2002:ac8:5bd5:0:b0:2f3:b654:694d with SMTP id b21-20020ac85bd5000000b002f3b654694dmr7030494qtb.435.1651926415569;
-        Sat, 07 May 2022 05:26:55 -0700 (PDT)
+         :in-reply-to;
+        bh=X96ihtFmQESa7ZeL681lFM+HhsabV81QBSKYbSCNCng=;
+        b=05sSkYRPT6E1EFlq+rp28hhThgYnPn7yU6tjjCnlcS8ynXYFMB9SK0E9BuxQA6djwx
+         f45JY/5IORvX+LOQjVhFLeDDFwS1YmosJaBUr+Lz+bCG2wE9UO+3dRG4MLImGEE2HmGp
+         Ell+Q1RmPc011RJ8Nz5pqWKJI0uZVbMVaD4Nl135ng65lx3HIfVWfsjPcbUpxEIJ4MNc
+         AmRCTQwiwZFP7cObLCGCvIt3uGdpiBRfiyaASNaUovkBhkmmWHqHCWTv9FP2zTRjtNpj
+         jNFjm9y5/iFoPN4H4S/q0afltZr2r/u8mFHQJ2IoJyPzcO1PUq078xmDpvkbYkLZur5e
+         3JoA==
+X-Gm-Message-State: AOAM533jGMJHD8b2RSdzPud6k96bii2Bhvk3/pJYzoEU2dL8wPWvGgol
+        DIZL+YuZR2WN6fV2QYG+uGKodHQRcRjkrD1UI+6+f8bpPoxPC1WvL6OfXImGFNGJ9A2rdf2NEd3
+        m7cIfefnJTsLqx6nKFQ==
+X-Received: by 2002:a05:622a:143:b0:2e0:b7c8:3057 with SMTP id v3-20020a05622a014300b002e0b7c83057mr7286217qtw.179.1651927828020;
+        Sat, 07 May 2022 05:50:28 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxVoy7BcGCwROSitMrftbqOjf6lked5emQfwn0ndKyl7rGjQlLma1vJ+fp6111TdHODfS3PCw==
+X-Received: by 2002:a05:622a:143:b0:2e0:b7c8:3057 with SMTP id v3-20020a05622a014300b002e0b7c83057mr7286193qtw.179.1651927827734;
+        Sat, 07 May 2022 05:50:27 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id i22-20020ac871d6000000b002f3ad89629dsm4190439qtp.2.2022.05.07.05.26.52
+        by smtp.gmail.com with ESMTPSA id d5-20020ae9ef05000000b0069fc13ce1ebsm3917677qkg.28.2022.05.07.05.50.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 07 May 2022 05:26:55 -0700 (PDT)
-Date:   Sat, 7 May 2022 20:26:49 +0800
+        Sat, 07 May 2022 05:50:27 -0700 (PDT)
+Date:   Sat, 7 May 2022 20:50:20 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Christian Brauner <brauner@kernel.org>
-Cc:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v3 1/5] idmapped-mounts: Reset errno to zero after detect
- fs_allow_idmap
-Message-ID: <20220507122649.dp7iopuu7rllli7k@zlang-mailbox>
-Mail-Followup-To: Christian Brauner <brauner@kernel.org>,
+Cc:     Dave Chinner <david@fromorbit.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>, Jan Kara <jack@suse.cz>,
+        "Darrick J. Wong" <djwong@kernel.org>,
         "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-References: <1649763226-2329-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <6275DAB9.5030700@fujitsu.com>
- <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
- <20220507114032.za7ejzgh2bspz6kv@wittgenstein>
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 00/11] rename & split tests
+Message-ID: <20220507125020.3po2gc36onouibuo@zlang-mailbox>
+Mail-Followup-To: Christian Brauner <brauner@kernel.org>,
+        Dave Chinner <david@fromorbit.com>,
+        Amir Goldstein <amir73il@gmail.com>, Christoph Hellwig <hch@lst.de>,
+        Jan Kara <jack@suse.cz>, "Darrick J. Wong" <djwong@kernel.org>,
+        "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        fstests <fstests@vger.kernel.org>
+References: <20220428151559.947144-1-brauner@kernel.org>
+ <20220501114643.ypif3dzglroqlce4@zlang-mailbox>
+ <20220507120309.7cjjfpmttjqtutxy@wittgenstein>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220507114032.za7ejzgh2bspz6kv@wittgenstein>
+In-Reply-To: <20220507120309.7cjjfpmttjqtutxy@wittgenstein>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, May 07, 2022 at 01:40:32PM +0200, Christian Brauner wrote:
-> On Sat, May 07, 2022 at 04:52:09PM +0800, Zorro Lang wrote:
-> > On Sat, May 07, 2022 at 01:33:33AM +0000, xuyang2018.jy@fujitsu.com wrote:
-> > > Hi Zorro
+On Sat, May 07, 2022 at 02:03:09PM +0200, Christian Brauner wrote:
+> On Sun, May 01, 2022 at 07:46:43PM +0800, Zorro Lang wrote:
+> > On Thu, Apr 28, 2022 at 05:15:48PM +0200, Christian Brauner wrote:
+> > > From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
 > > > 
-> > > Since  Christian doesn't send  a new patchset(for rename idmap-mount)
-> > > based on lastest xfstests, should I send a v4 patch for the following
-> > > patches today?
-> > > "idmapped-mounts: Reset errno to zero after detect fs_allow_idmap"
-> > > " idmapped-mounts: Add mknodat operation in setgid test"
-> > > "idmapped-mounts: Add open with O_TMPFILE operation in setgid test"
+> > > Hey everyone,
 > > > 
-> > > So you can merge these three patches if you plan to announce a new
-> > > xfstests version in this weekend.
+> > > As announced multiple times already we need to rename and split the
+> > > idmapped mount testsuite into separate source files and also give it a
+> > > better name to reflect the fact that it covers a lot more than just
+> > > idmapped mounts.
 > > > 
-> > > What do you think about it?
+> > > I have decided against compiling different binaries for now. Instead we
+> > > compile a single vfstest binary that can be called with various command
+> > > line switches to run the various test suites. This is not different than
+> > > what we did for the idmapped-mounts binary. Of course, nothing prevents
+> > > us from using multiple binaries in the future.
+> > > 
+> > > Note that this will have a conflict with Jan's series at:
+> > > https://lore.kernel.org/fstests/20220425131809.qzjrah7cw67mzzcw@zlang-mailbox/T/#m47d8da68ef1aff250918398e8d2228729a6acf97
 > > 
-> > Sure, you can send V4 of patch 1/5 ～ 3/5 (base on latest for-next branch
-> > please), as they have been reviewed and tested. Christian's patch (about
-> > refactor idmapped testing) might need more review, he just sent it out to
-> > get some review points I think (cc Christian).
-> 
-> LSFMM happened last week so with travel and conference there simply was
-> no time to rebase. It should be ready for merging once rebased.
-
-Yes, there's only a few of patches be reviewed this week, due to most of
-related people are in LSF meeting :)
-
-> 
+> > Hi Christian,
 > > 
-> > If you'd like to catch up the release of this weekend, please send your
-> > v4 patch ASAP. Due to I need time to do regression test before pushing.
-> > It'll wait for next week if too late.
+> > Thanks for your patches! But even without above conflict patches, I still can't
+> > merge your patchset, failures as below [1].
 > 
-> Rebasing the patchset is _massively_ painful which is why in the cover
-> letter to it I requested that patches which is why I requested
-> that currently pending patchsets that touch the same code please be
-> applied on top of it. (I'm happy to apply them manually on top of my
-> branch.)
+> Hi Zorro!
+> (Resending, since my last message had a messed-up To: line.)
+> 
+> The fstests list has a limit on how large a single patch can be in terms
+> of number of lines (10.000, I believe). Since this patchset contains
+> patches that change about 10.000 lines the fstests list drops those
+> patches. I ran into this issue before when we added the testsuite in the
+> first place but it has never been fixed.
+> 
+> The consequence of this is that b4 is missing patches since they are on
+> no list. This becomes more obvious if you use b4's quilt option which
+> creates a folder with individual patches:
+> 
+>   0001_src_rename_idmapped_mounts_folder.patch
+>   0002_src_vfs_rename_idmapped_mounts_c_file.patch
+>   0003_vfstest_rename_struct_t_idmapped_mounts.patch
+>   0004_utils_add_missing_global_h_include.patch
+>   0006_utils_move_helpers_into_utils.patch
+>   0007_missing_move_sys_execveat_to_missing_h.patch
+>   0008_utils_add_struct_test_suite.patch
+>   0011_vfstest_split_out_remaining_idmapped_mount_tests.patch
+>   series
+> 
+> so this is missing patches 9 and 10...
 
-Understand, I did tend to merge your change soon, due to it changes the
-fundament of whole idmapped test, but I can't refused other people's
-patches if they're ready. One of you or XuYang has to do once rebase at
-least, so I have to comply with the sequence of patch reviewed.
+Oh, I didn't notice that. Let me check ...
 
-If you'd like to merge your patch next week, I'll notice others wait one
-more week in the [ANNOUNCE] of this week, if they want to write idmapped
-related patches. Is that good to you? Please try to give your patch enough
-test, make sure it won't bring in big regression, then we can merge it
-quickly and smoothly :)
+> 
+> > May you rebase your patches on latest fstests for-next branch, and send out
+> > again? As Christoph Hellwig has Acked your patchset, we'd better to make it
+> 
+> I think we will have the same problem, i.e., patches will not be on the
+> list since they are too large and so b4 won't work. To work around this
+> I'll give you a signed tag to pull from in the cover letter.
+
+Hmm...I just used another method(avoid b4) to merge your 11 patches, I think
+it works:
+# git log --oneline
+14714a1b (HEAD -> for-brauner) vfstest: split out remaining idmapped mount tests
+ed027078 vfstest: split out btrfs idmapped mounts test
+fd026c1a vfstests: split idmapped mount tests into separate suite
+1cec19ec utils: add struct test_suite
+3dadfe72 missing: move sys_execveat() to missing.h
+ba0370e4 utils: move helpers into utils
+781f86e1 utils: add struct vfstest_info
+e1ffed6b utils: add missing global.h include
+4f68af21 vfstest: rename struct t_idmapped_mounts
+8fcd0f72 src/vfs: rename idmapped-mounts.c file
+0b03254e src: rename idmapped-mounts folder
+fbc6486b (redhat/master, origin/master, origin/HEAD, rh-master, master) generic: test that renaming into a directory fails with EDQUOT
+...
+...
+
+And yes, patch 9 and 10 are really huge:
+$ git show ed027078 | wc -l
+8223
+$ git show fd026c1a | wc -l
+15641
+
+But I still can't merge it into for-next branch, so you have to do once rebase
+at least. As we have 3 more idmapped patches to from XuYang to be merged,
+you'd better to wait the fstests release this week, then do once rebase
+on for-next branch. Hope that can save a little of your time.
 
 Thanks,
 Zorro
 
-> 
-> In any case, I'll have a rebased version ready on Monday (If there's no
-> urgent issues I have to address somewhere else that I missed during
-> travel.)
 > 
 > Christian
 > 
