@@ -2,38 +2,40 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6192C433F5
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 09:31:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B46BC433EF
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 09:31:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383893AbiEGJfP convert rfc822-to-8bit (ORCPT
+        id S1443304AbiEGJfR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 05:35:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40998 "EHLO
+        Sat, 7 May 2022 05:35:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1381255AbiEGJfO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 05:35:14 -0400
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDF50186DC
-        for <fstests@vger.kernel.org>; Sat,  7 May 2022 02:31:27 -0700 (PDT)
-Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.57])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4KwMbv371zz1JBNQ;
-        Sat,  7 May 2022 17:30:19 +0800 (CST)
+        with ESMTP id S1442853AbiEGJfP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 05:35:15 -0400
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55B0DBCAD
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 02:31:29 -0700 (PDT)
+Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.54])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4KwMWm20XQzXdlm;
+        Sat,  7 May 2022 17:26:44 +0800 (CST)
 Received: from huawei.com (10.175.127.227) by dggpeml500020.china.huawei.com
  (7.185.36.88) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Sat, 7 May
- 2022 17:31:25 +0800
+ 2022 17:31:27 +0800
 From:   Baokun Li <libaokun1@huawei.com>
 To:     <fstests@vger.kernel.org>
 CC:     <zlang@redhat.com>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
         <libaokun1@huawei.com>, <zhengliang6@huawei.com>,
         <yukuai3@huawei.com>
-Subject: [RFC v2 0/2] xfstests support overlay+tmpfs
-Date:   Sat, 7 May 2022 17:45:22 +0800
-Message-ID: <20220507094524.949615-1-libaokun1@huawei.com>
+Subject: [RFC v2 1/2] common/config: overlay support tmpfs
+Date:   Sat, 7 May 2022 17:45:23 +0800
+Message-ID: <20220507094524.949615-2-libaokun1@huawei.com>
 X-Mailer: git-send-email 2.31.1
+In-Reply-To: <20220507094524.949615-1-libaokun1@huawei.com>
+References: <20220507094524.949615-1-libaokun1@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8BIT
-Content-Type: text/plain
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
 X-Originating-IP: [10.175.127.227]
 X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
  dggpeml500020.china.huawei.com (7.185.36.88)
@@ -42,30 +44,69 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The results of `./check -overlay -g auto`
-Ran: 769 tests
-Not run: 547 tests
-Failures: 1 test
-Success: 221 tests
+xfstests local.config support overlay+tmpfs
 
-The details are as follows:
+```local.config.example
+export FSTYP=tmpfs
+export TEST_DEV=tmpfs_test
+export TEST_DIR=/tmp/test
+export SCRATCH_DEV=tmpfs_scratch
+export SCRATCH_MNT=/tmp/scratch
+```
 
-Ran: generic/001 generic/002 generic/003 generic/004 generic/005 generic/006 generic/007 generic/008 generic/009 generic/010 generic/011 generic/012 generic/013 generic/014 generic/015 generic/016 generic/017 generic/018 generic/020 generic/021 generic/022 generic/023 generic/024 generic/025 generic/026 generic/027 generic/028 generic/029 generic/030 generic/031 generic/032 generic/033 generic/034 generic/035 generic/036 generic/037 generic/038 generic/039 generic/040 generic/041 generic/043 generic/044 generic/045 generic/046 generic/047 generic/048 generic/049 generic/050 generic/051 generic/052 generic/053 generic/054 generic/055 generic/056 generic/057 generic/058 generic/059 generic/060 generic/061 generic/062 generic/063 generic/064 generic/065 generic/066 generic/067 generic/068 generic/069 generic/070 generic/071 generic/072 generic/073 generic/074 generic/075 generic/076 generic/077 generic/078 generic/079 generic/080 generic/081 generic/082 generic/083 generic/084 generic/085 generic/086 generic/087 generic/088 generic/089 generic/090 generic/091 generic/092 generic/093 generic/094 generic/095 generic/096 generic/097 generic/098 generic/099 generic/100 generic/101 generic/102 generic/103 generic/104 generic/105 generic/106 generic/107 generic/108 generic/109 generic/110 generic/111 generic/112 generic/113 generic/114 generic/115 generic/116 generic/117 generic/118 generic/119 generic/120 generic/121 generic/122 generic/123 generic/124 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/134 generic/135 generic/136 generic/137 generic/138 generic/139 generic/140 generic/141 generic/142 generic/143 generic/144 generic/145 generic/146 generic/147 generic/148 generic/149 generic/150 generic/151 generic/152 generic/153 generic/154 generic/155 generic/156 generic/157 generic/158 generic/159 generic/160 generic/161 generic/162 generic/163 generic/164 generic/165 generic/166 generic/167 generic/168 generic/169 generic/170 generic/171 generic/172 generic/173 generic/174 generic/175 generic/176 generic/177 generic/178 generic/179 generic/180 generic/181 generic/182 generic/183 generic/184 generic/185 generic/186 generic/187 generic/188 generic/189 generic/190 generic/191 generic/192 generic/193 generic/194 generic/195 generic/196 generic/197 generic/198 generic/199 generic/200 generic/201 generic/202 generic/203 generic/204 generic/205 generic/206 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/213 generic/214 generic/215 generic/216 generic/217 generic/218 generic/219 generic/220 generic/221 generic/222 generic/223 generic/224 generic/225 generic/226 generic/227 generic/228 generic/229 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/236 generic/237 generic/238 generic/239 generic/240 generic/241 generic/242 generic/243 generic/244 generic/245 generic/246 generic/247 generic/248 generic/249 generic/250 generic/252 generic/253 generic/254 generic/255 generic/256 generic/257 generic/258 generic/259 generic/260 generic/261 generic/262 generic/263 generic/264 generic/265 generic/266 generic/267 generic/268 generic/269 generic/270 generic/271 generic/272 generic/273 generic/274 generic/275 generic/276 generic/277 generic/278 generic/279 generic/280 generic/281 generic/282 generic/283 generic/284 generic/285 generic/286 generic/287 generic/288 generic/289 generic/290 generic/291 generic/292 generic/293 generic/294 generic/295 generic/296 generic/297 generic/298 generic/299 generic/300 generic/301 generic/302 generic/303 generic/304 generic/305 generic/306 generic/307 generic/308 generic/309 generic/310 generic/311 generic/312 generic/313 generic/314 generic/315 generic/316 generic/317 generic/318 generic/319 generic/320 generic/321 generic/322 generic/323 generic/324 generic/325 generic/326 generic/327 generic/328 generic/329 generic/330 generic/331 generic/332 generic/333 generic/334 generic/335 generic/336 generic/337 generic/338 generic/339 generic/340 generic/341 generic/342 generic/343 generic/344 generic/345 generic/346 generic/347 generic/348 generic/352 generic/353 generic/354 generic/355 generic/356 generic/357 generic/358 generic/359 generic/360 generic/361 generic/362 generic/363 generic/364 generic/365 generic/366 generic/367 generic/368 generic/369 generic/370 generic/371 generic/372 generic/373 generic/374 generic/375 generic/376 generic/377 generic/378 generic/379 generic/380 generic/381 generic/382 generic/383 generic/384 generic/385 generic/386 generic/387 generic/388 generic/389 generic/390 generic/391 generic/392 generic/393 generic/394 generic/395 generic/396 generic/397 generic/398 generic/399 generic/400 generic/401 generic/402 generic/403 generic/404 generic/405 generic/406 generic/407 generic/408 generic/409 generic/410 generic/411 generic/412 generic/413 generic/414 generic/415 generic/416 generic/417 generic/418 generic/419 generic/420 generic/421 generic/422 generic/423 generic/424 generic/425 generic/426 generic/427 generic/428 generic/429 generic/430 generic/431 generic/432 generic/433 generic/434 generic/435 generic/436 generic/437 generic/438 generic/439 generic/440 generic/441 generic/443 generic/444 generic/445 generic/446 generic/447 generic/448 generic/449 generic/450 generic/451 generic/452 generic/453 generic/454 generic/455 generic/456 generic/457 generic/458 generic/459 generic/460 generic/461 generic/462 generic/463 generic/464 generic/465 generic/466 generic/467 generic/468 generic/469 generic/470 generic/471 generic/472 generic/474 generic/475 generic/476 generic/477 generic/478 generic/479 generic/480 generic/481 generic/482 generic/483 generic/484 generic/485 generic/486 generic/487 generic/488 generic/489 generic/490 generic/491 generic/492 generic/493 generic/494 generic/495 generic/496 generic/497 generic/498 generic/499 generic/500 generic/501 generic/502 generic/503 generic/504 generic/505 generic/506 generic/507 generic/508 generic/509 generic/510 generic/511 generic/512 generic/513 generic/514 generic/515 generic/516 generic/517 generic/518 generic/519 generic/520 generic/523 generic/524 generic/525 generic/526 generic/527 generic/528 generic/529 generic/530 generic/531 generic/532 generic/533 generic/534 generic/535 generic/536 generic/537 generic/538 generic/539 generic/540 generic/541 generic/542 generic/543 generic/544 generic/545 generic/546 generic/547 generic/548 generic/549 generic/550 generic/551 generic/552 generic/553 generic/554 generic/555 generic/556 generic/557 generic/558 generic/559 generic/560 generic/561 generic/562 generic/563 generic/564 generic/565 generic/566 generic/567 generic/568 generic/569 generic/570 generic/571 generic/572 generic/573 generic/574 generic/575 generic/576 generic/577 generic/578 generic/579 generic/580 generic/581 generic/582 generic/583 generic/584 generic/585 generic/586 generic/587 generic/588 generic/589 generic/590 generic/591 generic/592 generic/593 generic/594 generic/595 generic/596 generic/597 generic/598 generic/599 generic/600 generic/601 generic/602 generic/603 generic/604 generic/605 generic/606 generic/607 generic/608 generic/609 generic/610 generic/611 generic/612 generic/613 generic/614 generic/615 generic/616 generic/617 generic/618 generic/619 generic/620 generic/621 generic/622 generic/623 generic/624 generic/625 generic/626 generic/627 generic/628 generic/629 generic/630 generic/631 generic/632 generic/633 generic/634 generic/635 generic/636 generic/637 generic/638 generic/639 generic/640 generic/641 generic/642 generic/643 generic/644 generic/645 generic/646 generic/647 generic/648 generic/649 generic/650 generic/651 generic/652 generic/653 generic/654 generic/655 generic/656 generic/657 generic/658 generic/659 generic/660 generic/661 generic/662 generic/663 generic/664 generic/665 generic/666 generic/667 generic/668 generic/669 generic/670 generic/671 generic/672 generic/673 generic/674 generic/675 generic/676 generic/677 generic/678 generic/679 generic/680 generic/681 generic/682 overlay/001 overlay/002 overlay/003 overlay/004 overlay/005 overlay/006 overlay/007 overlay/008 overlay/009 overlay/010 overlay/011 overlay/012 overlay/013 overlay/014 overlay/015 overlay/016 overlay/017 overlay/018 overlay/019 overlay/020 overlay/021 overlay/022 overlay/023 overlay/024 overlay/025 overlay/026 overlay/027 overlay/028 overlay/029 overlay/030 overlay/031 overlay/032 overlay/033 overlay/034 overlay/035 overlay/036 overlay/037 overlay/038 overlay/039 overlay/040 overlay/041 overlay/042 overlay/043 overlay/044 overlay/045 overlay/046 overlay/047 overlay/048 overlay/049 overlay/050 overlay/051 overlay/052 overlay/053 overlay/054 overlay/055 overlay/056 overlay/057 overlay/058 overlay/059 overlay/060 overlay/062 overlay/063 overlay/064 overlay/065 overlay/066 overlay/067 overlay/068 overlay/069 overlay/070 overlay/071 overlay/072 overlay/073 overlay/074 overlay/075 overlay/076 overlay/077 overlay/078 overlay/100 overlay/101 overlay/102 overlay/103 overlay/104 overlay/105 overlay/106 overlay/107 overlay/108 overlay/109 overlay/110 overlay/111 overlay/112 overlay/113 overlay/114 overlay/115 overlay/116 overlay/117 shared/002 shared/032 shared/298
-Not run: generic/004 generic/008 generic/009 generic/012 generic/015 generic/016 generic/017 generic/018 generic/020 generic/021 generic/022 generic/026 generic/027 generic/031 generic/032 generic/033 generic/034 generic/036 generic/037 generic/038 generic/039 generic/040 generic/041 generic/043 generic/044 generic/045 generic/046 generic/047 generic/048 generic/049 generic/050 generic/051 generic/052 generic/054 generic/055 generic/056 generic/057 generic/058 generic/059 generic/060 generic/061 generic/062 generic/063 generic/064 generic/065 generic/066 generic/067 generic/068 generic/070 generic/072 generic/073 generic/076 generic/077 generic/078 generic/079 generic/081 generic/082 generic/083 generic/085 generic/090 generic/091 generic/092 generic/094 generic/095 generic/096 generic/097 generic/101 generic/102 generic/103 generic/104 generic/106 generic/107 generic/108 generic/110 generic/111 generic/113 generic/114 generic/115 generic/116 generic/117 generic/118 generic/119 generic/121 generic/122 generic/130 generic/133 generic/134 generic/135 generic/136 generic/137 generic/138 generic/139 generic/140 generic/142 generic/143 generic/144 generic/145 generic/146 generic/147 generic/148 generic/149 generic/150 generic/151 generic/152 generic/153 generic/154 generic/155 generic/156 generic/157 generic/158 generic/159 generic/160 generic/161 generic/162 generic/163 generic/164 generic/165 generic/166 generic/167 generic/168 generic/170 generic/171 generic/172 generic/173 generic/174 generic/175 generic/176 generic/177 generic/178 generic/179 generic/180 generic/181 generic/182 generic/183 generic/185 generic/186 generic/187 generic/188 generic/189 generic/190 generic/191 generic/194 generic/195 generic/196 generic/197 generic/198 generic/199 generic/200 generic/201 generic/202 generic/203 generic/204 generic/205 generic/206 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/214 generic/216 generic/217 generic/218 generic/219 generic/220 generic/222 generic/223 generic/224 generic/225 generic/226 generic/227 generic/229 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/238 generic/239 generic/240 generic/242 generic/243 generic/244 generic/250 generic/252 generic/253 generic/254 generic/255 generic/256 generic/259 generic/260 generic/261 generic/262 generic/263 generic/264 generic/265 generic/266 generic/267 generic/268 generic/269 generic/270 generic/271 generic/272 generic/273 generic/274 generic/275 generic/276 generic/277 generic/278 generic/279 generic/280 generic/281 generic/282 generic/283 generic/284 generic/287 generic/288 generic/289 generic/290 generic/291 generic/292 generic/293 generic/295 generic/296 generic/297 generic/298 generic/299 generic/300 generic/301 generic/302 generic/303 generic/304 generic/305 generic/311 generic/312 generic/316 generic/320 generic/321 generic/322 generic/323 generic/324 generic/325 generic/326 generic/327 generic/328 generic/329 generic/330 generic/331 generic/332 generic/333 generic/334 generic/335 generic/336 generic/337 generic/338 generic/341 generic/342 generic/343 generic/347 generic/348 generic/352 generic/353 generic/355 generic/356 generic/357 generic/358 generic/359 generic/361 generic/362 generic/363 generic/364 generic/365 generic/366 generic/367 generic/368 generic/369 generic/370 generic/371 generic/372 generic/373 generic/374 generic/376 generic/377 generic/379 generic/380 generic/381 generic/382 generic/383 generic/384 generic/385 generic/386 generic/387 generic/388 generic/389 generic/390 generic/391 generic/392 generic/395 generic/396 generic/397 generic/398 generic/399 generic/400 generic/402 generic/404 generic/405 generic/406 generic/407 generic/408 generic/409 generic/410 generic/411 generic/412 generic/413 generic/414 generic/415 generic/416 generic/417 generic/418 generic/419 generic/421 generic/422 generic/424 generic/425 generic/426 generic/427 generic/429 generic/435 generic/440 generic/441 generic/447 generic/449 generic/450 generic/451 generic/453 generic/454 generic/455 generic/456 generic/457 generic/458 generic/459 generic/461 generic/462 generic/463 generic/465 generic/466 generic/467 generic/468 generic/469 generic/470 generic/471 generic/472 generic/474 generic/475 generic/477 generic/479 generic/480 generic/481 generic/482 generic/483 generic/484 generic/485 generic/486 generic/487 generic/488 generic/489 generic/491 generic/492 generic/493 generic/494 generic/495 generic/496 generic/497 generic/498 generic/499 generic/500 generic/501 generic/502 generic/503 generic/505 generic/506 generic/507 generic/508 generic/509 generic/510 generic/511 generic/512 generic/513 generic/514 generic/515 generic/516 generic/517 generic/518 generic/519 generic/520 generic/523 generic/526 generic/527 generic/528 generic/530 generic/533 generic/534 generic/535 generic/536 generic/537 generic/538 generic/540 generic/541 generic/542 generic/543 generic/544 generic/545 generic/546 generic/547 generic/548 generic/549 generic/550 generic/551 generic/552 generic/553 generic/554 generic/555 generic/556 generic/557 generic/558 generic/559 generic/560 generic/561 generic/562 generic/563 generic/566 generic/569 generic/570 generic/572 generic/573 generic/574 generic/575 generic/576 generic/577 generic/578 generic/579 generic/580 generic/581 generic/582 generic/583 generic/584 generic/585 generic/586 generic/587 generic/588 generic/589 generic/590 generic/591 generic/592 generic/593 generic/594 generic/595 generic/596 generic/599 generic/600 generic/601 generic/602 generic/603 generic/605 generic/606 generic/607 generic/608 generic/609 generic/610 generic/611 generic/612 generic/613 generic/615 generic/617 generic/618 generic/619 generic/620 generic/621 generic/622 generic/623 generic/624 generic/625 generic/626 generic/627 generic/628 generic/629 generic/630 generic/631 generic/635 generic/636 generic/640 generic/641 generic/643 generic/644 generic/645 generic/646 generic/647 generic/648 generic/649 generic/651 generic/652 generic/653 generic/654 generic/655 generic/656 generic/657 generic/658 generic/659 generic/660 generic/661 generic/662 generic/663 generic/664 generic/665 generic/666 generic/667 generic/668 generic/669 generic/670 generic/671 generic/672 generic/673 generic/674 generic/675 generic/677 generic/678 generic/679 generic/681 generic/682 overlay/001 overlay/021 overlay/027 overlay/030 overlay/032 overlay/035 overlay/040 overlay/045 overlay/046 overlay/056 overlay/075 overlay/076 overlay/078 shared/002 shared/032 shared/298
-Failures: generic/080
-Failed 1 of 769 tests
-
-V1: https://patchwork.kernel.org/project/fstests/patch/20220424063751.1067376-1-libaokun1@huawei.com/
-
-Baokun Li (2):
-  common/config: overlay support tmpfs
-  common: correct overlay+tmpfs cycle_mount
-
+Signed-off-by: Baokun Li <libaokun1@huawei.com>
+---
  common/config  | 12 ++++++------
  common/overlay |  2 +-
- common/rc      | 31 ++++++++++++++++++++++++-------
- 3 files changed, 31 insertions(+), 14 deletions(-)
+ 2 files changed, 7 insertions(+), 7 deletions(-)
 
+diff --git a/common/config b/common/config
+index 1033b890..d5953176 100644
+--- a/common/config
++++ b/common/config
+@@ -610,15 +610,15 @@ _overlay_config_override()
+ 	[ ! -d "$TEST_DEV" ] || export OVL_BASE_TEST_DIR="$TEST_DEV"
+ 	[ ! -d "$SCRATCH_DEV" ] || export OVL_BASE_SCRATCH_MNT="$SCRATCH_DEV"
+ 
++	# Config file may specify base fs type, but we obay -overlay flag
++	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
++	export FSTYP=overlay
++
+ 	# 2. SCRATCH/TEST_DEV point to the base fs partitions.  In this case,
+ 	#    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
+ 	#    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
+ 	#    overlayfs base and mount dirs inside base fs mount.
+-	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
+-
+-	# Config file may specify base fs type, but we obay -overlay flag
+-	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+-	export FSTYP=overlay
++	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+ 
+ 	# Store original base fs vars
+ 	export OVL_BASE_TEST_DEV="$TEST_DEV"
+@@ -634,7 +634,7 @@ _overlay_config_override()
+ 	export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+ 	export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
+ 
+-	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
++	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+ 
+ 	# Store original base fs vars
+ 	export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
+diff --git a/common/overlay b/common/overlay
+index fff67ba1..c4e7ee58 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -81,7 +81,7 @@ _overlay_base_mount()
+ 		return 1
+ 	fi
+ 
+-	_mount $* $dev $mnt
++	_mount -t $OVL_BASE_FSTYP $* $dev $mnt
+ 	_idmapped_mount $dev $mnt
+ }
+ 
 -- 
 2.31.1
 
