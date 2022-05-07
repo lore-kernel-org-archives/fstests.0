@@ -2,105 +2,95 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 429B5C4332F
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 09:31:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CD63C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 11:40:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383799AbiEGJfR (ORCPT
+        id S1446276AbiEGLo1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 05:35:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41026 "EHLO
+        Sat, 7 May 2022 07:44:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1381255AbiEGJfQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 05:35:16 -0400
-Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D3AA15A05
-        for <fstests@vger.kernel.org>; Sat,  7 May 2022 02:31:30 -0700 (PDT)
-Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.56])
-        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4KwMcm41BwzhYsV;
-        Sat,  7 May 2022 17:31:04 +0800 (CST)
-Received: from huawei.com (10.175.127.227) by dggpeml500020.china.huawei.com
- (7.185.36.88) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Sat, 7 May
- 2022 17:31:28 +0800
-From:   Baokun Li <libaokun1@huawei.com>
-To:     <fstests@vger.kernel.org>
-CC:     <zlang@redhat.com>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
-        <libaokun1@huawei.com>, <zhengliang6@huawei.com>,
-        <yukuai3@huawei.com>
-Subject: [RFC v2 2/2] common: correct overlay+tmpfs cycle_mount
-Date:   Sat, 7 May 2022 17:45:24 +0800
-Message-ID: <20220507094524.949615-3-libaokun1@huawei.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20220507094524.949615-1-libaokun1@huawei.com>
-References: <20220507094524.949615-1-libaokun1@huawei.com>
+        with ESMTP id S231339AbiEGLo0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 07:44:26 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E543A62CB;
+        Sat,  7 May 2022 04:40:39 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id D841BB80CF3;
+        Sat,  7 May 2022 11:40:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 05E2EC385A9;
+        Sat,  7 May 2022 11:40:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651923636;
+        bh=Kstf+5Om1UpV7wYBMz+qFHCkqVdczsiGFaKAy2n9be0=;
+        h=Date:From:To:Subject:References:In-Reply-To:From;
+        b=qPJ/MbbS8diXXRz5VxTvh87oHXjFAjBAulaeK91lyE592xP7KsymNJ8uJy5Zo5WNl
+         y1w8uTwX1QVUWuHH1EKOB7qa7jJnBz00u6bBTBuy6rTN2hNIz1+yMlDG9biI2VzTxN
+         f0mNkyoe0FF9fmlABVlzjmq7SX8v5/+4RsOaDdyV7o6Dp1EhETAeacc4/A9ayQ14vJ
+         jMfW/Sf+x1YQm6hAHgXU4oHIlBVL1CG0PwD5mmizO2V03NwHsrqEBSKDp8utc5rimW
+         NVOAlqigzplRtNrmtoihp913bvAyV9EfpEJVWQG51xppqDd7AUywji8Len+QIR2kDy
+         r8oIkf33b6fyQ==
+Date:   Sat, 7 May 2022 13:40:32 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        "david@fromorbit.com" <david@fromorbit.com>,
+        "djwong@kernel.org" <djwong@kernel.org>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH v3 1/5] idmapped-mounts: Reset errno to zero after detect
+ fs_allow_idmap
+Message-ID: <20220507114032.za7ejzgh2bspz6kv@wittgenstein>
+References: <1649763226-2329-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <6275DAB9.5030700@fujitsu.com>
+ <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.127.227]
-X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
- dggpeml500020.china.huawei.com (7.185.36.88)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-overlay+tmpfs cycle_mount should be like tmpfs cycle_mount,
-otherwise some test cases may have issue like "xxx: No such file or directory".
+On Sat, May 07, 2022 at 04:52:09PM +0800, Zorro Lang wrote:
+> On Sat, May 07, 2022 at 01:33:33AM +0000, xuyang2018.jy@fujitsu.com wrote:
+> > Hi Zorro
+> > 
+> > Since  Christian doesn't send  a new patchset(for rename idmap-mount)
+> > based on lastest xfstests, should I send a v4 patch for the following
+> > patches today?
+> > "idmapped-mounts: Reset errno to zero after detect fs_allow_idmap"
+> > " idmapped-mounts: Add mknodat operation in setgid test"
+> > "idmapped-mounts: Add open with O_TMPFILE operation in setgid test"
+> > 
+> > So you can merge these three patches if you plan to announce a new
+> > xfstests version in this weekend.
+> > 
+> > What do you think about it?
+> 
+> Sure, you can send V4 of patch 1/5 ～ 3/5 (base on latest for-next branch
+> please), as they have been reviewed and tested. Christian's patch (about
+> refactor idmapped testing) might need more review, he just sent it out to
+> get some review points I think (cc Christian).
 
-Signed-off-by: Baokun Li <libaokun1@huawei.com>
----
- common/rc | 31 ++++++++++++++++++++++++-------
- 1 file changed, 24 insertions(+), 7 deletions(-)
+LSFMM happened last week so with travel and conference there simply was
+no time to rebase. It should be ready for merging once rebased.
 
-diff --git a/common/rc b/common/rc
-index 553ae350..ca465438 100644
---- a/common/rc
-+++ b/common/rc
-@@ -410,10 +410,19 @@ _scratch_cycle_mount()
- {
-     local opts="$1"
- 
--    if [ "$FSTYP" = tmpfs ]; then
--	_scratch_remount "$opts"
--	return
--    fi
-+	case "$FSTYP" in
-+	tmpfs)
-+		_scratch_remount "$opts"
-+		return
-+		;;
-+	overlay)
-+		if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
-+			_scratch_remount "$opts"
-+			return
-+		fi
-+		;;
-+	esac
-+
-     if test -n "$opts"; then
- 	opts="-o $opts"
-     fi
-@@ -522,9 +531,17 @@ _test_unmount()
- 
- _test_cycle_mount()
- {
--    if [ "$FSTYP" = tmpfs ]; then
--	return
--    fi
-+	case "$FSTYP" in
-+	tmpfs)
-+		return
-+		;;
-+	overlay)
-+		if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
-+			return
-+		fi
-+		;;
-+	esac
-+
-     _test_unmount
-     _test_mount
- }
--- 
-2.31.1
+> 
+> If you'd like to catch up the release of this weekend, please send your
+> v4 patch ASAP. Due to I need time to do regression test before pushing.
+> It'll wait for next week if too late.
 
+Rebasing the patchset is _massively_ painful which is why in the cover
+letter to it I requested that patches which is why I requested
+that currently pending patchsets that touch the same code please be
+applied on top of it. (I'm happy to apply them manually on top of my
+branch.)
+
+In any case, I'll have a rebased version ready on Monday (If there's no
+urgent issues I have to address somewhere else that I missed during
+travel.)
+
+Christian
