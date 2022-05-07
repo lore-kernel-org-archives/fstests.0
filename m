@@ -2,192 +2,70 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F19FCC433EF
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 09:12:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6192C433F5
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 09:31:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383805AbiEGJQJ (ORCPT
+        id S1383893AbiEGJfP convert rfc822-to-8bit (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 05:16:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51060 "EHLO
+        Sat, 7 May 2022 05:35:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230191AbiEGJQI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 05:16:08 -0400
-Received: from esa18.fujitsucc.c3s2.iphmx.com (esa18.fujitsucc.c3s2.iphmx.com [216.71.158.38])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42F8D5710E;
-        Sat,  7 May 2022 02:12:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
-  t=1651914742; x=1683450742;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=SqGvNp5MdWTugrpDJ3gPgMf3Lh8/trltJzYHMQtWHFY=;
-  b=D+zKrLbX8LTLkHYr6+vAsgTzYK0bT4h79x2aoz+C60NT079wKCWIXzGf
-   7+hAXlq7wzhJe+I6wlHk8Gv7S0ySJZRBhZWbYOIhflQspF9bnZ0zjKFIL
-   VAYaD66IN52suIbYbbkgBBWq8OPy6ykxnXXFoNNwfo+rR2Y0wBy3cnWQ/
-   UJVsuxBLNm630AApK2+yOaFNDKwIg+pwtPhNXYkfqTuBbW/dNBWdbc2NR
-   Ae6NxIcWCPMCZ5kNd6FEt4d9dtDEP/O0POWN9rbQHuz5YZnI+MRm1KgcC
-   w1uU8OY/idvY16rz230JtIZHh5KLnIjIkIiEQqfLxFS2SZBVTwOjJlb/p
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10339"; a="56561811"
-X-IronPort-AV: E=Sophos;i="5.91,206,1647270000"; 
-   d="scan'208";a="56561811"
-Received: from mail-os0jpn01lp2107.outbound.protection.outlook.com (HELO JPN01-OS0-obe.outbound.protection.outlook.com) ([104.47.23.107])
-  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 May 2022 18:12:18 +0900
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Gr/jdGBlY2/z07BFDceOAU3BdQcWVqroYRlJ/r8FwYpwv0EOviu91E2rlISBVjxhGAi2yo63aTWsL1eUOH3OORXAoN6fENF/N0RdmefH7+/xqmXtQgErM/AG2tBif590NSY+dFPMPZMVFzdKqbn2mJiy2NmPmViHYaK9Je884orI7H0PICyfgNGfxzPLT3o+oTk/5LRE+sF79pp0DWfVtpb6pAzV0vKeHNNLz7HoONkMG6k87XUhO70243zQf5tO8S553qZHSnECu5j6AVoJDV8TwIEL15r0Qrss48UZXiNAsbcaetspyV1HSzm6LKk86J4FMJURGlPOoug9wvwvBg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=SqGvNp5MdWTugrpDJ3gPgMf3Lh8/trltJzYHMQtWHFY=;
- b=SDaWnImMmgAXJS+AvE2LtZNekilnCpKtKLRC8kH4U6UkYMdwobljfMnWWuDOuauB1by6kxX3h1ECsjalIieLWOr7jbfUNRUU5408L1qL3Vj3Lp1n8jdg0tp88EVPAN+0YCkZh3w05zmRMoLrBH8EU4DL6+5EevE2t+wZDQwn6w7ajmdKZgOWk6WBiQ+f8jm1pcMezq4SaSNmFwMn9SoPIm5Ars8fHJNpBGPDFNwVceDLv4EW0TYwTdxBZRejVwk8EX4ObidcFFkrlAB7wpFk0+mNIZmmEoNTld8PHsN0YLAerICw2IfiuXJH7dOj0q0b3WbQsPR1LwvG+hXQbrPVpw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
- dkim=pass header.d=fujitsu.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=fujitsu.onmicrosoft.com; s=selector2-fujitsu-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=SqGvNp5MdWTugrpDJ3gPgMf3Lh8/trltJzYHMQtWHFY=;
- b=TC+sfWawQ2vMUKThQgCybyltH17CAGaw7wir/Kz0ZhkmDlNK10CeVmQxEMn3Rsgs6bY4HR4SLYvv7C95ZBBFygYq7s7C0m1veSt8eTiRNGw2PmBBXqXJHz1oP+FzvRGJNPxQeGIACEQqJ48ulf1Vxb9udwG2OGlxlRD3BRWytMA=
-Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com (2603:1096:404:10d::20)
- by OS3PR01MB6885.jpnprd01.prod.outlook.com (2603:1096:604:12f::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5227.20; Sat, 7 May
- 2022 09:12:14 +0000
-Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com
- ([fe80::64bc:6d15:6404:2ff5]) by TY2PR01MB4427.jpnprd01.prod.outlook.com
- ([fe80::64bc:6d15:6404:2ff5%7]) with mapi id 15.20.5227.021; Sat, 7 May 2022
- 09:12:13 +0000
-From:   "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-To:     Zorro Lang <zlang@redhat.com>
-CC:     "david@fromorbit.com" <david@fromorbit.com>,
-        "brauner@kernel.org" <brauner@kernel.org>,
-        "djwong@kernel.org" <djwong@kernel.org>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v3 1/5] idmapped-mounts: Reset errno to zero after detect
- fs_allow_idmap
-Thread-Topic: [PATCH v3 1/5] idmapped-mounts: Reset errno to zero after detect
- fs_allow_idmap
-Thread-Index: AQHYTljA7n6MB3+pbU6sBga2TGnr2a0S2UaAgABpgICAABaUgA==
-Date:   Sat, 7 May 2022 09:12:13 +0000
-Message-ID: <62764629.5020005@fujitsu.com>
-References: <1649763226-2329-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <6275DAB9.5030700@fujitsu.com>
- <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
-In-Reply-To: <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=fujitsu.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: fc7b4c99-ed11-4758-53e2-08da3009acca
-x-ms-traffictypediagnostic: OS3PR01MB6885:EE_
-x-microsoft-antispam-prvs: <OS3PR01MB6885003AF43025BCB6B4F6BEFDC49@OS3PR01MB6885.jpnprd01.prod.outlook.com>
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: RAiWJ1n/PC9A025QIeaH5iSrPUqRgbVC+AUYOA/uKs0V1Js1KXwHYxI1aVt8jbwvwxy3MOFdbHCAKtijxG6FdcyNEMaaDaasz7un9lKhtlz/wnE29EAi8jGxwicf9B2nLcXVG1F6ewTc5fArYZJ3RQEVNsQN5Xu6tbShJA77VR2dK5Cgar0ypjG2N68Pd/cHN09b480ArlNv6SXsCTZNJ0jQOQRLiZANWi0/0zmq2tPdz0/5h1kCqc912fPi1T3oRwSa9xwFM4XGuymgCZS1brWRsWAFLgkxrcmHoTp4QFrwIiOhsJ0w9IjYGJYvRE4ZtavZwESZv80na0redb8jSEL+uf48qKIP3mKQLov/ViQRQ/Jwl4VVNc6mA6DyHatKelzsVXxwGCHvSYaCPo3q+1ouceYg/jC9/QuKdYl4xKjT/Kdu7Mj5OXlkPX650+qvuz0K+R04ZREukMoVYDD3nspu+825ywvskK4Ci6KtMMA2tc0Zr85IlaA5iORNeJRnKRy1604ypIqswkJrc535w/vZta4iOSmgLFl5bPBVJs3vpghGx1NsvIgSWutpDfczTaqhqq2xOl7xYe9KYmGj+PQWcXD7HdSQjKc1YJr1oLrfJaVooBZCFqJBPGLxJnOg4pAiNivhKPmMB1mX/5fNyJM33U86jGotwFJYxuRoebD5E1UXVARtkWkSaNR2iXoJ+l8baHahdwRDzi/49XhoOTaBF8bZAKoM3lTM1rqqz7E=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB4427.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(38070700005)(4326008)(8936002)(186003)(5660300002)(6486002)(38100700002)(8676002)(66476007)(91956017)(76116006)(508600001)(64756008)(66946007)(66556008)(82960400001)(2616005)(122000001)(71200400001)(2906002)(6506007)(85182001)(316002)(87266011)(54906003)(6916009)(26005)(6512007)(86362001)(36756003)(66446008)(83380400001)(62816006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?dllhay9hVzVSVjBsUEptYnBzRVJ6RTNqc2VSRFR2R2xoNmRzQUxQVDZsL0ho?=
- =?utf-8?B?OGZlWkcxSXFwVmYrR28zdGVKSGJRd1VtaXQrMGNReVM2ZStFQ1BsZ2E4WGpq?=
- =?utf-8?B?UWFjN1h5N1YwYjRpV1dvb1lFdUlzVXNOdjk0bzlLeXpqU0pJYU43cEZmU0hI?=
- =?utf-8?B?OG1qc0I1S3RVbjBUQ0tER3B3RmZ3SHZVQ2JiVkpGd0poY2VzZVRQbjhTNXFu?=
- =?utf-8?B?Y21jc0VoS3ord0Ryb3A3a2xWam1sRk5YdzhPWnNVV2dibW9HZFp5V3BoWURY?=
- =?utf-8?B?QXVhK3EyRFV0dVdNcm5SdnZ4OURaOHdpejFlbkswcDFzd084Y2UwY3gweE5J?=
- =?utf-8?B?YVNyZW0wVkNHckpCREhQOURKb0c4MnM2Ykw1S01XdlF5Q0Y1M0NQSUFjWldz?=
- =?utf-8?B?MEhVcVZpendJVkw4SmN1eVMzdDhuUkxkenRrbmZCS1p0SGhHakVSY0paTjFR?=
- =?utf-8?B?S3dWQXIxTjgrUWI1RlhmOTk3NjVmaFNrbThubmc5RmhqNFNyaXMybHBIYzRa?=
- =?utf-8?B?c0FYSVRUN0x2SU9qUUVmWGw0UGgzWkU0WTFKMVV6d1FCaFozWEdmcjlqVHhZ?=
- =?utf-8?B?UUowVktFRkFjM3pxUlNUa1A3NmYzRVFWWC9rQi82OU5KOXVORURRbVJscDhp?=
- =?utf-8?B?aEhiU2Z6K1prcGdmYVd5dTh6cjNMNFFyY3F0VnpGQ3NMZHM2V0p3S1VON3Bx?=
- =?utf-8?B?VHV3QmhlWUcwVjRtcTBHM25YMG9CUjRyVzU0T05VQndXY1JGL2JvdUtmMFpZ?=
- =?utf-8?B?TWVPaWJHdExzV0M2cXYzczV0aFQ3ZVk3b3laQnhpeTFTdnhRQVVNbTAxK3BY?=
- =?utf-8?B?c00xQUp2Z2NiQVFoQ0pxeWhBa3dFbU5aYWtodU9IL3o2Y21zK01oSW1DcDhu?=
- =?utf-8?B?QnNtOTdiN1dDNkxSejk5ckY2WVU5TGoxTmdZVkttbE9mR1pNME9QZ25nWDlX?=
- =?utf-8?B?S2lqZG4xWlljV1BnckdNa21Ka1VvWGZEbEdwdXRsV2hKZmpDVGVibmNUUSt1?=
- =?utf-8?B?bndCZVhmYlBYQ1BRUlNDUWdUMktWTnl1eTQwMWJvRXdSUmo1bXNZUkxMOTJO?=
- =?utf-8?B?dEN6SEUra1RNQ0k4NmFiMWlzWFIxeVJMYUJ3Q0RRa3hhdUF0bkZKWkcyYXk3?=
- =?utf-8?B?S1lUdURmbEd1cUx6V3NNRXBMYzFZTkQ4SFRMM3l6RGw3LzJrWDBUVVM3c2gx?=
- =?utf-8?B?eGhIcWhiZXdhWWE3RFRmRVdrRlVJc0o3WGV4cXdwZ1Y2cUhtMDVoK3hsS3h1?=
- =?utf-8?B?YWpIcERmZTBTM0U4VzF3d0hQbzNaZzZyZ2Y2bWN4ZlVrdDAxR0dyRnhnTlRu?=
- =?utf-8?B?S1FCaTJxUkNDN3NXcjJ0eW13ekNudHcyZjJLVnFFNGZ4MXRkanlyMXlsT1NP?=
- =?utf-8?B?bSt3ZVFjaldkbk9ITFp6c25QNEMwMTdFM0ViTThpM2x3YnM1UzV1RSt5Rzlm?=
- =?utf-8?B?QXRWTTlHYUE2cHNST2FxYUcyRGRha09BN0kyNXNEbUQwR1VkRTgxTEZleVRX?=
- =?utf-8?B?TGg4eUZzV3BJbTFtQUFwMWF1QzZ1Nm5OYzBnem4rR1VHWXMzbmZhaGszL1FY?=
- =?utf-8?B?R1hwbm5xMDV6ejhRaHlBTlptNWJSNi9NY1ZaYkZUWUs4bTd2WnVuWkUycmp3?=
- =?utf-8?B?a25LekxZVDBtMnRGOGNTQTFPWElqMmxnK2x2ZEYrRk8vWmNkaldnUjBWVU0x?=
- =?utf-8?B?OE1KZWhyRUZVaWFaR0VnSFRrZVFsKzVWRkpxdTNJNXBQUjcrQUhPRXQxRUNp?=
- =?utf-8?B?NDM1MUg5Tlp6QnZhdk5TRHJPQnl2RXNJMGlXMk9RTW90cExOQ2h3Y0dXL0wr?=
- =?utf-8?B?dk9EcTl1N0htekpvdWM2YllwQ3BINkVhZFNVeWZ3dktDQ0crMDBRSjMxUWho?=
- =?utf-8?B?SGxoVmtKL2Jla2FlS2k3K0l3WFJwZkQ4QWdFSURJYnMwSXdkdG1nQUgwNW96?=
- =?utf-8?B?UUtlTzZ5TDVUYzFxYlhxL0NFUjRMd0RVUGRDbUNBV1ZRdjd4bFhVdFVudGRP?=
- =?utf-8?B?WVdUSGlEOXh2ZEw0TjcyN0F6MldoYUpOTjdsSmFhTlUwSE14N0hOYm94bm9O?=
- =?utf-8?B?cEZKbkx2NTV0OVpTMk8zYmtnMnZ0Z3VFSXlyRnBwWkd3bXFoS1M0WjhDRnhB?=
- =?utf-8?B?VUZDZE9WaWJtTFBURkpYK1ViRUNmb3JVMTc2bVlIZEoxUTVDYnhIdVdNME5K?=
- =?utf-8?B?aktMOGxkNGhTNWh5bDZCdkwvekx1M2ZManJjV21INHBqaWZNa0xqMnRVYm5h?=
- =?utf-8?B?Rzl1M2xBRjVRQTh4TXZNNEpoTmtCUUVIUkNMbEd1Y2ZVT1NWd2Y3Y2o5Z2RW?=
- =?utf-8?B?bHhRUWIyd2hJeklDQ2ZLVThieXRVVmVITExmajM2cmdwOG1iTHR4S0wrT1l0?=
- =?utf-8?Q?DijjJ8X6I+J0mIyWhwM2Pn2IS7SvGet+KckqU?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <05901519A6B7074E9118312813736A5B@jpnprd01.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        with ESMTP id S1381255AbiEGJfO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 05:35:14 -0400
+Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDF50186DC
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 02:31:27 -0700 (PDT)
+Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.57])
+        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4KwMbv371zz1JBNQ;
+        Sat,  7 May 2022 17:30:19 +0800 (CST)
+Received: from huawei.com (10.175.127.227) by dggpeml500020.china.huawei.com
+ (7.185.36.88) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Sat, 7 May
+ 2022 17:31:25 +0800
+From:   Baokun Li <libaokun1@huawei.com>
+To:     <fstests@vger.kernel.org>
+CC:     <zlang@redhat.com>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
+        <libaokun1@huawei.com>, <zhengliang6@huawei.com>,
+        <yukuai3@huawei.com>
+Subject: [RFC v2 0/2] xfstests support overlay+tmpfs
+Date:   Sat, 7 May 2022 17:45:22 +0800
+Message-ID: <20220507094524.949615-1-libaokun1@huawei.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-X-OriginatorOrg: fujitsu.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB4427.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: fc7b4c99-ed11-4758-53e2-08da3009acca
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 May 2022 09:12:13.7501
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: a83/gkRslB9zoXvl+0UMGxD07zV9diQzX6S/F6EKd0HI+zrdT2WZUgRzGSa5/vTynwcP2hM0WggxqnWhJxXp1asLfzurbGovSpn1YBwdVMo=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3PR01MB6885
+Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
+X-Originating-IP: [10.175.127.227]
+X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+ dggpeml500020.china.huawei.com (7.185.36.88)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-b24gMjAyMi81LzcgMTY6NTIsIFpvcnJvIExhbmcgd3JvdGU6DQo+IE9uIFNhdCwgTWF5IDA3LCAy
-MDIyIGF0IDAxOjMzOjMzQU0gKzAwMDAsIHh1eWFuZzIwMTguanlAZnVqaXRzdS5jb20gd3JvdGU6
-DQo+PiBIaSBab3Jybw0KPj4NCj4+IFNpbmNlICBDaHJpc3RpYW4gZG9lc24ndCBzZW5kICBhIG5l
-dyBwYXRjaHNldChmb3IgcmVuYW1lIGlkbWFwLW1vdW50KQ0KPj4gYmFzZWQgb24gbGFzdGVzdCB4
-ZnN0ZXN0cywgc2hvdWxkIEkgc2VuZCBhIHY0IHBhdGNoIGZvciB0aGUgZm9sbG93aW5nDQo+PiBw
-YXRjaGVzIHRvZGF5Pw0KPj4gImlkbWFwcGVkLW1vdW50czogUmVzZXQgZXJybm8gdG8gemVybyBh
-ZnRlciBkZXRlY3QgZnNfYWxsb3dfaWRtYXAiDQo+PiAiIGlkbWFwcGVkLW1vdW50czogQWRkIG1r
-bm9kYXQgb3BlcmF0aW9uIGluIHNldGdpZCB0ZXN0Ig0KPj4gImlkbWFwcGVkLW1vdW50czogQWRk
-IG9wZW4gd2l0aCBPX1RNUEZJTEUgb3BlcmF0aW9uIGluIHNldGdpZCB0ZXN0Ig0KPj4NCj4+IFNv
-IHlvdSBjYW4gbWVyZ2UgdGhlc2UgdGhyZWUgcGF0Y2hlcyBpZiB5b3UgcGxhbiB0byBhbm5vdW5j
-ZSBhIG5ldw0KPj4geGZzdGVzdHMgdmVyc2lvbiBpbiB0aGlzIHdlZWtlbmQuDQo+Pg0KPj4gV2hh
-dCBkbyB5b3UgdGhpbmsgYWJvdXQgaXQ/DQo+DQo+IFN1cmUsIHlvdSBjYW4gc2VuZCBWNCBvZiBw
-YXRjaCAxLzUg772eIDMvNSAoYmFzZSBvbiBsYXRlc3QgZm9yLW5leHQgYnJhbmNoDQo+IHBsZWFz
-ZSksIGFzIHRoZXkgaGF2ZSBiZWVuIHJldmlld2VkIGFuZCB0ZXN0ZWQuIENocmlzdGlhbidzIHBh
-dGNoIChhYm91dA0KPiByZWZhY3RvciBpZG1hcHBlZCB0ZXN0aW5nKSBtaWdodCBuZWVkIG1vcmUg
-cmV2aWV3LCBoZSBqdXN0IHNlbnQgaXQgb3V0IHRvDQo+IGdldCBzb21lIHJldmlldyBwb2ludHMg
-SSB0aGluayAoY2MgQ2hyaXN0aWFuKS4NCj4NCj4gSWYgeW91J2QgbGlrZSB0byBjYXRjaCB1cCB0
-aGUgcmVsZWFzZSBvZiB0aGlzIHdlZWtlbmQsIHBsZWFzZSBzZW5kIHlvdXINCj4gdjQgcGF0Y2gg
-QVNBUC4gRHVlIHRvIEkgbmVlZCB0aW1lIHRvIGRvIHJlZ3Jlc3Npb24gdGVzdCBiZWZvcmUgcHVz
-aGluZy4NCj4gSXQnbGwgd2FpdCBmb3IgbmV4dCB3ZWVrIGlmIHRvbyBsYXRlLg0KDQpPSy4gSSB3
-aWxsIHNlbmQgdjQgcGF0Y2ggQVNBUCB0b2RheS4NCg0KPg0KPiBUaGFua3MsDQo+IFpvcnJvDQo+
-DQo+Pg0KPj4gQmVzdCBSZWdhcmRzDQo+PiBZYW5nIFh1DQo+Pj4gSWYgd2UgcnVuIGNhc2Ugb24g
-b2xkIGtlcm5lbCB0aGF0IGRvZXNuJ3Qgc3VwcG9ydCBtb3VudF9zZXRhdHRyIGFuZA0KPj4+IHRo
-ZW4gZmFpbCBvbiBvdXIgb3duIGZ1bmN0aW9uIGJlZm9yZSBjYWxsIGlzX3NldGdpZC9pc19zZXR1
-aWQgZnVuY3Rpb24NCj4+PiB0byByZXNldCBlcnJubywgcnVuX3Rlc3Qgd2lsbCBwcmludCAiRnVu
-Y3Rpb24gbm90IGltcGxlbWVudCIgZXJyb3IuDQo+Pj4NCj4+PiBTaWduZWQtb2ZmLWJ5OiBZYW5n
-IFh1PHh1eWFuZzIwMTguanlAZnVqaXRzdS5jb20+DQo+Pj4gLS0tDQo+Pj4gICAgc3JjL2lkbWFw
-cGVkLW1vdW50cy9pZG1hcHBlZC1tb3VudHMuYyB8IDIgKysNCj4+PiAgICAxIGZpbGUgY2hhbmdl
-ZCwgMiBpbnNlcnRpb25zKCspDQo+Pj4NCj4+PiBkaWZmIC0tZ2l0IGEvc3JjL2lkbWFwcGVkLW1v
-dW50cy9pZG1hcHBlZC1tb3VudHMuYyBiL3NyYy9pZG1hcHBlZC1tb3VudHMvaWRtYXBwZWQtbW91
-bnRzLmMNCj4+PiBpbmRleCA0Y2Y2YzNiYi4uOGU2NDA1YzUgMTAwNjQ0DQo+Pj4gLS0tIGEvc3Jj
-L2lkbWFwcGVkLW1vdW50cy9pZG1hcHBlZC1tb3VudHMuYw0KPj4+ICsrKyBiL3NyYy9pZG1hcHBl
-ZC1tb3VudHMvaWRtYXBwZWQtbW91bnRzLmMNCj4+PiBAQCAtMTQwNzAsNiArMTQwNzAsOCBAQCBp
-bnQgbWFpbihpbnQgYXJnYywgY2hhciAqYXJndltdKQ0KPj4+ICAgIAkJZGllKCJmYWlsZWQgdG8g
-b3BlbiAlcyIsIHRfbW91bnRwb2ludF9zY3JhdGNoKTsNCj4+Pg0KPj4+ICAgIAl0X2ZzX2FsbG93
-X2lkbWFwID0gZnNfYWxsb3dfaWRtYXAoKTsNCj4+PiArCS8qIGRvbid0IGNvcHkgRU5PU1lTIGVy
-cm5vIHRvIGNoaWxkIHByb2Nlc3Mgb24gb2xkZXIga2VybmVsICovDQo+Pj4gKwllcnJubyA9IDA7
-DQo+Pj4gICAgCWlmIChzdXBwb3J0ZWQpIHsNCj4+PiAgICAJCS8qDQo+Pj4gICAgCQkgKiBDYWxs
-ZXIganVzdCB3YW50cyB0byBrbm93IHdoZXRoZXIgdGhlIGZpbGVzeXN0ZW0gd2UncmUgb24NCj4N
-Cg==
+The results of `./check -overlay -g auto`
+Ran: 769 tests
+Not run: 547 tests
+Failures: 1 test
+Success: 221 tests
+
+The details are as follows:
+
+Ran: generic/001 generic/002 generic/003 generic/004 generic/005 generic/006 generic/007 generic/008 generic/009 generic/010 generic/011 generic/012 generic/013 generic/014 generic/015 generic/016 generic/017 generic/018 generic/020 generic/021 generic/022 generic/023 generic/024 generic/025 generic/026 generic/027 generic/028 generic/029 generic/030 generic/031 generic/032 generic/033 generic/034 generic/035 generic/036 generic/037 generic/038 generic/039 generic/040 generic/041 generic/043 generic/044 generic/045 generic/046 generic/047 generic/048 generic/049 generic/050 generic/051 generic/052 generic/053 generic/054 generic/055 generic/056 generic/057 generic/058 generic/059 generic/060 generic/061 generic/062 generic/063 generic/064 generic/065 generic/066 generic/067 generic/068 generic/069 generic/070 generic/071 generic/072 generic/073 generic/074 generic/075 generic/076 generic/077 generic/078 generic/079 generic/080 generic/081 generic/082 generic/083 generic/084 generic/085 generic/086 generic/087 generic/088 generic/089 generic/090 generic/091 generic/092 generic/093 generic/094 generic/095 generic/096 generic/097 generic/098 generic/099 generic/100 generic/101 generic/102 generic/103 generic/104 generic/105 generic/106 generic/107 generic/108 generic/109 generic/110 generic/111 generic/112 generic/113 generic/114 generic/115 generic/116 generic/117 generic/118 generic/119 generic/120 generic/121 generic/122 generic/123 generic/124 generic/126 generic/127 generic/128 generic/129 generic/130 generic/131 generic/132 generic/133 generic/134 generic/135 generic/136 generic/137 generic/138 generic/139 generic/140 generic/141 generic/142 generic/143 generic/144 generic/145 generic/146 generic/147 generic/148 generic/149 generic/150 generic/151 generic/152 generic/153 generic/154 generic/155 generic/156 generic/157 generic/158 generic/159 generic/160 generic/161 generic/162 generic/163 generic/164 generic/165 generic/166 generic/167 generic/168 generic/169 generic/170 generic/171 generic/172 generic/173 generic/174 generic/175 generic/176 generic/177 generic/178 generic/179 generic/180 generic/181 generic/182 generic/183 generic/184 generic/185 generic/186 generic/187 generic/188 generic/189 generic/190 generic/191 generic/192 generic/193 generic/194 generic/195 generic/196 generic/197 generic/198 generic/199 generic/200 generic/201 generic/202 generic/203 generic/204 generic/205 generic/206 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/213 generic/214 generic/215 generic/216 generic/217 generic/218 generic/219 generic/220 generic/221 generic/222 generic/223 generic/224 generic/225 generic/226 generic/227 generic/228 generic/229 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/236 generic/237 generic/238 generic/239 generic/240 generic/241 generic/242 generic/243 generic/244 generic/245 generic/246 generic/247 generic/248 generic/249 generic/250 generic/252 generic/253 generic/254 generic/255 generic/256 generic/257 generic/258 generic/259 generic/260 generic/261 generic/262 generic/263 generic/264 generic/265 generic/266 generic/267 generic/268 generic/269 generic/270 generic/271 generic/272 generic/273 generic/274 generic/275 generic/276 generic/277 generic/278 generic/279 generic/280 generic/281 generic/282 generic/283 generic/284 generic/285 generic/286 generic/287 generic/288 generic/289 generic/290 generic/291 generic/292 generic/293 generic/294 generic/295 generic/296 generic/297 generic/298 generic/299 generic/300 generic/301 generic/302 generic/303 generic/304 generic/305 generic/306 generic/307 generic/308 generic/309 generic/310 generic/311 generic/312 generic/313 generic/314 generic/315 generic/316 generic/317 generic/318 generic/319 generic/320 generic/321 generic/322 generic/323 generic/324 generic/325 generic/326 generic/327 generic/328 generic/329 generic/330 generic/331 generic/332 generic/333 generic/334 generic/335 generic/336 generic/337 generic/338 generic/339 generic/340 generic/341 generic/342 generic/343 generic/344 generic/345 generic/346 generic/347 generic/348 generic/352 generic/353 generic/354 generic/355 generic/356 generic/357 generic/358 generic/359 generic/360 generic/361 generic/362 generic/363 generic/364 generic/365 generic/366 generic/367 generic/368 generic/369 generic/370 generic/371 generic/372 generic/373 generic/374 generic/375 generic/376 generic/377 generic/378 generic/379 generic/380 generic/381 generic/382 generic/383 generic/384 generic/385 generic/386 generic/387 generic/388 generic/389 generic/390 generic/391 generic/392 generic/393 generic/394 generic/395 generic/396 generic/397 generic/398 generic/399 generic/400 generic/401 generic/402 generic/403 generic/404 generic/405 generic/406 generic/407 generic/408 generic/409 generic/410 generic/411 generic/412 generic/413 generic/414 generic/415 generic/416 generic/417 generic/418 generic/419 generic/420 generic/421 generic/422 generic/423 generic/424 generic/425 generic/426 generic/427 generic/428 generic/429 generic/430 generic/431 generic/432 generic/433 generic/434 generic/435 generic/436 generic/437 generic/438 generic/439 generic/440 generic/441 generic/443 generic/444 generic/445 generic/446 generic/447 generic/448 generic/449 generic/450 generic/451 generic/452 generic/453 generic/454 generic/455 generic/456 generic/457 generic/458 generic/459 generic/460 generic/461 generic/462 generic/463 generic/464 generic/465 generic/466 generic/467 generic/468 generic/469 generic/470 generic/471 generic/472 generic/474 generic/475 generic/476 generic/477 generic/478 generic/479 generic/480 generic/481 generic/482 generic/483 generic/484 generic/485 generic/486 generic/487 generic/488 generic/489 generic/490 generic/491 generic/492 generic/493 generic/494 generic/495 generic/496 generic/497 generic/498 generic/499 generic/500 generic/501 generic/502 generic/503 generic/504 generic/505 generic/506 generic/507 generic/508 generic/509 generic/510 generic/511 generic/512 generic/513 generic/514 generic/515 generic/516 generic/517 generic/518 generic/519 generic/520 generic/523 generic/524 generic/525 generic/526 generic/527 generic/528 generic/529 generic/530 generic/531 generic/532 generic/533 generic/534 generic/535 generic/536 generic/537 generic/538 generic/539 generic/540 generic/541 generic/542 generic/543 generic/544 generic/545 generic/546 generic/547 generic/548 generic/549 generic/550 generic/551 generic/552 generic/553 generic/554 generic/555 generic/556 generic/557 generic/558 generic/559 generic/560 generic/561 generic/562 generic/563 generic/564 generic/565 generic/566 generic/567 generic/568 generic/569 generic/570 generic/571 generic/572 generic/573 generic/574 generic/575 generic/576 generic/577 generic/578 generic/579 generic/580 generic/581 generic/582 generic/583 generic/584 generic/585 generic/586 generic/587 generic/588 generic/589 generic/590 generic/591 generic/592 generic/593 generic/594 generic/595 generic/596 generic/597 generic/598 generic/599 generic/600 generic/601 generic/602 generic/603 generic/604 generic/605 generic/606 generic/607 generic/608 generic/609 generic/610 generic/611 generic/612 generic/613 generic/614 generic/615 generic/616 generic/617 generic/618 generic/619 generic/620 generic/621 generic/622 generic/623 generic/624 generic/625 generic/626 generic/627 generic/628 generic/629 generic/630 generic/631 generic/632 generic/633 generic/634 generic/635 generic/636 generic/637 generic/638 generic/639 generic/640 generic/641 generic/642 generic/643 generic/644 generic/645 generic/646 generic/647 generic/648 generic/649 generic/650 generic/651 generic/652 generic/653 generic/654 generic/655 generic/656 generic/657 generic/658 generic/659 generic/660 generic/661 generic/662 generic/663 generic/664 generic/665 generic/666 generic/667 generic/668 generic/669 generic/670 generic/671 generic/672 generic/673 generic/674 generic/675 generic/676 generic/677 generic/678 generic/679 generic/680 generic/681 generic/682 overlay/001 overlay/002 overlay/003 overlay/004 overlay/005 overlay/006 overlay/007 overlay/008 overlay/009 overlay/010 overlay/011 overlay/012 overlay/013 overlay/014 overlay/015 overlay/016 overlay/017 overlay/018 overlay/019 overlay/020 overlay/021 overlay/022 overlay/023 overlay/024 overlay/025 overlay/026 overlay/027 overlay/028 overlay/029 overlay/030 overlay/031 overlay/032 overlay/033 overlay/034 overlay/035 overlay/036 overlay/037 overlay/038 overlay/039 overlay/040 overlay/041 overlay/042 overlay/043 overlay/044 overlay/045 overlay/046 overlay/047 overlay/048 overlay/049 overlay/050 overlay/051 overlay/052 overlay/053 overlay/054 overlay/055 overlay/056 overlay/057 overlay/058 overlay/059 overlay/060 overlay/062 overlay/063 overlay/064 overlay/065 overlay/066 overlay/067 overlay/068 overlay/069 overlay/070 overlay/071 overlay/072 overlay/073 overlay/074 overlay/075 overlay/076 overlay/077 overlay/078 overlay/100 overlay/101 overlay/102 overlay/103 overlay/104 overlay/105 overlay/106 overlay/107 overlay/108 overlay/109 overlay/110 overlay/111 overlay/112 overlay/113 overlay/114 overlay/115 overlay/116 overlay/117 shared/002 shared/032 shared/298
+Not run: generic/004 generic/008 generic/009 generic/012 generic/015 generic/016 generic/017 generic/018 generic/020 generic/021 generic/022 generic/026 generic/027 generic/031 generic/032 generic/033 generic/034 generic/036 generic/037 generic/038 generic/039 generic/040 generic/041 generic/043 generic/044 generic/045 generic/046 generic/047 generic/048 generic/049 generic/050 generic/051 generic/052 generic/054 generic/055 generic/056 generic/057 generic/058 generic/059 generic/060 generic/061 generic/062 generic/063 generic/064 generic/065 generic/066 generic/067 generic/068 generic/070 generic/072 generic/073 generic/076 generic/077 generic/078 generic/079 generic/081 generic/082 generic/083 generic/085 generic/090 generic/091 generic/092 generic/094 generic/095 generic/096 generic/097 generic/101 generic/102 generic/103 generic/104 generic/106 generic/107 generic/108 generic/110 generic/111 generic/113 generic/114 generic/115 generic/116 generic/117 generic/118 generic/119 generic/121 generic/122 generic/130 generic/133 generic/134 generic/135 generic/136 generic/137 generic/138 generic/139 generic/140 generic/142 generic/143 generic/144 generic/145 generic/146 generic/147 generic/148 generic/149 generic/150 generic/151 generic/152 generic/153 generic/154 generic/155 generic/156 generic/157 generic/158 generic/159 generic/160 generic/161 generic/162 generic/163 generic/164 generic/165 generic/166 generic/167 generic/168 generic/170 generic/171 generic/172 generic/173 generic/174 generic/175 generic/176 generic/177 generic/178 generic/179 generic/180 generic/181 generic/182 generic/183 generic/185 generic/186 generic/187 generic/188 generic/189 generic/190 generic/191 generic/194 generic/195 generic/196 generic/197 generic/198 generic/199 generic/200 generic/201 generic/202 generic/203 generic/204 generic/205 generic/206 generic/207 generic/208 generic/209 generic/210 generic/211 generic/212 generic/214 generic/216 generic/217 generic/218 generic/219 generic/220 generic/222 generic/223 generic/224 generic/225 generic/226 generic/227 generic/229 generic/230 generic/231 generic/232 generic/233 generic/234 generic/235 generic/238 generic/239 generic/240 generic/242 generic/243 generic/244 generic/250 generic/252 generic/253 generic/254 generic/255 generic/256 generic/259 generic/260 generic/261 generic/262 generic/263 generic/264 generic/265 generic/266 generic/267 generic/268 generic/269 generic/270 generic/271 generic/272 generic/273 generic/274 generic/275 generic/276 generic/277 generic/278 generic/279 generic/280 generic/281 generic/282 generic/283 generic/284 generic/287 generic/288 generic/289 generic/290 generic/291 generic/292 generic/293 generic/295 generic/296 generic/297 generic/298 generic/299 generic/300 generic/301 generic/302 generic/303 generic/304 generic/305 generic/311 generic/312 generic/316 generic/320 generic/321 generic/322 generic/323 generic/324 generic/325 generic/326 generic/327 generic/328 generic/329 generic/330 generic/331 generic/332 generic/333 generic/334 generic/335 generic/336 generic/337 generic/338 generic/341 generic/342 generic/343 generic/347 generic/348 generic/352 generic/353 generic/355 generic/356 generic/357 generic/358 generic/359 generic/361 generic/362 generic/363 generic/364 generic/365 generic/366 generic/367 generic/368 generic/369 generic/370 generic/371 generic/372 generic/373 generic/374 generic/376 generic/377 generic/379 generic/380 generic/381 generic/382 generic/383 generic/384 generic/385 generic/386 generic/387 generic/388 generic/389 generic/390 generic/391 generic/392 generic/395 generic/396 generic/397 generic/398 generic/399 generic/400 generic/402 generic/404 generic/405 generic/406 generic/407 generic/408 generic/409 generic/410 generic/411 generic/412 generic/413 generic/414 generic/415 generic/416 generic/417 generic/418 generic/419 generic/421 generic/422 generic/424 generic/425 generic/426 generic/427 generic/429 generic/435 generic/440 generic/441 generic/447 generic/449 generic/450 generic/451 generic/453 generic/454 generic/455 generic/456 generic/457 generic/458 generic/459 generic/461 generic/462 generic/463 generic/465 generic/466 generic/467 generic/468 generic/469 generic/470 generic/471 generic/472 generic/474 generic/475 generic/477 generic/479 generic/480 generic/481 generic/482 generic/483 generic/484 generic/485 generic/486 generic/487 generic/488 generic/489 generic/491 generic/492 generic/493 generic/494 generic/495 generic/496 generic/497 generic/498 generic/499 generic/500 generic/501 generic/502 generic/503 generic/505 generic/506 generic/507 generic/508 generic/509 generic/510 generic/511 generic/512 generic/513 generic/514 generic/515 generic/516 generic/517 generic/518 generic/519 generic/520 generic/523 generic/526 generic/527 generic/528 generic/530 generic/533 generic/534 generic/535 generic/536 generic/537 generic/538 generic/540 generic/541 generic/542 generic/543 generic/544 generic/545 generic/546 generic/547 generic/548 generic/549 generic/550 generic/551 generic/552 generic/553 generic/554 generic/555 generic/556 generic/557 generic/558 generic/559 generic/560 generic/561 generic/562 generic/563 generic/566 generic/569 generic/570 generic/572 generic/573 generic/574 generic/575 generic/576 generic/577 generic/578 generic/579 generic/580 generic/581 generic/582 generic/583 generic/584 generic/585 generic/586 generic/587 generic/588 generic/589 generic/590 generic/591 generic/592 generic/593 generic/594 generic/595 generic/596 generic/599 generic/600 generic/601 generic/602 generic/603 generic/605 generic/606 generic/607 generic/608 generic/609 generic/610 generic/611 generic/612 generic/613 generic/615 generic/617 generic/618 generic/619 generic/620 generic/621 generic/622 generic/623 generic/624 generic/625 generic/626 generic/627 generic/628 generic/629 generic/630 generic/631 generic/635 generic/636 generic/640 generic/641 generic/643 generic/644 generic/645 generic/646 generic/647 generic/648 generic/649 generic/651 generic/652 generic/653 generic/654 generic/655 generic/656 generic/657 generic/658 generic/659 generic/660 generic/661 generic/662 generic/663 generic/664 generic/665 generic/666 generic/667 generic/668 generic/669 generic/670 generic/671 generic/672 generic/673 generic/674 generic/675 generic/677 generic/678 generic/679 generic/681 generic/682 overlay/001 overlay/021 overlay/027 overlay/030 overlay/032 overlay/035 overlay/040 overlay/045 overlay/046 overlay/056 overlay/075 overlay/076 overlay/078 shared/002 shared/032 shared/298
+Failures: generic/080
+Failed 1 of 769 tests
+
+V1: https://patchwork.kernel.org/project/fstests/patch/20220424063751.1067376-1-libaokun1@huawei.com/
+
+Baokun Li (2):
+  common/config: overlay support tmpfs
+  common: correct overlay+tmpfs cycle_mount
+
+ common/config  | 12 ++++++------
+ common/overlay |  2 +-
+ common/rc      | 31 ++++++++++++++++++++++++-------
+ 3 files changed, 31 insertions(+), 14 deletions(-)
+
+-- 
+2.31.1
+
