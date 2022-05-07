@@ -2,340 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 433FEC433F5
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 12:06:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7440C433F5
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 12:27:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1446328AbiEGMKU (ORCPT
+        id S231705AbiEGMau (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 08:10:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52534 "EHLO
+        Sat, 7 May 2022 08:30:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352692AbiEGMKS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 08:10:18 -0400
-Received: from mail1.bemta36.messagelabs.com (mail1.bemta36.messagelabs.com [85.158.142.113])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0484E167D3;
-        Sat,  7 May 2022 05:06:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1651925190; i=@fujitsu.com;
-        bh=0JRoWl3GcAuQWOkluKc6JM/Ym+olUerUbxVko1Fe4e4=;
-        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-         MIME-Version:Content-Type;
-        b=QA6zcl+n5MTX3hZwMaSpaMp9kyQstV90bTKvkXfd+JZ0ckA2uxIW/il2zED717cvN
-         fJWrjJ/vne/kyq8Yk4D+slI2ti4T0Qdk2/Nl5L48hFUJc2CLP7l6WKuJHqYZIxSlYi
-         3b+7RdDsN1Zoyoc5d1ZjUVW6ctewi+PZewIm9g0Rde6b11gMf2Rz9NXnRXyJsYuG7s
-         BjRYSzpoKeIDt7qa2wjBDF7jY7kn8AN6IXRJWP3RLhSFDcaJVSJ9Xfcm5/z0OdFgUX
-         M4RFLkrGKIIroGBfv+w7ZIoO8h0f7A+VSZ4cEjCYOPcQx1Ohqr1tko2KKi07Zj/IRi
-         AEnCqt0BR0ZfQ==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrFIsWRWlGSWpSXmKPExsViZ8MxSfdoQlm
-  SwZ9bmhavD39itNhy7B6jxeUnfBanW/ayW+zZe5LFgdXj1CIJj02rOtk8Pm+SC2COYs3MS8qv
-  SGDNuNN9h62g365i4Z0m9gbGl0ZdjFwcQgJbGCXuT9vDBOEsYJL4vmEdK4Szm1Fi56tdzF2Mn
-  BxsApoSzzoXgNkiAi4S3/b/ZQOxmQVSJBrONzGC2MICkRI7l80Di7MIqEis2L+RFcTmFfCQmD
-  z5IJgtIaAgMeXhe7A5nAKeEm2L28HiQkA1K/7NZoeoF5Q4OfMJC8R8CYmDL14wQ/QqSlzq+MY
-  IYVdIzJrVxgRhq0lcPbeJeQKj4Cwk7bOQtC9gZFrFaJdUlJmeUZKbmJmja2hgoGtoaKprZqZr
-  aGqql1ilm6iXWqqbnJpXUpQIlNZLLC/WSy0u1iuuzE3OSdHLSy3ZxAiMgpRip9k7GHf0/dQ7x
-  CjJwaQkyttiU5okxJeUn1KZkVicEV9UmpNafIhRhoNDSYL3Y2xZkpBgUWp6akVaZg4wImHSEh
-  w8SiK8zNFAad7igsTc4sx0iNQpRkUpcV6jeKCEAEgiozQPrg2WBC4xykoJ8zIyMDAI8RSkFuV
-  mlqDKv2IU52BUEuZVBZnCk5lXAjf9FdBiJqDFHwNKQRaXJCKkpBqYyp1fTPr18nxqcpHfoUMv
-  rsXNnrTrW1ffk7YE2RLBJfYTNwVwdyy+WrDkB+eRvRfkO8oicqOeLO3zFp37zm1hQg7zveqtu
-  /PPP07Zk/Ww41V63+2fetcfyxbmntFpFVxylTOw3Vl4xro1rA/C2JtM7iRPFpr9Y4LnLp7bG/
-  doXk08d2n2qcRNBjYs2xbvCotbsrvzW8a7yS8Ek5V4z5zSdK7SFYkL5fLM2cPP+rWg30hW46/
-  +qY6FMZYe+0NvPOtnifbTsPOZGX/H/NMHN/2ijR5hm++KGO77XXb3tKOXS8zGvvcKgoJ759fw
-  Rl8osTipcGotzxfmsFfx89tXftmQMHP17wzNWU+efNpWn/o9WYmlOCPRUIu5qDgRAH23me19A
-  wAA
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-4.tower-545.messagelabs.com!1651925189!161158!1
-X-Originating-IP: [62.60.8.146]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.86.4; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 10162 invoked from network); 7 May 2022 12:06:29 -0000
-Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
-  by server-4.tower-545.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 7 May 2022 12:06:29 -0000
-Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 2E157100441;
-        Sat,  7 May 2022 13:06:29 +0100 (BST)
-Received: from R01UKEXCASM126.r01.fujitsu.local (unknown [10.183.43.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 2042F10034F;
-        Sat,  7 May 2022 13:06:29 +0100 (BST)
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Sat, 7 May 2022 13:06:18 +0100
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <david@fromorbit.com>, <brauner@kernel.org>, <djwong@kernel.org>
-CC:     <linux-fsdevel@vger.kernel.org>, <fstests@vger.kernel.org>,
-        Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v4 3/3] idmapped-mounts: Add open with O_TMPFILE operation in setgid test
-Date:   Sat, 7 May 2022 21:05:26 +0800
-Message-ID: <1651928726-2263-3-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1651928726-2263-1-git-send-email-xuyang2018.jy@fujitsu.com>
-References: <1651928726-2263-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        with ESMTP id S1384733AbiEGMap (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 08:30:45 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 777A63DA6B
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 05:26:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1651926417;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=t4+dYLAG02stwqQPLlW+dyXHUvNyUyia86wRiZi589s=;
+        b=V8xSqt2om0S4vujzcJA8BQ5wShTB2EtNVGJkOL3G0ZHKxGfID705ptrOIGLkdyccCqNIgd
+        dTIj0MmFmJsjeuXWpRAzcqyrAL3w8Th3FRysYQbTe2/NxlV4Ac3MKtLRhtsvYv8sILAiq6
+        Q4e1JIarLaEeplct2wO/kgTLLD3YqEk=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-393-f-eCK3I3OOigfZc9wPYThA-1; Sat, 07 May 2022 08:26:56 -0400
+X-MC-Unique: f-eCK3I3OOigfZc9wPYThA-1
+Received: by mail-qv1-f70.google.com with SMTP id kj4-20020a056214528400b0044399a9bb4cso7974773qvb.15
+        for <fstests@vger.kernel.org>; Sat, 07 May 2022 05:26:56 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :content-transfer-encoding:in-reply-to;
+        bh=t4+dYLAG02stwqQPLlW+dyXHUvNyUyia86wRiZi589s=;
+        b=JbGRRJWBFdJUUXYaxQeIncQHO8vHj//hoMn0o3VYL3aajKsqQpZcy1KQtSIL1YZhVU
+         O9Z8KzbcwdSoypTyCd1pamF5LGjHGwdX4o5Y1t1S5uSQrT4jpoAdbfK5s7zz2ZRU9Ltt
+         KorbJhkfWQ7ma40N9fdsO3HGO8z5R8ZYAnBjzg/JG+ZGAhgldhbTavJV9NEvHC0oc6Vh
+         HTw2fYj2EOLBYqdP83u6D3Qd7sYpCUSMIvIwrJSoe1QFyB9uAj7YDxVb+UjfYXR5gSDC
+         /fCTFI2/lgioQrlfGfFaSQfl7cfgs4jZ8XjrbUOHsst4Ku6TPmjFPDtz1nTWgAWDTOgu
+         L81Q==
+X-Gm-Message-State: AOAM532GpNNNkGts71pA7d4DRvgF6RvgzTj1OhSJRfTXwB/5yGfj/3to
+        KZI0GG9c+QWA3RGB1gptkdcFuCYq41jOqTYezrX3aUCigStPdY1OA62A5L1q7E9/3NBsMspPZMX
+        0sY+Adm12xyukNmz/bg==
+X-Received: by 2002:ac8:5bd5:0:b0:2f3:b654:694d with SMTP id b21-20020ac85bd5000000b002f3b654694dmr7030512qtb.435.1651926415815;
+        Sat, 07 May 2022 05:26:55 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxLfIZo5FGr8KN6oBnh0aJ4xtGpFQU6VqGeZ8V9zz19d4uro3J2m/5wT+lMQ6dQ4XflVWGPUQ==
+X-Received: by 2002:ac8:5bd5:0:b0:2f3:b654:694d with SMTP id b21-20020ac85bd5000000b002f3b654694dmr7030494qtb.435.1651926415569;
+        Sat, 07 May 2022 05:26:55 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id i22-20020ac871d6000000b002f3ad89629dsm4190439qtp.2.2022.05.07.05.26.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 07 May 2022 05:26:55 -0700 (PDT)
+Date:   Sat, 7 May 2022 20:26:49 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH v3 1/5] idmapped-mounts: Reset errno to zero after detect
+ fs_allow_idmap
+Message-ID: <20220507122649.dp7iopuu7rllli7k@zlang-mailbox>
+Mail-Followup-To: Christian Brauner <brauner@kernel.org>,
+        "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+References: <1649763226-2329-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <6275DAB9.5030700@fujitsu.com>
+ <20220507085209.ortk2ybj3t2nemkc@zlang-mailbox>
+ <20220507114032.za7ejzgh2bspz6kv@wittgenstein>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220507114032.za7ejzgh2bspz6kv@wittgenstein>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since we can create temp file by using O_TMPFILE flag and filesystem driver also
-has this api, we should also check this operation whether strip S_ISGID.
+On Sat, May 07, 2022 at 01:40:32PM +0200, Christian Brauner wrote:
+> On Sat, May 07, 2022 at 04:52:09PM +0800, Zorro Lang wrote:
+> > On Sat, May 07, 2022 at 01:33:33AM +0000, xuyang2018.jy@fujitsu.com wrote:
+> > > Hi Zorro
+> > > 
+> > > Since  Christian doesn't send  a new patchset(for rename idmap-mount)
+> > > based on lastest xfstests, should I send a v4 patch for the following
+> > > patches today?
+> > > "idmapped-mounts: Reset errno to zero after detect fs_allow_idmap"
+> > > " idmapped-mounts: Add mknodat operation in setgid test"
+> > > "idmapped-mounts: Add open with O_TMPFILE operation in setgid test"
+> > > 
+> > > So you can merge these three patches if you plan to announce a new
+> > > xfstests version in this weekend.
+> > > 
+> > > What do you think about it?
+> > 
+> > Sure, you can send V4 of patch 1/5 ～ 3/5 (base on latest for-next branch
+> > please), as they have been reviewed and tested. Christian's patch (about
+> > refactor idmapped testing) might need more review, he just sent it out to
+> > get some review points I think (cc Christian).
+> 
+> LSFMM happened last week so with travel and conference there simply was
+> no time to rebase. It should be ready for merging once rebased.
 
-Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
-v3->v4: use linkat with AT_EMPTY_PATH to make the temporary file permanent
-instead of snprint and link with AT_SYMLINK_FOLLOW
- src/idmapped-mounts/idmapped-mounts.c | 139 ++++++++++++++++++++++++++
- 1 file changed, 139 insertions(+)
+Yes, there's only a few of patches be reviewed this week, due to most of
+related people are in LSF meeting :)
 
-diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index a1c22da2..8fe06408 100644
---- a/src/idmapped-mounts/idmapped-mounts.c
-+++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -51,6 +51,7 @@
- #define FILE1_RENAME "file1_rename"
- #define FILE2 "file2"
- #define FILE2_RENAME "file2_rename"
-+#define FILE3 "file3"
- #define DIR1 "dir1"
- #define DIR2 "dir2"
- #define DIR3 "dir3"
-@@ -340,6 +341,24 @@ out:
- 	return fret;
- }
- 
-+static bool openat_tmpfile_supported(int dirfd)
-+{
-+	int fd = -1;
-+
-+	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+	if (fd == -1) {
-+		if (errno == ENOTSUP)
-+			return false;
-+		else
-+			return log_errno(false, "failure: create");
-+	}
-+
-+	if (close(fd))
-+		log_stderr("failure: close");
-+
-+	return true;
-+}
-+
- /* __expected_uid_gid - check whether file is owned by the provided uid and gid */
- static bool __expected_uid_gid(int dfd, const char *path, int flags,
- 			       uid_t expected_uid, gid_t expected_gid, bool log)
-@@ -7844,7 +7863,9 @@ static int setgid_create(void)
- {
- 	int fret = -1;
- 	int file1_fd = -EBADF;
-+	int tmpfile_fd = -EBADF;
- 	pid_t pid;
-+	bool supported = false;
- 
- 	if (!caps_supported())
- 		return 0;
-@@ -7869,6 +7890,8 @@ static int setgid_create(void)
- 		goto out;
- 	}
- 
-+	supported = openat_tmpfile_supported(t_dir1_fd);
-+
- 	pid = fork();
- 	if (pid < 0) {
- 		log_stderr("failure: fork");
-@@ -7932,6 +7955,24 @@ static int setgid_create(void)
- 		if (unlinkat(t_dir1_fd, CHRDEV1, 0))
- 			die("failure: delete");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(t_dir1_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			if (linkat(tmpfile_fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (!is_setgid(t_dir1_fd, FILE3, 0))
-+				die("failure: is_setgid");
-+			if (!expected_uid_gid(t_dir1_fd, FILE3, 0, 0, 0))
-+				die("failure: check ownership");
-+			if (unlinkat(t_dir1_fd, FILE3, 0))
-+				die("failure: delete");
-+		}
-+
- 		exit(EXIT_SUCCESS);
- 	}
- 	if (wait_for_pid(pid))
-@@ -8021,6 +8062,24 @@ static int setgid_create(void)
- 		if (unlinkat(t_dir1_fd, CHRDEV1, 0))
- 			die("failure: delete");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(t_dir1_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			if (linkat(tmpfile_fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(t_dir1_fd, FILE3, 0))
-+				die("failure: is_setgid");
-+			if (!expected_uid_gid(t_dir1_fd, FILE3, 0, 0, 0))
-+				die("failure: check ownership");
-+			if (unlinkat(t_dir1_fd, FILE3, 0))
-+				die("failure: delete");
-+		}
-+
- 		exit(EXIT_SUCCESS);
- 	}
- 	if (wait_for_pid(pid))
-@@ -8042,6 +8101,8 @@ static int setgid_create_idmapped(void)
- 		.attr_set = MOUNT_ATTR_IDMAP,
- 	};
- 	pid_t pid;
-+	int tmpfile_fd = -EBADF;
-+	bool supported = false;
- 
- 	if (!caps_supported())
- 		return 0;
-@@ -8089,6 +8150,8 @@ static int setgid_create_idmapped(void)
- 		goto out;
- 	}
- 
-+	supported = openat_tmpfile_supported(open_tree_fd);
-+
- 	pid = fork();
- 	if (pid < 0) {
- 		log_stderr("failure: fork");
-@@ -8171,6 +8234,24 @@ static int setgid_create_idmapped(void)
- 		if (unlinkat(open_tree_fd, CHRDEV1, 0))
- 			die("failure: delete");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			if (linkat(tmpfile_fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(open_tree_fd, FILE3, 0))
-+				die("failure: is_setgid");
-+			if (!expected_uid_gid(open_tree_fd, FILE3, 0, 10000, 10000))
-+				die("failure: check ownership");
-+			if  (unlinkat(open_tree_fd, FILE3, 0))
-+				die("failure: delete");
-+		}
-+
- 		exit(EXIT_SUCCESS);
- 	}
- 	if (wait_for_pid(pid))
-@@ -8194,6 +8275,8 @@ static int setgid_create_idmapped_in_userns(void)
- 		.attr_set = MOUNT_ATTR_IDMAP,
- 	};
- 	pid_t pid;
-+	int tmpfile_fd = -EBADF;
-+	bool supported = false;
- 
- 	if (!caps_supported())
- 		return 0;
-@@ -8241,6 +8324,8 @@ static int setgid_create_idmapped_in_userns(void)
- 		goto out;
- 	}
- 
-+	supported = openat_tmpfile_supported(open_tree_fd);
-+
- 	pid = fork();
- 	if (pid < 0) {
- 		log_stderr("failure: fork");
-@@ -8307,6 +8392,24 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (unlinkat(open_tree_fd, CHRDEV1, 0))
- 			die("failure: delete");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			if (linkat(tmpfile_fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (!is_setgid(open_tree_fd, FILE3, 0))
-+				die("failure: is_setgid");
-+			if (!expected_uid_gid(open_tree_fd, FILE3, 0, 0, 0))
-+				die("failure: check ownership");
-+			if (unlinkat(open_tree_fd, FILE3, 0))
-+				die("failure: delete");
-+		}
-+
- 		exit(EXIT_SUCCESS);
- 	}
- 	if (wait_for_pid(pid))
-@@ -8415,6 +8518,24 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (unlinkat(open_tree_fd, CHRDEV1, 0))
- 			die("failure: delete");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			if (linkat(tmpfile_fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(open_tree_fd, FILE3, 0))
-+				die("failure: is_setgid");
-+			if (!expected_uid_gid(open_tree_fd, FILE3, 0, 0, 1000))
-+				die("failure: check ownership");
-+			if (unlinkat(open_tree_fd, FILE3, 0))
-+				die("failure: delete");
-+		}
-+
- 		exit(EXIT_SUCCESS);
- 	}
- 	if (wait_for_pid(pid))
-@@ -8511,6 +8632,24 @@ static int setgid_create_idmapped_in_userns(void)
- 		if (unlinkat(open_tree_fd, CHRDEV1, 0))
- 			die("failure: delete");
- 
-+		/* create tmpfile via filesystem tmpfile api */
-+		if (supported) {
-+			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
-+			if (tmpfile_fd < 0)
-+				die("failure: create");
-+			/* link the temporary file into the filesystem, making it permanent */
-+			if (linkat(tmpfile_fd, "", t_dir1_fd, FILE3, AT_EMPTY_PATH))
-+				die("failure: linkat");
-+			if (close(tmpfile_fd))
-+				die("failure: close");
-+			if (is_setgid(open_tree_fd, FILE3, 0))
-+				die("failure: is_setgid");
-+			if (!expected_uid_gid(open_tree_fd, FILE3, 0, 0, 0))
-+				die("failure: check ownership");
-+			if (unlinkat(open_tree_fd, FILE3, 0))
-+				die("failure: delete");
-+		}
-+
- 		exit(EXIT_SUCCESS);
- 	}
- 	if (wait_for_pid(pid))
--- 
-2.31.1
+> 
+> > 
+> > If you'd like to catch up the release of this weekend, please send your
+> > v4 patch ASAP. Due to I need time to do regression test before pushing.
+> > It'll wait for next week if too late.
+> 
+> Rebasing the patchset is _massively_ painful which is why in the cover
+> letter to it I requested that patches which is why I requested
+> that currently pending patchsets that touch the same code please be
+> applied on top of it. (I'm happy to apply them manually on top of my
+> branch.)
+
+Understand, I did tend to merge your change soon, due to it changes the
+fundament of whole idmapped test, but I can't refused other people's
+patches if they're ready. One of you or XuYang has to do once rebase at
+least, so I have to comply with the sequence of patch reviewed.
+
+If you'd like to merge your patch next week, I'll notice others wait one
+more week in the [ANNOUNCE] of this week, if they want to write idmapped
+related patches. Is that good to you? Please try to give your patch enough
+test, make sure it won't bring in big regression, then we can merge it
+quickly and smoothly :)
+
+Thanks,
+Zorro
+
+> 
+> In any case, I'll have a rebased version ready on Monday (If there's no
+> urgent issues I have to address somewhere else that I missed during
+> travel.)
+> 
+> Christian
+> 
 
