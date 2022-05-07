@@ -2,246 +2,215 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AED0C433EF
-	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 05:34:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0D31C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 May 2022 07:30:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1445569AbiEGFiA (ORCPT
+        id S1384541AbiEGHd5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 7 May 2022 01:38:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36622 "EHLO
+        Sat, 7 May 2022 03:33:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1445538AbiEGFh6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 01:37:58 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 77F37C7B
-        for <fstests@vger.kernel.org>; Fri,  6 May 2022 22:34:12 -0700 (PDT)
+        with ESMTP id S1386097AbiEGHds (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 7 May 2022 03:33:48 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 909664505C
+        for <fstests@vger.kernel.org>; Sat,  7 May 2022 00:30:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1651901651;
+        s=mimecast20190719; t=1651908601;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=OJuR7GjkdQTa7zFaT5WrwO/9gJ81cO2Xl4VxT6k2XYg=;
-        b=JOCL3yoaBY5jJ3Yse7RgvJ3f7g3+JTgGu2AocrS3PXyC3sGP+buxmxXZfsDY48Sn0fV4Gt
-        oJQ73iKr/l6zDmFWbJuBQ/wzVJPXZKzfdM9A33Cqox0ntCFn7/PIz5TjobWs6gyvxtXovC
-        rDaNmAlIPx0i62UoMsErLrAhs71Y/hk=
-Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
- [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=WRRiDfyJoCnB7gneiHKhv29YR+7HKD175gMmBgjMUQU=;
+        b=bD0dm3XtlvICTzHCp1Bx6riy6k1h6FsnWrg2rlmaPlUCP4zMFVnq+WBXSL6pB7pIF/xdH5
+        scQu96sAQSeaQwerzaAfJWUAX199igAN4n6kRq8GHiimP1qi/bXumSic2seYzv2FdkuQNY
+        UzAyqiss2QtGeQRFFCZ9d39rxn5u5qk=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-150-Blwik_ZaNliEHDhJbQhiXg-1; Sat, 07 May 2022 01:34:10 -0400
-X-MC-Unique: Blwik_ZaNliEHDhJbQhiXg-1
-Received: by mail-qv1-f71.google.com with SMTP id j1-20020a0cf9c1000000b0045abd139f01so6918065qvo.23
-        for <fstests@vger.kernel.org>; Fri, 06 May 2022 22:34:10 -0700 (PDT)
+ us-mta-653-_fj09QoCPpebHeMWAFc9ug-1; Sat, 07 May 2022 03:29:59 -0400
+X-MC-Unique: _fj09QoCPpebHeMWAFc9ug-1
+Received: by mail-qv1-f72.google.com with SMTP id kc6-20020a056214410600b0045a97658c7dso7630064qvb.16
+        for <fstests@vger.kernel.org>; Sat, 07 May 2022 00:29:59 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
-         :content-transfer-encoding:in-reply-to;
-        bh=OJuR7GjkdQTa7zFaT5WrwO/9gJ81cO2Xl4VxT6k2XYg=;
-        b=bT0PrP/DR7F0sCt2dNEAIR1s0qJcLlrEtHCDDopdzuJ7eEKAAt5ECC9bjUifbOxcPS
-         0/2aKwmV6eAjXRaEY0RT394bmHvfl5OONMRsMXNeJb6he0+Fd+8PVeOr3IRVl6knLUA2
-         9z745yxGNeHVR5HWvZpdW4+V6baSOencmWAfdXX0W0Itxp9UJdoWz7WqPEVGPDSwBcOW
-         tAJv8Dknq1jyrik9gkOS66klnjaBM/v6Sdc3+qn3hD/2g/94S98EO2kgqH8YSp9cCMtk
-         NnAPyafY98esycFLcn+trHx0T2y87i6BJWWuszz/FQYeBieTMq/Co13J9wSwoJ++0dAG
-         ip/Q==
-X-Gm-Message-State: AOAM532vzuya4vIWQOllGrwdYjZ6hqm+7P4Mto7nzhydvBAd1LPtlMED
-        dE38e4RnD+xAlJI1V4XTu3VdvxFFLSTJYaPW60GsY6kgFydGKIjPqXyH6HCQfOlD2DJ+QoPKKYF
-        efrf7NjSlKolsLMp3eA==
-X-Received: by 2002:a05:6214:262c:b0:45a:97e8:68df with SMTP id gv12-20020a056214262c00b0045a97e868dfmr5618939qvb.52.1651901649090;
-        Fri, 06 May 2022 22:34:09 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyCXQr1yTkABLHkd7b3wlD/G9XDV5/4md4LDpuUq98kgsb30DfIFa/ABrdrZAnxFppWgHwZlA==
-X-Received: by 2002:a05:6214:262c:b0:45a:97e8:68df with SMTP id gv12-20020a056214262c00b0045a97e868dfmr5618924qvb.52.1651901648788;
-        Fri, 06 May 2022 22:34:08 -0700 (PDT)
+         :in-reply-to;
+        bh=WRRiDfyJoCnB7gneiHKhv29YR+7HKD175gMmBgjMUQU=;
+        b=mP3DDajE3r7KZBjVCArSVsIwyRTL8z0ZPfIZW/+/xwPlKhVGTlTEJsTB+h1nhXxQ5W
+         yqCsJDFeL8//sn4oP9szU30vt2LT5TsLGPn/odyXyLpRixpWNPUQ37Q5npohu+Pl0fjF
+         9j7L1WTQ26tuDmlsKYU84YAWnVcHj+F3Iulnxmm0uFHAIDDOYe3ZGdf728n94ynrFAH7
+         MqUoSSe/gL7yyReEOyKR5tAQHoeSB9dDbBeV5N5kV47O9uC4WuN+Dqc2xGqviZRP/7MP
+         xMjeD6x6QxBx34o8+xUYOHoHn4feTXtj+FwcuUmY3D0GDg/g+wdgUfQMx26PIDgKySVT
+         xdzg==
+X-Gm-Message-State: AOAM530t+K4VvJK0ARInPMSXbFtccZV47xfeS5WqRYRFQHNfv0L3J+SU
+        Ue4Z6M/uFHWuEXzi+F1vrMsR2FU0l/zSFEWOb5YrWS36LPrtPaoXQKfnl+g78c5pqFh7Iz7VYJZ
+        V9Hbnm4bUkAGqoIxfUQ==
+X-Received: by 2002:a05:622a:5c8:b0:2f3:c946:b0bd with SMTP id d8-20020a05622a05c800b002f3c946b0bdmr5050195qtb.298.1651908598659;
+        Sat, 07 May 2022 00:29:58 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJz6zyyjvdb04McBRtO/l+dSnznvjqrzI5TOG6sFL7Mj4n4HhIA4yK6NrcASe2/jG84Fx3yZAw==
+X-Received: by 2002:a05:622a:5c8:b0:2f3:c946:b0bd with SMTP id d8-20020a05622a05c800b002f3c946b0bdmr5050186qtb.298.1651908598409;
+        Sat, 07 May 2022 00:29:58 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id f3-20020ac84643000000b002f39b99f671sm3673793qto.11.2022.05.06.22.34.05
+        by smtp.gmail.com with ESMTPSA id x4-20020ac81204000000b002f3ce9c0601sm650760qti.3.2022.05.07.00.29.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 May 2022 22:34:08 -0700 (PDT)
-Date:   Sat, 7 May 2022 13:34:02 +0800
+        Sat, 07 May 2022 00:29:57 -0700 (PDT)
+Date:   Sat, 7 May 2022 15:29:52 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Catherine Hoang <catherine.hoang@oracle.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs/larp: Make test failures debuggable
-Message-ID: <20220507053402.kyzv2plopyx4tdak@zlang-mailbox>
-Mail-Followup-To: Dave Chinner <david@fromorbit.com>,
-        Catherine Hoang <catherine.hoang@oracle.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-References: <20220223033751.97913-1-catherine.hoang@oracle.com>
- <20220223033751.97913-2-catherine.hoang@oracle.com>
- <20220506075141.GH1949718@dread.disaster.area>
- <20220506161442.GP27195@magnolia>
- <20220506164051.pjccaapyytnt4iic@zlang-mailbox>
- <736E0977-3DF2-4100-AD8D-3EC6B67E44A1@oracle.com>
- <20220506200212.tw6lg5h6q2d2t6lr@zlang-mailbox>
- <20220506214859.GJ1949718@dread.disaster.area>
+To:     Rishabh Dave <ridave@redhat.com>
+Cc:     fstests@vger.kernel.org, jlayton@redhat.com, rishabhddave@gmail.com
+Subject: Re: [PATCHv2] cephfs: add ceph-fuse suport for ceph-fuse
+Message-ID: <20220507072952.dmtr3chfeofthorx@zlang-mailbox>
+Mail-Followup-To: Rishabh Dave <ridave@redhat.com>, fstests@vger.kernel.org,
+        jlayton@redhat.com, rishabhddave@gmail.com
+References: <20220506150141.333929-1-ridave@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220506214859.GJ1949718@dread.disaster.area>
+In-Reply-To: <20220506150141.333929-1-ridave@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, May 07, 2022 at 07:48:59AM +1000, Dave Chinner wrote:
-> On Sat, May 07, 2022 at 04:02:12AM +0800, Zorro Lang wrote:
-> > On Fri, May 06, 2022 at 06:08:08PM +0000, Catherine Hoang wrote:
-> > > > On May 6, 2022, at 9:40 AM, Zorro Lang <zlang@redhat.com> wrote:
-> > > > 
-> > > > On Fri, May 06, 2022 at 09:14:42AM -0700, Darrick J. Wong wrote:
-> > > >> On Fri, May 06, 2022 at 05:51:41PM +1000, Dave Chinner wrote:
-> > > >>> From: Dave Chinner <dchinner@redhat.com>
-> > > >>> 
-> > > >>> Md5sum output for attributes created combined program output and
-> > > >>> attribute values. This adds variable path names to the md5sum, so
-> > > >>> there's no way to tell if the md5sum is actually correct for the
-> > > >>> given attribute value that is returned as it's not constant from
-> > > >>> test to test. Hence we can't actually say that the output is correct
-> > > >>> because we can't reproduce exactly what we are hashing easily.
-> > > >>> 
-> > > >>> Indeed, the last attr test in series (node w/ replace) had an
-> > > >>> invalid md5sum. The attr value being produced after recovery was
-> > > >>> correct, but the md5sum output match was failing. Golden output
-> > > >>> appears to be wrong.
-> > > >>> 
-> > > >>> Fix this issue by seperately dumping all the attributes on the inode
-> > > >>> via a list operation to indicate their size, then dump the value of
-> > > >>> the test attribute directly to md5sum. This means the md5sum for
-> > > >>> the attributes using the same fixed values are all identical, so
-> > > >>> it's easy to tell if the md5sum for a given test is correct. We also
-> > > >>> check that all attributes that should be present after recovery are
-> > > >>> still there (e.g. checks recovery didn't trash innocent bystanders).
-> > > >>> 
-> > > >>> Further, the attribute replace tests replace an attribute with an
-> > > >>> identical value, hence there is no way to tell if recovery has
-> > > >>> resulted in the original being left behind or the new attribute
-> > > >>> being fully recovered because both have the same name and value.
-> > > >>> When replacing the attribute value, use a different sized value so
-> > > >>> it is trivial to determine that we've recovered the new attribute
-> > > >>> value correctly.
-> > > >>> 
-> > > >>> Also, the test runs on the scratch device - there is no need to
-> > > >>> remove the testdir in _cleanup. Doing so prevents post-mortem
-> > > >>> failure analysis because it burns the dead, broken corpse to ash and
-> > > >>> leaves no way of to determine cause of death.
-> > > >>> 
-> > > >>> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > > >>> ---
-> > > >>> 
-> > > >>> Hi Catherine,
-> > > >>> 
-> > > >>> These are all the mods I needed to make to be able to understand the
-> > > >>> test failures I was getting as I debugged the new LARP recovery
-> > > >>> algorithm I've written.  You'll need to massage the test number in
-> > > >>> this patch to apply it on top of your patch.
-> > > >>> 
-> > > >>> I haven't added any new test cases yet, nor have I done anything to
-> > > >>> manage the larp sysfs knob, but we'll need to do those in the near
-> > > >>> future.
-> > > >>> 
-> > > >>> Zorro, can you consider merging this test in the near future?  We're
-> > > >>> right at the point of merging the upstream kernel code and so really
-> > > >>> need to start growing the test coverage of this feature, and this
-> > > >>> test should simply not-run on kernels that don't have the feature
-> > > >>> enabled....
-> > > >>> 
-> > > >>> Cheers,
-> > > >>> 
-> > > >>> Dave.
-> > > >>> ---
-> > > >>> 
-> > > >>> tests/xfs/600     |  20 +++++-----
-> > > >>> tests/xfs/600.out | 109 ++++++++++++++++++++++++++++++++++++------------------
-> > > >>> 2 files changed, 85 insertions(+), 44 deletions(-)
-> > > >>> 
-> > > >>> diff --git a/tests/xfs/600 b/tests/xfs/600
-> > > >>> index 252cdf27..84704646 100755
-> > > >>> --- a/tests/xfs/600
-> > > >>> +++ b/tests/xfs/600
-> > > >>> @@ -16,7 +16,7 @@ _begin_fstest auto quick attr
-> > > >>> 
-> > > >>> _cleanup()
-> > > >>> {
-> > > >>> -	rm -rf $tmp.* $testdir
-> > > >>> +	rm -rf $tmp.*
-> > > >>> 	test -w /sys/fs/xfs/debug/larp && \
-> > > >>> 		echo 0 > /sys/fs/xfs/debug/larp
-> > > >> 
-> > > >> Blergh, this ^^^^^^^^^ is going to need fixing too.
+On Fri, May 06, 2022 at 08:31:42PM +0530, Rishabh Dave wrote:
+> Currently tests in xfstests-dev can be executed against CephFS only by
+> mounting CephFS using kernel driver. Attempting to run tests against
+> CephFS using FUSE doesn't work because xfstests-dev would remount CephFS
+> using kernel. This patch adds the ability for xfstest-dev code to mount
+> CephFS using FUSE.
 > 
-> Yes, I did point that out.
-> 
-> > > >> 
-> > > >> Please save the old value, then write it back in the _cleanup function.
-> > > > 
-> > > > Ok, I'm going to do that when I merge it,
-> 
-> No, please don't. I don't want random changes added to the test on
-> commit right now as I'm still actively working on it. I've said
-> twice now that this needs fixing (3 if you count this mention) and
-> that the test coverage also needs improving. If someone is still
-> working on the tests, then why make more work for everyone by making
-> unnecessary, unreviewed changes on commit?
-> 
-> > > > if Catherine wouldn't like to do
-> > > > more changes in a V8 patch. If this case still need more changes, please tell
-> > > > me in time, and then it might have to wait the fstests release after next, if
-> > > > too late.
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > 
-> > > Based on Dave’s feedback, it looks like the patch will need a few more
-> > > changes before it’s ready.
-> 
-> That doesn't mean it can't be merged. It is a pain for mulitple
-> people to collaborate on a test that isn't merged because the test
-> number is not set in stone and chosing numbers always conflicts with
-> other tests under development. Getting the test merged early makes
-> knocking all the problems out of the test (and the code it is
-> testing!) much, much easier.
+> Fixes: https://tracker.ceph.com/issues/55354
+> Signed-off-by: Rishabh Dave <ridave@redhat.com>
+> ---
 
-Oh, I thought you're hurry to hope this test be merged, so I tried to help it to
-catch the fstests release of this Sunday. If it's not such hurry, let's back to
-the regular review workflow, I'll merge this test case *immediately* when I saw
-a clear RVB on it from you. Then it'll catch the latest fstests release after
-that (not guarantee this weekend). Hope that help.
+This patch has been merged, refer to 1dac95cb ("cephfs: add ceph-fuse suport
+for ceph-fuse") in fstests for-next branch. And I've helped to fix that ";;"
+missing problem.
+
+The release [ANNOUNCE] is:
+https://lore.kernel.org/fstests/20220430190921.7BC56C385A7@smtp.kernel.org/
+
+If you need to fix more issues, please write new patch base on the latest
+fstests for-next branch.
 
 Thanks,
 Zorro
 
+>  common/config |  2 ++
+>  common/rc     | 47 +++++++++++++++++++++++++++++++++++------------
+>  2 files changed, 37 insertions(+), 12 deletions(-)
 > 
-> > Great, that would be really helpful if you'd like to rebase this patch to fstests
-> > for-next branch. And how about combine Dave's patch with your patch? I don't think
-> > it's worth merging two seperated patches for one signle new case. What does Dave think?
-> > 
-> > I just merged below two patchset[1] into xfs-5.18-fixes-1, then tried to test this case
-> > (with you and Dave's patch). But it always failed as [2].
-> 
-> You built a broken kernel as it has none of the dependencies and bug
-> fixes that had already been committed to for-next for the new
-> functionality to work correctly. I posted a V3 patchset last night
-> and a published a git branch with all the kernel changes that you
-> can use for testing if you want.
-> 
-> > Please make sure it works
-> > as expected with those kernel patches still reviewing,
-> 
-> I did - the failures you see are expected from what you were
-> testing. i.e. the test ran just fine, the kernel code you were
-> running is buggy and you didn't update xfsprogs so logprint
-> supported the new log types, hence the test (correctly) reported
-> failures.
-> 
-> Cheers,
-> 
-> Dave.
+> diff --git a/common/config b/common/config
+> index 1033b890..efcf12e9 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -556,6 +556,8 @@ _check_device()
+>  			_fatal "common/config: $name ($dev) is not a character device"
+>  		fi
+>  		;;
+> +	ceph-fuse)
+> +		;;
+>  	*)
+>  		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
+>  	esac
+> diff --git a/common/rc b/common/rc
+> index 553ae350..a8252c7f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -500,10 +500,14 @@ _test_mount()
+>  {
+>      local mount_ret
+>  
+> -    if [ "$FSTYP" == "overlay" ]; then
+> +    if [ "$FSTYP" == "ceph-fuse" ]; then
+> +        $CEPH_FUSE_BIN_PATH $TEST_FS_MOUNT_OPTS $TEST_DIR 2> /dev/null
+> +        return $?
+> +    elif [ "$FSTYP" == "overlay" ]; then
+>          _overlay_test_mount $*
+>          return $?
+>      fi
+> +
+>      _test_options mount
+>      _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+>      mount_ret=$?
+> @@ -1446,7 +1450,8 @@ _fs_type()
+>      # have to bother with this quirk.
+>      #
+>      _df_device $1 | $AWK_PROG '{ print $2 }' | \
+> -        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
+> +        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/' \
+> +            -e 's/fuse.ceph-fuse/ceph-fuse/'
+>  }
+>  
+>  # return the FS mount options of a mounted device
+> @@ -1595,6 +1600,24 @@ _supported_fs()
+>      _notrun "not suitable for this filesystem type: $FSTYP"
+>  }
+>  
+> +_check_if_dev_already_mounted()
+> +{
+> +	local dev=$1
+> +	local mnt=$2
+> +
+> +	# find $dev as the source, and print result in "$dev $mnt" format
+> +	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
+> +	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
+> +
+> +	# if it's mounted, make sure its on $mnt
+> +	if [ "$mount_rec" != "$dev $mnt" ]; then
+> +		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
+> +		echo "Already mounted result:"
+> +		echo $mount_rec
+> +		return 2 # 2 = mounted on wrong mnt
+> +	fi
+> +}
+> +
+>  # check if a FS on a device is mounted
+>  # if so, verify that it is mounted on mount point
+>  # if fstype is given as argument, verify that it is also
+> @@ -1608,16 +1631,14 @@ _check_mounted_on()
+>  	local mnt=$4
+>  	local type=$5
+>  
+> -	# find $dev as the source, and print result in "$dev $mnt" format
+> -	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
+> -	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
+> +	# this check doesn't work on ceph-fuse
+> +	if [ "$dev" != "ceph-fuse" ]; then
+> +		_check_if_dev_already_mounted $dev $mnt
+> +		dev_already_mounted=$?
+>  
+> -	# if it's mounted, make sure its on $mnt
+> -	if [ "$mount_rec" != "$dev $mnt" ]; then
+> -		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
+> -		echo "Already mounted result:"
+> -		echo $mount_rec
+> -		return 2 # 2 = mounted on wrong mnt
+> +		if [ $dev_already_mounted -ne 0 ]; then
+> +			return $dev_already_mounted
+> +		fi
+>  	fi
+>  
+>  	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+> @@ -1870,6 +1891,8 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> +	ceph-fuse)
+> +		;;
+>  	cifs)
+>  		echo $TEST_DEV | grep -q "//" > /dev/null 2>&1
+>  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+> @@ -3204,7 +3227,7 @@ _check_test_fs()
+>      virtiofs)
+>  	# no way to check consistency for virtiofs
+>  	;;
+> -    ceph)
+> +    ceph|ceph-fuse)
+>  	# no way to check consistency for CephFS
+>  	;;
+>      glusterfs)
 > -- 
-> Dave Chinner
-> david@fromorbit.com
+> 2.34.1
 > 
 
