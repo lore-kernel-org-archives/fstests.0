@@ -2,216 +2,162 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F622C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 May 2022 15:30:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F580C433FE
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 May 2022 16:01:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234831AbiEHPdz (ORCPT
+        id S232281AbiEHQFV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 May 2022 11:33:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48300 "EHLO
+        Sun, 8 May 2022 12:05:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59152 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234871AbiEHPdq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 May 2022 11:33:46 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C98FFBF7C
-        for <fstests@vger.kernel.org>; Sun,  8 May 2022 08:29:55 -0700 (PDT)
+        with ESMTP id S235082AbiEHQFU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 May 2022 12:05:20 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EB15654C
+        for <fstests@vger.kernel.org>; Sun,  8 May 2022 09:01:30 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 882D3B80DA9
-        for <fstests@vger.kernel.org>; Sun,  8 May 2022 15:29:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F8A4C385A4;
-        Sun,  8 May 2022 15:29:52 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0CB7A611FB
+        for <fstests@vger.kernel.org>; Sun,  8 May 2022 16:01:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA475C385A4;
+        Sun,  8 May 2022 16:01:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652023793;
-        bh=rpRXJ4x+B6/6tigoqvQZPfc5tDtqTxc3JOBnXy14MYc=;
+        s=k20201202; t=1652025689;
+        bh=MemGliUC1KuVLumYmZ0P15dgRPmuHl9o1uQPMxhncbY=;
         h=Date:From:To:Subject:From;
-        b=uPzPnIaxmdXsxSnWU1ft5xTAxcbsbY3b7pSbRdVWDOJ9E4ym3FhWrfqPVgVPFuskB
-         fJnUXxuzHVQK3OqamO0IrpiWUbD55Cj1b+42335yTdEerfMusFcuZCTSoxZS1wpbqB
-         huOJxpV6QYfQOFm3YgFddcpCc7iVsc4dlfYCldEr+pkN95rfZvaPiNia4Y//i6gTyj
-         rqDzkY9ftoiDTbXphKO/Ap35EehH1vk3VtvpmaES82tPZuJbnR7W0Rie1juC+84JiF
-         rskXQXXOO0JYvygoPbGDixXjOn0qvGDP8CXhATKpWBTVgNxJXg85Ih189NRiINlPcn
-         fFB+QTuNs/Rzg==
-Date:   Sun, 08 May 2022 23:29:49 +0800
+        b=kjxNOblw0GHVHNDS9emBS2McO1ANVOX+h29+v0prpfrrKdISO6bYzlZPK685hIBss
+         H8t5Qrt2KK0xgexu6o3bEwsDa/OJYID+fY/sWY6sXtr8Hil1Ji0SM1Ue89udO+IBPB
+         5A7hf2pLeSnzlZ971c76fryY2RF4lGhQmSy5hTTUgxIZhbvF+iJ29vTU0Okvix+F4/
+         ze3IY/AJApj8QBZ66/PIkbzTEx1BnjB2A/+DItGoRiZuEA0cHAPGUhS80bvaNfdEDy
+         nrKZ7zr/GVAhE6l/LB+ImLH4dap2utnrCIY/mo24uWOpqc/Mb3AWNgzbEMYaeFXrQI
+         IVi+wZDddSGRg==
+Date:   Mon, 09 May 2022 00:01:25 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merged v2022.05.01 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to 87cf32ad3fa2
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="LdbUKnWLyhCi"
+        protocol="application/pgp-signature"; boundary="ikm10M0Euhto"
 Content-Disposition: inline
-Message-Id: <20220508152952.9F8A4C385A4@smtp.kernel.org>
+Message-Id: <20220508160128.DA475C385A4@smtp.kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
---LdbUKnWLyhCi
+--ikm10M0Euhto
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2022.05.01 version (merged from for-next).
+has just been updated and tagged as v2022.05.08 release.
 
-Note: The master branch just merged from for-next branch, there's not new
-changes on master branch.
+In this release, Amir's patches provide "black list" support in _supported_fs,
+and two helpers _fixed_in_version() and _fixed_by_kernel_commit() to print hints
+for reasons of test failures. Feel free to use these helpers on new cases, or
+improve old cases.
+
+*A Kindly Reminder*
+Next week(2022.05.09 ~ 05.15) we plan to merge a big idmapped-mounts related
+code refactoring, details refer to:
+
+https://lore.kernel.org/fstests/20220507122649.dp7iopuu7rllli7k@zlang-mailbox/
+https://lore.kernel.org/fstests/20220507154346.oxfwcq547p325ti3@wittgenstein/T/#mf1bdf41d4a99bb4d1b90dfee2d30ac872c6074f2
+
+so if you're going to write patches to change src/idmapped-mounts, better to
+wait one more week, to avoid terrible rebasing later.
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-bb04d577435d fstests: add some missing _require_loop's
+87cf32ad3fa2 idmapped-mounts: Add open with O_TMPFILE operation in setgid test
 
-Merged commits:
+New commits:
 
-Christian Brauner (1):
-      [31c01ce18f73] generic: add test for tmpfs POSIX ACLs
+Amir Goldstein (2):
+[U]      [6ee5ffa079b9] common: support black listing fs in _supported_fs()
+[U]      [28c52b15c6e2] common: print hints for reasons of test failures
 
-Chung-Chiang Cheng (1):
-      [987700db300d] fstests: btrfs: test setting compression via xattr on nodatacow files
+Chandan Babu R (1):
+[D]      [9ae10c882550] xfs/533: Delete test since directory's extent count can never overflow
 
-Darrick J. Wong (4):
-      [af8aeeea48d0] xfs/019: fix golden output for files created in setgid dir
-      [ad5f89ef3013] generic/019: fix incorrect unset statements
-      [7f27a290aca8] xfs: make sure syncfs(2) passes back super_operations.sync_fs errors
-      [e81417a0964a] generic: ensure we drop suid after fallocate
+Dave Chinner (1):
+[U]      [441606d28681] fstests: faster group file creation
 
-Eric Sandeen (2):
-      [80a82f6926fa] xfs: test xfsdump when an inode < root inode is present
-      [7753e08d22e9] fstests: remove xfs/144
-
-Jan Kara (2):
-      [858a19c5e9b0] idmapped_mounts: Prepare for support for more features
-      [95c10ab90c28] generic/633: Avoid failure without CONFIG_USER_NS
-
-Josef Bacik (1):
-      [bb04d577435d] fstests: add some missing _require_loop's
-
-Murphy Zhou (1):
-      [0fd8e26141f5] chown: fix ownership format string
-
-Rishabh Dave (1):
-      [1dac95cb0d6e] cephfs: add ceph-fuse suport for ceph-fuse
-
-Theodore Ts'o (1):
-      [5528f7843b1a] generic/681, generic/682: add debugging information to $seqreq.full
-
-Yang Xu (1):
-      [298f60c81a93] generic/673: Add separate sgid stripping sub-tests
-
-Zorro Lang (2):
-      [380ee98d92e6] fstests: remove _wipe_fs from dump testing entirely
-      [ab47e281b70f] fsstress: remove ALLOCSP and FREESP operations entirely
+Yang Xu (3):
+[U]      [6ac390bb605b] idmapped-mounts: Reset errno to zero before run_test
+[U]      [5328ab947ff4] idmapped-mounts: Add mknodat operation in setgid test
+[U]      [87cf32ad3fa2] idmapped-mounts: Add open with O_TMPFILE operation in setgid test
 
 
 Code Diffstat:
 
- common/config                         |   2 +
- common/dump                           |  23 +--
- common/rc                             |  47 +++++--
- ltp/fsstress.c                        | 117 ----------------
- src/idmapped-mounts/idmapped-mounts.c | 257 +++++++++++++++++++++++++++-------
- tests/btrfs/012                       |   1 +
- tests/btrfs/264                       |  91 ++++++++++++
- tests/btrfs/264.out                   |  11 ++
- tests/generic/019                     |   4 +-
- tests/generic/070                     |   2 -
- tests/generic/099                     |   4 +-
- tests/generic/237                     |   2 +-
- tests/generic/318                     |   2 +-
- tests/generic/380                     |   2 +-
- tests/generic/597                     |   6 +-
- tests/generic/598                     |   6 +-
- tests/generic/648                     |   1 +
- tests/generic/673                     |  37 ++++-
- tests/generic/673.out                 |  24 ++++
- tests/generic/681                     |   4 +
- tests/generic/682                     |   4 +
- tests/generic/683                     | 127 +++++++++++++++++
- tests/generic/683.out                 |  33 +++++
- tests/generic/684                     | 127 +++++++++++++++++
- tests/generic/684.out                 |  33 +++++
- tests/generic/685                     | 127 +++++++++++++++++
- tests/generic/685.out                 |  33 +++++
- tests/generic/686                     | 127 +++++++++++++++++
- tests/generic/686.out                 |  33 +++++
- tests/generic/687                     | 127 +++++++++++++++++
- tests/generic/687.out                 |  33 +++++
- tests/generic/688                     |  77 ++++++++++
- tests/generic/688.out                 |  13 ++
- tests/generic/689                     |  33 +++++
- tests/generic/689.out                 |   2 +
- tests/xfs/019                         |   3 +-
- tests/xfs/019.out                     |   2 +-
- tests/xfs/022                         |   3 +
- tests/xfs/023                         |   3 +
- tests/xfs/024                         |   3 +
- tests/xfs/025                         |   3 +
- tests/xfs/026                         |   3 +
- tests/xfs/027                         |   3 +
- tests/xfs/028                         |   7 +-
- tests/xfs/035                         |   7 +
- tests/xfs/036                         |   3 +
- tests/xfs/037                         |   3 +
- tests/xfs/038                         |   3 +
- tests/xfs/039                         |   3 +
- tests/xfs/043                         |   5 +-
- tests/xfs/046                         |   3 +
- tests/xfs/047                         |   7 +-
- tests/xfs/055                         |   4 +
- tests/xfs/056                         |   3 +
- tests/xfs/059                         |   3 +
- tests/xfs/060                         |   3 +
- tests/xfs/061                         |   3 +
- tests/xfs/063                         |   3 +
- tests/xfs/064                         |   3 +
- tests/xfs/065                         |   3 +-
- tests/xfs/066                         |   3 +
- tests/xfs/068                         |   3 +
- tests/xfs/144                         | 128 -----------------
- tests/xfs/144.out                     | 151 --------------------
- tests/xfs/266                         |   3 +
- tests/xfs/267                         |   4 +-
- tests/xfs/268                         |   4 +-
- tests/xfs/281                         |   4 +-
- tests/xfs/282                         |   4 +-
- tests/xfs/283                         |   4 +-
- tests/xfs/296                         |   4 +-
- tests/xfs/301                         |   2 +
- tests/xfs/302                         |   3 +-
- tests/xfs/545                         |  62 ++++++++
- tests/xfs/545.out                     |  47 +++++++
- tests/xfs/546                         |  43 ++++++
- tests/xfs/546.out                     |   2 +
- 77 files changed, 1611 insertions(+), 521 deletions(-)
+ check                                 |  10 +-
+ common/preamble                       |  30 +--
+ common/rc                             |  57 +++++-
+ src/idmapped-mounts/idmapped-mounts.c | 369 +++++++++++++++++++++++++++++++++-
+ tests/generic/500                     |   3 +-
+ tests/generic/631                     |   3 +-
+ tests/generic/679                     |   3 +-
+ tests/overlay/009                     |   3 +
+ tests/overlay/010                     |   3 +
+ tests/overlay/014                     |   2 +
+ tests/overlay/016                     |   4 +-
+ tests/overlay/017                     |   4 +-
+ tests/overlay/018                     |   4 +-
+ tests/overlay/020                     |   3 +
+ tests/overlay/022                     |   2 +
+ tests/overlay/029                     |   2 +
+ tests/overlay/038                     |   2 +
+ tests/overlay/041                     |   2 +
+ tests/overlay/042                     |   3 +
+ tests/overlay/043                     |   4 +-
+ tests/overlay/044                     |   4 +-
+ tests/overlay/054                     |   3 +
+ tests/overlay/055                     |   3 +
+ tests/overlay/063                     |   3 +
+ tests/overlay/065                     |   4 +
+ tests/overlay/067                     |   3 +
+ tests/overlay/070                     |   4 +-
+ tests/overlay/071                     |   4 +-
+ tests/overlay/072                     |   2 +
+ tests/overlay/074                     |   5 +
+ tests/overlay/077                     |   5 +
+ tests/overlay/078                     |   1 +
+ tests/xfs/533                         | 170 ----------------
+ tests/xfs/533.out                     |  17 --
+ tools/mkgroupfile                     |  66 ++++--
+ 35 files changed, 541 insertions(+), 266 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---LdbUKnWLyhCi
+--ikm10M0Euhto
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmJ34FYACgkQlNbPkfr2
-tMwg4w//cE/BIQqLI9kdCvEBUQUxcAUd08JjGopqMH0lOZdPBedDDykJAuLkM30t
-ZfVGcOFZZDWX/sk3bpAHmifru7wddclWnKrMRal4dIn9tQRssoiwxqOJ8d+6rJKB
-8+c9qL4Wlj6FJ9UekIp9+p1pHWVIP7lskBaUBxGSOl5Sz2tvfqTLVYp0bFbDucK5
-JPviOcV5tB7o43lfaCSJXX/J+4b15fxn5+w5UAKUN1u2evNn3djzqWudXHzhaaAc
-hy9wYVXgOtvAAgvppfaKk1kdp+gssqTpW1YEFV9T5uG9s6dxInlt5DIl/JZthBUj
-LcjMKlZ6BoEIlasjdbVDB4KDCw8fU5zHfmb20zaPItR8uLEr2kjYujSfpopnc/9K
-Fr8LN8JEN4ZWE4b8aoneiysDYLtC2zsO6Koeir/IeYwBYAc/j6QeLT4UIEPQ4QLu
-72PKSU0/ISUDhQRGOETgc5hTmii1j/3D/WuDLaI+luwuqgpQA8p8EvxS+7Kp6M44
-1kfA5RSm9U+EcB871OmFmCgD1u+R6wEsqGsKSRk8z6+WFq2X2SKBl8O7+/3m3L54
-XrAyCtXLISUFOZ1gYmgYk4ROHUWe3guqlftnmeSlOEDFTzLcfVqpJB+/GxWNd9c3
-PB8ZAYaG3j3DFE1QE+7JiAYoW6Jb7ZcQHrizAC5FG4dCLjLUNYA=
-=0hfw
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmJ36N8ACgkQlNbPkfr2
+tMyySxAAyhh8lS4qGWUjlKtXb8jZuelP9dXNdqGPkyuroh2LRwcJ9e3FduHsRYlI
+Xd+z4yPRbw5JzKIiVuj3tFlcPavgVxpEgvEA44Prt9gJ02Y/wepoAw43fGDwObAk
+e5TpR5X5lk4MmQneLi/h7uDLacTtQRXIYDEU/rsT+eugSrVySSlhylbvA67vvD2x
+bGTJxJn1m4YY3q0GIB268bu1Ko5Igcw6EmCHB3grO+PiYYI8YaxcdPOvE2LBFYsG
+1zjjcIjEuP3vSuLjIMMouH0SJDxF2QvGYmQ+aGD7JayuChtE0AghyfBtuJ6szDec
+obVcH64X6InX7UVveXl1jJ5/8MN7wIsjsITUEDQMHl3Mt2+30XAiCOK4ES9f/jlT
+WJ6RpbZNuZnFKjYuXFtXuJlgxGli+mYpI/H+8NnHlr23vLuuIyQEH6rl2l+dCBXB
+rToCJIAqqmWqwTqI5l5TBbLguqT/QyICudQWHtTUkbYS+PS7eyDXrSsedIWQyw4M
+muKGdm3Ph0U8JluMZowyKLOGdnI8USGuAa/HFKOA1RSVyhh4iSWmzQZi5i4RINIg
+AhOCZ2VUg5wUoXJI9ayfbDDP3vkQ2+4u74zTiKQjIDDpqiD6Og8bgxqTmKAIiiS4
+xyxPfnVj2kgSIXQuf8Ny001LNnoErpjAHqvAX/qR8FNzBwLTtEg=
+=RVWx
 -----END PGP SIGNATURE-----
 
---LdbUKnWLyhCi--
+--ikm10M0Euhto--
