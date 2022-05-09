@@ -2,131 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BCFDC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 May 2022 06:27:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94E1CC433F5
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 May 2022 09:47:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230151AbiEIGap (ORCPT
+        id S229579AbiEIJv0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 9 May 2022 02:30:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39238 "EHLO
+        Mon, 9 May 2022 05:51:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36142 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235261AbiEIG16 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 9 May 2022 02:27:58 -0400
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F2FC17EC2A;
-        Sun,  8 May 2022 23:24:05 -0700 (PDT)
-Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 24913ULR023542;
-        Mon, 9 May 2022 06:22:57 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=EUzciikRinO769+UPV9+5CaGF8IJ3vz6NtwLfqJarCs=;
- b=R0lntO0fsG6s5mi6rKgJO2Hnd9PMz1IPd57GnsFqu1uY8qDN8qHbvVomKp12dttiMA/q
- +UfgnDND4Xw8REPSsc0jQeBswH5LiIgPZSJ+j6KycC0T5N7tkfQUfImu8vm+9Tf/TTOw
- 5N4plEZQRM9pdi9tk4wV78kyR7BgYvVPSdeZEHLMKOXExVBSWd8UV7fUSgeelByXHBmc
- T5Q8LKJcXc7DMmWTW9rFC1ksNECrU8WExj34a1XYmMnKrGDEq7xDqfVhINT9XSSaFvr4
- NPsWPrLy388G/zYNMYjWd6p8MOqbjbseSDAlcOhsD82QE+JNWwpiImqSijHcDghAARZ2 WA== 
-Received: from ppma06fra.de.ibm.com (48.49.7a9f.ip4.static.sl-reverse.com [159.122.73.72])
-        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3fx256b9sq-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 09 May 2022 06:22:57 +0000
-Received: from pps.filterd (ppma06fra.de.ibm.com [127.0.0.1])
-        by ppma06fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 2496021N004374;
-        Mon, 9 May 2022 06:22:50 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma06fra.de.ibm.com with ESMTP id 3fwg1hsjf2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 09 May 2022 06:22:50 +0000
-Received: from d06av24.portsmouth.uk.ibm.com (d06av24.portsmouth.uk.ibm.com [9.149.105.60])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 2496Mm3x52625870
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 9 May 2022 06:22:48 GMT
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 14D4C4203F;
-        Mon,  9 May 2022 06:22:48 +0000 (GMT)
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 1657142041;
-        Mon,  9 May 2022 06:22:46 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.35.189])
-        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Mon,  9 May 2022 06:22:45 +0000 (GMT)
-Date:   Mon, 9 May 2022 11:52:42 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To:     fstests@vger.kernel.org
-Cc:     riteshh@linux.ibm.com, linux-ext4@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <YnizMg+ALwVJYNLS@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
-References: <20220401055713.634842-1-ojaswin@linux.ibm.com>
+        with ESMTP id S237549AbiEIJUf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 May 2022 05:20:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2155C167C5
+        for <fstests@vger.kernel.org>; Mon,  9 May 2022 02:16:31 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B042C614BD
+        for <fstests@vger.kernel.org>; Mon,  9 May 2022 09:16:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57AF1C385A8;
+        Mon,  9 May 2022 09:16:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1652087790;
+        bh=YQxTlvDmTHgen1E4apukNC9Q1XlV+peQ9bvg9YoUL4I=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=slKkFy3jevU06s4gfhI8NzcsCDXHusCex3sqAMWgA+SsZs+059n68g09V/ThNQoAK
+         gwgLTWWY5P/Aq2Ruzhhq58jrC0MHsIYPoAbsCBG8fVF61Hi0GOjst2e3LEICCwIboN
+         2XG7TAQH4+m2GuecShPhNL0wQH0OigtAfAGklgDxxLQLBL073ISE11ChhiBwIm07HZ
+         y77/4duX51tsmFCfgeabETWYY1JEFUoBKvU0dWfg4g5wTFuC4hZuO0Nz+RQGrximm9
+         HkPUnzwOVkWI5bH9rW5NlE7SIZriQNc0JHDLgtBTn01B6IZMNKLYBXzDaBg1knmgHq
+         w754JyXjddH+g==
+Date:   Mon, 9 May 2022 11:16:25 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [ANNOUNCE] fstests: for-next branch updated to 87cf32ad3fa2
+Message-ID: <20220509091625.awordeknb2dngdy4@wittgenstein>
+References: <20220508160128.DA475C385A4@smtp.kernel.org>
+ <20220509033900.3gqaxzvhjezlqbqc@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20220401055713.634842-1-ojaswin@linux.ibm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: wYsTgguTGl8YPMEWgt8VXt3DtmAafGiO
-X-Proofpoint-ORIG-GUID: wYsTgguTGl8YPMEWgt8VXt3DtmAafGiO
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
- definitions=2022-05-09_01,2022-05-06_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxscore=0
- adultscore=0 clxscore=1011 impostorscore=0 bulkscore=0 mlxlogscore=490
- priorityscore=1501 malwarescore=0 spamscore=0 suspectscore=0
- lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2202240000 definitions=main-2205090035
+In-Reply-To: <20220509033900.3gqaxzvhjezlqbqc@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Greetings,
+On Mon, May 09, 2022 at 11:39:00AM +0800, Zorro Lang wrote:
+> On Mon, May 09, 2022 at 12:01:25AM +0800, Zorro Lang wrote:
+> > Hi all,
+> > 
+> > The for-next branch of the xfstests repository at:
+> > 
+> > 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> > 
+> > has just been updated and tagged as v2022.05.08 release.
+> > 
+> > In this release, Amir's patches provide "black list" support in _supported_fs,
+> > and two helpers _fixed_in_version() and _fixed_by_kernel_commit() to print hints
+> > for reasons of test failures. Feel free to use these helpers on new cases, or
+> > improve old cases.
+> > 
+> > *A Kindly Reminder*
+> > Next week(2022.05.09 ~ 05.15) we plan to merge a big idmapped-mounts related
+> > code refactoring, details refer to:
+> > 
+> > https://lore.kernel.org/fstests/20220507122649.dp7iopuu7rllli7k@zlang-mailbox/
+> > https://lore.kernel.org/fstests/20220507154346.oxfwcq547p325ti3@wittgenstein/T/#mf1bdf41d4a99bb4d1b90dfee2d30ac872c6074f2
+> > 
+> > so if you're going to write patches to change src/idmapped-mounts, better to
+> > wait one more week, to avoid terrible rebasing later.
+> 
+> Hi Christian,
 
-Please do let me know if there are any reviews or comments on this patch.
+Hi Zorro,
 
-Thank you,
-Ojaswin
+> 
+> I've sent this notification, hope to get your patchset soon :) Before offical
 
-On Fri, Apr 01, 2022 at 11:27:13AM +0530, Ojaswin Mujoo wrote:
-> A recent ext4 patch discussed [1] that some devices (eg LVMs) can
-> have a discard granularity as big as 42MB which makes it larger
-> than the group size of ext4 FS with 1k BS. This causes the FITRIM
-> IOCTL to fail on filesystems like ext4.
-> 
-> This case was not correctly handle by "_require_batched_discard" as
-> it incorrectly interpreted the FITRIM failure as fs not supporting
-> the IOCTL. This caused the tests like generic/260 to incorectly
-> report "not run" instead of "failed" in case of large discard
-> granularity.
-> 
-> Fix "_require_batched_discard" to use a more accurate method
-> to determine if discard is supported.
-> 
-> [1] commit 173b6e383d2
->     ext4: avoid trim error on fs with small groups
-> 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> ---
->  common/rc | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index e2d3d72a..97386342 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3858,7 +3858,13 @@ _require_batched_discard()
->  		exit 1
->  	fi
->  	_require_fstrim
-> -	$FSTRIM_PROG $1 > /dev/null 2>&1 || _notrun "FITRIM not supported on $1"
-> +
-> +	$FSTRIM_PROG $1 2>&1 | grep -q "not supported"
-> +	RET=$?
-> +	if [ "$RET" = "0" ]
-> +	then
-> +		_notrun "FITRIM not supported on $1"
-> +	fi
->  }
->  
->  _require_dumpe2fs()
-> -- 
-> 2.27.0
-> 
+Thank you!
+
+> release, I can provide a topic branch (maybe idmapped-mounts-refactoring) for
+> your changes temporarily, as others might want to give it a test or write
+> patches base on your changes but don't want to wait so long time.
+
+Sure, sounds good. I'm going to base my rebase on your xfstests for-next
+branch, sent them out and then you can create and apply them to that
+branch!
+
+Christian
