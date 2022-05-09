@@ -2,176 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3C7DC3527B
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 May 2022 03:49:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9864FC433F5
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 May 2022 06:04:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232078AbiEIDxV (ORCPT
+        id S229523AbiEIGGR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 May 2022 23:53:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44658 "EHLO
+        Mon, 9 May 2022 02:06:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57674 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232443AbiEIDnK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 May 2022 23:43:10 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CBBDAAC939
-        for <fstests@vger.kernel.org>; Sun,  8 May 2022 20:39:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652067548;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=384Wr8HpP/E+deBQjPRBhidqUv4na3aygGhwegGh2ZU=;
-        b=Rfcn17Yk6NI15PRWyLOjYEsSWXd1Lbh9+mjTCllqmomXlUkoTOo6+Lg3gW6KoMuNniD1Qy
-        K/qjfLE2B7WqWpR9FjhACbdOvUyG22joB6aHqTh02/JZCbmU/gBSu/6PqTZYL8puDok6nk
-        g1nC0Ln5Hc59eKgwEeK6qmxlKR7OD3I=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-490-TnqD8etdNP-vzP3_DYgigQ-1; Sun, 08 May 2022 23:39:07 -0400
-X-MC-Unique: TnqD8etdNP-vzP3_DYgigQ-1
-Received: by mail-qk1-f199.google.com with SMTP id bj2-20020a05620a190200b005084968bb24so7962205qkb.23
-        for <fstests@vger.kernel.org>; Sun, 08 May 2022 20:39:07 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=384Wr8HpP/E+deBQjPRBhidqUv4na3aygGhwegGh2ZU=;
-        b=KsWxhhJufkRrcfn740a/5Mtt2pSvZGgCiR5Rw8gPLhFOh6e8FLyvaZ13TBEqimhyp9
-         cTpB/8KlcSsWqOyilKSewQbPhbyTE+GAjejAxQ3ERzGveNu2q82G+4GSqAjZx3bEJnCd
-         4qCadj9puUnCCyuMJm6ZgcMPuLqixs2Sb34/tV5dxK1l+XeqpIKeY8x5XLuMmFH7wnhO
-         X/46GPCbNO5qdvSPQnmhhZ67ETTNNQgRt5MdyCRuXTo3h95Pn7sd6BAKah8v451+WJrH
-         MgrUqbFtVzNVolNJsPc7baFa/pwoykn6OGFC7a3zhuugPXEB80Ng8cnZnVvQ208I0RCD
-         RUGg==
-X-Gm-Message-State: AOAM53089R5D0A+5kYr4Bi80yIP/VOAI2a94pvgS6S7rCAG9WByDfFyJ
-        BXncIQq9CRF/ErkK39HiluTWjoAvyNyxUvWANUJwupLyg50aTbbFO2PED1Opq33mv5bgg2RUgsi
-        le4QMcNnbXiwHS7/O3w==
-X-Received: by 2002:a05:6214:4103:b0:440:e4d1:a2a0 with SMTP id kc3-20020a056214410300b00440e4d1a2a0mr12030298qvb.42.1652067546598;
-        Sun, 08 May 2022 20:39:06 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJx7vVXbgrXjgXzlgfNoHbGSK0tKI7G7S3ieCQQCJzV1wQoT1RN6bQ9kDl9PtRc4KylVYW1QJg==
-X-Received: by 2002:a05:6214:4103:b0:440:e4d1:a2a0 with SMTP id kc3-20020a056214410300b00440e4d1a2a0mr12030290qvb.42.1652067546392;
-        Sun, 08 May 2022 20:39:06 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 18-20020a05620a06d200b0069fc13ce213sm6212806qky.68.2022.05.08.20.39.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 May 2022 20:39:05 -0700 (PDT)
-Date:   Mon, 9 May 2022 11:39:00 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Christian Brauner <brauner@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to 87cf32ad3fa2
-Message-ID: <20220509033900.3gqaxzvhjezlqbqc@zlang-mailbox>
-Mail-Followup-To: Christian Brauner <brauner@kernel.org>,
-        fstests@vger.kernel.org
-References: <20220508160128.DA475C385A4@smtp.kernel.org>
+        with ESMTP id S236203AbiEIGB1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 May 2022 02:01:27 -0400
+Received: from mail1.bemta32.messagelabs.com (mail1.bemta32.messagelabs.com [195.245.230.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3592E16A108
+        for <fstests@vger.kernel.org>; Sun,  8 May 2022 22:57:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1652075786; i=@fujitsu.com;
+        bh=dD88wXDEOd97VrA0AfVwwKIf9dVEGjiP5vDuaDwQbFM=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=d/ox0Ji+st38yh4AN6Fso6wfObgLqnrQyIglQnBuFJg0A3vjbcjM+Lf68aMuvbKLm
+         /UpZRC/vJiK3JUImjN41ZdImQcnGGHX1T/TlMXwC94JWJpu3+eKYwb6StZwu9DPs2L
+         eBc/Zvo4xYUTXSabvgtd1efNqUoMIQVFWfLygijAZsO0ftjx3i+W0sTPOQZxydTPIX
+         xBXgNAiM3G9LKiZC8pDJh5Fi6PfGgDI+2m2epeAU7qZVEqQ06REWegz0GytO3mxEvg
+         wj4eoXpZu+S6V+oHAG/FAI+PoIkSeICCrLfYHNCxC2WCtlLCQeGN2S3oTyFuPHO/ye
+         SUN+SmdqHTRkg==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrJIsWRWlGSWpSXmKPExsViZ8MxRZdrbUW
+  SwYZ2NovTLXvZHRg9Pm+SC2CMYs3MS8qvSGDNuN36kq3gElvF3GnT2BoYj7F2MXJxCAl0MEmc
+  O9PIAuHsZpR4uvY9excjJwebgKbEs84FzCC2iICsxP8Zq5lAbGYBdYnlk36B2cIC9hLT77aC2
+  SwCKhJXps8B6+UV8JA4/HorI4gtIaAgMeXhe2aIuKDEyZlPWCDmSEgcfPGCGaJGUeJSxzeo+g
+  qJWbPamCYw8s5C0jILScsCRqZVjBZJRZnpGSW5iZk5uoYGBrqGhqa6hrpGeolVuol6qaW65an
+  FJbqGeonlxXqpxcV6xZW5yTkpenmpJZsYgeGVUszItINxWd9PvUOMkhxMSqK8lU0VSUJ8Sfkp
+  lRmJxRnxRaU5qcWHGGU4OJQkeN/OA8oJFqWmp1akZeYAQx0mLcHBoyTCy7caKM1bXJCYW5yZD
+  pE6xWjMsbbhwF5mjo9/Lu5lFmLJy89LlRLnnQpSKgBSmlGaBzcIFoOXGGWlhHkZGRgYhHgKUo
+  tyM0tQ5V8xinMwKgnzPgeZwpOZVwK37xXQKUxAp3wMKAU5pSQRISXVwORsUVqwd2vSAddPJsI
+  LI881/z3/Vv9Lt+udq1kpotGuc7Yc/1w4S3Tf9gnLuJhjasUYa3oXtupnmhmwNEnfPHf+7tmA
+  g3NOGWrP7Yj5413AvrZ13htPs9MfL2VOK5tdc2RtzNLDFbenzypZ//ni84BUkbvrX9V1vY4uL
+  /bLs/WfYzFzi+WG1dpyK6NMInaJLp2jeU9S6+hM7mutrZkVh95f3Fd1UD4v7ZhY8nRB+cLn/y
+  7KC+/6tXTFv/9Fge52J2JaJnDw2O4/qvHjo8/R50Vau9nOigt7LYydv7k+OPl8bvrBFT0rc8O
+  efjlzr8QjqaZa+ath+4FYuaDlD3RO12k769ux8YQ9jQ1nmREjoqfEUpyRaKjFXFScCAAoombt
+  PAMAAA==
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-20.tower-591.messagelabs.com!1652075785!303930!1
+X-Originating-IP: [62.60.8.148]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.86.4; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 11052 invoked from network); 9 May 2022 05:56:26 -0000
+Received: from unknown (HELO mailhost1.uk.fujitsu.com) (62.60.8.148)
+  by server-20.tower-591.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 9 May 2022 05:56:26 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 2495uIXT017045
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+        for <fstests@vger.kernel.org>; Mon, 9 May 2022 06:56:25 +0100
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Mon, 9 May 2022 06:56:16 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] xfs/298: Add 100ms sleep before scratch_umount
+Date:   Mon, 9 May 2022 14:56:57 +0800
+Message-ID: <1652079417-2255-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220508160128.DA475C385A4@smtp.kernel.org>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 09, 2022 at 12:01:25AM +0800, Zorro Lang wrote:
-> Hi all,
-> 
-> The for-next branch of the xfstests repository at:
-> 
-> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> 
-> has just been updated and tagged as v2022.05.08 release.
-> 
-> In this release, Amir's patches provide "black list" support in _supported_fs,
-> and two helpers _fixed_in_version() and _fixed_by_kernel_commit() to print hints
-> for reasons of test failures. Feel free to use these helpers on new cases, or
-> improve old cases.
-> 
-> *A Kindly Reminder*
-> Next week(2022.05.09 ~ 05.15) we plan to merge a big idmapped-mounts related
-> code refactoring, details refer to:
-> 
-> https://lore.kernel.org/fstests/20220507122649.dp7iopuu7rllli7k@zlang-mailbox/
-> https://lore.kernel.org/fstests/20220507154346.oxfwcq547p325ti3@wittgenstein/T/#mf1bdf41d4a99bb4d1b90dfee2d30ac872c6074f2
-> 
-> so if you're going to write patches to change src/idmapped-mounts, better to
-> wait one more week, to avoid terrible rebasing later.
+When testing this case on my machine, it reports the following error:
+umount: /mnt/xfstests/scratch: target is busy.
+xfs_db: /dev/sda11 contains a mounted filesystem
 
-Hi Christian,
+scratch_unmount failed, so  _scratch_xfs_db reports scratch_dev is a
+mounted filesystem. It seems filesystem has something to be doing.
 
-I've sent this notification, hope to get your patchset soon :) Before offical
-release, I can provide a topic branch (maybe idmapped-mounts-refactoring) for
-your changes temporarily, as others might want to give it a test or write
-patches base on your changes but don't want to wait so long time.
+To avoid this, just add a 100ms sleep before scratch_umount.
 
-Thanks,
-Zorro
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/xfs/298 | 1 +
+ 1 file changed, 1 insertion(+)
 
-> 
-> Thanks,
-> Zorro
-> 
-> The new head of the for-next branch is commit:
-> 
-> 87cf32ad3fa2 idmapped-mounts: Add open with O_TMPFILE operation in setgid test
-> 
-> New commits:
-> 
-> Amir Goldstein (2):
-> [U]      [6ee5ffa079b9] common: support black listing fs in _supported_fs()
-> [U]      [28c52b15c6e2] common: print hints for reasons of test failures
-> 
-> Chandan Babu R (1):
-> [D]      [9ae10c882550] xfs/533: Delete test since directory's extent count can never overflow
-> 
-> Dave Chinner (1):
-> [U]      [441606d28681] fstests: faster group file creation
-> 
-> Yang Xu (3):
-> [U]      [6ac390bb605b] idmapped-mounts: Reset errno to zero before run_test
-> [U]      [5328ab947ff4] idmapped-mounts: Add mknodat operation in setgid test
-> [U]      [87cf32ad3fa2] idmapped-mounts: Add open with O_TMPFILE operation in setgid test
-> 
-> 
-> Code Diffstat:
-> 
->  check                                 |  10 +-
->  common/preamble                       |  30 +--
->  common/rc                             |  57 +++++-
->  src/idmapped-mounts/idmapped-mounts.c | 369 +++++++++++++++++++++++++++++++++-
->  tests/generic/500                     |   3 +-
->  tests/generic/631                     |   3 +-
->  tests/generic/679                     |   3 +-
->  tests/overlay/009                     |   3 +
->  tests/overlay/010                     |   3 +
->  tests/overlay/014                     |   2 +
->  tests/overlay/016                     |   4 +-
->  tests/overlay/017                     |   4 +-
->  tests/overlay/018                     |   4 +-
->  tests/overlay/020                     |   3 +
->  tests/overlay/022                     |   2 +
->  tests/overlay/029                     |   2 +
->  tests/overlay/038                     |   2 +
->  tests/overlay/041                     |   2 +
->  tests/overlay/042                     |   3 +
->  tests/overlay/043                     |   4 +-
->  tests/overlay/044                     |   4 +-
->  tests/overlay/054                     |   3 +
->  tests/overlay/055                     |   3 +
->  tests/overlay/063                     |   3 +
->  tests/overlay/065                     |   4 +
->  tests/overlay/067                     |   3 +
->  tests/overlay/070                     |   4 +-
->  tests/overlay/071                     |   4 +-
->  tests/overlay/072                     |   2 +
->  tests/overlay/074                     |   5 +
->  tests/overlay/077                     |   5 +
->  tests/overlay/078                     |   1 +
->  tests/xfs/533                         | 170 ----------------
->  tests/xfs/533.out                     |  17 --
->  tools/mkgroupfile                     |  66 ++++--
->  35 files changed, 541 insertions(+), 266 deletions(-)
-> --
-> Zorro Lang
-> zlang@kernel.org
-
+diff --git a/tests/xfs/298 b/tests/xfs/298
+index b0153ebf..17510379 100755
+--- a/tests/xfs/298
++++ b/tests/xfs/298
+@@ -51,6 +51,7 @@ while [ $SIZE -lt 1024 ];do
+ 	rm $SYMLINK_FILE
+ # umount and check the number of extents on the inode. Should be 0.
+ 	cd /
++	sleep 0.1
+ 	_scratch_unmount >/dev/null 2>&1
+ 	_scratch_xfs_db  -c "inode $inode" -c "p core.nextents"
+ 
+-- 
+2.23.0
 
