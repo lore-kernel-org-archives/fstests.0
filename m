@@ -2,135 +2,195 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3428C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 May 2022 06:32:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B12ADC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 May 2022 07:51:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237134AbiEJGgc (ORCPT
+        id S233852AbiEJHz1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 May 2022 02:36:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51492 "EHLO
+        Tue, 10 May 2022 03:55:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232711AbiEJGgb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 02:36:31 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 887832265C7
-        for <fstests@vger.kernel.org>; Mon,  9 May 2022 23:32:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652164353;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=a3h5h7vFFNlEkouniwaXqhbwXvv2DW4g4x627EWieto=;
-        b=OiUwloX2ZgjGQ72MHKT6JrdAoLZ8Z0c+W/JQTET+mxhDvkr/0/N0Dq1Kuqi1v5L4C3adUP
-        37tVCvwF6zsdrcsw3UjbXWqBYqKwgIw46G02tk8gHJnnVdJ2h+reExa1tsIdwDuu1zni1c
-        H9QsDN/bvu5HFd+Xw47uToQJ7N+HW5E=
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
- [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-135-AtejmMvdO16p3s8i85BbCw-1; Tue, 10 May 2022 02:32:32 -0400
-X-MC-Unique: AtejmMvdO16p3s8i85BbCw-1
-Received: by mail-qv1-f69.google.com with SMTP id kd30-20020a056214401e00b0045a96ed0d4aso13547337qvb.17
-        for <fstests@vger.kernel.org>; Mon, 09 May 2022 23:32:32 -0700 (PDT)
+        with ESMTP id S237321AbiEJHzX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 03:55:23 -0400
+Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDF901B3B94
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 00:51:25 -0700 (PDT)
+Received: by mail-qt1-x82b.google.com with SMTP id t16so12964440qtr.9
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 00:51:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=m05a9U4eSLQ2Dg6X6bLY+uTUMxtlZMjRpY+Z31IhRHE=;
+        b=ZSJswyk6F9sbuIape2dG1p6m9j0Ln9RkS/Q8gtJHW48u+TIk4IGBPEO62i79uitWQa
+         2pfB3hqBzyVXx1ji6K16awEcpJe09Ht/wzpiwXzTjCEoJgi1jFPXZtiWDLogkgP5VPJY
+         9TCnvRl9A0q6dhygK6Lw0gNa6Il+arYXAY5BjCrNNS1MnhmwpLgIywVlG7K3N/8AL+7I
+         VavPTpvxXI9dQ6QM/sTNQTmYH4obaYPa8DZf6TLAR5AwmjXseQuBYi3Ej/hDOWXkWHGc
+         xfjAy8Qn2F8uozJMyg8l9KdZSSBFqkyU3A47rhDpO8/m281KqEs3JpQqHxuTUlBUCyvd
+         Lwxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=a3h5h7vFFNlEkouniwaXqhbwXvv2DW4g4x627EWieto=;
-        b=TmSWnW0GSeceQ7UTHXwT1PV3ds9vhjKPun6R3lMttlTKXLOKGZBkGoAGFeAp+dKRrm
-         rcCmZumAq7i7XcJaMSMi9B1moxngehXlYFWZyveV1WTTpq/nUj64FhSJKWm3XDM3ndpR
-         4bfrVJdT1/3Ws0UmBKq5AcAqviyRt0b+9ALsKPjryD4JFB19tQy8/+5hY1aDZ2Px4KJh
-         UK27I0YlIs/yelCDHh9evKJ6QLMli4QrVnb81bFITNyvSGk6Gec1F29UF0ERBcDW+61D
-         XTOtrAh/WbMqVr8KgxNP8znd+xuMhnHVZr3SLj3xhkvvN0KhCaqvftQSR48qhFgwr3zz
-         OX5w==
-X-Gm-Message-State: AOAM532VUdmA4aq4EsmoyVGfE/w4afgybQW+DPIWbI15VIIHconzIvot
-        Ngd06u/v4Vmsr8GkRtnARTDiPsshqG2ApdHDD8/ok0KbxlWXZ+I3hLV8t/f7sB1iqIAFKqmAgBz
-        Ay5wYJ8dkAt9h+E/FGg==
-X-Received: by 2002:a05:620a:71a:b0:6a0:15d6:60cc with SMTP id 26-20020a05620a071a00b006a015d660ccmr14022723qkc.413.1652164351026;
-        Mon, 09 May 2022 23:32:31 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyCznRrStrZANhqjTjRkWY2UTyw291k+9lD6DNcirlWqCKs5lhcy8i5x30DpJuXS3vWIlTlQg==
-X-Received: by 2002:a05:620a:71a:b0:6a0:15d6:60cc with SMTP id 26-20020a05620a071a00b006a015d660ccmr14022721qkc.413.1652164350778;
-        Mon, 09 May 2022 23:32:30 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c65-20020a379a44000000b0069fc13ce1eesm8315164qke.31.2022.05.09.23.32.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 May 2022 23:32:30 -0700 (PDT)
-Date:   Tue, 10 May 2022 14:32:23 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <20220510063223.dogoows5t7cxpnul@zlang-mailbox>
-Mail-Followup-To: Ojaswin Mujoo <ojaswin@linux.ibm.com>,
-        fstests@vger.kernel.org, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20220401055713.634842-1-ojaswin@linux.ibm.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=m05a9U4eSLQ2Dg6X6bLY+uTUMxtlZMjRpY+Z31IhRHE=;
+        b=z1yQWW/tSYywcfMJ9fb/VDYAEIUqS2vAxf8VB63SU7e9Pu3Ulh9hJMHnB8y9xzdP3s
+         M94cdvuPp29ICS2+e/p0PEkaDcI3rZO3EMzHjd3ItFOSQkTpmhjLbqcgYNAXXUcJsVWC
+         AVCDzK0bMuRSTh7I9mKFfZlyNwvrgonpsIFTsMmpfEl07ja/5PyKYVFly5u1M8++Ww7g
+         9jIWtVb9gwpboPsfPVbkQV0SpTEctDjPue93aVvh25P+Joo3+/8nFZoKpG1jGChhg3P4
+         zx8r0C80nVH8zkcQgbaxmdu0+OWJ3M6L8eKGsYlUm8y9o+kCf4doXZIi9WPiNrTaUzPk
+         ljBg==
+X-Gm-Message-State: AOAM530uqyBxMgQarnyeFxPwc1HWUH9Ayc8fLxj/J/JAnW8nJXVS+lEX
+        E1zPoFTjZftlNdOVyAwQzGlgABlreKykUvW3aavv4zEXQns=
+X-Google-Smtp-Source: ABdhPJyXnqSZa2A7DIk5X5aiV+n2PIb8asBVcFKzOlkdKPFNoKSU1CzP8dFrrDo9vlyBJc7+qz3JLnGmlVqrDt2zuV8=
+X-Received: by 2002:ac8:4e46:0:b0:2e1:b933:ec06 with SMTP id
+ e6-20020ac84e46000000b002e1b933ec06mr19066206qtw.684.1652169084846; Tue, 10
+ May 2022 00:51:24 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220401055713.634842-1-ojaswin@linux.ibm.com>
+References: <20220510020434.2561224-1-libaokun1@huawei.com>
+In-Reply-To: <20220510020434.2561224-1-libaokun1@huawei.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Tue, 10 May 2022 10:51:12 +0300
+Message-ID: <CAOQ4uxhTzqvuD5=5c4O_fhzV9CrHSpipegjUiETgCbNTkdvpvA@mail.gmail.com>
+Subject: Re: [RFC v3] common: xfstests support overlay+tmpfs
+To:     Baokun Li <libaokun1@huawei.com>
+Cc:     fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Zhihao Cheng <chengzhihao1@huawei.com>, yukuai3@huawei.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 01, 2022 at 11:27:13AM +0530, Ojaswin Mujoo wrote:
-> A recent ext4 patch discussed [1] that some devices (eg LVMs) can
-> have a discard granularity as big as 42MB which makes it larger
-> than the group size of ext4 FS with 1k BS. This causes the FITRIM
-> IOCTL to fail on filesystems like ext4.
-> 
-> This case was not correctly handle by "_require_batched_discard" as
-> it incorrectly interpreted the FITRIM failure as fs not supporting
-> the IOCTL. This caused the tests like generic/260 to incorectly
-> report "not run" instead of "failed" in case of large discard
-> granularity.
-> 
-> Fix "_require_batched_discard" to use a more accurate method
-> to determine if discard is supported.
-> 
-> [1] commit 173b6e383d2
->     ext4: avoid trim error on fs with small groups
-> 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+On Tue, May 10, 2022 at 4:50 AM Baokun Li <libaokun1@huawei.com> wrote:
+>
+> The local.config of overlay+tmpfs is as follows:
+> ```local.config.example
+> export FSTYP=tmpfs
+> export TEST_DEV=tmpfs_test
+> export TEST_DIR=/tmp/test
+> export SCRATCH_DEV=tmpfs_scratch
+> export SCRATCH_MNT=/tmp/scratch
+> ```
+>
+> Run `./check -overlay tests` to execute test case on overlay+tmpfs.
+>
+> Signed-off-by: Baokun Li <libaokun1@huawei.com>
 > ---
->  common/rc | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
-> 
+> V1->V2:
+>         Fix the bug in version V1 and fix the issue in cycle_mount.
+> V2->V3:
+>         Merge two patches into one completed patch.
+>
+> V1: https://patchwork.kernel.org/project/fstests/patch/20220424063751.1067376-1-libaokun1@huawei.com/
+> V2: https://patchwork.kernel.org/project/fstests/cover/20220507094524.949615-1-libaokun1@huawei.com/
+>
+>  common/config  | 12 ++++++------
+>  common/overlay |  2 +-
+>  common/rc      | 31 ++++++++++++++++++++++++-------
+>  3 files changed, 31 insertions(+), 14 deletions(-)
+>
+> diff --git a/common/config b/common/config
+> index 1033b890..d5953176 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -610,15 +610,15 @@ _overlay_config_override()
+>         [ ! -d "$TEST_DEV" ] || export OVL_BASE_TEST_DIR="$TEST_DEV"
+>         [ ! -d "$SCRATCH_DEV" ] || export OVL_BASE_SCRATCH_MNT="$SCRATCH_DEV"
+>
+> +       # Config file may specify base fs type, but we obay -overlay flag
+> +       [ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+> +       export FSTYP=overlay
+> +
+>         # 2. SCRATCH/TEST_DEV point to the base fs partitions.  In this case,
+>         #    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
+>         #    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
+>         #    overlayfs base and mount dirs inside base fs mount.
+> -       [ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
+> -
+> -       # Config file may specify base fs type, but we obay -overlay flag
+> -       [ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+> -       export FSTYP=overlay
+> +       [ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+>
+>         # Store original base fs vars
+>         export OVL_BASE_TEST_DEV="$TEST_DEV"
+> @@ -634,7 +634,7 @@ _overlay_config_override()
+>         export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+>         export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
+>
+> -       [ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
+> +       [ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+>
+>         # Store original base fs vars
+>         export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
+> diff --git a/common/overlay b/common/overlay
+> index fff67ba1..c4e7ee58 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -81,7 +81,7 @@ _overlay_base_mount()
+>                 return 1
+>         fi
+>
+> -       _mount $* $dev $mnt
+> +       _mount -t $OVL_BASE_FSTYP $* $dev $mnt
+>         _idmapped_mount $dev $mnt
+>  }
+>
 > diff --git a/common/rc b/common/rc
-> index e2d3d72a..97386342 100644
+> index 553ae350..ca465438 100644
 > --- a/common/rc
 > +++ b/common/rc
-> @@ -3858,7 +3858,13 @@ _require_batched_discard()
->  		exit 1
->  	fi
->  	_require_fstrim
-> -	$FSTRIM_PROG $1 > /dev/null 2>&1 || _notrun "FITRIM not supported on $1"
-> +
-> +	$FSTRIM_PROG $1 2>&1 | grep -q "not supported"
-> +	RET=$?
+> @@ -410,10 +410,19 @@ _scratch_cycle_mount()
+>  {
+>      local opts="$1"
+>
+> -    if [ "$FSTYP" = tmpfs ]; then
+> -       _scratch_remount "$opts"
+> -       return
+> -    fi
+> +       case "$FSTYP" in
+> +       tmpfs)
+> +               _scratch_remount "$opts"
+> +               return
+> +               ;;
+> +       overlay)
+> +               if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
+> +                       _scratch_remount "$opts"
 
-Better to use global variable carefully in common functions, if it's not
-necessary, I'd recommend using "local ret" at here.
 
-From my experience, the *quiet (-q)* grep does "exit_on_match" directly,
-it won't wait the write process, if the write process is still writing but
-the grep has exited, then it'll cause broken pipe, and the write process
-exit with failure.
+That doesn't look right.
+_scrtach_cycle_mount is important for several overlay tests and there
+is no reason to
+skip it if base fs is tmpfs.
+What you need to do is cycle mount the overlay without cycle mounting
+the base fs.
+You could do something like this:
 
-It doesn't always happend, it depends. So I'd like to use "${PIPESTATUS[1]}"
-or write it as 'grep -q "not supported" <($FSTRIM_PROG $1 2>&1)', to make sure
-we just care about the "grep" result.
+  local unmounted
+...
 
-> +	if [ "$RET" = "0" ]
-> +	then
-> +		_notrun "FITRIM not supported on $1"
-> +	fi
->  }
->  
->  _require_dumpe2fs()
-> -- 
-> 2.27.0
-> 
+  overlay)
+               if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
+                         $UMOUNT_PROG $SCRATCH_MNT
+                         unmounted=true
+               fi
+               ;;
+   esac
+...
+    [ "$unmounted" = true ] || _scratch_unmount
+    _try_scratch_mount "$opts" || _fail "cycle mount failed"
+}
 
+There are some overlay tests that open code this pattern like overlay/077:
+
+# Remove the lower directory and mount overlay again to create
+# a "former merge dir"
+$UMOUNT_PROG $SCRATCH_MNT
+rm -rf $lowerdir/former
+_scratch_mount
+
+So _scratch_mount is expected to work just fine when base fs is already mounted
+assuming that _check_mounted_on works correctly with tmpfs.
+
+Thanks,
+Amir.
