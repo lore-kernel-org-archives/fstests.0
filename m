@@ -2,149 +2,194 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F396C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 May 2022 11:49:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C11F3C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 May 2022 12:05:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241238AbiEJLxY (ORCPT
+        id S241075AbiEJMJ3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 May 2022 07:53:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36288 "EHLO
+        Tue, 10 May 2022 08:09:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42354 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233105AbiEJLxX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 07:53:23 -0400
-Received: from mx0a-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3DB825E79C;
-        Tue, 10 May 2022 04:49:26 -0700 (PDT)
-Received: from pps.filterd (m0098420.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 24AAfEGR011022;
-        Tue, 10 May 2022 11:49:26 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=ARFuf21vSRs3SqQwRlCsfgFUIcJIjrwmZkD6ORueLl8=;
- b=TI8JJuG+TEz4MdFaLVhPHZXlgMR/+YzoOOiPzu6pyVdX+/fP1CO4Zq8phXlwie0VZksN
- x1gWDj93RSQqZiBZWMpFYIiYLnEe4I2baO4HRtkz3Jgd9tnSBmemof0w3Sp/rBq5EpPe
- 12t6SC5FF1+namgvEsfhi7iWnSZNhK2W9/h3DC9gb4gS2ZCDpyrNFVJmuEp54xYTQcB+
- z6pQJvbLH3CHK+L5tWRAiPtK0cmANQn3uFkn6e0r20+t5fBYPjDWwwn7aUcTzHOCIMD5
- DJq0fT9/dhVvs+MmpG2U5xl3KS5u4hy8OW5y4dgmQJbWCsSXZISjhsgrerGHNzoOsb+a Dg== 
-Received: from ppma03ams.nl.ibm.com (62.31.33a9.ip4.static.sl-reverse.com [169.51.49.98])
-        by mx0b-001b2d01.pphosted.com (PPS) with ESMTPS id 3fyncetet2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 10 May 2022 11:49:25 +0000
-Received: from pps.filterd (ppma03ams.nl.ibm.com [127.0.0.1])
-        by ppma03ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 24ABnJkQ013231;
-        Tue, 10 May 2022 11:49:24 GMT
-Received: from b06cxnps3074.portsmouth.uk.ibm.com (d06relay09.portsmouth.uk.ibm.com [9.149.109.194])
-        by ppma03ams.nl.ibm.com with ESMTP id 3fwgd8v0gn-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 10 May 2022 11:49:23 +0000
-Received: from d06av25.portsmouth.uk.ibm.com (d06av25.portsmouth.uk.ibm.com [9.149.105.61])
-        by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 24ABnLvG49217806
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 10 May 2022 11:49:21 GMT
-Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 9163611C04A;
-        Tue, 10 May 2022 11:49:21 +0000 (GMT)
-Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 0362011C04C;
-        Tue, 10 May 2022 11:49:20 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.111.129])
-        by d06av25.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Tue, 10 May 2022 11:49:19 +0000 (GMT)
-Date:   Tue, 10 May 2022 17:19:16 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To:     fstests@vger.kernel.org, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <YnpRPGBhFqFyPMUg@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
-References: <20220401055713.634842-1-ojaswin@linux.ibm.com>
- <20220510063223.dogoows5t7cxpnul@zlang-mailbox>
+        with ESMTP id S236527AbiEJMJ2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 08:09:28 -0400
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3C4417856B
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 05:05:30 -0700 (PDT)
+Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.53])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4KyGnk4VbJzCsd1;
+        Tue, 10 May 2022 20:00:26 +0800 (CST)
+Received: from [10.174.177.174] (10.174.177.174) by
+ dggpeml500020.china.huawei.com (7.185.36.88) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Tue, 10 May 2022 20:05:12 +0800
+Message-ID: <1aa6663e-1c1d-3659-231d-29c6d4e448c9@huawei.com>
+Date:   Tue, 10 May 2022 20:05:12 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220510063223.dogoows5t7cxpnul@zlang-mailbox>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: xx6_o-zgZKMJI-XrxxxF8-Z8Yod7k9DZ
-X-Proofpoint-ORIG-GUID: xx6_o-zgZKMJI-XrxxxF8-Z8Yod7k9DZ
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
- definitions=2022-05-10_01,2022-05-10_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 suspectscore=0
- clxscore=1015 impostorscore=0 mlxlogscore=897 malwarescore=0 spamscore=0
- lowpriorityscore=0 bulkscore=0 mlxscore=0 adultscore=0 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2202240000
- definitions=main-2205100052
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.1
+Subject: Re: [RFC v3] common: xfstests support overlay+tmpfs
+To:     Amir Goldstein <amir73il@gmail.com>
+CC:     fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Zhihao Cheng <chengzhihao1@huawei.com>, <yukuai3@huawei.com>,
+        Baokun Li <libaokun1@huawei.com>
+References: <20220510020434.2561224-1-libaokun1@huawei.com>
+ <CAOQ4uxhTzqvuD5=5c4O_fhzV9CrHSpipegjUiETgCbNTkdvpvA@mail.gmail.com>
+From:   "libaokun (A)" <libaokun1@huawei.com>
+In-Reply-To: <CAOQ4uxhTzqvuD5=5c4O_fhzV9CrHSpipegjUiETgCbNTkdvpvA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.177.174]
+X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
+ dggpeml500020.china.huawei.com (7.185.36.88)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Zorro,
+在 2022/5/10 15:51, Amir Goldstein 写道:
+> On Tue, May 10, 2022 at 4:50 AM Baokun Li <libaokun1@huawei.com> wrote:
+>> The local.config of overlay+tmpfs is as follows:
+>> ```local.config.example
+>> export FSTYP=tmpfs
+>> export TEST_DEV=tmpfs_test
+>> export TEST_DIR=/tmp/test
+>> export SCRATCH_DEV=tmpfs_scratch
+>> export SCRATCH_MNT=/tmp/scratch
+>> ```
+>>
+>> Run `./check -overlay tests` to execute test case on overlay+tmpfs.
+>>
+>> Signed-off-by: Baokun Li <libaokun1@huawei.com>
+>> ---
+>> V1->V2:
+>>          Fix the bug in version V1 and fix the issue in cycle_mount.
+>> V2->V3:
+>>          Merge two patches into one completed patch.
+>>
+>> V1: https://patchwork.kernel.org/project/fstests/patch/20220424063751.1067376-1-libaokun1@huawei.com/
+>> V2: https://patchwork.kernel.org/project/fstests/cover/20220507094524.949615-1-libaokun1@huawei.com/
+>>
+>>   common/config  | 12 ++++++------
+>>   common/overlay |  2 +-
+>>   common/rc      | 31 ++++++++++++++++++++++++-------
+>>   3 files changed, 31 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/common/config b/common/config
+>> index 1033b890..d5953176 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -610,15 +610,15 @@ _overlay_config_override()
+>>          [ ! -d "$TEST_DEV" ] || export OVL_BASE_TEST_DIR="$TEST_DEV"
+>>          [ ! -d "$SCRATCH_DEV" ] || export OVL_BASE_SCRATCH_MNT="$SCRATCH_DEV"
+>>
+>> +       # Config file may specify base fs type, but we obay -overlay flag
+>> +       [ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+>> +       export FSTYP=overlay
+>> +
+>>          # 2. SCRATCH/TEST_DEV point to the base fs partitions.  In this case,
+>>          #    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
+>>          #    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
+>>          #    overlayfs base and mount dirs inside base fs mount.
+>> -       [ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
+>> -
+>> -       # Config file may specify base fs type, but we obay -overlay flag
+>> -       [ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+>> -       export FSTYP=overlay
+>> +       [ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+>>
+>>          # Store original base fs vars
+>>          export OVL_BASE_TEST_DEV="$TEST_DEV"
+>> @@ -634,7 +634,7 @@ _overlay_config_override()
+>>          export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+>>          export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
+>>
+>> -       [ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
+>> +       [ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+>>
+>>          # Store original base fs vars
+>>          export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
+>> diff --git a/common/overlay b/common/overlay
+>> index fff67ba1..c4e7ee58 100644
+>> --- a/common/overlay
+>> +++ b/common/overlay
+>> @@ -81,7 +81,7 @@ _overlay_base_mount()
+>>                  return 1
+>>          fi
+>>
+>> -       _mount $* $dev $mnt
+>> +       _mount -t $OVL_BASE_FSTYP $* $dev $mnt
+>>          _idmapped_mount $dev $mnt
+>>   }
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 553ae350..ca465438 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -410,10 +410,19 @@ _scratch_cycle_mount()
+>>   {
+>>       local opts="$1"
+>>
+>> -    if [ "$FSTYP" = tmpfs ]; then
+>> -       _scratch_remount "$opts"
+>> -       return
+>> -    fi
+>> +       case "$FSTYP" in
+>> +       tmpfs)
+>> +               _scratch_remount "$opts"
+>> +               return
+>> +               ;;
+>> +       overlay)
+>> +               if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
+>> +                       _scratch_remount "$opts"
+>
+> That doesn't look right.
+> _scrtach_cycle_mount is important for several overlay tests and there
+> is no reason to
+> skip it if base fs is tmpfs.
+> What you need to do is cycle mount the overlay without cycle mounting
+> the base fs.
+> You could do something like this:
+>
+>    local unmounted
+> ...
+>
+>    overlay)
+>                 if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
+>                           $UMOUNT_PROG $SCRATCH_MNT
+>                           unmounted=true
+>                 fi
+>                 ;;
+>     esac
+> ...
+>      [ "$unmounted" = true ] || _scratch_unmount
+>      _try_scratch_mount "$opts" || _fail "cycle mount failed"
+> }
+>
+> There are some overlay tests that open code this pattern like overlay/077:
+>
+> # Remove the lower directory and mount overlay again to create
+> # a "former merge dir"
+> $UMOUNT_PROG $SCRATCH_MNT
+> rm -rf $lowerdir/former
+> _scratch_mount
+>
+> So _scratch_mount is expected to work just fine when base fs is already mounted
+> assuming that _check_mounted_on works correctly with tmpfs.
+>
+> Thanks,
+> Amir.
+> .
 
-Thanks for the review.
+Thank you very much for your advice.
 
-On Tue, May 10, 2022 at 02:32:23PM +0800, Zorro Lang wrote:
-> On Fri, Apr 01, 2022 at 11:27:13AM +0530, Ojaswin Mujoo wrote:
-> > A recent ext4 patch discussed [1] that some devices (eg LVMs) can
-> > have a discard granularity as big as 42MB which makes it larger
-> > than the group size of ext4 FS with 1k BS. This causes the FITRIM
-> > IOCTL to fail on filesystems like ext4.
-> > 
-> > This case was not correctly handle by "_require_batched_discard" as
-> > it incorrectly interpreted the FITRIM failure as fs not supporting
-> > the IOCTL. This caused the tests like generic/260 to incorectly
-> > report "not run" instead of "failed" in case of large discard
-> > granularity.
-> > 
-> > Fix "_require_batched_discard" to use a more accurate method
-> > to determine if discard is supported.
-> > 
-> > [1] commit 173b6e383d2
-> >     ext4: avoid trim error on fs with small groups
-> > 
-> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > ---
-> >  common/rc | 8 +++++++-
-> >  1 file changed, 7 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index e2d3d72a..97386342 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3858,7 +3858,13 @@ _require_batched_discard()
-> >  		exit 1
-> >  	fi
-> >  	_require_fstrim
-> > -	$FSTRIM_PROG $1 > /dev/null 2>&1 || _notrun "FITRIM not supported on $1"
-> > +
-> > +	$FSTRIM_PROG $1 2>&1 | grep -q "not supported"
-> > +	RET=$?
-> 
-> Better to use global variable carefully in common functions, if it's not
-> necessary, I'd recommend using "local ret" at here.
-Sure, I'll make the change.
+I will send a patch V4 with the changes suggested by you.
 
-> 
-> From my experience, the *quiet (-q)* grep does "exit_on_match" directly,
-> it won't wait the write process, if the write process is still writing but
-> the grep has exited, then it'll cause broken pipe, and the write process
-> exit with failure.
-> 
-> It doesn't always happend, it depends. So I'd like to use "${PIPESTATUS[1]}"
-> or write it as 'grep -q "not supported" <($FSTRIM_PROG $1 2>&1)', to make sure
-> we just care about the "grep" result.
-Ah makes sense, will make this change as well.
+-- 
+With Best Regards,
+Baokun Li
 
-Regards,
-Ojaswin
-> 
-> > +	if [ "$RET" = "0" ]
-> > +	then
-> > +		_notrun "FITRIM not supported on $1"
-> > +	fi
-> >  }
-> >  
-> >  _require_dumpe2fs()
-> > -- 
-> > 2.27.0
-> > 
-> 
+.
+
+
+
