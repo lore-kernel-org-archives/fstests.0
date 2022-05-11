@@ -2,106 +2,76 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23417C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 May 2022 18:36:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22753C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 00:25:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245346AbiEJSg3 (ORCPT
+        id S231645AbiEKAZ2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 May 2022 14:36:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49462 "EHLO
+        Tue, 10 May 2022 20:25:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349106AbiEJSgW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 14:36:22 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22AFB50457;
-        Tue, 10 May 2022 11:36:21 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B140160DF0;
-        Tue, 10 May 2022 18:36:20 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED18EC385C2;
-        Tue, 10 May 2022 18:36:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652207780;
-        bh=vRlYcyDSWfWyjRka3YqXUxpx72aKcmWvtuE3ZI2eW6g=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=MON3fzAY2osPB5/7TsU9q2CAFh85n4s47bWXdjZLNFYG1cQipKrQIbIntmMwipCOq
-         /YQ9ZLwTAt/gl8wM7I+3YgAUDaKR/2I9ivA2T52gxKQvZIMUoVtf1cvLEXrREC5mWc
-         TNpvGRatKPEkZjJYU2jW1rcwA4IaPDAn2hvqCUiA2QDYJhXgoTbejhwK9Xb4tnT3AU
-         L/mkCdPoBIoMhubjZf00mklLmheFqAh3mnu7klZReHuhvGg0T7QkzgU2TWEsEKKjJ4
-         91qB7cuOJkOpmXidodXVT0J0gS66E9+Ixzj/fEh1BbdMsvkQoL7r6zCb0WJY35xrZi
-         +LUs/UnH0+TNA==
-Date:   Tue, 10 May 2022 11:36:18 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Lukas Czerner <lczerner@redhat.com>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org
-Subject: Re: [xfstests PATCH] ext4/053: fix the rejected mount option testing
-Message-ID: <Ynqwotv9lQvt3TV3@sol.localdomain>
-References: <20220430192130.131842-1-ebiggers@kernel.org>
- <Ynmmy+bWp0Q1/747@sol.localdomain>
- <20220510094308.mhzvcgq5wrat5qao@fedora>
- <20220510154359.xfhmumcmb4o37qdy@zlang-mailbox>
+        with ESMTP id S231210AbiEKAZ1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 20:25:27 -0400
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB5622609F4
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 17:25:26 -0700 (PDT)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: krisman)
+        with ESMTPSA id DEE4C1F44A16
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1652228725;
+        bh=PVe3SKizVtysv+7YxuAd6fmXiTfBHivoL+8Zrv4nHv8=;
+        h=From:To:Cc:Subject:Date:From;
+        b=VrbMDfZu4RA/7lrr+NFF7wsYIRCjr1WQWOPRM7075OG38q7pNIUwOCPno1g1WxOc3
+         AWD1VDwFonmB8sfOJtWRH5l5XBIaYejT6s0nQioweJnIFDbREUtZap0WUjGaYjvC0r
+         OfmDuWdt6IcTPxe0m1OrZZzvvFEXi9vBv3WLohdrwdUvPq0x6hsmGrV3cx1XiooF44
+         oAs9ziMrxW9YAcxnCq4YZYXk6lq+xDSLPX9lY1tjcVSn7iGEdYnwF7/haRnbdIeJi6
+         lCI9duWC9Ph3RL0eD1Qm1AeGIVxo3qDKI5MR14G2ZqDpk/EIchiKW+UAGVoqosUUQA
+         G17FcPxLn7thw==
+From:   Gabriel Krisman Bertazi <krisman@collabora.com>
+To:     zlang@kernel.org
+Cc:     fstests@vger.kernel.org,
+        Gabriel Krisman Bertazi <krisman@collabora.com>
+Subject: [PATCH] casefold: Fix expansion of seqres variable
+Date:   Tue, 10 May 2022 20:25:20 -0400
+Message-Id: <20220511002520.352812-1-krisman@collabora.com>
+X-Mailer: git-send-email 2.35.3
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220510154359.xfhmumcmb4o37qdy@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 10, 2022 at 11:43:59PM +0800, Zorro Lang wrote:
-> On Tue, May 10, 2022 at 11:43:08AM +0200, Lukas Czerner wrote:
-> > On Mon, May 09, 2022 at 04:42:03PM -0700, Eric Biggers wrote:
-> > > On Sat, Apr 30, 2022 at 12:21:30PM -0700, Eric Biggers wrote:
-> > > > From: Eric Biggers <ebiggers@google.com>
-> > > > 
-> > > > 'not_mnt OPTIONS' seems to have been intended to test that the
-> > > > filesystem cannot be mounted at all with the given OPTIONS, meaning that
-> > > > the mount fails as opposed to the options being ignored.  However, this
-> > > > doesn't actually work, as shown by the fact that the test case 'not_mnt
-> > > > test_dummy_encryption=v3' is passing in the !CONFIG_FS_ENCRYPTION case.
-> > > > Actually ext4 ignores this mount option when !CONFIG_FS_ENCRYPTION.
-> > > > (The ext4 behavior might be changed, but that is besides the point.)
-> > > > 
-> > > > The problem is that the do_mnt() helper function is being misused in a
-> > > > context where a mount failure is expected, and it does some additional
-> > > > remount tests that don't make sense in that context.  So if the mount
-> > > > unexpectedly succeeds, then one of these later tests can still "fail",
-> > > > causing the unexpected success to be shadowed by a later failure, which
-> > > > causes the overall test case to pass since it expects a failure.
-> > > > 
-> > > > Fix this by reworking not_mnt() and not_remount_noumount() to use
-> > > > simple_mount() in cases where they are expecting a failure.  Also fix
-> > > > up some of the naming and calling conventions to be less confusing.
-> > > > Finally, make sure to test that remounting fails too, not just mounting.
-> > > > 
-> > > > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > > > ---
-> > > >  tests/ext4/053 | 148 ++++++++++++++++++++++++++-----------------------
-> > > >  1 file changed, 78 insertions(+), 70 deletions(-)
-> > > 
-> > > Lukas, any thoughts on this patch?  You're the author of this test.
-> > > 
-> > > - Eric
-> > 
-> > Haven't tested it myself but the change looks fine, thanks.
-> 
-> Thanks for you help to review this patch. There's an new failure[1] after we
-> merged this patch:
->   "SHOULD FAIL remounting ext2 "commit=7" (remount unexpectedly succeeded) FAILED"
-> 
-> As this test generally passed, so before I give "Oops" to others, I hope to
-> check with you that if this's an expected failure we need to fix in kernel
-> or in this case itself?
-> 
+seqres is not properly expanded on these error paths, causing a file
+called seqres.full to be created instead.
 
-This appears to be a kernel bug, so to fix it I've sent the patch
-"ext4: reject the 'commit' option on ext2 filesystems"
-(https://lore.kernel.org/r/20220510183232.172615-1-ebiggers@kernel.org).
+Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+---
+ common/casefold | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-I didn't notice this earlier because it's not reproducible with
-CONFIG_EXT2_FS=y.  But it is reproducible with CONFIG_EXT2_FS=n and
-CONFIG_EXT4_USE_FOR_EXT2=y.
+diff --git a/common/casefold b/common/casefold
+index 9172d818125a..7e8f941211db 100644
+--- a/common/casefold
++++ b/common/casefold
+@@ -25,7 +25,7 @@ _require_scratch_casefold()
+ 		_notrun "$FSTYP does not support casefold feature"
+ 	fi
+ 
+-	if ! _scratch_mkfs_casefold &>>seqres.full; then
++	if ! _scratch_mkfs_casefold &>>$seqres.full; then
+ 		_notrun "$FSTYP userspace tools do not support casefold"
+ 	fi
+ 
+@@ -33,7 +33,7 @@ _require_scratch_casefold()
+ 	# defined by the userspace tools.  This will fail if
+ 	# the userspace tool used a more recent encoding than the one
+ 	# supported in kernel space.
+-	if ! _try_scratch_mount &>>seqres.full; then
++	if ! _try_scratch_mount &>>$seqres.full; then
+ 		_notrun "kernel can't mount filesystem with the encoding set by userspace"
+ 	fi
+ 	_scratch_unmount
+-- 
+2.35.3
 
-- Eric
