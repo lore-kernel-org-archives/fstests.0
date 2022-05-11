@@ -2,76 +2,72 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22753C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 00:25:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C68DC433FE
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 04:55:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231645AbiEKAZ2 (ORCPT
+        id S233174AbiEKEzn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 May 2022 20:25:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40586 "EHLO
+        Wed, 11 May 2022 00:55:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231210AbiEKAZ1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 May 2022 20:25:27 -0400
-Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB5622609F4
-        for <fstests@vger.kernel.org>; Tue, 10 May 2022 17:25:26 -0700 (PDT)
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (Authenticated sender: krisman)
-        with ESMTPSA id DEE4C1F44A16
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1652228725;
-        bh=PVe3SKizVtysv+7YxuAd6fmXiTfBHivoL+8Zrv4nHv8=;
-        h=From:To:Cc:Subject:Date:From;
-        b=VrbMDfZu4RA/7lrr+NFF7wsYIRCjr1WQWOPRM7075OG38q7pNIUwOCPno1g1WxOc3
-         AWD1VDwFonmB8sfOJtWRH5l5XBIaYejT6s0nQioweJnIFDbREUtZap0WUjGaYjvC0r
-         OfmDuWdt6IcTPxe0m1OrZZzvvFEXi9vBv3WLohdrwdUvPq0x6hsmGrV3cx1XiooF44
-         oAs9ziMrxW9YAcxnCq4YZYXk6lq+xDSLPX9lY1tjcVSn7iGEdYnwF7/haRnbdIeJi6
-         lCI9duWC9Ph3RL0eD1Qm1AeGIVxo3qDKI5MR14G2ZqDpk/EIchiKW+UAGVoqosUUQA
-         G17FcPxLn7thw==
-From:   Gabriel Krisman Bertazi <krisman@collabora.com>
-To:     zlang@kernel.org
-Cc:     fstests@vger.kernel.org,
-        Gabriel Krisman Bertazi <krisman@collabora.com>
-Subject: [PATCH] casefold: Fix expansion of seqres variable
-Date:   Tue, 10 May 2022 20:25:20 -0400
-Message-Id: <20220511002520.352812-1-krisman@collabora.com>
-X-Mailer: git-send-email 2.35.3
+        with ESMTP id S232048AbiEKEzm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 00:55:42 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9461BC1B
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 21:55:40 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 4CEC35346C7;
+        Wed, 11 May 2022 14:55:38 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1noeNt-00AZAB-3S; Wed, 11 May 2022 14:55:37 +1000
+Date:   Wed, 11 May 2022 14:55:37 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Gabriel Krisman Bertazi <krisman@collabora.com>
+Cc:     zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] casefold: Fix expansion of seqres variable
+Message-ID: <20220511045537.GF2306852@dread.disaster.area>
+References: <20220511002520.352812-1-krisman@collabora.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220511002520.352812-1-krisman@collabora.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=627b41cb
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=QX4gbG5DAAAA:8 a=7-415B0cAAAA:8
+        a=z0GxwwAP52pGHsxrT58A:9 a=CjuIK1q_8ugA:10 a=AbAUZ8qAyYyZVLSsDulk:22
+        a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-seqres is not properly expanded on these error paths, causing a file
-called seqres.full to be created instead.
+On Tue, May 10, 2022 at 08:25:20PM -0400, Gabriel Krisman Bertazi wrote:
+> seqres is not properly expanded on these error paths, causing a file
+> called seqres.full to be created instead.
+> 
+> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+> ---
+>  common/casefold | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/casefold b/common/casefold
+> index 9172d818125a..7e8f941211db 100644
+> --- a/common/casefold
+> +++ b/common/casefold
+> @@ -25,7 +25,7 @@ _require_scratch_casefold()
+>  		_notrun "$FSTYP does not support casefold feature"
+>  	fi
+>  
+> -	if ! _scratch_mkfs_casefold &>>seqres.full; then
+> +	if ! _scratch_mkfs_casefold &>>$seqres.full; then
 
-Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
----
- common/casefold | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+PLease add a space between the &>> and $seqres.full while you are
+fixing this. It's unreadable without proper whitespace separation...
 
-diff --git a/common/casefold b/common/casefold
-index 9172d818125a..7e8f941211db 100644
---- a/common/casefold
-+++ b/common/casefold
-@@ -25,7 +25,7 @@ _require_scratch_casefold()
- 		_notrun "$FSTYP does not support casefold feature"
- 	fi
- 
--	if ! _scratch_mkfs_casefold &>>seqres.full; then
-+	if ! _scratch_mkfs_casefold &>>$seqres.full; then
- 		_notrun "$FSTYP userspace tools do not support casefold"
- 	fi
- 
-@@ -33,7 +33,7 @@ _require_scratch_casefold()
- 	# defined by the userspace tools.  This will fail if
- 	# the userspace tool used a more recent encoding than the one
- 	# supported in kernel space.
--	if ! _try_scratch_mount &>>seqres.full; then
-+	if ! _try_scratch_mount &>>$seqres.full; then
- 		_notrun "kernel can't mount filesystem with the encoding set by userspace"
- 	fi
- 	_scratch_unmount
+Cheers,
+
+Dave.
 -- 
-2.35.3
-
+Dave Chinner
+david@fromorbit.com
