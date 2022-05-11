@@ -2,207 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3279BC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 09:07:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 160C7C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 09:27:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243315AbiEKJHw (ORCPT
+        id S233811AbiEKJ06 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 05:07:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40794 "EHLO
+        Wed, 11 May 2022 05:26:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49634 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241953AbiEKJHo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 05:07:44 -0400
-Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CA302CDDF
-        for <fstests@vger.kernel.org>; Wed, 11 May 2022 02:07:23 -0700 (PDT)
-Received: by mail-qk1-x72e.google.com with SMTP id k8so1806460qki.8
-        for <fstests@vger.kernel.org>; Wed, 11 May 2022 02:07:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=B2kykbnpNgIwbWTfEBeG4L0EXqsPynHn1rW49k9y2R4=;
-        b=puYTNXUWEPU0xV/v5XO1W2lq27zJUu/lyyqzRArZGEEc1KBt/oz3+qtqgV+2UmjI0g
-         UXC0LRtthR7cRjqWLcdGVfbPwKMPkNqCfyAwNwQ+W8w8nhUeN8AsdiWj6eHyYV2ksb88
-         vd6sIs/qF3KYmR0RTdoquM11umjipRbeK+7U/6Lh81DjEMwbby+/lYfsxCVVQfCgVJn5
-         oJmqZxqRjtBbpiPlI5g4fLQnBn04pzaU6oM7TBc0iBKz1MdxtavTemTCAcnosZG6eKPj
-         EtYEMmeeDvtOrRPqs5CauCLhMoAaoMD1N2r28ov1NEEfR6IbZ57bPryXhnCpGQfJ688T
-         WMqQ==
+        with ESMTP id S240126AbiEKJ0t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 05:26:49 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 037AF33A21
+        for <fstests@vger.kernel.org>; Wed, 11 May 2022 02:26:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1652261199;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=kO50a3ZMGqy36vUEXB5sJxbvfk9EgWkkvWo6Ed3qPTw=;
+        b=Rk4ehb/SdS3Q9FoTad/w8DYPL1tFzx1jeXOpyXcUNBIZwn26iJpMt0v+guF4xtl+NrMSK9
+        EW4FMTSU0eq9HMF53czFnAJse2LeSFq+2sH+uHHLvFVogRUlX83SiMu/n7Wc03UZRCrL2b
+        nk6ynX3LMbbZoxWzP3B20hqI11JPNdw=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-247-ohJz1Sh-Npq4QcxyLkbrvg-1; Wed, 11 May 2022 05:26:38 -0400
+X-MC-Unique: ohJz1Sh-Npq4QcxyLkbrvg-1
+Received: by mail-qk1-f198.google.com with SMTP id m1-20020a05620a24c100b006a060e0e241so1392264qkn.17
+        for <fstests@vger.kernel.org>; Wed, 11 May 2022 02:26:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=B2kykbnpNgIwbWTfEBeG4L0EXqsPynHn1rW49k9y2R4=;
-        b=1zXVzxWrowzcojW+QjuECM9Ji00zsovReFCSRZMMib5ZEIVqqvjMppRV2YOf2f4WN6
-         ZEh+ioZZof0LP1gHm53VFg9Zzgp2IJrwFWYkHwzzNyvblJazGspRYVBPIotg6pmasooj
-         6lBca2/e6lDnSYzvIcL4BI7hcLrxh8Ogrt4N2nELacxCbINh1aakOh5TASg2/WOTHqb7
-         j6Cxs1x8RwpkRYO27r8CZcg6ajeNS/rzASRntM3jMIBOHUR18bfuSCPOoC7CNx54k7WN
-         sW+kdJhFlvXQS/fp3/JreyjbLADjRjsCYzYecSrQe4QxBwS3LzpaUez6v91lGC17D7fC
-         BlaQ==
-X-Gm-Message-State: AOAM53328cUEs1Fvh7kAI64MgqJ0DdnCSRGOqk+lYdDoepaHo2gXcua7
-        czI8xv7OKK44I4jioIgR+VfSWrkANLdxxl1Qfuc=
-X-Google-Smtp-Source: ABdhPJxfgjjkffUrruVh+3Om6Q/2FSC9hyjYtusJ/fBzWK7Rf/0GRacJop4fFgXiRf7oITc2ab4mZbaGraXary9e7N4=
-X-Received: by 2002:a05:620a:2909:b0:6a0:472b:a30d with SMTP id
- m9-20020a05620a290900b006a0472ba30dmr17588955qkp.258.1652260042178; Wed, 11
- May 2022 02:07:22 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=kO50a3ZMGqy36vUEXB5sJxbvfk9EgWkkvWo6Ed3qPTw=;
+        b=cXUedAYbdUjpBubAHZtVSQeJy9lqBRPz1Msv1ThiVrohrLS1+2AkwseFnsCL/wdurD
+         hNDt9hxvLSEqvqHTwxmWyNM0vvRESPPOXbsHn5tVxV+uPMCRV4BPthRF/+vwxyKZbqCi
+         Ykr/Ddn38qELNQxLc30DviZzU9iH6wMi1znYaJIM5AU3vsL8qYyOaIudOvqwQLvqcKQD
+         zx5T99+2U8NDxkd6uL3uSC+1PDSoTe4u53in+27DeTPaH94B9TciROTIrVrI8FdK7RE8
+         klcHaMC+rHdnD9VKBYIm1eaLDI6JvLemRlIpjnf/X0QcB2425SaDKgWi9siO5h5d5tCD
+         unMg==
+X-Gm-Message-State: AOAM530mIbFGGbFmK9eLoIXdBFfmcYX3rdvdqcr94zcspk7yVO2dYkt/
+        p0ovF3/S9cX1Pav5JJXIvPExCKvLgtF1tgkZqDFj5QqGbqRPdPvM5L/fqMHIo8pn4JYLOxixhmo
+        dYGxCTSq6PZJcTuYYCA==
+X-Received: by 2002:a0c:f3d2:0:b0:456:34aa:5978 with SMTP id f18-20020a0cf3d2000000b0045634aa5978mr21406302qvm.59.1652261197355;
+        Wed, 11 May 2022 02:26:37 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJy9DdSDA/hx8JTNLJ4q/Q0Cghpa4F7z/Yb30ndeCV2xIF327qcyo8dLa9mbqpVe+mI/T3jrEA==
+X-Received: by 2002:a0c:f3d2:0:b0:456:34aa:5978 with SMTP id f18-20020a0cf3d2000000b0045634aa5978mr21406293qvm.59.1652261197117;
+        Wed, 11 May 2022 02:26:37 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id p6-20020a05620a056600b0069fc13ce226sm859989qkp.87.2022.05.11.02.26.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 11 May 2022 02:26:36 -0700 (PDT)
+Date:   Wed, 11 May 2022 17:26:31 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Gabriel Krisman Bertazi <krisman@collabora.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] casefold: Fix expansion of seqres variable
+Message-ID: <20220511092631.xejpwka3x7u6uozj@zlang-mailbox>
+Mail-Followup-To: Gabriel Krisman Bertazi <krisman@collabora.com>,
+        fstests@vger.kernel.org
+References: <20220511002520.352812-1-krisman@collabora.com>
+ <20220511045537.GF2306852@dread.disaster.area>
 MIME-Version: 1.0
-References: <20220511083404.3315147-1-libaokun1@huawei.com>
-In-Reply-To: <20220511083404.3315147-1-libaokun1@huawei.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 11 May 2022 12:07:10 +0300
-Message-ID: <CAOQ4uxh7TbkXHsaGA8Th5MQepsVfN_3L8nasiOK52aMeTwk_xg@mail.gmail.com>
-Subject: Re: [RFC v4] common: xfstests support overlay+tmpfs
-To:     Baokun Li <libaokun1@huawei.com>
-Cc:     fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Zhihao Cheng <chengzhihao1@huawei.com>, yukuai3@huawei.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220511045537.GF2306852@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 11, 2022 at 11:20 AM Baokun Li <libaokun1@huawei.com> wrote:
->
-> The local.config of overlay+tmpfs is as follows:
-> ```local.config.example
-> export FSTYP=tmpfs
-> export TEST_DEV=tmpfs_test
-> export TEST_DIR=/tmp/test
-> export SCRATCH_DEV=tmpfs_scratch
-> export SCRATCH_MNT=/tmp/scratch
-> ```
->
-> Run `./check -overlay tests` to execute test case on overlay+tmpfs.
->
-> Signed-off-by: Baokun Li <libaokun1@huawei.com>
+On Wed, May 11, 2022 at 02:55:37PM +1000, Dave Chinner wrote:
+> On Tue, May 10, 2022 at 08:25:20PM -0400, Gabriel Krisman Bertazi wrote:
+> > seqres is not properly expanded on these error paths, causing a file
+> > called seqres.full to be created instead.
+> > 
+> > Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+> > ---
+> >  common/casefold | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/common/casefold b/common/casefold
+> > index 9172d818125a..7e8f941211db 100644
+> > --- a/common/casefold
+> > +++ b/common/casefold
+> > @@ -25,7 +25,7 @@ _require_scratch_casefold()
+> >  		_notrun "$FSTYP does not support casefold feature"
+> >  	fi
+> >  
+> > -	if ! _scratch_mkfs_casefold &>>seqres.full; then
+> > +	if ! _scratch_mkfs_casefold &>>$seqres.full; then
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+By running `grep -rsn seqres|grep -v \$seqres`, I think this's only one file
+we missed '$' for 'seqres'. So this fix is good to me. And...
 
-> ---
-> V1->V2:
->         Fix the bug in version V1 and fix the issue in cycle_mount.
-> V2->V3:
->         Merge two patches into one completed patch.
-> V3->V4:
->         Cycle mount the overlay without cycle mounting the base fs.
->
-> V1: https://patchwork.kernel.org/project/fstests/patch/20220424063751.1067376-1-libaokun1@huawei.com/
-> V2: https://patchwork.kernel.org/project/fstests/cover/20220507094524.949615-1-libaokun1@huawei.com/
-> V3: https://patchwork.kernel.org/project/fstests/patch/20220510020434.2561224-1-libaokun1@huawei.com/
->
->  common/config  | 12 ++++++------
->  common/overlay |  2 +-
->  common/rc      | 39 ++++++++++++++++++++++++++++++---------
->  3 files changed, 37 insertions(+), 16 deletions(-)
->
-> diff --git a/common/config b/common/config
-> index 1033b890..d5953176 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -610,15 +610,15 @@ _overlay_config_override()
->         [ ! -d "$TEST_DEV" ] || export OVL_BASE_TEST_DIR="$TEST_DEV"
->         [ ! -d "$SCRATCH_DEV" ] || export OVL_BASE_SCRATCH_MNT="$SCRATCH_DEV"
->
-> +       # Config file may specify base fs type, but we obay -overlay flag
-> +       [ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
-> +       export FSTYP=overlay
-> +
->         # 2. SCRATCH/TEST_DEV point to the base fs partitions.  In this case,
->         #    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
->         #    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
->         #    overlayfs base and mount dirs inside base fs mount.
-> -       [ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
-> -
-> -       # Config file may specify base fs type, but we obay -overlay flag
-> -       [ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
-> -       export FSTYP=overlay
-> +       [ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
->
->         # Store original base fs vars
->         export OVL_BASE_TEST_DEV="$TEST_DEV"
-> @@ -634,7 +634,7 @@ _overlay_config_override()
->         export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
->         export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
->
-> -       [ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
-> +       [ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
->
->         # Store original base fs vars
->         export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
-> diff --git a/common/overlay b/common/overlay
-> index fff67ba1..c4e7ee58 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -81,7 +81,7 @@ _overlay_base_mount()
->                 return 1
->         fi
->
-> -       _mount $* $dev $mnt
-> +       _mount -t $OVL_BASE_FSTYP $* $dev $mnt
->         _idmapped_mount $dev $mnt
->  }
->
-> diff --git a/common/rc b/common/rc
-> index 553ae350..0d50cc22 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -409,15 +409,25 @@ _scratch_remount()
->  _scratch_cycle_mount()
->  {
->      local opts="$1"
-> +    local unmounted
-> +
-> +    case "$FSTYP" in
-> +    tmpfs)
-> +        _scratch_remount "$opts"
-> +        return
-> +        ;;
-> +    overlay)
-> +        if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
-> +            $UMOUNT_PROG $SCRATCH_MNT
-> +            unmounted=true
-> +        fi
-> +        ;;
-> +    esac
->
-> -    if [ "$FSTYP" = tmpfs ]; then
-> -       _scratch_remount "$opts"
-> -       return
-> -    fi
->      if test -n "$opts"; then
->         opts="-o $opts"
->      fi
-> -    _scratch_unmount
-> +    [ "$unmounted" = true ] || _scratch_unmount
->      _try_scratch_mount "$opts" || _fail "cycle mount failed"
->  }
->
-> @@ -522,10 +532,21 @@ _test_unmount()
->
->  _test_cycle_mount()
->  {
-> -    if [ "$FSTYP" = tmpfs ]; then
-> -       return
-> -    fi
-> -    _test_unmount
-> +    local unmounted
-> +
-> +    case "$FSTYP" in
-> +    tmpfs)
-> +        return
-> +        ;;
-> +    overlay)
-> +        if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
-> +            $UMOUNT_PROG $TEST_DIR
-> +            unmounted=true
-> +        fi
-> +        ;;
-> +    esac
-> +
-> +    [ "$unmounted" = true ] || _test_unmount
->      _test_mount
->  }
->
-> --
-> 2.31.1
->
+> 
+> PLease add a space between the &>> and $seqres.full while you are
+> fixing this. It's unreadable without proper whitespace separation...
+
+I'll merge your V2 patch, after you change it as Dave suggested above.
+
+Thanks,
+Zorro
+
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
+
