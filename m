@@ -2,147 +2,183 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45945C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 06:25:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A77FEC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 08:20:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230088AbiEKGZS (ORCPT
+        id S243542AbiEKIUg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 02:25:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57366 "EHLO
+        Wed, 11 May 2022 04:20:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44060 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241688AbiEKGZP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 02:25:15 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 090E0227807
-        for <fstests@vger.kernel.org>; Tue, 10 May 2022 23:25:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652250313;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=o3abCV31hEIagI/Cf2hwMAxBja66bv5qyGLhg7RJLWc=;
-        b=eGZx7RL4IH10HlDBPFg5K7FGmA71OdE4jXh3DBaWoNQDN4I/PCaWM1LYbyO09IeGHURHiv
-        0xsPimy9sqIeoncbLjlfqjRA4BRmo0q3p51tUlf4VJBnhAPylqsh5qd3WkCdtCykMMyQf5
-        rOAARruYqpIW6UJZSQIfAf1PDRZRIsM=
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
- [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-397-c41UYSE6Msqn3gBS-o2Frg-1; Wed, 11 May 2022 02:25:11 -0400
-X-MC-Unique: c41UYSE6Msqn3gBS-o2Frg-1
-Received: by mail-qt1-f198.google.com with SMTP id i11-20020ac85e4b000000b002f3d8c3a96dso879663qtx.9
-        for <fstests@vger.kernel.org>; Tue, 10 May 2022 23:25:11 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=o3abCV31hEIagI/Cf2hwMAxBja66bv5qyGLhg7RJLWc=;
-        b=Lvdzu0K0g3MSahpi5jv7gRaREpb7T8Ixm8IOz/+KDJ85dbJQOLpIBR9lwZR+rJPz11
-         SZTd9jX6qPVrIYdP7DBGNWrnG5oS2yl0aJMZ4nY57Q9487dA97TSlpvY0Ni105Me3jj8
-         iMgKYG/O+YyySARO5boJJr3/pNLcy91xTrJ+P1US2ufBLWJiGrbL+fzNBg+dGH8+/MEF
-         enSUHOv7e16FuNLWVpVuqg8wrl9LD6GWnXHBr44/LZCIsSv1PHJAqtjfbUCGBiBPs2mD
-         rjCHtdLBaDcBzBaItWV+UNvLoYLbbJGeivd+vWGyBfqLSNNbSuYjuH1gIBo7spbbijtO
-         gX+w==
-X-Gm-Message-State: AOAM5339kaVr6xsjqEeeG2v61YpEC0aJH20x5xfkEwduCp9NPCV+DLHy
-        /am1q1v6Uq1i+//iV3Ml+kIT2UNOYNqWQiIgYJ90NeOjuhUR4j0oce2JhTwMpjfH1mpUTg8dINU
-        YRP5HG640qzujUbWAtg==
-X-Received: by 2002:a05:620a:40c8:b0:6a0:922b:2d82 with SMTP id g8-20020a05620a40c800b006a0922b2d82mr9969598qko.252.1652250311106;
-        Tue, 10 May 2022 23:25:11 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJykqVcKNhhyYS6Y76lvSPlfcHxP/l7/GoT5qBFEzzRZOvzT2VGfolaTnc8xcziW6QWY+55cQA==
-X-Received: by 2002:a05:620a:40c8:b0:6a0:922b:2d82 with SMTP id g8-20020a05620a40c800b006a0922b2d82mr9969586qko.252.1652250310816;
-        Tue, 10 May 2022 23:25:10 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id h8-20020ac85148000000b002f3ef928fbbsm626311qtn.72.2022.05.10.23.25.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 May 2022 23:25:10 -0700 (PDT)
-Date:   Wed, 11 May 2022 14:25:04 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Lukas Czerner <lczerner@redhat.com>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org
-Subject: Re: [xfstests PATCH] ext4/053: fix the rejected mount option testing
-Message-ID: <20220511062504.c4ed7rhdyqfe54y6@zlang-mailbox>
-Mail-Followup-To: Eric Biggers <ebiggers@kernel.org>,
-        Lukas Czerner <lczerner@redhat.com>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org
-References: <20220430192130.131842-1-ebiggers@kernel.org>
- <Ynmmy+bWp0Q1/747@sol.localdomain>
- <20220510094308.mhzvcgq5wrat5qao@fedora>
- <20220510154359.xfhmumcmb4o37qdy@zlang-mailbox>
- <Ynqwotv9lQvt3TV3@sol.localdomain>
+        with ESMTP id S243628AbiEKIUQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 04:20:16 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BD882380F9
+        for <fstests@vger.kernel.org>; Wed, 11 May 2022 01:20:14 -0700 (PDT)
+Received: from dggpeml500020.china.huawei.com (unknown [172.30.72.57])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4Kynql6pVGzfbXC;
+        Wed, 11 May 2022 16:18:59 +0800 (CST)
+Received: from huawei.com (10.175.127.227) by dggpeml500020.china.huawei.com
+ (7.185.36.88) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Wed, 11 May
+ 2022 16:20:12 +0800
+From:   Baokun Li <libaokun1@huawei.com>
+To:     <fstests@vger.kernel.org>
+CC:     <zlang@redhat.com>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
+        <libaokun1@huawei.com>, <chengzhihao1@huawei.com>,
+        <yukuai3@huawei.com>
+Subject: [RFC v4] common: xfstests support overlay+tmpfs
+Date:   Wed, 11 May 2022 16:34:04 +0800
+Message-ID: <20220511083404.3315147-1-libaokun1@huawei.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Ynqwotv9lQvt3TV3@sol.localdomain>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.127.227]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ dggpeml500020.china.huawei.com (7.185.36.88)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 10, 2022 at 11:36:18AM -0700, Eric Biggers wrote:
-> On Tue, May 10, 2022 at 11:43:59PM +0800, Zorro Lang wrote:
-> > On Tue, May 10, 2022 at 11:43:08AM +0200, Lukas Czerner wrote:
-> > > On Mon, May 09, 2022 at 04:42:03PM -0700, Eric Biggers wrote:
-> > > > On Sat, Apr 30, 2022 at 12:21:30PM -0700, Eric Biggers wrote:
-> > > > > From: Eric Biggers <ebiggers@google.com>
-> > > > > 
-> > > > > 'not_mnt OPTIONS' seems to have been intended to test that the
-> > > > > filesystem cannot be mounted at all with the given OPTIONS, meaning that
-> > > > > the mount fails as opposed to the options being ignored.  However, this
-> > > > > doesn't actually work, as shown by the fact that the test case 'not_mnt
-> > > > > test_dummy_encryption=v3' is passing in the !CONFIG_FS_ENCRYPTION case.
-> > > > > Actually ext4 ignores this mount option when !CONFIG_FS_ENCRYPTION.
-> > > > > (The ext4 behavior might be changed, but that is besides the point.)
-> > > > > 
-> > > > > The problem is that the do_mnt() helper function is being misused in a
-> > > > > context where a mount failure is expected, and it does some additional
-> > > > > remount tests that don't make sense in that context.  So if the mount
-> > > > > unexpectedly succeeds, then one of these later tests can still "fail",
-> > > > > causing the unexpected success to be shadowed by a later failure, which
-> > > > > causes the overall test case to pass since it expects a failure.
-> > > > > 
-> > > > > Fix this by reworking not_mnt() and not_remount_noumount() to use
-> > > > > simple_mount() in cases where they are expecting a failure.  Also fix
-> > > > > up some of the naming and calling conventions to be less confusing.
-> > > > > Finally, make sure to test that remounting fails too, not just mounting.
-> > > > > 
-> > > > > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > > > > ---
-> > > > >  tests/ext4/053 | 148 ++++++++++++++++++++++++++-----------------------
-> > > > >  1 file changed, 78 insertions(+), 70 deletions(-)
-> > > > 
-> > > > Lukas, any thoughts on this patch?  You're the author of this test.
-> > > > 
-> > > > - Eric
-> > > 
-> > > Haven't tested it myself but the change looks fine, thanks.
-> > 
-> > Thanks for you help to review this patch. There's an new failure[1] after we
-> > merged this patch:
-> >   "SHOULD FAIL remounting ext2 "commit=7" (remount unexpectedly succeeded) FAILED"
-> > 
-> > As this test generally passed, so before I give "Oops" to others, I hope to
-> > check with you that if this's an expected failure we need to fix in kernel
-> > or in this case itself?
-> > 
-> 
-> This appears to be a kernel bug, so to fix it I've sent the patch
-> "ext4: reject the 'commit' option on ext2 filesystems"
-> (https://lore.kernel.org/r/20220510183232.172615-1-ebiggers@kernel.org).
+The local.config of overlay+tmpfs is as follows:
+```local.config.example
+export FSTYP=tmpfs
+export TEST_DEV=tmpfs_test
+export TEST_DIR=/tmp/test
+export SCRATCH_DEV=tmpfs_scratch
+export SCRATCH_MNT=/tmp/scratch
+```
 
-Thanks, great to know that.
+Run `./check -overlay tests` to execute test case on overlay+tmpfs.
 
-> 
-> I didn't notice this earlier because it's not reproducible with
-> CONFIG_EXT2_FS=y.  But it is reproducible with CONFIG_EXT2_FS=n and
-> CONFIG_EXT4_USE_FOR_EXT2=y.
+Signed-off-by: Baokun Li <libaokun1@huawei.com>
+---
+V1->V2:
+	Fix the bug in version V1 and fix the issue in cycle_mount.
+V2->V3:
+	Merge two patches into one completed patch.
+V3->V4:
+	Cycle mount the overlay without cycle mounting the base fs.
 
-Yes, I tested with this config. I'll remind this failure in next fstests
-announcement, Thanks a lot!
+V1: https://patchwork.kernel.org/project/fstests/patch/20220424063751.1067376-1-libaokun1@huawei.com/
+V2: https://patchwork.kernel.org/project/fstests/cover/20220507094524.949615-1-libaokun1@huawei.com/
+V3: https://patchwork.kernel.org/project/fstests/patch/20220510020434.2561224-1-libaokun1@huawei.com/
 
-Thanks,
-Zorro
+ common/config  | 12 ++++++------
+ common/overlay |  2 +-
+ common/rc      | 39 ++++++++++++++++++++++++++++++---------
+ 3 files changed, 37 insertions(+), 16 deletions(-)
 
-> 
-> - Eric
-> 
+diff --git a/common/config b/common/config
+index 1033b890..d5953176 100644
+--- a/common/config
++++ b/common/config
+@@ -610,15 +610,15 @@ _overlay_config_override()
+ 	[ ! -d "$TEST_DEV" ] || export OVL_BASE_TEST_DIR="$TEST_DEV"
+ 	[ ! -d "$SCRATCH_DEV" ] || export OVL_BASE_SCRATCH_MNT="$SCRATCH_DEV"
+ 
++	# Config file may specify base fs type, but we obay -overlay flag
++	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
++	export FSTYP=overlay
++
+ 	# 2. SCRATCH/TEST_DEV point to the base fs partitions.  In this case,
+ 	#    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
+ 	#    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
+ 	#    overlayfs base and mount dirs inside base fs mount.
+-	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
+-
+-	# Config file may specify base fs type, but we obay -overlay flag
+-	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+-	export FSTYP=overlay
++	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+ 
+ 	# Store original base fs vars
+ 	export OVL_BASE_TEST_DEV="$TEST_DEV"
+@@ -634,7 +634,7 @@ _overlay_config_override()
+ 	export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+ 	export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
+ 
+-	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
++	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || [ "$OVL_BASE_FSTYP" == tmpfs ] || return 0
+ 
+ 	# Store original base fs vars
+ 	export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
+diff --git a/common/overlay b/common/overlay
+index fff67ba1..c4e7ee58 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -81,7 +81,7 @@ _overlay_base_mount()
+ 		return 1
+ 	fi
+ 
+-	_mount $* $dev $mnt
++	_mount -t $OVL_BASE_FSTYP $* $dev $mnt
+ 	_idmapped_mount $dev $mnt
+ }
+ 
+diff --git a/common/rc b/common/rc
+index 553ae350..0d50cc22 100644
+--- a/common/rc
++++ b/common/rc
+@@ -409,15 +409,25 @@ _scratch_remount()
+ _scratch_cycle_mount()
+ {
+     local opts="$1"
++    local unmounted
++
++    case "$FSTYP" in
++    tmpfs)
++        _scratch_remount "$opts"
++        return
++        ;;
++    overlay)
++        if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
++            $UMOUNT_PROG $SCRATCH_MNT
++            unmounted=true
++        fi
++        ;;
++    esac
+ 
+-    if [ "$FSTYP" = tmpfs ]; then
+-	_scratch_remount "$opts"
+-	return
+-    fi
+     if test -n "$opts"; then
+ 	opts="-o $opts"
+     fi
+-    _scratch_unmount
++    [ "$unmounted" = true ] || _scratch_unmount
+     _try_scratch_mount "$opts" || _fail "cycle mount failed"
+ }
+ 
+@@ -522,10 +532,21 @@ _test_unmount()
+ 
+ _test_cycle_mount()
+ {
+-    if [ "$FSTYP" = tmpfs ]; then
+-	return
+-    fi
+-    _test_unmount
++    local unmounted
++
++    case "$FSTYP" in
++    tmpfs)
++        return
++        ;;
++    overlay)
++        if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
++            $UMOUNT_PROG $TEST_DIR
++            unmounted=true
++        fi
++        ;;
++    esac
++
++    [ "$unmounted" = true ] || _test_unmount
+     _test_mount
+ }
+ 
+-- 
+2.31.1
 
