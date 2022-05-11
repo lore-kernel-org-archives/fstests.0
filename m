@@ -2,256 +2,80 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CD51C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 16:01:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 508E3C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 16:33:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244414AbiEKQB3 (ORCPT
+        id S1344811AbiEKQd4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 12:01:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34104 "EHLO
+        Wed, 11 May 2022 12:33:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344252AbiEKQBM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 12:01:12 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0390E73565;
-        Wed, 11 May 2022 09:01:08 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id C9D0761B4C;
-        Wed, 11 May 2022 16:01:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D2D5C340EE;
-        Wed, 11 May 2022 16:01:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652284867;
-        bh=xxbac/MgUsz5BCKj4AKylUQEqB59ChN7BYRnDn4WYlM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=rusN3WLvup/ErEBcKHZuMWTGM7K+4srBtho+5KUM6QJgYWNhPi/3M1T5Y4PZcL3Yn
-         ID/hgB9i1CDgyF3zzXrzS3lbP4M/T9IUa0FlzqgPeuiguYMhJpup6/mrxuPUFtz6AO
-         pmIOEjcoA+PcrlXD5BBaVur2gpoyOusCFO4cBIueFmsZS/oRb+JokCtTgNJn0MZuzN
-         pdJByxxletjX9gC+EJM0qTzA4x76Two6ExK3868H5CfJrMpnBPgCgCEjAhILWmbpPR
-         hwFZ4jDGDT8PcRHErGylelifOWklI8qK4RMf0/jsxyLCE5TS8YZi6N34Jmo03D+1tP
-         9bemnumrRQSCg==
-Date:   Wed, 11 May 2022 09:01:06 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v2] generic: soft quota limits testing within grace time
-Message-ID: <20220511160106.GB27174@magnolia>
-References: <20220509183523.1809778-1-zlang@kernel.org>
+        with ESMTP id S1344804AbiEKQdt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 12:33:49 -0400
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC1412380CF
+        for <fstests@vger.kernel.org>; Wed, 11 May 2022 09:33:48 -0700 (PDT)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: krisman)
+        with ESMTPSA id 64FD31F4321E
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1652286827;
+        bh=dEbPtTq5tRdPhCh62UVOU7rsjNhPTZ6ImnqNgKl/N1M=;
+        h=From:To:Cc:Subject:Date:From;
+        b=G+sHHdbahrAbXi4HuhY4/26GIOO2MdIDvqkwgvh5ecPH4T9lUfb8sPUnvxOzPKffN
+         +vnWJ3pNDlrGG1XfysCnuqMJTouvWH9pdhXs0J1psswEC9f0JFyAK8zEG/P3JuNVaK
+         do2nJ3DkjFI6cM3gey1gfcBKGjXXPonoa/F6zwc3z2v3t02iicU1524Jn+wEh5inYB
+         7mFl6RiazOEJ7s/EsUldiYoXVl1KCV62E6WV0M1BjPTQj+wlxl7ILLivYhtlJ1bgzc
+         aICPziPKaDi2/jJ+RoIv31SQjd4QOEtW/WHNZPlMKh1D1yBmeZGQ/RdZkluI/QM8K/
+         tdgFGNmaBHegA==
+From:   Gabriel Krisman Bertazi <krisman@collabora.com>
+To:     zlang@kernel.org
+Cc:     fstests@vger.kernel.org, david@fromorbit.com,
+        Gabriel Krisman Bertazi <krisman@collabora.com>
+Subject: [PATCH v2] casefold: Fix expansion of seqres variable
+Date:   Wed, 11 May 2022 12:33:40 -0400
+Message-Id: <20220511163340.19969-1-krisman@collabora.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220509183523.1809778-1-zlang@kernel.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 10, 2022 at 02:35:23AM +0800, Zorro Lang wrote:
-> After soft limits are exceeded, within the grace time, fs quota
-> should allow more space allocation before exceeding hard limits,
-> even if allocating many small files.
-> 
-> This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
-> warning counts when we send warnings"). And will help to expose
-> later behavior changes on this side.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Thanks review points from Darrick, V2 move _create_project_quota and
-> _restore_project_quota to common/quota and help them to be common.
-> 
-> Thanks,
-> Zorro
-> 
->  common/quota          | 48 +++++++++++++++++++++++
->  tests/generic/999     | 88 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999.out |  2 +
->  3 files changed, 138 insertions(+)
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
-> 
-> diff --git a/common/quota b/common/quota
-> index 7fa1a61a..67698f74 100644
-> --- a/common/quota
-> +++ b/common/quota
-> @@ -351,5 +351,53 @@ _qsetup()
->  	echo "Using type=$type id=$id" >> $seqres.full
->  }
->  
-> +# Help to create project quota on directory, works for xfs and other fs.
-> +# Usage: _create_project_quota <dirname> <projid> [name]
-> +# Although the [name] is optional, better to specify it if need a fixed name.
-> +_create_project_quota()
-> +{
-> +	local prjdir=$1
-> +	local id=$2
-> +	local name=$3
-> +
-> +	if [ -z "$name" ];then
-> +		name=`echo $projdir | tr \/ \_`
-> +	fi
-> +
-> +	rm -rf $prjdir
-> +	mkdir $prjdir
-> +	chmod ugo+rwx $prjdir
-> +
-> +	if [ -f /etc/projects -a ! -f $tmp.projects.bk ];then
-> +		cat /etc/projects > $tmp.projects.bk
-> +		echo >/etc/projects
-> +	fi
-> +	if [ -f /etc/projid -a ! -f $tmp.projid.bk ];then
-> +		cat /etc/projid > $tmp.projid.bk
-> +		echo >/etc/projid
-> +	fi
-> +
-> +	cat >>/etc/projects <<EOF
-> +$id:$prjdir
-> +EOF
-> +	cat >>/etc/projid <<EOF
-> +$name:$id
-> +EOF
-> +	$XFS_IO_PROG -r -c "chproj $id" -c "chattr +P" $prjdir
-> +}
-> +
-> +# If you've called _create_project_quota, then use this function in _cleanup
-> +_restore_project_quota()
-> +{
-> +	if [ -f $tmp.projects.bk ];then
-> +		cat $tmp.projects.bk > /etc/projects && \
-> +			rm -f $tmp.projects.bk
-> +	fi
-> +	if [ -f $tmp.projid.bk ];then
-> +		cat $tmp.projid.bk > /etc/projid && \
-> +			rm -f $tmp.projid.bk
-> +	fi
-> +}
+seqres is not properly expanded on these error paths, causing a file
+called seqres.full to be created instead.
 
-When I asked you to hoist this, to common/quota, I also meant that you
-should port generic/603 to use the new common helpers.
+Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
 
-(That /can/ be a followup patch though, since 603 does a few more things
-in its project quota setup code.)
+---
+changes since v1:
+  - Add whitespace between variable and std redirection (chinner)
+---
+ common/casefold | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-> +
->  # make sure this script returns success
->  /bin/true
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 00000000..103a74f9
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,88 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 999
-> +#
-> +# Make sure filesystem quota works well, after soft limits are exceeded. The
-> +# fs quota should allow more space allocation before exceeding hard limits
-> +# and with in grace time.
-> +#
-> +# But different with other similar testing, this case trys to write many small
+diff --git a/common/casefold b/common/casefold
+index 9172d818125a..d9126f4c59e6 100644
+--- a/common/casefold
++++ b/common/casefold
+@@ -25,7 +25,7 @@ _require_scratch_casefold()
+ 		_notrun "$FSTYP does not support casefold feature"
+ 	fi
+ 
+-	if ! _scratch_mkfs_casefold &>>seqres.full; then
++	if ! _scratch_mkfs_casefold &>> $seqres.full ; then
+ 		_notrun "$FSTYP userspace tools do not support casefold"
+ 	fi
+ 
+@@ -33,7 +33,7 @@ _require_scratch_casefold()
+ 	# defined by the userspace tools.  This will fail if
+ 	# the userspace tool used a more recent encoding than the one
+ 	# supported in kernel space.
+-	if ! _try_scratch_mount &>>seqres.full; then
++	if ! _try_scratch_mount &>> $seqres.full ; then
+ 		_notrun "kernel can't mount filesystem with the encoding set by userspace"
+ 	fi
+ 	_scratch_unmount
+-- 
+2.36.1
 
-"tries"
-
-> +# files, to cover bc37e4fb5cac (xfs: revert "xfs: actually bump warning counts
-> +# when we send warnings"). If there's a behavior change in one day, this case
-
-"If there's a behavior change some day,"
-
-> +# might help to detect that too.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quota
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	_restore_project_quota
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +# Import common functions.
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_scratch
-> +_require_quota
-> +_require_user
-> +_require_group
-> +
-> +# Make sure the kernel supports project quota
-> +_scratch_mkfs >$seqres.full 2>&1
-> +_scratch_enable_pquota
-> +_qmount_option "prjquota"
-> +_qmount
-> +_require_prjquota $SCRATCH_DEV
-> +
-> +exercise()
-> +{
-> +	local type=$1
-> +	local file=$SCRATCH_MNT/testfile
-> +
-> +	echo "= Test type=$type quota =" >>$seqres.full
-> +	_scratch_unmount
-> +	_scratch_mkfs >>$seqres.full 2>&1
-> +	if [ "$1" = "P" ];then
-> +		_scratch_enable_pquota
-> +	fi
-> +	_qmount
-> +	if [ "$1" = "P" ];then
-> +		_create_project_quota $SCRATCH_MNT/t 100 $qa_user
-> +		file=$SCRATCH_MNT/t/testfile
-> +	fi
-> +
-> +	setquota -${type} $qa_user 1M 500M 0 0 $SCRATCH_MNT
-> +	setquota -${type} -t 86400 86400 $SCRATCH_MNT
-> +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
-> +	# Exceed the soft quota limit a bit at first
-> +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full 2>&1
-> +	# Write more data more times under soft quota limit exhausted condition,
-> +	# but not reach hard limit. To make sure the it won't trigger EDQUOT.
-> +	for ((i=1; i<=100; i++));do
-
-I forget, is there a test like this that also goes to the hard limit?
-
-(The rest of the logic here looks sound, fwiw)
-
---D
-
-> +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full 2>&1
-> +		if [ $? -ne 0 ];then
-> +			echo "Unexpected error (type=$type)!"
-> +			break
-> +		fi
-> +	done
-> +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
-> +}
-> +
-> +_qmount_option "usrquota"
-> +exercise u
-> +_qmount_option "grpquota"
-> +exercise g
-> +_qmount_option "prjquota"
-> +exercise P
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..3b276ca8
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Silence is golden
-> -- 
-> 2.31.1
-> 
