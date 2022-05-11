@@ -2,86 +2,147 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B5F8C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 05:31:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45945C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 06:25:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240867AbiEKFbb (ORCPT
+        id S230088AbiEKGZS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 01:31:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40716 "EHLO
+        Wed, 11 May 2022 02:25:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240442AbiEKFah (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 01:30:37 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 24DD6244F18
-        for <fstests@vger.kernel.org>; Tue, 10 May 2022 22:29:54 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 5F9615346AD;
-        Wed, 11 May 2022 15:29:52 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1noev2-00AZkU-2z; Wed, 11 May 2022 15:29:52 +1000
-Date:   Wed, 11 May 2022 15:29:52 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/298: Add 100ms sleep before scratch_umount
-Message-ID: <20220511052952.GG2306852@dread.disaster.area>
-References: <1652079417-2255-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        with ESMTP id S241688AbiEKGZP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 02:25:15 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 090E0227807
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 23:25:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1652250313;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=o3abCV31hEIagI/Cf2hwMAxBja66bv5qyGLhg7RJLWc=;
+        b=eGZx7RL4IH10HlDBPFg5K7FGmA71OdE4jXh3DBaWoNQDN4I/PCaWM1LYbyO09IeGHURHiv
+        0xsPimy9sqIeoncbLjlfqjRA4BRmo0q3p51tUlf4VJBnhAPylqsh5qd3WkCdtCykMMyQf5
+        rOAARruYqpIW6UJZSQIfAf1PDRZRIsM=
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
+ [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-397-c41UYSE6Msqn3gBS-o2Frg-1; Wed, 11 May 2022 02:25:11 -0400
+X-MC-Unique: c41UYSE6Msqn3gBS-o2Frg-1
+Received: by mail-qt1-f198.google.com with SMTP id i11-20020ac85e4b000000b002f3d8c3a96dso879663qtx.9
+        for <fstests@vger.kernel.org>; Tue, 10 May 2022 23:25:11 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=o3abCV31hEIagI/Cf2hwMAxBja66bv5qyGLhg7RJLWc=;
+        b=Lvdzu0K0g3MSahpi5jv7gRaREpb7T8Ixm8IOz/+KDJ85dbJQOLpIBR9lwZR+rJPz11
+         SZTd9jX6qPVrIYdP7DBGNWrnG5oS2yl0aJMZ4nY57Q9487dA97TSlpvY0Ni105Me3jj8
+         iMgKYG/O+YyySARO5boJJr3/pNLcy91xTrJ+P1US2ufBLWJiGrbL+fzNBg+dGH8+/MEF
+         enSUHOv7e16FuNLWVpVuqg8wrl9LD6GWnXHBr44/LZCIsSv1PHJAqtjfbUCGBiBPs2mD
+         rjCHtdLBaDcBzBaItWV+UNvLoYLbbJGeivd+vWGyBfqLSNNbSuYjuH1gIBo7spbbijtO
+         gX+w==
+X-Gm-Message-State: AOAM5339kaVr6xsjqEeeG2v61YpEC0aJH20x5xfkEwduCp9NPCV+DLHy
+        /am1q1v6Uq1i+//iV3Ml+kIT2UNOYNqWQiIgYJ90NeOjuhUR4j0oce2JhTwMpjfH1mpUTg8dINU
+        YRP5HG640qzujUbWAtg==
+X-Received: by 2002:a05:620a:40c8:b0:6a0:922b:2d82 with SMTP id g8-20020a05620a40c800b006a0922b2d82mr9969598qko.252.1652250311106;
+        Tue, 10 May 2022 23:25:11 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJykqVcKNhhyYS6Y76lvSPlfcHxP/l7/GoT5qBFEzzRZOvzT2VGfolaTnc8xcziW6QWY+55cQA==
+X-Received: by 2002:a05:620a:40c8:b0:6a0:922b:2d82 with SMTP id g8-20020a05620a40c800b006a0922b2d82mr9969586qko.252.1652250310816;
+        Tue, 10 May 2022 23:25:10 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id h8-20020ac85148000000b002f3ef928fbbsm626311qtn.72.2022.05.10.23.25.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 May 2022 23:25:10 -0700 (PDT)
+Date:   Wed, 11 May 2022 14:25:04 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     Lukas Czerner <lczerner@redhat.com>, fstests@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [xfstests PATCH] ext4/053: fix the rejected mount option testing
+Message-ID: <20220511062504.c4ed7rhdyqfe54y6@zlang-mailbox>
+Mail-Followup-To: Eric Biggers <ebiggers@kernel.org>,
+        Lukas Czerner <lczerner@redhat.com>, fstests@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+References: <20220430192130.131842-1-ebiggers@kernel.org>
+ <Ynmmy+bWp0Q1/747@sol.localdomain>
+ <20220510094308.mhzvcgq5wrat5qao@fedora>
+ <20220510154359.xfhmumcmb4o37qdy@zlang-mailbox>
+ <Ynqwotv9lQvt3TV3@sol.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1652079417-2255-1-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=627b49d1
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=omOdbC7AAAAA:8 a=7-415B0cAAAA:8
-        a=_zop-4oxbUxdrHR50OMA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <Ynqwotv9lQvt3TV3@sol.localdomain>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 09, 2022 at 02:56:57PM +0800, Yang Xu wrote:
-> When testing this case on my machine, it reports the following error:
-> umount: /mnt/xfstests/scratch: target is busy.
-> xfs_db: /dev/sda11 contains a mounted filesystem
+On Tue, May 10, 2022 at 11:36:18AM -0700, Eric Biggers wrote:
+> On Tue, May 10, 2022 at 11:43:59PM +0800, Zorro Lang wrote:
+> > On Tue, May 10, 2022 at 11:43:08AM +0200, Lukas Czerner wrote:
+> > > On Mon, May 09, 2022 at 04:42:03PM -0700, Eric Biggers wrote:
+> > > > On Sat, Apr 30, 2022 at 12:21:30PM -0700, Eric Biggers wrote:
+> > > > > From: Eric Biggers <ebiggers@google.com>
+> > > > > 
+> > > > > 'not_mnt OPTIONS' seems to have been intended to test that the
+> > > > > filesystem cannot be mounted at all with the given OPTIONS, meaning that
+> > > > > the mount fails as opposed to the options being ignored.  However, this
+> > > > > doesn't actually work, as shown by the fact that the test case 'not_mnt
+> > > > > test_dummy_encryption=v3' is passing in the !CONFIG_FS_ENCRYPTION case.
+> > > > > Actually ext4 ignores this mount option when !CONFIG_FS_ENCRYPTION.
+> > > > > (The ext4 behavior might be changed, but that is besides the point.)
+> > > > > 
+> > > > > The problem is that the do_mnt() helper function is being misused in a
+> > > > > context where a mount failure is expected, and it does some additional
+> > > > > remount tests that don't make sense in that context.  So if the mount
+> > > > > unexpectedly succeeds, then one of these later tests can still "fail",
+> > > > > causing the unexpected success to be shadowed by a later failure, which
+> > > > > causes the overall test case to pass since it expects a failure.
+> > > > > 
+> > > > > Fix this by reworking not_mnt() and not_remount_noumount() to use
+> > > > > simple_mount() in cases where they are expecting a failure.  Also fix
+> > > > > up some of the naming and calling conventions to be less confusing.
+> > > > > Finally, make sure to test that remounting fails too, not just mounting.
+> > > > > 
+> > > > > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > > > > ---
+> > > > >  tests/ext4/053 | 148 ++++++++++++++++++++++++++-----------------------
+> > > > >  1 file changed, 78 insertions(+), 70 deletions(-)
+> > > > 
+> > > > Lukas, any thoughts on this patch?  You're the author of this test.
+> > > > 
+> > > > - Eric
+> > > 
+> > > Haven't tested it myself but the change looks fine, thanks.
+> > 
+> > Thanks for you help to review this patch. There's an new failure[1] after we
+> > merged this patch:
+> >   "SHOULD FAIL remounting ext2 "commit=7" (remount unexpectedly succeeded) FAILED"
+> > 
+> > As this test generally passed, so before I give "Oops" to others, I hope to
+> > check with you that if this's an expected failure we need to fix in kernel
+> > or in this case itself?
+> > 
 > 
-> scratch_unmount failed, so  _scratch_xfs_db reports scratch_dev is a
-> mounted filesystem. It seems filesystem has something to be doing.
+> This appears to be a kernel bug, so to fix it I've sent the patch
+> "ext4: reject the 'commit' option on ext2 filesystems"
+> (https://lore.kernel.org/r/20220510183232.172615-1-ebiggers@kernel.org).
+
+Thanks, great to know that.
+
 > 
-> To avoid this, just add a 100ms sleep before scratch_umount.
+> I didn't notice this earlier because it's not reproducible with
+> CONFIG_EXT2_FS=y.  But it is reproducible with CONFIG_EXT2_FS=n and
+> CONFIG_EXT4_USE_FOR_EXT2=y.
+
+Yes, I tested with this config. I'll remind this failure in next fstests
+announcement, Thanks a lot!
+
+Thanks,
+Zorro
+
 > 
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> ---
->  tests/xfs/298 | 1 +
->  1 file changed, 1 insertion(+)
+> - Eric
 > 
-> diff --git a/tests/xfs/298 b/tests/xfs/298
-> index b0153ebf..17510379 100755
-> --- a/tests/xfs/298
-> +++ b/tests/xfs/298
-> @@ -51,6 +51,7 @@ while [ $SIZE -lt 1024 ];do
->  	rm $SYMLINK_FILE
->  # umount and check the number of extents on the inode. Should be 0.
->  	cd /
-> +	sleep 0.1
->  	_scratch_unmount >/dev/null 2>&1
 
-What? No.
-
-Never put random undocument sleeps in tests to hide failures - they
-are almost always covering up a problem that needs to be understood
-and fixed.
-
-First thing to do here is understand why the filesystem is busy and
-can't unmount. What is holding a reference that prevents unmount?
-
-Is systemd or udev doing something stupid on your system and so
-racing with unmount? Or is something else going on?
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
