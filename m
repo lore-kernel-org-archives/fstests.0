@@ -2,116 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 160C7C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 09:27:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEF64C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 12:31:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233811AbiEKJ06 (ORCPT
+        id S233312AbiEKMba (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 05:26:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49634 "EHLO
+        Wed, 11 May 2022 08:31:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50668 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240126AbiEKJ0t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 05:26:49 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 037AF33A21
-        for <fstests@vger.kernel.org>; Wed, 11 May 2022 02:26:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652261199;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=kO50a3ZMGqy36vUEXB5sJxbvfk9EgWkkvWo6Ed3qPTw=;
-        b=Rk4ehb/SdS3Q9FoTad/w8DYPL1tFzx1jeXOpyXcUNBIZwn26iJpMt0v+guF4xtl+NrMSK9
-        EW4FMTSU0eq9HMF53czFnAJse2LeSFq+2sH+uHHLvFVogRUlX83SiMu/n7Wc03UZRCrL2b
-        nk6ynX3LMbbZoxWzP3B20hqI11JPNdw=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-247-ohJz1Sh-Npq4QcxyLkbrvg-1; Wed, 11 May 2022 05:26:38 -0400
-X-MC-Unique: ohJz1Sh-Npq4QcxyLkbrvg-1
-Received: by mail-qk1-f198.google.com with SMTP id m1-20020a05620a24c100b006a060e0e241so1392264qkn.17
-        for <fstests@vger.kernel.org>; Wed, 11 May 2022 02:26:38 -0700 (PDT)
+        with ESMTP id S232665AbiEKMba (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 08:31:30 -0400
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEA09A0BCA;
+        Wed, 11 May 2022 05:31:28 -0700 (PDT)
+Received: by mail-pl1-x62c.google.com with SMTP id c9so1762588plh.2;
+        Wed, 11 May 2022 05:31:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=zjzOeWrxTpq1GmqSeFDQGiycbPYhik+3zIQ7m/MZAPI=;
+        b=Rg19OR7srAQTS284Ntvs2UQoBum2j6UFTuNAe2Oju5MTsg7BZ48eXQ83OYdW9aeY6B
+         iYMn/TKdBNNJ7qfv74EO6cGU8YRpPcd9eNeCdGyn2NHHw21qGahc2wyNis8dCYtu9X2e
+         WOU2oGiU+5pp4X+UkbmgKx4IA/vWnCVWzVPckSqRB7wwgGnBaVw0PTYT9lnHu1WSOpuW
+         OzHJE6LqSaZpsvvYiaOFuh2VP9ZyUyDvu4CKfdxeIh1MeN7RLOmBgBydYGavjkztLlXP
+         IHmnWR3sAEQMNseJ/hs+Oxn0O6xh3hDUnDquYTNHIvaOvz0+JLy8t9c38Vw9IrJSXs+A
+         O5MA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=kO50a3ZMGqy36vUEXB5sJxbvfk9EgWkkvWo6Ed3qPTw=;
-        b=cXUedAYbdUjpBubAHZtVSQeJy9lqBRPz1Msv1ThiVrohrLS1+2AkwseFnsCL/wdurD
-         hNDt9hxvLSEqvqHTwxmWyNM0vvRESPPOXbsHn5tVxV+uPMCRV4BPthRF/+vwxyKZbqCi
-         Ykr/Ddn38qELNQxLc30DviZzU9iH6wMi1znYaJIM5AU3vsL8qYyOaIudOvqwQLvqcKQD
-         zx5T99+2U8NDxkd6uL3uSC+1PDSoTe4u53in+27DeTPaH94B9TciROTIrVrI8FdK7RE8
-         klcHaMC+rHdnD9VKBYIm1eaLDI6JvLemRlIpjnf/X0QcB2425SaDKgWi9siO5h5d5tCD
-         unMg==
-X-Gm-Message-State: AOAM530mIbFGGbFmK9eLoIXdBFfmcYX3rdvdqcr94zcspk7yVO2dYkt/
-        p0ovF3/S9cX1Pav5JJXIvPExCKvLgtF1tgkZqDFj5QqGbqRPdPvM5L/fqMHIo8pn4JYLOxixhmo
-        dYGxCTSq6PZJcTuYYCA==
-X-Received: by 2002:a0c:f3d2:0:b0:456:34aa:5978 with SMTP id f18-20020a0cf3d2000000b0045634aa5978mr21406302qvm.59.1652261197355;
-        Wed, 11 May 2022 02:26:37 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy9DdSDA/hx8JTNLJ4q/Q0Cghpa4F7z/Yb30ndeCV2xIF327qcyo8dLa9mbqpVe+mI/T3jrEA==
-X-Received: by 2002:a0c:f3d2:0:b0:456:34aa:5978 with SMTP id f18-20020a0cf3d2000000b0045634aa5978mr21406293qvm.59.1652261197117;
-        Wed, 11 May 2022 02:26:37 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id p6-20020a05620a056600b0069fc13ce226sm859989qkp.87.2022.05.11.02.26.34
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=zjzOeWrxTpq1GmqSeFDQGiycbPYhik+3zIQ7m/MZAPI=;
+        b=q99MMNdn+wKafIL8oNdqib52WUYelCR2xBZ5pgY+fiR+2FAoVG7QjX9fbY8BCBYWH/
+         EonHIB6LFuVr37z73YTQd2mV9BkbSKZzPJXpkRt2WGV1oPV8hywCFlWXPnClYG2BGRXr
+         oos8WHYQOtwAfZ77G7SGVkDM608V6ykX8g3eAdgiVAHv8o6g9XuZhEjqgEl0FEEX7YVk
+         oo6TcmScsO/LOn+LyQP7XyJpt1S3K44HIj61oCx/rR5WEjWPoxnthPQ12IHIl96/PUCp
+         hgSQsvDIIFNQ1NEuTV5S1jnNFuAfwlmZq8Qe//j4Rqkl8JchLpDf6sfI1J0U4jtvIPX0
+         mcvw==
+X-Gm-Message-State: AOAM530UZxA7cgrNXeVEp1HHyMhGLikaFQMm6PvLpXQdu70Mfyv89Npp
+        h3/rRohUM+qD/zLpEIP3LB0=
+X-Google-Smtp-Source: ABdhPJycTQsxAcxbPU8JYSK1lFpoi5BwoFx80k16SyXudGpjZPyygTl4+HJhy6Jkn5as2VOhjNr84Q==
+X-Received: by 2002:a17:902:82c8:b0:15c:f7c7:ef9d with SMTP id u8-20020a17090282c800b0015cf7c7ef9dmr25109043plz.44.1652272288153;
+        Wed, 11 May 2022 05:31:28 -0700 (PDT)
+Received: from localhost ([2406:7400:63:532d:2759:da01:e9ea:1584])
+        by smtp.gmail.com with ESMTPSA id h10-20020a65468a000000b003c14af505f4sm1664877pgr.12.2022.05.11.05.31.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 May 2022 02:26:36 -0700 (PDT)
-Date:   Wed, 11 May 2022 17:26:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Gabriel Krisman Bertazi <krisman@collabora.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] casefold: Fix expansion of seqres variable
-Message-ID: <20220511092631.xejpwka3x7u6uozj@zlang-mailbox>
-Mail-Followup-To: Gabriel Krisman Bertazi <krisman@collabora.com>,
-        fstests@vger.kernel.org
-References: <20220511002520.352812-1-krisman@collabora.com>
- <20220511045537.GF2306852@dread.disaster.area>
+        Wed, 11 May 2022 05:31:27 -0700 (PDT)
+Date:   Wed, 11 May 2022 18:01:22 +0530
+From:   Ritesh Harjani <ritesh.list@gmail.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
+        Lukas Czerner <lczerner@redhat.com>
+Subject: Re: [PATCH] ext4: reject the 'commit' option on ext2 filesystems
+Message-ID: <20220511123122.x3k5zb5txbk6cqrn@riteshh-domain>
+References: <20220510183232.172615-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220511045537.GF2306852@dread.disaster.area>
+In-Reply-To: <20220510183232.172615-1-ebiggers@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 11, 2022 at 02:55:37PM +1000, Dave Chinner wrote:
-> On Tue, May 10, 2022 at 08:25:20PM -0400, Gabriel Krisman Bertazi wrote:
-> > seqres is not properly expanded on these error paths, causing a file
-> > called seqres.full to be created instead.
-> > 
-> > Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
-> > ---
-> >  common/casefold | 4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/common/casefold b/common/casefold
-> > index 9172d818125a..7e8f941211db 100644
-> > --- a/common/casefold
-> > +++ b/common/casefold
-> > @@ -25,7 +25,7 @@ _require_scratch_casefold()
-> >  		_notrun "$FSTYP does not support casefold feature"
-> >  	fi
-> >  
-> > -	if ! _scratch_mkfs_casefold &>>seqres.full; then
-> > +	if ! _scratch_mkfs_casefold &>>$seqres.full; then
+On 22/05/10 11:32AM, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+>
+> The 'commit' option is only applicable for ext3 and ext4 filesystems,
+> and has never been accepted by the ext2 filesystem driver, so the ext4
+> driver shouldn't allow it on ext2 filesystems.
 
-By running `grep -rsn seqres|grep -v \$seqres`, I think this's only one file
-we missed '$' for 'seqres'. So this fix is good to me. And...
+Yes indeed.
 
-> 
-> PLease add a space between the &>> and $seqres.full while you are
-> fixing this. It's unreadable without proper whitespace separation...
+Although with -o commit=1 it doesn't mount due to extra checks when commit is not
+equal to it's default value where it also checks if the fs has journal or not.
 
-I'll merge your V2 patch, after you change it as Dave suggested above.
+[19084.421413] EXT4-fs (loop2): mounting ext2 file system using the ext4 subsystem
+[19084.422679] EXT4-fs (loop2): can't mount with commit=1, fs mounted w/o journal
 
-Thanks,
-Zorro
 
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
+But when mounted with -o commit=5, ext2 gets mounted w/o this patch ;)
 
+[19146.337981] EXT4-fs (loop2): mounting ext2 file system using the ext4 subsystem
+[19146.345082] EXT4-fs (loop2): mounted filesystem without journal. Quota mode: none.
+
+Feel free to add -
+
+Reviewed-by: Ritesh Harjani <ritesh.list@gmail.com>
+
+-ritesh
+
+>
+> This fixes a failure in xfstest ext4/053.
+>
+> Fixes: 8dc0aa8cf0f7 ("ext4: check incompatible mount options while mounting ext2/3")
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  fs/ext4/super.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/fs/ext4/super.c b/fs/ext4/super.c
+> index 1847b46af8083..69d67724df24f 100644
+> --- a/fs/ext4/super.c
+> +++ b/fs/ext4/super.c
+> @@ -1913,6 +1913,7 @@ static const struct mount_opts {
+>  	 MOPT_EXT4_ONLY | MOPT_CLEAR},
+>  	{Opt_warn_on_error, EXT4_MOUNT_WARN_ON_ERROR, MOPT_SET},
+>  	{Opt_nowarn_on_error, EXT4_MOUNT_WARN_ON_ERROR, MOPT_CLEAR},
+> +	{Opt_commit, 0, MOPT_NO_EXT2},
+>  	{Opt_nojournal_checksum, EXT4_MOUNT_JOURNAL_CHECKSUM,
+>  	 MOPT_EXT4_ONLY | MOPT_CLEAR},
+>  	{Opt_journal_checksum, EXT4_MOUNT_JOURNAL_CHECKSUM,
+>
+> base-commit: 23e3d7f7061f8682c751c46512718f47580ad8f0
+> --
+> 2.36.1
+>
