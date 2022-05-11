@@ -2,118 +2,256 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEF64C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 12:31:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CD51C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 16:01:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233312AbiEKMba (ORCPT
+        id S244414AbiEKQB3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 08:31:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50668 "EHLO
+        Wed, 11 May 2022 12:01:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232665AbiEKMba (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 08:31:30 -0400
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEA09A0BCA;
-        Wed, 11 May 2022 05:31:28 -0700 (PDT)
-Received: by mail-pl1-x62c.google.com with SMTP id c9so1762588plh.2;
-        Wed, 11 May 2022 05:31:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=zjzOeWrxTpq1GmqSeFDQGiycbPYhik+3zIQ7m/MZAPI=;
-        b=Rg19OR7srAQTS284Ntvs2UQoBum2j6UFTuNAe2Oju5MTsg7BZ48eXQ83OYdW9aeY6B
-         iYMn/TKdBNNJ7qfv74EO6cGU8YRpPcd9eNeCdGyn2NHHw21qGahc2wyNis8dCYtu9X2e
-         WOU2oGiU+5pp4X+UkbmgKx4IA/vWnCVWzVPckSqRB7wwgGnBaVw0PTYT9lnHu1WSOpuW
-         OzHJE6LqSaZpsvvYiaOFuh2VP9ZyUyDvu4CKfdxeIh1MeN7RLOmBgBydYGavjkztLlXP
-         IHmnWR3sAEQMNseJ/hs+Oxn0O6xh3hDUnDquYTNHIvaOvz0+JLy8t9c38Vw9IrJSXs+A
-         O5MA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=zjzOeWrxTpq1GmqSeFDQGiycbPYhik+3zIQ7m/MZAPI=;
-        b=q99MMNdn+wKafIL8oNdqib52WUYelCR2xBZ5pgY+fiR+2FAoVG7QjX9fbY8BCBYWH/
-         EonHIB6LFuVr37z73YTQd2mV9BkbSKZzPJXpkRt2WGV1oPV8hywCFlWXPnClYG2BGRXr
-         oos8WHYQOtwAfZ77G7SGVkDM608V6ykX8g3eAdgiVAHv8o6g9XuZhEjqgEl0FEEX7YVk
-         oo6TcmScsO/LOn+LyQP7XyJpt1S3K44HIj61oCx/rR5WEjWPoxnthPQ12IHIl96/PUCp
-         hgSQsvDIIFNQ1NEuTV5S1jnNFuAfwlmZq8Qe//j4Rqkl8JchLpDf6sfI1J0U4jtvIPX0
-         mcvw==
-X-Gm-Message-State: AOAM530UZxA7cgrNXeVEp1HHyMhGLikaFQMm6PvLpXQdu70Mfyv89Npp
-        h3/rRohUM+qD/zLpEIP3LB0=
-X-Google-Smtp-Source: ABdhPJycTQsxAcxbPU8JYSK1lFpoi5BwoFx80k16SyXudGpjZPyygTl4+HJhy6Jkn5as2VOhjNr84Q==
-X-Received: by 2002:a17:902:82c8:b0:15c:f7c7:ef9d with SMTP id u8-20020a17090282c800b0015cf7c7ef9dmr25109043plz.44.1652272288153;
-        Wed, 11 May 2022 05:31:28 -0700 (PDT)
-Received: from localhost ([2406:7400:63:532d:2759:da01:e9ea:1584])
-        by smtp.gmail.com with ESMTPSA id h10-20020a65468a000000b003c14af505f4sm1664877pgr.12.2022.05.11.05.31.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 May 2022 05:31:27 -0700 (PDT)
-Date:   Wed, 11 May 2022 18:01:22 +0530
-From:   Ritesh Harjani <ritesh.list@gmail.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
-        Lukas Czerner <lczerner@redhat.com>
-Subject: Re: [PATCH] ext4: reject the 'commit' option on ext2 filesystems
-Message-ID: <20220511123122.x3k5zb5txbk6cqrn@riteshh-domain>
-References: <20220510183232.172615-1-ebiggers@kernel.org>
+        with ESMTP id S1344252AbiEKQBM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 12:01:12 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0390E73565;
+        Wed, 11 May 2022 09:01:08 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C9D0761B4C;
+        Wed, 11 May 2022 16:01:07 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D2D5C340EE;
+        Wed, 11 May 2022 16:01:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1652284867;
+        bh=xxbac/MgUsz5BCKj4AKylUQEqB59ChN7BYRnDn4WYlM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=rusN3WLvup/ErEBcKHZuMWTGM7K+4srBtho+5KUM6QJgYWNhPi/3M1T5Y4PZcL3Yn
+         ID/hgB9i1CDgyF3zzXrzS3lbP4M/T9IUa0FlzqgPeuiguYMhJpup6/mrxuPUFtz6AO
+         pmIOEjcoA+PcrlXD5BBaVur2gpoyOusCFO4cBIueFmsZS/oRb+JokCtTgNJn0MZuzN
+         pdJByxxletjX9gC+EJM0qTzA4x76Two6ExK3868H5CfJrMpnBPgCgCEjAhILWmbpPR
+         hwFZ4jDGDT8PcRHErGylelifOWklI8qK4RMf0/jsxyLCE5TS8YZi6N34Jmo03D+1tP
+         9bemnumrRQSCg==
+Date:   Wed, 11 May 2022 09:01:06 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] generic: soft quota limits testing within grace time
+Message-ID: <20220511160106.GB27174@magnolia>
+References: <20220509183523.1809778-1-zlang@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220510183232.172615-1-ebiggers@kernel.org>
+In-Reply-To: <20220509183523.1809778-1-zlang@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 22/05/10 11:32AM, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
->
-> The 'commit' option is only applicable for ext3 and ext4 filesystems,
-> and has never been accepted by the ext2 filesystem driver, so the ext4
-> driver shouldn't allow it on ext2 filesystems.
-
-Yes indeed.
-
-Although with -o commit=1 it doesn't mount due to extra checks when commit is not
-equal to it's default value where it also checks if the fs has journal or not.
-
-[19084.421413] EXT4-fs (loop2): mounting ext2 file system using the ext4 subsystem
-[19084.422679] EXT4-fs (loop2): can't mount with commit=1, fs mounted w/o journal
-
-
-But when mounted with -o commit=5, ext2 gets mounted w/o this patch ;)
-
-[19146.337981] EXT4-fs (loop2): mounting ext2 file system using the ext4 subsystem
-[19146.345082] EXT4-fs (loop2): mounted filesystem without journal. Quota mode: none.
-
-Feel free to add -
-
-Reviewed-by: Ritesh Harjani <ritesh.list@gmail.com>
-
--ritesh
-
->
-> This fixes a failure in xfstest ext4/053.
->
-> Fixes: 8dc0aa8cf0f7 ("ext4: check incompatible mount options while mounting ext2/3")
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+On Tue, May 10, 2022 at 02:35:23AM +0800, Zorro Lang wrote:
+> After soft limits are exceeded, within the grace time, fs quota
+> should allow more space allocation before exceeding hard limits,
+> even if allocating many small files.
+> 
+> This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
+> warning counts when we send warnings"). And will help to expose
+> later behavior changes on this side.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
->  fs/ext4/super.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-> index 1847b46af8083..69d67724df24f 100644
-> --- a/fs/ext4/super.c
-> +++ b/fs/ext4/super.c
-> @@ -1913,6 +1913,7 @@ static const struct mount_opts {
->  	 MOPT_EXT4_ONLY | MOPT_CLEAR},
->  	{Opt_warn_on_error, EXT4_MOUNT_WARN_ON_ERROR, MOPT_SET},
->  	{Opt_nowarn_on_error, EXT4_MOUNT_WARN_ON_ERROR, MOPT_CLEAR},
-> +	{Opt_commit, 0, MOPT_NO_EXT2},
->  	{Opt_nojournal_checksum, EXT4_MOUNT_JOURNAL_CHECKSUM,
->  	 MOPT_EXT4_ONLY | MOPT_CLEAR},
->  	{Opt_journal_checksum, EXT4_MOUNT_JOURNAL_CHECKSUM,
->
-> base-commit: 23e3d7f7061f8682c751c46512718f47580ad8f0
-> --
-> 2.36.1
->
+> 
+> Thanks review points from Darrick, V2 move _create_project_quota and
+> _restore_project_quota to common/quota and help them to be common.
+> 
+> Thanks,
+> Zorro
+> 
+>  common/quota          | 48 +++++++++++++++++++++++
+>  tests/generic/999     | 88 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/999.out |  2 +
+>  3 files changed, 138 insertions(+)
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/common/quota b/common/quota
+> index 7fa1a61a..67698f74 100644
+> --- a/common/quota
+> +++ b/common/quota
+> @@ -351,5 +351,53 @@ _qsetup()
+>  	echo "Using type=$type id=$id" >> $seqres.full
+>  }
+>  
+> +# Help to create project quota on directory, works for xfs and other fs.
+> +# Usage: _create_project_quota <dirname> <projid> [name]
+> +# Although the [name] is optional, better to specify it if need a fixed name.
+> +_create_project_quota()
+> +{
+> +	local prjdir=$1
+> +	local id=$2
+> +	local name=$3
+> +
+> +	if [ -z "$name" ];then
+> +		name=`echo $projdir | tr \/ \_`
+> +	fi
+> +
+> +	rm -rf $prjdir
+> +	mkdir $prjdir
+> +	chmod ugo+rwx $prjdir
+> +
+> +	if [ -f /etc/projects -a ! -f $tmp.projects.bk ];then
+> +		cat /etc/projects > $tmp.projects.bk
+> +		echo >/etc/projects
+> +	fi
+> +	if [ -f /etc/projid -a ! -f $tmp.projid.bk ];then
+> +		cat /etc/projid > $tmp.projid.bk
+> +		echo >/etc/projid
+> +	fi
+> +
+> +	cat >>/etc/projects <<EOF
+> +$id:$prjdir
+> +EOF
+> +	cat >>/etc/projid <<EOF
+> +$name:$id
+> +EOF
+> +	$XFS_IO_PROG -r -c "chproj $id" -c "chattr +P" $prjdir
+> +}
+> +
+> +# If you've called _create_project_quota, then use this function in _cleanup
+> +_restore_project_quota()
+> +{
+> +	if [ -f $tmp.projects.bk ];then
+> +		cat $tmp.projects.bk > /etc/projects && \
+> +			rm -f $tmp.projects.bk
+> +	fi
+> +	if [ -f $tmp.projid.bk ];then
+> +		cat $tmp.projid.bk > /etc/projid && \
+> +			rm -f $tmp.projid.bk
+> +	fi
+> +}
+
+When I asked you to hoist this, to common/quota, I also meant that you
+should port generic/603 to use the new common helpers.
+
+(That /can/ be a followup patch though, since 603 does a few more things
+in its project quota setup code.)
+
+> +
+>  # make sure this script returns success
+>  /bin/true
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 00000000..103a74f9
+> --- /dev/null
+> +++ b/tests/generic/999
+> @@ -0,0 +1,88 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 999
+> +#
+> +# Make sure filesystem quota works well, after soft limits are exceeded. The
+> +# fs quota should allow more space allocation before exceeding hard limits
+> +# and with in grace time.
+> +#
+> +# But different with other similar testing, this case trys to write many small
+
+"tries"
+
+> +# files, to cover bc37e4fb5cac (xfs: revert "xfs: actually bump warning counts
+> +# when we send warnings"). If there's a behavior change in one day, this case
+
+"If there's a behavior change some day,"
+
+> +# might help to detect that too.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quota
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	_restore_project_quota
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/quota
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_scratch
+> +_require_quota
+> +_require_user
+> +_require_group
+> +
+> +# Make sure the kernel supports project quota
+> +_scratch_mkfs >$seqres.full 2>&1
+> +_scratch_enable_pquota
+> +_qmount_option "prjquota"
+> +_qmount
+> +_require_prjquota $SCRATCH_DEV
+> +
+> +exercise()
+> +{
+> +	local type=$1
+> +	local file=$SCRATCH_MNT/testfile
+> +
+> +	echo "= Test type=$type quota =" >>$seqres.full
+> +	_scratch_unmount
+> +	_scratch_mkfs >>$seqres.full 2>&1
+> +	if [ "$1" = "P" ];then
+> +		_scratch_enable_pquota
+> +	fi
+> +	_qmount
+> +	if [ "$1" = "P" ];then
+> +		_create_project_quota $SCRATCH_MNT/t 100 $qa_user
+> +		file=$SCRATCH_MNT/t/testfile
+> +	fi
+> +
+> +	setquota -${type} $qa_user 1M 500M 0 0 $SCRATCH_MNT
+> +	setquota -${type} -t 86400 86400 $SCRATCH_MNT
+> +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	# Exceed the soft quota limit a bit at first
+> +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full 2>&1
+> +	# Write more data more times under soft quota limit exhausted condition,
+> +	# but not reach hard limit. To make sure the it won't trigger EDQUOT.
+> +	for ((i=1; i<=100; i++));do
+
+I forget, is there a test like this that also goes to the hard limit?
+
+(The rest of the logic here looks sound, fwiw)
+
+--D
+
+> +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full 2>&1
+> +		if [ $? -ne 0 ];then
+> +			echo "Unexpected error (type=$type)!"
+> +			break
+> +		fi
+> +	done
+> +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +}
+> +
+> +_qmount_option "usrquota"
+> +exercise u
+> +_qmount_option "grpquota"
+> +exercise g
+> +_qmount_option "prjquota"
+> +exercise P
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 00000000..3b276ca8
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Silence is golden
+> -- 
+> 2.31.1
+> 
