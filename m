@@ -2,115 +2,196 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D792C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 May 2022 16:43:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8C9FC433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 May 2022 16:53:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245666AbiEKQnM (ORCPT
+        id S1356460AbiELQxI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 May 2022 12:43:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47856 "EHLO
+        Thu, 12 May 2022 12:53:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236666AbiEKQnL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 May 2022 12:43:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C5E6062A1D
-        for <fstests@vger.kernel.org>; Wed, 11 May 2022 09:43:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652287389;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=gyD0LuMwGH55iSnxhEA4ec7RPvLhktAlhNu2qGKmJrQ=;
-        b=FvNcLYgyDaWdNGelWItgbtJrMr7RZONdHclJozg2/+SV4Lz84J/ZbvKcSupH7Kz0rXtlI7
-        hgZlUqzQaaiLSBgDOzKh8GoOrmkpQqFTXk5zk3qvMkie8PRLEnZPlY2yFmyOfuYAkQX/0B
-        Alct6cbw/89lBDBKDMPFzQocoyxG24M=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-462-AWqqstPlOGynmQlFofaC3w-1; Wed, 11 May 2022 12:43:08 -0400
-X-MC-Unique: AWqqstPlOGynmQlFofaC3w-1
-Received: by mail-qt1-f197.google.com with SMTP id a11-20020a05622a02cb00b002f3d23bdca2so2005940qtx.5
-        for <fstests@vger.kernel.org>; Wed, 11 May 2022 09:43:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=gyD0LuMwGH55iSnxhEA4ec7RPvLhktAlhNu2qGKmJrQ=;
-        b=ulQXW8pJCtSd65PxlXddAgKaXHxm0kgXWXaxAZkgVOPPBvNI4acGHVrGhkkF3Vvbbe
-         k+v6k8WHaVfmvl8CtDrv8NXbeUgAz1KMStRzcOOyIj0wOTNEvGUE85QjkJJPgkdbD31B
-         yk+4ci7Nj0VEWcH4GheEvHJXlAOszCCkPjV4AEVCKttyfQpMgwuDp3HS4Pm6HPTwGH/W
-         73ws8xtTI/qUjzCfPmuoyqyx10MM+JQ6yVjv9cIjxnUqHqTTco+AqRflBjqxi9q7ttyz
-         3fSwMYe2rg7UD3gnGNjjCEfdPQXOwAfsQgjgztIxQYfEHc4CWeEF1zpQ8DXKkRaqGOfU
-         0ihA==
-X-Gm-Message-State: AOAM531dF7X1hRqqqjoAXKoXKJfLDKDTjaVEEtcq8k7UG0hRfTeo0zLX
-        hABlkWz2HjnW1G3tCg23WPW7tB00T7QXgk7gPpM26xO5/wBrJi2E4HTa8hrrerqYBAUvmA3htrR
-        uKjTrRxyyt+VLg0ZXpQ==
-X-Received: by 2002:a37:6786:0:b0:6a0:59f1:d8ae with SMTP id b128-20020a376786000000b006a059f1d8aemr14493212qkc.649.1652287387954;
-        Wed, 11 May 2022 09:43:07 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJx0T65Ktfw4ud+QJxzp6yDV+7rBotrer5zpmcS58O+2AtEmMGoRYSztSfl8ztuPvRctxRPfkA==
-X-Received: by 2002:a37:6786:0:b0:6a0:59f1:d8ae with SMTP id b128-20020a376786000000b006a059f1d8aemr14493202qkc.649.1652287387690;
-        Wed, 11 May 2022 09:43:07 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id k14-20020a05620a414e00b0069fc2a7e7a5sm1567394qko.75.2022.05.11.09.43.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 May 2022 09:43:07 -0700 (PDT)
-Date:   Thu, 12 May 2022 00:43:02 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Gabriel Krisman Bertazi <krisman@collabora.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] casefold: Fix expansion of seqres variable
-Message-ID: <20220511164302.hfun2kqwqn4dwkub@zlang-mailbox>
-Mail-Followup-To: Gabriel Krisman Bertazi <krisman@collabora.com>,
-        fstests@vger.kernel.org
-References: <20220511163340.19969-1-krisman@collabora.com>
+        with ESMTP id S1356452AbiELQxI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 May 2022 12:53:08 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F2A73DA76
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 09:53:06 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 23FDFB82948
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 16:53:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D96CFC385B8;
+        Thu, 12 May 2022 16:53:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1652374383;
+        bh=IwSwZMSRVlliDgZNCmpSD+bezRxjFsenOA0+RnPDhRo=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Hs6R1vSMbCWqFD3zkJ/a463MLsKNpumLW22r14PiQN0Svn1ppx11vi2I4VXTpUgfB
+         2D7unSdmTFOcucu9r0OoRh03TaF7TtTNh+J2vA4gN5LUjftv1fhioouv71mkGGNsT7
+         AOaunu6QvDn8BXGXPGV4qkzo83CNx8VXoc852ilJSJGxHCGlUFqxwBpTQ2hkwvjXkf
+         Xj0CDJtIj5wjFCunpeHQOoUJJ4FhXrF30vM77Q+odqTBII+tCHQc2brqCEuKforEfI
+         q+KjvM05RIhe4OVPSQgbig5gBh0xtUp/6DztIm7HLOHEnuOrvbCZDBikL1QjX8umji
+         kYtGyqyENPsVg==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>
+Cc:     "Christian Brauner (Microsoft)" <brauner@kernel.org>,
+        Dave Chinner <david@fromorbit.com>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>,
+        "Darrick J. Wong" <djwong@kernel.org>
+Subject: [PATCH v2 00/13] rename & split tests
+Date:   Thu, 12 May 2022 18:52:37 +0200
+Message-Id: <20220512165250.450989-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220511163340.19969-1-krisman@collabora.com>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6010; h=from:subject; bh=6IJ6CPQEp6LitJsuVFdZ1tQ2a+0qKJTNWRhhSB1EZgI=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSTVWrtdvnIo9HhQTF1C1/rI/9fzFe2Fnact0K5YHLgsVdYq L8i5o5SFQYyLQVZMkcWh3SRcbjlPxWajTA2YOaxMIEMYuDgFYCKXjRgZbsvd1Ws0v/pUJU2X96pugH +P8FJpB/5t4goffT6/cNuyhpHhiX1/R5h+Ruell5Gu4jah56TaytYKnTkkYmuzJu19wn9OAA==
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 11, 2022 at 12:33:40PM -0400, Gabriel Krisman Bertazi wrote:
-> seqres is not properly expanded on these error paths, causing a file
-> called seqres.full to be created instead.
-> 
-> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
-> 
-> ---
+From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Hey everyone,
 
-> changes since v1:
->   - Add whitespace between variable and std redirection (chinner)
-> ---
->  common/casefold | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/casefold b/common/casefold
-> index 9172d818125a..d9126f4c59e6 100644
-> --- a/common/casefold
-> +++ b/common/casefold
-> @@ -25,7 +25,7 @@ _require_scratch_casefold()
->  		_notrun "$FSTYP does not support casefold feature"
->  	fi
->  
-> -	if ! _scratch_mkfs_casefold &>>seqres.full; then
-> +	if ! _scratch_mkfs_casefold &>> $seqres.full ; then
->  		_notrun "$FSTYP userspace tools do not support casefold"
->  	fi
->  
-> @@ -33,7 +33,7 @@ _require_scratch_casefold()
->  	# defined by the userspace tools.  This will fail if
->  	# the userspace tool used a more recent encoding than the one
->  	# supported in kernel space.
-> -	if ! _try_scratch_mount &>>seqres.full; then
-> +	if ! _try_scratch_mount &>> $seqres.full ; then
->  		_notrun "kernel can't mount filesystem with the encoding set by userspace"
->  	fi
->  	_scratch_unmount
-> -- 
-> 2.36.1
-> 
+Please note that this patch series contains patches that will be
+rejected by the fstests mailing list because of the amount of changes
+they contain. So tools like b4 will not be able to find the whole patch
+series on a mailing list. In case it's helpful I've added the
+"fstests.vfstest.for-next" tag which can be pulled. Otherwise it's
+possible to simply use the patch series as it appears in your inbox.
+
+All vfstests pass:
+
+#### btrfs ####
+ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+MKFS_OPTIONS  -- /dev/sda4
+MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
+
+btrfs/245 52s ...  54s
+generic/633 58s ...  51s
+generic/644 60s ...  49s
+generic/645 161s ...  143s
+generic/656 63s ...  55s
+Ran: btrfs/245 generic/633 generic/644 generic/645 generic/656
+Passed all 5 tests
+
+#### ext4 ####
+ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+FSTYP         -- ext4
+PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+MKFS_OPTIONS  -- /dev/sda4
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/sda4 /mnt/scratch
+
+generic/633 47s ...  50s
+generic/644 46s ...  49s
+generic/645 135s ...  139s
+generic/656 53s ...  54s
+Ran: generic/633 generic/644 generic/645 generic/656
+Passed all 4 tests
+
+#### xfs ####
+ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+MKFS_OPTIONS  -- -f /dev/sda4
+MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
+
+generic/633 58s ...  58s
+generic/644 62s ...  60s
+generic/645 161s ...  161s
+generic/656 62s ...  63s
+xfs/152 133s ...  133s
+xfs/153 94s ...  92s
+Ran: generic/633 generic/644 generic/645 generic/656 xfs/152 xfs/153
+Passed all 6 tests
+
+/* v2 */
+* This rebases the patchset on top the for-next branch.
+* Last week we merged 858a19c5e9b0 ("idmapped_mounts: Prepare for
+  support for more features"). The patch switched feature checking from
+  a boolean to a flag. It failed convert all tests. This adds a patch to
+  fix this in patch 01/13.
+* A patch has been added to remove an invalid test. The semantics for a
+  specific corner-case where we allowed a mount's idmapping to change
+  while there were active writers will be altered.
+
+/* v1 */
+As announced multiple times already we need to rename and split the
+idmapped mount testsuite into separate source files and also give it a
+better name to reflect the fact that it covers a lot more than just
+idmapped mounts.
+
+I have decided against compiling different binaries for now. Instead we
+compile a single vfstest binary that can be called with various command
+line switches to run the various test suites. This is not different than
+what we did for the idmapped-mounts binary. Of course, nothing prevents
+us from using multiple binaries in the future.
+
+Thanks!
+Christian
+
+Christian Brauner (13):
+  idmapped-mounts: make all tests set their required feature flags
+  src: rename idmapped-mounts folder
+  src/vfs: rename idmapped-mounts.c file
+  vfstest: rename struct t_idmapped_mounts
+  utils: add missing global.h include
+  utils: add struct vfstest_info
+  utils: move helpers into utils
+  missing: move sys_execveat() to missing.h
+  utils: add struct test_suite
+  vfstests: split idmapped mount tests into separate suite
+  vfstest: split out btrfs idmapped mounts test
+  vfstest: split out remaining idmapped mount tests
+  vfs/idmapped-mounts: remove invalid test
+
+ .gitignore                                    |     4 +-
+ common/rc                                     |    32 +-
+ src/Makefile                                  |     2 +-
+ src/detached_mounts_propagation.c             |     2 +-
+ src/feature.c                                 |     2 +-
+ src/idmapped-mounts/idmapped-mounts.c         | 14625 ----------------
+ src/idmapped-mounts/utils.c                   |   425 -
+ src/idmapped-mounts/utils.h                   |   130 -
+ src/{idmapped-mounts => vfs}/Makefile         |    14 +-
+ src/vfs/btrfs-idmapped-mounts.c               |  3854 ++++
+ src/vfs/btrfs-idmapped-mounts.h               |    15 +
+ src/vfs/idmapped-mounts.c                     |  7747 ++++++++
+ src/vfs/idmapped-mounts.h                     |    18 +
+ src/{idmapped-mounts => vfs}/missing.h        |    11 +
+ src/{idmapped-mounts => vfs}/mount-idmapped.c |     0
+ src/vfs/utils.c                               |  1050 ++
+ src/vfs/utils.h                               |   373 +
+ src/vfs/vfstest.c                             |  2073 +++
+ tests/btrfs/245                               |     2 +-
+ tests/generic/633                             |     2 +-
+ tests/generic/644                             |     2 +-
+ tests/generic/645                             |     2 +-
+ tests/generic/656                             |     2 +-
+ tests/xfs/152                                 |     4 +-
+ tests/xfs/153                                 |     2 +-
+ 25 files changed, 15177 insertions(+), 15216 deletions(-)
+ delete mode 100644 src/idmapped-mounts/idmapped-mounts.c
+ delete mode 100644 src/idmapped-mounts/utils.c
+ delete mode 100644 src/idmapped-mounts/utils.h
+ rename src/{idmapped-mounts => vfs}/Makefile (59%)
+ create mode 100644 src/vfs/btrfs-idmapped-mounts.c
+ create mode 100644 src/vfs/btrfs-idmapped-mounts.h
+ create mode 100644 src/vfs/idmapped-mounts.c
+ create mode 100644 src/vfs/idmapped-mounts.h
+ rename src/{idmapped-mounts => vfs}/missing.h (93%)
+ rename src/{idmapped-mounts => vfs}/mount-idmapped.c (100%)
+ create mode 100644 src/vfs/utils.c
+ create mode 100644 src/vfs/utils.h
+ create mode 100644 src/vfs/vfstest.c
+
+
+base-commit: 87cf32ad3fa234e3d5ec501e0f86516bef91d805
+-- 
+2.34.1
 
