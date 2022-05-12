@@ -2,120 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48974C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 May 2022 18:22:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE9A7C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 May 2022 18:29:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357452AbiELSWW (ORCPT
+        id S1357543AbiELS3Q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 May 2022 14:22:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53600 "EHLO
+        Thu, 12 May 2022 14:29:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357581AbiELSWO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 May 2022 14:22:14 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90A175C764
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 11:22:09 -0700 (PDT)
+        with ESMTP id S1357524AbiELS3P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 May 2022 14:29:15 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07F1926195A
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 11:29:15 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2D89460C6B
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 18:22:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C95E2C34118;
-        Thu, 12 May 2022 18:22:07 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A6B79B82799
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 18:29:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92F19C385B8;
+        Thu, 12 May 2022 18:29:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652379728;
-        bh=Aah6CErgBBjVH6lWrUSxNw1khtLNURi1m40LiaOJ0sU=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=C8rjYfYraMnqhSmoogLgik4iFhE3VkM5igFk03N9yp85igD+tfHRajFxLaXHrhbk0
-         AcdQhRFNvIz2REjcSn4OaE8WQmMORhSqPZKRDPoQPDjmGWVbodUVC3xDHMorsbGApr
-         2NN5RishQAjBPkGt4qxG79kg1nMwP12X6aQur2yBzjUztSA3JtLojDs62lS7iC5zMK
-         Z27u8ILULBune67BA6LoJNBLRfGgi71lJm0HW1W9oh18dUUJtU2T+EXjU0tDkERoMK
-         wMnqsfIIDm0h433vQnqqofWNdBA8x8xcIrjDLwYXH8XlWwUlJdfjSI5J/gif8nkj3r
-         sN6o75q4A4r0A==
+        s=k20201202; t=1652380152;
+        bh=Tz2UwsY0E0+fgez0IhU4l1HsHuhlKC5yGVtAB4qb4bA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=L8WWDXB9hyhMf4HyQqjqKYPpZmEDoKW/OwNT2BFDlbFCwwRkLSceeRVTLvKji6LKW
+         Y1TUucm2tl5FHaDP14g83xtreNwNxHUv6bLxJiAJEW5og1SvxVby9IzJMO8i6+Aqin
+         mWj3TudGWcU39BtZBQ/edXGpHz4XHd0yAoLP37blEslYlSmjOz1hp4USPLEYqtBRhJ
+         YNhufx1tcdCd5JiqXllYb9R7iJ/EVT0QqFwEn9nlRGAf+lwBaplIUCLLXCtpwvQu39
+         hxz9g7ABc1PFeHDKyCDYkqOEr8/NRkD8vr/vfCefq28J2+QKyU8elhWlHqaGswlKtQ
+         60gsvWYX7PVsA==
+Date:   Fri, 13 May 2022 02:29:07 +0800
 From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     djwong@kernel.org
-Subject: [PATCH v3 2/2] generic/603: use project quota create and restore common helpers
-Date:   Fri, 13 May 2022 02:22:03 +0800
-Message-Id: <20220512182203.2839593-2-zlang@kernel.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20220512182203.2839593-1-zlang@kernel.org>
-References: <20220512182203.2839593-1-zlang@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH] common/overlay: source base fs specific common file
+Message-ID: <20220512182907.mikejx7u4bas5kwj@zlang-mailbox>
+Mail-Followup-To: Amir Goldstein <amir73il@gmail.com>,
+        fstests <fstests@vger.kernel.org>
+References: <20220512175603.2833164-1-zlang@kernel.org>
+ <CAOQ4uxjW=8PvV8ANnCz-7+=DFgUjyd-7N73ZMhEW+92wpLgHNg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjW=8PvV8ANnCz-7+=DFgUjyd-7N73ZMhEW+92wpLgHNg@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-As common/quota has _create_project_quota and _restore_project_quota
-helpers now, so replace local similar functions with them.
+On Thu, May 12, 2022 at 09:11:34PM +0300, Amir Goldstein wrote:
+> On Thu, May 12, 2022 at 8:56 PM Zorro Lang <zlang@kernel.org> wrote:
+> >
+> > When tests overlayfs, sometimes we need the underlying fs specific
+> > helpers, e.g. common/rc has:
+> >   _filesystem_timestamp_range $OVL_BASE_TEST_DEV $OVL_BASE_FSTYP
+> >
+> > So when we source common/overlay, better to source then OVL_BASE_FSTYP
+> > too.
+> >
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> >
+> > The generic/402 always fails on overlayfs as:
+> >
+> >   QA output created by 402
+> >   ./common/rc: line 2441: _xfs_timestamp_range: command not found
+> >   ./common/rc: line 2403: [: syntax error: '-1' unexpected
+> >   ./common/rc: line 2408: [: -le: unary operator expected
+> >   ./common/rc: line 2441: _xfs_timestamp_range: command not found
+> >   0;0 != 1;1
+> >   0;0 != 1;1
+> >   Silence is golden
+> >
+> > Due to if FSTYP is overlay, we only source common/overlay file. But we
+> > still need the helpers of the underlying filesystem. So I think we need
+> > to source the common/$OVL_BASE_FSTYP in common/overlay. What do you think?
+> 
+> That makes sense.
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
- tests/generic/603 | 36 ++----------------------------------
- 1 file changed, 2 insertions(+), 34 deletions(-)
+I haven't given it enough test, hope it won't break something:)
 
-diff --git a/tests/generic/603 b/tests/generic/603
-index b362a3d0..08ddcbf2 100755
---- a/tests/generic/603
-+++ b/tests/generic/603
-@@ -13,7 +13,7 @@ _begin_fstest auto quick quota
- # Override the default cleanup function.
- _cleanup()
- {
--	restore_project
-+	_restore_project_quota
- 	cd /
- 	rm -f $tmp.*
- }
-@@ -22,38 +22,6 @@ _cleanup()
- . ./common/filter
- . ./common/quota
- 
--require_project()
--{
--	rm -f $tmp.projects $tmp.projid
--	if [ -f /etc/projects ];then
--		cat /etc/projects > $tmp.projects
--	fi
--	if [ -f /etc/projid ];then
--		cat /etc/projid > $tmp.projid
--	fi
--
--	cat >/etc/projects <<EOF
--100:$SCRATCH_MNT/t
--EOF
--	cat >/etc/projid <<EOF
--$qa_user:100
--EOF
--	PROJECT_CHANGED=1
--}
--
--restore_project()
--{
--	if [ "$PROJECT_CHANGED" = "1" ];then
--		rm -f /etc/projects /etc/projid
--		if [ -f $tmp.projects ];then
--			cat $tmp.projects > /etc/projects
--		fi
--		if [ -f $tmp.projid ];then
--			cat $tmp.projid > /etc/projid
--		fi
--	fi
--}
--
- init_files()
- {
- 	local dir=$1
-@@ -157,7 +125,7 @@ BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
- rm -rf $SCRATCH_MNT/t
- mkdir $SCRATCH_MNT/t
- $XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
--require_project
-+_create_project_quota $SCRATCH_MNT/t 100 $qa_user
- 
- echo "### Set up different grace timers to each type of quota"
- UBGRACE=12
--- 
-2.31.1
+> I don't know why I have never hit this.
+> Maybe because I am not running with multi section config or
+> because I am runing with kvm-xfstests runner.
 
+Do you test overlay with XFS? For now, I think only xfs+overlay can reproduce
+this failure.
+
+Thanks,
+Zorro
+
+> 
+> Thanks,
+> Amir.
+> 
