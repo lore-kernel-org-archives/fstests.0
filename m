@@ -2,157 +2,222 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2585EC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 May 2022 03:18:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20270C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 13 May 2022 05:10:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351518AbiEMDS6 (ORCPT
+        id S231216AbiEMFKD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 May 2022 23:18:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33346 "EHLO
+        Fri, 13 May 2022 01:10:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348514AbiEMDS5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 May 2022 23:18:57 -0400
-Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2078A7A817
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 20:18:55 -0700 (PDT)
-IronPort-Data: =?us-ascii?q?A9a23=3AijZXzq4sV6IkYx8Waa+2MQxRtCTFchMFZxGqfqr?=
- =?us-ascii?q?LsXjdYENS1mEOy2sYDWiGOPbbYDD0KdEiO4zg9h9Vv56Ez9BmTlE5pCpnJ55og?=
- =?us-ascii?q?ZCbXIzGdC8cHM8zwvXrFRsht4NHAjX5BJhcokT0+1H9YtANkVEmjfvSHuCkUba?=
- =?us-ascii?q?dUsxMbVQMpBkJ2EsLd9ER0tYAbeiRW2thiPuqyyHtEAbNNw1cbgr435m+RCZH5?=
- =?us-ascii?q?5wejt+3UmsWPpintHeG/5Uc4Ql2yauZdxMUSaEMdgK2qnqq8V23wo/Z109F5tK?=
- =?us-ascii?q?NmbC9fFAIQ6LJIE6FjX8+t6qK20AE/3JtlP1gcqd0hUR/0l1lm/hr1dxLro32R?=
- =?us-ascii?q?wEyIoXCheYcTwJFVSp5OMWq/ZeeeyTl6ZfNlhSun3zEhq8G4FsNFYMD5utsHXp?=
- =?us-ascii?q?m6/MVMnYOYwqFiubwx6i0ItSALOxLwNLDZdtZ4y8/i2qCS6tOfHwKeI2Sjfcw4?=
- =?us-ascii?q?dv6rpkm8S7iWvck?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AZ1kQU6PL4EzMVcBcTv2jsMiBIKoaSvp037BL?=
- =?us-ascii?q?7TEUdfUxSKGlfq+V8sjzqiWftN98YhAdcLO7Scy9qBHnhP1ICOAqVN/MYOCMgh?=
- =?us-ascii?q?rLEGgN1+vf6gylMyj/28oY7q14bpV5YeeaMXFKyer8/ym0euxN/OW6?=
-X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
-   d="scan'208";a="124203611"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 13 May 2022 11:18:55 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id E5E734D17197
-        for <fstests@vger.kernel.org>; Fri, 13 May 2022 11:18:51 +0800 (CST)
-Received: from G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Fri, 13 May 2022 11:18:50 +0800
-Received: from G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.85) by
- G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Fri, 13 May 2022 11:18:52 +0800
-Received: from [192.168.22.28] (10.167.225.141) by
- G08CNEXCHPEKD09.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Fri, 13 May 2022 11:18:49 +0800
-Message-ID: <c5b484fa-2fe0-0e9e-c0c7-9b9cd595d115@fujitsu.com>
-Date:   Fri, 13 May 2022 11:18:51 +0800
+        with ESMTP id S231183AbiEMFKC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 May 2022 01:10:02 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 018822854A9
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 22:10:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1652418599;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=jsNFGzxts9gLtq8OHgRwKStoV+rpdrA8Tiouy/Yy0/k=;
+        b=NHK2QANK+F8B6OMFXe8psxgD3H90g323UoWLiCD2QJHJL6B8wHeagpfHRkPawTpY6SQTuH
+        CJKPUuPZyEwngZSNJlAxj5jSmf9ygnP9HO+6yQ3VMrxw/fY+AOUaUffoJFhgzPinOoWPOA
+        Lgedtil5/hl0xYHIvdqVDfbQvZ9WdLM=
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
+ [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-556-NDRBAImfMJ-H-k_9qD2kVg-1; Fri, 13 May 2022 01:09:58 -0400
+X-MC-Unique: NDRBAImfMJ-H-k_9qD2kVg-1
+Received: by mail-qt1-f200.google.com with SMTP id i11-20020ac85e4b000000b002f3d8c3a96dso5515106qtx.9
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 22:09:58 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=jsNFGzxts9gLtq8OHgRwKStoV+rpdrA8Tiouy/Yy0/k=;
+        b=vs7F6Mzo6SoBgg1awxemCfohudByk7ekiGBpCFERnd3ICcUz57qbmDmzVVLvKbfGso
+         32zB7OLpi0gE5Rwr0j0WsrCC8aRawI1WN211iUXcfko4cExcNcAfVvCuTz8D8mpRhOEZ
+         VABBs5Epcx2xwasjKBvFytjcTNHeV2d4dP8boNlfTIVngsg+z775Y3R3ehJaoytaD+I5
+         6noDvIPlt3XpDskR/kDT6e7vNthkGeotc7+LDa5rshWp/xRrHssmmDMgfnlI8czUyEdF
+         A2+KSfZjRVHI8cykm9cxQdUG98GNTyVSzo9sl9a4GcipBjBs6ritePGOuCniKKw21TL5
+         eg8Q==
+X-Gm-Message-State: AOAM533EkmdGt/q7o7HomSQsx96FU1LQ6gwvXZniaBFXvGMPO2DUlEA/
+        +Ar7M3o7crUxPOAesEQwC8Wn4N96LDiD/f2jIG6J2mNdq+GM6siZLE9DwoaN3VwL1oZhhleqcyY
+        xZr6dgpfLACWnkKjCHA==
+X-Received: by 2002:ac8:580c:0:b0:2f3:ec02:80ba with SMTP id g12-20020ac8580c000000b002f3ec0280bamr3013932qtg.162.1652418597884;
+        Thu, 12 May 2022 22:09:57 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwRUoR9SZ8kF73+IrQPHSnak6kOBN3L9dud5k3PVK8GRN7ukzLsNuf25IxexLr9449g49DJlA==
+X-Received: by 2002:ac8:580c:0:b0:2f3:ec02:80ba with SMTP id g12-20020ac8580c000000b002f3ec0280bamr3013923qtg.162.1652418597621;
+        Thu, 12 May 2022 22:09:57 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id l26-20020a37f91a000000b006a0ff3ec18bsm851720qkj.122.2022.05.12.22.09.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 May 2022 22:09:56 -0700 (PDT)
+Date:   Fri, 13 May 2022 13:09:51 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3 1/2] generic: soft quota limits testing within grace
+ time
+Message-ID: <20220513050951.ealqnhg6bgp4io4e@zlang-mailbox>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        fstests@vger.kernel.org
+References: <20220512182203.2839593-1-zlang@kernel.org>
+ <20220512190647.GC27174@magnolia>
+ <20220512201651.yvi3hiwkln3dgojs@zlang-mailbox>
+ <20220513005814.GE27174@magnolia>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.1
-Subject: Re: [PATCH 2/3] xfs: add memory failure test for dax&reflink mode
-To:     <fstests@vger.kernel.org>
-References: <20220513031411.2369314-1-ruansy.fnst@fujitsu.com>
- <20220513031411.2369314-3-ruansy.fnst@fujitsu.com>
-CC:     <ruansy.fnst@fujitsu.com>
-From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
-In-Reply-To: <20220513031411.2369314-3-ruansy.fnst@fujitsu.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-yoursite-MailScanner-ID: E5E734D17197.AE56F
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220513005814.GE27174@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-在 2022/5/13 11:14, Shiyang Ruan 写道:
-> Verify that the dax-rmap feature works.
+On Thu, May 12, 2022 at 05:58:14PM -0700, Darrick J. Wong wrote:
+> On Fri, May 13, 2022 at 04:16:51AM +0800, Zorro Lang wrote:
+> > On Thu, May 12, 2022 at 12:06:47PM -0700, Darrick J. Wong wrote:
+> > > On Fri, May 13, 2022 at 02:22:02AM +0800, Zorro Lang wrote:
+> > > > After soft limits are exceeded, within the grace time, fs quota
+> > > > should allow more space allocation before exceeding hard limits,
+> > > > even if allocating many small files.
+> > > > 
+> > > > This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
+> > > > warning counts when we send warnings"). And will help to expose
+> > > > later behavior changes on this side.
+> > > > 
+> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > > ---
+> > > > 
+> > > > According to the review points of:
+> > > >   https://lore.kernel.org/fstests/20220511163806.uc4z7td2remhdru3@zlang-mailbox/T/#m23940b47261165a0442c7ae1eb4d96a1489a2935
+> > > > V3 did below changes:
+> > > > 1) fix some comments description
+> > > > 2) add a few hard limit test
+> > > > 3) And bring in [PATCH 2/2], to help g/603 to use the common functions of this
+> > > >    patch.
+> > > > 
+> > > > Thanks,
+> > > > Zorro
+> > > > 
+> > > >  common/quota          | 48 +++++++++++++++++++++
+> > > >  tests/generic/999     | 99 +++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/generic/999.out |  2 +
+> > > >  3 files changed, 149 insertions(+)
+> > > >  create mode 100755 tests/generic/999
+> > > >  create mode 100644 tests/generic/999.out
+> > > > 
+> > 
+> > [snip]
+> > 
+> > > > +
+> > > > +	setquota -${type} $qa_user 1M 200M 0 0 $SCRATCH_MNT
+> > > > +	setquota -${type} -t 86400 86400 $SCRATCH_MNT
+> > > > +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > > +	# Exceed the soft quota limit a bit at first
+> > > > +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full 2>&1
+> > > > +	# Write more data more times under soft quota limit exhausted condition,
+> > > > +	# but not reach hard limit. To make sure each write won't trigger EDQUOT.
+> > > > +	for ((i=1; i<=100; i++));do
+> > > > +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full 2>&1
+> > > 
+> > > Hmm -- if pwrite or fsync hit an error, shouldn't we let that end up in
+> > > 999.out so that the golden output diff fails?
+> > 
+> > Sure, will remove the "2>&1".
+> > 
+> > > 
+> > > > +		if [ $? -ne 0 ];then
+> > > > +			echo "Unexpected error (type=$type)!"
+> > > > +			break
+> > > > +		fi
+> > > > +	done
+> > > > +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > > +
+> > > > +	# As we've tested soft limit, now exceed the hard limit and give it a
+> > > > +	# test in passing.
+> > > > +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 100m' -c fsync ${file}.hard.0" >>$seqres.full 2>&1
+> > > > +	for ((i=1; i<=10; i++));do
+> > > > +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.hard.$i" >>$seqres.full 2>&1
+> > > 
+> > > Don't we want to encode the actual error in the golden output?
+> > 
+> > Hmm... due to I have to filter the ENOSPC or EDQUOT output again for project
+> > quota, as I did in generic/603 :-P Or put the that function into common/quota
+> > too.
 > 
-> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-
-Oh, sorry, I forgot to add Darrick's RVB[1]:
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
-[1] 
-https://lore.kernel.org/fstests/20220427062238.dkgkuzyh3ho2oirt@zlang-mailbox/T/#m0cb12aec91b1ddc92e1907ed0354773778507893
-
-> ---
->   tests/xfs/901     | 49 +++++++++++++++++++++++++++++++++++++++++++++++
->   tests/xfs/901.out |  9 +++++++++
->   2 files changed, 58 insertions(+)
->   create mode 100755 tests/xfs/901
->   create mode 100644 tests/xfs/901.out
+> I think it'd be fine if the golden output contained:
 > 
-> diff --git a/tests/xfs/901 b/tests/xfs/901
-> new file mode 100755
-> index 00000000..26c1581e
-> --- /dev/null
-> +++ b/tests/xfs/901
-> @@ -0,0 +1,49 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 901
-> +#
-> +# Test memory failure mechanism when dax and reflink working together
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick clone dax
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +_require_check_dmesg
-> +_require_scratch_reflink
-> +_require_cp_reflink
-> +_require_xfs_scratch_rmapbt
-> +_require_scratch_dax_mountopt "dax"
-> +_require_test_program "t_mmap_cow_memory_failure"
-> +
-> +echo "Format and mount"
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount "-o dax" >> $seqres.full 2>&1
-> +
-> +testdir=$SCRATCH_MNT/test-$seq
-> +mkdir $testdir
-> +
-> +echo "Create the original files"
-> +filesize=65536
-> +_pwrite_byte 0x61 0 $filesize $testdir/testfile >> $seqres.full
-> +_cp_reflink $testdir/testfile $testdir/poisonfile >> $seqres.full
-> +_scratch_cycle_mount "dax"
-> +
-> +echo "Inject memory failure (1 page)"
-> +# create two processes:
-> +#  process1: mread 1 page to cause page fault, and wait
-> +#  process2: mread 1 page to cause page fault, then inject poison on this page
-> +$here/src/t_mmap_cow_memory_failure -s1 -S1 -R $testdir/testfile -P $testdir/poisonfile
-> +
-> +echo "Inject memory failure (2 pages)"
-> +$here/src/t_mmap_cow_memory_failure -s2 -S2 -R $testdir/testfile -P $testdir/poisonfile
-> +
-> +_check_dmesg_for "Sending SIGBUS to t_mmap_cow_memo" || echo "Memory failure didn't kill the process"
-> +_check_dmesg_for "recovery action for dax page: Recovered" || echo "Failured page didn't recovered"
-> +
-> +# success, all done
-> +status=0
-> diff --git a/tests/xfs/901.out b/tests/xfs/901.out
-> new file mode 100644
-> index 00000000..92d64846
-> --- /dev/null
-> +++ b/tests/xfs/901.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 901
-> +Format and mount
-> +Create the original files
-> +Inject memory failure (1 page)
-> +Inject posion...
-> +Process is killed by signal: 7
-> +Inject memory failure (2 pages)
-> +Inject posion...
-> +Process is killed by signal: 7
+> pwrite: Insufficient quota
+> pwrite: Insufficient quota
+> pwrite: Not enough space
 
+Sorry I didn't explain that clearly :)
+
+When FSTYP=ext4, it got:
+pwrite: Disk quota exceeded
+pwrite: Disk quota exceeded
+pwrite: Disk quota exceeded
+...
+
+When FSTYP=xfs, it got:
+SCRATCH_MNT/testfile.hard.1: Disk quota exceeded
+SCRATCH_MNT/testfile.hard.1: Disk quota exceeded
+SCRATCH_MNT/t/testfile.hard.1: No space left on device
+...
+
+There're 2 differences:
+1) ext4 fails on write -- "-c pwrite", but xfs fails on open(O_CREAT) -- "xfs_io -f"
+2) For project quota, xfs returns ENOSPC, ext4 returns EDQUOT.
+
+If these're all as expected, I need to filter these differences. And I don't
+know what other filesystems will print, besides xfs and ext4.
+
+Thanks,
+Zorro
+
+> 
+> for each of the user/group/project quota tests.  Or did I misunderstand?
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > --D
+> > > 
+> > > > +		if [ $? -eq 0 ];then
+> > > > +			echo "Unexpected success (type=$type)!"
+> > > > +			break
+> > > > +		fi
+> > > > +	done
+> > > > +}
+> > > > +
+> > > > +_qmount_option "usrquota"
+> > > > +exercise u
+> > > > +_qmount_option "grpquota"
+> > > > +exercise g
+> > > > +_qmount_option "prjquota"
+> > > > +exercise P
+> > > > +
+> > > > +echo "Silence is golden"
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/generic/999.out b/tests/generic/999.out
+> > > > new file mode 100644
+> > > > index 00000000..3b276ca8
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/999.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 999
+> > > > +Silence is golden
+> > > > -- 
+> > > > 2.31.1
+> > > > 
+> > > 
+> 
 
