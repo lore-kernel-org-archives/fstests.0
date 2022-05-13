@@ -2,107 +2,167 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E614C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 May 2022 00:55:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CCFCC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 13 May 2022 00:58:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359816AbiEMAzF (ORCPT
+        id S1359777AbiEMA6R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 May 2022 20:55:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46676 "EHLO
+        Thu, 12 May 2022 20:58:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57210 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1359819AbiEMAzD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 May 2022 20:55:03 -0400
-Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 303B428BDC4
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 17:55:01 -0700 (PDT)
-Received: by mail-qt1-x82c.google.com with SMTP id t16so5763846qtr.9
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 17:55:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=wOBGFOHq5F0BwwClV9mBxuDGSKKM8LvfpAjnEXeIHW0=;
-        b=Wnu3Q0yG66r7q5juQJvlKls9LvnQKsDLoRl9VYEtuCBarioBB8FOfqyvHkw4xKWVac
-         XlrTi/+7OXmOrH6Ztxhi0Pdr9Uw0pvOSpsmcSJWygZDXVReyN/uwg1kDu4d+kvWOQ/6n
-         Am66KSSXp46eXw5tSw4H/urKXCj6kJnFKesFMvWWUHX7ePwx7CkTwpdRlInjNC+qzpDQ
-         TLtxZGjohfDh4lAWMae+QBj9i30RpnFL+UE94H3yy92Yxxuqf3xxHT/P1MyYHrzm3OAW
-         viOJ1ysGKc26cuqRmAAVdAlmrVM0EzD2PZ0Et3Yu964ixIn16XeUc6NtqlHS+ko9z6CJ
-         2vDw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=wOBGFOHq5F0BwwClV9mBxuDGSKKM8LvfpAjnEXeIHW0=;
-        b=H7IP00zo3QPihmB8uiYVb1iQBk309GWgejhxCKRxyECYfo0OoCK/Ahl8fF+L5APRv3
-         rJXfkbDSBWRDlBnixym7X+2RKJUQ6AtD0bmkNSfeeYy2n6fe/MHonUHIGqusTYRTbNMA
-         ScXjXe9LKgg3dBk/xRxqXPtOq6r8keQh0t3RYRoD2BvpA+AuX+IAR0YrBNCnPISmmXuT
-         4+IkN3wQ80UTbgwl87rOC39w4WrMtKAJ4pJUowAzWt/NWKAuI/gcxKM/Y76NSNRj6+jp
-         5PLhVx/Cgn5h0unHKlM9wwIulDp8Pqp7wuIPcta5TSnxZjWZdYbStrw5f2Owtw+8sc2t
-         opMQ==
-X-Gm-Message-State: AOAM530RE17kzxkjZZnY4ii9jLyLb56CG+JFIb+NLLl14MMVYhtKgtry
-        OuTa5uyTBpEJq//B4m1y4iuovlSkbqOAAdas/6tSkg4m
-X-Google-Smtp-Source: ABdhPJwJPVEcO7+TMbuXzPt+GPSH0ZzqMZ+XWnSLAQOzc/2cm8xJvk4JiDHwC0iahSnuGS5qmNETasGlGez7OYJrQKg=
-X-Received: by 2002:ac8:5a53:0:b0:2f3:c6bc:b66d with SMTP id
- o19-20020ac85a53000000b002f3c6bcb66dmr2416740qta.477.1652403300100; Thu, 12
- May 2022 17:55:00 -0700 (PDT)
+        with ESMTP id S241356AbiEMA6Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 May 2022 20:58:16 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5B921C0F18
+        for <fstests@vger.kernel.org>; Thu, 12 May 2022 17:58:15 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 52F2B60F5D
+        for <fstests@vger.kernel.org>; Fri, 13 May 2022 00:58:15 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F2A8C385B8
+        for <fstests@vger.kernel.org>; Fri, 13 May 2022 00:58:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1652403494;
+        bh=aXFeJb0CETGfFAOcYRq8i1nQlyfT1pzobpLL0UW8tM8=;
+        h=Date:From:To:Subject:References:In-Reply-To:From;
+        b=TtSQARyjNtDOdoww5EhUoqubUuu4MhMOsXEDS6UeYrPv+mR4YG9EK58Sh1cURKeow
+         NStDZhbLEjq0Q7UsBe8K8TiGEFbogUjtjNfzCz0nTBC4rL8zhlIrotT/HXtiGPjuh2
+         8pik2GtBe7wvDIkqwHVm1bidkhq1LiX8o97kMnnvcVjCy+54F+ZEr7ILutHYk8JDs7
+         R7hwZdywYXwFazsit7DVjcuyNShcqCipEgtoamH3sCg6kidGDyISM73RhUx5kDaGoO
+         oMl9+lVX9N+cPSHhrLt2xfou/BWycmC5PMYCC374x4kcN1wgCeFidURRGJB+Ol1DWx
+         WYexrSNR7YLdA==
+Date:   Thu, 12 May 2022 17:58:14 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3 1/2] generic: soft quota limits testing within grace
+ time
+Message-ID: <20220513005814.GE27174@magnolia>
+References: <20220512182203.2839593-1-zlang@kernel.org>
+ <20220512190647.GC27174@magnolia>
+ <20220512201651.yvi3hiwkln3dgojs@zlang-mailbox>
 MIME-Version: 1.0
-References: <20220512175603.2833164-1-zlang@kernel.org> <CAOQ4uxjW=8PvV8ANnCz-7+=DFgUjyd-7N73ZMhEW+92wpLgHNg@mail.gmail.com>
- <20220512182907.mikejx7u4bas5kwj@zlang-mailbox>
-In-Reply-To: <20220512182907.mikejx7u4bas5kwj@zlang-mailbox>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 13 May 2022 03:54:48 +0300
-Message-ID: <CAOQ4uxhA4aV89yFUTh9vGmMM7PjaNuu+3rxNu03uFJun0B3OsQ@mail.gmail.com>
-Subject: Re: [PATCH] common/overlay: source base fs specific common file
-To:     Amir Goldstein <amir73il@gmail.com>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220512201651.yvi3hiwkln3dgojs@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 12, 2022 at 9:29 PM Zorro Lang <zlang@kernel.org> wrote:
->
-> On Thu, May 12, 2022 at 09:11:34PM +0300, Amir Goldstein wrote:
-> > On Thu, May 12, 2022 at 8:56 PM Zorro Lang <zlang@kernel.org> wrote:
-> > >
-> > > When tests overlayfs, sometimes we need the underlying fs specific
-> > > helpers, e.g. common/rc has:
-> > >   _filesystem_timestamp_range $OVL_BASE_TEST_DEV $OVL_BASE_FSTYP
-> > >
-> > > So when we source common/overlay, better to source then OVL_BASE_FSTYP
-> > > too.
-> > >
-> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
+On Fri, May 13, 2022 at 04:16:51AM +0800, Zorro Lang wrote:
+> On Thu, May 12, 2022 at 12:06:47PM -0700, Darrick J. Wong wrote:
+> > On Fri, May 13, 2022 at 02:22:02AM +0800, Zorro Lang wrote:
+> > > After soft limits are exceeded, within the grace time, fs quota
+> > > should allow more space allocation before exceeding hard limits,
+> > > even if allocating many small files.
+> > > 
+> > > This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
+> > > warning counts when we send warnings"). And will help to expose
+> > > later behavior changes on this side.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
 > > > ---
-> > >
-> > > The generic/402 always fails on overlayfs as:
-> > >
-> > >   QA output created by 402
-> > >   ./common/rc: line 2441: _xfs_timestamp_range: command not found
-> > >   ./common/rc: line 2403: [: syntax error: '-1' unexpected
-> > >   ./common/rc: line 2408: [: -le: unary operator expected
-> > >   ./common/rc: line 2441: _xfs_timestamp_range: command not found
-> > >   0;0 != 1;1
-> > >   0;0 != 1;1
-> > >   Silence is golden
-> > >
-> > > Due to if FSTYP is overlay, we only source common/overlay file. But we
-> > > still need the helpers of the underlying filesystem. So I think we need
-> > > to source the common/$OVL_BASE_FSTYP in common/overlay. What do you think?
-> >
-> > That makes sense.
->
-> I haven't given it enough test, hope it won't break something:)
->
-> > I don't know why I have never hit this.
-> > Maybe because I am not running with multi section config or
-> > because I am runing with kvm-xfstests runner.
->
-> Do you test overlay with XFS? For now, I think only xfs+overlay can reproduce
-> this failure.
+> > > 
+> > > According to the review points of:
+> > >   https://lore.kernel.org/fstests/20220511163806.uc4z7td2remhdru3@zlang-mailbox/T/#m23940b47261165a0442c7ae1eb4d96a1489a2935
+> > > V3 did below changes:
+> > > 1) fix some comments description
+> > > 2) add a few hard limit test
+> > > 3) And bring in [PATCH 2/2], to help g/603 to use the common functions of this
+> > >    patch.
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > >  common/quota          | 48 +++++++++++++++++++++
+> > >  tests/generic/999     | 99 +++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/999.out |  2 +
+> > >  3 files changed, 149 insertions(+)
+> > >  create mode 100755 tests/generic/999
+> > >  create mode 100644 tests/generic/999.out
+> > > 
+> 
+> [snip]
+> 
+> > > +
+> > > +	setquota -${type} $qa_user 1M 200M 0 0 $SCRATCH_MNT
+> > > +	setquota -${type} -t 86400 86400 $SCRATCH_MNT
+> > > +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > +	# Exceed the soft quota limit a bit at first
+> > > +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full 2>&1
+> > > +	# Write more data more times under soft quota limit exhausted condition,
+> > > +	# but not reach hard limit. To make sure each write won't trigger EDQUOT.
+> > > +	for ((i=1; i<=100; i++));do
+> > > +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full 2>&1
+> > 
+> > Hmm -- if pwrite or fsync hit an error, shouldn't we let that end up in
+> > 999.out so that the golden output diff fails?
+> 
+> Sure, will remove the "2>&1".
+> 
+> > 
+> > > +		if [ $? -ne 0 ];then
+> > > +			echo "Unexpected error (type=$type)!"
+> > > +			break
+> > > +		fi
+> > > +	done
+> > > +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > +
+> > > +	# As we've tested soft limit, now exceed the hard limit and give it a
+> > > +	# test in passing.
+> > > +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 100m' -c fsync ${file}.hard.0" >>$seqres.full 2>&1
+> > > +	for ((i=1; i<=10; i++));do
+> > > +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.hard.$i" >>$seqres.full 2>&1
+> > 
+> > Don't we want to encode the actual error in the golden output?
+> 
+> Hmm... due to I have to filter the ENOSPC or EDQUOT output again for project
+> quota, as I did in generic/603 :-P Or put the that function into common/quota
+> too.
 
-I only test xfs+overlay.
-And Darrick also tests this regularly for xfs regression test,
-so it must be a different way in which we invoke the test.
+I think it'd be fine if the golden output contained:
 
-Thanks,
-Amir.
+pwrite: Insufficient quota
+pwrite: Insufficient quota
+pwrite: Not enough space
+
+for each of the user/group/project quota tests.  Or did I misunderstand?
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > +		if [ $? -eq 0 ];then
+> > > +			echo "Unexpected success (type=$type)!"
+> > > +			break
+> > > +		fi
+> > > +	done
+> > > +}
+> > > +
+> > > +_qmount_option "usrquota"
+> > > +exercise u
+> > > +_qmount_option "grpquota"
+> > > +exercise g
+> > > +_qmount_option "prjquota"
+> > > +exercise P
+> > > +
+> > > +echo "Silence is golden"
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/999.out b/tests/generic/999.out
+> > > new file mode 100644
+> > > index 00000000..3b276ca8
+> > > --- /dev/null
+> > > +++ b/tests/generic/999.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 999
+> > > +Silence is golden
+> > > -- 
+> > > 2.31.1
+> > > 
+> > 
