@@ -2,222 +2,257 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20270C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 May 2022 05:10:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 635A6C433F5
+	for <linux-fstests@archiver.kernel.org>; Sat, 14 May 2022 17:59:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231216AbiEMFKD (ORCPT
+        id S229709AbiENR7z (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 13 May 2022 01:10:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47350 "EHLO
+        Sat, 14 May 2022 13:59:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45542 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231183AbiEMFKC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 May 2022 01:10:02 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 018822854A9
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 22:10:00 -0700 (PDT)
+        with ESMTP id S229538AbiENR7y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 14 May 2022 13:59:54 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DBBF93CA58
+        for <fstests@vger.kernel.org>; Sat, 14 May 2022 10:59:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652418599;
+        s=mimecast20190719; t=1652551191;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=jsNFGzxts9gLtq8OHgRwKStoV+rpdrA8Tiouy/Yy0/k=;
-        b=NHK2QANK+F8B6OMFXe8psxgD3H90g323UoWLiCD2QJHJL6B8wHeagpfHRkPawTpY6SQTuH
-        CJKPUuPZyEwngZSNJlAxj5jSmf9ygnP9HO+6yQ3VMrxw/fY+AOUaUffoJFhgzPinOoWPOA
-        Lgedtil5/hl0xYHIvdqVDfbQvZ9WdLM=
-Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
- [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=lNNqzqIhJs8pQvqqWc8QoQT2jwrB+nbceP5WMmC6I5g=;
+        b=jKHndpPK9HRhyLm4QKvIouhvmzB4DrCUE8e2UvQvASRb0xfhSrb7vwq5dUR2D5nINcWw6/
+        SOATXxF7X5KaSGom/FWBpmk+vA3ZkU7f0lCoRgbWI4hr8neNr84Q57g+klMHgVP9m233uF
+        8nLAqh63YvCQXcihu/jUPyByM83m1MQ=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-556-NDRBAImfMJ-H-k_9qD2kVg-1; Fri, 13 May 2022 01:09:58 -0400
-X-MC-Unique: NDRBAImfMJ-H-k_9qD2kVg-1
-Received: by mail-qt1-f200.google.com with SMTP id i11-20020ac85e4b000000b002f3d8c3a96dso5515106qtx.9
-        for <fstests@vger.kernel.org>; Thu, 12 May 2022 22:09:58 -0700 (PDT)
+ us-mta-641-ECJMh_jRPveZTdw-D_-YBA-1; Sat, 14 May 2022 13:59:50 -0400
+X-MC-Unique: ECJMh_jRPveZTdw-D_-YBA-1
+Received: by mail-qv1-f70.google.com with SMTP id n5-20020a0cbe85000000b0045aff56564bso9142081qvi.4
+        for <fstests@vger.kernel.org>; Sat, 14 May 2022 10:59:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=jsNFGzxts9gLtq8OHgRwKStoV+rpdrA8Tiouy/Yy0/k=;
-        b=vs7F6Mzo6SoBgg1awxemCfohudByk7ekiGBpCFERnd3ICcUz57qbmDmzVVLvKbfGso
-         32zB7OLpi0gE5Rwr0j0WsrCC8aRawI1WN211iUXcfko4cExcNcAfVvCuTz8D8mpRhOEZ
-         VABBs5Epcx2xwasjKBvFytjcTNHeV2d4dP8boNlfTIVngsg+z775Y3R3ehJaoytaD+I5
-         6noDvIPlt3XpDskR/kDT6e7vNthkGeotc7+LDa5rshWp/xRrHssmmDMgfnlI8czUyEdF
-         A2+KSfZjRVHI8cykm9cxQdUG98GNTyVSzo9sl9a4GcipBjBs6ritePGOuCniKKw21TL5
-         eg8Q==
-X-Gm-Message-State: AOAM533EkmdGt/q7o7HomSQsx96FU1LQ6gwvXZniaBFXvGMPO2DUlEA/
-        +Ar7M3o7crUxPOAesEQwC8Wn4N96LDiD/f2jIG6J2mNdq+GM6siZLE9DwoaN3VwL1oZhhleqcyY
-        xZr6dgpfLACWnkKjCHA==
-X-Received: by 2002:ac8:580c:0:b0:2f3:ec02:80ba with SMTP id g12-20020ac8580c000000b002f3ec0280bamr3013932qtg.162.1652418597884;
-        Thu, 12 May 2022 22:09:57 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwRUoR9SZ8kF73+IrQPHSnak6kOBN3L9dud5k3PVK8GRN7ukzLsNuf25IxexLr9449g49DJlA==
-X-Received: by 2002:ac8:580c:0:b0:2f3:ec02:80ba with SMTP id g12-20020ac8580c000000b002f3ec0280bamr3013923qtg.162.1652418597621;
-        Thu, 12 May 2022 22:09:57 -0700 (PDT)
+        bh=lNNqzqIhJs8pQvqqWc8QoQT2jwrB+nbceP5WMmC6I5g=;
+        b=eQf+TchJ3lFNMmUVIXcADFhnyiQvfPerxVsenFntSBaRxJc6vtt80szcCAR2flpI9r
+         vcXiFpEReOtPAfATfIkC7puFh0wZO62eSPeolsxZUHEWCRs44+A/+4be0CfbDb/c9KvG
+         DZfnChOGC1d4aMA6qTkuxQQKSKyBpifSCQIrCm/M/baYw0MJDLJSJ0DQVSMhEO0lF/3y
+         29oWShwIIAE5/KiOEtOW0lJlveaPRUwKy/dIGoDT+4PYQEVcjmEAXyp7U0mKQcVDZwZl
+         pHP8ySWDE4/CugUSG+p6SQvKU15Ii44H7agYEtGIO3y+xTCHuHOFqnRxxTSGo+798eiF
+         N2lQ==
+X-Gm-Message-State: AOAM53303fErdajI4QldGx4HQH1+d5q4u+9860uI4u2+z23AzMzkryeB
+        YedgQyAWKtJjd7aFJdknp6SeYN5gxyXIhWboHWm1TDI4zD7yFn58e4FslM88SMqw94U+rVhmVz9
+        aFQyC1P4889JK6E1Obw==
+X-Received: by 2002:ad4:5f89:0:b0:45a:f6d9:41c1 with SMTP id jp9-20020ad45f89000000b0045af6d941c1mr9308521qvb.50.1652551189845;
+        Sat, 14 May 2022 10:59:49 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyru0bu8XXrPLaHddueF2l32pvgWZz+ZrkF8hGvyNxIRaKzX9xEV74cIc3SFvglcb9Q6wTj9A==
+X-Received: by 2002:ad4:5f89:0:b0:45a:f6d9:41c1 with SMTP id jp9-20020ad45f89000000b0045af6d941c1mr9308508qvb.50.1652551189568;
+        Sat, 14 May 2022 10:59:49 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id l26-20020a37f91a000000b006a0ff3ec18bsm851720qkj.122.2022.05.12.22.09.54
+        by smtp.gmail.com with ESMTPSA id 141-20020a370693000000b0069fc13ce22dsm3162056qkg.94.2022.05.14.10.59.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 May 2022 22:09:56 -0700 (PDT)
-Date:   Fri, 13 May 2022 13:09:51 +0800
+        Sat, 14 May 2022 10:59:48 -0700 (PDT)
+Date:   Sun, 15 May 2022 01:59:43 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v3 1/2] generic: soft quota limits testing within grace
- time
-Message-ID: <20220513050951.ealqnhg6bgp4io4e@zlang-mailbox>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        fstests@vger.kernel.org
-References: <20220512182203.2839593-1-zlang@kernel.org>
- <20220512190647.GC27174@magnolia>
- <20220512201651.yvi3hiwkln3dgojs@zlang-mailbox>
- <20220513005814.GE27174@magnolia>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH v2 00/13] rename & split tests
+Message-ID: <20220514175943.msaucvar5m3uxskb@zlang-mailbox>
+Mail-Followup-To: Christian Brauner <brauner@kernel.org>,
+        fstests <fstests@vger.kernel.org>
+References: <20220512165250.450989-1-brauner@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220513005814.GE27174@magnolia>
+In-Reply-To: <20220512165250.450989-1-brauner@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 12, 2022 at 05:58:14PM -0700, Darrick J. Wong wrote:
-> On Fri, May 13, 2022 at 04:16:51AM +0800, Zorro Lang wrote:
-> > On Thu, May 12, 2022 at 12:06:47PM -0700, Darrick J. Wong wrote:
-> > > On Fri, May 13, 2022 at 02:22:02AM +0800, Zorro Lang wrote:
-> > > > After soft limits are exceeded, within the grace time, fs quota
-> > > > should allow more space allocation before exceeding hard limits,
-> > > > even if allocating many small files.
-> > > > 
-> > > > This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
-> > > > warning counts when we send warnings"). And will help to expose
-> > > > later behavior changes on this side.
-> > > > 
-> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > ---
-> > > > 
-> > > > According to the review points of:
-> > > >   https://lore.kernel.org/fstests/20220511163806.uc4z7td2remhdru3@zlang-mailbox/T/#m23940b47261165a0442c7ae1eb4d96a1489a2935
-> > > > V3 did below changes:
-> > > > 1) fix some comments description
-> > > > 2) add a few hard limit test
-> > > > 3) And bring in [PATCH 2/2], to help g/603 to use the common functions of this
-> > > >    patch.
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > >  common/quota          | 48 +++++++++++++++++++++
-> > > >  tests/generic/999     | 99 +++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/generic/999.out |  2 +
-> > > >  3 files changed, 149 insertions(+)
-> > > >  create mode 100755 tests/generic/999
-> > > >  create mode 100644 tests/generic/999.out
-> > > > 
-> > 
-> > [snip]
-> > 
-> > > > +
-> > > > +	setquota -${type} $qa_user 1M 200M 0 0 $SCRATCH_MNT
-> > > > +	setquota -${type} -t 86400 86400 $SCRATCH_MNT
-> > > > +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
-> > > > +	# Exceed the soft quota limit a bit at first
-> > > > +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full 2>&1
-> > > > +	# Write more data more times under soft quota limit exhausted condition,
-> > > > +	# but not reach hard limit. To make sure each write won't trigger EDQUOT.
-> > > > +	for ((i=1; i<=100; i++));do
-> > > > +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full 2>&1
-> > > 
-> > > Hmm -- if pwrite or fsync hit an error, shouldn't we let that end up in
-> > > 999.out so that the golden output diff fails?
-> > 
-> > Sure, will remove the "2>&1".
-> > 
-> > > 
-> > > > +		if [ $? -ne 0 ];then
-> > > > +			echo "Unexpected error (type=$type)!"
-> > > > +			break
-> > > > +		fi
-> > > > +	done
-> > > > +	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
-> > > > +
-> > > > +	# As we've tested soft limit, now exceed the hard limit and give it a
-> > > > +	# test in passing.
-> > > > +	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 100m' -c fsync ${file}.hard.0" >>$seqres.full 2>&1
-> > > > +	for ((i=1; i<=10; i++));do
-> > > > +		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.hard.$i" >>$seqres.full 2>&1
-> > > 
-> > > Don't we want to encode the actual error in the golden output?
-> > 
-> > Hmm... due to I have to filter the ENOSPC or EDQUOT output again for project
-> > quota, as I did in generic/603 :-P Or put the that function into common/quota
-> > too.
+On Thu, May 12, 2022 at 06:52:37PM +0200, Christian Brauner wrote:
+> From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
 > 
-> I think it'd be fine if the golden output contained:
+> Hey everyone,
 > 
-> pwrite: Insufficient quota
-> pwrite: Insufficient quota
-> pwrite: Not enough space
+> Please note that this patch series contains patches that will be
+> rejected by the fstests mailing list because of the amount of changes
+> they contain. So tools like b4 will not be able to find the whole patch
+> series on a mailing list. In case it's helpful I've added the
+> "fstests.vfstest.for-next" tag which can be pulled. Otherwise it's
+> possible to simply use the patch series as it appears in your inbox.
 
-Sorry I didn't explain that clearly :)
+Hi Christian,
 
-When FSTYP=ext4, it got:
-pwrite: Disk quota exceeded
-pwrite: Disk quota exceeded
-pwrite: Disk quota exceeded
-...
-
-When FSTYP=xfs, it got:
-SCRATCH_MNT/testfile.hard.1: Disk quota exceeded
-SCRATCH_MNT/testfile.hard.1: Disk quota exceeded
-SCRATCH_MNT/t/testfile.hard.1: No space left on device
-...
-
-There're 2 differences:
-1) ext4 fails on write -- "-c pwrite", but xfs fails on open(O_CREAT) -- "xfs_io -f"
-2) For project quota, xfs returns ENOSPC, ext4 returns EDQUOT.
-
-If these're all as expected, I need to filter these differences. And I don't
-know what other filesystems will print, besides xfs and ext4.
+After a full round regression test, I just found this patchset cause
+generic/689 fail as [1], so I think it still need below fix [2]. If
+you won't send a fixed version before fstests release this sunday, I
+will fix it by myself, to help this patchset be merged this week. Due
+to it's not worth waiting one more week for this.
 
 Thanks,
 Zorro
 
+[1]
+/var/lib/xfstests/tests/generic/689: line 29: /var/lib/xfstests/src/idmapped-mounts/idmapped-mounts: No such file or directory
+
+[2]
+diff --git a/tests/generic/689 b/tests/generic/689
+index 670f8e5a..10dc58ed 100755
+--- a/tests/generic/689
++++ b/tests/generic/689
+@@ -11,7 +11,7 @@
+ # 705191b03d50 ("fs: fix acl translation")
+ #
+ . ./common/preamble
+-_begin_fstest auto quick perms
++_begin_fstest auto quick idmapped perms
+ 
+ # Import common functions.
+ . ./common/filter
+@@ -26,7 +26,7 @@ _require_group fsgqa
+ 
+ echo "Silence is golden"
+ 
+-$here/src/idmapped-mounts/idmapped-mounts --test-setxattr-fix-705191b03d50 \
++$here/src/vfs/vfstest --test-setxattr-fix-705191b03d50 \
+        --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
+ 
+ status=$?
+
 > 
-> for each of the user/group/project quota tests.  Or did I misunderstand?
+> All vfstests pass:
 > 
-> --D
+> #### btrfs ####
+> ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+> MKFS_OPTIONS  -- /dev/sda4
+> MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
 > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > +		if [ $? -eq 0 ];then
-> > > > +			echo "Unexpected success (type=$type)!"
-> > > > +			break
-> > > > +		fi
-> > > > +	done
-> > > > +}
-> > > > +
-> > > > +_qmount_option "usrquota"
-> > > > +exercise u
-> > > > +_qmount_option "grpquota"
-> > > > +exercise g
-> > > > +_qmount_option "prjquota"
-> > > > +exercise P
-> > > > +
-> > > > +echo "Silence is golden"
-> > > > +# success, all done
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/generic/999.out b/tests/generic/999.out
-> > > > new file mode 100644
-> > > > index 00000000..3b276ca8
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/999.out
-> > > > @@ -0,0 +1,2 @@
-> > > > +QA output created by 999
-> > > > +Silence is golden
-> > > > -- 
-> > > > 2.31.1
-> > > > 
-> > > 
+> btrfs/245 52s ...  54s
+> generic/633 58s ...  51s
+> generic/644 60s ...  49s
+> generic/645 161s ...  143s
+> generic/656 63s ...  55s
+> Ran: btrfs/245 generic/633 generic/644 generic/645 generic/656
+> Passed all 5 tests
+> 
+> #### ext4 ####
+> ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+> FSTYP         -- ext4
+> PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+> MKFS_OPTIONS  -- /dev/sda4
+> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sda4 /mnt/scratch
+> 
+> generic/633 47s ...  50s
+> generic/644 46s ...  49s
+> generic/645 135s ...  139s
+> generic/656 53s ...  54s
+> Ran: generic/633 generic/644 generic/645 generic/656
+> Passed all 4 tests
+> 
+> #### xfs ####
+> ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+> FSTYP         -- xfs (debug)
+> PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+> MKFS_OPTIONS  -- -f /dev/sda4
+> MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
+> 
+> generic/633 58s ...  58s
+> generic/644 62s ...  60s
+> generic/645 161s ...  161s
+> generic/656 62s ...  63s
+> xfs/152 133s ...  133s
+> xfs/153 94s ...  92s
+> Ran: generic/633 generic/644 generic/645 generic/656 xfs/152 xfs/153
+> Passed all 6 tests
+> 
+> /* v2 */
+> * This rebases the patchset on top the for-next branch.
+> * Last week we merged 858a19c5e9b0 ("idmapped_mounts: Prepare for
+>   support for more features"). The patch switched feature checking from
+>   a boolean to a flag. It failed convert all tests. This adds a patch to
+>   fix this in patch 01/13.
+> * A patch has been added to remove an invalid test. The semantics for a
+>   specific corner-case where we allowed a mount's idmapping to change
+>   while there were active writers will be altered.
+> 
+> /* v1 */
+> As announced multiple times already we need to rename and split the
+> idmapped mount testsuite into separate source files and also give it a
+> better name to reflect the fact that it covers a lot more than just
+> idmapped mounts.
+> 
+> I have decided against compiling different binaries for now. Instead we
+> compile a single vfstest binary that can be called with various command
+> line switches to run the various test suites. This is not different than
+> what we did for the idmapped-mounts binary. Of course, nothing prevents
+> us from using multiple binaries in the future.
+> 
+> Thanks!
+> Christian
+> 
+> Christian Brauner (13):
+>   idmapped-mounts: make all tests set their required feature flags
+>   src: rename idmapped-mounts folder
+>   src/vfs: rename idmapped-mounts.c file
+>   vfstest: rename struct t_idmapped_mounts
+>   utils: add missing global.h include
+>   utils: add struct vfstest_info
+>   utils: move helpers into utils
+>   missing: move sys_execveat() to missing.h
+>   utils: add struct test_suite
+>   vfstests: split idmapped mount tests into separate suite
+>   vfstest: split out btrfs idmapped mounts test
+>   vfstest: split out remaining idmapped mount tests
+>   vfs/idmapped-mounts: remove invalid test
+> 
+>  .gitignore                                    |     4 +-
+>  common/rc                                     |    32 +-
+>  src/Makefile                                  |     2 +-
+>  src/detached_mounts_propagation.c             |     2 +-
+>  src/feature.c                                 |     2 +-
+>  src/idmapped-mounts/idmapped-mounts.c         | 14625 ----------------
+>  src/idmapped-mounts/utils.c                   |   425 -
+>  src/idmapped-mounts/utils.h                   |   130 -
+>  src/{idmapped-mounts => vfs}/Makefile         |    14 +-
+>  src/vfs/btrfs-idmapped-mounts.c               |  3854 ++++
+>  src/vfs/btrfs-idmapped-mounts.h               |    15 +
+>  src/vfs/idmapped-mounts.c                     |  7747 ++++++++
+>  src/vfs/idmapped-mounts.h                     |    18 +
+>  src/{idmapped-mounts => vfs}/missing.h        |    11 +
+>  src/{idmapped-mounts => vfs}/mount-idmapped.c |     0
+>  src/vfs/utils.c                               |  1050 ++
+>  src/vfs/utils.h                               |   373 +
+>  src/vfs/vfstest.c                             |  2073 +++
+>  tests/btrfs/245                               |     2 +-
+>  tests/generic/633                             |     2 +-
+>  tests/generic/644                             |     2 +-
+>  tests/generic/645                             |     2 +-
+>  tests/generic/656                             |     2 +-
+>  tests/xfs/152                                 |     4 +-
+>  tests/xfs/153                                 |     2 +-
+>  25 files changed, 15177 insertions(+), 15216 deletions(-)
+>  delete mode 100644 src/idmapped-mounts/idmapped-mounts.c
+>  delete mode 100644 src/idmapped-mounts/utils.c
+>  delete mode 100644 src/idmapped-mounts/utils.h
+>  rename src/{idmapped-mounts => vfs}/Makefile (59%)
+>  create mode 100644 src/vfs/btrfs-idmapped-mounts.c
+>  create mode 100644 src/vfs/btrfs-idmapped-mounts.h
+>  create mode 100644 src/vfs/idmapped-mounts.c
+>  create mode 100644 src/vfs/idmapped-mounts.h
+>  rename src/{idmapped-mounts => vfs}/missing.h (93%)
+>  rename src/{idmapped-mounts => vfs}/mount-idmapped.c (100%)
+>  create mode 100644 src/vfs/utils.c
+>  create mode 100644 src/vfs/utils.h
+>  create mode 100644 src/vfs/vfstest.c
+> 
+> 
+> base-commit: 87cf32ad3fa234e3d5ec501e0f86516bef91d805
+> -- 
+> 2.34.1
 > 
 
