@@ -2,143 +2,137 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB1FEC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 21:35:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3F40C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 21:40:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349310AbiEPVf1 (ORCPT
+        id S234718AbiEPVk0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 17:35:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35730 "EHLO
+        Mon, 16 May 2022 17:40:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47692 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349364AbiEPVfZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 17:35:25 -0400
+        with ESMTP id S1349432AbiEPVkX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 17:40:23 -0400
 Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 3B7674093B
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 14:35:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B05A741F81
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 14:40:22 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 5562A5345B2;
-        Tue, 17 May 2022 07:35:18 +1000 (AEST)
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id B2050534751;
+        Tue, 17 May 2022 07:40:21 +1000 (AEST)
 Received: from dave by dread.disaster.area with local (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1nqiN3-00CoVO-0P; Tue, 17 May 2022 07:35:17 +1000
-Date:   Tue, 17 May 2022 07:35:17 +1000
+        id 1nqiRv-00CoYb-0F; Tue, 17 May 2022 07:40:19 +1000
+Date:   Tue, 17 May 2022 07:40:18 +1000
 From:   Dave Chinner <david@fromorbit.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 1/4] fstests: fix group list generation for whacky test
- names
-Message-ID: <20220516213516.GL2306852@dread.disaster.area>
+Subject: Re: [PATCH 3/4] xfs/148: fix failure from bad shortform size
+ assumptions
+Message-ID: <20220516214018.GM2306852@dread.disaster.area>
 References: <20220516085922.1306879-1-david@fromorbit.com>
- <20220516085922.1306879-2-david@fromorbit.com>
- <YoJ5yvYD9ZmNoNVi@magnolia>
+ <20220516085922.1306879-4-david@fromorbit.com>
+ <YoJvoETVVzsIHmvQ@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YoJ5yvYD9ZmNoNVi@magnolia>
+In-Reply-To: <YoJvoETVVzsIHmvQ@magnolia>
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6282c396
+X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6282c4c5
         a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
         a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
-        a=h9maRAkpTmx4mdwP3KUA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+        a=WQmH4K3oPmWSxOqEQ0wA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 16, 2022 at 09:20:26AM -0700, Darrick J. Wong wrote:
-> On Mon, May 16, 2022 at 06:59:19PM +1000, Dave Chinner wrote:
+On Mon, May 16, 2022 at 08:37:04AM -0700, Darrick J. Wong wrote:
+> On Mon, May 16, 2022 at 06:59:21PM +1000, Dave Chinner wrote:
 > > From: Dave Chinner <dchinner@redhat.com>
 > > 
-> > Darrick noticed that tests/xfs/191-input-validation didn't get
-> > generated properly. Fix the regex to handle this.
+> > We replaced an attr named:
 > > 
-> > $ grep -I -R "^_begin_fstest" tests/xfs | \
-> >   sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' |grep 191
-> > tests/xfs/191-input-validation:_begin_fstest auto quick mkfs realtime
-> > $
-> > $ grep -I -R "^_begin_fstest" tests/xfs | \
-> >   sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/ ' |grep 191
-> > 191 auto quick mkfs realtime
-> > $
+> > slashstr="are_bad_for_you"
 > > 
-> > Long term, we should rename that test to '191' and rip out all that
-> > unused and unnecessary complexity for matching ascii test names
-> > because we just don't use it. Numbers for tests are still working
-> > just fine.
+> > with this substitution:
 > > 
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  tools/mkgroupfile | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > cp $imgfile $imgfile.old
+> > sed -b \
+> >         -e "s/$nullstr/too_many\x00beans/g" \
+> >         -e "s/$slashstr/are_bad\/for_you/g" \
+> >         -i $imgfile
 > > 
-> > diff --git a/tools/mkgroupfile b/tools/mkgroupfile
-> > index 24435898..958d4e2f 100755
-> > --- a/tools/mkgroupfile
-> > +++ b/tools/mkgroupfile
-> > @@ -60,7 +60,7 @@ ENDL
-> >  
-> >  	# Aggregate the groups each test belongs to for the group file
-> >  	grep -I -R "^_begin_fstest" $test_dir/ | \
-> > -		sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' >> $new_groups
-> > +		sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/' >> $new_groups
+> > We then try to retreive the attr named 'a_are_bad/for_you'. The
+> > failure is:
+> > 
+> >     -Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+> >     -heh
+> >     +attr_get: No data available
+> >     +Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
+> > 
+> > The error returned is ENODATA - the xattr does not exist. While the
+> > name might exist in the attr leaf block:
+> > 
+> > ....
+> > nvlist[0].valuelen = 3
+> > nvlist[0].namelen = 17
+> > nvlist[0].name = "a_are_bad/for_you"
+> > nvlist[0].value = "heh"
+> > nvlist[1].valuelen = 3
+> > ....
+> > 
+> > xattrs are not looked up by name matches when in leaf or node form
+> > like they are in short form.  They are looked up by *name hash*
+> > matches, and if the hash is not found, then the name does not exist.
+> > Only if the has match is found, then it goes and retrieves the xattr
+> > pointed to by the hash and checks the name.
+> > 
+> > At this point, it should be obvious that the hash of
+> > "a_are_bad_for_you" is different to "a_a_are_bad/for_you". Hence the
+> > leaf lookup is always rejected at the hash match stage and never
+> > gets to the name compare stage.
+> > 
+> > IOWs, this test can *never* pass when the xattr is in leaf/node
+> > form, only when it is in short form.
+> > 
+> > The reason the attr fork is in leaf form is that we are using
+> > "-m crc=0" and so the inodes are only 256 bytes in size and can only
+> > hold ~150 bytes in the literal area. That leaves ~100 bytes maximum
+> > for shortform attr data. The test consumes ~80 bytes of shortform
+> > space, so it should fit and the test pass.
+> > 
+> > However:
+> > 
+> > nvlist[4].valuelen = 37
+> > nvlist[4].namelen = 7
+> > nvlist[4].name = "selinux"
+> > nvlist[4].value = "unconfined_u:object_r:unlabeled_t:s0\000"
+> > 
+> > Yes, I run the fstests with selinux enabled on some of test
+> > machines. The selinux attr pushes the attr fork way over the size
+> > that can fit in the shortform literal area, and so it moves to leaf
+> > form as the attrs are initially added and the test fails.
+> > 
+> > Fix this by forcing the test to use 512 byte inodes, so as to
+> > provide around 350 bytes of usable attr fork literal area so it's
+> > not affected by security attributes.
 > 
-> Sorry I didn't get a chance to review this patch before it went in, but
-> this string parsing gets tripped up by things that the old code handled
-> just fine.  Back when we'd run _begin_fstest as a real bash subroutine
-> to print the group name arguments, a line like this:
-> 
-> _begin_fstest deprecated # log logprint quota
+> I've long wondered if I should patch in a "security" module that
+> automatically pastes in a fake "s3linux" attribute so that I can
+> experience the different fs behavior that y'all see.
 
-And I just don't care about that.
+fstests basically already does that when selinux is turned on by
+setting a context mount option automatically:
 
-Handling these whacky corner cases is the *wrong solution* - we're
-just creating more technical debt for ourselves going down that
-path.
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/vdb /mnt/scratch
 
-$ git grep _begin_fstest tests/ |grep "#"
-tests/xfs/018:_begin_fstest deprecated # log logprint v2log
-tests/xfs/081:_begin_fstest deprecated # log logprint quota
-tests/xfs/082:_begin_fstest deprecated # log logprint v2log
-$
+The "-o context" options basically defines the security xattr that
+is written to every file that is created on the scratch device. All
+I've done on this VM is add this to the kernel CLI options:
 
-There are the only 3 tests marked deprecated. *Nobody runs them* and
-if they did, they all fail on a current kernel:
+selinux=1 security=selinux
 
-....
-Running: MOUNT_OPTIONS= ./check -R xunit -b -s xfs xfs/018 xfs/081 xfs/082
-....
-Failures: xfs/018 xfs/081 xfs/082
-Failed 3 of 3 tests
-
-We don't need to support this whacky corner case - just remove
-the three deprecated tests completely. If anyone needs them, they
-are still in the git history. But the right thing to do is to remove
-the corner case altogether, not add complexity to handle it
-needlessly.
-
-> Instead, that above output (which I harvested from xfs/081) now becomes:
-> 
-> 081 deprecated # log logprint quota
-> 
-> The first grepsed blobule should do more if it's going to
-> performance-optimize bash:
-
-We don't need to "performance-optimize bash" - we've already fixed
-the problem by addressing the low hanging fruit (35s down to less
-than 0.4s, and less than 0.1s with make -j8).
-
-Beyond where we iare now is really "don't care" territory because
-nobody is going to notice it going 0.1s faster now. OTOH, we are sure
-as anything going to notice the complexity of the regexes in a
-year's time when we have to work out what it does from first
-principles again....
-
-> grep -I -R "^_begin_fstest" -Z $test_dir/ | \
-> 	sed -e 's/#.*$//g' \
-
-This is the only bit that is needed to handle the commented out
-group case, everythign else is just complexity that comes from
-over-optimisation. And even handling comments is largely unnecessary
-because removing deprecated tests is the right way to fix this...
+and nothing else. Everyone should have at least on test VM set up
+this way - we need to ensure that LSM paths are actually exercised
+at some point during testing.
 
 Cheers,
 
