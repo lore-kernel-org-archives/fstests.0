@@ -2,82 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 856E0C4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 15:27:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04926C4332F
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 15:29:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237402AbiEPP1U (ORCPT
+        id S245136AbiEPP3R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 11:27:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46858 "EHLO
+        Mon, 16 May 2022 11:29:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243791AbiEPP1P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 11:27:15 -0400
+        with ESMTP id S239123AbiEPP3Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 11:29:16 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C07D81276B
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 08:27:11 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E00E839BAD
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 08:29:15 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 6FB32B8121B
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 15:27:10 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28227C385AA;
-        Mon, 16 May 2022 15:27:09 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A8BF8B8121B
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 15:29:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6748BC385AA;
+        Mon, 16 May 2022 15:29:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652714829;
-        bh=UQqmKz2SXvG/OqfRAMD343UYcaGpdsnFwGgy8NzeWV0=;
+        s=k20201202; t=1652714953;
+        bh=/dvno9+OFUO0BeqH2ss2Vrxw9dxWks4HZ1giJw266rQ=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=bYYqSRWCoDTG7BjHXSO7h26U3E59pXXZin7rQEcjINh3ks/h4JjgTwT0TfPPV3xIN
-         Cs1HZbe0XLNa4j/1HeE6qSmMlaxmi8jrqhLMZqTpn0enLorD6l1a52ga1PcEPkYUq5
-         7Y7GHInUURs+xEonev14D2lHHt5EVHWndGaBC71i3l6H54IwuCrVjQEk6ByvcfVw8j
-         tOggioBs99l+cikIE7PcFBRBviNWaUT2Dt+nqPENC2nTF736OknQeOt+kSdRtikpyg
-         7y2nSFQhwIWStajLqhQVjzbg8Pioq5N2YKYRXawU6nEnOuF0ndcfJLAMadp1HuxQ/b
-         DJNgryhJA1EUA==
-Date:   Mon, 16 May 2022 08:27:08 -0700
+        b=W4OpkImchgttraKIqaM8KpLDF/O8yDw7QMyetPtSW9tdA5+3QKiFS4P2mjhEbztv/
+         e7ol21hsvnmvmmXRItNDdllBcZtZBeU0mALnQNgLWBYMKBbhI8cf1HAl6nw5OyE1t/
+         BP98E4cHW+MJy3CVYkpAWupqPDZLC3pKDORHZ0Suq/+E1KD8KzKfFCq5FylWlOEd1Y
+         /4FtQgEOxQvu82JMZQxJqUYGTQad+iaY1eAQNoEMkbbzAYIv008KSVn9lUuA8wBJwd
+         rCQcVvaPgTnRjjLP25ik0km0mnRkUlIDwFUarLwrwbhlcItp4pW6Zks+C3FLgrbz5J
+         JQgEEN0w5wdaA==
+Date:   Mon, 16 May 2022 08:29:12 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Dave Chinner <david@fromorbit.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/3] xfs/122: add attribute log formats to test output.
-Message-ID: <YoJtTAFl/KXEAXzb@magnolia>
+Subject: Re: [PATCH 3/3] xfs/348: golden output is not correct
+Message-ID: <YoJtyH6OnvDzVoDK@magnolia>
 References: <20220516060807.1295102-1-david@fromorbit.com>
- <20220516060807.1295102-3-david@fromorbit.com>
+ <20220516060807.1295102-4-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220516060807.1295102-3-david@fromorbit.com>
+In-Reply-To: <20220516060807.1295102-4-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 16, 2022 at 04:08:06PM +1000, Dave Chinner wrote:
+On Mon, May 16, 2022 at 04:08:07PM +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> Now that we have merged logged attributes, add the attribute log
-> format sizes to the on-disk structure size checking.
+> The output of xfs/348 encodes the observed behaviour at the time the
+> test was written, not the correct behaviour that should occur.
+> Recent improvements in verification checking in the upstream kernel
+> (1eb70f54c445 "xfs: validate inode fork size against fork format")
+> have resulted in the kernel having correct behaviour and now the
+> test fails. Fix the test output to reflect correct behaviour.
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 
-Looks correct,
+Heh, I've long wondered (but never had the time) to go figure out why
+more things weren't failing.  Thx for fixing the kernel.
+
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
 > ---
->  tests/xfs/122.out | 2 ++
->  1 file changed, 2 insertions(+)
+>  tests/xfs/348.out | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-> index 608faa4b..a56cbee8 100644
-> --- a/tests/xfs/122.out
-> +++ b/tests/xfs/122.out
-> @@ -63,6 +63,8 @@ sizeof(struct xfs_attr3_leaf_hdr) = 80
->  sizeof(struct xfs_attr3_leafblock) = 88
->  sizeof(struct xfs_attr3_rmt_hdr) = 56
->  sizeof(struct xfs_attr_shortform) = 8
-> +sizeof(struct xfs_attrd_log_format) = 16
-> +sizeof(struct xfs_attri_log_format) = 40
->  sizeof(struct xfs_btree_block) = 72
->  sizeof(struct xfs_btree_block_lhdr) = 64
->  sizeof(struct xfs_btree_block_shdr) = 48
+> diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+> index 0d407718..9130f42a 100644
+> --- a/tests/xfs/348.out
+> +++ b/tests/xfs/348.out
+> @@ -108,7 +108,7 @@ would have junked entry "DATA" in directory PARENT_INO
+>  would have junked entry "EMPTY" in directory PARENT_INO
+>  would have junked entry "FIFO" in directory PARENT_INO
+>  stat: 'SCRATCH_MNT/test/DIR' is a directory
+> -stat: 'SCRATCH_MNT/test/DATA' is a directory
+> +stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
+>  stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+>  stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
+>  stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
+> @@ -240,7 +240,7 @@ would have junked entry "DIR" in directory PARENT_INO
+>  would have junked entry "EMPTY" in directory PARENT_INO
+>  would have junked entry "FIFO" in directory PARENT_INO
+>  stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
+> -stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
+> +stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
+>  stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+>  stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
+>  stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
 > -- 
 > 2.35.1
 > 
