@@ -2,86 +2,137 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1865BC4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 06:08:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9139C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 06:40:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238317AbiEPGI1 (ORCPT
+        id S237096AbiEPGkE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 02:08:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53120 "EHLO
+        Mon, 16 May 2022 02:40:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240209AbiEPGIO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 02:08:14 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5701E21243
-        for <fstests@vger.kernel.org>; Sun, 15 May 2022 23:08:11 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 337D710E695D
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 16:08:11 +1000 (AEST)
-Received: from discord.disaster.area ([192.168.253.110])
-        by dread.disaster.area with esmtp (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nqTtp-00CYbH-Gv
-        for fstests@vger.kernel.org; Mon, 16 May 2022 16:08:09 +1000
-Received: from dave by discord.disaster.area with local (Exim 4.95)
-        (envelope-from <david@fromorbit.com>)
-        id 1nqTtp-005QwN-Fy
-        for fstests@vger.kernel.org;
-        Mon, 16 May 2022 16:08:09 +1000
-From:   Dave Chinner <david@fromorbit.com>
+        with ESMTP id S240347AbiEPGkD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 02:40:03 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D60B338AD;
+        Sun, 15 May 2022 23:40:01 -0700 (PDT)
+Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 24G5OEn7005015;
+        Mon, 16 May 2022 06:40:01 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=DcLL7y2N8X7R3Q4gD9zmQ+4CbjMGdyO06C1r8lZBc54=;
+ b=A4OWmrxl4EwYLoZN+DV+NyVIktOcnE3JI7neX2y9nshrEr1JoDFm8/ZtORhLR8C2Ji1c
+ FOGlIY742etEPFbXOS7ymqlZZoKHTPBeG0lYesIeDDo3YJuQgahm5kpvjbTtNMjvXG3Z
+ GjAaaT2MNnMOfGEbsWwX1O2JrURC503Ykrgm0XQzeX1kSqIzuaI76n0aZ1lVJVBH3mTT
+ +M9dWmVniMbm1K1QTbG6ud3GkBjyMmJIcRTXnwFjSmjIpH5JKjPY17zmay2oGS21b6TM
+ yLlHksWhMR2LVe3e1tuAWfm66yUsO/QnacR9mN7vYFoAEM0agQNv/gTBPV2kxOvrOfZb tg== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3g3ge8h771-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 May 2022 06:40:01 +0000
+Received: from m0098404.ppops.net (m0098404.ppops.net [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 24G6GnNo008856;
+        Mon, 16 May 2022 06:40:00 GMT
+Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3g3ge8h76g-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 May 2022 06:40:00 +0000
+Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
+        by ppma05fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 24G68SVB016748;
+        Mon, 16 May 2022 06:39:58 GMT
+Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
+        by ppma05fra.de.ibm.com with ESMTP id 3g24291n56-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 May 2022 06:39:58 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 24G6dt2B40174078
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 16 May 2022 06:39:55 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id C854E4C044;
+        Mon, 16 May 2022 06:39:55 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id CB16C4C046;
+        Mon, 16 May 2022 06:39:53 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.41.34])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon, 16 May 2022 06:39:53 +0000 (GMT)
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH 3/3] xfs/348: golden output is not correct
-Date:   Mon, 16 May 2022 16:08:07 +1000
-Message-Id: <20220516060807.1295102-4-david@fromorbit.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220516060807.1295102-1-david@fromorbit.com>
-References: <20220516060807.1295102-1-david@fromorbit.com>
-MIME-Version: 1.0
+Cc:     zlang@redhat.com, riteshh@linux.ibm.com,
+        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2] common/rc: Modify _require_batched_discard to improve test coverage
+Date:   Mon, 16 May 2022 12:09:51 +0530
+Message-Id: <20220516063951.87838-1-ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.27.0
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: Fc-stSPmQNu3HczXZDnJ9etBJx865QbY
+X-Proofpoint-ORIG-GUID: VduchDHmEd_R5WWOixWOtniqCL0VB7JF
 Content-Transfer-Encoding: 8bit
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=6281ea4b
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=bLOITkrf0B9LOGp-q54A:9
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+MIME-Version: 1.0
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
+ definitions=2022-05-15_11,2022-05-13_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ clxscore=1015 impostorscore=0 bulkscore=0 phishscore=0 mlxlogscore=752
+ adultscore=0 mlxscore=0 malwarescore=0 spamscore=0 suspectscore=0
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2205160036
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Dave Chinner <dchinner@redhat.com>
+A recent ext4 patch discussed [1] that some devices (eg LVMs) can
+have a discard granularity as big as 42MB which makes it larger
+than the group size of ext4 FS with 1k BS.  This causes the FITRIM
+IOCTL to fail.
 
-The output of xfs/348 encodes the observed behaviour at the time the
-test was written, not the correct behaviour that should occur.
-Recent improvements in verification checking in the upstream kernel
-(1eb70f54c445 "xfs: validate inode fork size against fork format")
-have resulted in the kernel having correct behaviour and now the
-test fails. Fix the test output to reflect correct behaviour.
+This case was not correctly handled by this test since
+"_require_batched_discard" incorrectly interpreted the FITRIM
+failure as SCRATCH_DEV not supporting the IOCTL. This caused the test
+to report "not run" instead of "failed" in case of large discard granularity.
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Fix "_require_batched_discard" to use a more accurate method
+to determine if discard is supported.
+
+[1] commit 173b6e383d2
+    ext4: avoid trim error on fs with small groups
+
+Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
 ---
- tests/xfs/348.out | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/xfs/348.out b/tests/xfs/348.out
-index 0d407718..9130f42a 100644
---- a/tests/xfs/348.out
-+++ b/tests/xfs/348.out
-@@ -108,7 +108,7 @@ would have junked entry "DATA" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- stat: 'SCRATCH_MNT/test/DIR' is a directory
--stat: 'SCRATCH_MNT/test/DATA' is a directory
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
- stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
- stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
- stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-@@ -240,7 +240,7 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
- stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
- stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
+Changes since v1 [1] 
+
+*  Changed $RET to a local variable
+*  Fixed the grep command 
+
+[1]
+https://lore.kernel.org/all/20220401055713.634842-1-ojaswin@linux.ibm.com/
+
+ common/rc | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index e2d3d72a..f366e409 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3858,7 +3858,13 @@ _require_batched_discard()
+ 		exit 1
+ 	fi
+ 	_require_fstrim
+-	$FSTRIM_PROG $1 > /dev/null 2>&1 || _notrun "FITRIM not supported on $1"
++
++	grep -q "not supported" <($FSTRIM_PROG $1 2>&1)
++	local ret=$?
++	if [ "$ret" = "0" ]
++	then
++		_notrun "FITRIM not supported on $1"
++	fi
+ }
+ 
+ _require_dumpe2fs()
 -- 
-2.35.1
+2.27.0
 
