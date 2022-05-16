@@ -2,247 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A80FC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 08:03:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21DE3C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 08:46:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237315AbiEPIDH (ORCPT
+        id S231941AbiEPIqh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 04:03:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56300 "EHLO
+        Mon, 16 May 2022 04:46:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239270AbiEPIDF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 04:03:05 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FB102D1F6
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 01:03:04 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E026061196
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 08:03:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 820ECC385AA;
-        Mon, 16 May 2022 08:03:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652688183;
-        bh=PxNctA92Cqw+11jD1ST8Y86DOSAnvUxou2ch6tVAlkQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ZHmvfe5xWCPAodHrNSvQ3umrcQgduDjQtCeTLqnuO6o1pRkPFYZmRJZWEU1AkWjuR
-         6l0uZMo8rolOTuUq9kqG6D9Ns6+vB95ttrS/jfUmaJwnpMr3n+hKLoleFvfXO7sLOM
-         cLl0oCvCG6NboBRQaq1XRlv9Z0wYDs9TjLCjZamKvBL6sqsr4dWwt0ws5tAy4jglYQ
-         /Ist2ATCnjGgN06ua4+z3ohAVvhS9Ygo2iaZf5ViJDOakIkoaAvDE5STs8nnKAshHj
-         dGCQaXxlq9qKp+KHloiHH+6XCg+i6Hzd0B1y1Ja60TUCvZv8Bi7FyomdahCkObS6HI
-         Wc+/NxfeuVb9g==
-Date:   Mon, 16 May 2022 10:02:59 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2 00/13] rename & split tests
-Message-ID: <20220516080259.lhfbt6qyizbdekbm@wittgenstein>
-References: <20220512165250.450989-1-brauner@kernel.org>
- <20220514175943.msaucvar5m3uxskb@zlang-mailbox>
+        with ESMTP id S241998AbiEPIpq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 04:45:46 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B5F7E0F6;
+        Mon, 16 May 2022 01:45:17 -0700 (PDT)
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 24G7GMl3029172;
+        Mon, 16 May 2022 08:45:17 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=hfH9ENXHmkvYY4SrhVI4B6ngajE5iyLDfRCRRzKHlPg=;
+ b=lHrPtOe/MHrttYPkGozCjIffvk+BnrAEG+suQqEnnEpr+08XieQfsiG0QI8GSOcE7a2F
+ jSsQo+Vc4iMR62ILnembAj1J2FMQFnfapwgQDt/QAcNrkaaoyGVn++vi5bI+SghdvQDQ
+ iI4fBp2ReSqPwzG8f01FFWVA5tsFUCAn/eJ9bG/ub7Djs7riEm3APVU3vooT0mDaajHb
+ rNM+hlWCAAFGT4V55zRe7sCW5azxTcCKJ4pZnS7iFcCPmVUZV9FcqUmh33JQwMcQCeKY
+ 7gBucRe+8LNnj57scpnNve0zUK9ot7senVit54drQdkPl+kuLWugfbUdqNtv4LzY1nac VQ== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3g3j2s9kx2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 May 2022 08:45:17 +0000
+Received: from m0098409.ppops.net (m0098409.ppops.net [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 24G8Mfnj024366;
+        Mon, 16 May 2022 08:45:16 GMT
+Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3g3j2s9kvw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 May 2022 08:45:16 +0000
+Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
+        by ppma05fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 24G8hLA0020581;
+        Mon, 16 May 2022 08:45:14 GMT
+Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
+        by ppma05fra.de.ibm.com with ESMTP id 3g24291su0-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 16 May 2022 08:45:14 +0000
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
+        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 24G8jCRx41484640
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 16 May 2022 08:45:12 GMT
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id E6D8DA4064;
+        Mon, 16 May 2022 08:45:11 +0000 (GMT)
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 185F6A405F;
+        Mon, 16 May 2022 08:45:10 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.41.34])
+        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon, 16 May 2022 08:45:09 +0000 (GMT)
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     zlang@redhat.com, riteshh@linux.ibm.com,
+        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v3] common/rc: Modify _require_batched_discard to improve test coverage
+Date:   Mon, 16 May 2022 14:15:05 +0530
+Message-Id: <20220516084505.97655-1-ojaswin@linux.ibm.com>
+X-Mailer: git-send-email 2.27.0
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: kgmcdx_mKfYLTsSXVvCTqddhbJ44qoT3
+X-Proofpoint-ORIG-GUID: 7XO7ltc0Mnxms-7HRpVW9KauZzzBWQ3X
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20220514175943.msaucvar5m3uxskb@zlang-mailbox>
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
+ definitions=2022-05-16_03,2022-05-13_01,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 spamscore=0
+ clxscore=1015 mlxscore=0 priorityscore=1501 lowpriorityscore=0
+ phishscore=0 malwarescore=0 adultscore=0 bulkscore=0 mlxlogscore=772
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2202240000 definitions=main-2205160049
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, May 15, 2022 at 01:59:43AM +0800, Zorro Lang wrote:
-> On Thu, May 12, 2022 at 06:52:37PM +0200, Christian Brauner wrote:
-> > From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
-> > 
-> > Hey everyone,
-> > 
-> > Please note that this patch series contains patches that will be
-> > rejected by the fstests mailing list because of the amount of changes
-> > they contain. So tools like b4 will not be able to find the whole patch
-> > series on a mailing list. In case it's helpful I've added the
-> > "fstests.vfstest.for-next" tag which can be pulled. Otherwise it's
-> > possible to simply use the patch series as it appears in your inbox.
-> 
-> Hi Christian,
+A recent ext4 patch discussed [1] that some devices (eg LVMs) can
+have a discard granularity as big as 42MB which makes it larger
+than the group size of ext4 FS with 1k BS.  This causes the FITRIM
+IOCTL to fail.
 
-Hi Zorro,
+This case was not correctly handled by this test since
+"_require_batched_discard" incorrectly interpreted the FITRIM
+failure as SCRATCH_DEV not supporting the IOCTL. This caused the test
+to report "not run" instead of "failed" in case of large discard granularity.
 
-> 
-> After a full round regression test, I just found this patchset cause
-> generic/689 fail as [1], so I think it still need below fix [2]. If
-> you won't send a fixed version before fstests release this sunday, I
-> will fix it by myself, to help this patchset be merged this week. Due
-> to it's not worth waiting one more week for this.
+Fix "_require_batched_discard" to use a more accurate method
+to determine if discard is supported.
 
-Thank you!
+[1] commit 173b6e383d2
+    ext4: avoid trim error on fs with small groups
 
-> 
-> Thanks,
-> Zorro
-> 
-> [1]
-> /var/lib/xfstests/tests/generic/689: line 29: /var/lib/xfstests/src/idmapped-mounts/idmapped-mounts: No such file or directory
-> 
-> [2]
-> diff --git a/tests/generic/689 b/tests/generic/689
-> index 670f8e5a..10dc58ed 100755
-> --- a/tests/generic/689
-> +++ b/tests/generic/689
-> @@ -11,7 +11,7 @@
->  # 705191b03d50 ("fs: fix acl translation")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick perms
-> +_begin_fstest auto quick idmapped perms
+Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
+---
 
-Ah, I see. I didn't catch this because I forgot to add the test to the
-idmapped group.
+Changes since v2 [1] 
 
-Thanks,
-Christian
+*  Eliminated redundant $ret variable
 
->  
->  # Import common functions.
->  . ./common/filter
-> @@ -26,7 +26,7 @@ _require_group fsgqa
->  
->  echo "Silence is golden"
->  
-> -$here/src/idmapped-mounts/idmapped-mounts --test-setxattr-fix-705191b03d50 \
-> +$here/src/vfs/vfstest --test-setxattr-fix-705191b03d50 \
->         --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
->  
->  status=$?
-> 
-> > 
-> > All vfstests pass:
-> > 
-> > #### btrfs ####
-> > ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
-> > FSTYP         -- btrfs
-> > PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
-> > MKFS_OPTIONS  -- /dev/sda4
-> > MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
-> > 
-> > btrfs/245 52s ...  54s
-> > generic/633 58s ...  51s
-> > generic/644 60s ...  49s
-> > generic/645 161s ...  143s
-> > generic/656 63s ...  55s
-> > Ran: btrfs/245 generic/633 generic/644 generic/645 generic/656
-> > Passed all 5 tests
-> > 
-> > #### ext4 ####
-> > ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
-> > FSTYP         -- ext4
-> > PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
-> > MKFS_OPTIONS  -- /dev/sda4
-> > MOUNT_OPTIONS -- -o acl,user_xattr /dev/sda4 /mnt/scratch
-> > 
-> > generic/633 47s ...  50s
-> > generic/644 46s ...  49s
-> > generic/645 135s ...  139s
-> > generic/656 53s ...  54s
-> > Ran: generic/633 generic/644 generic/645 generic/656
-> > Passed all 4 tests
-> > 
-> > #### xfs ####
-> > ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
-> > FSTYP         -- xfs (debug)
-> > PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
-> > MKFS_OPTIONS  -- -f /dev/sda4
-> > MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
-> > 
-> > generic/633 58s ...  58s
-> > generic/644 62s ...  60s
-> > generic/645 161s ...  161s
-> > generic/656 62s ...  63s
-> > xfs/152 133s ...  133s
-> > xfs/153 94s ...  92s
-> > Ran: generic/633 generic/644 generic/645 generic/656 xfs/152 xfs/153
-> > Passed all 6 tests
-> > 
-> > /* v2 */
-> > * This rebases the patchset on top the for-next branch.
-> > * Last week we merged 858a19c5e9b0 ("idmapped_mounts: Prepare for
-> >   support for more features"). The patch switched feature checking from
-> >   a boolean to a flag. It failed convert all tests. This adds a patch to
-> >   fix this in patch 01/13.
-> > * A patch has been added to remove an invalid test. The semantics for a
-> >   specific corner-case where we allowed a mount's idmapping to change
-> >   while there were active writers will be altered.
-> > 
-> > /* v1 */
-> > As announced multiple times already we need to rename and split the
-> > idmapped mount testsuite into separate source files and also give it a
-> > better name to reflect the fact that it covers a lot more than just
-> > idmapped mounts.
-> > 
-> > I have decided against compiling different binaries for now. Instead we
-> > compile a single vfstest binary that can be called with various command
-> > line switches to run the various test suites. This is not different than
-> > what we did for the idmapped-mounts binary. Of course, nothing prevents
-> > us from using multiple binaries in the future.
-> > 
-> > Thanks!
-> > Christian
-> > 
-> > Christian Brauner (13):
-> >   idmapped-mounts: make all tests set their required feature flags
-> >   src: rename idmapped-mounts folder
-> >   src/vfs: rename idmapped-mounts.c file
-> >   vfstest: rename struct t_idmapped_mounts
-> >   utils: add missing global.h include
-> >   utils: add struct vfstest_info
-> >   utils: move helpers into utils
-> >   missing: move sys_execveat() to missing.h
-> >   utils: add struct test_suite
-> >   vfstests: split idmapped mount tests into separate suite
-> >   vfstest: split out btrfs idmapped mounts test
-> >   vfstest: split out remaining idmapped mount tests
-> >   vfs/idmapped-mounts: remove invalid test
-> > 
-> >  .gitignore                                    |     4 +-
-> >  common/rc                                     |    32 +-
-> >  src/Makefile                                  |     2 +-
-> >  src/detached_mounts_propagation.c             |     2 +-
-> >  src/feature.c                                 |     2 +-
-> >  src/idmapped-mounts/idmapped-mounts.c         | 14625 ----------------
-> >  src/idmapped-mounts/utils.c                   |   425 -
-> >  src/idmapped-mounts/utils.h                   |   130 -
-> >  src/{idmapped-mounts => vfs}/Makefile         |    14 +-
-> >  src/vfs/btrfs-idmapped-mounts.c               |  3854 ++++
-> >  src/vfs/btrfs-idmapped-mounts.h               |    15 +
-> >  src/vfs/idmapped-mounts.c                     |  7747 ++++++++
-> >  src/vfs/idmapped-mounts.h                     |    18 +
-> >  src/{idmapped-mounts => vfs}/missing.h        |    11 +
-> >  src/{idmapped-mounts => vfs}/mount-idmapped.c |     0
-> >  src/vfs/utils.c                               |  1050 ++
-> >  src/vfs/utils.h                               |   373 +
-> >  src/vfs/vfstest.c                             |  2073 +++
-> >  tests/btrfs/245                               |     2 +-
-> >  tests/generic/633                             |     2 +-
-> >  tests/generic/644                             |     2 +-
-> >  tests/generic/645                             |     2 +-
-> >  tests/generic/656                             |     2 +-
-> >  tests/xfs/152                                 |     4 +-
-> >  tests/xfs/153                                 |     2 +-
-> >  25 files changed, 15177 insertions(+), 15216 deletions(-)
-> >  delete mode 100644 src/idmapped-mounts/idmapped-mounts.c
-> >  delete mode 100644 src/idmapped-mounts/utils.c
-> >  delete mode 100644 src/idmapped-mounts/utils.h
-> >  rename src/{idmapped-mounts => vfs}/Makefile (59%)
-> >  create mode 100644 src/vfs/btrfs-idmapped-mounts.c
-> >  create mode 100644 src/vfs/btrfs-idmapped-mounts.h
-> >  create mode 100644 src/vfs/idmapped-mounts.c
-> >  create mode 100644 src/vfs/idmapped-mounts.h
-> >  rename src/{idmapped-mounts => vfs}/missing.h (93%)
-> >  rename src/{idmapped-mounts => vfs}/mount-idmapped.c (100%)
-> >  create mode 100644 src/vfs/utils.c
-> >  create mode 100644 src/vfs/utils.h
-> >  create mode 100644 src/vfs/vfstest.c
-> > 
-> > 
-> > base-commit: 87cf32ad3fa234e3d5ec501e0f86516bef91d805
-> > -- 
-> > 2.34.1
-> > 
-> 
+[1]
+https://lore.kernel.org/all/20220516063951.87838-1-ojaswin@linux.ibm.com/
+
+ common/rc | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index e2d3d72a..94344248 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3858,7 +3858,12 @@ _require_batched_discard()
+ 		exit 1
+ 	fi
+ 	_require_fstrim
+-	$FSTRIM_PROG $1 > /dev/null 2>&1 || _notrun "FITRIM not supported on $1"
++
++	grep -q "not supported" <($FSTRIM_PROG $1 2>&1)
++	if [ "$?" = "0" ]
++	then
++		_notrun "FITRIM not supported on $1"
++	fi
+ }
+ 
+ _require_dumpe2fs()
+-- 
+2.27.0
+
