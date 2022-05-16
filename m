@@ -2,178 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AC31C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 15:37:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F082C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 16:20:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245337AbiEPPhI (ORCPT
+        id S232773AbiEPQUa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 11:37:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39318 "EHLO
+        Mon, 16 May 2022 12:20:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33700 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243266AbiEPPhH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 11:37:07 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 785D4245AF
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 08:37:06 -0700 (PDT)
+        with ESMTP id S230103AbiEPQU3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 12:20:29 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCB5339145
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 09:20:27 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1C6BA60F63
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 15:37:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6E205C385AA;
-        Mon, 16 May 2022 15:37:05 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4E4D261011
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 16:20:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A112BC385AA;
+        Mon, 16 May 2022 16:20:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652715425;
-        bh=NpkAA1EIvx/U3gbWNsWpac0XszNDfanqQTRUpf08P74=;
+        s=k20201202; t=1652718026;
+        bh=Uh6bbzZWIvw7emlxt0ZL1dcuhFBusflD1hjNhgajrfw=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=cJInKloHuUjyXwS+mavQ7MoqGL8JXAhLnn3Vyo+BCh1C2HAH8Ubrw8drRywa7UVuS
-         Vt0NdUMWaH9EboDmIN5Bj9N3KycQjnaGC8m7EEiolK6x8aTxVVQp4WvPtIPJoKArPh
-         jKFwKu20pFoRy63pCYzWT+hcJ+RfipBtkdXrNZohEaHIivgw53yy9rrnMCPB1z3SKl
-         jLGR3wcoqp5BzHuUova9O1SovldUanjAM+oWATSELLp4Dctglun1NE7C5MXb0tEmqC
-         xQLH+BtZopx+lAsPCj3+HlP6T2dmGl2hwfRIH5OQGzWmS2rWnXGIWocR+s1NcnhE0d
-         t6OPl4KzxBIWg==
-Date:   Mon, 16 May 2022 08:37:04 -0700
+        b=e95vk8auS2W9cofflomtA1Qhb0WyD15Kc/nwoEBvwlxKEL2rj2StwxIIQNBltKZKX
+         SfCuaVM1ZQyYPRT0wiKwN0z6WvSfTEDL7JHtapMMzKUErKdmP75t1I3dpsz6cZttNB
+         hG32kfz0xNLLxAo4n3s6KRHtiNZaA6gWlDNl0o98Jc2H8FT9Q8f41msFGumr6t0wzO
+         HJX+7DINRlxt9mqje3lTAkNbvPMxMko5lM1SlhSmGD69m9xXxjJ9YrBfEzWi9jTGqS
+         PeC3sNJSO9M3rhrmd3UHj7yNnknR2vhPVe6rCgC2d/gd+zl/G2Lwdp9zKAHsSb4WUx
+         TxisnhVEQcsow==
+Date:   Mon, 16 May 2022 09:20:26 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Dave Chinner <david@fromorbit.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] xfs/148: fix failure from bad shortform size
- assumptions
-Message-ID: <YoJvoETVVzsIHmvQ@magnolia>
+Subject: Re: [PATCH 1/4] fstests: fix group list generation for whacky test
+ names
+Message-ID: <YoJ5yvYD9ZmNoNVi@magnolia>
 References: <20220516085922.1306879-1-david@fromorbit.com>
- <20220516085922.1306879-4-david@fromorbit.com>
+ <20220516085922.1306879-2-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220516085922.1306879-4-david@fromorbit.com>
+In-Reply-To: <20220516085922.1306879-2-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 16, 2022 at 06:59:21PM +1000, Dave Chinner wrote:
+On Mon, May 16, 2022 at 06:59:19PM +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> We replaced an attr named:
+> Darrick noticed that tests/xfs/191-input-validation didn't get
+> generated properly. Fix the regex to handle this.
 > 
-> slashstr="are_bad_for_you"
+> $ grep -I -R "^_begin_fstest" tests/xfs | \
+>   sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' |grep 191
+> tests/xfs/191-input-validation:_begin_fstest auto quick mkfs realtime
+> $
+> $ grep -I -R "^_begin_fstest" tests/xfs | \
+>   sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/ ' |grep 191
+> 191 auto quick mkfs realtime
+> $
 > 
-> with this substitution:
-> 
-> cp $imgfile $imgfile.old
-> sed -b \
->         -e "s/$nullstr/too_many\x00beans/g" \
->         -e "s/$slashstr/are_bad\/for_you/g" \
->         -i $imgfile
-> 
-> We then try to retreive the attr named 'a_are_bad/for_you'. The
-> failure is:
-> 
->     -Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
->     -heh
->     +attr_get: No data available
->     +Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
-> 
-> The error returned is ENODATA - the xattr does not exist. While the
-> name might exist in the attr leaf block:
-> 
-> ....
-> nvlist[0].valuelen = 3
-> nvlist[0].namelen = 17
-> nvlist[0].name = "a_are_bad/for_you"
-> nvlist[0].value = "heh"
-> nvlist[1].valuelen = 3
-> ....
-> 
-> xattrs are not looked up by name matches when in leaf or node form
-> like they are in short form.  They are looked up by *name hash*
-> matches, and if the hash is not found, then the name does not exist.
-> Only if the has match is found, then it goes and retrieves the xattr
-> pointed to by the hash and checks the name.
-> 
-> At this point, it should be obvious that the hash of
-> "a_are_bad_for_you" is different to "a_a_are_bad/for_you". Hence the
-> leaf lookup is always rejected at the hash match stage and never
-> gets to the name compare stage.
-> 
-> IOWs, this test can *never* pass when the xattr is in leaf/node
-> form, only when it is in short form.
-> 
-> The reason the attr fork is in leaf form is that we are using
-> "-m crc=0" and so the inodes are only 256 bytes in size and can only
-> hold ~150 bytes in the literal area. That leaves ~100 bytes maximum
-> for shortform attr data. The test consumes ~80 bytes of shortform
-> space, so it should fit and the test pass.
-> 
-> However:
-> 
-> nvlist[4].valuelen = 37
-> nvlist[4].namelen = 7
-> nvlist[4].name = "selinux"
-> nvlist[4].value = "unconfined_u:object_r:unlabeled_t:s0\000"
-> 
-> Yes, I run the fstests with selinux enabled on some of test
-> machines. The selinux attr pushes the attr fork way over the size
-> that can fit in the shortform literal area, and so it moves to leaf
-> form as the attrs are initially added and the test fails.
-> 
-> Fix this by forcing the test to use 512 byte inodes, so as to
-> provide around 350 bytes of usable attr fork literal area so it's
-> not affected by security attributes.
-
-I've long wondered if I should patch in a "security" module that
-automatically pastes in a fake "s3linux" attribute so that I can
-experience the different fs behavior that y'all see.
-
-> While there, clean up the silly conditional loop device cleanup
-> code.
+> Long term, we should rename that test to '191' and rip out all that
+> unused and unnecessary complexity for matching ascii test names
+> because we just don't use it. Numbers for tests are still working
+> just fine.
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  tools/mkgroupfile | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tools/mkgroupfile b/tools/mkgroupfile
+> index 24435898..958d4e2f 100755
+> --- a/tools/mkgroupfile
+> +++ b/tools/mkgroupfile
+> @@ -60,7 +60,7 @@ ENDL
+>  
+>  	# Aggregate the groups each test belongs to for the group file
+>  	grep -I -R "^_begin_fstest" $test_dir/ | \
+> -		sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' >> $new_groups
+> +		sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/' >> $new_groups
 
-Looks good,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Sorry I didn't get a chance to review this patch before it went in, but
+this string parsing gets tripped up by things that the old code handled
+just fine.  Back when we'd run _begin_fstest as a real bash subroutine
+to print the group name arguments, a line like this:
+
+_begin_fstest deprecated # log logprint quota
+
+would put this test in *only* the group "deprecated".  Everything
+starting with the '#' is a comment.  bash would also ignore extra spaces
+between arguments, and if someone happened to use a tab, that would also
+be fine because bash ignores all the unquoted whitespace between
+arguments.  Yes, it's slow, but I chose that method because (a) make
+-jXX, and (b) I hate string parsing with grep and sed gunk.
+
+Instead, that above output (which I harvested from xfs/081) now becomes:
+
+081 deprecated # log logprint quota
+
+The first grepsed blobule should do more if it's going to
+performance-optimize bash:
+
+grep -I -R "^_begin_fstest" -Z $test_dir/ | \
+	sed -e 's/#.*$//g' \
+	    -e 's/[[:space:]]$//g' \
+	    -e 's/[[:space:]]+/ /g' | \
+	    -e 's/^.*\/\(.*\)\x0.*_begin_fstest[[:space:]]*/\1 /g' \
+	sort -g
+
+The -Z option separates the filename from the found content, which
+enables sed to isolate the filename portion.  The first sed statement
+removes all comments, the second removes all trailing whitespace so that
+it won't end up in the output, and the third collapses whitespace runs
+into a single space.  The fourth reformats the input to match group file
+format.  The command ends with a sort -g so that the lines end up in
+numeric order instead of readdir() order.
+
+Even then, this still isn't sufficient, since a null in the test file
+will confuse this.  I half wonder if this will even work universally,
+since -Z is probably a GNUism, and I bet there are sed out there that
+won't recognize '\x0' to detect the NULL in the output.  But hey, -I and
+-R aren't in the posix definition either...
+
+>  	# Create the list of unique groups for existence checking
+>  	grep -I -R "^_begin_fstest" $test_dir/ | \
+
+This second blobule isn't so bad; it becomes:
+
+	grep -I -R "^_begin_fstest" -h $test_dir/ | \
+		sed -e 's/#.*$//g' \
+		    -e 's/[[:space:]]$//g' \
+		    -e 's/[[:space:]]+/ /g' \
+		    -e 's/^.*_begin_fstest[[:space:]]*//g' \
+		    -e 's/ /\n/g' | \
+		sort -u > $new_groups.check
+
+Where -h turns off the filename printing since we don't need that for
+the unique group list.  But still, UGH STRING PARSING.
 
 --D
 
-> ---
->  tests/xfs/148 | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
-> 
-> diff --git a/tests/xfs/148 b/tests/xfs/148
-> index 8d50a642..5d0a0bf4 100755
-> --- a/tests/xfs/148
-> +++ b/tests/xfs/148
-> @@ -15,7 +15,7 @@ _cleanup()
->  {
->  	cd /
->  	$UMOUNT_PROG $mntpt > /dev/null 2>&1
-> -	test -n "$loopdev" && _destroy_loop_device $loopdev > /dev/null 2>&1
-> +	_destroy_loop_device $loopdev > /dev/null 2>&1
->  	rm -r -f $tmp.*
->  }
->  
-> @@ -41,9 +41,12 @@ test_names=("something" "$nullstr" "$slashstr" "another")
->  rm -f $imgfile $imgfile.old
->  
->  # Format image file w/o crcs so we can sed the image file
-> +# We need to use 512 byte inodes to ensure the attr forks remain in short form
-> +# even when security xattrs are present so we are always doing name matches on
-> +# lookup and not name hash compares as leaf/node forms will do.
->  $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
->  loopdev=$(_create_loop_device $imgfile)
-> -MKFS_OPTIONS="-m crc=0" _mkfs_dev $loopdev >> $seqres.full
-> +MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
->  
->  # Mount image file
->  mkdir -p $mntpt
-> @@ -121,9 +124,6 @@ res=$?
->  test $res -eq 1 || \
->  	echo "repair failed to report corruption ($res)"
->  
-> -_destroy_loop_device $loopdev
-> -loopdev=
-> -
->  # success, all done
->  status=0
->  exit
 > -- 
 > 2.35.1
 > 
