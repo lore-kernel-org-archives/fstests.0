@@ -2,148 +2,225 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5A40C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 08:59:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7113C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 15:26:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230070AbiEPI7g (ORCPT
+        id S242187AbiEPP0g (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 04:59:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50184 "EHLO
+        Mon, 16 May 2022 11:26:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44410 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231337AbiEPI7d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 04:59:33 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4CBAF1C919
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 01:59:29 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id B46DD5348A5
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 18:59:25 +1000 (AEST)
-Received: from discord.disaster.area ([192.168.253.110])
-        by dread.disaster.area with esmtp (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nqWZY-00CbZW-5W
-        for fstests@vger.kernel.org; Mon, 16 May 2022 18:59:24 +1000
-Received: from dave by discord.disaster.area with local (Exim 4.95)
-        (envelope-from <david@fromorbit.com>)
-        id 1nqWZY-005U4L-47
-        for fstests@vger.kernel.org;
-        Mon, 16 May 2022 18:59:24 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH 4/4] generic/081: don't run on DAX capable devices
-Date:   Mon, 16 May 2022 18:59:22 +1000
-Message-Id: <20220516085922.1306879-5-david@fromorbit.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220516085922.1306879-1-david@fromorbit.com>
-References: <20220516085922.1306879-1-david@fromorbit.com>
+        with ESMTP id S245429AbiEPP0X (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 11:26:23 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BBB0DED3
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 08:26:22 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2C9B0B81250
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 15:26:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C5E58C385AA;
+        Mon, 16 May 2022 15:26:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1652714779;
+        bh=KtQ5cneKNzrohK0LBjJyvcalFG3WE7WuUmTRpQJ7WaI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=fdrZYSutn7hq3Q7RVRtbuZ44y0XDh5b6LisPZq/SRVRWCi9BPC7xSM4Gx5sP2Ppxo
+         dHy2bGY676aZzbe5ptVWgC1Wzq2T5SGvE0TIQKMFrjgglDn2aojuqYb41h8fGkgauo
+         mIbifv3oOxKvZN51fgoWmWEAcYbN31Qyxeyebn4oMrF69k95E4RAV3uPvPxFHuGlzX
+         HP0wnYG+BaJBmeWrWRjRuKRECjrLSPgFyfQzNnPZC4QAySM6RFROyyza7Z/ZVWsPaI
+         XhkxOCiD1G6WOdSo7gQHHBOfeh4Dz5IwUDNZ4F13tb8qoUT/26JEwt1BQvrN7wZ3qv
+         83KBaihxoX/cw==
+Date:   Mon, 16 May 2022 08:26:18 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/3] fstests: filter quota warnings
+Message-ID: <YoJtGrvDeeOmvFw0@magnolia>
+References: <20220516060807.1295102-1-david@fromorbit.com>
+ <20220516060807.1295102-2-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=6282126e
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=ZX5orWydIAkmiaoJ8_sA:9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220516060807.1295102-2-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Dave Chinner <dchinner@redhat.com>
+On Mon, May 16, 2022 at 04:08:05PM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+> 
+> Quota warning code has been removed from the upstream kernel and now
+> returns -EINVAL errors. Seeing as we can't set warnings anymore and
+> they have always been non-functional in the kernel, just remove the
+> calls to set warnings filter those errors out so those tests pass
+> again.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  tests/xfs/050 | 9 ---------
+>  tests/xfs/153 | 9 ---------
+>  tests/xfs/299 | 9 ---------
+>  3 files changed, 27 deletions(-)
+> 
+> diff --git a/tests/xfs/050 b/tests/xfs/050
+> index 1847611b..2220e470 100755
+> --- a/tests/xfs/050
+> +++ b/tests/xfs/050
+> @@ -84,9 +84,6 @@ _exercise()
+>  	_qsetup $1
+>  
+>  	echo "Using type=$type id=$id" >>$seqres.full
+> -
+> -	$XFS_QUOTA_PROG -x -c "warn -$type 65535 -d" $SCRATCH_DEV
+> -
+>  	echo
+>  	echo "*** report no quota settings" | tee -a $seqres.full
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> @@ -113,7 +110,6 @@ _exercise()
+>  	_file_as_id $SCRATCH_MNT/softie3 $id $type 1024 0
+>  	_file_as_id $SCRATCH_MNT/softie4 $id $type 1024 0
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" $SCRATCH_DEV
 
-LVM/DM has conniptions when you try to use snapshots on a device
-that has DAX capability. It first sets up the underlying device as a
-DAX capable mapping (type 3 or DM_TYPE_DAX_BIO_BASED) but because
-snapshots require COW and shared mappings, it isn't supported on DAX
-capable devices. Hence creating the snapshot device fails because it
-requires a type 1 (DM_TYPE_BIO_BASED) device and DM can't change
-types on a loaded mapping.
+I don't think we can revert this line from commit e5bbd47e
+("xfs/{050,299}: clear quota warnings in between checks") because any
+kernel released in the past two years will increment the warning
+counter, and not resetting it to zero between tests means the golden
+output will break.
 
-Hence we get this obscure error message in the log:
+We could, however, use more sed magic to force the warning counts in the
+repquota output to be zero, which (I think) enables these changes to
+move forward.
 
-device-mapper: ioctl: can't change device type (old=3 vs new=1) after initial table load.
+--D
 
-and these obscure, unhelpful error messages from the LVM command
-outputs:
-
-  device-mapper: reload ioctl on  (251:0) failed: Invalid argument
-  Failed to suspend logical volume vg_081/base_081.
-  Device vg_081-base_081-real (251:1) is used by another device.
-  Failed to revert logical volume vg_081/base_081.
-  Aborting. Manual intervention required.
-Failed to create snapshot
-
-How to turn off DAX capability is not documented in dmsetup or LVM
-man pages, nor is dax mentioned anywhere in
-Documentation/admin/device-mapper/ so I have no idea how to tell
-LVM/DM "don't try to enable DAX support!".
-
-As such, if the uderlying block device is dax capable, skip this
-test.
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- common/rc | 33 +++++++++++++++++++++++----------
- 1 file changed, 23 insertions(+), 10 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index 4201a059..f5ead044 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2167,7 +2167,7 @@ _require_sane_bdev_flush()
- #	3. "dax=inode" or nothing means "use scratch dev capability" to
- #	    determine whether DAX is going to be used.
- #
--# Returns 0 if DAX will be used, 1 if DAX is not going to be used.
-+# Returns 0 if the filesytem will use DAX, 1 if it won't.
- __scratch_uses_fsdax()
- {
- 	local ops=$(_normalize_mount_options "$MOUNT_OPTIONS")
-@@ -2175,9 +2175,19 @@ __scratch_uses_fsdax()
- 	echo $ops | egrep -qw "dax(=always| |$)" && return 0
- 	echo $ops | grep -qw "dax=never" && return 1
- 
-+	return 0
-+}
-+
-+# Determine if the scratch device is DAX capable. Every if the fs is not
-+# using DAX, we still can't use certain device mapper targets if the block
-+# device is DAX capable. hence the check needs to be separat from the FS
-+# capability.
-+__scratch_dev_has_dax()
-+{
- 	local sysfs="/sys/block/$(_short_dev $SCRATCH_DEV)"
- 	test -e "${sysfs}/dax" && return 0
- 	test "$(cat "${sysfs}/queue/dax" 2>/dev/null)" = "1" && return 0
-+
- 	return 1
- }
- 
-@@ -2194,15 +2204,18 @@ _require_dm_target()
- 	_require_sane_bdev_flush $SCRATCH_DEV
- 	_require_command "$DMSETUP_PROG" dmsetup
- 
--	if __scratch_uses_fsdax; then
--		case $target in
--		stripe|linear|log-writes)
--			;;
--		*)
--			_notrun "Cannot run tests with DAX on $target devices."
--			;;
--		esac
--	fi
-+	case $target in
-+	stripe|linear|log-writes)
-+		;;
-+	*)
-+		if __scratch_uses_fsdax; then
-+			_notrun "Cannot run tests with fsdax on $target devices."
-+		fi
-+		if __scratch_dev_has_dax; then
-+			_notrun "Cannot use $target devices on DAX capable block devices."
-+		fi
-+		;;
-+	esac
- 
- 	modprobe dm-$target >/dev/null 2>&1
- 
--- 
-2.35.1
-
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -122,8 +118,6 @@ _exercise()
+>  	echo "*** push past the soft block limit" | tee -a $seqres.full
+>  	_file_as_id $SCRATCH_MNT/softie $id $type $bsize 300
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" \
+> -		-c "warn -b -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -136,8 +130,6 @@ _exercise()
+>  		_file_as_id $SCRATCH_MNT/hard$i $id $type 1024 0
+>  	done
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x  -c "warn -b -$type 0 $id" \
+> -		-c "warn -i -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -149,7 +141,6 @@ _exercise()
+>  	echo "ls -l $SCRATCH_MNT" >>$seqres.full
+>  	ls -l $SCRATCH_MNT >>$seqres.full
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -b -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_and_check_blks | LC_COLLATE=POSIX sort -ru
+> diff --git a/tests/xfs/153 b/tests/xfs/153
+> index 8e1430c0..dbe26b68 100755
+> --- a/tests/xfs/153
+> +++ b/tests/xfs/153
+> @@ -89,9 +89,6 @@ run_tests()
+>  	_qsetup $1
+>  
+>  	echo "Using type=$type id=$id" >>$seqres.full
+> -
+> -	$XFS_QUOTA_PROG -x -c "warn -$type 65535 -d" $SCRATCH_DEV
+> -
+>  	echo
+>  	echo "*** report no quota settings" | tee -a $seqres.full
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> @@ -122,7 +119,6 @@ run_tests()
+>  	_file_as_id $SCRATCH_MNT/softie4 0 $type 1024 0
+>  	_scratch_umount_idmapped
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -133,8 +129,6 @@ run_tests()
+>  	_file_as_id $SCRATCH_MNT/softie 0 $type $bsize 300
+>  	_scratch_umount_idmapped
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" \
+> -		-c "warn -b -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -149,8 +143,6 @@ run_tests()
+>  		_scratch_umount_idmapped
+>  	done
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x  -c "warn -b -$type 0 $id" \
+> -		-c "warn -i -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -164,7 +156,6 @@ run_tests()
+>  	echo "ls -l $SCRATCH_MNT" >>$seqres.full
+>  	ls -l $SCRATCH_MNT >>$seqres.full
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -b -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_and_check_blks | LC_COLLATE=POSIX sort -ru
+> diff --git a/tests/xfs/299 b/tests/xfs/299
+> index a3077b0c..4b9df3c6 100755
+> --- a/tests/xfs/299
+> +++ b/tests/xfs/299
+> @@ -70,9 +70,6 @@ _exercise()
+>  	_qsetup $1
+>  
+>  	echo "Using type=$type id=$id" >>$seqres.full
+> -
+> -	$XFS_QUOTA_PROG -x -c "warn -$type 65535 -d" $SCRATCH_DEV
+> -
+>  	echo
+>  	echo "*** report no quota settings" | tee -a $seqres.full
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> @@ -99,7 +96,6 @@ _exercise()
+>  	_file_as_id $SCRATCH_MNT/softie3 $id $type 1024 0
+>  	_file_as_id $SCRATCH_MNT/softie4 $id $type 1024 0
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -108,8 +104,6 @@ _exercise()
+>  	echo "*** push past the soft block limit" | tee -a $seqres.full
+>  	_file_as_id $SCRATCH_MNT/softie $id $type $bsize 200
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" \
+> -		-c "warn -b -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -122,8 +116,6 @@ _exercise()
+>  		_file_as_id $SCRATCH_MNT/hard$i $id $type 1024 0
+>  	done
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x  -c "warn -b -$type 0 $id" \
+> -		-c "warn -i -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_quota_report | LC_COLLATE=POSIX sort -ru
+> @@ -135,7 +127,6 @@ _exercise()
+>  	echo "ls -l $SCRATCH_MNT" >>$seqres.full
+>  	ls -l $SCRATCH_MNT >>$seqres.full
+>  	_qmount
+> -	$XFS_QUOTA_PROG -x -c "warn -b -$type 0 $id" $SCRATCH_DEV
+>  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+>  		-c "repquota -birnN -$type" $SCRATCH_DEV |
+>  		_filter_and_check_blks | LC_COLLATE=POSIX sort -ru
+> -- 
+> 2.35.1
+> 
