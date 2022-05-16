@@ -2,149 +2,110 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F082C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 16:20:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D676C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 21:15:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232773AbiEPQUa (ORCPT
+        id S1349298AbiEPVPY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 12:20:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33700 "EHLO
+        Mon, 16 May 2022 17:15:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230103AbiEPQU3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 12:20:29 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCB5339145
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 09:20:27 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4E4D261011
-        for <fstests@vger.kernel.org>; Mon, 16 May 2022 16:20:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A112BC385AA;
-        Mon, 16 May 2022 16:20:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652718026;
-        bh=Uh6bbzZWIvw7emlxt0ZL1dcuhFBusflD1hjNhgajrfw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=e95vk8auS2W9cofflomtA1Qhb0WyD15Kc/nwoEBvwlxKEL2rj2StwxIIQNBltKZKX
-         SfCuaVM1ZQyYPRT0wiKwN0z6WvSfTEDL7JHtapMMzKUErKdmP75t1I3dpsz6cZttNB
-         hG32kfz0xNLLxAo4n3s6KRHtiNZaA6gWlDNl0o98Jc2H8FT9Q8f41msFGumr6t0wzO
-         HJX+7DINRlxt9mqje3lTAkNbvPMxMko5lM1SlhSmGD69m9xXxjJ9YrBfEzWi9jTGqS
-         PeC3sNJSO9M3rhrmd3UHj7yNnknR2vhPVe6rCgC2d/gd+zl/G2Lwdp9zKAHsSb4WUx
-         TxisnhVEQcsow==
-Date:   Mon, 16 May 2022 09:20:26 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Dave Chinner <david@fromorbit.com>
+        with ESMTP id S1349337AbiEPVPQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 17:15:16 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 38B1F17047
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 14:09:52 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 4299C5346D9;
+        Tue, 17 May 2022 07:09:51 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nqhyP-00Co1Z-CQ; Tue, 17 May 2022 07:09:49 +1000
+Date:   Tue, 17 May 2022 07:09:49 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 1/4] fstests: fix group list generation for whacky test
- names
-Message-ID: <YoJ5yvYD9ZmNoNVi@magnolia>
-References: <20220516085922.1306879-1-david@fromorbit.com>
- <20220516085922.1306879-2-david@fromorbit.com>
+Subject: Re: [PATCH 1/3] fstests: filter quota warnings
+Message-ID: <20220516210949.GK2306852@dread.disaster.area>
+References: <20220516060807.1295102-1-david@fromorbit.com>
+ <20220516060807.1295102-2-david@fromorbit.com>
+ <YoJtGrvDeeOmvFw0@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220516085922.1306879-2-david@fromorbit.com>
+In-Reply-To: <YoJtGrvDeeOmvFw0@magnolia>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=6282bd9f
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
+        a=O98FjWTPf4uj2PdoTswA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 16, 2022 at 06:59:19PM +1000, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Mon, May 16, 2022 at 08:26:18AM -0700, Darrick J. Wong wrote:
+> On Mon, May 16, 2022 at 04:08:05PM +1000, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> > 
+> > Quota warning code has been removed from the upstream kernel and now
+> > returns -EINVAL errors. Seeing as we can't set warnings anymore and
+> > they have always been non-functional in the kernel, just remove the
+> > calls to set warnings filter those errors out so those tests pass
+> > again.
+> > 
+> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > ---
+> >  tests/xfs/050 | 9 ---------
+> >  tests/xfs/153 | 9 ---------
+> >  tests/xfs/299 | 9 ---------
+> >  3 files changed, 27 deletions(-)
+> > 
+> > diff --git a/tests/xfs/050 b/tests/xfs/050
+> > index 1847611b..2220e470 100755
+> > --- a/tests/xfs/050
+> > +++ b/tests/xfs/050
+> > @@ -84,9 +84,6 @@ _exercise()
+> >  	_qsetup $1
+> >  
+> >  	echo "Using type=$type id=$id" >>$seqres.full
+> > -
+> > -	$XFS_QUOTA_PROG -x -c "warn -$type 65535 -d" $SCRATCH_DEV
+> > -
+> >  	echo
+> >  	echo "*** report no quota settings" | tee -a $seqres.full
+> >  	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+> > @@ -113,7 +110,6 @@ _exercise()
+> >  	_file_as_id $SCRATCH_MNT/softie3 $id $type 1024 0
+> >  	_file_as_id $SCRATCH_MNT/softie4 $id $type 1024 0
+> >  	_qmount
+> > -	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" $SCRATCH_DEV
 > 
-> Darrick noticed that tests/xfs/191-input-validation didn't get
-> generated properly. Fix the regex to handle this.
-> 
-> $ grep -I -R "^_begin_fstest" tests/xfs | \
->   sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' |grep 191
-> tests/xfs/191-input-validation:_begin_fstest auto quick mkfs realtime
-> $
-> $ grep -I -R "^_begin_fstest" tests/xfs | \
->   sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/ ' |grep 191
-> 191 auto quick mkfs realtime
-> $
-> 
-> Long term, we should rename that test to '191' and rip out all that
-> unused and unnecessary complexity for matching ascii test names
-> because we just don't use it. Numbers for tests are still working
-> just fine.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  tools/mkgroupfile | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tools/mkgroupfile b/tools/mkgroupfile
-> index 24435898..958d4e2f 100755
-> --- a/tools/mkgroupfile
-> +++ b/tools/mkgroupfile
-> @@ -60,7 +60,7 @@ ENDL
->  
->  	# Aggregate the groups each test belongs to for the group file
->  	grep -I -R "^_begin_fstest" $test_dir/ | \
-> -		sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' >> $new_groups
-> +		sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/' >> $new_groups
+> I don't think we can revert this line from commit e5bbd47e
+> ("xfs/{050,299}: clear quota warnings in between checks") because any
+> kernel released in the past two years will increment the warning
+> counter, and not resetting it to zero between tests means the golden
+> output will break.
 
-Sorry I didn't get a chance to review this patch before it went in, but
-this string parsing gets tripped up by things that the old code handled
-just fine.  Back when we'd run _begin_fstest as a real bash subroutine
-to print the group name arguments, a line like this:
+That's a feature, not a bug. i.e. it tells the people running the
+tests that there are fixes they need to backport to the kernel they
+are testing. Otherwise the moment a user sets warning limits they
+will end up with a broken system.
 
-_begin_fstest deprecated # log logprint quota
+If we want to make sure distros and LTS kernels backport fixes for
+this issue, this is the way to make sure their QE/test environments
+notice that these is something that needs fixing...
 
-would put this test in *only* the group "deprecated".  Everything
-starting with the '#' is a comment.  bash would also ignore extra spaces
-between arguments, and if someone happened to use a tab, that would also
-be fine because bash ignores all the unquoted whitespace between
-arguments.  Yes, it's slow, but I chose that method because (a) make
--jXX, and (b) I hate string parsing with grep and sed gunk.
+> We could, however, use more sed magic to force the warning counts in the
+> repquota output to be zero, which (I think) enables these changes to
+> move forward.
 
-Instead, that above output (which I harvested from xfs/081) now becomes:
+I think that's less good that the situation as it doesn't tell
+anyone they are running a kernel with broken quota functionality
+that needs fixing....
 
-081 deprecated # log logprint quota
+Cheers,
 
-The first grepsed blobule should do more if it's going to
-performance-optimize bash:
-
-grep -I -R "^_begin_fstest" -Z $test_dir/ | \
-	sed -e 's/#.*$//g' \
-	    -e 's/[[:space:]]$//g' \
-	    -e 's/[[:space:]]+/ /g' | \
-	    -e 's/^.*\/\(.*\)\x0.*_begin_fstest[[:space:]]*/\1 /g' \
-	sort -g
-
-The -Z option separates the filename from the found content, which
-enables sed to isolate the filename portion.  The first sed statement
-removes all comments, the second removes all trailing whitespace so that
-it won't end up in the output, and the third collapses whitespace runs
-into a single space.  The fourth reformats the input to match group file
-format.  The command ends with a sort -g so that the lines end up in
-numeric order instead of readdir() order.
-
-Even then, this still isn't sufficient, since a null in the test file
-will confuse this.  I half wonder if this will even work universally,
-since -Z is probably a GNUism, and I bet there are sed out there that
-won't recognize '\x0' to detect the NULL in the output.  But hey, -I and
--R aren't in the posix definition either...
-
->  	# Create the list of unique groups for existence checking
->  	grep -I -R "^_begin_fstest" $test_dir/ | \
-
-This second blobule isn't so bad; it becomes:
-
-	grep -I -R "^_begin_fstest" -h $test_dir/ | \
-		sed -e 's/#.*$//g' \
-		    -e 's/[[:space:]]$//g' \
-		    -e 's/[[:space:]]+/ /g' \
-		    -e 's/^.*_begin_fstest[[:space:]]*//g' \
-		    -e 's/ /\n/g' | \
-		sort -u > $new_groups.check
-
-Where -h turns off the filename printing since we don't need that for
-the unique group list.  But still, UGH STRING PARSING.
-
---D
-
-> -- 
-> 2.35.1
-> 
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
