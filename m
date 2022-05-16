@@ -2,109 +2,59 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9E44C4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 08:53:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E02B1C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 16 May 2022 08:59:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241997AbiEPIxW (ORCPT
+        id S231260AbiEPI7b (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 16 May 2022 04:53:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38554 "EHLO
+        Mon, 16 May 2022 04:59:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50116 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240906AbiEPIxU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 04:53:20 -0400
-Received: from mx0a-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0865913EA6;
-        Mon, 16 May 2022 01:53:19 -0700 (PDT)
-Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 24G7fOTk015201;
-        Mon, 16 May 2022 08:53:19 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=pp1; bh=xxf8nydfuoFkpTREIZCnApn7JKTJ8A7WGUCwv6+oPTM=;
- b=rzxw8uYK4hctvp4TVFG3yVyH8WLmPGuuVI7jvdty2mOAT2e9alFVzFsn4NtPEXv3bkAX
- J4sxwxgOUuA9+CZxBnq1eQdxdZEsdjvnOIuI6UGGrT7v2DlKMWrYRfCsNiEJ2Nu6bggz
- 5zhA1NOkZkjc2fZ2eqCp4Iodri5rK3eekniLu9lDVWPl/J8JGdsg8pxxJwof80MRbiD8
- dvP7o2jbTxpUnQnvPTXwJJ4vmOMQT6ilmeRIwPnrUZL50Q+KIXjUyEhos49pnpBMdeNr
- mXPQGREGO1FRlD2qaT4kOpDlQdywqRyahgYF9+wtV7JTY8uyAShT28i/O9wnMoOwIn2j mg== 
-Received: from ppma06fra.de.ibm.com (48.49.7a9f.ip4.static.sl-reverse.com [159.122.73.72])
-        by mx0b-001b2d01.pphosted.com (PPS) with ESMTPS id 3g3ey0d3mg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 16 May 2022 08:53:18 +0000
-Received: from pps.filterd (ppma06fra.de.ibm.com [127.0.0.1])
-        by ppma06fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 24G8huuM023807;
-        Mon, 16 May 2022 08:53:17 GMT
-Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
-        by ppma06fra.de.ibm.com with ESMTP id 3g23pj1t8a-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 16 May 2022 08:53:17 +0000
-Received: from d06av21.portsmouth.uk.ibm.com (d06av21.portsmouth.uk.ibm.com [9.149.105.232])
-        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 24G8rE3l53739806
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 16 May 2022 08:53:14 GMT
-Received: from d06av21.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id B59765204F;
-        Mon, 16 May 2022 08:53:14 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.41.34])
-        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTPS id 5F36E52050;
-        Mon, 16 May 2022 08:53:13 +0000 (GMT)
-Date:   Mon, 16 May 2022 14:23:10 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
-To:     fstests@vger.kernel.org, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <YoIQ9g/V0t18b5SB@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
-References: <20220516063951.87838-1-ojaswin@linux.ibm.com>
- <20220516073616.x3sauzctypcxstet@zlang-mailbox>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220516073616.x3sauzctypcxstet@zlang-mailbox>
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: wPcWMsCfDjJ4JIJVmFmWQ9Bd-ZrUBniC
-X-Proofpoint-GUID: wPcWMsCfDjJ4JIJVmFmWQ9Bd-ZrUBniC
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+        with ESMTP id S231253AbiEPI73 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 May 2022 04:59:29 -0400
+Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9F1F01C902
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 01:59:26 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 9378E10E6A73
+        for <fstests@vger.kernel.org>; Mon, 16 May 2022 18:59:25 +1000 (AEST)
+Received: from discord.disaster.area ([192.168.253.110])
+        by dread.disaster.area with esmtp (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nqWZY-00CbZO-0S
+        for fstests@vger.kernel.org; Mon, 16 May 2022 18:59:24 +1000
+Received: from dave by discord.disaster.area with local (Exim 4.95)
+        (envelope-from <david@fromorbit.com>)
+        id 1nqWZX-005U46-VR
+        for fstests@vger.kernel.org;
+        Mon, 16 May 2022 18:59:23 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH 0/3] fstests: more fixes...
+Date:   Mon, 16 May 2022 18:59:18 +1000
+Message-Id: <20220516085922.1306879-1-david@fromorbit.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
- definitions=2022-05-16_03,2022-05-13_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 suspectscore=0
- bulkscore=0 malwarescore=0 priorityscore=1501 impostorscore=0
- mlxlogscore=445 spamscore=0 phishscore=0 lowpriorityscore=0 clxscore=1015
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2202240000 definitions=main-2205160049
+Content-Transfer-Encoding: 8bit
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6282126e
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=oZkIemNP1mAA:10 a=TaHBvDkn_wZAEWSdJ2cA:9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-> 
-> Oh I forgot to ask why we need to add a variable (ret), to record the return
-> value at here. Why can't use "$?" directly? e.g.
-> 
->   grep -q "not supported" <($FSTRIM_PROG $1 2>&1)
->   if [ $? -eq 0 ]
-> 
-> Others look good to me.
-> 
-> Thanks,
-> Zorro
+Hi folks,
 
-That's right, I did it out of habbit. Anyways, I have eliminated the
-variable and sent in a new version here [1]. Let me know if it looks
-good.
+Another couple of fixes for test failures I see in my local test
+environments.  The g/081 failure (DM vs DAX issue) has been around
+for a long while, I've only just got around to writing a _notrun fix
+for it.
 
-Thank you!
-Ojaswin
+Darrick also noticed an issue with the new group list creation code,
+so there's a fix for that, too.
 
-[1]
-https://lore.kernel.org/all/20220516084505.97655-1-ojaswin@linux.ibm.com/
-> 
-> > +	then
-> > +		_notrun "FITRIM not supported on $1"
-> > +	fi
-> >  }
-> >  
-> >  _require_dumpe2fs()
-> > -- 
-> > 2.27.0
-> > 
-> 
+Cheers,
+
+Dave.
+
