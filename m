@@ -2,95 +2,148 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50A3BC43217
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 07:02:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73DDFC433FE
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 07:02:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240896AbiEQHCV (ORCPT
+        id S240470AbiEQHCY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 May 2022 03:02:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33920 "EHLO
+        Tue, 17 May 2022 03:02:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240498AbiEQHB3 (ORCPT
+        with ESMTP id S240474AbiEQHB3 (ORCPT
         <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 03:01:29 -0400
 Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CC55A255BD
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DE66925C4E
         for <fstests@vger.kernel.org>; Tue, 17 May 2022 00:01:20 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 311B910E69CE
-        for <fstests@vger.kernel.org>; Tue, 17 May 2022 17:01:18 +1000 (AEST)
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 39C0010E6984
+        for <fstests@vger.kernel.org>; Tue, 17 May 2022 17:01:19 +1000 (AEST)
 Received: from discord.disaster.area ([192.168.253.110])
         by dread.disaster.area with esmtp (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1nqrCj-00Cy70-7Y
+        id 1nqrCj-00Cy7B-CM
         for fstests@vger.kernel.org; Tue, 17 May 2022 17:01:13 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.95)
         (envelope-from <david@fromorbit.com>)
-        id 1nqrCj-005njt-6R
+        id 1nqrCj-005nkE-B7
         for fstests@vger.kernel.org;
         Tue, 17 May 2022 17:01:13 +1000
 From:   Dave Chinner <david@fromorbit.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH 04/12] fstests: fix group list generation for whacky test names
-Date:   Tue, 17 May 2022 17:01:03 +1000
-Message-Id: <20220517070111.1381936-5-david@fromorbit.com>
+Subject: [PATCH 08/12] generic/081: don't run on DAX capable devices
+Date:   Tue, 17 May 2022 17:01:07 +1000
+Message-Id: <20220517070111.1381936-9-david@fromorbit.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220517070111.1381936-1-david@fromorbit.com>
 References: <20220517070111.1381936-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6283483e
+X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6283483f
         a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=_vxGkCWramiWRfEBLmYA:9
+        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=ZX5orWydIAkmiaoJ8_sA:9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Darrick noticed that tests/xfs/191-input-validation didn't get
-generated properly. Fix the regex to handle this.
+LVM/DM has conniptions when you try to use snapshots on a device
+that has DAX capability. It first sets up the underlying device as a
+DAX capable mapping (type 3 or DM_TYPE_DAX_BIO_BASED) but because
+snapshots require COW and shared mappings, it isn't supported on DAX
+capable devices. Hence creating the snapshot device fails because it
+requires a type 1 (DM_TYPE_BIO_BASED) device and DM can't change
+types on a loaded mapping.
 
-$ grep -I -R "^_begin_fstest" tests/xfs | \
-  sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' |grep 191
-tests/xfs/191-input-validation:_begin_fstest auto quick mkfs realtime
-$
-$ grep -I -R "^_begin_fstest" tests/xfs | \
-  sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/ ' |grep 191
-191 auto quick mkfs realtime
-$
+Hence we get this obscure error message in the log:
 
-Use the regexes for matching test names defined in common/test_names
-rather than trying to open code it.
+device-mapper: ioctl: can't change device type (old=3 vs new=1) after initial table load.
+
+and these obscure, unhelpful error messages from the LVM command
+outputs:
+
+  device-mapper: reload ioctl on  (251:0) failed: Invalid argument
+  Failed to suspend logical volume vg_081/base_081.
+  Device vg_081-base_081-real (251:1) is used by another device.
+  Failed to revert logical volume vg_081/base_081.
+  Aborting. Manual intervention required.
+Failed to create snapshot
+
+How to turn off DAX capability is not documented in dmsetup or LVM
+man pages, nor is dax mentioned anywhere in
+Documentation/admin/device-mapper/ so I have no idea how to tell
+LVM/DM "don't try to enable DAX support!".
+
+As such, if the uderlying block device is dax capable, skip this
+test.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tools/mkgroupfile | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ common/rc | 33 +++++++++++++++++++++++----------
+ 1 file changed, 23 insertions(+), 10 deletions(-)
 
-diff --git a/tools/mkgroupfile b/tools/mkgroupfile
-index 24435898..414cb538 100755
---- a/tools/mkgroupfile
-+++ b/tools/mkgroupfile
-@@ -19,6 +19,8 @@ if [ ! -x ../../check ]; then
- 	exit 1
- fi
- 
-+. ../../common/test_names
-+
- cleanup()
+diff --git a/common/rc b/common/rc
+index 4201a059..f5ead044 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2167,7 +2167,7 @@ _require_sane_bdev_flush()
+ #	3. "dax=inode" or nothing means "use scratch dev capability" to
+ #	    determine whether DAX is going to be used.
+ #
+-# Returns 0 if DAX will be used, 1 if DAX is not going to be used.
++# Returns 0 if the filesytem will use DAX, 1 if it won't.
+ __scratch_uses_fsdax()
  {
- 	rm -f $new_groups.check
-@@ -60,7 +62,8 @@ ENDL
+ 	local ops=$(_normalize_mount_options "$MOUNT_OPTIONS")
+@@ -2175,9 +2175,19 @@ __scratch_uses_fsdax()
+ 	echo $ops | egrep -qw "dax(=always| |$)" && return 0
+ 	echo $ops | grep -qw "dax=never" && return 1
  
- 	# Aggregate the groups each test belongs to for the group file
- 	grep -I -R "^_begin_fstest" $test_dir/ | \
--		sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' >> $new_groups
-+		sed -e "s/^.*\/\($VALID_TEST_NAME\):_begin_fstest/\1/" \
-+		>> $new_groups
++	return 0
++}
++
++# Determine if the scratch device is DAX capable. Every if the fs is not
++# using DAX, we still can't use certain device mapper targets if the block
++# device is DAX capable. hence the check needs to be separat from the FS
++# capability.
++__scratch_dev_has_dax()
++{
+ 	local sysfs="/sys/block/$(_short_dev $SCRATCH_DEV)"
+ 	test -e "${sysfs}/dax" && return 0
+ 	test "$(cat "${sysfs}/queue/dax" 2>/dev/null)" = "1" && return 0
++
+ 	return 1
+ }
  
- 	# Create the list of unique groups for existence checking
- 	grep -I -R "^_begin_fstest" $test_dir/ | \
+@@ -2194,15 +2204,18 @@ _require_dm_target()
+ 	_require_sane_bdev_flush $SCRATCH_DEV
+ 	_require_command "$DMSETUP_PROG" dmsetup
+ 
+-	if __scratch_uses_fsdax; then
+-		case $target in
+-		stripe|linear|log-writes)
+-			;;
+-		*)
+-			_notrun "Cannot run tests with DAX on $target devices."
+-			;;
+-		esac
+-	fi
++	case $target in
++	stripe|linear|log-writes)
++		;;
++	*)
++		if __scratch_uses_fsdax; then
++			_notrun "Cannot run tests with fsdax on $target devices."
++		fi
++		if __scratch_dev_has_dax; then
++			_notrun "Cannot use $target devices on DAX capable block devices."
++		fi
++		;;
++	esac
+ 
+ 	modprobe dm-$target >/dev/null 2>&1
+ 
 -- 
 2.35.1
 
