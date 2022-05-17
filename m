@@ -2,163 +2,88 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2466C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 06:35:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A252C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 07:01:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229976AbiEQGfH (ORCPT
+        id S240333AbiEQHBU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 May 2022 02:35:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34766 "EHLO
+        Tue, 17 May 2022 03:01:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231146AbiEQGfG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 02:35:06 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 154353FBD6;
-        Mon, 16 May 2022 23:35:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=4EbXQYz/l5U4btSHrZ0I0ih1rzAJEOdrCD6qUJUkRwc=; b=i9L19imrF+zXjh6DSnnc7/QG38
-        C1m3emUdQTi8QwSOchhoHVHq/x0nGDqqlzDgv5UAog1muftsunJadilUgYUhKU19Xbawei7RE0jvC
-        wfI9tzU1yoypKxFFRBKh8BZJxkHh7k/2QmwIDd/WZ6sZXBDnkUag33LrJqgMs0fjlasvhiLsVDbLv
-        5PQKcwZNb6GpUlVbn0ZXhu4ysAODjAYc3BvTVNWpVGzEhyxzjK5zn+X3fZMz5pmRLCAjFoftB8TvB
-        quTbjsgyEyhZQ5DxnIetU+XVXuNxUZjPVJyPBjIB8ggrLBhl98P+6mvGgjLl8V4+RSM36urX6PRGT
-        2vVy2T2g==;
-Received: from [2001:4bb8:19a:7bdf:afb1:9e:37ad:b912] (helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nqqnQ-00Bpcl-A2; Tue, 17 May 2022 06:35:04 +0000
-From:   Christoph Hellwig <hch@lst.de>
+        with ESMTP id S239691AbiEQHBT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 03:01:19 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 1771512773
+        for <fstests@vger.kernel.org>; Tue, 17 May 2022 00:01:16 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 6C98E5345EB
+        for <fstests@vger.kernel.org>; Tue, 17 May 2022 17:01:14 +1000 (AEST)
+Received: from discord.disaster.area ([192.168.253.110])
+        by dread.disaster.area with esmtp (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nqrCj-00Cy6y-6c
+        for fstests@vger.kernel.org; Tue, 17 May 2022 17:01:13 +1000
+Received: from dave by discord.disaster.area with local (Exim 4.95)
+        (envelope-from <david@fromorbit.com>)
+        id 1nqrCj-005njp-5Q
+        for fstests@vger.kernel.org;
+        Tue, 17 May 2022 17:01:13 +1000
+From:   Dave Chinner <david@fromorbit.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: add a btrfs read_repair group
-Date:   Tue, 17 May 2022 08:35:02 +0200
-Message-Id: <20220517063502.3017563-1-hch@lst.de>
-X-Mailer: git-send-email 2.30.2
+Subject: [PATCH 03/12] xfs/348: golden output is not correct
+Date:   Tue, 17 May 2022 17:01:02 +1000
+Message-Id: <20220517070111.1381936-4-david@fromorbit.com>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220517070111.1381936-1-david@fromorbit.com>
+References: <20220517070111.1381936-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=6283483a
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=VwQbUJbxAAAA:8
+        a=bLOITkrf0B9LOGp-q54A:9 a=AjGcO6oz07-iQ99wixmX:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a new group to run all tests the exercise the btrfs read_repair code.
+From: Dave Chinner <dchinner@redhat.com>
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+The output of xfs/348 encodes the observed behaviour at the time the
+test was written, not the correct behaviour that should occur.
+Recent improvements in verification checking in the upstream kernel
+(1eb70f54c445 "xfs: validate inode fork size against fork format")
+have resulted in the kernel having correct behaviour and now the
+test fails. Fix the test output to reflect correct behaviour.
+
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 ---
- doc/group-names.txt | 1 +
- tests/btrfs/140     | 2 +-
- tests/btrfs/141     | 2 +-
- tests/btrfs/142     | 2 +-
- tests/btrfs/143     | 2 +-
- tests/btrfs/150     | 2 +-
- tests/btrfs/157     | 2 +-
- tests/btrfs/215     | 2 +-
- 8 files changed, 8 insertions(+), 7 deletions(-)
+ tests/xfs/348.out | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/doc/group-names.txt b/doc/group-names.txt
-index e8e3477e..ef411b5e 100644
---- a/doc/group-names.txt
-+++ b/doc/group-names.txt
-@@ -88,6 +88,7 @@ punch			fallocate FALLOC_FL_PUNCH_HOLE
- qgroup			btrfs qgroup feature
- quota			filesystem usage quotas
- raid			btrfs RAID
-+read_repair		btrfs error correction on read failure
- realtime		XFS realtime volumes
- recoveryloop		crash recovery loops
- redirect		overlayfs redirect_dir feature
-diff --git a/tests/btrfs/140 b/tests/btrfs/140
-index 66efc126..c680fe0a 100755
---- a/tests/btrfs/140
-+++ b/tests/btrfs/140
-@@ -12,7 +12,7 @@
- #	commit 2e949b0a5592 ("Btrfs: fix invalid dereference in btrfs_retry_endio")
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick read_repair
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/btrfs/141 b/tests/btrfs/141
-index ca164fdc..9fdcb2ab 100755
---- a/tests/btrfs/141
-+++ b/tests/btrfs/141
-@@ -13,7 +13,7 @@
- #	Commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick read_repair
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/btrfs/142 b/tests/btrfs/142
-index c88cace9..58d01add 100755
---- a/tests/btrfs/142
-+++ b/tests/btrfs/142
-@@ -13,7 +13,7 @@
- #	commit 97bf5a5589aa ("Btrfs: fix segmentation fault when doing dio read")
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick read_repair
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/btrfs/143 b/tests/btrfs/143
-index 8f086ee8..71db861d 100755
---- a/tests/btrfs/143
-+++ b/tests/btrfs/143
-@@ -20,7 +20,7 @@
- #	commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick read_repair
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/btrfs/150 b/tests/btrfs/150
-index 986c8069..c5e9c709 100755
---- a/tests/btrfs/150
-+++ b/tests/btrfs/150
-@@ -11,7 +11,7 @@
- #	Btrfs: fix kernel oops while reading compressed data
- #
- . ./common/preamble
--_begin_fstest auto quick dangerous
-+_begin_fstest auto quick dangerous read_repair
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/btrfs/157 b/tests/btrfs/157
-index ae56f3e1..343178b7 100755
---- a/tests/btrfs/157
-+++ b/tests/btrfs/157
-@@ -21,7 +21,7 @@
- # Btrfs: make raid6 rebuild retry more
- #
- . ./common/preamble
--_begin_fstest auto quick raid
-+_begin_fstest auto quick raid read_repair
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/btrfs/215 b/tests/btrfs/215
-index cbcd60e0..0dcbce2a 100755
---- a/tests/btrfs/215
-+++ b/tests/btrfs/215
-@@ -9,7 +9,7 @@
- # 814723e0a55a ("btrfs: increment device corruption error in case of checksum error")
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick read_repair
- 
- # Import common functions.
- . ./common/filter
+diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+index 0d407718..9130f42a 100644
+--- a/tests/xfs/348.out
++++ b/tests/xfs/348.out
+@@ -108,7 +108,7 @@ would have junked entry "DATA" in directory PARENT_INO
+ would have junked entry "EMPTY" in directory PARENT_INO
+ would have junked entry "FIFO" in directory PARENT_INO
+ stat: 'SCRATCH_MNT/test/DIR' is a directory
+-stat: 'SCRATCH_MNT/test/DATA' is a directory
++stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
+ stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+ stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
+ stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
+@@ -240,7 +240,7 @@ would have junked entry "DIR" in directory PARENT_INO
+ would have junked entry "EMPTY" in directory PARENT_INO
+ would have junked entry "FIFO" in directory PARENT_INO
+ stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
+-stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
++stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
+ stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+ stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
+ stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
 -- 
-2.30.2
+2.35.1
 
