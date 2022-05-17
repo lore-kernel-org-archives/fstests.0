@@ -2,174 +2,291 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED4DCC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 13:24:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF56BC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 15:57:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347577AbiEQNY6 (ORCPT
+        id S1345505AbiEQP5j (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 May 2022 09:24:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33946 "EHLO
+        Tue, 17 May 2022 11:57:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38358 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347647AbiEQNY4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 09:24:56 -0400
+        with ESMTP id S242914AbiEQP5i (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 11:57:38 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AC6543496;
-        Tue, 17 May 2022 06:24:54 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 238ED2CDED;
+        Tue, 17 May 2022 08:57:37 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 05BFFB818A1;
-        Tue, 17 May 2022 13:24:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B3BDC385B8;
-        Tue, 17 May 2022 13:24:51 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id D453FB81AA1;
+        Tue, 17 May 2022 15:57:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D553C34116;
+        Tue, 17 May 2022 15:57:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652793891;
-        bh=ePi+UIoTM2O8DaDc41FoXuIPGMY2KQZdC3cIVuAYEBw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=nPOvilL2VfTnSYQpFTfYmEZqrxyzLhOugzq06ZpX+TPc2WIQQjyErsJQwHOujPwPD
-         ScevPGL2q6HLvv1Yt+YjsxyaHAGaVK6hJrhoLNblmmC52N9aXZ4PODb3g73QnGETzY
-         iaPYGynD7EMZnjOXOueIPGywARj+FYFmTP4kOyEOrJquyQuCzmpvtV2He92ZxBMbfy
-         Qwjp8fM8dKmuu7mpxJK78lXHhijgrc30UAUZpDtyJ8hHehD8hmo4pDd2NgvqisJcti
-         PH2LqQyu0rmwm6a0AdvMr2y48yzwu+bANB0RAdFfrxGISVkxaE3+RE4kmY3OVeEuhl
-         nQypJIjdI7Bjw==
-Date:   Tue, 17 May 2022 14:24:48 +0100
-From:   Filipe Manana <fdmanana@kernel.org>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: add a btrfs read_repair group
-Message-ID: <20220517132448.GA2626143@falcondesktop>
-References: <20220517063502.3017563-1-hch@lst.de>
+        s=k20201202; t=1652803054;
+        bh=E5nyiW2mNqvckS4RMMe/3Bus6B5xdTzrVecmNyB3Ds4=;
+        h=From:To:Cc:Subject:Date:From;
+        b=cjY0aghgCdjJZ5gbSDXeCeMWY1wnQFtfdU3NZjxdFQdaUU9uQxuAGOktig51fMU0X
+         Z0TXgBWpNiC73MW1OEB/lRxFc9jMuv3mvrVz6TrYud2P+RmS6CAwD310g2w6NQaPl9
+         eTNbdQ79T+nqQOPQLsOOCG9g+pWfdlG6PNnWYglO1UMC1UGOhxFOaxwrvToxdso1bc
+         q5q/PUYTlQ0whsB08OzzjBQVxTuM4wQzv7rvNDFnKuJAmvzxUJC3Vd+tFvQzUroBlR
+         ypA3NNirHrMxY7J1tz6fXuzHTihV1lHmjdE4AM4NdCmYJ3RgB3iM0Ej51O83DCuBnq
+         cwGd1e1tvGjcg==
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org, djwong@kernel.org
+Subject: [PATCH v4 1/2] generic: soft quota limits testing within grace time
+Date:   Tue, 17 May 2022 23:57:30 +0800
+Message-Id: <20220517155730.327564-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220517063502.3017563-1-hch@lst.de>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 17, 2022 at 08:35:02AM +0200, Christoph Hellwig wrote:
-> Add a new group to run all tests the exercise the btrfs read_repair code.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+After soft limits are exceeded, within the grace time, fs quota
+should allow more space allocation before exceeding hard limits,
+even if allocating many small files.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+This case can cover bc37e4fb5cac (xfs: revert "xfs: actually bump
+warning counts when we send warnings"). And will help to expose
+later behavior changes on this side.
 
-Looks good to me as well, thanks.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-> ---
->  doc/group-names.txt | 1 +
->  tests/btrfs/140     | 2 +-
->  tests/btrfs/141     | 2 +-
->  tests/btrfs/142     | 2 +-
->  tests/btrfs/143     | 2 +-
->  tests/btrfs/150     | 2 +-
->  tests/btrfs/157     | 2 +-
->  tests/btrfs/215     | 2 +-
->  8 files changed, 8 insertions(+), 7 deletions(-)
-> 
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index e8e3477e..ef411b5e 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -88,6 +88,7 @@ punch			fallocate FALLOC_FL_PUNCH_HOLE
->  qgroup			btrfs qgroup feature
->  quota			filesystem usage quotas
->  raid			btrfs RAID
-> +read_repair		btrfs error correction on read failure
->  realtime		XFS realtime volumes
->  recoveryloop		crash recovery loops
->  redirect		overlayfs redirect_dir feature
-> diff --git a/tests/btrfs/140 b/tests/btrfs/140
-> index 66efc126..c680fe0a 100755
-> --- a/tests/btrfs/140
-> +++ b/tests/btrfs/140
-> @@ -12,7 +12,7 @@
->  #	commit 2e949b0a5592 ("Btrfs: fix invalid dereference in btrfs_retry_endio")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/141 b/tests/btrfs/141
-> index ca164fdc..9fdcb2ab 100755
-> --- a/tests/btrfs/141
-> +++ b/tests/btrfs/141
-> @@ -13,7 +13,7 @@
->  #	Commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/142 b/tests/btrfs/142
-> index c88cace9..58d01add 100755
-> --- a/tests/btrfs/142
-> +++ b/tests/btrfs/142
-> @@ -13,7 +13,7 @@
->  #	commit 97bf5a5589aa ("Btrfs: fix segmentation fault when doing dio read")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/143 b/tests/btrfs/143
-> index 8f086ee8..71db861d 100755
-> --- a/tests/btrfs/143
-> +++ b/tests/btrfs/143
-> @@ -20,7 +20,7 @@
->  #	commit 9d0d1c8b1c9d ("Btrfs: bring back repair during read")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/150 b/tests/btrfs/150
-> index 986c8069..c5e9c709 100755
-> --- a/tests/btrfs/150
-> +++ b/tests/btrfs/150
-> @@ -11,7 +11,7 @@
->  #	Btrfs: fix kernel oops while reading compressed data
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick dangerous
-> +_begin_fstest auto quick dangerous read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/157 b/tests/btrfs/157
-> index ae56f3e1..343178b7 100755
-> --- a/tests/btrfs/157
-> +++ b/tests/btrfs/157
-> @@ -21,7 +21,7 @@
->  # Btrfs: make raid6 rebuild retry more
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick raid
-> +_begin_fstest auto quick raid read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/215 b/tests/btrfs/215
-> index cbcd60e0..0dcbce2a 100755
-> --- a/tests/btrfs/215
-> +++ b/tests/btrfs/215
-> @@ -9,7 +9,7 @@
->  # 814723e0a55a ("btrfs: increment device corruption error in case of checksum error")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick read_repair
->  
->  # Import common functions.
->  . ./common/filter
-> -- 
-> 2.30.2
-> 
+Hi,
+
+As the [PATCH 2/2] has been reviewed, so only send the 1st patch.
+V4 did below changes according to [1]:
+1) Add new local function filter_quota.
+2) Don't filter out quota error output.
+
+Thanks,
+Zorro
+
+[1]
+https://lore.kernel.org/fstests/20220512190647.GC27174@magnolia/
+
+ common/quota          |  48 +++++++++++++++++++
+ tests/generic/999     | 107 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  34 ++++++++++++++
+ 3 files changed, 189 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/common/quota b/common/quota
+index 7fa1a61a..67698f74 100644
+--- a/common/quota
++++ b/common/quota
+@@ -351,5 +351,53 @@ _qsetup()
+ 	echo "Using type=$type id=$id" >> $seqres.full
+ }
+ 
++# Help to create project quota on directory, works for xfs and other fs.
++# Usage: _create_project_quota <dirname> <projid> [name]
++# Although the [name] is optional, better to specify it if need a fixed name.
++_create_project_quota()
++{
++	local prjdir=$1
++	local id=$2
++	local name=$3
++
++	if [ -z "$name" ];then
++		name=`echo $projdir | tr \/ \_`
++	fi
++
++	rm -rf $prjdir
++	mkdir $prjdir
++	chmod ugo+rwx $prjdir
++
++	if [ -f /etc/projects -a ! -f $tmp.projects.bk ];then
++		cat /etc/projects > $tmp.projects.bk
++		echo >/etc/projects
++	fi
++	if [ -f /etc/projid -a ! -f $tmp.projid.bk ];then
++		cat /etc/projid > $tmp.projid.bk
++		echo >/etc/projid
++	fi
++
++	cat >>/etc/projects <<EOF
++$id:$prjdir
++EOF
++	cat >>/etc/projid <<EOF
++$name:$id
++EOF
++	$XFS_IO_PROG -r -c "chproj $id" -c "chattr +P" $prjdir
++}
++
++# If you've called _create_project_quota, then use this function in _cleanup
++_restore_project_quota()
++{
++	if [ -f $tmp.projects.bk ];then
++		cat $tmp.projects.bk > /etc/projects && \
++			rm -f $tmp.projects.bk
++	fi
++	if [ -f $tmp.projid.bk ];then
++		cat $tmp.projid.bk > /etc/projid && \
++			rm -f $tmp.projid.bk
++	fi
++}
++
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..690a289f
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,107 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test No. 999
++#
++# Make sure filesystem quota works well, after soft limits are exceeded. The
++# fs quota should allow more space allocation before exceeding hard limits
++# and with in grace time.
++#
++# But different with other similar testing, this case tries to write many small
++# files, to cover bc37e4fb5cac (xfs: revert "xfs: actually bump warning counts
++# when we send warnings"). If there's a behavior change some day, this case
++# might help to detect that too.
++#
++. ./common/preamble
++_begin_fstest auto quota
++
++# Override the default cleanup function.
++_cleanup()
++{
++	_restore_project_quota
++	cd /
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++. ./common/quota
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++_require_quota
++_require_user
++_require_group
++
++# Make sure the kernel supports project quota
++_scratch_mkfs >$seqres.full 2>&1
++_scratch_enable_pquota
++_qmount_option "prjquota"
++_qmount
++_require_prjquota $SCRATCH_DEV
++
++filter_quota()
++{
++	# Different filesystems might returns EDQUOT or ENOSPC if project
++	# quota is exceeded
++	if [ "$1" = "P" ];then
++		sed -e "s/.*: \(.*\)/Error: \1/g" \
++		    -e "s,Disk quota exceeded,EDQUOT|ENOSPC,g" \
++		    -e "s,No space left on device,EDQUOT|ENOSPC,g"
++	else
++		sed -e "s/.*: \(.*\)/Error: \1/g"
++	fi
++}
++
++exercise()
++{
++	local type=$1
++	local file=$SCRATCH_MNT/testfile
++
++	echo "= Test type=$type quota =" >>$seqres.full
++	_scratch_unmount
++	_scratch_mkfs >>$seqres.full 2>&1
++	if [ "$type" = "P" ];then
++		_scratch_enable_pquota
++	fi
++	_qmount
++	if [ "$type" = "P" ];then
++		_create_project_quota $SCRATCH_MNT/t 100 $qa_user
++		file=$SCRATCH_MNT/t/testfile
++	fi
++
++	setquota -${type} $qa_user 1M 200M 0 0 $SCRATCH_MNT
++	setquota -${type} -t 86400 86400 $SCRATCH_MNT
++	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
++	# Exceed the soft quota limit a bit at first
++	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 2m' -c fsync ${file}.0" >>$seqres.full
++	# Write more data more times under soft quota limit exhausted condition,
++	# but not reach hard limit. To make sure each write won't trigger EDQUOT.
++	for ((i=1; i<=100; i++));do
++		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.$i" >>$seqres.full
++		if [ $? -ne 0 ];then
++			echo "Unexpected error (type=$type)!"
++			break
++		fi
++	done
++	repquota -v -${type} $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
++
++	# As we've tested soft limit, now exceed the hard limit and give it a
++	# test in passing.
++	su $qa_user -c "$XFS_IO_PROG -f -t -c 'pwrite 0 100m' -c fsync ${file}.hard.0" 2>&1 >/dev/null | filter_quota $type
++	for ((i=1; i<=10; i++));do
++		su "$qa_user" -c "$XFS_IO_PROG -f -c 'pwrite 0 1m' -c fsync ${file}.hard.$i" 2>&1 | filter_quota $type
++	done
++}
++
++_qmount_option "usrquota"
++exercise u
++_qmount_option "grpquota"
++exercise g
++_qmount_option "prjquota"
++exercise P
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..e50942f7
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,34 @@
++QA output created by 999
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: Disk quota exceeded
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
++Error: EDQUOT|ENOSPC
+-- 
+2.31.1
+
