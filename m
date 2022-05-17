@@ -2,405 +2,166 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65AB5C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 07:01:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 945D6C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 07:02:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240697AbiEQHBc (ORCPT
+        id S240673AbiEQHCM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 May 2022 03:01:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34020 "EHLO
+        Tue, 17 May 2022 03:02:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240441AbiEQHB2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 03:01:28 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B6A2620BEF
-        for <fstests@vger.kernel.org>; Tue, 17 May 2022 00:01:20 -0700 (PDT)
+        with ESMTP id S240542AbiEQHB3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 03:01:29 -0400
+Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8571A3CFF1
+        for <fstests@vger.kernel.org>; Tue, 17 May 2022 00:01:24 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 1C5D352D830
-        for <fstests@vger.kernel.org>; Tue, 17 May 2022 17:01:15 +1000 (AEST)
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id B9E6110E69D5
+        for <fstests@vger.kernel.org>; Tue, 17 May 2022 17:01:23 +1000 (AEST)
 Received: from discord.disaster.area ([192.168.253.110])
         by dread.disaster.area with esmtp (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1nqrCj-00Cy7T-JZ
+        id 1nqrCj-00Cy79-BB
         for fstests@vger.kernel.org; Tue, 17 May 2022 17:01:13 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.95)
         (envelope-from <david@fromorbit.com>)
-        id 1nqrCj-005nkZ-IK
+        id 1nqrCj-005nkA-9f
         for fstests@vger.kernel.org;
         Tue, 17 May 2022 17:01:13 +1000
 From:   Dave Chinner <david@fromorbit.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH 12/12] xfs/191: remove broken test
-Date:   Tue, 17 May 2022 17:01:11 +1000
-Message-Id: <20220517070111.1381936-13-david@fromorbit.com>
+Subject: [PATCH 07/12] xfs/148: fix failure from bad shortform size assumptions
+Date:   Tue, 17 May 2022 17:01:06 +1000
+Message-Id: <20220517070111.1381936-8-david@fromorbit.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220517070111.1381936-1-david@fromorbit.com>
 References: <20220517070111.1381936-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=6283483b
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62834844
         a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=s8yMT-HUfeyxIDQlTb4A:9
+        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=VwQbUJbxAAAA:8
+        a=mDPyBUI4OX8v4RjPpF4A:9 a=AjGcO6oz07-iQ99wixmX:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Test has been marked broken for a long time. Original intent of
-validating all mkfs.xfs input is not realistic, nobody is going to
-try to make that happen.
+We replaced an attr named:
 
-Remove it as it serves no useful purpose except to have a whacky
-unique name that nobody expects or codes for.
+slashstr="are_bad_for_you"
+
+with this substitution:
+
+cp $imgfile $imgfile.old
+sed -b \
+        -e "s/$nullstr/too_many\x00beans/g" \
+        -e "s/$slashstr/are_bad\/for_you/g" \
+        -i $imgfile
+
+We then try to retreive the attr named 'a_are_bad/for_you'. The
+failure is:
+
+    -Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+    -heh
+    +attr_get: No data available
+    +Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
+
+The error returned is ENODATA - the xattr does not exist. While the
+name might exist in the attr leaf block:
+
+....
+nvlist[0].valuelen = 3
+nvlist[0].namelen = 17
+nvlist[0].name = "a_are_bad/for_you"
+nvlist[0].value = "heh"
+nvlist[1].valuelen = 3
+....
+
+xattrs are not looked up by name matches when in leaf or node form
+like they are in short form.  They are looked up by *name hash*
+matches, and if the hash is not found, then the name does not exist.
+Only if the has match is found, then it goes and retrieves the xattr
+pointed to by the hash and checks the name.
+
+At this point, it should be obvious that the hash of
+"a_are_bad_for_you" is different to "a_a_are_bad/for_you". Hence the
+leaf lookup is always rejected at the hash match stage and never
+gets to the name compare stage.
+
+IOWs, this test can *never* pass when the xattr is in leaf/node
+form, only when it is in short form.
+
+The reason the attr fork is in leaf form is that we are using
+"-m crc=0" and so the inodes are only 256 bytes in size and can only
+hold ~150 bytes in the literal area. That leaves ~100 bytes maximum
+for shortform attr data. The test consumes ~80 bytes of shortform
+space, so it should fit and the test pass.
+
+However:
+
+nvlist[4].valuelen = 37
+nvlist[4].namelen = 7
+nvlist[4].name = "selinux"
+nvlist[4].value = "unconfined_u:object_r:unlabeled_t:s0\000"
+
+Yes, I run the fstests with selinux enabled on some of test
+machines. The selinux attr pushes the attr fork way over the size
+that can fit in the shortform literal area, and so it moves to leaf
+form as the attrs are initially added and the test fails.
+
+Fix this by forcing the test to use 512 byte inodes, so as to
+provide around 350 bytes of usable attr fork literal area so it's
+not affected by security attributes.
+
+While there, clean up the silly conditional loop device cleanup
+code.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/xfs/191-input-validation     | 324 -----------------------------
- tests/xfs/191-input-validation.out |   2 -
- 2 files changed, 326 deletions(-)
- delete mode 100755 tests/xfs/191-input-validation
- delete mode 100644 tests/xfs/191-input-validation.out
+ tests/xfs/148 | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
-deleted file mode 100755
-index 2728846e..00000000
---- a/tests/xfs/191-input-validation
-+++ /dev/null
-@@ -1,324 +0,0 @@
--#! /bin/bash
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
--#
--# FS QA Test No. xfs/191
--#
--# mkfs.xfs input validation test. Designed to break mkfs.xfs if it doesn't
--# filter garbage input or invalid option combinations correctly.
--#
--. ./common/preamble
--_begin_fstest auto quick mkfs realtime
+diff --git a/tests/xfs/148 b/tests/xfs/148
+index 8d50a642..5d0a0bf4 100755
+--- a/tests/xfs/148
++++ b/tests/xfs/148
+@@ -15,7 +15,7 @@ _cleanup()
+ {
+ 	cd /
+ 	$UMOUNT_PROG $mntpt > /dev/null 2>&1
+-	test -n "$loopdev" && _destroy_loop_device $loopdev > /dev/null 2>&1
++	_destroy_loop_device $loopdev > /dev/null 2>&1
+ 	rm -r -f $tmp.*
+ }
+ 
+@@ -41,9 +41,12 @@ test_names=("something" "$nullstr" "$slashstr" "another")
+ rm -f $imgfile $imgfile.old
+ 
+ # Format image file w/o crcs so we can sed the image file
++# We need to use 512 byte inodes to ensure the attr forks remain in short form
++# even when security xattrs are present so we are always doing name matches on
++# lookup and not name hash compares as leaf/node forms will do.
+ $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
+ loopdev=$(_create_loop_device $imgfile)
+-MKFS_OPTIONS="-m crc=0" _mkfs_dev $loopdev >> $seqres.full
++MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
+ 
+ # Mount image file
+ mkdir -p $mntpt
+@@ -121,9 +124,6 @@ res=$?
+ test $res -eq 1 || \
+ 	echo "repair failed to report corruption ($res)"
+ 
+-_destroy_loop_device $loopdev
+-loopdev=
 -
--# Override the default cleanup function.
--_cleanup()
--{
--	cd /
--	rm -f $tmp.*
--	[ -n "$loopdev" ] && _destroy_loop_device $loopdev
--}
--
--# Import common functions.
--. ./common/filter
--
--# real QA test starts here
--
--# Modify as appropriate.
--_supported_fs xfs
--_require_test
--_require_loop
--_require_xfs_mkfs_validation
--
--echo silence is golden
--
--# clear out any options to mkfs first. We want to test realtime and external log
--# devices if we can, but we also want to control them ourselves.
--logdev=$SCRATCH_LOGDEV
--rtdev=$SCRATCH_RTDEV
--
--MKFS_OPTIONS=
--SCRATCH_LOGDEV=
--SCRATCH_RTDEV=
--
--# limit the image size of the filesystem being created to something small
--fssize=$((4 * 1024 * 1024 * 1024))
--logsize=$((4 * 1024 * 1024 * 100))
--fsimg=$TEST_DIR/$seq.img
--
--#create a loop device to test
--loopimg=$TEST_DIR/$seq.loopimg
--$XFS_IO_PROG -f -c "truncate $fssize" $loopimg
--loopdev=$(_create_loop_device $loopimg)
--SCRATCH_DEV=$loopdev
--
--do_mkfs_pass()
--{
--	echo >> $seqres.full
--	echo "pass expected $*" >> $seqres.full
--	$MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
--	[ $? -ne 0 ] && echo "fail $*"
--}
--
--do_mkfs_fail()
--{
--	echo >> $seqres.full
--	echo "fail expected $*" >> $seqres.full
--	$MKFS_XFS_PROG -f -N $* >> $seqres.full 2>&1
--	[ $? -eq 0 ] && echo "pass $*"
--}
--
--reset_fsimg()
--{
--	rm -f $fsimg
--	$XFS_IO_PROG -f -c "truncate $fssize" $fsimg
--}
--
--reset_fsimg
--
--do_mkfs_pass $SCRATCH_DEV
--
--# basic "should fail" options
--
--# specifying sector sizes in sectors or blocks or garbage
--do_mkfs_fail -s size=2s $SCRATCH_DEV
--do_mkfs_fail -d sectsize=2s $SCRATCH_DEV
--do_mkfs_fail -l sectsize=2s $SCRATCH_DEV
--do_mkfs_fail -s size=2b $SCRATCH_DEV
--do_mkfs_fail -d sectsize=2b $SCRATCH_DEV
--do_mkfs_fail -l sectsize=2b $SCRATCH_DEV
--
--do_mkfs_fail -s size=grot $SCRATCH_DEV
--do_mkfs_fail -s size=2yerk $SCRATCH_DEV
--do_mkfs_fail -d sectsize=blah $SCRATCH_DEV
--do_mkfs_fail -d sectsize=2foo $SCRATCH_DEV
--do_mkfs_fail -l sectsize=nggh $SCRATCH_DEV
--do_mkfs_fail -l sectsize=2nggh $SCRATCH_DEV
--
--# conflicting sector/block sizes
--do_mkfs_fail -s size=512 -d sectsize=1024 $SCRATCH_DEV
--do_mkfs_fail -s size=512 -l sectsize=1024 $SCRATCH_DEV
--do_mkfs_fail -d sectsize=2048 -l sectsize=1024 $SCRATCH_DEV
--
--do_mkfs_fail -b size=512 -s size=1024 $SCRATCH_DEV
--do_mkfs_fail -b size=512 -d sectsize=1024 $SCRATCH_DEV
--do_mkfs_fail -b size=512 -l sectsize=1024 $SCRATCH_DEV
--
--# specifying block sizes in sectors without specifying sector size
--# or in blocks or garbage
--do_mkfs_fail -b size=2s $SCRATCH_DEV
--do_mkfs_fail -b size=2b $SCRATCH_DEV
--do_mkfs_fail -b size=nfi $SCRATCH_DEV
--do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
--do_mkfs_fail -n size=nfi $SCRATCH_DEV
--do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
--
--do_mkfs_pass -n size=2b $SCRATCH_DEV
--do_mkfs_pass -n size=2b $SCRATCH_DEV
--
--# bad label length
--do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
--
--# basic "should pass" data section tests
--do_mkfs_pass $SCRATCH_DEV
--do_mkfs_pass -d name=$SCRATCH_DEV
--do_mkfs_pass -d size=$fssize $SCRATCH_DEV
--do_mkfs_pass -d agcount=32 $SCRATCH_DEV
--do_mkfs_pass -d agsize=32m $SCRATCH_DEV
--do_mkfs_pass -d agsize=32M $SCRATCH_DEV
--do_mkfs_pass -d agsize=1g $SCRATCH_DEV
--do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
--do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
--do_mkfs_pass -d agsize=8192b $SCRATCH_DEV
--do_mkfs_pass -d agsize=65536s $SCRATCH_DEV
--do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
--do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
--do_mkfs_pass -d noalign $SCRATCH_DEV
--do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
--do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
--do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
--do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
--do_mkfs_pass -d su=0,sw=64 $SCRATCH_DEV
--do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
--do_mkfs_pass -d su=4096s,sw=64 $SCRATCH_DEV
--do_mkfs_pass -d su=4096b,sw=64 $SCRATCH_DEV
--do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
--do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
--do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
--do_mkfs_pass -d sectsize=512,su=8s,sw=8 $SCRATCH_DEV
--do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
--
--# invalid data section tests
--do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
--do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
--do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
--do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
--do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
--do_mkfs_fail -d agcount=1k $SCRATCH_DEV
--do_mkfs_fail -d agcount=6b $SCRATCH_DEV
--do_mkfs_fail -d agcount=32,agsize=32m $SCRATCH_DEV
--do_mkfs_fail -d sunit=0,swidth=64 $SCRATCH_DEV
--do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
--do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
--do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
--do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
--do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
--do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
--do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
--do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
--do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
--do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
--do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
--do_mkfs_fail -d sectsize=512s,agsize=65536s $SCRATCH_DEV
--
--reset_fsimg
--
--# file section, should pass
--do_mkfs_pass $fsimg
--do_mkfs_pass -d file=0 $SCRATCH_DEV
--do_mkfs_pass -d size=$fssize,file=1,name=$fsimg
--do_mkfs_pass -d size=$fssize,file $fsimg
--do_mkfs_pass -d size=$fssize $fsimg
--do_mkfs_pass -d size=$fssize,name=$fsimg
--do_mkfs_pass -d size=$((fssize/2)) $fsimg
--# again this one, to check that we didn't truncated the file
--do_mkfs_pass -d size=$fssize $fsimg
--rm -f $fsimg
--do_mkfs_pass -d file,size=$fssize $fsimg
--
--reset_fsimg
--
--# file section, should fail
--do_mkfs_fail -d file=1 $SCRATCH_DEV
--do_mkfs_fail -d file $fsimg # no size given
--rm -f $fsimg
--do_mkfs_fail $fsimg
--do_mkfs_fail -d size=$fssize $fsimg
--
--reset_fsimg
--
--# log section, should pass
--do_mkfs_pass -l size=$logsize -d size=$fssize $SCRATCH_DEV
--do_mkfs_pass -l agnum=2 $SCRATCH_DEV
--do_mkfs_pass -l size=4096b $SCRATCH_DEV
--do_mkfs_pass -l sectsize=512 $SCRATCH_DEV
--do_mkfs_pass -l sunit=64 $SCRATCH_DEV
--do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
--do_mkfs_pass -l sunit=8 $SCRATCH_DEV
--do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
--do_mkfs_pass -l su=10b $SCRATCH_DEV
--do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
--do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
--do_mkfs_pass -l internal $SCRATCH_DEV
--$XFS_IO_PROG -f -c "truncate $logsize" $fsimg
--do_mkfs_pass -l logdev=$fsimg $SCRATCH_DEV
--do_mkfs_pass -l name=$fsimg $SCRATCH_DEV
--do_mkfs_pass -l lazy-count=0 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -l lazy-count=1 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -l version=1 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -l version=2 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -l version=2 $SCRATCH_DEV
--
--# log section, should fail
--do_mkfs_fail -l size=${fssize}b $SCRATCH_DEV
--do_mkfs_fail -l size=${fssize}s $SCRATCH_DEV
--do_mkfs_fail -l size=${fssize}yerk $SCRATCH_DEV
--do_mkfs_fail -l agnum=1k $SCRATCH_DEV
--do_mkfs_fail -l agnum=6b $SCRATCH_DEV
--do_mkfs_fail -l agnum=32 $SCRATCH_DEV
--do_mkfs_fail -l sunit=0  $SCRATCH_DEV
--do_mkfs_fail -l sunit=63 $SCRATCH_DEV
--do_mkfs_fail -l su=1 $SCRATCH_DEV
--do_mkfs_fail -l su=10s $SCRATCH_DEV
--do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
--do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
--do_mkfs_fail -l sectsize=512s,agsize=65536s $SCRATCH_DEV
--do_mkfs_fail -l internal=0 $SCRATCH_DEV
--reset_fsimg
--do_mkfs_fail -l internal=1,logdev=$fsimg $SCRATCH_DEV
--do_mkfs_fail -l lazy-count=1garbage $SCRATCH_DEV
--do_mkfs_fail -l lazy-count=2 $SCRATCH_DEV
--do_mkfs_fail -l lazy-count=0 -m crc=1 $SCRATCH_DEV
--do_mkfs_fail -l version=1 -m crc=1 $SCRATCH_DEV
--do_mkfs_fail -l version=0  $SCRATCH_DEV
--
--# naming section, should pass
--do_mkfs_pass -n size=65536 $SCRATCH_DEV
--do_mkfs_pass -n version=2 $SCRATCH_DEV
--do_mkfs_pass -n version=ci $SCRATCH_DEV
--do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -n ftype=1 $SCRATCH_DEV
--
--# naming section, should fail
--do_mkfs_fail -n version=1 $SCRATCH_DEV
--do_mkfs_fail -n version=cid $SCRATCH_DEV
--do_mkfs_fail -n ftype=4 $SCRATCH_DEV
--do_mkfs_fail -n ftype=0 $SCRATCH_DEV
--do_mkfs_fail -n log=15 $SCRATCH_DE
--
--reset_fsimg
--
--# metadata section, should pass
--do_mkfs_pass -m crc=1,finobt=1 $SCRATCH_DEV
--do_mkfs_pass -m crc=1,finobt=0 $SCRATCH_DEV
--do_mkfs_pass -m crc=0,finobt=0 $SCRATCH_DEV
--do_mkfs_pass -m crc=1 -n ftype=1 $SCRATCH_DEV
--do_mkfs_pass -m crc=0 -n ftype=1 $SCRATCH_DEV
--do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
--
--# metadata section, should fail
--do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
--do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
--
--# realtime section, results depend on reflink
--_scratch_mkfs_xfs_supported -m reflink=0 >/dev/null 2>&1
--if [ $? -eq 0 ]; then
--	do_mkfs_pass -m reflink=0 -r rtdev=$fsimg $SCRATCH_DEV
--	do_mkfs_pass -m reflink=0 -r size=65536,rtdev=$fsimg $SCRATCH_DEV
--	do_mkfs_fail -m reflink=1 -r rtdev=$fsimg $SCRATCH_DEV
--	do_mkfs_fail -m reflink=1 -r size=65536,rtdev=$fsimg $SCRATCH_DEV
--else
--	do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
--	do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
--fi
--
--# realtime section, should pass
--do_mkfs_pass -r extsize=4k $SCRATCH_DEV
--do_mkfs_pass -r extsize=1G $SCRATCH_DEV
--do_mkfs_pass -r noalign $SCRATCH_DEV
--
--# realtime section, should fail
--do_mkfs_fail -r rtdev=$SCRATCH_DEV
--do_mkfs_fail -r extsize=256 $SCRATCH_DEV
--do_mkfs_fail -r extsize=2G $SCRATCH_DEV
--do_mkfs_fail -r size=65536 $SCRATCH_DEV
--
--# inode section, should pass
--do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -i size=512 $SCRATCH_DEV
--do_mkfs_pass -i size=2048 $SCRATCH_DEV
--do_mkfs_pass -i perblock=2 $SCRATCH_DEV
--do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
--do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
--do_mkfs_pass -i maxpct=0 $SCRATCH_DEV
--do_mkfs_pass -i align=0 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -i align=1 -m crc=1 $SCRATCH_DEV
--do_mkfs_pass -i attr=1 -m crc=0 $SCRATCH_DEV
--do_mkfs_pass -i attr=2 $SCRATCH_DEV
--do_mkfs_pass -i projid32bit $SCRATCH_DEV
--do_mkfs_pass -i sparse=0 $SCRATCH_DEV
--do_mkfs_pass -i sparse -m crc $SCRATCH_DEV
--
--# inode section, should fail
--do_mkfs_fail -i size=256 -m crc $SCRATCH_DEV
--do_mkfs_fail -i size=128 $SCRATCH_DEV
--do_mkfs_fail -i size=513 $SCRATCH_DEV
--do_mkfs_fail -i size=4096 $SCRATCH_DEV
--do_mkfs_fail -i maxpct=110 $SCRATCH_DEV
--do_mkfs_fail -i align=2 $SCRATCH_DEV
--do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
--do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
--do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
--do_mkfs_fail -i log=10 $SCRATCH_DEV
--
--status=0
--exit
-diff --git a/tests/xfs/191-input-validation.out b/tests/xfs/191-input-validation.out
-deleted file mode 100644
-index 020bd625..00000000
---- a/tests/xfs/191-input-validation.out
-+++ /dev/null
-@@ -1,2 +0,0 @@
--QA output created by 191-input-validation
--silence is golden
+ # success, all done
+ status=0
+ exit
 -- 
 2.35.1
 
