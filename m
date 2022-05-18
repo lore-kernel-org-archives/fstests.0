@@ -2,105 +2,86 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1934FC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 May 2022 21:39:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E618EC433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 May 2022 00:10:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229500AbiEQVjX (ORCPT
+        id S232285AbiERAKZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 May 2022 17:39:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36920 "EHLO
+        Tue, 17 May 2022 20:10:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44650 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229456AbiEQVjW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 17:39:22 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DF8CB4133F
-        for <fstests@vger.kernel.org>; Tue, 17 May 2022 14:39:20 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 3489A10E6AA9
-        for <fstests@vger.kernel.org>; Wed, 18 May 2022 07:39:20 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nr4uU-00DD43-Es
-        for fstests@vger.kernel.org; Wed, 18 May 2022 07:39:18 +1000
-Date:   Wed, 18 May 2022 07:39:18 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 00/13 V2] fstests: fixes and more fixes...
-Message-ID: <20220517213918.GP2306852@dread.disaster.area>
-References: <20220517070111.1381936-1-david@fromorbit.com>
- <20220517074910.GO2306852@dread.disaster.area>
- <20220517082409.anf5f5wg3yoldpki@zlang-mailbox>
+        with ESMTP id S231205AbiERAKY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 May 2022 20:10:24 -0400
+Received: from sandeen.net (sandeen.net [63.231.237.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D42FEB87A
+        for <fstests@vger.kernel.org>; Tue, 17 May 2022 17:10:22 -0700 (PDT)
+Received: from [10.0.0.146] (liberator.sandeen.net [10.0.0.146])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id C16CA323BE2;
+        Tue, 17 May 2022 19:10:09 -0500 (CDT)
+Message-ID: <4e7ba166-15a0-6560-da42-47c0c6ad9935@sandeen.net>
+Date:   Tue, 17 May 2022 19:10:20 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220517082409.anf5f5wg3yoldpki@zlang-mailbox>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62841608
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=7-415B0cAAAA:8
-        a=E1JkVgTRlL2h0Uy7SIEA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0)
+ Gecko/20100101 Thunderbird/91.9.0
+Content-Language: en-US
+To:     Dave Chinner <david@fromorbit.com>,
+        "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org
+References: <20220516085922.1306879-1-david@fromorbit.com>
+ <20220516085922.1306879-2-david@fromorbit.com> <YoJ5yvYD9ZmNoNVi@magnolia>
+ <20220516213516.GL2306852@dread.disaster.area> <YoLPfAi8sZH99FuV@magnolia>
+ <20220517043603.GN2306852@dread.disaster.area>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Subject: Re: [PATCH 1/4] fstests: fix group list generation for whacky test
+ names
+In-Reply-To: <20220517043603.GN2306852@dread.disaster.area>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 17, 2022 at 04:24:09PM +0800, Zorro Lang wrote:
-> On Tue, May 17, 2022 at 05:49:10PM +1000, Dave Chinner wrote:
-> > On Tue, May 17, 2022 at 05:00:59PM +1000, Dave Chinner wrote:
-> > > Hi folks,
-> > > 
-> > > This is a rollup of the two patch series I sent yesterday titled:
-> > > 
-> > > [PATCH 0/3] fstests: test updates for XFS 5.19 kernel mods
-> > > [PATCH 0/3] fstests: more fixes...
-> > > 
-> > > I've fixed some patches, added documentation for those changes,
-> > > and added a bunch of patches to remove deprecated/broken tests that
-> > > should ahve been removed long ago.
-> > > 
-> > > I do not know if patches 9-11 will make it through vger this time -
-> > > they didn't as a single patch. They are titled:
-> 
-> No, they didn't.
-> 
-> > > 
-> > > [PATCH 09/12] xfs/018: remove deprecated test
-> > > [PATCH 10/12] xfs/081: remove deprecated test
-> > > [PATCH 11/12] xfs/082: remove deprecated test
-> > > 
-> > > and is thould be pretty obvious what they do from the title....
-> > 
-> > Ok, it appears as though even separated vger still won't let a
-> > single one of them through
-> > 
-> > Zorro, all these patches are 'git rm' commands
-> > 
-> > git rm tests/xfs/018*
-> > git commit
-> > git rm tests/xfs/081*
-> > git commit
-> > git rm tests/xfs/082*
-> > git commit
-> > 
-> > I'm happy for you to just run them yourself, or do you want me to
-> > send a pull request for them?
-> 
-> Sure, I don't run this 3 cases either. As they're xfs specific cases, so if both
-> of you and Darrick agree to remove them entirely, I'm glad to help that :)
-> 
-> And how about remove them in single one commit/patch? Likes:
-> ---
-> [PATCH] fstests: remove xfs deprecated test
-> 
-> Remove xfs/018, xfs/081 and xfs/082 entirely, as they're deprecated
-> and obsolete for long time.
-> ---
+On 5/16/22 11:36 PM, Dave Chinner wrote:
+> On Mon, May 16, 2022 at 03:26:04PM -0700, Darrick J. Wong wrote:
+...
+>> Did _anyone_ actually compare the group.list output before and after
+>> applying the patch?
 
-Fine by me. That's exactly what the first patch I attempted to send
-was.
+...
 
-Cheers,
+> I Am Not A Happy Camper.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+...
+
+And this whole thing has made me Very Sad.
+
+Everybody's trying to do the right thing here. Darrick's original patch
+tried to ease maintainer burden with group file conflicts. Dave's patch
+tried to speed it up. Zorro reviewed it, cycled it through for-next and
+landed it in main in a timely manner. A problem or two remained, and now
+everybody's... angry. Of course.
+
+Can we try to just show a little more grace here? Assume good intent?
+Interpret things as charitably as possible? Voice concerns calmly, and
+hear them nondefensively? Accept that mistakes will happen, fix them, and
+move forward? It would go a long ways to making this all a lot more fun.
+
+I'm coming at this without most of the technical context or background
+for these changes. All of the issues raised seem reasonable to me:
+slowing down "make" has some drawbacks. Special requirements on lines
+of bash has drawbacks too. None of this is insurmountable. Document
+the specialness in the template. Make the parsing more robust, or make
+it fail in a more obvious way. Spend time on yet another approach to
+generate group files efficiently, if that's worth it ... I dunno.
+
+But we've got to be able to get through relatively minor issues like
+this without tempers flaring, it's just not worth it.
+
+It's not my intent to take sides or point fingers in this particular
+exchange, it's just that this dynamic has played out too many times
+recently, and I really wish we could collectively do better. It's not
+good for us as individuals or as a community.
+
+-Eric
