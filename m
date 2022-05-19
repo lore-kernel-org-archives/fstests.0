@@ -2,179 +2,152 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7499C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 04:47:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 182A4C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 04:56:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232714AbiESErP (ORCPT
+        id S233860AbiESE4a (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 May 2022 00:47:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35522 "EHLO
+        Thu, 19 May 2022 00:56:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233800AbiESErO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 00:47:14 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D9C7269280
-        for <fstests@vger.kernel.org>; Wed, 18 May 2022 21:47:11 -0700 (PDT)
+        with ESMTP id S233858AbiESE41 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 00:56:27 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9B3C369719
+        for <fstests@vger.kernel.org>; Wed, 18 May 2022 21:56:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652935630;
+        s=mimecast20190719; t=1652936183;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=ozKv8JuFCr47tZ31HF8OOTFb0OFMhv8avzY8kqwcUMM=;
-        b=enGWbQNFLdn2DPtc8MWsBwApgQ7K3vkrquiENX5n6GeyD66drcLr10w975gcJlWs9isooo
-        obp5roQs2FNG0Ns+ZfY9uiQrd82q0sWrD3x59HIcyaQDS476YPgKoc8cNgKLyKGHyIupVj
-        CedJPZ9SPig0k49pFZUgssJkcUNjcuk=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=fYfIqGfERh8bjjZqE1vFTpzT5vD5ieB7DjabHOjanZE=;
+        b=POMff/HksGk0ROmVgdT5BT+zi9gIpqU0rkg/PDfe0NgkBk1pU699HfrXBSoPbtcgc00uVj
+        kvcfzbmJTVzYmgtZ2/cZQhwUSlyargvF6+23kMJMcXW60RClixFkFJQiD9ArxSIOQDcxsY
+        O+SOPcAjInNkKR9c+I5DTjywuK5dPjg=
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
+ [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-611-NArEoCq5NdWjsa_HptR_8Q-1; Thu, 19 May 2022 00:47:09 -0400
-X-MC-Unique: NArEoCq5NdWjsa_HptR_8Q-1
-Received: by mail-qk1-f199.google.com with SMTP id m26-20020a05620a13ba00b006a32a7adb78so1667596qki.10
-        for <fstests@vger.kernel.org>; Wed, 18 May 2022 21:47:09 -0700 (PDT)
+ us-mta-248-icaTsERXOm6gp9NlDg-IiQ-1; Thu, 19 May 2022 00:56:21 -0400
+X-MC-Unique: icaTsERXOm6gp9NlDg-IiQ-1
+Received: by mail-qt1-f200.google.com with SMTP id m6-20020ac866c6000000b002f52f9fb4edso3359451qtp.19
+        for <fstests@vger.kernel.org>; Wed, 18 May 2022 21:56:21 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=ozKv8JuFCr47tZ31HF8OOTFb0OFMhv8avzY8kqwcUMM=;
-        b=zdeb52bUvhBmc/hKgEIaQDsXbN3Nn2e8KQbIKOduoUb55AVlX8QkRClIFMZ1hxtI1j
-         tXI4G8tkU69ffk2w9CCbuKBhwa2ogCDHliBgDTmhlPEFE9Tm4UP/OKKEDAESTHHvF+nW
-         KLfrPHnqNEjgxb3FLOIwWzoNBOi65rgoSQJIbmevnYCaRtZf9apcfl0BKKDprJC1dLqH
-         zW2tq/Er52cqJjZ7pGNVJlj1RHVi1FXiaM3/lwfHIUY1BeADB5chxh2XHAQfqAP2bTGq
-         4/g3gfKiVgpC3NHJXghmfeIOsgPd8gfTFYY6fNkeJNgHQKYU5kXubKz9evble+NCYg+l
-         5p7Q==
-X-Gm-Message-State: AOAM5324VU7NVi1p6E542U/4cEcOPwW8tNe8r2NoqPuFGHcIuhTfwnF1
-        sf2IKd446cu+tdnN6/uj75VFZRNOPgvQxWbKP0SM0H3ZSYZI9fDHnZNh+TAW5o/NqfrIMdGH+ph
-        RaqIKld9K3qb6y5aunA==
-X-Received: by 2002:a37:8846:0:b0:6a0:f6f1:a015 with SMTP id k67-20020a378846000000b006a0f6f1a015mr1977088qkd.386.1652935628526;
-        Wed, 18 May 2022 21:47:08 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxSs62f/3NAVJl6r6+Zj2S/Ryg5IxZ0abiKNKkm+nSFAtRkjbVrEx8KDPRBdZbqDAJw4g7n+A==
-X-Received: by 2002:a37:8846:0:b0:6a0:f6f1:a015 with SMTP id k67-20020a378846000000b006a0f6f1a015mr1977081qkd.386.1652935628246;
-        Wed, 18 May 2022 21:47:08 -0700 (PDT)
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=fYfIqGfERh8bjjZqE1vFTpzT5vD5ieB7DjabHOjanZE=;
+        b=MltZ+mgDO59f1T6y3GttOmWEy75Xh85hO6PmOFFKouwmpCFCNSea66bpUyqtm5Sv+q
+         55m5T+i4XdDRUgRBVbR1mQVeEBdAhUs21ErDVYnnHkRFVyKE0MjCVGjmG7GQXRkQdEdy
+         K4upQAWJkkeznnxpSAqLZe+mgpef20WgmTJGmKPoeusrDi+5T7Nw1AEP8p5RrxpuOCaM
+         xFQEiVQQlNvcF9hbaihAKvYPdBa7x9xfgm2OaGjzJBpvHD4PMeol2MCB1h1p4uL01Vwq
+         s/eN0cMD1pP9DvslJyZ4VNaCbfL43gCuZW2JC9t4Jae3IlW7+DH++wYbpcSTjPzp6QQA
+         4l5Q==
+X-Gm-Message-State: AOAM530ukr2KTRjouzT9gM7s198OJHBxyPunID+LfhBu3XaacD+rFjzo
+        YBTl6F3pAGiqT197AJxzhLTYG1mr2nDu/S8A1ZL4zc5h4xl33Z2AlmfibQGhvGq+jtve28VFCWP
+        ool2uzirD8N9Nre4XfA==
+X-Received: by 2002:a05:622a:494:b0:2f3:c0b0:599c with SMTP id p20-20020a05622a049400b002f3c0b0599cmr2611158qtx.95.1652936180874;
+        Wed, 18 May 2022 21:56:20 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyNZOH+JcFOvEKor5E6WB6TvKpJQvOX/aIgxYQ9X9vsEtbaDy7g0y3Cd/f+asce49WiW2DJDA==
+X-Received: by 2002:a05:622a:494:b0:2f3:c0b0:599c with SMTP id p20-20020a05622a049400b002f3c0b0599cmr2611148qtx.95.1652936180609;
+        Wed, 18 May 2022 21:56:20 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g206-20020a379dd7000000b0069fcf0da629sm677462qke.134.2022.05.18.21.47.05
+        by smtp.gmail.com with ESMTPSA id q28-20020a37f71c000000b0069fc13ce1d4sm836453qkj.5.2022.05.18.21.56.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 May 2022 21:47:07 -0700 (PDT)
-Date:   Thu, 19 May 2022 12:47:01 +0800
+        Wed, 18 May 2022 21:56:20 -0700 (PDT)
+Date:   Thu, 19 May 2022 12:56:15 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-ext4@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
-Subject: Re: [xfstests PATCH 0/2] update test_dummy_encryption testing in
- ext4/053
-Message-ID: <20220519044701.w7lf5tabdsl3cwra@zlang-mailbox>
-References: <20220501051928.540278-1-ebiggers@kernel.org>
- <20220518141911.zg73znk2o2krxxwk@zlang-mailbox>
- <YoUu60S2AjP2fEOk@sol.localdomain>
- <20220518181607.fpzqmtnaky5jdiuw@zlang-mailbox>
- <YoVspJ6NUByHPn3r@sol.localdomain>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/3] xfs: add memory failure test for dax mode
+Message-ID: <20220519045615.cg35r7t7gcqwrnjv@zlang-mailbox>
+References: <20220513031411.2369314-1-ruansy.fnst@fujitsu.com>
+ <20220513031411.2369314-2-ruansy.fnst@fujitsu.com>
+ <20220518183846.k6est3gobhh5jxrm@zlang-mailbox>
+ <7ee2d82f-655c-c3ee-6bf9-9353abb8f64a@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <YoVspJ6NUByHPn3r@sol.localdomain>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <7ee2d82f-655c-c3ee-6bf9-9353abb8f64a@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 18, 2022 at 03:01:08PM -0700, Eric Biggers wrote:
-> Zorro, can you fix your email configuration?  Your emails have a
-> Mail-Followup-To header that excludes you, so replying doesn't work correctly;
-> I had to manually fix the recipients list.  If you're using mutt, you need to
-> add 'set followup_to = no' to your muttrc.
-
-Oh, I didn't notice that, I use neomutt, it might enable the followup_to by
-default. OK, I've set followup_to = no, and restart my neomutt. Hope it helps:)
-
+On Thu, May 19, 2022 at 09:53:23AM +0800, Shiyang Ruan wrote:
 > 
-> On Thu, May 19, 2022 at 02:16:07AM +0800, Zorro Lang wrote:
-> > > > 
-> > > > And I saw some discussion under this patchset, and no any RVB, so I'm wondering
-> > > > if you are still working/changing on it?
-> > > > 
+> 
+> 在 2022/5/19 2:38, Zorro Lang 写道:
+> > On Fri, May 13, 2022 at 11:14:09AM +0800, Shiyang Ruan wrote:
+> > > Make sure memory failure mechanism works when filesystem is mounted with
+> > > dax option.
 > > > 
-> > > I might add a check for kernel version >= 5.19 in patch 1.  Otherwise I'm not
-> > > planning any more changes.
+> > > Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> > > ---
+> > >   .gitignore                      |   1 +
+> > >   src/Makefile                    |   3 +-
+> > >   src/t_mmap_cow_memory_failure.c | 157 ++++++++++++++++++++++++++++++++
+> > >   tests/xfs/900                   |  48 ++++++++++
+> > >   tests/xfs/900.out               |   9 ++
+> > >   5 files changed, 217 insertions(+), 1 deletion(-)
+> > >   create mode 100644 src/t_mmap_cow_memory_failure.c
+> > >   create mode 100755 tests/xfs/900
+> > >   create mode 100644 tests/xfs/900.out
+> > > 
+> ...
+> > > diff --git a/tests/xfs/900.out b/tests/xfs/900.out
+> > > new file mode 100644
+> > > index 00000000..d861bf1f
+> > > --- /dev/null
+> > > +++ b/tests/xfs/900.out
+> > > @@ -0,0 +1,9 @@
+> > > +QA output created by 900
+> > > +Format and mount
+> > > +Create the original files
+> > > +Inject memory failure (1 page)
+> > > +Inject posion...
 > > 
-> > Actually I don't think the kernel version check (in fstests) is a good method. Better
-> > to check a behavior/feature directly likes those "_require_*" functions.
+> > As your program is: printf("Inject poison...\n");
 > > 
-> > Why ext4/053 need >=5.12 or even >=5.19, what features restrict that? If some
-> > features testing might break the garden image (.out file), we can refer to
-> > _link_out_file(). Or even split this case to several small cases, make ext4/053
-> > only test old stable behaviors. Then use other cases to test new features,
-> > and use _require_$feature_you_test for them (avoid the kernel version
-> > restriction).
+> > So I think this place should be "poison".
 > 
-> This has been discussed earlier in this thread as well as on the patch that
-> added ext4/053 originally.  ext4/053 has been gated on version >= 5.12 since the
-> beginning.  Kernel version checks are certainly bad in general, but ext4/053 is
-> a very nit-picky test intended to detect if anything changed, where a change
-> does not necessarily mean a bug.  So maybe the kernel version check makes sense
+> My bad. I forgot to fix this typo in .out file.
 
-Even on old RHEL-8 system (with a variant of kernel 3.10), the ext4/053 fails
-as [1]. Most of mount options test passed, only a few options (inlinecrypt,
-test_dummy_encryption, prefetch_block_bitmaps, dioread_lock) might not be
-supported.
-
-I think it's not necessary to mix all old and new ext4 mount options test into
-one single test cause. If it's too complicated, we can move some functions into
-common/ext4 (or others you like), split ext4/053 to several cases. Let ext4/053
-test stable enough mount option (supported from an old enough kernel). Then let
-other newer mount options in different single cases.
-
-For example, make those CONFIG_FS_ENCRYPTION* tests into a seperated case,
-and add something likes require_(fs_encryption?), and src/feature.c can be
-used too. Then about dioread_lock and prefetch_block_bitmaps things, we can
-deal with them specially, or split them out from ext4/053. I even don't mind
-if you test ext2 and ext3/4 in separate case.
-
-That's my personal opinion, I can try to help to do that after merging this
-patchset, if ext4 forks agree and would like to give me some supports
-(review and Q&A). Anyway, as it's an ext4 specific testing, I respect the
-opinion from ext4 list particularly.
-
-[1]
-+SHOULD FAIL remounting ext2 "commit=7" (remount unexpectedly succeeded) FAILED
-+mounting ext2 "test_dummy_encryption=v1" (failed mount) FAILED
-+mounting ext2 "test_dummy_encryption=v2" (failed mount) FAILED
-+mounting ext2 "test_dummy_encryption=v3" (failed mount) FAILED
-+mounting ext2 "inlinecrypt" (failed mount) FAILED
-+mounting ext2 "prefetch_block_bitmaps" (failed mount) FAILED
-+mounting ext2 "no_prefetch_block_bitmaps" (failed mount) FAILED
-+mounting ext3 "test_dummy_encryption=v1" (failed mount) FAILED
-+mounting ext3 "test_dummy_encryption=v2" (failed mount) FAILED
-+mounting ext3 "test_dummy_encryption=v3" (failed mount) FAILED
-+mounting ext3 "inlinecrypt" (failed mount) FAILED
-+mounting ext3 "prefetch_block_bitmaps" (failed mount) FAILED
-+mounting ext3 "no_prefetch_block_bitmaps" (failed mount) FAILED
-+mounting ext4 "nodioread_nolock" (failed mount) FAILED
-+mounting ext4 "dioread_lock" checking "nodioread_nolock" (not found) FAILED
-+mounting ext4 "test_dummy_encryption=v1" (failed mount) FAILED
-+mounting ext4 "test_dummy_encryption=v2" (failed mount) FAILED
-+mounting ext4 "test_dummy_encryption=v3" (failed mount) FAILED
-+mounting ext4 "inlinecrypt" (failed mount) FAILED
-+mounting ext4 "prefetch_block_bitmaps" (failed mount) FAILED
-+mounting ext4 "no_prefetch_block_bitmaps" (failed mount) FAILED
-
-> there.  Lukas, any thoughts about the issues you encountered when running
-> ext4/053 on older kernels?
-> 
-> If you don't want a >= 5.19 version check for the test_dummy_encryption test
-> case as well, then I'd rather treat the kernel patch
-> "ext4: only allow test_dummy_encryption when supported" as a bug fix and
-> backport it to the LTS kernels.  The patch is fixing the mount option to work
-> the way it should have worked originally.  Either that or we just remove the
-> test_dummy_encryption test case as Ted suggested.
-
-Oh, I'd not like to push anyone to do more jobs:) And there're many Linux
-distributions with their downstream kernel, not only LTS kernel project.
-So I don't mean to make fstests' cases support the oldest existing kernel
-version, just hope some common cases try not *only* work for the latest
-one, if they have the chance :)
+Never mind. I'd like to merge these tests after your kernel patchset about
+"Add reflink&dedupe support for fsdax" be merged at first. To avoid you
+might add/change something. And I need to see the test works on offical
+kernel at least, before merging it. So feel free to ping me, if I forget
+this patchset at that time :)
 
 Thanks,
 Zorro
 
 > 
-> - Eric
+> > 
+> > > +Process is killed by signal: 7
+> > > +Inject memory failure (2 pages)
+> > > +Inject posion...
+> > 
+> > same as above. And other 2 patches might have same issue.
+> 
+> Thanks!  Will fix them.
+> 
+> 
+> --
+> Ruan.
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > +Process is killed by signal: 7
+> > > -- 
+> > > 2.35.1
+> > > 
+> > > 
+> > > 
+> > 
+> 
 > 
 
