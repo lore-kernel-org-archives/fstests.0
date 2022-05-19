@@ -2,111 +2,128 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08308C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 May 2022 22:11:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7FBAC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 01:53:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229624AbiERWLv (ORCPT
+        id S229995AbiESBxi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 May 2022 18:11:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54076 "EHLO
+        Wed, 18 May 2022 21:53:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55426 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229582AbiERWLu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 May 2022 18:11:50 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB0D93EF22
-        for <fstests@vger.kernel.org>; Wed, 18 May 2022 15:11:49 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4FC33615BE
-        for <fstests@vger.kernel.org>; Wed, 18 May 2022 22:11:49 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A48FDC385A5;
-        Wed, 18 May 2022 22:11:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1652911908;
-        bh=KcKzH+TGgaUQY0VniWBz62hRdjEGCoQBx49DxYq+wVs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=AXGxpDev7nTyBRR952pguuzUDD9iRAOWN+PhUjwzic1pA6sbGjQDF7LIT+uccUbeQ
-         EfE7qQcwb3Nc455N4u/7vNCudaLYxHsLHBeHn1ZaVoubh3B5M6tNd1d7TBG52Vpz8A
-         8+JkCXXEbhi7DWRpLFB/LTxASoWTbg1/kdfRvwgAIusXmpPHTCvd2cwXUK8N7lXhtq
-         6ElpwoQTad65nt0Sd6CnlSz/1nMdxCGud3djdDyxblf8RNEkkCurU1DAMiT9KCOijH
-         L3RXvUjaIj/RhgWQKMd2teHLUX8k7atx2OkdKvnf4/pDTWVmwz4E6+y81sCzov9NVR
-         2/7ZMf924qVbw==
-Date:   Wed, 18 May 2022 15:11:48 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Gabriel Krisman Bertazi <krisman@collabora.com>, zlang@redhat.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/556: Adequate expected output to touch behavior
- change
-Message-ID: <YoVvJPpQBSHbe53r@magnolia>
-References: <20220518202214.481121-1-krisman@collabora.com>
- <YoVl7MVtEUuupODz@sol.localdomain>
+        with ESMTP id S232465AbiESBxe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 May 2022 21:53:34 -0400
+Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 081BDC1ED7
+        for <fstests@vger.kernel.org>; Wed, 18 May 2022 18:53:32 -0700 (PDT)
+IronPort-Data: =?us-ascii?q?A9a23=3AFZjAIK3avxErg3sVY/bD5f1zkn2cJEfYwER7XOP?=
+ =?us-ascii?q?LsXnJhj8nhDUGmGVJUG+GM6yDYTekfdAjb9m//EJTusDQydE2QQE+nZ1PZygU8?=
+ =?us-ascii?q?JKaX7x1DatR0xu6d5SFFAQ+hyknQoGowPscEzmM9n9BDpC79SMmjfvQH+KlYAL?=
+ =?us-ascii?q?5EnsZqTFMGX5JZS1Ly7ZRbr5A2bBVMivV0T/Ai5S31GyNh1aYBlkpB5er83uDi?=
+ =?us-ascii?q?hhdVAQw5TTSbdgT1LPXeuJ84Jg3fcldJFOgKmVY83LTegrN8F251juxExYFAdX?=
+ =?us-ascii?q?jnKv5c1ERX/jZOg3mZnh+AvDk20Yd4HdplPtT2Pk0MC+7jx2Tgtl308QLu5qrV?=
+ =?us-ascii?q?S8nI6/NhP8AFRJfFkmSOIUfouOceiPh65T7I0ruNiGEL+9VJFMyNIsX0vx6DWF?=
+ =?us-ascii?q?H6boTLzVlRh6Ym++t3KmTVOZhnIIgIdPtMYdZvWtvpQw1p95OrYvrGv2MvIEHm?=
+ =?us-ascii?q?mxrwJ0mIBoXXOJBARIHUfgKS0Qn1o8rNa8D?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AZ9git6/nr7U5vPREQP9uk+DkI+orL9Y04lQ7?=
+ =?us-ascii?q?vn2ZKCYlFvBw8vrCoB1173HJYUkqMk3I9ergBEDiewK4yXcW2/hzAV7KZmCP11?=
+ =?us-ascii?q?dAR7sSj7cKrQeBJwTOssZZ1YpFN5N1EcDMCzFB5vrS0U2VFMkBzbC8nJyVuQ?=
+ =?us-ascii?q?=3D=3D?=
+X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
+   d="scan'208";a="124333620"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 19 May 2022 09:53:26 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 9A4E14D17192;
+        Thu, 19 May 2022 09:53:23 +0800 (CST)
+Received: from G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Thu, 19 May 2022 09:53:24 +0800
+Received: from [192.168.22.28] (10.167.225.141) by
+ G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.23 via Frontend Transport; Thu, 19 May 2022 09:53:23 +0800
+Message-ID: <7ee2d82f-655c-c3ee-6bf9-9353abb8f64a@fujitsu.com>
+Date:   Thu, 19 May 2022 09:53:23 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YoVl7MVtEUuupODz@sol.localdomain>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.1
+Subject: Re: [PATCH 1/3] xfs: add memory failure test for dax mode
+To:     <zlang@redhat.com>
+References: <20220513031411.2369314-1-ruansy.fnst@fujitsu.com>
+ <20220513031411.2369314-2-ruansy.fnst@fujitsu.com>
+ <20220518183846.k6est3gobhh5jxrm@zlang-mailbox>
+CC:     <fstests@vger.kernel.org>
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+In-Reply-To: <20220518183846.k6est3gobhh5jxrm@zlang-mailbox>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-yoursite-MailScanner-ID: 9A4E14D17192.AD4D8
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 18, 2022 at 02:32:28PM -0700, Eric Biggers wrote:
-> On Wed, May 18, 2022 at 04:22:14PM -0400, Gabriel Krisman Bertazi wrote:
-> > Coreutils commit d435cfc0bc55 ("touch: fix wrong
-> > diagnostic (Bug#48106)"), released in coreutils v9.0, changed the error
-> > reported by the tool when openat() fails with EINVAL.  Instead of
-> > reporting a generic message for the failure of either openat() or the
-> > following utimensat(), it now differentiates both failures with
-> > different messages.
-> > 
-> > This change breaks generic/556, which relied on the parsing of that
-> > message.  This test was originally developed by me on a Debian
-> > Buster (coreutils v8.x), so I used the generic error message.  Now that
-> > I tried to run it on a more modern distro, it reports a different error
-> > message, which fails the test.
-> > 
-> > We could do it in a more flexible way to catch future changes.  These
-> > are unlikely, and many other parts of fstests just use this generic
-> > touch message, so don't bother with it here.
-> > 
-> > There is no change in behavior on the kernel side, just a broken test.
-> > On both older and new distros, the kernel correctly rejects this invalid
-> > sequence with -EINVAL, as shown in the strace hunk below:
-> > 
-> > ...
-> > openat(AT_FDCWD, "/scratch_mnt/strict/corac\314\247\303", ...) = -1 EINVAL
-> > utimensat(AT_FDCWD, "/scratch_mnt/strict/corac\314\247\303", ...) = -1 EINVAL
-> > ...
-> > 
-> > Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
-> > ---
-> >  tests/generic/556.out | 4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/tests/generic/556.out b/tests/generic/556.out
-> > index f9dd9542fb12..12c77a5b0176 100644
-> > --- a/tests/generic/556.out
-> > +++ b/tests/generic/556.out
-> > @@ -12,5 +12,5 @@ user.foo="bar"
-> >  # file: SCRATCH_MNT/xattrs/x/f1
-> >  user.foo="bar"
-> >  
-> > -touch: setting times of 'SCRATCH_MNT/strict/corac'$'\314\247\303': Invalid argument
-> > -touch: setting times of 'SCRATCH_MNT/strict/cora'$'\303\247\303': Invalid argument
-> > +touch: cannot touch 'SCRATCH_MNT/strict/corac'$'\314\247\303': Invalid argument
-> > +touch: cannot touch 'SCRATCH_MNT/strict/cora'$'\303\247\303': Invalid argument
+
+
+在 2022/5/19 2:38, Zorro Lang 写道:
+> On Fri, May 13, 2022 at 11:14:09AM +0800, Shiyang Ruan wrote:
+>> Make sure memory failure mechanism works when filesystem is mounted with
+>> dax option.
+>>
+>> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+>> ---
+>>   .gitignore                      |   1 +
+>>   src/Makefile                    |   3 +-
+>>   src/t_mmap_cow_memory_failure.c | 157 ++++++++++++++++++++++++++++++++
+>>   tests/xfs/900                   |  48 ++++++++++
+>>   tests/xfs/900.out               |   9 ++
+>>   5 files changed, 217 insertions(+), 1 deletion(-)
+>>   create mode 100644 src/t_mmap_cow_memory_failure.c
+>>   create mode 100755 tests/xfs/900
+>>   create mode 100644 tests/xfs/900.out
+>>
+...
+>> diff --git a/tests/xfs/900.out b/tests/xfs/900.out
+>> new file mode 100644
+>> index 00000000..d861bf1f
+>> --- /dev/null
+>> +++ b/tests/xfs/900.out
+>> @@ -0,0 +1,9 @@
+>> +QA output created by 900
+>> +Format and mount
+>> +Create the original files
+>> +Inject memory failure (1 page)
+>> +Inject posion...
 > 
-> This would break the test on systems that still have an older version of
-> coreutils, right?  For example, currently kvm-xfstests test appliances are based
-> on Debian Bullseye by default, which isn't very old, but it has coreutils 8.32.
+> As your program is: printf("Inject poison...\n");
 > 
-> Can you filter the output to allow the test to pass with both old and new
-> coreutils versions?  Or, find another way to test the same thing without relying
-> on a tool that has changed its output.
+> So I think this place should be "poison".
 
-Seconded, those of us running ancient distros like Ubuntu 22.04 will
-need compatibility with 8.32 for a few years yet... ;)
+My bad. I forgot to fix this typo in .out file.
 
---D
+> 
+>> +Process is killed by signal: 7
+>> +Inject memory failure (2 pages)
+>> +Inject posion...
+> 
+> same as above. And other 2 patches might have same issue.
 
-> - Eric
+Thanks!  Will fix them.
+
+
+--
+Ruan.
+
+> 
+> Thanks,
+> Zorro
+> 
+>> +Process is killed by signal: 7
+>> -- 
+>> 2.35.1
+>>
+>>
+>>
+> 
+
+
