@@ -2,194 +2,279 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54F4CC433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 15:10:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D97B9C4332F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 15:36:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238456AbiESPKv (ORCPT
+        id S241335AbiESPgz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 May 2022 11:10:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37540 "EHLO
+        Thu, 19 May 2022 11:36:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234717AbiESPKt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 11:10:49 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 08C235FBC
-        for <fstests@vger.kernel.org>; Thu, 19 May 2022 08:10:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1652973047;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=pYo9QwJshnDwtzE/AWbi/Y4oLV1EYJTk8x6AWwlRJHM=;
-        b=WnpN8iOkXmnxrp93krqjpxl+W1fcCNgm/ZxDbnx4rgp0TSJIOCH9dY/OBmd5SKCyEoIG7K
-        797W72EF40ywt2+O8sL049uQB03y5PjprRfBd2Ioh4qIayuRhRGZXvmF6PLL2larsGIH7S
-        TB+MsQuwPXcWCXri+yliQEm3D82BKsU=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-154-HvQWHs7UNsOif10QI9UZWw-1; Thu, 19 May 2022 11:10:45 -0400
-X-MC-Unique: HvQWHs7UNsOif10QI9UZWw-1
-Received: by mail-qk1-f198.google.com with SMTP id j12-20020ae9c20c000000b0069e8ac6b244so4390225qkg.1
-        for <fstests@vger.kernel.org>; Thu, 19 May 2022 08:10:45 -0700 (PDT)
+        with ESMTP id S241408AbiESPgp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 11:36:45 -0400
+Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A16C82FE61
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 08:36:06 -0700 (PDT)
+Received: by mail-qk1-x729.google.com with SMTP id j6so4985238qkp.9
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 08:36:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=BNpiAp66r7nUZ8PlySXFTLPOtISp14h9MHHCuM/nnpY=;
+        b=sf4TjaH9vz+HxVfpHeMem1j5HKxR4RxtYRtK68ZaoRZe/NICE8Mh3I+rD02U44ZH5i
+         QCdK3OgNPzbDN4X0+TL3fKCa+RDMnmv6EU/ntRWVnzS/9eK2lm0BTnQAwkaBydFfxnKu
+         KEzQ/OqiHpQom/Q0nsJ4lZU68QP7xrzf3HnwF+PpkddIAh3ji+XYBIbUutinVVgcw6AU
+         IMEmg4OMRYblRPOW2h6zGg2baxAVwvyfaRaOqQc+3vwG9Rr30cGWnAFvmfrv8FY/zbKm
+         DI7evKDbEpzLjowhgl3o9B7q0WUXbuOAGD9C72c9UFRHQBAw4Y2Xkf0qnNzntmJIISFc
+         MkKQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=pYo9QwJshnDwtzE/AWbi/Y4oLV1EYJTk8x6AWwlRJHM=;
-        b=GbOIVjw36RNOVAAqHVoAcYnswLtALiSLlZ9+Ou6VhFtbBMdte2vupW2skjQVnTgiyU
-         tBFmJsbS9P6JhWuCgmvH5c9N/DnYjCwT2d5ehMOcHvCoxsg1pq7ZptinWpj7Lo00iSka
-         bhc/ROR1J269wzTQ5wZJJgwWAhBpGZBhpW4iG3+Tlr3L+wksagWO8pNPvH/z97wOhl3m
-         tGCk6BbYZxHvZg++vAS2Ozz2jO+r74SVphSBHjn5KqasuuJoEVj6NVejRM3EHa6aePW8
-         cyTOPT29nFoaMoxhMmRWDGhw0B14hlg7XCElycQtURMzk9Eyt8jzFW0LpKt8zqvv8IyS
-         pFrw==
-X-Gm-Message-State: AOAM532ZTM64ANUmK9K1UhUFJ1mzt4VCANqKGCzMWV1IlAMGLs+EZW70
-        MDNHdYIvUuNx11tTUp4xrX0HFDWorOByFaDNBdNiQk2/eI/2dUJgjx7MTTg9x1/bv/6VX8CIl95
-        c3hvSjdLHWImMzzUbzQ==
-X-Received: by 2002:a05:6214:2b09:b0:45b:59b:5df6 with SMTP id jx9-20020a0562142b0900b0045b059b5df6mr4346717qvb.22.1652973045432;
-        Thu, 19 May 2022 08:10:45 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwJU85gOlN5d5110p13TXYG+vSYE/1AP/JpUKdLmb8S5bbZQ1cCJysU/GHuoawEe0a316AkSw==
-X-Received: by 2002:a05:6214:2b09:b0:45b:59b:5df6 with SMTP id jx9-20020a0562142b0900b0045b059b5df6mr4346686qvb.22.1652973045149;
-        Thu, 19 May 2022 08:10:45 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g7-20020a376b07000000b0069fc13ce22dsm1385619qkc.94.2022.05.19.08.10.38
+        bh=BNpiAp66r7nUZ8PlySXFTLPOtISp14h9MHHCuM/nnpY=;
+        b=QBSi5Nn2uxSf/4RsMkJu76zzE3918aT2XDjdmNCpkO4KVbc19wxBasNTBDL0xyakqc
+         yk3RW76/C56hjpuw69TBgqJH3EOFJ3fdIeBcH9P2x1y8L6fhwKegOBCJ87T6snOm+xBW
+         QIqElXwt2oEsLv/p1BTSQi0PD/m0vi/oH1B7t70d/zGZD4lluSnmQ1WxBD64OuHSug19
+         3gP/cQOb9sfPpGuyFC3/xC3dZDRUUjRbc0uu2K4IyecsSif7WpgfZWoDvLCA0EhX8b88
+         kkpJEgfo7EUYTiiGeEXyMay+ckC+QCxtQXd+Q3sDMrjCCLOavNu4gYiCTTDgZvnHDDcl
+         AxKA==
+X-Gm-Message-State: AOAM530/hAiOBBxQ/zfMFpn198KUqtBAO+Uu3qHEUqoXDUrbvX7gnFO7
+        xmtaO9ceXWb7rVq4/WU7Ky18iw==
+X-Google-Smtp-Source: ABdhPJy5RiPhJyIyJco5qyeA4n8FyQc7ywfFOSnE8wzGNVY+4usKx3jFtLkPRVEJbvodku8fJPOaRQ==
+X-Received: by 2002:a05:620a:1a99:b0:680:f33c:dbd3 with SMTP id bl25-20020a05620a1a9900b00680f33cdbd3mr3422227qkb.17.1652974565117;
+        Thu, 19 May 2022 08:36:05 -0700 (PDT)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id h8-20020ac85148000000b002f39b99f679sm1492209qtn.19.2022.05.19.08.36.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 May 2022 08:10:44 -0700 (PDT)
-Date:   Thu, 19 May 2022 23:10:35 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
+        Thu, 19 May 2022 08:36:04 -0700 (PDT)
+Date:   Thu, 19 May 2022 11:36:02 -0400
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Dave Chinner <david@fromorbit.com>,
         Luis Chamberlain <mcgrof@kernel.org>,
         linux-fsdevel <linux-fsdevel@vger.kernel.org>,
         linux-block <linux-block@vger.kernel.org>, pankydev8@gmail.com,
-        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
+        Theodore Tso <tytso@mit.edu>, jmeneghi@redhat.com,
         Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
         Dan Williams <dan.j.williams@intel.com>,
         Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
+        Zorro Lang <zlang@redhat.com>,
         fstests <fstests@vger.kernel.org>
 Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for
  expunges
-Message-ID: <20220519151035.ouqegv3o4vktykfz@zlang-mailbox>
+Message-ID: <YoZj4nHX42AOn8+F@localhost.localdomain>
 References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org>
  <CAOQ4uxhKHMjGq0QKKMPFAV6iJFwe1H5hBomCVVeT1EWJzo0eXg@mail.gmail.com>
- <20220519112450.zbje64mrh65pifnz@zlang-mailbox>
- <YoZRyGOwde+xkK1y@mit.edu>
+ <20220519075805.GU2306852@dread.disaster.area>
+ <CAOQ4uxi-A2iErkbBBaewmoKa8OGWXaUzaZqwygQxKzzEZcsCXQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YoZRyGOwde+xkK1y@mit.edu>
+In-Reply-To: <CAOQ4uxi-A2iErkbBBaewmoKa8OGWXaUzaZqwygQxKzzEZcsCXQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 19, 2022 at 10:18:48AM -0400, Theodore Ts'o wrote:
-> On Thu, May 19, 2022 at 07:24:50PM +0800, Zorro Lang wrote:
-> > 
-> > Yes, we talked about this, but if I don't rememeber wrong, I recommended each
-> > downstream testers maintain their own "testing data/config", likes exclude
-> > list, failed ratio, known failures etc. I think they're not suitable to be
-> > fixed in the mainline fstests.
+On Thu, May 19, 2022 at 12:20:28PM +0300, Amir Goldstein wrote:
+> On Thu, May 19, 2022 at 10:58 AM Dave Chinner <david@fromorbit.com> wrote:
+> >
+> > On Thu, May 19, 2022 at 09:36:41AM +0300, Amir Goldstein wrote:
+> > > [adding fstests and Zorro]
+> > >
+> > > On Thu, May 19, 2022 at 6:07 AM Luis Chamberlain <mcgrof@kernel.org> wrote:
+> > > >
+> > > > I've been promoting the idea that running fstests once is nice,
+> > > > but things get interesting if you try to run fstests multiple
+> > > > times until a failure is found. It turns out at least kdevops has
+> > > > found tests which fail with a failure rate of typically 1/2 to
+> > > > 1/30 average failure rate. That is 1/2 means a failure can happen
+> > > > 50% of the time, whereas 1/30 means it takes 30 runs to find the
+> > > > failure.
+> > > >
+> > > > I have tried my best to annotate failure rates when I know what
+> > > > they might be on the test expunge list, as an example:
+> > > >
+> > > > workflows/fstests/expunges/5.17.0-rc7/xfs/unassigned/xfs_reflink.txt:generic/530 # failure rate about 1/15 https://gist.github.com/mcgrof/4129074db592c170e6bf748aa11d783d
+> > > >
+> > > > The term "failure rate 1/15" is 16 characters long, so I'd like
+> > > > to propose to standardize a way to represent this. How about
+> > > >
+> > > > generic/530 # F:1/15
+> > > >
+> > >
+> > > I am not fond of the 1/15 annotation at all, because the only fact that you
+> > > are able to document is that the test failed after 15 runs.
+> > > Suggesting that this means failure rate of 1/15 is a very big step.
+> > >
+> > > > Then we could extend the definition. F being current estimate, and this
+> > > > can be just how long it took to find the first failure. A more valuable
+> > > > figure would be failure rate avarage, so running the test multiple
+> > > > times, say 10, to see what the failure rate is and then averaging the
+> > > > failure out. So this could be a more accurate representation. For this
+> > > > how about:
+> > > >
+> > > > generic/530 # FA:1/15
+> > > >
+> > > > This would mean on average there failure rate has been found to be about
+> > > > 1/15, and this was determined based on 10 runs.
+> >
+> > These tests are run on multiple different filesystems. What happens
+> > if you run xfs, ext4, btrfs, overlay in sequence? We now have 4
+> > tests results, and 1 failure.
+> >
+> > Does that make it FA: 1/4, or does it make it 1/1,0/1,0/1,0/1?
+> >
+> > What happens if we run, say, XFS w/ defaults, rmapbt=1, v4, quotas?
+> >
+> > Does that make it FA: 1/4, or does it make it 0/1,1/1,0/1,0/1?
+> >
+> > In each case above, 1/4 tells us nothing useful. OTOH, the 0/1 vs
+> > 1/1 breakdown is useful information, because it tells us whihc
+> > filesystem failed the test, or which specific config failed the
+> > test.
+> >
+> > Hence I think the ability for us to draw useful conclusions from a
+> > number like this is large dependent on the specific data set it is
+> > drawn from...
+> >
+> > > > We should also go extend check for fstests/blktests to run a test
+> > > > until a failure is found and report back the number of successes.
+> > > >
+> > > > Thoughts?
+> >
+> > Who is the expected consumer of this information?
+> >
+> > I'm not sure it will be meaningful for anyone developing new code
+> > and needing to run every test every time they run fstests.
+> >
+> > OTOH, for a QA environment where you have a fixed progression of the
+> > kernel releases you are testing, it's likely valuable and already
+> > being tracked in various distro QE management tools and
+> > dashboards....
+> >
+> > > I have had a discussion about those tests with Zorro.
+> > >
+> > > Those tests that some people refer to as "flaky" are valuable,
+> > > but they are not deterministic, they are stochastic.
+> >
+> > Extremely valuable. Worth their weight in gold to developers like
+> > me.
+> >
+> > The recoveryloop group tests are a good example of this. The name of
+> > the group indicates how we use it. I typically set it up to run with
+> > an loop iteration like "-I 100" knowing that is will likely fail a
+> > random test in the group within 10 iterations.
+> >
+> > Those one-off failures are almost always a real bug, and they are
+> > often unique and difficult to reproduce exactly. Post-mortem needs
+> > to be performed immediately because it may well be a unique on-off
+> > failure and running another test after the failure destroys the
+> > state needed to perform a post-mortem.
+> >
+> > Hence having a test farm running these multiple times and then
+> > reporting "failed once in 15 runs" isn't really useful to me as a
+> > developer - it doesn't tell us anything new, nor does it help us
+> > find the bugs that are being tripped over.
+> >
+> > Less obvious stochastic tests exist, too. There are many tests that
+> > use fstress as a workload that runs while some other operation is
+> > performed - freeze, grow, ENOSPC, error injections, etc. They will
+> > never be deterministic, any again any failure tends to be a real
+> > bug, too.
+> >
+> > However, I think these should be run by QE environments all the time
+> > as they require long term, frequent execution across different
+> > configs in different environments to find the deep dark corners
+> > where the bugs may lie dormant. These are the tests that find things
+> > like subtle timing races no other tests ever exercise.
+> >
+> > I suspect that tests that alter their behaviour via LOAD_FACTOR or
+> > TIME_FACTOR will fall into this category.
+> >
+> > > I think MTBF is the standard way to describe reliability
+> > > of such tests, but I am having a hard time imagining how
+> > > the community can manage to document accurate annotations
+> > > of this sort, so I would stick with documenting the facts
+> > > (i.e. the test fails after N runs).
+> >
+> > I'm unsure of what "reliablity of such tests" means in this context.
+> > The tests are trying to exercise and measure the reliability of the
+> > kernel code - if the *test is unreliable* then that says to me the
+> > test needs fixing. If the test is reliable, then any failures that
+> > occur indicate that the filesystem/kernel/fs tools are unreliable,
+> > not the test....
+> >
+> > "test reliability" and "reliability of filesystem under test" are
+> > different things with similar names. The latter is what I think we
+> > are talking about measuring and reporting here, right?
+> >
+> > > OTOH, we do have deterministic tests, maybe even the majority of
+> > > fstests are deterministic(?)
+> >
+> > Very likely. As a generalisation, I'd say that anything that has a
+> > fixed, single step at a time recipe and a very well defined golden
+> > output or exact output comparison match is likely deterministic.
+> >
+> > We use things like 'within tolerance' so that slight variations in
+> > test results don't cause spurious failures and hence make the test
+> > more deterministic.  Hence any test that uses 'within_tolerance' is
+> > probably a test that is expecting deterministic behaviour....
+> >
+> > > Considering that every auto test loop takes ~2 hours on our rig and that
+> > > I have been running over 100 loops over the past two weeks, if half
+> > > of fstests are deterministic, that is a lot of wait time and a lot of carbon
+> > > emission gone to waste.
+> > >
+> > > It would have been nice if I was able to exclude a "deterministic" group.
+> > > The problem is - can a developer ever tag a test as being "deterministic"?
+> >
+> > fstests allows private exclude lists to be used - perhaps these
+> > could be used to start building such a group for your test
+> > environment. Building a list from the tests you never see fail in
+> > your environment could be a good way to seed such a group...
+> >
+> > Maybe you have all the raw results from those hundreds of tests
+> > sitting around - what does crunching that data look like? Who else
+> > has large sets of consistent historic data sitting around? I don't
+> > because I pollute my results archive by frequently running varied
+> > and badly broken kernels through fstests, but people who just run
+> > released or stable kernels may have data sets that could be used....
+> >
 > 
-> Failure ratios are the sort of thing that are only applicable for
+> I have no historic data of that sort and I have never stayed on the
+> same test system long enough to collect this sort of data.
 > 
-> * A specific filesystem
-> * A specific configuration
-> * A specific storage device / storage device class
-> * A specific CPU architecture / CPU speed
-> * A specific amount of memory available
+> Josef has told us in LPC 2021 about his btrfs fstests dashboard
+> where he started to collect historical data a while ago.
+> 
 
-And a specific bug I suppose :)
+I'm clearly biased, but I think this is the best way to go for *developers*.  We
+want to know all the things, so we just need to have a clear way to see what's
+failing and have a historical view of what has failed.  If you look at our
+dashboard at toxicpanda.com you can click on the tests and see their runs and
+failures on different configs.  This has been insanely valuable to me, and
+helped me narrow down test cases that needed to be adjusted for compression.
 
+> Collaborating on expunge lists of different fs and different
+> kernel/config/distro
+> is one of the goals behind Luis's kdevops project.
 > 
-> Put another way, there are problems that fail so close to rarely as to
-> be "hever" on, say, an x86_64 class server with gobs and gobs of
-> memory, but which can more reliably fail on, say, a Rasberry PI using
-> eMMC flash.
-> 
-> I don't think that Luis was suggesting that this kind of failure
-> annotation would go in upstream fstests.  I suspect he just wants to
-> use it in kdevops, and hope that other people would use it as well in
-> other contexts.  But even in the context of test runners like kdevops
-> and {kvm,gce,android}-xfstests, it's going to be very specific to a
-> particular test environment, and for the global list of excludes for a
-> particular file system.  So in the gce-xfstests context, this is the
-> difference between the excludes in the files:
-> 
-> 	fs/ext4/excludes
-> vs
-> 	fs/ext4/cfg/bigalloc.exclude
-> 
-> even if I only cared about, say, how things ran on GCE using
-> SSD-backed Persistent Disk (never mind that I can only run
-> gce-xfstests on Local SSD, and PD Extreme, etc.), failure percentages
-> would never make sense for fs/ext4/excludes, since that covers
-> multiple file system configs.  And my infrastructure supports kvm,
-> gce, and Android, as well as some people (such as at $WORK for our
-> data center kernels) who run the test appliacce directly on bare
-> metal, so I wouldn't use the failure percentages in these files, etc.
-> 
-> Now, what I *do* is to track this sort of thing in my own notes, e.g:
-> 
-> generic/051	ext4/adv	Failure percentage: 16% (4/25)
->     "Basic log recovery stress test - do lots of stuff, shut down in
->     the middle of it and check that recovery runs to completion and
->     everything can be successfully removed afterwards."
-> 
-> generic/410 nojournal	Couldn't reproduce after running 25 times
->      "Test mount shared subtrees, verify the state transitions..."
-> 
-> generic/68[12]	encrypt   Failure percentage: 100%
->     The directory does grow, but blocks aren't charged to either root or
->     the non-privileged users' quota.  So this appears to be a real bug.
-> 
-> 
-> There is one thing that I'd like to add to upstream fstests, and that
-> is some kind of option so that "check --retry-failures NN" would cause
-> fstests to automatically, upon finding a test failure, will rerun that
-> failing test NN aditional times.
 
-That makes more sense for me :) I'd like to help the testers to retry the
-(randomly) failed cases, to help them to get their testing statistics. That's
-better than recording these statistics in fstests itself.
+I think this is also hugely valuable from the "Willy usecase" perspective.
+Willy doesn't care about failure rates or interpreting the tea leaves of what
+our format is, he wants to make sure he didn't break anything.  We should strive
+to have 0 failures for this use case, so having expunge lists in place to get
+rid of any flakey results are going to make it easier for non-experts to get a
+solid grasp on wether they introduced a regression or not.
 
-> Another potential related feature
-> which we currently have in our daily spinner infrastructure at $WORK
-> would be to on a test failure, rerun a test up to M times (typically a
-> small number, such as 3), and if it passes on a retry attempt, declare
-> the test result as "flaky", and stop running the retries.  If the test
-> repeatedly fails after M attempts, then the test result is "fail".
-> 
-> These results would be reported in the junit XML file, and would allow
-> the test runners to annotate their test summaries appropriately.
-> 
-> I'm thinking about trying to implement something like this in my
-> copious spare time; but before I do, does the general idea seem
-> acceptable?
+There's room for both use cases.  I want the expunge lists for newbies, I want
+good reporting for the developers who know what they're doing.  We can provide
+documentation for both
 
-After a "./check ..." done, generally fstests shows 3 list:
-  Ran: ...
-  Not run: ...
-  Failures: ...
-
-So you mean if the "--retry-failures N" is specified. we can have one more list
-named "Flaky", which is part of "Failures" list, likes:
-  Ran: ...
-  Not run: ...
-  Failures: generic/388 generic/475 xfs/104 xfs/442
-  Flaky: generic/388 [2/N] xfs/104 [1/N]
-
-If I understand this correctly, it's acceptable for me. And it might be helpful
-for Amir's situation. But let's hear more voice from other developers, if there
-is not big objection from other fs maintainers, let's do it :)
-
-BTW, about the new group name to mark cases with random load/operations/env.,
-what do you think? Any suggestions or good names for that?
+- If Willy, run 'make fstests-clean'
+- If Josef, run 'mkame fstests'
 
 Thanks,
-Zorro
 
-> 
-> Thanks,
-> 
-> 					- Ted
-> 
-
+Josef
