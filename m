@@ -2,270 +2,221 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BED18C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 09:20:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5BF3C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 May 2022 10:40:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235938AbiESJUo (ORCPT
+        id S236841AbiESKkt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 May 2022 05:20:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53018 "EHLO
+        Thu, 19 May 2022 06:40:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38992 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235971AbiESJUm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 05:20:42 -0400
-Received: from mail-qv1-xf30.google.com (mail-qv1-xf30.google.com [IPv6:2607:f8b0:4864:20::f30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2A94A76F4;
-        Thu, 19 May 2022 02:20:40 -0700 (PDT)
-Received: by mail-qv1-xf30.google.com with SMTP id n10so4176678qvi.5;
-        Thu, 19 May 2022 02:20:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SrZrDaHweGaAi+UApTAiBNC9rpyNJRR1jI+3LTfDr6Y=;
-        b=BSJlE+nqmeFAlf64O3ZpGHq3v7Z6ozrWZwWowg6bGVvquUw567/291UK+Jk3k2Mfbj
-         Ecg5H2t75c32UIPMPKAun1q/Lu+Dj0sBDd8CZ2yZYLPUV5dK3xhL1MzHSMlqM8Niqfbp
-         Mg38VanBEoeBy3s6c3LQvMfYyFsfkSeVXjWGs823O1XaxiWnZ0NWHrrRw5CgJjWEbs1J
-         2vJe4CoLsJwb2R9POuT3rvEzv3/V26SGt6bC1QajVXu7h79Y1Oljd7S7bbCRgneKfJCb
-         HLQuFGBlvufwe2NrfsLcrL1qt7zQpBTz+UAzdHuKN6H8rIYN6h+6heuU43D38lJTgc9F
-         8rxA==
+        with ESMTP id S230011AbiESKkr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 06:40:47 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 3547DFE3
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 03:40:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1652956842;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=jHXfEQJCdzvn+vH6sbYtYQKkduxNJbglCQPnynYEPR8=;
+        b=WN821P/UrBvp3vIuBGN4YeWKwhom4DXppZNWKSN2pZDnpOHHOL8B69hmXIx4SVuIr4coPW
+        DvjsK+cj9YH+jCp7BDrLvmWIcfg+jJ+o14RlhhRY/tov0CQYwWHjyxdqNezVbyR+82ahuj
+        QwXzee/lmzuRvKgxd0LUkw+wgSHg66U=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-417-VQyNRSEbNc-whMDt-7iQxA-1; Thu, 19 May 2022 06:40:41 -0400
+X-MC-Unique: VQyNRSEbNc-whMDt-7iQxA-1
+Received: by mail-qv1-f69.google.com with SMTP id ke5-20020a056214300500b00461fc78b983so910727qvb.17
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 03:40:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SrZrDaHweGaAi+UApTAiBNC9rpyNJRR1jI+3LTfDr6Y=;
-        b=IvB6VEj07VHAltvoiFGjQSqA+uYN+ytlbcMHwOST7ImqibCK+Rf9YZXw27g8Z6H/ri
-         rFilEuF3Hmma39lBGLw5OwzW2FTkN1t5UXqFVDnMheEKoX/Nkg+g/XRQP4nNHPDvmVnG
-         VbVCeLfeH7D/TRlHz2HLKNUd7rjol8fs6sMv8hAx/Di99KKoUtkh5+d7WoXDmnH+U+Vh
-         VYAJ+uiLiSLY/ILtbh7Vcjh5w+/bEgCeHnNPiNcUN9zb++Mx597JsKh3pR7Zu1iOavWt
-         G7yO5zNax+pOd6UzD8Urex73vEmqbUWuy+2Vg0JBeDMzXUnK+p3Y0Bd65IwIwqvYAKWa
-         5X1A==
-X-Gm-Message-State: AOAM532R6XMz5EJdhUCFRexdBgCD0YJbLBlxZoOON5ifcJZ15SUqoRGv
-        wEKChzVX2MZWqE9f4knskJl/WHGxYSZYyJtD0ls=
-X-Google-Smtp-Source: ABdhPJwRNDZ7LsUV7RphF17SpNGi1YT2manjy7HGtcPUAr6qB4km+8AxgvzGIQfM/to3SoVnpyBjYv0PxZVoLVjllho=
-X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id
- g4-20020a0562141cc400b0043535c3f0f1mr3282856qvd.0.1652952039658; Thu, 19 May
- 2022 02:20:39 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=jHXfEQJCdzvn+vH6sbYtYQKkduxNJbglCQPnynYEPR8=;
+        b=IkTlxvfHvPwq1IJkII5ahBijjVkAbr03XDpUbcukBiZAO2gYz0KMHKRqesY7ZpA/Zh
+         BwZ2hhz5+5P2uGlKJu8UvQsRVlr5DbHLDBmHIRC/XgTL/ZxZESOi42GIwo+SH5nLPeT3
+         4ENAv8ylrLYVGNxbWv9eF62j16Ex21a/HNyhLld9IjRJmCAPV7eMARP45Q5U8KjibXFI
+         KShO2B4EQrXVWbpZq9RDBDyebIhkwL1tMG4XzwV3y+N48+8VO1JYJkPolva1i3x2jv8s
+         dDW3hoXYEtyVNa5PhekjVI5VBwgq7LsfMZx0IfxzWPNN6Uo6PurSkQ9p0StWoO4mgzPP
+         QG4g==
+X-Gm-Message-State: AOAM530e9HSiZCte3FF6KgPxfnZifJLHr9aZhOHrXS9E5b84cAB4pU0O
+        IMSkgqzPu/eD0vl1CS4qj88BsVVs8pWJyaGYw+l7lM00iAxBM38D9xaPTfduEMi9D1AvURURHwP
+        PoQEOpa9pN/7HR+BHnA==
+X-Received: by 2002:a05:6214:268d:b0:461:f5e4:81f4 with SMTP id gm13-20020a056214268d00b00461f5e481f4mr3048501qvb.33.1652956840425;
+        Thu, 19 May 2022 03:40:40 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxqus30SrNdDkzSDmH2UCJhElAIvUmrh6N8801+gbXdGw4RXwz/T6k8Gu83pMTtBMKrPZ9+Ng==
+X-Received: by 2002:a05:6214:268d:b0:461:f5e4:81f4 with SMTP id gm13-20020a056214268d00b00461f5e481f4mr3048489qvb.33.1652956840126;
+        Thu, 19 May 2022 03:40:40 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id b188-20020a3767c5000000b0069fc13ce250sm1040034qkc.129.2022.05.19.03.40.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 May 2022 03:40:39 -0700 (PDT)
+Date:   Thu, 19 May 2022 18:40:33 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Lukas Czerner <lczerner@redhat.com>
+Cc:     Eric Biggers <ebiggers@kernel.org>, fstests@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [xfstests PATCH 0/2] update test_dummy_encryption testing in
+ ext4/053
+Message-ID: <20220519104033.u7afgq4btpfdxh27@zlang-mailbox>
+References: <20220501051928.540278-1-ebiggers@kernel.org>
+ <20220518141911.zg73znk2o2krxxwk@zlang-mailbox>
+ <YoUu60S2AjP2fEOk@sol.localdomain>
+ <20220518181607.fpzqmtnaky5jdiuw@zlang-mailbox>
+ <YoVspJ6NUByHPn3r@sol.localdomain>
+ <20220519044701.w7lf5tabdsl3cwra@zlang-mailbox>
+ <20220519083322.6nfcts7wwevv4eca@fedora>
 MIME-Version: 1.0
-References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org> <CAOQ4uxhKHMjGq0QKKMPFAV6iJFwe1H5hBomCVVeT1EWJzo0eXg@mail.gmail.com>
- <20220519075805.GU2306852@dread.disaster.area>
-In-Reply-To: <20220519075805.GU2306852@dread.disaster.area>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 19 May 2022 12:20:28 +0300
-Message-ID: <CAOQ4uxi-A2iErkbBBaewmoKa8OGWXaUzaZqwygQxKzzEZcsCXQ@mail.gmail.com>
-Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for expunges
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>, pankydev8@gmail.com,
-        Theodore Tso <tytso@mit.edu>,
-        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
-        Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
-        Zorro Lang <zlang@redhat.com>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220519083322.6nfcts7wwevv4eca@fedora>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 19, 2022 at 10:58 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Thu, May 19, 2022 at 09:36:41AM +0300, Amir Goldstein wrote:
-> > [adding fstests and Zorro]
-> >
-> > On Thu, May 19, 2022 at 6:07 AM Luis Chamberlain <mcgrof@kernel.org> wrote:
-> > >
-> > > I've been promoting the idea that running fstests once is nice,
-> > > but things get interesting if you try to run fstests multiple
-> > > times until a failure is found. It turns out at least kdevops has
-> > > found tests which fail with a failure rate of typically 1/2 to
-> > > 1/30 average failure rate. That is 1/2 means a failure can happen
-> > > 50% of the time, whereas 1/30 means it takes 30 runs to find the
-> > > failure.
-> > >
-> > > I have tried my best to annotate failure rates when I know what
-> > > they might be on the test expunge list, as an example:
-> > >
-> > > workflows/fstests/expunges/5.17.0-rc7/xfs/unassigned/xfs_reflink.txt:generic/530 # failure rate about 1/15 https://gist.github.com/mcgrof/4129074db592c170e6bf748aa11d783d
-> > >
-> > > The term "failure rate 1/15" is 16 characters long, so I'd like
-> > > to propose to standardize a way to represent this. How about
-> > >
-> > > generic/530 # F:1/15
-> > >
-> >
-> > I am not fond of the 1/15 annotation at all, because the only fact that you
-> > are able to document is that the test failed after 15 runs.
-> > Suggesting that this means failure rate of 1/15 is a very big step.
-> >
-> > > Then we could extend the definition. F being current estimate, and this
-> > > can be just how long it took to find the first failure. A more valuable
-> > > figure would be failure rate avarage, so running the test multiple
-> > > times, say 10, to see what the failure rate is and then averaging the
-> > > failure out. So this could be a more accurate representation. For this
-> > > how about:
-> > >
-> > > generic/530 # FA:1/15
-> > >
-> > > This would mean on average there failure rate has been found to be about
-> > > 1/15, and this was determined based on 10 runs.
->
-> These tests are run on multiple different filesystems. What happens
-> if you run xfs, ext4, btrfs, overlay in sequence? We now have 4
-> tests results, and 1 failure.
->
-> Does that make it FA: 1/4, or does it make it 1/1,0/1,0/1,0/1?
->
-> What happens if we run, say, XFS w/ defaults, rmapbt=1, v4, quotas?
->
-> Does that make it FA: 1/4, or does it make it 0/1,1/1,0/1,0/1?
->
-> In each case above, 1/4 tells us nothing useful. OTOH, the 0/1 vs
-> 1/1 breakdown is useful information, because it tells us whihc
-> filesystem failed the test, or which specific config failed the
-> test.
->
-> Hence I think the ability for us to draw useful conclusions from a
-> number like this is large dependent on the specific data set it is
-> drawn from...
->
-> > > We should also go extend check for fstests/blktests to run a test
-> > > until a failure is found and report back the number of successes.
-> > >
-> > > Thoughts?
->
-> Who is the expected consumer of this information?
->
-> I'm not sure it will be meaningful for anyone developing new code
-> and needing to run every test every time they run fstests.
->
-> OTOH, for a QA environment where you have a fixed progression of the
-> kernel releases you are testing, it's likely valuable and already
-> being tracked in various distro QE management tools and
-> dashboards....
->
-> > I have had a discussion about those tests with Zorro.
-> >
-> > Those tests that some people refer to as "flaky" are valuable,
-> > but they are not deterministic, they are stochastic.
->
-> Extremely valuable. Worth their weight in gold to developers like
-> me.
->
-> The recoveryloop group tests are a good example of this. The name of
-> the group indicates how we use it. I typically set it up to run with
-> an loop iteration like "-I 100" knowing that is will likely fail a
-> random test in the group within 10 iterations.
->
-> Those one-off failures are almost always a real bug, and they are
-> often unique and difficult to reproduce exactly. Post-mortem needs
-> to be performed immediately because it may well be a unique on-off
-> failure and running another test after the failure destroys the
-> state needed to perform a post-mortem.
->
-> Hence having a test farm running these multiple times and then
-> reporting "failed once in 15 runs" isn't really useful to me as a
-> developer - it doesn't tell us anything new, nor does it help us
-> find the bugs that are being tripped over.
->
-> Less obvious stochastic tests exist, too. There are many tests that
-> use fstress as a workload that runs while some other operation is
-> performed - freeze, grow, ENOSPC, error injections, etc. They will
-> never be deterministic, any again any failure tends to be a real
-> bug, too.
->
-> However, I think these should be run by QE environments all the time
-> as they require long term, frequent execution across different
-> configs in different environments to find the deep dark corners
-> where the bugs may lie dormant. These are the tests that find things
-> like subtle timing races no other tests ever exercise.
->
-> I suspect that tests that alter their behaviour via LOAD_FACTOR or
-> TIME_FACTOR will fall into this category.
->
-> > I think MTBF is the standard way to describe reliability
-> > of such tests, but I am having a hard time imagining how
-> > the community can manage to document accurate annotations
-> > of this sort, so I would stick with documenting the facts
-> > (i.e. the test fails after N runs).
->
-> I'm unsure of what "reliablity of such tests" means in this context.
-> The tests are trying to exercise and measure the reliability of the
-> kernel code - if the *test is unreliable* then that says to me the
-> test needs fixing. If the test is reliable, then any failures that
-> occur indicate that the filesystem/kernel/fs tools are unreliable,
-> not the test....
->
-> "test reliability" and "reliability of filesystem under test" are
-> different things with similar names. The latter is what I think we
-> are talking about measuring and reporting here, right?
->
-> > OTOH, we do have deterministic tests, maybe even the majority of
-> > fstests are deterministic(?)
->
-> Very likely. As a generalisation, I'd say that anything that has a
-> fixed, single step at a time recipe and a very well defined golden
-> output or exact output comparison match is likely deterministic.
->
-> We use things like 'within tolerance' so that slight variations in
-> test results don't cause spurious failures and hence make the test
-> more deterministic.  Hence any test that uses 'within_tolerance' is
-> probably a test that is expecting deterministic behaviour....
->
-> > Considering that every auto test loop takes ~2 hours on our rig and that
-> > I have been running over 100 loops over the past two weeks, if half
-> > of fstests are deterministic, that is a lot of wait time and a lot of carbon
-> > emission gone to waste.
-> >
-> > It would have been nice if I was able to exclude a "deterministic" group.
-> > The problem is - can a developer ever tag a test as being "deterministic"?
->
-> fstests allows private exclude lists to be used - perhaps these
-> could be used to start building such a group for your test
-> environment. Building a list from the tests you never see fail in
-> your environment could be a good way to seed such a group...
->
-> Maybe you have all the raw results from those hundreds of tests
-> sitting around - what does crunching that data look like? Who else
-> has large sets of consistent historic data sitting around? I don't
-> because I pollute my results archive by frequently running varied
-> and badly broken kernels through fstests, but people who just run
-> released or stable kernels may have data sets that could be used....
->
+On Thu, May 19, 2022 at 10:33:22AM +0200, Lukas Czerner wrote:
+> On Thu, May 19, 2022 at 12:47:01PM +0800, Zorro Lang wrote:
+> > On Wed, May 18, 2022 at 03:01:08PM -0700, Eric Biggers wrote:
+> > > Zorro, can you fix your email configuration?  Your emails have a
+> > > Mail-Followup-To header that excludes you, so replying doesn't work correctly;
+> > > I had to manually fix the recipients list.  If you're using mutt, you need to
+> > > add 'set followup_to = no' to your muttrc.
+> > 
+> > Oh, I didn't notice that, I use neomutt, it might enable the followup_to by
+> > default. OK, I've set followup_to = no, and restart my neomutt. Hope it helps:)
+> > 
+> > > 
+> > > On Thu, May 19, 2022 at 02:16:07AM +0800, Zorro Lang wrote:
+> > > > > > 
+> > > > > > And I saw some discussion under this patchset, and no any RVB, so I'm wondering
+> > > > > > if you are still working/changing on it?
+> > > > > > 
+> > > > > 
+> > > > > I might add a check for kernel version >= 5.19 in patch 1.  Otherwise I'm not
+> > > > > planning any more changes.
+> > > > 
+> > > > Actually I don't think the kernel version check (in fstests) is a good method. Better
+> > > > to check a behavior/feature directly likes those "_require_*" functions.
+> > > > 
+> > > > Why ext4/053 need >=5.12 or even >=5.19, what features restrict that? If some
+> > > > features testing might break the garden image (.out file), we can refer to
+> > > > _link_out_file(). Or even split this case to several small cases, make ext4/053
+> > > > only test old stable behaviors. Then use other cases to test new features,
+> > > > and use _require_$feature_you_test for them (avoid the kernel version
+> > > > restriction).
+> > > 
+> > > This has been discussed earlier in this thread as well as on the patch that
+> > > added ext4/053 originally.  ext4/053 has been gated on version >= 5.12 since the
+> > > beginning.  Kernel version checks are certainly bad in general, but ext4/053 is
+> > > a very nit-picky test intended to detect if anything changed, where a change
+> > > does not necessarily mean a bug.  So maybe the kernel version check makes sense
+> > 
+> > Even on old RHEL-8 system (with a variant of kernel 3.10), the ext4/053 fails
+> > as [1]. Most of mount options test passed, only a few options (inlinecrypt,
+> > test_dummy_encryption, prefetch_block_bitmaps, dioread_lock) might not be
+> > supported.
+> 
+> No it does not. On RHEL-8 system the test will not run because of kernel
+> version test. It will be skipped.
 
-I have no historic data of that sort and I have never stayed on the
-same test system long enough to collect this sort of data.
+Yes, it will be skipped, I just ran it by removing that "kernel_gte 5.12" line :)
 
-Josef has told us in LPC 2021 about his btrfs fstests dashboard
-where he started to collect historical data a while ago.
+> 
+> > 
+> > I think it's not necessary to mix all old and new ext4 mount options test into
+> > one single test cause. If it's too complicated, we can move some functions into
+> > common/ext4 (or others you like), split ext4/053 to several cases. Let ext4/053
+> > test stable enough mount option (supported from an old enough kernel). Then let
+> > other newer mount options in different single cases.
+> > 
+> > For example, make those CONFIG_FS_ENCRYPTION* tests into a seperated case,
+> > and add something likes require_(fs_encryption?), and src/feature.c can be
+> > used too. Then about dioread_lock and prefetch_block_bitmaps things, we can
+> > deal with them specially, or split them out from ext4/053. I even don't mind
+> > if you test ext2 and ext3/4 in separate case.
+> 
+> Sure, but why to split it? It all should be stable enough, it's user
+> facing interface, that's the whole point of the test. I certainly see
+> the benefit of having the test for all ext4 mount option in one test -
+> it's faster and it's easier to see what's there. I would be agains
+> splitting it.
 
-Collaborating on expunge lists of different fs and different
-kernel/config/distro
-is one of the goals behind Luis's kdevops project.
+OK, although you can have a 'group name' to help to run all ext4 mount options
+regression test, but as I said: "as it's an ext4 specific testing, I respect
+the opinion from ext4 list particularly", so I won't touch this case, if you
+against :)
 
-For now, the expunge lists are curated in git:
-https://github.com/linux-kdevops/kdevops/tree/master/workflows/fstests/expunges
-Going forward, this cannot scale. If we want to collaborate and
-collect results from
-multiple testers and test labs we should consult with the KernelCI
-project, who are
-doing exactly that for other test suites.
+> 
+> As it is now there is only one kernel_gte() check to avoid testing the
+> entire history. With any new mount option as a separate test we would
+> still need kernel_gte test to avoid failing on kernels that don't have
+> the mount option. At least until kernel gains ability to list supported
+> mount options it's the only test we have.
+> 
+> On the other hand I do see some value in making a new test for a new
+> mount option. But I don't have a strong opinion about that.
+> 
+> As for the original topic of the discussion, as I said in previous
+> reply, maybe the right solution here is to treat the change as a bug fix
+> which is arguably is and let it fail on old behavior.
+> 
+> Thanks!
+> -Lukas
+> 
+> > 
+> > That's my personal opinion, I can try to help to do that after merging this
+> > patchset, if ext4 forks agree and would like to give me some supports
+> > (review and Q&A). Anyway, as it's an ext4 specific testing, I respect the
+> > opinion from ext4 list particularly.
+> > 
+> > [1]
+> > +SHOULD FAIL remounting ext2 "commit=7" (remount unexpectedly succeeded) FAILED
+> > +mounting ext2 "test_dummy_encryption=v1" (failed mount) FAILED
+> > +mounting ext2 "test_dummy_encryption=v2" (failed mount) FAILED
+> > +mounting ext2 "test_dummy_encryption=v3" (failed mount) FAILED
+> > +mounting ext2 "inlinecrypt" (failed mount) FAILED
+> > +mounting ext2 "prefetch_block_bitmaps" (failed mount) FAILED
+> > +mounting ext2 "no_prefetch_block_bitmaps" (failed mount) FAILED
+> > +mounting ext3 "test_dummy_encryption=v1" (failed mount) FAILED
+> > +mounting ext3 "test_dummy_encryption=v2" (failed mount) FAILED
+> > +mounting ext3 "test_dummy_encryption=v3" (failed mount) FAILED
+> > +mounting ext3 "inlinecrypt" (failed mount) FAILED
+> > +mounting ext3 "prefetch_block_bitmaps" (failed mount) FAILED
+> > +mounting ext3 "no_prefetch_block_bitmaps" (failed mount) FAILED
+> > +mounting ext4 "nodioread_nolock" (failed mount) FAILED
+> > +mounting ext4 "dioread_lock" checking "nodioread_nolock" (not found) FAILED
+> > +mounting ext4 "test_dummy_encryption=v1" (failed mount) FAILED
+> > +mounting ext4 "test_dummy_encryption=v2" (failed mount) FAILED
+> > +mounting ext4 "test_dummy_encryption=v3" (failed mount) FAILED
+> > +mounting ext4 "inlinecrypt" (failed mount) FAILED
+> > +mounting ext4 "prefetch_block_bitmaps" (failed mount) FAILED
+> > +mounting ext4 "no_prefetch_block_bitmaps" (failed mount) FAILED
+> > 
+> > > there.  Lukas, any thoughts about the issues you encountered when running
+> > > ext4/053 on older kernels?
+> > > 
+> > > If you don't want a >= 5.19 version check for the test_dummy_encryption test
+> > > case as well, then I'd rather treat the kernel patch
+> > > "ext4: only allow test_dummy_encryption when supported" as a bug fix and
+> > > backport it to the LTS kernels.  The patch is fixing the mount option to work
+> > > the way it should have worked originally.  Either that or we just remove the
+> > > test_dummy_encryption test case as Ted suggested.
+> > 
+> > Oh, I'd not like to push anyone to do more jobs:) And there're many Linux
+> > distributions with their downstream kernel, not only LTS kernel project.
+> > So I don't mean to make fstests' cases support the oldest existing kernel
+> > version, just hope some common cases try not *only* work for the latest
+> > one, if they have the chance :)
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > - Eric
+> > > 
+> > 
+> 
 
-You did not attend Luis' talk in LSFMM this year (he has already mentioned
-kdevops back in LSFMM 2019), where some of these issues were discussed.
-The video from LSFMM 2022 talk should be available in coming weeks.
-I hear that Luis is also planning on giving a talk to a wider audience
-in LPC 2022.
-
-Thanks,
-Amir.
-
-
-
-> Cheers,
->
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
