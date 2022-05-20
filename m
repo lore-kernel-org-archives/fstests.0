@@ -2,95 +2,60 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EFA1C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 10:51:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7158DC433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 11:41:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348315AbiETKuw (ORCPT
+        id S240420AbiETLkx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 May 2022 06:50:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39020 "EHLO
+        Fri, 20 May 2022 07:40:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348340AbiETKu1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 06:50:27 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5244154B08;
-        Fri, 20 May 2022 03:50:20 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S241967AbiETLkv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 07:40:51 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D37F5BCA0
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 04:40:47 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 9C9161F8BD;
-        Fri, 20 May 2022 10:50:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1653043819; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=QOjyaVmBZfxQqmgII5bbA/vNMF/63ApN5nBJCRaxlyI=;
-        b=rM+MsnCH2EyOxyByutRcntO7hyUHSc8/GBwObN+hs3vqqxQmjO2FRjm2QTjskACewpjDNq
-        8h7Ec+Ewuw17T9jNBCqTFG2W/ZaCD9dJopbaUSycrmD5c1xGAclAKdYDw80VsJPaZEVcw7
-        qOLAmeKj+fH1f5BnXk/rJr+23A1sHYc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1653043819;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=QOjyaVmBZfxQqmgII5bbA/vNMF/63ApN5nBJCRaxlyI=;
-        b=Q/8kFwruqOES1LVXlj+oam4uVd5vm7feMsII+jYXWMr2nkKzb1mWfef0jZc5ii+8U6Z9Ng
-        fp4JuZTa0/7K/gCA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6021013A5F;
-        Fri, 20 May 2022 10:50:19 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id S1LHFGtyh2InGAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Fri, 20 May 2022 10:50:19 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 22bb1dc9;
-        Fri, 20 May 2022 10:50:56 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     ceph-devel@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH] ceph/001: skip metrics check if no copyfrom mount option is used
-Date:   Fri, 20 May 2022 11:50:55 +0100
-Message-Id: <20220520105055.31520-1-lhenriques@suse.de>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6DCF661DAC
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 11:40:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0677DC385AA;
+        Fri, 20 May 2022 11:40:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653046846;
+        bh=KTfWH/fLSrjAPUGw0I5tecBfqy0F5Rkp0h+rivCvrnY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=MilavE2pkLcSKJGobUPWkSDFZA+V9ZP7yDsl4F6G+aWwCSJXdenPEn4t5Ic3BvzCw
+         4ExhwutIIxDPlEfYV2eaSKe8mZhIUduLBog5nrMt3mF+tw9c9vDFTefQNXiDfVE+AM
+         bZyexzDTtHRaDHZC1HYICFYDHYkQXqw5NXd+aFTLK9F6Ps9nkgnJfJIpd4iGcjqLwG
+         Suqtf+87uVQxp9qjd0H/REfXQOSH6TFHduJVZc7mMFR9JvDLzNQ3cw5nxnx355OwF5
+         IsiulRTwAJ6TltqE/CIZHznmhAbne5DiHKvqnNQJcqXqRlp+kXmw8fx5ioRg9ltC+N
+         ddcx9+R72U3Fg==
+Date:   Fri, 20 May 2022 13:40:42 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] fstests: tests should not source common/rc directly
+Message-ID: <20220520114042.czadq2gpk4im7pos@wittgenstein>
+References: <20220520012336.1542637-1-david@fromorbit.com>
+ <20220520012336.1542637-2-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220520012336.1542637-2-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Checking the metrics is only valid if 'copyfrom' mount option is
-explicitly set, otherwise the kernel won't be doing any remote object
-copies.  Fix the logic to skip this metrics checking if 'copyfrom' isn't
-used.
+On Fri, May 20, 2022 at 11:23:35AM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+> 
+> _begin_fstest() does this as every test needs it, so remove it from
+> all the tests that source it a second time.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
- tests/ceph/001 | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/tests/ceph/001 b/tests/ceph/001
-index 7970ce352bab..2e6a5e6be2d6 100755
---- a/tests/ceph/001
-+++ b/tests/ceph/001
-@@ -86,11 +86,15 @@ check_copyfrom_metrics()
- 	local copies=$4
- 	local c1=$(get_copyfrom_total_copies)
- 	local s1=$(get_copyfrom_total_size)
-+	local hascopyfrom=$(_fs_options $TEST_DEV | grep "copyfrom")
- 	local sum
- 
- 	if [ ! -d $metrics_dir ]; then
- 		return # skip metrics check if debugfs isn't mounted
- 	fi
-+	if [ -z $hascopyfrom ]; then
-+		return # ... or if we don't have copyfrom mount option
-+	fi
- 
- 	sum=$(($c0+$copies))
- 	if [ $sum -ne $c1 ]; then
+Looks good to me,
+Acked-by: Christian Brauner (Microsoft) <brauner@kernel.org>
