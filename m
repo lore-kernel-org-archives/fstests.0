@@ -2,192 +2,179 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB3D9C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 06:16:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE62CC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 07:34:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345815AbiETGQQ (ORCPT
+        id S1344549AbiETHew (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 May 2022 02:16:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42300 "EHLO
+        Fri, 20 May 2022 03:34:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345783AbiETGQP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 02:16:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5131657B30
-        for <fstests@vger.kernel.org>; Thu, 19 May 2022 23:16:14 -0700 (PDT)
+        with ESMTP id S238923AbiETHes (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 03:34:48 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4386114ACB9
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 00:34:47 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id DB79E61D97
-        for <fstests@vger.kernel.org>; Fri, 20 May 2022 06:16:13 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79B6DC385A9;
-        Fri, 20 May 2022 06:16:12 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id CD55BB82A53
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 07:34:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9C80C385A9;
+        Fri, 20 May 2022 07:34:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653027373;
-        bh=v5ELAGIsLBgMwtiDwOisawLZhmIyz6/poJIN24W3Bc4=;
+        s=k20201202; t=1653032084;
+        bh=5mCq/McSojrZvpixC0uvAc5KEfEXxC+bkYXR3uO9FmA=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sY4gpN17cwE/2H53w54OLEliM1jLKK16Yukl9sP4CjatLfQ+V7XBrwQ1bv9ySk51h
-         ssa3ts3J9I/SzziE4GCz3/d+WvQ9g4pxktvYRmJVMK0qDC7UZ4qPyAcWAf1H4b+3mE
-         xXcpGmV7OoY9Mb6h6O/vF/JCzeAJIezVCr/+2cbvHyfwmoxxPAqCXM/prgyBMm6xa/
-         cFiKQa0dTp6mpQtTAhbN6yUr4gtPeyZCpBM4Wb389rnK30qNQG1FYQ71ipy0Ql1NwS
-         WYVjpmxNnivB+/XCz9cTTfmxVN18/wA+ngRPYCU7EzmEoqrZvU8xy2C8JEJScL/Q0P
-         VE14veA+7aECQ==
-Date:   Fri, 20 May 2022 14:16:08 +0800
+        b=sO1crzMBAEZfJI2mYVWGc8KFMwrvG5TwEkFspuUzsSm29ligfu4yEtgOy2e7aKoPd
+         b+KUmguq5gEyrFyiclacNiGVBMBpAgAy9VEGGP3N+Bh/ZxwWaWnzmMwqt+ddglp39e
+         1b2OyR9BKjC/5kO3OtNHCwNPFa1BPMhtyWBSsm8Krz3nK5tT1mJvtx5iYWwfPo/e7f
+         Ie1PM+jYkpH5HDO6qN1A8rQZshVJwcOY002SlRXXJ6KNyue11dWL3AdUlZGI1xPkCX
+         qMgGhi4YTtPT8MXi0WFRJcYjjwkZXGi3jpzDD+B6ExjAZWrunBZZ7jdX/dMTplacq3
+         mLMoQE8rzVDzA==
+Date:   Fri, 20 May 2022 15:34:38 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     Dave Chinner <david@fromorbit.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 05/12] README: document _begin_fstests better
-Message-ID: <20220520061608.xackonyv7cr5353o@zlang-mailbox>
+Subject: Re: [PATCH 07/12] xfs/148: fix failure from bad shortform size
+ assumptions
+Message-ID: <20220520073438.bof3lpok2wx6krls@zlang-mailbox>
 References: <20220517070111.1381936-1-david@fromorbit.com>
- <20220517070111.1381936-6-david@fromorbit.com>
- <YobPNOJvSyUYEZpm@magnolia>
- <20220520015830.GW2306852@dread.disaster.area>
- <Yob2xHavHkIGfYzH@magnolia>
- <20220520052322.zbjoa6sv6r5es72g@zlang-mailbox>
- <20220520054236.GX2306852@dread.disaster.area>
+ <20220517070111.1381936-8-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220520054236.GX2306852@dread.disaster.area>
+In-Reply-To: <20220517070111.1381936-8-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 20, 2022 at 03:42:36PM +1000, Dave Chinner wrote:
-> On Fri, May 20, 2022 at 01:23:22PM +0800, Zorro Lang wrote:
-> > On Thu, May 19, 2022 at 07:02:44PM -0700, Darrick J. Wong wrote:
-> > > On Fri, May 20, 2022 at 11:58:30AM +1000, Dave Chinner wrote:
-> > > > On Thu, May 19, 2022 at 04:13:56PM -0700, Darrick J. Wong wrote:
-> > > > > On Tue, May 17, 2022 at 05:01:04PM +1000, Dave Chinner wrote:
-> > > > > > From: Dave Chinner <dchinner@redhat.com>
-> > > > > > 
-> > > > > > Because how it actually gets used by the fstests infrastructure
-> > > > > > has been undocumented and that has impact on how it should be set
-> > > > > > up.
-> > > > > > 
-> > > > > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > > > > > ---
-> > > > > >  README | 41 ++++++++++++++++++++++++++++++++---------
-> > > > > >  1 file changed, 32 insertions(+), 9 deletions(-)
-> > > > > > 
-> > > > > > diff --git a/README b/README
-> > > > > > index 7da66cb6..eacf1acd 100644
-> > > > > > --- a/README
-> > > > > > +++ b/README
-> > > > > > @@ -368,19 +368,42 @@ Test script environment:
-> > > > > >  
-> > > > > >       6. Test group membership: Each test can be associated with any number
-> > > > > >  	of groups for convenient selection of subsets of tests.  Group names
-> > > > > > -	can be any sequence of non-whitespace characters.  Test authors
-> > > > > > -	associate a test with groups by passing the names of those groups as
-> > > > > > -	arguments to the _begin_fstest function.  For example, the code:
-> > > > > > +	can be any sequence of non-whitespace characters, though human-readable
-> > > > > > +	names that match the set [A-Za-z0-9\-] are highly prefered.
-> > > > > >  
-> > > > > > -	_begin_fstest auto quick subvol snapshot
-> > > > > > +	Test authors associate a test with groups by passing the names of those
-> > > > > > +	groups as arguments to the _begin_fstest function. While _begin_fstests
-> > > > > > +	is a shell function that must be called at the start of a test to
-> > > > > > +	initialise the test environment correctly, the the build infrastructure
-> > > > > > +	also scans the test files for _begin_fstests invocations. It does this
-> > > > > > +	to compile the group lists that are used to determine which tests to run
-> > > > > > +	when `check` is executed. In other words, test files files must call
-> > > > > > +	_begin_fstest with their intended groups or they will not be run.
-> > > > > > +
-> > > > > > +	However, because the build infrastructure also uses _begin_fstests as
-> > > > > > +	a defined keyword, addition restrictions are placed on how it must be
-> > > > > > +	formatted:
-> > > > > > +
-> > > > > > +	(a) It must be a single line with no multi-line continuations.
-> > > > > > +
-> > > > > > +	(b) group names should be separated by spaces and not other whitespace
-> > > > > > +
-> > > > > > +	(c) A '#' placed anywhere in the list, even in the middle of a group
-> > > > > > +	    name, will cause everything from the # to the end of the line to be
-> > > > > > +	    ignored.
-> > > > > 
-> > > > > I don't see where this is implemented in mkgroupfile?
-> > > > 
-> > > > It doesn't need to be. It just aggregates the entire group line,
-> > > > comments and all. Comments *must* be stripped by the thing that reads
-> > > > the group file - mkgroupfile adds comments to every group file it
-> > > > builds.
-> > > > 
-> > > > > Was that in the
-> > > > > part of the patchset that got eaten by vger?  Or is this patch a
-> > > > > proposal for how we want to define _begin_fstest usage and will be
-> > > > > followed by changes to mkgroupfile to make it do what we now say it
-> > > > > does?
-> > > > 
-> > > > It documents the behaviour the mkgroupfile parser currently expects.
-> > > 
-> > > Ok.
-> > > 
-> > > > > Also, under the old behavior, a '#' not preceded by whitespace or
-> > > > > otherwise escaped on the command line is considered to be part of an
-> > > > > argument:
-> > > > > 
-> > > > > $ echo moo#cow
-> > > > > moo#cow
-> > > > 
-> > > > Yeah, but we don't need to support that sort of weird thing. The
-> > > > original "Group names can be any sequence of non-whitespace
-> > > > characters" requirement is just a can of worms.
-> > > > 
-> > > > > 
-> > > > > Not that we /had/ any groups like that.
-> > > > > 
-> > > > > Also, I think we ought to add:
-> > > > > 
-> > > > > 	(d) Group names may not contain whitespace or punctuation.
-> > > > > 
-> > > > > 	(e) Quotation marks are considered a part of the group name.
-> > > > 
-> > > > The specification after I modified it reads:
-> > > > 
-> > > > 	.... Group names
-> > > > 	can be any sequence of non-whitespace characters, though
-> > > > 	human-readable names that match the set [A-Za-z0-9\-] are highly
-> > > > 	prefered.
-> > > > 
-> > > > I'm happy to change that to something like:
-> > > > 
-> > > > 	Group names are to be humand readable names from the
-> > > > 	character set defined by [:isalnum:\-_].
-> > 
-> > As you haven't sent the next version, I might be a little picky :)
-> > I'm not a regex expert, just tried to run 'grep -E', I think [[:alnum:]_-] might
-> > be better. The 'isalnum' is a function name, the '-' better to be at the end,
-> > or it might be treated as a hyphen. For example:
+On Tue, May 17, 2022 at 05:01:06PM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
 > 
-> Sure, I wasn't trying to write a fully working regex - that takes
-> thought and this was just a brain dump to indicate roughly what I
-> meant. It looks like you understood it well enough. :)
+> We replaced an attr named:
 > 
-> I do intend to change the code to tested and correct regex, then
-> copy it across to the documentation....
+> slashstr="are_bad_for_you"
+> 
+> with this substitution:
+> 
+> cp $imgfile $imgfile.old
+> sed -b \
+>         -e "s/$nullstr/too_many\x00beans/g" \
+>         -e "s/$slashstr/are_bad\/for_you/g" \
+>         -i $imgfile
+> 
+> We then try to retreive the attr named 'a_are_bad/for_you'. The
+> failure is:
+> 
+>     -Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+>     -heh
+>     +attr_get: No data available
+>     +Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
+> 
+> The error returned is ENODATA - the xattr does not exist. While the
+> name might exist in the attr leaf block:
+> 
+> ....
+> nvlist[0].valuelen = 3
+> nvlist[0].namelen = 17
+> nvlist[0].name = "a_are_bad/for_you"
+> nvlist[0].value = "heh"
+> nvlist[1].valuelen = 3
+> ....
+> 
+> xattrs are not looked up by name matches when in leaf or node form
+> like they are in short form.  They are looked up by *name hash*
+> matches, and if the hash is not found, then the name does not exist.
+> Only if the has match is found, then it goes and retrieves the xattr
+> pointed to by the hash and checks the name.
+> 
+> At this point, it should be obvious that the hash of
+> "a_are_bad_for_you" is different to "a_a_are_bad/for_you". Hence the
+> leaf lookup is always rejected at the hash match stage and never
+> gets to the name compare stage.
+> 
+> IOWs, this test can *never* pass when the xattr is in leaf/node
+> form, only when it is in short form.
+> 
+> The reason the attr fork is in leaf form is that we are using
+> "-m crc=0" and so the inodes are only 256 bytes in size and can only
+> hold ~150 bytes in the literal area. That leaves ~100 bytes maximum
+> for shortform attr data. The test consumes ~80 bytes of shortform
+> space, so it should fit and the test pass.
+> 
+> However:
+> 
+> nvlist[4].valuelen = 37
+> nvlist[4].namelen = 7
+> nvlist[4].name = "selinux"
+> nvlist[4].value = "unconfined_u:object_r:unlabeled_t:s0\000"
+> 
+> Yes, I run the fstests with selinux enabled on some of test
+> machines. The selinux attr pushes the attr fork way over the size
+> that can fit in the shortform literal area, and so it moves to leaf
+> form as the attrs are initially added and the test fails.
+> 
+> Fix this by forcing the test to use 512 byte inodes, so as to
+> provide around 350 bytes of usable attr fork literal area so it's
+> not affected by security attributes.
+> 
+> While there, clean up the silly conditional loop device cleanup
+> code.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/148 | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/tests/xfs/148 b/tests/xfs/148
+> index 8d50a642..5d0a0bf4 100755
+> --- a/tests/xfs/148
+> +++ b/tests/xfs/148
+> @@ -15,7 +15,7 @@ _cleanup()
+>  {
+>  	cd /
+>  	$UMOUNT_PROG $mntpt > /dev/null 2>&1
+> -	test -n "$loopdev" && _destroy_loop_device $loopdev > /dev/null 2>&1
+> +	_destroy_loop_device $loopdev > /dev/null 2>&1
+>  	rm -r -f $tmp.*
+>  }
+>  
+> @@ -41,9 +41,12 @@ test_names=("something" "$nullstr" "$slashstr" "another")
+>  rm -f $imgfile $imgfile.old
+>  
+>  # Format image file w/o crcs so we can sed the image file
+> +# We need to use 512 byte inodes to ensure the attr forks remain in short form
+> +# even when security xattrs are present so we are always doing name matches on
+> +# lookup and not name hash compares as leaf/node forms will do.
+>  $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
+>  loopdev=$(_create_loop_device $imgfile)
+> -MKFS_OPTIONS="-m crc=0" _mkfs_dev $loopdev >> $seqres.full
+> +MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
 
-I'm pretty sure you're better at it than me, I just did that to save some of
-your time :)
+It's good to me, although I'm wondering why you didn't choose to use
+$SELINUX_MOUNT_OPTIONS [1]. Anyway, extending inode size can help too.
 
-> 
-> FWIW, if you want to improve your regex game, you can get plenty
-> of practice here:
-> 
-> https://regexcrossword.com/
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks! That looks interesting. Regex things are still 'black magic' for me
-sometimes. I have to google and give it enough test to make sure it works
-each time.
+[1]
+-_mount $loopdev $mntpt
++_mount $loopdev $mntpt $SELINUX_MOUNT_OPTIONS
 
-Thanks,
-Zorro
-
-> 
-> Cheers,
-> 
-> Dave.
+>  
+>  # Mount image file
+>  mkdir -p $mntpt
+> @@ -121,9 +124,6 @@ res=$?
+>  test $res -eq 1 || \
+>  	echo "repair failed to report corruption ($res)"
+>  
+> -_destroy_loop_device $loopdev
+> -loopdev=
+> -
+>  # success, all done
+>  status=0
+>  exit
 > -- 
-> Dave Chinner
-> david@fromorbit.com
+> 2.35.1
 > 
