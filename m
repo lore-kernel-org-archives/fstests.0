@@ -2,185 +2,213 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FA0AC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 02:02:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25F75C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 04:42:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229562AbiETCCr (ORCPT
+        id S245673AbiETEmu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 May 2022 22:02:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41088 "EHLO
+        Fri, 20 May 2022 00:42:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229475AbiETCCr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 22:02:47 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C58301053C6
-        for <fstests@vger.kernel.org>; Thu, 19 May 2022 19:02:45 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5FDA261BAC
-        for <fstests@vger.kernel.org>; Fri, 20 May 2022 02:02:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B887CC385B8;
-        Fri, 20 May 2022 02:02:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653012164;
-        bh=iLLzSMNesAvJebio7nGkRFwn3go6rHpSQXT8Y5tqO1A=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=I9vvZAn6ZhrN/f46xygjXKMUtp+TzWV6Jeix5IDGX6ZorrDyFaaPHcJhXCrWhnBPS
-         GVi2U+rBV1B3CE7W8Ht2vOVzKBv4LzcLZffX97rIBXY6ffYlcaDk0x6+0aDH3o/kjz
-         j3r0FLCTLXeiBzWurDJn2rQUjiMLItvPd0gpgFbzhFe9Ne4xABcCcmU9LN8p2vvj3s
-         fxptoXrYtV3wgCY0iVQhJj74D9gnZNNKZjfGzLmvxR5JyW9UJWyDaAUfOI+eWph+Oa
-         1RX01+6/SIfFP8axTdLoHZtDCYSaWN6L6ksM2G3JrtVEEdXZLQoO91yNs7WnbumrQe
-         e0kBcRNGrOpLQ==
-Date:   Thu, 19 May 2022 19:02:44 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S241873AbiETEms (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 00:42:48 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DD71812FEE5
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 21:42:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1653021766;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=jv6p3VfNPEWr6LTsJ9aQUdZuWrZOAU8R09yJ825hi9Y=;
+        b=alDxKg+ClTjrNZOxbtd+YU6jUnQagIu6O7xpTR5GFWLZMd23/eAcF6YsT7VpNRfa7ilgPg
+        fl5Pm/9h/Ew9EytkU3FKJBgmcLy4LGWE9L2rt4axxO2Suz9+tQhJjPNP2SAtj8XRho9slW
+        SmHJeK80Bui5dXYKm9zhM8106uNXjuU=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-661-koHC9pCIOKGAuH0PGqw2AA-1; Fri, 20 May 2022 00:42:44 -0400
+X-MC-Unique: koHC9pCIOKGAuH0PGqw2AA-1
+Received: by mail-qt1-f197.google.com with SMTP id q13-20020a05622a04cd00b002f3c0e197afso5931175qtx.0
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 21:42:44 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=jv6p3VfNPEWr6LTsJ9aQUdZuWrZOAU8R09yJ825hi9Y=;
+        b=oBhNzyiBLU0lNnhZNXMQ5kbbsiI+VS5beYGKF531Y5Z3p7Aq9kg+QDOiN8cKhkqDV5
+         +QBUtZRJhm6eFC1XaQfUPDEZxfqhUPZVJiCChqG997NqNrXdwhMsuV98+N5YGQpebz11
+         GNkt9DXKjzvzfBcKtRqlV25dF0QrmLByjgQeQPlfBZonvruhLx1jbC3sROBLI2XurehL
+         BIXrDYMJQncVRxr2ZikIinC5arMWGEp8VwWSvmVf71MV1EGmvJeMwXOqJVRZUfJGo/Bp
+         Teoa8FUPEWD+ucALQ4DDyKTu2twpAOYZIh4fSRri2/AxJE2DLFwNG/wXtn19bfbFKUYG
+         xSng==
+X-Gm-Message-State: AOAM532vaTVrSmg80TfOMbStUME4ybwa6/LvRW+5YUwc0w4+LFEPjnqO
+        tx7vnizBDyJ/HERHHbNWK0Gcjs77yEYiqzwiRj1j8gj4jWW7Cjeav579n4Lb67LUMnAoJV4ZPO8
+        PTYqGk4O82tNC/7tBbw==
+X-Received: by 2002:ac8:4e91:0:b0:2f3:cbc2:eb0c with SMTP id 17-20020ac84e91000000b002f3cbc2eb0cmr6314000qtp.459.1653021763745;
+        Thu, 19 May 2022 21:42:43 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxLcmTJwH9+111QOtsP6bY/+2KtkQopqY2yQC+Jefw+BjIXaoDlTOD+mUPgJuQG9r+YjpzaSg==
+X-Received: by 2002:ac8:4e91:0:b0:2f3:cbc2:eb0c with SMTP id 17-20020ac84e91000000b002f3cbc2eb0cmr6313997qtp.459.1653021763473;
+        Thu, 19 May 2022 21:42:43 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id k67-20020a37ba46000000b0069fc13ce1e9sm2460667qkf.26.2022.05.19.21.42.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 May 2022 21:42:43 -0700 (PDT)
+Date:   Fri, 20 May 2022 12:42:36 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     Dave Chinner <david@fromorbit.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 05/12] README: document _begin_fstests better
-Message-ID: <Yob2xHavHkIGfYzH@magnolia>
-References: <20220517070111.1381936-1-david@fromorbit.com>
- <20220517070111.1381936-6-david@fromorbit.com>
- <YobPNOJvSyUYEZpm@magnolia>
- <20220520015830.GW2306852@dread.disaster.area>
+Subject: Re: [PATCH 2/2] common/rc: fix test init performance regression on
+ XFS
+Message-ID: <20220520044236.qwyg3gsx357bqdh2@zlang-mailbox>
+References: <20220520012336.1542637-1-david@fromorbit.com>
+ <20220520012336.1542637-3-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220520015830.GW2306852@dread.disaster.area>
+In-Reply-To: <20220520012336.1542637-3-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 20, 2022 at 11:58:30AM +1000, Dave Chinner wrote:
-> On Thu, May 19, 2022 at 04:13:56PM -0700, Darrick J. Wong wrote:
-> > On Tue, May 17, 2022 at 05:01:04PM +1000, Dave Chinner wrote:
-> > > From: Dave Chinner <dchinner@redhat.com>
-> > > 
-> > > Because how it actually gets used by the fstests infrastructure
-> > > has been undocumented and that has impact on how it should be set
-> > > up.
-> > > 
-> > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > > ---
-> > >  README | 41 ++++++++++++++++++++++++++++++++---------
-> > >  1 file changed, 32 insertions(+), 9 deletions(-)
-> > > 
-> > > diff --git a/README b/README
-> > > index 7da66cb6..eacf1acd 100644
-> > > --- a/README
-> > > +++ b/README
-> > > @@ -368,19 +368,42 @@ Test script environment:
-> > >  
-> > >       6. Test group membership: Each test can be associated with any number
-> > >  	of groups for convenient selection of subsets of tests.  Group names
-> > > -	can be any sequence of non-whitespace characters.  Test authors
-> > > -	associate a test with groups by passing the names of those groups as
-> > > -	arguments to the _begin_fstest function.  For example, the code:
-> > > +	can be any sequence of non-whitespace characters, though human-readable
-> > > +	names that match the set [A-Za-z0-9\-] are highly prefered.
-> > >  
-> > > -	_begin_fstest auto quick subvol snapshot
-> > > +	Test authors associate a test with groups by passing the names of those
-> > > +	groups as arguments to the _begin_fstest function. While _begin_fstests
-> > > +	is a shell function that must be called at the start of a test to
-> > > +	initialise the test environment correctly, the the build infrastructure
-> > > +	also scans the test files for _begin_fstests invocations. It does this
-> > > +	to compile the group lists that are used to determine which tests to run
-> > > +	when `check` is executed. In other words, test files files must call
-> > > +	_begin_fstest with their intended groups or they will not be run.
-> > > +
-> > > +	However, because the build infrastructure also uses _begin_fstests as
-> > > +	a defined keyword, addition restrictions are placed on how it must be
-> > > +	formatted:
-> > > +
-> > > +	(a) It must be a single line with no multi-line continuations.
-> > > +
-> > > +	(b) group names should be separated by spaces and not other whitespace
-> > > +
-> > > +	(c) A '#' placed anywhere in the list, even in the middle of a group
-> > > +	    name, will cause everything from the # to the end of the line to be
-> > > +	    ignored.
-> > 
-> > I don't see where this is implemented in mkgroupfile?
+On Fri, May 20, 2022 at 11:23:36AM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
 > 
-> It doesn't need to be. It just aggregates the entire group line,
-> comments and all. Comments *must* be stripped by the thing that reads
-> the group file - mkgroupfile adds comments to every group file it
-> builds.
+> I've been having problems over the past month with tests randomly
+> running much slower than they should. The overall effect has been
+> that running an auto group iterate has blown out from about 3
+> hours to almost 5 hours.
 > 
-> > Was that in the
-> > part of the patchset that got eaten by vger?  Or is this patch a
-> > proposal for how we want to define _begin_fstest usage and will be
-> > followed by changes to mkgroupfile to make it do what we now say it
-> > does?
+> The problem has been that the root disks have been thrashing.
+> Thousands of iops and the backing store getting IO bound so all test
+> vms with root drive images hosted on that backing store then also
+> go slow.
 > 
-> It documents the behaviour the mkgroupfile parser currently expects.
+> I finally got to the bottom of it - it looked for all the world like
+> a qemu image format write amplification problem, because I couldn't
+> capture anything unusual from inside the guest. I converted all
+> the root images to raw format on fast SSD storage, and the problem
+> didn't go away - while some tests were faster, other tests were
+> still randomly slow.
+> 
+> Finally I tracked it down with blktrace/blkparse. All the IO was
+> coming from processes with the command line like:
+> 
+>  /sbin/mkfs.xfs -d file name=/tmp/791409.img size=512m
+> 
+> A quick grep then pointed me at common/rc::init_rc() where there is
+> a test for XFS specific on-disk format behaviour that uses that
+> exact command line.
+> 
+> init_rc() is run from _begin_fstest() so it is executed on every
+> test start. We run mkfs to create a 512MB filesystem in $tmp on
+> every test start. That's ..... not smart. And we do it so we can
+> change the setup of $XFS_COPY_PROG, which is only used in a handful
+> of tests. That's also .... not smart.
+> 
+> And then the penny dropped: we recently increased the default log
+> size of small filesystems, so this is now zeroing a 64MB log instead
+> of a 5-10MB log. And, of course it's on the root drive because of
+> the $tmp image prefix, which in this case is ext3, and it's
+> fragmenting the crap out of the writes and so it increases runtime
+> of the mkfs.xfs execution from nothing to 5-10s.
+> 
+> Then when one of these mkfs invocations co-incides with journal
+> flushing driven writeback, everything just stops until the writeback
+> stops thrashing. And so all tests are 5-10s slows, and random tests
+> take anywhere between 20-100s longer to start up....
+> 
+> Fix it by moving the setup of XFS_COPY_PROG to _require_xfs_copy()
+> so only the tests that use xfs_copy run this code.
+> 
+> Numbers don't lie:
+> 
+> generic/001 11s ...  6s
+> generic/002 9s ...  1s
+> generic/003 17s ...  10s
+> generic/004 12s ...  1s
+> generic/005 9s ...  1s
+> generic/006 9s ...  2s
+> generic/007 11s ...  3s
+> generic/008 5s ...  2s
+> generic/009 10s ...  2s
+> generic/010 5s ...  0s
+> generic/011 9s ...  1s
+> generic/012 7s ...  2s
+> generic/013 10s ...  5s
+> generic/014 11s ...  1s
+> generic/015 7s ...  1s
+> generic/016 7s ...  2s
+> .....
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
 
-Ok.
+Nice catch! I just checked all cases use XFS_COPY_PROG, they all contains
+_require_xfs_copy at beginning, so I think this change is good. I'll give
+it more test before pushing.
 
-> > Also, under the old behavior, a '#' not preceded by whitespace or
-> > otherwise escaped on the command line is considered to be part of an
-> > argument:
-> > 
-> > $ echo moo#cow
-> > moo#cow
-> 
-> Yeah, but we don't need to support that sort of weird thing. The
-> original "Group names can be any sequence of non-whitespace
-> characters" requirement is just a can of worms.
-> 
-> > 
-> > Not that we /had/ any groups like that.
-> > 
-> > Also, I think we ought to add:
-> > 
-> > 	(d) Group names may not contain whitespace or punctuation.
-> > 
-> > 	(e) Quotation marks are considered a part of the group name.
-> 
-> The specification after I modified it reads:
-> 
-> 	.... Group names
-> 	can be any sequence of non-whitespace characters, though
-> 	human-readable names that match the set [A-Za-z0-9\-] are highly
-> 	prefered.
-> 
-> I'm happy to change that to something like:
-> 
-> 	Group names are to be humand readable names from the
-> 	character set defined by [:isalnum:\-_].
-> 
-> No quotation marks, nothing outside the above as a single line
-> whitespace separated list.
+That remind me better to check the common code which runs before each case
+real starting. And carefully review patches might add more operations at
+each case beginning. Anyway, thanks for this performance improvement.
 
-Yes, please.  Fewer possible characters are a plus.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> I want to get rid of the group files altogether - all they are used
-> for is being read by check to build an in memory list of all the
-> tests and groups. We can do that quickly and easily now, we don't
-> need to do it at build time anymore. The group dictionary checks can be
-> done at build time, but that can easily be done with a make file
-> rule and doesn't need the group files to be built.
+Thanks,
+Zorro
 
-<nod>
-
-> Also, I want to apply the same approach "grep, collate, cull"
-> process to evaluating _requires rules when check starts. We evaluate
-> the same requires rules with the same results hundreds of times
-> during an auto run - we only need to run each rule once and cull the
-> tests that require unsupported things from the test list before we
-> start running tests...
+>  common/rc  | 13 -------------
+>  common/xfs | 12 ++++++++++++
+>  2 files changed, 12 insertions(+), 13 deletions(-)
 > 
-> > Otherwise, I'm happy with this.
-
-<nod> I'm looking forward to the next version.
-
---D
-
-> Thanks!
-> 
-> Cheers,
-> 
-> Dave.
+> diff --git a/common/rc b/common/rc
+> index f5ead044..67b4cc77 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4522,19 +4522,6 @@ init_rc()
+>  	# it is supported.
+>  	$XFS_IO_PROG -i -c quit 2>/dev/null && \
+>  		export XFS_IO_PROG="$XFS_IO_PROG -i"
+> -
+> -	# xfs_copy on v5 filesystems do not require the "-d" option if xfs_db
+> -	# can change the UUID on v5 filesystems
+> -	if [ "$FSTYP" == "xfs" ]; then
+> -		touch /tmp/$$.img
+> -		$MKFS_XFS_PROG -d file,name=/tmp/$$.img,size=512m >/dev/null 2>&1
+> -		# xfs_db will return 0 even if it can't generate a new uuid, so
+> -		# check the output to make sure if it can change UUID of V5 xfs
+> -		$XFS_DB_PROG -x -c "uuid generate" /tmp/$$.img \
+> -			| grep -q "invalid UUID\|supported on V5 fs" \
+> -			&& export XFS_COPY_PROG="$XFS_COPY_PROG -d"
+> -		rm -f /tmp/$$.img
+> -	fi
+>  }
+>  
+>  # get real device path name by following link
+> diff --git a/common/xfs b/common/xfs
+> index ac1d021e..2123a4ab 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1160,6 +1160,18 @@ _require_xfs_copy()
+>  	[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
+>  	[ "$USE_EXTERNAL" = yes ] && \
+>  		_notrun "Cannot xfs_copy with external devices"
+> +
+> +	# xfs_copy on v5 filesystems do not require the "-d" option if xfs_db
+> +	# can change the UUID on v5 filesystems
+> +	touch /tmp/$$.img
+> +	$MKFS_XFS_PROG -d file,name=/tmp/$$.img,size=64m >/dev/null 2>&1
+> +
+> +	# xfs_db will return 0 even if it can't generate a new uuid, so
+> +	# check the output to make sure if it can change UUID of V5 xfs
+> +	$XFS_DB_PROG -x -c "uuid generate" /tmp/$$.img \
+> +		| grep -q "invalid UUID\|supported on V5 fs" \
+> +		&& export XFS_COPY_PROG="$XFS_COPY_PROG -d"
+> +	rm -f /tmp/$$.img
+>  }
+>  
+>  __xfs_cowgc_interval_knob1="/proc/sys/fs/xfs/speculative_cow_prealloc_lifetime"
 > -- 
-> Dave Chinner
-> david@fromorbit.com
+> 2.35.1
+> 
+
