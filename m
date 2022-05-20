@@ -2,110 +2,146 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12AF1C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 01:35:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2A01C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 01:35:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344216AbiETBfk (ORCPT
+        id S1344492AbiETBfm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 May 2022 21:35:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51554 "EHLO
+        Thu, 19 May 2022 21:35:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240489AbiETBfk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 21:35:40 -0400
+        with ESMTP id S240489AbiETBfl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 21:35:41 -0400
 Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 18EA29BACD
-        for <fstests@vger.kernel.org>; Thu, 19 May 2022 18:35:38 -0700 (PDT)
-IronPort-Data: =?us-ascii?q?A9a23=3AKykLZKu9qT4JSsHwSa38CY4xfOfnVEpcMUV32f8?=
- =?us-ascii?q?akzHdYEJGY0x3yWMfW2qGOfaNMzGheN0lPtnioE1XuZXTztIwTwVkrX1gHilAw?=
- =?us-ascii?q?SbnLY7Hdx+vZUt+DSFioHpPtpxYMp+ZRCwNZie0SiyFb/6x/RGQ6YnSHuCmULS?=
- =?us-ascii?q?cY3goLeNZYHxJZSxLyrdRbrFA0YDR7zOl4bsekuWHULOX82cc3lE8t8pvnChSU?=
- =?us-ascii?q?MHa41v0iLCRicdj5zcyn1FNZH4WyDrYw3HQGuG4FcbiLwrPIS3Qw4/Xw/stIov?=
- =?us-ascii?q?NfrfTeUtMTKPQPBSVlzxdXK3Kbhpq/3R0i/hkcqFHLxo/ZzahxridzP1XqJW2U?=
- =?us-ascii?q?hZvMKvXhMwTThtZDzpje6ZB/dcrJFDm65DIkRSZIyGEL/JGSRte0Zcj0uhsHWx?=
- =?us-ascii?q?V6ecwNj8AdFaAiviwzbb9TfNj7vnPhuGD0Jg34ykmlG+GS619B82rfkkD3vcAt?=
- =?us-ascii?q?B9YuyyENa+2ixIlVAdS?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AJ1nUf6icNquQ9jVmCf0kxrkiYXBQXjIji2hC?=
- =?us-ascii?q?6mlwRA09TySZ//rBoB19726RtN9xYgBGpTnuAsm9qB/nmaKdgrNhWItKPjOW21?=
- =?us-ascii?q?dARbsKheCJrgEIcBeeygcy78hdmtBFeb/N5EZB/L3HyTj9A9A928OG7aztoe/f?=
- =?us-ascii?q?yk1mRQZsZ7oI1XYBNi+rVl1xWBJdBYc0UL6V5s98rTKmfngNKuuhAH1tZZm6m/?=
- =?us-ascii?q?T70ILhfQUdBwMqrC2HjTaT4rb8FBSCmjcyOgk/p4sfzQ=3D=3D?=
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A330C9BACD
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 18:35:40 -0700 (PDT)
+IronPort-Data: =?us-ascii?q?A9a23=3An9EfE6rQTpl+fYUPJn3eTIXKK+peBmIxZxIvgKr?=
+ =?us-ascii?q?LsJaIsI5as4F+vmIZCGqFa/aCNDPye9EkaI6+8UsEu5KDx9VrS1Fo/ns9QiMRo?=
+ =?us-ascii?q?6IpJ/zDcB6oYHn6wu4v7a5fx5xHLIGGdajYd1eEzvuWGuWn/SkUOZ2gHOKmUra?=
+ =?us-ascii?q?eYnkpHGeIdQ964f5ds79g6mJXqYjha++9kYuaT/z3YDdJ6RYtWo4nw/7rRCdUg?=
+ =?us-ascii?q?RjHkGhwUmrSyhx8lAS2e3E9VPrzLEwqRpfyatE88uWSH44vwFwll1418SvBCvv?=
+ =?us-ascii?q?9+lr6WkYMBLDPPwmSkWcQUK+n6vRAjnVqlP9la7xHMgEK49mKt4kZJNFlr4G5T?=
+ =?us-ascii?q?xw4eKPKg/g1XQRaEj1lIOtN/7qvzX2X6JbPlBOfLCu1qxlpJARsVWECwc57A35?=
+ =?us-ascii?q?J8/MwKz0XaB2HweWsz9qTRPJwi98/N+H1M44F/HJt1zfUCbAhW5+rfklgzbe0x?=
+ =?us-ascii?q?x9p3oYXQ6mYPJFfNFJSgN37S0UnEj8q5FgWwI9EXkXCTgA=3D?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3A/hSyGa1s/WFHsRcK4uNDiwqjBFYkLtp133Aq?=
+ =?us-ascii?q?2lEZdPRUGvb3qynIpoV86faUskdpZJhOo7C90cW7LU80sKQFhLX5Xo3SOzUO2l?=
+ =?us-ascii?q?HYT72KhLGKq1aLdhEWtNQtsZuIGJIeNDSfNzdHZL7BkWuF+sgbsaS62ZHtleHD?=
+ =?us-ascii?q?1G1sUA0vT6lh6j1yAgGdHlYefng8ObMJUIqb+tFcpyetPVAebsGADHEDWOTZ4/?=
+ =?us-ascii?q?LRkpaOW299OzcXrBmJkSiz6KP3VzyR3hIlWTtJxrs4tUjp+jaJnpmejw=3D=3D?=
 X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
-   d="scan'208";a="124361782"
+   d="scan'208";a="124361781"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 20 May 2022 09:35:38 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 3DE9A4D17179
-        for <fstests@vger.kernel.org>; Fri, 20 May 2022 09:35:36 +0800 (CST)
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 0A9114D17198;
+        Fri, 20 May 2022 09:35:37 +0800 (CST)
 Received: from G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Fri, 20 May 2022 09:35:36 +0800
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Fri, 20 May 2022 09:35:37 +0800
 Received: from irides.mr.mr (10.167.225.141) by
  G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Fri, 20 May 2022 09:35:36 +0800
+ id 15.0.1497.23 via Frontend Transport; Fri, 20 May 2022 09:35:37 +0800
 From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
 To:     <fstests@vger.kernel.org>
-CC:     <ruansy.fnst@fujitsu.com>
-Subject: [PATCH v3 0/3] xfs: add memory failure tests for dax mode
-Date:   Fri, 20 May 2022 09:35:31 +0800
-Message-ID: <20220520013534.2894233-1-ruansy.fnst@fujitsu.com>
+CC:     <ruansy.fnst@fujitsu.com>, "Darrick J . Wong" <djwong@kernel.org>
+Subject: [PATCH v3 2/3] xfs: add memory failure test for dax&reflink mode
+Date:   Fri, 20 May 2022 09:35:33 +0800
+Message-ID: <20220520013534.2894233-3-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220520013534.2894233-1-ruansy.fnst@fujitsu.com>
+References: <20220520013534.2894233-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 3DE9A4D17179.ACD24
+X-yoursite-MailScanner-ID: 0A9114D17198.AF024
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patchset is to verify whether memory failure mechanism still works
-with the fsdax-rmap feature.  With this feature, fsdax and reflink can be
-used together[1].  So, we also test it for reflinked files in filesystem
-mounted with dax option.
+Verify that the dax-rmap feature works.
 
-Memo: (quoted from v2[2]):
-> Never mind. I'd like to merge these tests after your kernel patchset about
-> "Add reflink&dedupe support for fsdax" be merged at first. To avoid you
-> might add/change something. And I need to see the test works on offical
-> kernel at least, before merging it. So feel free to ping me, if I forget
-> this patchset at that time
-
-[1] https://lore.kernel.org/linux-xfs/20220508143620.1775214-1-ruansy.fnst@fujitsu.com/
-[2] https://lore.kernel.org/fstests/20220513031411.2369314-1-ruansy.fnst@fujitsu.com/T/#mb0197877ad9f89e2de009572c02ac1cdd4f7c8a7
-
-Changes since v2:
-  1. Fixed typo in .out files
-
-Changes since v1:
-  1. Fixed typo
-  2. Use `sysconf(_SC_PAGESIZE)` as page size, instead of the fixed 4KiB
-  3. Use `$(get_page_size)` in testcase
-  4. Unify the style of comments => /* */
-
-Shiyang Ruan (3):
-  xfs: add memory failure test for dax mode
-  xfs: add memory failure test for dax&reflink mode
-  xfs: add memory failure test for partly-reflinked&dax file
-
- .gitignore                      |   1 +
- src/Makefile                    |   3 +-
- src/t_mmap_cow_memory_failure.c | 157 ++++++++++++++++++++++++++++++++
- tests/xfs/900                   |  48 ++++++++++
- tests/xfs/900.out               |   9 ++
- tests/xfs/901                   |  49 ++++++++++
- tests/xfs/901.out               |   9 ++
- tests/xfs/902                   |  52 +++++++++++
- tests/xfs/902.out               |   9 ++
- 9 files changed, 336 insertions(+), 1 deletion(-)
- create mode 100644 src/t_mmap_cow_memory_failure.c
- create mode 100755 tests/xfs/900
- create mode 100644 tests/xfs/900.out
+Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Reviewed-by: Darrick J. Wong <djwong@kernel.org> 
+---
+ tests/xfs/901     | 49 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/901.out |  9 +++++++++
+ 2 files changed, 58 insertions(+)
  create mode 100755 tests/xfs/901
  create mode 100644 tests/xfs/901.out
- create mode 100755 tests/xfs/902
- create mode 100644 tests/xfs/902.out
 
+diff --git a/tests/xfs/901 b/tests/xfs/901
+new file mode 100755
+index 00000000..26c1581e
+--- /dev/null
++++ b/tests/xfs/901
+@@ -0,0 +1,49 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# FS QA Test No. 901
++#
++# Test memory failure mechanism when dax and reflink working together
++#
++. ./common/preamble
++_begin_fstest auto quick clone dax
++
++# Import common functions.
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_require_check_dmesg
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_scratch_rmapbt
++_require_scratch_dax_mountopt "dax"
++_require_test_program "t_mmap_cow_memory_failure"
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount "-o dax" >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++echo "Create the original files"
++filesize=65536
++_pwrite_byte 0x61 0 $filesize $testdir/testfile >> $seqres.full
++_cp_reflink $testdir/testfile $testdir/poisonfile >> $seqres.full
++_scratch_cycle_mount "dax"
++
++echo "Inject memory failure (1 page)"
++# create two processes:
++#  process1: mread 1 page to cause page fault, and wait
++#  process2: mread 1 page to cause page fault, then inject poison on this page
++$here/src/t_mmap_cow_memory_failure -s1 -S1 -R $testdir/testfile -P $testdir/poisonfile
++
++echo "Inject memory failure (2 pages)"
++$here/src/t_mmap_cow_memory_failure -s2 -S2 -R $testdir/testfile -P $testdir/poisonfile
++
++_check_dmesg_for "Sending SIGBUS to t_mmap_cow_memo" || echo "Memory failure didn't kill the process"
++_check_dmesg_for "recovery action for dax page: Recovered" || echo "Failured page didn't recovered"
++
++# success, all done
++status=0
+diff --git a/tests/xfs/901.out b/tests/xfs/901.out
+new file mode 100644
+index 00000000..92d64846
+--- /dev/null
++++ b/tests/xfs/901.out
+@@ -0,0 +1,9 @@
++QA output created by 901
++Format and mount
++Create the original files
++Inject memory failure (1 page)
++Inject poison...
++Process is killed by signal: 7
++Inject memory failure (2 pages)
++Inject poison...
++Process is killed by signal: 7
 -- 
 2.35.1
 
