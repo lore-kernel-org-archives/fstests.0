@@ -2,172 +2,112 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFEAFC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 01:23:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12AF1C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 May 2022 01:35:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245324AbiETBXo (ORCPT
+        id S1344216AbiETBfk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 May 2022 21:23:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33030 "EHLO
+        Thu, 19 May 2022 21:35:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245387AbiETBXm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 21:23:42 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6424F29831
-        for <fstests@vger.kernel.org>; Thu, 19 May 2022 18:23:41 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 8FC195345DF
-        for <fstests@vger.kernel.org>; Fri, 20 May 2022 11:23:39 +1000 (AEST)
-Received: from discord.disaster.area ([192.168.253.110])
-        by dread.disaster.area with esmtp (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nrrMf-00E40V-T0
-        for fstests@vger.kernel.org; Fri, 20 May 2022 11:23:37 +1000
-Received: from dave by discord.disaster.area with local (Exim 4.95)
-        (envelope-from <david@fromorbit.com>)
-        id 1nrrMf-006TKB-Rt
-        for fstests@vger.kernel.org;
-        Fri, 20 May 2022 11:23:37 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH 2/2] common/rc: fix test init performance regression on XFS
-Date:   Fri, 20 May 2022 11:23:36 +1000
-Message-Id: <20220520012336.1542637-3-david@fromorbit.com>
+        with ESMTP id S240489AbiETBfk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 May 2022 21:35:40 -0400
+Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 18EA29BACD
+        for <fstests@vger.kernel.org>; Thu, 19 May 2022 18:35:38 -0700 (PDT)
+IronPort-Data: =?us-ascii?q?A9a23=3AKykLZKu9qT4JSsHwSa38CY4xfOfnVEpcMUV32f8?=
+ =?us-ascii?q?akzHdYEJGY0x3yWMfW2qGOfaNMzGheN0lPtnioE1XuZXTztIwTwVkrX1gHilAw?=
+ =?us-ascii?q?SbnLY7Hdx+vZUt+DSFioHpPtpxYMp+ZRCwNZie0SiyFb/6x/RGQ6YnSHuCmULS?=
+ =?us-ascii?q?cY3goLeNZYHxJZSxLyrdRbrFA0YDR7zOl4bsekuWHULOX82cc3lE8t8pvnChSU?=
+ =?us-ascii?q?MHa41v0iLCRicdj5zcyn1FNZH4WyDrYw3HQGuG4FcbiLwrPIS3Qw4/Xw/stIov?=
+ =?us-ascii?q?NfrfTeUtMTKPQPBSVlzxdXK3Kbhpq/3R0i/hkcqFHLxo/ZzahxridzP1XqJW2U?=
+ =?us-ascii?q?hZvMKvXhMwTThtZDzpje6ZB/dcrJFDm65DIkRSZIyGEL/JGSRte0Zcj0uhsHWx?=
+ =?us-ascii?q?V6ecwNj8AdFaAiviwzbb9TfNj7vnPhuGD0Jg34ykmlG+GS619B82rfkkD3vcAt?=
+ =?us-ascii?q?B9YuyyENa+2ixIlVAdS?=
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AJ1nUf6icNquQ9jVmCf0kxrkiYXBQXjIji2hC?=
+ =?us-ascii?q?6mlwRA09TySZ//rBoB19726RtN9xYgBGpTnuAsm9qB/nmaKdgrNhWItKPjOW21?=
+ =?us-ascii?q?dARbsKheCJrgEIcBeeygcy78hdmtBFeb/N5EZB/L3HyTj9A9A928OG7aztoe/f?=
+ =?us-ascii?q?yk1mRQZsZ7oI1XYBNi+rVl1xWBJdBYc0UL6V5s98rTKmfngNKuuhAH1tZZm6m/?=
+ =?us-ascii?q?T70ILhfQUdBwMqrC2HjTaT4rb8FBSCmjcyOgk/p4sfzQ=3D=3D?=
+X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
+   d="scan'208";a="124361782"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 20 May 2022 09:35:38 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 3DE9A4D17179
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 09:35:36 +0800 (CST)
+Received: from G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.23; Fri, 20 May 2022 09:35:36 +0800
+Received: from irides.mr.mr (10.167.225.141) by
+ G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.23 via Frontend Transport; Fri, 20 May 2022 09:35:36 +0800
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <ruansy.fnst@fujitsu.com>
+Subject: [PATCH v3 0/3] xfs: add memory failure tests for dax mode
+Date:   Fri, 20 May 2022 09:35:31 +0800
+Message-ID: <20220520013534.2894233-1-ruansy.fnst@fujitsu.com>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220520012336.1542637-1-david@fromorbit.com>
-References: <20220520012336.1542637-1-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=6286ed9b
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=oZkIemNP1mAA:10 a=20KFwNOVAAAA:8 a=u6XUrllArdfvgz3kJkIA:9
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 3DE9A4D17179.ACD24
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: ruansy.fnst@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Dave Chinner <dchinner@redhat.com>
+This patchset is to verify whether memory failure mechanism still works
+with the fsdax-rmap feature.  With this feature, fsdax and reflink can be
+used together[1].  So, we also test it for reflinked files in filesystem
+mounted with dax option.
 
-I've been having problems over the past month with tests randomly
-running much slower than they should. The overall effect has been
-that running an auto group iterate has blown out from about 3
-hours to almost 5 hours.
+Memo: (quoted from v2[2]):
+> Never mind. I'd like to merge these tests after your kernel patchset about
+> "Add reflink&dedupe support for fsdax" be merged at first. To avoid you
+> might add/change something. And I need to see the test works on offical
+> kernel at least, before merging it. So feel free to ping me, if I forget
+> this patchset at that time
 
-The problem has been that the root disks have been thrashing.
-Thousands of iops and the backing store getting IO bound so all test
-vms with root drive images hosted on that backing store then also
-go slow.
+[1] https://lore.kernel.org/linux-xfs/20220508143620.1775214-1-ruansy.fnst@fujitsu.com/
+[2] https://lore.kernel.org/fstests/20220513031411.2369314-1-ruansy.fnst@fujitsu.com/T/#mb0197877ad9f89e2de009572c02ac1cdd4f7c8a7
 
-I finally got to the bottom of it - it looked for all the world like
-a qemu image format write amplification problem, because I couldn't
-capture anything unusual from inside the guest. I converted all
-the root images to raw format on fast SSD storage, and the problem
-didn't go away - while some tests were faster, other tests were
-still randomly slow.
+Changes since v2:
+  1. Fixed typo in .out files
 
-Finally I tracked it down with blktrace/blkparse. All the IO was
-coming from processes with the command line like:
+Changes since v1:
+  1. Fixed typo
+  2. Use `sysconf(_SC_PAGESIZE)` as page size, instead of the fixed 4KiB
+  3. Use `$(get_page_size)` in testcase
+  4. Unify the style of comments => /* */
 
- /sbin/mkfs.xfs -d file name=/tmp/791409.img size=512m
+Shiyang Ruan (3):
+  xfs: add memory failure test for dax mode
+  xfs: add memory failure test for dax&reflink mode
+  xfs: add memory failure test for partly-reflinked&dax file
 
-A quick grep then pointed me at common/rc::init_rc() where there is
-a test for XFS specific on-disk format behaviour that uses that
-exact command line.
+ .gitignore                      |   1 +
+ src/Makefile                    |   3 +-
+ src/t_mmap_cow_memory_failure.c | 157 ++++++++++++++++++++++++++++++++
+ tests/xfs/900                   |  48 ++++++++++
+ tests/xfs/900.out               |   9 ++
+ tests/xfs/901                   |  49 ++++++++++
+ tests/xfs/901.out               |   9 ++
+ tests/xfs/902                   |  52 +++++++++++
+ tests/xfs/902.out               |   9 ++
+ 9 files changed, 336 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_cow_memory_failure.c
+ create mode 100755 tests/xfs/900
+ create mode 100644 tests/xfs/900.out
+ create mode 100755 tests/xfs/901
+ create mode 100644 tests/xfs/901.out
+ create mode 100755 tests/xfs/902
+ create mode 100644 tests/xfs/902.out
 
-init_rc() is run from _begin_fstest() so it is executed on every
-test start. We run mkfs to create a 512MB filesystem in $tmp on
-every test start. That's ..... not smart. And we do it so we can
-change the setup of $XFS_COPY_PROG, which is only used in a handful
-of tests. That's also .... not smart.
-
-And then the penny dropped: we recently increased the default log
-size of small filesystems, so this is now zeroing a 64MB log instead
-of a 5-10MB log. And, of course it's on the root drive because of
-the $tmp image prefix, which in this case is ext3, and it's
-fragmenting the crap out of the writes and so it increases runtime
-of the mkfs.xfs execution from nothing to 5-10s.
-
-Then when one of these mkfs invocations co-incides with journal
-flushing driven writeback, everything just stops until the writeback
-stops thrashing. And so all tests are 5-10s slows, and random tests
-take anywhere between 20-100s longer to start up....
-
-Fix it by moving the setup of XFS_COPY_PROG to _require_xfs_copy()
-so only the tests that use xfs_copy run this code.
-
-Numbers don't lie:
-
-generic/001 11s ...  6s
-generic/002 9s ...  1s
-generic/003 17s ...  10s
-generic/004 12s ...  1s
-generic/005 9s ...  1s
-generic/006 9s ...  2s
-generic/007 11s ...  3s
-generic/008 5s ...  2s
-generic/009 10s ...  2s
-generic/010 5s ...  0s
-generic/011 9s ...  1s
-generic/012 7s ...  2s
-generic/013 10s ...  5s
-generic/014 11s ...  1s
-generic/015 7s ...  1s
-generic/016 7s ...  2s
-.....
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- common/rc  | 13 -------------
- common/xfs | 12 ++++++++++++
- 2 files changed, 12 insertions(+), 13 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index f5ead044..67b4cc77 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4522,19 +4522,6 @@ init_rc()
- 	# it is supported.
- 	$XFS_IO_PROG -i -c quit 2>/dev/null && \
- 		export XFS_IO_PROG="$XFS_IO_PROG -i"
--
--	# xfs_copy on v5 filesystems do not require the "-d" option if xfs_db
--	# can change the UUID on v5 filesystems
--	if [ "$FSTYP" == "xfs" ]; then
--		touch /tmp/$$.img
--		$MKFS_XFS_PROG -d file,name=/tmp/$$.img,size=512m >/dev/null 2>&1
--		# xfs_db will return 0 even if it can't generate a new uuid, so
--		# check the output to make sure if it can change UUID of V5 xfs
--		$XFS_DB_PROG -x -c "uuid generate" /tmp/$$.img \
--			| grep -q "invalid UUID\|supported on V5 fs" \
--			&& export XFS_COPY_PROG="$XFS_COPY_PROG -d"
--		rm -f /tmp/$$.img
--	fi
- }
- 
- # get real device path name by following link
-diff --git a/common/xfs b/common/xfs
-index ac1d021e..2123a4ab 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1160,6 +1160,18 @@ _require_xfs_copy()
- 	[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
- 	[ "$USE_EXTERNAL" = yes ] && \
- 		_notrun "Cannot xfs_copy with external devices"
-+
-+	# xfs_copy on v5 filesystems do not require the "-d" option if xfs_db
-+	# can change the UUID on v5 filesystems
-+	touch /tmp/$$.img
-+	$MKFS_XFS_PROG -d file,name=/tmp/$$.img,size=64m >/dev/null 2>&1
-+
-+	# xfs_db will return 0 even if it can't generate a new uuid, so
-+	# check the output to make sure if it can change UUID of V5 xfs
-+	$XFS_DB_PROG -x -c "uuid generate" /tmp/$$.img \
-+		| grep -q "invalid UUID\|supported on V5 fs" \
-+		&& export XFS_COPY_PROG="$XFS_COPY_PROG -d"
-+	rm -f /tmp/$$.img
- }
- 
- __xfs_cowgc_interval_knob1="/proc/sys/fs/xfs/speculative_cow_prealloc_lifetime"
 -- 
 2.35.1
+
+
 
