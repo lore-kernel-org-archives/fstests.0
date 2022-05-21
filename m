@@ -2,212 +2,322 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD509C433FE
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 May 2022 00:27:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A791FC433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 May 2022 02:02:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346094AbiEUA1V (ORCPT
+        id S239031AbiEUCCe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 May 2022 20:27:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50558 "EHLO
+        Fri, 20 May 2022 22:02:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354210AbiEUA1S (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 20:27:18 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 1EAC45D670
-        for <fstests@vger.kernel.org>; Fri, 20 May 2022 17:27:16 -0700 (PDT)
+        with ESMTP id S232860AbiEUCCd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 May 2022 22:02:33 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D2E561611D7
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 19:02:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653092835;
+        s=mimecast20190719; t=1653098550;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=HvGcDCMvh/8nqMABN9EGSXFyxOb3uhxCDTJLFyFOgQM=;
-        b=QR0OkVtX1JuZ6eahICVpbRzvlAcl+3D17fXiXZfTgjxJob8Povd5taDPrd8btLhZ63Zm2l
-        yI3Wk4B20sSkDQ1klgdMtTBriqPubDw8FnMFmqna9YW6WAtezwprviJ59TyW5qeWjdmTis
-        2F62RASjrespXShjEWY7kjXMIxwHVlM=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=Uz87S3u4ogXJ6tSzQ1PZBCbqDcUqAw8kIxUBsoS3gio=;
+        b=V6IfVy8djJgX1RVlAtjeVIYj9YlQVZXqxMFN0sMUPihExYgvDfJ8c42PoARjbDu3EjtMbV
+        Lio5hJJz18VwMfNaGqghhBmx4pQHoDbjm8OXRMlw3TnxVe9RoXmBT9qV6Rk8nh47NIbit0
+        DTE3kgrv8dzBViLUS1moaTTAm3gxHGE=
+Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
+ [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-343-i-zHtP-HNlSd09PtMfsO2g-1; Fri, 20 May 2022 20:27:14 -0400
-X-MC-Unique: i-zHtP-HNlSd09PtMfsO2g-1
-Received: by mail-qk1-f199.google.com with SMTP id o13-20020a05620a0d4d00b0069f47054e58so7521642qkl.13
-        for <fstests@vger.kernel.org>; Fri, 20 May 2022 17:27:14 -0700 (PDT)
+ us-mta-378-nyWAvn3POHCTuzWgL3M52w-1; Fri, 20 May 2022 22:02:29 -0400
+X-MC-Unique: nyWAvn3POHCTuzWgL3M52w-1
+Received: by mail-qv1-f71.google.com with SMTP id r13-20020a056214068d00b00461d27bf0fdso7759715qvz.1
+        for <fstests@vger.kernel.org>; Fri, 20 May 2022 19:02:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=HvGcDCMvh/8nqMABN9EGSXFyxOb3uhxCDTJLFyFOgQM=;
-        b=Ofr+SOit6r7bahxgtRDqYI6vuZUhi8L4OUctH8PKcr3CgjA+ERZvz5bVKJlcHOw9eD
-         VKfvLI1IoTiuyFCLnN2YGC0Ix8SL4o+q7MGG5BSys3ITdvYmC4qUys0kEONr5Yexl09P
-         MizbF+whwDRKNXCx3A7d/6Lamk90AQYi/ztIztO+T7JiDW58AC/j4zkeIy2xoP6rfWUB
-         12/Q6oNrKATKvKZnaAqSgFDcPtRNxPUIQ5zxOyvcUTRneI/PMsQE8fUq94cIUDn+3Czs
-         VvhVUszU2uuWRER8htPlRLu1z1yVaG1J1YCaoZsDbr72nLCKF6by+dDqXPNqhC8NatPU
-         EDdA==
-X-Gm-Message-State: AOAM531532SWjkkWwoXHocvuWFrq65m2Mk4sjb/0dHZhnDzaUHJRgIvb
-        jbT9q5rcImpz+jQC4Uj9XYgNet+qo3c2UT3SaFRP/WhqLeQ63lPTadxL6RvDesyZ8WQfrXwOwNv
-        RpDaq6oyfFyxEzfgNAA==
-X-Received: by 2002:ac8:7dcb:0:b0:2f3:eb31:1e33 with SMTP id c11-20020ac87dcb000000b002f3eb311e33mr9574699qte.598.1653092833318;
-        Fri, 20 May 2022 17:27:13 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyyMreKMrJXJZZ4BfrjeSd70SJqPV/Lco7qkb3Sv67IMxymQMbUiWg529cDbGo0j1sTYlBEKQ==
-X-Received: by 2002:ac8:7dcb:0:b0:2f3:eb31:1e33 with SMTP id c11-20020ac87dcb000000b002f3eb311e33mr9574690qte.598.1653092833022;
-        Fri, 20 May 2022 17:27:13 -0700 (PDT)
+        bh=Uz87S3u4ogXJ6tSzQ1PZBCbqDcUqAw8kIxUBsoS3gio=;
+        b=bfuBmwDHUaHTgtVvanq4OEeAiNJCAMTYX/AWb0CWHfFDGqyl1qubQdIJroTb8ltWwZ
+         6ja8zBkW7oMHGSmHvn439ZDg3l3Gk7ZFv46ss5cAjEcimXopavPmsp12CkURhfNpkyc3
+         ptAg1OOrO7jvfV+4De/G/WFK7vGTzVhJgMqmyc3/+bHz7sbV5uMTEemhH/JcqN3NHi9f
+         8Zi9MsdF9iePn3AGzokt3KCXufL6WhudYDQwpntf9tfKpD9q3DLqfDm12qTT7R1qO/Po
+         IkrnLMY2+deZR8WcKibRf28lQ8A6pQPfmCbkTzdSeN/ntVho84CSoDmwDINZLXXNmD2u
+         Ockw==
+X-Gm-Message-State: AOAM5310WzcyyKVbHbyn+d8hwnyDiQAWiK72+mUUbDxW0ubZHbjsFOew
+        8EBbgB2blgCDQJHquuCiXGdCasUK7DfHpMiLoeWnEUz5YXCX5uHa8x/7QlbBCHre8gXMtGjQ592
+        OxP/2med2FalQPEnNDA==
+X-Received: by 2002:a0c:ea89:0:b0:461:c43d:7b5c with SMTP id d9-20020a0cea89000000b00461c43d7b5cmr10168509qvp.38.1653098548298;
+        Fri, 20 May 2022 19:02:28 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJy7JWoS58pbVuqD2O1CILd2m3IOXU+MNlR7+dDhJ4y6Ne1Q8HEKjgaIiwkDvNYNVzU8F4B2Gw==
+X-Received: by 2002:a0c:ea89:0:b0:461:c43d:7b5c with SMTP id d9-20020a0cea89000000b00461c43d7b5cmr10168499qvp.38.1653098548028;
+        Fri, 20 May 2022 19:02:28 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 131-20020a370989000000b0069fe1fc72e7sm547595qkj.90.2022.05.20.17.27.10
+        by smtp.gmail.com with ESMTPSA id cj19-20020a05622a259300b002f39b99f6aasm659495qtb.68.2022.05.20.19.02.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 May 2022 17:27:12 -0700 (PDT)
-Date:   Sat, 21 May 2022 08:27:06 +0800
+        Fri, 20 May 2022 19:02:27 -0700 (PDT)
+Date:   Sat, 21 May 2022 10:02:20 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH 04/12] fstests: fix group list generation for whacky test
- names
-Message-ID: <20220521002706.v43vkd7mc4cy76s6@zlang-mailbox>
-References: <20220517070111.1381936-1-david@fromorbit.com>
- <20220517070111.1381936-5-david@fromorbit.com>
- <20220520083647.s22yb2aearmviffi@zlang-mailbox>
- <20220520085445.mil6iwc5mltbmss3@zlang-mailbox>
- <20220520092515.q5lyyujfnanrpcmx@zlang-mailbox>
- <YofAbrh79yb2dmWs@magnolia>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] btrfs: test repair with sectors corrupted in
+ multiple mirrors
+Message-ID: <20220521020220.7qaktprdo47j3gno@zlang-mailbox>
+References: <20220520164743.4023665-1-hch@lst.de>
+ <20220520164743.4023665-2-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YofAbrh79yb2dmWs@magnolia>
+In-Reply-To: <20220520164743.4023665-2-hch@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 20, 2022 at 09:23:10AM -0700, Darrick J. Wong wrote:
-> On Fri, May 20, 2022 at 05:25:15PM +0800, Zorro Lang wrote:
-> > On Fri, May 20, 2022 at 04:54:45PM +0800, Zorro Lang wrote:
-> > > On Fri, May 20, 2022 at 04:36:47PM +0800, Zorro Lang wrote:
-> > > > On Tue, May 17, 2022 at 05:01:03PM +1000, Dave Chinner wrote:
-> > > > > From: Dave Chinner <dchinner@redhat.com>
-> > > > > 
-> > > > > Darrick noticed that tests/xfs/191-input-validation didn't get
-> > > > > generated properly. Fix the regex to handle this.
-> > > > > 
-> > > > > $ grep -I -R "^_begin_fstest" tests/xfs | \
-> > > > >   sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' |grep 191
-> > > > > tests/xfs/191-input-validation:_begin_fstest auto quick mkfs realtime
-> > > > > $
-> > > > > $ grep -I -R "^_begin_fstest" tests/xfs | \
-> > > > >   sed -e 's/^.*\/\([0-9]*\).*:_begin_fstest/\1/ ' |grep 191
-> > > > > 191 auto quick mkfs realtime
-> > > > > $
-> > > > > 
-> > > > > Use the regexes for matching test names defined in common/test_names
-> > > > > rather than trying to open code it.
-> > > > > 
-> > > > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > > > > ---
-> > > > 
-> > > > Hi Dave,
-> > > > 
-> > > > After testing, looks like this patch brings in a regression issue, it causes
-> > > > case number aren't sorted in group.list, then the xfstests/new program can't
-> > > > get a right new case number which is unused. For example:
-> > > 
-> > > Oh, this issue isn't from this patch, it's from 441606d2 ("fstests: faster group
-> > > file creation"). Hmm... I saw your used "sort -u" in that patch, I'm going to
-> > > look into what's wrong with that.
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > 
-> > > > # make
-> > > > # ./new generic
-> > > > Next test id is 019
-> > > > Append a name to the ID? Test name will be 019-$name. y,[n]: ^C
-> > > > # ls tests/generic/019
-> > > > tests/generic/019
-> > > > 
-> > > > Then comparing the tests/generic/group.list with old generic/group.list, found
-> > > > lots of difference, due to the number in new group.list isn't sorted from
-> > > > small to big (I haven't gotten chance to check if there're missing number).
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > >  tools/mkgroupfile | 5 ++++-
-> > > > >  1 file changed, 4 insertions(+), 1 deletion(-)
-> > > > > 
-> > > > > diff --git a/tools/mkgroupfile b/tools/mkgroupfile
-> > > > > index 24435898..414cb538 100755
-> > > > > --- a/tools/mkgroupfile
-> > > > > +++ b/tools/mkgroupfile
-> > > > > @@ -19,6 +19,8 @@ if [ ! -x ../../check ]; then
-> > > > >  	exit 1
-> > > > >  fi
-> > > > >  
-> > > > > +. ../../common/test_names
-> > > > > +
-> > > > >  cleanup()
-> > > > >  {
-> > > > >  	rm -f $new_groups.check
-> > > > > @@ -60,7 +62,8 @@ ENDL
-> > > > >  
-> > > > >  	# Aggregate the groups each test belongs to for the group file
-> > > > >  	grep -I -R "^_begin_fstest" $test_dir/ | \
-> > > > > -		sed -e 's/^.*\/\([0-9]*\):_begin_fstest/\1/' >> $new_groups
-> > > > > +		sed -e "s/^.*\/\($VALID_TEST_NAME\):_begin_fstest/\1/" \
-> > > > > +		>> $new_groups
-> > 
-> > I think add a "sort -ug" [1] will help to fix this problem.
+On Fri, May 20, 2022 at 06:47:42PM +0200, Christoph Hellwig wrote:
+> Test that repair handles the case where it needs to read from more than
+> a single mirror on the raid1c3 profile.
 > 
-> Yes please, it's much easier for us humans to index the file if it's
-> already sorted numerically.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/btrfs/265     | 127 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/265.out |  75 ++++++++++++++++++++++++++
+>  2 files changed, 202 insertions(+)
+>  create mode 100755 tests/btrfs/265
+>  create mode 100644 tests/btrfs/265.out
 > 
-> > I'm wondering
-> > why we use ">> $new_groups" at here, why an appending write is needed. I think
-> > there's not a 'loop running' for this code, right? If there's, please correct
-> > me, then the 'sort -ug' have to be moved to other place.
-> 
-> The function writes a header into the group list file warning readers
-> that it's an autogenerated file.
+> diff --git a/tests/btrfs/265 b/tests/btrfs/265
+> new file mode 100755
+> index 00000000..96f37989
+> --- /dev/null
+> +++ b/tests/btrfs/265
+> @@ -0,0 +1,127 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> +# Copyright (c) 2022 Christoph Hellwig.
+> +#
+> +# FS QA Test 265
+> +#
+> +# Test that btrfs raid repair on a raid1c3 profile can repair corruption on two
+> +# mirrors for the same logical offset.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick read_repair
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_require_scratch_dev_pool 3
+> +
+> +BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
 
-Oh, you're right, there's a comment as a header, so we should change as below:
+Hi Christoph,
 
--               sed -e "s/^.*\/\($VALID_TEST_NAME\):_begin_fstest/\1/" \
--               >> $new_groups
-+               sed -e "s/^.*\/\($VALID_TEST_NAME\):_begin_fstest/\1/" | \
-+               sort -ug >> $new_groups
+Thanks for the new test cases. I'm not an btrfs expert, so I'll only give
+this patchset some review points from fstests side. Btrfs forks please
+feel free to review this patchset :)
 
-Hi Dave, I'd like to fix this issue in this week. If you'd like to fix it
-in this patch today, I'll wait half day. Or as it's a separated issue, I
-can write another patch to get review, then merge with this patchset together.
-Until now, I've merged below patches from this patchset:
+If btrfs-map-logical is a general command from btffs-progs, I think we
+can move above line into common/config.
 
-38015b3d fstests: remove xfs deprecated test
-59f840bf xfs/191: remove broken test
-1de1ff66 xfs/148: fix failure from bad shortform size assumptions
-df84ba04 xfs/148: make test debuggable
-24ac437f xfs/348: golden output is not correct
-e3a4d0e8 xfs/122: add attribute log formats to test output.
-e121de4a fstests: filter quota warnings
+> +
+> +_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
+> +_require_command "$FILEFRAG_PROG" filefrag
+> +_require_odirect
+> +# Overwriting data is forbidden on a zoned block device
+> +_require_non_zoned_device "${SCRATCH_DEV}"
+> +
+> +get_physical()
+> +{
+> +	local logical=$1
+> +	local stripe=$2
+> +
+> +	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV >> $seqres.full 2>&1
+> +	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | \
+> +		$AWK_PROG "(\$1 ~ /mirror/ && \$2 ~ /$stripe/) { print \$6 }"
+> +}
+> +			
+> +get_device_path()
+> +{
+> +	local logical=$1
+> +	local stripe=$2
+> +
+> +	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | \
+> +		$AWK_PROG "(\$1 ~ /mirror/ && \$2 ~ /$stripe/) { print \$8 }"
+> +}
+> +
+> +_scratch_dev_pool_get 3
+> +# step 1, create a raid1 btrfs which contains one 128k file.
+> +echo "step 1......mkfs.btrfs"
+> +
+> +mkfs_opts="-d raid1c3 -b 1G"
+> +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+> +
+> +# make sure data is written to the start position of the data chunk
+> +_scratch_mount $(_btrfs_no_v1_cache_opt)
+> +
+> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" \
+> +	"$SCRATCH_MNT/foobar" | \
+> +	_filter_xfs_io_offset
+> +
+> +# ensure btrfs-map-logical sees the tree updates
+> +sync
+> +
+> +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
+> +# one in $SCRATCH_DEV_POOL
+> +echo "step 2......corrupt file extent"
+> +
+> +${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
+> +logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | cut -d '#' -f 1`
+> +
+> +physical1=$(get_physical ${logical_in_btrfs} 1)
+> +devpath1=$(get_device_path ${logical_in_btrfs} 1)
+> +
+> +physical2=$(get_physical ${logical_in_btrfs} 2)
+> +devpath2=$(get_device_path ${logical_in_btrfs} 2)
+
+I saw you do the same steps from "${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar" to
+this line in 2 patches, so I'm wondering are the FILEFRAG_PROG lines and
+get_physical() and get_device_path() worth moving to common/btrfs (might need
+to change name), to make them get "device_path" or "physical" from a filename
+(e.g. $SCRATCH_MNT/foobar) argument?
 
 Thanks,
 Zorro
 
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > [1]
-> > -               sed -e "s/^.*\/\($VALID_TEST_NAME\):_begin_fstest/\1/" \
-> > -               >> $new_groups
-> > +               sed -e "s/^.*\/\($VALID_TEST_NAME\):_begin_fstest/\1/" | \
-> > +               sort -ug > $new_groups
-> > 
-> > I'm wondering why we use
-> > 
-> > > > >  
-> > > > >  	# Create the list of unique groups for existence checking
-> > > > >  	grep -I -R "^_begin_fstest" $test_dir/ | \
-> > > > > -- 
-> > > > > 2.35.1
-> > > > > 
-> > 
+> +
+> +_scratch_unmount
+> +
+> +echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
+> +	>> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0xbf -b 64K $physical1 64K" $devpath1 \
+> +	> /dev/null
+> +
+> +echo " corrupt stripe #2, devpath $devpath2 physical $physical2" \
+> +	>> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0xbf -b 64K $physical2 64K" $devpath2 \
+> +	> /dev/null
+> +
+> +_scratch_mount
+> +
+> +# step 3, 128k dio read (this read can repair bad copy)
+> +echo "step 3......repair the bad copy"
+> +
+> +# since raid1c3 consists of three copies, and the bad copy was put on stripe #1
+> +# while the good copy lies the other stripes, the bad copy only gets accessed
+> +# when the reader's pid % 3 is 1
+> +while true; do
+> +	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
+> +	pid=$!
+> +	wait
+> +	if [ $((pid % 3)) == 1 ]; then
+> +	    break
+> +	fi
+> +done
+> +while true; do
+> +	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
+> +	pid=$!
+> +	wait
+> +	if [ $((pid % 3)) == 2 ]; then
+> +	    break
+> +	fi
+> +done
+> +
+> +_scratch_unmount
+> +
+> +echo "step 4......check if the repair works"
+> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical1 512" $devpath1 |\
+> +	_filter_xfs_io_offset
+> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical2 512" $devpath2 |\
+> +	_filter_xfs_io_offset
+> +
+> +_scratch_dev_pool_put
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/265.out b/tests/btrfs/265.out
+> new file mode 100644
+> index 00000000..4d3e7f80
+> --- /dev/null
+> +++ b/tests/btrfs/265.out
+> @@ -0,0 +1,75 @@
+> +QA output created by 265
+> +step 1......mkfs.btrfs
+> +wrote 131072/131072 bytes
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +step 2......corrupt file extent
+> +step 3......repair the bad copy
+> +step 4......check if the repair works
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +read 512/512 bytes
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> +read 512/512 bytes
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -- 
+> 2.30.2
 > 
 
