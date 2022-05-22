@@ -2,135 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24F0AC433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 22 May 2022 01:25:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EDF6C433F5
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 May 2022 02:19:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240310AbiEVBZs (ORCPT
+        id S231899AbiEVCT5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 21 May 2022 21:25:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47586 "EHLO
+        Sat, 21 May 2022 22:19:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232326AbiEVBZr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 May 2022 21:25:47 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 3A69035ABF
-        for <fstests@vger.kernel.org>; Sat, 21 May 2022 18:25:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653182744;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=zdPBWrD96fSukOd+Ai3cFI4v6cCBG6ng6yMWWNFHJEg=;
-        b=R35JN47KOlaXKg279Jmm3iaJvBGf6W9Y5LzA7u6Ix79FJOxWbiuMhujIpd4M+nxKs/uaRd
-        3cy18veHaUjQZXVi5wCHtw4sZJutoCdfj3TapasXUqvooFNiKrYDnSyAPDquLM6b6YCrA/
-        1vfkURbSah47wW8auiNpysVOYWa+/JM=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-164-cAoWYQ9UOqSJLCDd4pl7QA-1; Sat, 21 May 2022 21:25:03 -0400
-X-MC-Unique: cAoWYQ9UOqSJLCDd4pl7QA-1
-Received: by mail-qt1-f197.google.com with SMTP id t25-20020a05622a181900b002f3b32a6e30so9171510qtc.11
-        for <fstests@vger.kernel.org>; Sat, 21 May 2022 18:25:03 -0700 (PDT)
+        with ESMTP id S229650AbiEVCT4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 May 2022 22:19:56 -0400
+Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96EB243ECB
+        for <fstests@vger.kernel.org>; Sat, 21 May 2022 19:19:54 -0700 (PDT)
+Received: by mail-pj1-x1034.google.com with SMTP id oe17-20020a17090b395100b001df77d29587so14569150pjb.2
+        for <fstests@vger.kernel.org>; Sat, 21 May 2022 19:19:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language
+         :from:to:cc:references:in-reply-to:content-transfer-encoding;
+        bh=yNGECf7cpPXgM31FBYi/Q+Mk5ajHugGFdMlr8H02ns4=;
+        b=wEL7dYw2G/uVEpR1E1YAzkeLX/nV1AlB6vBxQCYEQmHrY4Zh19I62063M5Q3dn8qZi
+         rJMmff+Nbt0/AouoCgRxuXp+xenG1W7NPXj6M9S3MyP/6xoq6O3PudHT/eSyG/zbIAyg
+         NKQ+JDjC2a/Gf6ejY9R7WPj7KdsOHpPC50PE099iGDNnTaBibb0T10b833Li1e3xvj7a
+         Cnfg3DNQpehKBr77FjGZ8dlMgP+DCkt1RWgXqolXdAt2+0E9pUASJxETVDEUth38CuME
+         nL9L3E4WlR4viLMp8koS6ksaZWXzB2jw9QJQCJOPIrX6JEJj2Oir632qGsMCgfJvw0bL
+         fi3g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=zdPBWrD96fSukOd+Ai3cFI4v6cCBG6ng6yMWWNFHJEg=;
-        b=x1AE1pCro/JGTlr+y0tbdxhX6lTIEvbGnVUqFS3M1Zz0taNB9nlA6pLYImcmiqggQR
-         bTqeoGqSFEZ1I54LqpST0V9Xh/MTy6Y00NR28v9waoJnKHPGlp0q3zg5KO7w6V8DeyFn
-         +tneYutoXVhZ+ksfr7ETyvOHP8NMA743WKloETKXMUn8UGXG5l3OK+m8HC8GCMLYsMrS
-         Nu4FT/2G0dInckvK/y7jPBBG++JVCs2Rw6+6Sa/akFInJT/ylVDWMgO/IcmqVSpWdSDD
-         OXOOu9C30Lj4GS/E7XnWYGAXy7+W55S67xdYSaf507G6Y7xlmni6VqFXkUoWzX25RVtd
-         UTDw==
-X-Gm-Message-State: AOAM531rHKgyoDkx7CDxR6YORjhByv+6zJqh+LWOEmTbQgvX30xQVB+T
-        1GCT03DEJQmQjPySGNcfjvxJAo7zqpfiq1OAz2+IOTaiVJHPSrgUzW/I54nmefjLh7yuGuT0zab
-        6OMvp/VxJrnP/VbfYYA==
-X-Received: by 2002:a37:5587:0:b0:6a3:62ff:ee8c with SMTP id j129-20020a375587000000b006a362ffee8cmr3686840qkb.694.1653182702403;
-        Sat, 21 May 2022 18:25:02 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzfAABaxkOKhWWjGijkbk+9Tt2EN8AKqGd9ZGuYWHDlzrbj1bvjWvR0pInzfEKR4AOGBbQz5Q==
-X-Received: by 2002:a37:5587:0:b0:6a3:62ff:ee8c with SMTP id j129-20020a375587000000b006a362ffee8cmr3686834qkb.694.1653182702096;
-        Sat, 21 May 2022 18:25:02 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id v15-20020ac8748f000000b002f9114d2ebcsm2009990qtq.17.2022.05.21.18.24.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 May 2022 18:25:01 -0700 (PDT)
-Date:   Sun, 22 May 2022 09:24:55 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-        djwong@kernel.org
-Subject: Re: [PATCH] tools/mkgroupfile: help the cases of group.list in
- number order
-Message-ID: <20220522012455.catu32p2tsijlk7m@zlang-mailbox>
-References: <20220521054349.1691473-1-zlang@kernel.org>
- <20220521231748.GZ2306852@dread.disaster.area>
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:from:to:cc:references:in-reply-to
+         :content-transfer-encoding;
+        bh=yNGECf7cpPXgM31FBYi/Q+Mk5ajHugGFdMlr8H02ns4=;
+        b=YpOS7JxxN60gs98dkHQ96d6JiThWnNCrBzRY4twEVmk1NfJ4EmSOmHQt8EwzbgCYco
+         tCvxJxjV6wzLuHvJWietfuSRXIXbUBKr23dOhNTf/7ThyTPxTYGdEhTYKBJ2tILkJEJf
+         1nEX2WnhLkRPGulT3XsQsDZi6IMPvHK8tan7t2Q7kZwZgfYAJqPO0oZaqwIAm6PRC+MH
+         Ct/AXBDXbg5cz1ZtQdEEwajWiWOvdLfFD7acPYCiH8zRLggP101e1Hel9yd+C/xpALOc
+         T5RvGu10LO60zTk48/jnlVxflDNReUOl51ApLx9WTOELgm7ZEhoxE8DfYjg4FjubUopF
+         z2/Q==
+X-Gm-Message-State: AOAM533Rq8GQq5shG+e1WdwLWh0le1uu/KDwCA1/XSJvKsFB07n9W4Wn
+        9zview5EjL2FP61LOWLPM/rNgg==
+X-Google-Smtp-Source: ABdhPJyDQosH8GbPek/KjZJkAztrhBfNRKXvvkrZD8Pw0C4cTc8LAhET3Idv/O9c4p/dpPqCg/Y0MQ==
+X-Received: by 2002:a17:903:246:b0:153:87f0:a93e with SMTP id j6-20020a170903024600b0015387f0a93emr16668356plh.171.1653185994006;
+        Sat, 21 May 2022 19:19:54 -0700 (PDT)
+Received: from [192.168.1.100] ([198.8.77.157])
+        by smtp.gmail.com with ESMTPSA id x24-20020a637c18000000b003f9e80538d0sm2075611pgc.17.2022.05.21.19.19.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 21 May 2022 19:19:53 -0700 (PDT)
+Message-ID: <84e5e231-7c33-ad0f-fdd5-2d8c1052aa00@kernel.dk>
+Date:   Sat, 21 May 2022 20:19:51 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220521231748.GZ2306852@dread.disaster.area>
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.1
+Subject: Re: [PATCH v2 00/13] rename & split tests
+Content-Language: en-US
+From:   Jens Axboe <axboe@kernel.dk>
+To:     Dave Chinner <david@fromorbit.com>,
+        Christian Brauner <brauner@kernel.org>
+Cc:     Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>,
+        "Darrick J. Wong" <djwong@kernel.org>, io-uring@vger.kernel.org
+References: <20220512165250.450989-1-brauner@kernel.org>
+ <20220521231350.GY2306852@dread.disaster.area>
+ <f77e867f-ed7d-85f7-f1e4-b9dc10a6d23b@kernel.dk>
+In-Reply-To: <f77e867f-ed7d-85f7-f1e4-b9dc10a6d23b@kernel.dk>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, May 22, 2022 at 09:17:48AM +1000, Dave Chinner wrote:
-> On Sat, May 21, 2022 at 01:43:49PM +0800, Zorro Lang wrote:
-> > The mkgroupfile doesn't sort cases in number order, that cause
-> > fstests' ./new script can't find a proper number which isn't taken.
-> > The unsorted case number might cause more problems, so fix it.
+On 5/21/22 7:07 PM, Jens Axboe wrote:
+> On 5/21/22 5:13 PM, Dave Chinner wrote:
+>> [cc io_uring]
+>>
+>> On Thu, May 12, 2022 at 06:52:37PM +0200, Christian Brauner wrote:
+>>> From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
+>>>
+>>> Hey everyone,
+>>>
+>>> Please note that this patch series contains patches that will be
+>>> rejected by the fstests mailing list because of the amount of changes
+>>> they contain. So tools like b4 will not be able to find the whole patch
+>>> series on a mailing list. In case it's helpful I've added the
+>>> "fstests.vfstest.for-next" tag which can be pulled. Otherwise it's
+>>> possible to simply use the patch series as it appears in your inbox.
+>>>
+>>> All vfstests pass:
+>>
+>> [...]
+>>
+>>> #### xfs ####
+>>> ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+>>> FSTYP         -- xfs (debug)
+>>> PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+>>> MKFS_OPTIONS  -- -f /dev/sda4
+>>> MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
+>>>
+>>> generic/633 58s ...  58s
+>>> generic/644 62s ...  60s
+>>> generic/645 161s ...  161s
+>>> generic/656 62s ...  63s
+>>> xfs/152 133s ...  133s
+>>> xfs/153 94s ...  92s
+>>> Ran: generic/633 generic/644 generic/645 generic/656 xfs/152 xfs/153
+>>> Passed all 6 tests
+>>
+>> I'm not sure if it's this series that has introduced a test bug or
+>> triggered a latent issue in the kernel, but I've started seeing
+>> generic/633 throw audit subsystem warnings on a single test machine
+>> as of late Friday:
+>>
+>> [ 7285.015888] WARNING: CPU: 3 PID: 2147118 at kernel/auditsc.c:2035 __audit_syscall_entry+0x113/0x140
 > 
-> Yet more reason for these group lists to die and get replaced with a
-> common generation function.
+> Does your kernel have this commit?
 > 
-> > Fixes: 441606d28681 ("fstests: faster group file creation")
-> > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > ---
-> > 
-> > Hi,
-> > 
-> > If you'd like to fix this issue seperately, I can merge this patch with Dave's
-> > "[PATCH 04/12] fstests: fix group list generation for whacky test names"
-> > together.
+> commit 69e9cd66ae1392437234a63a3a1d60b6655f92ef
+> Author: Julian Orth <ju.orth@gmail.com>
+> Date:   Tue May 17 12:32:53 2022 +0200
 > 
-> It needs documentation updates, too. I had no idea that the group
+>     audit,io_uring,io-wq: call __audit_uring_exit for dummy contexts
 
-I've merged below changes[1]. As other two patches[2] need more changes, so how
-about we add it into doc by "[PATCH 05/12] README: document _begin_fstests
-better"? Or I can send another documentation patch to do that next week :) I
-hope to fix this regression issue today, due to it's been 2 weeks since we
-brought in it.
+I could not reproduce either with or without your patch when I finally
+got that test going and figure out how to turn on audit and get it
+enabled. I don't run with that.
 
-[1]
-68497440 tools/mkgroupfile: help the cases of group.list in number order
-1a04a7c9 fstests: fix group list generation for whacky test names
-e6d4d963 fstests: remove xfs deprecated test
-c1941d6f xfs/191: remove broken test
-6812c3b2 xfs/148: fix failure from bad shortform size assumptions
-460c4604 xfs/148: make test debuggable
-dbcc5493 xfs/348: golden output is not correct
-9a392f8d xfs/122: add attribute log formats to test output.
-307f0514 fstests: filter quota warnings
+But looking at your line numbers, I think you're missing the above
+commit. The WARN_ON_ONCE() matches up with it NOT being applied, which
+is most likely why it triggers for you. It's in Linus's tree, but not in
+-rc7.
 
-[2]
-[PATCH 05/12] README: document _begin_fstests better
-[PATCH 08/12] generic/081: don't run on DAX capable devices
-
-
-> list files were used by the new script or that there was a
-> requirement for them to be sorted into numerical order.
-
-Sorry, I didn't notice that either, until I tried to write a new case.
-When you have any better idea to replace the current group list method,
-feel free to share :)
-
-Thanks,
-Zorro
-
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
+-- 
+Jens Axboe
 
