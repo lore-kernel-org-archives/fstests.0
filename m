@@ -2,284 +2,173 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4FCDC433F5
-	for <linux-fstests@archiver.kernel.org>; Sun, 22 May 2022 14:10:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1ED7BC433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 May 2022 14:39:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346585AbiEVOKj (ORCPT
+        id S1346465AbiEVOjE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 22 May 2022 10:10:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48906 "EHLO
+        Sun, 22 May 2022 10:39:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346567AbiEVOKi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 22 May 2022 10:10:38 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A2DFD14D2F
-        for <fstests@vger.kernel.org>; Sun, 22 May 2022 07:10:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653228634;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=yAGQOuGQmyAW43l6fuW4f3tIjP+oEgnXaZB3G1shCKQ=;
-        b=BQS3tg2iRSo7uf/aMAz61UOKoP3gKQD6Xv9c/F+lIGHFisS38ESXei+XfYhoOvg1/q43ib
-        Ao2BZ1r+6/eVJgWY/LMQYZxOLHWD+TjcWjkWZoy6sUVJOe0Ar697Yn36n6381vFHaiY0hp
-        Y8dj62mnyl3eWrtDfSIW7f75xApxqns=
-Received: from mail-oa1-f69.google.com (mail-oa1-f69.google.com
- [209.85.160.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-558-7tT0GpBjMEOjVmovIRoN2Q-1; Sun, 22 May 2022 10:10:31 -0400
-X-MC-Unique: 7tT0GpBjMEOjVmovIRoN2Q-1
-Received: by mail-oa1-f69.google.com with SMTP id 586e51a60fabf-e630d5d6easo6033831fac.10
-        for <fstests@vger.kernel.org>; Sun, 22 May 2022 07:10:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=yAGQOuGQmyAW43l6fuW4f3tIjP+oEgnXaZB3G1shCKQ=;
-        b=ofk9oEtC8vq7AqI2jpW86JNfNLU0jdWmWj/O7HPTCoIpeDO79H2IyW1yXlhIAs8RKS
-         LXZVvUmgYHQohwZfAswfyt33wlAtxHezm4L2kfiCdrLCy5o8mtSHVvH0ONiUvIcxpx46
-         eHEtfsSH14M+6hXJ2UzLTXME7ZfMK6s//HfNT+IF5786k3IqN3WoWJ54aErkvDo5OO35
-         NIwbeZChy8oyw0uKvn6ypoRMRgKYF9LY+Gta3ZbEdWSzwoIgldxtiSqOPqhBl1yCrJut
-         ozqIqiGVxDcQCBuWNaRGQG3TuNo3g3P4RJ+xQjHeVjNLJX7sd7iCdD1EpqhuUfijJu2J
-         EwRw==
-X-Gm-Message-State: AOAM531Qt3S3hgOJRNL4yI4WV/x3PMe8RsNNo1KQopTTmnnVkPeR3MP+
-        GztHD7PMuhEzW3Hda00JNKYzUNI99IaES1BRofC+SJWuMl7Ii3zWEY1gKbpJPIhPEjVBjRqNyIY
-        5pTV0/tv6qEkYA7H/+w==
-X-Received: by 2002:a05:6808:f86:b0:328:c95e:ba17 with SMTP id o6-20020a0568080f8600b00328c95eba17mr9697297oiw.161.1653228630191;
-        Sun, 22 May 2022 07:10:30 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyvZm9qSyexBKN6jJ8p/DXvBOwCJq3PxyJtlxHo28nuDq0JT04zVpJYKjddEQSEzR7yRo4Jrg==
-X-Received: by 2002:a05:6808:f86:b0:328:c95e:ba17 with SMTP id o6-20020a0568080f8600b00328c95eba17mr9697288oiw.161.1653228629907;
-        Sun, 22 May 2022 07:10:29 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id v132-20020aca618a000000b00325cda1ffabsm3110141oib.42.2022.05.22.07.10.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 May 2022 07:10:29 -0700 (PDT)
-Date:   Sun, 22 May 2022 22:10:23 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: annotate fix commits for upcoming 5.10.y backports
-Message-ID: <20220522141023.diwajhcswq53wgt5@zlang-mailbox>
-References: <20220520143249.2103631-1-amir73il@gmail.com>
+        with ESMTP id S240100AbiEVOjD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 22 May 2022 10:39:03 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3F723A728
+        for <fstests@vger.kernel.org>; Sun, 22 May 2022 07:39:02 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 31FCF60FD7
+        for <fstests@vger.kernel.org>; Sun, 22 May 2022 14:39:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DA22C385AA;
+        Sun, 22 May 2022 14:39:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653230341;
+        bh=yN8IcQbYScj4sysiPlpW3CEu4G9jdUk1V4k0aU3Iyiw=;
+        h=Date:From:To:Subject:From;
+        b=sM9WdZjcXAFDYLEN3ygjSr1esqFQuOGalBFPyI0KSdK3iOoueQjVeGJlXctTbAKIz
+         z4yQd/+3VGVnMfM0eBKvjFT0s3oGPUw666BgOe3xjejrqlh10npbj2Su/UcyZrZDQI
+         ONIy3wdzM901Za8HacFxbEa2NV+PzGUb+qnuDpJ1Ct0D1XGjLIAppHDJWd3Qd1I72p
+         0i1Gu3U8GEnqZcJ74pKCt1gXFSGSipRZTMKYI0eol8fLaecnfHw/nhIS+4VGV6BqaQ
+         wfvqlhTArmLLRnVSrlNd2zywu04dsgoi3I4hO7AZt7LyRXYpQtkxpItjBNBeUc4vWW
+         mAK1L24Oaa6MA==
+Date:   Sun, 22 May 2022 22:38:58 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merged v2022.05.15 onto master branch
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="aGfGARQwsaqV"
 Content-Disposition: inline
-In-Reply-To: <20220520143249.2103631-1-amir73il@gmail.com>
+Message-Id: <20220522143901.1DA22C385AA@smtp.kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 20, 2022 at 05:32:49PM +0300, Amir Goldstein wrote:
-> In preparation for backporting xfs fixes to stable kernel 5.10.y,
-> annotate some of the tests that pass after applying the backports.
-> 
-> Most of the annotated tests have the fix commit documented either
-> in comment or in commit message already.
-> 
-> All tests have been verified to pass with fix commits apply, but
-> for a few tests, a failure was observed when running on kernel without
-> the documented fix commit. That is probably because failure happens
-> only on a specific setup.
-> 
-> Generic tests have also been annotated with xfs fix commits.
-> That may produce wrong hints if the test fails on another fs, but
-> that is what hints are for - to give tester a hint, so if tester is
-> not testing xfs, it's easy to figure out that the hint is irrelevant.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
-> 
-> Hi Zorro,
-> 
-> Here are a bunch of fixed_by annotations for xfs bug fixes,
-> which I am in the process of testing for stable kernel v5.10.y [1].
 
-I just confirmed that these commit IDs are right, and these cases are
-specific reproducer for them. So I'd like to ack this patch.
+--aGfGARQwsaqV
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Hi all,
 
-> 
-> There are a lot more tests with fix commits documented in comments
-> and/or commit message, but I did not annotate any test that I did not
-> verify myself to pass with the fix commit.
+The master branch of the xfstests repository at:
 
-Thanks for you did that such carefully. You remind me that I just release
-a new fstests version v2022.05.22, which has several known failures too.
-https://lore.kernel.org/fstests/20220522094622.25751C385AA@smtp.kernel.org/T/#u
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-I'm thinking about another question, if a case covers more and more known
-issue, the known list will be very long, even might take 1/3 of the code
-lines. That will look not graceful ...
+has just been updated to v2022.05.15 version (merged from for-next).
 
-We'd better to not make an existed case grow biger and biger. And don't
-record known issues in a case which just can reproduce it with small chance
-randomly. Likes you record e4826691cc7e ("xfs: restore shutdown check in mapped
-write fault path") into g/623, actually we found it by g/019 at first, then
-write g/623 to cover that. So g/019 isn't the recommended case to record this
-issue.
+Note: we've noticed that there's a small regression issue since v2022.05.08,
+which cause xfstests/new command can't find a proper new case number. This
+issue has been fixed in v2022.05.22 (for-next branch).
 
 Thanks,
 Zorro
 
-> 
-> If tests were not documented in kernel commit message nor mentioned
-> in the mailing list correspondance and if kernel commit or subject were
-> not mentioned in fstests commit message or comments, then I may have
-> missed those secret tests.
-> 
-> Thanks,
-> Amir.
-> 
-> [1] https://github.com/amir73il/linux/commits/xfs-5.10.y
-> 
->  tests/generic/623 | 3 +++
->  tests/generic/631 | 2 ++
->  tests/generic/646 | 3 +++
->  tests/generic/649 | 3 +++
->  tests/xfs/145     | 3 +++
->  tests/xfs/177     | 2 ++
->  tests/xfs/513     | 3 +++
->  tests/xfs/539     | 7 +++++--
->  tests/xfs/542     | 3 +++
->  9 files changed, 27 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/generic/623 b/tests/generic/623
-> index 324251b7..ea016d91 100755
-> --- a/tests/generic/623
-> +++ b/tests/generic/623
-> @@ -12,6 +12,9 @@ _begin_fstest auto quick shutdown
->  . ./common/filter
->  
->  _supported_fs generic
-> +_fixed_by_kernel_commit e4826691cc7e \
-> +	"xfs: restore shutdown check in mapped write fault path"
-> +
->  _require_scratch_nocheck
->  _require_scratch_shutdown
->  
-> diff --git a/tests/generic/631 b/tests/generic/631
-> index 219f7a05..ff1bb113 100755
-> --- a/tests/generic/631
-> +++ b/tests/generic/631
-> @@ -40,6 +40,8 @@ _require_scratch
->  _require_attrs trusted
->  _supported_fs ^overlay
->  _require_extra_fs overlay
-> +_fixed_by_kernel_commit 6da1b4b1ab36 \
-> +	"xfs: fix an ABBA deadlock in xfs_rename"
->  
->  _scratch_mkfs >> $seqres.full
->  _scratch_mount
-> diff --git a/tests/generic/646 b/tests/generic/646
-> index 79d3f17c..027df557 100755
-> --- a/tests/generic/646
-> +++ b/tests/generic/646
-> @@ -15,6 +15,9 @@
->  _begin_fstest auto quick recoveryloop shutdown
->  
->  # real QA test starts here
-> +_supported_fs generic
-> +_fixed_by_kernel_commit 50d25484bebe \
-> +	"xfs: sync lazy sb accounting on quiesce of read-only mounts"
->  
->  _require_scratch
->  _require_scratch_shutdown
-> diff --git a/tests/generic/649 b/tests/generic/649
-> index a6aabfaf..d6727765 100755
-> --- a/tests/generic/649
-> +++ b/tests/generic/649
-> @@ -33,6 +33,9 @@ _cleanup()
->  
->  # Modify as appropriate.
->  _supported_fs generic
-> +_fixed_by_kernel_commit 72a048c1056a \
-> +	"xfs: only set IOMAP_F_SHARED when providing a srcmap to a write"
-> +
->  _require_cp_reflink
->  _require_test_reflink
->  _require_test_program "punch-alternating"
-> diff --git a/tests/xfs/145 b/tests/xfs/145
-> index d32e726e..5fd8dcad 100755
-> --- a/tests/xfs/145
-> +++ b/tests/xfs/145
-> @@ -18,6 +18,9 @@ _begin_fstest auto quick quota
->  
->  # real QA test starts here
->  _supported_fs xfs
-> +_fixed_by_kernel_commit 1aecf3734a95 \
-> +	"xfs: fix chown leaking delalloc quota blocks when fssetxattr fails"
-> +
->  _require_command "$FILEFRAG_PROG" filefrag
->  _require_test_program "chprojid_fail"
->  _require_quota
-> diff --git a/tests/xfs/177 b/tests/xfs/177
-> index 10891550..1e59bd6c 100755
-> --- a/tests/xfs/177
-> +++ b/tests/xfs/177
-> @@ -39,6 +39,8 @@ _cleanup()
->  
->  # Modify as appropriate.
->  _supported_fs xfs
-> +_fixed_by_kernel_commit f38a032b165d "xfs: fix I_DONTCACHE"
-> +
->  _require_xfs_io_command "bulkstat"
->  _require_scratch
->  
-> diff --git a/tests/xfs/513 b/tests/xfs/513
-> index bfdfd4f6..85500af0 100755
-> --- a/tests/xfs/513
-> +++ b/tests/xfs/513
-> @@ -31,6 +31,9 @@ _cleanup()
->  
->  # real QA test starts here
->  _supported_fs xfs
-> +_fixed_by_kernel_commit 237d7887ae72 \
-> +	"xfs: show the proper user quota options"
-> +
->  _require_test
->  _require_loop
->  _require_xfs_io_command "falloc"
-> diff --git a/tests/xfs/539 b/tests/xfs/539
-> index 4bc52c1a..77b44c89 100755
-> --- a/tests/xfs/539
-> +++ b/tests/xfs/539
-> @@ -9,15 +9,18 @@
->  # the same value as during the mount
->  #
->  # Regression test for commit:
-> -# xfs: Skip repetitive warnings about mount options
-> +# 92cf7d36384b xfs: Skip repetitive warnings about mount options
->  
->  . ./common/preamble
->  _begin_fstest auto quick mount
->  
->  # Import common functions.
->  
-> -_require_check_dmesg
->  _supported_fs xfs
-> +_fixed_by_kernel_commit 92cf7d36384b \
-> +	"xfs: Skip repetitive warnings about mount options"
-> +
-> +_require_check_dmesg
->  _require_scratch
->  
->  log_tag()
-> diff --git a/tests/xfs/542 b/tests/xfs/542
-> index 5c45eed7..1540541e 100755
-> --- a/tests/xfs/542
-> +++ b/tests/xfs/542
-> @@ -26,6 +26,9 @@ _cleanup()
->  
->  # real QA test starts here
->  _supported_fs xfs
-> +_fixed_by_kernel_commit 5ca5916b6bc9 \
-> +	"xfs: punch out data fork delalloc blocks on COW writeback failure"
-> +
->  _require_scratch_reflink
->  _require_cp_reflink
->  _require_xfs_io_command "cowextsize"
-> -- 
-> 2.25.1
-> 
+The new head of the master branch is commit:
 
+781bb995a149 vfs/idmapped-mounts: remove invalid test
+
+New commits:
+
+Baokun Li (1):
+      [92fb58afaa2f] common: xfstests support overlay+tmpfs
+
+Christian Brauner (13):
+      [90c001261171] idmapped-mounts: make all tests set their required feature flags
+      [4cacbf7ae101] src: rename idmapped-mounts folder
+      [3607df35e440] src/vfs: rename idmapped-mounts.c file
+      [2d642516a73f] vfstest: rename struct t_idmapped_mounts
+      [836c87fb1e7b] utils: add missing global.h include
+      [e5f0de862eaa] utils: add struct vfstest_info
+      [6631d37ef388] utils: move helpers into utils
+      [c688623db6b5] missing: move sys_execveat() to missing.h
+      [0a26b226d838] utils: add struct test_suite
+      [48fdc9dd7dac] vfstest: split idmapped mount tests into separate suite
+      [3bc939bccca5] vfstest: split out btrfs idmapped mounts test
+      [a05df8ab47c5] vfstest: split out remaining idmapped mount tests
+      [781bb995a149] vfs/idmapped-mounts: remove invalid test
+
+Eric Biggers (1):
+      [b03323c1d990] ext4/053: fix the rejected mount option testing
+
+Filipe Manana (1):
+      [93db14575cd0] generic: test fsync of directory with renamed symlink
+
+Gabriel Krisman Bertazi (1):
+      [7a2adb8f44e5] casefold: Fix expansion of seqres variable
+
+Yang Xu (1):
+      [653da5b66160] generic/68[3-7]: Add separate sgid stripping sub-tests
+
+
+Code Diffstat:
+
+ .gitignore                                    |     4 +-
+ common/casefold                               |     4 +-
+ common/config                                 |    12 +-
+ common/overlay                                |     2 +-
+ common/rc                                     |    71 +-
+ src/Makefile                                  |     2 +-
+ src/detached_mounts_propagation.c             |     2 +-
+ src/feature.c                                 |     2 +-
+ src/idmapped-mounts/idmapped-mounts.c         | 14625 ------------------------
+ src/idmapped-mounts/utils.c                   |   425 -
+ src/idmapped-mounts/utils.h                   |   130 -
+ src/{idmapped-mounts => vfs}/Makefile         |    14 +-
+ src/vfs/btrfs-idmapped-mounts.c               |  3854 +++++++
+ src/vfs/btrfs-idmapped-mounts.h               |    15 +
+ src/vfs/idmapped-mounts.c                     |  7747 +++++++++++++
+ src/vfs/idmapped-mounts.h                     |    18 +
+ src/{idmapped-mounts => vfs}/missing.h        |    11 +
+ src/{idmapped-mounts => vfs}/mount-idmapped.c |     0
+ src/vfs/utils.c                               |  1050 ++
+ src/vfs/utils.h                               |   373 +
+ src/vfs/vfstest.c                             |  2073 ++++
+ tests/btrfs/245                               |     2 +-
+ tests/ext4/053                                |   148 +-
+ tests/generic/633                             |     2 +-
+ tests/generic/644                             |     2 +-
+ tests/generic/645                             |     2 +-
+ tests/generic/656                             |     2 +-
+ tests/generic/683                             |    69 +-
+ tests/generic/683.out                         |    16 +
+ tests/generic/684                             |    69 +-
+ tests/generic/684.out                         |    16 +
+ tests/generic/685                             |    69 +-
+ tests/generic/685.out                         |    16 +
+ tests/generic/686                             |    69 +-
+ tests/generic/686.out                         |    16 +
+ tests/generic/687                             |    69 +-
+ tests/generic/687.out                         |    16 +
+ tests/generic/689                             |     4 +-
+ tests/generic/690                             |    90 +
+ tests/generic/690.out                         |     2 +
+ tests/xfs/152                                 |     4 +-
+ tests/xfs/153                                 |     2 +-
+ 42 files changed, 15668 insertions(+), 15451 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--aGfGARQwsaqV
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmKKSq4ACgkQlNbPkfr2
+tMwtfw/6AuCIrGIr8CPX0VJBGSdjNY/j+lbzGVX2YxSvgjgNX/Jb5XB44cEPqGxk
+QaTP9gjyGYSuUFKaIrf4ubypj9eAYFObyNzk0aZ0+j6SK6+4uoj+yR19SWNd4FUf
+VAM1kfCPs+cVXz/NJGWJiPzm3KRiz5njviKZRTLPVEqg/5vCIeSP3SQHFXEnpXhF
+E7eiBjJQiXxdxGUaSYh5DGhGPHk+IlxgWJEsr6/+y2pftkv6vdAPhU8yBfh2XBBy
+MLmgPtmb0JvEqjV9YeCAlNZSv1h8rlgdAQMEaUzOq7y/eO1N989ktd8B1xHmq3OB
+jmoifwSQIBLFFjEY56VxmqmPrncZR9grdOEcQrpXMgJpHIwP+ZIWA4URTSiHAzzx
+xSn6mUFu66i0WFsVNg0/D/N08T1DTDa0d31VCOgyLW62Sk0dWDYkK5zrc28Zie53
+ap47LqL360iFO+w6X+if+3oOTg6urU+71i2NFYy064iMS2W8Yx3d/oWJEbqby8z/
+rDjOmUt77NVHLHmAkhbYuQljNG4NGggbcFfwTl/QYvU1VdVn2k8peSnwPQ5FWyG+
+QKN81y2qcg3G3POUegUs7DCPEaPHfdGxqHGy43Ux3rxUM6jFg69KPvOcb2EIFKK7
+x1AQXULnartaAxrGKwjRK5zr0VQjs0bpXhocmcSU/2oA+5AztY8=
+=/bRS
+-----END PGP SIGNATURE-----
+
+--aGfGARQwsaqV--
