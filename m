@@ -2,137 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFE6DC433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 May 2022 08:10:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 279B6C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 May 2022 08:30:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231381AbiEWIKH (ORCPT
+        id S231826AbiEWIaf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 May 2022 04:10:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35438 "EHLO
+        Mon, 23 May 2022 04:30:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231398AbiEWIKG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 May 2022 04:10:06 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08EC3D5B
-        for <fstests@vger.kernel.org>; Mon, 23 May 2022 01:10:04 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 1B16D21A11;
-        Mon, 23 May 2022 08:10:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1653293403; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ztsDDY/UgCsCi/AxVYbHfVyqVV20C5Q2vdqoLBrOJrM=;
-        b=xIufwwbyTgLtWPd7f2tryG0SJ1W0/ET5webl1hmJdnnDFr3I4rU7m5EOFxrp546GbBn58C
-        74F9hAAtaICI2WpgpJyq2gpTJLk5TMiqRAdRHyPjNuIOnPUc6Bq94d0eV0Vmyc/C4J4Sht
-        omFp5fpe/i2zzoThdfV2gPOEkwyGFxc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1653293403;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ztsDDY/UgCsCi/AxVYbHfVyqVV20C5Q2vdqoLBrOJrM=;
-        b=fbfpGqjH/rwmUBHnOJ5OaqhmwU+fDmqRiL0t7ib6XapCg5CpUElSGwpTp1TnC9qR3DgAup
-        vsJgW9xquyDUGpBw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id DC29C13AA5;
-        Mon, 23 May 2022 08:10:02 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id c0EOM1pBi2JAOQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Mon, 23 May 2022 08:10:02 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id db32a75c;
-        Mon, 23 May 2022 08:10:41 +0000 (UTC)
-Date:   Mon, 23 May 2022 09:10:41 +0100
-From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] ceph/002: fix test expected output
-Message-ID: <YotBgUpOvgqNbGot@suse.de>
-References: <20220520094709.30365-1-lhenriques@suse.de>
- <20220520123747.cbpeg6ox7orxmiqp@zlang-mailbox>
- <20220522095628.hgkhd2xchud4p3c5@zlang-mailbox>
+        with ESMTP id S231835AbiEWIae (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 May 2022 04:30:34 -0400
+Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BBFC6378
+        for <fstests@vger.kernel.org>; Mon, 23 May 2022 01:30:33 -0700 (PDT)
+Received: by mail-qt1-x82c.google.com with SMTP id u3so12058368qta.8
+        for <fstests@vger.kernel.org>; Mon, 23 May 2022 01:30:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=gfqXbgBPQZOYY9xVEbQyJ4GLjiHP4e/eTASAXq10efE=;
+        b=aw0niF39P5Q3V17IJv/bk4CIaV+/Q8s15d098ZNjh4FdpuLXnfwExzmasv2N3sWF+X
+         17TmiJ/4kBq/ewM0iYrOOuIP4RtQSoueeeCpvMC+5gdLsdi3nfSjux9DU8skG4xlHVen
+         oby4VQRMciwe8EV329WI29bk+7BEuA+abJ3qX+9RrzlV6PO918VLdwp0sN7ADO4EbXmM
+         +Sqk/DHEAzDgj9YaRLQB//XOdBLrTzpMyromj+reY7R1I+61O9mIRj7UbJcRXHXbk5AB
+         QcPfde74OPD5cOq/x3lkavqXGRBcporY0Jt5MJ37U+zN5gPVyjiUcE51/b66A5EKpL7z
+         5eqA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gfqXbgBPQZOYY9xVEbQyJ4GLjiHP4e/eTASAXq10efE=;
+        b=zyQ/aF0xZc7NnuanJS0V7fggJBBI/xdmpWq5Pcf8FZ4JTmszIKaMCFMD2JR9FkRm4p
+         MVkUm7mynBQqwOa7IS9Nj331/kYQ0Fo3WuoX/X7bjjOqTq40AqQXD/71qsZKS/hcbp8H
+         2pJQaQli8E5qHl9KVpngbWLePbRWPghM8lpOCxtYWOvvgWC7PB45z9UEQDy+CDP30/98
+         Ytt2S8RndRLPLFwuWeEIgenl+whrbeVkXstTuOJCCtoBsiI9XH5HvVwodfXIj4QTK2w7
+         Np+rr1YTtBlZX9+qRIFk4w7Lbn3sq4KTp4te+7gpDDnJ7ZtaKtLDAMNmOdmtOT6DbBWr
+         /EaA==
+X-Gm-Message-State: AOAM531wfDTJWkUYPuXSvr3ohG/gpydYv3bPtg6OnZCew4xzhpicVrVi
+        dJG9BUMxLAAMzb8rct0ngzgExdIQpArbWMUrLDY=
+X-Google-Smtp-Source: ABdhPJxqYhEs9ZhEwshPQbdt6r4bj5g/zaVGnBWaHb7qEKmfK03uyBUNWBuMmFjlpKF8rI5mUOKuGlIwjKbebwObQaM=
+X-Received: by 2002:ac8:5f0a:0:b0:2f9:3b64:b5ba with SMTP id
+ x10-20020ac85f0a000000b002f93b64b5bamr532790qta.2.1653294632189; Mon, 23 May
+ 2022 01:30:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220522095628.hgkhd2xchud4p3c5@zlang-mailbox>
+References: <20220520143249.2103631-1-amir73il@gmail.com> <20220522141023.diwajhcswq53wgt5@zlang-mailbox>
+In-Reply-To: <20220522141023.diwajhcswq53wgt5@zlang-mailbox>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Mon, 23 May 2022 11:30:20 +0300
+Message-ID: <CAOQ4uxgg--fHonEH7=cFoacfMjd5BdOYAedxoWbm1VfL6H-+Qw@mail.gmail.com>
+Subject: Re: [PATCH] xfs: annotate fix commits for upcoming 5.10.y backports
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, May 22, 2022 at 05:56:28PM +0800, Zorro Lang wrote:
-> On Fri, May 20, 2022 at 08:37:47PM +0800, Zorro Lang wrote:
-> > On Fri, May 20, 2022 at 10:47:09AM +0100, Luís Henriques wrote:
-> > > Commit daa0c0146c7d ("fstests: replace hexdump with od command") broke
-> > > ceph/002 by adding an extra '0' in the offset column.  Fix it.
-> > > 
-> > > Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> > > ---
-> > 
-> > Oh, that's my bad, I changed that in daa0c014 ("fstests: replace hexdump
-> > with od command"), but write an extra '0' for ceph/002.out [1]. And due to
-> > I don't test cephfs, so missed this failure. Thanks for fixing it!
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> 
-> Hi Luís,
-> 
-> Sorry, I just noticed that I missed this one in this week fstests release, I'll
-> merge and push it in next weekend (05.29) :)
+On Sun, May 22, 2022 at 5:10 PM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Fri, May 20, 2022 at 05:32:49PM +0300, Amir Goldstein wrote:
+> > In preparation for backporting xfs fixes to stable kernel 5.10.y,
+> > annotate some of the tests that pass after applying the backports.
+> >
+> > Most of the annotated tests have the fix commit documented either
+> > in comment or in commit message already.
+> >
+> > All tests have been verified to pass with fix commits apply, but
+> > for a few tests, a failure was observed when running on kernel without
+> > the documented fix commit. That is probably because failure happens
+> > only on a specific setup.
+> >
+> > Generic tests have also been annotated with xfs fix commits.
+> > That may produce wrong hints if the test fails on another fs, but
+> > that is what hints are for - to give tester a hint, so if tester is
+> > not testing xfs, it's easy to figure out that the hint is irrelevant.
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >
+> > Hi Zorro,
+> >
+> > Here are a bunch of fixed_by annotations for xfs bug fixes,
+> > which I am in the process of testing for stable kernel v5.10.y [1].
+>
+> I just confirmed that these commit IDs are right, and these cases are
+> specific reproducer for them. So I'd like to ack this patch.
+>
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+>
+> >
+> > There are a lot more tests with fix commits documented in comments
+> > and/or commit message, but I did not annotate any test that I did not
+> > verify myself to pass with the fix commit.
+>
+> Thanks for you did that such carefully. You remind me that I just release
+> a new fstests version v2022.05.22, which has several known failures too.
+> https://lore.kernel.org/fstests/20220522094622.25751C385AA@smtp.kernel.org/T/#u
+>
+> I'm thinking about another question, if a case covers more and more known
+> issue, the known list will be very long, even might take 1/3 of the code
+> lines. That will look not graceful ...
+>
+> We'd better to not make an existed case grow biger and biger. And don't
+> record known issues in a case which just can reproduce it with small chance
 
-Sure, no worries.  Thanks.
+No of course not, that would not be productive.
+fixed_by_commit should be reserved to "proper" regression tests
+failing before fix, passing after fix
 
-Cheers,
---
-Luís
+There could still be several fixed_by commits for different fs
+and for different regressions that were detected on different
+kernel versions.
 
-> 
-> Thanks,
-> Zorro
-> 
-> > 
-> > [1]
-> > ...
-> > diff --git a/tests/ceph/002.out b/tests/ceph/002.out
-> > index 6f067250..f7f1c0ba 100644
-> > --- a/tests/ceph/002.out
-> > +++ b/tests/ceph/002.out
-> > @@ -1,8 +1,8 @@
-> >  QA output created by 002
-> > -0000000 6161 6161 6161 6161 6161 6161 6161 6161
-> > +000000 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  >aaaaaaaaaaaaaaaa<
-> >  *
-> > -0400000 6262 6262 6262 6262 6262 6262 6262 6262
-> > +400000 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62  >bbbbbbbbbbbbbbbb<
-> >  *
-> > -0800000 6363 6363 6363 6363 6363 6363 6363 6363
-> > +800000 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63  >cccccccccccccccc<
-> >  *
-> > -0c00000
-> > +c000000
-> > ...
-> > 
-> > >  tests/ceph/002.out | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/tests/ceph/002.out b/tests/ceph/002.out
-> > > index f7f1c0ba8487..4f766c257a9c 100644
-> > > --- a/tests/ceph/002.out
-> > > +++ b/tests/ceph/002.out
-> > > @@ -5,4 +5,4 @@ QA output created by 002
-> > >  *
-> > >  800000 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63  >cccccccccccccccc<
-> > >  *
-> > > -c000000
-> > > +c00000
-> > > 
+> randomly. Likes you record e4826691cc7e ("xfs: restore shutdown check in mapped
+> write fault path") into g/623, actually we found it by g/019 at first, then
+> write g/623 to cover that. So g/019 isn't the recommended case to record this
+> issue.
+>
+
+Exactly. Good example.
+
+Thanks,
+Amir.
