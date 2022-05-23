@@ -2,173 +2,120 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1ED7BC433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 22 May 2022 14:39:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CD6AC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 May 2022 00:14:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346465AbiEVOjE (ORCPT
+        id S232039AbiEWAOA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 22 May 2022 10:39:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59378 "EHLO
+        Sun, 22 May 2022 20:14:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37734 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240100AbiEVOjD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 22 May 2022 10:39:03 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3F723A728
-        for <fstests@vger.kernel.org>; Sun, 22 May 2022 07:39:02 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 31FCF60FD7
-        for <fstests@vger.kernel.org>; Sun, 22 May 2022 14:39:02 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DA22C385AA;
-        Sun, 22 May 2022 14:39:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653230341;
-        bh=yN8IcQbYScj4sysiPlpW3CEu4G9jdUk1V4k0aU3Iyiw=;
-        h=Date:From:To:Subject:From;
-        b=sM9WdZjcXAFDYLEN3ygjSr1esqFQuOGalBFPyI0KSdK3iOoueQjVeGJlXctTbAKIz
-         z4yQd/+3VGVnMfM0eBKvjFT0s3oGPUw666BgOe3xjejrqlh10npbj2Su/UcyZrZDQI
-         ONIy3wdzM901Za8HacFxbEa2NV+PzGUb+qnuDpJ1Ct0D1XGjLIAppHDJWd3Qd1I72p
-         0i1Gu3U8GEnqZcJ74pKCt1gXFSGSipRZTMKYI0eol8fLaecnfHw/nhIS+4VGV6BqaQ
-         wfvqlhTArmLLRnVSrlNd2zywu04dsgoi3I4hO7AZt7LyRXYpQtkxpItjBNBeUc4vWW
-         mAK1L24Oaa6MA==
-Date:   Sun, 22 May 2022 22:38:58 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merged v2022.05.15 onto master branch
+        with ESMTP id S231827AbiEWAN7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 22 May 2022 20:13:59 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4E1FF101D7;
+        Sun, 22 May 2022 17:13:56 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 190BE5344A8;
+        Mon, 23 May 2022 10:13:52 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nsvhm-00FELA-Td; Mon, 23 May 2022 10:13:50 +1000
+Date:   Mon, 23 May 2022 10:13:50 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Christian Brauner <brauner@kernel.org>,
+        Zorro Lang <zlang@redhat.com>,
+        fstests <fstests@vger.kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>,
+        "Darrick J. Wong" <djwong@kernel.org>, io-uring@vger.kernel.org
+Subject: Re: [PATCH v2 00/13] rename & split tests
+Message-ID: <20220523001350.GB2306852@dread.disaster.area>
+References: <20220512165250.450989-1-brauner@kernel.org>
+ <20220521231350.GY2306852@dread.disaster.area>
+ <f77e867f-ed7d-85f7-f1e4-b9dc10a6d23b@kernel.dk>
+ <84e5e231-7c33-ad0f-fdd5-2d8c1052aa00@kernel.dk>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="aGfGARQwsaqV"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Message-Id: <20220522143901.1DA22C385AA@smtp.kernel.org>
+In-Reply-To: <84e5e231-7c33-ad0f-fdd5-2d8c1052aa00@kernel.dk>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=628ad1c2
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=VwQbUJbxAAAA:8 a=pGLkceISAAAA:8
+        a=7-415B0cAAAA:8 a=MV7SnyrCq3rvMmDJ-xcA:9 a=CjuIK1q_8ugA:10
+        a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sat, May 21, 2022 at 08:19:51PM -0600, Jens Axboe wrote:
+> On 5/21/22 7:07 PM, Jens Axboe wrote:
+> > On 5/21/22 5:13 PM, Dave Chinner wrote:
+> >> [cc io_uring]
+> >>
+> >> On Thu, May 12, 2022 at 06:52:37PM +0200, Christian Brauner wrote:
+> >>> From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
+> >>>
+> >>> Hey everyone,
+> >>>
+> >>> Please note that this patch series contains patches that will be
+> >>> rejected by the fstests mailing list because of the amount of changes
+> >>> they contain. So tools like b4 will not be able to find the whole patch
+> >>> series on a mailing list. In case it's helpful I've added the
+> >>> "fstests.vfstest.for-next" tag which can be pulled. Otherwise it's
+> >>> possible to simply use the patch series as it appears in your inbox.
+> >>>
+> >>> All vfstests pass:
+> >>
+> >> [...]
+> >>
+> >>> #### xfs ####
+> >>> ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+> >>> FSTYP         -- xfs (debug)
+> >>> PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+> >>> MKFS_OPTIONS  -- -f /dev/sda4
+> >>> MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
+> >>>
+> >>> generic/633 58s ...  58s
+> >>> generic/644 62s ...  60s
+> >>> generic/645 161s ...  161s
+> >>> generic/656 62s ...  63s
+> >>> xfs/152 133s ...  133s
+> >>> xfs/153 94s ...  92s
+> >>> Ran: generic/633 generic/644 generic/645 generic/656 xfs/152 xfs/153
+> >>> Passed all 6 tests
+> >>
+> >> I'm not sure if it's this series that has introduced a test bug or
+> >> triggered a latent issue in the kernel, but I've started seeing
+> >> generic/633 throw audit subsystem warnings on a single test machine
+> >> as of late Friday:
+> >>
+> >> [ 7285.015888] WARNING: CPU: 3 PID: 2147118 at kernel/auditsc.c:2035 __audit_syscall_entry+0x113/0x140
+> > 
+> > Does your kernel have this commit?
+> > 
+> > commit 69e9cd66ae1392437234a63a3a1d60b6655f92ef
+> > Author: Julian Orth <ju.orth@gmail.com>
+> > Date:   Tue May 17 12:32:53 2022 +0200
+> > 
+> >     audit,io_uring,io-wq: call __audit_uring_exit for dummy contexts
 
---aGfGARQwsaqV
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+No, that wasn't in -rc7.
 
-Hi all,
+> I could not reproduce either with or without your patch when I finally
+> got that test going and figure out how to turn on audit and get it
+> enabled. I don't run with that.
 
-The master branch of the xfstests repository at:
+Ok. Given that this has been broken for over a year and nobody
+has noticed until late .18-rcX, it might be worth adding an audit
+enabled VM to your io-uring test farm....
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Cheers,
 
-has just been updated to v2022.05.15 version (merged from for-next).
-
-Note: we've noticed that there's a small regression issue since v2022.05.08,
-which cause xfstests/new command can't find a proper new case number. This
-issue has been fixed in v2022.05.22 (for-next branch).
-
-Thanks,
-Zorro
-
-The new head of the master branch is commit:
-
-781bb995a149 vfs/idmapped-mounts: remove invalid test
-
-New commits:
-
-Baokun Li (1):
-      [92fb58afaa2f] common: xfstests support overlay+tmpfs
-
-Christian Brauner (13):
-      [90c001261171] idmapped-mounts: make all tests set their required feature flags
-      [4cacbf7ae101] src: rename idmapped-mounts folder
-      [3607df35e440] src/vfs: rename idmapped-mounts.c file
-      [2d642516a73f] vfstest: rename struct t_idmapped_mounts
-      [836c87fb1e7b] utils: add missing global.h include
-      [e5f0de862eaa] utils: add struct vfstest_info
-      [6631d37ef388] utils: move helpers into utils
-      [c688623db6b5] missing: move sys_execveat() to missing.h
-      [0a26b226d838] utils: add struct test_suite
-      [48fdc9dd7dac] vfstest: split idmapped mount tests into separate suite
-      [3bc939bccca5] vfstest: split out btrfs idmapped mounts test
-      [a05df8ab47c5] vfstest: split out remaining idmapped mount tests
-      [781bb995a149] vfs/idmapped-mounts: remove invalid test
-
-Eric Biggers (1):
-      [b03323c1d990] ext4/053: fix the rejected mount option testing
-
-Filipe Manana (1):
-      [93db14575cd0] generic: test fsync of directory with renamed symlink
-
-Gabriel Krisman Bertazi (1):
-      [7a2adb8f44e5] casefold: Fix expansion of seqres variable
-
-Yang Xu (1):
-      [653da5b66160] generic/68[3-7]: Add separate sgid stripping sub-tests
-
-
-Code Diffstat:
-
- .gitignore                                    |     4 +-
- common/casefold                               |     4 +-
- common/config                                 |    12 +-
- common/overlay                                |     2 +-
- common/rc                                     |    71 +-
- src/Makefile                                  |     2 +-
- src/detached_mounts_propagation.c             |     2 +-
- src/feature.c                                 |     2 +-
- src/idmapped-mounts/idmapped-mounts.c         | 14625 ------------------------
- src/idmapped-mounts/utils.c                   |   425 -
- src/idmapped-mounts/utils.h                   |   130 -
- src/{idmapped-mounts => vfs}/Makefile         |    14 +-
- src/vfs/btrfs-idmapped-mounts.c               |  3854 +++++++
- src/vfs/btrfs-idmapped-mounts.h               |    15 +
- src/vfs/idmapped-mounts.c                     |  7747 +++++++++++++
- src/vfs/idmapped-mounts.h                     |    18 +
- src/{idmapped-mounts => vfs}/missing.h        |    11 +
- src/{idmapped-mounts => vfs}/mount-idmapped.c |     0
- src/vfs/utils.c                               |  1050 ++
- src/vfs/utils.h                               |   373 +
- src/vfs/vfstest.c                             |  2073 ++++
- tests/btrfs/245                               |     2 +-
- tests/ext4/053                                |   148 +-
- tests/generic/633                             |     2 +-
- tests/generic/644                             |     2 +-
- tests/generic/645                             |     2 +-
- tests/generic/656                             |     2 +-
- tests/generic/683                             |    69 +-
- tests/generic/683.out                         |    16 +
- tests/generic/684                             |    69 +-
- tests/generic/684.out                         |    16 +
- tests/generic/685                             |    69 +-
- tests/generic/685.out                         |    16 +
- tests/generic/686                             |    69 +-
- tests/generic/686.out                         |    16 +
- tests/generic/687                             |    69 +-
- tests/generic/687.out                         |    16 +
- tests/generic/689                             |     4 +-
- tests/generic/690                             |    90 +
- tests/generic/690.out                         |     2 +
- tests/xfs/152                                 |     4 +-
- tests/xfs/153                                 |     2 +-
- 42 files changed, 15668 insertions(+), 15451 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---aGfGARQwsaqV
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmKKSq4ACgkQlNbPkfr2
-tMwtfw/6AuCIrGIr8CPX0VJBGSdjNY/j+lbzGVX2YxSvgjgNX/Jb5XB44cEPqGxk
-QaTP9gjyGYSuUFKaIrf4ubypj9eAYFObyNzk0aZ0+j6SK6+4uoj+yR19SWNd4FUf
-VAM1kfCPs+cVXz/NJGWJiPzm3KRiz5njviKZRTLPVEqg/5vCIeSP3SQHFXEnpXhF
-E7eiBjJQiXxdxGUaSYh5DGhGPHk+IlxgWJEsr6/+y2pftkv6vdAPhU8yBfh2XBBy
-MLmgPtmb0JvEqjV9YeCAlNZSv1h8rlgdAQMEaUzOq7y/eO1N989ktd8B1xHmq3OB
-jmoifwSQIBLFFjEY56VxmqmPrncZR9grdOEcQrpXMgJpHIwP+ZIWA4URTSiHAzzx
-xSn6mUFu66i0WFsVNg0/D/N08T1DTDa0d31VCOgyLW62Sk0dWDYkK5zrc28Zie53
-ap47LqL360iFO+w6X+if+3oOTg6urU+71i2NFYy064iMS2W8Yx3d/oWJEbqby8z/
-rDjOmUt77NVHLHmAkhbYuQljNG4NGggbcFfwTl/QYvU1VdVn2k8peSnwPQ5FWyG+
-QKN81y2qcg3G3POUegUs7DCPEaPHfdGxqHGy43Ux3rxUM6jFg69KPvOcb2EIFKK7
-x1AQXULnartaAxrGKwjRK5zr0VQjs0bpXhocmcSU/2oA+5AztY8=
-=/bRS
------END PGP SIGNATURE-----
-
---aGfGARQwsaqV--
+Dve.
+-- 
+Dave Chinner
+david@fromorbit.com
