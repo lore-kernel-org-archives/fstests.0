@@ -2,126 +2,201 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 279B6C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 May 2022 08:30:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB209C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 May 2022 09:46:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231826AbiEWIaf (ORCPT
+        id S232450AbiEWJqW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 May 2022 04:30:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50018 "EHLO
+        Mon, 23 May 2022 05:46:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48858 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231835AbiEWIae (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 May 2022 04:30:34 -0400
-Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BBFC6378
-        for <fstests@vger.kernel.org>; Mon, 23 May 2022 01:30:33 -0700 (PDT)
-Received: by mail-qt1-x82c.google.com with SMTP id u3so12058368qta.8
-        for <fstests@vger.kernel.org>; Mon, 23 May 2022 01:30:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gfqXbgBPQZOYY9xVEbQyJ4GLjiHP4e/eTASAXq10efE=;
-        b=aw0niF39P5Q3V17IJv/bk4CIaV+/Q8s15d098ZNjh4FdpuLXnfwExzmasv2N3sWF+X
-         17TmiJ/4kBq/ewM0iYrOOuIP4RtQSoueeeCpvMC+5gdLsdi3nfSjux9DU8skG4xlHVen
-         oby4VQRMciwe8EV329WI29bk+7BEuA+abJ3qX+9RrzlV6PO918VLdwp0sN7ADO4EbXmM
-         +Sqk/DHEAzDgj9YaRLQB//XOdBLrTzpMyromj+reY7R1I+61O9mIRj7UbJcRXHXbk5AB
-         QcPfde74OPD5cOq/x3lkavqXGRBcporY0Jt5MJ37U+zN5gPVyjiUcE51/b66A5EKpL7z
-         5eqA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gfqXbgBPQZOYY9xVEbQyJ4GLjiHP4e/eTASAXq10efE=;
-        b=zyQ/aF0xZc7NnuanJS0V7fggJBBI/xdmpWq5Pcf8FZ4JTmszIKaMCFMD2JR9FkRm4p
-         MVkUm7mynBQqwOa7IS9Nj331/kYQ0Fo3WuoX/X7bjjOqTq40AqQXD/71qsZKS/hcbp8H
-         2pJQaQli8E5qHl9KVpngbWLePbRWPghM8lpOCxtYWOvvgWC7PB45z9UEQDy+CDP30/98
-         Ytt2S8RndRLPLFwuWeEIgenl+whrbeVkXstTuOJCCtoBsiI9XH5HvVwodfXIj4QTK2w7
-         Np+rr1YTtBlZX9+qRIFk4w7Lbn3sq4KTp4te+7gpDDnJ7ZtaKtLDAMNmOdmtOT6DbBWr
-         /EaA==
-X-Gm-Message-State: AOAM531wfDTJWkUYPuXSvr3ohG/gpydYv3bPtg6OnZCew4xzhpicVrVi
-        dJG9BUMxLAAMzb8rct0ngzgExdIQpArbWMUrLDY=
-X-Google-Smtp-Source: ABdhPJxqYhEs9ZhEwshPQbdt6r4bj5g/zaVGnBWaHb7qEKmfK03uyBUNWBuMmFjlpKF8rI5mUOKuGlIwjKbebwObQaM=
-X-Received: by 2002:ac8:5f0a:0:b0:2f9:3b64:b5ba with SMTP id
- x10-20020ac85f0a000000b002f93b64b5bamr532790qta.2.1653294632189; Mon, 23 May
- 2022 01:30:32 -0700 (PDT)
+        with ESMTP id S233802AbiEWJoT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 May 2022 05:44:19 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43B3426120;
+        Mon, 23 May 2022 02:44:14 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 8A9A0B80EB4;
+        Mon, 23 May 2022 09:44:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13A5CC385A9;
+        Mon, 23 May 2022 09:44:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653299051;
+        bh=TgGdvEK04PZs/jUtUxweLcxD0AcWsHTTlwIZMTMm1Cs=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=vEbU+D09oKvoJS2kIR+3majqe522hQvANvJVB7PWHUaGnsBnsY94lY+BeBeMTP5C7
+         6Djp88WwGX2yslE2KNf8ZZz/aZ/2LfQcnbVN0jVFTHca4xARUXNXfD6pRoqNgZiOr6
+         Ujh9zULYx8OpwyEvXNKrkTNpyIR0JRIba9NhNRSOKJvtwc7hqRi+K6/1zashD3/RDe
+         /tZlonbr+Rg3PNJZuN+kdRHOBcWZvyHFINfLWhLRn5Bynulern81wJi99+24qUV250
+         za3qlYfievawuIH7zSk5PnALw9iy3BktEmDPYdJ9bgly7cwtalnCOvtvvY0qkDWxyy
+         6A9zewAMUBhig==
+Date:   Mon, 23 May 2022 11:44:00 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>,
+        "Darrick J. Wong" <djwong@kernel.org>, io-uring@vger.kernel.org
+Subject: Re: [PATCH v2 00/13] rename & split tests
+Message-ID: <20220523094400.ljvhog3tfbxgvhri@wittgenstein>
+References: <20220512165250.450989-1-brauner@kernel.org>
+ <20220521231350.GY2306852@dread.disaster.area>
 MIME-Version: 1.0
-References: <20220520143249.2103631-1-amir73il@gmail.com> <20220522141023.diwajhcswq53wgt5@zlang-mailbox>
-In-Reply-To: <20220522141023.diwajhcswq53wgt5@zlang-mailbox>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 23 May 2022 11:30:20 +0300
-Message-ID: <CAOQ4uxgg--fHonEH7=cFoacfMjd5BdOYAedxoWbm1VfL6H-+Qw@mail.gmail.com>
-Subject: Re: [PATCH] xfs: annotate fix commits for upcoming 5.10.y backports
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220521231350.GY2306852@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, May 22, 2022 at 5:10 PM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Fri, May 20, 2022 at 05:32:49PM +0300, Amir Goldstein wrote:
-> > In preparation for backporting xfs fixes to stable kernel 5.10.y,
-> > annotate some of the tests that pass after applying the backports.
-> >
-> > Most of the annotated tests have the fix commit documented either
-> > in comment or in commit message already.
-> >
-> > All tests have been verified to pass with fix commits apply, but
-> > for a few tests, a failure was observed when running on kernel without
-> > the documented fix commit. That is probably because failure happens
-> > only on a specific setup.
-> >
-> > Generic tests have also been annotated with xfs fix commits.
-> > That may produce wrong hints if the test fails on another fs, but
-> > that is what hints are for - to give tester a hint, so if tester is
-> > not testing xfs, it's easy to figure out that the hint is irrelevant.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >
-> > Hi Zorro,
-> >
-> > Here are a bunch of fixed_by annotations for xfs bug fixes,
-> > which I am in the process of testing for stable kernel v5.10.y [1].
->
-> I just confirmed that these commit IDs are right, and these cases are
-> specific reproducer for them. So I'd like to ack this patch.
->
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
->
-> >
-> > There are a lot more tests with fix commits documented in comments
-> > and/or commit message, but I did not annotate any test that I did not
-> > verify myself to pass with the fix commit.
->
-> Thanks for you did that such carefully. You remind me that I just release
-> a new fstests version v2022.05.22, which has several known failures too.
-> https://lore.kernel.org/fstests/20220522094622.25751C385AA@smtp.kernel.org/T/#u
->
-> I'm thinking about another question, if a case covers more and more known
-> issue, the known list will be very long, even might take 1/3 of the code
-> lines. That will look not graceful ...
->
-> We'd better to not make an existed case grow biger and biger. And don't
-> record known issues in a case which just can reproduce it with small chance
+On Sun, May 22, 2022 at 09:13:50AM +1000, Dave Chinner wrote:
+> [cc io_uring]
+> 
+> On Thu, May 12, 2022 at 06:52:37PM +0200, Christian Brauner wrote:
+> > From: "Christian Brauner (Microsoft)" <brauner@kernel.org>
+> > 
+> > Hey everyone,
+> > 
+> > Please note that this patch series contains patches that will be
+> > rejected by the fstests mailing list because of the amount of changes
+> > they contain. So tools like b4 will not be able to find the whole patch
+> > series on a mailing list. In case it's helpful I've added the
+> > "fstests.vfstest.for-next" tag which can be pulled. Otherwise it's
+> > possible to simply use the patch series as it appears in your inbox.
+> > 
+> > All vfstests pass:
+> 
+> [...]
+> 
+> > #### xfs ####
+> > ubuntu@imp1-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+> > FSTYP         -- xfs (debug)
+> > PLATFORM      -- Linux/x86_64 imp1-vm 5.18.0-rc4-fs-mnt-hold-writers-8a2e2350494f #107 SMP PREEMPT_DYNAMIC Mon May 9 12:12:34 UTC 2022
+> > MKFS_OPTIONS  -- -f /dev/sda4
+> > MOUNT_OPTIONS -- /dev/sda4 /mnt/scratch
+> > 
+> > generic/633 58s ...  58s
+> > generic/644 62s ...  60s
+> > generic/645 161s ...  161s
+> > generic/656 62s ...  63s
+> > xfs/152 133s ...  133s
+> > xfs/153 94s ...  92s
+> > Ran: generic/633 generic/644 generic/645 generic/656 xfs/152 xfs/153
+> > Passed all 6 tests
+> 
+> I'm not sure if it's this series that has introduced a test bug or
+> triggered a latent issue in the kernel, but I've started seeing
+> generic/633 throw audit subsystem warnings on a single test machine
+> as of late Friday:
+> 
+> [ 7285.015888] WARNING: CPU: 3 PID: 2147118 at kernel/auditsc.c:2035 __audit_syscall_entry+0x113/0x140
+> [ 7285.019973] Modules linked in:
+> [ 7285.021281] CPU: 3 PID: 2147118 Comm: vfstest Not tainted 5.18.0-rc7-dgc+ #1250
+> [ 7285.024341] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.15.0-1 04/01/2014
+> [ 7285.027782] RIP: 0010:__audit_syscall_entry+0x113/0x140
+> [ 7285.029923] Code: 24 e8 c1 6b ff ff 48 8b 34 24 85 c0 48 8b 54 24 08 48 8b 4c 24 10 4c 8b 44 24 18 0f 84 72 ff ff ff 48 83 c4 20 5b 5d 41 5c c3 <0f> 0b 85 c0 75 14 48 83 c4 20 48 c7 c7 70 45 7f 82 5b 5d 41 5c e9
+> [ 7285.037563] RSP: 0018:ffffc900012f7ed0 EFLAGS: 00010202
+> [ 7285.039748] RAX: 0000000000000000 RBX: ffff8880aaf18800 RCX: 000000000000003c
+> [ 7285.043126] RDX: 00000000000000e7 RSI: 0000000000000000 RDI: ffff888102104f00
+> [ 7285.046120] RBP: 00000000000000e7 R08: fffffffffffffe2c R09: 0000000000000002
+> [ 7285.049108] R10: 0000000000000001 R11: 0000000000000000 R12: 0000000000000000
+> [ 7285.052058] R13: ffffc900012f7f58 R14: 00000000000000e7 R15: 0000000000000000
+> [ 7285.055030] FS:  00007f7906d6c740(0000) GS:ffff88813bd80000(0000) knlGS:0000000000000000
+> [ 7285.058396] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [ 7285.060788] CR2: 00007f3ffa7e9bb8 CR3: 000000010bb00000 CR4: 00000000000006e0
+> [ 7285.063735] Call Trace:
+> [ 7285.064796]  <TASK>
+> [ 7285.065759]  syscall_trace_enter.constprop.0+0x122/0x1a0
+> [ 7285.067978]  do_syscall_64+0x16/0x80
+> [ 7285.069497]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+> [ 7285.071590] RIP: 0033:0x7f7906e35f49
+> [ 7285.073118] Code: 00 4c 8b 05 29 6f 10 00 be e7 00 00 00 ba 3c 00 00 00 eb 12 0f 1f 44 00 00 89 d0 0f 05 48 3d 00 f0 ff ff 77 1c f4 89 f0 0f 05 <48> 3d 00 f0 ff ff 76 e7 f7 d8 64 41 89 00 eb df 0f 1f 80 00 00 00
+> [ 7285.078021] RSP: 002b:00007ffeee52db88 EFLAGS: 00000246 ORIG_RAX: 00000000000000e7
+> [ 7285.079995] RAX: ffffffffffffffda RBX: 00007f7906f39920 RCX: 00007f7906e35f49
+> [ 7285.081869] RDX: 000000000000003c RSI: 00000000000000e7 RDI: 0000000000000000
+> [ 7285.083729] RBP: 0000000000000000 R08: ffffffffffffff88 R09: 0000000000000001
+> [ 7285.085594] R10: fffffffffffffe2c R11: 0000000000000246 R12: 00007f7906f39920
+> [ 7285.087457] R13: 0000000000000001 R14: 00007f7906f3ee28 R15: 0000000000000000
+> [ 7285.089320]  </TASK>
+> [ 7285.089949] ---[ end trace 0000000000000000 ]---
+> [ 7285.091182] audit_panic: 22 callbacks suppressed
+> [ 7285.091185] audit: unrecoverable error in audit_syscall_entry()
+> 
+> Adn faddr_to_line tells me it is this:
+> 
+> void __audit_syscall_entry(int major, unsigned long a1, unsigned long a2,
+>                            unsigned long a3, unsigned long a4)
+> {
+>         struct audit_context *context = audit_context();
+>         enum audit_state     state;
+> 
+>         if (!audit_enabled || !context)
+>                 return;
+> 
+> >>>>>>  WARN_ON(context->context != AUDIT_CTX_UNUSED);  <<<<<<
+>         WARN_ON(context->name_count);
+>         if (context->context != AUDIT_CTX_UNUSED || context->name_count) {
+>                 audit_panic("unrecoverable error in audit_syscall_entry()");
+>                 return;
+>         }
+> .....
+> 
+> I have no clue how the audit subsystem works, I don't even know how
+> to enable it, and I've never seen audit messages on the console of
+> this test machine. I have other test machines that have audit
+> enabled, and they do not dump warnings like this - the only thing I
+> see in the logs for those machines is this:
+> 
+>  run xfstest generic/633
+>  process 'vfstest' launched '/dev/fd/4/file1' with NULL argv: empty string added
+>  XFS (pmem0): Unmounting Filesystem
+>  XFS (pmem0): Mounting V5 Filesystem
+>  XFS (pmem0): Ending clean mount
+>  run xfstest generic/634
+> 
+> That's waht I was seeing from this test machine earlier in the week,
+> too - I've been running 5.18-rc7 as the base kernel all week - so
+> I'm not sure .....
+> 
+> Oooooohhhh.
+> 
+> /* The per-task audit context. */
+> struct audit_context {
+>         int                 dummy;      /* must be the first element */
+>         enum {
+>                 AUDIT_CTX_UNUSED,       /* audit_context is currently unused */
+>                 AUDIT_CTX_SYSCALL,      /* in use by syscall */
+>                 AUDIT_CTX_URING,        /* in use by io_uring */
+>         } context;
+> ....
+> 
+> And that reminded me of something. I commented on #xfs on Friday
+> afternoon:
+> 
+> [20/5/22 15:04] <dchinner> so of the 3.5 hours run time on the machine that jsut completed, it looks like about a dozen tests are responsible for an hour of that runtime...
+> [20/5/22 15:05] <dchinner> but it was a clean run with no failures in 1055 tests run.
+> [20/5/22 15:06] <dchinner> But there's some WTFs like this in it:
+> [20/5/22 15:06] <dchinner> generic/678     [not run] kernel does not support IO_URING
+> [20/5/22 15:08] <dchinner> yet the same kernel on a different machine:
+> [20/5/22 15:08] <dchinner> generic/678 11s ...  3s
+> [20/5/22 15:08] <dchinner> and they have the same userspace, too....
+> 
+> Yeah, the machine that complained about "kernel does not support
+> IO_URING" is the one that is throwing these warnings now. It wasn't
+> that the kernel didn't support io-uring, it was that the machine was
+> missing the liburing-dev library. I installed it and rebuilt
+> fstests. These audit failures co-incide with the first test runs
+> with io-uring enabled. And vfstest uses io_uring if fstests enables
+> it.
+> 
+> Hence this now smells like a pre-existing issue -  either a test bug
+> or an io_uring task audit context leak. Anyone got any ideas?
 
-No of course not, that would not be productive.
-fixed_by_commit should be reserved to "proper" regression tests
-failing before fix, passing after fix
+I see this is unrelated to the test thankfully and can be considered
+fixed afaict.
 
-There could still be several fixed_by commits for different fs
-and for different regressions that were detected on different
-kernel versions.
-
-> randomly. Likes you record e4826691cc7e ("xfs: restore shutdown check in mapped
-> write fault path") into g/623, actually we found it by g/019 at first, then
-> write g/623 to cover that. So g/019 isn't the recommended case to record this
-> issue.
->
-
-Exactly. Good example.
-
-Thanks,
-Amir.
+Thanks for taking care of this everyone!
+Christian
