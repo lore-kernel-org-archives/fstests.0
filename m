@@ -2,126 +2,346 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9CC1C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 13:24:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79690C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 13:28:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237607AbiEXNYg (ORCPT
+        id S233811AbiEXN2a (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 09:24:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56858 "EHLO
+        Tue, 24 May 2022 09:28:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235573AbiEXNYd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 09:24:33 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BCABC1E3D9
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 06:24:31 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id B2C0C534566;
-        Tue, 24 May 2022 23:24:30 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1ntUWS-00FqLt-Pz; Tue, 24 May 2022 23:24:28 +1000
-Date:   Tue, 24 May 2022 23:24:28 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 3/8] xfs/*: clean up _cleanup override
-Message-ID: <20220524132428.GO2306852@dread.disaster.area>
-References: <20220524073411.1943480-1-david@fromorbit.com>
- <20220524073411.1943480-4-david@fromorbit.com>
- <CAOQ4uxgZwngHevX_FXytAi68k=aqp_N-8Buk50rrJKD0UoK+2g@mail.gmail.com>
- <20220524122703.GL2306852@dread.disaster.area>
- <CAOQ4uxifd8gee1JLG1FN9fF3aSsVeSEuxFqjAf4D8ruCciXWYg@mail.gmail.com>
+        with ESMTP id S233673AbiEXN23 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 09:28:29 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2C2F99685;
+        Tue, 24 May 2022 06:28:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1653398905;
+        bh=KkgrfHFDxocqVQTtDL+WqtOBrGmgcXBZUiemoXpMmbE=;
+        h=X-UI-Sender-Class:Date:To:Cc:References:From:Subject:In-Reply-To;
+        b=gQOygaNreapnXSLo8j1CWeeWo7Y+iTegmDO+Dk4+YG2ceF2IqdpkeRzCcvXKJepT0
+         GBijM7HHZc+OrseCBBupNrTPYYV38OLAv91h5aeuH35FLoS6db4Y43cM+wnxNX67lJ
+         SVld0CIDnHsMXJomatW7Hbwt0rKPYrxML3+LnL5k=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1M72sJ-1nvO7j3MOF-008db1; Tue, 24
+ May 2022 15:28:25 +0200
+Message-ID: <6b7fa64f-7a20-639f-3820-edf52b4813f2@gmx.com>
+Date:   Tue, 24 May 2022 21:28:21 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxifd8gee1JLG1FN9fF3aSsVeSEuxFqjAf4D8ruCciXWYg@mail.gmail.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=628cdc8f
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=7-415B0cAAAA:8
-        a=22LgSLcDW-_urOX6tr8A:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.0
+Content-Language: en-US
+To:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+References: <20220524071838.715013-1-hch@lst.de>
+ <20220524071838.715013-9-hch@lst.de>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Subject: Re: [PATCH 8/9] btrfs: test repair with sectors corrupted in multiple
+ mirrors
+In-Reply-To: <20220524071838.715013-9-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:7PzE4dah5eQB+5j5CRHSRxfAvtUPGEBRE7w1oVgWocONXDmSTFL
+ vPN1SgDsFYKa+YnWC9nMHEqGdSaZ8PC+VcpB0tOCVPew+ife7JtOvfy0843eRPkUSRDagcm
+ I4UFBvm0DkM+mhIRtWN4cA/OeHmWrZ+HKPDYVJVNUVUNU2Oq98Uq0LAes/yAfeD1LKdqsh0
+ hf/VRNFq1oXBgE+XuuIZg==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:HSPR82JQL2c=:fBUqslTA/t9ZldWqo1Jb7f
+ M6VSlBEyWTj7UPy3tyC1bD6qpcvE+AzhdRMgoZdSU+hynrP4X4f3bqY6Q61sHdbuCKRSQl3Ap
+ vCcmsFtWP0uv67yilD+vN4qkgrDlTtdNL/g9TsgBYBljRBdGP5Qem529eR/J1zhuAwkB9AGaE
+ Kef0bvxNk37je5v7aPCv8XUhdofUOxtUd54ApYQ0BgxruAtYSbd3PpNL/pRenInB5rcobwsny
+ LggkaCqTLK2cyFVoN0zQaq2+ZLf13EQFO4BqGOz6O54vO3UWwO7G/TImo7AQ3rV7hg1O0bQYV
+ nhZeqsYBv9gJFy1PPOp3kDhEKte1A2/P+eyGIqwDJkXx7KZLe2lUkcg2MUmzr6krAQan+IZUC
+ KGDi/7NXkhkP3ujkDd6f3Q2YETrIu9/3DYCxRavp3Pri/9kaujdqXXo2xPsM/qgGbRyWwYNpK
+ ZRv6SNDf36rAt0eEdRfNlFtxZoJtK6AOiGeYwUjQfj6NNOqGUSFrQ7VYKSlLyHnyG2YSKp/Ad
+ lw7pNuvk6IOIDe7QJJDABKnEZftJfxeHDvG6o1nQXhpZQNIFC37bzkkY8aXSuOm3nQzvRCCp9
+ x7mhTRTV/FG+7rap/BEHeELVNxUchK+pKKvtjjSnXXX2SDjsN1cAWrfSibUbZNsCtYH9h13GA
+ vsh4DCUrjobVBbYllu0r0+VHjXnWB00DVB+MI9KOTc6sEErIip5RS1OSyRv0XYwKVDH43NPeW
+ adQI9zTCxsO9xfMABUTbi2L8Sg28bCX8wNJ9EW64J3vg8GLKq7JKYCB1Ex54mk8QVOYBZoXdJ
+ UhbV7FVT6Wj3gdicnZEXWnddq3Gt6Zxhjuz6rrHK+iOF7RC8JHLxTRPCHsabLm/N2Ck7hD6Hd
+ newZaNbb9vA7yCpzzTA0yI4rJjmoSsdTERZ0bYEZQDQBRSElQk3Jxd4KziPkVoPrQoQrmuXoy
+ FJACslUk/Yw4IYccOf+rAbHXprti9a93HFcmIvBu2OJiyVoDHdqFPlXgP/87D/W5gh1apH7ly
+ 20MI9AZr+mEZBvPHfaSxVyrV1ElTVwjQDTqvfHVPweT5tEymbz4HSq1LA93/BHQS2bFJVTHO3
+ Prccv1E+R6Ca/ucOLydbpWdLJlmcmxpFCI7gYZ0ZDYaebF/wy75MoorRw==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 24, 2022 at 03:55:47PM +0300, Amir Goldstein wrote:
-> > > > diff --git a/tests/xfs/310 b/tests/xfs/310
-> > > > index 3214e04b..c635b39a 100755
-> > > > --- a/tests/xfs/310
-> > > > +++ b/tests/xfs/310
-> > > > @@ -9,14 +9,12 @@
-> > > >  . ./common/preamble
-> > > >  _begin_fstest auto clone rmap
-> > > >
-> > > > -# Override the default cleanup function.
-> > > > -_cleanup()
-> > > > +_dmhuge_cleanup()
-> > > >  {
-> > > > -       cd /
-> > > > -       umount $SCRATCH_MNT > /dev/null 2>&1
-> > > >         _dmhugedisk_cleanup
-> > > > -       rm -rf $tmp.*
-> > > > +       _cleanup
-> > > >  }
-> > > > +_register_cleanup _dmhuge_cleanup
-> > >
-> > > Maybe it's just me, but if the intention is to maybe make this
-> > > function global someday then the difference with the name
-> > > _dmhugedisk_cleanup() is confusing.
-> >
-> > The names I used here are for classification, so I can grep over
-> > the _register_cleanup line and easily determine all the tests use
-> > loop devices, dmflakey, dmerror, etc and then consolidate them all
-> > into a single cleanup function that works for them all. This is just
-> > the first step in that process.
-> >
-> > > I'd rather keep the local function name local_cleanup
-> > > in unclear cases like this one.
-> >
-> > And that defeats the entire purpose of giving them a descriptive
-> > name at this point in time.
-> 
-> I understand. It makes a lot of sense to do that.
-> It is still VERY confusing that there is a helper _dmhugedisk_cleanup
-> that SHOULD NOT be used as a trap and a helper _dmhuge_cleanup
-> that SHOULD be used as a trap, so a better convention is needed.
 
-I think you missed my point.
 
-_dmhuge_cleanup() is a *temporary name*.
+On 2022/5/24 15:18, Christoph Hellwig wrote:
+> Test that repair handles the case where it needs to read from more than
+> a single mirror on the raid1c3 profile.
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-It will *go away* once I've processed the other 1000 tests which
-will also classify anything using dmhugedisk with a _dmhuge_cleanup
-function. It's a temporary token I can use for further
-classification and deduplication, nothing more, nothing less.
+Reviewed-by: Qu Wenruo <wqu@suse.com>
 
-> I suggest that all consolidated helpers for trap will be called
-> either _cleanup_* (like cleanup_dump) or _*_cleanup (like _fsstress_cleanup)
-> 
-> The problem is that there is no convetion in the common/* helpers.
-> there are _dmhugedisk_cleanup() _dmerror_cleanup() and there are
-> _cleanup_dump() _cleanup_delay().
+Just a cosmetic nitpick inlined below.
 
-Exactly the reason why I've used simple names and the only
-consistency I care about is that I use the same name for the same
-subsystem cleanup functions. I can't give them globally consistent
-names at this point and because they are temporary tokens I simply
-have not tried. I give it a name, copy the function into a register
-buffer, and then paste it into any other test that uses the same
-subsystem and has the same cleanup requirements.
+> ---
+>   tests/btrfs/265     | 86 +++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/265.out | 75 +++++++++++++++++++++++++++++++++++++++
+>   2 files changed, 161 insertions(+)
+>   create mode 100755 tests/btrfs/265
+>   create mode 100644 tests/btrfs/265.out
+>
+> diff --git a/tests/btrfs/265 b/tests/btrfs/265
+> new file mode 100755
+> index 00000000..b243ba0b
+> --- /dev/null
+> +++ b/tests/btrfs/265
+> @@ -0,0 +1,86 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+> +# Copyright (c) 2022 Christoph Hellwig.
+> +#
+> +# FS QA Test 265
+> +#
+> +# Test that btrfs raid repair on a raid1c3 profile can repair corruptio=
+n on two
+> +# mirrors for the same logical offset.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick read_repair
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_require_scratch_dev_pool 3
+> +
+> +_require_odirect
+> +# Overwriting data is forbidden on a zoned block device
+> +_require_non_zoned_device "${SCRATCH_DEV}"
+> +
+> +_scratch_dev_pool_get 3
+> +# step 1, create a raid1 btrfs which contains one 128k file.
+> +echo "step 1......mkfs.btrfs"
+> +
+> +mkfs_opts=3D"-d raid1c3 -b 1G"
+> +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+> +
+> +# make sure data is written to the start position of the data chunk
 
-Once I have all the tests that use dmhugedisk converted to use a
-local _dmhuge_cleanup function, I'll derive the commonality from
-them, move it into the existing cleanup function for that subsystem,
-and register the subsystem cleanup in those tests. _dmhuge_cleanup()
-then goes away forever.
+This comment is definitely from old test cases.
 
-Once everythign is deduplicated and common, changing names will be
-simple and straight forward. That's when you can argue all you want
-over the names of functions and I won't care one bit.
+Now it's obsolete in several ways:
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+- We have solid reasons that btrfs can write the new data into the
+   middle of an empty chunk
+
+   The full details explanation can be found here:
+
+https://lore.kernel.org/linux-btrfs/e636ebd2-2e67-0e94-9758-925df5a89557@g=
+mx.com/T/#u
+
+- Now with the new helpers, we no longer relies on the extent layout
+
+So we don't need the comment, nor the `_btrfs_no_v1_cache_opt` here.
+
+Thanks,
+Qu
+
+> +_scratch_mount $(_btrfs_no_v1_cache_opt)
+> +
+> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" \
+> +	"$SCRATCH_MNT/foobar" | \
+> +	_filter_xfs_io_offset
+> +
+> +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is th=
+e first
+> +# one in $SCRATCH_DEV_POOL
+> +echo "step 2......corrupt file extent"
+> +
+> +# ensure btrfs-map-logical sees the tree updates
+> +sync
+> +
+> +logical=3D$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
+> +
+> +physical1=3D$(_btrfs_get_physical ${logical} 1)
+> +devpath1=3D$(_btrfs_get_device_path ${logical} 1)
+> +
+> +physical2=3D$(_btrfs_get_physical ${logical} 2)
+> +devpath2=3D$(_btrfs_get_device_path ${logical} 2)
+> +
+> +_scratch_unmount
+> +
+> +echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
+> +	>> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0xbf -b 64K $physical1 64K" $devpath1 \
+> +	> /dev/null
+> +
+> +echo " corrupt stripe #2, devpath $devpath2 physical $physical2" \
+> +	>> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0xbf -b 64K $physical2 64K" $devpath2 \
+> +	> /dev/null
+> +
+> +_scratch_mount
+> +
+> +# step 3, 128k dio read (this read can repair bad copy)
+> +echo "step 3......repair the bad copy"
+> +
+> +_btrfs_direct_read_on_mirror 0 3 "$SCRATCH_MNT/foobar" 0 128K
+> +_btrfs_direct_read_on_mirror 1 3 "$SCRATCH_MNT/foobar" 0 128K
+> +
+> +_scratch_unmount
+> +
+> +echo "step 4......check if the repair worked"
+> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical1 512" $devpath1 |\
+> +	_filter_xfs_io_offset
+> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical2 512" $devpath2 |\
+> +	_filter_xfs_io_offset
+> +
+> +_scratch_dev_pool_put
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/265.out b/tests/btrfs/265.out
+> new file mode 100644
+> index 00000000..c62c7a39
+> --- /dev/null
+> +++ b/tests/btrfs/265.out
+> @@ -0,0 +1,75 @@
+> +QA output created by 265
+> +step 1......mkfs.btrfs
+> +wrote 131072/131072 bytes
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +step 2......corrupt file extent
+> +step 3......repair the bad copy
+> +step 4......check if the repair worked
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +read 512/512 bytes
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ...........=
+.....
+> +read 512/512 bytes
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
