@@ -2,142 +2,127 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27F9FC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 09:37:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B8F0C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 09:41:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232468AbiEXJhD (ORCPT
+        id S234801AbiEXJll (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 05:37:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52192 "EHLO
+        Tue, 24 May 2022 05:41:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59110 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231389AbiEXJhC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 05:37:02 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38D7B5FF36;
-        Tue, 24 May 2022 02:37:01 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id EACA721A0D;
-        Tue, 24 May 2022 09:36:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1653385019; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=zfwiGjNM3p3HtaGKIb/6Lplo3Li0ltaC5AAPXmo1aPw=;
-        b=0z9/d9BcptszSOdjmFD5ZspRf8I77Nwqmt7MSpuY8JdeGeIbutimoRjrtpO6nY8LMZUCeU
-        ZYvLCcGaCQL8V04lUrNZ/C5IagR4Y/Dzo/oeC0EvgS2cu042/ZPUWFd1M4U3U6D6a7POOV
-        4WV8mdhoxR5hsz3wSUHqAQsMEccsJMs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1653385019;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=zfwiGjNM3p3HtaGKIb/6Lplo3Li0ltaC5AAPXmo1aPw=;
-        b=WX7KvnVdudRDt6i/BxUzsIkooE4dgOKhh9XHb80slQaCKh/IwoQ1srpFUMtLUQMniIZ09Q
-        XuHJAUeX9RA8pwCQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id ADC6413ADF;
-        Tue, 24 May 2022 09:36:59 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id BYe3JzunjGKaCAAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 24 May 2022 09:36:59 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 44e5405e;
-        Tue, 24 May 2022 09:37:37 +0000 (UTC)
-From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH] ceph/001: skip metrics check if no copyfrom mount
- option is used
-References: <20220520105055.31520-1-lhenriques@suse.de>
-        <20220524044507.m3drhwpn2orfp7my@zlang-mailbox>
-        <20220524050436.qe4kc7bacm6hp54d@zlang-mailbox>
-Date:   Tue, 24 May 2022 10:37:37 +0100
-In-Reply-To: <20220524050436.qe4kc7bacm6hp54d@zlang-mailbox> (Zorro Lang's
-        message of "Tue, 24 May 2022 13:04:36 +0800")
-Message-ID: <87tu9fl19a.fsf@brahms.olymp>
+        with ESMTP id S232194AbiEXJlj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 05:41:39 -0400
+Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE91424591
+        for <fstests@vger.kernel.org>; Tue, 24 May 2022 02:41:37 -0700 (PDT)
+Received: by mail-qv1-xf2a.google.com with SMTP id y11so388624qvr.9
+        for <fstests@vger.kernel.org>; Tue, 24 May 2022 02:41:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Jr6BCQ94k8f/M0treLz3jfkwjPg1Xj6KNnjA6IkVo0s=;
+        b=alMg2VApxv9eSKkVFaN8kA5tWESQ95DI0yN/I6JRZe8qbjDlKXTZ3pXYK2dq50pfKK
+         A3K+wCWBnetfUNW+euDVuANjncfH3AfFrAzpV1fMNgVwJ8z85s93WHw7mHkRgAd4dzwj
+         siO6o/HVDc77QClEBVOzvhHl0SJcfhG1Zf1TnM/D8hVSpFQn/oXg3Nfkg9/LRsAGRW65
+         ftPzOwh8DMLl7q+EOiMNLnFsC3D4wyKz/bGMGJQ9Owat9ZbBOmpTWae/f0nL43J//uFx
+         wuq7ksRxuOjvAqhAzya3JpsKHHrXHRHkf004i91jSugGsSWT8VrXYLvP+4+SpXZNofxz
+         4r+g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Jr6BCQ94k8f/M0treLz3jfkwjPg1Xj6KNnjA6IkVo0s=;
+        b=ybRR81Dj7HnZDqHDwu1AvZibzk/kEVlNUoltwlOClL6N2K5LG9O+CY3aHZmM6gv4eC
+         YgEy59dNtR/qJ7FFb3YlK9yd6ZAhKdqr3YwZjjg8qmydh6R9MhP+Fod1pxn1iPJL5egv
+         VmJIii+TKcxNAmhOsRmOQhGdKMz4KiSmp87DmtH8df7KX2l/jrpgNI4spGRu/6x8Pr1f
+         RXxiuzINulmyvXO200ZtH6CzPBvPt3AvB2kIPbCiP5/5Mhy/X1js9eNrf8saMssgq1mU
+         M3xq+4Ntori49QR/uODNQVJtZeZdeau32dMok4WAFgmKor7BP55aIHuVvKym96DCtE6l
+         6j8g==
+X-Gm-Message-State: AOAM533/JIsJy8wZeXcw3HYE0dhh5k5NuUJX4BohoakXBRKanpgy1i2q
+        5I8GO1IL4dF3KPFdMsKxfMAFQ7yO8vAVHX+oZP11oo2pCgXROQ==
+X-Google-Smtp-Source: ABdhPJxSvdQjPsDxTeo9A4wOmO+O+PLaOWW5DJiYVKDfd1jYU62DCyOpwi+C/nHm9/eoD9nlIQVMKnNm+ANPhDNjxGQ=
+X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id
+ g4-20020a0562141cc400b0043535c3f0f1mr20518059qvd.0.1653385297116; Tue, 24 May
+ 2022 02:41:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+References: <20220524073411.1943480-1-david@fromorbit.com> <20220524073411.1943480-2-david@fromorbit.com>
+In-Reply-To: <20220524073411.1943480-2-david@fromorbit.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Tue, 24 May 2022 12:41:25 +0300
+Message-ID: <CAOQ4uxhqGEYgMYGuFsFV_AtuwyJhpzRrZw2rYDo-Dn_xziOYZw@mail.gmail.com>
+Subject: Re: [PATCH 1/8] generic/038: kill background threads on interrupt
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Zorro Lang <zlang@redhat.com> writes:
-
-> On Tue, May 24, 2022 at 12:45:07PM +0800, Zorro Lang wrote:
->> On Fri, May 20, 2022 at 11:50:55AM +0100, Lu=C3=ADs Henriques wrote:
->> > Checking the metrics is only valid if 'copyfrom' mount option is
->> > explicitly set, otherwise the kernel won't be doing any remote object
->> > copies.  Fix the logic to skip this metrics checking if 'copyfrom' isn=
-'t
->> > used.
->> >=20
->> > Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
->> > ---
->>=20
->> The code logic looks good to me, but I'm not familiar with cephfs, so if=
- there's
->> not review points or objection from ceph-fs, I'll merge this patch this =
-week.
->>=20
->> Reviewed-by: Zorro Lang <zlang@redhat.com>
->>=20
->> Thanks,
->> Zorro
->>=20
->> >  tests/ceph/001 | 4 ++++
->> >  1 file changed, 4 insertions(+)
->> >=20
->> > diff --git a/tests/ceph/001 b/tests/ceph/001
->> > index 7970ce352bab..2e6a5e6be2d6 100755
->> > --- a/tests/ceph/001
->> > +++ b/tests/ceph/001
->> > @@ -86,11 +86,15 @@ check_copyfrom_metrics()
->> >  	local copies=3D$4
->> >  	local c1=3D$(get_copyfrom_total_copies)
->> >  	local s1=3D$(get_copyfrom_total_size)
->> > +	local hascopyfrom=3D$(_fs_options $TEST_DEV | grep "copyfrom")
+On Tue, May 24, 2022 at 12:12 PM Dave Chinner <david@fromorbit.com> wrote:
 >
-> Oh, I forgot to metion that:
+> From: Dave Chinner <dchinner@redhat.com>
 >
-> I don't know what's the mount option output format at here, can't sure if
-> "grep -w" is needed, or need special pattern.
-
-I don't think there's a need for the '-w' here; the mount option is
-exactly that string:
-
-192.168.155.1:40768:/ on /mnt type ceph (rw,relatime,name=3Duser,secret=3D<=
-hidden>,acl,copyfrom)
-
->> >  	local sum
->> >=20=20
->> >  	if [ ! -d $metrics_dir ]; then
->> >  		return # skip metrics check if debugfs isn't mounted
->> >  	fi
->> > +	if [ -z $hascopyfrom ]; then
+> When I ctrl-c g/038, it either does nothing or it leaves processes
+> running in the background. It is not cleaning up it's background
+> processes correctly, so add kill vectors into the cleanup. Make sure
+> we only kill in the cleanup trap if the background processes are
+> running.
 >
-> I think better to use quotes ("$hascopyfrom") at here.
-
-I'll send v2 with that changed.  Thank you for your feedback.
-
-Cheers,
---=20
-Lu=C3=ADs
-
->> > +		return # ... or if we don't have copyfrom mount option
->> > +	fi
->> >=20=20
->> >  	sum=3D$(($c0+$copies))
->> >  	if [ $sum -ne $c1 ]; then
->> >=20
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  tests/generic/038 | 16 ++++++++++------
+>  1 file changed, 10 insertions(+), 6 deletions(-)
 >
+> diff --git a/tests/generic/038 b/tests/generic/038
+> index c6cea94e..0462ea13 100755
+> --- a/tests/generic/038
+> +++ b/tests/generic/038
+> @@ -36,6 +36,10 @@ _begin_fstest auto stress trim
+>  # Override the default cleanup function.
+>  _cleanup()
+>  {
+> +       [ -n "${create_pids}" ] && kill ${create_pids[@]}
+> +       [ -n "${fallocate_pids}" ] && kill ${fallocate_pids[@]}
+> +       [ -n "${trim_pids}" ] && kill ${trim_pids[@]}
+> +       wait
 
+Following the pattern of recently fixed generic/019,
+Please redirect stderr of kill to /dev/null
+and I think we would rather not wait in cleanup callbacks
+which could potentially block forever?
+
+>         rm -fr $tmp
+
+I suppose another patch is going to replace that with the proper _cleanup()?
+Patches from vger have been VERY slowly trickling into my mailbox.
+
+>  }
+>
+> @@ -47,6 +51,8 @@ _supported_fs generic
+>  _require_scratch
+>  _require_xfs_io_command "falloc"
+>
+> +echo "Silence is golden"
+> +
+>  # Keep allocating and deallocating 1G of data space with the goal of creating
+>  # and deleting 1 block group constantly. The intention is to race with the
+>  # fstrim loop below.
+> @@ -121,6 +127,7 @@ _scratch_mount
+>  _require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
+>  _require_batched_discard $SCRATCH_MNT
+>
+> +
+>  for ((i = 0; i < $((4 * $LOAD_FACTOR)); i++)); do
+>         trim_loop &
+>         trim_pids[$i]=$!
+> @@ -136,12 +143,9 @@ create_files "foobar"
+>  kill ${fallocate_pids[@]}
+>  kill ${trim_pids[@]}
+>  wait
+> +unset create_pids
+
+This one should be moved up to after the wait in  create_files()
+
+Thanks,
+Amir.
