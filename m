@@ -2,127 +2,100 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B8F0C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 09:41:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 467EBC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 09:42:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234801AbiEXJll (ORCPT
+        id S231156AbiEXJmX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 05:41:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59110 "EHLO
+        Tue, 24 May 2022 05:42:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33320 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232194AbiEXJlj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 05:41:39 -0400
-Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE91424591
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 02:41:37 -0700 (PDT)
-Received: by mail-qv1-xf2a.google.com with SMTP id y11so388624qvr.9
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 02:41:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Jr6BCQ94k8f/M0treLz3jfkwjPg1Xj6KNnjA6IkVo0s=;
-        b=alMg2VApxv9eSKkVFaN8kA5tWESQ95DI0yN/I6JRZe8qbjDlKXTZ3pXYK2dq50pfKK
-         A3K+wCWBnetfUNW+euDVuANjncfH3AfFrAzpV1fMNgVwJ8z85s93WHw7mHkRgAd4dzwj
-         siO6o/HVDc77QClEBVOzvhHl0SJcfhG1Zf1TnM/D8hVSpFQn/oXg3Nfkg9/LRsAGRW65
-         ftPzOwh8DMLl7q+EOiMNLnFsC3D4wyKz/bGMGJQ9Owat9ZbBOmpTWae/f0nL43J//uFx
-         wuq7ksRxuOjvAqhAzya3JpsKHHrXHRHkf004i91jSugGsSWT8VrXYLvP+4+SpXZNofxz
-         4r+g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Jr6BCQ94k8f/M0treLz3jfkwjPg1Xj6KNnjA6IkVo0s=;
-        b=ybRR81Dj7HnZDqHDwu1AvZibzk/kEVlNUoltwlOClL6N2K5LG9O+CY3aHZmM6gv4eC
-         YgEy59dNtR/qJ7FFb3YlK9yd6ZAhKdqr3YwZjjg8qmydh6R9MhP+Fod1pxn1iPJL5egv
-         VmJIii+TKcxNAmhOsRmOQhGdKMz4KiSmp87DmtH8df7KX2l/jrpgNI4spGRu/6x8Pr1f
-         RXxiuzINulmyvXO200ZtH6CzPBvPt3AvB2kIPbCiP5/5Mhy/X1js9eNrf8saMssgq1mU
-         M3xq+4Ntori49QR/uODNQVJtZeZdeau32dMok4WAFgmKor7BP55aIHuVvKym96DCtE6l
-         6j8g==
-X-Gm-Message-State: AOAM533/JIsJy8wZeXcw3HYE0dhh5k5NuUJX4BohoakXBRKanpgy1i2q
-        5I8GO1IL4dF3KPFdMsKxfMAFQ7yO8vAVHX+oZP11oo2pCgXROQ==
-X-Google-Smtp-Source: ABdhPJxSvdQjPsDxTeo9A4wOmO+O+PLaOWW5DJiYVKDfd1jYU62DCyOpwi+C/nHm9/eoD9nlIQVMKnNm+ANPhDNjxGQ=
-X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id
- g4-20020a0562141cc400b0043535c3f0f1mr20518059qvd.0.1653385297116; Tue, 24 May
- 2022 02:41:37 -0700 (PDT)
+        with ESMTP id S232220AbiEXJmV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 05:42:21 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9A6E52E5F;
+        Tue, 24 May 2022 02:42:20 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 649D721A11;
+        Tue, 24 May 2022 09:42:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1653385339; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=a1J5PSMp3r+wQWg4I2gAw29QQ98Ls3q2zeFV14zGoIQ=;
+        b=Y+qF1t9L5puitqy+nnZynN1htGHDzCGInOH5G2xZZvefqtJZyLV0w2ZA5sTQ384gWLkHaE
+        vkT01rHe6zqnd/00+wWaA6eQwPaOJ3j45aHr4S/WuNrKFinlxWwWl529cw3F6XUWZ9wI8c
+        XaNMRNV4Vho2HQoIc1Tl0m2tbUFJoX0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1653385339;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=a1J5PSMp3r+wQWg4I2gAw29QQ98Ls3q2zeFV14zGoIQ=;
+        b=h06JboV5wP4YUd/QzktlATWjv177YWVReQNSGWwWmzHjMm2DXOqS5tB6ElNmBri9LubFZj
+        qBe/1Ik792cMToBw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 2663913ADF;
+        Tue, 24 May 2022 09:42:19 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 9miNBnuojGJXCwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 24 May 2022 09:42:19 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 6875f8d8;
+        Tue, 24 May 2022 09:42:57 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v2] ceph/001: skip metrics check if no copyfrom mount option is used
+Date:   Tue, 24 May 2022 10:42:56 +0100
+Message-Id: <20220524094256.16746-1-lhenriques@suse.de>
 MIME-Version: 1.0
-References: <20220524073411.1943480-1-david@fromorbit.com> <20220524073411.1943480-2-david@fromorbit.com>
-In-Reply-To: <20220524073411.1943480-2-david@fromorbit.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 24 May 2022 12:41:25 +0300
-Message-ID: <CAOQ4uxhqGEYgMYGuFsFV_AtuwyJhpzRrZw2rYDo-Dn_xziOYZw@mail.gmail.com>
-Subject: Re: [PATCH 1/8] generic/038: kill background threads on interrupt
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 24, 2022 at 12:12 PM Dave Chinner <david@fromorbit.com> wrote:
->
-> From: Dave Chinner <dchinner@redhat.com>
->
-> When I ctrl-c g/038, it either does nothing or it leaves processes
-> running in the background. It is not cleaning up it's background
-> processes correctly, so add kill vectors into the cleanup. Make sure
-> we only kill in the cleanup trap if the background processes are
-> running.
->
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/generic/038 | 16 ++++++++++------
->  1 file changed, 10 insertions(+), 6 deletions(-)
->
-> diff --git a/tests/generic/038 b/tests/generic/038
-> index c6cea94e..0462ea13 100755
-> --- a/tests/generic/038
-> +++ b/tests/generic/038
-> @@ -36,6 +36,10 @@ _begin_fstest auto stress trim
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +       [ -n "${create_pids}" ] && kill ${create_pids[@]}
-> +       [ -n "${fallocate_pids}" ] && kill ${fallocate_pids[@]}
-> +       [ -n "${trim_pids}" ] && kill ${trim_pids[@]}
-> +       wait
+Checking the metrics is only valid if 'copyfrom' mount option is
+explicitly set, otherwise the kernel won't be doing any remote object
+copies.  Fix the logic to skip this metrics checking if 'copyfrom' isn't
+used.
 
-Following the pattern of recently fixed generic/019,
-Please redirect stderr of kill to /dev/null
-and I think we would rather not wait in cleanup callbacks
-which could potentially block forever?
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ tests/ceph/001 | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
->         rm -fr $tmp
+Changes since v1:
+- Quoted 'hascopyfrom' variable in 'if' statement; while there, added
+  quotes to the 'if' statement just above.
 
-I suppose another patch is going to replace that with the proper _cleanup()?
-Patches from vger have been VERY slowly trickling into my mailbox.
-
->  }
->
-> @@ -47,6 +51,8 @@ _supported_fs generic
->  _require_scratch
->  _require_xfs_io_command "falloc"
->
-> +echo "Silence is golden"
-> +
->  # Keep allocating and deallocating 1G of data space with the goal of creating
->  # and deleting 1 block group constantly. The intention is to race with the
->  # fstrim loop below.
-> @@ -121,6 +127,7 @@ _scratch_mount
->  _require_fs_space $SCRATCH_MNT $((10 * 1024 * 1024))
->  _require_batched_discard $SCRATCH_MNT
->
-> +
->  for ((i = 0; i < $((4 * $LOAD_FACTOR)); i++)); do
->         trim_loop &
->         trim_pids[$i]=$!
-> @@ -136,12 +143,9 @@ create_files "foobar"
->  kill ${fallocate_pids[@]}
->  kill ${trim_pids[@]}
->  wait
-> +unset create_pids
-
-This one should be moved up to after the wait in  create_files()
-
-Thanks,
-Amir.
+diff --git a/tests/ceph/001 b/tests/ceph/001
+index 7970ce352bab..060c4c450091 100755
+--- a/tests/ceph/001
++++ b/tests/ceph/001
+@@ -86,11 +86,15 @@ check_copyfrom_metrics()
+ 	local copies=$4
+ 	local c1=$(get_copyfrom_total_copies)
+ 	local s1=$(get_copyfrom_total_size)
++	local hascopyfrom=$(_fs_options $TEST_DEV | grep "copyfrom")
+ 	local sum
+ 
+-	if [ ! -d $metrics_dir ]; then
++	if [ ! -d "$metrics_dir" ]; then
+ 		return # skip metrics check if debugfs isn't mounted
+ 	fi
++	if [ -z "$hascopyfrom" ]; then
++		return # ... or if we don't have copyfrom mount option
++	fi
+ 
+ 	sum=$(($c0+$copies))
+ 	if [ $sum -ne $c1 ]; then
