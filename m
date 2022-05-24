@@ -2,107 +2,209 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44396C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 13:07:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 498C3C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 13:19:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237567AbiEXNHw (ORCPT
+        id S236306AbiEXNT0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 09:07:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56426 "EHLO
+        Tue, 24 May 2022 09:19:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45960 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237563AbiEXNHv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 09:07:51 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 387E892D18
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 06:07:48 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 0F5E110E6AAA;
-        Tue, 24 May 2022 23:07:46 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1ntUGH-00FqAp-B1; Tue, 24 May 2022 23:07:45 +1000
-Date:   Tue, 24 May 2022 23:07:45 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 6/8] fstests: consolidate no cleanup test setup
-Message-ID: <20220524130745.GN2306852@dread.disaster.area>
-References: <20220524073411.1943480-1-david@fromorbit.com>
- <20220524073411.1943480-7-david@fromorbit.com>
- <CAOQ4uxg9L2kcnWsVO_bmLK7N9M1VgiEbYVgjkym4P7MB0DoX2g@mail.gmail.com>
+        with ESMTP id S237747AbiEXNTQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 09:19:16 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7A799CF01;
+        Tue, 24 May 2022 06:18:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1653398337;
+        bh=65EdXG8iYMrMIEQ7HLnTZMGlbH5pyG8cM0vD7JOgwbQ=;
+        h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
+        b=dX+xbz59PNh/LqkZcOD+E1JekEohA1uba5qTHLDScx+Plwo4duB+12m6xZi/xelTm
+         iONwAgAlGow0SgIKcECsJd/BPAOEGwT/122cc4xdwnrnDHKd6RixBm43lA9zJguixZ
+         ggbLkd4zGTApL8gKF0VJbNKPxnEvBJBu34mlwXKM=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MgNh7-1nM3VH2vaJ-00hvo9; Tue, 24
+ May 2022 15:18:57 +0200
+Message-ID: <2f850377-0adf-cdf3-9fc6-02136b9a5282@gmx.com>
+Date:   Tue, 24 May 2022 21:18:53 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxg9L2kcnWsVO_bmLK7N9M1VgiEbYVgjkym4P7MB0DoX2g@mail.gmail.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=deDjYVbe c=1 sm=1 tr=0 ts=628cd8a3
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=7-415B0cAAAA:8 a=20KFwNOVAAAA:8
-        a=SUe3QKap5zjqsWnMLe0A:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.0
+Subject: Re: [PATCH 1/9] btrfs: add a helpers for read repair testing
+Content-Language: en-US
+To:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+References: <20220524071838.715013-1-hch@lst.de>
+ <20220524071838.715013-2-hch@lst.de>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+In-Reply-To: <20220524071838.715013-2-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:C8pNVj46ee9TCixlNoMksNkxN/gqS8s+osICdMnc3Wxn2xYMOYg
+ gQr6q9c5EGvuZjBbMsfd5FLgSZgWLyah7zWJtuXmegmtiqZh8+/42KkHWaeWKeZ6HYB5elp
+ cIDDL0BWiuWQ8VPsJdq2ky7/wJbDKQyxgWcvInfySydDoKgwrxMUQaORbIJQpeNQjMuF0j7
+ RSlGqDSTzGQxpHk10tXTg==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:mAGPqYuaeok=:7PsQ9h2W992VoufJeJ90wW
+ rPPnFyrA5C34P2n8SzJJcf9sDc+ly4mRoKO/ETk7QUfSGHrTGubXuAhG3rp+2s12kr8FetpPZ
+ knToPVnRJ+9oNZdotA2W4q7UhG9kUZd339FOWZa8mur5tw0Pgybzu0vzpN+M0MYHmziAn9JuL
+ A7V8Lhy6JzAnALW1tz0OGKWBndmSAuvy6FpOctxOmBG7WGrHq3Q6XUjOAD5/rwFTCAcqp4mTu
+ uAecp84KGiyfiyI0hZlmF1fCgkMVO2LbJhv4IxW0yEFzlxRyqSgFmM6j2DxZN0D5dG0JfrTT9
+ Im0Gb+4cPZSoV7NH7pV8KGDYybO7T08Jxow8TmBA3Y4LQ1xtkEiQe+E2PHyYga44ZOIaz3+rP
+ kilaRfx2sTiFH8jxpNsX+LMH4KqUCBGYy3bgFTix3giVtVo6mVqbNK1xJ308VL6kCzIYIwnZ4
+ YTjHkelMBOW9p+7NHkUOLfhguph9ejAcQhIFFldyr8SMEo+VRczTdMYmWdMeM1rNSd/j2j+sS
+ fp3qCJx/S9gs9lIkX6aLv2zFZMXC16mLqwER9s4Phl6A4r7UlgjBWXYPmyahoePigJFaf7inS
+ 5dBBxk1Kdps0P4qsiqEGKumLYOhUegNlUr+tO73JCbAONf5okkTJYWUhJ3PUz76qvdp100xHR
+ ManCPTqk/cU7GBACQvWgB3Sdvv9yDfBsLTzQQMLBvQMy1B7toG+jYLhqzgdelfUWKMHxzq161
+ MIBEbMZ+G1rEQm+C0xUlHsEfMgLoWp1WeGv4j0m3ryT+Q/FXWhQMGeSiZVTn1hoA+86Njejh2
+ z8N7HYJqAq+bBlu4NYog5+ZxFkRh7Fgvhj+sW7G+nCE7r0pJbI6OGvgzMk5KmYBziaBn9zcOi
+ bkJqwsn7ECuWlrApjdBcWcI4e7zTSVmCB9Ezx7sWy2jfpEkYwI+5Rv2w1IzsgVOMShd9Gcdw+
+ epM5fa8To6Lce1K/aYCMfO7yA6R0oesJ1vBopl5GUTAeSA8mNncku+z2mTB9afokXOmpo0vGS
+ x7SMKZ1K5XMhbJg7fERrP2NpSxPRr7+EvVLYGgiBu9GndEeJjwvHrc7hCBMPqhuTl/sEkXbpP
+ a1B1ZOh9X5p0pTFBZniKPwCPtA46qFhImMSvNMF+h1nKnaIV7Z7WcDKcQ==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 24, 2022 at 03:22:45PM +0300, Amir Goldstein wrote:
-> On Tue, May 24, 2022 at 2:42 PM Dave Chinner <david@fromorbit.com> wrote:
-> >
-> > From: Dave Chinner <dchinner@redhat.com>
-> >
-> > Many of the XFS fuzzer tests define a "no cleanup" cleanup function.
-> > Consolidate this in common/preamble and deduplicate all the tests
-> > using this setup.
-> >
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  common/preamble | 9 +++++++++
-> >  tests/xfs/083   | 5 -----
-> >  tests/xfs/085   | 5 -----
-> >  tests/xfs/086   | 5 -----
-> >  tests/xfs/087   | 5 -----
-> >  tests/xfs/088   | 5 -----
-> >  tests/xfs/089   | 5 -----
-> >  tests/xfs/091   | 5 -----
-> >  tests/xfs/093   | 5 -----
-> >  tests/xfs/097   | 5 -----
-> >  tests/xfs/098   | 5 -----
-> >  tests/xfs/099   | 5 -----
-> >  tests/xfs/100   | 5 -----
-> >  tests/xfs/101   | 5 -----
-> >  tests/xfs/102   | 5 -----
-> >  tests/xfs/105   | 5 -----
-> >  tests/xfs/112   | 5 -----
-> >  tests/xfs/113   | 5 -----
-> >  tests/xfs/117   | 5 -----
-> >  tests/xfs/120   | 5 -----
-> >  tests/xfs/123   | 5 -----
-> >  tests/xfs/124   | 5 -----
-> >  tests/xfs/125   | 5 -----
-> >  tests/xfs/126   | 5 -----
-> >  tests/xfs/130   | 5 -----
-> >  25 files changed, 9 insertions(+), 120 deletions(-)
-> >
-> 
-> I propose to use a dedicated helper _unregister_cleanup to opt out
-> of _cleanup and still leave _cleanup implicit for all the rest of the tests,
-> but I will not stop merging this cleanup on account of this suggestion.
-> It could be done by a followup cleanup as well, so unless you want to
-> take my suggestion
 
-Cart before the horse.  There's another 1000 tests I haven't even
-looked at yet, and there's still a heap of work to derive
-commonality from the remaining 100 xfs tests that have a random
-assortment of loop, local, dm, etc cleanup functions.
 
-I'm trying to focus on cleaning up and deduplicating the tests, not
-whether there's an exactly optimal API for a specific cleanup
-function. Once everything is deduplicated, changing the cleanup API
-is a much, much simpler proposition. So that's the first prioirty
-and trivialities like "_register_cleanup _no_cleanup" vs
-"_unregister_cleanup" aren't even on my radar.
+On 2022/5/24 15:18, Christoph Hellwig wrote:
+> Add a few helpers to consolidate code for btrfs read repair testing:
+>
+>   - _btrfs_get_first_logical() gets the btrfs logical address for the
+>     first extent in a file
+>   - _btrfs_get_device_path and _btrfs_get_physical use the
+>     btrfs-map-logical tool to find the device path and physical address
+>     for btrfs logical address for a specific mirror
+>   - _btrfs_direct_read_on_mirror and _btrfs_buffered_read_on_mirror
+>     read the data from a specific mirror
+>
+> These will be used to consolidate the read repair tests and avoid
+> duplication for new tests.
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Cheers,
+Reviewed-by: Qu Wenruo <wqu@suse.com>
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Some some small nitpicks inlined below.
+> ---
+>   common/btrfs  | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>   common/config |  1 +
+>   2 files changed, 76 insertions(+)
+>
+> diff --git a/common/btrfs b/common/btrfs
+> index ac597ca4..129a83f7 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -505,3 +505,78 @@ _btrfs_metadump()
+>   	$BTRFS_IMAGE_PROG "$device" "$dumpfile"
+>   	[ -n "$DUMP_COMPRESSOR" ] && $DUMP_COMPRESSOR -f "$dumpfile" &> /dev/=
+null
+>   }
+> +
+> +# Return the btrfs logical address for the first block in a file
+> +_btrfs_get_first_logical()
+> +{
+> +	local file=3D$1
+> +	_require_command "$FILEFRAG_PROG" filefrag
+> +
+> +	${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
+> +	${FILEFRAG_PROG} -v $file | _filter_filefrag | cut -d '#' -f 1
+> +}
+> +
+> +# Find the device path for a btrfs logical offset
+> +_btrfs_get_device_path()
+> +{
+> +	local logical=3D$1
+> +	local stripe=3D$2
+> +
+> +	_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
+> +
+> +	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | \
+> +		$AWK_PROG "(\$1 ~ /mirror/ && \$2 ~ /$stripe/) { print \$8 }"
+> +}
+> +
+> +
+> +# Find the device physical sector for a btrfs logical offset
+> +_btrfs_get_physical()
+> +{
+> +	local logical=3D$1
+> +	local stripe=3D$2
+> +
+> +	_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
+> +
+> +	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV >> $seqres.full 2>&1
+> +	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | \
+> +		$AWK_PROG "(\$1 ~ /mirror/ && \$2 ~ /$stripe/) { print \$6 }"
+
+Since the map logical output is saved into seqres, maybe it's better to
+add "-b <sectorsize>" parameters.
+
+The default bytes is the nodesize (which is super werid), thus under
+corner cases, like at the stripe boundary, it can return multiple result
+groups and cause some confusion.
+
+Although we will need another helper to grab the sectorsize of a mounted
+btrfs though.
+
+Thanks,
+Qu
+> +}
+> +
+> +# Read from a specific stripe to test read recovery that corrupted a sp=
+ecific
+> +# stripe.  Btrfs uses the PID to select the mirror, so keep reading unt=
+il the
+> +# xfs_io process that performed the read was executed with a PID that e=
+nds up
+> +# on the intended mirror.
+> +_btrfs_direct_read_on_mirror()
+> +{
+> +	local mirror=3D$1
+> +	local nr_mirrors=3D$2
+> +	local file=3D$3
+> +	local offset=3D$4
+> +	local size=3D$5
+> +
+> +	while [[ -z $( (( BASHPID % nr_mirrors =3D=3D mirror )) &&
+> +		exec $XFS_IO_PROG -d \
+> +			-c "pread -b $size $offset $size" $file) ]]; do
+> +		:
+> +	done
+> +}
+> +
+> +# Read from a specific stripe to test read recovery that corrupted a sp=
+ecific
+> +# stripe.  Btrfs uses the PID to select the mirror, so keep reading unt=
+il the
+> +# xfs_io process that performed the read was executed with a PID that e=
+nds up
+> +# on the intended mirror.
+> +_btrfs_buffered_read_on_mirror()
+> +{
+> +	local mirror=3D$1
+> +	local nr_mirrors=3D$2
+> +	local file=3D$3
+> +	local offset=3D$4
+> +	local size=3D$5
+> +
+> +	echo 3 > /proc/sys/vm/drop_caches
+> +	while [[ -z $( (( BASHPID % nr_mirrors =3D=3D mirror )) &&
+> +		exec $XFS_IO_PROG \
+> +			-c "pread -b $size $offset $size" $file) ]]; do
+> +		:
+> +	done
+> +}
+> diff --git a/common/config b/common/config
+> index c6428f90..df20afc1 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -228,6 +228,7 @@ export E2IMAGE_PROG=3D"$(type -P e2image)"
+>   export BLKZONE_PROG=3D"$(type -P blkzone)"
+>   export GZIP_PROG=3D"$(type -P gzip)"
+>   export BTRFS_IMAGE_PROG=3D"$(type -P btrfs-image)"
+> +export BTRFS_MAP_LOGICAL_PROG=3D$(type -P btrfs-map-logical)
+>
+>   # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>   # newer systems have udevadm command but older systems like RHEL5 don'=
+t.
