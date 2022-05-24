@@ -2,100 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18B14C433FE
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 May 2022 12:28:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA043C433FE
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 04:45:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235459AbiEWM2L (ORCPT
+        id S234477AbiEXEpV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 May 2022 08:28:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34586 "EHLO
+        Tue, 24 May 2022 00:45:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54740 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235401AbiEWM2L (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 May 2022 08:28:11 -0400
-Received: from mail-pg1-x536.google.com (mail-pg1-x536.google.com [IPv6:2607:f8b0:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD20341618
-        for <fstests@vger.kernel.org>; Mon, 23 May 2022 05:28:08 -0700 (PDT)
-Received: by mail-pg1-x536.google.com with SMTP id 31so13528805pgp.8
-        for <fstests@vger.kernel.org>; Mon, 23 May 2022 05:28:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=NfSqM13lltjldN1LkXFhLIfMmR5euG3sVeA4tBgn/IU=;
-        b=upsZgojui9qTc3PIFEr8J9Zi7p5GNookwfBvMHebIvdDqplon2JaOTh5ljODb4fVkd
-         LXyz9yyOQ5fF+zQlsdHPWm0XZvTZTLrhqEUv8tQr9rQWK7sxttiwRoHl9KWh3YYErcrs
-         76CiSrS9Bx9NZzaomfQYeE/IbRj7mWSe0jAAF2C4SJ80noBMQVCaNEBv1cyHGhyO+9Vw
-         kPmFNhUEmScUXH1k45jiaPgZ3AojHrEKmgHhlRfOt7btZHHZZvGJ45rg4LcW1+2MTHE5
-         TDA/uvsZpdl9i27LAgk8/dE5qsSp4R00+JhADx7OvUEZHOpvlCH5u6qedW0bimtCVOLn
-         QSWQ==
+        with ESMTP id S234479AbiEXEpT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 00:45:19 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0204A8BD0C
+        for <fstests@vger.kernel.org>; Mon, 23 May 2022 21:45:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1653367516;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=aVpIvJUvnqhOyn4AeRtvH6vizmpDjWylYJ1wgPnXUMQ=;
+        b=EX01f+OfhFTyKtv13t82/GAwrroU7KakmQZb97ngVl+OTtcyBOr52cdQjAWGxCzunNoC3H
+        0YUJckxgWwkXPdu0hPQ2zZI92w9iOhSxFaMAyAtle7dJjK39/xl4VuN3EgfuVpqnYfsT3G
+        HeMZO2qLyliZlfvqG07V/Tu/ATxDoNA=
+Received: from mail-oo1-f69.google.com (mail-oo1-f69.google.com
+ [209.85.161.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-636-2wC8Bt0NNO-w5N2qmb04DA-1; Tue, 24 May 2022 00:45:14 -0400
+X-MC-Unique: 2wC8Bt0NNO-w5N2qmb04DA-1
+Received: by mail-oo1-f69.google.com with SMTP id b4-20020a4a98c4000000b00362174f7ae2so8130787ooj.0
+        for <fstests@vger.kernel.org>; Mon, 23 May 2022 21:45:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=NfSqM13lltjldN1LkXFhLIfMmR5euG3sVeA4tBgn/IU=;
-        b=CzVhO4UWWjElLUg2alAhXKKmaG4i0qNYbaPBSXe7dUKf0dawyYo2XzE/FKbSqla/FF
-         t7JV0jBHtkJPAME0pK/2DystIdKbineyiIt315RDKMg23FASc7b+8RhRTcdzLnmFs60e
-         nhzIhsaPTpjn+yd+L3JsqZo9NRd9LKpHviNE7lamucmCZou8b5gm9egis6rVqEt7Dxmc
-         wtf5/xZ68/WTWQQP38BKilmKFFSMTQb7tKKLactjDF86yFDi4aJZgO+tu1/W14+AhqFy
-         vjEy4jHOmXTtWmWDGOQT4DTAPMWjK6n9R8LdRqmmq3H6G09E9ZBUM7U7yipTEijhfpuz
-         p35g==
-X-Gm-Message-State: AOAM531b/TNf7hK4AyCDGrh8K5bsXwYhDqfxn/rl41eIRLR0rKXTIWT8
-        0FhPgCYnFp0ECO2d0NFSZ4P7gdaTr6MaxQ==
-X-Google-Smtp-Source: ABdhPJxS2N57CNA2NGhcmaEGEhtuqryRSIdZU5aRF+Zxr5bLiFtfFvSr6E5rzU1MWMlESZSV+aCiQw==
-X-Received: by 2002:a63:6cca:0:b0:3ab:892e:bfa4 with SMTP id h193-20020a636cca000000b003ab892ebfa4mr20245975pgc.494.1653308887965;
-        Mon, 23 May 2022 05:28:07 -0700 (PDT)
-Received: from [192.168.1.100] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id f11-20020a62380b000000b005184640c939sm7047888pfa.207.2022.05.23.05.28.06
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 23 May 2022 05:28:07 -0700 (PDT)
-Message-ID: <172a656d-657b-69bb-5fe8-f63f546acbdc@kernel.dk>
-Date:   Mon, 23 May 2022 06:28:05 -0600
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=aVpIvJUvnqhOyn4AeRtvH6vizmpDjWylYJ1wgPnXUMQ=;
+        b=7Z2gfY1xxNpVN+4/2ekAkag/oCKuXA2MTik7Lm1xNu1acsxT0aOJr4bjEo2+WiIgqB
+         JdDSXhNRInWEVY74rTLA49nu8oiD/wYlHq3ZpBZcbp3hXCyCaCL6zqoG7TQ6nk0G5bE1
+         Py7mA9kGvbYN6wnUD5GTlGq8Q1FDvz+mAroLMSkNraVIorsEWueXq3AnaL3apeNHH671
+         9sBpZ6uMklcSiIF0xxq/tVS7g0EWcIp7EK3IBuZi27aLedgx0IJpYL7b7wuu0aU0u9X5
+         hBu7DiDjNCxFbp174NV3H3PhEbNx9at8U29ZIOXGuvn0IJJHzMF1LRA0b65NF3LI9U0r
+         PfIg==
+X-Gm-Message-State: AOAM533U/iAdeYFuAxSVWNhpJ6GQ3UzO/4rdh4TFBfaJRLaVacdQ3Wuq
+        x29s7YdnKQDYiNGXmxgUsxTHKO1KJ1t6EflYq8+qQdlXUUXKe3C3RvJgNi/Xlu/v8/jvja+coP4
+        m5jI5nqq4T5R32AzEGQ==
+X-Received: by 2002:a54:4f19:0:b0:325:338e:ff52 with SMTP id e25-20020a544f19000000b00325338eff52mr1379590oiy.98.1653367513608;
+        Mon, 23 May 2022 21:45:13 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyqxOdFwOKtDVttxKN/N0z5Z5reMYC6DHtGqyobe+Ts98GSz6ZT+4Sd25ukE1lS7/eFVGkapg==
+X-Received: by 2002:a54:4f19:0:b0:325:338e:ff52 with SMTP id e25-20020a544f19000000b00325338eff52mr1379586oiy.98.1653367513380;
+        Mon, 23 May 2022 21:45:13 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id u2-20020a05687004c200b000f23d04cd56sm2906251oam.44.2022.05.23.21.45.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 May 2022 21:45:12 -0700 (PDT)
+Date:   Tue, 24 May 2022 12:45:07 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
+Subject: Re: [PATCH] ceph/001: skip metrics check if no copyfrom mount option
+ is used
+Message-ID: <20220524044507.m3drhwpn2orfp7my@zlang-mailbox>
+References: <20220520105055.31520-1-lhenriques@suse.de>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.0
-Subject: Re: [PATCH v2 00/13] rename & split tests
-Content-Language: en-US
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Christian Brauner <brauner@kernel.org>,
-        Zorro Lang <zlang@redhat.com>,
-        fstests <fstests@vger.kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Amir Goldstein <amir73il@gmail.com>,
-        Christoph Hellwig <hch@lst.de>,
-        "Darrick J. Wong" <djwong@kernel.org>, io-uring@vger.kernel.org
-References: <20220512165250.450989-1-brauner@kernel.org>
- <20220521231350.GY2306852@dread.disaster.area>
- <f77e867f-ed7d-85f7-f1e4-b9dc10a6d23b@kernel.dk>
- <84e5e231-7c33-ad0f-fdd5-2d8c1052aa00@kernel.dk>
- <20220523001350.GB2306852@dread.disaster.area>
- <767778c5-ac0e-e798-38e0-199f54853cc6@kernel.dk>
- <20220523104144.GD2306852@dread.disaster.area>
-From:   Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20220523104144.GD2306852@dread.disaster.area>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220520105055.31520-1-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 5/23/22 4:41 AM, Dave Chinner wrote:
->> From my experience trying to reproduce it yesterday, my test distros
->> don't even enable it and you have to both fiddle the config and add a
->> boot parameter to even turn it on. And then it still didn't trigger for
->> me.
+On Fri, May 20, 2022 at 11:50:55AM +0100, Luís Henriques wrote:
+> Checking the metrics is only valid if 'copyfrom' mount option is
+> explicitly set, otherwise the kernel won't be doing any remote object
+> copies.  Fix the logic to skip this metrics checking if 'copyfrom' isn't
+> used.
 > 
-> I have machines with audit enabled as it seems to be the debian
-> default these days. I haven't explicitly turned it on - it's just
-> there. I guess it came along with selinux being enabled on these
-> test VMs - I have "selinux=1 security=selinux" on the kernel CLI for
-> these VMs.
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
 
-Hmm, I am running debian on these. Anyway, I'll get one configured so
-that it triggers this issue, and use that going forward. Maybe I need
-selinux too, not just audit, and explicitly enable it with the boot
-parameters.
+The code logic looks good to me, but I'm not familiar with cephfs, so if there's
+not review points or objection from ceph-fs, I'll merge this patch this week.
 
--- 
-Jens Axboe
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+Thanks,
+Zorro
+
+>  tests/ceph/001 | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/tests/ceph/001 b/tests/ceph/001
+> index 7970ce352bab..2e6a5e6be2d6 100755
+> --- a/tests/ceph/001
+> +++ b/tests/ceph/001
+> @@ -86,11 +86,15 @@ check_copyfrom_metrics()
+>  	local copies=$4
+>  	local c1=$(get_copyfrom_total_copies)
+>  	local s1=$(get_copyfrom_total_size)
+> +	local hascopyfrom=$(_fs_options $TEST_DEV | grep "copyfrom")
+>  	local sum
+>  
+>  	if [ ! -d $metrics_dir ]; then
+>  		return # skip metrics check if debugfs isn't mounted
+>  	fi
+> +	if [ -z $hascopyfrom ]; then
+> +		return # ... or if we don't have copyfrom mount option
+> +	fi
+>  
+>  	sum=$(($c0+$copies))
+>  	if [ $sum -ne $c1 ]; then
+> 
 
