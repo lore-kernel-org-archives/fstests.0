@@ -2,115 +2,130 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED2A8C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 19:54:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E475BC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 22:11:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241457AbiEXTyf (ORCPT
+        id S233571AbiEXWLw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 15:54:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44630 "EHLO
+        Tue, 24 May 2022 18:11:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241149AbiEXTya (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 15:54:30 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBC1C79818;
-        Tue, 24 May 2022 12:54:18 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S233088AbiEXWLv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 18:11:51 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4F9C2FE4C;
+        Tue, 24 May 2022 15:11:49 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7A1A8615FE;
-        Tue, 24 May 2022 19:54:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9E76C34100;
-        Tue, 24 May 2022 19:54:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653422057;
-        bh=O/559p5DHUq+MJ5MdcCVOnxnWIuT1w4PX0G5kdDGKd8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=cNSURPKBkQIsGm452iZQQit7Cr/qmb3+Ddlla1NCydC3B0sOBvVoouPWUXbl+TS6b
-         22QuLCfcYR17c6y6EPIUaIDG4d7eAy5n4Ub06ne88AdejJguZjvKU7J8DLOMdxVppA
-         BaUbrcDrgLEpSG/MCak6t6hvEfxBKYfydbmajqHHCz2tgTPw5yGP5RUtxJpOIAJR3V
-         SsnfBs9DPD6roiA4oyjyFnm6Hi+ivUTf7+CBLRmUtXvJxJe6Q67mKjwXWAW3XCusvO
-         YVmhqS0T8yGx5Zn1Te2c+GrkwCp3g0sYo1taCuGOK22Bzly72Rq9VUJOYivHRWX7pI
-         Wb+OF2jXRmgQw==
-Date:   Tue, 24 May 2022 12:54:17 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eric Sandeen <sandeen@redhat.com>, Zorro Lang <zlang@redhat.com>
-Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: [PATCH] xfs: test xfs_copy doesn't do cached read before libxfs_mount
-Message-ID: <Yo036Y+er/WaT2IH@magnolia>
-References: <Yo027/k+vAYsUt4U@magnolia>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 69C041F8D6;
+        Tue, 24 May 2022 22:11:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1653430308; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=qUilvDc5VpPdpdcvwIhX1OMwlgDV/cOZqTz70E/jD0k=;
+        b=rujv2iaf4e/RYx8Tr3LPueqlhGtAmXIUPpESCU8f41mEkFVa9RsXseT/GPSqDxcSuA5AyI
+        MqSLdjG19dQH3NN5h+h23Yu8lXAsrYWACMUsLvbYNMXep0cw8INIgtgMZR6w4jH+yYC38C
+        RMChYpf0I4C+CM2r+I/XQqg2rnVKv0Y=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1653430308;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=qUilvDc5VpPdpdcvwIhX1OMwlgDV/cOZqTz70E/jD0k=;
+        b=q9FME0BqgFBf2Bqk64ceLm/TKCkWip/7QaxYdfFwVLRglrsnMhhHWS+CNStJa9lVyrW0wU
+        VMAszz5hv1anOxBQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 2D9C413AE3;
+        Tue, 24 May 2022 22:11:48 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id xNPMCSRYjWLZVAAAMHmgww
+        (envelope-from <ddiss@suse.de>); Tue, 24 May 2022 22:11:48 +0000
+Date:   Wed, 25 May 2022 00:11:42 +0200
+From:   David Disseldorp <ddiss@suse.de>
+To:     =?UTF-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
+Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH] ceph/005: verify correct statfs behaviour with quotas
+Message-ID: <20220525001142.0a17a41a@suse.de>
+In-Reply-To: <20220427143409.987-1-lhenriques@suse.de>
+References: <20220427143409.987-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Yo027/k+vAYsUt4U@magnolia>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+Hi Lu=C3=ADs,
 
-This is a regression test for an xfs_copy fix that ensures that it
-doesn't perform a cached read of an XFS filesystem prior to initializing
-libxfs, since the xfs_mount (and hence the buffer cache) isn't set up
-yet.
+It looks like this one is still in need of review...
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/xfs/844     |   37 +++++++++++++++++++++++++++++++++++++
- tests/xfs/844.out |    3 +++
- 3 files changed, 40 insertions(+), 1 deletion(-)
- create mode 100755 tests/xfs/844
- create mode 100644 tests/xfs/844.out
+On Wed, 27 Apr 2022 15:34:09 +0100, Lu=C3=ADs Henriques wrote:
 
-diff --git a/tests/xfs/844 b/tests/xfs/844
-new file mode 100755
-index 00000000..720f45bb
---- /dev/null
-+++ b/tests/xfs/844
-@@ -0,0 +1,37 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 844
-+#
-+# Regression test for xfsprogs commit:
-+#
-+# XXXXXXXX ("xfs_copy: don't use cached buffer reads until after libxfs_mount")
-+#
-+. ./common/preamble
-+_begin_fstest auto copy
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.* $TEST_DIR/$seq.*
-+}
-+
-+# Import common functions.
-+# . ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_require_xfs_copy
-+_require_test
-+
-+truncate -s 100m $TEST_DIR/$seq.a
-+truncate -s 100m $TEST_DIR/$seq.b
-+
-+$XFS_COPY_PROG $TEST_DIR/$seq.a $TEST_DIR/$seq.b
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/844.out b/tests/xfs/844.out
-new file mode 100644
-index 00000000..dbefde1c
---- /dev/null
-+++ b/tests/xfs/844.out
-@@ -0,0 +1,3 @@
-+QA output created by 844
-+bad magic number
-+xfs_copy: couldn't read superblock, error=22
+> When using a directory with 'max_bytes' quota as a base for a mount,
+> statfs shall use that 'max_bytes' value as the total disk size.  That
+> value shall be used even when using subdirectory as base for the mount.
+>=20
+> A bug was found where, when this subdirectory also had a 'max_files'
+> quota, the real filesystem size would be returned instead of the parent
+> 'max_bytes' quota value.  This test case verifies this bug is fixed.
+>=20
+> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
+> ---
+>  tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
+>  tests/ceph/005.out |  2 ++
+>  2 files changed, 42 insertions(+)
+>  create mode 100755 tests/ceph/005
+>  create mode 100644 tests/ceph/005.out
+>=20
+> diff --git a/tests/ceph/005 b/tests/ceph/005
+> new file mode 100755
+> index 000000000000..0763a235a677
+> --- /dev/null
+> +++ b/tests/ceph/005
+> @@ -0,0 +1,40 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 005
+> +#
+> +# Make sure statfs reports correct total size when:
+> +# 1. using a directory with 'max_byte' quota as base for a mount
+> +# 2. using a subdirectory of the above directory with 'max_files' quota
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick quota
+> +
+> +_supported_fs generic
+> +_require_scratch
+> +
+> +_scratch_mount
+> +mkdir -p $SCRATCH_MNT/quota-dir/subdir
+> +
+> +# set quotas
+> +quota=3D$((1024*10000))
+> +$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-dir
+> +$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-dir/=
+subdir
+> +_scratch_unmount
+> +
+> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir _scratch_mount
+
+Aside from the standard please-quote-your-variables gripe, I'm a little
+confused with the use of SCRATCH_DEV for this test. Network FSes where
+mkfs isn't provided don't generally use it. Is there any way that this
+could be run against TEST_DEV, or does the umount / mount complicate
+things too much?
+
+Cheers, David
