@@ -2,198 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68B77C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 16:33:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5D56C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 May 2022 16:59:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229978AbiEXQdS (ORCPT
+        id S237648AbiEXQ7g (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 12:33:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33562 "EHLO
+        Tue, 24 May 2022 12:59:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231355AbiEXQdR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 12:33:17 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 084AA5DD19
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 09:33:15 -0700 (PDT)
+        with ESMTP id S239779AbiEXQ7g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 12:59:36 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4BC6E6EC53
+        for <fstests@vger.kernel.org>; Tue, 24 May 2022 09:59:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653409995;
+        s=mimecast20190719; t=1653411574;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=J67rwq1nS1FHAuR2/h+lzVO4fxuTaioE23bKyhNHDAg=;
-        b=Q/4WWN28uS3dzde5lQdJNAXh27tru6/09+N/NWTXPaqhu93zmnAXhQjz/79HY4ZpgebbYr
-        WCRTYZxoJYmBnUYj2ZIYY52TkctKY+3vqyzfrtSONZo7TmshmdUwjvHcqEOzHSUeLV3C0m
-        ykvud0GMbi/EYijOBraYBKvuugkfSiM=
-Received: from mail-oi1-f198.google.com (mail-oi1-f198.google.com
- [209.85.167.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=b54mK8xYCAhXsjzahjRnSBRagXlWJQyhFWbgJ8hoi5w=;
+        b=f8d6nYWI/f5juapLIv41B8NEcd+c3VcY1Df9WVtIPaJ9ncjPXOI9Ptgz5Hr0MzX6ZcBZrI
+        WDkLLwfkoIRGeSS3ZUguIBZyHm8dmZlqelItEjcxFw7QeO+CpLDU3gnBa2bOxbwsGkhKhp
+        1e8L4labOMYNb9b+sADv9i85YXY5180=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-661-bKjy3FXDObiB4hzq9qmQ7Q-1; Tue, 24 May 2022 12:32:11 -0400
-X-MC-Unique: bKjy3FXDObiB4hzq9qmQ7Q-1
-Received: by mail-oi1-f198.google.com with SMTP id d67-20020acab446000000b0032ae7767585so6604108oif.6
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 09:32:11 -0700 (PDT)
+ us-mta-332-udmrtF7vNhKYCrKcXf-t0w-1; Tue, 24 May 2022 12:59:32 -0400
+X-MC-Unique: udmrtF7vNhKYCrKcXf-t0w-1
+Received: by mail-qv1-f69.google.com with SMTP id dy10-20020ad44e8a000000b004625c7238edso1131095qvb.0
+        for <fstests@vger.kernel.org>; Tue, 24 May 2022 09:59:32 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=J67rwq1nS1FHAuR2/h+lzVO4fxuTaioE23bKyhNHDAg=;
-        b=ZHrdjp9AoDA3nhAgX3gV9SiDOuwXnnFzW7CJX3TPWKj2WXQ6C0xPBjuGW/puOru9VT
-         BGELxaQrvEtKCiBhJdm2RGdo6JUozW6BXFTbst23mRe9P/ZWwfrX4ZsbcUr3h+x7RUd9
-         RUHS64543vQbjhLxLPSIgF0Mg/AdbVYpF/jLbuiCVQH9QsLc+R5Ave2sJ38db/A16rJ/
-         LpgkBMPSf4dhD3TVsO3vN/F/ap3axPEN0BK46cWGx/aIJwOzUxdRQNFcwLigvpA6ZltR
-         u/DdxhFhusn/aeIJXXDWYQi6nRdsqNLR1NU+NMA4mSqJA7dZbvfqBjuN34LpdXbh1Lpx
-         q4ow==
-X-Gm-Message-State: AOAM531Ytnb9FTOF4vAJy1Wn5e9ADYdigJtQfKm6TIB2tgRRtflAe2R/
-        ol2TRGhXKDiFBedwmGzA5DGH8pMHhRvhUz/r7K0WfXOkXiGFN6W8QiQ9OGCtC3F3OVmxwuGYHBR
-        QCKXGQh5iRcEV0MV9+g==
-X-Received: by 2002:a4a:98cc:0:b0:35e:ba5d:5e9d with SMTP id b12-20020a4a98cc000000b0035eba5d5e9dmr11098582ooj.36.1653409930123;
-        Tue, 24 May 2022 09:32:10 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyAz+SRrjg/0KRtUKNrydcwOkJIX4CUetyeEwUmQSyzsSU6Pb+HNnqb4QPevLQ3XbwqmiFQRg==
-X-Received: by 2002:a4a:98cc:0:b0:35e:ba5d:5e9d with SMTP id b12-20020a4a98cc000000b0035eba5d5e9dmr11098570ooj.36.1653409929769;
-        Tue, 24 May 2022 09:32:09 -0700 (PDT)
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=b54mK8xYCAhXsjzahjRnSBRagXlWJQyhFWbgJ8hoi5w=;
+        b=BEJsMhXhZpbF+BVOxqpO9B3UDpmKjDNCqCS5IJbZs4WepnwXsSNEPI2OV2Gyo664Vj
+         85A5e6rX9UrK1q1F3APaDz+oWDk/E3MyjiN5/ZBp417aIH7j3MrbNRXTj3N7zNHfg0jq
+         2M4SzDR0wcRXlU6BsTl5Nr+5aJQUnrEKh5cVDd8kfR4DSBx+847Na/Z3hUWYd807JVSJ
+         stjYtjqS8+/RhV+dPRL55dx0+UpwnT9PQnNh6vchLeWsIwhSHywxT0qtfxM50vCQkXC4
+         xvvFj5joY2AZoy1/Y/cTDHsnx26+T+Cm0PpjWylsteywd7RtzN+TI56Gdf034/bmQbKw
+         ODEA==
+X-Gm-Message-State: AOAM530/zg6923xSpTNiaON42BR47aqvHaeBUwEujNrjEopXHqV4s6Am
+        lRlmkYn/Qtf1C11luM6ebzzFGDxbHmqnjqgrWwnatlJwsjYHVDRGQB2rGMnAiyZcXColjRphBNb
+        Ymgo9zo4SjvGxrZJdOA==
+X-Received: by 2002:a05:620a:b82:b0:6a3:9b26:d45 with SMTP id k2-20020a05620a0b8200b006a39b260d45mr6240288qkh.405.1653411572136;
+        Tue, 24 May 2022 09:59:32 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxPyK2cw49Zhkd3Nrx1cc7EK/KDdwr+rp6Aera4mFJx0isFVnaca45lMCeABPU1AAZM8KGS8A==
+X-Received: by 2002:a05:620a:b82:b0:6a3:9b26:d45 with SMTP id k2-20020a05620a0b8200b006a39b260d45mr6240267qkh.405.1653411571864;
+        Tue, 24 May 2022 09:59:31 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id y84-20020aca4b57000000b00324f24e623fsm5373792oia.3.2022.05.24.09.32.07
+        by smtp.gmail.com with ESMTPSA id k12-20020a05620a138c00b0069fcc501851sm6179209qki.78.2022.05.24.09.59.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 May 2022 09:32:09 -0700 (PDT)
-Date:   Wed, 25 May 2022 00:32:03 +0800
+        Tue, 24 May 2022 09:59:31 -0700 (PDT)
+Date:   Wed, 25 May 2022 00:59:26 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>,
-        Dave Chinner <david@fromorbit.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 3/8] xfs/*: clean up _cleanup override
-Message-ID: <20220524163203.l5nb6o6ougbbsrjx@zlang-mailbox>
-References: <20220524073411.1943480-1-david@fromorbit.com>
- <20220524073411.1943480-4-david@fromorbit.com>
- <CAOQ4uxgZwngHevX_FXytAi68k=aqp_N-8Buk50rrJKD0UoK+2g@mail.gmail.com>
- <20220524122703.GL2306852@dread.disaster.area>
- <CAOQ4uxifd8gee1JLG1FN9fF3aSsVeSEuxFqjAf4D8ruCciXWYg@mail.gmail.com>
- <20220524132428.GO2306852@dread.disaster.area>
- <CAOQ4uxhWCKb8_pKU4CCE5Nv2qTqge-AyGBdoX2isrBui4cHdqA@mail.gmail.com>
+To:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v2] ceph/001: skip metrics check if no copyfrom mount
+ option is used
+Message-ID: <20220524165926.dkighy46hi75mg6s@zlang-mailbox>
+References: <20220524094256.16746-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhWCKb8_pKU4CCE5Nv2qTqge-AyGBdoX2isrBui4cHdqA@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220524094256.16746-1-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 24, 2022 at 05:17:44PM +0300, Amir Goldstein wrote:
-> On Tue, May 24, 2022 at 4:24 PM Dave Chinner <david@fromorbit.com> wrote:
-> >
-> > On Tue, May 24, 2022 at 03:55:47PM +0300, Amir Goldstein wrote:
-> > > > > > diff --git a/tests/xfs/310 b/tests/xfs/310
-> > > > > > index 3214e04b..c635b39a 100755
-> > > > > > --- a/tests/xfs/310
-> > > > > > +++ b/tests/xfs/310
-> > > > > > @@ -9,14 +9,12 @@
-> > > > > >  . ./common/preamble
-> > > > > >  _begin_fstest auto clone rmap
-> > > > > >
-> > > > > > -# Override the default cleanup function.
-> > > > > > -_cleanup()
-> > > > > > +_dmhuge_cleanup()
-> > > > > >  {
-> > > > > > -       cd /
-> > > > > > -       umount $SCRATCH_MNT > /dev/null 2>&1
-> > > > > >         _dmhugedisk_cleanup
-> > > > > > -       rm -rf $tmp.*
-> > > > > > +       _cleanup
-> > > > > >  }
-> > > > > > +_register_cleanup _dmhuge_cleanup
-> > > > >
-> > > > > Maybe it's just me, but if the intention is to maybe make this
-> > > > > function global someday then the difference with the name
-> > > > > _dmhugedisk_cleanup() is confusing.
-> > > >
-> > > > The names I used here are for classification, so I can grep over
-> > > > the _register_cleanup line and easily determine all the tests use
-> > > > loop devices, dmflakey, dmerror, etc and then consolidate them all
-> > > > into a single cleanup function that works for them all. This is just
-> > > > the first step in that process.
-> > > >
-> > > > > I'd rather keep the local function name local_cleanup
-> > > > > in unclear cases like this one.
-> > > >
-> > > > And that defeats the entire purpose of giving them a descriptive
-> > > > name at this point in time.
-> > >
-> > > I understand. It makes a lot of sense to do that.
-> > > It is still VERY confusing that there is a helper _dmhugedisk_cleanup
-> > > that SHOULD NOT be used as a trap and a helper _dmhuge_cleanup
-> > > that SHOULD be used as a trap, so a better convention is needed.
-> >
-> > I think you missed my point.
-> >
-> > _dmhuge_cleanup() is a *temporary name*.
-> >
-> > It will *go away* once I've processed the other 1000 tests which
-> > will also classify anything using dmhugedisk with a _dmhuge_cleanup
-> > function. It's a temporary token I can use for further
-> > classification and deduplication, nothing more, nothing less.
-> >
+On Tue, May 24, 2022 at 10:42:56AM +0100, Luís Henriques wrote:
+> Checking the metrics is only valid if 'copyfrom' mount option is
+> explicitly set, otherwise the kernel won't be doing any remote object
+> copies.  Fix the logic to skip this metrics checking if 'copyfrom' isn't
+> used.
 > 
-> Ok if the two confusing names are not going to co-exists I'm fine
-> with either name.
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
+>  tests/ceph/001 | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
 > 
-> > > I suggest that all consolidated helpers for trap will be called
-> > > either _cleanup_* (like cleanup_dump) or _*_cleanup (like _fsstress_cleanup)
-> > >
-> > > The problem is that there is no convetion in the common/* helpers.
-> > > there are _dmhugedisk_cleanup() _dmerror_cleanup() and there are
-> > > _cleanup_dump() _cleanup_delay().
-> >
-> > Exactly the reason why I've used simple names and the only
-> > consistency I care about is that I use the same name for the same
-> > subsystem cleanup functions. I can't give them globally consistent
-> > names at this point and because they are temporary tokens I simply
-> > have not tried. I give it a name, copy the function into a register
-> > buffer, and then paste it into any other test that uses the same
-> > subsystem and has the same cleanup requirements.
-> >
-> > Once I have all the tests that use dmhugedisk converted to use a
-> > local _dmhuge_cleanup function, I'll derive the commonality from
-> > them, move it into the existing cleanup function for that subsystem,
-> > and register the subsystem cleanup in those tests. _dmhuge_cleanup()
-> > then goes away forever.
-> >
-> > Once everythign is deduplicated and common, changing names will be
-> > simple and straight forward. That's when you can argue all you want
-> > over the names of functions and I won't care one bit.
-> >
-> 
-> All right, please bear in mind that I try to do this review with as little
-> nit picking as I can while still doing a professional review, so some
-> questions need to be raised.
-> The work you did is huge and impressive and the review is not easy.
+> Changes since v1:
+> - Quoted 'hascopyfrom' variable in 'if' statement; while there, added
+>   quotes to the 'if' statement just above.
 
-Thanks Dave and Amir!
-
-Dave did a huge and impressive change again:) The purpose of this change makes
-sense to me, so there's not objections from me. But it really changed too many
-cases, and are going to change more. So if anyone has any concern, please show
-your review points as early as better. Thanks.
-
-Really appreciate Amir's help, I was bothered by COVID-19 issues during the day,
-just got time to read emails. You did give it a careful review line by line,
-and asked lots of questions (than I thought) :) That helps a lot! Compare with
-"it's fine but not perfect", I care about "it won't break any cases" more.
-So if Dave can force on his main work, keep the code stable, we can do later
-improvement bit by bit. As you can see, this patchset nearly affect the
-whole fstests, more time we take to change it, more patch conflicts might
-happen. Then Dave might need to do more 'rebase' jobs.
-
-I'll give it lots of testing (although I'm sure Dave did test) before merging.
-I'll try to help it catch the fstests release of this week. But that depends
-on when we have the lastest version, and how stable this patchset is :)
-
-Thanks,
-Zorro
+Good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 > 
-> Anyway, after fixing the recursive _dmerror_cleanup typo, you may add:
-> 
-> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-> 
-> Thanks,
-> Amir.
+> diff --git a/tests/ceph/001 b/tests/ceph/001
+> index 7970ce352bab..060c4c450091 100755
+> --- a/tests/ceph/001
+> +++ b/tests/ceph/001
+> @@ -86,11 +86,15 @@ check_copyfrom_metrics()
+>  	local copies=$4
+>  	local c1=$(get_copyfrom_total_copies)
+>  	local s1=$(get_copyfrom_total_size)
+> +	local hascopyfrom=$(_fs_options $TEST_DEV | grep "copyfrom")
+>  	local sum
+>  
+> -	if [ ! -d $metrics_dir ]; then
+> +	if [ ! -d "$metrics_dir" ]; then
+>  		return # skip metrics check if debugfs isn't mounted
+>  	fi
+> +	if [ -z "$hascopyfrom" ]; then
+> +		return # ... or if we don't have copyfrom mount option
+> +	fi
+>  
+>  	sum=$(($c0+$copies))
+>  	if [ $sum -ne $c1 ]; then
 > 
 
