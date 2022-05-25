@@ -2,162 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA012C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 10:37:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99D14C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 11:17:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229680AbiEYKhG (ORCPT
+        id S233163AbiEYLRj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 May 2022 06:37:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48408 "EHLO
+        Wed, 25 May 2022 07:17:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41858 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229528AbiEYKhC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 06:37:02 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA0679346C;
-        Wed, 25 May 2022 03:37:01 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 837401F932;
-        Wed, 25 May 2022 10:37:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1653475020; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=U94I4DfmqqFJ+4zwlilYGb0KquL5d1/33/Hl2nVDM4E=;
-        b=ZsUbi8Hlnu5a+qP8y86JMLxpH0GUIze4KoPM8ngOY5Wvg8JnelYhb2zPKs0h7YDZpkBrWn
-        N4tv2ms2opDhSojHMz7HLC8SwvpgLPKRiA1wh4EDd3NWA7RkJptwEMEAwcLacigXxYqAYM
-        rvE9njE1hR4EU26y8fofo0KJEE3sZXE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1653475020;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=U94I4DfmqqFJ+4zwlilYGb0KquL5d1/33/Hl2nVDM4E=;
-        b=WC+sZ/CkVMrH+a7CGGjuFf2HdBHWNdwx5U9ePno5rsgxleUivZb3voYVz9c51m4+LrY/oz
-        4Ghb5RkKEbRLKgBw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 4B3C713ADF;
-        Wed, 25 May 2022 10:37:00 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id MTkXEcwGjmJFdQAAMHmgww
-        (envelope-from <ddiss@suse.de>); Wed, 25 May 2022 10:37:00 +0000
-Date:   Wed, 25 May 2022 12:36:59 +0200
-From:   David Disseldorp <ddiss@suse.de>
-To:     =?UTF-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
-Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+        with ESMTP id S230193AbiEYLRi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 07:17:38 -0400
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FB89BF57;
+        Wed, 25 May 2022 04:17:34 -0700 (PDT)
+Received: by mail-wm1-x32a.google.com with SMTP id i82-20020a1c3b55000000b003974edd7c56so562791wma.2;
+        Wed, 25 May 2022 04:17:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=uuHHwNINyMSOCqXVj12EP1KOoOXQxeSy9GpwK1fGgXE=;
+        b=Ka+2K4At7mgaxormi55291lX0xC6u50+hPpUJs+cjmidlMmbsm2+E95eFUj4I94F4f
+         cDHGDP4UAplwj5UaUVJ9gKe9t2ngorYNXv57QitOpecRgA0bvR0XpjgVVVRH8ks0EUFQ
+         cEZ8S5L8q3NIR6yWEf88leSWROmm3jdp/4SGkFDrwZK04cQ5Hf5m2Cxguqu8y9WdE/z6
+         B9WTtpCcR6lgQI7+9SKoIqilHWsgWadobG9X501l1d00aO6Hxz610AF0qs4wDo8xYsHp
+         oORZ8G7psJTVISRxXJRblV0RqmWTQUBGJV//fPa/kHLA9d9/AgrGDeia4/QjPK2m+1Pz
+         Zpng==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=uuHHwNINyMSOCqXVj12EP1KOoOXQxeSy9GpwK1fGgXE=;
+        b=XTrR2unJUknmsxReDIp/VEwHV3DOLNOpsDKMgkJO7cQ0TULoDjAsjYbw3u+G2b+gb+
+         TxxypaQk2q3YlZOoo1fhnC/9YJ6LWyAbtCKWhIoTVWc3VE1cCzDXezQK7cjCYuRAYpBN
+         n6tYJW1sNhilnzaPy5w7DVwHVVESD0fGtjRhZ4bco3wYHAdoLTQtk/mE32X5JMI/vGEy
+         GK4mfp26H1d1ktK7SjLESCQtjcZduND+ujIG/WU578kFKqhS36fl9qEJRoqFHmfZ6b6w
+         t+Crgg5fruNJPEIaFE3GSFl3do1sgfMDiX8tU3py8E7XIdCxUsTs6OA2iZu+yUsLrzux
+         dyXA==
+X-Gm-Message-State: AOAM533W8mm1q/H9aPiGdkLR7FTMSxSMvHotJkNjqLb3S0QLsJ+UI7FB
+        xMzXRxOI/kN4/RPPnwdDNJE=
+X-Google-Smtp-Source: ABdhPJzHh38BQxustqLmiwAz9l96x8v2g+3o0fRoVXLq3w3iUgnSH9I8Bmfyf/gvRk/FO4tAFGvRwQ==
+X-Received: by 2002:a05:600c:6015:b0:397:54e1:8279 with SMTP id az21-20020a05600c601500b0039754e18279mr7496806wmb.100.1653477453025;
+        Wed, 25 May 2022 04:17:33 -0700 (PDT)
+Received: from localhost.localdomain ([5.29.19.200])
+        by smtp.gmail.com with ESMTPSA id e12-20020a056000178c00b0020c5253d8besm2059904wrg.10.2022.05.25.04.17.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 May 2022 04:17:32 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Dave Chinner <david@fromorbit.com>,
+        "Darrick J . Wong" <darrick.wong@oracle.com>
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Adam Manzanares <a.manzanares@samsung.com>,
+        Tyler Hicks <code@tyhicks.com>, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: Re: [PATCH] ceph/005: verify correct statfs behaviour with quotas
-Message-ID: <20220525123659.65270735@suse.de>
-In-Reply-To: <87pmk2kn6m.fsf@brahms.olymp>
-References: <20220427143409.987-1-lhenriques@suse.de>
-        <20220525001142.0a17a41a@suse.de>
-        <87pmk2kn6m.fsf@brahms.olymp>
+Subject: [PATH 5.10 0/4] xfs stable candidate patches for 5.10.y (part 1)
+Date:   Wed, 25 May 2022 14:17:11 +0300
+Message-Id: <20220525111715.2769700-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, 25 May 2022 09:53:53 +0100, Lu=C3=ADs Henriques wrote:
+Hi all!
 
-> David Disseldorp <ddiss@suse.de> writes:
->=20
-> > Hi Lu=C3=ADs,
-> >
-> > It looks like this one is still in need of review... =20
->=20
-> Ah! Thanks for reminding me about it, David!
->=20
-> >
-> > On Wed, 27 Apr 2022 15:34:09 +0100, Lu=C3=ADs Henriques wrote:
-> > =20
-> >> When using a directory with 'max_bytes' quota as a base for a mount,
-> >> statfs shall use that 'max_bytes' value as the total disk size.  That
-> >> value shall be used even when using subdirectory as base for the mount.
-> >>=20
-> >> A bug was found where, when this subdirectory also had a 'max_files'
-> >> quota, the real filesystem size would be returned instead of the parent
-> >> 'max_bytes' quota value.  This test case verifies this bug is fixed.
-> >>=20
-> >> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
-> >> ---
-> >>  tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
-> >>  tests/ceph/005.out |  2 ++
-> >>  2 files changed, 42 insertions(+)
-> >>  create mode 100755 tests/ceph/005
-> >>  create mode 100644 tests/ceph/005.out
-> >>=20
-> >> diff --git a/tests/ceph/005 b/tests/ceph/005
-> >> new file mode 100755
-> >> index 000000000000..0763a235a677
-> >> --- /dev/null
-> >> +++ b/tests/ceph/005
-> >> @@ -0,0 +1,40 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> >> +#
-> >> +# FS QA Test 005
-> >> +#
-> >> +# Make sure statfs reports correct total size when:
-> >> +# 1. using a directory with 'max_byte' quota as base for a mount
-> >> +# 2. using a subdirectory of the above directory with 'max_files' quo=
-ta
-> >> +#
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick quota
-> >> +
-> >> +_supported_fs generic
-> >> +_require_scratch
-> >> +
-> >> +_scratch_mount
-> >> +mkdir -p $SCRATCH_MNT/quota-dir/subdir
-> >> +
-> >> +# set quotas
-> >> +quota=3D$((1024*10000))
-> >> +$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-d=
-ir
-> >> +$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-d=
-ir/subdir
-> >> +_scratch_unmount
-> >> +
-> >> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir _scratch_mount =20
-> >
-> > Aside from the standard please-quote-your-variables gripe, I'm a little=
- =20
->=20
-> Sure, I'll fix those in next iteration.
->=20
-> > confused with the use of SCRATCH_DEV for this test. Network FSes where
-> > mkfs isn't provided don't generally use it. Is there any way that this
-> > could be run against TEST_DEV, or does the umount / mount complicate
-> > things too much? =20
->=20
-> When I looked at other tests doing similar things (i.e. changing the mount
-> device during the test), they all seemed to be using SCRATCH_DEV.  I guess
-> that I could change TEST_DEV instead.  I'll revisit this and see if that
-> works.
->=20
-> Anyway, regarding the usage of SCRATCH_DEV in cephfs, I've used several
-> different approaches:
->=20
-> - Use 2 different filesystems created on the same cluster,
-> - Use 2 volumes on the same filesystem, or
-> - Simply use 2 directories in the same filesystem.
+During LSFMM 2022, I have had an opportunity to speak with developers
+from several different companies that showed interest in collaborating
+on the effort of improving the state of xfs code in LTS kernels.
 
-Looking at _scratch_mkfs($FSTYP=3Dceph) there is support for scratch
-filesystem reinitialization, so I suppose this should be okay. With
-cephfs we could actually go one step further and call "ceph fs rm/new",
-but that's something for another day :-).
+I would like to kick-off this effort for the 5.10 LTS kernel, in the
+hope that others will join me in the future to produce a better common
+baseline for everyone to build on.
 
-Cheers, David
+This is the first of 6 series of stable patch candidates that
+I collected from xfs releases v5.11..v5.18 [1].
+
+My intention is to post the parts for review on the xfs list on
+a ~weekly basis and forward them to stable only after xfs developers
+have had the chance to review the selection.
+
+I used a gadget that I developed "b4 rn" that produces high level
+"release notes" with references to the posted patch series and also
+looks for mentions of fstest names in the discussions on lore.
+I then used an elimination process to select the stable tree candidate
+patches. The selection process is documented in the git log of [1].
+
+After I had candidates, Luis has helped me to set up a kdevops testing
+environment on a server that Samsung has contributed to the effort.
+Luis and I have spent a considerable amount of time to establish the
+expunge lists that produce stable baseline results for v5.10.y [2].
+Eventually, we ran the auto group test over 100 times to sanitize the
+baseline, on the following configurations:
+reflink_normapbt (default), reflink, reflink_1024, nocrc, nocrc_512.
+
+The patches in this part are from circa v5.11 release.
+They have been through 36 auto group runs with the configs listed above
+and no regressions from baseline were observed.
+
+At least two of the fixes have regression tests in fstests that were used
+to verify the fix. I also annotated [3] the fix commits in the tests.
+
+I would like to thank Luis for his huge part in this still ongoing effort
+and I would like to thank Samsung for contributing the hardware resources
+to drive this effort.
+
+Your inputs on the selection in this part and in upcoming parts [1]
+are most welcome!
+
+Thanks,
+Amir.
+
+[1] https://github.com/amir73il/b4/blob/xfs-5.10.y/xfs-5.10..5.17-fixes.rst
+[2] https://github.com/linux-kdevops/kdevops/tree/master/workflows/fstests/expunges/5.10.105/xfs/unassigned
+[3] https://lore.kernel.org/fstests/20220520143249.2103631-1-amir73il@gmail.com/
+
+Darrick J. Wong (3):
+  xfs: detect overflows in bmbt records
+  xfs: fix the forward progress assertion in xfs_iwalk_run_callbacks
+  xfs: fix an ABBA deadlock in xfs_rename
+
+Kaixu Xia (1):
+  xfs: show the proper user quota options
+
+ fs/xfs/libxfs/xfs_bmap.c    |  5 +++++
+ fs/xfs/libxfs/xfs_dir2.h    |  2 --
+ fs/xfs/libxfs/xfs_dir2_sf.c |  2 +-
+ fs/xfs/xfs_inode.c          | 42 ++++++++++++++++++++++---------------
+ fs/xfs/xfs_iwalk.c          |  2 +-
+ fs/xfs/xfs_super.c          | 10 +++++----
+ 6 files changed, 38 insertions(+), 25 deletions(-)
+
+-- 
+2.25.1
+
