@@ -2,161 +2,66 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57AF3C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 04:02:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70FC0C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 07:34:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232721AbiEYECn (ORCPT
+        id S242763AbiEYHei (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 May 2022 00:02:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44258 "EHLO
+        Wed, 25 May 2022 03:34:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60596 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230048AbiEYECk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 00:02:40 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9553752E52
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 21:02:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653451357;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Jlz6GA/gb+OMr7HKwKUKGB1wdQxe8ZxkG9RRRkr4MiE=;
-        b=hEYO8nhLUc0P+3zYSsIEJcvq9Nc9nLcr91LwwV8Thng6CXWrEJF6xMGu0/1yT/+rShA/sg
-        z0vvBSS/EcAH9n11sa4pJxqPzNWnAj1c1D4vsXEcX0NnixwVRmmzOR3EoUKklHqzBen3Vx
-        gm8BF7oBqsstPFpIzxLq7pbKAhYMeG0=
-Received: from mail-ot1-f70.google.com (mail-ot1-f70.google.com
- [209.85.210.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-544-lWi0hjVONviEp_EifCcF8g-1; Wed, 25 May 2022 00:02:30 -0400
-X-MC-Unique: lWi0hjVONviEp_EifCcF8g-1
-Received: by mail-ot1-f70.google.com with SMTP id w8-20020a9d5388000000b0060613b46a98so6339812otg.8
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 21:02:30 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Jlz6GA/gb+OMr7HKwKUKGB1wdQxe8ZxkG9RRRkr4MiE=;
-        b=HM3nMENVUgqms5gqMBKU/GgR4e5+vb1X6c/cIFNC/1+VdDuW43SQQYY6So6Gp/DS23
-         +j0rFCZVR1Ote2nqcNA7xhLjuGFP47/GkvaH1vEIMebWBZRtL62kRoObRTUidaTvpjWA
-         Q+xvrnpZpf+aldhbzLHfeG/ApDqdCx3VFURXZbXh8Meg1ocWe+wBzfJowFTZOgY7Qyvz
-         InlqP1I2vCf1Q6zePERLAUIsQRqYtEgc1Iq7eA1t/anYOGvVTotTpGSL/2G5pkcPMudG
-         iIyeQs2oLNaXy0BQTySYbCx59KnGDoZWc292tCFo/OPdlJ70Pv1SrwrbSQkX/tufM6hT
-         Mi1w==
-X-Gm-Message-State: AOAM532a/7Q2CaSygaErtyUsdtYBfIIXCpgSogfDcwwY5RUu21ZKy9XJ
-        +5CAzzIfZCU8l0ow8KzJUIp+42TJPgEnAXo82QN7+jm+Jji5zgDkiZDAl7KRpIyKn1w5LELvgc9
-        gmyPBUQsUjyHwye9YEw==
-X-Received: by 2002:a9d:76cd:0:b0:60b:400:8533 with SMTP id p13-20020a9d76cd000000b0060b04008533mr6920812otl.69.1653451349488;
-        Tue, 24 May 2022 21:02:29 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwWNcrCe1lHU4Hjl00DCZu5FgOMTyw0LKYuXiCxGJLvd7Rk4NiThAFE6vmleJUtdr3mH1P//A==
-X-Received: by 2002:a9d:76cd:0:b0:60b:400:8533 with SMTP id p13-20020a9d76cd000000b0060b04008533mr6920808otl.69.1653451349228;
-        Tue, 24 May 2022 21:02:29 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id b18-20020a4ae212000000b0035eb4e5a6bfsm5978304oot.21.2022.05.24.21.02.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 May 2022 21:02:28 -0700 (PDT)
-Date:   Wed, 25 May 2022 12:02:22 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs: test xfs_copy doesn't do cached read before
- libxfs_mount
-Message-ID: <20220525040222.7nepzhckyptuavl6@zlang-mailbox>
-References: <Yo027/k+vAYsUt4U@magnolia>
- <Yo036Y+er/WaT2IH@magnolia>
+        with ESMTP id S239807AbiEYHec (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 03:34:32 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96A9E443F8
+        for <fstests@vger.kernel.org>; Wed, 25 May 2022 00:34:31 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2AC106177A
+        for <fstests@vger.kernel.org>; Wed, 25 May 2022 07:34:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 025C0C385B8
+        for <fstests@vger.kernel.org>; Wed, 25 May 2022 07:34:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653464070;
+        bh=MbFB67gnD726284n1JM6z2FnVxIN/gvZr54Zmx15Kog=;
+        h=From:To:Subject:Date:From;
+        b=SgxyKQASZOwfPmO6EqAJAJfq4QSE0lAMDbr7xlXv2pWTM7zAjeUVflVKGNFGECHhL
+         PWUZHCktnKRzu3FcK708dR91u5VaWKFVmK4iJ/D6LsML5SsLIqIsooV77d40x9rNRs
+         +gn9qCdqT4W1tIaqcS2j+RJkQ5gLcWI3NQYM4bv6NgG998A6YQ5NeubPWcD3aYbCgN
+         oH0eb19JxH1Gcj9R9bwC44WwurOU1UyW0SOkDkUg4yuy+wRk6iU917Fs4vfSrUHoYo
+         nBaHAb3Qd8TjMdhvfteE1Tzzvl8PyZkWGRvVAHDVQT1pEsrtdBvpaDkPSlB4FHr2+b
+         OlR97MuQrpcAQ==
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [PATCH 0/2] source fs specific common file properly
+Date:   Wed, 25 May 2022 15:34:25 +0800
+Message-Id: <20220525073427.3355242-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Yo036Y+er/WaT2IH@magnolia>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 24, 2022 at 12:54:17PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> This is a regression test for an xfs_copy fix that ensures that it
-> doesn't perform a cached read of an XFS filesystem prior to initializing
-> libxfs, since the xfs_mount (and hence the buffer cache) isn't set up
-> yet.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/xfs/844     |   37 +++++++++++++++++++++++++++++++++++++
->  tests/xfs/844.out |    3 +++
->  3 files changed, 40 insertions(+), 1 deletion(-)
->  create mode 100755 tests/xfs/844
->  create mode 100644 tests/xfs/844.out
-> 
-> diff --git a/tests/xfs/844 b/tests/xfs/844
-> new file mode 100755
-> index 00000000..720f45bb
-> --- /dev/null
-> +++ b/tests/xfs/844
-> @@ -0,0 +1,37 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 844
-> +#
-> +# Regression test for xfsprogs commit:
-> +#
-> +# XXXXXXXX ("xfs_copy: don't use cached buffer reads until after libxfs_mount")
+It starts with generic/402 always fails on overlayfs as:
 
-     ^^^ I'd like to merge a test after it's fixed offically at first, anyway that
-     doesn't prevent us from reviewing it at first :)
+  QA output created by 402
+  ./common/rc: line 2441: _xfs_timestamp_range: command not found
+  ./common/rc: line 2403: [: syntax error: '-1' unexpected
+  ./common/rc: line 2408: [: -le: unary operator expected
+  ./common/rc: line 2441: _xfs_timestamp_range: command not found
+  0;0 != 1;1
+  0;0 != 1;1
+  Silence is golden
 
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto copy
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.* $TEST_DIR/$seq.*
-> +}
-> +
-> +# Import common functions.
-> +# . ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
+Due to if FSTYP is overlay, we only source common/overlay file. But we
+still need the helpers of the underlying filesystem. So I think we need
+to source the common/$OVL_BASE_FSTYP in common/overlay.
 
-"Modify as appropriate." can be removed.
-
-> +_supported_fs generic
-> +_require_xfs_copy
-> +_require_test
-> +
-> +truncate -s 100m $TEST_DIR/$seq.a
-> +truncate -s 100m $TEST_DIR/$seq.b
-
-fstests recommends using "truncate" of XFS_IO_PROG, although use 'truncate'
-isn't wrong at here.
-
-As TEST_DIR might have existed files, do we need to do
-        rm -rf $TEST_DIR/$seq.a $TEST_DIR/$seq.b
-at first?
+Besides overlayfs, I'd like to extend other uplying fs support its
+BASE_FSTYP, so other uplying fs (e.g. nfs, cifs, glusterfs ...) will
+do like this.
 
 Thanks,
 Zorro
-
-> +
-> +$XFS_COPY_PROG $TEST_DIR/$seq.a $TEST_DIR/$seq.b
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/844.out b/tests/xfs/844.out
-> new file mode 100644
-> index 00000000..dbefde1c
-> --- /dev/null
-> +++ b/tests/xfs/844.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 844
-> +bad magic number
-> +xfs_copy: couldn't read superblock, error=22
-> 
-
