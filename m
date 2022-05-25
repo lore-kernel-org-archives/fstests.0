@@ -2,52 +2,52 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99D14C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 11:17:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E557C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 11:17:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233163AbiEYLRj (ORCPT
+        id S233717AbiEYLRj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Wed, 25 May 2022 07:17:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41858 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230193AbiEYLRi (ORCPT
+        with ESMTP id S233019AbiEYLRi (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 07:17:38 -0400
 Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FB89BF57;
-        Wed, 25 May 2022 04:17:34 -0700 (PDT)
-Received: by mail-wm1-x32a.google.com with SMTP id i82-20020a1c3b55000000b003974edd7c56so562791wma.2;
-        Wed, 25 May 2022 04:17:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8326F8CCC5;
+        Wed, 25 May 2022 04:17:37 -0700 (PDT)
+Received: by mail-wm1-x32a.google.com with SMTP id 67-20020a1c1946000000b00397382b44f4so3141416wmz.2;
+        Wed, 25 May 2022 04:17:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=uuHHwNINyMSOCqXVj12EP1KOoOXQxeSy9GpwK1fGgXE=;
-        b=Ka+2K4At7mgaxormi55291lX0xC6u50+hPpUJs+cjmidlMmbsm2+E95eFUj4I94F4f
-         cDHGDP4UAplwj5UaUVJ9gKe9t2ngorYNXv57QitOpecRgA0bvR0XpjgVVVRH8ks0EUFQ
-         cEZ8S5L8q3NIR6yWEf88leSWROmm3jdp/4SGkFDrwZK04cQ5Hf5m2Cxguqu8y9WdE/z6
-         B9WTtpCcR6lgQI7+9SKoIqilHWsgWadobG9X501l1d00aO6Hxz610AF0qs4wDo8xYsHp
-         oORZ8G7psJTVISRxXJRblV0RqmWTQUBGJV//fPa/kHLA9d9/AgrGDeia4/QjPK2m+1Pz
-         Zpng==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=LuV2WNWBzFzDFM9UzO8H2iJ9QFWj2tDa1lgS6fde0JU=;
+        b=f7KxPQr4TkBQZfu/0UrPf81FTwY8ufQ8HzRDFb0sUZhCYJ3GHx4Bm6Fcr1QzDtTt17
+         mxGQ7QGK60fyop8LCIEZzCR+APCME2I4uEQag17zo8N5mC7hd1NO4AH4+BxeyQ/lVz9m
+         TpAPZLJi8UgiS2kG2gQ3OR/cwiDxXUCST7eXYnaEO/L5K83EuobvNjdi8L+j7b7zbIXA
+         YIsYGnw0s8wRab9vYHk78DTwcgWi1Kq4ZQhE1s00qETQMANf0+ZCZiF58DLW+gi3TnoE
+         HuyN3UIl8WY0G5kKjDnuLJHnmnKz66E+GlJOZH7JAV6+PAC9nyyuBFfw1oXQXMEUlv1P
+         I7jg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=uuHHwNINyMSOCqXVj12EP1KOoOXQxeSy9GpwK1fGgXE=;
-        b=XTrR2unJUknmsxReDIp/VEwHV3DOLNOpsDKMgkJO7cQ0TULoDjAsjYbw3u+G2b+gb+
-         TxxypaQk2q3YlZOoo1fhnC/9YJ6LWyAbtCKWhIoTVWc3VE1cCzDXezQK7cjCYuRAYpBN
-         n6tYJW1sNhilnzaPy5w7DVwHVVESD0fGtjRhZ4bco3wYHAdoLTQtk/mE32X5JMI/vGEy
-         GK4mfp26H1d1ktK7SjLESCQtjcZduND+ujIG/WU578kFKqhS36fl9qEJRoqFHmfZ6b6w
-         t+Crgg5fruNJPEIaFE3GSFl3do1sgfMDiX8tU3py8E7XIdCxUsTs6OA2iZu+yUsLrzux
-         dyXA==
-X-Gm-Message-State: AOAM533W8mm1q/H9aPiGdkLR7FTMSxSMvHotJkNjqLb3S0QLsJ+UI7FB
-        xMzXRxOI/kN4/RPPnwdDNJE=
-X-Google-Smtp-Source: ABdhPJzHh38BQxustqLmiwAz9l96x8v2g+3o0fRoVXLq3w3iUgnSH9I8Bmfyf/gvRk/FO4tAFGvRwQ==
-X-Received: by 2002:a05:600c:6015:b0:397:54e1:8279 with SMTP id az21-20020a05600c601500b0039754e18279mr7496806wmb.100.1653477453025;
-        Wed, 25 May 2022 04:17:33 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=LuV2WNWBzFzDFM9UzO8H2iJ9QFWj2tDa1lgS6fde0JU=;
+        b=wGek6YPwEli08Y8S66rX0lkNdEY4fafI+aboBBEZ5fmqdInqpU0PNnrfG41BNL+8s1
+         4UfIu+5BY2r24gthmscnwlcsLny54vidNVPqqogmt8CSqTvPKN988txbXCAEXHzpHEDH
+         s4KF+xcJUxmFRq99A0H57eSS3fQMh6uzy5APFZku32S2Vxr2J3a0Xio+wJvKdtmFcT2A
+         hlIy640pk5la+977tH2SSDjm6TbxUsnmvaHAG1BI2WtkcVJ/tcAMm7ucywQ31HIJTp8V
+         Cn1iWlYuDTtFhfg04Z5lAuVaOBuar8R+00pxsMuRR3Bn5Qktpo87HqJScYbFg8qCs6th
+         BX3g==
+X-Gm-Message-State: AOAM533p0xSlzfDnkNQ7kRyjEBrCCavOWiHdFFf9uRmX9ogCUe27v83s
+        R6cdxrz4jY+GyALxOJaF0pM=
+X-Google-Smtp-Source: ABdhPJyLZd6EpS1uB3O4EjN+11yEkNK6du/ru/pBqVcHqv6YGlNxh3hvhtW2EwhAD3Q0czl5kvq1fA==
+X-Received: by 2002:a05:600c:3ba4:b0:397:47b2:588d with SMTP id n36-20020a05600c3ba400b0039747b2588dmr7827185wms.64.1653477456137;
+        Wed, 25 May 2022 04:17:36 -0700 (PDT)
 Received: from localhost.localdomain ([5.29.19.200])
-        by smtp.gmail.com with ESMTPSA id e12-20020a056000178c00b0020c5253d8besm2059904wrg.10.2022.05.25.04.17.31
+        by smtp.gmail.com with ESMTPSA id e12-20020a056000178c00b0020c5253d8besm2059904wrg.10.2022.05.25.04.17.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 May 2022 04:17:32 -0700 (PDT)
+        Wed, 25 May 2022 04:17:35 -0700 (PDT)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Dave Chinner <david@fromorbit.com>,
         "Darrick J . Wong" <darrick.wong@oracle.com>
@@ -55,85 +55,57 @@ Cc:     Luis Chamberlain <mcgrof@kernel.org>,
         Theodore Ts'o <tytso@mit.edu>,
         Adam Manzanares <a.manzanares@samsung.com>,
         Tyler Hicks <code@tyhicks.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATH 5.10 0/4] xfs stable candidate patches for 5.10.y (part 1)
-Date:   Wed, 25 May 2022 14:17:11 +0300
-Message-Id: <20220525111715.2769700-1-amir73il@gmail.com>
+        fstests@vger.kernel.org, Kaixu Xia <kaixuxia@tencent.com>
+Subject: [PATH 5.10 2/4] xfs: show the proper user quota options
+Date:   Wed, 25 May 2022 14:17:13 +0300
+Message-Id: <20220525111715.2769700-3-amir73il@gmail.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220525111715.2769700-1-amir73il@gmail.com>
+References: <20220525111715.2769700-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all!
+From: Kaixu Xia <kaixuxia@tencent.com>
 
-During LSFMM 2022, I have had an opportunity to speak with developers
-from several different companies that showed interest in collaborating
-on the effort of improving the state of xfs code in LTS kernels.
+commit 237d7887ae723af7d978e8b9a385fdff416f357b upstream.
 
-I would like to kick-off this effort for the 5.10 LTS kernel, in the
-hope that others will join me in the future to produce a better common
-baseline for everyone to build on.
+The quota option 'usrquota' should be shown if both the XFS_UQUOTA_ACCT
+and XFS_UQUOTA_ENFD flags are set. The option 'uqnoenforce' should be
+shown when only the XFS_UQUOTA_ACCT flag is set. The current code logic
+seems wrong, Fix it and show proper options.
 
-This is the first of 6 series of stable patch candidates that
-I collected from xfs releases v5.11..v5.18 [1].
+Signed-off-by: Kaixu Xia <kaixuxia@tencent.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ fs/xfs/xfs_super.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-My intention is to post the parts for review on the xfs list on
-a ~weekly basis and forward them to stable only after xfs developers
-have had the chance to review the selection.
-
-I used a gadget that I developed "b4 rn" that produces high level
-"release notes" with references to the posted patch series and also
-looks for mentions of fstest names in the discussions on lore.
-I then used an elimination process to select the stable tree candidate
-patches. The selection process is documented in the git log of [1].
-
-After I had candidates, Luis has helped me to set up a kdevops testing
-environment on a server that Samsung has contributed to the effort.
-Luis and I have spent a considerable amount of time to establish the
-expunge lists that produce stable baseline results for v5.10.y [2].
-Eventually, we ran the auto group test over 100 times to sanitize the
-baseline, on the following configurations:
-reflink_normapbt (default), reflink, reflink_1024, nocrc, nocrc_512.
-
-The patches in this part are from circa v5.11 release.
-They have been through 36 auto group runs with the configs listed above
-and no regressions from baseline were observed.
-
-At least two of the fixes have regression tests in fstests that were used
-to verify the fix. I also annotated [3] the fix commits in the tests.
-
-I would like to thank Luis for his huge part in this still ongoing effort
-and I would like to thank Samsung for contributing the hardware resources
-to drive this effort.
-
-Your inputs on the selection in this part and in upcoming parts [1]
-are most welcome!
-
-Thanks,
-Amir.
-
-[1] https://github.com/amir73il/b4/blob/xfs-5.10.y/xfs-5.10..5.17-fixes.rst
-[2] https://github.com/linux-kdevops/kdevops/tree/master/workflows/fstests/expunges/5.10.105/xfs/unassigned
-[3] https://lore.kernel.org/fstests/20220520143249.2103631-1-amir73il@gmail.com/
-
-Darrick J. Wong (3):
-  xfs: detect overflows in bmbt records
-  xfs: fix the forward progress assertion in xfs_iwalk_run_callbacks
-  xfs: fix an ABBA deadlock in xfs_rename
-
-Kaixu Xia (1):
-  xfs: show the proper user quota options
-
- fs/xfs/libxfs/xfs_bmap.c    |  5 +++++
- fs/xfs/libxfs/xfs_dir2.h    |  2 --
- fs/xfs/libxfs/xfs_dir2_sf.c |  2 +-
- fs/xfs/xfs_inode.c          | 42 ++++++++++++++++++++++---------------
- fs/xfs/xfs_iwalk.c          |  2 +-
- fs/xfs/xfs_super.c          | 10 +++++----
- 6 files changed, 38 insertions(+), 25 deletions(-)
-
+diff --git a/fs/xfs/xfs_super.c b/fs/xfs/xfs_super.c
+index e3e229e52512..5ebd6cdc44a7 100644
+--- a/fs/xfs/xfs_super.c
++++ b/fs/xfs/xfs_super.c
+@@ -199,10 +199,12 @@ xfs_fs_show_options(
+ 		seq_printf(m, ",swidth=%d",
+ 				(int)XFS_FSB_TO_BB(mp, mp->m_swidth));
+ 
+-	if (mp->m_qflags & (XFS_UQUOTA_ACCT|XFS_UQUOTA_ENFD))
+-		seq_puts(m, ",usrquota");
+-	else if (mp->m_qflags & XFS_UQUOTA_ACCT)
+-		seq_puts(m, ",uqnoenforce");
++	if (mp->m_qflags & XFS_UQUOTA_ACCT) {
++		if (mp->m_qflags & XFS_UQUOTA_ENFD)
++			seq_puts(m, ",usrquota");
++		else
++			seq_puts(m, ",uqnoenforce");
++	}
+ 
+ 	if (mp->m_qflags & XFS_PQUOTA_ACCT) {
+ 		if (mp->m_qflags & XFS_PQUOTA_ENFD)
 -- 
 2.25.1
 
