@@ -2,115 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4B09C433F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 02:54:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57AF3C433F5
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 04:02:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243744AbiEYCy5 (ORCPT
+        id S232721AbiEYECn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 May 2022 22:54:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50738 "EHLO
+        Wed, 25 May 2022 00:02:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237304AbiEYCyx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 May 2022 22:54:53 -0400
-Received: from mail-qv1-xf2f.google.com (mail-qv1-xf2f.google.com [IPv6:2607:f8b0:4864:20::f2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D7B571A21
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 19:54:52 -0700 (PDT)
-Received: by mail-qv1-xf2f.google.com with SMTP id dm17so15606631qvb.2
-        for <fstests@vger.kernel.org>; Tue, 24 May 2022 19:54:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=uZtX8zW866LfkgXWAJ0xUQHbJRtmIMSPZuk0Xz5JEmg=;
-        b=EEKcg38UI99YxwSDXoQd/XB8K5VURq8ecLIROFsQ2bWu9CeJRB8toiqGosHn7LFIaU
-         eOX0iVHDIsZsO+ubJ9qUzRXeeeuPxou5hAFSfsHGtlu6W5XRQa3RXsTQ2krd6/1JFloy
-         pHn43ADMlY6PdwOQ1liezLljMWwTUArjwzRCfpj5aaN0gDaqsn56Oge6iKitHxxcGGNB
-         bqbRI6kWSh4+1Z6VtwvZgLCY9Rva32MMF4nN/CRAGHgDyxgab1gU4OXNRkIK4Okqzbml
-         AL/z1rIG65AR/Q8EJroUJ1MOGZB1U7CYbBYRdcQLCowrqdoJgH3AH2oE0SqUDOM/6gn/
-         wBYQ==
+        with ESMTP id S230048AbiEYECk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 00:02:40 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9553752E52
+        for <fstests@vger.kernel.org>; Tue, 24 May 2022 21:02:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1653451357;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Jlz6GA/gb+OMr7HKwKUKGB1wdQxe8ZxkG9RRRkr4MiE=;
+        b=hEYO8nhLUc0P+3zYSsIEJcvq9Nc9nLcr91LwwV8Thng6CXWrEJF6xMGu0/1yT/+rShA/sg
+        z0vvBSS/EcAH9n11sa4pJxqPzNWnAj1c1D4vsXEcX0NnixwVRmmzOR3EoUKklHqzBen3Vx
+        gm8BF7oBqsstPFpIzxLq7pbKAhYMeG0=
+Received: from mail-ot1-f70.google.com (mail-ot1-f70.google.com
+ [209.85.210.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-544-lWi0hjVONviEp_EifCcF8g-1; Wed, 25 May 2022 00:02:30 -0400
+X-MC-Unique: lWi0hjVONviEp_EifCcF8g-1
+Received: by mail-ot1-f70.google.com with SMTP id w8-20020a9d5388000000b0060613b46a98so6339812otg.8
+        for <fstests@vger.kernel.org>; Tue, 24 May 2022 21:02:30 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=uZtX8zW866LfkgXWAJ0xUQHbJRtmIMSPZuk0Xz5JEmg=;
-        b=C3voftOgsRVNEHzonDYwZ2q9Cjjfuh9VjXscY1cDT+P2UDWRhEqgYcXCl2RrmMpdX0
-         OkrZBo5f4pQjw6nTe9FhXnXI+FDx865VlW4mJCu235EXjACf0rSRXYVjTBolF130mHS1
-         dXyaFywA16fGeNQJzt4u18fCDMPwxK6MQY+jfwEhDhLxf0iVKIZaoYtTRgiTlLI8nYhx
-         cQP8h446JFZigiOAPJD95A4JUAhS0tZxEwfYpt7PTSXvGuo8vizixPdq+nidIOLRuQNG
-         aVcGdoujvygN88QdO+7KaMpNB+ukO+VSpXkbLaPJg64iPogl87WSs6tAG2VdOAo7Apgs
-         WkMg==
-X-Gm-Message-State: AOAM530rG0kyXp9WTAg7bgmkWg11dwkm+K3+bJxkRXeOF6SbzLdeVXJ8
-        Xnc91jzXuFVPT10NaJMi3v9CgopCWTpRQOqmCyk=
-X-Google-Smtp-Source: ABdhPJwojomo4kAMfnkqTrGehjijzjpx2K+03bbp0Z9JGzLh2NM+4+qrTb7zDZlxzmtmBCUdcMcpGN9VZoJShJRMpBE=
-X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id
- g4-20020a0562141cc400b0043535c3f0f1mr24239190qvd.0.1653447291042; Tue, 24 May
- 2022 19:54:51 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Jlz6GA/gb+OMr7HKwKUKGB1wdQxe8ZxkG9RRRkr4MiE=;
+        b=HM3nMENVUgqms5gqMBKU/GgR4e5+vb1X6c/cIFNC/1+VdDuW43SQQYY6So6Gp/DS23
+         +j0rFCZVR1Ote2nqcNA7xhLjuGFP47/GkvaH1vEIMebWBZRtL62kRoObRTUidaTvpjWA
+         Q+xvrnpZpf+aldhbzLHfeG/ApDqdCx3VFURXZbXh8Meg1ocWe+wBzfJowFTZOgY7Qyvz
+         InlqP1I2vCf1Q6zePERLAUIsQRqYtEgc1Iq7eA1t/anYOGvVTotTpGSL/2G5pkcPMudG
+         iIyeQs2oLNaXy0BQTySYbCx59KnGDoZWc292tCFo/OPdlJ70Pv1SrwrbSQkX/tufM6hT
+         Mi1w==
+X-Gm-Message-State: AOAM532a/7Q2CaSygaErtyUsdtYBfIIXCpgSogfDcwwY5RUu21ZKy9XJ
+        +5CAzzIfZCU8l0ow8KzJUIp+42TJPgEnAXo82QN7+jm+Jji5zgDkiZDAl7KRpIyKn1w5LELvgc9
+        gmyPBUQsUjyHwye9YEw==
+X-Received: by 2002:a9d:76cd:0:b0:60b:400:8533 with SMTP id p13-20020a9d76cd000000b0060b04008533mr6920812otl.69.1653451349488;
+        Tue, 24 May 2022 21:02:29 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwWNcrCe1lHU4Hjl00DCZu5FgOMTyw0LKYuXiCxGJLvd7Rk4NiThAFE6vmleJUtdr3mH1P//A==
+X-Received: by 2002:a9d:76cd:0:b0:60b:400:8533 with SMTP id p13-20020a9d76cd000000b0060b04008533mr6920808otl.69.1653451349228;
+        Tue, 24 May 2022 21:02:29 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id b18-20020a4ae212000000b0035eb4e5a6bfsm5978304oot.21.2022.05.24.21.02.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 May 2022 21:02:28 -0700 (PDT)
+Date:   Wed, 25 May 2022 12:02:22 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH] xfs: test xfs_copy doesn't do cached read before
+ libxfs_mount
+Message-ID: <20220525040222.7nepzhckyptuavl6@zlang-mailbox>
+References: <Yo027/k+vAYsUt4U@magnolia>
+ <Yo036Y+er/WaT2IH@magnolia>
 MIME-Version: 1.0
-References: <20220524073411.1943480-1-david@fromorbit.com> <20220524073411.1943480-4-david@fromorbit.com>
- <CAOQ4uxgZwngHevX_FXytAi68k=aqp_N-8Buk50rrJKD0UoK+2g@mail.gmail.com>
- <20220524122703.GL2306852@dread.disaster.area> <CAOQ4uxifd8gee1JLG1FN9fF3aSsVeSEuxFqjAf4D8ruCciXWYg@mail.gmail.com>
- <20220524132428.GO2306852@dread.disaster.area> <CAOQ4uxhWCKb8_pKU4CCE5Nv2qTqge-AyGBdoX2isrBui4cHdqA@mail.gmail.com>
- <20220524233452.GP2306852@dread.disaster.area>
-In-Reply-To: <20220524233452.GP2306852@dread.disaster.area>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 25 May 2022 05:54:39 +0300
-Message-ID: <CAOQ4uxhqnK4Gk=Cj4QphE6QQnjYc+hwrAmuH9g+iGAB0N+_5tg@mail.gmail.com>
-Subject: Re: [PATCH 3/8] xfs/*: clean up _cleanup override
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests <fstests@vger.kernel.org>, Theodore Tso <tytso@mit.edu>,
-        Josef Bacik <josef@toxicpanda.com>, Chris Mason <clm@fb.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        "Luis R. Rodriguez" <mcgrof@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yo036Y+er/WaT2IH@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 25, 2022 at 2:34 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Tue, May 24, 2022 at 05:17:44PM +0300, Amir Goldstein wrote:
-> > On Tue, May 24, 2022 at 4:24 PM Dave Chinner <david@fromorbit.com> wrote:
-> > > On Tue, May 24, 2022 at 03:55:47PM +0300, Amir Goldstein wrote:
-> > The work you did is huge and impressive and the review is not easy.
->
-> I disagree - it's not huge or impressive, it's just 4 hours of
-> *basic grunt work*. It's not difficult, it's not complex, it's just
-> time consuming. *Anyone* can do this.
->
-> The problem fstests has is *nobody* is doing these sorts of
-> maintenance tasks. We keep adding more tests and with them mountains
-> of technical debt, yet nobody wants to take any responsibility for
-> addressing the technical debt.
->
+On Tue, May 24, 2022 at 12:54:17PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> This is a regression test for an xfs_copy fix that ensures that it
+> doesn't perform a cached read of an XFS filesystem prior to initializing
+> libxfs, since the xfs_mount (and hence the buffer cache) isn't set up
+> yet.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/844     |   37 +++++++++++++++++++++++++++++++++++++
+>  tests/xfs/844.out |    3 +++
+>  3 files changed, 40 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/xfs/844
+>  create mode 100644 tests/xfs/844.out
+> 
+> diff --git a/tests/xfs/844 b/tests/xfs/844
+> new file mode 100755
+> index 00000000..720f45bb
+> --- /dev/null
+> +++ b/tests/xfs/844
+> @@ -0,0 +1,37 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 844
+> +#
+> +# Regression test for xfsprogs commit:
+> +#
+> +# XXXXXXXX ("xfs_copy: don't use cached buffer reads until after libxfs_mount")
 
-Well said.
+     ^^^ I'd like to merge a test after it's fixed offically at first, anyway that
+     doesn't prevent us from reviewing it at first :)
 
-And it is a sad reality that xfs maintainers are the ones having to clean up
-the mess. I'd imagine the xfs maintainer's pile is large enough as it is...
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto copy
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.* $TEST_DIR/$seq.*
+> +}
+> +
+> +# Import common functions.
+> +# . ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
 
-It doesn't have to be this way.
-I have said it in LSFMM in "Maintainers don't scale" session lead by Josef
-(who stood in for Darrick) - Tech companies have many filesystem developers
-on the payroll. They also contribute resources to KernelCI and LTP.
-I think it is a matter of communicating to our managers that full/part time
-fstests developers on the payroll are a good way to meet their goals.
+"Modify as appropriate." can be removed.
 
-Coming from fstests, when I first started working with LTP (for fanotify tests)
-I was amazed by the different experience:
-- Several LTP developers constantly working to improve the infrastructure
-- LTP developers reviewing merging and later improving the tests that you post
-- At some point, I saw a statement encouraging kernel developers to post
-   reproducer in any form they see fit and the LTP developers will make it
-   into an LTP test
+> +_supported_fs generic
+> +_require_xfs_copy
+> +_require_test
+> +
+> +truncate -s 100m $TEST_DIR/$seq.a
+> +truncate -s 100m $TEST_DIR/$seq.b
 
-Good will of developers and weekend projects can only get us so far.
-If we want fstests to scale as a project, we need to nudge our managers
-to allocate headcount for dedicated fstests work.
+fstests recommends using "truncate" of XFS_IO_PROG, although use 'truncate'
+isn't wrong at here.
 
-For that matter, I also consider the work on "fstests runners'' (i.e.
-fstests-bld
-and kdevops) as "fstests work", because making fstest more accessible
-to a wide audience will encourage more people to improve fstests itself.
+As TEST_DIR might have existed files, do we need to do
+        rm -rf $TEST_DIR/$seq.a $TEST_DIR/$seq.b
+at first?
 
 Thanks,
-Amir.
+Zorro
+
+> +
+> +$XFS_COPY_PROG $TEST_DIR/$seq.a $TEST_DIR/$seq.b
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/844.out b/tests/xfs/844.out
+> new file mode 100644
+> index 00000000..dbefde1c
+> --- /dev/null
+> +++ b/tests/xfs/844.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 844
+> +bad magic number
+> +xfs_copy: couldn't read superblock, error=22
+> 
+
