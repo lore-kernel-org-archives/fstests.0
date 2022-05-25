@@ -2,196 +2,179 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C507C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 11:17:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA77BC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 May 2022 14:25:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233321AbiEYLRn (ORCPT
+        id S230026AbiEYOZm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 May 2022 07:17:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41888 "EHLO
+        Wed, 25 May 2022 10:25:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52982 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229962AbiEYLRm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 07:17:42 -0400
-Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5FFFBF57;
-        Wed, 25 May 2022 04:17:40 -0700 (PDT)
-Received: by mail-wr1-x431.google.com with SMTP id s28so29517665wrb.7;
-        Wed, 25 May 2022 04:17:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=JLC0ja767iUSkq7vhFyAS50rOOoNLE8fxflV1RxjsDw=;
-        b=B+8Uuiwetwr3EOaHPsTSCuyBeUtYD3wotxWuLsZ/8+ouP/h7TN1hOBCFUI94i8Y2ds
-         Axl10hnC52K54iu3cuDniX7s3r2m82CfSFemaB3+r71i8RO+u5Yki0iwRbmNPK/qJMga
-         5PkhP5tJukVPGeelnyl5Se+lwISg/hmCxKQH+kmtV3kArjiI51As8Gd7g51uTSNkRB+O
-         WP5pDCjYwEXJsJ09/d8Zircnz7kSr5LpOQahAVOuVtUauj7BSOGeiFfsP2rXADzlg8Hn
-         waHBBj1XeqkMxwnxU1ReLyUKV33NW+o0MKOGE96U9IEsX/jh6DX1Eg3q8Ydxr0khkzko
-         GqlQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=JLC0ja767iUSkq7vhFyAS50rOOoNLE8fxflV1RxjsDw=;
-        b=I4lgmPzxjrRRvjzODQ+uinrTd7tDPp2FllL5SIlk0kovrf2VxSPeSyNhiZ+6a8gsS7
-         dX/Kjiz1oUgbOU/Kec881jP4uTVIxoJNMW9Ws/P5hEbOhE6FG7ZFPse6UGNM0HQrem1y
-         ghij8E7bDcJvI4qSYG2sPJeg5/RFiI6EUQ2Y6gCsayD5/CehP+ilIPu4IxO7y9Q+/1p4
-         5EmuH2wfzC2PwvRbF6dYqKEsn/UQ09eazQSrwkYzw5O8VkM/hghh3BTMLfodRMk6Txrs
-         MbG8dM4RkNKWVX8VjDUI0EFQau1oMV0PSZ559CAzsET2wGCjEXxCmEYcBGWi0Cr6D642
-         jKMw==
-X-Gm-Message-State: AOAM531YUUq9DY+ug8Jh4zBJrnSRXTWEJkRhSuAcf81gesPyW9gJBfLK
-        GQBfcKXjukRrWo9NNRD1U32pFM8d2xjBJA==
-X-Google-Smtp-Source: ABdhPJyRsykgXShW1kfR8nTS4vulfeVnDHcE4JVzPJOnlSdvecXYC0KCPSKqL7CBMDcxapjIkwehZA==
-X-Received: by 2002:adf:f582:0:b0:210:f0:24ac with SMTP id f2-20020adff582000000b0021000f024acmr1647830wro.444.1653477459408;
-        Wed, 25 May 2022 04:17:39 -0700 (PDT)
-Received: from localhost.localdomain ([5.29.19.200])
-        by smtp.gmail.com with ESMTPSA id e12-20020a056000178c00b0020c5253d8besm2059904wrg.10.2022.05.25.04.17.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 May 2022 04:17:38 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Dave Chinner <david@fromorbit.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Adam Manzanares <a.manzanares@samsung.com>,
-        Tyler Hicks <code@tyhicks.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, wenli xie <wlxie7296@gmail.com>,
-        Brian Foster <bfoster@redhat.com>
-Subject: [PATH 5.10 4/4] xfs: fix an ABBA deadlock in xfs_rename
-Date:   Wed, 25 May 2022 14:17:15 +0300
-Message-Id: <20220525111715.2769700-5-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220525111715.2769700-1-amir73il@gmail.com>
-References: <20220525111715.2769700-1-amir73il@gmail.com>
+        with ESMTP id S236722AbiEYOZm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 10:25:42 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1106ABF;
+        Wed, 25 May 2022 07:25:41 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id C13951F45E;
+        Wed, 25 May 2022 14:25:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1653488739; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=OcyUlkvRGFEW/ULXmTtgvKKFJcJyrBkqOjuEy8zAx28=;
+        b=06KoSj8lKddJaGaN4+0+oY7wtQB+63MaXmxxtnnFGXr/ePn3gEl1kbV2vstFtLIK3UnACf
+        cuIyB3uHIKNlkaM/bPsKmUb2sjig/ljmzJF8auCzz3dtdBS9AabeILrQVaxL0hL6hKXZXR
+        cnDPB78x6CDQm4qTZ28mzLTYscM/r0M=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1653488739;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=OcyUlkvRGFEW/ULXmTtgvKKFJcJyrBkqOjuEy8zAx28=;
+        b=S1cldFVF2yAA5MrFeG9i8mtR4FZ7Du4esMvuhkF+Cs+x1OFib8TLIim13GWx3ycjenanAw
+        lGtAbwtTMSTcFaAw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5309313487;
+        Wed, 25 May 2022 14:25:39 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id ZI1rEWM8jmI8awAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Wed, 25 May 2022 14:25:39 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 88802603;
+        Wed, 25 May 2022 14:26:16 +0000 (UTC)
+From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
+To:     David Disseldorp <ddiss@suse.de>
+Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH] ceph/005: verify correct statfs behaviour with quotas
+References: <20220427143409.987-1-lhenriques@suse.de>
+        <20220525001142.0a17a41a@suse.de> <87pmk2kn6m.fsf@brahms.olymp>
+        <20220525123659.65270735@suse.de>
+Date:   Wed, 25 May 2022 15:26:15 +0100
+In-Reply-To: <20220525123659.65270735@suse.de> (David Disseldorp's message of
+        "Wed, 25 May 2022 12:36:59 +0200")
+Message-ID: <87tu9dwuwo.fsf@brahms.olymp>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
+David Disseldorp <ddiss@suse.de> writes:
 
-commit 6da1b4b1ab36d80a3994fd4811c8381de10af604 upstream.
+> On Wed, 25 May 2022 09:53:53 +0100, Lu=C3=ADs Henriques wrote:
+>
+>> David Disseldorp <ddiss@suse.de> writes:
+>>=20
+>> > Hi Lu=C3=ADs,
+>> >
+>> > It looks like this one is still in need of review...=20=20
+>>=20
+>> Ah! Thanks for reminding me about it, David!
+>>=20
+>> >
+>> > On Wed, 27 Apr 2022 15:34:09 +0100, Lu=C3=ADs Henriques wrote:
+>> >=20=20
+>> >> When using a directory with 'max_bytes' quota as a base for a mount,
+>> >> statfs shall use that 'max_bytes' value as the total disk size.  That
+>> >> value shall be used even when using subdirectory as base for the moun=
+t.
+>> >>=20
+>> >> A bug was found where, when this subdirectory also had a 'max_files'
+>> >> quota, the real filesystem size would be returned instead of the pare=
+nt
+>> >> 'max_bytes' quota value.  This test case verifies this bug is fixed.
+>> >>=20
+>> >> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
+>> >> ---
+>> >>  tests/ceph/005     | 40 ++++++++++++++++++++++++++++++++++++++++
+>> >>  tests/ceph/005.out |  2 ++
+>> >>  2 files changed, 42 insertions(+)
+>> >>  create mode 100755 tests/ceph/005
+>> >>  create mode 100644 tests/ceph/005.out
+>> >>=20
+>> >> diff --git a/tests/ceph/005 b/tests/ceph/005
+>> >> new file mode 100755
+>> >> index 000000000000..0763a235a677
+>> >> --- /dev/null
+>> >> +++ b/tests/ceph/005
+>> >> @@ -0,0 +1,40 @@
+>> >> +#! /bin/bash
+>> >> +# SPDX-License-Identifier: GPL-2.0
+>> >> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+>> >> +#
+>> >> +# FS QA Test 005
+>> >> +#
+>> >> +# Make sure statfs reports correct total size when:
+>> >> +# 1. using a directory with 'max_byte' quota as base for a mount
+>> >> +# 2. using a subdirectory of the above directory with 'max_files' qu=
+ota
+>> >> +#
+>> >> +. ./common/preamble
+>> >> +_begin_fstest auto quick quota
+>> >> +
+>> >> +_supported_fs generic
+>> >> +_require_scratch
+>> >> +
+>> >> +_scratch_mount
+>> >> +mkdir -p $SCRATCH_MNT/quota-dir/subdir
+>> >> +
+>> >> +# set quotas
+>> >> +quota=3D$((1024*10000))
+>> >> +$SETFATTR_PROG -n ceph.quota.max_bytes -v $quota $SCRATCH_MNT/quota-=
+dir
+>> >> +$SETFATTR_PROG -n ceph.quota.max_files -v $quota $SCRATCH_MNT/quota-=
+dir/subdir
+>> >> +_scratch_unmount
+>> >> +
+>> >> +SCRATCH_DEV=3D$SCRATCH_DEV/quota-dir _scratch_mount=20=20
+>> >
+>> > Aside from the standard please-quote-your-variables gripe, I'm a littl=
+e=20=20
+>>=20
+>> Sure, I'll fix those in next iteration.
+>>=20
+>> > confused with the use of SCRATCH_DEV for this test. Network FSes where
+>> > mkfs isn't provided don't generally use it. Is there any way that this
+>> > could be run against TEST_DEV, or does the umount / mount complicate
+>> > things too much?=20=20
+>>=20
+>> When I looked at other tests doing similar things (i.e. changing the mou=
+nt
+>> device during the test), they all seemed to be using SCRATCH_DEV.  I gue=
+ss
+>> that I could change TEST_DEV instead.  I'll revisit this and see if that
+>> works.
+>>=20
+>> Anyway, regarding the usage of SCRATCH_DEV in cephfs, I've used several
+>> different approaches:
+>>=20
+>> - Use 2 different filesystems created on the same cluster,
+>> - Use 2 volumes on the same filesystem, or
+>> - Simply use 2 directories in the same filesystem.
+>
+> Looking at _scratch_mkfs($FSTYP=3Dceph) there is support for scratch
+> filesystem reinitialization, so I suppose this should be okay. With
+> cephfs we could actually go one step further and call "ceph fs rm/new",
+> but that's something for another day :-).
 
-When overlayfs is running on top of xfs and the user unlinks a file in
-the overlay, overlayfs will create a whiteout inode and ask xfs to
-"rename" the whiteout file atop the one being unlinked.  If the file
-being unlinked loses its one nlink, we then have to put the inode on the
-unlinked list.
+Right, that would require a more complex test setup, with user-space tools
+on the test box/VM.  It definitely would be desirable to have such an
+option for example in teuthology (the ceph testing framework), but for the
+simple runs I usually do on VMs, I'd rather keep the default as-is.
 
-This requires us to grab the AGI buffer of the whiteout inode to take it
-off the unlinked list (which is where whiteouts are created) and to grab
-the AGI buffer of the file being deleted.  If the whiteout was created
-in a higher numbered AG than the file being deleted, we'll lock the AGIs
-in the wrong order and deadlock.
-
-Therefore, grab all the AGI locks we think we'll need ahead of time, and
-in order of increasing AG number per the locking rules.
-
-Reported-by: wenli xie <wlxie7296@gmail.com>
-Fixes: 93597ae8dac0 ("xfs: Fix deadlock between AGI and AGF when target_ip exists in xfs_rename()")
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- fs/xfs/libxfs/xfs_dir2.h    |  2 --
- fs/xfs/libxfs/xfs_dir2_sf.c |  2 +-
- fs/xfs/xfs_inode.c          | 42 ++++++++++++++++++++++---------------
- 3 files changed, 26 insertions(+), 20 deletions(-)
-
-diff --git a/fs/xfs/libxfs/xfs_dir2.h b/fs/xfs/libxfs/xfs_dir2.h
-index e55378640b05..d03e6098ded9 100644
---- a/fs/xfs/libxfs/xfs_dir2.h
-+++ b/fs/xfs/libxfs/xfs_dir2.h
-@@ -47,8 +47,6 @@ extern int xfs_dir_lookup(struct xfs_trans *tp, struct xfs_inode *dp,
- extern int xfs_dir_removename(struct xfs_trans *tp, struct xfs_inode *dp,
- 				struct xfs_name *name, xfs_ino_t ino,
- 				xfs_extlen_t tot);
--extern bool xfs_dir2_sf_replace_needblock(struct xfs_inode *dp,
--				xfs_ino_t inum);
- extern int xfs_dir_replace(struct xfs_trans *tp, struct xfs_inode *dp,
- 				struct xfs_name *name, xfs_ino_t inum,
- 				xfs_extlen_t tot);
-diff --git a/fs/xfs/libxfs/xfs_dir2_sf.c b/fs/xfs/libxfs/xfs_dir2_sf.c
-index 2463b5d73447..8c4f76bba88b 100644
---- a/fs/xfs/libxfs/xfs_dir2_sf.c
-+++ b/fs/xfs/libxfs/xfs_dir2_sf.c
-@@ -1018,7 +1018,7 @@ xfs_dir2_sf_removename(
- /*
-  * Check whether the sf dir replace operation need more blocks.
-  */
--bool
-+static bool
- xfs_dir2_sf_replace_needblock(
- 	struct xfs_inode	*dp,
- 	xfs_ino_t		inum)
-diff --git a/fs/xfs/xfs_inode.c b/fs/xfs/xfs_inode.c
-index 2bfbcf28b1bd..e958b1c74561 100644
---- a/fs/xfs/xfs_inode.c
-+++ b/fs/xfs/xfs_inode.c
-@@ -3152,7 +3152,7 @@ xfs_rename(
- 	struct xfs_trans	*tp;
- 	struct xfs_inode	*wip = NULL;		/* whiteout inode */
- 	struct xfs_inode	*inodes[__XFS_SORT_INODES];
--	struct xfs_buf		*agibp;
-+	int			i;
- 	int			num_inodes = __XFS_SORT_INODES;
- 	bool			new_parent = (src_dp != target_dp);
- 	bool			src_is_directory = S_ISDIR(VFS_I(src_ip)->i_mode);
-@@ -3265,6 +3265,30 @@ xfs_rename(
- 		}
- 	}
- 
-+	/*
-+	 * Lock the AGI buffers we need to handle bumping the nlink of the
-+	 * whiteout inode off the unlinked list and to handle dropping the
-+	 * nlink of the target inode.  Per locking order rules, do this in
-+	 * increasing AG order and before directory block allocation tries to
-+	 * grab AGFs because we grab AGIs before AGFs.
-+	 *
-+	 * The (vfs) caller must ensure that if src is a directory then
-+	 * target_ip is either null or an empty directory.
-+	 */
-+	for (i = 0; i < num_inodes && inodes[i] != NULL; i++) {
-+		if (inodes[i] == wip ||
-+		    (inodes[i] == target_ip &&
-+		     (VFS_I(target_ip)->i_nlink == 1 || src_is_directory))) {
-+			struct xfs_buf	*bp;
-+			xfs_agnumber_t	agno;
-+
-+			agno = XFS_INO_TO_AGNO(mp, inodes[i]->i_ino);
-+			error = xfs_read_agi(mp, tp, agno, &bp);
-+			if (error)
-+				goto out_trans_cancel;
-+		}
-+	}
-+
- 	/*
- 	 * Directory entry creation below may acquire the AGF. Remove
- 	 * the whiteout from the unlinked list first to preserve correct
-@@ -3317,22 +3341,6 @@ xfs_rename(
- 		 * In case there is already an entry with the same
- 		 * name at the destination directory, remove it first.
- 		 */
--
--		/*
--		 * Check whether the replace operation will need to allocate
--		 * blocks.  This happens when the shortform directory lacks
--		 * space and we have to convert it to a block format directory.
--		 * When more blocks are necessary, we must lock the AGI first
--		 * to preserve locking order (AGI -> AGF).
--		 */
--		if (xfs_dir2_sf_replace_needblock(target_dp, src_ip->i_ino)) {
--			error = xfs_read_agi(mp, tp,
--					XFS_INO_TO_AGNO(mp, target_ip->i_ino),
--					&agibp);
--			if (error)
--				goto out_trans_cancel;
--		}
--
- 		error = xfs_dir_replace(tp, target_dp, target_name,
- 					src_ip->i_ino, spaceres);
- 		if (error)
--- 
-2.25.1
-
+Cheers,
+--=20
+Lu=C3=ADs
