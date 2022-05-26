@@ -2,143 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15142C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 01:23:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD0A7C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 01:35:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241957AbiEZBXZ (ORCPT
+        id S233978AbiEZBf0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 May 2022 21:23:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49554 "EHLO
+        Wed, 25 May 2022 21:35:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241151AbiEZBXY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 21:23:24 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C26192D14
-        for <fstests@vger.kernel.org>; Wed, 25 May 2022 18:23:23 -0700 (PDT)
+        with ESMTP id S229458AbiEZBfZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 May 2022 21:35:25 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 054DEDE93;
+        Wed, 25 May 2022 18:35:22 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E5931B81E9F
-        for <fstests@vger.kernel.org>; Thu, 26 May 2022 01:23:21 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CE563C385B8;
-        Thu, 26 May 2022 01:23:19 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 9D2D8617C2;
+        Thu, 26 May 2022 01:35:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01839C34113;
+        Thu, 26 May 2022 01:35:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653528200;
-        bh=QLPxVyLyF04cVK0WhFL2R8Ts62tr8xZiMBZPdlPT8oo=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=VFPa8ohyenIk/aE6gDkTJr20Jk5mVPN0N3DQAZ/6EUbIi7WHtKMtq5bUZ9g+QhljS
-         ELpIXan/P4qFGcMBYm7UGzcSiCeqPiMoCK/8KJHo6FocpuUgzKgd1MmFh/wrcRaE7x
-         Mh4vVBRFm9aQobfmI/7G2FwKprd9yn+B7mLfo6Xnq0jvSQyxjEcaRtKQc1xbvhIBMY
-         v4RH5k5ay0bDP8T+O39Xl2LKh0Tq32kYMPMokkE3tNGMni6oSlrdygIVVy3uYoRnR6
-         JzsC2sFLaPPsWb53UbKowphn1w5sTqXT9oKdfsyXVgQkrCwymmN14ps1IfvRBuvtGL
-         wMZtzrrh/6agA==
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     david@fromorbit.com
-Subject: [PATCH v2 2/2] tests: remove redundant common/$FSTYP importing
-Date:   Thu, 26 May 2022 09:23:17 +0800
-Message-Id: <20220526012317.3624914-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20220525073427.3355242-3-zlang@kernel.org>
-References: <20220525073427.3355242-3-zlang@kernel.org>
+        s=k20201202; t=1653528921;
+        bh=Ww7ObAXnJpfEuyfB7Be3bLStCrrBnElkWJH1L9aKZQQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=PuV3xQ/3GiO/7AvjrjeP/5gSfyH1raeiOgSKzvGG+MwulxMzwi/H3GV70Ycb14t20
+         c2SmctrjGc70WY8fH01aQOtATtSscYsHvjcp3i7YDqKqANFj4kjHVG0rZqAljgWUx1
+         3wkMttwgLvZ63Rcb0fsHmTjafRGo+4EIgTTsXWd2+KEdCao9XSyqEG8pZThci5FO0b
+         IrDO8c+gtKvsvc4Ak//Ud0jb0Q3y/0t2KuHZNgUwxSUjRVKSLaa7YI9hsJmiSFhqiV
+         aV8EnvikV8dsOaYnigvkzs0x1Gwt2qWffIwXy6GjOEdPDNboDtWqSWIhWeRwwDXUKu
+         9xurMehJ2sf4g==
+Date:   Wed, 25 May 2022 18:35:20 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     Zorro Lang <zlang@redhat.com>, Eryu Guan <guaneryu@gmail.com>,
+        fstests <fstests@vger.kernel.org>,
+        xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] xfs: test mkfs.xfs sizing of internal logs that
+Message-ID: <Yo7ZWKYseetNITrj@magnolia>
+References: <Yo03mZ12X1nLGihK@magnolia>
+ <20220524234426.GQ2306852@dread.disaster.area>
+ <Yo1vCizXEK7+AkZi@magnolia>
+ <20220525002413.GT2306852@dread.disaster.area>
+ <Yo66ACF65ao6Akis@magnolia>
+ <20220526001149.GW2306852@dread.disaster.area>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220526001149.GW2306852@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-As fstests intensively source specific common/$FSTYP files in
-common/rc, at the beginning of ./check running. Each single case
-doesn't need to import that again.
+On Thu, May 26, 2022 at 10:11:49AM +1000, Dave Chinner wrote:
+> On Wed, May 25, 2022 at 04:21:36PM -0700, Darrick J. Wong wrote:
+> > On Wed, May 25, 2022 at 10:24:13AM +1000, Dave Chinner wrote:
+> > > On Tue, May 24, 2022 at 04:49:30PM -0700, Darrick J. Wong wrote:
+> > > > On Wed, May 25, 2022 at 09:44:26AM +1000, Dave Chinner wrote:
+> > > > > On Tue, May 24, 2022 at 12:52:57PM -0700, Darrick J. Wong wrote:
+> > > > > > +# First we try various small filesystems and stripe sizes.
+> > > > > > +for M in `seq 298 302` `seq 490 520`; do
+> > > > > > +	for S in `seq 32 4 64`; do
+> > > > > > +		test_format "M=$M S=$S" -dsu=${S}k,sw=1,size=${M}m
+> > > > > > +	done
+> > > > > > +done
+> > > > > > +
+> > > > > > +# log so large it pushes the root dir into AG 1
+> > > > > > +test_format "log pushes rootdir into AG 1" -d agcount=3200,size=6366g -lagnum=0
+> > > > 
+> > > > ...this particular check in mkfs only happens after we allocate the root
+> > > > directory, which an -N invocation doesn't do.
+> > > 
+> > > Ok, so for this test can we drop the -N? We don't need to do 30 IOs
+> > > and write 64MB logs for every config we test - I think there's ~35 *
+> > > 8 invocations of test_format in the loop above before we get here...
+> > > 
+> > > Also, why do we need a 6.3TB filesystem with 2.1GB AGs and a 2GB log
+> > > to trigger this? That means we have to write 2GB to disk, plus
+> > > ~20,000 write IOs for the AG headers and btree root blocks before we
+> > > get to the failure case, yes?
+> > > 
+> > > Why not just exercise the failure case with something like this:
+> > > 
+> > > # mkfs.xfs -d agcount=2,size=64M -l size=8180b,agnum=0 -d file,name=test.img
+> > > meta-data=test.img               isize=512    agcount=2, agsize=8192 blks
+> > >          =                       sectsz=512   attr=2, projid32bit=1
+> > >          =                       crc=1        finobt=1, sparse=1, rmapbt=0
+> > >          =                       reflink=1    bigtime=0 inobtcount=0
+> > > data     =                       bsize=4096   blocks=16384, imaxpct=25
+> > >          =                       sunit=0      swidth=0 blks
+> > > naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+> > > log      =internal log           bsize=4096   blocks=8180, version=2
+> > >          =                       sectsz=512   sunit=0 blks, lazy-count=1
+> > > realtime =none                   extsz=4096   blocks=0, rtextents=0
+> > > mkfs.xfs: root inode created in AG 1, not AG 0
+> > 
+> > Welll... a better reason for why this test can't do that -- one of my
+> > fixes also made mkfs reject -l size=XXX when XXX is not possible.
+> 
+> So you make other changes to mkfs that aren't yet upstream that
+> check whether the log causes the root inode to change position?
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
+It's in for-next, is that not good enough?
 
-I removed "./common/filter" in btrfs/258 uncarefully, fix that in this V2.
+> I mean, '-l size=8180b' results in a log that fits perfectly fine in
+> an empty AG, and so you must have added more checks to detect this
+> moves the root inode somehow?
+> 
+> > That said... -d agcount=3200,size=6366g -lagnum=0 -N seems to work?
+> 
+> On a new mkfs binary with those checks that you mention above?  If
+> so, it seems to me that those new checks trigger for this case, too,
+> before we write anything?
+>
+> IOWs, this won't fail on older mkfs.xfs binaries that don't have
+> these new log size checks because we never get around to allocating
+> the root inode and checking it's location, right?  Yet what we
+> really want here is for it to fail on an old mkfs binary?
 
-Thanks,
-Zorro
+Yeah, something like that.  It's been so long since Eric and I were
+actively poking on this that I don't remember so well anymore.
 
- tests/btrfs/177 | 1 -
- tests/btrfs/258 | 1 -
- tests/btrfs/259 | 1 -
- tests/xfs/422   | 1 -
- tests/xfs/423   | 1 -
- tests/xfs/517   | 1 -
- 6 files changed, 6 deletions(-)
+--D
 
-diff --git a/tests/btrfs/177 b/tests/btrfs/177
-index 2fd11e89..7b004b83 100755
---- a/tests/btrfs/177
-+++ b/tests/btrfs/177
-@@ -10,7 +10,6 @@
- _begin_fstest auto quick swap balance
- 
- . ./common/filter
--. ./common/btrfs
- 
- # Modify as appropriate.
- _supported_fs btrfs
-diff --git a/tests/btrfs/258 b/tests/btrfs/258
-index 158eaf79..da073333 100755
---- a/tests/btrfs/258
-+++ b/tests/btrfs/258
-@@ -10,7 +10,6 @@
- . ./common/preamble
- _begin_fstest auto defrag quick
- 
--. ./common/btrfs
- . ./common/filter
- 
- # real QA test starts here
-diff --git a/tests/btrfs/259 b/tests/btrfs/259
-index e7bd8ddd..92d0b9a6 100755
---- a/tests/btrfs/259
-+++ b/tests/btrfs/259
-@@ -12,7 +12,6 @@ _begin_fstest auto quick defrag
- 
- # Import common functions.
- . ./common/filter
--. ./common/btrfs
- 
- # real QA test starts here
- 
-diff --git a/tests/xfs/422 b/tests/xfs/422
-index 77db492e..175253aa 100755
---- a/tests/xfs/422
-+++ b/tests/xfs/422
-@@ -17,7 +17,6 @@ _register_cleanup "_cleanup" BUS
- . ./common/filter
- . ./common/fuzzy
- . ./common/inject
--. ./common/xfs
- 
- # real QA test starts here
- _supported_fs xfs
-diff --git a/tests/xfs/423 b/tests/xfs/423
-index be56f311..c9dfaece 100755
---- a/tests/xfs/423
-+++ b/tests/xfs/423
-@@ -18,7 +18,6 @@ _register_cleanup "_cleanup" BUS
- . ./common/filter
- . ./common/fuzzy
- . ./common/inject
--. ./common/xfs
- 
- # real QA test starts here
- _supported_fs xfs
-diff --git a/tests/xfs/517 b/tests/xfs/517
-index 512f795f..88c4f43b 100755
---- a/tests/xfs/517
-+++ b/tests/xfs/517
-@@ -23,7 +23,6 @@ _cleanup()
- . ./common/filter
- . ./common/fuzzy
- . ./common/inject
--. ./common/xfs
- 
- # real QA test starts here
- _supported_fs xfs
--- 
-2.31.1
-
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
