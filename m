@@ -2,229 +2,163 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4C00C433F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 06:39:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9DE2C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 06:51:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346167AbiEZGjz (ORCPT
+        id S240195AbiEZGvQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 26 May 2022 02:39:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50210 "EHLO
+        Thu, 26 May 2022 02:51:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236456AbiEZGjv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 May 2022 02:39:51 -0400
-Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCCB3554A2
-        for <fstests@vger.kernel.org>; Wed, 25 May 2022 23:39:49 -0700 (PDT)
-Received: by mail-qv1-xf36.google.com with SMTP id cv1so1048337qvb.5
-        for <fstests@vger.kernel.org>; Wed, 25 May 2022 23:39:49 -0700 (PDT)
+        with ESMTP id S238937AbiEZGvP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 May 2022 02:51:15 -0400
+Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE0BEB488
+        for <fstests@vger.kernel.org>; Wed, 25 May 2022 23:51:13 -0700 (PDT)
+Received: by mail-qk1-x730.google.com with SMTP id c1so779302qkf.13
+        for <fstests@vger.kernel.org>; Wed, 25 May 2022 23:51:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=heSudPdDEXNaxrOIhxC4jmIAtja2mGZmu06JCteb72Y=;
-        b=oJ0c00gTk3FTbe17VqA03LltPdGsdakYTwluSsr6Ud8vIo8somklDaUkgYHm+6BJKh
-         MQrTW7UtZQQC6vPP1r1cPHztlH4imCVNqUNHyvcSHS72G66gWjM9FVWgQtr2oSNz0vmI
-         HgHxZ9UlAAvsx5sQJLg/5XD7XjIv7h9c1qnqtPPdcS18E4FReqjSoEZSifxV9uqSkfX1
-         n5D9IbgMUSyzMNa+Uy6jDTrOb+WZg+hH7QmUwR1jw0elbA0Ez1a8+xVXN21R8pmY2eYH
-         j9hd82ehAMoXsLfp89JpMu/MveCyDqX0/RGkHr7/ejnyh/kzT4hX+oCjb4ogN/bqKujE
-         Ar5Q==
+        bh=0g6XDEbX05UslLYsn1dUCe1tn//dcoUbDdx21KRU2Qs=;
+        b=jBru6tpp5x7RcbhnEC0bhZxcCAsg3Cg0i3k6Od/OeWWyQEYR2wVNulDhu51ryGtl2y
+         e9onl/YvWQv6EMTsUtqGwmTFqwDJYsb0z3lJdYKvf1zMibLO3vt6ZDX4k/q0OKOaTb3I
+         +aRF155Q8acePx+kFEyIFpj9b73wT7wMweUXUiE6jlLAqe+ePEwrKmge571MkaBubGIs
+         wtdHWrkoxUWXDFvtaAaueY2dK39HNyx+oiF5Tkcj9vo6Mx/xnh8/HD0HGINt5qoI2H7T
+         nXKE80oDusXoo9M3v6RgbxCJbwYBfxVZvuxPxXywP491ZYO5ghywgqq8gdHAq2ZqnCX7
+         m1Qw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=heSudPdDEXNaxrOIhxC4jmIAtja2mGZmu06JCteb72Y=;
-        b=vc6GOSj7d4IKEu56vfi9ipYzbxSPQarX+Y6ZMRqR4lZx747eawc76cSc+kh6qoQO+u
-         Gs6IoL1Tz2Epi1NBeUOPjDhJ8OyHE+K71iv1dfMAcyFVGsOHdfHt/JFs/geTpq9C+EtK
-         wnixTQxUVupiSkV0D95zwXzvUoQqzKKyNlgQC3NNkQYAScXyq/+8NKB4H+/WraWf0jhZ
-         dGMxrY3+T/Ob1KP7GjEOG1y/rh7n5GRAsn62rNdwLFUfXXQomsWYXp9Zukf3WPdm9I04
-         n8D1dvrUsii8HAK8/yNktkw5zHUSJQfJhNhkGNBYN8eMEGuG0XXigsncavcgF+sjjLR3
-         I/mQ==
-X-Gm-Message-State: AOAM533Dyq/dwOTJ+m3DgQ/KXgYwc+YIVcN88lUZF3jzWiG6nQLIm8Y6
-        tuj+a+8X+6VimCSFLp1xp05fDcQct2Uwx9YhDJWtl9w0bHA=
-X-Google-Smtp-Source: ABdhPJxBj8wHNhHCTtNPZwcCuOf+sw0qfbCEzWfO1VCgYY235OR/7FCjP0r66lUOG6eucjApf/RFns+9WVL1E0pSgig=
-X-Received: by 2002:a05:6214:1cc4:b0:435:35c3:f0f1 with SMTP id
- g4-20020a0562141cc400b0043535c3f0f1mr29182231qvd.0.1653547189063; Wed, 25 May
- 2022 23:39:49 -0700 (PDT)
+        bh=0g6XDEbX05UslLYsn1dUCe1tn//dcoUbDdx21KRU2Qs=;
+        b=cN/hdGrODRYz4UFcNvK03TBmyv2L9V9vUtdnAJSseUlM2QjqLfkyJ/qdMmnqEfiPoV
+         ndHLhj+CgQOMFOyy5a7LnRnKL1REtOdMIlFoKZeV+T3XOm55llw051ms8KX+abSonBbD
+         22KSkjrbO6jGwNL/sQh2HOFJuVIQX9iammk4gZpPG8tf/pRCLWm6P1OdH31a8D5sZRIC
+         5wvalmcYWGl2LjnthCkdyRD3cwkPQXohVCOYzZSSZfjfhv4Km4NYK8d2Xt7Pns/UItfL
+         rjMURiNelMWrZO+W7O5O5OHq3ap5hAJh4uJKeNvCaRW/YzLqhwJX2QDTIPdhvYadwCSS
+         oLsQ==
+X-Gm-Message-State: AOAM5304mWb+veWKlM1qsIAItJopbFq33KoL268tR8wzgltdw02RFzWG
+        Y94YluI4pH8LfQjRdxIM74z6moP/HfKeXiZeDQZCocbHDWc=
+X-Google-Smtp-Source: ABdhPJz1zju2VHffFp2/sxBURA3HphnXKi7PLjaA8BckwNdWeTXVqQhS820t3Pp0O22ly6NMhh8ObYX06tAEhcgUKf4=
+X-Received: by 2002:a37:6cc2:0:b0:6a3:769c:e5ba with SMTP id
+ h185-20020a376cc2000000b006a3769ce5bamr14169519qkc.19.1653547872801; Wed, 25
+ May 2022 23:51:12 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220525073427.3355242-1-zlang@kernel.org> <20220525073427.3355242-2-zlang@kernel.org>
-In-Reply-To: <20220525073427.3355242-2-zlang@kernel.org>
+References: <20220525073427.3355242-3-zlang@kernel.org> <20220526012317.3624914-1-zlang@kernel.org>
+In-Reply-To: <20220526012317.3624914-1-zlang@kernel.org>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 26 May 2022 09:39:37 +0300
-Message-ID: <CAOQ4uxidP_drarQsnX2kvHW=MfXjpLN--5B-cgXkG4401CfvgQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] common: source base fs specific common file
+Date:   Thu, 26 May 2022 09:51:01 +0300
+Message-ID: <CAOQ4uxg94oN6DyxCiM-x0_Kwtbpo0Cbi5yARDQxxOOODHLOrBg@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] tests: remove redundant common/$FSTYP importing
 To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests <fstests@vger.kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Dave Chinner <david@fromorbit.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 25, 2022 at 2:18 PM Zorro Lang <zlang@kernel.org> wrote:
+On Thu, May 26, 2022 at 9:47 AM Zorro Lang <zlang@kernel.org> wrote:
 >
-> When tests overlayfs, sometimes we need the underlying fs specific
-> helpers, e.g. common/rc has:
->   _filesystem_timestamp_range $OVL_BASE_TEST_DEV $OVL_BASE_FSTYP
->
-> So when we source common/overlay, better to source OVL_BASE_FSTYP
-> too.
+> As fstests intensively source specific common/$FSTYP files in
+> common/rc, at the beginning of ./check running. Each single case
+> doesn't need to import that again.
 >
 > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> ---
 
-Makes sense.
+Looks fine.
 
 Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 
-> ---
->  common/config  | 59 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  common/overlay |  4 ++++
->  common/rc      | 49 +----------------------------------------
->  3 files changed, 64 insertions(+), 48 deletions(-)
 >
-> diff --git a/common/config b/common/config
-> index c6428f90..558f148b 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -481,6 +481,65 @@ _fsck_opts()
->         esac
->  }
+> I removed "./common/filter" in btrfs/258 uncarefully, fix that in this V2.
 >
-> +# check necessary running dependences then source sepcific fs helpers
-> +_source_specific_fs()
-> +{
-> +       local fs=$1
-> +
-> +       if [ -z "$fs" ];then
-> +               fs=$FSTYP
-> +       fi
-> +
-> +       case "$fs" in
-> +       xfs)
-> +               [ "$XFS_LOGPRINT_PROG" = "" ] && _fatal "xfs_logprint not found"
-> +               [ "$XFS_REPAIR_PROG" = "" ] && _fatal "xfs_repair not found"
-> +               [ "$XFS_DB_PROG" = "" ] && _fatal "xfs_db not found"
-> +               [ "$MKFS_XFS_PROG" = "" ] && _fatal "mkfs_xfs not found"
-> +               [ "$XFS_INFO_PROG" = "" ] && _fatal "xfs_info not found"
-> +
-> +               . ./common/xfs
-> +               ;;
-> +       udf)
-> +               [ "$MKFS_UDF_PROG" = "" ] && _fatal "mkfs_udf/mkudffs not found"
-> +               ;;
-> +       btrfs)
-> +               [ "$MKFS_BTRFS_PROG" = "" ] && _fatal "mkfs.btrfs not found"
-> +
-> +               . ./common/btrfs
-> +               ;;
-> +       ext4)
-> +               [ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
-> +               ;;
-> +       f2fs)
-> +               [ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
-> +               ;;
-> +       nfs)
-> +               . ./common/nfs
-> +               ;;
-> +       cifs)
-> +               ;;
-> +       9p)
-> +               ;;
-> +       ceph)
-> +               . ./common/ceph
-> +               ;;
-> +       glusterfs)
-> +               ;;
-> +       overlay)
-> +               . ./common/overlay
-> +               ;;
-> +       reiser4)
-> +               [ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
-> +               ;;
-> +       pvfs2)
-> +               ;;
-> +       ubifs)
-> +               [ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
-> +               ;;
-> +       esac
-> +}
-> +
->  known_hosts()
->  {
->         [ "$HOST_CONFIG_DIR" ] || HOST_CONFIG_DIR=`pwd`/configs
-> diff --git a/common/overlay b/common/overlay
-> index c4e7ee58..e35419d0 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -12,6 +12,10 @@ export OVL_XATTR_NLINK="trusted.overlay.nlink"
->  export OVL_XATTR_UPPER="trusted.overlay.upper"
->  export OVL_XATTR_METACOPY="trusted.overlay.metacopy"
+> Thanks,
+> Zorro
 >
-> +if [ -n "$OVL_BASE_FSTYP" ];then
-> +       _source_specific_fs $OVL_BASE_FSTYP
-> +fi
-> +
->  # helper function to do the actual overlayfs mount operation
->  _overlay_mount_dirs()
->  {
-> diff --git a/common/rc b/common/rc
-> index 70a15f9c..2f31ca46 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -96,54 +96,7 @@ _log_err()
->  umask 022
+>  tests/btrfs/177 | 1 -
+>  tests/btrfs/258 | 1 -
+>  tests/btrfs/259 | 1 -
+>  tests/xfs/422   | 1 -
+>  tests/xfs/423   | 1 -
+>  tests/xfs/517   | 1 -
+>  6 files changed, 6 deletions(-)
 >
->  # check for correct setup and source the $FSTYP specific functions now
-> -case "$FSTYP" in
-> -    xfs)
-> -        [ "$XFS_LOGPRINT_PROG" = "" ] && _fatal "xfs_logprint not found"
-> -        [ "$XFS_REPAIR_PROG" = "" ] && _fatal "xfs_repair not found"
-> -        [ "$XFS_DB_PROG" = "" ] && _fatal "xfs_db not found"
-> -        [ "$MKFS_XFS_PROG" = "" ] && _fatal "mkfs_xfs not found"
-> -        [ "$XFS_INFO_PROG" = "" ] && _fatal "xfs_info not found"
-> -
-> -        . ./common/xfs
-> -        ;;
-> -    udf)
-> -        [ "$MKFS_UDF_PROG" = "" ] && _fatal "mkfs_udf/mkudffs not found"
-> -        ;;
-> -    btrfs)
-> -        [ "$MKFS_BTRFS_PROG" = "" ] && _fatal "mkfs.btrfs not found"
-> -
-> -        . ./common/btrfs
-> -        ;;
-> -    ext4)
-> -        [ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
-> -        ;;
-> -    f2fs)
-> -        [ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
-> -        ;;
-> -    nfs)
-> -        . ./common/nfs
-> -        ;;
-> -    cifs)
-> -        ;;
-> -    9p)
-> -        ;;
-> -    ceph)
-> -        . ./common/ceph
-> -        ;;
-> -    glusterfs)
-> -        ;;
-> -    overlay)
-> -        . ./common/overlay
-> -        ;;
-> -    reiser4)
-> -        [ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
-> -        ;;
-> -    pvfs2)
-> -       ;;
-> -    ubifs)
-> -       [ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
-> -       ;;
-> -esac
-> +_source_specific_fs $FSTYP
+> diff --git a/tests/btrfs/177 b/tests/btrfs/177
+> index 2fd11e89..7b004b83 100755
+> --- a/tests/btrfs/177
+> +++ b/tests/btrfs/177
+> @@ -10,7 +10,6 @@
+>  _begin_fstest auto quick swap balance
 >
->  if [ ! -z "$REPORT_LIST" ]; then
->         . ./common/report
+>  . ./common/filter
+> -. ./common/btrfs
+>
+>  # Modify as appropriate.
+>  _supported_fs btrfs
+> diff --git a/tests/btrfs/258 b/tests/btrfs/258
+> index 158eaf79..da073333 100755
+> --- a/tests/btrfs/258
+> +++ b/tests/btrfs/258
+> @@ -10,7 +10,6 @@
+>  . ./common/preamble
+>  _begin_fstest auto defrag quick
+>
+> -. ./common/btrfs
+>  . ./common/filter
+>
+>  # real QA test starts here
+> diff --git a/tests/btrfs/259 b/tests/btrfs/259
+> index e7bd8ddd..92d0b9a6 100755
+> --- a/tests/btrfs/259
+> +++ b/tests/btrfs/259
+> @@ -12,7 +12,6 @@ _begin_fstest auto quick defrag
+>
+>  # Import common functions.
+>  . ./common/filter
+> -. ./common/btrfs
+>
+>  # real QA test starts here
+>
+> diff --git a/tests/xfs/422 b/tests/xfs/422
+> index 77db492e..175253aa 100755
+> --- a/tests/xfs/422
+> +++ b/tests/xfs/422
+> @@ -17,7 +17,6 @@ _register_cleanup "_cleanup" BUS
+>  . ./common/filter
+>  . ./common/fuzzy
+>  . ./common/inject
+> -. ./common/xfs
+>
+>  # real QA test starts here
+>  _supported_fs xfs
+> diff --git a/tests/xfs/423 b/tests/xfs/423
+> index be56f311..c9dfaece 100755
+> --- a/tests/xfs/423
+> +++ b/tests/xfs/423
+> @@ -18,7 +18,6 @@ _register_cleanup "_cleanup" BUS
+>  . ./common/filter
+>  . ./common/fuzzy
+>  . ./common/inject
+> -. ./common/xfs
+>
+>  # real QA test starts here
+>  _supported_fs xfs
+> diff --git a/tests/xfs/517 b/tests/xfs/517
+> index 512f795f..88c4f43b 100755
+> --- a/tests/xfs/517
+> +++ b/tests/xfs/517
+> @@ -23,7 +23,6 @@ _cleanup()
+>  . ./common/filter
+>  . ./common/fuzzy
+>  . ./common/inject
+> -. ./common/xfs
+>
+>  # real QA test starts here
+>  _supported_fs xfs
 > --
 > 2.31.1
 >
