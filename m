@@ -2,150 +2,112 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C140FC433FE
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 18:59:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AD8EC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 23:39:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344208AbiEZS7d (ORCPT
+        id S1346986AbiEZXjz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 26 May 2022 14:59:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59748 "EHLO
+        Thu, 26 May 2022 19:39:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47270 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231196AbiEZS7d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 May 2022 14:59:33 -0400
-Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DBFBCFE24;
-        Thu, 26 May 2022 11:59:32 -0700 (PDT)
-Received: by mail-qk1-x72e.google.com with SMTP id p63so2332766qkf.0;
-        Thu, 26 May 2022 11:59:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=weY+EYNxcvGxOH+7TMih1ZKr+3Mghx/ygRt8J31EFDg=;
-        b=jaOwVcSyGLWyzzupmSslnUwVqqXsvKpJoOt3hwJ7ID4FpZTavxuN3o3NReLNn+60/7
-         H1u2J29DTJqUmoN9PrHfyJPxldheH52ygNAc+9TpWGaVQRFEghGC+s92Tz/mcFg0wZ/y
-         tDrFYsY0JtCumrtpGPzfR7TRTtDWHxm6VecNITthyELlMtP9S/FcVGFerf4qfvnM+QOg
-         DbZBHfWi7I4mqYEtVCpipvmKexY4ThvlNtcX+De+7DsmumE6tBVAzDD9ZTu6X5YdI9uf
-         FA+tPZ8h/XranTb0G7jD7ICpblcDk7Bm1qr5pnvJnnqxthJxDbPW0UuMyiXJ7lOGvrPe
-         jVZg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=weY+EYNxcvGxOH+7TMih1ZKr+3Mghx/ygRt8J31EFDg=;
-        b=MzL4qcSBtOV9lkHYST6cVUkSARph7/qY83lXED3MisHGSxXt7DFUdAGFb8OanbgMjZ
-         BbyEU9Ez4LJj6y5kOv1F3lZW32THB4CHCwlOxSy8lTV69uSVDZvwgJbzQu/PTIecqJAh
-         WLJJPbUjaqGaz0W+UY+cKm/wemgmJxhS/RhnyLwgH50dXtU5DX5Ux8kJc2MgoF9ZHyrj
-         qBcvc7XRc8GxbOipsCGwuVac6OCSRQKLZUh8rK1c6avMUwK+qI4vTw0czeA2g31saMNu
-         n+yLdkT/rM8cv4d+OH0nDXUueVXxSuT8u5HefGAQKRpLIC6vmib5g4cW4AFkq84RPB1B
-         dDng==
-X-Gm-Message-State: AOAM533hgtFEcXDc7PI2Zwp44FgGngB1JpvBzyFWMgQzdy57HTLcNpDF
-        WKN08SETrmSpkGJTkjf5tfVsHR3ZF62qctNsF9c=
-X-Google-Smtp-Source: ABdhPJxPSa7EMRKRnQQ3oHpXzm9Mks25PmqzGTYGvvst7KXcoT5x4g33fu+XPJ4ubb86FOC761RDyYp4B5IdeCH8/Ys=
-X-Received: by 2002:a37:6310:0:b0:6a5:71bf:17e6 with SMTP id
- x16-20020a376310000000b006a571bf17e6mr11011009qkb.258.1653591571204; Thu, 26
- May 2022 11:59:31 -0700 (PDT)
+        with ESMTP id S231784AbiEZXjy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 May 2022 19:39:54 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A51039CC91
+        for <fstests@vger.kernel.org>; Thu, 26 May 2022 16:39:52 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 5894B52C1E4;
+        Fri, 27 May 2022 09:39:51 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1nuN53-00GoEp-VE; Fri, 27 May 2022 09:39:49 +1000
+Date:   Fri, 27 May 2022 09:39:49 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 3/8] xfs/*: clean up _cleanup override
+Message-ID: <20220526233949.GB3923443@dread.disaster.area>
+References: <20220524073411.1943480-1-david@fromorbit.com>
+ <20220524073411.1943480-4-david@fromorbit.com>
+ <CAOQ4uxgZwngHevX_FXytAi68k=aqp_N-8Buk50rrJKD0UoK+2g@mail.gmail.com>
+ <20220524171336.pyoomozstpygnkjt@zlang-mailbox>
+ <20220526150417.bw3zpwiqcm5fkysn@zlang-mailbox>
 MIME-Version: 1.0
-References: <20220525111715.2769700-1-amir73il@gmail.com> <Yo+4jW0e4+fYIxX2@magnolia>
- <Yo/KibX8TOj+rZkV@bombadil.infradead.org>
-In-Reply-To: <Yo/KibX8TOj+rZkV@bombadil.infradead.org>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 26 May 2022 21:59:19 +0300
-Message-ID: <CAOQ4uxgSKFutWq03Yu2+AvucoZwJ5azz5G5KgDSztCczk_+OtA@mail.gmail.com>
-Subject: Re: [PATH 5.10 0/4] xfs stable candidate patches for 5.10.y (part 1)
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Dave Chinner <david@fromorbit.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        "Theodore Ts'o" <tytso@mit.edu>,
-        Adam Manzanares <a.manzanares@samsung.com>,
-        Tyler Hicks <code@tyhicks.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Leah Rumancik <lrumancik@google.com>, masahiroy@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220526150417.bw3zpwiqcm5fkysn@zlang-mailbox>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=62900fc7
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=kj9zAlcOel0A:10 a=oZkIemNP1mAA:10 a=7-415B0cAAAA:8 a=20KFwNOVAAAA:8
+        a=u_7UY2rsIc8I6M98PosA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 26, 2022 at 9:44 PM Luis Chamberlain <mcgrof@kernel.org> wrote:
->
-> On Thu, May 26, 2022 at 10:27:41AM -0700, Darrick J. Wong wrote:
-> > /me looks and sees a large collection of expunge lists, along with
-> > comments about how often failures occur and/or reasons.  Neat!
-> >
-> > Leah mentioned on the ext4 call this morning that she would have found
-> > it helpful to know (before she started working on 5.15 backports) which
-> > tests were of the flaky variety so that she could better prioritize the
-> > time she had to look into fstests failures.  (IOWS: saw a test fail a
-> > small percentage of the time and then burned a lot of machine time only
-> > to figure out that 5.15.0 also failed a percentage of th time).
->
-> See my proposal to try to make this easier to parse:
->
-> https://lore.kernel.org/all/YoW0ZC+zM27Pi0Us@bombadil.infradead.org/
->
-> > We talked about where it would be most useful for maintainers and QA
-> > people to store their historical pass/fail data, before settling on
-> > "somewhere public where everyone can review their colleagues' notes" and
-> > "somewhere minimizing commit friction".  At the time, we were thinking
-> > about having people contribute their notes directly to the fstests
-> > source code, but I guess Luis has been doing that in the kdevops repo
-> > for a few years now.
-> >
-> > So, maybe there?
->
-> For now sure, I'm happy to add others the linux-kdevops org on github
-> and they get immediate write access to the repo. This is working well
-> so far. Long term we need to decide if we want to spin off the
-> expunge list as a separate effort and make it a git subtree (note
-> it is different than a git sub module). Another example of a use case
-> for a git subtree, to use it as an example, is the way I forked
-> kconfig from Linux into a standalone git tree so to allow any project
-> to bump kconfig code with just one command. So different projects
-> don't need to fork kconfig as they do today.
->
-> The value in doing the git subtree for expunges is any runner can use
-> it. I did design kdevops though to run on *any* cloud, and support
-> local virtualization tech like libvirt and virtualbox.
->
-> The linux-kdevops git org also has other projects which both fstest
-> and blktests depend on, so for example dbench which I had forked and
-> cleaned up a while ago. It may make sense to share keeping oddball
-> efforts like thse which are no longer maintained in this repo.
->
-> There is other tech I'm evaluating for this sort of collaborative test
-> efforts such as ledgers, but that is in its infancy at this point in
-> time. I have a sense though it may be a good outlet for collection of
-> test artifacts in a decentralized way and also allow *any* entity to
-> participate in bringing confidence to stable kernel branches or dev
-> branches prior to release.
->
+On Thu, May 26, 2022 at 11:04:17PM +0800, Zorro Lang wrote:
+> On Wed, May 25, 2022 at 01:13:36AM +0800, Zorro Lang wrote:
+> > On Tue, May 24, 2022 at 01:42:15PM +0300, Amir Goldstein wrote:
+> > > On Tue, May 24, 2022 at 12:41 PM Dave Chinner <david@fromorbit.com> wrote:
+> > > >
+> > > > From: Dave Chinner <dchinner@redhat.com>
+> > > >
+> > > > Use a local cleanup function and _register_cleanup properly.
+> > > >
+> > > > Remove local cleanups that just do what the standard _cleanup and
+> > > > test exist does.
+> > > >
+> > > > Remove local cleanups that just remove test files and then do
+> > > > standard _cleanup functionality.
+> > > 
+> > > As I mentioned in response to the cover letter, the call to _cleanup()
+> > > can and I think should be chained implicitly, but I am still waiting
+> > > for your response regarding the tests where generic _cleanup is not
+> > > desired.
+> > > 
+> > > >
+> > > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > > > ---
+> > > >  tests/xfs/004     |  7 -------
+> > > >  tests/xfs/006     |  7 ++++---
+> > 
+> > [snap]
+> > 
+> > > > diff --git a/tests/xfs/006 b/tests/xfs/006
+> > > > index cecceaa3..fd8d8071 100755
+> > > > --- a/tests/xfs/006
+> > > > +++ b/tests/xfs/006
+> > > > @@ -11,11 +11,10 @@
+> > > >  _begin_fstest auto quick mount eio
+> > > >
+> > > >  # Override the default cleanup function.
+> > > > -_cleanup()
+> > > > +_dmerror_cleanup()
+> > > >  {
+> > > > -       cd /
+> > > > -       rm -f $tmp.*
+> > > >         _dmerror_cleanup
+> > > 
+> > > That looks recursive.
+> > 
+> > Yes, but this _dmerror_cleanup() won't be run. This function will be covered by
+> > the _dmerror_cleanup() in common/dmerror, when this case ". ./common/dmerror"
+> > several lines later. So the later _cleanup won't be run. So this place and other
+> > places similar with this need to change.
+> 
+> Hi Dave,
+> 
+> Are you going to fix this issue or making more changes on this patchset?
+> If not, I'll merge this patchset tomorrow (Friday) by changing above
+> _dmerror_cleanup to _dm_error_cleanup. Then give merged patches a regression
+> on Saturday. What do you think?
 
-There are few problems I noticed with the current workflow.
+I posted this patchset as an RFC, not as a candidate for merging.
+It's not ready for merging yet.
 
-1. It will not scale to maintain this in git as more and more testers
-start using kdepops and adding more and more fs and configs and distros.
-How many more developers you want to give push access to linux-kdevops?
-I don't know how test labs report to KernelCI, but we need to look at their
-model and not invent the wheel.
+Cheers,
 
-2. kdevops is very focused on stabilizing the baseline fast, which is
-very good, but there is no good process of getting a test out of expunge list.
-We have a very strong suspicion that some of the tests that we put in
-expunge lists failed due to some setup issue in the host OS that caused
-NVME IO errors in the guests. I tried to put that into comments when
-I noticed that, but I am afraid there may have been other tests that are
-falsely accused of failing. All developers make those mistakes in their
-own expunge lists, but if we start propagating those mistakes to the world,
-it becomes an issue.
-
-For those two reasons I think that the model to aspire to should be
-composed of a database where absolutely everyone can post data
-point to in the form of facts (i.e. the test failed after N runs on this kernel
-and this hardware...) and another process, partly AI, partly human to
-digest all those facts into a knowledge base that is valuable and
-maintained by experts. Much easier said than done...
-
-Thanks,
-Amir.
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
