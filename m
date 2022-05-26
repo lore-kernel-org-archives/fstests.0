@@ -2,163 +2,86 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9DE2C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 06:51:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 915D4C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 May 2022 09:57:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240195AbiEZGvQ (ORCPT
+        id S236036AbiEZJ5O (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 26 May 2022 02:51:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42942 "EHLO
+        Thu, 26 May 2022 05:57:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60398 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238937AbiEZGvP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 May 2022 02:51:15 -0400
-Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE0BEB488
-        for <fstests@vger.kernel.org>; Wed, 25 May 2022 23:51:13 -0700 (PDT)
-Received: by mail-qk1-x730.google.com with SMTP id c1so779302qkf.13
-        for <fstests@vger.kernel.org>; Wed, 25 May 2022 23:51:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=0g6XDEbX05UslLYsn1dUCe1tn//dcoUbDdx21KRU2Qs=;
-        b=jBru6tpp5x7RcbhnEC0bhZxcCAsg3Cg0i3k6Od/OeWWyQEYR2wVNulDhu51ryGtl2y
-         e9onl/YvWQv6EMTsUtqGwmTFqwDJYsb0z3lJdYKvf1zMibLO3vt6ZDX4k/q0OKOaTb3I
-         +aRF155Q8acePx+kFEyIFpj9b73wT7wMweUXUiE6jlLAqe+ePEwrKmge571MkaBubGIs
-         wtdHWrkoxUWXDFvtaAaueY2dK39HNyx+oiF5Tkcj9vo6Mx/xnh8/HD0HGINt5qoI2H7T
-         nXKE80oDusXoo9M3v6RgbxCJbwYBfxVZvuxPxXywP491ZYO5ghywgqq8gdHAq2ZqnCX7
-         m1Qw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=0g6XDEbX05UslLYsn1dUCe1tn//dcoUbDdx21KRU2Qs=;
-        b=cN/hdGrODRYz4UFcNvK03TBmyv2L9V9vUtdnAJSseUlM2QjqLfkyJ/qdMmnqEfiPoV
-         ndHLhj+CgQOMFOyy5a7LnRnKL1REtOdMIlFoKZeV+T3XOm55llw051ms8KX+abSonBbD
-         22KSkjrbO6jGwNL/sQh2HOFJuVIQX9iammk4gZpPG8tf/pRCLWm6P1OdH31a8D5sZRIC
-         5wvalmcYWGl2LjnthCkdyRD3cwkPQXohVCOYzZSSZfjfhv4Km4NYK8d2Xt7Pns/UItfL
-         rjMURiNelMWrZO+W7O5O5OHq3ap5hAJh4uJKeNvCaRW/YzLqhwJX2QDTIPdhvYadwCSS
-         oLsQ==
-X-Gm-Message-State: AOAM5304mWb+veWKlM1qsIAItJopbFq33KoL268tR8wzgltdw02RFzWG
-        Y94YluI4pH8LfQjRdxIM74z6moP/HfKeXiZeDQZCocbHDWc=
-X-Google-Smtp-Source: ABdhPJz1zju2VHffFp2/sxBURA3HphnXKi7PLjaA8BckwNdWeTXVqQhS820t3Pp0O22ly6NMhh8ObYX06tAEhcgUKf4=
-X-Received: by 2002:a37:6cc2:0:b0:6a3:769c:e5ba with SMTP id
- h185-20020a376cc2000000b006a3769ce5bamr14169519qkc.19.1653547872801; Wed, 25
- May 2022 23:51:12 -0700 (PDT)
+        with ESMTP id S231512AbiEZJ5L (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 May 2022 05:57:11 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9ED10C9EC2
+        for <fstests@vger.kernel.org>; Thu, 26 May 2022 02:57:10 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 56450B81ED7
+        for <fstests@vger.kernel.org>; Thu, 26 May 2022 09:57:09 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71533C385A9
+        for <fstests@vger.kernel.org>; Thu, 26 May 2022 09:57:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653559028;
+        bh=yDQWXozBVyWjawbIZFK14dDVIjQCbTaMak/9+I5Fo6o=;
+        h=From:To:Subject:Date:From;
+        b=q4IMF2Dy5mM+mf8zII9eNxYUI9xpFUxA4rbcVgMHNtGQTTOMode8iEAt9cjlAc3x0
+         8W2WMKWksq81nChjd23keMyz8vdUC1S31KtxEdQxuZu85v5wiKQjA3hsfLZrp6bjrU
+         rtNIM9o+j+/eCX6FmUbh158mJr8YbpxspRHCPeKB3zryR9E4SNxej3Tny0737Q/uju
+         8BLBpfvJgt8Kza3QEP5ys3L5cAomtIQXilV+a+vQKumT8oDuNVTavJb4Y/9k05L0ze
+         DFXZ9Y6LgeGQ7M89hzppsxNO7rplTgnGATkd1g7g7V5FTHMmIDgvlK0Qr9vCof0Rtb
+         e8EmSwO929AdQ==
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] common/rc: filter out extra mount error
+Date:   Thu, 26 May 2022 17:57:04 +0800
+Message-Id: <20220526095704.3772355-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <20220525073427.3355242-3-zlang@kernel.org> <20220526012317.3624914-1-zlang@kernel.org>
-In-Reply-To: <20220526012317.3624914-1-zlang@kernel.org>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 26 May 2022 09:51:01 +0300
-Message-ID: <CAOQ4uxg94oN6DyxCiM-x0_Kwtbpo0Cbi5yARDQxxOOODHLOrBg@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] tests: remove redundant common/$FSTYP importing
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests <fstests@vger.kernel.org>,
-        Dave Chinner <david@fromorbit.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 26, 2022 at 9:47 AM Zorro Lang <zlang@kernel.org> wrote:
->
-> As fstests intensively source specific common/$FSTYP files in
-> common/rc, at the beginning of ./check running. Each single case
-> doesn't need to import that again.
->
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
+The lastest mount command (from util-linux) merged below commit:
+  79534c0d7e0f ("mount: add hint about dmesg(8) to error messages")
+which brought in a new error output when mount fails.
 
-Looks fine.
+That cause some cases (e.g. xfs/005) fail as:
+  mount: Structure needs cleaning
+         dmesg(1) may have more information after failed mount system call
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+More failed cases like generic/050, ext4/002, xfs/154, etc ...
 
->
-> I removed "./common/filter" in btrfs/258 uncarefully, fix that in this V2.
->
-> Thanks,
-> Zorro
->
->  tests/btrfs/177 | 1 -
->  tests/btrfs/258 | 1 -
->  tests/btrfs/259 | 1 -
->  tests/xfs/422   | 1 -
->  tests/xfs/423   | 1 -
->  tests/xfs/517   | 1 -
->  6 files changed, 6 deletions(-)
->
-> diff --git a/tests/btrfs/177 b/tests/btrfs/177
-> index 2fd11e89..7b004b83 100755
-> --- a/tests/btrfs/177
-> +++ b/tests/btrfs/177
-> @@ -10,7 +10,6 @@
->  _begin_fstest auto quick swap balance
->
->  . ./common/filter
-> -. ./common/btrfs
->
->  # Modify as appropriate.
->  _supported_fs btrfs
-> diff --git a/tests/btrfs/258 b/tests/btrfs/258
-> index 158eaf79..da073333 100755
-> --- a/tests/btrfs/258
-> +++ b/tests/btrfs/258
-> @@ -10,7 +10,6 @@
->  . ./common/preamble
->  _begin_fstest auto defrag quick
->
-> -. ./common/btrfs
->  . ./common/filter
->
->  # real QA test starts here
-> diff --git a/tests/btrfs/259 b/tests/btrfs/259
-> index e7bd8ddd..92d0b9a6 100755
-> --- a/tests/btrfs/259
-> +++ b/tests/btrfs/259
-> @@ -12,7 +12,6 @@ _begin_fstest auto quick defrag
->
->  # Import common functions.
->  . ./common/filter
-> -. ./common/btrfs
->
->  # real QA test starts here
->
-> diff --git a/tests/xfs/422 b/tests/xfs/422
-> index 77db492e..175253aa 100755
-> --- a/tests/xfs/422
-> +++ b/tests/xfs/422
-> @@ -17,7 +17,6 @@ _register_cleanup "_cleanup" BUS
->  . ./common/filter
->  . ./common/fuzzy
->  . ./common/inject
-> -. ./common/xfs
->
->  # real QA test starts here
->  _supported_fs xfs
-> diff --git a/tests/xfs/423 b/tests/xfs/423
-> index be56f311..c9dfaece 100755
-> --- a/tests/xfs/423
-> +++ b/tests/xfs/423
-> @@ -18,7 +18,6 @@ _register_cleanup "_cleanup" BUS
->  . ./common/filter
->  . ./common/fuzzy
->  . ./common/inject
-> -. ./common/xfs
->
->  # real QA test starts here
->  _supported_fs xfs
-> diff --git a/tests/xfs/517 b/tests/xfs/517
-> index 512f795f..88c4f43b 100755
-> --- a/tests/xfs/517
-> +++ b/tests/xfs/517
-> @@ -23,7 +23,6 @@ _cleanup()
->  . ./common/filter
->  . ./common/fuzzy
->  . ./common/inject
-> -. ./common/xfs
->
->  # real QA test starts here
->  _supported_fs xfs
-> --
-> 2.31.1
->
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
+
+Due to _try_scratch_mount is call in many places, so I'm not sure if it's good
+to filter this message in _try_scratch_mount. Maybe better to filter it in each
+failed cases? Or write another function (e.g. _try_scratch_mount_fail) ?
+Welcome review points.
+
+Thanks,
+Zorro
+
+ common/rc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 70a15f9c..67342760 100644
+--- a/common/rc
++++ b/common/rc
+@@ -335,7 +335,8 @@ _try_scratch_mount()
+ 		_overlay_scratch_mount $*
+ 		return $?
+ 	fi
+-	_mount -t $FSTYP `_scratch_mount_options $*`
++	_mount -t $FSTYP `_scratch_mount_options $*`  2> \
++		>(grep -v "dmesg(1) may have more information after failed mount" >&2)
+ 	mount_ret=$?
+ 	[ $mount_ret -ne 0 ] && return $mount_ret
+ 	_idmapped_mount $SCRATCH_DEV $SCRATCH_MNT
+-- 
+2.31.1
+
