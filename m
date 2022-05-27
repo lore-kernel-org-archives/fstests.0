@@ -2,49 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28741C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 May 2022 06:18:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FCEBC433FE
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 May 2022 07:02:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237373AbiE0GSm (ORCPT
+        id S234075AbiE0HCD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 27 May 2022 02:18:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52692 "EHLO
+        Fri, 27 May 2022 03:02:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236231AbiE0GSl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 May 2022 02:18:41 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3735266F88;
-        Thu, 26 May 2022 23:18:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=Ly127bCv0VwPPQ7rRDrqfwwCLy
-        x8ZfIlflMqQ1ufjrLriPxNfHf07l6++JjEV5KwWX2WAWs1eKsRjghLXZnFMk73n/vGi0zj7Kyq8j3
-        hFRz4q5J5EDC768si+ekY3PNdqrpeboQtzB8fIte7fYfGo/uzg5A2xapEqNVUZYvlBSAA663nWKzT
-        eF1UFD7jcmETmIM93bp/uSQLYaXTfdWH+b36wJIcC8klRCJOMM6vGZJie1hlPBKSxXOtArCk5IV1I
-        on2FdPAM7hh7gGw8lnURxhFhOYXJjskcKbEw6QaNMsTC6VCrLBKgSWbivLjT2cYbukpPeooVmqJmF
-        wKqYg/hg==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nuTIu-00GkFo-Co; Fri, 27 May 2022 06:18:32 +0000
-Date:   Thu, 26 May 2022 23:18:32 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, Eryu Guan <guaneryu@gmail.com>,
-        fstests <fstests@vger.kernel.org>,
-        xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] xfs/545: check for fallocate support before running test
-Message-ID: <YpBtODduahS/jjq+@infradead.org>
-References: <Yo03czi2EzyKy2/c@magnolia>
+        with ESMTP id S1344712AbiE0HCC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 May 2022 03:02:02 -0400
+Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC698E2777;
+        Fri, 27 May 2022 00:02:00 -0700 (PDT)
+Received: by mail-qv1-xf36.google.com with SMTP id e2so3013467qvq.13;
+        Fri, 27 May 2022 00:02:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=yGtyTEdveXRcSR/o79WVTSJwn3zC4/L8aLctM+0PAFI=;
+        b=pRWa0t0GYx+8p5KHFLie4wV53c/aEH7XGbL/2DXeRg2+7fNI3VIWZS6fNSmkfr1Ka0
+         hB73Hr5CziNNFLaNk9XioEOvfHhIzJoDb7vO7XzEjFNZOxlI7dcQPx0l7+S5bifRstuh
+         V5WI0wn2bctDjr3RBVfSmbPIZWfHdW1z7/SYW+FPIl6LNRvvl1L1fll+YEttrzoj2Wov
+         DtX4f7U4Fsks1i5eOI3ZmkVdMkpQXVy+2TAFGHGsu/EQVYLi9xpf17V+6op5TWLiROua
+         LNMxuLq0kvB5qXkk3TNy5aXQPKsYjXAF5Ih3pjB33dUG6hKPFQiaOgnI5A9BEnuaiWyG
+         PTog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=yGtyTEdveXRcSR/o79WVTSJwn3zC4/L8aLctM+0PAFI=;
+        b=3+ZPpRo7FqMoK26vA6DAMqeD+4wxzvdWLYTcav0cCJP4PbWMZDPjnBthjeLcA+Wt8V
+         gWnPh+Qd83BzuGmzVHxu+mzUmwHAeUoUwljkWKk/g2IATExYjYIGhLNs7ImquoS464WD
+         m7FKGveFD25NxfsNf1ldTc5fjQvuBlklQNJaBaFlIQKDf1bsnKpNAlsoaumrBHhbw477
+         vVOTyJVGdOGHManUaRz4FveiKelwqnWbsYYKXWySSrWipyqG6y9lQ/ae7SRCb/rFba58
+         c/rLU2LSej4RdQeif23r0/lfo1D5ozEPcLMAxfwAdQjJkPo5xehA3Z/f3BbuThsl8a/Q
+         Nzfw==
+X-Gm-Message-State: AOAM531KTLb/Pi9BY3eO+oyOrrntIocJ4WvYFzZgPN0xOLgOvUSuvYhw
+        QGPCsNTkcvIuN6zQwic15k7LFcma57SYAO3E7nM=
+X-Google-Smtp-Source: ABdhPJyOuuMsQeq/7b+s5cnhGc/m7E9zf967H+H8ogM0Zzanzh9j7PrRZf5gQFOM8L+Fr8AF+e32pKDIVtANCXRHQ7s=
+X-Received: by 2002:a05:6214:5296:b0:461:d3bb:ba01 with SMTP id
+ kj22-20020a056214529600b00461d3bbba01mr33814685qvb.12.1653634919984; Fri, 27
+ May 2022 00:01:59 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Yo03czi2EzyKy2/c@magnolia>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+References: <20220525111715.2769700-1-amir73il@gmail.com> <YpBqfdmwQ675m72G@infradead.org>
+In-Reply-To: <YpBqfdmwQ675m72G@infradead.org>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Fri, 27 May 2022 10:01:48 +0300
+Message-ID: <CAOQ4uxjek9331geZGVbVT=gqkNTyVA_vjyjuB=2eGZD-ufeqNQ@mail.gmail.com>
+Subject: Re: [PATH 5.10 0/4] xfs stable candidate patches for 5.10.y (part 1)
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     Dave Chinner <david@fromorbit.com>,
+        "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        "Theodore Ts'o" <tytso@mit.edu>,
+        Adam Manzanares <a.manzanares@samsung.com>,
+        Tyler Hicks <code@tyhicks.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good:
+On Fri, May 27, 2022 at 9:06 AM Christoph Hellwig <hch@infradead.org> wrote:
+>
+> FYI, below is the 5.10-stable backport I have been testing earlier this
+> week that fixes a bugzilla reported hang:
+>
+> https://bugzilla.kernel.org/show_bug.cgi?id=214767
+>
+> I was just going to submit it to the stable maintaines today after
+> beeing out of the holiday, but if you want to add it to this queue
+> that is fine with me as well.
+>
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Let me take it for a short spin in out xfs stable test environment, since
+this env has caught one regression with an allegedly safe fix.
+This env has also VMs with old xfsprogs, which is kind of important to
+test since those LTS patches may end up in distros with old xfsprogs.
+
+If all is well, I'll send your patch later today to stable maintainers
+with this first for-5.10 series.
+
+> ---
+> From 8e0464752b24f2b3919e8e92298759d116b283eb Mon Sep 17 00:00:00 2001
+> From: Dave Chinner <dchinner@redhat.com>
+> Date: Fri, 18 Jun 2021 08:21:51 -0700
+> Subject: xfs: Fix CIL throttle hang when CIL space used going backwards
+>
+
+Damn! this patch slipped through my process (even though I did see
+the correspondence on the list).
+
+My (human) process has eliminated the entire 38 patch series
+https://lore.kernel.org/linux-xfs/20210603052240.171998-1-david@fromorbit.com/
+without noticing the fix that was inside it.
+
+I did read every cover letter carefully for optimization series that I
+eliminated
+to look for important fixes and more than once I did pick singular fix patches
+from optimization/cleanup series.
+
+In this case, I guess Dave was not aware of the severity of the bug fixed
+when he wrote the cover letter(?), but the fact that the series is not only
+an improvement was not mentioned.
+
+It's good that we have many vectors to find stable fixes :)
+
+Cheers,
+Amir.
