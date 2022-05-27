@@ -2,39 +2,41 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B357FC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 May 2022 08:19:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C838C43217
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 May 2022 08:19:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236979AbiE0ITV (ORCPT
+        id S1348906AbiE0ITY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 27 May 2022 04:19:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39458 "EHLO
+        Fri, 27 May 2022 04:19:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39502 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234196AbiE0ITU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 May 2022 04:19:20 -0400
+        with ESMTP id S1347019AbiE0ITY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 May 2022 04:19:24 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EA83ED8F5;
-        Fri, 27 May 2022 01:19:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 748BCED8FE;
+        Fri, 27 May 2022 01:19:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=kkRStRGtLvu5r997h610I3mv4VJpeYPszAMW/dhqqdE=; b=C8vuMZre/bvJRJdNYsbmtSMhwR
-        IQgFIuvE7gbDWPFAHUMG2NNrNwPxAsjYo7/eJja/XugV5iiS0jzkbR5YWO2UYWoCvYOJnvqvkgaSh
-        G2KlRgmAzZvfZWgwAw99gNESSkJ/KiQFzzbX2gp67dI9lzsIkX6OtterAFFa7+B2wec4wzXFI1VLV
-        guhYiehN02YzXE2BVsLbOr1FTD8l+S0+iQlf1UI/spgxu/WA+rgPzhgkzmyT6m4xb9lWYi+Z9uNt3
-        BMcCthEm/juYf2+8PBgjanIGg5hwz/3yq45UF0pkNeyw6k1Nj/tgjwia0aATnxxfteAC9AkKXRKRJ
-        mtL7KDYg==;
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=69hh06W+NdNVRer1I/ZMAn8KvaSQ+j0g8ghU4xRn5aw=; b=S3YRwp4IX4TpD0CeooERyaDqMk
+        BH3Ls31Ie1J0DoWR0Ndh5zJdGFsdYUj23Nsv+kj7Ix6XY8JhuOExUDMLmNeX4b0qNnBxatwjC1ugx
+        fC8+AsEHn1CxhGdb5XOjs0HxPjitdSuA+KfoRBLGp2+6+pl6RlA4xWM2kVx6TafL4XAhifOZqVmdW
+        00ZYoRPvzsQ/w6IIMcENJ/Uh/eYWhuCc6njsOwRtl5c1YoCuLYEVv8gLlEe0/3IPpLARIUkRIAwmy
+        tYitIfAOKNqeku673vKX2OQHVX8jNu3Jxw6zqZKaFQ+r7mu4CaPi8rFsJHmhTTb6o++1o/m1+8hsQ
+        bDkzMXnA==;
 Received: from [2001:4bb8:18c:7298:b5ab:7d49:c6be:2011] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nuVBl-00GztD-EO; Fri, 27 May 2022 08:19:17 +0000
+        id 1nuVBq-00GzvF-KX; Fri, 27 May 2022 08:19:23 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: btrfs read repair: new tests and cleanups
-Date:   Fri, 27 May 2022 10:19:05 +0200
-Message-Id: <20220527081915.2024853-1-hch@lst.de>
+Cc:     linux-btrfs@vger.kernel.org, Qu Wenruo <wqu@suse.com>
+Subject: [PATCH 02/10] btrfs/140: use common read repair helpers
+Date:   Fri, 27 May 2022 10:19:07 +0200
+Message-Id: <20220527081915.2024853-3-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20220527081915.2024853-1-hch@lst.de>
+References: <20220527081915.2024853-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
@@ -42,20 +44,53 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+Use the common helpers to find the btrfs logical address and to read from
+a specific mirror.
 
-this series adds more tests for the btrfs read-repair code that exercise
-the raid1c3 profile and adds helpers to avoid duplicating too much code
-for read repair testing
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/140 | 13 ++-----------
+ 1 file changed, 2 insertions(+), 11 deletions(-)
 
-Changes since v2:
- - use the -b option to btrfs-map-logical-blocks for the $seqres.full
-   output
- - don't use _btrfs_no_v1_cache_opt for the new tests
- - add a new test to test interleaved sector corruption repair for
-   direct I/O.
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
+index c680fe0a..fdff6eb2 100755
+--- a/tests/btrfs/140
++++ b/tests/btrfs/140
+@@ -24,7 +24,6 @@ _supported_fs btrfs
+ _require_scratch_dev_pool 2
+ 
+ _require_btrfs_command inspect-internal dump-tree
+-_require_command "$FILEFRAG_PROG" filefrag
+ _require_odirect
+ # Overwriting data is forbidden on a zoned block device
+ _require_non_zoned_device "${SCRATCH_DEV}"
+@@ -71,7 +70,7 @@ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ echo "step 2......corrupt file extent" >>$seqres.full
+ 
+ ${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
+-logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | cut -d '#' -f 1`
++logical_in_btrfs=$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
+ physical=$(get_physical ${logical_in_btrfs} 1)
+ devid=$(get_devid ${logical_in_btrfs} 1)
+ devpath=$(get_device_path ${devid})
+@@ -87,15 +86,7 @@ _scratch_mount
+ # step 3, 128k dio read (this read can repair bad copy)
+ echo "step 3......repair the bad copy" >>$seqres.full
+ 
+-# since raid1 consists of two copies, and the bad copy was put on stripe #1
+-# while the good copy lies on stripe #0, the bad copy only gets access when the
+-# reader's pid % 2 == 1 is true
+-while true; do
+-	$XFS_IO_PROG -d -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
+-	pid=$!
+-	wait
+-	[ $((pid % 2)) == 1 ] && break
+-done
++_btrfs_direct_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
+ 
+ _scratch_unmount
+ 
+-- 
+2.30.2
 
-Changes since v1:
- - add common helpers for read repair
- - increase the offsets so thay they should be fine with 64k block size
-   (although I don't have a system to actually verify that)
