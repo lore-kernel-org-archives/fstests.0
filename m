@@ -2,38 +2,38 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBD70C433FE
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 May 2022 08:19:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DB98C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 May 2022 08:19:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347657AbiE0ITW (ORCPT
+        id S1347019AbiE0IT2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 27 May 2022 04:19:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39466 "EHLO
+        Fri, 27 May 2022 04:19:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39548 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347019AbiE0ITV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 May 2022 04:19:21 -0400
+        with ESMTP id S238347AbiE0IT1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 May 2022 04:19:27 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7AD4ED8FC;
-        Fri, 27 May 2022 01:19:20 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11826ED8FE;
+        Fri, 27 May 2022 01:19:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=tGyY2wVDyAuJxuihe3FeTBKyvFue7JDkkgMl8TI3lyI=; b=vY7D0E9grRJHIsO6vwOm6jirry
-        wdKtMsCxlg3KYn15a1D55qUANkqf0Lkb8TTvTx2BcrDw+cpxrs2Hq6gfresjXvX4QtDQJF2b+Ev5k
-        FWF4ojuC26RCKd7bE5b9SqtrD736fqaStWEXfMaUEdzJAT+wkmj4UWIm2jGd4pg2j0DeQGEWRz2/X
-        3gctgFTJr9JtyCHD2SOvwRFIw+EJ5gEuGXtooXzFliJnO6imtN1OUjc2bXaNF9U+Hv1/SB/m4U3a1
-        CAehOSksSAMe0090mQWGkgjGW+zPSkzRg56WpRVY3/vnbCJDUfKypG3g5yZ/OTsvyNEPyY0yblfxf
-        ZGJoJmLg==;
+        bh=Zt4GUk0+M7yBUtGVMgiUd70j/wVP6RRywXvMddiZIeY=; b=0KJnP3wR9bhrUvWNuKb/P3k2/C
+        YHHwIfXJKct082ikFLeIBd5UX7m+7sSNsprP9K+DtLn2kONkWn4+kzCBWdiL83zkBvff+e5xYZuFx
+        cwcJyzhR/3U6CKolrf1fgZTQu1OrqbRjQRcHhJQi/Q1mqdE8FmwQobvx8q3lEgdhZr5iCKErhQy+N
+        69mBASquMcQijSXkrNwUMAUWfxgu4O/XiIEzZUGoPOPclXZYRaP9QbPyj1z5UPLZQkfRELgLGQCIb
+        3yFolQeN13WizL2Y4QfNLPHBf3YwvggAALi9HpPI9qKfElJxeKpuKgVqG5634NJftZoLCuOWVDxBf
+        y8xgpYkQ==;
 Received: from [2001:4bb8:18c:7298:b5ab:7d49:c6be:2011] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nuVBo-00GzuN-0m; Fri, 27 May 2022 08:19:20 +0000
+        id 1nuVBt-00Gzws-8u; Fri, 27 May 2022 08:19:25 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Qu Wenruo <wqu@suse.com>
-Subject: [PATCH 01/10] btrfs: add a helpers for read repair testing
-Date:   Fri, 27 May 2022 10:19:06 +0200
-Message-Id: <20220527081915.2024853-2-hch@lst.de>
+Subject: [PATCH 03/10] btrfs/141: use common read repair helpers
+Date:   Fri, 27 May 2022 10:19:08 +0200
+Message-Id: <20220527081915.2024853-4-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220527081915.2024853-1-hch@lst.de>
 References: <20220527081915.2024853-1-hch@lst.de>
@@ -44,121 +44,55 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a few helpers to consolidate code for btrfs read repair testing:
-
- - _btrfs_get_first_logical() gets the btrfs logical address for the
-   first extent in a file
- - _btrfs_get_device_path and _btrfs_get_physical use the
-   btrfs-map-logical tool to find the device path and physical address
-   for btrfs logical address for a specific mirror
- - _btrfs_direct_read_on_mirror and _btrfs_buffered_read_on_mirror
-   read the data from a specific mirror
-
-These will be used to consolidate the read repair tests and avoid
-duplication for new tests.
+Use the common helpers to find the btrfs logical address and to read from
+a specific mirror.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 Reviewed-by: Qu Wenruo <wqu@suse.com>
 ---
- common/btrfs  | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
- common/config |  1 +
- 2 files changed, 76 insertions(+)
+ tests/btrfs/141 | 15 ++-------------
+ 1 file changed, 2 insertions(+), 13 deletions(-)
 
-diff --git a/common/btrfs b/common/btrfs
-index ac597ca4..b69feeee 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -505,3 +505,78 @@ _btrfs_metadump()
- 	$BTRFS_IMAGE_PROG "$device" "$dumpfile"
- 	[ -n "$DUMP_COMPRESSOR" ] && $DUMP_COMPRESSOR -f "$dumpfile" &> /dev/null
- }
-+
-+# Return the btrfs logical address for the first block in a file
-+_btrfs_get_first_logical()
-+{
-+	local file=$1
-+	_require_command "$FILEFRAG_PROG" filefrag
-+
-+	${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
-+	${FILEFRAG_PROG} -v $file | _filter_filefrag | cut -d '#' -f 1
-+}
-+
-+# Find the device path for a btrfs logical offset
-+_btrfs_get_device_path()
-+{
-+	local logical=$1
-+	local stripe=$2
-+
-+	_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
-+
-+	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | \
-+		$AWK_PROG "(\$1 ~ /mirror/ && \$2 ~ /$stripe/) { print \$8 }"
-+}
-+
-+
-+# Find the device physical sector for a btrfs logical offset
-+_btrfs_get_physical()
-+{
-+	local logical=$1
-+	local stripe=$2
-+
-+	_require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-map-logical
-+
-+	$BTRFS_MAP_LOGICAL_PROG -b -l $logical $SCRATCH_DEV >> $seqres.full 2>&1
-+	$BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | \
-+		$AWK_PROG "(\$1 ~ /mirror/ && \$2 ~ /$stripe/) { print \$6 }"
-+}
-+
-+# Read from a specific stripe to test read recovery that corrupted a specific
-+# stripe.  Btrfs uses the PID to select the mirror, so keep reading until the
-+# xfs_io process that performed the read was executed with a PID that ends up
-+# on the intended mirror.
-+_btrfs_direct_read_on_mirror()
-+{
-+	local mirror=$1
-+	local nr_mirrors=$2
-+	local file=$3
-+	local offset=$4
-+	local size=$5
-+
-+	while [[ -z $( (( BASHPID % nr_mirrors == mirror )) &&
-+		exec $XFS_IO_PROG -d \
-+			-c "pread -b $size $offset $size" $file) ]]; do
-+		:
-+	done
-+}
-+
-+# Read from a specific stripe to test read recovery that corrupted a specific
-+# stripe.  Btrfs uses the PID to select the mirror, so keep reading until the
-+# xfs_io process that performed the read was executed with a PID that ends up
-+# on the intended mirror.
-+_btrfs_buffered_read_on_mirror()
-+{
-+	local mirror=$1
-+	local nr_mirrors=$2
-+	local file=$3
-+	local offset=$4
-+	local size=$5
-+
-+	echo 3 > /proc/sys/vm/drop_caches
-+	while [[ -z $( (( BASHPID % nr_mirrors == mirror )) &&
-+		exec $XFS_IO_PROG \
-+			-c "pread -b $size $offset $size" $file) ]]; do
-+		:
-+	done
-+}
-diff --git a/common/config b/common/config
-index c6428f90..df20afc1 100644
---- a/common/config
-+++ b/common/config
-@@ -228,6 +228,7 @@ export E2IMAGE_PROG="$(type -P e2image)"
- export BLKZONE_PROG="$(type -P blkzone)"
- export GZIP_PROG="$(type -P gzip)"
- export BTRFS_IMAGE_PROG="$(type -P btrfs-image)"
-+export BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
+index 9fdcb2ab..90a90d00 100755
+--- a/tests/btrfs/141
++++ b/tests/btrfs/141
+@@ -25,7 +25,6 @@ _supported_fs btrfs
+ _require_scratch_dev_pool 2
  
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
+ _require_btrfs_command inspect-internal dump-tree
+-_require_command "$FILEFRAG_PROG" filefrag
+ 
+ get_physical()
+ {
+@@ -69,8 +68,7 @@ $XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
+ # one in $SCRATCH_DEV_POOL
+ echo "step 2......corrupt file extent" >>$seqres.full
+ 
+-${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
+-logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | cut -d '#' -f 1`
++logical_in_btrfs=$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
+ physical=$(get_physical ${logical_in_btrfs} 1)
+ devid=$(get_devid ${logical_in_btrfs} 1)
+ devpath=$(get_device_path ${devid})
+@@ -85,16 +83,7 @@ _scratch_mount
+ # step 3, 128k buffered read (this read can repair bad copy)
+ echo "step 3......repair the bad copy" >>$seqres.full
+ 
+-# since raid1 consists of two copies, and the bad copy was put on stripe #1
+-# while the good copy lies on stripe #0, the bad copy only gets access when the
+-# reader's pid % 2 == 1 is true
+-while true; do
+-	echo 3 > /proc/sys/vm/drop_caches
+-	$XFS_IO_PROG -c "pread -b 128K 0 128K" "$SCRATCH_MNT/foobar" > /dev/null &
+-	pid=$!
+-	wait
+-	[ $((pid % 2)) == 1 ] && break
+-done
++_btrfs_buffered_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
+ 
+ _scratch_unmount
+ 
 -- 
 2.30.2
 
