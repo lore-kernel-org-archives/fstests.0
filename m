@@ -2,123 +2,270 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B78FBC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 17:31:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2CA7C433F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 18:17:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231893AbiE3RbT (ORCPT
+        id S239098AbiE3SRw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 May 2022 13:31:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52492 "EHLO
+        Mon, 30 May 2022 14:17:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230490AbiE3RbS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 May 2022 13:31:18 -0400
+        with ESMTP id S239547AbiE3SRv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 May 2022 14:17:51 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D16A0954B0;
-        Mon, 30 May 2022 10:31:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 342BE57116;
+        Mon, 30 May 2022 11:17:50 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4EBB261198;
-        Mon, 30 May 2022 17:31:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98532C385B8;
-        Mon, 30 May 2022 17:31:15 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C3BF96077B;
+        Mon, 30 May 2022 18:17:49 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 174A1C385B8;
+        Mon, 30 May 2022 18:17:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653931875;
-        bh=Lqoz8g+/Df334TjGWa8JLWKaskhep6JFCaaHhQgSDug=;
-        h=From:To:Cc:Subject:Date:From;
-        b=mq4ev+ThK8kYSfsAMqil5aTM7IfQfcjAdlYgwaD5JWV0Lub3WXTT7sUXchF9uITkB
-         yb0tgVR7InfSwFlkRIi24ygmbv3qrL4Zg1vBAQ7zn7L2fzwy5iaX9Qzeg019pcbb5l
-         nLa8wyASzu6oNfluLfasin0DVscMtbXVQBKr1jyRs0Lf+cBIlIULCX81evuY3Zbl7S
-         ho7KKtqEzMta70iDDPU8Ze++Oin5pCNlRvSVb3b4/o+g5wLTHt+6ovwO5gWnuEr8eN
-         eLR500xFjYD92JM3zUrXAfgmhVjiqw4mpo7i2B0ZFJry2elujrmMcRGZZLAxi1QnZD
-         rH8HmuROkPLXQ==
+        s=k20201202; t=1653934669;
+        bh=f6IbMLWwvc3aq8BpnOkh1PinEQC0U7w5dKhB9js57e0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=s0roayvVeFO0XoZ4fnhoAAotsTRUAwCIEzlZsSsT7y35H7h/LCgzd9Z+QzRoFaJbZ
+         nFcwqyweaOIfP8zqWpFvsmfdhz6jergWfgL4GCa+JYS6wP0MnF2daqc7wSvi2j3yOD
+         cg/HsmQ1gB4OmjJrNUcnUoM5P9ncry+zoHfxhZUf2V6BVvAKD75nrDEssf00bb4+83
+         lGkI1nHsuoQqX493H9ZWxad8S0QG9UZwyG0kMvtsTK2ZMWsUPPGhsTxCJwBRyb0iwE
+         ukXYpgeQjFYhqTm4n1rMOS+bgslgLsuySpj/BGBn+dqV++qzRSv00AJPw2F1D83VyZ
+         NntjIyDEwbIVg==
+Date:   Mon, 30 May 2022 11:17:47 -0700
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
-Subject: [PATCH v2] ext4/053: update the test_dummy_encryption tests
-Date:   Mon, 30 May 2022 10:30:44 -0700
-Message-Id: <20220530173044.156375-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.36.1
+To:     Nathan Huckleberry <nhuck@google.com>
+Cc:     fstests@vger.kernel.org, Sami Tolvanen <samitolvanen@google.com>,
+        linux-fscrypt@vger.kernel.org
+Subject: Re: [RFC PATCH v3 1/2] fscrypt-crypt-util: add HCTR2 reference
+ implementation
+Message-ID: <YpUKS8vti5d0ucU6@sol.localdomain>
+References: <20220520182315.615327-1-nhuck@google.com>
+ <20220520182315.615327-2-nhuck@google.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220520182315.615327-2-nhuck@google.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+Please include the linux-fscrypt mailing list in Cc.
 
-Kernel commit 5f41fdaea63d ("ext4: only allow test_dummy_encryption when
-supported") tightened the requirements on when the test_dummy_encryption
-mount option is accepted.  Update ext4/053 accordingly.
+On Fri, May 20, 2022 at 01:23:14PM -0500, Nathan Huckleberry wrote:
+> This patch adds a reference implementation of HCTR2 to the fscrypt
+> testing utility.
 
-Move the test cases to later in the file to group them with the other
-test cases that use do_mkfs to add custom mkfs options instead of using
-the "default" filesystem that the test creates at the beginning.
+The reference implementation is at https://github.com/google/hctr2.
+This one is just an "implementation", not a "reference implementation".
 
-Reviewed-by: Lukas Czerner <lczerner@redhat.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
+>  /* Multiply a GF(2^128) element by the polynomial 'x' */
+> -static inline void gf2_128_mul_x(ble128 *t)
+> +static inline void gf2_128_mul_x_ble(ble128 *t)
+>  {
+>  	u64 lo = le64_to_cpu(t->lo);
+>  	u64 hi = le64_to_cpu(t->hi);
+> @@ -302,6 +356,38 @@ static inline void gf2_128_mul_x(ble128 *t)
+>  	t->lo = cpu_to_le64((lo << 1) ^ ((hi & (1ULL << 63)) ? 0x87 : 0));
+>  }
+>  
+> +static inline void gf2_128_mul_x_polyval(ble128 *t)
+> +{
 
-v2: mention the commit ID now that it is merged, and add a Reviewed-by
+Please adjust the naming and comments to clearly distinguish between
+gf2_128_mul_x_ble() and gf2_128_mul_x_polyval().  The intention of the original
+code was that "ble" gave the field convention used.  However, the XTS and
+POLYVAL field conventions both use "ble" but differ in the reduction polynomial.
+So "ble" is no longer unambiguous.  How about renaming gf2_128_mul_x_ble() to
+gf2_128_mul_x_xts() to indicate it is using the XTS convention?
 
- tests/ext4/053 | 35 +++++++++++++++++++++--------------
- 1 file changed, 21 insertions(+), 14 deletions(-)
+> +	u64 lo = le64_to_cpu(t->lo);
+> +	u64 hi = le64_to_cpu(t->hi);
+> +
+> +	u64 lo_reducer = ((hi >> 63) & 1ULL) ? 1 : 0;
+> +	u64 hi_reducer = ((hi >> 63) & 1ULL) ? 0xc2ULL << 56 : 0;
 
-diff --git a/tests/ext4/053 b/tests/ext4/053
-index 187a2515..23e553c5 100755
---- a/tests/ext4/053
-+++ b/tests/ext4/053
-@@ -511,20 +511,6 @@ for fstype in ext2 ext3 ext4; do
- 	mnt noinit_itable
- 	mnt max_dir_size_kb=4096
- 
--	if _has_kernel_config CONFIG_FS_ENCRYPTION; then
--		mnt test_dummy_encryption
--		mnt test_dummy_encryption=v1
--		mnt test_dummy_encryption=v2
--		not_mnt test_dummy_encryption=v3
--		not_mnt test_dummy_encryption=
--	else
--		mnt test_dummy_encryption ^test_dummy_encryption
--		mnt test_dummy_encryption=v1 ^test_dummy_encryption=v1
--		mnt test_dummy_encryption=v2 ^test_dummy_encryption=v2
--		mnt test_dummy_encryption=v3 ^test_dummy_encryption=v3
--		not_mnt test_dummy_encryption=
--	fi
--
- 	if _has_kernel_config CONFIG_FS_ENCRYPTION_INLINE_CRYPT; then
- 		mnt inlinecrypt
- 	else
-@@ -686,6 +672,27 @@ for fstype in ext2 ext3 ext4; do
- 	mnt_then_not_remount defaults jqfmt=vfsv1
- 	remount defaults grpjquota=,usrjquota= ignored
- 
-+	echo "== Testing the test_dummy_encryption option" >> $seqres.full
-+	# Since kernel commit 5f41fdaea63d ("ext4: only allow
-+	# test_dummy_encryption when supported"), the test_dummy_encryption
-+	# option is only allowed when the filesystem has the encrypt feature and
-+	# the kernel has CONFIG_FS_ENCRYPTION.  The encrypt feature requirement
-+	# implies that this option is never allowed on ext2 or ext3 mounts.
-+	if [[ $fstype == ext4 ]] && _has_kernel_config CONFIG_FS_ENCRYPTION; then
-+		do_mkfs -O encrypt $SCRATCH_DEV ${SIZE}k
-+		mnt test_dummy_encryption
-+		mnt test_dummy_encryption=v1
-+		mnt test_dummy_encryption=v2
-+		not_mnt test_dummy_encryption=bad
-+		not_mnt test_dummy_encryption=
-+		do_mkfs -O ^encrypt $SCRATCH_DEV ${SIZE}k
-+	fi
-+	not_mnt test_dummy_encryption
-+	not_mnt test_dummy_encryption=v1
-+	not_mnt test_dummy_encryption=v2
-+	not_mnt test_dummy_encryption=bad
-+	not_mnt test_dummy_encryption=
-+
- done #for fstype in ext2 ext3 ext4; do
- 
- $UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+There shouldn't be a newline between variable declarations.
 
-base-commit: d3cc66012a287b6db81aad408b6970a4a96a67da
--- 
-2.36.1
+Also maybe write '(hi & (1ULL << 63))', so the code is more easily comparable to
+gf2_128_mul_x_xts().
 
+> +void gf2_128_mul_polyval(ble128 *r, const ble128 *b)
+> +{
+> +	ble128 p;
+> +	u64 lo = le64_to_cpu(b->lo);
+> +	u64 hi = le64_to_cpu(b->hi);
+> +
+> +	memset(&p, 0, sizeof(p));
+> +	for (int i = 0; i < 64; i++) {
+
+'i' should be declared at the beginning.
+
+> +		if (lo & (1ULL << i))
+> +			xor((u8 *)&p, (u8 *)&p, (u8 *)r, sizeof(p));
+> +		gf2_128_mul_x_polyval(r);
+> +	}
+> +	for (int i = 0; i < 64; i++) {
+> +		if (hi & (1ULL << i))
+> +			xor((u8 *)&p, (u8 *)&p, (u8 *)r, sizeof(p));
+> +		gf2_128_mul_x_polyval(r);
+> +	}
+> +	memcpy(r, &p, sizeof(p));
+> +}
+
+The last line can be '*r = p;'
+
+> +
+>  /*----------------------------------------------------------------------------*
+>   *                             Group arithmetic                               *
+>   *----------------------------------------------------------------------------*/
+> @@ -901,6 +987,41 @@ static void test_hkdf_sha512(void)
+>  }
+>  #endif /* ENABLE_ALG_TESTS */
+>  
+> +/*----------------------------------------------------------------------------*
+> + *                                 POLYVAL                                     *
+> + *----------------------------------------------------------------------------*/
+> +
+> +#define POLYVAL_KEY_SIZE	16
+> +#define POLYVAL_BLOCK_SIZE	16
+> +
+> +static void polyval_update(const u8 key[POLYVAL_KEY_SIZE],
+> +			   const u8 *msg, size_t msglen,
+> +			   u8 accumulator[POLYVAL_BLOCK_SIZE])
+> +{
+> +	ble128 h;
+> +	// x^{-128} = x^127 + x^124 + x^121 + x^114 + 1
+> +	static const ble128 inv128 = {
+> +	    cpu_to_le64(1),
+> +	    cpu_to_le64(0x9204ULL << 48)
+> +	};
+
+Use tabs for indentation, please.  This applies elsewhere in the file too.
+
+> +	int nblocks = msglen / POLYVAL_BLOCK_SIZE;
+
+size_t
+
+> +	int tail = msglen % POLYVAL_BLOCK_SIZE;
+> +
+> +	memcpy(&h, key, sizeof(h));
+> +	gf2_128_mul_polyval(&h, &inv128);
+> +
+> +	while (nblocks > 0) {
+> +		xor(accumulator, accumulator, msg, POLYVAL_BLOCK_SIZE);
+> +		gf2_128_mul_polyval((ble128 *)accumulator, &h);
+
+Casting a byte array to ble128, and then dereferencing it, is undefined
+behavior since it increases the alignment that is assumed.
+
+> +#define HCTR2_IV_SIZE 32
+> +static void aes_256_hctr2_crypt(const u8 key[AES_256_KEY_SIZE],
+> +				const u8 iv[HCTR2_IV_SIZE], const u8 *src,
+> +				u8 *dst, size_t nbytes, bool decrypting)
+> +{
+> +	struct aes_key k;
+> +	u8 hbar[AES_BLOCK_SIZE] = {0};
+> +	u8 L[AES_BLOCK_SIZE] = {1};
+> +	size_t bulk_bytes = nbytes - AES_BLOCK_SIZE;
+> +	size_t remainder = bulk_bytes % AES_BLOCK_SIZE;
+> +	le128 tweaklen_blk = {
+> +	    .lo = cpu_to_le64(HCTR2_IV_SIZE * 8 * 2 + 2 + (remainder != 0))
+> +	};
+> +	u8 padded_block[POLYVAL_BLOCK_SIZE];
+> +	u8 digest[POLYVAL_BLOCK_SIZE];
+> +	const u8 *M = src;
+> +	const u8 *N = src + AES_BLOCK_SIZE;
+> +	u8 MM[AES_BLOCK_SIZE];
+> +	u8 UU[AES_BLOCK_SIZE];
+> +	u8 S[AES_BLOCK_SIZE];
+> +	u8 *U = dst;
+> +	u8 *V = dst + AES_BLOCK_SIZE;
+> +
+> +	ASSERT(nbytes >= AES_BLOCK_SIZE);
+> +	aes_setkey(&k, key, AES_256_KEY_SIZE);
+> +
+> +	aes_encrypt(&k, hbar, hbar);
+> +	aes_encrypt(&k, L, L);
+> +
+> +	memset(digest, 0, POLYVAL_BLOCK_SIZE);
+> +	polyval_update(hbar, (u8 *)&tweaklen_blk, POLYVAL_BLOCK_SIZE, digest);
+> +	polyval_update(hbar, iv, HCTR2_IV_SIZE, digest);
+> +
+> +	polyval_update(hbar, N, bulk_bytes - remainder, digest);
+> +	if (remainder) {
+> +		memset(padded_block, 0, POLYVAL_BLOCK_SIZE);
+> +		memcpy(padded_block, N + bulk_bytes - remainder, remainder);
+> +		padded_block[remainder] = 0x01;
+> +		polyval_update(hbar, padded_block, POLYVAL_BLOCK_SIZE, digest);
+> +	}
+> +
+> +	xor(MM, M, digest, AES_BLOCK_SIZE);
+> +
+> +	if (decrypting)
+> +		aes_decrypt(&k, MM, UU);
+> +	else
+> +		aes_encrypt(&k, MM, UU);
+> +
+> +	xor(S, MM, UU, AES_BLOCK_SIZE);
+> +	xor(S, L, S, AES_BLOCK_SIZE);
+> +
+> +	aes_256_xctr_crypt(key, S, N, V, bulk_bytes);
+> +
+> +	memset(digest, 0, POLYVAL_BLOCK_SIZE);
+> +	polyval_update(hbar, (u8 *)&tweaklen_blk, POLYVAL_BLOCK_SIZE, digest);
+> +	polyval_update(hbar, iv, HCTR2_IV_SIZE, digest);
+> +
+> +	polyval_update(hbar, V, bulk_bytes - remainder, digest);
+> +	if (remainder) {
+> +		memset(padded_block, 0, POLYVAL_BLOCK_SIZE);
+> +		memcpy(padded_block, V + bulk_bytes - remainder, remainder);
+> +		padded_block[remainder] = 0x01;
+> +		polyval_update(hbar, padded_block, POLYVAL_BLOCK_SIZE, digest);
+> +	}
+> +
+> +	xor(U, UU, digest, AES_BLOCK_SIZE);
+> +}
+
+Long functions with many local variables are hard to read.  This would be easier
+to read if it used some helper functions, each called twice:
+
+static void hctr2_hash_iv(const u8 hbar[POLYVAL_KEY_SIZE],
+			  const u8 iv[HCTR2_IV_SIZE], size_t msglen,
+			  u8 digest[POLYVAL_BLOCK_SIZE])
+{
+	le128 tweaklen_blk = {
+		.lo = cpu_to_le64(HCTR2_IV_SIZE * 8 * 2 + 2 +
+				  (msglen % AES_BLOCK_SIZE != 0))
+	};
+
+	memset(digest, 0, POLYVAL_BLOCK_SIZE);
+	polyval_update(hbar, (u8 *)&tweaklen_blk, POLYVAL_BLOCK_SIZE, digest);
+	polyval_update(hbar, iv, HCTR2_IV_SIZE, digest);
+}
+
+static void hctr2_hash_message(const u8 hbar[POLYVAL_KEY_SIZE],
+			       const u8 *msg, size_t msglen,
+			       u8 digest[POLYVAL_BLOCK_SIZE])
+{
+	size_t remainder = msglen % AES_BLOCK_SIZE;
+	u8 padded_block[POLYVAL_BLOCK_SIZE] = {0};
+
+	polyval_update(hbar, msg, msglen - remainder, digest);
+	if (remainder) {
+		memcpy(padded_block, &msg[msglen - remainder], remainder);
+		padded_block[remainder] = 1;
+		polyval_update(hbar, padded_block, POLYVAL_BLOCK_SIZE, digest);
+	}
+}
+
+> +		rand_bytes(key, sizeof(key));
+> +		rand_bytes(iv, sizeof(iv));
+> +		rand_bytes(ptext, datalen);
+> +		memset(key, 0, sizeof(key));
+> +		memset(iv, 0, sizeof(iv));
+> +		memset(ptext, 0, datalen);
+
+What's going on here?  The memset() calls shouldn't be there.
+
+- Eric
