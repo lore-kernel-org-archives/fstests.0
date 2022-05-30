@@ -2,100 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C15C0C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 05:54:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C969BC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 06:03:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232565AbiE3Fyj (ORCPT
+        id S230479AbiE3GDK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 May 2022 01:54:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32884 "EHLO
+        Mon, 30 May 2022 02:03:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231518AbiE3Fyh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 May 2022 01:54:37 -0400
-Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AE163C4A7;
-        Sun, 29 May 2022 22:54:36 -0700 (PDT)
-Received: by mail-qv1-xf32.google.com with SMTP id i19so3740066qvu.13;
-        Sun, 29 May 2022 22:54:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=XoeP0MWsqlS9SBCtVy8FEzgcM0IN2SJZSy5ovcsWriE=;
-        b=QJc48QS93YYkuZBJGT4NiXkpO5O3FlqdCnu/dVSwB1E1+3Vzchu5Ch150Dc8H6tmgp
-         j0ehhDobpB5NEPiMk5IWgCANLDXBnoiz3fISrbtKpvzjEHFiJ1x8lqXUU5ZTCl1JG5kN
-         mwJxeSdY/NRF9v+KT1tiBSwHdTEEQXT1MKQAiSdpr6gElUuGcjXg68/2BJVQyREmgEvX
-         CKh1cTif6kwoSS+a+r0jxpwyKD9n8Ix8Qko072KTe9HX+EX4wlHnrHU/TbMVGF1jnae1
-         9llzPgpz7mh6hPhva3w4x9ZfBlOZx46nG8oQUQfsYkheFVd1Q+DJofUfzAS9L+zNGtT8
-         UF0Q==
+        with ESMTP id S232673AbiE3GDH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 May 2022 02:03:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0F34F25C64
+        for <fstests@vger.kernel.org>; Sun, 29 May 2022 23:03:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1653890584;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=X19Z8d42/APKz8FYZe6w08zaSso1PaLLGa69Ypf9ZRg=;
+        b=jJnfQShyq3MGPvqugp8QYndmYaK0AYbspHlX8zCmydFMHR99CkNIobQXtPgxBJ8NMYfsjM
+        0Xv7qanCfHqEnsyrlLtUaH8OnWA7p9jXBqYC0JwguCxC9csDNz+ZuPfx2cNI/5xfe3fmev
+        yt1FnbsGSSybm+xokXSyj4qLh5JKskE=
+Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com
+ [209.85.210.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-252-g1G10uEqMkW2z1d4K-atPA-1; Mon, 30 May 2022 02:03:01 -0400
+X-MC-Unique: g1G10uEqMkW2z1d4K-atPA-1
+Received: by mail-ot1-f71.google.com with SMTP id f68-20020a9d2c4a000000b0060af9dffeceso2519740otb.2
+        for <fstests@vger.kernel.org>; Sun, 29 May 2022 23:03:01 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=XoeP0MWsqlS9SBCtVy8FEzgcM0IN2SJZSy5ovcsWriE=;
-        b=3DE2ab99quVVRR89BykxlShXFH9ekedYquKb7wjB6vxYz1RlsYDFcplCucwLEqTFMu
-         hFsV1x7hE4uYc/MmhdYAzEC8Zcl4iCOhls/sbPHwnOfVvS8aG0neoKwgjnQw+dVRHi+P
-         KFb/ZbMAtD2dSC7CDrrMrVApEHTSwb18rXOasQ+7RZ+KUNxGSMN/4rkYGSGRxPqiPmRK
-         9WmrflWIJVq3WhGnkx/gcbrjVHvkfnotI57dbuYi6/piCugfV5VIy79Wc7H22gc+R0xv
-         YzzLAddbyQRzJjoDEEKNhHtKlNDJslH43nXCwiC00ABQ7hFwMHchteKVwcUD8I7vmS1b
-         xyOQ==
-X-Gm-Message-State: AOAM533m5J/+YXqQTqlTQGj9KGNe4sLiVHV5qGgswXu0jWDq+gGK3iC4
-        dNLPJsWHc79zZAhXmja+4cUyLgPKkHbsQmwMGHk+KtWzBPA=
-X-Google-Smtp-Source: ABdhPJz4Na5R1LRWJVA5QkdvFsr1+c3IrDFJC8iCQ2bKUaJUBdVPCh7GUwZ35b1OukVz3IUqiqlTQ65VLMmwSSDWH7M=
-X-Received: by 2002:a05:6214:766:b0:462:1701:bca1 with SMTP id
- f6-20020a056214076600b004621701bca1mr38175595qvz.77.1653890074974; Sun, 29
- May 2022 22:54:34 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=X19Z8d42/APKz8FYZe6w08zaSso1PaLLGa69Ypf9ZRg=;
+        b=qEUljE7nlgX/UBEC2SDUYDbPfmErDetOHD0Dyokk1ZksC4LWYBzKwws3iE5Uw2OOAi
+         4xnES4JypRkpCnTXV1p0qHP/28dhfIndbHP2Wps00umym8fq2eAiGS1jqEHqjCnWG9RO
+         RcvI7iX1YbAsaOibNsr14HVWbCuHocHwhHJ14qcjp5fsmCatz2A3v5YJ5ladk97xCigB
+         8sscTGoKgIH8KLw3u05gdSyyajKYavQC+ZQpGx4rSaEAjY3/KXga+mTwAp9hxZD3POrk
+         0mF+o0M1+BYgPdo02oA7+wNBX+ylDhOQeiS4xTnI45loollBZOcW1PO6mmPbOz3CAoM5
+         quAA==
+X-Gm-Message-State: AOAM531jpbvrMj+l5I8bP+M2oArTN6TrkpEXW9wF/tP6cLDH7n3D8oLx
+        fLiFyjqZSQb65y53jGR69eQ4XgFGz4BZVYOL0Hik2YjzX83x/51hK/4rJmWiK2hRSl1iPLoCUiA
+        FQK+VSCsd57YjpDawSA==
+X-Received: by 2002:a05:6870:d0ce:b0:f3:3856:f552 with SMTP id k14-20020a056870d0ce00b000f33856f552mr1290892oaa.99.1653890580405;
+        Sun, 29 May 2022 23:03:00 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzmZwm5nk0/daTtx3ffu5vfCSW+d+nEFwuZW3oXTqVQPGGRF5fgUr2500DJwG3Qcia2Ggt/yA==
+X-Received: by 2002:a05:6870:d0ce:b0:f3:3856:f552 with SMTP id k14-20020a056870d0ce00b000f33856f552mr1290887oaa.99.1653890580136;
+        Sun, 29 May 2022 23:03:00 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id x4-20020a056808144400b003264a325ecdsm4365340oiv.5.2022.05.29.23.02.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 29 May 2022 23:02:59 -0700 (PDT)
+Date:   Mon, 30 May 2022 14:02:54 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 4/5] generic/591: use proper sector size
+Message-ID: <20220530060254.kpah3jhyoz6woiov@zlang-mailbox>
+References: <20220529105505.667891-1-zlang@kernel.org>
+ <20220529105505.667891-5-zlang@kernel.org>
+ <20220529235712.GK3923443@dread.disaster.area>
 MIME-Version: 1.0
-References: <20220529105505.667891-1-zlang@kernel.org> <20220529105505.667891-6-zlang@kernel.org>
-In-Reply-To: <20220529105505.667891-6-zlang@kernel.org>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 30 May 2022 08:54:23 +0300
-Message-ID: <CAOQ4uxix_Un2EZUO=7PGMuFgimmKx0QDS_jvkBmgyFQjUgZHrg@mail.gmail.com>
-Subject: Re: [PATCH 5/5] generic/623: add overlay into the blacklist
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests <fstests@vger.kernel.org>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        overlayfs <linux-unionfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220529235712.GK3923443@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, May 29, 2022 at 8:59 PM Zorro Lang <zlang@kernel.org> wrote:
->
-> The _require_scratch_shutdown can't help this test case, except use
-> _scratch_shutdown or _scratch_shutdown_handle with it. But this test
-> case does 'shutdown' on $SCRATCH_MNT/file directly. It's not suitable
-> for overlay.
->
+On Mon, May 30, 2022 at 09:57:12AM +1000, Dave Chinner wrote:
+> On Sun, May 29, 2022 at 06:55:04PM +0800, Zorro Lang wrote:
+> > The generic/591 fails if the sector size of TEST_DEV isn't 512:
+> > 
+> >   splice-test: write: /mnt/test/a: Invalid argument
+> > 
+> > To fix this issue, this patch help src/splice-test.c to get a specify
+> > sector size from the test case. Then let g/591 give it a proper
+> > sector size which dio aligned.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> >  src/dmiperf        | Bin 0 -> 31288 bytes
+> >  src/splice-test.c  |  37 +++++++++++++++++++++++++------------
+> >  src/t_locks_execve | Bin 0 -> 25904 bytes
+> >  tests/generic/591  |   6 ++++--
+> 
+> I don't think this commit should include built binaries....
 
-This is not about testing overlayfs.
-It is about testing FS under overlayfs which can detect bugs in FS
-that are otherwise hard to trigger.
-mmap is an especially odd case of overlayfs so I rather not loose this
-test coverage. Please do not apply this patch I will send a fix to the test.
+That's a ... mistake, sorry, I'll resend.
 
 Thanks,
-Amir.
+Zorro
 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
->  tests/generic/623 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/tests/generic/623 b/tests/generic/623
-> index ea016d91..1083e796 100755
-> --- a/tests/generic/623
-> +++ b/tests/generic/623
-> @@ -11,7 +11,7 @@ _begin_fstest auto quick shutdown
->
->  . ./common/filter
->
-> -_supported_fs generic
-> +_supported_fs ^overlay
->  _fixed_by_kernel_commit e4826691cc7e \
->         "xfs: restore shutdown check in mapped write fault path"
->
-> --
-> 2.31.1
->
+> 
+> -Dave
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
+
