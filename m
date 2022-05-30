@@ -2,152 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 399C0C433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 16:17:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B78FBC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 17:31:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240330AbiE3QR4 (ORCPT
+        id S231893AbiE3RbT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 May 2022 12:17:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47776 "EHLO
+        Mon, 30 May 2022 13:31:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236528AbiE3QR4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 May 2022 12:17:56 -0400
-Received: from mail-qv1-xf2c.google.com (mail-qv1-xf2c.google.com [IPv6:2607:f8b0:4864:20::f2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAF73532E5;
-        Mon, 30 May 2022 09:17:54 -0700 (PDT)
-Received: by mail-qv1-xf2c.google.com with SMTP id cv1so10309424qvb.5;
-        Mon, 30 May 2022 09:17:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ILkgTjkaUQZ2I0uZmuE2xANkh0BVQ0rWXtc+1Ixun/g=;
-        b=oCpfj/s24CA6DiMTcf4gT85IDfc3NFcHcoShbVQclz/m6CWqT8an2ZcyxziAyW57ha
-         csAee1Anp/AcX+rSd/WYCq8JRztki27MOQ/f0TrMnd39IVi4c4Rb1XvLCnK102Uj3JvX
-         vVTA5KSIcJVnooqBm2aMCshpvmpAHQ3FmxNONpo9RLV8ZJ4otxrhsmbc/B+uvAKzAxyO
-         WD8Nfey9uechvgnIN1N9C3nW/AOj2/UTZ83eq4ArnA3Xg/qy4aQr3s/DLM0K0jKgXKYO
-         Er1hrGUVcAlmC+KaA8TsfaeZ+TzxGblAXSLQE/+8FaFKJjR45KFxaCSzDAAkyNLtdZgq
-         83rA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ILkgTjkaUQZ2I0uZmuE2xANkh0BVQ0rWXtc+1Ixun/g=;
-        b=Q6J5UZVBKUm3Lo6CJc4pd/EZAEpezc5ZmmJ/suewq9US6DteEFnTiJ0xfuJ6CRyYnR
-         QJYlpJtfhXwrW31XF88xQP+CxtjWnVjp/Xtz52lUOML8Fv0uSk0aDxMHrnbrzHyiDndZ
-         hQ41AIGDHo5WVoFmV/DfxN2urcWt/9FEpOkRFpjwcqAeuYgnOZS3V4eHZaX/6bvl2wen
-         eFXgdN8kZzxIm5RZa1xN2+a7jeH3O5fMecgb9DMPFHm67aXWps9MTT9t3DX82xj+4ruf
-         ccJ/FRy5MsHdem2InTgJ8Ek9C9V+Geqx9RLT1UZ4cgxP6Jvs5f6E/lt2rQqT+8Ul4Ezt
-         pbNw==
-X-Gm-Message-State: AOAM533ZfuCkLAIZNgcfXoygsox6rUzhzozTEyMEuqQeUb8DEn2IHkfs
-        9B2CXxBePQh3rjEQsof6YWJeoN/m41bTW3bfTrvBHszw7YvKOw==
-X-Google-Smtp-Source: ABdhPJyCP2KqOki+57yDkEYhneuC3e7J66HO4UROim+PL/+s7Tc/8oJpptfUVOn88Qbv0BSIj6v0cNuriMHJ+kwcRI8=
-X-Received: by 2002:a05:6214:1c83:b0:443:6749:51f8 with SMTP id
- ib3-20020a0562141c8300b00443674951f8mr46857204qvb.74.1653927473797; Mon, 30
- May 2022 09:17:53 -0700 (PDT)
+        with ESMTP id S230490AbiE3RbS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 May 2022 13:31:18 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D16A0954B0;
+        Mon, 30 May 2022 10:31:16 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4EBB261198;
+        Mon, 30 May 2022 17:31:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98532C385B8;
+        Mon, 30 May 2022 17:31:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1653931875;
+        bh=Lqoz8g+/Df334TjGWa8JLWKaskhep6JFCaaHhQgSDug=;
+        h=From:To:Cc:Subject:Date:From;
+        b=mq4ev+ThK8kYSfsAMqil5aTM7IfQfcjAdlYgwaD5JWV0Lub3WXTT7sUXchF9uITkB
+         yb0tgVR7InfSwFlkRIi24ygmbv3qrL4Zg1vBAQ7zn7L2fzwy5iaX9Qzeg019pcbb5l
+         nLa8wyASzu6oNfluLfasin0DVscMtbXVQBKr1jyRs0Lf+cBIlIULCX81evuY3Zbl7S
+         ho7KKtqEzMta70iDDPU8Ze++Oin5pCNlRvSVb3b4/o+g5wLTHt+6ovwO5gWnuEr8eN
+         eLR500xFjYD92JM3zUrXAfgmhVjiqw4mpo7i2B0ZFJry2elujrmMcRGZZLAxi1QnZD
+         rH8HmuROkPLXQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
+Subject: [PATCH v2] ext4/053: update the test_dummy_encryption tests
+Date:   Mon, 30 May 2022 10:30:44 -0700
+Message-Id: <20220530173044.156375-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-References: <20220530112905.79602-1-amir73il@gmail.com> <20220530132930.hbvehsbu3nppq6y7@zlang-mailbox>
-In-Reply-To: <20220530132930.hbvehsbu3nppq6y7@zlang-mailbox>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 30 May 2022 19:17:42 +0300
-Message-ID: <CAOQ4uxgoGxdWcqU6duRC58mtAPq5ZcwJQX3+=mX0yz2BB8J7tQ@mail.gmail.com>
-Subject: Re: [PATCH] generic/623: fix test for runing on overlayfs
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Brian Foster <bfoster@redhat.com>,
-        fstests <fstests@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 30, 2022 at 4:29 PM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Mon, May 30, 2022 at 02:29:05PM +0300, Amir Goldstein wrote:
-> > For this test to run on overlayfs we open a different file to perform
-> > shutdown+fsync while keeping the writeback target file open.
-> >
-> > We should probably perform fsync on the writeback target file, but
-> > the bug is reproduced on xfs and overlayfs+xfs also as is.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >
-> > Zorro,
-> >
-> > I tested that this test passes for both xfs and overlayfs+xfs on v5.18
-> > and tested that both configs fail with the same warning on v5.10.109.
-> >
-> > I tried changing fsync to syncfs for the test to be more correct in the
-> > overlayfs case, but then golden output of xfs and overlayfs+xfs differ
-> > and that would need some more output filtering (or disregarding output
-> > completely).
-> >
-> > Since this minimal change does the job and does not change test behavior
-> > on xfs on any of the tested kernels, I thought it might be good enough.
-> >
-> > Thanks,
-> > Amir.
-> >
-> >  tests/generic/623 | 5 ++++-
-> >  1 file changed, 4 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/tests/generic/623 b/tests/generic/623
-> > index ea016d91..bb36ad25 100755
-> > --- a/tests/generic/623
-> > +++ b/tests/generic/623
-> > @@ -24,10 +24,13 @@ _scratch_mount
-> >  # XFS had a regression where it failed to check shutdown status in the fault
-> >  # path. This produced an iomap warning because writeback failure clears Uptodate
-> >  # status on the page.
-> > +# For this test to run on overlayfs we open a different file to perform
-> > +# shutdown+fsync while keeping the writeback target file open.
-> >  file=$SCRATCH_MNT/file
-> >  $XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
-> >  ulimit -c 0
-> > -$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
-> > +$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" \
-> > +     -c "open $(_scratch_shutdown_handle)" -c shutdown -c fsync \
->
-> Did you try to reproduce the original bug which this test case covers?
->
+From: Eric Biggers <ebiggers@google.com>
 
-Yes. As I wrote:
-"tested that both configs fail with the same warning on v5.10.109"
-Meaning the same bug that the test triggered before my change
-in v5.10 is still triggered on xfs in v5.10 and it is triggered on both
-xfs and overlayfs+xfs in v5.10 with my change.
+Kernel commit 5f41fdaea63d ("ext4: only allow test_dummy_encryption when
+supported") tightened the requirements on when the test_dummy_encryption
+mount option is accepted.  Update ext4/053 accordingly.
 
-> According to the "man xfs_io":
->
->        open [[ -acdfrstRTPL ] path ]
->               Closes the current file, and opens the file specified by path instead.
+Move the test cases to later in the file to group them with the other
+test cases that use do_mkfs to add custom mkfs options instead of using
+the "default" filesystem that the test creates at the beginning.
 
-The documentation is incorrect.
-Current file is not closed.
+Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
 
-> Although I doubt if it always real close the current file, but you open to get
-> a new file descriptor, later operations will base on new fd. I don't know if
-> it still has original testing coverage.
+v2: mention the commit ID now that it is merged, and add a Reviewed-by
 
-fsync on the fs root dir is not the same as fsync on the original file.
-mwrite does not change because mwrite is not acted on open fd
-it is acted on memory mapping of mmap.
+ tests/ext4/053 | 35 +++++++++++++++++++++--------------
+ 1 file changed, 21 insertions(+), 14 deletions(-)
 
-I can either change fd again to first fd before doing fsync
-or change fsync to syncfs. Both solutions should be fine,
-just a bit more work on the golden output.
-I just wonder if we need to do anything at all as the bug is
-reproduced and warning triggered anyway.
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index 187a2515..23e553c5 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -511,20 +511,6 @@ for fstype in ext2 ext3 ext4; do
+ 	mnt noinit_itable
+ 	mnt max_dir_size_kb=4096
+ 
+-	if _has_kernel_config CONFIG_FS_ENCRYPTION; then
+-		mnt test_dummy_encryption
+-		mnt test_dummy_encryption=v1
+-		mnt test_dummy_encryption=v2
+-		not_mnt test_dummy_encryption=v3
+-		not_mnt test_dummy_encryption=
+-	else
+-		mnt test_dummy_encryption ^test_dummy_encryption
+-		mnt test_dummy_encryption=v1 ^test_dummy_encryption=v1
+-		mnt test_dummy_encryption=v2 ^test_dummy_encryption=v2
+-		mnt test_dummy_encryption=v3 ^test_dummy_encryption=v3
+-		not_mnt test_dummy_encryption=
+-	fi
+-
+ 	if _has_kernel_config CONFIG_FS_ENCRYPTION_INLINE_CRYPT; then
+ 		mnt inlinecrypt
+ 	else
+@@ -686,6 +672,27 @@ for fstype in ext2 ext3 ext4; do
+ 	mnt_then_not_remount defaults jqfmt=vfsv1
+ 	remount defaults grpjquota=,usrjquota= ignored
+ 
++	echo "== Testing the test_dummy_encryption option" >> $seqres.full
++	# Since kernel commit 5f41fdaea63d ("ext4: only allow
++	# test_dummy_encryption when supported"), the test_dummy_encryption
++	# option is only allowed when the filesystem has the encrypt feature and
++	# the kernel has CONFIG_FS_ENCRYPTION.  The encrypt feature requirement
++	# implies that this option is never allowed on ext2 or ext3 mounts.
++	if [[ $fstype == ext4 ]] && _has_kernel_config CONFIG_FS_ENCRYPTION; then
++		do_mkfs -O encrypt $SCRATCH_DEV ${SIZE}k
++		mnt test_dummy_encryption
++		mnt test_dummy_encryption=v1
++		mnt test_dummy_encryption=v2
++		not_mnt test_dummy_encryption=bad
++		not_mnt test_dummy_encryption=
++		do_mkfs -O ^encrypt $SCRATCH_DEV ${SIZE}k
++	fi
++	not_mnt test_dummy_encryption
++	not_mnt test_dummy_encryption=v1
++	not_mnt test_dummy_encryption=v2
++	not_mnt test_dummy_encryption=bad
++	not_mnt test_dummy_encryption=
++
+ done #for fstype in ext2 ext3 ext4; do
+ 
+ $UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
 
->
-> I'd like to help this case to support overlay, presuppose original fs
-> testing isn't changed. Or it's not worth.
->
-> Welcome more review points from the author of this case and others.
->
+base-commit: d3cc66012a287b6db81aad408b6970a4a96a67da
+-- 
+2.36.1
 
-Yes, me as well.
-
-Thanks,
-Amir.
