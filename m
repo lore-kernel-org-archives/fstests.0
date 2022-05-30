@@ -2,352 +2,271 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0670C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 00:51:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FDCBC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 May 2022 01:20:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231426AbiE3AvB (ORCPT
+        id S231428AbiE3BUm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 29 May 2022 20:51:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56312 "EHLO
+        Sun, 29 May 2022 21:20:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56148 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230242AbiE3Au7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 29 May 2022 20:50:59 -0400
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8543726AE8;
-        Sun, 29 May 2022 17:50:57 -0700 (PDT)
-Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 24TLql37019990;
-        Mon, 30 May 2022 00:50:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2021-07-09;
- bh=mDMQWbFOl5p+VZ4arfGa+vyyRxzgOi03uO7J7u9QgKk=;
- b=VXa2bDrgu1NA4hE92/xN0WOu/KdvXVL0IX5M1t71f7AJHQks95dbK7aUBLhI4tBsmgeZ
- /+XDRxw5k+ditRfwaLuGLSJckqBdxeR0Y9YWbGQ34Xx56bK9b1tW4Hb7k6aW5EtC9g7G
- s7Plj3StTv96OWkr0DJJadAlZ6V9YwguiEn3Wc54FwJ3H91QXIJDo1QGgrygbkgTDpOh
- t4jasZEM6AZFZd8jyX0r/Byi98LuCd4feU2smBTX+zkH/SshL3ASCaLkqLV4YJkuV6Vl
- j6tB7wbP0BWMU2/4QS0ADUNLLG7H9LirNU9V5gZ/znZ5MWvBgXzq0EVRBrmfNgPdJJSi vw== 
-Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3gbc4xhsdr-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 30 May 2022 00:50:52 +0000
-Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-        by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.16.1.2/8.16.1.2) with SMTP id 24U0fSRY018707;
-        Mon, 30 May 2022 00:50:51 GMT
-Received: from nam02-bn1-obe.outbound.protection.outlook.com (mail-bn1nam07lp2046.outbound.protection.outlook.com [104.47.51.46])
-        by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com with ESMTP id 3gc8p08un5-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 30 May 2022 00:50:51 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=aHMiKslj8nleOQtqPbpJof/Hb5gynKrwV46o9wTS/nSuOXgoKFodODEsxJpwneMiJ9rGshoXH21yt6CPmdCWUuIVwDW4Z7Vm9EQH4smycZ6Mblhx7ctRFZEt0Pv1WXvS1hJdCXUVtQyyNDpDv1wUvPM9KErkRszrOkODy3ACk9ncJb93Sut1RQNozdudp2UAn9AbqP+Yn0ekgowEfRM7WJBt30qx8muU6CDbI2DBgGrEI9fCUEGiLwMJ/J82DL9k+RDS2F38jpx1W0UUDPUYHgnVVF1b9MasHCuBipA1CdxT/0HJjz8XuZskLls1qIkVX1IFCaGdiy0L4n/7lBev1g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=mDMQWbFOl5p+VZ4arfGa+vyyRxzgOi03uO7J7u9QgKk=;
- b=TJFETj1P708UdiZPD9V+Ow3ez14Y8PbJKVJqNt+AY0ldkEP0h2EcGTX3I6w+XP1Ivd+HeL4cPBjRv1HCTn2LJunTMF4m7pAPfaY89rCMlp2haq6+Ad9Nww5Um1/6c/2WiRcIMcI7avo2tXzFYwHUfEoK8Xv+D2agmSbvS4zz8pSaklDQ/CHWjw5CELlzIx938XHbsbhK9U/291ugosUYqT4gGq8Rd5I8v9XGbjxknnNQBVm3YBQYeb6QA9TRforSSrajtgcB0t6nuG6Z01LDhqREaQlG4dwhZf0MXPrUI+AkzUUY314nvvMOoc7glxVp1aelZHYX1GTtsWQUNEZRjg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=mDMQWbFOl5p+VZ4arfGa+vyyRxzgOi03uO7J7u9QgKk=;
- b=Km+nBBpvrASqjsXOoXaZcigvLLW30C3nifxtq6pjERKDT/dVS56qXFhx8rfybVeMV+cHCsU8kS2B1HV4iQZDQrjPG1i8GMkvFKgGDvVpr22njMxmWd96u9sBpqA7LdRvPAm+VgNIV1syXgrETE7HhSehZAZ7VIxyOq2JFG4d3Ys=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by SA2PR10MB4681.namprd10.prod.outlook.com (2603:10b6:806:fb::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5293.13; Mon, 30 May
- 2022 00:50:49 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::5cd0:c06e:f0e0:784f]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::5cd0:c06e:f0e0:784f%3]) with mapi id 15.20.5293.018; Mon, 30 May 2022
- 00:50:49 +0000
-Message-ID: <77090cfd-e80d-67a8-e215-aa610f00f7de@oracle.com>
-Date:   Mon, 30 May 2022 06:20:39 +0530
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0)
- Gecko/20100101 Thunderbird/91.9.1
-Subject: Re: [PATCH 08/10] btrfs: test repair with sectors corrupted in
- multiple mirrors
-To:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+        with ESMTP id S229881AbiE3BUl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 May 2022 21:20:41 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08FC67357A;
+        Sun, 29 May 2022 18:20:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1653873632;
+        bh=D6D+aeEtd8BoRfqtLkDUJGfISoWXzfWwKrjihrUg9kM=;
+        h=X-UI-Sender-Class:Date:To:Cc:References:From:Subject:In-Reply-To;
+        b=XpGyAiwTlvQhGdXHOsp9TTaZ0gMQwIhU9T46jD+lipQ9j6SeZzYHmlaJoi/F6hsAj
+         aIPFvI5LHUDsd1lnPneyY14OuODDucSXhKhJAJT4WcjkFq/p1wkiHfG6IADTfodvPc
+         68pI72GOBrdhnMz5cnMvYUz+o+SIPlGdggEnorHQ=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MXXuB-1oJUBM1nmZ-00Z0Wp; Mon, 30
+ May 2022 03:20:32 +0200
+Message-ID: <289c77f4-a2b6-d7e1-0114-dcb111d57f91@gmx.com>
+Date:   Mon, 30 May 2022 09:20:27 +0800
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.0
+Content-Language: en-US
+To:     Anand Jain <anand.jain@oracle.com>, Christoph Hellwig <hch@lst.de>,
+        fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Qu Wenruo <wqu@suse.com>
 References: <20220527081915.2024853-1-hch@lst.de>
- <20220527081915.2024853-9-hch@lst.de>
-From:   Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <20220527081915.2024853-9-hch@lst.de>
+ <20220527081915.2024853-2-hch@lst.de>
+ <8bdaa753-ae46-88ec-09ce-0a5f86ea5b9d@oracle.com>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Subject: Re: [PATCH 01/10] btrfs: add a helpers for read repair testing
+In-Reply-To: <8bdaa753-ae46-88ec-09ce-0a5f86ea5b9d@oracle.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: PN3PR01CA0094.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:c01:9b::18) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
-MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 8459bf0c-8beb-4190-3fbb-08da41d67061
-X-MS-TrafficTypeDiagnostic: SA2PR10MB4681:EE_
-X-Microsoft-Antispam-PRVS: <SA2PR10MB46819C6980C6514074DC2E02E5DD9@SA2PR10MB4681.namprd10.prod.outlook.com>
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 9cy+muoFtulnjep64KQzSa/pGKqxhFp+nEHt5ht6jHMSgOXYCrATgDvyEFsMP8Yx/vge+20wmRIjAsle7RJasED1iiCu6mv2LdKsK1ApQUirwsYU18ggkSE8gMC7RwAEyjCjANVD/fe4FDQTFgp4bZKuwpduNfXTboCy3dK8JpUckMOa6lB/4Nhr8F+W9Rk3yNjtf7QsinfHD1usPS7RmP+/csrWsBX5yc+7QeVxzBxWvP+YV/RLFjaFzW9k4fre7iROkA73UhQZ8070TYIGIlO4jOBTjskbWsTTYuspk5gpOn3qStG83HPa+s1MCJtQA/6F10N/J8zviVyvswzF0XtLeg5mkdDUYJty0YEKLfKbjlpiwjukJlfu++TZEHkQ3xIpZcrm1PqCwAszpdqWIPrRFyAxWMEP1H124Ok/ZwjeW7aQx2IOAQeIrdh7VpNwHoikH7y3ApGd6rABZ0B0gbSBHsbQDM4PXv3erFuXwhyS/lFsdt3CpwJPatszeYhtcMr8UTN4XOIyLoWbBpeMXkxazTgWsnSoEy21sRledP5o6bEAahLR+IS6dode+Sks+zJs0A+oe5WbzKNt5AymhYX7qQ6H6QtUso/zPKuBJHxRwPUc9iAqEwyEZnfVwlqqn37K60cvuCseaxSxvusfRNKPSPR9ew2P646O3aOt3Vxngn6vfZmbwD8s5ytXEnvgcKu3Jtmp32RwAWYC/x691+7BQBwHqU8fHau1oh/IDCV9fg0hp2sFSCzv8RCLJol0
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(366004)(66946007)(5660300002)(66476007)(66556008)(4326008)(8676002)(6486002)(186003)(83380400001)(508600001)(31696002)(86362001)(8936002)(6512007)(38100700002)(2616005)(53546011)(6506007)(44832011)(6666004)(2906002)(36756003)(31686004)(316002)(21314003)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 2
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?b0I1blpDVU9JaTA1cHBrSUNFcGJ4RjQwSERiT3lac1p0dEpjVDA5aHR0clpD?=
- =?utf-8?B?VnBwWmZmYjEzR2RhcWYzenZLMEIyZ0JmNUI4KzR5NlRZalRmR21LY0FxMXZt?=
- =?utf-8?B?bVhvU1g2cmgzNGRqeUNwckpoSzRwekpNR3FZQkxtaExnSXVZTFc1TUhuaTZM?=
- =?utf-8?B?UkJDeGtJcWNTVW5UaTlDRk9lTE9MN002Tys4dzRrTGJJTTBZRTQzd0dXZUV6?=
- =?utf-8?B?aWdHZENIN25rQXhuc1IxckJKdGJaMU1VcUJjWEt1ejhHdUFlazdXNnJGVHVT?=
- =?utf-8?B?ZWl0b0lIOUF6SHU0TnV2N2dVanVRRkYvbGx6bXBzWXl0bm9TcnRmZkdFTUxy?=
- =?utf-8?B?dnA4OGNqa0E3d01tdUQyR0g5STZjQWxMcnFSWXRkTTBkVHFMVHlSdlVOR1h0?=
- =?utf-8?B?T0plMVlhRTFLNnI0T3JBUFZjQ0IwVkdBelRzTkVKc3k4QWMydFRRUVhnNDJI?=
- =?utf-8?B?Qnl1M2ZwN0RTTldWbHNSeXgvNUxwUDhJV2ZTUk1XVGovcEV1TW9TVmdUVUJT?=
- =?utf-8?B?eGhjQTZiQjMxc2lnb1hHbWVEMjdjNk13Um5oQ3VaUEVLaTdBY0kzVVJsOE00?=
- =?utf-8?B?bjJIVnB0eGRxbFpXY0h1QkhtVGxxNUViMW04UlEyWkpVQXhwTHhaTzlCdGF6?=
- =?utf-8?B?QjdHWUtwK0lkYjVFcllHUUM4bTF0aHpQNll4TVFRcTBjWFQ2cFlvQkozbjZM?=
- =?utf-8?B?UGZkQjluV0dCWEMwUXNEck1IeXZkSEpzdEptejVOLzBWbHVveEY2bGJHU21m?=
- =?utf-8?B?Y3ZXTk1tc1ZycWlVdTF2djNReWM5L1VldVNneUFyK1Zuc1JjRHJOd0I3Mmdh?=
- =?utf-8?B?U3VzRm1GUTZWWVk0dzhkWkUzQ3ovMUpSY3ZKR2VwL3hnOTIrcWRnVWxuWUh5?=
- =?utf-8?B?MmFuUUhGUHhleGtpd01jMnBUQ0FPKy9kdmhOZGxDZlB6NGhpRmtaTCtxTjJH?=
- =?utf-8?B?dFd5TGFBY1JyTWtZMmVtR1RuVTlOY3Y0empuTVR5SVZIcVA3NlJmVERHWDVy?=
- =?utf-8?B?TDdjajNJQ3pKQStmWks5MHJNQjBiMHpOa3NaR2dhdm5BNzlMRlluSVpReTE2?=
- =?utf-8?B?WWpjV1dFVzUxQWh1eWRCZ1poRE83T3hNcndLRTlMTWVXMFF5V05tN201N0U1?=
- =?utf-8?B?UmFOTnB4cmtRbzhZUnhUTHoxWUdDYXVTdVh6YnA0djdveTFrZHp2bU9PVzM3?=
- =?utf-8?B?d2Z1NjlqdlZQMit5dFhlYTBOMDBVV3pwUVIvcDY5MzlNck9MOWJaWm1SOHNG?=
- =?utf-8?B?R2piSHRYOVdZbTNZUWdlWEFxLzg0MXdqc1NnSkZ5a3k3S3BKSUsxMENrNUVD?=
- =?utf-8?B?N2oxcFdWdEZSc1JrOWFLbGd6bmdleWJodU90TkxHRGpQa3RUbkY5cW5kVmlV?=
- =?utf-8?B?SDlMVThiTmJXMEg0bXRwZWo4TStab1p2U1NKWGF0b1IzOUZLOFJtVjFxeElW?=
- =?utf-8?B?K0VZYUwzOG15WVQ4Y3B4YVpjN1hRbmpGeGdFc1NxemtwRURBakdOQjczZG1Q?=
- =?utf-8?B?T3dqbnZzNVpZOFBrR24raDBhTjE3a3JIWkJmbW55ZkJUZUhpdDltOEFIR20z?=
- =?utf-8?B?Ung3WGRpNFBraEczMlhUSG9UTjk2QXBLMDFFV0E3ZDk1cEVObFVwb1ViN20z?=
- =?utf-8?B?V3NSUVZUdTMzbEdRZU96WFI2VEh6KzNhWEthUkx6MHRKZis5Z240Ti81UkxQ?=
- =?utf-8?B?VHRkYUprbzFRYXk0QUM1TUlOeDNlSk5YVFZhL256b0RwY3I0VkxPekUvUjRu?=
- =?utf-8?B?MTJVZXBhMElzVUlRdHhWM2RmZDdvZUMwbWxBekY3QlpmOG5CUEN5bHQwWGF2?=
- =?utf-8?B?YnNKK3RNNXBZQk52MWZKcENhK3ZJajFJQjdGWE5vM2VqLzEvNFpwa3g0SnUx?=
- =?utf-8?B?NFVJaFJXdWZxSkFEY01RUGp2M0Evd3BGZ2Y0SkVZa0F4dlNGcGE3UzAwZFRy?=
- =?utf-8?B?R092NERiL1BoeDVESituMStwOGdlR1J1cXFLOUJEcVZhREpFamc2djhpNkFO?=
- =?utf-8?B?NUUzSVhPSkJTOEJpMUNSM2RkT0JkTUg2Qi9VNFBLVmlqaDRBS2ZJZ1ZudzJW?=
- =?utf-8?B?N2lFa3Z3cmN2c3ppM2F6SkFKRnNzOXdqS2daSkg2djA3MnVpQXI4ckd5Y29R?=
- =?utf-8?B?WGFJd29YQ1lzeExnSnNqU1NiTUhKd2Q4QStZeis4VFVpaFlMSzVDVjRuN2l1?=
- =?utf-8?B?M09ZcjZJb1E5b0tTeEltN2tnWmNXQTJURVJ4RVRRTzA4Sm5TR2NPZ2d1S3RB?=
- =?utf-8?B?NlNXR1l6REluc2tWNm9Ya2RkYUtpZ01xakhxSmZWYmVRTGNvTkxXMjljMkh2?=
- =?utf-8?B?MDRKQzFJb0J5NGdZaG5FV0lEZWkyR1BZdGRUalFnZ0w4QnVGbDJNU0tsKzVK?=
- =?utf-8?Q?qZ4Pg4wYo8/JNpCP9K6hS58L/ekiRu5+1hK+T4tpZLFaU?=
-X-MS-Exchange-AntiSpam-MessageData-1: kWUs5hFEt6NqB6AtnCpTQc5N+XIDAPCGW30=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8459bf0c-8beb-4190-3fbb-08da41d67061
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 May 2022 00:50:49.2136
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: l360DfwPwKwpu+2EGtC7ylUbufgPNROtwd7LMJ1PedZMldc7ZDzp9Am5dVueN/o+neK16XxP3oyDvAQz+Kx9YA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA2PR10MB4681
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.486,18.0.874
- definitions=2022-05-29_07:2022-05-27,2022-05-29 signatures=0
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxlogscore=999
- phishscore=0 suspectscore=0 malwarescore=0 mlxscore=0 adultscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2204290000 definitions=main-2205300003
-X-Proofpoint-GUID: 5KUFVy219Sh2gmBTh_YKGYNNAZ-k7tBu
-X-Proofpoint-ORIG-GUID: 5KUFVy219Sh2gmBTh_YKGYNNAZ-k7tBu
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:pb5oApCbY/DqZB2plYbdIfdFNgYQ9yJNKNdvX7JIhdtMU7kS2n0
+ PCByQbf9xFmKcIvnf/78D/ZrfqavQDhk1XRvFvkCOAL3igsUVqN84Un5pSVI1bgyQ12RphX
+ Rn6R9Xzr+ta1FHORIWxNpO/KzOn+4v/0q1C4U0WdtLnhN9uFSMfwO7xLL+OLk2FdPiru1Bw
+ JLM292HJyStnhvWgJLLXg==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:coStBQ83sQw=:YI3QWI+CvEejpVlFaGfrzY
+ fbS7WHlqbPyFcc9V+5LhEljUAKyFX9XDmLsTyH2ZX/6zDB44NiQmnjW98GCeEwTsmy1b9bkQV
+ LD7FDH/ZaB7VIVgx7C/4ptxB19Hqm10lc5CvmH3Tnfs5VdI9FKYmkG/+ol5AcpDEXLhL5Z7w+
+ p+1o83v5dSafdelA22HNt3MS2+qukqo3A+cq+ar8ThmzIvVj7jzh48xCP9zQrcNSURsI7PAbj
+ l7ZXuQuvd6m5ETU+7qW047cBQv1ZYYA4NQfXH94Tkdr1n7YgkpkHhs+NF9LGuWxum0bxLxDci
+ XTNTyuPZYzGoAYnnQujU2WMtfc9A5RBk60F9nwWQ5YDPPCrUOdS0g0GeKHxTZxGa/HUyRqswV
+ 6yVj65R9R0R6P/0Pgsrnz01sIBwXGpuS//Le7JJp6ePT9NG/pB8cUuLqseO0B6FECx4J+YlZB
+ NDB9kQYtZ3O+pwFdIk2OHyblPCQvwuEv7brvbRZmSBjLNg5W4e9A2OWjJh7xD6ZaUxM08e12p
+ DQMJ67rKbQ910hBwQbSAYtodyRU8DVPGIMyF0M1Byx2cF2uyQNCHAHvEIi0B8vjswVvByREuG
+ g6NWjdzvAa9an5w+KiHqmwY2WHYebzGgBNoWJNTBG7MaODmXqvuBe+bqd78qZ/wjv1kEVZ19x
+ Md03EsvCbtyLcoamqKiqIReV7+s/llUgJxzukmZWNGPS32RdbVFH4WxylZCcbzQgs2YC99PX7
+ jb/9Sbik4JucfGVg7PKiqzMSrE8Ssro4YJjmzzjWoQ44dorJMdt7lkAoAnRRT1aA9MggR7fRv
+ zsbO6ppDPZqn6mnjosm3Xbwf1IzVPmm8eLZ70MrPw7lgupZL65wOz4eEXim2QF0AwSbvaQ6RH
+ 2bGSGU//hB7AUGyoszbQtMGqS//AOEvwZUB2fGJn4K/UwKBvPa27zef8Xbs6zfbJZ8KGVJtiG
+ IFJWDuVVaX0YEuB99ukzPmCRJ9YoCRARPYCQKhwZ4p01mM4fd++3SRxvivBMso/KpWcAm6wKE
+ mh1YBhoSe5ANCs79vDxOXjNLNI3sZRl5/DyhV6OxWydLwS/vW3Tqyqz6Ah0PnlF8a+VJ8gkUP
+ b1Qc18BlTxpWpG8LZVMBNQh76Bx5qk05YLMGwqHNJVOcO1rvLlSrCE+Zg==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
-looks good.
 
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
+On 2022/5/30 08:23, Anand Jain wrote:
+> On 5/27/22 13:49, Christoph Hellwig wrote:
+>> Add a few helpers to consolidate code for btrfs read repair testing:
+>>
+>> =C2=A0 - _btrfs_get_first_logical() gets the btrfs logical address for =
+the
+>> =C2=A0=C2=A0=C2=A0 first extent in a file
+>> =C2=A0 - _btrfs_get_device_path and _btrfs_get_physical use the
+>> =C2=A0=C2=A0=C2=A0 btrfs-map-logical tool to find the device path and p=
+hysical address
+>> =C2=A0=C2=A0=C2=A0 for btrfs logical address for a specific mirror
+>> =C2=A0 - _btrfs_direct_read_on_mirror and _btrfs_buffered_read_on_mirro=
+r
+>> =C2=A0=C2=A0=C2=A0 read the data from a specific mirror
+>>
+>> These will be used to consolidate the read repair tests and avoid
+>> duplication for new tests.
+>>
+>> Signed-off-by: Christoph Hellwig <hch@lst.de>
+>> Reviewed-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>> =C2=A0 common/btrfs=C2=A0 | 75 ++++++++++++++++++++++++++++++++++++++++=
++++++++++++
+>> =C2=A0 common/config |=C2=A0 1 +
+>> =C2=A0 2 files changed, 76 insertions(+)
+>>
+>> diff --git a/common/btrfs b/common/btrfs
+>> index ac597ca4..b69feeee 100644
+>> --- a/common/btrfs
+>> +++ b/common/btrfs
+>> @@ -505,3 +505,78 @@ _btrfs_metadump()
+>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $BTRFS_IMAGE_PROG "$device" "$dumpfile"
+>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 [ -n "$DUMP_COMPRESSOR" ] && $DUMP_COMPR=
+ESSOR -f "$dumpfile" &>
+>> /dev/null
+>> =C2=A0 }
+>> +
+>> +# Return the btrfs logical address for the first block in a file
+>> +_btrfs_get_first_logical()
+>> +{
+>> +=C2=A0=C2=A0=C2=A0 local file=3D$1
+>> +=C2=A0=C2=A0=C2=A0 _require_command "$FILEFRAG_PROG" filefrag
+>> +
+>> +=C2=A0=C2=A0=C2=A0 ${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.=
+full
+>> +=C2=A0=C2=A0=C2=A0 ${FILEFRAG_PROG} -v $file | _filter_filefrag | cut =
+-d '#' -f 1
+>> +}
+>> +
+>> +# Find the device path for a btrfs logical offset
+>> +_btrfs_get_device_path()
+>> +{
+>> +=C2=A0=C2=A0=C2=A0 local logical=3D$1
+>> +=C2=A0=C2=A0=C2=A0 local stripe=3D$2
+>> +
+>> +=C2=A0=C2=A0=C2=A0 _require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-ma=
+p-logical
+>> +
+>> +=C2=A0=C2=A0=C2=A0 $BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | =
+\
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $AWK_PROG "(\$1 ~ /mirror/ =
+&& \$2 ~ /$stripe/) { print \$8 }"
+>> +}
+>> +
+>> +
+>> +# Find the device physical sector for a btrfs logical offset
+>> +_btrfs_get_physical()
+>> +{
+>> +=C2=A0=C2=A0=C2=A0 local logical=3D$1
+>> +=C2=A0=C2=A0=C2=A0 local stripe=3D$2
+>> +
+>> +=C2=A0=C2=A0=C2=A0 _require_command "$BTRFS_MAP_LOGICAL_PROG" btrfs-ma=
+p-logical
+>> +
+>> +=C2=A0=C2=A0=C2=A0 $BTRFS_MAP_LOGICAL_PROG -b -l $logical $SCRATCH_DEV=
+ >>
+>> $seqres.full 2>&1
+>> +=C2=A0=C2=A0=C2=A0 $BTRFS_MAP_LOGICAL_PROG -l $logical $SCRATCH_DEV | =
+\
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $AWK_PROG "(\$1 ~ /mirror/ =
+&& \$2 ~ /$stripe/) { print \$6 }"
+>> +}
+>> +
+>> +# Read from a specific stripe to test read recovery that corrupted a
+>> specific
+>> +# stripe.=C2=A0 Btrfs uses the PID to select the mirror, so keep readi=
+ng
+>> until the
+>> +# xfs_io process that performed the read was executed with a PID that
+>> ends up
+>> +# on the intended mirror.
+>> +_btrfs_direct_read_on_mirror()
+>> +{
+>> +=C2=A0=C2=A0=C2=A0 local mirror=3D$1
+>> +=C2=A0=C2=A0=C2=A0 local nr_mirrors=3D$2
+>> +=C2=A0=C2=A0=C2=A0 local file=3D$3
+>> +=C2=A0=C2=A0=C2=A0 local offset=3D$4
+>> +=C2=A0=C2=A0=C2=A0 local size=3D$5
+>> +
+>> +=C2=A0=C2=A0=C2=A0 while [[ -z $( (( BASHPID % nr_mirrors =3D=3D mirro=
+r )) &&
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 exec $XFS_IO_PROG -d \
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 -c =
+"pread -b $size $offset $size" $file) ]]; do
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 :
+>> +=C2=A0=C2=A0=C2=A0 done
+>> +}
+>> +
+>> +# Read from a specific stripe to test read recovery that corrupted a
+>> specific
+>> +# stripe.=C2=A0 Btrfs uses the PID to select the mirror, so keep readi=
+ng
+>> until the
+>> +# xfs_io process that performed the read was executed with a PID that
+>> ends up
+>> +# on the intended mirror.
+>> +_btrfs_buffered_read_on_mirror()
+>> +{
+>> +=C2=A0=C2=A0=C2=A0 local mirror=3D$1
+>> +=C2=A0=C2=A0=C2=A0 local nr_mirrors=3D$2
+>> +=C2=A0=C2=A0=C2=A0 local file=3D$3
+>> +=C2=A0=C2=A0=C2=A0 local offset=3D$4
+>> +=C2=A0=C2=A0=C2=A0 local size=3D$5
+>> +
+>> +=C2=A0=C2=A0=C2=A0 echo 3 > /proc/sys/vm/drop_caches
+>
+>
+>> +=C2=A0=C2=A0=C2=A0 while [[ -z $( (( BASHPID % nr_mirrors =3D=3D mirro=
+r )) &&
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 exec $XFS_IO_PROG \
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 -c =
+"pread -b $size $offset $size" $file) ]]; do
+>
+> I am confused if it should be BASHPID or PID?
+>
+> Next, it is ok if the xfs_io_prog fails and returns !=3D 0.
+> (Part of the test).
+> But then we will continue in the while loop. No?
 
-Thanks, Anand
+The loop goes like this:
+
+If "BASHPID % nr_mirrors" isn't mirror, then the whole condition inside
+the $() part is already 0, no need to exec the xfs_io command.
+
+Then -z 0 return true, we continue the while loop (aka, doing nothing).
+
+Only when (BASHPID % nr_mirrors =3D=3D mirror) is true, we will try to exe=
+c
+c XFS_IO_PROGS in the same PID, and normally we will exit.
 
 
-On 5/27/22 13:49, Christoph Hellwig wrote:
-> Test that repair handles the case where it needs to read from more than
-> a single mirror on the raid1c3 profile.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> Reviewed-by: Qu Wenruo <wqu@suse.com>
-> ---
->   tests/btrfs/265     | 85 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/265.out | 75 +++++++++++++++++++++++++++++++++++++++
->   2 files changed, 160 insertions(+)
->   create mode 100755 tests/btrfs/265
->   create mode 100644 tests/btrfs/265.out
-> 
-> diff --git a/tests/btrfs/265 b/tests/btrfs/265
-> new file mode 100755
-> index 00000000..b75d9c84
-> --- /dev/null
-> +++ b/tests/btrfs/265
-> @@ -0,0 +1,85 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
-> +# Copyright (c) 2022 Christoph Hellwig.
-> +#
-> +# FS QA Test 265
-> +#
-> +# Test that btrfs raid repair on a raid1c3 profile can repair corruption on two
-> +# mirrors for the same logical offset.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick read_repair
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs btrfs
-> +_require_scratch_dev_pool 3
-> +
-> +_require_odirect
-> +# Overwriting data is forbidden on a zoned block device
-> +_require_non_zoned_device "${SCRATCH_DEV}"
-> +
-> +_scratch_dev_pool_get 3
-> +# step 1, create a raid1 btrfs which contains one 128k file.
-> +echo "step 1......mkfs.btrfs"
-> +
-> +mkfs_opts="-d raid1c3 -b 1G"
-> +_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-> +
-> +_scratch_mount
-> +
-> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" \
-> +	"$SCRATCH_MNT/foobar" | \
-> +	_filter_xfs_io_offset
-> +
-> +# step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
-> +# one in $SCRATCH_DEV_POOL
-> +echo "step 2......corrupt file extent"
-> +
-> +# ensure btrfs-map-logical sees the tree updates
-> +sync
-> +
-> +logical=$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
-> +
-> +physical1=$(_btrfs_get_physical ${logical} 1)
-> +devpath1=$(_btrfs_get_device_path ${logical} 1)
-> +
-> +physical2=$(_btrfs_get_physical ${logical} 2)
-> +devpath2=$(_btrfs_get_device_path ${logical} 2)
-> +
-> +_scratch_unmount
-> +
-> +echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
-> +	>> $seqres.full
-> +$XFS_IO_PROG -d -c "pwrite -S 0xbf -b 64K $physical1 64K" $devpath1 \
-> +	> /dev/null
-> +
-> +echo " corrupt stripe #2, devpath $devpath2 physical $physical2" \
-> +	>> $seqres.full
-> +$XFS_IO_PROG -d -c "pwrite -S 0xbf -b 64K $physical2 64K" $devpath2 \
-> +	> /dev/null
-> +
-> +_scratch_mount
-> +
-> +# step 3, 128k dio read (this read can repair bad copy)
-> +echo "step 3......repair the bad copy"
-> +
-> +_btrfs_direct_read_on_mirror 0 3 "$SCRATCH_MNT/foobar" 0 128K
-> +_btrfs_direct_read_on_mirror 1 3 "$SCRATCH_MNT/foobar" 0 128K
-> +
-> +_scratch_unmount
-> +
+Some of your concern are valid.
+Like if some code bug makes the pread failed, then we will continue the
+loop, possibly lead to an infinite loop.
 
-> +echo "step 4......check if the repair worked"
-> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical1 512" $devpath1 |\
-> +	_filter_xfs_io_offset
-> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical2 512" $devpath2 |\
-> +	_filter_xfs_io_offset
+The pid-check-then-exec idea is pretty good, it allows us to only
+initiate the read, without doing some unnecessary read then check the pid.
 
+But putting the whole exec into the pid check is indeed hacky and can
+lead to problems.
 
-> +
-> +_scratch_dev_pool_put
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/265.out b/tests/btrfs/265.out
-> new file mode 100644
-> index 00000000..c62c7a39
-> --- /dev/null
-> +++ b/tests/btrfs/265.out
-> @@ -0,0 +1,75 @@
-> +QA output created by 265
-> +step 1......mkfs.btrfs
-> +wrote 131072/131072 bytes
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +step 2......corrupt file extent
-> +step 3......repair the bad copy
-> +step 4......check if the repair worked
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +read 512/512 bytes
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +read 512/512 bytes
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+Can we make it less hacky?
 
+Thanks,
+Qu
+
+Thanks,
+Qu
+
+>
+> Sorry, I am sceptical about this. Could you please clarify
+> how this works?
+>
+>
+> Thanks, Anand
+>
+>
+>
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 :
+>> +=C2=A0=C2=A0=C2=A0 done
+>
+>
+>
+>
+>> +}
+>> diff --git a/common/config b/common/config
+>> index c6428f90..df20afc1 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -228,6 +228,7 @@ export E2IMAGE_PROG=3D"$(type -P e2image)"
+>> =C2=A0 export BLKZONE_PROG=3D"$(type -P blkzone)"
+>> =C2=A0 export GZIP_PROG=3D"$(type -P gzip)"
+>> =C2=A0 export BTRFS_IMAGE_PROG=3D"$(type -P btrfs-image)"
+>> +export BTRFS_MAP_LOGICAL_PROG=3D$(type -P btrfs-map-logical)
+>> =C2=A0 # use 'udevadm settle' or 'udevsettle' to wait for lv to be sett=
+led.
+>> =C2=A0 # newer systems have udevadm command but older systems like RHEL=
+5
+>> don't.
+>
