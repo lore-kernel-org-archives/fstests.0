@@ -2,95 +2,231 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EEC0C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 31 May 2022 07:19:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B500FC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 31 May 2022 08:59:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239667AbiEaHTM (ORCPT
+        id S245018AbiEaI7H (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 31 May 2022 03:19:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40582 "EHLO
+        Tue, 31 May 2022 04:59:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233205AbiEaHTL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 31 May 2022 03:19:11 -0400
-Received: from heian.cn.fujitsu.com (mail.cn.fujitsu.com [183.91.158.132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5BF1E8B089
-        for <fstests@vger.kernel.org>; Tue, 31 May 2022 00:19:09 -0700 (PDT)
-IronPort-Data: =?us-ascii?q?A9a23=3AAnPUgql94tj5QYT1pw3JUF3o5gycJERdPkR7XQ2?=
- =?us-ascii?q?eYbTBsI5bpzJRyWtOXGmDaKnYY2XyL49wOdjko0oE65TUn9JjTlNq+CA2RRqmi?=
- =?us-ascii?q?+KfW43BcR2Y0wB+jyH7ZBs+qZ1YM7EsFehsJpPnjkrrYuiJQUVUj/nSHOKmULe?=
- =?us-ascii?q?cY0ideCc/IMsfoUM68wIGqt4w6TSJK1vlVeLa+6UzCnf8s9JHGj58B5a4lf9al?=
- =?us-ascii?q?K+aVAX0EbAJTasjUFf2zxH5BX+ETE27ByOQroJ8RoZWSwtfpYxV8F81/z91Yj+?=
- =?us-ascii?q?kur39NEMXQL/OJhXIgX1TM0SgqkEa4HVsjeBgb7xBAatUo2zhc9RZzNRQpJD2R?=
- =?us-ascii?q?wEyIoXCheYcTwJFVSp5OMWq/ZeeeyTh6JPMlxSun3zEhq8G4FsNFYMD5utsHXp?=
- =?us-ascii?q?m6/MVMnYOYwqFiubwx6i0ItSALOxLwNLDZdtZ4y8/i2qCS6tOfHwKeI2Sjfcw4?=
- =?us-ascii?q?dv6rpkm8S7iWvck?=
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3Akbi+4arE3GC7QNj63gBJf8IaV5oXeYIsimQD?=
- =?us-ascii?q?101hICG9E/bo8/xG+c536faaslgssQ4b8+xoVJPgfZq+z+8R3WByB8bAYOCOgg?=
- =?us-ascii?q?LBQ72KhrGSoQEIdRefysdtkY9kc4VbTOb7FEVGi6/BizWQIpINx8am/cmT6dvj?=
- =?us-ascii?q?8w=3D=3D?=
-X-IronPort-AV: E=Sophos;i="5.88,333,1635177600"; 
-   d="scan'208";a="124617701"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 31 May 2022 15:19:08 +0800
-Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
-        by cn.fujitsu.com (Postfix) with ESMTP id 85E454D17172
-        for <fstests@vger.kernel.org>; Tue, 31 May 2022 15:19:06 +0800 (CST)
-Received: from G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) by
- G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Tue, 31 May 2022 15:19:06 +0800
-Received: from G08CNEXCHPEKD08.g08.fujitsu.local (10.167.33.83) by
- G08CNEXJMPEKD02.g08.fujitsu.local (10.167.33.202) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Tue, 31 May 2022 15:19:06 +0800
-Received: from fedora.g08.fujitsu.local (10.167.223.71) by
- G08CNEXCHPEKD08.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.23 via Frontend Transport; Tue, 31 May 2022 15:19:05 +0800
-From:   Liu Yiding <liuyd.fnst@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Liu Yiding <liuyd.fnst@fujitsu.com>
-Subject: [PATCH] common/rc: Fix _require_batched_discard to skip test correctly
-Date:   Tue, 31 May 2022 15:12:52 +0800
-Message-ID: <20220531071252.30517-1-liuyd.fnst@fujitsu.com>
-X-Mailer: git-send-email 2.31.1
+        with ESMTP id S233830AbiEaI7G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 31 May 2022 04:59:06 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2567B13D1F
+        for <fstests@vger.kernel.org>; Tue, 31 May 2022 01:59:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1653987544;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=saLiCzbZolXA6IxcAM6JgwtRQPVc+6ncT31YzO8nYKw=;
+        b=IPSlzadpacqXpA957EX3tO+IbKfzgoKU8WLqjcr36W4Kwn6xfERABqHSGs5VvSeA5sMD7g
+        1i5PAf+fcRT9IYBfoBEjA1TX7wWJGoXnisDHa16wZzYA9Aq/bGeY9JE9EG1OzYjew1YXH7
+        4D0ZgpvZsNsnASw8ahaJwgvEWly8cq4=
+Received: from mail-oa1-f72.google.com (mail-oa1-f72.google.com
+ [209.85.160.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-408-v00xucl2Pk-amNdAomluLw-1; Tue, 31 May 2022 04:59:02 -0400
+X-MC-Unique: v00xucl2Pk-amNdAomluLw-1
+Received: by mail-oa1-f72.google.com with SMTP id 586e51a60fabf-f1e78da1a9so8992419fac.16
+        for <fstests@vger.kernel.org>; Tue, 31 May 2022 01:59:02 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=saLiCzbZolXA6IxcAM6JgwtRQPVc+6ncT31YzO8nYKw=;
+        b=yZX5ZOQ0u9ZCG6/jDXROmu/T4zO9vlAGldi/JJH6RIyt6X6vUnOZEm09BZFWglaejc
+         5ocTfFYbtlzGmV9cz9XTSHplvCeynJcSIl9VnfLYvka0grIPm68OK4gSHsxJl8WTPzub
+         11CGdskyaBMfeG0hO1sogggjp6Tz1dfmRjJK8NrvlsagPzXn251yi5XN2JEFWBuYqksC
+         EEe/Z+OAIL/3dSMgHPPil640ZoORtN3v3bkM209IrGYb7HnYyANeQ8pGGtK11UipqqCn
+         QguJQCirPCxfmxLn88aiaGb7CXW5THYIERql+Nx8NeuyAToWsP8YxYQraa95CVscY+Ig
+         GFVA==
+X-Gm-Message-State: AOAM5335imprMG60sawTmGlYdV/X1dKMXdBKzc6MSa+BrsitUq9XeRX/
+        wc88aIlVKdRDD3YGeUMZeXZIHtwsanuyRwUnnj1bj3VJYNzPCS3ygFVfMPVHRJDjGIfUITsvopu
+        075G+7syiP2lYyDJO2A==
+X-Received: by 2002:a05:6808:1719:b0:2f9:ac49:842d with SMTP id bc25-20020a056808171900b002f9ac49842dmr12157195oib.234.1653987541799;
+        Tue, 31 May 2022 01:59:01 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxpWwHwDSKGHWKGyY9mMoL8M4BnXiI60s3KB7fHDccC2iorU3btJJHNS5LuhC9yxDdO984Pqg==
+X-Received: by 2002:a05:6808:1719:b0:2f9:ac49:842d with SMTP id bc25-20020a056808171900b002f9ac49842dmr12157185oib.234.1653987541505;
+        Tue, 31 May 2022 01:59:01 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y9-20020a056830070900b00606387601a2sm5948305ots.34.2022.05.31.01.58.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 31 May 2022 01:59:00 -0700 (PDT)
+Date:   Tue, 31 May 2022 16:58:55 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Dave Chinner <david@fromorbit.com>,
+        Amir Goldstein <amir73il@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] generic/623: fix test for runing on overlayfs
+Message-ID: <20220531085855.zpof4m3vmm6jlv4c@zlang-mailbox>
+References: <20220530112905.79602-1-amir73il@gmail.com>
+ <20220530132930.hbvehsbu3nppq6y7@zlang-mailbox>
+ <CAOQ4uxgoGxdWcqU6duRC58mtAPq5ZcwJQX3+=mX0yz2BB8J7tQ@mail.gmail.com>
+ <20220530215848.GR3923443@dread.disaster.area>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 85E454D17172.AD59E
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: liuyd.fnst@fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220530215848.GR3923443@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-xfstest commit ee264b3f ("common/rc: Modify _require_batched_discard to
-improve test coverage") changed the way of determing if discard is
-supported by checking whether fstrim output contains "not supported"
-keywords.
+On Tue, May 31, 2022 at 07:58:48AM +1000, Dave Chinner wrote:
+> On Mon, May 30, 2022 at 07:17:42PM +0300, Amir Goldstein wrote:
+> > On Mon, May 30, 2022 at 4:29 PM Zorro Lang <zlang@redhat.com> wrote:
+> > >
+> > > On Mon, May 30, 2022 at 02:29:05PM +0300, Amir Goldstein wrote:
+> > > > For this test to run on overlayfs we open a different file to perform
+> > > > shutdown+fsync while keeping the writeback target file open.
+> > > >
+> > > > We should probably perform fsync on the writeback target file, but
+> > > > the bug is reproduced on xfs and overlayfs+xfs also as is.
+> > > >
+> > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > ---
+> > > >
+> > > > Zorro,
+> > > >
+> > > > I tested that this test passes for both xfs and overlayfs+xfs on v5.18
+> > > > and tested that both configs fail with the same warning on v5.10.109.
+> > > >
+> > > > I tried changing fsync to syncfs for the test to be more correct in the
+> > > > overlayfs case, but then golden output of xfs and overlayfs+xfs differ
+> > > > and that would need some more output filtering (or disregarding output
+> > > > completely).
+> > > >
+> > > > Since this minimal change does the job and does not change test behavior
+> > > > on xfs on any of the tested kernels, I thought it might be good enough.
+> > > >
+> > > > Thanks,
+> > > > Amir.
+> > > >
+> > > >  tests/generic/623 | 5 ++++-
+> > > >  1 file changed, 4 insertions(+), 1 deletion(-)
+> > > >
+> > > > diff --git a/tests/generic/623 b/tests/generic/623
+> > > > index ea016d91..bb36ad25 100755
+> > > > --- a/tests/generic/623
+> > > > +++ b/tests/generic/623
+> > > > @@ -24,10 +24,13 @@ _scratch_mount
+> > > >  # XFS had a regression where it failed to check shutdown status in the fault
+> > > >  # path. This produced an iomap warning because writeback failure clears Uptodate
+> > > >  # status on the page.
+> > > > +# For this test to run on overlayfs we open a different file to perform
+> > > > +# shutdown+fsync while keeping the writeback target file open.
+> 
+> To trigger the original bug, the post-shutdown fsync needs to be run
+> on the original file. That triggers a writeback error writeback
+> which clears the uptodate state on the mapped page. The mwrite that
+> follows then trips over the state of the page and attempts IO
+> operations without first checking shutdown state.
+> 
+> Hence moving the fsync to a different file will break the mechanism
+> the regression test uses to trigger the original bug.
+> 
+> > > >  file=$SCRATCH_MNT/file
+> > > >  $XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
+> > > >  ulimit -c 0
+> > > > -$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
+> > > > +$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" \
+> > > > +     -c "open $(_scratch_shutdown_handle)" -c shutdown -c fsync \
+> > >
+> > > Did you try to reproduce the original bug which this test case covers?
+> > >
+> > 
+> > Yes. As I wrote:
+> > "tested that both configs fail with the same warning on v5.10.109"
+> > Meaning the same bug that the test triggered before my change
+> > in v5.10 is still triggered on xfs in v5.10 and it is triggered on both
+> > xfs and overlayfs+xfs in v5.10 with my change.
+> 
+> It reproduced on 5.10, but not because of the reasons you are
+> suggesting.
+> 
+> > 
+> > > According to the "man xfs_io":
+> > >
+> > >        open [[ -acdfrstRTPL ] path ]
+> > >               Closes the current file, and opens the file specified by path instead.
+> > 
+> > The documentation is incorrect.
+> > Current file is not closed.
+> 
+> It is not closed, but it's also not the target of subsequent file
+> operations until you use "file 0" to switch back to it...
 
-On RHEL, fstrim output below info when discard is not supported
-"fstrim: /mnt/share0/: FITRIM ioctl failed: Function not implemented"
+I checked the xfsprogs/io/open.c, it truely doesn't "Close the current file",
+(need to update the man-page?) and it looks like make all opened files as a
+list, then operate them one by one(?):
 
-Supplyment unsupported keywords to _require_batched_discard.
+  execve("/usr/sbin/xfs_io", ["xfs_io", "-c", "mmap 0 4k", "-c", "mwrite 0 4k", "-c", "open testfile", "-c", "fsync", "-c", "mwrite 0 4k", "testfile"], 0x7ffdc2285b78 /* 42 vars */) = 0
+  ...
+  openat(AT_FDCWD, "testfile", O_RDWR)    = 3
+  ...
+  mmap(NULL, 4096, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_SHARED, 3, 0) = 0x7efc04548000
+  ...
+  openat(AT_FDCWD, "testfile", O_RDWR)    = 4
+  ...
+  fsync(3)                                = 0
+  fsync(4)                                = 0
+  exit_group(0)                           = ?
+  +++ exited with 0 +++
 
-Signed-off-by: Liu Yiding <liuyd.fnst@fujitsu.com>
----
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Anyway, looks like we're stuck at here. So I have 3 crude methods which is just
+out of my mind, hope to get review:)
 
-diff --git a/common/rc b/common/rc
-index 70a15f9c..eae9afc6 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4008,7 +4008,7 @@ _require_batched_discard()
- 	fi
- 	_require_fstrim
- 
--	grep -q "not supported" <($FSTRIM_PROG $1 2>&1)
-+	grep -q -E "not supported|not implemented" <($FSTRIM_PROG $1 2>&1)
- 	if [ "$?" = "0" ]
- 	then
- 		_notrun "FITRIM not supported on $1"
--- 
-2.31.1
+1) Skip this test for overlay directly, as this patch does.
+2) Add a _require_real_scratch_shutdown() helper, require the $FSTYP supporting
+   GOINGDOWN ioctl, don't fallback to the underlying fs. Then let generic/623
+   use it to skip overlay and other fs which really doesn't support shutdown.
+3) Change xfsprogs/io/shutdown.c, let shutdown_f() accept an extra mountpoint
+   path argument, to shutdown a specified mountpoint (?? not sure if it's
+   reasonable for xfs_io :). Then let generic/623 require and use this feature.
 
+Thanks,
+Zorro
 
+> 
+> > > Although I doubt if it always real close the current file, but you open to get
+> > > a new file descriptor, later operations will base on new fd. I don't know if
+> > > it still has original testing coverage.
+> > 
+> > fsync on the fs root dir is not the same as fsync on the original file.
+> 
+> Yup, and that's what will break the regression test.
+> 
+> But why does it still fail on v5.10.109?
+> 
+> Well, that's because of a quirk of the xfs_io fsync command.  It
+> doesn't have the CMD_FLAG_ONESHOT flag set on it, so it operates on
+> *all open files*, not just the current file.
+> 
+> IOWs, the misunderstanding of how the bug is triggered has been
+> covered up by the misunderstanding of how the xfs_io open file table
+> and the fsync command interact.
+> 
+> > mwrite does not change because mwrite is not acted on open fd
+> > it is acted on memory mapping of mmap.
+> > 
+> > I can either change fd again to first fd before doing fsync
+> > or change fsync to syncfs.
+> 
+> Do not change it to syncfs - that executes completely different
+> writeback and metadata sync code paths with different error
+> propagation and may well result in very different behaviour from the
+> underlying filesystem.  Fundamentally, syncfs() and fsync() are not
+> interchangeable from a regression test POV - you *might* get the
+> same high level result, but the low level code behaves very
+> differently...
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
