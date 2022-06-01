@@ -2,118 +2,121 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD36AC433FE
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jun 2022 12:34:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82A64C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jun 2022 17:33:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352915AbiFAMeX (ORCPT
+        id S1348929AbiFARdA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Jun 2022 08:34:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56116 "EHLO
+        Wed, 1 Jun 2022 13:33:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348177AbiFAMeW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Jun 2022 08:34:22 -0400
-Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18A8F9BAC3;
-        Wed,  1 Jun 2022 05:34:21 -0700 (PDT)
-Received: by mail-wr1-x42a.google.com with SMTP id u3so2168519wrg.3;
-        Wed, 01 Jun 2022 05:34:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=gISDPF1V5a3NWXBvppkjujgtPAJ0uyftRP2lWslVlMM=;
-        b=pgQmxFsBdKekVsfAjDuzsYI56xDt4BcX++J86mHFsRBGzLuQkymEYCJUnv5KB18ijY
-         R1KLQEF+OLHXLu8TfDVMk5F+m7IcyLtQVvjWdJnKn5//XzZFV0vp8lfBrdwgLb4/97rn
-         dUYhZNUcnuwifBq4hZwmpNFiw6pp0x8s6M8QSzPrEbjIbz8S8ZY1rbeFM/XMni9yx8L/
-         mSJc1Ag0PmR/ISpi/qg3a278moRE+zFRaAVtvt6FnqRw38rl/Ullp3EkTBuOEyLht1ct
-         yHUTEbcCSzxkmBUpNUGECRu7duDC0BTD0gAARUIkUM2XO2n6MBzuTFQoApdN7F/QI9iN
-         //zw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=gISDPF1V5a3NWXBvppkjujgtPAJ0uyftRP2lWslVlMM=;
-        b=l/M8j/10eAkI4jJV1fw+NJQ4iDISfIF9JEzj1gMjTXM6UpRqLEvhD1T7Teqimz8eRL
-         7hbY3sTDfaFj5MXtQlulnTgiGCvrdWzjZYqdHSmiBwKeL2OJdSPVsguZh/G4nx0cBh7g
-         gO02MgSWfkThLLIxQKyTkm5WEUfBfPcNL2JlwIPHYFHApQoLDZTDrOzJNakMAHoGCvXR
-         9Kre3yxyTEJii0aI8GPSvEN8cn6AJm4ShYr6kBPGvio4nDoGU0hHmsDGIzcniyI2Y5dF
-         v0Ex2UtBBrw5FRnxqxftVM3stFpyaq5iptaF0qInhsdHlFsAk9f+l7caiGg8G5dU8ThM
-         bgDg==
-X-Gm-Message-State: AOAM5300l/6yVSlnCgF25NeaFTmNyuh3z4899Ew5sbZOWYyIUlKfqQB+
-        2tj+e95zHrM4nRdhwv9bEtc=
-X-Google-Smtp-Source: ABdhPJzJeuKk57i0PH40YI4dQ97/YZc+yV7okvFt07Gr+P5/D8Q8eTFRBpUfx4iFuRyUb/ymp3vu1Q==
-X-Received: by 2002:a05:6000:1b03:b0:210:3372:2bd9 with SMTP id f3-20020a0560001b0300b0021033722bd9mr13111196wrz.704.1654086859489;
-        Wed, 01 Jun 2022 05:34:19 -0700 (PDT)
-Received: from localhost.localdomain ([77.137.79.96])
-        by smtp.gmail.com with ESMTPSA id i6-20020a05600c290600b00397470a8226sm1819887wmd.15.2022.06.01.05.34.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Jun 2022 05:34:19 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Brian Foster <bfoster@redhat.com>,
-        Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: [PATCH v2] generic/623: fix test for runing on overlayfs
-Date:   Wed,  1 Jun 2022 15:34:06 +0300
-Message-Id: <20220601123406.265475-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S1346250AbiFARc7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Jun 2022 13:32:59 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DC385003E
+        for <fstests@vger.kernel.org>; Wed,  1 Jun 2022 10:32:58 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id BBE64B81BCE
+        for <fstests@vger.kernel.org>; Wed,  1 Jun 2022 17:32:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 54F42C385A5;
+        Wed,  1 Jun 2022 17:32:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1654104775;
+        bh=gRE0Ka/I3MB8mouJmVViqFkfXLHTo103utZVdxSlaCI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=TUP5PbYM9be4TLGNp/74B9Mpqt7lLcKd/CJdiTcgCfciDW6W7axJaj7Gn/6f+IlYV
+         XSziWEJwx9fhiEp17KqKnlo+vruARuG4DLcDcWHZfcBncWSeFsvb9QUWbulspg8y+G
+         CYpVwRUGnK3E4cgaJoCoVl8r+vmfVNZ9Gq3NufIV3dgt/XU5kqJOn0yunuMDq6V3+x
+         F/0pca5rVdNjJTE0bAoVRgTsa/bnHontbbE69L06jh0dw0/KYIRJYDED74IS7II2RB
+         5w0L5oTx3eOm33KpcUgzid0f0tfTjw9EZQU9SAm4kaSNSK9ufoRZZt0J9TfHOHvRl0
+         Sf/URPp1TBdvw==
+Date:   Wed, 1 Jun 2022 10:32:54 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/5] generic/139: require 512 bytes to be the minimum
+ dio size
+Message-ID: <YpeixjeZ8kdVw/+7@magnolia>
+References: <20220601063730.1726879-1-zlang@kernel.org>
+ <20220601063730.1726879-2-zlang@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220601063730.1726879-2-zlang@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-For this test to run on overlayfs we open a different file to perform
-shutdown while keeping the writeback target file open.
+On Wed, Jun 01, 2022 at 02:37:26PM +0800, Zorro Lang wrote:
+> Due to generic/139 tests base on 512 bytes aligned, so skip this test
+> if the minimum dio write size >512. This patch also change the
+> common/rc::_require_dio helper, supports a minimum aligned size
+> argument.
+> 
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> ---
+>  common/rc         | 17 ++++++++++++++---
+>  tests/generic/139 |  2 +-
+>  2 files changed, 15 insertions(+), 4 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 2f31ca46..6d384eaf 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2721,9 +2721,12 @@ _require_xfs_io_command()
+>  	fi
+>  }
+>  
+> -# check that kernel and filesystem support direct I/O
+> +# check that kernel and filesystem support direct I/O, and check if "$1" size
+> +# aligned (optional) is supported
+>  _require_odirect()
+>  {
+> +	local alignment=${1:+"-b $1"}
+> +
+>  	if [ $FSTYP = "ext4" ] || [ $FSTYP = "f2fs" ] ; then
+>  		if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"; then
+>  			_notrun "$FSTYP encryption doesn't support O_DIRECT"
+> @@ -2735,9 +2738,17 @@ _require_odirect()
+>  		fi
+>  	fi
+>  	local testfile=$TEST_DIR/$$.direct
+> -	$XFS_IO_PROG -F -f -d -c "pwrite 0 20k" $testfile > /dev/null 2>&1
+> +	local opt
+> +	if [ -n "$1" ];then
+> +		opt="-b $1"
+> +	fi
 
-xfs_io -c fsync perform fsync also on the writeback target file, which
-is needed for triggering the write fault.
+Doesn't this duplicate the assignment of @alignment above?
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+--D
 
-Zorro,
-
-Following your comment on v1, this version does not change the
-behavior of the test when running on non-overlayfs.
-
-I tested that this test passes for both xfs and overlayfs+xfs on v5.18
-and tested that both configs fail with the same warning on v5.10.109.
-
-Thanks,
-Amir.
-
- tests/generic/623 | 14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
-
-diff --git a/tests/generic/623 b/tests/generic/623
-index ea016d91..5971717c 100755
---- a/tests/generic/623
-+++ b/tests/generic/623
-@@ -24,10 +24,22 @@ _scratch_mount
- # XFS had a regression where it failed to check shutdown status in the fault
- # path. This produced an iomap warning because writeback failure clears Uptodate
- # status on the page.
-+
-+# For this test to run on overlayfs we open a different file to perform
-+# shutdown while keeping the writeback target file open.
-+# xfs_io -c fsync post-shutdown performs fsync also on the writeback target file,
-+# which is critical for trigerring the writeback failure.
-+shutdown_cmd=()
-+shutdown_handle="$(_scratch_shutdown_handle)"
-+if [ "$shutdown_handle" != "$SCRATCH_MNT" ];then
-+	shutdown_cmd+=("-c" "open $shutdown_handle")
-+fi
-+shutdown_cmd+=("-c" "shutdown")
-+
- file=$SCRATCH_MNT/file
- $XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
- ulimit -c 0
--$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
-+$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" "${shutdown_cmd[@]}" -c fsync \
- 	-c "mwrite 0 4k" $file | _filter_xfs_io
- 
- # success, all done
--- 
-2.25.1
-
+> +	$XFS_IO_PROG -F -f -d -c "pwrite $opt 0 20k" $testfile > /dev/null 2>&1
+>  	if [ $? -ne 0 ]; then
+> -		_notrun "O_DIRECT is not supported"
+> +		if [ -n "$alignment" ]; then
+> +			_notrun "O_DIRECT aligned to $1 bytes is not supported"
+> +		else
+> +			_notrun "O_DIRECT is not supported"
+> +		fi
+>  	fi
+>  	rm -f $testfile 2>&1 > /dev/null
+>  }
+> diff --git a/tests/generic/139 b/tests/generic/139
+> index 0bbc222c..3eb1519d 100755
+> --- a/tests/generic/139
+> +++ b/tests/generic/139
+> @@ -26,7 +26,7 @@ _cleanup()
+>  # real QA test starts here
+>  _require_test_reflink
+>  _require_cp_reflink
+> -_require_odirect
+> +_require_odirect 512
+>  
+>  testdir=$TEST_DIR/test-$seq
+>  rm -rf $testdir
+> -- 
+> 2.31.1
+> 
