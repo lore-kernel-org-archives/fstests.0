@@ -2,227 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C0DCEC433F5
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jun 2022 07:10:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76AFAC433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jun 2022 07:18:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350211AbiFAHKY (ORCPT
+        id S1350262AbiFAHSh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Jun 2022 03:10:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45452 "EHLO
+        Wed, 1 Jun 2022 03:18:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35708 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350192AbiFAHKY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Jun 2022 03:10:24 -0400
-Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D7E568FAC;
-        Wed,  1 Jun 2022 00:10:23 -0700 (PDT)
-Received: by mail-qt1-x82a.google.com with SMTP id 2so608369qtw.0;
-        Wed, 01 Jun 2022 00:10:23 -0700 (PDT)
+        with ESMTP id S1350274AbiFAHSd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Jun 2022 03:18:33 -0400
+Received: from mail-yw1-x114a.google.com (mail-yw1-x114a.google.com [IPv6:2607:f8b0:4864:20::114a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43A853BFA6
+        for <fstests@vger.kernel.org>; Wed,  1 Jun 2022 00:18:30 -0700 (PDT)
+Received: by mail-yw1-x114a.google.com with SMTP id 00721157ae682-30c1d90587dso8481387b3.14
+        for <fstests@vger.kernel.org>; Wed, 01 Jun 2022 00:18:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=dGEoCiBjGeK+iSAiWi2hfPbMDHcFN0l5vy+V883s2PM=;
-        b=jNelCeOLBLQEhS8ZEWe2B1V4bCpge+8JIHoibBDDt/dabsH3I1+PaVYYMiEtg3EeGS
-         5hnX8jmscGgd1JDZRNPgnnfS6NYgnWsjXR9VV+16idg8Sa+eweFNNPmjLrmGjUcuiDs/
-         bQDfp2ZdG05A48fiA8NwaQXRNOp7NyRk8R+4qZ0Ps/7S6zdjRdCV4j8930/56w7MEQcr
-         1159bNhJaEpSte+I4eGQL5KS7yN1+Tv13taB8sPXWznNcr2l2+40ayyhJnQncRWCXKkQ
-         sPwV9zf2/cKKrXYLqsNw5mf7SqxWtU+t9bc1lKWgcFJrYsX/Xms7Yo015+1+NQNYk7fr
-         yuPA==
+        d=google.com; s=20210112;
+        h=date:message-id:mime-version:subject:from:to:cc;
+        bh=njWOh6xIF8JInl46Oy3mwRCy83f2wUQMvRE0/nlRIWw=;
+        b=ASBtyGuRi0uJdgg3X/I9/B4iNISBpM0ojz6F3WXYjiqvgmOuuqXxIIdTS+T5u4eFe0
+         W9dcJRfjoltRIdiBqTWHYfs+T34BsmVXTq4/O2bzTw1oei99/OzO9/5S9jtzyadC1c5f
+         1qt0OOGYjdbG8nESIBLSdZ5AfsrBLc4v34ItcpuFpPhmwZvwzY0EOhOyv9OBlliX1shs
+         LZpzD4el2ds86FaHITNAvs+cZH9gGZiWeCx4BQlkdOF4R/+NfdUrFyIWR2WMEOw/liKg
+         NBX6Xk7cs7bY/tMPzW+tI8LICzgIORtZgYGdIN7ivYs0BLdrs73NzCU8KrlHkxo4cS9u
+         L1Bw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=dGEoCiBjGeK+iSAiWi2hfPbMDHcFN0l5vy+V883s2PM=;
-        b=oumUlhmICgCLvrL35GEVQNLlwLpVdsnFFIwV+S1BeHnt+aSiV2HOcqEYopbmdiXC2X
-         mH4Tvmxz+wM5d0uBGULSWG5DOJ2REqBnQeq3pL+iGY4smIB9lNdcqgVOoHIrPWK2yqiZ
-         QF20clEmE31oHM4adI8+jtJ6AfLp5IA6AAeWPNQ8IauexwTkVkRtr8w0lMS8fHN+YJw+
-         7BbJzAEnBGIJgykB20h4bBWx4Z64ayXfkxj+Hp1c1TWQUOs/vRB1gZEm7AtHB5rWgvC6
-         4oBn7nK1xJEVvNhdLSyA1OOUl8X3V+VbemZ0z974E+pGC114lqUazFXZceULsxwQYEgN
-         ZuKQ==
-X-Gm-Message-State: AOAM530khHvA7xCdeERBmAK+WhYDgBx4RFgTCQueywzydZyBO4OyjN4m
-        qODyuQiIqT55RRtxgynXrAN3ikGxFjbauOg/4HSMdC5Q2gkRGQ==
-X-Google-Smtp-Source: ABdhPJyhe+ffz0K7Vnbbyus3tglZD3FoRDFMsYA6YzN/mwMV7/dcC++vbqFntzPv5f3eBJn78fLZ4uwcTyifaxbdrX8=
-X-Received: by 2002:ac8:5f09:0:b0:304:c31d:163e with SMTP id
- x9-20020ac85f09000000b00304c31d163emr2022871qta.2.1654067422465; Wed, 01 Jun
- 2022 00:10:22 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220525111715.2769700-1-amir73il@gmail.com> <YpBqfdmwQ675m72G@infradead.org>
- <CAOQ4uxjek9331geZGVbVT=gqkNTyVA_vjyjuB=2eGZD-ufeqNQ@mail.gmail.com>
- <20220527090838.GD3923443@dread.disaster.area> <CAOQ4uxgc9Zu0rvTY3oOqycGG+MoYEL3-+qghm9_qEn67D8OukA@mail.gmail.com>
- <YpDw3uVFB7LjPquX@bombadil.infradead.org> <20220527234202.GF3923443@dread.disaster.area>
- <CAOQ4uxgYoK=mE=Fpt8BizgHxXmgajCk=t2k6nzHb2mM=C-HvAg@mail.gmail.com> <20220601043100.GD227878@dread.disaster.area>
-In-Reply-To: <20220601043100.GD227878@dread.disaster.area>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 1 Jun 2022 10:10:11 +0300
-Message-ID: <CAOQ4uxgVTFjWrkpOMOTJ+dKu-YiwPi3dazrePzTzd-g6Tx1JQA@mail.gmail.com>
-Subject: Re: [PATH 5.10 0/4] xfs stable candidate patches for 5.10.y (part 1)
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Christoph Hellwig <hch@infradead.org>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        "Theodore Ts'o" <tytso@mit.edu>,
-        Adam Manzanares <a.manzanares@samsung.com>,
-        Tyler Hicks <code@tyhicks.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
+        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
+        bh=njWOh6xIF8JInl46Oy3mwRCy83f2wUQMvRE0/nlRIWw=;
+        b=F5Vcci6+havkufRv0hRA+MjTJuYoDJMpTMF0qtI2fdjZTrRkhhpaj4rlfBK3CaU/W1
+         0n8Vb5PvwKP3/OUyS9MxFmi45Mteipkw32pyIrYftoJykAABEIudDym7qUpZZkSYQsAe
+         dddshiMa4d2C7yF0d/dLomwe8UR845W1SrGnLOU//585TjaLVvgGE2PS6TnMLLAmzpxP
+         mTpbIpbvF6qQ9v++pVaRUvJvqIUF9Bs0a1rKtfoGKkVeLTtjwDQULaoGtXEiAWF0tTvl
+         t9o7YWlAYIcaU+2j1670xvYRozTMn6IoaEdfKbOPHejLaG/WrUYos5sfbCBPnr41JlYS
+         CP/g==
+X-Gm-Message-State: AOAM533ZwG9Svzu8y0ZQBD/1eCg6gzA6/0TXM3029rXLZLGVjlsn92ob
+        LnhjC2nxBe019fwXO/NhVvTChTtGoF5z23scePymRtD5wRJjxtDEW0dfNH0PK+3S42elA4bNzGd
+        MUXHU9JVRV9xfOhQGwtN/ZnlcFkbymV/dntAteIyiem+dmZkAg9lTJUlw3k5A
+X-Google-Smtp-Source: ABdhPJxDWkMZPTrv0lRCxwnetBUmWZi+WfdvM5H5mWyEUZd7TwYJbx1iHI/GxahicakNXnVXEH56UT5jQw==
+X-Received: from nhuck.c.googlers.com ([fda3:e722:ac3:cc00:14:4d90:c0a8:39cc])
+ (user=nhuck job=sendgmr) by 2002:a5b:a05:0:b0:652:493a:b35 with SMTP id
+ k5-20020a5b0a05000000b00652493a0b35mr40038803ybq.286.1654067909397; Wed, 01
+ Jun 2022 00:18:29 -0700 (PDT)
+Date:   Wed,  1 Jun 2022 00:18:09 -0700
+Message-Id: <20220601071811.1353635-1-nhuck@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.36.1.255.ge46751e96f-goog
+Subject: [RFC PATCH v4 0/2] generic: test HCTR2 filename encryption
+From:   Nathan Huckleberry <nhuck@google.com>
+To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
+Cc:     Eric Biggers <ebiggers@kernel.org>,
+        Sami Tolvanen <samitolvanen@google.com>,
+        Nathan Huckleberry <nhuck@google.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 1, 2022 at 7:31 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Sat, May 28, 2022 at 08:00:48AM +0300, Amir Goldstein wrote:
-> > On Sat, May 28, 2022 at 2:42 AM Dave Chinner <david@fromorbit.com> wrote:
-> > >
-> > > On Fri, May 27, 2022 at 08:40:14AM -0700, Luis Chamberlain wrote:
-> > > > On Fri, May 27, 2022 at 03:24:02PM +0300, Amir Goldstein wrote:
-> > > > > On Fri, May 27, 2022 at 12:08 PM Dave Chinner <david@fromorbit.com> wrote:
-> > > > > > Backport candidate: yes. Severe: absolutely not.
-> > > > > In the future, if you are writing a cover letter for an improvement
-> > > > > series or internal pull request and you know there is a backport
-> > > > > candidate inside, if you happen to remember to mention it, it would
-> > > > > be of great help to me.
-> > >
-> > > That's what "fixes" and "cc: stable" tags in the commit itself are
-> > > for, not the cover letter.
-> >
-> > Cover letter is an overview of the work.
-> > A good cover letter includes an overview of the individual patches
-> > in the context of the whole work as your cover letter did:
-> >
-> > Summary of series:
-> >
-> > Patches Modifications
-> > ------- -------------
-> > 1-7: log write FUA/FLUSH optimisations
-> > 8: bug fix
-> > 9-11: Async CIL pushes
-> > 12-25: xlog_write() rework
-> > 26-39: CIL commit scalability
-> >
-> > So it was lapse of judgement on my part or carelessness that made me
-> > eliminate the series without noting patch #8.
-> >
-> > Furthermore, the subject of the patch has Fix and trailer has
-> > Reported-and-tested-by:
-> > so auto candidate selection would have picked it up easily, but my scripts
-> > only looked for the obvious Fixes: tag inside the eliminated series, so that
-> > is a problem with my process that I need to improve.
-> >
-> > So the blame is entirely on me! not on you!
->
-> I can feel a "But..." is about to arrive....
->
-> > And yet.
-> > "bug fix"?
-> > Really?
->
-> ... and there's the passive-aggressive blame-shift.
->
+This patchset is not intended to be accepted yet.  It is reliant on HCTR2
+support in the kernel which has not yet been accepted.  See the HCTR2 patchset
+here: https://lore.kernel.org/all/20220520181501.2159644-1-nhuck@google.com/
 
-Not very passive ;)
+HCTR2 is a new wide-block encryption mode that can used for filename encryption
+in fscrypt.  This patchset adds a reference implementation of HCTR2 to the
+fscrypt testing utility and adds tests for filename encryption with HCTR2.
 
-> As you just said yourself, all the information you required was in
-> both the cover letter and the patch, but you missed them both. You
-> also missed the other 3 times this patch was posted to the list,
-> too. Hence even if that cover letter said "patch 8: CIL log space
-> overrun bug fix", it wouldn't have made any difference because of
-> the process failures on your side.
->
+More information on HCTR2 can be found here: "Length-preserving encryption with
+HCTR2": https://ia.cr/2021/1441
 
-That's fair.
+Changes in v4:
+* Add helper functions for HCTR2 hashing
+* Fix accumulator alignment bug
+* Small style fixes
 
-> So what's the point you're trying to make with this comment? What is
-> the problem it demonstrates that we need to address? We can't be
-> much more explicit than "patch X is a bug fix" in a cover letter, so
-> what are you expecting us to do differently?
->
+Changes in v3:
+* Consolidate tests into one file
 
-It is a bit hard for me to express my expectations in technical terms,
-because you are right - you did provide all the information.
+Changes in v2:
+* Use POLYVAL multiplication directly instead of using GHASH trick
+* Split reference implementation and tests into two patches
+* Remove v1 policy tests
+* Various small style fixes
 
-At a very high level, I would very much like the authors of patches
-and cover letters to consider the people working on backports
-when they are describing their work.
+Nathan Huckleberry (2):
+  fscrypt-crypt-util: add HCTR2 implementation
+  generic: add tests for fscrypt policies with HCTR2
 
-There are many people working on backports on every major
-company/distro so I think I am not alone in this request.
+ common/encrypt           |   2 +
+ src/fscrypt-crypt-util.c | 341 ++++++++++++++++++++++++++++++++-------
+ tests/generic/900        |  28 ++++
+ tests/generic/900.out    |  16 ++
+ 4 files changed, 330 insertions(+), 57 deletions(-)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
 
-The best I can do is point to an example patch set that
-I eliminated from back port for being a "rework" and where it
-was made very clear that the patch set contains an independent bug fix:
-https://lore.kernel.org/all/20210121154526.1852176-1-bfoster@redhat.com/
+-- 
+2.36.1.255.ge46751e96f-goog
 
-> > I may not have been expecting more of other developers.
-> > But I consider you to be one of the best when it comes to analyzing and
-> > documenting complex and subtle code, so forgive me for expecting more.
->
-> That's not very fair.  If you are going to hold me to a high bar,
-> then you need to hold everyone to that same high bar.....
->
-
-Holding everyone to your standards is not going to be easy,
-but I will try :)
-
-> > It makes me sad that you are being defensive about this, because I wish
->
-> .... because people tend to get defensive when they feel like they
-> are being singled out repeatedly for things that nobody else is
-> getting called out for.
->
-
-I am sorry that I made you feel this way.
-
-The trigger for this thread was a patch that I missed.
-Doing the post mortem, I was raising the postulate [with a (?)]
-that the author (who happened to be you) was not considering
-the bug to be severe, which you had later confirmed.
-
-After that, the conversation just escalated for the wrong reasons.
-I was trying to make a general plea for more consideration in
-the people that do backporting work and it came out wrong as
-an attack on you. I need to watch my phrasing more carefully.
-
-I sincerely apologize. It was not my intention at all.
-I hope we can move past this and avoid clashes in the future.
-
-Moving on...
-
-I was thinking later that there is another point of failure in the
-backport process that is demonstrated in this incident -
-An elephant in the room even -
-We have no *standard* way to mark a patch as a bug fix,
-so everyone is using their own scripts and regex magic.
-
-Fixes: is a standard that works, but it does not apply in many
-cases, for example:
-
-1. Zero day (some mark those as Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2"))
-2. Hard work to figure out the fix commit
-3. Discourage AUTOSEL
-
-I am not sure if the patch in question was not annotated with Fixes:
-for one or more of the above(?).
-
-Regarding AUTOSEL, I hope this is not a problem anymore, because
-AUTOSEL has been told to stay away from xfs code for a while now.
-
-Regarding Zero day, I think this is a common case that deserves
-attention by annotation.
-
-Any annotation along the lines of Fixes: ????/0000
-could cover cases #1 and #2 and may work with some existing auto
-selection scripts without having to change them.
-
-Granted, it may also break some existing script by making them
-unselect a fix for a commit they cannot find.
-
-Maybe instead of annotating what the fix fixes, annotation could
-be somehow related to how the bug was detected, on which version,
-with which test? not reproducible?
-
-Thoughts?
-
-Thanks,
-Amir.
