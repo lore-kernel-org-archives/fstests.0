@@ -2,83 +2,125 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED77CC43334
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jun 2022 00:38:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C26DAC43334
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jun 2022 00:51:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232790AbiFBAiM (ORCPT
+        id S232858AbiFBAvO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Jun 2022 20:38:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46990 "EHLO
+        Wed, 1 Jun 2022 20:51:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232786AbiFBAiL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Jun 2022 20:38:11 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E223C17067A;
-        Wed,  1 Jun 2022 17:38:09 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id D2B1D5EC4A9;
-        Thu,  2 Jun 2022 10:38:06 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nwYqi-001bCC-VB; Thu, 02 Jun 2022 10:38:04 +1000
-Date:   Thu, 2 Jun 2022 10:38:04 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     "Darrick J . Wong" <djwong@kernel.org>,
-        Brian Foster <bfoster@redhat.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Adam Manzanares <a.manzanares@samsung.com>,
-        Tyler Hicks <code@tyhicks.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 5.10 CANDIDATE 7/8] xfs: consider shutdown in bmapbt
- cursor delete assert
-Message-ID: <20220602003804.GJ227878@dread.disaster.area>
-References: <20220601104547.260949-1-amir73il@gmail.com>
- <20220601104547.260949-8-amir73il@gmail.com>
+        with ESMTP id S232856AbiFBAvN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Jun 2022 20:51:13 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67EE9227199
+        for <fstests@vger.kernel.org>; Wed,  1 Jun 2022 17:51:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 25839B81BA5
+        for <fstests@vger.kernel.org>; Thu,  2 Jun 2022 00:51:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C624EC385A5;
+        Thu,  2 Jun 2022 00:51:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1654131069;
+        bh=lHpo97yc9no/XvHsvbVZvWQz3DnC6u8QJBNU7onuY2g=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=QqXey1XxmM6bYPRSekZ390jbY+icjt2q9KUC+jN349W8kizzIAjGJJc7b7/BWpPu3
+         oJ8wkV1GjUZG406H5TMpGVe31CEKwiaQVFHE5MB+m3JxN4w30AE+1MXCFFA5cVr8nT
+         104t6rPhF6k2U27AgWynD4VIjp3yEeOR7hmgUvj5I0fYCLmDef+kOjzK0/6eDf8qF0
+         Lmb9TIeSCwASbP5DGTq02ki3u1TELNft9UBcRiCFjA5Nagcfe2V1b0V3RiE0+ZxlPi
+         ldF40hQ9D7UXViqw39WQR3dKSx+oTkflh6VJithrjdJcqmglwZZ6ptubuk4FuHR7rJ
+         qqD3AL7abjGXA==
+Date:   Wed, 1 Jun 2022 17:51:09 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 2/8] README: document _begin_fstests better
+Message-ID: <YpgJfbkaZJjA3EhZ@magnolia>
+References: <20220602003126.2903779-1-david@fromorbit.com>
+ <20220602003126.2903779-3-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220601104547.260949-8-amir73il@gmail.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62980671
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=20KFwNOVAAAA:8 a=VwQbUJbxAAAA:8
-        a=pGLkceISAAAA:8 a=7-415B0cAAAA:8 a=0fdg2fwtu5Mcqw8XrEgA:9
-        a=CjuIK1q_8ugA:10 a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <20220602003126.2903779-3-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 01, 2022 at 01:45:46PM +0300, Amir Goldstein wrote:
-> From: Brian Foster <bfoster@redhat.com>
+On Thu, Jun 02, 2022 at 10:31:20AM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
 > 
-> commit 1cd738b13ae9b29e03d6149f0246c61f76e81fcf upstream.
+> Because how it actually gets used by the fstests infrastructure
+> has been undocumented and that has impact on how it should be set
+> up.
 > 
-> The assert in xfs_btree_del_cursor() checks that the bmapbt block
-> allocation field has been handled correctly before the cursor is
-> freed. This field is used for accurate calculation of indirect block
-> reservation requirements (for delayed allocations), for example.
-> generic/019 reproduces a scenario where this assert fails because
-> the filesystem has shutdown while in the middle of a bmbt record
-> insertion. This occurs after a bmbt block has been allocated via the
-> cursor but before the higher level bmap function (i.e.
-> xfs_bmap_add_extent_hole_real()) completes and resets the field.
-> 
-> Update the assert to accommodate the transient state if the
-> filesystem has shutdown. While here, clean up the indentation and
-> comments in the function.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+
+Looks good,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
 > ---
->  fs/xfs/libxfs/xfs_btree.c | 33 ++++++++++++---------------------
->  1 file changed, 12 insertions(+), 21 deletions(-)
-
-https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/commit/?h=for-next&id=56486f307100e8fc66efa2ebd8a71941fa10bf6f
-
--- 
-Dave Chinner
-david@fromorbit.com
+>  README | 40 +++++++++++++++++++++++++++++++---------
+>  1 file changed, 31 insertions(+), 9 deletions(-)
+> 
+> diff --git a/README b/README
+> index 7da66cb6..80d148be 100644
+> --- a/README
+> +++ b/README
+> @@ -368,19 +368,41 @@ Test script environment:
+>  
+>       6. Test group membership: Each test can be associated with any number
+>  	of groups for convenient selection of subsets of tests.  Group names
+> -	can be any sequence of non-whitespace characters.  Test authors
+> -	associate a test with groups by passing the names of those groups as
+> -	arguments to the _begin_fstest function.  For example, the code:
+> +	must  be human readable using only characters in the set [:alnum:_-].
+>  
+> -	_begin_fstest auto quick subvol snapshot
+> +	Test authors associate a test with groups by passing the names of those
+> +	groups as arguments to the _begin_fstest function. While _begin_fstests
+> +	is a shell function that must be called at the start of a test to
+> +	initialise the test environment correctly, the the build infrastructure
+> +	also scans the test files for _begin_fstests invocations. It does this
+> +	to compile the group lists that are used to determine which tests to run
+> +	when `check` is executed. In other words, test files files must call
+> +	_begin_fstest with their intended groups or they will not be run.
+> +
+> +	However, because the build infrastructure also uses _begin_fstests as
+> +	a defined keyword, addition restrictions are placed on how it must be
+> +	formatted:
+> +
+> +	(a) It must be a single line with no multi-line continuations.
+> +
+> +	(b) group names should be separated by spaces and not other whitespace
+> +
+> +	(c) A '#' placed anywhere in the list, even in the middle of a group
+> +	    name, will cause everything from the # to the end of the line to be
+> +	    ignored.
+> +
+> +	For example, the code:
+> +
+> +	_begin_fstest auto quick subvol snapshot # metadata
+>  
+>  	associates the current test with the "auto", "quick", "subvol", and
+> -	"snapshot" groups.  It is not necessary to specify the "all" group
+> -	in the list because that group is computed at run time.
+> +	"snapshot" groups. Because "metadata" is after the "#" comment
+> +	delimiter, it is ignored by the build infrastructure and so it will not
+> +	be associated with that group.
+> +
+> +	It is not necessary to specify the "all" group in the list because that
+> +	group is always computed at run time from the group lists.
+>  
+> -	The build process scans test files for _begin_fstest invocations and
+> -	compiles the group list from that information.  In other words, test
+> -	files must call _begin_fstest or they will not be run.
+>  
+>  Verified output:
+>  
+> -- 
+> 2.35.1
+> 
