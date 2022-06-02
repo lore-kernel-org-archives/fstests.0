@@ -2,53 +2,75 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DB54C43334
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jun 2022 12:07:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CC39CCA478
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jun 2022 15:21:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234872AbiFBMH6 (ORCPT
+        id S233295AbiFBPVY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Jun 2022 08:07:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40400 "EHLO
+        Thu, 2 Jun 2022 11:21:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234003AbiFBMHy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Jun 2022 08:07:54 -0400
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 196DA20043F;
-        Thu,  2 Jun 2022 05:07:47 -0700 (PDT)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 3D0D768AFE; Thu,  2 Jun 2022 14:07:44 +0200 (CEST)
-Date:   Thu, 2 Jun 2022 14:07:43 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     Filipe Manana <fdmanana@kernel.org>
-Cc:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 8/9] btrfs: test repair with sectors corrupted in
- multiple mirrors
-Message-ID: <20220602120743.GA27700@lst.de>
-References: <20220524071838.715013-1-hch@lst.de> <20220524071838.715013-9-hch@lst.de> <20220602113056.GA3347231@falcondesktop>
+        with ESMTP id S229899AbiFBPVX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Jun 2022 11:21:23 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A5112A5515;
+        Thu,  2 Jun 2022 08:21:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Type:MIME-Version:
+        Message-ID:Subject:Cc:To:From:Date:Reply-To:Content-Transfer-Encoding:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=JIw8aKjJnDAUMfW/ZoAS3ykhzT+7C9tK1kg2A9Q7aFE=; b=dYtKQhtFUXzYAr4tHRCc7eIobY
+        OqE7Yfif70F45glOPSt41CFw8FgQ2zhaeZ3A/xgayBzLDgf+ROvjy8kRRwlJaAYsMz/YEwBiWD/sB
+        ZrLliJldX1+hlCnicbZof+iHBL23JEPGsqhvZhH5j4CUn5DYwW1ul0zhElxLUFKBwFL6NBGvCAmZF
+        4CBDk8rDX9m4nRfBovQRJQN8n18btfznjKeXOG8KfT0WtgyAqS75TbN/w1hhD4EdZtpBz3pzvSIkZ
+        AoSEugHfWhTAQKEYwcckFIspB8DdPsM8Ku00B6z52MznXh+xLsicwOMlmM26FQZcLmxAgCjaiozEF
+        P0lBVFRA==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1nwmdU-003gSj-6r; Thu, 02 Jun 2022 15:21:20 +0000
+Date:   Thu, 2 Jun 2022 08:21:20 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>,
+        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Amir Goldstein <amir73il@gmail.com>, pankydev8@gmail.com,
+        Josef Bacik <josef@toxicpanda.com>,
+        Theodore Tso <tytso@mit.edu>,
+        Davidlohr Bueso <dave@stgolabs.net>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Javier Gonzalez <javier.gonz@samsung.com>,
+        a.manzanares@samsung.com, Tyler Hicks <code@tyhicks.com>,
+        Leah Rumancik <lrumancik@google.com>,
+        Klaus Jensen <its@irrelevant.dk>,
+        Zorro Lang <zlang@redhat.com>, shirley.ma@oracle.com,
+        chandan.babu@oracle.com, konrad.wilk@oracle.com, mcgrof@kernel.org
+Subject: [ANN] Discord server for testing Linux with kdevops
+Message-ID: <YpjVcHuxhEQwPusN@bombadil.infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220602113056.GA3347231@falcondesktop>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 02, 2022 at 12:30:56PM +0100, Filipe Manana wrote:
-> On Tue, May 24, 2022 at 09:18:37AM +0200, Christoph Hellwig wrote:
-> > Test that repair handles the case where it needs to read from more than
-> > a single mirror on the raid1c3 profile.
-> 
-> The test currently fails (at least on current misc-next branch), as the
-> repair does not happen, see below. Is it a bug in the repair code for
-> raid1c3 (I haven't checked)?
+I've setup a discord server for general discussions around Linux
+kernel testing with kdevops. This should help with coordination
+around kdevops in an accessible way for:
 
-Yes, it only repairs the previously bad copy and doesn't propagate
-the repair.
+  * The shared kdevops repository and dependent trees on the linux-kdevops
+    organization: https://github.com/linux-kdevops/
+  * Sharing of expunges for fstests / blktests for different
+    filesystems / configuration / kernel releases
+  * Shared hardware resources such as the public Super Micro bigtwin server
+    currently used to help test fstests and blktests
+  * Future potential shared cloud credits
+  * Streamlining reports for new issues found on stable kernels or
+    Linus's tree or linux-next
+  * Storing / sharing test failure artifacts
 
-> Also why only raid1c3 coverage and not raid1c4 as well?
+The discord server:
 
-Because I've really wanted any coverage at all for mutiple mirror
-repair operations.  raid1c4 is probably useful to test, but won't
-increase the coverage of the read repair code much.
+https://discord.gg/pWgZZhRp
+
+  Luis
