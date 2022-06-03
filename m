@@ -2,114 +2,264 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8460EC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jun 2022 07:44:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F912C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jun 2022 08:03:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235498AbiFCHoF (ORCPT
+        id S241371AbiFCIDl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Jun 2022 03:44:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52520 "EHLO
+        Fri, 3 Jun 2022 04:03:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238457AbiFCHoD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jun 2022 03:44:03 -0400
+        with ESMTP id S239994AbiFCIDk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jun 2022 04:03:40 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7938038B1
-        for <fstests@vger.kernel.org>; Fri,  3 Jun 2022 00:44:02 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 1A68B7663
+        for <fstests@vger.kernel.org>; Fri,  3 Jun 2022 01:03:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1654242241;
+        s=mimecast20190719; t=1654243418;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=3NFR17KqSiA1Cv/9OF/SD8mUQpa5Kr1/3JIDc75JsUk=;
-        b=EvtZpfQqdRpxEl/+CXH/lUJelg0hjFBvUBkrGDxtuClucQFGjfB4w61plN9+BPMIr4XR6B
-        NfS38JsxUTn15LcIUUKmzjzvs1i4n+3f1u7Q/azb0jGQ4V6r2YUqGUgeJvuxZAQCwWlbsZ
-        Ue3mKas3EwpsFMoVQpYBkwT5hfPvXRM=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=FWW3ivYUjChU0NYDe6xjTszI5q/b919uaZhsyAe5Fh0=;
+        b=BlsBu4dtIfZwc3fpNrnhHtWi4uymt2kEWpZOvCzDMNWK6kSM9JtI6sCmvPtUcfx6p1u2l/
+        fwMWGtVTtGxnlIxrUJob5mq3bKlPkMpj5t7XC1ol/pUmqHz28v6+sbECrn/j/6W/fr32QR
+        0868YEAxSDhdz9ZwiElm+dJaqigAhOY=
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
+ [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-443-VTROs3x6Nly5YFfXa7ZtGg-1; Fri, 03 Jun 2022 03:41:03 -0400
-X-MC-Unique: VTROs3x6Nly5YFfXa7ZtGg-1
-Received: by mail-qt1-f197.google.com with SMTP id l20-20020ac81494000000b002f91203eeacso5352811qtj.10
-        for <fstests@vger.kernel.org>; Fri, 03 Jun 2022 00:41:03 -0700 (PDT)
+ us-mta-139-xMYwxowoOsSeDeSN7_mNHQ-1; Fri, 03 Jun 2022 04:03:37 -0400
+X-MC-Unique: xMYwxowoOsSeDeSN7_mNHQ-1
+Received: by mail-qt1-f198.google.com with SMTP id d13-20020ac85acd000000b002f3be21793dso5376435qtd.12
+        for <fstests@vger.kernel.org>; Fri, 03 Jun 2022 01:03:37 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=3NFR17KqSiA1Cv/9OF/SD8mUQpa5Kr1/3JIDc75JsUk=;
-        b=PZ1gHCd2vt1n1UKCmpHwN/E0QhAefYf68wlpUd5h0ptmmRkcZ7BJ7yUxJi4xrAs3NJ
-         BjBCaXnn1ytL024Lj8NIZnnus3Ios2liBgqr6oD8r/GAf/6s6WdY3EQbMMF/T+Qm7CTi
-         5VWMCR27++eq9tg6lisPFRD++TszatC3TSms7Hpjd6yQM9x+QdIDG04MqcAiUPoYzbuk
-         Jakodw556eIdEuzJr9Tq9fHfAVz1bonHNCeCWYfUkPZ9Cp4SWJ7tEQZO4/wHeY0k5Exy
-         coOUes9Nbd1clsj4PNswAcP/I1BJ/NkK1THnHmWn17pB6MphpNNyagHsYbKeKgIvxkLx
-         8ENg==
-X-Gm-Message-State: AOAM533HcmdN5/IFpPXVkg/iMeY9G8OVTehkB/FbWOjnx1BiISorUNtl
-        QL4WCT0aZi+vQPS2uRDs8gwTW2f8pG7jkxUzBTvfYNx2SRYqbH9bGiRH3ztNrkdMqX21lCOPNp7
-        y8jw57rFIU/40w+90DQ==
-X-Received: by 2002:a37:2fc4:0:b0:6a6:494e:475d with SMTP id v187-20020a372fc4000000b006a6494e475dmr5934583qkh.102.1654242063291;
-        Fri, 03 Jun 2022 00:41:03 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwd+761mLalCzth1wMYYZ/8jeGqiIQL3PL5SrqyGa2xf7m+maJqg+W2BR4hynzRsE6pv5DcOw==
-X-Received: by 2002:a37:2fc4:0:b0:6a6:494e:475d with SMTP id v187-20020a372fc4000000b006a6494e475dmr5934575qkh.102.1654242062972;
-        Fri, 03 Jun 2022 00:41:02 -0700 (PDT)
+        bh=FWW3ivYUjChU0NYDe6xjTszI5q/b919uaZhsyAe5Fh0=;
+        b=deWblekb8lVBKbI6nBkaRB0NyBeToYazLzCk2bimZHBKwPJNxNuukdOXAi6atO/xMb
+         E9khi91RN09bRwL7ZaJJGEJUo2QPA2IMBu+JMBxEcjkTqvHxi2J/S/89ssGPvZza3GyK
+         hvnCkIScht7VnOArD3zKkx4wniCVAJ4QgbPLXga+PLvE1xuFUjSWhvGqnJV5EavT/r4X
+         baUB9aDmPymSg0b0HDV8uCNy3Dq+i3Tk8UwHDT0M4j9D6gWPdwPhobbWkH1rlSGDBMAk
+         WBmfhFRvVUjDSwLA8SCsbt4PvsBcf2cMwIpiVLUZf5FckEv9aGyRMI+PPBgG4xQKNRNh
+         koww==
+X-Gm-Message-State: AOAM532VSuQE6bBndAWQO6BMcJ6XlSZagtmStEDQCBLvZKtnX2JFZpde
+        nvzJNA38+udG+I/NexU32v5fZGil8+woO/F3MPcH0ChnRDee7vqCDPy56R7iAItANo8q6D72HRl
+        Vvp7Q1ZaT+e5742IqtA==
+X-Received: by 2002:a05:620a:244e:b0:6a0:49a5:f409 with SMTP id h14-20020a05620a244e00b006a049a5f409mr5715265qkn.750.1654243416134;
+        Fri, 03 Jun 2022 01:03:36 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxzVymv8ywHtG3lmOJ6RkehIvUi2cOkNF7oKzzz6sruz2BhyzKpMUZH/0TOcTj5LPA9pakjrw==
+X-Received: by 2002:a05:620a:244e:b0:6a0:49a5:f409 with SMTP id h14-20020a05620a244e00b006a049a5f409mr5715253qkn.750.1654243415835;
+        Fri, 03 Jun 2022 01:03:35 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id n12-20020a05622a11cc00b003022cdcd28bsm4586450qtk.2.2022.06.03.00.41.00
+        by smtp.gmail.com with ESMTPSA id bm38-20020a05620a19a600b006a6941cc9e5sm1369059qkb.42.2022.06.03.01.03.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 03 Jun 2022 00:41:02 -0700 (PDT)
-Date:   Fri, 3 Jun 2022 15:40:57 +0800
+        Fri, 03 Jun 2022 01:03:35 -0700 (PDT)
+Date:   Fri, 3 Jun 2022 16:03:29 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v2] ext4/053: update the test_dummy_encryption tests
-Message-ID: <20220603074057.5l63o3opgouczueb@zlang-mailbox>
-References: <20220530173044.156375-1-ebiggers@kernel.org>
- <20220603053143.ud42tcsxrdkr3mj2@zlang-mailbox>
- <YpmgrJHnrMR8BcOG@sol.localdomain>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: corrupted xattr should not block removexattr
+Message-ID: <20220603080329.v2nxz6fzmnvzz2v5@zlang-mailbox>
+References: <20220528094715.309876-1-zlang@kernel.org>
+ <Ypjm1WbL/Mu7hBUQ@magnolia>
+ <20220602190635.yvxqu6ubquragt7x@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YpmgrJHnrMR8BcOG@sol.localdomain>
+In-Reply-To: <20220602190635.yvxqu6ubquragt7x@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 02, 2022 at 10:48:28PM -0700, Eric Biggers wrote:
-> On Fri, Jun 03, 2022 at 01:31:43PM +0800, Zorro Lang wrote:
-> > On Mon, May 30, 2022 at 10:30:44AM -0700, Eric Biggers wrote:
-> > > From: Eric Biggers <ebiggers@google.com>
+On Fri, Jun 03, 2022 at 03:06:35AM +0800, Zorro Lang wrote:
+> On Thu, Jun 02, 2022 at 09:35:33AM -0700, Darrick J. Wong wrote:
+> > On Sat, May 28, 2022 at 05:47:15PM +0800, Zorro Lang wrote:
+> > > After we corrupted an attr leaf block (under node block), getxattr
+> > > might hit EFSCORRUPTED in xfs_attr_node_get when it does
+> > > xfs_attr_node_hasname. A known bug cause xfs_attr_node_get won't do
+> > > xfs_buf_trans release job, then a subsequent removexattr will hang.
 > > > 
-> > > Kernel commit 5f41fdaea63d ("ext4: only allow test_dummy_encryption when
-> > > supported") tightened the requirements on when the test_dummy_encryption
-> > > mount option is accepted.  Update ext4/053 accordingly.
+> > > This case covers a1de97fe296c ("xfs: Fix the free logic of state in
+> > > xfs_attr_node_hasname")
 > > > 
-> > > Move the test cases to later in the file to group them with the other
-> > > test cases that use do_mkfs to add custom mkfs options instead of using
-> > > the "default" filesystem that the test creates at the beginning.
-> > > 
-> > > Reviewed-by: Lukas Czerner <lczerner@redhat.com>
-> > > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
 > > > ---
 > > > 
-> > > v2: mention the commit ID now that it is merged, and add a Reviewed-by
+> > > Hi,
+> > > 
+> > > It's been long time past, since Yang Xu tried to cover a regression bug
+> > > by changing xfs/126 (be Nacked):
+> > > https://lore.kernel.org/fstests/1642407736-3898-1-git-send-email-xuyang2018.jy@fujitsu.com/
+> > > 
+> > > As we (Red Hat) need to cover this regression issue too, and have waited so
+> > > long time. I think no one is doing this job now, so I'm trying to write a new one
+> > > case to cover it. If Yang has completed his test case but forgot to send out,
+> > > feel free to tell me :)
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > >  tests/xfs/999     | 80 +++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/xfs/999.out |  2 ++
+> > >  2 files changed, 82 insertions(+)
+> > >  create mode 100755 tests/xfs/999
+> > >  create mode 100644 tests/xfs/999.out
+> > > 
+> > > diff --git a/tests/xfs/999 b/tests/xfs/999
+> > > new file mode 100755
+> > > index 00000000..65d99883
+> > > --- /dev/null
+> > > +++ b/tests/xfs/999
+> > > @@ -0,0 +1,80 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 999
+> > > +#
+> > > +# This's a regression test for:
+> > > +#   a1de97fe296c ("xfs: Fix the free logic of state in xfs_attr_node_hasname")
+> > > +#
+> > > +# After we corrupted an attr leaf block (under node block), getxattr might hit
+> > > +# EFSCORRUPTED in xfs_attr_node_get when it does xfs_attr_node_hasname. A bug
+> > > +# cause xfs_attr_node_get won't do xfs_buf_trans release job, then a subsequent
+> > > +# removexattr will hang.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick attr
+> > > +
+> > > +# Import common functions.
+> > > +. ./common/filter
+> > > +. ./common/attr
+> > > +. ./common/populate
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs xfs
+> > > +_fixed_by_kernel_commit a1de97fe296c \
+> > > +       "xfs: Fix the free logic of state in xfs_attr_node_hasname"
+> > > +
+> > > +_require_scratch_nocheck
+> > > +# Only test with v5 xfs on-disk format
+> > > +_require_scratch_xfs_crc
+> > > +_require_attrs
+> > > +_require_populate_commands
+> > > +_require_xfs_db_blocktrash_z_command
+> > > +
+> > > +_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+> > > +source $tmp.mkfs
+> > > +_scratch_mount
+> > > +
+> > > +# This case will use 10 bytes xattr namelen and 11+ bytes valuelen, so:
+> > > +#   sizeof(xfs_attr_leaf_name_local) = 2 + 1 + 10 + 11 = 24,
+> > > +#   sizeof(xfs_attr_leaf_entry) = 8
+> > > +# So count in the header, if I create more than $((dbsize / 32)) xattr entries,
+> > > +# it will out of a leaf block (not much), then get one node block and two or
+> > > +# more leaf blocks, that's the testing need.
 > > 
-> > Hi Eric,
+> > I think this last sentence could be clearer:
 > > 
-> > If I don't remember wrong, it was a patchset with 2 patches. Now you only
-> > send this patch out, do you hope to merge this one only, or merge both?
-> > 
-> > Thanks,
-> > Zorro
-> > 
+> > "Create more than $((dbsize / 32)) xattr entries to force the creation
+> > of a node block, which we need for this test."
 > 
-> Just this one for now.  The second patch would add a test for the bug fix
-> https://lore.kernel.org/linux-ext4/20220526040412.173025-1-ebiggers@kernel.org,
-> but that wasn't applied for 5.19 due to a cross-tree dependency.  I'll be
-> resending that test patch later.  One step at a time...
+> Hi Darrick,
+> 
+> Thanks for your reviewing! Sure, I'll remove redundant comments.
+> 
+> > 
+> > > +nr_xattr="$((dbsize / 32))"
+> > > +localfile="${SCRATCH_MNT}/attrfile"
+> > > +touch $localfile
+> > > +for ((i=0; i<nr_xattr; i++));do
+> > > +	$SETFATTR_PROG -n user.x$(printf "%.09d" "$i") -v "aaaaaaaaaaaaaaaa" $localfile
+> > > +done
+> > > +inumber="$(stat -c '%i' $localfile)"
+> > 
+> > Though I also wonder, could you just steal this line:
+> > 
+> > __populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_NODE" "$((8 * blksz / 40))"
+> > 
+> > from _scratch_xfs_populate?
+> 
+> Oh, I don't know there's a helper like that. But I'm wondering is it recommended
+> using a function begin with "__" directly?
 
-Sure, thanks for clarify that :)
-
-Thanks,
-Zorro
+I think I tend to not use the __populate_create_attr, due to above setxattr
+while loop need to correspond to later getxattr and removexattr testing.
+There's not a helper correspond to __populate_create_attr, so if I use it
+at first, then have to use the manual while loop later, that might look
+a little abrupt :)
 
 > 
-> - Eric
+> BTW, may I ask why you prefer the number "40"? You use this number in some cases
+> likes x/124, x/125, x/126. Likes nr=((blksz / 40)) or nr = ((8 * blksz / 40)).
 > 
+> 
+> I tried to calculate, but didn't find anything match 40 bytes perfectly.
+> You used 9 bytes xattr name and 16 bytes xattr value, so the size of attr
+> leaf_name_local and leaf_entry is 28+8=36. So I think in order to make
+> attr entries out of a block, better to make the blksz divided by a
+> number <= 36. Why 40? I know I might miss something, so really hope to get
+> the details from you :)
+> 
+> > 
+> > > +_scratch_unmount
+> > > +
+> > > +# Expect the ablock 0 is a node block, later ablocks(>=1) are leaf blocks, then corrupt
+> > > +# the last leaf block. (Don't corrupt node block, or can't reproduce the bug)
+> > > +magic=$(_scratch_xfs_get_metadata_field "hdr.info.hdr.magic" "inode $inumber" "ablock 0")
+> > > +level=$(_scratch_xfs_get_metadata_field "hdr.level" "inode $inumber" "ablock 0")
+> > > +count=$(_scratch_xfs_get_metadata_field "hdr.count" "inode $inumber" "ablock 0")
+> > > +if [ "$magic" = "0x3ebe" -a "$level" = "1" ];then
+> > > +	# Corrupt the last leaf block
+> > > +	_scratch_xfs_db -x -c "inode ${inumber}" -c "ablock $count" -c "stack" \
+> > > +		-c "blocktrash -x 32 -y $((dbsize*8)) -3 -z" >> $seqres.full
+> > > +else
+> > > +	_fail "The ablock 0 isn't a root node block, maybe case issue"
+> > 
+> > Might want to capture the magic and level here so that we can diagnose
+> > test setup failures.
+> 
+> Sure
+> 
+> > 
+> > > +fi
+> > > +
+> > > +# This's the real testing, expect removexattr won't hang or panic.
+> > > +if _try_scratch_mount >> $seqres.full 2>&1; then
+> > > +	for ((i=0; i<nr_xattr; i++));do
+> > > +		$GETFATTR_PROG -n user.x$(printf "%.09d" "$i") $localfile >/dev/null 2>&1
+> > > +		$SETFATTR_PROG -x user.x$(printf "%.09d" "$i") $localfile 2>/dev/null
+> > > +	done
+> > > +else
+> > > +	_notrun "XFS refused to mount with this xattr corrutpion, test skipped"
+> > 
+> > When does mount fail?  Or is this a precaution?
+> 
+> Oh, it doesn't fail currently. But I can't be sure it always mount succeed,
+> especially I corrupt this fs manually. So add this judgement :)
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > +fi
+> > > +
+> > > +echo "Silence is golden"
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> > > new file mode 100644
+> > > index 00000000..3b276ca8
+> > > --- /dev/null
+> > > +++ b/tests/xfs/999.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 999
+> > > +Silence is golden
+> > > -- 
+> > > 2.31.1
+> > > 
+> > 
 
