@@ -2,141 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7EE4C43334
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jun 2022 05:29:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6E7DC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jun 2022 05:32:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236345AbiFCF3d (ORCPT
+        id S236949AbiFCFb4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Jun 2022 01:29:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39206 "EHLO
+        Fri, 3 Jun 2022 01:31:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42496 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233929AbiFCF3c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jun 2022 01:29:32 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4C3EB38DB4
-        for <fstests@vger.kernel.org>; Thu,  2 Jun 2022 22:29:31 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 884015EC4B7;
-        Fri,  3 Jun 2022 15:29:30 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1nwzsH-0024h9-7c; Fri, 03 Jun 2022 15:29:29 +1000
-Date:   Fri, 3 Jun 2022 15:29:29 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/8 v2] fstests: Add Log Attribute Replay test
-Message-ID: <20220603052929.GQ227878@dread.disaster.area>
-References: <20220602003126.2903779-1-david@fromorbit.com>
- <20220602003126.2903779-2-david@fromorbit.com>
- <20220603014112.GO227878@dread.disaster.area>
- <Ypl1SaRtV9O3HNqC@magnolia>
- <20220603045504.ws4unxiojst3qppb@zlang-mailbox>
+        with ESMTP id S237023AbiFCFby (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jun 2022 01:31:54 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE1DC105;
+        Thu,  2 Jun 2022 22:31:51 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 8B1D5B82153;
+        Fri,  3 Jun 2022 05:31:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 165ACC385A9;
+        Fri,  3 Jun 2022 05:31:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1654234309;
+        bh=8YyKCZHbzxEnqZHzlExnBfqd010jKWg9faUnMg77rp8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=q74aZMr2Kej9Yw10UVIC1hk2z5sZbTv5WA2VI2kr+29+CMvJQwyJX2RtZkrjtF22F
+         TtGiD/yLAkZ59IWRKG3o0DbYsW5oyYKQAS5SpnSYl81oZNZ7GFhoYBy+eCPYddKtcu
+         mhPB4u786CP0WQkyBcOeTtIhWj/2icmfUCflA2pqvYhwOGoKLpXeWbYNS/9KxTf2HO
+         aH1GMLlztt6EbS9M+WgeZZ0dyr/IegQZvtFEHml81lqPRhcC1OqrFQpRY1lCzlb23q
+         FtvQuo7/6FmJJIgfPAnULKzZQHHLf70kCkReJDh/l3WmEZuUZBDIlOk9/nmSg8uXT5
+         y5mwXsfSY0E7Q==
+Date:   Fri, 3 Jun 2022 13:31:43 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v2] ext4/053: update the test_dummy_encryption tests
+Message-ID: <20220603053143.ud42tcsxrdkr3mj2@zlang-mailbox>
+References: <20220530173044.156375-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220603045504.ws4unxiojst3qppb@zlang-mailbox>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62999c3a
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=yPCof4ZbAAAA:8 a=20KFwNOVAAAA:8
-        a=VwQbUJbxAAAA:8 a=7-415B0cAAAA:8 a=heNjibvkODbNPbefddsA:9
-        a=CjuIK1q_8ugA:10 a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <20220530173044.156375-1-ebiggers@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 03, 2022 at 12:55:04PM +0800, Zorro Lang wrote:
-> On Thu, Jun 02, 2022 at 07:43:21PM -0700, Darrick J. Wong wrote:
-> > On Fri, Jun 03, 2022 at 11:41:12AM +1000, Dave Chinner wrote:
-> > > From: Allison Henderson <allison.henderson@oracle.com>
-> > > 
-> > > This patch adds tests to exercise the log attribute error
-> > > inject and log replay. These tests aim to cover cases where attributes
-> > > are added, removed, and overwritten in each format (shortform, leaf,
-> > > node). Error inject is used to replay these operations from the log.
-> > > 
-> > > dchinner: sanitise md5sum input to just attr values.
-> > > dchinner: correct md5sums.
-> > > dchinner: ensure replace tests use different values so recovery can
-> > >           determine the replace was replayed correctly.
-> > > dchinner: don't remove corpse in _cleanup - scratch devices don't
-> > > 	  require cleanup, and if the test fails we want to leave
-> > > 	  the broken state for post-mortem analysis.
-> > > dchinner: only run on v5 filesystems.
-> > > 
-> > > Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
-> > > Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
-> > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > > ---
-> > > V2:
-> > > - redirected attr get failure messages to /dev/null rather than
-> > >   have to filter them. The md5sum tells us that the attr didn't
-> > >   exist.
-> > > 
-> > >  tests/xfs/600     | 179 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/600.out | 168 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  2 files changed, 347 insertions(+)
-> > > 
-> > > diff --git a/tests/xfs/600 b/tests/xfs/600
-> > > new file mode 100755
-> > > index 00000000..bc9415ec
-> > > --- /dev/null
-> > > +++ b/tests/xfs/600
-> > > @@ -0,0 +1,179 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 600
-> > > +#
-> > > +# Log attribute replay test
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick attr
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/filter
-> > > +. ./common/attr
-> > > +. ./common/inject
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	rm -rf $tmp.*
-> > > +	test -w /sys/fs/xfs/debug/larp && \
-> > > +		echo 0 > /sys/fs/xfs/debug/larp
-> > 
-> > Probably ought to restore the old value, but otherwise the logic in here
-> > looks solid enough.
+On Mon, May 30, 2022 at 10:30:44AM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> I can help that when I merge it this week.
+> Kernel commit 5f41fdaea63d ("ext4: only allow test_dummy_encryption when
+> supported") tightened the requirements on when the test_dummy_encryption
+> mount option is accepted.  Update ext4/053 accordingly.
 > 
-> BTW, I saw the "[PATCH 00/15] xfs: Log Attribute Replay" patchset has been
-> merged by mainline linux. So I suspose it's time to merge this patch. Please
-> tell me if it's still not the time. As I know there's not only one patchset
-> is related with this.
+> Move the test cases to later in the file to group them with the other
+> test cases that use do_mkfs to add custom mkfs options instead of using
+> the "default" filesystem that the test creates at the beginning.
+> 
+> Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+> 
+> v2: mention the commit ID now that it is merged, and add a Reviewed-by
 
-I wanted it merged two weeks ago because we merged LARP into the XFS
-for-next tree a month ago. We need tests merged when the changes go
-into the for-next tree, not when the for-next tree gets merged into
-Linus's tree weeks later....
+Hi Eric,
 
-> And I'll really appreciate that, if any of you would like to list all related
-> patchset titles (from kernel and userspace) to help this case test pass :)
+If I don't remember wrong, it was a patchset with 2 patches. Now you only
+send this patch out, do you hope to merge this one only, or merge both?
 
-I'm not going to attempt to find the 6 or 7 patchset and list them.
-They are all merged into 5.19, so use that kernel. For userspace,
-use the libxfs-5.19-sync branch I pushed out earlier in the week:
+Thanks,
+Zorro
 
-https://lore.kernel.org/linux-xfs/20220601010636.GC227878@dread.disaster.area/T/#u
-
-That contains all the 5.19 kernel changes and the userspace support
-for large extent counters and LARP, including all the error
-injection stuff that the various tests use.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> 
+>  tests/ext4/053 | 35 +++++++++++++++++++++--------------
+>  1 file changed, 21 insertions(+), 14 deletions(-)
+> 
+> diff --git a/tests/ext4/053 b/tests/ext4/053
+> index 187a2515..23e553c5 100755
+> --- a/tests/ext4/053
+> +++ b/tests/ext4/053
+> @@ -511,20 +511,6 @@ for fstype in ext2 ext3 ext4; do
+>  	mnt noinit_itable
+>  	mnt max_dir_size_kb=4096
+>  
+> -	if _has_kernel_config CONFIG_FS_ENCRYPTION; then
+> -		mnt test_dummy_encryption
+> -		mnt test_dummy_encryption=v1
+> -		mnt test_dummy_encryption=v2
+> -		not_mnt test_dummy_encryption=v3
+> -		not_mnt test_dummy_encryption=
+> -	else
+> -		mnt test_dummy_encryption ^test_dummy_encryption
+> -		mnt test_dummy_encryption=v1 ^test_dummy_encryption=v1
+> -		mnt test_dummy_encryption=v2 ^test_dummy_encryption=v2
+> -		mnt test_dummy_encryption=v3 ^test_dummy_encryption=v3
+> -		not_mnt test_dummy_encryption=
+> -	fi
+> -
+>  	if _has_kernel_config CONFIG_FS_ENCRYPTION_INLINE_CRYPT; then
+>  		mnt inlinecrypt
+>  	else
+> @@ -686,6 +672,27 @@ for fstype in ext2 ext3 ext4; do
+>  	mnt_then_not_remount defaults jqfmt=vfsv1
+>  	remount defaults grpjquota=,usrjquota= ignored
+>  
+> +	echo "== Testing the test_dummy_encryption option" >> $seqres.full
+> +	# Since kernel commit 5f41fdaea63d ("ext4: only allow
+> +	# test_dummy_encryption when supported"), the test_dummy_encryption
+> +	# option is only allowed when the filesystem has the encrypt feature and
+> +	# the kernel has CONFIG_FS_ENCRYPTION.  The encrypt feature requirement
+> +	# implies that this option is never allowed on ext2 or ext3 mounts.
+> +	if [[ $fstype == ext4 ]] && _has_kernel_config CONFIG_FS_ENCRYPTION; then
+> +		do_mkfs -O encrypt $SCRATCH_DEV ${SIZE}k
+> +		mnt test_dummy_encryption
+> +		mnt test_dummy_encryption=v1
+> +		mnt test_dummy_encryption=v2
+> +		not_mnt test_dummy_encryption=bad
+> +		not_mnt test_dummy_encryption=
+> +		do_mkfs -O ^encrypt $SCRATCH_DEV ${SIZE}k
+> +	fi
+> +	not_mnt test_dummy_encryption
+> +	not_mnt test_dummy_encryption=v1
+> +	not_mnt test_dummy_encryption=v2
+> +	not_mnt test_dummy_encryption=bad
+> +	not_mnt test_dummy_encryption=
+> +
+>  done #for fstype in ext2 ext3 ext4; do
+>  
+>  $UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+> 
+> base-commit: d3cc66012a287b6db81aad408b6970a4a96a67da
+> -- 
+> 2.36.1
+> 
