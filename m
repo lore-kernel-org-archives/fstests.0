@@ -2,157 +2,148 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06E10C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun,  5 Jun 2022 09:55:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 124FAC43334
+	for <linux-fstests@archiver.kernel.org>; Sun,  5 Jun 2022 10:13:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241839AbiFEJzs (ORCPT
+        id S245368AbiFEKNA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 5 Jun 2022 05:55:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33774 "EHLO
+        Sun, 5 Jun 2022 06:13:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46982 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235001AbiFEJzr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Jun 2022 05:55:47 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1F8A25C0
-        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 02:55:46 -0700 (PDT)
+        with ESMTP id S245335AbiFEKM7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 5 Jun 2022 06:12:59 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73D4E6249
+        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 03:12:56 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 51A70B80B74
-        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 09:55:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3BE24C385A5;
-        Sun,  5 Jun 2022 09:55:43 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4769960F01
+        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 10:12:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B536C385A5;
+        Sun,  5 Jun 2022 10:12:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654422944;
-        bh=ogDdjwEd21cLWHq0sZpClMs9DPw7SaUYIqX5WVxi9fA=;
+        s=k20201202; t=1654423975;
+        bh=t0G17P5N+Je8TqTmDmYOHSL93Mv9vxzqj0dPIExOF+A=;
         h=Date:From:To:Subject:From;
-        b=RCDDS9HXujVeOB1jrdNrl/KGqD8auuIdoXp3ej+KzJpNOGMJhuCJDWtB/BgM7mj3t
-         c/WxMDt6Q2HXRWfKVKzI608gdCyml+MNTU33JWe7HEXTzM2Gulx70JSfpkZcU2mBDy
-         ROJCZfJAx8TfHpRokgRyox9oyKOGNP71fHoHls9lu3Agi6GVi7sYLnS9fO6kg9pLox
-         gLcwKf2FA1pdGJx0LZMnt4yVQeeWJfeFfBfFHKVrSDVas8ot4bQS5qRMkxzGl+kNeM
-         09LOSh01ConkiffwoDV78T7jnOltxxFcmn25YRQy89fyVFHAdoBs9YDG0lWtp33msC
-         ZkTiKq8lKOeRA==
-Date:   Sun, 05 Jun 2022 17:55:40 +0800
+        b=gpVTMStAlrWru5vievkx86E7TTpV/bpnimV3Ca4+TmP+z1DvzDBC01Plr6+00PF5/
+         6YyNTUWWEAeKQEaJN+yFJGM32e01d29hBvEWQw5Y/s0nmP/EMHO/zdeg6tLwxnJ4qt
+         uJBLCVxSUeOlCZwG9dkR03lSoEBBbMH2JxogD8+td2QFekCY4OhGBmPoVDzx6BWfy9
+         mMoVC4aCXX9TQS3U8oIC5H9+T7JdR+95QZitQyQfXYIdLUhxOCCXZ2SqHrIemLcQia
+         kybkn47AVzUqWLn9M8xdITJZNmR6i/OFiZtiX2X0jphOUPB7oH3uE37VeOlMCc2SL+
+         fUyl8faadkgqA==
+Date:   Sun, 05 Jun 2022 18:12:53 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2022.05.29 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to 568ac9fffeb6
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="FjQ04r05TODI"
+        protocol="application/pgp-signature"; boundary="d8jRStldt4Nq"
 Content-Disposition: inline
-Message-Id: <20220605095543.3BE24C385A5@smtp.kernel.org>
+Message-Id: <20220605101255.4B536C385A5@smtp.kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
---FjQ04r05TODI
+--d8jRStldt4Nq
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2022.05.29 version (merged from for-next).
+has just been updated and tagged as v2022.06.05 release.
+
+Note:
+1) The ext4/053 add more testing, old kernel(<5.19) might hit some new failures.
+2) A new test case xfs/018 covers latest XFS log attribute replaying changes. To runt it, you need CONFIG_XFS_DEBUG, and 5.19 kernel and xfsprogs
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-d3cc66012a28 btrfs: test direct I/O read repair with interleaved corrupted sectors
+568ac9fffeb6 xfs/189: systemd monitoring of /etc/fstab sucks
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Amir Goldstein (1):
-      [4fb72cffd9e3] xfs: annotate fix commits for upcoming 5.10.y backports
+Allison Henderson (1):
+[N]      [b475a5a251b4] fstests: Add Log Attribute Replay test
 
-Christoph Hellwig (10):
-      [68da7b2ab804] btrfs: add a helpers for read repair testing
-      [b6daf3447d4d] btrfs/140: use common read repair helpers
-      [bd9306394f2c] btrfs/141: use common read repair helpers
-      [0baec6a82ada] btrfs/142: use common read repair helpers
-      [9106f321f91a] btrfs/143: use common read repair helpers
-      [ebb554efcbf7] btrfs/157: use _btrfs_get_first_logical
-      [cd87ca221a32] btrfs/215: use _btrfs_get_first_logical
-      [94b0abc48f77] btrfs: test repair with sectors corrupted in multiple mirrors
-      [fa1bcba58824] btrfs: test buffered I/O read repair with interleaved corrupted sectors
-      [d3cc66012a28] btrfs: test direct I/O read repair with interleaved corrupted sectors
+Chao Yu (1):
+[U]      [d9d729cf021a] generic: adjust strict SPO recovery testcases for f2fs
 
-Darrick J. Wong (1):
-      [a8812199578b] xfs/545: check for fallocate support before running test
+Dave Chinner (7):
+[U]      [41ff2ea0434c] README: document _begin_fstests better
+[U]      [e35f87e97507] generic/081: don't run on DAX capable devices
+[U]      [e75ea385432e] generic/038: kill background threads on interrupt
+[U]      [2066988abf20] xfs/538: fix fsstress scaling
+[U]      [4c76d0ba2b48] xfs/070: filter the bad sb magic number error
+[U]      [01dc3329bcc0] xfs/167: adjust runtime with TIME_FACTOR
+[U]      [568ac9fffeb6] xfs/189: systemd monitoring of /etc/fstab sucks
 
-Luís Henriques (2):
-      [96ca82d8e5d8] ceph/002: fix test expected output
-      [e57024a30588] ceph/001: skip metrics check if no copyfrom mount option is used
+Eric Biggers (1):
+[U]      [03a72544ad16] ext4/053: update the test_dummy_encryption tests
 
-Zorro Lang (2):
-      [61775fb9e1ab] common: source base fs specific common file
-      [7eb01db2b776] tests: remove redundant common/$FSTYP importing
+Liu Yiding (1):
+[U]      [bc0373ef244e] common/rc: Fix _require_batched_discard to skip test correctly
+
+Zorro Lang (4):
+[U]      [10d2fe7908a3] generic/139: require 512 bytes to be the minimum dio size
+[U]      [78af5961e41e] generic/506: call _require_quota before _qmount
+[U]      [568648f14515] generic/591: remove redundant output from golden image
+[U]      [627e079a5fb8] generic/591: use proper sector size
 
 
 Code Diffstat:
 
- common/btrfs        |  75 ++++++++++++++++++++++++++++++++++++
- common/config       |  60 +++++++++++++++++++++++++++++
- common/overlay      |   4 ++
- common/rc           |  49 +----------------------
- tests/btrfs/140     |  13 +------
- tests/btrfs/141     |  15 +-------
- tests/btrfs/142     |  10 ++---
- tests/btrfs/143     |  10 ++---
- tests/btrfs/157     |   2 +-
- tests/btrfs/177     |   1 -
- tests/btrfs/215     |   2 +-
- tests/btrfs/258     |   1 -
- tests/btrfs/259     |   1 -
- tests/btrfs/265     |  85 ++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/265.out |  75 ++++++++++++++++++++++++++++++++++++
- tests/btrfs/266     |  93 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/266.out | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/267     |  93 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/267.out | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ceph/001      |   6 ++-
- tests/ceph/002.out  |   2 +-
- tests/generic/623   |   3 ++
- tests/generic/631   |   2 +
- tests/generic/646   |   3 ++
- tests/generic/649   |   3 ++
- tests/xfs/145       |   3 ++
- tests/xfs/177       |   2 +
- tests/xfs/422       |   1 -
- tests/xfs/423       |   1 -
- tests/xfs/513       |   3 ++
- tests/xfs/517       |   1 -
- tests/xfs/539       |   7 +++-
- tests/xfs/542       |   3 ++
- tests/xfs/545       |   1 +
- 34 files changed, 750 insertions(+), 98 deletions(-)
+ README                |  40 ++++++++---
+ common/rc             |  55 ++++++++++-----
+ common/repair         |   1 +
+ src/splice-test.c     |  39 +++++++----
+ tests/ext4/053        |  35 ++++++----
+ tests/generic/038     |  16 +++--
+ tests/generic/139     |   2 +-
+ tests/generic/342     |   5 ++
+ tests/generic/502     |   5 ++
+ tests/generic/506     |   1 +
+ tests/generic/526     |   5 ++
+ tests/generic/527     |   5 ++
+ tests/generic/591     |   6 +-
+ tests/generic/591.out |   2 -
+ tests/xfs/018         | 181 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/018.out     | 168 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/167         |   6 +-
+ tests/xfs/189         |  26 +++++++-
+ tests/xfs/538         |  36 +++++-----
+ tests/xfs/538.out     |   3 +-
+ 20 files changed, 548 insertions(+), 89 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---FjQ04r05TODI
+--d8jRStldt4Nq
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmKcfWEACgkQlNbPkfr2
-tMyAERAArWKcQOOb1hZgl7F6mhMFAnV5HOYI2HwbWEUek3844RQMZEUX6kZSC/nL
-7YUFIhkxxb7xMTDFql4RAFE8u/yAU6+0ainyrvvxY53vv+oL/SInGyQOkB+g1ojW
-K+YtaBU4LkjzSTt4QOHcxQzdogJI6+uYXWRu+nb0zg7NISOD5ogcSTh0FSH7wAxE
-Xz/rIX0csrsMAOUNkptcWBVzTQ1G4Y60PNduUkdG9bi6RoJiYrZjaExdUkcJB2Ud
-fM/ZfoJC+f26ApAwDk4yWV9QyLDXvH8tsWUUdT6WcA+RlJ2Zd2BJaNZG2wYIeZK7
-FF/3Eaa7tHSfS6awbqZw3N+yXruqOVF/VDo5jqqFgSWa11tuM+a68gfuVSPJdiWm
-l2ZlJFD2AWDO/n5cwBvFsyIEM5sc5PY/L8d/1dJ0Oy8lj81wLiXRpYT4M7Ba9jiI
-oIq4fPmy3CwnhT2FqFCWrBfdqLOcVYK6fBMENw6nAwy29cc6OGxyBw5Z9sKX8UOd
-kTmkObF4kFwDPpZOt4uqFXVstOw9u7DtUcQabo64xg+0JKwC/QDni+WlUO/Q6X0k
-h6Rmr7ZhOk1G42fMeh85ldCLPHOIr8jaawwTmrs7txhxS75lMsZ4JSPDpV+cdpwB
-LwYwUNCBa4ZwVpGS5bzisItzsQ4VTLWWv4XY5ShbMdWVEbZsbGI=
-=OBpC
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmKcgWMACgkQlNbPkfr2
+tMyMMBAAyNBZYO/GDPyKgq0OfFr+c0GXujkD0wVrcR8kafmp7lkUHvOqwbq65zhI
+iQozIGFrCd+Q48SSZhZoZxkyzcAn8Fziu9NCfM6nB8m33BqWvQEWeFChQdmkXE+L
+JgmGWWnl1MzcvnUcJlZKl50Fzvgr9RbiXLjCj6BndqdyxVkG13hSDuvOUCPNLy0r
+neaB07SZ7I7AgWCD/XOEltBrucpMThCC6BCEzOxDPOwY2AzoKNz7i0jRy9D/lVbu
+QysVXgr9HA4z0vuS6Wz7dk3jiw3piga+AOOJHBXuBQJBxEQOVv7iFWnfVY5r7DgU
+qLalt9YbhfR3TF7a9HH2n5CuNsksvWivRgl4TDTzXgB9xMOPamNjDoHhjH2XxVGG
+6e03hv0YDKfR7K6lcWpHGKtgRAjYGYr6S4knHSTf830cftd7CRskTXjLI/9rhF4Z
+C6P88MRa+eyfqHXC7/Wu0lnjdsbp4yeUOR+hMonKKHLNstJigHAZOfAyMtINaOKK
+mydA0IdYGirgbR67ZTBK6s4j+NlPYEwKb+A88z/Vk6hE4pnPEZBHd6lViM8jdhEE
+jnYe+HlTEGpwzj9V6Keoq5aq5nKp1u+kH6F/5qGpZ5bkfEwlvWmL5tJOAhwBIknR
+Xiho2X3rCO4h19XjTPINu/OJ4aPqKS2o3c1lSUnBqC/Z/Li3fdc=
+=s59r
 -----END PGP SIGNATURE-----
 
---FjQ04r05TODI--
+--d8jRStldt4Nq--
