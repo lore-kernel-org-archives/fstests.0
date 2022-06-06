@@ -2,148 +2,211 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 124FAC43334
-	for <linux-fstests@archiver.kernel.org>; Sun,  5 Jun 2022 10:13:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C9FDC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jun 2022 04:05:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245368AbiFEKNA (ORCPT
+        id S229456AbiFFEFo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 5 Jun 2022 06:13:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46982 "EHLO
+        Mon, 6 Jun 2022 00:05:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44058 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245335AbiFEKM7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Jun 2022 06:12:59 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73D4E6249
-        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 03:12:56 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4769960F01
-        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 10:12:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B536C385A5;
-        Sun,  5 Jun 2022 10:12:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654423975;
-        bh=t0G17P5N+Je8TqTmDmYOHSL93Mv9vxzqj0dPIExOF+A=;
-        h=Date:From:To:Subject:From;
-        b=gpVTMStAlrWru5vievkx86E7TTpV/bpnimV3Ca4+TmP+z1DvzDBC01Plr6+00PF5/
-         6YyNTUWWEAeKQEaJN+yFJGM32e01d29hBvEWQw5Y/s0nmP/EMHO/zdeg6tLwxnJ4qt
-         uJBLCVxSUeOlCZwG9dkR03lSoEBBbMH2JxogD8+td2QFekCY4OhGBmPoVDzx6BWfy9
-         mMoVC4aCXX9TQS3U8oIC5H9+T7JdR+95QZitQyQfXYIdLUhxOCCXZ2SqHrIemLcQia
-         kybkn47AVzUqWLn9M8xdITJZNmR6i/OFiZtiX2X0jphOUPB7oH3uE37VeOlMCc2SL+
-         fUyl8faadkgqA==
-Date:   Sun, 05 Jun 2022 18:12:53 +0800
-From:   Zorro Lang <zlang@kernel.org>
+        with ESMTP id S229446AbiFFEFo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jun 2022 00:05:44 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 15CA034B9B
+        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 21:05:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1654488339;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=hXIzc9zVWI0tuX5YUpb2WS0HvfmJvHBn10RNWUgHUso=;
+        b=NoogiEJirlSrtgEYT8BJ4PcFiY757v/z8WDVnWtWOADNG/EwBK8FMX1xBnXgMnik5plmzX
+        FAk5FkPwVpv6r5K59gp9y+trUGOy2w3CXwn0XcOxYfCX+6TLazcnwFCWZ57Fts6Df9JVJt
+        SFbv/7ulJ96YUQ9ZqhYi39IuHLJJeuE=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-624-L_nqsBkWMIGdBoot_HeXGA-1; Mon, 06 Jun 2022 00:05:38 -0400
+X-MC-Unique: L_nqsBkWMIGdBoot_HeXGA-1
+Received: by mail-qk1-f199.google.com with SMTP id h16-20020a05620a401000b006a6b8ac9c64so1726278qko.8
+        for <fstests@vger.kernel.org>; Sun, 05 Jun 2022 21:05:38 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=hXIzc9zVWI0tuX5YUpb2WS0HvfmJvHBn10RNWUgHUso=;
+        b=uWDQK+QkwBbcVSZy+3J4FeIiQPNqNKCBi/2i08HK8LKJWV6d183gfd5l+W1zeXpKqi
+         o9botJMWNW8IzMtVop7pv/3oqcGgL/3n0XddRc3biRjszo9H7eTvx7SeCsV1ftHVBBZ5
+         LIoHGm0PQ2KMeaZfl+u/wz7xzvygzssCMp7nn45qTjF+gFSKx/+J4CpG1yuljE9lhEmZ
+         dJVG51H6EMxa9OO/xtBhettvgSAEPVxU+ZYq0zDeAwk1lwVABoIqu8bgAHf5ZqhSsxHr
+         XbViZ2Q0sD5Sfm0fESjPArw+SoQwsRA0TpO76x8+CLES1dRyp34+oz5oYwC3nIVifbID
+         TcDw==
+X-Gm-Message-State: AOAM533xRxqZMt0QJZezhjqkvqz2BN+ufNMPVYantcsVmrzl4P/C8Pk8
+        lArFLqmW2qL5nrcDbU76zQTnPtzXGB7B1qOdBJzr3cU0HKgwLG27acn8bqM3X5oRlGhnMJwNTnG
+        dicJXxLiAZLj3UTm7Os1D3nbLzQGxGfR2zEVFEZLnFt0n0RnnERP0D4etRSbpjZA0lw==
+X-Received: by 2002:a37:8d46:0:b0:6a6:48c7:8632 with SMTP id p67-20020a378d46000000b006a648c78632mr14145869qkd.633.1654488337527;
+        Sun, 05 Jun 2022 21:05:37 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJy9irx4+jM8wocjqvqYV04uuT5c66HtHmf+2wlDvLDWR9DKwSQUMEIAwYAHV9rJxX4tRI981A==
+X-Received: by 2002:a37:8d46:0:b0:6a6:48c7:8632 with SMTP id p67-20020a378d46000000b006a648c78632mr14145859qkd.633.1654488337117;
+        Sun, 05 Jun 2022 21:05:37 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id h12-20020a05620a13ec00b0069fc13ce20asm3330457qkl.59.2022.06.05.21.05.35
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 05 Jun 2022 21:05:36 -0700 (PDT)
+Date:   Mon, 6 Jun 2022 12:05:31 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to 568ac9fffeb6
+Subject: Re: [PATCH v2] common/filter: filter out extra mount error output
+Message-ID: <20220606040531.xo5ptknj7gjtyyud@zlang-mailbox>
+References: <20220527121115.34358-1-zlang@kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="d8jRStldt4Nq"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Message-Id: <20220605101255.4B536C385A5@smtp.kernel.org>
+In-Reply-To: <20220527121115.34358-1-zlang@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, May 27, 2022 at 08:11:15PM +0800, Zorro Lang wrote:
+> The lastest mount command (from util-linux) merged below commit:
+>   79534c0d7e0f ("mount: add hint about dmesg(8) to error messages")
+> which brought in a new error output when mount fails, no matter
+> ro/rw/busy mount fails.
+> 
+> That cause some cases (e.g. xfs/005) fail as:
+>   mount: Structure needs cleaning
+>          dmesg(1) may have more information after failed mount system call
+> 
+> More failed cases like generic/050, ext4/002, xfs/154, xfs/158 etc.
+> Especially xfs/154 and xfs/158, need to change their _filter_scratch
+> to _filter_error_mount.
+> 
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> ---
+> 
+> Thanks the review points from Dave. This V2 turn to filter out the error in
+> _filter_error/ro/busy_mount. And change xfs/154 and xfs/158 to use
+> _filter_error_mount.
 
---d8jRStldt4Nq
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Ping, hope to get review :)
 
-Hi all,
+> 
+> Thanks,
+> Zorro
+> 
+>  common/filter     | 13 +++++++++++--
+>  tests/xfs/154     |  2 +-
+>  tests/xfs/154.out |  2 +-
+>  tests/xfs/158     |  2 +-
+>  tests/xfs/158.out |  2 +-
+>  5 files changed, 15 insertions(+), 6 deletions(-)
+> 
+> diff --git a/common/filter b/common/filter
+> index a6a42b7a..14f6a027 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -380,6 +380,8 @@ _filter_ending_dot()
+>  # ancient:	   mount: cannot remount block device <device> read-write, is write-protected
+>  # prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
+>  # v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
+> +# v2.38 and later:
+> +# dmesg(1) may have more information after failed mount mount system call
+>  #
+>  # Now use _filter_ro_mount to unify all these differences across old & new
+>  # util-linux versions. So the filtered format would be:
+> @@ -412,7 +414,8 @@ _filter_ro_mount() {
+>  		print "mount: cannot remount device read-write, is write-protected\n";
+>  	} else {
+>  		print "$_";
+> -	}' | _filter_ending_dot
+> +	}' | grep -v "dmesg(1) may have more information after failed mount" | \
+> +	_filter_ending_dot
+>  }
+>  
+>  # Filter a failed mount output due to EUCLEAN and USTALE, util-linux changed
+> @@ -424,6 +427,8 @@ _filter_ro_mount() {
+>  # mount: mount <device> on <mountpoint> failed: Structure needs cleaning
+>  # v2.30 and later:
+>  # mount: <mountpoint>: mount(2) system call failed: Structure needs cleaning.
+> +# v2.38 and later:
+> +# dmesg(1) may have more information after failed mount mount system call
+>  #
+>  # This is also true for ESTALE error. So let's remove all the changing parts
+>  # and keep the 'prior to v2.21' format:
+> @@ -431,7 +436,8 @@ _filter_ro_mount() {
+>  # mount: Stale file handle
+>  _filter_error_mount()
+>  {
+> -	sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
+> +	grep -v "dmesg(1) may have more information after failed mount" | \
+> +		sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
+>  }
+>  
+>  # Similar to _filter_error_mount, filter a busy mount output.
+> @@ -440,8 +446,11 @@ _filter_error_mount()
+>  # old: mount: <device> is already mounted or <mountpoint> busy
+>  # new: mount: <mountpoint>: <device> already mounted or mount point busy.
+>  # filtered: mount: device already mounted or mount point busy
+> +# v2.38 and later, filter out:
+> +# dmesg(1) may have more information after failed mount mount system call
+>  _filter_busy_mount()
+>  {
+> +	grep -v "dmesg(1) may have more information after failed mount" | \
+>  	sed -e "s/.*: .* already mounted or .* busy/mount: device already mounted or mount point busy/" | \
+>  		_filter_ending_dot
+>  }
+> diff --git a/tests/xfs/154 b/tests/xfs/154
+> index 3f90a397..548c9490 100755
+> --- a/tests/xfs/154
+> +++ b/tests/xfs/154
+> @@ -48,7 +48,7 @@ test $? -eq 137 || echo "repair should have been killed??"
+>  _check_scratch_xfs_features NEEDSREPAIR
+>  _try_scratch_mount &> $tmp.mount
+>  res=$?
+> -_filter_scratch < $tmp.mount
+> +_filter_error_mount < $tmp.mount
+>  if [ $res -eq 0 ]; then
+>  	echo "Should not be able to mount after needsrepair crash"
+>  	_scratch_unmount
+> diff --git a/tests/xfs/154.out b/tests/xfs/154.out
+> index 12f154ab..1263f091 100644
+> --- a/tests/xfs/154.out
+> +++ b/tests/xfs/154.out
+> @@ -1,4 +1,4 @@
+>  QA output created by 154
+>  FEATURES: NEEDSREPAIR:YES
+> -mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
+> +mount: Structure needs cleaning
+>  FEATURES: NEEDSREPAIR:NO
+> diff --git a/tests/xfs/158 b/tests/xfs/158
+> index 505a9c73..4440adf6 100755
+> --- a/tests/xfs/158
+> +++ b/tests/xfs/158
+> @@ -51,7 +51,7 @@ test $? -eq 137 || echo "repair should have been killed??"
+>  _check_scratch_xfs_features NEEDSREPAIR INOBTCNT
+>  _try_scratch_mount &> $tmp.mount
+>  res=$?
+> -_filter_scratch < $tmp.mount
+> +_filter_error_mount < $tmp.mount
+>  if [ $res -eq 0 ]; then
+>  	echo "needsrepair should have prevented mount"
+>  	_scratch_unmount
+> diff --git a/tests/xfs/158.out b/tests/xfs/158.out
+> index 4f9dfd08..5461031a 100644
+> --- a/tests/xfs/158.out
+> +++ b/tests/xfs/158.out
+> @@ -8,7 +8,7 @@ FEATURES: INOBTCNT:NO
+>  Fail partway through upgrading
+>  Adding inode btree counts to filesystem.
+>  FEATURES: NEEDSREPAIR:YES INOBTCNT:YES
+> -mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
+> +mount: Structure needs cleaning
+>  Re-run repair to finish upgrade
+>  FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
+>  Filesystem should be usable again
+> -- 
+> 2.31.1
+> 
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2022.06.05 release.
-
-Note:
-1) The ext4/053 add more testing, old kernel(<5.19) might hit some new failures.
-2) A new test case xfs/018 covers latest XFS log attribute replaying changes. To runt it, you need CONFIG_XFS_DEBUG, and 5.19 kernel and xfsprogs
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-568ac9fffeb6 xfs/189: systemd monitoring of /etc/fstab sucks
-
-New commits ([N]ew, [U]pdate):
-
-Allison Henderson (1):
-[N]      [b475a5a251b4] fstests: Add Log Attribute Replay test
-
-Chao Yu (1):
-[U]      [d9d729cf021a] generic: adjust strict SPO recovery testcases for f2fs
-
-Dave Chinner (7):
-[U]      [41ff2ea0434c] README: document _begin_fstests better
-[U]      [e35f87e97507] generic/081: don't run on DAX capable devices
-[U]      [e75ea385432e] generic/038: kill background threads on interrupt
-[U]      [2066988abf20] xfs/538: fix fsstress scaling
-[U]      [4c76d0ba2b48] xfs/070: filter the bad sb magic number error
-[U]      [01dc3329bcc0] xfs/167: adjust runtime with TIME_FACTOR
-[U]      [568ac9fffeb6] xfs/189: systemd monitoring of /etc/fstab sucks
-
-Eric Biggers (1):
-[U]      [03a72544ad16] ext4/053: update the test_dummy_encryption tests
-
-Liu Yiding (1):
-[U]      [bc0373ef244e] common/rc: Fix _require_batched_discard to skip test correctly
-
-Zorro Lang (4):
-[U]      [10d2fe7908a3] generic/139: require 512 bytes to be the minimum dio size
-[U]      [78af5961e41e] generic/506: call _require_quota before _qmount
-[U]      [568648f14515] generic/591: remove redundant output from golden image
-[U]      [627e079a5fb8] generic/591: use proper sector size
-
-
-Code Diffstat:
-
- README                |  40 ++++++++---
- common/rc             |  55 ++++++++++-----
- common/repair         |   1 +
- src/splice-test.c     |  39 +++++++----
- tests/ext4/053        |  35 ++++++----
- tests/generic/038     |  16 +++--
- tests/generic/139     |   2 +-
- tests/generic/342     |   5 ++
- tests/generic/502     |   5 ++
- tests/generic/506     |   1 +
- tests/generic/526     |   5 ++
- tests/generic/527     |   5 ++
- tests/generic/591     |   6 +-
- tests/generic/591.out |   2 -
- tests/xfs/018         | 181 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/018.out     | 168 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/167         |   6 +-
- tests/xfs/189         |  26 +++++++-
- tests/xfs/538         |  36 +++++-----
- tests/xfs/538.out     |   3 +-
- 20 files changed, 548 insertions(+), 89 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---d8jRStldt4Nq
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmKcgWMACgkQlNbPkfr2
-tMyMMBAAyNBZYO/GDPyKgq0OfFr+c0GXujkD0wVrcR8kafmp7lkUHvOqwbq65zhI
-iQozIGFrCd+Q48SSZhZoZxkyzcAn8Fziu9NCfM6nB8m33BqWvQEWeFChQdmkXE+L
-JgmGWWnl1MzcvnUcJlZKl50Fzvgr9RbiXLjCj6BndqdyxVkG13hSDuvOUCPNLy0r
-neaB07SZ7I7AgWCD/XOEltBrucpMThCC6BCEzOxDPOwY2AzoKNz7i0jRy9D/lVbu
-QysVXgr9HA4z0vuS6Wz7dk3jiw3piga+AOOJHBXuBQJBxEQOVv7iFWnfVY5r7DgU
-qLalt9YbhfR3TF7a9HH2n5CuNsksvWivRgl4TDTzXgB9xMOPamNjDoHhjH2XxVGG
-6e03hv0YDKfR7K6lcWpHGKtgRAjYGYr6S4knHSTf830cftd7CRskTXjLI/9rhF4Z
-C6P88MRa+eyfqHXC7/Wu0lnjdsbp4yeUOR+hMonKKHLNstJigHAZOfAyMtINaOKK
-mydA0IdYGirgbR67ZTBK6s4j+NlPYEwKb+A88z/Vk6hE4pnPEZBHd6lViM8jdhEE
-jnYe+HlTEGpwzj9V6Keoq5aq5nKp1u+kH6F/5qGpZ5bkfEwlvWmL5tJOAhwBIknR
-Xiho2X3rCO4h19XjTPINu/OJ4aPqKS2o3c1lSUnBqC/Z/Li3fdc=
-=s59r
------END PGP SIGNATURE-----
-
---d8jRStldt4Nq--
