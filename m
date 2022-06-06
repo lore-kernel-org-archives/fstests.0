@@ -2,211 +2,169 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C9FDC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jun 2022 04:05:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20CFDC43334
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jun 2022 12:41:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229456AbiFFEFo (ORCPT
+        id S237495AbiFFMlc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 6 Jun 2022 00:05:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44058 "EHLO
+        Mon, 6 Jun 2022 08:41:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48616 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229446AbiFFEFo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jun 2022 00:05:44 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 15CA034B9B
-        for <fstests@vger.kernel.org>; Sun,  5 Jun 2022 21:05:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1654488339;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=hXIzc9zVWI0tuX5YUpb2WS0HvfmJvHBn10RNWUgHUso=;
-        b=NoogiEJirlSrtgEYT8BJ4PcFiY757v/z8WDVnWtWOADNG/EwBK8FMX1xBnXgMnik5plmzX
-        FAk5FkPwVpv6r5K59gp9y+trUGOy2w3CXwn0XcOxYfCX+6TLazcnwFCWZ57Fts6Df9JVJt
-        SFbv/7ulJ96YUQ9ZqhYi39IuHLJJeuE=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-624-L_nqsBkWMIGdBoot_HeXGA-1; Mon, 06 Jun 2022 00:05:38 -0400
-X-MC-Unique: L_nqsBkWMIGdBoot_HeXGA-1
-Received: by mail-qk1-f199.google.com with SMTP id h16-20020a05620a401000b006a6b8ac9c64so1726278qko.8
-        for <fstests@vger.kernel.org>; Sun, 05 Jun 2022 21:05:38 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=hXIzc9zVWI0tuX5YUpb2WS0HvfmJvHBn10RNWUgHUso=;
-        b=uWDQK+QkwBbcVSZy+3J4FeIiQPNqNKCBi/2i08HK8LKJWV6d183gfd5l+W1zeXpKqi
-         o9botJMWNW8IzMtVop7pv/3oqcGgL/3n0XddRc3biRjszo9H7eTvx7SeCsV1ftHVBBZ5
-         LIoHGm0PQ2KMeaZfl+u/wz7xzvygzssCMp7nn45qTjF+gFSKx/+J4CpG1yuljE9lhEmZ
-         dJVG51H6EMxa9OO/xtBhettvgSAEPVxU+ZYq0zDeAwk1lwVABoIqu8bgAHf5ZqhSsxHr
-         XbViZ2Q0sD5Sfm0fESjPArw+SoQwsRA0TpO76x8+CLES1dRyp34+oz5oYwC3nIVifbID
-         TcDw==
-X-Gm-Message-State: AOAM533xRxqZMt0QJZezhjqkvqz2BN+ufNMPVYantcsVmrzl4P/C8Pk8
-        lArFLqmW2qL5nrcDbU76zQTnPtzXGB7B1qOdBJzr3cU0HKgwLG27acn8bqM3X5oRlGhnMJwNTnG
-        dicJXxLiAZLj3UTm7Os1D3nbLzQGxGfR2zEVFEZLnFt0n0RnnERP0D4etRSbpjZA0lw==
-X-Received: by 2002:a37:8d46:0:b0:6a6:48c7:8632 with SMTP id p67-20020a378d46000000b006a648c78632mr14145869qkd.633.1654488337527;
-        Sun, 05 Jun 2022 21:05:37 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy9irx4+jM8wocjqvqYV04uuT5c66HtHmf+2wlDvLDWR9DKwSQUMEIAwYAHV9rJxX4tRI981A==
-X-Received: by 2002:a37:8d46:0:b0:6a6:48c7:8632 with SMTP id p67-20020a378d46000000b006a648c78632mr14145859qkd.633.1654488337117;
-        Sun, 05 Jun 2022 21:05:37 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id h12-20020a05620a13ec00b0069fc13ce20asm3330457qkl.59.2022.06.05.21.05.35
-        for <fstests@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Jun 2022 21:05:36 -0700 (PDT)
-Date:   Mon, 6 Jun 2022 12:05:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
+        with ESMTP id S237486AbiFFMl3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jun 2022 08:41:29 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B967625DF9E;
+        Mon,  6 Jun 2022 05:41:26 -0700 (PDT)
+Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 256BIbEG011625;
+        Mon, 6 Jun 2022 12:41:24 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : content-transfer-encoding : content-type :
+ mime-version; s=corp-2021-07-09;
+ bh=xTEZXqmsW8pfOOMh7vqp2RvZf8EK0/BN5x0DpN08ziM=;
+ b=svHvhBA0nL0okwM02T62nOD7ZezlGD4ftuEZXR916k1PTm2+IGM6EjmZlE516Tr9GS7k
+ AUV51G0AKi0EhfrxL5uHjFUmVycQoYVmrFJaU7HDsQi0KTkBIuqxbasdKmK+CiGIIFjr
+ gpGs8GrSDMaM3lHDvWuqi7IX5LzusU/lwYArhzF7XqGRkcxp54DnHN4ubfPC/1Pw5Raw
+ FBDtt5VHCBT3ezEMBcuIZjd3dDz0DJxyWvMHEdilsYm+yOISrZzJUfFr3KeRFN1Wovre
+ bZ9OxN4z6naYSAYuBqe6WS0pmD7xZ2Y281djdaBqpJmI0GSKjnWgJHO86138Rsq0olNN 9w== 
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3gfydqjyms-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 06 Jun 2022 12:41:23 +0000
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.16.1.2/8.16.1.2) with SMTP id 256CGDYe005014;
+        Mon, 6 Jun 2022 12:41:22 GMT
+Received: from nam10-bn7-obe.outbound.protection.outlook.com (mail-bn7nam10lp2105.outbound.protection.outlook.com [104.47.70.105])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com with ESMTP id 3gfwu7mb07-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 06 Jun 2022 12:41:22 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fXFGnmkvQEvF25AfE1uxi1cqvthBiAjvEZODfePzhx6QQ4E0PTmf6wjf8lMP+p1mRiD9qfK7RdmXngTV3DqUQuOg2ulXcPufGi4vbtzggJ4aOE+w49zP4lErFuX37UgkTwnb1YqmKzfySQFONytm71iLzUpFn7GzGmWMC9R1UyBdJ8kBoI7f/2osFta2UHHC3qfapPU21QO2iU83foMcjoWPbSvAHppNhsSGTsnozxigm+PaFfGNMeBBI8fv4Xn0S8r4b0lLdWPQZRhGtF324UxvjQXi3Eg8wn9SE+TV/7EegQj3LDCdtWfdZHLB22BC5L2YaVGiUOgGAHQcA/ONbg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=xTEZXqmsW8pfOOMh7vqp2RvZf8EK0/BN5x0DpN08ziM=;
+ b=g6bWROSaUjQ5nvOksJpAuWZKschCxSRW/lUjpZtRcQzTuCv/tcrS/5NJUULLMOLU4y2CqXep+WWGFyityhzqHSlMOPnWLbHesIUUgciPlWCWTSaS8rUH4Y4Juc+AdR9Xj5kdFsUlmNsDTfMPZZ1vpVaCy0iOfNRng86SKEvCgMeUIiYlgEDoshN9hJ+J8mCRoDydId9dzCg0P4kwH87FcG8CAaP4mtKLGamh6gfJmXviAo6O/H7iYPnXTWprA+UvnK607miunI/Y97VS7yutyR6x4v+9IsDgpscdgUKF58mxVb77SRCZohZOaqQDbUzg3XcpJEaBESPNZWOTv/lj6A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=xTEZXqmsW8pfOOMh7vqp2RvZf8EK0/BN5x0DpN08ziM=;
+ b=rP4SHguBJDLSe2w8fzPJs5DykghVTYIVW3FGqh5278EfR43+5TDHzV+vk5u0nNjXWJSpeABuVofud1gMl8o6/Zskf3/rjnwfgtoBJF79NyxSCMFcDTZBlkTLFX6o2Hd1Ct0OIa4zPy5nP0irSU7FbOZnpQ50mNunWwLIpxrqAZ4=
+Received: from SA2PR10MB4587.namprd10.prod.outlook.com (2603:10b6:806:114::12)
+ by DM6PR10MB2523.namprd10.prod.outlook.com (2603:10b6:5:b2::27) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5314.13; Mon, 6 Jun
+ 2022 12:41:21 +0000
+Received: from SA2PR10MB4587.namprd10.prod.outlook.com
+ ([fe80::5476:49e9:e3eb:e62]) by SA2PR10MB4587.namprd10.prod.outlook.com
+ ([fe80::5476:49e9:e3eb:e62%5]) with mapi id 15.20.5314.019; Mon, 6 Jun 2022
+ 12:41:20 +0000
+From:   Chandan Babu R <chandan.babu@oracle.com>
 To:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] common/filter: filter out extra mount error output
-Message-ID: <20220606040531.xo5ptknj7gjtyyud@zlang-mailbox>
-References: <20220527121115.34358-1-zlang@kernel.org>
+Cc:     Chandan Babu R <chandan.babu@oracle.com>, zlang@kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: [PATCH 0/4] Large extent counters tests
+Date:   Mon,  6 Jun 2022 18:10:57 +0530
+Message-Id: <20220606124101.263872-1-chandan.babu@oracle.com>
+X-Mailer: git-send-email 2.35.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2P153CA0031.APCP153.PROD.OUTLOOK.COM (2603:1096:4:c7::18)
+ To SA2PR10MB4587.namprd10.prod.outlook.com (2603:10b6:806:114::12)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220527121115.34358-1-zlang@kernel.org>
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: b661280e-caf2-4d4b-6507-08da47b9db89
+X-MS-TrafficTypeDiagnostic: DM6PR10MB2523:EE_
+X-Microsoft-Antispam-PRVS: <DM6PR10MB2523CFF99A86DE2613DEEF5CF6A29@DM6PR10MB2523.namprd10.prod.outlook.com>
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: LmlGoQH29eaVYRdVrJGT1c/xAu3CsJTCelfCj2ohD4oWyQPy3oq1UrdXUkiNR4AwXG1PHOKEsjuy+4ahH7oGGPpxTn2zbaSBTKUul/FwmIxIroSp4844jfKizWCrthzF31EWZJU/HKGnEfpsqUTRJI1XeZUXnHv/YzFNv1kWij7SOTuY2p5jlEybPBnaucwXjWs7zBRL4G69RChsCbzuULjCbBIKuSDLIudmJ24oHtCagxXBp8bhFX49SkFKXlfOGdv81rHFSIdTrWMy5e4LJwFRj59yrSS7MfDa0rX0iavIUYia7PEoFH10bVXo6Y8CMvSATW5VOS75W82JcROqrvS6QCRmW6Gw/sz0dy3XS67snkkPPAGL1RpI8pb2WnEZkDH0Bs8RvCJkgDyJI/lFTtbv+Rh4rqFJs0wf4WOrWOPM4cDvxMc85TFLh7lvd18Iy5PgKaM8mpruZnWis9tHtZqDQmA3CiHjVNZhZnYUdMjaHSyoQsk0Bs8e0OmoV1JbObnXu4YDLOSNqz6qQyoa50BeRHPzrrXnZgrXtLNDLNk8iHi7Dq66mycKEsNWvjdKcBny5IB7Q+wv7kTYKv9Tp/5A1pwCiXbyKUu6doEoXOfC8sV+1nxYqaAzoVYfuqwiY2gDcdvKfMAnttAjKThY3z1kvSoLgnSLXcbbe1jPP/KFTyRFvHBus8uTA2vkeTLwi0CSbebVAWZvtq6lhvucwg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA2PR10MB4587.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(366004)(186003)(6916009)(2616005)(66476007)(66946007)(66556008)(1076003)(316002)(6666004)(6506007)(2906002)(6512007)(83380400001)(52116002)(508600001)(36756003)(8936002)(4744005)(4326008)(26005)(6486002)(5660300002)(8676002)(38100700002)(38350700002)(86362001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?QcV80jOSlqkgJXVUIBWvptyVsBwxM0EFHSCZxlLIfQlT8ARnbXloGXDTrg2v?=
+ =?us-ascii?Q?xH5KccItRj6jsEG6FpXFhHurPClF/oeAAA+4GVbwPvuSz9lW/BJeXK9uPkQm?=
+ =?us-ascii?Q?5RV0EEMP052a1sPSrrHOWxA+CKclUysPy1kSjhmMzyG7VPKJbLpWHG4r6m6e?=
+ =?us-ascii?Q?E223HKiA8+r0zvggejJTL8wcIJpPCYOnupZk+hPWzW0sbOVMFpRLOBbR+9c2?=
+ =?us-ascii?Q?FVmzIuVYYF9wYyKD+3AixCJp0Xdgt5mVroNfYp9nOp7d/iW1netHPSYFBVxf?=
+ =?us-ascii?Q?HlgvrfLVsZjthw+SyXzCIom3Q+7V/zr9daxjtwPlDMCcq+6cOne1YhPfP0kq?=
+ =?us-ascii?Q?oTMaLVUM5NgWGSnqDzhwcU4JoUMkEMxRAO+AqcgqoNwJ5AclK+ADdTE4gWI+?=
+ =?us-ascii?Q?pbkgSQUYjvGfbbHFGvbQpkQCAxIcYL96E74yE0EO/OFPJHZJc48yJZHlGClf?=
+ =?us-ascii?Q?3Ju+VZB8gQ4zkSOIPPcK55eCeHcHv5jEiFVvdKu8rZWXpcHmxeDBc824kzbX?=
+ =?us-ascii?Q?wh6kTmi6RevoO+qADKKmBSGK62IIQjNIemxqIq3ASskqcOmr5IurR4JqsAjn?=
+ =?us-ascii?Q?V4qFYwKGlaWZgkgDra2Ji9/6MkRXuM4fdQicRJWcqmj/vHS1OVUkIQcPExPP?=
+ =?us-ascii?Q?eWu1pnwBiaQlKqSkekcyqc+k0L1x2qjJSXfnPh3JgdBhtiLLtbBB+wjX1qhL?=
+ =?us-ascii?Q?iBfctnYmoZPt+O8S1fP4XDmwTexPbqIeh5711O3WQOpoNLlzUUUPdYUuaOwM?=
+ =?us-ascii?Q?eGSWSKfheVQK6WxXyiDkmNjBmev97aBElrPvIudMx26UvTUYnkDIgYfiXpan?=
+ =?us-ascii?Q?muSLl70x8ZXGammPv9XuQpVJQmUiaFz7yaqgLU/wedAsmxVvc2j5oKYUZ1Ys?=
+ =?us-ascii?Q?qR9KQWEi1HAAg2FYJ7fG7JbDuklO6rByiwhR5CYSn7ai3rld7RVkV/dyzvuq?=
+ =?us-ascii?Q?TsTaAutDOU5K0P4cxIbt+0PVdB0zJgnN6AZTdgsGXtjgfrZCE3gpPgS9orgC?=
+ =?us-ascii?Q?OLDpIWN6mV/lVxy5FAP6mY3+iNw+qoZrdn0GpRBsDBg5mr07j9aJjdUfEyf9?=
+ =?us-ascii?Q?U0BUR+jJxRd1yLmrKm2bInzPPpmE8UYh6jUNck4gjrYw6b4nYqTci63EWVB5?=
+ =?us-ascii?Q?crhwm+gGIP6oNdiVZZnmq9fc45eHAXsKF7mkFkWHkM1EEjoPAW3RHryMeJ9F?=
+ =?us-ascii?Q?m2lYJexK+yqDO8b+0oB8yhoSCUi1YQwU6Q76Qd+s4mFKLjr6Gyw2exJApKeg?=
+ =?us-ascii?Q?i8sD8FcSFoSgbu5sRXi4vF0eWvgOBCUV6toFb+P3b8XVgBPEYX3f8QWbTO/p?=
+ =?us-ascii?Q?Nz/tEBV/4Y97RGECXzuQH2kddSmNWdavN2RiI0C7IS7k4oK0yPvvA0PcoFRe?=
+ =?us-ascii?Q?SavTPlHr3bo4HTp2lH8oUkG3Dwjosf8UtHgap/0aeS0KvWasJG9xp2PWnwPK?=
+ =?us-ascii?Q?jcSHJvfBtOsRD0PvdUOr5qg3dg1ooyglFu7wBD+uX0MTkfXGW4l+H3B1acn3?=
+ =?us-ascii?Q?q2GpTvrIlNYQzYfXCltb419PkNMZYDVknpS5gPewz+WZnVE+FUsV64r3i0+L?=
+ =?us-ascii?Q?TJFEU396si9d5Qfg6plbWxw+ZjuAHPskeiqE7XwkLOc8HxP1vSzgiFa+guzv?=
+ =?us-ascii?Q?6uNpI8NoffdICrjIEF9Y/Fn4BExyINe4oQ48TeOyx+XzK2ECznP/QpcvnI39?=
+ =?us-ascii?Q?4qupD6yTynl3wzCYEbEukOZpg1EpkCFI6zhauavlD36fT5dINWqif+EL+DFP?=
+ =?us-ascii?Q?4lHGg9qN6GmzZrNTcSqYIGiSY5zA/N0=3D?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b661280e-caf2-4d4b-6507-08da47b9db89
+X-MS-Exchange-CrossTenant-AuthSource: SA2PR10MB4587.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Jun 2022 12:41:20.8925
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: NsdmIrqRXSXS2t6/3GqWpAki3uFdSpjwCgQ05QztT1FS5cxSPeN/FkKQK7KjV60O4KD/4kwXUnmkh06WMzP0Qg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR10MB2523
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.517,18.0.874
+ definitions=2022-06-06_04:2022-06-02,2022-06-06 signatures=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxlogscore=809
+ adultscore=0 bulkscore=0 mlxscore=0 suspectscore=0 malwarescore=0
+ spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2204290000 definitions=main-2206060057
+X-Proofpoint-GUID: WNVaNh8KszAeXiuR8N_bbl55ZvEb1kPh
+X-Proofpoint-ORIG-GUID: WNVaNh8KszAeXiuR8N_bbl55ZvEb1kPh
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 27, 2022 at 08:11:15PM +0800, Zorro Lang wrote:
-> The lastest mount command (from util-linux) merged below commit:
->   79534c0d7e0f ("mount: add hint about dmesg(8) to error messages")
-> which brought in a new error output when mount fails, no matter
-> ro/rw/busy mount fails.
-> 
-> That cause some cases (e.g. xfs/005) fail as:
->   mount: Structure needs cleaning
->          dmesg(1) may have more information after failed mount system call
-> 
-> More failed cases like generic/050, ext4/002, xfs/154, xfs/158 etc.
-> Especially xfs/154 and xfs/158, need to change their _filter_scratch
-> to _filter_error_mount.
-> 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
-> 
-> Thanks the review points from Dave. This V2 turn to filter out the error in
-> _filter_error/ro/busy_mount. And change xfs/154 and xfs/158 to use
-> _filter_error_mount.
+Hi,
 
-Ping, hope to get review :)
+This patchset adds two tests for verifying the behaviour of Large
+extent counters feature. It also fixes xfs/270 test failure when
+executed on a filesystem with Large extent counters enabled.
 
-> 
-> Thanks,
-> Zorro
-> 
->  common/filter     | 13 +++++++++++--
->  tests/xfs/154     |  2 +-
->  tests/xfs/154.out |  2 +-
->  tests/xfs/158     |  2 +-
->  tests/xfs/158.out |  2 +-
->  5 files changed, 15 insertions(+), 6 deletions(-)
-> 
-> diff --git a/common/filter b/common/filter
-> index a6a42b7a..14f6a027 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -380,6 +380,8 @@ _filter_ending_dot()
->  # ancient:	   mount: cannot remount block device <device> read-write, is write-protected
->  # prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
->  # v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
-> +# v2.38 and later:
-> +# dmesg(1) may have more information after failed mount mount system call
->  #
->  # Now use _filter_ro_mount to unify all these differences across old & new
->  # util-linux versions. So the filtered format would be:
-> @@ -412,7 +414,8 @@ _filter_ro_mount() {
->  		print "mount: cannot remount device read-write, is write-protected\n";
->  	} else {
->  		print "$_";
-> -	}' | _filter_ending_dot
-> +	}' | grep -v "dmesg(1) may have more information after failed mount" | \
-> +	_filter_ending_dot
->  }
->  
->  # Filter a failed mount output due to EUCLEAN and USTALE, util-linux changed
-> @@ -424,6 +427,8 @@ _filter_ro_mount() {
->  # mount: mount <device> on <mountpoint> failed: Structure needs cleaning
->  # v2.30 and later:
->  # mount: <mountpoint>: mount(2) system call failed: Structure needs cleaning.
-> +# v2.38 and later:
-> +# dmesg(1) may have more information after failed mount mount system call
->  #
->  # This is also true for ESTALE error. So let's remove all the changing parts
->  # and keep the 'prior to v2.21' format:
-> @@ -431,7 +436,8 @@ _filter_ro_mount() {
->  # mount: Stale file handle
->  _filter_error_mount()
->  {
-> -	sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
-> +	grep -v "dmesg(1) may have more information after failed mount" | \
-> +		sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
->  }
->  
->  # Similar to _filter_error_mount, filter a busy mount output.
-> @@ -440,8 +446,11 @@ _filter_error_mount()
->  # old: mount: <device> is already mounted or <mountpoint> busy
->  # new: mount: <mountpoint>: <device> already mounted or mount point busy.
->  # filtered: mount: device already mounted or mount point busy
-> +# v2.38 and later, filter out:
-> +# dmesg(1) may have more information after failed mount mount system call
->  _filter_busy_mount()
->  {
-> +	grep -v "dmesg(1) may have more information after failed mount" | \
->  	sed -e "s/.*: .* already mounted or .* busy/mount: device already mounted or mount point busy/" | \
->  		_filter_ending_dot
->  }
-> diff --git a/tests/xfs/154 b/tests/xfs/154
-> index 3f90a397..548c9490 100755
-> --- a/tests/xfs/154
-> +++ b/tests/xfs/154
-> @@ -48,7 +48,7 @@ test $? -eq 137 || echo "repair should have been killed??"
->  _check_scratch_xfs_features NEEDSREPAIR
->  _try_scratch_mount &> $tmp.mount
->  res=$?
-> -_filter_scratch < $tmp.mount
-> +_filter_error_mount < $tmp.mount
->  if [ $res -eq 0 ]; then
->  	echo "Should not be able to mount after needsrepair crash"
->  	_scratch_unmount
-> diff --git a/tests/xfs/154.out b/tests/xfs/154.out
-> index 12f154ab..1263f091 100644
-> --- a/tests/xfs/154.out
-> +++ b/tests/xfs/154.out
-> @@ -1,4 +1,4 @@
->  QA output created by 154
->  FEATURES: NEEDSREPAIR:YES
-> -mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
-> +mount: Structure needs cleaning
->  FEATURES: NEEDSREPAIR:NO
-> diff --git a/tests/xfs/158 b/tests/xfs/158
-> index 505a9c73..4440adf6 100755
-> --- a/tests/xfs/158
-> +++ b/tests/xfs/158
-> @@ -51,7 +51,7 @@ test $? -eq 137 || echo "repair should have been killed??"
->  _check_scratch_xfs_features NEEDSREPAIR INOBTCNT
->  _try_scratch_mount &> $tmp.mount
->  res=$?
-> -_filter_scratch < $tmp.mount
-> +_filter_error_mount < $tmp.mount
->  if [ $res -eq 0 ]; then
->  	echo "needsrepair should have prevented mount"
->  	_scratch_unmount
-> diff --git a/tests/xfs/158.out b/tests/xfs/158.out
-> index 4f9dfd08..5461031a 100644
-> --- a/tests/xfs/158.out
-> +++ b/tests/xfs/158.out
-> @@ -8,7 +8,7 @@ FEATURES: INOBTCNT:NO
->  Fail partway through upgrading
->  Adding inode btree counts to filesystem.
->  FEATURES: NEEDSREPAIR:YES INOBTCNT:YES
-> -mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
-> +mount: Structure needs cleaning
->  Re-run repair to finish upgrade
->  FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
->  Filesystem should be usable again
-> -- 
-> 2.31.1
-> 
+Chandan Babu R (4):
+  xfs/270: Fix ro mount failure when nrext64 option is enabled
+  common/xfs: Add helper to check if nrext64 option is supported
+  xfs/547: Verify that the correct inode extent counters are updated
+    with/without nrext64
+  xfs/548: Verify correctness of upgrading an fs to support large extent
+    counters
+
+ common/xfs        |  13 ++++++
+ tests/xfs/270     |  16 ++++++-
+ tests/xfs/270.out |   1 -
+ tests/xfs/547     |  91 ++++++++++++++++++++++++++++++++++++++
+ tests/xfs/547.out |  13 ++++++
+ tests/xfs/548     | 109 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/548.out |  12 +++++
+ 7 files changed, 252 insertions(+), 3 deletions(-)
+ create mode 100755 tests/xfs/547
+ create mode 100644 tests/xfs/547.out
+ create mode 100755 tests/xfs/548
+ create mode 100644 tests/xfs/548.out
+
+-- 
+2.35.1
 
