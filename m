@@ -2,95 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F476C43334
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jun 2022 10:03:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1001C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jun 2022 14:30:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239176AbiFGKDz (ORCPT
+        id S242331AbiFGOaR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jun 2022 06:03:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35526 "EHLO
+        Tue, 7 Jun 2022 10:30:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240603AbiFGKDu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jun 2022 06:03:50 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 800FD92D25;
-        Tue,  7 Jun 2022 03:03:48 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S241271AbiFGOaP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jun 2022 10:30:15 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90951CE5C9
+        for <fstests@vger.kernel.org>; Tue,  7 Jun 2022 07:30:14 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6024F6136E;
-        Tue,  7 Jun 2022 10:03:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6AA1BC3411E;
-        Tue,  7 Jun 2022 10:03:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654596227;
-        bh=vWfrmukILqKlyTS37plpb4kkEkkiKtiobb3C0DuRQ80=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Vq9s/jOMwoacFRCVEZqhD25ij91fIGhaAip3h2ZAKnaSGMENeE0BZlwnXwNbe36pl
-         LYVZeRKR0+6kOMaQf9Om914bx3Zh3kizu9ojOSIY9qO/Y7K9NozrKnY3skH/CsFEwS
-         HsPZVFJrIV1g3T7OMKggM26DTDarbWm5TL5H4VlLAHbEdrMMhDghpYypbEk0LDQj88
-         mJQInOq32j9lz2anyIS4SenMLiRO2cMyFZB3egHK0B/HygHVTecnLRmrzy5TTFP2gi
-         aDI830XuiBoeJxyDQcysjfa1jJmSXMU4dsyaYuYlqVs/kHCUvNjDpuHItWLcxnUOwo
-         iplMs0jKEUMEA==
-Date:   Tue, 7 Jun 2022 11:03:44 +0100
-From:   Filipe Manana <fdmanana@kernel.org>
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] btrfs/220: zoned: skip nodatacow mount option for zoned
- btrfs
-Message-ID: <20220607100344.GA3556776@falcondesktop>
-References: <20220607080635.4010254-1-naohiro.aota@wdc.com>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 4DA941F9B2;
+        Tue,  7 Jun 2022 14:30:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1654612213; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=XYIytzpMLZzWQK02Azzxsya6ICCS/gc03kvF6uSKVMA=;
+        b=xKCqqRCsm+CPY2jlx3knKqGV54kqV9Cuh4upMEXXmkKlVnUH7fLhIvRbLu0+HB1/AEg14e
+        Nx9ocTX5oXIX/MNxNsjxzlwf2vSfklJ7D8lZ3DM/Nu1ORYZg9LdfSy60XVii6pVllB0v+k
+        q2sNIvhdEVqWk0XiQPQ8XkAVYb+HifA=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1654612213;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=XYIytzpMLZzWQK02Azzxsya6ICCS/gc03kvF6uSKVMA=;
+        b=lKdBJ4ERPZcii7mmG4ZbGqGI+VWyClowmTv5VuzLqRGxm0XOthn56fuJj2I7BVjteM2YWR
+        Y7GU290FbjKkiXAA==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0312513638;
+        Tue,  7 Jun 2022 14:30:12 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id +gW3OPRgn2IaRwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 14:30:12 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id c0f63e5d;
+        Tue, 7 Jun 2022 14:30:54 +0000 (UTC)
+Date:   Tue, 7 Jun 2022 15:30:54 +0100
+From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ceph/002: fix test expected output
+Message-ID: <Yp9hHodpGwM+5ZKK@suse.de>
+References: <20220520094709.30365-1-lhenriques@suse.de>
+ <20220520123747.cbpeg6ox7orxmiqp@zlang-mailbox>
+ <20220522095628.hgkhd2xchud4p3c5@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20220607080635.4010254-1-naohiro.aota@wdc.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220522095628.hgkhd2xchud4p3c5@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 07, 2022 at 05:06:35PM +0900, Naohiro Aota wrote:
-> The nodatacow mount option is not allowed on zoned btrfs and failing the
-> test. Skip the cases for zoned btrfs.
+On Sun, May 22, 2022 at 05:56:28PM +0800, Zorro Lang wrote:
+> On Fri, May 20, 2022 at 08:37:47PM +0800, Zorro Lang wrote:
+> > On Fri, May 20, 2022 at 10:47:09AM +0100, Luís Henriques wrote:
+> > > Commit daa0c0146c7d ("fstests: replace hexdump with od command") broke
+> > > ceph/002 by adding an extra '0' in the offset column.  Fix it.
+> > > 
+> > > Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> > > ---
+> > 
+> > Oh, that's my bad, I changed that in daa0c014 ("fstests: replace hexdump
+> > with od command"), but write an extra '0' for ceph/002.out [1]. And due to
+> > I don't test cephfs, so missed this failure. Thanks for fixing it!
+> > 
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
 > 
-> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Looks good, thanks.
-
-> ---
->  tests/btrfs/220 | 18 ++++++++++--------
->  1 file changed, 10 insertions(+), 8 deletions(-)
+> Hi Luís,
 > 
-> diff --git a/tests/btrfs/220 b/tests/btrfs/220
-> index fa91a38493af..4d94ccd6eee2 100755
-> --- a/tests/btrfs/220
-> +++ b/tests/btrfs/220
-> @@ -265,14 +265,16 @@ test_revertible_options()
->  	test_roundtrip_mount "compress=zlib:20" "compress=zlib:9" "compress=zstd:16" "compress=zstd:15"
->  	test_roundtrip_mount "compress-force=lzo" "compress-force=lzo" "compress-force=zlib:4" "compress-force=zlib:4"
->  
-> -	# on remount, if we only pass datacow after nodatacow was used it will remain with nodatasum
-> -	test_roundtrip_mount "nodatacow" "nodatasum,nodatacow" "datacow,datasum" "$DEFAULT_OPTS"
-> -	# nodatacow disabled compression
-> -	test_roundtrip_mount "compress-force" "compress-force=zlib:3" "nodatacow" "nodatasum,nodatacow"
-> -
-> -	# nodatacow disabled both datacow and datasum, and datasum enabled datacow and datasum
-> -	test_roundtrip_mount "nodatacow" "nodatasum,nodatacow" "datasum" "$DEFAULT_OPTS"
-> -	test_roundtrip_mount "nodatasum" "nodatasum" "datasum" "$DEFAULT_OPTS"
-> +	if ! _scratch_btrfs_is_zoned; then
-> +		# on remount, if we only pass datacow after nodatacow was used it will remain with nodatasum
-> +		test_roundtrip_mount "nodatacow" "nodatasum,nodatacow" "datacow,datasum" "$DEFAULT_OPTS"
-> +		# nodatacow disabled compression
-> +		test_roundtrip_mount "compress-force" "compress-force=zlib:3" "nodatacow" "nodatasum,nodatacow"
-> +
-> +		# nodatacow disabled both datacow and datasum, and datasum enabled datacow and datasum
-> +		test_roundtrip_mount "nodatacow" "nodatasum,nodatacow" "datasum" "$DEFAULT_OPTS"
-> +		test_roundtrip_mount "nodatasum" "nodatasum" "datasum" "$DEFAULT_OPTS"
-> +	fi
->  
->  	test_should_fail "discard=invalid"
->  	if [ "$enable_discard_sync" = true ]; then
-> -- 
-> 2.35.1
+> Sorry, I just noticed that I missed this one in this week fstests release, I'll
+> merge and push it in next weekend (05.29) :)
 > 
+
+Ping.  Looks like this hasn't yet been merged.  
+
+Cheers,
+--
+Luís
+
+> Thanks,
+> Zorro
+> 
+> > 
+> > [1]
+> > ...
+> > diff --git a/tests/ceph/002.out b/tests/ceph/002.out
+> > index 6f067250..f7f1c0ba 100644
+> > --- a/tests/ceph/002.out
+> > +++ b/tests/ceph/002.out
+> > @@ -1,8 +1,8 @@
+> >  QA output created by 002
+> > -0000000 6161 6161 6161 6161 6161 6161 6161 6161
+> > +000000 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  >aaaaaaaaaaaaaaaa<
+> >  *
+> > -0400000 6262 6262 6262 6262 6262 6262 6262 6262
+> > +400000 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62  >bbbbbbbbbbbbbbbb<
+> >  *
+> > -0800000 6363 6363 6363 6363 6363 6363 6363 6363
+> > +800000 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63  >cccccccccccccccc<
+> >  *
+> > -0c00000
+> > +c000000
+> > ...
+> > 
+> > >  tests/ceph/002.out | 2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > > 
+> > > diff --git a/tests/ceph/002.out b/tests/ceph/002.out
+> > > index f7f1c0ba8487..4f766c257a9c 100644
+> > > --- a/tests/ceph/002.out
+> > > +++ b/tests/ceph/002.out
+> > > @@ -5,4 +5,4 @@ QA output created by 002
+> > >  *
+> > >  800000 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63  >cccccccccccccccc<
+> > >  *
+> > > -c000000
+> > > +c00000
+> > > 
+
