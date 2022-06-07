@@ -2,130 +2,99 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29F3EC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jun 2022 16:20:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81FCDC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jun 2022 16:51:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242210AbiFGQUX (ORCPT
+        id S237110AbiFGQvR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jun 2022 12:20:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50390 "EHLO
+        Tue, 7 Jun 2022 12:51:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344866AbiFGQUF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jun 2022 12:20:05 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 834AF100516;
-        Tue,  7 Jun 2022 09:20:04 -0700 (PDT)
+        with ESMTP id S235555AbiFGQvQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jun 2022 12:51:16 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 876A1F5D37;
+        Tue,  7 Jun 2022 09:51:15 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 39D9B21BE5;
-        Tue,  7 Jun 2022 16:20:03 +0000 (UTC)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 4860D1F989;
+        Tue,  7 Jun 2022 16:51:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1654618803; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1654620674; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=hJU6PMlGS0wO7kgQB07BLWLliyeyV2R7JwwB4lP+pmo=;
-        b=qi/aLs8cvfJGoRGNo4TGkrYR8dTUGv4b1y5bLfvQzm7KmRPp1HQm36/QsbZ3EjD/tp/jhy
-        QQseKSOq1g0KdB1n/9DvJA355SEZ1Et9AMDCBRwYNPw6KTETmY1GS66JcVkXDtTWTzUqkR
-        Gh/gnEzYuDVV8hzkfW2FGQrqJo/q5v4=
+        bh=shFOWPg68Uwfa4tVZjUM5dOMRJq90YtpwIjmrRmGpPo=;
+        b=t1ojOnn5jcQS5iyPgsK2IgVRD06NDn8Wlx1oeTZQJU3wW6SCcoUz9SpdjTYzCa8T7oUYPC
+        Mih6orQFPbLub+mVZApYXc/yy+tC7ThwsPrhBbteYZ1mRh0ri9kkp+G7CXWWT4n/fy9YTu
+        3Lz3/y1KxRMr2dhXJUn/Zj5WzhwubkI=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1654618803;
+        s=susede2_ed25519; t=1654620674;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=hJU6PMlGS0wO7kgQB07BLWLliyeyV2R7JwwB4lP+pmo=;
-        b=XjSjybSIK3XUwp5qBPcAqhuZOQmx9/zkgZSL/iZEGxxg5BD5le/PxNp+HJ//2ttEix3PwM
-        xy1S41AkKerNnKCA==
+        bh=shFOWPg68Uwfa4tVZjUM5dOMRJq90YtpwIjmrRmGpPo=;
+        b=c0iiTrFjea4UEkWLV5XzqMPf2suuifZc87N0BX4XGZcA1rMhuk94r8xipLoMWRkkFXV/wU
+        fqda68qOMDVWNyBA==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D991113638;
-        Tue,  7 Jun 2022 16:20:02 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id CACFB13638;
+        Tue,  7 Jun 2022 16:51:13 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id G2biMbJ6n2IUdwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 16:20:02 +0000
+        id ikBFLgGCn2J6BAAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 16:51:13 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 2f8ed7e4;
-        Tue, 7 Jun 2022 16:20:44 +0000 (UTC)
-From:   =?utf-8?Q?Lu=C3=ADs_Henriques?= <lhenriques@suse.de>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, Jeff Layton <jlayton@kernel.org>,
-        Xiubo Li <xiubli@redhat.com>, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH 2/2] src/attr_replace_test: dynamically adjust the max
- xattr size
-References: <20220607151513.26347-1-lhenriques@suse.de>
-        <20220607151513.26347-3-lhenriques@suse.de>
-        <Yp9vu5RIxMc+Gbgs@magnolia>
-Date:   Tue, 07 Jun 2022 17:20:44 +0100
-In-Reply-To: <Yp9vu5RIxMc+Gbgs@magnolia> (Darrick J. Wong's message of "Tue, 7
-        Jun 2022 08:33:15 -0700")
-Message-ID: <87wnds8mxv.fsf@brahms.olymp>
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 4e2cb5fe;
+        Tue, 7 Jun 2022 16:51:54 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v2] src/attr_replace_test: dynamically adjust the max xattr size
+Date:   Tue,  7 Jun 2022 17:51:53 +0100
+Message-Id: <20220607165153.27797-1-lhenriques@suse.de>
+In-Reply-To: <87wnds8mxv.fsf@brahms.olymp>
+References: <87wnds8mxv.fsf@brahms.olymp>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-"Darrick J. Wong" <djwong@kernel.org> writes:
+CephFS doesn't had a maximum xattr size.  Instead, it imposes a maximum size
+for the full set of xattrs names+values, which by default is 64K but may be
+changed.
 
-> On Tue, Jun 07, 2022 at 04:15:13PM +0100, Lu=C3=ADs Henriques wrote:
->> CephFS doesn't had a maximum xattr size.  Instead, it imposes a maximum
->> size for the full set of an inode's xattrs names+values, which by default
->> is 64K but it can be changed by a cluster admin.
->>=20
->> Test generic/486 started to fail after fixing a ceph bug where this limit
->> wasn't being imposed.  Adjust dynamically the size of the xattr being set
->> if the error returned is -ENOSPC.
->>=20
->> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
->> ---
->>  src/attr_replace_test.c | 5 ++++-
->>  1 file changed, 4 insertions(+), 1 deletion(-)
->>=20
->> diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
->> index cca8dcf8ff60..de18e643f469 100644
->> --- a/src/attr_replace_test.c
->> +++ b/src/attr_replace_test.c
->> @@ -62,7 +62,10 @@ int main(int argc, char *argv[])
->>=20=20
->>  	/* Then, replace it with bigger one, forcing short form to leaf conver=
-sion. */
->>  	memset(value, '1', size);
->> -	ret =3D fsetxattr(fd, name, value, size, XATTR_REPLACE);
->> +	do {
->> +		ret =3D fsetxattr(fd, name, value, size, XATTR_REPLACE);
->> +		size -=3D 256;
->> +	} while ((ret < 0) && (errno =3D=3D ENOSPC) && (size > 0));
->
-> Isn't @size a size_t?  Which means that it can't be less than zero?  I
-> wouldn't count on st_blksize (or XATTR_SIZE_MAX) always being a multiple
-> of 256.
+Test generic/486 started to fail after fixing a ceph bug where this limit
+wasn't being imposed.  Adjust dynamically the size of the xattr being set
+if the error returned is -ENOSPC.
 
-*sigh*
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ src/attr_replace_test.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-You're right, of course.  Do you think it would be acceptable to do this
-instead:
-
-	} while ((ret < 0) && (errno =3D=3D ENOSPC) && (size > 256));
-
-It's still a magic number, but it should do the trick.  Although it's
-still a bit ugly, I know.  My initial idea was to add an arg to this
-program that would be then used as the value for 'size'; this way I could
-add a ceph-specific value.  But not sure that's less ugly...
-
-Cheers,
---=20
-Lu=C3=ADs
-
->
-> --D
->
->>  	if (ret < 0) die();
->>  	close(fd);
->>=20=20
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index cca8dcf8ff60..d1b92703ba2a 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -62,7 +62,10 @@ int main(int argc, char *argv[])
+ 
+ 	/* Then, replace it with bigger one, forcing short form to leaf conversion. */
+ 	memset(value, '1', size);
+-	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
++	do {
++		ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
++		size -= 256;
++	} while ((ret < 0) && (errno == ENOSPC) && (size > 256));
+ 	if (ret < 0) die();
+ 	close(fd);
+ 
