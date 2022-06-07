@@ -2,126 +2,99 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA2EBC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jun 2022 14:57:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A9C3C43334
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jun 2022 15:14:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242690AbiFGO5K (ORCPT
+        id S1343878AbiFGPOh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jun 2022 10:57:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44580 "EHLO
+        Tue, 7 Jun 2022 11:14:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39336 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343612AbiFGO5J (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jun 2022 10:57:09 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 225B1F5061;
-        Tue,  7 Jun 2022 07:57:08 -0700 (PDT)
+        with ESMTP id S245023AbiFGPOg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jun 2022 11:14:36 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9530D69B6D;
+        Tue,  7 Jun 2022 08:14:35 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id C33CE1F916;
-        Tue,  7 Jun 2022 14:57:06 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 55D9B219EE;
+        Tue,  7 Jun 2022 15:14:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1654613826; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1654614874; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=A9Rvgtg9HKPFHzF0E5JqLvylQXRC6vGtm86k2c6/6jc=;
-        b=ngoCSuRU2A1MoYFVMreHAKMfq4m77oscljFhyHWm2QRBonOEtbKJbvJOhroDtE5kPrsqV+
-        ZiaszGagjzCYAvu2d6OL16pehyKlCOYIQHoXvQTWUJU2kBcYvAd22ws/plsGMEnHJjmWma
-        q5WzDNOhimN/NFyJnYOClxNolJO69PQ=
+        bh=wpjPIR+wUVjX3PE+Tq8yv5deHvOVU6vemMV4suTxgb4=;
+        b=yEgZbTYk1KA3ZQ5251qfmquIzZkdhELMkNs2C0gCFRA8JsVpmmjJPDlVs7UGYb/gJTc5px
+        RV6/SMJO1u11Eodmccf6t9+PS3NwxULdwcKNEn6ZPfyBlackYjTHxY2LtauLrZOxYFh/zU
+        au7tA7w+12BkjKgLuuod5pF4u2fUMWM=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1654613826;
+        s=susede2_ed25519; t=1654614874;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=A9Rvgtg9HKPFHzF0E5JqLvylQXRC6vGtm86k2c6/6jc=;
-        b=tYIJszqw8q1xnIw/PMezTR8KYg0Um/PLU2Agp+6ZMirstA+6ZE6Hs8ylBJ3sM5019PRCYE
-        1oZP15OAvGgykpCw==
+        bh=wpjPIR+wUVjX3PE+Tq8yv5deHvOVU6vemMV4suTxgb4=;
+        b=2dnF1mWJ5ERAGxQAI3XU1cNAUIe7gZwhxHCNx0s2mE2PjO01ft8Obs/dtlfuwIzVTl1UL9
+        MjUQ+ukZ4XQc7PAw==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7C41B13A88;
-        Tue,  7 Jun 2022 14:57:06 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E6C8A13A88;
+        Tue,  7 Jun 2022 15:14:33 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id ylY3G0Jnn2IjUwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 14:57:06 +0000
+        id sDckNVlrn2JRWwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Tue, 07 Jun 2022 15:14:33 +0000
 Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id 004ad014;
-        Tue, 7 Jun 2022 14:57:47 +0000 (UTC)
-Date:   Tue, 7 Jun 2022 15:57:47 +0100
-From:   =?iso-8859-1?Q?Lu=EDs?= Henriques <lhenriques@suse.de>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v2] ceph/001: skip metrics check if no copyfrom mount
- option is used
-Message-ID: <Yp9na7/qSPxKuR5Y@suse.de>
-References: <20220524094256.16746-1-lhenriques@suse.de>
- <20220524165926.dkighy46hi75mg6s@zlang-mailbox>
- <Yp9ho/m0m3Su8ZzA@suse.de>
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 0ef3a077;
+        Tue, 7 Jun 2022 15:15:14 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH 2/2] src/attr_replace_test: dynamically adjust the max xattr size
+Date:   Tue,  7 Jun 2022 16:15:13 +0100
+Message-Id: <20220607151513.26347-3-lhenriques@suse.de>
+In-Reply-To: <20220607151513.26347-1-lhenriques@suse.de>
+References: <20220607151513.26347-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <Yp9ho/m0m3Su8ZzA@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 07, 2022 at 03:33:07PM +0100, Luís Henriques wrote:
-> On Wed, May 25, 2022 at 12:59:26AM +0800, Zorro Lang wrote:
-> > On Tue, May 24, 2022 at 10:42:56AM +0100, Luís Henriques wrote:
-> > > Checking the metrics is only valid if 'copyfrom' mount option is
-> > > explicitly set, otherwise the kernel won't be doing any remote object
-> > > copies.  Fix the logic to skip this metrics checking if 'copyfrom' isn't
-> > > used.
-> > > 
-> > > Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> > > ---
-> > >  tests/ceph/001 | 6 +++++-
-> > >  1 file changed, 5 insertions(+), 1 deletion(-)
-> > > 
-> > > Changes since v1:
-> > > - Quoted 'hascopyfrom' variable in 'if' statement; while there, added
-> > >   quotes to the 'if' statement just above.
-> > 
-> > Good to me,
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> 
-> Ping.
+CephFS doesn't had a maximum xattr size.  Instead, it imposes a maximum
+size for the full set of an inode's xattrs names+values, which by default
+is 64K but it can be changed by a cluster admin.
 
-Ok, please ignore my last two emails about 2 missing patches.  I was
-looking at a local stale branch.  Sorry for the noise :-(
+Test generic/486 started to fail after fixing a ceph bug where this limit
+wasn't being imposed.  Adjust dynamically the size of the xattr being set
+if the error returned is -ENOSPC.
+
+Signed-off-by: LuÃ­s Henriques <lhenriques@suse.de>
+---
+ src/attr_replace_test.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index cca8dcf8ff60..de18e643f469 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -62,7 +62,10 @@ int main(int argc, char *argv[])
  
-Cheers,
---
-Luís
-
-> 
-> > > 
-> > > diff --git a/tests/ceph/001 b/tests/ceph/001
-> > > index 7970ce352bab..060c4c450091 100755
-> > > --- a/tests/ceph/001
-> > > +++ b/tests/ceph/001
-> > > @@ -86,11 +86,15 @@ check_copyfrom_metrics()
-> > >  	local copies=$4
-> > >  	local c1=$(get_copyfrom_total_copies)
-> > >  	local s1=$(get_copyfrom_total_size)
-> > > +	local hascopyfrom=$(_fs_options $TEST_DEV | grep "copyfrom")
-> > >  	local sum
-> > >  
-> > > -	if [ ! -d $metrics_dir ]; then
-> > > +	if [ ! -d "$metrics_dir" ]; then
-> > >  		return # skip metrics check if debugfs isn't mounted
-> > >  	fi
-> > > +	if [ -z "$hascopyfrom" ]; then
-> > > +		return # ... or if we don't have copyfrom mount option
-> > > +	fi
-> > >  
-> > >  	sum=$(($c0+$copies))
-> > >  	if [ $sum -ne $c1 ]; then
-> > > 
-> > 
+ 	/* Then, replace it with bigger one, forcing short form to leaf conversion. */
+ 	memset(value, '1', size);
+-	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
++	do {
++		ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
++		size -= 256;
++	} while ((ret < 0) && (errno == ENOSPC) && (size > 0));
+ 	if (ret < 0) die();
+ 	close(fd);
+ 
