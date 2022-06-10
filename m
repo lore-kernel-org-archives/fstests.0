@@ -2,156 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96B9DC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jun 2022 09:22:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BF49C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jun 2022 13:01:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349103AbiFJJWH (ORCPT
+        id S237423AbiFJNBd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 10 Jun 2022 05:22:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37626 "EHLO
+        Fri, 10 Jun 2022 09:01:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349116AbiFJJVs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Jun 2022 05:21:48 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 02FF119F04A
-        for <fstests@vger.kernel.org>; Fri, 10 Jun 2022 02:19:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1654852749;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+        with ESMTP id S236631AbiFJNBa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Jun 2022 09:01:30 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B770BA9AF;
+        Fri, 10 Jun 2022 06:01:28 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 8649E220A0;
+        Fri, 10 Jun 2022 13:01:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1654866087; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=X0AMPbkKhpdg7q0DancqofewrNdx6mFHU0gwDtav3v0=;
-        b=SgWFfu5SfETH9O7QEjI2Qq7igvgQcHqaMgk125tPLBs75JyIFVWcnH+JVBPQ/eQ32KpDjV
-        7RXK8A4VBSYX2RN9ZUQDnzQXv6IFuH25CTPbza4u8UyuYBxJMCdCPZokjtmImhqRKCdgB0
-        kJ6aoHnr/p6Nwtuk+jOZmy8XWhJ4O40=
-Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
- [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-37-CwvFh8DcNN2Y7geEPR2w-w-1; Fri, 10 Jun 2022 05:19:08 -0400
-X-MC-Unique: CwvFh8DcNN2Y7geEPR2w-w-1
-Received: by mail-qv1-f71.google.com with SMTP id jo22-20020a056214501600b004646309a886so16737767qvb.2
-        for <fstests@vger.kernel.org>; Fri, 10 Jun 2022 02:19:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=X0AMPbkKhpdg7q0DancqofewrNdx6mFHU0gwDtav3v0=;
-        b=43BBIjeIPR3CYF1DLJChLeFh/ouOEGqxNlEINLPoSQwoEGqHjRf8eGgEengk/ERQhl
-         CSmJxFiET4QQgqJBlSA08cj+QswuXEU06LlCWqTMZeNFB/U7FpTs5qdxqxCbF8UVjw3Q
-         TJ4Nq3hWzGS84C3OQjn9im4GmRm6raqMcHKHNGpgbtbmGVFA0W/VynrCK58yJXsav5Hj
-         RFvE7yYOKCA+7k3XS46LRTN9TUyQBqJM85IixRtEyiBXSIkKb6kugwZNi/wy/Th+D/AF
-         C135cwUFVGHOnENmbnawDX7gEwosbksn5AF3KCgdJWOonK6uSoLhP9gbr3Q1hJz0qKCl
-         6p1g==
-X-Gm-Message-State: AOAM532sQHdElJQ9bFuzDBj0uCQjFDwWK7aMkyBWpv6yFo6+WOWnJGbz
-        FGPyci8xi3MaEl+rvZp2a8jP/DYDoXW4gKvE2GLb+ErEkfporCRCaF/fXuUpC7USLVg+22ziGwq
-        cL0NBanEE2/wLDD8yWw==
-X-Received: by 2002:a05:6214:5f8d:b0:464:6b1b:1bf2 with SMTP id ls13-20020a0562145f8d00b004646b1b1bf2mr33087140qvb.0.1654852747751;
-        Fri, 10 Jun 2022 02:19:07 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyFzSDQQVuVx2QtTYthqX9570kQJUi1CSJocxBs0ABJubI2O6NQmCL556UriOzDh41WzCYopA==
-X-Received: by 2002:a05:6214:5f8d:b0:464:6b1b:1bf2 with SMTP id ls13-20020a0562145f8d00b004646b1b1bf2mr33087130qvb.0.1654852747481;
-        Fri, 10 Jun 2022 02:19:07 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id t69-20020a374648000000b006a71c420460sm4706121qka.22.2022.06.10.02.19.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Jun 2022 02:19:06 -0700 (PDT)
-Date:   Fri, 10 Jun 2022 17:19:01 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] generic/486: adjust the max xattr size
-Message-ID: <20220610091901.is7qjqq3asr7hihh@zlang-mailbox>
+        bh=qBvGYzPa8D4Ojre5ccB01rqMTkEn2l/cObeudn0YqgU=;
+        b=C5xJW/SC3J6vt4zTFGNHWox0OkXrSgR+DlLvj7ltbMNVRYprh+3RqeaQP5bS6PVb8dRO1C
+        KTLGlPOtizcVga9KC8N3uN8DSgUXQ23HhqCJEzzbK/iXIrDQ4dwAk/hJYuzvFznDbK3lEZ
+        RnYf8vACoOe7Hal9CYArejIaVuI7KpQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1654866087;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=qBvGYzPa8D4Ojre5ccB01rqMTkEn2l/cObeudn0YqgU=;
+        b=sl58dheaBtsplWFunEaTcAfczVyVcl60JJRxmkVEkiuLGwQflHPNfzjeDA+yBt63GZ/dxu
+        uzHonca3NobbLDCg==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 14C0D13941;
+        Fri, 10 Jun 2022 13:01:27 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id gVbyAadAo2LbPgAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Fri, 10 Jun 2022 13:01:27 +0000
+Received: from localhost (orpheu.olymp [local])
+        by orpheu.olymp (OpenSMTPD) with ESMTPA id 93b2159b;
+        Fri, 10 Jun 2022 14:01:25 +0100 (WEST)
+From:   Luis Henriques <lhenriques@suse.de>
+To:     David Disseldorp <ddiss@suse.de>
+Cc:     fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] generic/020: adjust max_attrval_size for ceph
 References: <20220609105343.13591-1-lhenriques@suse.de>
- <20220609105343.13591-3-lhenriques@suse.de>
- <4c4572a2-2681-c2f7-a8dc-55eb2f5fc077@redhat.com>
- <20220610072545.GY1098723@dread.disaster.area>
+        <20220609105343.13591-2-lhenriques@suse.de>
+        <20220609162109.23883b71@suse.de> <87h74t51m0.fsf@brahms.olymp>
+        <20220610000002.45aa2cb5@suse.de>
+Date:   Fri, 10 Jun 2022 14:01:25 +0100
+In-Reply-To: <20220610000002.45aa2cb5@suse.de> (David Disseldorp's message of
+        "Fri, 10 Jun 2022 00:00:02 +0200")
+Message-ID: <87o7z0u0yi.fsf@orpheu.olymp>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220610072545.GY1098723@dread.disaster.area>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 10, 2022 at 05:25:45PM +1000, Dave Chinner wrote:
-> On Fri, Jun 10, 2022 at 01:35:36PM +0800, Xiubo Li wrote:
-> > 
-> > On 6/9/22 6:53 PM, Luís Henriques wrote:
-> > > CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
-> > > size for the full set of xattrs names+values, which by default is 64K.
-> > > And since ceph reports 4M as the blocksize (the default ceph object size),
-> > > generic/486 will fail in this filesystem because it will end up using
-> > > XATTR_SIZE_MAX to set the size of the 2nd (big) xattr value.
-> > > 
-> > > The fix is to adjust the max size in attr_replace_test so that it takes
-> > > into account the initial xattr name and value lengths.
-> > > 
-> > > Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> > > ---
-> > >   src/attr_replace_test.c | 7 ++++++-
-> > >   1 file changed, 6 insertions(+), 1 deletion(-)
-> > > 
-> > > diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
-> > > index cca8dcf8ff60..1c8d1049a1d8 100644
-> > > --- a/src/attr_replace_test.c
-> > > +++ b/src/attr_replace_test.c
-> > > @@ -29,6 +29,11 @@ int main(int argc, char *argv[])
-> > >   	char *value;
-> > >   	struct stat sbuf;
-> > >   	size_t size = sizeof(value);
-> > > +	/*
-> > > +	 * Take into account the initial (small) xattr name and value sizes and
-> > > +	 * subtract them from the XATTR_SIZE_MAX maximum.
-> > > +	 */
-> > > +	size_t maxsize = XATTR_SIZE_MAX - strlen(name) - 1;
-> > 
-> > Why not use the statfs to get the filesystem type first ? And then just
-> > minus the strlen(name) for ceph only ?
-> 
-> No. The test mechanism has no business knowing what filesystem type
-> it is running on - the test itself is supposed to get the limits for
-> the filesystem type from the test infrastructure.
-> 
-> As I've already said: the right thing to do is to pass the maximum
-> attr size for the test to use via the command line from the fstest
-> itself. As per g/020, the fstests infrastructure is where we encode
-> weird fs limit differences and behaviours based on $FSTYP.  Hacking
-> around weird filesystem specific behaviours deep inside random bits
-> of test source code is not maintainable.
-> 
-> AFAIA, only ceph is having a problem with this test, so it's trivial
-> to encode into g/486 with:
-> 
-> # ceph has a weird dynamic maximum xattr size and block size that is
-> # much, much larger than the maximum supported attr size. Hence the
-> # replace test can't auto-probe a sane attr size and so we have
-> # to provide it with a maximum size that will work.
-> max_attr_size=65536
-> [ "$FSTYP" = "ceph" ] && max_attr_size=64000
-> attr_replace_test -m $max_attr_size .....
-> .....
+David Disseldorp <ddiss@suse.de> writes:
 
-Agree. I'd recommend changing the attr_replace_test.c, make it have a
-default max xattr size (keep using the XATTR_SIZE_MAX or define one if
-it's not defined), then give it an optinal option which can specify a
-customed max xattr size from outside.
+> On Thu, 09 Jun 2022 15:54:15 +0100, Lu=C3=ADs Henriques wrote:
+>
+>> David Disseldorp <ddiss@suse.de> writes:
+> ...
+>> > I take it a more exact calculation would be something like:
+>> > (64K - $max_attrval_namelen - sizeof(user.snrub=3D"fish2\012"))?
+>> >
+>> > Perhaps you could calculate this on the fly for CephFS by passing in t=
+he
+>> > filename and subtracting the `getfattr -d $filename` results... That
+>> > said, it'd probably get a bit ugly, expecially if encoding needs to be
+>> > taken into account.=20=20
+>>=20
+>> In fact, this is *exactly* what I had before Dave suggested to keep it
+>> simple.
+>
+> Arg, sorry I missed your previous round.
+>
+>> After moving the code back into common/attr, where's how the
+>> generic code would look like:
+>>=20
+>> +       ceph)
+>> +		# CephFS does have a limit for the whole set of names+values
+>> +		# attributes in a file.  Thus, it is necessary to get the sizes
+>> +		# of all names and values already existent and subtract them to
+>> +		# the (default) maximum, which is 64k.
+>> +		local len=3D0
+>> +		while read line; do
+>> +			# skip 1st line
+>> +			[ "$line" !=3D "${line#'#'}" ] && continue
+>> +			n=3D$(echo $line | awk -F"=3D0x" '{print $1}')
+>> +			v=3D$(echo $line | awk -F"=3D0x" '{print $2}')
+>> +			nlen=3D${#n}
+>> +			vlen=3D${#v}
+>> +			# total is the sum of the name len and the value len
+>> +			# divided by 2 because we're dumping them in hex format
+>> +			t=3D$(($nlen + $vlen / 2))
+>> +			len=3D$(($len + $t))
+>> +		done <<< $(_getfattr -d -e hex $file 2> /dev/null)
+>> +		echo $((65536 - $max_attrval_namelen - $len))
+>> +		;;
+>>=20
+>> so... yeah, I'm not particularly gifted on shell, it could probably be
+>> done in more clever/cleaner ways.  Anyway, I'm open to revisit this if
+>> this is the preferred solution.
+>
+> hmm, I was hoping something like...
+> (( 65536 - $max_attrval_namelen - $(getfattr -d $file | _filter | wc -c) =
+))
+> would be possible, but getfattr output does make it a bit too messy.
 
-Then the test case (e.g. g/486) which uses attr_replace_test can
-specify a max xattr size if it needs. And it's easier to figure
-out what attr size is better for a specified fs in test case.
+Yeah, also we must decode the attributes as hex otherwise we'll miss
+non-string values.  Anyway, I'll see if I find something better.  Thanks,
+David.
 
-Thanks,
-Zorro
-
-> 
-> Cheers,
-> 
-> Dave.
-> 
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
-
+Cheers,
+--=20
+Luis
