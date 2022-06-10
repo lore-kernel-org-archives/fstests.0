@@ -2,141 +2,65 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77A56C43334
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jun 2022 00:47:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73CCCC43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jun 2022 02:36:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229833AbiFJArY (ORCPT
+        id S1346076AbiFJCgE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Jun 2022 20:47:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60244 "EHLO
+        Thu, 9 Jun 2022 22:36:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237000AbiFJArW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Jun 2022 20:47:22 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6FC313C07BB
-        for <fstests@vger.kernel.org>; Thu,  9 Jun 2022 17:47:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1654822039;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=I5HaQO1bTgl6NyIRCPfQY2T8zOH392jx6no+DaXW+J8=;
-        b=TpBwN7sLZHcQOnT1SKBqwqL7yz03oDRJb8dbTp280eSuRw9hR4A37V9q27vj6iY3zUsWgx
-        QoNCCxmUX/lnovE4KIdVVv1ZoXaq6vv8trLZvl3DD21OlzyY534cu/QxTWIqvz748LKZN+
-        SKznVBguf2AJruQggWb5Nr6tFx+Pk6U=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-179-ru99nPrTOhCRD2r2yz5uKA-1; Thu, 09 Jun 2022 20:47:18 -0400
-X-MC-Unique: ru99nPrTOhCRD2r2yz5uKA-1
-Received: by mail-pf1-f199.google.com with SMTP id 18-20020a621512000000b0051b90b3a793so13133060pfv.8
-        for <fstests@vger.kernel.org>; Thu, 09 Jun 2022 17:47:18 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=I5HaQO1bTgl6NyIRCPfQY2T8zOH392jx6no+DaXW+J8=;
-        b=bCgSa+UmvM9gWK2fwhURoTal30EHkWUJ8x7SrNN6tFSuvpkaf+IVtOtl8efiCGlIVL
-         nCgYN8CCKrPmLdV3dr3DMdJ6thtjlCf7VaeL14juO+Y1mqOSyhAU8jDcxzfn650QoE1X
-         iB1T9+nClVToV2TrfuVVrPwqu1BHa1mTujMzv+2YEiRXMAhsevYZfTp8xVEHVSpR0sfV
-         XI74exbpjJUapDl/bDUyupMrziMRzV2rrq6hj/44nVx2eC3NOQlxHR34LfSqlIdp+M/P
-         YQzOZqSw4w5BFUZ5OvXqw1ukAO9N2IvG8z3qMZFp0qJucE7SvhheJ4zSYZ1mWe9cIalC
-         81MA==
-X-Gm-Message-State: AOAM533gC0IkAmNiO61AJglVox+Byjdr+r+MVXufk44Uzx8p2UwZrL1K
-        codwRVsUW3DwQODLEYSaDC2Myl9V+9FQaWbfKVDzZn0QsMt096dyS6rsIFHWQ5A7AnraIpoUGwT
-        lfyYXArQ0iC89mUKN+w==
-X-Received: by 2002:a65:53cb:0:b0:3fc:5a97:b5fb with SMTP id z11-20020a6553cb000000b003fc5a97b5fbmr36566470pgr.207.1654822036601;
-        Thu, 09 Jun 2022 17:47:16 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwVcjMPOvgWPhWHZmT79LPUgHQ+W3fuMsTucmErjwaSs4I45FDNQ1iVZfmlAP30YnXz6plf/g==
-X-Received: by 2002:a65:53cb:0:b0:3fc:5a97:b5fb with SMTP id z11-20020a6553cb000000b003fc5a97b5fbmr36566454pgr.207.1654822036332;
-        Thu, 09 Jun 2022 17:47:16 -0700 (PDT)
-Received: from [10.72.12.54] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id k14-20020aa7998e000000b0050dc7628137sm18481384pfh.17.2022.06.09.17.47.12
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Jun 2022 17:47:15 -0700 (PDT)
-Subject: Re: [PATCH v2 1/2] generic/020: adjust max_attrval_size for ceph
-To:     David Disseldorp <ddiss@suse.de>,
-        =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>
-Cc:     fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
-References: <20220609105343.13591-1-lhenriques@suse.de>
- <20220609105343.13591-2-lhenriques@suse.de> <20220609162109.23883b71@suse.de>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <c2f88303-5360-6dca-93f1-a488f39f2325@redhat.com>
-Date:   Fri, 10 Jun 2022 08:47:09 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S240462AbiFJCf7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Jun 2022 22:35:59 -0400
+Received: from out20-159.mail.aliyun.com (out20-159.mail.aliyun.com [115.124.20.159])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88580B5247
+        for <fstests@vger.kernel.org>; Thu,  9 Jun 2022 19:35:56 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.343362|-1;BR=01201311R101S71rulernew998_84748_2000303;CH=blue;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.110168-0.0153295-0.874502;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=wangyugui@e16-tech.com;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.O1M3roV_1654828553;
+Received: from T640.e16-tech.com(mailfrom:wangyugui@e16-tech.com fp:SMTPD_---.O1M3roV_1654828553)
+          by smtp.aliyun-inc.com;
+          Fri, 10 Jun 2022 10:35:54 +0800
+From:   Wang Yugui <wangyugui@e16-tech.com>
+To:     fstests@vger.kernel.org
+Cc:     Wang Yugui <wangyugui@e16-tech.com>
+Subject: [PATCH] generic/297: fix the delta time based on stat
+Date:   Fri, 10 Jun 2022 10:35:53 +0800
+Message-Id: <20220610023553.24418-1-wangyugui@e16-tech.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-In-Reply-To: <20220609162109.23883b71@suse.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
-Content-Language: en-US
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+stat -c '%Y' report seconds as int, so the delta 2.01s may result as 3s.
 
-On 6/9/22 10:21 PM, David Disseldorp wrote:
-> Hi Luís,
->
-> On Thu,  9 Jun 2022 11:53:42 +0100, Luís Henriques wrote:
->
->> CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
->> size for the full set of xattrs names+values, which by default is 64K.
->>
->> This patch fixes the max_attrval_size so that it is slightly < 64K in
->> order to accommodate any already existing xattrs in the file.
->>
->> Signed-off-by: Luís Henriques <lhenriques@suse.de>
->> ---
->>   tests/generic/020 | 10 +++++++++-
->>   1 file changed, 9 insertions(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/020 b/tests/generic/020
->> index d8648e96286e..76f13220fe85 100755
->> --- a/tests/generic/020
->> +++ b/tests/generic/020
->> @@ -128,7 +128,7 @@ _attr_get_max()
->>   	pvfs2)
->>   		max_attrval_size=8192
->>   		;;
->> -	xfs|udf|9p|ceph)
->> +	xfs|udf|9p)
->>   		max_attrval_size=65536
->>   		;;
->>   	bcachefs)
->> @@ -139,6 +139,14 @@ _attr_get_max()
->>   		# the underlying filesystem, so just use the lowest value above.
->>   		max_attrval_size=1024
->>   		;;
->> +	ceph)
->> +		# CephFS does not have a maximum value for attributes.  Instead,
->> +		# it imposes a maximum size for the full set of xattrs
->> +		# names+values, which by default is 64K.  Set this to a value
->> +		# that is slightly smaller than 64K so that it can accommodate
->> +		# already existing xattrs.
->> +		max_attrval_size=65000
->> +		;;
-> I take it a more exact calculation would be something like:
-> (64K - $max_attrval_namelen - sizeof(user.snrub="fish2\012"))?
+Signed-off-by: Wang Yugui <wangyugui@e16-tech.com>
+---
+ tests/generic/297 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Yeah, something like this looks better to me.
-
-I am afraid without reaching up to the real max size we couldn't test 
-the real bugs out from ceph. Such as the bug you fixed in ceph Locker.cc 
-code.
-
-
-> Perhaps you could calculate this on the fly for CephFS by passing in the
-> filename and subtracting the `getfattr -d $filename` results... That
-> said, it'd probably get a bit ugly, expecially if encoding needs to be
-> taken into account.
->
-> Reviewed-by: David Disseldorp <ddiss@suse.de>
->
-> Cheers, David
->
+diff --git a/tests/generic/297 b/tests/generic/297
+index 6bdc3e1c..e3082202 100755
+--- a/tests/generic/297
++++ b/tests/generic/297
+@@ -51,7 +51,7 @@ for i in $(seq 0 $fnr); do
+ 	touch $TEST_DIR/after
+ 	before=$(stat -c '%Y' $TEST_DIR/before)
+ 	after=$(stat -c '%Y' $TEST_DIR/after)
+-	delta=$((after - before))
++	delta=$((after - before -1)) # 2.01s may result as 3s; so -1
+ 	test $delta -gt $timeout && break
+ done
+ 
+@@ -64,7 +64,7 @@ $TIMEOUT_PROG -s INT ${kill_after}s $XFS_IO_PROG -f -c "reflink $testdir/file1 0
+ touch $TEST_DIR/after
+ before=$(stat -c '%Y' $TEST_DIR/before)
+ after=$(stat -c '%Y' $TEST_DIR/after)
+-delta=$((after - before))
++delta=$((after - before - 1)) # 2.01s may result as 3s; so -1
+ echo "reflink of $n bytes took $delta seconds" >> $seqres.full
+ test $delta -gt $timeout && _fail "reflink didn't stop in time, n=$n t=$delta"
+ 
+-- 
+2.36.1
 
