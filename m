@@ -2,121 +2,141 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2CDDC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Jun 2022 22:00:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77A56C43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jun 2022 00:47:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233185AbiFIWAH (ORCPT
+        id S229833AbiFJArY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Jun 2022 18:00:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49648 "EHLO
+        Thu, 9 Jun 2022 20:47:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232394AbiFIWAG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Jun 2022 18:00:06 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40DA416087F;
-        Thu,  9 Jun 2022 15:00:05 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id EEC771F928;
-        Thu,  9 Jun 2022 22:00:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1654812003; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
+        with ESMTP id S237000AbiFJArW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Jun 2022 20:47:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6FC313C07BB
+        for <fstests@vger.kernel.org>; Thu,  9 Jun 2022 17:47:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1654822039;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=BTcQRG6LqBok8mSIWtXx9a+E9QNBH9UU5PziKbQT8A0=;
-        b=s50MQ9eRi0O8AtrMElGI6uHu97RicFdWVXqm/7l8KRLzJRpfy2cbwkLNHgO/rqug0ODFAl
-        NTM/lDl/GgbC3yfyG8xavY+cSUn8FY+lJaE7M56XsQ99CyEuRkZ9Vzw0F97faJ/XMNRymI
-        Ajpy6qelOsDXYX8A6BCdlZn7fSizVvw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1654812003;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=BTcQRG6LqBok8mSIWtXx9a+E9QNBH9UU5PziKbQT8A0=;
-        b=AGnnuPmKgVfACKlHwr9H4UNvaVm3wfcD81hWD0ddK1XTAvndsRft05K7ooGVED6oG7C5If
-        8xYgj2yXpfGfW/Bg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id B0D3A13A8C;
-        Thu,  9 Jun 2022 22:00:03 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id TA6kKWNtomIdEwAAMHmgww
-        (envelope-from <ddiss@suse.de>); Thu, 09 Jun 2022 22:00:03 +0000
-Date:   Fri, 10 Jun 2022 00:00:02 +0200
-From:   David Disseldorp <ddiss@suse.de>
-To:     =?UTF-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
+        bh=I5HaQO1bTgl6NyIRCPfQY2T8zOH392jx6no+DaXW+J8=;
+        b=TpBwN7sLZHcQOnT1SKBqwqL7yz03oDRJb8dbTp280eSuRw9hR4A37V9q27vj6iY3zUsWgx
+        QoNCCxmUX/lnovE4KIdVVv1ZoXaq6vv8trLZvl3DD21OlzyY534cu/QxTWIqvz748LKZN+
+        SKznVBguf2AJruQggWb5Nr6tFx+Pk6U=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-179-ru99nPrTOhCRD2r2yz5uKA-1; Thu, 09 Jun 2022 20:47:18 -0400
+X-MC-Unique: ru99nPrTOhCRD2r2yz5uKA-1
+Received: by mail-pf1-f199.google.com with SMTP id 18-20020a621512000000b0051b90b3a793so13133060pfv.8
+        for <fstests@vger.kernel.org>; Thu, 09 Jun 2022 17:47:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=I5HaQO1bTgl6NyIRCPfQY2T8zOH392jx6no+DaXW+J8=;
+        b=bCgSa+UmvM9gWK2fwhURoTal30EHkWUJ8x7SrNN6tFSuvpkaf+IVtOtl8efiCGlIVL
+         nCgYN8CCKrPmLdV3dr3DMdJ6thtjlCf7VaeL14juO+Y1mqOSyhAU8jDcxzfn650QoE1X
+         iB1T9+nClVToV2TrfuVVrPwqu1BHa1mTujMzv+2YEiRXMAhsevYZfTp8xVEHVSpR0sfV
+         XI74exbpjJUapDl/bDUyupMrziMRzV2rrq6hj/44nVx2eC3NOQlxHR34LfSqlIdp+M/P
+         YQzOZqSw4w5BFUZ5OvXqw1ukAO9N2IvG8z3qMZFp0qJucE7SvhheJ4zSYZ1mWe9cIalC
+         81MA==
+X-Gm-Message-State: AOAM533gC0IkAmNiO61AJglVox+Byjdr+r+MVXufk44Uzx8p2UwZrL1K
+        codwRVsUW3DwQODLEYSaDC2Myl9V+9FQaWbfKVDzZn0QsMt096dyS6rsIFHWQ5A7AnraIpoUGwT
+        lfyYXArQ0iC89mUKN+w==
+X-Received: by 2002:a65:53cb:0:b0:3fc:5a97:b5fb with SMTP id z11-20020a6553cb000000b003fc5a97b5fbmr36566470pgr.207.1654822036601;
+        Thu, 09 Jun 2022 17:47:16 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwVcjMPOvgWPhWHZmT79LPUgHQ+W3fuMsTucmErjwaSs4I45FDNQ1iVZfmlAP30YnXz6plf/g==
+X-Received: by 2002:a65:53cb:0:b0:3fc:5a97:b5fb with SMTP id z11-20020a6553cb000000b003fc5a97b5fbmr36566454pgr.207.1654822036332;
+        Thu, 09 Jun 2022 17:47:16 -0700 (PDT)
+Received: from [10.72.12.54] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id k14-20020aa7998e000000b0050dc7628137sm18481384pfh.17.2022.06.09.17.47.12
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 09 Jun 2022 17:47:15 -0700 (PDT)
+Subject: Re: [PATCH v2 1/2] generic/020: adjust max_attrval_size for ceph
+To:     David Disseldorp <ddiss@suse.de>,
+        =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>
 Cc:     fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>,
         "Darrick J. Wong" <djwong@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] generic/020: adjust max_attrval_size for ceph
-Message-ID: <20220610000002.45aa2cb5@suse.de>
-In-Reply-To: <87h74t51m0.fsf@brahms.olymp>
+        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
 References: <20220609105343.13591-1-lhenriques@suse.de>
-        <20220609105343.13591-2-lhenriques@suse.de>
-        <20220609162109.23883b71@suse.de>
-        <87h74t51m0.fsf@brahms.olymp>
+ <20220609105343.13591-2-lhenriques@suse.de> <20220609162109.23883b71@suse.de>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <c2f88303-5360-6dca-93f1-a488f39f2325@redhat.com>
+Date:   Fri, 10 Jun 2022 08:47:09 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20220609162109.23883b71@suse.de>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, 09 Jun 2022 15:54:15 +0100, Lu=C3=ADs Henriques wrote:
 
-> David Disseldorp <ddiss@suse.de> writes:
-...
-> > I take it a more exact calculation would be something like:
-> > (64K - $max_attrval_namelen - sizeof(user.snrub=3D"fish2\012"))?
-> >
-> > Perhaps you could calculate this on the fly for CephFS by passing in the
-> > filename and subtracting the `getfattr -d $filename` results... That
-> > said, it'd probably get a bit ugly, expecially if encoding needs to be
-> > taken into account. =20
->=20
-> In fact, this is *exactly* what I had before Dave suggested to keep it
-> simple.
+On 6/9/22 10:21 PM, David Disseldorp wrote:
+> Hi Luís,
+>
+> On Thu,  9 Jun 2022 11:53:42 +0100, Luís Henriques wrote:
+>
+>> CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
+>> size for the full set of xattrs names+values, which by default is 64K.
+>>
+>> This patch fixes the max_attrval_size so that it is slightly < 64K in
+>> order to accommodate any already existing xattrs in the file.
+>>
+>> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+>> ---
+>>   tests/generic/020 | 10 +++++++++-
+>>   1 file changed, 9 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/tests/generic/020 b/tests/generic/020
+>> index d8648e96286e..76f13220fe85 100755
+>> --- a/tests/generic/020
+>> +++ b/tests/generic/020
+>> @@ -128,7 +128,7 @@ _attr_get_max()
+>>   	pvfs2)
+>>   		max_attrval_size=8192
+>>   		;;
+>> -	xfs|udf|9p|ceph)
+>> +	xfs|udf|9p)
+>>   		max_attrval_size=65536
+>>   		;;
+>>   	bcachefs)
+>> @@ -139,6 +139,14 @@ _attr_get_max()
+>>   		# the underlying filesystem, so just use the lowest value above.
+>>   		max_attrval_size=1024
+>>   		;;
+>> +	ceph)
+>> +		# CephFS does not have a maximum value for attributes.  Instead,
+>> +		# it imposes a maximum size for the full set of xattrs
+>> +		# names+values, which by default is 64K.  Set this to a value
+>> +		# that is slightly smaller than 64K so that it can accommodate
+>> +		# already existing xattrs.
+>> +		max_attrval_size=65000
+>> +		;;
+> I take it a more exact calculation would be something like:
+> (64K - $max_attrval_namelen - sizeof(user.snrub="fish2\012"))?
 
-Arg, sorry I missed your previous round.
+Yeah, something like this looks better to me.
 
-> After moving the code back into common/attr, where's how the
-> generic code would look like:
->=20
-> +       ceph)
-> +		# CephFS does have a limit for the whole set of names+values
-> +		# attributes in a file.  Thus, it is necessary to get the sizes
-> +		# of all names and values already existent and subtract them to
-> +		# the (default) maximum, which is 64k.
-> +		local len=3D0
-> +		while read line; do
-> +			# skip 1st line
-> +			[ "$line" !=3D "${line#'#'}" ] && continue
-> +			n=3D$(echo $line | awk -F"=3D0x" '{print $1}')
-> +			v=3D$(echo $line | awk -F"=3D0x" '{print $2}')
-> +			nlen=3D${#n}
-> +			vlen=3D${#v}
-> +			# total is the sum of the name len and the value len
-> +			# divided by 2 because we're dumping them in hex format
-> +			t=3D$(($nlen + $vlen / 2))
-> +			len=3D$(($len + $t))
-> +		done <<< $(_getfattr -d -e hex $file 2> /dev/null)
-> +		echo $((65536 - $max_attrval_namelen - $len))
-> +		;;
->=20
-> so... yeah, I'm not particularly gifted on shell, it could probably be
-> done in more clever/cleaner ways.  Anyway, I'm open to revisit this if
-> this is the preferred solution.
+I am afraid without reaching up to the real max size we couldn't test 
+the real bugs out from ceph. Such as the bug you fixed in ceph Locker.cc 
+code.
 
-hmm, I was hoping something like...
-(( 65536 - $max_attrval_namelen - $(getfattr -d $file | _filter | wc -c) ))
-would be possible, but getfattr output does make it a bit too messy.
 
-Cheers, David
+> Perhaps you could calculate this on the fly for CephFS by passing in the
+> filename and subtracting the `getfattr -d $filename` results... That
+> said, it'd probably get a bit ugly, expecially if encoding needs to be
+> taken into account.
+>
+> Reviewed-by: David Disseldorp <ddiss@suse.de>
+>
+> Cheers, David
+>
+
