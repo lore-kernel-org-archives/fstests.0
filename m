@@ -2,175 +2,163 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 337F8C43334
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jun 2022 17:16:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 184DFC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jun 2022 18:42:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241399AbiFMRP5 (ORCPT
+        id S245718AbiFMSmQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Jun 2022 13:15:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58240 "EHLO
+        Mon, 13 Jun 2022 14:42:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241589AbiFMRPd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jun 2022 13:15:33 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F70527CDC;
-        Mon, 13 Jun 2022 05:24:47 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S1344292AbiFMSlx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jun 2022 14:41:53 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DDE33E2760
+        for <fstests@vger.kernel.org>; Mon, 13 Jun 2022 08:23:26 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 2D4901F38A;
-        Mon, 13 Jun 2022 12:24:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1655123086; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=YynRhdIgv4jshvoQMDKaLLWZty7Q3kDdQhQ5gNO+StM=;
-        b=vNg/5nrkq0c+CTbZ04/gpcf2tLJw3ytsoFQGr+EReCd1GklnLby9os7HwkhSR1OcFbGTr7
-        aGUnICovRz1QiOq4FKp4yUKc1Ff6DC73bjgca0o8ItQ88AFk9tKEMMoukeVIkDLsOdBbaJ
-        be7z1CltSvNz1N2oeVf+K/PP5dJospk=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1655123086;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=YynRhdIgv4jshvoQMDKaLLWZty7Q3kDdQhQ5gNO+StM=;
-        b=kmaaZvfaq7yYNso/8Nw9EQjqVLWL+Kj4k+cUZJNz4ejN64ov2VygVFj4PVe/WnvyAKwqsg
-        T+8DvYHyIQrkGDCA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id C9A3213443;
-        Mon, 13 Jun 2022 12:24:45 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 4W++L40sp2LxEAAAMHmgww
-        (envelope-from <ddiss@suse.de>); Mon, 13 Jun 2022 12:24:45 +0000
-Date:   Mon, 13 Jun 2022 14:24:44 +0200
-From:   David Disseldorp <ddiss@suse.de>
-To:     =?UTF-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
-Cc:     fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
-        Dave Chinner <david@fromorbit.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v3 2/2] generic/486: adjust the max xattr size
-Message-ID: <20220613142444.3276dfa8@suse.de>
-In-Reply-To: <20220613113142.4338-3-lhenriques@suse.de>
-References: <20220613113142.4338-1-lhenriques@suse.de>
-        <20220613113142.4338-3-lhenriques@suse.de>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 84A82614D4
+        for <fstests@vger.kernel.org>; Mon, 13 Jun 2022 15:23:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3E4E8C34114;
+        Mon, 13 Jun 2022 15:23:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1655133805;
+        bh=EjEtTuzY1+1Z7no0JZdfeBwLEVuRm5ZR6E6849QRGOc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=ovKw8i06jo20voVRN+8PpUGUAhPtDmb97D2WTYrRiHzPWkNE9+i3mFjd5AmtDicCn
+         lJqkUkxVPJt1DQHTKi4ihBM8sqQigELSA12Jv7Jy5b+YQVgew0lMJIHjHq/GI6ipdd
+         3eJ763oft+WRoEfaIm6zZRPjhgrlzJdkMGS/7707rbgaAuwucv1SU+4gIkXEt9OHTb
+         QMiUKh6YADG5iYk0K6vsR4rFooAQ1JkHR0opKqmDQwjgqmIe2xFPldBIotSv5DtYAu
+         UlLac0F/Vzav5aw08G5AWG/edKdk6jCXnZCaUE4m8cZ9d4omX1t74zqSCpNPz+/FgO
+         Y5o7uMNaC/msw==
+From:   Christian Brauner <brauner@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     Christian Brauner <brauner@kernel.org>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+        Aleksa Sarai <cyphar@cyphar.com>
+Subject: [PATCH] generic/692: test group ownership change
+Date:   Mon, 13 Jun 2022 17:23:14 +0200
+Message-Id: <20220613152314.2235940-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2899; h=from:subject; bh=EjEtTuzY1+1Z7no0JZdfeBwLEVuRm5ZR6E6849QRGOc=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSQtDwva8X7a+UN3WxYdvWPw5kx9cHnBHdXPa5xNWKpV1QLF vycs7ChlYRDjYpAVU2RxaDcJl1vOU7HZKFMDZg4rE8gQBi5OAZhI+kJGhtPBLxaoXn/aZFbiLd/VZb 7mumHEuTDt3GNRm5lWGCyeoc7wP+tC80qWalP9HXOu521pmx//Olv69idm1ou/Z21ba93hzwcA
+X-Developer-Key: i=brauner@kernel.org; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, 13 Jun 2022 12:31:42 +0100, Lu=C3=ADs Henriques wrote:
+When group ownership is changed a caller whose fsuid owns the inode can
+change the group of the inode to any group they are a member of. When
+searching through the caller's groups we failed to use the gid mapped
+according to the idmapped mount otherwise we fail to change ownership.
+Add a test for this.
 
-> CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
-> size for the full set of xattrs names+values, which by default is 64K.  A=
-nd
-> since it reports 4M as the blocksize (the default ceph object size),
-> generic/486 will fail in ceph because the XATTR_SIZE_MAX value can't be u=
-sed
-> in attr_replace_test.
->=20
-> The fix is to add a new argument to the test so that the max size can be
-> passed in instead of trying to auto-probe a value for it.
->=20
-> Signed-off-by: Lu=C3=ADs Henriques <lhenriques@suse.de>
-> ---
->  src/attr_replace_test.c | 30 ++++++++++++++++++++++++++----
->  tests/generic/486       | 11 ++++++++++-
->  2 files changed, 36 insertions(+), 5 deletions(-)
->=20
-> diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
-> index cca8dcf8ff60..1218e7264c8f 100644
-> --- a/src/attr_replace_test.c
-> +++ b/src/attr_replace_test.c
-> @@ -20,19 +20,41 @@ exit(1); } while (0)
->  fprintf(stderr, __VA_ARGS__); exit (1); \
->  } while (0)
-> =20
-> +void usage(char *progname)
-> +{
-> +	fail("usage: %s [-m max_attr_size] <file>\n", progname);
-> +}
-> +
->  int main(int argc, char *argv[])
->  {
->  	int ret;
->  	int fd;
-> +	int c;
->  	char *path;
->  	char *name =3D "user.world";
->  	char *value;
->  	struct stat sbuf;
->  	size_t size =3D sizeof(value);
-> +	size_t maxsize =3D XATTR_SIZE_MAX;
-> +
-> +	while ((c =3D getopt(argc, argv, "m:")) !=3D -1) {
-> +		char *endp;
-> +
-> +		switch (c) {
-> +		case 'm':
-> +			maxsize =3D strtoul(optarg, &endp, 0);
-> +			if (*endp || (maxsize > XATTR_SIZE_MAX))
-> +				fail("Invalid 'max_attr_size' value\n");
-> +			break;
-> +		default:
-> +			usage(argv[0]);
-> +		}
-> +	}
-> =20
-> -	if (argc !=3D 2)
-> -		fail("Usage: %s <file>\n", argv[0]);
-> -	path =3D argv[1];
-> +	if (optind =3D=3D argc - 1)
-> +		path =3D argv[optind];
-> +	else
-> +		usage(argv[0]);
-> =20
->  	fd =3D open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
->  	if (fd < 0) die();
-> @@ -46,7 +68,7 @@ int main(int argc, char *argv[])
->  	size =3D sbuf.st_blksize * 3 / 4;
->  	if (!size)
->  		fail("Invalid st_blksize(%ld)\n", sbuf.st_blksize);
-> -	size =3D MIN(size, XATTR_SIZE_MAX);
-> +	size =3D MIN(size, maxsize);
->  	value =3D malloc(size);
->  	if (!value)
->  		fail("Failed to allocate memory\n");
-> diff --git a/tests/generic/486 b/tests/generic/486
-> index 7de198f93a71..7dbfcb9835d9 100755
-> --- a/tests/generic/486
-> +++ b/tests/generic/486
-> @@ -41,7 +41,16 @@ filter_attr_output() {
->  		sed -e 's/has a [0-9]* byte value/has a NNNN byte value/g'
->  }
-> =20
-> -$here/src/attr_replace_test $SCRATCH_MNT/hello
-> +max_attr_size=3D65536
-> +
-> +# attr_replace_test can't easily auto-probe the attr size for ceph becau=
-se:
-> +# - ceph imposes a maximum value for the total xattr names+values, and
-> +# - ceph reports the 'object size' in the block size, which is, by defau=
-lt, much
-> +#   larger than XATTR_SIZE_MAX (4M > 64k)
-> +# Hence, we need to provide it with a maximum size.
-> +[ "$FSTYP" =3D "ceph" ] && max_attr_size=3D65000
-> +
-> +$here/src/attr_replace_test -m $max_attr_size $SCRATCH_MNT/hello
->  $ATTR_PROG -l $SCRATCH_MNT/hello >>$seqres.full 2>&1
->  $ATTR_PROG -l $SCRATCH_MNT/hello | filter_attr_output
+Cc: Seth Forshee <sforshee@digitalocean.com>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Aleksa Sarai <cyphar@cyphar.com>
+Cc: <fstests@vger.kernel.org>
+Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+---
+ tests/generic/692     | 74 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/692.out |  3 ++
+ 2 files changed, 77 insertions(+)
+ create mode 100755 tests/generic/692
+ create mode 100644 tests/generic/692.out
 
-Looks okay as an alternative to going through a 73aa648c
-("generic/020: move MAX_ATTRS and MAX_ATTRVAL_SIZE logic") revert.
+diff --git a/tests/generic/692 b/tests/generic/692
+new file mode 100755
+index 00000000..825c836a
+--- /dev/null
++++ b/tests/generic/692
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Christian Brauner (Microsoft).  All Rights Reserved.
++#
++# FS QA Test 692
++#
++# Test that users can changed group ownership of a file they own to a group
++# they are a member of.
++#
++# Regression test for commit:
++#
++# 263de29d8397 ("fs: account for group membership")
++#
++. ./common/preamble
++_begin_fstest auto quick perms attr idmapped mount
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	$UMOUNT_PROG $TEST_DIR/target-mnt
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++# . ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++_require_chown
++_require_idmapped_mounts
++_require_user fsgqa
++_require_group fsgqa
++_require_group fsgqa2
++
++uqid=`id -u fsgqa`
++gqid=`id -g fsgqa`
++uqid2=`id -u fsgqa2`
++gqid2=`id -g fsgqa2`
++
++setup_tree()
++{
++	mkdir -p $TEST_DIR/source-mnt
++	chmod 0777 $TEST_DIR/source-mnt
++	touch $TEST_DIR/source-mnt/dir1
++	chown 65534:65534 $TEST_DIR/source-mnt
++	chown 65534:65535 $TEST_DIR/source-mnt/dir1
++
++	mkdir -p $TEST_DIR/target-mnt
++	chmod 0777 $TEST_DIR/target-mnt
++}
++
++setup_idmapped_mnt()
++{
++	$here/src/vfs/mount-idmapped \
++		--map-mount=u:65534:$uqid:1 \
++		--map-mount=g:65534:$gqid:1 \
++		--map-mount=u:65535:$uqid2:1 \
++		--map-mount=g:65535:$gqid2:1 \
++		$TEST_DIR/source-mnt $TEST_DIR/target-mnt
++}
++
++setup_tree
++setup_idmapped_mnt
++stat -c '%U:%G' "$TEST_DIR/target-mnt/dir1"
++_user_do "chgrp $gqid $TEST_DIR/target-mnt/dir1"
++stat -c '%U:%G' "$TEST_DIR/target-mnt/dir1"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/692.out b/tests/generic/692.out
+new file mode 100644
+index 00000000..c963f7f4
+--- /dev/null
++++ b/tests/generic/692.out
+@@ -0,0 +1,3 @@
++QA output created by 692
++fsgqa:fsgqa2
++fsgqa:fsgqa
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+base-commit: 568ac9fffeb6afec03e5d6c9936617232fd7fc6d
+-- 
+2.34.1
+
