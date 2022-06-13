@@ -2,121 +2,165 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD685CCA47B
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jun 2022 08:35:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3137C43334
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jun 2022 13:41:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238890AbiFMIfq (ORCPT
+        id S1378296AbiFMNlA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Jun 2022 04:35:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44638 "EHLO
+        Mon, 13 Jun 2022 09:41:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233981AbiFMIfp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jun 2022 04:35:45 -0400
-Received: from mx0a-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A15513E3E;
-        Mon, 13 Jun 2022 01:35:45 -0700 (PDT)
-Received: from pps.filterd (m0098420.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 25D7wsuk029182;
-        Mon, 13 Jun 2022 08:35:44 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=pp1; bh=Tq+rZQb+sQaBbAJUXL5hT94FZDnniayd4qMtgChCTks=;
- b=rKvvzjUNDn/8P3q5T6NHNxSOjMZf/xHoY2ACMFFUp5UHp6RYPeCGI3lrywHctg3tYTeU
- cRRWifzFw3e3GCHUIl1kN2RB4Tx5sWRc6jRFjiSaril8FNPYxsEvXrPjCN2JOpb9BjjP
- y9ITX98VKRaCg5ZvKdiX9glkzvAP6OZsxor5zWBriiZevqShDsOrKWiinPwHdAmDXqp3
- YmD6UuNDOncVvs5DFa623YCVG0AwZhgYY8jViwXm1TKU+4i5IJXxE6gPlnjlDkcd8WDK
- wZfgPjiQ9LujtnVz+PQqPMhX/nXVqBW54BeMHvj+C1VNcNVxg5wMhawovSgobOA5kPhM Jw== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (PPS) with ESMTPS id 3gn54835h2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 13 Jun 2022 08:35:44 +0000
-Received: from m0098420.ppops.net (m0098420.ppops.net [127.0.0.1])
-        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 25D8Zh8L010644;
-        Mon, 13 Jun 2022 08:35:43 GMT
-Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
-        by mx0b-001b2d01.pphosted.com (PPS) with ESMTPS id 3gn54835gs-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 13 Jun 2022 08:35:43 +0000
-Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
-        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 25D8KFZG021366;
-        Mon, 13 Jun 2022 08:35:42 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma06ams.nl.ibm.com with ESMTP id 3gmjajaemh-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 13 Jun 2022 08:35:41 +0000
-Received: from d06av24.portsmouth.uk.ibm.com (mk.ibm.com [9.149.105.60])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 25D8ZdOc10879334
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 13 Jun 2022 08:35:39 GMT
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 5EE2942041;
-        Mon, 13 Jun 2022 08:35:39 +0000 (GMT)
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id B0D014203F;
-        Mon, 13 Jun 2022 08:35:37 +0000 (GMT)
-Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.28.249])
-        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Mon, 13 Jun 2022 08:35:37 +0000 (GMT)
-Date:   Mon, 13 Jun 2022 14:05:34 +0530
-From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
+        with ESMTP id S1379262AbiFMNkJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jun 2022 09:40:09 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1143EDEC9;
+        Mon, 13 Jun 2022 04:31:02 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id C3FD51FA74;
+        Mon, 13 Jun 2022 11:31:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1655119860; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=5ug4pTmLE6Ljo/diY5BUB/450JYo9SA6nq2eET7/wAU=;
+        b=F2MOaYco0NXpy1cS2EbcaUqibjAgxytQIGAK3sEgdQYJ2DU6pwSsYLDPsy+XUoAGVxxM+j
+        sTEjgcmCDVwyg02MzezLa73bPJY1F8jDNUbeYc30D+6MCtzw/Rdewj+aHqQO16HtuyjtGN
+        HZUqC3eyikQkg9GEvn0D1qyAAOBXno4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1655119860;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=5ug4pTmLE6Ljo/diY5BUB/450JYo9SA6nq2eET7/wAU=;
+        b=q9YTR1K6ixcNd6Xo7UwAfmN9QY/HdW6UxmqWmdhMGlRDw1W+Gq9OMN1/nJzfFuvNVz3z+x
+        C4h8g/OoKmgXAgBg==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 37116134CF;
+        Mon, 13 Jun 2022 11:31:00 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id WBTUCvQfp2ICeQAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Mon, 13 Jun 2022 11:31:00 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id 752b8581;
+        Mon, 13 Jun 2022 11:31:43 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
 To:     fstests@vger.kernel.org
-Cc:     zlang@redhat.com, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <Yqb21hTVUvob/sgc@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
-References: <20220516084505.97655-1-ojaswin@linux.ibm.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220516084505.97655-1-ojaswin@linux.ibm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: 6HYtaS7_8OogXTh-y_nA-LkW2SGiBzIF
-X-Proofpoint-ORIG-GUID: CzJHXZ451k5fwWDgfT5MaGxdz85Doc72
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>,
+        Dave Chinner <david@fromorbit.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v3 1/2] generic/020: adjust max_attrval_size for ceph
+Date:   Mon, 13 Jun 2022 12:31:41 +0100
+Message-Id: <20220613113142.4338-2-lhenriques@suse.de>
+In-Reply-To: <20220613113142.4338-1-lhenriques@suse.de>
+References: <20220613113142.4338-1-lhenriques@suse.de>
 MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.874,Hydra:6.0.517,FMLib:17.11.64.514
- definitions=2022-06-13_02,2022-06-09_02,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 impostorscore=0
- clxscore=1011 adultscore=0 bulkscore=0 spamscore=0 lowpriorityscore=0
- priorityscore=1501 mlxlogscore=638 suspectscore=0 mlxscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2204290000 definitions=main-2206130038
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Greetings,
+CephFS doesn't have a maximum xattr size.  Instead, it imposes a maximum
+size for the full set of xattrs names+values, which by default is 64K.
 
-Please let me know if there are any reviews/suggestions on this
-patch.
+This patch fixes the max_attrval_size for ceph so that it is takes into
+account any already existing attrs in the file.
 
-Thank you!
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+ tests/generic/020 | 33 +++++++++++++++++++++++++--------
+ 1 file changed, 25 insertions(+), 8 deletions(-)
 
-On Mon, May 16, 2022 at 02:15:05PM +0530, Ojaswin Mujoo wrote:
-> A recent ext4 patch discussed [1] that some devices (eg LVMs) can
-> have a discard granularity as big as 42MB which makes it larger
-> than the group size of ext4 FS with 1k BS.  This causes the FITRIM
-> IOCTL to fail.
-> 
-> This case was not correctly handled by this test since
-> "_require_batched_discard" incorrectly interpreted the FITRIM
-> failure as SCRATCH_DEV not supporting the IOCTL. This caused the test
-> to report "not run" instead of "failed" in case of large discard granularity.
-> 
-> Fix "_require_batched_discard" to use a more accurate method
-> to determine if discard is supported.
-> 
-> [1] commit 173b6e383d2
->     ext4: avoid trim error on fs with small groups
-> 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> ---
-> 
-> Changes since v2 [1] 
-> 
-> *  Eliminated redundant $ret variable
-> 
-> [1]
-> https://lore.kernel.org/all/20220516063951.87838-1-ojaswin@linux.ibm.com/
+diff --git a/tests/generic/020 b/tests/generic/020
+index d8648e96286e..b91bca34dcd4 100755
+--- a/tests/generic/020
++++ b/tests/generic/020
+@@ -51,13 +51,9 @@ _attr_list()
+     fi
+ }
+ 
+-# set fs-specific max_attrs and max_attrval_size values. The parameter
+-# @max_attrval_namelen is required for filesystems which take into account attr
+-# name lengths (including namespace prefix) when determining limits.
++# set fs-specific max_attrs
+ _attr_get_max()
+ {
+-	local max_attrval_namelen="$1"
+-
+ 	# set maximum total attr space based on fs type
+ 	case "$FSTYP" in
+ 	xfs|udf|pvfs2|9p|ceph|nfs)
+@@ -112,6 +108,16 @@ _attr_get_max()
+ 		# overhead
+ 		let max_attrs=$BLOCK_SIZE/40
+ 	esac
++}
++
++# set fs-specific max_attrval_size values. The parameter @max_attrval_namelen is
++# required for filesystems which take into account attr name lengths (including
++# namespace prefix) when determining limits; parameter @filename is required for
++# filesystems that need to take into account already existing attrs.
++_attr_get_maxval_size()
++{
++	local max_attrval_namelen="$1"
++	local filename="$2"
+ 
+ 	# Set max attr value size in bytes based on fs type
+ 	case "$FSTYP" in
+@@ -128,7 +134,7 @@ _attr_get_max()
+ 	pvfs2)
+ 		max_attrval_size=8192
+ 		;;
+-	xfs|udf|9p|ceph)
++	xfs|udf|9p)
+ 		max_attrval_size=65536
+ 		;;
+ 	bcachefs)
+@@ -139,6 +145,15 @@ _attr_get_max()
+ 		# the underlying filesystem, so just use the lowest value above.
+ 		max_attrval_size=1024
+ 		;;
++	ceph)
++		# CephFS does not have a maximum value for attributes.  Instead,
++		# it imposes a maximum size for the full set of xattrs
++		# names+values, which by default is 64K.  Compute the maximum
++		# taking into account the already existing attributes
++		max_attrval_size=$(getfattr --dump -e hex $filename 2>/dev/null | \
++			awk -F "=0x" '/^user/ {len += length($1) + length($2) / 2} END {print len}')
++		max_attrval_size=$((65536 - $max_attrval_size - $max_attrval_namelen))
++		;;
+ 	*)
+ 		# Assume max ~1 block of attrs
+ 		BLOCK_SIZE=`_get_block_size $TEST_DIR`
+@@ -181,8 +196,7 @@ echo "*** remove attribute"
+ _attr -r fish $testfile
+ _attr_list $testfile
+ 
+-max_attrval_name="long_attr"	# add 5 for "user." prefix
+-_attr_get_max "$(( 5 + ${#max_attrval_name} ))"
++_attr_get_max
+ 
+ echo "*** add lots of attributes"
+ v=0
+@@ -226,6 +240,9 @@ done
+ _attr_list $testfile
+ 
+ echo "*** really long value"
++max_attrval_name="long_attr"	# add 5 for "user." prefix
++_attr_get_maxval_size "$(( 5 + ${#max_attrval_name} ))" "$testfile"
++
+ dd if=/dev/zero bs=1 count=$max_attrval_size 2>/dev/null \
+     | _attr -s "$max_attrval_name" $testfile >/dev/null
+ 
