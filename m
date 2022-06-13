@@ -2,131 +2,121 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78118C43334
-	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jun 2022 10:48:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD685CCA47B
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jun 2022 08:35:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231658AbiFLKsz (ORCPT
+        id S238890AbiFMIfq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 12 Jun 2022 06:48:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41364 "EHLO
+        Mon, 13 Jun 2022 04:35:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236195AbiFLKsy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jun 2022 06:48:54 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BCFD1C13F
-        for <fstests@vger.kernel.org>; Sun, 12 Jun 2022 03:48:53 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B8C0C60B0D
-        for <fstests@vger.kernel.org>; Sun, 12 Jun 2022 10:48:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A35B7C34115;
-        Sun, 12 Jun 2022 10:48:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1655030932;
-        bh=CCJY0nVNy6wwBHEqcQnnlUMospSLdfj1EzuwmMjepTE=;
-        h=Date:From:To:Subject:From;
-        b=qJTnRXSIAFzavmle5btxDRya28prA0F2AVJAaeU3U58ygDguJXnIULS2MHkZEebST
-         OY3KqQR+Dt1ybMFht2fsGcJmlJihOYfO/4Y70w9QnImK2AjxSqLdlTRmM7bhMDhmcE
-         jKO2riLc41N0lRakH5GspDF80/tdeXUC6IcogpaDJ4VV9pcm3C7kG75Z5FGM1xpK9P
-         /lwgmCsVMQ9aMg/PGTgSJ/S8Pn5whB3GVYjech0s07TggdRb2ED2R/CL3BEmFYrpes
-         pfrVMZ41yya662u9I7tXOUyxXaoOXNuBoAEU6Ix17iLDuRgKynD1qL2pbcss8nKBIF
-         qDbNGF42fhIVQ==
-Date:   Sun, 12 Jun 2022 18:48:44 +0800
-From:   Zorro Lang <zlang@kernel.org>
+        with ESMTP id S233981AbiFMIfp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jun 2022 04:35:45 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A15513E3E;
+        Mon, 13 Jun 2022 01:35:45 -0700 (PDT)
+Received: from pps.filterd (m0098420.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 25D7wsuk029182;
+        Mon, 13 Jun 2022 08:35:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
+ subject : message-id : references : content-type : in-reply-to :
+ mime-version; s=pp1; bh=Tq+rZQb+sQaBbAJUXL5hT94FZDnniayd4qMtgChCTks=;
+ b=rKvvzjUNDn/8P3q5T6NHNxSOjMZf/xHoY2ACMFFUp5UHp6RYPeCGI3lrywHctg3tYTeU
+ cRRWifzFw3e3GCHUIl1kN2RB4Tx5sWRc6jRFjiSaril8FNPYxsEvXrPjCN2JOpb9BjjP
+ y9ITX98VKRaCg5ZvKdiX9glkzvAP6OZsxor5zWBriiZevqShDsOrKWiinPwHdAmDXqp3
+ YmD6UuNDOncVvs5DFa623YCVG0AwZhgYY8jViwXm1TKU+4i5IJXxE6gPlnjlDkcd8WDK
+ wZfgPjiQ9LujtnVz+PQqPMhX/nXVqBW54BeMHvj+C1VNcNVxg5wMhawovSgobOA5kPhM Jw== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (PPS) with ESMTPS id 3gn54835h2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 13 Jun 2022 08:35:44 +0000
+Received: from m0098420.ppops.net (m0098420.ppops.net [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 25D8Zh8L010644;
+        Mon, 13 Jun 2022 08:35:43 GMT
+Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
+        by mx0b-001b2d01.pphosted.com (PPS) with ESMTPS id 3gn54835gs-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 13 Jun 2022 08:35:43 +0000
+Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
+        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 25D8KFZG021366;
+        Mon, 13 Jun 2022 08:35:42 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma06ams.nl.ibm.com with ESMTP id 3gmjajaemh-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 13 Jun 2022 08:35:41 +0000
+Received: from d06av24.portsmouth.uk.ibm.com (mk.ibm.com [9.149.105.60])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 25D8ZdOc10879334
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 13 Jun 2022 08:35:39 GMT
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 5EE2942041;
+        Mon, 13 Jun 2022 08:35:39 +0000 (GMT)
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B0D014203F;
+        Mon, 13 Jun 2022 08:35:37 +0000 (GMT)
+Received: from li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com (unknown [9.43.28.249])
+        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
+        Mon, 13 Jun 2022 08:35:37 +0000 (GMT)
+Date:   Mon, 13 Jun 2022 14:05:34 +0530
+From:   Ojaswin Mujoo <ojaswin@linux.ibm.com>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to 0882b0913eae
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="WkscD3Jz6Lp0"
+Cc:     zlang@redhat.com, riteshh@linux.ibm.com,
+        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3] common/rc: Modify _require_batched_discard to improve
+ test coverage
+Message-ID: <Yqb21hTVUvob/sgc@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+References: <20220516084505.97655-1-ojaswin@linux.ibm.com>
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Message-Id: <20220612104851.A35B7C34115@smtp.kernel.org>
+In-Reply-To: <20220516084505.97655-1-ojaswin@linux.ibm.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: 6HYtaS7_8OogXTh-y_nA-LkW2SGiBzIF
+X-Proofpoint-ORIG-GUID: CzJHXZ451k5fwWDgfT5MaGxdz85Doc72
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+MIME-Version: 1.0
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.874,Hydra:6.0.517,FMLib:17.11.64.514
+ definitions=2022-06-13_02,2022-06-09_02,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 impostorscore=0
+ clxscore=1011 adultscore=0 bulkscore=0 spamscore=0 lowpriorityscore=0
+ priorityscore=1501 mlxlogscore=638 suspectscore=0 mlxscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2204290000 definitions=main-2206130038
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Greetings,
 
---WkscD3Jz6Lp0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Please let me know if there are any reviews/suggestions on this
+patch.
 
-Hi all,
+Thank you!
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2022.06.12 release.
-
-This week we don't have many changes, but have 3 new test cases as xfs/081,
-xfs/547 and xfs/548. The xfs/081 covers an old bug fix on linux v5.16, so
-it won't break new kernel, but might cause testing hang on kernel without
-this fix. The x/547 and x/548 cover a new xfs feature on later kernel 5.19
-or 5.20, so they won't break your current test.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-0882b0913eae xfs: Verify correctness of upgrading an fs to support large extent counters
-
-New commits ([N]ew, [U]pdate):
-
-Chandan Babu R (4):
-[U]      [5bb78c56ef59] xfs/270: Fix ro mount failure when nrext64 option is enabled
-[U]      [63b956a156ea] common/xfs: Add helper to check if nrext64 option is supported
-[N]      [9b448f06fe21] xfs: Verify that the correct inode extent counters are updated with/without nrext64
-[N]      [0882b0913eae] xfs: Verify correctness of upgrading an fs to support large extent counters
-
-Naohiro Aota (1):
-[U]      [3493b8dc8b3d] btrfs/220: zoned: skip nodatacow mount option for zoned btrfs
-
-Zorro Lang (2):
-[U]      [085faee2742c] xfs: corrupted xattr should not block removexattr
-[N]      [e937e23d2021] common/filter: filter out extra mount error output
-
-
-Code Diffstat:
-
- common/filter     |  13 ++++++-
- common/xfs        |  12 ++++++
- tests/btrfs/220   |  18 +++++----
- tests/xfs/081     |  80 ++++++++++++++++++++++++++++++++++++++
- tests/xfs/081.out |   2 +
- tests/xfs/154     |   2 +-
- tests/xfs/154.out |   2 +-
- tests/xfs/158     |   2 +-
- tests/xfs/158.out |   2 +-
- tests/xfs/270     |  26 ++++++++++++-
- tests/xfs/270.out |   1 -
- tests/xfs/547     |  92 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/547.out |  13 +++++++
- tests/xfs/548     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/548.out |  12 ++++++
- 15 files changed, 372 insertions(+), 17 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---WkscD3Jz6Lp0
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmKlxIIACgkQlNbPkfr2
-tMzMTBAAsJlkkPlrveR/1LPro660xUu/nEfvONTZojqKRJtPRyT98ngCA0zq17Am
-GyANnGGQXmeh+Bci3IXUqSITWqMNS8oBiLkBJdbybLFbBe3da/aul1LHtsMKlLfC
-XhEX1hEtGtKPqbqadZauOC0AtVOxos/U674DXH1h9db1YTT25AM/GSZGKDfIVZv/
-LqJxSy+b7+cQq+wOHCC+cmE1qI7M8d/zoCWOALKxDFR1kRRQjwLn76giIsJ2VyYq
-3sJ/+LuBP45hnO6Ewb/6uzXP9OdJRJ1Ss9Yaw9b39/0xcbdh6qlzTmnhcgJ2o9NA
-R6LYlkAMQnnwBck3BNhNRUTSRgIQKMI653o3GWR7R9Gh4jLLx9jTL4A8MVAterWo
-B1sJ7Gn3DA0vp8qu7BLjbPJgrXXnZXH1BBisxs4wOjrrFAdnhRvW0zNUCl0PgBOi
-4JZzj2itufIav4qCfidVyP7N2Xh3ui6b9OkPG0zCG+rBjC+oAhD3h19904G9xY3H
-Jy1m/H3ksb9ush2j8uv5PIq3/W0Sr1eUsaGpygK+RfYjQh2QMsZ0oXlQMrFwy2Bz
-0hrNBHQh+yjBALWxnl0f94sn4J3a6zPxm2c1Cr34uV4NeaGk+vkcf6fKQyXIUO9H
-qEIMXWdstZyidwjkh7/v13fwN3602cYjtkJ+LdhVVrXjIhu2izg=
-=HIPG
------END PGP SIGNATURE-----
-
---WkscD3Jz6Lp0--
+On Mon, May 16, 2022 at 02:15:05PM +0530, Ojaswin Mujoo wrote:
+> A recent ext4 patch discussed [1] that some devices (eg LVMs) can
+> have a discard granularity as big as 42MB which makes it larger
+> than the group size of ext4 FS with 1k BS.  This causes the FITRIM
+> IOCTL to fail.
+> 
+> This case was not correctly handled by this test since
+> "_require_batched_discard" incorrectly interpreted the FITRIM
+> failure as SCRATCH_DEV not supporting the IOCTL. This caused the test
+> to report "not run" instead of "failed" in case of large discard granularity.
+> 
+> Fix "_require_batched_discard" to use a more accurate method
+> to determine if discard is supported.
+> 
+> [1] commit 173b6e383d2
+>     ext4: avoid trim error on fs with small groups
+> 
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> ---
+> 
+> Changes since v2 [1] 
+> 
+> *  Eliminated redundant $ret variable
+> 
+> [1]
+> https://lore.kernel.org/all/20220516063951.87838-1-ojaswin@linux.ibm.com/
