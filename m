@@ -2,179 +2,176 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1D89C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jun 2022 05:08:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A9B4C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jun 2022 05:09:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235203AbiFNFIz (ORCPT
+        id S234888AbiFNFJB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Jun 2022 01:08:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53074 "EHLO
+        Tue, 14 Jun 2022 01:09:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234888AbiFNFIy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jun 2022 01:08:54 -0400
-Received: from EUR02-AM5-obe.outbound.protection.outlook.com (mail-eopbgr00062.outbound.protection.outlook.com [40.107.0.62])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CF8B3A70A
-        for <fstests@vger.kernel.org>; Mon, 13 Jun 2022 22:08:53 -0700 (PDT)
+        with ESMTP id S234653AbiFNFJA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jun 2022 01:09:00 -0400
+Received: from EUR02-AM5-obe.outbound.protection.outlook.com (mail-eopbgr00079.outbound.protection.outlook.com [40.107.0.79])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94BF63A5EB
+        for <fstests@vger.kernel.org>; Mon, 13 Jun 2022 22:08:59 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=IYKOn1owV+hVUygybJob6d2uLb6aLez+Gqek66PswCX+EMmsg8+/b7HjQcUut++DdR8+f5L3eHDjppY9jiuSs45gnRZ10pu3Hf9Po7FUGyr2tV0bk9XCOg61kXCx5um4t8JKI9vPVXWX0lxNlzio8r9XCMtmmNPthYXfWCpKSueQPP5Wgazpq2I3arbdH8NAlwD2ohtVUIdRIA9ifn8Yo+J90N4BJW1LgTLupjSnsvmapJYAH7I6AGRoQcEB0jDDUoIOmLvS1A66ghOrex0IbDdwQadTuXiML0x7Wk7s6tzh7W3fYDhKt8o74Ms86Tq12yVtL5+J+cYfO4+oM5TaHw==
+ b=aziL2xHuUFZy/M9ZdwT6XxOotD28+vVMhondywR1aqn5HuQGDvSDWbZLKWEOCFcgQ2e2A0BQv9xTg43WW1HW/L0sk4V/Yd5v/xrBD9qyp63fmduaJyh/u39T+6IHcVTQIQimHcvqjwCyLEbCyd8SfYRy0Wu0ib5HUaa4x/SQYnX2GsQ7f7zaLqOAVFkWrGZ5VWAcJgJdzzNLSDAuHC25APzBYvdLkvgvrK5aHcRqn5Abn48PFsDbxDXz2iDWmIMwSWS/70N0zA77R3fZMmhAp33homlZt0qhID9fXuyFNAnAcEPGUtnhVhDvZFlKa/Uo2IYvWxGnwyC3n2NjANjK+w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Oe9B+yCKJMqEWCQ1/acr3m41RfkPeFSQIIEQ3PNT7KA=;
- b=KbZ9EaMQYc0fcB45v8DhxlvXRXiqDpkKRqFf7oCZW0QekVomNQm9ocnnTtg1c+5JgX3W1VID/uleywhD77uU4ModRiofrBumxSYUogXTK1bi0HVrpbYW/W0K0Q6T/XYvpD0ZdscPvgkangJN2vUSCTW3hLQLfhkF2bs8GGmOWiJAQtDnSaC0+7e3KSdcDLhTRPQyxHF5cNYJm6TqykX8DvljrMFju+ic+1BPqPm0s9zBcJR7L+A/Npias8xVHbGYB4mZri/o4PhKZqawPqDi8ihdf+QhSz3jgK8cq98gOPZHzLs7mPWvqyAXyGAfMOn9GYEKMaL16h361QX61k7TfA==
+ bh=cN3MytubStkzHUZ5PVFCfVRCNbVkip9GtbUmjuT95eo=;
+ b=ZmWKZTRe/HjHXKiwp72o59EiFJHXB5xbxtYulTT3lQkt0WvTZOkuEbZxyf4Wav4TFseKNqvAzHwbkqW+jBI+Sdh60iOx74xrYFFEXU00wmOpTK91tUHU4+lzNwysmH8oop+QKyR44fcbYUq9Mbv9stOt0BllfxDsCnAGlWEj8CbiSfe5RhM/+gifVsPCWp87bRdYysGZyi1l1L7PegPkP0TAQtulMyclnYmiOl+Irpw0TE+DQ5DU5G61IjNwifDHNEinBF723AMgDFKtVpptIg/r/MwIMfGnYw8KU7G882QWPExJaGfKrv6ZDCejrzIKBqt9SC+5/mBwkVPgOdwEiw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
  dkim=pass header.d=suse.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Oe9B+yCKJMqEWCQ1/acr3m41RfkPeFSQIIEQ3PNT7KA=;
- b=CxwFtSKTyugVxnw+IFNfZh1Yb0ZgJiJfe749Vsbd5d956OvQmlIO7r8XYx859tTTSHkdeHg5Pm7gKN9V2Xf2E+Cp8wgtevF1J3ihxtvtGpmxZ40PZuPCbs79/msLVZ8xMSbg/YYqGkdu690RQ4Mp2cvOMGNTrosAhDWt244hpHWeHET2XRaI+9CJ1lH+KyAw8uB3g7S1RbD6bTZXYfY2gHJV4cd8rPsRvIBJkSFFD2820GfKnT5UOzgObtj2hfyF61WRZaP6oz/YYHZQd8N7DGiS7SQNUHaTwsfY51hoEcZ6uxKlEAfkQ+QOXZ5JAjYYOSNXuArRjM9J218oDIZfDw==
+ bh=cN3MytubStkzHUZ5PVFCfVRCNbVkip9GtbUmjuT95eo=;
+ b=u25Yzun8+xxHiejNuEj2o/Xk2HwrEIcn8pl1hg+2l3ysMc7PJ+YV4E5bNVFZGH1V+ENnaHS74tMb12Pf5/ukHDAL7yb5nwDAyniGKBYQCWMoGVj2exZW5Y/uXyrDx0tbbs6RAuUh/dIFcw4fpDg6XxADj+lsEQRORuk7Poz3dOi1sD2IVziW1RLd7ouRfIYPnOyvIUh6DkPAK0VNPkjTpj8eNLW0QUQDzqsxUhk6q4797B6Co7VVGjxIrdfeFFdcUhWyVQ7LM6FUkKYhaGDwRg5fbsyu98QRlQ3baFq2yxk8AzxDUk/JI+OsY56dQnqPR4zgqOruqd5fhNfzbxgQMg==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=suse.com;
 Received: from DB6PR0401MB2663.eurprd04.prod.outlook.com (2603:10a6:4:3b::12)
  by AS4PR04MB9481.eurprd04.prod.outlook.com (2603:10a6:20b:4ea::17) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5332.22; Tue, 14 Jun
- 2022 05:08:51 +0000
+ 2022 05:08:57 +0000
 Received: from DB6PR0401MB2663.eurprd04.prod.outlook.com
  ([fe80::79f5:6373:c4c1:ab3c]) by DB6PR0401MB2663.eurprd04.prod.outlook.com
  ([fe80::79f5:6373:c4c1:ab3c%5]) with mapi id 15.20.5332.021; Tue, 14 Jun 2022
- 05:08:51 +0000
+ 05:08:57 +0000
 From:   An Long <lan@suse.com>
 To:     fstests@vger.kernel.org
 Cc:     An Long <lan@suse.com>
-Subject: [PATCH 1/2] common/rc: add _parse_size_from_string
-Date:   Tue, 14 Jun 2022 13:08:42 +0800
-Message-Id: <20220614050843.11802-1-lan@suse.com>
+Subject: [PATCH 2/2] common/rc: fix input value to _scratch_mkfs_sized
+Date:   Tue, 14 Jun 2022 13:08:43 +0800
+Message-Id: <20220614050843.11802-2-lan@suse.com>
 X-Mailer: git-send-email 2.35.3
+In-Reply-To: <20220614050843.11802-1-lan@suse.com>
+References: <20220614050843.11802-1-lan@suse.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: SG2PR02CA0098.apcprd02.prod.outlook.com
- (2603:1096:4:92::14) To DB6PR0401MB2663.eurprd04.prod.outlook.com
+X-ClientProxiedBy: SG2PR02CA0101.apcprd02.prod.outlook.com
+ (2603:1096:4:92::17) To DB6PR0401MB2663.eurprd04.prod.outlook.com
  (2603:10a6:4:3b::12)
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: bfb2214f-9a60-44b8-ed7b-08da4dc3f872
+X-MS-Office365-Filtering-Correlation-Id: cbf792a3-0bde-494e-3641-08da4dc3fc5c
 X-MS-TrafficTypeDiagnostic: AS4PR04MB9481:EE_
-X-Microsoft-Antispam-PRVS: <AS4PR04MB948188B273641B493F4BA478C6AA9@AS4PR04MB9481.eurprd04.prod.outlook.com>
+X-Microsoft-Antispam-PRVS: <AS4PR04MB9481B3D863C773296DC2F81AC6AA9@AS4PR04MB9481.eurprd04.prod.outlook.com>
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 5OzZUeqUfgL7XJvP/QJrdh2DHsfgETD3E6cEdhBhj+6D/k+UXGesbSrAw5j8MFRVUtusp+g2g3Qb6FEnYzL/JFEYU6L10ERpUt0ODiUKb5xn79QDB8mx5NPZichNKMijJkE0+qNhPpZw7+DHMMhHlc7z9T6IcVrE9tQo1eHoTJAVj98aI02VWaj1iZBcbRwbl/4Ih1U3u/5leW6O+uD+W2Y7uGxu1frjjB+k2bS4YtpMDU1a/H6lHtoOp+hvwXDQDQAEzv2izSxufX69zFzON1rABybPGOR64k31jkxcSETjzHOjyd+UHdNbpy3gLaBZUnIwc2GdWjbf2UkMXOdk20d9TA7tZQsQp2GCliy5lot3gZq0JrxvyoGNWToTV+83W7HttPH+BijiWi7SYS5LuJG6YAgGesLVkpSj4hqN7bNuyiPoXDmxeZ2/RwVkVTk5bFYSY1TG3KRXBRmuWMaq6huym1spSMsJ1Tvu8wU13oYrpmgOqzv8NcJ40A/+DS3vDn9vum/HDbuxZe88UMeXmuW5KI07tHknVYj4cER+ILRsbY3+KJqO7QzWjWXFRmWt9Vpop50EzYNg40PRFX0+J6K2fw3aCsvJ6CH07WZTmP/qhjor6UiidevRJ61IRkIPBJ1im2YXa/546yH0WhOruA==
+X-Microsoft-Antispam-Message-Info: PhQF9UKfYIm7GeNx0RGypvwdyc1+rt3xkbMmS95PRW7a/3pACklLb5iymW0KC+z1MemS8iFptYNFWRh6dlSJQaYQEmbo10rO1uydQYO5qZC6e/UtigebDlTcfGdCvGoxIYUAyh7SzugdWS0kz9b2jFe59+uPBUINGlSY4yVvBHoSNH1kqrzTMODuCWEIUcMIEPy0pblB4M1UYD9QD2DpNFbDvBTRGxTn1JxKTgJefu71LvD+Di1r3pwHrVwKiEjeNH+YXOBvcJWrJtJyNbQc4YKo8vZnnAmQP2XkZkR/lkBt8SVxLEyzN6ntqXuzi9Jg8sCnfbZLYispKIxoWV3Vzv7lHNOnl5+c0/ypxK/qRjQUoPAC9Nz0G0B7HYe/MPUL6F/nB/e2B7SXo4TzekfdX0cBIIYnu3eyL3RcceOoaryzTCD3er1wKMYLv7zBLr8raRNqwT23xPTCFpZeowWXrzwjO4/HkevB9J4P5Jp9W5Lf+KPtS/1IYryBvLdM+bSK7bQ26YbCSmp1P6xHioPMtlnkPPB5ZWlxWh5Dt/8Y3FT/+l52G4tBqjMRGvFVG3Fuv43XWltjfc68PTdNcEbzLg/xvgz3VJ5k3lql18jkiKPn1/8MmUCqLlHzZ6KVVxyYqlfpC9EtN2p2PHMUA+7fkw==
 X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0401MB2663.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(366004)(316002)(6486002)(508600001)(6512007)(6916009)(8936002)(8676002)(5660300002)(36756003)(86362001)(4326008)(2616005)(66946007)(66556008)(66476007)(2906002)(83380400001)(186003)(1076003)(107886003)(38100700002)(6506007)(6666004);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?36VBn9RDYV4dQYPDWt1pGyz6MoupxxRFJmv3b/wxtkTCU+YIq9eHCLlnTTKr?=
- =?us-ascii?Q?uce6C+0DdWhRBMdYUQzZ1upjWM9liQk4u6gqKKg7NyQHetO7akk74NNQHg/V?=
- =?us-ascii?Q?8W/Q3lMhtFvkudRLnfPsBfAx0btRfKoKpaP549oFR9sRpswMUhNycyOx+ALX?=
- =?us-ascii?Q?D5EyroF6dzuBDwrqJg5a5gGDMZvj0Hu9/SMb2o4mSwmuT3JHhSZ1825SnUL+?=
- =?us-ascii?Q?9IOjwtZm4LWm38bfjoJY8DN8S5meOrK53HPS0fGq+jn3VLusUOrmL1sKuTJ+?=
- =?us-ascii?Q?Lj0407/JaCZR/U+NGzM9IUWDfZXMszZpG6Qny/oMYtsR8HUtLk/zyJa5buUQ?=
- =?us-ascii?Q?ebcisM08eZKvNp+pD5bBiWv3PhE8Q+x7NFj6WaNCmG0QlrOWAePJitZGbo4R?=
- =?us-ascii?Q?AebYmxN8p3VGQFHu4OtG+9kJqOXmuz92rhNYvDUq+mZNC901yVKfoiGGN1yM?=
- =?us-ascii?Q?bESbQwkYat5gtVwWg+8Jf1vAoLmzWR9udJfXf4mSHpIC12j81ga2Knv+S98i?=
- =?us-ascii?Q?P9fcdMIX3NRo8Rc4ovAtdx1IUFJCAxFVaxdHhn32KEevSn+Yg041jynozoBT?=
- =?us-ascii?Q?6tkyajLAPg1k6hLe5iMbmkQ82uRBIxgGi/7Q1YpXGjGCQFqM/+9CHNUNPEI+?=
- =?us-ascii?Q?PtyHM+jLKA3kOpabHhAR1edQ+j1Xc10i8HZgRL08AwVIBLFinEfLEh/AdgS4?=
- =?us-ascii?Q?6rOQwljka5rbWu0zB38gXpRvg4INSeceLDKVNsd/rBuJhl87NgGoS/foKQ5S?=
- =?us-ascii?Q?zbkdGZSd+pKACUdn1mIJieJPB78NO4UFXWOGSMUFL1rKozVoUpm+sGam+33n?=
- =?us-ascii?Q?Dk8hWh9GJ1s6Se859mv1NJuVfaS+nm4rMTNOXNjeZD4hDkC7A6CkaD8Mpine?=
- =?us-ascii?Q?Bo5lepztyJmOOZhfSvHOX47tdzJ7YQzOcGj82L3ZruuT8sf2NpBPk/01EjvJ?=
- =?us-ascii?Q?FDZOx/d/uGaVaExI/fGVEn5kS9tWYSnVV2K/TMV4be99mCAw2KSTXzHZQkAh?=
- =?us-ascii?Q?84JJ2UzLmzyOddVrJtyRheZ3qCPf47YaMmewBOFzS5v7WjNiPuqlxat+cKLt?=
- =?us-ascii?Q?hGOGP5ALJTWbv84aRvZMS9oYXXhWOnbfB1amcBjQEpus/ZJVI+kwiiqWcgZX?=
- =?us-ascii?Q?lDPMY+r8HlIQREPlsD2VQNF+85c5ejhMYgQBkQjvuS+pxP6HUX8AK7Necin9?=
- =?us-ascii?Q?IBl0fDgn5KU1Xkghw4uaqJDq5FjWnOKf+Eu5otob04+mgAfnLrlRJekrqF5v?=
- =?us-ascii?Q?yPPMsdlUbDQ1gI12EDfMR9rMzGgZLKkdtgjBTM7LQgXc/a2BGvC+Thvx5ki1?=
- =?us-ascii?Q?qs3wp1c4tYO7KLt2qIrlmp4eTk0Mdgsb/Yq+3AlIwCjfyVBdvGgc9PIdW5Yl?=
- =?us-ascii?Q?U7vIq7KYVyha6BUZmb0numf0+7vlBvjC+amVqr5v+DRrS8bWSMPOq6D1k/VH?=
- =?us-ascii?Q?8CF4Y50YyoX/HfR9u/eQFb+ekY5lT5pIF2SSJtuWBavNygW3egdFq6qq3WOV?=
- =?us-ascii?Q?sl/W+ow73o+EDh8eWy9wVwb3L+YMIQqoCzL7q9mebs1/15CKDBpBigFLcWcH?=
- =?us-ascii?Q?c6q0rQfoZlxWm0O6jlGZF6rEwrqClJhSEa/8isAJxnDXEakQ6rjP71OpRcpL?=
- =?us-ascii?Q?HFPQbs/YBFgSkOlrH6dCsPFCmF9FyECClkfsMifB+nD+8r86+vHHQ62uFfG9?=
- =?us-ascii?Q?DC9Z8Mhp9dzEv8jfaUGSV7DI75v1p5HZ4er4LXLbpTFrJRlfitY9aAjlbXkd?=
- =?us-ascii?Q?/Wa5WtMRMWe1Zx4H9vQ8f5w5mu1BzWeWDQRKacfe7CQzxNfVB2fd?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?fhHlabvjO5xD0+gyeq3A0il9yaytToNh/RY9ODt9GZapl+hdN/U2zJToGOcA?=
+ =?us-ascii?Q?bnhFQH1Zg8Q31nWE7pCFU0MK9cp0UWTvmziOtsAggRcB4qL0/4QNmrXE4Jci?=
+ =?us-ascii?Q?3oxghFwT22jxSiTpzaKKBHomyoJ4X/sonU1F/36MzNb868m6x953OCmB4jM1?=
+ =?us-ascii?Q?L8WAgJY6tx4dfqGVTNaaU99IBXZBXXxGxEh8InWd13PJ34kP6NIf+E+nW7C/?=
+ =?us-ascii?Q?UMPtZO62eXfZJgGC7BaxTfsHHvqEQfiC2uNHnZ6HlvvbhvjWPw3pF93tVls8?=
+ =?us-ascii?Q?iJI8tnCH9Wu7Dx565LPqp3c7KTlq2ql02e8KA16K9U5QSQSkuENG6DXT6wXk?=
+ =?us-ascii?Q?27zzHajZIMUyclWiVEv9qojoyhNzuJ1cdd/UHSMDS7QZffEgs6RLWalmFfI+?=
+ =?us-ascii?Q?hf05QD7EyWuMeM0Wa7v9w46zap9ei8OMIOWOb1IKjDaKlOh7d0c5PBANYmxI?=
+ =?us-ascii?Q?ECCDOCkeJjk2VKWsZJM9EkNEChNoUEMfUV/XZ5H1NCWZ6A8d5ja8xPvah8+Z?=
+ =?us-ascii?Q?4uZrcf5qPCjN+X6loJlJgcI4PRPP3Eu9CLQKZtUiEpVKHhXNzgyL9B8E+NEB?=
+ =?us-ascii?Q?yUHqtBtOrx2F4E2huTSEICOKv3nlolNeilcDxHwfBkjs5YKeN+Gf38XrtoSn?=
+ =?us-ascii?Q?x2yr96Lb5iU2ix9q0C6VRwaqtxDTIPt/KkiX3WB+0+0I2+LtJTn524BAi5pd?=
+ =?us-ascii?Q?MkI2Ry84dSziJbJ6WiCUyVyGOS8TVcjs10H8z1tL3GWAtul219kp4sVB/D1q?=
+ =?us-ascii?Q?LezzRN6srEHPW7Muzp4ot6gDJhugcR4ML66MnWF5fPZW5KrbZU3VozSLGGds?=
+ =?us-ascii?Q?MYsL3K+EGkMcJv1UkCY66Cpd/mUAv3NncNkYsWzIahBTvAHWFeUAcRx84KmM?=
+ =?us-ascii?Q?X20Qo6s3D8PpJQPH0glX09gLeI9sy4MlyAuCRJyulgnrWc7J/7GWWPSLlEVi?=
+ =?us-ascii?Q?amzLBtx8JonxsumSDjJTLVAE5EhBS7SxHsmU6rjWL2P+Q70hoC33Bx2Yi4v7?=
+ =?us-ascii?Q?z7hbqgQjLR8bdkerSzTZSsuh+/AucIGEEm15veO7YtqebHNyETrNILEZZK8X?=
+ =?us-ascii?Q?yOQiy6ZzpM50siIeMFibnKxeKyD61oGUkwK4JGAU6BEewb88Ty7u+5QP8Q2p?=
+ =?us-ascii?Q?IpxmsX6UHMu2kg700jw+ZMw4pHcV2Bhiw1+imVWlsIbYNq1f0JxjTrG3s2Ws?=
+ =?us-ascii?Q?2hXN02wivC4zok5eU1AKo4OL/4fHCZ/GQqb5fzpGHyW3ZDUlujOZQvrTXp6H?=
+ =?us-ascii?Q?y1X+2nai7N9knOBHQAuqEvv4NJrX79HieiDqM5z440Pd/KENGw8GUqxUrHG9?=
+ =?us-ascii?Q?Ws47U++nySghphgaiXQa2KLnfYocSZXDpcE3PwkB2tEDguNZxphBbasaR35w?=
+ =?us-ascii?Q?sLrT8isqa7/MY2BA+DhS2VvJGgUWV3Wv1dthfXZ4cfk21oAqWhd8HX8NNE0d?=
+ =?us-ascii?Q?Xs6KocWn3U+NP8uBlpAMRSINHTzx/lj+NEND1LOfGyPyFmzJT8CZx0LZGnlL?=
+ =?us-ascii?Q?atxJNb39wUYNhNrx1J8ID9Spzooqaq323o6KmGrgp09gqPHqLkp9wdn3W0rv?=
+ =?us-ascii?Q?sUvDEIrvIKuM2De/c3jkuEeDg8SRrfvIwhOxRTraKM0b3qUF3w/5uNUS1G0D?=
+ =?us-ascii?Q?21fMhzO5OlMIj9n+ZoW676fygccD+t9N02aG5d1t/eo17clAU6dXm8lolqu/?=
+ =?us-ascii?Q?UR1j0gIaB+BOxtLyBitP/MJneAN3g2Nx4Rr+tI/O2lh8vz26Gh2XBHgEzTTw?=
+ =?us-ascii?Q?RfNMOMSO3AGF5AA9eHdSn/3/AVQCibdfThuL8PeGBhvlGHGj3wij?=
 X-OriginatorOrg: suse.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: bfb2214f-9a60-44b8-ed7b-08da4dc3f872
+X-MS-Exchange-CrossTenant-Network-Message-Id: cbf792a3-0bde-494e-3641-08da4dc3fc5c
 X-MS-Exchange-CrossTenant-AuthSource: DB6PR0401MB2663.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Jun 2022 05:08:50.9526
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Jun 2022 05:08:57.5303
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: urJtELYH6dKs9iLEUUFXRVgJucLm7mCTw5Omm3n31JHpcmbzaWmrTdBAeWWJymkQ
+X-MS-Exchange-CrossTenant-UserPrincipalName: oa0cxB3zSYq9KmliS+S41CWzLht3ahGiihLtw/fSsQuBWThUTnmAwwUUunqdOFpv
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS4PR04MB9481
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a helper to convert size value to bytes. This is used to handle
-value as bytes, such as 4k to 4096.
+_scratch_mkfs_sized only receive integer number of bytes as a valid
+input. But if the MKFS_OPTIONS variable exists, it will use the value of
+block size in MKFS_OPTIONS to override input. In case of
+MKFS_OPTIONS="-b 4k", would result in blocksize=4 but not 4096. This
+will give errors to ext2/3/4 etc, and brings potential bugs to xfs or
+btrfs.
+
+In addition, since we can receive various strings, so remove integer
+number check.
 
 Signed-off-by: An Long <lan@suse.com>
 ---
- common/rc | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
+ common/rc | 18 ++++++------------
+ 1 file changed, 6 insertions(+), 12 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index 3c072c16..22050bc2 100644
+index 22050bc2..026007d3 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1028,6 +1028,54 @@ _check_minimal_fs_size()
- 	fi
+@@ -1077,7 +1077,7 @@ _parse_size_from_string()
  }
  
-+# Convert size value to bytes
-+# _parse_size_from_string <size>
-+_parse_size_from_string()
-+{
-+        local str=$1
-+        local mult=1
-+        local size
-+        local endchar
-+
-+        if [[ $str =~ ^[0-9]+[a-zA-Z]$ ]] ; then
-+                size=${str:: -1}
-+                endchar=${str: -1}
-+                case $endchar in
-+                e|E)
-+                                mult=$(($mult * 1024))
-+                                ;&
-+                p|P)
-+                                mult=$(($mult * 1024))
-+                                ;&
-+                t|T)
-+                                mult=$(($mult * 1024))
-+                                ;&
-+                g|G)
-+                                mult=$(($mult * 1024))
-+                                ;&
-+                m|M)
-+                                mult=$(($mult * 1024))
-+                                ;&
-+                k|K)
-+                                mult=$(($mult * 1024))
-+                                ;&
-+                b|B)
-+                                ;;
-+                *)
-+                                echo "unknown size descriptor $endchar"
-+                                exit 1
-+                esac
-+        elif [[ $str =~ ^[0-9]+$ ]] ; then
-+                size=$str
-+        else
-+                echo "size value $str is invalid"
-+                exit 1
-+        fi
-+
-+        size=$(($size * $mult))
-+        echo $size
-+}
-+
  # Create fs of certain size on scratch device
- # _scratch_mkfs_sized <size in bytes> [optional blocksize]
+-# _scratch_mkfs_sized <size in bytes> [optional blocksize]
++# _scratch_mkfs_sized <size> [optional blocksize]
  _scratch_mkfs_sized()
+ {
+ 	local fssize=$1
+@@ -1086,13 +1086,13 @@ _scratch_mkfs_sized()
+ 
+ 	case $FSTYP in
+ 	xfs)
+-		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'`
++		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?size= ?+([0-9]+[a-zA-Z]?).*/\1/p'`
+ 		;;
+ 	btrfs)
+-		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-s ?+([0-9]+).*/\1/p'`
++		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-s ?+([0-9]+[a-zA-Z]?).*/\1/p'`
+ 		;;
+ 	ext2|ext3|ext4|ext4dev|udf|reiser4|ocfs2|reiserfs)
+-		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
++		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+[a-zA-Z]?).*/\1/p'`
+ 		;;
+ 	jfs)
+ 		def_blksz=4096
+@@ -1101,14 +1101,8 @@ _scratch_mkfs_sized()
+ 
+ 	[ -n "$def_blksz" ] && blocksize=$def_blksz
+ 	[ -z "$blocksize" ] && blocksize=4096
+-
+-	local re='^[0-9]+$'
+-	if ! [[ $fssize =~ $re ]] ; then
+-		_notrun "error: _scratch_mkfs_sized: fs size \"$fssize\" not an integer."
+-	fi
+-	if ! [[ $blocksize =~ $re ]] ; then
+-		_notrun "error: _scratch_mkfs_sized: block size \"$blocksize\" not an integer."
+-	fi
++	blocksize=$(_parse_size_from_string $blocksize)
++	fssize=$(_parse_size_from_string $fssize)
+ 
+ 	local blocks=`expr $fssize / $blocksize`
+ 
 -- 
 2.35.3
 
