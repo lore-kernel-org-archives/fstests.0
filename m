@@ -2,124 +2,169 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B140CC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jun 2022 09:24:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7480C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jun 2022 10:16:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354278AbiFNJYn (ORCPT
+        id S1352195AbiFNKQh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Jun 2022 05:24:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35412 "EHLO
+        Tue, 14 Jun 2022 06:16:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33008 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241072AbiFNJYc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jun 2022 05:24:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2CBB648398
-        for <fstests@vger.kernel.org>; Tue, 14 Jun 2022 02:23:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1655198586;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=wL500kuZofPLhlgg9MWpmsN25gKPcsSWCkD4qrvFYPQ=;
-        b=jPprYa4MyTOlbANiIRL6AjDKlZ5hr2Gr4PiO1g4kDOl7Oe6R62Lc4QrAChudpLKKHLqpy9
-        r0JuDDl/v/8LtImizFPRzSswHHmd13pAlPFNDxu39KmG26iObpuxjtkpsZq/LU/Ane/ic+
-        T8/YkF6kb7mKC2/NNXAECng66tDqfiM=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-629-98aJm94HOHO1cBcRPAy4WQ-1; Tue, 14 Jun 2022 05:23:03 -0400
-X-MC-Unique: 98aJm94HOHO1cBcRPAy4WQ-1
-Received: by mail-pg1-f197.google.com with SMTP id y63-20020a638a42000000b003fd47b6f280so4767784pgd.12
-        for <fstests@vger.kernel.org>; Tue, 14 Jun 2022 02:23:02 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=wL500kuZofPLhlgg9MWpmsN25gKPcsSWCkD4qrvFYPQ=;
-        b=tXLg4xIoDohtRTNMGJ0pn/arBxLiaQ6Bxmu/4SI6DT6kxRTaiz17fqwEDKxEBzyWi3
-         UsUHumozW3mXaGrFldS/GutT1/9ppUP6Mu4QSMJ4H39uPsB/f4rX8WIatJq2uH5dLUi5
-         Wmfjep7i4OgL+vm1V4UtZ178plNNPr5vNOCzvs62iaxmuUL9T6QYl55xaeEYjKe5jgfb
-         pnRSoi1ehhq3woOV3LfdgfyS+JC8ese/Y3ly3todMe8ehdAy73Pjn+kKs1ZdnJvsfslg
-         72fu29ikcK4WKb+3hiaP379n0Wv6K2iy5Q+rmAKzGOxrs4rumrUC45Lxm4WrRbqvqnlv
-         2JAA==
-X-Gm-Message-State: AOAM532rYhn05t2urujzQCeK6t0p2anLrR9lTUR5ISkM+BOPO1FcJqX7
-        pXT0bXSznrU3Ry7eib6H/o7Uxy7fn2ts76g8rNNvNgr1BfLGQ9iCYBWvXomQCTgeSqo4yi4vm1J
-        W2QYPdGN+EqRudsnh7A==
-X-Received: by 2002:a63:1d46:0:b0:3fd:df71:dac0 with SMTP id d6-20020a631d46000000b003fddf71dac0mr3735053pgm.258.1655198581871;
-        Tue, 14 Jun 2022 02:23:01 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzcGgH+akAFo0vy21bwAxO7etCG+oDCVa+C3+GEbh6r+OW4jesY61jKu90/RhECEgkZdqTjPQ==
-X-Received: by 2002:a63:1d46:0:b0:3fd:df71:dac0 with SMTP id d6-20020a631d46000000b003fddf71dac0mr3735043pgm.258.1655198581584;
-        Tue, 14 Jun 2022 02:23:01 -0700 (PDT)
-Received: from [10.72.12.99] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r7-20020aa79627000000b0051bce5dc754sm6990536pfg.194.2022.06.14.02.22.57
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 14 Jun 2022 02:23:00 -0700 (PDT)
-Subject: Re: [PATCH v3 0/2] Two xattrs-related fixes for ceph
-To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
-        fstests@vger.kernel.org
-Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>,
-        Dave Chinner <david@fromorbit.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
-References: <20220613113142.4338-1-lhenriques@suse.de>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <e41f28f7-fbd0-e861-603f-0813b91fe3ed@redhat.com>
-Date:   Tue, 14 Jun 2022 17:22:54 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S1352914AbiFNKQe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jun 2022 06:16:34 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1311146CB3
+        for <fstests@vger.kernel.org>; Tue, 14 Jun 2022 03:16:34 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 96A0560AAD
+        for <fstests@vger.kernel.org>; Tue, 14 Jun 2022 10:16:33 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 972ACC3411B;
+        Tue, 14 Jun 2022 10:16:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1655201793;
+        bh=YQtLsgwlT5nlNH/cHdIDp5gRk5Rx+mkXd14IkXTbXnQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=A8pq6ClYya43QMbWpBcr9WW8hJli2RH/8MD5C6zKHn7me+SPaSWMINMPzQzAima1c
+         oBOHshLFYQ201nMXoGtu1He10EkqFM7OKZjTBOwLYB3fCsAvnSTM8Ed3wFmkHhDlRy
+         jDzhm9xIMAMs1YULp6nxgERka4huuvE44SvLhonqYNbnNOxecnlMzQndmKNOmF6qWM
+         BTjJ1/nt2FbDnNVx9YlYsMBFgO1vo0de6DY/5FdBKpXKgBYCItsSH/pgOzm3s3e/Km
+         tkYCPJPYSMdijM6dAGrMFuOUDkpYiDyVDA3u9oWfl6aQNOnLET9VIIByLpPsNBw1bK
+         eW4LYpOqzf3GQ==
+Date:   Tue, 14 Jun 2022 12:16:28 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, Seth Forshee <sforshee@digitalocean.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Aleksa Sarai <cyphar@cyphar.com>
+Subject: Re: [PATCH] generic/692: test group ownership change
+Message-ID: <20220614101628.j7fckh3izpxt3ahp@wittgenstein>
+References: <20220613152314.2235940-1-brauner@kernel.org>
+ <20220614042516.a6eyaajeiyg6irbh@zlang-mailbox>
 MIME-Version: 1.0
-In-Reply-To: <20220613113142.4338-1-lhenriques@suse.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220614042516.a6eyaajeiyg6irbh@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Tue, Jun 14, 2022 at 12:25:16PM +0800, Zorro Lang wrote:
+> On Mon, Jun 13, 2022 at 05:23:14PM +0200, Christian Brauner wrote:
+> > When group ownership is changed a caller whose fsuid owns the inode can
+> > change the group of the inode to any group they are a member of. When
+> > searching through the caller's groups we failed to use the gid mapped
+> > according to the idmapped mount otherwise we fail to change ownership.
+> > Add a test for this.
+> > 
+> > Cc: Seth Forshee <sforshee@digitalocean.com>
+> > Cc: Christoph Hellwig <hch@lst.de>
+> > Cc: Aleksa Sarai <cyphar@cyphar.com>
+> > Cc: <fstests@vger.kernel.org>
+> > Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+> > ---
+> 
+> Thanks for this test, a few of small review points as below ...
 
-On 6/13/22 7:31 PM, Luís Henriques wrote:
-> Hi!
->
-> A bug fix in ceph has made some changes in the way xattr limits are
-> enforced on the client side.  This requires some fixes on tests
-> generic/020 and generic/486.
->
-> * Changes since v2:
->
->    - patch 0001:
->      Add logic to compute the *real* maximum.  Kudos to David Disseldorp
->      for providing the right incantation to do the maths.  Also split
->      _attr_get_max() in two, so that they can be invoked from different
->      places in the test script.
->
->    - patch 002:
->      attr_replace_test now has an extra param as suggested by Dave Chinner,
->      and added fs-specific logic to the script.  No need to have an exact
->      maximum in this test, a big-enough value suffices.
->
-> * Changes since v1:
->
->    - patch 0001:
->      Set the max size for xattrs values to a 65000, so that it is close to
->      the maximum, but still able to accommodate any pre-existing xattr
->
->    - patch 0002:
->      Same thing as patch 0001, but in a more precise way: actually take
->      into account the exact sizes for name+value of a pre-existing xattr.
->
-> Luís Henriques (2):
->    generic/020: adjust max_attrval_size for ceph
->    generic/486: adjust the max xattr size
->
->   src/attr_replace_test.c | 30 ++++++++++++++++++++++++++----
->   tests/generic/020       | 33 +++++++++++++++++++++++++--------
->   tests/generic/486       | 11 ++++++++++-
->   3 files changed, 61 insertions(+), 13 deletions(-)
->
-This series looks good to me.
+Thanks for the review!
 
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
+> 
+> >  tests/generic/692     | 74 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/692.out |  3 ++
+> >  2 files changed, 77 insertions(+)
+> >  create mode 100755 tests/generic/692
+> >  create mode 100644 tests/generic/692.out
+> > 
+> > diff --git a/tests/generic/692 b/tests/generic/692
+> > new file mode 100755
+> > index 00000000..825c836a
+> > --- /dev/null
+> > +++ b/tests/generic/692
+> > @@ -0,0 +1,74 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Christian Brauner (Microsoft).  All Rights Reserved.
+> > +#
+> > +# FS QA Test 692
+> > +#
+> > +# Test that users can changed group ownership of a file they own to a group
+> > +# they are a member of.
+> > +#
+> > +# Regression test for commit:
+> > +#
+> > +# 263de29d8397 ("fs: account for group membership")
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick perms attr idmapped mount
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	$UMOUNT_PROG $TEST_DIR/target-mnt
+> 
+> Do you need to filter out the errors by "2>/dev/null"?
 
+Yeah, good idea.
 
+> 
+> > +	rm -r -f $tmp.*
+> > +}
+> > +
+> > +# Import common functions.
+> > +# . ./common/filter
+> 
+> I think you didn't use any filter, right? If so, this can be removed.
+
+Removed.
+
+> 
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+>      ^^^
+> This line can be removed too.
+
+Removed.
+
+> 
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_chown
+> > +_require_idmapped_mounts
+> > +_require_user fsgqa
+> > +_require_group fsgqa
+> > +_require_group fsgqa2
+> > +
+> > +uqid=`id -u fsgqa`
+> > +gqid=`id -g fsgqa`
+> > +uqid2=`id -u fsgqa2`
+> > +gqid2=`id -g fsgqa2`
+> > +
+> > +setup_tree()
+> > +{
+> > +	mkdir -p $TEST_DIR/source-mnt
+> > +	chmod 0777 $TEST_DIR/source-mnt
+> > +	touch $TEST_DIR/source-mnt/dir1
+> > +	chown 65534:65534 $TEST_DIR/source-mnt
+> > +	chown 65534:65535 $TEST_DIR/source-mnt/dir1
+> > +
+> > +	mkdir -p $TEST_DIR/target-mnt
+> > +	chmod 0777 $TEST_DIR/target-mnt
+> > +}
+> > +
+> > +setup_idmapped_mnt()
+> > +{
+> > +	$here/src/vfs/mount-idmapped \
+> 
+> You might need:
+>   _require_test_program "vfs/mount-idmapped"
+> 
+> due to _require_idmapped_mounts doesn't guarantee that.
+
+Yes, good point!
+
+Thanks!
+Christian
