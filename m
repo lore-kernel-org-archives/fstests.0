@@ -2,97 +2,167 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA3DDC43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jun 2022 09:56:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C60AEC433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jun 2022 15:14:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344127AbiFOJ4R (ORCPT
+        id S234532AbiFOPN7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Jun 2022 05:56:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38944 "EHLO
+        Wed, 15 Jun 2022 11:13:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237420AbiFOJ4Q (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2022 05:56:16 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FEBF49B59;
-        Wed, 15 Jun 2022 02:56:16 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S1348298AbiFOPNj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2022 11:13:39 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD17212AC2;
+        Wed, 15 Jun 2022 08:13:37 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id CE8D6B81C62;
-        Wed, 15 Jun 2022 09:56:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DB5FC34115;
-        Wed, 15 Jun 2022 09:56:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1655286973;
-        bh=ZhDBRgQU7ZcI9kZgJu86+5uy/cAyHPmmrrm4MdoMzic=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=UZ18s2nlPinYpFsreuxH/N3n6o1GGraB0CtE35X727U/GrkcexK1hPokbY41+Eudm
-         6EGsZKNg2YawcQPZMa6AclhI1nTS4+X2MsBG4XLI1yW2KqU9kReFbYu6ZX07MuFymB
-         GwTIP1vawNFSEb+H4t4lHhNh+LsEmBmdecOGnieT5gZUnDX1p+xc89bapP2/w6ECKb
-         9p5L28unvjqlcQ5TXO0ATnPLJFqdWA06mHUbzqGbdWXVXfcZFN8EDwcq2oM3UvlQYc
-         211BuFbgvLu22KO9zNuYjMN1oah0N0epuNjAzOzdI20QnKhGTJ/2LfC8GjqyaoFPnp
-         iUWiyf3nhc57Q==
-Date:   Wed, 15 Jun 2022 17:56:07 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, zlang@redhat.com, riteshh@linux.ibm.com,
-        linux-ext4@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3] common/rc: Modify _require_batched_discard to improve
- test coverage
-Message-ID: <20220615095607.zkvq2vnh4ebue3qi@zlang-mailbox>
-References: <20220516084505.97655-1-ojaswin@linux.ibm.com>
- <Yqb21hTVUvob/sgc@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 5344821B12;
+        Wed, 15 Jun 2022 15:13:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1655306016; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=zI2cpdM93IA+7cwY2q+Prqlp8PqKHmnVqAxFGSWX4Xk=;
+        b=geTSgM6EB5Isw2EdoxRmJlbMhAcwz6M2sLpqGALT3QPDI6XHadMFHJyNqx6Xe1zmVrG4Et
+        PFiWbGszVEEJknqofUa7/TljuP+yu+KmqwwqzF8eSmZTnx2j6qX0doSCGniGtQxqgw5oPT
+        bb9OlCPu2mzSv2TCDhNqY4O2/MpDHhM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1655306016;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=zI2cpdM93IA+7cwY2q+Prqlp8PqKHmnVqAxFGSWX4Xk=;
+        b=RDiSLWZeeF+AAmRuaaahZZZuUGsMBo7cGyr4CRnV8UzsczAz/ybR7PZOO5IgcydYzzRTT2
+        ZYGtOZl4sOaFWzDQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D2A1513A35;
+        Wed, 15 Jun 2022 15:13:35 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id wGqqMB/3qWLkTwAAMHmgww
+        (envelope-from <lhenriques@suse.de>); Wed, 15 Jun 2022 15:13:35 +0000
+Received: from localhost (brahms.olymp [local])
+        by brahms.olymp (OpenSMTPD) with ESMTPA id a9aa9f0d;
+        Wed, 15 Jun 2022 15:14:19 +0000 (UTC)
+From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>,
+        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org,
+        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
+Subject: [PATCH v2] ceph/005: verify correct statfs behaviour with quotas
+Date:   Wed, 15 Jun 2022 16:14:18 +0100
+Message-Id: <20220615151418.23805-1-lhenriques@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Yqb21hTVUvob/sgc@li-bb2b2a4c-3307-11b2-a85c-8fa5c3a69313.ibm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 13, 2022 at 02:05:34PM +0530, Ojaswin Mujoo wrote:
-> Greetings,
-> 
-> Please let me know if there are any reviews/suggestions on this
-> patch.
+When using a directory with 'max_bytes' quota as a base for a mount,
+statfs shall use that 'max_bytes' value as the total disk size.  That
+value shall be used even when using subdirectory as base for the mount.
 
-This patch has been merged in fstests v2022.05.22, as below
+A bug was found where, when this subdirectory also had a 'max_files'
+quota, the real filesystem size would be returned instead of the parent
+'max_bytes' quota value.  This test case verifies this bug is fixed.
 
-  ee264b3f common/rc: Modify _require_batched_discard to improve test coverage
+Signed-off-by: Luís Henriques <lhenriques@suse.de>
+---
+Finally, I've managed to come back to this test.  The major changes since
+v1 are:
+ - creation of an helper for getting total mount space using 'df'
+ - now the test sends quota size to stdout
 
-Is there anything wrong with that?
+ common/rc          | 13 +++++++++++++
+ tests/ceph/005     | 38 ++++++++++++++++++++++++++++++++++++++
+ tests/ceph/005.out |  4 ++++
+ 3 files changed, 55 insertions(+)
+ create mode 100755 tests/ceph/005
+ create mode 100644 tests/ceph/005.out
 
-Thanks,
-Zorro
-
-> 
-> Thank you!
-> 
-> On Mon, May 16, 2022 at 02:15:05PM +0530, Ojaswin Mujoo wrote:
-> > A recent ext4 patch discussed [1] that some devices (eg LVMs) can
-> > have a discard granularity as big as 42MB which makes it larger
-> > than the group size of ext4 FS with 1k BS.  This causes the FITRIM
-> > IOCTL to fail.
-> > 
-> > This case was not correctly handled by this test since
-> > "_require_batched_discard" incorrectly interpreted the FITRIM
-> > failure as SCRATCH_DEV not supporting the IOCTL. This caused the test
-> > to report "not run" instead of "failed" in case of large discard granularity.
-> > 
-> > Fix "_require_batched_discard" to use a more accurate method
-> > to determine if discard is supported.
-> > 
-> > [1] commit 173b6e383d2
-> >     ext4: avoid trim error on fs with small groups
-> > 
-> > Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> > Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> > ---
-> > 
-> > Changes since v2 [1] 
-> > 
-> > *  Eliminated redundant $ret variable
-> > 
-> > [1]
-> > https://lore.kernel.org/all/20220516063951.87838-1-ojaswin@linux.ibm.com/
-> 
+diff --git a/common/rc b/common/rc
+index 2f31ca464621..72eabb7a428c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4254,6 +4254,19 @@ _get_available_space()
+ 	echo $((avail_kb * 1024))
+ }
+ 
++# get the total space in bytes
++#
++_get_total_space()
++{
++	if [ -z "$1" ]; then
++		echo "Usage: _get_total_space <mnt>"
++		exit 1
++	fi
++	local total_kb;
++	total_kb=`$DF_PROG $1 | tail -n1 | awk '{ print $3 }'`
++	echo $(($total_kb * 1024))
++}
++
+ # return device size in kb
+ _get_device_size()
+ {
+diff --git a/tests/ceph/005 b/tests/ceph/005
+new file mode 100755
+index 000000000000..7eb687e8a092
+--- /dev/null
++++ b/tests/ceph/005
+@@ -0,0 +1,38 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 005
++#
++# Make sure statfs reports correct total size when:
++# 1. using a directory with 'max_byte' quota as base for a mount
++# 2. using a subdirectory of the above directory with 'max_files' quota
++#
++. ./common/preamble
++_begin_fstest auto quick quota
++
++_supported_fs ceph
++_require_scratch
++
++_scratch_mount
++mkdir -p "$SCRATCH_MNT/quota-dir/subdir"
++
++# set quota
++quota=$((2 ** 30)) # 1G 
++$SETFATTR_PROG -n ceph.quota.max_bytes -v "$quota" "$SCRATCH_MNT/quota-dir"
++$SETFATTR_PROG -n ceph.quota.max_files -v "$quota" "$SCRATCH_MNT/quota-dir/subdir"
++_scratch_unmount
++
++SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_mount
++echo ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
++SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_unmount
++
++SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_mount
++echo subdir ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
++SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_unmount
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ceph/005.out b/tests/ceph/005.out
+new file mode 100644
+index 000000000000..47798b1fcd6f
+--- /dev/null
++++ b/tests/ceph/005.out
+@@ -0,0 +1,4 @@
++QA output created by 005
++ceph quota size is 1073741824 bytes
++subdir ceph quota size is 1073741824 bytes
++Silence is golden
