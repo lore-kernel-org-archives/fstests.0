@@ -2,167 +2,224 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C60AEC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jun 2022 15:14:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9200AC43334
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jun 2022 04:30:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234532AbiFOPN7 (ORCPT
+        id S229681AbiFPEaw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Jun 2022 11:13:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35046 "EHLO
+        Thu, 16 Jun 2022 00:30:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348298AbiFOPNj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jun 2022 11:13:39 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD17212AC2;
-        Wed, 15 Jun 2022 08:13:37 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 5344821B12;
-        Wed, 15 Jun 2022 15:13:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1655306016; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=zI2cpdM93IA+7cwY2q+Prqlp8PqKHmnVqAxFGSWX4Xk=;
-        b=geTSgM6EB5Isw2EdoxRmJlbMhAcwz6M2sLpqGALT3QPDI6XHadMFHJyNqx6Xe1zmVrG4Et
-        PFiWbGszVEEJknqofUa7/TljuP+yu+KmqwwqzF8eSmZTnx2j6qX0doSCGniGtQxqgw5oPT
-        bb9OlCPu2mzSv2TCDhNqY4O2/MpDHhM=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1655306016;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=zI2cpdM93IA+7cwY2q+Prqlp8PqKHmnVqAxFGSWX4Xk=;
-        b=RDiSLWZeeF+AAmRuaaahZZZuUGsMBo7cGyr4CRnV8UzsczAz/ybR7PZOO5IgcydYzzRTT2
-        ZYGtOZl4sOaFWzDQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D2A1513A35;
-        Wed, 15 Jun 2022 15:13:35 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id wGqqMB/3qWLkTwAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Wed, 15 Jun 2022 15:13:35 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id a9aa9f0d;
-        Wed, 15 Jun 2022 15:14:19 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
-        ceph-devel@vger.kernel.org,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v2] ceph/005: verify correct statfs behaviour with quotas
-Date:   Wed, 15 Jun 2022 16:14:18 +0100
-Message-Id: <20220615151418.23805-1-lhenriques@suse.de>
+        with ESMTP id S229485AbiFPEav (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jun 2022 00:30:51 -0400
+Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2063.outbound.protection.outlook.com [40.107.21.63])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7537D5AA40
+        for <fstests@vger.kernel.org>; Wed, 15 Jun 2022 21:30:50 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=nW7zXShsK3XFdZv5CHG+HsfpLcWjBfnzxVcoqMoAT23X9YZxv2cH/y5ZVuUv0+7rirDjyeVWFdajl8RON72p2cbUyGkeBHk3RdJ+lSRKBEDoFptUdur9PdS++kEZPEYY829NuGkcfvRDLvLzV658+FRud2Xlp4vwfiFHKSOB02JTADFXatSm1saqUfJBBiUYZ/UaFoY6SYIVf19pT2wAn/bb6hMwgWTY7ethYjEwqeKPofCPv0fxo/1yTRQUhB96xko0Ih7koed+/X8j9H1bqh+8olzjcV+DjA/Dfh52GK3f4N2CfeLOIuxeE0ArLlHaMNVjaM3OZljCcG2e4ko5Cw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=MxsET0X7Apt0k+Q0VmYoIp2/q35asidMjqFfLAgrqOM=;
+ b=L7BKWwZisFMHCzIeGlYdVlHg/X486m7BMJNwqXw4E1HosVhu4fYqIC9jrGQP2Twe7ulU/5Z/IBFsiQRn0NQTpkf+ej6BHNocLaEwe79rHif6Qh8yf81nmABw5TOSrM9+aI4LYjFKiayN/JqccJ0eBpgXklKXC8KArodtneXKMXCJcVPO7p6F1qLzqyTZGrcvl0Q1PW6/LlE/keU1bb4E8OBUedwOitiz9Kol2p+XDYwRiFsWGUBCe6Wm2ha+5z0C3Wh1AyOXFXWt6Q+AON793zM4Yv2Sqj29D1AxROKT45fLmyboMjut70LRLp0SHOr+aCReko3J4hkbQAlgwjIvSA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=MxsET0X7Apt0k+Q0VmYoIp2/q35asidMjqFfLAgrqOM=;
+ b=D9P4UoNJdOAWAobdT9tE0GX5bv1+VMj27NfJgZuh/L78X2npCFnwab7llAA1mZEdFXwk58CTtUeG9LP4kuZfsYz2W4KQbQtXOD4TxiX1/x1MDDkEIUsME3q0lJMEmFleVSKy/gXvx4mIuVVbsdsFpu8RAUCn7jIxebrmTnZNN7DBDLz3FXq9Y9cwjPymJ8HVm1sdLKD8uUqgbUGP+ODrK5E/H1sI5YBZadafLlG+wkHRSBGOvH0AjFRk2Xe2i8hEOf22Y6k0+RcTEzCfPDkcSxtFph5jC1XNSnUm2piPWa2sC0LqC1gpsiZfRkGJDjHASLm/rtww35/EafZcNC1R7A==
+Received: from VI1PR0401MB2671.eurprd04.prod.outlook.com
+ (2603:10a6:800:55::10) by VI1PR04MB4335.eurprd04.prod.outlook.com
+ (2603:10a6:803:4e::23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5353.14; Thu, 16 Jun
+ 2022 04:30:48 +0000
+Received: from VI1PR0401MB2671.eurprd04.prod.outlook.com
+ ([fe80::282e:5a0b:aa1c:dd86]) by VI1PR0401MB2671.eurprd04.prod.outlook.com
+ ([fe80::282e:5a0b:aa1c:dd86%3]) with mapi id 15.20.5353.013; Thu, 16 Jun 2022
+ 04:30:47 +0000
+From:   Long An <lan@suse.com>
+To:     "zlang@redhat.com" <zlang@redhat.com>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH 2/2] common/rc: fix input value to _scratch_mkfs_sized
+Thread-Topic: [PATCH 2/2] common/rc: fix input value to _scratch_mkfs_sized
+Thread-Index: AQHYf6zZDn/dHwG330Sh8VpEgz+pzq1P3csAgAGWi4A=
+Date:   Thu, 16 Jun 2022 04:30:47 +0000
+Message-ID: <dde66682030f21610b65f908e150e5e3eb4eaa54.camel@suse.com>
+References: <20220614050843.11802-1-lan@suse.com>
+         <20220614050843.11802-2-lan@suse.com>
+         <20220615041540.k3lzznbeklbwh6ui@zlang-mailbox>
+In-Reply-To: <20220615041540.k3lzznbeklbwh6ui@zlang-mailbox>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=suse.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 5addc8fc-ffe6-4d9b-4969-08da4f50fc81
+x-ms-traffictypediagnostic: VI1PR04MB4335:EE_
+x-microsoft-antispam-prvs: <VI1PR04MB433576141A599B1CEA17A703C6AC9@VI1PR04MB4335.eurprd04.prod.outlook.com>
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: Z4fAFzyOEbCs070YhiNDDFdjSXp5X28kw+42ajE63HVCH43qtDlKWty52KpE5PPbPxJ5ndoL85rPrW5Z2mvtWmcWqmQpK6z5nxSPXwci64wHJSzU2AZovd4x2pHwa55AEVFLoU4BQcaDA/Rwphdszo7QaIiPa8rEUUvtm3A+EIyqZ1a/qrl0H2tJgXcCuhmlD7OnL+lgMUKG1AGWfJAzlESYCLdZDCESHoaAiFp5WvPjqVchsMHDOJOt6CIKS/7R384uj1+G+dPtVjDmJadp5I8AsNKe2DyFOUOEPENQlx0ihuICSwHY3XHDuVBTnAb0Fu1ajBgxBeTx5WgYSOpstaEO5Bxq2G6bt3r61D4FyxLcHLHsmCFCr6CF13NB49hOVMNdcNBlqvOSqWOIOL7Iy6WnU2RbWNfNIEQWKfihS4/f8lYItQjJKVVGxUgPtF9l/sY+Ew+YanMdIQ9sMN6X4VZBq8MTpxWmXfaxIQp8tV+MxSA+kax76yn8va5qovxaccO63W/9Sz3renPw/SC8XJmg3MjKuAW+YeLzAwqlDkBmy/R1fZ4KCl1AprmbFIVZAiNJEXZDsU3H7YiixQt+GKWZQXFqeeFvLkaf9YNRacPX84RA62lw7wL6yQKqOBfmVGd9W8v8CfIJ85gWi19NsTn49gchcOpXVqYZn2Bs3HjgwFu6+aS7VCeA2lunWuVMg0KgxEAb3crlSECZIOlEk9HK2lo0COu3PaJGlu4fE8Y=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR0401MB2671.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(366004)(8676002)(66946007)(4326008)(91956017)(508600001)(66446008)(66556008)(76116006)(66476007)(2616005)(8936002)(6506007)(6512007)(64756008)(86362001)(316002)(38100700002)(71200400001)(6486002)(38070700005)(6916009)(122000001)(36756003)(2906002)(5660300002)(83380400001)(186003)(21314003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 2
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?YXplNUVSZmVORERiRjVTWUxZaW9idmZvN1BybWRKWmEvN0U3TjZybFpxYStF?=
+ =?utf-8?B?R29SdFJPaHlERXZ5eEFLUGlVTnlNU1pJT1JEM0NkcG1MandGOVZkSkhyL0I2?=
+ =?utf-8?B?dkVidGs4M1RKV1dyZ0ZNMG9UaTFTVHVuaTVTeG0waGczUlE1aVkvNUVXcjFr?=
+ =?utf-8?B?RGU2blk5UWpqQzUxei8rMXJrRm5FVm9XOEV2ajRKK2xDVFVrRTRaTVgzNFFR?=
+ =?utf-8?B?TTJNTFVIWnQ3L0FTTWVmT21HaUlFWThMK1BYNnV1M1Y5UUNTWXhzTnJsekdJ?=
+ =?utf-8?B?bjExNUVEanM2ek9HYWxpYmtTWExOZ2NwNksyQXVNdGR5Zlgrb3p4VzJCUURp?=
+ =?utf-8?B?RTdNZTQ5UzAzVnNsYzBMTVpXTUNGZXRlZnJRS3RtdTVRRmZVODJiWEUzNlY5?=
+ =?utf-8?B?Y2ErYXl1bk8zSy9xRXBvQktROXJGcFdocWxsTVBNMWsrZ3JMN2hCZFJvckNt?=
+ =?utf-8?B?bnBpZzZuenZlRjNSd3paNGd6ZlpPb2U2V00xdjRaelFRNTJEcWZrRHU3Y3Rm?=
+ =?utf-8?B?N2prcDdkMy9peWVzenQ2QlVCaGxGcGhveHFDV1JpS25TaS9qUVVEVDl6bHVU?=
+ =?utf-8?B?VFdvM3EzZ2Q4SGlrdjd1dWhQdzFyempmQTRKMzFjdDZCcGZ6Rk50TnBhT0hz?=
+ =?utf-8?B?dFlGK2IyTXFjMDkzYVdzeEhIbG1IUnJQWk9BTDdPbXZhbm4xM3RON3BSbVZk?=
+ =?utf-8?B?Wms5emRDSHkvOFBQTnpOcG44cTFrc3p0d1dWU0xjRVZoNERmU2hpbm5pME12?=
+ =?utf-8?B?VHlkWUdGaUFWR3k4eng1V054RTM5WCt1bHc0RFNHVlBqVDlkRnQyV0E3RTNV?=
+ =?utf-8?B?Qmd0MU0yVHBlZWZRVjBSMXJraXBsTDlFdzdWQldPb3RxbjN3eEQ5R2tMR2tT?=
+ =?utf-8?B?b0pFU0ZLSWFUaWFsVFRZemMwQXdONzYwcG5rNWZMeEd3NDBUQ0k2anJSL1Q0?=
+ =?utf-8?B?aVpmR0pwVHUwRXNURlRnbG1GY1pNTGlFYWZ3QWpZMlpVQmJ5aVdFS3ZtSEdT?=
+ =?utf-8?B?UnVHeHMxbmdldkQ5ZVVFcDBTbUM0SkxNSFJoTjVKU2RHWnBOU3ZXcjBaeHpB?=
+ =?utf-8?B?SnBoeGt6YVFkVUFPOGpyNWNSd0dFb242aGg0VFJQWmptRjdjcFppeTROV0hw?=
+ =?utf-8?B?RTJIRlg4VGprTS9CVnhIanA5RFRzRXVibWEvN0FRaVdZR0dXaml2S3MxcmJV?=
+ =?utf-8?B?RmxVYkN2Vm03WFRBUCsxSHZxUXZSNDFCeEhNNzNhK2VpdzNsdUdFVjZDUUl3?=
+ =?utf-8?B?c1lHVXA1VUlYVFhzUCtZcnZZcDdMdWVmMGI3TnpMOW9OeGMydmJrTkhhM1RB?=
+ =?utf-8?B?WnhGTE9SM2RsZi9lVUxOYUkydEZ6NHFTOHZFOWlLQ21FeWRJTDE1SGlrOTNs?=
+ =?utf-8?B?Z2IzN1AwZEpFTVZ3MGNXeHJkZTVJWEhnaHZwNVo0dnlwREtpN0lleEVGbzR5?=
+ =?utf-8?B?bWI0VUE4YVh5b3d5eFdyem80N2dKR0pyeXBjVWdOalFjeHo2eDdRQ3ErOFZ2?=
+ =?utf-8?B?a2ZwMGZueDUxYnBjZmRLYTJpMnJOUUhJYzZhTGpiNG90MWxCUmkyZCsxb2Nz?=
+ =?utf-8?B?c1RrMXMvTWkwY082ZXBCRnR2dkZaZW1wOWFnbyt1cVVYOGFnVksvYUhiYlZD?=
+ =?utf-8?B?Y2hBVS9NNytGS0VRbyttcnN6dWhYRG8vWFZEZlB2RUk1bk82SnhLQjBzZTBw?=
+ =?utf-8?B?TGxueEUrNlNlN0I0Z3pxenZuejdsdzE0ZnlDeG84aVVteUFXSHRuQWQ1UmZQ?=
+ =?utf-8?B?M3JIWlgxdnBMbW9VK3ZCSnNXVmhJaTlKVGdIMll2OVlwNzl2dVUzbnBzSEQw?=
+ =?utf-8?B?TFlpRXJuZlNnTXJmQ1dvTzZKUUZkYjBXT2FFMTg3RFJVdTdjL0xWOEdCQmVj?=
+ =?utf-8?B?TXFnVmlzSTJ1QldXUk4vNTNzU081Lzc3SytpaWk2NEVoRWVUS08wUEZaRDFJ?=
+ =?utf-8?B?UmhIWmJSS29LNXZrK3ZCcUw0dkRhVWxkVm91d2xNQ1ljdzU4YnVYSGsrV1RH?=
+ =?utf-8?B?MlR5NE1oYTFGbEpNdnQ2UDlpL0paU3VHa1hVUTByUlk2WXVsSVAvREZGOFJB?=
+ =?utf-8?B?MXBmWDVIdnhiYUFod1pHNktzdzRrakt3eGF5aU13L3lrQW5VVWh2SFV4OXpi?=
+ =?utf-8?B?cWxxbmRUMVpkVVhIanFKZ2pUNVZlcm5tUlpZR2xHQjA4dml3U2hpNnZLbzhp?=
+ =?utf-8?B?Sllmem4yVFo0NnVhcEhTNVlPZTk3OVE0Tnl0eTBUbTFIN0JzZmlaa0NjVitY?=
+ =?utf-8?B?bnVUdVUyWkF0L2hnZnIvNEF1dHhzQ0pIZ0JDY1BNdmtEdHJBUyt0VS92Y2Zz?=
+ =?utf-8?B?QUlaWlN1SDV6cFJEd3NxQ21oQ01pUlZsb08yeVY1K1dDVlRSUHNsVW9weXFT?=
+ =?utf-8?Q?uL0tmyE2TFe0y6k6hILT/mZ1J4oozDJYY6ng+eFMkcaPV?=
+x-ms-exchange-antispam-messagedata-1: poxN1jcHIPuwyw==
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <716955212B7D854E944795C862996C08@eurprd04.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: suse.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: VI1PR0401MB2671.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5addc8fc-ffe6-4d9b-4969-08da4f50fc81
+X-MS-Exchange-CrossTenant-originalarrivaltime: 16 Jun 2022 04:30:47.8343
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: YKHJ/Skk6VWB+ypbXRhfDrFUE8JyKeJPb8o/pzWYuo4KVkWPjEnCMOwnfXid7OqC
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB4335
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When using a directory with 'max_bytes' quota as a base for a mount,
-statfs shall use that 'max_bytes' value as the total disk size.  That
-value shall be used even when using subdirectory as base for the mount.
-
-A bug was found where, when this subdirectory also had a 'max_files'
-quota, the real filesystem size would be returned instead of the parent
-'max_bytes' quota value.  This test case verifies this bug is fixed.
-
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
-Finally, I've managed to come back to this test.  The major changes since
-v1 are:
- - creation of an helper for getting total mount space using 'df'
- - now the test sends quota size to stdout
-
- common/rc          | 13 +++++++++++++
- tests/ceph/005     | 38 ++++++++++++++++++++++++++++++++++++++
- tests/ceph/005.out |  4 ++++
- 3 files changed, 55 insertions(+)
- create mode 100755 tests/ceph/005
- create mode 100644 tests/ceph/005.out
-
-diff --git a/common/rc b/common/rc
-index 2f31ca464621..72eabb7a428c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4254,6 +4254,19 @@ _get_available_space()
- 	echo $((avail_kb * 1024))
- }
- 
-+# get the total space in bytes
-+#
-+_get_total_space()
-+{
-+	if [ -z "$1" ]; then
-+		echo "Usage: _get_total_space <mnt>"
-+		exit 1
-+	fi
-+	local total_kb;
-+	total_kb=`$DF_PROG $1 | tail -n1 | awk '{ print $3 }'`
-+	echo $(($total_kb * 1024))
-+}
-+
- # return device size in kb
- _get_device_size()
- {
-diff --git a/tests/ceph/005 b/tests/ceph/005
-new file mode 100755
-index 000000000000..7eb687e8a092
---- /dev/null
-+++ b/tests/ceph/005
-@@ -0,0 +1,38 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 005
-+#
-+# Make sure statfs reports correct total size when:
-+# 1. using a directory with 'max_byte' quota as base for a mount
-+# 2. using a subdirectory of the above directory with 'max_files' quota
-+#
-+. ./common/preamble
-+_begin_fstest auto quick quota
-+
-+_supported_fs ceph
-+_require_scratch
-+
-+_scratch_mount
-+mkdir -p "$SCRATCH_MNT/quota-dir/subdir"
-+
-+# set quota
-+quota=$((2 ** 30)) # 1G 
-+$SETFATTR_PROG -n ceph.quota.max_bytes -v "$quota" "$SCRATCH_MNT/quota-dir"
-+$SETFATTR_PROG -n ceph.quota.max_files -v "$quota" "$SCRATCH_MNT/quota-dir/subdir"
-+_scratch_unmount
-+
-+SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_mount
-+echo ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
-+SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_unmount
-+
-+SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_mount
-+echo subdir ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
-+SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_unmount
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ceph/005.out b/tests/ceph/005.out
-new file mode 100644
-index 000000000000..47798b1fcd6f
---- /dev/null
-+++ b/tests/ceph/005.out
-@@ -0,0 +1,4 @@
-+QA output created by 005
-+ceph quota size is 1073741824 bytes
-+subdir ceph quota size is 1073741824 bytes
-+Silence is golden
+T24gV2VkLCAyMDIyLTA2LTE1IGF0IDEyOjE1ICswODAwLCBab3JybyBMYW5nIHdyb3RlOg0KPiBP
+biBUdWUsIEp1biAxNCwgMjAyMiBhdCAwMTowODo0M1BNICswODAwLCBBbiBMb25nIHdyb3RlOg0K
+PiA+IF9zY3JhdGNoX21rZnNfc2l6ZWQgb25seSByZWNlaXZlIGludGVnZXIgbnVtYmVyIG9mIGJ5
+dGVzIGFzIGEgdmFsaWQNCj4gPiBpbnB1dC4gQnV0IGlmIHRoZSBNS0ZTX09QVElPTlMgdmFyaWFi
+bGUgZXhpc3RzLCBpdCB3aWxsIHVzZSB0aGUNCj4gPiB2YWx1ZSBvZg0KPiA+IGJsb2NrIHNpemUg
+aW4gTUtGU19PUFRJT05TIHRvIG92ZXJyaWRlIGlucHV0LiBJbiBjYXNlIG9mDQo+ID4gTUtGU19P
+UFRJT05TPSItYiA0ayIsIHdvdWxkIHJlc3VsdCBpbiBibG9ja3NpemU9NCBidXQgbm90IDQwOTYu
+DQo+ID4gVGhpcw0KPiANCj4gSGkgQW4sDQo+IA0KPiBHb29kIGNhdGNoLiBDYW4geW91IHByb3Zp
+ZGUgYW4gZXhhbXBsZSB0aGF0IGEgY2FzZSBmYWlscyBvbiB0aGlzDQo+IGlzc3VlLCBhbmQNCj4g
+dGhlbiBpdCB0ZXN0cyBwYXNzZWQgYWZ0ZXIgaGF2aW5nIHRoaXMgcGF0Y2g/IEknbSB3b25kZXJp
+bmcgd2h5IG5vDQo+IG9uZSBub3RpY2UNCj4gdGhhdCBiZWZvcmUuDQo+IA0KDQpGb3IgZXhhbXBs
+ZSwgSSBzZXQgTUtGU19PUFRJT05TPSItYiA0ayIgYW5kIHRoZW4gcnVuIGdlbmVyaWMvNDE2IG9u
+DQpleHQ0IGZpbGVzeXN0ZW0uDQoNCiMgLi9jaGVjayB0ZXN0cy9nZW5lcmljLzQxNg0KRlNUWVAg
+ICAgICAgICAtLSBleHQ0DQpQTEFURk9STSAgICAgIC0tIExpbnV4L3g4Nl82NCBib2dvbiA1LjMu
+MTgtNTctZGVmYXVsdCAjMSBTTVAgV2VkIEFwciAyOA0KMTA6NTQ6NDEgVVRDIDIwMjEgKGJhM2My
+ZTkpDQpNS0ZTX09QVElPTlMgIC0tIC1iIDRrIC9kZXYvbG9vcDENCk1PVU5UX09QVElPTlMgLS0g
+LW8gYWNsLHVzZXJfeGF0dHIgL2Rldi9sb29wMSAvbW50L3NjcmF0Y2gNCg0KZ2VuZXJpYy80MTYg
+OTBzIC4uLiBbZmFpbGVkLCBleGl0IHN0YXR1cyAxXS0gb3V0cHV0IG1pc21hdGNoIChzZWUNCi9o
+b21lL2xhbi93b3JrL3hmc3Rlc3RzL3Jlc3VsdHMvL2dlbmVyaWMvNDE2Lm91dC5iYWQpDQogICAg
+LS0tIHRlc3RzL2dlbmVyaWMvNDE2Lm91dAkyMDIxLTA2LTI1IDIzOjE4OjA5LjU5NTI1NDExOCAr
+MDgwMA0KICAgICsrKyAvaG9tZS9sYW4vd29yay94ZnN0ZXN0cy9yZXN1bHRzLy9nZW5lcmljLzQx
+Ni5vdXQuYmFkCTIwMjItDQowNi0xNSAxNjozMzoxOS41ODQyMDYzMTYgKzA4MDANCiAgICBAQCAt
+MSwzICsxLDQgQEANCiAgICAgUUEgb3V0cHV0IGNyZWF0ZWQgYnkgNDE2DQogICAgLXdyb3RlIDE2
+Nzc3MjE2LzE2Nzc3MjE2IGJ5dGVzIGF0IG9mZnNldCAwDQogICAgLVhYWCBCeXRlcywgWCBvcHM7
+IFhYOlhYOlhYLlggKFhYWCBZWVkvc2VjIGFuZCBYWFggb3BzL3NlYykNCiAgICArbW91bnQ6IC9t
+bnQvc2NyYXRjaDogd3JvbmcgZnMgdHlwZSwgYmFkIG9wdGlvbiwgYmFkIHN1cGVyYmxvY2sgb24N
+Ci9kZXYvbG9vcDEsIG1pc3NpbmcgY29kZXBhZ2Ugb3IgaGVscGVyIHByb2dyYW0sIG9yIG90aGVy
+IGVycm9yLg0KICAgICttb3VudCAtbyBhY2wsdXNlcl94YXR0ciAvZGV2L2xvb3AxIC9tbnQvc2Ny
+YXRjaCBmYWlsZWQNCiAgICArKHNlZSAvaG9tZS9sYW4vd29yay94ZnN0ZXN0cy9yZXN1bHRzLy9n
+ZW5lcmljLzQxNi5mdWxsIGZvcg0KZGV0YWlscykNCiAgICAuLi4NCiAgICAoUnVuICdkaWZmIC11
+IC9ob21lL2xhbi93b3JrL3hmc3Rlc3RzL3Rlc3RzL2dlbmVyaWMvNDE2Lm91dA0KL2hvbWUvbGFu
+L3dvcmsveGZzdGVzdHMvcmVzdWx0cy8vZ2VuZXJpYy80MTYub3V0LmJhZCcgIHRvIHNlZSB0aGUN
+CmVudGlyZSBkaWZmKQ0KUmFuOiBnZW5lcmljLzQxNg0KRmFpbHVyZXM6IGdlbmVyaWMvNDE2DQpG
+YWlsZWQgMSBvZiAxIHRlc3RzDQoNCkJ1dCB0aGUgbW9yZSBjb21tb24gcmVzdWx0IGFzIGJlbG93
+Og0KIyAuL2NoZWNrIHRlc3RzL2dlbmVyaWMvNDE2DQpGU1RZUCAgICAgICAgIC0tIGV4dDQNClBM
+QVRGT1JNICAgICAgLS0gTGludXgveDg2XzY0IGJvZ29uIDUuMy4xOC01Ny1kZWZhdWx0ICMxIFNN
+UCBXZWQgQXByIDI4DQoxMDo1NDo0MSBVVEMgMjAyMSAoYmEzYzJlOSkNCk1LRlNfT1BUSU9OUyAg
+LS0gLWIgNGsgL2Rldi9sb29wMQ0KTU9VTlRfT1BUSU9OUyAtLSAtbyBhY2wsdXNlcl94YXR0ciAv
+ZGV2L2xvb3AxIC9tbnQvc2NyYXRjaA0KDQp1bW91bnQ6IC9tbnQvc2NyYXRjaDogdGFyZ2V0IGlz
+IGJ1c3kuDQpnZW5lcmljLzQxNiA3N3MgLi4uICA5MHMNClJhbjogZ2VuZXJpYy80MTYNClBhc3Nl
+ZCBhbGwgMSB0ZXN0cw0KDQpUZXN0IHBhc3NlZCBkdWUgdG8gX3JlcXVpcmVfc2NyYXRjaF9ub2No
+ZWNrKCkgaWdub3JlIHRoZSB1bW91bnQgZXJyb3IuDQpIb3dldmVyLCAibWtmcy5leHQ0OiBpbnZh
+bGlkIGJsb2NrIHNpemUgLSA0IiB3YXMgZm91bmQgaW4gdGhlIDQxNi5mdWxsDQoNCkFwYXJ0IGZy
+b20gdGhpcywgdGhlIGVycm9yIG9ubHkgb2NjdXJzIHdoZW4gTUtGU19PUFRJT05TIGlzIHNldCwg
+YW5kDQpkb2Vzbid0IGFmZmVjdCB4ZnMgb3IgYnRyZnMuIFNpbmNlIGV4dDQgb25seSBzdXBwb3J0
+cyA0ayBibG9ja3NpemUgb24NCm1vc3QgcGxhdGZvcm1zLCB3ZSB1c3VhbGx5IGRvbid0IHNldCBi
+bG9ja3NpemUgaW4gTUtGU19PUFRJT05TLg0KDQpJIHRoaW5rIHRoYXQncyB3aHkgdGhpcyBwcm9i
+bGVtIGhhc24ndCBiZWVuIGZvdW5kIGJlZm9yZS4gSW4gZmFjdCwgSQ0KZm91bmQgdGhpcyBpc3N1
+ZSB3aGVuIEkgdGVzdGVkIG9uIHBwYzY0IHdpdGggNjRrIGtlcm5lbCBhbmQgNGsNCnN1YmJsb2Nr
+c2l6ZSBmcy4NCg0KPiA+IHdpbGwgZ2l2ZSBlcnJvcnMgdG8gZXh0Mi8zLzQgZXRjLCBhbmQgYnJp
+bmdzIHBvdGVudGlhbCBidWdzIHRvIHhmcw0KPiA+IG9yDQo+ID4gYnRyZnMuDQo+ID4gDQo+ID4g
+SW4gYWRkaXRpb24sIHNpbmNlIHdlIGNhbiByZWNlaXZlIHZhcmlvdXMgc3RyaW5ncywgc28gcmVt
+b3ZlDQo+ID4gaW50ZWdlcg0KPiA+IG51bWJlciBjaGVjay4NCj4gPiANCj4gPiBTaWduZWQtb2Zm
+LWJ5OiBBbiBMb25nIDxsYW5Ac3VzZS5jb20+DQo+ID4gLS0tDQo+ID4gIGNvbW1vbi9yYyB8IDE4
+ICsrKysrKy0tLS0tLS0tLS0tLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgNiBpbnNlcnRpb25zKCsp
+LCAxMiBkZWxldGlvbnMoLSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvY29tbW9uL3JjIGIvY29t
+bW9uL3JjDQo+ID4gaW5kZXggMjIwNTBiYzIuLjAyNjAwN2QzIDEwMDY0NA0KPiA+IC0tLSBhL2Nv
+bW1vbi9yYw0KPiA+ICsrKyBiL2NvbW1vbi9yYw0KPiA+IEBAIC0xMDc3LDcgKzEwNzcsNyBAQCBf
+cGFyc2Vfc2l6ZV9mcm9tX3N0cmluZygpDQo+ID4gIH0NCj4gPiAgDQo+ID4gICMgQ3JlYXRlIGZz
+IG9mIGNlcnRhaW4gc2l6ZSBvbiBzY3JhdGNoIGRldmljZQ0KPiA+IC0jIF9zY3JhdGNoX21rZnNf
+c2l6ZWQgPHNpemUgaW4gYnl0ZXM+IFtvcHRpb25hbCBibG9ja3NpemVdDQo+ID4gKyMgX3NjcmF0
+Y2hfbWtmc19zaXplZCA8c2l6ZT4gW29wdGlvbmFsIGJsb2Nrc2l6ZV0NCj4gPiAgX3NjcmF0Y2hf
+bWtmc19zaXplZCgpDQo+ID4gIHsNCj4gPiAgCWxvY2FsIGZzc2l6ZT0kMQ0KPiA+IEBAIC0xMDg2
+LDEzICsxMDg2LDEzIEBAIF9zY3JhdGNoX21rZnNfc2l6ZWQoKQ0KPiA+ICANCj4gPiAgCWNhc2Ug
+JEZTVFlQIGluDQo+ID4gIAl4ZnMpDQo+ID4gLQkJZGVmX2Jsa3N6PWBlY2hvICRNS0ZTX09QVElP
+TlMgfCBzZWQgLXJuICdzLy4qLWIgP3NpemU9DQo+ID4gPysoWzAtOV0rKS4qL1wxL3AnYA0KPiA+
+ICsJCWRlZl9ibGtzej1gZWNobyAkTUtGU19PUFRJT05TIHwgc2VkIC1ybiAncy8uKi1iID9zaXpl
+PQ0KPiA+ID8rKFswLTldK1thLXpBLVpdPykuKi9cMS9wJ2ANCj4gPiAgCQk7Ow0KPiA+ICAJYnRy
+ZnMpDQo+ID4gLQkJZGVmX2Jsa3N6PWBlY2hvICRNS0ZTX09QVElPTlMgfCBzZWQgLXJuICdzLy4q
+LXMgPysoWzAtDQo+ID4gOV0rKS4qL1wxL3AnYA0KPiA+ICsJCWRlZl9ibGtzej1gZWNobyAkTUtG
+U19PUFRJT05TIHwgc2VkIC1ybiAncy8uKi1zID8rKFswLQ0KPiA+IDldK1thLXpBLVpdPykuKi9c
+MS9wJ2ANCj4gPiAgCQk7Ow0KPiA+ICAJZXh0MnxleHQzfGV4dDR8ZXh0NGRldnx1ZGZ8cmVpc2Vy
+NHxvY2ZzMnxyZWlzZXJmcykNCj4gPiAtCQlkZWZfYmxrc3o9YGVjaG8gJE1LRlNfT1BUSU9OUyB8
+IHNlZCAtcm4gJ3MvLiotYiA/KyhbMC0NCj4gPiA5XSspLiovXDEvcCdgDQo+ID4gKwkJZGVmX2Js
+a3N6PWBlY2hvICRNS0ZTX09QVElPTlMgfCBzZWQgLXJuICdzLy4qLWIgPysoWzAtDQo+ID4gOV0r
+W2EtekEtWl0/KS4qL1wxL3AnYA0KPiA+ICAJCTs7DQo+ID4gIAlqZnMpDQo+ID4gIAkJZGVmX2Js
+a3N6PTQwOTYNCj4gPiBAQCAtMTEwMSwxNCArMTEwMSw4IEBAIF9zY3JhdGNoX21rZnNfc2l6ZWQo
+KQ0KPiA+ICANCj4gPiAgCVsgLW4gIiRkZWZfYmxrc3oiIF0gJiYgYmxvY2tzaXplPSRkZWZfYmxr
+c3oNCj4gPiAgCVsgLXogIiRibG9ja3NpemUiIF0gJiYgYmxvY2tzaXplPTQwOTYNCj4gPiAtDQo+
+ID4gLQlsb2NhbCByZT0nXlswLTldKyQnDQo+ID4gLQlpZiAhIFtbICRmc3NpemUgPX4gJHJlIF1d
+IDsgdGhlbg0KPiA+IC0JCV9ub3RydW4gImVycm9yOiBfc2NyYXRjaF9ta2ZzX3NpemVkOiBmcyBz
+aXplDQo+ID4gXCIkZnNzaXplXCIgbm90IGFuIGludGVnZXIuIg0KPiA+IC0JZmkNCj4gPiAtCWlm
+ICEgW1sgJGJsb2Nrc2l6ZSA9fiAkcmUgXV0gOyB0aGVuDQo+ID4gLQkJX25vdHJ1biAiZXJyb3I6
+IF9zY3JhdGNoX21rZnNfc2l6ZWQ6IGJsb2NrIHNpemUNCj4gPiBcIiRibG9ja3NpemVcIiBub3Qg
+YW4gaW50ZWdlci4iDQo+ID4gLQlmaQ0KPiA+ICsJYmxvY2tzaXplPSQoX3BhcnNlX3NpemVfZnJv
+bV9zdHJpbmcgJGJsb2Nrc2l6ZSkNCj4gPiArCWZzc2l6ZT0kKF9wYXJzZV9zaXplX2Zyb21fc3Ry
+aW5nICRmc3NpemUpDQo+IA0KPiBGb3Igbm93LCB0aGUgX3BhcnNlX3NpemVfZnJvbV9zdHJpbmcg
+aXMgb25seSB1c2VkIGZvciB0aGlzIHBhdGNoLCBJDQo+IHRoaW5rIHRoZXNlDQo+IHR3byBwYXRj
+aGVzIGNhbiBiZSBtZXJnZWQgaW50byBvbmUgcGF0Y2gsIGFzIGl0IHRyeXMgdG8gZml4IG9uZQ0K
+PiBzaW5nbGUgcHJvYmxlbS4NCj4gDQoNClRoZXJlIGFyZSBhIHRvdGFsIG9mIHR3byBsb2dpY2Fs
+IGNoYW5nZXMuIEluIHBhcnRpY3VsYXIgaXQgYWxzbyBpbmNsdWRlDQphIEZ1bmN0aW9uIHVwZGF0
+ZS4gU28gaXQncyBiZXR0ZXIgdG8ga2VlcCB0d28gc2VwYXJhdGUgcGF0Y2guIEJ1dCBJJ2xsDQph
+ZGQgcGF0Y2ggZGVwZW5kcyBvbiBpbmZvIHRvIGNvbW1pdCBtZXNzYWdlLg0KDQpUaGFuayB5b3Ug
+Zm9yIHlvdXIgdGltZSENCg0KPiBUaGFua3MsDQo+IFpvcnJvDQo+IA0KPiA+ICANCj4gPiAgCWxv
+Y2FsIGJsb2Nrcz1gZXhwciAkZnNzaXplIC8gJGJsb2Nrc2l6ZWANCj4gPiAgDQo+ID4gLS0gDQo+
+ID4gMi4zNS4zDQo+ID4gDQotLSANCkFuIExvbmcgPGxhbkBzdXNlLmNvbT4NClNVU0UgUUUgTFNH
+LCBRRSAyLCBCZWlqaW5nDQo=
