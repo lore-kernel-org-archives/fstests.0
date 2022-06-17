@@ -2,108 +2,61 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A841AC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jun 2022 15:25:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B237C43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jun 2022 03:58:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234927AbiFPPZQ (ORCPT
+        id S232836AbiFQD6n (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Jun 2022 11:25:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33686 "EHLO
+        Thu, 16 Jun 2022 23:58:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53918 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376854AbiFPPZP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jun 2022 11:25:15 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B80A3616A
-        for <fstests@vger.kernel.org>; Thu, 16 Jun 2022 08:25:14 -0700 (PDT)
-Received: from localhost (mtl.collabora.ca [66.171.169.34])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (No client certificate requested)
-        (Authenticated sender: krisman)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 3009F6601741;
-        Thu, 16 Jun 2022 16:25:13 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1655393113;
-        bh=hoCtnetxD3Bf0fdXAzu+X/27sNxI2d4H4AK7opw67y4=;
-        h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
-        b=ScK5UIpPixi5MqvrwBUsIcNjb/sJQgH7iKYNWw2JKCvjYCSZQ0/lTBNHF3o6HKM3P
-         TNnHMCXvP+fAm4n6S0w2cDsYpmqs3UQJLrnqAzWNDxi4L29jLt6/WtL6JGvUit2b4g
-         91Si7M9DXo6ckB/AjyJFOGjYYZQGzTErTTCVZYonh24ZhECDY+FPyfAOp+2bfLioAj
-         aj4U+ZVPQ0I3+3URkg1cOWpIWW9vTJiyQYUwZtf5RZSlMfS8JeDKq2RtTPGvDrCX2R
-         d4N6zwdTMwBSTzr1TBMzqoPPrqNJkF+D/9tVYZ3O88BscJ6sqB4Ux6Gm5PKIiPhFBd
-         DLyaA1qIhUkwQ==
-From:   Gabriel Krisman Bertazi <krisman@collabora.com>
+        with ESMTP id S231650AbiFQD6l (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jun 2022 23:58:41 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 17CE666688
+        for <fstests@vger.kernel.org>; Thu, 16 Jun 2022 20:58:41 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 182C55ECB03;
+        Fri, 17 Jun 2022 13:58:38 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1o2380-007ahc-LL; Fri, 17 Jun 2022 13:58:36 +1000
+Date:   Fri, 17 Jun 2022 13:58:36 +1000
+From:   Dave Chinner <david@fromorbit.com>
 To:     An Long <lan@suse.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] common/rc: add _parse_size_string
-Organization: Collabora
+Subject: Re: [PATCH v2 0/2] Fix input value to _scratch_mkfs_sized
+Message-ID: <20220617035836.GZ1098723@dread.disaster.area>
 References: <20220616043845.14320-1-lan@suse.com>
-        <20220616043845.14320-2-lan@suse.com>
-Date:   Thu, 16 Jun 2022 11:25:09 -0400
-In-Reply-To: <20220616043845.14320-2-lan@suse.com> (An Long's message of "Thu,
-        16 Jun 2022 12:38:44 +0800")
-Message-ID: <874k0ky6ju.fsf@collabora.com>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.2 (gnu/linux)
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220616043845.14320-1-lan@suse.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62abfbef
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=7-415B0cAAAA:8
+        a=OIkrDSTBtBtnZ0NAmicA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-An Long <lan@suse.com> writes:
+On Thu, Jun 16, 2022 at 12:38:43PM +0800, An Long wrote:
+> Function _scratch_mkfs_sized cannot recognize the size descriptor.
+> 
+> For example, we set MKFS_OPTIONS="-b 4k" and then run generic/416 on
+> ext4, will fail with "mkfs.ext4: invalid block size - 4".
 
-> +        if [[ $str =~ ^[0-9]+[a-zA-Z]$ ]] ; then
-> +                size=${str:: -1}
-> +                endchar=${str: -1}
-> +                case $endchar in
-> +                e|E)
-> +                                mult=$((mult * 1024))
-> +                                ;&
-> +                p|P)
-> +                                mult=$((mult * 1024))
-> +                                ;&
-> +                t|T)
-> +                                mult=$((mult * 1024))
-> +                                ;&
-> +                g|G)
-> +                                mult=$((mult * 1024))
-> +                                ;&
-> +                m|M)
-> +                                mult=$((mult * 1024))
-> +                                ;&
-> +                k|K)
-> +                                mult=$((mult * 1024))
-> +                                ;&
-> +                b|B)
-> +                                ;;
-> +                *)
-> +                                echo "unknown size descriptor $endchar"
-> +                                exit 1
-> +                esac
-> +        elif [[ $str =~ ^[0-9]+$ ]] ; then
-> +                size=$str
-> +        else
-> +                echo "size value $str is invalid"
-> +                exit 1
-> +        fi
-> +
-> +        size=$((size * mult))
-> +        echo $size
-> +}
+So isn't the correct fix for this to use the correct format in
+MKFS_OPTIONS? ie. "-b 4096"?
 
-Hi An,
+i.e. why do we need ito add code to fix something that the user must
+specify themselves and could easily just use an integer to begin
+with?
 
-Coreutils has numfmt(1) to do this kind of conversion.  I wonder if we
-could use it here, unless it is not available all the platforms that
-matters for xfstests, though:
+Cheers,
 
-$ echo 1K | numfmt --from=iec
-1024
-
-> +
->  # Create fs of certain size on scratch device
->  # _scratch_mkfs_sized <size in bytes> [optional blocksize]
->  _scratch_mkfs_sized()
-
+Dave.
 -- 
-Gabriel Krisman Bertazi
+Dave Chinner
+david@fromorbit.com
