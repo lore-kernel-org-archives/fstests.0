@@ -2,178 +2,104 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E4FFCCA47C
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jun 2022 10:07:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A4E7C43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jun 2022 17:52:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1381618AbiFQKHs (ORCPT
+        id S1383159AbiFQRwW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Jun 2022 06:07:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52084 "EHLO
+        Fri, 17 Jun 2022 13:52:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1381638AbiFQKHT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Jun 2022 06:07:19 -0400
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FA7669CF9;
-        Fri, 17 Jun 2022 03:06:53 -0700 (PDT)
-Received: by mail-wm1-x335.google.com with SMTP id p6-20020a05600c1d8600b0039c630b8d96so4215941wms.1;
-        Fri, 17 Jun 2022 03:06:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=CYHDL8iVH4k/h/u1jXtZX43fHxv3dP+zew3PELKoGzk=;
-        b=ioBDdt23uQpSGJQwc3jXQrulPuAMXcKKDMfK7nC728S1KHXxtchsYf7y5dsVG3iaWa
-         AWkwIgUzGlt073oriq9xtCnvbVEt7WMJ4XZjughCWrG+xmm+xED4jidvsM7WCE5WSKm1
-         BfT3LAo+B2V5L8H1aYz4fVOtUEegPYheWHWTT85DrdRnxrsZX97TcAfObOX1+OgnesYG
-         zgRW7cXKyWol0iH1YRuRzV4RztOuA+UHsxZbLc069qU8kVYITyc0CjcGgn2yexx4iUqO
-         gg9e9VL2iywga71iaRDqO/f+ML5xGUEpiptekucNV+hLLEWLWs3Ds0tZy2DPHL0+vd34
-         5itg==
+        with ESMTP id S229975AbiFQRwV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Jun 2022 13:52:21 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0A8624D6A4
+        for <fstests@vger.kernel.org>; Fri, 17 Jun 2022 10:52:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1655488340;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=2OtgWOciqyrg03MkJpIxP3UFTyHzwB/PbXkc9oHvQYQ=;
+        b=VeZA/4D2OhM/EGX5QMB6HEXEAYJje8U/nyevO6Grp1qWFw6uMTq90ZPAmHniPsifueO5y1
+        ESRGRI2a0f0x4APiC3TbnGQ8MC6ZoBR1HR+O/M/qmf4CW7mWe/pTXrFdfozlCBE6wboDTs
+        hd7Oys46HILbOuw3oRwszU+5GsTPeV0=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-580-046miNV5Nm2noEYT8z7vEQ-1; Fri, 17 Jun 2022 13:52:18 -0400
+X-MC-Unique: 046miNV5Nm2noEYT8z7vEQ-1
+Received: by mail-qk1-f198.google.com with SMTP id k13-20020a05620a414d00b006a6e4dc1dfcso5660342qko.19
+        for <fstests@vger.kernel.org>; Fri, 17 Jun 2022 10:52:18 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=CYHDL8iVH4k/h/u1jXtZX43fHxv3dP+zew3PELKoGzk=;
-        b=xqlQ/F6aOrOr6j1NqwZV+EzEXq1U76E8Hng5nImwCBxU5KMpdMKQzxuyYq6sYJlnX8
-         Qrr/23lowj7rMHTpja31Cgm9TX/V2cq+3xx2Z7LhehhzEg1MbelU0igGOmo3fz5Jn5kD
-         dMrvvzIK7jq7pmX8pCEzQnn3nxy2HrAxkTmHEfZKH+tYc4l+/4ItybnY+FioGdS/tAyB
-         FZeXtmnT3KciGnJWjSRbE7ek/p3NcGgm44P2zAK7K0Noivms+ErfZ8UPeoGpqAcLxPB6
-         cUohqQ2/8vRWGniKNqTluL2YIBOZ1tRrXVdeyQXyLFgpP5IanvwS5QBI8fDrjbVq6EeG
-         tvhQ==
-X-Gm-Message-State: AOAM532AuRuDYwrj9cx/5vyKlaevcD79CgVaRGUOCHqLVTm0aOADUuH3
-        GY4M7pvjq+MEQkPe6oz6QTE=
-X-Google-Smtp-Source: ABdhPJy1Ge4VXnDs9/BWX3PjBGKOVRNi9H78DxT9xt1r5sjvRm/T4yAxbTqZqhjH1mWW5rXUWmCuVw==
-X-Received: by 2002:a1c:7317:0:b0:399:e654:3c92 with SMTP id d23-20020a1c7317000000b00399e6543c92mr20270880wmb.49.1655460411385;
-        Fri, 17 Jun 2022 03:06:51 -0700 (PDT)
-Received: from localhost.localdomain ([77.137.66.49])
-        by smtp.gmail.com with ESMTPSA id m42-20020a05600c3b2a00b003973435c517sm5265534wms.0.2022.06.17.03.06.49
+        h=x-gm-message-state:date:from:to:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=2OtgWOciqyrg03MkJpIxP3UFTyHzwB/PbXkc9oHvQYQ=;
+        b=ks+tAft4/0w3k5NHpPMsxiWPYdB2eYMPFpQ5VyJ2Qr5DAptyYE7XNCzlLlEho+2oXk
+         KRSWvrkKpT6xaCtHHuOc3vZGfwbogMX6dPBkh56wk2HURhUb+iP6zGbxfg30kn6KxbwD
+         EE0vlCNUJVJG5hPEZ4Oz/S/ZKWLWuzOkP6aOWZa35nU8ftBeVtQ6bLqfeGcbo2I3/RWq
+         qL8s9TY6QvxorOyvrkaHaH7LRnAICZhIe4fPskBmz28rwXVpX3MKHgOYtmr/bFJ0Txq+
+         bDk/QaFc1IrFPlF77ydJyPSqLftSG9a0h4p9d1Ct0b97C+/aWSMUd82wIGCD+ogiCZST
+         QeiA==
+X-Gm-Message-State: AJIora96uYgK6TnlQyx3h2vnZvKpg3GAykoxEmjQro4GZVtHPFC09IFv
+        r4B9QLcF11VWFk24BFMFllDWslsC2EI7qd5eMnxKxCCDQ9qbDOzgBINn15aEuwhKqTx0g9Rt3mI
+        LF5zPdyAtiMZLZkvdcyPpwV6LXJuYaXhoGcloPJldUWPN13esLVHsgS7G1UN9x/MNOA==
+X-Received: by 2002:ad4:5c66:0:b0:464:6b58:e695 with SMTP id i6-20020ad45c66000000b004646b58e695mr9361795qvh.126.1655488338081;
+        Fri, 17 Jun 2022 10:52:18 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1tJFBvgRfBe2yRm8kGfp7L4ALeTF2wWFsdIhX1RJ0hiMPb+BM2Xe5SAzU9Be7OOTiKkf/O3OQ==
+X-Received: by 2002:ad4:5c66:0:b0:464:6b58:e695 with SMTP id i6-20020ad45c66000000b004646b58e695mr9361769qvh.126.1655488337738;
+        Fri, 17 Jun 2022 10:52:17 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id bs18-20020a05620a471200b006a32bf19502sm4895612qkb.60.2022.06.17.10.52.15
+        for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Jun 2022 03:06:50 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     "Darrick J . Wong" <djwong@kernel.org>
-Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Dave Chinner <david@fromorbit.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Christian Brauner <christian.brauner@ubuntu.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH 5.10 CANDIDATE 03/11] xfs: Fix the free logic of state in xfs_attr_node_hasname
-Date:   Fri, 17 Jun 2022 13:06:33 +0300
-Message-Id: <20220617100641.1653164-4-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220617100641.1653164-1-amir73il@gmail.com>
-References: <20220617100641.1653164-1-amir73il@gmail.com>
+        Fri, 17 Jun 2022 10:52:17 -0700 (PDT)
+Date:   Sat, 18 Jun 2022 01:52:12 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2 0/2] Fix input value to _scratch_mkfs_sized
+Message-ID: <20220617175212.f5pikh6zdgud2qjl@zlang-mailbox>
+References: <20220616043845.14320-1-lan@suse.com>
+ <20220617035836.GZ1098723@dread.disaster.area>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220617035836.GZ1098723@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Yang Xu <xuyang2018.jy@fujitsu.com>
+On Fri, Jun 17, 2022 at 01:58:36PM +1000, Dave Chinner wrote:
+> On Thu, Jun 16, 2022 at 12:38:43PM +0800, An Long wrote:
+> > Function _scratch_mkfs_sized cannot recognize the size descriptor.
+> > 
+> > For example, we set MKFS_OPTIONS="-b 4k" and then run generic/416 on
+> > ext4, will fail with "mkfs.ext4: invalid block size - 4".
+> 
+> So isn't the correct fix for this to use the correct format in
+> MKFS_OPTIONS? ie. "-b 4096"?
+> 
+> i.e. why do we need ito add code to fix something that the user must
+> specify themselves and could easily just use an integer to begin
+> with?
 
-commit a1de97fe296c52eafc6590a3506f4bbd44ecb19a upstream.
+The fstests doesn't notice users that they *must* use pure number in
+MKFS_OPTIONS, especially the block size.
+As this issue, we have to accept the size unit(k/m/g ...) or have to
+tell the users that they must use pure integer, any of "k/m/g" is
+unacceptable. I prefer the former, so I'd like to have this change,
+except anyone has a better idea :)
 
-When testing xfstests xfs/126 on lastest upstream kernel, it will hang on some machine.
-Adding a getxattr operation after xattr corrupted, I can reproduce it 100%.
+Thanks,
+Zorro
 
-The deadlock as below:
-[983.923403] task:setfattr        state:D stack:    0 pid:17639 ppid: 14687 flags:0x00000080
-[  983.923405] Call Trace:
-[  983.923410]  __schedule+0x2c4/0x700
-[  983.923412]  schedule+0x37/0xa0
-[  983.923414]  schedule_timeout+0x274/0x300
-[  983.923416]  __down+0x9b/0xf0
-[  983.923451]  ? xfs_buf_find.isra.29+0x3c8/0x5f0 [xfs]
-[  983.923453]  down+0x3b/0x50
-[  983.923471]  xfs_buf_lock+0x33/0xf0 [xfs]
-[  983.923490]  xfs_buf_find.isra.29+0x3c8/0x5f0 [xfs]
-[  983.923508]  xfs_buf_get_map+0x4c/0x320 [xfs]
-[  983.923525]  xfs_buf_read_map+0x53/0x310 [xfs]
-[  983.923541]  ? xfs_da_read_buf+0xcf/0x120 [xfs]
-[  983.923560]  xfs_trans_read_buf_map+0x1cf/0x360 [xfs]
-[  983.923575]  ? xfs_da_read_buf+0xcf/0x120 [xfs]
-[  983.923590]  xfs_da_read_buf+0xcf/0x120 [xfs]
-[  983.923606]  xfs_da3_node_read+0x1f/0x40 [xfs]
-[  983.923621]  xfs_da3_node_lookup_int+0x69/0x4a0 [xfs]
-[  983.923624]  ? kmem_cache_alloc+0x12e/0x270
-[  983.923637]  xfs_attr_node_hasname+0x6e/0xa0 [xfs]
-[  983.923651]  xfs_has_attr+0x6e/0xd0 [xfs]
-[  983.923664]  xfs_attr_set+0x273/0x320 [xfs]
-[  983.923683]  xfs_xattr_set+0x87/0xd0 [xfs]
-[  983.923686]  __vfs_removexattr+0x4d/0x60
-[  983.923688]  __vfs_removexattr_locked+0xac/0x130
-[  983.923689]  vfs_removexattr+0x4e/0xf0
-[  983.923690]  removexattr+0x4d/0x80
-[  983.923693]  ? __check_object_size+0xa8/0x16b
-[  983.923695]  ? strncpy_from_user+0x47/0x1a0
-[  983.923696]  ? getname_flags+0x6a/0x1e0
-[  983.923697]  ? _cond_resched+0x15/0x30
-[  983.923699]  ? __sb_start_write+0x1e/0x70
-[  983.923700]  ? mnt_want_write+0x28/0x50
-[  983.923701]  path_removexattr+0x9b/0xb0
-[  983.923702]  __x64_sys_removexattr+0x17/0x20
-[  983.923704]  do_syscall_64+0x5b/0x1a0
-[  983.923705]  entry_SYSCALL_64_after_hwframe+0x65/0xca
-[  983.923707] RIP: 0033:0x7f080f10ee1b
-
-When getxattr calls xfs_attr_node_get function, xfs_da3_node_lookup_int fails with EFSCORRUPTED in
-xfs_attr_node_hasname because we have use blocktrash to random it in xfs/126. So it
-free state in internal and xfs_attr_node_get doesn't do xfs_buf_trans release job.
-
-Then subsequent removexattr will hang because of it.
-
-This bug was introduced by kernel commit 07120f1abdff ("xfs: Add xfs_has_attr and subroutines").
-It adds xfs_attr_node_hasname helper and said caller will be responsible for freeing the state
-in this case. But xfs_attr_node_hasname will free state itself instead of caller if
-xfs_da3_node_lookup_int fails.
-
-Fix this bug by moving the step of free state into caller.
-
-[amir: this text from original commit is not relevant for 5.10 backport:
-Also, use "goto error/out" instead of returning error directly in xfs_attr_node_addname_find_attr and
-xfs_attr_node_removename_setup function because we should free state ourselves.
-]
-
-Fixes: 07120f1abdff ("xfs: Add xfs_has_attr and subroutines")
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- fs/xfs/libxfs/xfs_attr.c | 13 +++++--------
- 1 file changed, 5 insertions(+), 8 deletions(-)
-
-diff --git a/fs/xfs/libxfs/xfs_attr.c b/fs/xfs/libxfs/xfs_attr.c
-index 96ac7e562b87..fcca36bbd997 100644
---- a/fs/xfs/libxfs/xfs_attr.c
-+++ b/fs/xfs/libxfs/xfs_attr.c
-@@ -876,21 +876,18 @@ xfs_attr_node_hasname(
- 
- 	state = xfs_da_state_alloc(args);
- 	if (statep != NULL)
--		*statep = NULL;
-+		*statep = state;
- 
- 	/*
- 	 * Search to see if name exists, and get back a pointer to it.
- 	 */
- 	error = xfs_da3_node_lookup_int(state, &retval);
--	if (error) {
--		xfs_da_state_free(state);
--		return error;
--	}
-+	if (error)
-+		retval = error;
- 
--	if (statep != NULL)
--		*statep = state;
--	else
-+	if (!statep)
- 		xfs_da_state_free(state);
-+
- 	return retval;
- }
- 
--- 
-2.25.1
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
