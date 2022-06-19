@@ -2,180 +2,122 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2F12CCA47A
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jun 2022 13:47:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B06B5CCA47E
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jun 2022 13:47:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230228AbiFSNr0 (ORCPT
+        id S231316AbiFSNr0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Sun, 19 Jun 2022 09:47:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41266 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236224AbiFSNrJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jun 2022 09:47:09 -0400
-Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EB9E637B
-        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:08 -0700 (PDT)
-Received: by mail-wr1-x42d.google.com with SMTP id g27so4681687wrb.10
-        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:08 -0700 (PDT)
+        with ESMTP id S235802AbiFSNrI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jun 2022 09:47:08 -0400
+Received: from mail-wm1-x32c.google.com (mail-wm1-x32c.google.com [IPv6:2a00:1450:4864:20::32c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0290C6378
+        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:07 -0700 (PDT)
+Received: by mail-wm1-x32c.google.com with SMTP id h14-20020a1ccc0e000000b0039eff745c53so359461wmb.5
+        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=lspYXotJXIgD9rJo2AqmUY24qO9c5voykkTiI+kyxYw=;
-        b=K0tjo59tsCY6kphCsc4nBNJjkxGkqo15n6jtyI8Daniwku3hbZnwnz9OyCQv75+jsg
-         9KfBN9fYpNKEXqsRE6LZlpZWWxIZnW9vUlR5v/QeE95FS1WTQXS4RL1ELRdQjz0clijI
-         TuxrjquDiv89PUw4HU+5wpIV1mJl/Aoo2esxAVx7iJPBiPoBO2fo+gj44g5nlM00UXsa
-         uZu0m3wY4BN7AcjonGSC/ItbjL/RmZulPWUnNq85x42rlFJGhxARM5abuCJekvL3jYbH
-         3+J+1dft8KjYl8GUXMIbKf2h0u3LYk9nJ3IwG4hby2mr8/eJGDdcIaKQaUIurWFu8dz9
-         wTXQ==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=xeM4C3LJEJ2YOy8YiYjY8tslsHGZfBwi4HmTLMK9ZlI=;
+        b=O6EOMRM0m4hD8DR+N46u2nwA1g2zlFzMRb9KxxNTeAYYhntttlajxFfj6XN1OpibkO
+         U9VrNuVZIoqRcg2P4w9r69Uf95gmjBHAkeOtRpFB8yWGDg9ZnQ7tHADdykUWql4SLy65
+         Bg3AcBeAJL+hiBIGzcx/c+lWeQFAC83BiVEON80qsD3cZ7FFFVkDPpokZ69az5VUknb8
+         SXhTy+P0kft/Tjj0DCpuDjkkZ9F2XgJIxyffTBLdT0k+JunXV42YRNL4a2SFoOF8xphL
+         c6Yb9RLrkSuB62gipuMEG6FOWDrnoyKJyPGig42esXuCdK0uJ69q8EgfII5xzgq/Q7c8
+         G13w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=lspYXotJXIgD9rJo2AqmUY24qO9c5voykkTiI+kyxYw=;
-        b=fR/QOjldu4dEusOJ7QtTHa5bCtZF+bAGGCsKpZvGukY7H7JdYQC8DWwz7lWvACQBVP
-         6tayInGwPutDbK9+LRfTV8bHj4gLWAdiJxK/7hvVcfFTBqWMz7x83Wgo4X2y1YUatwOS
-         L1F207EBjrNriIUrMd/1+zGj1WuJYt/3iGDm0CvZ62Xup1OmpXGCK3bK4qQNRVkPoixd
-         7/j1Gvp3E3t7BCd8V//ATACmdpPnzT45Img689ZkZje90SM0LRMyED5QMaWPW/XQRLMd
-         gw8gyB2cYbL+EgP3W9y9RbkYps7VPuumicnqYsIluKPz+BTc+bRrSCd8nsGjCEcGA1NK
-         etSQ==
-X-Gm-Message-State: AJIora/rOrexkY8Y0pV0ixhWke8wDeme7/vaqk3WCs8o0/GIefuW7mLL
-        ysZLYRqlc+CTwCF6P6BntWY=
-X-Google-Smtp-Source: AGRyM1tjuh5AuiBgFI1Ede0lFVxlF8XCcG9mBOo1Daqnfe/rUb5H+9K3LuOKROBjmG5DP42W3taRgg==
-X-Received: by 2002:a05:6000:3cd:b0:21b:8e8d:470f with SMTP id b13-20020a05600003cd00b0021b8e8d470fmr1124883wrg.387.1655646426774;
-        Sun, 19 Jun 2022 06:47:06 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=xeM4C3LJEJ2YOy8YiYjY8tslsHGZfBwi4HmTLMK9ZlI=;
+        b=F1gc4UgBScjZZvkAP6cwkbAWmPw62YUG+CHv8uq23W8qd/DQWp3O73MEdeOHm7TKXh
+         kn+XrXd3omisIBrWbL760B/VWx3Eeu45uEMSxbbwc42ZXIpdBomiFbQ0COl0IBKKW+y+
+         LHm3HBrYFXB5YeNLnc4gEUvZMR4Ob4fzMEQUXJmDwNaMShWiioSvkxD/RIgu3PUjIaoG
+         XukxjPDqhfo/ZGZxB7ZfyPCUXnAXG4qAnGXONeppgdd5T0KnZcXwgTkhzAIgsYwIoQPz
+         HsWY5g5l7GSYgF/fEBU6fGCgEcH494auQ6SnQ2vQIEjRv64yoa5cHRKCWmN59IMF++va
+         illw==
+X-Gm-Message-State: AOAM530lwFBKtwOYxk20BnkGUAYo72r++kz0p9uKjXMsiinRHfK/Ohy8
+        0VsrQ5lFnC2jteyaeCvpYVM=
+X-Google-Smtp-Source: ABdhPJxK19tp5fnOgW96HI5UCQ7Ajhw2Qu5kGED7uoNzIv6y5yidNEuziZMQWJezODsSVCocgjtisg==
+X-Received: by 2002:a05:600c:25cd:b0:39c:6bc0:a1fb with SMTP id 13-20020a05600c25cd00b0039c6bc0a1fbmr30569202wml.179.1655646425372;
+        Sun, 19 Jun 2022 06:47:05 -0700 (PDT)
 Received: from localhost.localdomain ([77.137.66.49])
-        by smtp.gmail.com with ESMTPSA id q18-20020adfcd92000000b00219e77e489fsm5240927wrj.17.2022.06.19.06.47.05
+        by smtp.gmail.com with ESMTPSA id q18-20020adfcd92000000b00219e77e489fsm5240927wrj.17.2022.06.19.06.47.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Jun 2022 06:47:06 -0700 (PDT)
+        Sun, 19 Jun 2022 06:47:04 -0700 (PDT)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Zorro Lang <zlang@redhat.com>
 Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
         Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
-Subject: [PATCH 1/4] fstests: add missing _require_freeze() to tests
-Date:   Sun, 19 Jun 2022 16:46:54 +0300
-Message-Id: <20220619134657.1846292-2-amir73il@gmail.com>
+Subject: [PATCH 0/4] aborted fstests may leave frozen fs behind
+Date:   Sun, 19 Jun 2022 16:46:53 +0300
+Message-Id: <20220619134657.1846292-1-amir73il@gmail.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220619134657.1846292-1-amir73il@gmail.com>
-References: <20220619134657.1846292-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-And add a few tests that use freeze to the freeze group
+Zorro,
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/xfs/119 | 1 +
- tests/xfs/318 | 3 ++-
- tests/xfs/325 | 3 ++-
- tests/xfs/422 | 3 ++-
- tests/xfs/438 | 2 +-
- tests/xfs/517 | 1 +
- 6 files changed, 9 insertions(+), 4 deletions(-)
+I was analyzing a flakey test failure of xfs/517 and
+fell down a rabbit hole of frzon fs cleanups.
 
-diff --git a/tests/xfs/119 b/tests/xfs/119
-index a1180371..b6f96601 100755
---- a/tests/xfs/119
-+++ b/tests/xfs/119
-@@ -20,6 +20,7 @@ _begin_fstest log v2log auto freeze
- _supported_fs xfs
- 
- _require_scratch
-+_require_freeze
- 
- # this may hang
- sync
-diff --git a/tests/xfs/318 b/tests/xfs/318
-index 38c7aa60..be93f9ab 100755
---- a/tests/xfs/318
-+++ b/tests/xfs/318
-@@ -7,7 +7,7 @@
- # Simulate free extent errors with a file write and a file remove.
- #
- . ./common/preamble
--_begin_fstest auto quick rw
-+_begin_fstest auto quick rw freeze
- 
- # Override the default cleanup function.
- _cleanup()
-@@ -26,6 +26,7 @@ _supported_fs xfs
- _require_scratch
- _require_error_injection
- _require_xfs_io_error_injection "rmap_finish_one"
-+_require_freeze
- 
- blksz=65536
- blks=64
-diff --git a/tests/xfs/325 b/tests/xfs/325
-index 5b26b2b3..c6861fbc 100755
---- a/tests/xfs/325
-+++ b/tests/xfs/325
-@@ -8,7 +8,7 @@
- # Inject an error during extent freeing to test log recovery.
- #
- . ./common/preamble
--_begin_fstest auto quick clone
-+_begin_fstest auto quick clone freeze
- 
- # Override the default cleanup function.
- _cleanup()
-@@ -29,6 +29,7 @@ _require_cp_reflink
- _require_scratch_reflink
- _require_error_injection
- _require_xfs_io_error_injection "free_extent"
-+_require_freeze
- 
- blksz=65536
- blks=30
-diff --git a/tests/xfs/422 b/tests/xfs/422
-index 175253aa..a83a66df 100755
---- a/tests/xfs/422
-+++ b/tests/xfs/422
-@@ -9,7 +9,7 @@
- # activity, so we can't have userspace wandering in and thawing it.
- #
- . ./common/preamble
--_begin_fstest dangerous_scrub dangerous_online_repair
-+_begin_fstest dangerous_scrub dangerous_online_repair freeze
- 
- _register_cleanup "_cleanup" BUS
- 
-@@ -24,6 +24,7 @@ _require_xfs_scratch_rmapbt
- _require_xfs_io_command "scrub"
- _require_xfs_io_error_injection "force_repair"
- _require_command "$KILLALL_PROG" killall
-+_require_freeze
- 
- echo "Format and populate"
- _scratch_mkfs > "$seqres.full" 2>&1
-diff --git a/tests/xfs/438 b/tests/xfs/438
-index c3008b1c..cfe75bd8 100755
---- a/tests/xfs/438
-+++ b/tests/xfs/438
-@@ -21,7 +21,7 @@
- # Fixed by upstream commit 373b058 ("xfs: Properly retry failed dquot
- # items in case of error during buffer writeback")
- . ./common/preamble
--_begin_fstest auto quick quota
-+_begin_fstest auto quick quota freeze
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/xfs/517 b/tests/xfs/517
-index 88c4f43b..f7f9a8a2 100755
---- a/tests/xfs/517
-+++ b/tests/xfs/517
-@@ -29,6 +29,7 @@ _supported_fs xfs
- _require_xfs_scratch_rmapbt
- _require_xfs_io_command "fsmap"
- _require_command "$KILLALL_PROG" killall
-+_require_freeze
- 
- echo "Format and populate"
- _scratch_mkfs > "$seqres.full" 2>&1
+Patch 4 fixes the false positive I was running into occasionnaly
+in cases where xfs/517 was completed successfully.
+
+While testing, I found out that if I interrupt the run of xfs/517
+this often leaves the fs frozen. So I did an audit of the tests that
+freeze the fs and found that very few of them unfreeze fs on interrupt.
+
+This is an attempt to provide a robust solution that minimizes the
+risks of that happenning.
+
+I tested that all the tests in the 'freeze' group that I modified
+run to completion.
+
+I did not try to interrupt all the rest of the tests, because
+interrupting a test at exact time that it is frozen is quite hard.
+
+I did test that interrupting xfs/517 several times did not leave the fs
+frozen.  Before the changes, it was rather easy to get it to leave a
+frozen fs behind, because the freeze_loop() keeps the fs frozon around
+half of the time that the test is running.
+
+As far as I can tell, this series is orthogonal to Dave's _cleanup()
+work [1]. It adds missing cleanups to tests (e.g. xfs/422) that could
+later make use of the common cleanup helpers (i.e. _fsstress_cleanup).
+However, the common _fsstress_cleanup() helper will need to kill without
+waiting. To my understand, Dave was also against waiting in the cleanup
+helper.
+
+Thanks,
+Amir.
+
+[1] https://lore.kernel.org/fstests/20220524073411.1943480-1-david@fromorbit.com/
+
+Amir Goldstein (4):
+  fstests: add missing _require_freeze() to tests
+  fstests: make sure to unfreeze test and scratch mounts
+  xfs/{422,517}: add missing killall to _cleanup()
+  xfs/{422,517}: fix false positive failure
+
+ check             | 14 ++++++++------
+ common/rc         |  5 +++--
+ tests/generic/390 |  2 --
+ tests/xfs/011     |  2 --
+ tests/xfs/119     |  1 +
+ tests/xfs/318     |  3 ++-
+ tests/xfs/325     |  3 ++-
+ tests/xfs/422     | 16 ++++++++++++++--
+ tests/xfs/438     |  2 +-
+ tests/xfs/517     |  8 ++++++--
+ 10 files changed, 37 insertions(+), 19 deletions(-)
+
 -- 
 2.25.1
 
