@@ -2,59 +2,59 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44481C43334
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2F12CCA47A
 	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jun 2022 13:47:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229637AbiFSNrZ (ORCPT
+        id S230228AbiFSNr0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jun 2022 09:47:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41278 "EHLO
+        Sun, 19 Jun 2022 09:47:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236357AbiFSNrK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jun 2022 09:47:10 -0400
-Received: from mail-wr1-x435.google.com (mail-wr1-x435.google.com [IPv6:2a00:1450:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 744CF6378
-        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:09 -0700 (PDT)
-Received: by mail-wr1-x435.google.com with SMTP id g4so11315534wrh.11
-        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:09 -0700 (PDT)
+        with ESMTP id S236224AbiFSNrJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jun 2022 09:47:09 -0400
+Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EB9E637B
+        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:08 -0700 (PDT)
+Received: by mail-wr1-x42d.google.com with SMTP id g27so4681687wrb.10
+        for <fstests@vger.kernel.org>; Sun, 19 Jun 2022 06:47:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=CY/oNJ8EO9OsfnaLTi7yO+kVNqN3sw4e4XLEDmrhyeM=;
-        b=W6hsGgsV9Rrya24zNST8qeezFeLOTellkMb5l3KkTBt6E1qG5Ntk1XGzZ42JAm4DBS
-         pgL+wDC4d8HK4Rol1cDlV02vhcc6SFacqagS7VfDS8xODNzU/jUDEeLGJv4iZOOBUG+o
-         X2P06UqdIXi0endEb0uqH/Y8v/UPDh19nYgzbq/uaHr9UYdZ6+kvvp0KpLJaJ+d0omLH
-         7ZV5NjJ+D5UHD16j+RfCtZr2gH73/WVBXV9Mw0A82dk+7k6wHsQ2HTwzo+1Rlvu13Uio
-         SrWL5sUVCH5GOzjaLAa7cgkqSt/L+cM49Cj/DVK1Edvf//6kFzT+mhAHAw6UwFHZQFJR
-         GF/g==
+        bh=lspYXotJXIgD9rJo2AqmUY24qO9c5voykkTiI+kyxYw=;
+        b=K0tjo59tsCY6kphCsc4nBNJjkxGkqo15n6jtyI8Daniwku3hbZnwnz9OyCQv75+jsg
+         9KfBN9fYpNKEXqsRE6LZlpZWWxIZnW9vUlR5v/QeE95FS1WTQXS4RL1ELRdQjz0clijI
+         TuxrjquDiv89PUw4HU+5wpIV1mJl/Aoo2esxAVx7iJPBiPoBO2fo+gj44g5nlM00UXsa
+         uZu0m3wY4BN7AcjonGSC/ItbjL/RmZulPWUnNq85x42rlFJGhxARM5abuCJekvL3jYbH
+         3+J+1dft8KjYl8GUXMIbKf2h0u3LYk9nJ3IwG4hby2mr8/eJGDdcIaKQaUIurWFu8dz9
+         wTXQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=CY/oNJ8EO9OsfnaLTi7yO+kVNqN3sw4e4XLEDmrhyeM=;
-        b=VAiakzYF+RF3tR4VGX+PZzbiFzVCIteJinJdGpIHVJjldQ90Ib59Fh3KIWvERNa/BA
-         b8dtt1RzLZT0aJq8uVN6OdXboAxu5NeEsciu89QqcMY9+/nOSxFMirQv3hjJ/0qOhTUt
-         FAOVQ3SxZQZVVSGLneIQlLWePQbVZltBsTqvWGFD7f0iSofYLfUZl536PfZ8b0KFQo6f
-         XHM2ldWltzy9CPK6mrrIdYkgGvNd9/MdElXfo9KU6aFhwAZKYVMXTfVMX/BMyybofuFE
-         VHU/4BumCgvTwhGsR75VAWKX5bZzc1DsignzOGrPx965mehIkrZAew720OUmXxgkjrRx
-         QeYA==
-X-Gm-Message-State: AJIora+o+BlgjWmi06FZoKVLryHl31gMH2ZTb++50SZIv8ihaPH905kT
-        lHsu/FViv4lQkhmmWAIW5iI=
-X-Google-Smtp-Source: AGRyM1sL/Z+M4APAHrLgecFyORMTpGHtIMNIIXDCzTUn+eC4Tpr6dPpGR36BAG3jACndy9L4zfzorg==
-X-Received: by 2002:adf:ebc4:0:b0:21b:815b:d135 with SMTP id v4-20020adfebc4000000b0021b815bd135mr10654007wrn.653.1655646428050;
-        Sun, 19 Jun 2022 06:47:08 -0700 (PDT)
+        bh=lspYXotJXIgD9rJo2AqmUY24qO9c5voykkTiI+kyxYw=;
+        b=fR/QOjldu4dEusOJ7QtTHa5bCtZF+bAGGCsKpZvGukY7H7JdYQC8DWwz7lWvACQBVP
+         6tayInGwPutDbK9+LRfTV8bHj4gLWAdiJxK/7hvVcfFTBqWMz7x83Wgo4X2y1YUatwOS
+         L1F207EBjrNriIUrMd/1+zGj1WuJYt/3iGDm0CvZ62Xup1OmpXGCK3bK4qQNRVkPoixd
+         7/j1Gvp3E3t7BCd8V//ATACmdpPnzT45Img689ZkZje90SM0LRMyED5QMaWPW/XQRLMd
+         gw8gyB2cYbL+EgP3W9y9RbkYps7VPuumicnqYsIluKPz+BTc+bRrSCd8nsGjCEcGA1NK
+         etSQ==
+X-Gm-Message-State: AJIora/rOrexkY8Y0pV0ixhWke8wDeme7/vaqk3WCs8o0/GIefuW7mLL
+        ysZLYRqlc+CTwCF6P6BntWY=
+X-Google-Smtp-Source: AGRyM1tjuh5AuiBgFI1Ede0lFVxlF8XCcG9mBOo1Daqnfe/rUb5H+9K3LuOKROBjmG5DP42W3taRgg==
+X-Received: by 2002:a05:6000:3cd:b0:21b:8e8d:470f with SMTP id b13-20020a05600003cd00b0021b8e8d470fmr1124883wrg.387.1655646426774;
+        Sun, 19 Jun 2022 06:47:06 -0700 (PDT)
 Received: from localhost.localdomain ([77.137.66.49])
-        by smtp.gmail.com with ESMTPSA id q18-20020adfcd92000000b00219e77e489fsm5240927wrj.17.2022.06.19.06.47.06
+        by smtp.gmail.com with ESMTPSA id q18-20020adfcd92000000b00219e77e489fsm5240927wrj.17.2022.06.19.06.47.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Jun 2022 06:47:07 -0700 (PDT)
+        Sun, 19 Jun 2022 06:47:06 -0700 (PDT)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Zorro Lang <zlang@redhat.com>
 Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
         Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
-Subject: [PATCH 2/4] fstests: make sure to unfreeze test and scratch mounts
-Date:   Sun, 19 Jun 2022 16:46:55 +0300
-Message-Id: <20220619134657.1846292-3-amir73il@gmail.com>
+Subject: [PATCH 1/4] fstests: add missing _require_freeze() to tests
+Date:   Sun, 19 Jun 2022 16:46:54 +0300
+Message-Id: <20220619134657.1846292-2-amir73il@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220619134657.1846292-1-amir73il@gmail.com>
 References: <20220619134657.1846292-1-amir73il@gmail.com>
@@ -64,136 +64,118 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Almost all of the tests that _require_freeze() fail to unfreeze
-scratch mount in case the test is interrupted while fs is frozen.
-
-Move the handling of unfreeze to generic check code.
-For now, tests only freeze scratch fs, but to be more robust, unfreeze
-both test and scratch fs following a call to _require_freeze().
-
-Tests could still hang if thier private _cleanup() routine tries
-to modify the frozen fs or wait for a blocked process. Fix the
-_cleanup() routine of xfs/011 to avoid that.
+And add a few tests that use freeze to the freeze group
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- check             | 14 ++++++++------
- common/rc         |  5 +++--
- tests/generic/390 |  2 --
- tests/xfs/011     |  2 --
- tests/xfs/517     |  1 -
- 5 files changed, 11 insertions(+), 13 deletions(-)
+ tests/xfs/119 | 1 +
+ tests/xfs/318 | 3 ++-
+ tests/xfs/325 | 3 ++-
+ tests/xfs/422 | 3 ++-
+ tests/xfs/438 | 2 +-
+ tests/xfs/517 | 1 +
+ 6 files changed, 9 insertions(+), 4 deletions(-)
 
-diff --git a/check b/check
-index de11b37e..d6ee71aa 100755
---- a/check
-+++ b/check
-@@ -527,17 +527,21 @@ _check_filesystems()
- {
- 	local ret=0
+diff --git a/tests/xfs/119 b/tests/xfs/119
+index a1180371..b6f96601 100755
+--- a/tests/xfs/119
++++ b/tests/xfs/119
+@@ -20,6 +20,7 @@ _begin_fstest log v2log auto freeze
+ _supported_fs xfs
  
-+	# Make sure both test and scratch are unfrozen post _require_freeze()
-+	if [ -f ${RESULT_DIR}/require_freeze ]; then
-+		xfs_freeze -u "$TEST_DIR" >/dev/null 2>&1
-+		xfs_freeze -u "$SCRATCH_MNT" >/dev/null 2>&1
-+	fi
- 	if [ -f ${RESULT_DIR}/require_test ]; then
- 		_check_test_fs || ret=1
--		rm -f ${RESULT_DIR}/require_test*
- 	else
- 		_test_unmount 2> /dev/null
- 	fi
- 	if [ -f ${RESULT_DIR}/require_scratch ]; then
- 		_check_scratch_fs || ret=1
--		rm -f ${RESULT_DIR}/require_scratch*
- 	fi
- 	_scratch_unmount 2> /dev/null
-+	rm -f ${RESULT_DIR}/require_*
- 	return $ret
- }
+ _require_scratch
++_require_freeze
  
-@@ -783,8 +787,7 @@ function run_section()
- 		seqres="$REPORT_DIR/$seqnum"
+ # this may hang
+ sync
+diff --git a/tests/xfs/318 b/tests/xfs/318
+index 38c7aa60..be93f9ab 100755
+--- a/tests/xfs/318
++++ b/tests/xfs/318
+@@ -7,7 +7,7 @@
+ # Simulate free extent errors with a file write and a file remove.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rw
++_begin_fstest auto quick rw freeze
  
- 		mkdir -p $RESULT_DIR
--		rm -f ${RESULT_DIR}/require_scratch*
--		rm -f ${RESULT_DIR}/require_test*
-+		rm -f ${RESULT_DIR}/require_*
- 		echo -n "$seqnum"
- 
- 		if $showme; then
-@@ -882,8 +885,7 @@ function run_section()
- 			_dump_err_cont "[failed, exit status $sts]"
- 			_test_unmount 2> /dev/null
- 			_scratch_unmount 2> /dev/null
--			rm -f ${RESULT_DIR}/require_test*
--			rm -f ${RESULT_DIR}/require_scratch*
-+			rm -f ${RESULT_DIR}/require_*
- 			err=true
- 		else
- 			# The test apparently passed, so check for corruption
-diff --git a/common/rc b/common/rc
-index 3c072c16..b87dfe05 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1540,8 +1540,7 @@ _notrun()
- {
-     echo "$*" > $seqres.notrun
-     echo "$seq not run: $*"
--    rm -f ${RESULT_DIR}/require_test*
--    rm -f ${RESULT_DIR}/require_scratch*
-+    rm -f ${RESULT_DIR}/require_*
- 
-     status=0
-     exit
-@@ -3648,6 +3647,8 @@ _require_freeze()
- 	local result=$?
- 	xfs_freeze -u "$TEST_DIR" >/dev/null 2>&1
- 	[ $result -eq 0 ] || _notrun "$FSTYP does not support freezing"
-+	# Make sure both test and scratch are unfrozen at the end of the test
-+	touch ${RESULT_DIR}/require_freeze
- }
- 
- # Does NFS export work on this fs?
-diff --git a/tests/generic/390 b/tests/generic/390
-index 20c66e22..0f2b86fa 100755
---- a/tests/generic/390
-+++ b/tests/generic/390
-@@ -14,8 +14,6 @@ _begin_fstest auto freeze stress
+ # Override the default cleanup function.
  _cleanup()
- {
- 	cd /
--	# Make sure $SCRATCH_MNT is unfreezed
--	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
- 	rm -f $tmp.*
- }
+@@ -26,6 +26,7 @@ _supported_fs xfs
+ _require_scratch
+ _require_error_injection
+ _require_xfs_io_error_injection "rmap_finish_one"
++_require_freeze
  
-diff --git a/tests/xfs/011 b/tests/xfs/011
-index d6e9099e..351a574e 100755
---- a/tests/xfs/011
-+++ b/tests/xfs/011
-@@ -17,9 +17,7 @@ _begin_fstest auto freeze log metadata quick
+ blksz=65536
+ blks=64
+diff --git a/tests/xfs/325 b/tests/xfs/325
+index 5b26b2b3..c6861fbc 100755
+--- a/tests/xfs/325
++++ b/tests/xfs/325
+@@ -8,7 +8,7 @@
+ # Inject an error during extent freeing to test log recovery.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick clone
++_begin_fstest auto quick clone freeze
+ 
+ # Override the default cleanup function.
  _cleanup()
- {
- 	$KILLALL_PROG -9 fsstress 2>/dev/null
--	wait
- 	cd /
--	_scratch_unmount 2>/dev/null
- 	rm -f $tmp.*
- }
+@@ -29,6 +29,7 @@ _require_cp_reflink
+ _require_scratch_reflink
+ _require_error_injection
+ _require_xfs_io_error_injection "free_extent"
++_require_freeze
  
+ blksz=65536
+ blks=30
+diff --git a/tests/xfs/422 b/tests/xfs/422
+index 175253aa..a83a66df 100755
+--- a/tests/xfs/422
++++ b/tests/xfs/422
+@@ -9,7 +9,7 @@
+ # activity, so we can't have userspace wandering in and thawing it.
+ #
+ . ./common/preamble
+-_begin_fstest dangerous_scrub dangerous_online_repair
++_begin_fstest dangerous_scrub dangerous_online_repair freeze
+ 
+ _register_cleanup "_cleanup" BUS
+ 
+@@ -24,6 +24,7 @@ _require_xfs_scratch_rmapbt
+ _require_xfs_io_command "scrub"
+ _require_xfs_io_error_injection "force_repair"
+ _require_command "$KILLALL_PROG" killall
++_require_freeze
+ 
+ echo "Format and populate"
+ _scratch_mkfs > "$seqres.full" 2>&1
+diff --git a/tests/xfs/438 b/tests/xfs/438
+index c3008b1c..cfe75bd8 100755
+--- a/tests/xfs/438
++++ b/tests/xfs/438
+@@ -21,7 +21,7 @@
+ # Fixed by upstream commit 373b058 ("xfs: Properly retry failed dquot
+ # items in case of error during buffer writeback")
+ . ./common/preamble
+-_begin_fstest auto quick quota
++_begin_fstest auto quick quota freeze
+ 
+ # Override the default cleanup function.
+ _cleanup()
 diff --git a/tests/xfs/517 b/tests/xfs/517
-index f7f9a8a2..961668e3 100755
+index 88c4f43b..f7f9a8a2 100755
 --- a/tests/xfs/517
 +++ b/tests/xfs/517
-@@ -15,7 +15,6 @@ _register_cleanup "_cleanup" BUS
- _cleanup()
- {
- 	cd /
--	$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT > /dev/null 2>&1
- 	rm -rf $tmp.*
- }
+@@ -29,6 +29,7 @@ _supported_fs xfs
+ _require_xfs_scratch_rmapbt
+ _require_xfs_io_command "fsmap"
+ _require_command "$KILLALL_PROG" killall
++_require_freeze
  
+ echo "Format and populate"
+ _scratch_mkfs > "$seqres.full" 2>&1
 -- 
 2.25.1
 
