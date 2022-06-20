@@ -2,175 +2,137 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA2ADC433EF
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jun 2022 22:34:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF4FFC433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jun 2022 23:14:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236349AbiFTWe1 (ORCPT
+        id S1346326AbiFTXOq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Jun 2022 18:34:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45388 "EHLO
+        Mon, 20 Jun 2022 19:14:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235910AbiFTWe0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Jun 2022 18:34:26 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 30FDD15719
-        for <fstests@vger.kernel.org>; Mon, 20 Jun 2022 15:34:25 -0700 (PDT)
+        with ESMTP id S1348221AbiFTXOR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Jun 2022 19:14:17 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8064A26550
+        for <fstests@vger.kernel.org>; Mon, 20 Jun 2022 16:12:32 -0700 (PDT)
 Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id 9A39610E74DB;
-        Tue, 21 Jun 2022 08:34:23 +1000 (AEST)
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 1EF005ECB75;
+        Tue, 21 Jun 2022 09:12:30 +1000 (AEST)
 Received: from dave by dread.disaster.area with local (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1o3PyP-0094wh-90; Tue, 21 Jun 2022 08:34:21 +1000
-Date:   Tue, 21 Jun 2022 08:34:21 +1000
+        id 1o3QZJ-0095XD-Dt; Tue, 21 Jun 2022 09:12:29 +1000
+Date:   Tue, 21 Jun 2022 09:12:29 +1000
 From:   Dave Chinner <david@fromorbit.com>
 To:     Zorro Lang <zlang@redhat.com>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Brian Foster <bfoster@redhat.com>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 2/4] fstests: make sure to unfreeze test and scratch
- mounts
-Message-ID: <20220620223421.GC1098723@dread.disaster.area>
-References: <20220619134657.1846292-1-amir73il@gmail.com>
- <20220619134657.1846292-3-amir73il@gmail.com>
- <20220620111705.zmujyr3v2f5uw326@zlang-mailbox>
- <CAOQ4uxjcMiT_-0mRWz3+v2pRx+sXdG0a51E=Tt1etgOrZJXrRA@mail.gmail.com>
- <20220620142139.zukdj3nk4lntwtpx@zlang-mailbox>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2 0/2] Fix input value to _scratch_mkfs_sized
+Message-ID: <20220620231229.GD1098723@dread.disaster.area>
+References: <20220616043845.14320-1-lan@suse.com>
+ <20220617035836.GZ1098723@dread.disaster.area>
+ <20220617175212.f5pikh6zdgud2qjl@zlang-mailbox>
+ <20220617222405.GA1098723@dread.disaster.area>
+ <20220618031413.j6pgaucpinl5csc5@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220620142139.zukdj3nk4lntwtpx@zlang-mailbox>
+In-Reply-To: <20220618031413.j6pgaucpinl5csc5@zlang-mailbox>
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62b0f5f0
+X-Optus-CM-Analysis: v=2.4 cv=OJNEYQWB c=1 sm=1 tr=0 ts=62b0fedf
         a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=20KFwNOVAAAA:8 a=pGLkceISAAAA:8
-        a=7-415B0cAAAA:8 a=p26x0u8fNZi2PX8B23IA:9 a=CjuIK1q_8ugA:10
-        a=biEYGPWJfzWAr4FL6Ov7:22
+        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=7-415B0cAAAA:8
+        a=GOA6u4ec4UHg7Z0lS2EA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 20, 2022 at 10:21:39PM +0800, Zorro Lang wrote:
-> On Mon, Jun 20, 2022 at 03:13:33PM +0300, Amir Goldstein wrote:
-> > On Mon, Jun 20, 2022 at 2:17 PM Zorro Lang <zlang@redhat.com> wrote:
-> > >
-> > > On Sun, Jun 19, 2022 at 04:46:55PM +0300, Amir Goldstein wrote:
-> > > > Almost all of the tests that _require_freeze() fail to unfreeze
-> > > > scratch mount in case the test is interrupted while fs is frozen.
-> > > >
-> > > > Move the handling of unfreeze to generic check code.
-> > > > For now, tests only freeze scratch fs, but to be more robust, unfreeze
-> > > > both test and scratch fs following a call to _require_freeze().
-> > > >
-> > > > Tests could still hang if thier private _cleanup() routine tries
-> > > > to modify the frozen fs or wait for a blocked process. Fix the
-> > > > _cleanup() routine of xfs/011 to avoid that.
-> > > >
-> > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > > > ---
-> > > >  check             | 14 ++++++++------
-> > > >  common/rc         |  5 +++--
-> > > >  tests/generic/390 |  2 --
-> > > >  tests/xfs/011     |  2 --
-> > > >  tests/xfs/517     |  1 -
-> > > >  5 files changed, 11 insertions(+), 13 deletions(-)
-> > > >
-> > > > diff --git a/check b/check
-> > > > index de11b37e..d6ee71aa 100755
-> > > > --- a/check
-> > > > +++ b/check
-> > > > @@ -527,17 +527,21 @@ _check_filesystems()
-> > > >  {
-> > > >       local ret=0
-> > > >
-> > > > +     # Make sure both test and scratch are unfrozen post _require_freeze()
-> > > > +     if [ -f ${RESULT_DIR}/require_freeze ]; then
-> > > > +             xfs_freeze -u "$TEST_DIR" >/dev/null 2>&1
-> > > > +             xfs_freeze -u "$SCRATCH_MNT" >/dev/null 2>&1
-> > > > +     fi
-> > >
-> > > Hi Amir,
-> > >
-> > > I'm wondering why not let each freeze related test cases take care of "unfreeze"
-> > > by itself? If a case freeze a filesystem which isn't on TEST_DEV or SCRATCH_DEV
-> > > (e.g. a loop device base on a file in $TEST_DIR), or other situations, then the
-> > > case still can call _require_freeze, but "unfreeze TEST_DIR or SCRATCH_MNT" can't
-> > > help.
+On Sat, Jun 18, 2022 at 11:14:13AM +0800, Zorro Lang wrote:
+> On Sat, Jun 18, 2022 at 08:24:05AM +1000, Dave Chinner wrote:
+> > On Sat, Jun 18, 2022 at 01:52:12AM +0800, Zorro Lang wrote:
+> > > On Fri, Jun 17, 2022 at 01:58:36PM +1000, Dave Chinner wrote:
+> > > > On Thu, Jun 16, 2022 at 12:38:43PM +0800, An Long wrote:
+> > > > > Function _scratch_mkfs_sized cannot recognize the size descriptor.
+> > > > > 
+> > > > > For example, we set MKFS_OPTIONS="-b 4k" and then run generic/416 on
+> > > > > ext4, will fail with "mkfs.ext4: invalid block size - 4".
+> > > > 
+> > > > So isn't the correct fix for this to use the correct format in
+> > > > MKFS_OPTIONS? ie. "-b 4096"?
+> > > > 
+> > > > i.e. why do we need ito add code to fix something that the user must
+> > > > specify themselves and could easily just use an integer to begin
+> > > > with?
+> > > 
+> > > The fstests doesn't notice users that they *must* use pure number in
+> > > MKFS_OPTIONS, especially the block size.
 > > 
-> > That's also an option, but:
-> > 1. It is less robust, leaving room for human mistakes. Why is that better?
-
-It's not, but I'm addressing exactly this problem with the common
-_cleanup() infrastructure that I'm working on. Several of the issues
-that you are trying to address here are already dealt with in that
-series, and it doesn't add extra overhead to the test
-infrastructure for tests that don't use freeze/thaw.
-
-> > 2. Leftover frozen fs is quite harmful to subsequent test runs, so it
-> > is important
-> >     to avoid it
-
-Well, yes. It is a test bug, and the test shouldn't have bugs.
-
-> > 3. Tests that freeze loop/dm (generic/459, xfs/428, [*]) can and should cleanup
-> >     themselves. I will add that too, but in any case...
-
-Except now we have two methods of thawing the filesystem depending
-on where it is mounted and what device is in use. That's not an
-improvement.
-
-> > 4. unfreeze of tests and scratch fs is harmless even when it is not needed -
-> >     we may even want to do that at the start of tests run(?)
+> > So why not just document the requirement? I mean,
+> > _mkfs_scratch_sized is documented to take the size in bytes primarly
+> > because some mkfs binaries only suport bytes and not shortform human
+> > numbers. We did that because it was seen that consistency in all the
+> > tests of using byte counts was much preferable to having a random
+> > smattering of different units. It's much easier to programatically
+> > calculate the size if it is in bytes, and that results in simpler
+> > and easier to understand code.
+> > 
+> > The main issue I have here is that we need to reduce the overhead of
+> > setting up every test - adding more complex parameter parsing to
+> > _scratch_mkfs_sized means every test that calls it now takes just a
+> > little bit longer to run. That's about a 100 tests that now take
+> > just a little longer to run, meaning fstests takes a few seconds
+> > more to run.
 > 
-> I think Dave doesn't like to add common steps to thousands of cases, if without
-> a critical reason. So I hope to get more review points for this kind of changes.
-
-Doing work that in every test execution that is only actually
-necessary if a test is interrupted to work around a potential bug in
-1 or 2 tests is really poor design and implementation. Just fix the
-test bugs, don't burden everything else with the additional overhead
-of checking whether the test might have a bug in it or not...
-
-> > [*] I noticed that generic/085 which _require_freeze() does not even
-> >     use xfs_freeze (intentionally) - it uses dmsetup suspend/resume,
-> >     so I guess _require_freeze() should be removed from that test.
+> Oh, so that's what's your really worry about. Understand. But will this
+> change takes that long time? If the user still use pure integer as usual,
+> it'll through:
 > 
-> Agree, I think dm suspend through different userspace and kernel interface with
-> fsfreeze, so that require doesn't make sense.
-
-dmsuspend uses the internal kernel freeze API to freeze the
-filesytsems. Failures in those tests can leave filesytsems frozen,
-too, but these days we cannot thaw them with fs level freeze....
-
-> > Anyway, if you and others insist against this auto-unfreeze approach,
-> > I will post the patch to unfreeze fs in individual tests, but I won't be
-> > happy about it.
+>     elif [[ $str =~ ^[0-9]+$ ]] ; then
+>             size=$str
 > 
-> From the functional side, I think this change makes sense. But if think about
-> the performance, let's get more opinions at first. If there's not objection,
-> we can have it.
+> then return directly, won't through those complex calculation.
 
-I think it's wrong from a functional side, too. The test harness is
-not responsible for individual test state cleanup - the tests
-themselves are responsible for that. The whole point of the
-_cleanup() consolidation I've started doing is that it will
-centralise all this common cleanup functionality and allow us to end
-up connecting it to _requires rules that indicate what functionality
-the test uses.  i.e. the end goal is that most tests do not need any
-cleanup - everything that needs cleaning up is defined by the
-_requires rules the test runs first and nothing else is needed.
+It's still additional unnecessary overhead to be adding to
+_mkfs_scratch_sized as user supplied MKFS_OPTIONS do not change from
+test to test.  So why do we even want to do this verification every
+time _mkfs_scratch_sized is run?  Look at the *big picture*, not the
+individual test context . Validate the user supplied MKFS_OPTIONS
+once at startup, not every time _mkfs_scratch_sized is run!
 
-Only when tests do custom stuff will test specific cleanup functions
-be needed, just like they are required to do now to clean up after
-themselves. And that means, right now, that tests that freeze the
-filesystem still need to do the right thing in the _cleanup()
-functions up until the consolidation of cleanup means they don't
-need it anymore....
+And looking at the big picture, we have a bunch of scratch_mkfs
+operations that take byte counts.  _scratch_mkfs_geom that takes
+stripe aligment parameters in bytes, _scratch_mkfs_blocksized that
+takes block size in bytes, _mkfs_scratch_sized that takes the fs
+size (and block size) in bytes, etc.
 
-AFAIC, you can go move all this stuff to check if you really
-want, but I'm just going to rip it all back out in short order
-because it just doesn't fit the cleanup model I'm trying to move the
-infrastructure towards.
+Bytes as an integer count  is the common unit across all tests,
+filesystems and APIs. We can do math directly on them, we don't need
+to care if different filesystems support some form of human readable
+or not (e.g. some filesystems will recognise "k" but not "K" for
+kilobytes), etc.
+
+So if you've going to actually support human readable units for byte
+values, think through the consequences of doing that. Think about
+the difficultly that then poses for tests that are written as
+
+_mkfs_scratch_sized 1G
+
+and now someone else comes along, needs to modify the test and do
+calculations based on the size of the filesystem. Do we expect the
+test to now have string parsing in it to convert the filesystem size
+to an integer for this new functionality? Or do we then have to
+convert every part of the test to use byte units instead of human
+units before making the modification? Either way, it adds more work
+to future changes than the amount of tiem and work it might save
+now.
+
+Hence to me, the big picture implications of allowing human readable
+units in fstests code and configs just does not add up to be a net
+positive.
+
+> So if we don't merge this patchset. I'd like to make something wrong to
+> remind that "must use pure integer in MKFS_OPTIONS". What do you think?
+
+IMO, a single validation check after section config loading in check
+is all that is necessary....
 
 Cheers,
 
