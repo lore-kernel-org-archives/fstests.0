@@ -2,216 +2,180 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08F12CCA481
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jun 2022 16:03:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33B98C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jun 2022 17:37:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353626AbiFUQDI (ORCPT
+        id S234101AbiFURhk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 21 Jun 2022 12:03:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46306 "EHLO
+        Tue, 21 Jun 2022 13:37:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353628AbiFUQCp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Jun 2022 12:02:45 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24A4F2DD77
-        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 09:02:03 -0700 (PDT)
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id A37BC21C3A;
-        Tue, 21 Jun 2022 16:02:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1655827321; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=wm202VUpLwLstxBwUKzMir2O1PtmLNEyCooM1ghVLzI=;
-        b=xF8ELxympDdNC5QFzNjhKfMF4IViosPG5NvGrHd5F7EXbCrreAiw7gyM+1FwMOPKFuiYkz
-        KRrgRZxngGlVX4WHs8QML/tW6lNu0t6uD2t8RlZ2lGx+4DLnQITraYCHcWvve4P7nUaQp4
-        JL/YWDbgmYwb6eXgZOvbvFRVEbRsqV0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1655827321;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=wm202VUpLwLstxBwUKzMir2O1PtmLNEyCooM1ghVLzI=;
-        b=7iQ3fRjrl4LViHYu4Uz8K2ThLTBe/SZFnPr67CSnzGfkNK4CKxb2w2/BkstFm6/xL1r0xw
-        TYMVOX0utXv30yBQ==
-Received: from echidna.suse.de (ddiss.udp.ovpn2.nue.suse.de [10.163.47.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id 842022C142;
-        Tue, 21 Jun 2022 16:02:01 +0000 (UTC)
-From:   David Disseldorp <ddiss@suse.de>
-To:     fstests@vger.kernel.org, tytso@mit.edu
-Cc:     David Disseldorp <ddiss@suse.de>
-Subject: [RFC PATCH 2/2] check: add -L <n> parameter to rerun failed tests
-Date:   Tue, 21 Jun 2022 18:01:53 +0200
-Message-Id: <20220621160153.29591-3-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20220621160153.29591-1-ddiss@suse.de>
-References: <20220621160153.29591-1-ddiss@suse.de>
+        with ESMTP id S233306AbiFURhj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Jun 2022 13:37:39 -0400
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D36322CC8A
+        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 10:37:37 -0700 (PDT)
+Received: by mail-wr1-x42f.google.com with SMTP id c21so19954768wrb.1
+        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 10:37:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=lspYXotJXIgD9rJo2AqmUY24qO9c5voykkTiI+kyxYw=;
+        b=K6hFRUntBh+CmCcIqqtFywNaZrXx3wLf3/Gdr1aNxwpiSW+hrPmzAhLDPl/sZQA6kv
+         ZlwY7gwFeIIj47B8p/TwXjqedysJxO2Yr5ty8Vvq9Pgf93WjqKvX1XBSIEo7VM9wuFHR
+         TljM6qEYa6SQzRhSy7ioxC/ypMER4BlwyzwyqfIHKo08w5kWkGkyUuzRgo6krTDZ+7Gb
+         0TGLnfjgPT75ePTKJSoeFraHOzC/083HGIy/h0JH46OHl++klh/rfl0JAyVdDH9YcIF3
+         d7cxkGpQ2SCG8UgoXqatNlAYzgCh8JLreeUxWT8SD00ZZxwqxk2BtuXHMXjZFiJTR5hT
+         oYTg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=lspYXotJXIgD9rJo2AqmUY24qO9c5voykkTiI+kyxYw=;
+        b=748LRYkyWRdjDfrfzsq3w9lomoxzpIgg+4KCE1SdyjQvAi/6Q30pFRAReGoM/KavYU
+         CIXRnCiI/TBiLYeIMuqw7Wtj1SzwOegouFuxdVKJZrGM7+gkjPf3vTli093kj4UlxlIJ
+         ToAGwdpbiF/UiVyXyR3G8xjCt2NC6ME4uB1KjGrX+9Zu0MEDJQ4QIZc/QJhZ6A3nPIOG
+         fFfu2mmOSDPd/y9h3bt/3l625ZcOur45GD1AqYp3td04lqzJNJWKq8lLXyp5LRrZXn51
+         197pOg5OJNtk6LusS69H2UC1T7WhFj33GUJfDsL7aZrqdcK1K4c31QkhycBs57fcETuz
+         ZQkg==
+X-Gm-Message-State: AJIora/lv0X+hCpo6kOksgvUaYHdgBmkl+w5I4rccBAYxCi7bdBgkvYz
+        CzB2rw9KIkO8JK7vxB1ITAE=
+X-Google-Smtp-Source: AGRyM1uDu2WvegPq55U4YQWKetkQpH7NQ8TgIgnBzZVojuueYAM35hL5nesgggLrsTbqR/ERl+SKRg==
+X-Received: by 2002:a5d:452d:0:b0:21b:81f6:d91 with SMTP id j13-20020a5d452d000000b0021b81f60d91mr21737076wra.521.1655833056322;
+        Tue, 21 Jun 2022 10:37:36 -0700 (PDT)
+Received: from localhost.localdomain ([77.137.66.49])
+        by smtp.gmail.com with ESMTPSA id k17-20020a5d6e91000000b0021a39f5ba3bsm16105120wrz.7.2022.06.21.10.37.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 21 Jun 2022 10:37:35 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
+Subject: [PATCH v2 1/3] fstests: add missing _require_freeze() to tests
+Date:   Tue, 21 Jun 2022 20:37:27 +0300
+Message-Id: <20220621173729.2135249-2-amir73il@gmail.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220621173729.2135249-1-amir73il@gmail.com>
+References: <20220621173729.2135249-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If check is run with -L <n>, then a failed test will be rerun <n> times
-before proceeding to the next test. Following completion of the rerun
-loop, aggregate pass/fail statistics are printed.
+And add a few tests that use freeze to the freeze group
 
-Caveats:
-- rerun tests will be tracked as a single failure in @try and @bad
-  + xunit reports do not include any rerun details
-- .bad files generated on failure will be overwritten by test reruns
-
-Suggested-by: Theodore Ts'o <tytso@mit.edu>
-Link: https://lwn.net/Articles/897061/
-Signed-off-by: David Disseldorp <ddiss@suse.de>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- check | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 75 insertions(+), 11 deletions(-)
+ tests/xfs/119 | 1 +
+ tests/xfs/318 | 3 ++-
+ tests/xfs/325 | 3 ++-
+ tests/xfs/422 | 3 ++-
+ tests/xfs/438 | 2 +-
+ tests/xfs/517 | 1 +
+ 6 files changed, 9 insertions(+), 4 deletions(-)
 
-diff --git a/check b/check
-index 3e8a232c..97fa50ad 100755
---- a/check
-+++ b/check
-@@ -26,6 +26,7 @@ do_report=false
- DUMP_OUTPUT=false
- iterations=1
- istop=false
-+loop_on_fail=0
+diff --git a/tests/xfs/119 b/tests/xfs/119
+index a1180371..b6f96601 100755
+--- a/tests/xfs/119
++++ b/tests/xfs/119
+@@ -20,6 +20,7 @@ _begin_fstest log v2log auto freeze
+ _supported_fs xfs
  
- # This is a global variable used to pass test failure text to reporting gunk
- _err_msg=""
-@@ -75,6 +76,7 @@ check options
-     --large-fs		optimise scratch device for large filesystems
-     -s section		run only specified section from config file
-     -S section		exclude the specified section from the config file
-+    -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
+ _require_scratch
++_require_freeze
  
- testlist options
-     -g group[,group...]	include tests from these groups
-@@ -333,6 +335,7 @@ while [ $# -gt 0 ]; do
- 		;;
- 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
- 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
-+	-L)	loop_on_fail=$2; shift ;;
+ # this may hang
+ sync
+diff --git a/tests/xfs/318 b/tests/xfs/318
+index 38c7aa60..be93f9ab 100755
+--- a/tests/xfs/318
++++ b/tests/xfs/318
+@@ -7,7 +7,7 @@
+ # Simulate free extent errors with a file write and a file remove.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rw
++_begin_fstest auto quick rw freeze
  
- 	-*)	usage ;;
- 	*)	# not an argument, we've got tests now.
-@@ -606,6 +609,40 @@ _run_seq() {
- 	fi
- }
+ # Override the default cleanup function.
+ _cleanup()
+@@ -26,6 +26,7 @@ _supported_fs xfs
+ _require_scratch
+ _require_error_injection
+ _require_xfs_io_error_injection "rmap_finish_one"
++_require_freeze
  
-+# Check whether the last test should be rerun according to loop-on-error state
-+# and return "0" if so, otherwise return "1".
-+_ix_inc() {
-+	local test_status="$1"
-+	local loop_len="$2"
-+
-+	if ((!loop_on_fail)); then
-+		echo 1
-+		return
-+	fi
-+
-+	if [ "$test_status" == "fail" ] && ((!loop_len)); then
-+		echo 0	# initial failure of this test, start loop-on-fail
-+	elif ((loop_len > 0)) && ((loop_len < loop_on_fail)); then
-+		echo 0	# continue loop following initial failure
-+	else
-+		echo 1	# completed or not currently in a failure loop
-+	fi
-+}
-+
-+_failure_loop_dump_stats() {
-+	local t="$1" && shift
-+	awk "BEGIN {
-+		n=split(\"$*\", arr);"'
-+		for (i = 1; i <= n; i++)
-+			stats[arr[i]]++;
-+		printf("'"$t"' aggregate results across %d runs: ", n);
-+		for (x in stats)
-+			printf("%s=%d (%.1f%%)", (i-- > n ? x : ", " x),
-+			       stats[x], 100 * stats[x] / n);
-+		print;
-+	     }'
-+}
-+
- _detect_kmemleak
- _prepare_test_list
+ blksz=65536
+ blks=64
+diff --git a/tests/xfs/325 b/tests/xfs/325
+index 5b26b2b3..c6861fbc 100755
+--- a/tests/xfs/325
++++ b/tests/xfs/325
+@@ -8,7 +8,7 @@
+ # Inject an error during extent freeing to test log recovery.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick clone
++_begin_fstest auto quick clone freeze
  
-@@ -746,13 +783,33 @@ function run_section()
- 	seqres="$check"
- 	_check_test_fs
+ # Override the default cleanup function.
+ _cleanup()
+@@ -29,6 +29,7 @@ _require_cp_reflink
+ _require_scratch_reflink
+ _require_error_injection
+ _require_xfs_io_error_injection "free_extent"
++_require_freeze
  
--	local tc_status="init"
-+	local tc_status="init" ix
- 	prev_seq=""
--	for seq in $list ; do
--		# Run report for previous test!
--		_stash_test_status "$seqnum" "$tc_status"
--		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
--			_make_testcase_report "$prev_seq" "$tc_status"
-+	local -a _list=( $list ) loop_status=()
-+	for ((ix = 0; ix < ${#_list[*]};
-+	      ix += $(_ix_inc "$tc_status" "${#loop_status[*]}"))); do
-+		seq="${_list[$ix]}"
-+
-+		if ((!loop_on_fail)); then
-+			# Run report for previous test!
-+			_stash_test_status "$seqnum" "$tc_status"
-+			if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
-+				_make_testcase_report "$prev_seq" "$tc_status"
-+			fi
-+		else
-+			if [ "$seq" == "$prev_seq" ]; then
-+				if ((!${#loop_status[*]})); then
-+					_stash_test_status "$seqnum" "$tc_status"
-+					if $do_report; then
-+						_make_testcase_report "$prev_seq" "$tc_status"
-+					fi
-+				fi
-+				loop_status+=("$tc_status")
-+			elif ((${#loop_status[*]})); then
-+				loop_status+=("$tc_status")
-+				_failure_loop_dump_stats "$seqnum" "${loop_status[@]}"
-+				loop_status=()
-+			fi
- 		fi
+ blksz=65536
+ blks=30
+diff --git a/tests/xfs/422 b/tests/xfs/422
+index 175253aa..a83a66df 100755
+--- a/tests/xfs/422
++++ b/tests/xfs/422
+@@ -9,7 +9,7 @@
+ # activity, so we can't have userspace wandering in and thawing it.
+ #
+ . ./common/preamble
+-_begin_fstest dangerous_scrub dangerous_online_repair
++_begin_fstest dangerous_scrub dangerous_online_repair freeze
  
- 		prev_seq="$seq"
-@@ -822,7 +879,9 @@ function run_section()
- 		fi
+ _register_cleanup "_cleanup" BUS
  
- 		# record that we really tried to run this test.
--		try+=("$seqnum")
-+		if ((!${#loop_status[*]})); then
-+			try+=("$seqnum")
-+		fi
+@@ -24,6 +24,7 @@ _require_xfs_scratch_rmapbt
+ _require_xfs_io_command "scrub"
+ _require_xfs_io_error_injection "force_repair"
+ _require_command "$KILLALL_PROG" killall
++_require_freeze
  
- 		awk 'BEGIN {lasttime="       "} \
- 		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
-@@ -949,10 +1008,15 @@ function run_section()
- 		fi
- 	done
+ echo "Format and populate"
+ _scratch_mkfs > "$seqres.full" 2>&1
+diff --git a/tests/xfs/438 b/tests/xfs/438
+index c3008b1c..cfe75bd8 100755
+--- a/tests/xfs/438
++++ b/tests/xfs/438
+@@ -21,7 +21,7 @@
+ # Fixed by upstream commit 373b058 ("xfs: Properly retry failed dquot
+ # items in case of error during buffer writeback")
+ . ./common/preamble
+-_begin_fstest auto quick quota
++_begin_fstest auto quick quota freeze
  
--	# make sure we record the status of the last test we ran.
--	_stash_test_status "$seqnum" "$tc_status"
--	if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
--		_make_testcase_report "$prev_seq" "$tc_status"
-+	if ((${#loop_status[*]})); then
-+		loop_status+=("$tc_status")
-+		_failure_loop_dump_stats "$seqnum" "${loop_status[@]}"
-+	else
-+		# make sure we record the status of the last test we ran.
-+		_stash_test_status "$seqnum" "$tc_status"
-+		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
-+			_make_testcase_report "$prev_seq" "$tc_status"
-+		fi
- 	fi
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/xfs/517 b/tests/xfs/517
+index 88c4f43b..f7f9a8a2 100755
+--- a/tests/xfs/517
++++ b/tests/xfs/517
+@@ -29,6 +29,7 @@ _supported_fs xfs
+ _require_xfs_scratch_rmapbt
+ _require_xfs_io_command "fsmap"
+ _require_command "$KILLALL_PROG" killall
++_require_freeze
  
- 	sect_stop=`_wallclock`
+ echo "Format and populate"
+ _scratch_mkfs > "$seqres.full" 2>&1
 -- 
-2.35.3
+2.25.1
 
