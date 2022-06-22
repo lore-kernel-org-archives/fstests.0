@@ -2,37 +2,37 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED4F2C43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 16:32:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30C9BC43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 16:38:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359088AbiFVQcN (ORCPT
+        id S241915AbiFVQiM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Jun 2022 12:32:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38888 "EHLO
+        Wed, 22 Jun 2022 12:38:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237555AbiFVQcM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 12:32:12 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44DC93150E;
-        Wed, 22 Jun 2022 09:32:11 -0700 (PDT)
+        with ESMTP id S229930AbiFVQiM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 12:38:12 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 664C833E11;
+        Wed, 22 Jun 2022 09:38:10 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D239461AA0;
-        Wed, 22 Jun 2022 16:32:10 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 372D0C34114;
-        Wed, 22 Jun 2022 16:32:10 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 12C4BB8204A;
+        Wed, 22 Jun 2022 16:38:09 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9B55C34114;
+        Wed, 22 Jun 2022 16:38:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1655915530;
-        bh=oZ/HMwEEpMmlxsE2fXgdNXqxu7e4J0wswI5GmTqQnI8=;
+        s=k20201202; t=1655915887;
+        bh=89Ryslcmd/UmokPofteCvD+NA85Fh+wLE9l8qNYXtY4=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=XKpEegHqdgwIxpcMmHEvWml4KlhLr/+RSQARZDOeTI1GkrTWYNQlsYxV+aTPQCG1M
-         wviDrGXyfCLFNuYpYf8BHiXuIyvdbSJqGyqu6SKQGwbx5BNL6noorAzfufT2EdkSkk
-         Rfx6tx0MRKPPLp7uohze9F4JPYm0+OHphfD0K0mcBxOBUoNzLVB9BwUmPxNB/CX7VE
-         eHHYTMISEywEAXU4es6NWQa6AjlPvIZ3Knn2rJdt9x5AdI7aUm0fKCNcOQkH3mun62
-         tUjUXrI+jteEGBAH4Th7wvlPJdJ2rHhacDKJ7JZVsuRFPRsMFh+RZSWxPcbUVAKniR
-         RfQ7hRloBP4/g==
-Date:   Wed, 22 Jun 2022 09:32:09 -0700
+        b=uqcx67BwkUAdvt1XSPxqk10D/+O3M/vGSU5uLqH/3dTRiCPRUx53sP+bYvXKBpv1P
+         8J2Y52ybTNr/Gt1WhJ54Vg8g6LU6BNkM1HqUsULmhZODjtLbKuqW+xuWBa5IcWk/fM
+         NV/MvauxtFhdJ0LdkxR/t25o1Og7TSDJXoK0JOFKJZ/48b017GUMMvMvbmS2j1JMiH
+         +XZkrMvz3vjwqWPm0omtVIBcMO51XQBr9DHS17iPkfx5MvYe6xhNlTEl5EfV+0EciG
+         A3wrc30ggBJji1NHrA2St4X5SHDX7qJpHwcQ3Ls5jrNfXdhFNEJxufcNwdDGRp9U0c
+         CTgbRcla3M2Mw==
+Date:   Wed, 22 Jun 2022 09:38:07 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Amir Goldstein <amir73il@gmail.com>
 Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
@@ -41,134 +41,78 @@ Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
         Christoph Hellwig <hch@lst.de>,
         Christian Brauner <christian.brauner@ubuntu.com>,
         linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: Re: [PATCH 5.10 CANDIDATE 03/11] xfs: Fix the free logic of state in
- xfs_attr_node_hasname
-Message-ID: <YrNECU28ujN2cabX@magnolia>
+        Dave Chinner <dchinner@redhat.com>
+Subject: Re: [PATCH 5.10 CANDIDATE 09/11] xfs: only bother with
+ sync_filesystem during readonly remount
+Message-ID: <YrNFb9999OY/8JDZ@magnolia>
 References: <20220617100641.1653164-1-amir73il@gmail.com>
- <20220617100641.1653164-4-amir73il@gmail.com>
+ <20220617100641.1653164-10-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220617100641.1653164-4-amir73il@gmail.com>
+In-Reply-To: <20220617100641.1653164-10-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 17, 2022 at 01:06:33PM +0300, Amir Goldstein wrote:
-> From: Yang Xu <xuyang2018.jy@fujitsu.com>
+On Fri, Jun 17, 2022 at 01:06:39PM +0300, Amir Goldstein wrote:
+> From: "Darrick J. Wong" <djwong@kernel.org>
 > 
-> commit a1de97fe296c52eafc6590a3506f4bbd44ecb19a upstream.
+> commit b97cca3ba9098522e5a1c3388764ead42640c1a5 upstream.
 > 
-> When testing xfstests xfs/126 on lastest upstream kernel, it will hang on some machine.
-> Adding a getxattr operation after xattr corrupted, I can reproduce it 100%.
+> In commit 02b9984d6408, we pushed a sync_filesystem() call from the VFS
+> into xfs_fs_remount.  The only time that we ever need to push dirty file
+> data or metadata to disk for a remount is if we're remounting the
+> filesystem read only, so this really could be moved to xfs_remount_ro.
 > 
-> The deadlock as below:
-> [983.923403] task:setfattr        state:D stack:    0 pid:17639 ppid: 14687 flags:0x00000080
-> [  983.923405] Call Trace:
-> [  983.923410]  __schedule+0x2c4/0x700
-> [  983.923412]  schedule+0x37/0xa0
-> [  983.923414]  schedule_timeout+0x274/0x300
-> [  983.923416]  __down+0x9b/0xf0
-> [  983.923451]  ? xfs_buf_find.isra.29+0x3c8/0x5f0 [xfs]
-> [  983.923453]  down+0x3b/0x50
-> [  983.923471]  xfs_buf_lock+0x33/0xf0 [xfs]
-> [  983.923490]  xfs_buf_find.isra.29+0x3c8/0x5f0 [xfs]
-> [  983.923508]  xfs_buf_get_map+0x4c/0x320 [xfs]
-> [  983.923525]  xfs_buf_read_map+0x53/0x310 [xfs]
-> [  983.923541]  ? xfs_da_read_buf+0xcf/0x120 [xfs]
-> [  983.923560]  xfs_trans_read_buf_map+0x1cf/0x360 [xfs]
-> [  983.923575]  ? xfs_da_read_buf+0xcf/0x120 [xfs]
-> [  983.923590]  xfs_da_read_buf+0xcf/0x120 [xfs]
-> [  983.923606]  xfs_da3_node_read+0x1f/0x40 [xfs]
-> [  983.923621]  xfs_da3_node_lookup_int+0x69/0x4a0 [xfs]
-> [  983.923624]  ? kmem_cache_alloc+0x12e/0x270
-> [  983.923637]  xfs_attr_node_hasname+0x6e/0xa0 [xfs]
-> [  983.923651]  xfs_has_attr+0x6e/0xd0 [xfs]
-> [  983.923664]  xfs_attr_set+0x273/0x320 [xfs]
-> [  983.923683]  xfs_xattr_set+0x87/0xd0 [xfs]
-> [  983.923686]  __vfs_removexattr+0x4d/0x60
-> [  983.923688]  __vfs_removexattr_locked+0xac/0x130
-> [  983.923689]  vfs_removexattr+0x4e/0xf0
-> [  983.923690]  removexattr+0x4d/0x80
-> [  983.923693]  ? __check_object_size+0xa8/0x16b
-> [  983.923695]  ? strncpy_from_user+0x47/0x1a0
-> [  983.923696]  ? getname_flags+0x6a/0x1e0
-> [  983.923697]  ? _cond_resched+0x15/0x30
-> [  983.923699]  ? __sb_start_write+0x1e/0x70
-> [  983.923700]  ? mnt_want_write+0x28/0x50
-> [  983.923701]  path_removexattr+0x9b/0xb0
-> [  983.923702]  __x64_sys_removexattr+0x17/0x20
-> [  983.923704]  do_syscall_64+0x5b/0x1a0
-> [  983.923705]  entry_SYSCALL_64_after_hwframe+0x65/0xca
-> [  983.923707] RIP: 0033:0x7f080f10ee1b
+> Once we've moved the call site, actually check the return value from
+> sync_filesystem.
 > 
-> When getxattr calls xfs_attr_node_get function, xfs_da3_node_lookup_int fails with EFSCORRUPTED in
-> xfs_attr_node_hasname because we have use blocktrash to random it in xfs/126. So it
-> free state in internal and xfs_attr_node_get doesn't do xfs_buf_trans release job.
-> 
-> Then subsequent removexattr will hang because of it.
-> 
-> This bug was introduced by kernel commit 07120f1abdff ("xfs: Add xfs_has_attr and subroutines").
-> It adds xfs_attr_node_hasname helper and said caller will be responsible for freeing the state
-> in this case. But xfs_attr_node_hasname will free state itself instead of caller if
-> xfs_da3_node_lookup_int fails.
-> 
-> Fix this bug by moving the step of free state into caller.
-> 
-> [amir: this text from original commit is not relevant for 5.10 backport:
-> Also, use "goto error/out" instead of returning error directly in xfs_attr_node_addname_find_attr and
-> xfs_attr_node_removename_setup function because we should free state ourselves.
-> ]
-> 
-> Fixes: 07120f1abdff ("xfs: Add xfs_has_attr and subroutines")
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Fixes: 02b9984d6408 ("fs: push sync_filesystem() down to the file system's remount_fs()")
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Reviewed-by: Dave Chinner <dchinner@redhat.com>
 > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > ---
->  fs/xfs/libxfs/xfs_attr.c | 13 +++++--------
->  1 file changed, 5 insertions(+), 8 deletions(-)
+>  fs/xfs/xfs_super.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
 > 
-> diff --git a/fs/xfs/libxfs/xfs_attr.c b/fs/xfs/libxfs/xfs_attr.c
-> index 96ac7e562b87..fcca36bbd997 100644
-> --- a/fs/xfs/libxfs/xfs_attr.c
-> +++ b/fs/xfs/libxfs/xfs_attr.c
-> @@ -876,21 +876,18 @@ xfs_attr_node_hasname(
+> diff --git a/fs/xfs/xfs_super.c b/fs/xfs/xfs_super.c
+> index 6323974d6b3e..dd0439ae6732 100644
+> --- a/fs/xfs/xfs_super.c
+> +++ b/fs/xfs/xfs_super.c
+> @@ -1716,6 +1716,11 @@ xfs_remount_ro(
+>  	};
+>  	int			error;
 >  
->  	state = xfs_da_state_alloc(args);
->  	if (statep != NULL)
-> -		*statep = NULL;
-> +		*statep = state;
->  
->  	/*
->  	 * Search to see if name exists, and get back a pointer to it.
->  	 */
->  	error = xfs_da3_node_lookup_int(state, &retval);
-> -	if (error) {
-> -		xfs_da_state_free(state);
-> -		return error;
-> -	}
-> +	if (error)
-> +		retval = error;
->  
-> -	if (statep != NULL)
-> -		*statep = state;
-> -	else
-> +	if (!statep)
->  		xfs_da_state_free(state);
-> +
->  	return retval;
->  }
->  
-> -- 
+> +	/* Flush all the dirty data to disk. */
+> +	error = sync_filesystem(mp->m_super);
 
-Curious -- the conversion of the _node_hasname callers isn't in this
-patch.  Looking at 5.10.124, I see that most of the callers already
-clean up the passed-out statep, but do the callers of xfs_has_attr free
-it too?
+Looking at 5.10.124's fsync.c and xfs_super.c:
+
+https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/fs/sync.c?h=v5.10.124#n31
+https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/fs/xfs/xfs_super.c?h=v5.10.124#n755
+
+I think this kernel needs the patch(es) that make __sync_filesystem return
+the errors passed back by ->sync_fs, and I think also the patch that
+makes xfs_fs_sync_fs return errors encountered by xfs_log_force, right?
 
 --D
 
+> +	if (error)
+> +		return error;
+> +
+>  	/*
+>  	 * Cancel background eofb scanning so it cannot race with the final
+>  	 * log force+buftarg wait and deadlock the remount.
+> @@ -1786,8 +1791,6 @@ xfs_fc_reconfigure(
+>  	if (error)
+>  		return error;
+>  
+> -	sync_filesystem(mp->m_super);
+> -
+>  	/* inode32 -> inode64 */
+>  	if ((mp->m_flags & XFS_MOUNT_SMALL_INUMS) &&
+>  	    !(new_mp->m_flags & XFS_MOUNT_SMALL_INUMS)) {
+> -- 
 > 2.25.1
 > 
