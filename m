@@ -2,253 +2,205 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E91A4C43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 05:12:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7538C43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 05:15:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356084AbiFVFMM (ORCPT
+        id S237402AbiFVFPP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Jun 2022 01:12:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52204 "EHLO
+        Wed, 22 Jun 2022 01:15:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237402AbiFVFMJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 01:12:09 -0400
+        with ESMTP id S1356650AbiFVFPO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 01:15:14 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 98E5335DC5
-        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 22:12:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 270E21139
+        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 22:15:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1655874727;
+        s=mimecast20190719; t=1655874912;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=DmQgI9oZ4FEsT/GdLmebCMyDofLpQdaq4nJRwb3I0nk=;
-        b=NBvC0e3Wp7+NKQnckaF6wM8J94iX8FvSWRAGvu919Yz7zyZtdu2khkxACsARE9GuzJiAay
-        +xX+bkq6W61cwsk3ylJ3NZt23R8vy69ECCOHF7/5lKMZOAsGi6JJnChkKiPvC11Lz6cQyS
-        0JdcSC2Ye0nIIYrsSehcYcuLpex77iQ=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=hFdYkDy+FDoMfcLqbQQJDWUOmFPvbgWqNignNdD+nRY=;
+        b=WnXol9cwYRFedplOZpfEkl1rD5D136ng1rsLOSM7J7tbswQXdH6Sc85JbZbxOWNArL0E4w
+        21+VzzAWM60hYu/9WPjKlbVk6Fir292v4p/ZHS4+HHquYJ0orzMBPZA4jNjlzI49G0tymK
+        pXBJ4VcqdVoAsukvxiDWwRM5XQAd81M=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-426-lA-rZixsPWqTy6uosSyXnQ-1; Wed, 22 Jun 2022 01:12:05 -0400
-X-MC-Unique: lA-rZixsPWqTy6uosSyXnQ-1
-Received: by mail-qk1-f199.google.com with SMTP id o10-20020a05620a2a0a00b006a77a64cd23so18745006qkp.21
-        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 22:12:05 -0700 (PDT)
+ us-mta-228-nRJP6wq1MzW90FccpGtmgg-1; Wed, 22 Jun 2022 01:15:09 -0400
+X-MC-Unique: nRJP6wq1MzW90FccpGtmgg-1
+Received: by mail-qk1-f198.google.com with SMTP id w22-20020a05620a445600b006a6c18678f2so18813680qkp.4
+        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 22:15:09 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=DmQgI9oZ4FEsT/GdLmebCMyDofLpQdaq4nJRwb3I0nk=;
-        b=6zVhQMJEOiEJ4vZT5og54B0pC0VOVqMQ4HU0bXRMCx/N2ScYklTAVTovvc2PjGpETS
-         HIvtUB/oa9LJIj+1vANMlcTwXBCD2qdVhFz7r7E2UtvnUrtl+G7pTREp/PlBmVR6sohB
-         tS7lANO1gx0XMcoY/RpV+Y1MsIxwy7mEEroLGqJE1XSR0U7LTtJgffjYZon0IzQgx4Xx
-         RbGORt4stAAX4Wcf7duCyQ3leY715cC4EbLS9bjQq5L3eT0dSs2PD6FBk9A5dtlCR74q
-         mAweYNp6k9MyTv8RCKIoHlBVb4jJlEB0HHX5DSG+Q7t16vrgtG1+Q50irfs29roOLe3x
-         KBKQ==
-X-Gm-Message-State: AJIora9n7//relZK5+JKYe31+D6SqtEe35O2sXH1sHnOZc2h9bJO/Wqu
-        B2o5TPk9L9z3fInqRa87TMJUIrjdJVQFnZOxCZ4/kXb+aKADOGRk/RhHRujseymd2G5cK8u9kxj
-        Px6af645xvNX8QFcZtg==
-X-Received: by 2002:a37:9cd0:0:b0:6ae:d801:8bc0 with SMTP id f199-20020a379cd0000000b006aed8018bc0mr1028513qke.456.1655874724669;
-        Tue, 21 Jun 2022 22:12:04 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1sTkhOiwNIla94RWd5HByPiIeuNcIT/Evtd3JgXkZAbc7i8kk02bG2Yi07wlhW2Z9s6n68QbA==
-X-Received: by 2002:a37:9cd0:0:b0:6ae:d801:8bc0 with SMTP id f199-20020a379cd0000000b006aed8018bc0mr1028505qke.456.1655874724373;
-        Tue, 21 Jun 2022 22:12:04 -0700 (PDT)
+        bh=hFdYkDy+FDoMfcLqbQQJDWUOmFPvbgWqNignNdD+nRY=;
+        b=f3JFR5LKjob1mGpeD+nk0W7HBvYRkVmnpZpG4O4Ur5Xau9ljJAMwae+XmGGPOP0bQR
+         k1s5CCZbYsff+aM5+gxj7BMUflPpyl5DUfAX30n0QDJVeYryRPwKVUnlByIGKXRC1oUL
+         f3K0i/DNLwqF4FGVRA/TQlzet8WRC3e5/q6mRKBR2315s6cQ34BOulzgi48shi+SSjbV
+         r2MIqwRC+0RvyKHGR/CNpVFVrvtBOgIhDuZbGoyORkel0jikO5EzcCAnhiNq2RdnWRNJ
+         ioc9h339Vg94YmjU0ldpBqdNytIJv1KqJ22KIHhxV7ZoFKBK/Jz8XKvp6fT2MtlSA47e
+         ZbRg==
+X-Gm-Message-State: AJIora+wVpYC/9GnGvomM5Lq4DcRhSKNYT6XbMGAnE9rR19n0KQMKMrb
+        JvqbZ8+WGEr2++1uoqnppmN9nsXzD/9VAfW3cXDpHifTA2VL+k2dPeU0KTvWIl++oLJWa5z8uaw
+        CMg0AAUVPt2kiTHByvQ==
+X-Received: by 2002:a05:6214:29e6:b0:470:44d9:1ec5 with SMTP id jv6-20020a05621429e600b0047044d91ec5mr10861348qvb.95.1655874909052;
+        Tue, 21 Jun 2022 22:15:09 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vt/rKfqUEytgGkHH4tnXQReyivH+jT+VezifecgL6KD5cWZVKILIpuFsBCGC6L/BTbDk1euQ==
+X-Received: by 2002:a05:6214:29e6:b0:470:44d9:1ec5 with SMTP id jv6-20020a05621429e600b0047044d91ec5mr10861339qvb.95.1655874908745;
+        Tue, 21 Jun 2022 22:15:08 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id m19-20020a05620a24d300b006a67eb4610fsm17196156qkn.116.2022.06.21.22.12.02
+        by smtp.gmail.com with ESMTPSA id bq9-20020a05620a468900b006a700aad48bsm17185483qkb.91.2022.06.21.22.15.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Jun 2022 22:12:03 -0700 (PDT)
-Date:   Wed, 22 Jun 2022 13:11:58 +0800
+        Tue, 21 Jun 2022 22:15:08 -0700 (PDT)
+Date:   Wed, 22 Jun 2022 13:15:03 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     David Disseldorp <ddiss@suse.de>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 5/6] check: use arrays instead of separate n_ counters
-Message-ID: <20220622051158.rfpnp7mnuvhpj4t2@zlang-mailbox>
+Subject: Re: [PATCH 6/6] check: remove err and first_test variables
+Message-ID: <20220622051503.n25iwnilfnk7u36n@zlang-mailbox>
 References: <20220620192934.21694-1-ddiss@suse.de>
- <20220620192934.21694-6-ddiss@suse.de>
+ <20220620192934.21694-7-ddiss@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220620192934.21694-6-ddiss@suse.de>
+In-Reply-To: <20220620192934.21694-7-ddiss@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 20, 2022 at 09:29:33PM +0200, David Disseldorp wrote:
-> The separate n_try, n_bad and n_notrun counters are unnecessary when
-> the corresponding lists are switched to bash arrays.
+On Mon, Jun 20, 2022 at 09:29:34PM +0200, David Disseldorp wrote:
+> tc_status can be used for both of these.
 > 
 > Signed-off-by: David Disseldorp <ddiss@suse.de>
 > ---
 
-
-
->  check | 72 ++++++++++++++++++++++++++---------------------------------
->  1 file changed, 32 insertions(+), 40 deletions(-)
-> 
-> diff --git a/check b/check
-> index a5183d3a..8423d7a1 100755
-> --- a/check
-> +++ b/check
-> @@ -8,13 +8,10 @@ tmp=/tmp/$$
->  status=0
->  needwrap=true
->  needsum=true
-> -n_try=0
-> -try=""
-> -n_bad=0
-> +try=()
->  sum_bad=0
-> -bad=""
-> -n_notrun=0
-> -notrun=""
-> +bad=()
-> +notrun=()
->  interrupt=true
->  diff="diff -u"
->  showme=false
-> @@ -412,10 +409,9 @@ fi
->  
->  _wipe_counters()
->  {
-> -	n_try="0"
-> -	n_bad="0"
-> -	n_notrun="0"
-> -	unset try notrun bad
-> +	try=()
-> +	notrun=()
-> +	bad=()
->  }
->  
->  _global_log() {
-> @@ -433,7 +429,7 @@ _wrapup()
->  	if $showme && $needwrap; then
->  		if $do_report; then
->  			# $showme = all selected tests are notrun (no tries)
-> -			_make_section_report "$n_notrun" "0" "$n_notrun"
-> +			_make_section_report "${#notrun[*]}" "0" "${#notrun[*]}"
->  		fi
->  		needwrap=false
->  	elif $needwrap; then
-> @@ -458,12 +454,12 @@ _wrapup()
->  
->  		echo "SECTION       -- $section" >>$tmp.summary
->  		echo "=========================" >>$tmp.summary
-> -		if [ ! -z "$n_try" -a $n_try != 0 ]; then
-> +		if ((${#try[*]} > 0)); then
->  			if [ $brief_test_summary == "false" ]; then
-> -				echo "Ran:$try"
-> -				echo "Ran:$try" >>$tmp.summary
-> +				echo "Ran: ${try[*]}"
-                                          ^
-No objection from me. And you even took into account the head space in original
-format :)
+Make sense.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> +				echo "Ran: ${try[*]}" >>$tmp.summary
->  			fi
-> -			_global_log "Ran:$try"
-> +			_global_log "Ran: ${try[*]}"
->  		fi
+>  check | 41 ++++++++++++++++-------------------------
+>  1 file changed, 16 insertions(+), 25 deletions(-)
+> 
+> diff --git a/check b/check
+> index 8423d7a1..2ea2920f 100755
+> --- a/check
+> +++ b/check
+> @@ -725,23 +725,17 @@ function run_section()
+>  	seqres="$check"
+>  	_check_test_fs
 >  
->  		$interrupt && echo "Interrupted!" | tee -a $check.log
-> @@ -472,34 +468,34 @@ _wrapup()
->  				${REPORT_DIR}/check.log
->  		fi
->  
-> -		if [ ! -z "$notrun" ]; then
-> +		if ((${#notrun[*]} > 0)); then
->  			if [ $brief_test_summary == "false" ]; then
-> -				echo "Not run:$notrun"
-> -				echo "Not run:$notrun" >>$tmp.summary
-> +				echo "Not run: ${notrun[*]}"
-> +				echo "Not run: ${notrun[*]}" >>$tmp.summary
->  			fi
-> -			_global_log "Not run:$notrun"
-> +			_global_log "Not run: ${notrun[*]}"
->  		fi
->  
-> -		if [ ! -z "$n_bad" -a $n_bad != 0 ]; then
-> -			echo "Failures:$bad"
-> -			echo "Failed $n_bad of $n_try tests"
-> -			_global_log "Failures:$bad"
-> -			_global_log "Failed $n_bad of $n_try tests"
-> -			echo "Failures:$bad" >>$tmp.summary
-> -			echo "Failed $n_bad of $n_try tests" >>$tmp.summary
-> +		if ((${#bad[*]} > 0)); then
-> +			echo "Failures: ${bad[*]}"
-> +			echo "Failed ${#bad[*]} of ${#try[*]} tests"
-> +			_global_log "Failures: ${bad[*]}"
-> +			_global_log "Failed ${#bad[*]} of ${#try[*]} tests"
-> +			echo "Failures: ${bad[*]}" >>$tmp.summary
-> +			echo "Failed ${#bad[*]} of ${#try[*]} tests" >>$tmp.summary
->  		else
-> -			echo "Passed all $n_try tests"
-> -			_global_log "Passed all $n_try tests"
-> -			echo "Passed all $n_try tests" >>$tmp.summary
-> +			echo "Passed all ${#try[*]} tests"
-> +			_global_log "Passed all ${#try[*]} tests"
-> +			echo "Passed all ${#try[*]} tests" >>$tmp.summary
->  		fi
->  		echo "" >>$tmp.summary
->  		if $do_report; then
-> -			_make_section_report "$n_try" "$n_bad" "$n_notrun"
-> +			_make_section_report "${#try[*]}" "${#bad[*]}" "${#notrun[*]}"
->  		fi
->  		needwrap=false
->  	fi
->  
-> -	sum_bad=`expr $sum_bad + $n_bad`
-> +	sum_bad=`expr $sum_bad + ${#bad[*]}`
->  	_wipe_counters
->  	rm -f /tmp/*.rawout /tmp/*.out /tmp/*.err /tmp/*.time
->  	if ! $OPTIONS_HAVE_SECTIONS; then
-> @@ -735,8 +731,7 @@ function run_section()
+> -	err=false
+> -	first_test=true
+> +	local tc_status="init"
+>  	prev_seq=""
 >  	for seq in $list ; do
 >  		# Run report for previous test!
->  		if $err ; then
-> -			bad="$bad $seqnum"
-> -			n_bad=`expr $n_bad + 1`
-> +			bad+=("$seqnum")
->  			tc_status="fail"
+> -		if $err ; then
+> +		if [ "$tc_status" == "fail" ]; then
+>  			bad+=("$seqnum")
+> -			tc_status="fail"
 >  		fi
->  		if $do_report && ! $first_test ; then
-> @@ -794,7 +789,7 @@ function run_section()
->  			start=0
->  			stop=0
->  			tc_status="list"
-> -			n_notrun=`expr $n_notrun + 1`
-> +			notrun+=("$seqnum")
->  			continue
+> -		if $do_report && ! $first_test ; then
+> -			if [ $tc_status != "expunge" ] ; then
+> -				_make_testcase_report "$prev_seq" "$tc_status"
+> -			fi
+> +		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
+> +			_make_testcase_report "$prev_seq" "$tc_status"
+>  		fi
+> -		first_test=false
+>  
+> -		err=false
+>  		prev_seq="$seq"
+>  		if [ ! -f $seq ]; then
+>  			# Try to get full name in case the user supplied only
+> @@ -845,7 +839,7 @@ function run_section()
+>  		if [ -f core ]; then
+>  			_dump_err_cont "[dumped core]"
+>  			mv core $RESULT_BASE/$seqnum.core
+> -			err=true
+> +			tc_status="fail"
 >  		fi
 >  
-> @@ -815,8 +810,7 @@ function run_section()
+>  		if [ -f $seqres.notrun ]; then
+> @@ -870,15 +864,15 @@ function run_section()
+>  			_scratch_unmount 2> /dev/null
+>  			rm -f ${RESULT_DIR}/require_test*
+>  			rm -f ${RESULT_DIR}/require_scratch*
+> -			err=true
+> +			tc_status="fail"
+>  		else
+>  			# The test apparently passed, so check for corruption
+>  			# and log messages that shouldn't be there.  Run the
+>  			# checking tools from a subshell with adjusted OOM
+>  			# score so that the OOM killer will target them instead
+>  			# of the check script itself.
+> -			(_adjust_oom_score 250; _check_filesystems) || err=true
+> -			_check_dmesg || err=true
+> +			(_adjust_oom_score 250; _check_filesystems) || tc_status="fail"
+> +			_check_dmesg || tc_status="fail"
 >  		fi
 >  
->  		# record that we really tried to run this test.
-> -		try="$try $seqnum"
-> -		n_try=`expr $n_try + 1`
-> +		try+=("$seqnum")
+>  		# Reload the module after each test to check for leaks or
+> @@ -892,7 +886,7 @@ function run_section()
 >  
->  		awk 'BEGIN {lasttime="       "} \
->  		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
-> @@ -861,8 +855,7 @@ function run_section()
->  			$timestamp && echo " [not run]" && \
->  				      echo -n "	$seqnum -- "
->  			cat $seqres.notrun
-> -			notrun="$notrun $seqnum"
-> -			n_notrun=`expr $n_notrun + 1`
-> +			notrun+=("$seqnum")
->  			tc_status="notrun"
+>  		# Scan for memory leaks after every test so that associating
+>  		# a leak to a particular test will be as accurate as possible.
+> -		_check_kmemleak || err=true
+> +		_check_kmemleak || tc_status="fail"
 >  
->  			# Unmount the scratch fs so that we can wipe the scratch
-> @@ -947,8 +940,7 @@ function run_section()
+>  		# test ends after all checks are done.
+>  		$timestamp && _timestamp
+> @@ -900,7 +894,7 @@ function run_section()
+>  
+>  		if [ ! -f $seq.out ]; then
+>  			_dump_err "no qualified output"
+> -			err=true
+> +			tc_status="fail"
+>  			continue;
+>  		fi
+>  
+> @@ -909,7 +903,7 @@ function run_section()
+>  		# version.
+>  		sed -i "s/\`/\'/g" $tmp.out
+>  		if diff $seq.out $tmp.out >/dev/null 2>&1 ; then
+> -			if ! $err ; then
+> +			if [ "$tc_status" != "fail" ]; then
+>  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
+>  				echo -n " `expr $stop - $start`s"
+>  			fi
+> @@ -926,10 +920,10 @@ function run_section()
+>  				echo "(Run '$diff $here/$seq.out $seqres.out.bad'" \
+>  					" to see the entire diff)"
+>  			fi; } | sed -e 's/^\(.\)/    \1/'
+> -			err=true
+> +			tc_status="fail"
+>  		fi
+>  		if [ -f $seqres.hints ]; then
+> -			if $err; then
+> +			if [ "$tc_status" == "fail" ]; then
+>  				echo
+>  				cat $seqres.hints
+>  			else
+> @@ -939,14 +933,11 @@ function run_section()
+>  	done
 >  
 >  	# make sure we record the status of the last test we ran.
->  	if $err ; then
-> -		bad="$bad $seqnum"
-> -		n_bad=`expr $n_bad + 1`
-> +		bad+=("$seqnum")
->  		tc_status="fail"
+> -	if $err ; then
+> +	if [ "$tc_status" == "fail" ]; then
+>  		bad+=("$seqnum")
+> -		tc_status="fail"
 >  	fi
->  	if $do_report && ! $first_test ; then
+> -	if $do_report && ! $first_test ; then
+> -		if [ $tc_status != "expunge" ] ; then
+> -			_make_testcase_report "$prev_seq" "$tc_status"
+> -		fi
+> +	if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
+> +		_make_testcase_report "$prev_seq" "$tc_status"
+>  	fi
+>  
+>  	sect_stop=`_wallclock`
 > -- 
 > 2.35.3
 > 
