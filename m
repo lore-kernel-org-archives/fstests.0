@@ -2,219 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52135C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jun 2022 17:37:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51382C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 00:07:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236039AbiFURhm (ORCPT
+        id S232356AbiFVAHW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 21 Jun 2022 13:37:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37108 "EHLO
+        Tue, 21 Jun 2022 20:07:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235961AbiFURhl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Jun 2022 13:37:41 -0400
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E15DA2CC8A
-        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 10:37:40 -0700 (PDT)
-Received: by mail-wm1-x329.google.com with SMTP id m39-20020a05600c3b2700b0039c511ebbacso9688771wms.3
-        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 10:37:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=DRkonhqIqKPjwKgYdn753QW8oSwPce1FWrd5SGWX04c=;
-        b=IBjA+woPMcS93VB3rTtjs2IT8Ua3FmMZ1vnmrix5L1HpMrlrJbL8WsF6kSGFp+wzaC
-         pAdHknRb8yI9C3B6bsKRum5fEncnmRX/Ya0rVJBhIDe+ucqhI9gUrm12nXJRywypt2BB
-         5XNteTvaKGf8dNebZjtIiO4P9zf1iYTKXtWcWZ9SHhgnn3n3ewKoBlCxR1DSSraapoR8
-         gf1rIBR59CuUG3DLmSU5dg5Zt7U3SH1r0D4rmnn7A0E5CE+eMd0bDyHI63Q1nJzOPGUs
-         TmY+Eqg+5FBmr1cKXY5AFYDnBQnUMJmjdZyaCeNxoMhJ4weUf17xqqrJiiM80Jo1pF6u
-         GyVQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=DRkonhqIqKPjwKgYdn753QW8oSwPce1FWrd5SGWX04c=;
-        b=5M5OJgI8PntuZTyqOF64mZWR96jtLyzQJt3bl+JlgIYIqahQIWPOruFZZrHtQMVuyC
-         bJ2Xr+8qA1SkEh40GjfWDDomj5vOEEHxn0SvDSi1o9FGyg0KhIeCPFOjeA7LZyRSwbhI
-         CJrTdmD4M6fI8kRP8S1YTXH3mn8CQA+OQoicrLuXXY7Cue1KYUf51jewPZw3UPlWkffr
-         HJ7vojHjuzHSI+2sRkeUMLlkYVV4AmWsPnf/6/q0M6wpaY1XcWUdYQpM4N2ve8KozzgJ
-         TfOD9i3SvAz6nljM3CQImXTvlFfl3kF9gDT94jU9hjMgyPE+jjWS0E9LJ60dDtADXPyB
-         j7YQ==
-X-Gm-Message-State: AOAM533Lf90Hv0NNWv5aDLrbB4fVBdxkN9Lapl4lTmSrbRDQGbNrFTEX
-        5AKnK1ziTiTas6UQYTFGSck=
-X-Google-Smtp-Source: ABdhPJy05xz2ZgN+flNPbmqB2A/Kya/yEYi0JTOzdTH25FAwAHV+981BBtC+UkWPsXfWwPT3SBUP2Q==
-X-Received: by 2002:a05:600c:4e54:b0:39c:6e5e:c667 with SMTP id e20-20020a05600c4e5400b0039c6e5ec667mr40924897wmq.151.1655833059475;
-        Tue, 21 Jun 2022 10:37:39 -0700 (PDT)
-Received: from localhost.localdomain ([77.137.66.49])
-        by smtp.gmail.com with ESMTPSA id k17-20020a5d6e91000000b0021a39f5ba3bsm16105120wrz.7.2022.06.21.10.37.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Jun 2022 10:37:38 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
-Subject: [PATCH v2 3/3] xfs/{422,517}: kill background jobs on test termination
-Date:   Tue, 21 Jun 2022 20:37:29 +0300
-Message-Id: <20220621173729.2135249-4-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220621173729.2135249-1-amir73il@gmail.com>
-References: <20220621173729.2135249-1-amir73il@gmail.com>
+        with ESMTP id S232348AbiFVAHR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Jun 2022 20:07:17 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04B5915831;
+        Tue, 21 Jun 2022 17:07:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=sigJDkoz0M+e883teC6LqmUFk5CfAmSb0+UHfvzEgpk=; b=bf2SqSeOzQmU1Vp7uyC56FP9yg
+        gNuBpSS2MwYW9FCuMphAA9pseLGidxaG5xNEU48HbHlkwhCSdP6cRlFjAdsyyp8uSuG1ORftzsGO0
+        bM5Z8VlrWXR2pKEp+BjVr5znWEKSMqzjV2Cb0qCF5lc5q54UL7C9iY9JqSu5pB+N2wqq8da8w8cVz
+        zG/dGQFLcWh3aGg+AvS076lTlL2uNBYCFqEwr91UeAvPbJEhjNKPkVZKRbHRV1hbmNEnYMGebX8e1
+        jZPNOHOGIT6BDP0NjJXppKTuMPK/hkKGvBPeUiSMNyu5JUdh/oX/vNtp7Z4kfO+6DxbaVoHUomLNz
+        ODBWFgtw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1o3ntm-007lSQ-Di; Wed, 22 Jun 2022 00:07:10 +0000
+Date:   Tue, 21 Jun 2022 17:07:10 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Leah Rumancik <leah.rumancik@gmail.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Chuck Lever <chuck.lever@oracle.com>, chandanrmail@gmail.com,
+        Sweet Tea Dorminy <sweettea-kernel@dorminy.me>,
+        Pankaj Raghav <pankydev8@gmail.com>
+Cc:     linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 5.15 CANDIDATE v2 0/8] xfs stable candidate patches for
+ 5.15.y (part 1)
+Message-ID: <YrJdLhHBsolF83Rq@bombadil.infradead.org>
+References: <20220616182749.1200971-1-leah.rumancik@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220616182749.1200971-1-leah.rumancik@gmail.com>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Those tests failed to cleanup background jobs properly after test
-is interrupted and even sometimes when it completed succefully.
+On Thu, Jun 16, 2022 at 11:27:41AM -0700, Leah Rumancik wrote:
+> https://gist.github.com/lrumancik/5a9d85d2637f878220224578e173fc23. 
 
-xfs/517 would sometime fails randomally with this false positive error:
-     QA output created by 517
-     Format and populate
-     Concurrent fsmap and freeze
-    +Terminated
-     Test done
+The coverage for XFS is using profiles which seem to come inspired
+by ext4's different mkfs configurations.
 
-The tests have several background sub-shells that spawn short lived
-programs in a loop.  By killing the spawned programs using killall,
-killall could find no process to kill and the sub-shell loop could still
-spawn another process that is not going to be killed and in the worst
-case, the freeze_loop() could spawn the xfs_io "freeze" command after
-test has thawn the fs before exit, which leaves the fs frozen after the
-test.
+Long ago (2019) I had asked we strive to address popular configurations
+for XFS so that what would be back then oscheck (now kdevops) can cover
+them for stable XFS patch candidate test consideration. That was so long
+ago no one should be surprised you didn't get the memo:
 
-The "Terminated" output is emitted by the sub-shell when killing the
-programs that it has spawned when the loop did not finish before test
-timeout.  By killing the sub-shell and not the spawned programs, we
-avoid the false positive "Terminated" error.
+https://lkml.kernel.org/r/20190208194829.GJ11489@garbanzo.do-not-panic.com
 
-Use a helper to perform this cleanup dance:
-First kill and wait the freeze_loop so it won't try to freeze fs again
-Then make sure fs is not frozen.
-Then kill and wait for the rest of the sub-shells, because
-if fs is frozen a killed writer process will never exit.
+This has grown to cover more now:
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/xfs/422 | 32 ++++++++++++++++++++++++++++++--
- tests/xfs/517 | 26 +++++++++++++++++++++++---
- 2 files changed, 53 insertions(+), 5 deletions(-)
+https://github.com/linux-kdevops/kdevops/blob/master/playbooks/roles/fstests/templates/xfs/xfs.config
 
-diff --git a/tests/xfs/422 b/tests/xfs/422
-index a83a66df..fdbb8bf1 100755
---- a/tests/xfs/422
-+++ b/tests/xfs/422
-@@ -13,6 +13,32 @@ _begin_fstest dangerous_scrub dangerous_online_repair freeze
- 
- _register_cleanup "_cleanup" BUS
- 
-+# First kill and wait the freeze loop so it won't try to freeze fs again
-+# Then make sure fs is not frozen
-+# Then kill and wait for the rest of the workers
-+# Because if fs is frozen a killed writer will never exit
-+kill_loops() {
-+	local sig=$1
-+
-+	[ -n "$freeze_pid" ] && kill $sig $freeze_pid
-+	wait $freeze_pid
-+	unset freeze_pid
-+	$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT
-+	[ -n "$stress_pid" ] && kill $sig $stress_pid
-+	[ -n "$repair_pid" ] && kill $sig $repair_pid
-+	wait
-+	unset stress_pid
-+	unset repair_pid
-+}
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	kill_loops -9 > /dev/null 2>&1
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
- # Import common functions.
- . ./common/filter
- . ./common/fuzzy
-@@ -78,8 +104,11 @@ end=$((start + (30 * TIME_FACTOR) ))
- 
- echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
- stress_loop $end &
-+stress_pid=$!
- freeze_loop $end &
-+freeze_pid=$!
- repair_loop $end &
-+repair_pid=$!
- 
- # Wait until 2 seconds after the loops should have finished...
- while [ "$(date +%s)" -lt $((end + 2)) ]; do
-@@ -87,8 +116,7 @@ while [ "$(date +%s)" -lt $((end + 2)) ]; do
- done
- 
- # ...and clean up after the loops in case they didn't do it themselves.
--$KILLALL_PROG -TERM xfs_io fsstress >> $seqres.full 2>&1
--$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
-+kill_loops >> $seqres.full 2>&1
- 
- echo "Loop finished at $(date)" >> $seqres.full
- echo "Test done"
-diff --git a/tests/xfs/517 b/tests/xfs/517
-index f7f9a8a2..6877af13 100755
---- a/tests/xfs/517
-+++ b/tests/xfs/517
-@@ -11,11 +11,29 @@ _begin_fstest auto quick fsmap freeze
- 
- _register_cleanup "_cleanup" BUS
- 
-+# First kill and wait the freeze loop so it won't try to freeze fs again
-+# Then make sure fs is not frozen
-+# Then kill and wait for the rest of the workers
-+# Because if fs is frozen a killed writer will never exit
-+kill_loops() {
-+	local sig=$1
-+
-+	[ -n "$freeze_pid" ] && kill $sig $freeze_pid
-+	wait $freeze_pid
-+	unset freeze_pid
-+	$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT
-+	[ -n "$stress_pid" ] && kill $sig $stress_pid
-+	[ -n "$fsmap_pid" ] && kill $sig $fsmap_pid
-+	wait
-+	unset stress_pid
-+	unset fsmap_pid
-+}
-+
- # Override the default cleanup function.
- _cleanup()
- {
-+	kill_loops -9 > /dev/null 2>&1
- 	cd /
--	$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT > /dev/null 2>&1
- 	rm -rf $tmp.*
- }
- 
-@@ -83,8 +101,11 @@ end=$((start + (30 * TIME_FACTOR) ))
- 
- echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
- stress_loop $end &
-+stress_pid=$!
- freeze_loop $end &
-+freeze_pid=$!
- fsmap_loop $end &
-+fsmap_pid=$!
- 
- # Wait until 2 seconds after the loops should have finished...
- while [ "$(date +%s)" -lt $((end + 2)) ]; do
-@@ -92,8 +113,7 @@ while [ "$(date +%s)" -lt $((end + 2)) ]; do
- done
- 
- # ...and clean up after the loops in case they didn't do it themselves.
--$KILLALL_PROG -TERM xfs_io fsstress >> $seqres.full 2>&1
--$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
-+kill_loops >> $seqres.full 2>&1
- 
- echo "Loop finished at $(date)" >> $seqres.full
- echo "Test done"
--- 
-2.25.1
+For instance xfs_bigblock and xfs_reflink_normapbt.
 
+My litmus test back then *and* today is to ensure we have no regressions
+on the test sections supported by kdevops for XFS as reflected above.
+Without that confidence I'd be really reluctant to support stable
+efforts.
+
+If you use kdevops, it should be easy to set up even if you are not
+using local virtualization technologies. For instance I just fired
+up an AWS cloud m5ad.4xlarge image which has 2 nvme drives, which
+mimics the reqs for the methodology of using loopback files:
+
+https://github.com/linux-kdevops/kdevops/blob/master/docs/seeing-more-issues.md
+
+GCE is supported as well, so is Azure and OpenStack, and even custom
+openstack solutions...
+
+Also, I see on the above URL you posted there is a TODO in the gist which
+says, "find a better route for publishing these". If you were to use
+kdevops for this it would have the immediate gain in that kdevops users
+could reproduce your findings and help augment it.
+
+However if using kdevops as a landing home for this is too large for you,
+we could use a new git tree which just tracks expunges and then kdevops can
+use it as a git subtree as I had suggested at LSFMM. The benefit of using a
+git subtree is then any runner can make use of it. And note that we
+track both fstests and blktests.
+
+The downside is for kdevops to use a new git subtree is just that kdevops
+developers would have to use two trees to work on, one for code changes just
+for kdevops and one for the git subtree for expunges. That workflow would be
+new. I don't suspect it would be a really big issue other than addressing the
+initial growing pains to adapt. I have used git subtrees before extensively
+and the best rule of thumb is just to ensure you keep the code for the git
+subtree in its own directory. You can either immediately upstream your
+delta or carry the delta until you are ready to try to push those
+changes. Right now kdevops uses the directory workflows/fstests/expunges/
+for expunges. Your runner could use whatever it wishes.
+
+We should discuss if we just also want to add the respective found
+*.bad, *.dmesg *.all files for results for expunged entries, or if
+we should be pushing these out to a new shared storage area. Right now
+kdevops keeps track of results in the directory workflows/fstests/results/
+but this is a path on .gitignore. If we *do* want to use github and a
+shared git subtree perhaps a workflows/fstests/artifacts/kdevops/ would
+make sense for the kdevops runner ? Then that namespace allows other
+runners to also add files, but we all share expunges / tribal knowledge.
+
+Thoughts?
+
+  Luis
