@@ -2,140 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0907CC43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 22:17:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF1B2C43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 23:42:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345677AbiFVWRh (ORCPT
+        id S232677AbiFVXme (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Jun 2022 18:17:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54316 "EHLO
+        Wed, 22 Jun 2022 19:42:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51380 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345378AbiFVWRh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 18:17:37 -0400
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F14053EBBD;
-        Wed, 22 Jun 2022 15:17:35 -0700 (PDT)
-Received: by mail-pf1-x433.google.com with SMTP id k127so12109313pfd.10;
-        Wed, 22 Jun 2022 15:17:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=wv+3ejE3XLnLczXlwBxdBb+mIIWKlS4zkTl1YG7+A2Y=;
-        b=LsoKNDO1aZGa4gpiXQlvzCkucjAkkEPxqABVydcFx31NODvoVC51lmkoasPp1m8nS0
-         MqqzgIycIweAiiSkA27Gm1kkrHFXKdw/0gEOew76uF5Mjixv0c+SJxmVIXei3PJsnQU3
-         IFQFSDCuoCvT9lxs2oqIsNCbDezCLWJlNsdDLTRvC9YFIJaAAtisI/cYnn0Zs1seOHe9
-         /1ChWt+k8OvO3B8+DzNgTg2eyU81lP6fNbmg8ogXA+UC5g3Qfah3LmWN4qNqr0FmsoMc
-         ZnZ4LoXa0i7Hw7nXixzPUGr+tWWUCEvWfzO1y4Vr7HOKWjPaZq2roKw19T2KtpinN2iQ
-         tg0g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=wv+3ejE3XLnLczXlwBxdBb+mIIWKlS4zkTl1YG7+A2Y=;
-        b=dC11OGqpvdhKIUWFEyOW61eJctYxDKpHXZmWLN6RLUx2SDngFeqt+Ieu1f/sd8DqDy
-         X/LlrYDXl72GAtmE0Sn0KbYph3RqosumFtwvoTJT/RcJNVD0CjzPFR0RCYvhUtZ9VcnX
-         RzdEgnMm4GY7Y0Kr6Sy/+RZRfiFJLY4c3ObcwcmaiHDufLEzjrX1Z10fCqbt5II/y/fI
-         cRFMfSpw3fwxgkKUAnzSsEeIkCWaIfFjQwwBlSUNELo80zpATd+GuSZ5NCBYzX+hVAJ2
-         9e6E2FdIRR5NvS3jzvHeH/9bis32UuUfYC3n4Afu53/WHoq4oYTGUoJLvdnWa8a0xcZy
-         EJ5g==
-X-Gm-Message-State: AJIora8ECQNlZwkIdIHbGyQCjRIBl7Yq9FoiQZdWz3F0qM3J0Nn+7d4H
-        5KbJkk0iY5dPZVJDgIU2ChsBg5wJBhyNdA==
-X-Google-Smtp-Source: AGRyM1vPtLj6GdsATpVbY0gDLRI/FrNNRrB6PeHI1qIPKrHS8Sa9Ak9l6TlNmz7AHwlt6Yt4WmkhdA==
-X-Received: by 2002:a63:b948:0:b0:40c:830b:338f with SMTP id v8-20020a63b948000000b0040c830b338fmr4802415pgo.50.1655936255453;
-        Wed, 22 Jun 2022 15:17:35 -0700 (PDT)
-Received: from google.com ([2620:0:1001:7810:1c61:ca22:3ef4:fce9])
-        by smtp.gmail.com with ESMTPSA id j4-20020a170902c3c400b0016a5384071bsm777905plj.1.2022.06.22.15.17.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Jun 2022 15:17:34 -0700 (PDT)
-Date:   Wed, 22 Jun 2022 15:17:32 -0700
-From:   Leah Rumancik <leah.rumancik@gmail.com>
+        with ESMTP id S229473AbiFVXmd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 19:42:33 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD37D427E5;
+        Wed, 22 Jun 2022 16:42:32 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5003061BBA;
+        Wed, 22 Jun 2022 23:42:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D8AEC341C5;
+        Wed, 22 Jun 2022 23:42:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1655941351;
+        bh=Q27lkrJvEz/mI+pvfPY/VN13BCriVcz3Js9zn2eyutI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=RCPQaeTL57XAd9GGBEI55l7fuiYVQUkvXShlSvh5xQ79PXZNDkRMDY/Gg7gjG/A0S
+         RRNC+WYJT0hdePU03hZwlwmw2H8BGL5YKahxxX06nNMC/yZ10vLHDd6n3gqv1lNdbc
+         lsDWZ6DcZHu+14gilFNR+UrsjlljBd2nBqUp9IPP/g1ckpXLiprLsC/7F1mqgtalAo
+         g3Ybrphl9OEK8i4q++iom6QdgE9lOG1i0JS90zKGbhCE8JyJ2sockTtvsuE0XYnzVV
+         RivmYgPjCG0cIH3yisps73fn/6y0616wHXtK+4Uo7wyd3HZsur4Luq1DIfJjJCQt56
+         psrm5veJd6g9w==
+Date:   Wed, 22 Jun 2022 16:42:31 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
         Luis Chamberlain <mcgrof@kernel.org>,
         Dave Chinner <david@fromorbit.com>,
         Christoph Hellwig <hch@lst.de>,
         Christian Brauner <christian.brauner@ubuntu.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
         fstests <fstests@vger.kernel.org>,
-        Dave Chinner <dchinner@redhat.com>,
-        Christian Brauner <brauner@kernel.org>
-Subject: Re: [PATCH 5.10 CANDIDATE 11/11] xfs: use setattr_copy to set vfs
- inode attributes
-Message-ID: <YrOU/FPCEWkozAQI@google.com>
+        Dave Chinner <dchinner@redhat.com>
+Subject: Re: [PATCH 5.10 CANDIDATE 09/11] xfs: only bother with
+ sync_filesystem during readonly remount
+Message-ID: <YrOo5wW6CtkK6p8C@magnolia>
 References: <20220617100641.1653164-1-amir73il@gmail.com>
- <20220617100641.1653164-12-amir73il@gmail.com>
- <YrNGJXYi2jQtPxs0@magnolia>
- <CAOQ4uxgXobea42K=WVyOhxxq+S=TA3RvLbxypKO02D9TZEgioA@mail.gmail.com>
+ <20220617100641.1653164-10-amir73il@gmail.com>
+ <YrNFb9999OY/8JDZ@magnolia>
+ <CAOQ4uxi1th2XJ7Ss8avKjrR=k1wMw524+2+ahyafBhSAUsS7dQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgXobea42K=WVyOhxxq+S=TA3RvLbxypKO02D9TZEgioA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxi1th2XJ7Ss8avKjrR=k1wMw524+2+ahyafBhSAUsS7dQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 22, 2022 at 09:36:53PM +0300, Amir Goldstein wrote:
-> On Wed, Jun 22, 2022 at 7:41 PM Darrick J. Wong <djwong@kernel.org> wrote:
+On Wed, Jun 22, 2022 at 07:54:33PM +0300, Amir Goldstein wrote:
+> On Wed, Jun 22, 2022 at 7:38 PM Darrick J. Wong <djwong@kernel.org> wrote:
 > >
-> > On Fri, Jun 17, 2022 at 01:06:41PM +0300, Amir Goldstein wrote:
+> > On Fri, Jun 17, 2022 at 01:06:39PM +0300, Amir Goldstein wrote:
 > > > From: "Darrick J. Wong" <djwong@kernel.org>
 > > >
-> > > commit e014f37db1a2d109afa750042ac4d69cf3e3d88e upstream.
+> > > commit b97cca3ba9098522e5a1c3388764ead42640c1a5 upstream.
 > > >
-> > > [remove userns argument of setattr_copy() for backport]
+> > > In commit 02b9984d6408, we pushed a sync_filesystem() call from the VFS
+> > > into xfs_fs_remount.  The only time that we ever need to push dirty file
+> > > data or metadata to disk for a remount is if we're remounting the
+> > > filesystem read only, so this really could be moved to xfs_remount_ro.
 > > >
-> > > Filipe Manana pointed out that XFS' behavior w.r.t. setuid/setgid
-> > > revocation isn't consistent with btrfs[1] or ext4.  Those two
-> > > filesystems use the VFS function setattr_copy to convey certain
-> > > attributes from struct iattr into the VFS inode structure.
+> > > Once we've moved the call site, actually check the return value from
+> > > sync_filesystem.
+> 
+> This part is not really relevant for this backport, do you want me to
+> emphasise that?
+
+Not relevant?  Making sync_fs return error codes to callers was the
+entire reason for creating this series...
+
 > > >
-> > > Andrey Zhadchenko reported[2] that XFS uses the wrong user namespace to
-> > > decide if it should clear setgid and setuid on a file attribute update.
-> > > This is a second symptom of the problem that Filipe noticed.
-> > >
-> > > XFS, on the other hand, open-codes setattr_copy in xfs_setattr_mode,
-> > > xfs_setattr_nonsize, and xfs_setattr_time.  Regrettably, setattr_copy is
-> > > /not/ a simple copy function; it contains additional logic to clear the
-> > > setgid bit when setting the mode, and XFS' version no longer matches.
-> > >
-> > > The VFS implements its own setuid/setgid stripping logic, which
-> > > establishes consistent behavior.  It's a tad unfortunate that it's
-> > > scattered across notify_change, should_remove_suid, and setattr_copy but
-> > > XFS should really follow the Linux VFS.  Adapt XFS to use the VFS
-> > > functions and get rid of the old functions.
-> > >
-> > > [1] https://lore.kernel.org/fstests/CAL3q7H47iNQ=Wmk83WcGB-KBJVOEtR9+qGczzCeXJ9Y2KCV25Q@mail.gmail.com/
-> > > [2] https://lore.kernel.org/linux-xfs/20220221182218.748084-1-andrey.zhadchenko@virtuozzo.com/
-> > >
-> > > Fixes: 7fa294c8991c ("userns: Allow chown and setgid preservation")
+> > > Fixes: 02b9984d6408 ("fs: push sync_filesystem() down to the file system's remount_fs()")
 > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > > > Reviewed-by: Dave Chinner <dchinner@redhat.com>
-> > > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > > Reviewed-by: Christian Brauner <brauner@kernel.org>
 > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > ---
+> > >  fs/xfs/xfs_super.c | 7 +++++--
+> > >  1 file changed, 5 insertions(+), 2 deletions(-)
+> > >
+> > > diff --git a/fs/xfs/xfs_super.c b/fs/xfs/xfs_super.c
+> > > index 6323974d6b3e..dd0439ae6732 100644
+> > > --- a/fs/xfs/xfs_super.c
+> > > +++ b/fs/xfs/xfs_super.c
+> > > @@ -1716,6 +1716,11 @@ xfs_remount_ro(
+> > >       };
+> > >       int                     error;
+> > >
+> > > +     /* Flush all the dirty data to disk. */
+> > > +     error = sync_filesystem(mp->m_super);
 > >
-> > Same question as I posted to Leah's series -- have all the necessary VFS
-> > fixes and whatnot been backported to 5.10?  Such that all the new sgid
-> > inheritance tests actually pass with this patch applied? :)
+> > Looking at 5.10.124's fsync.c and xfs_super.c:
+> >
+> > https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/fs/sync.c?h=v5.10.124#n31
+> > https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/fs/xfs/xfs_super.c?h=v5.10.124#n755
+> >
+> > I think this kernel needs the patch(es) that make __sync_filesystem return
+> > the errors passed back by ->sync_fs, and I think also the patch that
+> > makes xfs_fs_sync_fs return errors encountered by xfs_log_force, right?
 > 
-> The only patch I backorted to 5.10 is:
-> xfs: fix up non-directory creation in SGID directories
-> 
-> I will check which SGID tests ran on my series.
-> 
-> Personally, I would rather defer THIS patch to a later post to stable
-> (Leah's patch as well) until we have a better understanding of the state
-> of SGID issues.
+> It wasn't my intention to fix syncfs() does not return errors in 5.10.
+> It has always been that way and IIRC, the relevant patches did not
+> apply cleanly.
+
+...because right now userspace can call syncfs() on a filesystem that
+dies in the process, and the VFS eats the EIO and returns 0 to
+userspace.  Yes, that's the historical behavior fo 5.10, but that's a
+serious problem that needs addressing.  Eliding the sync_filesystem call
+during a rw remount is not itself all that exciting.
+
+> THIS patch however, fixes something else, not only the return of the error
+> to its caller, so I thought it was worth backporting.
+
+Assuming "something else" means "moving the sync_filesystem callsite" --
+that was a secondary piece that I did to get the requisite RVB tag under
+time pressure after 5.17-rc6 dropped.
+
+> If you think otherwise, I'll drop it.
+
+On the contrary, I think the ->sync_fs fixes *also* need backporting.
+It should be as simple as patching __sync_filesystem:
+
+static int __sync_filesystem(struct super_block *sb, int wait)
+{
+	if (wait)
+		sync_inodes_sb(sb);
+	else
+		writeback_inodes_sb(sb, WB_REASON_SYNC);
+
+	if (sb->s_op->sync_fs) {
+		int ret = sb->s_op->sync_fs(sb, wait);
+		if (ret)
+			return ret;
+	}
+	return __sync_blockdev(sb->s_bdev, wait);
+}
+
+Granted, that can be a part of the next batch.  If you plan to pick up
+the vfs sync_fs changes then I guess this one's ok for inclusion now.
+
+--D
+
 > 
 > Thanks,
 > Amir.
-
-On the latest version of the SGID tests, I see failures of
-generic/68[3-7] and xfs/019 on both the baseline and backports branch.
-generic/673 fails on most configs for the baseline but seems to be fixed
-in the backports branch. Regardless, I am fine dropping this patch for
-this round.
-
-Best,
-Leah
