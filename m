@@ -2,190 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B03BCCA485
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 04:59:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E072C43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jun 2022 05:03:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357005AbiFVE7K (ORCPT
+        id S232254AbiFVFDt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Jun 2022 00:59:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45152 "EHLO
+        Wed, 22 Jun 2022 01:03:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47808 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357010AbiFVE7D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 00:59:03 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0FAD2981B;
-        Tue, 21 Jun 2022 21:59:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
-        :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=GyCCPoZj3PX6jdclZjF9+An2q71g86u7wcDPTJBoSnY=; b=Oht0ZuvNKZ+sS6OqK+hxBvoeCw
-        iuLsoUrXw8UKOIV8q/f1Zr/xR5aPoHHJpeP6jfGa9TFZ5znu3C9FcsdL4NQIc1ZMX2aAoBr7hi0eX
-        9JJpXPI9QD7IZpbHf0Jw+izyWwlM3CtpUQ9xAVU9MWOqmhlS2n8qpK4qTFLT2CxvKcRpV7gQd3sOM
-        f9w2qmS+yRDLB3kyiW2kOhLGbcoIfsJmpFcGHZ0SQviEXOy7TLfw2PYWiBvMpqAy9vs0fh849uL0n
-        XRhbOTxjN9eK3rop2vZ5y2HD8/CpmpsWAMQzGEPAkT+rprud6kYjcpxzRBVw6sXpjNUQykwFu0P9H
-        H2kF4AFQ==;
-Received: from 213-225-1-25.nat.highway.a1.net ([213.225.1.25] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1o3sSB-008WmL-Nz; Wed, 22 Jun 2022 04:59:00 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH 4/4] btrfs: test read repair on a corrupted compressed extent
-Date:   Wed, 22 Jun 2022 06:58:44 +0200
-Message-Id: <20220622045844.3219390-5-hch@lst.de>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20220622045844.3219390-1-hch@lst.de>
-References: <20220622045844.3219390-1-hch@lst.de>
+        with ESMTP id S229644AbiFVFDs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jun 2022 01:03:48 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6207D35876
+        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 22:03:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1655874224;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=qwnYaolPCbFLHrrxsgzmacvTKlppNFFiox70SA/o/Ds=;
+        b=EwlRltkL1VSD8KJDlXw+Rm5ybQjJY5EBydMaF2cDYPwk7NNZ+cj/Hh4Rq9hDIa8BJA1jas
+        s/49CS/qgQeOrCQpkD119X6ITkcPDU/Uxm6FwRKd9WRhVBvkkhgb30BJI/GvYqihbzg7bY
+        Xgc6wC8dhWa+E6qknynfx8ophzSrNms=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-575-5LpaRmBqPmCW-tu716_mxw-1; Wed, 22 Jun 2022 01:03:42 -0400
+X-MC-Unique: 5LpaRmBqPmCW-tu716_mxw-1
+Received: by mail-qv1-f69.google.com with SMTP id mr11-20020a056214348b00b004705c0cb439so2086660qvb.19
+        for <fstests@vger.kernel.org>; Tue, 21 Jun 2022 22:03:42 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=qwnYaolPCbFLHrrxsgzmacvTKlppNFFiox70SA/o/Ds=;
+        b=d9afyXq850hVpumDyM2LAxpq7XxjKysxtinhuHBR6Gba4457G7aI0vukVMX5lkcKfb
+         o1fyT80uixy2iDhYwePMGCgz7RsYo2pPL8D0AsHdj+bSYEb6WDjiYq0PPhngqyrdpCP8
+         ZvKJmTVuUznaXZAzpamuUmba535p9UlPJ/iQc3+0IGbKs14dHy+DAcaJtkrweegbSOuj
+         BssAhjuYe4osW176lze5Z5i1KbEVEierARSxCKOt+IwQMNce0l3oXbjibdRjxR4YxBuP
+         3Nu/ui/ubWglgGYNZFn94/SYxvYJ2Gqa+Z3F2yIm6IRDG37ilTqf3FdLEMuMf3W+MxH4
+         pMKA==
+X-Gm-Message-State: AJIora+EvZRFsNRnmkbquJB0io5o0lfMvLKGLmZ81en9UVt2tl5Icga1
+        A/MWbhUQDwxtMYPC6mdIb1GAQ67BpRgbnru3EB8meDnHYP2GcmL4QRIYMk16wGG99N9eQYwZqMC
+        505lchI5m+tORIO8Mgg==
+X-Received: by 2002:ac8:5996:0:b0:305:1041:372e with SMTP id e22-20020ac85996000000b003051041372emr1412322qte.520.1655874221163;
+        Tue, 21 Jun 2022 22:03:41 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1tDAe+rCgDw5UiaeG7Tw/L4JcUR8tZuH9Mf/Looo5S933KthbKqLrqAxMPHqBlFehhj2UtGwQ==
+X-Received: by 2002:ac8:5996:0:b0:305:1041:372e with SMTP id e22-20020ac85996000000b003051041372emr1412316qte.520.1655874220911;
+        Tue, 21 Jun 2022 22:03:40 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id j6-20020a05620a410600b006a6d3a6d597sm16958545qko.71.2022.06.21.22.03.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 21 Jun 2022 22:03:40 -0700 (PDT)
+Date:   Wed, 22 Jun 2022 13:03:35 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     David Disseldorp <ddiss@suse.de>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 4/6] report: fix xunit tests count
+Message-ID: <20220622050335.rdm3vfa3cnj2uxw7@zlang-mailbox>
+References: <20220620192934.21694-1-ddiss@suse.de>
+ <20220620192934.21694-5-ddiss@suse.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220620192934.21694-5-ddiss@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Exercise read repair on a corrupted compressed sector.
+On Mon, Jun 20, 2022 at 09:29:32PM +0200, David Disseldorp wrote:
+> The xunit "section report" provides a tests attribute, which according
+> to https://llg.cubic.org/docs/junit/ represents:
+> tests=""     <!-- The total number of tests in the suite, required. -->
+> 
+> The current value is generated as a sum of the $n_try and $n_notrun
+> counters. This is incorrect as the $n_try counter already includes tests
+> which are run but complete with _notrun.
+> One special case exists for $showme (check -n), where $n_try remains
+> zero, so $n_notrun can be used as-is.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/btrfs/270     | 79 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/270.out | 41 +++++++++++++++++++++++
- 2 files changed, 120 insertions(+)
- create mode 100755 tests/btrfs/270
- create mode 100644 tests/btrfs/270.out
+Thanks for fixing it. So the n_total of xunit report is wrong. I think this
+change won't affect anyone's regular testing, but just notice that if someone
+use the xunit report, especially depends on the n_total number.
 
-diff --git a/tests/btrfs/270 b/tests/btrfs/270
-new file mode 100755
-index 00000000..4229a02c
---- /dev/null
-+++ b/tests/btrfs/270
-@@ -0,0 +1,79 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
-+#
-+# FS QA Test 270
-+#
-+# Regression test for btrfs buffered read repair of compressed data.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick read_repair
-+
-+. ./common/filter
-+
-+_supported_fs btrfs
-+_require_btrfs_command inspect-internal dump-tree
-+_require_non_zoned_device "${SCRATCH_DEV}" # no overwrites on zoned devices
-+_require_scratch_dev_pool 2
-+_scratch_dev_pool_get 2
-+
-+get_physical()
-+{
-+	local logical=$1
-+	local stripe=$2
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+		grep $logical -A 6 | \
-+		$AWK_PROG "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /$stripe/) { print \$6 }"
-+}
-+
-+get_devid()
-+{
-+	local logical=$1
-+	local stripe=$2
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+		grep $logical -A 6 | \
-+		$AWK_PROG "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /$stripe/) { print \$4 }"
-+}
-+
-+get_device_path()
-+{
-+	local devid=$1
-+	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+}
-+
-+
-+echo "step 1......mkfs.btrfs"
-+_check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
-+_scratch_pool_mkfs "-d raid1 -b 1G" >>$seqres.full 2>&1
-+_scratch_mount -ocompress
-+
-+# Create a file with all data being compressed
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa -W -b 128K 0 128K" \
-+	"$SCRATCH_MNT/foobar" | _filter_xfs_io_offset
-+
-+logical_in_btrfs=$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
-+physical=$(get_physical ${logical_in_btrfs} 1)
-+devid=$(get_devid ${logical_in_btrfs} 1)
-+devpath=$(get_device_path ${devid})
-+
-+_scratch_unmount
-+echo "step 2......corrupt file extent"
-+echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
-+	>> $seqres.full
-+$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
-+
-+_scratch_mount
-+
-+echo "step 3......repair the bad copy"
-+_btrfs_buffered_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
-+
-+_scratch_unmount
-+
-+echo "step 4......check if the repair worked"
-+$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
-+	_filter_xfs_io_offset
-+
-+_scratch_dev_pool_put
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/270.out b/tests/btrfs/270.out
-new file mode 100644
-index 00000000..53a80692
---- /dev/null
-+++ b/tests/btrfs/270.out
-@@ -0,0 +1,41 @@
-+QA output created by 270
-+step 1......mkfs.btrfs
-+wrote 131072/131072 bytes
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+step 2......corrupt file extent
-+step 3......repair the bad copy
-+step 4......check if the repair worked
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+read 512/512 bytes
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--- 
-2.30.2
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> 
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> ---
+>  check         | 13 ++++++-------
+>  common/report | 14 +++++++++-----
+>  2 files changed, 15 insertions(+), 12 deletions(-)
+> 
+> diff --git a/check b/check
+> index 43c072d2..a5183d3a 100755
+> --- a/check
+> +++ b/check
+> @@ -430,13 +430,12 @@ _wrapup()
+>  	seq="check"
+>  	check="$RESULT_BASE/check"
+>  
+> -	if $showme; then
+> -		if $needwrap; then
+> -			if $do_report; then
+> -				_make_section_report
+> -			fi
+> -			needwrap=false
+> +	if $showme && $needwrap; then
+> +		if $do_report; then
+> +			# $showme = all selected tests are notrun (no tries)
+> +			_make_section_report "$n_notrun" "0" "$n_notrun"
+>  		fi
+> +		needwrap=false
+>  	elif $needwrap; then
+>  		if [ -f $check.time -a -f $tmp.time ]; then
+>  			cat $check.time $tmp.time  \
+> @@ -495,7 +494,7 @@ _wrapup()
+>  		fi
+>  		echo "" >>$tmp.summary
+>  		if $do_report; then
+> -			_make_section_report
+> +			_make_section_report "$n_try" "$n_bad" "$n_notrun"
+>  		fi
+>  		needwrap=false
+>  	fi
+> diff --git a/common/report b/common/report
+> index bf05afa9..84d9e0a7 100644
+> --- a/common/report
+> +++ b/common/report
+> @@ -49,9 +49,11 @@ _xunit_add_property()
+>  _xunit_make_section_report()
+>  {
+>  	# xfstest:section ==> xunit:testsuite
+> +	local tests_count="$1"
+> +	local bad_count="$2"
+> +	local notrun_count="$3"
+>  	local sect_name=$section
+>  	local sect_time=`expr $sect_stop - $sect_start`
+> -	local n_total=`expr $n_try + $n_notrun`
+>  
+>  	if [ $sect_name == '-no-sections-' ]; then
+>  		sect_name='global'
+> @@ -62,9 +64,8 @@ _xunit_make_section_report()
+>  	if [ -z "$date_time" ]; then
+>  		date_time=$(date +"%F %T")
+>  	fi
+> -	local dtime=`echo $date_time| tr  " " 'T'`
+> -	local stats="failures=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
+> -	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
+> +	local stats="failures=\"$bad_count\" skipped=\"$notrun_count\" tests=\"$tests_count\" time=\"$sect_time\""
+> +	local hw_info="hostname=\"$HOST\" timestamp=\"${date_time/ /T}\" "
+>  	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
+>  
+>  	# Properties
+> @@ -149,10 +150,13 @@ _xunit_make_testcase_report()
+>  #  Common report generator entry points
+>  _make_section_report()
+>  {
+> +	local tests_count="$1"
+> +	local bad_count="$2"
+> +	local notrun_count="$3"
+>  	for report in $REPORT_LIST; do
+>  		case "$report" in
+>  		"xunit")
+> -			_xunit_make_section_report
+> +			_xunit_make_section_report "$tests_count" "$bad_count" "$notrun_count"
+>  			;;
+>  		*)
+>  			_dump_err "format '$report' is not supported"
+> -- 
+> 2.35.3
+> 
 
