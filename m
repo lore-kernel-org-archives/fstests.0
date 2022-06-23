@@ -2,42 +2,43 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A2A2C43334
-	for <linux-fstests@archiver.kernel.org>; Thu, 23 Jun 2022 19:18:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D29B2CCA47F
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Jun 2022 19:26:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229464AbiFWTSE (ORCPT
+        id S230190AbiFWT0o (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 23 Jun 2022 15:18:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35286 "EHLO
+        Thu, 23 Jun 2022 15:26:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45172 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230222AbiFWTRo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 15:17:44 -0400
+        with ESMTP id S230518AbiFWT0R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 15:26:17 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A34E890985
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 11:22:22 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B0576809A;
+        Thu, 23 Jun 2022 11:43:45 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2CDFF61F92
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 18:22:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67C3AC3411B;
-        Thu, 23 Jun 2022 18:22:21 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DCBBE6202D;
+        Thu, 23 Jun 2022 18:43:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01E16C341C6;
+        Thu, 23 Jun 2022 18:43:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1656008541;
-        bh=xVOtUmrJRRkyn36thHXn77I8tP9kxx31GHjx/DP2XY8=;
+        s=k20201202; t=1656009824;
+        bh=8JGe9eNXEurDtGUIOyQMri1/phHvJdA0fNLSfBzS7mg=;
         h=From:To:Cc:Subject:Date:From;
-        b=NkNtC5RS54+pTj3Zt2XgCT2GiDkdYv9PJ/iGFyX7ZhifvMvVVSfpD0obvBrNf/Zs2
-         WiA74DhmG/PPOdFtgzwNE5sIZZ40pPB6h4hePsnsbXLni1dwaP14XGcavpDcRjfGS3
-         XeKKwDGlMlaRv8s+rQ94sAoZP4OgIj3bWJxGNHR3g/9d6ul5sMIX3zTZff+2cPYTM0
-         okIDLV5lh3bU59EKmCySwgGsdNErJFclrTorXLJXXPTwvGugVR6NycdGLrEG2lUUDJ
-         QnVaRkCKsSTYv03uAaXVi6X1u7FI8pQaVn8W3pviQBQ4dDVmL4sfCwbncLAMBMQxxW
-         JcLe49zdsyLPw==
+        b=VTJnq498YgKS82Dy0bbSmatOgnVDF5fX0zO6WkqQSxO7/cUtrNLUpUD3RYVr1HG+J
+         hNgnkknImrSSx0uXv5u4q8wD0M3lMFo9z1qU63P0jME7UnfngZV7BFs7RkdADI9rQm
+         yaYTneIIVB7GcYHU1ggRao+3v9HUJ74AKsGePil7zeQzeNZxTgwO8W0pEYsFBDMDxD
+         ILgq52EVJbuSmwlwxkdLKtd13f+lPc2JTE3x3QWoyWeqPPwZPhcLd77OMyzACzSAdW
+         mE3XkW3l8wn/cPzsnBfuik7KdC6d4v/vc3SqWveuKJaW+TxWJC/IKboN+Iwl90CZef
+         DcjBfA35q7OQw==
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: [xfstests-bld PATCH] {kvm,gce}-xfstests: fix the --update-xfstests-tar option
-Date:   Thu, 23 Jun 2022 11:21:31 -0700
-Message-Id: <20220623182131.210809-1-ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        Lukas Czerner <lczerner@redhat.com>
+Subject: [xfstests PATCH v2] ext4/053: test changing test_dummy_encryption on remount
+Date:   Thu, 23 Jun 2022 11:41:13 -0700
+Message-Id: <20220623184113.330183-1-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -47,75 +48,37 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Make --update-xfstests-tar work with the new directory organization.
+The test_dummy_encryption mount option isn't supposed to be settable or
+changeable via a remount, so add test cases for this.  This is a
+regression test for a bug that was introduced in Linux v5.17 and fixed
+in v5.19-rc3 by commit 85456054e10b ("ext4: fix up test_dummy_encryption
+handling for new mount API").
 
+Reviewed-by: Lukas Czerner <lczerner@redhat.com>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- run-fstests/gce-xfstests   | 2 +-
- run-fstests/kvm-xfstests   | 2 +-
- run-fstests/util/parse_cli | 6 ++----
- 3 files changed, 4 insertions(+), 6 deletions(-)
 
-diff --git a/run-fstests/gce-xfstests b/run-fstests/gce-xfstests
-index 0127509..baf1fb9 100755
---- a/run-fstests/gce-xfstests
-+++ b/run-fstests/gce-xfstests
-@@ -806,7 +806,7 @@ fi
- 
- if test -z "$NO_ACTION" -a "$UPDATE_XFSTESTS" = "yes"
- then
--    LOCAL_XFSTESTS="$DIR/../xfstests.tar.gz"
-+    LOCAL_XFSTESTS="$DIR/../fstests-bld/xfstests.tar.gz"
-     GS_XFSTESTS="gs://$GS_BUCKET/xfstests.tar.gz"
-     get_local_hash "$LOCAL_XFSTESTS"
-     get_remote_hash "$GS_XFSTESTS"
-diff --git a/run-fstests/kvm-xfstests b/run-fstests/kvm-xfstests
-index 10b90d8..db2fcdd 100755
---- a/run-fstests/kvm-xfstests
-+++ b/run-fstests/kvm-xfstests
-@@ -132,7 +132,7 @@ tar -c -f "$VDH" -T /dev/null
- 
- if test -z "$NO_ACTION" -a "$UPDATE_XFSTESTS" = "yes"
- then
--    tar -r -f $VDH -C "$DIR/.." xfstests.tar.gz
-+    tar -r -f $VDH -C "$DIR/../fstests-bld" xfstests.tar.gz
- fi
- 
- if test -z "$NO_ACTION" -a "$UPDATE_EXTRA_TESTS" = "yes"
-diff --git a/run-fstests/util/parse_cli b/run-fstests/util/parse_cli
-index 441170e..5848bf4 100644
---- a/run-fstests/util/parse_cli
-+++ b/run-fstests/util/parse_cli
-@@ -402,17 +402,15 @@ while (( $# >= 1 )); do
- 	    supported_flavors kvm gce
- 	    UPDATE_XFSTESTS_TAR=yes
- 	    UPDATE_XFSTESTS=yes
--	    UPDATE_XFSTESTS_DIR="$DIR/.."
- 	    ;;
- 	--update-xfstests)
- 	    supported_flavors kvm gce
--	    if ! test -f "$DIR/../xfstests.tar.gz"
-+	    if ! test -f "$DIR/../fstests-bld/xfstests.tar.gz"
- 	    then
- 		echo "The xfstests.tar.gz file has not been built!"
- 		exit 1
- 	    fi
- 	    UPDATE_XFSTESTS=yes
--	    UPDATE_XFSTESTS_DIR="$DIR/.."
- 	    ;;
- 	--update-files)
- 	    supported_flavors kvm gce
-@@ -1032,7 +1030,7 @@ fi
- find_kernel_to_use
- 
- if test -n "$UPDATE_XFSTESTS_TAR" ; then
--    (cd $DIR/.. ; ./gen-tarball --fast)
-+    (cd "$DIR/../fstests-bld" ; ./gen-tarball --fast)
- fi
- 
- if test -n "$PMEM_DEVICE" ; then
+v2: added info about fixing commit, and added a Reviewed-by tag
 
-base-commit: 3b4b532e7c82bb17dbe50cf30ff933554ebf28cb
+ tests/ext4/053 | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index 23e553c5..555e474e 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -685,6 +685,9 @@ for fstype in ext2 ext3 ext4; do
+ 		mnt test_dummy_encryption=v2
+ 		not_mnt test_dummy_encryption=bad
+ 		not_mnt test_dummy_encryption=
++		# Can't be set or changed on remount.
++		mnt_then_not_remount defaults test_dummy_encryption
++		mnt_then_not_remount test_dummy_encryption=v1 test_dummy_encryption=v2
+ 		do_mkfs -O ^encrypt $SCRATCH_DEV ${SIZE}k
+ 	fi
+ 	not_mnt test_dummy_encryption
+
+base-commit: 0882b0913eae6fd6d2010323da1dde0ff96bf7d4
 -- 
 2.36.1
 
