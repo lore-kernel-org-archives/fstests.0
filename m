@@ -2,118 +2,112 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFB42C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 23 Jun 2022 18:59:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6EC5C43334
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Jun 2022 19:13:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231731AbiFWS7f (ORCPT
+        id S230181AbiFWTNu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 23 Jun 2022 14:59:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46708 "EHLO
+        Thu, 23 Jun 2022 15:13:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230073AbiFWS7V (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 14:59:21 -0400
+        with ESMTP id S229915AbiFWTN3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 15:13:29 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6679AB8835
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 11:04:33 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D87D863636
+        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 11:17:49 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 247FAB82430
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 18:04:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC788C341C5;
-        Thu, 23 Jun 2022 18:04:30 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 797B6B824B8
+        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 18:17:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28A6BC3411B;
+        Thu, 23 Jun 2022 18:17:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1656007470;
-        bh=EGvCjkx3VRTPTkLveYpAokCFBRARjexMeXLUDQF+Spg=;
+        s=k20201202; t=1656008265;
+        bh=jIU8W+d7RPWvMvPlEiMseDP+rdN3k8og4YwRXnHtF1Y=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=tmzf7mQ3AcQDoHiYm6nwE5Xk/GLcUFhFEb2yIJ40CEhT1Yr71jNAuvHgwqgpcBkKb
-         28NGqL/YRh3odmFsaa+SYGcVtqbQp8pnGhZ9GdjC/DqCpGAaMDpaPQjrgIJsKd7/j6
-         y3Roe58pBCojn21sVpEargMO8oiqQURfKSDR9QSaECbFt1g2Q07v7wi0fxFbyw0eVv
-         7yw3rKPqnTcONa0rTSTWMxUM7HGceuySPIR2FVCmso07Qxp8vczPKVqj07l0tbMmGK
-         HwDNegObZyOQsvxaYXQEIFIho8TaD9Ljf8qWwTptb9/JMJzHj4VQk4K0/5DZgIqpu0
-         ldoU4vHWPHgYA==
-Date:   Thu, 23 Jun 2022 11:04:30 -0700
+        b=p4kPlvQ3lFq3wQoVdtGSgD+BgLAc+ylPROYBL8ueUxIO8KyaPNzNwpVmAdgEgIOHE
+         SaBaCRgQzxx8RpY7TaHRi5UPk4fvMrDkgiG3ymgCMmZR8cKp1Ry66/iMZDxi/XzME8
+         e4J9zb7JYooaXtbELpHU+0Zk7Fa70runKT+yAoF6TYIBhM2rhESmb5XMcf5eIqh23b
+         GMDhGs3O+knCht/WZl3iJDk8TBclZeJnBt70cshf3Sgg92OtBXZG87pabujJN8fFdf
+         3hf2YL8Wvt/3D4RrIJwzbddl0eg595g/irdbj6vgvRW0Lz24yvbSIhu+gSF8+std6+
+         XcR3yQLaQKA4A==
+Date:   Thu, 23 Jun 2022 11:17:44 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Zorro Lang <zlang@redhat.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Dave Chinner <david@fromorbit.com>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 3/4] xfs/{422,517}: add missing killall to _cleanup()
-Message-ID: <YrSrLgU1OIgaaxiB@magnolia>
-References: <20220619134657.1846292-1-amir73il@gmail.com>
- <20220619134657.1846292-4-amir73il@gmail.com>
- <CAOQ4uxj350-k2bzCSD_j35XCH5E-VcdtfHmW3d_ZrSzHxWA5CQ@mail.gmail.com>
+To:     An Long <lan@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] common/config: Fix use of MKFS_OPTIONS
+Message-ID: <YrSuSKLKA6LMjyf/@magnolia>
+References: <20220623160825.31788-1-lan@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxj350-k2bzCSD_j35XCH5E-VcdtfHmW3d_ZrSzHxWA5CQ@mail.gmail.com>
+In-Reply-To: <20220623160825.31788-1-lan@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 21, 2022 at 07:02:02AM +0300, Amir Goldstein wrote:
-> On Sun, Jun 19, 2022 at 4:47 PM Amir Goldstein <amir73il@gmail.com> wrote:
-> >
-> > Those tests failed to cleanup background jobs after test
-> > is interrupted.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >  tests/xfs/422 | 8 ++++++++
-> >  tests/xfs/517 | 1 +
-> >  2 files changed, 9 insertions(+)
-> >
-> > diff --git a/tests/xfs/422 b/tests/xfs/422
-> > index a83a66df..8e9a3576 100755
-> > --- a/tests/xfs/422
-> > +++ b/tests/xfs/422
-> > @@ -13,6 +13,14 @@ _begin_fstest dangerous_scrub dangerous_online_repair freeze
-> >
-> >  _register_cleanup "_cleanup" BUS
-> >
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +       $KILLALL_PROG -9 $XFS_IO_PROG $FSSTRESS_PROG > /dev/null 2>&1
-> > +       cd /
-> > +       rm -rf $tmp.*
-> > +}
-> > +
-> >  # Import common functions.
-> >  . ./common/filter
-> >  . ./common/fuzzy
-> > diff --git a/tests/xfs/517 b/tests/xfs/517
-> > index 961668e3..18404248 100755
-> > --- a/tests/xfs/517
-> > +++ b/tests/xfs/517
-> > @@ -14,6 +14,7 @@ _register_cleanup "_cleanup" BUS
-> >  # Override the default cleanup function.
-> >  _cleanup()
-> >  {
-> > +       $KILLALL_PROG -9 $XFS_IO_PROG $FSSTRESS_PROG > /dev/null 2>&1
+On Fri, Jun 24, 2022 at 12:08:25AM +0800, An Long wrote:
+> _scratch_mkfs_sized() only receive integer number of bytes as a valid
+> input. But if the MKFS_OPTIONS variable exists, it will use the value of
+> block size in MKFS_OPTIONS to override input. In case of
+> MKFS_OPTIONS="-b 4k", would result in blocksize=4 but not 4096. This
+> will give errors to ext2/3/4 etc, and brings potential bugs to xfs or
+> btrfs.
 > 
-> Besides the missing wait, this cleanup is still racy, because stress_loop
-> can spawn a new fstress process after killall /proc iteration.
+> Therefore, add validation check to force MKFS_OPTIONS to use pure
+> integer in bytes for any size value.
 > 
-> Worst, freeze_loop can freeze after killall /proc iteration.
+> Signed-off-by: An Long <lan@suse.com>
+> ---
+>  README        | 3 ++-
+>  common/config | 5 +++++
+>  2 files changed, 7 insertions(+), 1 deletion(-)
 > 
-> The correct solution (I think) is to record the pid of the XXX_loop
-> sub-shells and kill those, which should also solve the "Terminated"
-> false positive error.
-> 
-> Will give that a shot.
+> diff --git a/README b/README
+> index 80d148be..7c2d3334 100644
+> --- a/README
+> +++ b/README
+> @@ -241,7 +241,8 @@ Misc:
+>     this option is supported for all filesystems currently only -overlay is
+>     expected to run without issues. For other filesystems additional patches
+>     and fixes to the test suite might be needed.
+> -
+> + - If MKFS_OPTIONS is used, the size value must be an integer number of bytes
+> +   without units. For example, set MKFS_OPTIONS="-b 4096" but not "-b 4k".
 
-FWIW I already have patches reworking 422 and all the other
-scrub-related stress tests:
+IDGI.  mkfs.$FSTYP does its own input validation, which means that fstest
+runners are required to set MKFS_OPTIONS to something that mkfs will
+accept.  It's not the job of fstests to add /another/ layer of
+validation...
 
-https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=race-scrub-and-mount-state-changes
+>  ______________________
+>  USING THE FSQA SUITE
+>  ______________________
+> diff --git a/common/config b/common/config
+> index de3aba15..ec723ac4 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -896,5 +896,10 @@ else
+>  	fi
+>  fi
+>  
+> +# check the size value in $MKFS_OPTIONS is an integer
+> +if [[ $MKFS_OPTIONS =~ [0-9]+[^0-9\ ] ]] ; then
 
-I swear I'll send all these some day, if I ever get caught up...
-Delegating LTS maintenance is a big help, but as it is I still can't
-stay abreast of all the mainline patchsets /and/ send my own stuff. :(
+...because this regex will break /any/ MKFS_OPTIONS with a number
+followed by a letter.  mkfs.xfs handles units just fine, so I don't
+understand why you're adding this blunt instrument.
+
+MKFS_OPTIONS='-b size=1k' works just fine for XFS.
 
 --D
 
-> Thanks,
-> Amir.
+> +        _fatal "error: \$MKFS_OPTIONS: Only number in bytes is allowed, no units."
+> +fi
+> +
+>  # make sure this script returns success
+>  /bin/true
+> -- 
+> 2.35.3
+> 
