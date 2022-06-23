@@ -2,141 +2,127 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55FD2C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 23 Jun 2022 04:47:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 095F5C43334
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Jun 2022 05:31:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232983AbiFWErR (ORCPT
+        id S229455AbiFWFbs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 23 Jun 2022 00:47:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59164 "EHLO
+        Thu, 23 Jun 2022 01:31:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53480 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346096AbiFWEXD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 00:23:03 -0400
-Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD76013D71;
-        Wed, 22 Jun 2022 21:23:00 -0700 (PDT)
-Received: by mail-vs1-xe2d.google.com with SMTP id h38so11039113vsv.7;
-        Wed, 22 Jun 2022 21:23:00 -0700 (PDT)
+        with ESMTP id S229436AbiFWFbr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 01:31:47 -0400
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F11AD3A5E0;
+        Wed, 22 Jun 2022 22:31:42 -0700 (PDT)
+Received: by mail-vs1-xe29.google.com with SMTP id 184so4118325vsz.2;
+        Wed, 22 Jun 2022 22:31:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=pFrEfKD/U56o/sw4xb/sn32In6S7q3U8cJGbDDixPgY=;
-        b=b3iKzEoko0m0+QUSEgtkacmZvILMMfu0t5WZ1wXeqictTgV7tFFl1ijC7FEM5n8QEy
-         ru5/YaSUCWSrotCuK3bBYKjAZjWbjl6Gm0Lr4XQml1LPH4adhHBEyyPniopKzIw9Zpef
-         UyCDpvB+pZHH7eWNc2hV0DQagDnW/EmCmI67oKcJ6OifJ5AQRhLcifZ9J0rj4si8e+/O
-         2w7A7IeoWYJo2KVOvW4Jv8VcW248JQURK52fK6yPzt+RlCgrwIaKkfCtQWccdbsxWO8y
-         A8jjilGYwFD7S10f8iXOTT4HVsmc1fsFfR9MOIC/R+0hq04HU1+NFzZ+plSfy0dYQ5B1
-         nuSA==
+        bh=Jwsao8T1ShIZ3cq30KhHlFNF6ltOQKMqhnxaS2OFbEc=;
+        b=gA6b6dc8brGoirKyezfIwxcWm9do3q1eHf3n2sQ+LQh8HEDKGgklVA7KiO9vqnWw48
+         1/xErQnj6NZaH5vTpfLB//MdXNpn0gCi6M3Dpna6MBMKY4bXlSqH1INyvmOuNZO6sH5y
+         CJpiY3XIlp0jWkXIaY9X72Sk+JOqGXew7T7/1Q38u9Ekzz/4Qk4lxKBTaJoQBXxCTvlt
+         CKdkRk+p2GqhJAsqi/LfuJLofMbX/6ouujcnHVCGLUmQ/vadN/bpxCC+kCCVmMy7/Pwf
+         XFZ5yDjNAvMXgYc8hCFZ+eRRqj0arY8GFLDqeXdSslrsMHWtU9dIPqrGb1f0qJotbyQ5
+         uxyQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=pFrEfKD/U56o/sw4xb/sn32In6S7q3U8cJGbDDixPgY=;
-        b=W24T23uyPoS+lhG1/IOS9IxpTJ+6EFcthO4LSHXX12Nw1EuTgpbMae2/nenwnROPEj
-         YgEZbDe2mycMj1BsRaMvbn1RIV3Ydw5x49tMZa+S26aNFnUJ9zY16E4QSn2thUnOIFje
-         VZkx3YGE1S03tJuYU4jvenufjkqHSKxtjMQzQ42689pN/nDNEKXFcX0af7YymvXvNpsI
-         oNpIelhgmo+jY7UvwFMaX7/EzQoaVH0w6j4r3EPWwRjT7og7TgRoLswS5n+aAeIaMJq+
-         +dxneRF20h3HmOvupwpP44f+ls1GvzJvVHolA/Mdqxqy+r+wfqokBpd/YuXAXB7CXRdd
-         +DBg==
-X-Gm-Message-State: AJIora8fUHVsae2Zt/7mDeqATJRbLdX5CciFfg5erH7INAKFQ43vFl6w
-        Ow4VbAHeTFk14iY45J52+E4haMy9zy8v+n/CpI4=
-X-Google-Smtp-Source: AGRyM1sj5LCtfLVkgKK4rmsD3+s28YKetuf7RonC+1gz1hPVcnQMOux3s5yIh/F+jkFKQrqWUeKJ3yV6GJi0+pqRq9w=
-X-Received: by 2002:a67:fa01:0:b0:354:3136:c62e with SMTP id
- i1-20020a67fa01000000b003543136c62emr9478594vsq.2.1655958179784; Wed, 22 Jun
- 2022 21:22:59 -0700 (PDT)
+        bh=Jwsao8T1ShIZ3cq30KhHlFNF6ltOQKMqhnxaS2OFbEc=;
+        b=Ku8Z4gAkROWOkivVAJWMC0k6WJfVd2nfYjBoDbb2TOBod3LZJMdmQUng5YdlSAPAwo
+         qkaIiUlTg7nCCUmdzuyJ6N4YkMrGH5zAdmnbOTmDWZhPvlEDmT4V4bD+5weH6aQOC82T
+         wzPdjDJ7m04SNroe1OO84WrJqkeWwVH2sXQ8gSgzC3SZYiN3gSNz6hqYaps+lc/Y1wv9
+         EkZeSIuyYxa785KF2yvhWpqpX0+HMfDghD9GcIsnnWZmsbqS3bLaflgpBWlZ1EadlcJf
+         RvwZgu7w2huNsqUXskPuaRLEKPjfPGrHgRvnh7y5fjRA+pt8gDg50XF9G9eUc1Qa1s9a
+         WcsA==
+X-Gm-Message-State: AJIora+Kky1b/j8+2cdApRRkrJe1QsN2kywUi9w0oXlW/dTpSZuUfEHI
+        AQkuOQ3QPBNzVtV7Or7RgZPq34MaJ5Pd5HRonv4=
+X-Google-Smtp-Source: AGRyM1tL61W6Rzw7IdNnn4nNIgJgHg+Aj7Z9t7c8r2h8N0FfiEQItzLDCvjzgILSYhaQOSx5MONQV8fd9zRqmivUyI0=
+X-Received: by 2002:a05:6102:5dc:b0:354:63f1:df8d with SMTP id
+ v28-20020a05610205dc00b0035463f1df8dmr2955535vsf.72.1655962302101; Wed, 22
+ Jun 2022 22:31:42 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220617100641.1653164-1-amir73il@gmail.com> <20220617100641.1653164-12-amir73il@gmail.com>
- <YrNGJXYi2jQtPxs0@magnolia> <CAOQ4uxgXobea42K=WVyOhxxq+S=TA3RvLbxypKO02D9TZEgioA@mail.gmail.com>
- <YrOU/FPCEWkozAQI@google.com>
-In-Reply-To: <YrOU/FPCEWkozAQI@google.com>
+References: <20220616182749.1200971-1-leah.rumancik@gmail.com>
+ <YrJdLhHBsolF83Rq@bombadil.infradead.org> <YrONPrBgopZQ2EUj@mit.edu>
+In-Reply-To: <YrONPrBgopZQ2EUj@mit.edu>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 23 Jun 2022 07:22:48 +0300
-Message-ID: <CAOQ4uxgEXC1v=JceqCwbmsbTaYqh7XUQ3dB=C-nLag4-BB4ArA@mail.gmail.com>
-Subject: Re: [PATCH 5.10 CANDIDATE 11/11] xfs: use setattr_copy to set vfs
- inode attributes
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Dave Chinner <david@fromorbit.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Christian Brauner <christian.brauner@ubuntu.com>,
+Date:   Thu, 23 Jun 2022 08:31:30 +0300
+Message-ID: <CAOQ4uxiNncOAM6cLPia6VNbKz0nZ4vUx1GHnHAN44JRgC6q1ug@mail.gmail.com>
+Subject: Re: [PATCH 5.15 CANDIDATE v2 0/8] xfs stable candidate patches for
+ 5.15.y (part 1)
+To:     "Theodore Ts'o" <tytso@mit.edu>
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Leah Rumancik <leah.rumancik@gmail.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Chuck Lever <chuck.lever@oracle.com>, chandanrmail@gmail.com,
+        Sweet Tea Dorminy <sweettea-kernel@dorminy.me>,
+        Pankaj Raghav <pankydev8@gmail.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Dave Chinner <dchinner@redhat.com>,
-        Christian Brauner <brauner@kernel.org>
+        fstests <fstests@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 23, 2022 at 1:17 AM Leah Rumancik <leah.rumancik@gmail.com> wrote:
+> It's optimized for developers, and for our use cases.  I'm sure
+> kdevops is much more general, since it can work for hardware-based
+> test machines, as well as many other cloud stacks, and it's also
+> optimized for the QA department --- not surprising, since where
+> kdevops has come from.
 >
-> On Wed, Jun 22, 2022 at 09:36:53PM +0300, Amir Goldstein wrote:
-> > On Wed, Jun 22, 2022 at 7:41 PM Darrick J. Wong <djwong@kernel.org> wrote:
-> > >
-> > > On Fri, Jun 17, 2022 at 01:06:41PM +0300, Amir Goldstein wrote:
-> > > > From: "Darrick J. Wong" <djwong@kernel.org>
-> > > >
-> > > > commit e014f37db1a2d109afa750042ac4d69cf3e3d88e upstream.
-> > > >
-> > > > [remove userns argument of setattr_copy() for backport]
-> > > >
-> > > > Filipe Manana pointed out that XFS' behavior w.r.t. setuid/setgid
-> > > > revocation isn't consistent with btrfs[1] or ext4.  Those two
-> > > > filesystems use the VFS function setattr_copy to convey certain
-> > > > attributes from struct iattr into the VFS inode structure.
-> > > >
-> > > > Andrey Zhadchenko reported[2] that XFS uses the wrong user namespace to
-> > > > decide if it should clear setgid and setuid on a file attribute update.
-> > > > This is a second symptom of the problem that Filipe noticed.
-> > > >
-> > > > XFS, on the other hand, open-codes setattr_copy in xfs_setattr_mode,
-> > > > xfs_setattr_nonsize, and xfs_setattr_time.  Regrettably, setattr_copy is
-> > > > /not/ a simple copy function; it contains additional logic to clear the
-> > > > setgid bit when setting the mode, and XFS' version no longer matches.
-> > > >
-> > > > The VFS implements its own setuid/setgid stripping logic, which
-> > > > establishes consistent behavior.  It's a tad unfortunate that it's
-> > > > scattered across notify_change, should_remove_suid, and setattr_copy but
-> > > > XFS should really follow the Linux VFS.  Adapt XFS to use the VFS
-> > > > functions and get rid of the old functions.
-> > > >
-> > > > [1] https://lore.kernel.org/fstests/CAL3q7H47iNQ=Wmk83WcGB-KBJVOEtR9+qGczzCeXJ9Y2KCV25Q@mail.gmail.com/
-> > > > [2] https://lore.kernel.org/linux-xfs/20220221182218.748084-1-andrey.zhadchenko@virtuozzo.com/
-> > > >
-> > > > Fixes: 7fa294c8991c ("userns: Allow chown and setgid preservation")
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > Reviewed-by: Dave Chinner <dchinner@redhat.com>
-> > > > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > > > Reviewed-by: Christian Brauner <brauner@kernel.org>
-> > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > >
-> > > Same question as I posted to Leah's series -- have all the necessary VFS
-> > > fixes and whatnot been backported to 5.10?  Such that all the new sgid
-> > > inheritance tests actually pass with this patch applied? :)
-> >
-> > The only patch I backorted to 5.10 is:
-> > xfs: fix up non-directory creation in SGID directories
-> >
-> > I will check which SGID tests ran on my series.
-> >
-> > Personally, I would rather defer THIS patch to a later post to stable
-> > (Leah's patch as well) until we have a better understanding of the state
-> > of SGID issues.
-> >
-> > Thanks,
-> > Amir.
->
-> On the latest version of the SGID tests, I see failures of
-> generic/68[3-7] and xfs/019 on both the baseline and backports branch.
-> generic/673 fails on most configs for the baseline but seems to be fixed
-> in the backports branch. Regardless, I am fine dropping this patch for
-> this round.
 
-Let's do that then.
-I actually didn't plan to post this patch for this round to begin with.
-I only posted it because you did.
+[...]
+
+>
+> We also have a very different philosophy about how to use expunge
+> files.  In paticular, if there is test which is only failing 0.5% of
+> the time, I don't think it makes sense to put that test into an
+> expunge file.
+>
+> In general, we are only placing tests into expunge files when
+> it causes the system under test to crash, or it takes *WAAAY* too
+> long, or it's a clear test bug that is too hard to fix for real, so we
+> just suppress the test for that config for now.  (Example: tests in
+> xfstests for quota don't understand clustered allocation.)
+>
+> So we want to run the tests, even if we know it will fail, and have a
+> way of annotating that a test is known to fail for a particular kernel
+> version, or if it's a flaky test, what the expected flake percentage
+> is for that particular test.  For flaky tests, we'd like to be able
+> automatically retry running the test, and so we can flag when a flaky
+> test has become a hard failure, or a flaky test has radically changed
+> how often it fails.  We haven't implemented all of this yet, but this
+> is something that we're exploring the design space at the moment.
+>
+> More generally, I think competition is a good thing, and for areas
+> where we are still exploring the best way to automate tests, not just
+> from a QA department's perspective, but from a file system developer's
+> perspective, having multiple systems where we can explore these ideas
+> can be a good thing.
+>
+
+I very much agree with Ted on that point.
+
+As a user and big fan of both kdevops and fstests-bld I wouldn't
+want to have to choose one over the other, not even to choose
+a unified expunge list.
+
+I think we are still at a point where this diversity makes our ecosystem
+stronger rather than causing duplicate work.
+
+To put it in more blunt terms, the core test suite, fstests, is not
+very reliable. Neither kdevops nor fstests-bld address all the
+reliability issue (and they contribute some of their own).
+So we need the community to run both to get better and more
+reliable filesystem test coverage.
+
+Nevertheless, we should continue to share as much experience
+and data points as we can during this co-opetition stage in order to
+improve both systems.
 
 Thanks,
 Amir.
