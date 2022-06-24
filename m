@@ -2,108 +2,195 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A314C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 15:19:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7AF0C43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 15:27:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229888AbiFXPTG (ORCPT
+        id S232691AbiFXP1I (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Jun 2022 11:19:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59288 "EHLO
+        Fri, 24 Jun 2022 11:27:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229801AbiFXPTG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 11:19:06 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B1B2396B8
-        for <fstests@vger.kernel.org>; Fri, 24 Jun 2022 08:19:05 -0700 (PDT)
-Received: from letrec.thunk.org (c-24-1-67-28.hsd1.il.comcast.net [24.1.67.28])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25OFIwtZ017586
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 24 Jun 2022 11:18:59 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656083940; bh=sKrA1b93yDEk3tE4ymtqs0xXZkuLGbcUPkTnBWWgglo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=AgFh++NXS2ljLcjQLcs0UveH9sC5EYKIMYsWfp/fhwaKA7B2jqfpb20WMzeGuyuB9
-         QCiN0Brc2oqbMNRfZ0BxcKIGDg0MknuGKggD0yo41j9DkwVM11gXoN3pmVxCZUul/J
-         /p4H/zbZmeyNgWMFfY37uprO3svpWkhLac56iGhgME+AQSuNOWe2aRL6l6at8eTAqY
-         IS8BOP/VVU10/XuEEOWiCbrFZkyDppAqv0QZ9cuU/WdwL4Y7OuTlXv/HnGzdMxnDPI
-         FXBoJPtkoUGMIXMdTEM845jUDVleWSRbKDyRul6DzxLfDuud9BPqM25xJfYiuli0SA
-         Wn4nCPWnkYjpA==
-Received: by letrec.thunk.org (Postfix, from userid 15806)
-        id 64C5A8C3495; Fri, 24 Jun 2022 11:18:58 -0400 (EDT)
-Date:   Fri, 24 Jun 2022 11:18:58 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     David Disseldorp <ddiss@suse.de>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [RFC PATCH 0/2] add option to rerun failed tests
-Message-ID: <YrXV4lm4oqKDdl5F@mit.edu>
-References: <20220621160153.29591-1-ddiss@suse.de>
- <YrVAm6dzTUh3ufb6@mit.edu>
- <20220624103243.10188970@suse.de>
+        with ESMTP id S232771AbiFXP1F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 11:27:05 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DF840517EA
+        for <fstests@vger.kernel.org>; Fri, 24 Jun 2022 08:27:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656084423;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=SfxKYTjphbavSvBNYvCqznKhwv1Ip+H53mD+3pMhBRI=;
+        b=cdvZ9qWbm83cjlVd9LLBMAm5RZlziO6j82JdfYXVYT8b4zqVUIeY8As8D7Wf5360L6P5Dn
+        u/eGbpI+MjKtk2v0NkSZDq/MPUEZCrURXI6Npx5vL7L0bOWS7CKaZLOLB76OC0vYaRqJDj
+        CLW2EFZ2u1rSWtAHN/7ZiBQ8J7pq7hk=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-591-_uhp6Cl5O-6kQY0Nmyl45A-1; Fri, 24 Jun 2022 11:27:02 -0400
+X-MC-Unique: _uhp6Cl5O-6kQY0Nmyl45A-1
+Received: by mail-qk1-f200.google.com with SMTP id bm2-20020a05620a198200b006a5dac37fa2so2934239qkb.16
+        for <fstests@vger.kernel.org>; Fri, 24 Jun 2022 08:27:02 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=SfxKYTjphbavSvBNYvCqznKhwv1Ip+H53mD+3pMhBRI=;
+        b=LLJUoYVnhfi6ux+7xFXdUd4wdCGL+jIlbPj9Bezzx2Z/gp8qh4AByCn1UQDGAW4/bi
+         R/1U7T+xWjBnMDh8PqNFI8axqS2sRnK2BE1K3vPrCrE9xjObUJsoZ5N8VxFhpVGnpGsu
+         yOwDbekVnAFeuIsVQMkcXYfAEAGkMQ58gwS4F6Gs0PXpjgtCNNgJdi9e/Rq+U4++MPIX
+         JiSpXGnF/Hfm+KhIIgNW/3lmr5fKYeIEBFoKQ9a4ikGAhLat2TtzzMaNdwYa2krMFjfu
+         Fv5MSWKtayfRODdwS/HThVrkdOU6W+a8Yu07UVcYC+/RjbayeAhuY8qkAyevpA9aweHO
+         9c1g==
+X-Gm-Message-State: AJIora8KfexpRZuKBtCoveSf16Z3MM1jNDQBzOagngqRnFKuEbzqwgPU
+        eNe0oyEJWwnPYBmIfJMDH8FZvVBlVwTJ+shAjS6kgxtwpz79lNy76ZiZvD4Whf0jpq/SRwCQpWt
+        fGa2ON3oD0NcxP09ehdU5987oigwz4/B7YoFfroE9zFj6QHt2uJ04PryW8wlt5+mYSA==
+X-Received: by 2002:a05:620a:27d1:b0:6a7:5ab4:4e71 with SMTP id i17-20020a05620a27d100b006a75ab44e71mr10948976qkp.5.1656084421818;
+        Fri, 24 Jun 2022 08:27:01 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1uy+GLL6PCDvFeZyYse4xGEBynXNJ/iTcBYI2vzN2dG0frmVb6PsoH4mzXBNgr4mewmg65FEg==
+X-Received: by 2002:a05:620a:27d1:b0:6a7:5ab4:4e71 with SMTP id i17-20020a05620a27d100b006a75ab44e71mr10948949qkp.5.1656084421393;
+        Fri, 24 Jun 2022 08:27:01 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id r4-20020ac84244000000b00317ca023e33sm1120879qtm.80.2022.06.24.08.26.59
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 Jun 2022 08:27:00 -0700 (PDT)
+Date:   Fri, 24 Jun 2022 23:26:56 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/3] fstests: add missing _require_freeze() to tests
+Message-ID: <20220624152656.lz3dnufxy3mla4m7@zlang-mailbox>
+References: <20220621173729.2135249-1-amir73il@gmail.com>
+ <20220621173729.2135249-2-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220624103243.10188970@suse.de>
+In-Reply-To: <20220621173729.2135249-2-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 24, 2022 at 10:32:43AM +0200, David Disseldorp wrote:
-> Yes, I forgot to mention that, sorry. As Zorro indicated, these were
-> done atop the v2022.06.12 tag with the following series applied:
-> https://lore.kernel.org/fstests/20220620192934.21694-1-ddiss@suse.de/
-
-Got it, thanks.  Sorry, I had forgotten that we had the next branch now.
-
-I'll try to do a full review once I'm able to give the patches a spin.
-
-> > <testcase classname="xfstests.global" name="generic/476" time="354">
-> > 		<failure message="Test  failed, reason unknown" type="TestFail" />
-> > 		<system-out>
-> > 		...
-> > 	</testcase>
-> > <testcase classname="xfstests.global" name="generic/476" time="343">
-> > 	</testcase>
-> > <testcase classname="xfstests.global" name="generic/476" time="353">
-> > 	</testcase>
-> > 	...
+On Tue, Jun 21, 2022 at 08:37:27PM +0300, Amir Goldstein wrote:
+> And add a few tests that use freeze to the freeze group
 > 
-> That seems sensible, I'll add this functionality.
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-I *think* that should happen automatically when _make_testcase_report
-gets called after each iteration.  So that might be easier than having
-to do any kind of special case handling.  (Which is why that was going
-to be how I was planning on tackling it before you went ahead and
-implemented --- thanks for that!!)
+Although there were some different points about if "318, 325, 422, 438"
+should be in freeze group, I don't mind having them in freeze group personally.
+So ...
 
-> > As far as haivng the .bad and .full files, I agree that some kind of
-> > .rerun-NN suffix would make a lot of sense.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/xfs/119 | 1 +
+>  tests/xfs/318 | 3 ++-
+>  tests/xfs/325 | 3 ++-
+>  tests/xfs/422 | 3 ++-
+>  tests/xfs/438 | 2 +-
+>  tests/xfs/517 | 1 +
+>  6 files changed, 9 insertions(+), 4 deletions(-)
 > 
-> I had a bit of a play with this and it does get a bit ugly if we want to
-> prefix things like .dmesg as well. The xunit rerun entries will already
-> capture everything, but I suppose it's still needed for those not using
-> xunit reports.
+> diff --git a/tests/xfs/119 b/tests/xfs/119
+> index a1180371..b6f96601 100755
+> --- a/tests/xfs/119
+> +++ b/tests/xfs/119
+> @@ -20,6 +20,7 @@ _begin_fstest log v2log auto freeze
+>  _supported_fs xfs
+>  
+>  _require_scratch
+> +_require_freeze
+>  
+>  # this may hang
+>  sync
+> diff --git a/tests/xfs/318 b/tests/xfs/318
+> index 38c7aa60..be93f9ab 100755
+> --- a/tests/xfs/318
+> +++ b/tests/xfs/318
+> @@ -7,7 +7,7 @@
+>  # Simulate free extent errors with a file write and a file remove.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick rw
+> +_begin_fstest auto quick rw freeze
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> @@ -26,6 +26,7 @@ _supported_fs xfs
+>  _require_scratch
+>  _require_error_injection
+>  _require_xfs_io_error_injection "rmap_finish_one"
+> +_require_freeze
+>  
+>  blksz=65536
+>  blks=64
+> diff --git a/tests/xfs/325 b/tests/xfs/325
+> index 5b26b2b3..c6861fbc 100755
+> --- a/tests/xfs/325
+> +++ b/tests/xfs/325
+> @@ -8,7 +8,7 @@
+>  # Inject an error during extent freeing to test log recovery.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick clone
+> +_begin_fstest auto quick clone freeze
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> @@ -29,6 +29,7 @@ _require_cp_reflink
+>  _require_scratch_reflink
+>  _require_error_injection
+>  _require_xfs_io_error_injection "free_extent"
+> +_require_freeze
+>  
+>  blksz=65536
+>  blks=30
+> diff --git a/tests/xfs/422 b/tests/xfs/422
+> index 175253aa..a83a66df 100755
+> --- a/tests/xfs/422
+> +++ b/tests/xfs/422
+> @@ -9,7 +9,7 @@
+>  # activity, so we can't have userspace wandering in and thawing it.
+>  #
+>  . ./common/preamble
+> -_begin_fstest dangerous_scrub dangerous_online_repair
+> +_begin_fstest dangerous_scrub dangerous_online_repair freeze
+>  
+>  _register_cleanup "_cleanup" BUS
+>  
+> @@ -24,6 +24,7 @@ _require_xfs_scratch_rmapbt
+>  _require_xfs_io_command "scrub"
+>  _require_xfs_io_error_injection "force_repair"
+>  _require_command "$KILLALL_PROG" killall
+> +_require_freeze
+>  
+>  echo "Format and populate"
+>  _scratch_mkfs > "$seqres.full" 2>&1
+> diff --git a/tests/xfs/438 b/tests/xfs/438
+> index c3008b1c..cfe75bd8 100755
+> --- a/tests/xfs/438
+> +++ b/tests/xfs/438
+> @@ -21,7 +21,7 @@
+>  # Fixed by upstream commit 373b058 ("xfs: Properly retry failed dquot
+>  # items in case of error during buffer writeback")
+>  . ./common/preamble
+> -_begin_fstest auto quick quota
+> +_begin_fstest auto quick quota freeze
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/xfs/517 b/tests/xfs/517
+> index 88c4f43b..f7f9a8a2 100755
+> --- a/tests/xfs/517
+> +++ b/tests/xfs/517
+> @@ -29,6 +29,7 @@ _supported_fs xfs
+>  _require_xfs_scratch_rmapbt
+>  _require_xfs_io_command "fsmap"
+>  _require_command "$KILLALL_PROG" killall
+> +_require_freeze
+>  
+>  echo "Format and populate"
+>  _scratch_mkfs > "$seqres.full" 2>&1
+> -- 
+> 2.25.1
+> 
 
-Well, actually, one of the things on my TODO list was to implement a
-new report type which would removed the xunit <system-out> fields from
-the xunit file.  The reason behind that is sometimes the the
-NNN.out.bad files can get huge --- and the Python library for parsing
-junit XML files has a safety mechanism which will error out if a field
-is larger than 10MB, to prevent some denial of service attacks.  And
-I've had some XFS NNN.out.bad files get to be 30MB or larger!
-
-When that happens, it causes the Python script I use to parse the XML
-file to fail.  In addition, since I already have a different mechanism
-for saving the full set of test artifiacts ---- sometimes having the
-NNN.full file is really useful for root causing the failure --- having
-two copies of the out.bad files in both the Xunit file and in my test
-artifacts tarball is a bit of a waste.
-
-I had a POC which implemented this, but then Darrick had a feature
-request, since for his workflow, it would be useful if saved only the
-first N lines and last N lines in the xunit file, since that's
-typically sufficient to figure out what's going on.  And I haven't had
-a chance to get back to it.
-
-						- Ted
