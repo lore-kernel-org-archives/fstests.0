@@ -2,144 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 852C1CCA47F
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 04:37:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F3AEC43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 04:42:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229441AbiFXEhH (ORCPT
+        id S229497AbiFXEmM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Jun 2022 00:37:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39774 "EHLO
+        Fri, 24 Jun 2022 00:42:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42482 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229478AbiFXEhF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 00:37:05 -0400
-Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 611F662710
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 21:37:04 -0700 (PDT)
-Received: by mail-vs1-xe2f.google.com with SMTP id k25so1274154vso.6
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 21:37:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=NZm/7Iwh8Qs+Tyui3O/c8yCGaWI5PyUfL6vkmYB/hRg=;
-        b=X1Kc2/S3Mowu2d1x3X8zDoF3j0qdq77kkMJLtxHjKYVp7tu8GujsP6cmdpWLCdyInN
-         ZifwTvEMIZHRFvrM6JRFvzfhFhK0rYImsOZ9FlrQCGle2HMysKtR9neisV7AgbS4G/dI
-         rQ6IUnJ8CInh72LdRrqsiR1cjgRSk00zkiT/K6qzRFEa0DHLF8cksv4S2gVMiMqftZfy
-         Uq3GrhAwJOEiJz0dlggU7cMxFDikwjw7uKj1aUHAaW57PiDUdWy3xmMJwqLyY0EuzqkD
-         nGXF0hSzh3CGbYU2othBVaOiMAgYjW1DJ8rg64QXRiS7JH3+lvuf98hTXkAUuE+80QIT
-         8kFQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=NZm/7Iwh8Qs+Tyui3O/c8yCGaWI5PyUfL6vkmYB/hRg=;
-        b=DrXUuh0FyZy74K15iVak0NDu+/4f+ZqP6vBcVmLpFYm+GdLbCktkAxtuqjyahMi5m8
-         Jf4SCsIL4t8AmoNGb3T21/DElleFooCtt3HIzvgv7sucU3dvKefRtifaQd+VjHKJFO98
-         B4bTsTurQKdTxjLtcxmrlA4bR0GLzVADh1Ip7XxPbaNWZnYuDwHSSplJLGR/BN6tWwor
-         soqb3wbQtYtVW3zwW++eW2/rMBL6Z1Qe0tdP3J6VhKWl1sZmerfSV89nN13fHZ+ICdiR
-         BrDqajR02tHQKS4IIqXstWyelaoaDNfhOBwyh0sW33aE/i60fTafFDRT6qmvUb2eL+Qs
-         0zHA==
-X-Gm-Message-State: AJIora+KjnB1kXi4+ldtv45j8/RE5Vl2RUEv60QIGUYCp34FPdECDR7R
-        7pBISWtTNotcVXQF9/TIAbwnPS9QBqbE9Ymanho=
-X-Google-Smtp-Source: AGRyM1uReLXYTh2YcOt05gkA8bZqf+nNJeOwwo7C318R3/lpA7S43dwsVhK9vHonpKU6H1nXqx++0BNuUy8+ioIgzrI=
-X-Received: by 2002:a67:fa01:0:b0:354:3136:c62e with SMTP id
- i1-20020a67fa01000000b003543136c62emr12822809vsq.2.1656045423456; Thu, 23 Jun
- 2022 21:37:03 -0700 (PDT)
+        with ESMTP id S229478AbiFXEmK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 00:42:10 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BCAB680AA
+        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 21:42:09 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25O4g4xX007086
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 24 Jun 2022 00:42:05 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1656045725; bh=LA69DI+gXKlJehPYLEpnzvpak9m1zQ3/ZzHaLtnXk08=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=m7UvezJ2KjxS9QMq9Rxf1XAzfOjTPbmmbLE3xTRwxjvNxdA7lJkAGc1knfn9fhWmb
+         tuHwzxJLeL4tgHMR5X1nxIg8/eJBsxosWxRcovV45sH5R3s2JRAozghE7Y/005K92Z
+         eSAF5eVnglZkyNS1SLmJhfpi61b/nb2cYP0aEcvnvMw1Zi0bvCsrMiA5q1+OlZkJga
+         oLXx7YqKS6lZp+rgBltdyXD7dGhvXzwpFbWZkCcf4b9M49Y8xtOIfY5YKTdB6j80Zp
+         xfhmVtGcuWvC1lGFIroCQMIFt3hcMYbMaSibYlUwxoHw0uMlEEzNK4dlWJyyaBPELO
+         zGXWY5bdSk/tg==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 00F3315C42F6; Fri, 24 Jun 2022 00:42:03 -0400 (EDT)
+Date:   Fri, 24 Jun 2022 00:42:03 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     David Disseldorp <ddiss@suse.de>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [RFC PATCH 0/2] add option to rerun failed tests
+Message-ID: <YrVAm6dzTUh3ufb6@mit.edu>
+References: <20220621160153.29591-1-ddiss@suse.de>
 MIME-Version: 1.0
-References: <20220619134657.1846292-1-amir73il@gmail.com> <20220619134657.1846292-4-amir73il@gmail.com>
- <CAOQ4uxj350-k2bzCSD_j35XCH5E-VcdtfHmW3d_ZrSzHxWA5CQ@mail.gmail.com> <YrSrLgU1OIgaaxiB@magnolia>
-In-Reply-To: <YrSrLgU1OIgaaxiB@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 24 Jun 2022 07:36:51 +0300
-Message-ID: <CAOQ4uxiyWnLFe95YXQ-xzYyK4D50-6pbqpduyZZzttvuXvVETg@mail.gmail.com>
-Subject: Re: [PATCH 3/4] xfs/{422,517}: add missing killall to _cleanup()
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>,
-        "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Dave Chinner <david@fromorbit.com>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220621160153.29591-1-ddiss@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 23, 2022 at 9:04 PM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> On Tue, Jun 21, 2022 at 07:02:02AM +0300, Amir Goldstein wrote:
-> > On Sun, Jun 19, 2022 at 4:47 PM Amir Goldstein <amir73il@gmail.com> wrote:
-> > >
-> > > Those tests failed to cleanup background jobs after test
-> > > is interrupted.
-> > >
-> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > > ---
-> > >  tests/xfs/422 | 8 ++++++++
-> > >  tests/xfs/517 | 1 +
-> > >  2 files changed, 9 insertions(+)
-> > >
-> > > diff --git a/tests/xfs/422 b/tests/xfs/422
-> > > index a83a66df..8e9a3576 100755
-> > > --- a/tests/xfs/422
-> > > +++ b/tests/xfs/422
-> > > @@ -13,6 +13,14 @@ _begin_fstest dangerous_scrub dangerous_online_repair freeze
-> > >
-> > >  _register_cleanup "_cleanup" BUS
-> > >
-> > > +# Override the default cleanup function.
-> > > +_cleanup()
-> > > +{
-> > > +       $KILLALL_PROG -9 $XFS_IO_PROG $FSSTRESS_PROG > /dev/null 2>&1
-> > > +       cd /
-> > > +       rm -rf $tmp.*
-> > > +}
-> > > +
-> > >  # Import common functions.
-> > >  . ./common/filter
-> > >  . ./common/fuzzy
-> > > diff --git a/tests/xfs/517 b/tests/xfs/517
-> > > index 961668e3..18404248 100755
-> > > --- a/tests/xfs/517
-> > > +++ b/tests/xfs/517
-> > > @@ -14,6 +14,7 @@ _register_cleanup "_cleanup" BUS
-> > >  # Override the default cleanup function.
-> > >  _cleanup()
-> > >  {
-> > > +       $KILLALL_PROG -9 $XFS_IO_PROG $FSSTRESS_PROG > /dev/null 2>&1
-> >
-> > Besides the missing wait, this cleanup is still racy, because stress_loop
-> > can spawn a new fstress process after killall /proc iteration.
-> >
-> > Worst, freeze_loop can freeze after killall /proc iteration.
-> >
-> > The correct solution (I think) is to record the pid of the XXX_loop
-> > sub-shells and kill those, which should also solve the "Terminated"
-> > false positive error.
-> >
-> > Will give that a shot.
->
-> FWIW I already have patches reworking 422 and all the other
-> scrub-related stress tests:
->
-> https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=race-scrub-and-mount-state-changes
->
+On Tue, Jun 21, 2022 at 06:01:51PM +0200, David Disseldorp wrote:
+> This RFC patchset adds support to loop on failed tests, as proposed by
+> Ted Ts'o in https://lwn.net/Articles/897061/:
+>   add a mode that will immediately rerun a failed test 25 or 100 times
+>   to establish a failure percentage.
+> 
+> There are a couple of things which I'd like to resolve before dropping
+> the RFC flag, but would appreciate early feedback on the approach here.
 
-That looks very nice.
-The cleanup looks very similar to the one I posted for v2,
-but instead of "killall xfs_io fsstress" you would be better off with
-"kill  $__SCRUB_STRESS_FREEZE_PID"
+This is really exciting!  I was hoping to try it out, but the first
+patch doesn't apply to origin/master on xfstests-dev.
 
-killing the child process and waiting for its parent bash
-process has the side effect of the bash parent emitting
-"Terminated" or "Killed" message with breaks golden output
-if the inner loop did not already exit, which is the behavior
-that got me started on doing this cleanup.
+For example this patch hunk:
 
-> I swear I'll send all these some day, if I ever get caught up...
-> Delegating LTS maintenance is a big help, but as it is I still can't
-> stay abreast of all the mainline patchsets /and/ send my own stuff. :(
->
+@@ -729,9 +750,7 @@ function run_section()
+ 	prev_seq=""
+ 	for seq in $list ; do
+ 		# Run report for previous test!
+-		if [ "$tc_status" == "fail" ]; then
+-			bad+=("$seqnum")
+-		fi
++		_stash_test_status "$seqnum" "$tc_status"
+ 		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
+ 			_make_testcase_report "$prev_seq" "$tc_status"
+ 		fi
 
-I will respond to that in another email.
+The relevant section of check looks like this:
 
-Thanks,
-Amir.
+		# Run report for previous test!
+		if $err ; then
+			bad="$bad $seqnum"
+			n_bad=`expr $n_bad + 1`
+			tc_status="fail"
+		fi
+
+And "git blame" shows that this part of check hasn't changed since
+2018, and I'm on the latest version upstream version of xfstests:
+
+commit 568ac9fffeb6afec03e5d6c9936617232fd7fc6d (HEAD, tag: v2022.06.05, origin/master, origin/HEAD, kernel/master)
+Author: Dave Chinner <dchinner@redhat.com>
+Date:   Fri Jun 3 11:54:13 2022 +1000
+
+    xfs/189: systemd monitoring of /etc/fstab sucks
+
+
+Was your patch based xfstests with some out-of-tree patches?
+
+> The caveats are:
+> - rerun tests will be tracked as a single failure in @try and @bad
+>   + xunit reports do not include any rerun details
+> - .bad files generated on failure will be overwritten by test reruns
+> 
+> For xunit reports, I think it'll make sense to stash the aggregates in a
+> separate <test>.agg-results file or something. Similarly for .bad file
+> overwrites, I could add a .<rerun #> suffix for capturing all failure
+> data.
+
+For xunit results fie, was assuming that simply we would just have
+multiple repeated testcase entries stored in the single results.xml
+file.  For example:
+
+<testcase classname="xfstests.global" name="generic/476" time="354">
+		<failure message="Test  failed, reason unknown" type="TestFail" />
+		<system-out>
+		...
+	</testcase>
+<testcase classname="xfstests.global" name="generic/476" time="343">
+	</testcase>
+<testcase classname="xfstests.global" name="generic/476" time="353">
+	</testcase>
+	...
+
+I don't know that we need a separate file for the rerun tests, since
+it's not that hard to create a python script which parses the results
+and calculates the pass/fail percentages for any test which is run
+mutiple times.
+
+
+As far as haivng the .bad and .full files, I agree that some kind of
+.rerun-NN suffix would make a lot of sense.
+
+Cheers,
+
+						- Ted
