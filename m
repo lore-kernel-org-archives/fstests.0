@@ -2,185 +2,223 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0B7DC43334
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 02:41:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A766EC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 03:29:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229547AbiFXCls (ORCPT
+        id S229480AbiFXD3t (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 23 Jun 2022 22:41:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59812 "EHLO
+        Thu, 23 Jun 2022 23:29:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229571AbiFXClr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 22:41:47 -0400
-Received: from mail105.syd.optusnet.com.au (mail105.syd.optusnet.com.au [211.29.132.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 800F35674A
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 19:41:44 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id C6E8D10E7833;
-        Fri, 24 Jun 2022 12:41:42 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1o4ZGP-00AKh9-98; Fri, 24 Jun 2022 12:41:41 +1000
-Date:   Fri, 24 Jun 2022 12:41:41 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     An Long <lan@suse.com>, fstests@vger.kernel.org
+        with ESMTP id S229457AbiFXD3s (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Jun 2022 23:29:48 -0400
+Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2068.outbound.protection.outlook.com [40.107.22.68])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BAFE550E26
+        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 20:29:46 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=QYJ7CWsreya4/nEXS+w4DI3/stmviyas23PyBA3Kj2U4fCM3DFguUKZtpOxOJmCtSHs4THJxHdguNiLMHqD/07LEk6lGvtOaj3tC/NLDK3UK3mW8mp3a0Lr8nlQ2PsE0mg0vSPMz3k/PWKTaNj9/WVt0/eGKT6IonCrNI9fCRJaenrVE5AL2fmy5fJITKZpTIel+3hvRa/jYaAmirBnonMECaLhkApC0Na9bEeDbDB4nznNfu+ayxUISQGm0pQ0QL8Hmn7rIlZnl9bTThHUWiuhUjnY3QDcwMfCK2rB2KK5peEayPustDuMejI5osQpltvVL3mEoxk4wb3ydM7NQXQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=69Jp83CNAJo1kuxXMw/idnxvVdvdoRWfkszyZJs+N80=;
+ b=FZa4R6/5OcSLSgatBZwRM+FnqMGd5k2+ZJzo7PFXrkv5dI0QK1ZJLXDlmxFPNGroCRqSrPFqY6XH6ehqLVIV8H8kjNm90BfG8jbF0KOZwFmQIf4t8PiIOoGOqNWofjG8ofqqBWUTNdDijOcvhDN0J5Ci2ncFgrNRqftOkp5ffUdQRIqEJf27KbQCdj3vDe3Fq+tshUgeEayoUw7yiIw8XetY2YzPTGKfIBw1d6DAzoWwZjhF7xgbIa6Vo3cSnfPyKP7eQn/Q/+HrIli2FahY4azRulZ1UCFSVigUkU7F+/ADU4SSPsVvTFHScPa42x7t9JIkaOErba6QBe8BD0E96g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=69Jp83CNAJo1kuxXMw/idnxvVdvdoRWfkszyZJs+N80=;
+ b=2LVQdss/59OfKqw1hKTPpeTh5DtKmmJGyMkJDlk4ME55dIH2EitQgnuqLYmJeypFZJVJEb1W+8JyNkV2WjYR4mU42Eccb4+rCDOy1BG8aUkFbnuf4dNUHjsZFbwZcPs3zgZS8LNoV5o9i0xZRfInttq1rp3tHcBIchE10x8pVAk6udFXzFqWhbTjqrL3xQ+JQpqTg4UuKCK8jMNG4Y1lByD9Ihb5EY7W9UZIvm4CujKXpLLop7SDsnTH5WjrXBBjHzfJXpYuB0M6NfQRui+CdItsg2tDlLYOW5Fwguy6ptyCaKRjCMA6T1bdEqXpCA9pt3LsElBR2ggW8T5f7w+tCw==
+Received: from VI1PR0401MB2671.eurprd04.prod.outlook.com
+ (2603:10a6:800:55::10) by PAXPR04MB8143.eurprd04.prod.outlook.com
+ (2603:10a6:102:1c4::7) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5373.15; Fri, 24 Jun
+ 2022 03:29:43 +0000
+Received: from VI1PR0401MB2671.eurprd04.prod.outlook.com
+ ([fe80::35ba:f1ca:dbc9:b5b5]) by VI1PR0401MB2671.eurprd04.prod.outlook.com
+ ([fe80::35ba:f1ca:dbc9:b5b5%9]) with mapi id 15.20.5373.015; Fri, 24 Jun 2022
+ 03:29:43 +0000
+From:   Long An <lan@suse.com>
+To:     "david@fromorbit.com" <david@fromorbit.com>,
+        "djwong@kernel.org" <djwong@kernel.org>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 Subject: Re: [PATCH] common/config: Fix use of MKFS_OPTIONS
-Message-ID: <20220624024141.GI1098723@dread.disaster.area>
-References: <20220623160825.31788-1-lan@suse.com>
- <YrSuSKLKA6LMjyf/@magnolia>
+Thread-Topic: [PATCH] common/config: Fix use of MKFS_OPTIONS
+Thread-Index: AQHYhxt8ltQeiatyoki7h1m/SsZ6La1dTNkAgACMzoCAAA1GAA==
+Date:   Fri, 24 Jun 2022 03:29:43 +0000
+Message-ID: <d7d49af51014829438bab8c30da3f8c2e5fedd1d.camel@suse.com>
+References: <20220623160825.31788-1-lan@suse.com>        <YrSuSKLKA6LMjyf/@magnolia>
+ <20220624024141.GI1098723@dread.disaster.area>
+In-Reply-To: <20220624024141.GI1098723@dread.disaster.area>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=suse.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 40844704-ebae-4c52-ffb9-08da5591c7a8
+x-ms-traffictypediagnostic: PAXPR04MB8143:EE_
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: NOc7qTA7LgPcmHWeYRsSNLtQC1cYfNSA3+eWocuWafYG+wvfKSa5PDOIr/k5dtvziLp531jIzedTZk4w3eVFHOasQL1lEEaVGZtg1dJx4/YHcOBf2eSPgJL1p+j8PU6vwUJ2dG7cZYOzwKhvU8OT/s/FMLygwY2OzJLlccpYj46EbXcf2l4nZtp04w87xcDYXA0zVEm2diOOUR9LpChsCD/JpLi4ulZE6Dm1X4FrT/Zf31+3G5Ny9ZimYn9xTZ8k5jC9C3D0aqPr/DGq1X6jPJcaoHpqJGVUphA2RLvrWfYk6Mcq3b5RjbuIaiAviBRbwRUtGdFrmCPeRXg1usZB92sXcdqAPKAZ5/UlnmEvbFjgbyu+O4wZGrgF6QdxFeJbtdzhMs2PficyWQVEG40+oLq1SVE16txP7CzV8xiQRVTV8aokATUJlwWL2HLiNP4GGcE7RMDWkiPgoSXGBNtSLwo33pXmx5othEKlfEzR43H5OqRQ33HAjn9CbyvYWmX1WAUjUJc3gHHj0Hss8mcKiRVpGpUkUijbE00ito2Ilx+QN69OO6Dd7FB1LuhVDbFQMnuzrQshRHrS+UAghDYiYw1cgcdt8sMO5MTIr7IzMLoIKK8jwFEeMZNkhU+5yon7Q09DUs9hlu0KgRer/EdsZkFSHhD/ES2VCZfUbVtx3DFmcGkCeQthdnLjmxnM17st/JumKFaL/W0ov93fO7EYsETETANDCwA3EGxRqrCHTNrOyuqVtIRMk1PfuNMv4HjXQFWHFARywhCcwji1flrQh4TwBE3SUNsSUZMkAAiPvM+XPTQUm1Bf/0HA2CO8GgIEwe0Fp96Sxv18L2w864ujXw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR0401MB2671.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(396003)(376002)(346002)(39860400002)(136003)(366004)(66446008)(6506007)(6512007)(966005)(91956017)(6486002)(8676002)(66946007)(66556008)(83380400001)(2906002)(38100700002)(5660300002)(478600001)(86362001)(71200400001)(316002)(38070700005)(8936002)(41300700001)(2616005)(186003)(4326008)(64756008)(110136005)(66476007)(76116006)(122000001)(36756003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?NWtSVlFvcUduYktoWm5FOHVIOUNmc2JKMkdqNkc5QjBNVWprL0RUbzNGYVBV?=
+ =?utf-8?B?c1crRFBzUitBd0pkM3k4ZStlU29va2tNelc0MGYwdDJzcmRzcUQxRWdLWGdu?=
+ =?utf-8?B?bkJWV3NId0E3TDQxNzhBeWVGK0F0SEdkcVRKNkxBS1MyOW5hQXZrL3FkY2Fi?=
+ =?utf-8?B?SWQvUUltQ1VJK1pjSThFVlQxdkZha1hSTUhzN1d0UWJ4VnF6WnRVUVloUnU2?=
+ =?utf-8?B?ZHB2UGFVc2dVcnRGdTRjSU5vVzM5RVBaQURFeW5nWVE2Y2VQZ3ZZTGJka0ZK?=
+ =?utf-8?B?bnpBT2pIZWJQODY4RnNTN0hnWTdvZDlkUlpNL0pDa1BsUTFDeC9ZZjlHVjUz?=
+ =?utf-8?B?SHprUHJnSGI3T2d3bTBsUlhqY09NL0ZzdndQRlErNEJoWm02MlNYRWllQnEy?=
+ =?utf-8?B?VlpuMUNxOU9KK3hSR3cwSHptb1FhSnc3ZEV4UHdvcXZ4bkZ0U1o0bFN5ODUw?=
+ =?utf-8?B?SjlUSEQ5UG53dnhWRVRHUzl1UEVPZzlYZExwVzdwcmw5ckF3ajJTUjBLb0NE?=
+ =?utf-8?B?MStlUEdzM1c1aHJJTHNmSnJkNnVpTGVWL2duK3BrN3Q5ZXh2UndsYkhZVXJh?=
+ =?utf-8?B?bXpiaUE1RU9lYVVWZnVna2dxSS9UdUNCU3VBa1ZTR084dmRkM0ZmcGUwOXNV?=
+ =?utf-8?B?VkEvKythWTNCd21DT3JJZHJsa0NQTDZZM1hQMjIxTEl1NnhDcS9TZ3NJSHdF?=
+ =?utf-8?B?NUZNRnlFbUpyNWRMQnRZcEpnMTU2Z0pFakgwenVoTFlSUkpDTWx6WGxrK3pj?=
+ =?utf-8?B?a004YXB2a2ttQVRFd2N4YkJWbmtHSEVEZndLNTBLY0FoQkliZi9jNTF1Wkdn?=
+ =?utf-8?B?RTd0cVVLMklnYkRhd3BLMEtsZ21keWxRU2FpT0JJenc4eWo0N2hoaEtEN0hR?=
+ =?utf-8?B?ejFHeS9GM0NDU2ZYVTJraFNLcGZxNWtrVEZSUFVLNjJLR0MwajdtZ0xFYVE4?=
+ =?utf-8?B?N1RSTjh5emNodjhvRTMzSUVMTFhwNEdKM2UvY0cydS9ORi9HbW9aekpDN3pm?=
+ =?utf-8?B?bXhUZzY5TWljdzFESVBJREdxT1NYWU9RdEcvSFo0dTFEcDJMN1l0NWU5L3RV?=
+ =?utf-8?B?VkFZZVp1Q2RhczVFZyt2TDJESkxYSFg3L29EWjV4WjkzQTkzajBJUGdmMFQ2?=
+ =?utf-8?B?SU8vbWRqQ2NNbWF6alM2TlVTdUJJTWhFTG9MQ2p6M3dXUEloM3VoNm45c0JZ?=
+ =?utf-8?B?M0N0c0dtRzNzeHpxa3gvVDVvTlR2Mkt1blIvclIyZmVCVUJRN2NBK1VvL3E5?=
+ =?utf-8?B?Z2YrOHJWRko0Y0JkRDBjRHdDbTVJOURJblhmRnVBdkx6T3oxaThXcGRXS0la?=
+ =?utf-8?B?VENQTjlGTzFPMWRsSXFXZ3FwQUluZEl6NE5WaU1kY1laRU5KUVltbUs3L2dP?=
+ =?utf-8?B?cDhYTys0STlON2NydlZWc1RWQ1FObDRKcUVaTUs3L1dIK3UyQzFNR0dXR1RB?=
+ =?utf-8?B?Q05odWV4akd1U2xjUXNCd1VXUURrdTBIUVBzQ0tqNDNoN2d4VTRMTE5mL1Rz?=
+ =?utf-8?B?M3UrUWVUSVk3azd1TzRlTFFYN0tpZlFFWUdJY0JnS2xib21XMVY4ME1RUEFS?=
+ =?utf-8?B?R25JbWxBYjl5L3hjZWNMNmN6NmxFclc1YnFwTVhoeFhlemxVdG9GRFY2c1J1?=
+ =?utf-8?B?MHBJZXBPK0FGOWwrM0tRZmhvc1h1WDBSaE4rR09EWWpFa0hJb2cxdlp6R1dy?=
+ =?utf-8?B?MThlak9NQVZhRVNVWXl3ODZ0TVZPcUZJcitjNVZtVko3V3Z6UkJpc2xtS1Bm?=
+ =?utf-8?B?b1VoSnIyWDVaYmZyK2cvUThuRHhNOXVUNDN4Rm8yWkVKczA2KzZaYkdyakVW?=
+ =?utf-8?B?Z3hFYXFmK3A2bUgzbWZ0NVliS2h0QkVycEpMaGRmbW96RGJGT05aQXo0alYx?=
+ =?utf-8?B?UWJVZDdwdWxqNE1BUDY0TjYycis1LzU1cnYrdlI1NGtvVDNKWWVpbms0UkpG?=
+ =?utf-8?B?VG9qZmFkay9uSnc0QmU2ZmNTNUJpZVpxUXM3WUFFcGdpRzlZdDRRSExLZ1hF?=
+ =?utf-8?B?Z3BCN1VwQkdMQnlWaGl1d0VYWXVTM3M0cFhBaTdLKzNobVlkM3hhMjJpNyts?=
+ =?utf-8?B?NDZUTXNMRmFGVHlFazRHbHp2VmN3QTcyeHJiTTFmZlVsVjhCbUMrUFlhUXYv?=
+ =?utf-8?B?NFhEMVEybDYyZHJZWTdVc2RtcWpMMDV5Z1A5RnFheWtvWUtONGdhdHFoYjAv?=
+ =?utf-8?Q?DuGm0bgjeBnrhbXrV0oCaIJHj0LdkB+FzLxupbzhTOiu?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <EF2BF3D90515644B8B24477EDBAE3409@eurprd04.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YrSuSKLKA6LMjyf/@magnolia>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=VuxAv86n c=1 sm=1 tr=0 ts=62b52467
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=iox4zFpeAAAA:8 a=VwQbUJbxAAAA:8
-        a=7-415B0cAAAA:8 a=dqjxnPYryD76r1QbGpYA:9 a=CjuIK1q_8ugA:10
-        a=WzC6qhA0u3u7Ye7llzcV:22 a=AjGcO6oz07-iQ99wixmX:22
-        a=biEYGPWJfzWAr4FL6Ov7:22
+X-OriginatorOrg: suse.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: VI1PR0401MB2671.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 40844704-ebae-4c52-ffb9-08da5591c7a8
+X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Jun 2022 03:29:43.4081
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: nvTPh/P9rQ7rNw/i1up0lXxPnfkDjtAxHCimSbQmhn59SZQoFgyg88lfHZGd7pD3
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PAXPR04MB8143
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 23, 2022 at 11:17:44AM -0700, Darrick J. Wong wrote:
-> On Fri, Jun 24, 2022 at 12:08:25AM +0800, An Long wrote:
-> > _scratch_mkfs_sized() only receive integer number of bytes as a valid
-> > input. But if the MKFS_OPTIONS variable exists, it will use the value of
-> > block size in MKFS_OPTIONS to override input. In case of
-> > MKFS_OPTIONS="-b 4k", would result in blocksize=4 but not 4096. This
-> > will give errors to ext2/3/4 etc, and brings potential bugs to xfs or
-> > btrfs.
-> > 
-> > Therefore, add validation check to force MKFS_OPTIONS to use pure
-> > integer in bytes for any size value.
-> > 
-> > Signed-off-by: An Long <lan@suse.com>
-> > ---
-> >  README        | 3 ++-
-> >  common/config | 5 +++++
-> >  2 files changed, 7 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/README b/README
-> > index 80d148be..7c2d3334 100644
-> > --- a/README
-> > +++ b/README
-> > @@ -241,7 +241,8 @@ Misc:
-> >     this option is supported for all filesystems currently only -overlay is
-> >     expected to run without issues. For other filesystems additional patches
-> >     and fixes to the test suite might be needed.
-> > -
-> > + - If MKFS_OPTIONS is used, the size value must be an integer number of bytes
-> > +   without units. For example, set MKFS_OPTIONS="-b 4096" but not "-b 4k".
-> 
-> IDGI.  mkfs.$FSTYP does its own input validation, which means that fstest
-> runners are required to set MKFS_OPTIONS to something that mkfs will
-> accept.  It's not the job of fstests to add /another/ layer of
-> validation...
-
-It's not validating it - it refelecting the fact that fstests parses
-the block device size out of MKFS_OPTIONS and does integer math on
-it and does not handle human readable units....
-
-> >  USING THE FSQA SUITE
-> >  ______________________
-> > diff --git a/common/config b/common/config
-> > index de3aba15..ec723ac4 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -896,5 +896,10 @@ else
-> >  	fi
-> >  fi
-> >  
-> > +# check the size value in $MKFS_OPTIONS is an integer
-> > +if [[ $MKFS_OPTIONS =~ [0-9]+[^0-9\ ] ]] ; then
-> 
-> ...because this regex will break /any/ MKFS_OPTIONS with a number
-> followed by a letter.  mkfs.xfs handles units just fine, so I don't
-> understand why you're adding this blunt instrument.
-> 
-> MKFS_OPTIONS='-b size=1k' works just fine for XFS.
-
-Except it where it doesn't.
-
-For example, _scratch_mkfs_sized does unexpected stuff
-because it assumes filesystem block sizes are all in bytes when it
-tries to parse the custom test block sizes out of MKFS_OPTIONS to
-set the default block size.
-
-https://lore.kernel.org/fstests/20220616043845.14320-1-lan@suse.com/
-
-In this case, using "1k" in the XFS mkfs specifications results in
-the default block size is incorrectly calculated:
-
-$ echo "-bsize=1024" | sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'
-1024
-$ echo "-bsize=1k" | sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'
-1
-$
-
-So it sets the block size to 1, not 1024.
-
-But then this bug is covered up later on by this code:
-
-                # don't override MKFS_OPTIONS that set a block size.
-                echo $MKFS_OPTIONS |egrep -q "b?size="
-                if [ $? -eq 0 ]; then
-                        _scratch_mkfs_xfs -d size=$fssize $rt_ops
-                else
-                        _scratch_mkfs_xfs -d size=$fssize $rt_ops -b size=$blocksize
-                fi
-
-Which omits the poorly calculated block size because there's
-already a block size specified in the MKFS_OPTIONS so it ignores the
-fact it calculated the block size incorrectly from MKFS_OPTIONS.
-
-But it also means that if the test specifies a block size via
-
-_scratch_mkfs_sized $((256 * 1024 * 1024)) 2048
-
-Then _scratch_mkfs_sized does the wrong thing for XFS if there is
-a MKFS_OPTIONS specified block size.....
-
-Other filesystems, like ext4, don't have this magic "don't override
-MKFS_OPTIONS" code that XFS does here, so they are exposed to the
-block size calculation bugs when human readable units are used. But
-then they don't have the "ignore test specified block size" bug and
-<head explodes>
-
-The whole thing is a mess of bugs and technical debt. Randomly
-adding more complex regexes and string parsing to random bits of
-fstests to support doing integer math on human readable units in
-random variables doesn't improve this situation at all.
-
-Hence my suggestion that we set a requirement that all block size
-specifications in MKFS_OPTIONS are in byte units, and we check and
-enforce that once at startup. With that requirement in place, we can
-clean up all this mess knowing that we only have to support integer
-units...
-
-What I expected to see was a function like:
-
-_check_mkfs_block_options()
-{
-	case $FSTYP:
-	xfs)
-		# check for -b?size= option in integer format
-		# exit if not valid
-	ext4)
-		# check for -b <num> option in integer format
-		# exit if not valid
-	.....
-}
-
-called from get_next_config() similar to how we call _check_device
-on every block device for existence after reading them from the
-config file.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+T24gRnJpLCAyMDIyLTA2LTI0IGF0IDEyOjQxICsxMDAwLCBEYXZlIENoaW5uZXIgd3JvdGU6DQo+
+IE9uIFRodSwgSnVuIDIzLCAyMDIyIGF0IDExOjE3OjQ0QU0gLTA3MDAsIERhcnJpY2sgSi4gV29u
+ZyB3cm90ZToNCj4gPiBPbiBGcmksIEp1biAyNCwgMjAyMiBhdCAxMjowODoyNUFNICswODAwLCBB
+biBMb25nIHdyb3RlOg0KPiA+ID4gX3NjcmF0Y2hfbWtmc19zaXplZCgpIG9ubHkgcmVjZWl2ZSBp
+bnRlZ2VyIG51bWJlciBvZiBieXRlcyBhcyBhDQo+ID4gPiB2YWxpZA0KPiA+ID4gaW5wdXQuIEJ1
+dCBpZiB0aGUgTUtGU19PUFRJT05TIHZhcmlhYmxlIGV4aXN0cywgaXQgd2lsbCB1c2UgdGhlDQo+
+ID4gPiB2YWx1ZSBvZg0KPiA+ID4gYmxvY2sgc2l6ZSBpbiBNS0ZTX09QVElPTlMgdG8gb3ZlcnJp
+ZGUgaW5wdXQuIEluIGNhc2Ugb2YNCj4gPiA+IE1LRlNfT1BUSU9OUz0iLWIgNGsiLCB3b3VsZCBy
+ZXN1bHQgaW4gYmxvY2tzaXplPTQgYnV0IG5vdCA0MDk2Lg0KPiA+ID4gVGhpcw0KPiA+ID4gd2ls
+bCBnaXZlIGVycm9ycyB0byBleHQyLzMvNCBldGMsIGFuZCBicmluZ3MgcG90ZW50aWFsIGJ1Z3Mg
+dG8NCj4gPiA+IHhmcyBvcg0KPiA+ID4gYnRyZnMuDQo+ID4gPiANCj4gPiA+IFRoZXJlZm9yZSwg
+YWRkIHZhbGlkYXRpb24gY2hlY2sgdG8gZm9yY2UgTUtGU19PUFRJT05TIHRvIHVzZSBwdXJlDQo+
+ID4gPiBpbnRlZ2VyIGluIGJ5dGVzIGZvciBhbnkgc2l6ZSB2YWx1ZS4NCj4gPiA+IA0KPiA+ID4g
+U2lnbmVkLW9mZi1ieTogQW4gTG9uZyA8bGFuQHN1c2UuY29tPg0KPiA+ID4gLS0tDQo+ID4gPiAg
+UkVBRE1FICAgICAgICB8IDMgKystDQo+ID4gPiAgY29tbW9uL2NvbmZpZyB8IDUgKysrKysNCj4g
+PiA+ICAyIGZpbGVzIGNoYW5nZWQsIDcgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KPiA+
+ID4gDQo+ID4gPiBkaWZmIC0tZ2l0IGEvUkVBRE1FIGIvUkVBRE1FDQo+ID4gPiBpbmRleCA4MGQx
+NDhiZS4uN2MyZDMzMzQgMTAwNjQ0DQo+ID4gPiAtLS0gYS9SRUFETUUNCj4gPiA+ICsrKyBiL1JF
+QURNRQ0KPiA+ID4gQEAgLTI0MSw3ICsyNDEsOCBAQCBNaXNjOg0KPiA+ID4gICAgIHRoaXMgb3B0
+aW9uIGlzIHN1cHBvcnRlZCBmb3IgYWxsIGZpbGVzeXN0ZW1zIGN1cnJlbnRseSBvbmx5DQo+ID4g
+PiAtb3ZlcmxheSBpcw0KPiA+ID4gICAgIGV4cGVjdGVkIHRvIHJ1biB3aXRob3V0IGlzc3Vlcy4g
+Rm9yIG90aGVyIGZpbGVzeXN0ZW1zDQo+ID4gPiBhZGRpdGlvbmFsIHBhdGNoZXMNCj4gPiA+ICAg
+ICBhbmQgZml4ZXMgdG8gdGhlIHRlc3Qgc3VpdGUgbWlnaHQgYmUgbmVlZGVkLg0KPiA+ID4gLQ0K
+PiA+ID4gKyAtIElmIE1LRlNfT1BUSU9OUyBpcyB1c2VkLCB0aGUgc2l6ZSB2YWx1ZSBtdXN0IGJl
+IGFuIGludGVnZXINCj4gPiA+IG51bWJlciBvZiBieXRlcw0KPiA+ID4gKyAgIHdpdGhvdXQgdW5p
+dHMuIEZvciBleGFtcGxlLCBzZXQgTUtGU19PUFRJT05TPSItYiA0MDk2IiBidXQNCj4gPiA+IG5v
+dCAiLWIgNGsiLg0KPiA+IA0KPiA+IElER0kuICBta2ZzLiRGU1RZUCBkb2VzIGl0cyBvd24gaW5w
+dXQgdmFsaWRhdGlvbiwgd2hpY2ggbWVhbnMgdGhhdA0KPiA+IGZzdGVzdA0KPiA+IHJ1bm5lcnMg
+YXJlIHJlcXVpcmVkIHRvIHNldCBNS0ZTX09QVElPTlMgdG8gc29tZXRoaW5nIHRoYXQgbWtmcw0K
+PiA+IHdpbGwNCj4gPiBhY2NlcHQuICBJdCdzIG5vdCB0aGUgam9iIG9mIGZzdGVzdHMgdG8gYWRk
+IC9hbm90aGVyLyBsYXllciBvZg0KPiA+IHZhbGlkYXRpb24uLi4NCj4gDQo+IEl0J3Mgbm90IHZh
+bGlkYXRpbmcgaXQgLSBpdCByZWZlbGVjdGluZyB0aGUgZmFjdCB0aGF0IGZzdGVzdHMgcGFyc2Vz
+DQo+IHRoZSBibG9jayBkZXZpY2Ugc2l6ZSBvdXQgb2YgTUtGU19PUFRJT05TIGFuZCBkb2VzIGlu
+dGVnZXIgbWF0aCBvbg0KPiBpdCBhbmQgZG9lcyBub3QgaGFuZGxlIGh1bWFuIHJlYWRhYmxlIHVu
+aXRzLi4uLg0KPiANCj4gPiA+ICBVU0lORyBUSEUgRlNRQSBTVUlURQ0KPiA+ID4gIF9fX19fX19f
+X19fX19fX19fX19fX18NCj4gPiA+IGRpZmYgLS1naXQgYS9jb21tb24vY29uZmlnIGIvY29tbW9u
+L2NvbmZpZw0KPiA+ID4gaW5kZXggZGUzYWJhMTUuLmVjNzIzYWM0IDEwMDY0NA0KPiA+ID4gLS0t
+IGEvY29tbW9uL2NvbmZpZw0KPiA+ID4gKysrIGIvY29tbW9uL2NvbmZpZw0KPiA+ID4gQEAgLTg5
+Niw1ICs4OTYsMTAgQEAgZWxzZQ0KPiA+ID4gIAlmaQ0KPiA+ID4gIGZpDQo+ID4gPiAgDQo+ID4g
+PiArIyBjaGVjayB0aGUgc2l6ZSB2YWx1ZSBpbiAkTUtGU19PUFRJT05TIGlzIGFuIGludGVnZXIN
+Cj4gPiA+ICtpZiBbWyAkTUtGU19PUFRJT05TID1+IFswLTldK1teMC05XCBdIF1dIDsgdGhlbg0K
+PiA+IA0KPiA+IC4uLmJlY2F1c2UgdGhpcyByZWdleCB3aWxsIGJyZWFrIC9hbnkvIE1LRlNfT1BU
+SU9OUyB3aXRoIGEgbnVtYmVyDQo+ID4gZm9sbG93ZWQgYnkgYSBsZXR0ZXIuICBta2ZzLnhmcyBo
+YW5kbGVzIHVuaXRzIGp1c3QgZmluZSwgc28gSSBkb24ndA0KPiA+IHVuZGVyc3RhbmQgd2h5IHlv
+dSdyZSBhZGRpbmcgdGhpcyBibHVudCBpbnN0cnVtZW50Lg0KPiA+IA0KPiA+IE1LRlNfT1BUSU9O
+Uz0nLWIgc2l6ZT0xaycgd29ya3MganVzdCBmaW5lIGZvciBYRlMuDQo+IA0KPiBFeGNlcHQgaXQg
+d2hlcmUgaXQgZG9lc24ndC4NCj4gDQo+IEZvciBleGFtcGxlLCBfc2NyYXRjaF9ta2ZzX3NpemVk
+IGRvZXMgdW5leHBlY3RlZCBzdHVmZg0KPiBiZWNhdXNlIGl0IGFzc3VtZXMgZmlsZXN5c3RlbSBi
+bG9jayBzaXplcyBhcmUgYWxsIGluIGJ5dGVzIHdoZW4gaXQNCj4gdHJpZXMgdG8gcGFyc2UgdGhl
+IGN1c3RvbSB0ZXN0IGJsb2NrIHNpemVzIG91dCBvZiBNS0ZTX09QVElPTlMgdG8NCj4gc2V0IHRo
+ZSBkZWZhdWx0IGJsb2NrIHNpemUuDQo+IA0KPiBodHRwczovL2xvcmUua2VybmVsLm9yZy9mc3Rl
+c3RzLzIwMjIwNjE2MDQzODQ1LjE0MzIwLTEtbGFuQHN1c2UuY29tLw0KPiANCj4gSW4gdGhpcyBj
+YXNlLCB1c2luZyAiMWsiIGluIHRoZSBYRlMgbWtmcyBzcGVjaWZpY2F0aW9ucyByZXN1bHRzIGlu
+DQo+IHRoZSBkZWZhdWx0IGJsb2NrIHNpemUgaXMgaW5jb3JyZWN0bHkgY2FsY3VsYXRlZDoNCj4g
+DQo+ICQgZWNobyAiLWJzaXplPTEwMjQiIHwgc2VkIC1ybiAncy8uKi1iID9zaXplPSA/KyhbMC05
+XSspLiovXDEvcCcNCj4gMTAyNA0KPiAkIGVjaG8gIi1ic2l6ZT0xayIgfCBzZWQgLXJuICdzLy4q
+LWIgP3NpemU9ID8rKFswLTldKykuKi9cMS9wJw0KPiAxDQo+ICQNCj4gDQo+IFNvIGl0IHNldHMg
+dGhlIGJsb2NrIHNpemUgdG8gMSwgbm90IDEwMjQuDQo+IA0KPiBCdXQgdGhlbiB0aGlzIGJ1ZyBp
+cyBjb3ZlcmVkIHVwIGxhdGVyIG9uIGJ5IHRoaXMgY29kZToNCj4gDQo+ICAgICAgICAgICAgICAg
+ICAjIGRvbid0IG92ZXJyaWRlIE1LRlNfT1BUSU9OUyB0aGF0IHNldCBhIGJsb2NrIHNpemUuDQo+
+ICAgICAgICAgICAgICAgICBlY2hvICRNS0ZTX09QVElPTlMgfGVncmVwIC1xICJiP3NpemU9Ig0K
+PiAgICAgICAgICAgICAgICAgaWYgWyAkPyAtZXEgMCBdOyB0aGVuDQo+ICAgICAgICAgICAgICAg
+ICAgICAgICAgIF9zY3JhdGNoX21rZnNfeGZzIC1kIHNpemU9JGZzc2l6ZSAkcnRfb3BzDQo+ICAg
+ICAgICAgICAgICAgICBlbHNlDQo+ICAgICAgICAgICAgICAgICAgICAgICAgIF9zY3JhdGNoX21r
+ZnNfeGZzIC1kIHNpemU9JGZzc2l6ZSAkcnRfb3BzIC1iDQo+IHNpemU9JGJsb2Nrc2l6ZQ0KPiAg
+ICAgICAgICAgICAgICAgZmkNCj4gDQo+IFdoaWNoIG9taXRzIHRoZSBwb29ybHkgY2FsY3VsYXRl
+ZCBibG9jayBzaXplIGJlY2F1c2UgdGhlcmUncw0KPiBhbHJlYWR5IGEgYmxvY2sgc2l6ZSBzcGVj
+aWZpZWQgaW4gdGhlIE1LRlNfT1BUSU9OUyBzbyBpdCBpZ25vcmVzIHRoZQ0KPiBmYWN0IGl0IGNh
+bGN1bGF0ZWQgdGhlIGJsb2NrIHNpemUgaW5jb3JyZWN0bHkgZnJvbSBNS0ZTX09QVElPTlMuDQo+
+IA0KPiBCdXQgaXQgYWxzbyBtZWFucyB0aGF0IGlmIHRoZSB0ZXN0IHNwZWNpZmllcyBhIGJsb2Nr
+IHNpemUgdmlhDQo+IA0KPiBfc2NyYXRjaF9ta2ZzX3NpemVkICQoKDI1NiAqIDEwMjQgKiAxMDI0
+KSkgMjA0OA0KPiANCj4gVGhlbiBfc2NyYXRjaF9ta2ZzX3NpemVkIGRvZXMgdGhlIHdyb25nIHRo
+aW5nIGZvciBYRlMgaWYgdGhlcmUgaXMNCj4gYSBNS0ZTX09QVElPTlMgc3BlY2lmaWVkIGJsb2Nr
+IHNpemUuLi4uLg0KPiANCj4gT3RoZXIgZmlsZXN5c3RlbXMsIGxpa2UgZXh0NCwgZG9uJ3QgaGF2
+ZSB0aGlzIG1hZ2ljICJkb24ndCBvdmVycmlkZQ0KPiBNS0ZTX09QVElPTlMiIGNvZGUgdGhhdCBY
+RlMgZG9lcyBoZXJlLCBzbyB0aGV5IGFyZSBleHBvc2VkIHRvIHRoZQ0KPiBibG9jayBzaXplIGNh
+bGN1bGF0aW9uIGJ1Z3Mgd2hlbiBodW1hbiByZWFkYWJsZSB1bml0cyBhcmUgdXNlZC4gQnV0DQo+
+IHRoZW4gdGhleSBkb24ndCBoYXZlIHRoZSAiaWdub3JlIHRlc3Qgc3BlY2lmaWVkIGJsb2NrIHNp
+emUiIGJ1ZyBhbmQNCj4gPGhlYWQgZXhwbG9kZXM+DQo+IA0KPiBUaGUgd2hvbGUgdGhpbmcgaXMg
+YSBtZXNzIG9mIGJ1Z3MgYW5kIHRlY2huaWNhbCBkZWJ0LiBSYW5kb21seQ0KPiBhZGRpbmcgbW9y
+ZSBjb21wbGV4IHJlZ2V4ZXMgYW5kIHN0cmluZyBwYXJzaW5nIHRvIHJhbmRvbSBiaXRzIG9mDQo+
+IGZzdGVzdHMgdG8gc3VwcG9ydCBkb2luZyBpbnRlZ2VyIG1hdGggb24gaHVtYW4gcmVhZGFibGUg
+dW5pdHMgaW4NCj4gcmFuZG9tIHZhcmlhYmxlcyBkb2Vzbid0IGltcHJvdmUgdGhpcyBzaXR1YXRp
+b24gYXQgYWxsLg0KPiANCj4gSGVuY2UgbXkgc3VnZ2VzdGlvbiB0aGF0IHdlIHNldCBhIHJlcXVp
+cmVtZW50IHRoYXQgYWxsIGJsb2NrIHNpemUNCj4gc3BlY2lmaWNhdGlvbnMgaW4gTUtGU19PUFRJ
+T05TIGFyZSBpbiBieXRlIHVuaXRzLCBhbmQgd2UgY2hlY2sgYW5kDQo+IGVuZm9yY2UgdGhhdCBv
+bmNlIGF0IHN0YXJ0dXAuIFdpdGggdGhhdCByZXF1aXJlbWVudCBpbiBwbGFjZSwgd2UgY2FuDQo+
+IGNsZWFuIHVwIGFsbCB0aGlzIG1lc3Mga25vd2luZyB0aGF0IHdlIG9ubHkgaGF2ZSB0byBzdXBw
+b3J0IGludGVnZXINCj4gdW5pdHMuLi4NCj4gDQo+IFdoYXQgSSBleHBlY3RlZCB0byBzZWUgd2Fz
+IGEgZnVuY3Rpb24gbGlrZToNCj4gDQo+IF9jaGVja19ta2ZzX2Jsb2NrX29wdGlvbnMoKQ0KPiB7
+DQo+IAljYXNlICRGU1RZUDoNCj4gCXhmcykNCj4gCQkjIGNoZWNrIGZvciAtYj9zaXplPSBvcHRp
+b24gaW4gaW50ZWdlciBmb3JtYXQNCj4gCQkjIGV4aXQgaWYgbm90IHZhbGlkDQo+IAlleHQ0KQ0K
+PiAJCSMgY2hlY2sgZm9yIC1iIDxudW0+IG9wdGlvbiBpbiBpbnRlZ2VyIGZvcm1hdA0KPiAJCSMg
+ZXhpdCBpZiBub3QgdmFsaWQNCj4gCS4uLi4uDQo+IH0NCj4gDQpIZWxsbyBEYXZlLA0KDQpBY3R1
+YWxseSwgSSBoYXZlIHRyaWVkIHRoZSBhYm92ZSBtZXRob2RzLiBJdCdzIHdvcmtzLCBidXQgd2Ug
+aGF2ZSB0bw0KYWRkIHNwZWNpZmljIGZ1bmN0aW9uIGZvciBzcGVjaWZpYyB0eXBlIG9mIHNpemU/
+DQpTdWNoIGFzIG5vZGUgc2l6ZSwgc2VjdG9yIHNpemUsIGRldmljZSBzaXplIG9yIGNsdXN0ZXIg
+c2l6ZS4NCg0KVGhhbmtzLA0KQW4gTG9uZw0KDQo+IGNhbGxlZCBmcm9tIGdldF9uZXh0X2NvbmZp
+ZygpIHNpbWlsYXIgdG8gaG93IHdlIGNhbGwgX2NoZWNrX2RldmljZQ0KPiBvbiBldmVyeSBibG9j
+ayBkZXZpY2UgZm9yIGV4aXN0ZW5jZSBhZnRlciByZWFkaW5nIHRoZW0gZnJvbSB0aGUNCj4gY29u
+ZmlnIGZpbGUuDQo+IA0KPiBDaGVlcnMsDQo+IA0KPiBEYXZlLg0K
