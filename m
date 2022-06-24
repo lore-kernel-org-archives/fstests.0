@@ -2,170 +2,173 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9DEBC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 05:32:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E2DFC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 06:15:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229598AbiFXFcl (ORCPT
+        id S229469AbiFXGPa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Jun 2022 01:32:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55682 "EHLO
+        Fri, 24 Jun 2022 02:15:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58098 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229441AbiFXFck (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 01:32:40 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A965469257;
-        Thu, 23 Jun 2022 22:32:38 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25O5WNfp025626
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 24 Jun 2022 01:32:24 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656048745; bh=uAKh3NUj4G1S3E0FBuW+i0JKjWjiL3EnZYYrNmT0gxY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=WWh8EP1UjDs+hiniQbsL7wOwQg0rRaJfVJKEKaUrQLLmE93eWOoslEKwRyVtRUvY/
-         6srxCFNJ8j88HD1P+e+2+fhsx8883EUZs8o+mC9+SZCLYwcQTuZkVTvHSP2AhmLi93
-         7EpF/ewuzc/omb+Os/thcumaXVWbst7xYg8YTPmzjLtvf6eYKQ08nh5qkGJlzRVNP9
-         vLWpar1aZpcMgXlGLgdkXNWC3z3ibEv2iyV9rYwwp9enzwK49idbVXtFfhJKEqZ6bc
-         sxfpfA67X6EiuJdJ+XEVVNNDGbrOkP/EaEuydeNJNOIVlQFe0ef+qI2CPDawKcD8Mp
-         0HMODNdLnNE2g==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 122E415C42F6; Fri, 24 Jun 2022 01:32:23 -0400 (EDT)
-Date:   Fri, 24 Jun 2022 01:32:23 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Leah Rumancik <leah.rumancik@gmail.com>,
-        Amir Goldstein <amir73il@gmail.com>,
-        Josef Bacik <josef@toxicpanda.com>,
-        Chuck Lever <chuck.lever@oracle.com>, chandanrmail@gmail.com,
-        Sweet Tea Dorminy <sweettea-kernel@dorminy.me>,
-        Pankaj Raghav <pankydev8@gmail.com>, linux-xfs@vger.kernel.org,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 5.15 CANDIDATE v2 0/8] xfs stable candidate patches for
- 5.15.y (part 1)
-Message-ID: <YrVMZ7/rJn11HH92@mit.edu>
-References: <20220616182749.1200971-1-leah.rumancik@gmail.com>
- <YrJdLhHBsolF83Rq@bombadil.infradead.org>
- <YrONPrBgopZQ2EUj@mit.edu>
- <YrTboFa4usTuCqUb@bombadil.infradead.org>
+        with ESMTP id S229454AbiFXGP3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 02:15:29 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7C8164D623
+        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 23:15:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656051326;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=BgGKZ1rTK/W8KP3iYmuhln2eUyPDrpdaod5DPwo8jDE=;
+        b=E7tiTVF69ZE93e9vMwl3Nz9ENiErtJL3WWEhELi3YIicfLtgJjaQooT1GJDP9izsifwgyJ
+        leX1zVTjJYn2OG9tp1ebqutG7SwwwosnyOzQtQvIQ3vyyG1ZTO44iAalQAD703TVWOKUnh
+        TkNoD00ni2ZSDTNbatpKmEL0uXUshCI=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-53-_L3WEA0TNO-42j10bP8jcA-1; Fri, 24 Jun 2022 02:15:24 -0400
+X-MC-Unique: _L3WEA0TNO-42j10bP8jcA-1
+Received: by mail-qk1-f199.google.com with SMTP id bl27-20020a05620a1a9b00b0069994eeb30cso1648764qkb.11
+        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 23:15:24 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=BgGKZ1rTK/W8KP3iYmuhln2eUyPDrpdaod5DPwo8jDE=;
+        b=V0DNdARG1YrhmiQiKT4XVXGw6k02LmWf+8yjZ13pE9+LAyenoYY6dRN6lcOq1ZKyMl
+         VPKvoTHoZ5UhwCqXBDgw2+BbLZ49jmLE+MDDkpHtQ/e07kw9xqfrQMhGN910DyUKnjyz
+         EkZWLywY83GDoI2ld4GlO2Erk/2RHKYIqMbH/TwxcjaN8N1nr6i11RMhROyU8jAxErJn
+         Owb+GRuNtxxAAOl+MFPow0Xd4154/AUM6KUanbGqYOgzLmHsAfGjj/fDUs3dSnFOzNI0
+         gf8VB+XWcqrvt9VqGafv2U61VLJHeb4hJ3b//gwaW0xDHvmzA5ulpdHRc7kBsj182RIU
+         0Igg==
+X-Gm-Message-State: AJIora/Fr8bEOSCB/dJ1sxSndklf0oqqtkC6+stwzArhZVaNs9ledKxm
+        Ranpfua7zwc4sLU54MjH75mHnzULxpJg7uLr5dm/1tOB6xiSIKKrTw2Qu1gYu+jX5RzUhZAt4n5
+        3nOJ9kZ9hQ5+QRtq5sQ==
+X-Received: by 2002:a05:6214:20ec:b0:464:6293:be01 with SMTP id 12-20020a05621420ec00b004646293be01mr35757984qvk.98.1656051323971;
+        Thu, 23 Jun 2022 23:15:23 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vyceu2tjcSU4xKLM4E/R44fEK5pa/5ewKkG3AeEOTuZM+BsthuTYkW8jadW5sD+53IPe00Nw==
+X-Received: by 2002:a05:6214:20ec:b0:464:6293:be01 with SMTP id 12-20020a05621420ec00b004646293be01mr35757969qvk.98.1656051323670;
+        Thu, 23 Jun 2022 23:15:23 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id m14-20020a05620a290e00b006a6b498e23esm1479243qkp.81.2022.06.23.23.15.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 23 Jun 2022 23:15:23 -0700 (PDT)
+Date:   Fri, 24 Jun 2022 14:15:17 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     David Disseldorp <ddiss@suse.de>, fstests@vger.kernel.org
+Subject: Re: [RFC PATCH 0/2] add option to rerun failed tests
+Message-ID: <20220624061517.qkfeni7aup6nuxya@zlang-mailbox>
+References: <20220621160153.29591-1-ddiss@suse.de>
+ <YrVAm6dzTUh3ufb6@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YrTboFa4usTuCqUb@bombadil.infradead.org>
+In-Reply-To: <YrVAm6dzTUh3ufb6@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 23, 2022 at 02:31:12PM -0700, Luis Chamberlain wrote:
+On Fri, Jun 24, 2022 at 12:42:03AM -0400, Theodore Ts'o wrote:
+> On Tue, Jun 21, 2022 at 06:01:51PM +0200, David Disseldorp wrote:
+> > This RFC patchset adds support to loop on failed tests, as proposed by
+> > Ted Ts'o in https://lwn.net/Articles/897061/:
+> >   add a mode that will immediately rerun a failed test 25 or 100 times
+> >   to establish a failure percentage.
+> > 
+> > There are a couple of things which I'd like to resolve before dropping
+> > the RFC flag, but would appreciate early feedback on the approach here.
 > 
-> To be clear, you seem to suggest gce-xfstests is a VM native solution.
-> I'd also like to clarify that kdevops supports native VMs, cloud and
-> baremetal. With kdevops you pick your bringup method.
+> This is really exciting!  I was hoping to try it out, but the first
+> patch doesn't apply to origin/master on xfstests-dev.
 
-Yes, that was my point.  Because gce-xfstests is a VM native solution,
-it has some advantages, such as the ability to take advantage of the
-fact that it's trivially easy to start up multiple cloud VM's which
-can run in parallel --- and then the VM's shut themselves down once
-they are done running the test, which saves cost and is more
-efficient.
+Hi Ted,
 
-It is *because* that we are a VM-native solution that we can optimize
-in certain ways because we don't have to also support a bare metal
-setup.  So yes, the fact that kdevops also supports bare metal is
-certainly granted.  That that kind of flexibility is an advantage for
-kdevops, certainly; but being able to fully take advantage of the
-unqiue attributes of cloud VM's can also be a good thing.
+The origin/for-next has latest (testing) update. But for this issue you hit
+below, you might need this patchset:
 
-(I've already made offers to folks working at other cloud vendors that
-if they are interested in adding support for other cloud systems
-beyond GCE, I'm happy to work with them to enable the use of other
-XXX-xfstests test-appliance runners.)
+  https://lore.kernel.org/fstests/20220620192934.21694-1-ddiss@suse.de/
 
-> kdevops started as an effort for kernel development and filesystems
-> testing. It is why the initial guest configuration was to use 8 GiB
-> of RAM and 4 vcpus, that suffices to do local builds / development.
-> I always did kernel development on guests back in the day still do
-> to this day.
+David sent that at first, to fix/change something before having this feature.
+I've acked that, and will merge it this week. For this patchset, I'd like to
+give it more time to get more reivew points.
 
-For kvm-xfstests, the default RAM size for the VM is 2GB.  One of the
-reasons why I was interested in low-memory configurations is because
-ext4 is often used in smaller devices (such as embedded systesm and
-mobile handsets) --- and running in memory constrained environments
-can turn up bugs that otherwise are much harder to reproduce on a
-system with more memory.
+Thanks,
+Zorro
 
-Separating the kernel build system from the test VM's means that the
-build can take place on a really powerful machine (either my desktop
-with 48 cores and gobs and gobs of memory, or a build VM if you are
-using the Lightweight Test Manager's Kernel Compilation Service) so
-builds go much faster.  And then, of course, we can then launch a
-dozen VM's, one for each test config.  If you force the build to be
-done on the test VM, then you either give up parallelism, or you waste
-time by building the kernel N times on N test VM's.
+> 
+> For example this patch hunk:
+> 
+> @@ -729,9 +750,7 @@ function run_section()
+>  	prev_seq=""
+>  	for seq in $list ; do
+>  		# Run report for previous test!
+> -		if [ "$tc_status" == "fail" ]; then
+> -			bad+=("$seqnum")
+> -		fi
+> +		_stash_test_status "$seqnum" "$tc_status"
+>  		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
+>  			_make_testcase_report "$prev_seq" "$tc_status"
+>  		fi
+> 
+> The relevant section of check looks like this:
+> 
+> 		# Run report for previous test!
+> 		if $err ; then
+> 			bad="$bad $seqnum"
+> 			n_bad=`expr $n_bad + 1`
+> 			tc_status="fail"
+> 		fi
+> 
+> And "git blame" shows that this part of check hasn't changed since
+> 2018, and I'm on the latest version upstream version of xfstests:
+> 
+> commit 568ac9fffeb6afec03e5d6c9936617232fd7fc6d (HEAD, tag: v2022.06.05, origin/master, origin/HEAD, kernel/master)
+> Author: Dave Chinner <dchinner@redhat.com>
+> Date:   Fri Jun 3 11:54:13 2022 +1000
+> 
+>     xfs/189: systemd monitoring of /etc/fstab sucks
+> 
+> 
+> Was your patch based xfstests with some out-of-tree patches?
+> 
+> > The caveats are:
+> > - rerun tests will be tracked as a single failure in @try and @bad
+> >   + xunit reports do not include any rerun details
+> > - .bad files generated on failure will be overwritten by test reruns
+> > 
+> > For xunit reports, I think it'll make sense to stash the aggregates in a
+> > separate <test>.agg-results file or something. Similarly for .bad file
+> > overwrites, I could add a .<rerun #> suffix for capturing all failure
+> > data.
+> 
+> For xunit results fie, was assuming that simply we would just have
+> multiple repeated testcase entries stored in the single results.xml
+> file.  For example:
+> 
+> <testcase classname="xfstests.global" name="generic/476" time="354">
+> 		<failure message="Test  failed, reason unknown" type="TestFail" />
+> 		<system-out>
+> 		...
+> 	</testcase>
+> <testcase classname="xfstests.global" name="generic/476" time="343">
+> 	</testcase>
+> <testcase classname="xfstests.global" name="generic/476" time="353">
+> 	</testcase>
+> 	...
+> 
+> I don't know that we need a separate file for the rerun tests, since
+> it's not that hard to create a python script which parses the results
+> and calculates the pass/fail percentages for any test which is run
+> mutiple times.
+> 
+> 
+> As far as haivng the .bad and .full files, I agree that some kind of
+> .rerun-NN suffix would make a lot of sense.
+> 
+> Cheers,
+> 
+> 						- Ted
+> 
 
-And in the case of the android-xfstests, which communicates with a
-phone or tablet over a debugging serial cable and Android's fastboot
-protocol, of *course* it would be insane to want to build the kernel
-on the system under test!
-
-So I've ***always*** done the kernel build on a machine or VM separate
-from the System Under Test.  At least for my use cases, it just makes
-a heck of a lot more sense.
-
-And that's fine.  I'm *not* trying to convince everyone that my test
-infrastructure everyone should standardize on.  Which quite frankly, I
-sometimes think you have been evangelizing.  I believe very strongly
-that the choice of test infrastructures is a personal choice, which is
-heavily dependent on each developer's workflow, and trying to get
-everyone to standardize on a single test infrastructure is likely
-going to work as well as trying to get everyone to standardize on a
-single text editor.
-
-(Although obviously emacs is the one true editor.  :-)
-
-> Sure, the TODO item on the URL seemed to indicate there was a desire to
-> find a better place to put failures.
-
-I'm not convinced the "better place" is expunge files.  I suspect it
-may need to be some kind of database.  Darrick tells me that he stores
-his test results in a postgres database.  (Which is way better than
-what I'm doing which is an mbox file and using mail search tools.)
-
-Currently, Leah is using flat text files for the XFS 5.15 stable
-backports effort, plus some tools that parse and analyze those text
-files.
-
-I'll also note that the number of baseline kernel versions is much
-smaller if you are primarily testing an enterprise Linux distribution,
-such as SLES.  And if you are working with stable kernels, you can
-probably get away with having updating the baseline for each LTS
-kernel every so often.  But for upstream kernels development the
-number of kernel versions for which a developer might want to track
-flaky percentages and far greater, and will need to be updated at
-least once every kernel development cycle, and possibly more
-frequently than that.  Which is why I'm not entirely sure a flat text
-file, such as an expunge file, is really the right answer.  I can
-completely understand why Darrick is using a Postgres database.
-
-So there is clearly more thought and design required here, in my
-opinion.
-
-> That is not a goal, the goal is allow variability! And share results
-> in the most efficient way.
-
-Sure, but are expunge files the most efficient way to "share results"?
-If we have a huge amount of variability, such that we have a large
-number of directories with different test configs and different
-hardware configs, each with different expunge files, I'm not sure how
-useful that actually is.  Are we expecting users to do a "git clone",
-and then start browsing all of these different expunge files by hand?
-
-It might perhaps be useful to get a bit more clarity about how we
-expect the shared results would be used, because that might drive some
-of the design decisions about the best way to store these "results".
-
-Cheers,
-
-					- Ted
