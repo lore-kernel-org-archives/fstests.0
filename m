@@ -2,364 +2,387 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BADCC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 16:06:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5C08C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 22:54:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229745AbiFXQGZ (ORCPT
+        id S230008AbiFXWy6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Jun 2022 12:06:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36668 "EHLO
+        Fri, 24 Jun 2022 18:54:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33188 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229653AbiFXQGY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 12:06:24 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 087E954FB1
-        for <fstests@vger.kernel.org>; Fri, 24 Jun 2022 09:06:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656086782;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=wHbakCgDGjabA+iPG+zWlC2WOLbOHqKLwELSvFqZtIc=;
-        b=blGFMBDZaLjRo4JhnW3SFV1ha6ERYJGAuAMtzRb851t8wrsJ4ZSF6lMQV8r48e4cDF7r2/
-        L7JHHUVtUcK3rKEaOdn0XmhgbJ8evuR9UeMJrFbg1Vv1ITVWXJwooxBG0n0kCKA7TCOrAU
-        UbQr0WZkVVhTdvELQBClmnvH6mTaD1o=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-607-c6NDl5WINI2LSCIOsYsQKg-1; Fri, 24 Jun 2022 12:06:20 -0400
-X-MC-Unique: c6NDl5WINI2LSCIOsYsQKg-1
-Received: by mail-qk1-f199.google.com with SMTP id g194-20020a379dcb000000b006aef700d954so3102410qke.1
-        for <fstests@vger.kernel.org>; Fri, 24 Jun 2022 09:06:20 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=wHbakCgDGjabA+iPG+zWlC2WOLbOHqKLwELSvFqZtIc=;
-        b=WMtgghi9fm6tB3LcBvUT8ZvZ+F+DEd7hPYz5bH4yEt6BC9A6q82rmJP8hXbX5OCR7b
-         n9vyi6G0ynC5CQ+oxt0fI9bLi16Sfkt86Ya5fp40p9bQwNwFcMCV85X1vvVte0eb91OW
-         PBSDHE9LRlwf4U8Bzz5nUq4+3pzSU6s25X8QqMmIk4xET4QErCMOZCdfTCcYvyP+RL4S
-         U1c3I1763Tx8CvvkPSjE1sTaV5gGXeak+8tZsu3VgydSsv9tW4pqRno1yg/SBCTTnixA
-         y05zBsJgO4orlhWJLQfJBcg0mRqhOJeY/qSTsxRzzT8GvSdw71+aHliqNkKMBm7eM5PH
-         6/Uw==
-X-Gm-Message-State: AJIora8pBhfwzfGHc0MSf+j+MogxnjObhFLv/SndF4/evEZnCbsqFt58
-        35NUoWLtSPeVsb1bBb2E+V6YSrKdKApxJ/AAqS2RmmK3Vv/E1zf8f75oGPj7c7a95n/+l5uot9I
-        zQFtiEpo9jo0JCciMgda9wa0HJ6yAINrkF1p5APDEMpuVNPLAffv7Z1VxRjETM5kq2w==
-X-Received: by 2002:ac8:5c43:0:b0:315:a78a:4cbe with SMTP id j3-20020ac85c43000000b00315a78a4cbemr13720740qtj.420.1656086779735;
-        Fri, 24 Jun 2022 09:06:19 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1tTY1mV9stPPjHkFyXuALUPRyQLtHWYcs6cep9F20fAWIkZx9eE/unW+v+NtoMotEGwFJ8cSw==
-X-Received: by 2002:ac8:5c43:0:b0:315:a78a:4cbe with SMTP id j3-20020ac85c43000000b00315a78a4cbemr13720702qtj.420.1656086779330;
-        Fri, 24 Jun 2022 09:06:19 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id x8-20020a05620a258800b006a75a0ffc97sm2232735qko.3.2022.06.24.09.06.17
-        for <fstests@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Jun 2022 09:06:18 -0700 (PDT)
-Date:   Sat, 25 Jun 2022 00:06:13 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 2/3] fstests: unfreeze fs on cleanup routines
-Message-ID: <20220624160613.brkkcfb55w2vlpmj@zlang-mailbox>
-References: <20220621173729.2135249-1-amir73il@gmail.com>
- <20220621173729.2135249-3-amir73il@gmail.com>
+        with ESMTP id S229988AbiFXWy5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 18:54:57 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EBEB457AB;
+        Fri, 24 Jun 2022 15:54:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=jEdDDZc0ENpCVOv0wcwtsTkb8sZL0vFROAXT6s2ZCME=; b=o01vfCjH+mrIa1/jh8oEGdbFsC
+        S7AMyT68olrXWiAUzGX4/qf/fg98NQerf8jfYvTfhFzb+if7PmYJy7P44rdpzk5wSHlZOkExHyYAo
+        LdhrQo1t6MdDHINLivjFZSi5bt4E7d2hV9m95wi5kufhtdKrBWKTkNQm3BMKybiDNCse8ZmB/jhzv
+        k1JrDCXZgz53Y/Lomu/fn4bamTfnzjHA5jX9gnsQRf1Gd4Cw3M+caVBfUH0AANRTVyYdC8yyXMDuQ
+        GgIELT8QI0o2VSnGMoJI4Eprri454SngoFVLkcP7x7rbS7wzp5Aq2MoOWgrz8MUT5MOEYFuRpLxvf
+        0Yu/MEEw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1o4sCK-0043Rx-JW; Fri, 24 Jun 2022 22:54:44 +0000
+Date:   Fri, 24 Jun 2022 15:54:44 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        Leah Rumancik <leah.rumancik@gmail.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Chuck Lever <chuck.lever@oracle.com>, chandanrmail@gmail.com,
+        Sweet Tea Dorminy <sweettea-kernel@dorminy.me>,
+        Pankaj Raghav <pankydev8@gmail.com>,
+        Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 5.15 CANDIDATE v2 0/8] xfs stable candidate patches for
+ 5.15.y (part 1)
+Message-ID: <YrZAtOqQERpYbBXg@bombadil.infradead.org>
+References: <20220616182749.1200971-1-leah.rumancik@gmail.com>
+ <YrJdLhHBsolF83Rq@bombadil.infradead.org>
+ <YrONPrBgopZQ2EUj@mit.edu>
+ <YrTboFa4usTuCqUb@bombadil.infradead.org>
+ <YrVMZ7/rJn11HH92@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220621173729.2135249-3-amir73il@gmail.com>
+In-Reply-To: <YrVMZ7/rJn11HH92@mit.edu>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 21, 2022 at 08:37:28PM +0300, Amir Goldstein wrote:
-> Many of tests that freeze fs do not make sure that fs is unfrozen on
-> test termination.
+On Fri, Jun 24, 2022 at 01:32:23AM -0400, Theodore Ts'o wrote:
+> On Thu, Jun 23, 2022 at 02:31:12PM -0700, Luis Chamberlain wrote:
+> > 
+> > To be clear, you seem to suggest gce-xfstests is a VM native solution.
+> > I'd also like to clarify that kdevops supports native VMs, cloud and
+> > baremetal. With kdevops you pick your bringup method.
 > 
-> Some tests also need to kill and wait for writer processes after
-> unfreezing the fs.
+> Yes, that was my point.  Because gce-xfstests is a VM native solution,
+> it has some advantages, such as the ability to take advantage of the
+> fact that it's trivially easy to start up multiple cloud VM's which
+> can run in parallel --- and then the VM's shut themselves down once
+> they are done running the test, which saves cost and is more
+> efficient.
+
+Perhaps I am not understanding what you are suggesting with a VM native
+solution. What do you mean by that? A full KVM VM inside the cloud?
+
+Anyway, kdevops has support to bring up whatever type of node you want
+in the clouds providers: GCE, AWS, Azure, and OpenStack and even custom
+OpenStack solutions. That could be a VM or a high end bare metal node.
+It does this by using terraform and providing the variability through
+kconfig.
+
+The initial 'make bringup' brings nodes up, and then all work runs on
+each in parallel for fstests as you run 'make fstests-baseline'. At the
+end you just run 'make destroy'.
+
+> It is *because* that we are a VM-native solution that we can optimize
+> in certain ways because we don't have to also support a bare metal
+> setup.  So yes, the fact that kdevops also supports bare metal is
+> certainly granted.  That that kind of flexibility is an advantage for
+> kdevops, certainly; but being able to fully take advantage of the
+> unqiue attributes of cloud VM's can also be a good thing.
+
+Yes, agreed. That is why I focused on technology that would support
+all cloud providers, not just one.
+
+I had not touched code for AWS code for example in 2 years, I just
+went and tried a bringup and it worked in 10 minutes, most of the time
+was getting my .aws/credentials file set up with information from the
+website.
+
+> > kdevops started as an effort for kernel development and filesystems
+> > testing. It is why the initial guest configuration was to use 8 GiB
+> > of RAM and 4 vcpus, that suffices to do local builds / development.
+> > I always did kernel development on guests back in the day still do
+> > to this day.
 > 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
+> For kvm-xfstests, the default RAM size for the VM is 2GB.  One of the
+> reasons why I was interested in low-memory configurations is because
+> ext4 is often used in smaller devices (such as embedded systesm and
+> mobile handsets) --- and running in memory constrained environments
+> can turn up bugs that otherwise are much harder to reproduce on a
+> system with more memory.
 
-The changes look good, and I didn't find regression issue from it for now.
-Please tell me your cencern if anyone has, or I'll merge it.
+Yes, I agree. We started with 8 GiB. Long ago while at SUSE I tried 2GiB
+and ran into the xfs/074 issue of requiring more due to xfs_scratch.
+Then later Amir ran into snags with xfs/084 and generic/627 due to the
+OOMs. So in terms of XFS to avoid OOMs with just the tests we need 3GiB.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> Separating the kernel build system from the test VM's means that the
+> build can take place on a really powerful machine (either my desktop
+> with 48 cores and gobs and gobs of memory, or a build VM if you are
+> using the Lightweight Test Manager's Kernel Compilation Service) so
+> builds go much faster.  And then, of course, we can then launch a
+> dozen VM's, one for each test config.  If you force the build to be
+> done on the test VM, then you either give up parallelism, or you waste
+> time by building the kernel N times on N test VM's.
 
->  tests/generic/068 | 14 ++++++++++----
->  tests/generic/085 |  3 +++
->  tests/generic/280 | 13 ++++++++++++-
->  tests/generic/390 |  8 +++++++-
->  tests/generic/459 |  2 ++
->  tests/generic/491 |  9 +++++++++
->  tests/xfs/011     |  3 ++-
->  tests/xfs/119     |  9 +++++++++
->  tests/xfs/297     | 11 +++++++++++
->  tests/xfs/318     |  3 ++-
->  tests/xfs/325     |  3 ++-
->  tests/xfs/438     |  2 ++
->  12 files changed, 71 insertions(+), 9 deletions(-)
+The build is done once but I agree this can be optimized for kdevops.
+
+Right now in kdevops the git clone and build of the kernel does take
+place on each guest, and that requires at least 3 GiB of RAM. Shallow
+git clone support was added as option to help here but the ideal thing
+will be to just build locally or perhaps as you suggest dedicated build
+VM.
+
+> And in the case of the android-xfstests, which communicates with a
+> phone or tablet over a debugging serial cable and Android's fastboot
+> protocol, of *course* it would be insane to want to build the kernel
+> on the system under test!
 > 
-> diff --git a/tests/generic/068 b/tests/generic/068
-> index 56262cd7..eeddf6d1 100755
-> --- a/tests/generic/068
-> +++ b/tests/generic/068
-> @@ -17,9 +17,12 @@ ITERATIONS=10
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> -    cd /
-> -
-> -    trap 0 1 2 3 15
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	[ -n "$pid" ] && kill -9 $pid 2>/dev/null
-> +	wait $pid
-> +	cd /
-> +	rm -f $tmp.*
->  }
->  
->  # Import common functions.
-> @@ -60,6 +63,7 @@ touch $tmp.running
->      rm -r $STRESS_DIR/*
->      rmdir $STRESS_DIR
->  } &
-> +pid=$!
->  
->  # start fstest -m loop in a background block; this gets us mmap coverage
->  {
-> @@ -75,6 +79,7 @@ touch $tmp.running
->      rm -rf $FSTEST_DIR/*
->      rmdir $FSTEST_DIR
->  } &
-> +pid="$pid $!"
->  
->  i=0
->  let ITERATIONS=$ITERATIONS-1
-> @@ -103,6 +108,7 @@ done
->  rm $tmp.running
->  
->  # wait for fsstresses to finish
-> -wait
-> +wait $pid
-> +unset pid
->  
->  exit 1
-> diff --git a/tests/generic/085 b/tests/generic/085
-> index 20cf875a..786d8e6f 100755
-> --- a/tests/generic/085
-> +++ b/tests/generic/085
-> @@ -25,6 +25,8 @@ cleanup_dmdev()
->  {
->  	# in case it's still suspended and/or mounted
->  	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-> +	[ -n "$pid" ] && kill -9 $pid 2>/dev/null
-> +	wait $pid
->  	$UMOUNT_PROG $lvdev >/dev/null 2>&1
->  	_dmsetup_remove $node
->  }
-> @@ -75,6 +77,7 @@ done &
->  pid="$pid $!"
->  
->  wait $pid
-> +unset pid
->  
->  status=0
->  exit
-> diff --git a/tests/generic/280 b/tests/generic/280
-> index 07144555..8e1ae4d2 100755
-> --- a/tests/generic/280
-> +++ b/tests/generic/280
-> @@ -10,6 +10,17 @@
->  . ./common/preamble
->  _begin_fstest auto quota freeze
->  
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	[ -n "$pid" ] && kill -9 $pid 2>/dev/null
-> +	wait $pid
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
->  # Import common functions.
->  . ./common/filter
->  . ./common/quota
-> @@ -34,7 +45,7 @@ pid=$!
->  sleep 1
->  xfs_freeze -u $SCRATCH_MNT
->  wait $pid
-> -_scratch_unmount
-> +unset pid
->  
->  # Failure comes in the form of a deadlock.
->  
-> diff --git a/tests/generic/390 b/tests/generic/390
-> index 20c66e22..e8f6a5dc 100755
-> --- a/tests/generic/390
-> +++ b/tests/generic/390
-> @@ -14,8 +14,12 @@ _begin_fstest auto freeze stress
->  _cleanup()
->  {
->  	cd /
-> -	# Make sure $SCRATCH_MNT is unfreezed
-> +	# Kill freeze loops and make sure $SCRATCH_MNT is unfreezed
-> +	[ -n "$freeze_pids" ] && kill -9 $freeze_pids 2>/dev/null
-> +	wait $freeze_pids
->  	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	[ -n "$fsstress_pid" ] && kill -9 $fsstress_pid 2>/dev/null
-> +	wait $fsstress_pid
->  	rm -f $tmp.*
->  }
->  
-> @@ -62,7 +66,9 @@ done
->  
->  wait $fsstress_pid
->  result=$?
-> +unset fsstress_pid
->  wait $freeze_pids
-> +unset freeze_pids
->  
->  # Exit with fsstress return value
->  status=$result
-> diff --git a/tests/generic/459 b/tests/generic/459
-> index 57d58e55..7be39089 100755
-> --- a/tests/generic/459
-> +++ b/tests/generic/459
-> @@ -24,6 +24,8 @@ _begin_fstest auto freeze thin
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
->  	cd /
->  	rm -f $tmp.*
->  	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
-> diff --git a/tests/generic/491 b/tests/generic/491
-> index e6e57dcd..797b08d5 100755
-> --- a/tests/generic/491
-> +++ b/tests/generic/491
-> @@ -12,6 +12,15 @@
->  . ./common/preamble
->  _begin_fstest auto quick freeze mount
->  
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	rm -f $tmp.*
-> +}
-> +
->  # Import common functions.
->  . ./common/filter
->  
-> diff --git a/tests/xfs/011 b/tests/xfs/011
-> index d6e9099e..ed44d074 100755
-> --- a/tests/xfs/011
-> +++ b/tests/xfs/011
-> @@ -16,10 +16,11 @@ _begin_fstest auto freeze log metadata quick
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
->  	$KILLALL_PROG -9 fsstress 2>/dev/null
->  	wait
->  	cd /
-> -	_scratch_unmount 2>/dev/null
->  	rm -f $tmp.*
->  }
->  
-> diff --git a/tests/xfs/119 b/tests/xfs/119
-> index b6f96601..5ffbce25 100755
-> --- a/tests/xfs/119
-> +++ b/tests/xfs/119
-> @@ -11,6 +11,15 @@
->  . ./common/preamble
->  _begin_fstest log v2log auto freeze
->  
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
->  # Import common functions.
->  . ./common/filter
->  
-> diff --git a/tests/xfs/297 b/tests/xfs/297
-> index ca482e06..07f84c25 100755
-> --- a/tests/xfs/297
-> +++ b/tests/xfs/297
-> @@ -11,6 +11,17 @@
->  . ./common/preamble
->  _begin_fstest auto freeze
->  
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
-> +	$KILLALL_PROG -q -9 $FSSTRESS_PROG
-> +	wait
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
->  # Import common functions.
->  . ./common/filter
->  
-> diff --git a/tests/xfs/318 b/tests/xfs/318
-> index be93f9ab..5798f9a3 100755
-> --- a/tests/xfs/318
-> +++ b/tests/xfs/318
-> @@ -12,8 +12,9 @@ _begin_fstest auto quick rw freeze
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
->  	cd /
-> -	_scratch_unmount > /dev/null 2>&1
->  	rm -rf $tmp.*
->  }
->  
-> diff --git a/tests/xfs/325 b/tests/xfs/325
-> index c6861fbc..43fb09a6 100755
-> --- a/tests/xfs/325
-> +++ b/tests/xfs/325
-> @@ -13,8 +13,9 @@ _begin_fstest auto quick clone freeze
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
->  	cd /
-> -	_scratch_unmount > /dev/null 2>&1
->  	rm -rf $tmp.*
->  }
->  
-> diff --git a/tests/xfs/438 b/tests/xfs/438
-> index cfe75bd8..0425c5b1 100755
-> --- a/tests/xfs/438
-> +++ b/tests/xfs/438
-> @@ -26,6 +26,8 @@ _begin_fstest auto quick quota freeze
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	# Make sure $SCRATCH_MNT is unfreezed
-> +	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
->  	[ -z "${interval}" ] || \
->  		sysctl -w fs.xfs.xfssyncd_centisecs=${interval} >/dev/null 2>&1
->  	cd /
-> -- 
-> 2.25.1
-> 
+> So I've ***always*** done the kernel build on a machine or VM separate
+> from the System Under Test.  At least for my use cases, it just makes
+> a heck of a lot more sense.
 
+Support for this will be added to kdevops.
+
+> And that's fine.  I'm *not* trying to convince everyone that my test
+> infrastructure everyone should standardize on.  Which quite frankly, I
+> sometimes think you have been evangelizing.  I believe very strongly
+> that the choice of test infrastructures is a personal choice, which is
+> heavily dependent on each developer's workflow, and trying to get
+> everyone to standardize on a single test infrastructure is likely
+> going to work as well as trying to get everyone to standardize on a
+> single text editor.
+
+What I think we *should* standardize on is at least configurations
+for testing. And now the dialog of how / if we track / share failures
+is also important.
+
+What runner you use is up to you.
+
+> (Although obviously emacs is the one true editor.  :-)
+> 
+> > Sure, the TODO item on the URL seemed to indicate there was a desire to
+> > find a better place to put failures.
+> 
+> I'm not convinced the "better place" is expunge files.  I suspect it
+> may need to be some kind of database.  Darrick tells me that he stores
+> his test results in a postgres database.  (Which is way better than
+> what I'm doing which is an mbox file and using mail search tools.)
+> 
+> Currently, Leah is using flat text files for the XFS 5.15 stable
+> backports effort, plus some tools that parse and analyze those text
+> files.
+
+Where does not matter yet, what I'd like to refocus on is *if* sharing
+is desirable by folks. We can discuss *how* and *where* if we do think
+it is worth to share.
+
+If folks would like to evaluate this I'd encourage to do so perhaps
+after a specific distro release moving forward, and to not backtrack.
+
+But for stable kernels I'd imagine it may be easier to see value in
+sharing.
+
+> I'll also note that the number of baseline kernel versions is much
+> smaller if you are primarily testing an enterprise Linux distribution,
+> such as SLES.
+
+Much smaller than what? Android? If so then perhaps. Just recall that
+Enterprise supports kernels for at least 10 years.
+
+> And if you are working with stable kernels, you can
+> probably get away with having updating the baseline for each LTS
+> kernel every so often.  But for upstream kernels development the
+> number of kernel versions for which a developer might want to track
+> flaky percentages and far greater, and will need to be updated at
+> least once every kernel development cycle, and possibly more
+> frequently than that.  Which is why I'm not entirely sure a flat text
+> file, such as an expunge file, is really the right answer.  I can
+> completely understand why Darrick is using a Postgres database.
+> 
+> So there is clearly more thought and design required here, in my
+> opinion.
+
+Sure, let's talk about it, *if* we do find it valuable to share.
+kdevops already has stuff in a format which is consistent, that
+can change or be ported. We first just need to decide if we want
+to as a community share.
+
+The flakyness annotations are important too, and we have a thread
+about that, which I have to go and get back to at some point.
+
+> > That is not a goal, the goal is allow variability! And share results
+> > in the most efficient way.
+> 
+> Sure, but are expunge files the most efficient way to "share results"?
+
+There are three things we want to do if we are going to talk about
+sharing results:
+
+a) Consuming expunges so check.sh for the Node Under Test (NUT) can expand
+   on the expunges given a criteria (flakyness, crash requirements)
+
+b) Sharing updates to expunges per kernel / distro / runner / node-config
+   and making patches to this easy.
+
+c) Making updates for failures easy to read for a developer / community.
+   These would be in the form of an email or results file for a test
+   run through some sort of kernel-ci.
+
+Let's start with a):
+
+We can adopt runners to use anything. My gut tells me postgres is
+a bit large unless we need socket communication. I can think of two
+ways to go here then. Perhaps others have some other ideas?
+
+1) We go lightweight on the db, maybe sqlite3 ? And embrace the same
+   postgres db schema as used by Darrick if he sees value in sharing
+   this. If we do this I think it does't make sense to *require*
+   sqlite3 on the NUT (nodes), for many reasons, so parsing the db
+   on the host to a flat file to be used by the node does seem
+   ideal.
+
+2) Keep postgres and provide a REST api for queries from the host to
+   this server so it can then construct a flat file / directory
+   interpreation of expunges for the nodes under test (NUT).
+
+Given the minimum requirements desirable on the NUTs I think in the end
+a flat file hierarchy is nice so to not incur some new dependency on
+them.
+
+Determinism is important for tests though so snapshotting a reflection
+interpretion of expunges at a specific point in time is also important.
+So the database would need to be versioned per updates, so a test is
+checkpointed against a specific version of the expunge db.
+
+If we come to some sort of consensus then this code for parsing an
+expunge set can be used from directly on fstests's check script, so the
+interpreation and use can be done in one place for all test runners.
+We also have additional criteria which we may want for the expunges.
+For instance, if we had flakyness percentage annotated somehow then
+fstests's check could be passed an argument to only include expunges
+given a certain flakyness level of some sort, or for example only
+include expunges for tests which are known to crash.
+
+Generating the files from a db is nice. But what gains do we have
+with using a db then?
+
+Now let's move on to b) sharing the expunges and sending patches for
+updates. I think sending a patch against a flat file reads a lot easier
+except for the comments / flakyness levels / crash consideration / and
+artifacts. For kdevop's purposes this reads well today as we don't
+upload artifacts anywhere and just refer to them on github gists as best
+effort / optional. There is no convention yet on expression of flakyness
+but some tests do mention "failure rate" in one way or another.
+
+So we want to evaluate if we want to share not only expunges but other
+meta data associated to why a new test can be expunged or removed:
+
+ * flakyness percentage
+ * cause a kernel crash?
+ * bogus test?
+ * expunged due to a slew of a tons of other reasons, some of them maybe
+   categorized and shared, some of them not
+
+And do we want to share artifacts? If so how? Perhaps an optional URL,
+with another component describing what it is, gist, or a tarball, etc.
+
+Then for the last part c) making failures easy to read to a developer
+let's review what could be done. I gather gce-xfstests explains the
+xunit results summary. Right now kdevop's kernel-ci stuff just sends
+an email with the same but also a diff to the expunge file hierarchy
+augmented for the target kernel directory being tested. The developer
+would just go and edit the line with meta data as a comment, but that
+is just because we lack a structure for it. If we strive to share
+an expunge list I think it would be wise to consider structure for
+this metadata.
+
+Perhaps:
+
+<test> # <crashes>|<flayness-percent-as-fraction>|<fs-skip-reason>|<artifact-type>|<artifact-dir-url>|<comments>
+
+Where:
+
+test:                         xfs/123 or btrfs/234
+crashes:                      can be either Y or N
+flayness-percent-as-percentage: 80%
+fs-skip-reason:               can be an enum to represent a series of 
+                              fs specific reasons why a test may not be
+			      applicable or should be skipped
+artifact-type:                optional, if present the type of artifact,
+                              can be enum to represent a gist test
+			      description, or a tarball
+artifact-dir-url:             optional, path to the artifact
+comments:                     additional comments
+
+All the above considered, a) b) and c), yes I think a flat file
+model works well as an option. I'd love to hear other's feedback.
+
+> If we have a huge amount of variability, such that we have a large
+> number of directories with different test configs and different
+> hardware configs, each with different expunge files, I'm not sure how
+> useful that actually is.
+
+*If* you want to share I think it would be useful.
+
+At least kdevops uses a flat file model with no artifacts, just the
+expunges and comments, and over time it has been very useful, even to be
+able to review historic issues on older kernels by simply using
+something like 'git grep xfs/123' gives me a quick sense of history of
+issues of a test.
+
+> Are we expecting users to do a "git clone",
+> and then start browsing all of these different expunge files by hand?
+
+If we want to extend fstests check script to look for this, it could
+be an optional directory and an arugment could be pased to check so
+to enable its hunt for it, so that if passed it would look for the
+runner / kernel / host-type. For instance today we already have
+a function on initialization for the check script which looks for
+the fstests' config file as follows:
+
+known_hosts()
+{
+	[ "$HOST_CONFIG_DIR" ] || HOST_CONFIG_DIR=`pwd`/configs
+
+	[ -f /etc/xfsqa.config ] && export HOST_OPTIONS=/etc/xfsqa.config
+	[ -f $HOST_CONFIG_DIR/$HOST ] && export HOST_OPTIONS=$HOST_CONFIG_DIR/$HOST
+	[ -f $HOST_CONFIG_DIR/$HOST.config ] && export HOST_OPTIONS=$HOST_CONFIG_DIR/$HOST.config
+}
+
+We could have something similar look for an expugne directory of say
+say --expunge-auto-look and that could be something like:
+
+process_expunge_dir()
+{
+	[ "$HOST_EXPUNGE_DIR" ] || HOST_EXPUNGE_DIR=`pwd`/expunges
+
+	[ -d /etc/fstests/expunges/$HOST ] && export HOST_EXPUNGES=/etc/fstests/expunges/$HOST
+	[ -d $HOST_EXPUNGE_DIR/$HOST ] && export HOST_EXPUNGES=$HOST_EXPUNGE_DIR/$HOST
+}
+
+The runner could be specified, and the host-type
+
+./check --runner <gce-xfstests|kdevops|whatever> --host-type <kvm-8vcpus-2gb>
+
+And so we can have it look for these directory and if any of these are used
+processed (commulative):
+
+  * HOST_EXPUNGES/any/$fstype/                       - regardless of kernel, host type and runner
+  * HOST_EXPUNGES/$kernel/$fstype/any                - common between runners for any host type
+  * HOST_EXPUNGES/$kernel/$fstype/$hostype           - common between runners for a host type
+  * HOST_EXPUNGES/$kernel/$fstype/$hostype/$runner   - only present for the runner
+
+The aggregate set of expugnes are used.
+
+Additional criteria could be passed to check so to ensure that only
+certain expunges that meet the criteria are used to skip tests for the
+run, provided we can agree on some metatdata for that.
+
+> It might perhaps be useful to get a bit more clarity about how we
+> expect the shared results would be used, because that might drive some
+> of the design decisions about the best way to store these "results".
+
+Sure.
+
+  Luis
