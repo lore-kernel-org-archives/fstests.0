@@ -2,132 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F3AEC43334
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 04:42:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE8CBC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Jun 2022 04:52:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229497AbiFXEmM (ORCPT
+        id S232331AbiFXEws (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Jun 2022 00:42:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42482 "EHLO
+        Fri, 24 Jun 2022 00:52:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49294 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229478AbiFXEmK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 00:42:10 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BCAB680AA
-        for <fstests@vger.kernel.org>; Thu, 23 Jun 2022 21:42:09 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25O4g4xX007086
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 24 Jun 2022 00:42:05 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656045725; bh=LA69DI+gXKlJehPYLEpnzvpak9m1zQ3/ZzHaLtnXk08=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=m7UvezJ2KjxS9QMq9Rxf1XAzfOjTPbmmbLE3xTRwxjvNxdA7lJkAGc1knfn9fhWmb
-         tuHwzxJLeL4tgHMR5X1nxIg8/eJBsxosWxRcovV45sH5R3s2JRAozghE7Y/005K92Z
-         eSAF5eVnglZkyNS1SLmJhfpi61b/nb2cYP0aEcvnvMw1Zi0bvCsrMiA5q1+OlZkJga
-         oLXx7YqKS6lZp+rgBltdyXD7dGhvXzwpFbWZkCcf4b9M49Y8xtOIfY5YKTdB6j80Zp
-         xfhmVtGcuWvC1lGFIroCQMIFt3hcMYbMaSibYlUwxoHw0uMlEEzNK4dlWJyyaBPELO
-         zGXWY5bdSk/tg==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 00F3315C42F6; Fri, 24 Jun 2022 00:42:03 -0400 (EDT)
-Date:   Fri, 24 Jun 2022 00:42:03 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     David Disseldorp <ddiss@suse.de>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [RFC PATCH 0/2] add option to rerun failed tests
-Message-ID: <YrVAm6dzTUh3ufb6@mit.edu>
-References: <20220621160153.29591-1-ddiss@suse.de>
+        with ESMTP id S232003AbiFXEvK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 00:51:10 -0400
+Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41EAF6B8DD;
+        Thu, 23 Jun 2022 21:49:41 -0700 (PDT)
+Received: by mail-vs1-xe30.google.com with SMTP id t127so1282828vsb.8;
+        Thu, 23 Jun 2022 21:49:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=7LHgNgAtnEuA7DCXWeLpPCmLAfMw4XcrPxE/RxanjDs=;
+        b=EZBDemakqX+VOAUWpA5gHBAeykSH80Rs7LQgwAwZ31SomZmqj1oJVzs5BLvUybGOED
+         Emc6tSghxNozOctTM8ae54DdnO9m9Xt4C7mmWLg7kb32vZfouY4RgfDTX4nSA8WbYwno
+         enISRANxm5hDHHOyjuYiBj4mZNwdSwgyS+esT3P2Xmja4MFPxKV1ENoQPE26LTiWQlgA
+         BW7f/DvjBvtg/BB3XyOAPsicxd2rwhwaTTN/fuPwOvMMcrs/cP624cNyLGgj9djf0PZH
+         ccbpzcNj/GOry+BRRSUOc7lW7/s98VR77sX92Lt0pnG6i/HcG3zVtgjcRxLuE2oR2Nrj
+         PniQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=7LHgNgAtnEuA7DCXWeLpPCmLAfMw4XcrPxE/RxanjDs=;
+        b=hUu60c4Clkt1q0j2uE/kf5khVO1aHFBW/Cl+c1qNu7MjKrkpK7XXoyGN+exIUaTjNu
+         9bCQ0G0uY33dMJ8xsBtWTtrikOKuB8MMYU5Cz8TKEiAilapUirs65tE+RJ3VIfmZPwRR
+         tG1mzC6Put9T1rG0tSt8Dl88PVI33H6qNDzW6X+Nt4IFuxWlk7sNMoUa2FEsOdDd0jyi
+         jQ9T+QrGN7M16+ZDUvkCOFJoXtf4azrUYEbGfwD1Ac8ICxfbzz4Vz67IKdVDuNnOFF6b
+         ryORq+w9nYS83fbl/qPRj/aYpdhYCkqFUs3QjaTgXftvS272eZQl0IbUf4xciAP9fhhB
+         WXew==
+X-Gm-Message-State: AJIora+/AiIMbge603/qnJbJt6SuwWG/uNLiKysteGM0rA9tnXzWVJun
+        OvQVMcLx39BS8uGhK7FtWALfm7Go2iuhaPgfe8YXd6Iq2v8=
+X-Google-Smtp-Source: AGRyM1vcHweCb81Qdwl5VjKHRlSt5eJqqfLJYGWdotlU4+v6jDPyKjl2jWAw5N1C7ywm/NW0fWkBZZT1UV05kMlL/3A=
+X-Received: by 2002:a67:fa01:0:b0:354:3136:c62e with SMTP id
+ i1-20020a67fa01000000b003543136c62emr12831620vsq.2.1656046180381; Thu, 23 Jun
+ 2022 21:49:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220621160153.29591-1-ddiss@suse.de>
+References: <20220619134657.1846292-1-amir73il@gmail.com> <20220619134657.1846292-4-amir73il@gmail.com>
+ <CAOQ4uxj350-k2bzCSD_j35XCH5E-VcdtfHmW3d_ZrSzHxWA5CQ@mail.gmail.com> <YrSrLgU1OIgaaxiB@magnolia>
+In-Reply-To: <YrSrLgU1OIgaaxiB@magnolia>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Fri, 24 Jun 2022 07:49:29 +0300
+Message-ID: <CAOQ4uxjCUdzVdMUR9gj4xHfS-wHo5HsJnkTAAWjKeEwdVvX5iQ@mail.gmail.com>
+Subject: Delegating fstests maintenance work (Was: Re: [PATCH 3/4]
+ xfs/{422,517}: add missing killall to _cleanup())
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Zorro Lang <zlang@redhat.com>,
+        "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Dave Chinner <david@fromorbit.com>,
+        fstests <fstests@vger.kernel.org>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Theodore Tso <tytso@mit.edu>, Chris Mason <clm@fb.com>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 21, 2022 at 06:01:51PM +0200, David Disseldorp wrote:
-> This RFC patchset adds support to loop on failed tests, as proposed by
-> Ted Ts'o in https://lwn.net/Articles/897061/:
->   add a mode that will immediately rerun a failed test 25 or 100 times
->   to establish a failure percentage.
-> 
-> There are a couple of things which I'd like to resolve before dropping
-> the RFC flag, but would appreciate early feedback on the approach here.
+[+fsdevel]
 
-This is really exciting!  I was hoping to try it out, but the first
-patch doesn't apply to origin/master on xfstests-dev.
+>
+> I swear I'll send all these some day, if I ever get caught up...
+> Delegating LTS maintenance is a big help, but as it is I still can't
+> stay abreast of all the mainline patchsets /and/ send my own stuff. :(
 
-For example this patch hunk:
+I have to repeat what I said in LSFMM about the LTP project and
+what fstests could be like.
 
-@@ -729,9 +750,7 @@ function run_section()
- 	prev_seq=""
- 	for seq in $list ; do
- 		# Run report for previous test!
--		if [ "$tc_status" == "fail" ]; then
--			bad+=("$seqnum")
--		fi
-+		_stash_test_status "$seqnum" "$tc_status"
- 		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
- 			_make_testcase_report "$prev_seq" "$tc_status"
- 		fi
+Companies put dedicated engineers to work as proactive LTP
+maintainers. There is absolutely no reason that companies won't
+do the same for fstests.
 
-The relevant section of check looks like this:
+If only every large corp. that employs >10 fs developers will assign
+a halftime engineer for fstests maintenance, their fs developer's
+work would become so much more productive and their fs product
+will become more reliable.
 
-		# Run report for previous test!
-		if $err ; then
-			bad="$bad $seqnum"
-			n_bad=`expr $n_bad + 1`
-			tc_status="fail"
-		fi
+I think the fact that this is not happening is a failure on our part to
+communicate that to our managers.
 
-And "git blame" shows that this part of check hasn't changed since
-2018, and I'm on the latest version upstream version of xfstests:
+From my experience, if you had sent stuff like your fstests cleanups
+to the LTP maintainers and ask for their help to land it, they would
+thank you for the work you did and take care of all the testing
+on all platforms and fixing all the code style and framework issues.
 
-commit 568ac9fffeb6afec03e5d6c9936617232fd7fc6d (HEAD, tag: v2022.06.05, origin/master, origin/HEAD, kernel/master)
-Author: Dave Chinner <dchinner@redhat.com>
-Date:   Fri Jun 3 11:54:13 2022 +1000
+LTP maintainers constantly work on improving the framework and
+providing more features to test writers as well as on converting old
+tests to use new infrastructure.
 
-    xfs/189: systemd monitoring of /etc/fstab sucks
+Stuff like Dave's work on sorting up the cleanup mess or the groups
+cleanup and groups speedup - all of those do not have to add load
+to busy maintainers - life can be different!
 
+Taking responsibility away from developers to deliver their own tests
+is a slippery slope, but getting help and working together is essential
+for offloading work from busy maintainers.
 
-Was your patch based xfstests with some out-of-tree patches?
-
-> The caveats are:
-> - rerun tests will be tracked as a single failure in @try and @bad
->   + xunit reports do not include any rerun details
-> - .bad files generated on failure will be overwritten by test reruns
-> 
-> For xunit reports, I think it'll make sense to stash the aggregates in a
-> separate <test>.agg-results file or something. Similarly for .bad file
-> overwrites, I could add a .<rerun #> suffix for capturing all failure
-> data.
-
-For xunit results fie, was assuming that simply we would just have
-multiple repeated testcase entries stored in the single results.xml
-file.  For example:
-
-<testcase classname="xfstests.global" name="generic/476" time="354">
-		<failure message="Test  failed, reason unknown" type="TestFail" />
-		<system-out>
-		...
-	</testcase>
-<testcase classname="xfstests.global" name="generic/476" time="343">
-	</testcase>
-<testcase classname="xfstests.global" name="generic/476" time="353">
-	</testcase>
-	...
-
-I don't know that we need a separate file for the rerun tests, since
-it's not that hard to create a python script which parses the results
-and calculates the pass/fail percentages for any test which is run
-mutiple times.
-
-
-As far as haivng the .bad and .full files, I agree that some kind of
-.rerun-NN suffix would make a lot of sense.
-
-Cheers,
-
-						- Ted
+Thanks,
+Amir.
