@@ -2,154 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9C14C433EF
-	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 21:50:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71FAEC43334
+	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 22:47:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230241AbiFYVuy (ORCPT
+        id S233529AbiFYWrP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 25 Jun 2022 17:50:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33626 "EHLO
+        Sat, 25 Jun 2022 18:47:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230116AbiFYVux (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 17:50:53 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 269C713E15;
-        Sat, 25 Jun 2022 14:50:52 -0700 (PDT)
-Received: from letrec.thunk.org (c-24-1-67-28.hsd1.il.comcast.net [24.1.67.28])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25PLoRcJ023513
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 25 Jun 2022 17:50:28 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656193830; bh=Otfw0i6A+bDyTiPbkZ9vPs4xbMQYL8LtwZ1kUohF33Y=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=Lz3Y/yVTX42/+cvT+MFD+cbbkYqDpyzITc5tkb3N4rO8NJ0xAnvS5JzURuz2xGJx/
-         dXHB5VAVrJX8QEPT5+KF8ggSZJN5u0vSK5oU8soPhXvICen8v/2tzTd5UaiUrwYNHW
-         Gc1alXTL4LyXxZY861hPDNvKVYmY+RaIuVctNBxNy9YzTJW+qZw+hHIJrfhApDA2i4
-         b6m+TOSctZVnMkkNNuoyBapmnQvp8nKcS4oxKL9wTIUF+tUaie96ylbjzpl/3UFP1n
-         AxNmS/eEWBKflyVjkWAR167WpTrEoqyM5kziD7WogrdRyC17VOYvfJUA7IU0QR/Ak8
-         MWcWO0qjCfGCQ==
-Received: by letrec.thunk.org (Postfix, from userid 15806)
-        id F39CE8C3689; Sat, 25 Jun 2022 17:50:26 -0400 (EDT)
-Date:   Sat, 25 Jun 2022 17:50:26 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Leah Rumancik <leah.rumancik@gmail.com>,
-        Josef Bacik <josef@toxicpanda.com>,
-        Chuck Lever <chuck.lever@oracle.com>, chandanrmail@gmail.com,
-        Sweet Tea Dorminy <sweettea-kernel@dorminy.me>,
-        Pankaj Raghav <pankydev8@gmail.com>,
-        Zorro Lang <zlang@redhat.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: sharing fstests results (Was: [PATCH 5.15 CANDIDATE v2 0/8] xfs
- stable candidate patches for 5.15.y (part 1))
-Message-ID: <YreDIk2FMMPQDpLL@mit.edu>
-References: <20220616182749.1200971-1-leah.rumancik@gmail.com>
- <YrJdLhHBsolF83Rq@bombadil.infradead.org>
- <YrONPrBgopZQ2EUj@mit.edu>
- <YrTboFa4usTuCqUb@bombadil.infradead.org>
- <YrVMZ7/rJn11HH92@mit.edu>
- <YrZAtOqQERpYbBXg@bombadil.infradead.org>
- <CAOQ4uxi-KVMWb4nvNCriPdjMcZkPut7x6LA6aHJz_hVMeBxvOA@mail.gmail.com>
- <YrdjluHoj9xAz3Op@bombadil.infradead.org>
+        with ESMTP id S233513AbiFYWrP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 18:47:15 -0400
+Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CAC0813E3F
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 15:47:13 -0700 (PDT)
+Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id C8AAA5EFAF5;
+        Sun, 26 Jun 2022 08:47:10 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1o5EYW-00B3cQ-8t; Sun, 26 Jun 2022 08:47:08 +1000
+Date:   Sun, 26 Jun 2022 08:47:08 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     An Long <lan@suse.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] common/config: Fix use of MKFS_OPTIONS
+Message-ID: <20220625224708.GJ1098723@dread.disaster.area>
+References: <20220623160825.31788-1-lan@suse.com>
+ <Yrc6Pz67mL56ML6j@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YrdjluHoj9xAz3Op@bombadil.infradead.org>
+In-Reply-To: <Yrc6Pz67mL56ML6j@mit.edu>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62b7906f
+        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
+        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=7-415B0cAAAA:8
+        a=5eWJavWNVerMDHAMmrAA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jun 25, 2022 at 12:35:50PM -0700, Luis Chamberlain wrote:
+On Sat, Jun 25, 2022 at 12:39:27PM -0400, Theodore Ts'o wrote:
+> On Fri, Jun 24, 2022 at 12:08:25AM +0800, An Long wrote:
+> >  
+> > +# check the size value in $MKFS_OPTIONS is an integer
+> > +if [[ $MKFS_OPTIONS =~ [0-9]+[^0-9\ ] ]] ; then
+> > +        _fatal "error: \$MKFS_OPTIONS: Only number in bytes is allowed, no units."
+> > +fi
 > 
-> The way the expunge list is process could simply be modified in kdevops
-> so that non-deterministic tests are not expunged but also not treated as
-> fatal at the end. But think about it, the exception is if the non-deterministic
-> failure does not lead to a crash, no?
+> This will break configs, since ext4 has a feature 64bit, so there
+> might be MKFS_OPTIONS that contain "-O 64bit", or "-O ^64bit".
+> 
+> For that matter, this wll also break things like "-E encoding=12.1"
+> which sets the Unicode encoding to 12.1.
+> 
+> ... or "-E lazy_itable_init=1,lazy_journal_init=1".
+> 
+> Bottom line, blindly assuming that any number followed by a non-number
+> is a unit, is just not going to work.
+> 
+> I think the real problem is that we have fstests trying to parse
+> MKFS_OPTIONS at all in the first place.
 
-That's what I'm doing today, but once we have a better test analysis
-system, what I think the only thing which should be excluded is:
+Yup. That's exactly the issue.
 
-   a)   bugs which cause the kernel to crash
-   b)   test bugs
-   c)   tests which take ***forever*** for a particular configuration
-   	    (and for which  we probably get enough coverage through
-	    other configs)
+> For that matter, I'm not fond
+> of tests that try to override MKFS_OPTIONS for their own nefarious
+> purposes, because sometimes certain MKFS_OPTIONS imply something about
+> what must be in MOUNT_OPTIONS, or vice versa.  I do understand why
+> that has to be done for certain tests, but... yelch.  Especially in
+> centralized functions like _scratch_mkfs_sized, it just leads to tech
+> debt.
+> 
+> I'll note that generic tests and functions in common/rc that do unholy
+> things with MKFS_OPTIONS already have to have per-file system hacks as
+> it is.  So having more per-file system hacks for check_block_options()
+> is par for the course, so long as we accept that we want to have
+> generic tests and generic code violate the abstraction barrier and try
+> to read or override MKFS_OPTIONS.
+> 
+> If we want to go down that approach, perhaps another approach would be
+> to specify the desired blocksize diretly in the fs config.  Something
+> like "FS_BLOCK_SIZE=1024"?  We can then have the fs-specific mkfs
+> commands translate that into the appropriate "-b 1024" or whatever
+> else might be appropriate for a particular file system.  And then
+> tests that want to override the block size can just override
+> FS_BLOCK_SIZE and then the _mkfs function can use it as appropriate.
 
-If we have a non-deterministic failure, which is due to a kernel bug,
-I don't see any reason why we should skip the test.  We just need to
-have a fully-featured enough test results analyzer so that we can
-distinguish between known failures, known flaky failures, and new test
-regressions.
+This is the right way to fix the problem.
 
-So for example, the new tests generic/681, generic/682, and
-generic/692 are causing determinsitic failures for the ext4/encrypt
-config.  Right now, this is being tracked manually in a flat text
-file:
+My plan was that once there was a single point of checking of
+MKFS_OPTIONS, I'd use that to extract the default value ifor the
+entire fstests run and convert everything else to use it. And then
+add config section support for the variable so that it can easily be
+specified on a config section by section basis.
 
-generic/68[12]  encrypt   Failure percentage: 100%
-    The directory does grow, but blocks aren't charged to either root or
-    the non-privileged users' quota.  So this appears to be a real bug.
-    Testing shows this goes all the way back to at least 4.14.
+I started writing an email that said exactly this, but then decided
+half way through that it was a waste of time because people would
+just nod, go their own way and yet again nothing would happen unless
+I did it myself....
 
-It's currently not tagged by kernel version, because I mostly only
-care about upstream.  So once it's fixed upstream, I stop caring about
-it.  In the ideal world, we'd track the kernel commit which fixed the
-test failure, and when the fix propagated to the various stable
-kernels, etc.
+-Dave.
 
-I've also resisted putting it in an expunge file, since if it did, I
-would ignore it forever.  If it stays in my face, I'm more likely to
-fix it, even if it's on my personal time.
-
-> Here's the thing though. Not all developers have incentives to share.
-
-Part of this is the amount of *time* that it takes to share this
-information.  Right now, a lot of sharing takes place on the weekly
-ext4 conference call.  It doesn't take Eric Whitney a lot of time to
-mention that he's seeing a particular test failure, and I can quickly
-search my test summary Unix mbox file and say, "yep, I've seen this
-fail a couple of times before, starting in February 2020 --- but it's
-super rare."
-
-And since Darrick attends the weekly ext4 video chats, once or twice
-we've asked him about some test failures on some esoteric xfs config,
-such as realtime with an external logdev, and he might say, "oh yeah,
-that's a known test bug.  pull this branch from my public xfstests
-tree, I just haven't had time to push those fixes upstream yet."
-
-(And I don't blame him for that; I just recently pushed some ext4 test
-bug fixes, some of which I had initially sent to the list in late
-April --- but on code review, changes were requested, and I just
-didn't have *time* to clean up fixes in response to the code reviews.
-So the fix which was good enough to suppress the failures sat in my
-tree, but didn't go upstream since it was deemed not ready for
-upstream.  I'm all for decreasing tech debt in xfstests; but do
-understand that sometimes this means fixes to known test bugs will
-stay in developers' git trees, since we're all overloaded.)
-
-It's a similar problem with test failures.  Simply reporting a test
-failure isn't *that* hard.  But the analysis, even if it's something
-like:
-
-generic/68[12]  encrypt   Failure percentage: 100%
-    The directory does grow, but blocks aren't charged to either root or
-    the non-privileged users' quota.....
-    
-... is the critical bit that people *really* want, and it takes real
-developer time to come up with that kind of information.  In the ideal
-world, I'd have an army of trained minions to run down this kind of
-stuff.  In the real world, sometimes this stuff happens after
-midnight, local time, on a Friday night.
-
-(Note that Android and Chrome OS, both of which are big users of
-fscrypt, don't use quota.  So If I were to open a bug tracker entry on
-it, the bug would get prioritized to P2 or P3, and never be heard from
-again, since there's no business reason to prioritize fixing it.
-Which is why some of this happens on personal time.)
-
-      	      	    	      	    	       - Ted
+-- 
+Dave Chinner
+david@fromorbit.com
