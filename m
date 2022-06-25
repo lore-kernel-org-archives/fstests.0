@@ -2,108 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59434C433EF
-	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 16:39:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7222C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 18:31:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232172AbiFYQje (ORCPT
+        id S233225AbiFYSbt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 25 Jun 2022 12:39:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58394 "EHLO
+        Sat, 25 Jun 2022 14:31:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52734 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233112AbiFYQje (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 12:39:34 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06D86140DE
-        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 09:39:32 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25PGdRkf030400
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 25 Jun 2022 12:39:28 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656175168; bh=24IKZ8XS/s9rApBg7Bkpmbq0/rO6CiZ9JM+0QKp38dk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=h9J8iK9kosWVXYO6KWNMDjcOJa3aVcCyCVND1cYuApNTYZF0Skk3TLFG2TBKCf4Bw
-         s16szwUtuwxCNy6ak6W+2cCxCotVcUGTUfkGs5Bf4Ka0ZC6j51u50v2dz7s6b/58mQ
-         ybTdYItqRrKOhHl7f7wZzcGlXDQN5ys5jEGrICbAV1bfeBJ4nxTlDe0TOG3/ZuRbGg
-         YNNrDx7TJnTS/2e3LaDKpEBC4mFGhIelc6/OvTi3EH6JGIkk/fJ0QYxY0BoMtl/lCo
-         svzyOb+sLlizqPfXgCz9E1S1aK5pYDDHUDPD4WBiesFVDLNq3khdICZ6PhQaPRzj+u
-         Ds0T5j2WETLPQ==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 43FD915C42F6; Sat, 25 Jun 2022 12:39:27 -0400 (EDT)
-Date:   Sat, 25 Jun 2022 12:39:27 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     An Long <lan@suse.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common/config: Fix use of MKFS_OPTIONS
-Message-ID: <Yrc6Pz67mL56ML6j@mit.edu>
-References: <20220623160825.31788-1-lan@suse.com>
+        with ESMTP id S233354AbiFYSbs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 14:31:48 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 175E7140BC
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 11:31:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656181907;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=nngqE5G13z98vhicyvNq2lHOXVumiC0a6jx6eWbmyu8=;
+        b=NDZwgyejOcn7jg5VhWnYj9fDfZGkg4i1vdohUwGukOG2QBwwlu3JvzM/lI1LT9cQq7a0nB
+        PwVfuCVeFDoOYLMrEJyuePGgI3AggHB6+47wlVHd7b6byUGvuMdws2VihegLUraGiIPIga
+        JLKECyq/POgb1jsyEJ3pXCyGg2vfpsQ=
+Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
+ [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-358-yH6aQSALNh-yN-bg4V13wA-1; Sat, 25 Jun 2022 14:31:45 -0400
+X-MC-Unique: yH6aQSALNh-yN-bg4V13wA-1
+Received: by mail-qv1-f71.google.com with SMTP id kj4-20020a056214528400b0044399a9bb4cso5622082qvb.15
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 11:31:45 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=nngqE5G13z98vhicyvNq2lHOXVumiC0a6jx6eWbmyu8=;
+        b=40lbXWnrve6rzsBiUEn8BltsxUzc3Crz99Z4G06F1y647z10rfOonREd5Qjoqmw9fb
+         G06yq7BLJ69HLvTL6XvzH6Xq7/MI8Qq0amSvWGV/ln/MqkdNeQAHXDYcxCYBqcpve7uc
+         uuzOPfJIKMigFfPuuru1Go4NNhk2mYxkMhxebpWym7ld3SQzUQfwveS00UD8d2W3KSLR
+         3r2XVS6UQ/FdxbuMnLW2nzD5x3gjR/wRo717XxwNf7gzHpzubOWHDFdtIikp7SBuWGNR
+         ESaBzT7C1sasej+X7MvD3eWXdzmr2znaDemMcXqR9GeopJ+/5/ZrvwjqN2e7JEIGAmNm
+         TUVQ==
+X-Gm-Message-State: AJIora9sZDJU/cjwRj7tXM+TR1qaVkWP0o+CAGMWHm9GgjiIyDkzHRY9
+        s2ByARMGvgO/lSkKOxDH+k7mR981huNPsbu3hcnQYEzUWWnw+txdT1sQO3icuCsL54544k3FUxx
+        9R8NJLRphljltI9Qg7A==
+X-Received: by 2002:a05:622a:64c:b0:318:9fcb:89a6 with SMTP id a12-20020a05622a064c00b003189fcb89a6mr2411924qtb.380.1656181905053;
+        Sat, 25 Jun 2022 11:31:45 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1u91WGSG8zdeKns+upZv3YKNLHAeVAxLoh0XvLp6WUGw7EYLpTh5dxPy1eQIzw/5xpIq79TSg==
+X-Received: by 2002:a05:622a:64c:b0:318:9fcb:89a6 with SMTP id a12-20020a05622a064c00b003189fcb89a6mr2411912qtb.380.1656181904810;
+        Sat, 25 Jun 2022 11:31:44 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id n1-20020a05620a294100b006a6bb044740sm5161208qkp.66.2022.06.25.11.31.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 25 Jun 2022 11:31:44 -0700 (PDT)
+Date:   Sun, 26 Jun 2022 02:31:36 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     fstests@vger.kernel.org, Seth Forshee <sforshee@digitalocean.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Aleksa Sarai <cyphar@cyphar.com>
+Subject: Re: [PATCH v3] generic/692: test group ownership change
+Message-ID: <20220625183136.kves26fjthhwtzdy@zlang-mailbox>
+References: <20220615092826.2333847-1-brauner@kernel.org>
+ <20220625151715.vxlq2wflms2ykcju@zlang-mailbox>
+ <20220625162540.lhdnqly5xzqzkesm@wittgenstein>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220623160825.31788-1-lan@suse.com>
+In-Reply-To: <20220625162540.lhdnqly5xzqzkesm@wittgenstein>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 24, 2022 at 12:08:25AM +0800, An Long wrote:
->  
-> +# check the size value in $MKFS_OPTIONS is an integer
-> +if [[ $MKFS_OPTIONS =~ [0-9]+[^0-9\ ] ]] ; then
-> +        _fatal "error: \$MKFS_OPTIONS: Only number in bytes is allowed, no units."
-> +fi
+On Sat, Jun 25, 2022 at 06:25:40PM +0200, Christian Brauner wrote:
+> On Sat, Jun 25, 2022 at 11:17:15PM +0800, Zorro Lang wrote:
+> > On Wed, Jun 15, 2022 at 11:28:26AM +0200, Christian Brauner wrote:
+> > > When group ownership is changed a caller whose fsuid owns the inode can
+> > > change the group of the inode to any group they are a member of. When
+> > > searching through the caller's groups we failed to use the gid mapped
+> > > according to the idmapped mount otherwise we fail to change ownership.
+> > > Add a test for this.
+> > > 
+> > > Cc: Seth Forshee <sforshee@digitalocean.com>
+> > > Cc: Amir Goldstein <amir73il@gmail.com>
+> > > Cc: Christoph Hellwig <hch@lst.de>
+> > > Cc: Aleksa Sarai <cyphar@cyphar.com>
+> > > Cc: <fstests@vger.kernel.org>
+> > > Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+> > > ---
+> > > /* v2 */
+> > > - Zorro Lang <zlang@redhat.com>:
+> > >   - various minor fixes
+> > > 
+> > > - Christian Brauner (Microsoft) <brauner@kernel.org>:
+> > >   - Expand test to also cover overlayfs on top of idmapped mounts.
+> > > 
+> > > /* v3 */
+> > > - Amir Goldstein <amir73il@gmail.com>:
+> > >   - Switch from calls to the mount binary to _overlay_mount_dirs helper.
+> > > 
+> > > - Christian Brauner (Microsoft) <brauner@kernel.org>:
+> > >   - Expand test to also cover non-idmapped mounts.
+> > > ---
+> > 
+> > We really make this test case become more complicated than its v1 version,
+> > for covering overlayfs on top of idmapped mounts.
+> > 
+> > I'm wondering if it's worth splitting this case to two cases, one similar
+> > as v1 to cover the original regression test, the other expand for overlayfs,
+> > although that will cause some duplicate testing steps use?
+> 
+> Both approaches would work. I chose to combine them because it's the
+> same regression just under different circumstances and because it avoids
+> duplicated code.
+> 
+> > 
+> > If most of you prefer this v3 version, I'd like to get more review points.
+> 
+> If you want to wait for additional acks then sure. But I'd like to not
+> put merging this off for too long.
+> I prefer to merge regression tests quickly so they are run as soon as
+> possible especially since the fix is already upstream for about 2 weeks
+> now.
 
-This will break configs, since ext4 has a feature 64bit, so there
-might be MKFS_OPTIONS that contain "-O 64bit", or "-O ^64bit".
+I'd like to split this test to two cases for two reasons:
+1) Reduce the complexity of this case.
+2) That overlayfs test part need a separated overlayfs idmapped feature which
+   is not necessary to be a limitation of this regression test, cause this
+   case can't be run on older kernel.
 
-For that matter, this wll also break things like "-E encoding=12.1"
-which sets the Unicode encoding to 12.1.
 
-... or "-E lazy_itable_init=1,lazy_journal_init=1".
+And that:
+  _supports_filetype $SCRATCH_MNT || _notrun "overlayfs test requires d_type"
+line should be called after _scratch_mount, due to $SCRATCH_MNT might not be
+mounted before _scratch_mount.
 
-Bottom line, blindly assuming that any number followed by a non-number
-is a unit, is just not going to work.
+Thanks,
+Zorro
 
-I think the real problem is that we have fstests trying to parse
-MKFS_OPTIONS at all in the first place.  For that matter, I'm not fond
-of tests that try to override MKFS_OPTIONS for their own nefarious
-purposes, because sometimes certain MKFS_OPTIONS imply something about
-what must be in MOUNT_OPTIONS, or vice versa.  I do understand why
-that has to be done for certain tests, but... yelch.  Especially in
-centralized functions like _scratch_mkfs_sized, it just leads to tech
-debt.
+> 
+> Christian
+> 
 
-I'll note that generic tests and functions in common/rc that do unholy
-things with MKFS_OPTIONS already have to have per-file system hacks as
-it is.  So having more per-file system hacks for check_block_options()
-is par for the course, so long as we accept that we want to have
-generic tests and generic code violate the abstraction barrier and try
-to read or override MKFS_OPTIONS.
-
-If we want to go down that approach, perhaps another approach would be
-to specify the desired blocksize diretly in the fs config.  Something
-like "FS_BLOCK_SIZE=1024"?  We can then have the fs-specific mkfs
-commands translate that into the appropriate "-b 1024" or whatever
-else might be appropriate for a particular file system.  And then
-tests that want to override the block size can just override
-FS_BLOCK_SIZE and then the _mkfs function can use it as appropriate.
-
-(BTW, this has been less important for ext4, since we allow the block
-size to be specified more than once, with the last option being the
-one which controls.  So "mkfs.ext4 -b 4096 ... -b 1024 ..." is OK for
-ext4, but it results in an error for mkfs.xfs.  Otherwise we could
-probably solve this problem more easily.)
-
-I know my proposed approach will require all of the fstests wrapers to
-be changed, and may require auditing a lot of tests to see what
-breaks.  But quite frankly, what we have write now with tests messing
-with MKFS_OPTIONS is kind of a mess already, and if we're going to do
-clean up the tech debt, it's going to requrie some pain.
-
-Or we could use the suggestion of more per-fs case in a
-_check_mkfs_options function.  Which is a bit ugly, but IMHO, not as
-ugly as the existing hacks where we have generic code trying to mess
-with MKFS_OPTIONS....
-
-						- Ted
