@@ -2,72 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B49EFC43334
-	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 03:08:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54991C433EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 03:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232345AbiFYDIR (ORCPT
+        id S231542AbiFYDLI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Jun 2022 23:08:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52110 "EHLO
+        Fri, 24 Jun 2022 23:11:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54120 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232474AbiFYDIF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 23:08:05 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6373060FC
-        for <fstests@vger.kernel.org>; Fri, 24 Jun 2022 20:08:04 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25P37YCG010381
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 24 Jun 2022 23:07:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656126455; bh=NDZVyZ5gvfyrcqKY2Brg3MnGgp5+uwqYZsM4M2WU+xg=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=LU3HM3XMisf31qEER6fgbpfYIlsM4QEhhV6qLCyv8BwKIG/QE7oR99NKLVEb54OxY
-         YfLEEP0mEuDqjQz2TbA5g1Ayim0q/fc03fCHa7UgvIB7hbmfHKUyJzdKB3jtrzUTpv
-         q6Ljz5NHa1FkZq2xlLFFbGXGBjYW6qC0AaUbEpctD2vxKMzSO5y6BzLFZ7fVR0uqP2
-         Cc/2NHhvq4ib/usZNaey79Anm1zg/OfEgvJ+kgeujfucor25SxayjjZ5NQo9vKYQIZ
-         /oaXXEtNA8aXbgUIZ1ZqunnZAeD9e7IOrZaMnml69No1TBUdx6157dcf0YL11XsF8N
-         IFjRCVpQ/FrKw==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id CD19415C4316; Fri, 24 Jun 2022 23:07:32 -0400 (EDT)
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     fstests@vger.kernel.org
-Cc:     "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 5/5] ext4/055: skip test if dax mount option is used
-Date:   Fri, 24 Jun 2022 23:07:18 -0400
-Message-Id: <20220625030718.1215980-6-tytso@mit.edu>
-X-Mailer: git-send-email 2.31.0
-In-Reply-To: <20220625030718.1215980-1-tytso@mit.edu>
-References: <20220625030718.1215980-1-tytso@mit.edu>
+        with ESMTP id S231220AbiFYDLH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Jun 2022 23:11:07 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7481369988;
+        Fri, 24 Jun 2022 20:11:06 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2E6B4B8216B;
+        Sat, 25 Jun 2022 03:11:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D834CC34114;
+        Sat, 25 Jun 2022 03:11:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1656126663;
+        bh=kVaUrRS0BBe7WiOdmUXAm8KCrP62LmXzg0L4lJ0jQSk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=r/++7NbtvvX7um9vYzK00E7pGt2oSlb6nZwKcjujY7mGjKRnfbEXuDlMR/1sHvzS7
+         BUn2Me247rRoMqLLQ+ncIZuaEpMTbyQU96AzqVB4HDXYV83hKeIfECkRAp0rYnIbIa
+         nAmVo5Z1JDepeA2yerW6XojpT4S2lkx2hdSHlk4lDPlq8JkbzzwgJgncN6pHbgPmd2
+         wedhaH+71IpJS0F/cNUw0pvTgAyEymPScDRU4vzQYn8CHcyj7Z8dopGRGHAXZwtn2R
+         pttyP0Za08RwwzVA5A+7c8jNodcLLUJv14XTXgOVH/L2muIzgnUEvEoIbrOF23KQGb
+         qobCR8UmXhyzw==
+Date:   Fri, 24 Jun 2022 20:11:03 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Zorro Lang <zlang@redhat.com>,
+        "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Dave Chinner <david@fromorbit.com>,
+        fstests <fstests@vger.kernel.org>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Theodore Tso <tytso@mit.edu>, Chris Mason <clm@fb.com>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Subject: Re: Delegating fstests maintenance work (Was: Re: [PATCH 3/4]
+ xfs/{422,517}: add missing killall to _cleanup())
+Message-ID: <YrZ8x9/PUpBe9mtX@magnolia>
+References: <20220619134657.1846292-1-amir73il@gmail.com>
+ <20220619134657.1846292-4-amir73il@gmail.com>
+ <CAOQ4uxj350-k2bzCSD_j35XCH5E-VcdtfHmW3d_ZrSzHxWA5CQ@mail.gmail.com>
+ <YrSrLgU1OIgaaxiB@magnolia>
+ <CAOQ4uxjCUdzVdMUR9gj4xHfS-wHo5HsJnkTAAWjKeEwdVvX5iQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjCUdzVdMUR9gj4xHfS-wHo5HsJnkTAAWjKeEwdVvX5iQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test creates a 1k block file system with the quota feature
-enabled.   As such, it is incompatible with DAX.
+On Fri, Jun 24, 2022 at 07:49:29AM +0300, Amir Goldstein wrote:
+> [+fsdevel]
+> 
+> >
+> > I swear I'll send all these some day, if I ever get caught up...
+> > Delegating LTS maintenance is a big help, but as it is I still can't
+> > stay abreast of all the mainline patchsets /and/ send my own stuff. :(
+> 
+> I have to repeat what I said in LSFMM about the LTP project and
+> what fstests could be like.
+> 
+> Companies put dedicated engineers to work as proactive LTP
+> maintainers. There is absolutely no reason that companies won't
+> do the same for fstests.
+> 
+> If only every large corp. that employs >10 fs developers will assign
+> a halftime engineer for fstests maintenance, their fs developer's
+> work would become so much more productive and their fs product
+> will become more reliable.
+> 
+> I think the fact that this is not happening is a failure on our part to
+> communicate that to our managers.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/ext4/055 | 1 +
- 1 file changed, 1 insertion(+)
+I'd enjoy that too; I'll bring it up the next time they start asking
+about budgeting here (which means in 2 weeks).
 
-diff --git a/tests/ext4/055 b/tests/ext4/055
-index 8f466f1b..aa15cfe9 100755
---- a/tests/ext4/055
-+++ b/tests/ext4/055
-@@ -26,6 +26,7 @@ _require_command "$DEBUGFS_PROG" debugfs
- echo "Silence is golden"
- 
- # The 1K blocksize is designed for debugfs.
-+_exclude_scratch_mount_option dax
- _scratch_mkfs "-F -O quota -b 1024" > $seqres.full 2>&1
- 
- # Start from 0, fill block 1 with 6，replace the original 2.
--- 
-2.31.0
+> From my experience, if you had sent stuff like your fstests cleanups
+> to the LTP maintainers and ask for their help to land it, they would
+> thank you for the work you did and take care of all the testing
+> on all platforms and fixing all the code style and framework issues.
 
+Though to be fair -- a lot of the fstests changes backing up in
+djwong-dev exist to enable testing of the online fsck feature.  This
+whole year I've deprioritized sending any of those patches to
+concentrate on writing the design documentation for online fsck[1].  Now
+that I've submitted *that*, I'm hoping to start code review once I
+convince a few people to grok the design doc.
+
+So perhaps next week I'll resume the patchbombing that I've become
+infamous for doing.
+
+In the mean time, no objections to merging /this/ series.  The group
+labelling is a little odd and I think that should be separate fix from
+adding _require_freeze), but if zorro's ok with its present form then so
+be it.
+
+--D
+
+[1] https://lore.kernel.org/linux-xfs/165456652256.167418.912764930038710353.stgit@magnolia/
+
+> LTP maintainers constantly work on improving the framework and
+> providing more features to test writers as well as on converting old
+> tests to use new infrastructure.
+> 
+> Stuff like Dave's work on sorting up the cleanup mess or the groups
+> cleanup and groups speedup - all of those do not have to add load
+> to busy maintainers - life can be different!
+> 
+> Taking responsibility away from developers to deliver their own tests
+> is a slippery slope, but getting help and working together is essential
+> for offloading work from busy maintainers.
+> 
+> Thanks,
+> Amir.
