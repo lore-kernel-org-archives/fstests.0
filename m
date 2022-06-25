@@ -2,298 +2,192 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C553CCA479
-	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 08:53:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92F98C43334
+	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 15:06:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231529AbiFYIxl (ORCPT
+        id S230055AbiFYPGP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 25 Jun 2022 04:53:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36266 "EHLO
+        Sat, 25 Jun 2022 11:06:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229959AbiFYIxj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 04:53:39 -0400
-Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C131C20BE2;
-        Sat, 25 Jun 2022 01:53:38 -0700 (PDT)
-Received: by mail-pg1-x532.google.com with SMTP id s185so4520375pgs.3;
-        Sat, 25 Jun 2022 01:53:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=/+S5lWO2xuJbiADTUfpb0PUnWieA1/9PRWqfftZkSMo=;
-        b=V7z9tGzpmQDCfMQQ1+DAv4aguCUqpmPR8n70GXzD3BK6Zi93YRMUGiQdIZ2FWawJOJ
-         SHNEb7rl6JdzeRn0jc1f9/YHKY99/T4mlp7ltI+x/IwDVjcS55tRp4kLhHOrujcwll+9
-         hcA//G7pS6IpdnvMaJZsPKzZ+887u1hqqPClnL+/JABbB5zxec9w11iD49lESBTXqfpF
-         c06CvAT83mxe1HbUOrlX4VLhzMOdPapqqqQ0eWohW0dI0ql4k1ZrGrM7o5BViPYXFEt7
-         nDzhUz9ltseqSVHNZx2qD1VGA4OYkbsYlWVaU66hBUX8yaP8zs/8AF7SQzddKPjRpzrl
-         50CA==
+        with ESMTP id S229516AbiFYPGO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 11:06:14 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8F2AC23B
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 08:06:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656169572;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Uwnr4xH9pB9UbYr2KSoRGlW4Tb//7RDSDgi/MtUGa/0=;
+        b=LKQ9dRTWMz1qda+u+4i1Xuq5zjmpJO7bZLohEvIRdjiHAsuo0q3X+peazxhzU3Ay6HRYrU
+        p+h6aaq3rxwKHpbUTXmpH9Ev/IGQgtRCGsygrOC+jwgvcxO0ERmnxRxN6H/GQorN73KEsz
+        LwlsGcqkYN8nYyUOOs++oxxGb80z52w=
+Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
+ [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-568-UAYKmbe0O1iwIiVV3TXA8Q-1; Sat, 25 Jun 2022 11:06:11 -0400
+X-MC-Unique: UAYKmbe0O1iwIiVV3TXA8Q-1
+Received: by mail-qk1-f197.google.com with SMTP id bs17-20020a05620a471100b006a734d3910dso5793563qkb.22
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 08:06:11 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=/+S5lWO2xuJbiADTUfpb0PUnWieA1/9PRWqfftZkSMo=;
-        b=ZO7kRg94sHPS1G8HBXJcc2yeQ6hqU/sb94psK0be8AOC4MLLbKDq0Tq4NbChhMn//1
-         47qJmnVXGhSOBikXcL8kLihw7FldImW6hwouw0GjcDILF7r27dsUM4qBjcCXT/89GQjt
-         NH9zwY+MMOU83Z+WLHaEScYyv3X1X25ZgC1Jo1Fa4eBB/eIufKVcxFymdKqwjOVgKxaE
-         bxrq0/j2oJo8C9KJixHSbLv5Buc5+VJ9S9y/OKnM6uS5e4ULtB+RrocVGhs4TtN1vo52
-         HuvR57umcOfr8zuasphjfauh6N8iNVVLC9j33JP60QjapxLCAIiQ8kQeOBT+4fF3MGCh
-         bVng==
-X-Gm-Message-State: AJIora96So6sXpek+uYOTR1ChSOmDmNjlLolmgVMNjiOMTZIZrXX5JvY
-        0S7MIAv7ymjdKf2KuQSsBSg=
-X-Google-Smtp-Source: AGRyM1t1lwMkjOCzpoGpWnIS4SnmCuGXlb9JhgYh1otYQACi75Vn/itXEt5boeMGQIFz2V0kWE2j2w==
-X-Received: by 2002:a63:1209:0:b0:3fc:e453:5424 with SMTP id h9-20020a631209000000b003fce4535424mr2869043pgl.131.1656147218192;
-        Sat, 25 Jun 2022 01:53:38 -0700 (PDT)
-Received: from jbongio9100214.roam.corp.google.com (cpe-104-173-199-31.socal.res.rr.com. [104.173.199.31])
-        by smtp.googlemail.com with ESMTPSA id l10-20020a17090a660a00b001ec7c8919f0sm5234656pjj.23.2022.06.25.01.53.37
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=Uwnr4xH9pB9UbYr2KSoRGlW4Tb//7RDSDgi/MtUGa/0=;
+        b=kLZvcy2lFTpuMEPbLAEOgdI74bmwWNoJjmRJk/bAr0X5CfIEeoYRj3c77iRjmO6v6N
+         M1LHGkMRn28bdT3t9kveYyPz3WWLRNgFf4Jsgr8eIJC7ucTA38ZqOj694lquR73bF/1d
+         QJFhoX2B5EYZUaMhu+5iFxxBDmV6B8B8B1MyCcIHTBdmmsSfd8OwfS0HD7/grw3XcfoJ
+         j6ghyTN6rkSZw9OFpdH3S6EgL3K6/f3tioDP4/nGg0Mz+BIjGsorEwPUQZJHrzwYqGuQ
+         vKgx4NU4IDAFnAqD801vcT21yQjmvZ3zmDpBIxXk7cSmeU/ZWKkume5NpGnhNgxzV0iz
+         k4QA==
+X-Gm-Message-State: AJIora8sPz/IZxQ1a6RloDv53pHU86Ma7CbGmM9kys8Qx1VOly39VImj
+        UjfJtU0I54QbQS3izQsnNLiylDKssEUo/QPEMAwR1helnlfAbl4ocnjL8yHqUk7sfMsetHOZTBe
+        1bceepG8toXQIeH4zNg==
+X-Received: by 2002:a05:620a:21c5:b0:6af:f32:2f0f with SMTP id h5-20020a05620a21c500b006af0f322f0fmr1644390qka.765.1656169570641;
+        Sat, 25 Jun 2022 08:06:10 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1s5dYWPtUZGBIozOeZw5u1Zzw8ZAPeyt42MMa+o9NGKXEhcul7lNwPttxIEDZE75EF3pGhp1A==
+X-Received: by 2002:a05:620a:21c5:b0:6af:f32:2f0f with SMTP id h5-20020a05620a21c500b006af0f322f0fmr1644367qka.765.1656169570343;
+        Sat, 25 Jun 2022 08:06:10 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id a5-20020ac85b85000000b00307cb34aa8asm3822836qta.47.2022.06.25.08.06.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 25 Jun 2022 01:53:37 -0700 (PDT)
-From:   Jeremy Bongio <bongiojp@gmail.com>
-To:     Ted Tso <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Jeremy Bongio <bongiojp@gmail.com>
-Subject: [PATCH] ext4/056: add a check to make sure ext4 uuid ioctls get/set during fsstress.
-Date:   Sat, 25 Jun 2022 01:53:21 -0700
-Message-Id: <20220625085321.109451-1-bongiojp@gmail.com>
-X-Mailer: git-send-email 2.37.0.rc0.161.g10f37bed90-goog
+        Sat, 25 Jun 2022 08:06:09 -0700 (PDT)
+Date:   Sat, 25 Jun 2022 23:06:02 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
+Cc:     fstests@vger.kernel.org, David Disseldorp <ddiss@suse.de>,
+        Jeff Layton <jlayton@kernel.org>, Xiubo Li <xiubli@redhat.com>,
+        ceph-devel@vger.kernel.org
+Subject: Re: [PATCH v2] ceph/005: verify correct statfs behaviour with quotas
+Message-ID: <20220625150602.7giyegtsf6un4y3l@zlang-mailbox>
+References: <20220615151418.23805-1-lhenriques@suse.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220615151418.23805-1-lhenriques@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Adds a utility to get/set uuid through ext4 ioctl. Executes the ioctls while
-running fsstress. These ioctls are used by tune2fs to safely change the uuid
-without racing other filesystem modifications.
+On Wed, Jun 15, 2022 at 04:14:18PM +0100, Luís Henriques wrote:
+> When using a directory with 'max_bytes' quota as a base for a mount,
+> statfs shall use that 'max_bytes' value as the total disk size.  That
+> value shall be used even when using subdirectory as base for the mount.
+> 
+> A bug was found where, when this subdirectory also had a 'max_files'
+> quota, the real filesystem size would be returned instead of the parent
+> 'max_bytes' quota value.  This test case verifies this bug is fixed.
+> 
+> Signed-off-by: Luís Henriques <lhenriques@suse.de>
+> ---
+> Finally, I've managed to come back to this test.  The major changes since
+> v1 are:
+>  - creation of an helper for getting total mount space using 'df'
+>  - now the test sends quota size to stdout
+> 
+>  common/rc          | 13 +++++++++++++
+>  tests/ceph/005     | 38 ++++++++++++++++++++++++++++++++++++++
+>  tests/ceph/005.out |  4 ++++
+>  3 files changed, 55 insertions(+)
+>  create mode 100755 tests/ceph/005
+>  create mode 100644 tests/ceph/005.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 2f31ca464621..72eabb7a428c 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4254,6 +4254,19 @@ _get_available_space()
+>  	echo $((avail_kb * 1024))
+>  }
+>  
+> +# get the total space in bytes
+> +#
+> +_get_total_space()
+> +{
+> +	if [ -z "$1" ]; then
+> +		echo "Usage: _get_total_space <mnt>"
+> +		exit 1
+> +	fi
+> +	local total_kb;
+> +	total_kb=`$DF_PROG $1 | tail -n1 | awk '{ print $3 }'`
+> +	echo $(($total_kb * 1024))
+> +}
+> +
+>  # return device size in kb
+>  _get_device_size()
+>  {
+> diff --git a/tests/ceph/005 b/tests/ceph/005
+> new file mode 100755
+> index 000000000000..7eb687e8a092
+> --- /dev/null
+> +++ b/tests/ceph/005
+> @@ -0,0 +1,38 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 005
+> +#
+> +# Make sure statfs reports correct total size when:
+> +# 1. using a directory with 'max_byte' quota as base for a mount
+> +# 2. using a subdirectory of the above directory with 'max_files' quota
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick quota
+> +
+> +_supported_fs ceph
+> +_require_scratch
+> +
+> +_scratch_mount
+> +mkdir -p "$SCRATCH_MNT/quota-dir/subdir"
+> +
+> +# set quota
+> +quota=$((2 ** 30)) # 1G 
+> +$SETFATTR_PROG -n ceph.quota.max_bytes -v "$quota" "$SCRATCH_MNT/quota-dir"
+> +$SETFATTR_PROG -n ceph.quota.max_files -v "$quota" "$SCRATCH_MNT/quota-dir/subdir"
+> +_scratch_unmount
+> +
+> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_mount
+> +echo ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
+> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_unmount
 
-Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
----
- src/Makefile       |   4 +-
- src/global.h       |   2 +
- src/uuid_ioctl.c   | 106 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/056     |  59 +++++++++++++++++++++++++
- tests/ext4/056.out |   1 +
- 5 files changed, 170 insertions(+), 2 deletions(-)
- create mode 100644 src/uuid_ioctl.c
- create mode 100755 tests/ext4/056
- create mode 100644 tests/ext4/056.out
+One week past, I hope to get some reviewing points from ceph mail list, due to I
+am really not familiar with cephfs, especially about the SCRATCH_DEV change as
+above.
 
-diff --git a/src/Makefile b/src/Makefile
-index 111ce1d9..e33e04de 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
- 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
--	detached_mounts_propagation ext4_resize
-+	detached_mounts_propagation ext4_resize uuid_ioctl
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py
- 
- SUBDIRS = log-writes perf
- 
--LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
-+LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
- 
- ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
- LINUX_TARGETS += loggen
-diff --git a/src/global.h b/src/global.h
-index b4407099..747d95f8 100644
---- a/src/global.h
-+++ b/src/global.h
-@@ -184,4 +184,6 @@ roundup_64(unsigned long long x, unsigned int y)
- 	return rounddown_64(x + y - 1, y);
- }
- 
-+#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
-+
- #endif /* GLOBAL_H */
-diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
-new file mode 100644
-index 00000000..51480689
---- /dev/null
-+++ b/src/uuid_ioctl.c
-@@ -0,0 +1,106 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+/*
-+ * Test program which uses the raw ext4 set_fsuuid ioctl directly.
-+ * SYNOPSIS:
-+ *   $0 COMMAND MOUNT_POINT [UUID]
-+ *
-+ * COMMAND must be either "get" or "set".
-+ * The UUID must be a 16 octet represented as 32 hexadecimal digits in canonical
-+ * textual representation, e.g. output from `uuidgen`.
-+ *
-+ */
-+
-+#include <stdio.h>
-+#include <fcntl.h>
-+#include <errno.h>
-+#include <unistd.h>
-+#include <stdint.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/ioctl.h>
-+#include <uuid/uuid.h>
-+#include <linux/fs.h>
-+#include "global.h"
-+
-+struct fsuuid {
-+        size_t len;
-+        __u8 *b;
-+};
-+
-+#ifndef EXT4_IOC_GETFSUUID
-+#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
-+#endif
-+
-+#ifndef EXT4_IOC_SETFSUUID
-+#define EXT4_IOC_SETFSUUID      _IOW('f', 45, struct fsuuid)
-+#endif
-+
-+int main(int argc, char **argv)
-+{
-+	int	error, fd;
-+        struct fsuuid fsuuid;
-+
-+	if (argc < 3) {
-+		fprintf(stderr, "Invalid arguments\n");
-+		return 1;
-+	}
-+
-+	fd = open(argv[2], O_RDONLY);
-+	if (!fd) {
-+		perror(argv[2]);
-+		return 1;
-+	}
-+
-+	BUILD_BUG_ON(sizeof(uuid_t) % 16);
-+	fsuuid.len = 16;
-+	fsuuid.b = calloc(fsuuid.len, sizeof(__u8));
-+
-+	if (strcmp(argv[1], "get") == 0) {
-+		uuid_t uuid;
-+		char uuid_str[37];
-+
-+		if (ioctl(fd, EXT4_IOC_GETFSUUID, &fsuuid)) {
-+			close(fd);
-+			fprintf(stderr, "%s while trying to get fs uuid\n",
-+				strerror(errno));
-+			return 1;
-+		}
-+
-+		memcpy(&uuid, fsuuid.b, sizeof(uuid));
-+		uuid_unparse(uuid, uuid_str);
-+		printf("%s", uuid_str);
-+	} else if (strcmp(argv[1], "set") == 0) {
-+		if (argc != 4) {
-+			fprintf(stderr, "UUID argument missing.\n");
-+			return 1;
-+		}
-+
-+		if (strlen(argv[3]) != 36) {
-+			fprintf(stderr, "Invalid UUID. The UUID should be in "
-+				"canonical format. Example: "
-+				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
-+			return 1;
-+		}
-+
-+		uuid_t uuid;
-+		error = uuid_parse(argv[3], uuid);
-+		if (error < 0) {
-+			fprintf(stderr, "%s: invalid UUID.\n", argv[0]);
-+			return 1;
-+		}
-+
-+		memcpy(fsuuid.b, uuid, sizeof(uuid));
-+		if(ioctl(fd, EXT4_IOC_SETFSUUID, &fsuuid)) {
-+			close(fd);
-+			fprintf(stderr, "%s while trying to set fs uuid\n",
-+				strerror(errno));
-+			return 1;
-+		}
-+	} else {
-+		fprintf(stderr, "Invalid command\n");
-+	}
-+
-+	close(fd);
-+	return 0;
-+}
-diff --git a/tests/ext4/056 b/tests/ext4/056
-new file mode 100755
-index 00000000..46631d46
---- /dev/null
-+++ b/tests/ext4/056
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2000-2005 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# Test the set/get UUID ioctl.
-+#
-+
-+. ./common/preamble
-+_begin_fstest auto ioctl resize
-+
-+tmpfile="/tmp/$$."
-+trap "rm -f $tmpfile; exit" 0 1 2 3 15
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_require_scratch
-+_require_test_program uuid_ioctl
-+
-+UUID_IOCTL=$here/src/uuid_ioctl
-+
-+# if the ioctl is not supported by the kernel, then skip test.
-+current_uid=$($UUID_IOCTL get $SCRATCH_MNT)
-+if [[ "$current_uid" = "Inappropriate ioctl for device while trying to set fs uuid" ]]; then
-+  _notrun "UUID ioctls are not supported by kernel."
-+fi
-+
-+# Create filesystem and mount
-+_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full
-+
-+# Begin fsstress while modifying UUID
-+fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
-+"$FSSTRESS_PROG" $fsstress_args > /dev/null &
-+
-+test_uuid_ioctl()
-+{
-+  for n in $(seq 1 20); do
-+    new_uuid=$(uuidgen)
-+
-+    echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
-+    $UUID_IOCTL set $SCRATCH_MNT $new_uuid >> $seqres.full 2>&1
-+
-+    current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
-+    echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
-+    if [[ "$current_uuid" != "$new_uuid" ]]; then
-+      echo "UUID does not equal what was sent with the ioctl"
-+      exit
-+    fi
-+  done
-+}
-+
-+test_uuid_ioctl
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/056.out b/tests/ext4/056.out
-new file mode 100644
-index 00000000..06f52bb4
---- /dev/null
-+++ b/tests/ext4/056.out
-@@ -0,0 +1 @@
-+QA output created by 056
--- 
-2.37.0.rc0.161.g10f37bed90-goog
+I tried to ask if we can use a directory under TEST_DIR to do that, but Luís
+said he need the "SCRATCH_DEV=$SCRATCH_DEV/xxxx" things. Is it always a good
+usage for cephfs?
+
+Hope to get review from ceph forks, Thanks!
+
+Thanks,
+Zorro
+
+> +
+> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_mount
+> +echo subdir ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
+> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_unmount
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ceph/005.out b/tests/ceph/005.out
+> new file mode 100644
+> index 000000000000..47798b1fcd6f
+> --- /dev/null
+> +++ b/tests/ceph/005.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 005
+> +ceph quota size is 1073741824 bytes
+> +subdir ceph quota size is 1073741824 bytes
+> +Silence is golden
+> 
 
