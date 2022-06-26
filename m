@@ -2,363 +2,319 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5738C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jun 2022 04:44:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEED2C43334
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jun 2022 06:43:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233918AbiFZEoI (ORCPT
+        id S232586AbiFZGnP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 26 Jun 2022 00:44:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46858 "EHLO
+        Sun, 26 Jun 2022 02:43:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233909AbiFZEoH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2022 00:44:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8F1A312D08
-        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 21:44:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656218645;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=arHf+ANxJDI0hQ8qj6GIDK7awNKxZGlAP2yk16Mo0tc=;
-        b=BLZx+IrV8WqvaZG8cDUqOvFIZSY6mBvkuXBxlGsaZKEO6z9PSOqm6DGW6pTo2F4NxB0RuF
-        gLjdPyKg3jES3JwiwJdNPdQ7UgQlA63JlRK75vJRtjjZoyrW+eBlGzKwza7CYVDxIyjaKh
-        A8N5JzIc/3FzwDYDFxW7fDgOQE50b+Q=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-240-2kZC-N6tMreGndCry-QYWQ-1; Sun, 26 Jun 2022 00:44:03 -0400
-X-MC-Unique: 2kZC-N6tMreGndCry-QYWQ-1
-Received: by mail-qk1-f199.google.com with SMTP id r6-20020a05620a298600b006a98e988ba4so7033114qkp.3
-        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 21:44:03 -0700 (PDT)
+        with ESMTP id S232935AbiFZGnO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2022 02:43:14 -0400
+Received: from mail-vk1-xa2f.google.com (mail-vk1-xa2f.google.com [IPv6:2607:f8b0:4864:20::a2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01381EE04
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 23:43:12 -0700 (PDT)
+Received: by mail-vk1-xa2f.google.com with SMTP id j15so3091933vkp.5
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 23:43:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=A7GWeZ+wfw/ISMiyP3p3ynFRlLDvcp3iHo90IF9hMZI=;
+        b=l0DaGZ6+uBqdHXole/Qlovu9el/lWiFLIIstada8L8oQDvT4mO0FZ7OS48vy4yTqRZ
+         H1K+8rv9QgqstgcUTnbkOkRJAy4keCwaM9M/je2wqgd+WsVCpe1x4sB3VSKtwaUdrox9
+         9sjmuKC9jmWVO/PCtInt7cMCdS2Djwj/1cDACu/PVREWl5CJlEiwoz1nS8bKZdMnNIRn
+         0jYzzZS3EuAeHyTy9PCzw4cs8vJtfjDNCCCkF+fTQ7XY2Qyf76gstMiU1svghKRR80pP
+         17MR3fdjxhzWUvhI+3m5aXiwLO3kyL3ryXDe7lL7yZaXHOy2MKwsaDB3b+oamEPX7HnW
+         D5tQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=arHf+ANxJDI0hQ8qj6GIDK7awNKxZGlAP2yk16Mo0tc=;
-        b=adDmD5lRjqjFE2xeYglEw6OeV428kTKoh4d4DNM6GHuaoOLd6jl96k+L9UR4SHi0dI
-         3kltyJ83BZwXemprC86LY5AiaW4n2CXr9Qcc/apMLOMgTE2qyg+PjIetIu2Jt5Ay+jIU
-         OFxdnvTxFU0NOBlttRojH28EVFS1RWJWWrvjOHQnk67D5U6Ns3yaaeJlGFNGZUkrQ55C
-         /j8vaoiLZhJ2i83cx6Wxgb8kQDEcyuVj1jGtx60Q9h63ZhxGRQ5STyW5o88QcFRdULJp
-         J+zd5c3Pul4ANo/2kh+OxWoXz7J/nqNOeO747FOLkNHxJigV4Jb1t/cqhOHUonf8kx7d
-         6BXg==
-X-Gm-Message-State: AJIora9AAfk0Nxe+mk4d0cQMDbASRTB36l398LuS0HQxr0jdpkWyTGyx
-        +P4zPE3lpdr8kpekxGktEsQEjPnZbPH2ZMjSZbbjMZbBDnI6voiWfVuQEJx0Us6zRrD/Yi5B7r2
-        K9ePdcSp8BDJ33fPa7w==
-X-Received: by 2002:a05:620a:372c:b0:6a7:3ad2:68cd with SMTP id de44-20020a05620a372c00b006a73ad268cdmr4599803qkb.418.1656218642676;
-        Sat, 25 Jun 2022 21:44:02 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1sFZ0ZrtkfZNt1XgBSRsEC5+Xea2ig8+LC9TEBH+I+ytKp8vAsicTz89NdJpocbwJlK3Uc5tA==
-X-Received: by 2002:a05:620a:372c:b0:6a7:3ad2:68cd with SMTP id de44-20020a05620a372c00b006a73ad268cdmr4599796qkb.418.1656218642338;
-        Sat, 25 Jun 2022 21:44:02 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 194-20020a370acb000000b006a8b6848556sm5536707qkk.7.2022.06.25.21.43.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 25 Jun 2022 21:44:01 -0700 (PDT)
-Date:   Sun, 26 Jun 2022 12:43:56 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Jeremy Bongio <bongiojp@gmail.com>
-Cc:     Ted Tso <tytso@mit.edu>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] ext4/056: add a check to make sure ext4 uuid ioctls
- get/set during fsstress.
-Message-ID: <20220626044356.aguhlcj2fb4embbj@zlang-mailbox>
-References: <20220625085321.109451-1-bongiojp@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=A7GWeZ+wfw/ISMiyP3p3ynFRlLDvcp3iHo90IF9hMZI=;
+        b=ihHTComtlEoCbEmOkfOSsWLMCfVrapUQ8MXacJ/LbU1E5SDmso8LFoZ8fY7t/8Zgnp
+         R8AavuqG/bmja3PC6jSsT6kPSbM8FvJO7i3qYu2fuP5JT0oKEdaIRurE7ZkzdMsdiaEA
+         hQh0riaF7QVMP1LYUkzgWkhZjWH/90VPsnoLIxOV30epnMZZkYdVQgYh57CM95VEfU7T
+         RecE49wGcKq3aWzmVYzvp73yT//vcyof+wP6eL37djj+7msIer0pVxrRJc6IayB3znmI
+         maUbIlH1d/+TOdvgFRKWNTihPCRNLg+/WLuvGIq1yozVJIXBNSy5zkKsLjIGXhDTYPc+
+         qFOQ==
+X-Gm-Message-State: AJIora/wrZ1LuZBZkHq8cGsZiqYMo3O70/1bPE8TubFmg2f2gcQp/WeO
+        SJHUiYscr4IDEvQ44F1we7bxbXNuAh6+7b+qjH8=
+X-Google-Smtp-Source: AGRyM1tqFIIr2iElL1WKCqQSOpTVPY+Z6tYas39CFTfTZQNb6trRjaiq38trqFeNj1tN+LKl+oydSrJwguWawxLV50o=
+X-Received: by 2002:a1f:eec2:0:b0:36c:1c9b:465f with SMTP id
+ m185-20020a1feec2000000b0036c1c9b465fmr2507847vkh.3.1656225792066; Sat, 25
+ Jun 2022 23:43:12 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220625085321.109451-1-bongiojp@gmail.com>
+References: <20220615092826.2333847-1-brauner@kernel.org>
+In-Reply-To: <20220615092826.2333847-1-brauner@kernel.org>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 26 Jun 2022 09:43:00 +0300
+Message-ID: <CAOQ4uxjEhPqdN3HjB9si2XPptDH+ea7BNLapf4j8=zUxdxHURA@mail.gmail.com>
+Subject: Re: [PATCH v3] generic/692: test group ownership change
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Seth Forshee <sforshee@digitalocean.com>,
+        Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+        Aleksa Sarai <cyphar@cyphar.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jun 25, 2022 at 01:53:21AM -0700, Jeremy Bongio wrote:
-> Adds a utility to get/set uuid through ext4 ioctl. Executes the ioctls while
-> running fsstress. These ioctls are used by tune2fs to safely change the uuid
-> without racing other filesystem modifications.
-> 
-> Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
+On Wed, Jun 15, 2022 at 12:28 PM Christian Brauner <brauner@kernel.org> wrote:
+>
+> When group ownership is changed a caller whose fsuid owns the inode can
+> change the group of the inode to any group they are a member of. When
+> searching through the caller's groups we failed to use the gid mapped
+> according to the idmapped mount otherwise we fail to change ownership.
+> Add a test for this.
+>
+> Cc: Seth Forshee <sforshee@digitalocean.com>
+> Cc: Amir Goldstein <amir73il@gmail.com>
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: Aleksa Sarai <cyphar@cyphar.com>
+> Cc: <fstests@vger.kernel.org>
+> Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
 > ---
-
-Hi Jeremy,
-
-Thanks for the patch, some picky review points as below:
-
->  src/Makefile       |   4 +-
->  src/global.h       |   2 +
->  src/uuid_ioctl.c   | 106 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/056     |  59 +++++++++++++++++++++++++
->  tests/ext4/056.out |   1 +
->  5 files changed, 170 insertions(+), 2 deletions(-)
->  create mode 100644 src/uuid_ioctl.c
->  create mode 100755 tests/ext4/056
->  create mode 100644 tests/ext4/056.out
-> 
-> diff --git a/src/Makefile b/src/Makefile
-> index 111ce1d9..e33e04de 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
->  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
->  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
-> -	detached_mounts_propagation ext4_resize
-> +	detached_mounts_propagation ext4_resize uuid_ioctl
->  
->  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->  	      btrfs_crc32c_forged_name.py
->  
->  SUBDIRS = log-writes perf
->  
-> -LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
-> +LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
->  
->  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
->  LINUX_TARGETS += loggen
-> diff --git a/src/global.h b/src/global.h
-> index b4407099..747d95f8 100644
-> --- a/src/global.h
-> +++ b/src/global.h
-> @@ -184,4 +184,6 @@ roundup_64(unsigned long long x, unsigned int y)
->  	return rounddown_64(x + y - 1, y);
->  }
->  
-> +#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
-> +
->  #endif /* GLOBAL_H */
-> diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
-> new file mode 100644
-> index 00000000..51480689
-> --- /dev/null
-> +++ b/src/uuid_ioctl.c
-> @@ -0,0 +1,106 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +
-> +/*
-> + * Test program which uses the raw ext4 set_fsuuid ioctl directly.
-> + * SYNOPSIS:
-> + *   $0 COMMAND MOUNT_POINT [UUID]
-> + *
-> + * COMMAND must be either "get" or "set".
-> + * The UUID must be a 16 octet represented as 32 hexadecimal digits in canonical
-> + * textual representation, e.g. output from `uuidgen`.
-> + *
-> + */
-> +
-> +#include <stdio.h>
-> +#include <fcntl.h>
-> +#include <errno.h>
-> +#include <unistd.h>
-> +#include <stdint.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <sys/ioctl.h>
-> +#include <uuid/uuid.h>
-> +#include <linux/fs.h>
-> +#include "global.h"
-> +
-> +struct fsuuid {
-> +        size_t len;
-> +        __u8 *b;
-> +};
-> +
-> +#ifndef EXT4_IOC_GETFSUUID
-> +#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
-> +#endif
-> +
-> +#ifndef EXT4_IOC_SETFSUUID
-> +#define EXT4_IOC_SETFSUUID      _IOW('f', 45, struct fsuuid)
-> +#endif
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	int	error, fd;
-> +        struct fsuuid fsuuid;
-        ^
-
-Bad indent at here, please check the indent of this program.
-
-> +
-> +	if (argc < 3) {
-> +		fprintf(stderr, "Invalid arguments\n");
-> +		return 1;
-> +	}
-> +
-> +	fd = open(argv[2], O_RDONLY);
-> +	if (!fd) {
-> +		perror(argv[2]);
-> +		return 1;
-> +	}
-> +
-> +	BUILD_BUG_ON(sizeof(uuid_t) % 16);
-> +	fsuuid.len = 16;
-> +	fsuuid.b = calloc(fsuuid.len, sizeof(__u8));
-> +
-> +	if (strcmp(argv[1], "get") == 0) {
-> +		uuid_t uuid;
-> +		char uuid_str[37];
-> +
-> +		if (ioctl(fd, EXT4_IOC_GETFSUUID, &fsuuid)) {
-> +			close(fd);
-> +			fprintf(stderr, "%s while trying to get fs uuid\n",
-> +				strerror(errno));
-> +			return 1;
-> +		}
-> +
-> +		memcpy(&uuid, fsuuid.b, sizeof(uuid));
-> +		uuid_unparse(uuid, uuid_str);
-> +		printf("%s", uuid_str);
-> +	} else if (strcmp(argv[1], "set") == 0) {
-> +		if (argc != 4) {
-> +			fprintf(stderr, "UUID argument missing.\n");
-> +			return 1;
-> +		}
-> +
-> +		if (strlen(argv[3]) != 36) {
-> +			fprintf(stderr, "Invalid UUID. The UUID should be in "
-> +				"canonical format. Example: "
-> +				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
-> +			return 1;
-> +		}
-> +
-> +		uuid_t uuid;
-> +		error = uuid_parse(argv[3], uuid);
-> +		if (error < 0) {
-> +			fprintf(stderr, "%s: invalid UUID.\n", argv[0]);
-> +			return 1;
-> +		}
-> +
-> +		memcpy(fsuuid.b, uuid, sizeof(uuid));
-> +		if(ioctl(fd, EXT4_IOC_SETFSUUID, &fsuuid)) {
-> +			close(fd);
-> +			fprintf(stderr, "%s while trying to set fs uuid\n",
-> +				strerror(errno));
-> +			return 1;
-> +		}
-> +	} else {
-> +		fprintf(stderr, "Invalid command\n");
-> +	}
-> +
-> +	close(fd);
-> +	return 0;
-> +}
-> diff --git a/tests/ext4/056 b/tests/ext4/056
+> /* v2 */
+> - Zorro Lang <zlang@redhat.com>:
+>   - various minor fixes
+>
+> - Christian Brauner (Microsoft) <brauner@kernel.org>:
+>   - Expand test to also cover overlayfs on top of idmapped mounts.
+>
+> /* v3 */
+> - Amir Goldstein <amir73il@gmail.com>:
+>   - Switch from calls to the mount binary to _overlay_mount_dirs helper.
+>
+> - Christian Brauner (Microsoft) <brauner@kernel.org>:
+>   - Expand test to also cover non-idmapped mounts.
+> ---
+>  tests/generic/692     | 195 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/692.out |  49 +++++++++++
+>  2 files changed, 244 insertions(+)
+>  create mode 100755 tests/generic/692
+>  create mode 100644 tests/generic/692.out
+>
+> diff --git a/tests/generic/692 b/tests/generic/692
 > new file mode 100755
-> index 00000000..46631d46
+> index 00000000..20579334
 > --- /dev/null
-> +++ b/tests/ext4/056
-> @@ -0,0 +1,59 @@
+> +++ b/tests/generic/692
+> @@ -0,0 +1,195 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2000-2005 Silicon Graphics, Inc.  All Rights Reserved.
+> +# Copyright (c) 2022 Christian Brauner (Microsoft).  All Rights Reserved.
 > +#
-> +# Test the set/get UUID ioctl.
+> +# FS QA Test 692
 > +#
-> +
+> +# Test that users can changed group ownership of a file they own to a group
+> +# they are a member of.
+> +#
+> +# Regression test for commit:
+> +#
+> +# 168f91289340 ("fs: account for group membership")
+> +#
 > +. ./common/preamble
-> +_begin_fstest auto ioctl resize
-
-Why this case is "resize" related?
-
+> +. ./common/overlay
+> +_begin_fstest auto quick perms attr idmapped mount
 > +
-> +tmpfile="/tmp/$$."
-> +trap "rm -f $tmpfile; exit" 0 1 2 3 15
-
-We have default "trap" when you source ./common/preamble. If you need a custom
-cleanup by youself, you can define a new one in this case (refer to other cases
-which has their own _cleanup).
-
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_require_scratch
-> +_require_test_program uuid_ioctl
-> +
-> +UUID_IOCTL=$here/src/uuid_ioctl
-> +
-> +# if the ioctl is not supported by the kernel, then skip test.
-> +current_uid=$($UUID_IOCTL get $SCRATCH_MNT)
-> +if [[ "$current_uid" = "Inappropriate ioctl for device while trying to set fs uuid" ]]; then
-> +  _notrun "UUID ioctls are not supported by kernel."
-   ^
-
-It's not fault, but we recommended the tab width is 8, for fstests bash script.
-
-> +fi
-> +
-> +# Create filesystem and mount
-> +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
-                                            ^
-Generally we make sure $seqres.full is null (rm -f $seqres.full) or truncated
-at first. So an easier way is using "> $seqres.full" at the first place which
-trys to write $seqres.full, to clean .full file.
-
-> +_scratch_mount >> $seqres.full
-> +
-> +# Begin fsstress while modifying UUID
-> +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
-> +"$FSSTRESS_PROG" $fsstress_args > /dev/null &
-
-Better to use "2>&1" if you don't want this case fails on some weird fsstress
-error output. Or ">>$seqres.full 2>&1" if you'd like to know what happened
-on fsstress.
-
-Do I miss something? I didn't find any place try to make sure above fsstress
-process is killed/end (by using kill and wait).
-
-> +
-> +test_uuid_ioctl()
+> +# Override the default cleanup function.
+> +_cleanup()
 > +{
-> +  for n in $(seq 1 20); do
-> +    new_uuid=$(uuidgen)
-
-I think uuidgen isn't a tool which is 100% installed on all linux system. So
-
-_require_command $UUIDGEN_PROG uuidgen
-
-> +
-> +    echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
-> +    $UUID_IOCTL set $SCRATCH_MNT $new_uuid >> $seqres.full 2>&1
-> +
-> +    current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
-> +    echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
-> +    if [[ "$current_uuid" != "$new_uuid" ]]; then
-> +      echo "UUID does not equal what was sent with the ioctl"
-> +      exit
-
-I think break is enough, but exit is fine too.
-
-> +    fi
-> +  done
+> +       cd /
+> +       $UMOUNT_PROG $SCRATCH_MNT/target-mnt 2>/dev/null
+> +       $UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
+> +       $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+> +       rm -r -f $tmp.*
 > +}
 > +
-> +test_uuid_ioctl
+> +# real QA test starts here
+> +_supported_fs ^overlay
+> +_require_extra_fs overlay
+> +_supports_filetype $SCRATCH_MNT || _notrun "overlayfs test requires d_type"
 
-I'm wondering why not run the code in test_uuid_ioctl directly. Looks like you
-just make them into a function, then run this function once. It doesn't use
-local variables, or be called many times, or have many complicated lines. Or
-you'd like to package the codes in "for n in $(seq 1 20)" loop?
+This requirement is a synonym for "very ancient filesystem"
+_require_idmapped_mounts is a much stronger requirement
+you can drop this one.
+
+> +_require_scratch
+> +_require_chown
+> +_require_idmapped_mounts
+> +_require_test_program "vfs/mount-idmapped"
+> +_require_user fsgqa2
+> +_require_group fsgqa2
+> +# Do this SECOND so that qa_user is fsgqa, and _user_do uses that account
+> +_require_user fsgqa
+> +_require_group fsgqa
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount
+> +
+> +user_foo=`id -u fsgqa`
+> +group_foo=`id -g fsgqa`
+> +user_bar=`id -u fsgqa2`
+> +group_bar=`id -g fsgqa2`
+> +
+> +setup_tree()
+> +{
+> +       mkdir -p $SCRATCH_MNT/source-mnt
+> +       chmod 0777 $SCRATCH_MNT/source-mnt
+> +       touch $SCRATCH_MNT/source-mnt/file1
+> +       chown 65534:65534 $SCRATCH_MNT
+> +       chown 65534:65534 $SCRATCH_MNT/source-mnt
+> +       chown 65534:65535 $SCRATCH_MNT/source-mnt/file1
+> +
+> +       mkdir -p $SCRATCH_MNT/target-mnt
+> +       chmod 0777 $SCRATCH_MNT/target-mnt
+> +}
+> +
+> +# Setup an idmapped mount where uid and gid 65534 are mapped to fsgqa and uid
+> +# and gid 65535 are mapped to fsgqa2.
+> +setup_idmapped_mnt()
+> +{
+> +       $here/src/vfs/mount-idmapped \
+> +               --map-mount=u:65534:$user_foo:1 \
+> +               --map-mount=g:65534:$group_foo:1 \
+> +               --map-mount=u:65535:$user_bar:1 \
+> +               --map-mount=g:65535:$group_bar:1 \
+> +               $SCRATCH_MNT/source-mnt $SCRATCH_MNT/target-mnt
+> +}
+> +
+> +# We've created a layout where fsgqa owns the target file but the group of the
+> +# target file is owned by another group. We now test that user fsgqa can change
+> +# the group ownership of the file to a group they control. In this case to the
+> +# fsgqa group.
+> +change_group_ownership()
+> +{
+> +       local path="$1"
+> +
+> +       stat -c '%U:%G' $path
+> +       _user_do "id -u --name; id -g --name; chgrp $group_foo $path"
+> +       stat -c '%U:%G' $path
+> +       _user_do "id -u --name; id -g --name; chgrp $group_bar $path > /dev/null 2>&1"
+> +       stat -c '%U:%G' $path
+> +}
+> +
+> +reset_ownership()
+> +{
+> +       local path="$SCRATCH_MNT/source-mnt/file1"
+> +
+> +       echo ""
+> +       echo "reset ownership"
+> +       chown 65534:65534 $path
+> +       stat -c '%u:%g' $path
+> +       chown 65534:65535 $path
+> +       stat -c '%u:%g' $path
+> +}
+> +
+> +run_base_test()
+> +{
+> +       mkdir -p $SCRATCH_MNT/source-mnt
+> +       chmod 0777 $SCRATCH_MNT/source-mnt
+> +       touch $SCRATCH_MNT/source-mnt/file1
+> +       chown $user_foo:$group_foo $SCRATCH_MNT
+> +       chown $user_foo:$group_foo $SCRATCH_MNT/source-mnt
+> +       chown $user_foo:$group_bar $SCRATCH_MNT/source-mnt/file1
+> +
+> +       echo ""
+> +       echo "base test"
+> +       change_group_ownership "$SCRATCH_MNT/source-mnt/file1"
+> +       rm -rf "$SCRATCH_MNT/source-mnt"
+> +}
+> +
+> +# Basic test as explained in the comment for change_group_ownership().
+> +run_idmapped_test()
+> +{
+> +       echo ""
+> +       echo "base idmapped test"
+> +       change_group_ownership "$SCRATCH_MNT/target-mnt/file1"
+> +       reset_ownership
+> +}
+> +
+> +lower="$SCRATCH_MNT/target-mnt"
+> +upper="$SCRATCH_MNT/ovl-upper"
+> +work="$SCRATCH_MNT/ovl-work"
+> +merge="$SCRATCH_MNT/ovl-merge"
+> +
+> +# Prepare overlayfs with metacopy turned off.
+> +setup_overlayfs_idmapped_lower_metacopy_off()
+> +{
+> +       mkdir -p $upper $work $merge
+> +       _overlay_mount_dirs $lower $upper $work \
+> +                           overlay $merge -ometacopy=off || \
+> +                           _notrun "overlayfs doesn't support idmappped layers"
+
+I agree with Zorro that this is going to limit running the base test
+on LTS 5.15.y (for example).
+
+One option is to not use _notrun.
+You could split this to another test as the common solution
+in fstests.
+You could make your own "skip test case" logic, i,e.:
+
+setup_overlayfs_idmapped_lower_metacopy off && \
+   run_overlayfs_idmapped_lower_metacopy off
+
+setup_overlayfs_idmapped_lower_metacopy on && \
+   run_overlayfs_idmapped_lower_metacopy on
+
+This is a very standard practice in LTP and its built in support
+for test case arrays.
+
+The problem is with fstests, there is no way to make that
+test case skip visible to the test runner. Splitting to two
+tests is the only way to communicate the result
+"this test passed and that test did not run" to the user.
+
+> +}
+> +
+> +# Prepare overlayfs with metacopy turned on.
+> +setup_overlayfs_idmapped_lower_metacopy_on()
+> +{
+> +       mkdir -p $upper $work $merge
+> +       _overlay_mount_dirs $lower $upper $work overlay $merge -ometacopy=on
+> +}
+
+Those helpers are exactly the same. on/off could be passed as parameter.
 
 > +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/056.out b/tests/ext4/056.out
-> new file mode 100644
-> index 00000000..06f52bb4
-> --- /dev/null
-> +++ b/tests/ext4/056.out
-> @@ -0,0 +1 @@
-> +QA output created by 056
+> +reset_overlayfs()
+> +{
+> +       $UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
+> +       rm -rf $upper $work $merge
+> +}
+> +
+> +# Overlayfs can be mounted on top of idmapped layers. Make sure that the basic
+> +# test explained in the comment for change_group_ownership() passes with
+> +# overlayfs mounted on top of it.
+> +# This tests overlayfs with metacopy turned off, i.e., changing a file copies
+> +# up data and metadata.
+> +run_overlayfs_idmapped_lower_metacopy_off()
+> +{
+> +       echo ""
+> +       echo "overlayfs idmapped lower metacopy off"
+> +       change_group_ownership "$SCRATCH_MNT/ovl-merge/file1"
+> +       reset_overlayfs
+> +       reset_ownership
+> +}
+> +
+> +# Overlayfs can be mounted on top of idmapped layers. Make sure that the basic
+> +# test explained in the comment for change_group_ownership() passes with
+> +# overlayfs mounted on top of it.
+> +# This tests overlayfs with metacopy turned on, i.e., changing a file tries to
+> +# only copy up metadata.
+> +run_overlayfs_idmapped_lower_metacopy_on()
+> +{
+> +       echo ""
+> +       echo "overlayfs idmapped lower metacopy on"
+> +       change_group_ownership "$SCRATCH_MNT/ovl-merge/file1"
+> +       reset_overlayfs
+> +       reset_ownership
+> +}
 
-Silence is golden ?
+Exactly the same. on/off can be passed as parameter.
 
 Thanks,
-Zorro
-
-> -- 
-> 2.37.0.rc0.161.g10f37bed90-goog
-> 
-
+Amir.
