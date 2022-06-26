@@ -2,108 +2,95 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71FAEC43334
-	for <linux-fstests@archiver.kernel.org>; Sat, 25 Jun 2022 22:47:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96187C43334
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jun 2022 02:10:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233529AbiFYWrP (ORCPT
+        id S233824AbiFZCKL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 25 Jun 2022 18:47:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56844 "EHLO
+        Sat, 25 Jun 2022 22:10:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36770 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233513AbiFYWrP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 18:47:15 -0400
-Received: from mail104.syd.optusnet.com.au (mail104.syd.optusnet.com.au [211.29.132.246])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CAC0813E3F
-        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 15:47:13 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-2-147.pa.nsw.optusnet.com.au [49.181.2.147])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id C8AAA5EFAF5;
-        Sun, 26 Jun 2022 08:47:10 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1o5EYW-00B3cQ-8t; Sun, 26 Jun 2022 08:47:08 +1000
-Date:   Sun, 26 Jun 2022 08:47:08 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Theodore Ts'o <tytso@mit.edu>
+        with ESMTP id S233823AbiFZCKJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 22:10:09 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D13F313E85
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 19:10:06 -0700 (PDT)
+Received: from letrec.thunk.org (c-24-1-67-28.hsd1.il.comcast.net [24.1.67.28])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25Q29xmO025234
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sat, 25 Jun 2022 22:10:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1656209401; bh=AUrmVzktZxGbc/BmKs/VMqwPaoxzWVIDStTzX+kGWJE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=ph0ieLSlMeljl3pT86j8TR+HoM7ROxKx8AXpD7TsKGf67MDGNZNWkqz0+xFWZhQdS
+         KWssHfUmwreddGeZoxPTPkuqp3jvWzl+iJazTVwhmPhAh8GHoivrFP076Zx4KiIx5q
+         l2mxc5drzg3JrgVlxr9bzuD+03O7t/ocU7XdBI4o0cM/31vuYK7+ZrMlUHxJMaq7+H
+         F2Tg1CyEYuTtSd36GuQ2sG2aEYWc/KvlLXRXSVlraeq9UXH4Efba6iJcVEnS0FleV2
+         mVA8RmgBO3UWsjcRlPfYK1oiLjVJmUieul+0gfwP1voLAEVX0jVd2VYnpq9Kqt2IhQ
+         79BS+htFnFj/g==
+Received: by letrec.thunk.org (Postfix, from userid 15806)
+        id C87638C32D6; Sat, 25 Jun 2022 22:09:58 -0400 (EDT)
+Date:   Sat, 25 Jun 2022 22:09:58 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Dave Chinner <david@fromorbit.com>
 Cc:     An Long <lan@suse.com>, fstests@vger.kernel.org
 Subject: Re: [PATCH] common/config: Fix use of MKFS_OPTIONS
-Message-ID: <20220625224708.GJ1098723@dread.disaster.area>
+Message-ID: <Yre/9qV62dtVyCvn@mit.edu>
 References: <20220623160825.31788-1-lan@suse.com>
  <Yrc6Pz67mL56ML6j@mit.edu>
+ <20220625224708.GJ1098723@dread.disaster.area>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Yrc6Pz67mL56ML6j@mit.edu>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.4 cv=e9dl9Yl/ c=1 sm=1 tr=0 ts=62b7906f
-        a=ivVLWpVy4j68lT4lJFbQgw==:117 a=ivVLWpVy4j68lT4lJFbQgw==:17
-        a=kj9zAlcOel0A:10 a=JPEYwPQDsx4A:10 a=7-415B0cAAAA:8
-        a=5eWJavWNVerMDHAMmrAA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <20220625224708.GJ1098723@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jun 25, 2022 at 12:39:27PM -0400, Theodore Ts'o wrote:
-> On Fri, Jun 24, 2022 at 12:08:25AM +0800, An Long wrote:
-> >  
-> > +# check the size value in $MKFS_OPTIONS is an integer
-> > +if [[ $MKFS_OPTIONS =~ [0-9]+[^0-9\ ] ]] ; then
-> > +        _fatal "error: \$MKFS_OPTIONS: Only number in bytes is allowed, no units."
-> > +fi
+On Sun, Jun 26, 2022 at 08:47:08AM +1000, Dave Chinner wrote:
+> > If we want to go down that approach, perhaps another approach would be
+> > to specify the desired blocksize diretly in the fs config.  Something
+> > like "FS_BLOCK_SIZE=1024"?  We can then have the fs-specific mkfs
+> > commands translate that into the appropriate "-b 1024" or whatever
+> > else might be appropriate for a particular file system.  And then
+> > tests that want to override the block size can just override
+> > FS_BLOCK_SIZE and then the _mkfs function can use it as appropriate.
 > 
-> This will break configs, since ext4 has a feature 64bit, so there
-> might be MKFS_OPTIONS that contain "-O 64bit", or "-O ^64bit".
+> This is the right way to fix the problem.
 > 
-> For that matter, this wll also break things like "-E encoding=12.1"
-> which sets the Unicode encoding to 12.1.
-> 
-> ... or "-E lazy_itable_init=1,lazy_journal_init=1".
-> 
-> Bottom line, blindly assuming that any number followed by a non-number
-> is a unit, is just not going to work.
-> 
-> I think the real problem is that we have fstests trying to parse
-> MKFS_OPTIONS at all in the first place.
+> My plan was that once there was a single point of checking of
+> MKFS_OPTIONS, I'd use that to extract the default value ifor the
+> entire fstests run and convert everything else to use it. And then
+> add config section support for the variable so that it can easily be
+> specified on a config section by section basis.
 
-Yup. That's exactly the issue.
+Nice, that sounds like a good way to go.
 
-> For that matter, I'm not fond
-> of tests that try to override MKFS_OPTIONS for their own nefarious
-> purposes, because sometimes certain MKFS_OPTIONS imply something about
-> what must be in MOUNT_OPTIONS, or vice versa.  I do understand why
-> that has to be done for certain tests, but... yelch.  Especially in
-> centralized functions like _scratch_mkfs_sized, it just leads to tech
-> debt.
-> 
-> I'll note that generic tests and functions in common/rc that do unholy
-> things with MKFS_OPTIONS already have to have per-file system hacks as
-> it is.  So having more per-file system hacks for check_block_options()
-> is par for the course, so long as we accept that we want to have
-> generic tests and generic code violate the abstraction barrier and try
-> to read or override MKFS_OPTIONS.
-> 
-> If we want to go down that approach, perhaps another approach would be
-> to specify the desired blocksize diretly in the fs config.  Something
-> like "FS_BLOCK_SIZE=1024"?  We can then have the fs-specific mkfs
-> commands translate that into the appropriate "-b 1024" or whatever
-> else might be appropriate for a particular file system.  And then
-> tests that want to override the block size can just override
-> FS_BLOCK_SIZE and then the _mkfs function can use it as appropriate.
+And if we start down this path, for those file systems that support a
+clustered allocation mode, what I'd then propose adding is a
+FS_CLUSTER_SIZE parameter, so that the cluster size could be specified
+in the config, hich could then get translated by the _mkfs_XXX
+function into the appropriate mkfs option --- AND, so that generic
+tests that are testing quota can just check the value of
+$FS_CLUSTER_SIZE, and if it's set, use that to determine the
+granularity of quota tracking.
 
-This is the right way to fix the problem.
+This avoids having tests need to use fs-specific tools (such as
+dumpe2fs) to determine if (a) clustered allocation is enabled, and (b)
+what the cluster size is.
 
-My plan was that once there was a single point of checking of
-MKFS_OPTIONS, I'd use that to extract the default value ifor the
-entire fstests run and convert everything else to use it. And then
-add config section support for the variable so that it can easily be
-specified on a config section by section basis.
+More generally, for any file system feature which is supported by more
+than one file system[1], instead of explicitly specifying it via
+MKFS_OPTIONS and/or MOUNT_OPTION, we could specify it abstractly,
+which will make it easier for those tests who either need to override
+that setting, or test to see what that setting might be.  This should
+allow us to reduce the number of instances of "case $FSTYPE ..." in
+tests/generic/*, which would be a very good thing.
 
-I started writing an email that said exactly this, but then decided
-half way through that it was a waste of time because people would
-just nod, go their own way and yet again nothing would happen unless
-I did it myself....
+[1] Examples of file system features that could use this include
+fscrypt, case folding and maybe DAX.  We're mostly doing this for
+external log devices already.
 
--Dave.
-
--- 
-Dave Chinner
-david@fromorbit.com
+					- Ted
