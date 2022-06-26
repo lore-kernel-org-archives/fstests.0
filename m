@@ -2,95 +2,363 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96187C43334
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jun 2022 02:10:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5738C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jun 2022 04:44:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233824AbiFZCKL (ORCPT
+        id S233918AbiFZEoI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 25 Jun 2022 22:10:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36770 "EHLO
+        Sun, 26 Jun 2022 00:44:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46858 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233823AbiFZCKJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 25 Jun 2022 22:10:09 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D13F313E85
-        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 19:10:06 -0700 (PDT)
-Received: from letrec.thunk.org (c-24-1-67-28.hsd1.il.comcast.net [24.1.67.28])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25Q29xmO025234
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 25 Jun 2022 22:10:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656209401; bh=AUrmVzktZxGbc/BmKs/VMqwPaoxzWVIDStTzX+kGWJE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=ph0ieLSlMeljl3pT86j8TR+HoM7ROxKx8AXpD7TsKGf67MDGNZNWkqz0+xFWZhQdS
-         KWssHfUmwreddGeZoxPTPkuqp3jvWzl+iJazTVwhmPhAh8GHoivrFP076Zx4KiIx5q
-         l2mxc5drzg3JrgVlxr9bzuD+03O7t/ocU7XdBI4o0cM/31vuYK7+ZrMlUHxJMaq7+H
-         F2Tg1CyEYuTtSd36GuQ2sG2aEYWc/KvlLXRXSVlraeq9UXH4Efba6iJcVEnS0FleV2
-         mVA8RmgBO3UWsjcRlPfYK1oiLjVJmUieul+0gfwP1voLAEVX0jVd2VYnpq9Kqt2IhQ
-         79BS+htFnFj/g==
-Received: by letrec.thunk.org (Postfix, from userid 15806)
-        id C87638C32D6; Sat, 25 Jun 2022 22:09:58 -0400 (EDT)
-Date:   Sat, 25 Jun 2022 22:09:58 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     An Long <lan@suse.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] common/config: Fix use of MKFS_OPTIONS
-Message-ID: <Yre/9qV62dtVyCvn@mit.edu>
-References: <20220623160825.31788-1-lan@suse.com>
- <Yrc6Pz67mL56ML6j@mit.edu>
- <20220625224708.GJ1098723@dread.disaster.area>
+        with ESMTP id S233909AbiFZEoH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2022 00:44:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8F1A312D08
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 21:44:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656218645;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=arHf+ANxJDI0hQ8qj6GIDK7awNKxZGlAP2yk16Mo0tc=;
+        b=BLZx+IrV8WqvaZG8cDUqOvFIZSY6mBvkuXBxlGsaZKEO6z9PSOqm6DGW6pTo2F4NxB0RuF
+        gLjdPyKg3jES3JwiwJdNPdQ7UgQlA63JlRK75vJRtjjZoyrW+eBlGzKwza7CYVDxIyjaKh
+        A8N5JzIc/3FzwDYDFxW7fDgOQE50b+Q=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-240-2kZC-N6tMreGndCry-QYWQ-1; Sun, 26 Jun 2022 00:44:03 -0400
+X-MC-Unique: 2kZC-N6tMreGndCry-QYWQ-1
+Received: by mail-qk1-f199.google.com with SMTP id r6-20020a05620a298600b006a98e988ba4so7033114qkp.3
+        for <fstests@vger.kernel.org>; Sat, 25 Jun 2022 21:44:03 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=arHf+ANxJDI0hQ8qj6GIDK7awNKxZGlAP2yk16Mo0tc=;
+        b=adDmD5lRjqjFE2xeYglEw6OeV428kTKoh4d4DNM6GHuaoOLd6jl96k+L9UR4SHi0dI
+         3kltyJ83BZwXemprC86LY5AiaW4n2CXr9Qcc/apMLOMgTE2qyg+PjIetIu2Jt5Ay+jIU
+         OFxdnvTxFU0NOBlttRojH28EVFS1RWJWWrvjOHQnk67D5U6Ns3yaaeJlGFNGZUkrQ55C
+         /j8vaoiLZhJ2i83cx6Wxgb8kQDEcyuVj1jGtx60Q9h63ZhxGRQ5STyW5o88QcFRdULJp
+         J+zd5c3Pul4ANo/2kh+OxWoXz7J/nqNOeO747FOLkNHxJigV4Jb1t/cqhOHUonf8kx7d
+         6BXg==
+X-Gm-Message-State: AJIora9AAfk0Nxe+mk4d0cQMDbASRTB36l398LuS0HQxr0jdpkWyTGyx
+        +P4zPE3lpdr8kpekxGktEsQEjPnZbPH2ZMjSZbbjMZbBDnI6voiWfVuQEJx0Us6zRrD/Yi5B7r2
+        K9ePdcSp8BDJ33fPa7w==
+X-Received: by 2002:a05:620a:372c:b0:6a7:3ad2:68cd with SMTP id de44-20020a05620a372c00b006a73ad268cdmr4599803qkb.418.1656218642676;
+        Sat, 25 Jun 2022 21:44:02 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1sFZ0ZrtkfZNt1XgBSRsEC5+Xea2ig8+LC9TEBH+I+ytKp8vAsicTz89NdJpocbwJlK3Uc5tA==
+X-Received: by 2002:a05:620a:372c:b0:6a7:3ad2:68cd with SMTP id de44-20020a05620a372c00b006a73ad268cdmr4599796qkb.418.1656218642338;
+        Sat, 25 Jun 2022 21:44:02 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id 194-20020a370acb000000b006a8b6848556sm5536707qkk.7.2022.06.25.21.43.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 25 Jun 2022 21:44:01 -0700 (PDT)
+Date:   Sun, 26 Jun 2022 12:43:56 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jeremy Bongio <bongiojp@gmail.com>
+Cc:     Ted Tso <tytso@mit.edu>, fstests@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] ext4/056: add a check to make sure ext4 uuid ioctls
+ get/set during fsstress.
+Message-ID: <20220626044356.aguhlcj2fb4embbj@zlang-mailbox>
+References: <20220625085321.109451-1-bongiojp@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220625224708.GJ1098723@dread.disaster.area>
+In-Reply-To: <20220625085321.109451-1-bongiojp@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jun 26, 2022 at 08:47:08AM +1000, Dave Chinner wrote:
-> > If we want to go down that approach, perhaps another approach would be
-> > to specify the desired blocksize diretly in the fs config.  Something
-> > like "FS_BLOCK_SIZE=1024"?  We can then have the fs-specific mkfs
-> > commands translate that into the appropriate "-b 1024" or whatever
-> > else might be appropriate for a particular file system.  And then
-> > tests that want to override the block size can just override
-> > FS_BLOCK_SIZE and then the _mkfs function can use it as appropriate.
+On Sat, Jun 25, 2022 at 01:53:21AM -0700, Jeremy Bongio wrote:
+> Adds a utility to get/set uuid through ext4 ioctl. Executes the ioctls while
+> running fsstress. These ioctls are used by tune2fs to safely change the uuid
+> without racing other filesystem modifications.
 > 
-> This is the right way to fix the problem.
+> Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
+> ---
+
+Hi Jeremy,
+
+Thanks for the patch, some picky review points as below:
+
+>  src/Makefile       |   4 +-
+>  src/global.h       |   2 +
+>  src/uuid_ioctl.c   | 106 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/056     |  59 +++++++++++++++++++++++++
+>  tests/ext4/056.out |   1 +
+>  5 files changed, 170 insertions(+), 2 deletions(-)
+>  create mode 100644 src/uuid_ioctl.c
+>  create mode 100755 tests/ext4/056
+>  create mode 100644 tests/ext4/056.out
 > 
-> My plan was that once there was a single point of checking of
-> MKFS_OPTIONS, I'd use that to extract the default value ifor the
-> entire fstests run and convert everything else to use it. And then
-> add config section support for the variable so that it can easily be
-> specified on a config section by section basis.
+> diff --git a/src/Makefile b/src/Makefile
+> index 111ce1d9..e33e04de 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> -	detached_mounts_propagation ext4_resize
+> +	detached_mounts_propagation ext4_resize uuid_ioctl
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py
+>  
+>  SUBDIRS = log-writes perf
+>  
+> -LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
+> +LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
+>  
+>  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+>  LINUX_TARGETS += loggen
+> diff --git a/src/global.h b/src/global.h
+> index b4407099..747d95f8 100644
+> --- a/src/global.h
+> +++ b/src/global.h
+> @@ -184,4 +184,6 @@ roundup_64(unsigned long long x, unsigned int y)
+>  	return rounddown_64(x + y - 1, y);
+>  }
+>  
+> +#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
+> +
+>  #endif /* GLOBAL_H */
+> diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
+> new file mode 100644
+> index 00000000..51480689
+> --- /dev/null
+> +++ b/src/uuid_ioctl.c
+> @@ -0,0 +1,106 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +/*
+> + * Test program which uses the raw ext4 set_fsuuid ioctl directly.
+> + * SYNOPSIS:
+> + *   $0 COMMAND MOUNT_POINT [UUID]
+> + *
+> + * COMMAND must be either "get" or "set".
+> + * The UUID must be a 16 octet represented as 32 hexadecimal digits in canonical
+> + * textual representation, e.g. output from `uuidgen`.
+> + *
+> + */
+> +
+> +#include <stdio.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <unistd.h>
+> +#include <stdint.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <sys/ioctl.h>
+> +#include <uuid/uuid.h>
+> +#include <linux/fs.h>
+> +#include "global.h"
+> +
+> +struct fsuuid {
+> +        size_t len;
+> +        __u8 *b;
+> +};
+> +
+> +#ifndef EXT4_IOC_GETFSUUID
+> +#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
+> +#endif
+> +
+> +#ifndef EXT4_IOC_SETFSUUID
+> +#define EXT4_IOC_SETFSUUID      _IOW('f', 45, struct fsuuid)
+> +#endif
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	int	error, fd;
+> +        struct fsuuid fsuuid;
+        ^
 
-Nice, that sounds like a good way to go.
+Bad indent at here, please check the indent of this program.
 
-And if we start down this path, for those file systems that support a
-clustered allocation mode, what I'd then propose adding is a
-FS_CLUSTER_SIZE parameter, so that the cluster size could be specified
-in the config, hich could then get translated by the _mkfs_XXX
-function into the appropriate mkfs option --- AND, so that generic
-tests that are testing quota can just check the value of
-$FS_CLUSTER_SIZE, and if it's set, use that to determine the
-granularity of quota tracking.
+> +
+> +	if (argc < 3) {
+> +		fprintf(stderr, "Invalid arguments\n");
+> +		return 1;
+> +	}
+> +
+> +	fd = open(argv[2], O_RDONLY);
+> +	if (!fd) {
+> +		perror(argv[2]);
+> +		return 1;
+> +	}
+> +
+> +	BUILD_BUG_ON(sizeof(uuid_t) % 16);
+> +	fsuuid.len = 16;
+> +	fsuuid.b = calloc(fsuuid.len, sizeof(__u8));
+> +
+> +	if (strcmp(argv[1], "get") == 0) {
+> +		uuid_t uuid;
+> +		char uuid_str[37];
+> +
+> +		if (ioctl(fd, EXT4_IOC_GETFSUUID, &fsuuid)) {
+> +			close(fd);
+> +			fprintf(stderr, "%s while trying to get fs uuid\n",
+> +				strerror(errno));
+> +			return 1;
+> +		}
+> +
+> +		memcpy(&uuid, fsuuid.b, sizeof(uuid));
+> +		uuid_unparse(uuid, uuid_str);
+> +		printf("%s", uuid_str);
+> +	} else if (strcmp(argv[1], "set") == 0) {
+> +		if (argc != 4) {
+> +			fprintf(stderr, "UUID argument missing.\n");
+> +			return 1;
+> +		}
+> +
+> +		if (strlen(argv[3]) != 36) {
+> +			fprintf(stderr, "Invalid UUID. The UUID should be in "
+> +				"canonical format. Example: "
+> +				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
+> +			return 1;
+> +		}
+> +
+> +		uuid_t uuid;
+> +		error = uuid_parse(argv[3], uuid);
+> +		if (error < 0) {
+> +			fprintf(stderr, "%s: invalid UUID.\n", argv[0]);
+> +			return 1;
+> +		}
+> +
+> +		memcpy(fsuuid.b, uuid, sizeof(uuid));
+> +		if(ioctl(fd, EXT4_IOC_SETFSUUID, &fsuuid)) {
+> +			close(fd);
+> +			fprintf(stderr, "%s while trying to set fs uuid\n",
+> +				strerror(errno));
+> +			return 1;
+> +		}
+> +	} else {
+> +		fprintf(stderr, "Invalid command\n");
+> +	}
+> +
+> +	close(fd);
+> +	return 0;
+> +}
+> diff --git a/tests/ext4/056 b/tests/ext4/056
+> new file mode 100755
+> index 00000000..46631d46
+> --- /dev/null
+> +++ b/tests/ext4/056
+> @@ -0,0 +1,59 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2000-2005 Silicon Graphics, Inc.  All Rights Reserved.
+> +#
+> +# Test the set/get UUID ioctl.
+> +#
+> +
+> +. ./common/preamble
+> +_begin_fstest auto ioctl resize
 
-This avoids having tests need to use fs-specific tools (such as
-dumpe2fs) to determine if (a) clustered allocation is enabled, and (b)
-what the cluster size is.
+Why this case is "resize" related?
 
-More generally, for any file system feature which is supported by more
-than one file system[1], instead of explicitly specifying it via
-MKFS_OPTIONS and/or MOUNT_OPTION, we could specify it abstractly,
-which will make it easier for those tests who either need to override
-that setting, or test to see what that setting might be.  This should
-allow us to reduce the number of instances of "case $FSTYPE ..." in
-tests/generic/*, which would be a very good thing.
+> +
+> +tmpfile="/tmp/$$."
+> +trap "rm -f $tmpfile; exit" 0 1 2 3 15
 
-[1] Examples of file system features that could use this include
-fscrypt, case folding and maybe DAX.  We're mostly doing this for
-external log devices already.
+We have default "trap" when you source ./common/preamble. If you need a custom
+cleanup by youself, you can define a new one in this case (refer to other cases
+which has their own _cleanup).
 
-					- Ted
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
+> +_require_scratch
+> +_require_test_program uuid_ioctl
+> +
+> +UUID_IOCTL=$here/src/uuid_ioctl
+> +
+> +# if the ioctl is not supported by the kernel, then skip test.
+> +current_uid=$($UUID_IOCTL get $SCRATCH_MNT)
+> +if [[ "$current_uid" = "Inappropriate ioctl for device while trying to set fs uuid" ]]; then
+> +  _notrun "UUID ioctls are not supported by kernel."
+   ^
+
+It's not fault, but we recommended the tab width is 8, for fstests bash script.
+
+> +fi
+> +
+> +# Create filesystem and mount
+> +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
+                                            ^
+Generally we make sure $seqres.full is null (rm -f $seqres.full) or truncated
+at first. So an easier way is using "> $seqres.full" at the first place which
+trys to write $seqres.full, to clean .full file.
+
+> +_scratch_mount >> $seqres.full
+> +
+> +# Begin fsstress while modifying UUID
+> +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
+> +"$FSSTRESS_PROG" $fsstress_args > /dev/null &
+
+Better to use "2>&1" if you don't want this case fails on some weird fsstress
+error output. Or ">>$seqres.full 2>&1" if you'd like to know what happened
+on fsstress.
+
+Do I miss something? I didn't find any place try to make sure above fsstress
+process is killed/end (by using kill and wait).
+
+> +
+> +test_uuid_ioctl()
+> +{
+> +  for n in $(seq 1 20); do
+> +    new_uuid=$(uuidgen)
+
+I think uuidgen isn't a tool which is 100% installed on all linux system. So
+
+_require_command $UUIDGEN_PROG uuidgen
+
+> +
+> +    echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
+> +    $UUID_IOCTL set $SCRATCH_MNT $new_uuid >> $seqres.full 2>&1
+> +
+> +    current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
+> +    echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
+> +    if [[ "$current_uuid" != "$new_uuid" ]]; then
+> +      echo "UUID does not equal what was sent with the ioctl"
+> +      exit
+
+I think break is enough, but exit is fine too.
+
+> +    fi
+> +  done
+> +}
+> +
+> +test_uuid_ioctl
+
+I'm wondering why not run the code in test_uuid_ioctl directly. Looks like you
+just make them into a function, then run this function once. It doesn't use
+local variables, or be called many times, or have many complicated lines. Or
+you'd like to package the codes in "for n in $(seq 1 20)" loop?
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ext4/056.out b/tests/ext4/056.out
+> new file mode 100644
+> index 00000000..06f52bb4
+> --- /dev/null
+> +++ b/tests/ext4/056.out
+> @@ -0,0 +1 @@
+> +QA output created by 056
+
+Silence is golden ?
+
+Thanks,
+Zorro
+
+> -- 
+> 2.37.0.rc0.161.g10f37bed90-goog
+> 
+
