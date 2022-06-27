@@ -2,197 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94B6EC43334
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Jun 2022 00:35:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06E66C43334
+	for <linux-fstests@archiver.kernel.org>; Mon, 27 Jun 2022 07:33:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230025AbiF0Af1 (ORCPT
+        id S232854AbiF0HdS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 26 Jun 2022 20:35:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40862 "EHLO
+        Mon, 27 Jun 2022 03:33:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43794 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229732AbiF0Af0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jun 2022 20:35:26 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E836AD8F
-        for <fstests@vger.kernel.org>; Sun, 26 Jun 2022 17:35:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656290123;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=JCvGSeoklAqx1gOmUCcWDBPV8GG8i/Hjqb6gxEvBonE=;
-        b=UFWMWStbKcUsEE+eJlfFEV6oSdbMnGuKfIW4VlVN5fK43BXktnTfEsdTNHF033mtW3gmDq
-        BlYB7xCAyZOryxGzTeugeXh7NJWh2ndwibspnhJx+epJOVXmFy1vBeYLHtADAxSEJAFw3x
-        jLTs2wALwdRZ4hz4SDnguYhjPOLJcCU=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-363-Hd8m2DaKPtyqZAFbCNr4pQ-1; Sun, 26 Jun 2022 20:35:22 -0400
-X-MC-Unique: Hd8m2DaKPtyqZAFbCNr4pQ-1
-Received: by mail-pj1-f69.google.com with SMTP id m5-20020a17090a4d8500b001e0cfe135c7so2762915pjh.3
-        for <fstests@vger.kernel.org>; Sun, 26 Jun 2022 17:35:22 -0700 (PDT)
+        with ESMTP id S232235AbiF0HdR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Jun 2022 03:33:17 -0400
+Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11D945FA5;
+        Mon, 27 Jun 2022 00:33:16 -0700 (PDT)
+Received: by mail-wr1-x42a.google.com with SMTP id r20so11735447wra.1;
+        Mon, 27 Jun 2022 00:33:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=IjCAYcZiyzmXKNidCoE+ZXPBYYITRg7RBpp+SdwMpOU=;
+        b=GSiHmMA9vbyGudgEWh9Y1AFUwYBXPmugBbu/9bK401UeuUYnBmF/OA585uARG6izBd
+         XxVh5qAT5ckqUpRwpiNNM5vTGDPZjHxi3JhZn+Wa97t0l4FdyzHQydJTdR+XNvol6666
+         Y2eTkEeIjJev/6qMBkLYVhdPxuio0HS67m8Ca1onueI5GIUrlEOQlwTn9B3Tz7r6LloX
+         stk1RLwl6pOy9+jZoo6jXhg7JxMtcMQMyPD7xU5fGMjKchOHr/J/N+t7nhfcIIShjpVC
+         bpdrunh+j5OW8BiVI1c/9FHt3rImU+uer3XBbIjFJzhSCkLchLumtHcX8NsAJiD7EAgV
+         ERhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=JCvGSeoklAqx1gOmUCcWDBPV8GG8i/Hjqb6gxEvBonE=;
-        b=epRfJkMoscTeu12IsA0caJWCpJwNY6kcl4LwCSeVwRTWqk7cCCTndEK7VSfPaTgHV5
-         3EGhLOEOBfKJLvNrGp5q4j1zoySTjAbQ6i/AVjASwWXKUegI1dVDtNBSZgUwEOR3xN4m
-         p3yHFKiwYubWZYitqjdMhiRXV7ulIGsSbeTsABYC4SMgsnWy3NS0Z4qz/m2NPCge3IYY
-         p5z/JSFTtkkX6ORmMyeGxAq6RGj3Ryz3vDM3gj45xH6z+G/O2t59jR906bTyfDCSPMMi
-         Rn2IasqIEaUwgL+1WJ6vBIbFIbOJ4FyXJN9iN1lLtD5vk/JrHskO1WaPKPFfcQTM5g48
-         XNFw==
-X-Gm-Message-State: AJIora8UyLTwabiTafa0Q3Dj/UkMT/c8Xz5pvI5iu4PkjaFmZvzEmc8k
-        HjzGFMOo+z2pWOz6eiLNZQr77FmXz7H1lkCqcmCLQFlQIZJAFwyYUVn5PS1Ok/hhbT5F5ew+LTy
-        Pi/zxN9uOU0mXOcODag==
-X-Received: by 2002:a17:902:7604:b0:16a:f36d:73f3 with SMTP id k4-20020a170902760400b0016af36d73f3mr4695481pll.170.1656290121141;
-        Sun, 26 Jun 2022 17:35:21 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1uz6pwTu7tc4a03NrfPE+qCvw77oO2PMKSAnvj0+WD46YNlNSFk1T7VyKUalEJ+lp6c9dEi6w==
-X-Received: by 2002:a17:902:7604:b0:16a:f36d:73f3 with SMTP id k4-20020a170902760400b0016af36d73f3mr4695455pll.170.1656290120857;
-        Sun, 26 Jun 2022 17:35:20 -0700 (PDT)
-Received: from [10.72.12.43] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id h5-20020a170902680500b0015e8d4eb20dsm5793791plk.87.2022.06.26.17.35.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 26 Jun 2022 17:35:20 -0700 (PDT)
-Subject: Re: [PATCH v2] ceph/005: verify correct statfs behaviour with quotas
-To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
-        fstests@vger.kernel.org
-Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
-References: <20220615151418.23805-1-lhenriques@suse.de>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <1924a7cc-245d-f35b-5e7c-a82f36cf2271@redhat.com>
-Date:   Mon, 27 Jun 2022 08:35:14 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=IjCAYcZiyzmXKNidCoE+ZXPBYYITRg7RBpp+SdwMpOU=;
+        b=xLyupm8Cm68t9FNSnZ0vs6AXiqNHr1dwGoOzz+qS1iEj/0wkFQXXVMXOFkoKy6FJt1
+         qnc+HB6o9lsKmwAvJDx1W8dEfc32Vw/UYqsuA1m2/aS6O+OQWN+EgI7vKir9OGm+7ash
+         l2S+T6t1KeVY6YxmeCt5QK5KvkgF5ia9visGqvp4zWwFJwjuBrufpvZsLZvOLHQlh792
+         3d0a2paDFG3rHXgaivWPryZw/FASjDYMbeylO7Pa9wXcup9p0l3lefRgQTqDzleutl5u
+         Z0hkh4IsvpMTY9/+ydNzDgDOZ7CHv3yYIF73L9sUn5ksXMG22Mu0U1JrLCed+nbYtaAM
+         QMqg==
+X-Gm-Message-State: AJIora+50jOBCaJtabQor73U9aCCHPSp/SXn+JcK3KJ0VKSFNivmZpg3
+        12wLERVIO9tnXCLKB5OOcy8=
+X-Google-Smtp-Source: AGRyM1tg7erOZgdACKLItuDRGcnUIRnFvY/H8ul5M1uy00pES3EfD0Ry7w2NUsiQp8TxCeGxKYmECQ==
+X-Received: by 2002:a05:6000:1885:b0:21b:ad25:8ae6 with SMTP id a5-20020a056000188500b0021bad258ae6mr10663203wri.183.1656315195496;
+        Mon, 27 Jun 2022 00:33:15 -0700 (PDT)
+Received: from amir-ThinkPad-T480.lan ([77.137.66.49])
+        by smtp.gmail.com with ESMTPSA id j20-20020a05600c2b9400b00397623ff335sm12070070wmc.10.2022.06.27.00.33.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Jun 2022 00:33:14 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     "Darrick J . Wong" <djwong@kernel.org>
+Cc:     Dave Chinner <david@fromorbit.com>,
+        Leah Rumancik <leah.rumancik@gmail.com>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH 5.10 CANDIDATE v2 0/7] xfs stable candidate patches for 5.10.y (from v5.13)
+Date:   Mon, 27 Jun 2022 10:33:04 +0300
+Message-Id: <20220627073311.2800330-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20220615151418.23805-1-lhenriques@suse.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
-Content-Language: en-US
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Luis,
+Hi all,
 
-Sorry for late.
+This is a resend of the series that was posted 3 weeks ago [v1].
+The backports in this series are from circa v5.12..v5.13.
+The remaining queue of tested 5.10 backports [1] contains 25 more patches
+from v5.13..v5.19-rc1.
 
-On 6/15/22 11:14 PM, Luís Henriques wrote:
-> When using a directory with 'max_bytes' quota as a base for a mount,
-> statfs shall use that 'max_bytes' value as the total disk size.  That
-> value shall be used even when using subdirectory as base for the mount.
->
-> A bug was found where, when this subdirectory also had a 'max_files'
-> quota, the real filesystem size would be returned instead of the parent
-> 'max_bytes' quota value.  This test case verifies this bug is fixed.
->
-> Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> ---
-> Finally, I've managed to come back to this test.  The major changes since
-> v1 are:
->   - creation of an helper for getting total mount space using 'df'
->   - now the test sends quota size to stdout
->
->   common/rc          | 13 +++++++++++++
->   tests/ceph/005     | 38 ++++++++++++++++++++++++++++++++++++++
->   tests/ceph/005.out |  4 ++++
->   3 files changed, 55 insertions(+)
->   create mode 100755 tests/ceph/005
->   create mode 100644 tests/ceph/005.out
->
-> diff --git a/common/rc b/common/rc
-> index 2f31ca464621..72eabb7a428c 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4254,6 +4254,19 @@ _get_available_space()
->   	echo $((avail_kb * 1024))
->   }
->   
-> +# get the total space in bytes
-> +#
-> +_get_total_space()
-> +{
-> +	if [ -z "$1" ]; then
-> +		echo "Usage: _get_total_space <mnt>"
-> +		exit 1
-> +	fi
-> +	local total_kb;
-> +	total_kb=`$DF_PROG $1 | tail -n1 | awk '{ print $3 }'`
-> +	echo $(($total_kb * 1024))
-> +}
-> +
->   # return device size in kb
->   _get_device_size()
->   {
-> diff --git a/tests/ceph/005 b/tests/ceph/005
-> new file mode 100755
-> index 000000000000..7eb687e8a092
-> --- /dev/null
-> +++ b/tests/ceph/005
-> @@ -0,0 +1,38 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 005
-> +#
-> +# Make sure statfs reports correct total size when:
-> +# 1. using a directory with 'max_byte' quota as base for a mount
-> +# 2. using a subdirectory of the above directory with 'max_files' quota
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick quota
-> +
-> +_supported_fs ceph
-> +_require_scratch
-> +
-> +_scratch_mount
-> +mkdir -p "$SCRATCH_MNT/quota-dir/subdir"
-> +
-> +# set quota
-> +quota=$((2 ** 30)) # 1G
-> +$SETFATTR_PROG -n ceph.quota.max_bytes -v "$quota" "$SCRATCH_MNT/quota-dir"
-> +$SETFATTR_PROG -n ceph.quota.max_files -v "$quota" "$SCRATCH_MNT/quota-dir/subdir"
-> +_scratch_unmount
-> +
-> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_mount
-> +echo ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
-> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_unmount
-> +
+There have been no comments on the first post except for Dave's request
+to collaborate the backports review process with Leah who had earlier
+sent out another series of backports for 5.15.y.
 
-For the 'SCRATCH_DEV' here, if you do:
+Following Dave's request, I had put this series a side to collaborate
+the shared review of 5.15/5.10 series with Leah and now that the shared
+series has been posted to stable, I am re-posting to request ACKs on this
+5.10.y specific series.
 
-SCRATCH_DEV="$SCRATCH_DEV/quota-dir"
+There are four user visible fixes in this series, one patch for dependency
+("rename variable mp") and two patches to improve testability of LTS.
 
-twice, won't it be "${ceph_scratch_dev}/quota-dir/quota-dir" at last ?
+Specifically, I selected the fix ("use current->journal_info for
+detecting transaction recursion") after I got a false positive assert
+while testing LTS kernel with XFS_DEBUG and at another incident, it
+helped me triage a regression that would have been harder to trace
+back to the offending code otherwise.
 
-Shouldn't it be:
+This series has been looping in kdevops for a long while, with and
+without the shared 5.15 backport with no regressions observed.
 
-SCRATCH_DEV="$TEST_DIR/quota-dir" ?
+Thanks,
+Amir.
 
--- Xiubo
+Changes since [v1]:
+- Rebased and tested on top of the v5.15+ ACKed backports [2]
 
-> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_mount
-> +echo subdir ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
-> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir/subdir" _scratch_unmount
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ceph/005.out b/tests/ceph/005.out
-> new file mode 100644
-> index 000000000000..47798b1fcd6f
-> --- /dev/null
-> +++ b/tests/ceph/005.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 005
-> +ceph quota size is 1073741824 bytes
-> +subdir ceph quota size is 1073741824 bytes
-> +Silence is golden
->
+[1] https://github.com/amir73il/linux/commits/xfs-5.10.y
+[2] https://lore.kernel.org/linux-xfs/20220624063702.2380990-1-amir73il@gmail.com/
+[v1] https://lore.kernel.org/linux-xfs/20220606160537.689915-1-amir73il@gmail.com/
+
+Anthony Iliopoulos (1):
+  xfs: fix xfs_trans slab cache name
+
+Darrick J. Wong (1):
+  xfs: fix xfs_reflink_unshare usage of filemap_write_and_wait_range
+
+Dave Chinner (2):
+  xfs: use current->journal_info for detecting transaction recursion
+  xfs: update superblock counters correctly for !lazysbcount
+
+Gao Xiang (1):
+  xfs: ensure xfs_errortag_random_default matches XFS_ERRTAG_MAX
+
+Pavel Reichl (2):
+  xfs: rename variable mp to parsing_mp
+  xfs: Skip repetitive warnings about mount options
+
+ fs/iomap/buffered-io.c    |   7 ---
+ fs/xfs/libxfs/xfs_btree.c |  12 +++-
+ fs/xfs/libxfs/xfs_sb.c    |  16 ++++-
+ fs/xfs/xfs_aops.c         |  17 +++++-
+ fs/xfs/xfs_error.c        |   2 +
+ fs/xfs/xfs_reflink.c      |   3 +-
+ fs/xfs/xfs_super.c        | 120 +++++++++++++++++++++-----------------
+ fs/xfs/xfs_trans.c        |  23 +++-----
+ fs/xfs/xfs_trans.h        |  30 ++++++++++
+ 9 files changed, 148 insertions(+), 82 deletions(-)
+
+-- 
+2.25.1
 
