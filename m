@@ -2,177 +2,113 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75835C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 04:25:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C9DCC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 04:28:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231199AbiF1EZL (ORCPT
+        id S231511AbiF1E2u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jun 2022 00:25:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45414 "EHLO
+        Tue, 28 Jun 2022 00:28:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50152 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229711AbiF1EZI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 00:25:08 -0400
+        with ESMTP id S244840AbiF1E23 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 00:28:29 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 21C9D13E8B
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:25:07 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 259EC13D5C
+        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:28:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656390306;
+        s=mimecast20190719; t=1656390508;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=3ijK1NnuikRq1mIkcXPksBX4gHVTQGnILEVjsTbCrAo=;
-        b=KT4AKUgpJ/kwc+9mWgUJ4fhDhdb0iMnUa5vRA2KUWatWThpFp3zgy4fKSNmZHMgsbBgjUj
-        ktGV0CIoUpAG0InGzEt0qZrxVxk0sUBsDzmQtVJfzyInkfttvI80IzTjdo7UsB01/F6ipF
-        W85dPbVTeoZ1LNJuNHuXjcDnsEHHvao=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=lT9dML198j2jI8sCB1rJkYluCfErFk7E3R2zXLiLwtc=;
+        b=dHsUGhDAjCJpGd2pxxm5QNBpjmDuk6HjjOE4TpA2noU3O7NZ0Cdsb9C8k/4xkgHVvII24n
+        FJkxoAx1J9/4gXYohGB4DqBZShXEnpemzOeeqglQ2j9mL+M8CPYCBUm/bvYKMvc3z1SLMl
+        xS1MfDKJ/tavgAsL3qfivxQj67Bii6E=
+Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
+ [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-528-gboamxY6MqCXs6GQ_UARlQ-1; Tue, 28 Jun 2022 00:25:04 -0400
-X-MC-Unique: gboamxY6MqCXs6GQ_UARlQ-1
-Received: by mail-qk1-f198.google.com with SMTP id de4-20020a05620a370400b006a9711bd9f8so12151038qkb.9
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:25:04 -0700 (PDT)
+ us-mta-636-dkfAYDgwMT60LtA4-q4Q7g-1; Tue, 28 Jun 2022 00:28:25 -0400
+X-MC-Unique: dkfAYDgwMT60LtA4-q4Q7g-1
+Received: by mail-qv1-f71.google.com with SMTP id m7-20020ad45dc7000000b0047042480dbfso11179784qvh.9
+        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:28:24 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=3ijK1NnuikRq1mIkcXPksBX4gHVTQGnILEVjsTbCrAo=;
-        b=TpSnRpJWKmJZr+2r+nEs7xaJNmZQ0OIFlEWbvzxJmTIMgJxPpVQaWHP3QSIq77tBMx
-         AsuxdYkeCCW2ysfcQgLyrmq1mDGH0s/v5H6DD49XmP5qzgmxhcDA+p842tF9IdAaqodp
-         glJ0XkBJ0nVpuE6bYeDItlcDgRZ61ll0IegSMxZwzuZidQiKu/Ap/CAXJTGTVIdpO5tT
-         7ZC3bsLlLUEgHDYZjQd1ni97fLItlX754SCal5vOQ9KTdrnnOxz+Y2mMiJOE/mgvzzRb
-         h//wL4qac3Tb7ZXaIgWHq3HDykne+jydi1qolTKUS4qFVanp+v2+bXQS4d/mtYwkndw0
-         4N8w==
-X-Gm-Message-State: AJIora8pEtQOjEo6PqsI75hIbkPONeWDZfdOhnZxJEn4oI2oHfMaJ9bK
-        DEtVClRLd6viKzirdbdHydKaBO1YzptTAyggfvA0J11jR0myPgyGotYdORDLui9ZJ+iOvN2oy59
-        hekPBZZCBszAnK7z17Q==
-X-Received: by 2002:a05:620a:13a3:b0:6af:a58:c139 with SMTP id m3-20020a05620a13a300b006af0a58c139mr10321939qki.751.1656390303799;
-        Mon, 27 Jun 2022 21:25:03 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1s4AlAyTEm1JoSqmH6AueFev8tLDBtcsTzBnzOmNFARg8LIPfzNWwnVb1Quevg+DDkWp5IErw==
-X-Received: by 2002:a05:620a:13a3:b0:6af:a58:c139 with SMTP id m3-20020a05620a13a300b006af0a58c139mr10321930qki.751.1656390303524;
-        Mon, 27 Jun 2022 21:25:03 -0700 (PDT)
+        bh=lT9dML198j2jI8sCB1rJkYluCfErFk7E3R2zXLiLwtc=;
+        b=vi6GAz1N9fvuMY2KJJN0qurs34SfzTBHzYGhBkO5qqtO9v24rYbhuAynba8jif+xpg
+         2r3DrhUV6nmVK6NPfbn5F6x8oQk6V8auzdjTcZZVdeinAYAlh4tqd72APxDUa33gBE/U
+         iZEPlsYRJEAX7TkyYDspK3xrXjgE0L9vCC3mfsgWqu0YbO6Tus7kvkKdujJVnxYvUZtf
+         IvWIz+E8MYPYVbM/gCZqNYLxwzM/Ro5pt4+6RoWHYkU/MzR43Crpjk/L8boudORaBCMA
+         Fd6lCYVPnb5vLi4Nb+em69TDok6TSoTAX8l/lYwJ7edqxwWtCRI65K2dHZp3w0lL4TMw
+         9zJw==
+X-Gm-Message-State: AJIora9DOKJyf3UA67Dn8PsmQqAuMLUqes5AYTRtg487UBCpKrjPhoeJ
+        tfiq604H0nNUtFX0+00Yi8oMNMopILDYPPApAjNTOtP5CQ51wvJp16rbhjFH0VonQf3RaIqDlsb
+        ascorf/NCvR/uj1fhRg==
+X-Received: by 2002:ac8:59c8:0:b0:31a:576f:13f9 with SMTP id f8-20020ac859c8000000b0031a576f13f9mr6421212qtf.596.1656390504530;
+        Mon, 27 Jun 2022 21:28:24 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1uqO69sQtIHzVWPm33MJuJF341Ab/cVZ/bWfHvEQI91Kf2WGYtWjTa+xQ+cJvO6tGernYvqhg==
+X-Received: by 2002:ac8:59c8:0:b0:31a:576f:13f9 with SMTP id f8-20020ac859c8000000b0031a576f13f9mr6421199qtf.596.1656390504260;
+        Mon, 27 Jun 2022 21:28:24 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id v15-20020a05620a440f00b006a79aa0c8b1sm10872232qkp.113.2022.06.27.21.25.00
+        by smtp.gmail.com with ESMTPSA id c24-20020ac853d8000000b003171a5dc474sm8202767qtq.23.2022.06.27.21.28.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Jun 2022 21:25:02 -0700 (PDT)
-Date:   Tue, 28 Jun 2022 12:24:57 +0800
+        Mon, 27 Jun 2022 21:28:23 -0700 (PDT)
+Date:   Tue, 28 Jun 2022 12:28:17 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     linux-ext4@vger.kernel.org
+To:     Theodore Ts'o <tytso@mit.edu>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 1/5] ext4/050: support indirect as well as extent mapped
- journals
-Message-ID: <20220628042457.zorfs2ghugnilqmm@zlang-mailbox>
+Subject: Re: [PATCH 2/5] ext4/044: skip test if the file system does not have
+ a journal
+Message-ID: <20220628042817.2xxzleisfguoq7qh@zlang-mailbox>
 References: <20220625030718.1215980-1-tytso@mit.edu>
- <20220625030718.1215980-2-tytso@mit.edu>
+ <20220625030718.1215980-3-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220625030718.1215980-2-tytso@mit.edu>
+In-Reply-To: <20220625030718.1215980-3-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 24, 2022 at 11:07:14PM -0400, Theodore Ts'o wrote:
-> Simplify the test and fix ext4/050 failures when running ext4 without
-> extents enabled (e.g., in ext3 emulation mode).
-> 
-> Instead of relying on parsing debugfs output's (which varies depending
-> on whether the journal inode is extent mapped or indirect block
-> mapped), use debugfs's "cat" command to get the contents of the
-> journal.
+On Fri, Jun 24, 2022 at 11:07:15PM -0400, Theodore Ts'o wrote:
+> This test mounts the file system using "mount -t ext3"; if the file
+> system config creates the file system without the jbd2 journal, the
+> "mount -t ext3" will fail.  So skip this test in that case.
 > 
 > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 > ---
+>  tests/ext4/044 | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/tests/ext4/044 b/tests/ext4/044
+> index 46e44053..fd27ae2d 100755
+> --- a/tests/ext4/044
+> +++ b/tests/ext4/044
+> @@ -16,11 +16,17 @@ _begin_fstest auto quick
+>  _supported_fs ext4
+>  _require_scratch
+>  _require_test_program "t_get_file_time"
+> +_require_dumpe2fs
+>  
+>  echo "Silence is golden"
+>  
+>  echo "Test timestamps with 256 inode size one device $SCRATCH_DEV" >$seqres.full
+>  _scratch_mkfs -t ext3 -I 256 >> $seqres.full 2>&1
+> +
+> +$DUMPE2FS_PROG -h $SCRATCH_DEV 2>> $seqres.full | grep '^Filesystem features' | grep -q has_journal
+> +if [ $? -ne 0 ]; then
+> +    _notrun "ext4 file system formatted without a journal"
+> +fi
 
-It looks good to me,
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-But as it contains many ext4 specific format things, so I hope to get one more
-reviewing from ext4 mail list, before I merge it.
+Can _has_metadata_journaling help that?
 
 Thanks,
 Zorro
 
->  tests/ext4/050 | 58 +++++---------------------------------------------
->  1 file changed, 5 insertions(+), 53 deletions(-)
-> 
-> diff --git a/tests/ext4/050 b/tests/ext4/050
-> index 79961957..6f93b86d 100755
-> --- a/tests/ext4/050
-> +++ b/tests/ext4/050
-> @@ -22,55 +22,6 @@ _require_command "$DEBUGFS_PROG" debugfs
->  checkpoint_journal=$here/src/checkpoint_journal
->  _require_test_program "checkpoint_journal"
+>  _scratch_mount
 >  
-> -# convert output from stat<journal_inode> to list of block numbers
-> -get_journal_extents() {
-> -	inode_info=$($DEBUGFS_PROG $SCRATCH_DEV -R "stat <8>" 2>> $seqres.full)
-> -	echo -e "\nJournal info:" >> $seqres.full
-> -	echo "$inode_info" >> $seqres.full
-> -
-> -	extents_line=$(echo "$inode_info" | awk '/EXTENTS:/{ print NR; exit }')
-> -	get_extents=$(echo "$inode_info" | sed -n "$(($extents_line + 1))"p)
-> -
-> -	# get just the physical block numbers
-> -	get_extents=$(echo "$get_extents" |  perl -pe 's|\(.*?\):||g' | sed -e 's/, /\n/g' | perl -pe 's|(\d+)-(\d+)|\1 \2|g')
-> -
-> -	echo "$get_extents"
-> -}
-> -
-> -# checks all extents are zero'd out except for the superblock
-> -# arg 1: extents (output of get_journal_extents())
-> -check_extents() {
-> -	echo -e "\nChecking extents:" >> $seqres.full
-> -	echo "$1" >> $seqres.full
-> -
-> -	super_block="true"
-> -	echo "$1" | while IFS= read line; do
-> -		start_block=$(echo $line | cut -f1 -d' ')
-> -		end_block=$(echo $line | cut -f2 -d' ' -s)
-> -
-> -		# if first block of journal, shouldn't be wiped
-> -		if [ "$super_block" == "true" ]; then
-> -			super_block="false"
-> -
-> -			#if super block only block in this extent, skip extent
-> -			if [ -z "$end_block" ]; then
-> -				continue;
-> -			fi
-> -			start_block=$(($start_block + 1))
-> -		fi
-> -
-> -		if [ ! -z "$end_block" ]; then
-> -			blocks=$(($end_block - $start_block + 1))
-> -		else
-> -			blocks=1
-> -		fi
-> -
-> -		check=$(od $SCRATCH_DEV --skip-bytes=$(($start_block * $blocksize)) --read-bytes=$(($blocks * $blocksize)) -An -v | sed -e 's/[0 \t\n\r]//g')
-> -
-> -		[ ! -z "$check" ] && echo "error" && break
-> -	done
-> -}
-> -
->  testdir="${SCRATCH_MNT}/testdir"
->  
->  _scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
-> @@ -93,11 +44,12 @@ sync --file-system $testdir/1
->  # call ioctl to checkpoint and zero-fill journal blocks
->  $checkpoint_journal $SCRATCH_MNT --erase=zeroout || _fail "ioctl returned error"
->  
-> -extents=$(get_journal_extents)
-> -
->  # check journal blocks zeroed out
-> -ret=$(check_extents "$extents")
-> -[ "$ret" = "error" ] && _fail "Journal was not zero-filled"
-> +$DEBUGFS_PROG $SCRATCH_DEV -R "cat <8>" 2> /dev/null | od >> $seqres.full
-> +check=$($DEBUGFS_PROG $SCRATCH_DEV -R "cat <8>" 2> /dev/null | \
-> +	    od --skip-bytes="$blocksize" -An -v | sed -e '/^[0 \t]*$/d')
-> +
-> +[ ! -z "$check" ] && _fail "Journal was not zeroed"
->  
->  _scratch_unmount >> $seqres.full 2>&1
->  
+>  # Create file
 > -- 
 > 2.31.0
 > 
