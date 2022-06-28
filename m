@@ -2,249 +2,178 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E0CFCCA480
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Jun 2022 22:23:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75835C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 04:25:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242580AbiF0WX2 (ORCPT
+        id S231199AbiF1EZL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 27 Jun 2022 18:23:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57044 "EHLO
+        Tue, 28 Jun 2022 00:25:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45414 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240197AbiF0WX0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Jun 2022 18:23:26 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3A9911803
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 15:23:19 -0700 (PDT)
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 72B8D1F8CC;
-        Mon, 27 Jun 2022 22:23:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1656368598; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
+        with ESMTP id S229711AbiF1EZI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 00:25:08 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 21C9D13E8B
+        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:25:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1656390306;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=sT7tyMW+6zWiTqt9TwCn0QMwr3ZNf3vvCC/UpgQ1iss=;
-        b=BvRlYb3cCHqhQ6byXBic6vZLR72/2Gc+kJV2kXZzOqlOGK8YODB5z9K3wPB+yL+QebNrCN
-        h1N3jrL/PqumahAP9XxA0vwB898s3TqRNkS4KvA7rY64Dv17tfnRVcSDvmOdOEZpMDjvpB
-        xP6lLX1PgGUVnmtk1zad6EEN4VWEVEw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1656368598;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=sT7tyMW+6zWiTqt9TwCn0QMwr3ZNf3vvCC/UpgQ1iss=;
-        b=4TVEl0N+L6GEEDP8GqTN6C2OnvoafRpBX8sG3pdYbM56vJ4BkPZwlR7Zx0//e0gNUkIPsf
-        zLzH9huN8EMMlCCw==
-Received: from echidna.suse.de (ddiss.udp.ovpn2.nue.suse.de [10.163.47.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id 524AF2C142;
-        Mon, 27 Jun 2022 22:23:18 +0000 (UTC)
-From:   David Disseldorp <ddiss@suse.de>
-To:     fstests@vger.kernel.org, tytso@mit.edu
-Cc:     David Disseldorp <ddiss@suse.de>
-Subject: [RFC PATCH v2 2/6] report: pass through most details as function parameters
-Date:   Tue, 28 Jun 2022 00:22:52 +0200
-Message-Id: <20220627222256.14175-3-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20220627222256.14175-1-ddiss@suse.de>
-References: <20220627222256.14175-1-ddiss@suse.de>
+        bh=3ijK1NnuikRq1mIkcXPksBX4gHVTQGnILEVjsTbCrAo=;
+        b=KT4AKUgpJ/kwc+9mWgUJ4fhDhdb0iMnUa5vRA2KUWatWThpFp3zgy4fKSNmZHMgsbBgjUj
+        ktGV0CIoUpAG0InGzEt0qZrxVxk0sUBsDzmQtVJfzyInkfttvI80IzTjdo7UsB01/F6ipF
+        W85dPbVTeoZ1LNJuNHuXjcDnsEHHvao=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-528-gboamxY6MqCXs6GQ_UARlQ-1; Tue, 28 Jun 2022 00:25:04 -0400
+X-MC-Unique: gboamxY6MqCXs6GQ_UARlQ-1
+Received: by mail-qk1-f198.google.com with SMTP id de4-20020a05620a370400b006a9711bd9f8so12151038qkb.9
+        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:25:04 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=3ijK1NnuikRq1mIkcXPksBX4gHVTQGnILEVjsTbCrAo=;
+        b=TpSnRpJWKmJZr+2r+nEs7xaJNmZQ0OIFlEWbvzxJmTIMgJxPpVQaWHP3QSIq77tBMx
+         AsuxdYkeCCW2ysfcQgLyrmq1mDGH0s/v5H6DD49XmP5qzgmxhcDA+p842tF9IdAaqodp
+         glJ0XkBJ0nVpuE6bYeDItlcDgRZ61ll0IegSMxZwzuZidQiKu/Ap/CAXJTGTVIdpO5tT
+         7ZC3bsLlLUEgHDYZjQd1ni97fLItlX754SCal5vOQ9KTdrnnOxz+Y2mMiJOE/mgvzzRb
+         h//wL4qac3Tb7ZXaIgWHq3HDykne+jydi1qolTKUS4qFVanp+v2+bXQS4d/mtYwkndw0
+         4N8w==
+X-Gm-Message-State: AJIora8pEtQOjEo6PqsI75hIbkPONeWDZfdOhnZxJEn4oI2oHfMaJ9bK
+        DEtVClRLd6viKzirdbdHydKaBO1YzptTAyggfvA0J11jR0myPgyGotYdORDLui9ZJ+iOvN2oy59
+        hekPBZZCBszAnK7z17Q==
+X-Received: by 2002:a05:620a:13a3:b0:6af:a58:c139 with SMTP id m3-20020a05620a13a300b006af0a58c139mr10321939qki.751.1656390303799;
+        Mon, 27 Jun 2022 21:25:03 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1s4AlAyTEm1JoSqmH6AueFev8tLDBtcsTzBnzOmNFARg8LIPfzNWwnVb1Quevg+DDkWp5IErw==
+X-Received: by 2002:a05:620a:13a3:b0:6af:a58:c139 with SMTP id m3-20020a05620a13a300b006af0a58c139mr10321930qki.751.1656390303524;
+        Mon, 27 Jun 2022 21:25:03 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id v15-20020a05620a440f00b006a79aa0c8b1sm10872232qkp.113.2022.06.27.21.25.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Jun 2022 21:25:02 -0700 (PDT)
+Date:   Tue, 28 Jun 2022 12:24:57 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     linux-ext4@vger.kernel.org
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/5] ext4/050: support indirect as well as extent mapped
+ journals
+Message-ID: <20220628042457.zorfs2ghugnilqmm@zlang-mailbox>
+References: <20220625030718.1215980-1-tytso@mit.edu>
+ <20220625030718.1215980-2-tytso@mit.edu>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220625030718.1215980-2-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Report generation currently involves reaching into a whole bunch of
-globals for things like section name and start/end times. Pass these
-through as explicit function parameters to avoid unintentional breakage.
+On Fri, Jun 24, 2022 at 11:07:14PM -0400, Theodore Ts'o wrote:
+> Simplify the test and fix ext4/050 failures when running ext4 without
+> extents enabled (e.g., in ext3 emulation mode).
+> 
+> Instead of relying on parsing debugfs output's (which varies depending
+> on whether the journal inode is extent mapped or indirect block
+> mapped), use debugfs's "cat" command to get the contents of the
+> journal.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
 
-One minor fix included is the default xunit error message, which used
-$sequm instead of $seqnum.
+It looks good to me,
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
- check         | 14 +++++++----
- common/report | 64 +++++++++++++++++++++++++++++----------------------
- 2 files changed, 47 insertions(+), 31 deletions(-)
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-diff --git a/check b/check
-index 2ea2920f..9d60df45 100755
---- a/check
-+++ b/check
-@@ -429,7 +429,9 @@ _wrapup()
- 	if $showme && $needwrap; then
- 		if $do_report; then
- 			# $showme = all selected tests are notrun (no tries)
--			_make_section_report "${#notrun[*]}" "0" "${#notrun[*]}"
-+			_make_section_report "$section" "${#notrun[*]}" "0" \
-+					     "${#notrun[*]}" \
-+					     "$((sect_stop - sect_start))"
- 		fi
- 		needwrap=false
- 	elif $needwrap; then
-@@ -490,7 +492,9 @@ _wrapup()
- 		fi
- 		echo "" >>$tmp.summary
- 		if $do_report; then
--			_make_section_report "${#try[*]}" "${#bad[*]}" "${#notrun[*]}"
-+			_make_section_report "$section" "${#try[*]}" \
-+					     "${#bad[*]}" "${#notrun[*]}" \
-+					     "$((sect_stop - sect_start))"
- 		fi
- 		needwrap=false
- 	fi
-@@ -733,7 +737,8 @@ function run_section()
- 			bad+=("$seqnum")
- 		fi
- 		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
--			_make_testcase_report "$prev_seq" "$tc_status"
-+			_make_testcase_report "$section" "$seqnum" \
-+					      "$tc_status" "$((stop - start))"
- 		fi
- 
- 		prev_seq="$seq"
-@@ -937,7 +942,8 @@ function run_section()
- 		bad+=("$seqnum")
- 	fi
- 	if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
--		_make_testcase_report "$prev_seq" "$tc_status"
-+		_make_testcase_report "$section" "$seqnum" "$tc_status" \
-+				      "$((stop - start))"
- 	fi
- 
- 	sect_stop=`_wallclock`
-diff --git a/common/report b/common/report
-index 2b8285d8..5ca41bc4 100644
---- a/common/report
-+++ b/common/report
-@@ -33,11 +33,11 @@ _xunit_add_property()
- _xunit_make_section_report()
- {
- 	# xfstest:section ==> xunit:testsuite
--	local tests_count="$1"
--	local bad_count="$2"
--	local notrun_count="$3"
--	local sect_name=$section
--	local sect_time=`expr $sect_stop - $sect_start`
-+	local sect_name="$1"
-+	local tests_count="$2"
-+	local bad_count="$3"
-+	local notrun_count="$4"
-+	local sect_time="$5"
- 
- 	if [ $sect_name == '-no-sections-' ]; then
- 		sect_name='global'
-@@ -67,12 +67,10 @@ _xunit_make_section_report()
- 
- _xunit_make_testcase_report()
- {
--	local test_seq="$1"
--	local test_status="$2"
--	local test_time=`expr $stop - $start`
--	local strip="$SRC_DIR/"
--	local test_name=${test_seq#$strip}
--	local sect_name=$section
-+	local sect_name="$1"
-+	local test_name="$2"
-+	local test_status="$3"
-+	local test_time="$4"
- 
- 	# TODO: other places may also win if no-section mode will be named like 'default/global'
- 	if [ $sect_name == '-no-sections-' ]; then
-@@ -86,8 +84,9 @@ _xunit_make_testcase_report()
- 	"pass")
- 		;;
- 	"notrun")
--		if [ -f $seqres.notrun ]; then
--			local msg=`cat $seqres.notrun | encode_xml`
-+		local notrun_file="${REPORT_DIR}/${test_name}.notrun"
-+		if [ -f "$notrun_file" ]; then
-+			local msg=`cat "$notrun_file" | encode_xml`
- 			echo -e "\t\t<skipped message=\"$msg\" />" >> $report
- 		else
- 			echo -e "\t\t<skipped/>" >> $report
-@@ -97,27 +96,31 @@ _xunit_make_testcase_report()
- 		echo -e "\t\t<skipped/>" >> $report
- 		;;
- 	"fail")
-+		local out_src="${SRC_DIR}/${test_name}.out"
-+		local full_file="${REPORT_DIR}/${test_name}.full"
-+		local dmesg_file="${REPORT_DIR}/${test_name}.dmesg"
-+		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
- 		if [ -z "$_err_msg" ]; then
--			_err_msg="Test $sequm failed, reason unknown"
-+			_err_msg="Test $test_name failed, reason unknown"
- 		fi
- 		echo -e "\t\t<failure message=\"$_err_msg\" type=\"TestFail\" />" >> $report
--		if [ -s $seqres.full ]; then
-+		if [ -s "$full_file" ]; then
- 			echo -e "\t\t<system-out>" >> $report
- 			printf	'<![CDATA[\n' >>$report
--			cat $seqres.full | tr -dc '[:print:][:space:]' | encode_xml >>$report
-+			cat "$full_file" | tr -dc '[:print:][:space:]' | encode_xml >>$report
- 			printf ']]>\n'	>>$report
- 			echo -e "\t\t</system-out>" >> $report
- 		fi
--		if [ -f $seqres.dmesg ]; then
-+		if [ -f "$dmesg_file" ]; then
- 			echo -e "\t\t<system-err>" >> $report
- 			printf	'<![CDATA[\n' >>$report
--			cat $seqres.dmesg | tr -dc '[:print:][:space:]' | encode_xml >>$report
-+			cat "$dmesg_file" | tr -dc '[:print:][:space:]' | encode_xml >>$report
- 			printf ']]>\n'	>>$report
- 			echo -e "\t\t</system-err>" >> $report
--		elif [ -s $seqres.out.bad ]; then
-+		elif [ -s "$outbad_file" ]; then
- 			echo -e "\t\t<system-err>" >> $report
- 			printf	'<![CDATA[\n' >>$report
--			$diff $test_seq.out $seqres.out.bad | encode_xml >>$report
-+			$diff "$out_src" "$outbad_file" | encode_xml >>$report
- 			printf ']]>\n'	>>$report
- 			echo -e "\t\t</system-err>" >> $report
- 		fi
-@@ -134,13 +137,17 @@ _xunit_make_testcase_report()
- #  Common report generator entry points
- _make_section_report()
- {
--	local tests_count="$1"
--	local bad_count="$2"
--	local notrun_count="$3"
-+	local sect_name="$1"
-+	local tests_count="$2"
-+	local bad_count="$3"
-+	local notrun_count="$4"
-+	local sect_time="$5"
- 	for report in $REPORT_LIST; do
- 		case "$report" in
- 		"xunit")
--			_xunit_make_section_report "$tests_count" "$bad_count" "$notrun_count"
-+			_xunit_make_section_report "$sect_name" "$tests_count" \
-+						   "$bad_count" "$notrun_count" \
-+						   "$sect_time"
- 			;;
- 		*)
- 			_dump_err "format '$report' is not supported"
-@@ -151,12 +158,15 @@ _make_section_report()
- 
- _make_testcase_report()
- {
--	local test_seq="$1"
--	local test_status="$2"
-+	local sect_name="$1"
-+	local test_seq="$2"
-+	local test_status="$3"
-+	local test_time="$4"
- 	for report in $REPORT_LIST; do
- 		case "$report" in
- 		"xunit")
--			_xunit_make_testcase_report "$test_seq" "$test_status"
-+			_xunit_make_testcase_report "$sect_name" "$test_seq" \
-+						    "$test_status" "$test_time"
- 			;;
- 		*)
- 			_dump_err "report format '$report' is not supported"
--- 
-2.35.3
+But as it contains many ext4 specific format things, so I hope to get one more
+reviewing from ext4 mail list, before I merge it.
+
+Thanks,
+Zorro
+
+>  tests/ext4/050 | 58 +++++---------------------------------------------
+>  1 file changed, 5 insertions(+), 53 deletions(-)
+> 
+> diff --git a/tests/ext4/050 b/tests/ext4/050
+> index 79961957..6f93b86d 100755
+> --- a/tests/ext4/050
+> +++ b/tests/ext4/050
+> @@ -22,55 +22,6 @@ _require_command "$DEBUGFS_PROG" debugfs
+>  checkpoint_journal=$here/src/checkpoint_journal
+>  _require_test_program "checkpoint_journal"
+>  
+> -# convert output from stat<journal_inode> to list of block numbers
+> -get_journal_extents() {
+> -	inode_info=$($DEBUGFS_PROG $SCRATCH_DEV -R "stat <8>" 2>> $seqres.full)
+> -	echo -e "\nJournal info:" >> $seqres.full
+> -	echo "$inode_info" >> $seqres.full
+> -
+> -	extents_line=$(echo "$inode_info" | awk '/EXTENTS:/{ print NR; exit }')
+> -	get_extents=$(echo "$inode_info" | sed -n "$(($extents_line + 1))"p)
+> -
+> -	# get just the physical block numbers
+> -	get_extents=$(echo "$get_extents" |  perl -pe 's|\(.*?\):||g' | sed -e 's/, /\n/g' | perl -pe 's|(\d+)-(\d+)|\1 \2|g')
+> -
+> -	echo "$get_extents"
+> -}
+> -
+> -# checks all extents are zero'd out except for the superblock
+> -# arg 1: extents (output of get_journal_extents())
+> -check_extents() {
+> -	echo -e "\nChecking extents:" >> $seqres.full
+> -	echo "$1" >> $seqres.full
+> -
+> -	super_block="true"
+> -	echo "$1" | while IFS= read line; do
+> -		start_block=$(echo $line | cut -f1 -d' ')
+> -		end_block=$(echo $line | cut -f2 -d' ' -s)
+> -
+> -		# if first block of journal, shouldn't be wiped
+> -		if [ "$super_block" == "true" ]; then
+> -			super_block="false"
+> -
+> -			#if super block only block in this extent, skip extent
+> -			if [ -z "$end_block" ]; then
+> -				continue;
+> -			fi
+> -			start_block=$(($start_block + 1))
+> -		fi
+> -
+> -		if [ ! -z "$end_block" ]; then
+> -			blocks=$(($end_block - $start_block + 1))
+> -		else
+> -			blocks=1
+> -		fi
+> -
+> -		check=$(od $SCRATCH_DEV --skip-bytes=$(($start_block * $blocksize)) --read-bytes=$(($blocks * $blocksize)) -An -v | sed -e 's/[0 \t\n\r]//g')
+> -
+> -		[ ! -z "$check" ] && echo "error" && break
+> -	done
+> -}
+> -
+>  testdir="${SCRATCH_MNT}/testdir"
+>  
+>  _scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
+> @@ -93,11 +44,12 @@ sync --file-system $testdir/1
+>  # call ioctl to checkpoint and zero-fill journal blocks
+>  $checkpoint_journal $SCRATCH_MNT --erase=zeroout || _fail "ioctl returned error"
+>  
+> -extents=$(get_journal_extents)
+> -
+>  # check journal blocks zeroed out
+> -ret=$(check_extents "$extents")
+> -[ "$ret" = "error" ] && _fail "Journal was not zero-filled"
+> +$DEBUGFS_PROG $SCRATCH_DEV -R "cat <8>" 2> /dev/null | od >> $seqres.full
+> +check=$($DEBUGFS_PROG $SCRATCH_DEV -R "cat <8>" 2> /dev/null | \
+> +	    od --skip-bytes="$blocksize" -An -v | sed -e '/^[0 \t]*$/d')
+> +
+> +[ ! -z "$check" ] && _fail "Journal was not zeroed"
+>  
+>  _scratch_unmount >> $seqres.full 2>&1
+>  
+> -- 
+> 2.31.0
+> 
 
