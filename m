@@ -2,199 +2,206 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68872CCA479
-	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 08:52:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0CA3C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 09:53:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245680AbiF1IwP (ORCPT
+        id S1344481AbiF1JxT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jun 2022 04:52:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49470 "EHLO
+        Tue, 28 Jun 2022 05:53:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245522AbiF1IwO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 04:52:14 -0400
+        with ESMTP id S242698AbiF1JxS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 05:53:18 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 76FA12F666
-        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 01:52:13 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5F7972DD63
+        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 02:53:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656406332;
+        s=mimecast20190719; t=1656409995;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=Sg+6t/WRC3y7wGjHl1FclmwwuLrthUOcnyFnztl34Bk=;
-        b=YVcmyrhPuyAIEbqc3+NW6DgbGhXzP7MDjociabb98isMLuzsxYjvrnrmZMEcl3+EbAQ7eF
-        TeJwhKlZAwbGSY1rWq1Ozyh49FWB7ZLcFeIj4F5fvk7+nsedeRmmZAfQ9ylqBDb/75eHcw
-        RhtRJguFNnscjZ6l6DQJyfNDspOy7yA=
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
- [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=cU/pzpi/XiokrCfOD5l4FITUl6zsqV8T8fPljHRYiow=;
+        b=HHiEsygdH6cbq44lnUPvVB48lZ1siMRgrX3lZPGxNFewBEvvkI13j5FyaDuGfx9RGQc/mt
+        cuMfy5ON5kf9uub1bNTBFJdCm+FfBSQlIt0rXsQN6Km6WHyiFmRDrlPBXmlfBHK0OxsrA6
+        GT8IQerVSlsZ5lSS2BKrMYxFm8lXOhA=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-108-2Z3ivHB2NkGGyRyD59W88Q-1; Tue, 28 Jun 2022 04:52:10 -0400
-X-MC-Unique: 2Z3ivHB2NkGGyRyD59W88Q-1
-Received: by mail-qk1-f200.google.com with SMTP id bs17-20020a05620a471100b006a734d3910dso12779347qkb.22
-        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 01:52:09 -0700 (PDT)
+ us-mta-414-whS1xUbxMJWPauyV_11RMA-1; Tue, 28 Jun 2022 05:53:13 -0400
+X-MC-Unique: whS1xUbxMJWPauyV_11RMA-1
+Received: by mail-pj1-f72.google.com with SMTP id nl1-20020a17090b384100b001ef0930ec9fso350221pjb.7
+        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 02:53:13 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=Sg+6t/WRC3y7wGjHl1FclmwwuLrthUOcnyFnztl34Bk=;
-        b=OEZ1NFOhGrg9+ziuhIfYvfn55AizioBWLNz+ryQWMWPdu8v6mDihY1VN9IgmoPjhOm
-         wtGu/87gEHIQditUwLpt4UCF6bdfChHw899BqYDrC45/66qRddGD0Twiqae43+yfDJVs
-         9HtdcgROENuG64kRQB3F9FZaJwJnornd+NgPKWCGq/sb2iMNMjdV7tbVZ4lnRVCmmjoN
-         DZqdMg3pFUBUTFMGHzQcv2erfOZuU+zAyYtde+hZTrHRnZWsIorYKrVAura8mtrdPWDj
-         CXLO9m9HsItUJUtK+Zzz7yRNqIBnSrCAGVaytVpDBxb6CjDtyfBMBkBre6TAiktX/l/6
-         7oZA==
-X-Gm-Message-State: AJIora+FtuUz9eXQTGYywLxhGoJxMZiqfdudGgKosJl6SM/9zH5gGt/w
-        8K5LHPTxRrWhc1bj1dex9fBYp/n9ormO8oCiqPBDh2YviZheVVXH9N8Xvosa16HwHEKUnXxxMlU
-        wLico9zeOk0Y6BB/0bg==
-X-Received: by 2002:a05:622a:44e:b0:305:252e:6807 with SMTP id o14-20020a05622a044e00b00305252e6807mr11912239qtx.440.1656406329258;
-        Tue, 28 Jun 2022 01:52:09 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1sHDfbVbTcurmEO5+rWThPzE8LQ1XynMoMUkbawOQYlZ6aJ5NH5VxVYrNy3iX+GflYr81i/Ag==
-X-Received: by 2002:a05:622a:44e:b0:305:252e:6807 with SMTP id o14-20020a05622a044e00b00305252e6807mr11912232qtx.440.1656406328963;
-        Tue, 28 Jun 2022 01:52:08 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id y20-20020a05620a44d400b006af0639f7casm10255040qkp.12.2022.06.28.01.52.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Jun 2022 01:52:08 -0700 (PDT)
-Date:   Tue, 28 Jun 2022 16:52:01 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Xiubo Li <xiubli@redhat.com>
-Cc:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=cU/pzpi/XiokrCfOD5l4FITUl6zsqV8T8fPljHRYiow=;
+        b=ndjGI1tGh+gXbs5nDSwZ1HuIv2ZZBVPwBjo6CqAs+xe2MY8dfI1kde+x67VURfexmH
+         z7NNZi+9bKUE4xVURtkgIzhi0wfXsYCqZa8xWIxCscrlcVyKgUYPmMshNFHVp/22wICd
+         cyk7tuhYZWlWPJtaHH4v08gI82yzZEozr4hBQQ6aI5KunAFvMW7Ff+ZNPnyFSRCo6AdM
+         fxEWEtTYPUncm4hIXUf49/R5H9KJMgKj0cqF+qKT8kpQoduzG7S014IhXzmwcOBvoCYJ
+         Q2fyv9Nn10e+zjIwKamohDFsr++R1atAweOwgMjlIoK0FrnDGteikh/H3JireLATPzGO
+         1leg==
+X-Gm-Message-State: AJIora9YW8DT2P7biSkmbYsexMykfZb/xc/PTy7tw3sSkSy7fwZoMFsp
+        cbPdJAz7k5bvCjBj75HWnAn7esLVbuSUaBVinVr+xrRYzP/ZqMEfP0UP1kQlWOmjb9qsjY7R3wk
+        ewY0TToYM4DvGopgdog==
+X-Received: by 2002:a17:903:2445:b0:16a:32da:cc9 with SMTP id l5-20020a170903244500b0016a32da0cc9mr4079862pls.148.1656409992787;
+        Tue, 28 Jun 2022 02:53:12 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1sYiIzN3g88kD3uymjxETJJRx6L90Xn6n6EmXV3e6YREH6inBBz/2br/V+aW+n5Z7U05XQChQ==
+X-Received: by 2002:a17:903:2445:b0:16a:32da:cc9 with SMTP id l5-20020a170903244500b0016a32da0cc9mr4079837pls.148.1656409992528;
+        Tue, 28 Jun 2022 02:53:12 -0700 (PDT)
+Received: from [10.72.12.43] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id f9-20020a170902f38900b0016a51167b75sm8740540ple.286.2022.06.28.02.53.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 28 Jun 2022 02:53:11 -0700 (PDT)
+Subject: Re: [PATCH v3] ceph/005: verify correct statfs behaviour with quotas
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
         fstests@vger.kernel.org, David Disseldorp <ddiss@suse.de>,
         Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH v3] ceph/005: verify correct statfs behaviour with quotas
-Message-ID: <20220628085201.p3pkyozrvbrf3vod@zlang-mailbox>
 References: <20220627102631.5006-1-lhenriques@suse.de>
  <3a0a72f9-6b36-f101-d77e-f5b6e51adc56@redhat.com>
+ <20220628085201.p3pkyozrvbrf3vod@zlang-mailbox>
+From:   Xiubo Li <xiubli@redhat.com>
+Message-ID: <55d9abfd-13ed-87cb-6036-f5e012ffa904@redhat.com>
+Date:   Tue, 28 Jun 2022 17:53:06 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+In-Reply-To: <20220628085201.p3pkyozrvbrf3vod@zlang-mailbox>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <3a0a72f9-6b36-f101-d77e-f5b6e51adc56@redhat.com>
+Content-Language: en-US
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 28, 2022 at 04:36:39PM +0800, Xiubo Li wrote:
-> Hi Luis,
-> 
-> BTW, shouldn't you update the 'tests/ceph/group.list' at the same time ?
 
-Thanks your review from cephfs side! We don't save group.list in fstests now,
-group.list is generated when building fstests. Group names of a case are
-recorded in the case itself, refer to:
+On 6/28/22 4:52 PM, Zorro Lang wrote:
+> On Tue, Jun 28, 2022 at 04:36:39PM +0800, Xiubo Li wrote:
+>> Hi Luis,
+>>
+>> BTW, shouldn't you update the 'tests/ceph/group.list' at the same time ?
+> Thanks your review from cephfs side! We don't save group.list in fstests now,
+> group.list is generated when building fstests. Group names of a case are
+> recorded in the case itself, refer to:
+>
+>    +_begin_fstest auto quick quota
 
-  +_begin_fstest auto quick quota
+Okay, get it.
 
-Thanks,
-Zorro
+Thanks.
 
-> 
-> -- Xiubo
-> 
-> On 6/27/22 6:26 PM, Luís Henriques wrote:
-> > When using a directory with 'max_bytes' quota as a base for a mount,
-> > statfs shall use that 'max_bytes' value as the total disk size.  That
-> > value shall be used even when using subdirectory as base for the mount.
-> > 
-> > A bug was found where, when this subdirectory also had a 'max_files'
-> > quota, the real filesystem size would be returned instead of the parent
-> > 'max_bytes' quota value.  This test case verifies this bug is fixed.
-> > 
-> > Signed-off-by: Luís Henriques <lhenriques@suse.de>
-> > ---
-> > Changes since v2:
-> >   - correctly set SCRATCH_DEV, always using its original value
-> > 
-> > Changes since v1 are:
-> >   - creation of an helper for getting total mount space using 'df'
-> >   - now the test sends quota size to stdout
-> > 
-> >   common/rc          | 13 +++++++++++++
-> >   tests/ceph/005     | 39 +++++++++++++++++++++++++++++++++++++++
-> >   tests/ceph/005.out |  4 ++++
-> >   3 files changed, 56 insertions(+)
-> >   create mode 100755 tests/ceph/005
-> >   create mode 100644 tests/ceph/005.out
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 2f31ca464621..72eabb7a428c 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -4254,6 +4254,19 @@ _get_available_space()
-> >   	echo $((avail_kb * 1024))
-> >   }
-> > +# get the total space in bytes
-> > +#
-> > +_get_total_space()
-> > +{
-> > +	if [ -z "$1" ]; then
-> > +		echo "Usage: _get_total_space <mnt>"
-> > +		exit 1
-> > +	fi
-> > +	local total_kb;
-> > +	total_kb=`$DF_PROG $1 | tail -n1 | awk '{ print $3 }'`
-> > +	echo $(($total_kb * 1024))
-> > +}
-> > +
-> >   # return device size in kb
-> >   _get_device_size()
-> >   {
-> > diff --git a/tests/ceph/005 b/tests/ceph/005
-> > new file mode 100755
-> > index 000000000000..fd71d91350db
-> > --- /dev/null
-> > +++ b/tests/ceph/005
-> > @@ -0,0 +1,39 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test 005
-> > +#
-> > +# Make sure statfs reports correct total size when:
-> > +# 1. using a directory with 'max_byte' quota as base for a mount
-> > +# 2. using a subdirectory of the above directory with 'max_files' quota
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick quota
-> > +
-> > +_supported_fs ceph
-> > +_require_scratch
-> > +
-> > +_scratch_mount
-> > +mkdir -p "$SCRATCH_MNT/quota-dir/subdir"
-> > +
-> > +# set quota
-> > +quota=$((2 ** 30)) # 1G
-> > +$SETFATTR_PROG -n ceph.quota.max_bytes -v "$quota" "$SCRATCH_MNT/quota-dir"
-> > +$SETFATTR_PROG -n ceph.quota.max_files -v "$quota" "$SCRATCH_MNT/quota-dir/subdir"
-> > +_scratch_unmount
-> > +
-> > +SCRATCH_DEV_ORIG="$SCRATCH_DEV"
-> > +SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_mount
-> > +echo ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
-> > +SCRATCH_DEV="$SCRATCH_DEV_ORIG/quota-dir" _scratch_unmount
-> > +
-> > +SCRATCH_DEV="$SCRATCH_DEV_ORIG/quota-dir/subdir" _scratch_mount
-> > +echo subdir ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
-> > +SCRATCH_DEV="$SCRATCH_DEV_ORIG/quota-dir/subdir" _scratch_unmount
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/ceph/005.out b/tests/ceph/005.out
-> > new file mode 100644
-> > index 000000000000..47798b1fcd6f
-> > --- /dev/null
-> > +++ b/tests/ceph/005.out
-> > @@ -0,0 +1,4 @@
-> > +QA output created by 005
-> > +ceph quota size is 1073741824 bytes
-> > +subdir ceph quota size is 1073741824 bytes
-> > +Silence is golden
-> > 
-> 
+>
+> Thanks,
+> Zorro
+>
+>> -- Xiubo
+>>
+>> On 6/27/22 6:26 PM, LuÃ­s Henriques wrote:
+>>> When using a directory with 'max_bytes' quota as a base for a mount,
+>>> statfs shall use that 'max_bytes' value as the total disk size.  That
+>>> value shall be used even when using subdirectory as base for the mount.
+>>>
+>>> A bug was found where, when this subdirectory also had a 'max_files'
+>>> quota, the real filesystem size would be returned instead of the parent
+>>> 'max_bytes' quota value.  This test case verifies this bug is fixed.
+>>>
+>>> Signed-off-by: LuÃ­s Henriques <lhenriques@suse.de>
+>>> ---
+>>> Changes since v2:
+>>>    - correctly set SCRATCH_DEV, always using its original value
+>>>
+>>> Changes since v1 are:
+>>>    - creation of an helper for getting total mount space using 'df'
+>>>    - now the test sends quota size to stdout
+>>>
+>>>    common/rc          | 13 +++++++++++++
+>>>    tests/ceph/005     | 39 +++++++++++++++++++++++++++++++++++++++
+>>>    tests/ceph/005.out |  4 ++++
+>>>    3 files changed, 56 insertions(+)
+>>>    create mode 100755 tests/ceph/005
+>>>    create mode 100644 tests/ceph/005.out
+>>>
+>>> diff --git a/common/rc b/common/rc
+>>> index 2f31ca464621..72eabb7a428c 100644
+>>> --- a/common/rc
+>>> +++ b/common/rc
+>>> @@ -4254,6 +4254,19 @@ _get_available_space()
+>>>    	echo $((avail_kb * 1024))
+>>>    }
+>>> +# get the total space in bytes
+>>> +#
+>>> +_get_total_space()
+>>> +{
+>>> +	if [ -z "$1" ]; then
+>>> +		echo "Usage: _get_total_space <mnt>"
+>>> +		exit 1
+>>> +	fi
+>>> +	local total_kb;
+>>> +	total_kb=`$DF_PROG $1 | tail -n1 | awk '{ print $3 }'`
+>>> +	echo $(($total_kb * 1024))
+>>> +}
+>>> +
+>>>    # return device size in kb
+>>>    _get_device_size()
+>>>    {
+>>> diff --git a/tests/ceph/005 b/tests/ceph/005
+>>> new file mode 100755
+>>> index 000000000000..fd71d91350db
+>>> --- /dev/null
+>>> +++ b/tests/ceph/005
+>>> @@ -0,0 +1,39 @@
+>>> +#! /bin/bash
+>>> +# SPDX-License-Identifier: GPL-2.0
+>>> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+>>> +#
+>>> +# FS QA Test 005
+>>> +#
+>>> +# Make sure statfs reports correct total size when:
+>>> +# 1. using a directory with 'max_byte' quota as base for a mount
+>>> +# 2. using a subdirectory of the above directory with 'max_files' quota
+>>> +#
+>>> +. ./common/preamble
+>>> +_begin_fstest auto quick quota
+>>> +
+>>> +_supported_fs ceph
+>>> +_require_scratch
+>>> +
+>>> +_scratch_mount
+>>> +mkdir -p "$SCRATCH_MNT/quota-dir/subdir"
+>>> +
+>>> +# set quota
+>>> +quota=$((2 ** 30)) # 1G
+>>> +$SETFATTR_PROG -n ceph.quota.max_bytes -v "$quota" "$SCRATCH_MNT/quota-dir"
+>>> +$SETFATTR_PROG -n ceph.quota.max_files -v "$quota" "$SCRATCH_MNT/quota-dir/subdir"
+>>> +_scratch_unmount
+>>> +
+>>> +SCRATCH_DEV_ORIG="$SCRATCH_DEV"
+>>> +SCRATCH_DEV="$SCRATCH_DEV/quota-dir" _scratch_mount
+>>> +echo ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
+>>> +SCRATCH_DEV="$SCRATCH_DEV_ORIG/quota-dir" _scratch_unmount
+>>> +
+>>> +SCRATCH_DEV="$SCRATCH_DEV_ORIG/quota-dir/subdir" _scratch_mount
+>>> +echo subdir ceph quota size is $(_get_total_space "$SCRATCH_MNT") bytes
+>>> +SCRATCH_DEV="$SCRATCH_DEV_ORIG/quota-dir/subdir" _scratch_unmount
+>>> +
+>>> +echo "Silence is golden"
+>>> +
+>>> +# success, all done
+>>> +status=0
+>>> +exit
+>>> diff --git a/tests/ceph/005.out b/tests/ceph/005.out
+>>> new file mode 100644
+>>> index 000000000000..47798b1fcd6f
+>>> --- /dev/null
+>>> +++ b/tests/ceph/005.out
+>>> @@ -0,0 +1,4 @@
+>>> +QA output created by 005
+>>> +ceph quota size is 1073741824 bytes
+>>> +subdir ceph quota size is 1073741824 bytes
+>>> +Silence is golden
+>>>
 
