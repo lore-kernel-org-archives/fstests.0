@@ -2,60 +2,60 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 546E4C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 05:58:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC142C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 08:36:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244030AbiF1F6b (ORCPT
+        id S245286AbiF1Ig4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jun 2022 01:58:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38148 "EHLO
+        Tue, 28 Jun 2022 04:36:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58134 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245193AbiF1F63 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 01:58:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8EEDD1A05F
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 22:58:28 -0700 (PDT)
+        with ESMTP id S245453AbiF1Igx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 04:36:53 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 774B72DAB4
+        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 01:36:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656395907;
+        s=mimecast20190719; t=1656405411;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=3SNh1I5su84TjBk9ZPRDQHkCRRQEPt012QDwlcQnwSY=;
-        b=cwENYpq3q+gi1wtCjSJypED/V6NRaFWy0mh9//NoEfmiMysugXoB1myqqf4M9aHQnXht37
-        ODEAEwuzfIzWvWziZyE1vwt8rs2VEhJ4613aPoTiVOhHHb12mF4GqJ90TC2QrZWqha57TL
-        VwlRfjieXSOhWrZUninMNqikIwz7+bE=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=dP4tUGmfGPN3oIv7hNqujttiBk+oSSVgVMyBnCUTsRk=;
+        b=V/Y09eKKLBctmJbjvf+BE68vGvDNRSeS1vHH/aaBbmAzI1ycKMA5VnZUCPIndXVyqnmJmH
+        zLhYyI3KzsCq/z9TF5GMp+gkvmKoeMhXq78OL2axdXPRQYFZezH6AlRzdHxdh7acc3xM2+
+        os9a0EAdUoUV9BQCdCuDYyE+oBxI6zE=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-218-xFX3i_vBPBye7ui_veIggQ-1; Tue, 28 Jun 2022 01:58:25 -0400
-X-MC-Unique: xFX3i_vBPBye7ui_veIggQ-1
-Received: by mail-pf1-f200.google.com with SMTP id o192-20020a62cdc9000000b00527a9108efaso1393022pfg.7
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 22:58:25 -0700 (PDT)
+ us-mta-553-lY2q87FqPPujMuIfO2uVIg-1; Tue, 28 Jun 2022 04:36:50 -0400
+X-MC-Unique: lY2q87FqPPujMuIfO2uVIg-1
+Received: by mail-pj1-f69.google.com with SMTP id p9-20020a17090a0e4900b001eaa92b5b95so4886872pja.4
+        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 01:36:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-transfer-encoding
          :content-language;
-        bh=3SNh1I5su84TjBk9ZPRDQHkCRRQEPt012QDwlcQnwSY=;
-        b=yY+F3sogv3W3Mn6AV3YdaDPN00eenzgpZq8mskHuCl3DjOaQ6X+/8PGd4Vi4KhGbvp
-         ayP2x1N0lqT0ssZ6wWuI4EtB4u5QFLWEl/IJgjOBVvACQQ+0t72B+HBbX1meQ+w5v1MX
-         kD7N6xk1nZhM2XBBLvUPAsR0wFZwBE0QRY7hSXU0QE2+nVO0vOJgdFVqZxVyi4z2s6kg
-         BJB+nNiEzaW1jTgZg9ygGC6im/Er7b3SSKzqNMttRfhYSqXqsQbH6ggQkujC5iOCpHYm
-         6TnljLEmjmmD8v0d6VFl9w9UIxcEEtnx59foTl3VDzXCU9dOjvIeXLiXNFF6hSxw8Ggk
-         dMZA==
-X-Gm-Message-State: AJIora/HDfMdEHnNxkY4i9IhE6UgVvyZHhqOX2xIeAO1izl5MGvLhxLf
-        G4b4v7RNjNiOCQoyzVK+wj0d1HSou3fcJtlw0C/ERT98bA19NF31jaO9uZhAENzF5Wl1/LbnQ7b
-        0l6DwwfZYoP0ADXksWQ==
-X-Received: by 2002:a17:90a:ca0f:b0:1ee:d4ab:1f41 with SMTP id x15-20020a17090aca0f00b001eed4ab1f41mr12026128pjt.165.1656395904736;
-        Mon, 27 Jun 2022 22:58:24 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1u2YDofdT2zT0IOV8lwDlXck0Cav5Y9E0EKFu3ZTda1PAZy0r46+gTQgCeQXHratAUpWaGdNA==
-X-Received: by 2002:a17:90a:ca0f:b0:1ee:d4ab:1f41 with SMTP id x15-20020a17090aca0f00b001eed4ab1f41mr12026099pjt.165.1656395904418;
-        Mon, 27 Jun 2022 22:58:24 -0700 (PDT)
+        bh=dP4tUGmfGPN3oIv7hNqujttiBk+oSSVgVMyBnCUTsRk=;
+        b=IMj1XPYTIj9SyAUebosFzk0WJWD9vtmfxM7/dtRYAHLyZZjQ/5WTuO5tAdFsz0o/dO
+         5wV1SshnTK50AdUJF/WmRd+EL9x2VhcUvT9vjWISkk2WeATW/ljSK8VtBQ+91oUxgOfD
+         pTr9Li1iZ5JKIZVM5iCJMA6PmATd7uflCjl+3VxPszzI0hDKOdt/IwOU48ZV/LeYZSQ7
+         zOZw/Llta4LA7Hp7uo09MkmGR45a9x4jiuZfb2KUhBTm3kINUei2SyS4ROymILXEYB/q
+         fRTNi2DmhETVuw56jsthKl7DuK5tC5sPOuS4bJbrXvvau/PzFfvxS3phk+RjR6q3n1Vc
+         YL8g==
+X-Gm-Message-State: AJIora+PFeGlx6FuQECGVmU9xMW5/HiSpH9vsMJbEqOjMplpZU+kkwUR
+        LOz+D0XV4wbNdxkd3zHiLGfsBOUM/03b2EHptjvfBoynkL60oaRDQFknFV3PK1rN1+zDGoKTO6H
+        H0+M4NHHUIrsiSoJSEQ==
+X-Received: by 2002:a17:902:cecc:b0:16a:416c:3d14 with SMTP id d12-20020a170902cecc00b0016a416c3d14mr2540254plg.73.1656405408995;
+        Tue, 28 Jun 2022 01:36:48 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1t7KNjNsIwnoG+fMs/EiLmcAQUGAgMOPRum7wW8TCRorDMbMi1hLSRXfguE6Gjn2Fc2q1wWHg==
+X-Received: by 2002:a17:902:cecc:b0:16a:416c:3d14 with SMTP id d12-20020a170902cecc00b0016a416c3d14mr2540228plg.73.1656405408729;
+        Tue, 28 Jun 2022 01:36:48 -0700 (PDT)
 Received: from [10.72.12.43] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id e17-20020a170902d39100b0016a3db5d608sm8230557pld.289.2022.06.27.22.58.20
+        by smtp.gmail.com with ESMTPSA id m17-20020a170902db1100b0016a275623c1sm1182919plx.219.2022.06.28.01.36.44
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Jun 2022 22:58:23 -0700 (PDT)
+        Tue, 28 Jun 2022 01:36:47 -0700 (PDT)
 Subject: Re: [PATCH v3] ceph/005: verify correct statfs behaviour with quotas
 To:     =?UTF-8?Q?Lu=c3=ads_Henriques?= <lhenriques@suse.de>,
         fstests@vger.kernel.org
@@ -63,8 +63,8 @@ Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>,
         Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org
 References: <20220627102631.5006-1-lhenriques@suse.de>
 From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <d267150e-88d9-00dc-6fce-5ce7bd957cf1@redhat.com>
-Date:   Tue, 28 Jun 2022 13:58:18 +0800
+Message-ID: <3a0a72f9-6b36-f101-d77e-f5b6e51adc56@redhat.com>
+Date:   Tue, 28 Jun 2022 16:36:39 +0800
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.10.1
 MIME-Version: 1.0
@@ -76,6 +76,11 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hi Luis,
+
+BTW, shouldn't you update the 'tests/ceph/group.list' at the same time ?
+
+-- Xiubo
 
 On 6/27/22 6:26 PM, Luís Henriques wrote:
 > When using a directory with 'max_bytes' quota as a base for a mount,
@@ -182,8 +187,4 @@ On 6/27/22 6:26 PM, Luís Henriques wrote:
 > +subdir ceph quota size is 1073741824 bytes
 > +Silence is golden
 >
-LGTM.
-
-Reviewed-by: Xiubo Li <xiubli@redhat.com>
-
 
