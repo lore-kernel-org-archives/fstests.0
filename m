@@ -2,119 +2,106 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65B41C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 04:32:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C1E0C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 04:37:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244172AbiF1Eco (ORCPT
+        id S243033AbiF1Ehz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jun 2022 00:32:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54492 "EHLO
+        Tue, 28 Jun 2022 00:37:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244135AbiF1Ecn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 00:32:43 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 868041C10F
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:32:39 -0700 (PDT)
+        with ESMTP id S244518AbiF1Ehc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 00:37:32 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2F4421D0C8
+        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:37:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656390758;
+        s=mimecast20190719; t=1656391045;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=WJrpicm06aJMU8IgkPl4F0r+SkpCimIJfvh4jXNOXZ4=;
-        b=FtGbp6EaOH7zvq76LiJ0hpw4ae3IjCKWG2/teyL8AtHzjxhjyLYHkX8vuAzvJuDaozIB8J
-        qhyT4nMK8QGy6SrsqZaQQHOFxflU/k2Ueaa6wlKozy6/KcZkoyS7K0cuFbhMFru0ZWsDRM
-        qAMYDFbc2ZTqip6p3kYDurFpW8jCOIw=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=2K0bt4sy19SZKigSvMt2GSFCfJ8WvLpG1zKBgVuSP78=;
+        b=R/H+VfjjH3/1ASXSCoUwTLNDhft3wQe7/Ko4PTgbcjUqJ3KsfKRetD9Xzvr573V2mzd53/
+        UC1LCkB5zgzunglnusdwdJ2pCtdWYyTzPic6cpOZDWR+TzH4efunECP/LODWs990wPS8sB
+        XNhpbeUQECdBw8vBbBqzZD+6b00zUWs=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-568-efUpm6sTM3-oZN2b1Rd07A-1; Tue, 28 Jun 2022 00:32:36 -0400
-X-MC-Unique: efUpm6sTM3-oZN2b1Rd07A-1
-Received: by mail-qk1-f199.google.com with SMTP id a7-20020a37b107000000b006af3bc02282so3375416qkf.21
-        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:32:36 -0700 (PDT)
+ us-mta-459-rxxdY9DxMEqnDkai-Z8yfw-1; Tue, 28 Jun 2022 00:37:23 -0400
+X-MC-Unique: rxxdY9DxMEqnDkai-Z8yfw-1
+Received: by mail-qk1-f200.google.com with SMTP id r6-20020a05620a298600b006a98e988ba4so12209100qkp.3
+        for <fstests@vger.kernel.org>; Mon, 27 Jun 2022 21:37:23 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=WJrpicm06aJMU8IgkPl4F0r+SkpCimIJfvh4jXNOXZ4=;
-        b=WKmrBxIU6cz0MN8kjNRU9E+D3MVfQLqVrldGm/WSbF9tW23QWx/qILj5dVEC/mC2iq
-         opQYrhXpE4ub6OookyW3MIBg9HllOCoD+l1uBmPQ6wUZIE4KQBRdAuTPuZQkSHq7TZYj
-         6Hk9JHhmcQv6VxEBKSusy1lSxSEGrQD/s+4HtNRoh1EiSOTtJOnem3D24dGBc8zs2O2L
-         VHmtFtegEDSOJEgmVGs7kUxw03/W0D47noBZjDv+WMccVF8qDg1UZk1sgBc9e8qwx5Fq
-         /hMiwL1CBPGpfJe4gq2wQHYa6kcEYwOOjDk40/QMGmskMiJFk2LHj57lY+yUzbYfwToC
-         DUBg==
-X-Gm-Message-State: AJIora80REJgZ76MzUB0zxKJEnfj9djt2UACCbe8j6DBDUBRqS5GNrTH
-        bsJbMT0MTak9u1xnjHXgMVQ4HNpA9wK8LTyXDnFAJschQxqZEnM7Bf7jBp4C8UAJDnwHIOpOsXf
-        YM7iysBkzFKIGwsX2QQ==
-X-Received: by 2002:ad4:4ee4:0:b0:472:7778:ff86 with SMTP id dv4-20020ad44ee4000000b004727778ff86mr2187036qvb.109.1656390755534;
-        Mon, 27 Jun 2022 21:32:35 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vsJbxW+6mzXJWvHXnRV2Y0aMzNTsyJpJ37zJgyCCcbwm87Z8K6II9XoCPRnNa1bpD52gEKYw==
-X-Received: by 2002:ad4:4ee4:0:b0:472:7778:ff86 with SMTP id dv4-20020ad44ee4000000b004727778ff86mr2187025qvb.109.1656390755276;
-        Mon, 27 Jun 2022 21:32:35 -0700 (PDT)
+        bh=2K0bt4sy19SZKigSvMt2GSFCfJ8WvLpG1zKBgVuSP78=;
+        b=qJP49iJe9BznO2oFYE1HSfC9EN/upIwuH3G2P5LG1RJ5Zm7VcxjMYznRFJPB1O0lc1
+         vJ1BkPbqUkRVzsnMlnEpHJPu+M+ly3qR5ngAcoDnrsYfV+XQj35YwvTUCW09+9E12/5G
+         oGgOx58VXDrb3Mb+dlOah8RSJizP4zlvH993THSFYwS7X5pyh1c90DlG9Stxmaxh2Xqu
+         ek6QDsp8OPZtbdEgmjqc6qPYWaaVD/fPekUEtk80DfoL93O4pGz96nwLkrzu873VkgEv
+         D1gsctv5f3bp3Ru2xhLd44lF2siq08gwu9uNW2nEtJeUYs7/cSiAw/1dAdaGqc4ls9l1
+         XRRQ==
+X-Gm-Message-State: AJIora97nMlBZftiwfnf8S3tMfUK2RcOxMTFDvJFCSxeNEoisUCglvbB
+        3ean+pmdpDoi+i8lpIT8ot5tf7h6h1+21V/9wohmTwMdU15++fPHfo8Czu03gARWkySGPwV5fXe
+        QlXDGtdsAfTh7S246mg==
+X-Received: by 2002:ac8:5d87:0:b0:319:31ee:196d with SMTP id d7-20020ac85d87000000b0031931ee196dmr8772610qtx.533.1656391042653;
+        Mon, 27 Jun 2022 21:37:22 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vwgZS2BBbTywhL7rKTgIaN2J3DtJCRyS9F25uH7ZKaciZv2XkOSfYiF7ZN3+VRPa2za2MKDg==
+X-Received: by 2002:ac8:5d87:0:b0:319:31ee:196d with SMTP id d7-20020ac85d87000000b0031931ee196dmr8772603qtx.533.1656391042403;
+        Mon, 27 Jun 2022 21:37:22 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id ey14-20020a05622a4c0e00b002fcb0d95f65sm8259677qtb.90.2022.06.27.21.32.33
+        by smtp.gmail.com with ESMTPSA id v26-20020ac873da000000b00304dec6452csm8330489qtp.78.2022.06.27.21.37.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Jun 2022 21:32:34 -0700 (PDT)
-Date:   Tue, 28 Jun 2022 12:32:29 +0800
+        Mon, 27 Jun 2022 21:37:21 -0700 (PDT)
+Date:   Tue, 28 Jun 2022 12:37:16 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Theodore Ts'o <tytso@mit.edu>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/5] ext4/044: skip test if the file system does not have
- a journal
-Message-ID: <20220628043229.pkluyozx4rfqqkfc@zlang-mailbox>
+Subject: Re: [PATCH 3/5] ext4/045: clean up unnecessary arguments to
+ _require_e2fsprogs
+Message-ID: <20220628043716.6y667we64rehq5qr@zlang-mailbox>
 References: <20220625030718.1215980-1-tytso@mit.edu>
- <20220625030718.1215980-3-tytso@mit.edu>
- <20220628042817.2xxzleisfguoq7qh@zlang-mailbox>
+ <20220625030718.1215980-4-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220628042817.2xxzleisfguoq7qh@zlang-mailbox>
+In-Reply-To: <20220625030718.1215980-4-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 28, 2022 at 12:28:17PM +0800, Zorro Lang wrote:
-> On Fri, Jun 24, 2022 at 11:07:15PM -0400, Theodore Ts'o wrote:
-> > This test mounts the file system using "mount -t ext3"; if the file
-> > system config creates the file system without the jbd2 journal, the
-> > "mount -t ext3" will fail.  So skip this test in that case.
-> > 
-> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > ---
-> >  tests/ext4/044 | 6 ++++++
-> >  1 file changed, 6 insertions(+)
-> > 
-> > diff --git a/tests/ext4/044 b/tests/ext4/044
-> > index 46e44053..fd27ae2d 100755
-> > --- a/tests/ext4/044
-> > +++ b/tests/ext4/044
-> > @@ -16,11 +16,17 @@ _begin_fstest auto quick
-> >  _supported_fs ext4
-> >  _require_scratch
-> >  _require_test_program "t_get_file_time"
-> > +_require_dumpe2fs
-> >  
-> >  echo "Silence is golden"
-> >  
-> >  echo "Test timestamps with 256 inode size one device $SCRATCH_DEV" >$seqres.full
-> >  _scratch_mkfs -t ext3 -I 256 >> $seqres.full 2>&1
-> > +
-> > +$DUMPE2FS_PROG -h $SCRATCH_DEV 2>> $seqres.full | grep '^Filesystem features' | grep -q has_journal
-> > +if [ $? -ne 0 ]; then
-> > +    _notrun "ext4 file system formatted without a journal"
-> > +fi
+On Fri, Jun 24, 2022 at 11:07:16PM -0400, Theodore Ts'o wrote:
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  tests/ext4/045 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> Can _has_metadata_journaling help that?
+> diff --git a/tests/ext4/045 b/tests/ext4/045
+> index ee7c0de3..4f0ad4aa 100755
+> --- a/tests/ext4/045
+> +++ b/tests/ext4/045
+> @@ -22,7 +22,7 @@ _supported_fs ext4
+>  _require_scratch
+>  _require_test_program "t_create_short_dirs"
+>  _require_test_program "t_create_long_dirs"
+> -_require_dumpe2fs "$DUMPE2FS_PROG" dumpe2fs
+> +_require_dumpe2fs
 
-Or use _require_metadata_journaling directly?
+Thanks, I think it planned to write "_require_command" :)
 
+This change is good, but the patch subject:
+  "ext4/045: clean up unnecessary arguments to _require_e2fsprogs"
+is a little weird, dut to it's not changing "_require_e2fsprogs" (and there's
+not _require_e2fsprogs).
+
+Thanks,
+Zorro
+
+>  
+>  echo "Silence is golden"
+>  
+> -- 
+> 2.31.0
 > 
-> Thanks,
-> Zorro
-> 
-> >  _scratch_mount
-> >  
-> >  # Create file
-> > -- 
-> > 2.31.0
-> > 
 
