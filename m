@@ -2,63 +2,72 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6959C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 18:21:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC340C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 28 Jun 2022 18:25:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230053AbiF1SVu (ORCPT
+        id S232224AbiF1SZy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jun 2022 14:21:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59612 "EHLO
+        Tue, 28 Jun 2022 14:25:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230027AbiF1SVs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 14:21:48 -0400
+        with ESMTP id S231223AbiF1SZy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jun 2022 14:25:54 -0400
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34417205D9
-        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 11:21:48 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 651C52125C
+        for <fstests@vger.kernel.org>; Tue, 28 Jun 2022 11:25:53 -0700 (PDT)
 Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25SILgXI023727
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25SIPnHt025888
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 28 Jun 2022 14:21:43 -0400
+        Tue, 28 Jun 2022 14:25:50 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656440504; bh=kznytDLrEzPusFkNJE+HL6nTBh9QrClYKB0cBxWezfw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=S4pB6vTlq+9NJVizDiC58tuWNFxd6hnJYYx+3hQPUUje2ACUXQfKVjqIQTM6WTmS5
-         64aF5P2jCW4L35PsEh8sKLDyw8fTeZPemvHMa5Zx4pOTxkt45GcIKm/Yk3Tus/evRI
-         T8vZo2Jie2v1UNNzpvDEwiw2ytFIYirDCrvrsxx4yKJiNtxFC5pkoslW6jnLOj+4TZ
-         BAOJjTayBuThf2whOJeoGA+ghG4BOouIr6YyE47GSAHQ3eHAephycYwdvSrmzPZwiO
-         bNRn2G/T5wWCERotymkyBji+oRY0xwuVQ6k0LOm13WLrm5EZzZzztqhzal6b+IqbHq
-         04KSPyS8/0YtA==
+        t=1656440750; bh=8xanglkN43VBugMwl8Hkn6Aw6FFf9nySfPvIfCCfQOE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References;
+        b=cMdDV62kcQ+0Kel6LnPVGVwQSgYSMhBLGyj1T1uw28/0lL6IQ/E0OPQgq4u+NHYT8
+         szxDEBMK2Z3TS+4CptQOka5eQn8s9UiamobzrjZijGralqqbagr9srX/Yx3em2wAM1
+         0Xbqo+I1tl5Kj7syDvGYQxdUo+bfdcqlP+/2pnFjK6BLOTtzBYzv2OjAqvPG0ISMZD
+         CIATxspv9ZYVtbXwiv2bAnbAxU7cX3ldK3NSlr0riEcAcTKn6vr+vfeCyZxTdv/uiF
+         AAk7je0cUthBYIr1FmRDNhjiv1GnDygCe+OAZHW49F2eI6BhUx9TECeLfPSY0kZOpR
+         VNMKcjIExh3mw==
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id D3F9B15C4311; Tue, 28 Jun 2022 14:21:42 -0400 (EDT)
-Date:   Tue, 28 Jun 2022 14:21:42 -0400
+        id 7E39D15C4314; Tue, 28 Jun 2022 14:25:49 -0400 (EDT)
 From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/5] ext4/045: clean up unnecessary arguments to
- _require_e2fsprogs
-Message-ID: <YrtGtuqL+fUnv4rX@mit.edu>
-References: <20220625030718.1215980-1-tytso@mit.edu>
- <20220625030718.1215980-4-tytso@mit.edu>
- <20220628043716.6y667we64rehq5qr@zlang-mailbox>
+To:     fstests@vger.kernel.org
+Cc:     "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH 2/6] ext4/044: skip test if the file system does not have a journal
+Date:   Tue, 28 Jun 2022 14:25:41 -0400
+Message-Id: <20220628182545.1834145-3-tytso@mit.edu>
+X-Mailer: git-send-email 2.31.0
+In-Reply-To: <20220628182545.1834145-1-tytso@mit.edu>
+References: <20220628182545.1834145-1-tytso@mit.edu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220628043716.6y667we64rehq5qr@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 28, 2022 at 12:37:16PM +0800, Zorro Lang wrote:
-> 
-> This change is good, but the patch subject:
->   "ext4/045: clean up unnecessary arguments to _require_e2fsprogs"
-> is a little weird, dut to it's not changing "_require_e2fsprogs" (and there's
-> not _require_e2fsprogs).
+This test mounts the file system using "mount -t ext3"; if the file
+system config creates the file system without the jbd2 journal, the
+"mount -t ext3" will fail.  So skip this test in that case.
 
-I've replaced the commit description with:
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/ext4/044 | 1 +
+ 1 file changed, 1 insertion(+)
 
-ext4/045: _require_dumpe2fs doesn't take any arguments so remove them
+diff --git a/tests/ext4/044 b/tests/ext4/044
+index 46e44053..158e2ac5 100755
+--- a/tests/ext4/044
++++ b/tests/ext4/044
+@@ -16,6 +16,7 @@ _begin_fstest auto quick
+ _supported_fs ext4
+ _require_scratch
+ _require_test_program "t_get_file_time"
++_require_metadata_journaling
+ 
+ echo "Silence is golden"
+ 
+-- 
+2.31.0
 
-	  		    	    	     - Ted
