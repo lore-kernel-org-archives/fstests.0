@@ -2,170 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07D6EC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 08:58:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BAFEC43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 09:13:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230523AbiF2I61 (ORCPT
+        id S232558AbiF2JNA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 29 Jun 2022 04:58:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40090 "EHLO
+        Wed, 29 Jun 2022 05:13:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230350AbiF2I6Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 04:58:24 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8128C9FFA
-        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 01:58:23 -0700 (PDT)
+        with ESMTP id S231424AbiF2JM7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 05:12:59 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 1A5251D0FD
+        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 02:12:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656493102;
+        s=mimecast20190719; t=1656493978;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Ju7ZLI/iK/NXt4WScnIRGw7IgYvVKrHI33cMGAhcnHg=;
-        b=fb4FL/hteBNPSTTLITvfqmCL37c54ncAIoz1uXzgqiQHESFJprvZs/Vrwo0BiWy4cgDsXs
-        GEXVYUBxF1/Qj15Db5j9yofbSMwa0K6kNhDzA92kc/sIMZMDi2NqMFsa0VIslsVzBi+25G
-        +kqo/kJyUDo9AVdVwU7o49YKFpp6Gwg=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=PHkzl/CtxfMEiDrBCMjqTBVk/1t45A9zbY4QPN+Lk68=;
+        b=PYS7CLE6VPrm4xpLu/AJo+WDORxN6GcrS6ZMDx78hmSZ5GlPGVmypEpxI/V0MkdmSmjg8t
+        PqCO54d8Yfk2w/Hr8HbQtkMHJmM80B96N2vv+Tz4oo61WH7uoYRbD8C4AzSFMwYWhnPaDG
+        B7ssXOi1zwgrKOd3/5voJ++9FkBlE5o=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-212-8B6LRQ0xPJGbacvYtrHc9g-1; Wed, 29 Jun 2022 04:58:21 -0400
-X-MC-Unique: 8B6LRQ0xPJGbacvYtrHc9g-1
-Received: by mail-qk1-f199.google.com with SMTP id e128-20020a376986000000b006af6adf035cso3109200qkc.8
-        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 01:58:20 -0700 (PDT)
+ us-mta-323-rzQnKaklNOOnM0ndyX--aQ-1; Wed, 29 Jun 2022 05:12:56 -0400
+X-MC-Unique: rzQnKaklNOOnM0ndyX--aQ-1
+Received: by mail-qv1-f70.google.com with SMTP id f6-20020a0cbec6000000b004728234508bso5274022qvj.8
+        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 02:12:56 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=Ju7ZLI/iK/NXt4WScnIRGw7IgYvVKrHI33cMGAhcnHg=;
-        b=6/ayW+bThwnXq28nSIe0RmfgM1H1KhbY5MpEfnkhMQVwiYceKq67xcr8+6I5wEE5Lx
-         /cUKK9j5O6FZoelQOWhnri6CI2CsZXIcd30Eahu+rpTBxYA2hunE29vK3EMcK6GEMwdy
-         KTYY9HXQWFKVheDGHZC6vZkX+cZex4ux9gMiLS21Vf/inhtBdcIOuWOa6SwD1ZXypI7W
-         6cdD7UOUPGSjSGpoG/g8GuT2X5s66meknr0i6VDi8SYNxcu0LJCTklGzXogmjWusTw00
-         RQNW5MmSlB+L5PcrCBrXXvk5z8A7VibAxOiVrkA7C8sq+eoXrKafQjHYAkoG1qnQ5Css
-         0kAw==
-X-Gm-Message-State: AJIora/2W521hY/POCqjaXaG8jUXVmaVFoQVAa86FsazTWY0cB3nCyrs
-        rxRGAV9Jl/Leb6uLF8cfJqke7M39u6gtliui+Qx7NslkMAT8Yzc/6wXXjruyie4j6U5fg49R/Cb
-        0f/zq2UctJx9ODccCUw==
-X-Received: by 2002:ac8:5953:0:b0:317:cfd0:1a72 with SMTP id 19-20020ac85953000000b00317cfd01a72mr1450040qtz.483.1656493100097;
-        Wed, 29 Jun 2022 01:58:20 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1v5K7TRvhobRrYUDZC13/4XmI2giPX+/o5y2PDyTHLHZOOybmPbSPpcuzWl7CCMc88X8NhOWw==
-X-Received: by 2002:ac8:5953:0:b0:317:cfd0:1a72 with SMTP id 19-20020ac85953000000b00317cfd01a72mr1450032qtz.483.1656493099814;
-        Wed, 29 Jun 2022 01:58:19 -0700 (PDT)
+        bh=PHkzl/CtxfMEiDrBCMjqTBVk/1t45A9zbY4QPN+Lk68=;
+        b=eENWb7779q/VQEd3lEuTaJKaf59Hk9omwKqGRJKTHkFIlg8Jd++zXWLaF3t+hcjyaz
+         6lYOQ1jCbtoM9aN9mLlO86g0k936UJxFJW2z8IhrHkkrYVqzojPBFEuU3zucKDJHcnJ4
+         fZUemDETR4OZbRqEROu7GeSsEo0kvTDy5ATOo5seRuHT+kyubwUtDC2Jb7Uk2NOPlVa8
+         d+GoISzJcwD0k+IRLKiXqAvqra5QK6qPKvKaFwbFK+Gx0BJLX8X+FlmhPJJAylySVSQw
+         TmQni5Miwtn46rC2h2DO4g/bsdEcyYWgpyJpanzdYpvO3K7yYwsi3YlV+RpIxOE6Gysu
+         jPHg==
+X-Gm-Message-State: AJIora8SkOcpCRs8m+j3KSXiJ7PZsN+igP/W7laYKzTPcwCdf8Z9CJNQ
+        M7TV2tlpw/uWIhgaJxxjZ2VcgNn/eom6Wbxw5jIQQfrLRvESoxAmbCO/jVQt+9JKiXM15h8CzM0
+        rh9NzpJcOssJuLY2kNQ==
+X-Received: by 2002:ac8:584b:0:b0:31b:efad:e020 with SMTP id h11-20020ac8584b000000b0031befade020mr1461179qth.425.1656493976170;
+        Wed, 29 Jun 2022 02:12:56 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vxPr2jKgDwkUQSZ+OnlrTusU8D4te8AP8eevk1tsKEwY1lBipsJ+RbHgcqLIL8sr82M3GFYw==
+X-Received: by 2002:ac8:584b:0:b0:31b:efad:e020 with SMTP id h11-20020ac8584b000000b0031befade020mr1461165qth.425.1656493975905;
+        Wed, 29 Jun 2022 02:12:55 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c3-20020ac84e03000000b00304f55e56e4sm10416373qtw.40.2022.06.29.01.58.17
+        by smtp.gmail.com with ESMTPSA id r4-20020ac84244000000b00317ca023e33sm10056891qtm.80.2022.06.29.02.12.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Jun 2022 01:58:19 -0700 (PDT)
-Date:   Wed, 29 Jun 2022 16:58:14 +0800
+        Wed, 29 Jun 2022 02:12:55 -0700 (PDT)
+Date:   Wed, 29 Jun 2022 17:12:48 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 6/6] ext4: create file systems with the enrypt feature if
- necessary
-Message-ID: <20220629085814.msgubmmpcstasrhp@zlang-mailbox>
-References: <20220628182545.1834145-1-tytso@mit.edu>
- <20220628182545.1834145-7-tytso@mit.edu>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 2/9] xfs/070: filter new superblock verifier messages
+Message-ID: <20220629091248.vtqtlk2wvqkmtxkm@zlang-mailbox>
+References: <165644767753.1045534.18231838177395571946.stgit@magnolia>
+ <165644768886.1045534.3177166462110135738.stgit@magnolia>
+ <20220629041547.GO1098723@dread.disaster.area>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220628182545.1834145-7-tytso@mit.edu>
+In-Reply-To: <20220629041547.GO1098723@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 28, 2022 at 02:25:45PM -0400, Theodore Ts'o wrote:
-> The linux kernel commit 5f41fdaea63d ("ext4: only allow
-> test_dummy_encryption when supported") the kernel will reject mounts
-> with the test_dummy_encryption option if the ext4 file system does not
-> have the encrypt feature enabled.
+On Wed, Jun 29, 2022 at 02:15:47PM +1000, Dave Chinner wrote:
+> On Tue, Jun 28, 2022 at 01:21:28PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > In Linux 5.19, the superblock verifier logging changed to elaborate on
+> > what was wrong.  Fix the xfs_repair filtering function to accomodate
+> > this development.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/repair |    1 +
+> >  1 file changed, 1 insertion(+)
+> > 
+> > 
+> > diff --git a/common/repair b/common/repair
+> > index 463ef9db..398e9904 100644
+> > --- a/common/repair
+> > +++ b/common/repair
+> > @@ -29,6 +29,7 @@ _filter_repair()
+> >  # for sb
+> >  /- agno = / && next;	# remove each AG line (variable number)
+> >  s/(pointer to) (\d+)/\1 INO/;
+> > +s/Superblock has bad magic number.*/bad magic number/;
+> >  # Changed inode output in 5.5.0
+> >  s/sb root inode value /sb root inode /;
+> >  s/realtime bitmap inode value /realtime bitmap inode /;
 > 
-> There are a handful of tests (ext4/003, ext4/035, ext4/306, and
-> generic/260) which will format the scratch file system using a
-> hard-coded set of mkfs.ext4 parameters ignoring the MKFS_OPTION that
-> is set by the file system test config.
-> 
-> For file system config that includes test_dummy_encryption in
-> MOUNT_OPTIONS and "-O encrypt" in MKFS_OPTIONS, we need to test for
-> test_dummy_encryption and force the hard-coded mkfs options to enable
-> the encrypt feature.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
->  tests/ext4/003    | 6 +++++-
->  tests/ext4/035    | 5 ++++-
->  tests/ext4/306    | 3 +++
->  tests/generic/260 | 5 ++++-
->  4 files changed, 16 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/ext4/003 b/tests/ext4/003
-> index 773bcb03..6a4518e3 100755
-> --- a/tests/ext4/003
-> +++ b/tests/ext4/003
-> @@ -27,7 +27,11 @@ _require_scratch
->  _require_scratch_ext4_feature "bigalloc"
->  
->  BLOCK_SIZE=$(get_page_size)
-> -$MKFS_EXT4_PROG -F -b $BLOCK_SIZE -O bigalloc -C $(($BLOCK_SIZE * 16)) -g 256 $SCRATCH_DEV 512m \
-> +FEATURES=bigalloc
-> +if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-> +    FEATURES=${FEATURES},encrypt
-> +fi
-> +$MKFS_EXT4_PROG -F -b $BLOCK_SIZE -O ${FEATURES} -C $(($BLOCK_SIZE * 16)) -g 256 $SCRATCH_DEV 512m \
->  	>> $seqres.full 2>&1
->  _scratch_mount
->  
-> diff --git a/tests/ext4/035 b/tests/ext4/035
-> index 1f26e766..a1ccce45 100755
-> --- a/tests/ext4/035
-> +++ b/tests/ext4/035
-> @@ -25,7 +25,10 @@ _require_scratch
->  _exclude_scratch_mount_option dax
->  _require_command "$RESIZE2FS_PROG" resize2fs
->  
-> -$MKFS_EXT4_PROG -F -b 1024 -E "resize=262144" $SCRATCH_DEV 32768 >> $seqres.full 2>&1
-> +if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-> +    ENCRYPT="-O encrypt"
-> +fi
-> +$MKFS_EXT4_PROG -F -b 1024 -E "resize=262144" $ENCRYPT $SCRATCH_DEV 32768 >> $seqres.full 2>&1
->  if [ $? -ne 0 ]; then
->      _notrun "Can't make file system with a block size of 1024"
->  fi
+> Didn't I already fix that in commit 4c76d0ba ("xfs/070: filter the
+> bad sb magic number error")?
 
-This _notrun part isn't in mainline fstests. That cause merging aborted
-at here :)
+Yes, you've added a line as below:
+  s/^Superblock has (bad magic number) 0x.*/\1/;
+which is equal to:
+  s/Superblock has bad magic number.*/bad magic number/;
+So we need to fix it again.
 
-Thanks,
-Zorro
-
-> diff --git a/tests/ext4/306 b/tests/ext4/306
-> index 2ff88537..a6b7eab5 100755
-> --- a/tests/ext4/306
-> +++ b/tests/ext4/306
-> @@ -33,6 +33,9 @@ features="^extents"
->  if grep -q 64bit /etc/mke2fs.conf ; then
->      features="^extents,^64bit"
->  fi
-> +if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-> +    features=${features},encrypt
-> +fi
->  
->  blksz=$(get_page_size)
->  
-> diff --git a/tests/generic/260 b/tests/generic/260
-> index b4d72e0f..e86afe9c 100755
-> --- a/tests/generic/260
-> +++ b/tests/generic/260
-> @@ -120,7 +120,10 @@ case $FSTYP in
->  		bsize=4096
->  		start=$(_math "$base*$agsize*$bsize")
->  		len=$start
-> -		export MKFS_OPTIONS="-F -b $bsize -g $agsize"
-> +		if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-> +		    ENCRYPT="-O encrypt"
-> +		fi
-> +		export MKFS_OPTIONS="-F -b $bsize -g $agsize $ENCRYPT"
->  		;;
->  	xfs)
->  		agsize=65538
+> 
+> Cheers,
+> 
+> Dave.
+> 
 > -- 
-> 2.31.0
+> Dave Chinner
+> david@fromorbit.com
 > 
 
