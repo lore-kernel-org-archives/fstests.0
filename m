@@ -2,85 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A543C43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 14:00:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96934C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 16:20:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232127AbiF2OAp (ORCPT
+        id S229945AbiF2QUn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 29 Jun 2022 10:00:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57394 "EHLO
+        Wed, 29 Jun 2022 12:20:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34712 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231298AbiF2OAo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 10:00:44 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id AEBE022BC1
-        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 07:00:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1656511238;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=f2HMdeTsOpHm9sZRS+HCad5LxmPJ37585281uvtRfvs=;
-        b=HzR639FCYFo8Vr79+LEMzuMEMKEZWHfMbmRJGQmTNRTWE/bx7RjrnLOghvlhYGLE3n5qTu
-        87ZYny/qnRAWSo7SPyANljUZfcIke0hzvK/1Ru8JSrInrrvfDjNlaJdErY02okwoK0zaca
-        1ptfvBmsegy9ErQxZ5EpvCuWMUmC3Yg=
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
- [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-270-Ia7LOxN7PtuAf0SPepbBtw-1; Wed, 29 Jun 2022 10:00:37 -0400
-X-MC-Unique: Ia7LOxN7PtuAf0SPepbBtw-1
-Received: by mail-qk1-f197.google.com with SMTP id bl27-20020a05620a1a9b00b0069994eeb30cso16317429qkb.11
-        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 07:00:37 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=f2HMdeTsOpHm9sZRS+HCad5LxmPJ37585281uvtRfvs=;
-        b=gcpqa0Bik356gkBuhKetofOF+dXOZ/vtk3hHcYCCnp8+sbc7HhOVDsP7rMKPoViNQv
-         6wgMkfBdSAkvn7oyTVU7xyNdZA6es9nmQUtWgkmoDkZAPijFPu6yeizkklVRCcmtfAG1
-         bxov1EpCIiE4OYna4GSpACmF1/fRtMPpg2GfxZmDPrViG3egwaydQrg0qsHhmCEChMdX
-         pKh7rWf5jW4Q+IcjQa6ZJ/6l3PMp1fr4dzAkEgAvIOIzfIFIu3SFxtVXFKszwS4vtsDb
-         N5gkZ06ew54uTnT8aVJPHLBgpJOT/kjYPN7IISoaF+8izitRoUlQEr8efBER53GMonU0
-         urRA==
-X-Gm-Message-State: AJIora/AAgoHJnkuVoGxc6hH/q1VvAYaTqbfEaYdtClmZak1Zm7BCGBn
-        huNg0ec4wIdLB2lw7R9qyLhzQ95zMuIUWErkC6u9X1/7q/P8ys3bqrkk3XfC36m52WSi7H8sfRv
-        xNN8YibPeE0RBrW/fww==
-X-Received: by 2002:ad4:5dcd:0:b0:470:3909:fc4c with SMTP id m13-20020ad45dcd000000b004703909fc4cmr7813770qvh.87.1656511236384;
-        Wed, 29 Jun 2022 07:00:36 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1usOyu3yMvnn48j1MkfYcDc0UP82OtqIkoCk8Oh1Fv3Z1mDYB9br3YBTwqnSGSmp5o3MeyG5A==
-X-Received: by 2002:ad4:5dcd:0:b0:470:3909:fc4c with SMTP id m13-20020ad45dcd000000b004703909fc4cmr7813740qvh.87.1656511236032;
-        Wed, 29 Jun 2022 07:00:36 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id f30-20020ac840de000000b00315110b47bcsm10853878qtm.22.2022.06.29.07.00.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Jun 2022 07:00:35 -0700 (PDT)
-Date:   Wed, 29 Jun 2022 22:00:30 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     linux-btrfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>
-Subject: Re: btrfs read repair: more tests
-Message-ID: <20220629140030.gby6u6gih2dxfs7v@zlang-mailbox>
-References: <20220622045844.3219390-1-hch@lst.de>
+        with ESMTP id S229699AbiF2QUm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 12:20:42 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BA26344C7;
+        Wed, 29 Jun 2022 09:20:41 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 5174AB82573;
+        Wed, 29 Jun 2022 16:20:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0DC6DC34114;
+        Wed, 29 Jun 2022 16:20:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1656519639;
+        bh=jUEvfkzTsecPy2ArOdW6RgMus29RLcrXT85mz+60n3A=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=MH+t8R+d0DWRiUwAzIkCTnagGELNtNcy5YzGi440s1Me+G9pZYmeAWFeC/4VH32aP
+         SUQ+UhRBzhHuvG+FTOrd3qCWSqkiD5l2S0Hpc3RHcbuDlm8q3t7V5z2p6xFJ6IH70w
+         SM1wKkC8rEjR4SOzYYMtgq2kgqge5aixRDlzyTa3O0J/zlaxb/YuiFIVcQ3c2wOVC7
+         gyezjl7ooyC3hcZkJY2GXf9u6oNxJzASMk9zg1DeygVQ4ENz8MxNiZAdZ3L+GjUlTH
+         PX4SM6TqTFbLSEe5ZKqzcvJCEwRI4atWBsR78pf0+7CinRXH76vWd/rk3/Ij/+OWxG
+         1jJD7Ew9hWioQ==
+Date:   Wed, 29 Jun 2022 09:20:38 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Dave Chinner <david@fromorbit.com>,
+        Leah Rumancik <leah.rumancik@gmail.com>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 5.10 CANDIDATE v2 0/7] xfs stable candidate patches for
+ 5.10.y (from v5.13)
+Message-ID: <Yrx71vp2SFsjVdzg@magnolia>
+References: <20220627073311.2800330-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220622045844.3219390-1-hch@lst.de>
+In-Reply-To: <20220627073311.2800330-1-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 22, 2022 at 06:58:40AM +0200, Christoph Hellwig wrote:
+On Mon, Jun 27, 2022 at 10:33:04AM +0300, Amir Goldstein wrote:
 > Hi all,
 > 
-> this series adds a few more btrfs read repair tests.  Still all for user
-> data as I haven't managed to successfully inject corruption into metadata
-> yet.
-
-This patchset is good to me (from fstests side). If there's not more review
-points or objections from btrfs list, I'll merge it. Welcome more review.
-
-Thanks,
-Zorro
-
+> This is a resend of the series that was posted 3 weeks ago [v1].
+> The backports in this series are from circa v5.12..v5.13.
+> The remaining queue of tested 5.10 backports [1] contains 25 more patches
+> from v5.13..v5.19-rc1.
 > 
+> There have been no comments on the first post except for Dave's request
+> to collaborate the backports review process with Leah who had earlier
+> sent out another series of backports for 5.15.y.
+> 
+> Following Dave's request, I had put this series a side to collaborate
+> the shared review of 5.15/5.10 series with Leah and now that the shared
+> series has been posted to stable, I am re-posting to request ACKs on this
+> 5.10.y specific series.
+> 
+> There are four user visible fixes in this series, one patch for dependency
+> ("rename variable mp") and two patches to improve testability of LTS.
 
+Aha, I had wondered why the journal_info thing was in this branch, and
+if that would even fit under the usual stable rules...
+
+> Specifically, I selected the fix ("use current->journal_info for
+> detecting transaction recursion") after I got a false positive assert
+> while testing LTS kernel with XFS_DEBUG and at another incident, it
+> helped me triage a regression that would have been harder to trace
+> back to the offending code otherwise.
+
+...but clearly maintainers have been hitting this, so that's ok by /me/ to
+have it.  If nothing else, XFS doesn't support nested transactions, so any
+weird stuff that falls out was already a dangerous bug.
+
+Acked-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
+> This series has been looping in kdevops for a long while, with and
+> without the shared 5.15 backport with no regressions observed.
+> 
+> Thanks,
+> Amir.
+> 
+> Changes since [v1]:
+> - Rebased and tested on top of the v5.15+ ACKed backports [2]
+> 
+> [1] https://github.com/amir73il/linux/commits/xfs-5.10.y
+> [2] https://lore.kernel.org/linux-xfs/20220624063702.2380990-1-amir73il@gmail.com/
+> [v1] https://lore.kernel.org/linux-xfs/20220606160537.689915-1-amir73il@gmail.com/
+> 
+> Anthony Iliopoulos (1):
+>   xfs: fix xfs_trans slab cache name
+> 
+> Darrick J. Wong (1):
+>   xfs: fix xfs_reflink_unshare usage of filemap_write_and_wait_range
+> 
+> Dave Chinner (2):
+>   xfs: use current->journal_info for detecting transaction recursion
+>   xfs: update superblock counters correctly for !lazysbcount
+> 
+> Gao Xiang (1):
+>   xfs: ensure xfs_errortag_random_default matches XFS_ERRTAG_MAX
+> 
+> Pavel Reichl (2):
+>   xfs: rename variable mp to parsing_mp
+>   xfs: Skip repetitive warnings about mount options
+> 
+>  fs/iomap/buffered-io.c    |   7 ---
+>  fs/xfs/libxfs/xfs_btree.c |  12 +++-
+>  fs/xfs/libxfs/xfs_sb.c    |  16 ++++-
+>  fs/xfs/xfs_aops.c         |  17 +++++-
+>  fs/xfs/xfs_error.c        |   2 +
+>  fs/xfs/xfs_reflink.c      |   3 +-
+>  fs/xfs/xfs_super.c        | 120 +++++++++++++++++++++-----------------
+>  fs/xfs/xfs_trans.c        |  23 +++-----
+>  fs/xfs/xfs_trans.h        |  30 ++++++++++
+>  9 files changed, 148 insertions(+), 82 deletions(-)
+> 
+> -- 
+> 2.25.1
+> 
