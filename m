@@ -2,134 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96934C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 16:20:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D539C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 19:30:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbiF2QUn (ORCPT
+        id S229632AbiF2TaQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 29 Jun 2022 12:20:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34712 "EHLO
+        Wed, 29 Jun 2022 15:30:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40778 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229699AbiF2QUm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 12:20:42 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BA26344C7;
-        Wed, 29 Jun 2022 09:20:41 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 5174AB82573;
-        Wed, 29 Jun 2022 16:20:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0DC6DC34114;
-        Wed, 29 Jun 2022 16:20:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1656519639;
-        bh=jUEvfkzTsecPy2ArOdW6RgMus29RLcrXT85mz+60n3A=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MH+t8R+d0DWRiUwAzIkCTnagGELNtNcy5YzGi440s1Me+G9pZYmeAWFeC/4VH32aP
-         SUQ+UhRBzhHuvG+FTOrd3qCWSqkiD5l2S0Hpc3RHcbuDlm8q3t7V5z2p6xFJ6IH70w
-         SM1wKkC8rEjR4SOzYYMtgq2kgqge5aixRDlzyTa3O0J/zlaxb/YuiFIVcQ3c2wOVC7
-         gyezjl7ooyC3hcZkJY2GXf9u6oNxJzASMk9zg1DeygVQ4ENz8MxNiZAdZ3L+GjUlTH
-         PX4SM6TqTFbLSEe5ZKqzcvJCEwRI4atWBsR78pf0+7CinRXH76vWd/rk3/Ij/+OWxG
-         1jJD7Ew9hWioQ==
-Date:   Wed, 29 Jun 2022 09:20:38 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Dave Chinner <david@fromorbit.com>,
-        Leah Rumancik <leah.rumancik@gmail.com>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 5.10 CANDIDATE v2 0/7] xfs stable candidate patches for
- 5.10.y (from v5.13)
-Message-ID: <Yrx71vp2SFsjVdzg@magnolia>
-References: <20220627073311.2800330-1-amir73il@gmail.com>
+        with ESMTP id S229601AbiF2TaQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 15:30:16 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0EC814035
+        for <fstests@vger.kernel.org>; Wed, 29 Jun 2022 12:30:14 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25TJU4Bg027684
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 29 Jun 2022 15:30:05 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1656531006; bh=uqylQ0Whn79KJc7zMDqHohZlvy+4v6p/cycEnAwuDJ4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=Qw2k/FUWRmyf6txKqtA9A14kIiSZY9/38k63RMGe6ZoBDaPGICo4fWa8d7rAIjwm1
+         NMg5KVz/tQ+XY53vNCXXFj1LWp4MCPOVCqlMEqMpE2PHlKCF1psCKZJDjU6GUiHEcC
+         k7A6GFCUmEUCOFk42OaHPuhEA8j0tBf9uxNkQN8HVivRq92qWWO3V2GVKldY4M9J1A
+         mBoK2Kn9mvMY2lavyJmq9DYP6d6oh5ETNVaVrvP1L7LbAAET3cYjLKlFg/vyzxa0SN
+         OerTJB0zWv9hvFePGc1QXabiE5GY8Fv0peBR1Ix4nMH4JlN5yU7FY2aR/1HxNvozJN
+         A/jk+h+5qGyPw==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 7083915C3E94; Wed, 29 Jun 2022 15:30:04 -0400 (EDT)
+Date:   Wed, 29 Jun 2022 15:30:04 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, Eric Biggers <ebiggers@kernel.org>
+Subject: Re: [PATCH -v3 7/7] ext4: create file systems with the encrypt
+ feature as necessary
+Message-ID: <YryoPGksgK3UfKvO@mit.edu>
+References: <20220629124540.175775-1-tytso@mit.edu>
+ <20220629124540.175775-8-tytso@mit.edu>
+ <20220629133052.3knyrselanytvrws@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220627073311.2800330-1-amir73il@gmail.com>
+In-Reply-To: <20220629133052.3knyrselanytvrws@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 27, 2022 at 10:33:04AM +0300, Amir Goldstein wrote:
-> Hi all,
+On Wed, Jun 29, 2022 at 09:30:52PM +0800, Zorro Lang wrote:
 > 
-> This is a resend of the series that was posted 3 weeks ago [v1].
-> The backports in this series are from circa v5.12..v5.13.
-> The remaining queue of tested 5.10 backports [1] contains 25 more patches
-> from v5.13..v5.19-rc1.
-> 
-> There have been no comments on the first post except for Dave's request
-> to collaborate the backports review process with Leah who had earlier
-> sent out another series of backports for 5.15.y.
-> 
-> Following Dave's request, I had put this series a side to collaborate
-> the shared review of 5.15/5.10 series with Leah and now that the shared
-> series has been posted to stable, I am re-posting to request ACKs on this
-> 5.10.y specific series.
-> 
-> There are four user visible fixes in this series, one patch for dependency
-> ("rename variable mp") and two patches to improve testability of LTS.
+> As Eric gave some review points to V2, so double check with Eric, if it's good
+> to him?
 
-Aha, I had wondered why the journal_info thing was in this branch, and
-if that would even fit under the usual stable rules...
+Eric, any other issues than the ones which you had mentioned (and
+which I have addressed)?
 
-> Specifically, I selected the fix ("use current->journal_info for
-> detecting transaction recursion") after I got a false positive assert
-> while testing LTS kernel with XFS_DEBUG and at another incident, it
-> helped me triage a regression that would have been harder to trace
-> back to the offending code otherwise.
+Zorro, I have the patches based against for-next, and with your
+reviewed-by tags appended, and tagged with a signed tag on the
+for-upstream branch up on github.  Or if you like I can resend patch
+series via e-mail.
 
-...but clearly maintainers have been hitting this, so that's ok by /me/ to
-have it.  If nothing else, XFS doesn't support nested transactions, so any
-weird stuff that falls out was already a dangerous bug.
+      	    	       	   	- Ted
 
-Acked-by: Darrick J. Wong <djwong@kernel.org>
+The following changes since commit 34c1208f601b5f22c62d0f3ed6f6c55c88aa4eff:
 
---D
+  xfs/{422,517}: kill background jobs on test termination (2022-06-25 00:27:11 +0800)
 
-> This series has been looping in kdevops for a long while, with and
-> without the shared 5.15 backport with no regressions observed.
-> 
-> Thanks,
-> Amir.
-> 
-> Changes since [v1]:
-> - Rebased and tested on top of the v5.15+ ACKed backports [2]
-> 
-> [1] https://github.com/amir73il/linux/commits/xfs-5.10.y
-> [2] https://lore.kernel.org/linux-xfs/20220624063702.2380990-1-amir73il@gmail.com/
-> [v1] https://lore.kernel.org/linux-xfs/20220606160537.689915-1-amir73il@gmail.com/
-> 
-> Anthony Iliopoulos (1):
->   xfs: fix xfs_trans slab cache name
-> 
-> Darrick J. Wong (1):
->   xfs: fix xfs_reflink_unshare usage of filemap_write_and_wait_range
-> 
-> Dave Chinner (2):
->   xfs: use current->journal_info for detecting transaction recursion
->   xfs: update superblock counters correctly for !lazysbcount
-> 
-> Gao Xiang (1):
->   xfs: ensure xfs_errortag_random_default matches XFS_ERRTAG_MAX
-> 
-> Pavel Reichl (2):
->   xfs: rename variable mp to parsing_mp
->   xfs: Skip repetitive warnings about mount options
-> 
->  fs/iomap/buffered-io.c    |   7 ---
->  fs/xfs/libxfs/xfs_btree.c |  12 +++-
->  fs/xfs/libxfs/xfs_sb.c    |  16 ++++-
->  fs/xfs/xfs_aops.c         |  17 +++++-
->  fs/xfs/xfs_error.c        |   2 +
->  fs/xfs/xfs_reflink.c      |   3 +-
->  fs/xfs/xfs_super.c        | 120 +++++++++++++++++++++-----------------
->  fs/xfs/xfs_trans.c        |  23 +++-----
->  fs/xfs/xfs_trans.h        |  30 ++++++++++
->  9 files changed, 148 insertions(+), 82 deletions(-)
-> 
-> -- 
-> 2.25.1
-> 
+are available in the Git repository at:
+
+  https://github.com/tytso/xfstests tags/for-zorro
+
+for you to fetch changes up to 43dec26fe614b1d8ad8f4c67aaf6f88413b7f2f8:
+
+  ext4: create file systems with the encrypt feature as necessary (2022-06-29 15:11:41 -0400)
+
+----------------------------------------------------------------
+Miscellaneous ext4 test fix ups
+
+Previous versions of this patch series can be found at:
+
+ - v1: https://lore.kernel.org/r/20220625030718.1215980-1-tytso@mit.edu
+ - v2: https://lore.kernel.org/r/20220628182545.1834145-1-tytso@mit.edu
+ - v3: https://lore.kernel.org/r/20220629124540.175775-1-tytso@mit.edu
+
+----------------------------------------------------------------
+Theodore Ts'o (7):
+      ext4/050: support indirect as well as extent mapped journals
+      ext4/044: skip test if the file system does not have a journal
+      ext4/045: _require_dumpe2fs doesn't take any arguments so remove them
+      ext4/054: skip test if the dax mount option is enabled
+      ext4/055: skip test if dax mount option is used
+      ext4/035: skip this test if the scratch device does not support 1k block sizes
+      ext4: create file systems with the encrypt feature as necessary
+
+ common/rc         |  3 +++
+ tests/ext4/003    |  6 +++++-
+ tests/ext4/035    |  8 +++++++-
+ tests/ext4/044    |  1 +
+ tests/ext4/045    |  2 +-
+ tests/ext4/050    | 58 +++++-----------------------------------------------------
+ tests/ext4/054    |  5 ++---
+ tests/ext4/055    |  1 +
+ tests/ext4/306    |  3 +++
+ tests/generic/260 |  5 ++++-
+ 10 files changed, 32 insertions(+), 60 deletions(-)
