@@ -2,116 +2,106 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C40EC433EF
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 21:38:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A223C43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jun 2022 22:41:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229966AbiF2ViU (ORCPT
+        id S229552AbiF2WlO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 29 Jun 2022 17:38:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46098 "EHLO
+        Wed, 29 Jun 2022 18:41:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55560 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229575AbiF2ViU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 17:38:20 -0400
-Received: from mail-vs1-xe35.google.com (mail-vs1-xe35.google.com [IPv6:2607:f8b0:4864:20::e35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B5CB12634;
-        Wed, 29 Jun 2022 14:38:19 -0700 (PDT)
-Received: by mail-vs1-xe35.google.com with SMTP id d187so8652032vsd.10;
-        Wed, 29 Jun 2022 14:38:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=glH6MA9OZFvYeXEMnrl0V5ZxmY5tpQoEsBxDvBnCdPs=;
-        b=HB8Q/mm5ZYuZsVXLdVvsfVMQ6nFHNXGc01NWUWfZ+Qgg0QM6VZGKvQG5pGeWbAE5F1
-         D6GrBDfMKfQzULotKMzZ0SEpMNjdGrJJs53hHKCN4ASFZqgnfP8HJCHgeKlBVP//VYK9
-         g8rAG7RHmR6ok76Y9MqoiNF/HvL9aBghGBtpnq/UwU9/LvXTKLQ9jZG5Tma/FYy0ltvR
-         JMOZ4W62b5aMarJitnaBMTXYRSQbbWpGuZzhHHPVdLG94q86HHVhDWr49fS1NpYLXC12
-         1TjPr+4qIzAio6fDu7RDj1d4U5kz/C77maUEsqajOItOYHX1yK+EfTYMFYf5ftdzyYQ7
-         Nc1w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=glH6MA9OZFvYeXEMnrl0V5ZxmY5tpQoEsBxDvBnCdPs=;
-        b=u3mmWlTvRMIu/kCb//FdCoT6bpPJ4OhPYu2Xioeuoiok7ygd15DiNirf6Vk9nIz9lp
-         XpQrNW83j0OOoC2HgcYTY8rpoJw3808mx+3SvYgbrbLzcHdn66ohmEkUgjWv3cItxWN1
-         ny+H80mFkbtOY0fW9pCAOS5TaThGybQOBat2nmFYNN8lGleT8xzRTlIy8TLpsqRTrfoe
-         COgJmD7QSZSNy1golmoKsQaTW5hAcPezeCWrXtzVznQ3DOWPJXFyRgjwyrzZ3iamEEXn
-         MVsLD1CeA4nLK8rlXMs/5I77v/FYNgHUcSqGxjaNmTslp7zAoR3VSO69YUOEVoWyMeAY
-         KX6g==
-X-Gm-Message-State: AJIora/KRe4ychHgDW/NyEJrXHQZHlhhflelZMmgMkuoH3ywJeGyiwtB
-        R0NOtXp0aYMagTZyH0dM/v6Ve3DR/GPG/g9kCTsGZuVB
-X-Google-Smtp-Source: AGRyM1vP8KsahKVGBoQ9ovaxmB8aTyZiPDc7KSkKjLHJfJfdgqHWtUvTPZE2vOPTXnokszlTyoh+TJWDD5JoqqQ1b/M=
-X-Received: by 2002:a05:6102:38c7:b0:356:4e2f:ae5b with SMTP id
- k7-20020a05610238c700b003564e2fae5bmr6295294vst.71.1656538698388; Wed, 29 Jun
- 2022 14:38:18 -0700 (PDT)
+        with ESMTP id S229480AbiF2WlN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jun 2022 18:41:13 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28D59A199;
+        Wed, 29 Jun 2022 15:41:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B9026619A3;
+        Wed, 29 Jun 2022 22:41:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11970C34114;
+        Wed, 29 Jun 2022 22:41:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1656542471;
+        bh=mYXhfv06FpBwp72IJsZx8X1ccWAAiw07HUb2Fw2vgQM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=VqhkCbGCia4AckAuHtff3pAPdui7yZUQpuhRHpme2DAv+XhLto0zdvQwGLxfqlK8X
+         HaSPCOAH4PjdtWCmm81G2YyAuvQzpTxn65oqzURQQEZg4u8NI30DUzi4tmfcjG4DRN
+         5V/BM0inFqJ+qrZCiy1EWlK+Hrv8vdabtBQa7xWneHmTj/exOLt7dlAEwukUFiFsfj
+         Ko2EKz4YC0u+OyWjdmrrrQXu9LswBBhntM2k+VB6J1B7yUbWHVouSZhgzonkqcSkCn
+         0BHu/qvUHXEXlQu5I01pNsWUBgc6i/pigbD3m7hZ8EPM1nxSw0PTwyDWwPkUoJwOGX
+         1pbeukbEI9N1g==
+Date:   Wed, 29 Jun 2022 15:41:10 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Dave Chinner <david@fromorbit.com>, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 2/9] xfs/070: filter new superblock verifier messages
+Message-ID: <YrzVBs9h0lzYFvCo@magnolia>
+References: <165644767753.1045534.18231838177395571946.stgit@magnolia>
+ <165644768886.1045534.3177166462110135738.stgit@magnolia>
+ <20220629041547.GO1098723@dread.disaster.area>
+ <20220629091248.vtqtlk2wvqkmtxkm@zlang-mailbox>
 MIME-Version: 1.0
-References: <20220627073311.2800330-1-amir73il@gmail.com> <Yrx71vp2SFsjVdzg@magnolia>
-In-Reply-To: <Yrx71vp2SFsjVdzg@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 30 Jun 2022 00:38:07 +0300
-Message-ID: <CAOQ4uxik4B5jP8rKq4oxT4x7edULPx4X9GKbMGRL5ny4r_t8DQ@mail.gmail.com>
-Subject: Re: [PATCH 5.10 CANDIDATE v2 0/7] xfs stable candidate patches for
- 5.10.y (from v5.13)
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Dave Chinner <david@fromorbit.com>,
-        Leah Rumancik <leah.rumancik@gmail.com>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220629091248.vtqtlk2wvqkmtxkm@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 29, 2022 at 7:20 PM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> On Mon, Jun 27, 2022 at 10:33:04AM +0300, Amir Goldstein wrote:
-> > Hi all,
-> >
-> > This is a resend of the series that was posted 3 weeks ago [v1].
-> > The backports in this series are from circa v5.12..v5.13.
-> > The remaining queue of tested 5.10 backports [1] contains 25 more patches
-> > from v5.13..v5.19-rc1.
-> >
-> > There have been no comments on the first post except for Dave's request
-> > to collaborate the backports review process with Leah who had earlier
-> > sent out another series of backports for 5.15.y.
-> >
-> > Following Dave's request, I had put this series a side to collaborate
-> > the shared review of 5.15/5.10 series with Leah and now that the shared
-> > series has been posted to stable, I am re-posting to request ACKs on this
-> > 5.10.y specific series.
-> >
-> > There are four user visible fixes in this series, one patch for dependency
-> > ("rename variable mp") and two patches to improve testability of LTS.
->
-> Aha, I had wondered why the journal_info thing was in this branch, and
-> if that would even fit under the usual stable rules...
->
-> > Specifically, I selected the fix ("use current->journal_info for
-> > detecting transaction recursion") after I got a false positive assert
-> > while testing LTS kernel with XFS_DEBUG and at another incident, it
-> > helped me triage a regression that would have been harder to trace
-> > back to the offending code otherwise.
->
-> ...but clearly maintainers have been hitting this, so that's ok by /me/ to
-> have it.  If nothing else, XFS doesn't support nested transactions, so any
-> weird stuff that falls out was already a dangerous bug.
+On Wed, Jun 29, 2022 at 05:12:48PM +0800, Zorro Lang wrote:
+> On Wed, Jun 29, 2022 at 02:15:47PM +1000, Dave Chinner wrote:
+> > On Tue, Jun 28, 2022 at 01:21:28PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > In Linux 5.19, the superblock verifier logging changed to elaborate on
+> > > what was wrong.  Fix the xfs_repair filtering function to accomodate
+> > > this development.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > >  common/repair |    1 +
+> > >  1 file changed, 1 insertion(+)
+> > > 
+> > > 
+> > > diff --git a/common/repair b/common/repair
+> > > index 463ef9db..398e9904 100644
+> > > --- a/common/repair
+> > > +++ b/common/repair
+> > > @@ -29,6 +29,7 @@ _filter_repair()
+> > >  # for sb
+> > >  /- agno = / && next;	# remove each AG line (variable number)
+> > >  s/(pointer to) (\d+)/\1 INO/;
+> > > +s/Superblock has bad magic number.*/bad magic number/;
+> > >  # Changed inode output in 5.5.0
+> > >  s/sb root inode value /sb root inode /;
+> > >  s/realtime bitmap inode value /realtime bitmap inode /;
+> > 
+> > Didn't I already fix that in commit 4c76d0ba ("xfs/070: filter the
+> > bad sb magic number error")?
 
-Exactly.
+Ah whoops I guess we can drop this one then.
 
->
-> Acked-by: Darrick J. Wong <djwong@kernel.org>
->
+> Yes, you've added a line as below:
+>   s/^Superblock has (bad magic number) 0x.*/\1/;
+> which is equal to:
+>   s/Superblock has bad magic number.*/bad magic number/;
+> So we need to fix it again.
 
-I am not going to post this to xfs list again with Acked-by
-before posting to stable, because this is the second posting
-already with no changes since v1.
+We .... do?
 
-I am going to wait until Greg picks up the already posted series
-for 5.10 and 5.15 - it looks like he is also on vacation...
+--D
 
-Thanks!
-Amir.
+> 
+> > 
+> > Cheers,
+> > 
+> > Dave.
+> > 
+> > -- 
+> > Dave Chinner
+> > david@fromorbit.com
+> > 
+> 
