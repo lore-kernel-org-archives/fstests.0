@@ -2,139 +2,160 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0D30CCA483
-	for <linux-fstests@archiver.kernel.org>; Thu, 30 Jun 2022 14:46:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 914FEC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 30 Jun 2022 19:32:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230129AbiF3Oqu (ORCPT
+        id S236679AbiF3TcR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 30 Jun 2022 10:46:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54692 "EHLO
+        Thu, 30 Jun 2022 15:32:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235205AbiF3Oqq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2022 10:46:46 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9AEDD1C127
-        for <fstests@vger.kernel.org>; Thu, 30 Jun 2022 07:46:45 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 25UEkeGU005696
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 30 Jun 2022 10:46:41 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656600402; bh=qhRE+8WpIYRPZYCoOSgC7za5IujOiBo9qnX6m0IG9+w=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=Rs6GTk9yVnAMnEfxpedHXRIeR4lmGBMvvGEuPYzf7RU2ot3s95YBXSmBLMLHviPGW
-         W4KHEqM/dHEUXdc3B6AtDgJJTWFwa7RyiwMfzyTsAYX77Kxgl9je5kD/A75h51O0Z6
-         9e7NC7E7sXRj+iaP9JqtpbwlyNKqxmzrW/ODRXGlVj5uXe0N9Td6jCIuQxl1Nssg56
-         tPmVT9z3784hc+9sCqJGdIgXR6//hRBcXnz9to2e6e8IrVl/IBmlWosl1WlTpvhvG6
-         u9QFFP3TTc7EcU3p4v7ApBfO/UAbxKJO8IGPyDEztFuBSmasS26zRz0Gt4T3O14imf
-         NzJsoBv35QyvA==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 50C6515C4333; Thu, 30 Jun 2022 10:46:39 -0400 (EDT)
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     fstests@vger.kernel.org
-Cc:     "Theodore Ts'o" <tytso@mit.edu>, Zorro Lang <zlang@redhat.com>
-Subject: [PATCH -v4 7/7] ext4: create file systems with the encrypt feature as necessary
-Date:   Thu, 30 Jun 2022 10:46:37 -0400
-Message-Id: <20220630144637.478568-8-tytso@mit.edu>
-X-Mailer: git-send-email 2.31.0
-In-Reply-To: <20220630144637.478568-1-tytso@mit.edu>
-References: <20220630144637.478568-1-tytso@mit.edu>
+        with ESMTP id S236786AbiF3TcO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 Jun 2022 15:32:14 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08EEA43AD3;
+        Thu, 30 Jun 2022 12:32:13 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A08BCB82CF7;
+        Thu, 30 Jun 2022 19:32:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56E11C34115;
+        Thu, 30 Jun 2022 19:32:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1656617530;
+        bh=DMTA8Bz0BCQwoa9GNAKN/yJXk5fM9/qvJHnqz4K+fC0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=glCF99gDE/IRpaBtJFspxhjReol3MNurcv08ua9JSmN+F1lt31sIOdgEOVe0iku8X
+         pVhgNKwbG7lBg+389pmeBeFsmHt3QDv5tO4a2qqmq2osYMY/DHNAC4MzUJaPfJKVKN
+         R9rDHTPHx/8FVBc1IpxEP43LaCC6F3ViTjuFM3GI4T+d+3OvsgxjwObMhnMcNaCtTz
+         d5KwK/G5/+oRizjBB94+AGFj04yNB+ghIZuhWLWE8YZHQ5FFUWML2H8Of4rAaYFMWk
+         Y9Fodb2Ab3mL+WB1ENiyyf9gbK/MBNTdudk0O3CJT9ryLBOE92ZbxCKI/J5rULDiyP
+         k/vZgLkLDkqCg==
+Date:   Thu, 30 Jun 2022 12:32:09 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Dave Chinner <david@fromorbit.com>, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 3/9] xfs: test mkfs.xfs sizing of internal logs that
+Message-ID: <Yr36ObMe5agymA+F@magnolia>
+References: <165644767753.1045534.18231838177395571946.stgit@magnolia>
+ <165644769450.1045534.8663346508633304230.stgit@magnolia>
+ <20220629041807.GP1098723@dread.disaster.area>
+ <YrzVmF1ixmr/3QhY@magnolia>
+ <20220630063714.vrvyip5b2fari3up@zlang-mailbox>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220630063714.vrvyip5b2fari3up@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The linux kernel commit 5f41fdaea63d ("ext4: only allow
-test_dummy_encryption when supported") the kernel will reject mounts
-with the test_dummy_encryption option if the ext4 file system does not
-have the encrypt feature enabled.
+On Thu, Jun 30, 2022 at 02:37:14PM +0800, Zorro Lang wrote:
+> On Wed, Jun 29, 2022 at 03:43:36PM -0700, Darrick J. Wong wrote:
+> > On Wed, Jun 29, 2022 at 02:18:07PM +1000, Dave Chinner wrote:
+> > > On Tue, Jun 28, 2022 at 01:21:34PM -0700, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > 
+> > > > This is a regression test that exercises the mkfs.xfs code that creates
+> > > > log sizes that are very close to the AG size when stripe units are in
+> > > > play and/or when the log is forced to be in AG 0.
+> > > > 
+> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > > ---
+> > > >  tests/xfs/843     |   51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/xfs/843.out |    2 ++
+> > > >  2 files changed, 53 insertions(+)
+> > > >  create mode 100755 tests/xfs/843
+> > > >  create mode 100644 tests/xfs/843.out
+> > > > 
+> > > > 
+> > > > diff --git a/tests/xfs/843 b/tests/xfs/843
+> > > > new file mode 100755
+> > > > index 00000000..5bb4bfb4
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/843
+> > > > @@ -0,0 +1,51 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test 843
+> > > > +#
+> > > > +# Now that we've increased the default log size calculation, test mkfs with
+> > > > +# various stripe units and filesystem sizes to see if we can provoke mkfs into
+> > > > +# breaking.
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto mkfs
+> > > > +
+> > > > +# real QA test starts here
+> > > > +
+> > > > +# Modify as appropriate.
+> > > > +_supported_fs xfs
+> > > > +_require_test
+> > > > +echo Silence is golden
+> > > > +
+> > > > +testfile=$TEST_DIR/a
+> > > > +rm -f $testfile
+> > > > +
+> > > > +test_format() {
+> > > > +	local tag="$1"
+> > > > +	shift
+> > > > +
+> > > > +	echo "$tag" >> $seqres.full
+> > > > +	$MKFS_XFS_PROG $@ -d file,name=$testfile &>> $seqres.full
+> > > > +	local res=$?
+> > > > +	test $res -eq 0 || echo "$tag FAIL $res" | tee -a $seqres.full
+> > > > +}
+> > > > +
+> > > > +# First we try various small filesystems and stripe sizes.
+> > > > +for M in `seq 298 302` `seq 490 520`; do
+> > > > +	for S in `seq 32 4 64`; do
+> > > > +		test_format "M=$M S=$S" -dsu=${S}k,sw=1,size=${M}m -N
+> > > > +	done
+> > > > +done
+> > > > +
+> > > > +# Log so large it pushes the root dir into AG 1.  We can't use -N for the mkfs
+> > > > +# because this check only occurs after the root directory has been allocated,
+> > > > +# which mkfs -N doesn't do.
+> > > > +test_format "log pushes rootdir into AG 1" -d agcount=3200,size=6366g -lagnum=0 -N
+> > > 
+> > > Why are you passing "-N" to the test if it can't be used to test
+> > > this?
+> > 
+> > I guess I went a little overboard after you asked for more -N and less
+> > test runtime last time.
+> 
+> Is there anything different coverage if mkfs.xfs with or without "-N" (except
+> really writing on disk) ? If no difference, I'm fine with that, or I think
+> without "-N" might be good, especially this case only makes fs with small size,
+> it's fast enough.
 
-There are a handful of tests (ext4/003, ext4/035, ext4/306, and
-generic/260) which will format the scratch file system using a
-hard-coded set of mkfs.ext4 parameters ignoring the MKFS_OPTION that
-is set by the file system test config.
+Yes -- with that one exception, the mkfs geometry validation examined by
+this test are all performed before mkfs writes anything to disk.  The
+root inode location check is performed /after/ allocating it, which
+means that we actually have to let it write the new filesystem to disk.
 
-For file system configs which includes test_dummy_encryption in
-MOUNT_OPTIONS and "-O encrypt" in MKFS_OPTIONS, we need to test for
-test_dummy_encryption and force the hard-coded mkfs options to enable
-the encrypt feature.
+That's why *most* of the tests can use -N to reduce runtime.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-Reviewed-by: Zorro Lang <zlang@redhat.com>
----
- tests/ext4/003    | 6 +++++-
- tests/ext4/035    | 6 +++++-
- tests/ext4/306    | 5 ++++-
- tests/generic/260 | 3 +++
- 4 files changed, 17 insertions(+), 3 deletions(-)
+Come to think of it, this really ought to have a _require_fs_space call
+to make sure that fallocating the log space succeeds.
 
-diff --git a/tests/ext4/003 b/tests/ext4/003
-index 773bcb03..8ac467b8 100755
---- a/tests/ext4/003
-+++ b/tests/ext4/003
-@@ -27,7 +27,11 @@ _require_scratch
- _require_scratch_ext4_feature "bigalloc"
- 
- BLOCK_SIZE=$(get_page_size)
--$MKFS_EXT4_PROG -F -b $BLOCK_SIZE -O bigalloc -C $(($BLOCK_SIZE * 16)) -g 256 $SCRATCH_DEV 512m \
-+features=bigalloc
-+if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-+    features+=",encrypt"
-+fi
-+$MKFS_EXT4_PROG -F -b $BLOCK_SIZE -O $features -C $(($BLOCK_SIZE * 16)) -g 256 $SCRATCH_DEV 512m \
- 	>> $seqres.full 2>&1
- _scratch_mount
- 
-diff --git a/tests/ext4/035 b/tests/ext4/035
-index 1f26e766..a8278b0e 100755
---- a/tests/ext4/035
-+++ b/tests/ext4/035
-@@ -25,7 +25,11 @@ _require_scratch
- _exclude_scratch_mount_option dax
- _require_command "$RESIZE2FS_PROG" resize2fs
- 
--$MKFS_EXT4_PROG -F -b 1024 -E "resize=262144" $SCRATCH_DEV 32768 >> $seqres.full 2>&1
-+encrypt=
-+if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-+    encrypt="-O encrypt"
-+fi
-+$MKFS_EXT4_PROG -F -b 1024 -E "resize=262144" $encrypt $SCRATCH_DEV 32768 >> $seqres.full 2>&1
- if [ $? -ne 0 ]; then
-     _notrun "Can't make file system with a block size of 1024"
- fi
-diff --git a/tests/ext4/306 b/tests/ext4/306
-index 2ff88537..db256284 100755
---- a/tests/ext4/306
-+++ b/tests/ext4/306
-@@ -31,7 +31,10 @@ _require_command "$RESIZE2FS_PROG" resize2fs
- # Make a small ext4 fs with extents disabled & mount it
- features="^extents"
- if grep -q 64bit /etc/mke2fs.conf ; then
--    features="^extents,^64bit"
-+    features+=",^64bit"
-+fi
-+if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-+    features+=",encrypt"
- fi
- 
- blksz=$(get_page_size)
-diff --git a/tests/generic/260 b/tests/generic/260
-index b4d72e0f..2f653b4a 100755
---- a/tests/generic/260
-+++ b/tests/generic/260
-@@ -121,6 +121,9 @@ case $FSTYP in
- 		start=$(_math "$base*$agsize*$bsize")
- 		len=$start
- 		export MKFS_OPTIONS="-F -b $bsize -g $agsize"
-+		if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
-+		    MKFS_OPTIONS+=" -O encrypt"
-+		fi
- 		;;
- 	xfs)
- 		agsize=65538
--- 
-2.31.0
+--D
 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > Cheers,
+> > > 
+> > > Dave.
+> > > -- 
+> > > Dave Chinner
+> > > david@fromorbit.com
+> > 
+> 
