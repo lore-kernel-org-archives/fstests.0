@@ -2,186 +2,261 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD57AC43334
-	for <linux-fstests@archiver.kernel.org>; Sat,  2 Jul 2022 17:02:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D25F3C43334
+	for <linux-fstests@archiver.kernel.org>; Sat,  2 Jul 2022 23:53:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232214AbiGBRCJ (ORCPT
+        id S229798AbiGBXx0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 2 Jul 2022 13:02:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54658 "EHLO
+        Sat, 2 Jul 2022 19:53:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231520AbiGBRCI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 2 Jul 2022 13:02:08 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 543AFDFEC;
-        Sat,  2 Jul 2022 10:02:06 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 262H1Mcw005085
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 2 Jul 2022 13:01:23 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1656781287; bh=YP1/tEtj9VsIJb/YIEUR2pIcNgtT3bFvYv3Fm1d9240=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=dJFOSUIIKSktp2BGhJUbbk9/eKhfPkuallTgI21xVjs/4px1B7XIc1cUapo4ESae0
-         G1QEAmgGTHHd2lyWP2Z2Ajw+M9nlYudU4pTkFN+71zfudqmy41U6ROy9XxjnPgkkUr
-         UpxDJljyT5nA9vHzdyEUGyCzARkGln8yGSxrd7gOFE7AOGno1oFH0Bx3bG/T46ZFtm
-         f9TryQ6GPX/ZAC9u56PLh/+vMheqGX1kUsGTGzTfvjAgKHQsL4s0xOTWLVCznLeLrv
-         TdZ4bjSDXmUdXHUXvFw99zQV9oZtEWKPr/9EhLFukivnj5nYlyUp9if9jKYJ+03t4v
-         pv3Q0S8KwYE6w==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id B343315C3E94; Sat,  2 Jul 2022 13:01:22 -0400 (EDT)
-Date:   Sat, 2 Jul 2022 13:01:22 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Matthew Wilcox <willy@infradead.org>
-Cc:     Zorro Lang <zlang@redhat.com>, Amir Goldstein <amir73il@gmail.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>, pankydev8@gmail.com,
-        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
-        Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for
- expunges
-Message-ID: <YsB54p1vpBg4v2Xd@mit.edu>
-References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org>
- <CAOQ4uxhKHMjGq0QKKMPFAV6iJFwe1H5hBomCVVeT1EWJzo0eXg@mail.gmail.com>
- <20220519112450.zbje64mrh65pifnz@zlang-mailbox>
- <YoZbF90qS+LlSDfS@casper.infradead.org>
- <20220519154419.ziy4esm4tgikejvj@zlang-mailbox>
- <YoZq7/lr8hvcs9T3@casper.infradead.org>
+        with ESMTP id S229787AbiGBXxZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 2 Jul 2022 19:53:25 -0400
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A901F1017;
+        Sat,  2 Jul 2022 16:53:21 -0700 (PDT)
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 262DX97H006215;
+        Sat, 2 Jul 2022 23:53:18 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : references : cc : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2021-07-09;
+ bh=UUGk2M8NQ64BNiCRx+TxHQ77aLRXhRZtHdPOo9KUWeI=;
+ b=t6BmbGLr809HbXYrVwH1e2iWFGOYkmTE6RiFvdlW1lgsN4/MzmikeLJxchQPJgef+0LR
+ 1/vmPxwxLRuqAhAhdvcIhHNTx0R+PFHLm27eDxC1jbVSZq/WH1jHIsqa/amfXOlcWiSL
+ bAjSzMdbCKViElyWdTzekBNrGR87jg/PMiVc+3GonrWcRqS4GWq+di5NbxyP8qu2GYeS
+ BYGiY9/JHZzm94aL1R2pZwshH81IOLogMebj46QwQHiCLApspHWPLs2yanNAF3P7zooL
+ xm7Ev5x+9ZXojA4WODsk+TGwP2LqxOd6JTfMw6nKRwNctmySdkGyx7pZhl8l6OYAvjym iQ== 
+Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3h2ct290jv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sat, 02 Jul 2022 23:53:18 +0000
+Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.16.1.2/8.16.1.2) with SMTP id 262Nj6uW020111;
+        Sat, 2 Jul 2022 23:53:17 GMT
+Received: from nam02-sn1-obe.outbound.protection.outlook.com (mail-sn1anam02lp2041.outbound.protection.outlook.com [104.47.57.41])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com with ESMTP id 3h2cf0pfee-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sat, 02 Jul 2022 23:53:17 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=KYnsADHrcjGzRBsXYGJJ8vKTFoNVNe2Jct5OWJtra4cZSjsPRzAz+qYwPc9i05v6yeWh5eWJKXcczhd72tthD9kMbrpgWvfWrkH/BwtOfDS3EWzwPKraGrq69G6aCeFdplnB93gAf/VnfjnJd4KZfvcADrTM5qDtyrnDcnaUAFs0B95TMPrPQDkavS0MGW81Qr1i6VV6UpTnm2UHNyWyH+g8juqNmIk7L3l3XYAhwfuKMqwZ4GjZgEoOA4oPunY68EjBPhZTmrOP1yEc5TW9MPytF4crJU1fU4SN14ZCumnywFJ9xDUtmi6OzryHdF5GvkWpe1vI/4EXqFtYQ5qSSw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=UUGk2M8NQ64BNiCRx+TxHQ77aLRXhRZtHdPOo9KUWeI=;
+ b=DZMMEoGXeYPq5iVhXnWSejIHTDMdMLokwmfeUibp2OV3fGQFLuHFCWo9AQNfuT7ZFUdAn+HOBcF4InscyYrfnxMUVGXxlKnDUPBKKwU9B8mIoKkQ0nrQWSpuSkB3prdSVBOH9N3OD4LF6vaPm+2At3WesxrDDKonmPoNn9a2HJefxn048KqnR71z81clKXgwsuFPmbYg+KFsoYCE7lXlRfI+3+cPgu9MMum/cjs19VhiYHh5hQFqr2ei3J5WkeOtngvR4Dc1SqPDE7NxmE+EzPsKivQ4/te4E9/IHizsT37Y32YTE7cKnxT3exZWF8XvQP5b3J2MgKrClp+MCl15Aw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=UUGk2M8NQ64BNiCRx+TxHQ77aLRXhRZtHdPOo9KUWeI=;
+ b=EnJfwWwcfsyo0LQrbfgryxmQDnbdWWUhgdwY3EwGJoOr1F6lhouvrLu2LRAoT4LVcU+q5VFG6SfEEPNQKIFf3O7m4mpSn3Ox5tvNBInuqEB+ndB1x3zcZpafnBrXX/d05joRBGy2btunpPmseZvMApyWGDUbDZl7ScPJar4cQoQ=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by IA1PR10MB6266.namprd10.prod.outlook.com (2603:10b6:208:3a2::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5395.19; Sat, 2 Jul
+ 2022 23:53:15 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::957a:9b8f:bb27:2173]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::957a:9b8f:bb27:2173%9]) with mapi id 15.20.5395.018; Sat, 2 Jul 2022
+ 23:53:15 +0000
+Message-ID: <fd955cf5-d6cb-b380-68a8-e6c840521589@oracle.com>
+Date:   Sun, 3 Jul 2022 07:53:02 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.1
+Subject: Re: [PATCH] btrfs: test raid1 write error handling
+To:     Christoph Hellwig <hch@lst.de>
+References: <20220702093330.3010115-1-hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+From:   Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <20220702093330.3010115-1-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SG2PR06CA0230.apcprd06.prod.outlook.com
+ (2603:1096:4:ac::14) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YoZq7/lr8hvcs9T3@casper.infradead.org>
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 753796fb-ee23-45c6-fbae-08da5c8607df
+X-MS-TrafficTypeDiagnostic: IA1PR10MB6266:EE_
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: h4kItqp2nASEyZcnzJe4w8+K7ZyRUNhBwlBuBp5AzVtcOSGyKI+cWpxfjVKMEqE+KDO8Jzuvq8TamJ7J3IIbmqOSErz8SFWOjturKsaE5FZ9uTa4EFByeNQTvSK6DUbY4OB1UCqb8gXPfO5XXLzKXJVJW0ldWoDxsOYAxzdRdABApq85LtJQ4KyeIE7dOtiTpJ2hFZNThnUBUYbtTA6Zaczo4GhwjJRQ8FeY+zJ+zygSVT1/6ONSkPHQwRyyHaqYIm7jhc6Wctg1kVpiqjyoHtNEm3435+aJ4URdnrcxV1drbOlym1DKlouTa00vAx8NZKGAlQ5jGxph5ZTTcG87+sGi/I7xtKGxikvEiHnrjUM6B38RSblrynLyg9rLv4UTBRK1FOpZpw8DSe6EFul9J8FEbkcNgMlQ7kQMdK5N9YYHWafH9FufuAZFHKjOJlcVS2WuznweUZZ5HAaXPkKb8XPj1CENVEP/5pNqsxwJftBUhHWUyRhMgnLaw4ImrXi8H3ZjrZjT9LigHhN4tN+1l93hNbecl0BIHAzAPzNwiDk6QQtlZJ+k0ZQavyHyMJzXqP2/VRtd1k9+Msh+gUtMjTQHUq2ezMNI0VF0oeyTGj7eAix6ylsFsUHFk+wXSMqNxNkdbHYNs7MfHTJ1JxGIelphWsw8gSKYn+IAOJBa/bQJpI0/0pHe9uRMxNQejeETPOMQdTlDbU6keldEGPxl8fi4+Wj6nowwoNdhle/PGRiHkZUpjF98Z87seuS1EkHBjmpMIVx2tvYlaMq3E4SFuGdXy77gXOcaCZ2Lkk3OOULk0RbrInvEXmbHz7NwFefT6TN+2RulQQWzZx0k62txkQ==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(136003)(39860400002)(396003)(376002)(366004)(346002)(26005)(83380400001)(6512007)(5660300002)(53546011)(478600001)(6486002)(6506007)(8936002)(44832011)(6916009)(186003)(38100700002)(41300700001)(36756003)(86362001)(316002)(2906002)(6666004)(31696002)(66946007)(66476007)(66556008)(8676002)(4326008)(2616005)(31686004)(43740500002)(45980500001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?ZTlxN0hPWHVZMFlsQjJZOE1ZSndpQUkxWG1KNjIzMmVHYXlCQ0NteDJTQXB2?=
+ =?utf-8?B?dm1aSGJRaFVXTnBFMkxhQ0FxaFdsd2x0anJWRVZGZERzTWN5d3M3RXB2QUNE?=
+ =?utf-8?B?V25VZXNEVkpBVFZ6a3o5alZqK1hsdW9xWlpOY1E0djllZWovbExvTnc4eS9k?=
+ =?utf-8?B?aHVSdEZWY2NHMGZlcURmNGhoVkhsSE0zbDI2NUc2V1doTURpckt4cnRYbzZa?=
+ =?utf-8?B?Nk96bUhvdU1ZVDVlSHFNU3VtN0NTelVDbVRPZWlaa01hTmNqNDEzeEhjN3BQ?=
+ =?utf-8?B?d01lSXFFclNJeExmTHZSMTlTNGx2dGI2VnUrbnlyRE9OdmNGUWhLT1ZxVGZt?=
+ =?utf-8?B?WVYyQkEvejA5YmUySG9SZFNOUVNYYU15dXhRallucHpObHQvVVl5YlY2L2tV?=
+ =?utf-8?B?UWtHTzJuWk5sVmhwMUZIU0tQTEhpSzZOR0Evd2pqNmcwbFR6VndScDBzMTdP?=
+ =?utf-8?B?OENDT1dKSk9aeEU3ZW84aXlRRlZaWU91TGlJbTF3UktnZnBwc2Q1aEJzOVpV?=
+ =?utf-8?B?OXh5d0hFdzd0VXB1Vnh0ZW95cmZmU3VYZFN6YzBsckpwK3A0SVFyVGRGOUJ5?=
+ =?utf-8?B?SUN3UmZhOE04UlVpN3R6YWNYTFJ2T0VLSW9nWWcvcFVqdkJ0SzdhM3dsTWk3?=
+ =?utf-8?B?bWdaYVJsZnZ6L0ZlYytyaEgvRWN1VHF3VkZrMjl5aCtqYVhudE05bVZ2Q1Zi?=
+ =?utf-8?B?b3NXYW5xV2t6UWt6cXZ2QkRSYVFEL1VLZU9nc3lwQnNMcnVyaURYVnBNMUwr?=
+ =?utf-8?B?Q3JLMlFMNkZyaURYVjNTckRxY2NHUHpPUEpJTmJsSy9hd2ZKVVh6M2QyOW5M?=
+ =?utf-8?B?RDI5QVdGSmRpcWJjenBFMEpkY0NQMTZPdmJieUtoVWFUUXhXTzNtVjhFVlJ5?=
+ =?utf-8?B?dVgrWFhjL0g3bGpwbzBxS1pCSEhHcDZnM0ZnVjhoSm1pREptR04zS2RPUHEw?=
+ =?utf-8?B?QnVINHdmdGJEb1pHNThkRG5WU2NBU2FaRjF3VlZON3ZlbFRhT2UzMFNnWVQ2?=
+ =?utf-8?B?ZHdiU0dsdmRGbVRkcmpROFM2R3FZRlZSUVQ1eHBvSG9pR0Fmb3VGYVhmQk1k?=
+ =?utf-8?B?ZjFRMUtLQy9lZVdYdWdFNlNCOVo2ZFpTUTUyNkw2OUJlQjJMSzdQU0lCelNt?=
+ =?utf-8?B?YlBQT1RxS3grTk44V2JCZ1ljNERaZHBHUytEalV5RXVhY3plb01hRU5tUU4v?=
+ =?utf-8?B?aXFERys5K1VhamJhR242YTNrOXhjKy8yb21yTHFoNmhCVW1HelQwN0IyM1pw?=
+ =?utf-8?B?alN2S2pPM3lhQUo2b2JscWVZYjVqVUZsMUIwRGFqdnN2SGxvUSt2TDFaTWdD?=
+ =?utf-8?B?Y1VXQjFsaGx2c05tZEgvYzVxN0NsUUpJQVhPTTRzam50cSswVGhUY3Z3cmti?=
+ =?utf-8?B?MnR5M1FLS1BSc2Voa0hKWjQzMXJZU0pEakZyb0p1U3o4Z3U2cm9VcFlpL2Jh?=
+ =?utf-8?B?SW5RYW45eUEweGVCZTRNcCtWT0tpOW5XU0FZUUlFa3MvQlJXdVZ3dHJwdXN0?=
+ =?utf-8?B?SVJTQTR5bGdobkZySGY3dXZqUmZRWjZnZmYycEZWZ05iQWg3ZFZCc05qaHF1?=
+ =?utf-8?B?bVRra09GeGJPbjQ2cFNhWmRvUlpsUDMvSXc5K2lsTGxRUXp3VkxpYjFvU2g1?=
+ =?utf-8?B?OWEwZ3l6akUrdGZRVTJVc1A0OTlzZzZQMUQvTGV5eGYyN0ExVTF0TW1abWF1?=
+ =?utf-8?B?THdvQjZFb01oSU5zUUpDaXNqM0ZQTHhoVjR1VlFGaXZFVWp1UzZVd3prcjgy?=
+ =?utf-8?B?TWkxUFpvWDNHRWgvV2I5bHJDQjM0aVAyM3ZQc0pSV0gwUEViaVVLK0NvcHR0?=
+ =?utf-8?B?OWpOdCsycVpDOG91YTNROCswMlV5MnVzcmVsem41cmVUWTY4T0cwd1VTazNr?=
+ =?utf-8?B?NkpobnRwb2pXeUkrMW9vcFZlV2dxSVF6dEhmZjB3TGpHSmRzTGVrZkw3QWZ1?=
+ =?utf-8?B?YzBOUkhNWlpkRXJ6TVZyY2NYc2Q1ZnpSWUJQcmU4ZjR3aVhVTzArM1Brekxi?=
+ =?utf-8?B?aDhmS21uYjlPbEhtbjVuRENtN3Rzb0R0Q1lhNHpMK2wwaGFjYWd4dGQvcFdL?=
+ =?utf-8?B?UjBIRjVrK0MxRnhvZXd4MmZ1OFVxK3paQTNWMndNY0g5UlRhMlNtT3BwMjh4?=
+ =?utf-8?Q?bTg9NVj/L01dZnZ9RLCj3ByJf?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 753796fb-ee23-45c6-fbae-08da5c8607df
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Jul 2022 23:53:15.6483
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: ArEXbu4x2G/u4E/ZJaEA/382GZjOlhnqR1hWn9EIvrTjXe5CygsHvJrvwM2UgVCi2pU5EWtP78SZImPbBoB46A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR10MB6266
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.517,18.0.883
+ definitions=2022-07-02_21:2022-06-28,2022-07-02 signatures=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 spamscore=0 adultscore=0
+ mlxlogscore=999 bulkscore=0 malwarescore=0 mlxscore=0 phishscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2204290000
+ definitions=main-2207020107
+X-Proofpoint-GUID: sPr8V-UDmvuiwAjIeB077yvCiEY_M_3P
+X-Proofpoint-ORIG-GUID: sPr8V-UDmvuiwAjIeB077yvCiEY_M_3P
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 19, 2022 at 05:06:07PM +0100, Matthew Wilcox wrote:
+On 02/07/2022 17:33, Christoph Hellwig wrote:
+> Test that a write with a single bad mirror works fine but reports errors
+> in the error counters, and that a write with two bad mirrors fails.
 > 
-> Right, but that's the personal perspective of an expert tester.  I don't
-> particularly want to build that expertise myself; I want to write patches
-> which touch dozens of filesystems, and I want to be able to smoke-test
-> those patches.  Maybe xfstests or kdevops doesn't want to solve that
-> problem, but that would seem like a waste of other peoples time.
 
-Willy,
+Thanks for the test case.
 
-For your use case I'm guessing that you have two major concerns:
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
-  * bugs that you may have introduced when "which touch dozens of
-    filesystems"
+A nit is below.
 
-  * bugs in the core mm and fs-writeback code which may be much
-    more substantive/complex changes.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>   tests/btrfs/271     |  78 +++++++
+>   tests/btrfs/271.out | 521 ++++++++++++++++++++++++++++++++++++++++++++
+>   2 files changed, 599 insertions(+)
+>   create mode 100755 tests/btrfs/271
+>   create mode 100644 tests/btrfs/271.out
+> 
+> diff --git a/tests/btrfs/271 b/tests/btrfs/271
+> new file mode 100755
+> index 00000000..c21858d1
+> --- /dev/null
+> +++ b/tests/btrfs/271
+> @@ -0,0 +1,78 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Christoph Hellwig.
+> +#
+> +# FS QA Test btrfs/271
+> +#
+> +# Test btrfs write error propagation and reporting on the raid1 profile.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick raid
+> +
+> +. ./common/filter
+> +
+> +_supported_fs btrfs
+> +_require_scratch
+> +_require_fail_make_request
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 2
+> +
+> +enable_io_failure()
+> +{
+> +	local sysfs_bdev=`_sysfs_dev $1`
+> +
+> +	echo 1 > $sysfs_bdev/make-it-fail
+> +}
+> +
+> +disable_io_failure()
+> +{
+> +	local sysfs_bdev=`_sysfs_dev $1`
+> +
+> +	echo 0 > $sysfs_bdev/make-it-fail
+> +}
+> +
+> +_check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+> +_scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
+> +
+> +_scratch_mount
+> +
+> +dev2=`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}'`
+> +
+> +pagesize=$(get_page_size)
+> +blocksize=$(_get_block_size $SCRATCH_MNT)
+> +sectors_per_page=$(($pagesize / $blocksize))
+> +
 
-Would you say that is correct?
+> +# enable block I/O error injection
+> +echo 100 > $DEBUGFS_MNT/fail_make_request/probability
 
-At least for ext4 and xfs, it's probably quite sufficient just to run
-the -g auto group for the ext4/4k and xfs/4k test configs --- that is
-the standard default file system configs using the 4k block size.
-Both of these currently don't require any test exclusions for
-kvm-xfstests or gce-xfstests when running the auto group.  And so for
-the purposes of catching bugs in the core MM/VFS layer and any changes
-that the folio patches are likely to touch for ext4 and xfs, it's the
-auto group for ext4/4k and xfs/4k is probably quite sufficient.
-Testing the more exotic test configs, such as bigalloc for ext4, or
-realtime for xfs, or the external log configs, are not likely to be
-relevant for the folio patches.
+  Probability 100%, so fail all IO.
 
-Note: I recommend that you skip using the loop device xfstests
-strategy, which Luis likes to advocate.  For the perspective of
-*likely* regressions caused by the Folio patches, I claim they are
-going to cause you more pain than they are worth.  If there are some
-strange Folio/loop device interactions, they aren't likely going to be
-obvious/reproduceable failures that will cause pain to linux-next
-testers.  While it would be nice to find **all** possible bugs before
-patches go usptream to Linus, if it slows down your development
-velocity to near-standstill, it's not worth it.  We have to be
-realistic about things.
+> +echo 1000 > $DEBUGFS_MNT/fail_make_request/times
 
+  For 1000 commands.
 
-What about other file systems?  Well, first of all, xfstests only has
-support for the following file systems:
+  I hope I got it correct. You may consider adding a comment.
 
-	9p btrfs ceph cifs exfat ext2 ext4 f2fs gfs glusterfs jfs msdos
-	nfs ocfs2 overlay pvfs2 reiserfs tmpfs ubifs udf vfat virtiofs xfs
+> +echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
 
-{kvm,gce}-xfstests supports these 16 file systems:
+> +
+> +echo "Step 1: writing with one failing mirror:"
+> +enable_io_failure $SCRATCH_DEV
+> +$XFS_IO_PROG -f -c "pwrite -W -S 0xaa 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
+> +disable_io_failure $SCRATCH_DEV
+> +
+> +errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | \
+> +	$AWK_PROG '/write_io_errs/ { print $2 }')
+> +if [ $errs -ne $((4 * $sectors_per_page)) ]; then
+> +        _fail "Errors: $errs expected: 4"
+> +fi
+> +
+> +echo "Step 2: verify that the data reads back fine:"
+> +$XFS_IO_PROG -c "pread -v 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io_offset
+> +
+> +echo "Step 3: writing with two failing mirrors (should fail):"
+> +enable_io_failure $SCRATCH_DEV
+> +enable_io_failure $dev2
+> +$XFS_IO_PROG -f -c "pwrite -W -S 0xbb 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
+> +disable_io_failure $dev2
+> +disable_io_failure $SCRATCH_DEV
+> +
+> +# disable block I/O error injection
+> +echo 0 > $DEBUGFS_MNT/fail_make_request/probability
+> +echo 0 > $DEBUGFS_MNT/fail_make_request/times
+> +
+> +_scratch_dev_pool_put
+> +# success, all done
+> +status=0
+> +exit
 
-	9p btrfs exfat ext2 ext4 f2fs jfs msdos nfs overlay reiserfs
-	tmpfs ubifs udf vfat xfs
-
-kdevops has support for these file systems:
-
-	btrfs ext4 xfs
-
-So realistically, you're not going to have *full* test coverage for
-all of the file systems you might want to touch, no matter what you
-do.  And even for those file systems that are technically supported by
-xfstests and kvm-xfstests, if they aren't being regularly run (for
-example, exfat, 9p, ubifs, udf, etc.) there may be bitrot and very
-likely there is no one actively *to* maintain exclude files.  For that
-matter, there might not be anyone you could turn to for help
-interpreting the test results.
-
-So....  I believe the most realistic thing is to do is to run xfstests
-on a simple set of configs --- using no special mkfs or mount options
---- first against the baseline, and then after you've applied your
-folio patches.  If there are any new test failures, do something like:
-
-   kvm-xfstests -c f2fs/default -C 10 generic/013
-
-to check to see whether it's a hard failure or not.  If it's a hard
-failure, then it's a problem with your patches.  If it's a flaky
-failure, it's possible you'll need to repeat the test against the baseline:
-
-   git checkout origin; kbuild
-   kvm-xfstests -c f2fs/default -C 10 generic/013
-
-If it's also flaky on the baseline, you can ignore the test failure
-for the purposes of folio development.
-
-There are more complex things you could do, such as running a baseline
-set of tests 500 times (as Luis suggests), but I believe that for your
-use case, it's not a good use of your time.  You'd need to speed
-several weeks finding *all* the flaky tests up front, especially if
-you want to do this for a large set of file systems.  It's much more
-efficient to check if a suspetected test regression is really a flaky
-test result when you come across them.
-
-I'd also suggest using the -g quick tests for file systems other than
-ext4 and xfs.  That's probably going to be quite sufficient for
-finding obvious problems that might be introduced when you're making
-changes to f2fs, btrfs, etc., and it will reduce the number of
-potential flaky tests that you might have to handle.
-
-
-It should be possible to automate this, and Leah and I have talked
-about designs to automate this process.  Leah has some rough scripts
-that do a semantic-style diff for the baseline and after applying the
-proposed xfs backports.  So it operates on something like this:
-
-f2fs/default: 868 tests, 10 failures, 217 skipped, 6899 seconds
-  Failures: generic/050 generic/064 generic/252 generic/342
-    generic/383 generic/502 generic/506 generic/526 generic/527
-    generic/563
-
-In theory, we could also have automated tools that look for the
-suspected test regressions, and then try running those test
-regressions 20 or 25 times on the baseline and after applying the
-patch series.  Those don't exist yet, but it's just a Mere Matter of
-Programming.  :-)
-
-I can't promise anything, especially with dates, but developing better
-automation tools to support the xfs stable backports is on our
-near-term roadmap --- and that would probably be applicable for for
-folio development usecase.
-
-Cheers,
-
-					- Ted
