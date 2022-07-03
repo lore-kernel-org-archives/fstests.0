@@ -2,148 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFD73C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Jul 2022 14:22:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EDAAC43334
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Jul 2022 15:05:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232929AbiGCOWh (ORCPT
+        id S232373AbiGCPFh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Jul 2022 10:22:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37518 "EHLO
+        Sun, 3 Jul 2022 11:05:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233020AbiGCOWa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2022 10:22:30 -0400
-Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CFD12DF0;
-        Sun,  3 Jul 2022 07:22:29 -0700 (PDT)
-Received: by mail-vs1-xe31.google.com with SMTP id 189so6766673vsh.2;
-        Sun, 03 Jul 2022 07:22:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/pAsz4QfzaFjXy7Vy118iqtoQ+29CHgJNrEY4mVAeMs=;
-        b=Nh4ZuoP7+jlqimG7xuP9QDOT3P+pZ0AORLfMyRP9QfxV6uUBEi2Wyb+upqAIoGcQ2b
-         Ju27gFx9zznRQiOZ5L0lB+0Ip2xVBSblWDcMDfUR4UN4NKrHMj69V+djgYE89quYkRXu
-         6N58/qUZSHzYMIxFPr666VfANsDzWg/wSVj2i1mAdiNyfPFAdkZpyX6eCIU9tSMsabKc
-         euSH9b0kE0pHZ1UjpTFqQQxMZAdQzARSmkFZvkLUEZQ3aAphHX/RHjnjk5beRoqNj+Nq
-         6LFfCkOz9/nZqaeaWCjvq4ycUK2tRihXYDVzyTLoqq33A1F+S6t0xgtT1CXoieEzIsph
-         5I2w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/pAsz4QfzaFjXy7Vy118iqtoQ+29CHgJNrEY4mVAeMs=;
-        b=7pWK65UQVoYKk6X87jfsR+y1DlbRe8x7tVDcIsmywfJIm4kSkN2+nVLmYE6fKNeUbI
-         2o/AXRjlFcNbeDlSWVyGAjzkdFJW5pFrHzlHazB/xptwQzb9b8dAGtUtQbLwvWhvR1Tx
-         xoI4c/OWKuAlo/ebOC37dYlx+Lt90k/qNBI1RnIEnjOv4gffUrofpMFC1RI7IlHCapm8
-         /cD8SFXQ4A0dR1oU7sDQWzqnZbxHg0xo1b9DLVMOtvyzHx4OuzCwM4KapIEJq3ctRH6j
-         AgKMxPnhesvCEmrW3LcRAuQUick4So6qyBalGAXfNnJ3OX8pJyMO/Ntz30pjiTB7pNL/
-         a/gg==
-X-Gm-Message-State: AJIora9fUDd6LEebbZUOcyVAsT1tsoDHPFi34wTaaSAD2oLbRZLjHkoc
-        zF9KHb/QJgiWByP72OMmdbB6A1RLN36/pj+vF9MnYmm9+fOmDw==
-X-Google-Smtp-Source: AGRyM1uEQOOUY3fdKlv0RswYlo+lPv9RHJzpSQ7EWV/O9/ofrLJhjT1A2qw5B08eafr6LkY6PkX1GBSymq/wC6C7vQQ=
-X-Received: by 2002:a05:6102:5dc:b0:354:63f1:df8d with SMTP id
- v28-20020a05610205dc00b0035463f1df8dmr14550839vsf.72.1656858148774; Sun, 03
- Jul 2022 07:22:28 -0700 (PDT)
+        with ESMTP id S231145AbiGCPFh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2022 11:05:37 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D88A5F5E;
+        Sun,  3 Jul 2022 08:05:36 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EC49E60FD2;
+        Sun,  3 Jul 2022 15:05:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41BAAC341C6;
+        Sun,  3 Jul 2022 15:05:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1656860735;
+        bh=ml13+lJ64hkDt+1Ct13RJqBJF6v3V7P/yEHeyrAHOeA=;
+        h=Date:From:To:Cc:Subject:From;
+        b=bBtjHQaGEfthY5DMayH45IyAqUTbp/YmwR9fik/6KJvWbrI8oBBFjPmRa4hk617mH
+         ffqsPlr2mXvUW4oDLJF+aRXkj72qizkIdk5fms5cCvic8z1YeV7PAIfLhCd3NCFzq5
+         kRSKZTl/iZ++8ql5m3Jr1Uxi9uBam33GEzDTHVAR1jDbBHo8dgRVQS+5czb0m8OFiR
+         qKQgoj2yTdiAlvyBOruncG0lNl4k47nX3BMHSU84Cbd4Csepcr8+VrECqn1S9eKu6+
+         9HPCSpV5dcq+sgGSsO265cwgw31yeEzqQyLmRFnaShm4LGmXR8X7iGYs3m3soGH0yb
+         hCLFZx6xJB3Xw==
+Date:   Sun, 3 Jul 2022 08:05:34 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org,
+        david@fromorbit.com, linux-kernel@vger.kernel.org,
+        sandeen@sandeen.net, hch@lst.de, fstests <fstests@vger.kernel.org>
+Subject: [GIT PULL] xfs: bug fixes for 5.19-rc5
+Message-ID: <YsGwPqUYSW/IwgkN@magnolia>
 MIME-Version: 1.0
-References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org> <a120fb86-5a08-230f-33ee-1cb47381fff1@acm.org>
- <CAOQ4uxgBtMifsNt1SDA0tz098Rt7Km6MAaNgfCeW=s=FPLtpCQ@mail.gmail.com> <YsGWb8nPUySuhos/@mit.edu>
-In-Reply-To: <YsGWb8nPUySuhos/@mit.edu>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 3 Jul 2022 17:22:17 +0300
-Message-ID: <CAOQ4uxhEaVjk6rEnsnjWOKs+dygioXk-9h-WJjBzkJfe8U9eMQ@mail.gmail.com>
-Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for expunges
-To:     "Theodore Ts'o" <tytso@mit.edu>
-Cc:     Bart Van Assche <bvanassche@acm.org>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Pankaj Raghav <pankydev8@gmail.com>,
-        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
-        Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
-        fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Dave Chinner <david@fromorbit.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 3, 2022 at 4:15 PM Theodore Ts'o <tytso@mit.edu> wrote:
->
-> On Sun, Jul 03, 2022 at 08:56:54AM +0300, Amir Goldstein wrote:
-> >
-> > That is true for some use cases, but unfortunately, the flaky
-> > fstests are way too valuable and too hard to replace or improve,
-> > so practically, fs developers have to run them, but not everyone does.
-> >
-> > Zorro has already proposed to properly tag the non deterministic tests
-> > with a specific group and I think there is really no other solution.
->
-> The non-deterministic tests are not the sole, or even the most likely
-> cause of flaky tests.  Or put another way, even if we used a
-> deterministic pseudo-random numberator seed for some of the curently
-> "non-determinstic tests" (and I believe we are for many of them
-> already anyway), it's not going to be make the flaky tests go away.
->
-> That's because with many of these tests, we are running multiple
-> threads either in the fstress or fsx, or in the antogonist workload
-> that is say, running the space utilization to full to generate ENOSPC
-> errors, and then deleting a bunch of files to trigger as many ENOSPC
-> hitter events as possible.
->
-> > The only question is whether we remove them from the 'auto' group
-> > (I think we should).
->
-> I wouldn't; if someone wants to exclude the non-determistic tests,
-> once they are tagged as belonging to a group, they can just exclude
-> that group.  So there's no point removing them from the auto group
-> IMHO.
+Hi Linus,
 
-The reason I suggested that *we* change our habits is because
-we want to give passing-by fs testers an easier experience.
+Please pull this branch containing bug fixes for XFS for 5.19-rc5.  The
+patches in this branch fix some stalling problems and correct the last
+of the problems (I hope) observed during testing of the new atomic xattr
+update feature.
 
-Another argument in favor of splitting out -g soak from -g auto -
-You only need to run -g soak in a loop for as long as you like to be
-confident about the results.
-You need to run -g auto only once per definition -
-If a test ends up failing the Nth time you run -g auto then it belongs
-in -g soak and not in -g auto.
+As usual, I did a test-merge with upstream master as of a few minutes
+ago, and it completed flawlessly.  Please let me know if you encounter
+any problems.
 
->
-> > filesystem developers that will run ./check -g auto -g soak
-> > will get the exact same test coverage as today's -g auto
-> > and the "commoners" that run ./check -g auto will enjoy blissful
-> > determitic test results, at least for the default config of regularly
-> > tested filesystems (a.k.a, the ones tested by kernet test bot).?
->
-> First of all, there are a number of tests today which are in soak or
-> long_rw which are not in auto, so "-g auto -g soak" will *not* result
-> in the "exact same test coverage".
+--D
 
-I addressed this in my proposal.
-I proposed to remove these two tests out of soak and asked for
-Darrick's opinion.
-Who is using -g soak anyway?
+The following changes since commit e89ab76d7e2564c65986add3d634cc5cf5bacf14:
 
->
-> Secondly, as I've tested above, deterministic tests does not
-> necessasrily mean determinsitic test results --- unless by
-> "determinsitic tests" you mean "completely single-threaded tests",
-> which would eliminate a large amount of useful test coverage.
->
+  xfs: preserve DIFLAG2_NREXT64 when setting other inode attributes (2022-06-15 23:13:33 -0700)
 
-To be clear, when I wrote deterministic, what I meant was deterministic
-results empirically, in the same sense that Bart meant - a test should
-always pass.
+are available in the Git repository at:
 
-Because Luis was using the expunge lists to blacklist any test failure,
-no matter the failure rate, the kdevops expunge lists could be used as
-a first draft for -g soak group, at least for tests that are blocklisted by
-kdevops for all of ext4,xfs and btrfs default configs on the upstream kernel.
+  git://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git tags/xfs-5.19-fixes-4
 
-Thanks,
-Amir.
+for you to fetch changes up to 7561cea5dbb97fecb952548a0fb74fb105bf4664:
+
+  xfs: prevent a UAF when log IO errors race with unmount (2022-07-01 09:09:52 -0700)
+
+----------------------------------------------------------------
+Fixes for 5.19-rc5:
+ - Fix statfs blocking on background inode gc workers
+ - Fix some broken inode lock assertion code
+ - Fix xattr leaf buffer leaks when cancelling a deferred xattr update
+   operation
+ - Clean up xattr recovery to make it easier to understand.
+ - Fix xattr leaf block verifiers tripping over empty blocks.
+ - Remove complicated and error prone xattr leaf block bholding mess.
+ - Fix a bug where an rt extent crossing EOF was treated as "posteof"
+   blocks and cleaned unnecessarily.
+ - Fix a UAF when log shutdown races with unmount.
+
+----------------------------------------------------------------
+Darrick J. Wong (6):
+      xfs: always free xattri_leaf_bp when cancelling a deferred op
+      xfs: clean up the end of xfs_attri_item_recover
+      xfs: empty xattr leaf header blocks are not corruption
+      xfs: don't hold xattr leaf buffers across transaction rolls
+      xfs: dont treat rt extents beyond EOF as eofblocks to be cleared
+      xfs: prevent a UAF when log IO errors race with unmount
+
+Dave Chinner (2):
+      xfs: bound maximum wait time for inodegc work
+      xfs: introduce xfs_inodegc_push()
+
+Kaixu Xia (2):
+      xfs: factor out the common lock flags assert
+      xfs: use invalidate_lock to check the state of mmap_lock
+
+ fs/xfs/libxfs/xfs_attr.c      | 38 ++++++-------------------
+ fs/xfs/libxfs/xfs_attr.h      |  5 ----
+ fs/xfs/libxfs/xfs_attr_leaf.c | 35 ++++++++++++-----------
+ fs/xfs/libxfs/xfs_attr_leaf.h |  3 +-
+ fs/xfs/xfs_attr_item.c        | 27 ++++++++++--------
+ fs/xfs/xfs_bmap_util.c        |  2 ++
+ fs/xfs/xfs_icache.c           | 56 ++++++++++++++++++++++++-------------
+ fs/xfs/xfs_icache.h           |  1 +
+ fs/xfs/xfs_inode.c            | 64 +++++++++++++++++--------------------------
+ fs/xfs/xfs_log.c              |  9 ++++--
+ fs/xfs/xfs_mount.h            |  2 +-
+ fs/xfs/xfs_qm_syscalls.c      |  9 ++++--
+ fs/xfs/xfs_super.c            |  9 ++++--
+ fs/xfs/xfs_trace.h            |  1 +
+ 14 files changed, 130 insertions(+), 131 deletions(-)
