@@ -2,141 +2,156 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCEB5C43334
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Jul 2022 14:07:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7C0CC433EF
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Jul 2022 14:22:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230446AbiGCOH7 (ORCPT
+        id S231693AbiGCOWT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Jul 2022 10:07:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55866 "EHLO
+        Sun, 3 Jul 2022 10:22:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230356AbiGCOH6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2022 10:07:58 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A35C5FC0
-        for <fstests@vger.kernel.org>; Sun,  3 Jul 2022 07:07:58 -0700 (PDT)
+        with ESMTP id S230446AbiGCOWS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2022 10:22:18 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C73582DF0
+        for <fstests@vger.kernel.org>; Sun,  3 Jul 2022 07:22:17 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id CA6A460DD4
-        for <fstests@vger.kernel.org>; Sun,  3 Jul 2022 14:07:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9EEDAC341C6;
-        Sun,  3 Jul 2022 14:07:56 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5FD9D60F91
+        for <fstests@vger.kernel.org>; Sun,  3 Jul 2022 14:22:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A651CC341C6;
+        Sun,  3 Jul 2022 14:22:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1656857277;
-        bh=z0FnkqHPi61Qc17kxmtI3Oq4BX2UNaLNoFH/ku6oifU=;
+        s=k20201202; t=1656858136;
+        bh=wbawilauQIIg/ZeSUGrz+7pRjLjGwbW1bHdHwR2is70=;
         h=Date:From:To:Subject:From;
-        b=eniDvE2ZgnZgCbWoL/s61u61G9F0SnjIWK4zj8BO23/6M0QsS5U6wMgcTQW114ZL4
-         h5bfQF0kv9QHxnxvTDM5MC1PI+17OFDVqDXCY/geT4WD9GYLBiXznOA2qgJV5iVi5i
-         ImER0fIMLw1q8TD89NPm56e7k2yqil5LHTpm+HCsNRkAqQmtC4zC+y8bqBAf9ElQtn
-         G1jjrQYEPkq6yb+hWeCpdhnOjmwc4l/3m6sxKhxZXk/yFfuMnxW99tRv0ZYfTw8PrG
-         s/BkEWhV/BwIoH8o579PXBeYrL4z/uKUMY5fGb2gLUH2QhG2DIX73XlI/cLTnddNsP
-         V7xG4ATtgQbGQ==
-Date:   Sun, 03 Jul 2022 22:07:54 +0800
+        b=lzbgs7weF14y1xwDfPSTHv+Jkv2ZCefoEW378Xv6r1geiYsI1fH/1EZVc5F7Eo+6s
+         GbPcJjoO/NGpXOlp5ZUz28QblOjVz+xQRbpIyJVywMX4hBvFYSVPcTFjwWwegs/rkk
+         KIFC5prFt938NrNYRbs8CnPQ5o1KjM5rZiaeZXPc13UWOHmhrZ/M5jvMmbb8r+ND3n
+         z1Ma6PstFU0I+ZDOeGGUbNUHOAxOdDkPmhQUzYeJZ1GyhHCi4qoqBDVFHFTscEnf2u
+         quhY1t+9GuTQ+gqMbdgeDg3/cMVAWJtLBUIUaqZQx1BJhk6h1rBip0wL9RBZGsWrbP
+         OTEmb29uqnyMw==
+Date:   Sun, 03 Jul 2022 22:22:13 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2022.06.26 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to 5834a0aab2c6
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="Q8ExPu75yKof"
+        protocol="application/pgp-signature"; boundary="SsFZU3TujWpP"
 Content-Disposition: inline
-Message-Id: <20220703140756.9EEDAC341C6@smtp.kernel.org>
+Message-Id: <20220703142215.A651CC341C6@smtp.kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
---Q8ExPu75yKof
+--SsFZU3TujWpP
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2022.06.26 version (merged from for-next).
+has just been updated and tagged as v2022.07.03 release.
+
+
+This release contains some fix/improving and 6 new cases for btrfs, xfs and ceph
+  -- btrfs/268, btrfs/269, btrfs/270, xfs/082, xfs/144 and ceph/005.
+
+More details refer to below.
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-34c1208f601b xfs/{422,517}: kill background jobs on test termination
+5834a0aab2c6 xfs: test xfs_copy doesn't do cached read before libxfs_mount
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Amir Goldstein (3):
-      [4aa167d0d4d0] fstests: add missing _require_freeze() to tests
-      [bc50d0f64a1b] fstests: unfreeze fs on cleanup routines
-      [34c1208f601b] xfs/{422,517}: kill background jobs on test termination
+Christoph Hellwig (4):
+[U]      [c4d2eeedf7f6] btrfs: fix the_btrfs_get_physical invocation in btrfs-map-logical
+[N]      [9de4ecd461d7] btrfs; add a test for impossible repair cases
+[N]      [504e5bcfdaf0] btrfs: test checker pattern corruption on raid10
+[N]      [6cbe7d91062d] btrfs: test read repair on a corrupted compressed extent
 
-David Disseldorp (6):
-      [0730b5a94e0f] check: avoid FSTYP=<fstyp parameter> repetition
-      [fdcff5481a86] check: simplify check.time parsing
-      [40aa19bcc2f1] report: drop unused _xunit_make_section_report parameter
-      [2b1016e1f507] report: fix xunit tests count
-      [eda21d205f67] check: use arrays instead of separate n_ counters
-      [0b0e82a4d755] check: remove err and first_test variables
+Darrick J. Wong (6):
+[U]      [e861a30255c9] seek_sanity_test: fix allocation unit detection on XFS realtime
+[U]      [36f382f991ef] check: document mkfs.xfs reliance on fstests exports
+[U]      [f0eb9b8d4a68] xfs/109: handle larger minimum filesystem size
+[U]      [a176070de75c] xfs/166: fix golden output failures when multipage folios enabled
+[N]      [10d5efecc0e0] xfs: test mkfs.xfs sizing of internal logs that
+[N]      [5834a0aab2c6] xfs: test xfs_copy doesn't do cached read before libxfs_mount
 
-Eric Biggers (1):
-      [fc8c0d9f44dc] ext4/053: test changing test_dummy_encryption on remount
+Luís Henriques (1):
+[N]      [56171bcb41d4] ceph/005: verify correct statfs behaviour with quotas
 
-Eric Sandeen (1):
-      [09f420da65a6] xfs/122: escape %zu in printf with %% not \\%
-
-Luís Henriques (2):
-      [ad794b00a3c2] generic/020: adjust max_attrval_size for ceph
-      [b55aef7cfe6c] generic/486: adjust the max xattr size
+Theodore Ts'o (7):
+[U]      [f30169ce7341] ext4/050: support indirect as well as extent mapped journals
+[U]      [b60038cc226a] ext4/044: skip test if the file system does not have a journal
+[U]      [1800121a017d] ext4/045: _require_dumpe2fs doesn't take any arguments so remove them
+[U]      [172b13b8e5c1] ext4/054: skip test if the dax mount option is enabled
+[U]      [9ac1dd12cd05] ext4/055: skip test if dax mount option is used
+[U]      [0a7a16123a67] ext4/035: skip this test if the scratch device does not support 1k block sizes
+[U]      [9d14711da549] ext4: create file systems with the encrypt feature as necessary
 
 
 Code Diffstat:
 
- check                   | 148 ++++++++++++++++++++----------------------------
- common/report           |  14 +++--
- src/attr_replace_test.c |  30 ++++++++--
- tests/ext4/053          |   3 +
- tests/generic/020       |  33 ++++++++---
- tests/generic/068       |  14 +++--
- tests/generic/085       |   3 +
- tests/generic/280       |  13 ++++-
- tests/generic/390       |   8 ++-
- tests/generic/459       |   2 +
- tests/generic/486       |  11 +++-
- tests/generic/491       |   9 +++
- tests/xfs/011           |   3 +-
- tests/xfs/119           |  10 ++++
- tests/xfs/122           |   4 +-
- tests/xfs/297           |  11 ++++
- tests/xfs/318           |   6 +-
- tests/xfs/325           |   6 +-
- tests/xfs/422           |  35 +++++++++++-
- tests/xfs/438           |   4 +-
- tests/xfs/517           |  27 ++++++++-
- 21 files changed, 270 insertions(+), 124 deletions(-)
+ check                  |  3 ++
+ common/btrfs           |  2 +-
+ common/rc              | 16 ++++++++++
+ src/seek_sanity_test.c | 12 +++++++-
+ tests/btrfs/268        | 62 +++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/268.out    |  7 +++++
+ tests/btrfs/269        | 73 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/269.out    | 41 ++++++++++++++++++++++++++
+ tests/btrfs/270        | 79 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/270.out    | 41 ++++++++++++++++++++++++++
+ tests/ceph/005         | 39 +++++++++++++++++++++++++
+ tests/ceph/005.out     |  4 +++
+ tests/ext4/003         |  6 +++-
+ tests/ext4/035         |  9 +++++-
+ tests/ext4/044         |  1 +
+ tests/ext4/045         |  2 +-
+ tests/ext4/050         | 58 ++++--------------------------------
+ tests/ext4/054         |  5 ++--
+ tests/ext4/055         |  1 +
+ tests/ext4/306         |  5 +++-
+ tests/generic/260      |  3 ++
+ tests/xfs/082          | 38 ++++++++++++++++++++++++
+ tests/xfs/082.out      |  3 ++
+ tests/xfs/109          |  2 +-
+ tests/xfs/144          | 51 ++++++++++++++++++++++++++++++++
+ tests/xfs/144.out      |  2 ++
+ tests/xfs/166          | 19 +++++++++---
+ 27 files changed, 517 insertions(+), 67 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---Q8ExPu75yKof
+--SsFZU3TujWpP
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmLBomcACgkQlNbPkfr2
-tMzlchAAr/cD4CEwyaVs1j1ALW13SydOWFRHoXZquoGGnHodKZlVDfSOVEsYfXDo
-wh36HFNKDHuiZEpm5QVVOK5+e9PUR05c6qEY0ljgHKaoFNrakg65ri5d6NZ7HbNA
-PYBHCF0k8K0goOPc0h25yqIEbAiILpNM6A/00wfSFj7gfij3JBESzuciCGT1PVn6
-iK2m6eV8tYK7kAeai3/A7xmPrHP8E+dYL8RvPk/y3nHLVisx/CaWjisxayLWk8t0
-28B0Y8WApQYgdhpxhayPdvrvp+DQoIzRnMNt3yU63NAD2ttLSlEpRq9ihegLyLSx
-vFGMuFNVXA7zo0jsPb9CDMsR1E4AzwqXXhj3TvbXDyh4iLvakATVIP8vMoNO98g/
-i6EvU6AnxTNVki+0+S1TIKI06MRRNiY77e5NSPB9I6ZEDZFGckdthTmrdZIl5M13
-n6tBJFCi1vMTIkLC4DJkJfkpZa7ejfqfnv8U6Epsz1j1SE4L91tUhcowxFFrtKQf
-L0pujr/ro2QIbpK+X2XMfCcoaQYekxvVsWPy7RX/s3jC/pCS/w2+uxGAb9yXsJ1L
-IowW6RBCJtgrZsKpEC61P0sG7L+3trIAGx473hb/Ul96UGRBkxaMqJitzzk8FM+i
-tRTgZTvMTxD0yEUNJi4E3UXUJnTyar4ydALThUF8ZYgWJrhpDvw=
-=x8HH
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmLBpewACgkQlNbPkfr2
+tMyTHBAAlv+q1Is7GgDbC9bQio7b1SqfUbRRqY8X8rm43aXjf5AExGe4/firejRv
+cJ8bpDVv5yR4EpURKSWMUbQLvSuRHJxskfQNYKRtqfkrcmcfuINEPI3xIQkfC8q/
+PFAWviXoJA5OM8/iFfWZOXwiaYd8FesJ059J42UUgFXoJpsjFrZ4u5t3JAT0v+ER
+UFeiHA8YLPziCuV+Buo9met51ZFtoR5aCD6ZUWWzLp04g2Zu+lOjmpxjVT0D8WBl
+o+ROylamafYOIiBU0wBOeNKWlp98Wn/zFFzAnkpRtmznyEtVBG6Xsxw4125v2Rmk
+8SuaWyJD57QJZTyv/0UNqhooc3YvcGq/aKMYzNy9ZbbtN7u99anK6pFW89gFvHht
+5zpaGtc/tNhn7EZ2o+/6pSYzUCXaoNfHApCbbS/GDdR8+lJIQhgqd2oB0mjZqI6P
+MD2eI/wNsnNQmEayvReb6yWRS8/3vMKsQwwIA2GajN/lJuSy2Kd5Lf7JZRb8ueOx
+4PDZMoO0itX/dEAYIYq7x9xQzjkcKKkKJgCx+wJdGdndnyZWcup5ZuGmiVPqn+6y
+1WsIYa7FlS45mRHENkDRj52XjGt7P21ZCE1fNu5lmNCmfdgGYoeqzg6/IFlkRnUe
+KEfIRJo+XZyCWQD0g4JdJAtLpwZK482cjestkG4GAmqhR79bP2c=
+=1mTk
 -----END PGP SIGNATURE-----
 
---Q8ExPu75yKof--
+--SsFZU3TujWpP--
