@@ -2,63 +2,45 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1571C433EF
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Jul 2022 05:57:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7A77C433EF
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Jul 2022 13:16:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229711AbiGCF5J (ORCPT
+        id S232671AbiGCNQT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Jul 2022 01:57:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35214 "EHLO
+        Sun, 3 Jul 2022 09:16:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229562AbiGCF5I (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2022 01:57:08 -0400
-Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39D2B635C;
-        Sat,  2 Jul 2022 22:57:07 -0700 (PDT)
-Received: by mail-vs1-xe2b.google.com with SMTP id w187so6134945vsb.1;
-        Sat, 02 Jul 2022 22:57:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=S09EmHyul/XlTGMMFg0S5sr547tyBYiGoQ4G8XzTNcI=;
-        b=ddINMmdAPrBQ66IZHifncJZbP+UcQiW7L/OYWGGvmDNZH4IEFt4XTLbAkliUAs5/N+
-         0YvwesqIn0cN9U8oaOX7J29t7/go35LyZWnbCmMVtReMixfQPcPDcXW4GQCmPs25xWeN
-         MOl5i+h83ZjwLVYoJ6e9gi1aTl+hw1ufA+PFGAsDXkrTHt9tYT/ZSW3jhNvrGNt10rZm
-         cRn8L1Dt6+Qp+Hlusfu/UbYY0/avVy0DkJEkbO+LAuiDijNAlvczNO67x8JYDvWJ0UUN
-         ZE77P4pJUVJBgs/8AagbpVojikLyV4lInQQikeOhpFs4GyH/gB6lFwgIAtb4rcDtddZR
-         nx7Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=S09EmHyul/XlTGMMFg0S5sr547tyBYiGoQ4G8XzTNcI=;
-        b=Q3jYSUkTeVdGwK5BJ+V1i0qU/vm0pOHw79HvJQ95Xly4L9Av52gT0TkyE/wg81/iSh
-         tKMGGyWPBCmmWqB3KBHBp8Kqxf68QLmZ2KgIfpnTKdSh3EZOn6CMP6dO6Garh+jS4Ttr
-         w6nUZyvT96xHEYSgkQJm9KSSyNRg3V69II0d51pmuJjkUHR+tFy/7YtuYV3f/maWC8f2
-         mIGbZPzlgbrK0ANMObaEYcSSExj9x9MmX1qNswYIaMU/8HD46NYtsDwNfKrM/SR6AIz/
-         HpAJ5FHXik+NjFXsVme5C1tdlqmlw5ZJuSIgRWsq4HjfIMzmN8N8OEFdHylEfPT2epul
-         N/IQ==
-X-Gm-Message-State: AJIora8cLuIS0cGAUOMjezHHzv17sPErGBdDxcQ/emP4JIPBhSFVX5/i
-        9uz1cPSeE6m1NQhUGqLgBY1uPd5v2M3eBS9jdWk=
-X-Google-Smtp-Source: AGRyM1tn8NLjJQpQ8hpfGDpoOVBmFOazVY52hM8TqvGWp/ZGkht9NeNFbBfVPOD7UgaiXvL6gEGW/PI/Raf5gZDorqk=
-X-Received: by 2002:a05:6102:38c7:b0:356:4e2f:ae5b with SMTP id
- k7-20020a05610238c700b003564e2fae5bmr14281202vst.71.1656827826320; Sat, 02
- Jul 2022 22:57:06 -0700 (PDT)
-MIME-Version: 1.0
-References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org> <a120fb86-5a08-230f-33ee-1cb47381fff1@acm.org>
-In-Reply-To: <a120fb86-5a08-230f-33ee-1cb47381fff1@acm.org>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 3 Jul 2022 08:56:54 +0300
-Message-ID: <CAOQ4uxgBtMifsNt1SDA0tz098Rt7Km6MAaNgfCeW=s=FPLtpCQ@mail.gmail.com>
-Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for expunges
-To:     Bart Van Assche <bvanassche@acm.org>,
-        "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        with ESMTP id S232487AbiGCNQS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jul 2022 09:16:18 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCD4463E9;
+        Sun,  3 Jul 2022 06:16:17 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 263DFRbI024097
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sun, 3 Jul 2022 09:15:28 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1656854134; bh=yN7VurO+JH7Mo0Ckmg7/VswnfnxYfW2lA7CXiFOOZa8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=ENt1xY3yANlkp01oZmFFQ1vZpE5hmxZSOapOmMq1o5KLT10yJRziY0BKdKrjhgJ35
+         KNDLYbuCEEoqhnlCinIttTawZM2ofnrLQcVKtZNNX7UXnGs/s+osL1b6aDzo2JPulX
+         CP9wmtbj1ncOzLJNn1R39ZLIxFvzuuXefQ+2W9Co7/CnsjEDWz+cW5ERywjH/bOxr6
+         JT+NWKgEln2ytRbYong40dTokBPmcyEttS5JuwhqTeF3y9MiIYXnzH4grRXI3Dd/Ek
+         iKbcMoQyFaaScDOSSzBfNEEcUzBREwE+W3WTsPeba3UJguLF8KZF/258dp8FUgqRD7
+         r9telvU5q75uA==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id C788315C3E94; Sun,  3 Jul 2022 09:15:27 -0400 (EDT)
+Date:   Sun, 3 Jul 2022 09:15:27 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Bart Van Assche <bvanassche@acm.org>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Luis Chamberlain <mcgrof@kernel.org>,
         linux-fsdevel <linux-fsdevel@vger.kernel.org>,
         linux-block <linux-block@vger.kernel.org>,
         Pankaj Raghav <pankydev8@gmail.com>,
-        Theodore Tso <tytso@mit.edu>,
         Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
         Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
         Dan Williams <dan.j.williams@intel.com>,
@@ -66,108 +48,64 @@ Cc:     Luis Chamberlain <mcgrof@kernel.org>,
         fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
         Matthew Wilcox <willy@infradead.org>,
         Dave Chinner <david@fromorbit.com>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for
+ expunges
+Message-ID: <YsGWb8nPUySuhos/@mit.edu>
+References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org>
+ <a120fb86-5a08-230f-33ee-1cb47381fff1@acm.org>
+ <CAOQ4uxgBtMifsNt1SDA0tz098Rt7Km6MAaNgfCeW=s=FPLtpCQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxgBtMifsNt1SDA0tz098Rt7Km6MAaNgfCeW=s=FPLtpCQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 3, 2022 at 12:48 AM Bart Van Assche <bvanassche@acm.org> wrote:
->
-> On 5/18/22 20:07, Luis Chamberlain wrote:
-> > I've been promoting the idea that running fstests once is nice,
-> > but things get interesting if you try to run fstests multiple
-> > times until a failure is found. It turns out at least kdevops has
-> > found tests which fail with a failure rate of typically 1/2 to
-> > 1/30 average failure rate. That is 1/2 means a failure can happen
-> > 50% of the time, whereas 1/30 means it takes 30 runs to find the
-> > failure.
-> >
-> > I have tried my best to annotate failure rates when I know what
-> > they might be on the test expunge list, as an example:
-> >
-> > workflows/fstests/expunges/5.17.0-rc7/xfs/unassigned/xfs_reflink.txt:generic/530 # failure rate about 1/15 https://gist.github.com/mcgrof/4129074db592c170e6bf748aa11d783d
-> >
-> > The term "failure rate 1/15" is 16 characters long, so I'd like
-> > to propose to standardize a way to represent this. How about
-> >
-> > generic/530 # F:1/15
-> >
-> > Then we could extend the definition. F being current estimate, and this
-> > can be just how long it took to find the first failure. A more valuable
-> > figure would be failure rate avarage, so running the test multiple
-> > times, say 10, to see what the failure rate is and then averaging the
-> > failure out. So this could be a more accurate representation. For this
-> > how about:
-> >
-> > generic/530 # FA:1/15
-> >
-> > This would mean on average there failure rate has been found to be about
-> > 1/15, and this was determined based on 10 runs.
-> >
-> > We should also go extend check for fstests/blktests to run a test
-> > until a failure is found and report back the number of successes.
-> >
-> > Thoughts?
-> >
-> > Note: yes failure rates lower than 1/100 do exist but they are rare
-> > creatures. I love them though as my experience shows so far that they
-> > uncover hidden bones in the closet, and they they make take months and
-> > a lot of eyeballs to resolve.
->
-> I strongly disagree with annotating tests with failure rates. My opinion
-> is that on a given test setup a test either should pass 100% of the time
-> or fail 100% of the time. If a test passes in one run and fails in
-> another run that either indicates a bug in the test or a bug in the
-> software that is being tested. Examples of behaviors that can cause
-> tests to behave unpredictably are use-after-free bugs and race
-> conditions. How likely it is to trigger such behavior depends on a
-> number of factors. This could even depend on external factors like which
-> network packets are received from other systems. I do not expect that
-> flaky tests have an exact failure rate. Hence my opinion that flaky
-> tests are not useful and also that it is not useful to annotate flaky
-> tests with a failure rate. If a test is flaky I think that the root
-> cause of the flakiness must be determined and fixed.
->
+On Sun, Jul 03, 2022 at 08:56:54AM +0300, Amir Goldstein wrote:
+> 
+> That is true for some use cases, but unfortunately, the flaky
+> fstests are way too valuable and too hard to replace or improve,
+> so practically, fs developers have to run them, but not everyone does.
+> 
+> Zorro has already proposed to properly tag the non deterministic tests
+> with a specific group and I think there is really no other solution.
 
-That is true for some use cases, but unfortunately, the flaky
-fstests are way too valuable and too hard to replace or improve,
-so practically, fs developers have to run them, but not everyone does.
+The non-deterministic tests are not the sole, or even the most likely
+cause of flaky tests.  Or put another way, even if we used a
+deterministic pseudo-random numberator seed for some of the curently
+"non-determinstic tests" (and I believe we are for many of them
+already anyway), it's not going to be make the flaky tests go away.
 
-Zorro has already proposed to properly tag the non deterministic tests
-with a specific group and I think there is really no other solution.
+That's because with many of these tests, we are running multiple
+threads either in the fstress or fsx, or in the antogonist workload
+that is say, running the space utilization to full to generate ENOSPC
+errors, and then deleting a bunch of files to trigger as many ENOSPC
+hitter events as possible.
 
-The only question is whether we remove them from the 'auto' group
-(I think we should).
+> The only question is whether we remove them from the 'auto' group
+> (I think we should).
 
-There is probably a large overlap already between the 'stress' 'soak' and
-'fuzzers' test groups and the non-deterministic tests.
-Moreover, if the test is not a stress/fuzzer test and it is not deterministic
-then the test is likely buggy.
+I wouldn't; if someone wants to exclude the non-determistic tests,
+once they are tagged as belonging to a group, they can just exclude
+that group.  So there's no point removing them from the auto group
+IMHO.
 
-There is only one 'stress' test not in 'auto' group (generic/019), only two
-'soak' tests not in the 'auto' group (generic/52{1,2}).
-There are only three tests in 'soak' group and they are also exactly
-the same three tests in the 'long_rw' group.
+> filesystem developers that will run ./check -g auto -g soak
+> will get the exact same test coverage as today's -g auto
+> and the "commoners" that run ./check -g auto will enjoy blissful
+> determitic test results, at least for the default config of regularly
+> tested filesystems (a.k.a, the ones tested by kernet test bot).?
 
-So instead of thinking up a new 'flaky' 'random' 'stochastic' name
-we may just repurpose the 'soak' group for this matter and start
-moving known flaky tests from 'auto' to 'soak'.
+First of all, there are a number of tests today which are in soak or
+long_rw which are not in auto, so "-g auto -g soak" will *not* result
+in the "exact same test coverage".
 
-generic/52{1,2} can be removed from 'soak' group and remain
-in 'long_rw' group, unless filesystem developers would like to
-add those to the stochastic test run.
+Secondly, as I've tested above, deterministic tests does not
+necessasrily mean determinsitic test results --- unless by
+"determinsitic tests" you mean "completely single-threaded tests",
+which would eliminate a large amount of useful test coverage.
 
-filesystem developers that will run ./check -g auto -g soak
-will get the exact same test coverage as today's -g auto
-and the "commoners" that run ./check -g auto will enjoy blissful
-determitic test results, at least for the default config of regularly
-tested filesystems (a.k.a, the ones tested by kernet test bot).?
+Cheers,
 
-Darrick,
-
-As the one who created the 'soak' group and only one that added
-tests to it, what do you think about this proposal?
-What do you think should be done with generic/52{1,2}?
-
-Thanks,
-Amir.
+					- Ted
