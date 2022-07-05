@@ -2,125 +2,327 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D191CCA47F
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jul 2022 14:28:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5C08C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jul 2022 15:25:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233257AbiGEO25 (ORCPT
+        id S229771AbiGEPZS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Jul 2022 10:28:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55322 "EHLO
+        Tue, 5 Jul 2022 11:25:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52220 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233010AbiGEO2z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jul 2022 10:28:55 -0400
+        with ESMTP id S229488AbiGEPZR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jul 2022 11:25:17 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7B08721B8
-        for <fstests@vger.kernel.org>; Tue,  5 Jul 2022 07:28:50 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A587E18B24
+        for <fstests@vger.kernel.org>; Tue,  5 Jul 2022 08:25:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1657031329;
+        s=mimecast20190719; t=1657034715;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=ZCvkKDJOgRfLIl7bd3bpIzsajWcpXauVFm37vGIc+PY=;
-        b=S18wXK6O35ofKb/yylTESG6vuV6lesuS06Tq8SmbjeRgWNGGfeYES0Feuy+BERpA+snPNT
-        4sTUUOEWLEgWlap5mGs2GSXyGW+Bdc0tV/Wk51vxZ54Rg1+ctqASVLOR2MMzyj+8ehbcYs
-        JBiVJMxGRc9oR11klBFWXameQTgYGjc=
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
- [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=PIB0P1ZoPByNJNpXaSib9unjusLtkFO0XUkrmvBQSyU=;
+        b=hsNc1wfOEsJID5GrgvR7uSFNlslzTnyPaEwXEXzKf6UoGm47oBsDI7CFa2hdYRAkLCRiNq
+        9ZN7+kdb9YDFxLXg/2CP6KgtUD6D5LezFgSStEN8nEgEC8Pi7xTNyNagbvh4ZfMz/bHMF6
+        yMv9Cx6cXO3aWAQ9ur8xLkLPmH5fZG8=
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
+ [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-663-3myn7TnMO4-Zz4hYVpXE0A-1; Tue, 05 Jul 2022 10:28:48 -0400
-X-MC-Unique: 3myn7TnMO4-Zz4hYVpXE0A-1
-Received: by mail-qt1-f198.google.com with SMTP id w42-20020a05622a192a00b0031d3a51eac8so9361371qtc.9
-        for <fstests@vger.kernel.org>; Tue, 05 Jul 2022 07:28:48 -0700 (PDT)
+ us-mta-49-v_xjfFeKM9SgXzabhfFoQQ-1; Tue, 05 Jul 2022 11:25:14 -0400
+X-MC-Unique: v_xjfFeKM9SgXzabhfFoQQ-1
+Received: by mail-qt1-f200.google.com with SMTP id w42-20020a05622a192a00b0031d3a51eac8so9516156qtc.9
+        for <fstests@vger.kernel.org>; Tue, 05 Jul 2022 08:25:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=ZCvkKDJOgRfLIl7bd3bpIzsajWcpXauVFm37vGIc+PY=;
-        b=jA4nPxSW4cH/pTE8ryO5RAmujMsso6TfTiVEykfzr6EYut/JoUGnOOvzFCEsq2vL30
-         w/vEFMQorcay386fdPnnIU/N5jWW0ddTO3O1g9bHXIgN3GmCiQDjBOeyubMOnKQsrwYV
-         v7MSmXrc526D0gEuD8snZ5dNRIP3HVIpLqJwnPKMEoS4khU4tBarUKHlTb+woc07qzuu
-         HhXxXJi+9D9w4rUd3D4Kfkj87I4fluBfjAzS8RAPg8Hy4vcz6zPX7Q3H07QTNXgVxW51
-         o9VvZBmu+0uO0xFWNPU6tZRh1ZS3exkfXGOGpqfzb/U9BP4OSKUdp+GKGAV8c+Q00eUX
-         BoFw==
-X-Gm-Message-State: AJIora+AO3j59LFkrbATY3EbqceEJOlLw7peMkIryMe1vKf3EkQvtbjf
-        Xd4dpDyxtyjA6YPclSQ90TcusM+5IAvDrQb9r0JxYcotxDINMf+ljvOiSI8pVE/PaazMvigmZDj
-        7rCbu1IQiWL2/h7Zpng==
-X-Received: by 2002:a05:620a:459f:b0:6b1:f5c1:6e61 with SMTP id bp31-20020a05620a459f00b006b1f5c16e61mr20666848qkb.436.1657031327507;
-        Tue, 05 Jul 2022 07:28:47 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1sEfJR17IrV9JLR3EjeCvAXCsIQGw4I9dqG2ZDovK1prOtub+0eMHlK4y+0/G8w/F+cbKnFPA==
-X-Received: by 2002:a05:620a:459f:b0:6b1:f5c1:6e61 with SMTP id bp31-20020a05620a459f00b006b1f5c16e61mr20666822qkb.436.1657031327196;
-        Tue, 05 Jul 2022 07:28:47 -0700 (PDT)
+        bh=PIB0P1ZoPByNJNpXaSib9unjusLtkFO0XUkrmvBQSyU=;
+        b=6GKo/nN8/zDEEhN0q2ze2bVnfzKqFsXJprpJnkRffq3i1vXJ5L/Y0AvxfdkKBApX83
+         klHbWPJfhy3DFHqs1oTAvGYgLWJR/s8lCuK2x+hqA8hoPvHcCPEtdK4Gl8t5h3pCoW+J
+         bk6r/si3OreI3BwP3wD7UNPz+TgzsfIDOnnXciOSgsnRIrf1eJKReslmKUdJCCMVnXpi
+         iaMt0xhwl7YcNN7V5l8KbKysLB2FnumjFWusq0o6mM5qmdiku6o15sNCGIwV/tqja4UI
+         3vds5NheGPBe01l9ICMul/D3eL81nKoR8fwKR4RDW0cNcUUMgdfbI3kTrZ0rENGBI7eQ
+         oGew==
+X-Gm-Message-State: AJIora8x3yXHtqSSTfCgumYjU43zkME97BtCiTwXse61PJPftDVMCmHg
+        va0hXbmvjhmGvoCF1g01X5hjqA4CiAGtZ0NYDM6dxfHB+GWAODptdps+ZR3doavz+eMpzG6zR+k
+        E4O4IAxDdTfP7K1rlwg==
+X-Received: by 2002:a05:620a:44c9:b0:6b2:1f49:f0f5 with SMTP id y9-20020a05620a44c900b006b21f49f0f5mr19715013qkp.327.1657034713911;
+        Tue, 05 Jul 2022 08:25:13 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1tqJ0OR6rL5oq2vdysVxabgA+/B7oTYTurnjibitwzcRLzgT3r1/dwa+oHSWlpmj3Fl6RKNBA==
+X-Received: by 2002:a05:620a:44c9:b0:6b2:1f49:f0f5 with SMTP id y9-20020a05620a44c900b006b21f49f0f5mr19714984qkp.327.1657034713556;
+        Tue, 05 Jul 2022 08:25:13 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id x4-20020ac87a84000000b00307cac53129sm22056880qtr.42.2022.07.05.07.28.44
+        by smtp.gmail.com with ESMTPSA id s10-20020a05620a0bca00b006af0ce13499sm26931607qki.115.2022.07.05.08.25.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Jul 2022 07:28:46 -0700 (PDT)
-Date:   Tue, 5 Jul 2022 22:28:40 +0800
+        Tue, 05 Jul 2022 08:25:13 -0700 (PDT)
+Date:   Tue, 5 Jul 2022 23:25:07 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCHSET 0/9] fstests: random fixes
-Message-ID: <20220705142840.gycwt264xrda3bkr@zlang-mailbox>
-References: <165644767753.1045534.18231838177395571946.stgit@magnolia>
+To:     Jeremy Bongio <bongiojp@gmail.com>
+Cc:     Ted Tso <tytso@mit.edu>, linux-ext4@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v2] ext4/056: add a check to make sure ext4 uuid ioctls
+ get/set during fsstress.
+Message-ID: <20220705152507.wsnqr56o7h3hzfxn@zlang-mailbox>
+References: <20220701201332.183711-1-bongiojp@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <165644767753.1045534.18231838177395571946.stgit@magnolia>
+In-Reply-To: <20220701201332.183711-1-bongiojp@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 28, 2022 at 01:21:17PM -0700, Darrick J. Wong wrote:
-> Hi all,
+On Fri, Jul 01, 2022 at 01:13:32PM -0700, Jeremy Bongio wrote:
+> Adds a utility to set/get uuid through ext4 ioctl. Executes the ioctls
+> while running fsstress. These ioctls are used by tune2fs to safely change
+> the uuid without racing other filesystem modifications.
 > 
-> Here's the usual batch of odd fixes for fstests.
+> Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
+> ---
+>  .gitignore         |   1 +
+>  src/Makefile       |   4 +-
+>  src/uuid_ioctl.c   | 106 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/056     |  55 +++++++++++++++++++++++
+>  tests/ext4/056.out |   2 +
+>  5 files changed, 166 insertions(+), 2 deletions(-)
+>  create mode 100644 src/uuid_ioctl.c
+>  create mode 100755 tests/ext4/056
+>  create mode 100644 tests/ext4/056.out
 > 
-> If you're going to start using this mess, you probably ought to just
-> pull from my git trees, which are linked below.
-> 
-> This is an extraordinary way to destroy everything.  Enjoy!
-> Comments and questions are, as always, welcome.
-> 
-> --D
+> diff --git a/.gitignore b/.gitignore
+> index ba0c572b..dab24d68 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -169,6 +169,7 @@ tags
+>  /src/unwritten_mmap
+>  /src/unwritten_sync
+>  /src/usemem
+> +/src/uuid_ioctl
+>  /src/writemod
+>  /src/writev_on_pagefault
+>  /src/xfsctl
+> diff --git a/src/Makefile b/src/Makefile
+> index 111ce1d9..e33e04de 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> -	detached_mounts_propagation ext4_resize
+> +	detached_mounts_propagation ext4_resize uuid_ioctl
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py
+>  
+>  SUBDIRS = log-writes perf
+>  
+> -LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
+> +LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
+>  
+>  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+>  LINUX_TARGETS += loggen
+> diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
+> new file mode 100644
+> index 00000000..a4937478
+> --- /dev/null
+> +++ b/src/uuid_ioctl.c
+> @@ -0,0 +1,106 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +/*
+> + * Test program which uses the raw ext4 set_fsuuid ioctl directly.
+> + * SYNOPSIS:
+> + *   $0 COMMAND MOUNT_POINT [UUID]
+> + *
+> + * COMMAND must be either "get" or "set".
+> + * The UUID must be a 16 octet represented as 32 hexadecimal digits in canonical
+> + * textual representation, e.g. output from `uuidgen`.
+> + *
+> + */
+> +
+> +#include <stdio.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <unistd.h>
+> +#include <stdint.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <sys/ioctl.h>
+> +#include <uuid/uuid.h>
+> +#include <linux/fs.h>
+> +
+> +struct fsuuid {
+> +	__u32   fu_len;
+> +	__u32   fu_flags;
+> +	__u8    fu_uuid[];
+> +};
+> +
+> +#define EXT4_IOC_SETFSUUID_FLAG_BLOCKING 0x1
+> +
+> +#ifndef EXT4_IOC_GETFSUUID
+> +#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
+> +#endif
+> +
+> +#ifndef EXT4_IOC_SETFSUUID
+> +#define EXT4_IOC_SETFSUUID      _IOW('f', 44, struct fsuuid)
+> +#endif
 
-Hi Darrick,
+Will this be ext4 only ioctl? If this C program is only used for ext4 ioctl, I'd
+like to rename it as "ext4_uuid_ioctl.c" (or something else make it not likes a
+common test program). I think XFS doesn't has this ioctl, for now at least, it
+get/set uuid by another way.
 
-JFYI, to push the proceeding of your patch merging, I've merged/pushed this
-patchset, except patch 7/9 and 9/9 due to they haven't gotten any review.
-I can review them, but patch 7/9 changes the case which Dave might care about,
-so I'd like to wait more response.
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	int error, fd;
+> +	struct fsuuid *fsuuid = NULL;
+> +
+> +	if (argc < 3) {
+> +		fprintf(stderr, "Invalid arguments\n");
+> +		return 1;
+> +	}
+> +
+> +	fd = open(argv[2], O_RDONLY);
+> +	if (!fd) {
+> +		perror(argv[2]);
+> +		return 1;
+> +	}
+> +
+> +	fsuuid = malloc(sizeof(*fsuuid) + sizeof(uuid_t));
+> +	if (!fsuuid) {
+> +		perror("malloc");
+> +		return 1;
+> +	}
+> +	fsuuid->fu_len = sizeof(uuid_t);
+> +
+> +	if (strcmp(argv[1], "get") == 0) {
+> +		uuid_t uuid;
+> +		char uuid_str[37];
+> +
+> +		if (ioctl(fd, EXT4_IOC_GETFSUUID, fsuuid)) {
+> +			fprintf(stderr, "%s while trying to get fs uuid\n",
+> +				strerror(errno));
+> +			return 1;
+> +		}
+> +
+> +		memcpy(&uuid, fsuuid->fu_uuid, sizeof(uuid));
+> +		uuid_unparse(uuid, uuid_str);
+> +		printf("%s", uuid_str);
+> +	} else if (strcmp(argv[1], "set") == 0) {
+> +		uuid_t uuid;
+> +
+> +		if (argc != 4) {
+> +			fprintf(stderr, "UUID argument missing.\n");
+> +			return 1;
+> +		}
+> +
+> +		error = uuid_parse(argv[3], uuid);
+> +		if (error < 0) {
+> +			fprintf(stderr, "Invalid UUID. The UUID should be in "
+> +				"canonical format. Example: "
+> +				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
+> +			return 1;
+> +		}
+> +
+> +		memcpy(&fsuuid->fu_uuid, uuid, sizeof(uuid));
+> +		fsuuid->fu_flags = EXT4_IOC_SETFSUUID_FLAG_BLOCKING;
+> +		if (ioctl(fd, EXT4_IOC_SETFSUUID, fsuuid)) {
+> +			fprintf(stderr, "%s while trying to set fs uuid\n",
+> +				strerror(errno));
+> +			return 1;
+> +		}
+> +	} else {
+> +		fprintf(stderr, "Invalid command\n");
+> +		return 1;
+> +	}
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/ext4/056 b/tests/ext4/056
+> new file mode 100755
+> index 00000000..ebefb136
+> --- /dev/null
+> +++ b/tests/ext4/056
+> @@ -0,0 +1,55 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# Test the set/get UUID ioctl.
+> +#
+> +
+> +. ./common/preamble
+> +_begin_fstest auto ioctl
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
+> +_require_scratch
+> +_require_test_program uuid_ioctl
+> +_require_command $UUIDGEN_PROG uuidgen
+> +
+> +UUID_IOCTL=$here/src/uuid_ioctl
+> +
+> +# if the ioctl is not supported by the kernel, then skip test.
+> +current_uuid=$($UUID_IOCTL get $SCRATCH_MNT 2>&1)
+> +if [[ "$current_uuid" =~ ^Inappropriate[[:space:]]ioctl ]]; then
+> +        _notrun "UUID ioctls are not supported by kernel."
+> +fi
+> +
+> +# Create filesystem and mount
 
-Feel free to send these 2 patches with more your new patches, if you'd like to
-do that :)
+Rather than this such obvious comment description, explain why the below
+"metadata_csum_seed" is necessary?
+
+> +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full
+> +
+> +# Begin fsstress while modifying UUID
+> +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
+> +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
+> +fsstress_pid=$!
+> +
+> +for n in $(seq 1 20); do
+> +        new_uuid=$($UUIDGEN_PROG)
+> +
+> +        echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
+> +        $UUID_IOCTL set $SCRATCH_MNT $new_uuid
+> +
+> +        current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
+> +        echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
+> +        if [[ "$current_uuid" != "$new_uuid" ]]; then
+> +                echo "Current UUID ($current_uuid) does not equal what "
+> +                "was sent with the ioctl ($new_uuid)"
+
+Can these two lines really be printed?
+
+> +        fi
+> +done
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +kill $fsstress_pid >/dev/null 2>&1
+> +wait
+
+We can't make sure the testing will exit normally, so better to make sure the
+fsstress processes are killed in _cleanup(). You can refer to generic/390.
 
 Thanks,
 Zorro
 
-> 
-> kernel git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
-> 
-> xfsprogs git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
-> 
-> fstests git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
-> ---
->  check                  |    3 +++
->  common/repair          |    1 +
->  src/seek_sanity_test.c |   12 ++++++++++-
->  tests/xfs/018          |   52 +++++++++++++++++++++++++++++++++++++++++++-----
->  tests/xfs/018.out      |   16 ++++-----------
->  tests/xfs/109          |    2 +-
->  tests/xfs/166          |   19 ++++++++++++++----
->  tests/xfs/547          |   14 +++++++++----
->  tests/xfs/843          |   51 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/843.out      |    2 ++
->  tests/xfs/844          |   33 ++++++++++++++++++++++++++++++
->  tests/xfs/844.out      |    3 +++
->  12 files changed, 181 insertions(+), 27 deletions(-)
->  create mode 100755 tests/xfs/843
->  create mode 100644 tests/xfs/843.out
->  create mode 100755 tests/xfs/844
->  create mode 100644 tests/xfs/844.out
+> +status=0
+> +exit
+> diff --git a/tests/ext4/056.out b/tests/ext4/056.out
+> new file mode 100644
+> index 00000000..6142fcd2
+> --- /dev/null
+> +++ b/tests/ext4/056.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 056
+> +Silence is golden
+> -- 
+> 2.37.0.rc0.161.g10f37bed90-goog
 > 
 
