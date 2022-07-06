@@ -2,186 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65625CCA47C
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Jul 2022 11:23:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14679C43334
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Jul 2022 14:31:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232583AbiGFLXk (ORCPT
+        id S233030AbiGFOb1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Jul 2022 07:23:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58660 "EHLO
+        Wed, 6 Jul 2022 10:31:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53596 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232755AbiGFLXh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2022 07:23:37 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB61415739
-        for <fstests@vger.kernel.org>; Wed,  6 Jul 2022 04:23:30 -0700 (PDT)
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 4C5A31FD9A;
-        Wed,  6 Jul 2022 11:23:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1657106609; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=xBcBsPD5OdWTh855JNDJoJt6HAP8HIk29jxAiPnN28Y=;
-        b=zgLT89vuYPoZa9s7RcJwy8Rf4if/AeqnOKILn2Zdoc+rBp4VMRN6oVcUx5sd0CM5QVTWBr
-        0xVPwFgm/F1FrbdISu9guvWel1CYzLDNIsU1w11Xn41f6M+PPwv7M+tPkmqj/bZx7d9dAo
-        oWjhC6snHnCsYaoKZSlQyCQtbjdhsWg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1657106609;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=xBcBsPD5OdWTh855JNDJoJt6HAP8HIk29jxAiPnN28Y=;
-        b=jiX2cAb9IgCZx4ujbyf/SkqDrJt6Vnt5Xfpjbzu/kHLGhc3S3l+C/QjCWsSa0aY+AkqLKH
-        ov6MLdizdzzCQtCg==
-Received: from echidna.suse.de (unknown [10.163.47.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id 2C9882C142;
-        Wed,  6 Jul 2022 11:23:29 +0000 (UTC)
-From:   David Disseldorp <ddiss@suse.de>
-To:     fstests@vger.kernel.org, tytso@mit.edu
-Cc:     David Disseldorp <ddiss@suse.de>
-Subject: [PATCH v3 5/5] check: add -L <n> parameter to rerun failed tests
-Date:   Wed,  6 Jul 2022 13:23:12 +0200
-Message-Id: <20220706112312.4349-6-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20220706112312.4349-1-ddiss@suse.de>
-References: <20220706112312.4349-1-ddiss@suse.de>
+        with ESMTP id S232523AbiGFOb0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2022 10:31:26 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B445A20182;
+        Wed,  6 Jul 2022 07:31:24 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 266ETwXl010753
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 6 Jul 2022 10:29:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1657117802; bh=NUUsO3D1IV2NnscRXQ3iW7vDLpbznJlBJF/3puoiFlU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=ByMVPDFr5R8Axivia9yVVNfmFzr4obgpDayheOHhBGP5rmhlYUHdlEHTNapSRSbf5
+         aU9t1GR/wcQgSFL/PlOl2xi1rRKoVFUsw1meRM189aCKKaCoVCnEzjCQIBLCcfNayW
+         9PwiaPAWermMd6xdFujtqUTzfOK5GZTYQA/CIOGTogVSfOo5KvlPGWBAQd6HlJWEPJ
+         NoVB7juD+bkcdYyzBN4rS3qExjK+32bsNAtI/b71wChegqKDeqd/obsyme4fYlmG3h
+         NPJ7v6IORhwbj8MAsfVR8BBTSDAnYqaxo9BAgZNJXifHiqbuItiJXN/+d8oCe4h0nJ
+         Aek0hE4Sl/5iw==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id DD1BA15C3E94; Wed,  6 Jul 2022 10:29:57 -0400 (EDT)
+Date:   Wed, 6 Jul 2022 10:29:57 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Dave Chinner <david@fromorbit.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Pankaj Raghav <pankydev8@gmail.com>,
+        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
+        Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
+        fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>
+Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for
+ expunges
+Message-ID: <YsWcZbBALgWKS88+@mit.edu>
+References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org>
+ <a120fb86-5a08-230f-33ee-1cb47381fff1@acm.org>
+ <CAOQ4uxgBtMifsNt1SDA0tz098Rt7Km6MAaNgfCeW=s=FPLtpCQ@mail.gmail.com>
+ <20220704032516.GC3237952@dread.disaster.area>
+ <CAOQ4uxj5wabQvsGELS7t_Z9Z4Z2ZUHAR8d+LBao89ANErwZ95g@mail.gmail.com>
+ <20220705031133.GD3237952@dread.disaster.area>
+ <CAOQ4uxi2rBGqmtXghFJ+frDORETum+4KOKEg0oeX-woPXLNxTw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxi2rBGqmtXghFJ+frDORETum+4KOKEg0oeX-woPXLNxTw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If check is run with -L <n>, then a failed test will be rerun <n> times
-before proceeding to the next test. Following completion of the rerun
-loop, aggregate pass/fail statistics are printed.
+On Wed, Jul 06, 2022 at 01:11:16PM +0300, Amir Goldstein wrote:
+> 
+> So I am wondering what is the status today, because I rarely
+> see fstests failure reports from kernel test bot on the list, but there
+> are some reports.
+> 
+> Does anybody have a clue what hw/fs/config/group of fstests
+> kernel test bot is running on linux-next?
 
-Rerun tests will be tracked as a single failure in overall pass/fail
-metrics (via @try and @bad), with .out.bad, .dmesg and .full saved using
-a .rerun# suffix.
+Te zero-day test bot only reports test regressions.  So they have some
+list of tests that have failed in the past, and they only report *new*
+test failures.  This is not just true for fstests, but it's also true
+for things like check and compiler warnings warnings --- and I suspect
+it's for those sorts of reports that caused the zero-day bot to keep
+state, and to filter out test failures and/or check warnings and/or
+compiler warnings, so that only new test failures and/or new compiler
+warnigns are reported.  If they didn't, they would be spamming kernel
+developers, and given how.... "kind and understanding" kernel
+developers are at getting spammed, especially when sometimes the
+complaints are bogus ones (either test bugs or compiler bugs), my
+guess is that they did the filtering out of sheer self-defense.  It
+certainly wasn't something requested by a file system developer as far
+as I know.
 
-Suggested-by: Theodore Ts'o <tytso@mit.edu>
-Link: https://lwn.net/Articles/897061/
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
- check | 56 +++++++++++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 53 insertions(+), 3 deletions(-)
 
-diff --git a/check b/check
-index 6dbdb2a8..46fca6e6 100755
---- a/check
-+++ b/check
-@@ -26,6 +26,7 @@ do_report=false
- DUMP_OUTPUT=false
- iterations=1
- istop=false
-+loop_on_fail=0
- 
- # This is a global variable used to pass test failure text to reporting gunk
- _err_msg=""
-@@ -78,6 +79,7 @@ check options
-     --large-fs		optimise scratch device for large filesystems
-     -s section		run only specified section from config file
-     -S section		exclude the specified section from the config file
-+    -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
- 
- testlist options
-     -g group[,group...]	include tests from these groups
-@@ -336,6 +338,9 @@ while [ $# -gt 0 ]; do
- 		;;
- 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
- 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
-+	-L)	[[ $2 =~ ^[0-9]+$ ]] || usage
-+		loop_on_fail=$2; shift
-+		;;
- 
- 	-*)	usage ;;
- 	*)	# not an argument, we've got tests now.
-@@ -553,6 +558,18 @@ _expunge_test()
- 	return 0
- }
- 
-+# retain files which would be overwritten in subsequent reruns of the same test
-+_stash_fail_loop_files() {
-+	local test_seq="$1"
-+	local suffix="$2"
-+
-+	for i in "${REPORT_DIR}/${test_seq}.full" \
-+		 "${REPORT_DIR}/${test_seq}.dmesg" \
-+		 "${REPORT_DIR}/${test_seq}.out.bad"; do
-+		[ -f "$i" ] && cp "$i" "${i}${suffix}"
-+	done
-+}
-+
- # Retain in @bad / @notrun the result of the just-run @test_seq. @try array
- # entries are added prior to execution.
- _stash_test_status() {
-@@ -564,8 +581,35 @@ _stash_test_status() {
- 				      "$test_status" "$((stop - start))"
- 	fi
- 
-+	if ((${#loop_status[*]} > 0)); then
-+		# continuing or completing rerun-on-failure loop
-+		_stash_fail_loop_files "$test_seq" ".rerun${#loop_status[*]}"
-+		loop_status+=("$test_status")
-+		if ((${#loop_status[*]} > loop_on_fail)); then
-+			printf "%s aggregate results across %d runs: " \
-+				"$test_seq" "${#loop_status[*]}"
-+			awk "BEGIN {
-+				n=split(\"${loop_status[*]}\", arr);"'
-+				for (i = 1; i <= n; i++)
-+					stats[arr[i]]++;
-+				for (x in stats)
-+					printf("%s=%d (%.1f%%)",
-+					       (i-- > n ? x : ", " x),
-+					       stats[x], 100 * stats[x] / n);
-+				}'
-+			echo
-+			loop_status=()
-+		fi
-+		return	# only stash @bad result for initial failure in loop
-+	fi
-+
- 	case "$test_status" in
- 	fail)
-+		if ((loop_on_fail > 0)); then
-+			# initial failure, start rerun-on-failure loop
-+			_stash_fail_loop_files "$test_seq" ".rerun0"
-+			loop_status+=("$test_status")
-+		fi
- 		bad+=("$test_seq")
- 		;;
- 	list|notrun)
-@@ -758,8 +802,12 @@ function run_section()
- 	seqres="$check"
- 	_check_test_fs
- 
--	local tc_status
--	for seq in $list ; do
-+	loop_status=()	# track rerun-on-failure state
-+	local tc_status ix
-+	local -a _list=( $list )
-+	for ((ix = 0; ix < ${#_list[*]}; !${#loop_status[*]} && ix++)); do
-+		seq="${_list[$ix]}"
-+
- 		if [ ! -f $seq ]; then
- 			# Try to get full name in case the user supplied only
- 			# seq id and the test has a name. A bit of hassle to
-@@ -829,7 +877,9 @@ function run_section()
- 		fi
- 
- 		# record that we really tried to run this test.
--		try+=("$seqnum")
-+		if ((!${#loop_status[*]})); then
-+			try+=("$seqnum")
-+		fi
- 
- 		awk 'BEGIN {lasttime="       "} \
- 		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
--- 
-2.35.3
+So this is how I think an automated system for "drive-by testers"
+should work.  First, the tester would specify the baseline/origin tag,
+and the testing system would run the tests on the baseline once.
+Hopefully, the test runner already has exclude files so that kernel
+bugs that cause an immediate kernel crash or deadlock would be already
+be in the exclude list.  But as I've discovered this weekend, for file
+systems that I haven't tried in a few yeas, like udf, or
+ubifs. etc. there may be missing tests that result in the test VM to
+stop responding and/or crash.
 
+I have a planned improvement where if you are using the gce-xfstests's
+lightweight test manager, since the LTM is constantly reading the
+serial console, a deadlock can be detected and the LTM can restart the
+VM.  The VM can then disambiguate from a forced reboot caused by the
+LTM, or a forced shutdown caused by the use of a preemptible VM (a
+planned feature not yet fully implemented yet), and the test runner
+can skip the tests already run, and skip the test which caused the
+crash or deadlock, and this could be reported so that eventually, the
+test could be added to the exclude file to benefit thouse people who
+are using kvm-xfstests.  (This is an example of a planned improvement
+in xfstests-bld which if someone is interested in helping to implement
+it, they should give me a ring.)
+
+Once the tests which are failing given a particular baseline are
+known, this state would then get saved, and then now the tests can be
+run on the drive-by developer's changes.  We can now compare the known
+failures for the baseline, with the changed kernels, and if there are
+any new failures, there are two possibilities: (a) this was a new
+feailure caused by the drive-by developer's changes, (b) this was a
+pre-existing known flake.
+
+To disambiguate between these two cases, we now run the failed test N
+times (where N is probably something like 10-50 times; I normally use
+25 times) on the changed kernel, and get the failure rate.  If the
+failure rate is 100%, then this is almost certainly (a).  If the
+failure rate is < 100% (and greater than 0%), then we need to rerun
+the failed test on the baseline kernel N times, and see if the failure
+rate is 0%, then we should do a bisection search to determine the
+guilty commit.
+
+If the failure rate is 0%, then this is either an extremely rare
+flake, in which case we might need to increase N --- or it's an
+example of a test failure which is sensitive to the order of tests
+which are failed, in which case we may need to reun all of the tests
+in order up to the failed test.
+
+This is right now what I do when processing patches for upstream.
+It's also rather similar to what we're doing for the XFS stable
+backports, because it's much more efficient than running the baseline
+tests 100 times (which can take a week of continuous testing per
+Luis's comments) --- we only tests dozens (or more) times where a
+potential flake has been found, as opposed to *all* tests.  It's all
+done manually, but it would be great if we could automate this to make
+life easier for XFS stable backporters, and *also* for drive-by
+developers.
+
+And again, if anyone is interested in helping with this, especially if
+you're familiar with shell, python 3, and/or the Go language, please
+contact me off-line.
+
+Cheers,
+
+						- Ted
