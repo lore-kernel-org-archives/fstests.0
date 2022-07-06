@@ -2,186 +2,367 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30A6CC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jul 2022 22:25:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 995F6C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Jul 2022 04:06:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230503AbiGEWZK (ORCPT
+        id S231773AbiGFEGu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Jul 2022 18:25:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33250 "EHLO
+        Wed, 6 Jul 2022 00:06:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37010 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232429AbiGEWZI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jul 2022 18:25:08 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E98E1A076
-        for <fstests@vger.kernel.org>; Tue,  5 Jul 2022 15:25:04 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 49291B81A21
-        for <fstests@vger.kernel.org>; Tue,  5 Jul 2022 22:25:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6786C341C7;
-        Tue,  5 Jul 2022 22:25:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1657059902;
-        bh=NEc1ruznQqFjoHIwxtmVQbe3Cg8CFD9ZrMnJ9eQG2B0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=XXYyvn/AWumTtXorpspooU+JLiNt9sCcvvvDfIBIK+FpiHjJHqgcoqwdFxuJst38I
-         8n4h2A+hJ9uPW5Q2QRKCJPYSn0MCBv/RPTgZqBPUv9F5gehMFfqHmmWUgrtrCPB/3w
-         dnBtvvixqJKsBNBTP1eo7uHRZ3iKKkB5AJXvzCRt6N5EmP5BhWXTr+Mia8gq17gSzD
-         P/u+5onPzVAJoKkHwba5jRmsC24CqR60MTqgZptSYxpGC5bzo1qRHG3nFs8nBrTjCQ
-         q97/e4dcsMTxnwOhthBG8tyQKB4dd803Efm+NtbDRKo9nwsPRF8EKpo5rQFeTPmmlG
-         +qRcSrqOGK6YQ==
-Date:   Tue, 5 Jul 2022 15:25:01 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 0/2] xfs test excluses needed for realtime_28k_logdev
-Message-ID: <YsS6PQiy+4SPavpA@magnolia>
-References: <20220629125207.176710-1-tytso@mit.edu>
+        with ESMTP id S231347AbiGFEGt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2022 00:06:49 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 15A6E958E
+        for <fstests@vger.kernel.org>; Tue,  5 Jul 2022 21:06:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1657080407;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=gA8tVthaUBeiD+VVwk7EEc1A2IUpND1y59kIELcdk64=;
+        b=RsnsWy42jiK67Bmn60aIisJSY85qc69Mt0KLNLSwGsNFZhiIMj1WX3yzBlbDXVvCMciRHI
+        5GOLIh/E/+KEL7ZdiKqz8RNIH4HKhOwWsHmXICOklUf9YLENTImVZ/tofm04DmOzxe45y8
+        //JGqXVnKi+1A59qRnnlglpOpUNDrog=
+Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
+ [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-411-8CYFs1iPOtWGBD6mcDAnOA-1; Wed, 06 Jul 2022 00:06:45 -0400
+X-MC-Unique: 8CYFs1iPOtWGBD6mcDAnOA-1
+Received: by mail-qt1-f199.google.com with SMTP id ck12-20020a05622a230c00b00304ee787b02so10082710qtb.11
+        for <fstests@vger.kernel.org>; Tue, 05 Jul 2022 21:06:45 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=gA8tVthaUBeiD+VVwk7EEc1A2IUpND1y59kIELcdk64=;
+        b=DtGCBpcB2ggo39CzypPt5ATOdpBLFISTfFfDsGMccG8gU7bbTnB4HCC/4x60INGBz3
+         YvEydt6XykTZ1Ye2/2NcOtHfTPPtW3+sdSrk0G5GYJVre/43vTRPfmYjDcokg7swUFH9
+         coSoQ/E65G4v+9OPjlqw7wFE20QaWEhTEkFzrjKwCqge3cQiTIPT59TFZbaPm2AmAuW5
+         d5Z1ixCmKMfUg3wSWTiy1tGnW69iZc5VC+oDjmXw3TqJjmX1ZdmPWvHyu4eUN4m/P1y1
+         jFqOmHKgNFlUkvKZhYPbOZvohya9+ataF8ArNAqPEWnwBVYHT4uLCQr7LP3eVJO3c7IX
+         cbpw==
+X-Gm-Message-State: AJIora/VknpBGFg1VvNLW0p4Z+eUYdKPRivScrj2Y6CS3fRgqZ3oKMkc
+        Na8Q/lER6HKeBcaUnzDP7qRyFxZjHC4itJLKbAi8qAlfv8rmR007CueJ50U3Do159rG43P1wJyy
+        vxHmYWynxsJ7KzsV5gA==
+X-Received: by 2002:a05:6214:4110:b0:470:7aff:7e8d with SMTP id kc16-20020a056214411000b004707aff7e8dmr35431733qvb.74.1657080405349;
+        Tue, 05 Jul 2022 21:06:45 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1sm+r4UDqGA7Zt4laiG6Z4cWBENMNKsU1HysqXfqSHodh2wKeDcSCsWBUA64bDFJWC2K74/0A==
+X-Received: by 2002:a05:6214:4110:b0:470:7aff:7e8d with SMTP id kc16-20020a056214411000b004707aff7e8dmr35431721qvb.74.1657080405067;
+        Tue, 05 Jul 2022 21:06:45 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id d8-20020ac85ac8000000b00304e70585f9sm25540063qtd.72.2022.07.05.21.06.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 Jul 2022 21:06:44 -0700 (PDT)
+Date:   Wed, 6 Jul 2022 12:06:38 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Jeremy Bongio <bongiojp@gmail.com>, Ted Tso <tytso@mit.edu>,
+        linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] ext4/056: add a check to make sure ext4 uuid ioctls
+ get/set during fsstress.
+Message-ID: <20220706040638.wxt52glkncefarur@zlang-mailbox>
+References: <20220701201332.183711-1-bongiojp@gmail.com>
+ <20220705152507.wsnqr56o7h3hzfxn@zlang-mailbox>
+ <YsS46dI6XQcJB/2B@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220629125207.176710-1-tytso@mit.edu>
+In-Reply-To: <YsS46dI6XQcJB/2B@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 29, 2022 at 08:52:05AM -0400, Theodore Ts'o wrote:
-> These are tests in my out-of-tree patches to xfstests, which were
-> cherry-picked from Darrick's out-of-tree patches.  They are needed to
-> prevent a huge whackload (that's a technical term) of test failures in
-> the xfs/realtime_28k_logdev test config, which uses:
+On Tue, Jul 05, 2022 at 03:19:21PM -0700, Darrick J. Wong wrote:
+> On Tue, Jul 05, 2022 at 11:25:07PM +0800, Zorro Lang wrote:
+> > On Fri, Jul 01, 2022 at 01:13:32PM -0700, Jeremy Bongio wrote:
+> > > Adds a utility to set/get uuid through ext4 ioctl. Executes the ioctls
+> > > while running fsstress. These ioctls are used by tune2fs to safely change
+> > > the uuid without racing other filesystem modifications.
+> > > 
+> > > Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
+> > > ---
+> > >  .gitignore         |   1 +
+> > >  src/Makefile       |   4 +-
+> > >  src/uuid_ioctl.c   | 106 +++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/ext4/056     |  55 +++++++++++++++++++++++
+> > >  tests/ext4/056.out |   2 +
+> > >  5 files changed, 166 insertions(+), 2 deletions(-)
+> > >  create mode 100644 src/uuid_ioctl.c
+> > >  create mode 100755 tests/ext4/056
+> > >  create mode 100644 tests/ext4/056.out
+> > > 
+> > > diff --git a/.gitignore b/.gitignore
+> > > index ba0c572b..dab24d68 100644
+> > > --- a/.gitignore
+> > > +++ b/.gitignore
+> > > @@ -169,6 +169,7 @@ tags
+> > >  /src/unwritten_mmap
+> > >  /src/unwritten_sync
+> > >  /src/usemem
+> > > +/src/uuid_ioctl
+> > >  /src/writemod
+> > >  /src/writev_on_pagefault
+> > >  /src/xfsctl
+> > > diff --git a/src/Makefile b/src/Makefile
+> > > index 111ce1d9..e33e04de 100644
+> > > --- a/src/Makefile
+> > > +++ b/src/Makefile
+> > > @@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> > >  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+> > >  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+> > >  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> > > -	detached_mounts_propagation ext4_resize
+> > > +	detached_mounts_propagation ext4_resize uuid_ioctl
+> > >  
+> > >  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+> > >  	      btrfs_crc32c_forged_name.py
+> > >  
+> > >  SUBDIRS = log-writes perf
+> > >  
+> > > -LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
+> > > +LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
+> > >  
+> > >  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+> > >  LINUX_TARGETS += loggen
+> > > diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
+> > > new file mode 100644
+> > > index 00000000..a4937478
+> > > --- /dev/null
+> > > +++ b/src/uuid_ioctl.c
+> > > @@ -0,0 +1,106 @@
+> > > +// SPDX-License-Identifier: GPL-2.0
+> > > +
+> > > +/*
+> > > + * Test program which uses the raw ext4 set_fsuuid ioctl directly.
+> > > + * SYNOPSIS:
+> > > + *   $0 COMMAND MOUNT_POINT [UUID]
+> > > + *
+> > > + * COMMAND must be either "get" or "set".
+> > > + * The UUID must be a 16 octet represented as 32 hexadecimal digits in canonical
+> > > + * textual representation, e.g. output from `uuidgen`.
+> > > + *
+> > > + */
+> > > +
+> > > +#include <stdio.h>
+> > > +#include <fcntl.h>
+> > > +#include <errno.h>
+> > > +#include <unistd.h>
+> > > +#include <stdint.h>
+> > > +#include <stdlib.h>
+> > > +#include <string.h>
+> > > +#include <sys/ioctl.h>
+> > > +#include <uuid/uuid.h>
+> > > +#include <linux/fs.h>
+> > > +
+> > > +struct fsuuid {
+> > > +	__u32   fu_len;
+> > > +	__u32   fu_flags;
+> > > +	__u8    fu_uuid[];
+> > > +};
+> > > +
+> > > +#define EXT4_IOC_SETFSUUID_FLAG_BLOCKING 0x1
+> > > +
+> > > +#ifndef EXT4_IOC_GETFSUUID
+> > > +#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
+> > > +#endif
+> > > +
+> > > +#ifndef EXT4_IOC_SETFSUUID
+> > > +#define EXT4_IOC_SETFSUUID      _IOW('f', 44, struct fsuuid)
+> > > +#endif
+> > 
+> > Will this be ext4 only ioctl? If this C program is only used for ext4 ioctl, I'd
+> > like to rename it as "ext4_uuid_ioctl.c" (or something else make it not likes a
+> > common test program). I think XFS doesn't has this ioctl, for now at least, it
+> > get/set uuid by another way.
 > 
-> XFS_MKFS_OPTIONS='-d rtinherit=1 -m reflink=0,rmapbt=0 -r extsize=28k '
-> 
-> and uses an external logdevice as well as an external realtime device.
-> 
-> This test config is being used in the xfs 5.15 backports testing,
-> since it's one of Darrick's upstream acceptance test configs.
-> 
-> Darrick, any objections if I ask Zorro to consider these for upstream
-> xfstests?
+> Right now XFS only supports offline changes to UUIDs, but in principle
+> we could implement this pair of ioctls some day.
 
-Hmm, maybe I should post the most recent version of this.  Ok, I'll move
-towards upstream head and send it in a day or two.
+Oh, good to know that, so this program might become a common/shared test program
+later? If so, we can keep current file name.
 
---D
+> 
+> > > +
+> > > +int main(int argc, char **argv)
+> > > +{
+> > > +	int error, fd;
+> > > +	struct fsuuid *fsuuid = NULL;
+> > > +
+> > > +	if (argc < 3) {
+> > > +		fprintf(stderr, "Invalid arguments\n");
+> > > +		return 1;
+> > > +	}
+> > > +
+> > > +	fd = open(argv[2], O_RDONLY);
+> > > +	if (!fd) {
+> > > +		perror(argv[2]);
+> > > +		return 1;
+> > > +	}
+> > > +
+> > > +	fsuuid = malloc(sizeof(*fsuuid) + sizeof(uuid_t));
+> > > +	if (!fsuuid) {
+> > > +		perror("malloc");
+> > > +		return 1;
+> > > +	}
+> > > +	fsuuid->fu_len = sizeof(uuid_t);
+> > > +
+> > > +	if (strcmp(argv[1], "get") == 0) {
+> > > +		uuid_t uuid;
+> > > +		char uuid_str[37];
+> > > +
+> > > +		if (ioctl(fd, EXT4_IOC_GETFSUUID, fsuuid)) {
+> > > +			fprintf(stderr, "%s while trying to get fs uuid\n",
+> > > +				strerror(errno));
+> > > +			return 1;
+> > > +		}
+> > > +
+> > > +		memcpy(&uuid, fsuuid->fu_uuid, sizeof(uuid));
+> > > +		uuid_unparse(uuid, uuid_str);
+> > > +		printf("%s", uuid_str);
+> > > +	} else if (strcmp(argv[1], "set") == 0) {
+> > > +		uuid_t uuid;
+> > > +
+> > > +		if (argc != 4) {
+> > > +			fprintf(stderr, "UUID argument missing.\n");
+> > > +			return 1;
+> > > +		}
+> > > +
+> > > +		error = uuid_parse(argv[3], uuid);
+> > > +		if (error < 0) {
+> > > +			fprintf(stderr, "Invalid UUID. The UUID should be in "
+> > > +				"canonical format. Example: "
+> > > +				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
+> > > +			return 1;
+> > > +		}
+> > > +
+> > > +		memcpy(&fsuuid->fu_uuid, uuid, sizeof(uuid));
+> > > +		fsuuid->fu_flags = EXT4_IOC_SETFSUUID_FLAG_BLOCKING;
+> > > +		if (ioctl(fd, EXT4_IOC_SETFSUUID, fsuuid)) {
+> > > +			fprintf(stderr, "%s while trying to set fs uuid\n",
+> > > +				strerror(errno));
+> > > +			return 1;
+> > > +		}
+> > > +	} else {
+> > > +		fprintf(stderr, "Invalid command\n");
+> > > +		return 1;
+> > > +	}
+> > > +
+> > > +	return 0;
+> > > +}
+> > > diff --git a/tests/ext4/056 b/tests/ext4/056
+> > > new file mode 100755
+> > > index 00000000..ebefb136
+> > > --- /dev/null
+> > > +++ b/tests/ext4/056
+> > > @@ -0,0 +1,55 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +#
+> > > +# Test the set/get UUID ioctl.
+> > > +#
+> > > +
+> > > +. ./common/preamble
+> > > +_begin_fstest auto ioctl
+> > > +
+> > > +# Import common functions.
+> > > +. ./common/filter
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs ext4
+> > > +_require_scratch
+> > > +_require_test_program uuid_ioctl
+> > > +_require_command $UUIDGEN_PROG uuidgen
+> > > +
+> > > +UUID_IOCTL=$here/src/uuid_ioctl
+> > > +
+> > > +# if the ioctl is not supported by the kernel, then skip test.
+> > > +current_uuid=$($UUID_IOCTL get $SCRATCH_MNT 2>&1)
+> > > +if [[ "$current_uuid" =~ ^Inappropriate[[:space:]]ioctl ]]; then
+> > > +        _notrun "UUID ioctls are not supported by kernel."
+> > > +fi
+> > > +
+> > > +# Create filesystem and mount
+> > 
+> > Rather than this such obvious comment description, explain why the below
+> > "metadata_csum_seed" is necessary?
+> > 
+> > > +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
+> > > +_scratch_mount >> $seqres.full
+> > > +
+> > > +# Begin fsstress while modifying UUID
+> > > +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
+> > > +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
+> > > +fsstress_pid=$!
+> > > +
+> > > +for n in $(seq 1 20); do
+> > > +        new_uuid=$($UUIDGEN_PROG)
+> > > +
+> > > +        echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
+> > > +        $UUID_IOCTL set $SCRATCH_MNT $new_uuid
+> > > +
+> > > +        current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
+> > > +        echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
+> > > +        if [[ "$current_uuid" != "$new_uuid" ]]; then
+> > > +                echo "Current UUID ($current_uuid) does not equal what "
+> > > +                "was sent with the ioctl ($new_uuid)"
+> > 
+> > Can these two lines really be printed?
+> 
+> Let's hope not.
+> 
+> > > +        fi
+> > > +done
+> > > +
+> > > +# success, all done
+> > > +echo "Silence is golden"
+> > > +kill $fsstress_pid >/dev/null 2>&1
+> > > +wait
+> > 
+> > We can't make sure the testing will exit normally, so better to make sure the
+> > fsstress processes are killed in _cleanup(). You can refer to generic/390.
+> 
+> Might be time to turn that (run fsstress/fsx in the background and kill it
+> later) into a set of common helper functions?
+> 
+> (Or just implement this fix now and we'll revisit it whenever I get
+> around to submitting the "fsstress vs. online fsck" series[1].)
 
-> Darrick J. Wong (2):
->   misc: skip remap/fallocate tests when op length not congruent with
->     file allocation unit
->   misc: skip extent size hint tests when hint not congruent with file
->     allocation unit
+I remember Dave tried to clean up the _cleanup() things in a patchset named:
+
+  [RFC PATCH 0/8] fstests: _cleanup() overrides are a mess
+
+it contains a patch named:
+
+  [PATCH 5/8] fstests: use a common fsstress cleanup function
+
+I think Dave is busy recently, I don't know if he's still working on that.
+(JFYI, to avoid you might take time to do reduplicate work)
+
+Thanks,
+Zorro
+
 > 
->  common/rc         | 16 ++++++++++++++++
->  tests/generic/031 |  1 +
->  tests/generic/116 |  1 +
->  tests/generic/118 |  1 +
->  tests/generic/119 |  1 +
->  tests/generic/121 |  1 +
->  tests/generic/122 |  1 +
->  tests/generic/134 |  1 +
->  tests/generic/136 |  1 +
->  tests/generic/137 |  1 +
->  tests/generic/144 |  1 +
->  tests/generic/149 |  1 +
->  tests/generic/162 |  1 +
->  tests/generic/163 |  1 +
->  tests/generic/164 |  1 +
->  tests/generic/165 |  1 +
->  tests/generic/168 |  1 +
->  tests/generic/170 |  1 +
->  tests/generic/181 |  1 +
->  tests/generic/183 |  1 +
->  tests/generic/185 |  1 +
->  tests/generic/186 |  1 +
->  tests/generic/187 |  1 +
->  tests/generic/188 |  1 +
->  tests/generic/189 |  1 +
->  tests/generic/190 |  1 +
->  tests/generic/191 |  1 +
->  tests/generic/194 |  1 +
->  tests/generic/195 |  1 +
->  tests/generic/196 |  1 +
->  tests/generic/197 |  1 +
->  tests/generic/199 |  1 +
->  tests/generic/200 |  1 +
->  tests/generic/201 |  1 +
->  tests/generic/284 |  1 +
->  tests/generic/287 |  1 +
->  tests/generic/289 |  1 +
->  tests/generic/290 |  1 +
->  tests/generic/291 |  1 +
->  tests/generic/292 |  1 +
->  tests/generic/293 |  1 +
->  tests/generic/295 |  1 +
->  tests/generic/352 |  1 +
->  tests/generic/358 |  1 +
->  tests/generic/359 |  1 +
->  tests/generic/372 |  1 +
->  tests/generic/414 |  1 +
->  tests/generic/501 |  1 +
->  tests/generic/515 |  1 +
->  tests/generic/516 |  1 +
->  tests/generic/540 |  1 +
->  tests/generic/541 |  1 +
->  tests/generic/542 |  1 +
->  tests/generic/543 |  1 +
->  tests/generic/544 |  1 +
->  tests/generic/546 |  1 +
->  tests/generic/578 |  1 +
->  tests/generic/588 |  2 ++
->  tests/xfs/069     |  1 +
->  tests/xfs/180     |  1 +
->  tests/xfs/182     |  1 +
->  tests/xfs/184     |  1 +
->  tests/xfs/192     |  1 +
->  tests/xfs/193     |  1 +
->  tests/xfs/198     |  1 +
->  tests/xfs/200     |  1 +
->  tests/xfs/204     |  1 +
->  tests/xfs/208     |  1 +
->  tests/xfs/209     |  1 +
->  tests/xfs/210     |  1 +
->  tests/xfs/211     |  1 +
->  tests/xfs/212     |  1 +
->  tests/xfs/215     |  1 +
->  tests/xfs/218     |  1 +
->  tests/xfs/219     |  1 +
->  tests/xfs/221     |  1 +
->  tests/xfs/223     |  1 +
->  tests/xfs/224     |  1 +
->  tests/xfs/225     |  1 +
->  tests/xfs/226     |  1 +
->  tests/xfs/228     |  1 +
->  tests/xfs/230     |  1 +
->  tests/xfs/231     |  1 +
->  tests/xfs/232     |  1 +
->  tests/xfs/237     |  1 +
->  tests/xfs/239     |  1 +
->  tests/xfs/240     |  1 +
->  tests/xfs/241     |  1 +
->  tests/xfs/248     |  1 +
->  tests/xfs/249     |  1 +
->  tests/xfs/251     |  1 +
->  tests/xfs/254     |  1 +
->  tests/xfs/255     |  1 +
->  tests/xfs/256     |  1 +
->  tests/xfs/257     |  1 +
->  tests/xfs/258     |  1 +
->  tests/xfs/280     |  1 +
->  tests/xfs/312     |  1 +
->  tests/xfs/315     |  1 +
->  tests/xfs/322     |  1 +
->  tests/xfs/326     |  1 +
->  tests/xfs/329     |  1 +
->  tests/xfs/346     |  1 +
->  tests/xfs/347     |  1 +
->  tests/xfs/436     |  1 +
->  tests/xfs/507     |  3 +++
->  106 files changed, 124 insertions(+)
+> --D
 > 
-> -- 
-> 2.31.0
+> [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=refactor-fsmap-stress
 > 
+> > Thanks,
+> > Zorro
+> > 
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/ext4/056.out b/tests/ext4/056.out
+> > > new file mode 100644
+> > > index 00000000..6142fcd2
+> > > --- /dev/null
+> > > +++ b/tests/ext4/056.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 056
+> > > +Silence is golden
+> > > -- 
+> > > 2.37.0.rc0.161.g10f37bed90-goog
+> > > 
+> > 
+> 
+
