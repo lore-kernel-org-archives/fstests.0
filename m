@@ -2,367 +2,288 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 995F6C433EF
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Jul 2022 04:06:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2EA8C43334
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Jul 2022 10:11:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231773AbiGFEGu (ORCPT
+        id S232271AbiGFKLm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Jul 2022 00:06:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37010 "EHLO
+        Wed, 6 Jul 2022 06:11:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51794 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231347AbiGFEGt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2022 00:06:49 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 15A6E958E
-        for <fstests@vger.kernel.org>; Tue,  5 Jul 2022 21:06:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1657080407;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=gA8tVthaUBeiD+VVwk7EEc1A2IUpND1y59kIELcdk64=;
-        b=RsnsWy42jiK67Bmn60aIisJSY85qc69Mt0KLNLSwGsNFZhiIMj1WX3yzBlbDXVvCMciRHI
-        5GOLIh/E/+KEL7ZdiKqz8RNIH4HKhOwWsHmXICOklUf9YLENTImVZ/tofm04DmOzxe45y8
-        //JGqXVnKi+1A59qRnnlglpOpUNDrog=
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
- [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-411-8CYFs1iPOtWGBD6mcDAnOA-1; Wed, 06 Jul 2022 00:06:45 -0400
-X-MC-Unique: 8CYFs1iPOtWGBD6mcDAnOA-1
-Received: by mail-qt1-f199.google.com with SMTP id ck12-20020a05622a230c00b00304ee787b02so10082710qtb.11
-        for <fstests@vger.kernel.org>; Tue, 05 Jul 2022 21:06:45 -0700 (PDT)
+        with ESMTP id S232865AbiGFKL2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Jul 2022 06:11:28 -0400
+Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F480B4B8;
+        Wed,  6 Jul 2022 03:11:27 -0700 (PDT)
+Received: by mail-vs1-xe2b.google.com with SMTP id i186so14551536vsc.9;
+        Wed, 06 Jul 2022 03:11:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=sCq1qR774KGiBeY4lPTFyzrnMabgyiMHInxYJ8h+1uY=;
+        b=B4itdb+3Yy5QKgIdMmwaF/Khf8LFzbWp6Np17oXHCQ8yh4FrNMW2iuFHLloL4y+BwJ
+         vAUTr9st12IdblZvx0zFHNaA4tb2aVoXtk7U7WxcguT/Y+0qnpXRy99NOM8tIBmFqyb5
+         f7z/iSJh2XOP+Ff0JrUIyR1j2IK7aiq7gUUsLixr1M+1MQdJa3TZ4AWus9+rOyDudDUF
+         VrvDM+d8J7ixE364LnAZNrSrp/XTh+/KGChpuKFpxCbgSaAYwni2LOvpu0m02dBefZ8Z
+         17G0BhUsboyOGNtjzHepkSLfOoy04UDneALwwXtVXmOugh+hUmwraY/SDctxta9EL7tR
+         MAiw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=gA8tVthaUBeiD+VVwk7EEc1A2IUpND1y59kIELcdk64=;
-        b=DtGCBpcB2ggo39CzypPt5ATOdpBLFISTfFfDsGMccG8gU7bbTnB4HCC/4x60INGBz3
-         YvEydt6XykTZ1Ye2/2NcOtHfTPPtW3+sdSrk0G5GYJVre/43vTRPfmYjDcokg7swUFH9
-         coSoQ/E65G4v+9OPjlqw7wFE20QaWEhTEkFzrjKwCqge3cQiTIPT59TFZbaPm2AmAuW5
-         d5Z1ixCmKMfUg3wSWTiy1tGnW69iZc5VC+oDjmXw3TqJjmX1ZdmPWvHyu4eUN4m/P1y1
-         jFqOmHKgNFlUkvKZhYPbOZvohya9+ataF8ArNAqPEWnwBVYHT4uLCQr7LP3eVJO3c7IX
-         cbpw==
-X-Gm-Message-State: AJIora/VknpBGFg1VvNLW0p4Z+eUYdKPRivScrj2Y6CS3fRgqZ3oKMkc
-        Na8Q/lER6HKeBcaUnzDP7qRyFxZjHC4itJLKbAi8qAlfv8rmR007CueJ50U3Do159rG43P1wJyy
-        vxHmYWynxsJ7KzsV5gA==
-X-Received: by 2002:a05:6214:4110:b0:470:7aff:7e8d with SMTP id kc16-20020a056214411000b004707aff7e8dmr35431733qvb.74.1657080405349;
-        Tue, 05 Jul 2022 21:06:45 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1sm+r4UDqGA7Zt4laiG6Z4cWBENMNKsU1HysqXfqSHodh2wKeDcSCsWBUA64bDFJWC2K74/0A==
-X-Received: by 2002:a05:6214:4110:b0:470:7aff:7e8d with SMTP id kc16-20020a056214411000b004707aff7e8dmr35431721qvb.74.1657080405067;
-        Tue, 05 Jul 2022 21:06:45 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id d8-20020ac85ac8000000b00304e70585f9sm25540063qtd.72.2022.07.05.21.06.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Jul 2022 21:06:44 -0700 (PDT)
-Date:   Wed, 6 Jul 2022 12:06:38 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Jeremy Bongio <bongiojp@gmail.com>, Ted Tso <tytso@mit.edu>,
-        linux-ext4@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] ext4/056: add a check to make sure ext4 uuid ioctls
- get/set during fsstress.
-Message-ID: <20220706040638.wxt52glkncefarur@zlang-mailbox>
-References: <20220701201332.183711-1-bongiojp@gmail.com>
- <20220705152507.wsnqr56o7h3hzfxn@zlang-mailbox>
- <YsS46dI6XQcJB/2B@magnolia>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=sCq1qR774KGiBeY4lPTFyzrnMabgyiMHInxYJ8h+1uY=;
+        b=ZZEMyKJkRELBayVWGBbt18sUIscgVqjFKBNT3Yhx3kN71T2LpjfGrfjp3JYBbDkwoa
+         DzsmPJQEJV/eja7M3BA0IujQPuj+wrcLeNolhaxWOvSi3mxHKrl1IYgMRGq+1WzmQzJQ
+         WFAqw3Z2cTIZPzMo2KPCn4op4ujF0zknv2/I33EwC8zS4KlbFqGAPOh7+2xjhhZIs1V7
+         ioLmb2B7XU5ah6OeeFrsSKWJ1FzNyfow0u90hBegvobJ4A6LgD1QstCnQzwuMekFTcSM
+         q0Wy6yOPE3HWj7gocbV3Quz7JQyVKN6PRAZ1qLiWvc8+OS1OVZmb8gHb+mPl6Xf+qBUs
+         Mk5A==
+X-Gm-Message-State: AJIora9ZqAUKu9LURWsFORP3Ed3HBy/nJqLVfeYDHEREPKeJr1742gYA
+        oyt5rWIP8FeJo3LRTbzgPup8JUzJ2lC4Z76ZtH4=
+X-Google-Smtp-Source: AGRyM1vtGMIPSfZDOvv9noTsaDQY3RhsvpQ9by2taIwfmaGFaFRbqphY007lDgXDnG39cxZ3Nxs1C6Ektv7UUKy/ESs=
+X-Received: by 2002:a05:6102:38c7:b0:356:4e2f:ae5b with SMTP id
+ k7-20020a05610238c700b003564e2fae5bmr21524628vst.71.1657102286505; Wed, 06
+ Jul 2022 03:11:26 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YsS46dI6XQcJB/2B@magnolia>
+References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org> <a120fb86-5a08-230f-33ee-1cb47381fff1@acm.org>
+ <CAOQ4uxgBtMifsNt1SDA0tz098Rt7Km6MAaNgfCeW=s=FPLtpCQ@mail.gmail.com>
+ <20220704032516.GC3237952@dread.disaster.area> <CAOQ4uxj5wabQvsGELS7t_Z9Z4Z2ZUHAR8d+LBao89ANErwZ95g@mail.gmail.com>
+ <20220705031133.GD3237952@dread.disaster.area>
+In-Reply-To: <20220705031133.GD3237952@dread.disaster.area>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 6 Jul 2022 13:11:16 +0300
+Message-ID: <CAOQ4uxi2rBGqmtXghFJ+frDORETum+4KOKEg0oeX-woPXLNxTw@mail.gmail.com>
+Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for expunges
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     Bart Van Assche <bvanassche@acm.org>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Pankaj Raghav <pankydev8@gmail.com>,
+        Theodore Tso <tytso@mit.edu>,
+        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
+        Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
+        fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 05, 2022 at 03:19:21PM -0700, Darrick J. Wong wrote:
-> On Tue, Jul 05, 2022 at 11:25:07PM +0800, Zorro Lang wrote:
-> > On Fri, Jul 01, 2022 at 01:13:32PM -0700, Jeremy Bongio wrote:
-> > > Adds a utility to set/get uuid through ext4 ioctl. Executes the ioctls
-> > > while running fsstress. These ioctls are used by tune2fs to safely change
-> > > the uuid without racing other filesystem modifications.
-> > > 
-> > > Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
-> > > ---
-> > >  .gitignore         |   1 +
-> > >  src/Makefile       |   4 +-
-> > >  src/uuid_ioctl.c   | 106 +++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/ext4/056     |  55 +++++++++++++++++++++++
-> > >  tests/ext4/056.out |   2 +
-> > >  5 files changed, 166 insertions(+), 2 deletions(-)
-> > >  create mode 100644 src/uuid_ioctl.c
-> > >  create mode 100755 tests/ext4/056
-> > >  create mode 100644 tests/ext4/056.out
-> > > 
-> > > diff --git a/.gitignore b/.gitignore
-> > > index ba0c572b..dab24d68 100644
-> > > --- a/.gitignore
-> > > +++ b/.gitignore
-> > > @@ -169,6 +169,7 @@ tags
-> > >  /src/unwritten_mmap
-> > >  /src/unwritten_sync
-> > >  /src/usemem
-> > > +/src/uuid_ioctl
-> > >  /src/writemod
-> > >  /src/writev_on_pagefault
-> > >  /src/xfsctl
-> > > diff --git a/src/Makefile b/src/Makefile
-> > > index 111ce1d9..e33e04de 100644
-> > > --- a/src/Makefile
-> > > +++ b/src/Makefile
-> > > @@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> > >  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
-> > >  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
-> > >  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
-> > > -	detached_mounts_propagation ext4_resize
-> > > +	detached_mounts_propagation ext4_resize uuid_ioctl
-> > >  
-> > >  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
-> > >  	      btrfs_crc32c_forged_name.py
-> > >  
-> > >  SUBDIRS = log-writes perf
-> > >  
-> > > -LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
-> > > +LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
-> > >  
-> > >  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
-> > >  LINUX_TARGETS += loggen
-> > > diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
-> > > new file mode 100644
-> > > index 00000000..a4937478
-> > > --- /dev/null
-> > > +++ b/src/uuid_ioctl.c
-> > > @@ -0,0 +1,106 @@
-> > > +// SPDX-License-Identifier: GPL-2.0
-> > > +
-> > > +/*
-> > > + * Test program which uses the raw ext4 set_fsuuid ioctl directly.
-> > > + * SYNOPSIS:
-> > > + *   $0 COMMAND MOUNT_POINT [UUID]
-> > > + *
-> > > + * COMMAND must be either "get" or "set".
-> > > + * The UUID must be a 16 octet represented as 32 hexadecimal digits in canonical
-> > > + * textual representation, e.g. output from `uuidgen`.
-> > > + *
-> > > + */
-> > > +
-> > > +#include <stdio.h>
-> > > +#include <fcntl.h>
-> > > +#include <errno.h>
-> > > +#include <unistd.h>
-> > > +#include <stdint.h>
-> > > +#include <stdlib.h>
-> > > +#include <string.h>
-> > > +#include <sys/ioctl.h>
-> > > +#include <uuid/uuid.h>
-> > > +#include <linux/fs.h>
-> > > +
-> > > +struct fsuuid {
-> > > +	__u32   fu_len;
-> > > +	__u32   fu_flags;
-> > > +	__u8    fu_uuid[];
-> > > +};
-> > > +
-> > > +#define EXT4_IOC_SETFSUUID_FLAG_BLOCKING 0x1
-> > > +
-> > > +#ifndef EXT4_IOC_GETFSUUID
-> > > +#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
-> > > +#endif
-> > > +
-> > > +#ifndef EXT4_IOC_SETFSUUID
-> > > +#define EXT4_IOC_SETFSUUID      _IOW('f', 44, struct fsuuid)
-> > > +#endif
-> > 
-> > Will this be ext4 only ioctl? If this C program is only used for ext4 ioctl, I'd
-> > like to rename it as "ext4_uuid_ioctl.c" (or something else make it not likes a
-> > common test program). I think XFS doesn't has this ioctl, for now at least, it
-> > get/set uuid by another way.
-> 
-> Right now XFS only supports offline changes to UUIDs, but in principle
-> we could implement this pair of ioctls some day.
+On Tue, Jul 5, 2022 at 6:11 AM Dave Chinner <david@fromorbit.com> wrote:
+>
+> On Mon, Jul 04, 2022 at 10:58:22AM +0300, Amir Goldstein wrote:
+> > On Mon, Jul 4, 2022 at 6:25 AM Dave Chinner <david@fromorbit.com> wrote:
+> > >
+> > > On Sun, Jul 03, 2022 at 08:56:54AM +0300, Amir Goldstein wrote:
+> > > > On Sun, Jul 3, 2022 at 12:48 AM Bart Van Assche <bvanassche@acm.org> wrote:
+> > > > >
+> > > > > On 5/18/22 20:07, Luis Chamberlain wrote:
+> > > > > > I've been promoting the idea that running fstests once is nice,
+> > > > > > but things get interesting if you try to run fstests multiple
+> > > > > > times until a failure is found. It turns out at least kdevops has
+> > > > > > found tests which fail with a failure rate of typically 1/2 to
+> > > > > > 1/30 average failure rate. That is 1/2 means a failure can happen
+> > > > > > 50% of the time, whereas 1/30 means it takes 30 runs to find the
+> > > > > > failure.
+> > > > > >
+> > > > > > I have tried my best to annotate failure rates when I know what
+> > > > > > they might be on the test expunge list, as an example:
+> > > > > >
+> > > > > > workflows/fstests/expunges/5.17.0-rc7/xfs/unassigned/xfs_reflink.txt:generic/530 # failure rate about 1/15 https://gist.github.com/mcgrof/4129074db592c170e6bf748aa11d783d
+> > > > > >
+> > > > > > The term "failure rate 1/15" is 16 characters long, so I'd like
+> > > > > > to propose to standardize a way to represent this. How about
+> > > > > >
+> > > > > > generic/530 # F:1/15
+> > > > > >
+> > > > > > Then we could extend the definition. F being current estimate, and this
+> > > > > > can be just how long it took to find the first failure. A more valuable
+> > > > > > figure would be failure rate avarage, so running the test multiple
+> > > > > > times, say 10, to see what the failure rate is and then averaging the
+> > > > > > failure out. So this could be a more accurate representation. For this
+> > > > > > how about:
+> > > > > >
+> > > > > > generic/530 # FA:1/15
+> > > > > >
+> > > > > > This would mean on average there failure rate has been found to be about
+> > > > > > 1/15, and this was determined based on 10 runs.
+> > > > > >
+> > > > > > We should also go extend check for fstests/blktests to run a test
+> > > > > > until a failure is found and report back the number of successes.
+> > > > > >
+> > > > > > Thoughts?
+> > > > > >
+> > > > > > Note: yes failure rates lower than 1/100 do exist but they are rare
+> > > > > > creatures. I love them though as my experience shows so far that they
+> > > > > > uncover hidden bones in the closet, and they they make take months and
+> > > > > > a lot of eyeballs to resolve.
+> > > > >
+> > > > > I strongly disagree with annotating tests with failure rates. My opinion
+> > > > > is that on a given test setup a test either should pass 100% of the time
+> > > > > or fail 100% of the time. If a test passes in one run and fails in
+> > > > > another run that either indicates a bug in the test or a bug in the
+> > > > > software that is being tested. Examples of behaviors that can cause
+> > > > > tests to behave unpredictably are use-after-free bugs and race
+> > > > > conditions. How likely it is to trigger such behavior depends on a
+> > > > > number of factors. This could even depend on external factors like which
+> > > > > network packets are received from other systems. I do not expect that
+> > > > > flaky tests have an exact failure rate. Hence my opinion that flaky
+> > > > > tests are not useful and also that it is not useful to annotate flaky
+> > > > > tests with a failure rate. If a test is flaky I think that the root
+> > > > > cause of the flakiness must be determined and fixed.
+> > > > >
+> > > >
+> > > > That is true for some use cases, but unfortunately, the flaky
+> > > > fstests are way too valuable and too hard to replace or improve,
+> > > > so practically, fs developers have to run them, but not everyone does.
+> > >
+> > > Everyone *should* be running them. They find *new bugs*, and it
+> > > doesn't matter how old the kernel is. e.g. if you're backporting XFS
+> > > log changes and you aren't running the "flakey" recoveryloop group
+> > > tests, then you are *not testing failure handling log recovery
+> > > sufficiently*.
+> > >
+> > > Where do you draw the line? recvoeryloop tests that shutdown and
+> > > recover the filesystem will find bugs, they are guaranteed to be
+> > > flakey, and they are *absolutely necessary* to be run because they
+> > > are the only tests that exercise that critical filesysetm crash
+> > > recovery functionality.
+> > >
+> > > What do we actually gain by excluding these "non-deterministic"
+> > > tests from automated QA environments?
+> > >
+> >
+> > Automated QA environment is a broad term.
+> > We all have automated QA environments.
+> > But there is a specific class of automated test env, such as CI build bots
+> > that do not tolerate human intervention.
+>
+> Those environments need curated test lists because of the fact
+> that failures gate progress. They also tend to run in resource
+> limited environments as fstests is not the only set of tests that
+> are run. Hence, generally speaking, CI is not an environment you'd
+> be running a full "auto" group set of tests. Even the 'quick' group
+> (which take an hour to run here) is often far too time and resource
+> intensive for a CI system to use effectively.
+>
+> IOWs, we can't easily curate a set of tests that are appropriate for
+> all CI environments - it's up to the people running the CI
+> enviroment to determine what level of testing is appropriate for
+> gating commits to their source tree, not the fstests maintainers or
+> developers...
+>
 
-Oh, good to know that, so this program might become a common/shared test program
-later? If so, we can keep current file name.
+OK. I think that is the way CIFS are doing CI -
+Running a whitelist of (probably quick) tests known to pass on cifs.
 
-> 
-> > > +
-> > > +int main(int argc, char **argv)
-> > > +{
-> > > +	int error, fd;
-> > > +	struct fsuuid *fsuuid = NULL;
-> > > +
-> > > +	if (argc < 3) {
-> > > +		fprintf(stderr, "Invalid arguments\n");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	fd = open(argv[2], O_RDONLY);
-> > > +	if (!fd) {
-> > > +		perror(argv[2]);
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	fsuuid = malloc(sizeof(*fsuuid) + sizeof(uuid_t));
-> > > +	if (!fsuuid) {
-> > > +		perror("malloc");
-> > > +		return 1;
-> > > +	}
-> > > +	fsuuid->fu_len = sizeof(uuid_t);
-> > > +
-> > > +	if (strcmp(argv[1], "get") == 0) {
-> > > +		uuid_t uuid;
-> > > +		char uuid_str[37];
-> > > +
-> > > +		if (ioctl(fd, EXT4_IOC_GETFSUUID, fsuuid)) {
-> > > +			fprintf(stderr, "%s while trying to get fs uuid\n",
-> > > +				strerror(errno));
-> > > +			return 1;
-> > > +		}
-> > > +
-> > > +		memcpy(&uuid, fsuuid->fu_uuid, sizeof(uuid));
-> > > +		uuid_unparse(uuid, uuid_str);
-> > > +		printf("%s", uuid_str);
-> > > +	} else if (strcmp(argv[1], "set") == 0) {
-> > > +		uuid_t uuid;
-> > > +
-> > > +		if (argc != 4) {
-> > > +			fprintf(stderr, "UUID argument missing.\n");
-> > > +			return 1;
-> > > +		}
-> > > +
-> > > +		error = uuid_parse(argv[3], uuid);
-> > > +		if (error < 0) {
-> > > +			fprintf(stderr, "Invalid UUID. The UUID should be in "
-> > > +				"canonical format. Example: "
-> > > +				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
-> > > +			return 1;
-> > > +		}
-> > > +
-> > > +		memcpy(&fsuuid->fu_uuid, uuid, sizeof(uuid));
-> > > +		fsuuid->fu_flags = EXT4_IOC_SETFSUUID_FLAG_BLOCKING;
-> > > +		if (ioctl(fd, EXT4_IOC_SETFSUUID, fsuuid)) {
-> > > +			fprintf(stderr, "%s while trying to set fs uuid\n",
-> > > +				strerror(errno));
-> > > +			return 1;
-> > > +		}
-> > > +	} else {
-> > > +		fprintf(stderr, "Invalid command\n");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	return 0;
-> > > +}
-> > > diff --git a/tests/ext4/056 b/tests/ext4/056
-> > > new file mode 100755
-> > > index 00000000..ebefb136
-> > > --- /dev/null
-> > > +++ b/tests/ext4/056
-> > > @@ -0,0 +1,55 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# Test the set/get UUID ioctl.
-> > > +#
-> > > +
-> > > +. ./common/preamble
-> > > +_begin_fstest auto ioctl
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs ext4
-> > > +_require_scratch
-> > > +_require_test_program uuid_ioctl
-> > > +_require_command $UUIDGEN_PROG uuidgen
-> > > +
-> > > +UUID_IOCTL=$here/src/uuid_ioctl
-> > > +
-> > > +# if the ioctl is not supported by the kernel, then skip test.
-> > > +current_uuid=$($UUID_IOCTL get $SCRATCH_MNT 2>&1)
-> > > +if [[ "$current_uuid" =~ ^Inappropriate[[:space:]]ioctl ]]; then
-> > > +        _notrun "UUID ioctls are not supported by kernel."
-> > > +fi
-> > > +
-> > > +# Create filesystem and mount
-> > 
-> > Rather than this such obvious comment description, explain why the below
-> > "metadata_csum_seed" is necessary?
-> > 
-> > > +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
-> > > +_scratch_mount >> $seqres.full
-> > > +
-> > > +# Begin fsstress while modifying UUID
-> > > +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
-> > > +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
-> > > +fsstress_pid=$!
-> > > +
-> > > +for n in $(seq 1 20); do
-> > > +        new_uuid=$($UUIDGEN_PROG)
-> > > +
-> > > +        echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
-> > > +        $UUID_IOCTL set $SCRATCH_MNT $new_uuid
-> > > +
-> > > +        current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
-> > > +        echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
-> > > +        if [[ "$current_uuid" != "$new_uuid" ]]; then
-> > > +                echo "Current UUID ($current_uuid) does not equal what "
-> > > +                "was sent with the ioctl ($new_uuid)"
-> > 
-> > Can these two lines really be printed?
-> 
-> Let's hope not.
-> 
-> > > +        fi
-> > > +done
-> > > +
-> > > +# success, all done
-> > > +echo "Silence is golden"
-> > > +kill $fsstress_pid >/dev/null 2>&1
-> > > +wait
-> > 
-> > We can't make sure the testing will exit normally, so better to make sure the
-> > fsstress processes are killed in _cleanup(). You can refer to generic/390.
-> 
-> Might be time to turn that (run fsstress/fsx in the background and kill it
-> later) into a set of common helper functions?
-> 
-> (Or just implement this fix now and we'll revisit it whenever I get
-> around to submitting the "fsstress vs. online fsck" series[1].)
+> > Is it enough to run only the deterministic tests to validate xfs code?
+> > No it is not.
+> >
+> > My LTS environment is human monitored - I look at every failure and
+> > analyse the logs and look at historic data to decide if they are regressions
+> > or not. A bot simply cannot do that.
+> > The bot can go back and run the test N times on baseline vs patch.
+> >
+> > The question is, do we want kernel test bot to run -g auto -x soak
+> > on linux-next and report issues to us?
+> >
+> > I think the answer to this question should be yes.
+> >
+> > Do we want kernel test bot to run -g auto and report flaky test
+> > failures to us?
+> >
+> > I am pretty sure that the answer is no.
+>
+> My answer to both is *yes, absolutely*.
+>
 
-I remember Dave tried to clean up the _cleanup() things in a patchset named:
+Ok.
 
-  [RFC PATCH 0/8] fstests: _cleanup() overrides are a mess
+> The zero-day kernel test bot runs all sorts of non-deterministic
+> tests, including performance regression testing. We want these
+> flakey/non-deterministic tests run in such environments, because
+> they are often configurations we do not ahve access to and/or would
+> never even consider. e.g. 128p server with a single HDD running IO
+> scalability tests like AIM7...
+>
+> This is exactly where such automated testing provides developers
+> with added value - it covers both hardware and software configs that
+> indvidual developers cannot exercise themselves. Developers may or
+> may not pay attention to those results depending on the test that
+> "fails" and the hardware it "failed' on, but the point is that it
+> got tested on something we'd never get coverage on otherwise.
+>
 
-it contains a patch named:
+So I am wondering what is the status today, because I rarely
+see fstests failure reports from kernel test bot on the list, but there
+are some reports.
 
-  [PATCH 5/8] fstests: use a common fsstress cleanup function
+Does anybody have a clue what hw/fs/config/group of fstests
+kernel test bot is running on linux-next?
 
-I think Dave is busy recently, I don't know if he's still working on that.
-(JFYI, to avoid you might take time to do reduplicate work)
+Did any fs maintainer communicate to kernel test bot maintainer
+about this?
+
+> > > The test run policy mechanisms we already have avoid
+> > > this whole can of worms - we don't need to care about the specific
+> > > test requirements of any specific test enviroment because the
+> > > default is inclusive and it is trivial to exclude tests from that
+> > > default set if needed.
+> > >
+> >
+> > I had the humble notion that we should make running fstests to
+> > passing-by developers as easy as possible, because I have had the
+> > chance to get feedback from some developers on their first time
+> > attempt to run fstests and it wasn't pleasant, but nevermind.
+> > -g auto -x soak is fine.
+>
+> I think that the way to do this is the way Ted has described - wrap
+> fstests in an environment where all the required knowledge is
+> already encapsulated and the "drive by testers" just need to crank
+> the handle and it churns out results.
+>
+> As it is, I don't think making things easier for "drive-by" testing
+> at the expense of making things arbitrarily different and/or harder
+> for people who use it every day is a good trade-off. The "target
+> market" for fstests is *filesystem developers* and people who spend
+> their working life *testing filesystems*. The number of people who
+> do *useful* "drive-by" testing of filesystems is pretty damn small,
+> and IMO that niche is nowhere near as important as making things
+> better for the people who use fstests every day....
+>
+
+I agree that using fstests runners for drive-by testing makes more
+sense.
+
+> > When you think about it, many fs developrs run ./check -g auto,
+> > so we should not interfere with that, but I bet very few run './check'?
+> > so we could make the default for './check' some group combination
+> > that is as deterministic as possible.
+>
+> Bare ./check invocations are designed to run every test, regardless
+> of what group they are in.
+>
+> Stop trying to redefine longstanding existing behaviour - if you
+> want to define "deterministic" tests so that you can run just those
+> tests, define a group for it, add all the tests to it, and then
+> document it in the README as "if you have no experience with
+> fstests, this is where you should start".
+
+OK. Or better yet, use an fstests runner.
+
+>
+> Good luck keeping that up to date, though, as you're now back to the
+> same problem that Ted describes, which is the "deterministic" group
+> changes based on kernel, filesystem, config, etc.
+>
+
+It's true. I think there is some room for improvement of how
+tests are classified in fstests repo. I will elaborate on my reply to Ted.
 
 Thanks,
-Zorro
-
-> 
-> --D
-> 
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=refactor-fsmap-stress
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/ext4/056.out b/tests/ext4/056.out
-> > > new file mode 100644
-> > > index 00000000..6142fcd2
-> > > --- /dev/null
-> > > +++ b/tests/ext4/056.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 056
-> > > +Silence is golden
-> > > -- 
-> > > 2.37.0.rc0.161.g10f37bed90-goog
-> > > 
-> > 
-> 
-
+Amir.
