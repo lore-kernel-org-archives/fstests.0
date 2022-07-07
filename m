@@ -2,260 +2,129 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6246EC43334
-	for <linux-fstests@archiver.kernel.org>; Thu,  7 Jul 2022 18:22:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B75CDC433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  7 Jul 2022 21:36:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235809AbiGGSWR (ORCPT
+        id S236854AbiGGVgi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 7 Jul 2022 14:22:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47756 "EHLO
+        Thu, 7 Jul 2022 17:36:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235666AbiGGSWR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2022 14:22:17 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56941564F3;
-        Thu,  7 Jul 2022 11:22:16 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E7BB2621C3;
-        Thu,  7 Jul 2022 18:22:15 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51007C3411E;
-        Thu,  7 Jul 2022 18:22:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1657218135;
-        bh=E9ulP8AEVSazaD914gKMcs4HYYzIrNXsKh5tRugvTJQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ndSPaf09Dhs+NBcHll78r/E/Ndf4BbIyHduO6990EK9uFUfoo2OAcpKIn4FscA3ea
-         1bq7fSqop7Ats9vfArmhGLEWg0UG6DoOBTFYuVASQ3tSVXydI8WQMI1wcll2VMrDNH
-         lF6PX54zlpVM5sllqsC/WB6jfzreKNN8hUaBaikHSOP+BV0Fdq0tBWTEgdbg61NPDb
-         F6Yln9xK1yTecQe2/qHSsQGEgM+W5TNuLQkPT/9skIR8fMYGriBh6QkYHvnvxFhtdt
-         UuptKGzuch3eeWEeQab+9FaI/H4p67Yiv1vYKjmMbMF2ETfLgfcOeZlLk/pxyAImgN
-         WNvWcqOL6+Zyw==
-Date:   Thu, 7 Jul 2022 11:22:14 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] xfs: make sure that we handle empty xattr leaf
- blocks ok
-Message-ID: <YsckVj+Yw4h1xeVp@magnolia>
-References: <165705854325.2821854.10317059026052442189.stgit@magnolia>
- <165705854877.2821854.7070105861462675249.stgit@magnolia>
- <20220707120639.qoqsfcwtmdyl5duv@zlang-mailbox>
+        with ESMTP id S236801AbiGGVgh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2022 17:36:37 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91942380;
+        Thu,  7 Jul 2022 14:36:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=ttm6gGP6SLsd/ERoDNA6enC+GfvJnC9kynUKCW0O0ns=; b=yG/OHYUxpGtlw44gkc5XopLGK7
+        I6y30vKOkhOgcv+c8LaKNmQixg7SzUKOv8wSBBO+6LBT8YXJPQXcIR0qWJClh6qOzughOSEPsNMfy
+        S8DJkDEk+QYlc/azK+k+pGgEtW9CrNp8CzMc1vh7pfA3wOIoQtKS6wSLiAAByTp2BbN5++4vl3VAC
+        Zku/392MLRMD/b2b6Zeco5gTA+2lC0sHcilcbcxPhxpF/P1rFjeBgdu6UdzweR4E0XmzLUCeP2ogK
+        RObaFJoTdvPJ1wAzXrh490Wnuns+OppbHZaPWd99DmY2EgLSK7UE7EuHzOSk9RlAx4688b2+ycQXa
+        /fqLBcTw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1o9ZAn-000Lbq-4A; Thu, 07 Jul 2022 21:36:33 +0000
+Date:   Thu, 7 Jul 2022 14:36:33 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Matthew Wilcox <willy@infradead.org>,
+        Zorro Lang <zlang@redhat.com>,
+        Amir Goldstein <amir73il@gmail.com>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>, pankydev8@gmail.com,
+        Josef Bacik <josef@toxicpanda.com>, jmeneghi@redhat.com,
+        Jan Kara <jack@suse.cz>, Davidlohr Bueso <dave@stgolabs.net>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Jake Edge <jake@lwn.net>, Klaus Jensen <its@irrelevant.dk>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [RFC: kdevops] Standardizing on failure rate nomenclature for
+ expunges
+Message-ID: <YsdR4XgXW+iE/m8h@bombadil.infradead.org>
+References: <YoW0ZC+zM27Pi0Us@bombadil.infradead.org>
+ <CAOQ4uxhKHMjGq0QKKMPFAV6iJFwe1H5hBomCVVeT1EWJzo0eXg@mail.gmail.com>
+ <20220519112450.zbje64mrh65pifnz@zlang-mailbox>
+ <YoZbF90qS+LlSDfS@casper.infradead.org>
+ <20220519154419.ziy4esm4tgikejvj@zlang-mailbox>
+ <YoZq7/lr8hvcs9T3@casper.infradead.org>
+ <YsB54p1vpBg4v2Xd@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220707120639.qoqsfcwtmdyl5duv@zlang-mailbox>
+In-Reply-To: <YsB54p1vpBg4v2Xd@mit.edu>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 07, 2022 at 08:06:39PM +0800, Zorro Lang wrote:
-> On Tue, Jul 05, 2022 at 03:02:28PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Make sure that the kernel can handle empty xattr leaf blocks properly,
-> > since we've screwed this up enough times.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/845 |  131 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 131 insertions(+)
-> >  create mode 100755 tests/xfs/845
-> > 
-> > 
-> > diff --git a/tests/xfs/845 b/tests/xfs/845
-> > new file mode 100755
-> > index 00000000..4a846e57
-> > --- /dev/null
-> > +++ b/tests/xfs/845
-> > @@ -0,0 +1,131 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 845
-> > +#
-> > +# Make sure that XFS can handle empty leaf xattr blocks correctly.  These
-> > +# blocks can appear in files as a result of system crashes in the middle of
-> > +# xattr operations, which means that we /must/ handle them gracefully.
-> > +# Check that read and write verifiers won't trip, that the get/list/setxattr
-> > +# operations don't stumble over them, and that xfs_repair will offer to remove
-> > +# the entire xattr fork if the root xattr leaf block is empty.
-> > +#
-> > +# Regression test for kernel commit:
-> > +#
-> > +# af866926d865 ("xfs: empty xattr leaf header blocks are not corruption")
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick attr
-> > +
-> > +# Override the default cleanup function.
-> > +# _cleanup()
-> > +# {
-> > +# 	cd /
-> > +# 	rm -r -f $tmp.*
-> > +# }
+On Sat, Jul 02, 2022 at 01:01:22PM -0400, Theodore Ts'o wrote:
+> Note: I recommend that you skip using the loop device xfstests
+> strategy, which Luis likes to advocate.  For the perspective of
+> *likely* regressions caused by the Folio patches, I claim they are
+> going to cause you more pain than they are worth.  If there are some
+> strange Folio/loop device interactions, they aren't likely going to be
+> obvious/reproduceable failures that will cause pain to linux-next
+> testers.  While it would be nice to find **all** possible bugs before
+> patches go usptream to Linus, if it slows down your development
+> velocity to near-standstill, it's not worth it.  We have to be
+> realistic about things.
+
+Regressions with the loopback block driver can creep up and we used to
+be much worse, but we have gotten better at it. Certainly testing a
+loopback driver can mean running into a regression with the loopback
+driver. But some block driver must be used in the end.
+
+> What about other file systems?  Well, first of all, xfstests only has
+> support for the following file systems:
 > 
-> Remove this part directly?
-
-Ok.
-
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +. ./common/attr
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
->       ^^
->       This comment is useless
-
-Oops, will delete.
-
-> > +_supported_fs xfs
-> > +_require_scratch
-> > +_fixed_by_kernel_commit af866926d865 "xfs: empty xattr leaf header blocks are not corruption"
-> > +
-> > +_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > +cat $tmp.mkfs >> $seqres.full
-> > +source $tmp.mkfs
-> > +_scratch_mount
-> > +
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 64k' $SCRATCH_MNT/largefile >> $seqres.full
-> > +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $isize" $SCRATCH_MNT/smallfile >> $seqres.full
-> > +
-> > +smallfile_md5=$(md5sum < $SCRATCH_MNT/smallfile)
-> > +largefile_md5=$(md5sum < $SCRATCH_MNT/largefile)
+> 	9p btrfs ceph cifs exfat ext2 ext4 f2fs gfs glusterfs jfs msdos
+> 	nfs ocfs2 overlay pvfs2 reiserfs tmpfs ubifs udf vfat virtiofs xfs
 > 
-> Hmm... is the tail '-' (printed by md5sum) as you wish? How about use the
-> _md5_checksum() in common/rc ? (Same as below small_md5 and large_md5 part)
-
-Ooh, nice suggestion.  I"ll convert the test.
-
-> > +
-> > +# Try to force the creation of a single leaf block in each of three files.
-> > +# The first one gets a local attr, the second a remote attr, and the third
-> > +# is left for scrub and repair to find.
-> > +touch $SCRATCH_MNT/e0
-> > +touch $SCRATCH_MNT/e1
-> > +touch $SCRATCH_MNT/e2
-> > +
-> > +$ATTR_PROG -s x $SCRATCH_MNT/e0 < $SCRATCH_MNT/smallfile >> $seqres.full
-> > +$ATTR_PROG -s x $SCRATCH_MNT/e1 < $SCRATCH_MNT/smallfile >> $seqres.full
-> > +$ATTR_PROG -s x $SCRATCH_MNT/e2 < $SCRATCH_MNT/smallfile >> $seqres.full
-> > +
-> > +e0_ino=$(stat -c '%i' $SCRATCH_MNT/e0)
-> > +e1_ino=$(stat -c '%i' $SCRATCH_MNT/e1)
-> > +e2_ino=$(stat -c '%i' $SCRATCH_MNT/e2)
-> > +
-> > +_scratch_unmount
-> > +
-> > +# We used to think that it wasn't possible for empty xattr leaf blocks to
-> > +# exist, but it turns out that setting a large xattr on a file that has no
-> > +# xattrs can race with a log flush and crash, which results in an empty
-> > +# leaf block being logged and recovered.  This is rather hard to trip, so we
-> > +# use xfs_db to turn a regular leaf block into an empty one.
-> > +make_empty_leaf() {
-> > +	local inum="$1"
-> > +
-> > +	echo "editing inode $inum" >> $seqres.full
-> > +
-> > +	magic=$(_scratch_xfs_get_metadata_field hdr.info.magic "inode $inum" "ablock 0")
-> > +	if [ "$magic" = "0xfbee" ]; then
-> > +		_notrun "V4 filesystems deprecated"
+> {kvm,gce}-xfstests supports these 16 file systems:
 > 
-> Can _require_scratch_xfs_crc (at beginning) help that? Or is there a way to
-> get a v4 leaf block when crc isn't enabled?
-
-Nope, that was an oversight on my part.  I'll add
-_require_scratch_xfs_crc to the start of the test.
-
-> > +		return 1
+> 	9p btrfs exfat ext2 ext4 f2fs jfs msdos nfs overlay reiserfs
+> 	tmpfs ubifs udf vfat xfs
 > 
-> I think _notrun will exit directly, this "return 1" never be run.
-
-Yep.
-
-> > +	fi
-> > +
-> > +	magic=$(_scratch_xfs_get_metadata_field hdr.info.hdr.magic "inode $inum" "ablock 0")
-> > +	if [ "$magic" != "0x3bee" ]; then
-> > +		echo "inode $inum ablock 0 is not a leaf block?"
-> > +		_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" -c print >> $seqres.full
-> > +		return 1
-> > +	fi
-> > +
-> > +	base=$(_scratch_xfs_get_metadata_field "hdr.freemap[0].base" "inode $inum" "ablock 0")
-> > +
-> > +	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" \
-> > +		-c "write -d hdr.count 0" \
-> > +		-c "write -d hdr.usedbytes 0" \
-> > +		-c "write -d hdr.firstused $dbsize" \
-> > +		-c "write -d hdr.freemap[0].size $((dbsize - base))" \
+> kdevops has support for these file systems:
 > 
-> Nice trick:) Do we expect there's not corruption (can be found by xfs_repair)
-> at here?
+> 	btrfs ext4 xfs
 
-Right.  We're setting up the empty leaf block 0 to check that the kernel
-and fsck tools do /not/ flag this as corruption.
+Thanks for this list Ted!
 
-> Or xfs_repair should blame the empty leaf block?
+And so adding suport for a new filesystem in kdevops should be:
 
-...though repair run in not-dryrun mode will free the empty leaf block 0
-if it finds one.
+ * a kconfig symbol for the fs and then one per supported mkfs config
+   option you want to support
 
-> > +		-c print >> $seqres.full
-> > +}
-> > +
-> > +make_empty_leaf $e0_ino || exit
-> 
-> How about call _fail() directly in make_empty_leaf, if [ "$magic" != "0x3bee" ]
+ * a configuration file for it, this can be as elaborate to support
+   different mkfs config options as we have for xfs [0] or one
+   with just one or two mkfs config options [1]. The default
+   is just shared information.
 
-_require_scratch_xfs_crc should take care of that.
+[0] https://github.com/linux-kdevops/kdevops/blob/master/playbooks/roles/fstests/templates/xfs/xfs.config
+[1] https://github.com/linux-kdevops/kdevops/blob/master/playbooks/roles/fstests/templates/ext4/ext4.config
 
-> > +make_empty_leaf $e1_ino
-> > +make_empty_leaf $e2_ino
-> > +
-> > +_scratch_mount
-> > +
-> > +# Check that listxattr/getxattr/removexattr do nothing.
-> > +$ATTR_PROG -l $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-> > +$ATTR_PROG -g x $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-> > +$ATTR_PROG -r x $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-> > +
-> > +# Add a small attr to e0
-> > +$ATTR_PROG -s x $SCRATCH_MNT/e0 < $SCRATCH_MNT/smallfile > /dev/null
-> > +$ATTR_PROG -l $SCRATCH_MNT/e0 2>&1 | sed -e 's/\([0-9]*\) byte/XXX byte/g' | _filter_scratch
-> > +small_md5="$($GETFATTR_PROG -n user.x --absolute-names --only-values $SCRATCH_MNT/e0 | md5sum)"
-> > +test "$small_md5" = "$smallfile_md5" || \
-> > +	echo "smallfile $smallfile_md5 does not match small attr $small_md5"
-> > +
-> > +# Add a large attr to e1
-> > +$ATTR_PROG -s x $SCRATCH_MNT/e1 < $SCRATCH_MNT/largefile > /dev/null
-> > +$ATTR_PROG -l $SCRATCH_MNT/e1 2>&1 | _filter_scratch
-> > +large_md5="$($GETFATTR_PROG -n user.x --absolute-names --only-values $SCRATCH_MNT/e1 | md5sum)"
-> > +test "$large_md5" = "$largefile_md5" || \
-> > +	echo "largefile $largefile_md5 does not match large attr $large_md5"
-> > +
-> > +
-> > +# Leave e2 to try to trip the repair tools, since xfs_repair used to flag
-> > +# empty leaf blocks incorrectly too.
-> 
-> So we expect there's not corruption at here, and the empty leaf block can
-> be used properly?
+> There are more complex things you could do, such as running a baseline
+> set of tests 500 times (as Luis suggests),
 
-Correct.
+I advocate 100 and I suggest that is a nice goal for enterprise kernels.
 
---D
+I also personally advocate this confidence in a baseline for stable
+kernels if *I* am going to backport changes.
 
-> Thanks,
-> Zorro
-> 
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > 
-> 
+> but I believe that for your
+> use case, it's not a good use of your time.  You'd need to speed
+> several weeks finding *all* the flaky tests up front, especially if
+> you want to do this for a large set of file systems.  It's much more
+> efficient to check if a suspetected test regression is really a flaky
+> test result when you come across them.
+
+Or you work with a test runner that has the list of known failures / flaky
+failures for a target configuration like using loopbacks already. And
+hence why I tend to attend to these for xfs, btrfs, and ext4 when I have
+time. My goal has been to work towards a baseline of at least 100
+successful runs without failure tracking upstream.
+
+  Luis
