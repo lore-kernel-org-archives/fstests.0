@@ -2,137 +2,133 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F161C43334
-	for <linux-fstests@archiver.kernel.org>; Thu,  7 Jul 2022 18:08:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC7C8C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu,  7 Jul 2022 18:09:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235156AbiGGSI0 (ORCPT
+        id S234713AbiGGSJm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 7 Jul 2022 14:08:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39416 "EHLO
+        Thu, 7 Jul 2022 14:09:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231540AbiGGSIZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2022 14:08:25 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D2DC83;
-        Thu,  7 Jul 2022 11:08:23 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S230313AbiGGSJk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2022 14:09:40 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62E2D1EAF8
+        for <fstests@vger.kernel.org>; Thu,  7 Jul 2022 11:09:39 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 04E14B822CC;
-        Thu,  7 Jul 2022 18:08:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD195C3411E;
-        Thu,  7 Jul 2022 18:08:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1657217300;
-        bh=RgxPrlTYUAr/uI+PuFpamDg9ijBkeK236jJD2oxXrY0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=pR5rGYntSbwUmtlxz1UQv2FFtVZVb+igJm9H7M7XmRdDYLYEQHh96qa3raLELGfaF
-         q6rogPxBGzX+uJwXGDZYKt3KEEfo5Y/z4mcJgTpuoiXnQR77Ax5sxZ8c55Lyf7qXQt
-         YwZx9IRKJq3pK7d1pnCIozoLTuz2MvgIlqKZ65Rp1RC3PgIPUQnhSDT9pv7ratTajH
-         9f9jsh1okFTie81cqct/vhSXJbth3BdJrxm6iu/fuPj4fSWTK/LSKPBioyUREAZ5Fe
-         39cRbCPq6dfjLrT9q2YbPac3ARCG6Hw66Ir5KG/qd5nHABf6BTDwAiGfZHs7KEYrYg
-         oNW7M/g87VbHw==
-Date:   Thu, 7 Jul 2022 11:08:20 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/288: skip repair -n when checking empty root
- leaf block behavior
-Message-ID: <YschFMW4rVuQz9Mi@magnolia>
-References: <165705854325.2821854.10317059026052442189.stgit@magnolia>
- <165705855433.2821854.6003804324518144422.stgit@magnolia>
- <20220707122525.so6alaa63hdz3bbx@zlang-mailbox>
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 1360622047;
+        Thu,  7 Jul 2022 18:09:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1657217378; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=SdcWLw4+SPSV7IX49dG8ixwMrE+x6uVyFXrSdFbFKFs=;
+        b=LJBwj3lMHjb3P/Jcaxks14u6D1LyrkEa8YKrmjrAsMF6B1pQCFCFJxzi14DacfmGjbASC0
+        wfJs3ah0iO2ELmSPcL9rV2xuDkLQ6/oyIiJjXAEiiY8yX8uPU2pYeOtqW8KSIO+MRP0Clk
+        glLxxLuN7KLZnofMAF0Vtd5F/qmAAHs=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1657217378;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=SdcWLw4+SPSV7IX49dG8ixwMrE+x6uVyFXrSdFbFKFs=;
+        b=PKUlcOPHzwRW6NiyjW7aqas2/290paRy8JvtW8lTsaBSxC3ObhdvGMajKOnO5dCu3m1NEg
+        acDx/AiiuvvT0PAQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E8E8713A33;
+        Thu,  7 Jul 2022 18:09:37 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 6phnN2Ehx2JUDAAAMHmgww
+        (envelope-from <ddiss@suse.de>); Thu, 07 Jul 2022 18:09:37 +0000
+Date:   Thu, 7 Jul 2022 20:09:36 +0200
+From:   David Disseldorp <ddiss@suse.de>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, tytso@mit.edu
+Subject: Re: [PATCH v3 5/5] check: add -L <n> parameter to rerun failed
+ tests
+Message-ID: <20220707200936.66d1b30d@suse.de>
+In-Reply-To: <20220706235452.694341f0@suse.de>
+References: <20220706112312.4349-1-ddiss@suse.de>
+        <20220706112312.4349-6-ddiss@suse.de>
+        <YsXbt85xBNJIOwZu@magnolia>
+        <20220706235452.694341f0@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220707122525.so6alaa63hdz3bbx@zlang-mailbox>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 07, 2022 at 08:25:25PM +0800, Zorro Lang wrote:
-> On Tue, Jul 05, 2022 at 03:02:34PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Update this test to reflect the (once again) corrected behavior of the
-> > xattr leaf block verifiers.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/288 |   32 +++++++++++++-------------------
-> >  1 file changed, 13 insertions(+), 19 deletions(-)
-> > 
-> > 
-> > diff --git a/tests/xfs/288 b/tests/xfs/288
-> > index e3d230e9..aa664a26 100755
-> > --- a/tests/xfs/288
-> > +++ b/tests/xfs/288
-> > @@ -8,7 +8,7 @@
-> >  # that leaf directly (as xfsprogs commit f714016).
-> >  #
-> >  . ./common/preamble
-> > -_begin_fstest auto quick repair fuzzers
-> > +_begin_fstest auto quick repair fuzzers attr
-> >  
-> >  # Import common functions.
-> >  . ./common/filter
-> > @@ -50,25 +50,19 @@ if [ "$count" != "0" ]; then
-> >  	_notrun "xfs_db can't set attr hdr.count to 0"
-> >  fi
-> >  
-> > -# make sure xfs_repair can find above corruption. If it can't, that
-> > -# means we need to fix this bug on current xfs_repair
-> > -_scratch_xfs_repair -n >> $seqres.full 2>&1
+On Wed, 6 Jul 2022 23:54:52 +0200, David Disseldorp wrote:
+
+> Thanks for the follow-up feedback, Darrick...
 > 
-> So we drop the `xfs_repair -n` test.
-
-Yep.
-
-> Will the latest xfs_repair fail or pass on that? I'm wondering what's the expect
-> result of `xfs_repair -n` on a xfs with empty leaf? Should it report errors,
-> or nothing wrong?
-
-xfs_repair -n no longer fails on attr block 0 being an empty leaf block
-since those are part of the ondisk format and are not a corruption.
-
-xfs_repair (without the -n) will clear the attr fork since there aren't
-any xattrs if attr block 0 is empty.
-
---D
-
-> Thanks,
-> Zorro
-> 
-> > -if [ $? -eq 0 ];then
-> > -	_fail "xfs_repair can't find the corruption"
-> > -else
-> > -	# If xfs_repair can find this corruption, then this repair
-> > -	# should junk above leaf attribute and fix this XFS.
-> > -	_scratch_xfs_repair >> $seqres.full 2>&1
-> > +# Check that xfs_repair discards the attr fork if block 0 is an empty leaf
-> > +# block.  Empty leaf blocks at the start of the xattr data can be a byproduct
-> > +# of a shutdown race, and hence are not a corruption.
-> > +_scratch_xfs_repair >> $seqres.full 2>&1
-> >  
-> > -	# Old xfs_repair maybe find and fix this corruption by
-> > -	# reset the first used heap value and the usedbytes cnt
-> > -	# in ablock 0. That's not what we want. So check if
-> > -	# xfs_repair has junked the whole ablock 0 by xfs_db.
-> > -	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-> > -		grep -q "no attribute data"
-> > -	if [ $? -ne 0 ]; then
-> > -		_fail "xfs_repair didn't junk the empty attr leaf"
-> > -	fi
-> > +# Old xfs_repair maybe find and fix this corruption by
-> > +# reset the first used heap value and the usedbytes cnt
-> > +# in ablock 0. That's not what we want. So check if
-> > +# xfs_repair has junked the whole ablock 0 by xfs_db.
-> > +_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-> > +	grep -q "no attribute data"
-> > +if [ $? -ne 0 ]; then
-> > +	_fail "xfs_repair didn't junk the empty attr leaf"
-> >  fi
-> >  
-> >  echo "Silence is golden"
+> On Wed, 6 Jul 2022 12:00:07 -0700, Darrick J. Wong wrote:
+...
+> > >  
+> > > +# retain files which would be overwritten in subsequent reruns of the same test
+> > > +_stash_fail_loop_files() {
+> > > +	local test_seq="$1"
+> > > +	local suffix="$2"
+> > > +
+> > > +	for i in "${REPORT_DIR}/${test_seq}.full" \
+> > > +		 "${REPORT_DIR}/${test_seq}.dmesg" \
+> > > +		 "${REPORT_DIR}/${test_seq}.out.bad"; do
+> > > +		[ -f "$i" ] && cp "$i" "${i}${suffix}"    
 > > 
+> > I wonder, is there any particular reason to copy the output file and let
+> > it get overwritten instead of simply mv'ing it?  
 > 
+> The copy is left over from an earlier version I had where xunit report
+> generation was done after the copy. Looking closer:
+> - .full is removed in _begin_fstest()
+> - _check_dmesg() overwrites .dmesg and retains on failure or KEEP_DMESG
+> - out.bad is removed in the main check loop prior to seq invocation
+> - .notrun, .core and .hints are also removed in the check loop at
+>   various places before seq (.hints again in _begin_fstest())
+> 
+> One concern I have in changing this to a move is that external scripts
+> may check for presence / parse these files after check invocation. I'd
+> considered moving and then copying / symlinking back the .rerun0 files
+> on rerun-on-failure loop completion but that's also pretty ugly. IMO
+> leaving this as a copy, with the non-suffix file state left to reflect
+> the results of the last rerun-on-failure loop, would make the most
+> sense for now.
+
+As a follow up here, I plan on squashing in the following change to
+cover the extra notrun, core and hints files, and also avoid stale
+.rerun# state:
+
+--- a/check
++++ b/check
+@@ -560,13 +560,14 @@ _expunge_test()
+ 
+ # retain files which would be overwritten in subsequent reruns of the same test
+ _stash_fail_loop_files() {
+-       local test_seq="$1"
+-       local suffix="$2"
++       local seq_prefix="${REPORT_DIR}/${1}"
++       local cp_suffix="$2"
+ 
+-       for i in "${REPORT_DIR}/${test_seq}.full" \
+-                "${REPORT_DIR}/${test_seq}.dmesg" \
+-                "${REPORT_DIR}/${test_seq}.out.bad"; do
+-               [ -f "$i" ] && cp "$i" "${i}${suffix}"
++       for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints"; do
++               rm -f "${seq_prefix}${i}${cp_suffix}"
++               if [ -f "${seq_prefix}${i}" ]; then
++                       cp "${seq_prefix}${i}" "${seq_prefix}${i}${cp_suffix}"
++               fi
+        done
+ }
+
+Cheers, David
