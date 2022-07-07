@@ -2,147 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED7F8C43334
-	for <linux-fstests@archiver.kernel.org>; Thu,  7 Jul 2022 12:25:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5B2FC43334
+	for <linux-fstests@archiver.kernel.org>; Thu,  7 Jul 2022 13:15:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234925AbiGGMZh (ORCPT
+        id S234888AbiGGNPi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 7 Jul 2022 08:25:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56330 "EHLO
+        Thu, 7 Jul 2022 09:15:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235211AbiGGMZg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2022 08:25:36 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0DD68112B
-        for <fstests@vger.kernel.org>; Thu,  7 Jul 2022 05:25:34 -0700 (PDT)
+        with ESMTP id S235350AbiGGNPi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jul 2022 09:15:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E23CA24BDD
+        for <fstests@vger.kernel.org>; Thu,  7 Jul 2022 06:15:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1657196734;
+        s=mimecast20190719; t=1657199735;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=9MyfM9qcxAgXPM/LZ2WgeXI48hqTj0++nO4aSqorrYk=;
-        b=IPzDnNsb0s9MUaNgdFbGm87ZSCQK9ERC4EEc3ZjyZtZB4jjuFYre0LT0BEryhLgNXqdp/E
-        Kug1bR3xLk/n59GkyqwMgMA8Jg57G57CcvjGIPdMtr7C1Z3YWGreWvSFUEqRfxZAxi7Yw8
-        jZiIpc1sk7sBm/JE4BGWS473mqvnS1w=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=I9ABd6mlgp3Adb9c8fAO5KZ0B43Z0Vbyn0ZvENr/7/4=;
+        b=ihdyxuq4GANDxVa9XWrZomEzIoH0QtrU7lcXqDtrHMK8j0ylDltfZLWO7ltk8LK/FfzM7q
+        iSCCH/I6g9b1i5RSfQDdnhLJzVJNcEHR/zo2Mp2RQGgvGWHi2iqMIC+26fRyz/mAcU4vAj
+        T933nZS6GyxC1Cinra5nqt/ZaBxYr3E=
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
+ [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-599-2DdXRqDtPvu4CqoIam_2bA-1; Thu, 07 Jul 2022 08:25:32 -0400
-X-MC-Unique: 2DdXRqDtPvu4CqoIam_2bA-1
-Received: by mail-qt1-f197.google.com with SMTP id cr13-20020a05622a428d00b0031d3463f241so15121885qtb.8
-        for <fstests@vger.kernel.org>; Thu, 07 Jul 2022 05:25:32 -0700 (PDT)
+ us-mta-664-nAyyfFe2ONqxTaig_Ihb9w-1; Thu, 07 Jul 2022 09:15:34 -0400
+X-MC-Unique: nAyyfFe2ONqxTaig_Ihb9w-1
+Received: by mail-qt1-f200.google.com with SMTP id fx12-20020a05622a4acc00b0031e98cb703cso1956762qtb.18
+        for <fstests@vger.kernel.org>; Thu, 07 Jul 2022 06:15:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=9MyfM9qcxAgXPM/LZ2WgeXI48hqTj0++nO4aSqorrYk=;
-        b=nmQKGg3Qv5Nc8/y2a92L4tNgq5OHK805kohPMlvSNp5dG7kvko1RS6lK+AYfIPj0uL
-         Qx6A4la5fgng63zfz1rKL7c7Ii9vZx2Wk94N5CMo+mrmPI+6CuTiigLOIzq98PTRI4zA
-         pDWk9V00u3Kx9x0TsEmBe2LpGKQmq83tU67NQuTehnlrEmArPZ7IBccex8bjMIIkcdzb
-         Qjymlvsc2YNIRuN4qcodphriarBKP+Vx+zlZTPjP21pe0cQC39j4ut+mKMHgsFACdkmH
-         9suDeuElrrPTx4BXlktXBNM+Lu9/r3woYQ/ezb6aC2FvVkt66he36W5J9d4ZK1J6QQWf
-         BOCA==
-X-Gm-Message-State: AJIora//uY03YGO/PMvTTTCL2QBGXLukWb8oWkseQhPa62GCkRj6mDmc
-        lzosxjzMWDJeReOVTC/re6gLGZWwLvlCe1sSNLi9o4Emyjn2atL5a4I6NJLeioaoLrEsqPcQKuP
-        Tcw8Z5d4ia4M73BUodA==
-X-Received: by 2002:a05:6214:2521:b0:472:f72b:a58f with SMTP id gg1-20020a056214252100b00472f72ba58fmr17194583qvb.97.1657196732167;
-        Thu, 07 Jul 2022 05:25:32 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1v1UUPZO/w2xjODdcL29icXgd/Wfw8e+dD7N6bCNS5kBW1qjSxCqQCuot6xKuqOTqOXL1b4qA==
-X-Received: by 2002:a05:6214:2521:b0:472:f72b:a58f with SMTP id gg1-20020a056214252100b00472f72ba58fmr17194568qvb.97.1657196731937;
-        Thu, 07 Jul 2022 05:25:31 -0700 (PDT)
+        bh=I9ABd6mlgp3Adb9c8fAO5KZ0B43Z0Vbyn0ZvENr/7/4=;
+        b=RrLOE7r1NcZsgHbO3vfaeHoS6CzoebwHkJOufsgqA/otc3Yw8efjx8AeZOtrbGl2kL
+         qzF+/pArHV3AUqLDIjSG4GLyd2QWOL4geISj+u6+ZZApW7WsF2ybOi2MP25gMVD4KgsB
+         hhH1mWxWTaxlz9fnfGbjrcn4xTnP3C9pmM0GEYsFij+TeS1MImJPjfXgNY7hn1ZeUob0
+         PkE62iRSzrWLZbTxPX1FrF7XuTonfeZEi5oflMI70lt+y2Pu4iGb1se3PSlTQhmZEXIc
+         X+zNhclxddfVw1hmvHAnP1gxhNa0LMZ4h9dX5XwZCTzhXQsYHrZSHjSWyRtkRNh8TTBS
+         APug==
+X-Gm-Message-State: AJIora8HBHMrN6SBH16sFhaTQMN2+P9p1VfsIyv2u1KsfxselqGAAI2b
+        6dhhUkU3uM3IGMsF7gsofSrOSgtJu4TxXgmwVH5WvaUNPXhXaFRTUFIGhLz89ao1QIteleRLqqB
+        5tH5NKHXGPN6qrNXnXQ==
+X-Received: by 2002:ac8:7fc2:0:b0:318:291d:8f55 with SMTP id b2-20020ac87fc2000000b00318291d8f55mr37516567qtk.572.1657199733759;
+        Thu, 07 Jul 2022 06:15:33 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1twwe3raefw9KWNlHtT+WPDQBBIlgy5kyHmsZChsVNT0XAdtoID8CRqq1fFHJhxwDjuHUKZ8Q==
+X-Received: by 2002:ac8:7fc2:0:b0:318:291d:8f55 with SMTP id b2-20020ac87fc2000000b00318291d8f55mr37516539qtk.572.1657199733385;
+        Thu, 07 Jul 2022 06:15:33 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id ea2-20020a05620a488200b006a79d8c8198sm22058719qkb.135.2022.07.07.05.25.29
+        by smtp.gmail.com with ESMTPSA id g6-20020ac842c6000000b00317ccc66971sm25925182qtm.52.2022.07.07.06.15.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Jul 2022 05:25:31 -0700 (PDT)
-Date:   Thu, 7 Jul 2022 20:25:25 +0800
+        Thu, 07 Jul 2022 06:15:32 -0700 (PDT)
+Date:   Thu, 7 Jul 2022 21:15:27 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/288: skip repair -n when checking empty root
- leaf block behavior
-Message-ID: <20220707122525.so6alaa63hdz3bbx@zlang-mailbox>
-References: <165705854325.2821854.10317059026052442189.stgit@magnolia>
- <165705855433.2821854.6003804324518144422.stgit@magnolia>
+Subject: Re: [PATCH 3/3] xfs/547: fix problems with realtime
+Message-ID: <20220707131527.g73ablzdf7p7pmsu@zlang-mailbox>
+References: <165705852280.2820493.17559217951744359102.stgit@magnolia>
+ <165705853976.2820493.11634341636419465537.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <165705855433.2821854.6003804324518144422.stgit@magnolia>
+In-Reply-To: <165705853976.2820493.11634341636419465537.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 05, 2022 at 03:02:34PM -0700, Darrick J. Wong wrote:
+On Tue, Jul 05, 2022 at 03:02:19PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Update this test to reflect the (once again) corrected behavior of the
-> xattr leaf block verifiers.
+> This test needs to fragment the free space on the data device so that
+> each block added to the attr fork gets its own mapping.  If the test
+> configuration sets up a rt device and rtinherit=1 on the root dir, the
+> test will erroneously fragment space on the *realtime* volume.  When
+> this happens, attr fork allocations are contiguous and get merged into
+> fewer than 10 extents and the test fails.
+> 
+> Fix this test to force all allocations to be on the data device, and fix
+> incorrect variable usage in the error messages.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/xfs/288 |   32 +++++++++++++-------------------
->  1 file changed, 13 insertions(+), 19 deletions(-)
+>  tests/xfs/547 |   14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
 > 
 > 
-> diff --git a/tests/xfs/288 b/tests/xfs/288
-> index e3d230e9..aa664a26 100755
-> --- a/tests/xfs/288
-> +++ b/tests/xfs/288
-> @@ -8,7 +8,7 @@
->  # that leaf directly (as xfsprogs commit f714016).
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick repair fuzzers
-> +_begin_fstest auto quick repair fuzzers attr
+> diff --git a/tests/xfs/547 b/tests/xfs/547
+> index 9d4216ca..60121eb9 100755
+> --- a/tests/xfs/547
+> +++ b/tests/xfs/547
+> @@ -33,6 +33,10 @@ for nrext64 in 0 1; do
+>  		      >> $seqres.full
+>  	_scratch_mount >> $seqres.full
 >  
->  # Import common functions.
->  . ./common/filter
-> @@ -50,25 +50,19 @@ if [ "$count" != "0" ]; then
->  	_notrun "xfs_db can't set attr hdr.count to 0"
->  fi
+> +	# Force data device extents so that we can fragment the free space
+> +	# and force attr fork allocations to be non-contiguous
+> +	_xfs_force_bdev data $SCRATCH_MNT
+> +
+>  	bsize=$(_get_file_block_size $SCRATCH_MNT)
 >  
-> -# make sure xfs_repair can find above corruption. If it can't, that
-> -# means we need to fix this bug on current xfs_repair
-> -_scratch_xfs_repair -n >> $seqres.full 2>&1
+>  	testfile=$SCRATCH_MNT/testfile
+> @@ -76,13 +80,15 @@ for nrext64 in 0 1; do
+>  	acnt=$(_scratch_xfs_get_metadata_field core.naextents \
+>  					       "path /$(basename $testfile)")
+>  
+> -	if (( $dcnt != 10 )); then
+> -		echo "Invalid data fork extent count: $dextcnt"
+> +	echo "nrext64: $nrext64 dcnt: $dcnt acnt: $acnt" >> $seqres.full
+> +
+> +	if [ -z "$dcnt" ] || (( $dcnt != 10 )); then
 
-So we drop the `xfs_repair -n` test.
-
-Will the latest xfs_repair fail or pass on that? I'm wondering what's the expect
-result of `xfs_repair -n` on a xfs with empty leaf? Should it report errors,
-or nothing wrong?
+I'm wondering why we need to use bash ((...)) operator at here, is $dcnt
+an expression? Can [ "$dcnt" != "10" ] help that?
 
 Thanks,
 Zorro
 
-> -if [ $? -eq 0 ];then
-> -	_fail "xfs_repair can't find the corruption"
-> -else
-> -	# If xfs_repair can find this corruption, then this repair
-> -	# should junk above leaf attribute and fix this XFS.
-> -	_scratch_xfs_repair >> $seqres.full 2>&1
-> +# Check that xfs_repair discards the attr fork if block 0 is an empty leaf
-> +# block.  Empty leaf blocks at the start of the xattr data can be a byproduct
-> +# of a shutdown race, and hence are not a corruption.
-> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +		echo "Invalid data fork extent count: $dcnt"
+>  		exit 1
+>  	fi
 >  
-> -	# Old xfs_repair maybe find and fix this corruption by
-> -	# reset the first used heap value and the usedbytes cnt
-> -	# in ablock 0. That's not what we want. So check if
-> -	# xfs_repair has junked the whole ablock 0 by xfs_db.
-> -	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-> -		grep -q "no attribute data"
-> -	if [ $? -ne 0 ]; then
-> -		_fail "xfs_repair didn't junk the empty attr leaf"
-> -	fi
-> +# Old xfs_repair maybe find and fix this corruption by
-> +# reset the first used heap value and the usedbytes cnt
-> +# in ablock 0. That's not what we want. So check if
-> +# xfs_repair has junked the whole ablock 0 by xfs_db.
-> +_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-> +	grep -q "no attribute data"
-> +if [ $? -ne 0 ]; then
-> +	_fail "xfs_repair didn't junk the empty attr leaf"
->  fi
->  
->  echo "Silence is golden"
+> -	if (( $acnt < 10 )); then
+> -		echo "Invalid attr fork extent count: $aextcnt"
+> +	if [ -z "$acnt" ] || (( $acnt < 10 )); then
+> +		echo "Invalid attr fork extent count: $acnt"
+>  		exit 1
+>  	fi
+>  done
 > 
 
