@@ -2,52 +2,52 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8E81CCA481
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 08:51:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 828C4CCA480
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 08:51:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237650AbiGHIvy (ORCPT
+        id S237635AbiGHIvz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Jul 2022 04:51:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48968 "EHLO
+        Fri, 8 Jul 2022 04:51:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48980 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237646AbiGHIvu (ORCPT
+        with ESMTP id S237666AbiGHIvu (ORCPT
         <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 04:51:50 -0400
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69803823BC
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8212F823BD
         for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 01:51:49 -0700 (PDT)
 Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id 102F921DFA;
+        by smtp-out1.suse.de (Postfix) with ESMTP id 42D0D21E61;
         Fri,  8 Jul 2022 08:51:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
         t=1657270308; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=JaYOpiHBsI2/xr9CV4WPU1qjh7pwMJa9O1tNo72CBts=;
-        b=cqx63RPT+5giLsA6HK/LmHd9/3uiS5kfCeDBf5FArqD45V9oyRa2m+e8PWsEVC1v0e+m+j
-        xfEtucGIoOPTGnj01nUIjtuDi3RrG7jLljBtpx8JGj66CrW5oKH37BwzGTEHiM57sNBmwt
-        lyyKZHWeDxLph/TrMisqzJhdzMDuKLU=
+        bh=DC9ecCb45lbZHyuhGlTZOma9QMAHB3GmxyhN52VHZSs=;
+        b=j1sDO4Z7sqKL8amifnPDdcZsES+41DbGE6Tazqzc+1cSNyS1YU31XbLPYbLOFUHL+PU6ZJ
+        EUh9f6rP3wxw6zhY30Dpv3/LyUjauxaWzUc0v2RNha5bYZaR+4qenUkAStUEi5u+Iccpm6
+        oVo7aWU+2+nYHhzLS0yFvJ8GP1Pk/Q4=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
         s=susede2_ed25519; t=1657270308;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=JaYOpiHBsI2/xr9CV4WPU1qjh7pwMJa9O1tNo72CBts=;
-        b=Q6YEOKfQTmtusqALUvi57zJ6Rh35tdpjKgkPucecLvJ0L0eQdgk3zECcEM3wxBhr+p3pEr
-        mcTXwFCOy8CPeFBQ==
+        bh=DC9ecCb45lbZHyuhGlTZOma9QMAHB3GmxyhN52VHZSs=;
+        b=CapzXVHw4pUvjGATqv/BpnD3k1IS4KYEzlmiSuy+OZxE/yWMB199LFkyjwm1cBc4mpsfML
+        g/oNm8vNO5rA8DBg==
 Received: from echidna.suse.de (unknown [10.163.47.146])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id D77A92C143;
-        Fri,  8 Jul 2022 08:51:47 +0000 (UTC)
+        by relay2.suse.de (Postfix) with ESMTPS id 182992C145;
+        Fri,  8 Jul 2022 08:51:48 +0000 (UTC)
 From:   David Disseldorp <ddiss@suse.de>
 To:     fstests@vger.kernel.org, tytso@mit.edu
 Cc:     djwong@kernel.org, zlang@redhat.com,
         David Disseldorp <ddiss@suse.de>
-Subject: [PATCH v4 3/5] check: make a few variables local
-Date:   Fri,  8 Jul 2022 10:51:40 +0200
-Message-Id: <20220708085142.20991-4-ddiss@suse.de>
+Subject: [PATCH v4 4/5] check: append bad / notrun arrays in helper function
+Date:   Fri,  8 Jul 2022 10:51:41 +0200
+Message-Id: <20220708085142.20991-5-ddiss@suse.de>
 X-Mailer: git-send-email 2.35.3
 In-Reply-To: <20220708085142.20991-1-ddiss@suse.de>
 References: <20220708085142.20991-1-ddiss@suse.de>
@@ -57,59 +57,155 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The variables aren't used outside of function scope. Also convert one
-timestamp output to use the helper.
+Currently the @try, @bad and @notrun arrays are appended with seqnum at
+different points in the main run_section() loop:
+- @try: shortly prior to test script execution
+- @notrun: on list (check -n), or after .notrun flagged test completion
+- @bad: at the start of subsequent test loop and loop exit
+
+For future loop-test-following-failure functionality it makes sense to
+combine some of these steps. This change moves both @notrun and @bad
+appends into a helper function which is called at the end of each loop
+iteration.
 
 Signed-off-by: David Disseldorp <ddiss@suse.de>
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 ---
- check | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ check | 68 ++++++++++++++++++++++++++++++++++-------------------------
+ 1 file changed, 39 insertions(+), 29 deletions(-)
 
 diff --git a/check b/check
-index dbad6dde..08857f7e 100755
+index 08857f7e..6dbdb2a8 100755
 --- a/check
 +++ b/check
-@@ -179,10 +179,10 @@ get_all_tests()
- # the function from that list.
- trim_test_list()
- {
--	test_list="$*"
-+	local test_list="$*"
- 
- 	rm -f $tmp.grep
--	numsed=0
-+	local numsed=0
- 	for t in $test_list
- 	do
- 	    if [ $numsed -gt 100 ]; then
-@@ -207,7 +207,7 @@ _wallclock()
- 
- _timestamp()
- {
--    now=`date "+%T"`
-+    local now=`date "+%T"`
-     echo -n " [$now]"
+@@ -553,6 +553,32 @@ _expunge_test()
+ 	return 0
  }
  
-@@ -603,7 +603,7 @@ fi
++# Retain in @bad / @notrun the result of the just-run @test_seq. @try array
++# entries are added prior to execution.
++_stash_test_status() {
++	local test_seq="$1"
++	local test_status="$2"
++
++	if $do_report && [[ $test_status != "expunge" ]]; then
++		_make_testcase_report "$section" "$test_seq" \
++				      "$test_status" "$((stop - start))"
++	fi
++
++	case "$test_status" in
++	fail)
++		bad+=("$test_seq")
++		;;
++	list|notrun)
++		notrun+=("$test_seq")
++		;;
++	pass|expunge)
++		;;
++	*)
++		echo "Unexpected test $test_seq status: $test_status"
++		;;
++	esac
++}
++
+ # Can we run systemd scopes?
+ HAVE_SYSTEMD_SCOPES=
+ systemctl reset-failed "fstests-check" &>/dev/null
+@@ -732,19 +758,8 @@ function run_section()
+ 	seqres="$check"
+ 	_check_test_fs
  
- function run_section()
- {
--	local section=$1
-+	local section=$1 skip
+-	local tc_status="init"
+-	prev_seq=""
++	local tc_status
+ 	for seq in $list ; do
+-		# Run report for previous test!
+-		if [ "$tc_status" == "fail" ]; then
+-			bad+=("$seqnum")
+-		fi
+-		if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
+-			_make_testcase_report "$section" "$seqnum" \
+-					      "$tc_status" "$((stop - start))"
+-		fi
+-
+-		prev_seq="$seq"
+ 		if [ ! -f $seq ]; then
+ 			# Try to get full name in case the user supplied only
+ 			# seq id and the test has a name. A bit of hassle to
+@@ -784,20 +799,21 @@ function run_section()
+ 		if $showme; then
+ 			_expunge_test $seqnum
+ 			if [ $? -eq 1 ]; then
+-			    tc_status="expunge"
+-			    continue
++				tc_status="expunge"
++			else
++				echo
++				start=0
++				stop=0
++				tc_status="list"
+ 			fi
+-			echo
+-			start=0
+-			stop=0
+-			tc_status="list"
+-			notrun+=("$seqnum")
++			_stash_test_status "$seqnum" "$tc_status"
+ 			continue
+ 		fi
  
- 	OLD_FSTYP=$FSTYP
- 	OLD_TEST_FS_MOUNT_OPTS=$TEST_FS_MOUNT_OPTS
-@@ -820,7 +820,7 @@ function run_section()
- 		rm -f core $seqres.notrun
+ 		tc_status="pass"
+ 		if [ ! -f $seq ]; then
+ 			echo " - no such test?"
++			_stash_test_status "$seqnum" "$tc_status"
+ 			continue
+ 		fi
  
- 		start=`_wallclock`
--		$timestamp && echo -n "	["`date "+%T"`"]"
-+		$timestamp && _timestamp
- 		[ ! -x $seq ] && chmod u+x $seq # ensure we can run it
- 		$LOGGER_PROG "run xfstest $seqnum"
- 		if [ -w /dev/kmsg ]; then
+@@ -808,6 +824,7 @@ function run_section()
+ 		_expunge_test $seqnum
+ 		if [ $? -eq 1 ]; then
+ 			tc_status="expunge"
++			_stash_test_status "$seqnum" "$tc_status"
+ 			continue
+ 		fi
+ 
+@@ -857,8 +874,8 @@ function run_section()
+ 			$timestamp && echo " [not run]" && \
+ 				      echo -n "	$seqnum -- "
+ 			cat $seqres.notrun
+-			notrun+=("$seqnum")
+ 			tc_status="notrun"
++			_stash_test_status "$seqnum" "$tc_status"
+ 
+ 			# Unmount the scratch fs so that we can wipe the scratch
+ 			# dev state prior to the next test run.
+@@ -903,6 +920,7 @@ function run_section()
+ 		if [ ! -f $seq.out ]; then
+ 			_dump_err "no qualified output"
+ 			tc_status="fail"
++			_stash_test_status "$seqnum" "$tc_status"
+ 			continue;
+ 		fi
+ 
+@@ -938,17 +956,9 @@ function run_section()
+ 				rm -f $seqres.hints
+ 			fi
+ 		fi
++		_stash_test_status "$seqnum" "$tc_status"
+ 	done
+ 
+-	# make sure we record the status of the last test we ran.
+-	if [ "$tc_status" == "fail" ]; then
+-		bad+=("$seqnum")
+-	fi
+-	if $do_report && [[ ! $tc_status =~ ^(init|expunge)$ ]]; then
+-		_make_testcase_report "$section" "$seqnum" "$tc_status" \
+-				      "$((stop - start))"
+-	fi
+-
+ 	sect_stop=`_wallclock`
+ 	interrupt=false
+ 	_wrapup
 -- 
 2.35.3
 
