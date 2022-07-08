@@ -2,168 +2,154 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C1F4C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:47:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F97BC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 16:16:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238499AbiGHPrv (ORCPT
+        id S238782AbiGHQQd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Jul 2022 11:47:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33200 "EHLO
+        Fri, 8 Jul 2022 12:16:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58736 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238439AbiGHPru (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:47:50 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 057D42F03F
-        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 08:47:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1657295269;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=1x7w4B8KkRbbLPOBK5w5COBwCSETd53dAVljfr2ix5E=;
-        b=C7xHDIYT+4Lm+Ge0phqdHusa4+AxETpo0dz7HgNtL8Q4LT3q2zoSNP9q+gu5sTMz+ABR+t
-        QBWsvbJNdujvO9YeIASzNl4uiYOKGcKIse0puWSffx2u5npvTaX9r8gYf+U4+UHelEan8D
-        CQDc5VltJ2zb0XTqdkTmQ2yzyyqYMy8=
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
- [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-110-xePwP7RKMz-u-bK3y50Dyg-1; Fri, 08 Jul 2022 11:47:48 -0400
-X-MC-Unique: xePwP7RKMz-u-bK3y50Dyg-1
-Received: by mail-qk1-f197.google.com with SMTP id f10-20020a05620a408a00b006b267fdf71fso19241318qko.6
-        for <fstests@vger.kernel.org>; Fri, 08 Jul 2022 08:47:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=1x7w4B8KkRbbLPOBK5w5COBwCSETd53dAVljfr2ix5E=;
-        b=fWwjmd48QP+TKt1JuYAWwBHS+rqn35aHaWX19B/43TYCe+0Q0BjhCInAfoIdqFvrR9
-         4mHA550HuZvhH7bTo+1ErOn/QWcsZtIcPfAwiQpkzYYp4T8YEg5rEhxV/dRoU8bm54gL
-         9h0aqzVKAtSgZELNtxgnVpbF5GPOv70OXAmbZ8D2Qlfsj4RRM46V+b1+G+ozQHCdE9OL
-         uQ2xv9PTIM2lJN38LEeRSwu7iRwCP9kQeijHAdWo7YypVSrD6M8LvD6h8UWiEwb6tQSo
-         SWIVumb6nlr/6wk4Y2ewmf3Cs7FUDEDz6ypIdqSbJRFIZd82S4nUr3OgDmEEb5a0Ffqn
-         c1Lw==
-X-Gm-Message-State: AJIora9dxjc8fn+PPmFZjbQIz8/go3eA7WulT6qphfj02PmFXE280CNG
-        QtLWNq/KrlmOBkBOVD3IeIfxIJOZCkF1uRCm/kIk2G/y05qIAAGvp6/LjSg9u+M4Pof6nKYLuBK
-        MvR3M2GEsKlpBlWAhIw==
-X-Received: by 2002:a05:620a:d54:b0:6b2:5a9b:ef2e with SMTP id o20-20020a05620a0d5400b006b25a9bef2emr2786425qkl.715.1657295267243;
-        Fri, 08 Jul 2022 08:47:47 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vPSt5KNlOnkU/SYB+AC3XD5ZpJVVYDDOVQRKvwSOqEDp/UTr/LW6Cmrp/TMB0a4D22GJBoiQ==
-X-Received: by 2002:a05:620a:d54:b0:6b2:5a9b:ef2e with SMTP id o20-20020a05620a0d5400b006b25a9bef2emr2786410qkl.715.1657295266963;
-        Fri, 08 Jul 2022 08:47:46 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id y21-20020ac87095000000b0031b18d29864sm21940875qto.64.2022.07.08.08.47.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Jul 2022 08:47:46 -0700 (PDT)
-Date:   Fri, 8 Jul 2022 23:47:41 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/288: skip repair -n when checking empty root
- leaf block behavior
-Message-ID: <20220708154741.elvskagzrsynbw4o@zlang-mailbox>
-References: <165705854325.2821854.10317059026052442189.stgit@magnolia>
- <165705855433.2821854.6003804324518144422.stgit@magnolia>
- <20220707122525.so6alaa63hdz3bbx@zlang-mailbox>
- <YschFMW4rVuQz9Mi@magnolia>
+        with ESMTP id S238902AbiGHQQd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 12:16:33 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1751076EB4;
+        Fri,  8 Jul 2022 09:16:32 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id BE655B80189;
+        Fri,  8 Jul 2022 16:16:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 81BA8C341C0;
+        Fri,  8 Jul 2022 16:16:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1657296989;
+        bh=YlKqOue3jMK+6GSQ63KXsfwr9r5EJDm+PTdC8Y8HnR0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=h9vXjfIVWlYf3U1lgqd7oSDJUKIgDfpSOTVcLOvoa9NqDtRZGo+gnORd04jn7SwRe
+         zkMjROuQo2LV7wsaiTCvtEq21UzWCCQeUTfmDNUAb2bkRUujepUzjupHV6Q5DuGdQI
+         h6BoMNwe2k8xzYO5VaysU/jENYv8/fVSFnhcNuHUD03OXj79TtEJolOIqLwGAjZyQq
+         f1uIgAkovhOCE832OPSBITnzxlozTN8mmR7/QdY++FuZogRNKGGs1C2XlhzeoUgiZQ
+         r2iF6gnUiD+0q0lcFSEa3B6oPrYant1c97gLzvEfU7wKP9A19C6krc1O28jdokpCLg
+         T5dA55cq2xQ6g==
+Date:   Sat, 9 Jul 2022 00:16:24 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     Sun Ke <sunke32@huawei.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] ext4: resize fs after resize_inode without e2fsck
+Message-ID: <20220708161624.etkxdewnje4nhmhl@zlang-mailbox>
+References: <20220708112155.2639551-1-sunke32@huawei.com>
+ <20220708112155.2639551-2-sunke32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YschFMW4rVuQz9Mi@magnolia>
+In-Reply-To: <20220708112155.2639551-2-sunke32@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 07, 2022 at 11:08:20AM -0700, Darrick J. Wong wrote:
-> On Thu, Jul 07, 2022 at 08:25:25PM +0800, Zorro Lang wrote:
-> > On Tue, Jul 05, 2022 at 03:02:34PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Update this test to reflect the (once again) corrected behavior of the
-> > > xattr leaf block verifiers.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/xfs/288 |   32 +++++++++++++-------------------
-> > >  1 file changed, 13 insertions(+), 19 deletions(-)
-> > > 
-> > > 
-> > > diff --git a/tests/xfs/288 b/tests/xfs/288
-> > > index e3d230e9..aa664a26 100755
-> > > --- a/tests/xfs/288
-> > > +++ b/tests/xfs/288
-> > > @@ -8,7 +8,7 @@
-> > >  # that leaf directly (as xfsprogs commit f714016).
-> > >  #
-> > >  . ./common/preamble
-> > > -_begin_fstest auto quick repair fuzzers
-> > > +_begin_fstest auto quick repair fuzzers attr
-> > >  
-> > >  # Import common functions.
-> > >  . ./common/filter
-> > > @@ -50,25 +50,19 @@ if [ "$count" != "0" ]; then
-> > >  	_notrun "xfs_db can't set attr hdr.count to 0"
-> > >  fi
-> > >  
-> > > -# make sure xfs_repair can find above corruption. If it can't, that
-> > > -# means we need to fix this bug on current xfs_repair
-> > > -_scratch_xfs_repair -n >> $seqres.full 2>&1
-> > 
-> > So we drop the `xfs_repair -n` test.
+On Fri, Jul 08, 2022 at 07:21:54PM +0800, Sun Ke wrote:
+> Forget to run requested e2fsck after resize_inode, then resize fs, it
+> will trigger off null pointer.
 > 
-> Yep.
+> Regression test for commit b55c3cd102a6 ext4: add reserved GDT blocks
+> check.
 > 
-> > Will the latest xfs_repair fail or pass on that? I'm wondering what's the expect
-> > result of `xfs_repair -n` on a xfs with empty leaf? Should it report errors,
-> > or nothing wrong?
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> ---
+>  tests/ext4/057     | 44 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/057.out |  2 ++
+>  2 files changed, 46 insertions(+)
+>  create mode 100755 tests/ext4/057
+>  create mode 100644 tests/ext4/057.out
 > 
-> xfs_repair -n no longer fails on attr block 0 being an empty leaf block
-> since those are part of the ondisk format and are not a corruption.
-> 
-> xfs_repair (without the -n) will clear the attr fork since there aren't
-> any xattrs if attr block 0 is empty.
+> diff --git a/tests/ext4/057 b/tests/ext4/057
+> new file mode 100755
+> index 00000000..125f841a
+> --- /dev/null
+> +++ b/tests/ext4/057
+> @@ -0,0 +1,44 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 HUAWEI.  All Rights Reserved.
+> +#
+> +# FS QA Test 057
+> +#
+> +# Forget to run requested e2fsck after resize_inode, then resize fs,
+> +# it will trigger off null pointer.
+> +#
+> +# Regression test for commit
+> +# b55c3cd102a6 ext4: add reserved GDT blocks check
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto resize quick
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs ext4
+> +_fixed_by_kernel_commit b55c3cd102a6 \
+> +	"ext4: add reserved GDT blocks check"
+> +
+> +_require_scratch
+> +_require_command "$TUNE2FS_PROG" tune2fs
+> +_require_command "$RESIZE2FS_PROG" resize2fs
+> +_require_scratch_size $((1024 * 1024)) #kB
+> +
+> +# set fs size 512M
+> +dev_size=$((512 * 1024 * 1024))
+> +_scratch_mkfs_sized $dev_size >$seqres.full 2>&1
+> +
+> +# forget to run requested e2fsck after resize_inode
+> +$TUNE2FS_PROG -O ^resize_inode $SCRATCH_DEV >$seqres.full 2>&1
 
-Thanks for the explain.
+Please use appending write ">>$seqres.full", to avoid seqres.full be
+overwritten.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+I think we don't need to filter out the error output, we don't expect
+there's an error, so if it fails, how about output errors to break
+golden image (remind the testers).
 
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > -if [ $? -eq 0 ];then
-> > > -	_fail "xfs_repair can't find the corruption"
-> > > -else
-> > > -	# If xfs_repair can find this corruption, then this repair
-> > > -	# should junk above leaf attribute and fix this XFS.
-> > > -	_scratch_xfs_repair >> $seqres.full 2>&1
-> > > +# Check that xfs_repair discards the attr fork if block 0 is an empty leaf
-> > > +# block.  Empty leaf blocks at the start of the xattr data can be a byproduct
-> > > +# of a shutdown race, and hence are not a corruption.
-> > > +_scratch_xfs_repair >> $seqres.full 2>&1
-> > >  
-> > > -	# Old xfs_repair maybe find and fix this corruption by
-> > > -	# reset the first used heap value and the usedbytes cnt
-> > > -	# in ablock 0. That's not what we want. So check if
-> > > -	# xfs_repair has junked the whole ablock 0 by xfs_db.
-> > > -	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-> > > -		grep -q "no attribute data"
-> > > -	if [ $? -ne 0 ]; then
-> > > -		_fail "xfs_repair didn't junk the empty attr leaf"
-> > > -	fi
-> > > +# Old xfs_repair maybe find and fix this corruption by
-> > > +# reset the first used heap value and the usedbytes cnt
-> > > +# in ablock 0. That's not what we want. So check if
-> > > +# xfs_repair has junked the whole ablock 0 by xfs_db.
-> > > +_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
-> > > +	grep -q "no attribute data"
-> > > +if [ $? -ne 0 ]; then
-> > > +	_fail "xfs_repair didn't junk the empty attr leaf"
-> > >  fi
-> > >  
-> > >  echo "Silence is golden"
-> > > 
-> > 
-> 
+> +
+> +_scratch_mount
+> +
+> +# resize fs will trigger NULL pointer in ext4_flex_group_add
+> +$RESIZE2FS_PROG $SCRATCH_DEV 1G >$seqres.full 2>&1
 
+Appending write too...
+
+I'm not sure what's the necessary condition to reproduce the bug. Do you
+need to resize fs will trigger the bug, but after:
+
+  # tune2fs -O ^resize_inode /dev/sda3
+
+Then resize2fs always get:
+
+  # resize2fs /dev/sda3 3g
+  resize2fs 1.45.6 (20-Mar-2020)
+  Please run 'e2fsck -f /dev/sda3' first.
+
+Looks like the resizing isn't run actually, is it what you really want?
+I've tried to review this patch from fstests side, better to get some
+review points from ext4 devel, to help to make sure that.
+
+Thanks,
+Zorro
+
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ext4/057.out b/tests/ext4/057.out
+> new file mode 100644
+> index 00000000..185023c7
+> --- /dev/null
+> +++ b/tests/ext4/057.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 057
+> +Silence is golden
+> -- 
+> 2.13.6
+> 
