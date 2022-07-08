@@ -2,161 +2,186 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2614C43334
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:20:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF41DC43334
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:21:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238528AbiGHPU0 (ORCPT
+        id S238817AbiGHPV3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Jul 2022 11:20:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39972 "EHLO
+        Fri, 8 Jul 2022 11:21:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238395AbiGHPUZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:20:25 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 713A81C92F
-        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 08:20:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1657293623;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0aso+p9eGYq+v6pFUF5uQ/7lDmfNnHm1Xte8Fgyvtc8=;
-        b=XCLF6ctvvasQMQjm0CxZM9ymRG5z4kdy0dSN04kGcGqGyKKY6FCn804C2qixIoCZoGHlI/
-        q4qJYveaLONWnY3GuUOoQbgGioJhyJU9rTezWgo3farSIvrc0oA5TxbyBsP8GAiGa6q9rZ
-        UBxRfc6BhuB9kKmM7yd5p40/hEhxmgI=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-661-XVTx9F9FPuGNtCrxOqnyKQ-1; Fri, 08 Jul 2022 11:20:22 -0400
-X-MC-Unique: XVTx9F9FPuGNtCrxOqnyKQ-1
-Received: by mail-qt1-f197.google.com with SMTP id o22-20020ac87c56000000b0031d4ab81b21so14940503qtv.1
-        for <fstests@vger.kernel.org>; Fri, 08 Jul 2022 08:20:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=0aso+p9eGYq+v6pFUF5uQ/7lDmfNnHm1Xte8Fgyvtc8=;
-        b=X3OmFLQSWtFUH0Z+/rmqeD4erTOV7y/hH1g6FEYb2purKYLLSy8zzlkCT+91iuaUZA
-         exrJGJk3EGQYXkHE+4HX5vGp1qFHM2cOUvT3vC268S8DKHgGpi5Btz9Vg7ulz7LKQ3NV
-         es/Y+knDTy4Me0hyh3JiFCTE/rhfDtd25fNS3je7Igb++Zd6Eus89oEhaRmY0ZE1vPyx
-         /M4KRNC4ZZ5QulHbwYWQz6XO8Fg3DGWqVERVHd6j4SG6RPAStv8vjci7XDEm0oW+2C8H
-         nb9GuZ8liUeMro8sK7iIRxelBkoNDyGKGk0GuXUbSV0XQMFhic+4CfxNVP5MmEZOgJNF
-         hfgg==
-X-Gm-Message-State: AJIora/9Xq3bY3l1/xj4Vd5X6glA0IXHYZ/0XHOCq5MYJMOWhqS5zEHh
-        5zvJCVl19JTtvbmx6/yAd8B7Xw4RPnu1dpX9UvIxv9xX2Hjq6qSKOAQbdQDT3TQS4Tuq3ZUPbmR
-        MGlKtYRm6kaGNNj5Z+A==
-X-Received: by 2002:a05:622a:410:b0:319:4e26:d0bd with SMTP id n16-20020a05622a041000b003194e26d0bdmr3396847qtx.593.1657293621341;
-        Fri, 08 Jul 2022 08:20:21 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vMObtzyqvcRumQ8pV8PwKAmWMleYQXJ9j77N3yQrCpG6LuJL9UPGjEQByjfTJlQdyJMOgjzQ==
-X-Received: by 2002:a05:622a:410:b0:319:4e26:d0bd with SMTP id n16-20020a05622a041000b003194e26d0bdmr3396822qtx.593.1657293621009;
-        Fri, 08 Jul 2022 08:20:21 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id b19-20020ae9eb13000000b006aee672937esm33742276qkg.37.2022.07.08.08.20.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Jul 2022 08:20:20 -0700 (PDT)
-Date:   Fri, 8 Jul 2022 23:20:14 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Sun Ke <sunke32@huawei.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] ext4: set 256 blocks in a block group then apply
- io pressure
-Message-ID: <20220708152014.bifm4u2wmdwj3mnf@zlang-mailbox>
-References: <20220708112155.2639551-1-sunke32@huawei.com>
- <20220708112155.2639551-3-sunke32@huawei.com>
+        with ESMTP id S238808AbiGHPV2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:21:28 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DAB11C108
+        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 08:21:27 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1A49EB828A9
+        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 15:21:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BF939C341C0;
+        Fri,  8 Jul 2022 15:21:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1657293684;
+        bh=uzXmucdxpk0BUxLF1rYZgzaLz6kQHunpqU6A8Vhe24A=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=q8/hF4auaj31L6E65U3SpKulXDdwzbRnXFTeW+q2MFJ3sufl/0N6Iz06rq4F3Bkju
+         FmrRMeO4jzviCtbXC7am+7gNMJ6ZLF9zdY8bUs04ON5Vc7zH4/+/90KEWik9SfsA2Q
+         Eiz2Lg46RjGnxTZsGVdAdjFihgI6/UzcI9Uj3zFwSDZew2PSuKWmn2aZI5f+hO5iKp
+         07EbSZNA5wPjrySW4guhDe2mQKbzOsh+EOLivKZ2QFeNqgh3e0hAE0RpsiPDQGGewY
+         Mn+PWYrqRcEcO9ulO9gtzBc1uDo7MiEIPc8pPfKH16A+6btphKmTPUgJQPuWPY4j/K
+         K5COPSw6TKqeQ==
+Date:   Fri, 8 Jul 2022 08:21:24 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     David Disseldorp <ddiss@suse.de>
+Cc:     fstests@vger.kernel.org, tytso@mit.edu, zlang@redhat.com
+Subject: Re: [PATCH v4 5/5] check: add -L <n> parameter to rerun failed tests
+Message-ID: <YshLdLX9m9rkh23E@magnolia>
+References: <20220708085142.20991-1-ddiss@suse.de>
+ <20220708085142.20991-6-ddiss@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220708112155.2639551-3-sunke32@huawei.com>
+In-Reply-To: <20220708085142.20991-6-ddiss@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 08, 2022 at 07:21:55PM +0800, Sun Ke wrote:
-> Set 256 blocks in a block group, then inject I/O pressure, it will
-> trigger off kernel BUG in ext4_mb_mark_diskspace_used.
+On Fri, Jul 08, 2022 at 10:51:42AM +0200, David Disseldorp wrote:
+> If check is run with -L <n>, then a failed test will be rerun <n> times
+> before proceeding to the next test. Following completion of the rerun
+> loop, aggregate pass/fail statistics are printed.
 > 
-> Regression test for commit a08f789d2ab5 ext4: fix bug_on
-> ext4_mb_use_inode_pa.
+> Rerun tests will be tracked as a single failure in overall pass/fail
+> metrics (via @try and @bad), with .out.bad, .dmesg, .core, .hints,
+> .notrun and .full saved using a .rerun# suffix.
 > 
-> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> Suggested-by: Theodore Ts'o <tytso@mit.edu>
+> Link: https://lwn.net/Articles/897061/
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
+
+Looks good!
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
 > ---
->  tests/ext4/058     | 33 +++++++++++++++++++++++++++++++++
->  tests/ext4/058.out |  2 ++
->  2 files changed, 35 insertions(+)
->  create mode 100755 tests/ext4/058
->  create mode 100644 tests/ext4/058.out
+>  check | 57 ++++++++++++++++++++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 54 insertions(+), 3 deletions(-)
 > 
-> diff --git a/tests/ext4/058 b/tests/ext4/058
-> new file mode 100755
-> index 00000000..b718c1ac
-> --- /dev/null
-> +++ b/tests/ext4/058
-> @@ -0,0 +1,33 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 HUAWEI.  All Rights Reserved.
-> +#
-> +# FS QA Test 058
-> +#
-> +# Set 256 blocks in a block group, then inject I/O pressure,
-> +# it will trigger off kernel BUG in ext4_mb_mark_diskspace_used
-> +#
-> +# Regression test for commit
-> +# a08f789d2ab5 ext4: fix bug_on ext4_mb_use_inode_pa 
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto
-
-quick ?
-
+> diff --git a/check b/check
+> index 6dbdb2a8..5f6d86b4 100755
+> --- a/check
+> +++ b/check
+> @@ -26,6 +26,7 @@ do_report=false
+>  DUMP_OUTPUT=false
+>  iterations=1
+>  istop=false
+> +loop_on_fail=0
+>  
+>  # This is a global variable used to pass test failure text to reporting gunk
+>  _err_msg=""
+> @@ -78,6 +79,7 @@ check options
+>      --large-fs		optimise scratch device for large filesystems
+>      -s section		run only specified section from config file
+>      -S section		exclude the specified section from the config file
+> +    -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
+>  
+>  testlist options
+>      -g group[,group...]	include tests from these groups
+> @@ -336,6 +338,9 @@ while [ $# -gt 0 ]; do
+>  		;;
+>  	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
+>  	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
+> +	-L)	[[ $2 =~ ^[0-9]+$ ]] || usage
+> +		loop_on_fail=$2; shift
+> +		;;
+>  
+>  	-*)	usage ;;
+>  	*)	# not an argument, we've got tests now.
+> @@ -553,6 +558,19 @@ _expunge_test()
+>  	return 0
+>  }
+>  
+> +# retain files which would be overwritten in subsequent reruns of the same test
+> +_stash_fail_loop_files() {
+> +	local seq_prefix="${REPORT_DIR}/${1}"
+> +	local cp_suffix="$2"
 > +
-> +# real QA test starts here
+> +	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints"; do
+> +		rm -f "${seq_prefix}${i}${cp_suffix}"
+> +		if [ -f "${seq_prefix}${i}" ]; then
+> +			cp "${seq_prefix}${i}" "${seq_prefix}${i}${cp_suffix}"
+> +		fi
+> +	done
+> +}
 > +
-> +_supported_fs ext4
-> +_fixed_by_kernel_commit a08f789d2ab5 \
-> +	"ext4: fix bug_on ext4_mb_use_inode_pa"
-> +_require_scratch
+>  # Retain in @bad / @notrun the result of the just-run @test_seq. @try array
+>  # entries are added prior to execution.
+>  _stash_test_status() {
+> @@ -564,8 +582,35 @@ _stash_test_status() {
+>  				      "$test_status" "$((stop - start))"
+>  	fi
+>  
+> +	if ((${#loop_status[*]} > 0)); then
+> +		# continuing or completing rerun-on-failure loop
+> +		_stash_fail_loop_files "$test_seq" ".rerun${#loop_status[*]}"
+> +		loop_status+=("$test_status")
+> +		if ((${#loop_status[*]} > loop_on_fail)); then
+> +			printf "%s aggregate results across %d runs: " \
+> +				"$test_seq" "${#loop_status[*]}"
+> +			awk "BEGIN {
+> +				n=split(\"${loop_status[*]}\", arr);"'
+> +				for (i = 1; i <= n; i++)
+> +					stats[arr[i]]++;
+> +				for (x in stats)
+> +					printf("%s=%d (%.1f%%)",
+> +					       (i-- > n ? x : ", " x),
+> +					       stats[x], 100 * stats[x] / n);
+> +				}'
+> +			echo
+> +			loop_status=()
+> +		fi
+> +		return	# only stash @bad result for initial failure in loop
+> +	fi
 > +
-> +# set 256 blocks in a block group
-> +_scratch_mkfs -g 256 >>$seqres.full 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
+>  	case "$test_status" in
+>  	fail)
+> +		if ((loop_on_fail > 0)); then
+> +			# initial failure, start rerun-on-failure loop
+> +			_stash_fail_loop_files "$test_seq" ".rerun0"
+> +			loop_status+=("$test_status")
+> +		fi
+>  		bad+=("$test_seq")
+>  		;;
+>  	list|notrun)
+> @@ -758,8 +803,12 @@ function run_section()
+>  	seqres="$check"
+>  	_check_test_fs
+>  
+> -	local tc_status
+> -	for seq in $list ; do
+> +	loop_status=()	# track rerun-on-failure state
+> +	local tc_status ix
+> +	local -a _list=( $list )
+> +	for ((ix = 0; ix < ${#_list[*]}; !${#loop_status[*]} && ix++)); do
+> +		seq="${_list[$ix]}"
 > +
-> +$FSSTRESS_PROG -d $SCRATCH_MNT/stress -n 1000 >> $seqres.full
-
-Use "2>&1", if you'd like to avoid some fsstress error output break golden image.
-
-BTW, just for make, are you sure this can reproduce that bug? Due to that fix
-commit said:
-...
-    we can easily reproduce this problem with the following commands:
-            `fallocate -l100M disk`
-            `mkfs.ext4 -b 1024 -g 256 disk`
-            `mount disk /mnt`
-            `fsstress -d /mnt -l 0 -n 1000 -p 1`
-...
-
-It uses "-l 0" to loop run fsstress until hit the bug. You removed the '-l 0',
-so are you sure one round `fsstress -n 1000` is enough to reproduce this bug
-stably?
-
-Thanks,
-Zorro
-
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/058.out b/tests/ext4/058.out
-> new file mode 100644
-> index 00000000..fb5ca60b
-> --- /dev/null
-> +++ b/tests/ext4/058.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 058
-> +Silence is golden
+>  		if [ ! -f $seq ]; then
+>  			# Try to get full name in case the user supplied only
+>  			# seq id and the test has a name. A bit of hassle to
+> @@ -829,7 +878,9 @@ function run_section()
+>  		fi
+>  
+>  		# record that we really tried to run this test.
+> -		try+=("$seqnum")
+> +		if ((!${#loop_status[*]})); then
+> +			try+=("$seqnum")
+> +		fi
+>  
+>  		awk 'BEGIN {lasttime="       "} \
+>  		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
 > -- 
-> 2.13.6
+> 2.35.3
 > 
-
