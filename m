@@ -2,295 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49001C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:08:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2614C43334
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:20:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238270AbiGHPIP (ORCPT
+        id S238528AbiGHPU0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Jul 2022 11:08:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59496 "EHLO
+        Fri, 8 Jul 2022 11:20:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39972 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237977AbiGHPIP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:08:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2038361D4E;
-        Fri,  8 Jul 2022 08:08:14 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BA9D760B34;
-        Fri,  8 Jul 2022 15:08:13 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D0DAC341C6;
-        Fri,  8 Jul 2022 15:08:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1657292893;
-        bh=upStwKqoYbxAHZuaC5eK6/9bgoaMjoYWTR1yh4xO3XM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qUq45e5A6Wa4g6AKoNhfc2U4ImiIbLWerQEungxeQjCTzye6JKwFCFr9OZcENkSmW
-         mK3pBJLqfX3+DrBZme7SA6DSYUP4v3UzJWm2yRGQKtTkWWHgBW/JPlvfNq/9GSiZUD
-         khFoQvZPaLqw+7kLgInS43uZkOt1XZH13d5OVWEwJqx3Mq2Avq/VCLNwAfIgv0p5kI
-         rrtxDUbbjFLKo/zpWo1MWMCNDS2gT4W94iNX2SsRWPAOCy3nLtjVhvgxxyJkMJ5bCp
-         sjC1u6aaFQCZmqkPhTSh+W/rsC1rCNDF7pgewF5xons8T+xJCRjdRHOCKEeWmTYHoL
-         eHtx3VQ0+QTfA==
-Date:   Fri, 8 Jul 2022 08:08:12 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] xfs: make sure that we handle empty xattr leaf
- blocks ok
-Message-ID: <YshIXAFjJlym6SXV@magnolia>
-References: <165705854325.2821854.10317059026052442189.stgit@magnolia>
- <165705854877.2821854.7070105861462675249.stgit@magnolia>
- <20220707120639.qoqsfcwtmdyl5duv@zlang-mailbox>
- <YsckVj+Yw4h1xeVp@magnolia>
- <20220708004916.tiidmzowad2wi3g4@zlang-mailbox>
+        with ESMTP id S238395AbiGHPUZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:20:25 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 713A81C92F
+        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 08:20:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1657293623;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=0aso+p9eGYq+v6pFUF5uQ/7lDmfNnHm1Xte8Fgyvtc8=;
+        b=XCLF6ctvvasQMQjm0CxZM9ymRG5z4kdy0dSN04kGcGqGyKKY6FCn804C2qixIoCZoGHlI/
+        q4qJYveaLONWnY3GuUOoQbgGioJhyJU9rTezWgo3farSIvrc0oA5TxbyBsP8GAiGa6q9rZ
+        UBxRfc6BhuB9kKmM7yd5p40/hEhxmgI=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-661-XVTx9F9FPuGNtCrxOqnyKQ-1; Fri, 08 Jul 2022 11:20:22 -0400
+X-MC-Unique: XVTx9F9FPuGNtCrxOqnyKQ-1
+Received: by mail-qt1-f197.google.com with SMTP id o22-20020ac87c56000000b0031d4ab81b21so14940503qtv.1
+        for <fstests@vger.kernel.org>; Fri, 08 Jul 2022 08:20:22 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=0aso+p9eGYq+v6pFUF5uQ/7lDmfNnHm1Xte8Fgyvtc8=;
+        b=X3OmFLQSWtFUH0Z+/rmqeD4erTOV7y/hH1g6FEYb2purKYLLSy8zzlkCT+91iuaUZA
+         exrJGJk3EGQYXkHE+4HX5vGp1qFHM2cOUvT3vC268S8DKHgGpi5Btz9Vg7ulz7LKQ3NV
+         es/Y+knDTy4Me0hyh3JiFCTE/rhfDtd25fNS3je7Igb++Zd6Eus89oEhaRmY0ZE1vPyx
+         /M4KRNC4ZZ5QulHbwYWQz6XO8Fg3DGWqVERVHd6j4SG6RPAStv8vjci7XDEm0oW+2C8H
+         nb9GuZ8liUeMro8sK7iIRxelBkoNDyGKGk0GuXUbSV0XQMFhic+4CfxNVP5MmEZOgJNF
+         hfgg==
+X-Gm-Message-State: AJIora/9Xq3bY3l1/xj4Vd5X6glA0IXHYZ/0XHOCq5MYJMOWhqS5zEHh
+        5zvJCVl19JTtvbmx6/yAd8B7Xw4RPnu1dpX9UvIxv9xX2Hjq6qSKOAQbdQDT3TQS4Tuq3ZUPbmR
+        MGlKtYRm6kaGNNj5Z+A==
+X-Received: by 2002:a05:622a:410:b0:319:4e26:d0bd with SMTP id n16-20020a05622a041000b003194e26d0bdmr3396847qtx.593.1657293621341;
+        Fri, 08 Jul 2022 08:20:21 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vMObtzyqvcRumQ8pV8PwKAmWMleYQXJ9j77N3yQrCpG6LuJL9UPGjEQByjfTJlQdyJMOgjzQ==
+X-Received: by 2002:a05:622a:410:b0:319:4e26:d0bd with SMTP id n16-20020a05622a041000b003194e26d0bdmr3396822qtx.593.1657293621009;
+        Fri, 08 Jul 2022 08:20:21 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id b19-20020ae9eb13000000b006aee672937esm33742276qkg.37.2022.07.08.08.20.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Jul 2022 08:20:20 -0700 (PDT)
+Date:   Fri, 8 Jul 2022 23:20:14 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Sun Ke <sunke32@huawei.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH v2 2/2] ext4: set 256 blocks in a block group then apply
+ io pressure
+Message-ID: <20220708152014.bifm4u2wmdwj3mnf@zlang-mailbox>
+References: <20220708112155.2639551-1-sunke32@huawei.com>
+ <20220708112155.2639551-3-sunke32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220708004916.tiidmzowad2wi3g4@zlang-mailbox>
+In-Reply-To: <20220708112155.2639551-3-sunke32@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 08, 2022 at 08:49:16AM +0800, Zorro Lang wrote:
-> On Thu, Jul 07, 2022 at 11:22:14AM -0700, Darrick J. Wong wrote:
-> > On Thu, Jul 07, 2022 at 08:06:39PM +0800, Zorro Lang wrote:
-> > > On Tue, Jul 05, 2022 at 03:02:28PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > Make sure that the kernel can handle empty xattr leaf blocks properly,
-> > > > since we've screwed this up enough times.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
-> > > >  tests/xfs/845 |  131 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  1 file changed, 131 insertions(+)
-> > > >  create mode 100755 tests/xfs/845
-> > > > 
-> > > > 
-> > > > diff --git a/tests/xfs/845 b/tests/xfs/845
-> > > > new file mode 100755
-> > > > index 00000000..4a846e57
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/845
-> > > > @@ -0,0 +1,131 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> > > > +#
-> > > > +# FS QA Test 845
-> > > > +#
-> > > > +# Make sure that XFS can handle empty leaf xattr blocks correctly.  These
-> > > > +# blocks can appear in files as a result of system crashes in the middle of
-> > > > +# xattr operations, which means that we /must/ handle them gracefully.
-> > > > +# Check that read and write verifiers won't trip, that the get/list/setxattr
-> > > > +# operations don't stumble over them, and that xfs_repair will offer to remove
-> > > > +# the entire xattr fork if the root xattr leaf block is empty.
-> > > > +#
-> > > > +# Regression test for kernel commit:
-> > > > +#
-> > > > +# af866926d865 ("xfs: empty xattr leaf header blocks are not corruption")
-> > > > +#
-> > > > +. ./common/preamble
-> > > > +_begin_fstest auto quick attr
-> > > > +
-> > > > +# Override the default cleanup function.
-> > > > +# _cleanup()
-> > > > +# {
-> > > > +# 	cd /
-> > > > +# 	rm -r -f $tmp.*
-> > > > +# }
-> > > 
-> > > Remove this part directly?
-> > 
-> > Ok.
-> > 
-> > > > +
-> > > > +# Import common functions.
-> > > > +. ./common/filter
-> > > > +. ./common/attr
-> > > > +
-> > > > +# real QA test starts here
-> > > > +
-> > > > +# Modify as appropriate.
-> > >       ^^
-> > >       This comment is useless
-> > 
-> > Oops, will delete.
-> > 
-> > > > +_supported_fs xfs
-> > > > +_require_scratch
-> > > > +_fixed_by_kernel_commit af866926d865 "xfs: empty xattr leaf header blocks are not corruption"
-> > > > +
-> > > > +_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > > > +cat $tmp.mkfs >> $seqres.full
-> > > > +source $tmp.mkfs
-> > > > +_scratch_mount
-> > > > +
-> > > > +$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 64k' $SCRATCH_MNT/largefile >> $seqres.full
-> > > > +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $isize" $SCRATCH_MNT/smallfile >> $seqres.full
-> > > > +
-> > > > +smallfile_md5=$(md5sum < $SCRATCH_MNT/smallfile)
-> > > > +largefile_md5=$(md5sum < $SCRATCH_MNT/largefile)
-> > > 
-> > > Hmm... is the tail '-' (printed by md5sum) as you wish? How about use the
-> > > _md5_checksum() in common/rc ? (Same as below small_md5 and large_md5 part)
-> > 
-> > Ooh, nice suggestion.  I"ll convert the test.
-> > 
-> > > > +
-> > > > +# Try to force the creation of a single leaf block in each of three files.
-> > > > +# The first one gets a local attr, the second a remote attr, and the third
-> > > > +# is left for scrub and repair to find.
-> > > > +touch $SCRATCH_MNT/e0
-> > > > +touch $SCRATCH_MNT/e1
-> > > > +touch $SCRATCH_MNT/e2
-> > > > +
-> > > > +$ATTR_PROG -s x $SCRATCH_MNT/e0 < $SCRATCH_MNT/smallfile >> $seqres.full
-> > > > +$ATTR_PROG -s x $SCRATCH_MNT/e1 < $SCRATCH_MNT/smallfile >> $seqres.full
-> > > > +$ATTR_PROG -s x $SCRATCH_MNT/e2 < $SCRATCH_MNT/smallfile >> $seqres.full
-> > > > +
-> > > > +e0_ino=$(stat -c '%i' $SCRATCH_MNT/e0)
-> > > > +e1_ino=$(stat -c '%i' $SCRATCH_MNT/e1)
-> > > > +e2_ino=$(stat -c '%i' $SCRATCH_MNT/e2)
-> > > > +
-> > > > +_scratch_unmount
-> > > > +
-> > > > +# We used to think that it wasn't possible for empty xattr leaf blocks to
-> > > > +# exist, but it turns out that setting a large xattr on a file that has no
-> > > > +# xattrs can race with a log flush and crash, which results in an empty
-> > > > +# leaf block being logged and recovered.  This is rather hard to trip, so we
-> > > > +# use xfs_db to turn a regular leaf block into an empty one.
-> > > > +make_empty_leaf() {
-> > > > +	local inum="$1"
-> > > > +
-> > > > +	echo "editing inode $inum" >> $seqres.full
-> > > > +
-> > > > +	magic=$(_scratch_xfs_get_metadata_field hdr.info.magic "inode $inum" "ablock 0")
-> > > > +	if [ "$magic" = "0xfbee" ]; then
-> > > > +		_notrun "V4 filesystems deprecated"
-> > > 
-> > > Can _require_scratch_xfs_crc (at beginning) help that? Or is there a way to
-> > > get a v4 leaf block when crc isn't enabled?
-> > 
-> > Nope, that was an oversight on my part.  I'll add
-> > _require_scratch_xfs_crc to the start of the test.
-> > 
-> > > > +		return 1
-> > > 
-> > > I think _notrun will exit directly, this "return 1" never be run.
-> > 
-> > Yep.
-> > 
-> > > > +	fi
-> > > > +
-> > > > +	magic=$(_scratch_xfs_get_metadata_field hdr.info.hdr.magic "inode $inum" "ablock 0")
-> > > > +	if [ "$magic" != "0x3bee" ]; then
-> > > > +		echo "inode $inum ablock 0 is not a leaf block?"
-> > > > +		_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" -c print >> $seqres.full
-> > > > +		return 1
-> > > > +	fi
-> > > > +
-> > > > +	base=$(_scratch_xfs_get_metadata_field "hdr.freemap[0].base" "inode $inum" "ablock 0")
-> > > > +
-> > > > +	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" \
-> > > > +		-c "write -d hdr.count 0" \
-> > > > +		-c "write -d hdr.usedbytes 0" \
-> > > > +		-c "write -d hdr.firstused $dbsize" \
-> > > > +		-c "write -d hdr.freemap[0].size $((dbsize - base))" \
-> > > 
-> > > Nice trick:) Do we expect there's not corruption (can be found by xfs_repair)
-> > > at here?
-> > 
-> > Right.  We're setting up the empty leaf block 0 to check that the kernel
-> > and fsck tools do /not/ flag this as corruption.
-> > 
-> > > Or xfs_repair should blame the empty leaf block?
-> > 
-> > ...though repair run in not-dryrun mode will free the empty leaf block 0
-> > if it finds one.
-> > 
-> > > > +		-c print >> $seqres.full
-> > > > +}
-> > > > +
-> > > > +make_empty_leaf $e0_ino || exit
-> > > 
-> > > How about call _fail() directly in make_empty_leaf, if [ "$magic" != "0x3bee" ]
-> > 
-> > _require_scratch_xfs_crc should take care of that.
+On Fri, Jul 08, 2022 at 07:21:55PM +0800, Sun Ke wrote:
+> Set 256 blocks in a block group, then inject I/O pressure, it will
+> trigger off kernel BUG in ext4_mb_mark_diskspace_used.
 > 
-> Hmm... I think _require_scratch_xfs_crc will help this:
+> Regression test for commit a08f789d2ab5 ext4: fix bug_on
+> ext4_mb_use_inode_pa.
 > 
->   magic=$(_scratch_xfs_get_metadata_field hdr.info.magic "inode $inum" "ablock 0")
->   if [ "$magic" = "0xfbee" ]; then
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> ---
+>  tests/ext4/058     | 33 +++++++++++++++++++++++++++++++++
+>  tests/ext4/058.out |  2 ++
+>  2 files changed, 35 insertions(+)
+>  create mode 100755 tests/ext4/058
+>  create mode 100644 tests/ext4/058.out
 > 
-> but can't help this part:
-> 
->  magic=$(_scratch_xfs_get_metadata_field hdr.info.hdr.magic "inode $inum" "ablock 0")
->  if [ "$magic" != "0x3bee" ]; then
-> 
-> due to ablock 0 might be 0x3ebe (XFS_DA3_NODE_MAGIC) besides 0x3bee, although
-> it looks nearly not impossible in this test, as you only create one attr equal
-> to inode size :) So if we make sure it never be a node block, it's fine to
-> remove this judgement, or you can keep it for sure.
+> diff --git a/tests/ext4/058 b/tests/ext4/058
+> new file mode 100755
+> index 00000000..b718c1ac
+> --- /dev/null
+> +++ b/tests/ext4/058
+> @@ -0,0 +1,33 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 HUAWEI.  All Rights Reserved.
+> +#
+> +# FS QA Test 058
+> +#
+> +# Set 256 blocks in a block group, then inject I/O pressure,
+> +# it will trigger off kernel BUG in ext4_mb_mark_diskspace_used
+> +#
+> +# Regression test for commit
+> +# a08f789d2ab5 ext4: fix bug_on ext4_mb_use_inode_pa 
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto
 
-That's actually a good point, I should print out something if the magic
-number isn't 0x3bee, because that means a test precondition was not
-satisfied.
+quick ?
 
-(Granted, anything other than a leaf block and the _set commands will
-spray errors, but we could be explicit about not finding the leaf block
-we expected to see.)
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs ext4
+> +_fixed_by_kernel_commit a08f789d2ab5 \
+> +	"ext4: fix bug_on ext4_mb_use_inode_pa"
+> +_require_scratch
+> +
+> +# set 256 blocks in a block group
+> +_scratch_mkfs -g 256 >>$seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +$FSSTRESS_PROG -d $SCRATCH_MNT/stress -n 1000 >> $seqres.full
 
---D
+Use "2>&1", if you'd like to avoid some fsstress error output break golden image.
 
-> Thanks,
-> Zorro
+BTW, just for make, are you sure this can reproduce that bug? Due to that fix
+commit said:
+...
+    we can easily reproduce this problem with the following commands:
+            `fallocate -l100M disk`
+            `mkfs.ext4 -b 1024 -g 256 disk`
+            `mount disk /mnt`
+            `fsstress -d /mnt -l 0 -n 1000 -p 1`
+...
+
+It uses "-l 0" to loop run fsstress until hit the bug. You removed the '-l 0',
+so are you sure one round `fsstress -n 1000` is enough to reproduce this bug
+stably?
+
+Thanks,
+Zorro
+
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ext4/058.out b/tests/ext4/058.out
+> new file mode 100644
+> index 00000000..fb5ca60b
+> --- /dev/null
+> +++ b/tests/ext4/058.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 058
+> +Silence is golden
+> -- 
+> 2.13.6
 > 
-> > 
-> > > > +make_empty_leaf $e1_ino
-> > > > +make_empty_leaf $e2_ino
-> > > > +
-> > > > +_scratch_mount
-> > > > +
-> > > > +# Check that listxattr/getxattr/removexattr do nothing.
-> > > > +$ATTR_PROG -l $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-> > > > +$ATTR_PROG -g x $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-> > > > +$ATTR_PROG -r x $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-> > > > +
-> > > > +# Add a small attr to e0
-> > > > +$ATTR_PROG -s x $SCRATCH_MNT/e0 < $SCRATCH_MNT/smallfile > /dev/null
-> > > > +$ATTR_PROG -l $SCRATCH_MNT/e0 2>&1 | sed -e 's/\([0-9]*\) byte/XXX byte/g' | _filter_scratch
-> > > > +small_md5="$($GETFATTR_PROG -n user.x --absolute-names --only-values $SCRATCH_MNT/e0 | md5sum)"
-> > > > +test "$small_md5" = "$smallfile_md5" || \
-> > > > +	echo "smallfile $smallfile_md5 does not match small attr $small_md5"
-> > > > +
-> > > > +# Add a large attr to e1
-> > > > +$ATTR_PROG -s x $SCRATCH_MNT/e1 < $SCRATCH_MNT/largefile > /dev/null
-> > > > +$ATTR_PROG -l $SCRATCH_MNT/e1 2>&1 | _filter_scratch
-> > > > +large_md5="$($GETFATTR_PROG -n user.x --absolute-names --only-values $SCRATCH_MNT/e1 | md5sum)"
-> > > > +test "$large_md5" = "$largefile_md5" || \
-> > > > +	echo "largefile $largefile_md5 does not match large attr $large_md5"
-> > > > +
-> > > > +
-> > > > +# Leave e2 to try to trip the repair tools, since xfs_repair used to flag
-> > > > +# empty leaf blocks incorrectly too.
-> > > 
-> > > So we expect there's not corruption at here, and the empty leaf block can
-> > > be used properly?
-> > 
-> > Correct.
-> > 
-> > --D
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > +
-> > > > +# success, all done
-> > > > +status=0
-> > > > +exit
-> > > > 
-> > > 
-> > 
-> 
+
