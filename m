@@ -2,188 +2,165 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D56A8C43334
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 08:51:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47026C43334
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 11:03:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237646AbiGHIv4 (ORCPT
+        id S237375AbiGHLDm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Jul 2022 04:51:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48978 "EHLO
+        Fri, 8 Jul 2022 07:03:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237651AbiGHIvu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 04:51:50 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7386823BE
-        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 01:51:49 -0700 (PDT)
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id 7778D21E73;
-        Fri,  8 Jul 2022 08:51:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1657270308; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=z32yBV3xcygo/Qzl/kOZ/6GVDykIHQMRoXQ4H9nbuu0=;
-        b=AjP4/A45zk94DeLPSW4G79qiwQqOrNwCHkj73hX9xEBwpvwX4Cw16Fv9ZNjDCb53f8QZIz
-        dp0V8FuFhSH9qCGofC7LkgDAgJCu6odHWqEa0+0N3rFHQmMPqTO/mSM2NvkaHgOqr2d/fb
-        7zaK/c4mrZoo6b2QBbnHKXZZIs2Y2QE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1657270308;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=z32yBV3xcygo/Qzl/kOZ/6GVDykIHQMRoXQ4H9nbuu0=;
-        b=wrpR6cAnIP5tP7+XSbh3Ay+5koNcbMgbcSgHIKpaYMM5H85T4xDbw67JJTF3l07oi9bk9W
-        mHGQRwP4bYhSjvAg==
-Received: from echidna.suse.de (unknown [10.163.47.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id 4C5B82C146;
-        Fri,  8 Jul 2022 08:51:48 +0000 (UTC)
-From:   David Disseldorp <ddiss@suse.de>
-To:     fstests@vger.kernel.org, tytso@mit.edu
-Cc:     djwong@kernel.org, zlang@redhat.com,
-        David Disseldorp <ddiss@suse.de>
-Subject: [PATCH v4 5/5] check: add -L <n> parameter to rerun failed tests
-Date:   Fri,  8 Jul 2022 10:51:42 +0200
-Message-Id: <20220708085142.20991-6-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20220708085142.20991-1-ddiss@suse.de>
-References: <20220708085142.20991-1-ddiss@suse.de>
+        with ESMTP id S238006AbiGHLDj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 07:03:39 -0400
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC0FF642D;
+        Fri,  8 Jul 2022 04:03:37 -0700 (PDT)
+Received: from dggemv703-chm.china.huawei.com (unknown [172.30.72.55])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4LfVjx5WdmzpWCP;
+        Fri,  8 Jul 2022 19:02:45 +0800 (CST)
+Received: from kwepemm600010.china.huawei.com (7.193.23.86) by
+ dggemv703-chm.china.huawei.com (10.3.19.46) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Fri, 8 Jul 2022 19:03:35 +0800
+Received: from [10.174.178.31] (10.174.178.31) by
+ kwepemm600010.china.huawei.com (7.193.23.86) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Fri, 8 Jul 2022 19:03:35 +0800
+Subject: Re: [PATCH 2/2] ext4/058: set 256 blocks in a block group Set 256
+ blocks in a block group
+To:     Zorro Lang <zlang@redhat.com>
+CC:     <fstests@vger.kernel.org>, <linux-ext4@vger.kernel.org>
+References: <20220707135917.373342-1-sunke32@huawei.com>
+ <20220707135917.373342-3-sunke32@huawei.com>
+ <20220707151833.72ggvyxjzz2e42kh@zlang-mailbox>
+From:   Sun Ke <sunke32@huawei.com>
+Message-ID: <5b019cf0-02ee-b7b8-9f08-b48e96ac74e8@huawei.com>
+Date:   Fri, 8 Jul 2022 19:03:34 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.1
 MIME-Version: 1.0
+In-Reply-To: <20220707151833.72ggvyxjzz2e42kh@zlang-mailbox>
+Content-Type: text/plain; charset="gbk"; format=flowed
 Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.178.31]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ kwepemm600010.china.huawei.com (7.193.23.86)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If check is run with -L <n>, then a failed test will be rerun <n> times
-before proceeding to the next test. Following completion of the rerun
-loop, aggregate pass/fail statistics are printed.
+Thanks for your suggestions, I will improve them in v2.
 
-Rerun tests will be tracked as a single failure in overall pass/fail
-metrics (via @try and @bad), with .out.bad, .dmesg, .core, .hints,
-.notrun and .full saved using a .rerun# suffix.
-
-Suggested-by: Theodore Ts'o <tytso@mit.edu>
-Link: https://lwn.net/Articles/897061/
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
- check | 57 ++++++++++++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 54 insertions(+), 3 deletions(-)
-
-diff --git a/check b/check
-index 6dbdb2a8..5f6d86b4 100755
---- a/check
-+++ b/check
-@@ -26,6 +26,7 @@ do_report=false
- DUMP_OUTPUT=false
- iterations=1
- istop=false
-+loop_on_fail=0
- 
- # This is a global variable used to pass test failure text to reporting gunk
- _err_msg=""
-@@ -78,6 +79,7 @@ check options
-     --large-fs		optimise scratch device for large filesystems
-     -s section		run only specified section from config file
-     -S section		exclude the specified section from the config file
-+    -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
- 
- testlist options
-     -g group[,group...]	include tests from these groups
-@@ -336,6 +338,9 @@ while [ $# -gt 0 ]; do
- 		;;
- 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
- 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
-+	-L)	[[ $2 =~ ^[0-9]+$ ]] || usage
-+		loop_on_fail=$2; shift
-+		;;
- 
- 	-*)	usage ;;
- 	*)	# not an argument, we've got tests now.
-@@ -553,6 +558,19 @@ _expunge_test()
- 	return 0
- }
- 
-+# retain files which would be overwritten in subsequent reruns of the same test
-+_stash_fail_loop_files() {
-+	local seq_prefix="${REPORT_DIR}/${1}"
-+	local cp_suffix="$2"
-+
-+	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints"; do
-+		rm -f "${seq_prefix}${i}${cp_suffix}"
-+		if [ -f "${seq_prefix}${i}" ]; then
-+			cp "${seq_prefix}${i}" "${seq_prefix}${i}${cp_suffix}"
-+		fi
-+	done
-+}
-+
- # Retain in @bad / @notrun the result of the just-run @test_seq. @try array
- # entries are added prior to execution.
- _stash_test_status() {
-@@ -564,8 +582,35 @@ _stash_test_status() {
- 				      "$test_status" "$((stop - start))"
- 	fi
- 
-+	if ((${#loop_status[*]} > 0)); then
-+		# continuing or completing rerun-on-failure loop
-+		_stash_fail_loop_files "$test_seq" ".rerun${#loop_status[*]}"
-+		loop_status+=("$test_status")
-+		if ((${#loop_status[*]} > loop_on_fail)); then
-+			printf "%s aggregate results across %d runs: " \
-+				"$test_seq" "${#loop_status[*]}"
-+			awk "BEGIN {
-+				n=split(\"${loop_status[*]}\", arr);"'
-+				for (i = 1; i <= n; i++)
-+					stats[arr[i]]++;
-+				for (x in stats)
-+					printf("%s=%d (%.1f%%)",
-+					       (i-- > n ? x : ", " x),
-+					       stats[x], 100 * stats[x] / n);
-+				}'
-+			echo
-+			loop_status=()
-+		fi
-+		return	# only stash @bad result for initial failure in loop
-+	fi
-+
- 	case "$test_status" in
- 	fail)
-+		if ((loop_on_fail > 0)); then
-+			# initial failure, start rerun-on-failure loop
-+			_stash_fail_loop_files "$test_seq" ".rerun0"
-+			loop_status+=("$test_status")
-+		fi
- 		bad+=("$test_seq")
- 		;;
- 	list|notrun)
-@@ -758,8 +803,12 @@ function run_section()
- 	seqres="$check"
- 	_check_test_fs
- 
--	local tc_status
--	for seq in $list ; do
-+	loop_status=()	# track rerun-on-failure state
-+	local tc_status ix
-+	local -a _list=( $list )
-+	for ((ix = 0; ix < ${#_list[*]}; !${#loop_status[*]} && ix++)); do
-+		seq="${_list[$ix]}"
-+
- 		if [ ! -f $seq ]; then
- 			# Try to get full name in case the user supplied only
- 			# seq id and the test has a name. A bit of hassle to
-@@ -829,7 +878,9 @@ function run_section()
- 		fi
- 
- 		# record that we really tried to run this test.
--		try+=("$seqnum")
-+		if ((!${#loop_status[*]})); then
-+			try+=("$seqnum")
-+		fi
- 
- 		awk 'BEGIN {lasttime="       "} \
- 		     $1 == "'$seqnum'" {lasttime=" " $2 "s ... "; exit} \
--- 
-2.35.3
-
+ÔÚ 2022/7/7 23:18, Zorro Lang Ð´µÀ:
+> On Thu, Jul 07, 2022 at 09:59:17PM +0800, Sun Ke wrote:
+>> Set 256 blocks in a block group, then inject I/O pressure, it will
+>> trigger off kernel BUG in ext4_mb_mark_diskspace_used.
+>>
+>> Regression test for commit a08f789d2ab5 ext4: fix bug_on
+>> ext4_mb_use_inode_pa.
+>>
+>> Signed-off-by: Sun Ke <sunke32@huawei.com>
+>> ---
+> 
+> About the subject:
+> "ext4/058: set 256 blocks in a block group Set 256 blocks in a block group"
+> 
+> Don't use a fixed number for new case, you can use "ext4: ...". And I can't
+> understand the meaning of this subject, except you say it's a duplicate :)
+> 
+> 
+>>   tests/ext4/058     | 37 +++++++++++++++++++++++++++++++++++++
+>>   tests/ext4/058.out |  2 ++
+>>   2 files changed, 39 insertions(+)
+>>   create mode 100755 tests/ext4/058
+>>   create mode 100644 tests/ext4/058.out
+>>
+>> diff --git a/tests/ext4/058 b/tests/ext4/058
+>> new file mode 100755
+>> index 00000000..dc7903b7
+>> --- /dev/null
+>> +++ b/tests/ext4/058
+>> @@ -0,0 +1,37 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2022 HUAWEI.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 058
+>> +#
+>> +# Set 256 blocks in a block group, then inject I/O pressure,
+>> +# it will trigger off kernel BUG in ext4_mb_mark_diskspace_used
+>> +#
+>> +# Regression test for commit
+>> +# a08f789d2ab5 ext4: fix bug_on ext4_mb_use_inode_pa
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>       ^^^
+> 
+> This's comment can be removed.
+> 
+>> +_supported_fs generic
+> 
+> If it's a ext4 specific test case, don't use "generic" at here.
+> 
+> And _fixed_by_kernel_commit() is recommend.
+> 
+>> +_require_scratch
+>> +_require_command "$KILLALL_PROG" killall
+>> +
+>> +# set 256 blocks in a block group
+>> +MKFS_OPTIONS="-g 256"
+>> +_scratch_mkfs >>$seqres.full 2>&1
+> 
+> I think
+>    _scratch_mkfs_ext4 -g 256 >>$seqres.full 2>&1
+> is enough. Does other mkfs options will affect this testing?
+> 
+> Or make sure mkfs passed:
+> _scratch_mkfs -g 256 >>$seqres.full 2>&1 || _fail "mkfs failed"
+> 
+>> +_scratch_mount
+>> +
+>> +$FSSTRESS_PROG -d $SCRATCH_MNT -n 1000 -p 1 >> $seqres.full 2>&1 &
+> 
+> Is "-p 1" necessary?
+> 
+>> +sleep 3
+>> +$KILLALL_PROG -q $FSSTRESS_PROG
+>> +wait
+> 
+> Hmm.... one more background fsstress test case again ... if so, you need to make
+> sure the fsstress processes be killed in _cleanup(). Please refer to other cases.
+> 
+> Besides that, I'm wondering if you really need to run fsstress in background?
+> Due to from the code logic, you run and kill it directly, then do nothing.
+> What special reason cause you have to run fsstress as that?
+> 
+> Thanks,
+> Zorro
+> 
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/ext4/058.out b/tests/ext4/058.out
+>> new file mode 100644
+>> index 00000000..fb5ca60b
+>> --- /dev/null
+>> +++ b/tests/ext4/058.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 058
+>> +Silence is golden
+>> -- 
+>> 2.13.6
+>>
+> 
+> .
+> 
