@@ -2,193 +2,168 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7CA6C433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:32:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C1F4C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Jul 2022 15:47:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238363AbiGHPcH (ORCPT
+        id S238499AbiGHPrv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Jul 2022 11:32:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50186 "EHLO
+        Fri, 8 Jul 2022 11:47:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237833AbiGHPcF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:32:05 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87AC95C9FE;
-        Fri,  8 Jul 2022 08:32:04 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 3D2E7B828A5;
-        Fri,  8 Jul 2022 15:32:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE5DCC341C6;
-        Fri,  8 Jul 2022 15:32:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1657294321;
-        bh=2gMNkfyYf62t5nnhb2rcw1TZFjxiaH8d8IpE4BKS1BI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=j2FXqUGTJ0Kp4d8CJyeP9fRDYS3ncQHDMs+HF8Yi4A3EiqnihIEiBJPGithtBNDFy
-         3ng37wsWgvLjBWiag/o7WvukPNeKuKFiHXGBMNEWlfoiGeDzmRRmg2569bPkKtELzk
-         zZxhZD/evV/VUTORXm8iqqOmym+sJ+WVbHAwvW7O/kbmJCwE5wIx36kguUCSIfThIF
-         CVo0BQMUb612q0S3U7lgxUr25UOXztpnTffoXxfnPrGHxgjSyaXq5VDSKgNwwRqqNH
-         6GL2u+4peyJo99BYEFaI2LNhF/aGtugUG5ukiJ/Rn+5Jpuka3/UFVmHHfLa1xLIGV5
-         aZVYaPb9/AzEQ==
-Date:   Fri, 8 Jul 2022 08:32:01 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     guaneryu@gmail.com, zlang@redhat.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: [PATCH v1.1 1/2] xfs: make sure that we handle empty xattr leaf
- blocks ok
-Message-ID: <YshN8cIvhmVRvm/m@magnolia>
+        with ESMTP id S238439AbiGHPru (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jul 2022 11:47:50 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 057D42F03F
+        for <fstests@vger.kernel.org>; Fri,  8 Jul 2022 08:47:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1657295269;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=1x7w4B8KkRbbLPOBK5w5COBwCSETd53dAVljfr2ix5E=;
+        b=C7xHDIYT+4Lm+Ge0phqdHusa4+AxETpo0dz7HgNtL8Q4LT3q2zoSNP9q+gu5sTMz+ABR+t
+        QBWsvbJNdujvO9YeIASzNl4uiYOKGcKIse0puWSffx2u5npvTaX9r8gYf+U4+UHelEan8D
+        CQDc5VltJ2zb0XTqdkTmQ2yzyyqYMy8=
+Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
+ [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-110-xePwP7RKMz-u-bK3y50Dyg-1; Fri, 08 Jul 2022 11:47:48 -0400
+X-MC-Unique: xePwP7RKMz-u-bK3y50Dyg-1
+Received: by mail-qk1-f197.google.com with SMTP id f10-20020a05620a408a00b006b267fdf71fso19241318qko.6
+        for <fstests@vger.kernel.org>; Fri, 08 Jul 2022 08:47:47 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=1x7w4B8KkRbbLPOBK5w5COBwCSETd53dAVljfr2ix5E=;
+        b=fWwjmd48QP+TKt1JuYAWwBHS+rqn35aHaWX19B/43TYCe+0Q0BjhCInAfoIdqFvrR9
+         4mHA550HuZvhH7bTo+1ErOn/QWcsZtIcPfAwiQpkzYYp4T8YEg5rEhxV/dRoU8bm54gL
+         9h0aqzVKAtSgZELNtxgnVpbF5GPOv70OXAmbZ8D2Qlfsj4RRM46V+b1+G+ozQHCdE9OL
+         uQ2xv9PTIM2lJN38LEeRSwu7iRwCP9kQeijHAdWo7YypVSrD6M8LvD6h8UWiEwb6tQSo
+         SWIVumb6nlr/6wk4Y2ewmf3Cs7FUDEDz6ypIdqSbJRFIZd82S4nUr3OgDmEEb5a0Ffqn
+         c1Lw==
+X-Gm-Message-State: AJIora9dxjc8fn+PPmFZjbQIz8/go3eA7WulT6qphfj02PmFXE280CNG
+        QtLWNq/KrlmOBkBOVD3IeIfxIJOZCkF1uRCm/kIk2G/y05qIAAGvp6/LjSg9u+M4Pof6nKYLuBK
+        MvR3M2GEsKlpBlWAhIw==
+X-Received: by 2002:a05:620a:d54:b0:6b2:5a9b:ef2e with SMTP id o20-20020a05620a0d5400b006b25a9bef2emr2786425qkl.715.1657295267243;
+        Fri, 08 Jul 2022 08:47:47 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vPSt5KNlOnkU/SYB+AC3XD5ZpJVVYDDOVQRKvwSOqEDp/UTr/LW6Cmrp/TMB0a4D22GJBoiQ==
+X-Received: by 2002:a05:620a:d54:b0:6b2:5a9b:ef2e with SMTP id o20-20020a05620a0d5400b006b25a9bef2emr2786410qkl.715.1657295266963;
+        Fri, 08 Jul 2022 08:47:46 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y21-20020ac87095000000b0031b18d29864sm21940875qto.64.2022.07.08.08.47.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Jul 2022 08:47:46 -0700 (PDT)
+Date:   Fri, 8 Jul 2022 23:47:41 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] xfs/288: skip repair -n when checking empty root
+ leaf block behavior
+Message-ID: <20220708154741.elvskagzrsynbw4o@zlang-mailbox>
 References: <165705854325.2821854.10317059026052442189.stgit@magnolia>
- <165705854877.2821854.7070105861462675249.stgit@magnolia>
+ <165705855433.2821854.6003804324518144422.stgit@magnolia>
+ <20220707122525.so6alaa63hdz3bbx@zlang-mailbox>
+ <YschFMW4rVuQz9Mi@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <165705854877.2821854.7070105861462675249.stgit@magnolia>
+In-Reply-To: <YschFMW4rVuQz9Mi@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Jul 07, 2022 at 11:08:20AM -0700, Darrick J. Wong wrote:
+> On Thu, Jul 07, 2022 at 08:25:25PM +0800, Zorro Lang wrote:
+> > On Tue, Jul 05, 2022 at 03:02:34PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > Update this test to reflect the (once again) corrected behavior of the
+> > > xattr leaf block verifiers.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > >  tests/xfs/288 |   32 +++++++++++++-------------------
+> > >  1 file changed, 13 insertions(+), 19 deletions(-)
+> > > 
+> > > 
+> > > diff --git a/tests/xfs/288 b/tests/xfs/288
+> > > index e3d230e9..aa664a26 100755
+> > > --- a/tests/xfs/288
+> > > +++ b/tests/xfs/288
+> > > @@ -8,7 +8,7 @@
+> > >  # that leaf directly (as xfsprogs commit f714016).
+> > >  #
+> > >  . ./common/preamble
+> > > -_begin_fstest auto quick repair fuzzers
+> > > +_begin_fstest auto quick repair fuzzers attr
+> > >  
+> > >  # Import common functions.
+> > >  . ./common/filter
+> > > @@ -50,25 +50,19 @@ if [ "$count" != "0" ]; then
+> > >  	_notrun "xfs_db can't set attr hdr.count to 0"
+> > >  fi
+> > >  
+> > > -# make sure xfs_repair can find above corruption. If it can't, that
+> > > -# means we need to fix this bug on current xfs_repair
+> > > -_scratch_xfs_repair -n >> $seqres.full 2>&1
+> > 
+> > So we drop the `xfs_repair -n` test.
+> 
+> Yep.
+> 
+> > Will the latest xfs_repair fail or pass on that? I'm wondering what's the expect
+> > result of `xfs_repair -n` on a xfs with empty leaf? Should it report errors,
+> > or nothing wrong?
+> 
+> xfs_repair -n no longer fails on attr block 0 being an empty leaf block
+> since those are part of the ondisk format and are not a corruption.
+> 
+> xfs_repair (without the -n) will clear the attr fork since there aren't
+> any xattrs if attr block 0 is empty.
 
-Make sure that the kernel can handle empty xattr leaf blocks properly,
-since we've screwed this up enough times.
+Thanks for the explain.
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
-v1.1: adopt maintainer's refactoring suggestions, skip v4 filesystems
-from the start, and check that we really get an attr leaf block.
----
- tests/xfs/845 |  123 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 123 insertions(+)
- create mode 100755 tests/xfs/845
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-diff --git a/tests/xfs/845 b/tests/xfs/845
-new file mode 100755
-index 00000000..0b7f4bff
---- /dev/null
-+++ b/tests/xfs/845
-@@ -0,0 +1,123 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 845
-+#
-+# Make sure that XFS can handle empty leaf xattr blocks correctly.  These
-+# blocks can appear in files as a result of system crashes in the middle of
-+# xattr operations, which means that we /must/ handle them gracefully.
-+# Check that read and write verifiers won't trip, that the get/list/setxattr
-+# operations don't stumble over them, and that xfs_repair will offer to remove
-+# the entire xattr fork if the root xattr leaf block is empty.
-+#
-+# Regression test for kernel commit:
-+#
-+# af866926d865 ("xfs: empty xattr leaf header blocks are not corruption")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick attr
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+
-+_supported_fs xfs
-+_require_scratch
-+_require_scratch_xfs_crc # V4 is deprecated
-+_fixed_by_kernel_commit af866926d865 "xfs: empty xattr leaf header blocks are not corruption"
-+
-+_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-+cat $tmp.mkfs >> $seqres.full
-+source $tmp.mkfs
-+_scratch_mount
-+
-+$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 64k' $SCRATCH_MNT/largefile >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $isize" $SCRATCH_MNT/smallfile >> $seqres.full
-+
-+smallfile_md5=$(_md5_checksum $SCRATCH_MNT/smallfile)
-+largefile_md5=$(_md5_checksum $SCRATCH_MNT/largefile)
-+
-+# Try to force the creation of a single leaf block in each of three files.
-+# The first one gets a local attr, the second a remote attr, and the third
-+# is left for scrub and repair to find.
-+touch $SCRATCH_MNT/e0
-+touch $SCRATCH_MNT/e1
-+touch $SCRATCH_MNT/e2
-+
-+$ATTR_PROG -s x $SCRATCH_MNT/e0 < $SCRATCH_MNT/smallfile >> $seqres.full
-+$ATTR_PROG -s x $SCRATCH_MNT/e1 < $SCRATCH_MNT/smallfile >> $seqres.full
-+$ATTR_PROG -s x $SCRATCH_MNT/e2 < $SCRATCH_MNT/smallfile >> $seqres.full
-+
-+e0_ino=$(stat -c '%i' $SCRATCH_MNT/e0)
-+e1_ino=$(stat -c '%i' $SCRATCH_MNT/e1)
-+e2_ino=$(stat -c '%i' $SCRATCH_MNT/e2)
-+
-+_scratch_unmount
-+
-+# We used to think that it wasn't possible for empty xattr leaf blocks to
-+# exist, but it turns out that setting a large xattr on a file that has no
-+# xattrs can race with a log flush and crash, which results in an empty
-+# leaf block being logged and recovered.  This is rather hard to trip, so we
-+# use xfs_db to turn a regular leaf block into an empty one.
-+make_empty_leaf() {
-+	local inum="$1"
-+
-+	echo "editing inode $inum" >> $seqres.full
-+
-+	magic=$(_scratch_xfs_get_metadata_field hdr.info.magic "inode $inum" "ablock 0")
-+	if [ "$magic" != "0x3bee" ]; then
-+		echo "attr block 0 expected magic 0x3bee, got $magic??"
-+	fi
-+
-+	magic=$(_scratch_xfs_get_metadata_field hdr.info.hdr.magic "inode $inum" "ablock 0")
-+	if [ "$magic" != "0x3bee" ]; then
-+		echo "inode $inum ablock 0 is not a leaf block?"
-+		_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" -c print >> $seqres.full
-+		return 1
-+	fi
-+
-+	base=$(_scratch_xfs_get_metadata_field "hdr.freemap[0].base" "inode $inum" "ablock 0")
-+
-+	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" \
-+		-c "write -d hdr.count 0" \
-+		-c "write -d hdr.usedbytes 0" \
-+		-c "write -d hdr.firstused $dbsize" \
-+		-c "write -d hdr.freemap[0].size $((dbsize - base))" \
-+		-c print >> $seqres.full
-+}
-+
-+make_empty_leaf $e0_ino
-+make_empty_leaf $e1_ino
-+make_empty_leaf $e2_ino
-+
-+_scratch_mount
-+
-+# Check that listxattr/getxattr/removexattr do nothing.
-+$ATTR_PROG -l $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-+$ATTR_PROG -g x $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-+$ATTR_PROG -r x $SCRATCH_MNT/e0 2>&1 | _filter_scratch
-+
-+# Add a small attr to e0
-+$ATTR_PROG -s x $SCRATCH_MNT/e0 < $SCRATCH_MNT/smallfile > /dev/null
-+$ATTR_PROG -l $SCRATCH_MNT/e0 2>&1 | sed -e 's/\([0-9]*\) byte/XXX byte/g' | _filter_scratch
-+small_md5="$($GETFATTR_PROG -n user.x --absolute-names --only-values $SCRATCH_MNT/e0 | _md5_checksum)"
-+test "$small_md5" = "$smallfile_md5" || \
-+	echo "smallfile $smallfile_md5 does not match small attr $small_md5"
-+
-+# Add a large attr to e1
-+$ATTR_PROG -s x $SCRATCH_MNT/e1 < $SCRATCH_MNT/largefile > /dev/null
-+$ATTR_PROG -l $SCRATCH_MNT/e1 2>&1 | _filter_scratch
-+large_md5="$($GETFATTR_PROG -n user.x --absolute-names --only-values $SCRATCH_MNT/e1 | _md5_checksum)"
-+test "$large_md5" = "$largefile_md5" || \
-+	echo "largefile $largefile_md5 does not match large attr $large_md5"
-+
-+
-+# Leave e2 to try to trip the repair tools, since xfs_repair used to flag
-+# empty leaf blocks incorrectly too.
-+
-+# success, all done
-+status=0
-+exit
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > -if [ $? -eq 0 ];then
+> > > -	_fail "xfs_repair can't find the corruption"
+> > > -else
+> > > -	# If xfs_repair can find this corruption, then this repair
+> > > -	# should junk above leaf attribute and fix this XFS.
+> > > -	_scratch_xfs_repair >> $seqres.full 2>&1
+> > > +# Check that xfs_repair discards the attr fork if block 0 is an empty leaf
+> > > +# block.  Empty leaf blocks at the start of the xattr data can be a byproduct
+> > > +# of a shutdown race, and hence are not a corruption.
+> > > +_scratch_xfs_repair >> $seqres.full 2>&1
+> > >  
+> > > -	# Old xfs_repair maybe find and fix this corruption by
+> > > -	# reset the first used heap value and the usedbytes cnt
+> > > -	# in ablock 0. That's not what we want. So check if
+> > > -	# xfs_repair has junked the whole ablock 0 by xfs_db.
+> > > -	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
+> > > -		grep -q "no attribute data"
+> > > -	if [ $? -ne 0 ]; then
+> > > -		_fail "xfs_repair didn't junk the empty attr leaf"
+> > > -	fi
+> > > +# Old xfs_repair maybe find and fix this corruption by
+> > > +# reset the first used heap value and the usedbytes cnt
+> > > +# in ablock 0. That's not what we want. So check if
+> > > +# xfs_repair has junked the whole ablock 0 by xfs_db.
+> > > +_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" | \
+> > > +	grep -q "no attribute data"
+> > > +if [ $? -ne 0 ]; then
+> > > +	_fail "xfs_repair didn't junk the empty attr leaf"
+> > >  fi
+> > >  
+> > >  echo "Silence is golden"
+> > > 
+> > 
+> 
+
