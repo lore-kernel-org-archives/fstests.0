@@ -2,117 +2,174 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC33FC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Jul 2022 22:01:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7257FC43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 15 Jul 2022 18:08:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240913AbiGNWA7 (ORCPT
+        id S229631AbiGOSI2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Jul 2022 18:00:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52952 "EHLO
+        Fri, 15 Jul 2022 14:08:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232682AbiGNWA7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Jul 2022 18:00:59 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5CCB6F7F6;
-        Thu, 14 Jul 2022 15:00:57 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26EM0YUF022715
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 14 Jul 2022 18:00:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1657836036; bh=gz6NEiHl+Wfm06ezTz46glT2Zntk28auy/eqXN3YzXI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=F9Og2YD4r+T/BRD84RKkst4u13clEyr8OFy5SntKI1ekmOuVoPDE2Skkxoj8gjwMQ
-         UC16LXV6cOk9QkbShGTmnhdSTApGfCN+WCr2Gca14nqUdg7awn6aFm4+skeiEXzUpO
-         2wUKp5ZDK7nJ2XzJCNWiLIwPMnYgWPCKJmzXKcKvKhT3w5yFoeZHKlDDdfwSxKwjth
-         bLLH+mo2ISx3eT8+cZJAvD7xkoSLvzHjYUWpb9H4oG5DXcdgVBcLcDWA5uTD6WWZwO
-         hfO09uhh0SO3PUP+c3djOsr/WLnt5UDQ/1Uzy6vIDd9BAHob5ixRlInwtIU1iuMLIP
-         ixxJIOpfbVKGg==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 5656F15C003C; Thu, 14 Jul 2022 18:00:34 -0400 (EDT)
-Date:   Thu, 14 Jul 2022 18:00:34 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Sun Ke <sunke32@huawei.com>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org
+        with ESMTP id S229573AbiGOSI1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Jul 2022 14:08:27 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8E4BF63925
+        for <fstests@vger.kernel.org>; Fri, 15 Jul 2022 11:08:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1657908505;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=1rPBnU2RUL5AiOnVTAOyHK1wMfPi1LA04wHJim9tiyk=;
+        b=adHsiFRPy/NFlLWg+piPlEWewI8VuGdpVC5/S3pfO01qeF1kwb2ttCn59tbSjfNhKe7B7K
+        3DHUeRa5DTw/ALSwV8OouVUaRX6XeQquLBgGPFT+F0mVleppjukiUppgfX3NVy2gHhPAvW
+        M7CwRhWK4s8jDFsVR3Qs2aeIHCZ8lHE=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-490-lfxvQX8lNY-5VvuzB5y1rg-1; Fri, 15 Jul 2022 14:08:24 -0400
+X-MC-Unique: lfxvQX8lNY-5VvuzB5y1rg-1
+Received: by mail-qk1-f200.google.com with SMTP id bl27-20020a05620a1a9b00b0069994eeb30cso3953870qkb.11
+        for <fstests@vger.kernel.org>; Fri, 15 Jul 2022 11:08:24 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=1rPBnU2RUL5AiOnVTAOyHK1wMfPi1LA04wHJim9tiyk=;
+        b=GEmchE8xUkyQfiurI1EAnmQ8f5seonPeG9Bw9Q+2KN63ZBpcp36Vv/vJHURF5a54lT
+         ZoRZtu3QWJSDr9Lo5jnv3IQZ6v/+Pifn37VDjGdpD31iMVk3v/LwjnTEx6IQWys+tbS4
+         ltdDNIsHyk0dZXi+17I7mHVC7wSe1fgTIJD3S3VXLNldTaCt1+p3xmvOzC/lzfeY5gLy
+         sHg6TrRq/DmFpFGsljUOakhwy32igwksrC6QM9DNncYp2qrhgTCdH7Co7MSi/4G+DO3n
+         HDZOXmOotFvVzhB2JBJgfUYTjpVMLEWC5OAHMLAWI8bq18uhs1RCK5PzjN98gbFGPaZ2
+         TMQw==
+X-Gm-Message-State: AJIora89fGDntl3gNHrp6Rg+FoFiHNGJp4jS62wQP0rmUTNbE2Jim65v
+        dqVI7EzGTwCB0oWzbW0eSRUdSI8AS9XhyxAagQR+TVUlLWnN3W8TH4RrzQdDfm/oh+528Js/ode
+        jAtEB8U/l9Rtb5ho59g==
+X-Received: by 2002:a05:620a:4007:b0:6b5:d88b:6d42 with SMTP id h7-20020a05620a400700b006b5d88b6d42mr461782qko.180.1657908503533;
+        Fri, 15 Jul 2022 11:08:23 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1tod/zt6okvJvxAZnL0jRKHfEBgB/LKlQpD9NW4YeZf6EmE+bdwe8MODDc3JhwxAv+4W/Vx0Q==
+X-Received: by 2002:a05:620a:4007:b0:6b5:d88b:6d42 with SMTP id h7-20020a05620a400700b006b5d88b6d42mr461760qko.180.1657908503136;
+        Fri, 15 Jul 2022 11:08:23 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id w18-20020a05620a445200b006a37c908d33sm4883965qkp.28.2022.07.15.11.08.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 Jul 2022 11:08:21 -0700 (PDT)
+Date:   Sat, 16 Jul 2022 02:08:15 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Theodore Ts'o <tytso@mit.edu>, Sun Ke <sunke32@huawei.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 Subject: Re: [PATCH v3 1/2] ext4: resize fs after resize_inode without e2fsck
-Message-ID: <YtCSAjiMc9RElnHu@mit.edu>
+Message-ID: <20220715180815.gegmapvruor6vin3@zlang-mailbox>
 References: <20220713092859.3881376-1-sunke32@huawei.com>
  <20220713092859.3881376-2-sunke32@huawei.com>
  <20220714154607.qq6cqgvncxhsn66w@zlang-mailbox>
+ <YtCSAjiMc9RElnHu@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220714154607.qq6cqgvncxhsn66w@zlang-mailbox>
+In-Reply-To: <YtCSAjiMc9RElnHu@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 14, 2022 at 11:46:07PM +0800, Zorro Lang wrote:
-> On Wed, Jul 13, 2022 at 05:28:58PM +0800, Sun Ke wrote:
-> > +
-> > +# forget to run requested e2fsck after resize_inode
-> > +$TUNE2FS_PROG -O ^resize_inode $SCRATCH_DEV | grep -w "e2fsck"
-> > +
-> > +_scratch_mount
-> > +
-> > +# resize fs will trigger NULL pointer in ext4_flex_group_add
-> > +$RESIZE2FS_PROG $SCRATCH_DEV 1G >> $seqres.full 2>&1
-> > +
-> > +echo "Silence is golden"
-  ...
-> > diff --git a/tests/ext4/057.out b/tests/ext4/057.out
-> > new file mode 100644
-> > index 00000000..4784ad7e
-> > --- /dev/null
-> > +++ b/tests/ext4/057.out
-> > @@ -0,0 +1,3 @@
-> > +QA output created by 057
-> > +Please run e2fsck -f on the filesystem.
+On Thu, Jul 14, 2022 at 06:00:34PM -0400, Theodore Ts'o wrote:
+> On Thu, Jul 14, 2022 at 11:46:07PM +0800, Zorro Lang wrote:
+> > On Wed, Jul 13, 2022 at 05:28:58PM +0800, Sun Ke wrote:
+> > > +
+> > > +# forget to run requested e2fsck after resize_inode
+> > > +$TUNE2FS_PROG -O ^resize_inode $SCRATCH_DEV | grep -w "e2fsck"
+> > > +
+> > > +_scratch_mount
+> > > +
+> > > +# resize fs will trigger NULL pointer in ext4_flex_group_add
+> > > +$RESIZE2FS_PROG $SCRATCH_DEV 1G >> $seqres.full 2>&1
+> > > +
+> > > +echo "Silence is golden"
+>   ...
+> > > diff --git a/tests/ext4/057.out b/tests/ext4/057.out
+> > > new file mode 100644
+> > > index 00000000..4784ad7e
+> > > --- /dev/null
+> > > +++ b/tests/ext4/057.out
+> > > @@ -0,0 +1,3 @@
+> > > +QA output created by 057
+> > > +Please run e2fsck -f on the filesystem.
+> > 
+> > If you hope to match this line, means this case isn't "Silence is golden".
+> > 
+> > I don't know why you'd to have this line, it looks not suit to be golden
+> > image. If you'd like to make sure current ext4 supports "resize_inode"
+> > feature, you can use:
+> >   _require_scratch_ext4_feature resize_inode
 > 
-> If you hope to match this line, means this case isn't "Silence is golden".
+> That's not the problem.
 > 
-> I don't know why you'd to have this line, it looks not suit to be golden
-> image. If you'd like to make sure current ext4 supports "resize_inode"
-> feature, you can use:
->   _require_scratch_ext4_feature resize_inode
+> The "tune2fs -O ^resize_inode" command is printing that message as a
+> reminder that it would be a Really Good idea to run e2fsck on the file
+> system, because tune2fs doesn't completely remove the resize inode
+> after turning off that feature.
+> 
+> The commit which this test is trying to verify is that the kernel
+> won't oops if the system adminsitrator ignores the rather explicit
+> request:
+> 
+> Please run e2fsck -f on the filesystem.
+> 
+> ... and blithely mounts the file system without running fsck -f on the
+> file system first.  While it could be argued that a system
+> administrator which fails to follow instructions deserves everything
+> they get, we decided the as a quality of implementation issue, it
+> would be better if the kernel didn't dereference a NULL pointer in
+> that case.  :-)
+> 
+> The one thing I'll note is that it is possible that at some point in
+> the future, tune2fs could be improved so that it cleanly removes the
+> resize_inode when the resize inode feature is removed, so that running
+> "fsck.ext4 -f" is no longer necessary.  So if you want to future-proof
 
-That's not the problem.
+Good to know :)
 
-The "tune2fs -O ^resize_inode" command is printing that message as a
-reminder that it would be a Really Good idea to run e2fsck on the file
-system, because tune2fs doesn't completely remove the resize inode
-after turning off that feature.
+> the test so it doesn't fail once tune2fs is made more idiot-proof, it
+> might be better if the test did something like this:
+> 
+> mke2fs -t ext4 -O ^resize_inode /dev/vdc 512m
+> debugfs -w -R "set_super_value s_reserved_gdt_blocks 100" /dev/vdc
 
-The commit which this test is trying to verify is that the kernel
-won't oops if the system adminsitrator ignores the rather explicit
-request:
+So make sure there're reserved GDT blocks, even if disable resize_inode
+feature.
 
-Please run e2fsck -f on the filesystem.
+> mount -t ext4 /dev/vdc /vdc
+> resize2fs /dev/vdc 1G
 
-... and blithely mounts the file system without running fsck -f on the
-file system first.  While it could be argued that a system
-administrator which fails to follow instructions deserves everything
-they get, we decided the as a quality of implementation issue, it
-would be better if the kernel didn't dereference a NULL pointer in
-that case.  :-)
+Thanks Ted! That's really helpful to get review points from ext4 expert.
 
-The one thing I'll note is that it is possible that at some point in
-the future, tune2fs could be improved so that it cleanly removes the
-resize_inode when the resize inode feature is removed, so that running
-"fsck.ext4 -f" is no longer necessary.  So if you want to future-proof
-the test so it doesn't fail once tune2fs is made more idiot-proof, it
-might be better if the test did something like this:
+Hi Ke, would you mind re-sending this case refer to above review points?
+You can refer to below code, but I didn't test it, so please test and make
+sure it works and can reproduce the bug. Feel free to improve it if something
+wrong.
 
-mke2fs -t ext4 -O ^resize_inode /dev/vdc 512m
-debugfs -w -R "set_super_value s_reserved_gdt_blocks 100" /dev/vdc
-mount -t ext4 /dev/vdc /vdc
-resize2fs /dev/vdc 1G
+_require_command "$DEBUGFS_PROG" debugfs
+...
 
-Translating the above from commands suitable for manual trial using
-"kvm-xfstests shell" to a proper xfstests script is left as an
-exercise for the reader.  :-)
+MKFS_OPTIONS="-O ^resize_inode $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
+	>>$seqres.full 2>&1 || _fail "mkfs failed"
+$DEBUGFS_PROG -w -R "set_super_value s_reserved_gdt_blocks 100" $SCRATCH_DEV \
+	>>$seqres.full 2>&1
+$DEBUGFS_PROG -R "show_super_stats -h" $SCRATCH_DEV 2>/dev/null | \
+	grep "Reserved GDT blocks"
+_scratch_mount
+$RESIZE2FS_PROG $SCRATCH_DEV 1g >> $seqres.full 2>&1
 
-					- Ted
+
+Thanks,
+Zorro
+
+
+> 
+> Translating the above from commands suitable for manual trial using
+> "kvm-xfstests shell" to a proper xfstests script is left as an
+> exercise for the reader.  :-)
+> 
+> 					- Ted
+> 
+
