@@ -2,318 +2,274 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F229CC43334
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Jul 2022 17:59:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DFB6C433EF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Jul 2022 18:45:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230208AbiGRR7a (ORCPT
+        id S233499AbiGRSpE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Jul 2022 13:59:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43792 "EHLO
+        Mon, 18 Jul 2022 14:45:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234863AbiGRR73 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jul 2022 13:59:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 663FADF27
-        for <fstests@vger.kernel.org>; Mon, 18 Jul 2022 10:59:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658167167;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=xxd2bHvo+scx08FbBFVoDX7lZKp7ozTbJ0nhUVpiE3c=;
-        b=H246NjMlcyov5zXQ7q/jadsRuXxogTBIqa+crS0a5gj6ataUyKQraLJFgQBWOsBG3qKs/L
-        odqx33QnIlJkW6fBlPJszHkcN0cRqn6iAGIwGm+X1KXf5R8J39d1DDkbSj4VEz7celPmRh
-        WWCmuDTx87VjYeTv8iNmAzmHHflYGLg=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-510-twCmnx27PVO_Jd5TQjdfuA-1; Mon, 18 Jul 2022 13:59:20 -0400
-X-MC-Unique: twCmnx27PVO_Jd5TQjdfuA-1
-Received: by mail-qk1-f198.google.com with SMTP id l189-20020a37bbc6000000b006af2596c5e8so9942202qkf.14
-        for <fstests@vger.kernel.org>; Mon, 18 Jul 2022 10:59:19 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=xxd2bHvo+scx08FbBFVoDX7lZKp7ozTbJ0nhUVpiE3c=;
-        b=5y3Nwlrh2gFmfFkViR7ImVg97++HSIkUPO9Mzu2xxHZM65n2tAVjOviev2+89O9u3d
-         jMA1WNfoAzb/tjSFnQkXH/Fv3G7JI4Zdl6yBl0sXtLfRm7GhkSwYhXn3OxnJ9/P76ozW
-         isLPtJeYB8UPRaCD3an5ul6lJWo3NK5zwFY0FaVvQzHTmOVNrLZZOKvf7z3t0bAaxOgN
-         h1g2RwTnQpdR5mpJvEJjR3Nj1ZSIpWjEM4qjMY4A0eFYn5uz8lsgmqwtIieLEsrLPXva
-         T9GBsz1AdD+6+gu0GuPmSi6AwQ70B/t9D5EuA4pwYR2Bpsj3SCxSm9XqzDk3lQy1hoXq
-         nLpw==
-X-Gm-Message-State: AJIora9BErR86BIrxMqx5q2r22sanFhlfrWlOSJswoG5Aq0iUFrF88UE
-        wR2d434+zHpuuVOSogJi6NX8lb9u8/cdlNZxBWbBE2OXpUS5ObLHZcKYBCQo3EoDFyvG6c7DCwA
-        R0Huft7IbBXVd2Sgu/Q==
-X-Received: by 2002:a05:622a:294:b0:31e:e442:ce4 with SMTP id z20-20020a05622a029400b0031ee4420ce4mr8539742qtw.146.1658167159457;
-        Mon, 18 Jul 2022 10:59:19 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vzdChWB9q8LkVDbvCIlsFlTiCCSoRDDzSbjMUHsgmQY2kr5TSRGH90VgB1RC4jYS4+V2mKPQ==
-X-Received: by 2002:a05:622a:294:b0:31e:e442:ce4 with SMTP id z20-20020a05622a029400b0031ee4420ce4mr8539722qtw.146.1658167159077;
-        Mon, 18 Jul 2022 10:59:19 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id bm17-20020a05620a199100b006b5cccf62fbsm10001757qkb.46.2022.07.18.10.59.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Jul 2022 10:59:18 -0700 (PDT)
-Date:   Tue, 19 Jul 2022 01:59:12 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-Subject: Re: [PATCH RFC] fstests: btrfs: add a tests case to make sure btrfs
- can handle certain interleaved free space correctly
-Message-ID: <20220718175912.5mhc7hhkysgadvqd@zlang-mailbox>
-References: <20220718061823.26147-1-wqu@suse.com>
+        with ESMTP id S232882AbiGRSpD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jul 2022 14:45:03 -0400
+X-Greylist: delayed 1337 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 18 Jul 2022 11:45:02 PDT
+Received: from box.fidei.email (box.fidei.email [71.19.144.250])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19F542A96A;
+        Mon, 18 Jul 2022 11:45:01 -0700 (PDT)
+Received: from authenticated-user (box.fidei.email [71.19.144.250])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        by box.fidei.email (Postfix) with ESMTPSA id A5AD680A78;
+        Mon, 18 Jul 2022 14:45:01 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
+        t=1658169901; bh=QS2ZPEL/XZt6kpKaBTHqMDgBo/XWb/MhaamT7pFmABI=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=gV4Q2j3l6SJ8ifot78d23gUZpXhLe7YxZ8h76u/tewwIdQb6gGkMW/qxccsznLImL
+         sGfLvk/NjWKMbRmZLi2Id+lWX4bMmkDGhk7f5rbaOEnzQRhJ+KrFx9ouP4dFaX6cNs
+         ynJ4XAqW+xz6Mm7qOMGvoHkMYrRfzVaF0OvPZiqGHzcxJewFxPLFpDUFDCKGrquCSR
+         y9eHYKjJIz0VIktepPbqolsjnNMCnYUixeYqgf9LpIdpUJe9l7gAUPmk6L9IvSGF/R
+         M/0rbDEOrAR5SbhIf7Ifad+jr+eHCfxqMIgpuVsL0KoeLGGHpmVSPScRYxgvN2ILqP
+         fdJxjzhbOwLDw==
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220718061823.26147-1-wqu@suse.com>
+Date:   Mon, 18 Jul 2022 14:45:01 -0400
+From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+To:     Boris Burkov <boris@bur.io>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        Eric Biggers <ebiggers@google.com>,
+        Josef Bacik <josefbacik@toxicpanda.com>
+Subject: Re: [PATCH v10 2/5] common/verity: support btrfs in generic fsverity
+ tests
+In-Reply-To: <727d2656f4c543fd8a50e0b4de3246d37d3e039d.1657916662.git.boris@bur.io>
+References: <cover.1657916662.git.boris@bur.io>
+ <727d2656f4c543fd8a50e0b4de3246d37d3e039d.1657916662.git.boris@bur.io>
+Message-ID: <da5f789371ea1b45826f8dd31189cb32@dorminy.me>
+X-Sender: sweettea-kernel@dorminy.me
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 18, 2022 at 02:18:23PM +0800, Qu Wenruo wrote:
-> This is a future-proof test mostly for future zoned raid-stripe-tree
-> (RST) and P/Q COW based RAID56 implementation.
+
+
+On 2022-07-15 16:31, Boris Burkov wrote:
+> generic/572-579 have tests for fsverity. Now that btrfs supports
+> fsverity, make these tests function as well. For a majority of the 
+> tests
+> that pass, simply adding the case to mkfs a btrfs filesystem with no
+> extra options is sufficient.
 > 
-> Unlike regular devices, zoned device can not do overwrite without
-> resetting (reclaim) a whole zone.
+> However, generic/574 has tests for corrupting the merkle tree itself.
+> Since btrfs uses a different scheme from ext4 and f2fs for storing this
+> data, the existing logic for corrupting it doesn't work out of the box.
+> Adapt it to properly corrupt btrfs merkle items.
 > 
-> And for the RST and P/Q COW based RAID56, the idea is to CoW the parity
-> stripe to other location.
+> 576 does not run because btrfs does not support transparent encryption.
 > 
-> But all above behaviors introduce some limitation, if we fill the fs,
-> then free half of the space interleaved.
+> This test relies on the btrfs implementation of fsverity in the patch:
+> btrfs: initial fsverity support
 > 
-> - For basic zoned btrfs (aka SINGLE profile for now)
->   Normally this means we have no free space at all.
+> and on btrfs-corrupt-block for corruption in the patches titled:
+> btrfs-progs: corrupt generic item data with btrfs-corrupt-block
+> btrfs-progs: expand corrupt_file_extent in btrfs-corrupt-block
 > 
->   Thankfully zoned btrfs has GC and reserved zones to reclaim those
->   half filled zones.
->   In theory we should be able to do new writes.
-> 
-> - For future RST with P/Q CoW for RAID56, on non-zoned device.
->   This is more complex, in this case, we should have the following
->   full stripe layout for every full stripe:
->           0                           64K
->   Disk A  |XXXXXXXXXXXXXXXXXXXXXXXXXXX| (Data 1)
->   Disk B  |                           | (Data 2)
->   Disk C  |XXXXXXXXXXXXXXXXXXXXXXXXXXX| (P stripe)
-> 
->   Although in theory we can write into Disk B, but we have to find
->   a free space for the new Parity.
-> 
->   But all other full stripe are like this, which means we're deadlocking
->   to find a pure free space without sub-stripe writing.
-> 
->   This means, even for non-zoned btrfs, we still need GC and reserved
->   space to handle P/Q CoW properly.
-> 
-> Another thing specific to this test case is, to reduce the runtime, I
-> use 256M as the mkfs size for each device.
-> (A full run with KASAN enabled kernel already takes over 700 seconds)
-> 
-> So far this can only works for non-zoned disks, as 256M is too small for
-> zoned devices to have enough zones.
-> 
-> Thus need extra advice from zoned device guys.
-> 
-> Cc: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> Signed-off-by: Boris Burkov <boris@bur.io>
 > ---
-
-I think this patch need more review from btrfs list. I just review this patch
-from fstests side as below ...
-
->  tests/btrfs/261     | 129 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/261.out |   2 +
->  2 files changed, 131 insertions(+)
->  create mode 100755 tests/btrfs/261
->  create mode 100644 tests/btrfs/261.out
+>  common/btrfs          |  5 +++++
+>  common/config         |  1 +
+>  common/verity         | 32 ++++++++++++++++++++++++++++++++
+>  tests/generic/574     | 37 ++++++++++++++++++++++++++++++++++---
+>  tests/generic/574.out | 13 ++++---------
+>  5 files changed, 76 insertions(+), 12 deletions(-)
 > 
-> diff --git a/tests/btrfs/261 b/tests/btrfs/261
-> new file mode 100755
-> index 00000000..01da4759
-> --- /dev/null
-> +++ b/tests/btrfs/261
-> @@ -0,0 +1,129 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 261
-> +#
-> +# Make sure all supported profiles (including future zoned RAID56) have proper
-> +# way to handle fs with interleaved filled space, and can still write data
-> +# into the fs.
-> +#
-> +# This is mostly inspired by some discussion on P/Q COW for RAID56, even for
-> +# regular devices, this can be problematic if we fill the fs then delete
-> +# half of the extents interleavedly. Without proper GC and extra reserved
-> +# space, such CoW P/Q way should run out of space (even one data stripe is
-> +# free, there is no place to CoW its P/Q).
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto enospc raid
+> diff --git a/common/btrfs b/common/btrfs
+> index 14ad890e..bd2639bf 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -580,3 +580,8 @@ _btrfs_buffered_read_on_mirror()
+>  		:
+>  	done
+>  }
 > +
-> +# Override the default cleanup function.
-> +# _cleanup()
-> +# {
-> +# 	cd /
-> +# 	rm -r -f $tmp.*
-> +# }
-
-This _cleanup looks like nothing special, you can remove it, to use the default
-one.
-
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-     ^^^
-   Remove this line please.
-
-> +_supported_fs btrfs
-> +# we check scratch dev after each loop
-> +_require_scratch_nocheck
-> +_require_scratch_dev_pool 4
-> +
-> +fill_fs()
-
-There's a help named _fill_fs() in common/populate file. I'm not sure if there
-are special things in your fill_fs function, better to check if our common
-helper can help you?
-
+> +_require_btrfs_corrupt_block()
 > +{
-> +	for (( i = 0;; i += 2 )); do
-> +		$XFS_IO_PROG -f -c "pwrite 0 64K" $SCRATCH_MNT/file_$i \
-> +			&> /dev/null
-> +		if [ $? -ne 0 ]; then
-> +			break
-> +		fi
-> +		$XFS_IO_PROG -f -c "pwrite 0 64K" $SCRATCH_MNT/file_$(($i + 1)) \
-> +			&> /dev/null
-> +		if [ $? -ne 0 ]; then
-> +			break
-> +		fi
-> +
-> +		# Only sync after data 1M writes.
-> +		if [ $(( $i % 8)) -eq 0 ]; then
-> +			sync
-> +		fi
-> +	done
-> +
-> +	# Sync what hasn't yet synced.
-> +	sync
-> +	
-> +	echo "fs filled with $i full stripe write" >> $seqres.full
-> +
-> +	# Delete half of the files created above, which should leave
-> +	# the fs half empty. For RAID56 this would leave all of its full
-> +	# stripes to be have one full data stripe, one free data stripe,
-> +	# and one P/Q stripe still in use.
-> +	rm -rf -- $SCRATCH_MNT/file_*[02468]
-> +	
-> +	# Sync to make sure above deleted files really got freed.
-> +	sync
+> +	_require_command "$BTRFS_CORRUPT_BLOCK_PROG" btrfs-corrupt-block
 > +}
-> +
-> +run_test()
-> +{
-> +	local profile=$1
-> +	local nr_dev=$2
-> +
-> +	echo "=== profile=$profile nr_dev=$nr_dev ===" >> $seqres.full
-> +	_scratch_dev_pool_get $nr_dev
-> +	# -b is for each device.
-> +	# Here we use 256M to reduce the runtime.
-> +	_scratch_pool_mkfs -b 256M -m$profile -d$profile >>$seqres.full 2>&1
+> diff --git a/common/config b/common/config
+> index de3aba15..c30eec6d 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -297,6 +297,7 @@ export BTRFS_UTIL_PROG=$(type -P btrfs)
+>  export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
+>  export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
+>  export BTRFS_TUNE_PROG=$(type -P btrfstune)
+> +export BTRFS_CORRUPT_BLOCK_PROG=$(type -P btrfs-corrupt-block)
+>  export XFS_FSR_PROG=$(type -P xfs_fsr)
+>  export MKFS_NFS_PROG="false"
+>  export MKFS_CIFS_PROG="false"
+> diff --git a/common/verity b/common/verity
+> index d58cad90..f9ccf2ff 100644
+> --- a/common/verity
+> +++ b/common/verity
+> @@ -3,6 +3,17 @@
+>  #
+>  # Functions for setting up and testing fs-verity
+> 
+> +. common/btrfs
 
-Do you need to make sure this mkfs successed at here?
+Only a tiny thing: do you need this include? I think all the 
+btrfs-specific stuff you're adding is behind a FSTYP == btrfs check, so 
+I think you could get away without having the include?
 
-> +	# make sure we created btrfs with desired options
-> +	if [ $? -ne 0 ]; then
-> +		echo "mkfs $mkfs_opts failed"
-> +		return
-> +	fi
-> +	_scratch_mount >>$seqres.full 2>&1
-
-If _scratch_mount fails, the testing will exit directly. So generally we don't
-need to fill out stdout/stderr. Or you actually want to use _try_scratch_mount
-at here?
-
-> +
-> +	fill_fs
-> +
-> +	# Now try to write 4M data, with the fs half empty we should be
-> +	# able to do that.
-> +	# For zoned devices, this will test if the GC and reserved zones
-> +	# can handle such cases properly.
-> +	$XFS_IO_PROG -f -c "pwrite 0 4M" -c sync $SCRATCH_MNT/final_write \
-> +		>> $seqres.full 2>&1
-> +	if [ $? -ne 0 ]; then
-> +		echo "The final write failed"
-> +	fi
-> +
-> +	_scratch_unmount
-> +	# we called _require_scratch_nocheck instead of _require_scratch
-> +	# do check after test for each profile config
-> +	_check_scratch_fs
-> +	echo  >> $seqres.full
-> +	_scratch_dev_pool_put
-> +}
-> +
-> +# Here we don't use _btrfs_profile_configs as that doesn't include
-> +# the number of devices, but for full stripe writes for RAID56, we
-> +# need to ensure nr_data must be 2, so here we manually specify
-> +# the profile and number of devices.
-> +run_test "single" "1"
-> +
-> +# Zoned only support
-> +if _scratch_btrfs_is_zoned; then
-> +	exit
-
-I think this "exit" will fail this test directly, due to status=1 currectly.
-You can use _require_non_zoned_device() to run this case for non-zoned device
-only. Or
-
-  if ! _scratch_btrfs_is_zoned;then
-	run_test "raid0" "2"
-	run_test "raid1" "2"
-	run_test "raid10" "4"
-	run_test "raid5" "3"
-	run_test "raid6" "4"
-  fi
-
-As this case is "Silence is golden".
-
-I'm not sure what do you really need at here, can these help?
-
-Thanks,
-Zorro
-
+> +# btrfs will return IO errors on corrupted data with or without 
+> fs-verity.
+> +# to really test fs-verity, use nodatasum.
+> +if [ "$FSTYP" == "btrfs" ]; then
+> +        if [ -z $MOUNT_OPTIONS ]; then
+> +                export MOUNT_OPTIONS="-o nodatasum"
+> +        else
+> +                export MOUNT_OPTIONS+=" -o nodatasum"
+> +        fi
 > +fi
 > +
-> +run_test "raid0" "2"
-> +run_test "raid1" "2"
-> +run_test "raid10" "4"
-> +run_test "raid5" "3"
-> +run_test "raid6" "4"
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/261.out b/tests/btrfs/261.out
-> new file mode 100644
-> index 00000000..679ddc0f
-> --- /dev/null
-> +++ b/tests/btrfs/261.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 261
-> +Silence is golden
-> -- 
-> 2.36.1
+>  _require_scratch_verity()
+>  {
+>  	_require_scratch
+> @@ -145,6 +156,9 @@ _require_fsverity_dump_metadata()
+>  _require_fsverity_corruption()
+>  {
+>  	_require_xfs_io_command "fiemap"
+> +	if [ $FSTYP == "btrfs" ]; then
+> +		_require_btrfs_corrupt_block
+> +	fi
+>  }
 > 
-
+>  _scratch_mkfs_verity()
+> @@ -153,6 +167,9 @@ _scratch_mkfs_verity()
+>  	ext4|f2fs)
+>  		_scratch_mkfs -O verity
+>  		;;
+> +	btrfs)
+> +		_scratch_mkfs
+> +		;;
+>  	*)
+>  		_notrun "No verity support for $FSTYP"
+>  		;;
+> @@ -314,6 +331,21 @@ _fsv_scratch_corrupt_merkle_tree()
+>  		(( offset += ($(_get_filesize $file) + 65535) & ~65535 ))
+>  		_fsv_scratch_corrupt_bytes $file $offset
+>  		;;
+> +	btrfs)
+> +		local ino=$(stat -c '%i' $file)
+> +		_scratch_unmount
+> +		local byte=""
+> +		while read -n 1 byte; do
+> +			local ascii=$(printf "%d" "'$byte'")
+> +			# This command will find a Merkle tree item for the inode (-I 
+> $ino,37,0)
+> +			# in the default filesystem tree (-r 5) and corrupt one byte (-b 1) 
+> at
+> +			# $offset (-o $offset) with the ascii representation of the byte we 
+> read
+> +			# (-v $ascii)
+> +			$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,37,0 -v $ascii -o $offset
+> -b 1 $SCRATCH_DEV
+> +			(( offset += 1 ))
+> +		done
+> +		_scratch_mount
+> +		;;
+>  	*)
+>  		_fail "_fsv_scratch_corrupt_merkle_tree() unimplemented on $FSTYP"
+>  		;;
+> diff --git a/tests/generic/574 b/tests/generic/574
+> index 17fdea52..5ba4be7e 100755
+> --- a/tests/generic/574
+> +++ b/tests/generic/574
+> @@ -126,6 +126,39 @@ corruption_test()
+>  	fi
+>  }
+> 
+> +# Reading the last block of the file with mmap is tricky, so we need 
+> to be
+> +# a bit careful. Some filesystems read the last block in full, while 
+> others
+> +# return zeros in the last block past EOF, regardless of the contents 
+> on
+> +# disk. In the former, corruption should be detected and result in 
+> SIGBUS,
+> +# while in the latter we would expect zeros past EOF, but no error.
+> +corrupt_eof_block_test() {
+> +	local file_len=$1
+> +	local zap_len=$2
+> +	local page_aligned_eof=$(round_up_to_page_boundary $file_len)
+> +	_fsv_scratch_begin_subtest "Corruption test: EOF block"
+> +	setup_zeroed_file $file_len false
+> +	cmp $fsv_file $fsv_orig_file
+> +	echo "Corrupting bytes..."
+> +	head -c $zap_len /dev/zero | tr '\0' X \
+> +		| _fsv_scratch_corrupt_bytes $fsv_file $file_len
+> +
+> +	echo "Reading eof block via mmap into a temporary file..."
+> +	bash -c "trap '' SIGBUS; $XFS_IO_PROG -r $fsv_file \
+> +		-c 'mmap -r 0 $page_aligned_eof' \
+> +		-c 'mread -v $file_len $zap_len'" \
+> +		|& filter_sigbus >$tmp.eof_block_read 2>&1
+> +
+> +	head -c $file_len /dev/zero > $tmp.zero_cmp_file
+> +	$XFS_IO_PROG -r $tmp.zero_cmp_file \
+> +		-c "mmap -r 0 $page_aligned_eof" \
+> +		-c "mread -v $file_len $zap_len" >$tmp.eof_zero_read
+> +
+> +	echo "Checking for SIGBUS or zeros..."
+> +	<$tmp.eof_block_read grep -q -e '^Bus error$' \
+> +		|| diff $tmp.eof_block_read $tmp.eof_zero_read \
+> +		&& echo "OK"
+> +}
+> +
+>  # Note: these tests just overwrite some bytes without checking their 
+> original
+>  # values.  Therefore, make sure to overwrite at least 5 or so bytes, 
+> to make it
+>  # nearly guaranteed that there will be a change -- even when the test 
+> file is
+> @@ -136,9 +169,7 @@ corruption_test 131072 4091 5
+>  corruption_test 131072 65536 65536
+>  corruption_test 131072 131067 5
+> 
+> -# Non-zeroed bytes in the final partial block beyond EOF should cause 
+> reads to
+> -# fail too.  Such bytes would be visible via mmap().
+> -corruption_test 130999 131000 72
+> +corrupt_eof_block_test 130999 72
+> 
+>  # Merkle tree corruption.
+>  corruption_test 200000 100 10 true
+> diff --git a/tests/generic/574.out b/tests/generic/574.out
+> index 3c08d3e8..d40d1263 100644
+> --- a/tests/generic/574.out
+> +++ b/tests/generic/574.out
+> @@ -56,17 +56,12 @@ Bus error
+>  Validating corruption (reading just corrupted part via mmap)...
+>  Bus error
+> 
+> -# Corruption test: file_len=130999 zap_offset=131000 zap_len=72
+> +# Corruption test: EOF block
+>  f5cca0d7fbb8b02bc6118a9954d5d306  SCRATCH_MNT/file.fsv
+>  Corrupting bytes...
+> -Validating corruption (reading full file)...
+> -md5sum: SCRATCH_MNT/file.fsv: Input/output error
+> -Validating corruption (direct I/O)...
+> -dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
+> -Validating corruption (reading full file via mmap)...
+> -Bus error
+> -Validating corruption (reading just corrupted part via mmap)...
+> -Bus error
+> +Reading eof block via mmap into a temporary file...
+> +Checking for SIGBUS or zeros...
+> +OK
+> 
+>  # Corruption test: file_len=200000 zap_offset=100 (in Merkle tree) 
+> zap_len=10
+>  4a1e4325031b13f933ac4f1db9ecb63f  SCRATCH_MNT/file.fsv
