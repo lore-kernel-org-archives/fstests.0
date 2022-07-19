@@ -2,158 +2,368 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80987C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 05:21:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E298C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 05:53:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234187AbiGSFVy (ORCPT
+        id S235963AbiGSFx1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jul 2022 01:21:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35282 "EHLO
+        Tue, 19 Jul 2022 01:53:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229916AbiGSFVw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 01:21:52 -0400
+        with ESMTP id S235755AbiGSFxR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 01:53:17 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BE58A2983F
-        for <fstests@vger.kernel.org>; Mon, 18 Jul 2022 22:21:51 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B6E6A3AB3F
+        for <fstests@vger.kernel.org>; Mon, 18 Jul 2022 22:53:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658208110;
+        s=mimecast20190719; t=1658209994;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=2TexJ9jYTQdtpl62jhbcqjuXbNaXGSoyELQQ3gP4T3w=;
-        b=bG4K/8sLUeFIXmr6xXYGe+JkmlaND2eVTOGFnmWXdyVQXcaB6vNNlIHKM7heuumUyfQB8z
-        sVVgvazRb5sOTVjZJ5ik4UxTROCo8lifRImTeQAcCxlqHM+0DPmhRSc/EdU4nSACKBNH3H
-        b4x5GxZpsLmGNvnNW5BxT3hc8nyFzR4=
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
- [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=YX4dhiSjuIQpsqN8+PuQTMzdHGy8TjHrt9u5yxYBsp8=;
+        b=K7QalmcaZ76WskWMcFmTLpIzrhNfmsDUOCgqMUQI1jedlsu8rMlQJSxA7G5MlHRESlohlW
+        2qga6bg9m/6ZGuuPr1m2sYuxw7Be6DKfbJJZTBzPUvKnVcBBdFR1OnYhlN+SOL+66fHo/2
+        jL6uBVz47nBZeKyB3AnQCsDOQXcdB64=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-650-JgZRcI9qOa6Edc0GUVVabw-1; Tue, 19 Jul 2022 01:21:49 -0400
-X-MC-Unique: JgZRcI9qOa6Edc0GUVVabw-1
-Received: by mail-qk1-f200.google.com with SMTP id br36-20020a05620a462400b006b5fa8e5dd5so1478788qkb.1
-        for <fstests@vger.kernel.org>; Mon, 18 Jul 2022 22:21:49 -0700 (PDT)
+ us-mta-158-n5Mo_m4aMT-cvfEDPY0g_Q-1; Tue, 19 Jul 2022 01:53:04 -0400
+X-MC-Unique: n5Mo_m4aMT-cvfEDPY0g_Q-1
+Received: by mail-qk1-f199.google.com with SMTP id m8-20020a05620a24c800b006b5d8eb23efso7199811qkn.10
+        for <fstests@vger.kernel.org>; Mon, 18 Jul 2022 22:53:04 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=2TexJ9jYTQdtpl62jhbcqjuXbNaXGSoyELQQ3gP4T3w=;
-        b=n8BzznXDPG/K23LvCTHw+XXhcTgrLykLEU2FpHrDnX5TakF/T5NI3sc8GnR8/Ge9Ml
-         YeuGSoCGn3bRnF9GL41KD66twEHC5VByU8GbxcUrgm78E7r9DZuqcEsXZH/KM0B7hUbD
-         4nk0VgUhLH56YDr2BFBmcOaaHCWN8ioYV3axY2hMiT5vSYlpagDsc1PtzPb32B4e2ghb
-         T62kuBtMIXOy30dH2kVbWH5DGy9RxwY7ugEV0dm7WfR0cchekuDA4ppSTftgheGMzzU+
-         C9L7aWffrBf3m30zL3iBRsc8bjP9OE1EQioFVU72XNbZYAQdm6bez3AUu3o9l9QiL8cO
-         jkeg==
-X-Gm-Message-State: AJIora8wnbs8UGdUHaFkvenCF2+/smFZoHyKL4vD9jyQeutfQ/waHC3O
-        Q3uCxbfvh6A7nujY7ydJU3AVxMZmtNLQoQRC33udJMSK3M09o0hZDjvIeJrsEyRPXfLiIzuh1tD
-        B7ppo5m3nx4U3brnrHA==
-X-Received: by 2002:a05:620a:3ce:b0:6b5:b62c:c9f8 with SMTP id r14-20020a05620a03ce00b006b5b62cc9f8mr20059549qkm.620.1658208108627;
-        Mon, 18 Jul 2022 22:21:48 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1s638jdCdxONzvNZKL9b81oSM9IKWUjIF+UJULiMMKvPg7VV5tJ0TNbhAKpAH1U+n1Opmb8KQ==
-X-Received: by 2002:a05:620a:3ce:b0:6b5:b62c:c9f8 with SMTP id r14-20020a05620a03ce00b006b5b62cc9f8mr20059541qkm.620.1658208108322;
-        Mon, 18 Jul 2022 22:21:48 -0700 (PDT)
+        bh=YX4dhiSjuIQpsqN8+PuQTMzdHGy8TjHrt9u5yxYBsp8=;
+        b=pUs+isXsCMlbLN1Jg6CpQJp6XQVZ+rqg+mpXTM44MXb5Y/eQ6j0H2F2t+ErqkaQxAQ
+         XsvsFndYfA6S09Rg2bYRmHyme0L9GCm2/Nd9X7++GWLiNJWxYd8yRR+oxdiNvt6kUxms
+         4wdMSnmIpErUFOcVJ1HQ3zoNj2RcCxauRSZNEwaJNLBGZdTmzQWukJ4v4WgudWdElMa4
+         mOfMOo8raXCfGL6NY3s6n0X0wteTmFMMV8i7Mf+rsXTL11Oam2BfyEDcBpUEPnbPPeuI
+         3NENVq+yx3rPhLiqvh+plj94JUON0iJQpuDJrJZPf2890qOkzv0z6OyXnHEuySc95Vdq
+         3uBg==
+X-Gm-Message-State: AJIora9t8ISs/wOPIn8ElnaneN0DaLPik4+3Q668Ud4eCi1QFwwRqhTB
+        33lqKZ39MZ+jl1XDM6wOLwrrvV1n0bZtuR0r+uzW3kHGJT/dWgDkut6CUAv73zagdghhhYwZYQ+
+        DYO93TYM1pFv0Ly6mhA==
+X-Received: by 2002:a05:6214:c25:b0:473:2d88:f5ff with SMTP id a5-20020a0562140c2500b004732d88f5ffmr24040191qvd.101.1658209983890;
+        Mon, 18 Jul 2022 22:53:03 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vCz/ZJA47504eU/7D2RPjMcoJoihY33vdo4zTOrerdhY5Py3rd9I5G2FpmsT1cEx8sE5J1ag==
+X-Received: by 2002:a05:6214:c25:b0:473:2d88:f5ff with SMTP id a5-20020a0562140c2500b004732d88f5ffmr24040178qvd.101.1658209983516;
+        Mon, 18 Jul 2022 22:53:03 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id m12-20020a05620a290c00b006b59ddb4bc5sm13907857qkp.84.2022.07.18.22.21.46
+        by smtp.gmail.com with ESMTPSA id j15-20020a05620a288f00b006a5d2eb58b2sm14119150qkp.33.2022.07.18.22.53.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Jul 2022 22:21:47 -0700 (PDT)
-Date:   Tue, 19 Jul 2022 13:21:42 +0800
+        Mon, 18 Jul 2022 22:53:02 -0700 (PDT)
+Date:   Tue, 19 Jul 2022 13:52:56 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] xfs/191: test xfs_db get corrupted value
-Message-ID: <20220719052142.nr75sxypecvhsdcs@zlang-mailbox>
-References: <1657012808-2204-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <1657012808-2204-2-git-send-email-xuyang2018.jy@fujitsu.com>
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org,
+        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+Subject: Re: [PATCH RFC] fstests: btrfs: add a tests case to make sure btrfs
+ can handle certain interleaved free space correctly
+Message-ID: <20220719055256.3rkebiphyep3dei5@zlang-mailbox>
+References: <20220718061823.26147-1-wqu@suse.com>
+ <20220718175912.5mhc7hhkysgadvqd@zlang-mailbox>
+ <b8d80f54-1a0e-54eb-3bc2-8b07cbd7edf6@gmx.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1657012808-2204-2-git-send-email-xuyang2018.jy@fujitsu.com>
+In-Reply-To: <b8d80f54-1a0e-54eb-3bc2-8b07cbd7edf6@gmx.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 05, 2022 at 05:20:08PM +0800, Yang Xu wrote:
-> This is a regression test that xfs_db code doesn't clean up the
-> LIBXFS_READBUF_SALVAGE call sites in set_cur so that we
-> can't use the return value directly and scraping it out later.
+On Tue, Jul 19, 2022 at 01:16:54PM +0800, Qu Wenruo wrote:
 > 
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> ---
->  tests/xfs/191     | 33 +++++++++++++++++++++++++++++++++
->  tests/xfs/191.out |  5 +++++
-
-This seqnum has been taken, please rebase to latest xfstests for-next branch.
-
->  2 files changed, 38 insertions(+)
->  create mode 100755 tests/xfs/191
->  create mode 100644 tests/xfs/191.out
 > 
-> diff --git a/tests/xfs/191 b/tests/xfs/191
-> new file mode 100755
-> index 00000000..98e9e186
-> --- /dev/null
-> +++ b/tests/xfs/191
-> @@ -0,0 +1,33 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 FUJITSU LIMITED. All rights reserved.
-> +#
-> +# FS QA Test 191
-> +#
-> +# Regression test for xfsprogs commit
-> +# f4afdcb0ad11 ("xfs_db: clean up the salvage read callsites in set_cur()")
-> +#
-> +# This case test xfs_db whether can get the new magicnum field value even we
-> +# just have corrupted this field value.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick
+> On 2022/7/19 01:59, Zorro Lang wrote:
+> > On Mon, Jul 18, 2022 at 02:18:23PM +0800, Qu Wenruo wrote:
+> > > This is a future-proof test mostly for future zoned raid-stripe-tree
+> > > (RST) and P/Q COW based RAID56 implementation.
+> > > 
+> > > Unlike regular devices, zoned device can not do overwrite without
+> > > resetting (reclaim) a whole zone.
+> > > 
+> > > And for the RST and P/Q COW based RAID56, the idea is to CoW the parity
+> > > stripe to other location.
+> > > 
+> > > But all above behaviors introduce some limitation, if we fill the fs,
+> > > then free half of the space interleaved.
+> > > 
+> > > - For basic zoned btrfs (aka SINGLE profile for now)
+> > >    Normally this means we have no free space at all.
+> > > 
+> > >    Thankfully zoned btrfs has GC and reserved zones to reclaim those
+> > >    half filled zones.
+> > >    In theory we should be able to do new writes.
+> > > 
+> > > - For future RST with P/Q CoW for RAID56, on non-zoned device.
+> > >    This is more complex, in this case, we should have the following
+> > >    full stripe layout for every full stripe:
+> > >            0                           64K
+> > >    Disk A  |XXXXXXXXXXXXXXXXXXXXXXXXXXX| (Data 1)
+> > >    Disk B  |                           | (Data 2)
+> > >    Disk C  |XXXXXXXXXXXXXXXXXXXXXXXXXXX| (P stripe)
+> > > 
+> > >    Although in theory we can write into Disk B, but we have to find
+> > >    a free space for the new Parity.
+> > > 
+> > >    But all other full stripe are like this, which means we're deadlocking
+> > >    to find a pure free space without sub-stripe writing.
+> > > 
+> > >    This means, even for non-zoned btrfs, we still need GC and reserved
+> > >    space to handle P/Q CoW properly.
+> > > 
+> > > Another thing specific to this test case is, to reduce the runtime, I
+> > > use 256M as the mkfs size for each device.
+> > > (A full run with KASAN enabled kernel already takes over 700 seconds)
+> > > 
+> > > So far this can only works for non-zoned disks, as 256M is too small for
+> > > zoned devices to have enough zones.
+> > > 
+> > > Thus need extra advice from zoned device guys.
+> > > 
+> > > Cc: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
+> > > ---
+> > 
+> > I think this patch need more review from btrfs list. I just review this patch
+> > from fstests side as below ...
+> > 
+> > >   tests/btrfs/261     | 129 ++++++++++++++++++++++++++++++++++++++++++++
+> > >   tests/btrfs/261.out |   2 +
+> > >   2 files changed, 131 insertions(+)
+> > >   create mode 100755 tests/btrfs/261
+> > >   create mode 100644 tests/btrfs/261.out
+> > > 
+> > > diff --git a/tests/btrfs/261 b/tests/btrfs/261
+> > > new file mode 100755
+> > > index 00000000..01da4759
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/261
+> > > @@ -0,0 +1,129 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 261
+> > > +#
+> > > +# Make sure all supported profiles (including future zoned RAID56) have proper
+> > > +# way to handle fs with interleaved filled space, and can still write data
+> > > +# into the fs.
+> > > +#
+> > > +# This is mostly inspired by some discussion on P/Q COW for RAID56, even for
+> > > +# regular devices, this can be problematic if we fill the fs then delete
+> > > +# half of the extents interleavedly. Without proper GC and extra reserved
+> > > +# space, such CoW P/Q way should run out of space (even one data stripe is
+> > > +# free, there is no place to CoW its P/Q).
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto enospc raid
+> > > +
+> > > +# Override the default cleanup function.
+> > > +# _cleanup()
+> > > +# {
+> > > +# 	cd /
+> > > +# 	rm -r -f $tmp.*
+> > > +# }
+> > 
+> > This _cleanup looks like nothing special, you can remove it, to use the default
+> > one.
+> 
+> It's still commented out, just from the template.
+> 
+> Or you mean I should delete the unused cleanup function if we don't need?
 
-This's a test for xfs_db, so add "db" test group please.
+Sure, please remove those useless comments from template, they're just reminder.
 
-> +
-> +# Import common functions.
-> +. ./common/filter
+> 
+> > 
+> > > +
+> > > +# Import common functions.
+> > > +. ./common/filter
+> > > +
+> > > +# real QA test starts here
+> > > +
+> > > +# Modify as appropriate.
+> >       ^^^
+> >     Remove this line please.
+> > 
+> > > +_supported_fs btrfs
+> > > +# we check scratch dev after each loop
+> > > +_require_scratch_nocheck
+> > > +_require_scratch_dev_pool 4
+> > > +
+> > > +fill_fs()
+> > 
+> > There's a help named _fill_fs() in common/populate file. I'm not sure if there
+> > are special things in your fill_fs function, better to check if our common
+> > helper can help you?
+> 
+> The fill fs here is to make sure we fill the fs in a specific way
+> (always fill the fs using 128KiB, while still being able to delete 64KiB).
+> 
+> I'll add a comment for the reason.
 
-Do you use any helpers in common/filter?
+Sure, if the comment _fill_fs can't help you, feel free to have your own
+one (and better to explain what's special in it).
 
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
+> 
+> > 
+> > > +{
+> > > +	for (( i = 0;; i += 2 )); do
+> > > +		$XFS_IO_PROG -f -c "pwrite 0 64K" $SCRATCH_MNT/file_$i \
+> > > +			&> /dev/null
+> > > +		if [ $? -ne 0 ]; then
+> > > +			break
+> > > +		fi
+> > > +		$XFS_IO_PROG -f -c "pwrite 0 64K" $SCRATCH_MNT/file_$(($i + 1)) \
+> > > +			&> /dev/null
+> > > +		if [ $? -ne 0 ]; then
+> > > +			break
+> > > +		fi
+> > > +
+> > > +		# Only sync after data 1M writes.
+> > > +		if [ $(( $i % 8)) -eq 0 ]; then
+> > > +			sync
+> > > +		fi
+> > > +	done
+> > > +
+> > > +	# Sync what hasn't yet synced.
+> > > +	sync
+> > > +
+> > > +	echo "fs filled with $i full stripe write" >> $seqres.full
+> > > +
+> > > +	# Delete half of the files created above, which should leave
+> > > +	# the fs half empty. For RAID56 this would leave all of its full
+> > > +	# stripes to be have one full data stripe, one free data stripe,
+> > > +	# and one P/Q stripe still in use.
+> > > +	rm -rf -- $SCRATCH_MNT/file_*[02468]
+> > > +
+> > > +	# Sync to make sure above deleted files really got freed.
+> > > +	sync
+> > > +}
+> > > +
+> > > +run_test()
+> > > +{
+> > > +	local profile=$1
+> > > +	local nr_dev=$2
+> > > +
+> > > +	echo "=== profile=$profile nr_dev=$nr_dev ===" >> $seqres.full
+> > > +	_scratch_dev_pool_get $nr_dev
+> > > +	# -b is for each device.
+> > > +	# Here we use 256M to reduce the runtime.
+> > > +	_scratch_pool_mkfs -b 256M -m$profile -d$profile >>$seqres.full 2>&1
+> > 
+> > Do you need to make sure this mkfs successed at here?
+> 
+> Yes.
+> 
+> > 
+> > > +	# make sure we created btrfs with desired options
+> > > +	if [ $? -ne 0 ]; then
+> > > +		echo "mkfs $mkfs_opts failed"
+> > > +		return
+> > > +	fi
+> > > +	_scratch_mount >>$seqres.full 2>&1
+> > 
+> > If _scratch_mount fails, the testing will exit directly. So generally we don't
+> > need to fill out stdout/stderr. Or you actually want to use _try_scratch_mount
+> > at here?
+> 
+> _scratch_mount is exactly what I need, I'll just remove the unnecessary
+> redirection.
 
-_require_scratch_nocheck ??
+OK
 
-And ...
+> 
+> > 
+> > > +
+> > > +	fill_fs
+> > > +
+> > > +	# Now try to write 4M data, with the fs half empty we should be
+> > > +	# able to do that.
+> > > +	# For zoned devices, this will test if the GC and reserved zones
+> > > +	# can handle such cases properly.
+> > > +	$XFS_IO_PROG -f -c "pwrite 0 4M" -c sync $SCRATCH_MNT/final_write \
+> > > +		>> $seqres.full 2>&1
+> > > +	if [ $? -ne 0 ]; then
+> > > +		echo "The final write failed"
+> > > +	fi
+> > > +
+> > > +	_scratch_unmount
+> > > +	# we called _require_scratch_nocheck instead of _require_scratch
+> > > +	# do check after test for each profile config
+> > > +	_check_scratch_fs
+> > > +	echo  >> $seqres.full
+> > > +	_scratch_dev_pool_put
+> > > +}
+> > > +
+> > > +# Here we don't use _btrfs_profile_configs as that doesn't include
+> > > +# the number of devices, but for full stripe writes for RAID56, we
+> > > +# need to ensure nr_data must be 2, so here we manually specify
+> > > +# the profile and number of devices.
+> > > +run_test "single" "1"
+> > > +
+> > > +# Zoned only support
+> > > +if _scratch_btrfs_is_zoned; then
+> > > +	exit
+> > 
+> > I think this "exit" will fail this test directly, due to status=1 currectly.
+> > You can use _require_non_zoned_device() to run this case for non-zoned device
+> > only. Or
+> > 
+> >    if ! _scratch_btrfs_is_zoned;then
+> > 	run_test "raid0" "2"
+> > 	run_test "raid1" "2"
+> > 	run_test "raid10" "4"
+> > 	run_test "raid5" "3"
+> > 	run_test "raid6" "4"
+> >    fi
+> > 
+> > As this case is "Silence is golden".
+> > 
+> > I'm not sure what do you really need at here, can these help?
+> 
+> My bad, I forgot to finish the comment, and your example is perfect.
+> 
+> Thanks for the review.
 
-_fixed_by_git_commit xfsprogs f4afdcb0ad11 \
-	"xfs_db: clean up the salvage read callsites in set_cur()"
+Np. But before I merge your patch, we still need a RVB from btrfs list at least,
+even if I give it my RVB, due to this case is marked as btrfs RFC.
 
 Thanks,
 Zorro
 
-> +
-> +_scratch_mkfs_xfs >>$seqres.full 2>&1
-> +
-> +# write the bad magicnum field value(0) to the superblock
-> +_scratch_xfs_set_metadata_field "magicnum" "0" "sb 1"
-> +
-> +#Even magicnum filed has been corrupted, we still can read this filed value
-> +_scratch_xfs_get_metadata_field "magicnum" "sb 1"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/191.out b/tests/xfs/191.out
-> new file mode 100644
-> index 00000000..71826198
-> --- /dev/null
-> +++ b/tests/xfs/191.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 191
-> +Allowing write of corrupted data with good CRC
-> +magicnum = 0
-> +bad magic number
-> +0
-> -- 
-> 2.27.0
+> Qu
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > +fi
+> > > +
+> > > +run_test "raid0" "2"
+> > > +run_test "raid1" "2"
+> > > +run_test "raid10" "4"
+> > > +run_test "raid5" "3"
+> > > +run_test "raid6" "4"
+> > > +
+> > > +echo "Silence is golden"
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/btrfs/261.out b/tests/btrfs/261.out
+> > > new file mode 100644
+> > > index 00000000..679ddc0f
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/261.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 261
+> > > +Silence is golden
+> > > --
+> > > 2.36.1
+> > > 
+> > 
 > 
 
