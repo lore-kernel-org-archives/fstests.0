@@ -2,175 +2,334 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1025DC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 15:31:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C161FC433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 16:49:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237440AbiGSPbF (ORCPT
+        id S230263AbiGSQtg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jul 2022 11:31:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33782 "EHLO
+        Tue, 19 Jul 2022 12:49:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233950AbiGSPay (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 11:30:54 -0400
-Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C6EE237E1;
-        Tue, 19 Jul 2022 08:30:52 -0700 (PDT)
-Received: from authenticated-user (box.fidei.email [71.19.144.250])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        with ESMTP id S230052AbiGSQtf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 12:49:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4483E57267
+        for <fstests@vger.kernel.org>; Tue, 19 Jul 2022 09:49:34 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id E8C6B81223;
-        Tue, 19 Jul 2022 11:30:51 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1658244652; bh=QUE5lCqNFgbcwKZmRXIED2MBDwk+5Rg10YU04z5n0SM=;
-        h=Date:From:Subject:To:Cc:References:In-Reply-To:From;
-        b=iXyZY/wN7BfiP74TyWsODbZP8OG8jmdEXsRzaMLre0sP1A4Ccja4jfQ+n5epkVPpv
-         po6LaVLPthx3T2g/und2/z75Ekk4fE54qVC9D/hptFK1qRq0L0B1/MwfKH98v75Tgj
-         M88lpbo+W/Fn/A/Zp/u6Xq4fWubEk8sewtNYbQJiYeRB4FVb4DhLvxJkB53/+bSGbu
-         HB6bhvM1p2gASjOK6j0BXXOgLNGOnjhAOVOli/SR8RdrUvq7Bt7lbG7OvMFUl57i2m
-         QLnb3e3UFiNZbwborkaLzP9cl3rN4aFkb+XGQ2v+inz5oZhFcJod2RbQ+ezAoqTJZJ
-         eEAAlTnsEV+IA==
-Message-ID: <b36032a0-f2a0-5ebb-2abb-c6b4434e9e68@dorminy.me>
-Date:   Tue, 19 Jul 2022 11:30:50 -0400
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D034E61A28
+        for <fstests@vger.kernel.org>; Tue, 19 Jul 2022 16:49:33 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1264AC341C6;
+        Tue, 19 Jul 2022 16:49:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1658249373;
+        bh=O50lXj3cPqMyAnF2wtu5xx8cOKb3w9+PtM1uQZvGIKg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=uTuPkSr94ZXzWAfCQx1Q8uMZ/yuITi5w4tbCG7xBxC/9ndat/ANAfeFXwPQ5WalnK
+         FJhpflSvUns4HXqLCuIZL9NoFi+2kIvZD0+4EqXCpsnQ/2W0Y8Ws8kdNVNoGVq8kbK
+         4YLCUH6bMajnJLBEZZCYiifkdxekJyQlriUH+BUzy7yF3objzOqhLWOVoN8RyCaMrA
+         8vyzsGBLzqJs5sZums6O7Zs2YF3JwnJsHJ4GOzTmV59/r9OgZhug0EPX8tT6pvRI+d
+         /YQRUsiSHYbvp1xN+aN5G8abNz4uEPfM1T1vA3wB59YF7YLH22aEQ79nbjfamgCZv/
+         XwmZe0RMVc+Dg==
+Date:   Tue, 19 Jul 2022 09:49:32 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3 1/3] xfs: add memory failure test for dax mode
+Message-ID: <YtbgnNQKTlRDgqzj@magnolia>
+References: <20220520013534.2894233-1-ruansy.fnst@fujitsu.com>
+ <20220520013534.2894233-2-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
-From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: Re: [PATCH] btrfs: fix btrfs/271
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <20220719061454.829559-1-hch@lst.de>
-Content-Language: en-US
-In-Reply-To: <20220719061454.829559-1-hch@lst.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220520013534.2894233-2-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2022-07-19 02:14, Christoph Hellwig wrote:
-> The commited old version test the broken behavior of the current
-> upstream code that writes the uncompressed data into a previously
-> bad mirror.  Fix the test to check that the compressed data gets
-> re-replicated and add it to the compress group while we're at it.
+On Fri, May 20, 2022 at 09:35:32AM +0800, Shiyang Ruan wrote:
+> Make sure memory failure mechanism works when filesystem is mounted with
+> dax option.
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+
+Looks like this is in good enough shape to merge,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
 > ---
->  tests/btrfs/270     | 11 +++++++----
->  tests/btrfs/270.out | 34 ----------------------------------
->  2 files changed, 7 insertions(+), 38 deletions(-)
+>  .gitignore                      |   1 +
+>  src/Makefile                    |   3 +-
+>  src/t_mmap_cow_memory_failure.c | 157 ++++++++++++++++++++++++++++++++
+>  tests/xfs/900                   |  48 ++++++++++
+>  tests/xfs/900.out               |   9 ++
+>  5 files changed, 217 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_mmap_cow_memory_failure.c
+>  create mode 100755 tests/xfs/900
+>  create mode 100644 tests/xfs/900.out
 > 
-> diff --git a/tests/btrfs/270 b/tests/btrfs/270
-> index 4229a02c..5b73fb15 100755
-> --- a/tests/btrfs/270
-> +++ b/tests/btrfs/270
-> @@ -7,7 +7,7 @@
->  # Regression test for btrfs buffered read repair of compressed data.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick read_repair
-> +_begin_fstest auto quick read_repair compress
+> diff --git a/.gitignore b/.gitignore
+> index ba0c572b..1d26b28a 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -146,6 +146,7 @@ tags
+>  /src/t_holes
+>  /src/t_immutable
+>  /src/t_mmap_collision
+> +/src/t_mmap_cow_memory_failure
+>  /src/t_mmap_cow_race
+>  /src/t_mmap_dio
+>  /src/t_mmap_fallocate
+> diff --git a/src/Makefile b/src/Makefile
+> index 111ce1d9..d702e200 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -18,7 +18,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+>  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+>  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+> -	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale
+> +	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+> +	t_mmap_cow_memory_failure
+>  
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/t_mmap_cow_memory_failure.c b/src/t_mmap_cow_memory_failure.c
+> new file mode 100644
+> index 00000000..4b2c1b8a
+> --- /dev/null
+> +++ b/src/t_mmap_cow_memory_failure.c
+> @@ -0,0 +1,157 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/* Copyright (c) 2022 Fujitsu Corporation. */
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <libgen.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <semaphore.h>
+> +#include <sys/mman.h>
+> +#include <sys/wait.h>
+> +#include <sys/sem.h>
+> +#include <time.h>
+> +#include <unistd.h>
+> +
+> +sem_t *sem;
+> +
+> +void sigbus_handler(int signal)
+> +{
+> +	printf("Process is killed by signal: %d\n", signal);
+> +	sem_post(sem);
+> +}
+> +
+> +void mmap_read_file(char *filename, off_t offset, size_t size)
+> +{
+> +	int fd;
+> +	char *map, *dummy;
+> +	struct timespec ts;
+> +
+> +	fd = open(filename, O_RDWR);
+> +	map = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, offset);
+> +	dummy = malloc(size);
+> +
+> +	/* make sure page fault happens */
+> +	memcpy(dummy, map, size);
+> +
+> +	/* ready */
+> +	sem_post(sem);
+> +
+> +	usleep(200000);
+> +
+> +	clock_gettime(CLOCK_REALTIME, &ts);
+> +	ts.tv_sec += 3;
+> +	/* wait for injection done */
+> +	sem_timedwait(sem, &ts);
+> +
+> +	free(dummy);
+> +	munmap(map, size);
+> +	close(fd);
+> +}
+> +
+> +void mmap_read_file_then_poison(char *filename, off_t offset, size_t size,
+> +		off_t poisonOffset, size_t poisonSize)
+> +{
+> +	int fd, error;
+> +	char *map, *dummy;
+> +
+> +	/* wait for parent preparation done */
+> +	sem_wait(sem);
+> +
+> +	fd = open(filename, O_RDWR);
+> +	map = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, offset);
+> +	dummy = malloc(size);
+> +
+> +	/* make sure page fault happens */
+> +	memcpy(dummy, map, size);
+> +
+> +	printf("Inject poison...\n");
+> +	error = madvise(map + poisonOffset, poisonSize, MADV_HWPOISON);
+> +	if (error)
+> +		printf("madvise() has fault: %d, errno: %d\n", error, errno);
+> +
+> +	free(dummy);
+> +	munmap(map, size);
+> +	close(fd);
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	char *pReadFile = NULL, *pPoisonFile = NULL;
+> +	size_t mmapSize, poisonSize;
+> +	off_t mmapOffset = 0, poisonOffset = 0;
+> +	long pagesize = sysconf(_SC_PAGESIZE);
+> +	int c;
+> +	pid_t pid;
+> +
+> +	if (pagesize < 1) {
+> +		fprintf(stderr, "sysconf(_SC_PAGESIZE): failed to get page size\n");
+> +		abort();
+> +	}
+> +
+> +	/* default mmap / poison size, in unit of System Page Size */
+> +	mmapSize = poisonSize = pagesize;
+> +
+> +	while ((c = getopt(argc, argv, "o::s::O::S::R:P:")) != -1) {
+> +		switch (c) {
+> +		/* mmap offset */
+> +		case 'o':
+> +			mmapOffset = atoi(optarg) * pagesize;
+> +			break;
+> +		/* mmap size */
+> +		case 's':
+> +			mmapSize = atoi(optarg) * pagesize;
+> +			break;
+> +		/* madvice offset */
+> +		case 'O':
+> +			poisonOffset = atoi(optarg) * pagesize;
+> +			break;
+> +		/* madvice size */
+> +		case 'S':
+> +			poisonSize = atoi(optarg) * pagesize;
+> +			break;
+> +		/* filename for mmap read */
+> +		case 'R':
+> +			pReadFile = optarg;
+> +			break;
+> +		/* filename for poison read */
+> +		case 'P':
+> +			pPoisonFile = optarg;
+> +			break;
+> +		default:
+> +			printf("Unknown option: %c\n", c);
+> +			exit(1);
+> +		}
+> +	}
+> +
+> +	if (!pReadFile || !pPoisonFile) {
+> +		printf("Usage: \n"
+> +		       "  %s [-o mmapOffset] [-s mmapSize] [-O mmapOffset] [-S mmapSize] -R readFile -P poisonFile\n"
+> +		       "  (offset and size are both in unit of System Page Size: %ld)\n",
+> +				basename(argv[0]), pagesize);
+> +		exit(0);
+> +	}
+> +	if (poisonSize < mmapSize)
+> +		mmapSize = poisonSize;
+> +
+> +	/* fork and mmap files */
+> +	pid = fork();
+> +	if (pid == 0) {
+> +		/* handle SIGBUS */
+> +		signal(SIGBUS, sigbus_handler);
+> +		sem = sem_open("sync", O_CREAT, 0666, 0);
+> +
+> +		/* mread & do memory failure on poison file */
+> +		mmap_read_file_then_poison(pPoisonFile, mmapOffset, mmapSize,
+> +				poisonOffset, poisonSize);
+> +
+> +		sem_close(sem);
+> +	} else {
+> +		sem = sem_open("sync", O_CREAT, 0666, 0);
+> +
+> +		/* mread read file, wait for child process to be killed */
+> +		mmap_read_file(pReadFile, mmapOffset, mmapSize);
+> +		sem_close(sem);
+> +	}
+> +	exit(0);
+> +}
+> diff --git a/tests/xfs/900 b/tests/xfs/900
+> new file mode 100755
+> index 00000000..da11230a
+> --- /dev/null
+> +++ b/tests/xfs/900
+> @@ -0,0 +1,48 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# FS QA Test No. 900
+> +#
+> +# Test memory failure mechanism when dax enabled
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick dax
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_require_check_dmesg
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +_require_xfs_scratch_rmapbt
+> +_require_scratch_dax_mountopt "dax"
+> +_require_test_program "t_mmap_cow_memory_failure"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount "-o dax" >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
+> +
+> +echo "Create the original files"
+> +filesize=65536
+> +_pwrite_byte 0x61 0 $filesize $testdir/testfile >> $seqres.full
+> +_scratch_cycle_mount "dax"
+> +
+> +echo "Inject memory failure (1 page)"
+> +# create two processes:
+> +#  process1: mread 1 page to cause page fault, and wait
+> +#  process2: mread 1 page to cause page fault, then inject poison on this page
+> +$here/src/t_mmap_cow_memory_failure -s1 -S1 -R $testdir/testfile -P $testdir/testfile
+> +
+> +echo "Inject memory failure (2 pages)"
+> +$here/src/t_mmap_cow_memory_failure -s2 -S2 -R $testdir/testfile -P $testdir/testfile
+> +
+> +_check_dmesg_for "Sending SIGBUS to t_mmap_cow_memo" || echo "Memory failure didn't kill the process"
+> +_check_dmesg_for "recovery action for dax page: Recovered" || echo "Failured page didn't recovered"
+> +
+> +# success, all done
+> +status=0
+> diff --git a/tests/xfs/900.out b/tests/xfs/900.out
+> new file mode 100644
+> index 00000000..d861bf1f
+> --- /dev/null
+> +++ b/tests/xfs/900.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 900
+> +Format and mount
+> +Create the original files
+> +Inject memory failure (1 page)
+> +Inject poison...
+> +Process is killed by signal: 7
+> +Inject memory failure (2 pages)
+> +Inject poison...
+> +Process is killed by signal: 7
+> -- 
+> 2.35.1
 > 
->  . ./common/filter
 > 
-> @@ -60,7 +60,9 @@ _scratch_unmount
->  echo "step 2......corrupt file extent"
->  echo " corrupt stripe #1, devid $devid devpath $devpath physical 
-> $physical" \
->  	>> $seqres.full
-> -$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > 
-> /dev/null
-> +dd if=$devpath of=$TEST_DIR/$seq.dump.good skip=$physical bs=1 
-> count=4096 \
-> +	2>/dev/null
-> +$XFS_IO_PROG -c "pwrite -S 0xbb -b 4K $physical 4K" $devpath > 
-> /dev/null
 > 
->  _scratch_mount
-> 
-> @@ -70,8 +72,9 @@ _btrfs_buffered_read_on_mirror 1 2
-> "$SCRATCH_MNT/foobar" 0 128K
->  _scratch_unmount
-> 
->  echo "step 4......check if the repair worked"
-> -$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
-> -	_filter_xfs_io_offset
-> +dd if=$devpath of=$TEST_DIR/$seq.dump skip=$physical bs=1 count=4096 \
-> +	2>/dev/null
-> +cmp -bl $TEST_DIR/$seq.dump.good $TEST_DIR/$seq.dump
-> 
->  _scratch_dev_pool_put
->  # success, all done
-> diff --git a/tests/btrfs/270.out b/tests/btrfs/270.out
-> index 53a80692..6d744c02 100644
-> --- a/tests/btrfs/270.out
-> +++ b/tests/btrfs/270.out
-> @@ -5,37 +5,3 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX 
-> ops/sec)
->  step 2......corrupt file extent
->  step 3......repair the bad copy
->  step 4......check if the repair worked
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  
-> ................
-> -read 512/512 bytes
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
