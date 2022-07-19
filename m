@@ -2,312 +2,189 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66AD7CCA481
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 06:49:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1195AC43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 07:00:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230001AbiGSGtR (ORCPT
+        id S233740AbiGSHAp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jul 2022 02:49:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55780 "EHLO
+        Tue, 19 Jul 2022 03:00:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35210 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237082AbiGSGtO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 02:49:14 -0400
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64FB72B61C;
-        Mon, 18 Jul 2022 23:49:09 -0700 (PDT)
-Received: by mail-pj1-x1031.google.com with SMTP id z12-20020a17090a7b8c00b001ef84000b8bso20386405pjc.1;
-        Mon, 18 Jul 2022 23:49:09 -0700 (PDT)
+        with ESMTP id S232634AbiGSHAo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 03:00:44 -0400
+X-Greylist: delayed 63 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 19 Jul 2022 00:00:40 PDT
+Received: from esa7.fujitsucc.c3s2.iphmx.com (esa7.fujitsucc.c3s2.iphmx.com [68.232.159.87])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77BC1E087
+        for <fstests@vger.kernel.org>; Tue, 19 Jul 2022 00:00:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
+  t=1658214043; x=1689750043;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=if0/qGh1xf6BSgJRAjU92TAOyhwhQYfVhAfvHx8aK2s=;
+  b=zIwMVZqpqx4HM/LQeU+/XckdZREAYmBqnQz3dLIq+upc/6GnHdhTKxFD
+   HNiTCb1U2rvNQVMFC37lm9hlANW+SOLxFQ0vLYhKUWSptQbGXX1UCelK3
+   JCoOktZ3G/KjCD+Qye5mnVLv94FDsNGKbNMBmLhJmnmDhMA5Zi33Mjm+N
+   v+8UP5GGyJ9IZYbnbP/ulXid9v+XESrWKoDQ2e/UaPh6GWX3lrGT8mZ2Y
+   zdYfqp8hHSHfQ6T48V8q1POkS3ymROdhY/NDmKYfXrsP8LiO+Lpc9K7Hl
+   zRvLGwA2KW2nAUoL24IHOkUK8QJC2e+hDAF9+t5oUjZYKbgpzHg6e0Azp
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10412"; a="60744177"
+X-IronPort-AV: E=Sophos;i="5.92,283,1650898800"; 
+   d="scan'208";a="60744177"
+Received: from mail-os0jpn01lp2106.outbound.protection.outlook.com (HELO JPN01-OS0-obe.outbound.protection.outlook.com) ([104.47.23.106])
+  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jul 2022 15:59:31 +0900
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LWfMxKUsWsbAGRh5HWFvdF2Eic7Yj5bqGCBMNDOlrxOzDlRFWoXjXIJn9R4Goabkx17O5HekxfgMKRsKgPf21oPn4dHixd8+KXDed0gxgJGy0VsBBNrtMcBGR+gHPSt/PCrldmiWrQ7Ege+W9FnRivk0aK4ONgP9vkMpk3AHf6FAjBTDJDRrxuXzVLQVipj+avK67gk5PGFmzjBRFFMRb/M0zFqtlUcJZClfcjSEEBWg511/iM4Valtf+SfW933OWxFr1ewhyackYMx60Uq7gIbKxFU0nxWgHODgwkYsFiFNu4yimtZKzfUXPcIQDDdIf6UE1qnVd1v421dVessIMQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=if0/qGh1xf6BSgJRAjU92TAOyhwhQYfVhAfvHx8aK2s=;
+ b=hXPXaQNrOc0SM0kvU7H5hYU5pFY3Vr+Ykeug9vW36j+EJ8yxJFYWcekK7YJDyYkJMgzhIhyXZK3226M7LWMm7P+KUWoqI1hzO0gHIjxN9/46q44fdhl4+d5ZFlYfsDKvJGNM8oM0E6C/JnM66EcyXzqzDk2tkxwANS1WFrGYRsDZJkxYUwmZospY5oPVf8q1beFwtfQEh8VlHZjIxernD/OpneITZAlyWJySfG+WU1GLX2VTX46QKBzWousDe0PTvqZTYL327oIM2wcwW2uvWlZffCCvDrjkMOWWGgLeDKmuGcwiw0tIW6GIx+S4/6ZZdTNeBKRv7Ljc3IgzLsl3Sg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
+ dkim=pass header.d=fujitsu.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=BVe+gsphO/pyZ6w6Jqw5wT9M2Cob7vGGyX8DR5WOgOc=;
-        b=Hq+7E9NlFj0eAgH5FeyoHJnlvP9IQl21eb6l3afzju96lPlk7sBsY7eVQScVIrZzBi
-         l378ET4p4D32xlz3bWsWlpIPBg9vaYUE788xpcUD1lk6Nk5KKQ2DTjuz9uHucnZ/yq68
-         5Dq5zGhV9b3cBnctne9CouCKkKJezqUHyzqrOaH1bOCurGQxLsaO7G8Uq8TxWW4fDWsy
-         hOfIyvJFsj59UtwQskDRjBj4HXFwxAA0sBAK/utSIh+WQiEzueybjcRd9iOCYFXsSlht
-         Wm5M4O8byH9gmOHfdrei1Lr0gf6bUUoXiVziGTphg+xLNsgTPR7RNHuhtr4PkB7+u1JM
-         ZX6Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=BVe+gsphO/pyZ6w6Jqw5wT9M2Cob7vGGyX8DR5WOgOc=;
-        b=sQtOhmO2NqJRPs0oNxNXufeeIdiRx9StHlMs1WnLegSJ1z6k7CtEoXxZJb3aWMZ/xf
-         1fu1Oq8zFRDEMvRL5alJBMhJsUgetuFRcgIGYUkwfrAhSl949YlNrG1NPFIl1WAM+ay/
-         XZE7hKhSDadgUQXAeph2MWc3+FU2RmJl34+kCG2QvHrcA9pogYzbRDNQ6dj4XeZVzsc/
-         6AvbBj9yFz2KxkM2bzuLpwPfkwKNize3uqlr9ostK3O9DGBSdKLi4V0PnFeDiCZCN7d3
-         zHAaeDsVkXMblqngbdIOxAFmUkGp9+pomt9uO6oP9Ec/ymodV+zDh+XmGPz5f+loyyZf
-         1Rcw==
-X-Gm-Message-State: AJIora9iWNsSEN9I7LNbf9hYjP9IuXtwi9VdyXpgV+tqfw2nnGvQqoM1
-        UALzvyesAheIfdeNzb4y0bs=
-X-Google-Smtp-Source: AGRyM1tULYsuQRCHNOYZj0twjrt+OhE47rag11erTlxMfgwDfUry5Dlh1b6p/h2XUR+kFqyjHRMMTA==
-X-Received: by 2002:a17:902:7209:b0:16b:fa09:5d6 with SMTP id ba9-20020a170902720900b0016bfa0905d6mr32134724plb.120.1658213348273;
-        Mon, 18 Jul 2022 23:49:08 -0700 (PDT)
-Received: from jbongio9100214.roam.corp.google.com (cpe-104-173-199-31.socal.res.rr.com. [104.173.199.31])
-        by smtp.googlemail.com with ESMTPSA id nd2-20020a17090b4cc200b001e292e30129sm10514114pjb.22.2022.07.18.23.49.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Jul 2022 23:49:07 -0700 (PDT)
-From:   Jeremy Bongio <bongiojp@gmail.com>
-To:     Ted Tso <tytso@mit.edu>
-Cc:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
-        Jeremy Bongio <bongiojp@gmail.com>
-Subject: [PATCH v4] ext4/056: add a check to make sure ext4 uuid ioctls get/set during fsstress.
-Date:   Mon, 18 Jul 2022 23:48:53 -0700
-Message-Id: <20220719064853.152501-1-bongiojp@gmail.com>
-X-Mailer: git-send-email 2.37.0.170.g444d1eabd0-goog
+ d=fujitsu.onmicrosoft.com; s=selector2-fujitsu-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=if0/qGh1xf6BSgJRAjU92TAOyhwhQYfVhAfvHx8aK2s=;
+ b=dFKAdBT4AJWb7OSN+0798vHaNsIz83WJGdpBV0+yn0/fLK/pM5DbitN/VoY8H9lw1bySpn60nrVgX4tDLK7k2M9yH0lFOy98293pO+gs+B2IyWg3WvPLCTidRpF8Hvzo3NTC+KyBJiA7KL+Wo7N7N6E+hGAjWEyr4+6d8ux4BmE=
+Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com (2603:1096:404:10d::20)
+ by TYCPR01MB8293.jpnprd01.prod.outlook.com (2603:1096:400:159::8) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5438.15; Tue, 19 Jul
+ 2022 06:59:27 +0000
+Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com
+ ([fe80::5092:a34:8a79:5e78]) by TY2PR01MB4427.jpnprd01.prod.outlook.com
+ ([fe80::5092:a34:8a79:5e78%5]) with mapi id 15.20.5438.023; Tue, 19 Jul 2022
+ 06:59:27 +0000
+From:   "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
+To:     Zorro Lang <zlang@redhat.com>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH v2 2/2] xfs/191: test xfs_db get corrupted value
+Thread-Topic: [PATCH v2 2/2] xfs/191: test xfs_db get corrupted value
+Thread-Index: AQHYkEf+ALn8iaOpd0e6Y4igdVvGFK2FPkwAgAAsPwA=
+Date:   Tue, 19 Jul 2022 06:59:27 +0000
+Message-ID: <9c49df1c-0026-8cf5-8394-13d20471dcb2@fujitsu.com>
+References: <1657012808-2204-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <1657012808-2204-2-git-send-email-xuyang2018.jy@fujitsu.com>
+ <20220719052142.nr75sxypecvhsdcs@zlang-mailbox>
+In-Reply-To: <20220719052142.nr75sxypecvhsdcs@zlang-mailbox>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=fujitsu.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 89f393dc-2d29-423f-b355-08da695438c5
+x-ms-traffictypediagnostic: TYCPR01MB8293:EE_
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: s0s5KppbqA6eMsPR145WhXBVJAuVgUAWQl2ft6p7HWiKHo8t3BgCX0cAPEXG3g9c+0lFZJMdsOLDGgxgS1g71rXVi5Uj0dtgvcS8/v0hUrGgeqkInZpfkNh7IZRpdR2/7FTRMByOzd0koHWt4TpEVor+JXYlQTrc6TQ7TMM4TihsluA0jauV5xEWy+Y1+vQ77wIQ+CUWNurbyzXdrSA1uWn/VD5QxUWSKIpaJjuAlK41+TOU5cAzF0zW6zx1HHqgr51Dt1e3JttgA3A0ynnggbfCwDFLyPaN7ziryg884MTI5iuXHCUuaSK7Q3kA6BOinAE6YnSCI3DVD7juRpLYybI10QJIr2fdAmCaUNYU24rJtboKWXscKj+V8q60YKGSmtDwi8LYzyyqC4v3Q0Qat5sz5lbGgk9JuBdmTNUfddpX/WhHMuZhYc0CXLpGpoi/uV/4IUSzEyeRA+l9fZWHI7HvUmGuNR3unneMkH6f6vLMRO996oTAJ6LylxLVYfGEjXgvlk3hdaBeWGAw49KKOv2uu9nmU4V5ahEQ3MG2VjYnedSNLLsTscbt0ujjxwz5xTgD8FvyMlEXwmuHgw800jjsk1b8O+2lGsQU89wbSF2qN+r3htSBAsiMKH6J9IyCZuzX7V3D6XxIpMy8jguiCs0UQzR3C9x4kV8uHCMFz99VVIJWc2M5RiL7X9CDHLp5OECOggSpgdoWpn1diFIvmNoRMmO1/TtS2tjxG1DGTv/z01sR+foYFwIDRn7eZgLQVB3YmtZOVPPMjfYoPJ9znbdHH8sJpQSKYHOzXVF3VtOg0JI/LMPsYPx2dALYIGs8IwFQNw1+diDQc48KqIVSRg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB4427.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(376002)(136003)(39860400002)(396003)(346002)(366004)(66476007)(4326008)(8676002)(66946007)(76116006)(66556008)(64756008)(66446008)(8936002)(316002)(38070700005)(122000001)(86362001)(6916009)(31686004)(85182001)(38100700002)(2906002)(36756003)(91956017)(82960400001)(186003)(5660300002)(26005)(6506007)(41300700001)(6486002)(71200400001)(478600001)(31696002)(2616005)(6512007)(83380400001)(45980500001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?RVBmOW9wOUVDazNiZEQvYUtzWTJONXRvakJ0WFlJcHVQcnRGNCtraGMvemZ3?=
+ =?utf-8?B?TXliZnVOcWxNMjI1OVZHdzhBekNLMGZMdEEveEdEME00ODZWUDMrK1BhMXEr?=
+ =?utf-8?B?Ym11ZlMyUVNzM0ZRdzlDVFJqK2Z2SE1qcXVhcm1VdFNBTUlYUTNhUEtkUkFM?=
+ =?utf-8?B?Z2hNUnIwQytZNTFJdjhNVTdMdWZHdyswc3Y3MW80RnVLL245b1ZHK3psOE05?=
+ =?utf-8?B?bzljSFNuWkRrVDNnUFhzUVpWc1hqRzhYLy9ZOVdDaytDbjdyMFU4VElGbTkx?=
+ =?utf-8?B?OHNPK3RtNGNWRGJtS1lRbFByTCtZaGp0OXB6ZTBBUlhMRlpjNnRTUGFKT1pU?=
+ =?utf-8?B?RVZZeGFmdjRNZDIra1RkOHhrWmxMMmtybnJNSnhqeTZsUUdxVDdoMTA3UURD?=
+ =?utf-8?B?M29ETzlXSG5uRkh0aXd2cGZLbGQyazFjU2ErVmkrNDFoVVdMc08vZ1FmZXVu?=
+ =?utf-8?B?RzI0d0psQ0hHODVPV2ptbGJIQktjZjBoWVpESFVUZGNHU1p2Z21Bc3ZHZFFs?=
+ =?utf-8?B?QWhsR2doQldtOFYweGVuY2JhS2h2ck5sYnQwNlpiOWVuSEpyMHBOdStia0sr?=
+ =?utf-8?B?Mm9VcjlhckRmUUpTMVZCWDNTZEhiZXhwSUlZVVFqTjZQMmVqdFJ6d0haZEY2?=
+ =?utf-8?B?MzA2RjV6YTB4VWRIaW5PRzZSZmZjOFJiVmdmVUlmbVlXMWhtZE42Z3ZraWx1?=
+ =?utf-8?B?Wld5bHRYRHUvOTVFN2FrWStZYi9NVmdkZ2kyNERYYy80dmdDV25yeGs2YnBR?=
+ =?utf-8?B?NFp2MmdsMC83cUhvOTZHc2tPdUJGT1NVcVBPOEpGNm5RTWd4WnYrcFlDd3Bh?=
+ =?utf-8?B?bndHWmpUUnVTNFZMMys5cGZMOHZYUEtrTkZsVVMzOE40b3N4QUEzTWZ2RDUr?=
+ =?utf-8?B?Z0k1R2RxT3VFVXhuTVhSZW41TXk2S0VnY2Y4bmcwRWZCMTczaFBwZW9tOVZQ?=
+ =?utf-8?B?bm4vTkU0STBoODUrZ2hSaFU0TGFTZ2s2UndWQ004YlNtVlpuUHZPMlRpK3pM?=
+ =?utf-8?B?NDVxYkdpckFtcVpYSVp1WVdsQkpGWmZsTWI4aHhhZWJpMW42bk5MMGFJT3RX?=
+ =?utf-8?B?UjlWNlBUK1A5SXhrQzdRaTI1S2JxMWxDaU5mTU04WThJTjJTMGdCSngyM3A4?=
+ =?utf-8?B?RzhwQ0cyYnhtVGc5QkEzOGpPRW1nQ1ZGWFhUQWR2MXd6Zk9tcUdScWxXdEk4?=
+ =?utf-8?B?c2VmUXJmK3EwcGNwOGJlcHU1S3lvdVdmYlBzcWdvRlRsd2RNYm5KRElFeWtQ?=
+ =?utf-8?B?cnVWQVpXTlhNNEEzUkJoK3VWbStIWkY3c3ZWRXp4YkZpdWIramZnM0NUSlQ5?=
+ =?utf-8?B?N2tMbkZpMGxCb3FmL2c1ZzlNRGRBd2pSRjFJOXRoMFFsbFNHYXBTSzczTDUx?=
+ =?utf-8?B?eFRUMGVkenZZa3FnNUh6NkRHUm5CdmJyMU82YmZ2Q0o0dUEvcmpPRjZ0ak5p?=
+ =?utf-8?B?RHc4YTZzYkVCR0U5dzA5aHZCWEkrVDQzYW4zNlNzaldmZXcrVUQ1TGRYeDZF?=
+ =?utf-8?B?UUZyTEhUQ3NCQ1FQUDE2bWVNTXowM2NUU0lDOWtxci91VkllK3RuTTlVS3cz?=
+ =?utf-8?B?QkdBRWhpWWVvWnNnWWZScGp0UDJocS9Zb1A5emt6RGpjeFk4UkVtK1hwa1Ux?=
+ =?utf-8?B?SEhVbDBrNW8zWW5vRXExZ1hoM0poa3hsekxnUVM2TDNnMDdUbTltdFF2QXFp?=
+ =?utf-8?B?V1pWWTVXVC8zeExiV1pPZURUQkRrc21IWkZTWGNFWUZnZW9wWjcwRDdqTW44?=
+ =?utf-8?B?YzJZQjVhUG9kTk0rY2dhYS9oMVhJcEpqVUdseUFqTFVnRnZiS1puajE3WGFM?=
+ =?utf-8?B?VFZsc3hRV1RUUUhGZk1IV0lBSSthMWlIZGhuakhaQzZuVjdGMGFUcU1UMDFW?=
+ =?utf-8?B?VFFmMUZnU1hZbUI0YjlRU0NwYUhGbE84dWxQWjJwK01hUmdzdHVXRFc5Zk1t?=
+ =?utf-8?B?aDhhQ1Q5SFVwVnhQU1o5aS80dXJUaWNwNVFLSFhldkc0c211SlBRdVJIWFk3?=
+ =?utf-8?B?eVhMb25zME9JL2xxUVJkMG41OW9EVFhIYTZCa1BQcTNTa0EwbFNGQm16TjdU?=
+ =?utf-8?B?bmI4SFBvSWc1WjV6czZIRWd0Ukp3ZEdqUmEyYmcvS05IczlsMlZZQ081WHg3?=
+ =?utf-8?B?eGprelBDTnpBWW1GZ2d4QkR5RlQ3MC9EanFJNU9MeFh1eHNEUDBRTlRCdTNY?=
+ =?utf-8?B?N0E9PQ==?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <9E0812DAF3213B4585BBE20C93F869D7@jpnprd01.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: fujitsu.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB4427.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 89f393dc-2d29-423f-b355-08da695438c5
+X-MS-Exchange-CrossTenant-originalarrivaltime: 19 Jul 2022 06:59:27.6527
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ZO4F7oGnSPd6lKXQPNFd6/eYdesn4GrBW9ZE0FyegjA6HjGE7sMerm8zMRR6o2JSw2YdPjUI3X2oTX6yK5r+maJo5JIeGLo2C2v8A++rTUI=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYCPR01MB8293
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Adds a utility to set/get uuid through ext4 ioctl. Executes the ioctls
-while running fsstress. These ioctls are used by tune2fs to safely change
-the uuid without racing other filesystem modifications.
-
-Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
----
-
-Outstanding fsstress pid is killed in _cleanup().
-
-Copyright added.
-
-Newline added to uuid_ioctl output.
-
-fu_* fields are now named fsu_*.
-
- .gitignore         |   1 +
- src/Makefile       |   4 +-
- src/uuid_ioctl.c   | 105 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/056     |  63 +++++++++++++++++++++++++++
- tests/ext4/056.out |   2 +
- 5 files changed, 173 insertions(+), 2 deletions(-)
- create mode 100644 src/uuid_ioctl.c
- create mode 100755 tests/ext4/056
- create mode 100644 tests/ext4/056.out
-
-diff --git a/.gitignore b/.gitignore
-index ba0c572b..dab24d68 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -169,6 +169,7 @@ tags
- /src/unwritten_mmap
- /src/unwritten_sync
- /src/usemem
-+/src/uuid_ioctl
- /src/writemod
- /src/writev_on_pagefault
- /src/xfsctl
-diff --git a/src/Makefile b/src/Makefile
-index 111ce1d9..e33e04de 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
- 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
--	detached_mounts_propagation ext4_resize
-+	detached_mounts_propagation ext4_resize uuid_ioctl
- 
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py
- 
- SUBDIRS = log-writes perf
- 
--LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
-+LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
- 
- ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
- LINUX_TARGETS += loggen
-diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
-new file mode 100644
-index 00000000..89a9b5d8
---- /dev/null
-+++ b/src/uuid_ioctl.c
-@@ -0,0 +1,105 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (c) 2022 Google, Inc. All Rights Reserved.
-+ *
-+ * Test program which uses the raw ext4 set_fsuuid ioctl directly.
-+ * SYNOPSIS:
-+ *   $0 COMMAND MOUNT_POINT [UUID]
-+ *
-+ * COMMAND must be either "get" or "set".
-+ * The UUID must be a 16 octet sequence represented as 32 hexadecimal digits in
-+ * canonical textual representation, e.g. output from `uuidgen`.
-+ *
-+ */
-+
-+#include <stdio.h>
-+#include <fcntl.h>
-+#include <errno.h>
-+#include <unistd.h>
-+#include <stdint.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/ioctl.h>
-+#include <uuid/uuid.h>
-+#include <linux/fs.h>
-+
-+struct fsuuid {
-+	__u32   fsu_len;
-+	__u32   fsu_flags;
-+	__u8    fsu_uuid[];
-+};
-+
-+#ifndef EXT4_IOC_GETFSUUID
-+#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
-+#endif
-+
-+#ifndef EXT4_IOC_SETFSUUID
-+#define EXT4_IOC_SETFSUUID      _IOW('f', 44, struct fsuuid)
-+#endif
-+
-+int main(int argc, char **argv)
-+{
-+	int error, fd;
-+	struct fsuuid *fsuuid = NULL;
-+
-+	if (argc < 3) {
-+		fprintf(stderr, "Invalid arguments\n");
-+		return 1;
-+	}
-+
-+	fd = open(argv[2], O_RDONLY);
-+	if (!fd) {
-+		perror(argv[2]);
-+		return 1;
-+	}
-+
-+	fsuuid = malloc(sizeof(*fsuuid) + sizeof(uuid_t));
-+	if (!fsuuid) {
-+		perror("malloc");
-+		return 1;
-+	}
-+	fsuuid->fsu_len = sizeof(uuid_t);
-+	fsuuid->fsu_flags = 0;
-+
-+	if (strcmp(argv[1], "get") == 0) {
-+		uuid_t uuid;
-+		char uuid_str[37];
-+
-+		if (ioctl(fd, EXT4_IOC_GETFSUUID, fsuuid)) {
-+			fprintf(stderr, "%s while trying to get fs uuid\n",
-+				strerror(errno));
-+			return 1;
-+		}
-+
-+		memcpy(&uuid, fsuuid->fsu_uuid, sizeof(uuid));
-+		uuid_unparse(uuid, uuid_str);
-+		printf("%s\n", uuid_str);
-+	} else if (strcmp(argv[1], "set") == 0) {
-+		uuid_t uuid;
-+
-+		if (argc != 4) {
-+			fprintf(stderr, "UUID argument missing.\n");
-+			return 1;
-+		}
-+
-+		error = uuid_parse(argv[3], uuid);
-+		if (error < 0) {
-+			fprintf(stderr, "Invalid UUID. The UUID should be in "
-+				"canonical format. Example: "
-+				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
-+			return 1;
-+		}
-+
-+		memcpy(&fsuuid->fsu_uuid, uuid, sizeof(uuid));
-+		if (ioctl(fd, EXT4_IOC_SETFSUUID, fsuuid)) {
-+			fprintf(stderr, "%s while trying to set fs uuid\n",
-+				strerror(errno));
-+			return 1;
-+		}
-+	} else {
-+		fprintf(stderr, "Invalid command\n");
-+		return 1;
-+	}
-+
-+	return 0;
-+}
-diff --git a/tests/ext4/056 b/tests/ext4/056
-new file mode 100755
-index 00000000..7fa4ac18
---- /dev/null
-+++ b/tests/ext4/056
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Google, Inc. All Rights Reserved.
-+#
-+# Test the set/get UUID ioctl.
-+#
-+
-+. ./common/preamble
-+_begin_fstest auto ioctl
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+        cd /
-+        rm -r -f $tmp.*
-+        kill -9 $fsstress_pid 2>/dev/null;
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_require_scratch
-+_require_test_program uuid_ioctl
-+_require_command $UUIDGEN_PROG uuidgen
-+
-+UUID_IOCTL=$here/src/uuid_ioctl
-+
-+# If the ioctl is not supported by the kernel, then skip test.
-+current_uuid=$($UUID_IOCTL get $SCRATCH_MNT 2>&1)
-+if [[ "$current_uuid" =~ ^Inappropriate[[:space:]]ioctl ]]; then
-+        _notrun "UUID ioctls are not supported by kernel."
-+fi
-+
-+# metadata_csum_seed must be set to decouple checksums from the uuid.
-+# Otherwise, checksums need to be recomputed when the uuid changes, which
-+# is not supported by the ioctl.
-+_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full
-+
-+# Begin fsstress while modifying UUID
-+fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
-+$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
-+fsstress_pid=$!
-+
-+for n in $(seq 1 20); do
-+        new_uuid=$($UUIDGEN_PROG)
-+
-+        echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
-+        $UUID_IOCTL set $SCRATCH_MNT $new_uuid
-+
-+        current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
-+        echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
-+        if [[ "$current_uuid" != "$new_uuid" ]]; then
-+                echo "Current UUID ($current_uuid) does not equal what was sent with the ioctl ($new_uuid)"
-+        fi
-+done
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/ext4/056.out b/tests/ext4/056.out
-new file mode 100644
-index 00000000..6142fcd2
---- /dev/null
-+++ b/tests/ext4/056.out
-@@ -0,0 +1,2 @@
-+QA output created by 056
-+Silence is golden
--- 
-2.37.0.170.g444d1eabd0-goog
-
+b24gMjAyMi8wNy8xOSAxMzoyMSwgWm9ycm8gTGFuZyB3cm90ZToNCj4gT24gVHVlLCBKdWwgMDUs
+IDIwMjIgYXQgMDU6MjA6MDhQTSArMDgwMCwgWWFuZyBYdSB3cm90ZToNCj4+IFRoaXMgaXMgYSBy
+ZWdyZXNzaW9uIHRlc3QgdGhhdCB4ZnNfZGIgY29kZSBkb2Vzbid0IGNsZWFuIHVwIHRoZQ0KPj4g
+TElCWEZTX1JFQURCVUZfU0FMVkFHRSBjYWxsIHNpdGVzIGluIHNldF9jdXIgc28gdGhhdCB3ZQ0K
+Pj4gY2FuJ3QgdXNlIHRoZSByZXR1cm4gdmFsdWUgZGlyZWN0bHkgYW5kIHNjcmFwaW5nIGl0IG91
+dCBsYXRlci4NCj4+DQo+PiBTaWduZWQtb2ZmLWJ5OiBZYW5nIFh1IDx4dXlhbmcyMDE4Lmp5QGZ1
+aml0c3UuY29tPg0KPj4gLS0tDQo+PiAgIHRlc3RzL3hmcy8xOTEgICAgIHwgMzMgKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrDQo+PiAgIHRlc3RzL3hmcy8xOTEub3V0IHwgIDUgKysr
+KysNCj4gDQo+IFRoaXMgc2VxbnVtIGhhcyBiZWVuIHRha2VuLCBwbGVhc2UgcmViYXNlIHRvIGxh
+dGVzdCB4ZnN0ZXN0cyBmb3ItbmV4dCBicmFuY2guDQoNCkkgd2lsbCB1c2UgeGZzLzUzMyBzZXFu
+dW0uDQo+IA0KPj4gICAyIGZpbGVzIGNoYW5nZWQsIDM4IGluc2VydGlvbnMoKykNCj4+ICAgY3Jl
+YXRlIG1vZGUgMTAwNzU1IHRlc3RzL3hmcy8xOTENCj4+ICAgY3JlYXRlIG1vZGUgMTAwNjQ0IHRl
+c3RzL3hmcy8xOTEub3V0DQo+Pg0KPj4gZGlmZiAtLWdpdCBhL3Rlc3RzL3hmcy8xOTEgYi90ZXN0
+cy94ZnMvMTkxDQo+PiBuZXcgZmlsZSBtb2RlIDEwMDc1NQ0KPj4gaW5kZXggMDAwMDAwMDAuLjk4
+ZTllMTg2DQo+PiAtLS0gL2Rldi9udWxsDQo+PiArKysgYi90ZXN0cy94ZnMvMTkxDQo+PiBAQCAt
+MCwwICsxLDMzIEBADQo+PiArIyEgL2Jpbi9iYXNoDQo+PiArIyBTUERYLUxpY2Vuc2UtSWRlbnRp
+ZmllcjogR1BMLTIuMA0KPj4gKyMgQ29weXJpZ2h0IChjKSAyMDIyIEZVSklUU1UgTElNSVRFRC4g
+QWxsIHJpZ2h0cyByZXNlcnZlZC4NCj4+ICsjDQo+PiArIyBGUyBRQSBUZXN0IDE5MQ0KPj4gKyMN
+Cj4+ICsjIFJlZ3Jlc3Npb24gdGVzdCBmb3IgeGZzcHJvZ3MgY29tbWl0DQo+PiArIyBmNGFmZGNi
+MGFkMTEgKCJ4ZnNfZGI6IGNsZWFuIHVwIHRoZSBzYWx2YWdlIHJlYWQgY2FsbHNpdGVzIGluIHNl
+dF9jdXIoKSIpDQo+PiArIw0KPj4gKyMgVGhpcyBjYXNlIHRlc3QgeGZzX2RiIHdoZXRoZXIgY2Fu
+IGdldCB0aGUgbmV3IG1hZ2ljbnVtIGZpZWxkIHZhbHVlIGV2ZW4gd2UNCj4+ICsjIGp1c3QgaGF2
+ZSBjb3JydXB0ZWQgdGhpcyBmaWVsZCB2YWx1ZS4NCj4+ICsjDQo+PiArDQo+PiArLiAuL2NvbW1v
+bi9wcmVhbWJsZQ0KPj4gK19iZWdpbl9mc3Rlc3QgYXV0byBxdWljaw0KPiANCj4gVGhpcydzIGEg
+dGVzdCBmb3IgeGZzX2RiLCBzbyBhZGQgImRiIiB0ZXN0IGdyb3VwIHBsZWFzZS4NCg0KWUVTLg0K
+PiANCj4+ICsNCj4+ICsjIEltcG9ydCBjb21tb24gZnVuY3Rpb25zLg0KPj4gKy4gLi9jb21tb24v
+ZmlsdGVyDQo+IA0KPiBEbyB5b3UgdXNlIGFueSBoZWxwZXJzIGluIGNvbW1vbi9maWx0ZXI/DQoN
+Ck5vLCB3aWxsIHJlbW92ZS4NCj4gDQo+PiArDQo+PiArIyByZWFsIFFBIHRlc3Qgc3RhcnRzIGhl
+cmUNCj4+ICtfc3VwcG9ydGVkX2ZzIHhmcw0KPiANCj4gX3JlcXVpcmVfc2NyYXRjaF9ub2NoZWNr
+ID8/DQo+IA0KPiBBbmQgLi4uDQo+IA0KPiBfZml4ZWRfYnlfZ2l0X2NvbW1pdCB4ZnNwcm9ncyBm
+NGFmZGNiMGFkMTEgXA0KPiAJInhmc19kYjogY2xlYW4gdXAgdGhlIHNhbHZhZ2UgcmVhZCBjYWxs
+c2l0ZXMgaW4gc2V0X2N1cigpIg0KDQpZZXMsIHdpbGwgYWRkIHRoZW0gaW4gdjMuDQoNCkJlc3Qg
+UmVnYXJkcw0KWWFuZyBYdQ0KPiANCj4gVGhhbmtzLA0KPiBab3Jybw0KPiANCj4+ICsNCj4+ICtf
+c2NyYXRjaF9ta2ZzX3hmcyA+PiRzZXFyZXMuZnVsbCAyPiYxDQo+PiArDQo+PiArIyB3cml0ZSB0
+aGUgYmFkIG1hZ2ljbnVtIGZpZWxkIHZhbHVlKDApIHRvIHRoZSBzdXBlcmJsb2NrDQo+PiArX3Nj
+cmF0Y2hfeGZzX3NldF9tZXRhZGF0YV9maWVsZCAibWFnaWNudW0iICIwIiAic2IgMSINCj4+ICsN
+Cj4+ICsjRXZlbiBtYWdpY251bSBmaWxlZCBoYXMgYmVlbiBjb3JydXB0ZWQsIHdlIHN0aWxsIGNh
+biByZWFkIHRoaXMgZmlsZWQgdmFsdWUNCj4+ICtfc2NyYXRjaF94ZnNfZ2V0X21ldGFkYXRhX2Zp
+ZWxkICJtYWdpY251bSIgInNiIDEiDQo+PiArDQo+PiArIyBzdWNjZXNzLCBhbGwgZG9uZQ0KPj4g
+K3N0YXR1cz0wDQo+PiArZXhpdA0KPj4gZGlmZiAtLWdpdCBhL3Rlc3RzL3hmcy8xOTEub3V0IGIv
+dGVzdHMveGZzLzE5MS5vdXQNCj4+IG5ldyBmaWxlIG1vZGUgMTAwNjQ0DQo+PiBpbmRleCAwMDAw
+MDAwMC4uNzE4MjYxOTgNCj4+IC0tLSAvZGV2L251bGwNCj4+ICsrKyBiL3Rlc3RzL3hmcy8xOTEu
+b3V0DQo+PiBAQCAtMCwwICsxLDUgQEANCj4+ICtRQSBvdXRwdXQgY3JlYXRlZCBieSAxOTENCj4+
+ICtBbGxvd2luZyB3cml0ZSBvZiBjb3JydXB0ZWQgZGF0YSB3aXRoIGdvb2QgQ1JDDQo+PiArbWFn
+aWNudW0gPSAwDQo+PiArYmFkIG1hZ2ljIG51bWJlcg0KPj4gKzANCj4+IC0tIA0KPj4gMi4yNy4w
+DQo+Pg0KPiA=
