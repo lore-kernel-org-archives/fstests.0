@@ -2,44 +2,66 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CF59C43334
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 14:56:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 583A3C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 15:18:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231440AbiGSO4o (ORCPT
+        id S238462AbiGSPSP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jul 2022 10:56:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56814 "EHLO
+        Tue, 19 Jul 2022 11:18:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238281AbiGSO4l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 10:56:41 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E43D849B66;
-        Tue, 19 Jul 2022 07:56:39 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 616F361879;
-        Tue, 19 Jul 2022 14:56:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A06BDC341C6;
-        Tue, 19 Jul 2022 14:56:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1658242598;
-        bh=REXpzai3NQJRg1G1Spk9o0RHprrMn/zArsK/ESwkfpM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=kZCeAoTSUbMNuqBeI4deRkamdCh5cFkHduyjO50afRR3WeTEy53efu2VORl2pUDr2
-         dxJqXQGG0HsXq9vSxJdtalLXAyTJCWk147gU5QEJde181qG4A4tF1zxJECPieqBoHS
-         YTxzzHrauQ/PI53h4ingcmQlVKlcGhchwuSSSEbn9jsg8uB5CcxaCOEsby1AWyqQX6
-         FzwXVKjdbyrBXdVmuJ4z3NJdEq/QhjoTgN7BAgHawg0+tLVUKHI3F8lwsUTWwOcIwz
-         dueFIG0KwLmZsYu934sJ069FEGAzNNd4ycOOkC+G8oAoAZhzVJ5zh98I3bHmBCD7Ue
-         ZN0Ak32bUTvig==
-Date:   Tue, 19 Jul 2022 07:56:38 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S232192AbiGSPSO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 11:18:14 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6D8F56273
+        for <fstests@vger.kernel.org>; Tue, 19 Jul 2022 08:18:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1658243891;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=N8X8r181SsE9bGEmXcY27OkuM3iBb59YL7z0rwhEJrQ=;
+        b=byNXcX0C7ZHOzv0daluc3oEhWHYvWF5g25Had71JWpENXHwIfeREyVDMwQCH1T9L6lc/TQ
+        dABjbjfW0O6I05Fke2K4Guc0g9kOBZKs9yoF4ZM4otrZkT58JNfTaegpzLFO2HDMrXZNXL
+        8uwU9bUeirH2QbrRnJxi3RDk7vD9KFQ=
+Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
+ [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-551-GneMsgx4Nd-_XrZzb7h3LA-1; Tue, 19 Jul 2022 11:18:10 -0400
+X-MC-Unique: GneMsgx4Nd-_XrZzb7h3LA-1
+Received: by mail-qt1-f199.google.com with SMTP id i8-20020ac871c8000000b0031ed35facf3so9750179qtp.0
+        for <fstests@vger.kernel.org>; Tue, 19 Jul 2022 08:18:10 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=N8X8r181SsE9bGEmXcY27OkuM3iBb59YL7z0rwhEJrQ=;
+        b=oz/JCLpXJN4pkin+1IQOGoOPl5vtl8hDAeMLx5TSFr8eBqc8Sk13hM3OC19E0NXG3e
+         0xXbZG/G/amBwigW122zgzLlBMVsvs4XQVxcIF7TPPws8LkdbSDvl/dH+v2Ck6UvUehv
+         7mb8Gwy61qv8/mVP6pSHPvap1he16HegsujdCwjZpk/TGYJEbHrHAejsX+JA1B0X4ncK
+         ESkTol7nf8CbLiMtRR+lIMfJzHJP7SsTH5obgVNa4UNwzXCVzz3l0iPxTFs7bmfcxtmS
+         QX2we8Ht+r9af9MR9lFgBq5Xj5I2FGndqtVsQDI1apFpM7eZnwC496FVJUJH0IZOcW59
+         Epww==
+X-Gm-Message-State: AJIora8veAU+4k0+0OONLouNsGYIW7qxq5FQwB4bg2frPxHYIkV/6wBD
+        gXgSeQx0LNKV78JOF5Uben1XvKn0AI4up/X9c3rJ6QaEKKZve8i5VzGO7E7D8ZIufSTyU+Nd758
+        1XqcYs1mWinrtEsD+9g==
+X-Received: by 2002:ac8:5bd2:0:b0:31e:f083:7e57 with SMTP id b18-20020ac85bd2000000b0031ef0837e57mr7239864qtb.524.1658243889325;
+        Tue, 19 Jul 2022 08:18:09 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1uJ1q8ib/14PjQsbHlSX0P3T+t9ZUZOYoh+KdNjFCilOmqesAX0uXj5TMhObq1PUWsxT9eTMA==
+X-Received: by 2002:ac8:5bd2:0:b0:31e:f083:7e57 with SMTP id b18-20020ac85bd2000000b0031ef0837e57mr7239837qtb.524.1658243889040;
+        Tue, 19 Jul 2022 08:18:09 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id j11-20020a05620a288b00b006b5ad8e5c3asm14624696qkp.68.2022.07.19.08.18.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 19 Jul 2022 08:18:08 -0700 (PDT)
+Date:   Tue, 19 Jul 2022 23:18:02 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     Jeremy Bongio <bongiojp@gmail.com>
 Cc:     Ted Tso <tytso@mit.edu>, linux-ext4@vger.kernel.org,
         fstests@vger.kernel.org
 Subject: Re: [PATCH v4] ext4/056: add a check to make sure ext4 uuid ioctls
  get/set during fsstress.
-Message-ID: <YtbGJqYNEIucg2mU@magnolia>
+Message-ID: <20220719151802.iw42b3wrpcgynmyg@zlang-mailbox>
 References: <20220719064853.152501-1-bongiojp@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -241,6 +263,16 @@ On Mon, Jul 18, 2022 at 11:48:53PM -0700, Jeremy Bongio wrote:
 > +        cd /
 > +        rm -r -f $tmp.*
 > +        kill -9 $fsstress_pid 2>/dev/null;
+
+wait ??
+
+I think it's worth waiting at here. Due you this's the only one place we try to
+kill fsstress processes, and we'd better to make sure there're not background
+processes to cause later 'umount' fail.
+
+Thanks,
+Zorro
+
 > +}
 > +
 > +# Import common functions.
@@ -265,17 +297,14 @@ On Mon, Jul 18, 2022 at 11:48:53PM -0700, Jeremy Bongio wrote:
 > +# is not supported by the ioctl.
 > +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
 > +_scratch_mount >> $seqres.full
+                  ^^^^^^^^^^^^^^^
+                 Useless, remove it directly
+
 > +
 > +# Begin fsstress while modifying UUID
 > +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
 > +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
 > +fsstress_pid=$!
-
-LGTM now, so
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
 > +
 > +for n in $(seq 1 20); do
 > +        new_uuid=$($UUIDGEN_PROG)
@@ -305,3 +334,4 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > -- 
 > 2.37.0.170.g444d1eabd0-goog
 > 
+
