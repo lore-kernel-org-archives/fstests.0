@@ -2,135 +2,312 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 906F2C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 06:15:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66AD7CCA481
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jul 2022 06:49:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237018AbiGSGPA (ORCPT
+        id S230001AbiGSGtR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jul 2022 02:15:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40046 "EHLO
+        Tue, 19 Jul 2022 02:49:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55780 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234444AbiGSGPA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 02:15:00 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B3441C11F;
-        Mon, 18 Jul 2022 23:14:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=JNfIOmb3pZUjyCwdfZUagOuJbfz98B4d+ZnwP0UG7uY=; b=3goxqST7R90v7QrpJTuy6B80M7
-        FExUoHLMOujZ44C67nnetuX3jUaPZzKD+GJRUfaY7ac3rLT0PuXMTRktrsWdANe0y9Qhwvn1Nr2hn
-        t3lhij/0hztyG+Vh+p+mLEUTKIeqBA8yqjB9DUfq+bQ33/fudQPuY+Fz18LIbPW+eXiL5Oe2AcNOr
-        5dvt3i19ADeKArVHylIdeUPrhHR40HWJNiugZZ9pHio8wvX/qLYLm/kukow0BwTPwrJvft50pZZQH
-        2rkQHInjGICICxAntPWZG0HqdXTH4K5dJRISCttACSQv4L0d7foH1lJf93U2n7Hy3R+QdBQhq6D8L
-        u8mag85w==;
-Received: from 089144198117.atnat0007.highway.a1.net ([89.144.198.117] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1oDgVU-005dPF-LJ; Tue, 19 Jul 2022 06:14:57 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH] btrfs: fix btrfs/271
-Date:   Tue, 19 Jul 2022 08:14:54 +0200
-Message-Id: <20220719061454.829559-1-hch@lst.de>
-X-Mailer: git-send-email 2.30.2
+        with ESMTP id S237082AbiGSGtO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 02:49:14 -0400
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64FB72B61C;
+        Mon, 18 Jul 2022 23:49:09 -0700 (PDT)
+Received: by mail-pj1-x1031.google.com with SMTP id z12-20020a17090a7b8c00b001ef84000b8bso20386405pjc.1;
+        Mon, 18 Jul 2022 23:49:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=BVe+gsphO/pyZ6w6Jqw5wT9M2Cob7vGGyX8DR5WOgOc=;
+        b=Hq+7E9NlFj0eAgH5FeyoHJnlvP9IQl21eb6l3afzju96lPlk7sBsY7eVQScVIrZzBi
+         l378ET4p4D32xlz3bWsWlpIPBg9vaYUE788xpcUD1lk6Nk5KKQ2DTjuz9uHucnZ/yq68
+         5Dq5zGhV9b3cBnctne9CouCKkKJezqUHyzqrOaH1bOCurGQxLsaO7G8Uq8TxWW4fDWsy
+         hOfIyvJFsj59UtwQskDRjBj4HXFwxAA0sBAK/utSIh+WQiEzueybjcRd9iOCYFXsSlht
+         Wm5M4O8byH9gmOHfdrei1Lr0gf6bUUoXiVziGTphg+xLNsgTPR7RNHuhtr4PkB7+u1JM
+         ZX6Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=BVe+gsphO/pyZ6w6Jqw5wT9M2Cob7vGGyX8DR5WOgOc=;
+        b=sQtOhmO2NqJRPs0oNxNXufeeIdiRx9StHlMs1WnLegSJ1z6k7CtEoXxZJb3aWMZ/xf
+         1fu1Oq8zFRDEMvRL5alJBMhJsUgetuFRcgIGYUkwfrAhSl949YlNrG1NPFIl1WAM+ay/
+         XZE7hKhSDadgUQXAeph2MWc3+FU2RmJl34+kCG2QvHrcA9pogYzbRDNQ6dj4XeZVzsc/
+         6AvbBj9yFz2KxkM2bzuLpwPfkwKNize3uqlr9ostK3O9DGBSdKLi4V0PnFeDiCZCN7d3
+         zHAaeDsVkXMblqngbdIOxAFmUkGp9+pomt9uO6oP9Ec/ymodV+zDh+XmGPz5f+loyyZf
+         1Rcw==
+X-Gm-Message-State: AJIora9iWNsSEN9I7LNbf9hYjP9IuXtwi9VdyXpgV+tqfw2nnGvQqoM1
+        UALzvyesAheIfdeNzb4y0bs=
+X-Google-Smtp-Source: AGRyM1tULYsuQRCHNOYZj0twjrt+OhE47rag11erTlxMfgwDfUry5Dlh1b6p/h2XUR+kFqyjHRMMTA==
+X-Received: by 2002:a17:902:7209:b0:16b:fa09:5d6 with SMTP id ba9-20020a170902720900b0016bfa0905d6mr32134724plb.120.1658213348273;
+        Mon, 18 Jul 2022 23:49:08 -0700 (PDT)
+Received: from jbongio9100214.roam.corp.google.com (cpe-104-173-199-31.socal.res.rr.com. [104.173.199.31])
+        by smtp.googlemail.com with ESMTPSA id nd2-20020a17090b4cc200b001e292e30129sm10514114pjb.22.2022.07.18.23.49.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 18 Jul 2022 23:49:07 -0700 (PDT)
+From:   Jeremy Bongio <bongiojp@gmail.com>
+To:     Ted Tso <tytso@mit.edu>
+Cc:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
+        Jeremy Bongio <bongiojp@gmail.com>
+Subject: [PATCH v4] ext4/056: add a check to make sure ext4 uuid ioctls get/set during fsstress.
+Date:   Mon, 18 Jul 2022 23:48:53 -0700
+Message-Id: <20220719064853.152501-1-bongiojp@gmail.com>
+X-Mailer: git-send-email 2.37.0.170.g444d1eabd0-goog
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The commited old version test the broken behavior of the current
-upstream code that writes the uncompressed data into a previously
-bad mirror.  Fix the test to check that the compressed data gets
-re-replicated and add it to the compress group while we're at it.
+Adds a utility to set/get uuid through ext4 ioctl. Executes the ioctls
+while running fsstress. These ioctls are used by tune2fs to safely change
+the uuid without racing other filesystem modifications.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
 ---
- tests/btrfs/270     | 11 +++++++----
- tests/btrfs/270.out | 34 ----------------------------------
- 2 files changed, 7 insertions(+), 38 deletions(-)
 
-diff --git a/tests/btrfs/270 b/tests/btrfs/270
-index 4229a02c..5b73fb15 100755
---- a/tests/btrfs/270
-+++ b/tests/btrfs/270
-@@ -7,7 +7,7 @@
- # Regression test for btrfs buffered read repair of compressed data.
- #
- . ./common/preamble
--_begin_fstest auto quick read_repair
-+_begin_fstest auto quick read_repair compress
+Outstanding fsstress pid is killed in _cleanup().
+
+Copyright added.
+
+Newline added to uuid_ioctl output.
+
+fu_* fields are now named fsu_*.
+
+ .gitignore         |   1 +
+ src/Makefile       |   4 +-
+ src/uuid_ioctl.c   | 105 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/056     |  63 +++++++++++++++++++++++++++
+ tests/ext4/056.out |   2 +
+ 5 files changed, 173 insertions(+), 2 deletions(-)
+ create mode 100644 src/uuid_ioctl.c
+ create mode 100755 tests/ext4/056
+ create mode 100644 tests/ext4/056.out
+
+diff --git a/.gitignore b/.gitignore
+index ba0c572b..dab24d68 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -169,6 +169,7 @@ tags
+ /src/unwritten_mmap
+ /src/unwritten_sync
+ /src/usemem
++/src/uuid_ioctl
+ /src/writemod
+ /src/writev_on_pagefault
+ /src/xfsctl
+diff --git a/src/Makefile b/src/Makefile
+index 111ce1d9..e33e04de 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+ 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+-	detached_mounts_propagation ext4_resize
++	detached_mounts_propagation ext4_resize uuid_ioctl
  
- . ./common/filter
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py
  
-@@ -60,7 +60,9 @@ _scratch_unmount
- echo "step 2......corrupt file extent"
- echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
- 	>> $seqres.full
--$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
-+dd if=$devpath of=$TEST_DIR/$seq.dump.good skip=$physical bs=1 count=4096 \
-+	2>/dev/null
-+$XFS_IO_PROG -c "pwrite -S 0xbb -b 4K $physical 4K" $devpath > /dev/null
+ SUBDIRS = log-writes perf
  
- _scratch_mount
+-LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
++LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
  
-@@ -70,8 +72,9 @@ _btrfs_buffered_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
- _scratch_unmount
- 
- echo "step 4......check if the repair worked"
--$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
--	_filter_xfs_io_offset
-+dd if=$devpath of=$TEST_DIR/$seq.dump skip=$physical bs=1 count=4096 \
-+	2>/dev/null
-+cmp -bl $TEST_DIR/$seq.dump.good $TEST_DIR/$seq.dump
- 
- _scratch_dev_pool_put
- # success, all done
-diff --git a/tests/btrfs/270.out b/tests/btrfs/270.out
-index 53a80692..6d744c02 100644
---- a/tests/btrfs/270.out
-+++ b/tests/btrfs/270.out
-@@ -5,37 +5,3 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
- step 2......corrupt file extent
- step 3......repair the bad copy
- step 4......check if the repair worked
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--read 512/512 bytes
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+ LINUX_TARGETS += loggen
+diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
+new file mode 100644
+index 00000000..89a9b5d8
+--- /dev/null
++++ b/src/uuid_ioctl.c
+@@ -0,0 +1,105 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2022 Google, Inc. All Rights Reserved.
++ *
++ * Test program which uses the raw ext4 set_fsuuid ioctl directly.
++ * SYNOPSIS:
++ *   $0 COMMAND MOUNT_POINT [UUID]
++ *
++ * COMMAND must be either "get" or "set".
++ * The UUID must be a 16 octet sequence represented as 32 hexadecimal digits in
++ * canonical textual representation, e.g. output from `uuidgen`.
++ *
++ */
++
++#include <stdio.h>
++#include <fcntl.h>
++#include <errno.h>
++#include <unistd.h>
++#include <stdint.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/ioctl.h>
++#include <uuid/uuid.h>
++#include <linux/fs.h>
++
++struct fsuuid {
++	__u32   fsu_len;
++	__u32   fsu_flags;
++	__u8    fsu_uuid[];
++};
++
++#ifndef EXT4_IOC_GETFSUUID
++#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
++#endif
++
++#ifndef EXT4_IOC_SETFSUUID
++#define EXT4_IOC_SETFSUUID      _IOW('f', 44, struct fsuuid)
++#endif
++
++int main(int argc, char **argv)
++{
++	int error, fd;
++	struct fsuuid *fsuuid = NULL;
++
++	if (argc < 3) {
++		fprintf(stderr, "Invalid arguments\n");
++		return 1;
++	}
++
++	fd = open(argv[2], O_RDONLY);
++	if (!fd) {
++		perror(argv[2]);
++		return 1;
++	}
++
++	fsuuid = malloc(sizeof(*fsuuid) + sizeof(uuid_t));
++	if (!fsuuid) {
++		perror("malloc");
++		return 1;
++	}
++	fsuuid->fsu_len = sizeof(uuid_t);
++	fsuuid->fsu_flags = 0;
++
++	if (strcmp(argv[1], "get") == 0) {
++		uuid_t uuid;
++		char uuid_str[37];
++
++		if (ioctl(fd, EXT4_IOC_GETFSUUID, fsuuid)) {
++			fprintf(stderr, "%s while trying to get fs uuid\n",
++				strerror(errno));
++			return 1;
++		}
++
++		memcpy(&uuid, fsuuid->fsu_uuid, sizeof(uuid));
++		uuid_unparse(uuid, uuid_str);
++		printf("%s\n", uuid_str);
++	} else if (strcmp(argv[1], "set") == 0) {
++		uuid_t uuid;
++
++		if (argc != 4) {
++			fprintf(stderr, "UUID argument missing.\n");
++			return 1;
++		}
++
++		error = uuid_parse(argv[3], uuid);
++		if (error < 0) {
++			fprintf(stderr, "Invalid UUID. The UUID should be in "
++				"canonical format. Example: "
++				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
++			return 1;
++		}
++
++		memcpy(&fsuuid->fsu_uuid, uuid, sizeof(uuid));
++		if (ioctl(fd, EXT4_IOC_SETFSUUID, fsuuid)) {
++			fprintf(stderr, "%s while trying to set fs uuid\n",
++				strerror(errno));
++			return 1;
++		}
++	} else {
++		fprintf(stderr, "Invalid command\n");
++		return 1;
++	}
++
++	return 0;
++}
+diff --git a/tests/ext4/056 b/tests/ext4/056
+new file mode 100755
+index 00000000..7fa4ac18
+--- /dev/null
++++ b/tests/ext4/056
+@@ -0,0 +1,63 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Google, Inc. All Rights Reserved.
++#
++# Test the set/get UUID ioctl.
++#
++
++. ./common/preamble
++_begin_fstest auto ioctl
++
++# Override the default cleanup function.
++_cleanup()
++{
++        cd /
++        rm -r -f $tmp.*
++        kill -9 $fsstress_pid 2>/dev/null;
++}
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_supported_fs ext4
++_require_scratch
++_require_test_program uuid_ioctl
++_require_command $UUIDGEN_PROG uuidgen
++
++UUID_IOCTL=$here/src/uuid_ioctl
++
++# If the ioctl is not supported by the kernel, then skip test.
++current_uuid=$($UUID_IOCTL get $SCRATCH_MNT 2>&1)
++if [[ "$current_uuid" =~ ^Inappropriate[[:space:]]ioctl ]]; then
++        _notrun "UUID ioctls are not supported by kernel."
++fi
++
++# metadata_csum_seed must be set to decouple checksums from the uuid.
++# Otherwise, checksums need to be recomputed when the uuid changes, which
++# is not supported by the ioctl.
++_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
++_scratch_mount >> $seqres.full
++
++# Begin fsstress while modifying UUID
++fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
++$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
++fsstress_pid=$!
++
++for n in $(seq 1 20); do
++        new_uuid=$($UUIDGEN_PROG)
++
++        echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
++        $UUID_IOCTL set $SCRATCH_MNT $new_uuid
++
++        current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
++        echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
++        if [[ "$current_uuid" != "$new_uuid" ]]; then
++                echo "Current UUID ($current_uuid) does not equal what was sent with the ioctl ($new_uuid)"
++        fi
++done
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/ext4/056.out b/tests/ext4/056.out
+new file mode 100644
+index 00000000..6142fcd2
+--- /dev/null
++++ b/tests/ext4/056.out
+@@ -0,0 +1,2 @@
++QA output created by 056
++Silence is golden
 -- 
-2.30.2
+2.37.0.170.g444d1eabd0-goog
 
