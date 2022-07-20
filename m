@@ -2,92 +2,144 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1C48C43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 14:30:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF738C43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 15:06:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229526AbiGTOae (ORCPT
+        id S233901AbiGTPGs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Jul 2022 10:30:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43626 "EHLO
+        Wed, 20 Jul 2022 11:06:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43346 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230225AbiGTOad (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2022 10:30:33 -0400
-Received: from box.fidei.email (box.fidei.email [71.19.144.250])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE52F46DA5;
-        Wed, 20 Jul 2022 07:30:30 -0700 (PDT)
-Received: from authenticated-user (box.fidei.email [71.19.144.250])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id D96CB811CF;
-        Wed, 20 Jul 2022 10:30:29 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1658327430; bh=j6pSIsicmSDYHHmekm0xrii0oHIr0LiP8jaXBAoTmiI=;
-        h=Date:Subject:To:References:From:In-Reply-To:From;
-        b=uey/8sEPUCRod0x24n3hRuEawsN0hZ6771lb5tdbsYX0ap/1lJyxEBhjNyAuMf3QH
-         4lsW561Uiqccx2J+zfLcXFxAVZnmG1RS0QTsiiuT/0wUkNr6tDDlNCUZt9jHh1JesY
-         OvNSGLJfxnxiNj7DwG3gzmtgbDBuANhhBezheUlRzDyWZpiu2TgpJTIdT9INYjkWit
-         saq0tzqNQfUg6w1Li6e3nSv4YPIjxwY7PTtTS1acM8ctQCge8QE+MuWdwwPYtJbZMM
-         hjNbXZBK6CuNqqXVreeRAK41G2rO1wDzZMZGP0HMcscNigBV2HoQk6cFQ1hz48ISMW
-         +XSQORv04F4+w==
-Message-ID: <14f33fb7-c7f1-5463-ad4a-fe031d2a8583@dorminy.me>
-Date:   Wed, 20 Jul 2022 10:30:27 -0400
+        with ESMTP id S232429AbiGTPGr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2022 11:06:47 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5E0CA237D6
+        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 08:06:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1658329605;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=UK9YreiLbpLF37if8b/b/eB7SmLDxp2g20abdpAcisg=;
+        b=SWd6CNREbCNQ8S5Nhy7fVZbuXpfMCAa4iIJCBJL7jLLeP32m6L2sFGh5Pz7Oql4CWeXo2Y
+        SbXQ2SP3xhU2s6S38sWLn60QApimYl/zVeBRKlW+Z8IRC0/AXxMyZCF+elsTRDRZ9A/S6n
+        qLxNk5spxwZt20uu760xklD8NAzj+D4=
+Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
+ [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-395-9HVA0inRMkGQF4RbibWfSw-1; Wed, 20 Jul 2022 11:06:43 -0400
+X-MC-Unique: 9HVA0inRMkGQF4RbibWfSw-1
+Received: by mail-qv1-f71.google.com with SMTP id e1-20020ad44181000000b00472f8ad6e71so9718521qvp.20
+        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 08:06:43 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=UK9YreiLbpLF37if8b/b/eB7SmLDxp2g20abdpAcisg=;
+        b=EaDG6v0fm32IAp44XGrPZVGzBolt3+vzkhgnlzmy/77oC/LXLoSvyt3nOdgycWSc5d
+         B9Qmwn1PY5wro0+D4ABAp1pteba3KHa4m8wufs1UsQbADdVAAHAAzBIZRtTtqmFU42va
+         EvS0IQ7R0hr66fPxl66XWQuMSNgEizPKBfWZUfpePnlCm2phggRRaNvOSgXla+KIAQuK
+         Qik9lv5QbQARfzyHuywRT8bkZTedq9NGzUXT2EdLbXmY6vsP+JNuoagtZjnUs5eo9GBo
+         +1VFT1+Sohvvsh7M/5xiU69NzjpQ1rxNGhQYbMVlGUlGVE0kDwreJroEMJD3/IjWIhJ6
+         b25w==
+X-Gm-Message-State: AJIora82YDjJj7I+EavCWOku7qz6oVu7r6bQlxvDLBlQrISFrpeCUFym
+        4hfS5jAXXLgTJZChj8+MiT40GMT1lj45C54qNeTdghXTgtVQW6zV+1m0HQjjeHcBW0nO/0sTDO8
+        pFNUdaZNWXYKbQC64gA==
+X-Received: by 2002:a05:620a:4507:b0:6af:348b:85fe with SMTP id t7-20020a05620a450700b006af348b85femr25276564qkp.629.1658329603311;
+        Wed, 20 Jul 2022 08:06:43 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1ustt5FtcBl8NwGhEpSo84ymHFf3R1zFX2DaJ5uPRciTbzM+xwaMrpZ2Xqo5Dtj9icbCLj6Ng==
+X-Received: by 2002:a05:620a:4507:b0:6af:348b:85fe with SMTP id t7-20020a05620a450700b006af348b85femr25276545qkp.629.1658329603024;
+        Wed, 20 Jul 2022 08:06:43 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id bi24-20020a05620a319800b006b5d8eb2414sm11627968qkb.120.2022.07.20.08.06.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Jul 2022 08:06:42 -0700 (PDT)
+Date:   Wed, 20 Jul 2022 23:06:36 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Jeremy Bongio <bongiojp@gmail.com>, linux-ext4@vger.kernel.org,
+        fstests@vger.kernel.org, "Darrick J . Wong" <djwong@kernel.org>
+Subject: Re: [PATCH v5] ext4/056: add a check to make sure ext4 uuid ioctls
+ get/set during fsstress.
+Message-ID: <20220720150636.cvd3ls2mbxbows27@zlang-mailbox>
+References: <20220720000256.239531-1-bongiojp@gmail.com>
+ <20220720100949.dttc5qbmy4qziz65@zlang-mailbox>
+ <YtfqIVEi7g4fFpqU@mit.edu>
 MIME-Version: 1.0
-Subject: Re: [PATCH v13 4/5] btrfs: test verity orphans with dmlogwrites
-Content-Language: en-US
-To:     Boris Burkov <boris@bur.io>, fstests@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com
-References: <cover.1658277755.git.boris@bur.io>
- <57123fe31da2886cfae01e27ffc43095ef7db7d1.1658277755.git.boris@bur.io>
-From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-In-Reply-To: <57123fe31da2886cfae01e27ffc43095ef7db7d1.1658277755.git.boris@bur.io>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YtfqIVEi7g4fFpqU@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 7/19/22 20:49, Boris Burkov wrote:
-> The behavior of orphans is most interesting across mounts, interrupted
-> at arbitrary points during fsverity enable. To cover as many such cases
-> as possible, use dmlogwrites and dmsnapshot as in
-> log-writes/replay-individual.sh. As we replay the log events, we run a
-> state machine with different invariants enforced at each state.
+On Wed, Jul 20, 2022 at 07:42:25AM -0400, Theodore Ts'o wrote:
+> On Wed, Jul 20, 2022 at 06:09:49PM +0800, Zorro Lang wrote:
+> > On Tue, Jul 19, 2022 at 05:02:56PM -0700, Jeremy Bongio wrote:
+> > > +# Override the default cleanup function.
+> > > +_cleanup()
+> > > +{
+> > > +        cd /
+> > > +        rm -r -f $tmp.*
+> > > +        kill -9 $fsstress_pid 2>/dev/null;
+> > > +        wait $fsstress_pid > /dev/null 2>&1
+> > 
+> > I think "wait" is enough. With this change, it's good to me.
 > 
-> There are three possible states for a given point in the log:
-> 0. Verity has not yet started
-> 1. Verity has started but not finished
-> 2. Verity has finished.
+> The kill -9 is needed, because otherwise the test will run for a
+> **very** long time.  The reason for it is because of the -n 999999 in
+
+Sure, I mean:
+
+  kill -9 $fsstress_pid 2>/dev/null
+  wait
+
+Not remove the "kill" line :)
+
+> fstress_args:
 > 
-> The possible transitions with causes are:
-> 0->1: We see an orphan item for the file.
-> 1->2: Running 'fsverity measure' succeeds on the file.
+> > > +# Begin fsstress while modifying UUID
+> > > +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
+> > > +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
+> > > +fsstress_pid=$!
 > 
-> Each state has its own invariant for testing:
-> 0: No verity items exist.
-> 1: Mount should handle the orphan and blow away verity data: expect 0
->     Merkle items after mounting.
-> 2: The orphan should be gone and mount should not blow away merkle
->     items. Expect the same number of merkle items before and after
->     mounting.
+> We could adjust the number of loops to a more reasonable number, but
+> then test becomes less reliable, since depending on the storage device
+> (e.g., cheap USB thumb drive found in the checkout counter at a
+> convenience store, vs. a high-end NVMe SSD) and the overall speed of
+> the system, a different number of loops will be needed.
 > 
-> As a result, we can be confident that if the file system loses power at
-> any point during enabling verity on a file, the work is either completed,
-> or gets rolled-back by mount.
+> Given that we're *only* using the fsstress as an antogonist while we
+> are changing the UUID of the file system 20 times, killing the
+> fsstress once we're done with the UUID runs is sufficient, I would
+> argue.
 > 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> Reviewed-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-> ---
->   tests/btrfs/291     | 168 ++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/291.out |   2 +
->   2 files changed, 170 insertions(+)
->   create mode 100755 tests/btrfs/291
->   create mode 100644 tests/btrfs/291.out
+> Also, Jeremy, it looks like you haven't updated your xfstests-dev
+> repository in a few weeks.  Since you started this project, ext4/056
+> has been assigned, and there has been some new helper programs added
+> which caused patch conflicts in src/Makefile and in .gitignore.  They
+> were pretty trivial to fix up the patch conflicts (which I've done in
+> my xfstests-dev tree), but it's best practice to rebase on top of
+> origin/for-next and re-test just to make sure there haven't been some
+> major change in the fstests common scripts that might catch your test
+> out.
+
+Thanks for pointing out that, yes, better to rebase to latest fstests
+for-next branch.
+
+> 
+> Also, feel free to add my:
+> 
+> Reviewed-by: Theodore Ts'o <tytso@mit.edu>
+
+Sure,
+
+Thanks,
+Zorro
+
+> 
+> Cheers,
+> 
+> 						- Ted
 > 
 
-Still looks good to me, with the fua-hunting rewrite.
-
-It occurred to me last night that the test doesn't verify that it sees a 
-disk state in state 1 -- theoretically it could go directly from state 0 
-to state 2 -- but I don't see a good way to ensure the test spends time 
-in state 1.
