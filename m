@@ -2,157 +2,330 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECACDC43334
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 09:58:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2CE5C433EF
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 10:10:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229523AbiGTJ6O (ORCPT
+        id S231790AbiGTKKC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Jul 2022 05:58:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53992 "EHLO
+        Wed, 20 Jul 2022 06:10:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231133AbiGTJ6N (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2022 05:58:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E614D24BFC
-        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 02:58:12 -0700 (PDT)
+        with ESMTP id S229379AbiGTKKB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2022 06:10:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5B11C5E311
+        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 03:09:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658311091;
+        s=mimecast20190719; t=1658311798;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=EQvxpPOoUaUU0AxHsyLj0LNLlrGA3fuwwOyk72E2lmo=;
-        b=D/cVcFp2u6ZfnAzpIp5GeWXkKAQXg3KLmCJICp5LiiznCLqANoPkJHtVPDyCZl6OfM1duW
-        e/Kc1iZIcUinhemIcEzIA+cHJUa+XTeiG2TwA5Bw9ql+fQFvK8K+LtReObgHEEjrFyqvv/
-        XKFaYhLyrckiiT+E0o4ZscDaN3fCrvM=
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
- [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=YgZdj4HiWf8hYLYatruHwnRbt5XsSuFh9EjtrMbqXY0=;
+        b=h8l8GAl4VmyHHwTxg4QXqOZkOTrht94J8FA+fIsQ8D2KtzGzw9GM+Roojb/KWSTLI5NTDV
+        6qtXFVAaXUfX9FbbkNQNGsxsqGrLAXwm+AvU6W2kr+mxehmrIYin8CNFvcL8jJdVbq4qEc
+        Ku1XxPDeA4OqnM6Hzi+BrvgwhC7JSmo=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-144-pAhbyF_WNvmDKAT4NUtQiw-1; Wed, 20 Jul 2022 05:58:10 -0400
-X-MC-Unique: pAhbyF_WNvmDKAT4NUtQiw-1
-Received: by mail-qt1-f199.google.com with SMTP id n14-20020ac8674e000000b0031ede6b9526so8954539qtp.3
-        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 02:58:10 -0700 (PDT)
+ us-mta-441-ppWSxQWoPyiCAFsZ0Plhwg-1; Wed, 20 Jul 2022 06:09:57 -0400
+X-MC-Unique: ppWSxQWoPyiCAFsZ0Plhwg-1
+Received: by mail-qk1-f200.google.com with SMTP id ay35-20020a05620a17a300b006b5d9646d31so9898433qkb.6
+        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 03:09:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=EQvxpPOoUaUU0AxHsyLj0LNLlrGA3fuwwOyk72E2lmo=;
-        b=zRC5pqIrukQf08gqGjPdyqThVxmaeeNGIdg9R8ta1P61XwI5YEh8uBgB2J2d7BNnE3
-         HiOBS9fHDWA7ZMCJ/6QkpfbhK8SBTOjJ7g7V5xuJCqCnD9XFrSSEiMvyToB3+daaQzyz
-         8QovoHRY7CB81JUkd2T1Is/jdPhmLGplvxGlzvNdl3HBisG9ZhczKubi6qFqwd2njdrp
-         FvymyYPn9JmU3zl8Ran/GrKKc2YOGRWvpiwShU+jqm08oIkEIf2nw0g//DeW/20TMu3c
-         0kk7DXRIUy/hn2F5l7+0RmrMAV61lNnJIc5txfNWjawwpnW88j6byyqW4o7oj2OwEVXK
-         SZng==
-X-Gm-Message-State: AJIora/HTnRJqXhGb503inNphNZHvQk8lOgpObAwiOPw6QhWGTyFj9wK
-        DQNkM/yX4/m+CuIM3bqH2qBNLja1bWz71KsZXxOAocQ/F0chBQ494vjNQiGrK5V+ebOUp7mW0t+
-        nLlrVHo8thXO/cFfQyg==
-X-Received: by 2002:a05:622a:216:b0:31e:df05:8154 with SMTP id b22-20020a05622a021600b0031edf058154mr17829075qtx.669.1658311089740;
-        Wed, 20 Jul 2022 02:58:09 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1uWNoUUoBfNNv4TqX7ws1LzIz274q/JnThxzEi7FeYez8BQCm03CXA+fp1adqbn35qtaFyrgA==
-X-Received: by 2002:a05:622a:216:b0:31e:df05:8154 with SMTP id b22-20020a05622a021600b0031edf058154mr17829067qtx.669.1658311089477;
-        Wed, 20 Jul 2022 02:58:09 -0700 (PDT)
+        bh=YgZdj4HiWf8hYLYatruHwnRbt5XsSuFh9EjtrMbqXY0=;
+        b=Czf6fiAwDNxIDI86VQ6alZh+4fVJsDtS/JHsJcaR9FuoQVF/8w6u7qy19iwpVnnLTz
+         JxJacLHzgbiPAcU2chPpi8/PcmpitJ62GBE/51OXzZVO7jJzG/xZQs1Z1fZ8nL2IXdRv
+         D2jnP30/PWfrDmx2pYopBEYq7U/UWqfdT0ecKskoMX/ppEDBtpmBG34lvTko0zDsgnaV
+         cwAeC4bhJBXE+kNt4n1pdZm1EfDWS7Rrt9kxzQ6OV9HhF7YynoNCnUxdAwsIBk3jkunB
+         y8Q4kEAtaZDA5fyDjHPRaLVL44oSUfGA8d09RyNS+G87qTmcj8JvAEsrQ6yKLdg31epW
+         7Stw==
+X-Gm-Message-State: AJIora8weeySaK2mGVDNDEuB8FlWLlZ/jt34Ho+psOkyiWCcV2gS2Qla
+        6OHITAV7oLSonpOT5dXPiaqLo43Qo9kiTxq9UKRyC7p6WnacbUCz3OU9gL61W9kNFVJ8kxM7JQJ
+        OrrTlWWBxEzbxFnSvmA==
+X-Received: by 2002:a37:88d:0:b0:6b5:cf2a:a485 with SMTP id 135-20020a37088d000000b006b5cf2aa485mr15847138qki.660.1658311796769;
+        Wed, 20 Jul 2022 03:09:56 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1uJPerdUt1iF7XBjf5dXIITvbz3Xyd7hg8dRBjwACY3qPHACap2FDpduP0hlDkRTxw04k7sfA==
+X-Received: by 2002:a37:88d:0:b0:6b5:cf2a:a485 with SMTP id 135-20020a37088d000000b006b5cf2aa485mr15847121qki.660.1658311796475;
+        Wed, 20 Jul 2022 03:09:56 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id x20-20020a05620a0b5400b006a6ab259261sm15954153qkg.29.2022.07.20.02.58.07
+        by smtp.gmail.com with ESMTPSA id h13-20020a05620a284d00b006aee5df383csm15711621qkp.134.2022.07.20.03.09.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Jul 2022 02:58:08 -0700 (PDT)
-Date:   Wed, 20 Jul 2022 17:58:03 +0800
+        Wed, 20 Jul 2022 03:09:55 -0700 (PDT)
+Date:   Wed, 20 Jul 2022 18:09:49 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] generic/275: fix premature enospc errors when fs
- block size is large
-Message-ID: <20220720095803.bnvp6rqpbfwa3g2r@zlang-mailbox>
-References: <165826662758.3249425.5439317033584646383.stgit@magnolia>
- <165826663321.3249425.14767713688923502274.stgit@magnolia>
+To:     Jeremy Bongio <bongiojp@gmail.com>
+Cc:     Ted Tso <tytso@mit.edu>, linux-ext4@vger.kernel.org,
+        fstests@vger.kernel.org, "Darrick J . Wong" <djwong@kernel.org>
+Subject: Re: [PATCH v5] ext4/056: add a check to make sure ext4 uuid ioctls
+ get/set during fsstress.
+Message-ID: <20220720100949.dttc5qbmy4qziz65@zlang-mailbox>
+References: <20220720000256.239531-1-bongiojp@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <165826663321.3249425.14767713688923502274.stgit@magnolia>
+In-Reply-To: <20220720000256.239531-1-bongiojp@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 19, 2022 at 02:37:13PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Jul 19, 2022 at 05:02:56PM -0700, Jeremy Bongio wrote:
+> Adds a utility to set/get uuid through ext4 ioctl. Executes the ioctls
+> while running fsstress. These ioctls are used by tune2fs to safely change
+> the uuid without racing other filesystem modifications.
 > 
-> When running this test on an XFS filesystem with a 64k block size, I
-> see this error:
-> 
-> generic/275       - output mismatch (see /var/tmp/fstests/generic/275.out.bad)
->     --- tests/generic/275.out   2021-05-13 11:47:55.694860280 -0700
->     +++ /var/tmp/fstests/generic/275.out.bad    2022-07-19 10:38:41.840000000 -0700
->     @@ -2,4 +2,7 @@
->      ------------------------------
->      write until ENOSPC test
->      ------------------------------
->     +du: cannot access '/opt/tmp1': No such file or directory
->     +stat: cannot statx '/opt/tmp1': No such file or directory
->     +/tmp/fstests/tests/generic/275: line 74: [: -lt: unary operator expected
->      done
->     ...
->     (Run 'diff -u /tmp/fstests/tests/generic/275.out /var/tmp/fstests/generic/275.out.bad'  to see the entire diff)
-> 
-> The 275.full file indicates that the test was unable to recreate the
-> $SCRATCH_MNT/tmp1 file after we freed all but the last 256K of free
-> space in the filesystem.  I mounted the scratch fs, and df reported
-> exactly 256K of free space available, which means there are 4 blocks
-> left in the filesystem for user programs to use.
-> 
-> Unfortunately for this test, xfs_create requires sufficient free blocks
-> in the filesystem to handle full inode btree splits and the maximal
-> directory expansion for a new dirent.  In other words, there must be
-> enough free space to handle the worst case space consumption.  That
-> quantity is 26 blocks, hence the last dd in the test fails with ENOSPC,
-> which makes the test fail.
-> 
-> Fix all this by creating the file that we use to test the low-space file
-> write *before* we drain the free space down to 256K.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Jeremy Bongio <bongiojp@gmail.com>
 > ---
->  tests/generic/275 |   15 ++++++++++++---
->  1 file changed, 12 insertions(+), 3 deletions(-)
 > 
+> Changes in v5:
 > 
-> diff --git a/tests/generic/275 b/tests/generic/275
-> index 6189edca..f3b05409 100755
-> --- a/tests/generic/275
-> +++ b/tests/generic/275
-> @@ -37,6 +37,15 @@ _scratch_unmount 2>/dev/null
->  _scratch_mkfs_sized $((2 * 1024 * 1024 * 1024)) >>$seqres.full 2>&1
->  _scratch_mount
+> Added reviewed-by tag.
+> 
+> Added wait after killing fsstress pids.
+> 
+> Removed _scratch_mount output redirection.
+> 
+>  .gitignore         |   1 +
+>  src/Makefile       |   4 +-
+>  src/uuid_ioctl.c   | 105 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/056     |  64 +++++++++++++++++++++++++++
+>  tests/ext4/056.out |   2 +
+>  5 files changed, 174 insertions(+), 2 deletions(-)
+>  create mode 100644 src/uuid_ioctl.c
+>  create mode 100755 tests/ext4/056
+>  create mode 100644 tests/ext4/056.out
+> 
+> diff --git a/.gitignore b/.gitignore
+> index ba0c572b..dab24d68 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -169,6 +169,7 @@ tags
+>  /src/unwritten_mmap
+>  /src/unwritten_sync
+>  /src/usemem
+> +/src/uuid_ioctl
+>  /src/writemod
+>  /src/writev_on_pagefault
+>  /src/xfsctl
+> diff --git a/src/Makefile b/src/Makefile
+> index 111ce1d9..e33e04de 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -31,14 +31,14 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> -	detached_mounts_propagation ext4_resize
+> +	detached_mounts_propagation ext4_resize uuid_ioctl
 >  
-> +# Certain filesystems such as XFS require sufficient free blocks to handle the
-> +# worst-case directory expansion as a result of a creat() call.  If the fs
-> +# block size is very large (e.g. 64k) then the number of blocks required for
-> +# the creat() call can represent far more free space than the 256K left at the
-> +# end of this test.  Therefore, create the file that the last dd will write to
-> +# now when we know there's enough free blocks.
-> +later_file=$SCRATCH_MNT/later
-> +touch $later_file
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py
+>  
+>  SUBDIRS = log-writes perf
+>  
+> -LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
+> +LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt -luuid
+>  
+>  ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+>  LINUX_TARGETS += loggen
+> diff --git a/src/uuid_ioctl.c b/src/uuid_ioctl.c
+> new file mode 100644
+> index 00000000..89a9b5d8
+> --- /dev/null
+> +++ b/src/uuid_ioctl.c
+> @@ -0,0 +1,105 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (c) 2022 Google, Inc. All Rights Reserved.
+> + *
+> + * Test program which uses the raw ext4 set_fsuuid ioctl directly.
+> + * SYNOPSIS:
+> + *   $0 COMMAND MOUNT_POINT [UUID]
+> + *
+> + * COMMAND must be either "get" or "set".
+> + * The UUID must be a 16 octet sequence represented as 32 hexadecimal digits in
+> + * canonical textual representation, e.g. output from `uuidgen`.
+> + *
+> + */
+> +
+> +#include <stdio.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <unistd.h>
+> +#include <stdint.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <sys/ioctl.h>
+> +#include <uuid/uuid.h>
+> +#include <linux/fs.h>
+> +
+> +struct fsuuid {
+> +	__u32   fsu_len;
+> +	__u32   fsu_flags;
+> +	__u8    fsu_uuid[];
+> +};
+> +
+> +#ifndef EXT4_IOC_GETFSUUID
+> +#define EXT4_IOC_GETFSUUID      _IOR('f', 44, struct fsuuid)
+> +#endif
+> +
+> +#ifndef EXT4_IOC_SETFSUUID
+> +#define EXT4_IOC_SETFSUUID      _IOW('f', 44, struct fsuuid)
+> +#endif
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	int error, fd;
+> +	struct fsuuid *fsuuid = NULL;
+> +
+> +	if (argc < 3) {
+> +		fprintf(stderr, "Invalid arguments\n");
+> +		return 1;
+> +	}
+> +
+> +	fd = open(argv[2], O_RDONLY);
+> +	if (!fd) {
+> +		perror(argv[2]);
+> +		return 1;
+> +	}
+> +
+> +	fsuuid = malloc(sizeof(*fsuuid) + sizeof(uuid_t));
+> +	if (!fsuuid) {
+> +		perror("malloc");
+> +		return 1;
+> +	}
+> +	fsuuid->fsu_len = sizeof(uuid_t);
+> +	fsuuid->fsu_flags = 0;
+> +
+> +	if (strcmp(argv[1], "get") == 0) {
+> +		uuid_t uuid;
+> +		char uuid_str[37];
+> +
+> +		if (ioctl(fd, EXT4_IOC_GETFSUUID, fsuuid)) {
+> +			fprintf(stderr, "%s while trying to get fs uuid\n",
+> +				strerror(errno));
+> +			return 1;
+> +		}
+> +
+> +		memcpy(&uuid, fsuuid->fsu_uuid, sizeof(uuid));
+> +		uuid_unparse(uuid, uuid_str);
+> +		printf("%s\n", uuid_str);
+> +	} else if (strcmp(argv[1], "set") == 0) {
+> +		uuid_t uuid;
+> +
+> +		if (argc != 4) {
+> +			fprintf(stderr, "UUID argument missing.\n");
+> +			return 1;
+> +		}
+> +
+> +		error = uuid_parse(argv[3], uuid);
+> +		if (error < 0) {
+> +			fprintf(stderr, "Invalid UUID. The UUID should be in "
+> +				"canonical format. Example: "
+> +				"8c628557-6987-42b2-ba16-b7cc79ddfb43\n");
+> +			return 1;
+> +		}
+> +
+> +		memcpy(&fsuuid->fsu_uuid, uuid, sizeof(uuid));
+> +		if (ioctl(fd, EXT4_IOC_SETFSUUID, fsuuid)) {
+> +			fprintf(stderr, "%s while trying to set fs uuid\n",
+> +				strerror(errno));
+> +			return 1;
+> +		}
+> +	} else {
+> +		fprintf(stderr, "Invalid command\n");
+> +		return 1;
+> +	}
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/ext4/056 b/tests/ext4/056
+> new file mode 100755
+> index 00000000..376f2972
+> --- /dev/null
+> +++ b/tests/ext4/056
+> @@ -0,0 +1,64 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Google, Inc. All Rights Reserved.
+> +#
+> +# Test the set/get UUID ioctl.
+> +#
+> +
+> +. ./common/preamble
+> +_begin_fstest auto ioctl
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +        cd /
+> +        rm -r -f $tmp.*
+> +        kill -9 $fsstress_pid 2>/dev/null;
+> +        wait $fsstress_pid > /dev/null 2>&1
 
-Make sense to me,
+I think "wait" is enough. With this change, it's good to me.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
+> +}
 > +
->  # this file will get removed to create 256k of free space after ENOSPC
->  # conditions are created.
->  dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=256K count=1 >>$seqres.full 2>&1
-> @@ -63,12 +72,12 @@ _freespace=`$DF_PROG -k $SCRATCH_MNT | tail -n 1 | awk '{print $5}'`
->  
->  # Try to write more than available space in chunks that will allow at least one
->  # full write to succeed.
-> -dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=128k count=8 >>$seqres.full 2>&1
-> +dd if=/dev/zero of=$later_file bs=128k count=8 >>$seqres.full 2>&1
->  echo "Bytes written until ENOSPC:" >>$seqres.full
-> -du $SCRATCH_MNT/tmp1 >>$seqres.full
-> +du $later_file >>$seqres.full
->  
->  # And at least some of it should succeed.
-> -_filesize=`_get_filesize $SCRATCH_MNT/tmp1`
-> +_filesize=`_get_filesize $later_file`
->  [ $_filesize -lt $((128 * 1024)) ] && \
->  	_fail "Partial write until enospc failed; wrote $_filesize bytes."
->  
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
+> +_require_scratch
+> +_require_test_program uuid_ioctl
+> +_require_command $UUIDGEN_PROG uuidgen
+> +
+> +UUID_IOCTL=$here/src/uuid_ioctl
+> +
+> +# If the ioctl is not supported by the kernel, then skip test.
+> +current_uuid=$($UUID_IOCTL get $SCRATCH_MNT 2>&1)
+> +if [[ "$current_uuid" =~ ^Inappropriate[[:space:]]ioctl ]]; then
+> +        _notrun "UUID ioctls are not supported by kernel."
+> +fi
+> +
+> +# metadata_csum_seed must be set to decouple checksums from the uuid.
+> +# Otherwise, checksums need to be recomputed when the uuid changes, which
+> +# is not supported by the ioctl.
+> +_scratch_mkfs_ext4 -O metadata_csum_seed >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Begin fsstress while modifying UUID
+> +fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
+> +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
+> +fsstress_pid=$!
+> +
+> +for n in $(seq 1 20); do
+> +        new_uuid=$($UUIDGEN_PROG)
+> +
+> +        echo "Setting UUID to ${new_uuid}" >> $seqres.full 2>&1
+> +        $UUID_IOCTL set $SCRATCH_MNT $new_uuid
+> +
+> +        current_uuid=$($UUID_IOCTL get $SCRATCH_MNT)
+> +        echo "$UUID_IOCTL get $SCARTCH_MNT: $current_uuid" >> $seqres.full 2>&1
+> +        if [[ "$current_uuid" != "$new_uuid" ]]; then
+> +                echo "Current UUID ($current_uuid) does not equal what was sent with the ioctl ($new_uuid)"
+> +        fi
+> +done
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/ext4/056.out b/tests/ext4/056.out
+> new file mode 100644
+> index 00000000..6142fcd2
+> --- /dev/null
+> +++ b/tests/ext4/056.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 056
+> +Silence is golden
+> -- 
+> 2.37.0.170.g444d1eabd0-goog
 > 
 
