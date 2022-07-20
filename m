@@ -2,78 +2,102 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 757BECCA480
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 16:45:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B119CC43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 17:16:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232601AbiGTQpH (ORCPT
+        id S233849AbiGTRQu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Jul 2022 12:45:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42508 "EHLO
+        Wed, 20 Jul 2022 13:16:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233592AbiGTQoH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2022 12:44:07 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94AC365D56
-        for <fstests@vger.kernel.org>; Wed, 20 Jul 2022 09:44:04 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26KGi14S023371
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 20 Jul 2022 12:44:02 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1658335442; bh=iCnwOw0mW1GMjl/nYcdjKKDpZAilqI7XsqfHaDyvrZQ=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=P0G5mygfQ7iUmqB4QciybLZ1iWyznZm8W4FuiSyVT9Vhij1BRKoOQi0ImpGmJsu+Q
-         gV4dasCuKAjKYIml7m/jS+IF9fRtvrB90JvN4O7MWWMWRem0M4rodtet8XhhVBlsna
-         kbOUNxSu5fe+oEwEg9aRUpE2LrWfgvykZzlyv3HSGwRYjRK43zGDK7LYWyMxTthCtG
-         yWYF33SrsfGM/xSPzKG7pNrrLsETbaQETfz6Hp3kpUcqCJ6cZAXS7bazFSoBQlg39P
-         65irZ5r+qoNfEa7XRCGdE0M52cEOf86uvrKitvRlspXOE/HhwsFLL+T+uRciXxm7uS
-         FqkeN0O+NLOrw==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 0D9D815C3ECF; Wed, 20 Jul 2022 12:44:01 -0400 (EDT)
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     fstests@vger.kernel.org
-Cc:     "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 4/4] generic/475: skip test when using an external log device
-Date:   Wed, 20 Jul 2022 12:43:56 -0400
-Message-Id: <20220720164356.4078789-5-tytso@mit.edu>
-X-Mailer: git-send-email 2.31.0
-In-Reply-To: <20220720164356.4078789-1-tytso@mit.edu>
-References: <20220720164356.4078789-1-tytso@mit.edu>
+        with ESMTP id S229652AbiGTRQt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jul 2022 13:16:49 -0400
+Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F86B192B0;
+        Wed, 20 Jul 2022 10:16:49 -0700 (PDT)
+Received: by mail-vs1-xe2d.google.com with SMTP id t127so16925093vsb.8;
+        Wed, 20 Jul 2022 10:16:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=EpuO2zBU6FoivfVNiIeAwgkNy+HaH0gJeb81o/gdeDA=;
+        b=V6706ZCetAGXyzEa10g6FKFOxQYean1vJnVx3buWiksY4a9Y4Vwj6ufkkqYx50Qw73
+         v+lobX/0o4NcGZt+YjXnpkZQHUcYDDCUx4ettoUkl3JhAXuVm++0wat3jCfcoPoyKbPl
+         Sqyg69t3LBXoo08eUuWggFbvB5ngPwv9Je1zgLDx3XnvlaW8OGqBqOeM2GCr7STLObKs
+         V9c1on5+/FqMyIxUd2v5Qbx7s2KR3dyAVsh5H/OcUA4mqnKc3tC6o4i3W+OlYZlYRssm
+         QB90PaSQd4wCSUIvQHXVfLz1epjoE4bicTTyM3L4oPdBboyIWDdhaMO/VVf3CIOKxgCA
+         nIwA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=EpuO2zBU6FoivfVNiIeAwgkNy+HaH0gJeb81o/gdeDA=;
+        b=Qqb1HQurBUltlDGR2gG1XUkYHO3veaj/vMP2cDQFVSieO6KhK7ZiguHpAzcSyCEPeK
+         gXlSNZyw94Bp92yuVALXvbatum3gqdJne9F5J5XRJDt2uDqWDxCYDIGObKwZq9T9+hGg
+         Vn07/87FrnIh93kYsUilxuYJbUAupuw15puvfy6JcyIp8NTgBS8Swe78nTlAXQEcs61Y
+         RnofEpw9HzExomFMYXHo4aLFqsE9JS9ThomcV91SHJvFY3k5UGkFmPt5JTDSMwKwsGkF
+         EdR7M/CcNm5ojwx69JWKwMESTZCVzoMJJqR9Gb5mxIuBh7mb8oHKTyTwMWCbqUBXEy3W
+         PAAQ==
+X-Gm-Message-State: AJIora86NQ1cfbpg0U2toGbFdk+m+HMTQwBcJoWJu3Jx2r6KpPhyl2KH
+        KiRzuktkXI4flnBIdiWcnndTFpGzRjC16TNAUo/iVYQ/4uNnjqcF
+X-Google-Smtp-Source: AGRyM1smX16Hl0dMp4wao/Y1kBLKJS2J4zWDDguWTa3BgaAUCdNI6P9WruTXLQiOTQgHOBESG/6HEWG1xvQM0giQw/g=
+X-Received: by 2002:a05:6102:302a:b0:357:2c0b:782a with SMTP id
+ v10-20020a056102302a00b003572c0b782amr13375198vsa.74.1658337408221; Wed, 20
+ Jul 2022 10:16:48 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220720000256.239531-1-bongiojp@gmail.com> <20220720100949.dttc5qbmy4qziz65@zlang-mailbox>
+ <YtfqIVEi7g4fFpqU@mit.edu> <20220720150636.cvd3ls2mbxbows27@zlang-mailbox> <YtgfevC8CnGaZpQ5@mit.edu>
+In-Reply-To: <YtgfevC8CnGaZpQ5@mit.edu>
+From:   Jeremy Bongio <bongiojp@gmail.com>
+Date:   Wed, 20 Jul 2022 10:16:37 -0700
+Message-ID: <CANfQU3x0jEOdbin0hOO-KBUgBLvK=uCfwyLA5iGJrOWa2stYhA@mail.gmail.com>
+Subject: Re: [PATCH v5] ext4/056: add a check to make sure ext4 uuid ioctls
+ get/set during fsstress.
+To:     "Theodore Ts'o" <tytso@mit.edu>
+Cc:     Zorro Lang <zlang@redhat.com>, linux-ext4@vger.kernel.org,
+        fstests@vger.kernel.org, "Darrick J . Wong" <djwong@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test tests log recovery by kicking off fstress on the scratch fs,
-then switching out the underlying the device with dm-error to see what
-happens when the disk goes down.  But when there is an external log
-device writes to the log device still succeed, while writes to the
-rest of the file system fail, and this leads to file system
-corruption.  So skip this test when there is an external log.
+On Wed, Jul 20, 2022 at 8:30 AM Theodore Ts'o <tytso@mit.edu> wrote:
+>
+> On Wed, Jul 20, 2022 at 11:06:36PM +0800, Zorro Lang wrote:
+> > > The kill -9 is needed, because otherwise the test will run for a
+> > > **very** long time.  The reason for it is because of the -n 999999 in
+> >
+> > Sure, I mean:
+> >
+> >   kill -9 $fsstress_pid 2>/dev/null
+> >   wait
+> >
+> > Not remove the "kill" line :)
+>
+> Ah yes, sorry, I misunderstood what you meant.
+>
+> > > Also, Jeremy, it looks like you haven't updated your xfstests-dev
+> > > repository in a few weeks.  Since you started this project, ext4/056
+> > > has been assigned, and there has been some new helper programs added
+> > > which caused patch conflicts in src/Makefile and in .gitignore.  They
+> > > were pretty trivial to fix up the patch conflicts (which I've done in
+> > > my xfstests-dev tree), but it's best practice to rebase on top of
+> > > origin/for-next and re-test just to make sure there haven't been some
+> > > major change in the fstests common scripts that might catch your test
+> > > out.
+> >
+> > Thanks for pointing out that, yes, better to rebase to latest fstests
+> > for-next branch.
+>
+> Jeremy, for your convenience, my version of the change which is
+> rebased on for-next, fixes the merge conflicts and uses ext4/057
+> instead of ext4/056 can be found here:
+>
+> https://github.com/tytso/xfstests/commit/330bf72dc67dd39e0fd413ecea78ab18b5405fb9
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/generic/475 | 4 ++++
- 1 file changed, 4 insertions(+)
+Great. Thank you everyone! I'll use your merged version, fix the wait
+line, and add Reviewed-by: Zorro Lang <zlang@redhat.com>.
 
-diff --git a/tests/generic/475 b/tests/generic/475
-index c426402e..43c26303 100755
---- a/tests/generic/475
-+++ b/tests/generic/475
-@@ -34,6 +34,10 @@ _require_scratch
- _require_dm_target error
- _require_command "$KILLALL_PROG" "killall"
- 
-+if test "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ; then
-+    _notrun "Cannot have external log device"
-+fi
-+
- echo "Silence is golden."
- 
- _scratch_mkfs >> $seqres.full 2>&1
--- 
-2.31.0
-
+>
+>                                                         - Ted
