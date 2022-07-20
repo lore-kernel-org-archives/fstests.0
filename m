@@ -2,205 +2,439 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE3F2CCA47F
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 00:50:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05459C43334
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jul 2022 01:34:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230229AbiGTAuL (ORCPT
+        id S237825AbiGTBey (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jul 2022 20:50:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47002 "EHLO
+        Tue, 19 Jul 2022 21:34:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57736 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229585AbiGTAuK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 20:50:10 -0400
-Received: from wout5-smtp.messagingengine.com (wout5-smtp.messagingengine.com [64.147.123.21])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07BF8284;
-        Tue, 19 Jul 2022 17:50:09 -0700 (PDT)
-Received: from compute2.internal (compute2.nyi.internal [10.202.2.46])
-        by mailout.west.internal (Postfix) with ESMTP id 2229332001FF;
-        Tue, 19 Jul 2022 20:50:07 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute2.internal (MEProxy); Tue, 19 Jul 2022 20:50:08 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
-        :content-transfer-encoding:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm3; t=1658278207; x=1658364607; bh=Z/
-        ScZcYly62LPugXqA1E0RFAVGO1KRdhrR/RtutZVQU=; b=FVmBlks/BqbtwugQbA
-        5ZaVFW133P0/K6KAlMthoEHcVeGdRtoyv/fZUAPtkGZEvL7k9GcX+rKGc4oaBwo4
-        gwpBsspkP3vcaOcrGCRaQh6vyWNXY09KP8bhhoX6wRaMqTb9ll2LKPfz3mMPqXJo
-        KenYHtzDzFpinx7k2VFLxrzmsTMT/7HUZt+Jlfv0AtZmQcxswbvFPXUYs2EAPujI
-        84V+ClhO3I3AhysUZMuUZTUsWJCCpcq4vCLU9Dhvb+LNA2u3TfeK2BEX1CGx+iAK
-        K80eFMrxNYvyVK/oDWpuIIPly3Rfg2JO6gKePJmuGMrXY/jc7GU9RoXns74GOmeO
-        CRZw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm3; t=1658278207; x=1658364607; bh=Z/ScZcYly62LP
-        ugXqA1E0RFAVGO1KRdhrR/RtutZVQU=; b=zjzF88279Z+sAFoC4vXDREx1ApAPh
-        tdscfRpKLX8V2UeH3+H1cw0FGBu23jQsSZi/40zuKoEQYkF/uON/eHF1axRWC2bk
-        lAbMl3msl7WI/P6zqUokf9ehJ2EY8DoktXuTIsqeXzyUF3XYMhl8qs8BZGHI1jri
-        m4Sl8yLVwvD06x6rwC+HMQR7jOpybK42WprbvN+x2M+hr9jTt5Et+qf35BAE54Ac
-        wtCctiPBwW1GWFicXHKhekL5oO5IybtkB4+tDpNzC6qkZqFqOXa6aALQORZoGEk2
-        9sxPNkeXzOMVAHZqPu8fnUP9zQ3u5zm/YZVZpyC8WV7NuKBCUPGJFfWRw==
-X-ME-Sender: <xms:P1HXYnkNKMi9Fv-L9lHA4B0-TyXrK9_B5zjdKzXIhTwyf-qHxOzotw>
-    <xme:P1HXYq2OqtY5hk1cqJzeBkRLfUNWL0XlHfOp5A-bYSMRKasP6MjtFjAIF2sArUG-h
-    rsv_GMrpQBluxSNoPw>
-X-ME-Received: <xmr:P1HXYtqFqieSUTQPJ_PK4kfhwDBmnaEXkeG1QyN7ACfCKXmBzN-QkcpFBO2iabCM3BqkOB5htQ4w9czkde0V0ctkIluQ5A>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrudeluddgfeelucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucenucfjughrpefhvffufffkofgjfhgggfestdekre
-    dtredttdenucfhrhhomhepuehorhhishcuuehurhhkohhvuceosghorhhishessghurhdr
-    ihhoqeenucggtffrrghtthgvrhhnpeeiueffuedvieeujefhheeigfekvedujeejjeffve
-    dvhedtudefiefhkeegueehleenucevlhhushhtvghrufhiiigvpedvnecurfgrrhgrmhep
-    mhgrihhlfhhrohhmpegsohhrihhssegsuhhrrdhioh
-X-ME-Proxy: <xmx:P1HXYvlFuM31q9QYGTarq6sFucSNMmuc-XqFITmBwHiau9atS9Xz-A>
-    <xmx:P1HXYl1FI9KlqhYTaVFeNSfxLPvRXrXXo3RRzRXMKaI2m0V7PoyBkg>
-    <xmx:P1HXYuuy-EEhCnqvQyHuN_-MsX3sHV31vNpDKPtgkwzXZNk6GNC4wQ>
-    <xmx:P1HXYjDB3IQfDgO0vwCj8ejkc6JbsUv1mY5YUsz3C1xdByVWjQRaOw>
-Feedback-ID: i083147f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 19 Jul 2022 20:50:06 -0400 (EDT)
-From:   Boris Burkov <boris@bur.io>
-To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: [PATCH v13 5/5] generic: test fs-verity EFBIG scenarios
-Date:   Tue, 19 Jul 2022 17:49:50 -0700
-Message-Id: <ff74fa26e99c7aef886a770bfc72b3694211c84f.1658277755.git.boris@bur.io>
-X-Mailer: git-send-email 2.37.0
-In-Reply-To: <cover.1658277755.git.boris@bur.io>
-References: <cover.1658277755.git.boris@bur.io>
+        with ESMTP id S241837AbiGTBd7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jul 2022 21:33:59 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A526A81484;
+        Tue, 19 Jul 2022 18:24:02 -0700 (PDT)
+Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 26JKACx0002381;
+        Wed, 20 Jul 2022 01:23:35 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : subject
+ : from : to : date : in-reply-to : references : content-type :
+ content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=SXqhneKGFww7/wmx2gNfQ/zQU175yUF6MwEillKXqZ4=;
+ b=tJRxWVqlEa1vX7j8rPgbNA/nee3D2b/8mokjjgRsOYgFZrNjgOWZ2UShIjjLPVKq1YQQ
+ RsBhJdSTBNxgyohvjJA7+m4SLu5T+rOf70H55R6yWgF8hdS0Sah7GcUNHjduV3bgBiax
+ TbxswIFBVGWmMg73Gg7umKwzJzzyesFmBqYP6Dg50/5GSqaXE9liOgF8RIjHmZ0SM/0V
+ GlLWwiwOWNhhQ5Eq0wZ+5TP5NOqubeYeHi/r/QdNe1Z3bLY0AmIarGsmZtvwGEjLOT5w
+ NDOG9fgV/SFBTBeOEurQFxOL2ruh2kdHnq7HdA1MRzhT82viGqFK8+4fqtx824Rmjc32 Pg== 
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3hbn7a7yh8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 20 Jul 2022 01:23:35 +0000
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 26K0v42A016396;
+        Wed, 20 Jul 2022 01:23:34 GMT
+Received: from nam04-mw2-obe.outbound.protection.outlook.com (mail-mw2nam04lp2169.outbound.protection.outlook.com [104.47.73.169])
+        by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3hc1en29gh-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 20 Jul 2022 01:23:34 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=O1IyJV5imCJKK5imh4OshggdeoR/rP1Y5UsJSHwJKAp48/Sxm+rLU53xoKMULMf65QszCYBvdoLjundDzXJr/rH+hzK5jlJqtoGeWFfRc6aYKP6lC3ZBkh1NyFECn4LDEE6E6bZt39IgcAv92Hgsfm+wd6no7PqA6JMNqUCTAbJDvNXG40na0xBcBpy7s/Nlf5Qkjfd3OPvL/u5RGcll5ekAXRCLuDnLdr21tuS/hVOlWVI4r4T5F88LvKDBVDAPUdAri7nETqWEk9iq0wW/VGe3KPCe4tWf5NdZtfnZsuY/fDqDbgZ3Zldmu7O/W1D1NfmQkjGMDT08BZAqPseMpw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=SXqhneKGFww7/wmx2gNfQ/zQU175yUF6MwEillKXqZ4=;
+ b=A4+nDibCwBxwWLMF3O8s+7+SS6FYYpcnd0fdk+hWuj0Sv4ssHTpLqzZDlyVTo1dIGSuMBoGNgmSdDi8JpzoFkRYsMTtfnXAWBMsOo/YVkeRC/yrxqwLeDYFxWbw1h4G1sR2GXbDMJU3lTS7FabOV1/sVVRXIxxkNT3SZR3fDPXo1q1mIKhmHt3A9V4NF4G+GA4bqKqTV1W6xV8KuGTnAywJgHwi5KVYR+TJPqh/XEMs0159U+92Cz3mjt8x/4SsCgwlL1NvQMf8StjMrkr4xJK1EIArsIaT23FaQDYsyA5FtZ/vOOVf5WgCkiqnd/M4Mzl+6P6KhiOfs0BTvVpRMXw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=SXqhneKGFww7/wmx2gNfQ/zQU175yUF6MwEillKXqZ4=;
+ b=WBV0OcI1MQNp3SqzgjSJdMAgmdZoSB3wYyFFHeSBCzZzICB2d4AIhilXEA649Rt5M9RNiwJNixYNNtovtD+5/ETHccQSiigmw1i31bYDAiQ23QSDyydb8ax4SRk1iJVaeyjF/6cXbNXu0VHtktIEFgfZtwJ9ZDID4Je4DLcjBFg=
+Received: from BY5PR10MB4306.namprd10.prod.outlook.com (2603:10b6:a03:211::7)
+ by SJ0PR10MB4781.namprd10.prod.outlook.com (2603:10b6:a03:2d0::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5438.20; Wed, 20 Jul
+ 2022 01:23:32 +0000
+Received: from BY5PR10MB4306.namprd10.prod.outlook.com
+ ([fe80::65a4:3dc0:32a1:7519]) by BY5PR10MB4306.namprd10.prod.outlook.com
+ ([fe80::65a4:3dc0:32a1:7519%4]) with mapi id 15.20.5438.024; Wed, 20 Jul 2022
+ 01:23:32 +0000
+Message-ID: <c13a9f6935db5696ef612079bdbdffd6d0ab18a8.camel@oracle.com>
+Subject: Re: [PATCH v2] xfs/018: fix LARP testing for small block sizes
+From:   Alli <allison.henderson@oracle.com>
+To:     Catherine Hoang <catherine.hoang@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Date:   Tue, 19 Jul 2022 18:23:30 -0700
+In-Reply-To: <20220719222520.15550-1-catherine.hoang@oracle.com>
+References: <20220719222520.15550-1-catherine.hoang@oracle.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SJ0PR13CA0003.namprd13.prod.outlook.com
+ (2603:10b6:a03:2c0::8) To BY5PR10MB4306.namprd10.prod.outlook.com
+ (2603:10b6:a03:211::7)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 0afc987f-f753-45d2-2e12-08da69ee75a7
+X-MS-TrafficTypeDiagnostic: SJ0PR10MB4781:EE_
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 8qqLiHlz6UnwHSwIQkn65c9KqHSo/XCWvHs36/ZRoJG1aYCR4ew3/7n9IsMnsL+VW5ppT69jRgO/wBApe4IA7C0UNimGY3R5aaFqG1dYENWTZahtwJDDB9jpab01zcVvqagpSvkkm+ZB7IsYv1hM0RJf9/FTkfwD4einkTiNgN9nNcC1JqexUL3HPJfuplcfz3Wl/kEbrGHglcpk9/08Z9yMRA7TFQU+1f6ZXquirt5kve74T3iYhdDCj/vTnguHHokGgjLpALXCqOZdQcCKFVJyurWTLJGneL7P29HFrM1cBkiH2ptnn3/EaRRt2nDhgTVgtQRgOFK9FOC/z2ahzH10B0mh5XUiR+tdJ2q90GV1Yu1n13IZI/5/Z8xC9800argpEoK35o2SHw3idVet6k3oFxwaIdVgVYtDeOIAGWhQEw+P2BhIQUWp3BDKlMJCBsF+W48XfkP9awfiAhsDQ7pP/GQd4vYHdlPfsMWqDk8i9XUD2KhZKq3DR+Q2gB2xX3Uowu9Ko3fNPe9FH2oUPTIJCALTXfm1sG84huQt6iw+ONE4qKl/QpwylE2ptrp7LjvM5Y5eKxOcLr1cX7a/++duA/Osuoyt4TG5wl1P8YEBiU+UxR/VQ8o/Ubnfrh/n6K+6mMZtQXTnpvC0YBgoa/yKd4dBPqvBeYbgolEBO2cPdX+aRYuVS7D/t6pjisxNvbR2P9RZxNsHXHMCOKsL3u3GffXsJjgcZRI0L3f+uyqKZhY7YzucRUAx8h0WnovEtpsruCD3J6cvIFqtTfh7bT+ER6II0DVAIaFdZwZdeaGwjxNOQ7QXeaZT5s31UNGw
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BY5PR10MB4306.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(136003)(39860400002)(346002)(376002)(396003)(366004)(6486002)(38350700002)(478600001)(36756003)(186003)(86362001)(26005)(52116002)(38100700002)(6506007)(6512007)(41300700001)(316002)(450100002)(2616005)(66556008)(30864003)(66476007)(66946007)(5660300002)(8936002)(8676002)(83380400001)(2906002)(357404004);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?L1N0OS9RdVdueXp0VUJwWExpdTRMek1iVW1zYmNHOVNuVzAvamZYN2oxVGpV?=
+ =?utf-8?B?VHhGMVRXVVBUckhOSi9ONWpFNXRpNG90bEUxYVg2Y2JZSXJTZzlOeWxyd0lw?=
+ =?utf-8?B?OEpsZ3c3OXFoMmptb1R3eVNxM21TZVZTSVFWaE05bS9GL0dndzlaVzdUQjNP?=
+ =?utf-8?B?VVgrZ2hhS3JjcTV5Z1hUNStVZnVlVnFIa2VkK1R1MERGdVBtWHVYRytrRnRt?=
+ =?utf-8?B?WUpjK3ZJQVM4aVZ1dnZYeWVqenRwajZhYlJXTS9iUVRVbHhUZXFVck1Bc25x?=
+ =?utf-8?B?NGJQT0N2MzZhUlZTdTlidFVuVEhENXQwNVMxNkJYbU9VeUlCUFVsM21OY2FR?=
+ =?utf-8?B?aEIvU0gxRCtGWmJPdCsrencrOFhTTzY4b0g3TjNjVTYzZGVqWHNrM2lGS25O?=
+ =?utf-8?B?KzkvL0RYMGsrakRrcWRaSDh1QlREYm54YUdycGxKSlYwNktXRFgvYnF0bHdQ?=
+ =?utf-8?B?VWZybGdvWHBLWi9rTnJjTVpvdldTOXAvZWZJb2REem5IRHJPUHRTL0g5elhx?=
+ =?utf-8?B?bGhwNHpxcWwrUVMyLzBQbWFlRmhicThwMGp2Q2JSMVlRclg0ZEtxSHlNMnhY?=
+ =?utf-8?B?OEdwdnZjSGMzSVVhRUoxZUhlRDhUUyszQ1lpOVFaMnJCTUYxUS9JUlZKL3J3?=
+ =?utf-8?B?cUN0clNKLzlDKzZueGxtcWtMa0wxL04waExLdXBtU2laUGpEME8vZmZVUHhR?=
+ =?utf-8?B?T3FhZVo2cVlKU2E1Y1NqdDEvMUk3bkY3RWNsWE5wcnpSRUlrREppbGJPd3Jq?=
+ =?utf-8?B?bHdCbFk1aWtNYjVRY1hEY2t3bTZzMlJmb0F0b3c0RDVjd3dXSExncHBGQWVz?=
+ =?utf-8?B?MUxucUdYcjRUK0tvZXh0WWR5RFRXaUtabFMvUll4L2xpQ3pJVkVOdjFmWnJO?=
+ =?utf-8?B?cnQ5TEhGMy9UeVlPQ09EV3g0TEhvNzdxaXQrSENhZFFLL2F0STgzZkFSbDFW?=
+ =?utf-8?B?TFlhRmptZ2xFQ3pnY29KUUMwV3VURm1yejJxTkVwSk9Pc3lXVmJobUNYblJL?=
+ =?utf-8?B?czBQOFJEcHVtUGFvai95Wmh1NmFMc2tjMjBNWDZiZnBLMlZUM1NwcC9Ec2Rv?=
+ =?utf-8?B?VFJ6Vkl3bFlENjNrMVMwTDdkL1JTc1I5RkVkbkVLZkVOOVpuRVNKeGhoOHVM?=
+ =?utf-8?B?dmZEWkt2SU85Mk83NkQ3OHltcGYyWGYycnpETVNrSUo0anREZHFuaFB4NDQw?=
+ =?utf-8?B?L3pHUkljall4NFZNRGpGbE1pUmxsNSs3MVNNR0RJRy9lVGttMmdOdkdXbkRo?=
+ =?utf-8?B?cGVORzlISmFLYy8zWlByYXRpZGlPcjFMUzBWbGdvRkJLUDJlSjNBT1gzQXlm?=
+ =?utf-8?B?c0VkSDNKU3ByNUowcEU5L3ZBY2ZuRFZTNUhaNFBsTE8vbk0yQngyc2NTTk9Q?=
+ =?utf-8?B?MGw4QlRtc0hiTFZLSUxTaTJ0ZHRRaEhLMmVyc3BtenBuR09yODVHSmtxVCs0?=
+ =?utf-8?B?K2VjOHR4NFpTWDBnVHFMeG55eFBna05hdjZRRHVsYU95eXlDb0MrMHowaVRi?=
+ =?utf-8?B?YWpwTWZOeVZFZFJGQjBCUFhCbklTa24wMXdBRWlrNjEzdGxjSWlONFRLcW45?=
+ =?utf-8?B?c3U4TVNDZlRCa0Q4clVwVFNpa1M0US90bHMvcXVOWXo2d1hPR21VOVJjbTJm?=
+ =?utf-8?B?MEZGeEdsNFZpaXRCQnUzNUs4b2RZZjdGVS9WVzBJYmZIYjFiV25aaUpaUnNC?=
+ =?utf-8?B?VFBGeGc3MTVhdmhpMGR1UVFvRHFqZ3pTT21ha2lINXFYZGpRKzdjOTZFelE4?=
+ =?utf-8?B?WTRNaGFWTTNtcytOUWpROUdUSXBtVmlLSExZakhpSEJnNm5tM0doTjR2QjE5?=
+ =?utf-8?B?WVFuZHRUR1hoK3ZVUlRvYmxCVk43NkcxZ04vTDVleFd4WUwzZXp3SGdjbkJC?=
+ =?utf-8?B?K205ZVFva0pndUZPbVJVV2lkWTlFWDI4bDQvendCWDFITVpSMFd5Q3hUcnh5?=
+ =?utf-8?B?WWFiS0VkZkJOWDN3UzlxeFBWRlBpdDBGUUwrMFdiSjNQWEhpTkFmQVJLcUdH?=
+ =?utf-8?B?TnZoTWNXWklSU2ZFTS9CbHdET2pPWWFiaGxWK3pSN2tHUHdkcEpodS92N2Ez?=
+ =?utf-8?B?TnloY0xzeVN2a2tlTzBzYnNTQjR5K2pmcXI1RmdKTXRQNmZLWlk4NjZuNVpU?=
+ =?utf-8?B?SmN6MjkxcFBHZDVmOXVzaVg4c2VJcnBKbDJVeXFzaWdjbDc0NG9wQjl3Um5o?=
+ =?utf-8?B?NUE9PQ==?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0afc987f-f753-45d2-2e12-08da69ee75a7
+X-MS-Exchange-CrossTenant-AuthSource: BY5PR10MB4306.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Jul 2022 01:23:32.5400
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: VOYuX/d3/MRhBVEqNhlQGlch/SNZA80jUa0kI/dGcGkSLtOTVLAeN4Z3xvA9tTe0ump8dynCHl8rtPCpLLLlwQ13wY9S5co/07b8sI2QJhc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR10MB4781
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.883,Hydra:6.0.517,FMLib:17.11.122.1
+ definitions=2022-07-19_10,2022-07-19_01,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxscore=0 mlxlogscore=999
+ suspectscore=0 phishscore=0 adultscore=0 spamscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2206140000
+ definitions=main-2207200003
+X-Proofpoint-ORIG-GUID: 4_A9B4heLtE96Ug75LInC6Dnwc2Xn_1i
+X-Proofpoint-GUID: 4_A9B4heLtE96Ug75LInC6Dnwc2Xn_1i
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs, ext4, and f2fs cache the Merkle tree past EOF, which restricts
-the maximum file size beneath the normal maximum. Test the logic in
-those filesystems against files with sizes near the maximum.
+On Tue, 2022-07-19 at 15:25 -0700, Catherine Hoang wrote:
+> From: "Darrick J. Wong" <djwong@kernel.org>
+> 
+> Fix this test to work properly when the filesystem block size is less
+> than 4k.  Tripping the error injection points on shape changes in the
+> xattr structure must be done dynamically.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
+Looks good to me
+Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
 
-To work properly, this does require some understanding of the practical
-but not standardized layout of the Merkle tree. This is a bit unpleasant
-and could make the test incorrect in the future, if the implementation
-changes. On the other hand, it feels quite useful to test this tricky
-edge case. It could perhaps be made more generic by adding some ioctls
-to let the file system communicate the maximum file size for a verity
-file or some information about the storage of the Merkle tree.
-
-Signed-off-by: Boris Burkov <boris@bur.io>
-Reviewed-by: Eric Biggers <ebiggers@google.com>
-Reviewed-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
----
- common/verity         | 11 ++++++++
- tests/generic/692     | 64 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/692.out |  7 +++++
- 3 files changed, 82 insertions(+)
- create mode 100644 tests/generic/692
- create mode 100644 tests/generic/692.out
-
-diff --git a/common/verity b/common/verity
-index 4c50d2b1..65a39d3e 100644
---- a/common/verity
-+++ b/common/verity
-@@ -350,3 +350,14 @@ _fsv_scratch_corrupt_merkle_tree()
- 		;;
- 	esac
- }
-+
-+_require_fsverity_max_file_size_limit()
-+{
-+	case $FSTYP in
-+	btrfs|ext4|f2fs)
-+		;;
-+	*)
-+		_notrun "$FSTYP does not store verity data past EOF; no special file size limit"
-+		;;
-+	esac
-+}
-diff --git a/tests/generic/692 b/tests/generic/692
-new file mode 100644
-index 00000000..0bb1fd33
---- /dev/null
-+++ b/tests/generic/692
-@@ -0,0 +1,64 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Meta, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 692
-+#
-+# fs-verity requires the filesystem to decide how it stores the Merkle tree,
-+# which can be quite large.
-+# It is convenient to treat the Merkle tree as past EOF, and ext4, f2fs, and
-+# btrfs do so in at least some fashion. This leads to an edge case where a
-+# large file can be under the file system file size limit, but trigger EFBIG
-+# on enabling fs-verity. Test enabling verity on some large files to exercise
-+# EFBIG logic for filesystems with fs-verity specific limits.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick verity
-+
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/verity
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_test
-+_require_math
-+_require_scratch_verity
-+_require_fsverity_max_file_size_limit
-+
-+_scratch_mkfs_verity &>> $seqres.full
-+_scratch_mount
-+
-+fsv_file=$SCRATCH_MNT/file.fsv
-+
-+max_sz=$(_get_max_file_size)
-+_fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-+truncate -s $max_sz $fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+# The goal of this second test is to make a big enough file that we trip the
-+# EFBIG codepath, but not so big that we hit it immediately when writing the
-+# first Merkle leaf.
-+#
-+# The Merkle tree is stored with the leaf node level (L0) last, but it is
-+# written first.  To get an interesting overflow, we need the maximum file size
-+# (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
-+# don't have to write many blocks before getting an error.
-+#
-+# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
-+# padding, L0 is 1/128 of the file size while the other levels in total are
-+# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
-+# ignoring padding, for L0 start exactly at MAX, the file size must be s such
-+# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
-+# where MAX occurs *near* the start of L0 rather than *at* the start, we can
-+# just subtract an overestimate of the padding: 64K after the file contents,
-+# then 4K per level, where the consideration of 8 levels is sufficient.
-+sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
-+_fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
-+truncate -s $sz $fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/692.out b/tests/generic/692.out
-new file mode 100644
-index 00000000..05996713
---- /dev/null
-+++ b/tests/generic/692.out
-@@ -0,0 +1,7 @@
-+QA output created by 692
-+
-+# way too big: fail on first merkle block
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
-+
-+# still too big: fail on first invalid merkle block
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
--- 
-2.37.1
+> ---
+>  tests/xfs/018     | 14 +++++++++-----
+>  tests/xfs/018.out | 47 ++++-----------------------------------------
+> --
+>  2 files changed, 13 insertions(+), 48 deletions(-)
+> 
+> diff --git a/tests/xfs/018 b/tests/xfs/018
+> index 041a3b24..323279b5 100755
+> --- a/tests/xfs/018
+> +++ b/tests/xfs/018
+> @@ -47,7 +47,8 @@ test_attr_replay()
+>  	touch $testfile
+>  
+>  	# Verify attr recovery
+> -	$ATTR_PROG -l $testfile | _filter_scratch
+> +	$ATTR_PROG -l $testfile >> $seqres.full
+> +	echo "Checking contents of $attr_name" >> $seqres.full
+>  	echo -n "$attr_name: "
+>  	$ATTR_PROG -q -g $attr_name $testfile 2> /dev/null | md5sum;
+>  
+> @@ -98,6 +99,9 @@ attr64k="$attr32k$attr32k"
+>  echo "*** mkfs"
+>  _scratch_mkfs >/dev/null
+>  
+> +blk_sz=$(_scratch_xfs_get_sb_field blocksize)
+> +multiplier=$(( $blk_sz / 276 )) # 256 + 20 to account for attr name
+> +
+>  echo "*** mount FS"
+>  _scratch_mount
+>  
+> @@ -140,12 +144,12 @@ test_attr_replay extent_file1 "attr_name2"
+> $attr1k "s" "larp"
+>  test_attr_replay extent_file1 "attr_name2" $attr1k "r" "larp"
+>  
+>  # extent, inject error on split
+> -create_test_file extent_file2 3 $attr1k
+> -test_attr_replay extent_file2 "attr_name4" $attr1k "s"
+> "da_leaf_split"
+> +create_test_file extent_file2 $multiplier $attr256
+> +test_attr_replay extent_file2 "attr_nameXXXX" $attr256 "s"
+> "da_leaf_split"
+>  
+>  # extent, inject error on fork transition
+> -create_test_file extent_file3 3 $attr1k
+> -test_attr_replay extent_file3 "attr_name4" $attr1k "s"
+> "attr_leaf_to_node"
+> +create_test_file extent_file3 $multiplier $attr256
+> +test_attr_replay extent_file3 "attr_nameXXXX" $attr256 "s"
+> "attr_leaf_to_node"
+>  
+>  # extent, remote
+>  create_test_file extent_file4 1 $attr1k
+> diff --git a/tests/xfs/018.out b/tests/xfs/018.out
+> index 022b0ca3..57dc448a 100644
+> --- a/tests/xfs/018.out
+> +++ b/tests/xfs/018.out
+> @@ -4,7 +4,6 @@ QA output created by 018
+>  attr_set: Input/output error
+>  Could not set "attr_name" for SCRATCH_MNT/testdir/empty_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/empty_file1': Input/output
+> error
+> -Attribute "attr_name" has a 65 byte value for
+> SCRATCH_MNT/testdir/empty_file1
+>  attr_name: cfbe2a33be4601d2b655d099a18378fc  -
+>  
+>  attr_remove: Input/output error
+> @@ -15,7 +14,6 @@ attr_name: d41d8cd98f00b204e9800998ecf8427e  -
+>  attr_set: Input/output error
+>  Could not set "attr_name" for SCRATCH_MNT/testdir/empty_file2
+>  touch: cannot touch 'SCRATCH_MNT/testdir/empty_file2': Input/output
+> error
+> -Attribute "attr_name" has a 1025 byte value for
+> SCRATCH_MNT/testdir/empty_file2
+>  attr_name: 9fd415c49d67afc4b78fad4055a3a376  -
+>  
+>  attr_remove: Input/output error
+> @@ -26,7 +24,6 @@ attr_name: d41d8cd98f00b204e9800998ecf8427e  -
+>  attr_set: Input/output error
+>  Could not set "attr_name" for SCRATCH_MNT/testdir/empty_file3
+>  touch: cannot touch 'SCRATCH_MNT/testdir/empty_file3': Input/output
+> error
+> -Attribute "attr_name" has a 65536 byte value for
+> SCRATCH_MNT/testdir/empty_file3
+>  attr_name: 7f6fd1b6d872108bd44bd143cbcdfa19  -
+>  
+>  attr_remove: Input/output error
+> @@ -37,132 +34,96 @@ attr_name: d41d8cd98f00b204e9800998ecf8427e  -
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/inline_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file1': Input/output
+> error
+> -Attribute "attr_name1" has a 16 byte value for
+> SCRATCH_MNT/testdir/inline_file1
+> -Attribute "attr_name2" has a 65 byte value for
+> SCRATCH_MNT/testdir/inline_file1
+>  attr_name2: cfbe2a33be4601d2b655d099a18378fc  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/inline_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file1': Input/output
+> error
+> -Attribute "attr_name1" has a 16 byte value for
+> SCRATCH_MNT/testdir/inline_file1
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/inline_file2
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file2': Input/output
+> error
+> -Attribute "attr_name2" has a 1025 byte value for
+> SCRATCH_MNT/testdir/inline_file2
+> -Attribute "attr_name1" has a 16 byte value for
+> SCRATCH_MNT/testdir/inline_file2
+>  attr_name2: 9fd415c49d67afc4b78fad4055a3a376  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/inline_file2
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file2': Input/output
+> error
+> -Attribute "attr_name1" has a 16 byte value for
+> SCRATCH_MNT/testdir/inline_file2
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/inline_file3
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file3': Input/output
+> error
+> -Attribute "attr_name2" has a 65536 byte value for
+> SCRATCH_MNT/testdir/inline_file3
+> -Attribute "attr_name1" has a 16 byte value for
+> SCRATCH_MNT/testdir/inline_file3
+>  attr_name2: 7f6fd1b6d872108bd44bd143cbcdfa19  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/inline_file3
+>  touch: cannot touch 'SCRATCH_MNT/testdir/inline_file3': Input/output
+> error
+> -Attribute "attr_name1" has a 16 byte value for
+> SCRATCH_MNT/testdir/inline_file3
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/extent_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file1': Input/output
+> error
+> -Attribute "attr_name2" has a 1025 byte value for
+> SCRATCH_MNT/testdir/extent_file1
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file1
+>  attr_name2: 9fd415c49d67afc4b78fad4055a3a376  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/extent_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file1': Input/output
+> error
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file1
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+> -Could not set "attr_name4" for SCRATCH_MNT/testdir/extent_file2
+> +Could not set "attr_nameXXXX" for SCRATCH_MNT/testdir/extent_file2
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file2': Input/output
+> error
+> -Attribute "attr_name4" has a 1025 byte value for
+> SCRATCH_MNT/testdir/extent_file2
+> -Attribute "attr_name2" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file2
+> -Attribute "attr_name3" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file2
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file2
+> -attr_name4: 9fd415c49d67afc4b78fad4055a3a376  -
+> +attr_nameXXXX: f4ea5799d72a0a9bf2d56a685c9cba7a  -
+>  
+>  attr_set: Input/output error
+> -Could not set "attr_name4" for SCRATCH_MNT/testdir/extent_file3
+> +Could not set "attr_nameXXXX" for SCRATCH_MNT/testdir/extent_file3
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file3': Input/output
+> error
+> -Attribute "attr_name4" has a 1025 byte value for
+> SCRATCH_MNT/testdir/extent_file3
+> -Attribute "attr_name2" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file3
+> -Attribute "attr_name3" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file3
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file3
+> -attr_name4: 9fd415c49d67afc4b78fad4055a3a376  -
+> +attr_nameXXXX: f4ea5799d72a0a9bf2d56a685c9cba7a  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/extent_file4
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file4': Input/output
+> error
+> -Attribute "attr_name2" has a 65536 byte value for
+> SCRATCH_MNT/testdir/extent_file4
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file4
+>  attr_name2: 7f6fd1b6d872108bd44bd143cbcdfa19  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/extent_file4
+>  touch: cannot touch 'SCRATCH_MNT/testdir/extent_file4': Input/output
+> error
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/extent_file4
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/remote_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/remote_file1': Input/output
+> error
+> -Attribute "attr_name2" has a 1025 byte value for
+> SCRATCH_MNT/testdir/remote_file1
+> -Attribute "attr_name1" has a 65536 byte value for
+> SCRATCH_MNT/testdir/remote_file1
+>  attr_name2: 9fd415c49d67afc4b78fad4055a3a376  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/remote_file1
+>  touch: cannot touch 'SCRATCH_MNT/testdir/remote_file1': Input/output
+> error
+> -Attribute "attr_name1" has a 65536 byte value for
+> SCRATCH_MNT/testdir/remote_file1
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/remote_file2
+>  touch: cannot touch 'SCRATCH_MNT/testdir/remote_file2': Input/output
+> error
+> -Attribute "attr_name2" has a 65536 byte value for
+> SCRATCH_MNT/testdir/remote_file2
+> -Attribute "attr_name1" has a 65536 byte value for
+> SCRATCH_MNT/testdir/remote_file2
+>  attr_name2: 7f6fd1b6d872108bd44bd143cbcdfa19  -
+>  
+>  attr_remove: Input/output error
+>  Could not remove "attr_name2" for SCRATCH_MNT/testdir/remote_file2
+>  touch: cannot touch 'SCRATCH_MNT/testdir/remote_file2': Input/output
+> error
+> -Attribute "attr_name1" has a 65536 byte value for
+> SCRATCH_MNT/testdir/remote_file2
+>  attr_name2: d41d8cd98f00b204e9800998ecf8427e  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/sf_file
+>  touch: cannot touch 'SCRATCH_MNT/testdir/sf_file': Input/output
+> error
+> -Attribute "attr_name1" has a 64 byte value for
+> SCRATCH_MNT/testdir/sf_file
+> -Attribute "attr_name2" has a 17 byte value for
+> SCRATCH_MNT/testdir/sf_file
+>  attr_name2: 9a6eb1bc9da3c66a9b495dfe2fe8a756  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/leaf_file
+>  touch: cannot touch 'SCRATCH_MNT/testdir/leaf_file': Input/output
+> error
+> -Attribute "attr_name2" has a 257 byte value for
+> SCRATCH_MNT/testdir/leaf_file
+> -Attribute "attr_name3" has a 1024 byte value for
+> SCRATCH_MNT/testdir/leaf_file
+> -Attribute "attr_name1" has a 1024 byte value for
+> SCRATCH_MNT/testdir/leaf_file
+>  attr_name2: f4ea5799d72a0a9bf2d56a685c9cba7a  -
+>  
+>  attr_set: Input/output error
+>  Could not set "attr_name2" for SCRATCH_MNT/testdir/node_file
+>  touch: cannot touch 'SCRATCH_MNT/testdir/node_file': Input/output
+> error
+> -Attribute "attr_name2" has a 257 byte value for
+> SCRATCH_MNT/testdir/node_file
+> -Attribute "attr_name1" has a 65536 byte value for
+> SCRATCH_MNT/testdir/node_file
+>  attr_name2: f4ea5799d72a0a9bf2d56a685c9cba7a  -
+>  
+>  *** done
 
