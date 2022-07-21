@@ -2,87 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DDE1FC433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Jul 2022 09:15:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2829C43334
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Jul 2022 11:43:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232829AbiGUJPT (ORCPT
+        id S232629AbiGULnL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Jul 2022 05:15:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46784 "EHLO
+        Thu, 21 Jul 2022 07:43:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232513AbiGUJPS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 05:15:18 -0400
-Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B301101D8
-        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 02:15:16 -0700 (PDT)
-Received: by mail-vs1-xe2f.google.com with SMTP id j1so970497vsr.4
-        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 02:15:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=yaqDU2czr0oCQvIvCw+fiZww3UYzWUMKWQyhdMpK+iQ=;
-        b=fszTfbfpAQLcQieY+obbyreHseziokWBDwGmFTuUFwU8VyVdW4YAgClmje72D//oac
-         kL61u3UYopM8T0n3HcrmJ6/cKU5CuUp9mGe4DSjbsxpSzP7t2pIBymEmE5HG/XYFkR3h
-         L8y8NseCDonFInN6ySfkSAH6omIJxEtKzAbxEOiPb3hkzqAZdd66GZr8hh7k9ImmjuIM
-         LAgXj3DTfEm4hI15+9oSkcvUfuf4H2ytxnomQ0i1JKZt8IeTYnjY56i7QW2QaxcvaYU5
-         m/fQ8HIrH6S0TATY+B40OxwPFa79Ylmg/Svj2A2E6hKtHvGQ1RU6VDbitaYUx04xd4Sh
-         XCLw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=yaqDU2czr0oCQvIvCw+fiZww3UYzWUMKWQyhdMpK+iQ=;
-        b=m7S1IqdORWxpsp7FZrP7/A3LLG2Ll3lf9iseawNraBNT/ilIOxywW+8jy7itGdOQeh
-         yWJBhBvd8McxAZtuQ1p+I51tfAPerUvFJIQbkWVPH188FwjT13Kbky5lgA8wnxx0tTXq
-         eQotn1agU20Dzudff6xCft3rc5ndGF22sB/YZXcQ0+s2z57FX5FF1/otR2jS+EUM5GCL
-         /Y1iF4aLd504R5VjEA2YVkfhCXWBeISkTpZ6GWPdOPLvqGHUvFdqN5ArK/wVBXrdEBrg
-         dny+JOEe/xBfBDhQLo1TzfEJIxCurzzqu4KBqxsie4C/LvGzhmpckjq2nWDZ8kUtudRP
-         D9Yw==
-X-Gm-Message-State: AJIora9iZHT7z3b0iU/COFEraJfn2099KnHleZ35gJf6ZvqIekvgHo9+
-        L1mN5LPX2I1UQpbPJBnI6PVpl//XbnzzBCOJ4L8OH6VSTvEywQ==
-X-Google-Smtp-Source: AGRyM1vt7Ncz4vXEa5FZyQw93hLo9OzZGGdzacM/7mWDTF3mxr0z5pQoWU/UGEWcFPYRvLuu+SA0vCWlTf7RRES0MAk=
-X-Received: by 2002:a67:c110:0:b0:357:6c34:9643 with SMTP id
- d16-20020a67c110000000b003576c349643mr15804717vsj.3.1658394915374; Thu, 21
- Jul 2022 02:15:15 -0700 (PDT)
+        with ESMTP id S230284AbiGULnK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 07:43:10 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 326FB77481
+        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 04:43:09 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26LBglUD020051
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 21 Jul 2022 07:42:48 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1658403769; bh=eCylLvAGqWGIDq7Y/mJGQFCW1VtbVocG9JY09cnuRjg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=DQJE6ShtTxOggx6QqzvcPnEq25l05moTVHsSt+PtMMWn2Iy8V+cy4+6REhqc2zB/U
+         9D3oIyRSK3brsHfUwCsnR/ZHFYoE6dss3putmSoPqLGMdDfqd0B0OIDyA7OyfXQCq4
+         0/+9FreRB+GJNwUq8U5LeeiQmYp02u+3/toxopipJRBu6l5OoUx1AA8128H8o/fWYq
+         s1JQpC3IrFdK6e03WRYml/oAlQpYatJ/B/2h+T0Wozgzc6ui/vL0AqM+ZQhBS9d/Oa
+         pHIB2QC5mKte+tbpfDpPG2N+tD5PY4XimNxsts4hyE4BQ74FN1NMbnwocSt+0HyZnT
+         9bdNw59NcMMBQ==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 7B62415C3EBF; Thu, 21 Jul 2022 07:42:47 -0400 (EDT)
+Date:   Thu, 21 Jul 2022 07:42:47 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Boyang Xue <bxue@redhat.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH v1] generic/476: requires 27GB scratch size
+Message-ID: <Ytk7t0am8H4x2BbS@mit.edu>
+References: <20220721022959.4189726-1-bxue@redhat.com>
+ <YtjYxyhVmSPzzFoH@magnolia>
+ <CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com>
 MIME-Version: 1.0
-References: <YpjVcHuxhEQwPusN@bombadil.infradead.org> <CAOQ4uxi0eY3ybXbL6TEZv27HUoBaSTcthjC7aHRCTzACfyq52w@mail.gmail.com>
- <CAB=NE6XAL1+OXV0X5zBZCMWsqsy-xz9E6rkwPkGOHRXyG4sohg@mail.gmail.com> <CAOQ4uxjbJWt06bx_iE2mh=JemuM+fAAGU2WGYV7vOWQzvY4wMQ@mail.gmail.com>
-In-Reply-To: <CAOQ4uxjbJWt06bx_iE2mh=JemuM+fAAGU2WGYV7vOWQzvY4wMQ@mail.gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 21 Jul 2022 11:15:04 +0200
-Message-ID: <CAOQ4uxjHp5iz4kP1qRbQtXSu3frVUhvxr23Gc0jzW9nY+_ep3A@mail.gmail.com>
-Subject: Collaborating updates of kdevops xfstests repo
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     chandanrmail@gmail.com, Josef Bacik <josef@toxicpanda.com>,
-        Zorro Lang <zlang@redhat.com>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Luis,
+On Thu, Jul 21, 2022 at 03:26:05PM +0800, Boyang Xue wrote:
+> > > I find generic/476 easily goes into an infinite run on top of NFS. When it
+> >
+> > Infinite?  It's only supposed to start 25000*nr_cpus*TIME_FACTOR
+> > operations, so it /should/ conclude eventually.  That includes driving
+> > the filesystem completel out of space, but there ought to be enough
+> > unlink/rmdir/truncate calls to free up space every now and then...
+> 
+> Yes. I'm not sure the calculations inside, but when the size of the
+> scratch device < 27GB (can be 26GB when the backing storage is ext4
+> rather than xfs), the test runs infinitely. I'm aware that the test
+> should be slow, especially on NFS, but I see the test never finishes
+> after multi-days. This problem happens in both localhost exported NFS
+> and remote exported NFS configurations.
 
-I have been on vacation and partly still on vacation.
-Quick question.
+I can partially confirm this.  I had noted a few weeks ago that I
+needed to exclude generic/476 or the test VM would hang for over 24
+hours, a which point I lost patience and terminated the VM.  I had
+gotten as far as
 
-Soon I will want to update the shared xfstetsts repo - it has not been
-updated since v2022.07.10
-I am still waiting on the SGID tests [1] to land, which may take a few more
-weeks, because I have a bunch of 5.10 backports related to SGID fixes
-that I would like to validate with those tests.
+	gce-xfstests -c nfs -g auto -X generic/476
 
-My question is, at the moment, who are the active kdevops users that you
-know of that will be affected by an update like that?
+(which is a loopback config) using 5.19-rc4 in order to get a test run
+to complete.
 
-Updating the kdevops clone of xfstests repo is going to have an immediate
-side effect of "destabilizing" all the established baselines.
+Note: this was also triggering failures of generic/426 and
+generic/551, which I also haven't had time to investigate, not being
+an NFS developer.  :-)
 
-I will announce it on fstests lists, but wanted to give a heads up
-and collaborate the update with the active kdevops users first.
+I wasn't sure whether generic/476 never terminating was caused by a
+loopback-triggered deadlock, or something else.  But it sounds like
+you've isolated it to the scratch device *too* small, and since that
+the failure occurred even on a configuration where the client and
+server were on different machines/VM's, correct?
 
-Thanks,
-Amir.
+> > >  _require_scratch
+> > > +_require_scratch_size $((27 * 1024 * 1024)) # 27GB
+> >
+> > ...so IDGI, this test works as intended.  Are you saying that NFS
+> > command overhead is so high that this test takes too long?
 
-[1] https://lore.kernel.org/fstests/bc3f8e56-d5fa-bee2-741f-d2950ca6e304@fujitsu.com/
+I interpreted this as "if the drive is too small, we're hitting some
+kind of problem".  This *could* be some kind of problem which triggers
+on ENOSPC; perhaps it's just much more likely on a smaller device?  So
+it's possible this is not a test bug, but an NFS problem.  Perhaps we
+should forward this off to the NFS folks first?
+
+	   		     	   	  - Ted
