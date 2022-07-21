@@ -2,98 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2829C43334
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Jul 2022 11:43:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60FD0C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Jul 2022 14:04:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232629AbiGULnL (ORCPT
+        id S230167AbiGUOEU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Jul 2022 07:43:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53478 "EHLO
+        Thu, 21 Jul 2022 10:04:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230284AbiGULnK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 07:43:10 -0400
+        with ESMTP id S230466AbiGUOEU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 10:04:20 -0400
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 326FB77481
-        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 04:43:09 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E175C4B4A6
+        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 07:04:18 -0700 (PDT)
 Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26LBglUD020051
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26LE3j2g024589
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 21 Jul 2022 07:42:48 -0400
+        Thu, 21 Jul 2022 10:03:46 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1658403769; bh=eCylLvAGqWGIDq7Y/mJGQFCW1VtbVocG9JY09cnuRjg=;
+        t=1658412227; bh=uMmUgra8WLeMLmpjopdjolODosinUcUJ8tJZoEfKN0s=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=DQJE6ShtTxOggx6QqzvcPnEq25l05moTVHsSt+PtMMWn2Iy8V+cy4+6REhqc2zB/U
-         9D3oIyRSK3brsHfUwCsnR/ZHFYoE6dss3putmSoPqLGMdDfqd0B0OIDyA7OyfXQCq4
-         0/+9FreRB+GJNwUq8U5LeeiQmYp02u+3/toxopipJRBu6l5OoUx1AA8128H8o/fWYq
-         s1JQpC3IrFdK6e03WRYml/oAlQpYatJ/B/2h+T0Wozgzc6ui/vL0AqM+ZQhBS9d/Oa
-         pHIB2QC5mKte+tbpfDpPG2N+tD5PY4XimNxsts4hyE4BQ74FN1NMbnwocSt+0HyZnT
-         9bdNw59NcMMBQ==
+        b=CWbvGQfur22W6jbvwyMRo9r/8MOsNIVQud3GtyJDewdmhD7/qXHos7RmtQpZ0Q0Y2
+         GzoXgRSs5XmCIJhpGoeCGOMYmY7FzraM0b97XEXC6hlwPzckvO2toM6BX6mqbvvwaQ
+         tgze+/Z9HrwzYFHZ28UBNClRXwpgrp3k1sdTBpPAhS/jlPpySD3WSCQxjBo25VG9ri
+         TXcalRs/X3W522fv3JSlXFmFClnV9KZw2jJxP49Ev3oe/QTjCvtAj1M7waykC+hydP
+         b/izLbtjD7vbtpHY2o2grcFGCMz9/myGOsazU6TXybEdPFVMU75zlajjYpXuDJTadF
+         lS20X1TO4H8EQ==
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 7B62415C3EBF; Thu, 21 Jul 2022 07:42:47 -0400 (EDT)
-Date:   Thu, 21 Jul 2022 07:42:47 -0400
+        id CDAFD15C3EBF; Thu, 21 Jul 2022 10:03:45 -0400 (EDT)
+Date:   Thu, 21 Jul 2022 10:03:45 -0400
 From:   "Theodore Ts'o" <tytso@mit.edu>
 To:     Boyang Xue <bxue@redhat.com>
 Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
 Subject: Re: [PATCH v1] generic/476: requires 27GB scratch size
-Message-ID: <Ytk7t0am8H4x2BbS@mit.edu>
+Message-ID: <YtlcwZ/66pJhpdiS@mit.edu>
 References: <20220721022959.4189726-1-bxue@redhat.com>
  <YtjYxyhVmSPzzFoH@magnolia>
  <CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com>
+ <Ytk7t0am8H4x2BbS@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com>
+In-Reply-To: <Ytk7t0am8H4x2BbS@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 21, 2022 at 03:26:05PM +0800, Boyang Xue wrote:
-> > > I find generic/476 easily goes into an infinite run on top of NFS. When it
-> >
-> > Infinite?  It's only supposed to start 25000*nr_cpus*TIME_FACTOR
-> > operations, so it /should/ conclude eventually.  That includes driving
-> > the filesystem completel out of space, but there ought to be enough
-> > unlink/rmdir/truncate calls to free up space every now and then...
-> 
-> Yes. I'm not sure the calculations inside, but when the size of the
-> scratch device < 27GB (can be 26GB when the backing storage is ext4
-> rather than xfs), the test runs infinitely. I'm aware that the test
-> should be slow, especially on NFS, but I see the test never finishes
-> after multi-days. This problem happens in both localhost exported NFS
-> and remote exported NFS configurations.
+Following up, using NFS loopback with a 5GB scratch device on a Google
+Compute Engine VM, generic/476 passes using a 4.14 LTS, 4.19 LTS, and
+5.4 LTS kernel.  So this looks like it's a regression which is in 5.10
+LTS and newer kernels, and so instead of patching it out of the test,
+I think the right thing to do is to add it to a kernel
+version-specific exclude file and then filing a bug with the NFS
+folks.
 
-I can partially confirm this.  I had noted a few weeks ago that I
-needed to exclude generic/476 or the test VM would hang for over 24
-hours, a which point I lost patience and terminated the VM.  I had
-gotten as far as
+KERNEL:    kernel 4.14.284-xfstests #8 SMP Tue Jul 5 08:21:37 EDT 2022 x86_64
+CMDLINE:   -c nfs/default generic/476
+CPUS:      2
+MEM:       7680
 
-	gce-xfstests -c nfs -g auto -X generic/476
+nfs/loopback: 1 tests, 597 seconds
+  generic/476  Pass     595s
+Totals: 1 tests, 0 skipped, 0 failures, 0 errors, 595s
 
-(which is a loopback config) using 5.19-rc4 in order to get a test run
-to complete.
+---
+KERNEL:    kernel 4.19.248-xfstests #4 SMP Sat Jun 25 10:43:45 EDT 2022 x86_64
+CMDLINE:   -c nfs/default generic/476
+CPUS:      2
+MEM:       7680
 
-Note: this was also triggering failures of generic/426 and
-generic/551, which I also haven't had time to investigate, not being
-an NFS developer.  :-)
+nfs/loopback: 1 tests, 407 seconds
+  generic/476  Pass     407s
+Totals: 1 tests, 0 skipped, 0 failures, 0 errors, 407s
 
-I wasn't sure whether generic/476 never terminating was caused by a
-loopback-triggered deadlock, or something else.  But it sounds like
-you've isolated it to the scratch device *too* small, and since that
-the failure occurred even on a configuration where the client and
-server were on different machines/VM's, correct?
+----
+KERNEL:    kernel 5.4.199-xfstests #21 SMP Sun Jul 3 12:15:15 EDT 2022 x86_64
+CMDLINE:   -c nfs/default generic/476
+CPUS:      2
+MEM:       7680
 
-> > >  _require_scratch
-> > > +_require_scratch_size $((27 * 1024 * 1024)) # 27GB
-> >
-> > ...so IDGI, this test works as intended.  Are you saying that NFS
-> > command overhead is so high that this test takes too long?
+nfs/loopback: 1 tests, 404 seconds
+  generic/476  Pass     404s
+Totals: 1 tests, 0 skipped, 0 failures, 0 errors, 404s
 
-I interpreted this as "if the drive is too small, we're hitting some
-kind of problem".  This *could* be some kind of problem which triggers
-on ENOSPC; perhaps it's just much more likely on a smaller device?  So
-it's possible this is not a test bug, but an NFS problem.  Perhaps we
-should forward this off to the NFS folks first?
 
-	   		     	   	  - Ted
+See below for what I'm checking into xfstests-bld for
+{kvm,gce}-xfstests.  I don't believe we should be changing xfstests's
+generic/476, since it *does* pass with a smaller scratch device on
+older kernels, and presumably, RHEL customers would be cranky if this
+issue resulted in their production systems to lock up, and so it
+should be considered a kernel bug as opposed to a test bug.
+
+						- Ted
+
+
+commit 4a33b6721d5db9c07f295a10a8ad65d2a0021406
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Thu Jul 21 09:54:50 2022 -0400
+
+    test-appliance: add an nfs test exclusions for kernels newer than 5.4
+    
+    This is apparently an NFS bug which is visible in 5.10 LTS and newer
+    kernels, and likely appeared sometime after 5.4.  Since it causes the
+    test VM to spin forever (or at least for days), let's exclude it for
+    now.
+    
+    Link: https://lore.kernel.org/all/CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com/
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+diff --git a/test-appliance/files/root/fs/nfs/exclude b/test-appliance/files/root/fs/nfs/exclude
+index 184750fb..ef4b19bc 100644
+--- a/test-appliance/files/root/fs/nfs/exclude
++++ b/test-appliance/files/root/fs/nfs/exclude
+@@ -10,3 +10,14 @@ generic/477
+ // failing in the expected output of the linux-nfs Wiki page.  So we'll
+ // suppress this failure for now.
+ generic/294
++
++#if LINUX_VERSION_CODE > KERNEL_VERSION(5,4,0)
++// There appears to be a regression that shows up sometime after 5.4.
++// LTS kernels for 4.14, 4.19, and 5.4 will terminate successfully,
++// but newer kernels will spin forever in some kind of deadlock or livelock
++// This apparently does not happen if the scratch device is > 27GB, so it
++// may be some kind of ENOSPC-related bug.
++// For more information see the e-mail thread starting at:
++// https://lore.kernel.org/r/CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com/
++generic/476
++#endif
