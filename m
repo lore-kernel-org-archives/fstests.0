@@ -2,166 +2,78 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB3F9C433EF
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Jul 2022 16:43:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1EF3C433EF
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Jul 2022 18:04:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230428AbiGUQnT (ORCPT
+        id S232432AbiGUSEd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Jul 2022 12:43:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48054 "EHLO
+        Thu, 21 Jul 2022 14:04:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54902 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229681AbiGUQnT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 12:43:19 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4269980F42
-        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 09:43:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658421796;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=EV8xjVe+gKzRO5oRabRnLwZ3MmJXguj/eTNP/g3jfMc=;
-        b=Zo/0ir9UYfSd0MSEPsNeaLmwmW8W4zYun8JDqoGS4/Q9dTiL1OStxkMobzNxc5L288NNOq
-        3Igw6lsqJ753GvCHy3duOdNqRAC9iHfJlbJm+r88A+3WISZnFa4oRvCm8VJQngG7NnJ8Do
-        gLbTLSHoOaWMhKUiQaBjspnPRCaxhQA=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-556-yu10rQygPf2hymuKuD6zIA-1; Thu, 21 Jul 2022 12:43:15 -0400
-X-MC-Unique: yu10rQygPf2hymuKuD6zIA-1
-Received: by mail-qk1-f198.google.com with SMTP id v13-20020a05620a0f0d00b006b5f0ec742eso1723940qkl.2
-        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 09:43:14 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=EV8xjVe+gKzRO5oRabRnLwZ3MmJXguj/eTNP/g3jfMc=;
-        b=YTYLA1o+jOZI0p9Uadf55XCbstY8Hynx7clW0GOmtwOzChfxbFmpJDuD1xwGTs6c3k
-         uzfbvSAGf52ahBDBHPFmcj5zsXSq35CX2qm8KqHDVWCFHe8msKJCCXINBLK7MKnvUJL/
-         mvzA480r/9RqB5MZuzeA9Qus4yszkwUyUMBlIgbqDaYsRwGVhDZXvZzZQeGPaG0vYwZV
-         O/jaeB4x7ffbYP/SbcZtXSGfNfo/Rbepg+jOPew/oxhyIW7PP+9/n5mgnsVzPJIG5CBy
-         lXzapUwRIdAXz1UMcgl/tfBnajcwX1Mj8iJtpTFx5IiZvfFB7WGxQ7fysZ5P2zK+D5Fm
-         kvdQ==
-X-Gm-Message-State: AJIora9RK9ER1xnJreyeSZKfSf3gIGjOxNcXD/ANz5ula293PnaUoc2q
-        21lFYT3Lcbk5L7yv0xt7hB2EwmSbf7mUnwl+niY/E7h8EeOPCPM1EFq8gE9YkUTLm04EvYYdcN3
-        zqeMJzT3r5Ll/XK76DA==
-X-Received: by 2002:a05:6214:1c4f:b0:473:7909:85e2 with SMTP id if15-20020a0562141c4f00b00473790985e2mr36288368qvb.69.1658421794296;
-        Thu, 21 Jul 2022 09:43:14 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vOh9B6Bl6bqdrAmybwlgZWDETBtLnJ+W8Uh4sT5I7JPYYteaJROLd8nBIhVMHczDyaA4T2Jw==
-X-Received: by 2002:a05:6214:1c4f:b0:473:7909:85e2 with SMTP id if15-20020a0562141c4f00b00473790985e2mr36288346qvb.69.1658421793978;
-        Thu, 21 Jul 2022 09:43:13 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id o17-20020ac841d1000000b0031bf484079esm1559355qtm.18.2022.07.21.09.43.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Jul 2022 09:43:13 -0700 (PDT)
-Date:   Fri, 22 Jul 2022 00:43:08 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Yang Xu <xuyang2018.jy@fujitsu.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/549: test mkfs.xfs whether terminate getsubopt
- arrays properly
-Message-ID: <20220721164308.p6gx2kfy6fjrbppz@zlang-mailbox>
-References: <1658295937-2169-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <Ytg5j+So+WP0PXNP@magnolia>
+        with ESMTP id S229461AbiGUSE2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 14:04:28 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA3708C3FD
+        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 11:04:26 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26LI4FZ0022702
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 21 Jul 2022 14:04:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1658426657; bh=TCUZJhaV7E2B7bTt98bv6Vd58aWzueYXB6CRve5LAnA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=OIZSXoKP9LzTz+SNP6O0GCxvRSCFtkyN6WvRUpLLbTsfvfX7M/j9siUBITedt3qHd
+         PfOIi78twbH2/5tQc5rrueohuYCMw3CIyYn9Iei6x5zWRFm3o1L7zn0lU2lwrDWc2l
+         vjG+JyfnfNwGR/zpZtS8RiL1mOS6ATBVakcyJDPbS4fFCxnm8A+7sJa6/OH0w3Wr1M
+         49k62KAeVuvvXHd6XzwVHZ9bTmZnIW08B4+uou0/IPr0pifNA9cD13YlRy3W763OnX
+         tsmzR+fZKfqY2E5K7xKb2E6iF/+LLyRa6Zx1BTnqTIM/VOztwJ450JUD3XS1K8XPJ5
+         lKwWxRJz7i22w==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 6ECB615C3EBF; Thu, 21 Jul 2022 14:04:15 -0400 (EDT)
+Date:   Thu, 21 Jul 2022 14:04:15 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Chuck Lever III <chuck.lever@oracle.com>
+Cc:     Boyang Xue <bxue@redhat.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH v1] generic/476: requires 27GB scratch size
+Message-ID: <YtmVH8HNHHxVUyoM@mit.edu>
+References: <20220721022959.4189726-1-bxue@redhat.com>
+ <YtjYxyhVmSPzzFoH@magnolia>
+ <CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com>
+ <Ytk7t0am8H4x2BbS@mit.edu>
+ <YtlcwZ/66pJhpdiS@mit.edu>
+ <E5C39D1E-3DB4-467A-8C6D-6630A2ADE97E@oracle.com>
+ <6C27EF62-B619-4451-9CBC-B21CEC72F66D@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Ytg5j+So+WP0PXNP@magnolia>
+In-Reply-To: <6C27EF62-B619-4451-9CBC-B21CEC72F66D@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 20, 2022 at 10:21:19AM -0700, Darrick J. Wong wrote:
-> On Wed, Jul 20, 2022 at 01:45:37PM +0800, Yang Xu wrote:
-> > When I run xfs/144 manually, the step as below:
-> > mkfs.xfs -f -d agcount=3200,size=6366g -d file,n
-> > 
-> > I accidentally pressed the Enter key, it triggers Segmentation fault.
-> > Then I found Darrick has fixed this one weeks ago. So add this test.
-> > 
-> > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> > ---
-> >  tests/xfs/549     | 33 +++++++++++++++++++++++++++++++++
-> >  tests/xfs/549.out |  2 ++
-> >  2 files changed, 35 insertions(+)
-> >  create mode 100755 tests/xfs/549
-> >  create mode 100644 tests/xfs/549.out
-> > 
-> > diff --git a/tests/xfs/549 b/tests/xfs/549
-> > new file mode 100755
-> > index 00000000..31ead3c7
-> > --- /dev/null
-> > +++ b/tests/xfs/549
-> > @@ -0,0 +1,33 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 FUJITSU LIMITED. All rights reserved.
-> > +#
-> > +# FS QA Test 549
-> > +#
-> > +# Regression test for xfsprogs commit
-> > +# 50dba8189b1f ("mkfs: terminate getsubopt arrays properly")
-> > +#
-> > +# This case test mkfs.xfs whether can terminate getsubopt arrays properly.
-> > +# If not, it will trigger segmentation fault.
-> > +#
-> > +
-> > +. ./common/preamble
-> > +_begin_fstest auto quick mkfs
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_fixed_by_git_commit xfsprogs 50dba8189b1f \
-> > +	"mkfs: terminate getsubopt arrays properly"
-> > +_require_test
-> > +
-> > +testfile=$TEST_DIR/a
-> > +rm -rf $testfile
-> > +
-> > +$MKFS_XFS_PROG -f -d agcount=4 -d file,name=$testfile,nrext64=0 \
-> > +	>> $seqres.full  2>&1
+On Thu, Jul 21, 2022 at 03:14:30PM +0000, Chuck Lever III wrote:
+> > - Loopback means there's often no way to know which part of
+> > the stack (client or server) is the problem.
 > 
-> Heh, you don't even need $testfile --
-> 
-> "$MKFS_XFS_PROG -d agcount=3 -d garbagegarbagegarbage=0"
-> 
-> is enough to cause the crash.  But this works just as well, so
+> And by the way, it's even worse if that single system acts as
+> both the NFS server scratch device and the server under test.
+>
 
-Thanks Darrick.
+I believe Boyang has stated that this has been seen both in loopback
+and in an externally mounted configuration.
 
-If it's not needed, let's remove those meaningless lines, likes
+Boyang, in your external exported configuration, was the lockup
+happening on the client or server system?
 
-  testfile=$TEST_DIR/a
-  rm -rf $testfile
-  $MKFS_XFS_PROG -f -d agcount=4 -d file,name=$testfile,nrext64=0
+					- Ted
 
-That makes me feel this test need "EEXIST" error, to trigger this bug :)
-
-Thanks,
-Zorro
-
-
-> 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> 
-> --D
-> 
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/549.out b/tests/xfs/549.out
-> > new file mode 100644
-> > index 00000000..4e3acd3f
-> > --- /dev/null
-> > +++ b/tests/xfs/549.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 549
-> > +Silence is golden
-> > -- 
-> > 2.23.0
-> > 
-> 
-
+P.S.  I just don't have the capability of testing NFS on separate VM's
+for the client and server using gce-xfstests.  It's on my list of
+things to implement someday, but I just don't have time at the moment.
+Maybe a GSOC project someday...  Or if someone has time, patches or
+pull requests to https://github.com/tytso/xfstests-bld are gratefully
+accepted.  :-)
