@@ -2,121 +2,143 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4257CCCA488
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jul 2022 02:19:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88561C43334
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jul 2022 02:42:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229739AbiGVCTX (ORCPT
+        id S231485AbiGVCms (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Jul 2022 22:19:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59972 "EHLO
+        Thu, 21 Jul 2022 22:42:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50354 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234212AbiGVCTU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 22:19:20 -0400
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86872E0D
-        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 19:19:18 -0700 (PDT)
-Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26M2Iwhw010680
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 21 Jul 2022 22:18:59 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1658456340; bh=//JYZGGhiv+f0UEthS1WEd9eTA2gTyx5C7BDyUWlD+Q=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=HdPNHHMKW6/vjC7YWbfhpmPW2CUJM4T9E7TzHYt1QCEsxlHFEXsv7QEwF935R9/B7
-         +2+i59jXvvSHjyQ63mPbN/rnzR2P40AkgE3ExaG5LfWpZR0En+S1K+Hb6w9Gsw3t8K
-         MY9MiE2OnEk5fSssf49v+JMdoYlDSqFGsXtnwaeBG9av2ceAAR8HJV2LK62CDxHAg/
-         9LJ8M8U/EFehiFPvECX6Ij13PSo/o93TEhsmmKnIyXqDjboyByN1RpBUJUxn1o7Tnl
-         eAsBRLmA9gU4jasWnISBu2TGjiAe2rC6jLTFhVAs7nbZP5PFx72HnVIhPr6QpBV2X8
-         Hw/1D9qg3L/Ag==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 7DBF515C3EBF; Thu, 21 Jul 2022 22:18:58 -0400 (EDT)
-Date:   Thu, 21 Jul 2022 22:18:58 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Chuck Lever III <chuck.lever@oracle.com>
-Cc:     Boyang Xue <bxue@redhat.com>,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v1] generic/476: requires 27GB scratch size
-Message-ID: <YtoJElcucHMtIYQT@mit.edu>
-References: <20220721022959.4189726-1-bxue@redhat.com>
- <YtjYxyhVmSPzzFoH@magnolia>
- <CAHLe9YaAVyBmmM8T27dudvoeAxbJ_JMQmkz7tdM1ZLnpeQW4UQ@mail.gmail.com>
- <Ytk7t0am8H4x2BbS@mit.edu>
- <YtlcwZ/66pJhpdiS@mit.edu>
- <E5C39D1E-3DB4-467A-8C6D-6630A2ADE97E@oracle.com>
- <6C27EF62-B619-4451-9CBC-B21CEC72F66D@oracle.com>
- <YtmVH8HNHHxVUyoM@mit.edu>
- <75AAE413-4142-45F2-BE8A-7A7867CC0DA4@oracle.com>
+        with ESMTP id S230153AbiGVCms (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jul 2022 22:42:48 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C311868A2
+        for <fstests@vger.kernel.org>; Thu, 21 Jul 2022 19:42:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1658457765; i=@fujitsu.com;
+        bh=Pyj2CY86hX6N/Mc20tqrpkQ/vuN9sYXlagCO+rAv0ag=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=Sb1iXMmtjUQ1nOpi3gN1VNa+alqEnLaZCIarQmepCq+9CDTzTvWCPI8hAO7lrvUd/
+         IcG23ew3w7XQUMWSZqhIsy77GjhuHP7NLUfqlsLhS00FV+feWlcD1irIDhXaiVLel8
+         Omv3EBOpTr2kUBweFiPg0YfEOFQ1IxLAfadTYX6THLNy/ejXR7Tm5I3rptMDflr9CU
+         sU+UZPnExE7m0XTdFKhWdWCW6MwW/UmnTtrCUzNx213d6CMGA6e39P7QaW0oEDvYWE
+         RcOvZ0Nf6jusN6CepIjIcKh9hS7oB2KNow2+jRql6mR3yhcQ/FVnUel1p2B/vzbHZS
+         3WprBY3yrP5vw==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrNIsWRWlGSWpSXmKPExsViZ8MxSXcJ360
+  kg7+dGhanW/ayOzB6fN4kF8AYxZqZl5RfkcCasfH7EqaCLTwVP5o/sTQwnuDqYuTiEBK4xCjx
+  6OlzdgjnKJNEy8Q2pi5GTiBnD6PEvon2IDabgKbEs84FzCC2iICsxP8Zq8FqmAXUJZZP+gVmC
+  wsESfw8twKshkVAVWLziu3sIDavgIfEzSuPwWwJAQWJKQ/fg9VwCthILFwzmw1il7XErWnXmS
+  HqBSVOznzCAjFfQuLgixfMEL2KEpc6vjFC2BUSrw9fgoqrSVw9t4l5AqPgLCTts5C0L2BkWsV
+  olVSUmZ5RkpuYmaNraGCga2hoqmtsrGtuopdYpZuol1qqW55aXKJrpJdYXqyXWlysV1yZm5yT
+  opeXWrKJERjCKcWKXjsYX634qXeIUZKDSUmUd9+km0lCfEn5KZUZicUZ8UWlOanFhxhlODiUJ
+  HiNeW8lCQkWpaanVqRl5gDjCSYtwcGjJML7jAMozVtckJhbnJkOkTrFaMxxcNf+vcwcaxsO7G
+  UWYsnLz0uVEuc1AJkkAFKaUZoHNwgW55cYZaWEeRkZGBiEeApSi3IzS1DlXzGKczAqCfO6gSz
+  kycwrgdv3CugUJqBTzM1vgJxSkoiQkmpgsn++/Gfzi+B0gYbj3b1Cq09JL732avryZdl8f4/9
+  lin0DTgfaXlQqSA3qG56Y8zmPambxQ92XTzh7Plq1Y+v63jz5vzKPcI0i9N0s/UrZuaWv7IO0
+  56L9mRp1Gw6NcfGLmDjkSKGAE/jxnT3f+cOpnbxCUfkf2I/JtnClygyb3KMmfbnN50/WubMLW
+  zy1Hz5+J0+w8ubbsDY4zcIsE7t4PVfpna+lvnZi6fxNktv7f8XsGZL0tmH+e8nN07PT2pq2bv
+  G0O6Rc3/ohosGCxbflzhssu/2swzD5wsLt9+/8Kp++ubjzGs7KuLWXLz1quVumXyU78s7fQ8Y
+  ytdf7Z7BWeN4fq77N0WjDPG1Xo+OKbEUZyQaajEXFScCANr1kC1uAwAA
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-13.tower-565.messagelabs.com!1658457764!471642!1
+X-Originating-IP: [62.60.8.146]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.87.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 11069 invoked from network); 22 Jul 2022 02:42:44 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-13.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 22 Jul 2022 02:42:44 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 606D61000DC
+        for <fstests@vger.kernel.org>; Fri, 22 Jul 2022 03:42:44 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 540B6100077
+        for <fstests@vger.kernel.org>; Fri, 22 Jul 2022 03:42:44 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Fri, 22 Jul 2022 03:42:34 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2] xfs: test mkfs.xfs whether terminate getsubopt arrays properly
+Date:   Fri, 22 Jul 2022 11:43:04 +0800
+Message-ID: <1658461384-2292-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <20220721164308.p6gx2kfy6fjrbppz@zlang-mailbox>
+References: <20220721164308.p6gx2kfy6fjrbppz@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <75AAE413-4142-45F2-BE8A-7A7867CC0DA4@oracle.com>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD08.g08.fujitsu.local (10.167.33.83) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 21, 2022 at 06:13:48PM +0000, Chuck Lever III wrote:
-> 
-> I agree that Q/A and dev testing needs are distinct, so a dev might
-> have a simpler series of tests to run and fewer resources to run them
-> in.
-> 
-> That said, I've had it on my to-do list for some time to find an easy
-> way to run automated multi-host tests, and I've been told it should be
-> straight-forward, but I've been swamped lately.
+When I run xfs/144 manually, the step as below:
+mkfs.xfs -f -d agcount=3200,size=6366g -d file,n
 
-Yeah, in a cloud or VM environment it shouldn't be *that* hard.
-Especially for cloud setup, it's just a matter of launching another
-cloud VM with a metadata flag that says, "please provide an NFS server
-using the specified file system as the backing store", noting the IP
-address, and then passing it to the client VM.  The only slightly
-tricky part is that monitoring and saving the serial console of the
-server as a test artifact in case of an oops or triggers a BUG or
-WARN_ON.
+I accidentally pressed the Enter key, it triggers Segmentation fault.
+Then I found Darrick has fixed this one week ago. So add this test.
 
-Unfortunately, like you, I've been swamped lately.  :-/
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/xfs/549     | 29 +++++++++++++++++++++++++++++
+ tests/xfs/549.out |  2 ++
+ 2 files changed, 31 insertions(+)
+ create mode 100755 tests/xfs/549
+ create mode 100644 tests/xfs/549.out
 
-> Many of us in the NFS community actually don't run the tests that
-> require a scratch dev, because many of them don't seem relevant to
-> NFS, or they take a long time to run. Someday we should sort through
-> all that :-)
+diff --git a/tests/xfs/549 b/tests/xfs/549
+new file mode 100755
+index 00000000..7d4fc8cf
+--- /dev/null
++++ b/tests/xfs/549
+@@ -0,0 +1,29 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 FUJITSU LIMITED. All rights reserved.
++#
++# FS QA Test 549
++#
++# Regression test for xfsprogs commit
++# 50dba8189b1f ("mkfs: terminate getsubopt arrays properly")
++#
++# This case test mkfs.xfs whether can terminate getsubopt arrays properly.
++# If not, it will trigger segmentation fault.
++#
++
++. ./common/preamble
++_begin_fstest auto quick mkfs
++
++# real QA test starts here
++_supported_fs xfs
++_fixed_by_git_commit xfsprogs 50dba8189b1f \
++	"mkfs: terminate getsubopt arrays properly"
++_require_test
++
++$MKFS_XFS_PROG -f -d agcount=4 -d garbage=0 >> $seqres.full  2>&1
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/549.out b/tests/xfs/549.out
+new file mode 100644
+index 00000000..4e3acd3f
+--- /dev/null
++++ b/tests/xfs/549.out
+@@ -0,0 +1,2 @@
++QA output created by 549
++Silence is golden
+-- 
+2.23.0
 
-It doesn't take *that* long.  In loopback mode, as well as using the
-GCE Filestore Basic product as the remote NFS server, it takes between
-2.5 and 3 hours to run the auto group with the test and scratch device
-sized to 5GB:
-
-nfs/filestore: 785 tests, 3 failures, 323 skipped, 9922 seconds
-  Failures: generic/258 generic/444 generic/551
-nfs/loopback: 814 tests, 2 failures, 342 skipped, 9364 seconds
-  Failures: generic/426 generic/551
-
-That's the same order of magnitude for ext4 or xfs running -g auto,
-and at least for me "gce-xfsetsts -c nfs/default -g auto" is fire and
-forget kind of thing.  2-3 hours later, the results show up in my
-inbox.  It's actually *analyzing* the test failures which takes time
-and NFS expertise, both of which I don't have a lot of at the moment.
-
-> For the particular issue with generic/476, I would like to see if
-> there's a reason that test takes a long time and fails with a small
-> scratch dev before agreeing that excluding it is the proper response.
-
-At the moment, my test runner setup assumes that if a single test
-takes more than hour, the system under test is hung and should be
-killed.  So if generic/476 is taking ~400 seconds for pre-5.10 LTS
-kernels, and over 24 hours if the watchdog safety timer isn't in use
-for 5.10+ kernels, I need to exclude it in my test runner, at least
-for now.
-
-Once it's fixed, I can use a linux versioned #ifdef to only exclude
-the test if the fix is not present.
-
-(Also on my todo wishlist is to have some way to automatically exclude
-a test if a specified fix commit isn't present on the tested kernel,
-but to run it automatically once the fix commit is present.
-Unfortunately, I don't have the time or the business case to put
-someone on it as a work project...)
-
-					- Ted
