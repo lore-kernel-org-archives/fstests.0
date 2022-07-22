@@ -2,67 +2,43 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF570C43334
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jul 2022 15:11:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B6CCC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jul 2022 16:37:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235548AbiGVPL0 (ORCPT
+        id S235761AbiGVQhR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Jul 2022 11:11:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58544 "EHLO
+        Fri, 22 Jul 2022 12:37:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235574AbiGVPLY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jul 2022 11:11:24 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9BA49951EC
-        for <fstests@vger.kernel.org>; Fri, 22 Jul 2022 08:11:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658502682;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Xi8dTMRGNSd0HqoORa/8kAp5M9DPhO5fCb8gODNwrS8=;
-        b=MnFVpx0VJ6kxOx/a+a/i1bUR7wl48ZN6Ipbuf7B6tNAke8QRJmOiXCnHfuBLJO9MPCCm2Y
-        7rZXbcR/by06jKJkwBQuI4xPKrkv8M4GVn3oniRGZ9VSUzJDx92RQ3FrsZBwc94ZVafwTZ
-        A5PqWWIbaPwHQ3yKmgg6VW7edTRiHXk=
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
- [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-470-kTLkmQEtNFK520VGAlhnew-1; Fri, 22 Jul 2022 11:11:21 -0400
-X-MC-Unique: kTLkmQEtNFK520VGAlhnew-1
-Received: by mail-qk1-f197.google.com with SMTP id bl27-20020a05620a1a9b00b0069994eeb30cso3896938qkb.11
-        for <fstests@vger.kernel.org>; Fri, 22 Jul 2022 08:11:21 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=Xi8dTMRGNSd0HqoORa/8kAp5M9DPhO5fCb8gODNwrS8=;
-        b=c81SlMwfhRknRKEA704UOfZQK89JWJ1cTvOxrBHUvEmTbRA1jREPqAMzT7epwDhbtd
-         qaXsGRoqrz4XymvEHhRJWtq0hdLKBIV0A0V6fvTBDZK9L52OY5HBsTqGEH7r8Dajh90b
-         Bw86qcvH3z2w3cjTnA7UmWgBSUuG/J0QYdvWsHOrtsKODa8rwmdGF/mcUbbryT6d9YUd
-         1l6RyJzzYrvDP3ktUGq3TGrUYSEURdzqSERcSnAURq6ENoKceDQvtsDF13lQZHO1KZ9D
-         I5Z8+VNLFozooCk1YAMBxLf+px3KciHDMZ3upf5Q1SLu903Lbh4eH4QvWx/4G6vtdAqr
-         kA4g==
-X-Gm-Message-State: AJIora+GvtCTdKJWbPacZcuv0afdlptprVrl8o+w8X+x8s6qUyDZx/nB
-        2OH3WQCiSnar0s3SeSz2ZPZFCaZjsSFDz12Q7RLrAQkYgDtBucVER7tcOaPe/hbPPvWe8RuKC2u
-        DmROpo1EnAlJBaoWBSw==
-X-Received: by 2002:a37:b03:0:b0:6b5:e533:e984 with SMTP id 3-20020a370b03000000b006b5e533e984mr281231qkl.364.1658502680843;
-        Fri, 22 Jul 2022 08:11:20 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1uq3flzgxrqK1gQXJEHFwK4uxREs0DKbcZ8RAp9PLHwPr7/n5KyiFPkrP0IlE4UhjA3p2EX5A==
-X-Received: by 2002:a37:b03:0:b0:6b5:e533:e984 with SMTP id 3-20020a370b03000000b006b5e533e984mr281210qkl.364.1658502680564;
-        Fri, 22 Jul 2022 08:11:20 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id d17-20020ac81191000000b0031ee3449f34sm2933907qtj.86.2022.07.22.08.11.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Jul 2022 08:11:20 -0700 (PDT)
-Date:   Fri, 22 Jul 2022 23:11:14 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Sun Ke <sunke32@huawei.com>
-Cc:     Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
+        with ESMTP id S229567AbiGVQhR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jul 2022 12:37:17 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E80FF93694;
+        Fri, 22 Jul 2022 09:37:15 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-118-63.bstnma.fios.verizon.net [173.48.118.63])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 26MGaxo1007545
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 22 Jul 2022 12:37:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1658507820; bh=V4B0S7YlVC/I6JJKkg4wR+2YzppJ/F016/91YQyybNY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=WwPmIZpPGwXATxQ5Mpx5IszodLJJdsnNqzyV6W+P7IG3c7rSLUkSyakfeG/TvJvYS
+         iR7Ro+p+g512QJmiP5dh1f+KIKnQFOlFmu/EALiaLVT9PcuHXMWw6TSxR5tExXwmZB
+         USUT+3rauJtGeWA1H8SGEv+T7+ZyCHfGXNXz1HOVhvzFcrMyqma6CGz39waCnN1AI1
+         5l9WCnX7VXUDohBK9bx1oPJzd5Swecgb8UvECBHBkVRxbuPK7m4n8CpFQQwlos9vPv
+         iBKH9hevuXuWpBv55YkLdW0HjpY0GdT3lLAuL6cQD3iJKi4FxN7vVG9GHogk5HN6h/
+         Gy4GUOwDgCqUw==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 215ED15C3EF7; Fri, 22 Jul 2022 12:36:59 -0400 (EDT)
+Date:   Fri, 22 Jul 2022 12:36:59 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Sun Ke <sunke32@huawei.com>, fstests@vger.kernel.org,
         linux-ext4@vger.kernel.org
 Subject: Re: [PATCH v3 1/2] ext4: resize fs after resize_inode without e2fsck
-Message-ID: <20220722151114.c4w7s6v6fu5hphf5@zlang-mailbox>
+Message-ID: <YtrSK+qUm9+xRI7L@mit.edu>
 References: <20220713092859.3881376-1-sunke32@huawei.com>
  <20220713092859.3881376-2-sunke32@huawei.com>
  <20220714154607.qq6cqgvncxhsn66w@zlang-mailbox>
@@ -70,48 +46,23 @@ References: <20220713092859.3881376-1-sunke32@huawei.com>
  <20220715180815.gegmapvruor6vin3@zlang-mailbox>
  <b424fd69-aeb4-f749-d09b-5d824454dd94@huawei.com>
  <YtqPXcFbbrFBr1om@mit.edu>
+ <20220722151114.c4w7s6v6fu5hphf5@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <YtqPXcFbbrFBr1om@mit.edu>
+In-Reply-To: <20220722151114.c4w7s6v6fu5hphf5@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 22, 2022 at 07:51:57AM -0400, Theodore Ts'o wrote:
-> On Fri, Jul 22, 2022 at 04:16:26PM +0800, Sun Ke wrote:
-> > 
-> > 1. The test run fsck automatically, and complain inconsistent，I think it
-> > need not run fsck.
+On Fri, Jul 22, 2022 at 11:11:14PM +0800, Zorro Lang wrote:
+> > This resets the s_reserved_gdt_blocks field back to zero, so the fsck
+> > doesn't fail.  Which is fine, because the point of the test is to see
+> > whether the kernel dereferences a NULL pointer or not.
 > 
-> The check script always run fscks after the test.  In order to
-> suppress the fsck complaint, we'll need to add this after the
-> resize2fs invocation:
-> 
-> _scratch_unmount
-> $DEBUGFS_PROG -w -R "set_super_value s_reserved_gdt_blocks 0" $SCRATCH_DEV \
->         >>$seqres.full 2>&1
-> 
-> This resets the s_reserved_gdt_blocks field back to zero, so the fsck
-> doesn't fail.  Which is fine, because the point of the test is to see
-> whether the kernel dereferences a NULL pointer or not.
+> Or maybe just replace _reuqire_scratch with _require_scratch_nocheck, if we
+> corrupt the fs on SCRATCH_DEV intentionally?
 
-Or maybe just replace _reuqire_scratch with _require_scratch_nocheck, if we
-corrupt the fs on SCRATCH_DEV intentionally?
+Agreed, that would be a better solution.
 
-Thanks,
-Zorro
-
-> 
-> > 2. It warn missing kernel fix, but the commit had merged.
-> 
-> The way _fixed_by_kernel_commit works is if the test fails (for any
-> reason), it prints that you MAY be missing the bugfix commit:
-> 
-> > HINT: You _MAY_ be missing kernel fix:
-> >       b55c3cd102a6 ext4: add reserved GDT blocks check
-> 
-> 		     	       		- Ted
-> 
-
+					- Ted
