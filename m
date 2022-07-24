@@ -2,162 +2,244 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60BD2C43334
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jul 2022 08:36:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29589C43334
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jul 2022 14:01:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229915AbiGXIgb (ORCPT
+        id S231149AbiGXOBj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 24 Jul 2022 04:36:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53556 "EHLO
+        Sun, 24 Jul 2022 10:01:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56252 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229602AbiGXIga (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Jul 2022 04:36:30 -0400
-Received: from mail-ua1-x935.google.com (mail-ua1-x935.google.com [IPv6:2607:f8b0:4864:20::935])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A97CB48E;
-        Sun, 24 Jul 2022 01:36:28 -0700 (PDT)
-Received: by mail-ua1-x935.google.com with SMTP id 94so3353237uau.8;
-        Sun, 24 Jul 2022 01:36:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=bukET7qSPWrxf/LwGnxfpa7QXgNbfdikx5lZrigpanA=;
-        b=mHZ8jxLJo480NIa4GeDG9N9PU6Xe19qNi7Vq842ww6gP58uIyrP9dsiW45KaaHnXVk
-         Dmt+m3x+X70NFfygWHpIgQGK3ek7ZcjxBsMQhlpFTc6bmaomURTPkdL7l0dwe8ef67xi
-         +DNuVbKXGqFLqYKA4m7pNMJdsHMBfC+HTqwugV0eel9Z9Kg7dR9genlp+Dafy31sXw9I
-         6+EJ/grxL0ftHqAZvKzQtLS9W/1pwJWUXcvm5g8062fp2HbXFgixYA1ZubCYwRL+F8CL
-         Ao3MfGt69bNDyN7+7l80OxBB8AeZ539t35kjsjtM1OmcYg1WNAZmFxt8gGiyx2I81gZZ
-         b6pQ==
+        with ESMTP id S230501AbiGXOBi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Jul 2022 10:01:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 73B9612090
+        for <fstests@vger.kernel.org>; Sun, 24 Jul 2022 07:01:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1658671296;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wzjWFBWWzS3vs3FN1IPanHJriLLGg6ks/nHjRtM9sk4=;
+        b=AwHbDveBkK2jWrGYFLxI7zrYRryHXUQs3PMguf6I1lPeWOLSvSk/H5GTpCnT2TVYdMsH9q
+        bie8HrkPMQGv3gsZkM9dPSN8ap67cZVoZs3DuI3qMSCEFUPBV064hV7uUQ5tQhA/caVmBA
+        oj5r5UwKake5eV7z9RHeQSCTmcffRKY=
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
+ [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-163-9dCE4W50M3-ejlPrPPmxRQ-1; Sun, 24 Jul 2022 10:01:34 -0400
+X-MC-Unique: 9dCE4W50M3-ejlPrPPmxRQ-1
+Received: by mail-qt1-f200.google.com with SMTP id x11-20020ac84d4b000000b0031ed94d739dso4648168qtv.11
+        for <fstests@vger.kernel.org>; Sun, 24 Jul 2022 07:01:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=bukET7qSPWrxf/LwGnxfpa7QXgNbfdikx5lZrigpanA=;
-        b=3OB6NFYxlEiaC3w+1pR9vZE7Uuj08HZbAfUlJLd1rEvF95G5xwkR43WMMyRtBzFHCy
-         kml7mOwQUPA9AorZ5VTkAhe6g2ye5FHtulrshF/OW0/JSE9uYzXy/3vanf5hFfzGflxn
-         IHig3mSHaB0SlKnOOf12U2diaPVHZspOIyLIwy00um1mSqrRqSvZdEFwEjuBruyM6aLE
-         Q5Daqp2ATvPoLY9Fqdj+0ZiCZ2Upd3f2yB0EaAMxZGfY7dZhqz4SIoLObUV8gjGGeHK/
-         zeZi1uBH0Kwff91v199LVk+G4PAaCb1oS3K5mjFLyMNVif1RLD4MydLfC/IpHBd38sG2
-         EWrg==
-X-Gm-Message-State: AJIora80FgC+DJ5gIacng0PjRfZQnIZkVlZotU9UVh4ayT47mssA/RFM
-        LMjcJbGHsiDpC+sUIM4HXz4MQ5+TMAs53kfvhyE=
-X-Google-Smtp-Source: AGRyM1sjKRFz9dBqfc1xaAGRur71gon2zJM0oeKzq+HdUJYUJQX5iNiO1gZFhcwTyjpO3kyWKCpJbadnEZs/Dz8Zkh8=
-X-Received: by 2002:a9f:3523:0:b0:384:28fe:6f with SMTP id o32-20020a9f3523000000b0038428fe006fmr2030880uao.60.1658651787295;
- Sun, 24 Jul 2022 01:36:27 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220617100641.1653164-1-amir73il@gmail.com> <YrOpmMzn9ArsR9Dy@magnolia>
- <CAOQ4uxhOAaYkWeKXz6M8681ZjFiOSOJQqmewoq+-P1O2oXhsOg@mail.gmail.com> <YrSPNFZ+Hium1rhE@magnolia>
-In-Reply-To: <YrSPNFZ+Hium1rhE@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 24 Jul 2022 10:36:15 +0200
-Message-ID: <CAOQ4uxj2vk4ZPXu20PM0hHCawTVdaY+z5=0WuN__UxwNRDK5+g@mail.gmail.com>
-Subject: Re: [PATCH 5.10 CANDIDATE 00/11] xfs stable candidate patches for
- 5.10.y (v5.15+)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=wzjWFBWWzS3vs3FN1IPanHJriLLGg6ks/nHjRtM9sk4=;
+        b=MWnYtML2v1nSHxJKCkblG8gwdDQCpWqzlvBO8NNjzCtZf5udyV50jlbGI0uaZCJxfQ
+         7pdY+B8hf0aetKcKNz4vdqIkdkC7YRkQqELLQ7QCPGWRFAPAm9f6srfVY0lgbgyMU/XT
+         03lD35a8cqPkLe5wyUNoSA+0ydi6F3InEHOzh/SrmVsKYnhFqdK9995jSYsgXe8WAyBM
+         VuV5WBbru+LID/Peai0HojALsVONsZU07ngO9h0JXuMuA1PwmkT+td1ANPGg/uOEiFxG
+         B+aodBQiXhvgpvLxn0TAJwAwEDXGh5hKKQ8+m10lNBSdP0HLHaqiwqyoAgTC5evxfYJ/
+         7xqA==
+X-Gm-Message-State: AJIora/+fMEvYROA0hXYXIiqOJeU+O/MUiBMqxF0FWHJwfBiyp0Dx4oJ
+        s0WO0UVqbPERvyEcgd+4n9LKCb9rpcuBi/mI4pdQZ0+qQVX5j4kmf6MF7vl13nLfXQevL8vZiiH
+        AwzzmPgoqjc/n4/lvMg==
+X-Received: by 2002:a05:620a:440b:b0:6b6:2e97:e4c with SMTP id v11-20020a05620a440b00b006b62e970e4cmr5863144qkp.649.1658671294214;
+        Sun, 24 Jul 2022 07:01:34 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1sXjyC2lhd0m4Unr0J9jztJkm6o9Gsai/nnsdBeMnp3H5ecGWasJL9RJPsbpIxbnJsp5aJkvw==
+X-Received: by 2002:a05:620a:440b:b0:6b6:2e97:e4c with SMTP id v11-20020a05620a440b00b006b62e970e4cmr5863123qkp.649.1658671293882;
+        Sun, 24 Jul 2022 07:01:33 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id x29-20020a05620a0b5d00b006a6a4b43c01sm7164773qkg.38.2022.07.24.07.01.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 24 Jul 2022 07:01:33 -0700 (PDT)
+Date:   Sun, 24 Jul 2022 22:01:27 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Dave Chinner <david@fromorbit.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Christian Brauner <christian.brauner@ubuntu.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCHSET v2 0/8] fstests: check file block congruency of file
+ range operations
+Message-ID: <20220724140127.dm5lf6ibrkzvkcis@zlang-mailbox>
+References: <165826663647.3249494.13640199673218669145.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <165826663647.3249494.13640199673218669145.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 23, 2022 at 6:05 PM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> On Thu, Jun 23, 2022 at 10:33:47AM +0300, Amir Goldstein wrote:
-> > On Thu, Jun 23, 2022 at 2:45 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> > >
-> > > On Fri, Jun 17, 2022 at 01:06:30PM +0300, Amir Goldstein wrote:
-> > > > Hi all,
-> > > >
-> > > > Previously posted candidates for 5.10.y followed chronological release
-> > > > order.
-> > > >
-> > > > Parts 1 and 2 of fixes from v5.10..v5.12 have already been applied to
-> > > > v5.10.121.
-> > > >
-> > > > Part 3 (from 5.13) has already been posted for review [3] on June 6,
-> > > > but following feedback from Dave, I changed my focus to get the same
-> > > > set of patches tested and reviewed for 5.10.y/5.15.y.
-> > > >
-> > > > I do want to ask you guys to also find time to review part 3, because
-> > > > we have a lot of catching up to do for 5.10.y, so we need to chew at
-> > > > this debt at a reasonable rate.
-> > > >
-> > > > This post has the matching set of patches for 5.10.y that goes with
-> > > > Leah's first set of candidates for 5.15.y [1].
-> > > >
-> > > > Most of the fixes are from v5.15..v5.17 except for patch 11 (v5.18-rc1).
-> > > > All fix patches have been tagged with Fixes: by the author.
-> > > >
-> > > > The patches have been soaking in kdepops since Sunday. They passed more
-> > > > than 30 auto group runs with several different versions of xfsprogs.
-> > > >
-> > > > The differences from Leah's 5.15.y:
-> > > > - It is 11 patches and not 8 because of dependencies
-> > > > - Patches 6,7 are non-fixes backported as dependency to patch 8 -
-> > > >   they have "backported .* for dependency" in their commit message
-> > > > - Patches 3,4,11 needed changes to apply to 5.10.y - they have a
-> > > >   "backport" related comment in their commit message to explain what
-> > > >   changes were needed
-> > > > - Patch 10 is a fix from v5.12 that is re-posted as a dependency for
-> > > >   patch 11
-> > > >
-> > > > Darrick,
-> > > >
-> > > > As the author patches 4,11 and sole reviewer of patch 3 (a.k.a
-> > > > the non-cleanly applied patches), please take a closer look at those.
-> > > >
-> > > > Patch 10 has been dropped from my part 2 candidates following concerns
-> > > > raised by Dave and is now being re-posted following feedback from
-> > > > Christian and Christoph [2].
-> > > >
-> > > > If there are still concerns about patches 10 or 11, please raise a flag.
-> > > > I can drop either of these patches before posting to stable if anyone
-> > > > feels that they need more time to soak in master.
-> > >
-> > > At the current moment (keep in mind that I have 2,978 more emails to get
-> >
-> > Oh boy! Thank you for getting to my series so soon.
-> >
-> > > through before I'm caught up), I think it's safe to say that for patches
-> > > 1-5:
-> > >
-> > > Acked-by: Darrick J. Wong <djwong@kernel.org>
-> > >
-> > > (patch 9 also, but see the reply I just sent for that one about grabbing
-> > > the sync_fs fixes too)
-> > >
-> > > The log changes are going to take more time to go through, since that
-> > > stuff is always tricky and /not/ something for me to be messing with at
-> > > 4:45pm.
-> >
-> > Let's make it easier for you then.
-> > I already decided to defer patches 9-11.
-> >
-> > Since you already started looking at patches 6-8, if you want to finish
-> > that review let me know and I will wait, but if you prefer, I can also defer
-> > the log changes 6-8 and post them along with the other log fixes from 5.14.
+On Tue, Jul 19, 2022 at 02:37:16PM -0700, Darrick J. Wong wrote:
+> Hi all,
+> 
+> I started running fstests with XFS filesystems that don't have the usual
+> file geometry characteristics -- block sizes larger than 4k, realtime
+> filesystems with extent sizes that aren't a power of two, etc.  What I
+> found is that many file operation tests (fallocate, reflink, etc.) that
+> operate on disk blocks assume that aligning the arguments to 64k is
+> sufficient to avoid EINVAL.  Unfortunately, this just means that these
+> tests fail left and right on realtime filesystems where the file
+> allocation unit is large (~2MB, anyone?) or a weird number (28K).
+> 
+> Add a predicate to all of these tests so that we can _notrun them if
+> they make assumptions about file size /and/ encode something (usually
+> file hashes) in the golden output that mean we can't easily accomodate
+> these corner cases without redesigning each test.
+> 
+> v2: skip congruency tests for network filesystems, be more consistent about
+>     TEST_DIR in the arguments, fix a bug in a helper's callsite reported by
+>     Zorro.
+> 
+> If you're going to start using this mess, you probably ought to just
+> pull from my git trees, which are linked below.
+> 
+> This is an extraordinary way to destroy everything.  Enjoy!
+> Comments and questions are, as always, welcome.
+> 
+> --D
 
-Hi Darrick,
+I'd like to merge this patchset after my personal review and testing. As I
+didn't find any regression from this patchset, and there's not any objection
+from anyone after two weeks passed. So I'm going to merge it, to help Darrick
+shift to his next patchset he's working on.
 
-FYI, I started testing the log fixes backports from v5.14 along with
-the deferred
-patches 6-8 [1] with extra focus on recoveryloop tests.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-I know that Leah is also testing another batch of 5.15-only patches, so she
-may yet post another 5.15-only series before my 5.10-only series.
+> 
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=check-blocksize-congruency
+> ---
+>  common/filter     |    4 ++--
+>  common/punch      |    3 ++-
+>  common/rc         |   28 +++++++++++++++++++++++++++-
+>  tests/generic/017 |    2 +-
+>  tests/generic/031 |    1 +
+>  tests/generic/064 |    2 +-
+>  tests/generic/116 |    1 +
+>  tests/generic/118 |    1 +
+>  tests/generic/119 |    1 +
+>  tests/generic/121 |    1 +
+>  tests/generic/122 |    1 +
+>  tests/generic/134 |    1 +
+>  tests/generic/136 |    1 +
+>  tests/generic/137 |    1 +
+>  tests/generic/144 |    1 +
+>  tests/generic/149 |    1 +
+>  tests/generic/153 |    2 +-
+>  tests/generic/158 |    2 +-
+>  tests/generic/162 |    1 +
+>  tests/generic/163 |    1 +
+>  tests/generic/164 |    1 +
+>  tests/generic/165 |    1 +
+>  tests/generic/168 |    1 +
+>  tests/generic/170 |    1 +
+>  tests/generic/181 |    1 +
+>  tests/generic/183 |    1 +
+>  tests/generic/185 |    1 +
+>  tests/generic/186 |    1 +
+>  tests/generic/187 |    1 +
+>  tests/generic/188 |    1 +
+>  tests/generic/189 |    1 +
+>  tests/generic/190 |    1 +
+>  tests/generic/191 |    1 +
+>  tests/generic/194 |    1 +
+>  tests/generic/195 |    1 +
+>  tests/generic/196 |    1 +
+>  tests/generic/197 |    1 +
+>  tests/generic/199 |    1 +
+>  tests/generic/200 |    1 +
+>  tests/generic/201 |    1 +
+>  tests/generic/284 |    1 +
+>  tests/generic/287 |    1 +
+>  tests/generic/289 |    1 +
+>  tests/generic/290 |    1 +
+>  tests/generic/291 |    1 +
+>  tests/generic/292 |    1 +
+>  tests/generic/293 |    1 +
+>  tests/generic/295 |    1 +
+>  tests/generic/352 |    1 +
+>  tests/generic/358 |    1 +
+>  tests/generic/359 |    1 +
+>  tests/generic/372 |    1 +
+>  tests/generic/404 |    2 +-
+>  tests/generic/414 |    1 +
+>  tests/generic/483 |    4 ++++
+>  tests/generic/495 |    4 ++++
+>  tests/generic/501 |    1 +
+>  tests/generic/503 |    4 ++++
+>  tests/generic/515 |    1 +
+>  tests/generic/516 |    1 +
+>  tests/generic/540 |    1 +
+>  tests/generic/541 |    1 +
+>  tests/generic/542 |    1 +
+>  tests/generic/543 |    1 +
+>  tests/generic/544 |    1 +
+>  tests/generic/546 |    1 +
+>  tests/generic/578 |    1 +
+>  tests/generic/588 |    2 ++
+>  tests/generic/673 |    1 +
+>  tests/generic/674 |    1 +
+>  tests/generic/675 |    1 +
+>  tests/generic/677 |    4 ++++
+>  tests/generic/683 |    1 +
+>  tests/generic/684 |    1 +
+>  tests/generic/685 |    1 +
+>  tests/generic/686 |    1 +
+>  tests/generic/687 |    1 +
+>  tests/generic/688 |    1 +
+>  tests/xfs/069     |    1 +
+>  tests/xfs/114     |    2 ++
+>  tests/xfs/166     |    4 ++++
+>  tests/xfs/180     |    1 +
+>  tests/xfs/182     |    1 +
+>  tests/xfs/184     |    1 +
+>  tests/xfs/192     |    1 +
+>  tests/xfs/193     |    1 +
+>  tests/xfs/198     |    1 +
+>  tests/xfs/200     |    1 +
+>  tests/xfs/203     |    4 ++++
+>  tests/xfs/204     |    1 +
+>  tests/xfs/208     |    1 +
+>  tests/xfs/209     |    1 +
+>  tests/xfs/210     |    1 +
+>  tests/xfs/211     |    1 +
+>  tests/xfs/212     |    1 +
+>  tests/xfs/215     |    1 +
+>  tests/xfs/218     |    1 +
+>  tests/xfs/219     |    1 +
+>  tests/xfs/221     |    1 +
+>  tests/xfs/223     |    1 +
+>  tests/xfs/224     |    1 +
+>  tests/xfs/225     |    1 +
+>  tests/xfs/226     |    1 +
+>  tests/xfs/228     |    1 +
+>  tests/xfs/230     |    1 +
+>  tests/xfs/231     |    1 +
+>  tests/xfs/232     |    1 +
+>  tests/xfs/237     |    1 +
+>  tests/xfs/239     |    1 +
+>  tests/xfs/240     |    1 +
+>  tests/xfs/241     |    1 +
+>  tests/xfs/248     |    1 +
+>  tests/xfs/249     |    1 +
+>  tests/xfs/251     |    1 +
+>  tests/xfs/254     |    1 +
+>  tests/xfs/255     |    1 +
+>  tests/xfs/256     |    1 +
+>  tests/xfs/257     |    1 +
+>  tests/xfs/258     |    1 +
+>  tests/xfs/280     |    1 +
+>  tests/xfs/312     |    1 +
+>  tests/xfs/315     |    1 +
+>  tests/xfs/322     |    1 +
+>  tests/xfs/326     |    1 +
+>  tests/xfs/329     |    1 +
+>  tests/xfs/346     |    1 +
+>  tests/xfs/347     |    1 +
+>  tests/xfs/436     |    1 +
+>  tests/xfs/507     |    3 +++
+>  tests/xfs/537     |    2 +-
+>  130 files changed, 180 insertions(+), 10 deletions(-)
+> 
 
-In the meanwhile, if you have some spare time due to rc8, please try to
-look at the already posted patches 6-8 [2] that were deferred from the original
-stable submission per your request.
-
-Thanks,
-Amir.
-
-[1] https://github.com/amir73il/linux/commits/xfs-5.10.y-for-review
-[2] https://lore.kernel.org/linux-xfs/20220617100641.1653164-1-amir73il@gmail.com/
