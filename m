@@ -2,169 +2,928 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9A55C433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jul 2022 08:20:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58FF1C433EF
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jul 2022 08:30:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230370AbiGZIUp (ORCPT
+        id S237839AbiGZIat (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Jul 2022 04:20:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39718 "EHLO
+        Tue, 26 Jul 2022 04:30:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47620 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229527AbiGZIUo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jul 2022 04:20:44 -0400
-Received: from esa3.fujitsucc.c3s2.iphmx.com (esa3.fujitsucc.c3s2.iphmx.com [68.232.151.212])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D185248D5
-        for <fstests@vger.kernel.org>; Tue, 26 Jul 2022 01:20:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
-  t=1658823643; x=1690359643;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=W/gLwZ/1o3Cc7mWy0SudNtGfDvvdyc9ci5LwKOOR4eY=;
-  b=XeyBS8D2Ny23Q2ED8VpALL3/6FF1P5zLLf3IXW8pBl9nFWROzWeXEjfo
-   xxHLJJKRUGaLjEm/l56faL+YvIcuxmAQXnNDgN42PfrVw9DX2lp0g3PCM
-   6LDPBiLyDzMgd3A6t1Gr/Biq35Nti2FngABEx/PQJRNE5v57huV5upCVg
-   WPci7xaPE+OMi7e7odEfd/faW7o824ml6pd2hmtnkaEdjcA3MefUXiwkO
-   NXWrFgiEx37kESlU0DdMxfingZu8pKUCJ/+izTuR/ReL0f8to90uBfbff
-   RFd0Zx/3BNgFL7fr/F8SmtAOotDnlxkK5oSzI5lzNNypdQz7PILrlrwuI
-   A==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10419"; a="69373873"
-X-IronPort-AV: E=Sophos;i="5.93,193,1654527600"; 
-   d="scan'208";a="69373873"
-Received: from mail-tycjpn01lp2171.outbound.protection.outlook.com (HELO JPN01-TYC-obe.outbound.protection.outlook.com) ([104.47.23.171])
-  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Jul 2022 17:20:40 +0900
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=BEjCFHtghD+OwNGkIEyIRkKP5CHrMyqjhCusg/93tgETMdD2zm6sD0rLZ6p/wo+PU9tTo/Q9J8DaEOWBAR7xff4ggiZnNIurJpwdESri8nfcpuqmjCcuPK+KEMN1tBW2nhav4zaOwRU0x0mdqm8EvkRvxpCdOgN7RVFFJmnfMPv0IY03ypbo8EDW7mwiW7z394G+GFKT3hk2CHCkV8nTQ9DA5Rqsby06tYQV2yItiFJbkTKaQHSk3sOAVbrGU1iPePJlTau4VoFfCs+y1b2+XtCsZqGao+TnRj3QMeJCe1isAa/YalX19wkiPHXjU63K2sVFdvtHs3QCuqgdXwqWQw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=W/gLwZ/1o3Cc7mWy0SudNtGfDvvdyc9ci5LwKOOR4eY=;
- b=ICJxC1f5TAUBcHOfvZhUZjStC4sDPl5Qii4OziOVadyyWKcYsHo6bK/5RKxgaCKlkluIPJykyYMFih/imlAuDWZpDxOgYp8JxWZiJ10U/XBSnaFobKNIJH/vZW2cpQ68Dp/uWJ5tjSmomXLWMbo0oVMBpLxRT4AEPIhMb15gUz0VBNZ6l++j2v6r0V74xFM5LhQCY1fB8wyJeOrl6KjvHZJkctSd7xIuhllkZJRnhfd6eFxcMhtcaBW6HJjK7blKpAW72jvbPXeI8I+rAle9Bm/kdNtK0HUwU6Xf9Dty5NV4WKZvgAPabP00QG8rrSPNF8VVHdHobn253P7EjDMt3Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
- dkim=pass header.d=fujitsu.com; arc=none
-Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com (2603:1096:404:10d::20)
- by TYAPR01MB3533.jpnprd01.prod.outlook.com (2603:1096:404:be::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5458.19; Tue, 26 Jul
- 2022 08:20:37 +0000
-Received: from TY2PR01MB4427.jpnprd01.prod.outlook.com
- ([fe80::5092:a34:8a79:5e78]) by TY2PR01MB4427.jpnprd01.prod.outlook.com
- ([fe80::5092:a34:8a79:5e78%5]) with mapi id 15.20.5458.024; Tue, 26 Jul 2022
- 08:20:37 +0000
-From:   "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-To:     Christian Brauner <brauner@kernel.org>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v1 1/2] vfs: Add new setgid_create_umask test
-Thread-Topic: [PATCH v1 1/2] vfs: Add new setgid_create_umask test
-Thread-Index: AQHYbFrWZGGhBv4WLkea2dxN2KJ35K2PMA8AgABakgCAAT7SAA==
-Date:   Tue, 26 Jul 2022 08:20:37 +0000
-Message-ID: <45d8176b-a0fb-ff10-b256-460ad3e69d5a@fujitsu.com>
-References: <1653062664-2125-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <91470460-44cd-90a3-2e95-8e0fbefcd9ad@fujitsu.com>
- <20220725142020.rtc2mgfhcw47v4t4@wittgenstein>
+        with ESMTP id S237582AbiGZIaq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jul 2022 04:30:46 -0400
+Received: from mail1.bemta37.messagelabs.com (mail1.bemta37.messagelabs.com [85.158.142.113])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F2142B185
+        for <fstests@vger.kernel.org>; Tue, 26 Jul 2022 01:30:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1658824242; i=@fujitsu.com;
+        bh=kZjL9mj8bftaXa8ATH95mWSrco3+0SztCl3e0KAjUgQ=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=TsQZhtIPRe08YGrNLoFtwZpX+hZbBA76jbG95Bn0sjXmBaNlBxCo7cHbWnw8QnQxV
+         k6K8ShtfOEVAG229a0dQdmuRfy/PQXKmS0KxIHzOTHrHSaR2rhdks5/C1Uu2grxPou
+         DOQbnwVnL1hF8NiqQ1VfKw7d32jpYIqgSHaBqtX47awChpeZMke/fsF76Q4tew2NbL
+         r61ajuTqcR8HkCPzGRPv22VZn8o/fqJYjIhyxZ6pD8wksazeyKxJDrWMRhuO/VyYGZ
+         iaBA8xj+09nEJEFBsgNh/gTXhR2a09T0a9QvE7k6Ti76Rbj+tWS5EhITpLtu8raKPP
+         15Ok8bnw0RaRA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrEIsWRWlGSWpSXmKPExsViZ8OxWddo2f0
+  kg+kdzBavD39itDjdspfdgclj06pONo/Pm+QCmKJYM/OS8isSWDP6Zh9jK/hwkrFi8U/xBsbv
+  ixm7GLk4hAQ2Mkps3vCJvYuRE8hZwiQx6TULhL2HUeL0Hy0Qm01AU+JZ5wJmEFtEQFbi/4zVT
+  CA2s4CtxLsf/9hAbGEge8PCmWA1LAKqEr3n94PV8Ap4SDz7c5wVxJYQUJCY8vA9WA2ngLXE2d
+  PfoPZaSVx/840Zol5Q4uTMJywQ8yUkDr54wQzRqyhxqeMbI4RdIfH68CWouJrE1XObmCcwCs5
+  C0j4LSfsCRqZVjLZJRZnpGSW5iZk5uoYGBrqGhqYQ2tJcL7FKN1EvtVQ3L7+oJEPXUC+xvFgv
+  tbhYr7gyNzknRS8vtWQTIzC4U4pTju5gPLbvl94hRkkOJiVR3qd995OE+JLyUyozEosz4otKc
+  1KLDzHKcHAoSfAeWAKUEyxKTU+tSMvMAUYaTFqCg0dJhPcoSJq3uCAxtzgzHSJ1ilGXY+rsf/
+  uZhVjy8vNSpcR59ZYCFQmAFGWU5sGNgEX9JUZZKWFeRgYGBiGegtSi3MwSVPlXjOIcjErCvNt
+  BVvFk5pXAbXoFdAQT0BGftO+AHFGSiJCSamDitpBNexv2Iqfo5IPAg5w8IcxSC/MmVtl6vC+q
+  UlysYPCkU2i6cs39IM51SU7PJsnurH0oqlcjNq+0QawqpU2m9EeRqaK+tPVuyQyNdQsytJ8dS
+  ze2m6KR+N0v1vbOx4Bszv1XfNXzoyOsvye9fufCfM/wUq1n/sudGnu58sMvPjqoKvgk1EK0p2
+  Vj4SHurUcK3Zc9Yo0vFOKdwJ/BUhZYGX/h6WvHq9+eWFS0PpuoPzV8cde6DuaZyf6J7HGTeM0
+  8pojOZjK4tlFozz+Jq64fgkpuCZWfOi4gt8TJ9ug8SxX53GkT/4UKO33PPJMTwad7cbLoEybv
+  tfmVunsnuLUZO646Vf2G4blHV1arEktxRqKhFnNRcSIA7DCTQXUDAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-19.tower-732.messagelabs.com!1658824241!134515!1
+X-Originating-IP: [62.60.8.179]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.87.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 27694 invoked from network); 26 Jul 2022 08:30:41 -0000
+Received: from unknown (HELO n03ukasimr04.n03.fujitsu.local) (62.60.8.179)
+  by server-19.tower-732.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 26 Jul 2022 08:30:41 -0000
+Received: from n03ukasimr04.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTP id 66A86155;
+        Tue, 26 Jul 2022 09:30:41 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTPS id 58706154;
+        Tue, 26 Jul 2022 09:30:41 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Tue, 26 Jul 2022 09:30:39 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <brauner@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2 1/2] vfs: Add new setgid_create_umask test
+Date:   Tue, 26 Jul 2022 17:31:20 +0800
+Message-ID: <1658827881-2347-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 In-Reply-To: <20220725142020.rtc2mgfhcw47v4t4@wittgenstein>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=fujitsu.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 6262b2a5-fe4c-4e1b-4fc4-08da6edfb846
-x-ms-traffictypediagnostic: TYAPR01MB3533:EE_
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: eWdWWIet78104yDuN/IKtBOl+NTba4I/7gtz7FThFJXvYo87z/fDIxHt6zhx5Ij2ad4J2b2BaPx6vazDWCOlUuR96cofbK+GTf7aXCsA3r7GY8KTnUZm7sjoBAZpXXjfv8DKgo5lvc4WSaTLfGr1EMtKpjXKlIw9htmg5i+1RPAJ9S/IFlT+wdVgpfBuNRJlfqFEuQeOX0gsNgKZi6yvqkQfa+Ia9eJPS59nhAic4q4B/whcLLHcw1vkMw4/8cVdoE3d/5dJkgri5iAwXjXGGrJ8Ge5cDhRtWHVE2LjxeboxHbxzEXiYXA/SlcDToWLQLVwn1rH1pGjxOS0oFWYU3iqAcXyav3GHCvx2kwRrUJP1qR1xGb1d880+CU3yGjzgsWeA8YyQU0B+T+/A6p/oCFl3ouUNCqn8tB+YpEiAUYoakddNNvfKnZbfoE7b5IDBnd8YAdgcQ9vOAN4ozlNGpIvgk+DK4w/qUF+40Scb0QHaIWFz2I+nqTYnYujS8YXtlltCRfLn7zUlOqYyK2YZ6Xn2ytWcosw2V7gQs/oT10glPBI09ya2cc/qLaLaXUtlQq597XBSGqrzHV5YHWBdsB+bPGms4ebGznZlphN/wuZG081iWqj2p/lBBdy2RcoGxOM/iolxq3AGIr6RT+Y+mxrw4Yu9WU2jDvca5h2/ug8CTUtZyb3f/Vm+ne5zjA3JQ87mz3xwLtz4DLCLR/rJh3ekX+bn4X94ZNFX/UPNqnjaGqMFlXzvvzsDw05xLNIrAKR+2lz4tsPHYEIQA7J8U3akadCQF7fVXDKAwNu+RqkReF+CJT8WDKD/mdO+NR+ApKOLYoMRXM1QPB4FOyyNVdfzyUbmOfsIRcO+ckrWgMOaYCiR5Gs19deeAPcV3RTz
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB4427.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(136003)(366004)(39860400002)(346002)(396003)(376002)(8936002)(31686004)(82960400001)(86362001)(31696002)(26005)(83380400001)(36756003)(6512007)(122000001)(38070700005)(85182001)(6506007)(38100700002)(186003)(2616005)(41300700001)(316002)(966005)(478600001)(6916009)(71200400001)(4326008)(5660300002)(8676002)(66556008)(66476007)(66446008)(66946007)(64756008)(6486002)(76116006)(2906002)(91956017)(45980500001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?VU5jUFFScHpEd0NjV3NNN2dOTk9CcTV3aHNBbzc5WnlXcnZjMXoxbW5JRDRX?=
- =?utf-8?B?THpCSTIxN01hVkswRUNSRnQzaGptMEp5WWVxSU81eU1oa3VtUHFpcWhtR2Nr?=
- =?utf-8?B?eXJhbTZ1Z1pVekhxRW1vZ2NLcVQ4MFFlSUxXeEM5QjBVeDA3TkxES3YxaCtR?=
- =?utf-8?B?Q2VpQmxUVVZqQlVJQ2NZM0VVczdnSXVORjcwd2FiZjVoYWttdU1TSndhcHVz?=
- =?utf-8?B?ZHZXZHNuVnpnN2NaYlJZbC9ET2MwVFBoNmdITlVrRG9SU3UwOTkvMkJSVGJp?=
- =?utf-8?B?RUtRYmRvUE1QM3dwTXZhbW5DUjZlc1NCQ0M4dXhFd2dQaTNqVk5kN2c4L0lT?=
- =?utf-8?B?UXA0dVJYcnNlbHpkT1lXcGRYWDdZUXFXTERvVFdSMmNWMmNseFkzekNEeWxH?=
- =?utf-8?B?dXNvc2o0bzdjRHBRLzJ2QVJ5UFhDdEZ0ZlN0S0l5b21CS3pLZi9BNjNvdFRq?=
- =?utf-8?B?ZmJ0VFNVZnpHVmczRGJkNExDWlJGYVJ5eFNOTkpqK2h4T09UTU5rby9WWUdH?=
- =?utf-8?B?RWhkRnpTNTg3SnNFZHVqK2JwYXlNYWZlZkFqaEs3RkFheGw2YWZaOG9YZlho?=
- =?utf-8?B?NWF3dzhYVzVkNVE1amtQTTk5WG10KzZsNVdUbEVOODN1c0kvL2NwOHJzSisr?=
- =?utf-8?B?MUxxYWZVbjJmc2k2d25Fb0RZQVFGUS9ITGtzKzNVeWlLbXZrOVVXcnYxYlRw?=
- =?utf-8?B?ZWF2ZUFUUkxGRk1QNzFNZWpNMGNCcmlxT2ZjR1czWXBYS3lRakpsdlZ0eVVu?=
- =?utf-8?B?UFAxNEs2ZVRlSWF3cXhOU0VZd1JXVlJIVnNiRHVFTllKcG1CZkpNUzUvSEov?=
- =?utf-8?B?QUt6THNDREcxUWpJN000SERMbjVDQ2hlcnBMYVpEQk5uYU1FeW5BNjRlUUtN?=
- =?utf-8?B?OFB3Nkw2T3pDUmlkN0pJMnYwTkxVN2xlZEsxWEp0UndXVUlhbW9wdU0xc25j?=
- =?utf-8?B?UWUzTXo2a0hZelptaW1xeExIVkNBdnhOaG93bVRmNzRhTkFKZXpBQnlqQ3lz?=
- =?utf-8?B?NjM5eVlUTUl4RGV2aTVhT1R2ZVZpSGVLME9Zc3VjTDdubUpRd0ZQUTRpQjZM?=
- =?utf-8?B?TUk1UDJ2NTQ0Q3VwMTMzcXZWVng4ck0wcUlMdkFyVEtKVW92WlVXQzZPVTI5?=
- =?utf-8?B?Z21YWnRHUGZ4Q05QK1NOWFQxTTBLVXMyQXdWYk8zWnM4TzBDbG9kNVlPbUhY?=
- =?utf-8?B?Uko5U2dzNDFVR3k2RkNvb3NnbXVPZ2pobE8wbEcyN2RQZFB5YlpoenNPMHJY?=
- =?utf-8?B?VzNobDF2dEJVTXduS205b1RRTEw5UG9JS2MwakNuTnN5ekkyQzNQQnZmazkr?=
- =?utf-8?B?QThuSzFqU1VDcVdZMlhCRUh5MmtHV3hBYXFWSmcrUlloUEVaQmV5TXEzYjZi?=
- =?utf-8?B?cFFJVUJna2l6UmNhbnZJVkJ3V2thcFprSWdsdjVvWUpjSnNvdmdQRUpMQkR4?=
- =?utf-8?B?SHd6RnNBSU5WWENuaFBtWm1ENDB2eHlRNktvWVNzcVBsdmZkbjUxdXJ4ZmFv?=
- =?utf-8?B?S3VsTEg0bGVHOFIySm54OENlMDFXeTA2OXJlQmtZZ1hIdE5xdldUcHUxdlNs?=
- =?utf-8?B?Y3YxVUNQekxhQ0dJSjVUaDdGaXJsOWNzZnZ3bER1dVFCTDRDdm0weXNxTlk3?=
- =?utf-8?B?d3dkWUR3TXl3bFoxeHRyRW9EWXRqT2ZUUGs1RU5ZamNpZ0RHT3RqSlNRZ0hn?=
- =?utf-8?B?R0RpMGtTajhFK3c0T2dXK0VtbzJBd3JHS0puZjhYVUVHbjFrYk5waTNjTVRB?=
- =?utf-8?B?cmVxRFZWOFBIeGJSRExGamEvaFpWbElvdzgwd1RXanVYbTZreWVTZmJja3lp?=
- =?utf-8?B?ZTcxaHppVk5zV29vZGlKT3NrSldLeEVRSDlWWUYwUHdIMmZ3a2taZ1BxTEln?=
- =?utf-8?B?WW82ZmtldzZLNmZPeTgvZXRVZFhHUGpKU1hZTW4vQ3pmTGdSR1VXK0tQUTNl?=
- =?utf-8?B?cXpoeFcxYmFFTHRGVUhjT0VWb1ZuUUR4T0JNTkJaalZ5VUhyV2Nwd1pEWW1M?=
- =?utf-8?B?bVRNYmtuN1pybDNtZGFaMmcxNmdzb3NzYVNFTmV6OUIybjdSSmNSWFE3RFlI?=
- =?utf-8?B?VlE3OW9kSGIrSXVLZ2JSd09UT1RQTFlUc3cxRk1tdy9CMkkxZDNpZG5tTm8w?=
- =?utf-8?B?eGt1Uk4vWGh5Um9oYWs0RHpNUExtV3o3U1pBZkJ3QnNyTW1aL1V4SGMzUXRr?=
- =?utf-8?B?Q3c9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <C5D572BA871FBC4BA9241C9E20D88D58@jpnprd01.prod.outlook.com>
-Content-Transfer-Encoding: base64
+References: <20220725142020.rtc2mgfhcw47v4t4@wittgenstein>
 MIME-Version: 1.0
-X-OriginatorOrg: fujitsu.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB4427.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6262b2a5-fe4c-4e1b-4fc4-08da6edfb846
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Jul 2022 08:20:37.4255
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: /wWH+JcPQ7HNPwr6eIu11qBJzqBx610/TS/gjtCrfsqQ2WDeW5qwyeRi4s3QcQoCv2F4AazI97e4BldWrXCKM4ENWERGdbtzkkNvui/PyqQ=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB3533
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD08.g08.fujitsu.local (10.167.33.83) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-b24gMjAyMi8wNy8yNSAyMjoyMCwgQ2hyaXN0aWFuIEJyYXVuZXIgd3JvdGU6DQo+IE9uIE1vbiwg
-SnVsIDI1LCAyMDIyIGF0IDA3OjU1OjIzQU0gKzAwMDAsIHh1eWFuZzIwMTguanlAZnVqaXRzdS5j
-b20gd3JvdGU6DQo+Pg0KPj4gb24gIDIwMjIvMDUvMjEgMDowNCwgWWFuZyBYdSB3cm90ZToNCj4+
-PiBUaGUgY3VycmVudF91bWFzaygpIGlzIHN0cmlwcGVkIGZyb20gdGhlIG1vZGUgZGlyZWN0bHkg
-aW4gdGhlIHZmcyBpZiB0aGUNCj4+PiBmaWxlc3lzdGVtIGVpdGhlciBkb2Vzbid0IHN1cHBvcnQg
-YWNscyBvciB0aGUgZmlsZXN5c3RlbSBoYXMgYmVlbg0KPj4+IG1vdW50ZWQgd2l0aG91dCBwb3Np
-YyBhY2wgc3VwcG9ydC4NCj4+Pg0KPj4+IElmIHRoZSBmaWxlc3lzdGVtIGRvZXMgc3VwcG9ydCBh
-Y2xzIHRoZW4gY3VycmVudF91bWFzaygpIHN0cmlwcGluZyBpcw0KPj4+IGRlZmVycmVkIHRvIHBv
-c2l4X2FjbF9jcmVhdGUoKS4gU28gd2hlbiB0aGUgZmlsZXN5c3RlbSBjYWxscw0KPj4+IHBvc2l4
-X2FjbF9jcmVhdGUoKSBhbmQgdGhlcmUgYXJlIG5vIGFjbHMgc2V0IG9yIG5vdCBzdXBwb3J0ZWQg
-dGhlbg0KPj4+IGN1cnJlbnRfdW1hc2soKSB3aWxsIGJlIHN0cmlwcGVkLg0KPj4+DQo+Pj4gVGhp
-cyBwYXRjaCBpcyBhbHNvIGRlc2lnbmVkIHRvIHRlc3Qga2VybmVsIHBhdGNoc2V0IGJlaGF2aW91
-cg0KPj4+ICJtb3ZlIFNfSVNHSUQgc3RyaXBwaW5nIGludG8gdGhlIHZmcyINCj4+PiBodHRwczov
-L3BhdGNod29yay5rZXJuZWwub3JnL3Byb2plY3QvbGludXgtZnNkZXZlbC9saXN0Lz9zZXJpZXM9
-NjM1NjkyDQo+Pg0KPj4gVGhlIGtlcm5lbCBwYXRjaCBoYXMgYmVlbiBtZXJnZWQgaW50byBsaW51
-eC1uZXh0IGJyYW5jaFsxXS4NCj4+DQo+PiBEb2VzIGFueW9uZSByZXZpZXcgdGhpcyBmc3Rlc3Rz
-IHBhdGNoIG9yIGdpdmUgc29tZSBjb21tZW50Pw0KPj4NCj4+IEkgcGxhbiB0byByZW1vdmUgc2V0
-Z2lkX2NyZWF0ZV91bWFza19pZG1hcHBlZF9pbl91c2VybnMgYW5kDQo+PiBzZXRnaWRfY3JlYXRl
-X3VtYXNrX2lkbWFwcGVkIGNhc2VzIGJlY2F1c2UgdGhleSBkb2Vzbid0IHRyaWdnZXIgYnVnLg0K
-Pj4NCj4+IEp1c3QgdHJlYXQgaXQgIGFzIGEga2VybmVsIHJlZ3Jlc3Npb24gdGVzdCBpZSAzMWMw
-MWNlMTggKCJnZW5lcmljOiBhZGQNCj4+IHRlc3QgZm9yIHRtcGZzIFBPU0lYIEFDTHMiKSBmb3Jt
-YXQuDQo+Pg0KPj4gQ0MgQ2hyaXN0aWFuIHRvIGNvbmZpcm0gdGhhdCB3aGV0aGVyIG5lZWQgdG8g
-dGVzdCBpZG1hcHBlZCBhbmQNCj4+IGlkbWFwcGVkX2luX3VzZXJicyBzaXR1YXRpb24gLg0KPiAN
-Cj4gWW91J3ZlIGFsc28gc2VudCBhIHBhdGNoIHRvIExUUCBJIHNhdyB3aGljaCBpcyBnb29kLiBJ
-J20gbm90IGNvbXBsZXRlbHkNCj4gc3VyZSB3aHkgeW91IHdhbnQgdG8gcmVtb3ZlIHNldGdpZF9j
-cmVhdGVfdW1hc2tfaWRtYXBwZWR7X2luX3VzZXJuc30uDQo+IEJ1dCBhcyBsb25nIGFzIHdlIGhh
-dmUgdGVzdHMgZm9yIHNldGdpZCBzdHJpcHBpbmcgb24gaWRtYXBwZWQgbW91bnRzIEknbQ0KPiBm
-aW5lIHdpdGggdGhpcy4NCg0KSSB0aGluayBhYm91dCBpdCBhZ2FpbiB0b2RheSwgbWF5YmUgc3Rp
-bGwgaGF2ZSAgc29tZSBtZWFuaW5nZnVsLiBJIHdpbGwgDQprZWVwIGl0IG9uIHYyLiB2MiBvbmx5
-IHVwZGF0ZXMgYSBzbWFsbCwgaW5jbHVkZSBhZGQga2VybmVsIGNvbW1pdCBpZCBhbmQgDQpyZW1v
-dmUgZHVwbGljYXRlZCBjb21tZW50Lg0KDQpCZXN0IFJlZ2FyZHMNCllhbmcgWHUNCj4gDQo+IENo
-cmlzdGlhbg==
+The current_umask() is stripped from the mode directly in the vfs if the
+filesystem either doesn't support acls or the filesystem has been
+mounted without posic acl support.
+
+If the filesystem does support acls then current_umask() stripping is
+deferred to posix_acl_create(). So when the filesystem calls
+posix_acl_create() and there are no acls set or not supported then
+current_umask() will be stripped.
+
+This patch is also designed to test kernel patch behaviour
+"move S_ISGID stripping into the vfs* helper"
+
+Here we only use umask(S_IXGRP) to check S_ISGID stripping whether works
+correctly and S_IXGRP mode still exists.
+
+Also use noacl mount option to test another kernel bug
+fs: Add missing umask strip in vfs_tmpfile
+
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+1.add kernel commit id
+2.use s_setgid_create_umask_idmapped_mounts instead of confused s_setgid_create_umask_idmapped
+ src/vfs/idmapped-mounts.c | 429 ++++++++++++++++++++++++++++++++++++++
+ src/vfs/idmapped-mounts.h |   1 +
+ src/vfs/utils.c           |  14 ++
+ src/vfs/utils.h           |   1 +
+ src/vfs/vfstest.c         | 205 +++++++++++++++++-
+ tests/generic/998         |  46 ++++
+ tests/generic/998.out     |   2 +
+ 7 files changed, 697 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/998
+ create mode 100644 tests/generic/998.out
+
+diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+index 63297d5f..f63ac44b 100644
+--- a/src/vfs/idmapped-mounts.c
++++ b/src/vfs/idmapped-mounts.c
+@@ -7664,6 +7664,425 @@ out:
+ 	return fret;
+ }
+ 
++static int setgid_create_umask_idmapped(const struct vfstest_info *info)
++{
++	int fret = -1;
++	int file1_fd = -EBADF, open_tree_fd = -EBADF;
++	struct mount_attr attr = {
++		.attr_set = MOUNT_ATTR_IDMAP,
++	};
++	pid_t pid;
++	int tmpfile_fd = -EBADF;
++	bool supported = false;
++	char path[PATH_MAX];
++	mode_t mode;
++
++	if (!caps_supported())
++		return 0;
++
++	if (fchmod(info->t_dir1_fd, S_IRUSR |
++			      S_IWUSR |
++			      S_IRGRP |
++			      S_IWGRP |
++			      S_IROTH |
++			      S_IWOTH |
++			      S_IXUSR |
++			      S_IXGRP |
++			      S_IXOTH |
++			      S_ISGID), 0) {
++		log_stderr("failure: fchmod");
++		goto out;
++	}
++
++	/* Verify that the sid bits got raised. */
++	if (!is_setgid(info->t_dir1_fd, "", AT_EMPTY_PATH)) {
++		log_stderr("failure: is_setgid");
++		goto out;
++	}
++
++	/* Changing mount properties on a detached mount. */
++	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
++	if (attr.userns_fd < 0) {
++		log_stderr("failure: get_userns_fd");
++		goto out;
++	}
++
++	open_tree_fd = sys_open_tree(info->t_dir1_fd, "",
++				     AT_EMPTY_PATH |
++				     AT_NO_AUTOMOUNT |
++				     AT_SYMLINK_NOFOLLOW |
++				     OPEN_TREE_CLOEXEC |
++				     OPEN_TREE_CLONE);
++	if (open_tree_fd < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	supported = openat_tmpfile_supported(open_tree_fd);
++
++	/* Only umask with S_IXGRP because inode strip S_ISGID will check mode
++	 * whether has group execute or search permission.
++	 */
++	umask(S_IXGRP);
++	mode = umask(S_IXGRP);
++	if (!(mode & S_IXGRP))
++		die("failure: umask");
++
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_ids(10000, 11000))
++			die("failure: switch fsids");
++
++		/* create regular file via open() */
++		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
++		if (file1_fd < 0)
++			die("failure: create");
++
++		/* Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
++		 * bit needs to be stripped.
++		 */
++		if (is_setgid(open_tree_fd, FILE1, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(open_tree_fd, FILE1, 0))
++			die("failure: is_ixgrp");
++
++		/* create directory */
++		if (mkdirat(open_tree_fd, DIR1, 0000))
++			die("failure: create");
++
++		if (xfs_irix_sgid_inherit_enabled(info->t_fstype)) {
++			/* We're not in_group_p(). */
++			if (is_setgid(open_tree_fd, DIR1, 0))
++				die("failure: is_setgid");
++		} else {
++			/* Directories always inherit the setgid bit. */
++			if (!is_setgid(open_tree_fd, DIR1, 0))
++				die("failure: is_setgid");
++		}
++
++		if (is_ixgrp(open_tree_fd, DIR1, 0))
++			die("failure: is_ixgrp");
++
++		/* create a special file via mknodat() vfs_create */
++		if (mknodat(open_tree_fd, FILE2, S_IFREG | S_ISGID | S_IXGRP, 0))
++			die("failure: mknodat");
++
++		if (is_setgid(open_tree_fd, FILE2, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(open_tree_fd, FILE2, 0))
++			die("failure: is_ixgrp");
++
++		/* create a whiteout device via mknodat() vfs_mknod */
++		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++			die("failure: mknodat");
++
++		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(open_tree_fd, CHRDEV1, 0))
++			die("failure: is_ixgrp");
++
++		/*
++		 * In setgid directories newly created files always inherit the
++		 * gid from the parent directory. Verify that the file is owned
++		 * by gid 10000, not by gid 11000.
++		 */
++		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 10000, 10000))
++			die("failure: check ownership");
++
++		/*
++		 * In setgid directories newly created directories always
++		 * inherit the gid from the parent directory. Verify that the
++		 * directory is owned by gid 10000, not by gid 11000.
++		 */
++		if (!expected_uid_gid(open_tree_fd, DIR1, 0, 10000, 10000))
++			die("failure: check ownership");
++
++		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 10000, 10000))
++			die("failure: check ownership");
++
++		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 10000, 10000))
++			die("failure: check ownership");
++
++		if (unlinkat(open_tree_fd, FILE1, 0))
++			die("failure: delete");
++
++		if (unlinkat(open_tree_fd, DIR1, AT_REMOVEDIR))
++			die("failure: delete");
++
++		if (unlinkat(open_tree_fd, FILE2, 0))
++			die("failure: delete");
++
++		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++			die("failure: delete");
++
++		/* create tmpfile via filesystem tmpfile api */
++		if (supported) {
++			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
++			if (tmpfile_fd < 0)
++				die("failure: create");
++			/* link the temporary file into the filesystem, making it permanent */
++			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
++			if (linkat(AT_FDCWD, path, open_tree_fd, FILE3, AT_SYMLINK_FOLLOW))
++				die("failure: linkat");
++			if (close(tmpfile_fd))
++				die("failure: close");
++			if (is_setgid(open_tree_fd, FILE3, 0))
++				die("failure: is_setgid");
++			if (is_ixgrp(open_tree_fd, FILE3, 0))
++				die("failure: is_ixgrp");
++			if (!expected_uid_gid(open_tree_fd, FILE3, 0, 10000, 10000))
++				die("failure: check ownership");
++			if (unlinkat(open_tree_fd, FILE3, 0))
++				die("failure: delete");
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	fret = 0;
++	log_debug("Ran test");
++out:
++	safe_close(attr.userns_fd);
++	safe_close(file1_fd);
++	safe_close(open_tree_fd);
++
++	return fret;
++}
++
++static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *info)
++{
++	int fret = -1;
++	int file1_fd = -EBADF, open_tree_fd = -EBADF;
++	struct mount_attr attr = {
++		.attr_set = MOUNT_ATTR_IDMAP,
++	};
++	pid_t pid;
++	int tmpfile_fd = -EBADF;
++	bool supported = false;
++	char path[PATH_MAX];
++	mode_t mode;
++
++	if (!caps_supported())
++		return 0;
++
++	if (fchmod(info->t_dir1_fd, S_IRUSR |
++			      S_IWUSR |
++			      S_IRGRP |
++			      S_IWGRP |
++			      S_IROTH |
++			      S_IWOTH |
++			      S_IXUSR |
++			      S_IXGRP |
++			      S_IXOTH |
++			      S_ISGID), 0) {
++		log_stderr("failure: fchmod");
++		goto out;
++	}
++
++	/* Verify that the sid bits got raised. */
++	if (!is_setgid(info->t_dir1_fd, "", AT_EMPTY_PATH)) {
++		log_stderr("failure: is_setgid");
++		goto out;
++	}
++
++	/* Changing mount properties on a detached mount. */
++	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
++	if (attr.userns_fd < 0) {
++		log_stderr("failure: get_userns_fd");
++		goto out;
++	}
++
++	open_tree_fd = sys_open_tree(info->t_dir1_fd, "",
++				     AT_EMPTY_PATH |
++				     AT_NO_AUTOMOUNT |
++				     AT_SYMLINK_NOFOLLOW |
++				     OPEN_TREE_CLOEXEC |
++				     OPEN_TREE_CLONE);
++	if (open_tree_fd < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	supported = openat_tmpfile_supported(open_tree_fd);
++
++	/* Only umask with S_IXGRP because inode strip S_ISGID will check mode
++	 * whether has group execute or search permission.
++	 */
++	umask(S_IXGRP);
++	mode = umask(S_IXGRP);
++	if (!(mode & S_IXGRP))
++		die("failure: umask");
++
++	/*
++	 * Below we verify that setgid inheritance for a newly created file or
++	 * directory works correctly. As part of this we need to verify that
++	 * newly created files or directories inherit their gid from their
++	 * parent directory. So we change the parent directorie's gid to 1000
++	 * and create a file with fs{g,u}id 0 and verify that the newly created
++	 * file and directory inherit gid 1000, not 0.
++	 */
++	if (fchownat(info->t_dir1_fd, "", -1, 1000, AT_SYMLINK_NOFOLLOW | AT_EMPTY_PATH)) {
++		log_stderr("failure: fchownat");
++		goto out;
++	}
++
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!caps_supported()) {
++			log_debug("skip: capability library not installed");
++			exit(EXIT_SUCCESS);
++		}
++
++		if (!switch_userns(attr.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		if (!caps_down_fsetid())
++			die("failure: caps_down_fsetid");
++
++		/* create regular file via open() */
++		file1_fd = openat(open_tree_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
++		if (file1_fd < 0)
++			die("failure: create");
++
++		/* Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
++		 * bit needs to be stripped.
++		 */
++		if (is_setgid(open_tree_fd, FILE1, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(open_tree_fd, FILE1, 0))
++			die("failure: is_ixgrp");
++
++		/* create directory */
++		if (mkdirat(open_tree_fd, DIR1, 0000))
++			die("failure: create");
++
++		if (xfs_irix_sgid_inherit_enabled(info->t_fstype)) {
++			/* We're not in_group_p(). */
++			if (is_setgid(open_tree_fd, DIR1, 0))
++				die("failure: is_setgid");
++		} else {
++			/* Directories always inherit the setgid bit. */
++			if (!is_setgid(open_tree_fd, DIR1, 0))
++				die("failure: is_setgid");
++		}
++
++		if (is_ixgrp(open_tree_fd, DIR1, 0))
++			die("failure: is_ixgrp");
++
++		/* create a special file via mknodat() vfs_create */
++		if (mknodat(open_tree_fd, FILE2, S_IFREG | S_ISGID | S_IXGRP, 0))
++			die("failure: mknodat");
++
++		if (is_setgid(open_tree_fd, FILE2, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(open_tree_fd, FILE2, 0))
++			die("failure: is_ixgrp");
++
++		/* create a whiteout device via mknodat() vfs_mknod */
++		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, 0))
++			die("failure: mknodat");
++
++		if (is_setgid(open_tree_fd, CHRDEV1, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(open_tree_fd, CHRDEV1, 0))
++			die("failure: is_ixgrp");
++
++		/*
++		 * In setgid directories newly created files always inherit the
++		 * gid from the parent directory. Verify that the file is owned
++		 * by gid 1000, not by gid 0.
++		 */
++		if (!expected_uid_gid(open_tree_fd, FILE1, 0, 0, 1000))
++			die("failure: check ownership");
++
++		/*
++		 * In setgid directories newly created directories always
++		 * inherit the gid from the parent directory. Verify that the
++		 * directory is owned by gid 1000, not by gid 0.
++		 */
++		if (!expected_uid_gid(open_tree_fd, DIR1, 0, 0, 1000))
++			die("failure: check ownership");
++
++		if (!expected_uid_gid(open_tree_fd, FILE2, 0, 0, 1000))
++			die("failure: check ownership");
++
++		if (!expected_uid_gid(open_tree_fd, CHRDEV1, 0, 0, 1000))
++			die("failure: check ownership");
++
++		if (unlinkat(open_tree_fd, FILE1, 0))
++			die("failure: delete");
++
++		if (unlinkat(open_tree_fd, DIR1, AT_REMOVEDIR))
++			die("failure: delete");
++
++		if (unlinkat(open_tree_fd, FILE2, 0))
++			die("failure: delete");
++
++		if (unlinkat(open_tree_fd, CHRDEV1, 0))
++			die("failure: delete");
++
++		/* create tmpfile via filesystem tmpfile api */
++		if (supported) {
++			tmpfile_fd = openat(open_tree_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
++			if (tmpfile_fd < 0)
++				die("failure: create");
++			/* link the temporary file into the filesystem, making it permanent */
++			snprintf(path, PATH_MAX,  "/proc/self/fd/%d", tmpfile_fd);
++			if (linkat(AT_FDCWD, path, open_tree_fd, FILE3, AT_SYMLINK_FOLLOW))
++				die("failure: linkat");
++			if (close(tmpfile_fd))
++				die("failure: close");
++			if (is_setgid(open_tree_fd, FILE3, 0))
++				die("failure: is_setgid");
++			if (is_ixgrp(open_tree_fd, FILE3, 0))
++				die("failure: is_ixgrp");
++			if (!expected_uid_gid(open_tree_fd, FILE3, 0, 0, 1000))
++				die("failure: check ownership");
++			if (unlinkat(open_tree_fd, FILE3, 0))
++				die("failure: delete");
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	fret = 0;
++	log_debug("Ran test");
++out:
++	safe_close(attr.userns_fd);
++	safe_close(file1_fd);
++	safe_close(open_tree_fd);
++
++	return fret;
++}
++
+ static const struct test_struct t_idmapped_mounts[] = {
+ 	{ acls,                                                         true,   "posix acls on regular mounts",                                                                 },
+ 	{ create_in_userns,                                             true,   "create operations in user namespace",                                                          },
+@@ -7745,3 +8164,13 @@ const struct test_suite s_setxattr_fix_705191b03d50 = {
+ 	.tests = t_setxattr_fix_705191b03d50,
+ 	.nr_tests = ARRAY_SIZE(t_setxattr_fix_705191b03d50),
+ };
++
++static const struct test_struct t_setgid_create_umask_idmapped_mounts[] = {
++	{ setgid_create_umask_idmapped,					T_REQUIRE_IDMAPPED_MOUNTS,	"create operations by using umask in directories with setgid bit set on idmapped mount",		},
++	{ setgid_create_umask_idmapped_in_userns,			T_REQUIRE_IDMAPPED_MOUNTS,	"create operations by using umask in directories with setgid bit set on idmapped mount inside userns",	},
++};
++
++const struct test_suite s_setgid_create_umask_idmapped_mounts = {
++	.tests = t_setgid_create_umask_idmapped_mounts,
++	.nr_tests = ARRAY_SIZE(t_setgid_create_umask_idmapped_mounts),
++};
+diff --git a/src/vfs/idmapped-mounts.h b/src/vfs/idmapped-mounts.h
+index ff21ea2c..a9fb31ea 100644
+--- a/src/vfs/idmapped-mounts.h
++++ b/src/vfs/idmapped-mounts.h
+@@ -14,5 +14,6 @@ extern const struct test_suite s_fscaps_in_ancestor_userns;
+ extern const struct test_suite s_nested_userns;
+ extern const struct test_suite s_setattr_fix_968219708108;
+ extern const struct test_suite s_setxattr_fix_705191b03d50;
++extern const struct test_suite s_setgid_create_umask_idmapped_mounts;
+ 
+ #endif /* __IDMAPPED_MOUNTS_H */
+diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+index 1388edda..6db7a11d 100644
+--- a/src/vfs/utils.c
++++ b/src/vfs/utils.c
+@@ -809,6 +809,20 @@ bool is_sticky(int dfd, const char *path, int flags)
+ 	return (st.st_mode & S_ISVTX) > 0;
+ }
+ 
++/*is_ixgrp - check whether file or directory is S_IXGRP */
++bool is_ixgrp(int dfd, const char *path, int flags)
++{
++	int ret;
++	struct stat st;
++
++	ret = fstatat(dfd, path, &st, flags);
++	if (ret < 0)
++		return false;
++
++	errno = 0; /* Don't report misleading errno. */
++	return (st.st_mode & S_IXGRP);
++}
++
+ bool switch_resids(uid_t uid, gid_t gid)
+ {
+ 	if (setresgid(gid, gid, gid))
+diff --git a/src/vfs/utils.h b/src/vfs/utils.h
+index 7fb702fd..c0dbe370 100644
+--- a/src/vfs/utils.h
++++ b/src/vfs/utils.h
+@@ -368,6 +368,7 @@ extern bool expected_file_size(int dfd, const char *path, int flags,
+ extern bool is_setid(int dfd, const char *path, int flags);
+ extern bool is_setgid(int dfd, const char *path, int flags);
+ extern bool is_sticky(int dfd, const char *path, int flags);
++extern bool is_ixgrp(int dfd, const char *path, int flags);
+ extern bool openat_tmpfile_supported(int dirfd);
+ 
+ #endif /* __IDMAP_UTILS_H */
+diff --git a/src/vfs/vfstest.c b/src/vfs/vfstest.c
+index 29ac0bec..e928a1f5 100644
+--- a/src/vfs/vfstest.c
++++ b/src/vfs/vfstest.c
+@@ -1733,6 +1733,186 @@ out:
+ 	return fret;
+ }
+ 
++/* The current_umask() is stripped from the mode directly in the vfs if the
++ * filesystem either doesn't support acls or the filesystem has been
++ * mounted without posic acl support.
++ *
++ * If the filesystem does support acls then current_umask() stripping is
++ * deferred to posix_acl_create(). So when the filesystem calls
++ * posix_acl_create() and there are no acls set or not supported then
++ * current_umask() will be stripped.
++ *
++ * Use umask(S_IXGRP) to check whether inode strip S_ISGID works correctly.
++ *
++ * test for commit ac6800e279a2 ("fs: Add missing umask strip in vfs_tmpfile")
++ * and 1639a49ccdce ("fs: move S_ISGID stripping into the vfs_*() helpers").
++ */
++
++static int setgid_create_umask(const struct vfstest_info *info)
++{
++	int fret = -1;
++	int file1_fd = -EBADF;
++	int tmpfile_fd = -EBADF;
++	pid_t pid;
++	bool supported = false;
++	mode_t mode;
++
++	if (!caps_supported())
++		return 0;
++
++	if (fchmod(info->t_dir1_fd, S_IRUSR |
++			      S_IWUSR |
++			      S_IRGRP |
++			      S_IWGRP |
++			      S_IROTH |
++			      S_IWOTH |
++			      S_IXUSR |
++			      S_IXGRP |
++			      S_IXOTH |
++			      S_ISGID), 0) {
++		log_stderr("failure: fchmod");
++		goto out;
++	}
++
++	/* Verify that the setgid bit got raised. */
++	if (!is_setgid(info->t_dir1_fd, "", AT_EMPTY_PATH)) {
++		log_stderr("failure: is_setgid");
++		goto out;
++	}
++
++	supported = openat_tmpfile_supported(info->t_dir1_fd);
++
++	umask(S_IXGRP);
++	mode = umask(S_IXGRP);
++	if (!(mode & S_IXGRP))
++		die("failure: umask");
++
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_ids(0, 10000))
++			die("failure: switch_ids");
++
++		if (!caps_down_fsetid())
++			die("failure: caps_down_fsetid");
++
++		/* create regular file via open() */
++		file1_fd = openat(info->t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, S_IXGRP | S_ISGID);
++		if (file1_fd < 0)
++			die("failure: create");
++
++		/* Neither in_group_p() nor capable_wrt_inode_uidgid() so setgid
++		 * bit needs to be stripped.
++		 */
++		if (is_setgid(info->t_dir1_fd, FILE1, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(info->t_dir1_fd, FILE1, 0))
++			die("failure: is_ixgrp");
++
++		if (mkdirat(info->t_dir1_fd, DIR1, 0000))
++			die("failure: create");
++
++		if (xfs_irix_sgid_inherit_enabled(info->t_fstype)) {
++			/* We're not in_group_p(). */
++			if (is_setgid(info->t_dir1_fd, DIR1, 0))
++				die("failure: is_setgid");
++		} else {
++			/* Directories always inherit the setgid bit. */
++			if (!is_setgid(info->t_dir1_fd, DIR1, 0))
++				die("failure: is_setgid");
++		}
++
++		if (is_ixgrp(info->t_dir1_fd, DIR1, 0))
++			die("failure: is_ixgrp");
++
++		/* create a special file via mknodat() vfs_create */
++		if (mknodat(info->t_dir1_fd, FILE2, S_IFREG | S_ISGID | S_IXGRP, 0))
++			die("failure: mknodat");
++
++		if (is_setgid(info->t_dir1_fd, FILE2, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(info->t_dir1_fd, FILE2, 0))
++			die("failure: is_ixgrp");
++
++		/* create a character device via mknodat() vfs_mknod */
++		if (mknodat(info->t_dir1_fd, CHRDEV1, S_IFCHR | S_ISGID | S_IXGRP, makedev(5, 1)))
++			die("failure: mknodat");
++
++		if (is_setgid(info->t_dir1_fd, CHRDEV1, 0))
++			die("failure: is_setgid");
++
++		if (is_ixgrp(info->t_dir1_fd, CHRDEV1, 0))
++			die("failure: is_ixgrp");
++
++		/*
++		 * In setgid directories newly created files always inherit the
++		 * gid from the parent directory. Verify that the file is owned
++		 * by gid 0, not by gid 10000.
++		 */
++		if (!expected_uid_gid(info->t_dir1_fd, FILE1, 0, 0, 0))
++			die("failure: check ownership");
++
++		/*
++		 * In setgid directories newly created directories always
++		 * inherit the gid from the parent directory. Verify that the
++		 * directory is owned by gid 0, not by gid 10000.
++		 */
++		if (!expected_uid_gid(info->t_dir1_fd, DIR1, 0, 0, 0))
++			die("failure: check ownership");
++
++		if (!expected_uid_gid(info->t_dir1_fd, FILE2, 0, 0, 0))
++			die("failure: check ownership");
++
++		if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0))
++			die("failure: check ownership");
++
++		if (unlinkat(info->t_dir1_fd, FILE1, 0))
++			die("failure: delete");
++
++		if (unlinkat(info->t_dir1_fd, DIR1, AT_REMOVEDIR))
++			die("failure: delete");
++
++		if (unlinkat(info->t_dir1_fd, FILE2, 0))
++			die("failure: delete");
++
++		if (unlinkat(info->t_dir1_fd, CHRDEV1, 0))
++			die("failure: delete");
++
++		/* create tmpfile via filesystem tmpfile api */
++		if (supported) {
++			tmpfile_fd = openat(info->t_dir1_fd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
++			if (tmpfile_fd < 0)
++				die("failure: create");
++			/* link the temporary file into the filesystem, making it permanent */
++			if (linkat(tmpfile_fd, "", info->t_dir1_fd, FILE3, AT_EMPTY_PATH))
++				die("failure: linkat");
++			if (close(tmpfile_fd))
++				die("failure: close");
++			if (is_setgid(info->t_dir1_fd, FILE3, 0))
++				die("failure: is_setgid");
++			if (is_ixgrp(info->t_dir1_fd, FILE3, 0))
++				die("failure: is_ixgrp");
++			if (unlinkat(info->t_dir1_fd, FILE3, 0))
++				die("failure: delete");
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	fret = 0;
++	log_debug("Ran test");
++out:
++	safe_close(file1_fd);
++	return fret;
++}
++
+ static int setattr_truncate(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+@@ -1807,6 +1987,7 @@ static void usage(void)
+ 	fprintf(stderr, "--test-btrfs                        Run btrfs specific idmapped mount testsuite\n");
+ 	fprintf(stderr, "--test-setattr-fix-968219708108     Run setattr regression tests\n");
+ 	fprintf(stderr, "--test-setxattr-fix-705191b03d50    Run setxattr regression tests\n");
++	fprintf(stderr, "--test-setgid-create-umask          Run setgid with umask tests\n");
+ 
+ 	_exit(EXIT_SUCCESS);
+ }
+@@ -1825,6 +2006,7 @@ static const struct option longopts[] = {
+ 	{"test-btrfs",				no_argument,		0,	'b'},
+ 	{"test-setattr-fix-968219708108",	no_argument,		0,	'i'},
+ 	{"test-setxattr-fix-705191b03d50",	no_argument,		0,	'j'},
++	{"test-setgid-create-umask",		no_argument,		0,	'u'},
+ 	{NULL,					0,			0,	  0},
+ };
+ 
+@@ -1850,6 +2032,15 @@ static const struct test_suite s_basic = {
+ 	.nr_tests = ARRAY_SIZE(t_basic),
+ };
+ 
++static const struct test_struct t_setgid_create_umask[] = {
++	{ setgid_create_umask,						0,			"create operations in directories with setgid bit set under umask",				},
++};
++
++static const struct test_suite s_setgid_create_umask = {
++	.tests = t_setgid_create_umask,
++	.nr_tests = ARRAY_SIZE(t_setgid_create_umask),
++};
++
+ static bool run_test(struct vfstest_info *info, const struct test_struct suite[], size_t suite_size)
+ {
+ 	int i;
+@@ -1947,7 +2138,8 @@ int main(int argc, char *argv[])
+ 	bool idmapped_mounts_supported = false, test_btrfs = false,
+ 	     test_core = false, test_fscaps_regression = false,
+ 	     test_nested_userns = false, test_setattr_fix_968219708108 = false,
+-	     test_setxattr_fix_705191b03d50 = false;
++	     test_setxattr_fix_705191b03d50 = false,
++	     test_setgid_create_umask = false;
+ 
+ 	init_vfstest_info(&info);
+ 
+@@ -1989,6 +2181,9 @@ int main(int argc, char *argv[])
+ 		case 'j':
+ 			test_setxattr_fix_705191b03d50 = true;
+ 			break;
++		case 'u':
++			test_setgid_create_umask = true;
++			break;
+ 		case 'h':
+ 			/* fallthrough */
+ 		default:
+@@ -2066,6 +2261,14 @@ int main(int argc, char *argv[])
+ 	    !run_suite(&info, &s_setxattr_fix_705191b03d50))
+ 		goto out;
+ 
++	if (test_setgid_create_umask) {
++		if (!run_suite(&info, &s_setgid_create_umask))
++			goto out;
++
++		if (!run_suite(&info, &s_setgid_create_umask_idmapped_mounts))
++			goto out;
++	}
++
+ 	fret = EXIT_SUCCESS;
+ 
+ out:
+diff --git a/tests/generic/998 b/tests/generic/998
+new file mode 100755
+index 00000000..5f736b6d
+--- /dev/null
++++ b/tests/generic/998
+@@ -0,0 +1,46 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
++#
++# FS QA Test No. 998
++#
++# Test S_ISGID stripping whether works correctly when call process
++# uses umask(S_IXGRP).
++#
++# It is also a regression test for
++# commit ac6800e279a2 ("fs: Add missing umask strip in vfs_tmpfile")
++# commit 1639a49ccdce ("fs: move S_ISGID stripping into the vfs_*() helpers")
++
++. ./common/preamble
++_begin_fstest auto quick cap idmapped mount perms rw unlink
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs generic
++_require_test
++_require_scratch
++_fixed_by_kernel_commit ac6800e279a2 \
++	"fs: Add missing umask strip in vfs_tmpfile" \
++1639a49ccdce "fs: move S_ISGID stripping into the vfs_*() helpers"
++
++_scratch_mkfs >$seqres.full 2>&1
++
++$here/src/vfs/vfstest --test-setgid-create-umask \
++        --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
++
++export MOUNT_OPTIONS="-o noacl"
++
++# Also test S_ISGID stripping whether works correctly on underflying filesystem
++# that supports noacl feature.
++# noacl will earse acl flag in superblock, so kernel will use current_umask in
++# vfs directly instead of calling posix_acl_create on underflying filesystem.
++_try_scratch_mount >>$seqres.full 2>&1 && \
++	$here/src/vfs/vfstest --test-setgid-create-umask \
++        --device "$SCRATCH_DEV" --mount "$SCRATCH_MNT" --fstype "$FSTYP"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/998.out b/tests/generic/998.out
+new file mode 100644
+index 00000000..d2679ae0
+--- /dev/null
++++ b/tests/generic/998.out
+@@ -0,0 +1,2 @@
++QA output created by 998
++Silence is golden
+-- 
+2.27.0
+
