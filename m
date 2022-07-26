@@ -2,165 +2,117 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AD75CCA489
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jul 2022 09:21:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3145C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jul 2022 09:49:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238025AbiGZJVn (ORCPT
+        id S238538AbiGZJtk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Jul 2022 05:21:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58020 "EHLO
+        Tue, 26 Jul 2022 05:49:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231765AbiGZJVm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jul 2022 05:21:42 -0400
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76A9F313A1;
-        Tue, 26 Jul 2022 02:21:41 -0700 (PDT)
-Received: by mail-ej1-x62a.google.com with SMTP id l23so25077096ejr.5;
-        Tue, 26 Jul 2022 02:21:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=VH4E2xWf2GMBb40Hbv+ADlezT14bYPB4k7B1UzgSDjc=;
-        b=I3iJyiGhOGUtYzieSYSL3YEnxaTiHg5pp73Dj0Tp0u7d84QdMy1/FPE8XooYfeLLRg
-         pPdWTihasVMMJ6PPn7gqlvHFLcienTeklLv1r45Zw/WSNLCZqbJKqfVwCM14d2NLBGt6
-         1bnzz5Qd6C4GzktzsYe2ToBDAltD3GW/Qel9Sj4jzCj85jKsebmuXwL3oPQqM9E6a/RU
-         qeOlGjqX5RKRXM8RbSVOpF/TiGkjmsqczuNYM1+fIhT+icXlOCa0up7a6z74aIMYTWZu
-         3wRnfwh6xLtCXjKujeSbuWXaoEnbBUsyfkdw770xgqzIC665JLObFeJIEYieY7UD8riq
-         K71w==
+        with ESMTP id S238543AbiGZJti (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jul 2022 05:49:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5FB6D32040
+        for <fstests@vger.kernel.org>; Tue, 26 Jul 2022 02:49:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1658828976;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=njmXR/tl6Yv4H7DqdHRc9Thiis+e3nUQsXGdK+eV/4k=;
+        b=jPbx39x/0ZyALp/Dm3+d1UDn66/cBDYIsnk4plxtQy8T12knyIaon7Ze7A6PtU/DBlGcRe
+        QQDrc3HASZH17+pXPX1sJdBAja4Aiv1YJZJkQ5U62Y+y/etZhUXiknXTQXjWmktro7YjWU
+        Hb9Dn7qESIzTm1+i2B7Ye6uPFmvv98w=
+Received: from mail-ot1-f72.google.com (mail-ot1-f72.google.com
+ [209.85.210.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-659-G-i1_csMPJiMZvZYfdD9zQ-1; Tue, 26 Jul 2022 05:49:34 -0400
+X-MC-Unique: G-i1_csMPJiMZvZYfdD9zQ-1
+Received: by mail-ot1-f72.google.com with SMTP id a13-20020a05683012cd00b0061c9b55da16so6982754otq.9
+        for <fstests@vger.kernel.org>; Tue, 26 Jul 2022 02:49:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=VH4E2xWf2GMBb40Hbv+ADlezT14bYPB4k7B1UzgSDjc=;
-        b=Sz4ZoTD5GN4BXl9rrJpmFu4T59pujH05BifOL/Z6I95qbMYD3gtfCjUlQAbtnx60Bo
-         x1/l3mFUjawT3zQJwKtGQlPrFrt9Zq84DWrUCfw3JLRdrIA6Xo9fBeQ5VB4zqga3depK
-         PZsWIkSAwAhZFLCTB/LXLYqNaao87wY6FX47v8aDzKOP+4+/pe18YkgQtDfj3uFFFg0/
-         YxzjHjeJGV7lGiAqv8xzHfiqUy8Rbm/mTJTlRFmeo/cjIJGfOGlS49OMXuVP4P9p9yCs
-         2ryNB0rm11CHiUC2jXlX+aWHmAM4FmruAAzBI2apiLO/C1tceWfyQgyQfacDZIQle6Q3
-         4Eug==
-X-Gm-Message-State: AJIora+MyEWbVR5nQorqlJLOAuN6p5S/SIXeefpP7kq1swEHsOoYeSq7
-        HrmJOJ2TZV4PhobZIlvkW5gMKTx/3GPWDQ==
-X-Google-Smtp-Source: AGRyM1t7YRZGk7YHBtiKa/Vy4VmzGjSIzkjfqw/6fXeriZjIsJuhaEsYwrKntsqQmrlDb/9x+egLqQ==
-X-Received: by 2002:a17:906:844d:b0:72b:307d:fb52 with SMTP id e13-20020a170906844d00b0072b307dfb52mr13842983ejy.182.1658827299941;
-        Tue, 26 Jul 2022 02:21:39 -0700 (PDT)
-Received: from amir-ThinkPad-T480.kpn (2a02-a45a-4ae9-1-7aa-6650-a0dd-61a2.fixed6.kpn.net. [2a02:a45a:4ae9:1:7aa:6650:a0dd:61a2])
-        by smtp.gmail.com with ESMTPSA id w17-20020a056402071100b0043aa17dc199sm8161528edx.90.2022.07.26.02.21.39
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=njmXR/tl6Yv4H7DqdHRc9Thiis+e3nUQsXGdK+eV/4k=;
+        b=lVSNh1+JFgkDdY6w3liBUINwr8LVoF+0gg0r7wrLrvjXPXmAPwluSsnWz+owruu//d
+         LBRnrGGO5Hxg7dURllm7qybhfXNk3OVWXoo94Mkhj/OdQBt24BUdEqK2m1eKZjmLnnIv
+         Y4SzD7/78sAy5tlShoCDqA3JBZm4s2hohQs2LmR8b91VQ58jhENFxOqXS5OHg29rJ6Y0
+         UbPOMV1+pquq6Ws2iDZ1pD/h/8u51nyfvv1n3H5wA5Ac6jUMB7yRR5ZOL4M6n3Xmwa0D
+         bU4slvrsCAJT+ny85/Z+UWOwkft+mLXSegjEmSbc4+5NMWlPNO5WZHaB92AlpcIkRx8s
+         Ij0A==
+X-Gm-Message-State: AJIora9pWqMW+155elUMfFsslxw4PzxzvABUWmjGUKPSSPvhiXVPt4li
+        XYHmM2m+YpQ396sJpWs4JiTU5jUaEld6qPmFpNxaIWGw+pLK02pqHMn60HG7x1vvI8Rx5yE6uTj
+        N27xL3QUZsN9kIpqDWQ==
+X-Received: by 2002:a05:6830:3101:b0:61c:bd29:3043 with SMTP id b1-20020a056830310100b0061cbd293043mr6253372ots.125.1658828973775;
+        Tue, 26 Jul 2022 02:49:33 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1vpXJ9KmpFv0EvnoDdSi9zeklf33OQ9+NZAMX9Mk653AjqKPJ7c00t/uGd671E5+e08bQCp0w==
+X-Received: by 2002:a05:6830:3101:b0:61c:bd29:3043 with SMTP id b1-20020a056830310100b0061cbd293043mr6253365ots.125.1658828973519;
+        Tue, 26 Jul 2022 02:49:33 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id x81-20020a4a4154000000b00425ce891cd8sm5794802ooa.34.2022.07.26.02.49.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Jul 2022 02:21:39 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     "Darrick J . Wong" <djwong@kernel.org>
-Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Dave Chinner <dchinner@redhat.com>,
-        Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 5.10 CANDIDATE 9/9] xfs: Enforce attr3 buffer recovery order
-Date:   Tue, 26 Jul 2022 11:21:25 +0200
-Message-Id: <20220726092125.3899077-10-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220726092125.3899077-1-amir73il@gmail.com>
-References: <20220726092125.3899077-1-amir73il@gmail.com>
+        Tue, 26 Jul 2022 02:49:33 -0700 (PDT)
+Date:   Tue, 26 Jul 2022 17:49:28 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Naohiro Aota <naohiro.aota@wdc.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] btrfs/253: skip on zoned mode as we cannot change the
+ chunk size
+Message-ID: <20220726094928.ovz42mjoanhtinbe@zlang-mailbox>
+References: <20220726075759.3155494-1-naohiro.aota@wdc.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220726075759.3155494-1-naohiro.aota@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Dave Chinner <dchinner@redhat.com>
+On Tue, Jul 26, 2022 at 04:57:59PM +0900, Naohiro Aota wrote:
+> On zoned mode, we have a fixed chunk size which is equal to the zone size.
+> So, we cannot change the chunk size, and running this test results in a
+> failure with below.
+> 
+>     --- tests/btrfs/253.out     2021-12-10 04:33:53.000000000 +0000
+>     +++ /host/results/btrfs/253.out.bad 2022-07-26 05:58:10.000000000 +0000
+>     @@ -2,9 +2,16 @@
+>      Capture default chunk sizes.
+>      First allocation.
+>      Second allocation.
+>     +./common/rc: line 4670: echo: write error: Invalid argument
+>     +./common/rc: line 4670: echo: write error: Invalid argument
+>      Calculate request size so last memory allocation cannot be completely fullfilled.
+>      Third allocation.
+>     ...
+> 
+> It is no use to test this feature on zoned mode. So, just skip it.
+> 
+> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+> ---
 
-commit d8f4c2d0398fa1d92cacf854daf80d21a46bfefc upstream.
+Make sense to me,
 
-From the department of "WTAF? How did we miss that!?"...
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-When we are recovering a buffer, the first thing we do is check the
-buffer magic number and extract the LSN from the buffer. If the LSN
-is older than the current LSN, we replay the modification to it. If
-the metadata on disk is newer than the transaction in the log, we
-skip it. This is a fundamental v5 filesystem metadata recovery
-behaviour.
-
-generic/482 failed with an attribute writeback failure during log
-recovery. The write verifier caught the corruption before it got
-written to disk, and the attr buffer dump looked like:
-
-XFS (dm-3): Metadata corruption detected at xfs_attr3_leaf_verify+0x275/0x2e0, xfs_attr3_leaf block 0x19be8
-XFS (dm-3): Unmount and run xfs_repair
-XFS (dm-3): First 128 bytes of corrupted metadata buffer:
-00000000: 00 00 00 00 00 00 00 00 3b ee 00 00 4d 2a 01 e1  ........;...M*..
-00000010: 00 00 00 00 00 01 9b e8 00 00 00 01 00 00 05 38  ...............8
-                                  ^^^^^^^^^^^^^^^^^^^^^^^
-00000020: df 39 5e 51 58 ac 44 b6 8d c5 e7 10 44 09 bc 17  .9^QX.D.....D...
-00000030: 00 00 00 00 00 02 00 83 00 03 00 cc 0f 24 01 00  .............$..
-00000040: 00 68 0e bc 0f c8 00 10 00 00 00 00 00 00 00 00  .h..............
-00000050: 00 00 3c 31 0f 24 01 00 00 00 3c 32 0f 88 01 00  ..<1.$....<2....
-00000060: 00 00 3c 33 0f d8 01 00 00 00 00 00 00 00 00 00  ..<3............
-00000070: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-.....
-
-The highlighted bytes are the LSN that was replayed into the
-buffer: 0x100000538. This is cycle 1, block 0x538. Prior to replay,
-that block on disk looks like this:
-
-$ sudo xfs_db -c "fsb 0x417d" -c "type attr3" -c p /dev/mapper/thin-vol
-hdr.info.hdr.forw = 0
-hdr.info.hdr.back = 0
-hdr.info.hdr.magic = 0x3bee
-hdr.info.crc = 0xb5af0bc6 (correct)
-hdr.info.bno = 105448
-hdr.info.lsn = 0x100000900
-               ^^^^^^^^^^^
-hdr.info.uuid = df395e51-58ac-44b6-8dc5-e7104409bc17
-hdr.info.owner = 131203
-hdr.count = 2
-hdr.usedbytes = 120
-hdr.firstused = 3796
-hdr.holes = 1
-hdr.freemap[0-2] = [base,size]
-
-Note the LSN stamped into the buffer on disk: 1/0x900. The version
-on disk is much newer than the log transaction that was being
-replayed. That's a bug, and should -never- happen.
-
-So I immediately went to look at xlog_recover_get_buf_lsn() to check
-that we handled the LSN correctly. I was wondering if there was a
-similar "two commits with the same start LSN skips the second
-replay" problem with buffers. I didn't get that far, because I found
-a much more basic, rudimentary bug: xlog_recover_get_buf_lsn()
-doesn't recognise buffers with XFS_ATTR3_LEAF_MAGIC set in them!!!
-
-IOWs, attr3 leaf buffers fall through the magic number checks
-unrecognised, so trigger the "recover immediately" behaviour instead
-of undergoing an LSN check. IOWs, we incorrectly replay ATTR3 leaf
-buffers and that causes silent on disk corruption of inode attribute
-forks and potentially other things....
-
-Git history shows this is *another* zero day bug, this time
-introduced in commit 50d5c8d8e938 ("xfs: check LSN ordering for v5
-superblocks during recovery") which failed to handle the attr3 leaf
-buffers in recovery. And we've failed to handle them ever since...
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- fs/xfs/xfs_buf_item_recover.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/fs/xfs/xfs_buf_item_recover.c b/fs/xfs/xfs_buf_item_recover.c
-index 1d649462d731..b374c9cee117 100644
---- a/fs/xfs/xfs_buf_item_recover.c
-+++ b/fs/xfs/xfs_buf_item_recover.c
-@@ -796,6 +796,7 @@ xlog_recover_get_buf_lsn(
- 	switch (magicda) {
- 	case XFS_DIR3_LEAF1_MAGIC:
- 	case XFS_DIR3_LEAFN_MAGIC:
-+	case XFS_ATTR3_LEAF_MAGIC:
- 	case XFS_DA3_NODE_MAGIC:
- 		lsn = be64_to_cpu(((struct xfs_da3_blkinfo *)blk)->lsn);
- 		uuid = &((struct xfs_da3_blkinfo *)blk)->uuid;
--- 
-2.25.1
+>  tests/btrfs/253 | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/tests/btrfs/253 b/tests/btrfs/253
+> index fbbb81fae754..c746f41e9264 100755
+> --- a/tests/btrfs/253
+> +++ b/tests/btrfs/253
+> @@ -81,6 +81,8 @@ alloc_size() {
+>  _supported_fs btrfs
+>  _require_test
+>  _require_scratch
+> +# The chunk size on zoned mode is fixed to the zone size
+> +_require_non_zoned_device "$SCRATCH_DEV"
+>  
+>  # Delete log file if it exists.
+>  rm -f "${seqres}.full"
+> -- 
+> 2.35.1
+> 
 
