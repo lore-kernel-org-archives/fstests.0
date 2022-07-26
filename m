@@ -2,182 +2,197 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8915CC433EF
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jul 2022 05:04:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6474C43334
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jul 2022 06:30:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237481AbiGZFEi (ORCPT
+        id S231129AbiGZGaM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Jul 2022 01:04:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54408 "EHLO
+        Tue, 26 Jul 2022 02:30:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231992AbiGZFEi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jul 2022 01:04:38 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 414ADCE2A
-        for <fstests@vger.kernel.org>; Mon, 25 Jul 2022 22:04:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1658811876;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=4jbFsJ3u7b3EDDKcMh5oNzFJd3D1ohx97XZnBcYktxo=;
-        b=PuRdGXj545o9G9NtFvKR7pgUbJUYV40izlsXQbSurxSZQXt2ymrWKHoY3dojaFpGVJFJ1T
-        3ZD5w3LbmVxLdAxbri+HY2ASFpfu9Sicawc+olevg/pnzF0D2GCBz9oTHsiw2xcuR19CgN
-        ykAL48c2W38Y21/MRR12ToDS38aPrjw=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-616-fqRwKIXgOLuH8vSbvtSNGw-1; Tue, 26 Jul 2022 01:04:34 -0400
-X-MC-Unique: fqRwKIXgOLuH8vSbvtSNGw-1
-Received: by mail-qv1-f72.google.com with SMTP id lp8-20020a056214590800b004744f4ad562so2556266qvb.2
-        for <fstests@vger.kernel.org>; Mon, 25 Jul 2022 22:04:34 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=4jbFsJ3u7b3EDDKcMh5oNzFJd3D1ohx97XZnBcYktxo=;
-        b=y3cAAI07rt1Ic/iMaEEbpc+hGQd3JSmNqpDIMWx9ommz2gt6Oskb7fLyjojSu1Wb8p
-         ws4exwz2NDIPS9rV3kDCsmNC/AEXiyNt0/GyIOvYRg8P6Vi1MfVv4O7SmAy1zuu67oSA
-         oetpliiJ6VBdhVjA6yDlZ5rucEGGCuI6mYOz72ec5eCTv8rygmaNzJhTCvnofZVOfHCK
-         6vyCz2K9UHVjOlnn3qbYy5zCciewvHNyaCEKio4SU+b/nKynaYSRIiqylIS2r6YwLG6W
-         lV2aBLy+K4ijUnGHJlSPqH/A8gD74cRACn49PZlE4vf1nu8roRr/qzWwwgPyFjTjwpI2
-         zEcg==
-X-Gm-Message-State: AJIora8DABe6W82fJgTxnF+RNg2nvhlVEwBkqNzkpH+oXyKFZzHkbpDV
-        1trxLciu0D0aVSieSwd9amc3n6+62HqwC1h2rnRQvDgO4/guGOTW8T4BUqJOy59odNBkZhg+5yZ
-        Kz8NNUn4LuyWPC2H9nQ==
-X-Received: by 2002:a05:6214:2308:b0:435:3440:7d3c with SMTP id gc8-20020a056214230800b0043534407d3cmr13494258qvb.65.1658811874014;
-        Mon, 25 Jul 2022 22:04:34 -0700 (PDT)
-X-Google-Smtp-Source: AGRyM1vXQYbiB7HSbDLNks65TuqQ8Fsz7p+v34ASBzL9falTwWhi3pLz+Lznym+CVZ/U2DP/OXs9Mg==
-X-Received: by 2002:a05:6214:2308:b0:435:3440:7d3c with SMTP id gc8-20020a056214230800b0043534407d3cmr13494245qvb.65.1658811873716;
-        Mon, 25 Jul 2022 22:04:33 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id v33-20020a05622a18a100b0031f0b43629dsm9273741qtc.23.2022.07.25.22.04.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Jul 2022 22:04:33 -0700 (PDT)
-Date:   Tue, 26 Jul 2022 13:04:28 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Sun Ke <sunke32@huawei.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v4] ext4: resize fs after set reserved GDT blocks equals
- 100
-Message-ID: <20220726050428.buqfbitoqspaafvg@zlang-mailbox>
-References: <20220726032240.3709879-1-sunke32@huawei.com>
+        with ESMTP id S237799AbiGZGaK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jul 2022 02:30:10 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADC8CB04;
+        Mon, 25 Jul 2022 23:30:08 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 3B5C61F9F4;
+        Tue, 26 Jul 2022 06:30:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1658817007; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=wyIFENh/lgbdz46LqgCNfOwRjvgNTYiO+Y785v9zlwM=;
+        b=JrQ2Y6N41dn9E0jKIsqGB3qZexvd/e0Xz5ERgYjkeKmjuBoKtOfQIBu3EeaPFfQT8GhZFx
+        f9APnTUCNFoI8m12C1zHe1qhmGxAVJEF/d1eKgBj/lL7OdFMw16deIvHZx3f4S1xSeSTR5
+        Q7P0YdDcV7zgvDapH0/emdGuOvz2jeQ=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5D4A813A7C;
+        Tue, 26 Jul 2022 06:30:06 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id FgZjCu6J32LOUQAAMHmgww
+        (envelope-from <wqu@suse.com>); Tue, 26 Jul 2022 06:30:06 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] fstests: add test case to make sure btrfs can handle one corrupted device
+Date:   Tue, 26 Jul 2022 14:29:48 +0800
+Message-Id: <20220726062948.56315-1-wqu@suse.com>
+X-Mailer: git-send-email 2.37.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220726032240.3709879-1-sunke32@huawei.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 26, 2022 at 11:22:40AM +0800, Sun Ke wrote:
-> Set reserved GDT blocks equals 100, then resize fs, will trigger null
-> pointer.
-> 
-> Regression test for commit b55c3cd102a6 ext4: add reserved GDT blocks
-> check.
-> 
-> Signed-off-by: Sun Ke <sunke32@huawei.com>
-> ---
->  tests/ext4/057     | 46 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/057.out |  2 ++
->  2 files changed, 48 insertions(+)
->  create mode 100755 tests/ext4/057
->  create mode 100644 tests/ext4/057.out
-> 
-> diff --git a/tests/ext4/057 b/tests/ext4/057
-> new file mode 100755
-> index 00000000..f4bbcd32
-> --- /dev/null
-> +++ b/tests/ext4/057
-> @@ -0,0 +1,46 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 HUAWEI.  All Rights Reserved.
-> +#
-> +# FS QA Test 057
-> +#
-> +# Set reserved GDT blocks equals 100, then resize fs, will trigger null pointer.
+The new test case will verify that btrfs can handle one corrupted device
+without affecting the consistency of the filesystem.
 
-The number "100" isn't important, it just hope to get reserved GDT blocks
-even if you disable resize_inode feature. So you'd better to reflect these
-two conditions, rather than the number "100". E.g:
+Unlike a missing device, one corrupted device can return garbage to the fs,
+thus btrfs has to utilize its data/metadata checksum to verify which
+data is correct.
 
-# A regression test for b55c3cd102a6 ("ext4: add reserved GDT blocks check").
-# Make sure there's not kernel crash, if resize an ext4 which resize_inode
-# feature is disabled but has reserved GDT blocks.
+The test case will:
 
-> +#
-> +# Regression test for commit
-> +# b55c3cd102a6 ext4: add reserved GDT blocks check
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto resize quick
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-     ^^^^
-Remove this useless comment
+- Create a small fs
+  Mostly to speedup the test
 
-> +_supported_fs ext4
-> +_fixed_by_kernel_commit b55c3cd102a6 \
-> +	"ext4: add reserved GDT blocks check"
-> +
-> +_require_command "$TUNE2FS_PROG" tune2fs
+- Fill the fs with a regular file
 
-If you don't need this command anymore, remove this line.
+- Use fsstress to create some contents
 
-> +_require_command "$RESIZE2FS_PROG" resize2fs
-> +_require_command "$DEBUGFS_PROG" debugfs
-> +_require_scratch_size $((1024 * 1024)) #kB
-> +_require_scratch_nocheck
+- Save the fssum for later verification
 
-Generally we don't use _require_scratch_size and _require_scratch together,
-You can use a simple one line:
+- Corrupt one device with garbage but keep the primary superblock
+  untouched
 
-  _require_scratch_size_nocheck $((1024 * 1024))
+- Run fssum verification
 
-> +
-> +# set fs size 512M
+- Run scrub to fix the fs
 
-If you'd like to have some comments:
+- Run scrub again to make sure the fs is fine
 
-# Initalize a 512M ext4 fs with resize_inode feature disabled
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/261     | 94 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/261.out |  2 +
+ 2 files changed, 96 insertions(+)
+ create mode 100755 tests/btrfs/261
+ create mode 100644 tests/btrfs/261.out
 
-> +dev_size=$((512 * 1024 * 1024))
-> +MKFS_OPTIONS="-O ^resize_inode $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
-> +	>>$seqres.full 2>&1 || _fail "mkfs failed"
-> +
-
-# Force some reserved GDT blocks to trigger the bug
-
-> +$DEBUGFS_PROG -w -R "set_super_value s_reserved_gdt_blocks 100" $SCRATCH_DEV \
-> +	>>$seqres.full 2>&1
-> +
-> +$DEBUGFS_PROG -R "show_super_stats -h" $SCRATCH_DEV 2>/dev/null | \
-> +	grep "Reserved GDT blocks"
-> +
-> +_scratch_mount
-> +
-> +# resize fs will trigger NULL pointer in ext4_flex_group_add
-
-# Expect no crash from this resize operation
-
-> +$RESIZE2FS_PROG $SCRATCH_DEV 1G >> $seqres.full 2>&1
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/057.out b/tests/ext4/057.out
-> new file mode 100644
-> index 00000000..99423e16
-> --- /dev/null
-> +++ b/tests/ext4/057.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 057
-> +Reserved GDT blocks:      100
-> -- 
-> 2.13.6
-> 
+diff --git a/tests/btrfs/261 b/tests/btrfs/261
+new file mode 100755
+index 00000000..15218e28
+--- /dev/null
++++ b/tests/btrfs/261
+@@ -0,0 +1,94 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 261
++#
++# Make sure btrfs raid profiles can handling one corrupted device
++# without affecting the consistency of the fs.
++#
++. ./common/preamble
++_begin_fstest raid
++
++. ./common/filter
++. ./common/populate
++
++_supported_fs btrfs
++_require_scratch_dev_pool 4
++_require_fssum
++
++prepare_fs()
++{
++	local profile=$1
++
++	# We don't want too large fs which can take too long to populate
++	# And the extra redirection of stderr is to avoid the RAID56 warning
++	# message to polluate the golden output
++	_scratch_pool_mkfs -m $profile -d $profile -b 1G >> $seqres.full 2>&1
++	if [ $? -ne 0 ]; then
++		echo "mkfs $mkfs_opts failed"
++		return
++	fi
++
++	# Disable compression, as compressed read repair is known to have problems
++	_scratch_mount -o compress=no
++
++	# Fill some part of the fs first
++	$XFS_IO_PROG -f -c "pwrite -S 0xfe 0 400M" $SCRATCH_MNT/garbage > /dev/null 2>&1
++
++	# Then use fsstress to generate some extra contents.
++	# Disable setattr related operations, as it may set NODATACOW which will
++	# not allow us to use btrfs checksum to verify the content.
++	$FSSTRESS_PROG -f setattr=0 -d $SCRATCH_MNT -w -n 3000 > /dev/null 2>&1
++	sync
++
++	# Save the fssum of this fs
++	$FSSUM_PROG -A -f -w $tmp.saved_fssum $SCRATCH_MNT
++	$BTRFS_UTIL_PROG fi show $SCRATCH_MNT >> $seqres.full
++	_scratch_unmount
++}
++
++workload()
++{
++	local target=$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $1}')
++	local profile=$1
++	local num_devs=$2
++
++	_scratch_dev_pool_get $num_devs
++	echo "=== Testing profile $profile ===" >> $seqres.full
++	rm -f -- $tmp.saved_fssum
++	prepare_fs $profile
++
++	# Corrupt the target device, only keep the superblock.
++	$XFS_IO_PROG -c "pwrite 1M 1023M" $target > /dev/null 2>&1
++
++	_scratch_mount
++
++	# All content should be fine
++	$FSSUM_PROG -r $tmp.saved_fssum $SCRATCH_MNT > /dev/null
++
++	# Scrub to fix the fs, this is known to report various correctable
++	# errors
++	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full 2>&1
++
++	# Make sure above scrub fixed the fs
++	$BTRFS_UTIL_PROG scrub start -Br $SCRATCH_MNT >> $seqres.full
++	if [ $? -ne 0 ]; then
++		echo "scrub failed to fix the fs for profile $profile"
++	fi
++	_scratch_unmount
++	_scratch_dev_pool_put
++}
++
++workload raid1 2
++workload raid1c3 3
++workload raid1c4 4
++workload raid10 4
++workload raid5 3
++workload raid6 4
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/261.out b/tests/btrfs/261.out
+new file mode 100644
+index 00000000..679ddc0f
+--- /dev/null
++++ b/tests/btrfs/261.out
+@@ -0,0 +1,2 @@
++QA output created by 261
++Silence is golden
+-- 
+2.36.1
 
