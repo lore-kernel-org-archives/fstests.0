@@ -2,158 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8672C19F28
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jul 2022 02:38:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2CABC19F2B
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jul 2022 03:36:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235045AbiG1CiE (ORCPT
+        id S235240AbiG1DgR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Jul 2022 22:38:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36830 "EHLO
+        Wed, 27 Jul 2022 23:36:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234735AbiG1CiD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jul 2022 22:38:03 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ECC95A3FF;
-        Wed, 27 Jul 2022 19:38:02 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S232849AbiG1Dfw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jul 2022 23:35:52 -0400
+Received: from mail1.bemta32.messagelabs.com (mail1.bemta32.messagelabs.com [195.245.230.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C930193
+        for <fstests@vger.kernel.org>; Wed, 27 Jul 2022 20:35:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1658979349; i=@fujitsu.com;
+        bh=1hSMzNvfmvzzeRpAUVooAQJtHRqNfwd5KYSpdMPfYZg=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=WaVkzRI+xDdv/OtmnWpchjmXbMILz+HqC1Wo/SfNpL/w0XKh6Rg3fkJH4a0Ny4pTN
+         hKywcpVTNQWeObKPPzZL2hyLKfkVFCJjsrDac4vBcyYtH+mIxUiZLwYQyAxDFSBBSe
+         gFcyERkPH1RGOsdqy4hRBx9FknXHbwcv4bTyOebHlNWNu8PhCDRzkTrJZSIveC7I7q
+         EaMr1oGiH7WfLaYp5XVbdZa6F+JnEHrn8VMaOzcJ8xSJcWfpWFDit75Q3sWJx/o/Ao
+         8cRLvk8/R7/38ipaNoeZrZ8Dozjb+KOp8IRpnhwMQeOB9u+QpRyZmNa8rsp1AbObeX
+         iUvtEbS4ZsN0Q==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrKIsWRWlGSWpSXmKPExsViZ8ORpCvC8ij
+  J4O9RS4vLT/gsTrfsZXdg8ti0qpPN4/MmuQCmKNbMvKT8igTWjAW9VxgLFnNW/D59g7mB8QN7
+  FyMXh5DARkaJ/o0LoZwlTBLfLh1j6mLkBHL2MEpMbzIBsdkENCWedS5gBrFFBGQl/s9YDVbDL
+  GAjcWjuFDYQW1jAVOLP9i2sIDaLgKrEqm2H2UFsXgEPiS3tf8HiEgIKElMevmeGiAtKnJz5hA
+  VijoTEwRcvmCFqFCUudXxjhLArJF4fvgQVV5O4em4T8wRG/llI2mchaV/AyLSK0TKpKDM9oyQ
+  3MTNH19DAQNfQ0FTXWNfCTC+xSjdRL7VUtzy1uETXUC+xvFgvtbhYr7gyNzknRS8vtWQTIzBE
+  U4qZw3Yw/un9qXeIUZKDSUmUd+bCh0lCfEn5KZUZicUZ8UWlOanFhxhlODiUJHitmB4lCQkWp
+  aanVqRl5gDjBSYtwcGjJMLLB5LmLS5IzC3OTIdInWLU5VjbcGAvsxBLXn5eqpQ4bwhIkQBIUU
+  ZpHtwIWOxeYpSVEuZlZGBgEOIpSC3KzSxBlX/FKM7BqCTM+5IRaApPZl4J3KZXQEcwAR2xReE
+  ByBEliQgpqQYmxsdJtdnRwdff1lxujTfwnH/xOIP2Mn7Xpom3TTO+Lr9vVJUrUu74K2LOHzce
+  5cRlIjtZZXsr2D5ofP11rnhbcOv84pWv+Rb8UZxWaS6lkr3tiXroslkPPh4R/XhjD/uljMm+1
+  2olltxaXNOj7FN9pcneS3pr7NEpkytmMrezOp3V5omPeLT7n/Th6oTG0IN3vr/4WWHQax76wU
+  Hp+58pb15c5/mRFOy3dJ3Ml2tpLPVf9K7Yfq/QLL158aFWvTCf8Jk8zsQsP/XzPRIbvVJeXip
+  2eOxQ9+n4A9YHazo+JWzo/73hvdiqd19Zz2yLO9Bg+qbSWMlg4YPDU1zSvksc23Ys1VHor+nn
+  56Ufjl4tV2Ipzkg01GIuKk4EAJ1LkSFYAwAA
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-13.tower-591.messagelabs.com!1658979348!1259653!1
+X-Originating-IP: [62.60.8.98]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.87.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 4638 invoked from network); 28 Jul 2022 03:35:48 -0000
+Received: from unknown (HELO n03ukasimr03.n03.fujitsu.local) (62.60.8.98)
+  by server-13.tower-591.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 28 Jul 2022 03:35:48 -0000
+Received: from n03ukasimr03.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTP id 8F3521AC;
+        Thu, 28 Jul 2022 04:35:48 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id AD6D9B82284;
-        Thu, 28 Jul 2022 02:38:00 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 739FFC433D6;
-        Thu, 28 Jul 2022 02:37:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1658975879;
-        bh=PwHs3UgvUhpjWd8LfLagrD5cJW2GYw02JSxoYVI1u9M=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=NFZn9Y2H88Eq6YKA7Jkyu2DavvH6rom2xfbigjWjEaV7OfjVVv9Ig6DsJZVWLptax
-         t+0eb9XlmecRtjPIpy+cj2ZxJ7qct+tJXOonF8i0/LBveFCetj3njRXEftSAc0l0R7
-         3u8xYv1EIkOTtE3EyiybmKZ39licYn1zF5I8RLqfNK/2Y/hCCwjQ/EG8+ya2JkhhhH
-         WrvzXA7o8ZOiLx/AmfpJE1n5Pgeq4oS9OGHD5rTx4eL/yMyVSPbHY0zFuk1OOn8ZwY
-         Cp+uC2wWSKStdoF/0F23WpQEEASTHbhSMh4Pv3zEwBhGIBUNd3avGy1mpAlPRzvNkj
-         Z4KJ6B+RJGz0Q==
-Date:   Wed, 27 Jul 2022 19:37:59 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     "liuyd.fnst@fujitsu.com" <liuyd.fnst@fujitsu.com>
-Cc:     "guaneryu@gmail.com" <guaneryu@gmail.com>,
-        "zlang@redhat.com" <zlang@redhat.com>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "guan@eryu.me" <guan@eryu.me>
-Subject: Re: [PATCH 1/9] seek_sanity_test: fix allocation unit detection on
- XFS realtime
-Message-ID: <YuH2h1DiRm8r3p2j@magnolia>
-References: <165644767753.1045534.18231838177395571946.stgit@magnolia>
- <165644768327.1045534.10420155448662856970.stgit@magnolia>
- <3f63e720-c252-a836-b700-7a5739312b1b@fujitsu.com>
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTPS id 8429C1AB;
+        Thu, 28 Jul 2022 04:35:48 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Thu, 28 Jul 2022 04:35:46 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <djwong@kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] xfs/191: Add missing xfsprogs commit
+Date:   Thu, 28 Jul 2022 12:36:31 +0800
+Message-ID: <1658982991-3860-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3f63e720-c252-a836-b700-7a5739312b1b@fujitsu.com>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD08.g08.fujitsu.local (10.167.33.83) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Does this patch fix NFS for you?
+xfs_repair also needs to think empty xattr leaf block isn't corruption, so
+case can pass.
 
---D
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
-From: Darrick J. Wong <djwong@kernel.org>
+ tests/xfs/191 | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-seek_sanity_test: use XFS ioctls to determine file allocation unit size
+diff --git a/tests/xfs/191 b/tests/xfs/191
+index c568f90e..a10077fe 100755
+--- a/tests/xfs/191
++++ b/tests/xfs/191
+@@ -11,9 +11,11 @@
+ # operations don't stumble over them, and that xfs_repair will offer to remove
+ # the entire xattr fork if the root xattr leaf block is empty.
+ #
+-# Regression test for kernel commit:
+-#
++# Regression test for
++# kernel commit:
+ # 7be3bd8856fb ("xfs: empty xattr leaf header blocks are not corruption")
++# xfsprogs commit:
++# f50d3462c654 ("xfs_repair: ignore empty xattr leaf blocks")
+ #
+ . ./common/preamble
+ _begin_fstest auto quick attr
+@@ -28,6 +30,7 @@ _supported_fs xfs
+ _require_scratch
+ _require_scratch_xfs_crc # V4 is deprecated
+ _fixed_by_kernel_commit 7be3bd8856fb "xfs: empty xattr leaf header blocks are not corruption"
++_fixed_by_git_commit xfsprogs f50d3462c654 "xfs_repair: ignore empty xattr leaf blocks"
+ 
+ _scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+ cat $tmp.mkfs >> $seqres.full
+-- 
+2.23.0
 
-liuyd.fnst@fujitsu.com reported that my recent change to the seek sanity
-test broke NFS.  I foolishly thought that st_blksize was sufficient to
-find the file allocation unit size so that applications could figure out
-the SEEK_HOLE granularity.  Replace that with an explicit callout to XFS
-ioctls so that xfs realtime will work again.
-
-Fixes: e861a302 ("seek_sanity_test: fix allocation unit detection on XFS realtime")
-Reported-by: liuyd.fnst@fujitsu.com
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- src/Makefile           |    4 ++++
- src/seek_sanity_test.c |   40 +++++++++++++++++++++++++++++++---------
- 2 files changed, 35 insertions(+), 9 deletions(-)
-
-diff --git a/src/Makefile b/src/Makefile
-index 38628a22..b89a7a5e 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -82,6 +82,10 @@ ifeq ($(HAVE_LIBCAP), true)
- LLDLIBS += -lcap
- endif
- 
-+ifeq ($(HAVE_FSXATTR_XFLAG_HASATTR), yes)
-+LCFLAGS += -DHAVE_FSXATTR_XFLAG_HASATTR
-+endif
-+
- ifeq ($(HAVE_SEEK_DATA), yes)
-  ifeq ($(HAVE_FSXATTR_XFLAG_HASATTR), yes)
-   ifeq ($(HAVE_NFTW), yes)
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index 1030d0c5..b53f4862 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -40,6 +40,32 @@ static void get_file_system(int fd)
- 	}
- }
- 
-+#ifdef HAVE_FSXATTR_XFLAG_HASATTR
-+/* Compute the file allocation unit size for an XFS file. */
-+static int detect_xfs_alloc_unit(int fd)
-+{
-+	struct fsxattr fsx;
-+	struct xfs_fsop_geom fsgeom;
-+	int ret;
-+
-+	ret = ioctl(fd, XFS_IOC_FSGEOMETRY, &fsgeom);
-+	if (ret)
-+		return -1;
-+
-+	ret = ioctl(fd, FS_IOC_FSGETXATTR, &fsx);
-+	if (ret)
-+		return -1;
-+
-+	alloc_size = fsgeom.blocksize;
-+	if (fsx.fsx_xflags & FS_XFLAG_REALTIME)
-+		alloc_size *= fsgeom.rtextsize;
-+
-+	return 0;
-+}
-+#else
-+# define detect_xfs_alloc_unit(fd) (-1)
-+#endif
-+
- static int get_io_sizes(int fd)
- {
- 	off_t pos = 0, offset = 1;
-@@ -47,6 +73,10 @@ static int get_io_sizes(int fd)
- 	int shift, ret;
- 	int pagesz = sysconf(_SC_PAGE_SIZE);
- 
-+	ret = detect_xfs_alloc_unit(fd);
-+	if (!ret)
-+		goto done;
-+
- 	ret = fstat(fd, &buf);
- 	if (ret) {
- 		fprintf(stderr, "  ERROR %d: Failed to find io blocksize\n",
-@@ -54,16 +84,8 @@ static int get_io_sizes(int fd)
- 		return ret;
- 	}
- 
--	/*
--	 * st_blksize is typically also the allocation size.  However, XFS
--	 * rounds this up to the page size, so if the stat blocksize is exactly
--	 * one page, use this iterative algorithm to see if SEEK_DATA will hint
--	 * at a more precise answer based on the filesystem's (pre)allocation
--	 * decisions.
--	 */
-+	/* st_blksize is typically also the allocation size */
- 	alloc_size = buf.st_blksize;
--	if (alloc_size != pagesz)
--		goto done;
- 
- 	/* try to discover the actual alloc size */
- 	while (pos == 0 && offset < alloc_size) {
