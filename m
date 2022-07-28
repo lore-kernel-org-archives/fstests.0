@@ -2,176 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61DD8C04A68
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jul 2022 03:54:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 330C4C04A68
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jul 2022 03:54:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233710AbiG1DyY (ORCPT
+        id S234444AbiG1Dyp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Jul 2022 23:54:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34758 "EHLO
+        Wed, 27 Jul 2022 23:54:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34990 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232465AbiG1DyX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jul 2022 23:54:23 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A50F1F620;
-        Wed, 27 Jul 2022 20:54:22 -0700 (PDT)
+        with ESMTP id S232465AbiG1Dyo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jul 2022 23:54:44 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C516275C2
+        for <fstests@vger.kernel.org>; Wed, 27 Jul 2022 20:54:43 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id F3B91B82320;
-        Thu, 28 Jul 2022 03:54:20 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A66CEC433C1;
-        Thu, 28 Jul 2022 03:54:19 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 288B1619DA
+        for <fstests@vger.kernel.org>; Thu, 28 Jul 2022 03:54:43 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 85FB9C433D7;
+        Thu, 28 Jul 2022 03:54:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1658980459;
-        bh=8gq0l4djNDFgoFnSfWHUfp0KklnFGoiHo5nPlftD+Cg=;
+        s=k20201202; t=1658980482;
+        bh=HvxrAxT3aupU1l0x5tusTc81evXIaOng+HJ2km0s22k=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=H3HFOg1r192m/ag/uCu6bnWAQvhrLWkFGoQ1I+YVBlweFzRiEEeiw2Xcnk5ShRLli
-         1GYSlbooYztobrvhb4EMvL9HKqBZ04G1RfsmUTltfWRF3jFf05mKYRsx7z6wA3YLvh
-         kDWXtCqfEzzbmNOc5lfZNrzjth530v5Kyz9I02tRw4vTLq47cO4ngRBDgc7KfrV8os
-         NuuL5Wfep73Pt4r1W0VVNf5LnZYx1QasKnAhZXrPsBmbAthwFGLYiRu0J3AcPcDHtl
-         kZ5NVlKkfo0f0Rz6XyyB1A8ASerNwEy6yXTz+TaquEX9Ke9BSuN7eiWzJRVMmKufWs
-         4X3n99cI7d7/w==
-Date:   Wed, 27 Jul 2022 20:54:19 -0700
+        b=JIKD8bw0eACgRSzjq8yrTjAq1E51J65atJDZbOD88BU0GuwcHkYJJKFtcCWWBo+RI
+         2bjdF83WXPJADJ8hBDt/mtWZUCvnJi4hqwc6gFEoBd6v7NEkOzjN/cQOIDlkLl4YWb
+         ECGP0V7AfmtFHHB7tRMFpx7wz1yhrBDBXK//iaP+i/DfrY93uOrtEgytkxY0V3IIwb
+         Z5UWk+On2IzzD1g7IanCxBH30mJba2wb605s39HhWRjHMrEjAL03Io4Fc242WHkbXv
+         Fau+GQ/IL3IMlaffEH0zpAgpSOmTeUkzDGDhqFspD7HsvMNWBi8RHc7u9DUkOmMOvL
+         /xwpqS0D9BO7g==
+Date:   Wed, 27 Jul 2022 20:54:42 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     "liuyd.fnst@fujitsu.com" <liuyd.fnst@fujitsu.com>
-Cc:     "guaneryu@gmail.com" <guaneryu@gmail.com>,
-        "zlang@redhat.com" <zlang@redhat.com>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "guan@eryu.me" <guan@eryu.me>
-Subject: Re: [PATCH 1/9] seek_sanity_test: fix allocation unit detection on
- XFS realtime
-Message-ID: <YuIIa2EboQGTeNo1@magnolia>
-References: <165644767753.1045534.18231838177395571946.stgit@magnolia>
- <165644768327.1045534.10420155448662856970.stgit@magnolia>
- <3f63e720-c252-a836-b700-7a5739312b1b@fujitsu.com>
- <YuH2h1DiRm8r3p2j@magnolia>
- <45012000-087a-e98d-7322-4f1079bbb1d8@fujitsu.com>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/191: Add missing xfsprogs commit
+Message-ID: <YuIIggUZXat6Lp2F@magnolia>
+References: <1658982991-3860-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <45012000-087a-e98d-7322-4f1079bbb1d8@fujitsu.com>
+In-Reply-To: <1658982991-3860-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 28, 2022 at 03:38:38AM +0000, liuyd.fnst@fujitsu.com wrote:
-> Hi, Darrick.
+On Thu, Jul 28, 2022 at 12:36:31PM +0800, Yang Xu wrote:
+> xfs_repair also needs to think empty xattr leaf block isn't corruption, so
+> case can pass.
 > 
-> 
-> On 7/28/22 10:37, Darrick J. Wong wrote:
-> > Does this patch fix NFS for you?
-> 
-> It works for me. Thanks.
-> BTW. It has conflict during "git am". Looks like your branch are ahead 
-> of master.
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 
-Yes, I base my development branch off of for-next nowadays.  Thanks for
-the report, I'll add a tested-by if that's ok and send it out as a bug
-fix.
+Yep, thanks.
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
-> > 
-> > --D
-> > ---
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > seek_sanity_test: use XFS ioctls to determine file allocation unit size
-> > 
-> > liuyd.fnst@fujitsu.com reported that my recent change to the seek sanity
-> > test broke NFS.  I foolishly thought that st_blksize was sufficient to
-> > find the file allocation unit size so that applications could figure out
-> > the SEEK_HOLE granularity.  Replace that with an explicit callout to XFS
-> > ioctls so that xfs realtime will work again.
-> > 
-> > Fixes: e861a302 ("seek_sanity_test: fix allocation unit detection on XFS realtime")
-> > Reported-by: liuyd.fnst@fujitsu.com
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >   src/Makefile           |    4 ++++
-> >   src/seek_sanity_test.c |   40 +++++++++++++++++++++++++++++++---------
-> >   2 files changed, 35 insertions(+), 9 deletions(-)
-> > 
-> > diff --git a/src/Makefile b/src/Makefile
-> > index 38628a22..b89a7a5e 100644
-> > --- a/src/Makefile
-> > +++ b/src/Makefile
-> > @@ -82,6 +82,10 @@ ifeq ($(HAVE_LIBCAP), true)
-> >   LLDLIBS += -lcap
-> >   endif
-> >   
-> > +ifeq ($(HAVE_FSXATTR_XFLAG_HASATTR), yes)
-> > +LCFLAGS += -DHAVE_FSXATTR_XFLAG_HASATTR
-> > +endif
-> > +
-> >   ifeq ($(HAVE_SEEK_DATA), yes)
-> >    ifeq ($(HAVE_FSXATTR_XFLAG_HASATTR), yes)
-> >     ifeq ($(HAVE_NFTW), yes)
-> > diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-> > index 1030d0c5..b53f4862 100644
-> > --- a/src/seek_sanity_test.c
-> > +++ b/src/seek_sanity_test.c
-> > @@ -40,6 +40,32 @@ static void get_file_system(int fd)
-> >   	}
-> >   }
-> >   
-> > +#ifdef HAVE_FSXATTR_XFLAG_HASATTR
-> > +/* Compute the file allocation unit size for an XFS file. */
-> > +static int detect_xfs_alloc_unit(int fd)
-> > +{
-> > +	struct fsxattr fsx;
-> > +	struct xfs_fsop_geom fsgeom;
-> > +	int ret;
-> > +
-> > +	ret = ioctl(fd, XFS_IOC_FSGEOMETRY, &fsgeom);
-> > +	if (ret)
-> > +		return -1;
-> > +
-> > +	ret = ioctl(fd, FS_IOC_FSGETXATTR, &fsx);
-> > +	if (ret)
-> > +		return -1;
-> > +
-> > +	alloc_size = fsgeom.blocksize;
-> > +	if (fsx.fsx_xflags & FS_XFLAG_REALTIME)
-> > +		alloc_size *= fsgeom.rtextsize;
-> > +
-> > +	return 0;
-> > +}
-> > +#else
-> > +# define detect_xfs_alloc_unit(fd) (-1)
-> > +#endif
-> > +
-> >   static int get_io_sizes(int fd)
-> >   {
-> >   	off_t pos = 0, offset = 1;
-> > @@ -47,6 +73,10 @@ static int get_io_sizes(int fd)
-> >   	int shift, ret;
-> >   	int pagesz = sysconf(_SC_PAGE_SIZE);
-> >   
-> > +	ret = detect_xfs_alloc_unit(fd);
-> > +	if (!ret)
-> > +		goto done;
-> > +
-> >   	ret = fstat(fd, &buf);
-> >   	if (ret) {
-> >   		fprintf(stderr, "  ERROR %d: Failed to find io blocksize\n",
-> > @@ -54,16 +84,8 @@ static int get_io_sizes(int fd)
-> >   		return ret;
-> >   	}
-> >   
-> > -	/*
-> > -	 * st_blksize is typically also the allocation size.  However, XFS
-> > -	 * rounds this up to the page size, so if the stat blocksize is exactly
-> > -	 * one page, use this iterative algorithm to see if SEEK_DATA will hint
-> > -	 * at a more precise answer based on the filesystem's (pre)allocation
-> > -	 * decisions.
-> > -	 */
-> > +	/* st_blksize is typically also the allocation size */
-> >   	alloc_size = buf.st_blksize;
-> > -	if (alloc_size != pagesz)
-> > -		goto done;
-> >   
-> >   	/* try to discover the actual alloc size */
-> >   	while (pos == 0 && offset < alloc_size) {
+> ---
+>  tests/xfs/191 | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/xfs/191 b/tests/xfs/191
+> index c568f90e..a10077fe 100755
+> --- a/tests/xfs/191
+> +++ b/tests/xfs/191
+> @@ -11,9 +11,11 @@
+>  # operations don't stumble over them, and that xfs_repair will offer to remove
+>  # the entire xattr fork if the root xattr leaf block is empty.
+>  #
+> -# Regression test for kernel commit:
+> -#
+> +# Regression test for
+> +# kernel commit:
+>  # 7be3bd8856fb ("xfs: empty xattr leaf header blocks are not corruption")
+> +# xfsprogs commit:
+> +# f50d3462c654 ("xfs_repair: ignore empty xattr leaf blocks")
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick attr
+> @@ -28,6 +30,7 @@ _supported_fs xfs
+>  _require_scratch
+>  _require_scratch_xfs_crc # V4 is deprecated
+>  _fixed_by_kernel_commit 7be3bd8856fb "xfs: empty xattr leaf header blocks are not corruption"
+> +_fixed_by_git_commit xfsprogs f50d3462c654 "xfs_repair: ignore empty xattr leaf blocks"
+>  
+>  _scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+>  cat $tmp.mkfs >> $seqres.full
+> -- 
+> 2.23.0
+> 
