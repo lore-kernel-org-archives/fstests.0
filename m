@@ -2,164 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB1C8C19F2A
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Jul 2022 16:15:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ED5EC00144
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Jul 2022 18:22:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231134AbiG2QPw (ORCPT
+        id S237057AbiG2SWq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Jul 2022 12:15:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40876 "EHLO
+        Fri, 29 Jul 2022 14:22:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54152 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231976AbiG2QPv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Jul 2022 12:15:51 -0400
-Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B01F4FD29;
-        Fri, 29 Jul 2022 09:15:50 -0700 (PDT)
-Received: by mail-vs1-xe30.google.com with SMTP id 129so5022815vsq.8;
-        Fri, 29 Jul 2022 09:15:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc;
-        bh=mzoPDf5bDlXx1BaYbqPpOiGhYYUfpkfcEpH1gSsIq0g=;
-        b=LG2i5/BHu/Y7osIg+JH3KAl+aG/uU6dDUbVb2Xmv2eYIJ+vK8KsqWRZAEaQ6xrQyEF
-         oe/zzVQP0C7pOvYlLIXHWNPN0s4rND02vN5iDWaUglwIMgaMqPPxH8Cvq7aisQl2WZBc
-         NsgW7ZsxavHW+03qzeSg7HCYgdqaZKPIqVktUzoD3NgbjCwgB1x0razFHGdnDEtF1Eb5
-         xRwEvn/5gInKBrg6pQueOx7Buzc8ifoiuvEriPWPDKC5pgTspwY0hOo9HVDl7qfZVTXT
-         blEE16rrH2ecy1v9Whs5N5yi6C+VxXQytIPKUKoWYmd5KoPFcQq5+m/Qk4gKlki5RQhe
-         w6/Q==
+        with ESMTP id S229509AbiG2SWp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Jul 2022 14:22:45 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9839745057
+        for <fstests@vger.kernel.org>; Fri, 29 Jul 2022 11:22:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1659118963;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=VNWhmZoUZjJIpagEq2CDqSrvSr/sBhwgkq3aQaRTHWM=;
+        b=NvfViqnmTEX4PN7D5+ZSDo+8b09M6DDhjBLbyH4yDv8xFBjeqGNCo3i94G1jXyFtxQDeZl
+        dXcbIleAQvFzmpUCbMtQ+ygC1sgPykUwT6JPK2Il9rocR7o1n2owuNSUFCXP6yea6A/2pJ
+        oXiULcOKljj8DgtOHpdTTRn/Z6UZIhk=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-62-ZrO3srQwMjyIzYDUWjA5WQ-1; Fri, 29 Jul 2022 14:22:42 -0400
+X-MC-Unique: ZrO3srQwMjyIzYDUWjA5WQ-1
+Received: by mail-qt1-f197.google.com with SMTP id a18-20020a05622a02d200b0031ed7ae9abeso3305597qtx.8
+        for <fstests@vger.kernel.org>; Fri, 29 Jul 2022 11:22:42 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc;
-        bh=mzoPDf5bDlXx1BaYbqPpOiGhYYUfpkfcEpH1gSsIq0g=;
-        b=hjFbN54k7yX6Qu4kS0LUCRXbyk/vt3O0BBJidhDuuJ7gf1z95qfxNcl6/9y3XTcU/z
-         1GQCWunWqjJoddbUIWAygnaRpQoOeVz3Y0CTMGIcVMCPfT4Cf6eFTisDlnOWCsQKyuoO
-         61k9W0XefamDisndmNjpXM2iWmNtQ7IbfF8rIkZ2b+1s4wHFyjk4Q+oj01h9W16PdjyW
-         JWBECXfW2LH87kN1jKvyqUMlozo8b5CN1WzzZmfGmiFfVYgQ1o60ZNCDfb5iEZA9adEB
-         uJZPVXUZWDtigbUo5fYRx8g4zvXA3K+qHoWowScxPnqTpI2QWko3h4DVigmcSLOYCfW9
-         Mz+A==
-X-Gm-Message-State: AJIora++8S34+pwa5b+BTKnu4824aeBUWNSZPdx3qj1Ez8S6Oa774UHa
-        +6jcaAgle19Syca57kYoSftMWkNpnV+9eOCbcEdQd4iBKEA=
-X-Google-Smtp-Source: AGRyM1sznv/9jLAu/P6nK9T1fjifa+VwUMkIaEixgKPPQDU/XYabfVkUmLROWvfRrwM3Ue/9Kvx3idUrZbTYnWzJI4s=
-X-Received: by 2002:a67:eb98:0:b0:358:6274:71b3 with SMTP id
- e24-20020a67eb98000000b00358627471b3mr1607451vso.72.1659111349554; Fri, 29
- Jul 2022 09:15:49 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=VNWhmZoUZjJIpagEq2CDqSrvSr/sBhwgkq3aQaRTHWM=;
+        b=YDnY300ds9UKlX02qevVr1DyP1j3b6/k4ycCOeHHwGohaXL9N7qFwXLcOQSp92TvT7
+         Bdc/WKq4r+GvmXpqWZCnZQYmg846GJ+f9K9zOe5mJN5uPVATBqF7EMP3hX4QpMCZ6lIU
+         IpE6hMuE53ruX0fNmjvg2DE86s9zixjiqqHOOa9dWORvWsMy/X7+POH4ccyK9ayBIJdw
+         njhnAdeyOGvg4Qsrr+NVR4Ez5uFpmo7d3xx7GS630uU5ltMjK09X8We5s73CHEzhvRKA
+         Swi6IpvC8gBUn8mJcuupwj5KR31uRAxr1z6+crt+vlbxnb1PhN1YAjpcr/T1c9/CtJUG
+         2Tig==
+X-Gm-Message-State: AJIora9cW+2agjVhiH6ZnwfXzH9QxNxIp16KIlHWdSWnEFrpPIAU5HLP
+        mGnBk4tLoN8a93OFzBk3Umy+Ovl+9kgfJG8RSS+BdLcvJ8TEF/KJ8BbR18yFIE756hOJlhLsvJE
+        Qxce9jpR0nLAVlOmQRg==
+X-Received: by 2002:a37:5fc4:0:b0:6b5:ec2b:93e6 with SMTP id t187-20020a375fc4000000b006b5ec2b93e6mr3706351qkb.693.1659118961497;
+        Fri, 29 Jul 2022 11:22:41 -0700 (PDT)
+X-Google-Smtp-Source: AGRyM1u5OWpYRofAoBzGN2STPZmPDUhr+GRvLEj1EYRpHTL5FrfOd/TyaB2/fcGaXWamiz9OBtyhUA==
+X-Received: by 2002:a37:5fc4:0:b0:6b5:ec2b:93e6 with SMTP id t187-20020a375fc4000000b006b5ec2b93e6mr3706335qkb.693.1659118961190;
+        Fri, 29 Jul 2022 11:22:41 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id v13-20020a05622a014d00b0031ef366c9b5sm2771847qtw.34.2022.07.29.11.22.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 29 Jul 2022 11:22:40 -0700 (PDT)
+Date:   Sat, 30 Jul 2022 02:22:35 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3 3/3] xfs: add memory failure test for
+ partly-reflinked&dax file
+Message-ID: <20220729182235.2uchnrqcnizwwnlp@zlang-mailbox>
+References: <20220520013534.2894233-1-ruansy.fnst@fujitsu.com>
+ <20220520013534.2894233-4-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
-References: <20220726092125.3899077-1-amir73il@gmail.com> <CAOQ4uxi=VYa+86A7G3wqCX84n2Aezx2mYqfYrFTAVtSpYmeq_Q@mail.gmail.com>
- <YuHt65YWtkqLxlpv@magnolia> <YuHve9LEkM7nmbUJ@magnolia> <CAOQ4uxiSKNYAT_oUXAwGADt4KQvVH8s12nFSrRUoKYi8DOzQig@mail.gmail.com>
-In-Reply-To: <CAOQ4uxiSKNYAT_oUXAwGADt4KQvVH8s12nFSrRUoKYi8DOzQig@mail.gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 29 Jul 2022 18:15:38 +0200
-Message-ID: <CAOQ4uxgbWOEZTCX_S43DCT-0KihU6By3TtwvYjZA6DS=y20FHQ@mail.gmail.com>
-Subject: Re: [PATCH 5.10 CANDIDATE 0/9] xfs stable candidate patches for
- 5.10.y (from v5.13+)
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220520013534.2894233-4-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 28, 2022 at 11:39 AM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> On Thu, Jul 28, 2022 at 4:07 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> >
-> > On Wed, Jul 27, 2022 at 07:01:15PM -0700, Darrick J. Wong wrote:
-> > > On Wed, Jul 27, 2022 at 09:17:47PM +0200, Amir Goldstein wrote:
-> > > > On Tue, Jul 26, 2022 at 11:21 AM Amir Goldstein <amir73il@gmail.com> wrote:
-> > > > >
-> > > > > Darrick,
-> > > > >
-> > > > > This backport series contains mostly fixes from v5.14 release along
-> > > > > with three deferred patches from the joint 5.10/5.15 series [1].
-> > > > >
-> > > > > I ran the auto group 10 times on baseline (v5.10.131) and this series
-> > > > > with no observed regressions.
-> > > > >
-> > > > > I ran the recoveryloop group 100 times with no observed regressions.
-> > > > > The soak group run is in progress (10+) with no observed regressions
-> > > > > so far.
-> > > > >
-> > > > > I am somewhat disappointed from not seeing any improvement in the
-> > > > > results of the recoveryloop tests comapred to baseline.
-> > > > >
-> > > > > This is the summary of the recoveryloop test results on both baseline
-> > > > > and backport branch:
-> > > > >
-> > > > > generic,455, generic/457, generic/646: pass
-> > > > > generic/019, generic/475, generic/648: failing often in all config
-> > >
-> > > <nod> I posted a couple of patchsets to fstests@ yesterday that might
-> > > help with these recoveryloop tests failing.
-> > >
-> > > https://lore.kernel.org/fstests/165886493457.1585218.32410114728132213.stgit@magnolia/T/#t
-> > > https://lore.kernel.org/fstests/165886492580.1585149.760428651537119015.stgit@magnolia/T/#t
-> > > https://lore.kernel.org/fstests/165886491119.1585061.14285332087646848837.stgit@magnolia/T/#t
-> > >
-> > > > > generic/388: failing often with reflink_1024
-> > > > > generic/388: failing at ~1/50 rate for any config
-> > > > > generic/482: failing often on V4 configs
-> > > > > generic/482: failing at ~1/100 rate for V5 configs
-> > > > > xfs/057: failing at ~1/200 rate for any config
-> > > > >
-> > > > > I observed no failures in soak group so far neither on baseline nor
-> > > > > on backport branch. I will update when I have more results.
-> > > > >
-> > > >
-> > > > Some more results after 1.5 days of spinning:
-> > > > 1. soak group reached 100 runs (x5 configs) with no failures
-> > > > 2. Ran all the tests also on debian/testing with xfsprogs 5.18 and
-> > > >     observed a very similar fail/pass pattern as with xfsprogs 5.10
-> > > > 3. Started to run the 3 passing recoveryloop tests 1000 times and
-> > > >     an interesting pattern emerged -
-> > > >
-> > > > generic/455 failed 3 times on baseline (out of 250 runs x 5 configs),
-> > > > but if has not failed on backport branch yet (700 runs x 5 configs).
-> > > >
-> > > > And it's not just failures, it's proper data corruptions, e.g.
-> > > > "testfile2.mark1 md5sum mismatched" (and not always on mark1)
-> > >
-> > > Oh good!
-> > >
-> > >
-> > > >
-> > > > I will keep this loop spinning, but I am cautiously optimistic about
-> > > > this being an actual proof of bug fix.
->
-> That was wishful thinking - after 1500 x 5 runs there are 2 failures also
-> on the backport branch.
->
-> It is still better than 4 failures out of 800 x 5 runs on baseline, but I can
-> not call that a proof for bug fix - only no regression.
->
-> > > >
-> > > > If these results don't change, I would be happy to get an ACK for the
-> > > > series so I can post it after the long soaking.
-> > >
-> > > Patches 4-9 are an easy
-> > > Acked-by: Darrick J. Wong <djwong@kernel.org>
-> >
-> > I hit send too fast.
-> >
-> > I think patches 1-3 look correct.  I still think it's sort of risky,
-> > but your testing shows that things at least get better and don't
-> > immediately explode or anything. :)
-> >
-> > By my recollection of the log changes between 5.10 and 5.17 I think the
-> > lsn/cil split didn't change all that much, so if you get to the end of
-> > the week with no further problems then I say Acked-by for them too.
-> >
->
-> Great. I'll keep it spinning.
->
+On Fri, May 20, 2022 at 09:35:34AM +0800, Shiyang Ruan wrote:
+> Verify that dax-rmap works for both normal extent and shared extent.
+> 
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> ---
+>  tests/xfs/902     | 52 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/902.out |  9 ++++++++
+>  2 files changed, 61 insertions(+)
+>  create mode 100755 tests/xfs/902
+>  create mode 100644 tests/xfs/902.out
+> 
+> diff --git a/tests/xfs/902 b/tests/xfs/902
+> new file mode 100755
+> index 00000000..85ae07a1
+> --- /dev/null
+> +++ b/tests/xfs/902
+> @@ -0,0 +1,52 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# FS QA Test No. 902
+> +#
+> +# Test memory failure mechanism when dax and reflink working together
+> +#   test for partly reflinked file
+> +#
 
-Well, it's the end of my week now and loop has passed over 4,000
-runs x 5 configs on the backport branch with only 4 failures, so it's
-going to stable.
+Hi Shiyang,
+
+I'd like to merge this patchset now, but I just noticed these 3 new cases
+doesn't have Copyright announce, so I hope to double check with you that
+if you intend to drop Copyright line?
+
+If so, I'll merge directly, or please tell me what Copyright do you want
+to use, or send a new version with your Copyright (and RVB from Darrick).
 
 Thanks,
-Amir.
+Zorro
+
+> +. ./common/preamble
+> +_begin_fstest auto quick clone dax
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_require_check_dmesg
+> +_require_scratch_reflink
+> +_require_xfs_scratch_rmapbt
+> +_require_scratch_dax_mountopt "dax"
+> +_require_test_program "t_mmap_cow_memory_failure"
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount "-o dax" >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
+> +
+> +echo "Create the original files"
+> +nr=16
+> +blksz=$(get_page_size)
+> +_pwrite_byte 0x61 0 $((blksz * nr)) $testdir/testfile >> $seqres.full
+> +_pwrite_byte 0x62 0 $((blksz * nr)) $testdir/poisonfile >> $seqres.full
+> +seq 0 2 $((nr - 1)) | while read i; do
+> +	_reflink_range $testdir/testfile $((blksz * i)) \
+> +		$testdir/poisonfile $((blksz * i)) $blksz >> $seqres.full
+> +done
+> +_scratch_cycle_mount "dax"
+> +
+> +echo "Inject memory failure (1 page)"
+> +$here/src/t_mmap_cow_memory_failure -s1 -S1 -R $testdir/testfile -P $testdir/poisonfile
+> +
+> +echo "Inject memory failure (2 pages)"
+> +# poison on reflinked page and not reflinked page
+> +$here/src/t_mmap_cow_memory_failure -s2 -S2 -R $testdir/testfile -P $testdir/poisonfile
+> +
+> +_check_dmesg_for "Sending SIGBUS to t_mmap_cow_memo" || echo "Memory failure didn't kill the process"
+> +_check_dmesg_for "recovery action for dax page: Recovered" || echo "Failured page didn't recovered"
+> +
+> +# success, all done
+> +status=0
+> diff --git a/tests/xfs/902.out b/tests/xfs/902.out
+> new file mode 100644
+> index 00000000..3c055d54
+> --- /dev/null
+> +++ b/tests/xfs/902.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 902
+> +Format and mount
+> +Create the original files
+> +Inject memory failure (1 page)
+> +Inject poison...
+> +Process is killed by signal: 7
+> +Inject memory failure (2 pages)
+> +Inject poison...
+> +Process is killed by signal: 7
+> -- 
+> 2.35.1
+> 
+> 
+> 
+
