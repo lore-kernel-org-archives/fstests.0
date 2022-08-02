@@ -2,62 +2,110 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7340C00144
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Aug 2022 21:13:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56FDAC00140
+	for <linux-fstests@archiver.kernel.org>; Tue,  2 Aug 2022 07:52:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233396AbiHAVNM (ORCPT
+        id S232747AbiHBHwp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 1 Aug 2022 17:13:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40738 "EHLO
+        Tue, 2 Aug 2022 03:52:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232288AbiHAVNL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 1 Aug 2022 17:13:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43B4717E09;
-        Mon,  1 Aug 2022 14:13:09 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S231859AbiHBHwo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Aug 2022 03:52:44 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C16239F
+        for <fstests@vger.kernel.org>; Tue,  2 Aug 2022 00:52:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1659426761; i=@fujitsu.com;
+        bh=WPV67SlE4IkQyJ0oE1D09yV6R4h+kjrR81Oonq0FFWM=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=cEI3gDOEx7GRdOsnYgVg0RY9ZJxQJaRHE0g9aaCiJJ5yejGaOf18pdi9HB+13CSeN
+         ueELNccxox6utjb3XpiYguLugOkdAjromLm2xdCctByeDlmKMN9pga3p+IOw+HytTb
+         yZjY6eNNYnceBsEwgXgxAYYfQf/lXRY78vXr+1Ll+LLTUDZRV8q5VOSjD00lGMT8hy
+         YQ9qwEEkIyavT+73gEvGF80qVcceGquOy4oavk02vFveHoTzs4Kp1XK4geM7WyRqwi
+         hc5vkLCCge5Eh74AMDuMdRjJWc/ZqVjwyXJYcl7MKb4KeTvBHK6Tgj4NwPSNUkJeYJ
+         JR3V1hyI7dNJA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrDIsWRWlGSWpSXmKPExsViZ8OxWffk9Rd
+  JBuvOKlicbtnL7sDo8XmTXABjFGtmXlJ+RQJrxqQrnAVL2Sq6v3UzNjBuZe1i5OIQEjjPKHH/
+  yXq2LkZOIOcQk8SDxkyIxBFGic//JjGDJNgENCUO/H7KBGKLCMhK/J+xGsxmFpCR+NP6BKiGg
+  0NYwE1i0nxZkDCLgIrErc+rGUFsXgEnifYZn9lBbAkBBYkpD98zQ8QFJU7OfMICMUZC4uCLF8
+  wQNYoSM5YvZYGwKyRmzWpjgrDVJK6e28Q8gZF/FpL2WUjaFzAyrWK0TirKTM8oyU3MzNE1NDD
+  QNTQ01TU20jU0MtNLrNJN1Est1S1PLS7RNdJLLC/WSy0u1iuuzE3OSdHLSy3ZxAgMyJRihbod
+  jNdW/tQ7xCjJwaQkylu240WSEF9SfkplRmJxRnxRaU5q8SFGGQ4OJQnenitAOcGi1PTUirTMH
+  GB0wKQlOHiURHhvngdK8xYXJOYWZ6ZDpE4x6nJ8/HNxL7MQS15+XqqUOG/jVaAiAZCijNI8uB
+  GwSL3EKCslzMvIwMAgxFOQWpSbWYIq/4pRnINRSZjXEOQSnsy8ErhNr4COYAI6QocL7IiSRIS
+  UVAOTyan3izZqWj6bJ8Rw7cN3T4HV5kxSD9WXdezb/jy/Nn5WbFqgaP2B0/a/WJQzA78dvRRf
+  9XoJw3N1Qz3uZ0UX+VaaHimce9fR/pj//DgN3pqN3785Rc7panGU+zjTX7QrRPf6voz8dAlGH
+  tE7eQu2l5wvWy5ya/PkNbMD5uwvrl75ds/SWfN15Vml+9YwVV77+9l0nf/RY2VmQa6x188py2
+  WWt1VY+H2aKvSssr5pmnVERmeut3+WxyPeLdvvGVoYRM+UEp7R6MRWm2F8+2EmW/5Wxc/CF9Y
+  uvNpQyrDW6GDVpn02vyf+Nvqb7rz4ltyydrb68pRsv3Xnp1ypuDflimqBxWr9vor9wjc/ybEo
+  sRRnJBpqMRcVJwIANEYLv08DAAA=
+X-Env-Sender: liuyd.fnst@fujitsu.com
+X-Msg-Ref: server-23.tower-571.messagelabs.com!1659426761!6713!1
+X-Originating-IP: [62.60.8.179]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.87.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 24527 invoked from network); 2 Aug 2022 07:52:41 -0000
+Received: from unknown (HELO n03ukasimr04.n03.fujitsu.local) (62.60.8.179)
+  by server-23.tower-571.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 2 Aug 2022 07:52:41 -0000
+Received: from n03ukasimr04.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTP id 36889154
+        for <fstests@vger.kernel.org>; Tue,  2 Aug 2022 08:52:41 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id CA49F611C5;
-        Mon,  1 Aug 2022 21:13:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 22FC7C433D6;
-        Mon,  1 Aug 2022 21:13:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1659388388;
-        bh=MRb0LW2uoy4/4LXJB4zr4kkfNVeM+rOLFCCS3vbYaq0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=bDupovY75NbqS34P5QGdH5b40ya0Yxb24REzFSpHaBQxtA2SijyvCQA/kKnpF6ipu
-         nLmcLpzB2Ey2R63fj0ymC92XPsN6Fk4sLw2nm31FO8WFLr4iLIF+vnM1gB9EQHmUmT
-         Xhu95Y2uH3uY2rrsPEQf5ZSK3ziPTMAV0z3BM5ZfYaWFVKkrYOs/iozgG+83p6y0ir
-         Xty7LNoK0LG7J4nW+ukOc0SMl1zzjL8lqQD/B5LkypB17XBB2iyJhvwRGNsIMf7mBM
-         zEcl5+t9qBZ/kyTJD24rBPWuCvpmfaqCh9z6D1+G8Kf9aWwpFpiijPB4xYIWweDoN2
-         Rqcd/VyCQTqdw==
-Date:   Mon, 1 Aug 2022 14:13:07 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     guaneryu@gmail.com, zlang@redhat.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 2/2] fail_make_request: teach helpers about external
- devices
-Message-ID: <YuhB44OEEnmvd8vM@magnolia>
-References: <165886493457.1585218.32410114728132213.stgit@magnolia>
- <165886494578.1585218.6398445606846645392.stgit@magnolia>
- <YuLdQC7dh6stnIbm@infradead.org>
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTPS id 29B2B14C
+        for <fstests@vger.kernel.org>; Tue,  2 Aug 2022 08:52:41 +0100 (BST)
+Received: from d94fddf05399.g08.fujitsu.local (10.167.226.82) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Tue, 2 Aug 2022 08:52:39 +0100
+From:   Liu Yiding <liuyd.fnst@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <liuyd.fnst@fujitsu.com>
+Subject: [PATCH] generic/688: Skip test if fs doesn't support security
+Date:   Tue, 2 Aug 2022 07:52:40 +0000
+Message-ID: <1659426760-2-1-git-send-email-liuyd.fnst@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YuLdQC7dh6stnIbm@infradead.org>
+Content-Type: text/plain
+X-Originating-IP: [10.167.226.82]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 28, 2022 at 12:02:24PM -0700, Christoph Hellwig wrote:
-> Ah, and this adds the per-bdev helpers.  So this looks fine:
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
-> I can add an incremental patch to convert btrfs/271
+This test require security attr. Skip test if fs doesn't support
+security attr. E.g. virtiofs
 
-Yes please. :)
+Signed-off-by: Liu Yiding <liuyd.fnst@fujitsu.com>
+---
+ tests/generic/688 | 2 ++
+ 1 file changed, 2 insertions(+)
 
---D
+diff --git a/tests/generic/688 b/tests/generic/688
+index 426286b6..d11b4c21 100755
+--- a/tests/generic/688
++++ b/tests/generic/688
+@@ -7,6 +7,7 @@
+ # Functional test for dropping capability bits as part of an fallocate.
+ #
+ . ./common/preamble
++. ./common/attr
+ _begin_fstest auto prealloc quick
+ 
+ # Override the default cleanup function.
+@@ -28,6 +29,7 @@ _require_command "$GETCAP_PROG" getcap
+ _require_command "$SETCAP_PROG" setcap
+ _require_xfs_io_command falloc
+ _require_test
++_require_attrs security
+ _require_congruent_file_oplen $TEST_DIR 65536
+ 
+ junk_dir=$TEST_DIR/$seq
+-- 
+2.34.1
+
