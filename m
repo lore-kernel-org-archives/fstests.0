@@ -2,124 +2,36 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FEA7C19F28
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Aug 2022 18:52:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B690C19F28
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Aug 2022 20:09:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238124AbiHCSwl (ORCPT
+        id S232796AbiHCUJM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 3 Aug 2022 14:52:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40122 "EHLO
+        Wed, 3 Aug 2022 16:09:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236531AbiHCSwk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2022 14:52:40 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 582794A80F;
-        Wed,  3 Aug 2022 11:52:39 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id C1A386132C;
-        Wed,  3 Aug 2022 18:52:38 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1EAB5C433D7;
-        Wed,  3 Aug 2022 18:52:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1659552758;
-        bh=icIFDjn8ZFDiDZSJj06LtCvl/73AMs5IXgcud+vSgro=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=AAWWPPypBN1qmCLTFtPzLpWO4YjKVmT8o3sVefWBH7P/g16x0ASp3Be1qsD4oCzqm
-         mgvzeXhWd4O2VSZw/aOPZClsyv7XVtioId4hAQvYOQzL1s6Q0RqOcaY/hrdkMmcGAy
-         eS3mPAh7DPzYeOIh988P80u5neH9YHnTqGZfvC9KkKuQYtvTSB+t6b+debEhI3InyN
-         RCs/1iyqEO7Is77L3oj2mItN7dqa6CBop6zW/mYhzG/ZRnIxLVO7TgmnkmYdh5X0lG
-         gV64ZV1mkmst8s7bPdd9/FqjCTRFUUz7+jt1w6aXCAvo0OcGb4+4v3LIVeEL2KLPEC
-         HY21UfoiwoQKg==
-Date:   Wed, 3 Aug 2022 11:52:37 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, tytso@mit.edu,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 3/3] common/ext4: provide custom ext4 scratch fs options
-Message-ID: <YurD9cItB/yvfvL9@magnolia>
-References: <165950050051.198922.13423077997881086438.stgit@magnolia>
- <165950051745.198922.6487109955066878945.stgit@magnolia>
- <20220803182843.mznuba2z7mbti4co@zlang-mailbox>
+        with ESMTP id S229881AbiHCUJM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2022 16:09:12 -0400
+X-Greylist: delayed 370 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 03 Aug 2022 13:09:09 PDT
+Received: from 230605.vhostingservices.com (230605.vhostingservices.com [195.201.115.235])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9F562529A
+        for <fstests@vger.kernel.org>; Wed,  3 Aug 2022 13:09:09 -0700 (PDT)
+Received: by 230605.vhostingservices.com (Postfix, from userid 10004)
+        id 34FF763C26; Wed,  3 Aug 2022 22:02:58 +0200 (CEST)
+To:     fstests@vger.kernel.org
+Subject: =?us-ascii?Q?CRYPTOCURRENCY_WILL_MAKE_YOU_A_BILLIONAIRE_<Mod?=
+ =?us-ascii?Q?ulo_di_contatto_jobstyle.it>?=
+Date:   Wed, 3 Aug 2022 20:02:57 +0000
+From:   CharlesSwell <info@jobstyle.it>
+Message-ID: <FULiyYPykD1H9oiv2nbh9XKATrB2hg8x79klIQtGU@jobstyle.it>
+X-Mailer: PHPMailer 6.5.3 (https://github.com/PHPMailer/PHPMailer)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220803182843.mznuba2z7mbti4co@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8
+X-PPP-Message-ID: <165955697811.2160788.3987859190160629238@230605.vhostingservices.com>
+X-PPP-Vhost: jobstyle.it
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 04, 2022 at 02:28:43AM +0800, Zorro Lang wrote:
-> On Tue, Aug 02, 2022 at 09:21:57PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Create a _scratch_options backend for ext* so that we can inject
-> > pathnames to external log devices into the scratch fs mount options.
-> > This enables common/dm* to install block device filters, e.g. dm-error
-> > for stress testing.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  common/ext4 |   20 ++++++++++++++++++++
-> >  common/rc   |    3 +++
-> >  2 files changed, 23 insertions(+)
-> > 
-> > 
-> > diff --git a/common/ext4 b/common/ext4
-> > index 287705af..819f9786 100644
-> > --- a/common/ext4
-> > +++ b/common/ext4
-> > @@ -154,3 +154,23 @@ _require_scratch_richacl_ext4()
-> >  		|| _notrun "kernel doesn't support richacl feature on $FSTYP"
-> >  	_scratch_unmount
-> >  }
-> > +
-> > +_scratch_ext4_options()
-> > +{
-> > +    local type=$1
-> > +    local log_opt=""
-> > +
-> > +    case $type in
-> > +    mkfs)
-> > +        log_opt="-J device=$SCRATCH_LOGDEV"
-> 
-> In _scratch_mkfs_ext4, it deals with mkfs with SCRATCH_LOGDEV:
-> 
->   [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
->      $mkfs_cmd -O journal_dev $MKFS_OPTIONS $SCRATCH_LOGDEV && \
->      mkfs_cmd="$mkfs_cmd -J device=$SCRATCH_LOGDEV"
-> 
-> So is there a conflict or duplication?
+THE WORLD FINANCIAL CRISIS CAN MAKE YOU RICH! https://telegra.ph/Cryptocurrency-makes-people-millionaires-at-15-people-per-hour---Page-331973-08-02 Messaggio:
 
-Nope, I simply missed that.  I'll respin the patch.
-
---D
-
-> > +	;;
-> > +    mount)
-> > +	# As of kernel 5.19, the kernel mount option path parser only accepts
-> > +	# direct paths to block devices--the final path component cannot be a
-> > +	# symlink.
-> > +        log_opt="-o journal_path=$(realpath $SCRATCH_LOGDEV)"
-> > +	;;
-> > +    esac
-> > +    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > +	SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${log_opt}"
-> > +}
-> > diff --git a/common/rc b/common/rc
-> > index dc1d65c3..b82bb36b 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -178,6 +178,9 @@ _scratch_options()
-> >      "xfs")
-> >  	_scratch_xfs_options "$@"
-> >  	;;
-> > +    ext2|ext3|ext4|ext4dev)
-> > +	_scratch_ext4_options "$@"
-> > +	;;
-> >      esac
-> >  }
-> >  
-> > 
-> 
