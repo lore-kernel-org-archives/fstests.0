@@ -2,111 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB7A8C19F2D
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Aug 2022 22:42:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 913A4C19F2B
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Aug 2022 00:25:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238108AbiHCWmo (ORCPT
+        id S231656AbiHDAZO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 3 Aug 2022 18:42:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33250 "EHLO
+        Wed, 3 Aug 2022 20:25:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43242 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236511AbiHCWmn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2022 18:42:43 -0400
-Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 892A417A9E
-        for <fstests@vger.kernel.org>; Wed,  3 Aug 2022 15:42:42 -0700 (PDT)
-Received: by mail-lj1-x234.google.com with SMTP id x25so25070ljm.5
-        for <fstests@vger.kernel.org>; Wed, 03 Aug 2022 15:42:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc;
-        bh=ZTC8pqnrrWrVXkLaGQrW0Mi6fvjHzMsYZgeoNR5c7Xk=;
-        b=ghCsBaGRN7NASruqI7lhfwUTZQUCbOzpvP8io/1rI0/bMsZmbloWcYtD7n7/IfiYPB
-         BUbObP8qhUbzu49ghHR0xHoq3F9nd7GUDpzyqDashy2AIrpo2tYEiDITExdqgn5RyAKD
-         NGcGKnicjt5zWuZs0tC3Ym5fAa28sR2pKCIYCKrPzRGF1hJxe82I0sxhO3wcXDLxsvMk
-         gDRzpxXz99Kh+U2XQW4kEEAEnO1jWe1osi/USnt08aGB0tVlXpEM8EwEs4FKAfdPMN3O
-         F4u0x9Q816EVOoMyC3vSU6fnPQkAjHSvKPBSeqzp+DbMZRxvy1Dtk0ezi8tuVnJbI2ly
-         Qy9g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc;
-        bh=ZTC8pqnrrWrVXkLaGQrW0Mi6fvjHzMsYZgeoNR5c7Xk=;
-        b=gU29d5FE55+unuXrLaLSyEcWYrlYXZ0LlUarwVvKbNobwSFgCT9axs87RlLd9/BVuK
-         RMvpuVXaYvzxLso5+zubVenoG61u+DSki0S1ar2U+loV4fnkNubxC0vjGTLJbWAKiwYW
-         /tR6t1Kq+UNSE6XLHtLu/y37i/FKOTm8p7SQRrnDdY3jkQwSNU3vD7jL9rtGpAdNF9cI
-         r2nDgZMqhk6k3+sWGnb7RYF9keECb0O8xiuFCtZawjxvJm7woWhfrvVJqTf1HsLJaPQG
-         2Y8hFza2Ubhsfc/VAfKfQhhhg/lBZVb8mct2zwsB74qzvC1fdYk54JXgTfn+HMmgHGpL
-         uNZg==
-X-Gm-Message-State: AJIora96obG4YhfpiKkvfRXYrgH3A7F+nXpECy+WL+XX55Fhn8v7mIsE
-        F2o7rG0AhXU6NG0hWokvSP3d1cFLH4a1q/+BA2g8AFp75DU=
-X-Google-Smtp-Source: AGRyM1sS3D+36i3ULxDy7oZWSbBf1r5kMqPnKHsEckihriqkGQmKe5vFAmu6KuyMr4ohPwCQKTi2L0a6MEK3kCTGrxg=
-X-Received: by 2002:a2e:9444:0:b0:25d:91c1:caa3 with SMTP id
- o4-20020a2e9444000000b0025d91c1caa3mr9029485ljh.190.1659566560588; Wed, 03
- Aug 2022 15:42:40 -0700 (PDT)
+        with ESMTP id S236904AbiHDAZO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Aug 2022 20:25:14 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0679B52;
+        Wed,  3 Aug 2022 17:25:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6C99B61737;
+        Thu,  4 Aug 2022 00:25:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C88FDC433D6;
+        Thu,  4 Aug 2022 00:25:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1659572711;
+        bh=kqKZ7ISpCOBkkf9SIOPno19SY8z+jeRc+EusXoBgFgA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=p0zK5xCZh1z2AWHnjsB8hd9Vaa1oXPh+RkQWeXSRJzjy8gHy5X+pilsNL6+VHf8zG
+         LI8lyn8NmmWsUskgL6VxHGzk1BMOjk8cd2/U9w0Fs2EkozH5hfM7MgzWQTnY89Y8dM
+         BqqLFzcH4Y87m+UI+JEqXXof/E8h7POS03yOcLgSbcnabewtlNvppvs4kJPVu9NWRK
+         /mTWSEY2rVnENtROP4cOKi2j3j1WhyQITMT2KJgj+jZVc/5QGQTYbLrWvAQr9A6AgV
+         9DiyBXr8Ew8wuC0Q1mG++3+UHop9E/g/4SsOLaKzsrXwbMwZGCtK5FbfM8AqYAxdPb
+         wmqexXhwKlj4g==
+Date:   Wed, 3 Aug 2022 17:25:11 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     guaneryu@gmail.com, zlang@redhat.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
+        tytso@mit.edu, linux-ext4@vger.kernel.org
+Subject: [PATCH v1.2 3/3] common/ext4: provide custom ext4 scratch fs options
+Message-ID: <YusR5ww7Y4+/HXTt@magnolia>
+References: <165950050051.198922.13423077997881086438.stgit@magnolia>
+ <165950051745.198922.6487109955066878945.stgit@magnolia>
 MIME-Version: 1.0
-References: <20220803224121.420705-1-nhuck@google.com>
-In-Reply-To: <20220803224121.420705-1-nhuck@google.com>
-From:   Nathan Huckleberry <nhuck@google.com>
-Date:   Wed, 3 Aug 2022 15:42:29 -0700
-Message-ID: <CAJkfWY7kJDqBzqnGD_X4vVKZc3tfnDShC=AbFOjyra+8o1shvw@mail.gmail.com>
-Subject: Re: [PATCH v5 0/2] generic: test HCTR2 filename encryption
-To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Cc:     Eric Biggers <ebiggers@kernel.org>,
-        Sami Tolvanen <samitolvanen@google.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <165950051745.198922.6487109955066878945.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 3, 2022 at 3:41 PM Nathan Huckleberry <nhuck@google.com> wrote:
->
-> This patchset is not intended to be accepted yet.  It is reliant on HCTR2
-> support in the kernel which has not yet been accepted.  See the HCTR2 patchset
-> here: https://lore.kernel.org/all/20220520181501.2159644-1-nhuck@google.com/
+From: Darrick J. Wong <djwong@kernel.org>
 
-Oops, I need to remove this.
+Create a _scratch_options backend for ext* so that we can inject
+pathnames to external log devices into the scratch fs mount options.
+This enables common/dm* to install block device filters, e.g. dm-error
+for stress testing.
 
->
-> HCTR2 is a new wide-block encryption mode that can used for filename encryption
-> in fscrypt.  This patchset adds a reference implementation of HCTR2 to the
-> fscrypt testing utility and adds tests for filename encryption with HCTR2.
->
-> More information on HCTR2 can be found here: "Length-preserving encryption with
-> HCTR2": https://ia.cr/2021/1441
->
-> Changes in v5:
-> * Added links to relevant references for POLYVAL and HCTR2
-> * Removed POLYVAL partial block handling
-> * Referenced HCTR2 commit in test
->
-> Changes in v4:
-> * Add helper functions for HCTR2 hashing
-> * Fix accumulator alignment bug
-> * Small style fixes
->
-> Changes in v3:
-> * Consolidate tests into one file
->
-> Changes in v2:
-> * Use POLYVAL multiplication directly instead of using GHASH trick
-> * Split reference implementation and tests into two patches
-> * Remove v1 policy tests
-> * Various small style fixes
->
-> Nathan Huckleberry (2):
->   fscrypt-crypt-util: add HCTR2 implementation
->   generic: add tests for fscrypt policies with HCTR2
->
->  common/encrypt           |   2 +
->  src/fscrypt-crypt-util.c | 358 ++++++++++++++++++++++++++++++++-------
->  tests/generic/900        |  31 ++++
->  tests/generic/900.out    |  16 ++
->  4 files changed, 350 insertions(+), 57 deletions(-)
->  create mode 100755 tests/generic/900
->  create mode 100644 tests/generic/900.out
->
-> --
-> 2.37.1.455.g008518b4e5-goog
->
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+v1.2: refactor _scratch_mkfs_ext4 to use _scratch_options too
+---
+ common/ext4 |   34 +++++++++++++++++++++++++++++++---
+ common/rc   |    3 +++
+ 2 files changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/common/ext4 b/common/ext4
+index 287705af..8a3385af 100644
+--- a/common/ext4
++++ b/common/ext4
+@@ -63,16 +63,24 @@ _setup_large_ext4_fs()
+ 	return 0
+ }
+ 
++_scratch_mkfs_ext4_opts()
++{
++	mkfs_opts=$*
++
++	_scratch_options mkfs
++
++	echo "$MKFS_EXT4_PROG -F $SCRATCH_OPTIONS $mkfs_opts"
++}
++
+ _scratch_mkfs_ext4()
+ {
+-	local mkfs_cmd="$MKFS_EXT4_PROG -F"
++	local mkfs_cmd="`_scratch_mkfs_ext4_opts`"
+ 	local mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \" | grep -v \"^$\""
+ 	local tmp=`mktemp -u`
+ 	local mkfs_status
+ 
+ 	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+-	    $mkfs_cmd -O journal_dev $MKFS_OPTIONS $SCRATCH_LOGDEV && \
+-	    mkfs_cmd="$mkfs_cmd -J device=$SCRATCH_LOGDEV"
++	    $MKFS_EXT4_PROG -F -O journal_dev $MKFS_OPTIONS $SCRATCH_LOGDEV
+ 
+ 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	mkfs_status=$?
+@@ -154,3 +162,23 @@ _require_scratch_richacl_ext4()
+ 		|| _notrun "kernel doesn't support richacl feature on $FSTYP"
+ 	_scratch_unmount
+ }
++
++_scratch_ext4_options()
++{
++    local type=$1
++    local log_opt=""
++
++    case $type in
++    mkfs)
++        log_opt="-J device=$SCRATCH_LOGDEV"
++	;;
++    mount)
++	# As of kernel 5.19, the kernel mount option path parser only accepts
++	# direct paths to block devices--the final path component cannot be a
++	# symlink.
++        log_opt="-o journal_path=$(realpath $SCRATCH_LOGDEV)"
++	;;
++    esac
++    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
++	SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${log_opt}"
++}
+diff --git a/common/rc b/common/rc
+index dc1d65c3..b82bb36b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -178,6 +178,9 @@ _scratch_options()
+     "xfs")
+ 	_scratch_xfs_options "$@"
+ 	;;
++    ext2|ext3|ext4|ext4dev)
++	_scratch_ext4_options "$@"
++	;;
+     esac
+ }
+ 
