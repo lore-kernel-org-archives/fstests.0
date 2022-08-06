@@ -2,161 +2,156 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E470EC25B0C
-	for <linux-fstests@archiver.kernel.org>; Sat,  6 Aug 2022 14:36:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B656C19F2D
+	for <linux-fstests@archiver.kernel.org>; Sat,  6 Aug 2022 14:45:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230114AbiHFOgT (ORCPT
+        id S232164AbiHFOp1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 6 Aug 2022 10:36:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50588 "EHLO
+        Sat, 6 Aug 2022 10:45:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231534AbiHFOgR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 6 Aug 2022 10:36:17 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 52B58DFCE
-        for <fstests@vger.kernel.org>; Sat,  6 Aug 2022 07:36:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1659796575;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=nEiFrT8pUfGEdF80sgqt23VsfWyfMiuRGEYUmc8/30c=;
-        b=StbAmVpvES4Mx1/uCNDknd2kFbJi/w2ckVE8Sn84fYyWzI/TLF6w3B0nvqXpjWD3fuutat
-        w+gTRsBF3yWxLHLCHE1YilUxAULPvDzbBTVhgzDlD/qC6tIa8dCSMWDYUXYXvcgrcNj5VV
-        Tt+5Bi1P5ZsFz0uCDDNRmpJqrfsgK1E=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-212-q8eMCKYXOsq21I4pB0zhug-1; Sat, 06 Aug 2022 10:36:14 -0400
-X-MC-Unique: q8eMCKYXOsq21I4pB0zhug-1
-Received: by mail-qt1-f197.google.com with SMTP id l21-20020ac87255000000b0034243a8c14eso3741160qtp.6
-        for <fstests@vger.kernel.org>; Sat, 06 Aug 2022 07:36:14 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=nEiFrT8pUfGEdF80sgqt23VsfWyfMiuRGEYUmc8/30c=;
-        b=kq6ttxnhO/9riSkA/+rC+cQjkGvuXN0dLwRX7ERNZ5uXv+TKhH8JKqhVG29W+fYJow
-         gGYfn28cB1xyzoCQ8jctumlbb7wdd1uAwixkTecbA9avcqC4mIKjD3taN37wSVTrM8EA
-         j2RbSQYRGftqM/fMB/AWA/XcPzlSPOYj1zsKpoB4KIa1v4WWP4nz151o/DPACqyGkx3e
-         UfpSHE66DxCKjJ1E8dM5PSGJW3mIOVsk1x3Yz9wav/dpdQAI6Cmk2XkBd/pl/c/0HYBs
-         FUQQyqrxfnZ3rcxL24JOtLql7P3a4cwv9MmiSB+Yn8qjKAqFn/3KEBaktoCwo2ABVSKa
-         159A==
-X-Gm-Message-State: ACgBeo0+QD54t/HyP1W2HZyLQVUP+mI4xKLjWL9mR4hGrTF4S/sDS4zD
-        j6Tsa7m9J9cA5/1ZJgAjg/+J0RTSsrW8GrkinBx5WOfB/3l3BnyJMmYl+KCwBk66GyDCA2Cr98C
-        wbgfJ6bCOdB56NVdw0g==
-X-Received: by 2002:ac8:5793:0:b0:342:ea28:742f with SMTP id v19-20020ac85793000000b00342ea28742fmr3541695qta.177.1659796573513;
-        Sat, 06 Aug 2022 07:36:13 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR5Edqgd5tEma8Bbe0qmCrc7D7VQUC2Kd1HRUpHkIo359q3oDb/C2ul7wCAHGRuyZNWLp8tMpQ==
-X-Received: by 2002:ac8:5793:0:b0:342:ea28:742f with SMTP id v19-20020ac85793000000b00342ea28742fmr3541671qta.177.1659796573204;
-        Sat, 06 Aug 2022 07:36:13 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id i14-20020a05620a248e00b006b57b63a8ddsm5295002qkn.122.2022.08.06.07.36.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 06 Aug 2022 07:36:12 -0700 (PDT)
-Date:   Sat, 6 Aug 2022 22:36:06 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, tytso@mit.edu,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCHSET 0/3] fstests: refactor ext4-specific code
-Message-ID: <20220806143606.kd7ikbdjntugcpp4@zlang-mailbox>
-References: <165950050051.198922.13423077997881086438.stgit@magnolia>
+        with ESMTP id S231772AbiHFOpW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 6 Aug 2022 10:45:22 -0400
+X-Greylist: delayed 601 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 06 Aug 2022 07:45:10 PDT
+Received: from synology.com (mail.synology.com [211.23.38.101])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 813101D6
+        for <fstests@vger.kernel.org>; Sat,  6 Aug 2022 07:45:09 -0700 (PDT)
+Received: from localhost.localdomain (unknown [10.17.41.204])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by synology.com (Postfix) with ESMTPSA id EA87E2A23FDA9;
+        Sat,  6 Aug 2022 22:35:05 +0800 (CST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
+        t=1659796506; bh=h7vrbD78lFi6B+Lx/u+OsG1iAHRsZIuRbhr5OUKRMJg=;
+        h=From:To:Cc:Subject:Date;
+        b=qHogRfjOZYglGEeZG+bb9XClCViNY/T4HjXUqB9gRWcz3fsf98X2VlFkP7MKI48/L
+         KRTEg1Jl66LFeBlEO2fZtQgP3uZ/1aFzQ1GKbdgDlKcV13yHuQ+zjr1x9MarvWDytD
+         z2zkeWZLbL9QzH5o/W1vnTuio0a1aVJfuiyVIXpw=
+From:   bingjingc <bingjingc@synology.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     fdmanana@kernel.org, bxxxjxxg@gmail.com,
+        BingJing Chang <bingjingc@synology.com>
+Subject: [PATCH] fstests: btrfs: test incremental send for changed reference paths
+Date:   Sat,  6 Aug 2022 22:34:36 +0800
+Message-Id: <20220806143436.3501-1-bingjingc@synology.com>
+X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <165950050051.198922.13423077997881086438.stgit@magnolia>
+Content-Transfer-Encoding: 8bit
+X-Synology-MCP-Status: no
+X-Synology-Spam-Flag: no
+X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
+X-Synology-Virus-Status: no
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 02, 2022 at 09:21:40PM -0700, Darrick J. Wong wrote:
-> Hi all,
-> 
-> This series aims to make it so that fstests can install device mapper
-> filters for external log devices.  Before we can do that, however, we
-> need to change fstests to pass the device path of the jbd2 device to
-> mount and mkfs.  Before we can do /that/, refactor all the ext4-specific
-> code out of common/rc into a separate common/ext4 file.
-> 
-> If you're going to start using this mess, you probably ought to just
-> pull from my git trees, which are linked below.
-> 
-> This is an extraordinary way to destroy everything.  Enjoy!
-> Comments and questions are, as always, welcome.
-> 
-> --D
-> 
-> fstests git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=refactor-ext4-helpers
-> ---
+From: BingJing Chang <bingjingc@synology.com>
 
-Hi Darrick,
+Normally btrfs stores reference paths in an array of ref items. However,
+items for the same parent directory can not exceed the size of a leaf. So
+btrfs also store the rest of them in extended ref items alternatively.
 
-There're 3 failures[1] if test ext4 with external logdev, after merging this
-patchset.
-The g/629 is always failed with or without this patchset, it fails if test
-with external logdev.
-The g/250 and g/252 fail due to _scratch_mkfs_sized doesn't use common ext4
-mkfs helper, so can't deal with SCRATCH_LOGDEV well.
+In this test, it creates a large number of links under a directory
+causing the reference paths stored in these two ways as the parent
+snapshot. And it deletes and recreates just an amount of them that can be
+stored within an array of ref items as the send snapshot. Test that an
+incremental send operation correctly issues link/unlink operations only
+against new/deleted reference paths, or the receive operation will fail
+due to a link on an existed path.
 
-Thanks,
-Zorro
+This currently fails on btrfs but is fixed by a kernel patch with the
+following subject:
 
-[1]
-SECTION       -- logdev
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 5.19.0-0.rc2.21.fc37.x86_64+debug #1 SMP PREEMPT_DYNAMIC Mon Jun 13 14:55:18 UTC 2022
-MKFS_OPTIONS  -- -F -J device=/dev/loop0 /dev/sda3
-MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 -o journal_path=/dev/loop0 /dev/sda3 /mnt/scratch
+  "btrfs: send: fix sending link commands for existing file paths"
 
-generic/250 2s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/250.out.bad)
-    --- tests/generic/250.out   2022-04-29 23:07:23.262498285 +0800
-    +++ /root/git/xfstests/results//logdev/generic/250.out.bad  2022-08-06 22:26:45.179294149 +0800
-    @@ -1,9 +1,19 @@
-     QA output created by 250
-     Format and mount
-    +umount: /mnt/scratch: not mounted.
-    +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/error-test, missing codepage or helper program, or other error.
-    +       dmesg(1) may have more information after failed mount system call.
-     Create the original files
-    +umount: /mnt/scratch: not mounted.
-    ...
-    (Run 'diff -u /root/git/xfstests/tests/generic/250.out /root/git/xfstests/results//logdev/generic/250.out.bad'  to see the entire diff)
-generic/252 2s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/252.out.bad)
-    --- tests/generic/252.out   2022-04-29 23:07:23.264498308 +0800
-    +++ /root/git/xfstests/results//logdev/generic/252.out.bad  2022-08-06 22:26:48.495330525 +0800
-    @@ -1,10 +1,19 @@
-     QA output created by 252
-     Format and mount
-    +umount: /mnt/scratch: not mounted.
-    +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/error-test, missing codepage or helper program, or other error.
-    +       dmesg(1) may have more information after failed mount system call.
-     Create the original files
-    +umount: /mnt/scratch: not mounted.
-    ...
-    (Run 'diff -u /root/git/xfstests/tests/generic/252.out /root/git/xfstests/results//logdev/generic/252.out.bad'  to see the entire diff)
-generic/629 3s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/629.out.bad)
-    --- tests/generic/629.out   2022-04-29 23:07:23.545501491 +0800
-    +++ /root/git/xfstests/results//logdev/generic/629.out.bad  2022-08-06 22:26:50.810355920 +0800
-    @@ -1,4 +1,5 @@
-     QA output created by 629
-    +mke2fs 1.46.5 (30-Dec-2021)
-     test o_sync write
-     310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/0
-     test unaligned copy range o_sync
-    ...
-    (Run 'diff -u /root/git/xfstests/tests/generic/629.out /root/git/xfstests/results//logdev/generic/629.out.bad'  to see the entire diff)
-Ran: generic/250 generic/252 generic/629
-Failures: generic/250 generic/252 generic/629
-Failed 3 of 3 tests
+Signed-off-by: BingJing Chang <bingjingc@synology.com>
+---
+ tests/btrfs/272     | 65 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/272.out |  2 ++
+ 2 files changed, 67 insertions(+)
+ create mode 100755 tests/btrfs/272
+ create mode 100644 tests/btrfs/272.out
 
-
->  common/config |    4 +
->  common/ext4   |  176 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  common/rc     |  177 ++-------------------------------------------------------
->  common/xfs    |   23 +++++++
->  4 files changed, 208 insertions(+), 172 deletions(-)
->  create mode 100644 common/ext4
-> 
+diff --git a/tests/btrfs/272 b/tests/btrfs/272
+new file mode 100755
+index 00000000..a362d943
+--- /dev/null
++++ b/tests/btrfs/272
+@@ -0,0 +1,65 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 BingJing Chang.
++#
++# FS QA Test No. btrfs/272
++#
++# Regression test for btrfs incremental send issue where a link instruction
++# is sent against an existed file, causing btrfs receive to fail.
++#
++# This issue is fixed by the following linux kernel btrfs patch:
++#
++#   btrfs: send: fix sending link commands for existing file paths
++#
++. ./common/preamble
++_begin_fstest auto quick send
++
++tmp=`mktemp -d`
++
++# Override the default cleanup function.
++_cleanup()
++{
++	rm -rf $tmp
++}
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_require_test
++_require_scratch
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
++
++# create a file and 2000 hard links to the same inode
++touch $SCRATCH_MNT/vol/foo
++for i in {1..2000}; do
++	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
++done
++
++# take a snapshot for a parent snapshot
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
++
++# remove 2000 hard links and re-create the last 1000 links
++for i in {1..2000}; do
++	rm $SCRATCH_MNT/vol/$i
++done
++for i in {1001..2000}; do
++	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
++done
++
++# take another one for a send snapshot
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap2
++
++mkdir $SCRATCH_MNT/receive_dir
++_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $tmp/diff.snap \
++	$SCRATCH_MNT/snap2
++_run_btrfs_util_prog receive -f $tmp/diff.snap $SCRATCH_MNT/receive_dir
++_scratch_unmount
++
++echo "Silence is golden"
++status=0 ; exit
+diff --git a/tests/btrfs/272.out b/tests/btrfs/272.out
+new file mode 100644
+index 00000000..c18563ad
+--- /dev/null
++++ b/tests/btrfs/272.out
+@@ -0,0 +1,2 @@
++QA output created by 272
++Silence is golden
+-- 
+2.37.1
 
