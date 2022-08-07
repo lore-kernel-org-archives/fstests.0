@@ -2,143 +2,146 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BC4AC19F2A
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Aug 2022 15:51:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89155C19F2A
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Aug 2022 16:30:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234222AbiHGPvT (ORCPT
+        id S231896AbiHGQad (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 7 Aug 2022 11:51:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51096 "EHLO
+        Sun, 7 Aug 2022 12:30:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234182AbiHGPvQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Aug 2022 11:51:16 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75F542DD6
-        for <fstests@vger.kernel.org>; Sun,  7 Aug 2022 08:51:15 -0700 (PDT)
+        with ESMTP id S230172AbiHGQac (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Aug 2022 12:30:32 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95CE4384;
+        Sun,  7 Aug 2022 09:30:31 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id DB83260FB1
-        for <fstests@vger.kernel.org>; Sun,  7 Aug 2022 15:51:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0989C433D6;
-        Sun,  7 Aug 2022 15:51:12 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 289C4B80D3B;
+        Sun,  7 Aug 2022 16:30:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C97E1C433C1;
+        Sun,  7 Aug 2022 16:30:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1659887474;
-        bh=2rcYZwG56P52zn0hZF8xFvEhqD0MYeeLCruAl5N9kq4=;
-        h=Date:From:To:Subject:From;
-        b=YpfZkkt00hxpITvAcLtp9OJSeUK5osPfC4SZ29cI/q1y0kvfFaP0g2b7j14JiJSZq
-         gjpkuBxx5vMFpjq2lf+Oc9ll7dJAyO6+vIZvjrHWe96UxurSBRP22hA2RiJ/CMNtfS
-         74aQQLGvUHMX5h9yThe578uK1Gvj3t16kfgAmKdiVzNFwTYN7W322bArlmNSw+5fV3
-         spe6XTFVYTI6y1S+F2ALEWMy6un8Qi9Y60jUge9ftHVe6ZcknNdRmliKYMFT43Vi1E
-         hZReAeqls6M1/C+LSTacILX9KIFtyVjVWFRWllxxK/63P1HCaEt3S6K/xR8kOV0K/l
-         TZ51M8NpT6qxA==
-Date:   Sun, 07 Aug 2022 23:51:08 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to 16ddbd1aee29
+        s=k20201202; t=1659889828;
+        bh=6iP6UIJeUhFilY+S9Fs+Z2tz+ZlUbKp9xmJtJ2lNI1g=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=t1ZcnRPsMP/+SSwHdbh2YS9oM2oeO87Y9oIahUQ9bubqJKSFl2g4L9xHEGSO3Nhgn
+         6qhi13zR/UTk81RxOBsOCzmtt8rh9f5/9D2wuOC7Cx0IYhKRM6iq2atvU0z5INEH0f
+         iTlhBv2NeO2Qvqo2JHLtJ0vJliMX40IhGZ2NJIX3FtY+rXobPf2xJsg7kHh43QNhwb
+         giHJtdPMDNUVv+a4Ho/sV2C5WIhaatO+MnRrN6NZtPmXdeug4/6eZx/wkp7o49+lD7
+         Oq9DgWg30LrSROUCJ8Jx0N87XcNzQE6YPM/t0m7UWKM7fKYrn1GTmrb+w1jS0y2nF2
+         QMu1jtZySFcnQ==
+Date:   Sun, 7 Aug 2022 09:30:28 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, tytso@mit.edu,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCHSET 0/3] fstests: refactor ext4-specific code
+Message-ID: <Yu/opJBYTkgbiIPJ@magnolia>
+References: <165950050051.198922.13423077997881086438.stgit@magnolia>
+ <20220806143606.kd7ikbdjntugcpp4@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="RG6yOUgWUL2F"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Message-Id: <20220807155112.E0989C433D6@smtp.kernel.org>
+In-Reply-To: <20220806143606.kd7ikbdjntugcpp4@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sat, Aug 06, 2022 at 10:36:06PM +0800, Zorro Lang wrote:
+> On Tue, Aug 02, 2022 at 09:21:40PM -0700, Darrick J. Wong wrote:
+> > Hi all,
+> > 
+> > This series aims to make it so that fstests can install device mapper
+> > filters for external log devices.  Before we can do that, however, we
+> > need to change fstests to pass the device path of the jbd2 device to
+> > mount and mkfs.  Before we can do /that/, refactor all the ext4-specific
+> > code out of common/rc into a separate common/ext4 file.
+> > 
+> > If you're going to start using this mess, you probably ought to just
+> > pull from my git trees, which are linked below.
+> > 
+> > This is an extraordinary way to destroy everything.  Enjoy!
+> > Comments and questions are, as always, welcome.
+> > 
+> > --D
+> > 
+> > fstests git tree:
+> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=refactor-ext4-helpers
+> > ---
+> 
+> Hi Darrick,
+> 
+> There're 3 failures[1] if test ext4 with external logdev, after merging this
+> patchset.
+> The g/629 is always failed with or without this patchset, it fails if test
+> with external logdev.
+> The g/250 and g/252 fail due to _scratch_mkfs_sized doesn't use common ext4
+> mkfs helper, so can't deal with SCRATCH_LOGDEV well.
 
---RG6yOUgWUL2F
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Totally different helper, but yes, I'll add that to my list if nothing
+else than to get this patchset moving.
 
-Hi all,
+--D
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2022.08.07 release.
-
-There're 4 new cases in this release (g/693, x/550, x/551 and x/552), but they
-test for new features,  so won't fail on old kernel generally. Those 3 xfs
-cases are written for xfs' dax&reflink feature, it'll be in linux v5.20, if
-no exception.
-
-More details refer to below.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-16ddbd1aee29 xfs: add memory failure test for partly-reflinked&dax file
-
-New commits ([U]pdate, [N]ew):
-
-Darrick J. Wong (4):
-[U]      [437f7742b8f1] xfs/432: fix this test when external devices are in use
-[U]      [bbfa39e7a5cf] xfs/291: convert open-coded _scratch_xfs_repair usage
-[U]      [b41bf16361fe] xfs/533: fix false negatives for this test
-[U]      [78a3ce021ba8] xfs/018: fix LARP testing for small block sizes
-
-Nathan Huckleberry (2):
-[U]      [f57ffcf43811] fscrypt-crypt-util: add HCTR2 implementation
-[N]      [94e0bda55b36] generic: add tests for fscrypt policies with HCTR2
-
-Shiyang Ruan (3):
-[N]      [2eaabb1d38cf] xfs: add memory failure test for dax mode
-[N]      [545d6b783773] xfs: add memory failure test for dax&reflink mode
-[N]      [16ddbd1aee29] xfs: add memory failure test for partly-reflinked&dax file
-
-Zorro Lang (1):
-[U]      [378cf1c48143] fstests: add more dmerror related test cases into eio group
-
-
-Code Diffstat:
-
- .gitignore                      |   1 +
- common/encrypt                  |   2 +
- src/Makefile                    |   3 +-
- src/fscrypt-crypt-util.c        | 357 +++++++++++++++++++++++++++++++++-------
- src/t_mmap_cow_memory_failure.c | 157 ++++++++++++++++++
- tests/generic/484               |   2 +-
- tests/generic/628               |   2 +-
- tests/generic/629               |   2 +-
- tests/generic/693               |  31 ++++
- tests/generic/693.out           |  16 ++
- tests/xfs/018                   |  15 +-
- tests/xfs/018.out               |  43 +----
- tests/xfs/291                   |   6 +-
- tests/xfs/432                   |   3 +-
- tests/xfs/533                   |  10 +-
- tests/xfs/550                   |  50 ++++++
- tests/xfs/550.out               |   9 +
- tests/xfs/551                   |  51 ++++++
- tests/xfs/551.out               |   9 +
- tests/xfs/552                   |  54 ++++++
- tests/xfs/552.out               |   9 +
- 21 files changed, 717 insertions(+), 115 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---RG6yOUgWUL2F
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmLv3xkACgkQlNbPkfr2
-tMygMg//cLWP7UW171eR0dWgSfvoJ/OWOshSYv3pSVqQ/toJ2CqH74NZv5G2YrtL
-5K3xmB3u3tcPGbAUPp34+79g4HrfaxvVXi87k+y+kwaVdMXt4rCumJ6jX234W53L
-x9yhmZBasT6gFptyctlFAiK6f8fTZu4UWwx+F5PvlcT3QAxS5m2w+SnGd9LzuNE9
-WnZjyyycB0D2qelMzoKyo5vTIxw4TjM7YvRFexSXZzI94A7I3kiNkY2p9fkccDz6
-JnJUWvb4yr+F7DoVjXoW5rWgk0CigdAE9Wuv1NvrqPwwlgIdNn/zFkYpTBxAX9LY
-h7pj8x3kiTqNVY6k4dJ2F6/LJp7t/SAcETzpOclHGoGgvz9HfPL42XOfWzhkgxyP
-HUITi0xXWAp4Ucb+mNEfoAAt1tEW/glsoc147QS6wOhCUUlGwSG+/c9h5A8fBA0z
-jnEylvkpYvJ4NSuNdZRCiSaqNOvudnC0LY8TZw9WQOXvSHCmyJmeHC5UASVK/pUO
-5RsU+uaK/7eBUbomt4TsfUaD3dDhZ1DeTMF2pojitJHPQT+Cb3k84n9N8+NFt3kh
-zAojTB3TA4N1xbzMQM54RLRWOnIqG9CNFZtKUakGaLFDMHWYAwEQeDEupbOf4zaJ
-fglvZTXMJhzcNMbzFrHSueR6B2oXNdv9/fIWcHBTtqTjFgEJADs=
-=QI5o
------END PGP SIGNATURE-----
-
---RG6yOUgWUL2F--
+> Thanks,
+> Zorro
+> 
+> [1]
+> SECTION       -- logdev
+> FSTYP         -- ext4
+> PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 5.19.0-0.rc2.21.fc37.x86_64+debug #1 SMP PREEMPT_DYNAMIC Mon Jun 13 14:55:18 UTC 2022
+> MKFS_OPTIONS  -- -F -J device=/dev/loop0 /dev/sda3
+> MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 -o journal_path=/dev/loop0 /dev/sda3 /mnt/scratch
+> 
+> generic/250 2s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/250.out.bad)
+>     --- tests/generic/250.out   2022-04-29 23:07:23.262498285 +0800
+>     +++ /root/git/xfstests/results//logdev/generic/250.out.bad  2022-08-06 22:26:45.179294149 +0800
+>     @@ -1,9 +1,19 @@
+>      QA output created by 250
+>      Format and mount
+>     +umount: /mnt/scratch: not mounted.
+>     +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/error-test, missing codepage or helper program, or other error.
+>     +       dmesg(1) may have more information after failed mount system call.
+>      Create the original files
+>     +umount: /mnt/scratch: not mounted.
+>     ...
+>     (Run 'diff -u /root/git/xfstests/tests/generic/250.out /root/git/xfstests/results//logdev/generic/250.out.bad'  to see the entire diff)
+> generic/252 2s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/252.out.bad)
+>     --- tests/generic/252.out   2022-04-29 23:07:23.264498308 +0800
+>     +++ /root/git/xfstests/results//logdev/generic/252.out.bad  2022-08-06 22:26:48.495330525 +0800
+>     @@ -1,10 +1,19 @@
+>      QA output created by 252
+>      Format and mount
+>     +umount: /mnt/scratch: not mounted.
+>     +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/error-test, missing codepage or helper program, or other error.
+>     +       dmesg(1) may have more information after failed mount system call.
+>      Create the original files
+>     +umount: /mnt/scratch: not mounted.
+>     ...
+>     (Run 'diff -u /root/git/xfstests/tests/generic/252.out /root/git/xfstests/results//logdev/generic/252.out.bad'  to see the entire diff)
+> generic/629 3s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/629.out.bad)
+>     --- tests/generic/629.out   2022-04-29 23:07:23.545501491 +0800
+>     +++ /root/git/xfstests/results//logdev/generic/629.out.bad  2022-08-06 22:26:50.810355920 +0800
+>     @@ -1,4 +1,5 @@
+>      QA output created by 629
+>     +mke2fs 1.46.5 (30-Dec-2021)
+>      test o_sync write
+>      310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/0
+>      test unaligned copy range o_sync
+>     ...
+>     (Run 'diff -u /root/git/xfstests/tests/generic/629.out /root/git/xfstests/results//logdev/generic/629.out.bad'  to see the entire diff)
+> Ran: generic/250 generic/252 generic/629
+> Failures: generic/250 generic/252 generic/629
+> Failed 3 of 3 tests
+> 
+> 
+> >  common/config |    4 +
+> >  common/ext4   |  176 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  common/rc     |  177 ++-------------------------------------------------------
+> >  common/xfs    |   23 +++++++
+> >  4 files changed, 208 insertions(+), 172 deletions(-)
+> >  create mode 100644 common/ext4
+> > 
+> 
