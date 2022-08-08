@@ -2,221 +2,186 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 582B2C00140
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Aug 2022 09:31:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31503C00140
+	for <linux-fstests@archiver.kernel.org>; Mon,  8 Aug 2022 11:21:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236090AbiHHJbQ (ORCPT
+        id S242369AbiHHLVE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Aug 2022 05:31:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35804 "EHLO
+        Mon, 8 Aug 2022 07:21:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34130 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242503AbiHHJbG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Aug 2022 05:31:06 -0400
+        with ESMTP id S234627AbiHHLVD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Aug 2022 07:21:03 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EEE02BE1;
-        Mon,  8 Aug 2022 02:30:52 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE19FE80;
+        Mon,  8 Aug 2022 04:21:02 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C1B03B80E27;
-        Mon,  8 Aug 2022 09:30:50 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71FC5C433D6;
-        Mon,  8 Aug 2022 09:30:49 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 8DE1EB803F6;
+        Mon,  8 Aug 2022 11:21:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 543D5C433D6;
+        Mon,  8 Aug 2022 11:20:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1659951049;
-        bh=zFfWcIGkez6OAjgy8mA5wQWRw8k14yr8+Z6IR90ax48=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=DZOQXOH1kt4wLwa6TwPQ9dmL3RaEXcrzZ5gV5E8Brd2uL/9TP64HJ0z/S0AKT/mdw
-         rV5mj4NUI0L4fyUcPulksSNtPt4b1Y2xtNlfO/yeDSGHPHEWVpEXZqCqsv50y3NAIl
-         T0zSg+fPGkNwcm3uhbrRXV0sDRvy8YnMWNsC0gzhtJ4hyNzK3B5Yy1sKs6CnPx6rRC
-         /VkdT1fjXzHF/SGxGYQJ4zWy/XUQVDPo7F4BmZFOtkdmxcv8JvuojsLi/k0/aVCBt8
-         kn+M2hbU3cqSVcY+mufaFb39X09zuoUvFKHwmI0Ubog04XRRX1U6u7devPfnABUYVN
-         A4hTthF7F+dbA==
-Received: by mail-oi1-f176.google.com with SMTP id h188so9694501oia.13;
-        Mon, 08 Aug 2022 02:30:49 -0700 (PDT)
-X-Gm-Message-State: ACgBeo1DpzEbpoRw4davUUZxNxNfioEoLtHlLEzgA+vxLzU4Lfb31hQN
-        P0+YOibi1oHSP5qZBAEHV2G4uchHZvCZWTen9u8=
-X-Google-Smtp-Source: AA6agR6R/g5ZmsPXH2OKCK/AzfF+sZNqGiwrwbCEhEcOSOIFsSvxiMMt49D4P6HsO5nrTeKLCW8AFWcFrm4iUOzzz90=
-X-Received: by 2002:a05:6808:1b85:b0:33a:7a2b:3ff7 with SMTP id
- cj5-20020a0568081b8500b0033a7a2b3ff7mr7543590oib.152.1659951048528; Mon, 08
- Aug 2022 02:30:48 -0700 (PDT)
+        s=k20201202; t=1659957660;
+        bh=W+M9uGv2Jn1unWmblGLLj0WmGrqV36rpg6ZAhtclXxg=;
+        h=From:To:Cc:Subject:Date:From;
+        b=O5IcvuATPi12mt8ogfKDLZ4VzhBLwlWh9CTy+ueIwRK4INzETNZ3UEIGWuZ/MmmMm
+         SsH91CEbqB6rhgCeRcbzXcC60CfYElYQYZmNXWH+HEIuWzx/SmKmOPmYtHbPKcRIKa
+         ZykFdT0rxKEC2SdwK2MTLCS9KJ74U1YWGa7qD/lnpePMDPwXaqWKw0qiAejssdKHSU
+         ZJXM+hpT/f3xLte5UGvN5ll4XT2EHK7Me+OBKWdTwC6eT0BvjYuF/rAlcLLRI3UXsa
+         2UfaUhgrXjYEJMC3zbVpb9kpU0EOvLp+/Yp7smbirwpz7LriQGEftNCBip8oBKYgOS
+         dY3FkpIrNjVug==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test fsync after punching hole adjacent to an existing hole
+Date:   Mon,  8 Aug 2022 12:18:58 +0100
+Message-Id: <83a74ba89e9e4ee1060b7dfa1f190d4b51691909.1659957268.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-References: <20220806143436.3501-1-bingjingc@synology.com>
-In-Reply-To: <20220806143436.3501-1-bingjingc@synology.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Mon, 8 Aug 2022 10:30:11 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H52=bJj7nGsso0zhD6kYHDtXGhR7FSM=aFkF2wUvtWOSQ@mail.gmail.com>
-Message-ID: <CAL3q7H52=bJj7nGsso0zhD6kYHDtXGhR7FSM=aFkF2wUvtWOSQ@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: test incremental send for changed
- reference paths
-To:     bingjingc <bingjingc@synology.com>
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, bxxxjxxg@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Aug 6, 2022 at 3:35 PM bingjingc <bingjingc@synology.com> wrote:
->
-> From: BingJing Chang <bingjingc@synology.com>
->
-> Normally btrfs stores reference paths in an array of ref items. However,
-> items for the same parent directory can not exceed the size of a leaf. So
-> btrfs also store the rest of them in extended ref items alternatively.
->
-> In this test, it creates a large number of links under a directory
-> causing the reference paths stored in these two ways as the parent
-> snapshot. And it deletes and recreates just an amount of them that can be
-> stored within an array of ref items as the send snapshot. Test that an
-> incremental send operation correctly issues link/unlink operations only
-> against new/deleted reference paths, or the receive operation will fail
-> due to a link on an existed path.
->
-> This currently fails on btrfs but is fixed by a kernel patch with the
-> following subject:
+From: Filipe Manana <fdmanana@suse.com>
 
-Thanks for sending the test BingJing!
-Some comments below.
+Test that if we punch a hole adjacent to an existing hole, fsync the file
+and then power fail, the new hole exists after mounting again the
+filesystem.
 
->
->   "btrfs: send: fix sending link commands for existing file paths"
+This currently fails on btrfs with kernels 5.18 and 5.19 when not using
+the "no-holes" feature. The "no-holes" feature is enabled by default at
+mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
+btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
+"-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
+btrfs test matrix).
 
-Since the patch already landed in Linus' tree last week, the preferred
-format here is:
+The issue is fixed for btrfs with the following kernel patch:
 
-commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
-existing file paths")
+  "btrfs: update generation of hole file extent item when merging holes"
 
->
-> Signed-off-by: BingJing Chang <bingjingc@synology.com>
-> ---
->  tests/btrfs/272     | 65 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/272.out |  2 ++
->  2 files changed, 67 insertions(+)
->  create mode 100755 tests/btrfs/272
->  create mode 100644 tests/btrfs/272.out
->
-> diff --git a/tests/btrfs/272 b/tests/btrfs/272
-> new file mode 100755
-> index 00000000..a362d943
-> --- /dev/null
-> +++ b/tests/btrfs/272
-> @@ -0,0 +1,65 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 BingJing Chang.
-> +#
-> +# FS QA Test No. btrfs/272
-> +#
-> +# Regression test for btrfs incremental send issue where a link instruction
-> +# is sent against an existed file, causing btrfs receive to fail.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/694     | 85 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/694.out | 15 ++++++++
+ 2 files changed, 100 insertions(+)
+ create mode 100755 tests/generic/694
+ create mode 100644 tests/generic/694.out
 
-existed file -> existing path
+diff --git a/tests/generic/694 b/tests/generic/694
+new file mode 100755
+index 00000000..c034f914
+--- /dev/null
++++ b/tests/generic/694
+@@ -0,0 +1,85 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 694
++#
++# Test that if we punch a hole adjacent to an existing hole, fsync the file and
++# then power fail, the new hole exists after mounting again the filesystem.
++#
++. ./common/preamble
++_begin_fstest quick log punch
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++. ./common/filter
++. ./common/dmflakey
++. ./common/punch
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_scratch
++_require_dm_target flakey
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "fiemap"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test file with the following layout:
++#
++# [0, 2M)    - hole
++# [2M, 10M)  - extent
++# [10M, 12M) - hole
++$XFS_IO_PROG -f -c "truncate 12M" \
++	     -c "pwrite -S 0xab 2M 8M" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Persist everything, commit the filesystem's transaction.
++sync
++
++# Now punch two holes in the file:
++#
++# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
++#    [0, 2M);
++# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
++#    range [10M, 12M).
++#
++# These operations start a new filesystem transaction.
++# Then finally fsync the file.
++$XFS_IO_PROG -c "fpunch 2M 2M" \
++	     -c "fpunch 8M 2M" \
++	     -c "fsync" $SCRATCH_MNT/foobar
++
++# Simulate a power failure and mount the filesystem to check that everything
++# is in the same state as before the power failure.
++_flakey_drop_and_remount
++
++# We expect the following file layout:
++#
++# [0, 4M)    - hole
++# [4M, 8M)   - extent
++# [8M, 12M)  - hole
++echo "File layout after power failure:"
++$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
++
++# When reading the file we expect to get the range [4M, 8M) filled with bytes
++# that have a value of 0xab and 0x00 for anything outside that range.
++echo "File content after power failure:"
++od -A d -t x1 $SCRATCH_MNT/foobar
++
++_unmount_flakey
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/694.out b/tests/generic/694.out
+new file mode 100644
+index 00000000..f55212f3
+--- /dev/null
++++ b/tests/generic/694.out
+@@ -0,0 +1,15 @@
++QA output created by 694
++wrote 8388608/8388608 bytes at offset 2097152
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File layout after power failure:
++0: [0..8191]: hole
++1: [8192..16383]: data
++2: [16384..24575]: hole
++File content after power failure:
++0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++4194304 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
++*
++8388608 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++12582912
+-- 
+2.35.1
 
-> +#
-> +# This issue is fixed by the following linux kernel btrfs patch:
-> +#
-> +#   btrfs: send: fix sending link commands for existing file paths
-
-Same here.
-
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick send
-> +
-> +tmp=`mktemp -d`
-
-Overriding $tmp, which is set by the fstests framework is not a good idea.
-It's expected to be a file and not a directory.
-
-If you need a directory to store temporary files, you can use the test device.
-Take a look at btrfs/241 for example.
-
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +       rm -rf $tmp
-
-Then here leave the standard "rm -f $tmp.*" followed by a rm -rf of
-the temporary directory in the test mount point.
-
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_test
-> +_require_scratch
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +
-> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
-> +
-> +# create a file and 2000 hard links to the same inode
-> +touch $SCRATCH_MNT/vol/foo
-> +for i in {1..2000}; do
-> +       link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
-> +done
-> +
-> +# take a snapshot for a parent snapshot
-
-"take a snapshot for a full send operation"
-
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
-> +
-> +# remove 2000 hard links and re-create the last 1000 links
-> +for i in {1..2000}; do
-> +       rm $SCRATCH_MNT/vol/$i
-> +done
-> +for i in {1001..2000}; do
-> +       link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
-> +done
-> +
-> +# take another one for a send snapshot
-
-"take a snapshot for an incremental send operation"
-
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap2
-> +
-> +mkdir $SCRATCH_MNT/receive_dir
-> +_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $tmp/diff.snap \
-> +       $SCRATCH_MNT/snap2
-> +_run_btrfs_util_prog receive -f $tmp/diff.snap $SCRATCH_MNT/receive_dir
-> +_scratch_unmount
-
-Btw, there's no need to call _scratch_unmount, the fstests framework
-automatically does that when the test finishes.
-
-So, this tests that the send and receive commands do not fail.
-
-However it does not test that they produce the correct results: that
-after the receive we have the file with the same hardlinks, mtime,
-ctime, etc, as in the original subvolume.
-For send/receive tests (well, most tests actually), we always want to
-verify that the operations produce the expected results, not just that
-they don't fail with an error.
-
-The fssum utility can be used here to verify that, and we use it in
-many send/receive tests like btrfs/241 for example.
-
-Thanks for doing this!
-
-> +
-> +echo "Silence is golden"
-> +status=0 ; exit
-> diff --git a/tests/btrfs/272.out b/tests/btrfs/272.out
-> new file mode 100644
-> index 00000000..c18563ad
-> --- /dev/null
-> +++ b/tests/btrfs/272.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 272
-> +Silence is golden
-> --
-> 2.37.1
->
