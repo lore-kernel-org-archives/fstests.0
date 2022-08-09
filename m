@@ -2,68 +2,71 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46F09C19F2D
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Aug 2022 19:07:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39294C19F2D
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Aug 2022 21:01:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345379AbiHITHj (ORCPT
+        id S229531AbiHIVBO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Aug 2022 15:07:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38692 "EHLO
+        Tue, 9 Aug 2022 17:01:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53534 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347399AbiHITG2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 Aug 2022 15:06:28 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 065FF1CB1D;
-        Tue,  9 Aug 2022 11:48:27 -0700 (PDT)
+        with ESMTP id S230120AbiHIVAi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Aug 2022 17:00:38 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E780A2B25F;
+        Tue,  9 Aug 2022 14:00:34 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 98B38B816EC;
-        Tue,  9 Aug 2022 18:48:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BCE4EC433D6;
-        Tue,  9 Aug 2022 18:48:24 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6CBE560B98;
+        Tue,  9 Aug 2022 21:00:33 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9CA1C433C1;
+        Tue,  9 Aug 2022 21:00:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660070905;
-        bh=KDjLZfZKk5p+iqbsWFja1ZBsHYDrWv9/93Yvy/BtmLQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=fW4BZ8iImzfjx7wrCMoWFf7OamP4/gbTphsAJb5FJly3pD6kNVUf0cLIYR3SZRw9s
-         l6IlBLkn+/4rC1dvqINn3zSXz7Kn0DHjejkLFCBSl6h9J9TdZBk88IlEFFHPGSYAit
-         8QQEBoq162vmqVvXQXTuljv7QKAyVF/hRgawYU9dJVf0Jq27k7Qk/qTcGfWe3ZuT9q
-         6NYdTZasrBbPrEZ4HQAG/e913bbHcUAQbz6ihsj9XRGjCRwGWCidsKi/L8GJucYrHN
-         Bl06xy1Pnxc+j27X7yw6QfCK4KcqGDO9ji9w6fa1wOu4Xhjy1XZZh6uKI1WT7Kc9g0
-         Ulwdd2+ftt9pg==
-Date:   Tue, 9 Aug 2022 18:48:23 +0000
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Nathan Huckleberry <nhuck@google.com>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        Sami Tolvanen <samitolvanen@google.com>
-Subject: Re: [PATCH v6 0/2] generic: test HCTR2 filename encryption
-Message-ID: <YvKr97mYRUF5m4h8@gmail.com>
-References: <20220809184037.636578-1-nhuck@google.com>
+        s=k20201202; t=1660078832;
+        bh=NsfOyeat7eQRBQGfIh1c6X63qvec96mHVmms0EBOupU=;
+        h=Subject:From:To:Cc:Date:From;
+        b=XunadNpUlCa5G1m8t0Pg6ecZ6ianWQqjt8IPyWBWbkAQLhISpkx/y8bIZjHimnJ89
+         wXMBRo1d68o0sTPs7L37OWGEkfcDKCIz0kkPiRfnwJNoxwsb6FonSZgfACn2+GhgbV
+         vPDW0S+T0IHI1bA8lJFWkTN676T5evOzY6HsvsTZCTyC3PMGAQUR7+HEWKL4/78yTR
+         Nu5c8CWdc1VvvZk+2m8ifQLWIf5Mbpm14nbakF4ZCptbGXfmGfYFcze4Yk6zbS+IZn
+         sQTl4KvuujZvtJXqIqSxNcenhhgFP7AbzHURLmyKdW285IJXTOXVSoiBHXJ92lhUz7
+         IpScWENgren2g==
+Subject: [PATCHSET 0/1] fstests: fix tests for kernel 5.19
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     djwong@kernel.org, guaneryu@gmail.com, zlang@redhat.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Tue, 09 Aug 2022 14:00:32 -0700
+Message-ID: <166007883231.3274939.3963254355857450803.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220809184037.636578-1-nhuck@google.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 09, 2022 at 11:40:35AM -0700, Nathan Huckleberry wrote:
-> HCTR2 is a new wide-block encryption mode that can used for filename encryption
-> in fscrypt.  This patchset adds a reference implementation of HCTR2 to the
-> fscrypt testing utility and adds tests for filename encryption with HCTR2.
-> 
-> More information on HCTR2 can be found here: "Length-preserving encryption with
-> HCTR2": https://ia.cr/2021/1441
-> 
-> The patchset introducing HCTR2 to the kernel can be found here:
-> https://lore.kernel.org/linux-crypto/20220520181501.2159644-1-nhuck@google.com/
+Hi all,
 
-Thanks Huck.  Zorro already applied v5 to the for-next branch, with the
-chunk_size variable removed (which is the only code you changed in v6), and with
-generic/900 renamed to its final name of generic/693.  See
-https://lore.kernel.org/fstests/20220807155112.E0989C433D6@smtp.kernel.org/T/#u
+Pending fixes for new 5.19 material.
 
-So I think everything is good to go already.
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
 
-- Eric
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=xfs-fixes-5.19
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=xfs-fixes-5.19
+---
+ tests/xfs/015     |    4 ++--
+ tests/xfs/042     |   14 +++++++-------
+ tests/xfs/042.out |    4 ++--
+ tests/xfs/076     |    2 +-
+ 4 files changed, 12 insertions(+), 12 deletions(-)
+
