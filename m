@@ -2,183 +2,236 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFB92C00140
-	for <linux-fstests@archiver.kernel.org>; Mon,  8 Aug 2022 15:14:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBD48C00140
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Aug 2022 03:36:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243010AbiHHPOL (ORCPT
+        id S230508AbiHIDgF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Aug 2022 11:14:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56940 "EHLO
+        Mon, 8 Aug 2022 23:36:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236232AbiHHPOL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Aug 2022 11:14:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 085DEDEAB
-        for <fstests@vger.kernel.org>; Mon,  8 Aug 2022 08:14:09 -0700 (PDT)
+        with ESMTP id S230262AbiHIDgC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Aug 2022 23:36:02 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EC7821D339
+        for <fstests@vger.kernel.org>; Mon,  8 Aug 2022 20:36:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1659971649;
+        s=mimecast20190719; t=1660016160;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=CWS5lr0dtSTOC1UPZzz4U7wmq6O5TUNS8THJlD5Vdho=;
-        b=AQJLgfH8LtfxsRZvKdJB9GhCfx2rbo8JGhn9x5xbFjXIQcTK/VWSM9UuaGM4OJ+rEQV0jo
-        RJfOufo5TfrncE5pOF3mItWtsDPUhRr7plBQuXErRpxrOpvJl4jrbHhqRskPTDjT57pUOF
-        E1Cx4prq1Y40rKnyYAiuTNmRMQrk26A=
+        bh=tRpTzSCutRhSU7KrxI5EUYYsl3ijEUMNVGzdJ2ADq2k=;
+        b=VHkx4nODCdL8Gy9pUHyPeFBqFCnhCIUmZkVW1VvBCCPcvMAF7smkyUTG9pMVOzTF/1UrN7
+        ynblRNzCnL9cNlm8o+GHV2URCCgCWHjuY/r3HCQnQOFWo+kW90fYoS9Ky7NMFGuake8U6l
+        OoZbYzDa7RLwovLEZWTDnn3DRRyw6OA=
 Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
  [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-620-UKBmB8omNimmq4B_kmlt-w-1; Mon, 08 Aug 2022 11:14:08 -0400
-X-MC-Unique: UKBmB8omNimmq4B_kmlt-w-1
-Received: by mail-qk1-f199.google.com with SMTP id ay35-20020a05620a17a300b006b5d9646d31so8053092qkb.6
-        for <fstests@vger.kernel.org>; Mon, 08 Aug 2022 08:14:08 -0700 (PDT)
+ us-mta-121-9sr6RGWeNBaC5D7JwH2TAw-1; Mon, 08 Aug 2022 23:35:58 -0400
+X-MC-Unique: 9sr6RGWeNBaC5D7JwH2TAw-1
+Received: by mail-qk1-f199.google.com with SMTP id u15-20020a05620a0c4f00b006b8b3f41303so9259157qki.8
+        for <fstests@vger.kernel.org>; Mon, 08 Aug 2022 20:35:58 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=CWS5lr0dtSTOC1UPZzz4U7wmq6O5TUNS8THJlD5Vdho=;
-        b=dc8SDSnQrrswB/p12P79Gi23c3E4QyxTZclNu0K99X5k4shXCRapLaaCMi9MV5VX8i
-         sg6BvqDVGjO0ZYVgwo2vu9GDdtpc3LuEW275IIOpu/bG04lIbYvKwmHHc4QwNE4R+PoI
-         zmisIQRvPGJ6L82w+ppjclDY2wb84XKcDOyAon8eSVKqwecAOjeGNpkTVkXFW1iK2Jx2
-         ena40QbXRLrtPzp5GZm8sKRkuSCV+W4VDPvm8ssDsgAU+o59KebmwRIUMLGfDqsYxpES
-         CD42Q9mPcw24SfsyoV7OoH4nMehSBj6iBJQy9Vg7LnMlwen62CF0OgtHJO/rBrcKlt0M
-         1sLA==
-X-Gm-Message-State: ACgBeo2fPp1ZDnTr52As2IB4HlxSWnO6ufxM8x+/Xt6BY7rfYzVcBp4f
-        WIs9toSFkCr7tfwjiS/JqdQwKGvmXHowEDgU3YsQNu4GEMY+eae26H9d50PCU3YPanrwuCBQfGj
-        tYaXKPV3cjrbMDgF2Pg==
-X-Received: by 2002:a05:620a:414c:b0:6b5:cd90:6d27 with SMTP id k12-20020a05620a414c00b006b5cd906d27mr14552874qko.238.1659971647472;
-        Mon, 08 Aug 2022 08:14:07 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR55mhsnYcUTBIV3q5mFdNhg2SA0THgd0xWf4Km0TyqR3lKgKIl7qgFlTWnvs97tWrMZHSaVRg==
-X-Received: by 2002:a05:620a:414c:b0:6b5:cd90:6d27 with SMTP id k12-20020a05620a414c00b006b5cd906d27mr14552837qko.238.1659971647139;
-        Mon, 08 Aug 2022 08:14:07 -0700 (PDT)
+        bh=tRpTzSCutRhSU7KrxI5EUYYsl3ijEUMNVGzdJ2ADq2k=;
+        b=eZXlfJ4AbEeOPQw99ex4GoTXzIV4fO9ah0sEhKc3z1t2eJb0rt14iYm8WKb4vNZsKh
+         2cWtY3XCiCagO3tCESIrg5hyI5Gg9AQy9KEt+a1XCJQ0LudaBg3Jrc9ps/ucTEdY6R3o
+         jd6Vv2D89QCGG1njjbVnq+M0VrteCZdPZUQYeDXyRZliZiVHL6lblQQrejwi12/VxleA
+         mprpJD+gD97rlfOdd/t6lebVp4hCnVqh6f/4NXmNWT/MvIur/irWxe3nVRoiKwrZ0utg
+         De9lEZgxPThbF0XZmuvhrskIykvw6FxfuKwPOl76QHbCLqGfbPxxiXlHn96Ua671AsRX
+         joLQ==
+X-Gm-Message-State: ACgBeo1WwOC1xv2SIHJx7KGZ7olRCjbawsCe3RBpvPvbdNv7xLfukml9
+        QmxHkUMSLw1QXkMPMA4ruykGhFRqZBtueT+2w/NvS4eRRzvDK+kC61Gg+PDbjiXnv6fdT77eqtZ
+        E4/AYnUVnJiOTzAU1sQ==
+X-Received: by 2002:a05:622a:30a:b0:31e:fa39:2dd with SMTP id q10-20020a05622a030a00b0031efa3902ddmr18323744qtw.679.1660016158335;
+        Mon, 08 Aug 2022 20:35:58 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR6lMAJ7tS6WQTGe6/LKnZhG5yNZBSYxUa0l9SRjNn1H5Uc2p9iCqA3Yobgn/CUA5zgwtnPsEg==
+X-Received: by 2002:a05:622a:30a:b0:31e:fa39:2dd with SMTP id q10-20020a05622a030a00b0031efa3902ddmr18323730qtw.679.1660016158010;
+        Mon, 08 Aug 2022 20:35:58 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id s13-20020a05622a178d00b0031eeefd896esm8478355qtk.3.2022.08.08.08.14.04
+        by smtp.gmail.com with ESMTPSA id s11-20020a05622a1a8b00b0031d283f4c4dsm9843839qtc.60.2022.08.08.20.35.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 Aug 2022 08:14:06 -0700 (PDT)
-Date:   Mon, 8 Aug 2022 23:13:59 +0800
+        Mon, 08 Aug 2022 20:35:57 -0700 (PDT)
+Date:   Tue, 9 Aug 2022 11:35:51 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, tytso@mit.edu,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCHSET 0/3] fstests: refactor ext4-specific code
-Message-ID: <20220808151359.4e3ydlznmdx4vmgn@zlang-mailbox>
-References: <165950050051.198922.13423077997881086438.stgit@magnolia>
- <20220806143606.kd7ikbdjntugcpp4@zlang-mailbox>
- <Yu/opJBYTkgbiIPJ@magnolia>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        djwong@kernel.org
+Subject: Re: [PATCH] generic: test fsync after punching hole adjacent to an
+ existing hole
+Message-ID: <20220809033551.ip3lq5kkhvabdppn@zlang-mailbox>
+References: <83a74ba89e9e4ee1060b7dfa1f190d4b51691909.1659957268.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Yu/opJBYTkgbiIPJ@magnolia>
+In-Reply-To: <83a74ba89e9e4ee1060b7dfa1f190d4b51691909.1659957268.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 07, 2022 at 09:30:28AM -0700, Darrick J. Wong wrote:
-> On Sat, Aug 06, 2022 at 10:36:06PM +0800, Zorro Lang wrote:
-> > On Tue, Aug 02, 2022 at 09:21:40PM -0700, Darrick J. Wong wrote:
-> > > Hi all,
-> > > 
-> > > This series aims to make it so that fstests can install device mapper
-> > > filters for external log devices.  Before we can do that, however, we
-> > > need to change fstests to pass the device path of the jbd2 device to
-> > > mount and mkfs.  Before we can do /that/, refactor all the ext4-specific
-> > > code out of common/rc into a separate common/ext4 file.
-> > > 
-> > > If you're going to start using this mess, you probably ought to just
-> > > pull from my git trees, which are linked below.
-> > > 
-> > > This is an extraordinary way to destroy everything.  Enjoy!
-> > > Comments and questions are, as always, welcome.
-> > > 
-> > > --D
-> > > 
-> > > fstests git tree:
-> > > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=refactor-ext4-helpers
-> > > ---
-> > 
-> > Hi Darrick,
-> > 
-> > There're 3 failures[1] if test ext4 with external logdev, after merging this
-> > patchset.
-> > The g/629 is always failed with or without this patchset, it fails if test
-> > with external logdev.
-> > The g/250 and g/252 fail due to _scratch_mkfs_sized doesn't use common ext4
-> > mkfs helper, so can't deal with SCRATCH_LOGDEV well.
+On Mon, Aug 08, 2022 at 12:18:58PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Totally different helper, but yes, I'll add that to my list if nothing
-> else than to get this patchset moving.
+> Test that if we punch a hole adjacent to an existing hole, fsync the file
+> and then power fail, the new hole exists after mounting again the
+> filesystem.
+> 
+> This currently fails on btrfs with kernels 5.18 and 5.19 when not using
+> the "no-holes" feature. The "no-holes" feature is enabled by default at
+> mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
+> btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
+> "-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
+> btrfs test matrix).
+> 
+> The issue is fixed for btrfs with the following kernel patch:
+> 
+>   "btrfs: update generation of hole file extent item when merging holes"
 
-Yes, just due to you try to help common/dmerror to support external logdev,
-and these two eio test cases use _scratch_mkfs_sized, it's not compatible
-with your new change on dmerror, but it's not regression :)
-
-I think we can fix visible errors at first, then improve ext4 external logdev
-supporting bit by bit.
-
-Thanks,
-Zorro
+CC btrfs list
 
 > 
-> --D
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/generic/694     | 85 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/694.out | 15 ++++++++
+>  2 files changed, 100 insertions(+)
+>  create mode 100755 tests/generic/694
+>  create mode 100644 tests/generic/694.out
 > 
-> > Thanks,
-> > Zorro
-> > 
-> > [1]
-> > SECTION       -- logdev
-> > FSTYP         -- ext4
-> > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 5.19.0-0.rc2.21.fc37.x86_64+debug #1 SMP PREEMPT_DYNAMIC Mon Jun 13 14:55:18 UTC 2022
-> > MKFS_OPTIONS  -- -F -J device=/dev/loop0 /dev/sda3
-> > MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 -o journal_path=/dev/loop0 /dev/sda3 /mnt/scratch
-> > 
-> > generic/250 2s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/250.out.bad)
-> >     --- tests/generic/250.out   2022-04-29 23:07:23.262498285 +0800
-> >     +++ /root/git/xfstests/results//logdev/generic/250.out.bad  2022-08-06 22:26:45.179294149 +0800
-> >     @@ -1,9 +1,19 @@
-> >      QA output created by 250
-> >      Format and mount
-> >     +umount: /mnt/scratch: not mounted.
-> >     +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/error-test, missing codepage or helper program, or other error.
-> >     +       dmesg(1) may have more information after failed mount system call.
-> >      Create the original files
-> >     +umount: /mnt/scratch: not mounted.
-> >     ...
-> >     (Run 'diff -u /root/git/xfstests/tests/generic/250.out /root/git/xfstests/results//logdev/generic/250.out.bad'  to see the entire diff)
-> > generic/252 2s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/252.out.bad)
-> >     --- tests/generic/252.out   2022-04-29 23:07:23.264498308 +0800
-> >     +++ /root/git/xfstests/results//logdev/generic/252.out.bad  2022-08-06 22:26:48.495330525 +0800
-> >     @@ -1,10 +1,19 @@
-> >      QA output created by 252
-> >      Format and mount
-> >     +umount: /mnt/scratch: not mounted.
-> >     +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/error-test, missing codepage or helper program, or other error.
-> >     +       dmesg(1) may have more information after failed mount system call.
-> >      Create the original files
-> >     +umount: /mnt/scratch: not mounted.
-> >     ...
-> >     (Run 'diff -u /root/git/xfstests/tests/generic/252.out /root/git/xfstests/results//logdev/generic/252.out.bad'  to see the entire diff)
-> > generic/629 3s ... - output mismatch (see /root/git/xfstests/results//logdev/generic/629.out.bad)
-> >     --- tests/generic/629.out   2022-04-29 23:07:23.545501491 +0800
-> >     +++ /root/git/xfstests/results//logdev/generic/629.out.bad  2022-08-06 22:26:50.810355920 +0800
-> >     @@ -1,4 +1,5 @@
-> >      QA output created by 629
-> >     +mke2fs 1.46.5 (30-Dec-2021)
-> >      test o_sync write
-> >      310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/0
-> >      test unaligned copy range o_sync
-> >     ...
-> >     (Run 'diff -u /root/git/xfstests/tests/generic/629.out /root/git/xfstests/results//logdev/generic/629.out.bad'  to see the entire diff)
-> > Ran: generic/250 generic/252 generic/629
-> > Failures: generic/250 generic/252 generic/629
-> > Failed 3 of 3 tests
-> > 
-> > 
-> > >  common/config |    4 +
-> > >  common/ext4   |  176 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  common/rc     |  177 ++-------------------------------------------------------
-> > >  common/xfs    |   23 +++++++
-> > >  4 files changed, 208 insertions(+), 172 deletions(-)
-> > >  create mode 100644 common/ext4
-> > > 
-> > 
+> diff --git a/tests/generic/694 b/tests/generic/694
+> new file mode 100755
+> index 00000000..c034f914
+> --- /dev/null
+> +++ b/tests/generic/694
+> @@ -0,0 +1,85 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 694
+> +#
+> +# Test that if we punch a hole adjacent to an existing hole, fsync the file and
+> +# then power fail, the new hole exists after mounting again the filesystem.
+
+Better to explain this's a known regression test at here.
+
+And add _fixed_by_kernel_commit later, after that kernel patch is merged and
+has a fixed commit id.
+
+> +#
+> +. ./common/preamble
+> +_begin_fstest quick log punch
+
+"auto" group?
+
+> +
+> +_cleanup()
+> +{
+> +	_cleanup_flakey
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/dmflakey
+> +. ./common/punch
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+   ^^^^
+This's just a reminder, please remove it.
+
+> +_supported_fs generic
+> +_require_scratch
+> +_require_dm_target flakey
+> +_require_xfs_io_command "fpunch"
+> +_require_xfs_io_command "fiemap"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_init_flakey
+> +_mount_flakey
+> +
+> +# Create our test file with the following layout:
+> +#
+> +# [0, 2M)    - hole
+> +# [2M, 10M)  - extent
+> +# [10M, 12M) - hole
+> +$XFS_IO_PROG -f -c "truncate 12M" \
+> +	     -c "pwrite -S 0xab 2M 8M" \
+> +	     $SCRATCH_MNT/foobar | _filter_xfs_io
+> +
+> +# Persist everything, commit the filesystem's transaction.
+> +sync
+> +
+> +# Now punch two holes in the file:
+> +#
+> +# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
+> +#    [0, 2M);
+> +# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
+> +#    range [10M, 12M).
+> +#
+> +# These operations start a new filesystem transaction.
+> +# Then finally fsync the file.
+> +$XFS_IO_PROG -c "fpunch 2M 2M" \
+> +	     -c "fpunch 8M 2M" \
+> +	     -c "fsync" $SCRATCH_MNT/foobar
+
+Darrick added a new helper _require_congruent_file_oplen(), might worth
+using it. Any thoughts?
+
+> +
+> +# Simulate a power failure and mount the filesystem to check that everything
+> +# is in the same state as before the power failure.
+> +_flakey_drop_and_remount
+> +
+> +# We expect the following file layout:
+> +#
+> +# [0, 4M)    - hole
+> +# [4M, 8M)   - extent
+> +# [8M, 12M)  - hole
+> +echo "File layout after power failure:"
+> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
+> +
+> +# When reading the file we expect to get the range [4M, 8M) filled with bytes
+> +# that have a value of 0xab and 0x00 for anything outside that range.
+> +echo "File content after power failure:"
+> +od -A d -t x1 $SCRATCH_MNT/foobar
+
+Can _hexdump in common/rc help ?
+
+> +
+> +_unmount_flakey
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/694.out b/tests/generic/694.out
+> new file mode 100644
+> index 00000000..f55212f3
+> --- /dev/null
+> +++ b/tests/generic/694.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 694
+> +wrote 8388608/8388608 bytes at offset 2097152
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File layout after power failure:
+> +0: [0..8191]: hole
+> +1: [8192..16383]: data
+> +2: [16384..24575]: hole
+> +File content after power failure:
+> +0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> +*
+> +4194304 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
+> +*
+> +8388608 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> +*
+> +12582912
+> -- 
+> 2.35.1
 > 
 
