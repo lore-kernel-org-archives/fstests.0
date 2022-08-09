@@ -2,236 +2,247 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBD48C00140
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Aug 2022 03:36:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0810C19F2D
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Aug 2022 07:30:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230508AbiHIDgF (ORCPT
+        id S238996AbiHIHaD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Aug 2022 23:36:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42348 "EHLO
+        Tue, 9 Aug 2022 03:30:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53862 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230262AbiHIDgC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Aug 2022 23:36:02 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EC7821D339
-        for <fstests@vger.kernel.org>; Mon,  8 Aug 2022 20:36:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1660016160;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=tRpTzSCutRhSU7KrxI5EUYYsl3ijEUMNVGzdJ2ADq2k=;
-        b=VHkx4nODCdL8Gy9pUHyPeFBqFCnhCIUmZkVW1VvBCCPcvMAF7smkyUTG9pMVOzTF/1UrN7
-        ynblRNzCnL9cNlm8o+GHV2URCCgCWHjuY/r3HCQnQOFWo+kW90fYoS9Ky7NMFGuake8U6l
-        OoZbYzDa7RLwovLEZWTDnn3DRRyw6OA=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-121-9sr6RGWeNBaC5D7JwH2TAw-1; Mon, 08 Aug 2022 23:35:58 -0400
-X-MC-Unique: 9sr6RGWeNBaC5D7JwH2TAw-1
-Received: by mail-qk1-f199.google.com with SMTP id u15-20020a05620a0c4f00b006b8b3f41303so9259157qki.8
-        for <fstests@vger.kernel.org>; Mon, 08 Aug 2022 20:35:58 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=tRpTzSCutRhSU7KrxI5EUYYsl3ijEUMNVGzdJ2ADq2k=;
-        b=eZXlfJ4AbEeOPQw99ex4GoTXzIV4fO9ah0sEhKc3z1t2eJb0rt14iYm8WKb4vNZsKh
-         2cWtY3XCiCagO3tCESIrg5hyI5Gg9AQy9KEt+a1XCJQ0LudaBg3Jrc9ps/ucTEdY6R3o
-         jd6Vv2D89QCGG1njjbVnq+M0VrteCZdPZUQYeDXyRZliZiVHL6lblQQrejwi12/VxleA
-         mprpJD+gD97rlfOdd/t6lebVp4hCnVqh6f/4NXmNWT/MvIur/irWxe3nVRoiKwrZ0utg
-         De9lEZgxPThbF0XZmuvhrskIykvw6FxfuKwPOl76QHbCLqGfbPxxiXlHn96Ua671AsRX
-         joLQ==
-X-Gm-Message-State: ACgBeo1WwOC1xv2SIHJx7KGZ7olRCjbawsCe3RBpvPvbdNv7xLfukml9
-        QmxHkUMSLw1QXkMPMA4ruykGhFRqZBtueT+2w/NvS4eRRzvDK+kC61Gg+PDbjiXnv6fdT77eqtZ
-        E4/AYnUVnJiOTzAU1sQ==
-X-Received: by 2002:a05:622a:30a:b0:31e:fa39:2dd with SMTP id q10-20020a05622a030a00b0031efa3902ddmr18323744qtw.679.1660016158335;
-        Mon, 08 Aug 2022 20:35:58 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR6lMAJ7tS6WQTGe6/LKnZhG5yNZBSYxUa0l9SRjNn1H5Uc2p9iCqA3Yobgn/CUA5zgwtnPsEg==
-X-Received: by 2002:a05:622a:30a:b0:31e:fa39:2dd with SMTP id q10-20020a05622a030a00b0031efa3902ddmr18323730qtw.679.1660016158010;
-        Mon, 08 Aug 2022 20:35:58 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id s11-20020a05622a1a8b00b0031d283f4c4dsm9843839qtc.60.2022.08.08.20.35.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 Aug 2022 20:35:57 -0700 (PDT)
-Date:   Tue, 9 Aug 2022 11:35:51 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
+        with ESMTP id S237439AbiHIHaC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Aug 2022 03:30:02 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9EAA21249;
+        Tue,  9 Aug 2022 00:30:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6D4D561281;
+        Tue,  9 Aug 2022 07:30:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E078C433D6;
+        Tue,  9 Aug 2022 07:29:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1660030199;
+        bh=7FDnoGOm0q9dE2qKTPazVh/OnxjGcVT2F3gW5IE2pAc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=bzsPgOx0mE3dW0+pke/FPsIroQjfEZLt9XQ1KJJTrK6JV3heO3EtYnfhUVMRGfFa/
+         eTcx/YlsuxsDk+dVqHS+9y/jN7M1ko006od9gN4pzaMtX+xWdhxM7A6Zls2j2jHLBf
+         b1p9lIzBZrMc4FjhYhGNXv2rFgCpL3QT8je6dwqiWkKCgPsdZP/9NQGRrdLs3affc7
+         WI6mkWU57YNSXLVexQRW1hpV+iY9uBI5ZMZgDNyRXXgdtKkKAAuBzcnl+eD5m8gv5W
+         +3QgMc0Y/SyhoI/jjbxyc1lBnOzoYO2hutjvH7m3SEOE6qeGAlAcLgmdAq88xKZiU+
+         5j+6egaOrTPwA==
+Date:   Tue, 9 Aug 2022 08:29:56 +0100
+From:   Filipe Manana <fdmanana@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
 Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
         djwong@kernel.org
 Subject: Re: [PATCH] generic: test fsync after punching hole adjacent to an
  existing hole
-Message-ID: <20220809033551.ip3lq5kkhvabdppn@zlang-mailbox>
+Message-ID: <20220809072956.GA2067106@falcondesktop>
 References: <83a74ba89e9e4ee1060b7dfa1f190d4b51691909.1659957268.git.fdmanana@suse.com>
+ <20220809033551.ip3lq5kkhvabdppn@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <83a74ba89e9e4ee1060b7dfa1f190d4b51691909.1659957268.git.fdmanana@suse.com>
+In-Reply-To: <20220809033551.ip3lq5kkhvabdppn@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 08, 2022 at 12:18:58PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Aug 09, 2022 at 11:35:51AM +0800, Zorro Lang wrote:
+> On Mon, Aug 08, 2022 at 12:18:58PM +0100, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> > 
+> > Test that if we punch a hole adjacent to an existing hole, fsync the file
+> > and then power fail, the new hole exists after mounting again the
+> > filesystem.
+> > 
+> > This currently fails on btrfs with kernels 5.18 and 5.19 when not using
+> > the "no-holes" feature. The "no-holes" feature is enabled by default at
+> > mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
+> > btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
+> > "-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
+> > btrfs test matrix).
+> > 
+> > The issue is fixed for btrfs with the following kernel patch:
+> > 
+> >   "btrfs: update generation of hole file extent item when merging holes"
 > 
-> Test that if we punch a hole adjacent to an existing hole, fsync the file
-> and then power fail, the new hole exists after mounting again the
-> filesystem.
-> 
-> This currently fails on btrfs with kernels 5.18 and 5.19 when not using
-> the "no-holes" feature. The "no-holes" feature is enabled by default at
-> mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
-> btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
-> "-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
-> btrfs test matrix).
-> 
-> The issue is fixed for btrfs with the following kernel patch:
-> 
->   "btrfs: update generation of hole file extent item when merging holes"
+> CC btrfs list
 
-CC btrfs list
+It was already in cc (and I always cc the btrfs list).
 
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/generic/694     | 85 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/694.out | 15 ++++++++
->  2 files changed, 100 insertions(+)
->  create mode 100755 tests/generic/694
->  create mode 100644 tests/generic/694.out
+> > 
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >  tests/generic/694     | 85 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/694.out | 15 ++++++++
+> >  2 files changed, 100 insertions(+)
+> >  create mode 100755 tests/generic/694
+> >  create mode 100644 tests/generic/694.out
+> > 
+> > diff --git a/tests/generic/694 b/tests/generic/694
+> > new file mode 100755
+> > index 00000000..c034f914
+> > --- /dev/null
+> > +++ b/tests/generic/694
+> > @@ -0,0 +1,85 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> > +#
+> > +# FS QA Test 694
+> > +#
+> > +# Test that if we punch a hole adjacent to an existing hole, fsync the file and
+> > +# then power fail, the new hole exists after mounting again the filesystem.
 > 
-> diff --git a/tests/generic/694 b/tests/generic/694
-> new file mode 100755
-> index 00000000..c034f914
-> --- /dev/null
-> +++ b/tests/generic/694
-> @@ -0,0 +1,85 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 694
-> +#
-> +# Test that if we punch a hole adjacent to an existing hole, fsync the file and
-> +# then power fail, the new hole exists after mounting again the filesystem.
+> Better to explain this's a known regression test at here.
 
-Better to explain this's a known regression test at here.
+So, duplicate the changelog here?
 
-And add _fixed_by_kernel_commit later, after that kernel patch is merged and
-has a fixed commit id.
-
-> +#
-> +. ./common/preamble
-> +_begin_fstest quick log punch
-
-"auto" group?
-
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_flakey
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/dmflakey
-> +. ./common/punch
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-   ^^^^
-This's just a reminder, please remove it.
-
-> +_supported_fs generic
-> +_require_scratch
-> +_require_dm_target flakey
-> +_require_xfs_io_command "fpunch"
-> +_require_xfs_io_command "fiemap"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
-> +_mount_flakey
-> +
-> +# Create our test file with the following layout:
-> +#
-> +# [0, 2M)    - hole
-> +# [2M, 10M)  - extent
-> +# [10M, 12M) - hole
-> +$XFS_IO_PROG -f -c "truncate 12M" \
-> +	     -c "pwrite -S 0xab 2M 8M" \
-> +	     $SCRATCH_MNT/foobar | _filter_xfs_io
-> +
-> +# Persist everything, commit the filesystem's transaction.
-> +sync
-> +
-> +# Now punch two holes in the file:
-> +#
-> +# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
-> +#    [0, 2M);
-> +# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
-> +#    range [10M, 12M).
-> +#
-> +# These operations start a new filesystem transaction.
-> +# Then finally fsync the file.
-> +$XFS_IO_PROG -c "fpunch 2M 2M" \
-> +	     -c "fpunch 8M 2M" \
-> +	     -c "fsync" $SCRATCH_MNT/foobar
-
-Darrick added a new helper _require_congruent_file_oplen(), might worth
-using it. Any thoughts?
-
-> +
-> +# Simulate a power failure and mount the filesystem to check that everything
-> +# is in the same state as before the power failure.
-> +_flakey_drop_and_remount
-> +
-> +# We expect the following file layout:
-> +#
-> +# [0, 4M)    - hole
-> +# [4M, 8M)   - extent
-> +# [8M, 12M)  - hole
-> +echo "File layout after power failure:"
-> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
-> +
-> +# When reading the file we expect to get the range [4M, 8M) filled with bytes
-> +# that have a value of 0xab and 0x00 for anything outside that range.
-> +echo "File content after power failure:"
-> +od -A d -t x1 $SCRATCH_MNT/foobar
-
-Can _hexdump in common/rc help ?
-
-> +
-> +_unmount_flakey
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/694.out b/tests/generic/694.out
-> new file mode 100644
-> index 00000000..f55212f3
-> --- /dev/null
-> +++ b/tests/generic/694.out
-> @@ -0,0 +1,15 @@
-> +QA output created by 694
-> +wrote 8388608/8388608 bytes at offset 2097152
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File layout after power failure:
-> +0: [0..8191]: hole
-> +1: [8192..16383]: data
-> +2: [16384..24575]: hole
-> +File content after power failure:
-> +0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> +*
-> +4194304 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +8388608 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> +*
-> +12582912
-> -- 
-> 2.35.1
 > 
+> And add _fixed_by_kernel_commit later, after that kernel patch is merged and
+> has a fixed commit id.
 
+I wasn't aware we have that nowadays.
+Does that mean that tests get merged only after the corresponding kernel fix
+is merged in Linus' tree?
+
+> 
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest quick log punch
+> 
+> "auto" group?
+
+Yes, forgotten when running the "new" script.
+
+> 
+> > +
+> > +_cleanup()
+> > +{
+> > +	_cleanup_flakey
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +. ./common/dmflakey
+> > +. ./common/punch
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+>    ^^^^
+> This's just a reminder, please remove it.
+> 
+> > +_supported_fs generic
+> > +_require_scratch
+> > +_require_dm_target flakey
+> > +_require_xfs_io_command "fpunch"
+> > +_require_xfs_io_command "fiemap"
+> > +
+> > +_scratch_mkfs >>$seqres.full 2>&1
+> > +_require_metadata_journaling $SCRATCH_DEV
+> > +_init_flakey
+> > +_mount_flakey
+> > +
+> > +# Create our test file with the following layout:
+> > +#
+> > +# [0, 2M)    - hole
+> > +# [2M, 10M)  - extent
+> > +# [10M, 12M) - hole
+> > +$XFS_IO_PROG -f -c "truncate 12M" \
+> > +	     -c "pwrite -S 0xab 2M 8M" \
+> > +	     $SCRATCH_MNT/foobar | _filter_xfs_io
+> > +
+> > +# Persist everything, commit the filesystem's transaction.
+> > +sync
+> > +
+> > +# Now punch two holes in the file:
+> > +#
+> > +# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
+> > +#    [0, 2M);
+> > +# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
+> > +#    range [10M, 12M).
+> > +#
+> > +# These operations start a new filesystem transaction.
+> > +# Then finally fsync the file.
+> > +$XFS_IO_PROG -c "fpunch 2M 2M" \
+> > +	     -c "fpunch 8M 2M" \
+> > +	     -c "fsync" $SCRATCH_MNT/foobar
+> 
+> Darrick added a new helper _require_congruent_file_oplen(), might worth
+> using it. Any thoughts?
+
+Wasn't aware of it. Seems like it's to deal with some rare xfs realtime configurations.
+So I suppose, this needs:
+
+_require_congruent_file_oplen $((2 * 1024 * 1024))
+
+> 
+> > +
+> > +# Simulate a power failure and mount the filesystem to check that everything
+> > +# is in the same state as before the power failure.
+> > +_flakey_drop_and_remount
+> > +
+> > +# We expect the following file layout:
+> > +#
+> > +# [0, 4M)    - hole
+> > +# [4M, 8M)   - extent
+> > +# [8M, 12M)  - hole
+> > +echo "File layout after power failure:"
+> > +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
+> > +
+> > +# When reading the file we expect to get the range [4M, 8M) filled with bytes
+> > +# that have a value of 0xab and 0x00 for anything outside that range.
+> > +echo "File content after power failure:"
+> > +od -A d -t x1 $SCRATCH_MNT/foobar
+> 
+> Can _hexdump in common/rc help ?
+
+It can, I wasn't aware that helper existed. It's relatively new.
+Glad to see od is being preferred over hexdump, and I have always used it in
+tests over the years.
+
+Btw, _hexdump is asking od to output file offsets in hex.
+I find it a lot more friendly to read decimal values (maybe I'm weird), so
+I always pass '-A d' to od. Thoughts on that?
+
+Thanks.
+
+> 
+> > +
+> > +_unmount_flakey
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/694.out b/tests/generic/694.out
+> > new file mode 100644
+> > index 00000000..f55212f3
+> > --- /dev/null
+> > +++ b/tests/generic/694.out
+> > @@ -0,0 +1,15 @@
+> > +QA output created by 694
+> > +wrote 8388608/8388608 bytes at offset 2097152
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +File layout after power failure:
+> > +0: [0..8191]: hole
+> > +1: [8192..16383]: data
+> > +2: [16384..24575]: hole
+> > +File content after power failure:
+> > +0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> > +*
+> > +4194304 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
+> > +*
+> > +8388608 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> > +*
+> > +12582912
+> > -- 
+> > 2.35.1
+> > 
+> 
