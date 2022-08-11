@@ -2,137 +2,49 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C366FC25B08
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Aug 2022 21:02:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A07A0C19F2A
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Aug 2022 12:30:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229622AbiHIVCM (ORCPT
+        id S231638AbiHKMar (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Aug 2022 17:02:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54644 "EHLO
+        Thu, 11 Aug 2022 08:30:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38690 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230399AbiHIVA5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 Aug 2022 17:00:57 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 471BB2C659;
-        Tue,  9 Aug 2022 14:00:54 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 71F1A60B9F;
-        Tue,  9 Aug 2022 21:00:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF2ABC433D6;
-        Tue,  9 Aug 2022 21:00:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660078852;
-        bh=bnN3+rr2Irc5hVunotTz6N7Asyuu/jHCPgME80PdV/0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=EwdEeAVmeLmhyGUN7Dyi9mf7JE4cvsQdlP1QcGfNpm57tI/1sMIpvx3/hig7GwxOe
-         Xv9D4YS8pVp2oqD+ttJfylYfaj97ZalB+rcSO3lVbTGzyMZu1F55sDAZ7E8md5AVam
-         +qvP5G1VJFtv0EgLROX2sElULWT1aQdZj03zzEGWFuWmH1oLqPtUYJVwkra4giWAHM
-         pqaZps2YERmd+GBrHc0kb4rpNLc6TJsF3hkvsYHQ8HuZ/0OKJHEFs4y4AKQqwtEeP0
-         tLV/L/UHJbsGRrkv7bzgIYyqSRpETmXnQ9G8TuZYXcZ1pq8wtstKEaV5q+Nmd1J/1R
-         5ZypLORPVytfA==
-Subject: [PATCH 2/3] common/rc: move XFS-specific parts of _scratch_options
- into common/xfs
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, guaneryu@gmail.com, zlang@redhat.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
-        tytso@mit.edu, linux-ext4@vger.kernel.org
-Date:   Tue, 09 Aug 2022 14:00:52 -0700
-Message-ID: <166007885241.3276300.13584305054616588936.stgit@magnolia>
-In-Reply-To: <166007884125.3276300.15348421560641051945.stgit@magnolia>
-References: <166007884125.3276300.15348421560641051945.stgit@magnolia>
-User-Agent: StGit/0.19
+        with ESMTP id S234280AbiHKMaj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Aug 2022 08:30:39 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F524B05;
+        Thu, 11 Aug 2022 05:30:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=ahss/HdoMTK7IqfMJGCt1/UfT7
+        vm8Mo3Nctj4I6JmQTQNtkM3zlJKwy2fyjA0mvrxk5EdEJAKIHhlAYoGyEDOsI+uFACj6af3dTiMBA
+        KgCjp/iNMTGMBZeJxEpinYNbZ2HceJA7URfcRZw1S5VMtJ1oaTg13a33qJiZC3STysaxBVchjr9vG
+        zELLbVFF46cxt70BriFiICP9oRHsgXNnahJjSnZDY8oEvV46P1XiRO12N2R81xdJ99pwPflVK1s6K
+        xi86953h/GjBGgQWyF6Li5G9Q5cAwqRdQWZs03dUyhfdFr+iXpnwQKvn8xVvpeLcSQRpmzHTp2zTf
+        G1wWfLoQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1oM7Ka-00C8JH-Ge; Thu, 11 Aug 2022 12:30:32 +0000
+Date:   Thu, 11 Aug 2022 05:30:32 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, zlang@redhat.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/1] xfs/{015,042,076}: fix mkfs failures with nrext64=1
+Message-ID: <YvT2aMUtgXWOPpAS@infradead.org>
+References: <166007883231.3274939.3963254355857450803.stgit@magnolia>
+ <166007883796.3274939.8920861122422263977.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <166007883796.3274939.8920861122422263977.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+Looks good:
 
-Move all the non-XFS code in _scratch_options into a
-_scratch_xfs_options helper in common/xfs, in preparation to add ext4
-bits.
-
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- common/rc  |   23 +++--------------------
- common/xfs |   23 +++++++++++++++++++++++
- 2 files changed, 26 insertions(+), 20 deletions(-)
-
-
-diff --git a/common/rc b/common/rc
-index 52dd3b41..dc1d65c3 100644
---- a/common/rc
-+++ b/common/rc
-@@ -172,30 +172,13 @@ _clear_mount_stack()
- 
- _scratch_options()
- {
--    local type=$1
--    local rt_opt=""
--    local log_opt=""
-     SCRATCH_OPTIONS=""
- 
--    if [ "$FSTYP" != "xfs" ]; then
--        return
--    fi
--
--    case $type in
--    mkfs)
--	SCRATCH_OPTIONS="$SCRATCH_OPTIONS -f"
--	rt_opt="-r"
--        log_opt="-l"
--	;;
--    mount)
--	rt_opt="-o"
--        log_opt="-o"
-+    case "$FSTYP" in
-+    "xfs")
-+	_scratch_xfs_options "$@"
- 	;;
-     esac
--    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
--	SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${rt_opt}rtdev=$SCRATCH_RTDEV"
--    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
--	SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${log_opt}logdev=$SCRATCH_LOGDEV"
- }
- 
- _test_options()
-diff --git a/common/xfs b/common/xfs
-index 9f84dffb..f6f4cdd2 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -265,6 +265,29 @@ _xfs_check()
- 	return $status
- }
- 
-+_scratch_xfs_options()
-+{
-+    local type=$1
-+    local rt_opt=""
-+    local log_opt=""
-+
-+    case $type in
-+    mkfs)
-+	SCRATCH_OPTIONS="$SCRATCH_OPTIONS -f"
-+	rt_opt="-r"
-+        log_opt="-l"
-+	;;
-+    mount)
-+	rt_opt="-o"
-+        log_opt="-o"
-+	;;
-+    esac
-+    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
-+	SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${rt_opt}rtdev=$SCRATCH_RTDEV"
-+    [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-+	SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${log_opt}logdev=$SCRATCH_LOGDEV"
-+}
-+
- _scratch_xfs_db_options()
- {
- 	SCRATCH_OPTIONS=""
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
