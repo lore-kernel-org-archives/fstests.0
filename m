@@ -2,330 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2F72C25B0C
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Aug 2022 17:16:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF046C00140
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Aug 2022 14:50:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235947AbiHKRQi (ORCPT
+        id S238161AbiHLOu5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 11 Aug 2022 13:16:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45212 "EHLO
+        Fri, 12 Aug 2022 10:50:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236020AbiHKRQA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Aug 2022 13:16:00 -0400
+        with ESMTP id S229760AbiHLOu4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Aug 2022 10:50:56 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 582D672851
-        for <fstests@vger.kernel.org>; Thu, 11 Aug 2022 10:06:00 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C4984901A5
+        for <fstests@vger.kernel.org>; Fri, 12 Aug 2022 07:50:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1660237559;
+        s=mimecast20190719; t=1660315854;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=s3k2KXIWAPMfPPQ+ItC5/PQn2EePPBoQLa/yeQ15GB0=;
-        b=YsUTNiE3T9F5ASIKPwEq3R5l/raWlQ0gVXRcVAfy0M4t+P2mUXL+LVJ6tq0Z0GZyrrk1VS
-        D15b6EvWpXeSZtVJ+PHeZqyAEiCdtDBdRdSXHgxfEJrixh+93kXTDQ+hyNbz8WZYYj36JX
-        fjcTTGBu9ha/VCJLJhuYCZ+lHLeRXd0=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=2FEub00A6DBFxyGaoBCILmU9icilwbwstlWYdWUGap8=;
+        b=DKRtAzPFhZXD2VZDivdkeBBLWddJZDQ/yhJoc7+D3Uqbizv5fkR8MrsRVbkZT+1Cn/wHev
+        +SXEFnQLxzbo9Kn9lKIVCvzAqItDtrO6PSmOQFIiBy7yALbCBf7cGZmfqiNjCJGAh7d376
+        hTrGhxRcoRjdkXpDyfxll5rEv92bbYQ=
+Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
+ [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-325-2uzFYRK6PEWw3-AkK0aPzQ-1; Thu, 11 Aug 2022 13:05:58 -0400
-X-MC-Unique: 2uzFYRK6PEWw3-AkK0aPzQ-1
-Received: by mail-qt1-f197.google.com with SMTP id h19-20020ac85493000000b00343408bd8e5so5264334qtq.4
-        for <fstests@vger.kernel.org>; Thu, 11 Aug 2022 10:05:57 -0700 (PDT)
+ us-mta-29-UWvLD2UWO_quRrUklhvyAg-1; Fri, 12 Aug 2022 10:50:53 -0400
+X-MC-Unique: UWvLD2UWO_quRrUklhvyAg-1
+Received: by mail-ed1-f72.google.com with SMTP id v19-20020a056402349300b0043d42b7ddefso744253edc.13
+        for <fstests@vger.kernel.org>; Fri, 12 Aug 2022 07:50:53 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=s3k2KXIWAPMfPPQ+ItC5/PQn2EePPBoQLa/yeQ15GB0=;
-        b=ach1N120ZmT/9NXQdMJJjKqz5rI2lBcVCCBwgv643DKDW3iFCzzIRzHDbDwY5kv0vF
-         Jlbgp+cY7ALdCYBa9gXKD+7Zhy8wMpiPzlOjH2YHsfWtpcIAgvD6lxVYaTdV7wAxMz//
-         IwhGAiKBfWlZVKZItKxF6+hDN+5XGKHD4jc74YV0hmM2sVBsIuwL51Jq3d0iXxmtmmEr
-         wKet+1tBf58X9FrOpQqlaW3p/uvJxiGqdN+Oi2ouc+OtMZcCi2GImr/ttut67xgxCAlC
-         ms7UXtx8CIww5rPJB/wJxKsRnALp5+JuY0yeG8klzCzEhKIBoXZ7CndRU3/O/cWG72b4
-         pz9w==
-X-Gm-Message-State: ACgBeo0IOiMHm5QzAnCMISQvqxJFI/gPNUBIFHloLIbUMYvIJt80MwW9
-        KcanA8iFxHRQWWjzR3yzgZMDCR9YDn9t2OSTKblxndOC7YPYcn9uCYdx9zVYIen79s54pRc12bX
-        ZJD4sVv7QXjXaIidaDA==
-X-Received: by 2002:a05:6214:e46:b0:477:289f:15b4 with SMTP id o6-20020a0562140e4600b00477289f15b4mr28244106qvc.83.1660237557274;
-        Thu, 11 Aug 2022 10:05:57 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR6pKa85JPq7lJ55IBipROxQXaIpYMA+OFq7g0YOH0aAI71PFAxMcpb+ti0TnqZv3gJvpIYO6g==
-X-Received: by 2002:a05:6214:e46:b0:477:289f:15b4 with SMTP id o6-20020a0562140e4600b00477289f15b4mr28244084qvc.83.1660237556898;
-        Thu, 11 Aug 2022 10:05:56 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id q18-20020a37f712000000b006b921ae5cdesm2116654qkj.44.2022.08.11.10.05.53
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc;
+        bh=2FEub00A6DBFxyGaoBCILmU9icilwbwstlWYdWUGap8=;
+        b=QvozfWZ2KXro7dmINof1Sml5eWS40QulwWJPf287LlFHpchzf9S8SEilsOH9O9aaqF
+         Px3hOvdpdr/eV8OJVxCqTfdQFntT8Bk1sEJt4PdKy/BUGGg1XtdrjydyR24bqdzt1tIz
+         cR84ZLfPWFC6ylAaEMGN4lySzdaGwtz2mB8kXOi3Tb19TluSg6v+MN1rxTXfHgXzbNY7
+         T7nkNZEktfgKVvL5GyEynx0qTCu7/q7YPcnNzuzdP4kHX07N7hTBlNIVx/wBTdmtGz/G
+         5rAmDiMG+wgMg05D2oUT4q5qJtBtQErwE6upULVt0Zf3V2Tz3ZDhHq6O7fwM00G+KVfu
+         wUHg==
+X-Gm-Message-State: ACgBeo3/Eoyuy+QqMJDfFDCUYSF7afpc42qO+RBjwO2N6SviSNjsypQ4
+        2stFszCWXEuFF/X0NHPYshfxFHCSqlOld+fUnuw8QDH6SnXaF1sJ1G92/g6Ylck6yv3CA7ncLDm
+        TwKUOAT3V+346I2FSho8vW324y2U9IDDEyPftEpvUoISBeSuVjyRHiDmMyy27oinP3378
+X-Received: by 2002:a17:906:9bdd:b0:730:5b04:7298 with SMTP id de29-20020a1709069bdd00b007305b047298mr3085644ejc.180.1660315852375;
+        Fri, 12 Aug 2022 07:50:52 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR5BDEywKf/49t6S4dOJNLeTAEcIi/xxd6Buv1zK1X+dZXDBcxArW8pZcsy53qC/bUEeqqyXew==
+X-Received: by 2002:a17:906:9bdd:b0:730:5b04:7298 with SMTP id de29-20020a1709069bdd00b007305b047298mr3085623ejc.180.1660315851894;
+        Fri, 12 Aug 2022 07:50:51 -0700 (PDT)
+Received: from localhost.localdomain (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
+        by smtp.gmail.com with ESMTPSA id gg17-20020a170906e29100b0072af930cf97sm852574ejb.115.2022.08.12.07.50.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 11 Aug 2022 10:05:56 -0700 (PDT)
-Date:   Fri, 12 Aug 2022 01:05:50 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Filipe Manana <fdmanana@kernel.org>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] generic: test fsync after punching hole adjacent to an
- existing hole
-Message-ID: <20220811170550.6ziiaioaye7hy7ie@zlang-mailbox>
-References: <83a74ba89e9e4ee1060b7dfa1f190d4b51691909.1659957268.git.fdmanana@suse.com>
- <20220809033551.ip3lq5kkhvabdppn@zlang-mailbox>
- <20220809072956.GA2067106@falcondesktop>
- <YvJ5r3u9wpq+JHo1@magnolia>
+        Fri, 12 Aug 2022 07:50:51 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     sj1557.seo@samsung.com
+Subject: [PATCH] generic: test i_blocks for large files
+Date:   Fri, 12 Aug 2022 16:50:50 +0200
+Message-Id: <20220812145050.43966-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YvJ5r3u9wpq+JHo1@magnolia>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 09, 2022 at 08:13:51AM -0700, Darrick J. Wong wrote:
-> On Tue, Aug 09, 2022 at 08:29:56AM +0100, Filipe Manana wrote:
-> > On Tue, Aug 09, 2022 at 11:35:51AM +0800, Zorro Lang wrote:
-> > > On Mon, Aug 08, 2022 at 12:18:58PM +0100, fdmanana@kernel.org wrote:
-> > > > From: Filipe Manana <fdmanana@suse.com>
-> > > > 
-> > > > Test that if we punch a hole adjacent to an existing hole, fsync the file
-> > > > and then power fail, the new hole exists after mounting again the
-> > > > filesystem.
-> > > > 
-> > > > This currently fails on btrfs with kernels 5.18 and 5.19 when not using
-> > > > the "no-holes" feature. The "no-holes" feature is enabled by default at
-> > > > mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
-> > > > btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
-> > > > "-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
-> > > > btrfs test matrix).
-> > > > 
-> > > > The issue is fixed for btrfs with the following kernel patch:
-> > > > 
-> > > >   "btrfs: update generation of hole file extent item when merging holes"
-> > > 
-> > > CC btrfs list
-> > 
-> > It was already in cc (and I always cc the btrfs list).
-> > 
-> > > 
-> > > > 
-> > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > > ---
-> > > >  tests/generic/694     | 85 +++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/generic/694.out | 15 ++++++++
-> > > >  2 files changed, 100 insertions(+)
-> > > >  create mode 100755 tests/generic/694
-> > > >  create mode 100644 tests/generic/694.out
-> > > > 
-> > > > diff --git a/tests/generic/694 b/tests/generic/694
-> > > > new file mode 100755
-> > > > index 00000000..c034f914
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/694
-> > > > @@ -0,0 +1,85 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> > > > +#
-> > > > +# FS QA Test 694
-> > > > +#
-> > > > +# Test that if we punch a hole adjacent to an existing hole, fsync the file and
-> > > > +# then power fail, the new hole exists after mounting again the filesystem.
-> > > 
-> > > Better to explain this's a known regression test at here.
-> > 
-> > So, duplicate the changelog here?
+This is a regression test for an incorrect
+computation of i_blocks for files larger than
+4 GiB. Bug was filed for exFAT.
 
-No harm I think. When someone open and read this case, he'll know it's a
-known regression test cases for a known patch fix, don't need to check
-the original commit log.
+Signed-off-by: Pavel Reichl <preichl@redhat.com>
+---
+ tests/generic/693-inodes-for-large-files     | 49 ++++++++++++++++++++
+ tests/generic/693-inodes-for-large-files.out |  1 +
+ 2 files changed, 50 insertions(+)
+ create mode 100755 tests/generic/693-inodes-for-large-files
+ create mode 100644 tests/generic/693-inodes-for-large-files.out
 
-> > 
-> > > 
-> > > And add _fixed_by_kernel_commit later, after that kernel patch is merged and
-> > > has a fixed commit id.
-> > 
-> > I wasn't aware we have that nowadays.
-
-It's new, Amir talked about that with me, and brought in this helper to help
-downstream kernel maintain.
-
-> 
-> It's a recent addition to try to standardize the process of identifying
-> bugfixes for LTS kernels.  Whereas before we just stuffed them adhoc in
-> the test comments, this new helper will tell you which commits you need
-> to apply if the regression test fails.
-> 
-> > Does that mean that tests get merged only after the corresponding kernel fix
-> > is merged in Linus' tree?
-
-No force ... but at least the kernel fix has been reviewed I think,
-to make sure there won't be big changes, or even be denied.
-
-> 
-> I usually put in an obvious placeholder:
-> 
-> _fixed_by_kernel_commit XXXXXX "xfs: fix the frobnitech"
-> 
-> ...and hope someone remembers to clean it up.
-
-You can refer to what Darrick does, or make up that later.
-
-> 
-> > > 
-> > > > +#
-> > > > +. ./common/preamble
-> > > > +_begin_fstest quick log punch
-> > > 
-> > > "auto" group?
-> > 
-> > Yes, forgotten when running the "new" script.
-> > 
-> > > 
-> > > > +
-> > > > +_cleanup()
-> > > > +{
-> > > > +	_cleanup_flakey
-> > > > +	cd /
-> > > > +	rm -r -f $tmp.*
-> > > > +}
-> > > > +
-> > > > +# Import common functions.
-> > > > +. ./common/filter
-> > > > +. ./common/dmflakey
-> > > > +. ./common/punch
-> > > > +
-> > > > +# real QA test starts here
-> > > > +
-> > > > +# Modify as appropriate.
-> > >    ^^^^
-> > > This's just a reminder, please remove it.
-> > > 
-> > > > +_supported_fs generic
-> > > > +_require_scratch
-> > > > +_require_dm_target flakey
-> > > > +_require_xfs_io_command "fpunch"
-> > > > +_require_xfs_io_command "fiemap"
-> > > > +
-> > > > +_scratch_mkfs >>$seqres.full 2>&1
-> > > > +_require_metadata_journaling $SCRATCH_DEV
-> > > > +_init_flakey
-> > > > +_mount_flakey
-> > > > +
-> > > > +# Create our test file with the following layout:
-> > > > +#
-> > > > +# [0, 2M)    - hole
-> > > > +# [2M, 10M)  - extent
-> > > > +# [10M, 12M) - hole
-> > > > +$XFS_IO_PROG -f -c "truncate 12M" \
-> > > > +	     -c "pwrite -S 0xab 2M 8M" \
-> > > > +	     $SCRATCH_MNT/foobar | _filter_xfs_io
-> > > > +
-> > > > +# Persist everything, commit the filesystem's transaction.
-> > > > +sync
-> > > > +
-> > > > +# Now punch two holes in the file:
-> > > > +#
-> > > > +# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
-> > > > +#    [0, 2M);
-> > > > +# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
-> > > > +#    range [10M, 12M).
-> > > > +#
-> > > > +# These operations start a new filesystem transaction.
-> > > > +# Then finally fsync the file.
-> > > > +$XFS_IO_PROG -c "fpunch 2M 2M" \
-> > > > +	     -c "fpunch 8M 2M" \
-> > > > +	     -c "fsync" $SCRATCH_MNT/foobar
-> > > 
-> > > Darrick added a new helper _require_congruent_file_oplen(), might worth
-> > > using it. Any thoughts?
-> > 
-> > Wasn't aware of it. Seems like it's to deal with some rare xfs realtime configurations.
-> > So I suppose, this needs:
-> 
-> Weird xfs realtime configs was the initial purpose (e.g. 28k allocation
-> units) but it also _notruns tests that don't expect things like punching
-> a 4k hole failing on an fs with 64k blocksize.
-> 
-> (Granted, anything in tests/generic/ should be assuming at least a 64k
-> block size as a possibility, as you do here...)
-> 
-> > _require_congruent_file_oplen $((2 * 1024 * 1024))
-> 
-> Yep.
-> 
-> > 
-> > > 
-> > > > +
-> > > > +# Simulate a power failure and mount the filesystem to check that everything
-> > > > +# is in the same state as before the power failure.
-> > > > +_flakey_drop_and_remount
-> > > > +
-> > > > +# We expect the following file layout:
-> > > > +#
-> > > > +# [0, 4M)    - hole
-> > > > +# [4M, 8M)   - extent
-> > > > +# [8M, 12M)  - hole
-> > > > +echo "File layout after power failure:"
-> > > > +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
-> > > > +
-> > > > +# When reading the file we expect to get the range [4M, 8M) filled with bytes
-> > > > +# that have a value of 0xab and 0x00 for anything outside that range.
-> > > > +echo "File content after power failure:"
-> > > > +od -A d -t x1 $SCRATCH_MNT/foobar
-> > > 
-> > > Can _hexdump in common/rc help ?
-> > 
-> > It can, I wasn't aware that helper existed. It's relatively new.
-> > Glad to see od is being preferred over hexdump, and I have always used it in
-> > tests over the years.
-> > 
-> > Btw, _hexdump is asking od to output file offsets in hex.
-> > I find it a lot more friendly to read decimal values (maybe I'm weird), so
-> > I always pass '-A d' to od. Thoughts on that?
-> 
-> Same here, though my preference is eroding as we convert the xfs
-> tracepoints to report in hexadecimal. :)
-
-To replaced hexdump with od, we brought in _hexdump() and changed lots of old
-cases. Due to old cases with hexdump output hexadecimal number in .out
-file, so I tried keep same format in new _hexdump() function
-
-If most of us prefer decimal values output, we can help _hexdump to accept
-an argument to change the default format. Or write a _decdump, as the
-current one calls *hex*dump :-P
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > Thanks.
-> > 
-> > > 
-> > > > +
-> > > > +_unmount_flakey
-> > > > +
-> > > > +# success, all done
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/generic/694.out b/tests/generic/694.out
-> > > > new file mode 100644
-> > > > index 00000000..f55212f3
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/694.out
-> > > > @@ -0,0 +1,15 @@
-> > > > +QA output created by 694
-> > > > +wrote 8388608/8388608 bytes at offset 2097152
-> > > > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > > > +File layout after power failure:
-> > > > +0: [0..8191]: hole
-> > > > +1: [8192..16383]: data
-> > > > +2: [16384..24575]: hole
-> > > > +File content after power failure:
-> > > > +0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> > > > +*
-> > > > +4194304 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> > > > +*
-> > > > +8388608 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> > > > +*
-> > > > +12582912
-> > > > -- 
-> > > > 2.35.1
-> > > > 
-> > > 
-> 
+diff --git a/tests/generic/693-inodes-for-large-files b/tests/generic/693-inodes-for-large-files
+new file mode 100755
+index 00000000..797d6a21
+--- /dev/null
++++ b/tests/generic/693-inodes-for-large-files
+@@ -0,0 +1,49 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
++#
++# FS QA Test 693
++#
++# Verify that i_blocks for files larger than 4 GiB have correct
++# values.
++#
++# This test verifies the problem fixed in kernel with commit
++# 0c336d6e33f4 exfat: fix incorrect loading of i_blocks for large files
++#
++. ./common/preamble
++_begin_fstest auto
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.* $junk_dir
++}
++
++_supported_fs generic
++_require_test
++
++junk_dir=$TEST_DIR/$seq
++junk_file=$junk_dir/junk
++mkdir -p $junk_dir
++
++$XFS_IO_PROG -f -c "truncate 4G" $junk_file
++
++iblocks=`$XFS_IO_PROG -c "stat" $junk_file | grep 'stat.blocks'`
++test -z "$iblocks" && echo 'Failed to parse the blocks'
++
++_test_cycle_mount
++
++iblocks_after_remount=`$XFS_IO_PROG -c "stat" $junk_file | grep 'stat.blocks'`
++
++test -z "$iblocks_after_remount" && echo 'Failed to parse the blocks'
++
++if [ "$iblocks" != "$iblocks_after_remount" ]; then
++	echo "Number of blocks needs to be same: $iblocks, $iblocks_after_remount"
++	status=1
++	exit
++fi
++
++status=0
++
++exit
+diff --git a/tests/generic/693-inodes-for-large-files.out b/tests/generic/693-inodes-for-large-files.out
+new file mode 100644
+index 00000000..f39aa77c
+--- /dev/null
++++ b/tests/generic/693-inodes-for-large-files.out
+@@ -0,0 +1 @@
++QA output created by 693-inodes-for-large-files
+-- 
+2.37.1
 
