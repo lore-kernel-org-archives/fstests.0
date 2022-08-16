@@ -2,113 +2,168 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BEE3C32773
-	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 11:05:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 945D8C2BB41
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 11:30:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229574AbiHPLFT (ORCPT
+        id S233967AbiHPL3c (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 16 Aug 2022 07:05:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44942 "EHLO
+        Tue, 16 Aug 2022 07:29:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230096AbiHPLEr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 07:04:47 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E1678B9BD;
-        Tue, 16 Aug 2022 03:30:46 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9E95A60693;
-        Tue, 16 Aug 2022 10:30:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D473C433C1;
-        Tue, 16 Aug 2022 10:30:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660645845;
-        bh=blPhcC0pgTkrB9jGvICGYlhhM6GmXD3Tvwm3zPr4qZI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sh2vymdjBrlgaS4VfqRxqiifkmcyk9X5K1mM4jSnUka9oNnYgQUrp+kxxyJfn5SsU
-         uB8oKiKdAHK4nfaNfuJWVEfU8JyUqG/eqsJtNhrc3psL/VdmOFaKR7BqMa6nSJbwdD
-         TPktetHrsDRvXwHPBGyx9f3OsSwfg3WmhpjcoWo8Pxo5PfXdG13dWgHzsmsehpdcU5
-         VOCnLr8nG/kiVVr28LYYAACPEIu1J8kMbWvhYc/7rmnUEdTcreXo17fOXDu7mfLcmR
-         chFJ9Gp//keE0kbaCM03wsIpENJach1Xv6kvMJhegVEpn/uyDUvr4viOXRyUNiG6eI
-         DKSnblbj+NljA==
-Date:   Tue, 16 Aug 2022 12:30:40 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Su Yue <glass@fydeos.io>
-Cc:     linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org,
-        l@damenly.su, Seth Forshee <sforshee@digitalocean.com>
-Subject: Re: [PATCH] attr: validate kuid first in chown_common
-Message-ID: <20220816103040.gtgg2w75tzpejas5@wittgenstein>
-References: <20220816092538.84252-1-glass@fydeos.io>
+        with ESMTP id S232570AbiHPL3H (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 07:29:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6FD7BA157
+        for <fstests@vger.kernel.org>; Tue, 16 Aug 2022 03:45:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1660646741;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=iyY12bIDIkxdAC45Eh2dTf1vKg/kxUNeeEbHNWPMido=;
+        b=VNWEBhd06c36kDG2Wn4OJz0ROJoTxNwXY4VZp6D/9HpS8Ue8M5LBn6zUiWGFhIIf+6vkFz
+        3a9elOG7Nf5gtIuVY+CYQjD5CJw8AL2YzAREsrt/1evxcUuJv44lqPZUSYLVUN3zVaDUsP
+        vz8zyXYFnr+klnp6ptK4KqkGzBcXh6A=
+Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
+ [209.85.128.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-661-84haxTnpP1WqVnYSgM5tjw-1; Tue, 16 Aug 2022 06:45:40 -0400
+X-MC-Unique: 84haxTnpP1WqVnYSgM5tjw-1
+Received: by mail-wm1-f69.google.com with SMTP id ay27-20020a05600c1e1b00b003a5bff0df8dso366512wmb.0
+        for <fstests@vger.kernel.org>; Tue, 16 Aug 2022 03:45:40 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc;
+        bh=iyY12bIDIkxdAC45Eh2dTf1vKg/kxUNeeEbHNWPMido=;
+        b=YmyCX4IZkkkUt4qlNB7pNjOCcUOkHz6or7OVrn/TZBgn/xhxYzYCRrq7kXpmMEW+wY
+         tDq+dB4zuE2pE7u79jitCamHWGtXhC3X6doG50T8G+8DWGwmalZ8VYAnqxgftDr4iPA4
+         GQGA706M8uC0GVlMweFMtXwHLR9liksIPf5kG8OSYs+9EnoFvrdrYjWD3uZCjn1vT2Dw
+         ElpCjRZAdTxmtT7pndbfIOEf+4s1jpSPt5DI6M+2UTxOcrmYX/Keh9v2XgEexXaRdJLv
+         1KAxIsQVYZomXf4wo7RNBtTHu2AZUxVqNn3920rim7rrCinBrdAcVJuqgbzsMUHNikyy
+         sg3g==
+X-Gm-Message-State: ACgBeo2eGWyGBst8mowpwtIL1q4NpBu0vMBiQC8Bakz8cepHWa031McR
+        PSRmruosO7R9SpVIYgAu07AXUOTHNWtQWkcKRH2xj4p+iWCVkLn7T20boDaJGnRy0DmqWgghen+
+        pITT4StDrZk4hYfUlY1j+ITT3j3qq4+Mwf3R+TU1k89Rt28mzOm76ycR4rAZYVEV5NkjS
+X-Received: by 2002:a7b:cb4e:0:b0:3a2:f3b0:4233 with SMTP id v14-20020a7bcb4e000000b003a2f3b04233mr12697754wmj.50.1660646739174;
+        Tue, 16 Aug 2022 03:45:39 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR70UyaOCke0n1p44mn9yXZIQjtH72pcH+M7lR1A5bvgh1R4iwg0UHoKhnkoERqt7th++Hpq3g==
+X-Received: by 2002:a7b:cb4e:0:b0:3a2:f3b0:4233 with SMTP id v14-20020a7bcb4e000000b003a2f3b04233mr12697738wmj.50.1660646738816;
+        Tue, 16 Aug 2022 03:45:38 -0700 (PDT)
+Received: from localhost.localdomain.com (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
+        by smtp.gmail.com with ESMTPSA id u4-20020a5d5144000000b00220606afdf4sm9741802wrt.43.2022.08.16.03.45.37
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 16 Aug 2022 03:45:38 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v2] generic: test i_blocks for large files
+Date:   Tue, 16 Aug 2022 12:45:36 +0200
+Message-Id: <20220816104536.273937-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.37.2
+In-Reply-To: <20220813054438.ghygw23t6phvuwos@zlang-mailbox>
+References: <20220813054438.ghygw23t6phvuwos@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20220816092538.84252-1-glass@fydeos.io>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 16, 2022 at 05:25:38PM +0800, Su Yue wrote:
-> Since the commit b27c82e12965 ("attr: port attribute changes to new
-> types"), chown_common stores vfs{g,u}id which converted from kuid into
-> iattr::vfs{g,u}id without check of the corresponding fs mapping ids.
-> 
-> When fchownat(2) is called with unmapped {g,u}id, now chown_common
-> fails later by vfsuid_has_fsmapping in notify_change. Then it returns
-> EOVERFLOW instead of EINVAL to the caller.
-> 
-> Fix it by validating k{u,g}id whether has valid fs mapping ids in
-> chown_common so it can return EINVAL early and make fchownat(2)
-> behave consistently.
-> 
-> This commit fixes fstests/generic/656.
-> 
-> Cc: Christian Brauner (Microsoft) <brauner@kernel.org>
-> Cc: Seth Forshee <sforshee@digitalocean.com>
-> Fixes: b27c82e12965 ("attr: port attribute changes to new types")
-> Signed-off-by: Su Yue <glass@fydeos.io>
-> ---
+This is a regression test for an incorrect
+computation of i_blocks for files larger than
+4 GiB. Bug was filed for exFAT.
 
-Thanks for the patch, Su!
+Signed-off-by: Pavel Reichl <preichl@redhat.com>
+---
+ common/rc             | 10 ++++++++++
+ tests/generic/693     | 46 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/693.out |  2 ++
+ 3 files changed, 58 insertions(+)
+ create mode 100755 tests/generic/693
+ create mode 100644 tests/generic/693.out
 
-I'm aware of this change in behavior and it is intentional. The
-regression risk outside of fstests is very low. So I would prefer if we
-fix the test in fstests first to check for EINVAL or EOVERFLOW.
+diff --git a/common/rc b/common/rc
+index 197c9415..06cbdee5 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1980,6 +1980,16 @@ _require_test()
+     touch ${RESULT_DIR}/require_test
+ }
+ 
++# require a test dev of a minimum size (in kb)
++_require_test_size()
++{
++	[ $# -eq 1 ] || _fail "_require_test_size: expected size param"
++
++	_require_test
++	local devsize=`_get_device_size $TEST_DEV`
++	[ $devsize -lt $1 ] && _notrun "test dev too small"
++}
++
+ _has_logdev()
+ {
+ 	local ret=0
+diff --git a/tests/generic/693 b/tests/generic/693
+new file mode 100755
+index 00000000..a6d1abff
+--- /dev/null
++++ b/tests/generic/693
+@@ -0,0 +1,46 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
++#
++# FS QA Test 693
++#
++# Verify that i_blocks for files larger than 4 GiB have correct
++# values.
++#
++# This test verifies the problem fixed in kernel with commit
++# 0c336d6e33f4 exfat: fix incorrect loading of i_blocks for large files
++#
++. ./common/preamble
++_begin_fstest auto
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.* $junk_dir
++}
++
++_supported_fs generic
++_require_test_size $((4 * 1024 * 1024)) #kB
++
++echo "Silence is golden"
++
++junk_dir=$TEST_DIR/$seq
++junk_file=$junk_dir/junk
++mkdir -p $junk_dir
++
++$XFS_IO_PROG -f -c "pwrite -W 0 4G" $junk_file > /dev/null
++
++iblocks=`stat -c '%b' $junk_file`
++
++_test_cycle_mount
++
++iblocks_after_remount=`stat -c '%b' $junk_file`
++
++if [ "$iblocks" != "$iblocks_after_remount" ]; then
++	echo "Number of blocks needs to be same: $iblocks, $iblocks_after_remount"
++fi
++
++status=0
++
++exit
+diff --git a/tests/generic/693.out b/tests/generic/693.out
+new file mode 100644
+index 00000000..01884ea5
+--- /dev/null
++++ b/tests/generic/693.out
+@@ -0,0 +1,2 @@
++QA output created by 693
++Silence is golden
+-- 
+2.37.2
 
-The reason is that reporting EOVERFLOW for this case is the correct
-behavior imho:
-
-- EINVAL should only be reported because the target {g,u}id_t has no
-  mapping in the caller's idmapping, i.e. doesn't yield a valid k{g,u}id_t.
-- EOVERFLOW should be reported because the target k{g,u}id_t doesn't
-  have a mapping in the filesystem idmapping or mount idmapping. IOW,
-  the filesystem cannot represent the intended value. The mount's
-  idmapping is on a par with the filesystem idmapping and thus a failure
-  to represent a vfs{g,u}id_t in the filesystem should yield EOVERFLOW.
-
-Would you care to send something like the following:
-
-diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
-index 63297d5f..ee41110f 100644
---- a/src/vfs/idmapped-mounts.c
-+++ b/src/vfs/idmapped-mounts.c
-@@ -7367,7 +7367,7 @@ static int setattr_fix_968219708108(const struct vfstest_info *info)
-                 */
-                if (!fchownat(open_tree_fd, FILE1, 0, 0, AT_SYMLINK_NOFOLLOW))
-                        die("failure: change ownership");
--               if (errno != EINVAL)
-+               if (errno != EINVAL && errno != EOVERFLOW)
-                        die("failure: errno");
-
-                /*
-@@ -7457,7 +7457,7 @@ static int setattr_fix_968219708108(const struct vfstest_info *info)
-                 */
-                if (!fchownat(open_tree_fd, FILE1, 0, 0, AT_SYMLINK_NOFOLLOW))
-                        die("failure: change ownership");
--               if (errno != EINVAL)
-+               if (errno != EINVAL && errno != EOVERFLOW)
-                        die("failure: errno");
-
-                /*
-
-to fstests upstream?
