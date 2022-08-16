@@ -2,230 +2,174 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FFD5C32771
-	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 06:46:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8987FC2BB41
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 08:15:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230291AbiHPGqs (ORCPT
+        id S232460AbiHPIPH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 16 Aug 2022 02:46:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54546 "EHLO
+        Tue, 16 Aug 2022 04:15:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230292AbiHPGqX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 02:46:23 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 080322ED70;
-        Mon, 15 Aug 2022 18:47:33 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S231847AbiHPIOi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 04:14:38 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADDC3A00FE;
+        Mon, 15 Aug 2022 23:21:21 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A0CE26068B;
-        Tue, 16 Aug 2022 01:47:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 08870C433C1;
-        Tue, 16 Aug 2022 01:47:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660614452;
-        bh=UasLdHY4c8QlD9e4a8HTUpXAtzd2OS98yy6i0gbvKI4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=kAf5MAU5YwEoybxxzu3BGLUU7IbujU9waEM9+LcLMr0bbwm7vtxsp5wmnLOFje+aG
-         6F2sdX04V205VAA4LNCY5OU8AY8gWSCHVQE4Va6/fk5d7HWoQP1iSPLm+PoF2xMCBW
-         XMGF7wCqvkb8jCGnsmM0PCCDXzBdRA9LVnXjByiDwNFHg58m7s7sY0wJTe33NvYWzN
-         ACXXnlhsqnFSJJgu65Lyvz6L1h8IC52JSLjPdytCvT6KeYH2UFal8SGLq5Sf7/zE5T
-         7gMTR1csyg4zD7KkiFJNAhEyGHrMZTZzLp3JjtXjI5TZL4qchsOCghpq1WcnaeN3a9
-         y44NZ9jKDAIIQ==
-Date:   Mon, 15 Aug 2022 18:47:31 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/3] common: disable infinite IO error retry for EIO
- shutdown tests
-Message-ID: <Yvr3M8V9Tg9LQE6E@magnolia>
-References: <165950054404.199222.5615656337332007333.stgit@magnolia>
- <165950055523.199222.9175019533516343488.stgit@magnolia>
- <20220815094246.iqrbfdkwzvrjbjb3@zlang-mailbox>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 53DBC5BD0F;
+        Tue, 16 Aug 2022 06:21:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1660630880; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=5aVGzAWQvMfe6IW//9T7qw8GP0WcddjvAVIo+6BJdNc=;
+        b=M2wyF9GdD4LkBZEp2K7FUceawIUQT8sFVEBQQng+n73JmuCmR8wy6fKCaCGsWYfZDoWrWJ
+        QxxNmRz5jTnJT3xWoMIMiE0vWyu11ngBtG6FF++fT54kImi9RQG5A9eO7HWxFJsovNd2Li
+        zLZnxbLRjWH0uugMX3rFzXaJY94AqH0=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6BB541345B;
+        Tue, 16 Aug 2022 06:21:19 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id hcAWDV83+2IvLAAAMHmgww
+        (envelope-from <wqu@suse.com>); Tue, 16 Aug 2022 06:21:19 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] btrfs: add test case to check if btrfs RAID5 can detect corrupted data stripe
+Date:   Tue, 16 Aug 2022 14:21:01 +0800
+Message-Id: <20220816062101.36119-1-wqu@suse.com>
+X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220815094246.iqrbfdkwzvrjbjb3@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 15, 2022 at 05:42:46PM +0800, Zorro Lang wrote:
-> On Tue, Aug 02, 2022 at 09:22:35PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > This patch fixes a rather hard to hit livelock in the tests that test
-> > how xfs handles shutdown behavior when the device suddenly dies and
-> > starts returing EIO all the time.  The livelock happens if the AIL is
-> > stuck retrying failed metadata updates forever, the log itself is not
-> > being written, and there is no more log grant space, which prevents the
-> > frontend from shutting down the log due to EIO errors during
-> > transactions.
-> > 
-> > While most users probably want the default retry-forever behavior
-> > because EIO can be transient, the circumstances are different here.  The
-> > tests are designed to flip the device back to working status only after
-> > the unmount succeeds, so we know there's no point in the filesystem
-> > retrying writes until after the unmount.
-> > 
-> > This fixes some of the periodic hangs in generic/019 and generic/475.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  common/dmerror           |    4 ++++
-> >  common/fail_make_request |    1 +
-> >  common/rc                |   31 +++++++++++++++++++++++++++----
-> >  common/xfs               |   29 +++++++++++++++++++++++++++++
-> >  4 files changed, 61 insertions(+), 4 deletions(-)
-> > 
-> > 
-> > diff --git a/common/dmerror b/common/dmerror
-> > index 0934d220..54122b12 100644
-> > --- a/common/dmerror
-> > +++ b/common/dmerror
-> > @@ -138,6 +138,10 @@ _dmerror_load_error_table()
-> >  		suspend_opt="$*"
-> >  	fi
-> >  
-> > +	# If the full environment is set up, configure ourselves for shutdown
-> > +	type _prepare_for_eio_shutdown &>/dev/null && \
-> 
-> I'm wondering why we need to check if _prepare_for_eio_shutdown() is defined
-> at here? This patch define this function, so if we merge this patch, this
-> function is exist, right?
+This test case is not intended to pass with current btrfs code.
 
-This mess exists because of src/dmerror, which sources common/dmerror
-but does *not* source common/rc.  src/dmerror, in turn, is a helper
-script that is called as a subprocess of src/fsync-err.c, which (as a C
-program) doesn't inherit any of the shell data contained within its
-caller (e.g. generic/441).
+The problem of "destructive RMW" is affecting btrfs from the very
+beginning of btrfs RAID56.
 
-I probably should have documented that better, but TBH I'm not fully
-convinced that I understand all this nested re-entry stuff that some of
-the dmerror tests invoke.
+The "destructive RMW" happens by:
 
-> > +		_prepare_for_eio_shutdown $DMERROR_DEV
-> 
-> Hmm... what about someone load error table, but not for testing fs shutdown?
+- Do some sub-stripe writes into data stripe 1
 
-Even the tests that use dmerror but aren't looking for an fs shutdown
-could trigger one anyway, because (a) timestamp updates, or (b) inodegc
-running in the background.  Either way, an EIO shutdown is possible, so
-we should turn off infinite retries to avoid hanging fstests.
+- Corrupt above written data stripe 1
 
---D
+- Do some sub-stripe writes into data stripe 2 of the same full stripe
+  We need to do RMW to calculate a new P/Q stripe.
+  However btrfs RAID56 code has no way to determine on-disk data stripes
+  are correct or not. It just read the corrupted data stripe 1, and
+  use them to calculate new P stripe.
 
-> > +
-> >  	# Suspend the scratch device before the log and realtime devices so
-> >  	# that the kernel can freeze and flush the filesystem if the caller
-> >  	# wanted a freeze.
-> > diff --git a/common/fail_make_request b/common/fail_make_request
-> > index 9f8ea500..b5370ba6 100644
-> > --- a/common/fail_make_request
-> > +++ b/common/fail_make_request
-> > @@ -44,6 +44,7 @@ _start_fail_scratch_dev()
-> >  {
-> >      echo "Force SCRATCH_DEV device failure"
-> >  
-> > +    _prepare_for_eio_shutdown $SCRATCH_DEV
-> >      _bdev_fail_make_request $SCRATCH_DEV 1
-> >      [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> >          _bdev_fail_make_request $SCRATCH_LOGDEV 1
-> > diff --git a/common/rc b/common/rc
-> > index 63bafb4b..119cc477 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -4205,6 +4205,20 @@ _check_dmesg()
-> >  	fi
-> >  }
-> >  
-> > +# Make whatever configuration changes we need ahead of testing fs shutdowns due
-> > +# to unexpected IO errors while updating metadata.  The sole parameter should
-> > +# be the fs device, e.g.  $SCRATCH_DEV.
-> > +_prepare_for_eio_shutdown()
-> > +{
-> > +	local dev="$1"
-> > +
-> > +	case "$FSTYP" in
-> > +	"xfs")
-> > +		_xfs_prepare_for_eio_shutdown "$dev"
-> > +		;;
-> > +	esac
-> > +}
-> > +
-> >  # capture the kmemleak report
-> >  _capture_kmemleak()
-> >  {
-> > @@ -4467,7 +4481,7 @@ run_fsx()
-> >  #
-> >  # Usage example:
-> >  #   _require_fs_sysfs error/fail_at_unmount
-> > -_require_fs_sysfs()
-> > +_has_fs_sysfs()
-> >  {
-> >  	local attr=$1
-> >  	local dname
-> > @@ -4483,9 +4497,18 @@ _require_fs_sysfs()
-> >  		_fail "Usage: _require_fs_sysfs <sysfs_attr_path>"
-> >  	fi
-> >  
-> > -	if [ ! -e /sys/fs/${FSTYP}/${dname}/${attr} ];then
-> > -		_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr}"
-> > -	fi
-> > +	test -e /sys/fs/${FSTYP}/${dname}/${attr}
-> > +}
-> > +
-> > +# Require the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
-> > +_require_fs_sysfs()
-> > +{
-> > +	_has_fs_sysfs "$@" && return
-> > +
-> > +	local attr=$1
-> > +	local dname=$(_short_dev $TEST_DEV)
-> > +
-> > +	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr}"
-> >  }
-> >  
-> >  _require_statx()
-> > diff --git a/common/xfs b/common/xfs
-> > index 92c281c6..65234c8b 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -823,6 +823,35 @@ _scratch_xfs_unmount_dirty()
-> >  	_scratch_unmount
-> >  }
-> >  
-> > +# Prepare a mounted filesystem for an IO error shutdown test by disabling retry
-> > +# for metadata writes.  This prevents a (rare) log livelock when:
-> > +#
-> > +# - The log has given out all available grant space, preventing any new
-> > +#   writers from tripping over IO errors (and shutting down the fs/log),
-> > +# - All log buffers were written to disk, and
-> > +# - The log tail is pinned because the AIL keeps hitting EIO trying to write
-> > +#   committed changes back into the filesystem.
-> > +#
-> > +# Real users might want the default behavior of the AIL retrying writes forever
-> > +# but for testing purposes we don't want to wait.
-> > +#
-> > +# The sole parameter should be the filesystem data device, e.g. $SCRATCH_DEV.
-> > +_xfs_prepare_for_eio_shutdown()
-> > +{
-> > +	local dev="$1"
-> > +	local ctlfile="error/fail_at_unmount"
-> > +
-> > +	# Don't retry any writes during the (presumably) post-shutdown unmount
-> > +	_has_fs_sysfs "$ctlfile" && _set_fs_sysfs_attr $dev "$ctlfile" 1
-> > +
-> > +	# Disable retry of metadata writes that fail with EIO
-> > +	for ctl in max_retries retry_timeout_seconds; do
-> > +		ctlfile="error/metadata/EIO/$ctl"
-> > +
-> > +		_has_fs_sysfs "$ctlfile" && _set_fs_sysfs_attr $dev "$ctlfile" 0
-> > +	done
-> > +}
-> > +
-> >  # Skip if we are running an older binary without the stricter input checks.
-> >  # Make multiple checks to be sure that there is no regression on the one
-> >  # selected feature check, which would skew the result.
-> > 
-> 
+  Since data stripe 1 is already corrupted, the new P stripe (with
+  correct data stripe 2) can not recover the original data stripe 1,
+  making data stripe 1 unable to recover.
+
+The test case itself will intentionally create such "destructive RMW" to
+check if btrfs can handle it.
+
+Unfortunately current btrfs code can not handle it at all, thus the test
+case is going to always fail.
+
+Thus the test case is here mostly to leave a warning sign for now, and
+that's why it's only in "raid" and "repair" groups.
+
+It will only moved to "auto" and "quick" groups after upstream kernel
+has a way to solve it.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/272     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/272.out |  5 ++++
+ 2 files changed, 67 insertions(+)
+ create mode 100755 tests/btrfs/272
+ create mode 100644 tests/btrfs/272.out
+
+diff --git a/tests/btrfs/272 b/tests/btrfs/272
+new file mode 100755
+index 00000000..d4aa7737
+--- /dev/null
++++ b/tests/btrfs/272
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 272
++#
++# Test if btrfs RAID5 can detects corrupted data stripes before doing RMW.
++#
++# If not properly detected, this can make btrfs RAID56 to use corrupted data
++# stripes to calculate new P/Q stripes, and result unrecoverable corruption.
++#
++# Unfortunately such error detection is not implemented in btrfs RAID56 yet.
++#
++. ./common/preamble
++_begin_fstest quick raid repair
++
++# Import common functions.
++. ./common/btrfs
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_require_scratch_dev_pool 3
++_scratch_dev_pool_get 3
++
++# mkfs using RAID5 will cause WARNING message, needs to redirect it.
++_scratch_pool_mkfs "-d raid5 -m raid5" >> $seqres.full 2>&1
++
++_scratch_mount
++
++# Btrfs RAID all uses 64K as stripe length, so this should
++# fill data stripe 1.
++$XFS_IO_PROG -f -c "pwrite -S 0x11 0 64K" $SCRATCH_MNT/file1 -c sync > /dev/null
++
++echo "=== MD5 before corruption ==="
++_md5_checksum $SCRATCH_MNT/file1
++
++logical=$(_btrfs_get_first_logical $SCRATCH_MNT/file1)
++physical=$(_btrfs_get_physical $logical 1)
++dev=$(_btrfs_get_device_path $logical 1)
++
++echo "=== Data stripe 1, logical=$logical dev=$dev physical=$physical ===" >> $seqres.full
++_scratch_unmount
++
++# Corrupt data stripe 1
++$XFS_IO_PROG -c "pwrite -S 0xff $physical 64K" $dev > /dev/null
++
++_scratch_mount
++
++# Do a new write into data stripe 2, this write will trigger RMW, which will
++# read data stripe 1 (already corrupted) to calculate P stripe.
++$XFS_IO_PROG -f -c "pwrite -S 0x22 0 64K" $SCRATCH_MNT/file2 -c sync > /dev/null
++
++# Check if file1 (aka, data stripe 1) can still be recovered
++echo "=== MD5 after corruption and RMW ==="
++_md5_checksum $SCRATCH_MNT/file1
++
++_scratch_unmount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/272.out b/tests/btrfs/272.out
+new file mode 100644
+index 00000000..b7bb02f4
+--- /dev/null
++++ b/tests/btrfs/272.out
+@@ -0,0 +1,5 @@
++QA output created by 272
++=== MD5 before corruption ===
++876f4f724f70c185824f120574658786
++=== MD5 after corruption and RMW ===
++876f4f724f70c185824f120574658786
+-- 
+2.37.2
+
