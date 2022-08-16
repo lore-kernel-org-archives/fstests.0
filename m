@@ -2,245 +2,153 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEED5C25B0E
-	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 13:34:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2728C25B0E
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 16:00:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235744AbiHPNeU (ORCPT
+        id S236210AbiHPQAF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 16 Aug 2022 09:34:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56628 "EHLO
+        Tue, 16 Aug 2022 12:00:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235770AbiHPNeS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 09:34:18 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A57714BA43;
-        Tue, 16 Aug 2022 06:34:16 -0700 (PDT)
+        with ESMTP id S233487AbiHPP7m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 11:59:42 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5A9BDF0B
+        for <fstests@vger.kernel.org>; Tue, 16 Aug 2022 08:58:06 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 43C1E60A09;
-        Tue, 16 Aug 2022 13:34:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48B84C433D6;
-        Tue, 16 Aug 2022 13:34:15 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A25D7B8188C
+        for <fstests@vger.kernel.org>; Tue, 16 Aug 2022 15:58:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5AE72C433D6;
+        Tue, 16 Aug 2022 15:58:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660656855;
-        bh=yRKmarZ3sRxQHVQpotVy13wyeGDSiZwkyWwSPPwpR8k=;
-        h=From:To:Cc:Subject:Date:From;
-        b=jf5NIatr6GZhYsZZyJlmCEcWyUKj9flwn1j27o1iBmRGXNSVUadJilWlWdU4PBWRg
-         5C/cbYBVmuQklGg0x95Yp67CRBHDBA1XUegQr+wdZ3/LSeNwSw2/Y90ttE3N2DjIA0
-         nxqdOXsSRItLyuOEOHJCuwy6KWVmKpucZnK27Lh2p2UGmDxHMaHIMruFZAltUoPjCv
-         +PQGbp+4J6Wpi8BkmDqdjyvWuD2CGkkdr4e78hYVxFa8ZLwnMDBNjHRk74Wl0fSeWH
-         6qTqTUxGE/6PLpdBEE012PwdQ035injVXzU8+N3ypi1rbSC5EVw3AseFjOUjO0TxH5
-         KL6+W1g8TKUaQ==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: [xfstests PATCH] generic/693: add basic change attr test
-Date:   Tue, 16 Aug 2022 09:34:13 -0400
-Message-Id: <20220816133413.44298-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.37.2
+        s=k20201202; t=1660665484;
+        bh=QTtxTP5aBOVClGyoGYSmE9QvvuN9qSJ/hsgj92R5vq4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Etcjs0IW9dChAuL3rlRsg18Striu4xfG0tSWDQoDxMkvvYhDF4aWO6dYX5IbFlrAA
+         GPueboDQdzVkmpVt3Byo4gplBbhllYXA7qFIJEm6tN4mB/an7JS4x+WpbXj8W9lySJ
+         AH8BkTyfqTWjSDFs2Q/oDWiD1L5NjhPpHsiE9Im52wd59WFb9Jb/5G9uTPdVvzMHh0
+         Ini2EtBjG/TTTRnErqyj+o20MRQQylHtfcMW9ZLwXJr71/04k456DUJe4ni5t7uAm0
+         RBF2OyvUH9bI89cMb/ZFWsBh9niU1VfcQ3NkDZZVxqZEqYnTYjJLZgkI6aMERVTg0M
+         pCk09YoCI0Xlw==
+Date:   Tue, 16 Aug 2022 08:58:03 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2] generic: test i_blocks for large files
+Message-ID: <Yvu+i1sxTD/KcVjL@magnolia>
+References: <20220813054438.ghygw23t6phvuwos@zlang-mailbox>
+ <20220816104536.273937-1-preichl@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220816104536.273937-1-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Now that we have the ability to query the change attribute in userland,
-test that the filesystems implement it correctly. Fetch the change
-attribute before and after various operations and validate that it
-changes (or doesn't change) as expected.
+On Tue, Aug 16, 2022 at 12:45:36PM +0200, Pavel Reichl wrote:
+> This is a regression test for an incorrect
+> computation of i_blocks for files larger than
+> 4 GiB. Bug was filed for exFAT.
+> 
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> ---
+>  common/rc             | 10 ++++++++++
+>  tests/generic/693     | 46 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/693.out |  2 ++
+>  3 files changed, 58 insertions(+)
+>  create mode 100755 tests/generic/693
+>  create mode 100644 tests/generic/693.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 197c9415..06cbdee5 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1980,6 +1980,16 @@ _require_test()
+>      touch ${RESULT_DIR}/require_test
+>  }
+>  
+> +# require a test dev of a minimum size (in kb)
+> +_require_test_size()
+> +{
+> +	[ $# -eq 1 ] || _fail "_require_test_size: expected size param"
+> +
+> +	_require_test
+> +	local devsize=`_get_device_size $TEST_DEV`
+> +	[ $devsize -lt $1 ] && _notrun "test dev too small"
+> +}
+> +
+>  _has_logdev()
+>  {
+>  	local ret=0
+> diff --git a/tests/generic/693 b/tests/generic/693
+> new file mode 100755
+> index 00000000..a6d1abff
+> --- /dev/null
+> +++ b/tests/generic/693
+> @@ -0,0 +1,46 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 693
+> +#
+> +# Verify that i_blocks for files larger than 4 GiB have correct
+> +# values.
+> +#
+> +# This test verifies the problem fixed in kernel with commit
+> +# 0c336d6e33f4 exfat: fix incorrect loading of i_blocks for large files
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.* $junk_dir
+> +}
+> +
+> +_supported_fs generic
+> +_require_test_size $((4 * 1024 * 1024)) #kB
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- common/rc             |  17 ++++++
- tests/generic/693     | 138 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/693.out |   1 +
- 3 files changed, 156 insertions(+)
- create mode 100755 tests/generic/693
- create mode 100644 tests/generic/693.out
+What does this new helper do that "_require_fs_space $TEST_DIR 4194304"
+wouldn't solve?
 
-Please look and make sure I'm not missing other operations that we
-should be testing here!
+--D
 
-diff --git a/common/rc b/common/rc
-index 197c94157025..b9cb47f99016 100644
---- a/common/rc
-+++ b/common/rc
-@@ -5052,6 +5052,23 @@ hexdump()
- 	_fail "Use _hexdump(), please!"
- }
- 
-+_require_change_attr ()
-+{
-+
-+	_mask=$($XFS_IO_PROG -f -c "statx -m 0x2000 -r" $TEST_DIR/change_attr_test.$$ \
-+		| grep "^stat.mask" | cut -d' ' -f 3)
-+	rm -f $TEST_DIR/change_attr_test.$$
-+	if [ $(( ${_mask}&0x2000 )) -eq 0 ]; then
-+		_notrun "$FSTYP does not support inode change attribute"
-+	fi
-+}
-+
-+_get_change_attr ()
-+{
-+	$XFS_IO_PROG -r -c "statx -m 0x2000 -r" $1 | grep '^stat.change_attr' | \
-+		cut -d' ' -f3
-+}
-+
- init_rc
- 
- ################################################################################
-diff --git a/tests/generic/693 b/tests/generic/693
-new file mode 100755
-index 000000000000..fa92931d2ac8
---- /dev/null
-+++ b/tests/generic/693
-@@ -0,0 +1,138 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
-+#
-+# FS QA Test No. 693
-+#
-+# Test the behavior of the inode change attribute
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rw
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_test
-+_require_change_attr
-+
-+# from the stat.h header file
-+UTIME_OMIT=1073741822
-+
-+testdir="$TEST_DIR/test_iversion_dir.$$"
-+testfile="$testdir/test_iversion_file.$$"
-+
-+mkdir $testdir
-+
-+# DIRECTORY TESTS
-+#################
-+# Does dir change attr change on a create?
-+old=$(_get_change_attr $testdir)
-+touch $testfile
-+new=$(_get_change_attr $testdir)
-+if [ $old = $new ]; then
-+	_fail "Change attr of dir did not change after create!"
-+fi
-+
-+# on a hardlink?
-+old=$new
-+ln $testfile $testdir/linky
-+new=$(_get_change_attr $testdir)
-+if [ $old = $new ]; then
-+	_fail "Change attr of dir did not change after hardlink!"
-+fi
-+
-+# on an unlink?
-+old=$new
-+rm -f $testfile
-+new=$(_get_change_attr $testdir)
-+if [ $old = $new ]; then
-+	_fail "Change attr of dir did not change after unlink!"
-+fi
-+
-+# on a rename (within same dir)
-+old=$new
-+mv $testdir/linky $testfile
-+new=$(_get_change_attr $testdir)
-+if [ $old = $new ]; then
-+	_fail "Change attr of dir did not change after rename!"
-+fi
-+
-+# on a mknod
-+old=$new
-+mknod $testdir/pipe p
-+new=$(_get_change_attr $testdir)
-+if [ $old = $new ]; then
-+	_fail "Change attr of dir did not change after mknod!"
-+fi
-+
-+
-+# REGULAR FILE TESTS
-+####################
-+# ensure change_attr changes after a write
-+old=$(_get_change_attr $testfile)
-+$XFS_IO_PROG -c "pwrite -W -q 0 32" $testfile
-+new=$(_get_change_attr $testfile)
-+if [ $old = $new ]; then
-+	_fail "Change attr did not change after write!"
-+fi
-+
-+# ensure it doesn't change after a sync
-+old=$new
-+sync
-+new=$(_get_change_attr $testfile)
-+if [ $old != $new ]; then
-+	_fail "Change attr changed after sync!"
-+fi
-+
-+# ensure change_attr does not change after read
-+old=$new
-+cat $testfile > /dev/null
-+new=$(_get_change_attr $testfile)
-+if [ $old != $new ]; then
-+	_fail "Change attr changed after read!"
-+fi
-+
-+# ensure it changes after truncate
-+old=$new
-+truncate --size 0 $testfile
-+new=$(_get_change_attr $testfile)
-+if [ $old = $new ]; then
-+	_fail "Change attr did not change after truncate!"
-+fi
-+
-+# ensure it changes after only atime update
-+old=$new
-+$XFS_IO_PROG -c "utimes 1 1 $UTIME_OMIT $UTIME_OMIT" $testfile
-+new=$(_get_change_attr $testfile)
-+if [ $old = $new ]; then
-+	_fail "Change attr did not change after atime update!"
-+fi
-+
-+# ensure it changes after utimes atime/mtime update
-+old=$new
-+$XFS_IO_PROG -c "utimes 1 1 1 1" $testfile
-+new=$(_get_change_attr $testfile)
-+if [ $old = $new ]; then
-+	_fail "Change attr did not change after mtime update!"
-+fi
-+
-+# after setting xattr
-+old=$new
-+setfattr -n user.foo -v bar $testfile
-+new=$(_get_change_attr $testfile)
-+if [ $old = $new ]; then
-+	_fail "Change attr did not change after setxattr!"
-+fi
-+
-+# after removing xattr
-+old=$new
-+setfattr -x user.foo $testfile
-+new=$(_get_change_attr $testfile)
-+if [ $old = $new ]; then
-+	_fail "Change attr did not change after rmxattr!"
-+fi
-+
-+status=0
-+exit
-diff --git a/tests/generic/693.out b/tests/generic/693.out
-new file mode 100644
-index 000000000000..89ad553d911c
---- /dev/null
-+++ b/tests/generic/693.out
-@@ -0,0 +1 @@
-+QA output created by 693
--- 
-2.37.2
-
+> +
+> +echo "Silence is golden"
+> +
+> +junk_dir=$TEST_DIR/$seq
+> +junk_file=$junk_dir/junk
+> +mkdir -p $junk_dir
+> +
+> +$XFS_IO_PROG -f -c "pwrite -W 0 4G" $junk_file > /dev/null
+> +
+> +iblocks=`stat -c '%b' $junk_file`
+> +
+> +_test_cycle_mount
+> +
+> +iblocks_after_remount=`stat -c '%b' $junk_file`
+> +
+> +if [ "$iblocks" != "$iblocks_after_remount" ]; then
+> +	echo "Number of blocks needs to be same: $iblocks, $iblocks_after_remount"
+> +fi
+> +
+> +status=0
+> +
+> +exit
+> diff --git a/tests/generic/693.out b/tests/generic/693.out
+> new file mode 100644
+> index 00000000..01884ea5
+> --- /dev/null
+> +++ b/tests/generic/693.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 693
+> +Silence is golden
+> -- 
+> 2.37.2
+> 
