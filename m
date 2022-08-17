@@ -2,198 +2,106 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 500F6C25B0E
-	for <linux-fstests@archiver.kernel.org>; Tue, 16 Aug 2022 21:40:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F80EC25B0E
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Aug 2022 02:09:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233550AbiHPVk5 (ORCPT
+        id S238292AbiHQCJu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 16 Aug 2022 17:40:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48296 "EHLO
+        Tue, 16 Aug 2022 22:09:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45226 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231594AbiHPVk4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 17:40:56 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53014753A7;
-        Tue, 16 Aug 2022 14:40:55 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S238274AbiHQCJt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Aug 2022 22:09:49 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0A5C7EFEC;
+        Tue, 16 Aug 2022 19:09:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1660702186; i=@fujitsu.com;
+        bh=pe28sQSKtrN6/qiGjOSCUDh43q+ivyIlZ/SxwGp+uJw=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=d8JONErLpEHybrufVjONrQsNtKdaYiqNRBGXtoS8iytZi61gdMYtIbZy8mjUqd8bJ
+         6ENYEYI3jND8C9cQ8YnZJNVIHhmQqofCx+Xi8ycxgQkeS4WeGWi+8z61S0MTOirGZq
+         IDJRvqIFeC+ZCnG+rCYJIu4SwkQ5y84BnsWvUkhgTMMO+2iYeU1Bss8LUN3A+U7Gv/
+         OiW+Jh8+GQbsAP/FcLHUvbkDZrjcrvDRG5D3k+YNyqX6hOVEq7glF4qPZC/QM2ylcu
+         hH1D5Hv9XF6wNV+v0qoSLNRR1Jdtl6xNy4ri1eSqIBwasCVCpkV7OgVc9NWMJySbR0
+         psj7At0pj18eg==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrEIsWRWlGSWpSXmKPExsViZ8ORpPvS90+
+  Swb1bghanW/ayW8ye3sxksezBZhaLmfPusFm8an7EZrHg018Wi9aen+wO7B6L97xk8mg6c5TZ
+  4/2+q2weZxYcYff4vEkugDWKNTMvKb8igTVjX/899oIfLBVzWo6zNTBOZuli5OIQEtjIKLH22
+  F5WCGcJk8SeZeegnD2MEk8mtzF2MXJysAloSjzrXMAMYosIyEr8n7GaCaSIWWAlo0Tno4tMIA
+  lhAWOJ5YeWs4LYLAKqEv0tv8HivAIeEksvN7OA2BICChJTHr5nhogLSpyc+QQsziwgIXHwxQt
+  miBpFiUsd3xgh7AqJ14cvQcXVJK6e28Q8gZF/FpL2WUjaFzAyrWK0TirKTM8oyU3MzNE1NDDQ
+  NTQ01TW20DUyNNJLrNJN1Est1S1PLS7RBXLLi/VSi4v1iitzk3NS9PJSSzYxAoM/pVjtyg7GP
+  at+6h1ilORgUhLl7Wf6kyTEl5SfUpmRWJwRX1Sak1p8iFGGg0NJgtffEygnWJSanlqRlpkDjE
+  SYtAQHj5IIb4wPUJq3uCAxtzgzHSJ1ilGXY/HVK3uZhVjy8vNSpcR534IUCYAUZZTmwY2AJYV
+  LjLJSwryMDAwMQjwFqUW5mSWo8q8YxTkYlYR593kDTeHJzCuB2/QK6AgmoCOOXfwNckRJIkJK
+  qoEp9m3LvNn8M39uadDdIcNkFLFP1O6+R8+MqPmmK54sLryieUJobfyVGZo5B0VNbM+3lsyvi
+  wo77Ln7xoFnd8705Ba8fdHY96HitU97j9aU+4cufo6YcCTr10eGz1GP7gYfD7042yA6vFfAPI
+  yT9W+OXJqFjNuFpdeezNlgysFnEDBHJNMtN9ZMN662fdO2zm/ixn4Xe44yae1IbbM+1zPBJn2
+  LRHDlUz5ds6WVapsC+n+xai3ZtfjPfdfD0ma3J97avr4s60B9gIofe/Zrx8miTu6TsuSWPgx8
+  UvVnxbWpXtXPor5pXDnFFf9tr+PB3v+LasoM06sY3vxn//uQ69+sC4V2bB7285LkA62Paz9UY
+  inOSDTUYi4qTgQAZVDpkIUDAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-13.tower-565.messagelabs.com!1660702185!212978!1
+X-Originating-IP: [62.60.8.98]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.87.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 3116 invoked from network); 17 Aug 2022 02:09:45 -0000
+Received: from unknown (HELO n03ukasimr03.n03.fujitsu.local) (62.60.8.98)
+  by server-13.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 17 Aug 2022 02:09:45 -0000
+Received: from n03ukasimr03.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTP id EE2411AC;
+        Wed, 17 Aug 2022 03:09:44 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id BD1001F385;
-        Tue, 16 Aug 2022 21:40:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1660686053; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type;
-        bh=vT5KSQeyPFq+/ZMvtSMzDrveJluLKoELYbO+MruC5QA=;
-        b=QrAmCQyg/sAqn+0GtB313n4gmXQ4q30ACzWc+O6XtGtJtC40HklfL466YCbAZKw/LaSegK
-        DRGxq677fKHNoVN4QXcnWI8NAMN6cOL7+JEmUMCnAnfglTSkWZ6sMp03pCL/m84HXQx/Vk
-        OtbZlYMB1IYgE/hKE1yII7HgVrlAnl4=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1660686053;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type;
-        bh=vT5KSQeyPFq+/ZMvtSMzDrveJluLKoELYbO+MruC5QA=;
-        b=8WC+/5bP+dNgkMX+3EGOJA54W6AdvoFpi7dHdwPKJwXUnhD2TlY53nNT1PSNG0SNGlp6A0
-        +ChQhSrAV+MAryAw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 528B21345B;
-        Tue, 16 Aug 2022 21:40:53 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id PinjCuUO/GK+IAAAMHmgww
-        (envelope-from <rgoldwyn@suse.de>); Tue, 16 Aug 2022 21:40:53 +0000
-Date:   Tue, 16 Aug 2022 16:40:51 -0500
-From:   Goldwyn Rodrigues <rgoldwyn@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, fdmanana@kernel.org
-Subject: [PATCH] btrfs: Test xattr changes for read-only btrfs property
-Message-ID: <20220816214051.wsw75y3mtjdsim6w@fiona>
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTPS id E2BEB1A3;
+        Wed, 17 Aug 2022 03:09:44 +0100 (BST)
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Wed, 17 Aug 2022 03:09:41 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <jack@suse.cz>, <oliver.sang@intel.com>, <lkp@intel.com>,
+        <linux-ext4@vger.kernel.org>, <tytso@mit.edu>,
+        <lczerner@redhat.com>, Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] ext4/053: Remove nouser_xattr test
+Date:   Wed, 17 Aug 2022 11:10:23 +0800
+Message-ID: <1660705823-2172-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD08.g08.fujitsu.local (10.167.33.83) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test creation, modification and deletion of xattr for a BTRFS filesystem
-which has the read-only property set to true.
+Plan to remove noacl and nouser_xattr mount option in kernel because they
+are deprecated[1]. So remove nouser_xattr test in here.
 
-Re-test the same after BTRFS read-only property is set to false.
+Reported-by: kernel test robot <oliver.sang@intel.com>
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/ext4/053 | 1 -
+ 1 file changed, 1 deletion(-)
 
-This tests the bug for "security.*" modifications which escape
-xattr_permission(), because security parameters are let through
-in xattr_permission(), without checks from
-inode_permission()->btrfs_permission(). There is no restriction on
-security.* from VFS and decision is left to the underlying filesystem.
-
-Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-
-diff --git a/tests/btrfs/273 b/tests/btrfs/273
-new file mode 100755
-index 00000000..ec7d264d
---- /dev/null
-+++ b/tests/btrfs/273
-@@ -0,0 +1,78 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 273
-+#
-+# Test that no xattr can be changed once btrfs property is set to RO
-+#
-+. ./common/preamble
-+_begin_fstest auto quick attr
-+
-+# Import common functions.
-+#. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_attrs
-+_require_btrfs_command "property"
-+_require_scratch
-+
-+_scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+FILENAME=$SCRATCH_MNT/foo
-+
-+set_xattr() {
-+	local value=$1
-+	$SETFATTR_PROG -n "user.one" -v $value $FILENAME
-+	$SETFATTR_PROG -n "security.one" -v $value $FILENAME
-+	$SETFATTR_PROG -n "trusted.one" -v $value $FILENAME
-+}
-+
-+get_xattr() {
-+	$GETFATTR_PROG -n "user.one" $FILENAME
-+	$GETFATTR_PROG -n "security.one" $FILENAME
-+	$GETFATTR_PROG -n "trusted.one" $FILENAME
-+}
-+
-+del_xattr() {
-+	$SETFATTR_PROG -x "user.one" $FILENAME
-+	$SETFATTR_PROG -x "security.one" $FILENAME
-+	$SETFATTR_PROG -x "trusted.one" $FILENAME
-+}
-+
-+# Create a test file.
-+echo "hello world" > $FILENAME
-+
-+set_xattr 1
-+
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro true
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
-+
-+# Attempt to change values of RO (property) filesystem
-+set_xattr 2
-+
-+# Check the values of RO (property) filesystem is not changed
-+get_xattr
-+
-+# Attempt to remove xattr from RO (property) filesystem
-+del_xattr
-+
-+# Change filesystem property RO to false
-+
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro false
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
-+
-+# Change the xattrs after RO is false
-+set_xattr 2
-+
-+# Get the changed values
-+get_xattr
-+
-+# Remove xattr
-+del_xattr
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/273.out b/tests/btrfs/273.out
-new file mode 100644
-index 00000000..f6fca029
---- /dev/null
-+++ b/tests/btrfs/273.out
-@@ -0,0 +1,33 @@
-+QA output created by 273
-+ro=true
-+setfattr: /scratch/foo: Read-only file system
-+setfattr: /scratch/foo: Read-only file system
-+setfattr: /scratch/foo: Read-only file system
-+getfattr: Removing leading '/' from absolute path names
-+# file: scratch/foo
-+user.one="1"
-+
-+getfattr: Removing leading '/' from absolute path names
-+# file: scratch/foo
-+security.one="1"
-+
-+getfattr: Removing leading '/' from absolute path names
-+# file: scratch/foo
-+trusted.one="1"
-+
-+setfattr: /scratch/foo: Read-only file system
-+setfattr: /scratch/foo: Read-only file system
-+setfattr: /scratch/foo: Read-only file system
-+ro=false
-+getfattr: Removing leading '/' from absolute path names
-+# file: scratch/foo
-+user.one="2"
-+
-+getfattr: Removing leading '/' from absolute path names
-+# file: scratch/foo
-+security.one="2"
-+
-+getfattr: Removing leading '/' from absolute path names
-+# file: scratch/foo
-+trusted.one="2"
-+
-
+diff --git a/tests/ext4/053 b/tests/ext4/053
+index 555e474e..5d2c478a 100755
+--- a/tests/ext4/053
++++ b/tests/ext4/053
+@@ -439,7 +439,6 @@ for fstype in ext2 ext3 ext4; do
+ 	mnt oldalloc removed
+ 	mnt orlov removed
+ 	mnt -t user_xattr
+-	mnt nouser_xattr
+ 
+ 	if _has_kernel_config CONFIG_EXT4_FS_POSIX_ACL; then
+ 		mnt -t acl
 -- 
-Goldwyn
+2.27.0
+
