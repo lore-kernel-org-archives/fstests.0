@@ -2,350 +2,110 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CB11C25B08
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Aug 2022 14:46:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C2BBC25B08
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Aug 2022 02:56:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240449AbiHQOqF (ORCPT
+        id S242677AbiHRC41 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 17 Aug 2022 10:46:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59754 "EHLO
+        Wed, 17 Aug 2022 22:56:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50264 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239585AbiHQOqE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 Aug 2022 10:46:04 -0400
-Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8260D9C2E2;
-        Wed, 17 Aug 2022 07:46:00 -0700 (PDT)
-Received: from authenticated-user (box.fidei.email [71.19.144.250])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id 0ED8080F11;
-        Wed, 17 Aug 2022 10:45:58 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1660747559; bh=+tj91MH5uinNbo9wdIP6bc/AzwaMuZup+5nSv515UzM=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=TeX0mKOnWF74PV6WYmfcCkbpJ3wXlC5Q9e7envKu1YZ9k9RJMGk1SSG+7YPOH6zje
-         qQIH1X6pG7BXEe81YNMBYXQEpopIs01caA+GC5eiArMCZ5k4ClfgsnpzPd1io38hOj
-         EkGmPDcjhDzsY+UwtnHY60uVp0puaU3h6Ymbdjh8YpoHmm+AKryRl78mVyuZuYI5hm
-         dOIV7GJ4Ga28d8brPtLkbL1+tTIEcTD5TNyAN7chVftKIYKix5/UllGWzJRonBdKzu
-         sNhyuFMJnr65SW7A4HDQqW6lvE6Y8nBX5GfyiMgTg0AHM0O9GOebl3vg0TWCFyxDuM
-         exeMCRwzPiHDQ==
-From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [PATCH 2/2] fstests: fscrypt: update tests of encryption contents for btrfs
-Date:   Wed, 17 Aug 2022 10:45:46 -0400
-Message-Id: <97f8063f0220933afe504d3a52fa2fecac8dce8a.1660729861.git.sweettea-kernel@dorminy.me>
-In-Reply-To: <cover.1660729861.git.sweettea-kernel@dorminy.me>
-References: <cover.1660729861.git.sweettea-kernel@dorminy.me>
+        with ESMTP id S234590AbiHRC40 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 Aug 2022 22:56:26 -0400
+Received: from out20-122.mail.aliyun.com (out20-122.mail.aliyun.com [115.124.20.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63B64A5C52
+        for <fstests@vger.kernel.org>; Wed, 17 Aug 2022 19:56:17 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07461943|-1;BR=01201311R191S24rulernew998_84748_2000303;CH=blue;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0280579-0.00153849-0.970404;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=wangyugui@e16-tech.com;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.OvvE7kA_1660791374;
+Received: from T640.e16-tech.com(mailfrom:wangyugui@e16-tech.com fp:SMTPD_---.OvvE7kA_1660791374)
+          by smtp.aliyun-inc.com;
+          Thu, 18 Aug 2022 10:56:14 +0800
+From:   Wang Yugui <wangyugui@e16-tech.com>
+To:     fstests@vger.kernel.org
+Cc:     Wang Yugui <wangyugui@e16-tech.com>
+Subject: [PATCH] fstests: add missing _require_scratch
+Date:   Thu, 18 Aug 2022 10:56:14 +0800
+Message-Id: <20220818025614.47274-1-wangyugui@e16-tech.com>
+X-Mailer: git-send-email 2.36.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-As btrfs has a new encryption policy, and requires a particular set of
-policy flags, both the tests to verify contents and filename encryption,
-and the tool to verify against, need updates to use the new policy for
-btrfs. This change updates the tool with the new fscrypt policy
-behavior; updates the test functions to extract per-extent IVs, assuming
-there is only one extent per inode; and updates the test functions to
-use btrfs's dump-tree as necessary to extract information.
+When $SCRATCH_DEV is not defined correctly, we need _require_scratch to skip
+the tests that need $SCRATCH_DEV without an error.
 
-It is somewhat fragile to assume that the contents always fit within one
-extent, but no test yet uses large enough files for this to be an issue.
+so add missing _require_scratch.
 
-Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+Signed-off-by: Wang Yugui <wangyugui@e16-tech.com>
 ---
- common/encrypt           | 75 +++++++++++++++++++++++++++++++++++-----
- src/fscrypt-crypt-util.c | 34 ++++++++++++++++--
- tests/generic/576        |  1 +
- 3 files changed, 99 insertions(+), 11 deletions(-)
+ tests/btrfs/202 | 1 +
+ tests/btrfs/215 | 1 +
+ tests/btrfs/268 | 1 +
+ tests/btrfs/269 | 1 +
+ tests/btrfs/270 | 1 +
+ 5 files changed, 5 insertions(+)
 
-diff --git a/common/encrypt b/common/encrypt
-index b011c3e8..ce6ebdf9 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -110,7 +110,7 @@ _require_encryption_policy_support()
+diff --git a/tests/btrfs/202 b/tests/btrfs/202
+index c1fa3c3f..5f0429f1 100755
+--- a/tests/btrfs/202
++++ b/tests/btrfs/202
+@@ -11,6 +11,7 @@ _begin_fstest auto quick subvol snapshot
+ . ./common/filter
  
- 	if [ "$FSTYP" = "btrfs" ]; then
- 		if (( policy_flags & ~FSCRYPT_POLICY_FLAG_IV_FROM_FS )); then
--			_fail "Btrfs accepts policy flags of IV_FROM_FS only"
-+			_notrun "Btrfs accepts policy flags of IV_FROM_FS only"
- 		fi
- 	fi
+ _supported_fs btrfs
++_require_scratch
  
-@@ -635,6 +635,40 @@ _get_encryption_nonce()
- 	esac
- }
+ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount
+diff --git a/tests/btrfs/215 b/tests/btrfs/215
+index 27649160..7df74892 100755
+--- a/tests/btrfs/215
++++ b/tests/btrfs/215
+@@ -25,6 +25,7 @@ get_physical()
  
-+# Retrieve the encryption IV of the first file extent in an inode as a hex
-+# string.  The IV was randomly generated by the filesystem, in the case of
-+# btrfs, and isn't exposed directly to userspace.  But it can be read using
-+# the filesystem's debugging tools.
-+_get_encryption_iv()
-+{
-+	local device=$1
-+	local inode=$2
-+
-+	case $FSTYP in
-+	btrfs)
-+		# btrfs prints the file extents (for simple unshared
-+		# inodes) like:
-+		#         item 21 key ($inode EXTENT_DATA 0) itemoff 2534 itemsize 69
-+		#                generation 7 type 1 (regular)
-+                #		 extent data disk byte 5304320 nr 1048576
-+                #		 extent data offset 0 nr 1048576 ram 1048576
-+                #		 extent compression 0 (none)
-+                #		 extent encryption 81 (1, 16: IV 77d05501da7c23920f9ca00872f0bbc3)
-+
-+		#
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 5 "key ($inode EXTENT_DATA 0)" | \
-+			awk '/ IV [[:xdigit:]]+)/ {
-+				match($0, /IV ([[:xdigit:]]+)\)/,a);
-+				print a[1];
-+			}'
-+		;;
-+	*)
-+		_fail "_get_encryption_iv() isn't implemented on $FSTYP"
-+		;;
-+	esac
-+}
-+
- # Require support for _get_encryption_nonce()
- _require_get_encryption_nonce_support()
- {
-@@ -669,6 +703,19 @@ _get_ciphertext_filename()
- 	local dir_inode=$3
+ # Modify as appropriate.
+ _supported_fs btrfs
++_require_scratch
+ # Overwriting data is forbidden on a zoned block device
+ _require_non_zoned_device $SCRATCH_DEV
  
- 	case $FSTYP in
-+	btrfs)
-+		# Extract the filename from the inode_ref object, similar to:
-+		# item 24 key (259 INODE_REF 257) itemoff 14826 itemsize 26
-+		# 	index 3 namelen 16 name: J\xf7\x15tD\x8eL\xae/\x98\x9f\x09\xc1\xb6\x09>
-+		#
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 1 "key ($inode INODE_REF " | tail -n 1 | \
-+			perl -ne '
-+				s/.*?name: //;
-+				chomp;
-+				s/\\x([[:xdigit:]]{2})/chr hex $1/eg;
-+				print;'
-+		;;
- 	ext4)
- 		# Extract the filename from the debugfs output line like:
- 		#
-@@ -806,6 +853,7 @@ _do_verify_ciphertext_for_encryption_policy()
- 	local raw_key_hex=$6
- 	local crypt_contents_cmd="$here/src/fscrypt-crypt-util $7"
- 	local crypt_filename_cmd="$here/src/fscrypt-crypt-util $8"
-+	local use_iv=$9
+diff --git a/tests/btrfs/268 b/tests/btrfs/268
+index 5043bb02..9dc14a18 100755
+--- a/tests/btrfs/268
++++ b/tests/btrfs/268
+@@ -14,6 +14,7 @@ _begin_fstest auto quick read_repair
+ . ./common/filter
  
- 	local blocksize=$(_get_block_size $SCRATCH_MNT)
- 	local test_contents_files=()
-@@ -860,18 +908,24 @@ _do_verify_ciphertext_for_encryption_policy()
+ _supported_fs btrfs
++_require_scratch
+ _require_odirect
+ _require_non_zoned_device "${SCRATCH_DEV}" # no overwrites on zoned devices
+ _require_scratch_dev_pool 2
+diff --git a/tests/btrfs/269 b/tests/btrfs/269
+index 3c11da3f..ad8f7286 100755
+--- a/tests/btrfs/269
++++ b/tests/btrfs/269
+@@ -18,6 +18,7 @@ _begin_fstest auto quick read_repair
+ . ./common/filter
  
- 	echo "Verifying encrypted file contents" >> $seqres.full
- 	for f in "${test_contents_files[@]}"; do
-+		local iv_arg=""
- 		read -r src inode blocklist <<< "$f"
- 		nonce=$(_get_encryption_nonce $SCRATCH_DEV $inode)
- 		_dump_ciphertext_blocks $SCRATCH_DEV $blocklist > $tmp.actual_contents
-+		if [ -n "$use_iv" ]; then
-+			local iv_hex=$(_get_encryption_iv $SCRATCH_DEV $inode)
-+			iv_arg=" --iv=$iv_hex"
-+		fi
-+			
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
- 			--file-nonce=$nonce --block-size=$blocksize \
--			--inode-number=$inode < $src > $tmp.expected_contents
-+			--inode-number=$inode $iv_arg < $src > $tmp.expected_contents
- 		if ! cmp $tmp.expected_contents $tmp.actual_contents; then
- 			_fail "Expected encrypted contents != actual encrypted contents.  File: $f"
- 		fi
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
- 			--decrypt --file-nonce=$nonce --block-size=$blocksize \
--			--inode-number=$inode \
-+			--inode-number=$inode $iv_arg \
- 			< $tmp.actual_contents > $tmp.decrypted_contents
- 		if ! cmp $src $tmp.decrypted_contents; then
- 			_fail "Contents decryption sanity check failed.  File: $f"
-@@ -957,9 +1011,10 @@ _verify_ciphertext_for_encryption_policy()
- 	local crypt_util_contents_args=""
- 	local crypt_util_filename_args=""
- 	local expected_identifier
-+	local use_iv=""
+ _supported_fs btrfs
++_require_scratch
+ _require_odirect
+ _require_non_zoned_device "${SCRATCH_DEV}" # no overwrites on zoned devices
+ _require_scratch_dev_pool 4
+diff --git a/tests/btrfs/270 b/tests/btrfs/270
+index 5b73fb15..221ef7d2 100755
+--- a/tests/btrfs/270
++++ b/tests/btrfs/270
+@@ -12,6 +12,7 @@ _begin_fstest auto quick read_repair compress
+ . ./common/filter
  
- 	if [ "$FSTYP" = "btrfs" ]; then
--		policy_version = 2
-+		policy_version=2
- 	fi
- 	
- 	shift 2
-@@ -999,9 +1054,9 @@ _verify_ciphertext_for_encryption_policy()
- 		crypt_util_args+=" --kdf=HKDF-SHA512"
- 		if [ "$FSTYP" = "btrfs" ]; then
- 			if (( policy_flags & ~FSCRYPT_POLICY_FLAG_IV_FROM_FS )); then
--				_fail "Btrfs accepts policy flags of IV_FROM_FS only"
-+				_notrun "Btrfs accepts policy flags of IV_FROM_FS only"
- 			fi	
--			policy_flags |= FSCRYPT_POLICY_FLAG_IV_FROM_FS
-+			(( policy_flags |= FSCRYPT_POLICY_FLAG_IV_FROM_FS ))
- 		fi
- 		if (( policy_flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
- 			crypt_util_args+=" --direct-key"
-@@ -1009,6 +1064,9 @@ _verify_ciphertext_for_encryption_policy()
- 			crypt_util_args+=" --iv-ino-lblk-64"
- 		elif (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32 )); then
- 			crypt_util_args+=" --iv-ino-lblk-32"
-+		elif (( policy_flags & FSCRYPT_POLICY_FLAG_IV_FROM_FS )); then
-+			crypt_util_args+=" --iv-from-fs"
-+			use_iv=1
- 		fi
- 	else
- 		if (( policy_flags & ~FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
-@@ -1026,7 +1084,7 @@ _verify_ciphertext_for_encryption_policy()
- 	_require_test_program "fscrypt-crypt-util"
- 	_require_xfs_io_command "fiemap"
- 	_require_get_encryption_nonce_support
--	_require_get_ciphertext_filename_support
-+	#_require_get_ciphertext_filename_support
- 	if (( policy_version == 1 )); then
- 		_require_command "$KEYCTL_PROG" keyctl
- 	fi
-@@ -1094,7 +1152,8 @@ EOF
- 		"$keyspec" \
- 		"$raw_key_hex" \
- 		"$crypt_util_contents_args" \
--		"$crypt_util_filename_args"
-+		"$crypt_util_filename_args" \
-+		"$use_iv"
- }
- 
- # Replace no-key filenames in the given directory with "NOKEY_NAME".
-diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
-index ffb9534d..6f4f8190 100644
---- a/src/fscrypt-crypt-util.c
-+++ b/src/fscrypt-crypt-util.c
-@@ -76,10 +76,14 @@ static void usage(FILE *fp)
- "  --inode-number=INUM         The file's inode number.  Required for\n"
- "                                --iv-ino-lblk-32 and --iv-ino-lblk-64;\n"
- "                                otherwise is unused.\n"
-+"  --iv=IV                     For the IV-from-FS format, the starting IV for\n"
-+"                                the file\n"
- "  --iv-ino-lblk-32            Similar to --iv-ino-lblk-64, but selects the\n"
- "                                32-bit variant.\n"
- "  --iv-ino-lblk-64            Use the format where the IVs include the inode\n"
- "                                number and the same key is shared across files.\n"
-+"  --iv-from-fs                Use the format where the IV is specifically\n"
-+"                                supplied by the filesystem\n"
- "  --kdf=KDF                   Key derivation function to use: AES-128-ECB,\n"
- "                                HKDF-SHA512, or none.  Default: none\n"
- "  --mode-num=NUM              The encryption mode number.  This may be required\n"
-@@ -1794,8 +1798,11 @@ struct key_and_iv_params {
- 	u8 file_nonce[FILE_NONCE_SIZE];
- 	bool file_nonce_specified;
- 	bool direct_key;
-+	u8 iv[MAX_IV_SIZE];
-+	bool iv_set;
- 	bool iv_ino_lblk_64;
- 	bool iv_ino_lblk_32;
-+	bool iv_from_fs;
- 	u64 block_number;
- 	u64 inode_number;
- 	u8 fs_uuid[UUID_SIZE];
-@@ -1809,6 +1816,7 @@ struct key_and_iv_params {
- #define HKDF_CONTEXT_DIRHASH_KEY	5
- #define HKDF_CONTEXT_IV_INO_LBLK_32_KEY	6
- #define HKDF_CONTEXT_INODE_HASH_KEY	7
-+#define HKDF_CONTEXT_IV_FROM_FS		8
- 
- /* Hash the file's inode number using SipHash keyed by a derived key */
- static u32 hash_inode_number(const struct key_and_iv_params *params)
-@@ -1881,9 +1889,10 @@ static void derive_real_key(const struct key_and_iv_params *params,
- 			info[infolen++] = params->mode_num;
- 			memcpy(&info[infolen], params->fs_uuid, UUID_SIZE);
- 			infolen += UUID_SIZE;
--		} else {
--			if (!params->file_nonce_specified)
--				die("--kdf=HKDF-SHA512 requires --file-nonce or --iv-ino-lblk-{64,32}");
-+		} else if (params->iv_from_fs) {
-+			info[infolen++] = HKDF_CONTEXT_IV_FROM_FS;
-+			info[infolen++] = params->mode_num;
-+		} else if (params->file_nonce_specified) {
- 			info[infolen++] = HKDF_CONTEXT_PER_FILE_ENC_KEY;
- 			memcpy(&info[infolen], params->file_nonce,
- 			       FILE_NONCE_SIZE);
-@@ -1906,6 +1915,10 @@ static void generate_iv(const struct key_and_iv_params *params,
- 			die("--direct-key requires --file-nonce");
- 		iv->block_number = cpu_to_le64(params->block_number);
- 		memcpy(iv->nonce, params->file_nonce, FILE_NONCE_SIZE);
-+	} else if (params->iv_from_fs) {
-+		memcpy(iv->nonce, params->file_nonce, FILE_NONCE_SIZE);
-+		if (params->iv_set)
-+			memcpy(iv->bytes, params->iv, MAX_IV_SIZE);
- 	} else if (params->iv_ino_lblk_64) {
- 		if (params->block_number > UINT32_MAX)
- 			die("iv-ino-lblk-64 can't use --block-number > UINT32_MAX");
-@@ -1987,8 +2000,10 @@ enum {
- 	OPT_FS_UUID,
- 	OPT_HELP,
- 	OPT_INODE_NUMBER,
-+	OPT_IV,
- 	OPT_IV_INO_LBLK_32,
- 	OPT_IV_INO_LBLK_64,
-+	OPT_IV_FROM_FS,
- 	OPT_KDF,
- 	OPT_MODE_NUM,
- 	OPT_PADDING,
-@@ -2004,8 +2019,10 @@ static const struct option longopts[] = {
- 	{ "fs-uuid",         required_argument, NULL, OPT_FS_UUID },
- 	{ "help",            no_argument,       NULL, OPT_HELP },
- 	{ "inode-number",    required_argument, NULL, OPT_INODE_NUMBER },
-+	{ "iv",              required_argument, NULL, OPT_IV },
- 	{ "iv-ino-lblk-32",  no_argument,       NULL, OPT_IV_INO_LBLK_32 },
- 	{ "iv-ino-lblk-64",  no_argument,       NULL, OPT_IV_INO_LBLK_64 },
-+	{ "iv-from-fs",      no_argument,       NULL, OPT_IV_FROM_FS },
- 	{ "kdf",             required_argument, NULL, OPT_KDF },
- 	{ "mode-num",        required_argument, NULL, OPT_MODE_NUM },
- 	{ "padding",         required_argument, NULL, OPT_PADDING },
-@@ -2082,12 +2099,23 @@ int main(int argc, char *argv[])
- 			if (params.inode_number <= 0 || *tmp || errno)
- 				die("Invalid inode number: %s", optarg);
- 			break;
-+		case OPT_IV:
-+			int iv_len = hex2bin(optarg, params.iv, MAX_IV_SIZE);
-+			if ((iv_len != AES_BLOCK_SIZE) &&
-+			    (iv_len != ADIANTUM_IV_SIZE))
-+				die("Invalid iv length: %d (must be %u or %u)",
-+				    iv_len, AES_BLOCK_SIZE, ADIANTUM_IV_SIZE);
-+			params.iv_set = true;
-+			break;
- 		case OPT_IV_INO_LBLK_32:
- 			params.iv_ino_lblk_32 = true;
- 			break;
- 		case OPT_IV_INO_LBLK_64:
- 			params.iv_ino_lblk_64 = true;
- 			break;
-+		case OPT_IV_FROM_FS:
-+			params.iv_from_fs = true;
-+			break;
- 		case OPT_KDF:
- 			params.kdf = parse_kdf_algorithm(optarg);
- 			break;
-diff --git a/tests/generic/576 b/tests/generic/576
-index 7a368a8d..060d5ac8 100755
---- a/tests/generic/576
-+++ b/tests/generic/576
-@@ -61,6 +61,7 @@ cmp $fsv_orig_file $fsv_file && echo "Files matched"
- 
- # Just in case, try again after a mount cycle to empty the page cache.
- _scratch_cycle_mount
-+_add_default_policy_key $raw_key &>> $seqres.full
- cmp $fsv_orig_file $fsv_file && echo "Files matched"
- 
- # Corrupt some bytes as a sanity check that fs-verity is really working.
+ _supported_fs btrfs
++_require_scratch
+ _require_btrfs_command inspect-internal dump-tree
+ _require_non_zoned_device "${SCRATCH_DEV}" # no overwrites on zoned devices
+ _require_scratch_dev_pool 2
 -- 
-2.35.1
+2.36.2
 
