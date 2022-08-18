@@ -2,123 +2,228 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34867C00140
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Aug 2022 07:23:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB735C00140
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Aug 2022 08:10:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243762AbiHRHX1 (ORCPT
+        id S231552AbiHRIK1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 18 Aug 2022 03:23:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36732 "EHLO
+        Thu, 18 Aug 2022 04:10:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243791AbiHRHX0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Aug 2022 03:23:26 -0400
-Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6EEA901B2
-        for <fstests@vger.kernel.org>; Thu, 18 Aug 2022 00:23:24 -0700 (PDT)
-Received: by mail-wr1-x434.google.com with SMTP id u14so682211wrq.9
-        for <fstests@vger.kernel.org>; Thu, 18 Aug 2022 00:23:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc;
-        bh=YN89IQiPuePtnogUN8hxoYWSBf1w7d4DxJZPoOSyxRQ=;
-        b=osRHvR0IGDuc/JkvVP4jjZLIn1uGAXxixS12ZonynrlbJPqLadob1wotSkH8bURoGI
-         ERfeV14bs9Zmc0rAovY0zeay2yR9BRH1ZpckslpRiRmqpNPbnKqo3DOj7D2YJRbRqTQk
-         2m9VWoB8xn4dWM2ggNj6ImwC849VynqDRkmxUiR5b5QcsrzXrB6bNUleoyMAo0WFrnMT
-         Y3pJMTmF0HQNomS76TnjLzZvE0Jl2FogynRGwpmxLB9nnY9b51JgE0l7d6sL2XH/r8AB
-         Nlub8nNexvahHMtfljpnqBnKHoYmwufz6FdbZfFwNRPFwcNX6+4QmwvKvGAOfh9FEwFn
-         ZIJg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc;
-        bh=YN89IQiPuePtnogUN8hxoYWSBf1w7d4DxJZPoOSyxRQ=;
-        b=e5evQlITcQKkRhOL1S+kj6A9xgMJuFAUCfr8TP/IX+2BODyC7aiTm4OP58znYb1342
-         NC5iB1q+wY+jJpmQ56Ooaei5BOgIJHtLLIwYzn46ruiqkDyXmD+paCAg4Pco63dAzZ6z
-         9dK2If3X1ACp07dg1b97wU0ksjn/qm4lEOG7i9CFmueL3227bKso/gU2tssUMcBcAp4m
-         2SWvWHxNnTdfpeB/zv+TcIoCs9DUkWVU19uoFguR1F/qozminEkJcP/rfYfXj2x7L5ie
-         O5bSpGwdkVVGFz7g+a7WRgWvRMGvI2Lk1MAOY+KUHApfEJDdxI4lzQf9HW/rnAfLuw7b
-         PCXQ==
-X-Gm-Message-State: ACgBeo1Q2h3WmaL4lQoembXervD7trNGiubh3QvoYeTHgkBynJ1ozfQN
-        Do5qiCR0apXC8EYPRP5h4xHc4CXX6fo=
-X-Google-Smtp-Source: AA6agR7B39Yg8JQ7mo/BmVNs/V7fHehXwqmchzT3krBQ/0aBWflvtiQNVzzF6GuCfCBg5iTFZJxzWQ==
-X-Received: by 2002:a05:6000:1a89:b0:222:c343:dc5b with SMTP id f9-20020a0560001a8900b00222c343dc5bmr807617wry.348.1660807402747;
-        Thu, 18 Aug 2022 00:23:22 -0700 (PDT)
-Received: from amir-ThinkPad-T480.lan ([77.137.66.49])
-        by smtp.gmail.com with ESMTPSA id z3-20020adfec83000000b0021e43b4edf0sm583327wrn.20.2022.08.18.00.23.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Aug 2022 00:23:21 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Leah Rumancik <leah.rumancik@gmail.com>, fstests@vger.kernel.org
-Subject: [PATCH] Documentation: update gce-xfstests startup guide
-Date:   Thu, 18 Aug 2022 10:23:18 +0300
-Message-Id: <20220818072318.928812-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S239618AbiHRIKZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Aug 2022 04:10:25 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B4ED83BE6;
+        Thu, 18 Aug 2022 01:10:24 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id ACA096172E;
+        Thu, 18 Aug 2022 08:10:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17633C433D7;
+        Thu, 18 Aug 2022 08:10:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1660810223;
+        bh=E1fQfZS5ERKG9i4AQ6XzlstUKAui8XJWz/lA3NQtSyk=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=cixTkJk0gGs8L2PlG5TX+byIG4DJNIpEpjwDK6kfN8cPFw2UU3wfLi7iPG/NfXvys
+         MooedvbwcuP4LJcvLgGmQ1PESgCjpZXfSUeebnz0XiKjKL1gjqD0C4ZKxiaKl000CB
+         QAeH9BOcCFPsRu2bz5Hl4uRxN9kAkoQikHkGrnQg2AbvQqkk6g3hlJnjvmAmhsN7E6
+         AfOhf6Rx3TJlUiFML4/yqK0bfFUdexFzDJQHhgfLHA8xAlo99nlOHbsB/UwHnrASgN
+         qWRox7iGJyVCSBbu30PXPYDv9SerpWASjB2KYzL22SKXWaxNXm7miL8t3rcBVhcX3v
+         2liUnCHekmT/g==
+Received: by mail-ej1-f44.google.com with SMTP id dc19so1799780ejb.12;
+        Thu, 18 Aug 2022 01:10:22 -0700 (PDT)
+X-Gm-Message-State: ACgBeo0BNE7UqbT3TKNzuew4b1sZyE5tXTrCE5FJsvqehdJG8QOHoqb4
+        XYO51cQaPRmalmisCKpm+QYCUh3MpSg29xqViDw=
+X-Google-Smtp-Source: AA6agR5TlQdExmmgc7kImRMYtA/RLYZOkVIRnG2EN+Ne9bWc3Bn0/05bX4VM1jHZEcsvgNSlvqcY3Nm3h6rYWQ6dLi8=
+X-Received: by 2002:a17:907:6d8b:b0:730:c160:1f9c with SMTP id
+ sb11-20020a1709076d8b00b00730c1601f9cmr1226091ejc.342.1660810221229; Thu, 18
+ Aug 2022 01:10:21 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220816214051.wsw75y3mtjdsim6w@fiona> <143a26d6-9237-b745-ece6-ce37dc7dca9a@oracle.com>
+In-Reply-To: <143a26d6-9237-b745-ece6-ce37dc7dca9a@oracle.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Thu, 18 Aug 2022 09:09:43 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H46y85Y4K14ud0Hv8bGS+6ikuRTj84CNYzg=hJwDSA95Q@mail.gmail.com>
+Message-ID: <CAL3q7H46y85Y4K14ud0Hv8bGS+6ikuRTj84CNYzg=hJwDSA95Q@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: Test xattr changes for read-only btrfs property
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     Goldwyn Rodrigues <rgoldwyn@suse.de>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The instructions for setting up a Sendgrid account were
-a bit out of date.  Updated the terms of the Free trial plan
-and some changed setup flows.
+On Thu, Aug 18, 2022 at 4:08 AM Anand Jain <anand.jain@oracle.com> wrote:
+>
+>
+>
+>
+> On 8/17/22 05:40, Goldwyn Rodrigues wrote:
+> > Test creation, modification and deletion of xattr for a BTRFS filesystem
+> > which has the read-only property set to true.
+> >
+> > Re-test the same after BTRFS read-only property is set to false.
+> >
+> > This tests the bug for "security.*" modifications which escape
+> > xattr_permission(), because security parameters are let through
+> > in xattr_permission(), without checks from
+> > inode_permission()->btrfs_permission(). There is no restriction on
+> > security.* from VFS and decision is left to the underlying filesystem.
+> >
+> > Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+> >
+> > diff --git a/tests/btrfs/273 b/tests/btrfs/273
+> > new file mode 100755
+> > index 00000000..ec7d264d
+> > --- /dev/null
+> > +++ b/tests/btrfs/273
+> > @@ -0,0 +1,78 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 273
+> > +#
+> > +# Test that no xattr can be changed once btrfs property is set to RO
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick attr
+> > +
+> > +# Import common functions.
+> > +#. ./common/filter
+> > +. ./common/attr
+> > +
+> > +# real QA test starts here
+> > +_supported_fs btrfs
+> > +_require_attrs
+> > +_require_btrfs_command "property"
+> > +_require_scratch
+> > +
+> > +_scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
+> > +_scratch_mount
+> > +
+> > +FILENAME=$SCRATCH_MNT/foo
+> > +
+> > +set_xattr() {
+> > +     local value=$1
+> > +     $SETFATTR_PROG -n "user.one" -v $value $FILENAME
+> > +     $SETFATTR_PROG -n "security.one" -v $value $FILENAME
+> > +     $SETFATTR_PROG -n "trusted.one" -v $value $FILENAME
+> > +}
+> > +
+> > +get_xattr() {
+> > +     $GETFATTR_PROG -n "user.one" $FILENAME
+> > +     $GETFATTR_PROG -n "security.one" $FILENAME
+> > +     $GETFATTR_PROG -n "trusted.one" $FILENAME
+> > +}
+> > +
+> > +del_xattr() {
+> > +     $SETFATTR_PROG -x "user.one" $FILENAME
+> > +     $SETFATTR_PROG -x "security.one" $FILENAME
+> > +     $SETFATTR_PROG -x "trusted.one" $FILENAME
+> > +}
+> > +
+>
+> This output contains mnt references that need to be filtered.
+> Filter _filter_scratch should help.
 
-The name of the required package python-crcmod was updated to
-python3-crcmod as the former package is no longer supported.
+That was already pointed out in my previous review, wasn't it?
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- Documentation/gce-xfstests.md | 21 ++++++++++-----------
- 1 file changed, 10 insertions(+), 11 deletions(-)
+>
+>
+>
+> > +# Create a test file.
+> > +echo "hello world" > $FILENAME
+> > +
+> > +set_xattr 1
+> > +
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro true
+> > +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+> > +
+> > +# Attempt to change values of RO (property) filesystem
+> > +set_xattr 2
+> > +
+> > +# Check the values of RO (property) filesystem is not changed
+> > +get_xattr
+> > +
+> > +# Attempt to remove xattr from RO (property) filesystem
+> > +del_xattr
+> > +
+> > +# Change filesystem property RO to false
+> > +
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro false
+> > +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+> > +
+> > +# Change the xattrs after RO is false
+>
+> > +set_xattr 2
+> > +
+>
+>   Nit:  We are reusing the value "2" and changing it to "3"  makes it
+>   unique and so the debugging easier.
 
-diff --git a/Documentation/gce-xfstests.md b/Documentation/gce-xfstests.md
-index 2d013ab..f9da45c 100644
---- a/Documentation/gce-xfstests.md
-+++ b/Documentation/gce-xfstests.md
-@@ -63,12 +63,11 @@ test reports show up in your inbox once they are finished.
- 
- The gce-xfstests system uses sendgrid, so if you would like to get
- e-mailed reports, you will need to sign up for a free Sendgrid
--account.  Sendgrid is designed for companies who want to do bulk
--mailings, so the free account provides 40,000 e-mails for the
--first 30 days and 100/day afterwards --- and it's highly unlikely that
--you will be running more than 100 test runs per month.  To start, visit
--the [Sendgrid website](http://www.sendgrid.com) and click on the "Start
--for Free" button. It may take a day or two
-+account.  The Sendgrid free account provides 100 e-mails per day and
-+it's unlikely that you will be running more than 100 test runs per day.
-+
-+To start, visit the [Sendgrid website](http://www.sendgrid.com) and
-+click on the "Start for Free" button. It may take a day or two
- for sendgrid to decide you are a not a robot spammer, so please start
- the process right away while you familiarize yourself with the rest of
- gce-xfstests.
-@@ -80,10 +79,10 @@ verify their Sender Identities before using the service. You could check
- Once you have set up a Sendgrid account, get a new API key by going to
- the url
- [https://app.sendgrid.com/settings/api_keys](https://app.sendgrid.com/settings/api_keys)
--and click on the blue "Create API Key" button and select "General API
--Key".  Pick a name such as "gce-xfstests" and enter it into the "Name
--of this key".  Then click on the Mail Send's "Full Access" bubble and
--then click on the blue "Save" button.  Copy the API key that was
-+and click on the blue "Create API Key" button.
-+Pick a name such as "gce-xfstests" and enter it into "API Key Name".
-+Then click on the Mail Send's "Full Access" bubble and
-+then click on the blue "Create & View" button.  Copy the API key that was
- generated and use it to set the `GCE_SG_API` configuration variable in
- gce-xfstests's config file.
- 
-@@ -126,7 +125,7 @@ https://cloud.google.com/sdk/docs/quickstart-linux
- 2.  Install the following packages (debian package names
- used):
- 
--        % sudo apt-get install jq xz-utils dnsutils python-crcmod
-+        % sudo apt-get install jq xz-utils dnsutils python3-crcmod
- 
- ## Configure gce-xfstests
- 
--- 
-2.25.1
+That's a good idea.
 
+>
+>
+> > +# Get the changed values
+> > +get_xattr
+> > +
+> > +# Remove xattr
+> > +del_xattr
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/273.out b/tests/btrfs/273.out
+> > new file mode 100644
+> > index 00000000..f6fca029
+> > --- /dev/null
+> > +++ b/tests/btrfs/273.out
+> > @@ -0,0 +1,33 @@
+> > +QA output created by 273
+> > +ro=true
+> > +setfattr: /scratch/foo: Read-only file system
+> > +setfattr: /scratch/foo: Read-only file system
+> > +setfattr: /scratch/foo: Read-only file system
+> > +getfattr: Removing leading '/' from absolute path names
+> > +# file: scratch/foo
+> > +user.one="1"
+> > +
+> > +getfattr: Removing leading '/' from absolute path names
+> > +# file: scratch/foo
+> > +security.one="1"
+> > +
+> > +getfattr: Removing leading '/' from absolute path names
+> > +# file: scratch/foo
+> > +trusted.one="1"
+> > +
+> > +setfattr: /scratch/foo: Read-only file system
+> > +setfattr: /scratch/foo: Read-only file system
+> > +setfattr: /scratch/foo: Read-only file system
+> > +ro=false
+> > +getfattr: Removing leading '/' from absolute path names
+> > +# file: scratch/foo
+> > +user.one="2"
+> > +
+> > +getfattr: Removing leading '/' from absolute path names
+> > +# file: scratch/foo
+> > +security.one="2"
+> > +
+> > +getfattr: Removing leading '/' from absolute path names
+> > +# file: scratch/foo
+> > +trusted.one="2"
+>
+>
+> > +
+>
+> Nit: A whitespace.
+
+It's needed, getfattr prints a blank line at the end.
+
+>
+> Thanks.
+>
+>
