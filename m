@@ -2,78 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1860C32772
-	for <linux-fstests@archiver.kernel.org>; Fri, 19 Aug 2022 10:36:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B64DC32772
+	for <linux-fstests@archiver.kernel.org>; Fri, 19 Aug 2022 11:14:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348371AbiHSKgL (ORCPT
+        id S229601AbiHSLOe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 19 Aug 2022 06:36:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55506 "EHLO
+        Fri, 19 Aug 2022 07:14:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43092 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347745AbiHSKgJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2022 06:36:09 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB9F4F2C8E
-        for <fstests@vger.kernel.org>; Fri, 19 Aug 2022 03:36:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1660905368;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
+        with ESMTP id S1348267AbiHSLOd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2022 07:14:33 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F9D5CCE1A;
+        Fri, 19 Aug 2022 04:14:31 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id C002D3F8CD;
+        Fri, 19 Aug 2022 11:14:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1660907669;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Gv24X5iUZmQ3lRi/Sd7/xOmeJQuU+u8ddhvFNlFWWPo=;
-        b=amGDLJ/hmqZTO7Q3t59azldPYICkCDiwMHFHv3ZsLrAscZFicTa/Ha/kAuERToBVsIDpUk
-        6qPpKxn8/cDG4UaL/SukQPutXe3R75eLlumKVNI/9jF11HmJZIoBNvbyFuKc6OWCCBp0tg
-        7+HO6d2vqY8ytcR9jRn3pnoyOaUHQ8k=
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
- [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-609-CypoCsFdPtyNkYZhj2Ml-Q-1; Fri, 19 Aug 2022 06:36:06 -0400
-X-MC-Unique: CypoCsFdPtyNkYZhj2Ml-Q-1
-Received: by mail-ej1-f71.google.com with SMTP id nb10-20020a1709071c8a00b006e8f89863ceso1347706ejc.18
-        for <fstests@vger.kernel.org>; Fri, 19 Aug 2022 03:36:06 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc;
-        bh=Gv24X5iUZmQ3lRi/Sd7/xOmeJQuU+u8ddhvFNlFWWPo=;
-        b=5eZ1uJ9kkYU9lZWBScpEI489+MBRAum6QIY9MOgxq6nvdWSQEyRfctjREhWna7ShGl
-         emHe1lL2DwKUHvjY1pccky2eV/VnESxh7fQMQCi2tALYTPJwscVlbY4SWUA17Ny8qR30
-         TqC9JhoVyPpA8CRRzl0Wqqrn/H5j4hkgdiVwC1yZEoBy4sC6AptuaGOVJcHkNCmzUIo/
-         kl/36h2TBPap91QCMTpzg7n1GUHDfBYwpubrP3HibKho0Va4tm/9RlEZgk0sBETW1I4W
-         Pfo3mpycHXoHp7xvb7rx/TbLgxlJ1JUXX01JBCYYqgaKbYwSTNfl9uDH/cajVlQXjr5G
-         XDrQ==
-X-Gm-Message-State: ACgBeo3DgNmm9QardPuqhDq1YPLoQjYrBS23nm2KzF1hO/uGFMPycnTB
-        R7Y1RueATBRMdr08Dk8/+xyOuiHDvznpIPuJujZICF5WUgDKy1ud+naWz47WclK6rG7fQx3SNyE
-        2dOLBPf31zw0HOK6QTg==
-X-Received: by 2002:a17:906:668b:b0:730:a5b7:8985 with SMTP id z11-20020a170906668b00b00730a5b78985mr4245920ejo.548.1660905365578;
-        Fri, 19 Aug 2022 03:36:05 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR76tAFRrIi+XDGEfhx87egos+SIXoI7+a+DEk2izX9r4jxWvEzOeaPNvOxT9OKqLL46/7FIvw==
-X-Received: by 2002:a17:906:668b:b0:730:a5b7:8985 with SMTP id z11-20020a170906668b00b00730a5b78985mr4245915ejo.548.1660905365397;
-        Fri, 19 Aug 2022 03:36:05 -0700 (PDT)
-Received: from [192.168.100.69] (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
-        by smtp.gmail.com with ESMTPSA id c18-20020a17090618b200b007306a4ecc9dsm2199269ejf.18.2022.08.19.03.36.03
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 19 Aug 2022 03:36:04 -0700 (PDT)
-Message-ID: <de7b86fd-4228-60ef-01ee-3ff44ba9debe@redhat.com>
-Date:   Fri, 19 Aug 2022 12:36:02 +0200
+        bh=Z1GDxJbx+KB/qA4pxm9HVh5vMJZlaEZx8YtS83ZfxTg=;
+        b=P541Xi9aO3pFkCcmOMJ6PLo+o9b1TBwcys/jYx0gp7NEL6OvWgMWdBYn++wg6Sj+gNVWK9
+        R/ZNvZB0IiXeBwcfdxq6KwKTWEWPVOEqD/tQGx8X7nCEqRiRaJMvE2bfs5XTd4YPaD8qMC
+        4w0yUX3DvgCw30kP3xth9u5V9dtPI58=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1660907669;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Z1GDxJbx+KB/qA4pxm9HVh5vMJZlaEZx8YtS83ZfxTg=;
+        b=/GhM+MayMH8BLSN1+0urh0zTPlB3pozih4aK0+YFpPyS2jHIaQ7FmIQO85zIbMlE8qi5Fs
+        uFTZDsMwgE2/MZAQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7BA9813AE9;
+        Fri, 19 Aug 2022 11:14:29 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id fLc7HZVw/2JkKQAAMHmgww
+        (envelope-from <dsterba@suse.cz>); Fri, 19 Aug 2022 11:14:29 +0000
+Date:   Fri, 19 Aug 2022 13:09:17 +0200
+From:   David Sterba <dsterba@suse.cz>
+To:     Boris Burkov <boris@bur.io>
+Cc:     linux-btrfs@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v3] fstests: add btrfs fs-verity send/recv test
+Message-ID: <20220819110917.GQ13489@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+Mail-Followup-To: dsterba@suse.cz, Boris Burkov <boris@bur.io>,
+        linux-btrfs@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        fstests@vger.kernel.org
+References: <e1e77ce5d7277b235e48adc8daf00a0dc0ae36e9.1660860807.git.boris@bur.io>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.12.0
-Subject: Re: [PATCH] fstests: add missing _require_scratch
-Content-Language: en-US
-To:     Wang Yugui <wangyugui@e16-tech.com>, fstests@vger.kernel.org
-References: <20220818025614.47274-1-wangyugui@e16-tech.com>
-From:   Pavel Reichl <preichl@redhat.com>
-In-Reply-To: <20220818025614.47274-1-wangyugui@e16-tech.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e1e77ce5d7277b235e48adc8daf00a0dc0ae36e9.1660860807.git.boris@bur.io>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good to me.
+On Thu, Aug 18, 2022 at 03:16:30PM -0700, Boris Burkov wrote:
+> Test btrfs send/recv support for fs-verity. Includes tests for
+> signatures, salts, and interaction with chmod/caps. The last of those is
+> to ensure the various features that go in during inode_finalize interact
+> properly.
+> 
+> This depends on the kernel patch adding support for send:
+> btrfs: send: add support for fs-verity
+> 
+> And the btrfs-progs patch adding support for recv:
+> btrfs-progs: receive: add support for fs-verity
+> 
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+> Changes for v3:
+> - commit a few things from v2 that I left unstaged (277 in output,
+>   true/false)
+> Changes for v2:
+> - btrfs/271 -> btrfs/277
+> - YOUR NAME HERE -> Meta
+> - change 0/1 to false/true
+> - change drop caches to cycle mount
+> - get rid of unneeded _require_test
+> - compare file contents
+> 
+>  tests/btrfs/277     | 115 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/277.out |  59 +++++++++++++++++++++++
+>  2 files changed, 174 insertions(+)
+>  create mode 100755 tests/btrfs/277
+>  create mode 100644 tests/btrfs/277.out
+> 
+> diff --git a/tests/btrfs/277 b/tests/btrfs/277
+> new file mode 100755
+> index 00000000..251e2818
+> --- /dev/null
+> +++ b/tests/btrfs/277
+> @@ -0,0 +1,115 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Meta, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 277
+> +#
+> +# Test sendstreams involving fs-verity enabled files.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick verity send
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	_restore_fsverity_signatures
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/verity
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch_verity
+> +_require_fsverity_builtin_signatures
+> +_require_command "$SETCAP_PROG" setcap
+> +_require_command "$GETCAP_PROG" getcap
+> +
+> +subv=$SCRATCH_MNT/subv
+> +fsv_file=$subv/file.fsv
+> +keyfile=$tmp.key.pem
+> +certfile=$tmp.cert.pem
+> +certfileder=$tmp.cert.der
+> +sigfile=$tmp.sig
+> +stream=$tmp.fsv.ss
+> +
+> +_test_send_verity() {
+> +	local sig=$1
+> +	local salt=$2
+> +	local extra_args=""
+> +
+> +	_scratch_mkfs >> $seqres.full
+> +	_scratch_mount
+> +	echo -e "\nverity send/recv test: sig: $sig salt: $salt"
+> +	_disable_fsverity_signatures
+> +
+> +	echo "create subvolume"
+> +	$BTRFS_UTIL_PROG subv create $subv >> $seqres.full
 
-Reviewed-by: Pavel Reichl <preichl@redhat.com>
-
+Please use full name of subcommands, ie. 'subvolume'
