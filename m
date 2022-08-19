@@ -2,230 +2,214 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15864C32773
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85FB9C3F6B0
 	for <linux-fstests@archiver.kernel.org>; Fri, 19 Aug 2022 11:53:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348696AbiHSLxr (ORCPT
+        id S1348061AbiHSLxs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 19 Aug 2022 07:53:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35848 "EHLO
+        Fri, 19 Aug 2022 07:53:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348061AbiHSLxq (ORCPT
+        with ESMTP id S1348694AbiHSLxq (ORCPT
         <rfc822;fstests@vger.kernel.org>); Fri, 19 Aug 2022 07:53:46 -0400
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FD772E694
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CAF832BAD
         for <fstests@vger.kernel.org>; Fri, 19 Aug 2022 04:53:44 -0700 (PDT)
 Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20220819115341euoutp011b49c00cba999383383eb8771037f38a~MvN1KpE6-2603826038euoutp01i
-        for <fstests@vger.kernel.org>; Fri, 19 Aug 2022 11:53:41 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20220819115341euoutp011b49c00cba999383383eb8771037f38a~MvN1KpE6-2603826038euoutp01i
+        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20220819115340euoutp02028c4b675b378a979d23a8d90609ba4f~MvN0ip5-l2964229642euoutp02k
+        for <fstests@vger.kernel.org>; Fri, 19 Aug 2022 11:53:40 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20220819115340euoutp02028c4b675b378a979d23a8d90609ba4f~MvN0ip5-l2964229642euoutp02k
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1660910021;
-        bh=14LibsWewtKNwrqtvIOuuU85qhj5cQSfXn9WL14KrM8=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=XEvT9Cpks/ww0X7XK7U8/pxay/3E4IwM7FkOQHLTXlnjgS6tubTdcEj76bUMuK05R
-         H5XM4wFTJJJqBRs2RIKn1UjaGiUFIipQHOHd1qRpsh8WEqe0R8rc1U2K56o8Nh54k9
-         WdX49ItRkVG2ZUTu8+fXpmL0BicBAOa8k8Utz6mY=
+        s=mail20170921; t=1660910020;
+        bh=W6eaEdO3HavTo+5bedHpzJyzViWVnEcx34c/LA3XghQ=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=T1toZKsIGcwSX8osj74uI1WZfJTjX8WOfgBpeBuZUzTwL1WvavdOKpTMH8fttP/AY
+         vVmgOMzRN3tItWArnng+WvapLIzeGJss6YF7xXCy0juA2mEvK5XTjSQjNxBY76voyk
+         paQ92KdUIgq0Z6lbvnmJDy02fXDQ4D2gMThHlPqw=
 Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
         eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-        20220819115340eucas1p1cf7897a13cfcec801d4af84eec85fcb9~MvN0Ip4bv0078100781eucas1p1D;
-        Fri, 19 Aug 2022 11:53:40 +0000 (GMT)
+        20220819115339eucas1p1681bb9e4d83d4f512d08da280d88a2ca~MvNzIvq7N1396313963eucas1p1G;
+        Fri, 19 Aug 2022 11:53:39 +0000 (GMT)
 Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
-        eusmges2new.samsung.com (EUCPMTA) with SMTP id 29.9A.10067.4C97FF26; Fri, 19
-        Aug 2022 12:53:40 +0100 (BST)
+        eusmges2new.samsung.com (EUCPMTA) with SMTP id 57.9A.10067.2C97FF26; Fri, 19
+        Aug 2022 12:53:38 +0100 (BST)
 Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
         eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-        20220819115339eucas1p1896638f0a9a3d0c71c7fcba3b754b8ad~MvNziTYNx1419114191eucas1p12;
-        Fri, 19 Aug 2022 11:53:39 +0000 (GMT)
+        20220819115338eucas1p11b916296213572e97a03241ebdc399d0~MvNygipyW1733517335eucas1p1N;
+        Fri, 19 Aug 2022 11:53:38 +0000 (GMT)
 Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
         eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20220819115339eusmtrp1bb0ba3f6d5bd8ebeeabd2ecdee961c92~MvNzhkU6G0147601476eusmtrp1U;
-        Fri, 19 Aug 2022 11:53:39 +0000 (GMT)
-X-AuditID: cbfec7f4-dd7ff70000002753-6f-62ff79c4a03d
+        20220819115338eusmtrp1fd7db32b4a479edeb1eae79e4b058361~MvNyfze_u0147601476eusmtrp1R;
+        Fri, 19 Aug 2022 11:53:38 +0000 (GMT)
+X-AuditID: cbfec7f4-dd7ff70000002753-6b-62ff79c20aa4
 Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
-        eusmgms2.samsung.com (EUCPMTA) with SMTP id C4.73.09038.3C97FF26; Fri, 19
-        Aug 2022 12:53:39 +0100 (BST)
+        eusmgms2.samsung.com (EUCPMTA) with SMTP id 13.73.09038.2C97FF26; Fri, 19
+        Aug 2022 12:53:38 +0100 (BST)
 Received: from localhost (unknown [106.210.248.74]) by eusmtip1.samsung.com
         (KnoxPortal) with ESMTPA id
-        20220819115339eusmtip1ee6f9a48832b0bc7c3fb813245b30a6e~MvNzOVflA1915719157eusmtip1n;
-        Fri, 19 Aug 2022 11:53:39 +0000 (GMT)
+        20220819115337eusmtip13c919f3c4a158ce9d5e22ac2402e5ab2~MvNyJo8GB1960919609eusmtip1T;
+        Fri, 19 Aug 2022 11:53:37 +0000 (GMT)
 From:   Pankaj Raghav <p.raghav@samsung.com>
 To:     fstests@vger.kernel.org
 Cc:     Johannes.Thumshirn@wdc.com, damien.lemoal@opensource.wdc.com,
         pankydev8@gmail.com, naohiro.aota@wdc.com, gost.dev@samsung.com,
         mcgrof@kernel.org, dsterba@suse.cz,
         Pankaj Raghav <p.raghav@samsung.com>
-Subject: [RFC 1/1] btrfs/237: adapt the test to work with the new reclaim
- algorithm
-Date:   Fri, 19 Aug 2022 13:53:37 +0200
-Message-Id: <20220819115337.35681-2-p.raghav@samsung.com>
+Subject: [RFC 0/1] adapting btrfs/237 to work with the new reclaim algorithm
+Date:   Fri, 19 Aug 2022 13:53:36 +0200
+Message-Id: <20220819115337.35681-1-p.raghav@samsung.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220819115337.35681-1-p.raghav@samsung.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrIKsWRmVeSWpSXmKPExsWy7djP87pHKv8nGfxoYbb4ffY8s8Xi399Z
+X-Brightmail-Tracker: H4sIAAAAAAAAA01SbUhTYRjt3b3brtbGbRY+aZQMDDLSVQY3+jAh4VZGJdiPJGvaxS3nrLuW
+        VhRlK21aW42w1iChj9n8ZJq4oIj1YeZM8aPNMk2aVlJBaS11as27qH/nOc85nPO8vAQmucWP
+        IJTqwwyrlqukglC84dlY23Ln0ekMWaFvDTXR2oZRNyd8ONWieyCkeh45eNSkvo9HeYyDiLrU
+        VMenRm7rhFRlzyC+MYR2mN8KabvtvIB2nO3n0xfrbYh2lT0R0iP2RXTho2LeDuHu0HX7GZXy
+        CMPGbdgXqvCbx/kHn0Tke+0/8VPIOF+PQggg4+Fb1SdMj0IJCVmOoNpXFhxGEXiqq4QBlYQc
+        QWB1Z/11vKvoFXAiK4I7lSbEDR8RuFx+nh4RhICMgdPnZ8zzyEj4buibMWBkG4LGp24ssAgj
+        k6G7vpMfwDgZDZbXtXgAi8g18KJunM+lLYZrHT4hx8+F5mveGQ32hz9z7/pMVSDbCXh8tV3A
+        GTaBvc+EcTgMhpvqhRxeCC2mEpzDx2HQMxE06xAYHDWCQGsg18JFlyoAMXIp1NyP4+SJ0N3r
+        xDiFGDxf5nIVxHC5oTRIi6DonIRTS8Ex5g2GAnQWWIKhNFyeLgy+5x4YL58UGFGU+b/DzP8d
+        Zv7XoQxhNhTOaDU5WYxmpZrJi9XIczRadVZsZm6OHf35SC1TTaONyDr8LdaJeARyIiAw6TyR
+        p9efIRHtlx89xrC5e1mtitE4USSBS8NFmcpauYTMkh9mshnmIMP+3fKIkIhTvD1dZT8av2i3
+        rmYXH0uOr2Wj3uyTllCy9dtTTg7E541hVQMFE/mvjBLjkLdfl1BwICynW3ujdlXd9i4X7l7X
+        PJqesSiuY5nWUpF6c/XPVgP9MtmWeOiKFfe/cdZM+cIMsLOhc3ZpUqtOm+xqmpM9kP859t7x
+        JAW6qnzpEamKcs0HNiiKqhdMN6enZhwpZ59fkD3c7FCkXIiwWfyseNLuFnfqioe0UbOm2967
+        ukzehY7l7bIO5bAt/ZXenjA0db80k79l8lnMbesWkWKJe+BuxZWUUVxQ0r8r6W6ewbRCbAmP
+        NvxKTfiaRjc7o9N6rifKtrVKb0V+sKqzT2ws7pHiGoV8RQzGauS/AaSYJ0u3AwAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprEIsWRmVeSWpSXmKPExsVy+t/xu7qHKv8nGbSf47P4ffY8s8Xi399Z
         LE637GW3uHlgJ5PF3657TBY3JjxltJh4fDOrxeelLewWa24+ZXHg9Ng56y67x6ZVnWweO1vv
-        s3r0bVnF6HFmwRF2j8+b5DzaD3QzBbBHcdmkpOZklqUW6dslcGVcmjaDseCHasX+z4dZGhh/
-        y3cxcnJICJhIfOyfytjFyMUhJLCCUWLemm0sEM4XRomG82ehnM+MEnu//WLuYuQAa3m/QxYi
-        vpxRou/dFmYI5wWjxNL1S8CK2AS0JBo72UFWiAhIS3zqv8cGUsMscJ5RYsfR68wgCWGBUIkl
-        F3+C2SwCqhI33/9iAbF5BSwl2g53sUHcJy8x89J3dpCZnAJWEhMmWUGUCEqcnPkErJwZqKR5
-        62ywGyQE7nBITD02G+pQF4lTE0UgxghLvDq+hR3ClpE4PbmHBcKulnh64zdUbwujRP/O9WwQ
-        vdYSfWdyQExmAU2J9bv0IaKOEo1zFCBMPokbbwUhDuCTmLRtOtROXomONiGI2UoSO38+gdop
-        IXG5aQ7UTg+JF90H2CYwKs5C8sosJK/MQli7gJF5FaN4amlxbnpqsVFearlecWJucWleul5y
-        fu4mRmAqOv3v+JcdjMtffdQ7xMjEwXiIUYKDWUmE98adP0lCvCmJlVWpRfnxRaU5qcWHGKU5
-        WJTEeZMzNyQKCaQnlqRmp6YWpBbBZJk4OKUamDZwLEnVu8WRxah67kIWd5W5bM+L6UxLqu34
-        ZDpfdV3Jcefe+3tuzp6fmSkPLi/9LFkkvk6hy//N6d3Zm36bVC/jLq9feH/ZvWAp+Y41s7o0
-        fga/yvx5ipNzrtZRtdf/cp/qr1ftc9Y01Fl/5TxTlHyj9PFuNfbHDtPPN9UeEMr4dIuTgeHF
-        o9n7I19lauh8y0hlNFD3OcK5xFP3otetUn7LhJqEv1oMDyc6SPPFNgpoO0aIteff5+HcsGTT
-        pWKj9z4Fi5INY29FzBX5kXbhnPqhm8bzFlX6/M69VGqkwrTq1kr7NmUNeY5Cye8chn4dl6P+
-        +FnLPN460Vx18lwG+cXp8bbcZRvOn9408c4pJZbijERDLeai4kQAGlfiArQDAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprEIsWRmVeSWpSXmKPExsVy+t/xu7qHK/8nGWy8Jm7x++x5ZovFv7+z
-        WJxu2ctucfPATiaLv133mCxuTHjKaDHx+GZWi89LW9gt1tx8yuLA6bFz1l12j02rOtk8drbe
-        Z/Xo27KK0ePMgiPsHp83yXm0H+hmCmCP0rMpyi8tSVXIyC8usVWKNrQw0jO0tNAzMrHUMzQ2
-        j7UyMlXSt7NJSc3JLEst0rdL0Mu4NG0GY8EP1Yr9nw+zNDD+lu9i5OCQEDCReL9DtouRi0NI
-        YCmjxPbVj1m7GDmB4hIStxc2MULYwhJ/rnWxQRQ9Y5TYPPc5I0gzm4CWRGMnO0iNiIC0xKf+
-        e2A1zAI3GSUWHp8DlhAWCJb4d/Iv2FAWAVWJm+9/sYDYvAKWEm2HQYaCLJCXmHnpOzvITE4B
-        K4kJk6xAwkJAJS+Xb2SDKBeUODnzCVgrM1B589bZzBMYBWYhSc1CklrAyLSKUSS1tDg3PbfY
-        SK84Mbe4NC9dLzk/dxMjMHK2Hfu5ZQfjylcf9Q4xMnEwHmKU4GBWEuG9cedPkhBvSmJlVWpR
-        fnxRaU5q8SFGU6CzJzJLiSbnA2M3ryTe0MzA1NDEzNLA1NLMWEmc17OgI1FIID2xJDU7NbUg
-        tQimj4mDU6qBae+JY3MnMkebWqb/yKo+vEqlaLO9sujX1X7Rzxpq4icdmWZQktgdxdnR7rxM
-        Jle74chfA4fVL99KTP789l7S5A96f2Zdv9x7yf9OxFLt70nihnyXgtaoFlvpT3pnmpkZYyP5
-        fWHgXRaXoC0crIYyV0q/Cvv4Gfw8zlmbMZnxTJ4Fx9F5c+dNub0gp5hrT+zLotxDwX/mt81r
-        Kd8YsPnk6lTfs2vyLK59Tmc/dPnkq2ur8pcv5vsQfFKJV3JVSV+M6CGthwsWm1VPCly/0Dd2
-        Ybv9//c/9H5/erDxiiHrv+L1go88j72Pv5pz59PL7UXndL8lqllq82aH/ZgS7PQxMvgBe2yR
-        183tR7y6Xs4IOKbEUpyRaKjFXFScCACC2TdTJQMAAA==
-X-CMS-MailID: 20220819115339eucas1p1896638f0a9a3d0c71c7fcba3b754b8ad
+        s3r0bVnF6HFmwRF2j8+b5DzaD3QzBbBH6dkU5ZeWpCpk5BeX2CpFG1oY6RlaWugZmVjqGRqb
+        x1oZmSrp29mkpOZklqUW6dsl6GX8mfWLteCIVMWTTd9YGhgniHYxcnJICJhIPFh9h62LkYtD
+        SGApo8TjjtmMEAkJidsLm6BsYYk/17qgip4xSlx5vom1i5GDg01AS6Kxkx2kRkRAWuJT/z2w
+        GmaBm4wSC4/PAUsIC/hIXN1ymRXEZhFQlZhzawMLiM0rYClxavMvVogF8hIzL31nB5nJLKAp
+        sX6XPkSJoMTJmU/AypmBSpq3zmaewMg/C6FqFpKqWUiqFjAyr2IUSS0tzk3PLTbSK07MLS7N
+        S9dLzs/dxAiMnG3Hfm7Zwbjy1Ue9Q4xMHIyHGCU4mJVEeG/c+ZMkxJuSWFmVWpQfX1Sak1p8
+        iNEU6OqJzFKiyfnA2M0riTc0MzA1NDGzNDC1NDNWEuf1LOhIFBJITyxJzU5NLUgtgulj4uCU
+        amBiZo/UiCqrvi0j//mHq2repdP/Aq9NZr3iypJQplwoviqcYeef5BPfQ49xcjvG6bId9o7x
+        LAkQTL0q/n/WsRfXezK073jfmfiGIX3/o1Uf+BjNRFXfpwo2sn7wnyy1OKFBcP3N00HHNu1l
+        knz4tbTuyc9Itvf+FeETz7zSqHjp5fleqZ7b9NnULU627CJGxYvW6pry9Ojfrw9L5eU+FSO2
+        h/v0iVm3N/ZKWbayZEzcn6q1rC23xV6rNnXy6tUTczdbrZA/u4RHZcJ+4VUPF7yYEczUaXFd
+        8nH4w5OXLdu7pQWPKr3J2+dff+5d0Ir5TMtu7dFLZfr0lTlLmG/qdcNpfRtl2i7u/ZnrZfXR
+        20GJpTgj0VCLuag4EQALQcjZJQMAAA==
+X-CMS-MailID: 20220819115338eucas1p11b916296213572e97a03241ebdc399d0
 X-Msg-Generator: CA
 Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20220819115339eucas1p1896638f0a9a3d0c71c7fcba3b754b8ad
+X-RootMTR: 20220819115338eucas1p11b916296213572e97a03241ebdc399d0
 X-EPHeader: CA
 CMS-TYPE: 201P
-X-CMS-RootMailID: 20220819115339eucas1p1896638f0a9a3d0c71c7fcba3b754b8ad
-References: <20220819115337.35681-1-p.raghav@samsung.com>
-        <CGME20220819115339eucas1p1896638f0a9a3d0c71c7fcba3b754b8ad@eucas1p1.samsung.com>
+X-CMS-RootMailID: 20220819115338eucas1p11b916296213572e97a03241ebdc399d0
+References: <CGME20220819115338eucas1p11b916296213572e97a03241ebdc399d0@eucas1p1.samsung.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hi ,
 Since 3687fcb0752a ("btrfs: zoned: make auto-reclaim less aggressive")
 commit, reclaim algorithm has been changed to trigger auto-reclaim once
-the fs used size is more than certain threshold. This change breaks this
-test.
+the fs used size is more than a certain threshold. This change breaks
+237 test.
 
-The test has been adapted so that the new auto-reclaim algorithm can be
-tested along with relocation.
----
+I tried to adapt the test by doing the following:
+- Write a small file first
+- Write a big file that increases the disk usage to be more than the
+  reclaim threshold
+- Delete the big file to trigger threshold
+- Ensure the small file is relocated and the space used by the big file
+  is reclaimed.
+
+My test case works properly for small ZNS drives but not for bigger
+sized drives in QEMU. When I use a drive with a size of 100G, not all
+zones that were used by the big file are correctly reclaimed.
+Either I am not setting up the test correctly or there is something
+wrong on how reclaim works for zoned devices.
+
+I created a simple script to reproduce the scenario instead of running
+the test. Please adapt the $DEV and $big_file_size based on the drive
+size. As I am setting the bg_reclaim_threshold to be 51, $big_file_size
+should be at least 51% of the drive size.
+
+```
+DEV=nvme0n3
+DEV_PATH=/dev/$DEV
+big_file_size=2500M
+
+echo "mq-deadline" > /sys/block/$DEV/queue/scheduler
+umount /mnt/scratch
+blkzone reset $DEV_PATH
+mkfs.btrfs -f -d single -m single $DEV_PATH > /dev/null;  mount -t btrfs $DEV_PATH \
+	/mnt/scratch
+uuid=$(btrfs fi show $DEV_PATH | grep 'uuid' | awk '{print $NF}')
+
+echo "51" > /sys/fs/btrfs/$uuid/bg_reclaim_threshold
+
+fio --filename=/mnt/scratch/test2 --size=1M --rw=write --bs=4k \
+	--name=btrfs_zoned > /dev/null
+btrfs fi sync /mnt/scratch
+
+echo "Open zones before big file trasfer:"
+blkzone report $DEV_PATH | grep -v -e em -e nw | wc -l
+
+fio --filename=/mnt/scratch/test1 --size=$big_file_size --rw=write --bs=4k \
+	--ioengine=io_uring --name=btrfs_zoned > /dev/null
+btrfs fi sync /mnt/scratch
+
+echo "Open zones before removing the file:"
+blkzone report $DEV_PATH | grep -v -e em -e nw | wc -l
+rm /mnt/scratch/test1
+btrfs fi sync /mnt/scratch
+
+echo "Going to sleep. Removed the file"
+sleep 30
+
+echo "Open zones after reclaim:"
+blkzone report $DEV_PATH | grep -v -e em -e nw | wc -l
+```
+
+I am getting the following output in QEMU:
+
+- 5GB ZNS drive with 128MB zone size (and cap) and it is working as
+  expected:
+
+```
+Open zones before big file trasfer:
+4
+Open zones before removing the file:
+23
+Going to sleep. Removed the file
+Open zones after reclaim:
+4
+```
+
+- 100GB ZNS drive with 128MB zone size (and cap) and it is **not
+  working** as expected:
+
+```
+Open zones before big file trasfer:
+4
+Open zones before removing the file:
+455
+Going to sleep. Removed the file
+Open zones after reclaim:
+411
+```
+
+Only partial reclaim is happening for bigger sized drives. The issue
+with that is, if I do another FIO transfer, the drive spits out ENOSPC
+before its actual capacity is reached as most of the zones have not been
+reclaimed back and are basically in an unusable state.
+
+Is there a limit on how many bgs can be reclaimed?
+
+Let me know if I am doing something wrong in the test or if it is an
+actual issue.
+
+Pankaj Raghav (1):
+  btrfs/237: adapt the test to work with the new reclaim algorithm
+
  tests/btrfs/237 | 80 +++++++++++++++++++++++++++++++++++--------------
  1 file changed, 57 insertions(+), 23 deletions(-)
 
-diff --git a/tests/btrfs/237 b/tests/btrfs/237
-index f96031d5..18945e78 100755
---- a/tests/btrfs/237
-+++ b/tests/btrfs/237
-@@ -54,46 +54,80 @@ if [[ "$uuid" == "" ]]; then
- 	exit 1
- fi
- 
-+fssize=$($BTRFS_UTIL_PROG fi usage -b $SCRATCH_MNT |grep "Device size" |\
-+	grep -Eo "[0-9]+")
-+
-+allocated_fssize=$($BTRFS_UTIL_PROG fi usage -b $SCRATCH_MNT |grep "Device allocated" |\
-+	grep -Eo "[0-9]+")
-+
-+
- start_data_bg_phy=$(get_data_bg_physical)
- start_data_bg_phy=$((start_data_bg_phy >> 9))
- 
--size=$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV |\
-+zone_cap=$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV |\
- 	_filter_blkzone_report |\
- 	grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
--size=$((size << 9))
-+zone_cap=$((zone_cap << 9))
- 
--reclaim_threshold=75
--echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
--fill_percent=$((reclaim_threshold + 2))
--rest_percent=$((90 - fill_percent)) # make sure we're not creating a new BG
--fill_size=$((size * fill_percent / 100))
--rest=$((size * rest_percent / 100))
-+fs_reclaim_threshold=60
-+bg_reclaim_threshold=75
-+echo $fs_reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
-+echo $bg_reclaim_threshold > /sys/fs/btrfs/"$uuid"/allocation/data/bg_reclaim_threshold
- 
--# step 1, fill FS over $fillsize
--$XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test1 >> $seqres.full
--$XFS_IO_PROG -fc "pwrite 0 $rest" $SCRATCH_MNT/$seq.test2 >> $seqres.full
-+fs_fill_percent=$((fs_reclaim_threshold + 2))
-+fill_size=$((fssize * fs_fill_percent / 100))
-+
-+# Remove the allocated size from the $fill_size
-+fill_size=$((fill_size - allocated_fssize))
-+
-+bg_fill_percent=$((bg_reclaim_threshold + 2))
-+zone_fill_size=$((zone_cap * bg_fill_percent / 100))
-+
-+# $fill_size might not cover the last zone block group with threshold
-+# for reclaim. Add the remaining bytes so that it can also be reclaimed
-+last_zone_offset=$((fill_size % zone_cap))
-+
-+if [ $last_zone_offset -lt $zone_fill_size ]; then
-+	fill_size=$((fill_size + zone_fill_size - last_zone_offset))
-+fi
-+
-+# This small file will be used to verify the relocation
-+relocate_file_size=$((zone_cap * 2 / 100))
-+
-+# step 1, fill FS over $relocated_file_size and $fill_size
-+$XFS_IO_PROG -fc "pwrite 0 $relocate_file_size" $SCRATCH_MNT/$seq.test1 >> $seqres.full
- $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
- 
--zones_before=$($BLKZONE_PROG report $SCRATCH_DEV | grep -v -e em -e nw | wc -l)
--echo "Before reclaim: $zones_before zones open" >> $seqres.full
- old_data_zone=$(get_data_bg)
- old_data_zone=$((old_data_zone >> 9))
- printf "Old data zone 0x%x\n" $old_data_zone >> $seqres.full
- 
--# step 2, delete the 1st $fill_size sized file to trigger reclaim
--rm $SCRATCH_MNT/$seq.test1
-+$XFS_IO_PROG -fc "pwrite 0 $fill_size" $SCRATCH_MNT/$seq.test2 >> $seqres.full
- $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
--sleep 2 # 1 transaction commit for 'rm' and 1 for balance
-+
-+open_zones_before_reclaim=$($BLKZONE_PROG report --offset $start_data_bg_phy $SCRATCH_DEV |\
-+	grep -v -e em -e nw | wc -l)
-+
-+# sanity check
-+if [ $open_zones_before_reclaim -eq 0 ]; then
-+	echo "Error writing to the device"
-+fi
-+
-+echo "Before reclaim: $open_zones_before_reclaim zones open" >> $seqres.full
-+
-+# step 2, delete the $fill_size sized file to trigger reclaim
-+rm $SCRATCH_MNT/$seq.test2
-+$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-+sleep 5 # sleep for transaction commit for 'rm' and for balance
- 
- # check that we don't have more zones open than before
--zones_after=$($BLKZONE_PROG report $SCRATCH_DEV | grep -v -e em -e nw | wc -l)
--echo "After reclaim: $zones_after zones open" >> $seqres.full
-+open_zones_after_reclaim=$($BLKZONE_PROG report --offset $start_data_bg_phy $SCRATCH_DEV |\
-+	grep -v -e em -e nw | wc -l)
-+echo "After reclaim: $open_zones_after_reclaim zones open" >> $seqres.full
- 
--# Check that old data zone was reset
--old_wptr=$($BLKZONE_PROG report -o $old_data_zone -c 1 $SCRATCH_DEV |\
--	grep -Eo "wptr 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
--if [ "$old_wptr" != "0x000000" ]; then
--	_fail "Old wptr still at $old_wptr"
-+# Check that data was really relocated to a different zone
-+if [ $open_zones_after_reclaim != 1 ]; then
-+	echo "Error relocating the data"
- fi
- 
- new_data_zone=$(get_data_bg)
 -- 
 2.25.1
 
