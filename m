@@ -2,155 +2,185 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0379DC00140
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Aug 2022 15:23:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31376C00140
+	for <linux-fstests@archiver.kernel.org>; Mon, 22 Aug 2022 00:49:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229561AbiHUPXZ (ORCPT
+        id S231928AbiHVAts (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 21 Aug 2022 11:23:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56850 "EHLO
+        Sun, 21 Aug 2022 20:49:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229919AbiHUPXX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 21 Aug 2022 11:23:23 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27A8B114F
-        for <fstests@vger.kernel.org>; Sun, 21 Aug 2022 08:23:21 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S231921AbiHVAtr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Aug 2022 20:49:47 -0400
+Received: from synology.com (mail.synology.com [211.23.38.101])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FA8815FFA
+        for <fstests@vger.kernel.org>; Sun, 21 Aug 2022 17:49:43 -0700 (PDT)
+Received: from localhost.localdomain (unknown [10.17.41.204])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 8F89CB80923
-        for <fstests@vger.kernel.org>; Sun, 21 Aug 2022 15:23:20 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9BABBC433D6;
-        Sun, 21 Aug 2022 15:23:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661095399;
-        bh=tLo9VCQZ/U9rfw6DLay/A8+0U1RH1Vu/EoZuyUCBYdo=;
-        h=Date:From:To:Subject:From;
-        b=QZJGmiV0a66ESnzPfdOca7rcZjwfsLfC763LLTVIJlFhisX0UdxnIdPOlZa/kWE4v
-         ICJY5imv6wO1NrNhF7l5Zj7GdHM4nbW764RgPlLJ24U50czgPcLkeqtNVtAU7yn/bv
-         jEz3ukbmP5tOJyly5u0GW8Ov8cfDlLwVlCnNuh7oow245SNb+NjPUo4fI+huz3+d+m
-         70y7p1TthWnbcrZf1pvcvqD8kklCxX2KLHf4O4g9x95Z5fHnFL5dQpOvshGTTfHU6K
-         hoGDvsa0BhurNqcoFzkOxhk2l7sRbsQCxJJlYx9HsUh+fyLXddAf3WFPSU2oLYGcnY
-         MIfELt4LYrEBA==
-Date:   Sun, 21 Aug 2022 23:23:15 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to bf1ef26900ee
+        by synology.com (Postfix) with ESMTPSA id 196A031A6D859;
+        Mon, 22 Aug 2022 08:49:41 +0800 (CST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
+        t=1661129382; bh=IZQHJz0tudZimxBKrJrpdlj7NPlf4aPidrQpOtJTEXE=;
+        h=From:To:Cc:Subject:Date;
+        b=md3Jn1qOCP9WGc/ktJIkHvrusLpdlTPGjKuQ4Rp7CmWx877Miki5ZXEMlK1IML9rZ
+         9EYLcpklnkN9TIkFYN13MyFjCGbF+dOsTgL7OdzmfwMEqhllKj8cEOOCxVPUXrz/03
+         XiLStH7IxMooYhxK4/vpTQqd4VMMjN5KhauFuxpg=
+From:   bingjingc <bingjingc@synology.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.orgto
+Cc:     fdmanana@kernel.org, bingjingc@synology.com, bxxxjxxg@gmail.com
+Subject: [PATCH v2] fstests: btrfs: test incremental send for changed reference paths
+Date:   Mon, 22 Aug 2022 08:49:32 +0800
+Message-Id: <20220822004932.1280053-1-bingjingc@synology.com>
+X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="oM5WfWmbbI5V"
-Content-Disposition: inline
-Message-Id: <20220821152318.9BABBC433D6@smtp.kernel.org>
+Content-Transfer-Encoding: 8bit
+X-Synology-MCP-Status: no
+X-Synology-Spam-Flag: no
+X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
+X-Synology-Virus-Status: no
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: BingJing Chang <bingjingc@synology.com>
 
---oM5WfWmbbI5V
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Normally btrfs stores file paths in an array of ref items. However, items
+for the same parent directory can not exceed the size of a leaf. So btrfs
+also store the rest of them in extended ref items alternatively.
 
-Hi all,
+In this test, it creates a large number of links under a directory causing
+the file paths stored in these two ways to be the parent snapshot. And it
+deletes and recreates just an amount of them that can be stored within an
+array of ref items to be the send snapshot. Test that an incremental send
+operation correctly issues link/unlink operations only against new/deleted
+paths, or the receive operation will fail due to a link on an existed path.
 
-The for-next branch of the xfstests repository at:
+This currently fails on btrfs but is fixed by a kernel patch with the
+commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
+existing file paths")
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Signed-off-by: BingJing Chang <bingjingc@synology.com>
+---
+ tests/btrfs/272     | 97 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/272.out |  3 ++
+ 2 files changed, 100 insertions(+)
+ create mode 100755 tests/btrfs/272
+ create mode 100644 tests/btrfs/272.out
 
-has just been updated and tagged as v2022.08.21 release.
+diff --git a/tests/btrfs/272 b/tests/btrfs/272
+new file mode 100755
+index 00000000..e1986de9
+--- /dev/null
++++ b/tests/btrfs/272
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 BingJing Chang.
++#
++# FS QA Test No. btrfs/272
++#
++# Regression test for btrfs incremental send issue where a link instruction
++# is sent against an existing path, causing btrfs receive to fail.
++#
++# This issue is fixed by the following linux kernel btrfs patch:
++#
++#   commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
++#   existing file paths")
++#
++. ./common/preamble
++_begin_fstest auto quick send
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -fr $send_files_dir
++	rm -f $tmp.*
++}
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_require_test
++_require_scratch
++_require_fssum
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
++# Create a file and 2000 hard links to the same inode
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
++touch $SCRATCH_MNT/vol/foo
++for i in {1..2000}; do
++	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
++done
++
++# Create a snapshot for a full send operation
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
++_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
++
++# Remove 2000 hard links and re-create the last 1000 links
++for i in {1..2000}; do
++	rm $SCRATCH_MNT/vol/$i
++done
++for i in {1001..2000}; do
++	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
++done
++
++# Create another snapshot for an incremental send operation
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
++_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
++		     $SCRATCH_MNT/snap2
++
++$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/snap1
++$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/snap2/snap1 $SCRATCH_MNT/snap2
++
++# Recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Add the first snapshot to the new filesystem by applying the first send
++# stream.
++_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
++
++# The incremental receive operation below used to fail with the following
++# error:
++#
++#    ERROR: link 1238 -> foo failed: File exists
++#
++# This is because the path "1238" was stored as an extended ref item in the
++# original snapshot but as a normal ref item in the next snapshot. The send
++# operation cannot handle the duplicated paths, which are stored in
++# different ways, well, so it decides to issue a link operation for the
++# existing path. This results in the receiver to fail with the above error.
++_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
++
++$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/snap1
++$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/snap2
++
++status=0
++exit
+diff --git a/tests/btrfs/272.out b/tests/btrfs/272.out
+new file mode 100644
+index 00000000..b009b87a
+--- /dev/null
++++ b/tests/btrfs/272.out
+@@ -0,0 +1,3 @@
++QA output created by 272
++OK
++OK
+-- 
+2.37.1
 
-Release note:
-1. There're two new cases this release, btrfs/277 for a btrfs new feature,
-   generic/694 for a known issue of exfat fs. So both of them generally
-   won't break downstream linux testing.
-
-2. A big change from Darrick on dmerror improve, help it support external log
-   and rt device, and help ext4 part support external logdev better, and move
-   ext4 specific helper into common/ext4 file (which is just created in this
-   release). Thanks Darrick, and inform ext4 folks.
-
-Thanks for all your contribution, and more details see below.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-bf1ef26900ee src/t_ofd_locks.c: Reset errno to zero
-
-New commits ([N]ew, [U]pdate:
-
-Boris Burkov (1):
-[N]      [192f5297b54f] fstests: add btrfs fs-verity send/recv test
-
-Darrick J. Wong (7):
-[U]      [04307f499d13] xfs/{015,042,076}: fix mkfs failures with nrext64=1
-[U]      [67afd5c74246] common/rc: move ext4-specific helpers into a separate common/ext4 file
-[U]      [e88c0d38eeda] common/rc: move XFS-specific parts of _scratch_options into common/xfs
-[U]      [92caf7ebe14d] common/ext4: provide custom ext4 scratch fs options
-[U]      [acf0424671ff] dmerror: support external log and realtime devices
-[U]      [49272aacac85] common: refactor fail_make_request boilerplate
-[U]      [6049ccca12ab] fail_make_request: teach helpers about external devices
-
-Pavel Reichl (1):
-[N]      [87d9aea81007] generic: test i_blocks for large files
-
-Wang Yugui (1):
-[U]      [c9734480a1dd] fstests: add missing _require_scratch
-
-Yang Xu (1):
-[U]      [bf1ef26900ee] src/t_ofd_locks.c: Reset errno to zero
-
-
-Code Diffstat:
-
- common/config            |   4 +
- common/dmerror           | 163 +++++++++++++++++++++++++++++++++++++--
- common/ext4              | 193 +++++++++++++++++++++++++++++++++++++++++++++++
- common/fail_make_request |  63 ++++++++++++++++
- common/rc                | 193 ++++-------------------------------------------
- common/xfs               |  23 ++++++
- src/t_ofd_locks.c        |   2 +
- tests/btrfs/088          |  14 ++--
- tests/btrfs/150          |  13 ++--
- tests/btrfs/202          |   1 +
- tests/btrfs/215          |   1 +
- tests/btrfs/268          |   1 +
- tests/btrfs/269          |   1 +
- tests/btrfs/270          |   1 +
- tests/btrfs/277          | 115 ++++++++++++++++++++++++++++
- tests/btrfs/277.out      |  59 +++++++++++++++
- tests/generic/019        |  40 ++--------
- tests/generic/441        |   2 +-
- tests/generic/487        |   2 +-
- tests/generic/694        |  47 ++++++++++++
- tests/generic/694.out    |   2 +
- tests/xfs/015            |   4 +-
- tests/xfs/042            |  14 ++--
- tests/xfs/042.out        |   4 +-
- tests/xfs/076            |   2 +-
- 25 files changed, 711 insertions(+), 253 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---oM5WfWmbbI5V
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmMCTb8ACgkQlNbPkfr2
-tMxdeQ/+JbX3x59+Jn8EsUHj8BFvDP3YvIfEM2ERo8Yq59DJANAqoGZY5Rhmdxat
-709Cz/oGe7pm2+r/2iPyTcNyh7lYvOLMpIAscWr/MzdlCsGthWEsgYSdht9plTNr
-yW7LNVI6H7Gkppu84vgE1OUoPhUu1YSCq5IweQEdthJW5AWG0GLeRnXvEtRZD2/M
-Z1zU0DiUuiZJwog3XEbjGVP6ZcFTqb8bD34zrZkZTdnbkXomf9J0maw0rSLDsCxi
-xlgHZoTJjTVxVVd8Kv5hVB7hnjGvjZXGcNIc4OHEdYsZvVYuS+dwsMm4nZ/yhBAF
-kb/N6MXreOYvZQz/phuTlXu8xIO3tnOvLqU9lf75+gVSc30BrzVMkjeoOp1436GZ
-iIiFo0iqsUd6E1sC4GkGkelNI4vSTKRVkpQeiBuuEKzK+LaabdvU3b/7IFM8Oi/t
-lSNAxdmcbHk8REsWeB6tBkDlkQ0oub8dpmH5RslGEpOKGgqYy9PjRd4Hz/AWao92
-PGU7aO5AxJrgeFMRHc0xTMWoLm/c4gxtZhHawEeNTgs6EPuQlgNSuoQaYJjSvboG
-vK6C6XwvPF24uan/5K50Di3GhgD5X9nei2/MfMyuKVYGNbxUYbI0TLAz+7eLjGju
-gKqUJzk1gCx1o9DgYMY0mCKSKm2qiWujw2dkttyx9yb3NYhmDyE=
-=HBqK
------END PGP SIGNATURE-----
-
---oM5WfWmbbI5V--
