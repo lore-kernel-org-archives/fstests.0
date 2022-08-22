@@ -2,62 +2,62 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3647BC28D13
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0616C32774
 	for <linux-fstests@archiver.kernel.org>; Mon, 22 Aug 2022 16:28:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237012AbiHVQ2X (ORCPT
+        id S237014AbiHVQ20 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Aug 2022 12:28:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46012 "EHLO
+        Mon, 22 Aug 2022 12:28:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46182 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237014AbiHVQ2P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 Aug 2022 12:28:15 -0400
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF9E92A2;
-        Mon, 22 Aug 2022 09:28:13 -0700 (PDT)
-Received: by mail-wm1-x335.google.com with SMTP id k18-20020a05600c0b5200b003a5dab49d0bso6309559wmr.3;
-        Mon, 22 Aug 2022 09:28:13 -0700 (PDT)
+        with ESMTP id S237025AbiHVQ2R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 22 Aug 2022 12:28:17 -0400
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0A18E9A;
+        Mon, 22 Aug 2022 09:28:16 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id r16so13892507wrm.6;
+        Mon, 22 Aug 2022 09:28:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc;
-        bh=59bI0yR2jhIr7DA55+u7TB6jQiSVDZFeMCHEmKcrfqs=;
-        b=AHjq2nTcmkrdEHKSt1IjuUkA4AkTGYH/M53d9Cjo6tX8x12+YMTcfni1wU7w6VKxMJ
-         TGRLnYjDNze0BI/XPAR3s13GK+74QEHNUuzQH11WqHmQ7yJGfMEM/gWYEVrXZQH6dMPZ
-         F4eJelGT5N5LkuXvTmp/rDeE84xOCCal+6RwHAdoYbenw8XxnlLfzowi6xU0+sNx/C7r
-         wMi04hlkvSHM/FV5JLi/9xy8B2VZ+f8XdDZ+eybSxCxiSyvRA2+Td/NMQwaK3Tetv0Qt
-         gBI5IgPmIHHbvKg5Jwmi+JsyRL7sdzQDKGCSeJM2NVRkVq63dZj2Pg/bZ0b/GE8dNmUa
-         GrTA==
+        bh=q/FI4CYR+WYkVFva7q03Gliz+K3Jnhdatwd2qEAi2Ao=;
+        b=G3inXztuNs6ypVb1NVRJ8CdJzgxlJMB2mRdjf/EmS7SLOcBfZZSwgTQZCmJbgTNkaX
+         hICVtUk24z0oaPZA5lX694qFK+hczNmto+DIyVyH1FCqVKn58UXG5zOl8yAfGGrEAGbv
+         XFpRJXq94KZIq6z5Yg0YLVsuCZXOnn7mK4+s5fxXVzvOBysKXRZuNppg2MTL494NJP3W
+         u0yrVjwQV9omEoidB+VkOw+lT/Er7EjPCL3kB2pUZx3mEh9bdrMsxtoMtCt05Wybwq3J
+         TADNsUcSu+TTPN10efrEYENviAkiAuRfDGphnZcxgDdhkoaZVhJCGJldQlXogtYA4q5g
+         BVJQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc;
-        bh=59bI0yR2jhIr7DA55+u7TB6jQiSVDZFeMCHEmKcrfqs=;
-        b=Fh/C3ON5rn+WqCbQuK6t7yI4y7aE2lksk6IUZxY21mznCmDat71uSSoilMtL6kF+jE
-         yXQbtLnXA/E9tkGtzilURX5wGuBp+U1WXFWTT75dWyXYXJUnPEjRxvcjskgVL7v2A5HJ
-         kL5FFCAVIlg/S7T+J6eVTzCUY+g54eY2Dcj78bWcwt7n2t76UF/lzsjPMQ5mlDHf4PxN
-         P0NFnApiBzWd4B1pWd8YhG75QAxN58sni41CI28GkfAXyHvIcYVztCaFg2nLJWS/LWXm
-         ile1rPxZqRD21KUNU+CLZd7r0JZlcNzzChHH8dEq1alBZwOz8LEEWPf5ci+gciu1QQS9
-         pKOQ==
-X-Gm-Message-State: ACgBeo0Or5cdZQRpZ9pfW7CYvpIiScBW/Uj66Kt8mPkUh7IT6yQdV+ae
-        m+y5Hjp/zHFv2cQoBwoFGps=
-X-Google-Smtp-Source: AA6agR7HtIgZumh2Bal7Job0hNfZhRdT5pqSBvP0JFX+cnUYafm10CcVXENgjOP5fkfdlL06Ps9PEA==
-X-Received: by 2002:a1c:a187:0:b0:3a5:e055:715b with SMTP id k129-20020a1ca187000000b003a5e055715bmr12975931wme.171.1661185692443;
-        Mon, 22 Aug 2022 09:28:12 -0700 (PDT)
+        bh=q/FI4CYR+WYkVFva7q03Gliz+K3Jnhdatwd2qEAi2Ao=;
+        b=P84oBuMPl56zVCj1NEsQ5/QIIiB+GzyrHDXKZkpxsEtGBo53k/cOHLCMpLhaI+wh3C
+         yukaG0zdJUTwmgeT3AKAgy0ANt6Do1AA4xKSoHTBzMM6QUseokyXs6fbnFqAms8islmi
+         P7lR1CwfMRVvQP8TVlLKSHkzFHLgdV8DLpOzuY08FNxHUOtRqBz7VxmuskhEMcdSmrkr
+         +5D9ktWCZlhl+PAHoasGOFg7SAdxmAdO5AppSF50ItxVZWl6g6zESGPJqwMDZGOg/lO2
+         fBLLujfkll55gA08yCK4YJbFGjrChY8NuPV60aaOTL1kCEJT/6G+rimgtSlDFQOzJv2e
+         yrTw==
+X-Gm-Message-State: ACgBeo0lD7iGfSJbA3CR3VCLXuk0KLWYc8Im0PC8BfS84dhXZ6XLm3EN
+        MG4V34+4rZBRH3Orc4B16/7hwv9yfYc=
+X-Google-Smtp-Source: AA6agR71bmi0TjYMckHqvLWSKbz2NnuUh3hXSzUQvPkWeISOW+fgYfweZ0BAeqRWH/n2t/4MMpP+0Q==
+X-Received: by 2002:a05:6000:1881:b0:222:c899:cac6 with SMTP id a1-20020a056000188100b00222c899cac6mr10738712wri.283.1661185695155;
+        Mon, 22 Aug 2022 09:28:15 -0700 (PDT)
 Received: from amir-ThinkPad-T480.ctera.local (bzq-166-168-31-246.red.bezeqint.net. [31.168.166.246])
-        by smtp.gmail.com with ESMTPSA id z13-20020a5d44cd000000b00222ed7ea203sm11749229wrr.100.2022.08.22.09.28.11
+        by smtp.gmail.com with ESMTPSA id z13-20020a5d44cd000000b00222ed7ea203sm11749229wrr.100.2022.08.22.09.28.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 22 Aug 2022 09:28:12 -0700 (PDT)
+        Mon, 22 Aug 2022 09:28:14 -0700 (PDT)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     "Darrick J . Wong" <djwong@kernel.org>
 Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
         Chandan Babu R <chandan.babu@oracle.com>,
         linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Allison Henderson <allison.henderson@oracle.com>,
-        Catherine Hoang <catherine.hoang@oracle.com>
-Subject: [PATCH 5.10 CANDIDATE 2/6] xfs: reject crazy array sizes being fed to XFS_IOC_GETBMAP*
-Date:   Mon, 22 Aug 2022 19:27:58 +0300
-Message-Id: <20220822162802.1661512-3-amir73il@gmail.com>
+        Jan Kara <jack@suse.cz>, Christoph Hellwig <hch@lst.de>,
+        Christian Brauner <brauner@kernel.org>
+Subject: [PATCH 5.10 CANDIDATE 4/6] vfs: make sync_filesystem return errors from ->sync_fs
+Date:   Mon, 22 Aug 2022 19:28:00 +0300
+Message-Id: <20220822162802.1661512-5-amir73il@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220822162802.1661512-1-amir73il@gmail.com>
 References: <20220822162802.1661512-1-amir73il@gmail.com>
@@ -69,46 +69,63 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: "Darrick J. Wong" <djwong@kernel.org>
 
-commit 29d650f7e3ab55283b89c9f5883d0c256ce478b5 upstream.
+commit 5679897eb104cec9e99609c3f045a0c20603da4c upstream.
 
-Syzbot tripped over the following complaint from the kernel:
+[backport to 5.10 only differs in __sync_blockdev helper]
 
-WARNING: CPU: 2 PID: 15402 at mm/util.c:597 kvmalloc_node+0x11e/0x125 mm/util.c:597
-
-While trying to run XFS_IOC_GETBMAP against the following structure:
-
-struct getbmap fubar = {
-	.bmv_count	= 0x22dae649,
-};
-
-Obviously, this is a crazy huge value since the next thing that the
-ioctl would do is allocate 37GB of memory.  This is enough to make
-kvmalloc mad, but isn't large enough to trip the validation functions.
-In other words, I'm fussing with checks that were **already sufficient**
-because that's easier than dealing with 644 internal bug reports.  Yes,
-that's right, six hundred and forty-four.
+Strangely, sync_filesystem ignores the return code from the ->sync_fs
+call, which means that syscalls like syncfs(2) never see the error.
+This doesn't seem right, so fix that.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-Reviewed-by: Catherine Hoang <catherine.hoang@oracle.com>
+Reviewed-by: Jan Kara <jack@suse.cz>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Acked-by: Christian Brauner <brauner@kernel.org>
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- fs/xfs/xfs_ioctl.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ fs/sync.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-diff --git a/fs/xfs/xfs_ioctl.c b/fs/xfs/xfs_ioctl.c
-index d973350d5946..103fa8381e7d 100644
---- a/fs/xfs/xfs_ioctl.c
-+++ b/fs/xfs/xfs_ioctl.c
-@@ -1689,7 +1689,7 @@ xfs_ioc_getbmap(
+diff --git a/fs/sync.c b/fs/sync.c
+index 0d6cdc507cb9..79180e58d862 100644
+--- a/fs/sync.c
++++ b/fs/sync.c
+@@ -28,7 +28,7 @@
+  */
+ int sync_filesystem(struct super_block *sb)
+ {
+-	int ret;
++	int ret = 0;
  
- 	if (bmx.bmv_count < 2)
- 		return -EINVAL;
--	if (bmx.bmv_count > ULONG_MAX / recsize)
-+	if (bmx.bmv_count >= INT_MAX / recsize)
- 		return -ENOMEM;
+ 	/*
+ 	 * We need to be protected against the filesystem going from
+@@ -51,15 +51,21 @@ int sync_filesystem(struct super_block *sb)
+ 	 * at a time.
+ 	 */
+ 	writeback_inodes_sb(sb, WB_REASON_SYNC);
+-	if (sb->s_op->sync_fs)
+-		sb->s_op->sync_fs(sb, 0);
++	if (sb->s_op->sync_fs) {
++		ret = sb->s_op->sync_fs(sb, 0);
++		if (ret)
++			return ret;
++	}
+ 	ret = __sync_blockdev(sb->s_bdev, 0);
+-	if (ret < 0)
++	if (ret)
+ 		return ret;
  
- 	buf = kvzalloc(bmx.bmv_count * sizeof(*buf), GFP_KERNEL);
+ 	sync_inodes_sb(sb);
+-	if (sb->s_op->sync_fs)
+-		sb->s_op->sync_fs(sb, 1);
++	if (sb->s_op->sync_fs) {
++		ret = sb->s_op->sync_fs(sb, 1);
++		if (ret)
++			return ret;
++	}
+ 	return __sync_blockdev(sb->s_bdev, 1);
+ }
+ EXPORT_SYMBOL(sync_filesystem);
 -- 
 2.25.1
 
