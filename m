@@ -2,158 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19723C38142
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Aug 2022 16:47:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23CBAC32772
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Aug 2022 20:12:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245362AbiHWQrF (ORCPT
+        id S230250AbiHWUM1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Aug 2022 12:47:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39152 "EHLO
+        Tue, 23 Aug 2022 16:12:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343784AbiHWQqO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2022 12:46:14 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D8A7C7FAF;
-        Tue, 23 Aug 2022 07:28:34 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id BB566B8191E;
-        Tue, 23 Aug 2022 14:28:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 61A7BC433C1;
-        Tue, 23 Aug 2022 14:28:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661264911;
-        bh=1MtnzPedujxaeQqskAInC5MQZi5DdXIRqiIgbQJ0P9s=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=dyf8o4L+Yq3k5XdvTdot1BN3t7UxqOaNp3TGIpnRFxakOVhzWguSCHg6CAbMnxWrs
-         eEA5MxDPJwxC2Iuwr+rc077XBhL92lpmPspJjUq5IXAQ194rFq6RXXHGBuipskbFmQ
-         qQckzge/40HfzFDwUq+gTiHkKlbrYTJsNnm6v07WVhQ19oO4DY/d39poyTwPCMgAIY
-         mH4FH/dhkE1evJ9Yugh9ci13tclREExLnkQNRByjmk9GPr72DwAHcncjQMNpCEBS35
-         vu82Cr75Vin0ZaTrY97LJr1BmUVj5KwIXnGDO76wHkWWsnl2j1FeXPz7JjGu2P9YoH
-         y+4x6k19cDbJA==
-Date:   Tue, 23 Aug 2022 07:28:30 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandan.babu@oracle.com>
-Cc:     fstests@vger.kernel.org, zlang@kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: Check if a direct write can result in a false
- ENOSPC error
-Message-ID: <YwTkDrlpzPc2TXDC@magnolia>
-References: <20220823090433.1164296-1-chandan.babu@oracle.com>
+        with ESMTP id S230366AbiHWUMG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2022 16:12:06 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FAF5A4064;
+        Tue, 23 Aug 2022 12:32:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:To:From:Sender:
+        Reply-To:Cc:Content-Type:Content-ID:Content-Description;
+        bh=guTyfOZCaRlHZvAjDuV9ElTojd1SDJ1/Mg03YBv7KpY=; b=DNSsnxvr9QX9CwopzDsvJIDZo6
+        W7rOe+5ppq/XJeZ8yMatk1Jh/3/hGXo8fbkuTaYDIvzKNKAuUiQmMg0cO0bwyii9fo9Vu/bMBTAKR
+        Qx0DMx0dGjOBAuwYKz3ggpsGZxHb1OV8QXFKqlQFvQKjhguEqoWUVCyug9Hi5LpWExwNUQZ8Leazk
+        1Wg/V+aenc7gn6jHIlkSa9XFEh3+FJsR6VOydhnMoegeGzTun8k+FBB3jebxwRIsLQCPeYexUb2bj
+        3jBIbfSjuwE/Xs7yLQmBhXOFQHexFQi+yZjvC/RDs96Bd7JJwIsdJt8MvB2IfZRxJHYlZrRiuw62J
+        g68+xrSQ==;
+Received: from [2001:4bb8:190:6c32:d3e3:62e2:bb3f:326d] (helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1oQZdb-008bF0-Nm; Tue, 23 Aug 2022 19:32:36 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH 2/2] btrfs/271: use the common fail_request setup helpers
+Date:   Tue, 23 Aug 2022 21:32:30 +0200
+Message-Id: <20220823193230.505544-2-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20220823193230.505544-1-hch@lst.de>
+References: <20220823193230.505544-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220823090433.1164296-1-chandan.babu@oracle.com>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 23, 2022 at 02:34:33PM +0530, Chandan Babu R wrote:
-> This commit adds a test to check if a direct write on a delalloc extent
-> present in CoW fork can result in a false ENOSPC error. The bug has been fixed
-> by upstream commit d62113303d691 ("xfs: Fix false ENOSPC when performing
-> direct write on a delalloc extent in cow fork").
-> 
-> Signed-off-by: Chandan Babu R <chandan.babu@oracle.com>
-> ---
->  tests/xfs/553     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/553.out |  9 +++++++
->  2 files changed, 72 insertions(+)
->  create mode 100755 tests/xfs/553
->  create mode 100644 tests/xfs/553.out
-> 
-> diff --git a/tests/xfs/553 b/tests/xfs/553
-> new file mode 100755
-> index 00000000..78ed0995
-> --- /dev/null
-> +++ b/tests/xfs/553
-> @@ -0,0 +1,63 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 553
-> +#
-> +# Test to check if a direct write on a delalloc extent present in CoW fork can
-> +# result in an ENOSPC error.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick clone
-> +
-> +# Import common functions.
-> +. ./common/reflink
-> +. ./common/inject
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_fixed_by_kernel_commit d62113303d691 \
-> +	"xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork"
-> +_require_scratch_reflink
-> +_require_xfs_debug
-> +_require_test_program "punch-alternating"
-> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> +_require_xfs_io_command "reflink"
-> +_require_xfs_io_command "cowextsize"
-> +
-> +source=${SCRATCH_MNT}/source
-> +destination=${SCRATCH_MNT}/destination
-> +fragmented_file=${SCRATCH_MNT}/fragmented_file
-> +
-> +echo "Format and mount fs"
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +echo "Create source file"
-> +$XFS_IO_PROG -f -c "pwrite 0 32M" $source >> $seqres.full
-> +
-> +echo "Reflink destination file with source file"
-> +$XFS_IO_PROG -f -c "reflink $source" $destination >> $seqres.full
-> +
-> +echo "Set destination file's cowextsize"
-> +$XFS_IO_PROG -c "cowextsize 16M" $destination >> $seqres.full
-> +
-> +echo "Fragment FS"
-> +$XFS_IO_PROG -f -c "pwrite 0 64M" $fragmented_file >> $seqres.full
-> +sync
-> +$here/src/punch-alternating $fragmented_file >> $seqres.full
-> +
-> +echo "Inject bmap_alloc_minlen_extent error tag"
-> +_scratch_inject_error bmap_alloc_minlen_extent 1
-> +
-> +echo "Create 16MiB delalloc extent in destination file's CoW fork"
-> +$XFS_IO_PROG -c "pwrite 0 4k" $destination >> $seqres.full
-> +
-> +sync
-> +
-> +echo "Direct I/O write at 12k file offset in destination file"
-> +$XFS_IO_PROG -d -c "pwrite 12k 8k" $destination >> $seqres.full
+Use the helpers from common/fail_make_request instead of open coding
+them.  This switches to using a higher error count than the existing
+code, which was the intention from the very beginning (and doesn't
+actuallt matter for the short sequences in this test).
 
-Does this still work if the blocksize is 64k? ;)
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/btrfs/271     | 35 ++++++++---------------------------
+ tests/btrfs/271.out |  2 ++
+ 2 files changed, 10 insertions(+), 27 deletions(-)
 
-(The rest of the test code looks ok to me)
+diff --git a/tests/btrfs/271 b/tests/btrfs/271
+index 681fa965..c7c95b3e 100755
+--- a/tests/btrfs/271
++++ b/tests/btrfs/271
+@@ -18,20 +18,6 @@ _require_fail_make_request
+ _require_scratch_dev_pool 2
+ _scratch_dev_pool_get 2
+ 
+-enable_io_failure()
+-{
+-	local sysfs_bdev=`_sysfs_dev $1`
+-
+-	echo 1 > $sysfs_bdev/make-it-fail
+-}
+-
+-disable_io_failure()
+-{
+-	local sysfs_bdev=`_sysfs_dev $1`
+-
+-	echo 0 > $sysfs_bdev/make-it-fail
+-}
+-
+ _check_minimal_fs_size $(( 1024 * 1024 * 1024 ))
+ _scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
+ 
+@@ -43,15 +29,12 @@ pagesize=$(get_page_size)
+ blocksize=$(_get_block_size $SCRATCH_MNT)
+ sectors_per_page=$(($pagesize / $blocksize))
+ 
+-# enable block I/O error injection
+-echo 100 > $DEBUGFS_MNT/fail_make_request/probability
+-echo 1000 > $DEBUGFS_MNT/fail_make_request/times
+-echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
++_allow_fail_make_request
+ 
+ echo "Step 1: writing with one failing mirror:"
+-enable_io_failure $SCRATCH_DEV
++_bdev_fail_make_request $SCRATCH_DEV 1
+ $XFS_IO_PROG -f -c "pwrite -W -S 0xaa 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
+-disable_io_failure $SCRATCH_DEV
++_bdev_fail_make_request $SCRATCH_DEV 0
+ 
+ errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | \
+ 	$AWK_PROG '/write_io_errs/ { print $2 }')
+@@ -63,15 +46,13 @@ echo "Step 2: verify that the data reads back fine:"
+ $XFS_IO_PROG -c "pread -v 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io_offset
+ 
+ echo "Step 3: writing with two failing mirrors (should fail):"
+-enable_io_failure $SCRATCH_DEV
+-enable_io_failure $dev2
++_bdev_fail_make_request $SCRATCH_DEV 1
++_bdev_fail_make_request $dev2 1
+ $XFS_IO_PROG -f -c "pwrite -W -S 0xbb 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
+-disable_io_failure $dev2
+-disable_io_failure $SCRATCH_DEV
++_bdev_fail_make_request $dev2 0
++_bdev_fail_make_request $SCRATCH_DEV 0
+ 
+-# disable block I/O error injection
+-echo 0 > $DEBUGFS_MNT/fail_make_request/probability
+-echo 0 > $DEBUGFS_MNT/fail_make_request/times
++_disallow_fail_make_request
+ 
+ _scratch_dev_pool_put
+ # success, all done
+diff --git a/tests/btrfs/271.out b/tests/btrfs/271.out
+index 27451c37..d58c92f2 100644
+--- a/tests/btrfs/271.out
++++ b/tests/btrfs/271.out
+@@ -1,4 +1,5 @@
+ QA output created by 271
++Allow global fail_make_request feature
+ Step 1: writing with one failing mirror:
+ wrote 8192/8192 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+@@ -519,3 +520,4 @@ read 8192/8192 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ Step 3: writing with two failing mirrors (should fail):
+ fsync: Input/output error
++Disallow global fail_make_request feature
+-- 
+2.30.2
 
---D
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/553.out b/tests/xfs/553.out
-> new file mode 100644
-> index 00000000..a2e91678
-> --- /dev/null
-> +++ b/tests/xfs/553.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 553
-> +Format and mount fs
-> +Create source file
-> +Reflink destination file with source file
-> +Set destination file's cowextsize
-> +Fragment FS
-> +Inject bmap_alloc_minlen_extent error tag
-> +Create 16MiB delalloc extent in destination file's CoW fork
-> +Direct I/O write at 12k file offset in destination file
-> -- 
-> 2.35.1
-> 
