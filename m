@@ -2,237 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80891C32774
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Aug 2022 10:27:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7790FC32772
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Aug 2022 15:47:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353345AbiHWK1I (ORCPT
+        id S238076AbiHWPrE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Aug 2022 06:27:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52128 "EHLO
+        Tue, 23 Aug 2022 11:47:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43010 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354466AbiHWKZk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2022 06:25:40 -0400
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F06CBE0D3;
-        Tue, 23 Aug 2022 02:05:08 -0700 (PDT)
-Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 27N7dYXK026391;
-        Tue, 23 Aug 2022 09:04:56 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : content-transfer-encoding : content-type :
- mime-version; s=corp-2022-7-12;
- bh=DWFp/PWWM2TV2KbKrTgooLKoYA27bN9VTEJCCmrXXZk=;
- b=x+LnO2hVQJ7+PkpsRT1vBb6VGoxnQk84QPNKm26xTtNcGKPya2fGgDS+S/5H8V3tInpL
- c3TVEfcEwy9wkVzmGeA3SXfj1Xg335fz2WIJOb7t3Hfn1kF0wD+HiaM7Q9MRTXQPaEHl
- wFot8QqkW2lfRkwmf7QrkSfsCA6H2UGUUt5gzyVlhOQqMfiji25y/SocrpjNWOsPrTg5
- 4De+3nHcDhAyXud67IjmlcMhzp6yKHfM7eTzbvzsIRxM5OgfZlEkuOMPYh7EUCM1IEJm
- uWyKluCDv/vsCCfyJnGp1GD/SrXoeSv6M4q7+4pzzQAq7jfvjbX7stRXoUCKgg106AC3 sQ== 
-Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3j4ea71kfx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 23 Aug 2022 09:04:56 +0000
-Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-        by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 27N8H5Ib038599;
-        Tue, 23 Aug 2022 09:04:55 GMT
-Received: from nam10-bn7-obe.outbound.protection.outlook.com (mail-bn7nam10lp2104.outbound.protection.outlook.com [104.47.70.104])
-        by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3j3mq2njqj-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 23 Aug 2022 09:04:55 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=JhKIgtebgPR045ow+tTmv0EhPncquA5CxlFstwls3oX+yNUcTE6tI0W7eXhOBENHeeqVwYErfDgtNcvLo7B627P7P+/LF1wlu0WImHO1iAyDE90fMeH8EVcVuwojxoDk4T94Uf0ZZvicQ2hF+PiADibK5IxNHYo5B7QzI1hxVNKfpmxhjSwil2Q0PB2OBrcTxboBGA3VdiqyYfGcA4xh3WGBiRqm4vwN1EwnUt4k/Zip52M9Sos5ZF3Y+iI4x9v0JkO29eolSLCErSPorHtuSpyFcId0l16eUeffMjNyn28jfv8xOUsX42q2kyiTngftBOMyPOVdzSdF1O/KHyQiDg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DWFp/PWWM2TV2KbKrTgooLKoYA27bN9VTEJCCmrXXZk=;
- b=K3MxX/s2Tpln8sCSZ2uA1qybxuZvOXAPzQx41K5XpSpA/Imh71uil6OuTZ2zpyJzmWNwEHxxP9yHlwXiBBeX1ZVU3Rh+xjNBD4ilanCF9fi4MiUOPomud1CxpKxhszXHLgrcoWTzXm+JXwR/TOG07zrHwofTyiw439WkxNN8er/yhNvcrPJi/mtajoCSameExs5uVjN4PYmZfxlWiwpQFhQp06gl6ft+rRApdXKdpWyus/BWp+KjL1mxhHX5lE+jEESQn4ebkPf2Ce10M42qN8OxoBbz7KdbOb/IsVqYZxnktu9WSUIQ/VauEt/C4eUCqvdYhe8mOQJ5wWwBBrtJhw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DWFp/PWWM2TV2KbKrTgooLKoYA27bN9VTEJCCmrXXZk=;
- b=ofWCDQdUlbmZmZzGD0ogFRE2yfxTOZMYyuoAUYWM5Mmu9Yor01Xy6ZSvO1F39R4dJohsUfC8lZIjA2gw0SCDXxB81Dip/KrrQVBoVek6as7OA7LkAtqyFG9UaaTAmZ72+W46aEWWKvNl/9I/1xQKbZHeGIG9lgOTL9JFIP6MZqA=
-Received: from SA2PR10MB4587.namprd10.prod.outlook.com (2603:10b6:806:114::12)
- by BYAPR10MB2808.namprd10.prod.outlook.com (2603:10b6:a03:8d::18) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5546.21; Tue, 23 Aug
- 2022 09:04:52 +0000
-Received: from SA2PR10MB4587.namprd10.prod.outlook.com
- ([fe80::f84c:c30b:6d3e:d3e4]) by SA2PR10MB4587.namprd10.prod.outlook.com
- ([fe80::f84c:c30b:6d3e:d3e4%5]) with mapi id 15.20.5546.023; Tue, 23 Aug 2022
- 09:04:52 +0000
-From:   Chandan Babu R <chandan.babu@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     Chandan Babu R <chandan.babu@oracle.com>, zlang@kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: [PATCH] xfs: Check if a direct write can result in a false ENOSPC error
-Date:   Tue, 23 Aug 2022 14:34:33 +0530
-Message-Id: <20220823090433.1164296-1-chandan.babu@oracle.com>
-X-Mailer: git-send-email 2.35.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: TYCPR01CA0030.jpnprd01.prod.outlook.com
- (2603:1096:405:1::18) To SA2PR10MB4587.namprd10.prod.outlook.com
- (2603:10b6:806:114::12)
+        with ESMTP id S243734AbiHWPqt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Aug 2022 11:46:49 -0400
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D56762AB3DE
+        for <fstests@vger.kernel.org>; Tue, 23 Aug 2022 04:47:12 -0700 (PDT)
+Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
+        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20220823114637euoutp02c3f267a42f7dc3ba1073c509aba69064~N9szKdn5-1687116871euoutp02h
+        for <fstests@vger.kernel.org>; Tue, 23 Aug 2022 11:46:36 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20220823114637euoutp02c3f267a42f7dc3ba1073c509aba69064~N9szKdn5-1687116871euoutp02h
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1661255197;
+        bh=B10ypvqVwJt/Fq7OCyqEIn46ouPAntJQfECocykoOfE=;
+        h=Date:Subject:To:CC:From:In-Reply-To:References:From;
+        b=OhKgoL/q57/0WWeN+MEBX8Kv2gKOOdtkWYH7ZveF9I/7ObpM95uGgtrDi79VlwrxB
+         OYySaklCp09b4OLkBw8YXhoc+3mWs93JuSHsGnKYgzqflT3syjQcpiwe5kJpcn1Np9
+         QxoCdIhkBRouRmRWMSmztcX/me3tH1MK/Lt2fOp4=
+Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
+        eucas1p1.samsung.com (KnoxPortal) with ESMTP id
+        20220823114636eucas1p1c74fc58edd6eb83185ce030280ddc6af~N9sy93e7K3218932189eucas1p1N;
+        Tue, 23 Aug 2022 11:46:36 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+        eusmges2new.samsung.com (EUCPMTA) with SMTP id A8.0B.07817.C1EB4036; Tue, 23
+        Aug 2022 12:46:36 +0100 (BST)
+Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
+        eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
+        20220823114636eucas1p1215ec07b224b3f506883263d148bc0f3~N9syk61CT0612106121eucas1p1N;
+        Tue, 23 Aug 2022 11:46:36 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220823114636eusmtrp12eb76927b83a4368956ebad26d80f76d~N9sykJYpX2270222702eusmtrp1l;
+        Tue, 23 Aug 2022 11:46:36 +0000 (GMT)
+X-AuditID: cbfec7f4-893ff70000011e89-a4-6304be1cb12c
+Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
+        eusmgms2.samsung.com (EUCPMTA) with SMTP id C0.5C.10862.C1EB4036; Tue, 23
+        Aug 2022 12:46:36 +0100 (BST)
+Received: from CAMSVWEXC01.scsc.local (unknown [106.1.227.71]) by
+        eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
+        20220823114636eusmtip104cb915f5969128b79c7e729269c26a7~N9syWBNP81974919749eusmtip1X;
+        Tue, 23 Aug 2022 11:46:36 +0000 (GMT)
+Received: from [192.168.8.130] (106.210.248.52) by CAMSVWEXC01.scsc.local
+        (2002:6a01:e347::6a01:e347) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
+        Tue, 23 Aug 2022 12:46:34 +0100
+Message-ID: <4abc02a3-3518-f5b9-e8c7-cbb77dca30a9@samsung.com>
+Date:   Tue, 23 Aug 2022 13:46:33 +0200
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 10ecc886-25f5-45aa-9d61-08da84e68a54
-X-MS-TrafficTypeDiagnostic: BYAPR10MB2808:EE_
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: Ca9quY0gkemTabFMVRxvvj++WdqOsmqkqqkh6QTtMkWvZgxtupdi9CnH8TZYI0QShXMvgXN6BO8vJBdigvMOX7DMCneaWD3M8xpPTKyFV/EI6pSZ7ShtTwpmt/7/NyRw0EC4O1W0qdll4Vh2ujV/PSNQp9J7XlSCa+/J6Gx6imvjjv8OhcXGlfOO4aaiYfB7rVtKdK1J5/E28Q9uPWVmOgTaKFOxeGXcBbzJZYGQJ6/0KyRtFbiHh6ZNqjkIpiEgl81afod3dC2eSrwE03ovPES+98whB4qxF511VMkbhIxExT6T9UcH0FessY4hoxeebidJPqJttAMVIN1qfk+dHsl58pZxm41sIUoy+nBTBE2v1BgwVe1oicWb+tbFMnLy7U9RGVTSL1+xTEVutlRvM+9h/8sGapSltAVK6u/atd82GdFeiXHh62irgx8fh26t1vJbji7OXwarJhKJKIxre3mTBncSstJPVulrw5R2g5MCWBO7GYp17gwVXYxrvO7ueFjRXIoMuy82Tr7e7+NTAvNbnzjTCExZbzHIxaSs8UF8Pe/JP6pqKZtxagEYV/tiL/OTEKW21v8YVB/Ug5svx/EdSrpYhyNvEW0YRd0T1JXxsJxjGiK1QOM2fpXocURvOvG5a6OEK63I3OPFPkX6iT6j1wRyGLLgqmGQOx8w/0eBlwX+qdXZgCunzdoaf4eYcYtpJOWGvO3UzNc+bTIiuGq/umVgCfedINx9VKFAfBW5AKSbZDTlndSkTQ8Wn3KI
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA2PR10MB4587.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(376002)(136003)(396003)(366004)(346002)(39860400002)(52116002)(8936002)(6506007)(6512007)(26005)(6666004)(5660300002)(36756003)(4326008)(66946007)(8676002)(316002)(66556008)(66476007)(6916009)(86362001)(38350700002)(38100700002)(2906002)(1076003)(2616005)(478600001)(6486002)(186003)(41300700001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?I+uvfS3iMO4TQ3FAyPQOJB9pzs6UiBsF3Gr9ufYsCJ2ZbLigFQf/GhdertSn?=
- =?us-ascii?Q?qyl8hKqGvICiR8FWh9UEOfUQO/zn8gm31Zy9+x0A4wLgvzIivxbtW3fotKaS?=
- =?us-ascii?Q?BbpGl9Xpxl+CSB2DeWJ1D1vWIGw9qG6cw/7D+nFo9nYakkRTDQdhsG0Bt/eU?=
- =?us-ascii?Q?nl0VTR6e1xOJaTx2WT7U9IR82WPdhWU8andgD6iatL6UbYMYfCMfQ1I6gblL?=
- =?us-ascii?Q?x/g2w4CmLuuahnDaHjoIB1uXvgo3sWA2z6hd4f90e2/7PMxt5+lFPecUhWaN?=
- =?us-ascii?Q?8ArlkYNxHSirhdBgutMFR5Qqexpz06QapBuJ8HEaetcepTxd4Y+CW4YF8JQa?=
- =?us-ascii?Q?LNaj3p/sekPcAo2/de7Ixh7FEd1pSue/HGnN+rpPGZ6Z+RJ3P6Fw1uOyRrbM?=
- =?us-ascii?Q?b3WFBSpeN7PoRtsuG+NSzfEVCsIK3qreS+uL8wzLzGnWJ2/L8smJ02vsPBXB?=
- =?us-ascii?Q?JmDAuxRfPRUA7kWWoDrV+PF5OBE6fAeLsvkmIiJ8zRE9hdQHitK9NhIrqqcm?=
- =?us-ascii?Q?RAQUHu90XekUOw90Mtr2mhqVux9IZU8trHrg1J7RlDKdEeeGC8ZVRvnKAOEL?=
- =?us-ascii?Q?+ag092zNVDSmE9kNFZ1rRpU0nsPIwODRj9AQl0SSFP29CEm6q5cPoppOZGZ+?=
- =?us-ascii?Q?PbL540r3XyFLT3s2gexhgO2lAdk+mxglbAJg/xrQKwb7TcKlF4CwQXiiejk1?=
- =?us-ascii?Q?8TeTR7tGwrOxPQrF0fCWyv+TLWHXNU/7hsJmN6ARscQKC4csUf2rjD1FjM0x?=
- =?us-ascii?Q?az0atoxgBmAW4nrtnuqnLiKMmmYlEpik/xQx+J4ar5tDXQpC3RKtZ6QjNUK9?=
- =?us-ascii?Q?W+A0PolApzrFYn0LJ0/CRVfjumGmpkUKfEDNoPUUTjKKP/I4+rJlF9+2Je5Q?=
- =?us-ascii?Q?HAf45ypegOSD4Bst8Z2pYMQpB1gqJI7ZxpX8KVTahTXP8DsTUXTFd9bD1R7n?=
- =?us-ascii?Q?602wasDC6nellKcmzYaZpcO8GQpBW3BA0qor5WpaFavevYIKWzuB/Ff938ZV?=
- =?us-ascii?Q?E36+HRbERoQaUByuXB9WZNQftJQ8YwD7ZYq5qwfQa8Db/1jsT1nX8Qi0lkfE?=
- =?us-ascii?Q?FOftPEVWnmlrwbIg/2eMVkcQugvKXj51MOvXYgRApGqmnz8qbQIst4yeAUwu?=
- =?us-ascii?Q?ZcEiMdBeht09kDkYrto7uwAEMxeGrTvtuM6sJpe6ODOvGiJJjNqAJPWwojCl?=
- =?us-ascii?Q?/yRk4N4ejwiZYLqjsryLf9RVi0qt3Q2VvpN/0xUAbaVKRLY5/v8ur97cgrGl?=
- =?us-ascii?Q?lgwf2Q+cz11iE71DKueo6npWl3R49NR5WmL1R7QlmHE4y7D3V2RCJWNZj0eW?=
- =?us-ascii?Q?tQMToq38k03hXpPfEy1udOQb+Ph8xH79Y7sLya6ts1oumpZE6F7rBpBaCO0r?=
- =?us-ascii?Q?0JDVj/YQ4IT6SKJyTAQbdNR0OUy9cNB6YmRos5bYuWhLlcry9vYlNXfJ5McR?=
- =?us-ascii?Q?bmWT9aw2iXV+WpRUk4AS4/YP2YSkDeuZhcPhiWVxQLzVYV/LLRihlfeB80U8?=
- =?us-ascii?Q?XCJsvrct+kuSN1P51LaUdJ7qm/uIf5NIbSvUlNQiIB8L3Yf4ODiZaDwRx6bO?=
- =?us-ascii?Q?HP/VIDJZDQThAhC+4nYvgv04Ij8bhKTuiBg9Kgmg?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 10ecc886-25f5-45aa-9d61-08da84e68a54
-X-MS-Exchange-CrossTenant-AuthSource: SA2PR10MB4587.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Aug 2022 09:04:52.7147
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: emDVpzO3J2T7ARLBt2Cs14sda3PJGrRcoWZIxO5CL5xZxq/UrZgKiw5w1dgc1kxwF7UffYjBKMjRU9a5eT9gbg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR10MB2808
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.517,FMLib:17.11.122.1
- definitions=2022-08-23_04,2022-08-22_02,2022-06-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 adultscore=0 bulkscore=0
- mlxlogscore=999 spamscore=0 phishscore=0 suspectscore=0 malwarescore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2207270000
- definitions=main-2208230035
-X-Proofpoint-GUID: n3oB3EJ7kWfOpUHwclmBUnB4o9c9kamm
-X-Proofpoint-ORIG-GUID: n3oB3EJ7kWfOpUHwclmBUnB4o9c9kamm
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+        Thunderbird/91.11.0
+Subject: Re: [RFC 0/1] adapting btrfs/237 to work with the new reclaim
+ algorithm
+Content-Language: en-US
+To:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+CC:     "damien.lemoal@opensource.wdc.com" <damien.lemoal@opensource.wdc.com>,
+        "pankydev8@gmail.com" <pankydev8@gmail.com>,
+        Naohiro Aota <Naohiro.Aota@wdc.com>,
+        "gost.dev@samsung.com" <gost.dev@samsung.com>,
+        "mcgrof@kernel.org" <mcgrof@kernel.org>,
+        "dsterba@suse.cz" <dsterba@suse.cz>
+From:   Pankaj Raghav <p.raghav@samsung.com>
+In-Reply-To: <PH0PR04MB7416A0B8F8FA5698EB11A0D49B719@PH0PR04MB7416.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [106.210.248.52]
+X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
+        CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347)
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrCKsWRmVeSWpSXmKPExsWy7djP87oy+1iSDVqXaVn8Pnue2WLx7+8s
+        Fqdb9rJb/O26x2RxY8JTRouJxzezWqy5+ZTFgd1j56y77B6bVnWyeexsvc/qcWbBEXaPz5vk
+        PNoPdDMFsEVx2aSk5mSWpRbp2yVwZWzruc1c8Iqz4uSnE4wNjHfYuxg5OSQETCTm39/K1MXI
+        xSEksIJRYvbJB8wgCSGBL4wSHydbQiQ+M0p8uryBCaZjxo1vjBCJ5UBFK7oZ4ao2ft0F5exi
+        lLi0cxobSAuvgJ3Eod8fwOayCKhKfF3zhwUiLihxcuYTMFtUIFJize6zYEcJCwRJHF1wFMxm
+        FhCXuPVkPthqEYEsieYpp1lAFjALzGOS6Hx1nbWLkYODTUBLorETrJ5TIFZiZ/trFoheTYnW
+        7b+h5shLbH87hxniBSWJ63PPQdm1EmuPnWEHmSkh0M0pcfX9FEaQmRICLhJLP8tB1AhLvDq+
+        BRpgMhKnJ/ewQNjVEk9v/GaG6G1hlOjfuZ4Notdaou9MDkSNo8TVO4eYIcJ8EjfeCkKcwycx
+        adt05gmMqrOQQmIWko9nIflgFpIPFjCyrGIUTy0tzk1PLTbKSy3XK07MLS7NS9dLzs/dxAhM
+        SKf/Hf+yg3H5q496hxiZOBgPMUpwMCuJ8FZfZEgW4k1JrKxKLcqPLyrNSS0+xCjNwaIkzpuc
+        uSFRSCA9sSQ1OzW1ILUIJsvEwSnVwBTrftf2UUnbKpVvX/59Snw3/cPSqMvJR++/stdgzOi7
+        0xBWz8uZXV15W0dK/uha1mPtDy/sCHR0qewvSpvHeuOjTlLO0cmdu7KKX1/9bRyxUXLpqohl
+        TW2heyo+pvd9X2nr94v5wM9669OsX3LYjZ4HeLI//FO1ymSS59+WoDJWa5vDxT8/Pp/Wqs+6
+        Sr1lqR9/4sWoCd0rLQOP/Xm+ONc+Sn9N2LG7jybULTa4fO3lBSmbjZe4dacIcqY/YJ4oM2vx
+        pN8/tRIsy5zflSXdYlxg9n//+wp/9qcpp3UKGtZYB/Ev2vNqG+/MVKWKc5a2TNJ7q29m/ZxU
+        6OIsp8X0b/k2952rgu4Y/123Ku/yy3AlluKMREMt5qLiRACimOSqtwMAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrNIsWRmVeSWpSXmKPExsVy+t/xu7oy+1iSDVpf8Fr8Pnue2WLx7+8s
+        Fqdb9rJb/O26x2RxY8JTRouJxzezWqy5+ZTFgd1j56y77B6bVnWyeexsvc/qcWbBEXaPz5vk
+        PNoPdDMFsEXp2RTll5akKmTkF5fYKkUbWhjpGVpa6BmZWOoZGpvHWhmZKunb2aSk5mSWpRbp
+        2yXoZWzruc1c8Iqz4uSnE4wNjHfYuxg5OSQETCRm3PjG2MXIxSEksJRRYvfrE2wQCRmJT1c+
+        QhUJS/y51sUGUfSRUWLx7LVQHbsYJe4/3MwIUsUrYCdx6PcHZhCbRUBV4uuaPywQcUGJkzOf
+        gNmiApESD5c1MYHYwgJBEkcXHAXbwCwgLnHryXywuIhAlsTkmX+ZQRYwC8xjkuh8dZ0VYtsD
+        RokZCy8CVXFwsAloSTR2gjVzCsRK7Gx/zQIxSFOidftvqKHyEtvfzmGGeEFJ4vrcc1B2rcSr
+        +7sZJzCKzkJy3ywkd8xCMmoWklELGFlWMYqklhbnpucWG+kVJ+YWl+al6yXn525iBMbytmM/
+        t+xgXPnqo94hRiYOxkOMEhzMSiK81RcZkoV4UxIrq1KL8uOLSnNSiw8xmgIDaSKzlGhyPjCZ
+        5JXEG5oZmBqamFkamFqaGSuJ83oWdCQKCaQnlqRmp6YWpBbB9DFxcEo1MCm1Mup4JDBtm6Wh
+        vj92t4Df47YbompaPus2Z3yTalY4plPQ9egVy+Qvbz5u7P6294FRzB55n1a1fHP57avkld9J
+        JJc16nNcOj3zvttW7pXZJYec/HY9E8tcsmzXdx45/tf6c3bayKx6Fnn/9iGP57+m7TzlX9jg
+        uuztxsqbMm1xvtfzcr6afq+WZnJKc7gb7yPAkOfy+n+2UIbJ1qIFZae0u4PT1wuW+X+MvL7L
+        9bmg3Rur38ddbqSd85dg/SK/IEb64XouVQ4OWzOBruyM3x+KhG+2Jzz/8Wnhilvn7G/cCevz
+        ntb4u3KasNaTo6sn2e4Quripujrt9Oxff0W4BHsm3zv8WGfHOrdvp1ffyFRiKc5INNRiLipO
+        BAAMELbtbgMAAA==
+X-CMS-MailID: 20220823114636eucas1p1215ec07b224b3f506883263d148bc0f3
+X-Msg-Generator: CA
+X-RootMTR: 20220819115338eucas1p11b916296213572e97a03241ebdc399d0
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20220819115338eucas1p11b916296213572e97a03241ebdc399d0
+References: <CGME20220819115338eucas1p11b916296213572e97a03241ebdc399d0@eucas1p1.samsung.com>
+        <20220819115337.35681-1-p.raghav@samsung.com>
+        <PH0PR04MB7416A0B8F8FA5698EB11A0D49B719@PH0PR04MB7416.namprd04.prod.outlook.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This commit adds a test to check if a direct write on a delalloc extent
-present in CoW fork can result in a false ENOSPC error. The bug has been fixed
-by upstream commit d62113303d691 ("xfs: Fix false ENOSPC when performing
-direct write on a delalloc extent in cow fork").
+On 2022-08-22 16:29, Johannes Thumshirn wrote:
+>>
+>> Only partial reclaim is happening for bigger sized drives. The issue
+>> with that is, if I do another FIO transfer, the drive spits out ENOSPC
+>> before its actual capacity is reached as most of the zones have not been
+>> reclaimed back and are basically in an unusable state.
+>>
+>> Is there a limit on how many bgs can be reclaimed?
+>>
+>> Let me know if I am doing something wrong in the test or if it is an
+>> actual issue.
+> 
+> Can you try setting max_active_zones to 0? I have the feeling it's yet 
+> another (or perhaps already known, Naohiro shoudl know that) issue with 
+> MAZ handling.
 
-Signed-off-by: Chandan Babu R <chandan.babu@oracle.com>
----
- tests/xfs/553     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/553.out |  9 +++++++
- 2 files changed, 72 insertions(+)
- create mode 100755 tests/xfs/553
- create mode 100644 tests/xfs/553.out
+The Max active zones is set to 0 (QEMU defaults to 0). I also changed the
+backing image format of QEMU from qcow to raw, and still the same issue of
+partial reclaim for a drive size of 100G.
 
-diff --git a/tests/xfs/553 b/tests/xfs/553
-new file mode 100755
-index 00000000..78ed0995
---- /dev/null
-+++ b/tests/xfs/553
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 553
-+#
-+# Test to check if a direct write on a delalloc extent present in CoW fork can
-+# result in an ENOSPC error.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick clone
-+
-+# Import common functions.
-+. ./common/reflink
-+. ./common/inject
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_fixed_by_kernel_commit d62113303d691 \
-+	"xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork"
-+_require_scratch_reflink
-+_require_xfs_debug
-+_require_test_program "punch-alternating"
-+_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-+_require_xfs_io_command "reflink"
-+_require_xfs_io_command "cowextsize"
-+
-+source=${SCRATCH_MNT}/source
-+destination=${SCRATCH_MNT}/destination
-+fragmented_file=${SCRATCH_MNT}/fragmented_file
-+
-+echo "Format and mount fs"
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+echo "Create source file"
-+$XFS_IO_PROG -f -c "pwrite 0 32M" $source >> $seqres.full
-+
-+echo "Reflink destination file with source file"
-+$XFS_IO_PROG -f -c "reflink $source" $destination >> $seqres.full
-+
-+echo "Set destination file's cowextsize"
-+$XFS_IO_PROG -c "cowextsize 16M" $destination >> $seqres.full
-+
-+echo "Fragment FS"
-+$XFS_IO_PROG -f -c "pwrite 0 64M" $fragmented_file >> $seqres.full
-+sync
-+$here/src/punch-alternating $fragmented_file >> $seqres.full
-+
-+echo "Inject bmap_alloc_minlen_extent error tag"
-+_scratch_inject_error bmap_alloc_minlen_extent 1
-+
-+echo "Create 16MiB delalloc extent in destination file's CoW fork"
-+$XFS_IO_PROG -c "pwrite 0 4k" $destination >> $seqres.full
-+
-+sync
-+
-+echo "Direct I/O write at 12k file offset in destination file"
-+$XFS_IO_PROG -d -c "pwrite 12k 8k" $destination >> $seqres.full
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/553.out b/tests/xfs/553.out
-new file mode 100644
-index 00000000..a2e91678
---- /dev/null
-+++ b/tests/xfs/553.out
-@@ -0,0 +1,9 @@
-+QA output created by 553
-+Format and mount fs
-+Create source file
-+Reflink destination file with source file
-+Set destination file's cowextsize
-+Fragment FS
-+Inject bmap_alloc_minlen_extent error tag
-+Create 16MiB delalloc extent in destination file's CoW fork
-+Direct I/O write at 12k file offset in destination file
--- 
-2.35.1
+I tried the same test in a 100G drive with 1G zone size, and it is working
+as expected.
 
+root@zns-btrfs-simple-zns:/data# ./reclaim_script.sh
+Open zones before big file transfer:
+4
+Open zones before removing the file:
+59
+Going to sleep. Removed the file
+Open zones after reclaim:
+4
+
+I am not 100% sure what is causing this issue of partial reclaim when the
+number of zones is higher.
