@@ -2,214 +2,171 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39CE3C38142
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Aug 2022 13:44:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5FC4C00140
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Aug 2022 15:05:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238537AbiHXNoB (ORCPT
+        id S237833AbiHXPFv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Aug 2022 09:44:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32872 "EHLO
+        Wed, 24 Aug 2022 11:05:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238584AbiHXNmp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Aug 2022 09:42:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C034D7FE74
-        for <fstests@vger.kernel.org>; Wed, 24 Aug 2022 06:41:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1661348517;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=6brpFB0/duglLqKunC0MFCpekPPgM+VfGoMg7+ajU6Y=;
-        b=H4S0GzfnEg/8wmEPRoubP2c5ehiyZTputlHWVb7MRC+gNOfkeKKTpnjuwrd2Vo/2CBB+VB
-        04ZEkRoOObb67ut39+iRr/vRQmpG3iULilGhG3mjd94UiJWicDBa+bs19VgPGAeIReIexZ
-        iUIGdTajBfKZt8hPEqrfrZkEgrkRGW8=
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
- [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-356-yThmH578Oxmp3SOHmMgbtg-1; Wed, 24 Aug 2022 09:41:55 -0400
-X-MC-Unique: yThmH578Oxmp3SOHmMgbtg-1
-Received: by mail-qt1-f197.google.com with SMTP id v5-20020ac873c5000000b003434ef0a8c7so13064375qtp.21
-        for <fstests@vger.kernel.org>; Wed, 24 Aug 2022 06:41:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=6brpFB0/duglLqKunC0MFCpekPPgM+VfGoMg7+ajU6Y=;
-        b=aOgD7ztrtmJFhWj3IYTZVA2yQTtrNiUQ+yY7sLLpntzzd85xNk0CTvWDjpcxOOfbE8
-         VGodeZzpG8cJo8XN9te8nfHwumGbeoX38sQuov4tU3f0EZZ8EHAj3sm/o4BwtCm7YkuC
-         hXK8e63yWvX+sma8nvIs1ype4cGXyDa0M/gWzf+0mui4jlr0MtwdMBGiiOXPHpbY7Xs3
-         TcAPW46TdHwmvygoeJ+UAta/4RcH0HFqX6Qo4FneJehe+ltl9rUb5qYmfFe/D0pP5lVn
-         PxS+FNyN4APAKYu6uOu+fz7AugLV11bIKLnwGI4KrouvtgXENNXVUi6fnEiZGRvZOCV3
-         7xdQ==
-X-Gm-Message-State: ACgBeo1jHeUyTRxYUuceH9npu+qDmzA0MHFXzZiOzZIscwYdYAUiBecB
-        alTJCV4x0ZnpsQJdrtUoIWQnyIwJavRwzMP5B26OVU/8XbB1RGgditlMeB3UGCdO+hmtSSLbItq
-        OCjtQ32skX9GVjm52fA==
-X-Received: by 2002:a05:622a:48c:b0:344:9d12:db79 with SMTP id p12-20020a05622a048c00b003449d12db79mr20388769qtx.351.1661348515367;
-        Wed, 24 Aug 2022 06:41:55 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR7/LsQ6s39s+BE/6b0NCioHReFFlhzfwY0fStioJ49pSgmKYNHTsO8UkKuWUq8fR3OrlRPnUA==
-X-Received: by 2002:a05:622a:48c:b0:344:9d12:db79 with SMTP id p12-20020a05622a048c00b003449d12db79mr20388740qtx.351.1661348515083;
-        Wed, 24 Aug 2022 06:41:55 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 22-20020ac85956000000b00343057845f7sm13495192qtz.20.2022.08.24.06.41.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Aug 2022 06:41:54 -0700 (PDT)
-Date:   Wed, 24 Aug 2022 21:41:48 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     bingjingc <bingjingc@synology.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        fdmanana@kernel.org, bxxxjxxg@gmail.com
-Subject: Re: [PATCH v3] fstests: btrfs: test incremental send for changed
- reference paths
-Message-ID: <20220824134148.un2c2hq4xb6xmh7a@zlang-mailbox>
-References: <20220824104202.2505-1-bingjingc@synology.com>
+        with ESMTP id S235661AbiHXPFt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Aug 2022 11:05:49 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10B3784ED9;
+        Wed, 24 Aug 2022 08:05:46 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B9B2D6188C;
+        Wed, 24 Aug 2022 15:05:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0F61CC433C1;
+        Wed, 24 Aug 2022 15:05:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1661353545;
+        bh=74u1AMY+frKIJLQa2qIhCk6O9IzEZU9s9XBB42TQTGc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=CiJpTtmZ9OjJppacjvOpoMRqLBsvOf3WZruVYyiMKV9cTZzG7SPLZiJPbTpgqXi4U
+         0QzwoO7mcVQRjBrgWEHIlY8C3YxbYbV8BgdjwZgs17mjaQsVU13XrCNuHPmBkbNWaG
+         apMdiJImO9imrjWwzei9iDfCNPOYAzNrvm6GHUHMOx2k1WTtPxIa3wHad98B+576+H
+         QymlvR8xXgpxTSjfqRDAQTmVd7qIbAtyhUaaD8GMZx9+C6eBkBXnjUmuIGn0ekqrh5
+         FV2Y6XPw9CNnEfJjDSa1Uzp3/a80f7erl5ZD5yyMbHDEP/fBQdegB9QANbXt40fs2f
+         9cxfcH8USVFUw==
+Date:   Wed, 24 Aug 2022 08:05:44 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Chandan Babu R <chandan.babu@oracle.com>
+Cc:     fstests@vger.kernel.org, zlang@kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH V2] xfs: Check if a direct write can result in a false
+ ENOSPC error
+Message-ID: <YwY+SBk+fOh83PdI@magnolia>
+References: <20220824093057.197585-1-chandan.babu@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220824104202.2505-1-bingjingc@synology.com>
+In-Reply-To: <20220824093057.197585-1-chandan.babu@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 24, 2022 at 06:42:02PM +0800, bingjingc wrote:
-> From: BingJing Chang <bingjingc@synology.com>
+On Wed, Aug 24, 2022 at 03:00:57PM +0530, Chandan Babu R wrote:
+> This commit adds a test to check if a direct write on a delalloc extent
+> present in CoW fork can result in a false ENOSPC error. The bug has been fixed
+> by upstream commit d62113303d691 ("xfs: Fix false ENOSPC when performing
+> direct write on a delalloc extent in cow fork").
 > 
-> Normally btrfs stores file paths in an array of ref items. However, items
-> for the same parent directory can not exceed the size of a leaf. So btrfs
-> also store the rest of them in extended ref items alternatively.
-> 
-> In this test, it creates a large number of links under a directory causing
-> the file paths stored in these two ways to be the parent snapshot. And it
-> deletes and recreates just an amount of them that can be stored within an
-> array of ref items to be the send snapshot. Test that an incremental send
-> operation correctly issues link/unlink operations only against new/deleted
-> paths, or the receive operation will fail due to a link on an existed path.
-> 
-> This currently fails on btrfs but is fixed by a kernel patch with the
-> commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
-> existing file paths")
-> 
-> Signed-off-by: BingJing Chang <bingjingc@synology.com>
+> Signed-off-by: Chandan Babu R <chandan.babu@oracle.com>
 > ---
->  tests/btrfs/272     | 91 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/272.out |  3 ++
->  2 files changed, 94 insertions(+)
->  create mode 100755 tests/btrfs/272
->  create mode 100644 tests/btrfs/272.out
+> Changelog:
+> V1 -> V2:
+>   1. Use file blocks as units instead of bytes to specify file offsets.
 > 
-> diff --git a/tests/btrfs/272 b/tests/btrfs/272
+>  tests/xfs/553     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/553.out |  9 +++++++
+>  2 files changed, 74 insertions(+)
+>  create mode 100755 tests/xfs/553
+>  create mode 100644 tests/xfs/553.out
+> 
+> diff --git a/tests/xfs/553 b/tests/xfs/553
 > new file mode 100755
-> index 00000000..57dd065c
+> index 00000000..ae52e9fc
 > --- /dev/null
-> +++ b/tests/btrfs/272
-> @@ -0,0 +1,91 @@
+> +++ b/tests/xfs/553
+> @@ -0,0 +1,65 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 BingJing Chang.
+> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
 > +#
-> +# FS QA Test No. btrfs/272
+> +# FS QA Test 553
 > +#
-> +# Regression test for btrfs incremental send issue where a link instruction
-> +# is sent against an existing path, causing btrfs receive to fail.
-> +#
-> +# This issue is fixed by the following linux kernel btrfs patch:
-> +#
-> +#   commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
-> +#   existing file paths")
+> +# Test to check if a direct write on a delalloc extent present in CoW fork can
+> +# result in an ENOSPC error.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick send
+> +_begin_fstest auto quick clone
 > +
 > +# Import common functions.
-> +. ./common/filter
-
-I think this case doesn't use any helpers in common/filter, if so you can
-remove this line. Others looks good to me.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
+> +. ./common/reflink
+> +. ./common/inject
 > +
 > +# real QA test starts here
-> +_supported_fs btrfs
-> +_fixed_by_kernel_commit 3aa5bd367fa5a3 \
-> +	"btrfs: send: fix sending link commands for existing file paths"
-> +_require_test
-> +_require_scratch
-> +_require_fssum
+> +_supported_fs xfs
+> +_fixed_by_kernel_commit d62113303d691 \
+> +	"xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork"
+> +_require_scratch_reflink
+> +_require_xfs_debug
+> +_require_test_program "punch-alternating"
+> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
+> +_require_xfs_io_command "reflink"
+> +_require_xfs_io_command "cowextsize"
 > +
-> +send_files_dir=$TEST_DIR/btrfs-test-$seq
+> +source=${SCRATCH_MNT}/source
+> +destination=${SCRATCH_MNT}/destination
+> +fragmented_file=${SCRATCH_MNT}/fragmented_file
 > +
-> +rm -fr $send_files_dir
-> +mkdir $send_files_dir
+> +echo "Format and mount fs"
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount >> $seqres.full
 > +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
+> +blksz=$(_get_block_size $SCRATCH_MNT)
+
+_get_file_block_size, since COW can only be done in file allocation
+units.
+
+This is (currently) a distinction that won't make a difference until
+realtime reflink, where we'll have to deal with rextsize > 1FSB, but we
+might as well get this correct from the start.
+
+With that fixed,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
+
 > +
-> +# Create a file and 2000 hard links to the same inode
-> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
-> +touch $SCRATCH_MNT/vol/foo
-> +for i in {1..2000}; do
-> +	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
-> +done
+> +echo "Create source file"
+> +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 8192))" $source >> $seqres.full
 > +
-> +# Create a snapshot for a full send operation
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
-> +_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
+> +echo "Reflink destination file with source file"
+> +$XFS_IO_PROG -f -c "reflink $source" $destination >> $seqres.full
 > +
-> +# Remove 2000 hard links and re-create the last 1000 links
-> +for i in {1..2000}; do
-> +	rm $SCRATCH_MNT/vol/$i
-> +done
-> +for i in {1001..2000}; do
-> +	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
-> +done
+> +echo "Set destination file's cowextsize to 4096 blocks"
+> +$XFS_IO_PROG -c "cowextsize $((blksz * 4096))" $destination >> $seqres.full
 > +
-> +# Create another snapshot for an incremental send operation
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap2
-> +_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
-> +		     $SCRATCH_MNT/snap2
+> +echo "Fragment FS"
+> +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 16384))" $fragmented_file >> $seqres.full
+> +sync
+> +$here/src/punch-alternating $fragmented_file >> $seqres.full
 > +
-> +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-> +	-x $SCRATCH_MNT/snap2/snap1 $SCRATCH_MNT/snap2
+> +echo "Inject bmap_alloc_minlen_extent error tag"
+> +_scratch_inject_error bmap_alloc_minlen_extent 1
 > +
-> +# Recreate the filesystem by receiving both send streams and verify we get
-> +# the same content that the original filesystem had.
-> +_scratch_unmount
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
+> +echo "Create delalloc extent of length 4096 blocks in destination file's CoW fork"
+> +$XFS_IO_PROG -c "pwrite 0 $blksz" $destination >> $seqres.full
 > +
-> +# Add the first snapshot to the new filesystem by applying the first send
-> +# stream.
-> +_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
+> +sync
 > +
-> +# The incremental receive operation below used to fail with the following
-> +# error:
-> +#
-> +#    ERROR: link 1238 -> foo failed: File exists
-> +#
-> +# This is because the path "1238" was stored as an extended ref item in the
-> +# original snapshot but as a normal ref item in the next snapshot. The send
-> +# operation cannot handle the duplicated paths, which are stored in
-> +# different ways, well, so it decides to issue a link operation for the
-> +# existing path. This results in the receiver to fail with the above error.
-> +_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
+> +echo "Direct I/O write at 3rd block in destination file"
+> +$XFS_IO_PROG -d -c "pwrite $((blksz * 3)) $((blksz * 2))" $destination >> $seqres.full
 > +
-> +$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-> +$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/snap2
-> +
+> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/272.out b/tests/btrfs/272.out
+> diff --git a/tests/xfs/553.out b/tests/xfs/553.out
 > new file mode 100644
-> index 00000000..b009b87a
+> index 00000000..9f5679de
 > --- /dev/null
-> +++ b/tests/btrfs/272.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 272
-> +OK
-> +OK
+> +++ b/tests/xfs/553.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 553
+> +Format and mount fs
+> +Create source file
+> +Reflink destination file with source file
+> +Set destination file's cowextsize to 4096 blocks
+> +Fragment FS
+> +Inject bmap_alloc_minlen_extent error tag
+> +Create delalloc extent of length 4096 blocks in destination file's CoW fork
+> +Direct I/O write at 3rd block in destination file
 > -- 
-> 2.37.1
+> 2.35.1
 > 
-
