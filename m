@@ -2,108 +2,125 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2211FECAAD1
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Aug 2022 02:49:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8087ECAAD2
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Aug 2022 12:46:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231920AbiH1CtL (ORCPT
+        id S229549AbiH1Mqb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 27 Aug 2022 22:49:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36520 "EHLO
+        Sun, 28 Aug 2022 08:46:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231851AbiH1CtK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 27 Aug 2022 22:49:10 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 857AA2ED51
-        for <fstests@vger.kernel.org>; Sat, 27 Aug 2022 19:49:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1661654948;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=68X0zg3NEM88zYos+dzftqhh6Zlx3yOU3jN3Id6tzdQ=;
-        b=H52ZNWr1bSZ+SRBWTExjc/HbXRP8BBZRMjzFOULXiVTd9NUL7W7oSyPkbCZECYOU6JUwpz
-        O/i6Roo2cKeN0UBfOvTI/gqnoCp0MZhpZ4OXE7om+mchFDuipKpmOruk/ymY2StqRO5lwT
-        aXtujMYIqZA4hyYptJSMiqr7PhrkMxs=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-321-1ROgS0YpP-6MHsCTfB3-cA-1; Sat, 27 Aug 2022 22:49:07 -0400
-X-MC-Unique: 1ROgS0YpP-6MHsCTfB3-cA-1
-Received: by mail-qk1-f199.google.com with SMTP id h8-20020a05620a284800b006b5c98f09fbso4153392qkp.21
-        for <fstests@vger.kernel.org>; Sat, 27 Aug 2022 19:49:06 -0700 (PDT)
+        with ESMTP id S229436AbiH1Mqa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Aug 2022 08:46:30 -0400
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0617D39BAC;
+        Sun, 28 Aug 2022 05:46:29 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id bs25so7057009wrb.2;
+        Sun, 28 Aug 2022 05:46:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc;
+        bh=+LfkNYJ2H9zp6tL3WOMBOTlGLiCB9JmtiuK3YkFIZUU=;
+        b=I99ZZmvamOqqUWvWIxZ7Sr/Uo7jKedt3udaLsCt+ZxMyjDV6fSmzRmFdHZhSmDe4JG
+         1sURLO97YWmSGyA7XGY6jd+AUIlE4+NKG1aqQBhV7VOtIwg/xP41LA4n3n0tzd/RDIv/
+         ptevypUQ0tDEWV8d0OKCNQwceojk0LFx4CCmBnPZ+Lelq2dylbVFBnAiO0AhKETUarfh
+         vqIF4j/3XymBIdw3uoqGtXQn57JsOJqRlA6SPBpmF/Ng3lEHYVAYX6F0mkzufBJXa4JH
+         X+tgkSCo2eYlQGEBkQiP6SQsqe3crrjn+bhmrVV1dg9BNLzKIR7kFF9vrVY+lvRkZvLL
+         GwHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=68X0zg3NEM88zYos+dzftqhh6Zlx3yOU3jN3Id6tzdQ=;
-        b=Sw7HPPlr9LTuzRJUYdcIgUR+qLb+P1lAv38VraEwOzysD59Z2nPgf1ajpzCoFGcYJX
-         XwzYkm/Xt+NM62HA2zHf7RBIGXnLEtJDSCy26APsIqYpyubfoFPKk2a7AwQXlBIZEFaz
-         0maAA1isahIIjrKxkICizjXa2hIRHTK1k8yqRzSSkLB6SHEuu5eBM8m0fCRr3+L6eRgB
-         nzOKQ2GxZkp+hAI+Mj8p5eE8TjMu8+wAeX0zltZPrnctyJKJ3UCGmrtmUsfYbZ0T6FuS
-         pR+vuuEtoH8aVrR3bllFmZZZgYd1Cn33xNmV/E1JWrJwYM6mwrZAUfhAsk8UwQ4+h/KG
-         6L5A==
-X-Gm-Message-State: ACgBeo0HObAoxM87DLhHChz63lJmBEdZFw7RDfXX3tc2cT2Q2qOYP8nK
-        HjMvFawKcAEuqFAqPWOJ3lhiIsSJneEwYcHUXFpCEtKH/LaYEbc1FcZ3Tu38PSmqV7VJ1S0j5k/
-        fe4rfvUoYfmWx7BHCNg==
-X-Received: by 2002:a05:6214:c44:b0:497:1321:b7a7 with SMTP id r4-20020a0562140c4400b004971321b7a7mr5659505qvj.16.1661654946626;
-        Sat, 27 Aug 2022 19:49:06 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR4l0x25JtgDBZhxzAsWMWgLDcUeKwiIG/3i5Z4Fb7nKFdXAJPKH9MCTErDsDpJP+sXfPb96Zw==
-X-Received: by 2002:a05:6214:c44:b0:497:1321:b7a7 with SMTP id r4-20020a0562140c4400b004971321b7a7mr5659496qvj.16.1661654946364;
-        Sat, 27 Aug 2022 19:49:06 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id z20-20020ac87f94000000b003051ea4e7f6sm2816172qtj.48.2022.08.27.19.49.02
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc;
+        bh=+LfkNYJ2H9zp6tL3WOMBOTlGLiCB9JmtiuK3YkFIZUU=;
+        b=1qw63M9hZP0kUv2gQbqroQZ54rGtQmRdBHQQDcEi26wiH7FLz1iZaGvyd7hmW5+hxq
+         ccGojJXfbcreukfzpK0w9YKQYoZ0qvcfhIYgIIdnWGCIUGz4ALfHfw2Gi2s+T56BL8Oj
+         /a4HEYWCeiRhVe23YgTKZe4SEPyLynaVC4vd/IAAc9MmEq87QEaOB0AzHjcTLxeKXCcd
+         lMmKnSn+z2PzVejOE1qiPUJkyixc9UUokDFoQMMRk4RQYEiaiRGr6opddpDf9Bs2q8a/
+         coZ53+7RjBssr5cvfeCk4NdxJmqHrrOqkqbdngEb+XbrGLx4OufnZdxBY81AvZBlRiOj
+         4rSQ==
+X-Gm-Message-State: ACgBeo1E6RipOJ8bh34gFzMtLY2RES3dd4v0Wlr76D1eORZf1UKhmAag
+        OZsnvA8se8ikl0nKo/Ypkd94CX93VCM=
+X-Google-Smtp-Source: AA6agR7Vmy/9VKoH9TrCjdH42NGlsicP3jz0RhjsGy9i613mumeLqBUvRe3RbX9IdzDsuRykyS7o9w==
+X-Received: by 2002:adf:fd46:0:b0:226:d31c:a249 with SMTP id h6-20020adffd46000000b00226d31ca249mr2930750wrs.429.1661690787400;
+        Sun, 28 Aug 2022 05:46:27 -0700 (PDT)
+Received: from amir-ThinkPad-T480.lan ([2a0d:6fc2:4b00:1500:ecf5:e90e:2ba2:1534])
+        by smtp.gmail.com with ESMTPSA id k25-20020adfd239000000b0021e43b4edf0sm4443414wrh.20.2022.08.28.05.46.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 27 Aug 2022 19:49:05 -0700 (PDT)
-Date:   Sun, 28 Aug 2022 10:48:58 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org, jack@suse.cz, oliver.sang@intel.com,
-        lkp@intel.com, linux-ext4@vger.kernel.org, tytso@mit.edu,
-        lczerner@redhat.com
-Subject: Re: [PATCH] ext4/053: Remove nouser_xattr test
-Message-ID: <20220828024858.cf5awn2uksbpchb3@zlang-mailbox>
-References: <1660705823-2172-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        Sun, 28 Aug 2022 05:46:26 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     "Darrick J . Wong" <djwong@kernel.org>
+Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH 5.10 CANDIDATE 0/7] xfs stable candidate patches for 5.10.y (from v5.18+)
+Date:   Sun, 28 Aug 2022 15:46:07 +0300
+Message-Id: <20220828124614.2190592-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1660705823-2172-1-git-send-email-xuyang2018.jy@fujitsu.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 17, 2022 at 11:10:23AM +0800, Yang Xu wrote:
-> Plan to remove noacl and nouser_xattr mount option in kernel because they
-> are deprecated[1]. So remove nouser_xattr test in here.
+Hi Darrick,
 
-What's the [1]?
+This 5.10.y backport series contains fixes from v5.18 and v5.19 releases.
 
-We'd better to be careful when we want to remove a testing coverage. I'm not
-sure if they've decided to removed this mount option, the ext4/053 is an
-important test case for ext4, so I'd like to hear their opinion.
+Patches 1-5 in this series have already been applied to 5.15.y in Leah's
+latest update [1], so this 5.10.y is is mostly catching up with 5.15.y.
+
+Patches 2-3 from the last 5.15.y update have not been picked for 5.10.y,
+because they were not trivial to backport as the quota code is quite
+different betrween 5.10.y and upstream.
+This omission leave fstests generic/681,682 broken on 5.10.y.
+
+Patches 6-7 in this 5.10.y update have not been applied to 5.15.y yet.
+I pointed Leah's attention to these patches and she said she will
+include them in a following 5.15.y update.
+
+In particular, Darrick has pointed me at the fix in patch 6 a long time
+ago, but I was waiting to apply fixes to 5.10.y in chronoligal order.
+
+Please note that the upstream fix 6f5097e3367a ("xfs: fix xfs_ifree()
+error handling to not leak perag ref") Which Fixes: 9a5280b312e2e
+("xfs: reorder iunlink remove operation in xfs_ifree")
+is not relevant for the 5.10.y backport.
+
+These patches has gone through the usual 30 auto group runs x 5 configs
+on kdevops.
 
 Thanks,
-Zorro
+Amir.
 
-> 
-> Reported-by: kernel test robot <oliver.sang@intel.com>
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> ---
->  tests/ext4/053 | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/tests/ext4/053 b/tests/ext4/053
-> index 555e474e..5d2c478a 100755
-> --- a/tests/ext4/053
-> +++ b/tests/ext4/053
-> @@ -439,7 +439,6 @@ for fstype in ext2 ext3 ext4; do
->  	mnt oldalloc removed
->  	mnt orlov removed
->  	mnt -t user_xattr
-> -	mnt nouser_xattr
->  
->  	if _has_kernel_config CONFIG_EXT4_FS_POSIX_ACL; then
->  		mnt -t acl
-> -- 
-> 2.27.0
-> 
+
+[1] https://lore.kernel.org/linux-xfs/20220819181431.4113819-1-leah.rumancik@gmail.com/
+
+Amir Goldstein (1):
+  xfs: remove infinite loop when reserving free block pool
+
+Brian Foster (1):
+  xfs: fix soft lockup via spinning in filestream ag selection loop
+
+Darrick J. Wong (2):
+  xfs: always succeed at setting the reserve pool size
+  xfs: fix overfilling of reserve pool
+
+Dave Chinner (2):
+  xfs: reorder iunlink remove operation in xfs_ifree
+  xfs: validate inode fork size against fork format
+
+Eric Sandeen (1):
+  xfs: revert "xfs: actually bump warning counts when we send warnings"
+
+ fs/xfs/libxfs/xfs_inode_buf.c | 35 +++++++++++++++++------
+ fs/xfs/xfs_filestream.c       |  7 +++--
+ fs/xfs/xfs_fsops.c            | 52 ++++++++++++++---------------------
+ fs/xfs/xfs_inode.c            | 22 ++++++++-------
+ fs/xfs/xfs_mount.h            |  8 ++++++
+ fs/xfs/xfs_trans_dquot.c      |  1 -
+ 6 files changed, 71 insertions(+), 54 deletions(-)
+
+-- 
+2.25.1
 
