@@ -2,110 +2,176 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1F3FECAAD2
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Aug 2022 10:07:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A8ACECAAD4
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Aug 2022 13:24:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229446AbiH2KHE (ORCPT
+        id S229543AbiH2NYJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 29 Aug 2022 06:07:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58388 "EHLO
+        Mon, 29 Aug 2022 09:24:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229450AbiH2KHC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 Aug 2022 06:07:02 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 924E95FADA;
-        Mon, 29 Aug 2022 03:06:59 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S231175AbiH2NXq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 29 Aug 2022 09:23:46 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11B4B92F41
+        for <fstests@vger.kernel.org>; Mon, 29 Aug 2022 06:21:01 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 0992F219DD;
-        Mon, 29 Aug 2022 10:06:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1661767618; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=F3jbrbr7lCpBnUCttSs3SxHmODTqTPlam9vJ2wqjxmo=;
-        b=g6vv7cbJI/hDUtRHAsQCRfqv/oiY4Y38/8nLLMeItHdzB6f2//dWsrPrWVfjktyWfhkCsU
-        mPvHvs0/9knDFHQbvFFL5qNhmN4NSWsI21pP679XVweCZPFk1dth+rn1uS8dXnmqGcJ4jO
-        ZZ6Cv5Y1K8roE+H/MWXkuD9QuJIVdCI=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1661767618;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=F3jbrbr7lCpBnUCttSs3SxHmODTqTPlam9vJ2wqjxmo=;
-        b=WlP9kpuvG33PdNVMtLqxvYwxE7ykeAh7d78mzDtrro0m1/OnWDMOh53DIxqRZznwuCt0tF
-        yokCnLolrFp0krCg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D280F133A6;
-        Mon, 29 Aug 2022 10:06:57 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id QiaWM8GPDGPmOwAAMHmgww
-        (envelope-from <jack@suse.cz>); Mon, 29 Aug 2022 10:06:57 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-        id 47BE5A066D; Mon, 29 Aug 2022 12:06:57 +0200 (CEST)
-Date:   Mon, 29 Aug 2022 12:06:57 +0200
-From:   Jan Kara <jack@suse.cz>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Yang Xu <xuyang2018.jy@fujitsu.com>, fstests@vger.kernel.org,
-        jack@suse.cz, oliver.sang@intel.com, lkp@intel.com,
-        linux-ext4@vger.kernel.org, tytso@mit.edu, lczerner@redhat.com
-Subject: Re: [PATCH] ext4/053: Remove nouser_xattr test
-Message-ID: <20220829100657.wunvx2twhjzuqckk@quack3>
-References: <1660705823-2172-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <20220828024858.cf5awn2uksbpchb3@zlang-mailbox>
+        by ams.source.kernel.org (Postfix) with ESMTPS id CD410B80EF3
+        for <fstests@vger.kernel.org>; Mon, 29 Aug 2022 13:20:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C13F2C433C1;
+        Mon, 29 Aug 2022 13:20:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1661779215;
+        bh=yA7Ygy6/4I2QpwLD5u7qO3B4auQ+JitDGVkiidJPGfo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=MlxIv4+LqM6CXgHbpAkCFW/tNXwOYPH9KqU8/utUmCjSf9hsjpmE9pLU0dWSZM3yR
+         Yv4dmyzS8QQLfhtVc8B+t8MX5bPnBht2jEwxq56e97bjfJfhQF3cE5PmSB+sapgN9Y
+         OVDeUu2iyNRSfCdFreL5HzY4Qtd0ukfv/EGLJIoEZClkLuuQ0vnCNUHlM5XhB5LL9s
+         JAkVHHlQ4b4cAClfgawcw11zRxCW0yD+E999ey3NmkubHUJqYljQDfni641iLmBtr6
+         SQ25LG5rRNHd11AQ80MwqgFxPTamvIwD649JF4jX42GMnClDBiLL+o78zVhXZhVyua
+         IqLJJ50W/TUXw==
+Date:   Mon, 29 Aug 2022 15:20:11 +0200
+From:   Christian Brauner <brauner@kernel.org>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2 2/2] vfs: Add new setgid_create_acl test
+Message-ID: <20220829132011.krq2er4ghhwwq5kj@wittgenstein>
+References: <20220725142020.rtc2mgfhcw47v4t4@wittgenstein>
+ <1658827881-2347-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <1658827881-2347-2-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20220828024858.cf5awn2uksbpchb3@zlang-mailbox>
+In-Reply-To: <1658827881-2347-2-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun 28-08-22 10:48:58, Zorro Lang wrote:
-> On Wed, Aug 17, 2022 at 11:10:23AM +0800, Yang Xu wrote:
-> > Plan to remove noacl and nouser_xattr mount option in kernel because they
-> > are deprecated[1]. So remove nouser_xattr test in here.
+On Tue, Jul 26, 2022 at 05:31:21PM +0800, Yang Xu wrote:
+> The current_umask() is stripped from the mode directly in the vfs if the
+> filesystem either doesn't support acls or the filesystem has been
+> mounted without posic acl support.
 > 
-> What's the [1]?
+> If the filesystem does support acls then current_umask() stripping is
+> deferred to posix_acl_create(). So when the filesystem calls
+> posix_acl_create() and there are no acls set or not supported then
+> current_umask() will be stripped.
 > 
-> We'd better to be careful when we want to remove a testing coverage. I'm not
-> sure if they've decided to removed this mount option, the ext4/053 is an
-> important test case for ext4, so I'd like to hear their opinion.
-
-Yes, the option is long deprecated and we want to remove it from ext4. But
-I think you might want to see official ack from Ted as a maintainer on this
-:). Ted?
-
-								Honza
-
-> > Reported-by: kernel test robot <oliver.sang@intel.com>
-> > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> > ---
-> >  tests/ext4/053 | 1 -
-> >  1 file changed, 1 deletion(-)
-> > 
-> > diff --git a/tests/ext4/053 b/tests/ext4/053
-> > index 555e474e..5d2c478a 100755
-> > --- a/tests/ext4/053
-> > +++ b/tests/ext4/053
-> > @@ -439,7 +439,6 @@ for fstype in ext2 ext3 ext4; do
-> >  	mnt oldalloc removed
-> >  	mnt orlov removed
-> >  	mnt -t user_xattr
-> > -	mnt nouser_xattr
-> >  
-> >  	if _has_kernel_config CONFIG_EXT4_FS_POSIX_ACL; then
-> >  		mnt -t acl
-> > -- 
-> > 2.27.0
-> > 
+> If the parent directory has a default acl then permissions are based off
+> of that and current_umask() is ignored. Specifically, if the ACL has an
+> ACL_MASK entry, the group permissions correspond to the permissions of
+> the ACL_MASK entry. Otherwise, if the ACL has no ACL_MASK entry, the
+> group permissions correspond to the permissions of the ACL_GROUP_OBJ
+> entry.
 > 
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+> Here we only use setfacl to set default acl or add ACL_MASK to check
+> whether inode strip  S_ISGID works correctly.
+> 
+> Like umask test, this patch is also designed to test kernel patchset behaviour
+> "move S_ISGID stripping into the vfs* helper"
+> 
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> ---
+
+Hey Yang,
+
+Thanks for your patches! Just a minor comment below.
+
+> 1.add kernel commit id
+> 2.move umask into parent process intead of child process
+> 3.remove duplicated comment for ACL_GROUP_OBJ and ACL_MASK because
+> we have mentioned it before the function
+>  src/vfs/idmapped-mounts.c | 704 ++++++++++++++++++++++++++++++++++++++
+>  src/vfs/idmapped-mounts.h |   1 +
+>  src/vfs/vfstest.c         | 345 ++++++++++++++++++-
+>  tests/generic/999         |  33 ++
+>  tests/generic/999.out     |   2 +
+>  5 files changed, 1084 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+> index f63ac44b..f934cf4a 100644
+> --- a/src/vfs/idmapped-mounts.c
+> +++ b/src/vfs/idmapped-mounts.c
+> @@ -8083,6 +8083,700 @@ out:
+>  	return fret;
+>  }
+>  
+> +static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+> +{
+> +	int fret = -1;
+> +	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+> +	struct mount_attr attr = {
+> +		.attr_set = MOUNT_ATTR_IDMAP,
+> +	};
+> +	pid_t pid;
+> +	int tmpfile_fd = -EBADF;
+> +	bool supported = false;
+> +	char path[PATH_MAX];
+> +	mode_t mode;
+> +
+> +	if (!caps_supported())
+> +		return 0;
+> +
+> +	if (fchmod(info->t_dir1_fd, S_IRUSR |
+> +			      S_IWUSR |
+> +			      S_IRGRP |
+> +			      S_IWGRP |
+> +			      S_IROTH |
+> +			      S_IWOTH |
+> +			      S_IXUSR |
+> +			      S_IXGRP |
+> +			      S_IXOTH |
+> +			      S_ISGID), 0) {
+> +		log_stderr("failure: fchmod");
+> +		goto out;
+> +	}
+> +
+> +	/* Verify that the sid bits got raised. */
+> +	if (!is_setgid(info->t_dir1_fd, "", AT_EMPTY_PATH)) {
+> +		log_stderr("failure: is_setgid");
+> +		goto out;
+> +	}
+> +
+> +	/* Changing mount properties on a detached mount. */
+> +	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> +	if (attr.userns_fd < 0) {
+> +		log_stderr("failure: get_userns_fd");
+> +		goto out;
+> +	}
+> +
+> +	open_tree_fd = sys_open_tree(info->t_dir1_fd, "",
+> +				     AT_EMPTY_PATH |
+> +				     AT_NO_AUTOMOUNT |
+> +				     AT_SYMLINK_NOFOLLOW |
+> +				     OPEN_TREE_CLOEXEC |
+> +				     OPEN_TREE_CLONE);
+> +	if (open_tree_fd < 0) {
+> +		log_stderr("failure: sys_open_tree");
+> +		goto out;
+> +	}
+> +
+> +	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
+> +		log_stderr("failure: sys_mount_setattr");
+> +		goto out;
+> +	}
+> +
+> +	supported = openat_tmpfile_supported(open_tree_fd);
+> +
+> +	/* Only umask with S_IXGRP because inode strip S_ISGID will check mode
+> +	 * whether has group execute or search permission.
+> +	 */
+> +	umask(S_IXGRP);
+> +	mode = umask(S_IXGRP);
+> +	if (!(mode & S_IXGRP))
+> +		die("failure: umask");
+
+All the calls to umask() in this patch should be after the fork() in the
+child process. The die() helper is only supposed to be used in child
+processes anyway. The rest looks fine to me. So with the umask() moved
+you can add,
+Tested-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
