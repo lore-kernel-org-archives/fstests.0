@@ -2,92 +2,110 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F046AECAAD2
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Aug 2022 07:09:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1F3FECAAD2
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Aug 2022 10:07:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229463AbiH2HJg (ORCPT
+        id S229446AbiH2KHE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 29 Aug 2022 03:09:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52404 "EHLO
+        Mon, 29 Aug 2022 06:07:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229668AbiH2HJf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 Aug 2022 03:09:35 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AABE4D25B
-        for <fstests@vger.kernel.org>; Mon, 29 Aug 2022 00:09:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1661756973;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=881+7q4/KA5jq6tkPlCSdoExOaZuIBuS6SZqt+cTi8k=;
-        b=ZHTlFhBuu6nWhr5lRmLCSeE689oi1A9sIeL05sseI5so7WW2MPUzh7BhhDxnV8dHDi6DFb
-        pOI/m/ARuRc5oQM5eT9qEJmO92rl1ow+h2KKMXHWWL6lWrm50VpHrkQ7iTeSO+hfF+8Whv
-        9oxFV2r8Bss/bcK2a/PBCFLizRVRW6o=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-632-YTMSRQEEP7qoYeZxYbGNaA-1; Mon, 29 Aug 2022 03:09:28 -0400
-X-MC-Unique: YTMSRQEEP7qoYeZxYbGNaA-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S229450AbiH2KHC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 29 Aug 2022 06:07:02 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 924E95FADA;
+        Mon, 29 Aug 2022 03:06:59 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 3646A3C01D81;
-        Mon, 29 Aug 2022 07:09:28 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 96AE5400E88E;
-        Mon, 29 Aug 2022 07:09:24 +0000 (UTC)
-From:   xiubli@redhat.com
-To:     fstests@vger.kernel.org
-Cc:     ddiss@suse.de, zlang@redhat.com, david@fromorbit.com,
-        djwong@kernel.org, jlayton@kernel.org, ceph-devel@vger.kernel.org,
-        lhenriques@suse.de, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH] ceph/004: fix the ceph.quota.max_bytes values
-Date:   Mon, 29 Aug 2022 15:09:21 +0800
-Message-Id: <20220829070921.547074-1-xiubli@redhat.com>
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 0992F219DD;
+        Mon, 29 Aug 2022 10:06:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1661767618; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=F3jbrbr7lCpBnUCttSs3SxHmODTqTPlam9vJ2wqjxmo=;
+        b=g6vv7cbJI/hDUtRHAsQCRfqv/oiY4Y38/8nLLMeItHdzB6f2//dWsrPrWVfjktyWfhkCsU
+        mPvHvs0/9knDFHQbvFFL5qNhmN4NSWsI21pP679XVweCZPFk1dth+rn1uS8dXnmqGcJ4jO
+        ZZ6Cv5Y1K8roE+H/MWXkuD9QuJIVdCI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1661767618;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=F3jbrbr7lCpBnUCttSs3SxHmODTqTPlam9vJ2wqjxmo=;
+        b=WlP9kpuvG33PdNVMtLqxvYwxE7ykeAh7d78mzDtrro0m1/OnWDMOh53DIxqRZznwuCt0tF
+        yokCnLolrFp0krCg==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D280F133A6;
+        Mon, 29 Aug 2022 10:06:57 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id QiaWM8GPDGPmOwAAMHmgww
+        (envelope-from <jack@suse.cz>); Mon, 29 Aug 2022 10:06:57 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+        id 47BE5A066D; Mon, 29 Aug 2022 12:06:57 +0200 (CEST)
+Date:   Mon, 29 Aug 2022 12:06:57 +0200
+From:   Jan Kara <jack@suse.cz>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Yang Xu <xuyang2018.jy@fujitsu.com>, fstests@vger.kernel.org,
+        jack@suse.cz, oliver.sang@intel.com, lkp@intel.com,
+        linux-ext4@vger.kernel.org, tytso@mit.edu, lczerner@redhat.com
+Subject: Re: [PATCH] ext4/053: Remove nouser_xattr test
+Message-ID: <20220829100657.wunvx2twhjzuqckk@quack3>
+References: <1660705823-2172-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <20220828024858.cf5awn2uksbpchb3@zlang-mailbox>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.11.54.1
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220828024858.cf5awn2uksbpchb3@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+On Sun 28-08-22 10:48:58, Zorro Lang wrote:
+> On Wed, Aug 17, 2022 at 11:10:23AM +0800, Yang Xu wrote:
+> > Plan to remove noacl and nouser_xattr mount option in kernel because they
+> > are deprecated[1]. So remove nouser_xattr test in here.
+> 
+> What's the [1]?
+> 
+> We'd better to be careful when we want to remove a testing coverage. I'm not
+> sure if they've decided to removed this mount option, the ext4/053 is an
+> important test case for ext4, so I'd like to hear their opinion.
 
-Cephfs has required that the quota.max_bytes must be aligned to
-4MB if greater than or equal to 4MB, otherwise must align to 4KB.
+Yes, the option is long deprecated and we want to remove it from ext4. But
+I think you might want to see official ack from Ted as a maintainer on this
+:). Ted?
 
-URL: https://tracker.ceph.com/issues/57321
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
- tests/ceph/004 | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+								Honza
 
-diff --git a/tests/ceph/004 b/tests/ceph/004
-index dbca713e..124ed1bc 100755
---- a/tests/ceph/004
-+++ b/tests/ceph/004
-@@ -9,7 +9,7 @@
- #
- #    mkdir files limit
- #    truncate files/file -s 10G
--#    setfattr limit -n ceph.quota.max_bytes -v 1000000
-+#    setfattr limit -n ceph.quota.max_bytes -v 1048576
- #    mv files limit/
- #
- # Because we're creating a new file and truncating it, we have Fx caps and thus
-@@ -76,9 +76,9 @@ check_Fs_caps()
- }
- 
- # set quota to 1m
--$SETFATTR_PROG -n ceph.quota.max_bytes -v 1000000 $dest
-+$SETFATTR_PROG -n ceph.quota.max_bytes -v 1048576 $dest
- # set quota to 20g
--$SETFATTR_PROG -n ceph.quota.max_bytes -v 20000000000 $orig2
-+$SETFATTR_PROG -n ceph.quota.max_bytes -v 21474836480 $orig2
- 
- #
- # The following 2 testcases shall fail with either -EXDEV or -EDQUOT
+> > Reported-by: kernel test robot <oliver.sang@intel.com>
+> > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> > ---
+> >  tests/ext4/053 | 1 -
+> >  1 file changed, 1 deletion(-)
+> > 
+> > diff --git a/tests/ext4/053 b/tests/ext4/053
+> > index 555e474e..5d2c478a 100755
+> > --- a/tests/ext4/053
+> > +++ b/tests/ext4/053
+> > @@ -439,7 +439,6 @@ for fstype in ext2 ext3 ext4; do
+> >  	mnt oldalloc removed
+> >  	mnt orlov removed
+> >  	mnt -t user_xattr
+> > -	mnt nouser_xattr
+> >  
+> >  	if _has_kernel_config CONFIG_EXT4_FS_POSIX_ACL; then
+> >  		mnt -t acl
+> > -- 
+> > 2.27.0
+> > 
+> 
 -- 
-2.36.0.rc1
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
