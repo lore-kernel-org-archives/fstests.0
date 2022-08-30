@@ -2,120 +2,170 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6060ECAAD5
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Aug 2022 14:21:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07FCBECAAD1
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Aug 2022 04:44:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229701AbiH2OVJ (ORCPT
+        id S229845AbiH3Eoy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 29 Aug 2022 10:21:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43692 "EHLO
+        Tue, 30 Aug 2022 00:44:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230302AbiH2OVI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 Aug 2022 10:21:08 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01EA2696C3;
-        Mon, 29 Aug 2022 07:21:06 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 97DC6B810A1;
-        Mon, 29 Aug 2022 14:21:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3C57FC433C1;
-        Mon, 29 Aug 2022 14:21:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661782864;
-        bh=U0YzpPXyBtGzDIZyOLsF0+QyAtTGeB1D5ISsYu8mmZU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=EO2e524W6Hd89YHfiEEz+fr/u9lu7qQCjYH2nUq0BMmLf7YWB/GM4Z3IeO03qlxqA
-         RYZUQ5xeNwyAcnMOMXUQH1jrihfiLcC/jcgc41vcKOuAhOuYM6Y2NI8HtgjtqMxsNy
-         2si7BXbGJXpj19xqEG065sPh1eNbSUl7shWmkafVmuWmtJepvfTgLz1L0hZAVLfYFE
-         lf46aEBz+/mwVOi/CH4n5ZbtEgaiqgtLMOut4lAFCJyloCx4KrdJ7olgfXgtkmqUK4
-         IegSWKhADbajYGDx94Y4Puq2wSfIPJPqJyWH7IUY7ID6p0slt7n1QNVVXFfuTEMvrr
-         uRFr4QeC62AAA==
-Date:   Mon, 29 Aug 2022 07:21:03 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Leah Rumancik <leah.rumancik@gmail.com>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 5.10 CANDIDATE 0/7] xfs stable candidate patches for
- 5.10.y (from v5.18+)
-Message-ID: <YwzLTxUDxkefDI/g@magnolia>
-References: <20220828124614.2190592-1-amir73il@gmail.com>
+        with ESMTP id S229437AbiH3Eox (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 00:44:53 -0400
+Received: from mail-qt1-x82f.google.com (mail-qt1-x82f.google.com [IPv6:2607:f8b0:4864:20::82f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16A58BC90;
+        Mon, 29 Aug 2022 21:44:50 -0700 (PDT)
+Received: by mail-qt1-x82f.google.com with SMTP id y18so7737882qtv.5;
+        Mon, 29 Aug 2022 21:44:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc;
+        bh=dOEv9hIXfiaMqY+tsrgaoJMgV7rSwIMk/A0LInKQids=;
+        b=aMTlogrLeuE307snE9fCaoqIyDT5VJFy0c56T055vyphoKHTUQ/I/AtkS3ei25K2p9
+         ZolnZ0sy5b32RxLEwCdUti6d21yA+ecNhBtzHibv7lu/+hnre+K9H4JKP6N7/RN7BibI
+         hQIQweoEeWMzYKjLSX/n06RlrcXYtnM9iRJQVpgT9Ls2msqIuejMwNHBgP3RWSqHm6rM
+         Ahdl6HaDjoYnBpoI3LkwFoTF7Z8Kk9sA/I7M8/zVb9lUw2D7YDfqdpSz1KWWjar4JoI5
+         xauh0mCv94RNN0Cv58WF5dlX12oGkeUg2hgpWUUg/nikMzk/bU7gkd1iXHvolyiKLTXT
+         77jQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc;
+        bh=dOEv9hIXfiaMqY+tsrgaoJMgV7rSwIMk/A0LInKQids=;
+        b=jEi9/oRfM0YRPLDu3dN2aSt9AYTDiRaplFhzfJaAIyp3fTYu2irDn+Lq0CRelW72ZN
+         ryFQaT++8NUIxCAKdh+CJuKXx9uIiX237pJIXa5dGS55zYA0LlGso8Vt/dU/51OpeBQa
+         p076iCXLceZqLjsFCk0Br/hccc30cPHkNASn/cSkPpCo8364DvmHsUfGw2jXfQdjWgiE
+         KNj8vWf/fgLEu8RQVMvyDcwjOA5ifrupwY7soLlxaEO8V8OOAVqG6ZZwEly8Xuvm1cPq
+         A/XOhHv0GxYofiiHj+R6u/etDfsNwHAExyqhpzsVMzmiU0oVR6L+rqhvU7+MiMzk5xHt
+         Ak+w==
+X-Gm-Message-State: ACgBeo1C2QiyesCumFXrJN1YKDe8yWmXts1hnnxIZh5bqv5LfKcFOe1j
+        bLRSyUu1ZGkjMS+DHqQoLQfUtWT03Cw=
+X-Google-Smtp-Source: AA6agR78dJ/+ByMv/VbBUoqN1F27s+WlNUBz2Vh8bgD00Nuv621cZS0UqFb3KwRlqIbm26bs5+VBMQ==
+X-Received: by 2002:a05:622a:2d1:b0:343:6193:3348 with SMTP id a17-20020a05622a02d100b0034361933348mr13115115qtx.633.1661834688870;
+        Mon, 29 Aug 2022 21:44:48 -0700 (PDT)
+Received: from xzhouw.hosts.qa.psi.rdu2.redhat.com ([66.187.232.127])
+        by smtp.gmail.com with ESMTPSA id bj11-20020a05620a190b00b006b60d5a7205sm7478585qkb.51.2022.08.29.21.44.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 29 Aug 2022 21:44:48 -0700 (PDT)
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH v3 0/4] tweaks for denying tiny xfs
+Date:   Tue, 30 Aug 2022 12:44:29 +0800
+Message-Id: <20220830044433.1719246-1-jencce.kernel@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220828124614.2190592-1-amir73il@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 28, 2022 at 03:46:07PM +0300, Amir Goldstein wrote:
-> Hi Darrick,
-> 
-> This 5.10.y backport series contains fixes from v5.18 and v5.19 releases.
-> 
-> Patches 1-5 in this series have already been applied to 5.15.y in Leah's
-> latest update [1], so this 5.10.y is is mostly catching up with 5.15.y.
-> 
-> Patches 2-3 from the last 5.15.y update have not been picked for 5.10.y,
-> because they were not trivial to backport as the quota code is quite
-> different betrween 5.10.y and upstream.
-> This omission leave fstests generic/681,682 broken on 5.10.y.
-> 
-> Patches 6-7 in this 5.10.y update have not been applied to 5.15.y yet.
-> I pointed Leah's attention to these patches and she said she will
-> include them in a following 5.15.y update.
-> 
-> In particular, Darrick has pointed me at the fix in patch 6 a long time
-> ago, but I was waiting to apply fixes to 5.10.y in chronoligal order.
-> 
+Since this xfsprogs commit:
+  6e0ed3d19c54 mkfs: stop allowing tiny filesystems
+xfs refuses filesystem size less then 300m, log size less then 64m,
+and filesystems with single AG.
 
-Woot! :)
+And with this xfsprogs commit
+  1b580a773 mkfs: don't let internal logs bump the root dir inode chunk to AG 1
+part of xfs/144 is removed as it is not allowed.
 
-Acked-by: Darrick J. Wong <djwong@kernel.org>
+v3:
+	Fix more fs size and log size limitation;
+	Fix more single AG tests;
+	Fix xfs/144;
+	Tested group all excluding some testcases from dangerous_fuzzers group
+v2:
+	Fix more about 300m limit;
+	Fix about log size larger then 64m;
+	Remove xfs/202
 
---D
+Murphy Zhou (4):
+  tests: increase fs size for mkfs
+  tests: increase xfs log size
+  tests/xfs: remove single-AG options
+  xfs/144: remove testing root dir inode in AG 1
 
-> Please note that the upstream fix 6f5097e3367a ("xfs: fix xfs_ifree()
-> error handling to not leak perag ref") Which Fixes: 9a5280b312e2e
-> ("xfs: reorder iunlink remove operation in xfs_ifree")
-> is not relevant for the 5.10.y backport.
-> 
-> These patches has gone through the usual 30 auto group runs x 5 configs
-> on kdevops.
-> 
-> Thanks,
-> Amir.
-> 
-> 
-> [1] https://lore.kernel.org/linux-xfs/20220819181431.4113819-1-leah.rumancik@gmail.com/
-> 
-> Amir Goldstein (1):
->   xfs: remove infinite loop when reserving free block pool
-> 
-> Brian Foster (1):
->   xfs: fix soft lockup via spinning in filestream ag selection loop
-> 
-> Darrick J. Wong (2):
->   xfs: always succeed at setting the reserve pool size
->   xfs: fix overfilling of reserve pool
-> 
-> Dave Chinner (2):
->   xfs: reorder iunlink remove operation in xfs_ifree
->   xfs: validate inode fork size against fork format
-> 
-> Eric Sandeen (1):
->   xfs: revert "xfs: actually bump warning counts when we send warnings"
-> 
->  fs/xfs/libxfs/xfs_inode_buf.c | 35 +++++++++++++++++------
->  fs/xfs/xfs_filestream.c       |  7 +++--
->  fs/xfs/xfs_fsops.c            | 52 ++++++++++++++---------------------
->  fs/xfs/xfs_inode.c            | 22 ++++++++-------
->  fs/xfs/xfs_mount.h            |  8 ++++++
->  fs/xfs/xfs_trans_dquot.c      |  1 -
->  6 files changed, 71 insertions(+), 54 deletions(-)
-> 
-> -- 
-> 2.25.1
-> 
+ common/config         |    2 +-
+ common/log            |    8 +-
+ common/xfs            |    6 +-
+ tests/generic/015     |    2 +-
+ tests/generic/027     |    2 +-
+ tests/generic/042     |    3 +
+ tests/generic/054.out | 1410 -----------------------------------------
+ tests/generic/055.out |  126 ----
+ tests/generic/077     |    2 +-
+ tests/generic/081     |    6 +-
+ tests/generic/083     |    2 +-
+ tests/generic/085     |    2 +-
+ tests/generic/108     |    4 +-
+ tests/generic/204     |    2 +-
+ tests/generic/226     |    2 +-
+ tests/generic/250     |    2 +-
+ tests/generic/252     |    2 +-
+ tests/generic/371     |    2 +-
+ tests/generic/387     |    2 +-
+ tests/generic/416     |    2 +-
+ tests/generic/416.out |    2 +-
+ tests/generic/427     |    2 +-
+ tests/generic/449     |    2 +-
+ tests/generic/455     |    2 +-
+ tests/generic/457     |    2 +-
+ tests/generic/482     |    2 +-
+ tests/generic/511     |    2 +-
+ tests/generic/520     |    4 +-
+ tests/generic/536     |    2 +-
+ tests/generic/619     |    2 +-
+ tests/generic/626     |    2 +-
+ tests/xfs/002         |    2 +-
+ tests/xfs/015         |    2 +-
+ tests/xfs/041         |    8 +-
+ tests/xfs/041.out     |   10 +-
+ tests/xfs/042         |    2 +-
+ tests/xfs/049         |    2 +-
+ tests/xfs/073         |    2 +-
+ tests/xfs/076         |    2 +-
+ tests/xfs/078         |    6 +-
+ tests/xfs/078.out     |   23 +-
+ tests/xfs/104         |    6 +-
+ tests/xfs/104.out     |   30 -
+ tests/xfs/107         |    4 +-
+ tests/xfs/118         |    4 +-
+ tests/xfs/144         |   10 +-
+ tests/xfs/148         |    2 +-
+ tests/xfs/149         |   12 +-
+ tests/xfs/168         |    2 +-
+ tests/xfs/170         |   10 +-
+ tests/xfs/170.out     |    8 +-
+ tests/xfs/171         |   10 +-
+ tests/xfs/171.out     |    8 +-
+ tests/xfs/172         |    4 +-
+ tests/xfs/172.out     |    4 +-
+ tests/xfs/173         |   10 +-
+ tests/xfs/173.out     |    8 +-
+ tests/xfs/174         |    4 +-
+ tests/xfs/174.out     |    4 +-
+ tests/xfs/176         |    2 +-
+ tests/xfs/179         |    2 +-
+ tests/xfs/202         |   40 --
+ tests/xfs/202.out     |   29 -
+ tests/xfs/205         |    2 +-
+ tests/xfs/206         |    2 +-
+ tests/xfs/227         |    2 +-
+ tests/xfs/233         |    2 +-
+ tests/xfs/250         |    6 +-
+ tests/xfs/259         |    2 +-
+ tests/xfs/279         |    6 +-
+ tests/xfs/289         |   22 +-
+ tests/xfs/291         |    4 +-
+ tests/xfs/306         |    2 +-
+ tests/xfs/445         |    2 +-
+ tests/xfs/514         |    2 +-
+ tests/xfs/520         |    2 +-
+ 76 files changed, 151 insertions(+), 1790 deletions(-)
+ delete mode 100755 tests/xfs/202
+ delete mode 100644 tests/xfs/202.out
+
+-- 
+2.31.1
+
