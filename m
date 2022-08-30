@@ -2,191 +2,210 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55A1DECAAA1
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Aug 2022 11:16:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55AA5ECAAD1
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Aug 2022 13:49:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229671AbiH3LQg (ORCPT
+        id S229834AbiH3NtZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Aug 2022 07:16:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37916 "EHLO
+        Tue, 30 Aug 2022 09:49:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38114 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229740AbiH3LQe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 07:16:34 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D324E97C2
-        for <fstests@vger.kernel.org>; Tue, 30 Aug 2022 04:16:29 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8A1B461518
-        for <fstests@vger.kernel.org>; Tue, 30 Aug 2022 11:16:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 16DF0C433C1;
-        Tue, 30 Aug 2022 11:16:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661858187;
-        bh=y34rSocOfMbzb7iwA6AAGafOnsiZ8eNPUUo42NfM9j0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=X8YGM1NDrXqiNOoVBZ/+cc9f/cz5F6tRZNJfygz1M5FAVNvW0NrrrDZyTBkaMeqB5
-         bhhR+LjlODbB9Paxs1tsaXf1WyY4XQy90jpJOVOPXWp4wlTzArAyNsqA654uTDyQGA
-         N/c9EvVGeLqy212js1zgrf06hC4fPwVU/t3Z4YMu+ef/r52aN3HJj3mPlkMNzQ6SBk
-         uKp4e3VHjZuwLTiIYmJbJDshGnmldnfdE5sqn0VlWrFcABvRSsogSoiNUiNMF0mwMY
-         2wIW6TDIzuExWKzeUgfzsdAGCrQIa72vZ5/osI348iDNPTxnK3Q8YpyT1shKVKmqfv
-         JHeHxXED4DQPw==
-Date:   Tue, 30 Aug 2022 13:16:23 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v3 2/2] vfs: Add new setgid_create_acl test
-Message-ID: <20220830111623.xqs42cula4pe2tey@wittgenstein>
-References: <20220829135225.wscmhw4dqkzitcvf@wittgenste>
- <1661858003-2181-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <1661858003-2181-2-git-send-email-xuyang2018.jy@fujitsu.com>
- <20220830110732.mjjpykrihbicqlsw@wittgenstein>
+        with ESMTP id S231358AbiH3Nst (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 09:48:49 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A06D11B3D4
+        for <fstests@vger.kernel.org>; Tue, 30 Aug 2022 06:46:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1661867178;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=r+PZxqc8b4Nzewql8RGLC0Tbbp5lXeZy1S77g/wCvNQ=;
+        b=COSp2IVU6QaHeLggmXiyBSknhi06hEZMmM8rPpo/CUfLha7x9iOT0HHEkgbLnYTCdYJ5Yk
+        i+vThNv0ysAXuK8umANLl+hGLjllp9+4lC8SCrLbVRAtByklQXJA867QD6qP9QTf5kos9M
+        VfePwp0U6P0WK6E1tFLfwP1Axd1QNWI=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-287-Vm3JANjFOQyNu2oMPssfNg-1; Tue, 30 Aug 2022 09:43:04 -0400
+X-MC-Unique: Vm3JANjFOQyNu2oMPssfNg-1
+Received: by mail-qv1-f70.google.com with SMTP id oo7-20020a056214450700b00499144ac01dso687613qvb.13
+        for <fstests@vger.kernel.org>; Tue, 30 Aug 2022 06:43:04 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
+        bh=r+PZxqc8b4Nzewql8RGLC0Tbbp5lXeZy1S77g/wCvNQ=;
+        b=jQL/wLkrswaDsDLZlPSqzf0jSuKggPwQWbadhXAK9X3n9UoZDeKhKzRTg/nWqMe08x
+         D44RQJyJxVr3Q9ngIoY7sjP05qfMQg8Z1qcd2t9t8gwJAUPfqRTT8imvoDXggoj0J8dg
+         O1jAvqu9juZK31l8heFpwSWwRqLJ/NkeBvbLM6JpKDPLIjAjdnkqxoNdKjY3SjxiVXFD
+         46ZyZPL2cL8dLmJjLH5MIQE3RHCOHzpermixDSIUEimY4p6oOHg0wLi8m3Tkj7X5lHki
+         1/CHqQrH+pmNZ3aAqEzcq9GFYGNRoXl3beusrIkNrZrOwWWSFDZOs4Iz3cRlk7PHdCC5
+         A7aA==
+X-Gm-Message-State: ACgBeo1GmN6HWYgWP2ZC3yOR8M8JezrMzbJ7eCHgF4fRf6rvIMTGfJ2Z
+        xGiSnZ35IL0H1lIRiVsWO3q3CxB7ox3ClLniuleZ0E0CzrpJzIx/4WQn37n9EB/5rwRGSnFQwch
+        3vaMkHbE1e1JisA2LYg==
+X-Received: by 2002:a05:620a:1513:b0:6ba:e66b:726d with SMTP id i19-20020a05620a151300b006bae66b726dmr11787666qkk.692.1661866983730;
+        Tue, 30 Aug 2022 06:43:03 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR4g+P6Qk90P7S7GYF9/tDs/ReY3pzyvJiOAPbU87ng04wSQwN3nLw3hg/uG22h8P1rT003Pyg==
+X-Received: by 2002:a05:620a:1513:b0:6ba:e66b:726d with SMTP id i19-20020a05620a151300b006bae66b726dmr11787652qkk.692.1661866983417;
+        Tue, 30 Aug 2022 06:43:03 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id k17-20020a05620a143100b006bb83e2e65fsm7634501qkj.42.2022.08.30.06.43.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 30 Aug 2022 06:43:03 -0700 (PDT)
+Date:   Tue, 30 Aug 2022 21:42:57 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Murphy Zhou <jencce.kernel@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v3 3/4] tests/xfs: remove single-AG options
+Message-ID: <20220830134257.2sve6rwvyvz66lsg@zlang-mailbox>
+References: <20220830044433.1719246-1-jencce.kernel@gmail.com>
+ <20220830044433.1719246-4-jencce.kernel@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220830110732.mjjpykrihbicqlsw@wittgenstein>
+In-Reply-To: <20220830044433.1719246-4-jencce.kernel@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 30, 2022 at 01:07:43PM +0200, Christian Brauner wrote:
-> On Tue, Aug 30, 2022 at 07:13:23PM +0800, Yang Xu wrote:
-> > The current_umask() is stripped from the mode directly in the vfs if the
-> > filesystem either doesn't support acls or the filesystem has been
-> > mounted without posic acl support.
-> > 
-> > If the filesystem does support acls then current_umask() stripping is
-> > deferred to posix_acl_create(). So when the filesystem calls
-> > posix_acl_create() and there are no acls set or not supported then
-> > current_umask() will be stripped.
-> > 
-> > If the parent directory has a default acl then permissions are based off
-> > of that and current_umask() is ignored. Specifically, if the ACL has an
-> > ACL_MASK entry, the group permissions correspond to the permissions of
-> > the ACL_MASK entry. Otherwise, if the ACL has no ACL_MASK entry, the
-> > group permissions correspond to the permissions of the ACL_GROUP_OBJ
-> > entry.
-> > 
-> > Here we only use setfacl to set default acl or add ACL_MASK to check
-> > whether inode strip  S_ISGID works correctly.
-> > 
-> > Like umask test, this patch is also designed to test kernel patchset behaviour
-> > "move S_ISGID stripping into the vfs* helper"
-> > 
-> > Tested-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-> > Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-> > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> > ---
-> >  src/vfs/idmapped-mounts.c | 907 ++++++++++++++++++++++++++++++++++----
-> >  src/vfs/idmapped-mounts.h |   1 +
-> >  src/vfs/vfstest.c         | 356 ++++++++++++++-
-> >  tests/generic/999         |  33 ++
-> >  tests/generic/999.out     |   2 +
-> >  5 files changed, 1218 insertions(+), 81 deletions(-)
-> >  create mode 100755 tests/generic/999
-> >  create mode 100644 tests/generic/999.out
-> > 
-> > diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
-> > index 01a5fbd4..c010dfa1 100644
-> > --- a/src/vfs/idmapped-mounts.c
-> > +++ b/src/vfs/idmapped-mounts.c
-> > @@ -7664,7 +7664,6 @@ out:
-> >  	return fret;
-> >  }
-> >  
-> > -
-> >  /* The current_umask() is stripped from the mode directly in the vfs if the
-> >   * filesystem either doesn't support acls or the filesystem has been
-> >   * mounted without posic acl support.
-> > @@ -8114,94 +8113,842 @@ out:
-> >  	return fret;
-> >  }
-> >  
-> > -static const struct test_struct t_idmapped_mounts[] = {
-> > -	{ acls,                                                         true,   "posix acls on regular mounts",                                                                 },
-> > -	{ create_in_userns,                                             true,   "create operations in user namespace",                                                          },
-> > -	{ device_node_in_userns,                                        true,   "device node in user namespace",                                                                },
-> > -	{ expected_uid_gid_idmapped_mounts,				true,	"expected ownership on idmapped mounts",							},
-> > -	{ fscaps_idmapped_mounts,					true,	"fscaps on idmapped mounts",									},
-> > -	{ fscaps_idmapped_mounts_in_userns,				true,	"fscaps on idmapped mounts in user namespace",							},
-> > -	{ fscaps_idmapped_mounts_in_userns_separate_userns,		true,	"fscaps on idmapped mounts in user namespace with different id mappings",			},
-> > -	{ fsids_mapped,                                                 true,   "mapped fsids",                                                                                 },
-> > -	{ fsids_unmapped,                                               true,   "unmapped fsids",                                                                               },
-> > -	{ hardlink_crossing_idmapped_mounts,				true,	"cross idmapped mount hardlink",								},
-> > -	{ hardlink_from_idmapped_mount,					true,	"hardlinks from idmapped mounts",								},
-> > -	{ hardlink_from_idmapped_mount_in_userns,			true,	"hardlinks from idmapped mounts in user namespace",						},
-> > -#ifdef HAVE_LIBURING_H
-> > -	{ io_uring_idmapped,						true,	"io_uring from idmapped mounts",								},
-> > -	{ io_uring_idmapped_userns,					true,	"io_uring from idmapped mounts in user namespace",						},
-> > -	{ io_uring_idmapped_unmapped,					true,	"io_uring from idmapped mounts with unmapped ids",						},
-> > -	{ io_uring_idmapped_unmapped_userns,				true,	"io_uring from idmapped mounts with unmapped ids in user namespace",				},
-> > -#endif
-> > -	{ protected_symlinks_idmapped_mounts,				true,	"following protected symlinks on idmapped mounts",						},
-> > -	{ protected_symlinks_idmapped_mounts_in_userns,			true,	"following protected symlinks on idmapped mounts in user namespace",				},
-> > -	{ rename_crossing_idmapped_mounts,				true,	"cross idmapped mount rename",									},
-> > -	{ rename_from_idmapped_mount,					true,	"rename from idmapped mounts",									},
-> > -	{ rename_from_idmapped_mount_in_userns,				true,	"rename from idmapped mounts in user namespace",						},
-> > -	{ setattr_truncate_idmapped,					true,	"setattr truncate on idmapped mounts",								},
-> > -	{ setattr_truncate_idmapped_in_userns,				true,	"setattr truncate on idmapped mounts in user namespace",					},
-> > -	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
-> > -	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
-> > -	{ setid_binaries_idmapped_mounts,				true,	"setid binaries on idmapped mounts",								},
-> > -	{ setid_binaries_idmapped_mounts_in_userns,			true,	"setid binaries on idmapped mounts in user namespace",						},
-> > -	{ setid_binaries_idmapped_mounts_in_userns_separate_userns,	true,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
-> > -	{ sticky_bit_unlink_idmapped_mounts,				true,	"sticky bit unlink operations on idmapped mounts",						},
-> > -	{ sticky_bit_unlink_idmapped_mounts_in_userns,			true,	"sticky bit unlink operations on idmapped mounts in user namespace",				},
-> > -	{ sticky_bit_rename_idmapped_mounts,				true,	"sticky bit rename operations on idmapped mounts",						},
-> > -	{ sticky_bit_rename_idmapped_mounts_in_userns,			true,	"sticky bit rename operations on idmapped mounts in user namespace",				},
-> > -	{ symlink_idmapped_mounts,					true,	"symlink from idmapped mounts",									},
-> > -	{ symlink_idmapped_mounts_in_userns,				true,	"symlink from idmapped mounts in user namespace",						},
-> > -};
-> > +/*
-> > + * If the parent directory has a default acl then permissions are based off
-> > + * of that and current_umask() is ignored. Specifically, if the ACL has an
-> > + * ACL_MASK entry, the group permissions correspond to the permissions of
-> > + * the ACL_MASK entry. Otherwise, if the ACL has no ACL_MASK entry, the
-> > + * group permissions correspond to the permissions of the ACL_GROUP_OBJ
-> > + * entry.
-> > + *
-> > + * Use setfacl to check whether inode strip S_ISGID works correctly under
-> > + * the above two situations when enabling idmapped.
-> > + *
-> > + * Test for commit
-> > + * 1639a49ccdce ("fs: move S_ISGID stripping into the vfs_*() helpers").
-> > + */
-> > +static int setgid_create_acl_idmapped(const struct vfstest_info *info)
-> > +{
-> > +	int fret = -1;
-> > +	int file1_fd = -EBADF, open_tree_fd = -EBADF;
-> > +	struct mount_attr attr = {
-> > +		.attr_set = MOUNT_ATTR_IDMAP,
-> > +	};
-> > +	pid_t pid;
-> > +	int tmpfile_fd = -EBADF;
-> > +	bool supported = false;
-> > +	char path[PATH_MAX];
-> > +	mode_t mode;
-> >  
-> > -const struct test_suite s_idmapped_mounts = {
-> > -	.tests		= t_idmapped_mounts,
-> > -	.nr_tests	= ARRAY_SIZE(t_idmapped_mounts),
-> > -};
-> > +	if (!caps_supported())
-> > +		return 0;
-> >  
-> > -static const struct test_struct t_fscaps_in_ancestor_userns[] = {
-> > -	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	true,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
-> > -};
-> > +	if (fchmod(info->t_dir1_fd, S_IRUSR |
-> > +			      S_IWUSR |
-> > +			      S_IRGRP |
+On Tue, Aug 30, 2022 at 12:44:32PM +0800, Murphy Zhou wrote:
+> Since this xfsprogs commit:
+> 	6e0ed3d19c54 mkfs: stop allowing tiny filesystems
+> Single-AG xfs is not allowed.
 > 
-> This is difficult to review on list and it's not your fault but for the
-> future when you see patch that seems really unclean and messed-up it can
-> help to pass --minimal to git format-patch.
+> Remove agcount=1 from mkfs options and xfs/202 entirely.
 > 
-> I'll apply locally for review.
+> Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+> ---
 
-Ok, still seems good!
-Reviewed-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+Looks like all single AG xfs tests are invalid now. As this patch would like to
+remove xfs specific cases or change its original format, better to let xfs list
+review, to make sure they are informed at least.
+
+BTW I remember xfs/041 uses "agcount=1" too, don't we need to change it with
+this patch together?
+
+Thanks,
+Zorro
+
+>  tests/xfs/179     |  2 +-
+>  tests/xfs/202     | 40 ----------------------------------------
+>  tests/xfs/202.out | 29 -----------------------------
+>  tests/xfs/520     |  2 +-
+>  4 files changed, 2 insertions(+), 71 deletions(-)
+>  delete mode 100755 tests/xfs/202
+>  delete mode 100644 tests/xfs/202.out
+> 
+> diff --git a/tests/xfs/179 b/tests/xfs/179
+> index ec0cb7e5..f0169717 100755
+> --- a/tests/xfs/179
+> +++ b/tests/xfs/179
+> @@ -22,7 +22,7 @@ _require_cp_reflink
+>  _require_test_program "punch-alternating"
+>  
+>  echo "Format and mount"
+> -_scratch_mkfs -d agcount=1 > $seqres.full 2>&1
+> +_scratch_mkfs > $seqres.full 2>&1
+>  _scratch_mount >> $seqres.full 2>&1
+>  
+>  testdir=$SCRATCH_MNT/test-$seq
+> diff --git a/tests/xfs/202 b/tests/xfs/202
+> deleted file mode 100755
+> index 5075d3a1..00000000
+> --- a/tests/xfs/202
+> +++ /dev/null
+> @@ -1,40 +0,0 @@
+> -#! /bin/bash
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2009 Christoph Hellwig.
+> -#
+> -# FS QA Test No. 202
+> -#
+> -# Test out the xfs_repair -o force_geometry option on single-AG filesystems.
+> -#
+> -. ./common/preamble
+> -_begin_fstest repair auto quick
+> -
+> -# Import common functions.
+> -. ./common/filter
+> -. ./common/repair
+> -
+> -# real QA test starts here
+> -_supported_fs xfs
+> -
+> -# single AG will cause default xfs_repair to fail. This test is actually
+> -# testing the special corner case option needed to repair a single AG fs.
+> -_require_scratch_nocheck
+> -
+> -#
+> -# The AG size is limited to 1TB (or even less with historic xfsprogs),
+> -# so chose a small enough filesystem to make sure we can actually create
+> -# a single AG filesystem.
+> -#
+> -echo "== Creating single-AG filesystem =="
+> -_scratch_mkfs_xfs -d agcount=1 -d size=$((1024*1024*1024)) >/dev/null 2>&1 \
+> - || _fail "!!! failed to make filesystem with single AG"
+> -
+> -echo "== Trying to repair it (should fail) =="
+> -_scratch_xfs_repair
+> -
+> -echo "== Trying to repair it with -o force_geometry =="
+> -_scratch_xfs_repair -o force_geometry 2>&1 | _filter_repair
+> -
+> -# success, all done
+> -echo "*** done"
+> -status=0
+> diff --git a/tests/xfs/202.out b/tests/xfs/202.out
+> deleted file mode 100644
+> index c2c5c881..00000000
+> --- a/tests/xfs/202.out
+> +++ /dev/null
+> @@ -1,29 +0,0 @@
+> -QA output created by 202
+> -== Creating single-AG filesystem ==
+> -== Trying to repair it (should fail) ==
+> -Phase 1 - find and verify superblock...
+> -Only one AG detected - cannot validate filesystem geometry.
+> -Use the -o force_geometry option to proceed.
+> -== Trying to repair it with -o force_geometry ==
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -*** done
+> diff --git a/tests/xfs/520 b/tests/xfs/520
+> index d9e252bd..de70db60 100755
+> --- a/tests/xfs/520
+> +++ b/tests/xfs/520
+> @@ -60,7 +60,7 @@ force_crafted_metadata() {
+>  }
+>  
+>  bigval=100000000
+> -fsdsopt="-d agcount=1,size=512m"
+> +fsdsopt="-d size=512m"
+>  
+>  force_crafted_metadata freeblks 0 "agf 0"
+>  force_crafted_metadata longest $bigval "agf 0"
+> -- 
+> 2.31.1
+> 
+
