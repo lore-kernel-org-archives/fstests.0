@@ -2,210 +2,195 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55AA5ECAAD1
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Aug 2022 13:49:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53D0CECAAD1
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Aug 2022 14:07:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229834AbiH3NtZ (ORCPT
+        id S229802AbiH3OHW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Aug 2022 09:49:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38114 "EHLO
+        Tue, 30 Aug 2022 10:07:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231358AbiH3Nst (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 09:48:49 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A06D11B3D4
-        for <fstests@vger.kernel.org>; Tue, 30 Aug 2022 06:46:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1661867178;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=r+PZxqc8b4Nzewql8RGLC0Tbbp5lXeZy1S77g/wCvNQ=;
-        b=COSp2IVU6QaHeLggmXiyBSknhi06hEZMmM8rPpo/CUfLha7x9iOT0HHEkgbLnYTCdYJ5Yk
-        i+vThNv0ysAXuK8umANLl+hGLjllp9+4lC8SCrLbVRAtByklQXJA867QD6qP9QTf5kos9M
-        VfePwp0U6P0WK6E1tFLfwP1Axd1QNWI=
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
- [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-287-Vm3JANjFOQyNu2oMPssfNg-1; Tue, 30 Aug 2022 09:43:04 -0400
-X-MC-Unique: Vm3JANjFOQyNu2oMPssfNg-1
-Received: by mail-qv1-f70.google.com with SMTP id oo7-20020a056214450700b00499144ac01dso687613qvb.13
-        for <fstests@vger.kernel.org>; Tue, 30 Aug 2022 06:43:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=r+PZxqc8b4Nzewql8RGLC0Tbbp5lXeZy1S77g/wCvNQ=;
-        b=jQL/wLkrswaDsDLZlPSqzf0jSuKggPwQWbadhXAK9X3n9UoZDeKhKzRTg/nWqMe08x
-         D44RQJyJxVr3Q9ngIoY7sjP05qfMQg8Z1qcd2t9t8gwJAUPfqRTT8imvoDXggoj0J8dg
-         O1jAvqu9juZK31l8heFpwSWwRqLJ/NkeBvbLM6JpKDPLIjAjdnkqxoNdKjY3SjxiVXFD
-         46ZyZPL2cL8dLmJjLH5MIQE3RHCOHzpermixDSIUEimY4p6oOHg0wLi8m3Tkj7X5lHki
-         1/CHqQrH+pmNZ3aAqEzcq9GFYGNRoXl3beusrIkNrZrOwWWSFDZOs4Iz3cRlk7PHdCC5
-         A7aA==
-X-Gm-Message-State: ACgBeo1GmN6HWYgWP2ZC3yOR8M8JezrMzbJ7eCHgF4fRf6rvIMTGfJ2Z
-        xGiSnZ35IL0H1lIRiVsWO3q3CxB7ox3ClLniuleZ0E0CzrpJzIx/4WQn37n9EB/5rwRGSnFQwch
-        3vaMkHbE1e1JisA2LYg==
-X-Received: by 2002:a05:620a:1513:b0:6ba:e66b:726d with SMTP id i19-20020a05620a151300b006bae66b726dmr11787666qkk.692.1661866983730;
-        Tue, 30 Aug 2022 06:43:03 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR4g+P6Qk90P7S7GYF9/tDs/ReY3pzyvJiOAPbU87ng04wSQwN3nLw3hg/uG22h8P1rT003Pyg==
-X-Received: by 2002:a05:620a:1513:b0:6ba:e66b:726d with SMTP id i19-20020a05620a151300b006bae66b726dmr11787652qkk.692.1661866983417;
-        Tue, 30 Aug 2022 06:43:03 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id k17-20020a05620a143100b006bb83e2e65fsm7634501qkj.42.2022.08.30.06.43.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Aug 2022 06:43:03 -0700 (PDT)
-Date:   Tue, 30 Aug 2022 21:42:57 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v3 3/4] tests/xfs: remove single-AG options
-Message-ID: <20220830134257.2sve6rwvyvz66lsg@zlang-mailbox>
-References: <20220830044433.1719246-1-jencce.kernel@gmail.com>
- <20220830044433.1719246-4-jencce.kernel@gmail.com>
+        with ESMTP id S229685AbiH3OHV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 10:07:21 -0400
+Received: from synology.com (mail.synology.com [211.23.38.101])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2BC7F72C6;
+        Tue, 30 Aug 2022 07:07:19 -0700 (PDT)
+Received: from localhost.localdomain (unknown [10.17.41.204])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by synology.com (Postfix) with ESMTPSA id 835B235801DA1;
+        Tue, 30 Aug 2022 22:07:16 +0800 (CST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
+        t=1661868437; bh=I5OogS8AePXVMG6sy9je9+8B6xup/wXIg9XDBn2p7VQ=;
+        h=From:To:Cc:Subject:Date;
+        b=deCgJjKKYWeIl54ZLySwKANGpkXM/aIVn7KieXPvVUYf9kWyogFKjFtX55h1FbdyX
+         HPu5KTzFY+RlRyA22HAJafQeburzMakWJ+pkxPSZ2GDYzQ0L1iJ5MQnf77lG38AanN
+         hKUnE0Thx1R/XMY2xFXDOSZfyP+1koUHHTwKKSQY=
+From:   bingjingc <bingjingc@synology.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc:     fdmanana@kernel.org, zlang@redhat.com, bingjingc@synology.com,
+        bxxxjxxg@gmail.com, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v4] fstests: btrfs: test incremental send for changed reference paths
+Date:   Tue, 30 Aug 2022 22:06:59 +0800
+Message-Id: <20220830140659.47757-1-bingjingc@synology.com>
+X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220830044433.1719246-4-jencce.kernel@gmail.com>
+Content-Transfer-Encoding: 8bit
+X-Synology-MCP-Status: no
+X-Synology-Spam-Flag: no
+X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
+X-Synology-Virus-Status: no
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 30, 2022 at 12:44:32PM +0800, Murphy Zhou wrote:
-> Since this xfsprogs commit:
-> 	6e0ed3d19c54 mkfs: stop allowing tiny filesystems
-> Single-AG xfs is not allowed.
-> 
-> Remove agcount=1 from mkfs options and xfs/202 entirely.
-> 
-> Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
-> ---
+From: BingJing Chang <bingjingc@synology.com>
 
-Looks like all single AG xfs tests are invalid now. As this patch would like to
-remove xfs specific cases or change its original format, better to let xfs list
-review, to make sure they are informed at least.
+Normally btrfs stores file paths in an array of ref items. However, items
+for the same parent directory can not exceed the size of a leaf. So btrfs
+also store the rest of them in extended ref items alternatively.
 
-BTW I remember xfs/041 uses "agcount=1" too, don't we need to change it with
-this patch together?
+In this test, it creates a large number of links under a directory causing
+the file paths stored in these two ways to be the parent snapshot. And it
+deletes and recreates just an amount of them that can be stored within an
+array of ref items to be the send snapshot. Test that an incremental send
+operation correctly issues link/unlink operations only against new/deleted
+paths, or the receive operation will fail due to a link on an existed path.
 
-Thanks,
-Zorro
+This currently fails on btrfs but is fixed by a kernel patch with the
+commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
+existing file paths")
 
->  tests/xfs/179     |  2 +-
->  tests/xfs/202     | 40 ----------------------------------------
->  tests/xfs/202.out | 29 -----------------------------
->  tests/xfs/520     |  2 +-
->  4 files changed, 2 insertions(+), 71 deletions(-)
->  delete mode 100755 tests/xfs/202
->  delete mode 100644 tests/xfs/202.out
-> 
-> diff --git a/tests/xfs/179 b/tests/xfs/179
-> index ec0cb7e5..f0169717 100755
-> --- a/tests/xfs/179
-> +++ b/tests/xfs/179
-> @@ -22,7 +22,7 @@ _require_cp_reflink
->  _require_test_program "punch-alternating"
->  
->  echo "Format and mount"
-> -_scratch_mkfs -d agcount=1 > $seqres.full 2>&1
-> +_scratch_mkfs > $seqres.full 2>&1
->  _scratch_mount >> $seqres.full 2>&1
->  
->  testdir=$SCRATCH_MNT/test-$seq
-> diff --git a/tests/xfs/202 b/tests/xfs/202
-> deleted file mode 100755
-> index 5075d3a1..00000000
-> --- a/tests/xfs/202
-> +++ /dev/null
-> @@ -1,40 +0,0 @@
-> -#! /bin/bash
-> -# SPDX-License-Identifier: GPL-2.0
-> -# Copyright (c) 2009 Christoph Hellwig.
-> -#
-> -# FS QA Test No. 202
-> -#
-> -# Test out the xfs_repair -o force_geometry option on single-AG filesystems.
-> -#
-> -. ./common/preamble
-> -_begin_fstest repair auto quick
-> -
-> -# Import common functions.
-> -. ./common/filter
-> -. ./common/repair
-> -
-> -# real QA test starts here
-> -_supported_fs xfs
-> -
-> -# single AG will cause default xfs_repair to fail. This test is actually
-> -# testing the special corner case option needed to repair a single AG fs.
-> -_require_scratch_nocheck
-> -
-> -#
-> -# The AG size is limited to 1TB (or even less with historic xfsprogs),
-> -# so chose a small enough filesystem to make sure we can actually create
-> -# a single AG filesystem.
-> -#
-> -echo "== Creating single-AG filesystem =="
-> -_scratch_mkfs_xfs -d agcount=1 -d size=$((1024*1024*1024)) >/dev/null 2>&1 \
-> - || _fail "!!! failed to make filesystem with single AG"
-> -
-> -echo "== Trying to repair it (should fail) =="
-> -_scratch_xfs_repair
-> -
-> -echo "== Trying to repair it with -o force_geometry =="
-> -_scratch_xfs_repair -o force_geometry 2>&1 | _filter_repair
-> -
-> -# success, all done
-> -echo "*** done"
-> -status=0
-> diff --git a/tests/xfs/202.out b/tests/xfs/202.out
-> deleted file mode 100644
-> index c2c5c881..00000000
-> --- a/tests/xfs/202.out
-> +++ /dev/null
-> @@ -1,29 +0,0 @@
-> -QA output created by 202
-> -== Creating single-AG filesystem ==
-> -== Trying to repair it (should fail) ==
-> -Phase 1 - find and verify superblock...
-> -Only one AG detected - cannot validate filesystem geometry.
-> -Use the -o force_geometry option to proceed.
-> -== Trying to repair it with -o force_geometry ==
-> -Phase 1 - find and verify superblock...
-> -Phase 2 - using <TYPEOF> log
-> -        - zero log...
-> -        - scan filesystem freespace and inode maps...
-> -        - found root inode chunk
-> -Phase 3 - for each AG...
-> -        - scan and clear agi unlinked lists...
-> -        - process known inodes and perform inode discovery...
-> -        - process newly discovered inodes...
-> -Phase 4 - check for duplicate blocks...
-> -        - setting up duplicate extent list...
-> -        - check for inodes claiming duplicate blocks...
-> -Phase 5 - rebuild AG headers and trees...
-> -        - reset superblock...
-> -Phase 6 - check inode connectivity...
-> -        - resetting contents of realtime bitmap and summary inodes
-> -        - traversing filesystem ...
-> -        - traversal finished ...
-> -        - moving disconnected inodes to lost+found ...
-> -Phase 7 - verify and correct link counts...
-> -done
-> -*** done
-> diff --git a/tests/xfs/520 b/tests/xfs/520
-> index d9e252bd..de70db60 100755
-> --- a/tests/xfs/520
-> +++ b/tests/xfs/520
-> @@ -60,7 +60,7 @@ force_crafted_metadata() {
->  }
->  
->  bigval=100000000
-> -fsdsopt="-d agcount=1,size=512m"
-> +fsdsopt="-d size=512m"
->  
->  force_crafted_metadata freeblks 0 "agf 0"
->  force_crafted_metadata longest $bigval "agf 0"
-> -- 
-> 2.31.1
-> 
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: BingJing Chang <bingjingc@synology.com>
+---
+Changelog:
+
+V3->V4:
+  1. Remove the redundant import of common/filter.
+
+V2->V3:
+  1. Use _fixed_by_kernel_commit tag.
+  2. Fix a bug creating the snapshot on a wrong path.
+  3. Remove the unnecessary cleanup of temp files.
+  4. Always keep the _scratch_mkfs output in $seqres.full.
+
+V1->V2:
+  1. Fix several typos.
+  2. Create a temp folder as btrfs/241 to store the send streams.
+  3. Use fssum utility to verify the results.
+---
+ tests/btrfs/272     | 88 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/272.out |  3 ++
+ 2 files changed, 91 insertions(+)
+ create mode 100755 tests/btrfs/272
+ create mode 100644 tests/btrfs/272.out
+
+diff --git a/tests/btrfs/272 b/tests/btrfs/272
+new file mode 100755
+index 00000000..a49ec076
+--- /dev/null
++++ b/tests/btrfs/272
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 BingJing Chang.
++#
++# FS QA Test No. btrfs/272
++#
++# Regression test for btrfs incremental send issue where a link instruction
++# is sent against an existing path, causing btrfs receive to fail.
++#
++# This issue is fixed by the following linux kernel btrfs patch:
++#
++#   commit 3aa5bd367fa5a3 ("btrfs: send: fix sending link commands for
++#   existing file paths")
++#
++. ./common/preamble
++_begin_fstest auto quick send
++
++# real QA test starts here
++_supported_fs btrfs
++_fixed_by_kernel_commit 3aa5bd367fa5a3 \
++	"btrfs: send: fix sending link commands for existing file paths"
++_require_test
++_require_scratch
++_require_fssum
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create a file and 2000 hard links to the same inode
++_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
++touch $SCRATCH_MNT/vol/foo
++for i in {1..2000}; do
++	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
++done
++
++# Create a snapshot for a full send operation
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
++_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
++
++# Remove 2000 hard links and re-create the last 1000 links
++for i in {1..2000}; do
++	rm $SCRATCH_MNT/vol/$i
++done
++for i in {1001..2000}; do
++	link $SCRATCH_MNT/vol/foo $SCRATCH_MNT/vol/$i
++done
++
++# Create another snapshot for an incremental send operation
++_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap2
++_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
++		     $SCRATCH_MNT/snap2
++
++$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/snap1
++$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/snap2/snap1 $SCRATCH_MNT/snap2
++
++# Recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Add the first snapshot to the new filesystem by applying the first send
++# stream.
++_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
++
++# The incremental receive operation below used to fail with the following
++# error:
++#
++#    ERROR: link 1238 -> foo failed: File exists
++#
++# This is because the path "1238" was stored as an extended ref item in the
++# original snapshot but as a normal ref item in the next snapshot. The send
++# operation cannot handle the duplicated paths, which are stored in
++# different ways, well, so it decides to issue a link operation for the
++# existing path. This results in the receiver to fail with the above error.
++_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
++
++$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/snap1
++$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/snap2
++
++status=0
++exit
+diff --git a/tests/btrfs/272.out b/tests/btrfs/272.out
+new file mode 100644
+index 00000000..b009b87a
+--- /dev/null
++++ b/tests/btrfs/272.out
+@@ -0,0 +1,3 @@
++QA output created by 272
++OK
++OK
+-- 
+2.37.1
 
