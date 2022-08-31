@@ -2,58 +2,58 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A405ECAAA1
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Aug 2022 00:02:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEF80ECAAD4
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Aug 2022 00:10:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231228AbiHaACl (ORCPT
+        id S229776AbiHaAKh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Aug 2022 20:02:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37174 "EHLO
+        Tue, 30 Aug 2022 20:10:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48180 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229797AbiHaACk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 20:02:40 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDF8267450;
-        Tue, 30 Aug 2022 17:02:39 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id mj6so7571430pjb.1;
-        Tue, 30 Aug 2022 17:02:39 -0700 (PDT)
+        with ESMTP id S229740AbiHaAKh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Aug 2022 20:10:37 -0400
+Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 761D649B58;
+        Tue, 30 Aug 2022 17:10:34 -0700 (PDT)
+Received: by mail-pf1-x434.google.com with SMTP id q15so7528261pfn.11;
+        Tue, 30 Aug 2022 17:10:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc;
-        bh=zztb5SPCCCHz/KqN3OXQAj9QVlbXU1r8bk9c+Pzi20Y=;
-        b=OfDOgzt7naP5KY6vEuPSR90qIuvAFuWCLoATNNQfFRvqTNUUGIfGTRub1FqKLn+Y9P
-         +ByOpknRqkTyrmipGhxUL0J3BjnAHxFJDlz3d1/pzTMVZ/xYYL/T2HQ8bvG6w2/BOz/6
-         3esewHJupEYfjVH3Eh/MeH7pxRJ5DAdJv2x28vIh+wY4qkeL8Ot9KGfJd67hXr2XtYvH
-         Sx2cJz25z0mmql96w357E4tPhPTlgiSqWabY1Jz9HlyE3wLF7F2ugVFJ8Js8rddH+6LL
-         Of6Kj7dJbolQFhpEj3EH7Hwy0nAIcIqoxWB+cCDznkB0E8WqDiApbW0BOToqpzhRFH9a
-         drpA==
+        bh=QLiKYqdI1KiuJx5ULNik5L1yb8NhaJKxbFBCsKQAtBw=;
+        b=JDY1+qdiL0JRXboT215qoRyPDRoQIMzSGvN6+Pv+r1ytU3mcF9CSOzfeocPmLqhDwB
+         UMvPESXyaSEJGj01kQeOaoc38ZndtIs7q9p0F+5CSi3HuxKpCTwKOy5HxJZdxlk9cxWv
+         OgeXfLb60SPnPQdBkjpQelZvyGaCz/4OJi+UA5H3GTf5nHCHY6k+vSRKNqbhQs6XpomS
+         GbuZzmGcgLHDZwWw7ZpcNsFWqVl1eU3hLae1dgGbuvEYxtTIkp38P0F66lqyzXpjhH0l
+         5m2TMkkLR1WjwbB5ZcBElJZxmK1HVhVlytjoK84YeDSheWYWL8PusIwR0GFxDYYG3ICq
+         N7YA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc;
-        bh=zztb5SPCCCHz/KqN3OXQAj9QVlbXU1r8bk9c+Pzi20Y=;
-        b=bnkF/+aRNiZ7Vqx1F1wtBg3Iu4TdJiuuHpED+aIsp4nQbp3F1siNXpM75lGjlsPAAy
-         6RRJc5z7tXJ6zqI17KAHQyO9bGtmRuUEv+PazP7SEFJfw9SbWuFRl5yVhFziSnE84cXo
-         TbSTXwm+jOsMPqnhJkl08BPketxPvsB9SaD9i5/Ws8gqaiD6ziOpfJ7ieopORGW+trcp
-         vQO3YS6cXRygptPZT/RtqjMf9lWdtb4fLpJnepjq4OmEBkq6cT+DqVq30W4qqfqJfmqT
-         e1vbkogWTG4lSPUKBYpPELjC5dc2evXPnRtbZPvvNwIPfUTogtx5QyMYBRddAzXMc3Cu
-         qc+Q==
-X-Gm-Message-State: ACgBeo1Lt+zqbGSjqe6C1adU5IEN/HKWQ1RVCpaj8YAqKkSR5RzyprnY
-        wlGBJO4wr6Z3YYz/lQ7a4tCvD9zA+3PxRPIzYqA=
-X-Google-Smtp-Source: AA6agR5sET670AKG+jVD9+Y66Dgq2KS75Zb/lauMKmOgUw/h/9xZk4MQJQy4i1s1tQoSjn7ZZC1V6WayRq7SS8BHmh8=
-X-Received: by 2002:a17:90a:cb14:b0:1fd:c964:f708 with SMTP id
- z20-20020a17090acb1400b001fdc964f708mr523142pjt.62.1661904159351; Tue, 30 Aug
- 2022 17:02:39 -0700 (PDT)
+        bh=QLiKYqdI1KiuJx5ULNik5L1yb8NhaJKxbFBCsKQAtBw=;
+        b=Rjz7r9diXcw8f7ldk3XCLoqjqGyaevmVYITJtuxawrOs8H8jqGDr6QTX4hA+ZBYiMs
+         VXjTFDguFC2SD6mU/CjFI44T8GbXtj4ZZBMzq44bJjWYO0XDqHtnMJoD4O98AkwPovU4
+         gL1E52gWiDg7JqOr0earYuyeX31b+G+AQsKRNitWAa5KscZcVSm6Es7lMfTBETAnSF9D
+         /6Q9j0OGIk8NgbU1U47sWXby/jQvRcjbHRPrhMT/Cn4JFbQ7AP36yJqbZGAdE55n7uTF
+         NaXXoXKlBtSTysuzGO76RIEpIaUQt2NmPrmcxnxZi1WizgnWCcSVSqX/W5fsBW4KzLJH
+         KDWA==
+X-Gm-Message-State: ACgBeo2p/EeJCrwU27z94C0Cg0Rd3wygwHnZtEU4ajL85TGtnoQ/0Ue2
+        ikFuvnA9mPC85ByO4e78cWMMNHaSX9dztCkfE9NE9wW7dqA=
+X-Google-Smtp-Source: AA6agR4R2zwM5m1tdy+zEJChk+4o+Qe//ICLJUGoIw0AL8xGcj0y+QXQdofmm/zOrXCjnz+e91vfZfYWW3U6nEipYPc=
+X-Received: by 2002:aa7:8055:0:b0:536:df46:c567 with SMTP id
+ y21-20020aa78055000000b00536df46c567mr23975113pfm.1.1661904633901; Tue, 30
+ Aug 2022 17:10:33 -0700 (PDT)
 MIME-Version: 1.0
 References: <20220830044433.1719246-1-jencce.kernel@gmail.com>
- <20220830044433.1719246-4-jencce.kernel@gmail.com> <20220830134257.2sve6rwvyvz66lsg@zlang-mailbox>
-In-Reply-To: <20220830134257.2sve6rwvyvz66lsg@zlang-mailbox>
+ <20220830044433.1719246-4-jencce.kernel@gmail.com> <Yw4nSjAsFbCYveP+@magnolia>
+In-Reply-To: <Yw4nSjAsFbCYveP+@magnolia>
 From:   Murphy Zhou <jencce.kernel@gmail.com>
-Date:   Wed, 31 Aug 2022 08:02:27 +0800
-Message-ID: <CADJHv_uSATsSnpnxaxvYf0N8wDQVU6qDeGuLW-UYmE1_A+NpyA@mail.gmail.com>
+Date:   Wed, 31 Aug 2022 08:10:21 +0800
+Message-ID: <CADJHv_tWzv6L-s63VjR0_TGZgapH5UR-S+bK41msrQJsO_o8bg@mail.gmail.com>
 Subject: Re: [PATCH v3 3/4] tests/xfs: remove single-AG options
-To:     Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     fstests <fstests@vger.kernel.org>,
         linux-xfs <linux-xfs@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
@@ -61,7 +61,7 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 30, 2022 at 9:43 PM Zorro Lang <zlang@redhat.com> wrote:
+On Tue, Aug 30, 2022 at 11:05 PM Darrick J. Wong <djwong@kernel.org> wrote:
 >
 > On Tue, Aug 30, 2022 at 12:44:32PM +0800, Murphy Zhou wrote:
 > > Since this xfsprogs commit:
@@ -69,23 +69,38 @@ On Tue, Aug 30, 2022 at 9:43 PM Zorro Lang <zlang@redhat.com> wrote:
 > > Single-AG xfs is not allowed.
 > >
 > > Remove agcount=1 from mkfs options and xfs/202 entirely.
-> >
+>
+> It's not supported for /new/ filesystems, but the rest of the tools must
+> continue the same levels of support for existing filesystems, even if
+> they cannot be created today.
+
+All these changes, all of them, only fix mkfs complaints, not others.
+
+So it is ONLY about creating new filesystems, not the existing ones.
+
+>
+> Second, there exist fstests that need to create a specific layout to
+> test some part of the code.  Single-AG filesystems sometimes make this
+> much easier.
+
+But it's not allowed to be made by mkfs.xfs. Most of fstests create fs
+from scratch, it's hard to cover in this situation.
+
+Thanks,
+Murphy
+
+>
+> Both of these reasons are why fstests (and LTP) get a special pass on
+> all the new checks in mkfs 5.19.
+>
+> IOWs, we still need to check that xfs_repair works ok for existing
+> single AG filesystems.  We can perhaps drop these tests in a decade or
+> so, but now is premature.
+>
+> --D
+>
 > > Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
 > > ---
->
-> Looks like all single AG xfs tests are invalid now. As this patch would like to
-> remove xfs specific cases or change its original format, better to let xfs list
-> review, to make sure they are informed at least.
->
-> BTW I remember xfs/041 uses "agcount=1" too, don't we need to change it with
-> this patch together?
-
-I changed to agcount=2 with the fs size change patch.
-
->
-> Thanks,
-> Zorro
->
 > >  tests/xfs/179     |  2 +-
 > >  tests/xfs/202     | 40 ----------------------------------------
 > >  tests/xfs/202.out | 29 -----------------------------
@@ -204,4 +219,3 @@ I changed to agcount=2 with the fs size change patch.
 > > --
 > > 2.31.1
 > >
->
