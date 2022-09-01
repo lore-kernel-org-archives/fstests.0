@@ -2,151 +2,197 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51AAAECAAD1
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Sep 2022 14:35:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43242ECAAD3
+	for <linux-fstests@archiver.kernel.org>; Thu,  1 Sep 2022 16:10:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234582AbiIAOfH (ORCPT
+        id S234877AbiIAQKo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Sep 2022 10:35:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50916 "EHLO
+        Thu, 1 Sep 2022 12:10:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234837AbiIAOfF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 10:35:05 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91D3D1A825;
-        Thu,  1 Sep 2022 07:35:04 -0700 (PDT)
+        with ESMTP id S234900AbiIAQKk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 12:10:40 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 258A432A9F;
+        Thu,  1 Sep 2022 09:10:36 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0060E61D44;
-        Thu,  1 Sep 2022 14:35:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82CB4C433D6;
-        Thu,  1 Sep 2022 14:35:02 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A87C861F69;
+        Thu,  1 Sep 2022 16:10:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4073FC433D6;
+        Thu,  1 Sep 2022 16:10:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1662042903;
-        bh=UVUZa3kUR0wSInbe83acw9bVhEeigAl/rf7NUa/DVSg=;
+        s=k20201202; t=1662048635;
+        bh=lFQ7Y/eCSF3He4PUTwuqymxubf7JzTOuanMETZJH4SE=;
         h=From:To:Cc:Subject:Date:From;
-        b=KwyWUQni4ybEi8ppdLhQmRhHiX299h7YjqaGrmide7cosSAluozyVsdqLd/39Pmi+
-         sK+YsrW2YVZTPoqZExOGJCjOL4Iqkl477gh4LCvu6jq873d8mAw1YQRoHtxKw1xUv0
-         n59Ku/aMXTZW9gcnem1Yi1nE/rASMQLeNEIDZFvFn8c9e+Ah1MEP6c1FWiHsWdKEur
-         5NP2v31SnKKpRhrAvu8LDDkgZyOrMGG9HrCHL5+QntKY8bpDZGGC9e7efgKGuybWct
-         zFaIRmCs38iyzdxiqQlPVYmfBxFWm0c3uhYU4aNPyx3OQfMeyJVatNOi/ZCjUW3BGT
-         8ERrPNgAG4t7A==
-From:   Zorro Lang <zlang@kernel.org>
+        b=n58a+OmYHMRTy4g1g5SOLId2EkuSt/+exd+attIyg/uUeQ1GzM/wtYSxvhZloahMV
+         VE03HvNwapGyYWxNVCtAFwooKkey+WmyBCjhrRUoYfD2J5hCUoBWr0mQhPHJVY69Zz
+         Bz33EqOVdwB/NjYjYsI3FcTwG7WFuqEUU/nCmZOSOENPG06zE3z4yrIaUV2SUkF08h
+         CRGzrmSbKL6lm5V5GdhJQGZ5+8Eowq4QOsSrXhhnNfK09rZyvFiGRsoDUEOQh+5z90
+         d07GHfaoiyXXFS5cU2zE0dq9ytDOWQRxPy3/8oUK7W3NlOpkI3dYHYIn8+VlyDcXbG
+         3mFS+jcE/N6lw==
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v3] generic: new test to verify selinux label of whiteout inode
-Date:   Thu,  1 Sep 2022 22:34:59 +0800
-Message-Id: <20220901143459.3883118-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.31.1
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] generic: test fsync after punching hole adjacent to an existing hole
+Date:   Thu,  1 Sep 2022 17:10:09 +0100
+Message-Id: <176a9103bc2a3fe5cc8d9306c3a7c50d5cdc1568.1662048436.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-A but on XFS cause renameat2() with flags=RENAME_WHITEOUT doesn't
-apply an selinux label. That's quite different with other fs (e.g.
-ext4, tmpfs).
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
+Test that if we punch a hole adjacent to an existing hole, fsync the file
+and then power fail, the new hole exists after mounting again the
+filesystem.
+
+This currently fails on btrfs with kernels 5.18 and 5.19 when not using
+the "no-holes" feature. The "no-holes" feature is enabled by default at
+mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
+btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
+"-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
+btrfs test matrix).
+
+The issue is fixed for btrfs with the following kernel patch:
+
+   "btrfs: update generation of hole file extent item when merging holes"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
 
-V1 -> V2:
-1) Add "whiteout" group
-2) Add commit ID which fix that bug
-3) Rebase to latest fstests for-next branch
+v2: Added kernel commit tag (now that's merged in Linus' tree),
+    added auto group, added the new odd _require_congruent_file_oplen
+    requirement.
 
-V2 -> V3:
-Rebase to latest fstests for-next branch again
-
-Thanks,
-Zorro
-
- tests/generic/695     | 64 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/695.out |  2 ++
- 2 files changed, 66 insertions(+)
+ tests/generic/695     | 91 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/695.out | 15 +++++++
+ 2 files changed, 106 insertions(+)
  create mode 100755 tests/generic/695
  create mode 100644 tests/generic/695.out
 
 diff --git a/tests/generic/695 b/tests/generic/695
 new file mode 100755
-index 00000000..f04d4b3d
+index 00000000..b46e35cf
 --- /dev/null
 +++ b/tests/generic/695
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,91 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Red Hat, Copyright.  All Rights Reserved.
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test No. 695
++# FS QA Test 695
 +#
-+# Verify selinux label can be kept after RENAME_WHITEOUT. This is
-+# a regression test for:
-+#   70b589a37e1a ("xfs: add selinux labels to whiteout inodes")
++# Test that if we punch a hole adjacent to an existing hole, fsync the file and
++# then power fail, the new hole exists after mounting again the filesystem.
++#
++# This is motivated by a regression on btrfs, fixed by the commit mentioned
++# below, when not using the no-holes feature (which is enabled by default since
++# btrfs-progs 5.15).
 +#
 +. ./common/preamble
-+_begin_fstest auto quick rename attr whiteout
++_begin_fstest auto quick log punch
 +
-+# Import common functions.
-+. ./common/attr
-+. ./common/renameat2
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_scratch
-+_require_attrs
-+_require_renameat2 whiteout
-+
-+_fixed_by_kernel_commit 70b589a37e1a \
-+	xfs: add selinux labels to whiteout inodes
-+
-+get_selinux_label()
++_cleanup()
 +{
-+	local label
-+
-+	label=`_getfattr --absolute-names -n security.selinux $@ | sed -n 's/security.selinux=\"\(.*\)\"/\1/p'`
-+	if [ ${PIPESTATUS[0]} -ne 0 -o -z "$label" ];then
-+		_fail "Fail to get selinux label: $label"
-+	fi
-+	echo $label
++	_cleanup_flakey
++	cd /
++	rm -r -f $tmp.*
 +}
 +
-+_scratch_mkfs >> $seqres.full 2>&1
-+# SELINUX_MOUNT_OPTIONS will be set in common/config if selinux is enabled
-+if [ -z "$SELINUX_MOUNT_OPTIONS" ]; then
-+	_notrun "Require selinux to be enabled"
-+fi
-+# This test need to verify selinux labels in objects, so unset this selinux
-+# mount option
-+export SELINUX_MOUNT_OPTIONS=""
-+_scratch_mount
++. ./common/filter
++. ./common/dmflakey
++. ./common/punch
 +
-+touch $SCRATCH_MNT/f1
-+echo "Before RENAME_WHITEOUT" >> $seqres.full
-+ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
-+# Expect f1 and f2 have same label after RENAME_WHITEOUT
-+$here/src/renameat2 -w $SCRATCH_MNT/f1 $SCRATCH_MNT/f2
-+echo "After RENAME_WHITEOUT" >> $seqres.full
-+ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
-+label1=`get_selinux_label $SCRATCH_MNT/f1`
-+label2=`get_selinux_label $SCRATCH_MNT/f2`
-+if [ "$label1" != "$label2" ];then
-+	echo "$label1 != $label2"
-+fi
++_supported_fs generic
++_fixed_by_kernel_commit e6e3dec6c3c288 \
++        "btrfs: update generation of hole file extent item when merging holes"
++_require_scratch
++_require_dm_target flakey
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "fiemap"
 +
-+echo "Silence is golden"
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# We punch 2M holes and require extent allocations to align to 2M in fiemap
++# results.
++_require_congruent_file_oplen $SCRATCH_MNT $((2 * 1024 * 1024))
++
++# Create our test file with the following layout:
++#
++# [0, 2M)    - hole
++# [2M, 10M)  - extent
++# [10M, 12M) - hole
++$XFS_IO_PROG -f -c "truncate 12M" \
++	     -c "pwrite -S 0xab 2M 8M" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Persist everything, commit the filesystem's transaction.
++sync
++
++# Now punch two holes in the file:
++#
++# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
++#    [0, 2M);
++# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
++#    range [10M, 12M).
++#
++# These operations start a new filesystem transaction.
++# Then finally fsync the file.
++$XFS_IO_PROG -c "fpunch 2M 2M" \
++	     -c "fpunch 8M 2M" \
++	     -c "fsync" $SCRATCH_MNT/foobar
++
++# Simulate a power failure and mount the filesystem to check that everything
++# is in the same state as before the power failure.
++_flakey_drop_and_remount
++
++# We expect the following file layout:
++#
++# [0, 4M)    - hole
++# [4M, 8M)   - extent
++# [8M, 12M)  - hole
++echo "File layout after power failure:"
++$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
++
++# When reading the file we expect to get the range [4M, 8M) filled with bytes
++# that have a value of 0xab and 0x00 for anything outside that range.
++echo "File content after power failure:"
++_hexdump $SCRATCH_MNT/foobar
++
++_unmount_flakey
++
 +# success, all done
 +status=0
 +exit
 diff --git a/tests/generic/695.out b/tests/generic/695.out
 new file mode 100644
-index 00000000..1332ff16
+index 00000000..447ef5cf
 --- /dev/null
 +++ b/tests/generic/695.out
-@@ -0,0 +1,2 @@
+@@ -0,0 +1,15 @@
 +QA output created by 695
-+Silence is golden
++wrote 8388608/8388608 bytes at offset 2097152
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File layout after power failure:
++0: [0..8191]: hole
++1: [8192..16383]: data
++2: [16384..24575]: hole
++File content after power failure:
++000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
++*
++400000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
++*
++800000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
++*
++c00000
 -- 
-2.31.1
+2.35.1
 
