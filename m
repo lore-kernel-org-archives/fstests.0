@@ -2,127 +2,151 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0990ECAAD1
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Aug 2022 10:37:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51AAAECAAD1
+	for <linux-fstests@archiver.kernel.org>; Thu,  1 Sep 2022 14:35:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229786AbiHaKhd (ORCPT
+        id S234582AbiIAOfH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 31 Aug 2022 06:37:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53678 "EHLO
+        Thu, 1 Sep 2022 10:35:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50916 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229658AbiHaKhc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 Aug 2022 06:37:32 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A28ECBFC77;
-        Wed, 31 Aug 2022 03:37:27 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S234837AbiIAOfF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 10:35:05 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91D3D1A825;
+        Thu,  1 Sep 2022 07:35:04 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 5CBCE1F950;
-        Wed, 31 Aug 2022 10:37:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1661942246; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=oAVbXh8Sv4Kg7ajdiS+SYvzgFKQFZzIUQa2MG93qgpo=;
-        b=umyq3H6nRIV03g50IC2i4MwmzWhTX1ghqj5L+iJOX33dKCUD4ASbsYwtx4DBm3CNoCMvkW
-        /13xidmFGiSczFx7mi00CgOmj0duFNykK0wA4liwa5uFJLccutK203KfJXCO6HDV630lZZ
-        ompXQ3SI2D9q5SFllAyx+iruF44srmQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1661942246;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=oAVbXh8Sv4Kg7ajdiS+SYvzgFKQFZzIUQa2MG93qgpo=;
-        b=qIrrCmxOq6U1Kslfi91K8+95+8zh9JJlffaohDkTuLa121tAIAze/Xch1l9Gf7icgrNqF0
-        HnRuhit5ITd3ecAw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 46FEC13A7C;
-        Wed, 31 Aug 2022 10:37:26 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id XFREEeY5D2OCZwAAMHmgww
-        (envelope-from <jack@suse.cz>); Wed, 31 Aug 2022 10:37:26 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-        id CE2A0A067B; Wed, 31 Aug 2022 12:37:25 +0200 (CEST)
-Date:   Wed, 31 Aug 2022 12:37:25 +0200
-From:   Jan Kara <jack@suse.cz>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Jan Kara <jack@suse.cz>, Yang Xu <xuyang2018.jy@fujitsu.com>,
-        fstests@vger.kernel.org, oliver.sang@intel.com, lkp@intel.com,
-        linux-ext4@vger.kernel.org, tytso@mit.edu, lczerner@redhat.com
-Subject: Re: [PATCH] ext4/053: Remove nouser_xattr test
-Message-ID: <20220831103725.j4fpbi75oxzqhyi6@quack3>
-References: <1660705823-2172-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <20220828024858.cf5awn2uksbpchb3@zlang-mailbox>
- <20220829100657.wunvx2twhjzuqckk@quack3>
- <20220831093148.twysch2nhpajrxpq@zlang-mailbox>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0060E61D44;
+        Thu,  1 Sep 2022 14:35:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82CB4C433D6;
+        Thu,  1 Sep 2022 14:35:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1662042903;
+        bh=UVUZa3kUR0wSInbe83acw9bVhEeigAl/rf7NUa/DVSg=;
+        h=From:To:Cc:Subject:Date:From;
+        b=KwyWUQni4ybEi8ppdLhQmRhHiX299h7YjqaGrmide7cosSAluozyVsdqLd/39Pmi+
+         sK+YsrW2YVZTPoqZExOGJCjOL4Iqkl477gh4LCvu6jq873d8mAw1YQRoHtxKw1xUv0
+         n59Ku/aMXTZW9gcnem1Yi1nE/rASMQLeNEIDZFvFn8c9e+Ah1MEP6c1FWiHsWdKEur
+         5NP2v31SnKKpRhrAvu8LDDkgZyOrMGG9HrCHL5+QntKY8bpDZGGC9e7efgKGuybWct
+         zFaIRmCs38iyzdxiqQlPVYmfBxFWm0c3uhYU4aNPyx3OQfMeyJVatNOi/ZCjUW3BGT
+         8ERrPNgAG4t7A==
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH v3] generic: new test to verify selinux label of whiteout inode
+Date:   Thu,  1 Sep 2022 22:34:59 +0800
+Message-Id: <20220901143459.3883118-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220831093148.twysch2nhpajrxpq@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed 31-08-22 17:31:48, Zorro Lang wrote:
-> On Mon, Aug 29, 2022 at 12:06:57PM +0200, Jan Kara wrote:
-> > On Sun 28-08-22 10:48:58, Zorro Lang wrote:
-> > > On Wed, Aug 17, 2022 at 11:10:23AM +0800, Yang Xu wrote:
-> > > > Plan to remove noacl and nouser_xattr mount option in kernel because they
-> > > > are deprecated[1]. So remove nouser_xattr test in here.
-> > > 
-> > > What's the [1]?
-> > > 
-> > > We'd better to be careful when we want to remove a testing coverage. I'm not
-> > > sure if they've decided to removed this mount option, the ext4/053 is an
-> > > important test case for ext4, so I'd like to hear their opinion.
-> > 
-> > Yes, the option is long deprecated and we want to remove it from ext4. But
-> > I think you might want to see official ack from Ted as a maintainer on this
-> > :). Ted?
-> 
-> It's fine for me, if anyone stand for ext4 list to give this patch a RVB, due
-> to it's not a bug fix or new testing, it's a testing deduction, and only affect
-> ext4 testing.
+A but on XFS cause renameat2() with flags=RENAME_WHITEOUT doesn't
+apply an selinux label. That's quite different with other fs (e.g.
+ext4, tmpfs).
 
-Sure, feel free to add:
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
 
-Reviewed-by: Jan Kara <jack@suse.cz>
+V1 -> V2:
+1) Add "whiteout" group
+2) Add commit ID which fix that bug
+3) Rebase to latest fstests for-next branch
 
-								Honza
+V2 -> V3:
+Rebase to latest fstests for-next branch again
 
-> > > > Reported-by: kernel test robot <oliver.sang@intel.com>
-> > > > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> > > > ---
-> > > >  tests/ext4/053 | 1 -
-> > > >  1 file changed, 1 deletion(-)
-> > > > 
-> > > > diff --git a/tests/ext4/053 b/tests/ext4/053
-> > > > index 555e474e..5d2c478a 100755
-> > > > --- a/tests/ext4/053
-> > > > +++ b/tests/ext4/053
-> > > > @@ -439,7 +439,6 @@ for fstype in ext2 ext3 ext4; do
-> > > >  	mnt oldalloc removed
-> > > >  	mnt orlov removed
-> > > >  	mnt -t user_xattr
-> > > > -	mnt nouser_xattr
-> > > >  
-> > > >  	if _has_kernel_config CONFIG_EXT4_FS_POSIX_ACL; then
-> > > >  		mnt -t acl
-> > > > -- 
-> > > > 2.27.0
-> > > > 
-> > > 
-> > -- 
-> > Jan Kara <jack@suse.com>
-> > SUSE Labs, CR
-> > 
-> 
+Thanks,
+Zorro
+
+ tests/generic/695     | 64 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/695.out |  2 ++
+ 2 files changed, 66 insertions(+)
+ create mode 100755 tests/generic/695
+ create mode 100644 tests/generic/695.out
+
+diff --git a/tests/generic/695 b/tests/generic/695
+new file mode 100755
+index 00000000..f04d4b3d
+--- /dev/null
++++ b/tests/generic/695
+@@ -0,0 +1,64 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Red Hat, Copyright.  All Rights Reserved.
++#
++# FS QA Test No. 695
++#
++# Verify selinux label can be kept after RENAME_WHITEOUT. This is
++# a regression test for:
++#   70b589a37e1a ("xfs: add selinux labels to whiteout inodes")
++#
++. ./common/preamble
++_begin_fstest auto quick rename attr whiteout
++
++# Import common functions.
++. ./common/attr
++. ./common/renameat2
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++_require_attrs
++_require_renameat2 whiteout
++
++_fixed_by_kernel_commit 70b589a37e1a \
++	xfs: add selinux labels to whiteout inodes
++
++get_selinux_label()
++{
++	local label
++
++	label=`_getfattr --absolute-names -n security.selinux $@ | sed -n 's/security.selinux=\"\(.*\)\"/\1/p'`
++	if [ ${PIPESTATUS[0]} -ne 0 -o -z "$label" ];then
++		_fail "Fail to get selinux label: $label"
++	fi
++	echo $label
++}
++
++_scratch_mkfs >> $seqres.full 2>&1
++# SELINUX_MOUNT_OPTIONS will be set in common/config if selinux is enabled
++if [ -z "$SELINUX_MOUNT_OPTIONS" ]; then
++	_notrun "Require selinux to be enabled"
++fi
++# This test need to verify selinux labels in objects, so unset this selinux
++# mount option
++export SELINUX_MOUNT_OPTIONS=""
++_scratch_mount
++
++touch $SCRATCH_MNT/f1
++echo "Before RENAME_WHITEOUT" >> $seqres.full
++ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
++# Expect f1 and f2 have same label after RENAME_WHITEOUT
++$here/src/renameat2 -w $SCRATCH_MNT/f1 $SCRATCH_MNT/f2
++echo "After RENAME_WHITEOUT" >> $seqres.full
++ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
++label1=`get_selinux_label $SCRATCH_MNT/f1`
++label2=`get_selinux_label $SCRATCH_MNT/f2`
++if [ "$label1" != "$label2" ];then
++	echo "$label1 != $label2"
++fi
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/695.out b/tests/generic/695.out
+new file mode 100644
+index 00000000..1332ff16
+--- /dev/null
++++ b/tests/generic/695.out
+@@ -0,0 +1,2 @@
++QA output created by 695
++Silence is golden
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.31.1
+
