@@ -2,124 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 319F7ECAAD5
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:22:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42584ECAAD5
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:31:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236080AbiIBJWo (ORCPT
+        id S235584AbiIBJbU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Sep 2022 05:22:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56610 "EHLO
+        Fri, 2 Sep 2022 05:31:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236068AbiIBJWl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:22:41 -0400
-Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BC9FB5E5F;
-        Fri,  2 Sep 2022 02:22:40 -0700 (PDT)
-Received: from kwepemi500019.china.huawei.com (unknown [172.30.72.56])
-        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4MJspS6h0DzHncf;
-        Fri,  2 Sep 2022 17:20:48 +0800 (CST)
-Received: from huawei.com (10.175.124.27) by kwepemi500019.china.huawei.com
- (7.221.188.117) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Fri, 2 Sep
- 2022 17:22:37 +0800
-From:   Guo Xuenan <guoxuenan@huawei.com>
-To:     <zlang@kernel.org>, <fstests@vger.kernel.org>
-CC:     <djwong@kernel.org>, <dchinner@redhat.com>,
-        <linux-xfs@vger.kernel.org>, <yi.zhang@huawei.com>,
-        <houtao1@huawei.com>, <zhengbin13@huawei.com>,
-        <jack.qiu@huawei.com>, <guoxuenan@huawei.com>
-Subject: [PATCH fstests] xfs/554: xfs add illegal bestfree array size inject for leaf dir
-Date:   Fri, 2 Sep 2022 17:40:46 +0800
-Message-ID: <20220902094046.3891252-1-guoxuenan@huawei.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S232699AbiIBJan (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:30:43 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C20044E62E;
+        Fri,  2 Sep 2022 02:30:42 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5F7AE61BBA;
+        Fri,  2 Sep 2022 09:30:42 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC1D4C433D6;
+        Fri,  2 Sep 2022 09:30:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1662111041;
+        bh=Bh9FHDBNwHPp/BxUYYcvt3nGhxk1gOj+ynGQSWWRg2c=;
+        h=From:To:Cc:Subject:Date:From;
+        b=iAJ0cxC4se7PTUeRWeKb+bnYZdtvZAL5GBXgQSFaOEynr3xl+akxADJd4EwnHVjmV
+         o5lWFze/H2UBL+mzxtxs4MA6lOqfQ14TOyFTNHX32j5qTZetl6B7hzxLhwaOG82dFf
+         zU27LcH50sHYcgWaV5HVW8nmRgMQdg3TiSW/YkqvEdnsKHgqXPC6NjFge3NEHtd8NV
+         ZN34JSIEBh8+MHz63+YECq7kdYbaJjVU1fMo43AYE8pFRw+gjcNIa4xXgVQNrHPD4k
+         r8RO4M+j3OMNNUoQsaLHp9OKh7/yJxb78Z/RJBT3eqR827XzKC8PZk0+ipQUnexaT6
+         OoWHkPa6znCWg==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] btrfs: test that we can not delete a subvolume with an active swap file
+Date:   Fri,  2 Sep 2022 10:30:32 +0100
+Message-Id: <0bc9cd4abfbde3f76b981628942f94631cef7162.1662110839.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.124.27]
-X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
- kwepemi500019.china.huawei.com (7.221.188.117)
-X-CFilter-Loop: Reflected
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test leaf dir allocting new block when bestfree array size
-less than data blocks count, which may lead to UAF.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Guo Xuenan <guoxuenan@huawei.com>
+Verify that we can not delete a subvolume that has an active swap file,
+and that after disabling the swap file, we can delete it.
+
+This tests a fix done by kernel commit 60021bd754c6ca ("btrfs: prevent
+subvol with swapfile from being deleted"), which landed in kernel 5.18.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/xfs/554     | 48 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/554.out |  6 ++++++
- 2 files changed, 54 insertions(+)
- create mode 100755 tests/xfs/554
- create mode 100644 tests/xfs/554.out
 
-diff --git a/tests/xfs/554 b/tests/xfs/554
+V2: Add _cleanup() override to make sure swapfile is disabled in case
+    the test is interrupted.
+
+ tests/btrfs/274     | 58 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/274.out |  6 +++++
+ 2 files changed, 64 insertions(+)
+ create mode 100755 tests/btrfs/274
+ create mode 100644 tests/btrfs/274.out
+
+diff --git a/tests/btrfs/274 b/tests/btrfs/274
 new file mode 100755
-index 00000000..fcf45731
+index 00000000..c0594e25
 --- /dev/null
-+++ b/tests/xfs/554
-@@ -0,0 +1,48 @@
++++ b/tests/btrfs/274
+@@ -0,0 +1,58 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Huawei Limited.  All Rights Reserved.
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test No. 554
++# FS QA Test 274
 +#
-+# Test leaf dir bestfree array size match with dir disk size
++# Test that we can not delete a subvolume that has an active swap file.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick
++_begin_fstest auto quick swap subvol
 +
-+# Import common functions.
-+. ./common/populate
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	test -n "$swap_file" && swapoff $swap_file &> /dev/null
++}
 +
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_check_dmesg
++. ./common/filter
 +
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount  >> $seqres.full 2>&1
++_supported_fs btrfs
++_fixed_by_kernel_commit 60021bd754c6ca \
++    "btrfs: prevent subvol with swapfile from being deleted"
++_require_scratch_swapfile
 +
-+echo "Create and check leaf dir"
-+blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-+dblksz="$($XFS_INFO_PROG "${SCRATCH_DEV}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
-+leaf_lblk="$((32 * 1073741824 / blksz))"
-+node_lblk="$((64 * 1073741824 / blksz))"
-+__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dblksz / 12))"
-+leaf_dir="$(__populate_find_inode "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF")"
-+_scratch_unmount
-+__populate_check_xfs_dir "${leaf_dir}" "leaf"
-+
-+echo "Inject bad bestfress array size"
-+_scratch_xfs_db -x -c "inode ${leaf_dir}" -c "dblock 8388608" -c "write ltail.bestcount 0"
-+
-+echo "Test add entry to dir"
++_scratch_mkfs >> $seqres.full 2>&1
 +_scratch_mount
-+touch ${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/{1..100}.txt > /dev/null 2>&1
-+_scratch_unmount 2>&1
-+_repair_scratch_fs >> $seqres.full 2>&1
 +
-+# check demsg error
-+_check_dmesg
++swap_file="$SCRATCH_MNT/subvol/swap"
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol | _filter_scratch
++
++echo "Creating and activating swap file..."
++_format_swapfile $swap_file $(($(get_page_size) * 32)) >> $seqres.full
++_swapon_file $swap_file
++
++echo "Attempting to delete subvolume with swap file enabled..."
++# Output differs with different btrfs-progs versions and some display multiple
++# lines on failure like this for example:
++#
++#   ERROR: Could not destroy subvolume/snapshot: Operation not permitted
++#   WARNING: deletion failed with EPERM, send may be in progress
++#   Delete subvolume (no-commit): '/home/fdmanana/btrfs-tests/scratch_1/subvol'
++#
++# So just redirect all output to the .full file and check the command's exit
++# status instead.
++$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/subvol >> $seqres.full 2>&1 && \
++    echo "subvolume deletion successful, expected failure!"
++
++echo "Disabling swap file..."
++swapoff $swap_file
++
++echo "Attempting to delete subvolume after disabling swap file..."
++$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/subvol >> $seqres.full 2>&1 || \
++   echo "subvolume deletion failure, expected success!"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+diff --git a/tests/btrfs/274.out b/tests/btrfs/274.out
 new file mode 100644
-index 00000000..ea1f30cc
+index 00000000..66e0de25
 --- /dev/null
-+++ b/tests/xfs/554.out
++++ b/tests/btrfs/274.out
 @@ -0,0 +1,6 @@
-+QA output created by 554
-+Format and mount
-+Create and check leaf dir
-+Inject bad bestfress array size
-+ltail.bestcount = 0
-+Test add entry to dir
++QA output created by 274
++Create subvolume 'SCRATCH_MNT/subvol'
++Creating and activating swap file...
++Attempting to delete subvolume with swap file enabled...
++Disabling swap file...
++Attempting to delete subvolume after disabling swap file...
 -- 
-2.25.1
+2.35.1
 
