@@ -2,279 +2,180 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50762ECAAD5
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:41:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64E63ECAAD5
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:42:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233341AbiIBJlf (ORCPT
+        id S235486AbiIBJmx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Sep 2022 05:41:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38570 "EHLO
+        Fri, 2 Sep 2022 05:42:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233481AbiIBJld (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:41:33 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D2A82E9F2;
-        Fri,  2 Sep 2022 02:41:32 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id ACFA861E36;
-        Fri,  2 Sep 2022 09:41:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A824DC433C1;
-        Fri,  2 Sep 2022 09:41:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1662111691;
-        bh=JlfZEPKunXFgiUrPOyu21ml9zgBI6rBnRu5PPuVieRY=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=rIqWPkvCOvhlXJFByMsyv0QO8bZMo61rs7r9Wbk25ArWcFO2vQt+Xm6xBVrU1FuIC
-         +MHOX2Okv4ySJbC6lE8PIQKo7d5HLfL3eO7Z1YWb7XRuHWzYJfhiN/H5MbRYqsUG5l
-         kWL2vxyT+QwLb8eXbUF1AD40xK7JJZylXmjY61lqrLu7ZgXh3/9hpT8MJSIvf3oT9O
-         gRUuHnbKNMaw8qUXl0TyHeZOgreozZJ1LNO/H9yHDtezUqnmhQJwiZSPLd7NT3GhJK
-         fSdn4m5Pc6lXJqz57N/1naXCBPhRn8XejzYxSnwuwUyn6Qak/BgtArji0WycjuhUvd
-         /Tl2ZaJSF+SyA==
-Message-ID: <5167c66c0a3285d2d3188871250af77df3919635.camel@kernel.org>
-Subject: Re: [xfstests PATCH] generic/693: add basic change attr test
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        Linux-Fsdevel <linux-fsdevel@vger.kernel.org>
-Date:   Fri, 02 Sep 2022 05:41:29 -0400
-In-Reply-To: <CADJHv_ufx=k+HGbL8wChLVXLsv-HOgzdMMfU4eUfnV3dZFMnaQ@mail.gmail.com>
-References: <20220816133413.44298-1-jlayton@kernel.org>
-         <CADJHv_ufx=k+HGbL8wChLVXLsv-HOgzdMMfU4eUfnV3dZFMnaQ@mail.gmail.com>
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4 (3.44.4-1.fc36) 
+        with ESMTP id S235727AbiIBJmv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:42:51 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85381CCE1C;
+        Fri,  2 Sep 2022 02:42:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1662111764;
+        bh=EerkxjvmxnIlbJga+jXmNGmfN0/eIJP/nXPk7zuf1t0=;
+        h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
+        b=ZM6cF1Ckl05KkXfGwMTXlDt3UYUuQIyeKML11DmAV2TEzUmwKIhFnDoc1FdNjE53u
+         qKpwjDCT6WQqlkPjwfIe8Knft8O1lMWsHsgVgvlSm9TolQ5VByzyN05QjaD1UpBBME
+         GH8Tvb/UtO/vKs0sErkiUW3K29FO9n3r2hnmegw8=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1M89L1-1oPuam1fQh-005IpU; Fri, 02
+ Sep 2022 11:42:44 +0200
+Message-ID: <58aafcbd-7fe8-fb50-3229-65e9721e471b@gmx.com>
+Date:   Fri, 2 Sep 2022 17:42:40 +0800
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.0
+Subject: Re: [PATCH v2] btrfs: test that we can not delete a subvolume with an
+ active swap file
+Content-Language: en-US
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <0bc9cd4abfbde3f76b981628942f94631cef7162.1662110839.git.fdmanana@suse.com>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+In-Reply-To: <0bc9cd4abfbde3f76b981628942f94631cef7162.1662110839.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:KhnnFJl6Jb3e954zWnTvoCeFald9/Ty8pDkbpHuknTBGgxETgQO
+ 9oA31OzX5vFF2x/rWIW0lqgkdJ7PsNZyVPVlATjYOE1NqLVssBI5ifNo60PjoBNx5kKbGzm
+ Ay4sOdiCfagPW9bRkrQ1xd5MR2VZ7z+9/bD9Nrk/i9e8RxV4+GQU5lH5O+0dtHgeCmbIGNt
+ aF/Gy3Fr5jXUzgqKsahYQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:jmLeVHmm1Oc=:V4WmIjg3UASkChnME+2CUV
+ G1bEUx75IKCV/pMAiA3UgOGXHPfRbhFAqrj40q5D++Mdu0SBNh1LrHidmZvcn3QeGFw8/Kvnx
+ PLKlgkK+97cUiAOFDua1g1FuimvXcUKp7AnsvJE8Z1OA7o6AehWx9BNK1Oitjg/AEq8K7hCDQ
+ RP/CmDivLjxNUSBXmXe5iNZodyLTJh0xJ9B74vCyvRnXM0C1zzWXlB3S2czMeUhv7jAH10bG/
+ ZIyCu/+abcB0eoEVnERNl6kc0Ob2kzHZ0rCAR2l9vhmPKJyVBKVq0NzETsMV+Fsmj/tSIaxNr
+ eKUubOBVRyL71ga9lFUFMwFmFiYL+dA4Zq2jxZUsNpophy1nLfLi7v87nV43nqbZIlVr1sWcz
+ cMqyXXjPAecZ7dcCja3hggJ0l1V4x5p7lzshsLCgjIayW0Zd2SSMXzy6/KyzXNNJrj+UsVExt
+ ALv4LysTxaban/Plm9plY1ftve1gvzTEnYnFe1CPOx7KN1lznHDJjNN30UiQw545q9VDYT0RB
+ 5WJFLR9tSB93LiU+5z1XSMzkDq7CVqI36Ctplo/b8bKD4qw0Xk8H11R0NKMHdfA1PO+wQ+Ehm
+ KztCADI6pl/JgK8LyQGvVMLmPsvAWhvV+QLJQbtqd3K2/A+jAIh4l09ueZsTklR7eFw7sO6Vb
+ T0tAjcej43aIdK2h2koCVAXjOUf7YPcTd07CRkWoffUGUrxUv91aoi4MPGHcXwhYkAeXBhsLa
+ C6/KVyabgPbWmpijUfW93XyZonOXaDsALi/5V5pqhKZbOD9eqY0BEeMprj0medj9s4zk3uaCK
+ EQsZIDObcgCR8HVQg8/Mg6Ls/vL3wBXYMKC0JS80LmYCB+SPFfiLoJ6/0YfZwIvhElPz58Ehm
+ yc56rGmIufXoQYsZ6gdafh9MK1ZynMD5sa8EH9vCBo2m72VGlLGMkt9n7VylU0KSfDurkDl1N
+ YFnObLT4G3Gt79tlmtYVMtIsHxNEhY2byyYYYbiZin5l9ulX3jIkz0UOeMYezwotCAo9iKwcA
+ RuS1MyLdXlKL1mNj9NV2qqek+zLppwrR8BiBp0OUJBKr05uosGvfEVAniF2eYQgvcf5R39zmG
+ DINZ+S9NQSWNhWGRU047uXw3YWL2ERxbi1WXfuTbjVGznfWuYOS87V+3w92Zs9aczzf3r+EEm
+ JeIMG0bc0DwBRUaz6JOPRylN1P
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Thanks for having a look. I should probably have marked this as an RFC
-patch. The infrastructure for this is still being debated on the mailing
-lists. Until that's settled we won't want to merge this.
 
-Cheers,
-Jeff
 
-On Fri, 2022-09-02 at 09:28 +0800, Murphy Zhou wrote:
-> Hi Jeff,
->=20
-> Thanks for the patch!
->=20
-> On Tue, Aug 16, 2022 at 9:43 PM Jeff Layton <jlayton@kernel.org> wrote:
-> >=20
-> > Now that we have the ability to query the change attribute in userland,
-> > test that the filesystems implement it correctly. Fetch the change
-> > attribute before and after various operations and validate that it
-> > changes (or doesn't change) as expected.
-> >=20
-> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > ---
-> >  common/rc             |  17 ++++++
-> >  tests/generic/693     | 138 ++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/693.out |   1 +
-> >  3 files changed, 156 insertions(+)
-> >  create mode 100755 tests/generic/693
-> >  create mode 100644 tests/generic/693.out
-> >=20
-> > Please look and make sure I'm not missing other operations that we
-> > should be testing here!
-> >=20
-> > diff --git a/common/rc b/common/rc
-> > index 197c94157025..b9cb47f99016 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -5052,6 +5052,23 @@ hexdump()
-> >         _fail "Use _hexdump(), please!"
-> >  }
-> >=20
-> > +_require_change_attr ()
-> > +{
-> > +
-> > +       _mask=3D$($XFS_IO_PROG -f -c "statx -m 0x2000 -r" $TEST_DIR/cha=
-nge_attr_test.$$ \
-> > +               | grep "^stat.mask" | cut -d' ' -f 3)
-> > +       rm -f $TEST_DIR/change_attr_test.$$
-> > +       if [ $(( ${_mask}&0x2000 )) -eq 0 ]; then
-> > +               _notrun "$FSTYP does not support inode change attribute=
-"
-> > +       fi
-> > +}
-> > +
-> > +_get_change_attr ()
-> > +{
-> > +       $XFS_IO_PROG -r -c "statx -m 0x2000 -r" $1 | grep '^stat.change=
-_attr' | \
-> > +               cut -d' ' -f3
-> > +}
-> > +
-> >  init_rc
-> >=20
-> >  ######################################################################=
-##########
-> > diff --git a/tests/generic/693 b/tests/generic/693
-> > new file mode 100755
-> > index 000000000000..fa92931d2ac8
-> > --- /dev/null
-> > +++ b/tests/generic/693
-> > @@ -0,0 +1,138 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
-> > +#
-> > +# FS QA Test No. 693
-> > +#
-> > +# Test the behavior of the inode change attribute
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick rw
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_require_test
-> > +_require_change_attr
-> > +
-> > +# from the stat.h header file
-> > +UTIME_OMIT=3D1073741822
-> > +
-> > +testdir=3D"$TEST_DIR/test_iversion_dir.$$"
-> > +testfile=3D"$testdir/test_iversion_file.$$"
-> > +
-> > +mkdir $testdir
-> > +
-> > +# DIRECTORY TESTS
-> > +#################
-> > +# Does dir change attr change on a create?
-> > +old=3D$(_get_change_attr $testdir)
-> > +touch $testfile
-> > +new=3D$(_get_change_attr $testdir)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr of dir did not change after create!"
-> > +fi
-> > +
-> > +# on a hardlink?
-> > +old=3D$new
-> > +ln $testfile $testdir/linky
->=20
-> We may need to clean up these temporary testing files.
->=20
-> Other parts look good to me.
->=20
-> Regards~
->=20
-> > +new=3D$(_get_change_attr $testdir)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr of dir did not change after hardlink!"
-> > +fi
-> > +
-> > +# on an unlink?
-> > +old=3D$new
-> > +rm -f $testfile
-> > +new=3D$(_get_change_attr $testdir)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr of dir did not change after unlink!"
-> > +fi
-> > +
-> > +# on a rename (within same dir)
-> > +old=3D$new
-> > +mv $testdir/linky $testfile
-> > +new=3D$(_get_change_attr $testdir)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr of dir did not change after rename!"
-> > +fi
-> > +
-> > +# on a mknod
-> > +old=3D$new
-> > +mknod $testdir/pipe p
-> > +new=3D$(_get_change_attr $testdir)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr of dir did not change after mknod!"
-> > +fi
-> > +
-> > +
-> > +# REGULAR FILE TESTS
-> > +####################
-> > +# ensure change_attr changes after a write
-> > +old=3D$(_get_change_attr $testfile)
-> > +$XFS_IO_PROG -c "pwrite -W -q 0 32" $testfile
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr did not change after write!"
-> > +fi
-> > +
-> > +# ensure it doesn't change after a sync
-> > +old=3D$new
-> > +sync
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old !=3D $new ]; then
-> > +       _fail "Change attr changed after sync!"
-> > +fi
-> > +
-> > +# ensure change_attr does not change after read
-> > +old=3D$new
-> > +cat $testfile > /dev/null
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old !=3D $new ]; then
-> > +       _fail "Change attr changed after read!"
-> > +fi
-> > +
-> > +# ensure it changes after truncate
-> > +old=3D$new
-> > +truncate --size 0 $testfile
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr did not change after truncate!"
-> > +fi
-> > +
-> > +# ensure it changes after only atime update
-> > +old=3D$new
-> > +$XFS_IO_PROG -c "utimes 1 1 $UTIME_OMIT $UTIME_OMIT" $testfile
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr did not change after atime update!"
-> > +fi
-> > +
-> > +# ensure it changes after utimes atime/mtime update
-> > +old=3D$new
-> > +$XFS_IO_PROG -c "utimes 1 1 1 1" $testfile
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr did not change after mtime update!"
-> > +fi
-> > +
-> > +# after setting xattr
-> > +old=3D$new
-> > +setfattr -n user.foo -v bar $testfile
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr did not change after setxattr!"
-> > +fi
-> > +
-> > +# after removing xattr
-> > +old=3D$new
-> > +setfattr -x user.foo $testfile
-> > +new=3D$(_get_change_attr $testfile)
-> > +if [ $old =3D $new ]; then
-> > +       _fail "Change attr did not change after rmxattr!"
-> > +fi
-> > +
-> > +status=3D0
-> > +exit
-> > diff --git a/tests/generic/693.out b/tests/generic/693.out
-> > new file mode 100644
-> > index 000000000000..89ad553d911c
-> > --- /dev/null
-> > +++ b/tests/generic/693.out
-> > @@ -0,0 +1 @@
-> > +QA output created by 693
-> > --
-> > 2.37.2
-> >=20
+On 2022/9/2 17:30, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+>
+> Verify that we can not delete a subvolume that has an active swap file,
+> and that after disabling the swap file, we can delete it.
+>
+> This tests a fix done by kernel commit 60021bd754c6ca ("btrfs: prevent
+> subvol with swapfile from being deleted"), which landed in kernel 5.18.
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
---=20
-Jeff Layton <jlayton@kernel.org>
+Pretty straightforward.
+
+Reivewed-by: Qu Wenruo <wqu@suse.com>
+
+Thanks,
+Qu
+> ---
+>
+> V2: Add _cleanup() override to make sure swapfile is disabled in case
+>      the test is interrupted.
+>
+>   tests/btrfs/274     | 58 +++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/274.out |  6 +++++
+>   2 files changed, 64 insertions(+)
+>   create mode 100755 tests/btrfs/274
+>   create mode 100644 tests/btrfs/274.out
+>
+> diff --git a/tests/btrfs/274 b/tests/btrfs/274
+> new file mode 100755
+> index 00000000..c0594e25
+> --- /dev/null
+> +++ b/tests/btrfs/274
+> @@ -0,0 +1,58 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 274
+> +#
+> +# Test that we can not delete a subvolume that has an active swap file.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick swap subvol
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	test -n "$swap_file" && swapoff $swap_file &> /dev/null
+> +}
+> +
+> +. ./common/filter
+> +
+> +_supported_fs btrfs
+> +_fixed_by_kernel_commit 60021bd754c6ca \
+> +    "btrfs: prevent subvol with swapfile from being deleted"
+> +_require_scratch_swapfile
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +swap_file=3D"$SCRATCH_MNT/subvol/swap"
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol | _filter_scratch
+> +
+> +echo "Creating and activating swap file..."
+> +_format_swapfile $swap_file $(($(get_page_size) * 32)) >> $seqres.full
+> +_swapon_file $swap_file
+> +
+> +echo "Attempting to delete subvolume with swap file enabled..."
+> +# Output differs with different btrfs-progs versions and some display m=
+ultiple
+> +# lines on failure like this for example:
+> +#
+> +#   ERROR: Could not destroy subvolume/snapshot: Operation not permitte=
+d
+> +#   WARNING: deletion failed with EPERM, send may be in progress
+> +#   Delete subvolume (no-commit): '/home/fdmanana/btrfs-tests/scratch_1=
+/subvol'
+> +#
+> +# So just redirect all output to the .full file and check the command's=
+ exit
+> +# status instead.
+> +$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/subvol >> $seqres.full 2=
+>&1 && \
+> +    echo "subvolume deletion successful, expected failure!"
+> +
+> +echo "Disabling swap file..."
+> +swapoff $swap_file
+> +
+> +echo "Attempting to delete subvolume after disabling swap file..."
+> +$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/subvol >> $seqres.full 2=
+>&1 || \
+> +   echo "subvolume deletion failure, expected success!"
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/274.out b/tests/btrfs/274.out
+> new file mode 100644
+> index 00000000..66e0de25
+> --- /dev/null
+> +++ b/tests/btrfs/274.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 274
+> +Create subvolume 'SCRATCH_MNT/subvol'
+> +Creating and activating swap file...
+> +Attempting to delete subvolume with swap file enabled...
+> +Disabling swap file...
+> +Attempting to delete subvolume after disabling swap file...
