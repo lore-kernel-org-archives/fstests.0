@@ -2,147 +2,124 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8988C6FA81
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 04:38:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 319F7ECAAD5
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:22:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231757AbiIBEiR (ORCPT
+        id S236080AbiIBJWo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Sep 2022 00:38:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55822 "EHLO
+        Fri, 2 Sep 2022 05:22:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56610 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229554AbiIBEiQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 00:38:16 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A63D56BD47
-        for <fstests@vger.kernel.org>; Thu,  1 Sep 2022 21:38:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1662093494;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=KSKxsbWcbjemUY+RQV9MT0hnj8un8lsAL7pYZO+AaoQ=;
-        b=glPInDTINrwprW1GJoH0gpwOMSXAVKE7cL+8aNFXz2UKB4/fKg/1WCUgtdSRqdqqovVHF3
-        34m/0MDzcqRjdPsehf47isnjhiwdgTnkX1QSItE9NAi4KhfmexWzvsXWk9xi7f2a3+mBLY
-        d5DUl5Ag5LvwtagFWyq4jrXeXO0LQlQ=
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
- [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-396-2zjfm23HPnmrIQuX_gPJ-g-1; Fri, 02 Sep 2022 00:38:13 -0400
-X-MC-Unique: 2zjfm23HPnmrIQuX_gPJ-g-1
-Received: by mail-qt1-f198.google.com with SMTP id cj19-20020a05622a259300b003446920ea91so742388qtb.10
-        for <fstests@vger.kernel.org>; Thu, 01 Sep 2022 21:38:13 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=KSKxsbWcbjemUY+RQV9MT0hnj8un8lsAL7pYZO+AaoQ=;
-        b=x/77FJNKoHV6COU2+VoN2dGK4NMMtFlI8m2E3YXjzCccpiW33TcWNzSfh+Y8xOh79p
-         IzTMJ37l8nSUSOl31dVwOA/EQJiQVCvjwca6rzJILk0h7sxYAxUl6baSUSeIAXtgszhP
-         W1CXM65kGKAdKU4HllTcWNBF2BcDzdmO3hK7C63azWQPJ2/Cs6KiynI5LXey1lQvo4bw
-         qPRAITF0sdY9Dstv/H7d06LmrZ7mxNroFhv/QJ2OqFE2d4tlbevZQZEJG/DzaPyfdRF/
-         IAXo0Vqgd1WPNoXeZEy+J5QgxKTQafAmowj6BdnYDi40PlkEUZ9kDYgr2bzH9iRXMWTf
-         2rqw==
-X-Gm-Message-State: ACgBeo1DoVVx2Nrz5EQM6GAhiBGztxKZObtJlLd+/Gup634PSUzr1r4+
-        9aCKWpPi9+gvzn9lty2arPa1kNviN64LRmm8uYW+v/zsoJL/wuYkx9z6xNcRgu+EQLQfmVuU5EW
-        voagm/csPZU+wQe5elQ==
-X-Received: by 2002:a37:65c6:0:b0:6bb:ed38:3145 with SMTP id z189-20020a3765c6000000b006bbed383145mr21854362qkb.262.1662093492844;
-        Thu, 01 Sep 2022 21:38:12 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR74uXYv6AOD4YNCxdNuw365+wkHRZgQMFRoNK2cWmCoW1wKu/pWmC2sk82gR3mjFnEHRgQZqQ==
-X-Received: by 2002:a37:65c6:0:b0:6bb:ed38:3145 with SMTP id z189-20020a3765c6000000b006bbed383145mr21854349qkb.262.1662093492449;
-        Thu, 01 Sep 2022 21:38:12 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id a29-20020ac8611d000000b0033b30e8e7a5sm441370qtm.58.2022.09.01.21.38.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Sep 2022 21:38:12 -0700 (PDT)
-Date:   Fri, 2 Sep 2022 12:38:05 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: fix btrfs/271 failure due to missing source of
- fail_make_request
-Message-ID: <20220902043805.7isxdhmvzmopl4zj@zlang-mailbox>
-References: <62ccab661ea8591cbc5f8b936fc4e0a47f2bfc86.1662063388.git.fdmanana@suse.com>
- <20220902022751.4q7uvzzljzstakg3@zlang-mailbox>
+        with ESMTP id S236068AbiIBJWl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:22:41 -0400
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BC9FB5E5F;
+        Fri,  2 Sep 2022 02:22:40 -0700 (PDT)
+Received: from kwepemi500019.china.huawei.com (unknown [172.30.72.56])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4MJspS6h0DzHncf;
+        Fri,  2 Sep 2022 17:20:48 +0800 (CST)
+Received: from huawei.com (10.175.124.27) by kwepemi500019.china.huawei.com
+ (7.221.188.117) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Fri, 2 Sep
+ 2022 17:22:37 +0800
+From:   Guo Xuenan <guoxuenan@huawei.com>
+To:     <zlang@kernel.org>, <fstests@vger.kernel.org>
+CC:     <djwong@kernel.org>, <dchinner@redhat.com>,
+        <linux-xfs@vger.kernel.org>, <yi.zhang@huawei.com>,
+        <houtao1@huawei.com>, <zhengbin13@huawei.com>,
+        <jack.qiu@huawei.com>, <guoxuenan@huawei.com>
+Subject: [PATCH fstests] xfs/554: xfs add illegal bestfree array size inject for leaf dir
+Date:   Fri, 2 Sep 2022 17:40:46 +0800
+Message-ID: <20220902094046.3891252-1-guoxuenan@huawei.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220902022751.4q7uvzzljzstakg3@zlang-mailbox>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.124.27]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ kwepemi500019.china.huawei.com (7.221.188.117)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 02, 2022 at 10:27:51AM +0800, Zorro Lang wrote:
-> On Thu, Sep 01, 2022 at 09:17:02PM +0100, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> > 
-> > The recent commit 49272aacac850c ("common: refactor fail_make_request
-> > boilerplate") moved _require_fail_make_request() from common/rc into
-> > common/fail_make_request, but it forgot to make btrfs/271 source this
-> > new file, so now the test always fails:
-> > 
-> >   $ ./check btrfs/271
-> >   FSTYP         -- btrfs
-> >   PLATFORM      -- Linux/x86_64 debian9 6.0.0-rc2-btrfs-next-122 #1 SMP PREEMPT_DYNAMIC Mon Aug 29 09:45:59 WEST 2022
-> >   MKFS_OPTIONS  -- /dev/sdb
-> >   MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
-> > 
-> >   btrfs/271 4s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad)
-> >       --- tests/btrfs/271.out	2022-08-08 10:36:20.404812893 +0100
-> >       +++ /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad	2022-09-01 21:12:29.689481068 +0100
-> >       @@ -1,4 +1,5 @@
-> >        QA output created by 271
-> >       +/home/fdmanana/git/hub/xfstests/tests/btrfs/271: line 17: _require_fail_make_request: command not found
-> >        Step 1: writing with one failing mirror:
-> >        wrote 8192/8192 bytes at offset 0
-> >        XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> >       ...
-> >       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/271.out /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad'  to see the entire diff)
-> >   Ran: btrfs/271
-> >   Failures: btrfs/271
-> >   Failed 1 of 1 tests
-> > 
-> > Fix that by sourcing common/fail_make_request at btrfs/271.
-> > 
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> 
-> Thanks for fixing it! Looks like we missed the btrfs/271 ...
-> 
->   $ grep -rsn _require_fail_make_request tests/
->   tests/btrfs/271:16:_require_fail_make_request
->   tests/btrfs/088:26:_require_fail_make_request
->   tests/btrfs/150:25:_require_fail_make_request
->   tests/generic/019:21:_require_fail_make_request
-> 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+Test leaf dir allocting new block when bestfree array size
+less than data blocks count, which may lead to UAF.
 
+Signed-off-by: Guo Xuenan <guoxuenan@huawei.com>
+---
+ tests/xfs/554     | 48 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/554.out |  6 ++++++
+ 2 files changed, 54 insertions(+)
+ create mode 100755 tests/xfs/554
+ create mode 100644 tests/xfs/554.out
 
-Oh, Christoph has sent a patch to fix this issue:
-https://lore.kernel.org/fstests/20220823193230.505544-1-hch@lst.de/
-
-It's been reviewed but hasn't been merged (will be in this week).
-
-Thanks,
-Zorro
-
-> 
-> >  tests/btrfs/271 | 1 +
-> >  1 file changed, 1 insertion(+)
-> > 
-> > diff --git a/tests/btrfs/271 b/tests/btrfs/271
-> > index c21858d1..681fa965 100755
-> > --- a/tests/btrfs/271
-> > +++ b/tests/btrfs/271
-> > @@ -10,6 +10,7 @@
-> >  _begin_fstest auto quick raid
-> >  
-> >  . ./common/filter
-> > +. ./common/fail_make_request
-> >  
-> >  _supported_fs btrfs
-> >  _require_scratch
-> > -- 
-> > 2.35.1
-> > 
+diff --git a/tests/xfs/554 b/tests/xfs/554
+new file mode 100755
+index 00000000..fcf45731
+--- /dev/null
++++ b/tests/xfs/554
+@@ -0,0 +1,48 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Huawei Limited.  All Rights Reserved.
++#
++# FS QA Test No. 554
++#
++# Test leaf dir bestfree array size match with dir disk size
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++# Import common functions.
++. ./common/populate
++
++# real QA test starts here
++_supported_fs xfs
++_require_scratch
++_require_check_dmesg
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount  >> $seqres.full 2>&1
++
++echo "Create and check leaf dir"
++blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
++dblksz="$($XFS_INFO_PROG "${SCRATCH_DEV}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
++leaf_lblk="$((32 * 1073741824 / blksz))"
++node_lblk="$((64 * 1073741824 / blksz))"
++__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dblksz / 12))"
++leaf_dir="$(__populate_find_inode "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF")"
++_scratch_unmount
++__populate_check_xfs_dir "${leaf_dir}" "leaf"
++
++echo "Inject bad bestfress array size"
++_scratch_xfs_db -x -c "inode ${leaf_dir}" -c "dblock 8388608" -c "write ltail.bestcount 0"
++
++echo "Test add entry to dir"
++_scratch_mount
++touch ${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/{1..100}.txt > /dev/null 2>&1
++_scratch_unmount 2>&1
++_repair_scratch_fs >> $seqres.full 2>&1
++
++# check demsg error
++_check_dmesg
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+new file mode 100644
+index 00000000..ea1f30cc
+--- /dev/null
++++ b/tests/xfs/554.out
+@@ -0,0 +1,6 @@
++QA output created by 554
++Format and mount
++Create and check leaf dir
++Inject bad bestfress array size
++ltail.bestcount = 0
++Test add entry to dir
+-- 
+2.25.1
 
