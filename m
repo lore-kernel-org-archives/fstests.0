@@ -2,134 +2,229 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3881AECAAD3
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 02:28:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE585ECAAD3
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 02:39:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231344AbiIBC2E (ORCPT
+        id S235065AbiIBCjI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Sep 2022 22:28:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55782 "EHLO
+        Thu, 1 Sep 2022 22:39:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230151AbiIBC2D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 22:28:03 -0400
+        with ESMTP id S232517AbiIBCjI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 22:39:08 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AC13D8C
-        for <fstests@vger.kernel.org>; Thu,  1 Sep 2022 19:28:02 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 25B0374DE4
+        for <fstests@vger.kernel.org>; Thu,  1 Sep 2022 19:39:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1662085681;
+        s=mimecast20190719; t=1662086346;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=YYdvjm5GB+jrMEGjl5J8cEs5EIE6VGdkpOoFW4clzEM=;
-        b=PcR+kQpcQG2k2CAbMGwpS9lpxUTZS9pWhnqGdaC3lr5tMf+HZadKFmJA/hHCWXAZi79T1M
-        4JqLV5TuBtoo3JfV/npmGN6hGsRlV5BNwLqjnqKOdwukgp3fD/vrew22qP+wCwmywFWQS9
-        q+hHB8BEQCBh5rWF2Fy2ZUDDB4Ty36E=
-Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
- [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=CRLFCHY6wy/rOTY7aKDRzJA0JLqIR4loTOp3UDO00cU=;
+        b=cuyrhPX5kvv2LO7yzdnBHtd1LOw0cRnRqNa3fbi/riNisS1jrzIZpKEV6GZj7TM0uYxSrx
+        Am0If5HFFe/0GupMO1JFlh/2CwcbsWG13u+OYZ4qq9VQx4eQo//S9VPvPA1A/4/vkHXbam
+        iTAiToNr8PuTEr7BahjbqR32CNdKsnc=
+Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
+ [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-636-xaWukapsP6O-WAjCVs97xg-1; Thu, 01 Sep 2022 22:27:58 -0400
-X-MC-Unique: xaWukapsP6O-WAjCVs97xg-1
-Received: by mail-qt1-f200.google.com with SMTP id fv24-20020a05622a4a1800b003445e593889so600402qtb.2
-        for <fstests@vger.kernel.org>; Thu, 01 Sep 2022 19:27:58 -0700 (PDT)
+ us-mta-634-cVCiLUMXOC-ImtxlU-F5Wg-1; Thu, 01 Sep 2022 22:39:05 -0400
+X-MC-Unique: cVCiLUMXOC-ImtxlU-F5Wg-1
+Received: by mail-qv1-f71.google.com with SMTP id d15-20020a056214184f00b00498efcf3965so437348qvy.15
+        for <fstests@vger.kernel.org>; Thu, 01 Sep 2022 19:39:05 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=YYdvjm5GB+jrMEGjl5J8cEs5EIE6VGdkpOoFW4clzEM=;
-        b=5ZINQJHxDtBWVgaLimXnr/BIiWb290XPxy78EKiKEHcrMWuWlYLCmGiv9RfJcZimSg
-         yMrVN1fiTr9GyJ69BBydyUtEvfTZSmV2B2RDJGiD2LTMN6LPVMB3MSxwWAnhUgXUMEz4
-         zBOaADAVwvBe8/oWubUGn4q8gEWH5hIIfFgzRwqUk3CIFKQqq0YBnQ2oWe6gNaSOAajW
-         dZhi4iCVgMA6Sn7BbyMOQgTubriYl7fiED02L6PRSdoZlml0gPENtxqdc5VdXIz5cMAc
-         xRwTI5d/FYfNzLxopFncGp9lJiRBZs7+zh0hJjYdrJCZGDj1RZ09af4StnDYoGN50e3h
-         wElA==
-X-Gm-Message-State: ACgBeo0/TR73VMHE8q/ejsS5XHS9PGMaYTmqWXGKCE9bFxeknTxI3S7f
-        N/7KAtITueUA08iRQPryD0O2BL7HA1PqWWdg18ozu4OncShRrk3y56raFAtTLu45u1yv4fY4m8S
-        QmjvMSO6PyES/JbmLQQ==
-X-Received: by 2002:a05:620a:254f:b0:6bb:dcb6:4279 with SMTP id s15-20020a05620a254f00b006bbdcb64279mr22595342qko.79.1662085677674;
-        Thu, 01 Sep 2022 19:27:57 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR5uHBPnNZ/mj1TyVajLNwrfC6qXsehPkmNkagFeRkqd+VT37EA+DWngOWa9DPLutnlS7HIAHg==
-X-Received: by 2002:a05:620a:254f:b0:6bb:dcb6:4279 with SMTP id s15-20020a05620a254f00b006bbdcb64279mr22595335qko.79.1662085677423;
-        Thu, 01 Sep 2022 19:27:57 -0700 (PDT)
+        bh=CRLFCHY6wy/rOTY7aKDRzJA0JLqIR4loTOp3UDO00cU=;
+        b=BuUWsj7Gw/xRR4rqG8aeHi3f6wTmhzWm1xIlFzsXiTYnr21IdVwO0Z6qTL3mhHYQfu
+         sivmmmY18xeYzMSj13D+nBZdodyTzFkRWy/BjMjRKQ5TT/kw4GOvcNc/UBZaInimF2yp
+         ZI6LuwohwxiIyz8mN5BgFsUvgbcROcx2GMfNkIQWBvieCopms8kXmUhkfOjcEIABGZm+
+         RP7LVrw/p+/UPZg+62OWWIsb77P7FwldDRcQOkb8BVFrjBOQwPkPl/oJ6rDmuIBlG+y2
+         QVk1FQD7fonC/UaaFd+H6iLpA4jRgksMmo7C5uMbewzRhcCCP85UnXQ8w0rU1228bua9
+         Da4Q==
+X-Gm-Message-State: ACgBeo0e+M6YdfGdLXqwX+JTNg7N0ta0KiqIPhBwPgN4I7a6Cpxb3sR5
+        dwPf4/dWf/zEke9ESvYt3N9/PXr18vm7cOH8kiejSDhzyctNjN0GE9BVt1gLpTHpzyipp8iGTHb
+        rGYyQoMH8yOZd/hhS8w==
+X-Received: by 2002:ad4:5b8f:0:b0:499:254a:726a with SMTP id 15-20020ad45b8f000000b00499254a726amr7724948qvp.117.1662086344417;
+        Thu, 01 Sep 2022 19:39:04 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR78pghQA2UdlDfKKWq2VW6/I0/zNpYupernE2disdGQ6F6BXkioz3Xqb0948es6td9HHeyjyQ==
+X-Received: by 2002:ad4:5b8f:0:b0:499:254a:726a with SMTP id 15-20020ad45b8f000000b00499254a726amr7724928qvp.117.1662086344017;
+        Thu, 01 Sep 2022 19:39:04 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c8-20020a37e108000000b006b9264191b5sm471918qkm.32.2022.09.01.19.27.54
+        by smtp.gmail.com with ESMTPSA id k22-20020ac84756000000b0033fc75c3469sm305884qtp.27.2022.09.01.19.39.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Sep 2022 19:27:57 -0700 (PDT)
-Date:   Fri, 2 Sep 2022 10:27:51 +0800
+        Thu, 01 Sep 2022 19:39:03 -0700 (PDT)
+Date:   Fri, 2 Sep 2022 10:38:57 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fdmanana@kernel.org
 Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
         Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: fix btrfs/271 failure due to missing source of
- fail_make_request
-Message-ID: <20220902022751.4q7uvzzljzstakg3@zlang-mailbox>
-References: <62ccab661ea8591cbc5f8b936fc4e0a47f2bfc86.1662063388.git.fdmanana@suse.com>
+Subject: Re: [PATCH v2] generic: test fsync after punching hole adjacent to
+ an existing hole
+Message-ID: <20220902023857.mzyqmwx3tcihsqvl@zlang-mailbox>
+References: <176a9103bc2a3fe5cc8d9306c3a7c50d5cdc1568.1662048436.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <62ccab661ea8591cbc5f8b936fc4e0a47f2bfc86.1662063388.git.fdmanana@suse.com>
+In-Reply-To: <176a9103bc2a3fe5cc8d9306c3a7c50d5cdc1568.1662048436.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 01, 2022 at 09:17:02PM +0100, fdmanana@kernel.org wrote:
+On Thu, Sep 01, 2022 at 05:10:09PM +0100, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> The recent commit 49272aacac850c ("common: refactor fail_make_request
-> boilerplate") moved _require_fail_make_request() from common/rc into
-> common/fail_make_request, but it forgot to make btrfs/271 source this
-> new file, so now the test always fails:
+> Test that if we punch a hole adjacent to an existing hole, fsync the file
+> and then power fail, the new hole exists after mounting again the
+> filesystem.
 > 
->   $ ./check btrfs/271
->   FSTYP         -- btrfs
->   PLATFORM      -- Linux/x86_64 debian9 6.0.0-rc2-btrfs-next-122 #1 SMP PREEMPT_DYNAMIC Mon Aug 29 09:45:59 WEST 2022
->   MKFS_OPTIONS  -- /dev/sdb
->   MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
+> This currently fails on btrfs with kernels 5.18 and 5.19 when not using
+> the "no-holes" feature. The "no-holes" feature is enabled by default at
+> mkfs time starting with btrfs-progs 5.15, so to trigger the issue with
+> btrfs-progs 5.15+ and kernel 5.18 or kernel 5.19, one must set
+> "-O ^no-holes" in the MKFS_OPTIONS environment variable (part of the
+> btrfs test matrix).
 > 
->   btrfs/271 4s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad)
->       --- tests/btrfs/271.out	2022-08-08 10:36:20.404812893 +0100
->       +++ /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad	2022-09-01 21:12:29.689481068 +0100
->       @@ -1,4 +1,5 @@
->        QA output created by 271
->       +/home/fdmanana/git/hub/xfstests/tests/btrfs/271: line 17: _require_fail_make_request: command not found
->        Step 1: writing with one failing mirror:
->        wrote 8192/8192 bytes at offset 0
->        XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->       ...
->       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/271.out /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad'  to see the entire diff)
->   Ran: btrfs/271
->   Failures: btrfs/271
->   Failed 1 of 1 tests
+> The issue is fixed for btrfs with the following kernel patch:
 > 
-> Fix that by sourcing common/fail_make_request at btrfs/271.
+>    "btrfs: update generation of hole file extent item when merging holes"
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
+> 
+> v2: Added kernel commit tag (now that's merged in Linus' tree),
+>     added auto group, added the new odd _require_congruent_file_oplen
+>     requirement.
 
-Thanks for fixing it! Looks like we missed the btrfs/271 ...
-
-  $ grep -rsn _require_fail_make_request tests/
-  tests/btrfs/271:16:_require_fail_make_request
-  tests/btrfs/088:26:_require_fail_make_request
-  tests/btrfs/150:25:_require_fail_make_request
-  tests/generic/019:21:_require_fail_make_request
+This version looks good to me, I don't have more review points.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/btrfs/271 | 1 +
->  1 file changed, 1 insertion(+)
 > 
-> diff --git a/tests/btrfs/271 b/tests/btrfs/271
-> index c21858d1..681fa965 100755
-> --- a/tests/btrfs/271
-> +++ b/tests/btrfs/271
-> @@ -10,6 +10,7 @@
->  _begin_fstest auto quick raid
->  
->  . ./common/filter
-> +. ./common/fail_make_request
->  
->  _supported_fs btrfs
->  _require_scratch
+>  tests/generic/695     | 91 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/695.out | 15 +++++++
+>  2 files changed, 106 insertions(+)
+>  create mode 100755 tests/generic/695
+>  create mode 100644 tests/generic/695.out
+> 
+> diff --git a/tests/generic/695 b/tests/generic/695
+> new file mode 100755
+> index 00000000..b46e35cf
+> --- /dev/null
+> +++ b/tests/generic/695
+> @@ -0,0 +1,91 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 695
+> +#
+> +# Test that if we punch a hole adjacent to an existing hole, fsync the file and
+> +# then power fail, the new hole exists after mounting again the filesystem.
+> +#
+> +# This is motivated by a regression on btrfs, fixed by the commit mentioned
+> +# below, when not using the no-holes feature (which is enabled by default since
+> +# btrfs-progs 5.15).
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick log punch
+> +
+> +_cleanup()
+> +{
+> +	_cleanup_flakey
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +. ./common/filter
+> +. ./common/dmflakey
+> +. ./common/punch
+> +
+> +_supported_fs generic
+> +_fixed_by_kernel_commit e6e3dec6c3c288 \
+> +        "btrfs: update generation of hole file extent item when merging holes"
+> +_require_scratch
+> +_require_dm_target flakey
+> +_require_xfs_io_command "fpunch"
+> +_require_xfs_io_command "fiemap"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_init_flakey
+> +_mount_flakey
+> +
+> +# We punch 2M holes and require extent allocations to align to 2M in fiemap
+> +# results.
+> +_require_congruent_file_oplen $SCRATCH_MNT $((2 * 1024 * 1024))
+> +
+> +# Create our test file with the following layout:
+> +#
+> +# [0, 2M)    - hole
+> +# [2M, 10M)  - extent
+> +# [10M, 12M) - hole
+> +$XFS_IO_PROG -f -c "truncate 12M" \
+> +	     -c "pwrite -S 0xab 2M 8M" \
+> +	     $SCRATCH_MNT/foobar | _filter_xfs_io
+> +
+> +# Persist everything, commit the filesystem's transaction.
+> +sync
+> +
+> +# Now punch two holes in the file:
+> +#
+> +# 1) For the range [2M, 4M), which is adjacent to the existing hole in the range
+> +#    [0, 2M);
+> +# 2) For the range [8M, 10M), which is adjacent to the existing hole in the
+> +#    range [10M, 12M).
+> +#
+> +# These operations start a new filesystem transaction.
+> +# Then finally fsync the file.
+> +$XFS_IO_PROG -c "fpunch 2M 2M" \
+> +	     -c "fpunch 8M 2M" \
+> +	     -c "fsync" $SCRATCH_MNT/foobar
+> +
+> +# Simulate a power failure and mount the filesystem to check that everything
+> +# is in the same state as before the power failure.
+> +_flakey_drop_and_remount
+> +
+> +# We expect the following file layout:
+> +#
+> +# [0, 4M)    - hole
+> +# [4M, 8M)   - extent
+> +# [8M, 12M)  - hole
+> +echo "File layout after power failure:"
+> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
+> +
+> +# When reading the file we expect to get the range [4M, 8M) filled with bytes
+> +# that have a value of 0xab and 0x00 for anything outside that range.
+> +echo "File content after power failure:"
+> +_hexdump $SCRATCH_MNT/foobar
+> +
+> +_unmount_flakey
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/695.out b/tests/generic/695.out
+> new file mode 100644
+> index 00000000..447ef5cf
+> --- /dev/null
+> +++ b/tests/generic/695.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 695
+> +wrote 8388608/8388608 bytes at offset 2097152
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File layout after power failure:
+> +0: [0..8191]: hole
+> +1: [8192..16383]: data
+> +2: [16384..24575]: hole
+> +File content after power failure:
+> +000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
+> +*
+> +400000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
+> +*
+> +800000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
+> +*
+> +c00000
 > -- 
 > 2.35.1
 > 
