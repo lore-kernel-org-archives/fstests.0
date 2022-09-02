@@ -2,96 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A180ECAAD3
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Sep 2022 20:17:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E153FECAAD3
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 00:44:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234456AbiIAUR3 (ORCPT
+        id S232898AbiIBAof (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Sep 2022 16:17:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54606 "EHLO
+        Thu, 1 Sep 2022 20:44:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231589AbiIAUR2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 16:17:28 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82D066E2E0;
-        Thu,  1 Sep 2022 13:17:27 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 1A672B82934;
-        Thu,  1 Sep 2022 20:17:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01494C433D6;
-        Thu,  1 Sep 2022 20:17:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1662063444;
-        bh=jWTMFH7oshcJJYNE2Zkgcv3wnsWAXwSMF+e6hfl3w1k=;
-        h=From:To:Cc:Subject:Date:From;
-        b=g1e3H/hSxuQ7mjzZW/Y95G953g/qyIzIPEIHWNAAJw/gMonZP9wgzE4RBCLd1lEzd
-         sqIJRWxM+yN1rZnNft3aaP44GOga9jm3iSiOfkeZd0nNI+nrvJ3E5vCXRJuEMG1m2Y
-         BERo0qqOwv7NaeGJHHC6Y4anQygLe6Sr6sRtwOQ1nkdCj9WO9lJdPb0TMoW+LQr0To
-         0KIR1EugAzGzTk8jT5TvIyuF+uW8hGY852E0g+sMsSWRtZZljYIfeR5/IQsCsAD8Xe
-         ibP35R9vGnJ9v3DND7G8KG/WmcAQ8dK1anW7fpJRUWWzbnTZ/MCaj9bjhv1GOm+Hgm
-         ZD/qF56eXtVOg==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: fix btrfs/271 failure due to missing source of fail_make_request
-Date:   Thu,  1 Sep 2022 21:17:02 +0100
-Message-Id: <62ccab661ea8591cbc5f8b936fc4e0a47f2bfc86.1662063388.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S234557AbiIBAoe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Sep 2022 20:44:34 -0400
+Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5426FA1D25;
+        Thu,  1 Sep 2022 17:44:33 -0700 (PDT)
+Received: by mail-pl1-x62e.google.com with SMTP id v5so375975plo.9;
+        Thu, 01 Sep 2022 17:44:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date;
+        bh=E4nPos8j2trGdUyNjY0PKnLHeXxwvnp6sv+OTLgAl0E=;
+        b=ZL+ic6+jtFRwUSWCyFZ2r0dFS98Dt65vIvpwBTpMG5BctwnH85/Ne74xvRV9iqN9dT
+         C/bP26kue9DaniJ304Xv6VC5T7+OgMOGN07eVk0/7DABR+H6IAP6EHvm/gMJTVWsyBhp
+         SkcgckUzhCNwAS66Dha+k67adeTTXbyRDJEbATOETPwPfKEPrk4nOy7RdVndpqUYgRX7
+         zdLns7e/t+VYh6oXfVuUuaEg1EGTHq+fbvxlvirMoODjo0i402TgcZ0YahkmSK07wdfU
+         YOt1leJWOZoeqlLmq/Aul6qqla2oNUwbVxKS9nIvIWuiHTWh9xiWcqMoeuOxMgFZXmaC
+         V91g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date;
+        bh=E4nPos8j2trGdUyNjY0PKnLHeXxwvnp6sv+OTLgAl0E=;
+        b=nytFezD8qqhWYN/IbY9t4FvuEb+piw7wYP0ootJNoHq1NYerIGemZARmMJPS3suozZ
+         HKgOi53LHQoZFUnES9/RDrAeuDfV9xNRUkEjA8WEU8SVOt6OcG1TXrI58rVClMHpj4/1
+         BRQ2XaYshhYhPY4HiMlmH9AvoCcIhpN2MqiPe5ATW57HfUTxhBzDxxEAAuJ9m1nmirlQ
+         S8jn3sJquo6SwEMFbl4r+lHUNmDxRzBUi2lJUp7lRSUvuwK0PDGCMV6UvMz+cpIpDayg
+         ta6lE+IEXJJoTaLLMFnJkBhD46n5UWF3VSKFVG6torZaXU/UmafzMiO1keQIHxhH0VPB
+         mV5Q==
+X-Gm-Message-State: ACgBeo0kNUi7VVIYK69Px9JvAf0qn4pzyjJ3FHzmYTwCKFMQrDNTeP6t
+        ySnjUhG7XAhtZdRpRzFWC7Ix/AWgqWXo7577OziUgVpy
+X-Google-Smtp-Source: AA6agR5hXCu83Oz9Z5/QKhKKAbnSHRBdja8QIfTPeYoGU2AIDP6s5EJa9wbs3VzbMmBO4ddCSqxxBlENKjrc1xraFQ4=
+X-Received: by 2002:a17:902:bd05:b0:172:ae77:1eea with SMTP id
+ p5-20020a170902bd0500b00172ae771eeamr32943662pls.158.1662079472802; Thu, 01
+ Sep 2022 17:44:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220901143459.3883118-1-zlang@kernel.org>
+In-Reply-To: <20220901143459.3883118-1-zlang@kernel.org>
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+Date:   Fri, 2 Sep 2022 08:44:21 +0800
+Message-ID: <CADJHv_vX+7tONjguTw8ZgyV9uE=OW=RtZQ_FdF2-ViGaxQbzYw@mail.gmail.com>
+Subject: Re: [PATCH v3] generic: new test to verify selinux label of whiteout inode
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Thu, Sep 1, 2022 at 10:47 PM Zorro Lang <zlang@kernel.org> wrote:
+>
+> A but on XFS cause renameat2() with flags=RENAME_WHITEOUT doesn't
+       ^ bug
+> apply an selinux label. That's quite different with other fs (e.g.
+> ext4, tmpfs).
+>
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> ---
+>
+> V1 -> V2:
+> 1) Add "whiteout" group
+> 2) Add commit ID which fix that bug
+> 3) Rebase to latest fstests for-next branch
+>
+> V2 -> V3:
+> Rebase to latest fstests for-next branch again
+>
+> Thanks,
+> Zorro
+>
+>  tests/generic/695     | 64 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/695.out |  2 ++
+>  2 files changed, 66 insertions(+)
+>  create mode 100755 tests/generic/695
+>  create mode 100644 tests/generic/695.out
+>
+> diff --git a/tests/generic/695 b/tests/generic/695
+> new file mode 100755
+> index 00000000..f04d4b3d
+> --- /dev/null
+> +++ b/tests/generic/695
+> @@ -0,0 +1,64 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Red Hat, Copyright.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 695
+> +#
+> +# Verify selinux label can be kept after RENAME_WHITEOUT. This is
+> +# a regression test for:
+> +#   70b589a37e1a ("xfs: add selinux labels to whiteout inodes")
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick rename attr whiteout
+> +
+> +# Import common functions.
+> +. ./common/attr
+> +. ./common/renameat2
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_scratch
+> +_require_attrs
+> +_require_renameat2 whiteout
+> +
+> +_fixed_by_kernel_commit 70b589a37e1a \
+> +       xfs: add selinux labels to whiteout inodes
+> +
+> +get_selinux_label()
+> +{
+> +       local label
+> +
+> +       label=`_getfattr --absolute-names -n security.selinux $@ | sed -n 's/security.selinux=\"\(.*\)\"/\1/p'`
 
-The recent commit 49272aacac850c ("common: refactor fail_make_request
-boilerplate") moved _require_fail_make_request() from common/rc into
-common/fail_make_request, but it forgot to make btrfs/271 source this
-new file, so now the test always fails:
+Just curious, why `` instead of $() ? I see the latter is preferred in
+many articles.
 
-  $ ./check btrfs/271
-  FSTYP         -- btrfs
-  PLATFORM      -- Linux/x86_64 debian9 6.0.0-rc2-btrfs-next-122 #1 SMP PREEMPT_DYNAMIC Mon Aug 29 09:45:59 WEST 2022
-  MKFS_OPTIONS  -- /dev/sdb
-  MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
+Regards~
 
-  btrfs/271 4s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad)
-      --- tests/btrfs/271.out	2022-08-08 10:36:20.404812893 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad	2022-09-01 21:12:29.689481068 +0100
-      @@ -1,4 +1,5 @@
-       QA output created by 271
-      +/home/fdmanana/git/hub/xfstests/tests/btrfs/271: line 17: _require_fail_make_request: command not found
-       Step 1: writing with one failing mirror:
-       wrote 8192/8192 bytes at offset 0
-       XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/271.out /home/fdmanana/git/hub/xfstests/results//btrfs/271.out.bad'  to see the entire diff)
-  Ran: btrfs/271
-  Failures: btrfs/271
-  Failed 1 of 1 tests
-
-Fix that by sourcing common/fail_make_request at btrfs/271.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/271 | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/tests/btrfs/271 b/tests/btrfs/271
-index c21858d1..681fa965 100755
---- a/tests/btrfs/271
-+++ b/tests/btrfs/271
-@@ -10,6 +10,7 @@
- _begin_fstest auto quick raid
- 
- . ./common/filter
-+. ./common/fail_make_request
- 
- _supported_fs btrfs
- _require_scratch
--- 
-2.35.1
-
+> +       if [ ${PIPESTATUS[0]} -ne 0 -o -z "$label" ];then
+> +               _fail "Fail to get selinux label: $label"
+> +       fi
+> +       echo $label
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +# SELINUX_MOUNT_OPTIONS will be set in common/config if selinux is enabled
+> +if [ -z "$SELINUX_MOUNT_OPTIONS" ]; then
+> +       _notrun "Require selinux to be enabled"
+> +fi
+> +# This test need to verify selinux labels in objects, so unset this selinux
+> +# mount option
+> +export SELINUX_MOUNT_OPTIONS=""
+> +_scratch_mount
+> +
+> +touch $SCRATCH_MNT/f1
+> +echo "Before RENAME_WHITEOUT" >> $seqres.full
+> +ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
+> +# Expect f1 and f2 have same label after RENAME_WHITEOUT
+> +$here/src/renameat2 -w $SCRATCH_MNT/f1 $SCRATCH_MNT/f2
+> +echo "After RENAME_WHITEOUT" >> $seqres.full
+> +ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
+> +label1=`get_selinux_label $SCRATCH_MNT/f1`
+> +label2=`get_selinux_label $SCRATCH_MNT/f2`
+> +if [ "$label1" != "$label2" ];then
+> +       echo "$label1 != $label2"
+> +fi
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/695.out b/tests/generic/695.out
+> new file mode 100644
+> index 00000000..1332ff16
+> --- /dev/null
+> +++ b/tests/generic/695.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 695
+> +Silence is golden
+> --
+> 2.31.1
+>
