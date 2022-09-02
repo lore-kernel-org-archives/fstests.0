@@ -2,97 +2,88 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEF03C6FA83
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:49:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA922C38145
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:58:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235684AbiIBJt5 (ORCPT
+        id S234836AbiIBJ6M (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Sep 2022 05:49:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50064 "EHLO
+        Fri, 2 Sep 2022 05:58:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44890 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235769AbiIBJts (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:49:48 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 705982F2;
-        Fri,  2 Sep 2022 02:49:45 -0700 (PDT)
+        with ESMTP id S235706AbiIBJ6F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:58:05 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9543D11F8;
+        Fri,  2 Sep 2022 02:58:03 -0700 (PDT)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 3FBDE342EB;
-        Fri,  2 Sep 2022 09:49:44 +0000 (UTC)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 8CA4820C84;
+        Fri,  2 Sep 2022 09:58:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1662112184;
+        t=1662112682;
         h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
          cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=lmwlFwwsi5q4Nc/M0e28I3Vhn1BiDjq+Yf2XdS1hGjI=;
-        b=Uavy29kBX+v4xKIvq0EnryNAXmkf7WaqaWJ+b13K+C02+Z56nze5o6sDYYzBWgz9EpYjNO
-        VIxrfs4bYAHPJxUuZh6FMln9MYapOxTdUeK3b16kWRn7N+OOduu1KdVyVVOXl9/Ndyr9Y5
-        QB2PcVqlcFHMqkXDPkWf5R6K8QSZKHo=
+        bh=J6sYBDKezySjvz2Map3Sx5LU178FYfCDAgpLT8uuuP4=;
+        b=dKtuxtdhD2FRFty2EDEzT/WyZyCW6+vA9Sw+MAmW57jrqu3baKMiFlK1fpO1PRIeqsboDt
+        LTy8HJXjNznvy9e7wc/zeV2bikiMAiw19OQPoW0O0m1K6A5MOAMSKyGLgZfVcWfevoHZnS
+        iEMW2uZNeWIeCSy2NFheihABfmzZ5M0=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1662112184;
+        s=susede2_ed25519; t=1662112682;
         h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
          cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=lmwlFwwsi5q4Nc/M0e28I3Vhn1BiDjq+Yf2XdS1hGjI=;
-        b=q/98rliO6/+9FDbQ/468A5Uh3iSIt+IcD8DDD6h98ZcrY73cMEjUj/4TvbA7Ju0xadbiyw
-        VxLAJAVXhtMhBxDg==
+        bh=J6sYBDKezySjvz2Map3Sx5LU178FYfCDAgpLT8uuuP4=;
+        b=RFq/kHsQYGNr3L3y1+Z+r12OAbb3bEehe/wS9F/m25+W6m6fenDVEX1a0yM/yqFvB1OPkx
+        8Y20aGtfeBVBQdAA==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1503213328;
-        Fri,  2 Sep 2022 09:49:44 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 659EF13328;
+        Fri,  2 Sep 2022 09:58:02 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id fHhaBLjREWOlHAAAMHmgww
-        (envelope-from <dsterba@suse.cz>); Fri, 02 Sep 2022 09:49:44 +0000
-Date:   Fri, 2 Sep 2022 11:44:24 +0200
+        id Go70F6rTEWMsIAAAMHmgww
+        (envelope-from <dsterba@suse.cz>); Fri, 02 Sep 2022 09:58:02 +0000
+Date:   Fri, 2 Sep 2022 11:52:42 +0200
 From:   David Sterba <dsterba@suse.cz>
 To:     Zorro Lang <zlang@redhat.com>
-Cc:     fdmanana@kernel.org, Christoph Hellwig <hch@lst.de>,
-        fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: remove 'seek' group from btrfs/007
-Message-ID: <20220902094424.GQ13489@twin.jikos.cz>
+Cc:     fdmanana@kernel.org, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs: test that we can not delete a subvolume with an
+ active swap file
+Message-ID: <20220902095242.GR13489@twin.jikos.cz>
 Reply-To: dsterba@suse.cz
 Mail-Followup-To: dsterba@suse.cz, Zorro Lang <zlang@redhat.com>,
-        fdmanana@kernel.org, Christoph Hellwig <hch@lst.de>,
-        fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-References: <bc7149309a8eca5999f22477a838602023094cb8.1662048451.git.fdmanana@suse.com>
- <20220902020030.oho6ssdrdzjy66pw@zlang-mailbox>
+        fdmanana@kernel.org, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <e34bd1b1693a135444c3618e9e16ac8a91f595a3.1662048448.git.fdmanana@suse.com>
+ <20220902021137.fvmnbodmijtutloe@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220902020030.oho6ssdrdzjy66pw@zlang-mailbox>
+In-Reply-To: <20220902021137.fvmnbodmijtutloe@zlang-mailbox>
 User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 02, 2022 at 10:00:30AM +0800, Zorro Lang wrote:
-> On Thu, Sep 01, 2022 at 05:12:25PM +0100, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> > 
-> > btrfs/007 does not test lseek, it tests send/receive and lseek is not
-> > exercised anywhere in this test. So just remove it from the 'seek' group.
-> > 
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> 
-> This 'seek' group is brought in by below commit:
-> 
->   commit 6fd9210bc97710f81e5a7646a2abfd11af0f0c28
->   Author: Christoph Hellwig <hch@lst.de>
->   Date:   Mon Feb 18 10:05:03 2019 +0100
-> 
->       fstests: add a seek group
-> 
-> So I'd like to let Christoph help to double check it.
+On Fri, Sep 02, 2022 at 10:11:37AM +0800, Zorro Lang wrote:
+> Better to make sure we swapoff this file in _cleanup() too, to avoid it affect
+> later testing if something suddently kill the testing. Others looks good to me,
+> welcome more review from btrfs.
 
-It's quite obvious from the test itself that it tests only send/receive,
-which is mentioned in the changelog. The commit adding the seek group
-does not provide any rationale so it's hard to argue but as it stands
-now the 'seek' group should not be there.
+You can assume an implicit ack for any btrfs tests when it's sent by a
+person with history of existing fstests and/or btrfs commits. A review
+would be desirable but I'd say it would hardly find any problems,
+typically the one who writes the kernel patch has a test script that is
+then transformed to the test case so you can also expect a real testing.
+
+Speaking for the btrfs developer group, we'd rather see slightly
+imperfect or not formally reviewed patch in fstests suite as we'd catch
+any breakage once it's pushed to git. We have daily update and test
+loops and we'll notice, also we know how to revert commits or disable
+tests if needed. Holding back sent patches is counterproductive. Thanks.
