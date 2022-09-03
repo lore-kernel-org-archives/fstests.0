@@ -2,88 +2,178 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA922C38145
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Sep 2022 09:58:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28D12ECAAA1
+	for <linux-fstests@archiver.kernel.org>; Sat,  3 Sep 2022 00:44:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234836AbiIBJ6M (ORCPT
+        id S229649AbiICAoN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Sep 2022 05:58:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44890 "EHLO
+        Fri, 2 Sep 2022 20:44:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235706AbiIBJ6F (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 05:58:05 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9543D11F8;
-        Fri,  2 Sep 2022 02:58:03 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 8CA4820C84;
-        Fri,  2 Sep 2022 09:58:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1662112682;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
+        with ESMTP id S229508AbiICAoM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Sep 2022 20:44:12 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DD49DC0B9
+        for <fstests@vger.kernel.org>; Fri,  2 Sep 2022 17:44:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1662165850;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=J6sYBDKezySjvz2Map3Sx5LU178FYfCDAgpLT8uuuP4=;
-        b=dKtuxtdhD2FRFty2EDEzT/WyZyCW6+vA9Sw+MAmW57jrqu3baKMiFlK1fpO1PRIeqsboDt
-        LTy8HJXjNznvy9e7wc/zeV2bikiMAiw19OQPoW0O0m1K6A5MOAMSKyGLgZfVcWfevoHZnS
-        iEMW2uZNeWIeCSy2NFheihABfmzZ5M0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1662112682;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=J6sYBDKezySjvz2Map3Sx5LU178FYfCDAgpLT8uuuP4=;
-        b=RFq/kHsQYGNr3L3y1+Z+r12OAbb3bEehe/wS9F/m25+W6m6fenDVEX1a0yM/yqFvB1OPkx
-        8Y20aGtfeBVBQdAA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 659EF13328;
-        Fri,  2 Sep 2022 09:58:02 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id Go70F6rTEWMsIAAAMHmgww
-        (envelope-from <dsterba@suse.cz>); Fri, 02 Sep 2022 09:58:02 +0000
-Date:   Fri, 2 Sep 2022 11:52:42 +0200
-From:   David Sterba <dsterba@suse.cz>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fdmanana@kernel.org, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test that we can not delete a subvolume with an
- active swap file
-Message-ID: <20220902095242.GR13489@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-Mail-Followup-To: dsterba@suse.cz, Zorro Lang <zlang@redhat.com>,
-        fdmanana@kernel.org, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <e34bd1b1693a135444c3618e9e16ac8a91f595a3.1662048448.git.fdmanana@suse.com>
- <20220902021137.fvmnbodmijtutloe@zlang-mailbox>
+        bh=yOBDvKJ7qVFQZivKym6g6NBVGmxKrxbTzFWb9Hu5L78=;
+        b=PH07hjny3GjuPGTi2gpJ6Yr3FKerZj1ZaeuEXl74NZGKtS/znp1mZpasZdSdHDU4PXwAwJ
+        iNcUpgF+Zmj1VdwfwSfuMYrX/qI1DpK5aPnEHfS75/T8CtXECJ5z7msxjZ7PEp80IhARvS
+        geWo5o2kz5m7Eypm/0wetoufSXLYUEs=
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
+ [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-582-5KhNo7rYN4e9YSQ9Kr-NAQ-1; Fri, 02 Sep 2022 20:44:08 -0400
+X-MC-Unique: 5KhNo7rYN4e9YSQ9Kr-NAQ-1
+Received: by mail-qk1-f200.google.com with SMTP id bi16-20020a05620a319000b006bc2334be53so3212544qkb.14
+        for <fstests@vger.kernel.org>; Fri, 02 Sep 2022 17:44:08 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
+        bh=yOBDvKJ7qVFQZivKym6g6NBVGmxKrxbTzFWb9Hu5L78=;
+        b=fS2F9f2QujO73OSOnXCv1vUOHl9LUsSuX9DSwPMi9L55qkI6LEl7T6D/bckWIHkOeJ
+         R+v5B+VzoQ8GBcmOqtncBSjfP2eF3j60oaFbV0JYk9nYvQyAkw8WUtEyAsjj63tD+j5w
+         3kojSFUwjsdeXAmmvbLTdlhziOBT/vRJx0aPdhqXM9V+CC6e8uZxi3slXFC9ZoB+6aLt
+         4P88ujUBzyFUjxauw3aF0s7cSpMEcAek8t1AH2RHgT6yxlqeL9ZMdK5kRNCyr8YMc/qN
+         Be0AgvQaBbW3nuHSQLIpffBz3R5+q0b/BQSgJGFT/vbskQRgQaGrnrhmR5/z3Ehx09rz
+         zuKA==
+X-Gm-Message-State: ACgBeo1onuOvqV4sWC0DBctZPZmDQDcJsOlmfZtwbdzE7bhGkJYZ1Tzm
+        ddIasfVfolHyDPqPUfxSce6B3L7iOKyIICguGlIfGRB6+HVudNlTVDGRe+qkMfe4/887Bs6yw3g
+        YOjuQXfkYpIVRWo7VFw==
+X-Received: by 2002:a05:622a:1b8c:b0:344:5d0e:e795 with SMTP id bp12-20020a05622a1b8c00b003445d0ee795mr31313333qtb.86.1662165848367;
+        Fri, 02 Sep 2022 17:44:08 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR57Vedc3NssA7yui3Ckh/vwesHYzFCyslYqSieBZL/EeSk123D5AMgLpdLjgKP5CvNX+MxOYw==
+X-Received: by 2002:a05:622a:1b8c:b0:344:5d0e:e795 with SMTP id bp12-20020a05622a1b8c00b003445d0ee795mr31313322qtb.86.1662165848123;
+        Fri, 02 Sep 2022 17:44:08 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id o1-20020ac85541000000b00339163a06fcsm1968981qtr.6.2022.09.02.17.44.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Sep 2022 17:44:07 -0700 (PDT)
+Date:   Sat, 3 Sep 2022 08:44:01 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH v2] btrfs: test that we can not delete a subvolume with
+ an active swap file
+Message-ID: <20220903004401.xobe5elurx3bkh3f@zlang-mailbox>
+References: <0bc9cd4abfbde3f76b981628942f94631cef7162.1662110839.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220902021137.fvmnbodmijtutloe@zlang-mailbox>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+In-Reply-To: <0bc9cd4abfbde3f76b981628942f94631cef7162.1662110839.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 02, 2022 at 10:11:37AM +0800, Zorro Lang wrote:
-> Better to make sure we swapoff this file in _cleanup() too, to avoid it affect
-> later testing if something suddently kill the testing. Others looks good to me,
-> welcome more review from btrfs.
+On Fri, Sep 02, 2022 at 10:30:32AM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Verify that we can not delete a subvolume that has an active swap file,
+> and that after disabling the swap file, we can delete it.
+> 
+> This tests a fix done by kernel commit 60021bd754c6ca ("btrfs: prevent
+> subvol with swapfile from being deleted"), which landed in kernel 5.18.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+> 
+> V2: Add _cleanup() override to make sure swapfile is disabled in case
+>     the test is interrupted.
 
-You can assume an implicit ack for any btrfs tests when it's sent by a
-person with history of existing fstests and/or btrfs commits. A review
-would be desirable but I'd say it would hardly find any problems,
-typically the one who writes the kernel patch has a test script that is
-then transformed to the test case so you can also expect a real testing.
+Thanks for doing this cleanup, now it's good to me.
 
-Speaking for the btrfs developer group, we'd rather see slightly
-imperfect or not formally reviewed patch in fstests suite as we'd catch
-any breakage once it's pushed to git. We have daily update and test
-loops and we'll notice, also we know how to revert commits or disable
-tests if needed. Holding back sent patches is counterproductive. Thanks.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> 
+>  tests/btrfs/274     | 58 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/274.out |  6 +++++
+>  2 files changed, 64 insertions(+)
+>  create mode 100755 tests/btrfs/274
+>  create mode 100644 tests/btrfs/274.out
+> 
+> diff --git a/tests/btrfs/274 b/tests/btrfs/274
+> new file mode 100755
+> index 00000000..c0594e25
+> --- /dev/null
+> +++ b/tests/btrfs/274
+> @@ -0,0 +1,58 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 274
+> +#
+> +# Test that we can not delete a subvolume that has an active swap file.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick swap subvol
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	test -n "$swap_file" && swapoff $swap_file &> /dev/null
+> +}
+> +
+> +. ./common/filter
+> +
+> +_supported_fs btrfs
+> +_fixed_by_kernel_commit 60021bd754c6ca \
+> +    "btrfs: prevent subvol with swapfile from being deleted"
+> +_require_scratch_swapfile
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +swap_file="$SCRATCH_MNT/subvol/swap"
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol | _filter_scratch
+> +
+> +echo "Creating and activating swap file..."
+> +_format_swapfile $swap_file $(($(get_page_size) * 32)) >> $seqres.full
+> +_swapon_file $swap_file
+> +
+> +echo "Attempting to delete subvolume with swap file enabled..."
+> +# Output differs with different btrfs-progs versions and some display multiple
+> +# lines on failure like this for example:
+> +#
+> +#   ERROR: Could not destroy subvolume/snapshot: Operation not permitted
+> +#   WARNING: deletion failed with EPERM, send may be in progress
+> +#   Delete subvolume (no-commit): '/home/fdmanana/btrfs-tests/scratch_1/subvol'
+> +#
+> +# So just redirect all output to the .full file and check the command's exit
+> +# status instead.
+> +$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/subvol >> $seqres.full 2>&1 && \
+> +    echo "subvolume deletion successful, expected failure!"
+> +
+> +echo "Disabling swap file..."
+> +swapoff $swap_file
+> +
+> +echo "Attempting to delete subvolume after disabling swap file..."
+> +$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/subvol >> $seqres.full 2>&1 || \
+> +   echo "subvolume deletion failure, expected success!"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/274.out b/tests/btrfs/274.out
+> new file mode 100644
+> index 00000000..66e0de25
+> --- /dev/null
+> +++ b/tests/btrfs/274.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 274
+> +Create subvolume 'SCRATCH_MNT/subvol'
+> +Creating and activating swap file...
+> +Attempting to delete subvolume with swap file enabled...
+> +Disabling swap file...
+> +Attempting to delete subvolume after disabling swap file...
+> -- 
+> 2.35.1
+> 
+
