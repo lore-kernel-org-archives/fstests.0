@@ -2,264 +2,168 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7013ECAAD4
-	for <linux-fstests@archiver.kernel.org>; Sat,  3 Sep 2022 11:13:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86430ECAAD5
+	for <linux-fstests@archiver.kernel.org>; Sat,  3 Sep 2022 18:43:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230138AbiICLNA (ORCPT
+        id S232619AbiICSns (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 3 Sep 2022 07:13:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34772 "EHLO
+        Sat, 3 Sep 2022 14:43:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34318 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229810AbiICLM7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 3 Sep 2022 07:12:59 -0400
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36C1D6B8F0;
-        Sat,  3 Sep 2022 04:12:58 -0700 (PDT)
-Received: from kwepemi500019.china.huawei.com (unknown [172.30.72.54])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4MKX9L5Tb3zlWXK;
-        Sat,  3 Sep 2022 19:09:26 +0800 (CST)
-Received: from [10.174.177.238] (10.174.177.238) by
- kwepemi500019.china.huawei.com (7.221.188.117) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Sat, 3 Sep 2022 19:12:55 +0800
-Message-ID: <bdb78b9c-9e43-9eb5-1e26-0e33596c1420@huawei.com>
-Date:   Sat, 3 Sep 2022 19:12:54 +0800
+        with ESMTP id S233284AbiICSnh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 3 Sep 2022 14:43:37 -0400
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 469E958DD9;
+        Sat,  3 Sep 2022 11:43:33 -0700 (PDT)
+Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 2839utbR030010;
+        Sat, 3 Sep 2022 18:43:32 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : content-type : content-id :
+ content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=W3AEQVPADp/NocIgOy4HLuFCxZaCd335mGsAIrauUQs=;
+ b=gMWkK8Szxj0TLGmnBFsv7vd3Fy3wA0+z1ypGGEu5ugbRaN25Td4bickpZcPBLz+h0sWt
+ UyPFYgwVWCcnVKbftm6be5tE4K2TjY3DCv2UXnuMeIlT8gm9UJJO4YBhYnqnjxWUOBi1
+ Iw5y3grWcKG2EKge0m2CbAzTGWBHV1ZIprz+dQpjiB3/zNmkX6gGBC29ST6uToLoL3Fw
+ YA2PI+dR6Ir3NFJF1SpSAO5cK8NSd3vBj+ENcoOjpntAwcAJTTD3PgHUb8SvU6jOyaQP
+ mQfzg7y65O/jDFuxDdsItf5CkEr9WJ+TLNhk0J8wep1KUYw8u7v4VBVb1LSz4I7u5Hjm vQ== 
+Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3jbxhsgw4r-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sat, 03 Sep 2022 18:43:32 +0000
+Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 2839hr4H034906;
+        Sat, 3 Sep 2022 18:43:31 GMT
+Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2173.outbound.protection.outlook.com [104.47.56.173])
+        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3jbwc6ufvu-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sat, 03 Sep 2022 18:43:31 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=G3HTpSBAAoHEu+gp7+MHiHvQc2DrCKwx1AaXB2M18HmIxIz5Xx/a7BzmBruiwjesdXnDiBemxXPX66N5BfrG9HeFsEZTf18udHjZaYx3FG9Nbdv5zVBwNWFLYphUDDHVcmONvtpCQfnYkN00uDwhis2GjYEw9ZqPcNnhxRHLJ0y9HGUJLbrtOgvRmuJb/WEg/7gESbEr6UsGi4y+sV1R3qyVPOK8lSx7k5//XQBArETmY8PamJk2ZSA8PQP9jpxzAERodmSbHyiDT68pEKr5He1fXbPR6UcUZG9EH1X8byec8Rqb5/6MXk8qk2X6gLxD+jzGzBajhoEhVX/xBj76Ig==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=W3AEQVPADp/NocIgOy4HLuFCxZaCd335mGsAIrauUQs=;
+ b=P7DmelSU6Gr1yUBvLJ7QUTz/k5zV3TxhIm38I/iUYDFXyYMwjp1x7zsLf3GmfmZcPtkd68y/bMWO+2ZDcUSY0IpcxuhuSoRgzIId6iz7TSSVlhHGqlU4KmZmXEkpMYh2ZPs3NeaB+IFtkMeueqdTnhxgsYwyUmN8Ioc3+HdvtQQtH/4e1IzWuA9Em0ZYbVstB2Jv10uGJsGyrPvRSOl9E4QIh9dx6GfDozBOsGNThMH55hDXasiGDl+IwjhQw+m5BWJh056zhEb0LRlpy7hC9SHrCrKsVFwGWQ2lK5cPahjhJs7OS9k1jI0RoIWb0pOjEdcbzYnffOtuVW1kE2nzKQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=W3AEQVPADp/NocIgOy4HLuFCxZaCd335mGsAIrauUQs=;
+ b=cHb9T/NyY3kxgOIQ6FtEn63nz1MEN6Qnuo+91Wa1Hh3/E7kcnjPcE9fI6QNPIDAgQduC7YZgJ46CZHpq1q18I35OAi8D+0YrnrPTiB5sZe/UgNx2NtfTzipgJwa9eJlsKd45lQ8dM3/CFEq0vREx5ZIl8FhsZTOidiN9BSotL0g=
+Received: from BN0PR10MB5128.namprd10.prod.outlook.com (2603:10b6:408:117::24)
+ by DS7PR10MB5005.namprd10.prod.outlook.com (2603:10b6:5:3ac::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5588.10; Sat, 3 Sep
+ 2022 18:43:29 +0000
+Received: from BN0PR10MB5128.namprd10.prod.outlook.com
+ ([fe80::25d6:da15:34d:92fa]) by BN0PR10MB5128.namprd10.prod.outlook.com
+ ([fe80::25d6:da15:34d:92fa%4]) with mapi id 15.20.5588.017; Sat, 3 Sep 2022
+ 18:43:29 +0000
+From:   Chuck Lever III <chuck.lever@oracle.com>
+To:     Linux NFS Mailing List <linux-nfs@vger.kernel.org>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: generic/650 makes v6.0-rc client unusable
+Thread-Topic: generic/650 makes v6.0-rc client unusable
+Thread-Index: AQHYv8UPTDI1uHGr8UOM/bcjO7bwcQ==
+Date:   Sat, 3 Sep 2022 18:43:29 +0000
+Message-ID: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-mailer: Apple Mail (2.3696.120.41.1.1)
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 078fbb4c-6b7a-4bf0-4a08-08da8ddc3193
+x-ms-traffictypediagnostic: DS7PR10MB5005:EE_
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: fX1P3E+077XbOjCjH64RlGuNErbiiospUTq2Q4Wc+bKzvV+gblUMMk5gvB8yNzxSIxLco9LvJvlVJU+ThIpVrwsIM4twCpDak+L7R/pv+9GbekWDQGhCnFQ33zEuq1E0nouK6kRSUHxauo/7EmubiunSNMh1r7xgsKo5L9mA6d4IgdyJedffhGqzXOB8baPpYyqi+0RZiN6XUsgxfY6H5OvvmADUaL5xbxACSl+A89kz9vrFKnZyPcl9LujzquVcvMg4Orv4SeGVxmkMboLxpp624zXaTO7W+XqDfxPSbKeTNmKIP2/5t3XiYiVs8uWFB2mT+SBNqHW+SfLygc4vLNyDBknCIf44TJTHzfkQ89qvOJL/mHZTc7h3usWfgSYqSUIb7CPfOmPoJ4SJCS9FjN3Jn8xR/2NuT10LyXDQQ8hK6H7HRAlgBfSoavZVEaJbun11tGKQgfypxyLpWGCJNS83wqd30rRz+boKDSiGzYx85Za1gkMKAkWaoyAaRwGhizzrS52IEVA8DaUU5UGS8ugLo7XU1F7eteUkrnd6nedstq2V/YezTLmB8hiWHCOb5RUVsuqur8d8vT1Uwcwlx4b6UcMNW6ZJmh/rn157rSKCUIkGuz9GCy+jweb99GzkzE1AvXSWT7ZyapQkdgegGhW49+x9O8C7tXkMMjo5j5qOtjC0PG84nT1wGkvPQizBACYLjSu/rONM6T/9JEA4JCJSzFuoIwQb91MjYuxKxiR5ELOcKbpNGExmi7k6HXNltziFDh1eG1X6QAqho5cQgO+l86xpVUb65q+NExLw6at6vGImAjlW0Y+wQQStBWfi
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN0PR10MB5128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(396003)(376002)(366004)(136003)(346002)(39860400002)(6512007)(26005)(2616005)(83380400001)(2906002)(4744005)(5660300002)(8936002)(33656002)(478600001)(41300700001)(86362001)(36756003)(6486002)(186003)(6506007)(71200400001)(38070700005)(91956017)(64756008)(450100002)(66446008)(66476007)(66556008)(66946007)(6916009)(8676002)(76116006)(316002)(38100700002)(4326008)(122000001)(41533002)(45980500001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?fg80eFQiw5OynZZ70e2iO3U5Y6hiIjvRVU0g8n1VQuko1VSw19pDQaqo30DI?=
+ =?us-ascii?Q?Kg7J8QLFdi5j9+suexra10RT4QRdNlUctKHTobq5ZeAgTsN0PUM8yzOicku1?=
+ =?us-ascii?Q?Ah5xv/7JWJhBXbQ3Tj+zWZV11c4y+Y57uuf+XlwP2IDLRV0AprGIMLA58Gwj?=
+ =?us-ascii?Q?6/ELiV7AFOBCmue8QfcHiTWbKHnCuG77YVrsIoikrP4JT88B6UdhJlPqfCnV?=
+ =?us-ascii?Q?PYtszTyOrxz0f0a8etEKVBHXpIJNeIlU2pKMi7CL/H5nhTlCFaNShOoOwQQ6?=
+ =?us-ascii?Q?n00NgaFUUfW4L2Gf/Z8AKZIyna60FRgjplbxMhiqqa2FYb8NVZwG+G0KKjfE?=
+ =?us-ascii?Q?noc5/VoYEQNEuv55AD5sdiRA/PSjcr113GAYLdxW2DBAzmCHPe1Ey4lB5MhY?=
+ =?us-ascii?Q?Hzu53iZuwYEzGwzTU8/kKdCUoYQjgTueOsmY9WnXzXOfCkHmIpel/kV3ltit?=
+ =?us-ascii?Q?kLL2QJSchCshjDAwbWN3Xry3SvJe/XJmVr7mnCV66uR0YvqjuPDKQQO57XCL?=
+ =?us-ascii?Q?lJMp2t+sNcQAukwfSUWtT22yxZW9vjiNW3cLkNHCPCv/xh/SMngpokMDr5q9?=
+ =?us-ascii?Q?VUGWHRJri07zYBv2y1WkA7bGQVBQq7FsBIyR8IIwgrgjs5efCxgZgUksv+Bx?=
+ =?us-ascii?Q?fLK7t0maPQN8Zty8mxnXfnf/XZQ3xe8ex9WESU/aqQoOv0pGNgQIqVqaSL5L?=
+ =?us-ascii?Q?/4gVIOasP/GholP7ttoe3GLNPFqtoBmkdvtagS6SlHMHVkmu6xzn6aAuixcq?=
+ =?us-ascii?Q?OYJQeWN6MC1GIJ9T2cg8G92Dfk/6CMhB4MXQ3I70rSOYYSXc3xlZeSmelGEH?=
+ =?us-ascii?Q?zxzEaZ1nQ5SIrY5hA7VY++aV2LaGjUuRPQhnP97wUwzCWR/OHmXmXHG0u6hQ?=
+ =?us-ascii?Q?2P4rmJQ4dxNwQ0kSKyvUWmNA/UAK9ziXL2V9BqZN7xFWJtxwK0Ep7U43w17B?=
+ =?us-ascii?Q?wS9LiZ70LcxWoxpFsMzOzYaCN0vLbfISuhH1/H9ey0Ua88tbm/aJibcxojp0?=
+ =?us-ascii?Q?3NXjt7NaTfB3WhQg7S9GKcnyfUch52mBpb82gUbWvER64KSMAkeLL5lqPNGH?=
+ =?us-ascii?Q?oIHe4DcKZKLOYuUtmCxBW+t6fa4ppGqwOii5ci6+NoO7PXuRKtplhndoH1Je?=
+ =?us-ascii?Q?DUyKLrg7jO60SSOS0e6c7cCr2elujHrS1DzYt16V+wOKv4Gs+KQomoKQTuFB?=
+ =?us-ascii?Q?ns8COuMao0sWeIkv9i9SwG83Isx5WtM1Zri1mYdtBBWbDdDU0oDQR+cc6S8y?=
+ =?us-ascii?Q?kwC+yhdbX8zIHDsDKd6EsZTwOslaNKQCV48giYUVMMvDw8M+03YuDUd+YoOm?=
+ =?us-ascii?Q?lApz5yUkw7WresOgEewnX6gl1O1Vac4yNLWqeiVXwtc1ekrijcNrTOiAtn8I?=
+ =?us-ascii?Q?gwUfb25j0rZ2zdxIrnFYGySvdJ1TqZUnaL0u8T4iez/iySiFICvDzt/eP12w?=
+ =?us-ascii?Q?99Eg1ZG2YFsURLxQErL7xJBioRdgOfvn1MChHZ+/V4ihXNSjHg6/JLoIwJ6k?=
+ =?us-ascii?Q?XsQtcSe7l3gEAuRi+EMVTCTZn+wsOld0pWGRai0BW9Uu4lIYGGM3Xg1HGoy8?=
+ =?us-ascii?Q?ghGNEaHCIW3+W+oDQ9B8K/30jDDwE6OpGawrsGHw7LW7z4SAiqOvwvQEYUlv?=
+ =?us-ascii?Q?Rg=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <87258A8D4BCC7542B80554194FD1F15E@namprd10.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.0.2
-Subject: Re: [PATCH fstests] xfs/554: xfs add illegal bestfree array size
- inject for leaf dir
-To:     Zorro Lang <zlang@redhat.com>
-CC:     <fstests@vger.kernel.org>, <djwong@kernel.org>,
-        <dchinner@redhat.com>, <linux-xfs@vger.kernel.org>,
-        <yi.zhang@huawei.com>, <houtao1@huawei.com>,
-        <zhengbin13@huawei.com>, <jack.qiu@huawei.com>
-References: <20220902094046.3891252-1-guoxuenan@huawei.com>
- <20220903013921.wbmwkf6rs2iknqn6@zlang-mailbox>
- <e51811d6-be83-47ee-c4bb-7dc18f97df97@huawei.com>
- <20220903095755.ftrecvbfkt6drdwc@zlang-mailbox>
-From:   Guo Xuenan <guoxuenan@huawei.com>
-In-Reply-To: <20220903095755.ftrecvbfkt6drdwc@zlang-mailbox>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.174.177.238]
-X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
- kwepemi500019.china.huawei.com (7.221.188.117)
-X-CFilter-Loop: Reflected
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BN0PR10MB5128.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 078fbb4c-6b7a-4bf0-4a08-08da8ddc3193
+X-MS-Exchange-CrossTenant-originalarrivaltime: 03 Sep 2022 18:43:29.0247
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: +AADLGe11Xb130ebksP+Fe2ppuB51O/z+avzLZP2pkuRcvS74klgQsFylTxRVYMXuVE1sbpTF4iewhpBqf3UHg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB5005
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.517,FMLib:17.11.122.1
+ definitions=2022-09-03_08,2022-08-31_03,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0 spamscore=0
+ mlxlogscore=999 mlxscore=0 bulkscore=0 malwarescore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2207270000
+ definitions=main-2209030096
+X-Proofpoint-GUID: BFPQ6UK8vZtwEGxPRPgNwcvD08diSBC6
+X-Proofpoint-ORIG-GUID: BFPQ6UK8vZtwEGxPRPgNwcvD08diSBC6
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Zorro:
+While investigating some of the other issues that have been
+reported lately, I've found that my v6.0-rc3 NFS/TCP client
+goes off the rails often (but not always) during generic/650.
 
-On 2022/9/3 17:57, Zorro Lang wrote:
-> On Sat, Sep 03, 2022 at 11:51:13AM +0800, Guo Xuenan wrote:
->> Hi Zorro：
->>
->> On 2022/9/3 9:39, Zorro Lang wrote:
->>> On Fri, Sep 02, 2022 at 05:40:46PM +0800, Guo Xuenan wrote:
->>>> Test leaf dir allocting new block when bestfree array size
->>>> less than data blocks count, which may lead to UAF.
->>>>
->>>> Signed-off-by: Guo Xuenan <guoxuenan@huawei.com>
->>>> ---
->>>>    tests/xfs/554     | 48 +++++++++++++++++++++++++++++++++++++++++++++++
->>>>    tests/xfs/554.out |  6 ++++++
->>>>    2 files changed, 54 insertions(+)
->>>>    create mode 100755 tests/xfs/554
->>>>    create mode 100644 tests/xfs/554.out
->>>>
->>>> diff --git a/tests/xfs/554 b/tests/xfs/554
->>>> new file mode 100755
->>>> index 00000000..fcf45731
->>>> --- /dev/null
->>>> +++ b/tests/xfs/554
->>>> @@ -0,0 +1,48 @@
->>>> +#! /bin/bash
->>>> +# SPDX-License-Identifier: GPL-2.0
->>>> +# Copyright (c) 2022 Huawei Limited.  All Rights Reserved.
->>>> +#
->>>> +# FS QA Test No. 554
->>>> +#
->>>> +# Test leaf dir bestfree array size match with dir disk size
->>> Is it for a known bug? known commit id?
->> The bug is being solved and waitting to be reviewed here[v1/v2].
->> [v1]
->> https://lore.kernel.org/all/20220902094046.3891252-1-guoxuenan@huawei.com/
->> [v2]
->> https://lore.kernel.org/all/20220831121639.3060527-1-guoxuenan@huawei.com/
->>>> +#
->>>> +. ./common/preamble
->>>> +_begin_fstest auto quick
->>>> +
->>>> +# Import common functions.
->>>> +. ./common/populate
->>>> +
->>>> +# real QA test starts here
->>>> +_supported_fs xfs
->>>> +_require_scratch
->>> Do you need V5 xfs? Or v4 is fine?
->>> _require_scratch_xfs_crc ??
-Both v4 and v5 have this problem,
->>>> +_require_check_dmesg
->>>> +
->>>> +echo "Format and mount"
->>>> +_scratch_mkfs > $seqres.full 2>&1
->>>> +_scratch_mount  >> $seqres.full 2>&1
-> If _scratch_mount fails, the testing will exit directly, so generally we just
-> run _scratch_mount.
-OK, you are right.
->>>> +
->>>> +echo "Create and check leaf dir"
->>>> +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
->>>> +dblksz="$($XFS_INFO_PROG "${SCRATCH_DEV}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
->>> Why do you need these two kinds of block size for xfs? And you sometimes
->>> use the former, sometimes use the later? If you'd like to get the xfs data
->>> block size, you can:
->>>
->>>     _scratch_mkfs | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
->>>     . $tmp.mkfs
->>>
->>> Then "dbsize" is what you want.
->>>
->>>> +leaf_lblk="$((32 * 1073741824 / blksz))"
->>>> +node_lblk="$((64 * 1073741824 / blksz))"
->>> I didn't see the "node_lblk" is used in this case, looks like you don't want to
->>> get directory node blocks in this case.
->> It's really needed here, must define leaf_lblk and node_lblk before calling
->> __populate_check_xfs_dir
->> or an waring will be printed by the function.
-> Oh, so these two global parameters are used for later __populate_check_xfs_dir.
-> Hmm.. are "blksz" and "dblksz" necessary too, for someone __populate_* helper
-> you used? I really don't understand why we need them both. These helpers are
-> written by Darrick, I think he learns about that more :)
-yes, there are same usage for eg. xfs/113 xfs/101 ...
->>>> +__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dblksz / 12))"
->>>> +leaf_dir="$(__populate_find_inode "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF")"
->>>> +_scratch_unmount
->>>> +__populate_check_xfs_dir "${leaf_dir}" "leaf"
->>>> +
->>>> +echo "Inject bad bestfress array size"
->>>> +_scratch_xfs_db -x -c "inode ${leaf_dir}" -c "dblock 8388608" -c "write ltail.bestcount 0"
->>> As you tried to detect xfs block size above, so it might not 4k block size, so
->>> 8388608 is not fixed.
->>>
->>> According to the kernel definition:
->>>     #define XFS_DIR2_DATA_ALIGN_LOG 3
->>>     #define XFS_DIR2_SPACE_SIZE     (1ULL << (32 + XFS_DIR2_DATA_ALIGN_LOG))
->>>     #define XFS_DIR2_LEAF_SPACE     1
->>>     #define XFS_DIR2_LEAF_OFFSET    (XFS_DIR2_LEAF_SPACE * XFS_DIR2_SPACE_SIZE)
->>>
->>> The XFS_DIR2_LEAF_OFFSET = 1 * (1 << (32 + 3)) = 1<<35 = 34359738368 = 32GB, so
->>> the fixed logical offset of leaf extent is 34359738368 bytes, then the offset
->>> block number should be "34359738368 / dbsize". 8388608 is only for 4k block
->>> size.
->> Sorry, you are totally right! it should be "dblock ${leaf_lblk}"
-> That looks better.
->
->>>> +
->>>> +echo "Test add entry to dir"
->>>> +_scratch_mount
->>>> +touch ${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/{1..100}.txt > /dev/null 2>&1
->>>> +_scratch_unmount 2>&1
-> This "2>&1" looks useless, I think it can be removed
-OK, in v2 it will disappear :）
->>>> +_repair_scratch_fs >> $seqres.full 2>&1
->>> Can you explain more about this testing steps? The xfs has been corrupted, then
->>> we expect is can be mounted. And create 100 new files on that corrupted dir,
->>> do you expect the 100 files can be created successfully? Or what ever, even
->>> nothing be created?
->> since we have create an leaf dir,and set bestfree count to 0; then, need to
->> touch some files to
->> trigger the problem, the action will be failed as expected.
-> OK, I think you can add more comments to explain this part. Due to you make
-> a obvious corruption at first, then try to mount and write the corrupted fs,
-> there must be some error happen, so you'd better to explain what do you
-> expect, and what's not.
-Thanks a lot, and I'm happliy accept your suggestion, It's really a bit 
-confusing here,
-I will add some specific description
->>> What's the xfs_repair expect? Fix all curruption and left a clean xfs?
->> Adding repair is really not necessary, only toavoid _check_xfs_filesystem
->> warning
->> " _check_xfs_filesystem: filesystem on /dev/sdb is inconsistent (r)"
-> Except you'd like to verify if xfs_repair can fix this corruption. Or replace
-> _require_scatch with _require_scratch_nocheck, that will help you avoid known
-> fs corruption warning. Then you can remove _repair_scratch_fs and above
-> _scratch_unmount.
-Yep, you got my point, since it's my fisrt contribution code for 
-fstests, and
-I didn't figure out how to disable the post fsck execution. so great, I 
-will
-add _require_scratch_nocheck.
->>>> +
->>>> +# check demsg error
->>>> +_check_dmesg
->>> Which above step will trigger a dmesg you want to check? What kind of dmesg do
->> dmesg eg:
->> [   80.543884] XFS (sdb): Internal error xfs_dir2_data_use_free at line 1200
->> of file fs/xfs/libxfs/xfs_dir2_data.c.  Caller
->> xfs_dir2_data_use_free+0xb3/0xeb0
->> [   80.545141] CPU: 2 PID: 2978 Comm: touch Not tainted 6.0.0-rc3+ #115
->> [   80.545715] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS
->> 1.13.0-1ubuntu1.1 04/01/2014
->> [   80.546546] Call Trace:
->> [   80.546785]  <TASK>
->> [   80.546985]  dump_stack_lvl+0x4d/0x66
->> [   80.547335] xfs_corruption_error+0x132/0x150
->> [   80.548391]  ? xfs_dir2_data_use_free+0xb3/0xeb0
->> [   80.548901]  ? xfs_dir2_data_use_free+0xb3/0xeb0
->> [   80.549319]  ? xfs_dir2_data_use_free+0xb3/0xeb0
->> [   80.550190] xfs_dir2_data_use_free+0x198/0xeb0
->> [   80.550718]  ? xfs_dir2_data_use_free+0xb3/0xeb0
->> [   80.551140] xfs_dir2_leaf_addname+0xa59/0x1ac0
->> [   80.551881]  ? _raw_spin_unlock_irqrestore+0x42/0x80
->> [   80.552403]  ? xfs_dir2_leaf_search_hash+0x300/0x300
->> or
->> [  201.405239] BUG: KASAN: slab-out-of-bounds in
->> xfs_dir2_leaf_addname+0x1995/0x1ac0
->> [  201.406179] Write of size 2 at addr ffff888078c33000 by task touch/7433
->> [  201.407010]
->> [  201.407217] CPU: 6 PID: 7433 Comm: touch Not tainted 6.0.0-rc3+ #115
->> [  201.408016] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS
->> 1.13.0-1ubuntu1.1 04/01/2014
->> [  201.409143] Call Trace:
->> [  201.409461]  <TASK>
->> [  201.409740]  dump_stack_lvl+0x4d/0x66
->> [  201.410214]  print_report.cold+0xf6/0x691
->> [  201.410730]  ? xfs_dir3_data_init+0x18e/0x960
->>
->> UAF/slab-out-of bound etc...
-> Look at the _check_dmesg, it checks "Internal error" and "\bBUG:" etc, so I
-> think it can catch above dmesg error, you can remove this _check_dmesg and
-> run again, to make sure if it works as you wish.
-OK, I will check it again.
->>> you want to check? I think xfstests checks dmesg at the end of each test case,
->>> except you need to check some special one, or need a special filter?
->> check demsg without filter seems enough, so i did not add special filter.
->>> Thanks,
->>> Zorro
->>>
->>>> +
->>>> +# success, all done
->>>> +status=0
->>>> +exit
->>>> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
->>>> new file mode 100644
->>>> index 00000000..ea1f30cc
->>>> --- /dev/null
->>>> +++ b/tests/xfs/554.out
->>>> @@ -0,0 +1,6 @@
->>>> +QA output created by 554
->>>> +Format and mount
->>>> +Create and check leaf dir
->>>> +Inject bad bestfress array size
->>>> +ltail.bestcount = 0
->>>> +Test add entry to dir
->>>> -- 
->>>> 2.25.1
->>>>
->>> .
-> .
-Thanks
-Xuenan
+This is the test that runs a workload while offlining and
+onlining CPUs. My test client has 12 physical cores.
+
+The test appears to start normally, but then after a bit
+the NFS server workload drops to zero and the NFS mount
+disappears. I can't run programs (sudo, for example) on
+the client. Can't log in, even on the console. The console
+has a constant stream of "can't rotate log: Input/Output
+error" type messages.
+
+I haven't looked further into this yet. Actually I'm not
+quite sure where to start looking.
+
+I recently switched this client from a local /home to an
+NFS-mounted one, and that's where the xfstests are built
+and run from, fwiw.
+
+
+--
+Chuck Lever
+
+
+
