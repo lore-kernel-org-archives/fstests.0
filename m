@@ -2,160 +2,196 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C709FECAAD3
-	for <linux-fstests@archiver.kernel.org>; Sun,  4 Sep 2022 14:09:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC78BECAAD3
+	for <linux-fstests@archiver.kernel.org>; Sun,  4 Sep 2022 16:03:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230015AbiIDOJQ (ORCPT
+        id S234831AbiIDQDQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 4 Sep 2022 10:09:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51362 "EHLO
+        Sun, 4 Sep 2022 12:03:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57702 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233715AbiIDOJP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2022 10:09:15 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2F0238456
-        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 07:09:12 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 4C39ECE0E7A
-        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 14:09:11 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2ED7DC433D6;
-        Sun,  4 Sep 2022 14:09:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1662300549;
-        bh=7Tq8vrVb0Wa3irHjIKV/xMZYn2N8Lw4QVU6nJ5ceylk=;
-        h=Date:From:To:Subject:From;
-        b=oC83U2k/4S09MuMLnsJM5Ii5uUb+LHr8Oo/6o0ugEBjU8w+97erxUICy5pIKMlTJz
-         fkSvbQLlF3A7+bMAWpspw45ZSad2tTnMJSv+gbtuziKQhUcSXep4BzCV0EsKeXg7cv
-         63To9SLqKRhfoNz8yPYre3zkFjl0shx7DX0GWGp+G3sVJmz59pW2rJoFWfDv6nC82n
-         Jslo3MBQnxXv283H4108hFV4dUNyoUfHCEITsIcTbME8STAOr3dhlNNopmaurLkJn6
-         fCDrlBWazgTH1tpJlox2COQJxaxrUn1WiBsU6ENlcLxyyjOFqYOOiEL8xbzpdxmDgw
-         hQrVFuXc4hSwg==
-Date:   Sun, 04 Sep 2022 22:09:06 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to 890c50823b64
+        with ESMTP id S234765AbiIDQDJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2022 12:03:09 -0400
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26DDC399DB;
+        Sun,  4 Sep 2022 09:02:49 -0700 (PDT)
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 284CUHjL004049;
+        Sun, 4 Sep 2022 16:02:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-id : content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=sJvZgWEsj5bvHrZogtLXt63CpaVGAkhv3TIxYvZqxHY=;
+ b=yLxLVYrNVY2al9wT+9v53bAwNtksqhnfzdVu9q2uuHUqxZRjgz5mN4mT6NSwoJ64as4J
+ mzxXewY4TYXfYy7c4+muSKWCS+7u8f73RbG+mM7Ury6bo5LdVha7m6ALm4N+JWqR6nJS
+ vuoDS+6oFj2agssraYv9kYvTr+8KW6GZnK5+gUcFRds0jAiSmjQAgw/aOijlpBIhCZwu
+ TY4zhqKeiYGdsM9qMOlkINKjWj5+7Qbm+0DiMa2vuWx8P+qcgC5bQyamei9GTcAnITU+
+ 6jCoB0ETL5FXg6WceD96jEq3hpka7CP6+p/YXwL2xGZdObVFje4hgaJtXElXaKkAauW5 BA== 
+Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3jbwq29y33-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sun, 04 Sep 2022 16:02:47 +0000
+Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 284C0Vr0002885;
+        Sun, 4 Sep 2022 16:02:46 GMT
+Received: from nam10-dm6-obe.outbound.protection.outlook.com (mail-dm6nam10lp2103.outbound.protection.outlook.com [104.47.58.103])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3jbwc0teyj-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sun, 04 Sep 2022 16:02:46 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=nHMMT53ZE7Bxgom3+RsqBIXpOiCpVBMUU1/Rf2Dng0gHJroAJQB4iVDtEjKI3/MySU/75cjEHftF2iHZ/19KNsAfRjGUVjHlbwH/vzrsVKL912fBUL3SoHTIAw5JHVc7NX2YvI7YI/rNrH3zCrfVgSK4HaWBjG8Ff3WO7B3OlAt9DRQrjg6cc604v/C+NqKtvlZXJx4ZwKAuA3plg1+XqlAJkdqW1kEGqWbUXL28lQWVHV0YeoS1xEax1ZTjAip9Ek7Puso8lFnl/ZVTm9L84vRggjUZh9LVCWZbXPJDRvGj2KfHKqA4wZxPBgMEScYyC9oiQXiA0jqUWhvlFPHjew==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=sJvZgWEsj5bvHrZogtLXt63CpaVGAkhv3TIxYvZqxHY=;
+ b=Rt0Gk2MQ+3kDb/5czyCxUX+4pSLTUoV4d3qqFwuHyKNqQ7/oj++gFisa16m2UHzaNkyDvqwpNPU4NEwNIRi6r/PQ0VzzNIMdylTKKceZDLm/93B30g5HMuwDhg114uEFf8n4VDVcIDyyQgEQCoKivcN5/QGPrzVmkA4ZiqoA5JsWMoVqAQ3v6AkXuHWmpRajskzVSM509vNIOeuLXlZO9aK9EwP2k5fNfYkgi5wMkEE/+nxd61J7Iv5nke4Qvu901NXhmDD14Rvl6/cDmYNtDX6M87st0IRliKStqfpkfje61s3eyGB8IUbhLhUfrEl81jaYUjfyMEY5vVNKLEINRQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=sJvZgWEsj5bvHrZogtLXt63CpaVGAkhv3TIxYvZqxHY=;
+ b=xrc0z09ehvH5U78mPrb+in2iAaC/KB7OOc6hXMCU0uADeS+Fjk39AfC3tRUUGxyCeUQGjItxwlRnPG1gYkHVyaUyrJzOeeE6PH2cjHFmvcIt0N7uzK/NdGpqFVSFxCZ32/teoh4YONaqiRnTmMiXJNdz7rptdxGmTvhEau72Yqk=
+Received: from BN0PR10MB5128.namprd10.prod.outlook.com (2603:10b6:408:117::24)
+ by CH0PR10MB5177.namprd10.prod.outlook.com (2603:10b6:610:df::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5588.10; Sun, 4 Sep
+ 2022 16:02:44 +0000
+Received: from BN0PR10MB5128.namprd10.prod.outlook.com
+ ([fe80::25d6:da15:34d:92fa]) by BN0PR10MB5128.namprd10.prod.outlook.com
+ ([fe80::25d6:da15:34d:92fa%4]) with mapi id 15.20.5588.017; Sun, 4 Sep 2022
+ 16:02:44 +0000
+From:   Chuck Lever III <chuck.lever@oracle.com>
+To:     Zorro Lang <zlang@redhat.com>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
+        "djwong@vger.kernel.org" <djwong@vger.kernel.org>,
+        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+Subject: Re: generic/650 makes v6.0-rc client unusable
+Thread-Topic: generic/650 makes v6.0-rc client unusable
+Thread-Index: AQHYv8UPIvgoSU1RX0u5XzLtJ9lDJ63PQWGAgAAunIA=
+Date:   Sun, 4 Sep 2022 16:02:44 +0000
+Message-ID: <0AB3B4E6-3B0F-4F04-8618-A3257D820FAA@oracle.com>
+References: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
+ <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
+In-Reply-To: <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-mailer: Apple Mail (2.3696.120.41.1.1)
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 1085cbef-9b16-49c5-b871-08da8e8ee741
+x-ms-traffictypediagnostic: CH0PR10MB5177:EE_
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: IOxW7wo6aOgRmsm14y7nODkhx/Z9LLD3ks5mHxVvC646GQNxB06kYm36hOpL6+EVKO9skZj/SzXwdluLWeNKWJhUfbqprtk8bmtdVtTqxUywPrY6SM6YfgXMUfSYvwrMP3jRGZus5hjs5VpwpUmfz9UCJkk5gBH/Oj4MLQswZSL3OsRQxI7hcWrUpsZIT3Xtep9nLaqWIFB64x0xgbIvzKPJIGlVGemsh7w6+ezoyRLdRRlRIamlbe0pEXnbjA0Kw2GHUVuQOjC+JvbIvSzvof0gJu2bm02nzm2mvtTxxKznGweuUi/3aFbv07LBmErifYvKEx5iEju3JTXwYsvjUwVmqYK6oKUMzL9+92MJDM7zuY4+xCMoClvO0CQniHNU71kidRdYZ4mG0MjCIQCyy8yt7eV4QXxytDgaqvgEnRiCSixoDoeiONTeGylKhIOKbhmhTbzyMdnTZ8fNJV3PvLw/Oo8GN83RiOxdgeSLWPsebrbUAEqoOr8EVECH36dywuE62yFi0VWrXCegdLtmevA4kp7Tjyi3ew6EcWBywQW7KA7xmzXg3G/Dk/UKyeDwm39cRnRM5thCg6lFSJHsrq73J3SMUIDpcLTFv5Yk6hNzxUHuRzvIR3jXlSpiI1iXGviy4cY9DRoQSVU9co407XbM31eLlaJ0/4yrrgmshj9wGfMjNmiy5aAcS+4zHfyjY1DYj4HDerzKzlA/KUPfnJTyIgRWB6yfMXKfKIPTJFAGJE5DcPwREyBiiCDVTtUJIkJhhX+J4CvZyHMPl3Aq6rFDGPbekB7cMFrpFLiKTEhhPv9bCqIq94zfR+2W0b3bTrz5qdPUTMzCcY5CzDfJZA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN0PR10MB5128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(366004)(376002)(136003)(39860400002)(396003)(346002)(2616005)(186003)(66446008)(8676002)(478600001)(4326008)(316002)(54906003)(6916009)(36756003)(64756008)(6486002)(76116006)(66476007)(66556008)(66946007)(91956017)(71200400001)(53546011)(33656002)(2906002)(122000001)(86362001)(6506007)(5660300002)(26005)(8936002)(41300700001)(6512007)(83380400001)(38100700002)(38070700005)(41533002)(45980500001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?gR/9qPRueW+ZuddeJtfe3Q7dFXo/07dySfPjO5l+tkFnAr435EL2vINy0LXR?=
+ =?us-ascii?Q?cHSZoBqpwy6uNnfIPnqcDQkt5X4i1WpHMmYKmwBsL6lfzgz1yMMFWHb/5N8R?=
+ =?us-ascii?Q?D5lhAyvWBtUpxknHFPnQOkUsMFqUe3O3PQw96pmyyS8CZ68pKEgB0/ThR7wW?=
+ =?us-ascii?Q?vx38BMff95nVmDp0l3Iw9KQ7oO8WWc1liSAfoThsqlZJWaJ/UYnTV6sWNGMe?=
+ =?us-ascii?Q?pKoQUE7oyxocMdKO6KJkhmRinJvXNepEwDBhsq2UdRjDLxdkPYm3uLjNPBzw?=
+ =?us-ascii?Q?eCi3SPdt99EKA2LkLbKAGctNvuyfit0kXEKvsu8Qz+EDJVXj95Jg3XnQT0Hq?=
+ =?us-ascii?Q?osz8RQgEUxC7DQ1+xwHCdeXrexjXG9tXhy2KmxwEA6rK27NRr32KgHwoaOu1?=
+ =?us-ascii?Q?bm9brEN+WoWMLW9BXvh1EK5QerSwNxHZgQgiyTha4J1wo7EiNR+avbZ5MXnh?=
+ =?us-ascii?Q?v/+1FNJXqJDhC6C6Wcak3aZ8BsVZBwaDJZ0uXN5YoMWIAk1ymMwCdbmdo5Vq?=
+ =?us-ascii?Q?/UPqjD3KWltPz0MzsKHLNOQFxpc81lAdp1qWx+ATOB8iVsUwdf7Q2BYOG0sJ?=
+ =?us-ascii?Q?gwuR5Ze3E4jeb8gqoX1Av8yJvcf3aKRNFA+NYW4xf5yyx3GfkD5oi7T33qE5?=
+ =?us-ascii?Q?sWllKDXyoH8bOrCLXaOf42WABD5MkP8Lt/z6IaDAO6JjXuVVKKpMFbWKihaR?=
+ =?us-ascii?Q?MZ5wlzHKqFGfrNmeTfG0CiTtMG0i80oGhzV97lv/SPWuG7gB8RGZDLezduIt?=
+ =?us-ascii?Q?2u8EeoQiDuWjq74lKRTRi8MkPBuI40UH5aK3akeLkm+ImyX4/lOoi6BYFvYD?=
+ =?us-ascii?Q?VuB6xTPU+XPaNPzprpQTBXvlTUgfHZv8VyYKoj5G/xM2JIzfSbkUie4/bLw3?=
+ =?us-ascii?Q?yQsrCo7OlsRK7Rv9wQhvexnMDsmnPbQsivSmZKPu4fO04ZDy1Ql8bA0dHMay?=
+ =?us-ascii?Q?FPtnxhzEYkgdkLWJJcXeloe7as4iwyysEeGQm4HPiFk7Q/XQZuknn7IHePkG?=
+ =?us-ascii?Q?QQg2e6VJYOmxUDoxRoYnIM8ZEatDVfB7vnS6v7ipyy/BB8fFQG2vCSnEEXZN?=
+ =?us-ascii?Q?B+JaE7TS/Z8A7fetFExiO9Pzz40YjLumnIHDhs8N2BmgZhS6gsYmh0hpzHYZ?=
+ =?us-ascii?Q?uqxnWws0c7SM5NT33h1kWVYP1yqpM56XCmnAj1KlprhJbQcAg6/MxfVnIKB4?=
+ =?us-ascii?Q?CzSklg0gHIA5WiMrBV9l4zEXZHKKslYfZP9MHmcuiXYCR76e++BBWCBhIcWg?=
+ =?us-ascii?Q?AMChMOeRb7CbbHXT6LVHHs/4lcOEBjJ5qPlXVp9CcfNk2+XbESPMrKcb8iE9?=
+ =?us-ascii?Q?yUyhzfPJCgkcPNa/qr4D/6r1/5s1rzvTQtm0MKzS9Fz8qa/l9SqoYjAkLyST?=
+ =?us-ascii?Q?2sb14czpcoS4YxFp7VsvO6IjnZ1wZvR0LYS/XpUCjUfqijwbSn5vknssrtz0?=
+ =?us-ascii?Q?ZGL0BtHMePxqMH0VI/0M920m/JF+FO2+1l5uzmHWUSW7VDKEbznNkTnfxtt5?=
+ =?us-ascii?Q?6wI96I72sRvLTkQ4j0/eS85y34h/qH8jMUsNYgscMJAO83uSIN4iyvJKWn0x?=
+ =?us-ascii?Q?K4PunsshTPnnvRDlQbb/rLyCvamnvuwGGxYhNjYsWPohI6qkxHVKB2I07uso?=
+ =?us-ascii?Q?iw=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <A0908AE75556A649BA776C7DF0285C17@namprd10.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="6ZAEWJGol1DB"
-Content-Disposition: inline
-Message-Id: <20220904140909.2ED7DC433D6@smtp.kernel.org>
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BN0PR10MB5128.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1085cbef-9b16-49c5-b871-08da8e8ee741
+X-MS-Exchange-CrossTenant-originalarrivaltime: 04 Sep 2022 16:02:44.1884
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: m8D8GtFn3f3xiNmxQa24yGy+0DHVcz+sJXaxFcWFvNFN3RF4PlA+3Dd8OkKYyil+HF5r4XVxVf6XPOm+JnZlvw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR10MB5177
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.517,FMLib:17.11.122.1
+ definitions=2022-09-04_02,2022-08-31_03,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 suspectscore=0 phishscore=0
+ mlxlogscore=999 spamscore=0 adultscore=0 mlxscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2207270000
+ definitions=main-2209040081
+X-Proofpoint-GUID: pocGIbqku0MwAjqsvJO13QEgY5dAtFqh
+X-Proofpoint-ORIG-GUID: pocGIbqku0MwAjqsvJO13QEgY5dAtFqh
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hi-
 
---6ZAEWJGol1DB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+> On Sep 4, 2022, at 9:15 AM, Zorro Lang <zlang@redhat.com> wrote:
+>=20
+> On Sat, Sep 03, 2022 at 06:43:29PM +0000, Chuck Lever III wrote:
+>> While investigating some of the other issues that have been
+>> reported lately, I've found that my v6.0-rc3 NFS/TCP client
+>> goes off the rails often (but not always) during generic/650.
+>>=20
+>> This is the test that runs a workload while offlining and
+>> onlining CPUs. My test client has 12 physical cores.
+>>=20
+>> The test appears to start normally, but then after a bit
+>> the NFS server workload drops to zero and the NFS mount
+>> disappears. I can't run programs (sudo, for example) on
+>> the client. Can't log in, even on the console. The console
+>> has a constant stream of "can't rotate log: Input/Output
+>> error" type messages.
+>>=20
+>> I haven't looked further into this yet. Actually I'm not
+>> quite sure where to start looking.
+>>=20
+>> I recently switched this client from a local /home to an
+>> NFS-mounted one, and that's where the xfstests are built
+>> and run from, fwiw.
+>=20
+> If most of users complain generic/650, I'd like to exclude g/650 from the
+> "auto" default run group. Any more points?
 
-Hi all,
+Well generic/650 was passing for me before v6.0-rc, and IMO
+it is a tough but reasonable test, considering the ubiquitous
+use of workqueues and other scheduling primitives in our
+filesystems.
 
-The for-next branch of the xfstests repository at:
+So I think I caught a real bug, but I need a couple more days
+to work it out before deciding generic/650 is throwing false
+negatives and is thus not worth running in the "auto" group.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2022.09.04 release.
-
-Release Note:
-1. There're 5 new cases (btrfs/272, xfs/553 and generic/695~697) in this
-   release. All of them are known regression test, you can find the related
-   kernel commit id in source code. Generally they won't cause panic or hang,
-   so might not break downstream kernel testing.
-2. Thanks Darrick keep improving eio testing.
-3. ext4/053 removed "nouser_xattr" testing.
-
-Feel free to reply this email if you have any questions. Thanks all your
-contribution. More details as below.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-890c50823b64 vfs: Add new setgid_create_acl test
-
-New commits ([N]ew, [U]pdate, [D]elete):
-
-BingJing Chang (1):
-[N]      [ea66d27cb5e6] fstests: btrfs: test incremental send for changed reference paths
-
-Chandan Babu R (1):
-[N]      [0044157d9027] xfs: Check if a direct write can result in a false ENOSPC error
-
-Christoph Hellwig (2):
-[U]      [aa309b96fb5d] btrfs/271: include common/fail_make_request
-[U]      [3e8936c3e84d] btrfs/271: use the common fail_request setup helpers
-
-Darrick J. Wong (3):
-[U]      [f3c314574d01] common/xfs: fix _reset_xfs_sysfs_error_handling reset to actual defaults
-[U]      [4f929ebc5928] common: disable infinite IO error retry for EIO shutdown tests
-[U]      [de3717ae0985] common: filter internal errors during io error testing
-
-Filipe Manana (1):
-[N]      [e42fa9fec802] generic: test fsync after punching hole adjacent to an existing hole
-
-Xiubo Li (1):
-[U]      [c935c7dce550] ceph/004: fix the ceph.quota.max_bytes values
-
-Yang Xu (3):
-[D]      [f9bf0d5130e1] ext4/053: Remove nouser_xattr test
-[N]      [c87543428673] vfs: Add new setgid_create_umask test
-[N]      [890c50823b64] vfs: Add new setgid_create_acl test
+I can't really say whether Ted's failing tests are the
+result of an interaction with the GCE platform or the test
+itself. Ie, his patch might be the right approach -- exclude
+it based on the test platform.
 
 
-Code Diffstat:
-
- check                     |    1 +
- common/dmerror            |    4 +
- common/fail_make_request  |    1 +
- common/rc                 |   50 +-
- common/xfs                |   38 +-
- src/vfs/idmapped-mounts.c | 1207 +++++++++++++++++++++++++++++++++++++++++++++
- src/vfs/idmapped-mounts.h |    2 +
- src/vfs/utils.c           |   14 +
- src/vfs/utils.h           |    1 +
- src/vfs/vfstest.c         |  558 ++++++++++++++++++++-
- tests/btrfs/271           |   36 +-
- tests/btrfs/271.out       |    2 +
- tests/btrfs/272           |   88 ++++
- tests/btrfs/272.out       |    3 +
- tests/ceph/004            |    6 +-
- tests/ext4/053            |    1 -
- tests/generic/695         |   91 ++++
- tests/generic/695.out     |   15 +
- tests/generic/696         |   46 ++
- tests/generic/696.out     |    2 +
- tests/generic/697         |   33 ++
- tests/generic/697.out     |    2 +
- tests/xfs/006.out         |    6 +-
- tests/xfs/264.out         |   12 +-
- tests/xfs/553             |   67 +++
- tests/xfs/553.out         |    9 +
- 26 files changed, 2248 insertions(+), 47 deletions(-)
 --
-Zorro Lang
-zlang@kernel.org
+Chuck Lever
 
---6ZAEWJGol1DB
-Content-Type: application/pgp-signature; name="signature.asc"
 
------BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmMUsEsACgkQlNbPkfr2
-tMy7xQ//UtALponD6vyeQA0Puvnws0A04XFX6uuH0qwPllXZrHuzCWxHsM4Qv9UH
-0kRuhCzNpTP8N0Z9O9Vv4+pwhZxsA6iWgg28I9hw54auMC5q10jVzlidy+V+LvsL
-XOjxkWd1Q5OQoc0aiFr9nquxPmdqFXL+7pn9MtWWTozmxb6lQEjCk9v1KgvGHsE9
-wv5WCwNLs9eYh9/LMlJsgL26Sh/AnlVhhUEi9/dQ4Z5jkksX5Rv4BRvsXB5g7JR7
-rQlPpU9Qp9m/k0zWQF45ty6ub+TVMvEfbih0totg3LDFeEEI38+l0FOhcTPHrP6E
-3G+TiAFpo4jRHTDCewj8rcDBQ7vv/cvmj4GssXh8TCS2d8cHyGodA5X83Ve0InZn
-wNwRZDxsTASv4k9KzFVDW7CZ5NtUo0n+5j4a5I/Obz1SZt87caBYEdiE8B+vouy2
-qxHu9Iu6uWYkZXAnO6uUoE+hFmFWohBeGJU7F41qUFDeqN5e5iYfal2e31JqtdPc
-DiFOqwMvSjdXDecV0pHZpRZwUGOSQlfaAEXjNi94mS8E9pU70P30ZzUrZGhr/PRF
-Nd0f/ekCV5y5oCj65RgoPK+wi8JFcDrpsawgfBcIdjFwsL8jmMD/gKGeuz7a9sAl
-UhSUQUTNoCLyVCEMcgsRNAWn1Zzade9+Qt4rTwmc6aO1u4YpcNQ=
-=EnKp
------END PGP SIGNATURE-----
-
---6ZAEWJGol1DB--
