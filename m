@@ -2,143 +2,160 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E647ECAAD3
-	for <linux-fstests@archiver.kernel.org>; Sun,  4 Sep 2022 13:26:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C709FECAAD3
+	for <linux-fstests@archiver.kernel.org>; Sun,  4 Sep 2022 14:09:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229748AbiIDN0n (ORCPT
+        id S230015AbiIDOJQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 4 Sep 2022 09:26:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39576 "EHLO
+        Sun, 4 Sep 2022 10:09:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229627AbiIDN0n (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2022 09:26:43 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4AA4937F86
-        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 06:26:42 -0700 (PDT)
+        with ESMTP id S233715AbiIDOJP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2022 10:09:15 -0400
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2F0238456
+        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 07:09:12 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D7BE960F7C
-        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 13:26:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4DB5C433C1;
-        Sun,  4 Sep 2022 13:26:40 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 4C39ECE0E7A
+        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 14:09:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2ED7DC433D6;
+        Sun,  4 Sep 2022 14:09:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1662298001;
-        bh=PRDlZBbogr2KLyul7OH6H+E25ACdNQVf/gWkoEcC+to=;
+        s=k20201202; t=1662300549;
+        bh=7Tq8vrVb0Wa3irHjIKV/xMZYn2N8Lw4QVU6nJ5ceylk=;
         h=Date:From:To:Subject:From;
-        b=e3YsLMccEolBy6cXRfnlivKVcJ70uSqAroBervR93MwOCdX6KmTNTi426TEeZmhN0
-         t9u+BAMRmDAyvBTyErAjdHQtRrmx2Hxm7OZvVeYj+Vfx2rlOmaHU3JTfX/XsM5w5ay
-         IjBjtPubU1VsqCJ/iXAHTal1whrB+NM+X60OFnYHC8gESmlASzQr5S84YWraWUOvGj
-         zXkzm/pEwQAxHieONtO7QW64AUpDnaE4lz2yEeAmFTtJA+8ud5Lihj0Q/Wc5a5fZQu
-         5XUM0wKD3xNm42N1aPIG3SRT1Dp1EvVcvmztmqy2mtveye7kujDwG86PW6ErpMjuPo
-         SavnFVAPdQbcg==
-Date:   Sun, 04 Sep 2022 21:26:38 +0800
+        b=oC83U2k/4S09MuMLnsJM5Ii5uUb+LHr8Oo/6o0ugEBjU8w+97erxUICy5pIKMlTJz
+         fkSvbQLlF3A7+bMAWpspw45ZSad2tTnMJSv+gbtuziKQhUcSXep4BzCV0EsKeXg7cv
+         63To9SLqKRhfoNz8yPYre3zkFjl0shx7DX0GWGp+G3sVJmz59pW2rJoFWfDv6nC82n
+         Jslo3MBQnxXv283H4108hFV4dUNyoUfHCEITsIcTbME8STAOr3dhlNNopmaurLkJn6
+         fCDrlBWazgTH1tpJlox2COQJxaxrUn1WiBsU6ENlcLxyyjOFqYOOiEL8xbzpdxmDgw
+         hQrVFuXc4hSwg==
+Date:   Sun, 04 Sep 2022 22:09:06 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2022.08.21 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to 890c50823b64
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="9MNOUSOLbBrx"
+        protocol="application/pgp-signature"; boundary="6ZAEWJGol1DB"
 Content-Disposition: inline
-Message-Id: <20220904132640.E4DB5C433C1@smtp.kernel.org>
+Message-Id: <20220904140909.2ED7DC433D6@smtp.kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
---9MNOUSOLbBrx
+--6ZAEWJGol1DB
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2022.08.21 version (merged from for-next).
+has just been updated and tagged as v2022.09.04 release.
+
+Release Note:
+1. There're 5 new cases (btrfs/272, xfs/553 and generic/695~697) in this
+   release. All of them are known regression test, you can find the related
+   kernel commit id in source code. Generally they won't cause panic or hang,
+   so might not break downstream kernel testing.
+2. Thanks Darrick keep improving eio testing.
+3. ext4/053 removed "nouser_xattr" testing.
+
+Feel free to reply this email if you have any questions. Thanks all your
+contribution. More details as below.
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-bf1ef26900ee src/t_ofd_locks.c: Reset errno to zero
+890c50823b64 vfs: Add new setgid_create_acl test
 
-New commits:
+New commits ([N]ew, [U]pdate, [D]elete):
 
-Boris Burkov (1):
-      [192f5297b54f] fstests: add btrfs fs-verity send/recv test
+BingJing Chang (1):
+[N]      [ea66d27cb5e6] fstests: btrfs: test incremental send for changed reference paths
 
-Darrick J. Wong (7):
-      [04307f499d13] xfs/{015,042,076}: fix mkfs failures with nrext64=1
-      [67afd5c74246] common/rc: move ext4-specific helpers into a separate common/ext4 file
-      [e88c0d38eeda] common/rc: move XFS-specific parts of _scratch_options into common/xfs
-      [92caf7ebe14d] common/ext4: provide custom ext4 scratch fs options
-      [acf0424671ff] dmerror: support external log and realtime devices
-      [49272aacac85] common: refactor fail_make_request boilerplate
-      [6049ccca12ab] fail_make_request: teach helpers about external devices
+Chandan Babu R (1):
+[N]      [0044157d9027] xfs: Check if a direct write can result in a false ENOSPC error
 
-Pavel Reichl (1):
-      [87d9aea81007] generic: test i_blocks for large files
+Christoph Hellwig (2):
+[U]      [aa309b96fb5d] btrfs/271: include common/fail_make_request
+[U]      [3e8936c3e84d] btrfs/271: use the common fail_request setup helpers
 
-Wang Yugui (1):
-      [c9734480a1dd] fstests: add missing _require_scratch
+Darrick J. Wong (3):
+[U]      [f3c314574d01] common/xfs: fix _reset_xfs_sysfs_error_handling reset to actual defaults
+[U]      [4f929ebc5928] common: disable infinite IO error retry for EIO shutdown tests
+[U]      [de3717ae0985] common: filter internal errors during io error testing
 
-Yang Xu (1):
-      [bf1ef26900ee] src/t_ofd_locks.c: Reset errno to zero
+Filipe Manana (1):
+[N]      [e42fa9fec802] generic: test fsync after punching hole adjacent to an existing hole
+
+Xiubo Li (1):
+[U]      [c935c7dce550] ceph/004: fix the ceph.quota.max_bytes values
+
+Yang Xu (3):
+[D]      [f9bf0d5130e1] ext4/053: Remove nouser_xattr test
+[N]      [c87543428673] vfs: Add new setgid_create_umask test
+[N]      [890c50823b64] vfs: Add new setgid_create_acl test
 
 
 Code Diffstat:
 
- common/config            |   4 +
- common/dmerror           | 163 +++++++++++++++++++++++++++++++++++++--
- common/ext4              | 193 +++++++++++++++++++++++++++++++++++++++++++++++
- common/fail_make_request |  63 ++++++++++++++++
- common/rc                | 193 ++++-------------------------------------------
- common/xfs               |  23 ++++++
- src/t_ofd_locks.c        |   2 +
- tests/btrfs/088          |  14 ++--
- tests/btrfs/150          |  13 ++--
- tests/btrfs/202          |   1 +
- tests/btrfs/215          |   1 +
- tests/btrfs/268          |   1 +
- tests/btrfs/269          |   1 +
- tests/btrfs/270          |   1 +
- tests/btrfs/277          | 115 ++++++++++++++++++++++++++++
- tests/btrfs/277.out      |  59 +++++++++++++++
- tests/generic/019        |  40 ++--------
- tests/generic/441        |   2 +-
- tests/generic/487        |   2 +-
- tests/generic/694        |  47 ++++++++++++
- tests/generic/694.out    |   2 +
- tests/xfs/015            |   4 +-
- tests/xfs/042            |  14 ++--
- tests/xfs/042.out        |   4 +-
- tests/xfs/076            |   2 +-
- 25 files changed, 711 insertions(+), 253 deletions(-)
+ check                     |    1 +
+ common/dmerror            |    4 +
+ common/fail_make_request  |    1 +
+ common/rc                 |   50 +-
+ common/xfs                |   38 +-
+ src/vfs/idmapped-mounts.c | 1207 +++++++++++++++++++++++++++++++++++++++++++++
+ src/vfs/idmapped-mounts.h |    2 +
+ src/vfs/utils.c           |   14 +
+ src/vfs/utils.h           |    1 +
+ src/vfs/vfstest.c         |  558 ++++++++++++++++++++-
+ tests/btrfs/271           |   36 +-
+ tests/btrfs/271.out       |    2 +
+ tests/btrfs/272           |   88 ++++
+ tests/btrfs/272.out       |    3 +
+ tests/ceph/004            |    6 +-
+ tests/ext4/053            |    1 -
+ tests/generic/695         |   91 ++++
+ tests/generic/695.out     |   15 +
+ tests/generic/696         |   46 ++
+ tests/generic/696.out     |    2 +
+ tests/generic/697         |   33 ++
+ tests/generic/697.out     |    2 +
+ tests/xfs/006.out         |    6 +-
+ tests/xfs/264.out         |   12 +-
+ tests/xfs/553             |   67 +++
+ tests/xfs/553.out         |    9 +
+ 26 files changed, 2248 insertions(+), 47 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---9MNOUSOLbBrx
+--6ZAEWJGol1DB
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmMUp14ACgkQlNbPkfr2
-tMyVDxAAsBnSSaWpXxls6R9m+HPxQRsjKuZApOi1dqsheshvBfdWfwSGI0uoFMz+
-oQ96wX9hgNXXGbXRIw2OdnDfuwOLTRnKX7s0Mrc/+tZjuZQcvaxeyb9oVjs+9eYk
-SiqEJ9OzY7pbiH28qP4NEPGsWZbIdrroRnU9K+9LUc6ZpfGgfptWCE2rUts0yWDc
-z2ZSfFWBNWPKRoHjPMXV5pJ7VWbRcUpaAKd1Ova6RjRR9eXmS2iLw5EDXgmj1HDX
-q6iCytCXhNeZOdrI94DbnnhUrBYi0RJbkLXVLq8WWrGKtNoWs40mLG8cA/tducJv
-1C48L7DKoITyoq2x5mj/oQOES0aTWFUJyj++DnPkoTm1gwdHWKZsyZtk3IprOtOz
-0BHbalzD9grecSI7v+KJktOi2LGDECEcMfJdDXUqO0lpCbTp+N9C996PTaK4phES
-jQTUhjTDpd9dlItAGb5CHDs6PPeII6jE7JTqjX8eyYf9NGf04jNTXRcl1YpUUNlj
-b9WKDJV2oQMNAsxbXCLckmtvOYcDyt8ZD7wvE+PHAif7VpG8W0ZJHiGU4fqUTWvL
-A/i3TGUr/ij7MuXX8NFsubl8lQaS9U1Z/5fnIV20s6p5Mu9xjudhUSeru6++omEL
-tlJX+6doAWDlUga1HplRak4Cr1DlccxKpZ44h9TykBibGBT5h38=
-=AeuE
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmMUsEsACgkQlNbPkfr2
+tMy7xQ//UtALponD6vyeQA0Puvnws0A04XFX6uuH0qwPllXZrHuzCWxHsM4Qv9UH
+0kRuhCzNpTP8N0Z9O9Vv4+pwhZxsA6iWgg28I9hw54auMC5q10jVzlidy+V+LvsL
+XOjxkWd1Q5OQoc0aiFr9nquxPmdqFXL+7pn9MtWWTozmxb6lQEjCk9v1KgvGHsE9
+wv5WCwNLs9eYh9/LMlJsgL26Sh/AnlVhhUEi9/dQ4Z5jkksX5Rv4BRvsXB5g7JR7
+rQlPpU9Qp9m/k0zWQF45ty6ub+TVMvEfbih0totg3LDFeEEI38+l0FOhcTPHrP6E
+3G+TiAFpo4jRHTDCewj8rcDBQ7vv/cvmj4GssXh8TCS2d8cHyGodA5X83Ve0InZn
+wNwRZDxsTASv4k9KzFVDW7CZ5NtUo0n+5j4a5I/Obz1SZt87caBYEdiE8B+vouy2
+qxHu9Iu6uWYkZXAnO6uUoE+hFmFWohBeGJU7F41qUFDeqN5e5iYfal2e31JqtdPc
+DiFOqwMvSjdXDecV0pHZpRZwUGOSQlfaAEXjNi94mS8E9pU70P30ZzUrZGhr/PRF
+Nd0f/ekCV5y5oCj65RgoPK+wi8JFcDrpsawgfBcIdjFwsL8jmMD/gKGeuz7a9sAl
+UhSUQUTNoCLyVCEMcgsRNAWn1Zzade9+Qt4rTwmc6aO1u4YpcNQ=
+=EnKp
 -----END PGP SIGNATURE-----
 
---9MNOUSOLbBrx--
+--6ZAEWJGol1DB--
