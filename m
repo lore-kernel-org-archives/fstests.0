@@ -2,108 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FFAFECAAD4
-	for <linux-fstests@archiver.kernel.org>; Sun,  4 Sep 2022 13:16:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C784ECAAD4
+	for <linux-fstests@archiver.kernel.org>; Sun,  4 Sep 2022 13:18:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233755AbiIDNQI (ORCPT
+        id S230261AbiIDNSx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 4 Sep 2022 09:16:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55484 "EHLO
+        Sun, 4 Sep 2022 09:18:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56798 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233582AbiIDNQH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2022 09:16:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E8C5303DA
-        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 06:16:02 -0700 (PDT)
+        with ESMTP id S229705AbiIDNSw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Sep 2022 09:18:52 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF840303D9
+        for <fstests@vger.kernel.org>; Sun,  4 Sep 2022 06:18:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1662297361;
+        s=mimecast20190719; t=1662297531;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=yJ5kx5GSVqmDyMggaz6MuQ7w9VCEp5UcT1diD2YpI2E=;
-        b=Ys1U3C0qIARPCbuB3kxtwd/T40I9la/bS/knJEN1bZGijw5ftXeuPt3UCtxBmktrZhmNwG
-        fx+hwloLPAbQiI+sOZgOHuHDxZ6QL6mkadMFF5eCv2eVLEEJoBNzVptV4vYGMxVf83KvZp
-        /PiaeuQLh+VW9K0y/A9lpl61G/00yOo=
+        bh=FfuxrJ4oWqcvzN7vx/HjjBrDrn01TeGfS8uHSMGvNvk=;
+        b=SxXFPZ+xODLaeoPdmK17RIyly7inBqGmCfrUk/6Y0mmi+rna8MiOlfdotuzgf1KX3xb25d
+        nAzyOyrRvsUSqJK9+2I1NF58aZyZ0aSTk4IERCUik45fm1f3Kvv4irGppDCNaPu2FTTRSa
+        qE+Jw7ZYasRRCrpy6vqi2F+Ua/s7BJM=
 Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
  [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-395-kX9ssEpXOHOuT1ZC7Ee8LQ-1; Sun, 04 Sep 2022 09:16:00 -0400
-X-MC-Unique: kX9ssEpXOHOuT1ZC7Ee8LQ-1
-Received: by mail-qt1-f198.google.com with SMTP id cj19-20020a05622a259300b003446920ea91so5182796qtb.10
-        for <fstests@vger.kernel.org>; Sun, 04 Sep 2022 06:16:00 -0700 (PDT)
+ us-mta-496-IUo01rrcNAa7Gru6uZOkYQ-1; Sun, 04 Sep 2022 09:18:50 -0400
+X-MC-Unique: IUo01rrcNAa7Gru6uZOkYQ-1
+Received: by mail-qt1-f198.google.com with SMTP id h13-20020ac87d4d000000b00342f6c363afso5134996qtb.9
+        for <fstests@vger.kernel.org>; Sun, 04 Sep 2022 06:18:49 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=yJ5kx5GSVqmDyMggaz6MuQ7w9VCEp5UcT1diD2YpI2E=;
-        b=Zk0IazT239KXXCtQKcmOUM51iHWwbnnfey1SLnnzugm0MAdtg3yXhnlZlKqAG/ionl
-         csytSaNG95twRCe2GKUoj0kJxIiEUn/ehgWlx2Ak85Tlk3/mU3YHJhnhloB8Pk19Rkla
-         8k54eZdGvVrRUuRlFzID3piQBK9wjw/krMDnNV9z53HlvHeS/sWa/f/m7tMQbiO69iCw
-         yvbS85qnxAav9hCyfriLK3n0fseuu3JPJ+QGCSftHf/5Dwf0lmjVh73+KaRQodmR9bqv
-         JvwyrDgRP90y2nZNi5e0K0+Yq+5q/iOHDe1vjTR3/p1UnKUH+4wH9pnQTmzVSCNDF7RI
-         Cd+w==
-X-Gm-Message-State: ACgBeo3HJO0iNRAU89mmtWp3V8s2ftN7iQxGrkzuFDAdjbDlDYNt7ng1
-        ndBysbU2aagtFtGsEv0i2Xe98xvPPwi4V+YPui/qaHfGtLUsgyrVBAoEb1Ol9XG/1GGRzm9k7Lj
-        08UqX4j2Ebwh5cQC+87ALuO0FMIFxkcd4uN+vVnDFcvnpLyw0T/T4374WOYGK3HJSFw==
-X-Received: by 2002:a05:622a:95:b0:343:66b1:d32a with SMTP id o21-20020a05622a009500b0034366b1d32amr35221194qtw.32.1662297359362;
-        Sun, 04 Sep 2022 06:15:59 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR73D/KejJPoRZVOG1bs+e3JWf8wwl21iYdMBPVw1L5/bD73hUocaF4XSUQctjWKIEzxEUeHDA==
-X-Received: by 2002:a05:622a:95:b0:343:66b1:d32a with SMTP id o21-20020a05622a009500b0034366b1d32amr35221169qtw.32.1662297359104;
-        Sun, 04 Sep 2022 06:15:59 -0700 (PDT)
+        bh=FfuxrJ4oWqcvzN7vx/HjjBrDrn01TeGfS8uHSMGvNvk=;
+        b=TKs7E1y9KUZYqVsTCnGgHyqdMIBFggCBaPotk08ljCxggiCyssoh+S25/EVFqMnd9T
+         uFHGgE8l74Z5hwwGK322ggOF5xCbw7fSGsgZGIdl4z9WcJCyP8vj5x3tf8c3RkL9I3/g
+         Rz2eySbAYw1QQOplrwQf7pt6X17EjB7GoVuQY/kIqK3kdwJm5xiCdPZyGx6t5GPYM/38
+         ZuLECR4tKicWxExvlL3p7Ona2352AIGNYyCga3/7chtgsS7DuEhNGKAIz8wIyK+WZYsC
+         WGyBeovX4pU9Bi+ScfM8AnHn+eWRqZPRnW4Hl2c9IH4H2E4niT5yJQTK1qWQEj98ZzRe
+         XLwA==
+X-Gm-Message-State: ACgBeo1W7CE/68/u5ygVMMTs3ps1dHAi8U0lNCuO+JDK7GZxbzXErNM5
+        3Uyiw+U8BrslIcg6cAp/+zTgtckOCMgoo+E0+xAAxyWCTirT2LLLHJLadxbP8Km8VhHvh98Fd2T
+        R2apvU1xUWExqLvZnaw==
+X-Received: by 2002:ac8:5a83:0:b0:343:11f:a781 with SMTP id c3-20020ac85a83000000b00343011fa781mr35646724qtc.19.1662297529635;
+        Sun, 04 Sep 2022 06:18:49 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR7yW72RLqIs/eFRNsMSCVxL5Vwx5Il3R9HM8+6EBL+pVUueQ2hPSSEPU/C398OfY0WYLb1YPQ==
+X-Received: by 2002:ac8:5a83:0:b0:343:11f:a781 with SMTP id c3-20020ac85a83000000b00343011fa781mr35646713qtc.19.1662297529414;
+        Sun, 04 Sep 2022 06:18:49 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l2-20020ac87242000000b0034455ff76ddsm4941002qtp.34.2022.09.04.06.15.56
+        by smtp.gmail.com with ESMTPSA id s6-20020a05620a29c600b006bbda80595asm6230445qkp.5.2022.09.04.06.18.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Sep 2022 06:15:58 -0700 (PDT)
-Date:   Sun, 4 Sep 2022 21:15:53 +0800
+        Sun, 04 Sep 2022 06:18:48 -0700 (PDT)
+Date:   Sun, 4 Sep 2022 21:18:44 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Cc:     Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
-        Chuck Lever III <chuck.lever@oracle.com>,
-        djwong@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: generic/650 makes v6.0-rc client unusable
-Message-ID: <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
-References: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCHSET v2 0/3] fstests: fix some hangs in crash recovery
+Message-ID: <20220904131844.yacyz3j4lxbocrr7@zlang-mailbox>
+References: <165950054404.199222.5615656337332007333.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
+In-Reply-To: <165950054404.199222.5615656337332007333.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Sep 03, 2022 at 06:43:29PM +0000, Chuck Lever III wrote:
-> While investigating some of the other issues that have been
-> reported lately, I've found that my v6.0-rc3 NFS/TCP client
-> goes off the rails often (but not always) during generic/650.
+On Tue, Aug 02, 2022 at 09:22:24PM -0700, Darrick J. Wong wrote:
+> Hi all,
 > 
-> This is the test that runs a workload while offlining and
-> onlining CPUs. My test client has 12 physical cores.
+> There are several tests in fstests (generic/019, generic/388,
+> generic/475, xfs/057, etc.) that test filesystem crash recovery by
+> starting a loop that kicks off a filesystem exerciser, waits a few
+> seconds, and offlines the filesystem somehow.  Some of them use the
+> block layer's error injector, some use dm-error, and some use the
+> shutdown ioctl.
 > 
-> The test appears to start normally, but then after a bit
-> the NFS server workload drops to zero and the NFS mount
-> disappears. I can't run programs (sudo, for example) on
-> the client. Can't log in, even on the console. The console
-> has a constant stream of "can't rotate log: Input/Output
-> error" type messages.
+> The crash tests that employ error injection have the unfortunate trait
+> of causing occasional livelocks when tested against XFS because XFS
+> allows administrators to configure the filesystem to retry some failed
+> writes indefinitely.  If the offlining races with a full log trying to
+> update the filesystem, the fs will hang forever.  Fix this by allowing
+> XFS to go offline immediately.
 > 
-> I haven't looked further into this yet. Actually I'm not
-> quite sure where to start looking.
+> While we're at it, fix the dmesg scrapers so they don't trip over XFS
+> reporting these IO errors as internal errors.
 > 
-> I recently switched this client from a local /home to an
-> NFS-mounted one, and that's where the xfstests are built
-> and run from, fwiw.
+> v2: add hch reviews
+> 
+> If you're going to start using this mess, you probably ought to just
+> pull from my git trees, which are linked below.
+> 
+> This is an extraordinary way to destroy everything.  Enjoy!
+> Comments and questions are, as always, welcome.
+> 
+> --D
 
-If most of users complain generic/650, I'd like to exclude g/650 from the
-"auto" default run group. Any more points?
+I'd like to merge this patchset, after long time testing, it looks like not
+bring in regression. It's stuck long time, let's keep moving :)
 
-Thanks,
-Zorro
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 > 
-> 
-> --
-> Chuck Lever
-> 
-> 
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-shutdown-test-hangs
+> ---
+>  check                    |    1 +
+>  common/dmerror           |    4 ++++
+>  common/fail_make_request |    1 +
+>  common/rc                |   50 +++++++++++++++++++++++++++++++++++++++++-----
+>  common/xfs               |   38 ++++++++++++++++++++++++++++++++++-
+>  tests/xfs/006.out        |    6 +++---
+>  tests/xfs/264.out        |   12 ++++++-----
+>  7 files changed, 97 insertions(+), 15 deletions(-)
 > 
 
