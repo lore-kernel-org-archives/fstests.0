@@ -2,437 +2,210 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DE61C6FA8C
-	for <linux-fstests@archiver.kernel.org>; Tue,  6 Sep 2022 00:31:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 560F1ECAAA1
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Sep 2022 16:22:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232627AbiIFAbv (ORCPT
+        id S238662AbiIFQWg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 5 Sep 2022 20:31:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35158 "EHLO
+        Tue, 6 Sep 2022 12:22:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229575AbiIFAbt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Sep 2022 20:31:49 -0400
-Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EBF4696D8;
-        Mon,  5 Sep 2022 17:31:48 -0700 (PDT)
-Received: from authenticated-user (box.fidei.email [71.19.144.250])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id B55B8810F2;
-        Mon,  5 Sep 2022 20:31:47 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1662424308; bh=V5PQwc8u0Mn0cLciaO5gApyu1uad4sIaHUoZEyNoQtA=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Wbkuz+XLhbL//r48S4m/lbFQfjbnn3ITw84y6cYOyfVtpm6KsnOIcuYB5Pw6pbYyx
-         qB/qxjyYW00UoEvdc4kYoUo1MQ9SsEArI1nrx6IYPQjbr5MnVhgELltRyMkUnksmK1
-         x9TL2x2ofWchOLwcdcZDcAcK+o67TGI8o9U/QKuT/BKCOLKF3lDYM4ACnEwvg/b870
-         nBGhzf0neBQ5v1DIJUVgmuFVdM0Ohi1qy++YKSc3lZ/IZ1vf9hhrVq15lJbMxTnSjA
-         BN+tEVYoCo6gWk5TqHYDQqcD8CPmuxoAZ0qrUPXvyV/LsgY+W9Tse0AXWV4pxCgT+O
-         Ifwb7BBPhxGuw==
-From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [PATCH 2/2] fstests: fscrypt: update tests of encryption contents for btrfs
-Date:   Mon,  5 Sep 2022 20:31:38 -0400
-Message-Id: <b213c5daf3db1e5cf2a2e56becef9f052c5bd4f0.1662417905.git.sweettea-kernel@dorminy.me>
-In-Reply-To: <cover.1662417905.git.sweettea-kernel@dorminy.me>
-References: <cover.1662417905.git.sweettea-kernel@dorminy.me>
+        with ESMTP id S233327AbiIFQWO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Sep 2022 12:22:14 -0400
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F7E865556;
+        Tue,  6 Sep 2022 08:50:52 -0700 (PDT)
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 286FY78e021984;
+        Tue, 6 Sep 2022 15:50:50 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-id : content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=Sf9IxrWq/EFeTeEyDTeXiTjrfJts7NV+eozWWOmGnHM=;
+ b=0oVmT+wo6YGF7Pwym6bqDTyBOfhdGB9bQLaBhSGxICpMMg2WyKW7RMflW0TdG00Xlq/V
+ +c7w0XFu1xfdYbl8waPch++/xvs7niBZo7GbMcwER4bkKCtr/KV37oPktQZIfn6wahD6
+ YVbQfR8bDCpoC5N85rTPVIiZZQqBDUsS5PEB0gZT9olVJXszGkj/wag4ZueSF79NIWvW
+ fcuB8tlR+RPeMZVyEj4jKI27jeQ41/2zwFYZNvpsMFdyGmloGepH7KbMg6a3VZDP4JE6
+ K8aqc+S0SZFgb4LhYhwL7N19nBSdk2Asik7nTwD5j88CANamdrG8Mympa9aPHaR1iE3q Yg== 
+Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3jbwq2ebp9-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 06 Sep 2022 15:50:50 +0000
+Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 286EwCJM037531;
+        Tue, 6 Sep 2022 15:50:49 GMT
+Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2177.outbound.protection.outlook.com [104.47.56.177])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3jbwc2ts42-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 06 Sep 2022 15:50:49 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Mone3WSctuiW0MIaNrdJqY9ael73qY5jQo0LYeMpq+gt0Tzt5xI4Ri9GHoBvuth/DdnhQOjEsdEUATQqNNrizKMucVq80dOkB7S7qjMG5cATL7VqPJZiLJjToUCNN0wYszVIq2+T1gN/RRQSfMsxaspisWhEBdbujBNvexIayqCTAJhSYPyMMQBxD/4WsNqK/TXq7A2a2ZXxzuzd0Uo/1z1ZpNR6PwXTcYwGcJLQHtMKgcK4lxWEZgBB7XXXvo512X++jRVSDJ7SWwWftnsMs0t2cvE071uhU22cVSocIwH573wXrTukBlfxqR7RlZPFADPec464w678TIwuXsYWmg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Sf9IxrWq/EFeTeEyDTeXiTjrfJts7NV+eozWWOmGnHM=;
+ b=Z5YxYtYYi0mwri0BgUF+IOJtJckQnI9RK8dUwyzSgy9UKLbLC51a6+dreZ0u2oEE25+AF62U6ysDeMk1sziZmTX1R4QyGC4evgtWRKlS4dXKIA0shOcm25s/C4PoeRzfYo54uJb5OCvn+uxp91M9p/MsG4/QQCt30BnGGD10Bo5fZ4UdciHKDp0/Gef7Sj2CRA5MrC4tiyS3pJB9HvWbUXWiORoLrxSFzzVZyu5yB7nH/mhua/h+pz2gCey3p6oooIedixHGUohwx+XxaSzDGg87hbhil4zAJbJPsP2xAKKK3c/eALOTK7fJgrzmwZJZY7IeEOKZtqWSYJQn4JYVew==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Sf9IxrWq/EFeTeEyDTeXiTjrfJts7NV+eozWWOmGnHM=;
+ b=Y75fQJKM/bIaTUzAiwb4vD/CRllrRE86auHhZXUBTK2xb64j/IZ9P/DaCuoe2bksprZUD6yP5GxIy24WpzYZezXvsCYRbUied4vBkreuPOX3hCbX/FrhMIa0ZiRTzpg26hKqoGwYNVZCZjfP7UFUTU22DkV5nToPlBV1kxlX+U8=
+Received: from BN0PR10MB5128.namprd10.prod.outlook.com (2603:10b6:408:117::24)
+ by DM4PR10MB6255.namprd10.prod.outlook.com (2603:10b6:8:8e::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5588.14; Tue, 6 Sep
+ 2022 15:50:47 +0000
+Received: from BN0PR10MB5128.namprd10.prod.outlook.com
+ ([fe80::25d6:da15:34d:92fa]) by BN0PR10MB5128.namprd10.prod.outlook.com
+ ([fe80::25d6:da15:34d:92fa%4]) with mapi id 15.20.5588.017; Tue, 6 Sep 2022
+ 15:50:47 +0000
+From:   Chuck Lever III <chuck.lever@oracle.com>
+To:     Zorro Lang <zlang@redhat.com>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
+        "djwong@vger.kernel.org" <djwong@vger.kernel.org>,
+        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+Subject: Re: generic/650 makes v6.0-rc client unusable
+Thread-Topic: generic/650 makes v6.0-rc client unusable
+Thread-Index: AQHYv8UPIvgoSU1RX0u5XzLtJ9lDJ63PQWGAgAAunICAAyFTAA==
+Date:   Tue, 6 Sep 2022 15:50:47 +0000
+Message-ID: <EC58E371-ED4B-4C36-B45E-EF2B861CAE65@oracle.com>
+References: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
+ <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
+ <0AB3B4E6-3B0F-4F04-8618-A3257D820FAA@oracle.com>
+In-Reply-To: <0AB3B4E6-3B0F-4F04-8618-A3257D820FAA@oracle.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-mailer: Apple Mail (2.3696.120.41.1.1)
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 41b10499-fcb2-4741-b708-08da901f90dd
+x-ms-traffictypediagnostic: DM4PR10MB6255:EE_
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: CPfyGcscqURceI32WJae9xmxh27JUqcUFzSbcPWxg11JhlVzoecfx1/oFH0MnojzMQhpekWYkXhB0bHiwW5RwuLQgmtUxdU39tNracL4I5Onvr2w9SQpxQnD6E0Yn12rTWjbZxCatdd6Kpu/AgKLHm/heBFT4KHBxDVFLgE5G5nupp4km/SAsNz/b1V3njIvmQhqCZWtuwvx1UZoEGqL+XxtmUUOlE20HCdVV8mnlI5X2dd1C3sKI+pZCn7linN/PRnz6cIsOz8tjBldP9QkuHlb4TTXzK4AbfhRlGYV/Gk0jY7u8xAwb1IItMbnwLAMPySDvDKlJ74HX+e1NMFUz748uDAQzefj5gIBhH4yQ+Dpgf4l7P1J+9Tj/0drW7POKjyaiQ5xtSWoPjbKD5dm/onWU1aagaHTe1vAN/QJ/YhA5yZlDXMZFSPJG/SGP5KSTcHCTy3wrYindoVGtGFLrZq1jH+WVoAS9pRerU1jf4UvqyyoyC+Z+I0Kmzm1XS/Enf6JOHAzbrZRAb4/zdzFpmNP4biSwFax+FfXpeO/T7HwBZZ230GhSaA3aJLUyzpoLibq04G8iPhBRRjfIbIM08b1wb9zt34AMOulXm+5rQ8h+1KmcFZO0gLrR985KMoH7U7dmdV7i2qiJXdKaiyq2gRQbSscu/WQN1+2pZJYToqRUDNDn3gIq7uOQlD4XwE/rUnSZQ13iMj6waDbctVFvel47raBbREGoGHTIw1+3Y0FqsnQHChWZI5LpPZ4+6FAC9t2rDwLQLPMyCxmMnC9PKoJ208iXunNxcab/4/LfNku4wjtIt84UQVfq6VG94bwOeqId6qA/VOguPupzGHElQ==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN0PR10MB5128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(39860400002)(136003)(366004)(396003)(376002)(346002)(53546011)(38070700005)(6486002)(83380400001)(66946007)(186003)(64756008)(4326008)(66556008)(66446008)(41300700001)(76116006)(8676002)(91956017)(66476007)(478600001)(8936002)(2616005)(5660300002)(33656002)(86362001)(6506007)(38100700002)(54906003)(6916009)(71200400001)(6512007)(36756003)(122000001)(26005)(316002)(2906002)(41533002)(45980500001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?FdBf4egL1FO3qyA0HvbJFsedN8aMiOB07afSZoWwNWsj4lzdWXGL5MvYyK1R?=
+ =?us-ascii?Q?uo5Omy3/6ycJrjZCWshjDPgD9iUE8QTd1rgW1x4rzbcwWlhG1GwLoqdb10Ng?=
+ =?us-ascii?Q?Yl5J0yxuU5ov2kqDZixXQIpR1Wl4Pg3IaeIF8RzgFdF6XlWGxGUl2QAOmR3B?=
+ =?us-ascii?Q?3d7nx7cxZyw3CJasY4AqDQhM9ACCrJYmMmOg1zm6c5DpkoZGpTj+Bt5eOD3w?=
+ =?us-ascii?Q?3lHISaEcszlPNflpFD8iD/msg3yWzdp8w6RZH0GMO3HdrhSRUPyuEHNb/eNy?=
+ =?us-ascii?Q?pk00YHlt59BZLoKEz5mcpIYe01htXm+bsFf3iZm5mDuoTvQRxRPrY4rAEMqm?=
+ =?us-ascii?Q?3dXt3G8cq9DrtfD81+Igp3l+bZfm5LLLHM7/thq5BqIPO3S2T9TkKHaaFcDv?=
+ =?us-ascii?Q?XNEo3NMdpnCI9ciJUN/hNaxA+yNikRi5h4FSYJcoXPLJv0D+v7DKJmEZJ3Ce?=
+ =?us-ascii?Q?nC9CqadHbVwqk/Y7LqgER5F7aOjWFHfZ39bfc3FGlPFaFHmXT0xiNpo0KsAo?=
+ =?us-ascii?Q?SAZQ9gluegZ05izGvd2IWyeXndQrRVXtP+uzxQ1Q46umMvY82Q+D+GmnUH3A?=
+ =?us-ascii?Q?3TYvy21sDeZyCm+D6CAB+L38RH57LCZVGsbDZvgBLX5W1i4vhUHfn5yYOKbz?=
+ =?us-ascii?Q?PlX67igTdI3mDQhElaGnaICJVqLQz9KLqg2JjK9vRt4M8tSDkiJlKSGt8V68?=
+ =?us-ascii?Q?gcmGbtBurc2QHTHQVdxuAFOs9ntkUMwD/qoQVGPoxnacVspPfOOW21pNoKm2?=
+ =?us-ascii?Q?tjI+Hkv9FB58IGzoyy9a4fFb6C61DcpbiJLDc8FgLEkHuFmYv/1+a/vLbyNk?=
+ =?us-ascii?Q?1UatHLQFF2AbW1V/vESyS8raRBJUSkgsxeDHXHS3OEeTlYAHTEeecOmFoZD0?=
+ =?us-ascii?Q?NmcAs4h8Dl4RIdu+2ayytO6G5vd5TVaInpJX0ZdzTY6N/97RRyqAMtXfoDqM?=
+ =?us-ascii?Q?8HEU3nrLr5YQ75uLy+9Dt7eXpE31Rqup7iMXxrFqbRh362eHQNJ7rOmUnjSV?=
+ =?us-ascii?Q?x0MOFKontlfcQmnJDdGzTSlBJE3rzKm1boYOWBx17X5f6jJxbR1nq1PNFdMT?=
+ =?us-ascii?Q?CJ/0SFkfNc9qB0fEeDCFV1Z059zVNU4gpJ/Ay4ozPinsLfxgbOgPdIGHxfI0?=
+ =?us-ascii?Q?Cp0abpq1wQPcQ1ZQ8qFfUf/w+G6etPJGNxVOC1PRkMthnTfzjZJBbCucoYVZ?=
+ =?us-ascii?Q?GpzpF+Kgm4gaRM4P+s6Gn44Yl1cttOqKfU7P1jw06y3/DeqFNM5QPeyEA/3F?=
+ =?us-ascii?Q?Kt2kadHMzgj1WF6ioTHDVgSJdenXCJeBZ5CElYeak9y0gtlNgtODhn+3Umj8?=
+ =?us-ascii?Q?ndYYN2WJHboHnsFZs0q096pRqA0emPl3HjvrjBh/eGlJGJpiurSO5KwxzdeK?=
+ =?us-ascii?Q?SXET2LhFAGr/jrYBB5t6jcgpGijj+WQIXl5gaLQd3V3EJzfM2iu5Ucm4TKUJ?=
+ =?us-ascii?Q?WaiNKTNecg5w4YK5Z4depFGPdxippVfIXrSOMIid84vq1XO15tvJ8qTAK0nc?=
+ =?us-ascii?Q?iioHAjnJTVqkmASL7Ka5yyueyUwQM3dIy0axIfyETimCaOJ/85Tgaal+GSvW?=
+ =?us-ascii?Q?LAWYF4ZEE3pnZ1slDENzGzmrC1V4QeJUDdOW/fGvqf/Za9H5wiUImmAgIhRT?=
+ =?us-ascii?Q?ug=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <F66F475E2CE5C24A9C6A95D024C643DE@namprd10.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BN0PR10MB5128.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 41b10499-fcb2-4741-b708-08da901f90dd
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Sep 2022 15:50:47.4556
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: hVQo6Cufd0nFYqV0iTMfK+MK63L4jpFGr5OBkc0AcF3rPg+35mo0gKCsNi1ctJr6JGBGR/hs0X3jcKRukzRA7g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR10MB6255
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.528,FMLib:17.11.122.1
+ definitions=2022-09-06_09,2022-09-06_02,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 suspectscore=0 phishscore=0
+ mlxlogscore=999 spamscore=0 adultscore=0 mlxscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2207270000
+ definitions=main-2209060075
+X-Proofpoint-GUID: e7g4yzeIBJP3OXuQQELQCR3I1IjWFzVY
+X-Proofpoint-ORIG-GUID: e7g4yzeIBJP3OXuQQELQCR3I1IjWFzVY
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-As btrfs uses extent-based encryption, tests and tools for verifying
-content encryption need updates. This change updates the tool with an
-option to explicitly specify IV; updates the test functions to extract
-per-extent IVs, assuming there is only one extent per inode; and updates
-the test functions to use btrfs's dump-tree as necessary to extract
-information. It also splits apart the two Adiantum tests to test direct
-and non-direct key policies separately, as btrfs is incompatible with
-non-direct key policies.
 
-It is somewhat fragile to assume that the contents always fit within one
-extent, but no test yet uses large enough files for this to be an issue.
 
-Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
----
- common/encrypt           | 80 +++++++++++++++++++++++++++++++++++-----
- src/fscrypt-crypt-util.c | 18 ++++++++-
- tests/generic/550        |  2 -
- tests/generic/550.out    |  5 ---
- tests/generic/584        |  2 -
- tests/generic/584.out    |  5 ---
- tests/generic/720        | 26 +++++++++++++
- tests/generic/720.out    |  6 +++
- tests/generic/721        | 26 +++++++++++++
- tests/generic/721.out    |  6 +++
- 10 files changed, 152 insertions(+), 24 deletions(-)
- create mode 100755 tests/generic/720
- create mode 100644 tests/generic/720.out
- create mode 100755 tests/generic/721
- create mode 100644 tests/generic/721.out
+> On Sep 4, 2022, at 12:02 PM, Chuck Lever III <chuck.lever@oracle.com> wro=
+te:
+>=20
+> Hi-
+>=20
+>> On Sep 4, 2022, at 9:15 AM, Zorro Lang <zlang@redhat.com> wrote:
+>>=20
+>> On Sat, Sep 03, 2022 at 06:43:29PM +0000, Chuck Lever III wrote:
+>>> While investigating some of the other issues that have been
+>>> reported lately, I've found that my v6.0-rc3 NFS/TCP client
+>>> goes off the rails often (but not always) during generic/650.
+>>>=20
+>>> This is the test that runs a workload while offlining and
+>>> onlining CPUs. My test client has 12 physical cores.
+>>>=20
+>>> The test appears to start normally, but then after a bit
+>>> the NFS server workload drops to zero and the NFS mount
+>>> disappears. I can't run programs (sudo, for example) on
+>>> the client. Can't log in, even on the console. The console
+>>> has a constant stream of "can't rotate log: Input/Output
+>>> error" type messages.
+>>>=20
+>>> I haven't looked further into this yet. Actually I'm not
+>>> quite sure where to start looking.
+>>>=20
+>>> I recently switched this client from a local /home to an
+>>> NFS-mounted one, and that's where the xfstests are built
+>>> and run from, fwiw.
+>>=20
+>> If most of users complain generic/650, I'd like to exclude g/650 from th=
+e
+>> "auto" default run group. Any more points?
+>=20
+> Well generic/650 was passing for me before v6.0-rc, and IMO
+> it is a tough but reasonable test, considering the ubiquitous
+> use of workqueues and other scheduling primitives in our
+> filesystems.
+>=20
+> So I think I caught a real bug, but I need a couple more days
+> to work it out before deciding generic/650 is throwing false
+> negatives and is thus not worth running in the "auto" group.
 
-diff --git a/common/encrypt b/common/encrypt
-index c2e3e6f6..46b24fd8 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -573,6 +573,41 @@ _get_encryption_nonce()
- 	esac
- }
- 
-+# Retrieve the encryption IV of the first file extent in an inode as a hex
-+# string.  The IV was randomly generated by the filesystem, in the case of
-+# btrfs, and isn't exposed directly to userspace.  But it can be read using
-+# the filesystem's debugging tools.
-+_get_extent_iv()
-+{
-+	local device=$1
-+	local inode=$2
-+
-+	case $FSTYP in
-+	btrfs)
-+		# btrfs prints the file extents (for simple unshared
-+		# inodes) like:
-+		#         item 21 key ($inode EXTENT_DATA 0) itemoff 2534 itemsize 69
-+		#                generation 7 type 1 (regular)
-+                #		 extent data disk byte 5304320 nr 1048576
-+                #		 extent data offset 0 nr 1048576 ram 1048576
-+                #		 extent compression 0 (none)
-+                #		 extent encryption 133 (1, 33: context 0177d05501da7c23920f9ca00872f0bbc3)
-+                # The first character of the context is the version; the rest
-+                # are the IV.
-+
-+		#
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 5 "key ($inode EXTENT_DATA 0)" | \
-+			awk '/ context [[:xdigit:]]+)/ {
-+				match($0, /context ([[:xdigit:]]+)\)/,a);
-+				print substr(a[1], 3, length(a[1]) - 1);
-+			}'
-+		;;
-+	*)
-+		_fail "_get_extent_iv() isn't implemented on $FSTYP" ;;
-+	esac
-+}
-+
- # Require support for _get_encryption_nonce()
- _require_get_encryption_nonce_support()
- {
-@@ -607,6 +642,19 @@ _get_ciphertext_filename()
- 	local dir_inode=$3
- 
- 	case $FSTYP in
-+	btrfs)
-+		# Extract the filename from the inode_ref object, similar to:
-+		# item 24 key (259 INODE_REF 257) itemoff 14826 itemsize 26
-+		# 	index 3 namelen 16 name: J\xf7\x15tD\x8eL\xae/\x98\x9f\x09\xc1\xb6\x09>
-+		#
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 1 "key ($inode INODE_REF " | tail -n 1 | \
-+			perl -ne '
-+				s/.*?name: //;
-+				chomp;
-+				s/\\x([[:xdigit:]]{2})/chr hex $1/eg;
-+				print;'
-+		;;
- 	ext4)
- 		# Extract the filename from the debugfs output line like:
- 		#
-@@ -661,6 +709,10 @@ _require_get_ciphertext_filename_support()
- {
- 	echo "Checking for _get_ciphertext_filename() support for $FSTYP" >> $seqres.full
- 	case $FSTYP in
-+	btrfs)
-+		# Verify that we have BTRFS_UTIL_PROG
-+		_require_btrfs_command inspect-internal dump-tree
-+		;;
- 	ext4)
- 		# Verify that the "ls -l -r" debugfs command is supported and
- 		# that it hex-encodes non-ASCII characters, rather than using an
-@@ -744,7 +796,7 @@ _do_verify_ciphertext_for_encryption_policy()
- 	local raw_key_hex=$6
- 	local crypt_contents_cmd="$here/src/fscrypt-crypt-util $7"
- 	local crypt_filename_cmd="$here/src/fscrypt-crypt-util $8"
--
-+	local use_iv=$9
- 	local blocksize=$(_get_block_size $SCRATCH_MNT)
- 	local test_contents_files=()
- 	local test_filenames_files=()
-@@ -798,18 +850,24 @@ _do_verify_ciphertext_for_encryption_policy()
- 
- 	echo "Verifying encrypted file contents" >> $seqres.full
- 	for f in "${test_contents_files[@]}"; do
-+		local iv_arg=""
- 		read -r src inode blocklist <<< "$f"
- 		nonce=$(_get_encryption_nonce $SCRATCH_DEV $inode)
- 		_dump_ciphertext_blocks $SCRATCH_DEV $blocklist > $tmp.actual_contents
-+		if [ -n "$use_iv" ]; then
-+			local iv_hex=$(_get_extent_iv $SCRATCH_DEV $inode)
-+			iv_arg=" --iv=$iv_hex"
-+		fi
-+			
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
- 			--file-nonce=$nonce --block-size=$blocksize \
--			--inode-number=$inode < $src > $tmp.expected_contents
-+			--inode-number=$inode $iv_arg < $src > $tmp.expected_contents
- 		if ! cmp $tmp.expected_contents $tmp.actual_contents; then
- 			_fail "Expected encrypted contents != actual encrypted contents.  File: $f"
- 		fi
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
- 			--decrypt --file-nonce=$nonce --block-size=$blocksize \
--			--inode-number=$inode \
-+			--inode-number=$inode $iv_arg \
- 			< $tmp.actual_contents > $tmp.decrypted_contents
- 		if ! cmp $src $tmp.decrypted_contents; then
- 			_fail "Contents decryption sanity check failed.  File: $f"
-@@ -894,6 +952,7 @@ _verify_ciphertext_for_encryption_policy()
- 	local crypt_util_contents_args=""
- 	local crypt_util_filename_args=""
- 	local expected_identifier
-+	local use_iv=""
- 
- 	shift 2
- 	for opt; do
-@@ -927,14 +986,16 @@ _verify_ciphertext_for_encryption_policy()
- 	crypt_util_contents_args+=" --mode-num=$contents_mode_num"
- 	crypt_util_filename_args+=" --mode-num=$filenames_mode_num"
- 
-+	if [ "$FSTYP" == "btrfs" ]; then
-+		if (( policy_flags == 0 )); then
-+			_notrun "Btrfs does not accept default policies"
-+		fi	
-+		use_iv=1
-+	fi
-+
- 	if (( policy_version > 1 )); then
- 		set_encpolicy_args+=" -v 2"
- 		crypt_util_args+=" --kdf=HKDF-SHA512"
--		if [ "$FSTYP" = "btrfs" ]; then
--			if (( policy_flags == 0 )); then
--				_notrun "Btrfs does not accept default policies"
--			fi	
--		fi
- 		if (( policy_flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
- 			crypt_util_args+=" --direct-key"
- 		elif (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 )); then
-@@ -1026,7 +1087,8 @@ EOF
- 		"$keyspec" \
- 		"$raw_key_hex" \
- 		"$crypt_util_contents_args" \
--		"$crypt_util_filename_args"
-+		"$crypt_util_filename_args" \
-+		"$use_iv"
- }
- 
- # Replace no-key filenames in the given directory with "NOKEY_NAME".
-diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
-index ffb9534d..93b8a36f 100644
---- a/src/fscrypt-crypt-util.c
-+++ b/src/fscrypt-crypt-util.c
-@@ -76,6 +76,8 @@ static void usage(FILE *fp)
- "  --inode-number=INUM         The file's inode number.  Required for\n"
- "                                --iv-ino-lblk-32 and --iv-ino-lblk-64;\n"
- "                                otherwise is unused.\n"
-+"  --iv=IV                     For extent-based encryption filesystems, the\n"
-+"                                starting IV for the file\n"
- "  --iv-ino-lblk-32            Similar to --iv-ino-lblk-64, but selects the\n"
- "                                32-bit variant.\n"
- "  --iv-ino-lblk-64            Use the format where the IVs include the inode\n"
-@@ -1794,6 +1796,8 @@ struct key_and_iv_params {
- 	u8 file_nonce[FILE_NONCE_SIZE];
- 	bool file_nonce_specified;
- 	bool direct_key;
-+	u8 iv[MAX_IV_SIZE];
-+	bool iv_set;
- 	bool iv_ino_lblk_64;
- 	bool iv_ino_lblk_32;
- 	u64 block_number;
-@@ -1901,7 +1905,9 @@ static void generate_iv(const struct key_and_iv_params *params,
- 			union fscrypt_iv *iv)
- {
- 	memset(iv, 0, sizeof(*iv));
--	if (params->direct_key) {
-+	if (params->iv_set) {
-+		memcpy(iv->bytes, params->iv, MAX_IV_SIZE);
-+	} else if (params->direct_key) {
- 		if (!params->file_nonce_specified)
- 			die("--direct-key requires --file-nonce");
- 		iv->block_number = cpu_to_le64(params->block_number);
-@@ -1987,6 +1993,7 @@ enum {
- 	OPT_FS_UUID,
- 	OPT_HELP,
- 	OPT_INODE_NUMBER,
-+	OPT_IV,
- 	OPT_IV_INO_LBLK_32,
- 	OPT_IV_INO_LBLK_64,
- 	OPT_KDF,
-@@ -2004,6 +2011,7 @@ static const struct option longopts[] = {
- 	{ "fs-uuid",         required_argument, NULL, OPT_FS_UUID },
- 	{ "help",            no_argument,       NULL, OPT_HELP },
- 	{ "inode-number",    required_argument, NULL, OPT_INODE_NUMBER },
-+	{ "iv",              required_argument, NULL, OPT_IV },
- 	{ "iv-ino-lblk-32",  no_argument,       NULL, OPT_IV_INO_LBLK_32 },
- 	{ "iv-ino-lblk-64",  no_argument,       NULL, OPT_IV_INO_LBLK_64 },
- 	{ "kdf",             required_argument, NULL, OPT_KDF },
-@@ -2082,6 +2090,14 @@ int main(int argc, char *argv[])
- 			if (params.inode_number <= 0 || *tmp || errno)
- 				die("Invalid inode number: %s", optarg);
- 			break;
-+		case OPT_IV:
-+			int iv_len = hex2bin(optarg, params.iv, MAX_IV_SIZE);
-+			if ((iv_len != AES_BLOCK_SIZE) &&
-+			    (iv_len != ADIANTUM_IV_SIZE))
-+				die("Invalid iv length: %d (must be %u or %u)",
-+				    iv_len, AES_BLOCK_SIZE, ADIANTUM_IV_SIZE);
-+			params.iv_set = true;
-+			break;
- 		case OPT_IV_INO_LBLK_32:
- 			params.iv_ino_lblk_32 = true;
- 			break;
-diff --git a/tests/generic/550 b/tests/generic/550
-index aa792089..1c350090 100755
---- a/tests/generic/550
-+++ b/tests/generic/550
-@@ -17,9 +17,7 @@ _begin_fstest auto quick encrypt
- # real QA test starts here
- _supported_fs generic
- 
--# Test both with and without the DIRECT_KEY flag.
- _verify_ciphertext_for_encryption_policy Adiantum Adiantum
--_verify_ciphertext_for_encryption_policy Adiantum Adiantum direct
- 
- # success, all done
- status=0
-diff --git a/tests/generic/550.out b/tests/generic/550.out
-index 4cec7570..418fa0b1 100644
---- a/tests/generic/550.out
-+++ b/tests/generic/550.out
-@@ -3,8 +3,3 @@ QA output created by 550
- Verifying ciphertext with parameters:
- 	contents_encryption_mode: Adiantum
- 	filenames_encryption_mode: Adiantum
--
--Verifying ciphertext with parameters:
--	contents_encryption_mode: Adiantum
--	filenames_encryption_mode: Adiantum
--	options: direct
-diff --git a/tests/generic/584 b/tests/generic/584
-index adafec6a..ec03908b 100755
---- a/tests/generic/584
-+++ b/tests/generic/584
-@@ -19,9 +19,7 @@ _begin_fstest auto quick encrypt
- # real QA test starts here
- _supported_fs generic
- 
--# Test both with and without the DIRECT_KEY flag.
- _verify_ciphertext_for_encryption_policy Adiantum Adiantum v2
--_verify_ciphertext_for_encryption_policy Adiantum Adiantum v2 direct
- 
- # success, all done
- status=0
-diff --git a/tests/generic/584.out b/tests/generic/584.out
-index 946c5f0a..2a5fc053 100644
---- a/tests/generic/584.out
-+++ b/tests/generic/584.out
-@@ -4,8 +4,3 @@ Verifying ciphertext with parameters:
- 	contents_encryption_mode: Adiantum
- 	filenames_encryption_mode: Adiantum
- 	options: v2
--
--Verifying ciphertext with parameters:
--	contents_encryption_mode: Adiantum
--	filenames_encryption_mode: Adiantum
--	options: v2 direct
-diff --git a/tests/generic/720 b/tests/generic/720
-new file mode 100755
-index 00000000..5072d3ab
---- /dev/null
-+++ b/tests/generic/720
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test No. 720
-+#
-+# Verify ciphertext for v2 encryption policies that use Adiantum to encrypt file
-+# contents and file names.
-+#
-+# This is the same as generic/584, except using direct policy 
-+#
-+. ./common/preamble
-+_begin_fstest auto quick encrypt
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/encrypt
-+
-+# real QA test starts here
-+_supported_fs generic
-+
-+_verify_ciphertext_for_encryption_policy Adiantum Adiantum v2 direct
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/720.out b/tests/generic/720.out
-new file mode 100644
-index 00000000..0b0d82f8
---- /dev/null
-+++ b/tests/generic/720.out
-@@ -0,0 +1,6 @@
-+QA output created by 720
-+
-+Verifying ciphertext with parameters:
-+	contents_encryption_mode: Adiantum
-+	filenames_encryption_mode: Adiantum
-+	options: v2 direct
-diff --git a/tests/generic/721 b/tests/generic/721
-new file mode 100755
-index 00000000..98f2e6f9
---- /dev/null
-+++ b/tests/generic/721
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test No. 550
-+#
-+# Verify ciphertext for v1 encryption policies that use Adiantum to encrypt file
-+# contents and file names.
-+# This is the same as generic/550, except with direct keys.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick encrypt
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/encrypt
-+
-+# real QA test starts here
-+_supported_fs generic
-+
-+_verify_ciphertext_for_encryption_policy Adiantum Adiantum direct
-+
-+# success, all done
-+status=0
-+exit
-+
-diff --git a/tests/generic/721.out b/tests/generic/721.out
-new file mode 100644
-index 00000000..018c4666
---- /dev/null
-+++ b/tests/generic/721.out
-@@ -0,0 +1,6 @@
-+QA output created by 721
-+
-+Verifying ciphertext with parameters:
-+	contents_encryption_mode: Adiantum
-+	filenames_encryption_mode: Adiantum
-+	options: direct
--- 
-2.35.1
+Following up. I can't reproduce it any more. I've heard more
+than one report that this failure can happen on non-NFS
+configurations. I'd therefore conclude that I haven't caught
+a bug in something I'm actively testing.
+
+Carry on!
+
+
+> I can't really say whether Ted's failing tests are the
+> result of an interaction with the GCE platform or the test
+> itself. Ie, his patch might be the right approach -- exclude
+> it based on the test platform.
+
+--
+Chuck Lever
+
+
 
