@@ -2,296 +2,210 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61423ECAAD5
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Sep 2022 15:09:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F4A4C54EE9
+	for <linux-fstests@archiver.kernel.org>; Tue, 13 Sep 2022 08:44:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229813AbiILPJi (ORCPT
+        id S230308AbiIMIoP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Sep 2022 11:09:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32842 "EHLO
+        Tue, 13 Sep 2022 04:44:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229986AbiILPJh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Sep 2022 11:09:37 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 190D8287
-        for <fstests@vger.kernel.org>; Mon, 12 Sep 2022 08:09:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1662995374;
-        h=from:from:reply-to:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-type:in-reply-to:in-reply-to:  references:references;
-        bh=T1tDCI1uVOj3W6q0V/sjEFz90fkKQidKMTIKCOvPX0U=;
-        b=M92nl0DBGgHQu9R0m8ny8p6QQDr5XzsUTEFJ67ad9by7gzpFNWlDdOLtCp5wp5EUjavDwP
-        QD3m+tLc6AdAG8Q2DMdvu2mIBkQRR2rJfQYnV8gVey2v9ifoMY07AMlHvseQyZDtm2rwDD
-        K6RlIPpD3CSO4qxh3Ezauz7IULU6KPE=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-311-wKMsUVjYN1GLb0qJF-OleQ-1; Mon, 12 Sep 2022 11:09:32 -0400
-X-MC-Unique: wKMsUVjYN1GLb0qJF-OleQ-1
-Received: by mail-ed1-f72.google.com with SMTP id s17-20020a056402521100b004511c8d59e3so5903041edd.11
-        for <fstests@vger.kernel.org>; Mon, 12 Sep 2022 08:09:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:reply-to
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=T1tDCI1uVOj3W6q0V/sjEFz90fkKQidKMTIKCOvPX0U=;
-        b=L44B2WCROrBUywnaHZC9V8lflab2OZ292Xeyao+WZ6j0IbSuY4h5xhvclzWuzCW5+d
-         3sZSBtynlVktPw/UebF5bUKTbaQGlb+9tyfw/eazqytR5B9egLHdkoTuBQybIgXerh5d
-         pYCIy1fd56/0bzmVOIunWPQetGneL74qvAoWKOhay/0tBo1lsmdqQbG+Uoi5DGVDNXlp
-         G2gLkkmDuWSd9+Hsz2Syka9EAQdaE+LtdN1ahXvS4pUFlb6bRLd0zh1Swt99Rx/kJrjD
-         vQlylUpWijC6uxHVyGUgOQPDWbCIQEFcPN6yUl8C6C41oeRgTCecc4YXTXTSlwSRBmel
-         VapA==
-X-Gm-Message-State: ACgBeo1mc97qB/RbvZeoIz9BsAOdRQ6hQkp9fTLgdoHr/F3n9+FY7Uci
-        PGjrNmGeiPXj1tI5w28Ex3RMDKOvJQQVnBVDwzj7AZEak8D8VXifU1VEJ5g93382ez6JnYCxPF9
-        mDyOZR4EZW7+oY0RA
-X-Received: by 2002:a05:6402:5106:b0:451:787c:9fcc with SMTP id m6-20020a056402510600b00451787c9fccmr7063359edd.164.1662995371667;
-        Mon, 12 Sep 2022 08:09:31 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR7lFUMG0xrxJ5ZBimgCaZ8qp2fxGKnFvL5eiQQHToD8ijh//9AIU94k6t+WHUXGyXJLbBvoPw==
-X-Received: by 2002:a05:6402:5106:b0:451:787c:9fcc with SMTP id m6-20020a056402510600b00451787c9fccmr7063345edd.164.1662995371412;
-        Mon, 12 Sep 2022 08:09:31 -0700 (PDT)
-Received: from aalbersh.remote.csb ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id p5-20020a50cd85000000b0043ba7df7a42sm5934260edi.26.2022.09.12.08.09.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Sep 2022 08:09:30 -0700 (PDT)
-Date:   Mon, 12 Sep 2022 17:09:29 +0200
-From:   Andrey Albershteyn <aalbersh@redhat.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v3] xfs: test xfs_quota's 'dump' and 'report' -L/-R range
- parameters
-Message-ID: <20220912150929.drmewflfct7h6zht@aalbersh.remote.csb>
-Reply-To: 20220909034950.pxim3itf6qiusidl@zlang-mailbox
-References: <20220805172531.520862-1-aalbersh@redhat.com>
- <20220909034950.pxim3itf6qiusidl@zlang-mailbox>
+        with ESMTP id S230224AbiIMIoO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Sep 2022 04:44:14 -0400
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D03656BB1
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 01:44:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1663058651; i=@fujitsu.com;
+        bh=yKkSFMw3BsUhpehlA6/tc8YzrnOS9yOoXhpQbGhyq8k=;
+        h=Message-ID:Date:MIME-Version:From:Subject:References:To:
+         In-Reply-To:Content-Type:Content-Transfer-Encoding;
+        b=fmhuPCP3JyflttpFpqWZiQZM6yuP7imA0F5q4mzCyTJrxA/hJSCfKimLY/FBH0Gkl
+         gGwbNMjHakKuoQhDAZS8gxAiekG6FRgLhn/bHmDUfGCgClq5N10lSau+QG++ZlRqMj
+         URmcgJjGP29OC5dePfHAW4lJCNGnAgzBpZYKcQtfF3TviLhHU3cMD5W050OkMYykMc
+         b52JSBIJ4c7Ax1UOFOClg8Yybo2ZMkHy9nlFUsU4OeeW4vNEeOwsek88PCL9mmSB7T
+         anGX/xz7GKolUC435eHV2etc3Bpff+tInNy5sn4qw+nyFLXU3Wl2OydsF5W83ISjT6
+         f/CUFIuo+gEEg==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrIIsWRWlGSWpSXmKPExsViZ8ORpHvbSSH
+  Z4PhuIYvTLXvZHRg9Pm+SC2CMYs3MS8qvSGDNuNAcVvBBvuJn+zXGBsZjUl2MXBxCAucZJV49
+  PsoI4Rxikth68S8bhLONUaL5y0GWLkZODl4BO4n9L5YwgtgsAqoSbZ0TGCHighInZz4BqxEVS
+  JboOdHMDmKzCchLPFtxiA3EFhawlvh+aiFrFyMH0FA+iflv8kDCIgKyEv9nrGYCsTkF+CU+X9
+  8K1sosYCGx+M1BKFteYvvbOcwgtoSAosSfe4cYIewKicbph5ggbDWJq+c2MU9gFJyF5KJZSEb
+  NQjJqASPzKkbrpKLM9IyS3MTMHF1DAwNdQ0NTXWMLINNSL7FKN1EvtVS3PLW4RNdIL7G8WC+1
+  uFivuDI3OSdFLy+1ZBMjMLRTitVydzBOWflT7xCjJAeTkijvI0aFZCG+pPyUyozE4oz4otKc1
+  OJDjDIcHEoSvAmOQDnBotT01Iq0zBxgnMGkJTh4lER4b9sBpXmLCxJzizPTIVKnGHU5ps7+t5
+  9ZiCUvPy9VSpy3G2SGAEhRRmke3AhYzF9ilJUS5mVkYGAQ4ilILcrNLEGVf8UozsGoJMybAjK
+  FJzOvBG7TK6AjmICOMLKWBzmiJBEhJdXAdPzyktNvn5RI1nU/8FPSufMxVe/DynKvtR5qbFEH
+  /u/n7ZC5JOXe7JaynnWDWZTC/amWPCdeTUja+15958NpAUf3yUrXcXl4CBnvnvFXVtNI/G2Pi
+  ckWg8zYeI5rNiJ5N9dfWXveotpXnHP6Al47Z97/kttdH9tEys+X+pxS/EX8U+uhQ9/DA6eVd5
+  7Y6/Cv4ZSiaRvLofhdRn67t2dGXbPiV9YPYI9/t1P6XZpJ/+a5e2KTJn/Y1WrJHqLVqHw83vS
+  hxf+XIqwLbhiHP+utj83eEvzOoKmuO74sW3KySfR230WhzYwFIf9z2C7ZBx5b0KV33+aE0qll
+  2ies9tq8XHL+meSLSrXfmQ2BghJKLMUZiYZazEXFiQCSjJUadAMAAA==
+X-Env-Sender: cuiyue-fnst@fujitsu.com
+X-Msg-Ref: server-7.tower-565.messagelabs.com!1663058651!242943!1
+X-Originating-IP: [62.60.8.98]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.87.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 31475 invoked from network); 13 Sep 2022 08:44:11 -0000
+Received: from unknown (HELO n03ukasimr03.n03.fujitsu.local) (62.60.8.98)
+  by server-7.tower-565.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 13 Sep 2022 08:44:11 -0000
+Received: from n03ukasimr03.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTP id EDD331AC
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 09:44:10 +0100 (BST)
+Received: from R01UKEXCASM121.r01.fujitsu.local (R01UKEXCASM121 [10.183.43.173])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTPS id E2E741B3
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 09:44:10 +0100 (BST)
+Received: from [10.167.225.61] (10.167.225.61) by
+ R01UKEXCASM121.r01.fujitsu.local (10.183.43.173) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Tue, 13 Sep 2022 09:44:09 +0100
+Message-ID: <dda772ba-c391-eb9e-2613-a67892b8785f@fujitsu.com>
+Date:   Tue, 13 Sep 2022 16:44:04 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220909034950.pxim3itf6qiusidl@zlang-mailbox>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.1
+From:   <cuiyue-fnst@fujitsu.com>
+Subject: [PATCH] generic: fix the expected output of sysctl
+References: <>
+To:     <fstests@vger.kernel.org>
+In-Reply-To: <>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.225.61]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM121.r01.fujitsu.local (10.183.43.173)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 09, 2022 at 11:49:50AM +0800, Zorro Lang wrote:
-> On Fri, Aug 05, 2022 at 07:25:31PM +0200, Andrey Albershteyn wrote:
-> > These parameters define ID range of users/groups/projects to show.
-> > This test adds more checks for wider coverage (e.g. empty range,
-> > full range, open range).
-> > 
-> > Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
-> > ---
-> > 
-> > This is regression test in relation to the patch [1].
-> 
-> If this's a regression test case for a specific patchset, will it fail
-> on the kernel without this patchset?
-> 
 
-This is on xfs_quota from xfsprogs. This won't fail with older or updated
-xfs_quota. I implemented it as those arguments weren't covered by any test.
+When the version of procps-ng is 3.3.17-6, the output of "sysctl -w" is 
+like:
+/proc/sys/fs/protected_regular = 0
 
-Ops, sorry, I was going to check in which version this patchset was merged, and
-looks like it got lost somewhere between releases. The new version should go
-into 6.0 release [1].
+But when I install procps-ng 3.3.17-4, the output is like:
+fs.protected_regular = 0
 
-[1]: https://lore.kernel.org/linux-xfs/20220912142823.30865-1-aalbersh@redhat.com/T/#t
+To avoid this, Just remove the sysctl's stdout from out file.
+---
+  tests/generic/597     |  8 ++++----
+  tests/generic/597.out |  4 ----
+  tests/generic/598     | 12 ++++++------
+  tests/generic/598.out |  6 ------
+  4 files changed, 10 insertions(+), 20 deletions(-)
 
-> > 
-> > Changes from v1:
-> >  - Moved to separate test (initially added to 152)
-> > Changes from v2:
-> >  - sed expression simplification
-> >  - remove _filter_trailing_spaces() from common/filter
-> >  - easier to read test cases
-> > 
-> > [1]: https://lore.kernel.org/all/20220328222503.146496-1-aalbersh@redhat.com/
-> > 
-> > ---
-> >  tests/xfs/550     | 169 +++++++++++++++++++++++++++++++++
-> >  tests/xfs/550.out | 232 ++++++++++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 401 insertions(+)
-> >  create mode 100755 tests/xfs/550
-> >  create mode 100644 tests/xfs/550.out
-> > 
-> > diff --git a/tests/xfs/550 b/tests/xfs/550
-> > new file mode 100755
-> > index 00000000..1fc1d37c
-> > --- /dev/null
-> > +++ b/tests/xfs/550
-> > @@ -0,0 +1,169 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 Andrey Albershteyn <aalbersh@redhat.com>.
-> > +# All Rights Reserved.
-> > +#
-> > +# FS QA Test 550
-> > +#
-> > +# Test xfs_quota -L/-U range parameters for report and dump commands. These
-> > +# parameters define ID range of users/groups/projects with non-zero quota to
-> > +# show.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest quick quota
-> 
-> Can it be in "auto" group?
-> 
-
-sure.
-
-> > +
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +	_scratch_unmount >/dev/null 2>&1
-> 
-> Why a _scratch_unmount is needed at here? I think this case doesn't need
-> a specific _cleanup.
-> 
-
-Yup, thanks! Will remove that.
-
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +. ./common/quota
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_require_test
-> 
-> I didn't see this case need TEST_DIR, so this requirement might be useless
-> 
-
-It is. Will remove that
-
-> > +_require_scratch
-> > +_require_xfs_quota
-> > +_require_user fsgqa
-> > +_require_user fsgqa2
-> > +_require_group fsgqa
-> > +_require_group fsgqa2
-> > +
-> > +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
-> > +
-> > +uqid=`id -u fsgqa`
-> > +gqid=`id -g fsgqa`
-> > +
-> > +uqid2=`id -u fsgqa2`
-> > +gqid2=`id -g fsgqa2`
-> > +
-> > +[ $uqid -ge $uqid2 ] && _notrun \
-> > +	"ID of fsgqa user ($uqid) expected to be lower than fsgqa2 ($uqid2)"
-> > +[ $gqid -ge $gqid2 ] && _notrun \
-> > +	"ID of fsgqa group ($gqid) expected to be lower than fsgqa2 ($gqid2)"
-> > +
-> > +pqid=10
-> > +pqid2=42
-> > +cat >$tmp.projects <<EOF
-> > +$pqid:$SCRATCH_MNT
-> > +$pqid2:$SCRATCH_MNT
-> > +EOF
-> > +
-> > +cat >$tmp.projid <<EOF
-> > +root:0
-> > +fsgqa:$pqid
-> > +fsgqa2:$pqid2
-> > +EOF
-> > +
-> > +filter_dump()
-> > +{
-> > +	_filter_scratch | sed -e 's/^[0-9]\+/#ID/' -e 's/\s*$//'
-> > +}
-> > +
-> > +filter_report()
-> > +{
-> > +	_filter_quota | sed -e '/^root/d' \
-> > +				-e '/^#0/d' \
-> > +				-e 's/^#[0-9]\+/#ID/' \
-> > +				-e 's/\s*$//'
-> > +}
-> > +
-> > +set_quota_limit()
-> > +{
-> > +	local bs=$1
-> > +	local bh=$2
-> > +	local is=$3
-> > +	local ih=$4
-> > +	local user=$5
-> > +
-> > +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> > +			-c "limit -$type bsoft=$bs bhard=$bh $user" \
-> > +			-c "limit -$type isoft=$is ihard=$ih $user" \
-> > +			$SCRATCH_MNT
-> > +}
-> > +
-> > +test_dump()
-> > +{
-> > +	local description=$1 ; shift
-> > +	local opt="$*"
-> > +
-> > +	echo "Options: $description"
-> > +
-> > +	rm -f $tmp.backup 2>>/dev/null
-> > +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> > +			-c "dump -$type $opt -f $tmp.backup" \
-> > +			$SCRATCH_MNT | _filter_scratch
-> > +	cat $tmp.backup | filter_dump
-> > +}
-> > +
-> > +test_report()
-> > +{
-> > +	local description=$1 ; shift
-> > +	local opt="$*"
-> > +
-> > +	echo "Options: $description"
-> > +
-> > +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> > +			-c "report -$type $opt -bi" \
-> > +			$SCRATCH_MNT | filter_report
-> > +}
-> > +
-> > +test_xfs_quota()
-> > +{
-> > +	set_quota_limit 512k 2048k 10 20 $id
-> > +	set_quota_limit 1024k 4096k 10 20 $id2
-> > +
-> > +	echo "dump options test (type=$type)"
-> > +	test_dump "no options (full range)"
-> > +	test_dump "-L option" -L $id
-> > +	test_dump "-U option" -U $id
-> > +	test_dump "-L/-U options (one element range)" -L $id -U $id
-> > +	test_dump "-L/-U options (multiple elements range)" -L $id -U $id2
-> > +	test_dump "-L/-U options (empty range)" -L $id2 -U $id
-> > +	test_dump "-L/-U options (full range)" -L 0 -U 0
-> > +
-> > +	echo "report options test (type=$type)"
-> > +	test_report "no options (full range)"
-> > +	test_report "-L options" -L $id
-> > +	test_report "-U options" -U $id
-> > +	test_report "-L/-U options (one element range)" -L $id -U $id
-> > +	test_report "-L/-U options (multiple elements range)" -L $id -U $id2
-> > +	test_report "-L/-U options (empty range)" -L $id2 -U $id
-> > +	test_report "-L/-U options (full range)" -L 0 -U 0
-> > +}
-> > +
-> > +echo "Checking User quota"
-> > +_scratch_unmount >/dev/null 2>&1
-> > +_qmount_option "uquota"
-> > +_try_scratch_mount || _fail "qmount failed"
-> 
-> Why not use "_qmount" directly? (same below)
-> 
-
-Sure, will change to "_qmount", missed that this exists.
-
-> Thanks,
-> Zorro
-> 
-
+diff --git a/tests/generic/597 b/tests/generic/597
+index ff985ca..30129ac 100755
+--- a/tests/generic/597
++++ b/tests/generic/597
+@@ -83,9 +83,9 @@ setup_tree
+  # is not the link owner.
+  echo "== Test symlink follow protection when"
+  echo "== process != link owner and dir owner != link owner"
+-sysctl -w fs.protected_symlinks=0
++sysctl -w fs.protected_symlinks=0 > /dev/null
+  test_symlink
+-sysctl -w fs.protected_symlinks=1
++sysctl -w fs.protected_symlinks=1 > /dev/null
+  test_symlink
+   echo
+@@ -96,9 +96,9 @@ echo
+  # read-write access to the target
+  echo "== Test hardlink create protection when"
+  echo "== process != target owner and process cannot read target"
+-sysctl -w fs.protected_hardlinks=0
++sysctl -w fs.protected_hardlinks=0 > /dev/null
+  test_hardlink
+-sysctl -w fs.protected_hardlinks=1
++sysctl -w fs.protected_hardlinks=1 > /dev/null
+  test_hardlink
+   # success, all done
+diff --git a/tests/generic/597.out b/tests/generic/597.out
+index c654da7..dc327ae 100644
+--- a/tests/generic/597.out
++++ b/tests/generic/597.out
+@@ -1,14 +1,10 @@
+  QA output created by 597
+  == Test symlink follow protection when
+  == process != link owner and dir owner != link owner
+-fs.protected_symlinks = 0
+  successfully followed symlink
+-fs.protected_symlinks = 1
+  Permission denied
+   == Test hardlink create protection when
+  == process != target owner and process cannot read target
+-fs.protected_hardlinks = 0
+  successfully created hardlink
+-fs.protected_hardlinks = 1
+  ln: failed to create hard link 'TEST_DIR/597/sticky_dir/hardlink' => 
+'TEST_DIR/597/target': Operation not permitted
+diff --git a/tests/generic/598 b/tests/generic/598
+index 769c1b1..4264f33 100755
+--- a/tests/generic/598
++++ b/tests/generic/598
+@@ -88,11 +88,11 @@ setup_tree
+  # sticky directories
+   echo "== Test file open when owned by another and file owner != dir 
+owner"
+-sysctl -w fs.protected_regular=0
++sysctl -w fs.protected_regular=0 > /dev/null
+  test_access file
+-sysctl -w fs.protected_regular=1
++sysctl -w fs.protected_regular=1 > /dev/null
+  test_access file
+-sysctl -w fs.protected_regular=2
++sysctl -w fs.protected_regular=2 > /dev/null
+  test_access file
+   echo
+@@ -105,11 +105,11 @@ echo
+  # With protection set to 2, the same goes for group-writable
+  # sticky directories
+  echo "== Test fifo open when owned by another and fifo owner != dir owner"
+-sysctl -w fs.protected_fifos=0
++sysctl -w fs.protected_fifos=0 > /dev/null
+  test_access fifo
+-sysctl -w fs.protected_fifos=1
++sysctl -w fs.protected_fifos=1 > /dev/null
+  test_access fifo
+-sysctl -w fs.protected_fifos=2
++sysctl -w fs.protected_fifos=2 > /dev/null
+  test_access fifo
+   # success, all done
+diff --git a/tests/generic/598.out b/tests/generic/598.out
+index 6d8047d..7903107 100644
+--- a/tests/generic/598.out
++++ b/tests/generic/598.out
+@@ -1,27 +1,21 @@
+  QA output created by 598
+  == Test file open when owned by another and file owner != dir owner
+-fs.protected_regular = 0
+  = group & world writable dir
+  = only group writable dir
+-fs.protected_regular = 1
+  = group & world writable dir
+  Permission denied
+  = only group writable dir
+-fs.protected_regular = 2
+  = group & world writable dir
+  Permission denied
+  = only group writable dir
+  Permission denied
+   == Test fifo open when owned by another and fifo owner != dir owner
+-fs.protected_fifos = 0
+  = group & world writable dir
+  = only group writable dir
+-fs.protected_fifos = 1
+  = group & world writable dir
+  Permission denied
+  = only group writable dir
+-fs.protected_fifos = 2
+  = group & world writable dir
+  Permission denied
+  = only group writable dir
 -- 
-- Andrey
+1.8.3.1
 
