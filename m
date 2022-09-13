@@ -2,114 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 294FCC6FA82
-	for <linux-fstests@archiver.kernel.org>; Tue, 13 Sep 2022 12:29:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B0E5C54EE9
+	for <linux-fstests@archiver.kernel.org>; Tue, 13 Sep 2022 12:53:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232204AbiIMM3o (ORCPT
+        id S231281AbiIMMxI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 13 Sep 2022 08:29:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36016 "EHLO
+        Tue, 13 Sep 2022 08:53:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39858 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232216AbiIMM3X (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Sep 2022 08:29:23 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7AB061D60
-        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 05:28:01 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S231701AbiIMMxH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Sep 2022 08:53:07 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6147C51419
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 05:53:04 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 030721F8C6;
-        Tue, 13 Sep 2022 12:27:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1663072061; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3X8EbHHh6pCsdmo5AIn8U/eEThZtbYvDt66iCLHfSEY=;
-        b=IVFnE80Yxx7TGixnFfP3B7/JofbZcD99Ch5CVDJ+1D/IsiJN/4znqSqZ2DuDg/vVdBPNUv
-        cVGBIhhnGp98Xp2qXSLx5iQ5Khu/T4/lANNHPGnjlAYHAKyS72mkiBg4QDsSlgVQZ/JaRU
-        DIDr8gwnEt9oHsaNMkdY3qCGRgoihvg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1663072061;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3X8EbHHh6pCsdmo5AIn8U/eEThZtbYvDt66iCLHfSEY=;
-        b=5feii5Kn3jJakksWIUG4oA7dCjXdc3YfLFdDrwwliKvTe/dzGVfmLltrPT/eDl6n8C5JLM
-        GV2rXY/441gqq8BQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id DBF9313AB5;
-        Tue, 13 Sep 2022 12:27:40 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id xflBNDx3IGOAAQAAMHmgww
-        (envelope-from <ddiss@suse.de>); Tue, 13 Sep 2022 12:27:40 +0000
-Date:   Tue, 13 Sep 2022 14:27:51 +0200
-From:   David Disseldorp <ddiss@suse.de>
-To:     Zorro Lang <zlang@kernel.org>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C8CE261466
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 12:53:03 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5AD7DC433D6;
+        Tue, 13 Sep 2022 12:53:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1663073583;
+        bh=20V9JMd8t2M6Turr5Ulnau31s/S4gZKwB0o7NaWXnDc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=O8+cXsvFezf68ds92mo9Ym2iLaceN5w/9k4H6CR7xLcs5HSBCTFQvNoY62Yn6gmx5
+         UBhHdUWfY7kvc8C24T8yFH8XIKlQ54P6dqeeDiEM9zEsxnkZYpF7BLKIpQZUIc0mE4
+         T1l2uNCOQjp99T0ucJUGJQ7iHdHOamoXrENW3S0rdvULFN01yYbP2nOSwxZghW3WVf
+         W48wgKYgQ4i1EzfYK7uwGAvFoG+GdvctuTFbhij9eTVFcgofJU/b+fBu8v00Gucrsm
+         G+y+vXcMSTT/nT5GZx6RKoOAxwVTNHbX9c1gXSkI36ySRifU6NxwaqwQ0DhJNTMeJU
+         1I3FQV5FKQXKg==
+Date:   Tue, 13 Sep 2022 20:52:58 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     David Disseldorp <ddiss@suse.de>
 Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH] common/rc: replace obsolescent egrep and fgrep
-Message-ID: <20220913142751.2d4026d9@echidna.suse.de>
-In-Reply-To: <20220913093345.84370-1-zlang@kernel.org>
+Message-ID: <20220913125258.exj4iszolctiuxv2@zlang-mailbox>
 References: <20220913093345.84370-1-zlang@kernel.org>
+ <20220913142751.2d4026d9@echidna.suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220913142751.2d4026d9@echidna.suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, 13 Sep 2022 17:33:45 +0800, Zorro Lang wrote:
+On Tue, Sep 13, 2022 at 02:27:51PM +0200, David Disseldorp wrote:
+> On Tue, 13 Sep 2022 17:33:45 +0800, Zorro Lang wrote:
+> 
+> > Due to the change in grep project:
+> >   a95156247098 ("egrep, fgrep: now obsolete")
+> > 
+> > some tests start to fail on latest Fedora system with grep-3.8-1.fc38
+> > or newer version, as:
+> > 
+> >   generic/447 70s ... egrep: warning: egrep is obsolescent; using grep -E
+> >   ...
+> >       @@ -1,4 +1,5 @@
+> >        QA output created by 447
+> >       +egrep: warning: egrep is obsolescent; using grep -E
+> >       ...
+> > 
+> > So use grep -E and -F to instead of egrep and fgrep commands.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> >  common/rc | 11 +++++++++++
+> >  1 file changed, 11 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index a25cbcd0..dee3965e 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -30,6 +30,17 @@ dd()
+> >  	fi
+> >  }
+> >  
+> > +# The egrep and fgrep are obsolescent
+> > +egrep()
+> > +{
+> > +	grep -E "$@"
+> > +}
+> > +
+> > +fgrep()
+> > +{
+> > +	grep -F "$@"
+> > +}
+> > +
+> >  # Prints the md5 checksum of a given file
+> >  _md5_checksum()
+> >  {
+> 
+> Nit: AFAICT there's only one fgrep caller, so just change that single
+> case. With that fixed:
 
-> Due to the change in grep project:
->   a95156247098 ("egrep, fgrep: now obsolete")
-> 
-> some tests start to fail on latest Fedora system with grep-3.8-1.fc38
-> or newer version, as:
-> 
->   generic/447 70s ... egrep: warning: egrep is obsolescent; using grep -E
->   ...
->       @@ -1,4 +1,5 @@
->        QA output created by 447
->       +egrep: warning: egrep is obsolescent; using grep -E
->       ...
-> 
-> So use grep -E and -F to instead of egrep and fgrep commands.
-> 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
->  common/rc | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index a25cbcd0..dee3965e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -30,6 +30,17 @@ dd()
->  	fi
->  }
->  
-> +# The egrep and fgrep are obsolescent
-> +egrep()
-> +{
-> +	grep -E "$@"
-> +}
-> +
-> +fgrep()
-> +{
-> +	grep -F "$@"
-> +}
-> +
->  # Prints the md5 checksum of a given file
->  _md5_checksum()
->  {
+Thanks for reviewing!
 
-Nit: AFAICT there's only one fgrep caller, so just change that single
-case. With that fixed:
+Yeah, I thought about that too. But then I thought a fgrep() might help later
+patches to avoid using fgrep command directly, so ...
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+Thanks,
+Zorro
+
+> 
+> Reviewed-by: David Disseldorp <ddiss@suse.de>
+> 
