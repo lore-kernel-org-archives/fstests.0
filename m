@@ -2,217 +2,157 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8919EC6FA82
-	for <linux-fstests@archiver.kernel.org>; Tue, 13 Sep 2022 13:24:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C9A4ECAAD3
+	for <linux-fstests@archiver.kernel.org>; Wed, 14 Sep 2022 06:06:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232116AbiIMNYo (ORCPT
+        id S229729AbiINGGY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 13 Sep 2022 09:24:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56744 "EHLO
+        Wed, 14 Sep 2022 02:06:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231502AbiIMNYn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Sep 2022 09:24:43 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79FA6115D
-        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 06:24:40 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A32586146E
-        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 13:24:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 184E5C433D6;
-        Tue, 13 Sep 2022 13:24:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663075479;
-        bh=l5O1om1P1wsTGNiFTZkr16dRJPNYLzJwz6xVjJU1ozQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MgNbm6GM24R4szEpsNTzkgyUnbM6vgerY01dnG9ED7ljDlfziQOxRDW9OKQYUkxrX
-         kPDNm6uQRbMLtozm3c2VyAw9V1WpY5EzW2jqej1AOKyQCIZwp40JPBG6q2ZgDjMrwr
-         HgzYX97xjLnWBwWipwOhpXG2CZvu5UfgHkCN/9OsJ7t6Wb+SQ/Ll0LyWD3HaDCkhkS
-         qcx+C+2ME+vYnvGi+UEL1w7QtLOLDmr1UWIiRsePy7g67FXWAGURTPYPDeOGc0Ia4n
-         C6o/ylE8xEt7biGtor9qEoe2+xG82qazM31jna6uTzN8bOozrFkagdmqkSKWAfiAwQ
-         XQg260jHorqTg==
-Date:   Tue, 13 Sep 2022 21:24:33 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     cuiyue-fnst@fujitsu.com
-Cc:     fstests@vger.kernel.org, procps@freelists.org
-Subject: Re: [PATCH] generic: fix the expected output of sysctl
-Message-ID: <20220913132433.dgl4ybggvfxtdc47@zlang-mailbox>
-References: <>
- <dda772ba-c391-eb9e-2613-a67892b8785f@fujitsu.com>
+        with ESMTP id S229642AbiINGGX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Sep 2022 02:06:23 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD18A6567A
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 23:06:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1663135580;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=qEJVt/aSk85Ga0VJqlwpFm7sMse4riuEryaDQ+NEg5U=;
+        b=i40/s9op/SY1JvaAxsMV6GUxTGC0NZFHLMvajNtJ/zQ4cP29WHRwXpdyoRAqjsWw20rrzF
+        XNWJFbNdFPfbz4mBW9RmXHQqDw8lPscE+Mn8EqhY7wW/RNZiSbHsbVEXXrRMaGfomDtm0l
+        gfoGU2qt/F8vonZmUAYEpNzytjL3qEM=
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
+ [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-135-WKwy0YgoOMGnmZsEa2GX0g-1; Wed, 14 Sep 2022 02:06:18 -0400
+X-MC-Unique: WKwy0YgoOMGnmZsEa2GX0g-1
+Received: by mail-qv1-f69.google.com with SMTP id lx4-20020a0562145f0400b00496ecf45ac4so9613269qvb.7
+        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 23:06:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
+        bh=qEJVt/aSk85Ga0VJqlwpFm7sMse4riuEryaDQ+NEg5U=;
+        b=JOYUQOqtHI8/NsrI31AMMRz02vmGkCa0rcSHXzYIoVEJ66L6bKKBXNmDDk8ebqs+Z0
+         puvfq1OR1tTIGkB2pFi3eniHTtPpBdsKEkqxhMJbMyv9dYgMkJfkGUpupDN6m61btR6U
+         AWEbxjFxp1RkgWkMPw5QRZNcHdC0ljqHPf6OHOFY7EqgCbu7a5fn4WRB9jj3BCQjRLmZ
+         Lzx2qM74aoQDSWBOXJYUZbfWPt8mO5UiXAlxE/0sgw1N3r/c+k18P0E7lAVrfsaP58wj
+         wI9qTt57UThsDuAryS1C9V0gj/19rgioFQX5jJPYk13RVlYAk0RqUqmFr1ccUm69qvy3
+         Deaw==
+X-Gm-Message-State: ACgBeo3/p2/G+Tp6O72J6ZNvYXn6kS1ZoRlXKuBDXOq3bu9n2w4G8zEQ
+        Kw6by5gLftDJsFFlUGzJ8uJnPESydshqdAyFSAylaCl3zsJ4LTjaCmWJhpy580rNnX9Xf7ZmuRF
+        GZDs4pS8hMP2HbV+dUA==
+X-Received: by 2002:a05:622a:ce:b0:343:55cf:443c with SMTP id p14-20020a05622a00ce00b0034355cf443cmr31586450qtw.218.1663135577912;
+        Tue, 13 Sep 2022 23:06:17 -0700 (PDT)
+X-Google-Smtp-Source: AA6agR7+nGMktGnuqF5/zrJRT9u6Yxaxvp7Ju5m2bPdksz6gPO5vcel10SA40AKCUsw/q0hLsplwsQ==
+X-Received: by 2002:a05:622a:ce:b0:343:55cf:443c with SMTP id p14-20020a05622a00ce00b0034355cf443cmr31586438qtw.218.1663135577678;
+        Tue, 13 Sep 2022 23:06:17 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id bs14-20020a05620a470e00b006b58d8f6181sm1143515qkb.72.2022.09.13.23.06.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 13 Sep 2022 23:06:17 -0700 (PDT)
+Date:   Wed, 14 Sep 2022 14:06:13 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/1] generic: test i_blocks for truncated large files
+Message-ID: <20220914060613.f7srzq6mzple6coj@zlang-mailbox>
+References: <20220913125801.56366-1-preichl@redhat.com>
+ <20220913125801.56366-2-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <dda772ba-c391-eb9e-2613-a67892b8785f@fujitsu.com>
+In-Reply-To: <20220913125801.56366-2-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 13, 2022 at 04:44:04PM +0800, cuiyue-fnst@fujitsu.com wrote:
+On Tue, Sep 13, 2022 at 02:58:01PM +0200, Pavel Reichl wrote:
+> This is a regression test for an incorrect computation of i_blocks for
+> truncated files larger than 4 GiB. Bug was filed for exFAT.
 > 
-> When the version of procps-ng is 3.3.17-6, the output of "sysctl -w" is
-> like:
-> /proc/sys/fs/protected_regular = 0
+> Test is based on reproducer provied by Christophe Vu-Brugier as part
+> of kernel patch-fix submission.
 > 
-> But when I install procps-ng 3.3.17-4, the output is like:
-> fs.protected_regular = 0
-> 
-> To avoid this, Just remove the sysctl's stdout from out file.
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
 > ---
 
-Hi,
+This version looks good to me.
 
-I have two points about this patch...
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-1)
-Is this a designed change of procps, or an issue which was brought in
-accidentally? Better to figure out which commit brought in it, due to
-when I tried to use the upstream procps source code, I didn't hit this
-issue:
-
-# git clone https://gitlab.com/procps-ng/procps.git
-# git lo
-a8f1c50d (tag: v4.0.1rc1) nls: Update man-po for EIP updates
-...
-# cd procps
-# ./autogen.sh
-# ./configure
-# make -j8
-# ./sysctl -w fs.protected_symlinks=1
-fs.protected_symlinks = 1
-
-So I doubt if it's an issue which has been fixed by procps? If anyone knows
-more about that, please feel free to tell us :)
-
-2)
-Even if this's an expected behavior change of procps, we'd better to use a
-filter to keep same output format for old and new procps. E.g.
-
-_sysctl()
-{
-        sysctl "$@" | sed -e /proc\\/sys/s#/proc/sys/##g \
-                          -e s#/#.#g
-}
-
-It's a little rude, welcome better pattern :)
-
-Thanks,
-Zorro
-
-
->  tests/generic/597     |  8 ++++----
->  tests/generic/597.out |  4 ----
->  tests/generic/598     | 12 ++++++------
->  tests/generic/598.out |  6 ------
->  4 files changed, 10 insertions(+), 20 deletions(-)
+>  tests/generic/698     | 48 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/698.out |  2 ++
+>  2 files changed, 50 insertions(+)
+>  create mode 100755 tests/generic/698
+>  create mode 100644 tests/generic/698.out
 > 
-> diff --git a/tests/generic/597 b/tests/generic/597
-> index ff985ca..30129ac 100755
-> --- a/tests/generic/597
-> +++ b/tests/generic/597
-> @@ -83,9 +83,9 @@ setup_tree
->  # is not the link owner.
->  echo "== Test symlink follow protection when"
->  echo "== process != link owner and dir owner != link owner"
-> -sysctl -w fs.protected_symlinks=0
-> +sysctl -w fs.protected_symlinks=0 > /dev/null
->  test_symlink
-> -sysctl -w fs.protected_symlinks=1
-> +sysctl -w fs.protected_symlinks=1 > /dev/null
->  test_symlink
->   echo
-> @@ -96,9 +96,9 @@ echo
->  # read-write access to the target
->  echo "== Test hardlink create protection when"
->  echo "== process != target owner and process cannot read target"
-> -sysctl -w fs.protected_hardlinks=0
-> +sysctl -w fs.protected_hardlinks=0 > /dev/null
->  test_hardlink
-> -sysctl -w fs.protected_hardlinks=1
-> +sysctl -w fs.protected_hardlinks=1 > /dev/null
->  test_hardlink
->   # success, all done
-> diff --git a/tests/generic/597.out b/tests/generic/597.out
-> index c654da7..dc327ae 100644
-> --- a/tests/generic/597.out
-> +++ b/tests/generic/597.out
-> @@ -1,14 +1,10 @@
->  QA output created by 597
->  == Test symlink follow protection when
->  == process != link owner and dir owner != link owner
-> -fs.protected_symlinks = 0
->  successfully followed symlink
-> -fs.protected_symlinks = 1
->  Permission denied
->   == Test hardlink create protection when
->  == process != target owner and process cannot read target
-> -fs.protected_hardlinks = 0
->  successfully created hardlink
-> -fs.protected_hardlinks = 1
->  ln: failed to create hard link 'TEST_DIR/597/sticky_dir/hardlink' =>
-> 'TEST_DIR/597/target': Operation not permitted
-> diff --git a/tests/generic/598 b/tests/generic/598
-> index 769c1b1..4264f33 100755
-> --- a/tests/generic/598
-> +++ b/tests/generic/598
-> @@ -88,11 +88,11 @@ setup_tree
->  # sticky directories
->   echo "== Test file open when owned by another and file owner != dir owner"
-> -sysctl -w fs.protected_regular=0
-> +sysctl -w fs.protected_regular=0 > /dev/null
->  test_access file
-> -sysctl -w fs.protected_regular=1
-> +sysctl -w fs.protected_regular=1 > /dev/null
->  test_access file
-> -sysctl -w fs.protected_regular=2
-> +sysctl -w fs.protected_regular=2 > /dev/null
->  test_access file
->   echo
-> @@ -105,11 +105,11 @@ echo
->  # With protection set to 2, the same goes for group-writable
->  # sticky directories
->  echo "== Test fifo open when owned by another and fifo owner != dir owner"
-> -sysctl -w fs.protected_fifos=0
-> +sysctl -w fs.protected_fifos=0 > /dev/null
->  test_access fifo
-> -sysctl -w fs.protected_fifos=1
-> +sysctl -w fs.protected_fifos=1 > /dev/null
->  test_access fifo
-> -sysctl -w fs.protected_fifos=2
-> +sysctl -w fs.protected_fifos=2 > /dev/null
->  test_access fifo
->   # success, all done
-> diff --git a/tests/generic/598.out b/tests/generic/598.out
-> index 6d8047d..7903107 100644
-> --- a/tests/generic/598.out
-> +++ b/tests/generic/598.out
-> @@ -1,27 +1,21 @@
->  QA output created by 598
->  == Test file open when owned by another and file owner != dir owner
-> -fs.protected_regular = 0
->  = group & world writable dir
->  = only group writable dir
-> -fs.protected_regular = 1
->  = group & world writable dir
->  Permission denied
->  = only group writable dir
-> -fs.protected_regular = 2
->  = group & world writable dir
->  Permission denied
->  = only group writable dir
->  Permission denied
->   == Test fifo open when owned by another and fifo owner != dir owner
-> -fs.protected_fifos = 0
->  = group & world writable dir
->  = only group writable dir
-> -fs.protected_fifos = 1
->  = group & world writable dir
->  Permission denied
->  = only group writable dir
-> -fs.protected_fifos = 2
->  = group & world writable dir
->  Permission denied
->  = only group writable dir
+> diff --git a/tests/generic/698 b/tests/generic/698
+> new file mode 100755
+> index 00000000..337df6c5
+> --- /dev/null
+> +++ b/tests/generic/698
+> @@ -0,0 +1,48 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 698
+> +#
+> +# Verify that i_blocks for truncated files larger than 4 GiB have correct
+> +# values.
+> +#
+> +# This test verifies the problem fixed in kernel with commit
+> +# 92fba084b79e exfat: fix i_blocks for files truncated over 4 GiB
+> +#
+> +. ./common/preamble
+> +. ./common/filter
+> +
+> +_begin_fstest auto
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.* $junk_dir
+> +}
+> +
+> +_supported_fs generic
+> +_fixed_by_kernel_commit 92fba084b79e \
+> +	"exfat: fix i_blocks for files truncated over 4 GiB"
+> +
+> +_require_test
+> +_require_fs_space $TEST_DIR $((5 * 1024 * 1024)) #kB
+> +
+> +junk_dir=$TEST_DIR/$seq
+> +junk_file=$junk_dir/junk
+> +mkdir -p $junk_dir
+> +
+> +$XFS_IO_PROG -f -c "pwrite -W 0 5G" $junk_file > /dev/null
+> +
+> +truncate -s $((4 * 1024 * 1024 * 1024)) $junk_file
+> +
+> +block_size=`stat -c '%B' $junk_file`
+> +iblocks_after_truncate=`stat -c '%b' $junk_file`
+> +iblocks_expected=$((4 * 1024 * 1024 * 1024 / $block_size))
+> +
+> +_within_tolerance "Number of allocated blocks after truncate" $iblocks_after_truncate $iblocks_expected 1% -v
+> +
+> +status=0
+> +
+> +exit
+> diff --git a/tests/generic/698.out b/tests/generic/698.out
+> new file mode 100644
+> index 00000000..cbb02d37
+> --- /dev/null
+> +++ b/tests/generic/698.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 698
+> +Number of allocated blocks after truncate is in range
 > -- 
-> 1.8.3.1
+> 2.37.3
 > 
+
