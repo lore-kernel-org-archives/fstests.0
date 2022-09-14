@@ -2,157 +2,89 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C9A4ECAAD3
-	for <linux-fstests@archiver.kernel.org>; Wed, 14 Sep 2022 06:06:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 824ABC6FA89
+	for <linux-fstests@archiver.kernel.org>; Wed, 14 Sep 2022 09:15:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229729AbiINGGY (ORCPT
+        id S231495AbiINJP1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 14 Sep 2022 02:06:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45568 "EHLO
+        Wed, 14 Sep 2022 05:15:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54332 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229642AbiINGGX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 14 Sep 2022 02:06:23 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD18A6567A
-        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 23:06:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663135580;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=qEJVt/aSk85Ga0VJqlwpFm7sMse4riuEryaDQ+NEg5U=;
-        b=i40/s9op/SY1JvaAxsMV6GUxTGC0NZFHLMvajNtJ/zQ4cP29WHRwXpdyoRAqjsWw20rrzF
-        XNWJFbNdFPfbz4mBW9RmXHQqDw8lPscE+Mn8EqhY7wW/RNZiSbHsbVEXXrRMaGfomDtm0l
-        gfoGU2qt/F8vonZmUAYEpNzytjL3qEM=
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
- [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-135-WKwy0YgoOMGnmZsEa2GX0g-1; Wed, 14 Sep 2022 02:06:18 -0400
-X-MC-Unique: WKwy0YgoOMGnmZsEa2GX0g-1
-Received: by mail-qv1-f69.google.com with SMTP id lx4-20020a0562145f0400b00496ecf45ac4so9613269qvb.7
-        for <fstests@vger.kernel.org>; Tue, 13 Sep 2022 23:06:18 -0700 (PDT)
+        with ESMTP id S231835AbiINJOe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Sep 2022 05:14:34 -0400
+Received: from mail-qv1-xf31.google.com (mail-qv1-xf31.google.com [IPv6:2607:f8b0:4864:20::f31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D88A778589
+        for <fstests@vger.kernel.org>; Wed, 14 Sep 2022 02:06:33 -0700 (PDT)
+Received: by mail-qv1-xf31.google.com with SMTP id c6so11222283qvn.6
+        for <fstests@vger.kernel.org>; Wed, 14 Sep 2022 02:06:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:from:to:cc:subject:date;
+        bh=qYcb/Ydik4KcUVhndWl8iSSvBnJ7xykgJWs3X+3iiIM=;
+        b=aXgsG1aVquj/S3yVeOJU1rC1q9aBpRZC7H1BVGkwJvJMtHI/RjNEw7PYYu+RQ6ZICY
+         7gyqItAaqju8Gbk7iukiRo4migp3vxWDiGcWHccNKg7SFPVee+/21fzF+LOrwbUOA2FT
+         E2nwC4QHS9ZetyJBHV6tr0JFBVhQTfeOCUBfVmhiCAIFAU/ORwB4tauB5uosvQscZlWr
+         2mHmNCEjwIfE6MNldX+xgjVBTqloIGApl98HuMWns4V9YWqx62iqfeZMQ5PUnr7MYYOz
+         skkuvf1IXa0buGkKK8kJAkAyppC/uKr8R2sXkBpNVViGikzx1peANmxWxW14G/49KEyH
+         +4Mw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=qEJVt/aSk85Ga0VJqlwpFm7sMse4riuEryaDQ+NEg5U=;
-        b=JOYUQOqtHI8/NsrI31AMMRz02vmGkCa0rcSHXzYIoVEJ66L6bKKBXNmDDk8ebqs+Z0
-         puvfq1OR1tTIGkB2pFi3eniHTtPpBdsKEkqxhMJbMyv9dYgMkJfkGUpupDN6m61btR6U
-         AWEbxjFxp1RkgWkMPw5QRZNcHdC0ljqHPf6OHOFY7EqgCbu7a5fn4WRB9jj3BCQjRLmZ
-         Lzx2qM74aoQDSWBOXJYUZbfWPt8mO5UiXAlxE/0sgw1N3r/c+k18P0E7lAVrfsaP58wj
-         wI9qTt57UThsDuAryS1C9V0gj/19rgioFQX5jJPYk13RVlYAk0RqUqmFr1ccUm69qvy3
-         Deaw==
-X-Gm-Message-State: ACgBeo3/p2/G+Tp6O72J6ZNvYXn6kS1ZoRlXKuBDXOq3bu9n2w4G8zEQ
-        Kw6by5gLftDJsFFlUGzJ8uJnPESydshqdAyFSAylaCl3zsJ4LTjaCmWJhpy580rNnX9Xf7ZmuRF
-        GZDs4pS8hMP2HbV+dUA==
-X-Received: by 2002:a05:622a:ce:b0:343:55cf:443c with SMTP id p14-20020a05622a00ce00b0034355cf443cmr31586450qtw.218.1663135577912;
-        Tue, 13 Sep 2022 23:06:17 -0700 (PDT)
-X-Google-Smtp-Source: AA6agR7+nGMktGnuqF5/zrJRT9u6Yxaxvp7Ju5m2bPdksz6gPO5vcel10SA40AKCUsw/q0hLsplwsQ==
-X-Received: by 2002:a05:622a:ce:b0:343:55cf:443c with SMTP id p14-20020a05622a00ce00b0034355cf443cmr31586438qtw.218.1663135577678;
-        Tue, 13 Sep 2022 23:06:17 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id bs14-20020a05620a470e00b006b58d8f6181sm1143515qkb.72.2022.09.13.23.06.16
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=qYcb/Ydik4KcUVhndWl8iSSvBnJ7xykgJWs3X+3iiIM=;
+        b=iBQIogWtiDa9phBNhQEKBBrGZYR+zdTrXia9EiUM+y/oNChGQWuWywtoC0fLQsrqCQ
+         CaaJEDlSAAXEI1uL6sxq77Tci8IXGO67TsEkbucDZ6bxGsdnAafFjfmrMAQ4EIG4I6OM
+         SoxvUqM1TmFwJgBUk8QEHJp0LCcVoFR4G4ZolQ0VI/cAEeIRhaHavTKCC9JQt/jwzXjr
+         xxy7ZDI6QhSyF+ANQ46jOjvYGqW2co9+moE/4pBWJwNRqrHpPzRgVlKUvWaGwS/aZvS/
+         ztksK7YXJ2ZmouZUQ58CJQfEGvgD1LJIinnfSXSgByQb4TSuY3IEQ+9Cqfs/kiuLsjqS
+         iSiQ==
+X-Gm-Message-State: ACgBeo1uKeoVjsiLEWWOyZ0BxW44fPc112yh8KtiZPe6Cr/hvB6iSuzc
+        5wSYGSpu39FTn07Ae6e3HKhcf9Rt5gY=
+X-Google-Smtp-Source: AA6agR67uCml+EYpOGIptFZF65BNBIGQxh3D6foGIKY06wRnSKUlUKltw40/Snz8lZ9mrXeixtK1xw==
+X-Received: by 2002:ad4:5bec:0:b0:4ac:9578:4c4c with SMTP id k12-20020ad45bec000000b004ac95784c4cmr18638973qvc.13.1663146383542;
+        Wed, 14 Sep 2022 02:06:23 -0700 (PDT)
+Received: from xzhouw.hosts.qa.psi.rdu2.redhat.com ([66.187.232.127])
+        by smtp.gmail.com with ESMTPSA id cp4-20020a05622a420400b0035bab4dd6c9sm1250324qtb.22.2022.09.14.02.06.22
+        for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Sep 2022 23:06:17 -0700 (PDT)
-Date:   Wed, 14 Sep 2022 14:06:13 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Pavel Reichl <preichl@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/1] generic: test i_blocks for truncated large files
-Message-ID: <20220914060613.f7srzq6mzple6coj@zlang-mailbox>
-References: <20220913125801.56366-1-preichl@redhat.com>
- <20220913125801.56366-2-preichl@redhat.com>
+        Wed, 14 Sep 2022 02:06:23 -0700 (PDT)
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH 2/2] common/quota: fix grep pattern
+Date:   Wed, 14 Sep 2022 17:06:10 +0800
+Message-Id: <20220914090610.1994485-2-jencce.kernel@gmail.com>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <20220914090610.1994485-1-jencce.kernel@gmail.com>
+References: <20220914090610.1994485-1-jencce.kernel@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220913125801.56366-2-preichl@redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 13, 2022 at 02:58:01PM +0200, Pavel Reichl wrote:
-> This is a regression test for an incorrect computation of i_blocks for
-> truncated files larger than 4 GiB. Bug was filed for exFAT.
-> 
-> Test is based on reproducer provied by Christophe Vu-Brugier as part
-> of kernel patch-fix submission.
-> 
-> Signed-off-by: Pavel Reichl <preichl@redhat.com>
-> ---
+The second dash is not needed now. Newer grep is complaining:
++grep: warning: stray \ before -
 
-This version looks good to me.
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+ common/quota | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  tests/generic/698     | 48 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/698.out |  2 ++
->  2 files changed, 50 insertions(+)
->  create mode 100755 tests/generic/698
->  create mode 100644 tests/generic/698.out
-> 
-> diff --git a/tests/generic/698 b/tests/generic/698
-> new file mode 100755
-> index 00000000..337df6c5
-> --- /dev/null
-> +++ b/tests/generic/698
-> @@ -0,0 +1,48 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
-> +#
-> +# FS QA Test 698
-> +#
-> +# Verify that i_blocks for truncated files larger than 4 GiB have correct
-> +# values.
-> +#
-> +# This test verifies the problem fixed in kernel with commit
-> +# 92fba084b79e exfat: fix i_blocks for files truncated over 4 GiB
-> +#
-> +. ./common/preamble
-> +. ./common/filter
-> +
-> +_begin_fstest auto
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.* $junk_dir
-> +}
-> +
-> +_supported_fs generic
-> +_fixed_by_kernel_commit 92fba084b79e \
-> +	"exfat: fix i_blocks for files truncated over 4 GiB"
-> +
-> +_require_test
-> +_require_fs_space $TEST_DIR $((5 * 1024 * 1024)) #kB
-> +
-> +junk_dir=$TEST_DIR/$seq
-> +junk_file=$junk_dir/junk
-> +mkdir -p $junk_dir
-> +
-> +$XFS_IO_PROG -f -c "pwrite -W 0 5G" $junk_file > /dev/null
-> +
-> +truncate -s $((4 * 1024 * 1024 * 1024)) $junk_file
-> +
-> +block_size=`stat -c '%B' $junk_file`
-> +iblocks_after_truncate=`stat -c '%b' $junk_file`
-> +iblocks_expected=$((4 * 1024 * 1024 * 1024 / $block_size))
-> +
-> +_within_tolerance "Number of allocated blocks after truncate" $iblocks_after_truncate $iblocks_expected 1% -v
-> +
-> +status=0
-> +
-> +exit
-> diff --git a/tests/generic/698.out b/tests/generic/698.out
-> new file mode 100644
-> index 00000000..cbb02d37
-> --- /dev/null
-> +++ b/tests/generic/698.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 698
-> +Number of allocated blocks after truncate is in range
-> -- 
-> 2.37.3
-> 
+diff --git a/common/quota b/common/quota
+index 22be3c69..01ff7e6d 100644
+--- a/common/quota
++++ b/common/quota
+@@ -218,7 +218,7 @@ _qmount()
+         quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+         quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
+         # try to turn on project quota if it's supported
+-        if quotaon --help 2>&1 | grep -q '\-\-project'; then
++        if quotaon --help 2>&1 | grep -q '\--project'; then
+             quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
+         fi
+     fi
+-- 
+2.31.1
 
