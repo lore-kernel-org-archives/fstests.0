@@ -2,138 +2,113 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57370C6FA82
-	for <linux-fstests@archiver.kernel.org>; Wed, 14 Sep 2022 17:59:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EF20ECAAD3
+	for <linux-fstests@archiver.kernel.org>; Thu, 15 Sep 2022 03:40:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229801AbiINR7v (ORCPT
+        id S229779AbiIODks (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 14 Sep 2022 13:59:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58060 "EHLO
+        Wed, 14 Sep 2022 23:40:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53548 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229875AbiINR7s (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 14 Sep 2022 13:59:48 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0105DDEE3
-        for <fstests@vger.kernel.org>; Wed, 14 Sep 2022 10:59:41 -0700 (PDT)
+        with ESMTP id S230316AbiIODkZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Sep 2022 23:40:25 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A07D101F0
+        for <fstests@vger.kernel.org>; Wed, 14 Sep 2022 20:39:41 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 61A8761E2B
-        for <fstests@vger.kernel.org>; Wed, 14 Sep 2022 17:59:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD58DC43145;
-        Wed, 14 Sep 2022 17:59:40 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 12494B81D75
+        for <fstests@vger.kernel.org>; Thu, 15 Sep 2022 03:39:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F2A45C433C1;
+        Thu, 15 Sep 2022 03:39:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663178380;
-        bh=Yz6D+c+IzBaJ8vpsNTnAGWB3nypH4KkLd8UD+jhwhqI=;
+        s=k20201202; t=1663213178;
+        bh=vwq1vZMBoNuuxvg/yj28OKoFzbEL8dYGqaoedfMFypE=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=PNd8ipTHADdoBlQHA8AYSL6vXZoOsTjXOFLW72qRx3lqG37vDHWvr/TOE0xR+/iEX
-         JmdUBdhOAkc/urevI7J27pAeRWtfDQVtFHcYXg3Kv6IkXkOE5KY0kyxju4LUCaDJhf
-         D1o2kjxAYG9EkTGCsXhEAZq2Paz2HepdQH2zTNWIqrI7nC/giKJdT+PcxJMS9oRb5/
-         XCpWJm8DldoMDSGjlLVjMuAkDaC/NKeSNXvgfdbiqtUiE4BJPfqRU5OApX8Wv3E70m
-         pctG9G0WrlMkpQA/OnbKa1F2G4CDQfnPk32HTFicDE7/6+0aJ33dcoSnzKQy/6+KzN
-         KdzmY7mJi/xjg==
-Date:   Wed, 14 Sep 2022 10:59:40 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Pavel Reichl <preichl@redhat.com>
+        b=AyoOF0WEoZWncPldcLTIpOLUr6NkKkF9oDabIMhMljy6bfwO/dxmIDPcRIaBLgdQe
+         PMT2aFlgW5SfW3FG8IIe04DteoxHjVN1/jina58/M6USNsICdC4F9+Rft5JckJuJNb
+         C2WQPwt9czeK5ohG35fM70gTXX8rihpM0Vn9llrdbnIB/BMPAE8snr9O0jB5G5T0RM
+         NrEGvhz1Es8vHVI4fFmQP1aSRjDibHW37MJQyagmZ/Sj59L53/5GYkPGIwV5y4iePL
+         rpmvPXnkfXKHvcL5z3RK0ir52PJKcxs292JmrmIizATt1N6MYQYMTCR2htNHV2ad3N
+         m+eFl/tRxf8lQ==
+Date:   Thu, 15 Sep 2022 11:39:34 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/1] generic: test i_blocks for truncated large files
-Message-ID: <YyIWjArO7bvCJQLM@magnolia>
-References: <20220913125801.56366-1-preichl@redhat.com>
- <20220913125801.56366-2-preichl@redhat.com>
+Subject: Re: [PATCH] common/rc: replace obsolescent egrep and fgrep
+Message-ID: <20220915033934.gncutjkjqttaocjr@zlang-mailbox>
+References: <20220913093345.84370-1-zlang@kernel.org>
+ <YyIWI8+OURMPIkLe@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220913125801.56366-2-preichl@redhat.com>
+In-Reply-To: <YyIWI8+OURMPIkLe@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 13, 2022 at 02:58:01PM +0200, Pavel Reichl wrote:
-> This is a regression test for an incorrect computation of i_blocks for
-> truncated files larger than 4 GiB. Bug was filed for exFAT.
+On Wed, Sep 14, 2022 at 10:57:55AM -0700, Darrick J. Wong wrote:
+> On Tue, Sep 13, 2022 at 05:33:45PM +0800, Zorro Lang wrote:
+> > Due to the change in grep project:
+> >   a95156247098 ("egrep, fgrep: now obsolete")
+> > 
+> > some tests start to fail on latest Fedora system with grep-3.8-1.fc38
+> > or newer version, as:
+> > 
+> >   generic/447 70s ... egrep: warning: egrep is obsolescent; using grep -E
+> >   ...
+> >       @@ -1,4 +1,5 @@
+> >        QA output created by 447
+> >       +egrep: warning: egrep is obsolescent; using grep -E
+> >       ...
+> > 
+> > So use grep -E and -F to instead of egrep and fgrep commands.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> >  common/rc | 11 +++++++++++
+> >  1 file changed, 11 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index a25cbcd0..dee3965e 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -30,6 +30,17 @@ dd()
+> >  	fi
+> >  }
+> >  
+> > +# The egrep and fgrep are obsolescent
+> > +egrep()
+> > +{
+> > +	grep -E "$@"
+> > +}
+> > +
+> > +fgrep()
+> > +{
+> > +	grep -F "$@"
+> > +}
 > 
-> Test is based on reproducer provied by Christophe Vu-Brugier as part
-> of kernel patch-fix submission.
+> Why not conditionally define these *only* if the system doesn't already
+> have an egrep/fgrep binary?
 > 
-> Signed-off-by: Pavel Reichl <preichl@redhat.com>
-> ---
->  tests/generic/698     | 48 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/698.out |  2 ++
->  2 files changed, 50 insertions(+)
->  create mode 100755 tests/generic/698
->  create mode 100644 tests/generic/698.out
+> (Alternately I guess you could take Murphy's patch, since that's the
+> proper fix according to the gnu grep maintainers...)
+
+OK, let's drop this patch, turn to review Murphy's. I just hope to avoid later
+patches using egrep and fgrep commands.
+
+Thanks,
+Zorro
+
 > 
-> diff --git a/tests/generic/698 b/tests/generic/698
-> new file mode 100755
-> index 00000000..337df6c5
-> --- /dev/null
-> +++ b/tests/generic/698
-> @@ -0,0 +1,48 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
-> +#
-> +# FS QA Test 698
-> +#
-> +# Verify that i_blocks for truncated files larger than 4 GiB have correct
-> +# values.
-> +#
-> +# This test verifies the problem fixed in kernel with commit
-> +# 92fba084b79e exfat: fix i_blocks for files truncated over 4 GiB
-> +#
-> +. ./common/preamble
-> +. ./common/filter
-> +
-> +_begin_fstest auto
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.* $junk_dir
-> +}
-> +
-> +_supported_fs generic
-> +_fixed_by_kernel_commit 92fba084b79e \
-> +	"exfat: fix i_blocks for files truncated over 4 GiB"
-> +
-> +_require_test
-> +_require_fs_space $TEST_DIR $((5 * 1024 * 1024)) #kB
-> +
-> +junk_dir=$TEST_DIR/$seq
-> +junk_file=$junk_dir/junk
-> +mkdir -p $junk_dir
-> +
-> +$XFS_IO_PROG -f -c "pwrite -W 0 5G" $junk_file > /dev/null
-
-I wonder, how long will this test take to write 5GB of data?  Can we
-speed it up by using fallocate, at least for the filesystems that
-support it?
-
-(Aside from that, the rest looks fine to me...)
-
---D
-
-> +
-> +truncate -s $((4 * 1024 * 1024 * 1024)) $junk_file
-> +
-> +block_size=`stat -c '%B' $junk_file`
-> +iblocks_after_truncate=`stat -c '%b' $junk_file`
-> +iblocks_expected=$((4 * 1024 * 1024 * 1024 / $block_size))
-> +
-> +_within_tolerance "Number of allocated blocks after truncate" $iblocks_after_truncate $iblocks_expected 1% -v
-> +
-> +status=0
-> +
-> +exit
-> diff --git a/tests/generic/698.out b/tests/generic/698.out
-> new file mode 100644
-> index 00000000..cbb02d37
-> --- /dev/null
-> +++ b/tests/generic/698.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 698
-> +Number of allocated blocks after truncate is in range
-> -- 
-> 2.37.3
+> --D
+> 
+> > +
+> >  # Prints the md5 checksum of a given file
+> >  _md5_checksum()
+> >  {
+> > -- 
+> > 2.31.1
+> > 
 > 
