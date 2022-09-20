@@ -2,273 +2,125 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1AE7C6FA8B
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Sep 2022 11:50:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EF10ECAAD8
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Sep 2022 14:35:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230119AbiITLuv (ORCPT
+        id S230296AbiITOfg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Sep 2022 07:50:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49404 "EHLO
+        Tue, 20 Sep 2022 10:35:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230148AbiITLuu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2022 07:50:50 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 286896E2CB
-        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 04:50:49 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B9A6161E41
-        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 11:50:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 913D8C433D6;
-        Tue, 20 Sep 2022 11:50:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663674648;
-        bh=7P01kViLloP5KDk//+wrLonkGedcl1Wued56Wjxm96c=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=kMarvxb5ydX2u79K3oKCmHOgwJNG6NGMtcYxT4i4ZgFymVvrjVtYGH9mdIUd7u+fI
-         KhvVUIpRAUCwDCj5l/5ofaUvHXeJO71tNP0vqEPb2xG3sK2usR9JBuJqN5FLlrM+xr
-         Ak3TrgBcdgQO91/A8bP5pTTxs/uXtFYSkQmuzo6EsS24dB3MENp/UWk5lAQemKTeSS
-         cpSaxZYP5yvepZRF2O45EOliBJAsmi+U1qPR4PChi6fCOY2nWyUvOf618QUgkNV+oE
-         RsvWGRugjesshg/AyCSmdhF8QUALFvCMlMnnNql4kp51PemI/a3BpOxi7/lMlAFVMM
-         5euayet62vyeQ==
-From:   Zorro Lang <zlang@kernel.org>
-To:     brauner@kernel.org, fstests@vger.kernel.org
-Cc:     sforshee@digitalocean.com, amir73il@gmail.com, hch@lst.de,
-        cyphar@cyphar.com
-Subject: [PATCH v4 2/2] generic: overlay group ownership changing test
-Date:   Tue, 20 Sep 2022 19:50:35 +0800
-Message-Id: <20220920115035.2472076-3-zlang@kernel.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20220920115035.2472076-1-zlang@kernel.org>
-References: <20220920115035.2472076-1-zlang@kernel.org>
+        with ESMTP id S231297AbiITOff (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2022 10:35:35 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 827BD2F66A
+        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 07:35:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1663684532;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=pqI78RUgjc+DFTKUcUydT8yc6Qi0sfN0Rwsnzb/3giE=;
+        b=aN3OE2kiYvQjWJKxief0DmHVMxmTIyn3J1BkkQjxK/Q663xJdrdeKHcIGhx4wvF6q8PKFQ
+        QoJL5j6bEdaiYx0dYJZe+fjT8NYQ1tvuGC9AnwCsHaFqUo00NB0eyfa5dD7KUaOJDLqrJu
+        BejKk4n0w8lM23jQ3F32Xpu+XQxM4y4=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-607-K4vGQdseP6uSbezH5NeWBw-1; Tue, 20 Sep 2022 10:35:30 -0400
+X-MC-Unique: K4vGQdseP6uSbezH5NeWBw-1
+Received: by mail-qv1-f70.google.com with SMTP id y7-20020ad45307000000b004ac7fd46495so2120837qvr.23
+        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 07:35:30 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
+        bh=pqI78RUgjc+DFTKUcUydT8yc6Qi0sfN0Rwsnzb/3giE=;
+        b=Bph4N6IYldNsyfENS1ee7TnES3c1n0sMmkF1+ru4Ilm36XuONxVnJ/Gzffp7e45sta
+         /QS6KbctWimLc1PztI/f2BWcsJheYCAmyo+9tyBN2WrHL3UatBbprc/KAtk/1kGEYfua
+         rT/zBro3XMvyjTYGofTquYLx6QegHtHb6BUmo8tnPCYwkyjfkPm7Pqej07ppiKbdYQuS
+         GD3VE0UIn+70aeur3b8scCr6A3ucFmMGxQTaXGQ/At5TiLy5S2olhAm5THVVH1xpkozA
+         yvvNAU1NrH0rx4GAu3wtR+LvFHwYiyip3G2zFx0VPX7FTw/LlrjDvsAg9LgCpc8+t2bQ
+         nFGg==
+X-Gm-Message-State: ACrzQf275qczxQWOSRVPF4GsXI5+ROlUWv8fEga0d19dEns5ubkKhNjR
+        dAc+WfD/gbWxhpPh6LdQ+TN38ccFd01bBIZn/IAKCcGkqJz1Llc6ZUk8dgbf4mHz1dDBeGLReC3
+        Z3G4P788sFKIL5As/oA==
+X-Received: by 2002:a05:622a:13c7:b0:35b:ba86:17b1 with SMTP id p7-20020a05622a13c700b0035bba8617b1mr19357859qtk.33.1663684530095;
+        Tue, 20 Sep 2022 07:35:30 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5JtCkPrdiLSct/TPaYaYwwMrj/e9s5pWkxUJuEfMkm80Y3UerBc53dsmM/w/caC9OW7HIuGQ==
+X-Received: by 2002:a05:622a:13c7:b0:35b:ba86:17b1 with SMTP id p7-20020a05622a13c700b0035bba8617b1mr19357840qtk.33.1663684529860;
+        Tue, 20 Sep 2022 07:35:29 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id x22-20020a05620a259600b006ce7316f361sm194539qko.118.2022.09.20.07.35.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 20 Sep 2022 07:35:29 -0700 (PDT)
+Date:   Tue, 20 Sep 2022 22:35:25 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4/044: Add missing check for return value
+Message-ID: <20220920143525.y6o5mf36sczn7rut@zlang-mailbox>
+References: <20220920083810.288984-1-preichl@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220920083810.288984-1-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Christian Brauner <brauner@kernel.org>
+On Tue, Sep 20, 2022 at 10:38:10AM +0200, Pavel Reichl wrote:
+> When calling _within_tolerance either return value or text output
+> should be checked. Otherwise the function is useless for a test.
+> 
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> ---
 
-This's copied from generic/698, extend it to test overlayfs on top of
-idmapped mounts specifically.
+Make sense,
 
-When group ownership is changed a caller whose fsuid owns the inode can
-change the group of the inode to any group they are a member of. When
-searching through the caller's groups we failed to use the gid mapped
-according to the idmapped mount otherwise we fail to change ownership.
-Add a test for this.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
----
- tests/generic/699     | 163 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/699.out |  27 +++++++
- 2 files changed, 190 insertions(+)
- create mode 100755 tests/generic/699
- create mode 100644 tests/generic/699.out
-
-diff --git a/tests/generic/699 b/tests/generic/699
-new file mode 100755
-index 00000000..82e83644
---- /dev/null
-+++ b/tests/generic/699
-@@ -0,0 +1,163 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Christian Brauner (Microsoft).  All Rights Reserved.
-+#
-+# FS QA Test 698
-+#
-+# This's copied from generic/698, extend it to test overlayfs on top of idmapped
-+# mounts specifically.
-+#
-+. ./common/preamble
-+. ./common/overlay
-+_begin_fstest auto quick perms attr idmapped mount
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $SCRATCH_MNT/target-mnt
-+	$UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
-+	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
-+	rm -r -f $tmp.*
-+}
-+
-+# real QA test starts here
-+_supported_fs ^overlay
-+_require_extra_fs overlay
-+_require_scratch
-+_require_chown
-+_require_idmapped_mounts
-+_require_test_program "vfs/mount-idmapped"
-+_require_user fsgqa2
-+_require_group fsgqa2
-+# Do this SECOND so that qa_user is fsgqa, and _user_do uses that account
-+_require_user fsgqa
-+_require_group fsgqa
-+
-+user_foo=`id -u fsgqa`
-+group_foo=`id -g fsgqa`
-+user_bar=`id -u fsgqa2`
-+group_bar=`id -g fsgqa2`
-+
-+setup_tree()
-+{
-+	mkdir -p $SCRATCH_MNT/source-mnt
-+	chmod 0777 $SCRATCH_MNT/source-mnt
-+	touch $SCRATCH_MNT/source-mnt/file1
-+	chown 65534:65534 $SCRATCH_MNT
-+	chown 65534:65534 $SCRATCH_MNT/source-mnt
-+	chown 65534:65535 $SCRATCH_MNT/source-mnt/file1
-+
-+	mkdir -p $SCRATCH_MNT/target-mnt
-+	chmod 0777 $SCRATCH_MNT/target-mnt
-+}
-+
-+# Setup an idmapped mount where uid and gid 65534 are mapped to fsgqa and uid
-+# and gid 65535 are mapped to fsgqa2.
-+setup_idmapped_mnt()
-+{
-+	$here/src/vfs/mount-idmapped \
-+		--map-mount=u:65534:$user_foo:1 \
-+		--map-mount=g:65534:$group_foo:1 \
-+		--map-mount=u:65535:$user_bar:1 \
-+		--map-mount=g:65535:$group_bar:1 \
-+		$SCRATCH_MNT/source-mnt $SCRATCH_MNT/target-mnt
-+}
-+
-+# We've created a layout where fsgqa owns the target file but the group of the
-+# target file is owned by another group. We now test that user fsgqa can change
-+# the group ownership of the file to a group they control. In this case to the
-+# fsgqa group.
-+change_group_ownership()
-+{
-+	local path="$1"
-+
-+	stat -c '%U:%G' $path
-+	_user_do "id -u --name; id -g --name; chgrp $group_foo $path"
-+	stat -c '%U:%G' $path
-+	_user_do "id -u --name; id -g --name; chgrp $group_bar $path > /dev/null 2>&1"
-+	stat -c '%U:%G' $path
-+}
-+
-+lower="$SCRATCH_MNT/target-mnt"
-+upper="$SCRATCH_MNT/ovl-upper"
-+work="$SCRATCH_MNT/ovl-work"
-+merge="$SCRATCH_MNT/ovl-merge"
-+
-+reset_ownership()
-+{
-+	local path="$SCRATCH_MNT/source-mnt/file1"
-+
-+	echo ""
-+	echo "reset ownership"
-+	chown 65534:65534 $path
-+	stat -c '%u:%g' $path
-+	chown 65534:65535 $path
-+	stat -c '%u:%g' $path
-+}
-+
-+# Prepare overlayfs with metacopy turned off.
-+setup_overlayfs_idmapped_lower_metacopy_off()
-+{
-+	mkdir -p $upper $work $merge
-+	_overlay_mount_dirs $lower $upper $work \
-+			    overlay $merge -ometacopy=off || \
-+			    _notrun "overlayfs doesn't support idmappped layers"
-+}
-+
-+# Prepare overlayfs with metacopy turned on.
-+setup_overlayfs_idmapped_lower_metacopy_on()
-+{
-+	mkdir -p $upper $work $merge
-+	_overlay_mount_dirs $lower $upper $work overlay $merge -ometacopy=on
-+}
-+
-+reset_overlayfs()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
-+	rm -rf $upper $work $merge
-+}
-+
-+# Overlayfs can be mounted on top of idmapped layers. Make sure that the basic
-+# test explained in the comment for change_group_ownership() passes with
-+# overlayfs mounted on top of it.
-+# This tests overlayfs with metacopy turned off, i.e., changing a file copies
-+# up data and metadata.
-+run_overlayfs_idmapped_lower_metacopy_off()
-+{
-+	echo ""
-+	echo "overlayfs idmapped lower metacopy off"
-+	change_group_ownership "$SCRATCH_MNT/ovl-merge/file1"
-+	reset_overlayfs
-+	reset_ownership
-+}
-+
-+# Overlayfs can be mounted on top of idmapped layers. Make sure that the basic
-+# test explained in the comment for change_group_ownership() passes with
-+# overlayfs mounted on top of it.
-+# This tests overlayfs with metacopy turned on, i.e., changing a file tries to
-+# only copy up metadata.
-+run_overlayfs_idmapped_lower_metacopy_on()
-+{
-+	echo ""
-+	echo "overlayfs idmapped lower metacopy on"
-+	change_group_ownership "$SCRATCH_MNT/ovl-merge/file1"
-+	reset_overlayfs
-+	reset_ownership
-+}
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+_supports_filetype $SCRATCH_MNT || _notrun "overlayfs test requires d_type"
-+
-+setup_tree
-+setup_idmapped_mnt
-+setup_overlayfs_idmapped_lower_metacopy_off
-+run_overlayfs_idmapped_lower_metacopy_off
-+
-+setup_overlayfs_idmapped_lower_metacopy_on
-+run_overlayfs_idmapped_lower_metacopy_on
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/699.out b/tests/generic/699.out
-new file mode 100644
-index 00000000..e5786d8e
---- /dev/null
-+++ b/tests/generic/699.out
-@@ -0,0 +1,27 @@
-+QA output created by 699
-+
-+overlayfs idmapped lower metacopy off
-+fsgqa:fsgqa2
-+fsgqa
-+fsgqa
-+fsgqa:fsgqa
-+fsgqa
-+fsgqa
-+fsgqa:fsgqa
-+
-+reset ownership
-+65534:65534
-+65534:65535
-+
-+overlayfs idmapped lower metacopy on
-+fsgqa:fsgqa2
-+fsgqa
-+fsgqa
-+fsgqa:fsgqa
-+fsgqa
-+fsgqa
-+fsgqa:fsgqa
-+
-+reset ownership
-+65534:65534
-+65534:65535
--- 
-2.31.1
+>  tests/ext4/044     | 8 +++-----
+>  tests/ext4/044.out | 4 +++-
+>  2 files changed, 6 insertions(+), 6 deletions(-)
+> 
+> diff --git a/tests/ext4/044 b/tests/ext4/044
+> index 158e2ac5..50de5a40 100755
+> --- a/tests/ext4/044
+> +++ b/tests/ext4/044
+> @@ -18,8 +18,6 @@ _require_scratch
+>  _require_test_program "t_get_file_time"
+>  _require_metadata_journaling
+>  
+> -echo "Silence is golden"
+> -
+>  echo "Test timestamps with 256 inode size one device $SCRATCH_DEV" >$seqres.full
+>  _scratch_mkfs -t ext3 -I 256 >> $seqres.full 2>&1
+>  _scratch_mount
+> @@ -49,9 +47,9 @@ nsec_mtime: $nsec_mtime, nsec_ctime: $nsec_ctime, cur_time[ns]: $nsec)"
+>  fi
+>  
+>  # Check difference between file time and current time
+> -_within_tolerance "sec_atime" $sec_atime $sec 1
+> -_within_tolerance "sec_mtime" $sec_mtime $sec 1
+> -_within_tolerance "sec_ctime" $sec_ctime $sec 1
+> +_within_tolerance "sec_atime" $sec_atime $sec 1 -v
+> +_within_tolerance "sec_mtime" $sec_mtime $sec 1 -v
+> +_within_tolerance "sec_ctime" $sec_ctime $sec 1 -v
+>  
+>  _scratch_unmount >> $seqres.full 2>&1
+>  
+> diff --git a/tests/ext4/044.out b/tests/ext4/044.out
+> index 12a61dc4..8a3a8072 100644
+> --- a/tests/ext4/044.out
+> +++ b/tests/ext4/044.out
+> @@ -1,2 +1,4 @@
+>  QA output created by 044
+> -Silence is golden
+> +sec_atime is in range
+> +sec_mtime is in range
+> +sec_ctime is in range
+> -- 
+> 2.37.3
+> 
 
