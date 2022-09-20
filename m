@@ -2,104 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC75FC54EE9
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Sep 2022 04:32:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0E3FC54EE9
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Sep 2022 07:35:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229908AbiITEcw (ORCPT
+        id S230144AbiITHfb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Sep 2022 00:32:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45760 "EHLO
+        Tue, 20 Sep 2022 03:35:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42386 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229839AbiITEcw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2022 00:32:52 -0400
+        with ESMTP id S230153AbiITHfW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2022 03:35:22 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06DE354C84
-        for <fstests@vger.kernel.org>; Mon, 19 Sep 2022 21:32:50 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E30975D0FE
+        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 00:35:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663648370;
+        s=mimecast20190719; t=1663659320;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=WidnTcxe+Q5+zVzIB7PWVz+NQEaL6Q6KEnHU8kE6hA8=;
-        b=hNcqUSESDYcIqHezugcRbtKO5WZFNguTuah1dSeRfIZ6z1Y/+tzXKMtOvbi4V+H+oaS+P4
-        TTjO+6UTU2MRDr/8NsaSC35cLuOnh5Y3tGFhZzZNLEvjuCUUONpsRmADe/5fZfHuxWVuk4
-        vzcntD1072kL80nSuD0WMup8Pld/cZ4=
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
- [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=imjo6QDuippFQitNqOx4XVtygC5zhQSbfNDOJj+GdYU=;
+        b=DshbzxyKiF4mqiqFr/nFulK1AQpDCg4fAa2zbkfowcUeFqqvIZ1fGxOGJcJ1ezL4n2BDY0
+        sDLJzN63ZjORIXD83Gs7W9eQcX9siYsWgQZ5znvP91snf408PIaHownR1T0XfWLWa9105P
+        fKNwdLyCuZ55pMNTI4ItnbhcofqRxP0=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-595-Ejjmy3_jM4SiVM1wm4CSuw-1; Tue, 20 Sep 2022 00:32:48 -0400
-X-MC-Unique: Ejjmy3_jM4SiVM1wm4CSuw-1
-Received: by mail-qt1-f199.google.com with SMTP id g21-20020ac87d15000000b0035bb6f08778so1016930qtb.2
-        for <fstests@vger.kernel.org>; Mon, 19 Sep 2022 21:32:48 -0700 (PDT)
+ us-mta-53-KHqdPuFROiKhtKtBC2Kvvw-1; Tue, 20 Sep 2022 03:35:18 -0400
+X-MC-Unique: KHqdPuFROiKhtKtBC2Kvvw-1
+Received: by mail-ej1-f71.google.com with SMTP id he41-20020a1709073da900b00780bff831ebso880195ejc.6
+        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 00:35:18 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=WidnTcxe+Q5+zVzIB7PWVz+NQEaL6Q6KEnHU8kE6hA8=;
-        b=idvwGU3WWvPvdmExboXRQdZnz6QXxNu2885rDu5Df9PfMZVz4AnwoPkg4tHCtsMG06
-         yGf8exlVH3K+l/c93Y7qj5c5+CcMAPyoSkgxAyz7dQ7QHhOSmtFIU72m0QUHq3A5sVGc
-         BH6kEH8ZkfvIwhyq56cNitK+YsMZHgikb2LctLGYu0uA4PFpvhu1rcECx4c2FtLACSKI
-         VCQvwvqs+p7Hi7/8zbmhzdpTVQ50ge5TMOGRpqCiUdrqx+wa7y2sLdldWWUStOadvV52
-         PiFKeolCKqaY6662Lz5a+k0DcEnmH2t+c5v3JrKKZgZOoyBR9B59E0gd2vx6gtTPcABb
-         RyOw==
-X-Gm-Message-State: ACrzQf1RmvOdLMqbfp+qxyf+QAGiJR4qX042wQGtE+dXiqLvVtmWaQ27
-        rUbuYmESxQRzuHlqUXpi2EC23RZP7fdvrU2UekS1e8xFyO09NNrTwZl/ymhTEQghIxzgK2Ls1mY
-        duxQaEnTRlide3F+4ww==
-X-Received: by 2002:a05:6214:da6:b0:4ad:552e:5216 with SMTP id h6-20020a0562140da600b004ad552e5216mr2883547qvh.116.1663648368209;
-        Mon, 19 Sep 2022 21:32:48 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM54HB5EazCOG+lz7ICkY12NR+gpX3RJnKI0z5H3+ERpIOmqhVZ2KBexYovE2928r1F3e0K0oA==
-X-Received: by 2002:a05:6214:da6:b0:4ad:552e:5216 with SMTP id h6-20020a0562140da600b004ad552e5216mr2883539qvh.116.1663648368008;
-        Mon, 19 Sep 2022 21:32:48 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id k6-20020a05620a414600b006ce813bb306sm281689qko.125.2022.09.19.21.32.46
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date;
+        bh=imjo6QDuippFQitNqOx4XVtygC5zhQSbfNDOJj+GdYU=;
+        b=6B1syTYyEtebbvjVqu8EynKs6dWpWosEPgRU8L2nZbennpejSUl+DEY5Eu9Rq2K4Fe
+         jRR9jsggYK1JcSI1NhtUboNWLbAnvOp/1lniH/+lvbFawYb7OOsLTWzhvGWiEOAfJoE4
+         ltKyD5P5BAgZkSGwq7DRrrxmYkPYkShvgwNMgGeJKAH8WeWLPaDx9fgNRRokMRQ2hYp3
+         CYg1voCeZcDnI/sVXsmjtVPTlNjjZxesFV+rXNutvTV8T1syExSsGHvtaMD+HC6MeqsA
+         i5j396oQYX+YP6YIuo3tx7YozM0yKlRIi5g6sleVgRdZaMFVC6b4ChY3l2e9E+5qnLxU
+         Wxlw==
+X-Gm-Message-State: ACrzQf19R9kUJFQqY8VMv607iaoinfnn3/CvW1FZgrK/99Tk+b6TJJRJ
+        OLwj87f8hkQaXGUFTczdV9Ny4kaBjJ1A66tp3sZSbF7OlJ+oAZJE83zruq40dzOYchrwPGchPsH
+        VUQ2+4t/qi2JDlEXTta2DwhRe6kwHkpM5ej7NR93G8nWUTD4H6uX6UKRY6qUlhCwbiTnF
+X-Received: by 2002:a17:907:16a5:b0:77c:e0f0:1f25 with SMTP id hc37-20020a17090716a500b0077ce0f01f25mr15478301ejc.217.1663659316816;
+        Tue, 20 Sep 2022 00:35:16 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM4EPodk1gi+T7JvAA8Ft4EK+ned/N+lj8WwdxlXhK8A0istOyN8pjPOg8wB2ref49rXnZoJMw==
+X-Received: by 2002:a17:907:16a5:b0:77c:e0f0:1f25 with SMTP id hc37-20020a17090716a500b0077ce0f01f25mr15478288ejc.217.1663659316595;
+        Tue, 20 Sep 2022 00:35:16 -0700 (PDT)
+Received: from localhost.localdomain (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
+        by smtp.gmail.com with ESMTPSA id y8-20020a50e608000000b0043d1eff72b3sm733479edm.74.2022.09.20.00.35.15
+        for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Sep 2022 21:32:47 -0700 (PDT)
-Date:   Tue, 20 Sep 2022 12:32:43 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] common/quota: fix grep pattern
-Message-ID: <20220920043243.cx42bsa5xyr3skfq@zlang-mailbox>
-References: <20220920031951.2098839-1-jencce.kernel@gmail.com>
- <20220920031951.2098839-2-jencce.kernel@gmail.com>
+        Tue, 20 Sep 2022 00:35:15 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v3 0/2] generic: test i_blocks for truncated largefiles
+Date:   Tue, 20 Sep 2022 09:35:12 +0200
+Message-Id: <20220920073514.285136-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.37.3
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220920031951.2098839-2-jencce.kernel@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 20, 2022 at 11:19:51AM +0800, Murphy Zhou wrote:
-> The second dash is not needed now. Newer grep is complaining:
-> +grep: warning: stray \ before -
-> 
-> Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
-> ---
-> v1-->v2:
-> 	Using -- option.
+Please see next revision of the patch set.
+Please do not hesitate with proposing better name than
+create_sizedfile() or better place for its definition.
+Thank you.
 
-Good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+*Time taken before falloc optimization to run on my system*
 
-> 
->  common/quota | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/quota b/common/quota
-> index 22be3c69..24251d09 100644
-> --- a/common/quota
-> +++ b/common/quota
-> @@ -218,7 +218,7 @@ _qmount()
->          quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
->          quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
->          # try to turn on project quota if it's supported
-> -        if quotaon --help 2>&1 | grep -q '\-\-project'; then
-> +        if quotaon --help 2>&1 | grep -q -- '--project'; then
->              quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
->          fi
->      fi
-> -- 
-> 2.31.1
-> 
+* fs: ext2
+generic/694 8s ...  7s
+generic/698 9s ...  10s
+Passed all 2 tests
+* fs: xfs
+generic/694 7s ...  11s
+generic/698 10s ...  7s
+Passed all 2 tests
+* fs: btrfs
+generic/694 11s ...  6s
+generic/698 7s ...  7s
+Passed all 2 tests
+* fs: exfat
+generic/694 6s ...  8s
+generic/698 7s ...  9s
+Passed all 2 tests
+
+*With falloc optimization in place*
+
+* fs: ext2
+generic/694 8s ...  7s
+generic/698 9s ...  7s
+Passed all 2 tests
+* fs: xfs
+generic/694 7s ...  0s
+generic/698 7s ...  0s
+Passed all 2 tests
+* fs: btrfs
+generic/694 0s ...  0s
+generic/698 0s ...  1s
+Passed all 2 tests
+* fs: exfat
+generic/694 0s ...  8s
+generic/698 1s ...  9s
+Passed all 2 tests
+[preichl@f32 xfstests-dev]$ 
+
+
+V3
+* introduced create_sizedfile() helper
+* amended g/694 and g/698 to utilize this helper
+
+Pavel Reichl (2):
+  common: new helper to alloacate fixed size files
+  generic: test i_blocks for truncated large files
+
+ common/rc             | 13 ++++++++++++
+ tests/generic/694     |  2 +-
+ tests/generic/698     | 47 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/698.out |  2 ++
+ 4 files changed, 63 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/698
+ create mode 100644 tests/generic/698.out
+
+-- 
+2.37.3
 
