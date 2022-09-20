@@ -2,43 +2,43 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47BF1ECAAD8
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1AE7C6FA8B
 	for <linux-fstests@archiver.kernel.org>; Tue, 20 Sep 2022 11:50:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230333AbiITLuu (ORCPT
+        id S230119AbiITLuv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Sep 2022 07:50:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49402 "EHLO
+        Tue, 20 Sep 2022 07:50:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230119AbiITLut (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2022 07:50:49 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B92B474375
-        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 04:50:48 -0700 (PDT)
+        with ESMTP id S230148AbiITLuu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Sep 2022 07:50:50 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 286896E2CB
+        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 04:50:49 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 710EDB8285C
-        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 11:50:47 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8581BC433B5;
-        Tue, 20 Sep 2022 11:50:44 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B9A6161E41
+        for <fstests@vger.kernel.org>; Tue, 20 Sep 2022 11:50:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 913D8C433D6;
+        Tue, 20 Sep 2022 11:50:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663674646;
-        bh=2QMcO+p/LyW1MZAZS0Dx8hesT1Jpcnb7urwzXd+wwrc=;
+        s=k20201202; t=1663674648;
+        bh=7P01kViLloP5KDk//+wrLonkGedcl1Wued56Wjxm96c=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=P+AvLeUe8S1cRA1Vf5ZklNIyoD8HioyolG14Ql0IoibyWKbmFI2mgJyD/53KP54gO
-         oBoO1XRMChlIgGzOBeyu6ZLloAOtfcuf/j2uZiyx1+3MhciTY+nE3W/zVMvvPMnVjc
-         06VZVkRN8kDgnLqmPLLfZ5PMZkXM6TaxUrqYGZ31VcMbWIC4GQKxSxtBdIYPklzq/x
-         A9vc1yEBOZoc9yvZbWVxSe8MhT8wFfWlwdQPg7qKYzygkfLZjNdTM4Ec2O05q9MsMl
-         hOkRanaUMMJ8XaEMArPsCrs67ao3ku9XJQuJAaBH0kmT9O0Zuudxa1kKuUoBuipgBb
-         0lcy4ZzX5RVhg==
+        b=kMarvxb5ydX2u79K3oKCmHOgwJNG6NGMtcYxT4i4ZgFymVvrjVtYGH9mdIUd7u+fI
+         KhvVUIpRAUCwDCj5l/5ofaUvHXeJO71tNP0vqEPb2xG3sK2usR9JBuJqN5FLlrM+xr
+         Ak3TrgBcdgQO91/A8bP5pTTxs/uXtFYSkQmuzo6EsS24dB3MENp/UWk5lAQemKTeSS
+         cpSaxZYP5yvepZRF2O45EOliBJAsmi+U1qPR4PChi6fCOY2nWyUvOf618QUgkNV+oE
+         RsvWGRugjesshg/AyCSmdhF8QUALFvCMlMnnNql4kp51PemI/a3BpOxi7/lMlAFVMM
+         5euayet62vyeQ==
 From:   Zorro Lang <zlang@kernel.org>
 To:     brauner@kernel.org, fstests@vger.kernel.org
 Cc:     sforshee@digitalocean.com, amir73il@gmail.com, hch@lst.de,
         cyphar@cyphar.com
-Subject: [PATCH v4 1/2] generic: basic group ownership changing test
-Date:   Tue, 20 Sep 2022 19:50:34 +0800
-Message-Id: <20220920115035.2472076-2-zlang@kernel.org>
+Subject: [PATCH v4 2/2] generic: overlay group ownership changing test
+Date:   Tue, 20 Sep 2022 19:50:35 +0800
+Message-Id: <20220920115035.2472076-3-zlang@kernel.org>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20220920115035.2472076-1-zlang@kernel.org>
 References: <20220920115035.2472076-1-zlang@kernel.org>
@@ -50,54 +50,55 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Christian Brauner <brauner@kernel.org>
 
-When group ownership is changed a caller whose fsuid owns the inode
-can change the group of the inode to any group they are a member of.
-When searching through the caller's groups we failed to use the gid
-mapped according to the idmapped mount otherwise we fail to change
-ownership. Add a test for this.
+This's copied from generic/698, extend it to test overlayfs on top of
+idmapped mounts specifically.
+
+When group ownership is changed a caller whose fsuid owns the inode can
+change the group of the inode to any group they are a member of. When
+searching through the caller's groups we failed to use the gid mapped
+according to the idmapped mount otherwise we fail to change ownership.
+Add a test for this.
 
 Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
 ---
- tests/generic/698     | 117 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/698.out |  19 +++++++
- 2 files changed, 136 insertions(+)
- create mode 100755 tests/generic/698
- create mode 100644 tests/generic/698.out
+ tests/generic/699     | 163 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/699.out |  27 +++++++
+ 2 files changed, 190 insertions(+)
+ create mode 100755 tests/generic/699
+ create mode 100644 tests/generic/699.out
 
-diff --git a/tests/generic/698 b/tests/generic/698
+diff --git a/tests/generic/699 b/tests/generic/699
 new file mode 100755
-index 00000000..143490b2
+index 00000000..82e83644
 --- /dev/null
-+++ b/tests/generic/698
-@@ -0,0 +1,117 @@
++++ b/tests/generic/699
+@@ -0,0 +1,163 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2022 Christian Brauner (Microsoft).  All Rights Reserved.
 +#
 +# FS QA Test 698
 +#
-+# Test that users can changed group ownership of a file they own to a group
-+# they are a member of.
-+#
-+# Regression test for commit:
-+# 168f91289340 ("fs: account for group membership")
++# This's copied from generic/698, extend it to test overlayfs on top of idmapped
++# mounts specifically.
 +#
 +. ./common/preamble
++. ./common/overlay
 +_begin_fstest auto quick perms attr idmapped mount
 +
 +# Override the default cleanup function.
 +_cleanup()
 +{
 +	cd /
-+	$UMOUNT_PROG $SCRATCH_MNT/target-mnt 2>/dev/null
++	$UMOUNT_PROG $SCRATCH_MNT/target-mnt
++	$UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
 +	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
 +	rm -r -f $tmp.*
 +}
 +
 +# real QA test starts here
-+_supported_fs generic
-+_fixed_by_kernel_commit 168f91289340 \
-+	"fs: account for group membership"
++_supported_fs ^overlay
++_require_extra_fs overlay
 +_require_scratch
 +_require_chown
 +_require_idmapped_mounts
@@ -153,49 +154,97 @@ index 00000000..143490b2
 +	stat -c '%U:%G' $path
 +}
 +
-+run_base_test()
++lower="$SCRATCH_MNT/target-mnt"
++upper="$SCRATCH_MNT/ovl-upper"
++work="$SCRATCH_MNT/ovl-work"
++merge="$SCRATCH_MNT/ovl-merge"
++
++reset_ownership()
 +{
-+	mkdir -p $SCRATCH_MNT/source-mnt
-+	chmod 0777 $SCRATCH_MNT/source-mnt
-+	touch $SCRATCH_MNT/source-mnt/file1
-+	chown $user_foo:$group_foo $SCRATCH_MNT
-+	chown $user_foo:$group_foo $SCRATCH_MNT/source-mnt
-+	chown $user_foo:$group_bar $SCRATCH_MNT/source-mnt/file1
++	local path="$SCRATCH_MNT/source-mnt/file1"
 +
 +	echo ""
-+	echo "base test"
-+	change_group_ownership "$SCRATCH_MNT/source-mnt/file1"
-+	rm -rf "$SCRATCH_MNT/source-mnt"
++	echo "reset ownership"
++	chown 65534:65534 $path
++	stat -c '%u:%g' $path
++	chown 65534:65535 $path
++	stat -c '%u:%g' $path
 +}
 +
-+# Basic test as explained in the comment for change_group_ownership().
-+run_idmapped_test()
++# Prepare overlayfs with metacopy turned off.
++setup_overlayfs_idmapped_lower_metacopy_off()
++{
++	mkdir -p $upper $work $merge
++	_overlay_mount_dirs $lower $upper $work \
++			    overlay $merge -ometacopy=off || \
++			    _notrun "overlayfs doesn't support idmappped layers"
++}
++
++# Prepare overlayfs with metacopy turned on.
++setup_overlayfs_idmapped_lower_metacopy_on()
++{
++	mkdir -p $upper $work $merge
++	_overlay_mount_dirs $lower $upper $work overlay $merge -ometacopy=on
++}
++
++reset_overlayfs()
++{
++	$UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
++	rm -rf $upper $work $merge
++}
++
++# Overlayfs can be mounted on top of idmapped layers. Make sure that the basic
++# test explained in the comment for change_group_ownership() passes with
++# overlayfs mounted on top of it.
++# This tests overlayfs with metacopy turned off, i.e., changing a file copies
++# up data and metadata.
++run_overlayfs_idmapped_lower_metacopy_off()
 +{
 +	echo ""
-+	echo "base idmapped test"
-+	change_group_ownership "$SCRATCH_MNT/target-mnt/file1"
++	echo "overlayfs idmapped lower metacopy off"
++	change_group_ownership "$SCRATCH_MNT/ovl-merge/file1"
++	reset_overlayfs
++	reset_ownership
++}
++
++# Overlayfs can be mounted on top of idmapped layers. Make sure that the basic
++# test explained in the comment for change_group_ownership() passes with
++# overlayfs mounted on top of it.
++# This tests overlayfs with metacopy turned on, i.e., changing a file tries to
++# only copy up metadata.
++run_overlayfs_idmapped_lower_metacopy_on()
++{
++	echo ""
++	echo "overlayfs idmapped lower metacopy on"
++	change_group_ownership "$SCRATCH_MNT/ovl-merge/file1"
++	reset_overlayfs
++	reset_ownership
 +}
 +
 +_scratch_mkfs >> $seqres.full
 +_scratch_mount
++_supports_filetype $SCRATCH_MNT || _notrun "overlayfs test requires d_type"
 +
-+run_base_test
 +setup_tree
 +setup_idmapped_mnt
-+run_idmapped_test
++setup_overlayfs_idmapped_lower_metacopy_off
++run_overlayfs_idmapped_lower_metacopy_off
++
++setup_overlayfs_idmapped_lower_metacopy_on
++run_overlayfs_idmapped_lower_metacopy_on
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/698.out b/tests/generic/698.out
+diff --git a/tests/generic/699.out b/tests/generic/699.out
 new file mode 100644
-index 00000000..519234b5
+index 00000000..e5786d8e
 --- /dev/null
-+++ b/tests/generic/698.out
-@@ -0,0 +1,19 @@
-+QA output created by 698
++++ b/tests/generic/699.out
+@@ -0,0 +1,27 @@
++QA output created by 699
 +
-+base test
++overlayfs idmapped lower metacopy off
 +fsgqa:fsgqa2
 +fsgqa
 +fsgqa
@@ -204,7 +253,11 @@ index 00000000..519234b5
 +fsgqa
 +fsgqa:fsgqa
 +
-+base idmapped test
++reset ownership
++65534:65534
++65534:65535
++
++overlayfs idmapped lower metacopy on
 +fsgqa:fsgqa2
 +fsgqa
 +fsgqa
@@ -212,6 +265,10 @@ index 00000000..519234b5
 +fsgqa
 +fsgqa
 +fsgqa:fsgqa
++
++reset ownership
++65534:65534
++65534:65535
 -- 
 2.31.1
 
