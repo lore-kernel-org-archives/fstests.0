@@ -2,177 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D495ECAAD8
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Sep 2022 07:10:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F7CEC32771
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Sep 2022 14:10:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229822AbiIUHKX (ORCPT
+        id S229830AbiIUOKt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Sep 2022 03:10:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46054 "EHLO
+        Wed, 21 Sep 2022 10:10:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229892AbiIUHJq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Sep 2022 03:09:46 -0400
-Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 628B7832F2;
-        Wed, 21 Sep 2022 00:09:04 -0700 (PDT)
-Received: by mail-pf1-x42b.google.com with SMTP id w2so5086576pfb.0;
-        Wed, 21 Sep 2022 00:09:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=EVNWmBaqdWDxG2j2tyHGp3VW7fxSk1kOCKqU1yn/NYc=;
-        b=Q9Wyr6FA5NPOU2cj4JdASgo69Lq2aHs2N/43ME1FzoUOgU0shdoCgTjWFkNvRDwBzs
-         OGp7cFJS/fdn2UWLnSNemcGgTX8S8lYOCjIV2frrUuCCGioDqRubRflL/Veaio9sTWCQ
-         OUSdHYhN4INhm+sLSq4IiGjUQUqaZa1WDNmkC/tIl1r/mT8RGjK7ZHsESLiF+SKNJJQQ
-         vekqJfYusTZyd9zB5IYkqVcWIFjUnums0sBlXKsyozKGzK7YEi9RKx8p03IritiTvLkk
-         7gc9NNMpmTr1uMwPnHj0iGV9SjfiuCI+6vhw7py+JTupvIz12Zc0eKv1YzGLPhhnOGco
-         YDjw==
+        with ESMTP id S229971AbiIUOKl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Sep 2022 10:10:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4CE78E4F2
+        for <fstests@vger.kernel.org>; Wed, 21 Sep 2022 07:10:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1663769431;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Kj8xYkIG9PGl97JchHJj7VNuyYhDeHnjp5dkeNas5iY=;
+        b=BryaB5LE+PL6z9mtgohrRK+KUAX/jjHIwzMV66IxyehTeDbPcDy6xWwFXT+Ow2to4DBssK
+        EqPbTk3q2KLvknvpCAwzjORLxYe3F1tMv0CGqsxM2HidISi419CaKp1iccs89+POLyg3Wk
+        NuyJfv8GVjzfMXzP0Uq+sEBnqmafn6Y=
+Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
+ [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-671-x8ZJS1MlNYeYTwOveVNBtg-1; Wed, 21 Sep 2022 10:10:29 -0400
+X-MC-Unique: x8ZJS1MlNYeYTwOveVNBtg-1
+Received: by mail-ed1-f71.google.com with SMTP id dz21-20020a0564021d5500b0045217702048so4483115edb.5
+        for <fstests@vger.kernel.org>; Wed, 21 Sep 2022 07:10:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=EVNWmBaqdWDxG2j2tyHGp3VW7fxSk1kOCKqU1yn/NYc=;
-        b=5sGYM5if5DlWfDj7B/FRmhr15K2pKpDvRi+EQFNsL1RGdwj8dSZOI2sOAuoE7W5gHh
-         KWowW45bX003sKri441H9heNfvjd19hnos6Un8Xgz59w572kS62RPmfDuA5OUqHo0wJ8
-         KRu4TpJcBoPI3Mdr4HNxcYox6KlUc+6bkK9l29MJx9FYotLL7b01MxxqQrehCIsK8ipU
-         HeS/YiMuJIwtv9chzVDaLk+k0r+gov147xJdETQB3LXTODYKqeTB15hQrcd58af84k47
-         04r87IGFDP5lZZjwhkXzYUHmj8EikdhF/dAcxx/QF5Vyqgyeagv1Micu1AYWJfT6HMbs
-         k8qg==
-X-Gm-Message-State: ACrzQf08awaN/XwM2agQZ2OYByXfyQb31hWXoGV6c1h4xeG8Oe2Lx9B/
-        3vwhTsg5K26igthX+Mp3jA7V0I5RSnWdNMzmvrw=
-X-Google-Smtp-Source: AMsMyM5Th9KE4RmHUd0kMp0a9l6vqBrYYawaTz1pNWnjqLbVnlQyjc129zCvC/v5nrJrFNZfeOrId4Z4B+ytc0lEB8E=
-X-Received: by 2002:a63:c06:0:b0:439:9b18:8574 with SMTP id
- b6-20020a630c06000000b004399b188574mr23101040pgl.608.1663744143394; Wed, 21
- Sep 2022 00:09:03 -0700 (PDT)
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date;
+        bh=Kj8xYkIG9PGl97JchHJj7VNuyYhDeHnjp5dkeNas5iY=;
+        b=QMeMmkXls6PzA3BiOmx7AyQzlkd9rHj5otuQnSpRUmJguaPwBGnkG0BLPCxUOaYT5l
+         IgvIUE3Y+3V2ICk6Im/9YXc4jqkqeX3esedfcxMK1m6cC1+daKADUGKusa6YV93ClzSi
+         yJGtXCaHdrPJ2iTbPTLqFE77sru4BUTfPO15UjsiTELIjfK0fWV6gE8vMDQeAuQMVHev
+         /13ugv/GztfLeR0+KYf2Lndr1mjhV8+lrVm4xWjEENcSdWUqv8Maka/WBwvWrBFlOeS0
+         KP95/GsTL1P98pHAAAA7eyXPZv1sw5c50APR0Zmf7+ZKdbu8QITROcfBE6qhlpFD2IHP
+         xX4Q==
+X-Gm-Message-State: ACrzQf2DCQD89jJnC3n++pbDqFPjI2VzqpbqlCEtpVZ0Uafrnct0WALH
+        NLlp2hSQYcnmaVwYLbxxF07AB6USJf+2nQ3gbPUFaznd1ac5POa8cSzRx6ppNhs+/BaKaUuurrd
+        NmvNEgscKXx8nxmeDVYUzwReJohcme/H0kBQvpT6GR9UzW88MvuQBnZIHta311BydTLk6
+X-Received: by 2002:a17:907:970f:b0:781:de97:9a42 with SMTP id jg15-20020a170907970f00b00781de979a42mr5279305ejc.81.1663769427672;
+        Wed, 21 Sep 2022 07:10:27 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7jfVCVtr6vunI3PHre0jdjzB9AVDqW/IIUNnQBb4FN2JCecCz51BbFBVi6gKhcJKN5ebAmFw==
+X-Received: by 2002:a17:907:970f:b0:781:de97:9a42 with SMTP id jg15-20020a170907970f00b00781de979a42mr5279293ejc.81.1663769427403;
+        Wed, 21 Sep 2022 07:10:27 -0700 (PDT)
+Received: from localhost.localdomain (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
+        by smtp.gmail.com with ESMTPSA id mf24-20020a170906cb9800b0077fc446aaf6sm1273400ejb.202.2022.09.21.07.10.26
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 Sep 2022 07:10:26 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v4 0/2] test i_blocks for truncated largefiles
+Date:   Wed, 21 Sep 2022 16:10:23 +0200
+Message-Id: <20220921141025.920599-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.37.3
 MIME-Version: 1.0
-References: <CADJHv_vX+7tONjguTw8ZgyV9uE=OW=RtZQ_FdF2-ViGaxQbzYw@mail.gmail.com>
- <20220902015018.4036984-1-zlang@kernel.org>
-In-Reply-To: <20220902015018.4036984-1-zlang@kernel.org>
-From:   Murphy Zhou <jencce.kernel@gmail.com>
-Date:   Wed, 21 Sep 2022 15:08:51 +0800
-Message-ID: <CADJHv_tmwP-8_P+GcBf+m3TFehNRPasr3BzX0G9=Rgx3XaF4zA@mail.gmail.com>
-Subject: Re: [PATCH v4] generic: new test to verify selinux label of whiteout inode
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good to me!
+Hello,
 
-Regards~
+Zorro, Darick - thank you for your comments. Please see next revision.
 
-On Fri, Sep 2, 2022 at 9:59 AM Zorro Lang <zlang@kernel.org> wrote:
->
-> A bug on XFS cause renameat2() with flags=RENAME_WHITEOUT doesn't
-> apply an selinux label. That's quite different with other fs (e.g.
-> ext4, tmpfs).
->
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
->
-> V3 -> V4:
-> 1) Fix a typo
-> 2) replace `` with $()
->
-> V2 -> V3:
-> Rebase to latest fstests for-next branch again
->
-> V1 -> V2:
-> 1) Add "whiteout" group
-> 2) Add commit ID which fix that bug
-> 3) Rebase to latest fstests for-next branch
->
-> Thanks,
-> Zorro
->
->
->  tests/generic/695     | 64 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/695.out |  2 ++
->  2 files changed, 66 insertions(+)
->  create mode 100755 tests/generic/695
->  create mode 100644 tests/generic/695.out
->
-> diff --git a/tests/generic/695 b/tests/generic/695
-> new file mode 100755
-> index 00000000..3f65020a
-> --- /dev/null
-> +++ b/tests/generic/695
-> @@ -0,0 +1,64 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Red Hat, Copyright.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 695
-> +#
-> +# Verify selinux label can be kept after RENAME_WHITEOUT. This is
-> +# a regression test for:
-> +#   70b589a37e1a ("xfs: add selinux labels to whiteout inodes")
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rename attr whiteout
-> +
-> +# Import common functions.
-> +. ./common/attr
-> +. ./common/renameat2
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_scratch
-> +_require_attrs
-> +_require_renameat2 whiteout
-> +
-> +_fixed_by_kernel_commit 70b589a37e1a \
-> +       xfs: add selinux labels to whiteout inodes
-> +
-> +get_selinux_label()
-> +{
-> +       local label
-> +
-> +       label=$(_getfattr --absolute-names -n security.selinux $@ | sed -n 's/security.selinux=\"\(.*\)\"/\1/p')
-> +       if [ ${PIPESTATUS[0]} -ne 0 -o -z "$label" ];then
-> +               _fail "Fail to get selinux label: $label"
-> +       fi
-> +       echo $label
-> +}
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +# SELINUX_MOUNT_OPTIONS will be set in common/config if selinux is enabled
-> +if [ -z "$SELINUX_MOUNT_OPTIONS" ]; then
-> +       _notrun "Require selinux to be enabled"
-> +fi
-> +# This test need to verify selinux labels in objects, so unset this selinux
-> +# mount option
-> +export SELINUX_MOUNT_OPTIONS=""
-> +_scratch_mount
-> +
-> +touch $SCRATCH_MNT/f1
-> +echo "Before RENAME_WHITEOUT" >> $seqres.full
-> +ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
-> +# Expect f1 and f2 have same label after RENAME_WHITEOUT
-> +$here/src/renameat2 -w $SCRATCH_MNT/f1 $SCRATCH_MNT/f2
-> +echo "After RENAME_WHITEOUT" >> $seqres.full
-> +ls -lZ $SCRATCH_MNT >> $seqres.full 2>&1
-> +label1=$(get_selinux_label $SCRATCH_MNT/f1)
-> +label2=$(get_selinux_label $SCRATCH_MNT/f2)
-> +if [ "$label1" != "$label2" ];then
-> +       echo "$label1 != $label2"
-> +fi
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/695.out b/tests/generic/695.out
-> new file mode 100644
-> index 00000000..1332ff16
-> --- /dev/null
-> +++ b/tests/generic/695.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 695
-> +Silence is golden
-> --
-> 2.31.1
->
+V3
+* introduced create_sizedfile() helper
+* amended g/694 and g/698 to utilize this helper
+
+V4
+* copy-pasted the helper as suggested by Zorro (just proposed a different comment)
+* updated the tests to use it and check its return value
+* added _fixed_by_kernel_commit directive into g/694
+
+
+Pavel Reichl (2):
+  common: new helper to alloacate fixed size files
+  generic: test i_blocks for truncated large files
+
+ common/rc             | 22 +++++++++++++++++++
+ tests/generic/694     |  8 ++++++-
+ tests/generic/698     | 51 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/698.out |  2 ++
+ 4 files changed, 82 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/698
+ create mode 100644 tests/generic/698.out
+
+-- 
+2.37.3
+
