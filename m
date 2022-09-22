@@ -2,186 +2,111 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C54BDC6FA82
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 14:36:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88D39C6FA82
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 14:46:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229893AbiIVOgt (ORCPT
+        id S229901AbiIVOqT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Sep 2022 10:36:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35782 "EHLO
+        Thu, 22 Sep 2022 10:46:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54744 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231411AbiIVOgq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 10:36:46 -0400
+        with ESMTP id S229970AbiIVOqS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 10:46:18 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9662F685D
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 07:36:45 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A08D4EFF78
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 07:46:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663857404;
+        s=mimecast20190719; t=1663857976;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=IdlimTdqnU7cx3fIabOIXWxNClfLh7yHsmII1GdaRLA=;
-        b=MgKXCT8h9GXKEGs5iYiK5hOQRhWSIDA2Yvs4wnj67MztE88j+Fr4ABmTFXJ9wSnDvING0X
-        yDaE2S0YUhuUBFes5n0xvN7UQC/xW2SEiGGSO+JrG1B8K+KfF2IbvhwnKI7JYJSMf/pox/
-        OhyeUbiroZEVurqh6QYzPpMLjql/iFQ=
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
- [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=hK8OkEI13YlbZtz/gy30d7umxiu2huJuyfljlK4FQnk=;
+        b=HwFPxL3sf9rv124ilMtiVOxlmlDI2Qj/SGtdIlMx9fGZvXbx3EYsi4PF2+YocsCqwUNjT/
+        gX4vvSOevS/thXtnmbFME0OhZdOfulPViRS112SYlOXb37eOQObXLGOIeZ1TclxL5UcGaN
+        SsoItGWYjQsKwMu1UwbxVWIVewAhHTY=
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
+ [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-570-Hmj3spTFNlapsPne9-Qf7w-1; Thu, 22 Sep 2022 10:36:43 -0400
-X-MC-Unique: Hmj3spTFNlapsPne9-Qf7w-1
-Received: by mail-qt1-f199.google.com with SMTP id h7-20020ac85047000000b0035a6794699bso6513670qtm.3
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 07:36:43 -0700 (PDT)
+ us-mta-652-Wks6zyuFMq6oo45j9V8T4A-1; Thu, 22 Sep 2022 10:46:13 -0400
+X-MC-Unique: Wks6zyuFMq6oo45j9V8T4A-1
+Received: by mail-qt1-f198.google.com with SMTP id fz10-20020a05622a5a8a00b0035ce18717daso6515899qtb.11
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 07:46:11 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=IdlimTdqnU7cx3fIabOIXWxNClfLh7yHsmII1GdaRLA=;
-        b=xt2ZywJIdz+1PsUqLRt2V7ZhGRnjIapTNkSOWlidZedpmdLytTvi12aU9L/5s8igUu
-         d8gxXHlwUnEpYI1T2ovrpJSXRsH8Acb1vPlqb9OXPjjxMTNGw9BQxeSBlP8bSsxDx243
-         TtJ0DLA/g7QtvB42fpykEa5fEcsNgKjFZJNHFDDBCEM1lAB+pDK397x33dKMjNd8XsaP
-         GX1Tx23BNto+eubpqxnCNFFc+BJM85ghWMY9YpEJlsLBUfC8jtdfKuWg3wrmjRGP3cx4
-         8LZgAXKXFtqB43QAWPTE51Ml7HsQCZ6Bw/XRyrpRb/FNJtioRyo/isCuYVIfSuwrMO2f
-         Vy4Q==
-X-Gm-Message-State: ACrzQf34iPujL2cE9SGsKeHEOWiSt8lwiL2J/wbHlj1wr5Yl1a3rRwxa
-        3llLQZw+1GCshT5jcQ+yEcgxiD8TGfZqT5WhJQ7LJqnSOUvYEGiZg+c6Dqh4rFDJT+VQMH1OFs7
-        YlBglp4fDNIvdwR9JWg==
-X-Received: by 2002:a05:622a:178c:b0:35b:b8cc:e711 with SMTP id s12-20020a05622a178c00b0035bb8cce711mr3031503qtk.111.1663857402925;
-        Thu, 22 Sep 2022 07:36:42 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5OWNy9EXCDdbT5fHCzejEOIrmo+Sqkfkvp9fmYOC51u/vPYWBMpaeDBKgTLcA3HUXiiWFgFQ==
-X-Received: by 2002:a05:622a:178c:b0:35b:b8cc:e711 with SMTP id s12-20020a05622a178c00b0035bb8cce711mr3031472qtk.111.1663857402601;
-        Thu, 22 Sep 2022 07:36:42 -0700 (PDT)
+        bh=hK8OkEI13YlbZtz/gy30d7umxiu2huJuyfljlK4FQnk=;
+        b=57nScs1F+4dyp7jM6AptkMnXoY5KQ7ITULA+wzP+lJjchmH3edWiq4YcG6WYfLiDJG
+         R4TugH8tw9jI570hQ+K/eAhH1XFarY38r3q0YU67I8T8xGdFtZcA4YCT1jHSKWioFtg9
+         69lJCmoiceuDtpafVS1xwPvHjiZX+TY+5hGXRvIvqoxCkKV7NyagLto4Lb6ZAVU4edVs
+         p5muUAL+7BZb0iqh6MShrdSmIvMKG3MLcC1XYtE7CJrLneTsselzbxiEK1YHd8YWsH0N
+         UA5EzD6MODdfGySN5ULIqAVHYPRsbtEUHnQ6LPKpZIdu226CSl4Hp6cfCFDpwO+zAISD
+         MgYw==
+X-Gm-Message-State: ACrzQf1dqHkdOSa0YPw9YrgwCeIIGfAAqBFjOw39IkV3ywvC86xRLvTQ
+        gfMvV4cxahpyIK30ZM2QxKAwb1RVHhVOXxL/FNbAhUIGKyHHhnTTJxT28AtWQBE56DMq7F65RQd
+        OJPGc0KhW/Fi75qv2yw==
+X-Received: by 2002:a05:6214:4112:b0:4ac:6d95:1037 with SMTP id kc18-20020a056214411200b004ac6d951037mr2839872qvb.14.1663857971357;
+        Thu, 22 Sep 2022 07:46:11 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM53o3SlOHx3Zvy78iJLgK6SYivPzWgezmCEKJjogFy5a8aAuXp5iupYiEy0MCYbX99PKN23AA==
+X-Received: by 2002:a05:6214:4112:b0:4ac:6d95:1037 with SMTP id kc18-20020a056214411200b004ac6d951037mr2839861qvb.14.1663857971114;
+        Thu, 22 Sep 2022 07:46:11 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id r1-20020ae9d601000000b006cbbc3daaacsm3919270qkk.113.2022.09.22.07.36.41
+        by smtp.gmail.com with ESMTPSA id t14-20020a05620a450e00b006cbcdc6efedsm3997141qkp.41.2022.09.22.07.46.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 22 Sep 2022 07:36:42 -0700 (PDT)
-Date:   Thu, 22 Sep 2022 22:36:38 +0800
+        Thu, 22 Sep 2022 07:46:10 -0700 (PDT)
+Date:   Thu, 22 Sep 2022 22:46:06 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Pavel Reichl <preichl@redhat.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] generic: cleanup test files
-Message-ID: <20220922143638.ruwujtwblv43sgfo@zlang-mailbox>
+Subject: Re: [PATCH 1/4] common: Fix file leak in _get_max_file_size
+Message-ID: <20220922144606.6nx5figsoe6j7wrz@zlang-mailbox>
 References: <20220922134822.1020119-1-preichl@redhat.com>
- <20220922134822.1020119-3-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220922134822.1020119-3-preichl@redhat.com>
+In-Reply-To: <20220922134822.1020119-1-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 22, 2022 at 03:48:21PM +0200, Pavel Reichl wrote:
-> There seems to be some seek_sanity_testfile files that are not
-> cleaned up and take up space.
-> 
-> -rwxr-xr-x. 1 root root 8.0G Sep 22 13:39 seek_sanity_testfile10
+On Thu, Sep 22, 2022 at 03:48:19PM +0200, Pavel Reichl wrote:
+> This is obviously mostly problematic for FS lacking support for sparse
+> files.
 > 
 > Signed-off-by: Pavel Reichl <preichl@redhat.com>
 > ---
->  tests/generic/285 | 2 +-
->  tests/generic/436 | 2 +-
->  tests/generic/445 | 2 +-
->  tests/generic/448 | 2 +-
->  4 files changed, 4 insertions(+), 4 deletions(-)
+>  common/rc         | 1 +
+>  tests/generic/692 | 0
+>  2 files changed, 1 insertion(+)
+>  mode change 100644 => 100755 tests/generic/692
 > 
-> diff --git a/tests/generic/285 b/tests/generic/285
-> index 6c755b5f..d1850021 100755
-> --- a/tests/generic/285
-> +++ b/tests/generic/285
-> @@ -28,7 +28,7 @@ _require_test_program "seek_sanity_test"
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> -	eval "rm -f $BASE_TEST_FILE.*"
-> +	rm -f $BASE_TEST_FILE*
+> diff --git a/common/rc b/common/rc
+> index 228fcb37..c9078649 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4637,6 +4637,7 @@ _get_max_file_size()
+>  			l=$m
+>  		fi
+>  	done
+> +	rm -f $testfile
 
-OK, this eval looks not reasonable.
+OK, as "truncate" will allocate real space in exfat and other fs not
+support sparse file, I think we'd better to remove it. If you find
+more similar situation, please remove them in same one patch :)
 
+>  	echo $l
 >  }
 >  
->  _run_seek_sanity_test $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> diff --git a/tests/generic/436 b/tests/generic/436
-> index 7fb24b41..d54af436 100755
-> --- a/tests/generic/436
-> +++ b/tests/generic/436
-> @@ -16,7 +16,7 @@ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
+> diff --git a/tests/generic/692 b/tests/generic/692
+> old mode 100644
+> new mode 100755
 
-I'm wondering two questions:
-1) If these cases all use $TEST_DIR/seek_sanity_testfile, and don't really
-   remove these seek_sanity_testfile* files, will them affect each testing
-   result? Can we set BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile_$seq
-   at least, to avoid they use same files?
-
-2) If these $BASE_TEST_FILE* files won't take too much space, and won't affect
-   later testing, how about keeping them in $TEST_DIR, then remove these
-   specific _cleanup(). From my testing, after running g/285, g/436, g/445 and
-   g/448, I got [1]. Looks like they only takes ~25M space.
+Hmm... is this another fix? Although I don't know if it's worth to be a single
+patch, if it doesn't cause anything wrong?
 
 Thanks,
 Zorro
 
-[1]
-# du -h /mnt/test/
-25M     /mnt/test/
-# du -h /mnt/test/seek_sanity_testfile*
-4.0K    /mnt/test/seek_sanity_testfile
-0       /mnt/test/seek_sanity_testfile01
-4.0K    /mnt/test/seek_sanity_testfile02
-12K     /mnt/test/seek_sanity_testfile03
-4.0K    /mnt/test/seek_sanity_testfile04
-4.0K    /mnt/test/seek_sanity_testfile05
-8.0K    /mnt/test/seek_sanity_testfile06
-44K     /mnt/test/seek_sanity_testfile07
-44K     /mnt/test/seek_sanity_testfile08
-404K    /mnt/test/seek_sanity_testfile09
-128K    /mnt/test/seek_sanity_testfile10
-128K    /mnt/test/seek_sanity_testfile11
-128K    /mnt/test/seek_sanity_testfile12
-4.0M    /mnt/test/seek_sanity_testfile13
-4.0M    /mnt/test/seek_sanity_testfile14
-12M     /mnt/test/seek_sanity_testfile15
-4.0M    /mnt/test/seek_sanity_testfile16
-0       /mnt/test/seek_sanity_testfile17
-0       /mnt/test/seek_sanity_testfile_44818
-
-
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> -	rm -f $tmp.* $BASE_TEST_FILE.*
-> +	rm -f $tmp.* $BASE_TEST_FILE*
->  }
->  
->  # Import common functions.
-> diff --git a/tests/generic/445 b/tests/generic/445
-> index 05d1c5b3..d9e9f84b 100755
-> --- a/tests/generic/445
-> +++ b/tests/generic/445
-> @@ -16,7 +16,7 @@ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> -	rm -f $tmp.* $BASE_TEST_FILE.*
-> +	rm -f $tmp.* $BASE_TEST_FILE*
->  }
->  
->  # Import common functions.
-> diff --git a/tests/generic/448 b/tests/generic/448
-> index d66967bc..11945549 100755
-> --- a/tests/generic/448
-> +++ b/tests/generic/448
-> @@ -15,7 +15,7 @@ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile_$seq
->  _cleanup()
->  {
->  	cd /
-> -	rm -f $tmp.* $BASE_TEST_FILE
-> +	rm -f $tmp.* $BASE_TEST_FILE*
-
-
-
->  }
->  
->  # Import common functions.
 > -- 
 > 2.37.3
 > 
