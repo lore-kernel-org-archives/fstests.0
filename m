@@ -2,99 +2,150 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EAD9C54EE9
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 13:49:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF198C6FA82
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 14:05:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231639AbiIVNtG (ORCPT
+        id S229631AbiIVOFO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Sep 2022 09:49:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54498 "EHLO
+        Thu, 22 Sep 2022 10:05:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231682AbiIVNsl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 09:48:41 -0400
+        with ESMTP id S229866AbiIVOFL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 10:05:11 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38369DF3BC
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 06:48:35 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 720A5A99F5
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 07:05:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663854514;
+        s=mimecast20190719; t=1663855508;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=NZPdxeVRitzgNEnEGr25UFIDaOdKThFzt7KR/fGRikA=;
-        b=PShpCLMybUXM/vdSO9pisjwY3YFH32kKxn+JxzawavhK7WGoZSIX3Le7B/YJ3UZyv5eqLS
-        XbtIvI5W42SCSLXw3a7f6942XIUpe9QUuBRayV9XFt/h2Ht/2dUFFT7SlT5RuVoBbVs/ix
-        YlRkEuoWgQhrDX9Q5XplxSQDvgS6zAk=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=vt16du8YjTKc4ZsRrYpWhSrbxclyD6u2MeMil614VHk=;
+        b=E3otPR32UFZy1KpkPUSA7xvD9rjzyWoc0b61HVGenFZSHcYgVlWtYWLxaM+AM+dFrToEsQ
+        sj5sfJVXlYkxvdqI0t4Gn8wSlWMDj7nWVnFd6ghwqOtrKbfM0cqQY+jKZBQoz/7glytXmr
+        joUUoFsWI2Ug15BUeMgdL7BB4IRuq7w=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-661-gTr_TuVMOZuaMhQ3OpoM4w-1; Thu, 22 Sep 2022 09:48:33 -0400
-X-MC-Unique: gTr_TuVMOZuaMhQ3OpoM4w-1
-Received: by mail-ej1-f69.google.com with SMTP id ga33-20020a1709070c2100b00781bd47a18eso4234754ejc.12
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 06:48:32 -0700 (PDT)
+ us-mta-145-gW8FB1dBNY2hETjOKSjPnQ-1; Thu, 22 Sep 2022 10:05:07 -0400
+X-MC-Unique: gW8FB1dBNY2hETjOKSjPnQ-1
+Received: by mail-qk1-f198.google.com with SMTP id n15-20020a05620a294f00b006b5768a0ed0so6622015qkp.7
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 07:05:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=NZPdxeVRitzgNEnEGr25UFIDaOdKThFzt7KR/fGRikA=;
-        b=N2hkmWwdRTBzPbEDpxE4zORBcqUi1Mw/pb3dLOLNC0EptthlxF1F+Vl51cn5PzEvhI
-         aXtrIqq4nmVn/sUBENuYJ08oYE/HeT3H8nx4aOnqHMEhcDcHrwTTuh9m0OSk0BIQ/baG
-         o+Os/TC9rScG5PZbwY8Vf6MzwJV4uw2fLCHddIm5Ib10RXciu0ptsz/ONDfeBSK3VNAd
-         BBma8Mhjzsy15QukVppGEFiqrie88s/OEiLV06Vh2+MeMkZjIOfOQwV4gKHFxHdVwjaB
-         qA0NGiOaRtce0OJMwl5Jgnh2EV84sXDm/UHQj/OV4rBqsAjFNZG6btQqSN5rfvQFiFVs
-         za5w==
-X-Gm-Message-State: ACrzQf1bEyAzOPCqmOtoh8YnwSzHxNSW4C7M2ND/ttUm8JtvL7t03VG3
-        1B1foNW3b+hWeL8dLNQJ9sQa5chJl2d9XO4qQyKZzxVbr5Qs5G7Ig05frRm5bwS6nM7emsC2GLo
-        lUAOlcedDzC+3LRP+UJkOvmugJLf1h1jzcPL3e0WuAECyeFam9OPmXEsMx38qnJvKQBva
-X-Received: by 2002:a17:907:3fa1:b0:782:e53:7ab7 with SMTP id hr33-20020a1709073fa100b007820e537ab7mr2985565ejc.144.1663854511289;
-        Thu, 22 Sep 2022 06:48:31 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM6uZunoDZcSQ/zmxL8kY6t+1nggMN1xGD7ApEVX40YhOjnfzsmxktQTuVPlSVkvvogUhh33aw==
-X-Received: by 2002:a17:907:3fa1:b0:782:e53:7ab7 with SMTP id hr33-20020a1709073fa100b007820e537ab7mr2985546ejc.144.1663854511011;
-        Thu, 22 Sep 2022 06:48:31 -0700 (PDT)
-Received: from localhost.localdomain (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
-        by smtp.gmail.com with ESMTPSA id e4-20020aa7d7c4000000b0044ec76521a1sm3760861eds.55.2022.09.22.06.48.29
-        for <fstests@vger.kernel.org>
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
+        bh=vt16du8YjTKc4ZsRrYpWhSrbxclyD6u2MeMil614VHk=;
+        b=sgnBgPVXFEwMvMLq6HuSaoteGho5W7jYU+6KymhNP/CVpjnnZJsvqtrlIgwAV2RD+n
+         KWvBpX+9UYLDMyBdA99EUsWGrt6gXfMyiHDL7JkID9RtXcnQcVSvOs3jARxTEER6Br8j
+         /+dwzHLzjD9/EpIg3+eD3muHBkhuVHR8FkTdL9YENkTKUH/PFWdQczu6ayFWS9Z56HOH
+         hM6U0cApgAunfcO9GR8pxmgTdVGvNJJCxnhfFtUixVSthfU707huQAdFV6B2udyoQ3cR
+         TQMlaA7iPujOXA5sotLs9kuCSLiMpV01D7mI85MMrHpcl9AWNyvq9x/aOK/93syw28De
+         KozA==
+X-Gm-Message-State: ACrzQf20NQ0szUBofvdcI5zfJLM85yHfl2V1E8TpU4Wu0yyuYMPyR6Zg
+        qrlUoX/ulHrGDjdxrUbMLkei0GHFJNKoHECq9Se4psSiKCj7KwUfQJ1kYqS2FLpipV1DLy3L/SY
+        Ea/u6xoDrfDo7P2KP9Q==
+X-Received: by 2002:ac8:5b44:0:b0:35b:b23b:2f2c with SMTP id n4-20020ac85b44000000b0035bb23b2f2cmr2888846qtw.133.1663855507096;
+        Thu, 22 Sep 2022 07:05:07 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM4ZyOKA/UcLaAkQIHsgNaqjwUzjbFaoOXwIkOqMRWHYrDfNnEGYfRhl5qpp9f8T9BeydAPbvg==
+X-Received: by 2002:ac8:5b44:0:b0:35b:b23b:2f2c with SMTP id n4-20020ac85b44000000b0035bb23b2f2cmr2888799qtw.133.1663855506676;
+        Thu, 22 Sep 2022 07:05:06 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id x17-20020a05620a449100b006b9264191b5sm4006497qkp.32.2022.09.22.07.05.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 22 Sep 2022 06:48:29 -0700 (PDT)
-From:   Pavel Reichl <preichl@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH 4/4] g/394: clean up test files
-Date:   Thu, 22 Sep 2022 15:48:22 +0200
-Message-Id: <20220922134822.1020119-4-preichl@redhat.com>
-X-Mailer: git-send-email 2.37.3
-In-Reply-To: <20220922134822.1020119-1-preichl@redhat.com>
-References: <20220922134822.1020119-1-preichl@redhat.com>
+        Thu, 22 Sep 2022 07:05:06 -0700 (PDT)
+Date:   Thu, 22 Sep 2022 22:05:01 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v5 1/2] common: new helper to alloacate fixed size files
+Message-ID: <20220922140501.fo5b73eipp333euy@zlang-mailbox>
+References: <20220922063836.974796-1-preichl@redhat.com>
+ <20220922063836.974796-2-preichl@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220922063836.974796-2-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Clean up test files taking space.
+On Thu, Sep 22, 2022 at 08:38:35AM +0200, Pavel Reichl wrote:
+> Helper that creates files of specified size using falloc if supported,
+> otherwise pwrite is used.
+> 
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  common/rc         | 23 +++++++++++++++++++++++
+>  tests/generic/694 |  8 +++++++-
+>  2 files changed, 30 insertions(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index a25cbcd0..228fcb37 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4925,6 +4925,29 @@ hexdump()
+>  	_fail "Use _hexdump(), please!"
+>  }
+>  
+> +# Try to create a file with inode->i_blocks >= (length / blocksize).
+> +# There may be some small overhead, e.g. ext2 filesystem allocates a
+> +# substantial number of blocks to store block mappings. Those are accounted
+> +# to i_blocks.
+> +_create_file_sized()
+> +{
+> +	local length=$1
+> +	local file=$2
+> +	local tmp=`mktemp -u`
+> +	local ret=0
+> +
+> +	$XFS_IO_PROG -ft -c "falloc 0 $length" $file >$tmp.out 2>&1
+> +	ret=$?
+> +	if (grep -Eq "Operation not supported|command .* not found" $tmp.out);then
+> +		# fallocate isn't supported, fallback to general buffer write
+> +		$XFS_IO_PROG -ft -c "pwrite 0 $length" $file >$tmp.out 2>&1
+> +		ret=$?
+> +	fi
+> +	[ $ret -ne 0 ] && cat $tmp.out
+> +	rm -f $tmp.out
+> +	return $ret
+> +}
+> +
+>  init_rc
+>  
+>  ################################################################################
+> diff --git a/tests/generic/694 b/tests/generic/694
+> index dfd988df..c96c2154 100755
+> --- a/tests/generic/694
+> +++ b/tests/generic/694
+> @@ -21,6 +21,9 @@ _cleanup()
+>  }
+>  
+>  _supported_fs generic
+> +_fixed_by_kernel_commit 0c336d6e33f4 \
+> +	"exfat: fix incorrect loading of i_blocks for large file"
+> +
 
--rwxr-xr-x. 1 root root 1.0G Sep 22 14:58 394.1183899
--rwxr-xr-x. 1 root root 1.0G Sep 22 14:58 394.1183899-1
--rwxr-xr-x. 1 root root    0 sep 22 14:58 394.1183899+1
+Thanks for adding this too, this version looks good to me now.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Pavel Reichl <preichl@redhat.com>
----
- tests/generic/394 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/generic/394 b/tests/generic/394
-index fc03e2f3..cbc2ce13 100755
---- a/tests/generic/394
-+++ b/tests/generic/394
-@@ -14,7 +14,7 @@ _cleanup()
- {
- 	cd /
- 	ulimit -f unlimited
--	rm -f $tmp.*
-+	rm -f $tmp.* $TEST_DIR/$seq.*
- }
- 
- # Import common functions.
--- 
-2.37.3
+>  _require_test
+>  _require_fs_space $TEST_DIR $((4 * 1024 * 1024)) #kB
+>  
+> @@ -30,7 +33,10 @@ junk_dir=$TEST_DIR/$seq
+>  junk_file=$junk_dir/junk
+>  mkdir -p $junk_dir
+>  
+> -$XFS_IO_PROG -f -c "pwrite -W 0 4G" $junk_file > /dev/null
+> +_create_file_sized 4G $junk_file
+> +if [ $? -ne 0 ]; then
+> +	echo "Could not create 4G test file"
+> +fi
+>  
+>  iblocks=`stat -c '%b' $junk_file`
+>  
+> -- 
+> 2.37.3
+> 
 
