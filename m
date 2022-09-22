@@ -2,155 +2,140 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68E47C6FA90
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 06:38:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 212ACC6FA82
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 09:41:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229611AbiIVGis (ORCPT
+        id S229899AbiIVJlq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Sep 2022 02:38:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46732 "EHLO
+        Thu, 22 Sep 2022 05:41:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34582 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229712AbiIVGis (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 02:38:48 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7364CB6D1A
-        for <fstests@vger.kernel.org>; Wed, 21 Sep 2022 23:38:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663828726;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ynH91aIqphd5XSYlCjy5Z9T879e+jI8maiNeIW6cgfs=;
-        b=eKDzKxjz3+CUH1Ng93uGUYnMtj1QOPcw6sScWKWCrtYJnVrYzYyxQn5uZ7LGTgdtSIGglT
-        DXFfYn5yRpnLkKv1szkEYm7r6A85HtA3vGTz/DpGBIQSY3dLjJjEegZDRhBb/H5eiJH4eT
-        9HwJvRvL1DMe036ycSWcpbkrT5/Ov10=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-434-xrsWheU0N9K1wxo2fBJWLw-1; Thu, 22 Sep 2022 02:38:44 -0400
-X-MC-Unique: xrsWheU0N9K1wxo2fBJWLw-1
-Received: by mail-ej1-f70.google.com with SMTP id xc12-20020a170907074c00b007416699ea14so3970847ejb.19
-        for <fstests@vger.kernel.org>; Wed, 21 Sep 2022 23:38:44 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=ynH91aIqphd5XSYlCjy5Z9T879e+jI8maiNeIW6cgfs=;
-        b=n2NFHDWJ12W7BKgjoBPD2LvamuWZ7mg8eP1MXqb9KaDrF2ct/rFvOehkwwqRbzf14H
-         IKisROlcvHHXBEbXfFFvQRrzcg3yP933ZrwB/nyXsFtu7+IczI6gPwcnZ6fEDCVyrF7k
-         M++rrQoi+osTVsB0O3uIyA5hTMz0X2oaCzj8WBSnYdsA2xNhj0TpXTlTAPC5RSLnUEmp
-         Nd/LrE/JEfNJAG3Mx07CyF+U7hTXnG/rD6JcAUQY8BaOqsjpA+wFGz+1Dht+sxlDcL7g
-         H2LQzyDqkX9k12Pbce/4f8QgChoXQtv0MYAm3MV5Ox1oHAszfHuAQYmm7MMuPrPbuB+h
-         eU7A==
-X-Gm-Message-State: ACrzQf0g27E6dCIpVLjia36pKiioqAD1AGEvn1MaSy43/gdpWHPi45t/
-        BRfz8GVqZpVVymkdAZs6GMx53VtDk46iSvdQ2hfHhfQ6hG1lpmndTIMCS1I7D2GQh0Lrjrid0kK
-        AOJz3L38hsvHBB2OvFaX9Ofcc672YXDzvkj3mwj9ljy8CIoC26EKHbxXGn2IxT06tLrsa
-X-Received: by 2002:a05:6402:b45:b0:44e:a071:2b3b with SMTP id bx5-20020a0564020b4500b0044ea0712b3bmr1698509edb.95.1663828723257;
-        Wed, 21 Sep 2022 23:38:43 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5DOdyCRMJgNsZInZoHmHVwexNYkQp57Cou00tSbpolM7e38JRL261rHIOkTQ1vlsPkU/LYSw==
-X-Received: by 2002:a05:6402:b45:b0:44e:a071:2b3b with SMTP id bx5-20020a0564020b4500b0044ea0712b3bmr1698485edb.95.1663828722897;
-        Wed, 21 Sep 2022 23:38:42 -0700 (PDT)
-Received: from localhost.localdomain (gw19-pha-stl-mmo-1.avonet.cz. [131.117.213.203])
-        by smtp.gmail.com with ESMTPSA id s4-20020aa7d784000000b0044838efb8f8sm3072750edq.25.2022.09.21.23.38.39
-        for <fstests@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Sep 2022 23:38:41 -0700 (PDT)
-From:   Pavel Reichl <preichl@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH v5 2/2] generic: test i_blocks for truncated large files
-Date:   Thu, 22 Sep 2022 08:38:36 +0200
-Message-Id: <20220922063836.974796-3-preichl@redhat.com>
+        with ESMTP id S229729AbiIVJlq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 05:41:46 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16892CF48A;
+        Thu, 22 Sep 2022 02:41:45 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id C2744219BF;
+        Thu, 22 Sep 2022 09:41:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1663839703; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=kCFTHf7Fe/qWuqQvgPCacPSJLPuKeb4UkBz9qexYCxo=;
+        b=mhWZ5bthExsl2Q7ahlmJSFfT40xU89xgH4h4KVFv4JlM1WSHxESckpjECnbJPWLXMlt/C8
+        rJuioFTpg2OZ+7NHvFvq8iW5/SqXfOFGDgS+1Xayc1bbe7H3zM8gbjShdEyb+dVPuCJUap
+        pH6UQ2IQNvaANlZh9cgFfXYxcoDx894=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7AA1C1346B;
+        Thu, 22 Sep 2022 09:41:42 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id ovzBCtYtLGMSBwAAMHmgww
+        (envelope-from <wqu@suse.com>); Thu, 22 Sep 2022 09:41:42 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] btrfs/253: update the data chunk size to the correct one
+Date:   Thu, 22 Sep 2022 17:41:23 +0800
+Message-Id: <20220922094123.98330-1-wqu@suse.com>
 X-Mailer: git-send-email 2.37.3
-In-Reply-To: <20220922063836.974796-1-preichl@redhat.com>
-References: <20220922063836.974796-1-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a regression test for an incorrect computation of i_blocks for
-truncated files larger than 4 GiB. Bug was filed for exFAT.
+[BUG]
+After kernel commit 5da431b71d4b ("btrfs: fix the max chunk size and
+stripe length calculation") the test case btrfs/253 will always fail.
 
-Test is based on reproducer provied by Christophe Vu-Brugier as part
-of kernel patch-fix submission.
+[CAUSE]
+Btrfs calculates the to-be-allocated chunk size using both
+chunk and stripe size limits.
 
-Signed-off-by: Pavel Reichl <preichl@redhat.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+By default data chunk is limited to 10G, while data stripe size limit
+is only 1G.
+Thus the real chunk size limit would be:
+
+  min(num_data_devices * max_stripe_size, max_chunk_size)
+
+For single disk case (the test case), the value would be:
+
+  min(        1        *       1G       ,       10G) = 1G.
+
+The test case can only pass during a small window:
+
+- Commit f6fca3917b4d ("btrfs: store chunk size in space-info struct")
+
+  This changed the max chunk size limit to 1G, which would cause way
+  more chunks for profiles like RAID0/10/5/6, thus it is considered as
+  a regression.
+
+- Commit 5da431b71d4b ("btrfs: fix the max chunk size and stripe length calculation")
+
+  This is the fix for above regression, which reverts the data chunk
+  limit back to 10G.
+
+[FIX]
+Fix the failure by introducing a hardcoded expected data chunk size (1G).
+
+Since the test case has fixed fs size (10G) and is only utilizing one
+disk, that 1G size will work for all possible data profiles (SINGLE and
+DUP).
+
+The more elegant solution is to export stripe size limit through sysfs
+interfaces, but that would take at least 2 kernel cycles.
+
+For now, just use a hotfix to make the test case work again.
+
+Since we are here, also remove the leading "t" in the error message.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/generic/698     | 51 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/698.out |  2 ++
- 2 files changed, 53 insertions(+)
- create mode 100755 tests/generic/698
- create mode 100644 tests/generic/698.out
+ tests/btrfs/253 | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
 
-diff --git a/tests/generic/698 b/tests/generic/698
-new file mode 100755
-index 00000000..6aeea64e
---- /dev/null
-+++ b/tests/generic/698
-@@ -0,0 +1,51 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022  Red Hat Inc. All Rights Reserved.
+diff --git a/tests/btrfs/253 b/tests/btrfs/253
+index c746f41e..5fbce070 100755
+--- a/tests/btrfs/253
++++ b/tests/btrfs/253
+@@ -107,7 +107,21 @@ SCRATCH_BDEV=$(_real_dev $SCRATCH_DEV)
+ 
+ # Get chunk sizes.
+ echo "Capture default chunk sizes."
+-FIRST_DATA_CHUNK_SIZE_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/data/chunk_size)
++
++# The sysfs interface has only exported chunk_size (10G by default),
++# but no stripe_size (1G by default) exported.
 +#
-+# FS QA Test 698
++# Btrfs calculate the real chunk to be allocated using both limits,
++# Thus the default 10G chunk size can only be fulfilled by something
++# like 10 disk RAID0
 +#
-+# Verify that i_blocks for truncated files larger than 4 GiB have correct
-+# values.
-+#
-+# This test verifies the problem fixed in kernel with commit
-+# 92fba084b79e exfat: fix i_blocks for files truncated over 4 GiB
-+#
-+. ./common/preamble
-+. ./common/filter
++# The proper solution should be exporting the stripe_size limit too,
++# but that may take several cycles, here we just use hard coded 1G
++# as the expected chunk size.
++FIRST_DATA_CHUNK_SIZE_B=$((1024 * 1024 * 1024))
 +
-+_begin_fstest auto
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.* $junk_dir
-+}
-+
-+_supported_fs generic
-+_fixed_by_kernel_commit 92fba084b79e \
-+	"exfat: fix i_blocks for files truncated over 4 GiB"
-+
-+_require_test
-+_require_fs_space $TEST_DIR $((5 * 1024 * 1024)) #kB
-+
-+junk_dir=$TEST_DIR/$seq
-+junk_file=$junk_dir/junk
-+mkdir -p $junk_dir
-+
-+_create_file_sized 5G $junk_file
-+if [ $? -ne 0 ]; then
-+	echo "Could not create 5G test file"
-+fi
-+
-+truncate -s 4G $junk_file
-+
-+block_size=`stat -c '%B' $junk_file`
-+iblocks_after_truncate=`stat -c '%b' $junk_file`
-+iblocks_expected=$((4 * 1024 * 1024 * 1024 / $block_size))
-+
-+_within_tolerance "Number of allocated blocks after truncate" $iblocks_after_truncate $iblocks_expected 1% -v
-+
-+status=0
-+
-+exit
-diff --git a/tests/generic/698.out b/tests/generic/698.out
-new file mode 100644
-index 00000000..cbb02d37
---- /dev/null
-+++ b/tests/generic/698.out
-@@ -0,0 +1,2 @@
-+QA output created by 698
-+Number of allocated blocks after truncate is in range
++# For metadata, we are safe to use the exported value, as the default
++# metadata chunk size limit is already smaller than its stripe size.
+ FIRST_METADATA_CHUNK_SIZE_B=$(_get_fs_sysfs_attr ${SCRATCH_BDEV} allocation/metadata/chunk_size)
+ 
+ echo "Orig Data chunk size    = ${FIRST_DATA_CHUNK_SIZE_B}"     >> ${seqres}.full
+@@ -226,7 +240,7 @@ FIRST_METADATA_CHUNK_SIZE_MB=$(expr ${FIRST_METADATA_CHUNK_SIZE_B} / 1024 / 1024
+ 
+ # if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne $(expr ${FIRST_DATA_SIZE_MB}) ]]; then
+ if [[ $(expr ${FIRST_DATA_CHUNK_SIZE_MB} + ${DATA_SIZE_START_MB}) -ne ${FIRST_DATA_SIZE_MB} ]]; then
+-	echo "tInitial data allocation not correct."
++	echo "Initial data allocation not correct."
+ fi
+ 
+ if [[ $(expr ${FIRST_METADATA_CHUNK_SIZE_MB} + ${METADATA_SIZE_START_MB}) -ne ${FIRST_METADATA_SIZE_MB} ]]; then
 -- 
-2.37.3
+2.37.2
 
