@@ -2,108 +2,152 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBAC8C54EE9
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 15:17:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16C76C6FA82
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 15:41:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230002AbiIVPRG (ORCPT
+        id S229492AbiIVPls (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Sep 2022 11:17:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39878 "EHLO
+        Thu, 22 Sep 2022 11:41:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51300 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230035AbiIVPRF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 11:17:05 -0400
+        with ESMTP id S229540AbiIVPlr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 11:41:47 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80ED9EBBC7
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:17:04 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00EB9ECCC3
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:41:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663859823;
+        s=mimecast20190719; t=1663861305;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=XwTUEeVgarSgjYIyipiN+WWvxqFf5Mn4Wa2qOCHYKXY=;
-        b=GFcCwvEa+wgvBZEstXhO572+5d9btHiO9C5fgOvealmaX+Sj4gj0cN0Rq/8BXpd4+yAYlV
-        +Mn1k3NEe/hy/2jvElOC95rpZe3ZmsV2LbraBxn1P6DAM37CPbJ210pVsEqGtz8/aC2sHs
-        5V9bjZEq9iW49JwlWMrwVD1DV4HFaw8=
+        bh=nuEVOCaePF0x52QRZveop/hCtakLu2js5SPN/0L6700=;
+        b=Twbpeqw388BXq6Bm4x0QCeZo2zgqflbIzu1ukSsug6x/SKigUjOPfjWbnTCorLW3IHwoYy
+        tYdBU32ZzakFLJeFMTWYF5esx2pHdWQO2kVNJfwRgR/5r6g05ao7p4BIZK0kM0LPgxLlQ9
+        vM3TipplB8YEo6UEGnX8ODJdBtCrrlI=
 Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
  [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-568-LcAOmVKIOkWURqvIQpU6zA-1; Thu, 22 Sep 2022 11:17:00 -0400
-X-MC-Unique: LcAOmVKIOkWURqvIQpU6zA-1
-Received: by mail-qt1-f198.google.com with SMTP id fe14-20020a05622a4d4e00b0035cc376b1d5so6590232qtb.4
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:17:00 -0700 (PDT)
+ us-mta-346-LL0I4_M4O4S5ky5YxeWNwA-1; Thu, 22 Sep 2022 11:41:38 -0400
+X-MC-Unique: LL0I4_M4O4S5ky5YxeWNwA-1
+Received: by mail-qt1-f198.google.com with SMTP id ay22-20020a05622a229600b0035bbb349e79so6692666qtb.13
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:41:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=XwTUEeVgarSgjYIyipiN+WWvxqFf5Mn4Wa2qOCHYKXY=;
-        b=YFqgtC0GA+I2vHk3YkHpNi4OfGlGnucJPUrs4/DdVfPoeICVAMKCzPB8rXhyuMe0S7
-         6yVmRTNhvNQwN0W26fQ+cM2oAhurtKGtt0Zo9cPqSL2RbgcCUJ2NkNf69hId2YzRZJ8v
-         s+j29gfQYU7MUez0hD5694FbnEwmsO0eMMR5aC5ZODzPwo2/OJzvI/o+Pe4jWb1zSFkC
-         6Wv/EcVLQcNWPtfGB9u0C8CAsXxhy8UJAlYzLZMPVMVMwJPLBY/G/5mwMy5lAAygqcIN
-         e3pPKjr5b+xv9lVwfAb4x/WwlJTAK4LVL3N9zFkcmIIh7Xfjs9z8CvpfFkJ/Dv3qeooy
-         LHoQ==
-X-Gm-Message-State: ACrzQf1C0583UsXRvfrzxwDl4NYyZrwVKM6WXL7Qv9QYHREOiw/WH9//
-        oasj0MfOq3ALZBYbcQXuqIEAnsMTp/Po8ORt2/Q/0Tmdd0tzodAnyDYjtS0tj2xugSuBsKEjR4p
-        wM2dZ9H8leGqdvbL7fw==
-X-Received: by 2002:a05:622a:1046:b0:35c:dde0:6735 with SMTP id f6-20020a05622a104600b0035cdde06735mr3169190qte.689.1663859820051;
-        Thu, 22 Sep 2022 08:17:00 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7rBl9yq/Ktfsu6VfwCU4ZtoRMHQJO2O6CBUQBTpY+PfHXmdR6DN6JvmkOXvjkrMcIlKnhGVA==
-X-Received: by 2002:a05:622a:1046:b0:35c:dde0:6735 with SMTP id f6-20020a05622a104600b0035cdde06735mr3169170qte.689.1663859819821;
-        Thu, 22 Sep 2022 08:16:59 -0700 (PDT)
+        bh=nuEVOCaePF0x52QRZveop/hCtakLu2js5SPN/0L6700=;
+        b=TTwvt9cut8oFh1IKJztw9ZskhejUImEBFzJFBMzFK+6SkB6uPIU8wvZm27pm+LPpHN
+         AK0LMXpPk9Kw/LYZoV62VVdgKc7+7OKlzZPSEqyGQftCUOS/nb6CrH5mKEbcUKMYPX/H
+         /HE8UMyowK3MR9V9iQVoKf+FVdFFitlzNFdojjOIccD4DNvA73chFTJbw8h8K3miBTL0
+         5mvRa8jd6/4ht7GCImCoJ7K21zoZK+1OSn6AvNr/kPtJfUDRytJjRoyD3FWJZYicWju1
+         xD6i65iFqlxK46a2oNemDuuA2hIgDkdhM9lnmHkXB9wcXjQmpTJImBrk6PbHuVsh570E
+         aN/w==
+X-Gm-Message-State: ACrzQf1V+YGx1ekf8eYML+ofoL2PBalY+1cL77y5obJe8FZyuduq4ibo
+        0Yjv/k7VvBO9eL1DnJiNbVbi9LVAgky61d1/20XPL9whPuxa/7+2hQbPSVDwYXWajO0/lKGXfMa
+        a08d7tAGcG1/du2R7VQ==
+X-Received: by 2002:a05:620a:2910:b0:6ce:1517:918 with SMTP id m16-20020a05620a291000b006ce15170918mr2640655qkp.190.1663861297827;
+        Thu, 22 Sep 2022 08:41:37 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5JLuPBlrTKAe+fIcdQMnOfUld9Eo7n49K0Tld3CA1tQKnRKtXLMI25ZQa9MYbQHMZ9bS3dGQ==
+X-Received: by 2002:a05:620a:2910:b0:6ce:1517:918 with SMTP id m16-20020a05620a291000b006ce15170918mr2640647qkp.190.1663861297586;
+        Thu, 22 Sep 2022 08:41:37 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id k7-20020a05620a138700b006b9c6d590fasm3812917qki.61.2022.09.22.08.16.58
+        by smtp.gmail.com with ESMTPSA id q14-20020a37f70e000000b006bba46e5eeasm3735100qkj.37.2022.09.22.08.41.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 22 Sep 2022 08:16:59 -0700 (PDT)
-Date:   Thu, 22 Sep 2022 23:16:55 +0800
+        Thu, 22 Sep 2022 08:41:37 -0700 (PDT)
+Date:   Thu, 22 Sep 2022 23:41:32 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Pavel Reichl <preichl@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/4] g/299: speed up the test
-Message-ID: <20220922151655.3eudeubqbh6s32io@zlang-mailbox>
-References: <20220922134822.1020119-1-preichl@redhat.com>
- <20220922134822.1020119-2-preichl@redhat.com>
+To:     Naohiro Aota <naohiro.aota@wdc.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] common: introduce zone_capacity() to return a zone
+ capacity
+Message-ID: <20220922154132.dpadkhaccwzysq4d@zlang-mailbox>
+References: <cover.1663825728.git.naohiro.aota@wdc.com>
+ <97ede9bba67f0848fc0b706d757170d7dfacb7fd.1663825728.git.naohiro.aota@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220922134822.1020119-2-preichl@redhat.com>
+In-Reply-To: <97ede9bba67f0848fc0b706d757170d7dfacb7fd.1663825728.git.naohiro.aota@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 22, 2022 at 03:48:20PM +0200, Pavel Reichl wrote:
-> Move the _require_xfs_io_command "falloc" above the
-> potencially 'expensive' function _get_max_file_size
+On Thu, Sep 22, 2022 at 02:54:58PM +0900, Naohiro Aota wrote:
+> Introduce _zone_capacity() to return a zone capacity of the given address
+> in the given device (optional). Rewrite btrfs/237 with it.
 > 
-> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 > ---
-
-It's not for speeding up this test, I think you're trying to notrun this case
-on a fs which doesn't support fallocate and sparse file but support truncate
-syscall. Anyway I don't have objection on this patch.
-
->  tests/generic/299 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  common/zbd      | 17 +++++++++++++++++
+>  tests/btrfs/237 |  8 ++------
+>  2 files changed, 19 insertions(+), 6 deletions(-)
+>  create mode 100644 common/zbd
 > 
-> diff --git a/tests/generic/299 b/tests/generic/299
-> index 8e1a112c..1bb371a3 100755
-> --- a/tests/generic/299
-> +++ b/tests/generic/299
-> @@ -24,6 +24,7 @@ _require_scratch
->  _require_odirect
->  _require_aio
->  _require_block_device $SCRATCH_DEV
-> +_require_xfs_io_command "falloc"
+> diff --git a/common/zbd b/common/zbd
+> new file mode 100644
+> index 000000000000..329bb7be6b7b
+> --- /dev/null
+> +++ b/common/zbd
+
+I don't like this abbreviation :-P If others don't open this file and read the
+comment in it, they nearly no chance to guess what's this file for.
+
+> @@ -0,0 +1,17 @@
+> +#
+> +# Common zoned block device specific functions
+> +#
+> +
+> +. common/filter
+> +
+> +_zone_capacity() {
+> +    local phy=$1
+> +    local dev=$2
+> +
+> +    [ -z "$dev" ] && dev=$SCRATCH_DEV
+> +
+> +    size=$($BLKZONE_PROG report -o $phy -l 1 $dev |\
+> +	       _filter_blkzone_report |\
+> +	       grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
+> +    echo $((size << 9))
+> +}
+
+Do you have more zone related helpers are going to provide? If only this
+single one helper, I think it's not worth adding a new common file. You
+can put it into common/rc simply, as there're already several *zone*
+related helpers in it.
+
+We can pick up these *zone* related function into a separate include file in
+one day we feel it's time (too many related helpers, and better to be maintained
+individually).
+
+Thanks,
+Zorro
+
+> diff --git a/tests/btrfs/237 b/tests/btrfs/237
+> index bc6522e2200a..101094b5ce70 100755
+> --- a/tests/btrfs/237
+> +++ b/tests/btrfs/237
+> @@ -13,7 +13,7 @@
+>  _begin_fstest auto quick zone balance
 >  
->  NUM_JOBS=$((4*LOAD_FACTOR))
->  BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-> @@ -96,7 +97,6 @@ filename=buffered-aio-verifier
->  EOF
+>  # Import common functions.
+> -. ./common/filter
+> +. ./common/zbd
 >  
->  _require_fio $fio_config
-> -_require_xfs_io_command "falloc"
+>  # real QA test starts here
 >  
->  _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount
+> @@ -56,11 +56,7 @@ fi
+>  
+>  start_data_bg_phy=$(get_data_bg_physical)
+>  start_data_bg_phy=$((start_data_bg_phy >> 9))
+> -
+> -size=$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV |\
+> -	_filter_blkzone_report |\
+> -	grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
+> -size=$((size << 9))
+> +size=$(_zone_capacity $start_data_bg_phy)
+>  
+>  reclaim_threshold=75
+>  echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
 > -- 
 > 2.37.3
 > 
