@@ -2,89 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCAF6C54EE9
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 15:08:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBAC8C54EE9
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Sep 2022 15:17:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231431AbiIVPIX (ORCPT
+        id S230002AbiIVPRG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Sep 2022 11:08:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55512 "EHLO
+        Thu, 22 Sep 2022 11:17:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230212AbiIVPIW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 11:08:22 -0400
+        with ESMTP id S230035AbiIVPRF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Sep 2022 11:17:05 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83FE3E118B
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:08:20 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80ED9EBBC7
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:17:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663859299;
+        s=mimecast20190719; t=1663859823;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=xuPIksFpqIz7/6+YKfUafOJxqtO2Vfj6GB3KC4TDRb8=;
-        b=ctex1jy4jBJVm4+8NudbUgwgzQORQVElXabVYMNjjAYNNMwOZXPkyD7RkdVlTxZTa6EMke
-        QbLSd4BinLVqJNQfGDCpQWOwbbRrApfqA8JtVaKyVLIe0WNO7soglk/2Bb2kHvgGotnQdT
-        TXKcaFunKkSW2FtyIfvc7o5pue/l1A4=
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
- [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=XwTUEeVgarSgjYIyipiN+WWvxqFf5Mn4Wa2qOCHYKXY=;
+        b=GFcCwvEa+wgvBZEstXhO572+5d9btHiO9C5fgOvealmaX+Sj4gj0cN0Rq/8BXpd4+yAYlV
+        +Mn1k3NEe/hy/2jvElOC95rpZe3ZmsV2LbraBxn1P6DAM37CPbJ210pVsEqGtz8/aC2sHs
+        5V9bjZEq9iW49JwlWMrwVD1DV4HFaw8=
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
+ [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-562-RZvHX2ANPmq8kcIIf8z1_A-1; Thu, 22 Sep 2022 11:08:17 -0400
-X-MC-Unique: RZvHX2ANPmq8kcIIf8z1_A-1
-Received: by mail-qk1-f197.google.com with SMTP id j13-20020a05620a288d00b006be7b2a758fso6789916qkp.1
-        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:08:17 -0700 (PDT)
+ us-mta-568-LcAOmVKIOkWURqvIQpU6zA-1; Thu, 22 Sep 2022 11:17:00 -0400
+X-MC-Unique: LcAOmVKIOkWURqvIQpU6zA-1
+Received: by mail-qt1-f198.google.com with SMTP id fe14-20020a05622a4d4e00b0035cc376b1d5so6590232qtb.4
+        for <fstests@vger.kernel.org>; Thu, 22 Sep 2022 08:17:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=xuPIksFpqIz7/6+YKfUafOJxqtO2Vfj6GB3KC4TDRb8=;
-        b=Its9P2FBLMJCoOl24lId+CbILnI8DmFWn6t7XbKMLmwq48iHHKoa2aiPNGEoauO/4I
-         9oZ6Y0qTRuDSeIbkuUFUy2cISpWKNH/q4fuEbTL++v1qgJ+u0bc5d+GwD0b0fqqo+ci2
-         fj8xkHK2G7XLVSp3SguNTThsmDmWIalGgMC1q1jnYVPMoKcvCBwqTgIDKEzr9FiK3rot
-         txZK1t75xB0tVSqzx6ASsbRPXlhvNhDpv3cGOFO2fqzi5L2FL8xHQIUT7agGlqBvSLBi
-         zp8J3ffoLDOqZ5jO/WE64DgVLSxJUuTuVq+S9RePtD2WlZYv/4vYKmXypqGcbypNnDVI
-         IuhQ==
-X-Gm-Message-State: ACrzQf3B9EiYVsMnvAA2XWmygk3MsFEwl6hN6pqBpFHtUFJOH6eXMNOl
-        Dmw7lfi58rXC22QSr4bzrTzeRMqdmLht/2Ye0dKRYH2N4FQCptycU1mM4LZjxDycA+8F6OyZPzM
-        Ej+/y+woC9TmXDcMRcw==
-X-Received: by 2002:a05:620a:905:b0:6ce:604c:3187 with SMTP id v5-20020a05620a090500b006ce604c3187mr2461871qkv.523.1663859297397;
-        Thu, 22 Sep 2022 08:08:17 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM553wWOGK67T0wFOu3jpAiny49dPc7NZe/ua27jBE9NIQuNbhseQROEOem1qc2hD1FEpkTndQ==
-X-Received: by 2002:a05:620a:905:b0:6ce:604c:3187 with SMTP id v5-20020a05620a090500b006ce604c3187mr2461837qkv.523.1663859297117;
-        Thu, 22 Sep 2022 08:08:17 -0700 (PDT)
+        bh=XwTUEeVgarSgjYIyipiN+WWvxqFf5Mn4Wa2qOCHYKXY=;
+        b=YFqgtC0GA+I2vHk3YkHpNi4OfGlGnucJPUrs4/DdVfPoeICVAMKCzPB8rXhyuMe0S7
+         6yVmRTNhvNQwN0W26fQ+cM2oAhurtKGtt0Zo9cPqSL2RbgcCUJ2NkNf69hId2YzRZJ8v
+         s+j29gfQYU7MUez0hD5694FbnEwmsO0eMMR5aC5ZODzPwo2/OJzvI/o+Pe4jWb1zSFkC
+         6Wv/EcVLQcNWPtfGB9u0C8CAsXxhy8UJAlYzLZMPVMVMwJPLBY/G/5mwMy5lAAygqcIN
+         e3pPKjr5b+xv9lVwfAb4x/WwlJTAK4LVL3N9zFkcmIIh7Xfjs9z8CvpfFkJ/Dv3qeooy
+         LHoQ==
+X-Gm-Message-State: ACrzQf1C0583UsXRvfrzxwDl4NYyZrwVKM6WXL7Qv9QYHREOiw/WH9//
+        oasj0MfOq3ALZBYbcQXuqIEAnsMTp/Po8ORt2/Q/0Tmdd0tzodAnyDYjtS0tj2xugSuBsKEjR4p
+        wM2dZ9H8leGqdvbL7fw==
+X-Received: by 2002:a05:622a:1046:b0:35c:dde0:6735 with SMTP id f6-20020a05622a104600b0035cdde06735mr3169190qte.689.1663859820051;
+        Thu, 22 Sep 2022 08:17:00 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7rBl9yq/Ktfsu6VfwCU4ZtoRMHQJO2O6CBUQBTpY+PfHXmdR6DN6JvmkOXvjkrMcIlKnhGVA==
+X-Received: by 2002:a05:622a:1046:b0:35c:dde0:6735 with SMTP id f6-20020a05622a104600b0035cdde06735mr3169170qte.689.1663859819821;
+        Thu, 22 Sep 2022 08:16:59 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id bm17-20020a05620a199100b006c73c3d288esm4071956qkb.131.2022.09.22.08.08.15
+        by smtp.gmail.com with ESMTPSA id k7-20020a05620a138700b006b9c6d590fasm3812917qki.61.2022.09.22.08.16.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 22 Sep 2022 08:08:16 -0700 (PDT)
-Date:   Thu, 22 Sep 2022 23:08:12 +0800
+        Thu, 22 Sep 2022 08:16:59 -0700 (PDT)
+Date:   Thu, 22 Sep 2022 23:16:55 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Pavel Reichl <preichl@redhat.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] generic: cleanup test files
-Message-ID: <20220922150812.b3tp2cdue7bklxvs@zlang-mailbox>
+Subject: Re: [PATCH 2/4] g/299: speed up the test
+Message-ID: <20220922151655.3eudeubqbh6s32io@zlang-mailbox>
 References: <20220922134822.1020119-1-preichl@redhat.com>
- <20220922134822.1020119-3-preichl@redhat.com>
- <20220922143638.ruwujtwblv43sgfo@zlang-mailbox>
- <91ec6d59-5014-2e3e-8e80-aac162b8ffc1@redhat.com>
+ <20220922134822.1020119-2-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <91ec6d59-5014-2e3e-8e80-aac162b8ffc1@redhat.com>
+In-Reply-To: <20220922134822.1020119-2-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 22, 2022 at 04:55:17PM +0200, Pavel Reichl wrote:
-> 2) If these $BASE_TEST_FILE* files won't take too much space, and won't affect
->    later testing, how about keeping them in $TEST_DIR, then remove these
->    specific _cleanup(). From my testing, after running g/285, g/436, g/445 and
->    g/448, I got [1]. Looks like they only takes ~25M space.
+On Thu, Sep 22, 2022 at 03:48:20PM +0200, Pavel Reichl wrote:
+> Move the _require_xfs_io_command "falloc" above the
+> potencially 'expensive' function _get_max_file_size
 > 
->    Hi,
-> 
->    as I mentioned in the commit message - in my case I'm getting:
->    8.0G  seek_sanity_testfile10
->    So I think it's good idea to solve it somehow.
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> ---
 
-OK, you can combine patch 1,3,4 into one patch, due to they all take too
-much space on filesystem which doesn't support sparse file, so we make
-sure these files be cleanup.
+It's not for speeding up this test, I think you're trying to notrun this case
+on a fs which doesn't support fallocate and sparse file but support truncate
+syscall. Anyway I don't have objection on this patch.
+
+>  tests/generic/299 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/299 b/tests/generic/299
+> index 8e1a112c..1bb371a3 100755
+> --- a/tests/generic/299
+> +++ b/tests/generic/299
+> @@ -24,6 +24,7 @@ _require_scratch
+>  _require_odirect
+>  _require_aio
+>  _require_block_device $SCRATCH_DEV
+> +_require_xfs_io_command "falloc"
+>  
+>  NUM_JOBS=$((4*LOAD_FACTOR))
+>  BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+> @@ -96,7 +97,6 @@ filename=buffered-aio-verifier
+>  EOF
+>  
+>  _require_fio $fio_config
+> -_require_xfs_io_command "falloc"
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+>  _scratch_mount
+> -- 
+> 2.37.3
+> 
 
