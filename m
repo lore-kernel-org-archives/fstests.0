@@ -2,262 +2,775 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DCA5ECAAD8
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Sep 2022 14:46:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16C01C04A95
+	for <linux-fstests@archiver.kernel.org>; Sat, 24 Sep 2022 00:49:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231255AbiIWOqz (ORCPT
+        id S231253AbiIXAty (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 23 Sep 2022 10:46:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40910 "EHLO
+        Fri, 23 Sep 2022 20:49:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230110AbiIWOqx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Sep 2022 10:46:53 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FBF0142E37
-        for <fstests@vger.kernel.org>; Fri, 23 Sep 2022 07:46:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1663944410;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=H40lw/bCWI9drNhEVO4RrgNa2U+qIWPzkkfvxjoxtKs=;
-        b=aBzAt9lJUBivBsB5mdeY2muvYdLu9sylbUG6BFb5dFEHM8e2QOd8K9/o5qxYwjeDbHO1SX
-        qTBlvCPFA10fR8UlDxyAfViQufxYA0UxJ1ZCeleFpykGU+/VlXlCWyciMK4HuWSNOzdLJF
-        S1ILng7yq0Wb67cqyxHjj3PIs1d6Xkc=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-79-ihAwJC7qPTSX-SvLlU96mw-1; Fri, 23 Sep 2022 10:46:49 -0400
-X-MC-Unique: ihAwJC7qPTSX-SvLlU96mw-1
-Received: by mail-pj1-f71.google.com with SMTP id d1-20020a17090a2a4100b00202ec7968c0so127194pjg.6
-        for <fstests@vger.kernel.org>; Fri, 23 Sep 2022 07:46:49 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=H40lw/bCWI9drNhEVO4RrgNa2U+qIWPzkkfvxjoxtKs=;
-        b=DL/iMq/42VX/2HhVnRhXKDCM6ex1fah6a3UryCdw5TUyJHBLCpWPLk44uCl5Rlpow/
-         2yS3OumEUrhBBbfgHp0e2WHSAH+WPoQXhbsmmvDA6llSsDFCU1dB1YD9FoojfJz268s3
-         IlAKrHE8PaqVw5EyHYHfJvDXhupLLGWkHG6dVLuuW4x8extFTd5KYMm0JuDriLraH/jO
-         ehes6t8M6Se0nRqB5L3/uNTIaZUeRySwmDeG3q+yjeuG1L9zU/MOIY3vZ7Cg7Lw99qQ4
-         zS/+1ReAtlk32SglwT9x2nrssS6ZzpgfP1GPvCxWwiQLZAwdQGmtCu1HoZEfWuIStZgT
-         J2ZQ==
-X-Gm-Message-State: ACrzQf1ghthq2r7uWh0tEO3P1I3JsFOVUBRXvCUQoTTWZXdhAOUgmPau
-        8uHbpZQJzTDOhmGxYv1YYMPU5flomV110+DJJF5rAlyeRq/I4nGm+S9D2603dvBZX9bDOSro0cl
-        DtEHSxauYowkWtW1S+w==
-X-Received: by 2002:a05:6a00:180a:b0:540:a7f6:4393 with SMTP id y10-20020a056a00180a00b00540a7f64393mr9659459pfa.65.1663944408587;
-        Fri, 23 Sep 2022 07:46:48 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM6R7VzAGc+gWQtmPBNQvbZ1DkJS7EToMkjX7NIGIH81UScIuDsKOnZSUp+uLJ+l8KgiKv+KqQ==
-X-Received: by 2002:a05:6a00:180a:b0:540:a7f6:4393 with SMTP id y10-20020a056a00180a00b00540a7f64393mr9659428pfa.65.1663944408231;
-        Fri, 23 Sep 2022 07:46:48 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c17-20020aa79531000000b0054ad9c6b70fsm6508964pfp.8.2022.09.23.07.46.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Sep 2022 07:46:47 -0700 (PDT)
-Date:   Fri, 23 Sep 2022 22:46:43 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Goldwyn Rodrigues <rgoldwyn@suse.de>,
-        Filipe Manana <fdmanana@suse.com>,
-        Goldwyn Rodrigues <rgoldwyn@suse.com>
-Subject: Re: [PATCH v3] btrfs: test xattr changes for RO btrfs property
-Message-ID: <20220923144643.ifffuy5usi5hjoaz@zlang-mailbox>
-References: <f72207b27052afc7dcbdf4fb7cf956fc37105724.1663840534.git.fdmanana@suse.com>
+        with ESMTP id S230079AbiIXAtw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Sep 2022 20:49:52 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56F8325C5A;
+        Fri, 23 Sep 2022 17:49:49 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id DEB7AB815B4;
+        Sat, 24 Sep 2022 00:49:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73B0BC433C1;
+        Sat, 24 Sep 2022 00:49:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1663980586;
+        bh=w3ncYbAZVqVmZUaZ2xMVsQOw6b3krBG1QnRzmI5mIYo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=uNqVMMJ83laaT00mv0LsrlCiCPGSTjPi1zLg2s344BEcuUyzxGE41v+3h7uHrjB+S
+         KkWmTvmDq026qoNBqv72RED2dOwJE1lFHBHNdEhXoKWMsjkdSXhTrp6871R40qhIbs
+         Jq5HQ0PmurFyZ9RxkyxJVmKY+dmt0xL9dSwwfNyVIb6lLlbmrzYv8hwl4HsBDSMu6b
+         +WD9kqJGQYvN68anJwOTh6ByIvrBpse51NK6cufEVV9pWq70UmZ3qhtjCHRon9Hkn5
+         U1S45s4fppL8krM4FYUSlmEEc5UbfNzyBZCu2W//uG8SrgSd0Lzv5Bvgub7sSN9g2L
+         6TFwV0yVi3ZUA==
+Date:   Fri, 23 Sep 2022 17:49:45 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Catherine Hoang <catherine.hoang@oracle.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v1 1/1] xfstests: Add parent pointer test
+Message-ID: <Yy5UKf1SxzszOCYw@magnolia>
+References: <20220614220129.20847-1-catherine.hoang@oracle.com>
+ <20220614220129.20847-2-catherine.hoang@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f72207b27052afc7dcbdf4fb7cf956fc37105724.1663840534.git.fdmanana@suse.com>
+In-Reply-To: <20220614220129.20847-2-catherine.hoang@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 22, 2022 at 10:56:39AM +0100, fdmanana@kernel.org wrote:
-> From: Goldwyn Rodrigues <rgoldwyn@suse.de>
+On Tue, Jun 14, 2022 at 03:01:29PM -0700, Catherine Hoang wrote:
+> From: Allison Henderson <allison.henderson@oracle.com>
 > 
-> Test creation, modification and deletion of xattr for a BTRFS filesystem
-> which has the read-only property set to true.
+> This patch adds a test for basic parent pointer operations,
+> including link, unlink, rename, overwrite, hardlinks and
+> error inject.
 > 
-> Re-test the same after read-only property is set to false.
-> 
-> This tests the bug for "security.*" modifications which escape
-> xattr_permission(), because security parameters are usually let through
-> in xattr_permission, without checking
-> inode_permission()->btrfs_permission().
-> 
-> This resulted in being able to change a security xattr on a RO subvolume
-> until it got fixed by kernel commit b51111271b03 ("btrfs: check if root
-> is readonly while setting security xattr").
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+> Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
+> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
 > ---
+>  common/parent       |  196 +++++++++
+>  common/rc           |    3 +
+>  doc/group-names.txt |    1 +
+>  tests/xfs/547       |  126 ++++++
+>  tests/xfs/547.out   |   59 +++
+>  tests/xfs/548       |   97 +++++
+>  tests/xfs/548.out   | 1002 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/549       |  110 +++++
+>  tests/xfs/549.out   |   14 +
+>  9 files changed, 1608 insertions(+)
+>  create mode 100644 common/parent
+>  create mode 100755 tests/xfs/547
+>  create mode 100644 tests/xfs/547.out
+>  create mode 100755 tests/xfs/548
+>  create mode 100644 tests/xfs/548.out
+>  create mode 100755 tests/xfs/549
+>  create mode 100644 tests/xfs/549.out
 > 
-> V3: Use the _getfattr() helper.
->     Redirect mkfs output to the .full file and remove the _fail call,
->     which is an antipattern.
-> 
->     Change the subject from:
-> 
->     "btrfs: test security xattr changes for RO btrfs property"
-> 
->     to:
-> 
->     "btrfs: test xattr changes for RO btrfs property"
-> 
->     Since it does not test only security xattrs.
-
-This version looks good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-
-> 
->  tests/btrfs/275     | 88 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/275.out | 39 ++++++++++++++++++++
->  2 files changed, 127 insertions(+)
->  create mode 100755 tests/btrfs/275
->  create mode 100644 tests/btrfs/275.out
-> 
-> diff --git a/tests/btrfs/275 b/tests/btrfs/275
-> new file mode 100755
-> index 00000000..b34fbda0
+> diff --git a/common/parent b/common/parent
+> new file mode 100644
+> index 00000000..0af12553
 > --- /dev/null
-> +++ b/tests/btrfs/275
-> @@ -0,0 +1,88 @@
+> +++ b/common/parent
+> @@ -0,0 +1,196 @@
+> +#
+> +# Parent pointer common functions
+> +#
+> +
+> +#
+> +# parse_parent_pointer parents parent_inode parent_pointer_name
+> +#
+> +# Given a list of parent pointers, find the record that matches
+> +# the given inode and filename
+> +#
+> +# inputs:
+> +# parents	: A list of parent pointers in the format of:
+> +#		  inode/generation/name_length/name
+> +# parent_inode	: The parent inode to search for
+> +# parent_name	: The parent name to search for
+> +#
+> +# outputs:
+> +# PPINO         : Parent pointer inode
+> +# PPGEN         : Parent pointer generation
+> +# PPNAME        : Parent pointer name
+> +# PPNAME_LEN    : Parent pointer name length
+> +#
+> +_parse_parent_pointer()
+> +{
+> +	local parents=$1
+> +	local pino=$2
+> +	local parent_pointer_name=$3
+> +
+> +	local found=0
+> +
+> +	# Find the entry that has the same inode as the parent
+> +	# and parse out the entry info
+> +	while IFS=\/ read PPINO PPGEN PPNAME_LEN PPNAME; do
+> +		if [ "$PPINO" != "$pino" ]; then
+> +			continue
+> +		fi
+> +
+> +		if [ "$PPNAME" != "$parent_pointer_name" ]; then
+> +			continue
+> +		fi
+> +
+> +		found=1
+> +		break
+> +	done <<< $(echo "$parents")
+> +
+> +	# Check to see if we found anything
+> +	# We do not fail the test because we also use this
+> +	# routine to verify when parent pointers should
+> +	# be removed or updated  (ie a rename or a move
+> +	# operation changes your parent pointer)
+> +	if [ $found -eq "0" ]; then
+> +		return 1
+> +	fi
+> +
+> +	# Verify the parent pointer name length is correct
+> +	if [ "$PPNAME_LEN" -ne "${#parent_pointer_name}" ]
+> +	then
+> +		_fail "Bad parent pointer reclen"
+
+Do you really want to _fail the whole test immediately?  Or simply let
+the golden output comparison mark the test failed because there's
+unexpected output from "echo 'bad parent pointer reclen'" ?
+
+> +	fi
+> +
+> +	#return sucess
+> +	return 0
+> +}
+> +
+> +#
+> +# _verify_parent parent_path parent_pointer_name child_path
+> +#
+> +# Verify that the given child path lists the given parent as a parent pointer
+> +# and that the parent pointer name matches the given name
+> +#
+> +# Examples:
+> +#
+> +# #simple example
+> +# mkdir testfolder1
+> +# touch testfolder1/file1
+> +# verify_parent testfolder1 file1 testfolder1/file1
+> +#
+> +# # In this above example, we want to verify that "testfolder1"
+> +# # appears as a parent pointer of "testfolder1/file1".  Additionally
+> +# # we verify that the name record of the parent pointer is "file1"
+> +#
+> +#
+> +# #hardlink example
+> +# mkdir testfolder1
+> +# mkdir testfolder2
+> +# touch testfolder1/file1
+> +# ln testfolder1/file1 testfolder2/file1_ln
+> +# verify_parent testfolder2 file1_ln testfolder1/file1
+> +#
+> +# # In this above example, we want to verify that "testfolder2"
+> +# # appears as a parent pointer of "testfolder1/file1".  Additionally
+> +# # we verify that the name record of the parent pointer is "file1_ln"
+> +#
+> +_verify_parent()
+> +{
+> +
+> +	local parent_path=$1
+> +	local parent_pointer_name=$2
+> +	local child_path=$3
+> +
+> +	local parent_ppath="$parent_path/$parent_pointer_name"
+> +
+> +	# Verify parent exists
+> +	if [ ! -d $SCRATCH_MNT/$parent_path ]; then
+> +		_fail "$SCRATCH_MNT/$parent_path not found"
+> +	else
+> +		echo "*** $parent_path OK"
+> +	fi
+> +
+> +	# Verify child exists
+> +	if [ ! -f $SCRATCH_MNT/$child_path ]; then
+> +		_fail "$SCRATCH_MNT/$child_path not found"
+> +	else
+> +		echo "*** $child_path OK"
+> +	fi
+> +
+> +	# Verify the parent pointer name exists as a child of the parent
+> +	if [ ! -f $SCRATCH_MNT/$parent_ppath ]; then
+> +		_fail "$SCRATCH_MNT/$parent_ppath not found"
+> +	else
+> +		echo "*** $parent_ppath OK"
+> +	fi
+> +
+> +	# Get the inodes of both parent and child
+> +	pino="$(stat -c '%i' $SCRATCH_MNT/$parent_path)"
+> +	cino="$(stat -c '%i' $SCRATCH_MNT/$child_path)"
+> +
+> +	# Get all the parent pointers of the child
+> +	parents=($($XFS_IO_PROG -x -c "parent -f -i $pino -n $parent_pointer_name" $SCRATCH_MNT/$child_path))
+> +	if [[ $? != 0 ]]; then
+> +		 _fail "No parent pointers found for $child_path"
+> +	fi
+> +
+> +	# Parse parent pointer output.
+> +	# This sets PPINO PPGEN PPNAME PPNAME_LEN
+> +	_parse_parent_pointer $parents $pino $parent_pointer_name
+> +
+> +	# If we didnt find one, bail out
+> +	if [ $? -ne 0 ]; then
+> +		_fail "No parent pointer record found for $parent_path in $child_path"
+> +	fi
+> +
+> +	# Verify the inode generated by the parent pointer name is
+> +	# the same as the child inode
+> +	pppino="$(stat -c '%i' $SCRATCH_MNT/$parent_ppath)"
+> +	if [ $cino -ne $pppino ]
+> +	then
+> +		_fail "Bad parent pointer name value for $child_path."\
+> +				"$SCRATCH_MNT/$parent_ppath belongs to inode $PPPINO, but should be $cino"
+> +	fi
+> +
+> +	echo "*** Verified parent pointer:"\
+> +			"name:$PPNAME, namelen:$PPNAME_LEN"
+> +	echo "*** Parent pointer OK for child $child_path"
+> +}
+> +
+> +#
+> +# _verify_parent parent_pointer_name pino child_path
+> +#
+> +# Verify that the given child path contains no parent pointer entry
+> +# for the given inode and file name
+> +#
+> +_verify_no_parent()
+> +{
+> +
+> +	local parent_pname=$1
+> +	local pino=$2
+> +	local child_path=$3
+> +
+> +	# Verify child exists
+> +	if [ ! -f $SCRATCH_MNT/$child_path ]; then
+> +		_fail "$SCRATCH_MNT/$child_path not found"
+> +	else
+> +		echo "*** $child_path OK"
+> +	fi
+> +
+> +	# Get all the parent pointers of the child
+> +	local parents=($($XFS_IO_PROG -x -c "parent -f -i $pino -n $parent_pname" $SCRATCH_MNT/$child_path))
+> +	if [[ $? != 0 ]]; then
+> +		return 0
+> +	fi
+> +
+> +	# Parse parent pointer output.
+> +	# This sets PPINO PPGEN PPNAME PPNAME_LEN
+> +	_parse_parent_pointer $parents $pino $parent_pname
+> +
+> +	# If we didnt find one, return sucess
+> +	if [ $? -ne 0 ]; then
+> +		return 0
+> +	fi
+> +
+> +	_fail "Parent pointer entry found where none should:"\
+> +			"inode:$PPINO, gen:$PPGEN,"
+> +			"name:$PPNAME, namelen:$PPNAME_LEN"
+> +}
+> +
+> diff --git a/common/rc b/common/rc
+> index 4201a059..68752cdc 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2701,6 +2701,9 @@ _require_xfs_io_command()
+>  		echo $testio | grep -q "invalid option" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+> +	"parent")
+> +		testio=`$XFS_IO_PROG -x -c "parent" $TEST_DIR 2>&1`
+> +		;;
+>  	"pwrite")
+>  		# -N (RWF_NOWAIT) only works with direct vectored I/O writes
+>  		local pwrite_opts=" "
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index e8e3477e..98bbe3b7 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -77,6 +77,7 @@ nfs4_acl		NFSv4 access control lists
+>  nonsamefs		overlayfs layers on different filesystems
+>  online_repair		online repair functionality tests
+>  other			dumping ground, do not add more tests to this group
+> +parent			Parent pointer tests
+>  pattern			specific IO pattern tests
+>  perms			access control and permission checking
+>  pipe			pipe functionality
+> diff --git a/tests/xfs/547 b/tests/xfs/547
+> new file mode 100755
+> index 00000000..5c7d1d45
+> --- /dev/null
+> +++ b/tests/xfs/547
+> @@ -0,0 +1,126 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 275
+> +# FS QA Test 547
 > +#
-> +# Test that no xattr can be changed once btrfs property is set to RO.
+> +# simple parent pointer test
 > +#
-> +. ./common/preamble
-> +_begin_fstest auto quick attr
 > +
-> +# Import common functions.
+> +. ./common/preamble
+> +_begin_fstest auto quick parent
+> +
+> +cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	echo 0 > /sys/fs/xfs/debug/larp
+> +}
+> +
+> +full()
+> +{
+> +    echo ""            >>$seqres.full
+> +    echo "*** $* ***"  >>$seqres.full
+> +    echo ""            >>$seqres.full
+> +}
+> +
+> +# get standard environment, filters and checks
 > +. ./common/filter
-> +. ./common/attr
+> +. ./common/reflink
+> +. ./common/inject
+> +. ./common/parent
+> +
+> +# Modify as appropriate
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_sysfs debug/larp
+> +_require_xfs_io_error_injection "larp"
+> +
+> +echo 1 > /sys/fs/xfs/debug/larp
+
+Doesn't the parent pointer code turn on LARP mode automatically?
+Why does the test need to do that explicitly?
+
 > +
 > +# real QA test starts here
-> +_supported_fs btrfs
-> +_fixed_by_kernel_commit b51111271b03 \
-> +	"btrfs: check if root is readonly while setting security xattr"
-> +_require_attrs
-> +_require_btrfs_command "property"
-> +_require_scratch
 > +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
+> +# Create a directory tree using a protofile and
+> +# make sure all inodes created have parent pointers
 > +
-> +FILENAME=$SCRATCH_MNT/foo
+> +protofile=$tmp.proto
 > +
-> +set_xattr()
-> +{
-> +	local value=$1
-> +	$SETFATTR_PROG -n "user.one" -v $value $FILENAME 2>&1 | _filter_scratch
-> +	$SETFATTR_PROG -n "security.one" -v $value $FILENAME 2>&1 | _filter_scratch
-> +	$SETFATTR_PROG -n "trusted.one" -v $value $FILENAME 2>&1 | _filter_scratch
-> +}
+> +cat >$protofile <<EOF
+> +DUMMY1
+> +0 0
+> +: root directory
+> +d--777 3 1
+> +: a directory
+> +testfolder1 d--755 3 1
+> +file1 ---755 3 1 /dev/null
+> +$
+> +: back in the root
+> +testfolder2 d--755 3 1
+> +file2 ---755 3 1 /dev/null
+> +: done
+> +$
+> +EOF
 > +
-> +get_xattr()
-> +{
-> +	_getfattr --absolute-names -n "user.one" $FILENAME 2>&1 | _filter_scratch
-> +	_getfattr --absolute-names -n "security.one" $FILENAME 2>&1 | _filter_scratch
-> +	_getfattr --absolute-names -n "trusted.one" $FILENAME 2>&1 | _filter_scratch
-> +}
+> +if [ $? -ne 0 ]
+> +then
+> +    _fail "failed to create test protofile"
+> +fi
 > +
-> +del_xattr()
-> +{
-> +	$SETFATTR_PROG -x "user.one" $FILENAME 2>&1 | _filter_scratch
-> +	$SETFATTR_PROG -x "security.one" $FILENAME 2>&1 | _filter_scratch
-> +	$SETFATTR_PROG -x "trusted.one" $FILENAME 2>&1 | _filter_scratch
-> +}
+> +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqres.full 2>&1 \
+> +	|| _fail "mkfs failed"
+> +_check_scratch_fs
 > +
-> +# Create a test file.
-> +echo "hello world" > $FILENAME
+> +_scratch_mount >>$seqres.full 2>&1 \
+> +	|| _fail "mount failed"
 > +
-> +set_xattr 1
+> +testfolder1="testfolder1"
+> +testfolder2="testfolder2"
+> +file1="file1"
+> +file2="file2"
+> +file3="file3"
+> +file4="file4"
+> +file5="file5"
+> +file1_ln="file1_link"
 > +
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro true
-> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+> +echo ""
+> +# Create parent pointer test
+> +_verify_parent "$testfolder1" "$file1" "$testfolder1/$file1"
 > +
-> +# Attempt to change values of RO (property) filesystem.
-> +set_xattr 2
+> +echo ""
+> +# Move parent pointer test
+> +mv $SCRATCH_MNT/$testfolder1/$file1 $SCRATCH_MNT/$testfolder2/$file1
+> +_verify_parent "$testfolder2" "$file1" "$testfolder2/$file1"
 > +
-> +# Check the values of RO (property) filesystem are not changed.
-> +get_xattr
+> +echo ""
+> +# Hard link parent pointer test
+> +ln $SCRATCH_MNT/$testfolder2/$file1 $SCRATCH_MNT/$testfolder1/$file1_ln
+> +_verify_parent "$testfolder1" "$file1_ln"  "$testfolder1/$file1_ln"
+> +_verify_parent "$testfolder1" "$file1_ln"  "$testfolder2/$file1"
+> +_verify_parent "$testfolder2" "$file1"     "$testfolder1/$file1_ln"
+> +_verify_parent "$testfolder2" "$file1"     "$testfolder2/$file1"
 > +
-> +# Attempt to remove xattr from RO (property) filesystem.
-> +del_xattr
+> +echo ""
+> +# Remove hard link parent pointer test
+> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file1)"
+> +rm $SCRATCH_MNT/$testfolder2/$file1
+> +_verify_parent    "$testfolder1" "$file1_ln" "$testfolder1/$file1_ln"
+> +_verify_no_parent "$file1" "$ino" "$testfolder1/$file1_ln"
 > +
-> +# Check if xattr still exist.
-> +get_xattr
+> +echo ""
+> +# Rename parent pointer test
+> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder1/$file1_ln)"
+> +mv $SCRATCH_MNT/$testfolder1/$file1_ln $SCRATCH_MNT/$testfolder1/$file2
+> +_verify_parent    "$testfolder1" "$file2"    "$testfolder1/$file2"
+> +_verify_no_parent "$file1_ln" "$ino" "$testfolder1/$file2"
 > +
-> +# Change filesystem property RO to false
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT ro false
-> +$BTRFS_UTIL_PROG property get $SCRATCH_MNT ro
+> +echo ""
+> +# Over write parent pointer test
+> +touch $SCRATCH_MNT/$testfolder2/$file3
+> +_verify_parent    "$testfolder2" "$file3"    "$testfolder2/$file3"
+> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file3)"
+> +mv -f $SCRATCH_MNT/$testfolder2/$file3 $SCRATCH_MNT/$testfolder1/$file2
+> +_verify_parent    "$testfolder1" "$file2"    "$testfolder1/$file2"
 > +
-> +# Change the xattrs after RO is false.
-> +set_xattr 2
-> +
-> +# Get the changed values.
-> +get_xattr
-> +
-> +# Remove xattr.
-> +del_xattr
-> +
-> +# check if the xattrs are really deleted.
-> +get_xattr
-> +
+> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/275.out b/tests/btrfs/275.out
+> diff --git a/tests/xfs/547.out b/tests/xfs/547.out
 > new file mode 100644
-> index 00000000..fb8f02f8
+> index 00000000..e0ce9e65
 > --- /dev/null
-> +++ b/tests/btrfs/275.out
-> @@ -0,0 +1,39 @@
-> +QA output created by 275
-> +ro=true
-> +setfattr: SCRATCH_MNT/foo: Read-only file system
-> +setfattr: SCRATCH_MNT/foo: Read-only file system
-> +setfattr: SCRATCH_MNT/foo: Read-only file system
-> +# file: SCRATCH_MNT/foo
-> +user.one="1"
+> +++ b/tests/xfs/547.out
+> @@ -0,0 +1,59 @@
+> +QA output created by 547
 > +
-> +# file: SCRATCH_MNT/foo
-> +security.one="1"
+> +*** testfolder1 OK
+> +*** testfolder1/file1 OK
+> +*** testfolder1/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder1/file1
 > +
-> +# file: SCRATCH_MNT/foo
-> +trusted.one="1"
+> +*** testfolder2 OK
+> +*** testfolder2/file1 OK
+> +*** testfolder2/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder2/file1
 > +
-> +setfattr: SCRATCH_MNT/foo: Read-only file system
-> +setfattr: SCRATCH_MNT/foo: Read-only file system
-> +setfattr: SCRATCH_MNT/foo: Read-only file system
-> +# file: SCRATCH_MNT/foo
-> +user.one="1"
+> +*** testfolder1 OK
+> +*** testfolder1/file1_link OK
+> +*** testfolder1/file1_link OK
+> +*** Verified parent pointer: name:file1_link, namelen:10
+> +*** Parent pointer OK for child testfolder1/file1_link
+> +*** testfolder1 OK
+> +*** testfolder2/file1 OK
+> +*** testfolder1/file1_link OK
+> +*** Verified parent pointer: name:file1_link, namelen:10
+> +*** Parent pointer OK for child testfolder2/file1
+> +*** testfolder2 OK
+> +*** testfolder1/file1_link OK
+> +*** testfolder2/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder1/file1_link
+> +*** testfolder2 OK
+> +*** testfolder2/file1 OK
+> +*** testfolder2/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder2/file1
 > +
-> +# file: SCRATCH_MNT/foo
-> +security.one="1"
+> +*** testfolder1 OK
+> +*** testfolder1/file1_link OK
+> +*** testfolder1/file1_link OK
+> +*** Verified parent pointer: name:file1_link, namelen:10
+> +*** Parent pointer OK for child testfolder1/file1_link
+> +*** testfolder1/file1_link OK
 > +
-> +# file: SCRATCH_MNT/foo
-> +trusted.one="1"
+> +*** testfolder1 OK
+> +*** testfolder1/file2 OK
+> +*** testfolder1/file2 OK
+> +*** Verified parent pointer: name:file2, namelen:5
+> +*** Parent pointer OK for child testfolder1/file2
+> +*** testfolder1/file2 OK
 > +
-> +ro=false
-> +# file: SCRATCH_MNT/foo
-> +user.one="2"
+> +*** testfolder2 OK
+> +*** testfolder2/file3 OK
+> +*** testfolder2/file3 OK
+> +*** Verified parent pointer: name:file3, namelen:5
+> +*** Parent pointer OK for child testfolder2/file3
+> +*** testfolder1 OK
+> +*** testfolder1/file2 OK
+> +*** testfolder1/file2 OK
+> +*** Verified parent pointer: name:file2, namelen:5
+> +*** Parent pointer OK for child testfolder1/file2
+> diff --git a/tests/xfs/548 b/tests/xfs/548
+> new file mode 100755
+> index 00000000..229d871a
+> --- /dev/null
+> +++ b/tests/xfs/548
+> @@ -0,0 +1,97 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# FS QA Test 548
+> +#
+> +# multi link parent pointer test
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick parent
 > +
-> +# file: SCRATCH_MNT/foo
-> +security.one="2"
+> +cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	echo 0 > /sys/fs/xfs/debug/larp
+> +}
 > +
-> +# file: SCRATCH_MNT/foo
-> +trusted.one="2"
+> +full()
+> +{
+> +    echo ""            >>$seqres.full
+> +    echo "*** $* ***"  >>$seqres.full
+> +    echo ""            >>$seqres.full
+> +}
 > +
-> +SCRATCH_MNT/foo: user.one: No such attribute
-> +SCRATCH_MNT/foo: security.one: No such attribute
-> +SCRATCH_MNT/foo: trusted.one: No such attribute
-> -- 
-> 2.35.1
-> 
+> +# get standard environment, filters and checks
+> +. ./common/filter
+> +. ./common/reflink
+> +. ./common/inject
+> +. ./common/parent
+> +
+> +# Modify as appropriate
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_io_error_injection "larp"
+> +_require_xfs_sysfs debug/larp
+> +
+> +echo 1 > /sys/fs/xfs/debug/larp
+> +
+> +# real QA test starts here
+> +
+> +# Create a directory tree using a protofile and
+> +# make sure all inodes created have parent pointers
+> +
+> +protofile=$tmp.proto
+> +
+> +cat >$protofile <<EOF
+> +DUMMY1
+> +0 0
+> +: root directory
+> +d--777 3 1
+> +: a directory
+> +testfolder1 d--755 3 1
+> +file1 ---755 3 1 /dev/null
+> +: done
+> +$
+> +EOF
+> +
+> +if [ $? -ne 0 ]
+> +then
+> +    _fail "failed to create test protofile"
+> +fi
+> +
+> +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqresres.full 2>&1 \
+> +	|| _fail "mkfs failed"
+> +_check_scratch_fs
+> +
+> +_scratch_mount >>$seqres.full 2>&1 \
+> +	|| _fail "mount failed"
+> +
+> +testfolder1="testfolder1"
+> +testfolder2="testfolder2"
+> +file1="file1"
+> +file2="file2"
+> +file3="file3"
+> +file4="file4"
+> +file5="file5"
+> +file1_ln="file1_link"
+> +
+> +echo ""
+> +# Multi link parent pointer test
+> +NLINKS=100
+> +for (( j=0; j<$NLINKS; j++ )); do
+> +	ln $SCRATCH_MNT/$testfolder1/$file1 $SCRATCH_MNT/$testfolder1/$file1_ln.$j
+> +	_verify_parent    "$testfolder1" "$file1_ln.$j"    "$testfolder1/$file1"
+> +	_verify_parent    "$testfolder1" "$file1"          "$testfolder1/$file1_ln.$j"
+> +done
+> +# Multi unlink parent pointer test
+> +for (( j=$NLINKS-1; j<=0; j-- )); do
+> +	ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder1/$file1_ln.$j)"
+> +	rm $SCRATCH_MNT/$testfolder1/$file1_ln.$j
+> +	_verify_no_parent "$file1_ln.$j" "$ino" "$testfolder1/$file1"
+> +done
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/548.out b/tests/xfs/548.out
+> new file mode 100644
+> index 00000000..afdc083b
+> --- /dev/null
+> +++ b/tests/xfs/548.out
+> @@ -0,0 +1,1002 @@
+> +QA output created by 548
+> +
+> +*** testfolder1 OK
 
+<snip>
+
+> +*** testfolder1 OK
+> +*** testfolder1/file1_link.99 OK
+> +*** testfolder1/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder1/file1_link.99
+> diff --git a/tests/xfs/549 b/tests/xfs/549
+> new file mode 100755
+> index 00000000..e8e74b8a
+> --- /dev/null
+> +++ b/tests/xfs/549
+> @@ -0,0 +1,110 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# FS QA Test 549
+> +#
+> +# parent pointer inject test
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick parent
+> +
+> +cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	echo 0 > /sys/fs/xfs/debug/larp
+> +}
+> +
+> +full()
+> +{
+> +    echo ""            >>$seqres.full
+> +    echo "*** $* ***"  >>$seqres.full
+> +    echo ""            >>$seqres.full
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/filter
+> +. ./common/reflink
+> +. ./common/inject
+> +. ./common/parent
+> +
+> +# Modify as appropriate
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_sysfs debug/larp
+> +_require_xfs_io_error_injection "larp"
+> +
+> +echo 1 > /sys/fs/xfs/debug/larp
+> +
+> +# real QA test starts here
+> +
+> +# Create a directory tree using a protofile and
+> +# make sure all inodes created have parent pointers
+
+Looks like we're testing the error injection knobs too?
+
+--D
+
+> +
+> +protofile=$tmp.proto
+> +
+> +cat >$protofile <<EOF
+> +DUMMY1
+> +0 0
+> +: root directory
+> +d--777 3 1
+> +: a directory
+> +testfolder1 d--755 3 1
+> +file1 ---755 3 1 /dev/null
+> +$
+> +: back in the root
+> +testfolder2 d--755 3 1
+> +file2 ---755 3 1 /dev/null
+> +: done
+> +$
+> +EOF
+> +
+> +if [ $? -ne 0 ]
+> +then
+> +    _fail "failed to create test protofile"
+> +fi
+> +
+> +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqres.full 2>&1 \
+> +	|| _fail "mkfs failed"
+> +_check_scratch_fs
+> +
+> +_scratch_mount >>$seqres.full 2>&1 \
+> +	|| _fail "mount failed"
+> +
+> +testfolder1="testfolder1"
+> +testfolder2="testfolder2"
+> +file1="file1"
+> +file2="file2"
+> +file3="file3"
+> +file4="file4"
+> +file5="file5"
+> +file1_ln="file1_link"
+> +
+> +echo ""
+> +
+> +# Create files
+> +touch $SCRATCH_MNT/$testfolder1/$file4
+> +_verify_parent    "$testfolder1" "$file4" "$testfolder1/$file4"
+> +
+> +# Inject error
+> +_scratch_inject_error "larp"
+> +
+> +# Move files
+> +mv $SCRATCH_MNT/$testfolder1/$file4 $SCRATCH_MNT/$testfolder2/$file5 2>&1 | _filter_scratch
+> +
+> +# FS should be shut down, touch will fail
+> +touch $SCRATCH_MNT/$testfolder2/$file5 2>&1 | _filter_scratch
+> +
+> +# Remount to replay log
+> +_scratch_remount_dump_log >> $seqres.full
+> +
+> +# FS should be online, touch should succeed
+> +touch $SCRATCH_MNT/$testfolder2/$file5
+> +
+> +# Check files again
+> +_verify_parent    "$testfolder2" "$file5" "$testfolder2/$file5"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/549.out b/tests/xfs/549.out
+> new file mode 100644
+> index 00000000..1af49c73
+> --- /dev/null
+> +++ b/tests/xfs/549.out
+> @@ -0,0 +1,14 @@
+> +QA output created by 549
+> +
+> +*** testfolder1 OK
+> +*** testfolder1/file4 OK
+> +*** testfolder1/file4 OK
+> +*** Verified parent pointer: name:file4, namelen:5
+> +*** Parent pointer OK for child testfolder1/file4
+> +mv: cannot stat 'SCRATCH_MNT/testfolder1/file4': Input/output error
+> +touch: cannot touch 'SCRATCH_MNT/testfolder2/file5': Input/output error
+> +*** testfolder2 OK
+> +*** testfolder2/file5 OK
+> +*** testfolder2/file5 OK
+> +*** Verified parent pointer: name:file5, namelen:5
+> +*** Parent pointer OK for child testfolder2/file5
+> -- 
+> 2.25.1
+> 
