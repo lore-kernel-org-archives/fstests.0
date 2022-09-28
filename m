@@ -2,150 +2,144 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A083C32771
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Sep 2022 10:13:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1254C32771
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Sep 2022 15:33:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231642AbiI1KNA (ORCPT
+        id S229486AbiI1Pdk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Sep 2022 06:13:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36032 "EHLO
+        Wed, 28 Sep 2022 11:33:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45604 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232294AbiI1KM7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Sep 2022 06:12:59 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CF3AF2747
-        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 03:12:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1664359976;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=34ah5Qx5SWB/Hj8cpIchXCXz8Ue2F2IGLqZPbERHyto=;
-        b=V/icuWO1Uk5cYwIGAYdEYiLYI9CjX4ud4KtB6F0DN08FZQu0qKZGsbdSubv4Z4qFrxU5eB
-        1hYuhKWZMx7S/3GfZTcqQkPCYsc8WdPNi7DlRdBNqXom0wV+zZmTK2aeYBIT5k54ygzStv
-        6E1D9C//pGLsYzhNdJSyH5aMWrVo73k=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-402-vRLv0JlnNiKkrcpsLnCl9Q-1; Wed, 28 Sep 2022 06:12:55 -0400
-X-MC-Unique: vRLv0JlnNiKkrcpsLnCl9Q-1
-Received: by mail-qk1-f198.google.com with SMTP id br14-20020a05620a460e00b006cec4af5a2fso9095882qkb.2
-        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 03:12:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=34ah5Qx5SWB/Hj8cpIchXCXz8Ue2F2IGLqZPbERHyto=;
-        b=vULEeqo/NmhdicDyCxuhlbbtnKKX3yaDXAbbOLSNqNzggh/rUqmDh5s8OJd5syYtd5
-         jr2bwncg0JY6Q8CDBK6f6g6RL1XuHY45qP/DyQ4RoKbkCeCqopB+Fkj9YNNMbRwQRihA
-         4rM82xJszFt8Bz5KBzdqu6GU7btlSMO2IeJr63TDVBEGdr9BUpRlVluF87vKyldHfP5A
-         yWy/a9oN34+I9BeWNFk+cUb1Wt5Znzf6Z/dRjWGQgtur9O6WcmkLUU1mecKKfQyhf8h5
-         bBy53ie24Fn1PH9tfLjcnPWLmcHiPoyrUncABcqO+x+Xzlw/ePXG/uTLa5iqpGU95wEO
-         K1Rw==
-X-Gm-Message-State: ACrzQf247+qHAwH2rEmZVEkmabmlem4XYmkutC66MeWSRWnar2r0yw2Y
-        q00+0u7gAkwxLueUCJzPZlZb095EG22YeurKdnpjX7KuRbMgvJ6r9zvIkfGi7aJwLyB8oCfEs9o
-        hN1UzUOALl+obG6sFBg==
-X-Received: by 2002:ac8:5909:0:b0:35b:ce5c:ed73 with SMTP id 9-20020ac85909000000b0035bce5ced73mr25392048qty.635.1664359975047;
-        Wed, 28 Sep 2022 03:12:55 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4JGBVNtWy9tMXwmkgIEckWnJDeIWtEspWCYEjr0BDUO+vSzCxJn35ZnruFwmn/0lxjiUIm0A==
-X-Received: by 2002:ac8:5909:0:b0:35b:ce5c:ed73 with SMTP id 9-20020ac85909000000b0035bce5ced73mr25392025qty.635.1664359974780;
-        Wed, 28 Sep 2022 03:12:54 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id h12-20020a05620a284c00b006b5e296452csm2448074qkp.54.2022.09.28.03.12.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Sep 2022 03:12:54 -0700 (PDT)
-Date:   Wed, 28 Sep 2022 18:12:49 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 3/3] xfs/229: do not _xfs_force_bdev on TEST_DIR
-Message-ID: <20220928101249.we2numsrkpzbruqx@zlang-mailbox>
-References: <166433903099.2008389.13181182359220271890.stgit@magnolia>
- <166433904802.2008389.15649565619122354418.stgit@magnolia>
+        with ESMTP id S234495AbiI1PdV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Sep 2022 11:33:21 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84ED3C9973;
+        Wed, 28 Sep 2022 08:32:49 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3BEA561EFD;
+        Wed, 28 Sep 2022 15:32:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92953C433C1;
+        Wed, 28 Sep 2022 15:32:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1664379167;
+        bh=2EUplTuwlkLDv8yF0HvdcZx3IIz7WNtbOI9oKAAlT0U=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nwdBWdfZEjWnOk/oEvm0s9/Ub4NYipbKqNh7ruX+8yTvVeMQVjguQFakSG+r9MOjb
+         9mgWzxl6kP4Zj6aHP9OJ7HaO1dyOMubMUXGScOYwhho9E20f8STrf8tM18gXTwAr9s
+         Vbdt/yvNuWqnVUbJGiGpUhwKSQjp5evQo4iI6d41QcLb1Onr3P1qWPHDCWa3ElZgnE
+         fOi3CEuyivcllR1KL+z0RaHmSiuwgCAJxJggQr45cAmzFdxJxONRWD7Ylaxv92MSTZ
+         18hdDA0jhKa0o1x2o6n7lfArIo8f6hwcxA7tRPNUHoWz89e7gZNjh/AVFoCq7yo1oG
+         v7Nzs+aWn4Zfg==
+Date:   Wed, 28 Sep 2022 08:32:47 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Naohiro Aota <Naohiro.Aota@wdc.com>,
+        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+Subject: Re: [PATCH 1/2] common: introduce zone_capacity() to return a zone
+ capacity
+Message-ID: <YzRpH5SvkKwhlELi@magnolia>
+References: <cover.1663825728.git.naohiro.aota@wdc.com>
+ <97ede9bba67f0848fc0b706d757170d7dfacb7fd.1663825728.git.naohiro.aota@wdc.com>
+ <20220922154132.dpadkhaccwzysq4d@zlang-mailbox>
+ <PH0PR04MB741656D7881D11281ECBBD489B519@PH0PR04MB7416.namprd04.prod.outlook.com>
+ <20220923115126.s3ctf4erpepa3zy7@zlang-mailbox>
+ <20220928035707.v7kv4ult46w3hjlj@naota-xeon>
+ <20220928054715.ol6gammnf6jmrjab@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <166433904802.2008389.15649565619122354418.stgit@magnolia>
+In-Reply-To: <20220928054715.ol6gammnf6jmrjab@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 27, 2022 at 09:24:08PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Sep 28, 2022 at 01:47:15PM +0800, Zorro Lang wrote:
+> On Wed, Sep 28, 2022 at 03:57:08AM +0000, Naohiro Aota wrote:
+> > On Fri, Sep 23, 2022 at 07:51:26PM +0800, Zorro Lang wrote:
+> > > On Fri, Sep 23, 2022 at 08:02:10AM +0000, Johannes Thumshirn wrote:
+> > > > On 22.09.22 17:42, Zorro Lang wrote:
+> > > > >> --- /dev/null
+> > > > >> +++ b/common/zbd
+> > > > > I don't like this abbreviation :-P If others don't open this file and read the
+> > > > > comment in it, they nearly no chance to guess what's this file for.
+> > > > > 
+> > > > 
+> > > > zbd is a well known abbreviation for zoned block devices. I think most
+> > > > people in storage and filesystems know it.
+> > > 
+> > > OK, but we haven't been that "a single character is worth a thousand
+> > > pieces of gold", so we can use a longer name, likes common/zone,
+> > > common/zoned, common/zoned_block, common/zoned_device or something likes
+> > > that. Anyway, that's just my personal opinion, if most of people prefer
+> > > using "common/zbd", I'm fine to have that :) 
+> > 
+> > Sure. I'll use "zoned" as it is more common in the kernel code.
+> > 
+> > > But I hope you can move all zoned block device related helpers to the new
+> > > common file if you'd like to bring in this file, likes what Darrick did in:
+> > > 
+> > > commit 67afd5c742464607994316acb2c6e8303b8af4c5
+> > > Author: Darrick J. Wong <djwong@kernel.org>
+> > > Date:   Tue Aug 9 14:00:46 2022 -0700
+> > > 
+> > >     common/rc: move ext4-specific helpers into a separate common/ext4 file
+> > 
+> > Yes, that will be better to have things in common/zoned. I considered
+> > moving zoned functions (_zone_type, _require_{,non_}zoned_device), but
+> > _require_loop() and _require_dm_target() use _require_non_zoned_device() in
+> > them. So, moving _require_non_zoned_device() will make a dependency from
+> > common/rc to common/zoned, which I considered not much clean. How do you
+> > think of it?
 > 
-> In commit ea15099b71, I observed that this test tries to test the
-> behavior of the extent size hint on the data device.  If the test runner
-> set up MKFS_OPTIONS such that the filesystem gets created with a
-> realtime section and rtinherit set on the root directory, then the
-> preconditions of this test (creating files on the data section) is not
-> satisfied and the results of this test are incorrect.  The solution was
-> to force all files created by this test to be assigned to the data
-> section.
+> Oh, below commit [1] brought in the coupling of common/rc and zoned helpers.
+> Hmm... that cause all the 3 helpers (_zone_type, _require_{,non_}zoned_device)
+> have to be in common/rc or be imported in common/rc. Looks like we have to
+> keep them in common/rc, except we make a bigger refactor to common/rc, or you'd
+> like to make your 2 new helpers in common/rc too (likes these 3 old ones:)
 > 
-> Unfortunately, the correction that I made has side effects beyond this
-> test -- by clearing rtinherit on $TEST_DIR, all tests that run after
-> this one will create files on the data section, because the test
-> filesystem persists for the duration of the entire test run.  This leads
-> to the wrong things being tested.
-> 
-> Fix this new problem by clearing the rtinherit flag on $TDIR, which
-> contains the files created by this test and is removed during cleanup,
-> and leave a few comments celebrating our new discoveries.
-> 
-> Fixes: ea15099b71 ("xfs: force file creation to the data device for certain layout tests")
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+> BTW I doubt if we might need to use more zoned related helpers in common/rc, due
+> to we deal with test devices in common/rc mostly, likes dax. Someone might want
+> a seperated common/dax or common/pmem file one day. The common/rc imports
+> specific fs helpers according to $FSTYP (common/config: _source_specific_fs()).
+> If we need to deal with different kind of device types in common/rc one day, is
+> there a better idea to determine which one should be imported? Welcome any
+> suggestions if anyone has :)
 
-OK, good news is most of _xfs_force_bdev run on SCRATCH_MNT, only this x/229 run
-on TEST_DIR. Better to not change TEST_DIR directly, to avoid it affect later
-testing. Thanks for fix it.
+Leave those three in common/rc and put/move the rest to common/zoned ?
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+I think it's fine for common/rc to have helpers that *detect* the
+presence of a blockdev feature, and require tests to source
+common/$feature if they want to do anything clever with that feature.
+After all, the _require_non_zoned_device tests don't care about
+_zone_capacity, right?
 
-Thanks,
-Zorro
+--D
 
->  common/xfs    |    3 +++
->  tests/xfs/229 |    7 ++++++-
->  2 files changed, 9 insertions(+), 1 deletion(-)
+> [1]
+> commit 952310a57d9323ae0bb174b50be93107a8895e0c
+> Author: Naohiro Aota <naohiro.aota@wdc.com>
+> Date:   Mon Aug 16 20:35:08 2021 +0900
 > 
+>     common: add zoned block device checks
 > 
-> diff --git a/common/xfs b/common/xfs
-> index 170dd621a1..e1c15d3d04 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -201,6 +201,9 @@ _xfs_get_file_block_size()
->  # For each directory, each file subsequently created will target the given
->  # device for file data allocations.  For each empty regular file, each
->  # subsequent file data allocation will be on the given device.
-> +#
-> +# NOTE: If you call this on $TEST_DIR, you must reset the rtinherit flag state
-> +# before the end of the test to avoid polluting subsequent tests.
->  _xfs_force_bdev()
->  {
->  	local device="$1"
-> diff --git a/tests/xfs/229 b/tests/xfs/229
-> index 2221b9c49c..a58fd16bba 100755
-> --- a/tests/xfs/229
-> +++ b/tests/xfs/229
-> @@ -31,11 +31,16 @@ _require_fs_space $TEST_DIR 3200000
->  TDIR="${TEST_DIR}/t_holes"
->  NFILES="10"
->  EXTSIZE="256k"
-> -_xfs_force_bdev data $TEST_DIR
->  
->  # Create the test directory
->  mkdir ${TDIR}
->  
-> +# Per-directory extent size hints aren't particularly useful for files that
-> +# are created on the realtime section.  Force the test file to be created on
-> +# the data directory.  Do not change the rtinherit flag on $TEST_DIR because
-> +# that will affect other tests.
-> +_xfs_force_bdev data $TDIR
-> +
->  # Set the test directory extsize
->  $XFS_IO_PROG -c "extsize ${EXTSIZE}" ${TDIR}
->  
+> > 
+> > Moving _filter_blkzone_report() would be fine, though.
 > 
-
+> Yeah, moving this is fine.
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > 
+> > > > 
+> > > 
+> > 
+> 
