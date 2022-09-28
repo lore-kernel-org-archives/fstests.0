@@ -2,153 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1D95C32771
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Sep 2022 05:47:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59BD1C32771
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Sep 2022 09:28:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230185AbiI1Fr0 (ORCPT
+        id S233227AbiI1J21 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Sep 2022 01:47:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39920 "EHLO
+        Wed, 28 Sep 2022 05:28:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232303AbiI1FrZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Sep 2022 01:47:25 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9C3E102500
-        for <fstests@vger.kernel.org>; Tue, 27 Sep 2022 22:47:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1664344042;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=UcB2qI4DuMPPORjctmP9Ux78GtR4/YOSaCOXY9+toX4=;
-        b=CrmUC3MgMDl9E2wiruhmTbssLpVdnuBU15qv7neNzyB1bBvRLibfyTaI5JeZecVLYFz7gV
-        THwu3bB/rrMB26MK+mcYvgxAXn0vpXMr+AcsWQ/8pxx80vZivvhbEW6CvnOFjNy/yJLeZW
-        QumQ5cs7Fe4OsQgAuSFdRzNV59WGlSI=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-390-9sjf9j6vPian4IzSxcDGag-1; Wed, 28 Sep 2022 01:47:21 -0400
-X-MC-Unique: 9sjf9j6vPian4IzSxcDGag-1
-Received: by mail-pl1-f200.google.com with SMTP id n10-20020a170902e54a00b001782663dcaeso7632601plf.18
-        for <fstests@vger.kernel.org>; Tue, 27 Sep 2022 22:47:20 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=UcB2qI4DuMPPORjctmP9Ux78GtR4/YOSaCOXY9+toX4=;
-        b=jaHDC2Kxc3bIRj1ukggKMnxrsIQYBrT66EHbY2IIeajie1x369PrCtAPezVuROjmhf
-         Ntcj0ed4PQ/H+L5Gh5Vlcu5cKrjM/4pIQdS2rKo5q/8JXEbpbi/0GpZJPQAx15JlQlHl
-         ScrVj3d6/QybQQ+KJ1k7GtL1ZcAf3BHguNDVDhltQb82QVAjeHoafC9pM45t9RT8ApAd
-         3PqAW/2lZ3fVllsctuZCc7YWHRsPecGs2yiGhBIzgCKj5aOuc1lUp90c+MhCHtUXgKAD
-         RPTtwkfIPC44u8XAknLBZqy0BAyZDiArxO+lHlUUd4f7nUXbRCochppcnnY4Y03Un1TG
-         zJ3A==
-X-Gm-Message-State: ACrzQf0i9dVgcCPG1ECb+G48lsDwqE8W5m8d0dsB4TDXku/7VoLYT6nj
-        F+ZjEiOOt1azx+ejw43lnFRbc6lvcIBNZtooSgIfNVfwC0seLPc6tNrN6ycFyLaop+7V/viiGWh
-        YyytDKgFZi301yUsJWA==
-X-Received: by 2002:a17:90b:3889:b0:200:8255:f0e5 with SMTP id mu9-20020a17090b388900b002008255f0e5mr8744429pjb.51.1664344040109;
-        Tue, 27 Sep 2022 22:47:20 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5Z3qZ4SqdS6G6THd0M37egNcEsx/EbTy2MlWbZFALHMCqylw9cj/wRIMVdY5U4D3hbRjSn4Q==
-X-Received: by 2002:a17:90b:3889:b0:200:8255:f0e5 with SMTP id mu9-20020a17090b388900b002008255f0e5mr8744416pjb.51.1664344039801;
-        Tue, 27 Sep 2022 22:47:19 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g20-20020aa796b4000000b0053e199aa99bsm2874819pfk.220.2022.09.27.22.47.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Sep 2022 22:47:19 -0700 (PDT)
-Date:   Wed, 28 Sep 2022 13:47:15 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Naohiro Aota <Naohiro.Aota@wdc.com>
-Cc:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH 1/2] common: introduce zone_capacity() to return a zone
- capacity
-Message-ID: <20220928054715.ol6gammnf6jmrjab@zlang-mailbox>
-References: <cover.1663825728.git.naohiro.aota@wdc.com>
- <97ede9bba67f0848fc0b706d757170d7dfacb7fd.1663825728.git.naohiro.aota@wdc.com>
- <20220922154132.dpadkhaccwzysq4d@zlang-mailbox>
- <PH0PR04MB741656D7881D11281ECBBD489B519@PH0PR04MB7416.namprd04.prod.outlook.com>
- <20220923115126.s3ctf4erpepa3zy7@zlang-mailbox>
- <20220928035707.v7kv4ult46w3hjlj@naota-xeon>
+        with ESMTP id S233114AbiI1J20 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Sep 2022 05:28:26 -0400
+Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02CF7B56C5;
+        Wed, 28 Sep 2022 02:28:25 -0700 (PDT)
+Received: from kwepemi500019.china.huawei.com (unknown [172.30.72.56])
+        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4McrfH0pMdz1P6sW;
+        Wed, 28 Sep 2022 17:24:07 +0800 (CST)
+Received: from huawei.com (10.175.124.27) by kwepemi500019.china.huawei.com
+ (7.221.188.117) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Wed, 28 Sep
+ 2022 17:28:22 +0800
+From:   Guo Xuenan <guoxuenan@huawei.com>
+To:     <zlang@redhat.com>, <dchinner@redhat.com>, <djwong@kernel.org>
+CC:     <fstests@vger.kernel.org>, <guoxuenan@huawei.com>,
+        <houtao1@huawei.com>, <jack.qiu@huawei.com>,
+        <linux-xfs@vger.kernel.org>, <yi.zhang@huawei.com>,
+        <zhengbin13@huawei.com>
+Subject: [PATCH v2] xfs/554: xfs add illegal bestfree array size inject for leaf dir
+Date:   Wed, 28 Sep 2022 17:53:55 +0800
+Message-ID: <20220928095355.2074025-1-guoxuenan@huawei.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220904005549.c3dzjutog724wykg@zlang-mailbox>
+References: <20220904005549.c3dzjutog724wykg@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220928035707.v7kv4ult46w3hjlj@naota-xeon>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.124.27]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ kwepemi500019.china.huawei.com (7.221.188.117)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 28, 2022 at 03:57:08AM +0000, Naohiro Aota wrote:
-> On Fri, Sep 23, 2022 at 07:51:26PM +0800, Zorro Lang wrote:
-> > On Fri, Sep 23, 2022 at 08:02:10AM +0000, Johannes Thumshirn wrote:
-> > > On 22.09.22 17:42, Zorro Lang wrote:
-> > > >> --- /dev/null
-> > > >> +++ b/common/zbd
-> > > > I don't like this abbreviation :-P If others don't open this file and read the
-> > > > comment in it, they nearly no chance to guess what's this file for.
-> > > > 
-> > > 
-> > > zbd is a well known abbreviation for zoned block devices. I think most
-> > > people in storage and filesystems know it.
-> > 
-> > OK, but we haven't been that "a single character is worth a thousand
-> > pieces of gold", so we can use a longer name, likes common/zone,
-> > common/zoned, common/zoned_block, common/zoned_device or something likes
-> > that. Anyway, that's just my personal opinion, if most of people prefer
-> > using "common/zbd", I'm fine to have that :) 
-> 
-> Sure. I'll use "zoned" as it is more common in the kernel code.
-> 
-> > But I hope you can move all zoned block device related helpers to the new
-> > common file if you'd like to bring in this file, likes what Darrick did in:
-> > 
-> > commit 67afd5c742464607994316acb2c6e8303b8af4c5
-> > Author: Darrick J. Wong <djwong@kernel.org>
-> > Date:   Tue Aug 9 14:00:46 2022 -0700
-> > 
-> >     common/rc: move ext4-specific helpers into a separate common/ext4 file
-> 
-> Yes, that will be better to have things in common/zoned. I considered
-> moving zoned functions (_zone_type, _require_{,non_}zoned_device), but
-> _require_loop() and _require_dm_target() use _require_non_zoned_device() in
-> them. So, moving _require_non_zoned_device() will make a dependency from
-> common/rc to common/zoned, which I considered not much clean. How do you
-> think of it?
+Test leaf dir allocting new block when bestfree array size
+less than data blocks count, which may lead to UAF.
 
-Oh, below commit [1] brought in the coupling of common/rc and zoned helpers.
-Hmm... that cause all the 3 helpers (_zone_type, _require_{,non_}zoned_device)
-have to be in common/rc or be imported in common/rc. Looks like we have to
-keep them in common/rc, except we make a bigger refactor to common/rc, or you'd
-like to make your 2 new helpers in common/rc too (likes these 3 old ones:)
+Signed-off-by: Guo Xuenan <guoxuenan@huawei.com>
+---
+ tests/xfs/554     | 96 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/554.out |  7 ++++
+ 2 files changed, 103 insertions(+)
+ create mode 100755 tests/xfs/554
+ create mode 100644 tests/xfs/554.out
 
-BTW I doubt if we might need to use more zoned related helpers in common/rc, due
-to we deal with test devices in common/rc mostly, likes dax. Someone might want
-a seperated common/dax or common/pmem file one day. The common/rc imports
-specific fs helpers according to $FSTYP (common/config: _source_specific_fs()).
-If we need to deal with different kind of device types in common/rc one day, is
-there a better idea to determine which one should be imported? Welcome any
-suggestions if anyone has :)
-
-[1]
-commit 952310a57d9323ae0bb174b50be93107a8895e0c
-Author: Naohiro Aota <naohiro.aota@wdc.com>
-Date:   Mon Aug 16 20:35:08 2021 +0900
-
-    common: add zoned block device checks
-
-> 
-> Moving _filter_blkzone_report() would be fine, though.
-
-Yeah, moving this is fine.
-
-Thanks,
-Zorro
-
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > 
-> > 
-> 
+diff --git a/tests/xfs/554 b/tests/xfs/554
+new file mode 100755
+index 00000000..dba6aefa
+--- /dev/null
++++ b/tests/xfs/554
+@@ -0,0 +1,96 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Huawei Limited.  All Rights Reserved.
++#
++# FS QA Test No. 554
++#
++# Check the running state of the XFS under illegal bestfree count
++# for leaf directory format.
++
++. ./common/preamble
++_begin_fstest auto quick
++
++# Import common functions.
++. ./common/populate
++
++# real QA test starts here
++_supported_fs xfs
++_require_scratch
++
++# Get last dirblock entries
++__lastdb_entry_list()
++{
++	local dir_ino=$1
++	local entry_list=$2
++	local nblocks=`_scratch_xfs_db -c "inode $dir_ino" -c "p core.nblocks" |
++			sed -e 's/^.*core.nblocks = //g' -e 's/\([0-9]*\).*$/\1/g'`
++	local last_db=$((nblocks / 2))
++	_scratch_xfs_db -c "inode $dir_ino" -c "dblock ${last_db}" -c 'p du' |\
++		grep ".name =" | sed -e 's/^.*.name = //g' \
++		-e 's/\"//g' > ${entry_list} ||\
++		_fail "get last dir block entries failed"
++}
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++echo "Create and check leaf dir"
++blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
++dirblksz=`$XFS_INFO_PROG "${SCRATCH_DEV}" | grep naming.*bsize |
++	sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g'`
++# Usually, following routine will create a directory with one leaf block
++# and three data block, meanwhile, the last data block is not full.
++__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dirblksz / 12))"
++leaf_dir="$(__populate_find_inode "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF")"
++_scratch_unmount
++
++# Delete directory entries in the last directory block,
++last_db_entries=$tmp.ldb_ents
++__lastdb_entry_list ${leaf_dir} ${last_db_entries}
++_scratch_mount
++cat ${last_db_entries} >> $seqres.full
++cat ${last_db_entries} | while read f
++do
++	rm -rf ${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/$f
++done
++_scratch_unmount
++
++# Check leaf directory
++leaf_lblk="$((32 * 1073741824 / blksz))"
++node_lblk="$((64 * 1073741824 / blksz))"
++__populate_check_xfs_dir "${leaf_dir}" "leaf"
++
++# Inject abnormal bestfree count
++echo "Inject bad bestfree count."
++_scratch_xfs_db -x -c "inode ${leaf_dir}" -c "dblock ${leaf_lblk}" \
++	-c "write ltail.bestcount 0"
++# Adding new entries to S_IFDIR.FMT_LEAF. Since we delete the files
++# in last direcotry block, current dir block have no spare space for new
++# entry. With ltail.bestcount setting illegally (eg. bestcount=0), then
++# creating new directories, which will trigger xfs to allocate new dir
++# block, meanwhile, exception will be triggered.
++# Root cause is that xfs don't examin the number bestfree slots, when the
++# slots number less than dir data blocks, if we need to allocate new dir
++# data block and update the bestfree array, we will use the dir block number
++# as index to assign bestfree array, while we did not check the leaf buf
++# boundary which may cause UAF or other memory access problem.
++echo "Add directory entries to trigger exception."
++_scratch_mount
++seq 1 $((dirblksz / 24)) | while read d
++do
++mkdir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/TEST$(printf "%.04d" "$d")" >> $seqres.full 2>&1
++done
++_scratch_unmount
++
++# Bad bestfree count should be found and fixed by xfs_repair
++_scratch_xfs_repair -n >> $seqres.full 2>&1
++egrep -q 'leaf block.*bad tail' $seqres.full && echo "Repair found problems."
++_repair_scratch_fs >> $seqres.full 2>&1 || _fail "Repair failed!"
++
++# Check demsg error
++_check_dmesg
++
++# Success, all done
++status=0
++exit
+diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+new file mode 100644
+index 00000000..d966ab0a
+--- /dev/null
++++ b/tests/xfs/554.out
+@@ -0,0 +1,7 @@
++QA output created by 554
++Format and mount
++Create and check leaf dir
++Inject bad bestfree count.
++ltail.bestcount = 0
++Add a directory entry to trigger exception.
++Repair found problems.
+-- 
+2.25.1
 
