@@ -2,144 +2,224 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1254C32771
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Sep 2022 15:33:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16C25C04A95
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Sep 2022 21:12:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229486AbiI1Pdk (ORCPT
+        id S234680AbiI1VMy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Sep 2022 11:33:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45604 "EHLO
+        Wed, 28 Sep 2022 17:12:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234495AbiI1PdV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Sep 2022 11:33:21 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84ED3C9973;
-        Wed, 28 Sep 2022 08:32:49 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3BEA561EFD;
-        Wed, 28 Sep 2022 15:32:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92953C433C1;
-        Wed, 28 Sep 2022 15:32:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664379167;
-        bh=2EUplTuwlkLDv8yF0HvdcZx3IIz7WNtbOI9oKAAlT0U=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=nwdBWdfZEjWnOk/oEvm0s9/Ub4NYipbKqNh7ruX+8yTvVeMQVjguQFakSG+r9MOjb
-         9mgWzxl6kP4Zj6aHP9OJ7HaO1dyOMubMUXGScOYwhho9E20f8STrf8tM18gXTwAr9s
-         Vbdt/yvNuWqnVUbJGiGpUhwKSQjp5evQo4iI6d41QcLb1Onr3P1qWPHDCWa3ElZgnE
-         fOi3CEuyivcllR1KL+z0RaHmSiuwgCAJxJggQr45cAmzFdxJxONRWD7Ylaxv92MSTZ
-         18hdDA0jhKa0o1x2o6n7lfArIo8f6hwcxA7tRPNUHoWz89e7gZNjh/AVFoCq7yo1oG
-         v7Nzs+aWn4Zfg==
-Date:   Wed, 28 Sep 2022 08:32:47 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Naohiro Aota <Naohiro.Aota@wdc.com>,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH 1/2] common: introduce zone_capacity() to return a zone
- capacity
-Message-ID: <YzRpH5SvkKwhlELi@magnolia>
-References: <cover.1663825728.git.naohiro.aota@wdc.com>
- <97ede9bba67f0848fc0b706d757170d7dfacb7fd.1663825728.git.naohiro.aota@wdc.com>
- <20220922154132.dpadkhaccwzysq4d@zlang-mailbox>
- <PH0PR04MB741656D7881D11281ECBBD489B519@PH0PR04MB7416.namprd04.prod.outlook.com>
- <20220923115126.s3ctf4erpepa3zy7@zlang-mailbox>
- <20220928035707.v7kv4ult46w3hjlj@naota-xeon>
- <20220928054715.ol6gammnf6jmrjab@zlang-mailbox>
+        with ESMTP id S233512AbiI1VM2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Sep 2022 17:12:28 -0400
+Received: from mail-qk1-x731.google.com (mail-qk1-x731.google.com [IPv6:2607:f8b0:4864:20::731])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B77910B226;
+        Wed, 28 Sep 2022 14:07:17 -0700 (PDT)
+Received: by mail-qk1-x731.google.com with SMTP id h28so8712951qka.0;
+        Wed, 28 Sep 2022 14:07:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date;
+        bh=ooZR2YU2nQ8lFMMYZZVjgeUFJelu6/7ApndiUdTsin0=;
+        b=L2AobJtj7kVtE6b2CFAs5tCB6if4KuHbDXAjLaLGEM+kJXGdY9L+y9XgnyBoB0MNh+
+         xsz4wwM4D3ANhfQchsWX5/nkhD1mHiTsUMEfzyrnIILYlKmsFCB8sprqXRakad2FXC+R
+         4tdZ48vq0mMVrVk+H+AupdL3gHj8oIz1SR8EKiXWEMfxDqcQxSgItnZTnp+j/vQZaTnS
+         6Zjc9kN5UAS9ykyuvQVNshm8EL8YHNWBjenzzNOEuKVsmv5wIfMTv9wfcqeFKogLK/vO
+         or278T+LExsWWfu1U4B9t7JUb8DlrkrVNZUxtTbZkPpbaaw8xGqn9qhxnlEnclBcDhVe
+         V00w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date;
+        bh=ooZR2YU2nQ8lFMMYZZVjgeUFJelu6/7ApndiUdTsin0=;
+        b=tDePWgCQZObSAn7NBQFlE+sf8g+KqNN6febE2WSEntnqweUariHZCsfEbwVC6FuRt2
+         0T8q5k/OrDBcaO63fjyoHuKuydzW8FxEGBosa/1i3LknrSCEsgQaY4jO/fRSUXFbXGep
+         uYiRl0S+uUOkFN3O5v51aTPHNtZ+pNPv+okQLeoD4GscCgGeFqYBHsRe4ep7Vd+ZmQbW
+         B7s1liRTCZ6FJauZ+FzV5QmtjOZvd0+kpLP21dTpK5kdCGiBE6o6NdJfgXkmaEg0x6iG
+         fLRhu215+jvRCCrgNuGdUi0TfL3lkzrnsgHFaevrdEZRRyJHRNKXEYfHMQTTdaQLEITJ
+         IlfQ==
+X-Gm-Message-State: ACrzQf1V+4KLwodzZVx1OCiRYjP5Kdd3dVzKOl9qblX3k/eZsP6sUfq3
+        RJYVpfF9Km1tZcmJhuKhWx+QAHzMzqga3mgl
+X-Google-Smtp-Source: AMsMyM5WJ9T0H4NRCGydJVVF3volXE2A9lG/ekllG4xXXc8e9jJOWqHzBHbjkLaOyGreSTfUDE54/w==
+X-Received: by 2002:a37:f71c:0:b0:6ce:e3f7:4438 with SMTP id q28-20020a37f71c000000b006cee3f74438mr23261501qkj.453.1664399151231;
+        Wed, 28 Sep 2022 14:05:51 -0700 (PDT)
+Received: from shiina-laptop.redhat.com ([2601:18f:801:e210:abfc:537a:d62c:c353])
+        by smtp.gmail.com with ESMTPSA id ay33-20020a05620a17a100b006cf43968db6sm3962275qkb.76.2022.09.28.14.05.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Sep 2022 14:05:50 -0700 (PDT)
+From:   Hironori Shiina <shiina.hironori@gmail.com>
+X-Google-Original-From: Hironori Shiina <shiina.hironori@fujitsu.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org,
+        Hironori Shiina <shiina.hironori@fujitsu.com>
+Subject: [RFC PATCH] xfs: test for fixing wrong root inode number
+Date:   Wed, 28 Sep 2022 17:03:37 -0400
+Message-Id: <20220928210337.417054-1-shiina.hironori@fujitsu.com>
+X-Mailer: git-send-email 2.37.3
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220928054715.ol6gammnf6jmrjab@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 28, 2022 at 01:47:15PM +0800, Zorro Lang wrote:
-> On Wed, Sep 28, 2022 at 03:57:08AM +0000, Naohiro Aota wrote:
-> > On Fri, Sep 23, 2022 at 07:51:26PM +0800, Zorro Lang wrote:
-> > > On Fri, Sep 23, 2022 at 08:02:10AM +0000, Johannes Thumshirn wrote:
-> > > > On 22.09.22 17:42, Zorro Lang wrote:
-> > > > >> --- /dev/null
-> > > > >> +++ b/common/zbd
-> > > > > I don't like this abbreviation :-P If others don't open this file and read the
-> > > > > comment in it, they nearly no chance to guess what's this file for.
-> > > > > 
-> > > > 
-> > > > zbd is a well known abbreviation for zoned block devices. I think most
-> > > > people in storage and filesystems know it.
-> > > 
-> > > OK, but we haven't been that "a single character is worth a thousand
-> > > pieces of gold", so we can use a longer name, likes common/zone,
-> > > common/zoned, common/zoned_block, common/zoned_device or something likes
-> > > that. Anyway, that's just my personal opinion, if most of people prefer
-> > > using "common/zbd", I'm fine to have that :) 
-> > 
-> > Sure. I'll use "zoned" as it is more common in the kernel code.
-> > 
-> > > But I hope you can move all zoned block device related helpers to the new
-> > > common file if you'd like to bring in this file, likes what Darrick did in:
-> > > 
-> > > commit 67afd5c742464607994316acb2c6e8303b8af4c5
-> > > Author: Darrick J. Wong <djwong@kernel.org>
-> > > Date:   Tue Aug 9 14:00:46 2022 -0700
-> > > 
-> > >     common/rc: move ext4-specific helpers into a separate common/ext4 file
-> > 
-> > Yes, that will be better to have things in common/zoned. I considered
-> > moving zoned functions (_zone_type, _require_{,non_}zoned_device), but
-> > _require_loop() and _require_dm_target() use _require_non_zoned_device() in
-> > them. So, moving _require_non_zoned_device() will make a dependency from
-> > common/rc to common/zoned, which I considered not much clean. How do you
-> > think of it?
-> 
-> Oh, below commit [1] brought in the coupling of common/rc and zoned helpers.
-> Hmm... that cause all the 3 helpers (_zone_type, _require_{,non_}zoned_device)
-> have to be in common/rc or be imported in common/rc. Looks like we have to
-> keep them in common/rc, except we make a bigger refactor to common/rc, or you'd
-> like to make your 2 new helpers in common/rc too (likes these 3 old ones:)
-> 
-> BTW I doubt if we might need to use more zoned related helpers in common/rc, due
-> to we deal with test devices in common/rc mostly, likes dax. Someone might want
-> a seperated common/dax or common/pmem file one day. The common/rc imports
-> specific fs helpers according to $FSTYP (common/config: _source_specific_fs()).
-> If we need to deal with different kind of device types in common/rc one day, is
-> there a better idea to determine which one should be imported? Welcome any
-> suggestions if anyone has :)
+Test '-x' option of xfsrestore. With this option, a wrong root inode
+number is corrected. A root inode number can be wrong in a dump created
+by problematic xfsdump (v3.1.7 - v3.1.9) with blukstat misuse. This
+patch adds a dump with a wrong inode number created by xfsdump 3.1.8.
 
-Leave those three in common/rc and put/move the rest to common/zoned ?
+Link: https://lore.kernel.org/linux-xfs/20201113125127.966243-1-hsiangkao@redhat.com/
+Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
+---
+ common/dump                    |   2 +-
+ src/root-inode-broken-dumpfile | Bin 0 -> 21648 bytes
+ tests/xfs/554                  |  37 +++++++++++++++++++++
+ tests/xfs/554.out              |  57 +++++++++++++++++++++++++++++++++
+ 4 files changed, 95 insertions(+), 1 deletion(-)
+ create mode 100644 src/root-inode-broken-dumpfile
+ create mode 100644 tests/xfs/554
+ create mode 100644 tests/xfs/554.out
 
-I think it's fine for common/rc to have helpers that *detect* the
-presence of a blockdev feature, and require tests to source
-common/$feature if they want to do anything clever with that feature.
-After all, the _require_non_zoned_device tests don't care about
-_zone_capacity, right?
+diff --git a/common/dump b/common/dump
+index 8e0446d9..50b2ba03 100644
+--- a/common/dump
++++ b/common/dump
+@@ -1003,7 +1003,7 @@ _parse_restore_args()
+         --no-check-quota)
+             do_quota_check=false
+             ;;
+-	-K|-R)
++	-K|-R|-x)
+ 	    restore_args="$restore_args $1"
+             ;;
+ 	*)
+diff --git a/src/root-inode-broken-dumpfile b/src/root-inode-broken-dumpfile
+new file mode 100644
+index 0000000000000000000000000000000000000000..9a42e65d8047497be31f3abbaf4223ae384fd14d
+GIT binary patch
+literal 21648
+zcmeI)K}ge49KiAC_J<CEBr!0AwBf~zbCHB}5DyxL6eU8Jnqylvayj;2VuG+d)TN6;
+z5J8vlAaw9hXi(UousT$Sin@BRJfwHM)O+*2*njz_zc+h*ckuV#@BMuKe;;JbgTL{<
+z!SwZ9zC#ERe%reLe5&cz2e}qM<!i2dXQHt^{^`d1Qx{)MMzW#$%dR@J={0`IRsGx4
+z(yn@Oi-nBqCOVIG?&{kpwnv~&w_>6_ozY1^fph=w8(=^oTg&wOe=(WQByyQ_Hfd|4
+z^o76<0!zn#v>k3blbU)nzx=KF^}-G%R;OaQYsHwGDkO`kD^@q^(_Ac_8H<gKj^>a0
+z6p*%BK>q#b>2EE%^!@f?Z`-p+tI@M}qmMm@zMJk>K1U^=d~G^NUG?X4vkvKtOf-3Y
+zpVM9YgM9Y7{*P0ApJNUh^uk1wCnA6V0tg_000IagfB*srAb<b@2q1s}0tg_000Iag
+zfB*srAb<b@2q1s}0tg_000IagfB*srAb<b@2q1s}0tg_000IagfB*srAb`MM1p>_h
+z2-R=Q9ooK1{l9<Dy8IIMUVXr9BW9uI1x7};j+kij|5kLI^32no;n|PvqD74ZOlJ#n
+z0-~CKSlx#liMS>jt232#==00xPqwp;gsZrjc?`PPxaCE~>3(^o5-%+Nj=HegJFK2b
+z=l5zT4IDgO=sJ1zp=jyrALvcQJK|j;sN2_jUmobjN<!S6m1{G<LZ^+JP;T!|3{9)w
+eGf&ioo}iw|li2&4IyG;z<}vrl)Mic2`t2{52##q0
 
---D
+literal 0
+HcmV?d00001
 
-> [1]
-> commit 952310a57d9323ae0bb174b50be93107a8895e0c
-> Author: Naohiro Aota <naohiro.aota@wdc.com>
-> Date:   Mon Aug 16 20:35:08 2021 +0900
-> 
->     common: add zoned block device checks
-> 
-> > 
-> > Moving _filter_blkzone_report() would be fine, though.
-> 
-> Yeah, moving this is fine.
-> 
-> Thanks,
-> Zorro
-> 
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > 
-> > > > 
-> > > 
-> > 
-> 
+diff --git a/tests/xfs/554 b/tests/xfs/554
+new file mode 100644
+index 00000000..13bc62c7
+--- /dev/null
++++ b/tests/xfs/554
+@@ -0,0 +1,37 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
++#
++# FS QA Test No. 554
++#
++# Test restoring a dumpfile with a wrong root inode number created by
++# xfsdump 3.1.8.
++# This test restores the checked-in broken dump with '-x' flag.
++#
++
++. ./common/preamble
++_begin_fstest auto quick dump
++
++# Import common functions.
++. ./common/dump
++
++# real QA test starts here
++_supported_fs xfs
++_require_scratch
++_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
++_scratch_mount
++
++# Create dumpdir for comparing with restoredir
++rm -rf $dump_dir
++mkdir $dump_dir || _fail "failed to mkdir $restore_dir"
++touch $dump_dir/FILE_1019
++
++_do_restore_toc -x -f $here/src/root-inode-broken-dumpfile
++
++_do_restore_file -x -f $here/src/root-inode-broken-dumpfile -L stress_545
++_diff_compare_sub
++_ls_nodate_compare_sub
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+new file mode 100644
+index 00000000..40a3f3a4
+--- /dev/null
++++ b/tests/xfs/554.out
+@@ -0,0 +1,57 @@
++QA output created by 554
++Contents of dump ...
++xfsrestore  -x -f DUMP_FILE -t
++xfsrestore: using file dump (drive_simple) strategy
++xfsrestore: searching media for dump
++xfsrestore: examining media file 0
++xfsrestore: dump description: 
++xfsrestore: hostname: xfsdump
++xfsrestore: mount point: SCRATCH_MNT
++xfsrestore: volume: SCRATCH_DEV
++xfsrestore: session time: TIME
++xfsrestore: level: 0
++xfsrestore: session label: "stress_545"
++xfsrestore: media label: "stress_tape_media"
++xfsrestore: file system ID: ID
++xfsrestore: session id: ID
++xfsrestore: media ID: ID
++xfsrestore: searching media for directory dump
++xfsrestore: reading directories
++xfsrestore: found fake rootino #128, will fix.
++xfsrestore: fix root # to 1024 (bind mount?)
++xfsrestore: 2 directories and 2 entries processed
++xfsrestore: directory post-processing
++xfsrestore: reading non-directory files
++xfsrestore: table of contents display complete: SECS seconds elapsed
++xfsrestore: Restore Status: SUCCESS
++
++dumpdir/FILE_1019
++Restoring from file...
++xfsrestore  -x -f DUMP_FILE  -L stress_545 RESTORE_DIR
++xfsrestore: using file dump (drive_simple) strategy
++xfsrestore: searching media for dump
++xfsrestore: examining media file 0
++xfsrestore: found dump matching specified label:
++xfsrestore: hostname: xfsdump
++xfsrestore: mount point: SCRATCH_MNT
++xfsrestore: volume: SCRATCH_DEV
++xfsrestore: session time: TIME
++xfsrestore: level: 0
++xfsrestore: session label: "stress_545"
++xfsrestore: media label: "stress_tape_media"
++xfsrestore: file system ID: ID
++xfsrestore: session id: ID
++xfsrestore: media ID: ID
++xfsrestore: searching media for directory dump
++xfsrestore: reading directories
++xfsrestore: found fake rootino #128, will fix.
++xfsrestore: fix root # to 1024 (bind mount?)
++xfsrestore: 2 directories and 2 entries processed
++xfsrestore: directory post-processing
++xfsrestore: restoring non-directory files
++xfsrestore: restore complete: SECS seconds elapsed
++xfsrestore: Restore Status: SUCCESS
++Comparing dump directory with restore directory
++Files DUMP_DIR/FILE_1019 and RESTORE_DIR/DUMP_SUBDIR/FILE_1019 are identical
++Comparing listing of dump directory with restore directory
++Files TMP.dump_dir and TMP.restore_dir are identical
+-- 
+2.37.3
+
