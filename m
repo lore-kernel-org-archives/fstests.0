@@ -2,348 +2,259 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1154EC04A95
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Sep 2022 06:01:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46120C433F5
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Sep 2022 11:32:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234865AbiI2GBS (ORCPT
+        id S235301AbiI2Lcc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Sep 2022 02:01:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43384 "EHLO
+        Thu, 29 Sep 2022 07:32:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48596 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234427AbiI2GBS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Sep 2022 02:01:18 -0400
+        with ESMTP id S234411AbiI2Lca (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Sep 2022 07:32:30 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A49E912C1DF
-        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 23:01:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2B9114DAD0
+        for <fstests@vger.kernel.org>; Thu, 29 Sep 2022 04:32:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1664431275;
+        s=mimecast20190719; t=1664451144;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=CRH5eY0riP3D2THopWZq/41hRe90mhyk1DcxGo70UWI=;
-        b=O4zga0Q5wKDvDgXVo6N+6o/XrEKOfmFkyzEusipVRV/ZScQA30dze260tzIkgJUAPK1yXa
-        dOGJg68EdzaKtEgButRr+r7+xwyh9CQ0lSV4/XasgURwi1YetNzgEHF83aFMhCBd/MdFTN
-        1tYK0ETnQBUBrFY17nW6fxIulfnQVY8=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=Apr9Q5u36TNrNptCNL3d0HR1k1onh/SadicM5r1dx5s=;
+        b=HJkNDSgkNlIBmHvIBkEVueyk0HN90Cd9E6epoLBdDk2WGRN6UrMJmIDEtDQ8JUKLZ7qqBB
+        yzEk7oLD/bem7LLcg9XJ0CKwu2lXtw2qszp/g+w+lW64lpjgVUXTzl3cPHO/fZ727cmk63
+        GUyYSEr1Vb8wqkoXHx6/731RPll/Si0=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-9-iO180ZTZN4SPaGqoM-f5xw-1; Thu, 29 Sep 2022 02:01:13 -0400
-X-MC-Unique: iO180ZTZN4SPaGqoM-f5xw-1
-Received: by mail-pl1-f199.google.com with SMTP id l2-20020a170902f68200b00177ee7e673eso384184plg.2
-        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 23:01:13 -0700 (PDT)
+ us-mta-347-JV6uqGFPMGignraQeRwfOQ-1; Thu, 29 Sep 2022 07:32:21 -0400
+X-MC-Unique: JV6uqGFPMGignraQeRwfOQ-1
+Received: by mail-pj1-f71.google.com with SMTP id o23-20020a17090a9f9700b00205dcb26c16so3420097pjp.7
+        for <fstests@vger.kernel.org>; Thu, 29 Sep 2022 04:32:21 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=CRH5eY0riP3D2THopWZq/41hRe90mhyk1DcxGo70UWI=;
-        b=PRdkslkraS6AVkMGgGUpXWXD3J8bMIa8xeIglkBnW/9jZ1s2nxj4p988Vvf0NUrW7A
-         HFLMxBpjinLObQFGTj1QM5Aq7PrsMj5G6oHtMLNpGRtegV+xVa2gRBS52jtOJy9944Tk
-         UBPJr1AhtjlD4/jT33PtOz7g6js6bEtoJJfcNLW43A1vXudMoV5thw93eXoQRVvPzCTF
-         Q/JHtm03vhVr56zxcD6WUlYuxh/rl5Mnnn38JvP6rVExThKf40sNF/Ru6VvxZclbRw3l
-         JmvkLUdsAAILgCq5W06XED2NDuV0sIcUcdS3bGwE0c62Jsgn7krVG4ZxLxrCLNg0el2d
-         dxlA==
-X-Gm-Message-State: ACrzQf1ij4gUSH/xsfumC5x+bAlJbeVkWYqsQFpVhJzUBLT+vHiP8d3F
-        iyI6/FHjf++w80Y8bQ+q9o5hMMCJ8zyGcN56iVNDJEydyC9Er+o67x8BUWTn4NPZmJO61BtPjM1
-        U5Tom1gilbdllOcTS+A==
-X-Received: by 2002:a17:90a:d908:b0:206:122:35d1 with SMTP id c8-20020a17090ad90800b00206012235d1mr1807324pjv.245.1664431272056;
-        Wed, 28 Sep 2022 23:01:12 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5bLPeQAM9FhViiGEesR2l8g4UuARj/+Rxk2fr64IPYTVEHo7q3VhjsSoksLWAlYzzIhaZFKw==
-X-Received: by 2002:a17:90a:d908:b0:206:122:35d1 with SMTP id c8-20020a17090ad90800b00206012235d1mr1807291pjv.245.1664431271600;
-        Wed, 28 Sep 2022 23:01:11 -0700 (PDT)
+        bh=Apr9Q5u36TNrNptCNL3d0HR1k1onh/SadicM5r1dx5s=;
+        b=aJ77fv1CxTnWczfXyfogO/YmxThLTXZHsQpzxptHUL/S9uVp2GgGQsiGBvBAA+0F8W
+         dnz4cK6GYA6BpKP3KokEeUlKoKVRIGp8c6TSENA5L9ull2JSBtJR+TUDGFVNqtxJdNbh
+         cdVquK6VbuVaMW44n5w7JTAG2iVFd5ihHSuRqkq5DNoaZNag6nLXQi3TRxX4IcEogKef
+         ns0Q0Vb6hVChxNv4olsRhuRdKIl67uABFWVLiqaiGljQKiP4KsUTN40lc813YW32IkdT
+         HIlPDB0VBBSfVRlb8LeLG/Wnzc2l70K3Oka8ZdbsFcHq5TPOyA9SsK+KGRUGOQIw3tjP
+         4clw==
+X-Gm-Message-State: ACrzQf2hlAoJOtWyqyglmEBllOEGRt7pmJVz5+bQrZgOhJdsmyEQ4hM5
+        FAwqBGLsMAvmQW77hgd3Etb7KqGfeDeayoAMmdFYbEyZHzpH5HASdkcxXsxwJ4TDHIIcmx5RZpx
+        QONZeoB0qR3o0+sSSyw==
+X-Received: by 2002:a17:90b:4a8a:b0:202:8eec:b87a with SMTP id lp10-20020a17090b4a8a00b002028eecb87amr15986982pjb.48.1664451140192;
+        Thu, 29 Sep 2022 04:32:20 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM4HS72S4N//zP2+QEcJ2ROAvDP7wB9XVZndAp1WcNVPownhLornRMq/gWJ/VS74v0AfwZfstA==
+X-Received: by 2002:a17:90b:4a8a:b0:202:8eec:b87a with SMTP id lp10-20020a17090b4a8a00b002028eecb87amr15986938pjb.48.1664451139794;
+        Thu, 29 Sep 2022 04:32:19 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id rm10-20020a17090b3eca00b00202618f0df4sm2698340pjb.0.2022.09.28.23.01.09
+        by smtp.gmail.com with ESMTPSA id z17-20020a170903019100b00172d9f6e22bsm5800581plg.15.2022.09.29.04.32.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Sep 2022 23:01:11 -0700 (PDT)
-Date:   Thu, 29 Sep 2022 14:01:06 +0800
+        Thu, 29 Sep 2022 04:32:19 -0700 (PDT)
+Date:   Thu, 29 Sep 2022 19:32:13 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] btrfs: test active zone tracking
-Message-ID: <20220929060106.dy7enioljc3hi3lt@zlang-mailbox>
-References: <cover.1664419525.git.naohiro.aota@wdc.com>
- <7390d3a918ce574d5349d31ab26fed0ae79952a9.1664419525.git.naohiro.aota@wdc.com>
+To:     Guo Xuenan <guoxuenan@huawei.com>
+Cc:     dchinner@redhat.com, djwong@kernel.org, fstests@vger.kernel.org,
+        houtao1@huawei.com, jack.qiu@huawei.com, linux-xfs@vger.kernel.org,
+        yi.zhang@huawei.com, zhengbin13@huawei.com
+Subject: Re: [PATCH v2] xfs/554: xfs add illegal bestfree array size inject
+ for leaf dir
+Message-ID: <20220929113213.4r7be3dbr5r2nqqn@zlang-mailbox>
+References: <20220904005549.c3dzjutog724wykg@zlang-mailbox>
+ <20220928095355.2074025-1-guoxuenan@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7390d3a918ce574d5349d31ab26fed0ae79952a9.1664419525.git.naohiro.aota@wdc.com>
+In-Reply-To: <20220928095355.2074025-1-guoxuenan@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 29, 2022 at 01:19:25PM +0900, Naohiro Aota wrote:
-> A ZNS device limits the number of active zones, which is the number of
-> zones can be written at the same time. To deal with the limit, btrfs's
-> zoned mode tracks which zone (corresponds to a block group on the SINGLE
-> profile) is active, and finish a zone if necessary.
+On Wed, Sep 28, 2022 at 05:53:55PM +0800, Guo Xuenan wrote:
+> Test leaf dir allocting new block when bestfree array size
+> less than data blocks count, which may lead to UAF.
 > 
-> This test checks if the active zone tracking and the finishing of zones
-> works properly. First, it fills <number of max active zones> zones
-> mostly. And, run some data/metadata stress workload to force btrfs to use a
-> new zone.
-> 
-> This test fails on an older kernel (e.g, 5.18.2) like below.
-> 
-> btrfs/292
-> [failed, exit status 1]- output mismatch (see /host/btrfs/292.out.bad)
->     --- tests/btrfs/292.out     2022-09-15 07:52:18.000000000 +0000
->     +++ /host/btrfs/292.out.bad 2022-09-15 07:59:14.290967793 +0000
->     @@ -1,2 +1,5 @@
->      QA output created by 292
->     -Silence is golden
->     +stress_data_bgs failed
->     +stress_data_bgs_2 failed
->     +failed: '/bin/btrfs subvolume snapshot /mnt/scratch /mnt/scratch/snap825'
->     +(see /host/btrfs/292.full for details)
->     ...
->     (Run 'diff -u /var/lib/xfstests/tests/btrfs/292.out /host/btrfs/292.out.bad'  to see the entire diff)
-> 
-> The failure is fixed with a series "btrfs: zoned: fix active zone tracking
-> issues" [1] (upstream commits from 65ea1b66482f ("block: add bdev_max_segments()
-> helper") to 2ce543f47843 ("btrfs: zoned: wait until zone is finished when
-> allocation didn't progress")).
-
-If this's a regression test case for known fix, we'd better to use:
-_fixed_by_kernel_commit 65ea1b66482f block: add bdev_max_segments (patchset)
-
-to remind downstream testers about that known issue.
-
-> 
-> [1] https://lore.kernel.org/linux-btrfs/cover.1657321126.git.naohiro.aota@wdc.com/
-> 
-> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+> Signed-off-by: Guo Xuenan <guoxuenan@huawei.com>
 > ---
->  common/zoned        |  11 ++++
->  tests/btrfs/292     | 136 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/292.out |   2 +
->  3 files changed, 149 insertions(+)
->  create mode 100755 tests/btrfs/292
->  create mode 100644 tests/btrfs/292.out
+>  tests/xfs/554     | 96 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/554.out |  7 ++++
+>  2 files changed, 103 insertions(+)
+>  create mode 100755 tests/xfs/554
+>  create mode 100644 tests/xfs/554.out
 > 
-> diff --git a/common/zoned b/common/zoned
-> index d1bc60f784a1..eed0082a15cf 100644
-> --- a/common/zoned
-> +++ b/common/zoned
-> @@ -15,6 +15,17 @@ _filter_blkzone_report()
->  	sed -e 's/len/cap/2'
->  }
->  
-> +_require_limited_active_zones() {
-> +    local dev=$1
-> +    local sysfs=$(_sysfs_dev ${dev})
-> +    local attr="${sysfs}/queue/max_active_zones"
-> +
-> +    [ -e "${attr}" ] || _notrun "cannot find queue/max_active_zones. Maybe non-zoned device?"
-> +    if [ $(cat "${attr}") == 0 ]; then
-> +	_notrun "this test requires limited active zones"
-> +    fi
-> +}
-> +
->  _zone_capacity() {
->      local phy=$1
->      local dev=$2
-> diff --git a/tests/btrfs/292 b/tests/btrfs/292
+> diff --git a/tests/xfs/554 b/tests/xfs/554
 > new file mode 100755
-> index 000000000000..6cfd6b18c299
+> index 00000000..dba6aefa
 > --- /dev/null
-> +++ b/tests/btrfs/292
-> @@ -0,0 +1,136 @@
+> +++ b/tests/xfs/554
+> @@ -0,0 +1,96 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Western Digital Corporation.  All Rights Reserved.
+> +# Copyright (c) 2022 Huawei Limited.  All Rights Reserved.
 > +#
-> +# FS QA Test 292
+> +# FS QA Test No. 554
 > +#
-> +# Test that an active zone is properly reclaimed to allow the further
-> +# allocations, even if the active zones are mostly filled.
-> +#
+> +# Check the running state of the XFS under illegal bestfree count
+> +# for leaf directory format.
+> +
 > +. ./common/preamble
-> +_begin_fstest auto quick snapshot zone
+> +_begin_fstest auto quick
 > +
 > +# Import common functions.
-> +. ./common/btrfs
-
-It's not necessary, due to fs specified common file is included automatically
-by _source_specific_fs() according to $FSTYP.
-
-> +. ./common/zoned
+> +. ./common/populate
 > +
 > +# real QA test starts here
-> +
-> +_supported_fs btrfs
+> +_supported_fs xfs
 > +_require_scratch
-> +_require_zoned_device "$SCRATCH_DEV"
-> +_require_limited_active_zones "$SCRATCH_DEV"
 > +
-> +_require_command "$BLKZONE_PROG" blkzone
-> +_require_btrfs_command inspect-internal dump-tree
-> +
-> +# This test requires specific data space usage, skip if we have compression
-> +# enabled.
-> +_require_no_compress
-> +
-> +max_active=$(cat $(_sysfs_dev ${SCRATCH_DEV})/queue/max_active_zones)
-> +
-> +# Fill the zones leaving the last 1MB
-> +fill_active_zones() {
-> +    # Asuumes we have the same capacity between zones.
-> +    local capacity=$(_zone_capacity 0)
-> +    local fill_size=$((capacity - 1024 * 1024))
-> +
-> +    for x in $(seq ${max_active}); do
-> +	dd if=/dev/zero of=${SCRATCH_MNT}/fill$(printf "%02d" $x) bs=${fill_size} \
+> +# Get last dirblock entries
+> +__lastdb_entry_list()
 
-What kind of indentation do you use? 4 spaces? 2 spaces? or a tab? Although that's
-not a big deal, 8 characters width tab is recommended in fstests :)
+I think you don't need to use "__" for a case internal function.
 
-> +	   count=1 oflag=direct 2>/dev/null
-> +	$BTRFS_UTIL_PROG filesystem sync ${SCRATCH_MNT}
-> +
-> +	local nactive=$($BLKZONE_PROG report ${SCRATCH_DEV} | grep oi | wc -l)
-> +	if [[ ${nactive} == ${max_active} ]]; then
-> +	    break
-> +	fi
-> +    done
-> +
-> +    echo "max active zones: ${max_active}" >> $seqres.full
-> +    $BLKZONE_PROG report ${SCRATCH_DEV} | grep oi | cat -n >> $seqres.full
+> +{
+> +	local dir_ino=$1
+> +	local entry_list=$2
+> +	local nblocks=`_scratch_xfs_db -c "inode $dir_ino" -c "p core.nblocks" |
+> +			sed -e 's/^.*core.nblocks = //g' -e 's/\([0-9]*\).*$/\1/g'`
+
+_scratch_xfs_get_metadata_field ...
+
+> +	local last_db=$((nblocks / 2))
+
+I'm not a xfs expert, what's this mean? Why nblocks/2 is the last data block?
+For example, if we get a directory inode as this:
+  u3.bmx[0-3] = [startoff,startblock,blockcount,extentflag]
+  0:[0,14,2,0]
+  1:[2,10,2,0]
+  2:[4,72,6,0]
+  3:[8388608,12,2,0]
+
+do you want to get the "2:[4,72,6,0]" ?
+
+> +	_scratch_xfs_db -c "inode $dir_ino" -c "dblock ${last_db}" -c 'p du' |\
+> +		grep ".name =" | sed -e 's/^.*.name = //g' \
+> +		-e 's/\"//g' > ${entry_list} ||\
+> +		_fail "get last dir block entries failed"
 > +}
 > +
-> +workout() {
-> +    local func="$1"
+> +echo "Format and mount"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
 > +
-> +    _scratch_mkfs >/dev/null 2>&1
-> +    _scratch_mount
+> +echo "Create and check leaf dir"
+> +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> +dirblksz=`$XFS_INFO_PROG "${SCRATCH_DEV}" | grep naming.*bsize |
+> +	sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g'`
+> +# Usually, following routine will create a directory with one leaf block
+> +# and three data block, meanwhile, the last data block is not full.
+> +__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dirblksz / 12))"
+> +leaf_dir="$(__populate_find_inode "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF")"
+> +_scratch_unmount
 > +
-> +    fill_active_zones
-> +    eval "$func"
-> +    local ret=$?
-> +
-> +    _scratch_unmount
-> +    _check_btrfs_filesystem ${SCRATCH_DEV}
-> +
-> +    return $ret
-> +}
-> +
-> +stress_data_bgs() {
-> +    # This dd fails with ENOSPC, which should not :(
-> +    dd if=/dev/zero of=${SCRATCH_MNT}/large bs=64M count=1 oflag=sync \
-> +       >>$seqres.full 2>&1
-> +}
-> +
-> +stress_data_bgs_2() {
-> +    # This dd fails with ENOSPC, which should not :(
-> +    dd if=/dev/zero of=${SCRATCH_MNT}/large bs=64M count=10 conv=fsync \
-> +       >>$seqres.full 2>&1 &
-> +    local pid1=$!
-> +
-> +    dd if=/dev/zero of=${SCRATCH_MNT}/large2 bs=64M count=10 conv=fsync \
-> +       >>$seqres.full 2>&1 &
+> +# Delete directory entries in the last directory block,
+> +last_db_entries=$tmp.ldb_ents
+> +__lastdb_entry_list ${leaf_dir} ${last_db_entries}
 
-If we used background processes, we'd better to deal with them in cleanup time.
-But above two background processes are simple enough, I think you can add a
-"wait" in _cleanup to make sure these backgroud processes are done.
-Or you'd like to remove the "local" for pid1 and pid2, then does below in
-_cleanup:
+Hmm... I don't like to give a tmp file to a function to get a name list,
+how about:
 
-_cleanup()
-{
-	[ -n "$pid1" ] && kill $pid1
-	[ -n "$pid2" ] && kill $pid2
-	wait
-	...
-}
+  lastdb_entry_list ${leaf_dir} > $tmp.ldb_ents
 
-And ...
+Or ...(below)
 
-> +    local pid2=$!
-> +
-> +    wait $pid1; local ret1=$?
-
-unset pid1
-
-> +    wait $pid2; local ret2=$?
-
-unset pid2
-
-At here
-
-> +
-> +    if [ $ret1 -ne 0 -o $ret2 -ne 0 ]; then
-> +	return 1
-> +    fi
-> +    return 0
-> +}
-> +
-> +get_meta_bgs() {
-> +    $BTRFS_UTIL_PROG inspect-internal dump-tree -t EXTENT ${SCRATCH_DEV} |
-> +        grep BLOCK_GROUP -A 1 |grep -B1 'METADATA|' |
-> +        grep -oP '\(\d+ BLOCK_GROUP_ITEM \d+\)'
-> +}
-> +
-> +# This test case does not return the result because
-> +# _run_btrfs_util_prog will call _fail() in the error case anyway.
-> +stress_metadata_bgs() {
-> +    local metabgs=$(get_meta_bgs)
-> +    local count=0
-> +
-> +    while : ; do
-> +        _run_btrfs_util_prog subvolume snapshot ${SCRATCH_MNT} ${SCRATCH_MNT}/snap$i
-> +        _run_btrfs_util_prog filesystem sync ${SCRATCH_MNT}
-> +        cur_metabgs=$(get_meta_bgs)
-> +        if [[ "${cur_metabgs}" != "${metabgs}" ]]; then
-> +            break
-> +        fi
-> +        i=$((i + 1))
-> +    done
-> +}
-> +
-> +WORKS=(
-> +    stress_data_bgs
-> +    stress_data_bgs_2
-> +    stress_metadata_bgs
-> +)
-> +
-> +status=0
-> +for work in "${WORKS[@]}"; do
-> +    if ! workout "${work}"; then
-> +	echo "${work} failed"
-> +	status=1
-> +    fi
+> +_scratch_mount
+> +cat ${last_db_entries} >> $seqres.full
+> +cat ${last_db_entries} | while read f
+> +do
+> +	rm -rf ${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/$f
 > +done
+> +_scratch_unmount
 
-The $status is 1 at the beginning of each case, and we set it to 0 at the end
-of each case. If a test case _fail exit in the middle, then status keep be 1.
-For your case, I think you don't need to touch the $status, you _fail directly
-if anyone *worktout* returns failure. Or just let the "${work} failed" output
-breaks the golden image(.out) to cause a test failure (no matter the status=0/1).
+... you even can make all above code into a function named
+remove_lastdb_entries() or other name you like.
+
+This new part (not in v1) makes this case more complicated than v1, is it
+necessary to reproduce the bug? Do we have a simple way?
 
 > +
-> +# success, all done
-> +if [ $status -eq 0 ]; then
-> +    echo "Silence is golden"
-> +fi
+> +# Check leaf directory
+> +leaf_lblk="$((32 * 1073741824 / blksz))"
+> +node_lblk="$((64 * 1073741824 / blksz))"
+> +__populate_check_xfs_dir "${leaf_dir}" "leaf"
+> +
+> +# Inject abnormal bestfree count
+> +echo "Inject bad bestfree count."
+> +_scratch_xfs_db -x -c "inode ${leaf_dir}" -c "dblock ${leaf_lblk}" \
+> +	-c "write ltail.bestcount 0"
+> +# Adding new entries to S_IFDIR.FMT_LEAF. Since we delete the files
+> +# in last direcotry block, current dir block have no spare space for new
+> +# entry. With ltail.bestcount setting illegally (eg. bestcount=0), then
+> +# creating new directories, which will trigger xfs to allocate new dir
+> +# block, meanwhile, exception will be triggered.
+> +# Root cause is that xfs don't examin the number bestfree slots, when the
+> +# slots number less than dir data blocks, if we need to allocate new dir
+> +# data block and update the bestfree array, we will use the dir block number
+> +# as index to assign bestfree array, while we did not check the leaf buf
+> +# boundary which may cause UAF or other memory access problem.
+> +echo "Add directory entries to trigger exception."
+> +_scratch_mount
+> +seq 1 $((dirblksz / 24)) | while read d
+> +do
+> +mkdir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/TEST$(printf "%.04d" "$d")" >> $seqres.full 2>&1
 
-You can output "Silence is golden" at here directly, due to this case expect
-that "Silence".
+Indentation
 
-I'm not the best reviewer for a zoned&btrfs related case, so I tried to review
-from fstests side. I saw Johannes Thumshirn <johannes.thumshirn@wdc.com> has
-given you a RVB last time, I think you can keep that as a review from btrfs and
-zbd side (except he has more review points now).
+> +done
+> +_scratch_unmount
+> +
+> +# Bad bestfree count should be found and fixed by xfs_repair
+> +_scratch_xfs_repair -n >> $seqres.full 2>&1
+> +egrep -q 'leaf block.*bad tail' $seqres.full && echo "Repair found problems."
 
-Thanks,
-Zorro
+If you don't care about the xfs_repair output, you can do it simply as:
+  _scratch_xfs_repair -n >> $seqres.full 2>&1 && \
+          echo "repair didn't find corruption?"
 
+Or you can filter the output of `_scratch_xfs_repair -n` to be golden image.
+
+> +_repair_scratch_fs >> $seqres.full 2>&1 || _fail "Repair failed!"
+
+How about:
+
+  _repair_scratch_fs >> $seqres.full 2>&1
+  _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
+
+(not sure, welcome more suggestions)
+
+> +
+> +# Check demsg error
+> +_check_dmesg
+
+You don't need to do that manually, except your dmesg error isn't in the
+default checking list of _check_dmesg.
+
+> +
+> +# Success, all done
+> +status=0
 > +exit
-> diff --git a/tests/btrfs/292.out b/tests/btrfs/292.out
+> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
 > new file mode 100644
-> index 000000000000..627309d3fbd2
+> index 00000000..d966ab0a
 > --- /dev/null
-> +++ b/tests/btrfs/292.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 292
-> +Silence is golden
+> +++ b/tests/xfs/554.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 554
+> +Format and mount
+> +Create and check leaf dir
+> +Inject bad bestfree count.
+> +ltail.bestcount = 0
+> +Add a directory entry to trigger exception.
+> +Repair found problems.
 > -- 
-> 2.37.3
+> 2.25.1
 > 
 
