@@ -2,177 +2,347 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D0C6C04A95
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Sep 2022 05:15:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1154EC04A95
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Sep 2022 06:01:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234780AbiI2FPT (ORCPT
+        id S234865AbiI2GBS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Sep 2022 01:15:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39006 "EHLO
+        Thu, 29 Sep 2022 02:01:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232007AbiI2FPS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Sep 2022 01:15:18 -0400
+        with ESMTP id S234427AbiI2GBS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Sep 2022 02:01:18 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F75E50705
-        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 22:15:15 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A49E912C1DF
+        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 23:01:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1664428514;
+        s=mimecast20190719; t=1664431275;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=7GTuWhbffLEeU8hqaqNOROd9qdekK/JDI25YrwgIquQ=;
-        b=EBA468mbN9ZwLhFGtd5pQLdIiGS72kQgG+KY85puLsUjnqHVQn0hz0807+NtxAKxHY9FjB
-        3PKBzSbsgMKG9Ao0C8odlWE4T7+SHPvvG0lwydnxPkIVLzmfZab1ND3F1cfVSEZwSjfouW
-        gTJHBQ2WdZbuiPp9aMuZjchOBICZe+E=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=CRH5eY0riP3D2THopWZq/41hRe90mhyk1DcxGo70UWI=;
+        b=O4zga0Q5wKDvDgXVo6N+6o/XrEKOfmFkyzEusipVRV/ZScQA30dze260tzIkgJUAPK1yXa
+        dOGJg68EdzaKtEgButRr+r7+xwyh9CQ0lSV4/XasgURwi1YetNzgEHF83aFMhCBd/MdFTN
+        1tYK0ETnQBUBrFY17nW6fxIulfnQVY8=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-127-y3825FwjMzW6UodqHJ7z5Q-1; Thu, 29 Sep 2022 01:15:13 -0400
-X-MC-Unique: y3825FwjMzW6UodqHJ7z5Q-1
-Received: by mail-pj1-f70.google.com with SMTP id q99-20020a17090a17ec00b00205fb739e79so243349pja.0
-        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 22:15:12 -0700 (PDT)
+ us-mta-9-iO180ZTZN4SPaGqoM-f5xw-1; Thu, 29 Sep 2022 02:01:13 -0400
+X-MC-Unique: iO180ZTZN4SPaGqoM-f5xw-1
+Received: by mail-pl1-f199.google.com with SMTP id l2-20020a170902f68200b00177ee7e673eso384184plg.2
+        for <fstests@vger.kernel.org>; Wed, 28 Sep 2022 23:01:13 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=7GTuWhbffLEeU8hqaqNOROd9qdekK/JDI25YrwgIquQ=;
-        b=hixueSbHInfuUAB6EqbWnFYR4jXjb8YQv85yW+YLF0dSfj9K0umNbfoFsX698m/vpR
-         YPvk0y519QqGCnyd+QRHLXwbZrWZnKLYlsz5yOqIVT/ZMSLzyzal1GRE7hd5q6CcJJHr
-         XssFuMDJYgoYzASVF+8dZoMNuuPX+agna3uQRLX+zOHouXYazw2mr8ktoPYWtP2Rqc/J
-         qeWlnnSW5hzSLWFR2mjRbqVX137Df6wqBbC9553lSJzYBSNkcr9O+sbhJrZdLtluObKA
-         u8cCof44GFEVBheBJwfjVxvgVSzEouckmGVkoePTIsD/C2T6lt+ob5W8fvSskDPA2LiJ
-         p0Tg==
-X-Gm-Message-State: ACrzQf1w5wFHVmj+fLY5qvUZ4i/65U1FLWjtlaNm+r3H2Rwl7qw1JRcL
-        cvzNeKvpMyc2GFzB5A7NJI3zh/Z80jZaVJW+CG/C8XmrgOYQ/6ZY2+ZARe/XKCifYOlMjceNddt
-        BNWD/uYzYNVw0w2Z/Qw==
-X-Received: by 2002:a17:90a:1617:b0:200:9da5:d0ed with SMTP id n23-20020a17090a161700b002009da5d0edmr1726918pja.90.1664428511890;
-        Wed, 28 Sep 2022 22:15:11 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5WymMJm3RJ490QTBz0OGuToqqM9rKqU7ZRaOk4r7ofg6uhYEgWsXRz4PMJwbsSgxbu1fD9OQ==
-X-Received: by 2002:a17:90a:1617:b0:200:9da5:d0ed with SMTP id n23-20020a17090a161700b002009da5d0edmr1726883pja.90.1664428511523;
-        Wed, 28 Sep 2022 22:15:11 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id z67-20020a626546000000b00546d875a944sm5002769pfb.214.2022.09.28.22.15.09
+        bh=CRH5eY0riP3D2THopWZq/41hRe90mhyk1DcxGo70UWI=;
+        b=PRdkslkraS6AVkMGgGUpXWXD3J8bMIa8xeIglkBnW/9jZ1s2nxj4p988Vvf0NUrW7A
+         HFLMxBpjinLObQFGTj1QM5Aq7PrsMj5G6oHtMLNpGRtegV+xVa2gRBS52jtOJy9944Tk
+         UBPJr1AhtjlD4/jT33PtOz7g6js6bEtoJJfcNLW43A1vXudMoV5thw93eXoQRVvPzCTF
+         Q/JHtm03vhVr56zxcD6WUlYuxh/rl5Mnnn38JvP6rVExThKf40sNF/Ru6VvxZclbRw3l
+         JmvkLUdsAAILgCq5W06XED2NDuV0sIcUcdS3bGwE0c62Jsgn7krVG4ZxLxrCLNg0el2d
+         dxlA==
+X-Gm-Message-State: ACrzQf1ij4gUSH/xsfumC5x+bAlJbeVkWYqsQFpVhJzUBLT+vHiP8d3F
+        iyI6/FHjf++w80Y8bQ+q9o5hMMCJ8zyGcN56iVNDJEydyC9Er+o67x8BUWTn4NPZmJO61BtPjM1
+        U5Tom1gilbdllOcTS+A==
+X-Received: by 2002:a17:90a:d908:b0:206:122:35d1 with SMTP id c8-20020a17090ad90800b00206012235d1mr1807324pjv.245.1664431272056;
+        Wed, 28 Sep 2022 23:01:12 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5bLPeQAM9FhViiGEesR2l8g4UuARj/+Rxk2fr64IPYTVEHo7q3VhjsSoksLWAlYzzIhaZFKw==
+X-Received: by 2002:a17:90a:d908:b0:206:122:35d1 with SMTP id c8-20020a17090ad90800b00206012235d1mr1807291pjv.245.1664431271600;
+        Wed, 28 Sep 2022 23:01:11 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id rm10-20020a17090b3eca00b00202618f0df4sm2698340pjb.0.2022.09.28.23.01.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Sep 2022 22:15:11 -0700 (PDT)
-Date:   Thu, 29 Sep 2022 13:15:07 +0800
+        Wed, 28 Sep 2022 23:01:11 -0700 (PDT)
+Date:   Thu, 29 Sep 2022 14:01:06 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Naohiro Aota <naohiro.aota@wdc.com>
 Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] common: introduce zone_capacity() to return a
- zone capacity
-Message-ID: <20220929051507.aonami57xnhnixan@zlang-mailbox>
+Subject: Re: [PATCH v2 2/2] btrfs: test active zone tracking
+Message-ID: <20220929060106.dy7enioljc3hi3lt@zlang-mailbox>
 References: <cover.1664419525.git.naohiro.aota@wdc.com>
- <b148b071bb11828f4a4c6600331cc8464a1895f1.1664419525.git.naohiro.aota@wdc.com>
+ <7390d3a918ce574d5349d31ab26fed0ae79952a9.1664419525.git.naohiro.aota@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <b148b071bb11828f4a4c6600331cc8464a1895f1.1664419525.git.naohiro.aota@wdc.com>
+In-Reply-To: <7390d3a918ce574d5349d31ab26fed0ae79952a9.1664419525.git.naohiro.aota@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 29, 2022 at 01:19:24PM +0900, Naohiro Aota wrote:
-> Introduce _zone_capacity() to return a zone capacity of the given address
-> in the given device (optional). Move _filter_blkzone_report() for it, and
-> rewrite btrfs/237 with it.
+On Thu, Sep 29, 2022 at 01:19:25PM +0900, Naohiro Aota wrote:
+> A ZNS device limits the number of active zones, which is the number of
+> zones can be written at the same time. To deal with the limit, btrfs's
+> zoned mode tracks which zone (corresponds to a block group on the SINGLE
+> profile) is active, and finish a zone if necessary.
+> 
+> This test checks if the active zone tracking and the finishing of zones
+> works properly. First, it fills <number of max active zones> zones
+> mostly. And, run some data/metadata stress workload to force btrfs to use a
+> new zone.
+> 
+> This test fails on an older kernel (e.g, 5.18.2) like below.
+> 
+> btrfs/292
+> [failed, exit status 1]- output mismatch (see /host/btrfs/292.out.bad)
+>     --- tests/btrfs/292.out     2022-09-15 07:52:18.000000000 +0000
+>     +++ /host/btrfs/292.out.bad 2022-09-15 07:59:14.290967793 +0000
+>     @@ -1,2 +1,5 @@
+>      QA output created by 292
+>     -Silence is golden
+>     +stress_data_bgs failed
+>     +stress_data_bgs_2 failed
+>     +failed: '/bin/btrfs subvolume snapshot /mnt/scratch /mnt/scratch/snap825'
+>     +(see /host/btrfs/292.full for details)
+>     ...
+>     (Run 'diff -u /var/lib/xfstests/tests/btrfs/292.out /host/btrfs/292.out.bad'  to see the entire diff)
+> 
+> The failure is fixed with a series "btrfs: zoned: fix active zone tracking
+> issues" [1] (upstream commits from 65ea1b66482f ("block: add bdev_max_segments()
+> helper") to 2ce543f47843 ("btrfs: zoned: wait until zone is finished when
+> allocation didn't progress")).
+
+If this's a regression test case for known fix, we'd better to use:
+_fixed_by_kernel_commit 65ea1b66482f block: add bdev_max_segments (patchset)
+
+to remind downstream testers about that known issue.
+
+> 
+> [1] https://lore.kernel.org/linux-btrfs/cover.1657321126.git.naohiro.aota@wdc.com/
 > 
 > Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 > ---
->  common/filter   | 13 -------------
->  common/zoned    | 28 ++++++++++++++++++++++++++++
->  tests/btrfs/237 |  8 ++------
->  3 files changed, 30 insertions(+), 19 deletions(-)
->  create mode 100644 common/zoned
+>  common/zoned        |  11 ++++
+>  tests/btrfs/292     | 136 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/292.out |   2 +
+>  3 files changed, 149 insertions(+)
+>  create mode 100755 tests/btrfs/292
+>  create mode 100644 tests/btrfs/292.out
 > 
-> diff --git a/common/filter b/common/filter
-> index 28dea64662dc..ac5c93422567 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -651,18 +651,5 @@ _filter_bash()
->  	sed -e "s/^bash: line 1: /bash: /"
+> diff --git a/common/zoned b/common/zoned
+> index d1bc60f784a1..eed0082a15cf 100644
+> --- a/common/zoned
+> +++ b/common/zoned
+> @@ -15,6 +15,17 @@ _filter_blkzone_report()
+>  	sed -e 's/len/cap/2'
 >  }
 >  
-> -#
-> -# blkzone report added zone capacity to be printed from v2.37.
-> -# This filter will add an extra column 'cap' with the same value of
-> -# 'len'(zone size) for blkzone version < 2.37
-> -#
-> -# Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
-> -# After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000 ..
-> -_filter_blkzone_report()
-> -{
-> -	$AWK_PROG -F "," 'BEGIN{OFS=",";} $3 !~ /cap/ {$2=$2","$2;} {print;}' |\
-> -	sed -e 's/len/cap/2'
-> -}
-> -
->  # make sure this script returns success
->  /bin/true
-> diff --git a/common/zoned b/common/zoned
-> new file mode 100644
-> index 000000000000..d1bc60f784a1
+> +_require_limited_active_zones() {
+> +    local dev=$1
+> +    local sysfs=$(_sysfs_dev ${dev})
+> +    local attr="${sysfs}/queue/max_active_zones"
+> +
+> +    [ -e "${attr}" ] || _notrun "cannot find queue/max_active_zones. Maybe non-zoned device?"
+> +    if [ $(cat "${attr}") == 0 ]; then
+> +	_notrun "this test requires limited active zones"
+> +    fi
+> +}
+> +
+>  _zone_capacity() {
+>      local phy=$1
+>      local dev=$2
+> diff --git a/tests/btrfs/292 b/tests/btrfs/292
+> new file mode 100755
+> index 000000000000..6cfd6b18c299
 > --- /dev/null
-> +++ b/common/zoned
-> @@ -0,0 +1,28 @@
+> +++ b/tests/btrfs/292
+> @@ -0,0 +1,136 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Western Digital Corporation.  All Rights Reserved.
 > +#
-> +# Common zoned block device specific functions
+> +# FS QA Test 292
 > +#
+> +# Test that an active zone is properly reclaimed to allow the further
+> +# allocations, even if the active zones are mostly filled.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick snapshot zone
 > +
-> +#
-> +# blkzone report added zone capacity to be printed from v2.37.
-> +# This filter will add an extra column 'cap' with the same value of
-> +# 'len'(zone size) for blkzone version < 2.37
-> +#
-> +# Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
-> +# After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000 ..
-> +_filter_blkzone_report()
-> +{
-> +	$AWK_PROG -F "," 'BEGIN{OFS=",";} $3 !~ /cap/ {$2=$2","$2;} {print;}' |\
-> +	sed -e 's/len/cap/2'
+> +# Import common functions.
+> +. ./common/btrfs
+
+It's not necessary, due to fs specified common file is included automatically
+by _source_specific_fs() according to $FSTYP.
+
+> +. ./common/zoned
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_require_scratch
+> +_require_zoned_device "$SCRATCH_DEV"
+> +_require_limited_active_zones "$SCRATCH_DEV"
+> +
+> +_require_command "$BLKZONE_PROG" blkzone
+> +_require_btrfs_command inspect-internal dump-tree
+> +
+> +# This test requires specific data space usage, skip if we have compression
+> +# enabled.
+> +_require_no_compress
+> +
+> +max_active=$(cat $(_sysfs_dev ${SCRATCH_DEV})/queue/max_active_zones)
+> +
+> +# Fill the zones leaving the last 1MB
+> +fill_active_zones() {
+> +    # Asuumes we have the same capacity between zones.
+> +    local capacity=$(_zone_capacity 0)
+> +    local fill_size=$((capacity - 1024 * 1024))
+> +
+> +    for x in $(seq ${max_active}); do
+> +	dd if=/dev/zero of=${SCRATCH_MNT}/fill$(printf "%02d" $x) bs=${fill_size} \
+
+What kind of indentation do you use? 4 spaces? 2 spaces? or a tab? Although that's
+not a big deal, 8 characters width tab is recommended in fstests :)
+
+> +	   count=1 oflag=direct 2>/dev/null
+> +	$BTRFS_UTIL_PROG filesystem sync ${SCRATCH_MNT}
+> +
+> +	local nactive=$($BLKZONE_PROG report ${SCRATCH_DEV} | grep oi | wc -l)
+> +	if [[ ${nactive} == ${max_active} ]]; then
+> +	    break
+> +	fi
+> +    done
+> +
+> +    echo "max active zones: ${max_active}" >> $seqres.full
+> +    $BLKZONE_PROG report ${SCRATCH_DEV} | grep oi | cat -n >> $seqres.full
 > +}
 > +
-> +_zone_capacity() {
-> +    local phy=$1
-> +    local dev=$2
+> +workout() {
+> +    local func="$1"
 > +
-> +    [ -z "$dev" ] && dev=$SCRATCH_DEV
+> +    _scratch_mkfs >/dev/null 2>&1
+> +    _scratch_mount
 > +
-> +    size=$($BLKZONE_PROG report -o $phy -l 1 $dev |\
-> +	       _filter_blkzone_report |\
-> +	       grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
-> +    echo $((size << 9))
+> +    fill_active_zones
+> +    eval "$func"
+> +    local ret=$?
+> +
+> +    _scratch_unmount
+> +    _check_btrfs_filesystem ${SCRATCH_DEV}
+> +
+> +    return $ret
 > +}
-> diff --git a/tests/btrfs/237 b/tests/btrfs/237
-> index bc6522e2200a..101094b5ce70 100755
-> --- a/tests/btrfs/237
-> +++ b/tests/btrfs/237
-> @@ -13,7 +13,7 @@
->  _begin_fstest auto quick zone balance
->  
->  # Import common functions.
-> -. ./common/filter
-> +. ./common/zbd
+> +
+> +stress_data_bgs() {
+> +    # This dd fails with ENOSPC, which should not :(
+> +    dd if=/dev/zero of=${SCRATCH_MNT}/large bs=64M count=1 oflag=sync \
+> +       >>$seqres.full 2>&1
+> +}
+> +
+> +stress_data_bgs_2() {
+> +    # This dd fails with ENOSPC, which should not :(
+> +    dd if=/dev/zero of=${SCRATCH_MNT}/large bs=64M count=10 conv=fsync \
+> +       >>$seqres.full 2>&1 &
+> +    local pid1=$!
+> +
+> +    dd if=/dev/zero of=${SCRATCH_MNT}/large2 bs=64M count=10 conv=fsync \
+> +       >>$seqres.full 2>&1 &
 
-I'm a little surprised this line doesn't report error :) Anyway, it should be
-common/zoned as above. Others look good to me. With this fix, you can add:
+If we used background processes, we'd better to deal with them in cleanup time.
+But above two background processes are simple enough, I think you can add a
+"wait" in _cleanup to make sure these backgroud processes are done.
+Or you'd like to remove the "local" for pid1 and pid2, then does below in
+_cleanup:
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+_cleanup()
+{
+	[ -n "$pid1" ] && kill $pid1
+	[ -n "$pid2" ] && kill $pid2
+	wait
+	...
+}
 
->  
->  # real QA test starts here
->  
-> @@ -56,11 +56,7 @@ fi
->  
->  start_data_bg_phy=$(get_data_bg_physical)
->  start_data_bg_phy=$((start_data_bg_phy >> 9))
-> -
-> -size=$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV |\
-> -	_filter_blkzone_report |\
-> -	grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
-> -size=$((size << 9))
-> +size=$(_zone_capacity $start_data_bg_phy)
->  
->  reclaim_threshold=75
->  echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
+And ...
+
+> +    local pid2=$!
+> +
+> +    wait $pid1; local ret1=$?
+
+unset pid1
+
+> +    wait $pid2; local ret2=$?
+
+unset pid2
+
+At here
+
+> +
+> +    if [ $ret1 -ne 0 -o $ret2 -ne 0 ]; then
+> +	return 1
+> +    fi
+> +    return 0
+> +}
+> +
+> +get_meta_bgs() {
+> +    $BTRFS_UTIL_PROG inspect-internal dump-tree -t EXTENT ${SCRATCH_DEV} |
+> +        grep BLOCK_GROUP -A 1 |grep -B1 'METADATA|' |
+> +        grep -oP '\(\d+ BLOCK_GROUP_ITEM \d+\)'
+> +}
+> +
+> +# This test case does not return the result because
+> +# _run_btrfs_util_prog will call _fail() in the error case anyway.
+> +stress_metadata_bgs() {
+> +    local metabgs=$(get_meta_bgs)
+> +    local count=0
+> +
+> +    while : ; do
+> +        _run_btrfs_util_prog subvolume snapshot ${SCRATCH_MNT} ${SCRATCH_MNT}/snap$i
+> +        _run_btrfs_util_prog filesystem sync ${SCRATCH_MNT}
+> +        cur_metabgs=$(get_meta_bgs)
+> +        if [[ "${cur_metabgs}" != "${metabgs}" ]]; then
+> +            break
+> +        fi
+> +        i=$((i + 1))
+> +    done
+> +}
+> +
+> +WORKS=(
+> +    stress_data_bgs
+> +    stress_data_bgs_2
+> +    stress_metadata_bgs
+> +)
+> +
+> +status=0
+> +for work in "${WORKS[@]}"; do
+> +    if ! workout "${work}"; then
+> +	echo "${work} failed"
+> +	status=1
+> +    fi
+> +done
+
+The $status is 1 at the beginning of each case, and we set it to 0 at the end
+of each case. If a test case _fail exit in the middle, then status keep be 1.
+For your case, I think you don't need to touch the $status, you _fail directly
+if anyone *worktout* returns failure. Or just let the "${work} failed" output
+breaks the golden image(.out) to cause a test failure (no matter the status=0/1).
+
+> +
+> +# success, all done
+> +if [ $status -eq 0 ]; then
+> +    echo "Silence is golden"
+> +fi
+
+You can output "Silence is golden" at here directly, due to this case expect
+that "Silence".
+
+I'm not the best reviewer for a zoned&btrfs related case, so I tried to review
+from fstests side. I saw Johannes Thumshirn <johannes.thumshirn@wdc.com> has
+given you a RVB last time, I think you can keep that as a review from btrfs and
+zbd side (except he has more review points now).
+
+Thanks,
+Zorro
+
+> +exit
+> diff --git a/tests/btrfs/292.out b/tests/btrfs/292.out
+> new file mode 100644
+> index 000000000000..627309d3fbd2
+> --- /dev/null
+> +++ b/tests/btrfs/292.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 292
+> +Silence is golden
 > -- 
 > 2.37.3
 > 
