@@ -2,331 +2,254 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2140C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Sep 2022 02:41:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54233C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Sep 2022 06:19:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229718AbiI3ClM (ORCPT
+        id S229892AbiI3GTp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Sep 2022 22:41:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38236 "EHLO
+        Fri, 30 Sep 2022 02:19:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229479AbiI3ClL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Sep 2022 22:41:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 253B610B20E
-        for <fstests@vger.kernel.org>; Thu, 29 Sep 2022 19:41:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1664505669;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=VOsyKjOGH+aQnVSOW59gRTSXbPWDi7ZZcSXHCseoJyY=;
-        b=KJWmQwVyblh4jTZwfwp6bC3/og02mXtyf5VqLlqp5Tuub/kD89HwQsm3n2AJRF+hO3QUeX
-        WfQuPZ2IDrocgAhDP2Ik573RNUmctmpovhdemTdgMCY1tj7Neh9ZAoy1d0KdTIGgYQ0cFL
-        KIaTpb738fMd4TSwobPUF1YAota6kvs=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-65-9LmCLxtuNViiIDshg0zuvQ-1; Thu, 29 Sep 2022 22:41:07 -0400
-X-MC-Unique: 9LmCLxtuNViiIDshg0zuvQ-1
-Received: by mail-pg1-f197.google.com with SMTP id h62-20020a636c41000000b0043cc1874c79so2016095pgc.5
-        for <fstests@vger.kernel.org>; Thu, 29 Sep 2022 19:41:07 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=VOsyKjOGH+aQnVSOW59gRTSXbPWDi7ZZcSXHCseoJyY=;
-        b=1Id0YeXehzKD20W7cXLShjaZAJpL1nKUAPOGx42sYJRvE9Jhks1UZAUKJHT/F3UDHh
-         a8ayrodsLKaV/lNyCkZjYtHh6wb4XvaW/wnB6aRPlOwm4B96/zn409xTdDSL1T5Ytwna
-         XfGLbYQP8xQFlF5/lYexHTJHdnE55kL7ZRr5YbhfQNLP4RQqBNUATT607SYZWICBAHMP
-         KfuIURV6rnDv+zO2pA6cIt8yg788iiEzdcGNPvGhU5lQYvEiP2Q0yUFUoCqubvxSrN7S
-         7kImI8bzILhrXjy0eHWKcx+bNTUoz1KMEt0Unw1q1TJN+2vhdhS9oHHk8FVHh6Q5g9O0
-         j5vQ==
-X-Gm-Message-State: ACrzQf3jp9qRfXGrVEhUfcnCo3jF0KMJLgsQJtAtS7/VxEBwCn12M1Qr
-        /9l2IL9JUg+zCTYwbABewSW2hpqWQgMA47qSp1yUys1DCayb0LbUYILUk3gKEZZ0NEUf0GLsgO6
-        v+t+YU8A/0N0PjCaBWQ==
-X-Received: by 2002:a17:903:2684:b0:17b:7568:ffea with SMTP id jf4-20020a170903268400b0017b7568ffeamr5018872plb.128.1664505666336;
-        Thu, 29 Sep 2022 19:41:06 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5NTfrglDfyvkjuAoxkqZTdN5OZFSLXOKh7yKkydhrpHFevDGUJXm7aISsWcvVHKWwevqiGJA==
-X-Received: by 2002:a17:903:2684:b0:17b:7568:ffea with SMTP id jf4-20020a170903268400b0017b7568ffeamr5018846plb.128.1664505665933;
-        Thu, 29 Sep 2022 19:41:05 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a27-20020aa78e9b000000b0053e599d7032sm420910pfr.54.2022.09.29.19.41.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Sep 2022 19:41:05 -0700 (PDT)
-Date:   Fri, 30 Sep 2022 10:41:00 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Guo Xuenan <guoxuenan@huawei.com>, dchinner@redhat.com,
-        fstests@vger.kernel.org, houtao1@huawei.com, jack.qiu@huawei.com,
-        linux-xfs@vger.kernel.org, yi.zhang@huawei.com,
-        zhengbin13@huawei.com
-Subject: Re: [PATCH v2] xfs/554: xfs add illegal bestfree array size inject
- for leaf dir
-Message-ID: <20220930024100.i4qg4iunfb3akz5w@zlang-mailbox>
-References: <20220904005549.c3dzjutog724wykg@zlang-mailbox>
- <20220928095355.2074025-1-guoxuenan@huawei.com>
- <20220929113213.4r7be3dbr5r2nqqn@zlang-mailbox>
- <YzYIU9J0QH6WOHB2@magnolia>
+        with ESMTP id S230125AbiI3GTn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Sep 2022 02:19:43 -0400
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7137D61;
+        Thu, 29 Sep 2022 23:19:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1664518773; x=1696054773;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=8CROzHJ7uWC10gY+h44Baojo6B38tDTFCMbPKgkqMJI=;
+  b=iaOpiY+RhPs/KqA9nAE9BrrVsuPTlgob8YWvHn2GUiny+Q80A9yb8bCZ
+   ugefkAeVQgQ6IxNKq+zlxEfqwk9Aypra9pdZ6ct2RjLKgnCjn9gNrHfws
+   pd9DwgUmA6UiW61+JbjY/6sDIF7LOP4vaY+itgNtUTk9r1yO2YPOe8uUg
+   sh5vVQAyZsEKlH1DZBb21vSTrl5t/7yJbVDYHlmRePEB5EGPdeKt9Xr3x
+   hzMUAU3D3zhzP5zCtahNKC6woecJ02GiNV3sNgYPLhgxbqBenlph0+f0j
+   aPc2qmGqEOxIx1SJaMsM3NpwZqy9La4AD9a3J9hiRlJV7x9UKCVGe825L
+   w==;
+X-IronPort-AV: E=Sophos;i="5.93,357,1654531200"; 
+   d="scan'208";a="212647776"
+Received: from mail-bn8nam11lp2169.outbound.protection.outlook.com (HELO NAM11-BN8-obe.outbound.protection.outlook.com) ([104.47.58.169])
+  by ob1.hgst.iphmx.com with ESMTP; 30 Sep 2022 14:19:32 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=B2o+4A84es6EfaybuTCsRnVPpbatM8xKVWWUSbTMfcIEz2lvGb5VGDMQVs0qCBx+dJ0nA2uX0UuE6KhJEPDa2ND8vR/JXPbWldwqY1OuB56dRHmnl+ZqdvHGToZLxNOO7ezZ75HHNXfIac36yFg281h8+UyBuSqsx726L2mRyvCS0JBg1I3Z+x8huAPDBywtjSa41kpnbSD1LSqRMbjiwW/VuI43kxWt/Gvtv+ZXNoQjBanHWAOOyQOTkbyBlhsd/fy04CFmGPkHPljB7cGQEVz0w1Cipnv/E2135z/SikMvj/K2PTxId+eMgkmpm4KWAEudgEURZ/tgv/xZeT2Rvg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=IeVztM0NXWALHfTLPBMxVPkRWHuaa3VDP/cpDc0ZO+4=;
+ b=mc2+tc4+BOI7JvX0c7KYR2I6AnlCiHPj71GUVbTUylrPB1TSq8gI+jWQEX665+y/grHhfO6aqQsk/9zrE/f9jNUVL/slQlhNp3H4tl4gEHfxCQq9mGiVLS5bEhA0i0r7DtPSAeITSRnWdS30htXHG624gJ5ud83k4UpaPmrm9dbffpC5dkVkjTaWXmjmHljkZgb1kYxA5JWWKubVP6olUSmUS5ivwQMsJ4JOMzQPC7q3IS+67l4pa05p8FMkyQTwgRP7v21vFXfMsryGKlYhxOpd8VjiWX/2TACU8IJ63uA/vQpadKrmk7X0kzE82EDQPk11CWdvybzn+tFPmFH9pw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=IeVztM0NXWALHfTLPBMxVPkRWHuaa3VDP/cpDc0ZO+4=;
+ b=vA7XPK4wwduKk60+Zpr3d8GldR2Cgw7yFa5um48B5bqTDRRxUMwPDB7iU/3N1VDwF3NTxPz3xrdbA2E1yFYLCRxuVinKMNyvvAb4uWiwI2Wg8KTdQnWFS0Ctn4yEvC5cakVlbXY6u4V5HgRaKNnHbzg8LPHewkVplnorHl+Na5U=
+Received: from SJ0PR04MB7776.namprd04.prod.outlook.com (2603:10b6:a03:300::11)
+ by DM6PR04MB6153.namprd04.prod.outlook.com (2603:10b6:5:12a::25) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5676.17; Fri, 30 Sep
+ 2022 06:19:29 +0000
+Received: from SJ0PR04MB7776.namprd04.prod.outlook.com
+ ([fe80::11a7:2daa:ac81:48da]) by SJ0PR04MB7776.namprd04.prod.outlook.com
+ ([fe80::11a7:2daa:ac81:48da%9]) with mapi id 15.20.5676.023; Fri, 30 Sep 2022
+ 06:19:28 +0000
+From:   Naohiro Aota <Naohiro.Aota@wdc.com>
+To:     Zorro Lang <zlang@redhat.com>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+Subject: Re: [PATCH v2 1/2] common: introduce zone_capacity() to return a zone
+ capacity
+Thread-Topic: [PATCH v2 1/2] common: introduce zone_capacity() to return a
+ zone capacity
+Thread-Index: AQHY07qxkqqwrCW/oE27PJQvPT+AOa313WuAgAGkTQA=
+Date:   Fri, 30 Sep 2022 06:19:28 +0000
+Message-ID: <20220930061926.pdej5mnfunj37sow@naota-xeon>
+References: <cover.1664419525.git.naohiro.aota@wdc.com>
+ <b148b071bb11828f4a4c6600331cc8464a1895f1.1664419525.git.naohiro.aota@wdc.com>
+ <20220929051507.aonami57xnhnixan@zlang-mailbox>
+In-Reply-To: <20220929051507.aonami57xnhnixan@zlang-mailbox>
+Accept-Language: ja-JP, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SJ0PR04MB7776:EE_|DM6PR04MB6153:EE_
+x-ms-office365-filtering-correlation-id: ee804f7b-a435-4eca-9b12-08daa2abbb0b
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: m2tzqzDmOw01k6Jrnp6aKeguKq7rMMFCvidxYdiB4qPSH3lCyMSGsRl9eyt66+XXwPv/kfpRX1A77VtIGxoN2AxcnEbgKPqXWuvBoUk00VPoPj0gJSWxo+woeq94hTaqTqd4SaFOSWfopm9t5FK2t9tB4CVRL+SS0QMc5AOllMng7lFqWQZx3Jr6NmuLsAgMVrQ4Dg02JoWy/3WMDQ1MQslkh9xfmad+ZJYD1/8RZEDYc17OD1OH8iOMI5s0AjGwxE2IxNfwkw3pfzyvW5IclFgCvm4Y8EY+2kRv34oKTrInHvJD8ZzvENp+6pJ/dO/0uBzbtblpels3mj1YQyZo5OalNvx76x52Vr0TLc/0z3JmpBB6SFPYep+d9V9pi5yPCxSNvzs4tJYSA4wRxUVc6ume6MLI8ul+ZwIdeoRRkIMirXiPVHvIxwbQROdoxbTYTnnknQHffhPkv4eL5nPNCF3le9EqLwekozqScrrnlW/+J61CtsuD/mqQih7sIegDVrNI8D6pn2QEJBT/TshL5K8lvk+5iaRRFLR2FUPHphX2q6qM6m1nDPrP9SaWbgLD4fbgdi5T3H3XmrEMF9hPECJ9P6Z1LUMiulRmbh+7MZI8W5YrT2lx1cHDXdaQ5q0iuiIBxrUtRYtHnsSq6t3OMS7ToNMGZfqvsGH0BtlQmBqkLroUci0hzwjYukFM3V1V9qBKTCKk1m7YP0q72CLNwEqUb2zvn9kZPJ1fW/Juvqe23jP0OU/ACo4MloYlg6QUe3zJFjg45CX91CaSNNXwVw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR04MB7776.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(7916004)(396003)(346002)(366004)(39860400002)(376002)(136003)(451199015)(71200400001)(6486002)(66446008)(2906002)(4326008)(6506007)(316002)(478600001)(54906003)(38070700005)(82960400001)(38100700002)(8676002)(76116006)(66946007)(33716001)(64756008)(91956017)(66556008)(86362001)(41300700001)(8936002)(6916009)(5660300002)(122000001)(83380400001)(186003)(1076003)(6512007)(9686003)(66476007)(26005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?mXbN4zdGl8YjWWGoFmgBTSjA1AyzyKU7RzVr2+s2rk3yQRu3X96yHKLq27UK?=
+ =?us-ascii?Q?dH1XT0a+atkJukMiixRmA+zjfxK8U6nctEu0gPKcuvvRMv8zlrYdY14l39/5?=
+ =?us-ascii?Q?GamTbMXhfbGIGdDGHWaVAIkPfRydEzENNAd+COnVDxNWBKw5uIUWnh66QBJZ?=
+ =?us-ascii?Q?IENLnH/KnKDm643qNIuxmqZK5IgWBUwx9ukemJhpu8Tc2rqYeDt5b/KHnkSV?=
+ =?us-ascii?Q?QxuJB4OUX8ZiS3tGyhxciVz8doY8IlrBnXcVkfhfQY3thq8806aM6mh8mEOR?=
+ =?us-ascii?Q?ctvDi7KYjzMTu7dQvugbUTE3pyUKhW6G8S1ASFZLNTEU9Jqfk8D22RtyaX4P?=
+ =?us-ascii?Q?Fp/L9bNKA4aFwQJowjmUFrTbNsKqxD/H4xCmKEJkLh479An97o+x/gbHznDZ?=
+ =?us-ascii?Q?eZwQ9HwWf5du2eRUkTcoz3T2NJTG2UneZA9SnCszJhhULD+NnDZCtFPRoFxU?=
+ =?us-ascii?Q?6Y5nvto0x8YMjnA78JQ5PKYz2YnHszG5HzgrC/4KnJFbz5/0OptQqqzKRH0e?=
+ =?us-ascii?Q?cGlGC6DMH9cwjwjwjoGHcrobDYE6Ahzm+lhOlzkAX0mKHPtbOunH5SjDMKkn?=
+ =?us-ascii?Q?cUuIP6+y7kGAntXg+Zs+oz6N5P1yqSD3qwoyCRKekXSaA/MxhiWD0NQWHwsU?=
+ =?us-ascii?Q?nVqPMSyP5gBLm68dC66FTsPhTDaBvAl2aSVE4E+Wp3JSwgcafPmuf6WP5emJ?=
+ =?us-ascii?Q?g7QKcSVP2dFlgbpHlhFSEVJCjU6iplVynWHB4+/XEEzws/FP1+6lGDfYN4IT?=
+ =?us-ascii?Q?VgdtW7vMXWgIKmqN8DH8qkhqysdwqvkpI2tz4IblQRnXxGs4W3zMsd2Y7zbd?=
+ =?us-ascii?Q?nSnk+awDP6aVNuSrl3XiuEsUgeRI7AC9DD/GdEnK6RHaQb+faSp6DEsneH1O?=
+ =?us-ascii?Q?LuMv1A0RqLpmCGu8/1FOSTZwPfIVdn0BYlOsP2lQojmOBc01UmVQ4mD7+OXV?=
+ =?us-ascii?Q?7GSC1cR9GThTZ2CxO67k1TKRcmOFG4g0AVVHCFHtgKuCH8blpDpL7/NXYIV5?=
+ =?us-ascii?Q?Cv0jnx1UKVnrfSSEGgyUgezeOdckbtIvsfN4xayqWjirEYNL2CFvlH2LeavO?=
+ =?us-ascii?Q?rIQzURg/B8YooDYRYEPlSEjIj3yfnR9IZ4EfN1CYjxe6wyjMn2Ie7ws87N1T?=
+ =?us-ascii?Q?yKiH/P6x5L5lsRqxc1Tvoec+MSZOduEgtLN2YeYNrVdcL+Axf6Rs/P3Jcrdr?=
+ =?us-ascii?Q?+jvaRYnYU7mSowecJRabveKqJzfXKK1rGdMeg5r5ez92OZjiS7GV5p+k4orF?=
+ =?us-ascii?Q?lCUHqImBtdyoLWgo6VjrMs5rBBPnJovy12k4gN6/agM7toPoM76LyZ721+oQ?=
+ =?us-ascii?Q?Pa0Jqk67R5BUjWSD6iT0TbsutKNdRpeYI7EmnU/r2DfyVWnGa0ZSvbygZCnR?=
+ =?us-ascii?Q?k0Zql750CpleB0Q7MfwIM6UBd2dhpMH5NaHSYQr/5B7h/BJxBelVSVD8kzgJ?=
+ =?us-ascii?Q?2UfuR/xBfPSBw72buYATEs9s+mXPP8a6hyVno8JDvL5cR/An1gem2jAYVays?=
+ =?us-ascii?Q?Z5+p0tl3FSwVR6Otfg1y/ezHZElNGhIJ1TUWnZ6ghTYi7B6xGlrb8m7//2ak?=
+ =?us-ascii?Q?5esxt4Jk30f6ko/KYhqnCrMRTtQqX+pY1ltqpnfk7pz2CxPbTB7xzoJV1goz?=
+ =?us-ascii?Q?zQ=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <E65239466DB4E64BBDF847CF547ADC89@namprd04.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YzYIU9J0QH6WOHB2@magnolia>
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SJ0PR04MB7776.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ee804f7b-a435-4eca-9b12-08daa2abbb0b
+X-MS-Exchange-CrossTenant-originalarrivaltime: 30 Sep 2022 06:19:28.7085
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: /urtQDKIj2R6Lm6o6J0qJh5SjPOJZtV2aAOmrR/2OiGXi3Q7yEKG6Y/Nx3QqZy1aET/cdkhQ5yRe5tdH3QEdaQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB6153
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 29, 2022 at 02:04:19PM -0700, Darrick J. Wong wrote:
-> On Thu, Sep 29, 2022 at 07:32:13PM +0800, Zorro Lang wrote:
-> > On Wed, Sep 28, 2022 at 05:53:55PM +0800, Guo Xuenan wrote:
-> > > Test leaf dir allocting new block when bestfree array size
-> > > less than data blocks count, which may lead to UAF.
-> > > 
-> > > Signed-off-by: Guo Xuenan <guoxuenan@huawei.com>
-> > > ---
-> > >  tests/xfs/554     | 96 +++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/554.out |  7 ++++
-> > >  2 files changed, 103 insertions(+)
-> > >  create mode 100755 tests/xfs/554
-> > >  create mode 100644 tests/xfs/554.out
-> > > 
-> > > diff --git a/tests/xfs/554 b/tests/xfs/554
-> > > new file mode 100755
-> > > index 00000000..dba6aefa
-> > > --- /dev/null
-> > > +++ b/tests/xfs/554
-> > > @@ -0,0 +1,96 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2022 Huawei Limited.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 554
-> > > +#
-> > > +# Check the running state of the XFS under illegal bestfree count
-> > > +# for leaf directory format.
-> > > +
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/populate
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs xfs
-> > > +_require_scratch
-> > > +
-> > > +# Get last dirblock entries
-> > > +__lastdb_entry_list()
-> > 
-> > I think you don't need to use "__" for a case internal function.
-> > 
-> > > +{
-> > > +	local dir_ino=$1
-> > > +	local entry_list=$2
-> > > +	local nblocks=`_scratch_xfs_db -c "inode $dir_ino" -c "p core.nblocks" |
-> > > +			sed -e 's/^.*core.nblocks = //g' -e 's/\([0-9]*\).*$/\1/g'`
-> > 
-> > _scratch_xfs_get_metadata_field ...
-> > 
-> > > +	local last_db=$((nblocks / 2))
-> > 
-> > I'm not a xfs expert, what's this mean? Why nblocks/2 is the last data block?
-> > For example, if we get a directory inode as this:
-> >   u3.bmx[0-3] = [startoff,startblock,blockcount,extentflag]
-> >   0:[0,14,2,0]
-> >   1:[2,10,2,0]
-> >   2:[4,72,6,0]
-> >   3:[8388608,12,2,0]
-> > 
-> > do you want to get the "2:[4,72,6,0]" ?
-> 
-> I think they want 9 (offset (4) + blockcount (6) - 1)?
-> 
-> I'm also not sure what this computation does...
-> 
-> > > +	_scratch_xfs_db -c "inode $dir_ino" -c "dblock ${last_db}" -c 'p du' |\
-> > > +		grep ".name =" | sed -e 's/^.*.name = //g' \
-> > > +		-e 's/\"//g' > ${entry_list} ||\
-> > > +		_fail "get last dir block entries failed"
-> 
-> ...though from the 'print du' command, I'm fairly sure they want to
-> extract the dirents from the last directory data block.  So yes, 9.
+On Thu, Sep 29, 2022 at 01:15:07PM +0800, Zorro Lang wrote:
+> On Thu, Sep 29, 2022 at 01:19:24PM +0900, Naohiro Aota wrote:
+> > Introduce _zone_capacity() to return a zone capacity of the given addre=
+ss
+> > in the given device (optional). Move _filter_blkzone_report() for it, a=
+nd
+> > rewrite btrfs/237 with it.
+> >=20
+> > Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+> > ---
+> >  common/filter   | 13 -------------
+> >  common/zoned    | 28 ++++++++++++++++++++++++++++
+> >  tests/btrfs/237 |  8 ++------
+> >  3 files changed, 30 insertions(+), 19 deletions(-)
+> >  create mode 100644 common/zoned
+> >=20
+> > diff --git a/common/filter b/common/filter
+> > index 28dea64662dc..ac5c93422567 100644
+> > --- a/common/filter
+> > +++ b/common/filter
+> > @@ -651,18 +651,5 @@ _filter_bash()
+> >  	sed -e "s/^bash: line 1: /bash: /"
+> >  }
+> > =20
+> > -#
+> > -# blkzone report added zone capacity to be printed from v2.37.
+> > -# This filter will add an extra column 'cap' with the same value of
+> > -# 'len'(zone size) for blkzone version < 2.37
+> > -#
+> > -# Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
+> > -# After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000=
+ ..
+> > -_filter_blkzone_report()
+> > -{
+> > -	$AWK_PROG -F "," 'BEGIN{OFS=3D",";} $3 !~ /cap/ {$2=3D$2","$2;} {prin=
+t;}' |\
+> > -	sed -e 's/len/cap/2'
+> > -}
+> > -
+> >  # make sure this script returns success
+> >  /bin/true
+> > diff --git a/common/zoned b/common/zoned
+> > new file mode 100644
+> > index 000000000000..d1bc60f784a1
+> > --- /dev/null
+> > +++ b/common/zoned
+> > @@ -0,0 +1,28 @@
+> > +#
+> > +# Common zoned block device specific functions
+> > +#
+> > +
+> > +#
+> > +# blkzone report added zone capacity to be printed from v2.37.
+> > +# This filter will add an extra column 'cap' with the same value of
+> > +# 'len'(zone size) for blkzone version < 2.37
+> > +#
+> > +# Before: start: 0x000100000, len 0x040000, wptr 0x000000 ..
+> > +# After: start: 0x000100000, len 0x040000, cap 0x040000, wptr 0x000000=
+ ..
+> > +_filter_blkzone_report()
+> > +{
+> > +	$AWK_PROG -F "," 'BEGIN{OFS=3D",";} $3 !~ /cap/ {$2=3D$2","$2;} {prin=
+t;}' |\
+> > +	sed -e 's/len/cap/2'
+> > +}
+> > +
+> > +_zone_capacity() {
+> > +    local phy=3D$1
+> > +    local dev=3D$2
+> > +
+> > +    [ -z "$dev" ] && dev=3D$SCRATCH_DEV
+> > +
+> > +    size=3D$($BLKZONE_PROG report -o $phy -l 1 $dev |\
+> > +	       _filter_blkzone_report |\
+> > +	       grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
+> > +    echo $((size << 9))
+> > +}
+> > diff --git a/tests/btrfs/237 b/tests/btrfs/237
+> > index bc6522e2200a..101094b5ce70 100755
+> > --- a/tests/btrfs/237
+> > +++ b/tests/btrfs/237
+> > @@ -13,7 +13,7 @@
+> >  _begin_fstest auto quick zone balance
+> > =20
+> >  # Import common functions.
+> > -. ./common/filter
+> > +. ./common/zbd
+>=20
+> I'm a little surprised this line doesn't report error :) Anyway, it shoul=
+d be
+> common/zoned as above. Others look good to me. With this fix, you can add=
+:
 
-OK, so he wants the last logic block of the last extent which store dir entries.
+Oops, I forgot to run this one. Thank you for catching this.
 
-> 
-> This is sorta ugly, I think this means that you'd have to 'print u3.bmx'
-> and then walk the bmbt entries to return the fileoff of the last block
-> before $leaf_lblk.
-
-Yeah, it will be ugly, might be something like this:
-
-remove_lastdb_entries()
-{
-	local dino=$1
-
-	local leaf_bmx=$(_scratch_xfs_db -c "inode $dino" -c "p u3.bmx" | \
-				sed -ne "/\[$leaf_lblk,/s/\(.*\)\:\[.*\]/\1/p")
-	local lastdb_bmx=$((leaf_bmx - 1))
-	local startoff=$(_scratch_xfs_db -c "inode $dino" -c "p u3.bmx" | \
-				sed -ne "s/$lastdb_bmx:\[\(.*\),.*,.*,.*\]/\1/p")
-	local blockcount=$(_scratch_xfs_db -c "inode $dino" -c "p u3.bmx" | \
-				sed -ne "s/$lastdb_bmx:\[.*,.*,\(.*\),.*\]/\1/p")
-	local lastdb=$((startoff + blockcount - 1))
-
-	# remove all entries in the last logic data block
-	_scratch_xfs_db -c "inode $dino" -c "dblock $lastdb" -c "p du" | \
-		sed -ne "s/du.*\.name = \"\(.*\)\"/\1/p" | xargs rm -f
-}
-
-Or some better implements. Anyway these code looks like easy to broken :)
-
-So I tried to ask if this step is necessary to reproduce the bug? The v1 patch
-didn't have this step, is it can reproduce this bug ?
-I think we don't need to make sure it's reproducible 100%, if we can simplify
-a test case very much and keep high probability to reproduce the bug, that's
-fine for me.
-
-Thanks,
-Zorro
-
-> 
-> > > +}
-> > > +
-> > > +echo "Format and mount"
-> > > +_scratch_mkfs > $seqres.full 2>&1
-> > > +_scratch_mount
-> > > +
-> > > +echo "Create and check leaf dir"
-> > > +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-> > > +dirblksz=`$XFS_INFO_PROG "${SCRATCH_DEV}" | grep naming.*bsize |
-> > > +	sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g'`
-> > > +# Usually, following routine will create a directory with one leaf block
-> > > +# and three data block, meanwhile, the last data block is not full.
-> 
-> 
-> 
-> > > +__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dirblksz / 12))"
-> > > +leaf_dir="$(__populate_find_inode "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF")"
-> > > +_scratch_unmount
-> > > +
-> > > +# Delete directory entries in the last directory block,
-> > > +last_db_entries=$tmp.ldb_ents
-> > > +__lastdb_entry_list ${leaf_dir} ${last_db_entries}
-> > 
-> > Hmm... I don't like to give a tmp file to a function to get a name list,
-> > how about:
-> > 
-> >   lastdb_entry_list ${leaf_dir} > $tmp.ldb_ents
-> > 
-> > Or ...(below)
-> > 
-> > > +_scratch_mount
-> > > +cat ${last_db_entries} >> $seqres.full
-> > > +cat ${last_db_entries} | while read f
-> > > +do
-> > > +	rm -rf ${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/$f
-> > > +done
-> > > +_scratch_unmount
-> > 
-> > ... you even can make all above code into a function named
-> > remove_lastdb_entries() or other name you like.
-> > 
-> > This new part (not in v1) makes this case more complicated than v1, is it
-> > necessary to reproduce the bug? Do we have a simple way?
-> > 
-> > > +
-> > > +# Check leaf directory
-> > > +leaf_lblk="$((32 * 1073741824 / blksz))"
-> > > +node_lblk="$((64 * 1073741824 / blksz))"
-> > > +__populate_check_xfs_dir "${leaf_dir}" "leaf"
-> > > +
-> > > +# Inject abnormal bestfree count
-> > > +echo "Inject bad bestfree count."
-> > > +_scratch_xfs_db -x -c "inode ${leaf_dir}" -c "dblock ${leaf_lblk}" \
-> > > +	-c "write ltail.bestcount 0"
-> > > +# Adding new entries to S_IFDIR.FMT_LEAF. Since we delete the files
-> 
-> It would be nice to have a blank line before the comments so that the
-> test doesn't look quite so much like a wall of text.
-> 
-> > > +# in last direcotry block, current dir block have no spare space for new
-> 
-> s/direcotry/directory/
-> 
-> > > +# entry. With ltail.bestcount setting illegally (eg. bestcount=0), then
-> > > +# creating new directories, which will trigger xfs to allocate new dir
-> > > +# block, meanwhile, exception will be triggered.
-> > > +# Root cause is that xfs don't examin the number bestfree slots, when the
-> > > +# slots number less than dir data blocks, if we need to allocate new dir
-> > > +# data block and update the bestfree array, we will use the dir block number
-> > > +# as index to assign bestfree array, while we did not check the leaf buf
-> > > +# boundary which may cause UAF or other memory access problem.
-> 
-> I suppose this implies that the test should be tagged dangerous for now?
-> 
-> > > +echo "Add directory entries to trigger exception."
-> > > +_scratch_mount
-> > > +seq 1 $((dirblksz / 24)) | while read d
-> > > +do
-> > > +mkdir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF/TEST$(printf "%.04d" "$d")" >> $seqres.full 2>&1
-> > 
-> > Indentation
-> > 
-> > > +done
-> > > +_scratch_unmount
-> > > +
-> > > +# Bad bestfree count should be found and fixed by xfs_repair
-> > > +_scratch_xfs_repair -n >> $seqres.full 2>&1
-> > > +egrep -q 'leaf block.*bad tail' $seqres.full && echo "Repair found problems."
-> > 
-> > If you don't care about the xfs_repair output, you can do it simply as:
-> >   _scratch_xfs_repair -n >> $seqres.full 2>&1 && \
-> >           echo "repair didn't find corruption?"
-> > 
-> > Or you can filter the output of `_scratch_xfs_repair -n` to be golden image.
-> 
-> I think they're trying to look specifically for xfs_repair complaining
-> about the bad leaf1 block tail, not just any error.
-> 
-> --D
-> 
-> > > +_repair_scratch_fs >> $seqres.full 2>&1 || _fail "Repair failed!"
-> > 
-> > How about:
-> > 
-> >   _repair_scratch_fs >> $seqres.full 2>&1
-> >   _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
-> > 
-> > (not sure, welcome more suggestions)
-> > 
-> > > +
-> > > +# Check demsg error
-> > > +_check_dmesg
-> > 
-> > You don't need to do that manually, except your dmesg error isn't in the
-> > default checking list of _check_dmesg.
-> > 
-> > > +
-> > > +# Success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/xfs/554.out b/tests/xfs/554.out
-> > > new file mode 100644
-> > > index 00000000..d966ab0a
-> > > --- /dev/null
-> > > +++ b/tests/xfs/554.out
-> > > @@ -0,0 +1,7 @@
-> > > +QA output created by 554
-> > > +Format and mount
-> > > +Create and check leaf dir
-> > > +Inject bad bestfree count.
-> > > +ltail.bestcount = 0
-> > > +Add a directory entry to trigger exception.
-> > > +Repair found problems.
-> > > -- 
-> > > 2.25.1
-> > > 
-> > 
-> 
-
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+>=20
+> > =20
+> >  # real QA test starts here
+> > =20
+> > @@ -56,11 +56,7 @@ fi
+> > =20
+> >  start_data_bg_phy=3D$(get_data_bg_physical)
+> >  start_data_bg_phy=3D$((start_data_bg_phy >> 9))
+> > -
+> > -size=3D$($BLKZONE_PROG report -o $start_data_bg_phy -l 1 $SCRATCH_DEV =
+|\
+> > -	_filter_blkzone_report |\
+> > -	grep -Po "cap 0x[[:xdigit:]]+" | cut -d ' ' -f 2)
+> > -size=3D$((size << 9))
+> > +size=3D$(_zone_capacity $start_data_bg_phy)
+> > =20
+> >  reclaim_threshold=3D75
+> >  echo $reclaim_threshold > /sys/fs/btrfs/"$uuid"/bg_reclaim_threshold
+> > --=20
+> > 2.37.3
+> >=20
+> =
