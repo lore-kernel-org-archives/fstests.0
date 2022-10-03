@@ -2,279 +2,233 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92308C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun,  2 Oct 2022 04:27:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B764C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Oct 2022 14:58:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229449AbiJBE1U (ORCPT
+        id S229570AbiJCO6i (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 2 Oct 2022 00:27:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49466 "EHLO
+        Mon, 3 Oct 2022 10:58:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40588 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229458AbiJBE1S (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Oct 2022 00:27:18 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6782A32A8C
-        for <fstests@vger.kernel.org>; Sat,  1 Oct 2022 21:27:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1664684836;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Omy72SFP7rhZ5NcNm+ld6kd+vTb/JXOKGzq1vwsf4Qg=;
-        b=Z1QHwMca5VEgaey8WxtKPXzZ0tGgj0hQQQpuPJxrarzpeX3S+cRhZ0rPOkj6Fu9ZCPceAZ
-        Bmrcs875cELzwsq4yUq2J0Sd65gOty1Z5ZflHICAH19Yu3RUGC67Mga44VJxLPZOw5Laz3
-        Di65NYYz5olSQNroubRl9yf3G7RvD6s=
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
- [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-383-bW85PWXfPJqNqGSyr6ML5g-1; Sun, 02 Oct 2022 00:27:14 -0400
-X-MC-Unique: bW85PWXfPJqNqGSyr6ML5g-1
-Received: by mail-qk1-f199.google.com with SMTP id de16-20020a05620a371000b006ceb92bc740so6754454qkb.15
-        for <fstests@vger.kernel.org>; Sat, 01 Oct 2022 21:27:14 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=Omy72SFP7rhZ5NcNm+ld6kd+vTb/JXOKGzq1vwsf4Qg=;
-        b=tVDB5MRRRwdQ44DzFw5JXX0Kwzubip3Qs13aypDsczvFmfABCHalDyfgSjtqY89g0+
-         u5hm4PpdNOykL2n710v9GD4239IhMVFDQ2aWXQc+Bm/x0d97ZQJSPQUIOemYtOSgDBDi
-         TsCaZL8qhkbHbOVja8l9dXQlhctQnxYNttwTEAB9ShbFPPaZAUhlcZf92CBnhGB2EzpC
-         wy9t2MH8ZqOceyk4JCAp58kVN/fByoMGQ7UUQJFkFmBgs+ouGU+ZHpO9xYIQp8SAXL4P
-         EN72t4U3ufWy+bwvlSmCkOIl73Y4VBKrZxdfSGx//kEchFY6LnyMOhkJspG0uzIvMHom
-         13dg==
-X-Gm-Message-State: ACrzQf2OQedeUW7WGyMsN4Hn2zyLQu60HAZS2F83Pji7Zfifj7Zksere
-        6L63OywECPdOe9IDeJNEcc9/1+NuT0fakSGcEl/N7Gwd+/AMUoKCFA0bTCjNL2QAYcZlqNFo+ex
-        BlEz5uy2wdz4vgOd69g==
-X-Received: by 2002:ae9:e206:0:b0:6cb:d54d:69ee with SMTP id c6-20020ae9e206000000b006cbd54d69eemr10822320qkc.466.1664684834070;
-        Sat, 01 Oct 2022 21:27:14 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4CpvHH/v+0OLpuLK7KA3HnODDE02Rt6vyRLN2vzt1SwMuCJxW5+nvtw4t1bm2x8DH5PAF9pQ==
-X-Received: by 2002:ae9:e206:0:b0:6cb:d54d:69ee with SMTP id c6-20020ae9e206000000b006cbd54d69eemr10822314qkc.466.1664684833731;
-        Sat, 01 Oct 2022 21:27:13 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id he47-20020a05622a602f00b0031ef0081d77sm6057174qtb.79.2022.10.01.21.27.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 01 Oct 2022 21:27:13 -0700 (PDT)
-Date:   Sun, 2 Oct 2022 12:27:08 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Hironori Shiina <shiina.hironori@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Hironori Shiina <shiina.hironori@fujitsu.com>
-Subject: Re: [RFC PATCH] xfs: test for fixing wrong root inode number
-Message-ID: <20221002042708.fshgqyqyhidgsx7z@zlang-mailbox>
-References: <20220928210337.417054-1-shiina.hironori@fujitsu.com>
- <20220929014955.pxou2qymdumvijtt@zlang-mailbox>
- <eae39d48-1fc1-09dc-7f5e-b1112c880584@gmail.com>
+        with ESMTP id S230061AbiJCO6c (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Oct 2022 10:58:32 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3EAC43C15B;
+        Mon,  3 Oct 2022 07:58:29 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id C9917B8117A;
+        Mon,  3 Oct 2022 14:58:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A993CC433D7;
+        Mon,  3 Oct 2022 14:58:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1664809106;
+        bh=tkvcnmn0rzId1765Ob53Fa9jAy+ddPjtOc7y0am5s1s=;
+        h=From:To:Cc:Subject:Date:From;
+        b=S41jda3kXk55XqNPD7TYFR9kXf9+Sa72o5SSmOAjdzMnCyYIE2VpJrOuIR0LPBb/F
+         /0srTe6AN1cEtQQVejKku2H6smqgiP8uhFpDan6cvzGUTcfszL3/NW2f4DGpn9Ml9u
+         zrDAaS59W3SeSnYD0fo/B+L4lrWMpVu4GxG4LV0vNZ0XYVcLeHJX4h2pEUpMjeU8hB
+         hF+aVWP9+UlhJUv2VgArhlDhB/5p7wTNSm1bWleDygziIf/JpV6oGGiy18za5gL1Ni
+         /u4TZmuJutsbSVxpVQ5e4+2ubUC0tKh/ZDKMaADOTU029k4ox9RzuGRQoSkf/jVVuV
+         fP+c/4THbOY0g==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test fiemap on large file with extents shared through a snapshot
+Date:   Mon,  3 Oct 2022 15:58:17 +0100
+Message-Id: <d4bf2bc47e3be1437d5693a0b728e199acb549fd.1664808949.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <eae39d48-1fc1-09dc-7f5e-b1112c880584@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 30, 2022 at 11:01:51AM -0400, Hironori Shiina wrote:
-> 
-> 
-> On 9/28/22 21:49, Zorro Lang wrote:
-> > On Wed, Sep 28, 2022 at 05:03:37PM -0400, Hironori Shiina wrote:
-> >> Test '-x' option of xfsrestore. With this option, a wrong root inode
-> >> number is corrected. A root inode number can be wrong in a dump created
-> >> by problematic xfsdump (v3.1.7 - v3.1.9) with blukstat misuse. This
-> >> patch adds a dump with a wrong inode number created by xfsdump 3.1.8.
-> >>
-> >> Link: https://lore.kernel.org/linux-xfs/20201113125127.966243-1-hsiangkao@redhat.com/
-> >> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
-> >> ---
-> >>  common/dump                    |   2 +-
-> >>  src/root-inode-broken-dumpfile | Bin 0 -> 21648 bytes
-> >>  tests/xfs/554                  |  37 +++++++++++++++++++++
-> >>  tests/xfs/554.out              |  57 +++++++++++++++++++++++++++++++++
-> >>  4 files changed, 95 insertions(+), 1 deletion(-)
-> >>  create mode 100644 src/root-inode-broken-dumpfile
-> >>  create mode 100644 tests/xfs/554
-> >>  create mode 100644 tests/xfs/554.out
-> >>
-> >> diff --git a/common/dump b/common/dump
-> >> index 8e0446d9..50b2ba03 100644
-> >> --- a/common/dump
-> >> +++ b/common/dump
-> >> @@ -1003,7 +1003,7 @@ _parse_restore_args()
-> >>          --no-check-quota)
-> >>              do_quota_check=false
-> >>              ;;
-> >> -	-K|-R)
-> >> +	-K|-R|-x)
-> >>  	    restore_args="$restore_args $1"
-> >>              ;;
-> >>  	*)
-> >> diff --git a/src/root-inode-broken-dumpfile b/src/root-inode-broken-dumpfile
-> >> new file mode 100644
-> >> index 0000000000000000000000000000000000000000..9a42e65d8047497be31f3abbaf4223ae384fd14d
-> >> GIT binary patch
-> >> literal 21648
-> >> zcmeI)K}ge49KiAC_J<CEBr!0AwBf~zbCHB}5DyxL6eU8Jnqylvayj;2VuG+d)TN6;
-> >> z5J8vlAaw9hXi(UousT$Sin@BRJfwHM)O+*2*njz_zc+h*ckuV#@BMuKe;;JbgTL{<
-> >> z!SwZ9zC#ERe%reLe5&cz2e}qM<!i2dXQHt^{^`d1Qx{)MMzW#$%dR@J={0`IRsGx4
-> >> z(yn@Oi-nBqCOVIG?&{kpwnv~&w_>6_ozY1^fph=w8(=^oTg&wOe=(WQByyQ_Hfd|4
-> >> z^o76<0!zn#v>k3blbU)nzx=KF^}-G%R;OaQYsHwGDkO`kD^@q^(_Ac_8H<gKj^>a0
-> >> z6p*%BK>q#b>2EE%^!@f?Z`-p+tI@M}qmMm@zMJk>K1U^=d~G^NUG?X4vkvKtOf-3Y
-> >> zpVM9YgM9Y7{*P0ApJNUh^uk1wCnA6V0tg_000IagfB*srAb<b@2q1s}0tg_000Iag
-> >> zfB*srAb<b@2q1s}0tg_000IagfB*srAb<b@2q1s}0tg_000IagfB*srAb`MM1p>_h
-> >> z2-R=Q9ooK1{l9<Dy8IIMUVXr9BW9uI1x7};j+kij|5kLI^32no;n|PvqD74ZOlJ#n
-> >> z0-~CKSlx#liMS>jt232#==00xPqwp;gsZrjc?`PPxaCE~>3(^o5-%+Nj=HegJFK2b
-> >> z=l5zT4IDgO=sJ1zp=jyrALvcQJK|j;sN2_jUmobjN<!S6m1{G<LZ^+JP;T!|3{9)w
-> >> eGf&ioo}iw|li2&4IyG;z<}vrl)Mic2`t2{52##q0
-> >>
-> >> literal 0
-> >> HcmV?d00001
-> > 
-> > Please don't try to add a binary file to fstests directly.
-> > 
-> >>
-> >> diff --git a/tests/xfs/554 b/tests/xfs/554
-> >> new file mode 100644
-> >> index 00000000..13bc62c7
-> >> --- /dev/null
-> >> +++ b/tests/xfs/554
-> >> @@ -0,0 +1,37 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
-> >> +#
-> >> +# FS QA Test No. 554
-> >> +#
-> >> +# Test restoring a dumpfile with a wrong root inode number created by
-> >> +# xfsdump 3.1.8.
-> >> +# This test restores the checked-in broken dump with '-x' flag.
-> >> +#
-> >> +
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick dump
-> >> +
-> >> +# Import common functions.
-> >> +. ./common/dump
-> >> +
-> >> +# real QA test starts here
-> >> +_supported_fs xfs
-> >> +_require_scratch
-> > 
-> > The -x option is a new feature for xfsdump, not all system support that. So
-> > we need to _notrun if test on a system doesn't support it. A separated
-> > _require_* helper would be better if there'll be more testing about this
-> > new feature. Or a local detection in this case is fine too (can be moved as
-> > a common helper later).
-> > 
-> >> +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
-> >> +_scratch_mount
-> >> +
-> >> +# Create dumpdir for comparing with restoredir
-> >> +rm -rf $dump_dir
-> >> +mkdir $dump_dir || _fail "failed to mkdir $restore_dir"
-> >           ^^                                  ^^
-> > 
-> > Are you trying to create a dump dir or restore dir?
-> > 
-> >> +touch $dump_dir/FILE_1019
-> >> +
-> >> +_do_restore_toc -x -f $here/src/root-inode-broken-dumpfile
-> > 
-> > Why I didn't see how you generate this broken dumpfile in this case?
-> > 
-> > Oh... I see, you want to store a dumpfile in fstests source code directly.
-> > I thought you submited that file accidentally...
-> > 
-> > No, we don't do things like this way, please try to generate the dumpfile
-> > in this test case at first, then restore it. For example using xfs_db to
-> > break a xfs, or using some tricky method (likes xfs/545).
-> > 
-> 
-> Thank you for the comments. I will try another approach. I'm having
-> trouble creating a dumpfile for this test. Because xfsdump was already
-> fixed, xfsdump no longer generates a corrupted dumpfile even if there is
-> a lower inode number than a root inode.
+From: Filipe Manana <fdmanana@suse.com>
 
-Oh, I see. You can try, but I think it's hard. It maybe not suitable to be a
-fstests case, if it has to depend on a binary fs dump file. If so, We can cover
-it on other place, with this existed "bad" dump file.
+Verify that fiemap correctly reports the sharedness of extents for a file
+with a very large number of extents, spanning many b+tree leaves in the fs
+tree, and when the file's subvolume was snapshoted.
 
-Thanks,
-Zorro
+Currently this passes on all kernel releases and its purpose is to prevent
+and detect regressions in the future, as this actually happened during
+recent development on the btrfs' fiemap related code. With this test we
+now have better coverage for fiemap when a file is shared through a
+snapshot.
 
-> 
-> >> +
-> >> +_do_restore_file -x -f $here/src/root-inode-broken-dumpfile -L stress_545
-> >> +_diff_compare_sub
-> >> +_ls_nodate_compare_sub
-> >> +
-> >> +# success, all done
-> >> +status=0
-> >> +exit
-> >> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
-> >> new file mode 100644
-> >> index 00000000..40a3f3a4
-> >> --- /dev/null
-> >> +++ b/tests/xfs/554.out
-> >> @@ -0,0 +1,57 @@
-> >> +QA output created by 554
-> >> +Contents of dump ...
-> >> +xfsrestore  -x -f DUMP_FILE -t
-> >> +xfsrestore: using file dump (drive_simple) strategy
-> >> +xfsrestore: searching media for dump
-> >> +xfsrestore: examining media file 0
-> >> +xfsrestore: dump description: 
-> >> +xfsrestore: hostname: xfsdump
-> >> +xfsrestore: mount point: SCRATCH_MNT
-> >> +xfsrestore: volume: SCRATCH_DEV
-> >> +xfsrestore: session time: TIME
-> >> +xfsrestore: level: 0
-> >> +xfsrestore: session label: "stress_545"
-> >> +xfsrestore: media label: "stress_tape_media"
-> >> +xfsrestore: file system ID: ID
-> >> +xfsrestore: session id: ID
-> >> +xfsrestore: media ID: ID
-> >> +xfsrestore: searching media for directory dump
-> >> +xfsrestore: reading directories
-> >> +xfsrestore: found fake rootino #128, will fix.
-> >> +xfsrestore: fix root # to 1024 (bind mount?)
-> >> +xfsrestore: 2 directories and 2 entries processed
-> >> +xfsrestore: directory post-processing
-> >> +xfsrestore: reading non-directory files
-> >> +xfsrestore: table of contents display complete: SECS seconds elapsed
-> >> +xfsrestore: Restore Status: SUCCESS
-> >> +
-> >> +dumpdir/FILE_1019
-> >> +Restoring from file...
-> >> +xfsrestore  -x -f DUMP_FILE  -L stress_545 RESTORE_DIR
-> >> +xfsrestore: using file dump (drive_simple) strategy
-> >> +xfsrestore: searching media for dump
-> >> +xfsrestore: examining media file 0
-> >> +xfsrestore: found dump matching specified label:
-> >> +xfsrestore: hostname: xfsdump
-> >> +xfsrestore: mount point: SCRATCH_MNT
-> >> +xfsrestore: volume: SCRATCH_DEV
-> >> +xfsrestore: session time: TIME
-> >> +xfsrestore: level: 0
-> >> +xfsrestore: session label: "stress_545"
-> >> +xfsrestore: media label: "stress_tape_media"
-> >> +xfsrestore: file system ID: ID
-> >> +xfsrestore: session id: ID
-> >> +xfsrestore: media ID: ID
-> >> +xfsrestore: searching media for directory dump
-> >> +xfsrestore: reading directories
-> >> +xfsrestore: found fake rootino #128, will fix.
-> >> +xfsrestore: fix root # to 1024 (bind mount?)
-> >> +xfsrestore: 2 directories and 2 entries processed
-> >> +xfsrestore: directory post-processing
-> >> +xfsrestore: restoring non-directory files
-> >> +xfsrestore: restore complete: SECS seconds elapsed
-> >> +xfsrestore: Restore Status: SUCCESS
-> >> +Comparing dump directory with restore directory
-> >> +Files DUMP_DIR/FILE_1019 and RESTORE_DIR/DUMP_SUBDIR/FILE_1019 are identical
-> >> +Comparing listing of dump directory with restore directory
-> >> +Files TMP.dump_dir and TMP.restore_dir are identical
-> >> -- 
-> >> 2.37.3
-> >>
-> > 
-> 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ doc/group-names.txt |   1 +
+ tests/btrfs/276     | 123 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/276.out |  16 ++++++
+ 3 files changed, 140 insertions(+)
+ create mode 100755 tests/btrfs/276
+ create mode 100644 tests/btrfs/276.out
+
+diff --git a/doc/group-names.txt b/doc/group-names.txt
+index ef411b5e..6cc9af78 100644
+--- a/doc/group-names.txt
++++ b/doc/group-names.txt
+@@ -47,6 +47,7 @@ eio			IO error reporting
+ encrypt			encrypted file contents
+ enospc			ENOSPC error reporting
+ exportfs		file handles
++fiemap			fiemap ioctl
+ filestreams		XFS filestreams allocator
+ freeze			filesystem freeze tests
+ fsck			general fsck tests
+diff --git a/tests/btrfs/276 b/tests/btrfs/276
+new file mode 100755
+index 00000000..5946dad9
+--- /dev/null
++++ b/tests/btrfs/276
+@@ -0,0 +1,123 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 276
++#
++# Verify that fiemap correctly reports the sharedness of extents for a file with
++# a very large number of extents, spanning many b+tree leaves in the fs tree,
++# and when the file's subvolume was snapshoted.
++#
++. ./common/preamble
++_begin_fstest auto snapshot compress fiemap
++
++. ./common/filter
++
++_supported_fs btrfs
++_require_scratch
++_require_xfs_io_command "fiemap" "ranged"
++
++_scratch_mkfs >> $seqres.full 2>&1
++# We use compression because it's a very quick way to create a file with a very
++# large number of extents (compression limits the maximum extent size to 128K)
++# and while using very little disk space.
++_scratch_mount -o compress
++
++fiemap_test_file()
++{
++	local offset=$1
++	local len=$2
++
++	# Skip the first two lines of xfs_io's fiemap output (file path and
++	# header describing the output columns).
++	$XFS_IO_PROG -c "fiemap -v $offset $len" $SCRATCH_MNT/foo | tail -n +3
++}
++
++# Count the number of shared extents for the whole test file or just for a given
++# range.
++count_shared_extents()
++{
++	local offset=$1
++	local len=$2
++
++	# Column 5 (from xfs_io's "fiemap -v" command) is the flags (hex field).
++	# 0x2000 is the value for the FIEMAP_EXTENT_SHARED flag.
++	fiemap_test_file $offset $len | \
++		$AWK_PROG --source 'BEGIN { cnt = 0 }' \
++			  --source '{ if (and(strtonum($5), 0x2000)) cnt++ }' \
++			  --source 'END { print cnt }'
++}
++
++# Count the number of non shared extents for the whole test file or just for a
++# given range.
++count_not_shared_extents()
++{
++	local offset=$1
++	local len=$2
++
++	# Column 5 (from xfs_io's "fiemap -v" command) is the flags (hex field).
++	# 0x2000 is the value for the FIEMAP_EXTENT_SHARED flag.
++	fiemap_test_file $offset $len | \
++		$AWK_PROG --source 'BEGIN { cnt = 0 }' \
++			  --source '{ if (!and(strtonum($5), 0x2000)) cnt++ }' \
++			  --source 'END { print cnt }'
++}
++
++# Create a 16G file as that results in 131072 extents, all with a size of 128K
++# (due to compression), and a fs tree with a height of 3 (root node at level 2).
++# We want to verify later that fiemap correctly reports the sharedness of each
++# extent, even when it needs to switch from one leaf to the next one and from a
++# node at level 1 to the next node at level 1.
++#
++$XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Sync to flush delalloc and commit the current transaction, so fiemap will see
++# all extents in the fs tree and extent trees and not look at delalloc.
++sync
++
++echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
++
++# Creating a snapshot.
++$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _filter_scratch
++
++# We have a snapshot, so now all extents should be reported as shared.
++echo "Number of shared extents in the whole file: $(count_shared_extents)"
++
++# Now COW two files ranges, of 1M each, in the snapshot's file.
++# So 16 extents should become non-shared after this.
++#
++$XFS_IO_PROG -c "pwrite -b 1M 8M 1M" \
++	     -c "pwrite -b 1M 12G 1M" \
++	     $SCRATCH_MNT/snap/foo | _filter_xfs_io
++
++# Sync to flush delalloc and commit the current transaction, so fiemap will see
++# all extents in the fs tree and extent trees and not look at delalloc.
++sync
++
++# Now we should have 16 non-shared extents and 131056 (131072 - 16) shared
++# extents.
++echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
++echo "Number of shared extents in the whole file: $(count_shared_extents)"
++
++# Check that the non-shared extents are indeed in the expected file ranges (each
++# with 8 extents).
++echo "Number of non-shared extents in range [8M, 9M): $(count_not_shared_extents 8M 1M)"
++echo "Number of non-shared extents in range [12G, 12G + 1M): $(count_not_shared_extents 12G 1M)"
++
++# Now delete the snapshot.
++$BTRFS_UTIL_PROG subvolume delete -c $SCRATCH_MNT/snap | _filter_scratch
++
++# We deleted the snapshot and committed the transaction used to delete it (-c),
++# but all its extents (both metadata and data) are actually only deleted in the
++# background, by the cleaner kthread. So remount, which wakes up the cleaner
++# kthread, with a commit interval of 1 second and sleep for 1.1 seconds - after
++# this we are guaranteed all extents of the snapshot were deleted.
++_scratch_remount commit=1
++sleep 1.1
++
++# Now all extents should be reported as not shared (131072 extents).
++echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
+new file mode 100644
+index 00000000..3bf5a5e6
+--- /dev/null
++++ b/tests/btrfs/276.out
+@@ -0,0 +1,16 @@
++QA output created by 276
++wrote 17179869184/17179869184 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Number of non-shared extents in the whole file: 131072
++Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
++Number of shared extents in the whole file: 131072
++wrote 1048576/1048576 bytes at offset 8388608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 12884901888
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Number of non-shared extents in the whole file: 16
++Number of shared extents in the whole file: 131056
++Number of non-shared extents in range [8M, 9M): 8
++Number of non-shared extents in range [12G, 12G + 1M): 8
++Delete subvolume (commit): 'SCRATCH_MNT/snap'
++Number of non-shared extents in the whole file: 131072
+-- 
+2.35.1
 
