@@ -2,95 +2,289 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE1F0C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Oct 2022 05:46:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFBC4C43219
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Oct 2022 05:46:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229941AbiJEFqx (ORCPT
+        id S229588AbiJEFqz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Oct 2022 01:46:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37844 "EHLO
+        Wed, 5 Oct 2022 01:46:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229588AbiJEFqv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Oct 2022 01:46:51 -0400
+        with ESMTP id S229946AbiJEFqx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Oct 2022 01:46:53 -0400
 Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D63472866;
-        Tue,  4 Oct 2022 22:46:50 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C66472B6A;
+        Tue,  4 Oct 2022 22:46:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1664948810; x=1696484810;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=uFxELFmiwDIu9C3D+tGh6lrwomyO98z7pVBflUIQI8s=;
-  b=Z2K2/lVO4C/3IjLhQdXeuFMGiB8hNDhHHVa45vE3PJ8DXco1UahAcAq9
-   nHY3zBzodHrly/02Lefj3XSt9bf0ToXGTTdhMmo1xartKQ5kWOZMADv+e
-   AL8vDmzbLixO5Q8g3+BzYpmsGgA6aShX5PUmN380bHLvsZ0Sey7uQPGVd
-   oATBef5q+Bit0ADBqmmGFNPSjzE4WLmUEU6CAp9I5ZOaq4UgQkooKH1YN
-   cK1i5HizxkDkFW+OYY3LlyzSJEcfuj177BT/ebzWidN8SaqvcEEh40j61
-   4SvnAhqHqVOqugtzGEEQM0uFcc1FaOEj/q+wxTgJXSsdeHLtSYxKvK+42
-   g==;
+  t=1664948812; x=1696484812;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=Zz8EGP68GFfz00z+TD7RpSCgY56irAOtcxjJkFkvxcY=;
+  b=kqCz/WtEk/6jQ2SRaWVGjeN27gwiCBV3DMIU4t0l36oMhBhmV8Etpma7
+   zfdtR3vLPNqBkTmj6Dmo1RACMWj4SXsr/0vXgwc0PGH+KeBiHe89COB4K
+   lOn5UY1e50uphR8Gi4sczqRxoaiDxAj09V1m0u/yLy0+odcqnIdDqSn1K
+   gfIDQuyHPA2px3QDJ/R5HL26bL3Lx0W4lNO6y7nY/Cl2X+VPcJl28+9rc
+   /CbDHV0WLbM/YY9R+GsEpxd9KG4CTTDMwfWeubIND16ooT4rD+GYWVGW5
+   h3jQkjZfZrgGtNxElcc57HEEH/cmw4EsM1jhaVP0Qtu8j9bUfWjdJAwFZ
+   w==;
 X-IronPort-AV: E=Sophos;i="5.95,159,1661788800"; 
-   d="scan'208";a="317309476"
+   d="scan'208";a="317309478"
 Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 05 Oct 2022 13:46:49 +0800
-IronPort-SDR: QVRDcLQqWP2puAN/rzFiDwyShG26VODW2zcsv139jvMTJfnXvw0R8DrVy6dZZoQNLfq5BUxtDp
- z9Ogfa9YSiRfXtN/OUIIBfrRb2JTw4OPZzZ/aY9Vbzan1JHjWLcTwynUKyh37lR4uISOIzDD0p
- rSOZVxEu+XZ5EP8v6MwMrttRnmJN5AAUhPq3/Gfr1m1a8C5WfoUN0r7ERyp1LDWS71SATqSbcZ
- SAg1xlmdBTVMi4B1swT9PE95P47Ct0AzTdG73WnKFyO0VzawUq7dhkJ+F5qhYUcN+GdRyKZfWs
- tWIuyd/NS4HxpO1rJo/+UyjJ
+  by ob1.hgst.iphmx.com with ESMTP; 05 Oct 2022 13:46:51 +0800
+IronPort-SDR: anfD7eSWrV9U/CQ5ww8XxZc040TBpNjGEVEdgGl2Kr/DXXMPlQ6KcODXUb9r5oV/mudlRJOQau
+ Pg0A8HCS4iQp6i5tde0yQgTmvudg2rAOvV3oB0YXigtxfgP9tg111Xxpt5xBM1rAWI9TOsvD8v
+ vX33p5GriZpAUKD56QXvig/nmgFtG3oSyj+EOzn5M2R5JRZpk8nyAdbPvnLTGItDDrRyCQrnbR
+ S1mmwEB1T66TXSODY0XzVbhziuvypldYnnBZW/wVOAVVsLFxgDLjD3UYpy6sgfgLa48vJex6Kf
+ 9zm7ofEyF80UN2czC9rZZBKH
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Oct 2022 22:01:02 -0700
-IronPort-SDR: erds+Y/Nx2nonIP0JB52iyqNQewVjjXIbuDlWXf2hDdraS2RvknTj5llSNywhw1eoNj8rn29yX
- EJz/VyagN5jO+rCI/IdgU5UPlGcHioKnqIicz7L+wLazPrO1FZdBgLAA4zRndC4F0z8gig2E6P
- EJHShHUNE9mg8+2l4gwTnlu744H7fIdUOIgVRXODhV0xQzX5EaVq59cwtTNQrwn7fm0lTpbWgR
- 3trIgw621v803J/ZmYgC7xVP9rG6PHrwzJbKzOf04/k2C0/FUlkIJOU7/ofBwRUFQB8Y1hNgqf
- X4k=
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Oct 2022 22:01:04 -0700
+IronPort-SDR: 00iWFwHkLBtzBX2I2AuTu8aPb3230OQzo7nGdlB+zKVHh9G9wmbPEimTVw5kOVssZilZXB0m/G
+ Ab8vjpLHFjdfCu08VHOLkgkRfJEctIsiphdHcAz0oHoFO1G99cHqLzQbJmentBeKNPi9JbzC7b
+ o1rKAG7+VTxExtdQpKBeW1iBBjo4EN9p8qMjmaY3aVWPDQXVlMCX9dV3ZkcSH3eeWZxRFkMrIS
+ yM8/PSGngffMPD0qc55pfyOzqqxAG/cQMFHkn3SREU5AD+Xy3aIfLye2jFKS/R5OCptdoOGSqD
+ Njc=
 WDCIronportException: Internal
 Received: from 5cg2075dx4.ad.shared (HELO naota-xeon.wdc.com) ([10.225.48.62])
-  by uls-op-cesaip02.wdc.com with ESMTP; 04 Oct 2022 22:46:49 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP; 04 Oct 2022 22:46:51 -0700
 From:   Naohiro Aota <naohiro.aota@wdc.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH v3 0/2] btrfs: test active zone tracking
-Date:   Wed,  5 Oct 2022 14:46:42 +0900
-Message-Id: <cover.1664948475.git.naohiro.aota@wdc.com>
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v3 2/2] btrfs: test active zone tracking
+Date:   Wed,  5 Oct 2022 14:46:44 +0900
+Message-Id: <244083eb330f899de5f4aef3716a716208796d73.1664948475.git.naohiro.aota@wdc.com>
 X-Mailer: git-send-email 2.38.0
+In-Reply-To: <cover.1664948475.git.naohiro.aota@wdc.com>
+References: <cover.1664948475.git.naohiro.aota@wdc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This series adds a test for checking if an active zone tracking feature of
-btrfs's zoned mode. The first patch introduces _zone_capacity() helper to
-get the zone capacity of a specified zone. It rewrites btrfs/237 with the
-helper and use the helper in a newly added test btrfs/292.
+A ZNS device limits the number of active zones, which is the number of
+zones can be written at the same time. To deal with the limit, btrfs's
+zoned mode tracks which zone (corresponds to a block group on the SINGLE
+profile) is active, and finish a zone if necessary.
 
-Changes:
-- v3:
-  - Fix import of common/zoned in btrfs/237. 
-  - Use _fixed_by_kernel_commit.
-  - Cleanup background dd processes.
-  - Rework error handling.
-  - Fix indent.
-- v2:
-  - Rename to common/zoned.
-  - Move _filter_blkzone_report() as well to common/zoned.
-  - Drop _require_fio as it was already unnecessary.
+This test checks if the active zone tracking and the finishing of zones
+works properly. First, it fills <number of max active zones> zones
+mostly. And, run some data/metadata stress workload to force btrfs to use a
+new zone.
 
-Naohiro Aota (2):
-  common: introduce zone_capacity() to return a zone capacity
-  btrfs: test active zone tracking
+This test fails on an older kernel (e.g, 5.18.2) like below.
 
- common/filter       |  13 ----
- common/zoned        |  39 ++++++++++++
- tests/btrfs/237     |   8 +--
+btrfs/292
+[failed, exit status 1]- output mismatch (see /host/btrfs/292.out.bad)
+    --- tests/btrfs/292.out     2022-09-15 07:52:18.000000000 +0000
+    +++ /host/btrfs/292.out.bad 2022-09-15 07:59:14.290967793 +0000
+    @@ -1,2 +1,5 @@
+     QA output created by 292
+    -Silence is golden
+    +stress_data_bgs failed
+    +stress_data_bgs_2 failed
+    +failed: '/bin/btrfs subvolume snapshot /mnt/scratch /mnt/scratch/snap825'
+    +(see /host/btrfs/292.full for details)
+    ...
+    (Run 'diff -u /var/lib/xfstests/tests/btrfs/292.out /host/btrfs/292.out.bad'  to see the entire diff)
+
+The failure is fixed with a series "btrfs: zoned: fix active zone tracking
+issues" [1] (upstream commits from 65ea1b66482f ("block: add bdev_max_segments()
+helper") to 2ce543f47843 ("btrfs: zoned: wait until zone is finished when
+allocation didn't progress")).
+
+[1] https://lore.kernel.org/linux-btrfs/cover.1657321126.git.naohiro.aota@wdc.com/
+
+Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ common/zoned        |  11 ++++
  tests/btrfs/292     | 143 ++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/292.out |   2 +
- 5 files changed, 186 insertions(+), 19 deletions(-)
- create mode 100644 common/zoned
+ 3 files changed, 156 insertions(+)
  create mode 100755 tests/btrfs/292
  create mode 100644 tests/btrfs/292.out
 
+diff --git a/common/zoned b/common/zoned
+index d1bc60f784a1..eed0082a15cf 100644
+--- a/common/zoned
++++ b/common/zoned
+@@ -15,6 +15,17 @@ _filter_blkzone_report()
+ 	sed -e 's/len/cap/2'
+ }
+ 
++_require_limited_active_zones() {
++    local dev=$1
++    local sysfs=$(_sysfs_dev ${dev})
++    local attr="${sysfs}/queue/max_active_zones"
++
++    [ -e "${attr}" ] || _notrun "cannot find queue/max_active_zones. Maybe non-zoned device?"
++    if [ $(cat "${attr}") == 0 ]; then
++	_notrun "this test requires limited active zones"
++    fi
++}
++
+ _zone_capacity() {
+     local phy=$1
+     local dev=$2
+diff --git a/tests/btrfs/292 b/tests/btrfs/292
+new file mode 100755
+index 000000000000..00b8e165b102
+--- /dev/null
++++ b/tests/btrfs/292
+@@ -0,0 +1,143 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Western Digital Corporation.  All Rights Reserved.
++#
++# FS QA Test 292
++#
++# Test that an active zone is properly reclaimed to allow the further
++# allocations, even if the active zones are mostly filled.
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot zone
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++
++	# kill commands in stress_data_bgs_2
++	[ -n "$pid1" ] && kill $pid1
++	[ -n "$pid2" ] && kill $pid2
++	wait
++}
++
++# Import common functions.
++. ./common/zoned
++
++# real QA test starts here
++
++_supported_fs btrfs
++_fixed_by_kernel_commit 2ce543f47843 \
++	"btrfs: zoned: wait until zone is finished when allocation didn't progress"
++# which is further fixed by
++_fixed_by_kernel_commit d5b81ced74af \
++	"btrfs: zoned: fix API misuse of zone finish waiting"
++_require_zoned_device "$SCRATCH_DEV"
++_require_limited_active_zones "$SCRATCH_DEV"
++
++_require_command "$BLKZONE_PROG" blkzone
++_require_btrfs_command inspect-internal dump-tree
++
++# This test requires specific data space usage, skip if we have compression
++# enabled.
++_require_no_compress
++
++max_active=$(cat $(_sysfs_dev ${SCRATCH_DEV})/queue/max_active_zones)
++
++# Fill the zones leaving the last 1MB
++fill_active_zones() {
++	# Asuumes we have the same capacity between zones.
++	local capacity=$(_zone_capacity 0)
++	local fill_size=$((capacity - 1024 * 1024))
++
++	for x in $(seq ${max_active}); do
++		dd if=/dev/zero of=${SCRATCH_MNT}/fill$(printf "%02d" $x) \
++			bs=${fill_size} count=1 oflag=direct 2>/dev/null
++		$BTRFS_UTIL_PROG filesystem sync ${SCRATCH_MNT}
++
++		local nactive=$($BLKZONE_PROG report ${SCRATCH_DEV} | grep oi | wc -l)
++		if [[ ${nactive} == ${max_active} ]]; then
++			break
++		fi
++	done
++
++	echo "max active zones: ${max_active}" >> $seqres.full
++	$BLKZONE_PROG report ${SCRATCH_DEV} | grep oi | cat -n >> $seqres.full
++}
++
++workout() {
++	local func="$1"
++
++	_scratch_mkfs >/dev/null 2>&1
++	_scratch_mount
++
++	fill_active_zones
++	eval "$func" || _fail "${func} failed"
++
++	_scratch_unmount
++	_check_btrfs_filesystem ${SCRATCH_DEV}
++}
++
++stress_data_bgs() {
++	# This dd fails with ENOSPC, which should not :(
++	dd if=/dev/zero of=${SCRATCH_MNT}/large bs=64M count=1 oflag=sync \
++		>>$seqres.full 2>&1
++}
++
++stress_data_bgs_2() {
++	# This dd fails with ENOSPC, which should not :(
++	dd if=/dev/zero of=${SCRATCH_MNT}/large bs=64M count=10 conv=fsync \
++		>>$seqres.full 2>&1 &
++	pid1=$!
++
++	dd if=/dev/zero of=${SCRATCH_MNT}/large2 bs=64M count=10 conv=fsync \
++		>>$seqres.full 2>&1 &
++	pid2=$!
++
++	wait $pid1; local ret1=$?; unset pid1
++	wait $pid2; local ret2=$?; unset pid2
++
++	if [ $ret1 -ne 0 -o $ret2 -ne 0 ]; then
++		return 1
++	fi
++	return 0
++}
++
++get_meta_bgs() {
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t EXTENT ${SCRATCH_DEV} |
++		grep BLOCK_GROUP -A 1 |grep -B1 'METADATA|' |
++		grep -oP '\(\d+ BLOCK_GROUP_ITEM \d+\)'
++}
++
++# This test case does not return the result because
++# _run_btrfs_util_prog will call _fail() in the error case anyway.
++stress_metadata_bgs() {
++	local metabgs=$(get_meta_bgs)
++	local count=0
++
++	while : ; do
++		_run_btrfs_util_prog subvolume snapshot ${SCRATCH_MNT} ${SCRATCH_MNT}/snap$i
++		_run_btrfs_util_prog filesystem sync ${SCRATCH_MNT}
++		cur_metabgs=$(get_meta_bgs)
++		if [[ "${cur_metabgs}" != "${metabgs}" ]]; then
++			break
++		fi
++		i=$((i + 1))
++	done
++}
++
++WORKS=(
++	stress_data_bgs
++	stress_data_bgs_2
++	stress_metadata_bgs
++)
++
++for work in "${WORKS[@]}"; do
++	workout "${work}"
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/292.out b/tests/btrfs/292.out
+new file mode 100644
+index 000000000000..627309d3fbd2
+--- /dev/null
++++ b/tests/btrfs/292.out
+@@ -0,0 +1,2 @@
++QA output created by 292
++Silence is golden
 -- 
 2.38.0
 
