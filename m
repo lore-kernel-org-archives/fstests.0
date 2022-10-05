@@ -2,269 +2,95 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48848C433F5
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Oct 2022 22:05:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE1F0C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Oct 2022 05:46:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230123AbiJCWFP (ORCPT
+        id S229941AbiJEFqx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Oct 2022 18:05:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36632 "EHLO
+        Wed, 5 Oct 2022 01:46:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229719AbiJCWFJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Oct 2022 18:05:09 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9EB7E091;
-        Mon,  3 Oct 2022 15:04:54 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 5BD6CB81619;
-        Mon,  3 Oct 2022 22:04:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 03795C433D7;
-        Mon,  3 Oct 2022 22:04:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664834692;
-        bh=BuEPg5Rnb5rDzndjDTy4F539zS3/B7ofdoqRBxDwCeM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Hp+Hqw65ghVFKkuf58s6Jg0nCWaKkOi5b/Sb92wAYT98k5nvoLNdlOb0xk+n6b1dA
-         toQ5d27bGXAJ3i8499Sx+rBRuePUKlxkInYobMkH0hFbHa5v5rk+XeRMr7nF0yWZJf
-         IL7tRqjSz+UGLVJzFXWiZgQJPVRkqZBKrBLy6NW7l1bCfZJZwOO2sOkuzy1Ohk2Vr5
-         CjVrK2F41IVDOFPVnvxk0aerNVi6BrQyk5rnd0/QOciXCdbQaznO6KKsXYKqQp/r/t
-         YsDaxVxSDCauiFhBC10q2OdBWDtDLlzAHU8N9/KmFE/KSfWDry2Jy08WAU/ze3aJ1u
-         tWvdMKPXuJANw==
-Date:   Mon, 3 Oct 2022 15:04:51 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Hironori Shiina <shiina.hironori@gmail.com>,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Hironori Shiina <shiina.hironori@fujitsu.com>
-Subject: Re: [RFC PATCH] xfs: test for fixing wrong root inode number
-Message-ID: <Yztcg/8nbS0BDedf@magnolia>
-References: <20220928210337.417054-1-shiina.hironori@fujitsu.com>
- <20220929014955.pxou2qymdumvijtt@zlang-mailbox>
- <eae39d48-1fc1-09dc-7f5e-b1112c880584@gmail.com>
- <20221002042708.fshgqyqyhidgsx7z@zlang-mailbox>
+        with ESMTP id S229588AbiJEFqv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Oct 2022 01:46:51 -0400
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D63472866;
+        Tue,  4 Oct 2022 22:46:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1664948810; x=1696484810;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=uFxELFmiwDIu9C3D+tGh6lrwomyO98z7pVBflUIQI8s=;
+  b=Z2K2/lVO4C/3IjLhQdXeuFMGiB8hNDhHHVa45vE3PJ8DXco1UahAcAq9
+   nHY3zBzodHrly/02Lefj3XSt9bf0ToXGTTdhMmo1xartKQ5kWOZMADv+e
+   AL8vDmzbLixO5Q8g3+BzYpmsGgA6aShX5PUmN380bHLvsZ0Sey7uQPGVd
+   oATBef5q+Bit0ADBqmmGFNPSjzE4WLmUEU6CAp9I5ZOaq4UgQkooKH1YN
+   cK1i5HizxkDkFW+OYY3LlyzSJEcfuj177BT/ebzWidN8SaqvcEEh40j61
+   4SvnAhqHqVOqugtzGEEQM0uFcc1FaOEj/q+wxTgJXSsdeHLtSYxKvK+42
+   g==;
+X-IronPort-AV: E=Sophos;i="5.95,159,1661788800"; 
+   d="scan'208";a="317309476"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 05 Oct 2022 13:46:49 +0800
+IronPort-SDR: QVRDcLQqWP2puAN/rzFiDwyShG26VODW2zcsv139jvMTJfnXvw0R8DrVy6dZZoQNLfq5BUxtDp
+ z9Ogfa9YSiRfXtN/OUIIBfrRb2JTw4OPZzZ/aY9Vbzan1JHjWLcTwynUKyh37lR4uISOIzDD0p
+ rSOZVxEu+XZ5EP8v6MwMrttRnmJN5AAUhPq3/Gfr1m1a8C5WfoUN0r7ERyp1LDWS71SATqSbcZ
+ SAg1xlmdBTVMi4B1swT9PE95P47Ct0AzTdG73WnKFyO0VzawUq7dhkJ+F5qhYUcN+GdRyKZfWs
+ tWIuyd/NS4HxpO1rJo/+UyjJ
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Oct 2022 22:01:02 -0700
+IronPort-SDR: erds+Y/Nx2nonIP0JB52iyqNQewVjjXIbuDlWXf2hDdraS2RvknTj5llSNywhw1eoNj8rn29yX
+ EJz/VyagN5jO+rCI/IdgU5UPlGcHioKnqIicz7L+wLazPrO1FZdBgLAA4zRndC4F0z8gig2E6P
+ EJHShHUNE9mg8+2l4gwTnlu744H7fIdUOIgVRXODhV0xQzX5EaVq59cwtTNQrwn7fm0lTpbWgR
+ 3trIgw621v803J/ZmYgC7xVP9rG6PHrwzJbKzOf04/k2C0/FUlkIJOU7/ofBwRUFQB8Y1hNgqf
+ X4k=
+WDCIronportException: Internal
+Received: from 5cg2075dx4.ad.shared (HELO naota-xeon.wdc.com) ([10.225.48.62])
+  by uls-op-cesaip02.wdc.com with ESMTP; 04 Oct 2022 22:46:49 -0700
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH v3 0/2] btrfs: test active zone tracking
+Date:   Wed,  5 Oct 2022 14:46:42 +0900
+Message-Id: <cover.1664948475.git.naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.38.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221002042708.fshgqyqyhidgsx7z@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 02, 2022 at 12:27:08PM +0800, Zorro Lang wrote:
-> On Fri, Sep 30, 2022 at 11:01:51AM -0400, Hironori Shiina wrote:
-> > 
-> > 
-> > On 9/28/22 21:49, Zorro Lang wrote:
-> > > On Wed, Sep 28, 2022 at 05:03:37PM -0400, Hironori Shiina wrote:
-> > >> Test '-x' option of xfsrestore. With this option, a wrong root inode
-> > >> number is corrected. A root inode number can be wrong in a dump created
-> > >> by problematic xfsdump (v3.1.7 - v3.1.9) with blukstat misuse. This
-> > >> patch adds a dump with a wrong inode number created by xfsdump 3.1.8.
-> > >>
-> > >> Link: https://lore.kernel.org/linux-xfs/20201113125127.966243-1-hsiangkao@redhat.com/
-> > >> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
-> > >> ---
-> > >>  common/dump                    |   2 +-
-> > >>  src/root-inode-broken-dumpfile | Bin 0 -> 21648 bytes
-> > >>  tests/xfs/554                  |  37 +++++++++++++++++++++
-> > >>  tests/xfs/554.out              |  57 +++++++++++++++++++++++++++++++++
-> > >>  4 files changed, 95 insertions(+), 1 deletion(-)
-> > >>  create mode 100644 src/root-inode-broken-dumpfile
-> > >>  create mode 100644 tests/xfs/554
-> > >>  create mode 100644 tests/xfs/554.out
-> > >>
-> > >> diff --git a/common/dump b/common/dump
-> > >> index 8e0446d9..50b2ba03 100644
-> > >> --- a/common/dump
-> > >> +++ b/common/dump
-> > >> @@ -1003,7 +1003,7 @@ _parse_restore_args()
-> > >>          --no-check-quota)
-> > >>              do_quota_check=false
-> > >>              ;;
-> > >> -	-K|-R)
-> > >> +	-K|-R|-x)
-> > >>  	    restore_args="$restore_args $1"
-> > >>              ;;
-> > >>  	*)
-> > >> diff --git a/src/root-inode-broken-dumpfile b/src/root-inode-broken-dumpfile
-> > >> new file mode 100644
-> > >> index 0000000000000000000000000000000000000000..9a42e65d8047497be31f3abbaf4223ae384fd14d
-> > >> GIT binary patch
-> > >> literal 21648
-> > >> zcmeI)K}ge49KiAC_J<CEBr!0AwBf~zbCHB}5DyxL6eU8Jnqylvayj;2VuG+d)TN6;
-> > >> z5J8vlAaw9hXi(UousT$Sin@BRJfwHM)O+*2*njz_zc+h*ckuV#@BMuKe;;JbgTL{<
-> > >> z!SwZ9zC#ERe%reLe5&cz2e}qM<!i2dXQHt^{^`d1Qx{)MMzW#$%dR@J={0`IRsGx4
-> > >> z(yn@Oi-nBqCOVIG?&{kpwnv~&w_>6_ozY1^fph=w8(=^oTg&wOe=(WQByyQ_Hfd|4
-> > >> z^o76<0!zn#v>k3blbU)nzx=KF^}-G%R;OaQYsHwGDkO`kD^@q^(_Ac_8H<gKj^>a0
-> > >> z6p*%BK>q#b>2EE%^!@f?Z`-p+tI@M}qmMm@zMJk>K1U^=d~G^NUG?X4vkvKtOf-3Y
-> > >> zpVM9YgM9Y7{*P0ApJNUh^uk1wCnA6V0tg_000IagfB*srAb<b@2q1s}0tg_000Iag
-> > >> zfB*srAb<b@2q1s}0tg_000IagfB*srAb<b@2q1s}0tg_000IagfB*srAb`MM1p>_h
-> > >> z2-R=Q9ooK1{l9<Dy8IIMUVXr9BW9uI1x7};j+kij|5kLI^32no;n|PvqD74ZOlJ#n
-> > >> z0-~CKSlx#liMS>jt232#==00xPqwp;gsZrjc?`PPxaCE~>3(^o5-%+Nj=HegJFK2b
-> > >> z=l5zT4IDgO=sJ1zp=jyrALvcQJK|j;sN2_jUmobjN<!S6m1{G<LZ^+JP;T!|3{9)w
-> > >> eGf&ioo}iw|li2&4IyG;z<}vrl)Mic2`t2{52##q0
-> > >>
-> > >> literal 0
-> > >> HcmV?d00001
-> > > 
-> > > Please don't try to add a binary file to fstests directly.
-> > > 
-> > >>
-> > >> diff --git a/tests/xfs/554 b/tests/xfs/554
-> > >> new file mode 100644
-> > >> index 00000000..13bc62c7
-> > >> --- /dev/null
-> > >> +++ b/tests/xfs/554
-> > >> @@ -0,0 +1,37 @@
-> > >> +#! /bin/bash
-> > >> +# SPDX-License-Identifier: GPL-2.0
-> > >> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
-> > >> +#
-> > >> +# FS QA Test No. 554
-> > >> +#
-> > >> +# Test restoring a dumpfile with a wrong root inode number created by
-> > >> +# xfsdump 3.1.8.
-> > >> +# This test restores the checked-in broken dump with '-x' flag.
-> > >> +#
-> > >> +
-> > >> +. ./common/preamble
-> > >> +_begin_fstest auto quick dump
-> > >> +
-> > >> +# Import common functions.
-> > >> +. ./common/dump
-> > >> +
-> > >> +# real QA test starts here
-> > >> +_supported_fs xfs
-> > >> +_require_scratch
-> > > 
-> > > The -x option is a new feature for xfsdump, not all system support that. So
-> > > we need to _notrun if test on a system doesn't support it. A separated
-> > > _require_* helper would be better if there'll be more testing about this
-> > > new feature. Or a local detection in this case is fine too (can be moved as
-> > > a common helper later).
-> > > 
-> > >> +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
-> > >> +_scratch_mount
-> > >> +
-> > >> +# Create dumpdir for comparing with restoredir
-> > >> +rm -rf $dump_dir
-> > >> +mkdir $dump_dir || _fail "failed to mkdir $restore_dir"
-> > >           ^^                                  ^^
-> > > 
-> > > Are you trying to create a dump dir or restore dir?
-> > > 
-> > >> +touch $dump_dir/FILE_1019
-> > >> +
-> > >> +_do_restore_toc -x -f $here/src/root-inode-broken-dumpfile
-> > > 
-> > > Why I didn't see how you generate this broken dumpfile in this case?
-> > > 
-> > > Oh... I see, you want to store a dumpfile in fstests source code directly.
-> > > I thought you submited that file accidentally...
-> > > 
-> > > No, we don't do things like this way, please try to generate the dumpfile
-> > > in this test case at first, then restore it. For example using xfs_db to
-> > > break a xfs, or using some tricky method (likes xfs/545).
-> > > 
-> > 
-> > Thank you for the comments. I will try another approach. I'm having
-> > trouble creating a dumpfile for this test. Because xfsdump was already
-> > fixed, xfsdump no longer generates a corrupted dumpfile even if there is
-> > a lower inode number than a root inode.
-> 
-> Oh, I see. You can try, but I think it's hard. It maybe not suitable to be a
-> fstests case, if it has to depend on a binary fs dump file. If so, We can cover
-> it on other place, with this existed "bad" dump file.
+This series adds a test for checking if an active zone tracking feature of
+btrfs's zoned mode. The first patch introduces _zone_capacity() helper to
+get the zone capacity of a specified zone. It rewrites btrfs/237 with the
+helper and use the helper in a newly added test btrfs/292.
 
-How difficult is it to create a dumpfile with a broken root inode?
-Is it a simple matter of creating a good dump and patching a few bytes,
-or do we end up having to patch the whole file?
+Changes:
+- v3:
+  - Fix import of common/zoned in btrfs/237. 
+  - Use _fixed_by_kernel_commit.
+  - Cleanup background dd processes.
+  - Rework error handling.
+  - Fix indent.
+- v2:
+  - Rename to common/zoned.
+  - Move _filter_blkzone_report() as well to common/zoned.
+  - Drop _require_fio as it was already unnecessary.
 
-(The reason I ask is that I've heard about this problem for ages but
-I don't actually know how to create a bad dump...)
+Naohiro Aota (2):
+  common: introduce zone_capacity() to return a zone capacity
+  btrfs: test active zone tracking
 
---D
+ common/filter       |  13 ----
+ common/zoned        |  39 ++++++++++++
+ tests/btrfs/237     |   8 +--
+ tests/btrfs/292     | 143 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/292.out |   2 +
+ 5 files changed, 186 insertions(+), 19 deletions(-)
+ create mode 100644 common/zoned
+ create mode 100755 tests/btrfs/292
+ create mode 100644 tests/btrfs/292.out
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > >> +
-> > >> +_do_restore_file -x -f $here/src/root-inode-broken-dumpfile -L stress_545
-> > >> +_diff_compare_sub
-> > >> +_ls_nodate_compare_sub
-> > >> +
-> > >> +# success, all done
-> > >> +status=0
-> > >> +exit
-> > >> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
-> > >> new file mode 100644
-> > >> index 00000000..40a3f3a4
-> > >> --- /dev/null
-> > >> +++ b/tests/xfs/554.out
-> > >> @@ -0,0 +1,57 @@
-> > >> +QA output created by 554
-> > >> +Contents of dump ...
-> > >> +xfsrestore  -x -f DUMP_FILE -t
-> > >> +xfsrestore: using file dump (drive_simple) strategy
-> > >> +xfsrestore: searching media for dump
-> > >> +xfsrestore: examining media file 0
-> > >> +xfsrestore: dump description: 
-> > >> +xfsrestore: hostname: xfsdump
-> > >> +xfsrestore: mount point: SCRATCH_MNT
-> > >> +xfsrestore: volume: SCRATCH_DEV
-> > >> +xfsrestore: session time: TIME
-> > >> +xfsrestore: level: 0
-> > >> +xfsrestore: session label: "stress_545"
-> > >> +xfsrestore: media label: "stress_tape_media"
-> > >> +xfsrestore: file system ID: ID
-> > >> +xfsrestore: session id: ID
-> > >> +xfsrestore: media ID: ID
-> > >> +xfsrestore: searching media for directory dump
-> > >> +xfsrestore: reading directories
-> > >> +xfsrestore: found fake rootino #128, will fix.
-> > >> +xfsrestore: fix root # to 1024 (bind mount?)
-> > >> +xfsrestore: 2 directories and 2 entries processed
-> > >> +xfsrestore: directory post-processing
-> > >> +xfsrestore: reading non-directory files
-> > >> +xfsrestore: table of contents display complete: SECS seconds elapsed
-> > >> +xfsrestore: Restore Status: SUCCESS
-> > >> +
-> > >> +dumpdir/FILE_1019
-> > >> +Restoring from file...
-> > >> +xfsrestore  -x -f DUMP_FILE  -L stress_545 RESTORE_DIR
-> > >> +xfsrestore: using file dump (drive_simple) strategy
-> > >> +xfsrestore: searching media for dump
-> > >> +xfsrestore: examining media file 0
-> > >> +xfsrestore: found dump matching specified label:
-> > >> +xfsrestore: hostname: xfsdump
-> > >> +xfsrestore: mount point: SCRATCH_MNT
-> > >> +xfsrestore: volume: SCRATCH_DEV
-> > >> +xfsrestore: session time: TIME
-> > >> +xfsrestore: level: 0
-> > >> +xfsrestore: session label: "stress_545"
-> > >> +xfsrestore: media label: "stress_tape_media"
-> > >> +xfsrestore: file system ID: ID
-> > >> +xfsrestore: session id: ID
-> > >> +xfsrestore: media ID: ID
-> > >> +xfsrestore: searching media for directory dump
-> > >> +xfsrestore: reading directories
-> > >> +xfsrestore: found fake rootino #128, will fix.
-> > >> +xfsrestore: fix root # to 1024 (bind mount?)
-> > >> +xfsrestore: 2 directories and 2 entries processed
-> > >> +xfsrestore: directory post-processing
-> > >> +xfsrestore: restoring non-directory files
-> > >> +xfsrestore: restore complete: SECS seconds elapsed
-> > >> +xfsrestore: Restore Status: SUCCESS
-> > >> +Comparing dump directory with restore directory
-> > >> +Files DUMP_DIR/FILE_1019 and RESTORE_DIR/DUMP_SUBDIR/FILE_1019 are identical
-> > >> +Comparing listing of dump directory with restore directory
-> > >> +Files TMP.dump_dir and TMP.restore_dir are identical
-> > >> -- 
-> > >> 2.37.3
-> > >>
-> > > 
-> > 
-> 
+-- 
+2.38.0
+
