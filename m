@@ -2,110 +2,167 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35C40C433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Oct 2022 05:02:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA5C0C433FE
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Oct 2022 05:19:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229472AbiJGFC5 (ORCPT
+        id S229492AbiJGFTF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Oct 2022 01:02:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46138 "EHLO
+        Fri, 7 Oct 2022 01:19:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbiJGFC4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 01:02:56 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98256BB070
-        for <fstests@vger.kernel.org>; Thu,  6 Oct 2022 22:02:55 -0700 (PDT)
+        with ESMTP id S229472AbiJGFTE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 01:19:04 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7073C4596
+        for <fstests@vger.kernel.org>; Thu,  6 Oct 2022 22:19:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665118974;
+        s=mimecast20190719; t=1665119942;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=2OSdMSmKz2+8FohR2BeL0lBuEHTByXbSkcCGSK/zZns=;
-        b=hddA0o83TqUcGYYuty3OvQYD2UGGm3NjWaNDbU2L7pqSSEV12RmR3BVVq75wH1X9vNsFnt
-        bCpi/uWoBS9cTgrvhuTR2WeD22WJgQOa6xRe+fkkPdDzqhq/GyyY3HT0LhgCsOPKf4ZY2C
-        L0ONZTAzk9gwSsWJqeWzwBs5DbzA778=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=ys7GnxnPNQtVFgtmfLQ0GfTqsrJhiBOFggXQ/Tpt86A=;
+        b=FwB8O6MyE8FQKED05IbknyIx3Q3DBMjgcyONl2vR8oIv6DfIt2RDl5nwkoPnHy48EEn5ZB
+        xdjAiG7eb69INzGLSghTfLMFSAxEPW4zt0FwwvW+dmKjljUp5b5YVF5FAD6V2a8edW5Z88
+        HoHCJ53xdI+ZlUM9aQZB6Kby5ijANRs=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-561-pjg4tGSSNd2aVRJSiQqkcg-1; Fri, 07 Oct 2022 01:02:53 -0400
-X-MC-Unique: pjg4tGSSNd2aVRJSiQqkcg-1
-Received: by mail-qk1-f198.google.com with SMTP id de16-20020a05620a371000b006ceb92bc740so3036570qkb.15
-        for <fstests@vger.kernel.org>; Thu, 06 Oct 2022 22:02:53 -0700 (PDT)
+ us-mta-324-yzjRRvvHN4-lr47E-qO2qA-1; Fri, 07 Oct 2022 01:19:00 -0400
+X-MC-Unique: yzjRRvvHN4-lr47E-qO2qA-1
+Received: by mail-pf1-f197.google.com with SMTP id u10-20020a056a00098a00b00543b3eb6416so2308360pfg.15
+        for <fstests@vger.kernel.org>; Thu, 06 Oct 2022 22:19:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=2OSdMSmKz2+8FohR2BeL0lBuEHTByXbSkcCGSK/zZns=;
-        b=GXqzkanzm9Dku6rVNby58KvdUhtPI53Lrd86fBUAEaDOK4EFSkLHAQqByOqJtIzY6A
-         ac8TflMpj86GQhKo2kk0AIRSE8ZYNXh5uW/7/IOH85Yv8uTZj6aXvx6jD+pdpGsundPp
-         7aCUC3exSzLnWaaEqbRYTkbXaiKtS7nVi89mr4H74CI4dTZ6SbGtTGC1+VSMdaip2UUf
-         IA5w7kOIZ8EmMb8s5Es6ERY5EMbZT7jBHZaAEjOD/hkTiDFmWoKRsk0k5txZEEXSrAe/
-         Ah2/FG8+0XwQhq3w20/6GWDNxytQBEfK9lAeKtvGktllxJy0Oj7s4FVEQJi/qlUQ20cU
-         JuzQ==
-X-Gm-Message-State: ACrzQf13bCYSpvaNR9w79ywLJVoqrJ2DKvHXf1ZtWqt8NbvH5Ts6zDiv
-        /uKzzKIOGWigA55qfw8BPe5Xkmyj2IvMMqaKoPhFil6pwdNgYgNY+j8+JIVkS+eU0ltIIwqxbUi
-        f3T4YxdhsYMOYZhLQQg==
-X-Received: by 2002:a05:620a:3:b0:6ce:1a87:dc6f with SMTP id j3-20020a05620a000300b006ce1a87dc6fmr2611491qki.73.1665118972977;
-        Thu, 06 Oct 2022 22:02:52 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7D8F7Eb08yusEtIIJQQoTnduUY+fn2NcCN2qC9KkNJa47taIe4SdiVCFeJWksFUqm2vEAMHg==
-X-Received: by 2002:a05:620a:3:b0:6ce:1a87:dc6f with SMTP id j3-20020a05620a000300b006ce1a87dc6fmr2611483qki.73.1665118972766;
-        Thu, 06 Oct 2022 22:02:52 -0700 (PDT)
+        bh=ys7GnxnPNQtVFgtmfLQ0GfTqsrJhiBOFggXQ/Tpt86A=;
+        b=DII/ZnwRg+3GB2fn5LqVlscyfaGo4jtgOR/keveAciIIXZRGa2T3vjB5wo/cNb1uSM
+         hhLPzvBIa+MR7hGheVL6ugJo8xhgHhJ7wFxIjeITgZYHmjuP/w14EjBf2moEjA3X5yuG
+         UPrk4cV5CfolrelyM1wqaqIOc6Kvdb98ahUW5IWAOsjxRdFuL53eBXDPk/k1CZsONJjA
+         +njI7bMbjpNqgdQZTKpNTdtIGGXH2wXuHuIkWHRlybzQ/vu9hUI2SlxxwF/Czo+zL5d1
+         wiw9tYvvEH7IjP1asGmAJm10nVEDhIRuhEX7WfbuDpJEKtqx5o6KU5KUfy/5ualq1/hL
+         UWpw==
+X-Gm-Message-State: ACrzQf2ByP1ojMhKvNe1gbJSBNe2D1BygYXGif7Qee4FgJeF0Yy0cDU6
+        wnCTSCRnd5f8p/tDYBgT2D3EEQ993B501Oj6YRIgZEarR9MuzDVpg/Oq754XF41iop56YHj2Srs
+        uTOfu3HON/F1nFZ3x4A==
+X-Received: by 2002:a63:fb09:0:b0:43c:b1c6:b335 with SMTP id o9-20020a63fb09000000b0043cb1c6b335mr3074406pgh.276.1665119939629;
+        Thu, 06 Oct 2022 22:18:59 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM44DePExSUfOgMCJVRpXOiIOwL0LLo8k6CuV3CPTYRF2ooACV1jIUBwPIJhRJ34k9svuCCwIQ==
+X-Received: by 2002:a63:fb09:0:b0:43c:b1c6:b335 with SMTP id o9-20020a63fb09000000b0043cb1c6b335mr3074390pgh.276.1665119939313;
+        Thu, 06 Oct 2022 22:18:59 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id u28-20020a05620a085c00b006ceafb1aa92sm1048053qku.96.2022.10.06.22.02.50
+        by smtp.gmail.com with ESMTPSA id n15-20020a65488f000000b0042bf6034b3fsm693889pgs.55.2022.10.06.22.18.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Oct 2022 22:02:52 -0700 (PDT)
-Date:   Fri, 7 Oct 2022 13:02:48 +0800
+        Thu, 06 Oct 2022 22:18:58 -0700 (PDT)
+Date:   Fri, 7 Oct 2022 13:18:55 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v3 0/2] btrfs: test active zone tracking
-Message-ID: <20221007050248.kagbkgfbqrkmv54g@zlang-mailbox>
-References: <cover.1664948475.git.naohiro.aota@wdc.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] check: detect and preserve all coredumps made by a
+ test
+Message-ID: <20221007051855.z3om7f5feqtqqkgb@zlang-mailbox>
+References: <166500906990.887104.14293889638885406232.stgit@magnolia>
+ <166500907546.887104.248083399669088204.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cover.1664948475.git.naohiro.aota@wdc.com>
+In-Reply-To: <166500907546.887104.248083399669088204.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 05, 2022 at 02:46:42PM +0900, Naohiro Aota wrote:
-> This series adds a test for checking if an active zone tracking feature of
-> btrfs's zoned mode. The first patch introduces _zone_capacity() helper to
-> get the zone capacity of a specified zone. It rewrites btrfs/237 with the
-> helper and use the helper in a newly added test btrfs/292.
+On Wed, Oct 05, 2022 at 03:31:15PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> If someone sets kernel.core_uses_pid (or kernel.core_pattern), any
+> coredumps generated by fstests might have names that are longer than
+> just "core".  Since the pid isn't all that useful by itself, let's
+> record the coredumps by hash when we save them, so that we don't waste
+> space storing identical crash dumps.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  check     |   26 ++++++++++++++++++++++----
+>  common/rc |   16 ++++++++++++++++
+>  2 files changed, 38 insertions(+), 4 deletions(-)
+> 
+> 
+> diff --git a/check b/check
+> index af23572ccc..654d986b27 100755
+> --- a/check
+> +++ b/check
+> @@ -913,11 +913,19 @@ function run_section()
+>  			sts=$?
+>  		fi
+>  
+> -		if [ -f core ]; then
+> -			_dump_err_cont "[dumped core]"
+> -			mv core $RESULT_BASE/$seqnum.core
+> +		# If someone sets kernel.core_pattern or kernel.core_uses_pid,
+> +		# coredumps generated by fstests might have a longer name than
+> +		# just "core".  Use globbing to find the most common patterns,
+> +		# assuming there are no other coredump capture packages set up.
+> +		local cores=0
+> +		for i in core core.*; do
 
-I have no more review points on this version now, will push it in next fstests
-release, if no objection from others. Thanks!
+I'm wondering if it should be "for i in core*" ? The coredump file only can be
+"core" with dot ".", can it with "-" or "_" or others?
 
-> 
-> Changes:
-> - v3:
->   - Fix import of common/zoned in btrfs/237. 
->   - Use _fixed_by_kernel_commit.
->   - Cleanup background dd processes.
->   - Rework error handling.
->   - Fix indent.
-> - v2:
->   - Rename to common/zoned.
->   - Move _filter_blkzone_report() as well to common/zoned.
->   - Drop _require_fio as it was already unnecessary.
-> 
-> Naohiro Aota (2):
->   common: introduce zone_capacity() to return a zone capacity
->   btrfs: test active zone tracking
-> 
->  common/filter       |  13 ----
->  common/zoned        |  39 ++++++++++++
->  tests/btrfs/237     |   8 +--
->  tests/btrfs/292     | 143 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/292.out |   2 +
->  5 files changed, 186 insertions(+), 19 deletions(-)
->  create mode 100644 common/zoned
->  create mode 100755 tests/btrfs/292
->  create mode 100644 tests/btrfs/292.out
-> 
-> -- 
-> 2.38.0
+
+> +			test -f "$i" || continue
+> +			if ((cores++ == 0)); then
+> +				_dump_err_cont "[dumped core]"
+> +			fi
+> +			_save_coredump "$i"
+>  			tc_status="fail"
+> -		fi
+> +		done
+>  
+>  		if [ -f $seqres.notrun ]; then
+>  			$timestamp && _timestamp
+> @@ -950,6 +958,16 @@ function run_section()
+>  			# of the check script itself.
+>  			(_adjust_oom_score 250; _check_filesystems) || tc_status="fail"
+>  			_check_dmesg || tc_status="fail"
+> +
+> +			# Save any coredumps from the post-test fs checks
+> +			for i in core core.*; do
+> +				test -f "$i" || continue
+> +				if ((cores++ == 0)); then
+> +					_dump_err_cont "[dumped core]"
+> +				fi
+> +				_save_coredump "$i"
+> +				tc_status="fail"
+> +			done
+>  		fi
+>  
+>  		# Reload the module after each test to check for leaks or
+> diff --git a/common/rc b/common/rc
+> index d1f3d56bf8..9750d06a9a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4948,6 +4948,22 @@ _create_file_sized()
+>  	return $ret
+>  }
+>  
+> +_save_coredump()
+> +{
+> +	local path="$1"
+> +
+> +	local core_hash="$(_md5_checksum "$path")"
+> +	local out_file="$RESULT_BASE/$seqnum.core.$core_hash"
+> +
+> +	if [ -s "$out_file" ]; then
+> +		rm -f "$path"
+> +		return
+> +	fi
+> +	rm -f "$out_file"
+> +
+> +	mv "$path" "$out_file"
+> +}
+> +
+>  init_rc
+>  
+>  ################################################################################
 > 
 
