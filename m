@@ -2,167 +2,272 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA5C0C433FE
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Oct 2022 05:19:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDBE3C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Oct 2022 07:32:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229492AbiJGFTF (ORCPT
+        id S229555AbiJGHcf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Oct 2022 01:19:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37946 "EHLO
+        Fri, 7 Oct 2022 03:32:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229472AbiJGFTE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 01:19:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7073C4596
-        for <fstests@vger.kernel.org>; Thu,  6 Oct 2022 22:19:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665119942;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ys7GnxnPNQtVFgtmfLQ0GfTqsrJhiBOFggXQ/Tpt86A=;
-        b=FwB8O6MyE8FQKED05IbknyIx3Q3DBMjgcyONl2vR8oIv6DfIt2RDl5nwkoPnHy48EEn5ZB
-        xdjAiG7eb69INzGLSghTfLMFSAxEPW4zt0FwwvW+dmKjljUp5b5YVF5FAD6V2a8edW5Z88
-        HoHCJ53xdI+ZlUM9aQZB6Kby5ijANRs=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-324-yzjRRvvHN4-lr47E-qO2qA-1; Fri, 07 Oct 2022 01:19:00 -0400
-X-MC-Unique: yzjRRvvHN4-lr47E-qO2qA-1
-Received: by mail-pf1-f197.google.com with SMTP id u10-20020a056a00098a00b00543b3eb6416so2308360pfg.15
-        for <fstests@vger.kernel.org>; Thu, 06 Oct 2022 22:19:00 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
-        bh=ys7GnxnPNQtVFgtmfLQ0GfTqsrJhiBOFggXQ/Tpt86A=;
-        b=DII/ZnwRg+3GB2fn5LqVlscyfaGo4jtgOR/keveAciIIXZRGa2T3vjB5wo/cNb1uSM
-         hhLPzvBIa+MR7hGheVL6ugJo8xhgHhJ7wFxIjeITgZYHmjuP/w14EjBf2moEjA3X5yuG
-         UPrk4cV5CfolrelyM1wqaqIOc6Kvdb98ahUW5IWAOsjxRdFuL53eBXDPk/k1CZsONJjA
-         +njI7bMbjpNqgdQZTKpNTdtIGGXH2wXuHuIkWHRlybzQ/vu9hUI2SlxxwF/Czo+zL5d1
-         wiw9tYvvEH7IjP1asGmAJm10nVEDhIRuhEX7WfbuDpJEKtqx5o6KU5KUfy/5ualq1/hL
-         UWpw==
-X-Gm-Message-State: ACrzQf2ByP1ojMhKvNe1gbJSBNe2D1BygYXGif7Qee4FgJeF0Yy0cDU6
-        wnCTSCRnd5f8p/tDYBgT2D3EEQ993B501Oj6YRIgZEarR9MuzDVpg/Oq754XF41iop56YHj2Srs
-        uTOfu3HON/F1nFZ3x4A==
-X-Received: by 2002:a63:fb09:0:b0:43c:b1c6:b335 with SMTP id o9-20020a63fb09000000b0043cb1c6b335mr3074406pgh.276.1665119939629;
-        Thu, 06 Oct 2022 22:18:59 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM44DePExSUfOgMCJVRpXOiIOwL0LLo8k6CuV3CPTYRF2ooACV1jIUBwPIJhRJ34k9svuCCwIQ==
-X-Received: by 2002:a63:fb09:0:b0:43c:b1c6:b335 with SMTP id o9-20020a63fb09000000b0043cb1c6b335mr3074390pgh.276.1665119939313;
-        Thu, 06 Oct 2022 22:18:59 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id n15-20020a65488f000000b0042bf6034b3fsm693889pgs.55.2022.10.06.22.18.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Oct 2022 22:18:58 -0700 (PDT)
-Date:   Fri, 7 Oct 2022 13:18:55 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] check: detect and preserve all coredumps made by a
- test
-Message-ID: <20221007051855.z3om7f5feqtqqkgb@zlang-mailbox>
-References: <166500906990.887104.14293889638885406232.stgit@magnolia>
- <166500907546.887104.248083399669088204.stgit@magnolia>
+        with ESMTP id S229525AbiJGHcf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 03:32:35 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B41BBBE0C;
+        Fri,  7 Oct 2022 00:32:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1EE8BB82232;
+        Fri,  7 Oct 2022 07:32:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0C40C433D6;
+        Fri,  7 Oct 2022 07:32:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1665127950;
+        bh=uQ2cFCmdA5UWx0PRz+7P5thMnOvL9dkKfx4YIQQr81o=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=vMDy8jV3IOLW3g5mYquWetywNZtpYGc+TGcdbeCr6Hj/TsyPNGze7eZsKfyMEVMlp
+         DLL+Pct4278IQsjVyV5iCPxQQrCsg82EzgslnmQOpdKujbkVF3/E6kcLx5Q9MMbzpb
+         F3RQsZ4xcetc0NabamXAUh81Ie39GrQDUjSpLwgIt4bZPsCGMEIQoXAg/BKhOuh0Uz
+         K4MDw3QTvs7b1n5nNdXkBaKljddD1gpmedGPJw7KwEnV/6oqJs5Bshy62ci5xdqI3/
+         K8NP0dNoL5US5BaVIRx/y7Oek8WH9Np+5wqyFhKivw1/Lpaa1Z0jEPjgbfcqDOEXVm
+         Zr4q0EGIFqA1g==
+Received: by mail-oo1-f44.google.com with SMTP id s125-20020a4a5183000000b0047fbaf2fcbcso834878ooa.11;
+        Fri, 07 Oct 2022 00:32:30 -0700 (PDT)
+X-Gm-Message-State: ACrzQf19zkHkd4aMDaNXuM1m8bM05XVN/O4YxTcSxd9oinxxEkP32wrK
+        MQPosXa17fPHb8m8kMyQtcdPFYEWbzZ0Ho0ewuA=
+X-Google-Smtp-Source: AMsMyM52OhcQiiEebNMfpUZZG/CCk86aFQLzxLk6Uj8sjft39O4FPgNiFJ2jFTSO1UsIM28Dieyoiilo7MWHFmP6YJs=
+X-Received: by 2002:a9d:6b05:0:b0:655:f30b:35b6 with SMTP id
+ g5-20020a9d6b05000000b00655f30b35b6mr1572116otp.274.1665127949764; Fri, 07
+ Oct 2022 00:32:29 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <166500907546.887104.248083399669088204.stgit@magnolia>
+References: <d4bf2bc47e3be1437d5693a0b728e199acb549fd.1664808949.git.fdmanana@suse.com>
+ <20221007045912.5ieeylkcxweiaurx@zlang-mailbox>
+In-Reply-To: <20221007045912.5ieeylkcxweiaurx@zlang-mailbox>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Fri, 7 Oct 2022 08:31:53 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H6UxYf0Oo-U8K0fwWw+Pnv4BN36i+vu3LM9RHM4FUHrGg@mail.gmail.com>
+Message-ID: <CAL3q7H6UxYf0Oo-U8K0fwWw+Pnv4BN36i+vu3LM9RHM4FUHrGg@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test fiemap on large file with extents shared
+ through a snapshot
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 05, 2022 at 03:31:15PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> If someone sets kernel.core_uses_pid (or kernel.core_pattern), any
-> coredumps generated by fstests might have names that are longer than
-> just "core".  Since the pid isn't all that useful by itself, let's
-> record the coredumps by hash when we save them, so that we don't waste
-> space storing identical crash dumps.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  check     |   26 ++++++++++++++++++++++----
->  common/rc |   16 ++++++++++++++++
->  2 files changed, 38 insertions(+), 4 deletions(-)
-> 
-> 
-> diff --git a/check b/check
-> index af23572ccc..654d986b27 100755
-> --- a/check
-> +++ b/check
-> @@ -913,11 +913,19 @@ function run_section()
->  			sts=$?
->  		fi
->  
-> -		if [ -f core ]; then
-> -			_dump_err_cont "[dumped core]"
-> -			mv core $RESULT_BASE/$seqnum.core
-> +		# If someone sets kernel.core_pattern or kernel.core_uses_pid,
-> +		# coredumps generated by fstests might have a longer name than
-> +		# just "core".  Use globbing to find the most common patterns,
-> +		# assuming there are no other coredump capture packages set up.
-> +		local cores=0
-> +		for i in core core.*; do
+On Fri, Oct 7, 2022 at 5:59 AM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Mon, Oct 03, 2022 at 03:58:17PM +0100, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> >
+> > Verify that fiemap correctly reports the sharedness of extents for a file
+> > with a very large number of extents, spanning many b+tree leaves in the fs
+> > tree, and when the file's subvolume was snapshoted.
+> >
+> > Currently this passes on all kernel releases and its purpose is to prevent
+> > and detect regressions in the future, as this actually happened during
+> > recent development on the btrfs' fiemap related code. With this test we
+> > now have better coverage for fiemap when a file is shared through a
+> > snapshot.
+> >
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >  doc/group-names.txt |   1 +
+> >  tests/btrfs/276     | 123 ++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/btrfs/276.out |  16 ++++++
+> >  3 files changed, 140 insertions(+)
+> >  create mode 100755 tests/btrfs/276
+> >  create mode 100644 tests/btrfs/276.out
+> >
+> > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > index ef411b5e..6cc9af78 100644
+> > --- a/doc/group-names.txt
+> > +++ b/doc/group-names.txt
+> > @@ -47,6 +47,7 @@ eio                 IO error reporting
+> >  encrypt                      encrypted file contents
+> >  enospc                       ENOSPC error reporting
+> >  exportfs             file handles
+> > +fiemap                       fiemap ioctl
+>
+> Hi,
+>
+> There're many fiemap related cases, if we'd like to bring in this new group,
+> I hope we can use a separated patch to do this job completely, include adding
+> this group name to all related cases. We can talk about it in another patch,
+> this patch can force on its testing.
 
-I'm wondering if it should be "for i in core*" ? The coredump file only can be
-"core" with dot ".", can it with "-" or "_" or others?
+Sorry, it's not entirely clear to me, but are you saying that you're
+fine with the patch as it is,
+or you want the addition of the fiemap group done in a separate patch
+(that would also add
+the group to all other tests that exercise fiemap)?
 
+Do you want me to make any changes to this patch?
 
-> +			test -f "$i" || continue
-> +			if ((cores++ == 0)); then
-> +				_dump_err_cont "[dumped core]"
-> +			fi
-> +			_save_coredump "$i"
->  			tc_status="fail"
-> -		fi
-> +		done
->  
->  		if [ -f $seqres.notrun ]; then
->  			$timestamp && _timestamp
-> @@ -950,6 +958,16 @@ function run_section()
->  			# of the check script itself.
->  			(_adjust_oom_score 250; _check_filesystems) || tc_status="fail"
->  			_check_dmesg || tc_status="fail"
-> +
-> +			# Save any coredumps from the post-test fs checks
-> +			for i in core core.*; do
-> +				test -f "$i" || continue
-> +				if ((cores++ == 0)); then
-> +					_dump_err_cont "[dumped core]"
-> +				fi
-> +				_save_coredump "$i"
-> +				tc_status="fail"
-> +			done
->  		fi
->  
->  		# Reload the module after each test to check for leaks or
-> diff --git a/common/rc b/common/rc
-> index d1f3d56bf8..9750d06a9a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4948,6 +4948,22 @@ _create_file_sized()
->  	return $ret
->  }
->  
-> +_save_coredump()
-> +{
-> +	local path="$1"
-> +
-> +	local core_hash="$(_md5_checksum "$path")"
-> +	local out_file="$RESULT_BASE/$seqnum.core.$core_hash"
-> +
-> +	if [ -s "$out_file" ]; then
-> +		rm -f "$path"
-> +		return
-> +	fi
-> +	rm -f "$out_file"
-> +
-> +	mv "$path" "$out_file"
-> +}
-> +
->  init_rc
->  
->  ################################################################################
-> 
+Thanks.
 
+>
+> Thanks,
+> Zorro
+>
+> >  filestreams          XFS filestreams allocator
+> >  freeze                       filesystem freeze tests
+> >  fsck                 general fsck tests
+> > diff --git a/tests/btrfs/276 b/tests/btrfs/276
+> > new file mode 100755
+> > index 00000000..5946dad9
+> > --- /dev/null
+> > +++ b/tests/btrfs/276
+> > @@ -0,0 +1,123 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> > +#
+> > +# FS QA Test 276
+> > +#
+> > +# Verify that fiemap correctly reports the sharedness of extents for a file with
+> > +# a very large number of extents, spanning many b+tree leaves in the fs tree,
+> > +# and when the file's subvolume was snapshoted.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto snapshot compress fiemap
+> > +
+> > +. ./common/filter
+> > +
+> > +_supported_fs btrfs
+> > +_require_scratch
+> > +_require_xfs_io_command "fiemap" "ranged"
+> > +
+> > +_scratch_mkfs >> $seqres.full 2>&1
+> > +# We use compression because it's a very quick way to create a file with a very
+> > +# large number of extents (compression limits the maximum extent size to 128K)
+> > +# and while using very little disk space.
+> > +_scratch_mount -o compress
+> > +
+> > +fiemap_test_file()
+> > +{
+> > +     local offset=$1
+> > +     local len=$2
+> > +
+> > +     # Skip the first two lines of xfs_io's fiemap output (file path and
+> > +     # header describing the output columns).
+> > +     $XFS_IO_PROG -c "fiemap -v $offset $len" $SCRATCH_MNT/foo | tail -n +3
+> > +}
+> > +
+> > +# Count the number of shared extents for the whole test file or just for a given
+> > +# range.
+> > +count_shared_extents()
+> > +{
+> > +     local offset=$1
+> > +     local len=$2
+> > +
+> > +     # Column 5 (from xfs_io's "fiemap -v" command) is the flags (hex field).
+> > +     # 0x2000 is the value for the FIEMAP_EXTENT_SHARED flag.
+> > +     fiemap_test_file $offset $len | \
+> > +             $AWK_PROG --source 'BEGIN { cnt = 0 }' \
+> > +                       --source '{ if (and(strtonum($5), 0x2000)) cnt++ }' \
+> > +                       --source 'END { print cnt }'
+> > +}
+> > +
+> > +# Count the number of non shared extents for the whole test file or just for a
+> > +# given range.
+> > +count_not_shared_extents()
+> > +{
+> > +     local offset=$1
+> > +     local len=$2
+> > +
+> > +     # Column 5 (from xfs_io's "fiemap -v" command) is the flags (hex field).
+> > +     # 0x2000 is the value for the FIEMAP_EXTENT_SHARED flag.
+> > +     fiemap_test_file $offset $len | \
+> > +             $AWK_PROG --source 'BEGIN { cnt = 0 }' \
+> > +                       --source '{ if (!and(strtonum($5), 0x2000)) cnt++ }' \
+> > +                       --source 'END { print cnt }'
+> > +}
+> > +
+> > +# Create a 16G file as that results in 131072 extents, all with a size of 128K
+> > +# (due to compression), and a fs tree with a height of 3 (root node at level 2).
+> > +# We want to verify later that fiemap correctly reports the sharedness of each
+> > +# extent, even when it needs to switch from one leaf to the next one and from a
+> > +# node at level 1 to the next node at level 1.
+> > +#
+> > +$XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_io
+> > +
+> > +# Sync to flush delalloc and commit the current transaction, so fiemap will see
+> > +# all extents in the fs tree and extent trees and not look at delalloc.
+> > +sync
+> > +
+> > +echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> > +
+> > +# Creating a snapshot.
+> > +$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _filter_scratch
+> > +
+> > +# We have a snapshot, so now all extents should be reported as shared.
+> > +echo "Number of shared extents in the whole file: $(count_shared_extents)"
+> > +
+> > +# Now COW two files ranges, of 1M each, in the snapshot's file.
+> > +# So 16 extents should become non-shared after this.
+> > +#
+> > +$XFS_IO_PROG -c "pwrite -b 1M 8M 1M" \
+> > +          -c "pwrite -b 1M 12G 1M" \
+> > +          $SCRATCH_MNT/snap/foo | _filter_xfs_io
+> > +
+> > +# Sync to flush delalloc and commit the current transaction, so fiemap will see
+> > +# all extents in the fs tree and extent trees and not look at delalloc.
+> > +sync
+> > +
+> > +# Now we should have 16 non-shared extents and 131056 (131072 - 16) shared
+> > +# extents.
+> > +echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> > +echo "Number of shared extents in the whole file: $(count_shared_extents)"
+> > +
+> > +# Check that the non-shared extents are indeed in the expected file ranges (each
+> > +# with 8 extents).
+> > +echo "Number of non-shared extents in range [8M, 9M): $(count_not_shared_extents 8M 1M)"
+> > +echo "Number of non-shared extents in range [12G, 12G + 1M): $(count_not_shared_extents 12G 1M)"
+> > +
+> > +# Now delete the snapshot.
+> > +$BTRFS_UTIL_PROG subvolume delete -c $SCRATCH_MNT/snap | _filter_scratch
+> > +
+> > +# We deleted the snapshot and committed the transaction used to delete it (-c),
+> > +# but all its extents (both metadata and data) are actually only deleted in the
+> > +# background, by the cleaner kthread. So remount, which wakes up the cleaner
+> > +# kthread, with a commit interval of 1 second and sleep for 1.1 seconds - after
+> > +# this we are guaranteed all extents of the snapshot were deleted.
+> > +_scratch_remount commit=1
+> > +sleep 1.1
+> > +
+> > +# Now all extents should be reported as not shared (131072 extents).
+> > +echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
+> > new file mode 100644
+> > index 00000000..3bf5a5e6
+> > --- /dev/null
+> > +++ b/tests/btrfs/276.out
+> > @@ -0,0 +1,16 @@
+> > +QA output created by 276
+> > +wrote 17179869184/17179869184 bytes at offset 0
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +Number of non-shared extents in the whole file: 131072
+> > +Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> > +Number of shared extents in the whole file: 131072
+> > +wrote 1048576/1048576 bytes at offset 8388608
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +wrote 1048576/1048576 bytes at offset 12884901888
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +Number of non-shared extents in the whole file: 16
+> > +Number of shared extents in the whole file: 131056
+> > +Number of non-shared extents in range [8M, 9M): 8
+> > +Number of non-shared extents in range [12G, 12G + 1M): 8
+> > +Delete subvolume (commit): 'SCRATCH_MNT/snap'
+> > +Number of non-shared extents in the whole file: 131072
+> > --
+> > 2.35.1
+> >
+>
