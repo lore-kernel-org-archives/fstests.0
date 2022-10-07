@@ -2,136 +2,163 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AFCBC433FE
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Oct 2022 12:45:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77BA3C433F5
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Oct 2022 13:53:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229656AbiJGMpf (ORCPT
+        id S229609AbiJGNx6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Oct 2022 08:45:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35482 "EHLO
+        Fri, 7 Oct 2022 09:53:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229668AbiJGMpe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 08:45:34 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8B727B291
-        for <fstests@vger.kernel.org>; Fri,  7 Oct 2022 05:45:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665146732;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=GLr7Gt2dC4Ir7s09uhTfCpNPvoL4bioMe30SOVPG5bw=;
-        b=J6bAto7Rf+oveK5k/tBcuVFuopENrLe7VU+MjTpqSPQwdbBrwWmXqO4cMwZl7KLdGYgVX+
-        aVOsnPAobyNwqYN9tGb58oWzEbR9yla+lHY93fxlypoHMl5AkPdB1PjI9tYgU+mrNH3VNu
-        nKVLt8qYwZfGBEv3g5dXGU1Zg0OUYCw=
-Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com
- [209.85.160.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-317-PmIDLmynOdicJstA6b9Qzw-1; Fri, 07 Oct 2022 08:45:31 -0400
-X-MC-Unique: PmIDLmynOdicJstA6b9Qzw-1
-Received: by mail-qt1-f200.google.com with SMTP id ew15-20020a05622a514f00b0035cb76e35e5so2938095qtb.7
-        for <fstests@vger.kernel.org>; Fri, 07 Oct 2022 05:45:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GLr7Gt2dC4Ir7s09uhTfCpNPvoL4bioMe30SOVPG5bw=;
-        b=AtYi1vdaShBHVBdVcH2kX7csw2qcbHwvmc8B7tOduCrO5O6OlRFZwEGbexcV4op0iv
-         c6JMl6Te5hAJhs/rBaf0FjsHPfYyiLzsS7b82CjK+EY4hPeXmroH/VmNF6/+NkIJksm4
-         sf60OqIU3ZJ7GAiDba+9nJvsrRSaqxPp1ivxAlfoVcG+d9GY01WxGJS7GRxY2iChltaf
-         Pdc5LyF3IERLX9OqviUoW/W2GA2HGLzAE4jYDorbl0S278gEi1Dsedm3a6Wz4aERCmmZ
-         OAt75pwD6MVQCaVa/RP4V/0gzgTqkhvuDcdQMXgi4UHZfcVSgjeKLEjXhCqdzc5lyyWC
-         wc1A==
-X-Gm-Message-State: ACrzQf1V42KPf/tj5KbRzCauhWSPMyE9uhdiSjb/Fuc/f5sQtYyvZyPS
-        dRHLD8vVAb/iONBQMYFyPakTG9sHYotWg96CkizyLubZWZui6ekUoA7SN/ng6/kHA8Br47ssjcd
-        vxRFjRl2yc5z4gV/N+A==
-X-Received: by 2002:ad4:4ea2:0:b0:4b1:86aa:e31a with SMTP id ed2-20020ad44ea2000000b004b186aae31amr4019753qvb.10.1665146731089;
-        Fri, 07 Oct 2022 05:45:31 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4+5SITRdFMnFqkx1Ewcco9lwFJjesMF+ZFjLrxm5quNZq583eaih4MmdaTVGly3EoZC62D6g==
-X-Received: by 2002:ad4:4ea2:0:b0:4b1:86aa:e31a with SMTP id ed2-20020ad44ea2000000b004b186aae31amr4019736qvb.10.1665146730841;
-        Fri, 07 Oct 2022 05:45:30 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x18-20020a05620a259200b006ced196a73fsm1855244qko.135.2022.10.07.05.45.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Oct 2022 05:45:30 -0700 (PDT)
-Date:   Fri, 7 Oct 2022 20:45:26 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] check: optionally compress core dumps
-Message-ID: <20221007124526.wr2laws2c7rzujtv@zlang-mailbox>
-References: <166500906990.887104.14293889638885406232.stgit@magnolia>
- <166500908117.887104.12652015559068296578.stgit@magnolia>
+        with ESMTP id S229754AbiJGNx5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 09:53:57 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81F79CF1A5;
+        Fri,  7 Oct 2022 06:53:55 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0026C61D03;
+        Fri,  7 Oct 2022 13:53:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58144C433D6;
+        Fri,  7 Oct 2022 13:53:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1665150833;
+        bh=pzDfZjSIIxMWNT2LU3cI9FVcdmfchvhzl64DIRBVnVI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=suR0olSRwixG63G7uM426lh1Cnet8nQqAXIsCV3mdYiQ3Ubr2eu6bcTXMRPV2WIyc
+         i1PSJQVDJkNH9U69SeoVVz7Dux78UaBPcF37iQrsKUtzUXD8qjDtCBQsfCJzztYqDl
+         qwZCqsil98NIzj2s3lKH8EDpozI1cta5efYoUMLs6Xyc8LQq26MzPDRWrerDC6bw6R
+         zUSchhBCB6zdpciCqv/pQ9DbXu6h0l62R1Yknds2VqcDXsKSveGjG8OkNGFQZZvLJs
+         aSgW7VlrbkoMKNMKpowgCw8UM3jUEbNFL40refR9H1pXVFsofJqdb1wY3oMIu31HZ0
+         /ZUE+MfhxG9OA==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, zlang@redhat.com,
+        Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH 0/3] fstests: add a btrfs fiemap test and fiemap test group
+Date:   Fri,  7 Oct 2022 14:53:33 +0100
+Message-Id: <cover.1665150613.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <166500908117.887104.12652015559068296578.stgit@magnolia>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 05, 2022 at 03:31:21PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Compress coredumps whenever desired to save space.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  README    |    1 +
->  common/rc |   13 +++++++++++++
->  2 files changed, 14 insertions(+)
-> 
-> 
-> diff --git a/README b/README
-> index 80d148be82..ec923ca564 100644
-> --- a/README
-> +++ b/README
-> @@ -241,6 +241,7 @@ Misc:
->     this option is supported for all filesystems currently only -overlay is
->     expected to run without issues. For other filesystems additional patches
->     and fixes to the test suite might be needed.
-> + - Set COMPRESS_COREDUMPS=1 to compress core dumps with gzip -9.
+From: Filipe Manana <fdmanana@suse.com>
 
-This patch looks good to me, just one question I'm thinking -- should this
-parameter be under "Misc:" or "Tools specification:" part? If the former is
-good, then:
+Add a new btrfs test case to exercise fiemap in the presence of a
+snapshot, and then add a fiemap test group, as well as some missing
+'_require_xfs_io_command "fiemap"' calls in a few tests.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Filipe Manana (3):
+  btrfs: test fiemap on large file with extents shared through a snapshot
+  fstests: add missing require of xfs_io fiemap command to some tests
+  fstests: add fiemap group
 
+ doc/group-names.txt |   1 +
+ tests/btrfs/004     |   2 +-
+ tests/btrfs/079     |   2 +-
+ tests/btrfs/137     |   2 +-
+ tests/btrfs/140     |   2 +-
+ tests/btrfs/199     |   2 +-
+ tests/btrfs/200     |   2 +-
+ tests/btrfs/211     |   2 +-
+ tests/btrfs/257     |   3 +-
+ tests/btrfs/258     |   3 +-
+ tests/btrfs/259     |   3 +-
+ tests/btrfs/260     |   2 +-
+ tests/btrfs/263     |   2 +-
+ tests/btrfs/276     | 124 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/276.out |  16 ++++++
+ tests/ext4/001      |   2 +-
+ tests/ext4/034      |   2 +-
+ tests/ext4/308      |   2 +-
+ tests/f2fs/002      |   2 +-
+ tests/generic/009   |   2 +-
+ tests/generic/012   |   2 +-
+ tests/generic/016   |   2 +-
+ tests/generic/017   |   2 +-
+ tests/generic/021   |   2 +-
+ tests/generic/022   |   2 +-
+ tests/generic/032   |   2 +-
+ tests/generic/043   |   2 +-
+ tests/generic/044   |   2 +-
+ tests/generic/045   |   2 +-
+ tests/generic/046   |   2 +-
+ tests/generic/047   |   2 +-
+ tests/generic/048   |   2 +-
+ tests/generic/049   |   2 +-
+ tests/generic/058   |   2 +-
+ tests/generic/060   |   2 +-
+ tests/generic/061   |   2 +-
+ tests/generic/063   |   2 +-
+ tests/generic/064   |   2 +-
+ tests/generic/092   |   2 +-
+ tests/generic/094   |   2 +-
+ tests/generic/110   |   2 +-
+ tests/generic/111   |   2 +-
+ tests/generic/115   |   2 +-
+ tests/generic/177   |   2 +-
+ tests/generic/225   |   2 +-
+ tests/generic/255   |   2 +-
+ tests/generic/301   |   2 +-
+ tests/generic/302   |   2 +-
+ tests/generic/305   |   2 +-
+ tests/generic/316   |   2 +-
+ tests/generic/326   |   2 +-
+ tests/generic/327   |   2 +-
+ tests/generic/328   |   2 +-
+ tests/generic/352   |   2 +-
+ tests/generic/353   |   2 +-
+ tests/generic/372   |   2 +-
+ tests/generic/414   |   2 +-
+ tests/generic/425   |   2 +-
+ tests/generic/473   |   2 +-
+ tests/generic/483   |   2 +-
+ tests/generic/516   |   2 +-
+ tests/generic/519   |   2 +-
+ tests/generic/540   |   2 +-
+ tests/generic/541   |   2 +-
+ tests/generic/542   |   2 +-
+ tests/generic/543   |   2 +-
+ tests/generic/578   |   2 +-
+ tests/generic/654   |   2 +-
+ tests/generic/655   |   2 +-
+ tests/generic/677   |   2 +-
+ tests/generic/679   |   2 +-
+ tests/generic/695   |   2 +-
+ tests/overlay/066   |   2 +-
+ tests/shared/298    |   2 +-
+ tests/xfs/180       |   2 +-
+ tests/xfs/182       |   2 +-
+ tests/xfs/184       |   2 +-
+ tests/xfs/192       |   2 +-
+ tests/xfs/193       |   2 +-
+ tests/xfs/198       |   2 +-
+ tests/xfs/200       |   2 +-
+ tests/xfs/204       |   2 +-
+ tests/xfs/207       |   2 +-
+ tests/xfs/208       |   2 +-
+ tests/xfs/209       |   2 +-
+ tests/xfs/210       |   2 +-
+ tests/xfs/211       |   2 +-
+ tests/xfs/212       |   2 +-
+ tests/xfs/213       |   2 +-
+ tests/xfs/214       |   2 +-
+ tests/xfs/231       |   2 +-
+ tests/xfs/232       |   2 +-
+ tests/xfs/252       |   2 +-
+ tests/xfs/344       |   2 +-
+ tests/xfs/345       |   2 +-
+ tests/xfs/346       |   2 +-
+ tests/xfs/347       |   2 +-
+ tests/xfs/443       |   3 +-
+ 98 files changed, 240 insertions(+), 95 deletions(-)
+ create mode 100755 tests/btrfs/276
+ create mode 100644 tests/btrfs/276.out
 
->  
->  ______________________
->  USING THE FSQA SUITE
-> diff --git a/common/rc b/common/rc
-> index 9750d06a9a..d3af4e07b2 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4955,12 +4955,25 @@ _save_coredump()
->  	local core_hash="$(_md5_checksum "$path")"
->  	local out_file="$RESULT_BASE/$seqnum.core.$core_hash"
->  
-> +	if [ "$COMPRESS_COREDUMPS" = "1" ]; then
-> +		out_file="${out_file}.gz"
-> +	fi
-> +
->  	if [ -s "$out_file" ]; then
->  		rm -f "$path"
->  		return
->  	fi
->  	rm -f "$out_file"
->  
-> +	if [ "$COMPRESS_COREDUMPS" = "1" ]; then
-> +		if gzip -9 < "$path" > "$out_file"; then
-> +			rm -f "$path"
-> +		else
-> +			rm -f "$out_file"
-> +		fi
-> +		return
-> +	fi
-> +
->  	mv "$path" "$out_file"
->  }
->  
-> 
+-- 
+2.35.1
 
