@@ -2,325 +2,201 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA7B2C433F5
-	for <linux-fstests@archiver.kernel.org>; Sat,  8 Oct 2022 01:59:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE908C433FE
+	for <linux-fstests@archiver.kernel.org>; Sat,  8 Oct 2022 03:16:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229505AbiJHB7r (ORCPT
+        id S229452AbiJHDQg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Oct 2022 21:59:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44610 "EHLO
+        Fri, 7 Oct 2022 23:16:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229800AbiJHB7m (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 21:59:42 -0400
-Received: from mail-qv1-xf2e.google.com (mail-qv1-xf2e.google.com [IPv6:2607:f8b0:4864:20::f2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AAB695BE;
-        Fri,  7 Oct 2022 18:59:38 -0700 (PDT)
-Received: by mail-qv1-xf2e.google.com with SMTP id mg6so4125299qvb.10;
-        Fri, 07 Oct 2022 18:59:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=LCWqk8XNjUEog+dpKmkrThcl3iV6GkMHD85IOWg1CLI=;
-        b=lG29NiYAk2ZwwkOirO1RUHbQw1SNzK3+7J2Gny3ZFiwlvS3AqCI209/V3/aPNROS4B
-         hvKmtqEiNFeafAeJ8HP05g+D4AVWcMU4rXbVTEU+idNLg8HHJKe/LaFeNn4Jxa7O82QF
-         L7FyYir5Hu/cWwMTL+yV4FvkZHcCDjXc/QCx0RG6pAsW/GGpnhb2a8IX9//nX2+VdUMP
-         aaPQInrY/B4Y7DwJANHZF5oodxJ+ktgBynxeL7EvzqOzF1l067LF0JU00/z0lZDjafu5
-         sZu3M2knn+4Ofos7WOLAh8S7eK0m01r83xrHq7AV/5NjVJ8iRRfH57yxBOMmlYzW4nRT
-         oElQ==
+        with ESMTP id S229563AbiJHDQf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 23:16:35 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E729B77571
+        for <fstests@vger.kernel.org>; Fri,  7 Oct 2022 20:16:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1665198994;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=DhbxeJroSHaKpAvFPoOatTT7B0GoHZwGhdusH6yXbfE=;
+        b=B/HxNXhCqkuGeLP5axkeznJY9mQLF7jvVeS/b6q98ZQaQWU4S/B6A4xLABTWC2jIYzQgLc
+        oS+qazQusbOBrLtHu59nHYwuH4w54c3tlkMAAxsI3jgR+cYuiR7bpHtvtVs6eXofvAgds/
+        Uz/Ut1ZlkqMWUgO9N8YBxTCZefALL60=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-639-UVz5CljbOv2VRW4kP8Q7RQ-1; Fri, 07 Oct 2022 23:16:25 -0400
+X-MC-Unique: UVz5CljbOv2VRW4kP8Q7RQ-1
+Received: by mail-pl1-f199.google.com with SMTP id z7-20020a170903018700b0017835863686so4412507plg.11
+        for <fstests@vger.kernel.org>; Fri, 07 Oct 2022 20:16:24 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=LCWqk8XNjUEog+dpKmkrThcl3iV6GkMHD85IOWg1CLI=;
-        b=q4PWaK2+QkanU0rhLi35NoZ08zZZCkyBJUXUsavTAuUUwOMy5TLYuIoTXWZoG9zJAA
-         aBjqVq7tLsUTH5/Yfm2bB/69Nv9jeMwwvuj54ptaLRtoG/fVHC0/O4RPKAdxSGWsg3G6
-         vegN8TD9GzeU2pNOV/gy0KhpNOUJW5gWd0Rnk/gHQV/U1SlhckdcZf73B1MKv+tmlsaC
-         E73QxcqSiTwIWCOI2GiqoTu1q2WVVL3IzVFJaFbZz70Rw1/KA6ZIzXJBUySf0aGG6XdO
-         JAMRttqlZYrth/4y2HWV4q12bzYUGMDlvX/iwZ4beK5o5uF+2z/cItRTHs6LwUyrrHHy
-         drmA==
-X-Gm-Message-State: ACrzQf0aDf5YQz5AySXiDdHEzZNTYLujORNvrzafGKiqL2sfQ00mex1F
-        I3iwQEl00Bvj0tMxi3gPKWFUQXePDt+WvwQo
-X-Google-Smtp-Source: AMsMyM6BjVeoi5nZRaTKer0XL0QijW1CKJvG89t1vQxjJCU6jIkZXTFnuSAgvEAWKMY0d3zVs+kkpA==
-X-Received: by 2002:ad4:5765:0:b0:4b1:bf78:83cd with SMTP id r5-20020ad45765000000b004b1bf7883cdmr6375725qvx.81.1665194377691;
-        Fri, 07 Oct 2022 18:59:37 -0700 (PDT)
-Received: from ?IPV6:2601:18f:801:e210:abfc:537a:d62c:c353? ([2601:18f:801:e210:abfc:537a:d62c:c353])
-        by smtp.gmail.com with ESMTPSA id w3-20020ac84d03000000b0039014fd4b9bsm3236347qtv.47.2022.10.07.18.59.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Oct 2022 18:59:37 -0700 (PDT)
-Message-ID: <fe8aa034-ec20-f316-ae03-33f52ecc3001@gmail.com>
-Date:   Fri, 7 Oct 2022 21:59:35 -0400
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DhbxeJroSHaKpAvFPoOatTT7B0GoHZwGhdusH6yXbfE=;
+        b=cijhBjJuw4AHyiYbpS8U6yldk8NjsLJ+VUUDdX3l62lqRt2wiil5vR0MX0MrgjxdJM
+         P/4ZYVH8SsKgN0CAnfgCBG8Hre8yuO38kMpYvvBUfaF0qol4bZreu+ILJVpqB4GdY7N4
+         wFKM7eb4UCMlNnWos1m+qTnoJszo6snQn09EP5uARj83bC9pzGagmUU98TOfvD6Afixm
+         AJGcy2bmfHb0sJJbHIX580ZylQa1UIBcguy1opsNZ56f+2opZaClir5pmJvByhw51S9e
+         rtbAV5FNtYL5L4DEHTtKiWn7lfcq7gbqTnh39lNVXQDXV9Z2MA0xctVG7KSQE+FRU8Lq
+         927w==
+X-Gm-Message-State: ACrzQf27k7xmi5/mZp82uemKqqatXvOsEtkmIp2a2xIkv6DEcVDHFWGs
+        8dP+tabA0/+uncyN3Rut/brDeSgHbYScERQcMqdsci7ntEaDfkQ8zvD49i7mEddA/6GqwXbPC60
+        I7NE3f2jAODle+YW9ng==
+X-Received: by 2002:a17:90b:1c0d:b0:202:61d0:33c with SMTP id oc13-20020a17090b1c0d00b0020261d0033cmr20026986pjb.90.1665198983977;
+        Fri, 07 Oct 2022 20:16:23 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5EAWoXWLQXUj/3mWol3hDyD9uARG19oFUN2WxxpIC4Qtlf3M5VfyBqvKnL8PclqQjQhBLISw==
+X-Received: by 2002:a17:90b:1c0d:b0:202:61d0:33c with SMTP id oc13-20020a17090b1c0d00b0020261d0033cmr20026964pjb.90.1665198983651;
+        Fri, 07 Oct 2022 20:16:23 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id f17-20020a170902ce9100b00172f4835f60sm2223977plg.189.2022.10.07.20.16.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Oct 2022 20:16:23 -0700 (PDT)
+Date:   Sat, 8 Oct 2022 11:16:19 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 0/3] fstests: add a btrfs fiemap test and fiemap test
+ group
+Message-ID: <20221008031619.7zwzzgdgr7q3b4pw@zlang-mailbox>
+References: <cover.1665150613.git.fdmanana@suse.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.0
-Subject: Re: [RFC PATCH] xfs: test for fixing wrong root inode number
-Content-Language: en-US
-To:     "Darrick J. Wong" <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Hironori Shiina <shiina.hironori@fujitsu.com>
-References: <20220928210337.417054-1-shiina.hironori@fujitsu.com>
- <20220929014955.pxou2qymdumvijtt@zlang-mailbox>
- <eae39d48-1fc1-09dc-7f5e-b1112c880584@gmail.com>
- <20221002042708.fshgqyqyhidgsx7z@zlang-mailbox> <Yztcg/8nbS0BDedf@magnolia>
-From:   Hironori Shiina <shiina.hironori@gmail.com>
-In-Reply-To: <Yztcg/8nbS0BDedf@magnolia>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cover.1665150613.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 10/3/22 18:04, Darrick J. Wong wrote:
-> On Sun, Oct 02, 2022 at 12:27:08PM +0800, Zorro Lang wrote:
->> On Fri, Sep 30, 2022 at 11:01:51AM -0400, Hironori Shiina wrote:
->>>
->>>
->>> On 9/28/22 21:49, Zorro Lang wrote:
->>>> On Wed, Sep 28, 2022 at 05:03:37PM -0400, Hironori Shiina wrote:
->>>>> Test '-x' option of xfsrestore. With this option, a wrong root inode
->>>>> number is corrected. A root inode number can be wrong in a dump created
->>>>> by problematic xfsdump (v3.1.7 - v3.1.9) with blukstat misuse. This
->>>>> patch adds a dump with a wrong inode number created by xfsdump 3.1.8.
->>>>>
->>>>> Link: https://lore.kernel.org/linux-xfs/20201113125127.966243-1-hsiangkao@redhat.com/
->>>>> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
->>>>> ---
->>>>>  common/dump                    |   2 +-
->>>>>  src/root-inode-broken-dumpfile | Bin 0 -> 21648 bytes
->>>>>  tests/xfs/554                  |  37 +++++++++++++++++++++
->>>>>  tests/xfs/554.out              |  57 +++++++++++++++++++++++++++++++++
->>>>>  4 files changed, 95 insertions(+), 1 deletion(-)
->>>>>  create mode 100644 src/root-inode-broken-dumpfile
->>>>>  create mode 100644 tests/xfs/554
->>>>>  create mode 100644 tests/xfs/554.out
->>>>>
->>>>> diff --git a/common/dump b/common/dump
->>>>> index 8e0446d9..50b2ba03 100644
->>>>> --- a/common/dump
->>>>> +++ b/common/dump
->>>>> @@ -1003,7 +1003,7 @@ _parse_restore_args()
->>>>>          --no-check-quota)
->>>>>              do_quota_check=false
->>>>>              ;;
->>>>> -	-K|-R)
->>>>> +	-K|-R|-x)
->>>>>  	    restore_args="$restore_args $1"
->>>>>              ;;
->>>>>  	*)
->>>>> diff --git a/src/root-inode-broken-dumpfile b/src/root-inode-broken-dumpfile
->>>>> new file mode 100644
->>>>> index 0000000000000000000000000000000000000000..9a42e65d8047497be31f3abbaf4223ae384fd14d
->>>>> GIT binary patch
->>>>> literal 21648
->>>>> zcmeI)K}ge49KiAC_J<CEBr!0AwBf~zbCHB}5DyxL6eU8Jnqylvayj;2VuG+d)TN6;
->>>>> z5J8vlAaw9hXi(UousT$Sin@BRJfwHM)O+*2*njz_zc+h*ckuV#@BMuKe;;JbgTL{<
->>>>> z!SwZ9zC#ERe%reLe5&cz2e}qM<!i2dXQHt^{^`d1Qx{)MMzW#$%dR@J={0`IRsGx4
->>>>> z(yn@Oi-nBqCOVIG?&{kpwnv~&w_>6_ozY1^fph=w8(=^oTg&wOe=(WQByyQ_Hfd|4
->>>>> z^o76<0!zn#v>k3blbU)nzx=KF^}-G%R;OaQYsHwGDkO`kD^@q^(_Ac_8H<gKj^>a0
->>>>> z6p*%BK>q#b>2EE%^!@f?Z`-p+tI@M}qmMm@zMJk>K1U^=d~G^NUG?X4vkvKtOf-3Y
->>>>> zpVM9YgM9Y7{*P0ApJNUh^uk1wCnA6V0tg_000IagfB*srAb<b@2q1s}0tg_000Iag
->>>>> zfB*srAb<b@2q1s}0tg_000IagfB*srAb<b@2q1s}0tg_000IagfB*srAb`MM1p>_h
->>>>> z2-R=Q9ooK1{l9<Dy8IIMUVXr9BW9uI1x7};j+kij|5kLI^32no;n|PvqD74ZOlJ#n
->>>>> z0-~CKSlx#liMS>jt232#==00xPqwp;gsZrjc?`PPxaCE~>3(^o5-%+Nj=HegJFK2b
->>>>> z=l5zT4IDgO=sJ1zp=jyrALvcQJK|j;sN2_jUmobjN<!S6m1{G<LZ^+JP;T!|3{9)w
->>>>> eGf&ioo}iw|li2&4IyG;z<}vrl)Mic2`t2{52##q0
->>>>>
->>>>> literal 0
->>>>> HcmV?d00001
->>>>
->>>> Please don't try to add a binary file to fstests directly.
->>>>
->>>>>
->>>>> diff --git a/tests/xfs/554 b/tests/xfs/554
->>>>> new file mode 100644
->>>>> index 00000000..13bc62c7
->>>>> --- /dev/null
->>>>> +++ b/tests/xfs/554
->>>>> @@ -0,0 +1,37 @@
->>>>> +#! /bin/bash
->>>>> +# SPDX-License-Identifier: GPL-2.0
->>>>> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
->>>>> +#
->>>>> +# FS QA Test No. 554
->>>>> +#
->>>>> +# Test restoring a dumpfile with a wrong root inode number created by
->>>>> +# xfsdump 3.1.8.
->>>>> +# This test restores the checked-in broken dump with '-x' flag.
->>>>> +#
->>>>> +
->>>>> +. ./common/preamble
->>>>> +_begin_fstest auto quick dump
->>>>> +
->>>>> +# Import common functions.
->>>>> +. ./common/dump
->>>>> +
->>>>> +# real QA test starts here
->>>>> +_supported_fs xfs
->>>>> +_require_scratch
->>>>
->>>> The -x option is a new feature for xfsdump, not all system support that. So
->>>> we need to _notrun if test on a system doesn't support it. A separated
->>>> _require_* helper would be better if there'll be more testing about this
->>>> new feature. Or a local detection in this case is fine too (can be moved as
->>>> a common helper later).
->>>>
->>>>> +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
->>>>> +_scratch_mount
->>>>> +
->>>>> +# Create dumpdir for comparing with restoredir
->>>>> +rm -rf $dump_dir
->>>>> +mkdir $dump_dir || _fail "failed to mkdir $restore_dir"
->>>>           ^^                                  ^^
->>>>
->>>> Are you trying to create a dump dir or restore dir?
->>>>
->>>>> +touch $dump_dir/FILE_1019
->>>>> +
->>>>> +_do_restore_toc -x -f $here/src/root-inode-broken-dumpfile
->>>>
->>>> Why I didn't see how you generate this broken dumpfile in this case?
->>>>
->>>> Oh... I see, you want to store a dumpfile in fstests source code directly.
->>>> I thought you submited that file accidentally...
->>>>
->>>> No, we don't do things like this way, please try to generate the dumpfile
->>>> in this test case at first, then restore it. For example using xfs_db to
->>>> break a xfs, or using some tricky method (likes xfs/545).
->>>>
->>>
->>> Thank you for the comments. I will try another approach. I'm having
->>> trouble creating a dumpfile for this test. Because xfsdump was already
->>> fixed, xfsdump no longer generates a corrupted dumpfile even if there is
->>> a lower inode number than a root inode.
->>
->> Oh, I see. You can try, but I think it's hard. It maybe not suitable to be a
->> fstests case, if it has to depend on a binary fs dump file. If so, We can cover
->> it on other place, with this existed "bad" dump file.
+On Fri, Oct 07, 2022 at 02:53:33PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> How difficult is it to create a dumpfile with a broken root inode?
-> Is it a simple matter of creating a good dump and patching a few bytes,
-> or do we end up having to patch the whole file?
+> Add a new btrfs test case to exercise fiemap in the presence of a
+> snapshot, and then add a fiemap test group, as well as some missing
+> '_require_xfs_io_command "fiemap"' calls in a few tests.
 > 
-> (The reason I ask is that I've heard about this problem for ages but
-> I don't actually know how to create a bad dump...)
-> 
+> Filipe Manana (3):
+>   btrfs: test fiemap on large file with extents shared through a snapshot
+>   fstests: add missing require of xfs_io fiemap command to some tests
+>   fstests: add fiemap group
 
-As I dug into the data structure, I succeeded in creating a dumpfile with a wrong
-root inode by modifying `content_inode_hdr_t.cih_rootino` and
-`global_hdr_t.gh_checksum`.
-
-After creating a inode with a lower number than the root inode with the method in
-generic/545, I modified a dumpfile as follows:
----
-_do_dump_file
-
-# Break dumpfile
-old_checksum=$(od -A n -j 12 -N 4 -i --endian=big $dump_file)
-gap=$(($root_inum - $inum))
-new_checksum=$(($old_checksum + ($gap >> 32) + ($gap & 0x00000000ffffffff)))
-v=($(printf "%016x" $inum |  awk -v FS='' '{for (i=1; i<=NF; i+=2) print $i$(i+1)}'))
-echo -en "\x${v[0]}\x${v[1]}\x${v[2]}\x${v[3]}\x${v[4]}\x${v[5]}\x${v[6]}\x${v[7]}" | dd of=$dump_file bs=1 seek=3928 conv=notrunc
-v=($(printf "%016x" $new_checksum |  awk -v FS='' '{for (i=9; i<=NF; i+=2) print $i$(i+1)}'))
-echo -en "\x${v[0]}\x${v[1]}\x${v[2]}\x${v[3]}" | dd of=$dump_file bs=1 seek=12 conv=notrunc
-
-_do_restore_file -x
----
-(I'm afraid I'm not so familiar with editing a binary file.)
-
-The offset of `global_hdr_t.gh_checksum` is 12.
-The offset of `content_inode_hdr_t.cih_rootino` is:
-  global_hdr_t.gh_upper (0x400) + drive_hdr_t.dh_upper (0x400) + 
-  media_hdr_t.mh_upper (0x400) + content_hdr_t.ch_specific (0x340) +
-  content_inode_hdr_t.cih_rootino (0x18) = 0xf58 (3928)
+Thanks for doing this! The 1st patch looks good to me, the 2nd is fine too.
+If you're hurry (Are you?) to have that btrfs test coverage, I can merge the
+1st patch at first. Then keep other patch one more week. Due to it changes
+many other fs cases (although not big change:), I need time to check one by
+one, and I hope to see if there're more review points from others :)
 
 Thanks,
-Hiro
+Zorro
 
-> --D
 > 
->> Thanks,
->> Zorro
->>
->>>
->>>>> +
->>>>> +_do_restore_file -x -f $here/src/root-inode-broken-dumpfile -L stress_545
->>>>> +_diff_compare_sub
->>>>> +_ls_nodate_compare_sub
->>>>> +
->>>>> +# success, all done
->>>>> +status=0
->>>>> +exit
->>>>> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
->>>>> new file mode 100644
->>>>> index 00000000..40a3f3a4
->>>>> --- /dev/null
->>>>> +++ b/tests/xfs/554.out
->>>>> @@ -0,0 +1,57 @@
->>>>> +QA output created by 554
->>>>> +Contents of dump ...
->>>>> +xfsrestore  -x -f DUMP_FILE -t
->>>>> +xfsrestore: using file dump (drive_simple) strategy
->>>>> +xfsrestore: searching media for dump
->>>>> +xfsrestore: examining media file 0
->>>>> +xfsrestore: dump description: 
->>>>> +xfsrestore: hostname: xfsdump
->>>>> +xfsrestore: mount point: SCRATCH_MNT
->>>>> +xfsrestore: volume: SCRATCH_DEV
->>>>> +xfsrestore: session time: TIME
->>>>> +xfsrestore: level: 0
->>>>> +xfsrestore: session label: "stress_545"
->>>>> +xfsrestore: media label: "stress_tape_media"
->>>>> +xfsrestore: file system ID: ID
->>>>> +xfsrestore: session id: ID
->>>>> +xfsrestore: media ID: ID
->>>>> +xfsrestore: searching media for directory dump
->>>>> +xfsrestore: reading directories
->>>>> +xfsrestore: found fake rootino #128, will fix.
->>>>> +xfsrestore: fix root # to 1024 (bind mount?)
->>>>> +xfsrestore: 2 directories and 2 entries processed
->>>>> +xfsrestore: directory post-processing
->>>>> +xfsrestore: reading non-directory files
->>>>> +xfsrestore: table of contents display complete: SECS seconds elapsed
->>>>> +xfsrestore: Restore Status: SUCCESS
->>>>> +
->>>>> +dumpdir/FILE_1019
->>>>> +Restoring from file...
->>>>> +xfsrestore  -x -f DUMP_FILE  -L stress_545 RESTORE_DIR
->>>>> +xfsrestore: using file dump (drive_simple) strategy
->>>>> +xfsrestore: searching media for dump
->>>>> +xfsrestore: examining media file 0
->>>>> +xfsrestore: found dump matching specified label:
->>>>> +xfsrestore: hostname: xfsdump
->>>>> +xfsrestore: mount point: SCRATCH_MNT
->>>>> +xfsrestore: volume: SCRATCH_DEV
->>>>> +xfsrestore: session time: TIME
->>>>> +xfsrestore: level: 0
->>>>> +xfsrestore: session label: "stress_545"
->>>>> +xfsrestore: media label: "stress_tape_media"
->>>>> +xfsrestore: file system ID: ID
->>>>> +xfsrestore: session id: ID
->>>>> +xfsrestore: media ID: ID
->>>>> +xfsrestore: searching media for directory dump
->>>>> +xfsrestore: reading directories
->>>>> +xfsrestore: found fake rootino #128, will fix.
->>>>> +xfsrestore: fix root # to 1024 (bind mount?)
->>>>> +xfsrestore: 2 directories and 2 entries processed
->>>>> +xfsrestore: directory post-processing
->>>>> +xfsrestore: restoring non-directory files
->>>>> +xfsrestore: restore complete: SECS seconds elapsed
->>>>> +xfsrestore: Restore Status: SUCCESS
->>>>> +Comparing dump directory with restore directory
->>>>> +Files DUMP_DIR/FILE_1019 and RESTORE_DIR/DUMP_SUBDIR/FILE_1019 are identical
->>>>> +Comparing listing of dump directory with restore directory
->>>>> +Files TMP.dump_dir and TMP.restore_dir are identical
->>>>> -- 
->>>>> 2.37.3
->>>>>
->>>>
->>>
->>
+>  doc/group-names.txt |   1 +
+>  tests/btrfs/004     |   2 +-
+>  tests/btrfs/079     |   2 +-
+>  tests/btrfs/137     |   2 +-
+>  tests/btrfs/140     |   2 +-
+>  tests/btrfs/199     |   2 +-
+>  tests/btrfs/200     |   2 +-
+>  tests/btrfs/211     |   2 +-
+>  tests/btrfs/257     |   3 +-
+>  tests/btrfs/258     |   3 +-
+>  tests/btrfs/259     |   3 +-
+>  tests/btrfs/260     |   2 +-
+>  tests/btrfs/263     |   2 +-
+>  tests/btrfs/276     | 124 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/276.out |  16 ++++++
+>  tests/ext4/001      |   2 +-
+>  tests/ext4/034      |   2 +-
+>  tests/ext4/308      |   2 +-
+>  tests/f2fs/002      |   2 +-
+>  tests/generic/009   |   2 +-
+>  tests/generic/012   |   2 +-
+>  tests/generic/016   |   2 +-
+>  tests/generic/017   |   2 +-
+>  tests/generic/021   |   2 +-
+>  tests/generic/022   |   2 +-
+>  tests/generic/032   |   2 +-
+>  tests/generic/043   |   2 +-
+>  tests/generic/044   |   2 +-
+>  tests/generic/045   |   2 +-
+>  tests/generic/046   |   2 +-
+>  tests/generic/047   |   2 +-
+>  tests/generic/048   |   2 +-
+>  tests/generic/049   |   2 +-
+>  tests/generic/058   |   2 +-
+>  tests/generic/060   |   2 +-
+>  tests/generic/061   |   2 +-
+>  tests/generic/063   |   2 +-
+>  tests/generic/064   |   2 +-
+>  tests/generic/092   |   2 +-
+>  tests/generic/094   |   2 +-
+>  tests/generic/110   |   2 +-
+>  tests/generic/111   |   2 +-
+>  tests/generic/115   |   2 +-
+>  tests/generic/177   |   2 +-
+>  tests/generic/225   |   2 +-
+>  tests/generic/255   |   2 +-
+>  tests/generic/301   |   2 +-
+>  tests/generic/302   |   2 +-
+>  tests/generic/305   |   2 +-
+>  tests/generic/316   |   2 +-
+>  tests/generic/326   |   2 +-
+>  tests/generic/327   |   2 +-
+>  tests/generic/328   |   2 +-
+>  tests/generic/352   |   2 +-
+>  tests/generic/353   |   2 +-
+>  tests/generic/372   |   2 +-
+>  tests/generic/414   |   2 +-
+>  tests/generic/425   |   2 +-
+>  tests/generic/473   |   2 +-
+>  tests/generic/483   |   2 +-
+>  tests/generic/516   |   2 +-
+>  tests/generic/519   |   2 +-
+>  tests/generic/540   |   2 +-
+>  tests/generic/541   |   2 +-
+>  tests/generic/542   |   2 +-
+>  tests/generic/543   |   2 +-
+>  tests/generic/578   |   2 +-
+>  tests/generic/654   |   2 +-
+>  tests/generic/655   |   2 +-
+>  tests/generic/677   |   2 +-
+>  tests/generic/679   |   2 +-
+>  tests/generic/695   |   2 +-
+>  tests/overlay/066   |   2 +-
+>  tests/shared/298    |   2 +-
+>  tests/xfs/180       |   2 +-
+>  tests/xfs/182       |   2 +-
+>  tests/xfs/184       |   2 +-
+>  tests/xfs/192       |   2 +-
+>  tests/xfs/193       |   2 +-
+>  tests/xfs/198       |   2 +-
+>  tests/xfs/200       |   2 +-
+>  tests/xfs/204       |   2 +-
+>  tests/xfs/207       |   2 +-
+>  tests/xfs/208       |   2 +-
+>  tests/xfs/209       |   2 +-
+>  tests/xfs/210       |   2 +-
+>  tests/xfs/211       |   2 +-
+>  tests/xfs/212       |   2 +-
+>  tests/xfs/213       |   2 +-
+>  tests/xfs/214       |   2 +-
+>  tests/xfs/231       |   2 +-
+>  tests/xfs/232       |   2 +-
+>  tests/xfs/252       |   2 +-
+>  tests/xfs/344       |   2 +-
+>  tests/xfs/345       |   2 +-
+>  tests/xfs/346       |   2 +-
+>  tests/xfs/347       |   2 +-
+>  tests/xfs/443       |   3 +-
+>  98 files changed, 240 insertions(+), 95 deletions(-)
+>  create mode 100755 tests/btrfs/276
+>  create mode 100644 tests/btrfs/276.out
+> 
+> -- 
+> 2.35.1
+> 
+
