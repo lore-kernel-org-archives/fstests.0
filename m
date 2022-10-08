@@ -2,256 +2,180 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD1F6C433FE
-	for <linux-fstests@archiver.kernel.org>; Sat,  8 Oct 2022 03:27:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68AD5C433F5
+	for <linux-fstests@archiver.kernel.org>; Sat,  8 Oct 2022 11:11:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229495AbiJHD1O (ORCPT
+        id S229758AbiJHLLN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Oct 2022 23:27:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36240 "EHLO
+        Sat, 8 Oct 2022 07:11:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbiJHD1M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Oct 2022 23:27:12 -0400
+        with ESMTP id S229696AbiJHLLM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 8 Oct 2022 07:11:12 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DE8A7676E
-        for <fstests@vger.kernel.org>; Fri,  7 Oct 2022 20:27:11 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95A4150F87
+        for <fstests@vger.kernel.org>; Sat,  8 Oct 2022 04:11:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665199630;
+        s=mimecast20190719; t=1665227470;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=xqANhglfz2KN6UJ+jqEVr0yc6agxGBu3MLkK6ZrABYE=;
-        b=R6kH+Qn/ahE0MvMMoOtB6w5fauZA132FtV0X2kyoWENo7mQu+mqONGP+wWbrXIwaFlKnzo
-        C89+wFObB8qgu1QKmosjC9LMeAgoIGLCmxxomuGNYXtCzRKVMqljcS4KrKtX7DsLtqwUXR
-        DKMnT5S0qc+rxB/aRRgxInXKyIy9IJc=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=2uzPhe7+sVhPn7+Ulqv8cTg9LAxTrz0NGR5Cpg5L4vw=;
+        b=cuMwWdP7iazadhnFuanThIEj28gXdDammDsk2zcObnYECNjprz2PUhfwb/v+GqjnQqlBSk
+        lsan2uUAh/u05UBytDkz+ZL8O6EkXDixi4uxRDezaFFqdZmV3l90vdLlLaOyzfXUJLXboi
+        PGRbGI2lCDNoB0NlYo9kdZECoCJl80c=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-50-FnJIvsPCNFuCQlvylCfG0w-1; Fri, 07 Oct 2022 23:27:07 -0400
-X-MC-Unique: FnJIvsPCNFuCQlvylCfG0w-1
-Received: by mail-pg1-f199.google.com with SMTP id h19-20020a63e153000000b00434dfee8dbaso3803232pgk.18
-        for <fstests@vger.kernel.org>; Fri, 07 Oct 2022 20:27:07 -0700 (PDT)
+ us-mta-654-6UNrvOn4O0m3wh4iVcy85w-1; Sat, 08 Oct 2022 07:11:08 -0400
+X-MC-Unique: 6UNrvOn4O0m3wh4iVcy85w-1
+Received: by mail-qv1-f70.google.com with SMTP id q6-20020a0cf5c6000000b004b1999f94bcso4223532qvm.15
+        for <fstests@vger.kernel.org>; Sat, 08 Oct 2022 04:11:08 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=xqANhglfz2KN6UJ+jqEVr0yc6agxGBu3MLkK6ZrABYE=;
-        b=XKOHuPhKI+Yh8v9il4ZgTHCeu7oLiVO8/WRyZtVJnGr6ivthU7K/5YrW3LAJClcG9I
-         I2AoqwmcOdTSarzzB/MPv6Bib6MicpxagY4h205KWnilFE1T0B00/3g0+J3U4IczezHy
-         h5QGHSnL33Iypq7Ap3uL5Gh6UqWJhYIfUjeWPp49rT2WBUW8hmF/HsoTBZ+k1hsErOU1
-         zupsgS5LxMiyDG84wUww7AdTalOPtWDnsSS9XY7YvTRMaYzUjOWtU6RYJEeciK+lfg0z
-         MezUmRfd34mea158CyksrBYqmJhGSdqtwiqcCtdvDP7qnpjIQQtEoCzX0vwE06IF1ute
-         70XQ==
-X-Gm-Message-State: ACrzQf3zYDi5fY1XhrMi9L6hBUxncpAXFFUGvsejqtOYwNjdlORcRFEg
-        DL7qub/F0aNBJsOPR8KlnJdkANaX/j1uDg6+gw2Z+jCCEKBJ3LGtiYR/SnjKZ25/ZvL1+VlEQfr
-        sxSPeyqrQ1cbjoZm79Q==
-X-Received: by 2002:a17:902:d50f:b0:178:6505:fae3 with SMTP id b15-20020a170902d50f00b001786505fae3mr8308619plg.54.1665199626382;
-        Fri, 07 Oct 2022 20:27:06 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7ouHy9z2CxOFaMcP2pPWPxIUJpE33ptyQHGKMs81lbY3OfS+yqCUcTaBJzaVgZsyzPfMaj6g==
-X-Received: by 2002:a17:902:d50f:b0:178:6505:fae3 with SMTP id b15-20020a170902d50f00b001786505fae3mr8308588plg.54.1665199626037;
-        Fri, 07 Oct 2022 20:27:06 -0700 (PDT)
+        bh=2uzPhe7+sVhPn7+Ulqv8cTg9LAxTrz0NGR5Cpg5L4vw=;
+        b=rk6CHdi3kjx39R+7JfwrxDKX624hcylRwIbqXDHEYOPN0LRZh7V72dj9w2HmRh6o8W
+         NPCfpVyJsZPBgoMGtBM5WK4JIhnd7HKMFlQcilAiSX7zTt3MgQma9fJ7HN6ZNq+DXJyM
+         5vg6yqsJswlC/l2FvVNgRVTBMPPKL/wUruXPSE2oMG3w5VauySdd2e9oit2ncsg9kGit
+         iM2yWnEWtiRFcam+Hwrn9tfhjtt4jS6RICB5/7m4jxes9zdbT8merkeGBbN7J8fX/Sqp
+         qoRHukzmbmErot7InTyZMKMoYBZB4+WazqCC7uotufGdzaRcMcTACDjmbbY3jfyvGu59
+         6cpw==
+X-Gm-Message-State: ACrzQf1JiV7qqxV10bO9vyS3xld2SvF4jCKCQ9fRshYrFbdbt9xxPhJi
+        /iGNhOzlNYUxpaxDL+omEGWXxUECuBGPoB5WWbzPd01CbVbVwrHhS1uRAorBw5h78vHK1xk/dDw
+        14FQDHkwWxDrXAD5wzA==
+X-Received: by 2002:a05:620a:4250:b0:6cf:a822:7c7e with SMTP id w16-20020a05620a425000b006cfa8227c7emr6820409qko.503.1665227468434;
+        Sat, 08 Oct 2022 04:11:08 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7lhYgAMC8XELDZ5ZddtHdWK9ny7hLruZeFRy4xp/tlPQ8BKL3SPB5nOhIzlWJfyzlwbchCVQ==
+X-Received: by 2002:a05:620a:4250:b0:6cf:a822:7c7e with SMTP id w16-20020a05620a425000b006cfa8227c7emr6820388qko.503.1665227468134;
+        Sat, 08 Oct 2022 04:11:08 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l12-20020a170903120c00b0017e93c158d7sm2243931plh.214.2022.10.07.20.27.04
+        by smtp.gmail.com with ESMTPSA id i13-20020a05620a248d00b006b5e296452csm4706330qkn.54.2022.10.08.04.11.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Oct 2022 20:27:05 -0700 (PDT)
-Date:   Sat, 8 Oct 2022 11:27:01 +0800
+        Sat, 08 Oct 2022 04:11:07 -0700 (PDT)
+Date:   Sat, 8 Oct 2022 19:11:02 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 1/3] btrfs: test fiemap on large file with extents shared
- through a snapshot
-Message-ID: <20221008032701.mzkgmvw5fdx5lguo@zlang-mailbox>
-References: <cover.1665150613.git.fdmanana@suse.com>
- <e8be02ae6e5495a029e1345df8b66139042a3c72.1665150613.git.fdmanana@suse.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 4/6] xfs/128: try to force file allocation behavior
+Message-ID: <20221008111102.mb25fytm5yilkefr@zlang-mailbox>
+References: <166500903290.886939.12532028548655386973.stgit@magnolia>
+ <166500905541.886939.4232929527218167462.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e8be02ae6e5495a029e1345df8b66139042a3c72.1665150613.git.fdmanana@suse.com>
+In-Reply-To: <166500905541.886939.4232929527218167462.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 07, 2022 at 02:53:34PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Oct 05, 2022 at 03:30:55PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Verify that fiemap correctly reports the sharedness of extents for a file
-> with a very large number of extents, spanning many b+tree leaves in the fs
-> tree, and when the file's subvolume was snapshoted.
+> Over the years, I've noticed that this test occasionally fails when I've
+> programmed the allocator to hand out the minimum amount of space with
+> each allocation or if extent size hints are enabled:
 > 
-> Currently this passes on all kernel releases and its purpose is to prevent
-> and detect regressions in the future, as this actually happened during
-> recent development on the btrfs' fiemap related code. With this test we
-> now have better coverage for fiemap when a file is shared through a
-> snapshot.
+> --- /tmp/fstests/tests/xfs/128.out      2022-09-01 15:09:11.506679341 -0700
+> +++ /var/tmp/fstests/xfs/128.out.bad    2022-10-04 17:32:50.992000000 -0700
+> @@ -20,7 +21,9 @@
+>  56ed2f712c91e035adeeb26ed105a982  SCRATCH_MNT/test-128/file3
+>  b81534f439aac5c34ce3ed60a03eba70  SCRATCH_MNT/test-128/file4
+>  Check files
+>  free blocks after creating some reflink copies is in range
+>  free blocks after CoW some reflink copies is in range
+> -free blocks after defragging all reflink copies is in range
+> -free blocks after all tests is in range
+> +free blocks after defragging all reflink copies has value of 8620027
+> +free blocks after defragging all reflink copies is NOT in range 8651819 .. 8652139
+> +free blocks after all tests has value of 8620027
+> +free blocks after all tests is NOT in range 8651867 .. 8652187
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> It turns out that under the right circumstances, the _pwrite_byte at the
+> start of this test will end up allocating two extents to file1.  This
+> almost never happens when delalloc is enabled or when the extent size is
+> large, and is more prone to happening if the extent size is > 1FSB but
+> small, the allocator hands out small allocations, or if writeback shoots
+> down pages in random order.
+> 
+> When file1 gets more than 1 extent, problems start to happen.  The free
+> space accounting checks at the end of the test assume that file1 and
+> file4 still share the same space at the end of the test.  This
+> definitely happens if file1 gets one extent (since fsr ignores
+> single-extent files), but if there's more than 1, fsr will try to
+> defragment it.  If fsr succeeds in copying the file contents to a temp
+> file with fewer extents than the source file, it will switch the
+> contents, but unsharing the contents in the process.  This cause the
+> free space to be lower than expected, and the test fails.
+> 
+> Resolve this situation by preallocating space beforehand to try to set
+> up file1 with a single space extent.  If the test fails and we got more
+> than one extent, note that in the output.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
 
-Looks good to me,
-
+Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/btrfs/276     | 124 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/276.out |  16 ++++++
->  2 files changed, 140 insertions(+)
->  create mode 100755 tests/btrfs/276
->  create mode 100644 tests/btrfs/276.out
+>  tests/xfs/128 |   34 ++++++++++++++++++++++++++++++----
+>  1 file changed, 30 insertions(+), 4 deletions(-)
 > 
-> diff --git a/tests/btrfs/276 b/tests/btrfs/276
-> new file mode 100755
-> index 00000000..c27e8383
-> --- /dev/null
-> +++ b/tests/btrfs/276
-> @@ -0,0 +1,124 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 276
-> +#
-> +# Verify that fiemap correctly reports the sharedness of extents for a file with
-> +# a very large number of extents, spanning many b+tree leaves in the fs tree,
-> +# and when the file's subvolume was snapshoted.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto snapshot compress
+> 
+> diff --git a/tests/xfs/128 b/tests/xfs/128
+> index db5d9a60db..2d2975115e 100755
+> --- a/tests/xfs/128
+> +++ b/tests/xfs/128
+> @@ -34,7 +34,20 @@ margin=160
+>  blksz=65536
+>  real_blksz="$(_get_block_size $testdir)"
+>  blksz_factor=$((blksz / real_blksz))
 > +
-> +. ./common/filter
-> +
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_xfs_io_command "fiemap" "ranged"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +# We use compression because it's a very quick way to create a file with a very
-> +# large number of extents (compression limits the maximum extent size to 128K)
-> +# and while using very little disk space.
-> +_scratch_mount -o compress
-> +
-> +fiemap_test_file()
-> +{
-> +	local offset=$1
-> +	local len=$2
-> +
-> +	# Skip the first two lines of xfs_io's fiemap output (file path and
-> +	# header describing the output columns).
-> +	$XFS_IO_PROG -c "fiemap -v $offset $len" $SCRATCH_MNT/foo | tail -n +3
-> +}
-> +
-> +# Count the number of shared extents for the whole test file or just for a given
-> +# range.
-> +count_shared_extents()
-> +{
-> +	local offset=$1
-> +	local len=$2
-> +
-> +	# Column 5 (from xfs_io's "fiemap -v" command) is the flags (hex field).
-> +	# 0x2000 is the value for the FIEMAP_EXTENT_SHARED flag.
-> +	fiemap_test_file $offset $len | \
-> +		$AWK_PROG --source 'BEGIN { cnt = 0 }' \
-> +			  --source '{ if (and(strtonum($5), 0x2000)) cnt++ }' \
-> +			  --source 'END { print cnt }'
-> +}
-> +
-> +# Count the number of non shared extents for the whole test file or just for a
-> +# given range.
-> +count_not_shared_extents()
-> +{
-> +	local offset=$1
-> +	local len=$2
-> +
-> +	# Column 5 (from xfs_io's "fiemap -v" command) is the flags (hex field).
-> +	# 0x2000 is the value for the FIEMAP_EXTENT_SHARED flag.
-> +	fiemap_test_file $offset $len | \
-> +		$AWK_PROG --source 'BEGIN { cnt = 0 }' \
-> +			  --source '{ if (!and(strtonum($5), 0x2000)) cnt++ }' \
-> +			  --source 'END { print cnt }'
-> +}
-> +
-> +# Create a 16G file as that results in 131072 extents, all with a size of 128K
-> +# (due to compression), and a fs tree with a height of 3 (root node at level 2).
-> +# We want to verify later that fiemap correctly reports the sharedness of each
-> +# extent, even when it needs to switch from one leaf to the next one and from a
-> +# node at level 1 to the next node at level 1.
-> +#
-> +$XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +# Sync to flush delalloc and commit the current transaction, so fiemap will see
-> +# all extents in the fs tree and extent trees and not look at delalloc.
+> +# The expected free space numbers in this test require file1 and file4 to share
+> +# the same blocks at the end of the test.  Therefore, we need the allocator to
+> +# give file1 a single extent at the start of the test so that fsr will not be
+> +# tempted to "defragment" a multi-extent file1 or file4.  Defragmenting really
+> +# means rewriting the file, and if that succeeds on either file, we'll have
+> +# unshared the space and there will be too little free space.  Therefore,
+> +# preallocate space to try to produce a single extent.
+> +$XFS_IO_PROG -f -c "falloc 0 $((blks * blksz))" $testdir/file1 >> $seqres.full
+>  _pwrite_byte 0x61 0 $((blks * blksz)) $testdir/file1 >> $seqres.full
 > +sync
 > +
-> +# All extents should be reported as non shared (131072 extents).
-> +echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> +nextents=$($XFS_IO_PROG -c 'stat' $testdir/file1 | grep 'fsxattr.nextents' | awk '{print $3}')
 > +
-> +# Creating a snapshot.
-> +$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _filter_scratch
+>  _cp_reflink $testdir/file1 $testdir/file2
+>  _cp_reflink $testdir/file2 $testdir/file3
+>  _cp_reflink $testdir/file3 $testdir/file4
+> @@ -106,10 +119,23 @@ test $c14 = $c24 || echo "File4 changed by defrag"
+>  
+>  #echo $free_blocks0 $free_blocks1 $free_blocks2 $free_blocks3
+>  
+> -_within_tolerance "free blocks after creating some reflink copies" $free_blocks1 $((free_blocks0 - (blks * blksz_factor) )) $margin -v
+> -_within_tolerance "free blocks after CoW some reflink copies" $free_blocks2 $((free_blocks1 - 2)) $margin -v
+> -_within_tolerance "free blocks after defragging all reflink copies" $free_blocks3 $((free_blocks2 - (blks * 2 * blksz_factor))) $margin -v
+> -_within_tolerance "free blocks after all tests" $free_blocks3 $((free_blocks0 - (blks * 3 * blksz_factor))) $margin -v
+> +freesp_bad=0
 > +
-> +# We have a snapshot, so now all extents should be reported as shared.
-> +echo "Number of shared extents in the whole file: $(count_shared_extents)"
+> +_within_tolerance "free blocks after creating some reflink copies" \
+> +	$free_blocks1 $((free_blocks0 - (blks * blksz_factor) )) $margin -v || freesp_bad=1
 > +
-> +# Now COW two file ranges, of 1M each, in the snapshot's file.
-> +# So 16 extents should become non-shared after this.
-> +#
-> +$XFS_IO_PROG -c "pwrite -b 1M 8M 1M" \
-> +	     -c "pwrite -b 1M 12G 1M" \
-> +	     $SCRATCH_MNT/snap/foo | _filter_xfs_io
+> +_within_tolerance "free blocks after CoW some reflink copies" \
+> +	$free_blocks2 $((free_blocks1 - 2)) $margin -v || freesp_bad=1
 > +
-> +# Sync to flush delalloc and commit the current transaction, so fiemap will see
-> +# all extents in the fs tree and extent trees and not look at delalloc.
-> +sync
+> +_within_tolerance "free blocks after defragging all reflink copies" \
+> +	$free_blocks3 $((free_blocks2 - (blks * 2 * blksz_factor))) $margin -v || freesp_bad=1
 > +
-> +# Now we should have 16 non-shared extents and 131056 (131072 - 16) shared
-> +# extents.
-> +echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
-> +echo "Number of shared extents in the whole file: $(count_shared_extents)"
+> +_within_tolerance "free blocks after all tests" \
+> +	$free_blocks3 $((free_blocks0 - (blks * 3 * blksz_factor))) $margin -v || freesp_bad=1
 > +
-> +# Check that the non-shared extents are indeed in the expected file ranges (each
-> +# with 8 extents).
-> +echo "Number of non-shared extents in range [8M, 9M): $(count_not_shared_extents 8M 1M)"
-> +echo "Number of non-shared extents in range [12G, 12G + 1M): $(count_not_shared_extents 12G 1M)"
-> +
-> +# Now delete the snapshot.
-> +$BTRFS_UTIL_PROG subvolume delete -c $SCRATCH_MNT/snap | _filter_scratch
-> +
-> +# We deleted the snapshot and committed the transaction used to delete it (-c),
-> +# but all its extents (both metadata and data) are actually only deleted in the
-> +# background, by the cleaner kthread. So remount, which wakes up the cleaner
-> +# kthread, with a commit interval of 1 second and sleep for 1.1 seconds - after
-> +# this we are guaranteed all extents of the snapshot were deleted.
-> +_scratch_remount commit=1
-> +sleep 1.1
-> +
-> +# Now all extents should be reported as not shared (131072 extents).
-> +echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
-> new file mode 100644
-> index 00000000..3bf5a5e6
-> --- /dev/null
-> +++ b/tests/btrfs/276.out
-> @@ -0,0 +1,16 @@
-> +QA output created by 276
-> +wrote 17179869184/17179869184 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Number of non-shared extents in the whole file: 131072
-> +Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
-> +Number of shared extents in the whole file: 131072
-> +wrote 1048576/1048576 bytes at offset 8388608
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 1048576/1048576 bytes at offset 12884901888
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Number of non-shared extents in the whole file: 16
-> +Number of shared extents in the whole file: 131056
-> +Number of non-shared extents in range [8M, 9M): 8
-> +Number of non-shared extents in range [12G, 12G + 1M): 8
-> +Delete subvolume (commit): 'SCRATCH_MNT/snap'
-> +Number of non-shared extents in the whole file: 131072
-> -- 
-> 2.35.1
+> +if [ $freesp_bad -ne 0 ] && [ $nextents -gt 0 ]; then
+> +	echo "free space checks probably failed because file1 nextents was $nextents"
+> +fi
+>  
+>  # success, all done
+>  status=0
 > 
 
