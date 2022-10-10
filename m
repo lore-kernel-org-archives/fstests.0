@@ -2,177 +2,131 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B872C4332F
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Oct 2022 17:09:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C717C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Oct 2022 15:56:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230110AbiJIRJI (ORCPT
+        id S229644AbiJJP4w (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 Oct 2022 13:09:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60774 "EHLO
+        Mon, 10 Oct 2022 11:56:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229719AbiJIRJG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Oct 2022 13:09:06 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BBF628711;
-        Sun,  9 Oct 2022 10:09:05 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C9271B80D86;
-        Sun,  9 Oct 2022 17:09:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 76BADC433D7;
-        Sun,  9 Oct 2022 17:09:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1665335342;
-        bh=HmtBczcDUBLkGs1o1iEOX2i/VEh3bh6dNQreD50pGog=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=PZU+x7VpRVVZnTylahvrjghucNvadN+kboUWddulGAmiy+QLTTgaOwVoNTVDMHVq3
-         MF5VePTcP2brkvTO8CTgoGZqTG8E80aHCCVjt0QS3VFgqYJ+6SjRdOC6xO545Ft6jz
-         4B5WccmW1dVKiNLyefhENnAzXkmq649Co55qHYmy3GcgmiuYOkTAi3teirWL+3gYPO
-         vKlXLUbwt4terIUu1OWFtvmsDfyFUTXaOB6TGyRXZ1VMHJP4sMJ4SpQtr3u+Xl9nSs
-         ufJucGaOEHz6E6nl+CLTXAm8+BiiT1U/g5bvU6UW7hmyE5/MVntlq0685Eix6LjDyi
-         ysKj7YJDriChQ==
-Date:   Sun, 9 Oct 2022 10:09:02 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S229672AbiJJP4v (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 Oct 2022 11:56:51 -0400
+Received: from mail-qk1-x735.google.com (mail-qk1-x735.google.com [IPv6:2607:f8b0:4864:20::735])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF8965BC33
+        for <fstests@vger.kernel.org>; Mon, 10 Oct 2022 08:56:50 -0700 (PDT)
+Received: by mail-qk1-x735.google.com with SMTP id x25so3266629qki.2
+        for <fstests@vger.kernel.org>; Mon, 10 Oct 2022 08:56:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=Lr/IdHXUBC5o5sSh1+oYlL+SeGy6hMZVycAp91mAftQ=;
+        b=WGimGTLjshEM2qrpez7iFsahA5bQg0sKJXG6aqjjWRi3VUjX1hDnk5mJ38KbxDNu9G
+         9x55D1dDS/UiELZEY2ug6U1tZ4fN7PPe/T7vuGozGMs+/4EtEVh/1rPUWw01jkxYfJ/h
+         Yuhd3OMqyOvnkUpJPnzxUDAb2DisrxkK/jWRM7IJrGKSLsZmUSZ7exhZNayt9b6AwiZ5
+         kPkGw69g+0rr/TwHZ3MP3Jpse77hmnCCBcNRJIuO9+PB59lJFovCMsylnyU1umXVbjj6
+         m/t3GUEbhB35QIoGO1jBQvUO2hdX1WBcL+i71Ia7ZmN9zrKnA/ow9Bh7W6xZujOb2AYE
+         HOjw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Lr/IdHXUBC5o5sSh1+oYlL+SeGy6hMZVycAp91mAftQ=;
+        b=M8f0AKH3Ldut4aJjUCESsmohpqgxtcVGcV/GEbO5ZBwvc0H0OcAHfwkDrUONW3e7+H
+         R0/VrZxUVG/UkbBYILIYg89Rx7He7WfWRec137iPZlGrkwG3Ty/i5bajeJFtgmesQfdg
+         zpkiOXB9rXLdvWFvbBsduF9SdVTK/ycjjHBPkicXT4ysj/shCQOacQiX+Bh3wjB+lP8G
+         iIu5+w1QVJyAcROevtFMv5cNRfjy1CAg9zMoTumuU3+swLDvFGO8rc68wct2y98J6lQo
+         uxzSTg0s/GbIOLvX1xwukglSON50mzq1iOIyb81cXSVMMMyhyQz3o8QnP8LiSdMeiE4u
+         IiBg==
+X-Gm-Message-State: ACrzQf2CIVQmnikSeI/24oyjdNgZ40MVGUmX2kgeo+2gLbF1XGwq/OuF
+        dVCwKb8U4qZUr1BXbuSMIZxy4v0FsMDhkg==
+X-Google-Smtp-Source: AMsMyM4tzfYE2TRtbO+jPrSvhXPZbZp/HJzZO9gMKc72/mg0k4TnbYbRVGHPLFdhS3iGkxfeiqd4Bg==
+X-Received: by 2002:a05:620a:4015:b0:6ed:a8db:32c0 with SMTP id h21-20020a05620a401500b006eda8db32c0mr2176326qko.656.1665417409888;
+        Mon, 10 Oct 2022 08:56:49 -0700 (PDT)
+Received: from localhost (2603-6080-7808-8c00-f5b5-8829-a8a7-c191.res6.spectrum.com. [2603:6080:7808:8c00:f5b5:8829:a8a7:c191])
+        by smtp.gmail.com with ESMTPSA id m8-20020ac84448000000b0039a1146e0e1sm2863306qtn.33.2022.10.10.08.56.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Oct 2022 08:56:49 -0700 (PDT)
+Date:   Mon, 10 Oct 2022 11:56:48 -0400
+From:   Josef Bacik <josef@toxicpanda.com>
 To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 4/6] xfs/128: try to force file allocation behavior
-Message-ID: <Y0MALjSwZoOF0DyU@magnolia>
-References: <166500903290.886939.12532028548655386973.stgit@magnolia>
- <166500905541.886939.4232929527218167462.stgit@magnolia>
- <20221008111102.mb25fytm5yilkefr@zlang-mailbox>
- <Y0G5b7wZXIupRYDs@magnolia>
- <20221009021939.yiuzvrdbcscafdg4@zlang-mailbox>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: get section config after RUN_SECTION checks
+Message-ID: <Y0RAwGyGsa+mL7hW@localhost.localdomain>
+References: <f214d554b294bd3d2515742ad3bd7eeeab4d361f.1661369519.git.josef@toxicpanda.com>
+ <20220825144242.25zstpvox5dcrvmg@zlang-mailbox>
+ <20220923141958.jps5bddtsnbli7ed@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221009021939.yiuzvrdbcscafdg4@zlang-mailbox>
+In-Reply-To: <20220923141958.jps5bddtsnbli7ed@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 09, 2022 at 10:19:39AM +0800, Zorro Lang wrote:
-> On Sat, Oct 08, 2022 at 10:54:55AM -0700, Darrick J. Wong wrote:
-> > On Sat, Oct 08, 2022 at 07:11:02PM +0800, Zorro Lang wrote:
-> > > On Wed, Oct 05, 2022 at 03:30:55PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > Over the years, I've noticed that this test occasionally fails when I've
-> > > > programmed the allocator to hand out the minimum amount of space with
-> > > > each allocation or if extent size hints are enabled:
-> > > > 
-> > > > --- /tmp/fstests/tests/xfs/128.out      2022-09-01 15:09:11.506679341 -0700
-> > > > +++ /var/tmp/fstests/xfs/128.out.bad    2022-10-04 17:32:50.992000000 -0700
-> > > > @@ -20,7 +21,9 @@
-> > > >  56ed2f712c91e035adeeb26ed105a982  SCRATCH_MNT/test-128/file3
-> > > >  b81534f439aac5c34ce3ed60a03eba70  SCRATCH_MNT/test-128/file4
-> > > >  Check files
-> > > >  free blocks after creating some reflink copies is in range
-> > > >  free blocks after CoW some reflink copies is in range
-> > > > -free blocks after defragging all reflink copies is in range
-> > > > -free blocks after all tests is in range
-> > > > +free blocks after defragging all reflink copies has value of 8620027
-> > > > +free blocks after defragging all reflink copies is NOT in range 8651819 .. 8652139
-> > > > +free blocks after all tests has value of 8620027
-> > > > +free blocks after all tests is NOT in range 8651867 .. 8652187
-> > > > 
-> > > > It turns out that under the right circumstances, the _pwrite_byte at the
-> > > > start of this test will end up allocating two extents to file1.  This
-> > > > almost never happens when delalloc is enabled or when the extent size is
-> > > > large, and is more prone to happening if the extent size is > 1FSB but
-> > > > small, the allocator hands out small allocations, or if writeback shoots
-> > > > down pages in random order.
-> > > > 
-> > > > When file1 gets more than 1 extent, problems start to happen.  The free
-> > > > space accounting checks at the end of the test assume that file1 and
-> > > > file4 still share the same space at the end of the test.  This
-> > > > definitely happens if file1 gets one extent (since fsr ignores
-> > > > single-extent files), but if there's more than 1, fsr will try to
-> > > > defragment it.  If fsr succeeds in copying the file contents to a temp
-> > > > file with fewer extents than the source file, it will switch the
-> > > > contents, but unsharing the contents in the process.  This cause the
-> > > > free space to be lower than expected, and the test fails.
-> > > > 
-> > > > Resolve this situation by preallocating space beforehand to try to set
-> > > > up file1 with a single space extent.  If the test fails and we got more
-> > > > than one extent, note that in the output.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
+On Fri, Sep 23, 2022 at 10:19:58PM +0800, Zorro Lang wrote:
+> On Thu, Aug 25, 2022 at 10:42:42PM +0800, Zorro Lang wrote:
+> > On Wed, Aug 24, 2022 at 03:32:10PM -0400, Josef Bacik wrote:
+> > > While trying to do
 > > > 
-> > > Good to me,
-> > > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > > ./check -s <some section>
 > > > 
-> > > >  tests/xfs/128 |   34 ++++++++++++++++++++++++++++++----
-> > > >  1 file changed, 30 insertions(+), 4 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/tests/xfs/128 b/tests/xfs/128
-> > > > index db5d9a60db..2d2975115e 100755
-> > > > --- a/tests/xfs/128
-> > > > +++ b/tests/xfs/128
-> > > > @@ -34,7 +34,20 @@ margin=160
-> > > >  blksz=65536
-> > > >  real_blksz="$(_get_block_size $testdir)"
-> > > >  blksz_factor=$((blksz / real_blksz))
-> > > > +
-> > > > +# The expected free space numbers in this test require file1 and file4 to share
-> > > > +# the same blocks at the end of the test.  Therefore, we need the allocator to
-> > > > +# give file1 a single extent at the start of the test so that fsr will not be
-> > > > +# tempted to "defragment" a multi-extent file1 or file4.  Defragmenting really
-> > > > +# means rewriting the file, and if that succeeds on either file, we'll have
-> > > > +# unshared the space and there will be too little free space.  Therefore,
-> > > > +# preallocate space to try to produce a single extent.
-> > > > +$XFS_IO_PROG -f -c "falloc 0 $((blks * blksz))" $testdir/file1 >> $seqres.full
-> > > >  _pwrite_byte 0x61 0 $((blks * blksz)) $testdir/file1 >> $seqres.full
-> > > > +sync
-> > > > +
-> > > > +nextents=$($XFS_IO_PROG -c 'stat' $testdir/file1 | grep 'fsxattr.nextents' | awk '{print $3}')
-> > > > +
-> > > >  _cp_reflink $testdir/file1 $testdir/file2
-> > > >  _cp_reflink $testdir/file2 $testdir/file3
-> > > >  _cp_reflink $testdir/file3 $testdir/file4
-> > > > @@ -106,10 +119,23 @@ test $c14 = $c24 || echo "File4 changed by defrag"
-> > > >  
-> > > >  #echo $free_blocks0 $free_blocks1 $free_blocks2 $free_blocks3
-> > > >  
-> > > > -_within_tolerance "free blocks after creating some reflink copies" $free_blocks1 $((free_blocks0 - (blks * blksz_factor) )) $margin -v
-> > > > -_within_tolerance "free blocks after CoW some reflink copies" $free_blocks2 $((free_blocks1 - 2)) $margin -v
-> > > > -_within_tolerance "free blocks after defragging all reflink copies" $free_blocks3 $((free_blocks2 - (blks * 2 * blksz_factor))) $margin -v
-> > > > -_within_tolerance "free blocks after all tests" $free_blocks3 $((free_blocks0 - (blks * 3 * blksz_factor))) $margin -v
-> > > > +freesp_bad=0
-> > > > +
-> > > > +_within_tolerance "free blocks after creating some reflink copies" \
-> > > > +	$free_blocks1 $((free_blocks0 - (blks * blksz_factor) )) $margin -v || freesp_bad=1
-> > > > +
-> > > > +_within_tolerance "free blocks after CoW some reflink copies" \
-> > > > +	$free_blocks2 $((free_blocks1 - 2)) $margin -v || freesp_bad=1
-> > > > +
-> > > > +_within_tolerance "free blocks after defragging all reflink copies" \
-> > > > +	$free_blocks3 $((free_blocks2 - (blks * 2 * blksz_factor))) $margin -v || freesp_bad=1
-> > > > +
-> > > > +_within_tolerance "free blocks after all tests" \
-> > > > +	$free_blocks3 $((free_blocks0 - (blks * 3 * blksz_factor))) $margin -v || freesp_bad=1
-> > > > +
-> > > > +if [ $freesp_bad -ne 0 ] && [ $nextents -gt 0 ]; then
+> > > I was failing because I had a section defined higher than <some section>
+> > > that had TEST_DEV=/some/nonexistent/device, since I was using the other
+> > > section to test an experimental drive.  This appears to be because we
+> > > run through all of the sections, and when getting the section config we
+> > > check to see if it's valid, and in this case the section wasn't valid.
+> > > 
+> > > The section I was actually trying to use was valid however.  Fix check
+> > > to see if the section we're trying to run is in our list of sections to
+> > > run first, and then if it is get the config at that point.
+> > > 
+> > > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> > > ---
 > > 
-> > If you decide to commit this, could you change ^^^ this to -gt 1, please?
+> > May you provide any specific config examples to clarify what kind of issue
+> > you feel wrong, and what kind of usage you hope to support :)
 > 
-> Sure, done :)
-
-Cool, thank you!
-
---D
-
-> > 
-> > --D
-> > 
-> > > > +	echo "free space checks probably failed because file1 nextents was $nextents"
-> > > > +fi
-> > > >  
-> > > >  # success, all done
-> > > >  status=0
-> > > > 
-> > > 
-> > 
+> Hi Josef,
 > 
+> Although you didn't reply this email, but I think I might hit similar
+> problem with you recently when I tried to do a btrfs test. I wrote a
+> config.file likes:
+> 
+
+Sorry I don't actually get emails to my inbox, I use lei so sometimes miss
+simple things like this.
+
+I'm using kdevops, and I had a general config that I was using for all hosts,
+except one host has a PCI passthrough ZNS device.  So I have something akin to
+this
+
+[defaut]
+TEST_DIR=/mnt/test
+SCRATCH_MNT=/mnt/scratch
+
+[btrfs-normal]
+TEST_DEV=/dev/sda
+SCRATCH_DEV_POOL="/dev/sdb /dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg /dev/sdh"
+SCRATCH_LOGDEV=/dev/loop0
+
+[btrfs-zns]
+TEST_DEV=/dev/nvme0n1
+SCRATCH_DEV=/dev/nvme1n1
+
+[btrfs-compress]
+TEST_DEV=/dev/sda
+SCRATCH_DEV_POOL="/dev/sdb /dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg /dev/sdh"
+SCRATCH_LOGDEV=/dev/loop0
+MOUNT_OPTIONS="-o compress"
+
+If I tried to run
+
+./check -s btrfs-compress
+
+it would fail because it couldn't find /dev/nvme0n1, despite it not being in the
+section I'm running.  Thanks,
+
+Josef
