@@ -2,91 +2,195 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 278D6C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 Oct 2022 09:23:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75447C433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 Oct 2022 12:23:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229606AbiJKJXi (ORCPT
+        id S229459AbiJKMXv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 11 Oct 2022 05:23:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59432 "EHLO
+        Tue, 11 Oct 2022 08:23:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53830 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229637AbiJKJX0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Oct 2022 05:23:26 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1BD772EE6
-        for <fstests@vger.kernel.org>; Tue, 11 Oct 2022 02:23:22 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229846AbiJKMXk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Oct 2022 08:23:40 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2AEA8E989;
+        Tue, 11 Oct 2022 05:23:37 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id E296E1F8D5;
-        Tue, 11 Oct 2022 09:23:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1665480200; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=S+TiayvXFkz7buOpQxbSrqKE/FvYR4gPYjB5bEA3yuw=;
-        b=ht+5pDxoj/mlITW+H/MlR/veRlgdpOhvUdMRLvBpU45d83Bqo4Ak0B8gMPoJtu5AKY2P+g
-        z4CUKkVHYnpQf7Od4wiWKTENvexPQY6M3GcQjzkuD+1x/60i+cokAndrdB5BzNBohCjN7x
-        6FMMaPtS2h9R79+FE1y58Ph9wtqF9Dg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1665480200;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=S+TiayvXFkz7buOpQxbSrqKE/FvYR4gPYjB5bEA3yuw=;
-        b=JAbHstEcZhsiocnn/py1f5IekCfcc62LvZfKB3/r2zSWdIKUsVuN9LSdBmYcdhYPLChQ88
-        FLPz4nGS6k0wk+Cg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id AB2BA13ACD;
-        Tue, 11 Oct 2022 09:23:20 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id IMFfKAg2RWNodQAAMHmgww
-        (envelope-from <ddiss@suse.de>); Tue, 11 Oct 2022 09:23:20 +0000
-From:   David Disseldorp <ddiss@suse.de>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4523C61185;
+        Tue, 11 Oct 2022 12:23:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D21BFC433B5;
+        Tue, 11 Oct 2022 12:23:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1665491016;
+        bh=sBHJ6g0DrAuFV6GU9I0trG4dICA0Idrzl/SrDamatmo=;
+        h=From:To:Cc:Subject:Date:From;
+        b=WoJMiWieiCQ6xkdlK2yAm0aF5bvJUKsApOZGIBjLezF6x+DE2pQKv+4vvmcuF5KrJ
+         PTIxt2VbG4/AO5GRDe9nmqX7ArKLEqFRL2wjzBO6PTwiZVU2shGm46SsTE+RP2mo6N
+         7QzwJmmDcbAvwgUr4H0bEcFr8hrtniglgpIYCWehWg6Lag871FXl8ASj3KWf72n89e
+         jaHqlkrKp8oqNs+G5lWxO0BloFFdpyjSf5baFpgKTRLwRff1kueK8ToPxYrdcMmPLW
+         o5JkPmnhwtb6v2wJPeP9cnW9Qpb54XHnKUyKDD91krBYIIMcEIwQYw6bpHyBeDBxZm
+         Ae2sEJI5smPLQ==
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     David Disseldorp <ddiss@suse.de>
-Subject: [PATCH 1/2] lsqa.pl: fix --header output
-Date:   Tue, 11 Oct 2022 11:23:39 +0200
-Message-Id: <20221011092340.24857-2-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20221011092340.24857-1-ddiss@suse.de>
-References: <20221011092340.24857-1-ddiss@suse.de>
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test fiemap reports extent as shared after cloning it
+Date:   Tue, 11 Oct 2022 13:22:03 +0100
+Message-Id: <c5ede97bf4c2537ef9ee3adf35a9b35cb2150b8a.1665490911.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-7e98d41a ("fstests: move test group info to test files") replaces the
-post-header "seq" assignment with "./common/preamble\n_begin_fstest ..."
-Update lsqa.pl to recognise the "./common/preamble" line as a header
-divider.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
+Test that if we have two consecutive extents and only one of them is
+cloned, then fiemap correctly reports which one is shared and reports
+the other as not shared.
+
+This currently fails on btrfs for all kernel releases, but is fixed by
+a kernel patch that landed in Linus' tree last week:
+
+  ac3c0d36a2a2f7 ("btrfs: make fiemap more efficient and accurate reporting extent sharedness")
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- lsqa.pl | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/generic/702     | 92 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/702.out | 23 +++++++++++
+ 2 files changed, 115 insertions(+)
+ create mode 100755 tests/generic/702
+ create mode 100644 tests/generic/702.out
 
-diff --git a/lsqa.pl b/lsqa.pl
-index 8ca1167f..63bee582 100755
---- a/lsqa.pl
-+++ b/lsqa.pl
-@@ -99,7 +99,7 @@ sub get_qa_header($) {
- 	m/^# SPDX/i		and next; # SPDX tags
- 	m/^# Copyright/i	and next; # Copyright tags
- 	m/^#\s*\-{10}/		and last; # dashed lines
--	m/^seq/i		and last; # test start
-+	m/^\. \.\/common\/preamble/ and last; # test start
- 
- 	s/^# *//;
- 
+diff --git a/tests/generic/702 b/tests/generic/702
+new file mode 100755
+index 00000000..f93bc946
+--- /dev/null
++++ b/tests/generic/702
+@@ -0,0 +1,92 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 702
++#
++# Test that if we have two consecutive extents and only one of them is cloned,
++# then fiemap correctly reports which one is shared and reports the other as not
++# shared.
++#
++. ./common/preamble
++_begin_fstest auto quick clone fiemap
++
++. ./common/filter
++. ./common/reflink
++
++_fixed_by_kernel_commit ac3c0d36a2a2f7 \
++	"btrfs: make fiemap more efficient and accurate reporting extent sharedness"
++
++_supported_fs generic
++_require_scratch_reflink
++_require_xfs_io_command "fiemap"
++
++fiemap_test_file()
++{
++	local filepath=$1
++
++	# Skip the first two lines of xfs_io's fiemap output (file path and
++	# header describing the output columns).
++	#
++	# Print the first column (extent number), second column (file range),
++	# fourth column (extent size) and fifth column (flags) of the fiemap
++	# output.
++	#
++	# We filter the flags column to only tell us if an extent is shared or
++	# not (flag 0x2000, which matches FIEMAP_EXTENT_SHARED) because on some
++	# filesystem configs we may have other flags printed - for example
++	# running btrfs with "-o compress" we get the flag 0x8 as well (which
++	# is FIEMAP_EXTENT_ENCODED).
++	#
++	# The third column is the physical location of the extents, so it's
++	# omitted because the location varies between different filesystems.
++	#
++	$XFS_IO_PROG -c "fiemap -v" $filepath | tail -n +3 | \
++		$AWK_PROG '{ print $1, $2, $4, \
++			  and(strtonum($5), 0x2000) ? "shared" : "not_shared" }'
++}
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++# We create 128K extents in the test files below.
++_require_congruent_file_oplen $SCRATCH_MNT $((128 * 1024))
++
++# Create file foo with 2 consecutive extents, each one with a size of 128K.
++echo "Creating file foo"
++$XFS_IO_PROG -f -c "pwrite -b 128K 0 128K" -c "fsync" \
++	     -c "pwrite -b 128K 128K 128K" -c "fsync" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Clone only the first extent into another file.
++echo "Cloning first extent of file foo to file bar"
++$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/foo 0 0 128K" $SCRATCH_MNT/bar | \
++	_filter_xfs_io
++
++# Now fiemap file foo, it should report the first 128K extent as shared and the
++# second 128K extent as not shared.
++echo "fiemap of file foo:"
++fiemap_test_file $SCRATCH_MNT/foo
++
++# Now do a similar test as above, except that this time only the second 128K
++# extent is cloned, the first extent is not cloned.
++
++# Create file foo2 with 2 consecutive extents, each one with a size of 128K.
++echo "Creating file foo2"
++$XFS_IO_PROG -f -c "pwrite -b 128K 0 128K" -c "fsync" \
++	     -c "pwrite -b 128K 128K 128K" -c "fsync" \
++	     $SCRATCH_MNT/foo2 | _filter_xfs_io
++
++# Clone only the second extent of foo2 into another file.
++echo "Cloning second extent of file foo2 to file bar2"
++$XFS_IO_PROG -f -c "reflink $SCRATCH_MNT/foo2 128K 0 128K" $SCRATCH_MNT/bar2 | \
++	_filter_xfs_io
++
++# Now fiemap file foo2, it should report the first 128K extent as not shared and
++# the second 128K extent as shared
++echo "fiemap of file foo2:"
++fiemap_test_file $SCRATCH_MNT/foo2
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/702.out b/tests/generic/702.out
+new file mode 100644
+index 00000000..576bb5e8
+--- /dev/null
++++ b/tests/generic/702.out
+@@ -0,0 +1,23 @@
++QA output created by 702
++Creating file foo
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Cloning first extent of file foo to file bar
++linked 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++fiemap of file foo:
++0: [0..255]: 256 shared
++1: [256..511]: 256 not_shared
++Creating file foo2
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 131072/131072 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Cloning second extent of file foo2 to file bar2
++linked 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++fiemap of file foo2:
++0: [0..255]: 256 not_shared
++1: [256..511]: 256 shared
 -- 
-2.35.3
+2.35.1
 
