@@ -2,1429 +2,317 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2803C433F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 Oct 2022 17:45:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AECBFC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 Oct 2022 17:49:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229820AbiJKRpl (ORCPT
+        id S229837AbiJKRtJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 11 Oct 2022 13:45:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47208 "EHLO
+        Tue, 11 Oct 2022 13:49:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230099AbiJKRph (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Oct 2022 13:45:37 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C98E42AE4;
-        Tue, 11 Oct 2022 10:45:32 -0700 (PDT)
+        with ESMTP id S229812AbiJKRtI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Oct 2022 13:49:08 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 172E54B98D;
+        Tue, 11 Oct 2022 10:49:06 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8DA6061244;
-        Tue, 11 Oct 2022 17:45:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D96EBC433D6;
-        Tue, 11 Oct 2022 17:45:30 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 88ABD61230;
+        Tue, 11 Oct 2022 17:49:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0423C433C1;
+        Tue, 11 Oct 2022 17:49:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1665510331;
-        bh=8xNfkfTy5LzBpSiZWjicmwo7YXvOori58wUVFg0T2VY=;
+        s=k20201202; t=1665510545;
+        bh=Tx6VSe0aEm9DsbJigOKGBjfcl9+tMwSv+OZa38VrEDM=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=K5I3UofR8urEa+r8KlJNP+qvxHfrzsrjQXs02VEyNcWazlishxK6LQr8AmdiNdjiW
-         nN3tCGIRbWC5pLD9j5LYtxRIv1P+n1DE0IFJrvPf1aegDTTrG3I0tGjxH1DaJoBDwc
-         85K0OMJztF6wCDy23rghXFqsARWOFVN6V0rGogTUBgMIILkkPE6zYIN8CVzGoh3Lth
-         IAwyGd6qPGY24IMmzeHJKsHoyVmzjXfl+h3vGaocKB3m5B1e38ekY/NwOhYD2NSCld
-         uh3JH7akOJosjM9fKcLh+24RfMFHS9mQuV4f6uMMLm90lgenc9IPmCXzVnLqvuybh+
-         x3/k7v2i06PZw==
-Date:   Tue, 11 Oct 2022 10:45:30 -0700
+        b=eug4FctvkItews45WiLguZ1aefFLx/UVV3hHHIur6iGxN4XmReRw91mYv7TwJHpuP
+         4PfEQzZXEBH/CsRKgxooiFZD0gFINFWx6/N2Gn3Jzx+nK9ZnItYRxtFofznPGm0CZ3
+         Rfb3idmhyu3SPVsKIKsEAnRQPzUIjZXMtL5RNWzm9eOUEThRGR1ps5oj/Amgev9MSk
+         GD3YmptmPlRhEV7IVAUr7O4c4jCbx93Pu+R5e8/gzexTeWe0MNp+NPtJ98bzSxnjnk
+         tJaEomySIpFF4xIGQq/u620357Pjecr6jpP0oaM47oSxAnFOMsf1UKjQfpfs4XR0nU
+         h5/WMdpYM84Fg==
+Date:   Tue, 11 Oct 2022 10:49:05 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        zlang@redhat.com, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 3/3] fstests: add fiemap group
-Message-ID: <Y0Wrui6HB+V/tZxa@magnolia>
-References: <cover.1665150613.git.fdmanana@suse.com>
- <db8bc237902bcfc4e2c55ec33752d3209e074b2e.1665150613.git.fdmanana@suse.com>
+To:     Hironori Shiina <shiina.hironori@gmail.com>
+Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org,
+        Hironori Shiina <shiina.hironori@fujitsu.com>
+Subject: Re: [RFC PATCH] xfs: test for fixing wrong root inode number
+Message-ID: <Y0WskT/O3J0pm48N@magnolia>
+References: <20220928210337.417054-1-shiina.hironori@fujitsu.com>
+ <20220929014955.pxou2qymdumvijtt@zlang-mailbox>
+ <eae39d48-1fc1-09dc-7f5e-b1112c880584@gmail.com>
+ <20221002042708.fshgqyqyhidgsx7z@zlang-mailbox>
+ <Yztcg/8nbS0BDedf@magnolia>
+ <fe8aa034-ec20-f316-ae03-33f52ecc3001@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <db8bc237902bcfc4e2c55ec33752d3209e074b2e.1665150613.git.fdmanana@suse.com>
+In-Reply-To: <fe8aa034-ec20-f316-ae03-33f52ecc3001@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 07, 2022 at 02:53:36PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Fri, Oct 07, 2022 at 09:59:35PM -0400, Hironori Shiina wrote:
 > 
-> Add a fiemap group for all tests that exercise fiemap, either directly
-> through xfs_io, or more indirectly like through filefrag or helpers in
-> common/* (like _count_extents, _count_holes, etc). This is useful in
-> order to quickly test changes made to the fiemap implementation of a
-> filesystem for example.
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> On 10/3/22 18:04, Darrick J. Wong wrote:
+> > On Sun, Oct 02, 2022 at 12:27:08PM +0800, Zorro Lang wrote:
+> >> On Fri, Sep 30, 2022 at 11:01:51AM -0400, Hironori Shiina wrote:
+> >>>
+> >>>
+> >>> On 9/28/22 21:49, Zorro Lang wrote:
+> >>>> On Wed, Sep 28, 2022 at 05:03:37PM -0400, Hironori Shiina wrote:
+> >>>>> Test '-x' option of xfsrestore. With this option, a wrong root inode
+> >>>>> number is corrected. A root inode number can be wrong in a dump created
+> >>>>> by problematic xfsdump (v3.1.7 - v3.1.9) with blukstat misuse. This
+> >>>>> patch adds a dump with a wrong inode number created by xfsdump 3.1.8.
+> >>>>>
+> >>>>> Link: https://lore.kernel.org/linux-xfs/20201113125127.966243-1-hsiangkao@redhat.com/
+> >>>>> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
+> >>>>> ---
+> >>>>>  common/dump                    |   2 +-
+> >>>>>  src/root-inode-broken-dumpfile | Bin 0 -> 21648 bytes
+> >>>>>  tests/xfs/554                  |  37 +++++++++++++++++++++
+> >>>>>  tests/xfs/554.out              |  57 +++++++++++++++++++++++++++++++++
+> >>>>>  4 files changed, 95 insertions(+), 1 deletion(-)
+> >>>>>  create mode 100644 src/root-inode-broken-dumpfile
+> >>>>>  create mode 100644 tests/xfs/554
+> >>>>>  create mode 100644 tests/xfs/554.out
+> >>>>>
+> >>>>> diff --git a/common/dump b/common/dump
+> >>>>> index 8e0446d9..50b2ba03 100644
+> >>>>> --- a/common/dump
+> >>>>> +++ b/common/dump
+> >>>>> @@ -1003,7 +1003,7 @@ _parse_restore_args()
+> >>>>>          --no-check-quota)
+> >>>>>              do_quota_check=false
+> >>>>>              ;;
+> >>>>> -	-K|-R)
+> >>>>> +	-K|-R|-x)
+> >>>>>  	    restore_args="$restore_args $1"
+> >>>>>              ;;
+> >>>>>  	*)
+> >>>>> diff --git a/src/root-inode-broken-dumpfile b/src/root-inode-broken-dumpfile
+> >>>>> new file mode 100644
+> >>>>> index 0000000000000000000000000000000000000000..9a42e65d8047497be31f3abbaf4223ae384fd14d
+> >>>>> GIT binary patch
+> >>>>> literal 21648
+> >>>>> zcmeI)K}ge49KiAC_J<CEBr!0AwBf~zbCHB}5DyxL6eU8Jnqylvayj;2VuG+d)TN6;
+> >>>>> z5J8vlAaw9hXi(UousT$Sin@BRJfwHM)O+*2*njz_zc+h*ckuV#@BMuKe;;JbgTL{<
+> >>>>> z!SwZ9zC#ERe%reLe5&cz2e}qM<!i2dXQHt^{^`d1Qx{)MMzW#$%dR@J={0`IRsGx4
+> >>>>> z(yn@Oi-nBqCOVIG?&{kpwnv~&w_>6_ozY1^fph=w8(=^oTg&wOe=(WQByyQ_Hfd|4
+> >>>>> z^o76<0!zn#v>k3blbU)nzx=KF^}-G%R;OaQYsHwGDkO`kD^@q^(_Ac_8H<gKj^>a0
+> >>>>> z6p*%BK>q#b>2EE%^!@f?Z`-p+tI@M}qmMm@zMJk>K1U^=d~G^NUG?X4vkvKtOf-3Y
+> >>>>> zpVM9YgM9Y7{*P0ApJNUh^uk1wCnA6V0tg_000IagfB*srAb<b@2q1s}0tg_000Iag
+> >>>>> zfB*srAb<b@2q1s}0tg_000IagfB*srAb<b@2q1s}0tg_000IagfB*srAb`MM1p>_h
+> >>>>> z2-R=Q9ooK1{l9<Dy8IIMUVXr9BW9uI1x7};j+kij|5kLI^32no;n|PvqD74ZOlJ#n
+> >>>>> z0-~CKSlx#liMS>jt232#==00xPqwp;gsZrjc?`PPxaCE~>3(^o5-%+Nj=HegJFK2b
+> >>>>> z=l5zT4IDgO=sJ1zp=jyrALvcQJK|j;sN2_jUmobjN<!S6m1{G<LZ^+JP;T!|3{9)w
+> >>>>> eGf&ioo}iw|li2&4IyG;z<}vrl)Mic2`t2{52##q0
+> >>>>>
+> >>>>> literal 0
+> >>>>> HcmV?d00001
+> >>>>
+> >>>> Please don't try to add a binary file to fstests directly.
+> >>>>
+> >>>>>
+> >>>>> diff --git a/tests/xfs/554 b/tests/xfs/554
+> >>>>> new file mode 100644
+> >>>>> index 00000000..13bc62c7
+> >>>>> --- /dev/null
+> >>>>> +++ b/tests/xfs/554
+> >>>>> @@ -0,0 +1,37 @@
+> >>>>> +#! /bin/bash
+> >>>>> +# SPDX-License-Identifier: GPL-2.0
+> >>>>> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
+> >>>>> +#
+> >>>>> +# FS QA Test No. 554
+> >>>>> +#
+> >>>>> +# Test restoring a dumpfile with a wrong root inode number created by
+> >>>>> +# xfsdump 3.1.8.
+> >>>>> +# This test restores the checked-in broken dump with '-x' flag.
+> >>>>> +#
+> >>>>> +
+> >>>>> +. ./common/preamble
+> >>>>> +_begin_fstest auto quick dump
+> >>>>> +
+> >>>>> +# Import common functions.
+> >>>>> +. ./common/dump
+> >>>>> +
+> >>>>> +# real QA test starts here
+> >>>>> +_supported_fs xfs
+> >>>>> +_require_scratch
+> >>>>
+> >>>> The -x option is a new feature for xfsdump, not all system support that. So
+> >>>> we need to _notrun if test on a system doesn't support it. A separated
+> >>>> _require_* helper would be better if there'll be more testing about this
+> >>>> new feature. Or a local detection in this case is fine too (can be moved as
+> >>>> a common helper later).
+> >>>>
+> >>>>> +_scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
+> >>>>> +_scratch_mount
+> >>>>> +
+> >>>>> +# Create dumpdir for comparing with restoredir
+> >>>>> +rm -rf $dump_dir
+> >>>>> +mkdir $dump_dir || _fail "failed to mkdir $restore_dir"
+> >>>>           ^^                                  ^^
+> >>>>
+> >>>> Are you trying to create a dump dir or restore dir?
+> >>>>
+> >>>>> +touch $dump_dir/FILE_1019
+> >>>>> +
+> >>>>> +_do_restore_toc -x -f $here/src/root-inode-broken-dumpfile
+> >>>>
+> >>>> Why I didn't see how you generate this broken dumpfile in this case?
+> >>>>
+> >>>> Oh... I see, you want to store a dumpfile in fstests source code directly.
+> >>>> I thought you submited that file accidentally...
+> >>>>
+> >>>> No, we don't do things like this way, please try to generate the dumpfile
+> >>>> in this test case at first, then restore it. For example using xfs_db to
+> >>>> break a xfs, or using some tricky method (likes xfs/545).
+> >>>>
+> >>>
+> >>> Thank you for the comments. I will try another approach. I'm having
+> >>> trouble creating a dumpfile for this test. Because xfsdump was already
+> >>> fixed, xfsdump no longer generates a corrupted dumpfile even if there is
+> >>> a lower inode number than a root inode.
+> >>
+> >> Oh, I see. You can try, but I think it's hard. It maybe not suitable to be a
+> >> fstests case, if it has to depend on a binary fs dump file. If so, We can cover
+> >> it on other place, with this existed "bad" dump file.
+> > 
+> > How difficult is it to create a dumpfile with a broken root inode?
+> > Is it a simple matter of creating a good dump and patching a few bytes,
+> > or do we end up having to patch the whole file?
+> > 
+> > (The reason I ask is that I've heard about this problem for ages but
+> > I don't actually know how to create a bad dump...)
+> > 
+> 
+> As I dug into the data structure, I succeeded in creating a dumpfile with a wrong
+> root inode by modifying `content_inode_hdr_t.cih_rootino` and
+> `global_hdr_t.gh_checksum`.
+> 
+> After creating a inode with a lower number than the root inode with the method in
+> generic/545, I modified a dumpfile as follows:
+> ---
+> _do_dump_file
+> 
+> # Break dumpfile
+> old_checksum=$(od -A n -j 12 -N 4 -i --endian=big $dump_file)
+> gap=$(($root_inum - $inum))
+> new_checksum=$(($old_checksum + ($gap >> 32) + ($gap & 0x00000000ffffffff)))
+> v=($(printf "%016x" $inum |  awk -v FS='' '{for (i=1; i<=NF; i+=2) print $i$(i+1)}'))
+> echo -en "\x${v[0]}\x${v[1]}\x${v[2]}\x${v[3]}\x${v[4]}\x${v[5]}\x${v[6]}\x${v[7]}" | dd of=$dump_file bs=1 seek=3928 conv=notrunc
+> v=($(printf "%016x" $new_checksum |  awk -v FS='' '{for (i=9; i<=NF; i+=2) print $i$(i+1)}'))
+> echo -en "\x${v[0]}\x${v[1]}\x${v[2]}\x${v[3]}" | dd of=$dump_file bs=1 seek=12 conv=notrunc
+> 
+> _do_restore_file -x
+> ---
+> (I'm afraid I'm not so familiar with editing a binary file.)
 
-Seems like a good idea to me
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+That's the only way I know of to do this via shell script. :/
+
+Perhaps it would be cleaner to submit a small C program to do the
+editing instead of relying on bash?
+
+> The offset of `global_hdr_t.gh_checksum` is 12.
+> The offset of `content_inode_hdr_t.cih_rootino` is:
+>   global_hdr_t.gh_upper (0x400) + drive_hdr_t.dh_upper (0x400) + 
+>   media_hdr_t.mh_upper (0x400) + content_hdr_t.ch_specific (0x340) +
+>   content_inode_hdr_t.cih_rootino (0x18) = 0xf58 (3928)
+
+Whatever you come up with, please include this comment with the program
+code so that it's more obvious what the byte editing is doing.
 
 --D
 
-> ---
->  doc/group-names.txt | 1 +
->  tests/btrfs/004     | 2 +-
->  tests/btrfs/079     | 2 +-
->  tests/btrfs/137     | 2 +-
->  tests/btrfs/140     | 2 +-
->  tests/btrfs/199     | 2 +-
->  tests/btrfs/200     | 2 +-
->  tests/btrfs/211     | 2 +-
->  tests/btrfs/257     | 2 +-
->  tests/btrfs/258     | 2 +-
->  tests/btrfs/259     | 2 +-
->  tests/btrfs/260     | 2 +-
->  tests/btrfs/263     | 2 +-
->  tests/btrfs/276     | 2 +-
->  tests/ext4/001      | 2 +-
->  tests/ext4/034      | 2 +-
->  tests/ext4/308      | 2 +-
->  tests/f2fs/002      | 2 +-
->  tests/generic/009   | 2 +-
->  tests/generic/012   | 2 +-
->  tests/generic/016   | 2 +-
->  tests/generic/017   | 2 +-
->  tests/generic/021   | 2 +-
->  tests/generic/022   | 2 +-
->  tests/generic/032   | 2 +-
->  tests/generic/043   | 2 +-
->  tests/generic/044   | 2 +-
->  tests/generic/045   | 2 +-
->  tests/generic/046   | 2 +-
->  tests/generic/047   | 2 +-
->  tests/generic/048   | 2 +-
->  tests/generic/049   | 2 +-
->  tests/generic/058   | 2 +-
->  tests/generic/060   | 2 +-
->  tests/generic/061   | 2 +-
->  tests/generic/063   | 2 +-
->  tests/generic/064   | 2 +-
->  tests/generic/092   | 2 +-
->  tests/generic/094   | 2 +-
->  tests/generic/110   | 2 +-
->  tests/generic/111   | 2 +-
->  tests/generic/115   | 2 +-
->  tests/generic/177   | 2 +-
->  tests/generic/225   | 2 +-
->  tests/generic/255   | 2 +-
->  tests/generic/301   | 2 +-
->  tests/generic/302   | 2 +-
->  tests/generic/305   | 2 +-
->  tests/generic/316   | 2 +-
->  tests/generic/326   | 2 +-
->  tests/generic/327   | 2 +-
->  tests/generic/328   | 2 +-
->  tests/generic/352   | 2 +-
->  tests/generic/353   | 2 +-
->  tests/generic/372   | 2 +-
->  tests/generic/414   | 2 +-
->  tests/generic/425   | 2 +-
->  tests/generic/473   | 2 +-
->  tests/generic/483   | 2 +-
->  tests/generic/516   | 2 +-
->  tests/generic/519   | 2 +-
->  tests/generic/540   | 2 +-
->  tests/generic/541   | 2 +-
->  tests/generic/542   | 2 +-
->  tests/generic/543   | 2 +-
->  tests/generic/578   | 2 +-
->  tests/generic/654   | 2 +-
->  tests/generic/655   | 2 +-
->  tests/generic/677   | 2 +-
->  tests/generic/679   | 2 +-
->  tests/generic/695   | 2 +-
->  tests/overlay/066   | 2 +-
->  tests/shared/298    | 2 +-
->  tests/xfs/180       | 2 +-
->  tests/xfs/182       | 2 +-
->  tests/xfs/184       | 2 +-
->  tests/xfs/192       | 2 +-
->  tests/xfs/193       | 2 +-
->  tests/xfs/198       | 2 +-
->  tests/xfs/200       | 2 +-
->  tests/xfs/204       | 2 +-
->  tests/xfs/207       | 2 +-
->  tests/xfs/208       | 2 +-
->  tests/xfs/209       | 2 +-
->  tests/xfs/210       | 2 +-
->  tests/xfs/211       | 2 +-
->  tests/xfs/212       | 2 +-
->  tests/xfs/213       | 2 +-
->  tests/xfs/214       | 2 +-
->  tests/xfs/231       | 2 +-
->  tests/xfs/232       | 2 +-
->  tests/xfs/252       | 2 +-
->  tests/xfs/344       | 2 +-
->  tests/xfs/345       | 2 +-
->  tests/xfs/346       | 2 +-
->  tests/xfs/347       | 2 +-
->  tests/xfs/443       | 2 +-
->  97 files changed, 97 insertions(+), 96 deletions(-)
+> Thanks,
+> Hiro
 > 
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index ef411b5e..6cc9af78 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -47,6 +47,7 @@ eio			IO error reporting
->  encrypt			encrypted file contents
->  enospc			ENOSPC error reporting
->  exportfs		file handles
-> +fiemap			fiemap ioctl
->  filestreams		XFS filestreams allocator
->  freeze			filesystem freeze tests
->  fsck			general fsck tests
-> diff --git a/tests/btrfs/004 b/tests/btrfs/004
-> index 4e767a2f..aa37c45d 100755
-> --- a/tests/btrfs/004
-> +++ b/tests/btrfs/004
-> @@ -10,7 +10,7 @@
->  # We check to end up back at the original file with the correct offset.
->  #
->  . ./common/preamble
-> -_begin_fstest auto rw metadata
-> +_begin_fstest auto rw metadata fiemap
->  
->  noise_pid=0
->  
-> diff --git a/tests/btrfs/079 b/tests/btrfs/079
-> index 1acd1855..92d59479 100755
-> --- a/tests/btrfs/079
-> +++ b/tests/btrfs/079
-> @@ -18,7 +18,7 @@
->  # btrfs: Fix the wrong condition judgment about subset extent map
->  #
->  . ./common/preamble
-> -_begin_fstest auto rw metadata
-> +_begin_fstest auto rw metadata fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/137 b/tests/btrfs/137
-> index 64ed2450..7d03c260 100755
-> --- a/tests/btrfs/137
-> +++ b/tests/btrfs/137
-> @@ -7,7 +7,7 @@
->  # Test that both incremental and full send operations preserve file holes.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick send
-> +_begin_fstest auto quick send fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/140 b/tests/btrfs/140
-> index fdff6eb2..247a7356 100755
-> --- a/tests/btrfs/140
-> +++ b/tests/btrfs/140
-> @@ -12,7 +12,7 @@
->  #	commit 2e949b0a5592 ("Btrfs: fix invalid dereference in btrfs_retry_endio")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick read_repair
-> +_begin_fstest auto quick read_repair fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/199 b/tests/btrfs/199
-> index 2024447c..709ad1f9 100755
-> --- a/tests/btrfs/199
-> +++ b/tests/btrfs/199
-> @@ -16,7 +16,7 @@
->  # boundary"
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick trim
-> +_begin_fstest auto quick trim fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/200 b/tests/btrfs/200
-> index 48cd7046..5ce3775f 100755
-> --- a/tests/btrfs/200
-> +++ b/tests/btrfs/200
-> @@ -8,7 +8,7 @@
->  # operations for extents that are shared between the same file.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick send clone
-> +_begin_fstest auto quick send clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/211 b/tests/btrfs/211
-> index 60ef3d1b..f5744b75 100755
-> --- a/tests/btrfs/211
-> +++ b/tests/btrfs/211
-> @@ -10,7 +10,7 @@
->  # the NO_HOLES feature.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick log prealloc
-> +_begin_fstest auto quick log prealloc fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/257 b/tests/btrfs/257
-> index 87f9e0b2..f8e69f7a 100755
-> --- a/tests/btrfs/257
-> +++ b/tests/btrfs/257
-> @@ -9,7 +9,7 @@
->  #
->  
->  . ./common/preamble
-> -_begin_fstest auto quick defrag prealloc
-> +_begin_fstest auto quick defrag prealloc fiemap
->  
->  # Override the default cleanup function.
->  # _cleanup()
-> diff --git a/tests/btrfs/258 b/tests/btrfs/258
-> index be61d039..e4a23dcc 100755
-> --- a/tests/btrfs/258
-> +++ b/tests/btrfs/258
-> @@ -8,7 +8,7 @@
->  # in the middle
->  #
->  . ./common/preamble
-> -_begin_fstest auto defrag quick
-> +_begin_fstest auto defrag quick fiemap
->  
->  . ./common/filter
->  
-> diff --git a/tests/btrfs/259 b/tests/btrfs/259
-> index 36f499f9..cbbea9f5 100755
-> --- a/tests/btrfs/259
-> +++ b/tests/btrfs/259
-> @@ -8,7 +8,7 @@
->  # at their max capacity.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick defrag
-> +_begin_fstest auto quick defrag fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/260 b/tests/btrfs/260
-> index 8042ec4d..111a3bd6 100755
-> --- a/tests/btrfs/260
-> +++ b/tests/btrfs/260
-> @@ -8,7 +8,7 @@
->  # algorithm of all regular extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick defrag compress prealloc
-> +_begin_fstest auto quick defrag compress prealloc fiemap
->  
->  # Override the default cleanup function.
->  # _cleanup()
-> diff --git a/tests/btrfs/263 b/tests/btrfs/263
-> index d201f14e..8ff363d1 100755
-> --- a/tests/btrfs/263
-> +++ b/tests/btrfs/263
-> @@ -8,7 +8,7 @@
->  # defragmentation.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick defrag
-> +_begin_fstest auto quick defrag fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/276 b/tests/btrfs/276
-> index c27e8383..944b0c8f 100755
-> --- a/tests/btrfs/276
-> +++ b/tests/btrfs/276
-> @@ -9,7 +9,7 @@
->  # and when the file's subvolume was snapshoted.
->  #
->  . ./common/preamble
-> -_begin_fstest auto snapshot compress
-> +_begin_fstest auto snapshot compress fiemap
->  
->  . ./common/filter
->  
-> diff --git a/tests/ext4/001 b/tests/ext4/001
-> index f1d1e829..f8650365 100755
-> --- a/tests/ext4/001
-> +++ b/tests/ext4/001
-> @@ -8,7 +8,7 @@
->  #
->  seqfull=$0
->  . ./common/preamble
-> -_begin_fstest auto prealloc quick zero
-> +_begin_fstest auto prealloc quick zero fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/ext4/034 b/tests/ext4/034
-> index 223c964f..bf7466d4 100755
-> --- a/tests/ext4/034
-> +++ b/tests/ext4/034
-> @@ -11,7 +11,7 @@
->  # "ext4: make sure enough credits are reserved for dioread_nolock writes"
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick quota
-> +_begin_fstest auto quick quota fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/ext4/308 b/tests/ext4/308
-> index b88ea056..849ebdf8 100755
-> --- a/tests/ext4/308
-> +++ b/tests/ext4/308
-> @@ -9,7 +9,7 @@
->  # So if ioctl was performed twice then inode's layout should not change.
->  #
->  . ./common/preamble
-> -_begin_fstest auto ioctl rw prealloc quick defrag
-> +_begin_fstest auto ioctl rw prealloc quick defrag fiemap
->  
->  PIDS=""
->  
-> diff --git a/tests/f2fs/002 b/tests/f2fs/002
-> index 59ca2a2d..8235d88a 100755
-> --- a/tests/f2fs/002
-> +++ b/tests/f2fs/002
-> @@ -40,7 +40,7 @@
->  # just test LZ4.
->  
->  . ./common/preamble
-> -_begin_fstest auto quick rw encrypt compress
-> +_begin_fstest auto quick rw encrypt compress fiemap
->  
->  . ./common/filter
->  . ./common/f2fs
-> diff --git a/tests/generic/009 b/tests/generic/009
-> index 3b362943..7c9b137f 100755
-> --- a/tests/generic/009
-> +++ b/tests/generic/009
-> @@ -7,7 +7,7 @@
->  # Test fallocate FALLOC_FL_ZERO_RANGE
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc zero
-> +_begin_fstest auto quick prealloc zero fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/012 b/tests/generic/012
-> index 4b3c69f4..74e7a02b 100755
-> --- a/tests/generic/012
-> +++ b/tests/generic/012
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch collapse
-> +_begin_fstest auto quick prealloc punch collapse fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/016 b/tests/generic/016
-> index 59cb8085..833e9161 100755
-> --- a/tests/generic/016
-> +++ b/tests/generic/016
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch collapse
-> +_begin_fstest auto quick prealloc punch collapse fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/017 b/tests/generic/017
-> index 12c486d1..5f0d8513 100755
-> --- a/tests/generic/017
-> +++ b/tests/generic/017
-> @@ -10,7 +10,7 @@
->  # Also check for file system consistency after completing this operation
->  # for each blocksize.
->  . ./common/preamble
-> -_begin_fstest auto prealloc collapse
-> +_begin_fstest auto prealloc collapse fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/021 b/tests/generic/021
-> index 7407bf03..532feeeb 100755
-> --- a/tests/generic/021
-> +++ b/tests/generic/021
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch collapse
-> +_begin_fstest auto quick prealloc punch collapse fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/022 b/tests/generic/022
-> index b983c5d0..62577b81 100755
-> --- a/tests/generic/022
-> +++ b/tests/generic/022
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch collapse
-> +_begin_fstest auto quick prealloc punch collapse fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/032 b/tests/generic/032
-> index 3302c1ee..90ff0773 100755
-> --- a/tests/generic/032
-> +++ b/tests/generic/032
-> @@ -11,7 +11,7 @@
->  # are always read back as zeroes.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick rw
-> +_begin_fstest auto quick rw fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/043 b/tests/generic/043
-> index b1432e25..d5ca438a 100755
-> --- a/tests/generic/043
-> +++ b/tests/generic/043
-> @@ -7,7 +7,7 @@
->  # Test for NULL files problem
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata log auto
-> +_begin_fstest shutdown metadata log auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/044 b/tests/generic/044
-> index 56c50548..a5d3e9ed 100755
-> --- a/tests/generic/044
-> +++ b/tests/generic/044
-> @@ -7,7 +7,7 @@
->  # Test for NULL files problem
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata log auto
-> +_begin_fstest shutdown metadata log auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/045 b/tests/generic/045
-> index f5f36a7a..dfbcaeb4 100755
-> --- a/tests/generic/045
-> +++ b/tests/generic/045
-> @@ -7,7 +7,7 @@
->  # Test for NULL files problem
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata log auto
-> +_begin_fstest shutdown metadata log auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/046 b/tests/generic/046
-> index 5dbb8fa5..29165e45 100755
-> --- a/tests/generic/046
-> +++ b/tests/generic/046
-> @@ -7,7 +7,7 @@
->  # Test for NULL files problem
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata log auto
-> +_begin_fstest shutdown metadata log auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/047 b/tests/generic/047
-> index 770e7f1b..61590e9b 100755
-> --- a/tests/generic/047
-> +++ b/tests/generic/047
-> @@ -8,7 +8,7 @@
->  # test inode size is on disk after fsync
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata rw auto
-> +_begin_fstest shutdown metadata rw auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/048 b/tests/generic/048
-> index 10c87f3b..ebe9132e 100755
-> --- a/tests/generic/048
-> +++ b/tests/generic/048
-> @@ -8,7 +8,7 @@
->  # test inode size is on disk after sync
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata rw auto
-> +_begin_fstest shutdown metadata rw auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/049 b/tests/generic/049
-> index 4effc4a6..e5c5a0e3 100755
-> --- a/tests/generic/049
-> +++ b/tests/generic/049
-> @@ -8,7 +8,7 @@
->  # test inode size is on disk after sync - expose log replay bug
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown metadata rw auto
-> +_begin_fstest shutdown metadata rw auto fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/058 b/tests/generic/058
-> index cb685ffb..dddadbe0 100755
-> --- a/tests/generic/058
-> +++ b/tests/generic/058
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch insert
-> +_begin_fstest auto quick prealloc punch insert fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/060 b/tests/generic/060
-> index 0fd42785..3a890ed0 100755
-> --- a/tests/generic/060
-> +++ b/tests/generic/060
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch insert
-> +_begin_fstest auto quick prealloc punch insert fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/061 b/tests/generic/061
-> index c4998b93..e370ffdf 100755
-> --- a/tests/generic/061
-> +++ b/tests/generic/061
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch insert
-> +_begin_fstest auto quick prealloc punch insert fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/063 b/tests/generic/063
-> index 60a5f242..3974647b 100755
-> --- a/tests/generic/063
-> +++ b/tests/generic/063
-> @@ -11,7 +11,7 @@
->  # For the type of tests, check the description of _test_generic_punch
->  # in common/rc.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch insert
-> +_begin_fstest auto quick prealloc punch insert fiemap
->  
->  # Import common functions.
->  # we need to include common/punch to get defination fo filter functions
-> diff --git a/tests/generic/064 b/tests/generic/064
-> index 3b32fa1b..b50c55e7 100755
-> --- a/tests/generic/064
-> +++ b/tests/generic/064
-> @@ -10,7 +10,7 @@
->  # on the previously inserted ranges to test merge code of collapse
->  # range. Also check for data integrity and file system consistency.
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc collapse insert
-> +_begin_fstest auto quick prealloc collapse insert fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/092 b/tests/generic/092
-> index 505e0ec8..8fefcb85 100755
-> --- a/tests/generic/092
-> +++ b/tests/generic/092
-> @@ -12,7 +12,7 @@
->  # preallocated space.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc
-> +_begin_fstest auto quick prealloc fiemap
->  
->  status=0	# success is the default!
->  
-> diff --git a/tests/generic/094 b/tests/generic/094
-> index 7a078a88..5c12b731 100755
-> --- a/tests/generic/094
-> +++ b/tests/generic/094
-> @@ -7,7 +7,7 @@
->  # Run the fiemap (file extent mapping) tester with preallocation enabled
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc
-> +_begin_fstest auto quick prealloc fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/110 b/tests/generic/110
-> index 5d6d6ecb..ef5ac5f6 100755
-> --- a/tests/generic/110
-> +++ b/tests/generic/110
-> @@ -11,7 +11,7 @@
->  #   - Modify the reflinked file
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/111 b/tests/generic/111
-> index 3e376096..5df0fa80 100755
-> --- a/tests/generic/111
-> +++ b/tests/generic/111
-> @@ -12,7 +12,7 @@
->  #   - Modify one of the copies
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/115 b/tests/generic/115
-> index daaca523..13d4b537 100755
-> --- a/tests/generic/115
-> +++ b/tests/generic/115
-> @@ -10,7 +10,7 @@
->  #   - Delete the original (moved) file, check that the copy still exists.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/177 b/tests/generic/177
-> index 8ad3f966..ff55a79f 100755
-> --- a/tests/generic/177
-> +++ b/tests/generic/177
-> @@ -11,7 +11,7 @@
->  # This test is motivated by a bug found in btrfs.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc metadata punch log
-> +_begin_fstest auto quick prealloc metadata punch log fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/225 b/tests/generic/225
-> index 26156c9b..d9638299 100755
-> --- a/tests/generic/225
-> +++ b/tests/generic/225
-> @@ -7,7 +7,7 @@
->  # Run the fiemap (file extent mapping) tester
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/255 b/tests/generic/255
-> index 307d5287..39efb6b2 100755
-> --- a/tests/generic/255
-> +++ b/tests/generic/255
-> @@ -7,7 +7,7 @@
->  # Test Generic fallocate hole punching
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch
-> +_begin_fstest auto quick prealloc punch fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/301 b/tests/generic/301
-> index faf982f5..3f895ff8 100755
-> --- a/tests/generic/301
-> +++ b/tests/generic/301
-> @@ -10,7 +10,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/302 b/tests/generic/302
-> index 01177602..9c305abe 100755
-> --- a/tests/generic/302
-> +++ b/tests/generic/302
-> @@ -10,7 +10,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/305 b/tests/generic/305
-> index 3b0ff698..b46d5127 100755
-> --- a/tests/generic/305
-> +++ b/tests/generic/305
-> @@ -8,7 +8,7 @@
->  # charged for buffered copy on write.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/316 b/tests/generic/316
-> index 5bc9c1d9..5b890126 100755
-> --- a/tests/generic/316
-> +++ b/tests/generic/316
-> @@ -7,7 +7,7 @@
->  # Test Generic fallocate hole punching w/o unwritten extent
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick punch
-> +_begin_fstest auto quick punch fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/326 b/tests/generic/326
-> index 3e9332ac..f5c557b3 100755
-> --- a/tests/generic/326
-> +++ b/tests/generic/326
-> @@ -8,7 +8,7 @@
->  # charged for directio copy on write.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/327 b/tests/generic/327
-> index 95a22461..92540b19 100755
-> --- a/tests/generic/327
-> +++ b/tests/generic/327
-> @@ -7,7 +7,7 @@
->  # Ensure that we can't go over the hard block limit when reflinking.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/328 b/tests/generic/328
-> index 2b589211..db7fd3db 100755
-> --- a/tests/generic/328
-> +++ b/tests/generic/328
-> @@ -7,7 +7,7 @@
->  # Ensure that we can't go over the hard block limit when CoWing a file.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/352 b/tests/generic/352
-> index 608c6c81..52ec4850 100755
-> --- a/tests/generic/352
-> +++ b/tests/generic/352
-> @@ -11,7 +11,7 @@
->  # Which btrfs will soft lock up and return wrong shared flag.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone
-> +_begin_fstest auto clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/353 b/tests/generic/353
-> index 1ce6ce6d..9a1471bd 100755
-> --- a/tests/generic/353
-> +++ b/tests/generic/353
-> @@ -12,7 +12,7 @@
->  # This caused SHARED flag only occurs after sync.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/372 b/tests/generic/372
-> index b649f590..ca50ae39 100755
-> --- a/tests/generic/372
-> +++ b/tests/generic/372
-> @@ -7,7 +7,7 @@
->  # Check that bmap/fiemap accurately report shared extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  _register_cleanup "_cleanup" BUS
->  
-> diff --git a/tests/generic/414 b/tests/generic/414
-> index 6416216d..f2d63c17 100755
-> --- a/tests/generic/414
-> +++ b/tests/generic/414
-> @@ -8,7 +8,7 @@
->  # block mapping extent.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  _register_cleanup "_cleanup" BUS
->  
-> diff --git a/tests/generic/425 b/tests/generic/425
-> index 13a76563..b43294f9 100755
-> --- a/tests/generic/425
-> +++ b/tests/generic/425
-> @@ -8,7 +8,7 @@
->  # block to hold extended attributes.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick attr
-> +_begin_fstest auto quick attr fiemap
->  
->  _register_cleanup "_cleanup" BUS
->  
-> diff --git a/tests/generic/473 b/tests/generic/473
-> index 89241770..125b9518 100755
-> --- a/tests/generic/473
-> +++ b/tests/generic/473
-> @@ -9,7 +9,7 @@
->  # Also the test used 16k holes to be compatible with 16k block filesystems
->  #
->  . ./common/preamble
-> -_begin_fstest broken
-> +_begin_fstest broken fiemap
->  
->  # Import common functions.
->  . ./common/punch
-> diff --git a/tests/generic/483 b/tests/generic/483
-> index 39129542..8a8a6f24 100755
-> --- a/tests/generic/483
-> +++ b/tests/generic/483
-> @@ -8,7 +8,7 @@
->  # are placed beyond a file's size.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick log metadata
-> +_begin_fstest auto quick log metadata fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/516 b/tests/generic/516
-> index e846ee24..47af6237 100755
-> --- a/tests/generic/516
-> +++ b/tests/generic/516
-> @@ -9,7 +9,7 @@
->  #   - Check that nothing changes in either file
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick dedupe clone
-> +_begin_fstest auto quick dedupe clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/519 b/tests/generic/519
-> index 28747c21..0839c6b8 100755
-> --- a/tests/generic/519
-> +++ b/tests/generic/519
-> @@ -8,7 +8,7 @@
->  # 79b3dbe4adb3 fs: fix iomap_bmap position calculation
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/540 b/tests/generic/540
-> index da36939a..8c66b572 100755
-> --- a/tests/generic/540
-> +++ b/tests/generic/540
-> @@ -17,7 +17,7 @@
->  #   - Check that the files are now different where we say they're different.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/541 b/tests/generic/541
-> index a0f6cae3..227c45e1 100755
-> --- a/tests/generic/541
-> +++ b/tests/generic/541
-> @@ -17,7 +17,7 @@
->  #   - Check that the files are now different where we say they're different.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/542 b/tests/generic/542
-> index 530fb8e0..7b413d6d 100755
-> --- a/tests/generic/542
-> +++ b/tests/generic/542
-> @@ -17,7 +17,7 @@
->  #   - Check that the files are now different where we say they're different.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/543 b/tests/generic/543
-> index 1dad37fb..66f46e92 100755
-> --- a/tests/generic/543
-> +++ b/tests/generic/543
-> @@ -17,7 +17,7 @@
->  #   - Check that the files are now different where we say they're different.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/578 b/tests/generic/578
-> index d04cacb4..b024f6ff 100755
-> --- a/tests/generic/578
-> +++ b/tests/generic/578
-> @@ -7,7 +7,7 @@
->  # Make sure that we can handle multiple mmap writers to the same file.
->  
->  . ./common/preamble
-> -_begin_fstest auto quick rw clone
-> +_begin_fstest auto quick rw clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/654 b/tests/generic/654
-> index da7eaf4d..45ed19de 100755
-> --- a/tests/generic/654
-> +++ b/tests/generic/654
-> @@ -10,7 +10,7 @@
->  # the golden output; we can only compare to a check file.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/655 b/tests/generic/655
-> index ec8366e3..8106d15c 100755
-> --- a/tests/generic/655
-> +++ b/tests/generic/655
-> @@ -11,7 +11,7 @@
->  # the golden output; we can only compare to a check file.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/677 b/tests/generic/677
-> index 4dbfed7d..84146c5e 100755
-> --- a/tests/generic/677
-> +++ b/tests/generic/677
-> @@ -9,7 +9,7 @@
->  # after we mount the filesystem.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick log prealloc
-> +_begin_fstest auto quick log prealloc fiemap
->  
->  _cleanup()
->  {
-> diff --git a/tests/generic/679 b/tests/generic/679
-> index a0094e48..ddf975a2 100755
-> --- a/tests/generic/679
-> +++ b/tests/generic/679
-> @@ -9,7 +9,7 @@
->  # space to allocate extents for the holes.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc
-> +_begin_fstest auto quick prealloc fiemap
->  
->  . ./common/filter
->  . ./common/punch
-> diff --git a/tests/generic/695 b/tests/generic/695
-> index b46e35cf..d53457dc 100755
-> --- a/tests/generic/695
-> +++ b/tests/generic/695
-> @@ -12,7 +12,7 @@
->  # btrfs-progs 5.15).
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick log punch
-> +_begin_fstest auto quick log punch fiemap
->  
->  _cleanup()
->  {
-> diff --git a/tests/overlay/066 b/tests/overlay/066
-> index 163e74f1..5b9f7b18 100755
-> --- a/tests/overlay/066
-> +++ b/tests/overlay/066
-> @@ -8,7 +8,7 @@
->  # Test overlayfs copy-up function for variant sparse files.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick copyup
-> +_begin_fstest auto quick copyup fiemap
->  
->  # Import common functions..
->  . ./common/filter
-> diff --git a/tests/shared/298 b/tests/shared/298
-> index bd52b6a0..807d4c87 100755
-> --- a/tests/shared/298
-> +++ b/tests/shared/298
-> @@ -7,7 +7,7 @@
->  # Test that filesystem sends discard requests only on free blocks
->  #
->  . ./common/preamble
-> -_begin_fstest auto trim
-> +_begin_fstest auto trim fiemap
->  
->  _supported_fs ext4 xfs btrfs
->  _require_test
-> diff --git a/tests/xfs/180 b/tests/xfs/180
-> index 9b52f1ff..cfea2020 100755
-> --- a/tests/xfs/180
-> +++ b/tests/xfs/180
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/182 b/tests/xfs/182
-> index 93852229..ec3f7dc0 100755
-> --- a/tests/xfs/182
-> +++ b/tests/xfs/182
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/184 b/tests/xfs/184
-> index 2ca6528e..e6f083f0 100755
-> --- a/tests/xfs/184
-> +++ b/tests/xfs/184
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/192 b/tests/xfs/192
-> index 8329604d..a4a33bc7 100755
-> --- a/tests/xfs/192
-> +++ b/tests/xfs/192
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/193 b/tests/xfs/193
-> index 18f2fc2f..c71aef35 100755
-> --- a/tests/xfs/193
-> +++ b/tests/xfs/193
-> @@ -10,7 +10,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/198 b/tests/xfs/198
-> index 231e1c23..c61fbab7 100755
-> --- a/tests/xfs/198
-> +++ b/tests/xfs/198
-> @@ -10,7 +10,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/200 b/tests/xfs/200
-> index 435cd9b9..eb0121e3 100755
-> --- a/tests/xfs/200
-> +++ b/tests/xfs/200
-> @@ -13,7 +13,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/204 b/tests/xfs/204
-> index 3f9b6dca..c62ad980 100755
-> --- a/tests/xfs/204
-> +++ b/tests/xfs/204
-> @@ -13,7 +13,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/207 b/tests/xfs/207
-> index ba07f1ee..4bdafd26 100755
-> --- a/tests/xfs/207
-> +++ b/tests/xfs/207
-> @@ -10,7 +10,7 @@
->  # - Ensure that whatever we set we get back later.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/208 b/tests/xfs/208
-> index 0fbb99c8..9a71b74f 100755
-> --- a/tests/xfs/208
-> +++ b/tests/xfs/208
-> @@ -14,7 +14,7 @@
->  # - Repeat, but with extsz = 1MB and cowextsz = $blocksize.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/209 b/tests/xfs/209
-> index 08ec87f5..1ef6d33d 100755
-> --- a/tests/xfs/209
-> +++ b/tests/xfs/209
-> @@ -7,7 +7,7 @@
->  # Make sure setting cowextsz on a directory propagates it to subfiles.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/210 b/tests/xfs/210
-> index 2439967b..5f05ab26 100755
-> --- a/tests/xfs/210
-> +++ b/tests/xfs/210
-> @@ -11,7 +11,7 @@
->  # otherwise.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/211 b/tests/xfs/211
-> index b99871ba..96c0b85b 100755
-> --- a/tests/xfs/211
-> +++ b/tests/xfs/211
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest clone_stress
-> +_begin_fstest clone_stress fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/212 b/tests/xfs/212
-> index 805a72af..6df03608 100755
-> --- a/tests/xfs/212
-> +++ b/tests/xfs/212
-> @@ -10,7 +10,7 @@
->  # - Crash the FS to test recovery.
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown auto quick clone
-> +_begin_fstest shutdown auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/213 b/tests/xfs/213
-> index 3e1c45cd..e1849624 100755
-> --- a/tests/xfs/213
-> +++ b/tests/xfs/213
-> @@ -9,7 +9,7 @@
->  # play with cowextsz.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/214 b/tests/xfs/214
-> index 7c694e92..84ba838f 100755
-> --- a/tests/xfs/214
-> +++ b/tests/xfs/214
-> @@ -9,7 +9,7 @@
->  # with cowextsz.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/231 b/tests/xfs/231
-> index fd7d7a85..de8a7ca9 100755
-> --- a/tests/xfs/231
-> +++ b/tests/xfs/231
-> @@ -12,7 +12,7 @@
->  # - Write more and see how bad fragmentation is.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/xfs/232 b/tests/xfs/232
-> index 0bf3bb75..5ca1a9f1 100755
-> --- a/tests/xfs/232
-> +++ b/tests/xfs/232
-> @@ -13,7 +13,7 @@
->  # - Write more and see how bad fragmentation is.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/xfs/252 b/tests/xfs/252
-> index 43740cb4..f167fd5a 100755
-> --- a/tests/xfs/252
-> +++ b/tests/xfs/252
-> @@ -7,7 +7,7 @@
->  # Test fallocate hole punching
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick prealloc punch
-> +_begin_fstest auto quick prealloc punch fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/344 b/tests/xfs/344
-> index f87095bf..230757e4 100755
-> --- a/tests/xfs/344
-> +++ b/tests/xfs/344
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/345 b/tests/xfs/345
-> index 702c6d82..8511e568 100755
-> --- a/tests/xfs/345
-> +++ b/tests/xfs/345
-> @@ -10,7 +10,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/346 b/tests/xfs/346
-> index 6d371342..0cbe8ab3 100755
-> --- a/tests/xfs/346
-> +++ b/tests/xfs/346
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/347 b/tests/xfs/347
-> index 86f405b5..e5a2dcd4 100755
-> --- a/tests/xfs/347
-> +++ b/tests/xfs/347
-> @@ -11,7 +11,7 @@
->  # - Check the number of extents.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/xfs/443 b/tests/xfs/443
-> index de28b85b..764c63eb 100755
-> --- a/tests/xfs/443
-> +++ b/tests/xfs/443
-> @@ -15,7 +15,7 @@
->  # accounting inconsistency.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick ioctl fsr punch
-> +_begin_fstest auto quick ioctl fsr punch fiemap
->  
->  # Import common functions.
->  . ./common/filter
-> -- 
-> 2.35.1
-> 
+> > --D
+> > 
+> >> Thanks,
+> >> Zorro
+> >>
+> >>>
+> >>>>> +
+> >>>>> +_do_restore_file -x -f $here/src/root-inode-broken-dumpfile -L stress_545
+> >>>>> +_diff_compare_sub
+> >>>>> +_ls_nodate_compare_sub
+> >>>>> +
+> >>>>> +# success, all done
+> >>>>> +status=0
+> >>>>> +exit
+> >>>>> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+> >>>>> new file mode 100644
+> >>>>> index 00000000..40a3f3a4
+> >>>>> --- /dev/null
+> >>>>> +++ b/tests/xfs/554.out
+> >>>>> @@ -0,0 +1,57 @@
+> >>>>> +QA output created by 554
+> >>>>> +Contents of dump ...
+> >>>>> +xfsrestore  -x -f DUMP_FILE -t
+> >>>>> +xfsrestore: using file dump (drive_simple) strategy
+> >>>>> +xfsrestore: searching media for dump
+> >>>>> +xfsrestore: examining media file 0
+> >>>>> +xfsrestore: dump description: 
+> >>>>> +xfsrestore: hostname: xfsdump
+> >>>>> +xfsrestore: mount point: SCRATCH_MNT
+> >>>>> +xfsrestore: volume: SCRATCH_DEV
+> >>>>> +xfsrestore: session time: TIME
+> >>>>> +xfsrestore: level: 0
+> >>>>> +xfsrestore: session label: "stress_545"
+> >>>>> +xfsrestore: media label: "stress_tape_media"
+> >>>>> +xfsrestore: file system ID: ID
+> >>>>> +xfsrestore: session id: ID
+> >>>>> +xfsrestore: media ID: ID
+> >>>>> +xfsrestore: searching media for directory dump
+> >>>>> +xfsrestore: reading directories
+> >>>>> +xfsrestore: found fake rootino #128, will fix.
+> >>>>> +xfsrestore: fix root # to 1024 (bind mount?)
+> >>>>> +xfsrestore: 2 directories and 2 entries processed
+> >>>>> +xfsrestore: directory post-processing
+> >>>>> +xfsrestore: reading non-directory files
+> >>>>> +xfsrestore: table of contents display complete: SECS seconds elapsed
+> >>>>> +xfsrestore: Restore Status: SUCCESS
+> >>>>> +
+> >>>>> +dumpdir/FILE_1019
+> >>>>> +Restoring from file...
+> >>>>> +xfsrestore  -x -f DUMP_FILE  -L stress_545 RESTORE_DIR
+> >>>>> +xfsrestore: using file dump (drive_simple) strategy
+> >>>>> +xfsrestore: searching media for dump
+> >>>>> +xfsrestore: examining media file 0
+> >>>>> +xfsrestore: found dump matching specified label:
+> >>>>> +xfsrestore: hostname: xfsdump
+> >>>>> +xfsrestore: mount point: SCRATCH_MNT
+> >>>>> +xfsrestore: volume: SCRATCH_DEV
+> >>>>> +xfsrestore: session time: TIME
+> >>>>> +xfsrestore: level: 0
+> >>>>> +xfsrestore: session label: "stress_545"
+> >>>>> +xfsrestore: media label: "stress_tape_media"
+> >>>>> +xfsrestore: file system ID: ID
+> >>>>> +xfsrestore: session id: ID
+> >>>>> +xfsrestore: media ID: ID
+> >>>>> +xfsrestore: searching media for directory dump
+> >>>>> +xfsrestore: reading directories
+> >>>>> +xfsrestore: found fake rootino #128, will fix.
+> >>>>> +xfsrestore: fix root # to 1024 (bind mount?)
+> >>>>> +xfsrestore: 2 directories and 2 entries processed
+> >>>>> +xfsrestore: directory post-processing
+> >>>>> +xfsrestore: restoring non-directory files
+> >>>>> +xfsrestore: restore complete: SECS seconds elapsed
+> >>>>> +xfsrestore: Restore Status: SUCCESS
+> >>>>> +Comparing dump directory with restore directory
+> >>>>> +Files DUMP_DIR/FILE_1019 and RESTORE_DIR/DUMP_SUBDIR/FILE_1019 are identical
+> >>>>> +Comparing listing of dump directory with restore directory
+> >>>>> +Files TMP.dump_dir and TMP.restore_dir are identical
+> >>>>> -- 
+> >>>>> 2.37.3
+> >>>>>
+> >>>>
+> >>>
+> >>
