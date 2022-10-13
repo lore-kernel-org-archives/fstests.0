@@ -2,196 +2,334 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2200FC4332F
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Oct 2022 16:03:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37D60C433FE
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Oct 2022 16:06:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229655AbiJMQDs (ORCPT
+        id S229552AbiJMQGk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Oct 2022 12:03:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48562 "EHLO
+        Thu, 13 Oct 2022 12:06:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229941AbiJMQDp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Oct 2022 12:03:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 367F6104526
-        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 09:03:42 -0700 (PDT)
+        with ESMTP id S229573AbiJMQGi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Oct 2022 12:06:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74610122743
+        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 09:06:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665677021;
+        s=mimecast20190719; t=1665677192;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=e93vqJ23RYx44/ECvLt0VpML/YmZi4QGBHib1Tp67Ic=;
-        b=jFBnqew1TWTX8LVJDA+URDT0vwa4RzLG3U5ypN+Qi6hDtyKOaNjV3XwNgYJNvOCkGhhFRa
-        a5C4czQN3et9T3uiVqqsNOuPMZb1cYiSPUD5x/mDADIDY/XY66/26ndH5/q4ilvFbWqXN4
-        4QXKo3QZevmikmqba57IU/cPYafWePI=
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
- [209.85.219.69]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=6Q/rCkWxnrkA6t+ozYZcPq8NnGQYX5Sm9li8hYHRwoQ=;
+        b=Wz3N2g0XVbZFz2P1nIlc4b3V0G+JLGonEt7sBrdhD26F6EvaZlHQL06vP5AS5pC/pCsDRT
+        oV89Rr+QpUsLfQhcH+FZRZjosJlUZ95HIfnfTvjGAjd8BWQEXwIg+rxEyAajOrpGZlkC2w
+        pKefNAleoOo2jrs5JGU4oZhps1Uo+Sk=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-531-j5wIrBeMP2emZsJ-C0RdTQ-1; Thu, 13 Oct 2022 12:03:32 -0400
-X-MC-Unique: j5wIrBeMP2emZsJ-C0RdTQ-1
-Received: by mail-qv1-f69.google.com with SMTP id mz8-20020a0562142d0800b004b18a95b180so1707769qvb.8
-        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 09:03:32 -0700 (PDT)
+ us-mta-500-dYlkjvJLO-iWAIPgCyeP7w-1; Thu, 13 Oct 2022 12:06:30 -0400
+X-MC-Unique: dYlkjvJLO-iWAIPgCyeP7w-1
+Received: by mail-qv1-f70.google.com with SMTP id eu10-20020ad44f4a000000b004b18126c4bfso1716084qvb.11
+        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 09:06:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=e93vqJ23RYx44/ECvLt0VpML/YmZi4QGBHib1Tp67Ic=;
-        b=vEMJj1l0Dr36fh478igeAiA5CaeIVV53CMD2UeCKQqqqSr6b0KejbaWJkrQUqCR4zj
-         KujQ1St7R/Iycw/xa7Z4nTm5UGc9WyQl4lWMNa4URf8VrpaNwtPfBHe+Nk8P6JQIyA7t
-         xzsRJS5NQ4zENgnU2i3nKjhEVoCT36Rei3Qxt+wPFS9EUQjorR4nK2EKl4QdQJLM+bDj
-         nPXjgcBFCtA0tNeFwzlD+o4LC5KI4l4OkCAGXd7J8Pek//UCjW+++4pQMUVLQmqUcSeQ
-         BUNx0EhOC/ruPC3MJylB6HDFXC3gv2YhgocngY2RpQoppM1zwAOQN0s4nv1j4uzpORYI
-         Lgsw==
-X-Gm-Message-State: ACrzQf19op8/uzF4X7dsBHAeAVjKjjefwFCm0YKY3DKV3EYY/KrvPc6T
-        sKxDCeJWlptamKM+jG0tOQTgfqeDPdDzBDRf+tM6F4KxQ0uUsETDawtH2zwNEmoccDAenRqKDrz
-        wKneylLvF3OZXk5pq/g==
-X-Received: by 2002:a05:6214:2626:b0:4b1:d285:33b1 with SMTP id gv6-20020a056214262600b004b1d28533b1mr274561qvb.39.1665677011483;
-        Thu, 13 Oct 2022 09:03:31 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM54fy6UXaq67EMDjg8yPJAda44Fy1syJLGNC3kgjTmmfsWLT11YEFGp1YNbfmZL4pYMjqU0oA==
-X-Received: by 2002:a05:6214:2626:b0:4b1:d285:33b1 with SMTP id gv6-20020a056214262600b004b1d28533b1mr274528qvb.39.1665677011110;
-        Thu, 13 Oct 2022 09:03:31 -0700 (PDT)
+        bh=6Q/rCkWxnrkA6t+ozYZcPq8NnGQYX5Sm9li8hYHRwoQ=;
+        b=KvUGbfV4VqNqnl4WAJRQ995j/cnIx0Rokg7aDkgF1N45rb3L428O/66el2tNNgPp8g
+         wZa7fZB23kbdaWuzLcbkEB0gIfNHM3cBdc5iYfdo/HwW2u8+QPD7psSb/qyNTm2dLLOD
+         TfCBOq9ZNnC5nF60GkA9bE8JsKGcACeqCirmmDBClQFGfdfQWIqPgnj1BidECfyA+Guy
+         DoMQpI1/DojXivPEi0vwvH/9IuJDsgkwl/tWvVlcPRifNIyUfayfBPpqSwlYT3b/klJp
+         LqUxmzWIh+sOSc9d/yDxAifOfsaD3nccH74JcGb5491btCrbZpDb16ruDK7seADPJP00
+         EH7w==
+X-Gm-Message-State: ACrzQf3PHNELfLIleJ8ybDvxiZxMtGijWJqf3szdCSpYYjBJD28A5vAp
+        HUbD2k+NCIHI/vWwacDfIYq614suU2FNyJgbJEILJMYXYgaEww1Poi7saf4ec+iay9oyxX8f1Sh
+        S9/XU22Q4Um9x02+1qA==
+X-Received: by 2002:a05:622a:552:b0:39c:d621:6114 with SMTP id m18-20020a05622a055200b0039cd6216114mr407384qtx.523.1665677188869;
+        Thu, 13 Oct 2022 09:06:28 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM43vsx2j9Bq7LtEwj+cnb3rtj2IMNKJJPqn38X1CpRswoOm6Oj8xGvHyTOC2/Z+zgk37vGxzQ==
+X-Received: by 2002:a05:622a:552:b0:39c:d621:6114 with SMTP id m18-20020a05622a055200b0039cd6216114mr407346qtx.523.1665677188582;
+        Thu, 13 Oct 2022 09:06:28 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id r1-20020a05620a298100b006e2a1999263sm71081qkp.62.2022.10.13.09.03.29
+        by smtp.gmail.com with ESMTPSA id v12-20020a05620a0f0c00b006c73c3d288esm25987qkl.131.2022.10.13.09.06.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Oct 2022 09:03:30 -0700 (PDT)
-Date:   Fri, 14 Oct 2022 00:03:26 +0800
+        Thu, 13 Oct 2022 09:06:28 -0700 (PDT)
+Date:   Fri, 14 Oct 2022 00:06:24 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2.1 1/2] check: detect and preserve all coredumps made
- by a test
-Message-ID: <20221013160326.l4s6sz4yxeul64d5@zlang-mailbox>
-References: <166553910766.422356.8069826206437666467.stgit@magnolia>
- <166553911331.422356.4424521847397525024.stgit@magnolia>
- <Y0dZpkOwJpyQ9SA9@magnolia>
- <20221013114446.346ii4nd5i3l77ar@zlang-mailbox>
- <Y0gzWbBd5PdlQWP6@magnolia>
+Subject: Re: [PATCH 5/5] fstests: refactor xfs_mdrestore calls
+Message-ID: <20221013160624.pxuk5bzzhfjgl4mg@zlang-mailbox>
+References: <166553912229.422450.15473762183660906876.stgit@magnolia>
+ <166553915032.422450.8262466611928449491.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y0gzWbBd5PdlQWP6@magnolia>
+In-Reply-To: <166553915032.422450.8262466611928449491.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 13, 2022 at 08:48:41AM -0700, Darrick J. Wong wrote:
-> On Thu, Oct 13, 2022 at 07:44:46PM +0800, Zorro Lang wrote:
-> > On Wed, Oct 12, 2022 at 05:19:50PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > If someone sets kernel.core_uses_pid (or kernel.core_pattern), any
-> > > coredumps generated by fstests might have names that are longer than
-> > > just "core".  Since the pid isn't all that useful by itself, let's
-> > > record the coredumps by hash when we save them, so that we don't waste
-> > > space storing identical crash dumps.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > > v2.1: use REPORT_DIR per maintainer suggestion
-> > > ---
-> > 
-> > This version looks good to me,
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+On Tue, Oct 11, 2022 at 06:45:50PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> It occurred to me overnight that ./check doesn't export REPORT_DIR, so
-> I'll push out a v2.2 that adds that.  Currently the lack of an export
-> doesn't affect anyone, but as soon as any tests want to call
-> _save_coredump they're going to run into that issue.
-
-Hmm... the RESULT_DIR is exported, you can use it, or use $seqres directly due
-to it's defined in common/preamble (although is not exported).
-
-./common/preamble:42:   seqres=$RESULT_DIR/$seq
-
-What do you think?
-
-Thanks,
-Zorro
-
+> Wrap calls to xfs_mdrestore in the usual $XFS_MDRESTORE_PROG variable.
 > 
-> (...and yes, I do have future fuzz tests that will call it from a test
-> in between fuzz field cycles.)
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+
+Make sense,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  common/config   |    1 +
+>  common/fuzzy    |    2 +-
+>  common/populate |    3 ++-
+>  tests/xfs/129   |    3 ++-
+>  tests/xfs/234   |    3 ++-
+>  tests/xfs/253   |    3 ++-
+>  tests/xfs/284   |    3 ++-
+>  tests/xfs/291   |    3 ++-
+>  tests/xfs/336   |    3 ++-
+>  tests/xfs/432   |    3 ++-
+>  tests/xfs/503   |    9 +++++----
+>  11 files changed, 23 insertions(+), 13 deletions(-)
 > 
-> --D
 > 
-> > >  check     |   26 ++++++++++++++++++++++----
-> > >  common/rc |   16 ++++++++++++++++
-> > >  2 files changed, 38 insertions(+), 4 deletions(-)
-> > > 
-> > > diff --git a/check b/check
-> > > index d587a70546..29303db1c8 100755
-> > > --- a/check
-> > > +++ b/check
-> > > @@ -923,11 +923,19 @@ function run_section()
-> > >  			sts=$?
-> > >  		fi
-> > >  
-> > > -		if [ -f core ]; then
-> > > -			_dump_err_cont "[dumped core]"
-> > > -			mv core $RESULT_BASE/$seqnum.core
-> > > +		# If someone sets kernel.core_pattern or kernel.core_uses_pid,
-> > > +		# coredumps generated by fstests might have a longer name than
-> > > +		# just "core".  Use globbing to find the most common patterns,
-> > > +		# assuming there are no other coredump capture packages set up.
-> > > +		local cores=0
-> > > +		for i in core core.*; do
-> > > +			test -f "$i" || continue
-> > > +			if ((cores++ == 0)); then
-> > > +				_dump_err_cont "[dumped core]"
-> > > +			fi
-> > > +			_save_coredump "$i"
-> > >  			tc_status="fail"
-> > > -		fi
-> > > +		done
-> > >  
-> > >  		if [ -f $seqres.notrun ]; then
-> > >  			$timestamp && _timestamp
-> > > @@ -960,6 +968,16 @@ function run_section()
-> > >  			# of the check script itself.
-> > >  			(_adjust_oom_score 250; _check_filesystems) || tc_status="fail"
-> > >  			_check_dmesg || tc_status="fail"
-> > > +
-> > > +			# Save any coredumps from the post-test fs checks
-> > > +			for i in core core.*; do
-> > > +				test -f "$i" || continue
-> > > +				if ((cores++ == 0)); then
-> > > +					_dump_err_cont "[dumped core]"
-> > > +				fi
-> > > +				_save_coredump "$i"
-> > > +				tc_status="fail"
-> > > +			done
-> > >  		fi
-> > >  
-> > >  		# Reload the module after each test to check for leaks or
-> > > diff --git a/common/rc b/common/rc
-> > > index d877ac77a0..2e1891180a 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -4949,6 +4949,22 @@ _create_file_sized()
-> > >  	return $ret
-> > >  }
-> > >  
-> > > +_save_coredump()
-> > > +{
-> > > +	local path="$1"
-> > > +
-> > > +	local core_hash="$(_md5_checksum "$path")"
-> > > +	local out_file="$REPORT_DIR/$seqnum.core.$core_hash"
-> > > +
-> > > +	if [ -s "$out_file" ]; then
-> > > +		rm -f "$path"
-> > > +		return
-> > > +	fi
-> > > +	rm -f "$out_file"
-> > > +
-> > > +	mv "$path" "$out_file"
-> > > +}
-> > > +
-> > >  init_rc
-> > >  
-> > >  ################################################################################
-> > > 
-> > 
+> diff --git a/common/config b/common/config
+> index 5eaae4471d..0c3813dc23 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -156,6 +156,7 @@ export XFS_LOGPRINT_PROG="$(type -P xfs_logprint)"
+>  export XFS_REPAIR_PROG="$(type -P xfs_repair)"
+>  export XFS_DB_PROG="$(type -P xfs_db)"
+>  export XFS_METADUMP_PROG="$(type -P xfs_metadump)"
+> +export XFS_MDRESTORE_PROG="$(type -P xfs_mdrestore)"
+>  export XFS_ADMIN_PROG="$(type -P xfs_admin)"
+>  export XFS_GROWFS_PROG=$(type -P xfs_growfs)
+>  export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
+> diff --git a/common/fuzzy b/common/fuzzy
+> index b4fda6f533..2d688fd27b 100644
+> --- a/common/fuzzy
+> +++ b/common/fuzzy
+> @@ -159,7 +159,7 @@ __scratch_xfs_fuzz_mdrestore()
+>  	test -e "${POPULATE_METADUMP}" || _fail "Need to set POPULATE_METADUMP"
+>  
+>  	__scratch_xfs_fuzz_unmount
+> -	xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}"
+> +	$XFS_MDRESTORE_PROG "${POPULATE_METADUMP}" "${SCRATCH_DEV}"
+>  }
+>  
+>  __fuzz_notify() {
+> diff --git a/common/populate b/common/populate
+> index 05bdfe33c5..0c0538554a 100644
+> --- a/common/populate
+> +++ b/common/populate
+> @@ -15,6 +15,7 @@ _require_populate_commands() {
+>  	"xfs")
+>  		_require_command "$XFS_DB_PROG" "xfs_db"
+>  		_require_command "$WIPEFS_PROG" "wipefs"
+> +		_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  		;;
+>  	ext*)
+>  		_require_command "$DUMPE2FS_PROG" "dumpe2fs"
+> @@ -860,7 +861,7 @@ _scratch_populate_restore_cached() {
+>  
+>  	case "${FSTYP}" in
+>  	"xfs")
+> -		xfs_mdrestore "${metadump}" "${SCRATCH_DEV}"
+> +		$XFS_MDRESTORE_PROG "${metadump}" "${SCRATCH_DEV}"
+>  		res=$?
+>  		test $res -ne 0 && return $res
+>  
+> diff --git a/tests/xfs/129 b/tests/xfs/129
+> index 90887d5476..09d40630d0 100755
+> --- a/tests/xfs/129
+> +++ b/tests/xfs/129
+> @@ -25,6 +25,7 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_loop
+>  _require_scratch_reflink
+>  
+> @@ -52,7 +53,7 @@ _scratch_xfs_metadump $metadump_file
+>  
+>  # Now restore the obfuscated one back and take a look around
+>  echo "Restore metadump"
+> -xfs_mdrestore $metadump_file $TEST_DIR/image
+> +$XFS_MDRESTORE_PROG $metadump_file $TEST_DIR/image
+>  SCRATCH_DEV=$TEST_DIR/image _scratch_mount
+>  SCRATCH_DEV=$TEST_DIR/image _scratch_unmount
+>  
+> diff --git a/tests/xfs/234 b/tests/xfs/234
+> index 6ff2f228e8..cc1ee9a8ca 100755
+> --- a/tests/xfs/234
+> +++ b/tests/xfs/234
+> @@ -24,6 +24,7 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_loop
+>  _require_xfs_scratch_rmapbt
+>  _require_xfs_io_command "fpunch"
+> @@ -52,7 +53,7 @@ _scratch_xfs_metadump $metadump_file
+>  
+>  # Now restore the obfuscated one back and take a look around
+>  echo "Restore metadump"
+> -xfs_mdrestore $metadump_file $TEST_DIR/image
+> +$XFS_MDRESTORE_PROG $metadump_file $TEST_DIR/image
+>  SCRATCH_DEV=$TEST_DIR/image _scratch_mount
+>  SCRATCH_DEV=$TEST_DIR/image _scratch_unmount
+>  
+> diff --git a/tests/xfs/253 b/tests/xfs/253
+> index 1899ce5226..1cfc218088 100755
+> --- a/tests/xfs/253
+> +++ b/tests/xfs/253
+> @@ -32,6 +32,7 @@ _cleanup()
+>  # Import common functions.
+>  . ./common/filter
+>  
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_test
+>  _require_scratch
+>  
+> @@ -151,7 +152,7 @@ _scratch_unmount
+>  _scratch_xfs_metadump $METADUMP_FILE
+>  
+>  # Now restore the obfuscated one back and take a look around
+> -xfs_mdrestore "${METADUMP_FILE}" "${SCRATCH_DEV}"
+> +$XFS_MDRESTORE_PROG "${METADUMP_FILE}" "${SCRATCH_DEV}"
+>  
+>  _scratch_mount
+>  
+> diff --git a/tests/xfs/284 b/tests/xfs/284
+> index fa7bfdd0f0..e2bd05d4c7 100755
+> --- a/tests/xfs/284
+> +++ b/tests/xfs/284
+> @@ -24,6 +24,7 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_xfs_copy
+>  _require_test
+>  _require_scratch
+> @@ -48,7 +49,7 @@ _scratch_unmount
+>  # xfs_mdrestore should refuse to restore to a mounted device
+>  _scratch_xfs_metadump $METADUMP_FILE
+>  _scratch_mount
+> -xfs_mdrestore $METADUMP_FILE $SCRATCH_DEV 2>&1 | filter_mounted
+> +$XFS_MDRESTORE_PROG $METADUMP_FILE $SCRATCH_DEV 2>&1 | filter_mounted
+>  _scratch_unmount
+>  
+>  # Test xfs_copy to a mounted device
+> diff --git a/tests/xfs/291 b/tests/xfs/291
+> index a2425e472d..f5fea7f9a5 100755
+> --- a/tests/xfs/291
+> +++ b/tests/xfs/291
+> @@ -13,6 +13,7 @@ _begin_fstest auto repair metadump
+>  . ./common/filter
+>  
+>  _supported_fs xfs
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  
+>  # real QA test starts here
+>  _require_scratch
+> @@ -92,7 +93,7 @@ _scratch_xfs_check >> $seqres.full 2>&1 || _fail "xfs_check failed"
+>  # Yes they can!  Now...
+>  # Can xfs_metadump cope with this monster?
+>  _scratch_xfs_metadump $tmp.metadump || _fail "xfs_metadump failed"
+> -xfs_mdrestore $tmp.metadump $tmp.img || _fail "xfs_mdrestore failed"
+> +$XFS_MDRESTORE_PROG $tmp.metadump $tmp.img || _fail "xfs_mdrestore failed"
+>  SCRATCH_DEV=$tmp.img _scratch_xfs_repair -f &>> $seqres.full || \
+>  	_fail "xfs_repair of metadump failed"
+>  
+> diff --git a/tests/xfs/336 b/tests/xfs/336
+> index 6592419d03..b1de8e5fc1 100755
+> --- a/tests/xfs/336
+> +++ b/tests/xfs/336
+> @@ -21,6 +21,7 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_realtime
+>  _require_xfs_scratch_rmapbt
+>  _require_test_program "punch-alternating"
+> @@ -64,7 +65,7 @@ _scratch_xfs_metadump $metadump_file
+>  
+>  # Now restore the obfuscated one back and take a look around
+>  echo "Restore metadump"
+> -xfs_mdrestore $metadump_file $TEST_DIR/image
+> +$XFS_MDRESTORE_PROG $metadump_file $TEST_DIR/image
+>  SCRATCH_DEV=$TEST_DIR/image _scratch_mount
+>  SCRATCH_DEV=$TEST_DIR/image _scratch_unmount
+>  
+> diff --git a/tests/xfs/432 b/tests/xfs/432
+> index e1e610d054..676be9bd8a 100755
+> --- a/tests/xfs/432
+> +++ b/tests/xfs/432
+> @@ -28,6 +28,7 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_scratch
+>  
+>  rm -f "$seqres.full"
+> @@ -86,7 +87,7 @@ test -n "$extlen" || _notrun "could not create dir extent > 1000 blocks"
+>  
+>  echo "Try to metadump"
+>  _scratch_xfs_metadump $metadump_file -w
+> -xfs_mdrestore $metadump_file $metadump_img
+> +$XFS_MDRESTORE_PROG $metadump_file $metadump_img
+>  
+>  echo "Check restored metadump image"
+>  SCRATCH_DEV=$metadump_img _scratch_xfs_repair -n &>> $seqres.full || \
+> diff --git a/tests/xfs/503 b/tests/xfs/503
+> index 6c4bfd1c45..18bd8694c8 100755
+> --- a/tests/xfs/503
+> +++ b/tests/xfs/503
+> @@ -28,6 +28,7 @@ testdir=$TEST_DIR/test-$seq
+>  # real QA test starts here
+>  _supported_fs xfs
+>  
+> +_require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_xfs_copy
+>  _require_scratch_nocheck
+>  _require_populate_commands
+> @@ -65,25 +66,25 @@ _check_scratch_fs
+>  _scratch_unmount
+>  
+>  echo mdrestore
+> -xfs_mdrestore $metadump_file $SCRATCH_DEV
+> +$XFS_MDRESTORE_PROG $metadump_file $SCRATCH_DEV
+>  _scratch_mount
+>  _check_scratch_fs
+>  _scratch_unmount
+>  
+>  echo mdrestore a
+> -xfs_mdrestore $metadump_file_a $SCRATCH_DEV
+> +$XFS_MDRESTORE_PROG $metadump_file_a $SCRATCH_DEV
+>  _scratch_mount
+>  _check_scratch_fs
+>  _scratch_unmount
+>  
+>  echo mdrestore g
+> -xfs_mdrestore $metadump_file_g $SCRATCH_DEV
+> +$XFS_MDRESTORE_PROG $metadump_file_g $SCRATCH_DEV
+>  _scratch_mount
+>  _check_scratch_fs
+>  _scratch_unmount
+>  
+>  echo mdrestore ag
+> -xfs_mdrestore $metadump_file_ag $SCRATCH_DEV
+> +$XFS_MDRESTORE_PROG $metadump_file_ag $SCRATCH_DEV
+>  _scratch_mount
+>  _check_scratch_fs
+>  _scratch_unmount
 > 
 
