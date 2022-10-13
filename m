@@ -2,111 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E012C4321E
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Oct 2022 15:48:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7840C43217
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Oct 2022 15:50:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229573AbiJMPsr (ORCPT
+        id S229710AbiJMPuM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Oct 2022 11:48:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39032 "EHLO
+        Thu, 13 Oct 2022 11:50:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229874AbiJMPsp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Oct 2022 11:48:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F7BFEA6A9
-        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 08:48:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665676120;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=6z8rf6ZYpSjKMzpItfXQF69axd1BsXH4wsuzdLosv+Y=;
-        b=WBvF4D+tcIX7n6QeQ/9FZrPc6zeN6JWh/Xf6ype2fv+dP5klkHmloUzOq2cyLLcZ8cbQLZ
-        iRwRf+S9moUaBNJiP8D66F9ibx/uMRhtNq/Sr8LghYMyOANF6fWNQCDQiW7WKrzSaaTz3w
-        TdZf/asLdrR4BrjesTkLx+W7zZjrJDE=
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
- [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-223-YasruIb-Ov6hWOmkDuC0HQ-1; Thu, 13 Oct 2022 11:48:39 -0400
-X-MC-Unique: YasruIb-Ov6hWOmkDuC0HQ-1
-Received: by mail-qt1-f198.google.com with SMTP id b12-20020a05622a020c00b003983950639bso1606749qtx.16
-        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 08:48:38 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=6z8rf6ZYpSjKMzpItfXQF69axd1BsXH4wsuzdLosv+Y=;
-        b=HYoBp+g95ANLwTHf7Iie9RMYCBC/fzu0P3ppLWlB3MxgPN2uDkvw+5DgQ7F2kfKH0C
-         X4euQMd1Fyfe0NRBK+UsSDRiPWxfhvSjEvmHKtFsAzQslXaPwh5BS/Qt30G+8sRFrH8N
-         slyjHXmp1vxYswvPfOWUCxrGy/v3j5nBrXOnQikBUNo1JhWRHX9VfZSvOMquodP0/5+/
-         LHNG0vGEb8QWnptukl8imW1rUMtfJywoGOD2arzhLN15AwGRbIuLtgMIH1wIysDb7oz3
-         oqzRpNX+cLhaZu9AhPHajAXj9Ucr5U0kfLPc4R+gC4dLvQih1QF0JYeqOwUtS693phj2
-         8NyA==
-X-Gm-Message-State: ACrzQf1A9oXVSv8EEz92giaA2CUOwLsbB6CwgOYibCOWHkG4SOXxa6Lk
-        aONKMbz4zJJbfUegVUfgxRjk7iuevlardMqrBBvMsgJWiAv9nXhRO+Ac7BjWRYyl6ZEdkRAQCKg
-        wu8S9HoJxU/DLmIbPWA==
-X-Received: by 2002:a37:6504:0:b0:6ee:6fb:4ae2 with SMTP id z4-20020a376504000000b006ee06fb4ae2mr409933qkb.49.1665676118392;
-        Thu, 13 Oct 2022 08:48:38 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM6Z1SpCyTqhN8ysHmAkbQaVD7byH61MKGW3R6faEM/yLQYTSaoHeB0GABAOKn/OkIKMvVrang==
-X-Received: by 2002:a37:6504:0:b0:6ee:6fb:4ae2 with SMTP id z4-20020a376504000000b006ee06fb4ae2mr409922qkb.49.1665676118129;
-        Thu, 13 Oct 2022 08:48:38 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c5-20020ac80545000000b0039913d588fbsm161524qth.48.2022.10.13.08.48.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Oct 2022 08:48:37 -0700 (PDT)
-Date:   Thu, 13 Oct 2022 23:48:33 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S229484AbiJMPuJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Oct 2022 11:50:09 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEC48422CF;
+        Thu, 13 Oct 2022 08:50:04 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2F6DE6186B;
+        Thu, 13 Oct 2022 15:50:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87E4FC433D7;
+        Thu, 13 Oct 2022 15:50:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1665676203;
+        bh=+uqZDl54/XnooiyOhlrOeJdNMvQ3hqg6Ja4OTn+rCnQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=LFiLaUNzB1AdOSGAhVmk6hZ7q7NAuEibWgZj+878xpkhthOm2K7wAvTqQxxCZ5JCj
+         v/RPbu0L2wvStIl8JVD2gC8Oc5n6vB3h3W2puf4kmgHvNZzvoqJ9bg3zGGlYumwsuG
+         gDlOAyeTh4sP9BcmsCNWGDjJXo+pa6KMWDdUAwIf7JHe9OicPteQQq2NQT+6kep49/
+         dnvo/8QcMUKbJ+ck8WRRXSpMaMfZyBXLWGuNMtged7nJ2rFN5pyzKz84R7lRHHVhJr
+         NYjh0aBEL2OZFwp5hFLZMQPCwYEJM6UmWKhOXvtCpEjBWSLMxkU3pigF1ErrhuuDi+
+         BSeP1h+ve6GDA==
+Date:   Thu, 13 Oct 2022 08:50:03 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 4/5] populate: require e2image before populating
-Message-ID: <20221013154833.kqwygzftf7thscx7@zlang-mailbox>
-References: <166553912229.422450.15473762183660906876.stgit@magnolia>
- <166553914474.422450.8871747567060992809.stgit@magnolia>
+Subject: Re: [PATCH 2/2] check: optionally compress core dumps
+Message-ID: <Y0gzqyyaU171aagR@magnolia>
+References: <166553910766.422356.8069826206437666467.stgit@magnolia>
+ <166553911893.422356.7143540040827489080.stgit@magnolia>
+ <20221013115102.qb7r37ywdy2qbwkn@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <166553914474.422450.8871747567060992809.stgit@magnolia>
+In-Reply-To: <20221013115102.qb7r37ywdy2qbwkn@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 11, 2022 at 06:45:44PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Oct 13, 2022 at 07:51:02PM +0800, Zorro Lang wrote:
+> On Tue, Oct 11, 2022 at 06:45:18PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Add a new option, COREDUMP_COMPRESSOR, that will be used to compress
+> > core dumps collected during a fstests run.  The program specified must
+> > accept the -f -9 arguments that gzip has.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  README    |    4 ++++
+> >  common/rc |   14 +++++++++-----
+> >  2 files changed, 13 insertions(+), 5 deletions(-)
+> > 
+> > 
+> > diff --git a/README b/README
+> > index 80d148be82..4c4f22f853 100644
+> > --- a/README
+> > +++ b/README
+> > @@ -212,6 +212,10 @@ Tools specification:
+> >      - Set FSSTRESS_AVOID and/or FSX_AVOID, which contain options added to
+> >        the end of fsstresss and fsx invocations, respectively, in case you wish
+> >        to exclude certain operational modes from these tests.
+> > + - core dumps:
+> > +    - Set COREDUMP_COMPRESSOR to a compression program to compress crash dumps.
+> > +      This program must accept '-f' and the name of a file to compress.  In
+> > +      other words, it must emulate gzip.
+> >  
+> >  Kernel/Modules related configuration:
+> >   - Set TEST_FS_MODULE_RELOAD=1 to unload the module and reload it between
+> > diff --git a/common/rc b/common/rc
+> > index 152b8bb414..c68869b7dc 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -4956,13 +4956,17 @@ _save_coredump()
+> >  	local core_hash="$(_md5_checksum "$path")"
+> >  	local out_file="$RESULT_BASE/$seqnum.core.$core_hash"
+> >  
+> > -	if [ -s "$out_file" ]; then
+> > -		rm -f "$path"
+> > -		return
+> > -	fi
+> > -	rm -f "$out_file"
+> > +	for dump in "$out_file"*; do
+> > +		if [ -s "$dump" ]; then
+> > +			rm -f "$path"
+> > +			return 0
+> > +		fi
+> > +	done
+> >  
+> >  	mv "$path" "$out_file"
+> > +	test -z "$COREDUMP_COMPRESSOR" && return 0
+> > +
+> > +	$COREDUMP_COMPRESSOR -f "$out_file"
 > 
-> Use $E2IMAGE_PROG, not e2image, and check that it exists before
-> proceeding.
+> This patch looks good to me,
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
 > 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+> I'm just not sure if all/most compressor supports "-f" option, I use bzip2
+> and gzip mostly, they both support that.
 
-Make sense,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+As do xz, lz4, and zstd, so I think that's sufficient coverage.
 
->  common/populate |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> 
-> diff --git a/common/populate b/common/populate
-> index 66c55b682f..05bdfe33c5 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -18,6 +18,7 @@ _require_populate_commands() {
->  		;;
->  	ext*)
->  		_require_command "$DUMPE2FS_PROG" "dumpe2fs"
-> +		_require_command "$E2IMAGE_PROG" "e2image"
->  		;;
->  	esac
->  }
-> @@ -874,7 +875,7 @@ _scratch_populate_restore_cached() {
->  		return $res
->  		;;
->  	"ext2"|"ext3"|"ext4")
-> -		e2image -r "${metadump}" "${SCRATCH_DEV}"
-> +		$E2IMAGE_PROG -r "${metadump}" "${SCRATCH_DEV}"
->  		ret=$?
->  		test $ret -ne 0 && return $ret
->  
-> 
+The only one I know of that won't be compatible is zip, since it uses -f
+for "freshen archive".
 
+--D
+
+> Thanks,
+> Zorro
+> 
+> >  }
+> >  
+> >  init_rc
+> > 
+> 
