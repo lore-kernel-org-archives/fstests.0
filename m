@@ -2,180 +2,374 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8737EC433FE
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Oct 2022 01:17:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43719C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Oct 2022 01:24:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229794AbiJNBRv (ORCPT
+        id S229599AbiJNBYq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Oct 2022 21:17:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39804 "EHLO
+        Thu, 13 Oct 2022 21:24:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229788AbiJNBRu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Oct 2022 21:17:50 -0400
+        with ESMTP id S229557AbiJNBYp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Oct 2022 21:24:45 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 787B7164BFA
-        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 18:17:49 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA5151118
+        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 18:24:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1665710268;
+        s=mimecast20190719; t=1665710682;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=AZ9y8tKOu8PvZM+Ki1up7Wbldjs7xwlDEH15zyduYdg=;
-        b=MZIRCOHcA96vG2sHQ/SBpMNUczwxSgOXLhY0GMmP/3OPe0rxJA0ufOzYCgqdm9arA1boRI
-        qMmbmuzI9iuKub37kyL1eDGqAudbkw5q1lZvvmfmTjbwoKKUrIXtDT+j6maV8cl5Eng4a+
-        Fc2MMopoGS6Qj9z7FAQTOFvn7VdHwJE=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=Vagzotfo2211TyowG/v91idIfQddn6OCRkazSePc4+g=;
+        b=KVngkwn/mpy3/ruYQsfOZAwDhN407ZajkDEa8c6bSCsPNWosDvOZgXYLV/3C0Do8cot8/o
+        O+PrRXk9Wab8of8WeMMBrJmzOxDi11IfKT6UnLjTK/4H22IVzoQ8596+wgmrN+IepBZEAw
+        ujcBFGlENwph6mGnvNRr8hI1XNpnYOM=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-76-wosWji8SMP6KcRKZ832kFg-1; Thu, 13 Oct 2022 21:17:47 -0400
-X-MC-Unique: wosWji8SMP6KcRKZ832kFg-1
-Received: by mail-pl1-f200.google.com with SMTP id q3-20020a17090311c300b0017898180dddso2319135plh.0
-        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 18:17:47 -0700 (PDT)
+ us-mta-636-f7yhSFmDP8qpd8N5wxejXQ-1; Thu, 13 Oct 2022 21:24:41 -0400
+X-MC-Unique: f7yhSFmDP8qpd8N5wxejXQ-1
+Received: by mail-pj1-f72.google.com with SMTP id gn9-20020a17090ac78900b0020d7a817d36so1836530pjb.2
+        for <fstests@vger.kernel.org>; Thu, 13 Oct 2022 18:24:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=AZ9y8tKOu8PvZM+Ki1up7Wbldjs7xwlDEH15zyduYdg=;
-        b=wHCDr4ffjh0lyOVr+zEB7foTD5XR78O32jUEweMV6uDuIUPCFpy1AZ8ndDQD6l7lmK
-         0IWfpujw4OoSX8Fvib4qqEUsU7CzNSFYaqndgr0kKMNY1I14y1CJpzN0XblNfgytD60w
-         U9Po3T7J6uGkpq9pOLW41QaI946aQB/hh1IUQvSidYpo8dCnD3AjZRvLgDmFNJdoIiXt
-         fE1LltZ5JGOAOuPEEvfuUFcmpsWeQUVCqc0az3m+5A+KOA49ik0AdKDuABWTUnQAop2B
-         cBZBrJ/IayDcL4EwIwbrdP25Me5vrEQ8CyEABnusGgZUdkgIK4zHc0VGgdCosWeoNMue
-         yr9Q==
-X-Gm-Message-State: ACrzQf3SlBiTd0rQihckgBOV8bhfmRZ5LiTzEp5YwZgx1Nw3LjeLfDLU
-        5l9tT8lFEoTUW8c8jgRE8zsw3b6SbMld4kcIU4JYwOzqOxQu0nlOs8B0xmqFc26D68ttV7L+RhR
-        hNN0TN7pUUk8T55KbxA==
-X-Received: by 2002:a05:6a00:1304:b0:555:6d3f:1223 with SMTP id j4-20020a056a00130400b005556d3f1223mr2484454pfu.60.1665710266152;
-        Thu, 13 Oct 2022 18:17:46 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM6HVxyk89iaHVTPmNuPIp3Jp0psLtEaR/btiGN+HEm78fRAOyLuT2j53cInOTKP21XZQhz1sA==
-X-Received: by 2002:a05:6a00:1304:b0:555:6d3f:1223 with SMTP id j4-20020a056a00130400b005556d3f1223mr2484442pfu.60.1665710265850;
-        Thu, 13 Oct 2022 18:17:45 -0700 (PDT)
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Vagzotfo2211TyowG/v91idIfQddn6OCRkazSePc4+g=;
+        b=08g1SfEYjdX4HQf9/ViUbjlYSKtxz1n5GvV2ualAHimsqXzw4pv1864I6YqsfwyEH3
+         PoyvcKku73rxDSIo/XZgxwMi1ZeI2E3dSnugcb6fheiLZNjSK5Azy45qrGMMayUJLcXs
+         +Kwfvn71MrgST9eJI9cSENCTsO/kzuA7Sf3C00mpKv6hdMuqE74ms18ArDB/cTRd3qFq
+         1Dg67+5INnnkPHEyRDbiVfssJWc1ZNXluqzzw15ii/DKx4Wu/bwHHmCcDfCqlXibZM6Y
+         49myFjbhhhnCWQ3htbaxUG+TMCQ1AlssLv7ATpEjnLd/36J4YJSFpU7Gy0kBBtUQh1Ba
+         0ovQ==
+X-Gm-Message-State: ACrzQf1hQPTrCReWhzjToxsr60kmGw6t7tTnqgjW+y5o9fCFov/lcSMy
+        Bb31CxUSCRmsF5mgg+pHFMuft7HbsadQ9UvHpm91AwwDg1DvnCjBy5jRya7+v0INLZ+BEwFzZP6
+        DNckxDW9z8wfebPjybA==
+X-Received: by 2002:aa7:9614:0:b0:562:b07b:ad62 with SMTP id q20-20020aa79614000000b00562b07bad62mr2588878pfg.79.1665710680529;
+        Thu, 13 Oct 2022 18:24:40 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7HQEaTQRW578xpkQ7qIWtlSFydO32ASWqGe1q+zngXPubTCXLmMUIKKPkdps6a1mMDtxTCpg==
+X-Received: by 2002:aa7:9614:0:b0:562:b07b:ad62 with SMTP id q20-20020aa79614000000b00562b07bad62mr2588863pfg.79.1665710680229;
+        Thu, 13 Oct 2022 18:24:40 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id v14-20020a1709028d8e00b00176e2fa216csm469386plo.52.2022.10.13.18.17.44
+        by smtp.gmail.com with ESMTPSA id r26-20020aa7989a000000b00565d35cd658sm306201pfl.217.2022.10.13.18.24.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Oct 2022 18:17:45 -0700 (PDT)
-Date:   Fri, 14 Oct 2022 09:17:41 +0800
+        Thu, 13 Oct 2022 18:24:39 -0700 (PDT)
+Date:   Fri, 14 Oct 2022 09:24:35 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/5] populate: export the metadump description name
-Message-ID: <20221014011741.ky4bml5ythuv3svb@zlang-mailbox>
-References: <166553912229.422450.15473762183660906876.stgit@magnolia>
- <166553912788.422450.6797363004980943410.stgit@magnolia>
- <20221013145515.2vx3xy6hnf37777o@zlang-mailbox>
- <Y0g0u5byHQK/aOEz@magnolia>
- <20221013162826.hfs75s33giqmfu4t@zlang-mailbox>
- <Y0hjE3neN2rDhkxw@magnolia>
+To:     Allison Henderson <allison.henderson@oracle.com>
+Cc:     Catherine Hoang <catherine.hoang@oracle.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH v2 2/4] xfs: add parent pointer test
+Message-ID: <20221014012435.tjtfd2nwic5k64tj@zlang-mailbox>
+References: <20221012013812.82161-1-catherine.hoang@oracle.com>
+ <20221012013812.82161-3-catherine.hoang@oracle.com>
+ <20221012030220.ng5xra7deoeutb77@zlang-mailbox>
+ <20221012031053.ied3kipypzdlwv4w@zlang-mailbox>
+ <5a9cbf00f1545b7578f4e099e83b5fe89360f4d7.camel@oracle.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <Y0hjE3neN2rDhkxw@magnolia>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <5a9cbf00f1545b7578f4e099e83b5fe89360f4d7.camel@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 13, 2022 at 12:12:19PM -0700, Darrick J. Wong wrote:
-> On Fri, Oct 14, 2022 at 12:28:26AM +0800, Zorro Lang wrote:
-> > On Thu, Oct 13, 2022 at 08:54:35AM -0700, Darrick J. Wong wrote:
-> > > On Thu, Oct 13, 2022 at 10:55:15PM +0800, Zorro Lang wrote:
-> > > > On Tue, Oct 11, 2022 at 06:45:27PM -0700, Darrick J. Wong wrote:
-> > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > 
-> > > > > Not sure why this hasn't been broken all along, but we should be
-> > > > > exporting this variable so that it shows up in subshells....
+On Thu, Oct 13, 2022 at 07:55:42PM +0000, Allison Henderson wrote:
+> On Wed, 2022-10-12 at 11:10 +0800, Zorro Lang wrote:
+> > On Wed, Oct 12, 2022 at 11:02:20AM +0800, Zorro Lang wrote:
+> > > On Tue, Oct 11, 2022 at 06:38:10PM -0700, Catherine Hoang wrote:
+> > > > From: Allison Henderson <allison.henderson@oracle.com>
 > > > > 
-> > > > May I ask where's the subshell which uses $POPULATE_METADUMP?
+> > > > Add a test to verify basic parent pointers operations (create,
+> > > > move, link,
+> > > > unlink, rename, overwrite).
+> > > > 
+> > > > Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
+> > > > Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
+> > > > ---
+> > > >  doc/group-names.txt |   1 +
+> > > >  tests/xfs/554       | 125
+> > > > ++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/xfs/554.out   |  59 +++++++++++++++++++++
+> > > >  3 files changed, 185 insertions(+)
+> > > >  create mode 100755 tests/xfs/554
+> > > >  create mode 100644 tests/xfs/554.out
+> > > > 
+> > > > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > > > index ef411b5e..8e35c699 100644
+> > > > --- a/doc/group-names.txt
+> > > > +++ b/doc/group-names.txt
+> > > > @@ -77,6 +77,7 @@ nfs4_acl              NFSv4 access control
+> > > > lists
+> > > >  nonsamefs              overlayfs layers on different filesystems
+> > > >  online_repair          online repair functionality tests
+> > > >  other                  dumping ground, do not add more tests to
+> > > > this group
+> > > > +parent                 Parent pointer tests
+> > > >  pattern                        specific IO pattern tests
+> > > >  perms                  access control and permission checking
+> > > >  pipe                   pipe functionality
+> > > > diff --git a/tests/xfs/554 b/tests/xfs/554
+> > > > new file mode 100755
+> > > > index 00000000..26914e4c
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/554
+> > > > @@ -0,0 +1,125 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights
+> > > > Reserved.
+> > > > +#
+> > > > +# FS QA Test 554
+> > > > +#
+> > > > +# simple parent pointer test
+> > > > +#
+> > > > +
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto quick parent
+> > > > +
+> > > > +cleanup()
+> > > > +{
+> > > > +       cd /
+> > > > +       rm -f $tmp.*
+> > > > +}
 > > > 
-> > > _scratch_xfs_fuzz_metadata does this:
-> > > 
-> > > 	echo "${fields}" | while read field; do
-> > > 		echo "${verbs}" | while read fuzzverb; do
-> > > 			__scratch_xfs_fuzz_mdrestore
-> > > 				_xfs_mdrestore "${POPULATE_METADUMP}"
-> > > 
-> > > The (nested) echo piped to while starts subshells.
+> > > This's same with common cleanup function, you can remove this
+> > > function.
 > > 
-> > I'm not so familar with this part, so I didn't a simple test[1], and looks like
-> > the PARAM can be seen, even it's not exported. Do I misunderstand something?
+> > Same for patch 3 and 4.
+> > 
+> > > 
+> > > > +
+> > > > +full()
+> > > > +{
+> > > > +    echo ""            >>$seqres.full
+> > > > +    echo "*** $* ***"  >>$seqres.full
+> > > > +    echo ""            >>$seqres.full
+> > > > +}
+> > > 
+> > > What's this function for? I didn't see this function is called in
+> > > this case.
+> > > Am I missing something?
+> > 
+> > Same question for patch 3 and 4.
+> Think I answered these in the other patch review...
+> 
+> > 
+> > > 
+> > > > +
+> > > > +# get standard environment, filters and checks
+> > > > +. ./common/filter
+> > > > +. ./common/reflink
+> > > > +. ./common/inject
+> > > > +. ./common/parent
+> > > > +
+> > > > +# Modify as appropriate
+> > > > +_supported_fs xfs
+> > > > +_require_scratch
+> > > > +_require_xfs_sysfs debug/larp
+> > > > +_require_xfs_io_error_injection "larp"
+> > 
+> > And does this case really do error injection? I didn't find that. If
+> > not, please
+> > remove this requirement and above common/inject. 
+> I think at one point I had all these tests in one file and then later
+> separated them into multiple tests.  So I think the requirements for
+> injects can be removed from patch 2 and 3
+
+Sure, yes, same for patch 3 not 4. I said wrong below:)
+
+> 
+> > Same question for patch 4.
+> Patch 4 does do injects, so the requirement should stay.
+> 
+> Allison
+> 
 > > 
 > > Thanks,
 > > Zorro
 > > 
-> > [1]
-> > $ echo "$list"
-> > a
-> > b
-> > cc
-> > $ PARAM="This's a test"
-> > $ echo "$list"|while read c1;do echo "$list"|while read c2;do echo $PARAM;done; done
-> > This's a test
-> > This's a test
-> > This's a test
-> > This's a test
-> > This's a test
-> > This's a test
-> > This's a test
-> > This's a test
-> > This's a test
-> 
-> Hmm.  I can't figure out why I needed the export here.  It was late one
-> night, something was broken, and exporting the variable made it work.
-> Now I can't recall exactly what that was and it seems fine without
-> it...?
-> 
-> I guess I'll put it back and rerun the entire fuzz suite to see what
-> pops out...
-
-Sure, I don't have objection on this patch, so you can have the RVB when
-you change "local POPULATE_METADUMP_DESCR" to lower-case, and show at least
-one example about why POPULATE_METADUMP need to be exported in next version.
-No push:)
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
+> > > > +_require_xfs_parent
+> > > > +_require_xfs_io_command "parent"
+> > > > +
+> > > > +# real QA test starts here
+> > > > +
+> > > > +# Create a directory tree using a protofile and
+> > > > +# make sure all inodes created have parent pointers
+> > > > +
+> > > > +protofile=$tmp.proto
+> > > > +
+> > > > +cat >$protofile <<EOF
+> > > > +DUMMY1
+> > > > +0 0
+> > > > +: root directory
+> > > > +d--777 3 1
+> > > > +: a directory
+> > > > +testfolder1 d--755 3 1
+> > > > +file1 ---755 3 1 /dev/null
+> > > > +$
+> > > > +: back in the root
+> > > > +testfolder2 d--755 3 1
+> > > > +file2 ---755 3 1 /dev/null
+> > > > +: done
+> > > > +$
+> > > > +EOF
+> > > > +
+> > > > +if [ $? -ne 0 ]
+> > > > +then
+> > > > +    _fail "failed to create test protofile"
+> > > > +fi
 > > > 
-> > > > > 
-> > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > > ---
-> > > > >  common/populate |    6 +++---
-> > > > >  1 file changed, 3 insertions(+), 3 deletions(-)
-> > > > > 
-> > > > > 
-> > > > > diff --git a/common/populate b/common/populate
-> > > > > index cfdaf766f0..b501c2fe45 100644
-> > > > > --- a/common/populate
-> > > > > +++ b/common/populate
-> > > > > @@ -868,9 +868,9 @@ _scratch_populate_cached() {
-> > > > >  	local meta_tag="$(echo "${meta_descr}" | md5sum - | cut -d ' ' -f 1)"
-> > > > >  	local metadump_stem="${TEST_DIR}/__populate.${FSTYP}.${meta_tag}"
-> > > > >  
-> > > > > -	# These variables are shared outside this function
-> > > > > -	POPULATE_METADUMP="${metadump_stem}.metadump"
-> > > > > -	POPULATE_METADUMP_DESCR="${metadump_stem}.txt"
-> > > > > +	# This variable is shared outside this function
-> > > > > +	export POPULATE_METADUMP="${metadump_stem}.metadump"
-> > > > > +	local POPULATE_METADUMP_DESCR="${metadump_stem}.txt"
+> > > It just writes a general file, right? Is there any special reason
+> > > might cause
+> > > write fail?
+> > > 
+> > > I think we don't need to check each step's return value. And if we
+> > > fail to write
+> > > a file, bash helps to output error message to break golden image
+> > > too.
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > +
+> > > > +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqres.full 2>&1 \
+> > > > +       || _fail "mkfs failed"
+> > > > +_check_scratch_fs
+> > > > +
+> > > > +_scratch_mount >>$seqres.full 2>&1 \
+> > > > +       || _fail "mount failed"
+> > > > +
+> > > > +testfolder1="testfolder1"
+> > > > +testfolder2="testfolder2"
+> > > > +file1="file1"
+> > > > +file2="file2"
+> > > > +file3="file3"
+> > > > +file4="file4"
+> > > > +file5="file5"
+> > > > +file1_ln="file1_link"
+> > > > +
+> > > > +echo ""
+> > > > +# Create parent pointer test
+> > > > +_verify_parent "$testfolder1" "$file1" "$testfolder1/$file1"
+> > > > +
+> > > > +echo ""
+> > > > +# Move parent pointer test
+> > > > +mv $SCRATCH_MNT/$testfolder1/$file1
+> > > > $SCRATCH_MNT/$testfolder2/$file1
+> > > > +_verify_parent "$testfolder2" "$file1" "$testfolder2/$file1"
+> > > > +
+> > > > +echo ""
+> > > > +# Hard link parent pointer test
+> > > > +ln $SCRATCH_MNT/$testfolder2/$file1
+> > > > $SCRATCH_MNT/$testfolder1/$file1_ln
+> > > > +_verify_parent "$testfolder1" "$file1_ln"
+> > > > "$testfolder1/$file1_ln"
+> > > > +_verify_parent "$testfolder1" "$file1_ln" "$testfolder2/$file1"
+> > > > +_verify_parent "$testfolder2" "$file1"   
+> > > > "$testfolder1/$file1_ln"
+> > > > +_verify_parent "$testfolder2" "$file1"    "$testfolder2/$file1"
+> > > > +
+> > > > +echo ""
+> > > > +# Remove hard link parent pointer test
+> > > > +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file1)"
+> > > > +rm $SCRATCH_MNT/$testfolder2/$file1
+> > > > +_verify_parent "$testfolder1" "$file1_ln"
+> > > > "$testfolder1/$file1_ln"
+> > > > +_verify_no_parent "$file1" "$ino" "$testfolder1/$file1_ln"
+> > > > +
+> > > > +echo ""
+> > > > +# Rename parent pointer test
+> > > > +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder1/$file1_ln)"
+> > > > +mv $SCRATCH_MNT/$testfolder1/$file1_ln
+> > > > $SCRATCH_MNT/$testfolder1/$file2
+> > > > +_verify_parent "$testfolder1" "$file2" "$testfolder1/$file2"
+> > > > +_verify_no_parent "$file1_ln" "$ino" "$testfolder1/$file2"
+> > > > +
+> > > > +echo ""
+> > > > +# Over write parent pointer test
+> > > > +touch $SCRATCH_MNT/$testfolder2/$file3
+> > > > +_verify_parent "$testfolder2" "$file3" "$testfolder2/$file3"
+> > > > +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file3)"
+> > > > +mv -f $SCRATCH_MNT/$testfolder2/$file3
+> > > > $SCRATCH_MNT/$testfolder1/$file2
+> > > > +_verify_parent "$testfolder1" "$file2" "$testfolder1/$file2"
+> > > > +
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+> > > > new file mode 100644
+> > > > index 00000000..67ea9f2b
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/554.out
+> > > > @@ -0,0 +1,59 @@
+> > > > +QA output created by 554
+> > > > +
+> > > > +*** testfolder1 OK
+> > > > +*** testfolder1/file1 OK
+> > > > +*** testfolder1/file1 OK
+> > > > +*** Verified parent pointer: name:file1, namelen:5
+> > > > +*** Parent pointer OK for child testfolder1/file1
+> > > > +
+> > > > +*** testfolder2 OK
+> > > > +*** testfolder2/file1 OK
+> > > > +*** testfolder2/file1 OK
+> > > > +*** Verified parent pointer: name:file1, namelen:5
+> > > > +*** Parent pointer OK for child testfolder2/file1
+> > > > +
+> > > > +*** testfolder1 OK
+> > > > +*** testfolder1/file1_link OK
+> > > > +*** testfolder1/file1_link OK
+> > > > +*** Verified parent pointer: name:file1_link, namelen:10
+> > > > +*** Parent pointer OK for child testfolder1/file1_link
+> > > > +*** testfolder1 OK
+> > > > +*** testfolder2/file1 OK
+> > > > +*** testfolder1/file1_link OK
+> > > > +*** Verified parent pointer: name:file1_link, namelen:10
+> > > > +*** Parent pointer OK for child testfolder2/file1
+> > > > +*** testfolder2 OK
+> > > > +*** testfolder1/file1_link OK
+> > > > +*** testfolder2/file1 OK
+> > > > +*** Verified parent pointer: name:file1, namelen:5
+> > > > +*** Parent pointer OK for child testfolder1/file1_link
+> > > > +*** testfolder2 OK
+> > > > +*** testfolder2/file1 OK
+> > > > +*** testfolder2/file1 OK
+> > > > +*** Verified parent pointer: name:file1, namelen:5
+> > > > +*** Parent pointer OK for child testfolder2/file1
+> > > > +
+> > > > +*** testfolder1 OK
+> > > > +*** testfolder1/file1_link OK
+> > > > +*** testfolder1/file1_link OK
+> > > > +*** Verified parent pointer: name:file1_link, namelen:10
+> > > > +*** Parent pointer OK for child testfolder1/file1_link
+> > > > +*** testfolder1/file1_link OK
+> > > > +
+> > > > +*** testfolder1 OK
+> > > > +*** testfolder1/file2 OK
+> > > > +*** testfolder1/file2 OK
+> > > > +*** Verified parent pointer: name:file2, namelen:5
+> > > > +*** Parent pointer OK for child testfolder1/file2
+> > > > +*** testfolder1/file2 OK
+> > > > +
+> > > > +*** testfolder2 OK
+> > > > +*** testfolder2/file3 OK
+> > > > +*** testfolder2/file3 OK
+> > > > +*** Verified parent pointer: name:file3, namelen:5
+> > > > +*** Parent pointer OK for child testfolder2/file3
+> > > > +*** testfolder1 OK
+> > > > +*** testfolder1/file2 OK
+> > > > +*** testfolder1/file2 OK
+> > > > +*** Verified parent pointer: name:file2, namelen:5
+> > > > +*** Parent pointer OK for child testfolder1/file2
+> > > > -- 
+> > > > 2.25.1
 > > > > 
-> > > > If the POPULATE_METADUMP_DESCR is not shared outside anymore, how about change
-> > > > it to lower-case?
-> > > 
-> > > Ok.
-> > > 
-> > > --D
-> > > 
-> > > > >  
-> > > > >  	# Don't keep metadata images cached for more 48 hours...
-> > > > >  	rm -rf "$(find "${POPULATE_METADUMP}" -mtime +2 2>/dev/null)"
-> > > > > 
-> > > > 
-> > > 
 > > 
 > 
 
