@@ -2,298 +2,194 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9342BC4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Oct 2022 16:55:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20360C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Oct 2022 18:15:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbiJNQzm (ORCPT
+        id S230257AbiJNSP3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Oct 2022 12:55:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60210 "EHLO
+        Fri, 14 Oct 2022 14:15:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229587AbiJNQzl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2022 12:55:41 -0400
-X-Greylist: delayed 540 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 14 Oct 2022 09:55:39 PDT
-Received: from synology.com (mail.synology.com [211.23.38.101])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0503443311;
-        Fri, 14 Oct 2022 09:55:37 -0700 (PDT)
-Received: from localhost.localdomain (unknown [10.17.17.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        with ESMTP id S230236AbiJNSP2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Oct 2022 14:15:28 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D809C33424;
+        Fri, 14 Oct 2022 11:15:27 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by synology.com (Postfix) with ESMTPSA id 0DC53485DFBA8;
-        Sat, 15 Oct 2022 00:46:35 +0800 (CST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
-        t=1665765996; bh=jAg60Wh4/RWpYApJK+LoGnLHB2OyRwCnyVuKqMR5AIc=;
-        h=From:To:Cc:Subject:Date;
-        b=k7yWSPvn6ymaQqkTkPwtEUXOxGevT5wlAVagDLb/+bb5xcC6X5gO7QOoZ0ib8IIG5
-         7h8QAxLXCXWhJcv3flv96yueq1+dFTgyA1+yqwIhIWHu9eGtCANLqmn9hVrWabnd3r
-         So75idDzKPXsFsPtooOTH0yRwVVVY0Jw6CkutzYc=
-From:   bingjingc <bingjingc@synology.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc:     fdmanana@kernel.org, bingjingc@synology.com, bxxxjxxg@gmail.com
-Subject: [PATCH] fstests: btrfs: test incremental send for orphan inodes
-Date:   Sat, 15 Oct 2022 00:46:00 +0800
-Message-Id: <20221014164600.2626-1-bingjingc@synology.com>
-X-Mailer: git-send-email 2.37.1
+        by ams.source.kernel.org (Postfix) with ESMTPS id 7C9CDB82390;
+        Fri, 14 Oct 2022 18:15:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D87AC433D6;
+        Fri, 14 Oct 2022 18:15:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1665771325;
+        bh=2ZoHp6B1+R0scNMD4ax9z8MwHRcqBJStfQsAoDJlKog=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=gxXuTAiDdyYsf2fBZUx9LIdVK+1faHQptAp4ZJyKRk92Spath66QEb94W7b9NcKOJ
+         MpOX0TUht7k9Fz4VzoasI2/8PApciXaEoZXewkFRPfku8PWyytKZZpvrsRl9VxsXPE
+         1QGTpL+gfkbW2z0Qvt40Lerrt0q1m0aQ4j9wp7g7TrN5x8QKdSUXLjEfokljrlEn6l
+         icaYa+df8JpPMs2lXdTT4ft2OyYaFkMTFt+DKHJsgMA1ua/ti+RT31ysX37h47P1UO
+         fPkvJxpEHX/CcnyN0Uot6w3DAuvImIpQePGcDSrz4+4DYy8C7UQoMwHqil4ck1qUNE
+         ALQMQFwUFGotQ==
+Date:   Fri, 14 Oct 2022 11:15:24 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2.1 1/2] check: detect and preserve all coredumps made
+ by a test
+Message-ID: <Y0mnPD3bJhmo0S0K@magnolia>
+References: <166553910766.422356.8069826206437666467.stgit@magnolia>
+ <166553911331.422356.4424521847397525024.stgit@magnolia>
+ <Y0dZpkOwJpyQ9SA9@magnolia>
+ <20221013114446.346ii4nd5i3l77ar@zlang-mailbox>
+ <Y0gzWbBd5PdlQWP6@magnolia>
+ <20221013160326.l4s6sz4yxeul64d5@zlang-mailbox>
+ <Y0g8XPzJHw6eICoK@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Synology-MCP-Status: no
-X-Synology-Spam-Flag: no
-X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
-X-Synology-Virus-Status: no
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y0g8XPzJHw6eICoK@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: BingJing Chang <bingjingc@synology.com>
+On Thu, Oct 13, 2022 at 09:27:08AM -0700, Darrick J. Wong wrote:
+> On Fri, Oct 14, 2022 at 12:03:26AM +0800, Zorro Lang wrote:
+> > On Thu, Oct 13, 2022 at 08:48:41AM -0700, Darrick J. Wong wrote:
+> > > On Thu, Oct 13, 2022 at 07:44:46PM +0800, Zorro Lang wrote:
+> > > > On Wed, Oct 12, 2022 at 05:19:50PM -0700, Darrick J. Wong wrote:
+> > > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > > 
+> > > > > If someone sets kernel.core_uses_pid (or kernel.core_pattern), any
+> > > > > coredumps generated by fstests might have names that are longer than
+> > > > > just "core".  Since the pid isn't all that useful by itself, let's
+> > > > > record the coredumps by hash when we save them, so that we don't waste
+> > > > > space storing identical crash dumps.
+> > > > > 
+> > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > > > ---
+> > > > > v2.1: use REPORT_DIR per maintainer suggestion
+> > > > > ---
+> > > > 
+> > > > This version looks good to me,
+> > > > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > > 
+> > > It occurred to me overnight that ./check doesn't export REPORT_DIR, so
+> > > I'll push out a v2.2 that adds that.  Currently the lack of an export
+> > > doesn't affect anyone, but as soon as any tests want to call
+> > > _save_coredump they're going to run into that issue.
+> > 
+> > Hmm... the RESULT_DIR is exported, you can use it, or use $seqres directly due
+> > to it's defined in common/preamble (although is not exported).
+> > 
+> > ./common/preamble:42:   seqres=$RESULT_DIR/$seq
+> > 
+> > What do you think?
+> 
+> seqres is defined differently in check than in common/preamble, but I
+> guess RESULT_DIR will work.
 
-Test that an incremental send operation can handle orphan files or
-directories in or not in the parent snapshot and the send snapshot.
+Nope, it won't, because RESULT_DIR ends up getting set to something
+like /var/tmp/fstests/xfs_moocow/xfs, seqnum gets set to xfs/350, and
+then you end up with garbage paths like:
 
-This issue is fixed by a kernel patch with the commit 9ed0a72e5b355d
-("btrfs: send: fix failures when processing inodes with no links")
+/var/tmp/fstests/xfs_moocow/xfs/xfs/350.core.XXX
 
-Signed-off-by: BingJing Chang <bingjingc@synology.com>
----
- tests/btrfs/278     | 218 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/278.out |   3 +
- 2 files changed, 221 insertions(+)
- create mode 100755 tests/btrfs/278
- create mode 100644 tests/btrfs/278.out
+Soooo you were right, I should have used seqres from the start.  The
+multiple definitions are confusing, but they end up resolving to the
+same pathnames(!) so it's all good.
 
-diff --git a/tests/btrfs/278 b/tests/btrfs/278
-new file mode 100755
-index 00000000..82da29e0
---- /dev/null
-+++ b/tests/btrfs/278
-@@ -0,0 +1,218 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 BingJing Chang.
-+#
-+# FS QA Test No. btrfs/278
-+#
-+# Regression test for btrfs incremental send issue when processing inodes
-+# with no links
-+#
-+# This issue is fixed by the following linux kernel btrfs patch:
-+#
-+#   commit 9ed0a72e5b355d ("btrfs: send: fix failures when processing
-+#   inodes with no links")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick send
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_fixed_by_kernel_commit 9ed0a72e5b355d \
-+	"btrfs: send: fix failures when processing inodes with no links"
-+_require_test
-+_require_scratch
-+_require_btrfs_command "property"
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
-+
-+# Creating the first snapshot looks like:
-+#
-+# .                                                                  (ino 256)
-+# |--- deleted.file                                                  (ino 257)
-+# |--- deleted.dir/                                                  (ino 258)
-+# |--- changed_subcase1.file                                         (ino 259)
-+# |--- changed_subcase2.file                                         (ino 260)
-+# |--- changed_subcase1.dir/                                         (ino 261)
-+# |    |---- foo                                                     (ino 262)
-+# |--- changed_subcase2.dir/                                         (ino 263)
-+# |    |---- foo                                                     (ino 264)
-+#
-+touch $SCRATCH_MNT/vol/deleted.file
-+mkdir $SCRATCH_MNT/vol/deleted.dir
-+touch $SCRATCH_MNT/vol/changed_subcase1.file
-+touch $SCRATCH_MNT/vol/changed_subcase2.file
-+mkdir $SCRATCH_MNT/vol/changed_subcase1.dir
-+touch $SCRATCH_MNT/vol/changed_subcase1.dir/foo
-+mkdir $SCRATCH_MNT/vol/changed_subcase2.dir
-+touch $SCRATCH_MNT/vol/changed_subcase2.dir/foo
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
-+
-+# Delete the deleted.*, create a new file and a new directory, and then
-+# take the second snapshot looks like:
-+#
-+# .                                                                  (ino 256)
-+# |--- changed_subcase1.file                                         (ino 259)
-+# |--- changed_subcase2.file                                         (ino 260)
-+# |--- changed_subcase1.dir/                                         (ino 261)
-+# |    |---- foo                                                     (ino 262)
-+# |--- changed_subcase2.dir/                                         (ino 263)
-+# |    |---- foo                                                     (ino 264)
-+# |--- new.file                                                      (ino 265)
-+# |--- new.dir/                                                      (ino 266)
-+#
-+unlink $SCRATCH_MNT/vol/deleted.file
-+rmdir $SCRATCH_MNT/vol/deleted.dir
-+touch $SCRATCH_MNT/vol/new.file
-+mkdir $SCRATCH_MNT/vol/new.dir
-+_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap2
-+
-+# Set the subvolume back to read-write mode to make orphans of the first
-+# snapshot to look like:
-+#
-+# .                                                                  (ino 256)
-+# |--- (orphan) deleted.file                                         (ino 257)
-+# |--- (orphan) deleted.dir/                                         (ino 258)
-+# |--- (orphan) changed_subcase1.file                                (ino 259)
-+# |--- changed_subcase2.file                                         (ino 260)
-+# |--- (orphan) changed_subcase1.dir/                                (ino 261)
-+# |--- changed_subcase2.dir/                                         (ino 263)
-+# |    |---- foo                                                     (ino 264)
-+#
-+# Note: To make an easy illustration, I just put a tag "(orphan)" in front of
-+# their original names to indicate that they're deleted, but their inodes can
-+# not be removed because of open file descriptors on them. Mention that orphan
-+# inodes don't have names(paths).
-+#
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap1 ro false
-+exec 71<$SCRATCH_MNT/snap1/deleted.file
-+exec 72<$SCRATCH_MNT/snap1/deleted.dir
-+exec 73<$SCRATCH_MNT/snap1/changed_subcase1.file
-+exec 74<$SCRATCH_MNT/snap1/changed_subcase1.dir
-+unlink $SCRATCH_MNT/snap1/deleted.file
-+rmdir $SCRATCH_MNT/snap1/deleted.dir
-+unlink $SCRATCH_MNT/snap1/changed_subcase1.file
-+unlink $SCRATCH_MNT/snap1/changed_subcase1.dir/foo
-+rmdir $SCRATCH_MNT/snap1/changed_subcase1.dir
-+
-+# Turn the subvolume back to read-only mode as snapshots
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap1 ro true
-+
-+# Set the subvolume back to read-write mode to make orphans of the second
-+# snapshot to look like:
-+#
-+# .                                                                  (ino 256)
-+# |--- (orphan) changed_subcase1.file                                (ino 259)
-+# |--- (orphan) changed_subcase2.file                                (ino 260)
-+# |--- (orphan) changed_subcase1.dir/                                (ino 261)
-+# |--- (orphan) changed_subcase2.dir/                                (ino 263)
-+# |--- (orphan) new.file                                             (ino 265)
-+# |--- (orphan) new.dir/                                             (ino 266)
-+#
-+# Note: Same notice as above. Mention that orphan inodes don't have
-+# names(paths).
-+#
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro false
-+exec 81<$SCRATCH_MNT/snap2/changed_subcase1.file
-+exec 82<$SCRATCH_MNT/snap2/changed_subcase1.dir
-+exec 83<$SCRATCH_MNT/snap2/changed_subcase2.file
-+exec 84<$SCRATCH_MNT/snap2/changed_subcase2.dir
-+exec 85<$SCRATCH_MNT/snap2/new.file
-+exec 86<$SCRATCH_MNT/snap2/new.dir
-+unlink $SCRATCH_MNT/snap2/changed_subcase1.file
-+unlink $SCRATCH_MNT/snap2/changed_subcase1.dir/foo
-+rmdir $SCRATCH_MNT/snap2/changed_subcase1.dir
-+unlink $SCRATCH_MNT/snap2/changed_subcase2.file
-+unlink $SCRATCH_MNT/snap2/changed_subcase2.dir/foo
-+rmdir $SCRATCH_MNT/snap2/changed_subcase2.dir
-+unlink $SCRATCH_MNT/snap2/new.file
-+rmdir $SCRATCH_MNT/snap2/new.dir
-+
-+# Turn the subvolume back to read-only mode as snapshots
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro true
-+
-+# Test that a full send operation can handle orphans with no paths
-+_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
-+
-+# Test that an incremental send operation can handle orphans.
-+#
-+# Here're descriptions for the details:
-+#
-+# Case 1: new.file and new.dir (BTRFS_COMPARE_TREE_NEW)
-+#        |  send snapshot  | action
-+#  --------------------------------
-+#  nlink |        0        | ignore
-+#
-+# They're new inodes in the send snapshots, while they don't have paths.
-+# Test that the send operation can ignore them in order not to generate
-+# the creation commands for them. Or it will fail in retrieving their
-+# current paths.
-+#
-+#
-+# Case 2: deleted.file and deleted.dir (BTRFS_COMPARE_TREE_DELETED)
-+#       | parent snapshot | action
-+# ----------------------------------
-+# nlink |        0        | as usual
-+#
-+# They're deleted in the parent snapshots but become orphans with no
-+# paths. Test that no deletion commands will be generated as usual.
-+# This case didn't fail before.
-+#
-+#
-+# Case 3: changed_*.file and changed_*.dir (BTRFS_COMPARE_TREE_CHANGED)
-+#           |       | parent snapshot | send snapshot | action
-+# -----------------------------------------------------------------------
-+# subcase 1 | nlink |        0        |       0       | ignore
-+# subcase 2 | nlink |       >0        |       0       | new_gen(deletion)
-+#
-+# In subcase 1, test that the send operation can ignore them without trying
-+# to generate any commands.
-+#
-+# In subcase 2, test that the send operation can generate an unlink command
-+# for that file and test that it can generate a rename command for the
-+# non-empty directory first and a rmdir command to remove it finally. Or
-+# the receive operation will fail with a wrong unlink on a non-empty
-+# directory.
-+#
-+_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
-+		     $SCRATCH_MNT/snap2
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/snap2/snap1 $SCRATCH_MNT/snap2
-+
-+# Recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+exec 71>&-
-+exec 72>&-
-+exec 73>&-
-+exec 74>&-
-+exec 81>&-
-+exec 82>&-
-+exec 83>&-
-+exec 84>&-
-+exec 85>&-
-+exec 86>&-
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Add the first snapshot to the new filesystem by applying the first send
-+# stream.
-+_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+
-+# Test the incremental send stream
-+_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
-+
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/snap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/278.out b/tests/btrfs/278.out
-new file mode 100644
-index 00000000..82b93b4e
---- /dev/null
-+++ b/tests/btrfs/278.out
-@@ -0,0 +1,3 @@
-+QA output created by 278
-+OK
-+OK
--- 
-2.37.1
+--D
 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > (...and yes, I do have future fuzz tests that will call it from a test
+> > > in between fuzz field cycles.)
+> > > 
+> > > --D
+> > > 
+> > > > >  check     |   26 ++++++++++++++++++++++----
+> > > > >  common/rc |   16 ++++++++++++++++
+> > > > >  2 files changed, 38 insertions(+), 4 deletions(-)
+> > > > > 
+> > > > > diff --git a/check b/check
+> > > > > index d587a70546..29303db1c8 100755
+> > > > > --- a/check
+> > > > > +++ b/check
+> > > > > @@ -923,11 +923,19 @@ function run_section()
+> > > > >  			sts=$?
+> > > > >  		fi
+> > > > >  
+> > > > > -		if [ -f core ]; then
+> > > > > -			_dump_err_cont "[dumped core]"
+> > > > > -			mv core $RESULT_BASE/$seqnum.core
+> > > > > +		# If someone sets kernel.core_pattern or kernel.core_uses_pid,
+> > > > > +		# coredumps generated by fstests might have a longer name than
+> > > > > +		# just "core".  Use globbing to find the most common patterns,
+> > > > > +		# assuming there are no other coredump capture packages set up.
+> > > > > +		local cores=0
+> > > > > +		for i in core core.*; do
+> > > > > +			test -f "$i" || continue
+> > > > > +			if ((cores++ == 0)); then
+> > > > > +				_dump_err_cont "[dumped core]"
+> > > > > +			fi
+> > > > > +			_save_coredump "$i"
+> > > > >  			tc_status="fail"
+> > > > > -		fi
+> > > > > +		done
+> > > > >  
+> > > > >  		if [ -f $seqres.notrun ]; then
+> > > > >  			$timestamp && _timestamp
+> > > > > @@ -960,6 +968,16 @@ function run_section()
+> > > > >  			# of the check script itself.
+> > > > >  			(_adjust_oom_score 250; _check_filesystems) || tc_status="fail"
+> > > > >  			_check_dmesg || tc_status="fail"
+> > > > > +
+> > > > > +			# Save any coredumps from the post-test fs checks
+> > > > > +			for i in core core.*; do
+> > > > > +				test -f "$i" || continue
+> > > > > +				if ((cores++ == 0)); then
+> > > > > +					_dump_err_cont "[dumped core]"
+> > > > > +				fi
+> > > > > +				_save_coredump "$i"
+> > > > > +				tc_status="fail"
+> > > > > +			done
+> > > > >  		fi
+> > > > >  
+> > > > >  		# Reload the module after each test to check for leaks or
+> > > > > diff --git a/common/rc b/common/rc
+> > > > > index d877ac77a0..2e1891180a 100644
+> > > > > --- a/common/rc
+> > > > > +++ b/common/rc
+> > > > > @@ -4949,6 +4949,22 @@ _create_file_sized()
+> > > > >  	return $ret
+> > > > >  }
+> > > > >  
+> > > > > +_save_coredump()
+> > > > > +{
+> > > > > +	local path="$1"
+> > > > > +
+> > > > > +	local core_hash="$(_md5_checksum "$path")"
+> > > > > +	local out_file="$REPORT_DIR/$seqnum.core.$core_hash"
+> > > > > +
+> > > > > +	if [ -s "$out_file" ]; then
+> > > > > +		rm -f "$path"
+> > > > > +		return
+> > > > > +	fi
+> > > > > +	rm -f "$out_file"
+> > > > > +
+> > > > > +	mv "$path" "$out_file"
+> > > > > +}
+> > > > > +
+> > > > >  init_rc
+> > > > >  
+> > > > >  ################################################################################
+> > > > > 
+> > > > 
+> > > 
+> > 
