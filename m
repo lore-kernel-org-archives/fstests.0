@@ -2,357 +2,117 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8556CC4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Oct 2022 11:20:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0B34C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Oct 2022 13:29:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229896AbiJQLUB (ORCPT
+        id S229671AbiJQN31 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Oct 2022 07:20:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40252 "EHLO
+        Mon, 17 Oct 2022 09:29:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229776AbiJQLT6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2022 07:19:58 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04EA418362;
-        Mon, 17 Oct 2022 04:19:51 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7409E6104D;
-        Mon, 17 Oct 2022 11:19:50 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D717CC433C1;
-        Mon, 17 Oct 2022 11:19:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666005589;
-        bh=ikSkEha/FQZ0eNL3TbH7Lqnd/uYHthS3ZEsg1r7q7I0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=niWxA40rhkeFi5rBEf8G8lvr/YtCZsJ1BYOoMTHGEV79VAI8rp1PVfdY14UwQhjzj
-         DqwhC/qAs2rZAV5cqs75NzcHQghBWOGSLa6AWKSSwoyBYFIZ0o5PfNQmcqr7qBlZxa
-         Z0Hz+ij5OrSjpHQ/oOT43vIe9zM3bcdEXC5BYMhqQMtmgh4R8kM+tdIGy8bKuyeUne
-         iBK8dPlqAL+tkl+decUgKbPOoIm4X7cGXIWFcnRofe0DP4Yh83WYscfdeihsmZVmfq
-         3uSdmK21bfgToXTKD/9EabCDO1vgzJwiCwsZAI+3MX5Gb68Dnfu0uWm0AMHf3Fe+Mp
-         IZx4HYEzQ5zLA==
-Received: by mail-oi1-f172.google.com with SMTP id n130so11706334oia.6;
-        Mon, 17 Oct 2022 04:19:49 -0700 (PDT)
-X-Gm-Message-State: ACrzQf2X1RjAMUrxry2jBnWcFYwFk8lQ5fayy3vq3L1Liz8XzHHzX5mn
-        yA9edkEPN2+Zx3AiwatQq/byQrVDToHRqiUU50A=
-X-Google-Smtp-Source: AMsMyM5IjV/iy0ALN9nDtU3rTLTq2VlLJIdcciu0XbgQgv94Kgbwv98EEtK+ZZkKRKm9H3HiuSGwzl4iERYlYmfbNKk=
-X-Received: by 2002:a05:6808:1691:b0:351:48da:62e0 with SMTP id
- bb17-20020a056808169100b0035148da62e0mr4694056oib.98.1666005588934; Mon, 17
- Oct 2022 04:19:48 -0700 (PDT)
+        with ESMTP id S229738AbiJQN30 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Oct 2022 09:29:26 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07823C6C
+        for <fstests@vger.kernel.org>; Mon, 17 Oct 2022 06:29:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1666013364;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=icm0fqH8mWH/waJrgrlMnYc8YSz+Am8tGhKz5Mh0SBY=;
+        b=bWGODFx0TwPqu1sodz+fLoPg3EbAr4EdEvZM0/Jz4HywWoBVvrXLiGiXhgm5qXLlg1/qeu
+        EHbRh3elTApm/rwR6gbZaX85WiDRF20E8TDLwlHa2/jlRusO5hA24vGzUL/mqxpzrq1KjG
+        h+R6lnl8fEuBsXVDshLL5LgK+V4KfLs=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-237-57LBuDkWOL-hcSjEtCDeAQ-1; Mon, 17 Oct 2022 09:29:20 -0400
+X-MC-Unique: 57LBuDkWOL-hcSjEtCDeAQ-1
+Received: by mail-pj1-f69.google.com with SMTP id lx11-20020a17090b4b0b00b0020d7c0b426dso9864283pjb.6
+        for <fstests@vger.kernel.org>; Mon, 17 Oct 2022 06:29:20 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=icm0fqH8mWH/waJrgrlMnYc8YSz+Am8tGhKz5Mh0SBY=;
+        b=bQzK4dEvPIuWP+FlG/gez4Vb/mLKywI006Qso+M175Q1z8yyBbpE9dJFqc0BhaWoUa
+         zWVmfKOUk+qL7fxztPQGSuW8knWnXbzzPqJUtWM/uFdwJ7f8zyItDvPe07Y/ZDLCgazJ
+         FEG8L5wi0EgavxpWGOVYIpMgMhjtYSZknv7k9NUjec3nxtUNTD79kOM6yEL1yY9aIJxD
+         bjQJEkE6e6YAWJHKDxTVOf5w2xP3CXsLWsyGleMNgsMZLN0Y6tWeA0BAbzap07NWng5n
+         Zl/yNidWiu+tIijhQ2uebUId27Sm7DAi7C2EpbXnS0gMkV4YC4EyQtUxmVVDSvD+xIQ+
+         bxHQ==
+X-Gm-Message-State: ACrzQf2Ayd4qioQVBfUN2UbfKXtp8oZWhsvQn6RcL8HNdi07gGyosP+f
+        TiSc238qhllyvmxbQq9PDoV6LMFupRh7VJgOiXWXYAvvQrybG3iK/4AqYhpYcOxiJ2SDu03IawZ
+        juHh1BTDSOiZoietz3g==
+X-Received: by 2002:a17:902:e191:b0:181:b25e:9c17 with SMTP id y17-20020a170902e19100b00181b25e9c17mr12287629pla.57.1666013359562;
+        Mon, 17 Oct 2022 06:29:19 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5SeEXzRDX32pPl3YmQCf0Kfa/ZJMVYfvaNsWz99y8Bx3glqLTTSTMbJMy+CxZIUPtdAKJdFQ==
+X-Received: by 2002:a17:902:e191:b0:181:b25e:9c17 with SMTP id y17-20020a170902e19100b00181b25e9c17mr12287610pla.57.1666013359225;
+        Mon, 17 Oct 2022 06:29:19 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id on13-20020a17090b1d0d00b0020d48bc6661sm9655255pjb.31.2022.10.17.06.29.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Oct 2022 06:29:18 -0700 (PDT)
+Date:   Mon, 17 Oct 2022 21:29:14 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH] generic/193: add to perms group
+Message-ID: <20221017132914.zj3lou5cizuuxluv@zlang-mailbox>
+References: <20221017095311.68280-1-brauner@kernel.org>
+ <7eb737f8-5fb2-97ac-6ad7-eb1ce8a59f30@fujitsu.com>
 MIME-Version: 1.0
-References: <20221014164600.2626-1-bingjingc@synology.com>
-In-Reply-To: <20221014164600.2626-1-bingjingc@synology.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Mon, 17 Oct 2022 12:19:12 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H6rOyeDf3pHBeDkq8VKgLQccwzo8KKu4-ybcp-Pb2DpJg@mail.gmail.com>
-Message-ID: <CAL3q7H6rOyeDf3pHBeDkq8VKgLQccwzo8KKu4-ybcp-Pb2DpJg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: test incremental send for orphan inodes
-To:     bingjingc <bingjingc@synology.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        bxxxjxxg@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7eb737f8-5fb2-97ac-6ad7-eb1ce8a59f30@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 14, 2022 at 5:46 PM bingjingc <bingjingc@synology.com> wrote:
->
-> From: BingJing Chang <bingjingc@synology.com>
->
-> Test that an incremental send operation can handle orphan files or
-> directories in or not in the parent snapshot and the send snapshot.
->
-> This issue is fixed by a kernel patch with the commit 9ed0a72e5b355d
-> ("btrfs: send: fix failures when processing inodes with no links")
->
-> Signed-off-by: BingJing Chang <bingjingc@synology.com>
-> ---
->  tests/btrfs/278     | 218 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/278.out |   3 +
->  2 files changed, 221 insertions(+)
->  create mode 100755 tests/btrfs/278
->  create mode 100644 tests/btrfs/278.out
->
-> diff --git a/tests/btrfs/278 b/tests/btrfs/278
-> new file mode 100755
-> index 00000000..82da29e0
-> --- /dev/null
-> +++ b/tests/btrfs/278
-> @@ -0,0 +1,218 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 BingJing Chang.
-> +#
-> +# FS QA Test No. btrfs/278
-> +#
-> +# Regression test for btrfs incremental send issue when processing inodes
-> +# with no links
-> +#
-> +# This issue is fixed by the following linux kernel btrfs patch:
-> +#
-> +#   commit 9ed0a72e5b355d ("btrfs: send: fix failures when processing
-> +#   inodes with no links")
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick send
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_fixed_by_kernel_commit 9ed0a72e5b355d \
-> +       "btrfs: send: fix failures when processing inodes with no links"
-> +_require_test
-> +_require_scratch
-> +_require_btrfs_command "property"
-> +_require_fssum
-> +
-> +send_files_dir=$TEST_DIR/btrfs-test-$seq
-> +
-> +rm -fr $send_files_dir
-> +mkdir $send_files_dir
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
-> +
-> +# Creating the first snapshot looks like:
-> +#
-> +# .                                                                  (ino 256)
-> +# |--- deleted.file                                                  (ino 257)
-> +# |--- deleted.dir/                                                  (ino 258)
-> +# |--- changed_subcase1.file                                         (ino 259)
-> +# |--- changed_subcase2.file                                         (ino 260)
-> +# |--- changed_subcase1.dir/                                         (ino 261)
-> +# |    |---- foo                                                     (ino 262)
-> +# |--- changed_subcase2.dir/                                         (ino 263)
-> +# |    |---- foo                                                     (ino 264)
-> +#
-> +touch $SCRATCH_MNT/vol/deleted.file
-> +mkdir $SCRATCH_MNT/vol/deleted.dir
-> +touch $SCRATCH_MNT/vol/changed_subcase1.file
-> +touch $SCRATCH_MNT/vol/changed_subcase2.file
-> +mkdir $SCRATCH_MNT/vol/changed_subcase1.dir
-> +touch $SCRATCH_MNT/vol/changed_subcase1.dir/foo
-> +mkdir $SCRATCH_MNT/vol/changed_subcase2.dir
-> +touch $SCRATCH_MNT/vol/changed_subcase2.dir/foo
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap1
-> +
-> +# Delete the deleted.*, create a new file and a new directory, and then
-> +# take the second snapshot looks like:
-> +#
-> +# .                                                                  (ino 256)
-> +# |--- changed_subcase1.file                                         (ino 259)
-> +# |--- changed_subcase2.file                                         (ino 260)
-> +# |--- changed_subcase1.dir/                                         (ino 261)
-> +# |    |---- foo                                                     (ino 262)
-> +# |--- changed_subcase2.dir/                                         (ino 263)
-> +# |    |---- foo                                                     (ino 264)
-> +# |--- new.file                                                      (ino 265)
-> +# |--- new.dir/                                                      (ino 266)
-> +#
-> +unlink $SCRATCH_MNT/vol/deleted.file
-> +rmdir $SCRATCH_MNT/vol/deleted.dir
-> +touch $SCRATCH_MNT/vol/new.file
-> +mkdir $SCRATCH_MNT/vol/new.dir
-> +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_MNT/snap2
-> +
-> +# Set the subvolume back to read-write mode to make orphans of the first
-> +# snapshot to look like:
+On Mon, Oct 17, 2022 at 10:01:13AM +0000, xuyang2018.jy@fujitsu.com wrote:
+> 
+> 
+> on 2022/10/17 17:53, Christian Brauner wrote:
+> > This test changes permissions and specifically tests for setuid and
+> > setgid bits to be dropped or kept. It really needs to be run when -g
+> > perms is specified.
+> 
+> Yes, Reviewed-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> 
+> ps: generic/67[3-4] and generic/68[3-7] test suid and sgid, they should 
+> also add perms group.
 
-This confused me. You mention setting the subvolume to RW, but what
-happens is we are
-setting the snapshot "snap1" to RW. So, something like:
+OK, if Christian agrees with this point and would like to help that, please
+help to check and add "perms" to more proper cases in one patch.
 
-"Set the snapshot "snap1" to read-write mode and turn several inodes
-to orphans, so
-that the snapshot will look like this:"
+Thanks,
+Zorro
 
-> +#
-> +# .                                                                  (ino 256)
-> +# |--- (orphan) deleted.file                                         (ino 257)
-> +# |--- (orphan) deleted.dir/                                         (ino 258)
-> +# |--- (orphan) changed_subcase1.file                                (ino 259)
-> +# |--- changed_subcase2.file                                         (ino 260)
-> +# |--- (orphan) changed_subcase1.dir/                                (ino 261)
-> +# |--- changed_subcase2.dir/                                         (ino 263)
-> +# |    |---- foo                                                     (ino 264)
-> +#
-> +# Note: To make an easy illustration, I just put a tag "(orphan)" in front of
-> +# their original names to indicate that they're deleted, but their inodes can
-> +# not be removed because of open file descriptors on them. Mention that orphan
-> +# inodes don't have names(paths).
-> +#
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap1 ro false
-> +exec 71<$SCRATCH_MNT/snap1/deleted.file
-> +exec 72<$SCRATCH_MNT/snap1/deleted.dir
-> +exec 73<$SCRATCH_MNT/snap1/changed_subcase1.file
-> +exec 74<$SCRATCH_MNT/snap1/changed_subcase1.dir
-> +unlink $SCRATCH_MNT/snap1/deleted.file
-> +rmdir $SCRATCH_MNT/snap1/deleted.dir
-> +unlink $SCRATCH_MNT/snap1/changed_subcase1.file
-> +unlink $SCRATCH_MNT/snap1/changed_subcase1.dir/foo
-> +rmdir $SCRATCH_MNT/snap1/changed_subcase1.dir
-> +
-> +# Turn the subvolume back to read-only mode as snapshots
+> 
+> Best Regards
+> Yang Xu
+> > 
+> > Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+> > ---
+> >   tests/generic/193 | 2 +-
+> >   1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/generic/193 b/tests/generic/193
+> > index ddaff69b..e2710b07 100755
+> > --- a/tests/generic/193
+> > +++ b/tests/generic/193
+> > @@ -7,7 +7,7 @@
+> >   # Test permission checks in ->setattr
+> >   #
+> >   . ./common/preamble
+> > -_begin_fstest metadata auto quick
+> > +_begin_fstest metadata auto quick perms
+> >   
+> >   _register_cleanup "_cleanup_files"
+> >   tag="added by qa $seq"
+> > 
+> > base-commit: a75c5f50584e03ca7862ad51f48efd2d524d1dc5
 
-Same here, and the sentence also seems unfinished. So:
-
-"Turn the snapshot "snap1" back to read-only mode."
-
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap1 ro true
-> +
-> +# Set the subvolume back to read-write mode to make orphans of the second
-> +# snapshot to look like:
-
-Same here, it's the snapshot "snap2" and not the subvolume.
-
-"Set the snapshot "snap2" to read-write mode and turn several inodes
-to orphans, so
-that the snapshot will look like this:"
-
-> +#
-> +# .                                                                  (ino 256)
-> +# |--- (orphan) changed_subcase1.file                                (ino 259)
-> +# |--- (orphan) changed_subcase2.file                                (ino 260)
-> +# |--- (orphan) changed_subcase1.dir/                                (ino 261)
-> +# |--- (orphan) changed_subcase2.dir/                                (ino 263)
-> +# |--- (orphan) new.file                                             (ino 265)
-> +# |--- (orphan) new.dir/                                             (ino 266)
-> +#
-> +# Note: Same notice as above. Mention that orphan inodes don't have
-> +# names(paths).
-> +#
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro false
-> +exec 81<$SCRATCH_MNT/snap2/changed_subcase1.file
-> +exec 82<$SCRATCH_MNT/snap2/changed_subcase1.dir
-> +exec 83<$SCRATCH_MNT/snap2/changed_subcase2.file
-> +exec 84<$SCRATCH_MNT/snap2/changed_subcase2.dir
-> +exec 85<$SCRATCH_MNT/snap2/new.file
-> +exec 86<$SCRATCH_MNT/snap2/new.dir
-> +unlink $SCRATCH_MNT/snap2/changed_subcase1.file
-> +unlink $SCRATCH_MNT/snap2/changed_subcase1.dir/foo
-> +rmdir $SCRATCH_MNT/snap2/changed_subcase1.dir
-> +unlink $SCRATCH_MNT/snap2/changed_subcase2.file
-> +unlink $SCRATCH_MNT/snap2/changed_subcase2.dir/foo
-> +rmdir $SCRATCH_MNT/snap2/changed_subcase2.dir
-> +unlink $SCRATCH_MNT/snap2/new.file
-> +rmdir $SCRATCH_MNT/snap2/new.dir
-> +
-> +# Turn the subvolume back to read-only mode as snapshots
-
-Same here, it's snapshot "snap2" and not the subvolume.
-The sentence also seems unfinished.
-
-"Turn the snapshot "snap2" back to read-only mode."
-
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro true
-> +
-> +# Test that a full send operation can handle orphans with no paths
-> +_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
-> +
-> +# Test that an incremental send operation can handle orphans.
-> +#
-> +# Here're descriptions for the details:
-> +#
-> +# Case 1: new.file and new.dir (BTRFS_COMPARE_TREE_NEW)
-> +#        |  send snapshot  | action
-> +#  --------------------------------
-> +#  nlink |        0        | ignore
-> +#
-> +# They're new inodes in the send snapshots, while they don't have paths.
-
-snapshots -> snapshot
-
-"They are new inodes in the send snapshot ("snap2"), but they don't
-have paths because they have no links".
-
-> +# Test that the send operation can ignore them in order not to generate
-> +# the creation commands for them. Or it will fail in retrieving their
-> +# current paths.
-
-Mentioning the error would be useful:
-
- "... Or it will fail, with -ENOENT, when trying to generate paths for them."
-
-Other than those minor things, it looks good to me.
-Test passes on a patched kernel and fails on an unpatched kernel.
-
-Thanks so much for doing this!
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-
-> +#
-> +#
-> +# Case 2: deleted.file and deleted.dir (BTRFS_COMPARE_TREE_DELETED)
-> +#       | parent snapshot | action
-> +# ----------------------------------
-> +# nlink |        0        | as usual
-> +#
-> +# They're deleted in the parent snapshots but become orphans with no
-> +# paths. Test that no deletion commands will be generated as usual.
-> +# This case didn't fail before.
-> +#
-> +#
-> +# Case 3: changed_*.file and changed_*.dir (BTRFS_COMPARE_TREE_CHANGED)
-> +#           |       | parent snapshot | send snapshot | action
-> +# -----------------------------------------------------------------------
-> +# subcase 1 | nlink |        0        |       0       | ignore
-> +# subcase 2 | nlink |       >0        |       0       | new_gen(deletion)
-> +#
-> +# In subcase 1, test that the send operation can ignore them without trying
-> +# to generate any commands.
-> +#
-> +# In subcase 2, test that the send operation can generate an unlink command
-> +# for that file and test that it can generate a rename command for the
-> +# non-empty directory first and a rmdir command to remove it finally. Or
-> +# the receive operation will fail with a wrong unlink on a non-empty
-> +# directory.
-> +#
-> +_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
-> +                    $SCRATCH_MNT/snap2
-> +
-> +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-> +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-> +       -x $SCRATCH_MNT/snap2/snap1 $SCRATCH_MNT/snap2
-> +
-> +# Recreate the filesystem by receiving both send streams and verify we get
-> +# the same content that the original filesystem had.
-> +exec 71>&-
-> +exec 72>&-
-> +exec 73>&-
-> +exec 74>&-
-> +exec 81>&-
-> +exec 82>&-
-> +exec 83>&-
-> +exec 84>&-
-> +exec 85>&-
-> +exec 86>&-
-> +_scratch_unmount
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Add the first snapshot to the new filesystem by applying the first send
-> +# stream.
-> +_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-> +
-> +# Test the incremental send stream
-> +_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
-> +
-> +$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-> +$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/snap2
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/278.out b/tests/btrfs/278.out
-> new file mode 100644
-> index 00000000..82b93b4e
-> --- /dev/null
-> +++ b/tests/btrfs/278.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 278
-> +OK
-> +OK
-> --
-> 2.37.1
->
