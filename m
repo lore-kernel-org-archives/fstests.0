@@ -2,262 +2,211 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B29C1C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Oct 2022 11:11:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93CD7C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Oct 2022 18:16:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229990AbiJRLLj (ORCPT
+        id S229543AbiJRSQp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Oct 2022 07:11:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60008 "EHLO
+        Tue, 18 Oct 2022 14:16:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58676 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229890AbiJRLLj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Oct 2022 07:11:39 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE4BB8768F
-        for <fstests@vger.kernel.org>; Tue, 18 Oct 2022 04:11:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1666091496;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0rL1OOo1oTyl8o49xI4/ME6aKEAO616FTJYfN4p7neA=;
-        b=GdySTRz6inEuJH8PzadgpPxuqGfNxcybVcuKPgT+WpvjclHYRzFiZIjQL2GY35EItp5cIb
-        qUIitCDQzUivSrsyjOEiokLTqypveE1lT0JFaDSFlRAff0V1jDcD+iaQtzGbfFUdDE4u80
-        9DwUz2qbHQAZ9Dcs7+8Ubbd/KMPn3y8=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-240-45mTH5lDPgeHP8CQP6A6fg-1; Tue, 18 Oct 2022 07:11:34 -0400
-X-MC-Unique: 45mTH5lDPgeHP8CQP6A6fg-1
-Received: by mail-pf1-f199.google.com with SMTP id n56-20020a056a000d7800b00562b27194d1so7636841pfv.19
-        for <fstests@vger.kernel.org>; Tue, 18 Oct 2022 04:11:34 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0rL1OOo1oTyl8o49xI4/ME6aKEAO616FTJYfN4p7neA=;
-        b=4ZHiaXHp0X0/KAId7o9TrlIbmnUJojZzVZraVJNwzpG3KFADtXSjE93F594suxfubE
-         yjT7ph8Ugd1m3xXu2RBUhAGuwcQF3Kths0EZdFrMSNmpzZ/N3jHahM1c330J1pSc2VRO
-         UjgMxGcEw9+pxmhyr+F7jTQl9cBiF+N5fm6fyu0b3KX5C/Z9nGqu/+0qpOWbLTrDVww3
-         mIqHgwXIP3gx/klYSBGMxgTS9EDufoavC7vUQiEg9Y/c5mAao/eR9D//hHKrkqQ+lh78
-         l+oUBozuOJ8xm/SjWx3SVEtyFY/YLerQZtxC1GCi1QxOxodypbNcQRk3kqyQGKkGWtC+
-         6Mcw==
-X-Gm-Message-State: ACrzQf1klCeRtwDCPDMFlIcK6LJK2ObceKpDkKy5o/tycgRcTVi9ozFd
-        ts7Qm5J1eMwwh3BA6rxUGVvUVY8Ji3zgKaqe8jwG4D3Zloz85z+eV5v6zrqzgisbZn1h0GbyVVE
-        T8q5dOzy4KuGw1xdLAQ==
-X-Received: by 2002:a17:90b:4d8c:b0:20d:2935:7058 with SMTP id oj12-20020a17090b4d8c00b0020d29357058mr38361107pjb.86.1666091493121;
-        Tue, 18 Oct 2022 04:11:33 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM58M27WQR3283HkkCBFH6uN1hmQJXNI8eZezWrtDK2iQxbDqfKYCq0Jjt6x4ZBICUEIFgfABQ==
-X-Received: by 2002:a17:90b:4d8c:b0:20d:2935:7058 with SMTP id oj12-20020a17090b4d8c00b0020d29357058mr38361070pjb.86.1666091492663;
-        Tue, 18 Oct 2022 04:11:32 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id p1-20020a1709027ec100b00172973d3cd9sm8341361plb.55.2022.10.18.04.11.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Oct 2022 04:11:31 -0700 (PDT)
-Date:   Tue, 18 Oct 2022 19:11:27 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-Cc:     "brauner@kernel.org" <brauner@kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] Add more suid/sgid related cases to perms group
-Message-ID: <20221018111127.kjoo6vqjwkhncca6@zlang-mailbox>
-References: <1666066330-2006-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <20221018061613.ul7nqupy3g34vjqe@zlang-mailbox>
- <a5c5b77d-efe7-6535-90c4-f2e0c4ffe65b@fujitsu.com>
+        with ESMTP id S229705AbiJRSQo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Oct 2022 14:16:44 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4509833436
+        for <fstests@vger.kernel.org>; Tue, 18 Oct 2022 11:16:43 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id EE36EB820EC
+        for <fstests@vger.kernel.org>; Tue, 18 Oct 2022 18:16:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9AC72C433D6;
+        Tue, 18 Oct 2022 18:16:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1666117000;
+        bh=U9tblLfgIT/spVxHTS81sl8QNOWD+4+sBmXnDwfyzKk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=oDibwypjz81hqsf5wSN1fHJrROrz5AlzvMjeUlzYwv+yY7HOwNfko6F+KD3sxD7YG
+         nCkQ5YclonByYCK5PJmOicfstMLehZAI3dy2QEX+xnoOiLeDjygaEwqqpBxuMTiNct
+         5o9kjK2Gj7qQPU+mM88E84mSgAdJdK3RsRTrnXuqJu/wyUL9LySkYVm5yL+r1POZAY
+         NDx11FVwz2hZb5z6AKqegz355+ow9Nkw967Fn95pNyBy18p9ebhy3T20BbxS8iGpck
+         qM74A8b6LkCGNFeVME9+aSPSD7b70Au5VVLILmrHU4Bs315SQU2so6xFGju9E3E5uJ
+         TIGEpvSV1OMKQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org
+Subject: [xfstests-bld PATCH] Use grep -E instead of egrep
+Date:   Tue, 18 Oct 2022 11:16:26 -0700
+Message-Id: <20221018181626.154383-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.38.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a5c5b77d-efe7-6535-90c4-f2e0c4ffe65b@fujitsu.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 18, 2022 at 06:25:18AM +0000, xuyang2018.jy@fujitsu.com wrote:
-> Hi Zorro
-> 
-> > On Tue, Oct 18, 2022 at 12:12:10PM +0800, Yang Xu wrote:
-> >> Just use the following ways to look for these cases
-> >> 1) grep -nsr suid or grep -nsr sgid
-> >> 2) grep -nsr chmod | grep "+s"
-> >> 3) grep -nsr ISUID/ISGID then search execute program ie(vfstest/idmapped_mounts)
-> >>
-> >> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> >> ---
-> >>   tests/generic/193 | 2 +-
-> >>   tests/generic/355 | 2 +-
-> >>   tests/generic/673 | 2 +-
-> >>   tests/generic/674 | 2 +-
-> >>   tests/generic/683 | 2 +-
-> >>   tests/generic/684 | 2 +-
-> >>   tests/generic/685 | 2 +-
-> >>   tests/generic/686 | 2 +-
-> >>   tests/generic/687 | 2 +-
-> >>   tests/overlay/015 | 2 +-
-> >>   10 files changed, 10 insertions(+), 10 deletions(-)
-> > 
-> > According to the definition of "perms" group:
-> >    perms                   access control and permission checking
-> > 
-> > It's not only about suid/sgid. I try to check more (roughly), find below
-> > cases[1] might be related with "perms", please double check and add more proper
-> > cases into perms group (if there're more).
-> 
-> Ok, will do. Can you share which simple way you used to find these cases?
+From: Eric Biggers <ebiggers@google.com>
 
-No special way, just "grep -rsni xxx" some key words then look into the case
-source code to double check. The key words include permission, acl, chown,
-chmod, suid, sgid, etc.
+Avoid some of the "egrep is obsolescent" warnings that the latest
+version of GNU grep prints.
 
-Thanks,
-Zorro
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ run-fstests/get-results                          |  8 ++++----
+ setup-buildchroot                                |  2 +-
+ test-appliance/android-setup-partitions          | 10 +++++-----
+ test-appliance/files/usr/local/sbin/gce-shutdown | 16 ++++++++--------
+ test-appliance/files/usr/local/sbin/get-results  |  8 ++++----
+ 5 files changed, 22 insertions(+), 22 deletions(-)
 
-> 
-> Best Regards
-> Yang Xu
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > [1]
-> > generic/099, generic/105, generic/128, generic/237, generic/314, generic/318,
-> > generic/319, generic/362, generic/363, generic/364, generic/365, generic/366,
-> > generic/367, generic/368, generic/369, generic/370, generic/375, generic/444,
-> > generic/698, generic/699, overlay/004, overlay/008, overlay/023
-> > 
-> >>
-> >> diff --git a/tests/generic/193 b/tests/generic/193
-> >> index ddaff69b..e2710b07 100755
-> >> --- a/tests/generic/193
-> >> +++ b/tests/generic/193
-> >> @@ -7,7 +7,7 @@
-> >>   # Test permission checks in ->setattr
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest metadata auto quick
-> >> +_begin_fstest metadata auto quick perms
-> >>   
-> >>   _register_cleanup "_cleanup_files"
-> >>   tag="added by qa $seq"
-> >> diff --git a/tests/generic/355 b/tests/generic/355
-> >> index 4bc69eeb..7c108d1b 100755
-> >> --- a/tests/generic/355
-> >> +++ b/tests/generic/355
-> >> @@ -7,7 +7,7 @@
-> >>   # Test clear of suid/sgid on direct write.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto quick
-> >> +_begin_fstest auto quick perms
-> >>   
-> >>   # Import common functions.
-> >>   . ./common/filter
-> >> diff --git a/tests/generic/673 b/tests/generic/673
-> >> index 4d8dc07e..6d1f49ea 100755
-> >> --- a/tests/generic/673
-> >> +++ b/tests/generic/673
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a reflink.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Import common functions.
-> >>   . ./common/filter
-> >> diff --git a/tests/generic/674 b/tests/generic/674
-> >> index a3130249..c3ff1b7b 100755
-> >> --- a/tests/generic/674
-> >> +++ b/tests/generic/674
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a deduplication.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Import common functions.
-> >>   . ./common/filter
-> >> diff --git a/tests/generic/683 b/tests/generic/683
-> >> index 4c93346d..302f8bb2 100755
-> >> --- a/tests/generic/683
-> >> +++ b/tests/generic/683
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a fallocate.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Override the default cleanup function.
-> >>   _cleanup()
-> >> diff --git a/tests/generic/684 b/tests/generic/684
-> >> index 03481e69..19ccb228 100755
-> >> --- a/tests/generic/684
-> >> +++ b/tests/generic/684
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a fpunch.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Override the default cleanup function.
-> >>   _cleanup()
-> >> diff --git a/tests/generic/685 b/tests/generic/685
-> >> index 6a108842..a58eccda 100755
-> >> --- a/tests/generic/685
-> >> +++ b/tests/generic/685
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a fzero.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Override the default cleanup function.
-> >>   _cleanup()
-> >> diff --git a/tests/generic/686 b/tests/generic/686
-> >> index 4279f76b..ef9ea47a 100755
-> >> --- a/tests/generic/686
-> >> +++ b/tests/generic/686
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a finsert.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Override the default cleanup function.
-> >>   _cleanup()
-> >> diff --git a/tests/generic/687 b/tests/generic/687
-> >> index 78cb6202..f4a1c1bb 100755
-> >> --- a/tests/generic/687
-> >> +++ b/tests/generic/687
-> >> @@ -7,7 +7,7 @@
-> >>   # Functional test for dropping suid and sgid bits as part of a fcollapse.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto clone quick
-> >> +_begin_fstest auto clone quick perms
-> >>   
-> >>   # Override the default cleanup function.
-> >>   _cleanup()
-> >> diff --git a/tests/overlay/015 b/tests/overlay/015
-> >> index fd23e373..f0c05579 100755
-> >> --- a/tests/overlay/015
-> >> +++ b/tests/overlay/015
-> >> @@ -7,7 +7,7 @@
-> >>   # SGID bit inheritance over whiteout.
-> >>   #
-> >>   . ./common/preamble
-> >> -_begin_fstest auto quick whiteout
-> >> +_begin_fstest auto quick whiteout perms
-> >>   
-> >>   # Import common functions.
-> >>   . ./common/filter
-> >> -- 
-> >> 2.27.0
-> >>
-> > 
+diff --git a/run-fstests/get-results b/run-fstests/get-results
+index ebaf701..d899c33 100755
+--- a/run-fstests/get-results
++++ b/run-fstests/get-results
+@@ -21,12 +21,12 @@ then
+     IN=$(/bin/ls -t logs/log.* | head -1)
+ fi
+ 
+-egrep "$REGEXP" "$IN"
++grep -E "$REGEXP" "$IN"
+ if test -n "$do_failure"; then
+-    b=$(egrep ^BEGIN "$IN" | wc -l)
+-    e=$(egrep ^END "$IN" | wc -l)
++    b=$(grep -E ^BEGIN "$IN" | wc -l)
++    e=$(grep -E ^END "$IN" | wc -l)
+     if test "$b" -gt "$e" ; then
+-	l=$(egrep ^BEGIN "$IN" | tail -n 1 | sed -e 's/BEGIN //')
++	l=$(grep -E ^BEGIN "$IN" | tail -n 1 | sed -e 's/BEGIN //')
+ 	echo " "
+ 	echo Missing END "$l"
+     fi
+diff --git a/setup-buildchroot b/setup-buildchroot
+index 6cf14b3..ff2b01f 100755
+--- a/setup-buildchroot
++++ b/setup-buildchroot
+@@ -421,7 +421,7 @@ get_schroot_config()
+     then
+ 	(cd $SCHROOT_CHROOT_D ;
+ 	 find . -maxdepth 1 -type f |
+-	     egrep '^./[a-ZA-Z0-9_-][a-ZA-Z0-9_.-]*$' |
++	     grep -E '^./[a-ZA-Z0-9_-][a-ZA-Z0-9_.-]*$' |
+ 	     xargs cat)
+     fi
+ }
+diff --git a/test-appliance/android-setup-partitions b/test-appliance/android-setup-partitions
+index 2eb5fca..1f4bb7e 100755
+--- a/test-appliance/android-setup-partitions
++++ b/test-appliance/android-setup-partitions
+@@ -57,7 +57,7 @@ pprint_bytes()
+ get_partition_number()
+ {
+     local dev=$1
+-    echo $dev | egrep -o '[0-9]+$'
++    echo $dev | grep -E -o '[0-9]+$'
+ }
+ 
+ # Get the size in bytes of the given partition, as stored in the partition table
+@@ -108,7 +108,7 @@ find_userdata_partition()
+     if [ ! -b $dev ]; then
+ 	die "Unable to find the userdata partition"
+     fi
+-    if ! echo $dev | egrep -q '[0-9]+$'; then
++    if ! echo $dev | grep -E -q '[0-9]+$'; then
+ 	die "Name of userdata device node has an unexpected format: \"$dev\""
+     fi
+     echo $dev
+@@ -118,7 +118,7 @@ find_userdata_partition()
+ find_dm_device_by_name()
+ {
+     local dm_device_name=$1
+-    if ls /sys/class/block/ | egrep -q 'dm-[0-9]+$'; then
++    if ls /sys/class/block/ | grep -E -q 'dm-[0-9]+$'; then
+ 	for dir in /sys/class/block/dm-*; do
+ 	    if [ $dm_device_name = $(< $dir/dm/name) ]; then
+ 		local dev=/dev/block/$(basename $dir)
+@@ -173,8 +173,8 @@ validate_dm_device()
+ 	;;
+     esac
+ 
+-    if ! echo "$start_sector" | egrep -q '^[0-9]+$' ||
+-       ! echo "$raw_devno" | egrep -q '^[0-9]+:[0-9]+$'; then
++    if ! echo "$start_sector" | grep -E -q '^[0-9]+$' ||
++       ! echo "$raw_devno" | grep -E -q '^[0-9]+:[0-9]+$'; then
+ 	die "device-mapper device \"$dm_devname\" uses target with" \
+ 	    "unsupported table format: ${table[@]}"
+     fi
+diff --git a/test-appliance/files/usr/local/sbin/gce-shutdown b/test-appliance/files/usr/local/sbin/gce-shutdown
+index 9ebe008..0ca1d32 100755
+--- a/test-appliance/files/usr/local/sbin/gce-shutdown
++++ b/test-appliance/files/usr/local/sbin/gce-shutdown
+@@ -24,13 +24,13 @@ REGEXP_FAILURE="(^CMDLINE)|(^FSTEST)|(^MNTOPTS)|(^CPUS:)|(^MEM:)|(^BEGIN)|(^Fail
+ 
+ function gen_xfstests_summary()
+ {
+-    egrep "$REGEXP" < /results/runtests.log > /results/summary
++    grep -E "$REGEXP" < /results/runtests.log > /results/summary
+ 
+-    egrep "$REGEXP_FAILURE" < /results/runtests.log > /results/failures
++    grep -E "$REGEXP_FAILURE" < /results/runtests.log > /results/failures
+     printf "\n" >> /results/failures
+     sed -n -f /usr/local/lib/get-check-failures.sed < /results/runtests.log >> /results/failures
+     printf "\n" >> /results/failures
+-    egrep "$SYSLOG_RE_FAILURE" < /results/syslog >> /results/failures
++    grep -E "$SYSLOG_RE_FAILURE" < /results/syslog >> /results/failures
+ }
+ 
+ BLK_REGEXP="( Linux version )|(^CMDLINE)|(^FSTEST)|(^MNTOPTS)|(^CPUS:)|(^MEM:)|(^BEGIN)|(^MOUNT_OPTIONS)|(^MKFS_OPTIONS)|(^EXT4-fs error)|(WARNING)|(^_check_)|(inconsistent)|(^Shutdown reason)"
+@@ -38,24 +38,24 @@ BLK_REGEXP_FAILURE="( Linux version )|(^CMDLINE)|(^FSTEST)|(^MNTOPTS)|(^CPUS:)|(
+ 
+ function gen_blktests_summary()
+ {
+-    run_tests=$(egrep "(\[failed\])|(\[passed\])" < /results/runtests.log | awk '{print $1}')
+-    failed_tests=$(egrep "\[failed\]" < /results/runtests.log | awk '{print $1}')
++    run_tests=$(grep -E "(\[failed\])|(\[passed\])" < /results/runtests.log | awk '{print $1}')
++    failed_tests=$(grep -E "\[failed\]" < /results/runtests.log | awk '{print $1}')
+ 
+     nr_run="$(echo $run_tests | wc -w)"
+     nr_failed="$(echo $failed_tests | wc -w)"
+ 
+-    egrep "$BLK_REGEXP" < /results/runtests.log > /results/summary
++    grep -E "$BLK_REGEXP" < /results/runtests.log > /results/summary
+     echo "Run: $(echo $run_tests)" >> /results/summary
+     echo "Failures: $(echo $failed_tests)" >> /results/summary
+     echo "Failed $nr_failed of $nr_run tests" >> /results/summary
+     grep ^END < /results/runtests.log >> /results/summary
+ 
+-    egrep "$BLK_REGEXP_FAILURE" < /results/runtests.log >> /results/failures
++    grep -E "$BLK_REGEXP_FAILURE" < /results/runtests.log >> /results/failures
+     echo "Run: $(echo $run_tests)" >> /results/failures
+     echo "Failures: $(echo $failed_tests)" >> /results/failures
+     echo "Failed $nr_failed of $nr_run tests" >> /results/failures
+     grep ^END < /results/runtests.log >> /results/failures
+-    egrep "$SYSLOG_RE_FAILURE" < /results/syslog >> /results/failures
++    grep -E "$SYSLOG_RE_FAILURE" < /results/syslog >> /results/failures
+ }
+ 
+ reason=$(gce_attribute shutdown_reason)
+diff --git a/test-appliance/files/usr/local/sbin/get-results b/test-appliance/files/usr/local/sbin/get-results
+index 7169b12..053c45c 100755
+--- a/test-appliance/files/usr/local/sbin/get-results
++++ b/test-appliance/files/usr/local/sbin/get-results
+@@ -21,12 +21,12 @@ then
+     IN=-
+ fi
+ 
+-egrep "$REGEXP" "$IN"
++grep -E "$REGEXP" "$IN"
+ if test -n "$do_failure"; then
+-    b=$(egrep ^BEGIN "$IN" | wc -l)
+-    e=$(egrep ^END "$IN" | wc -l)
++    b=$(grep -E ^BEGIN "$IN" | wc -l)
++    e=$(grep -E ^END "$IN" | wc -l)
+     if test "$b" -gt "$e" ; then
+-	l=$(egrep ^BEGIN "$IN" | tail -n 1 | sed -e 's/BEGIN //')
++	l=$(grep -E ^BEGIN "$IN" | tail -n 1 | sed -e 's/BEGIN //')
+ 	echo " "
+ 	echo Missing END "$l"
+     fi
+-- 
+2.38.0
 
