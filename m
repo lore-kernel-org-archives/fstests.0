@@ -2,61 +2,71 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F1DEC433FE
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Oct 2022 18:26:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCED7C433FE
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Oct 2022 22:45:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229711AbiJRS0f (ORCPT
+        id S229932AbiJRWpJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Oct 2022 14:26:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52952 "EHLO
+        Tue, 18 Oct 2022 18:45:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229756AbiJRS0d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Oct 2022 14:26:33 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E60F11AD93;
-        Tue, 18 Oct 2022 11:26:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=AEJf2mNYwXZ5xrVD3xYZy+5u0F73izIOkv8ZsjU50Ng=; b=MzBS007LU+n50xTa/QwcK9g5cK
-        CRC3WNNnL3E6oQsHPvVR/Yy9qp+SOTG/culz+OokdCI2bsKrE9SATVM6No4+N2XjaFWnMHj8kO6NO
-        Xtz77p07hLugAK/FG2id8GrdpUh+ANUXxqqvL7hJzaU2MWW1rKG0Av81DpufsUqwn3DY4m7xbq9kD
-        x53uB9GTlVZya0y/CMs8fT1lplECe4i8KYfV/O3hwreSTi0DIJcnOW4dv3YCXEdTg2ff0g95m3sWv
-        r89tiLpFXqXNuOXJt8Vb24on88Qw/DrKSZ+lsbETpy+i1c3c7gcmu31ZYm7wgszp51LcfiNBj9X2W
-        ftVQEv+Q==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1okrIG-009uqz-40; Tue, 18 Oct 2022 18:26:24 +0000
-Date:   Tue, 18 Oct 2022 11:26:24 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Cc:     Zorro Lang <zlang@redhat.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: add btrfs tests exercising raid to the raid
- group
-Message-ID: <Y07v0MWnbCa0zLhT@bombadil.infradead.org>
-References: <20221017085317.96172-1-johannes.thumshirn@wdc.com>
+        with ESMTP id S229893AbiJRWpJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Oct 2022 18:45:09 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 690681D655;
+        Tue, 18 Oct 2022 15:45:07 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 21228B82113;
+        Tue, 18 Oct 2022 22:45:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D739DC433C1;
+        Tue, 18 Oct 2022 22:45:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1666133104;
+        bh=zPjs1/nYnOapjCl5X9K4Hjy/6FZ6j+gbi68c8ECPZXE=;
+        h=Subject:From:To:Cc:Date:From;
+        b=RKy7YADLyutxf/nHtZPO0gXYo9Fz47B/ttKY1fEs6jOrMmb0q+kxi7PcY/X0Pm3iY
+         2OQKoi/YwqhhB6ujiRrdnqjiG60p8ulzYQK27Tr5dg1JpdQHrngYKVmZ5k67T9AoSI
+         qSYL6qYDGe7lsgvbHkr2y1MBK7PPpvFZ9V6s2UciGhLsKzAryDQqs4RUYCB3Lplqpx
+         Zhv9lb3i8A4w/0Xye40WEE+9FrXImbCYGbIGJkc7SqinhwuYCVnyCHHBOBnxNcCDe1
+         8GFCrKkVxtk/zKDGHKRNR63PiVk8/PBDqWYujTJklTKjq3nDKkIFai1nuyN2jjGZL7
+         C6MnfmoSQH6Jg==
+Subject: [PATCHSET 0/1] fstests: random fixes for v2022.10.16
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     djwong@kernel.org, guaneryu@gmail.com, zlang@redhat.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Tue, 18 Oct 2022 15:45:04 -0700
+Message-ID: <166613310432.868003.6099082434184908563.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221017085317.96172-1-johannes.thumshirn@wdc.com>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 17, 2022 at 01:53:17AM -0700, Johannes Thumshirn wrote:
-> Several tests for btrfs exercise the raid code, but are not added to the
-> raid group. Most of these tests pull in raid via
-> '_btrfs_get_profile_configs()'.
-> 
-> Other tests have a '_require_btrfs_fs_feature raid56' which also pulls in
-> raid, but are not added to the raid group.
-> 
-> Reported-by: Luis Chamberlain <mcgrof@kernel.org>
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Hi all,
 
-Shouldn't we have a raid56 group alone too? Then distros that simply
-don't support it can skip those tests.
- 
-  Luis
+Here's the usual odd fixes for fstests.
+
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
+---
+ common/populate |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
