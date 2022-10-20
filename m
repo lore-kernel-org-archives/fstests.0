@@ -2,265 +2,130 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22F74C433FE
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Oct 2022 00:11:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5061C4332F
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Oct 2022 03:03:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230089AbiJTALj (ORCPT
+        id S229786AbiJTDDM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Oct 2022 20:11:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56236 "EHLO
+        Wed, 19 Oct 2022 23:03:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229675AbiJTALi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2022 20:11:38 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC3C21C4913;
-        Wed, 19 Oct 2022 17:11:35 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 4CBF8CE2465;
-        Thu, 20 Oct 2022 00:11:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E9F1C433D6;
-        Thu, 20 Oct 2022 00:11:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666224692;
-        bh=wDS9z8CGlnO6Y6swJ/5DTK2JfvC6zDDT5yljSRvxlhc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Y1nSdEJptZOmgO6IH/LwuE6Jom5LAlUPRbFLANDuXJ9F8CdPM1TeklTNTgCjU+neF
-         UPC925sSKPBmVfylOZTD0hFUSfca7b+c5TZhVyIneErur6FqvfjdwVloIV27Um7qJP
-         RYdRhSvIMQvwaBAO1K4h0/ZwMXJmScsYES6HQzA0Sxqw4xiVnIQLeg50yH08ZeLVak
-         txZulTTMcfIB/XfnOpEWJH3Yovh2v/K88QSf0wf3OSagy9BSSccJwL0urj7k39zzaT
-         /7Dk905C1mpfu5Fq6rrUHkoXNXjMs8SlRlVipBe1JviAu1zZCNWh4mazdcOmpo2k1s
-         Y0xa2N+dY3fuA==
-Date:   Wed, 19 Oct 2022 17:11:32 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+        with ESMTP id S229612AbiJTDDF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Oct 2022 23:03:05 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55E5A192B8C;
+        Wed, 19 Oct 2022 20:03:03 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 29K32h5F005694
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 19 Oct 2022 23:02:44 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1666234965; bh=unpXEP1E407PXOt0MAIPUHFNcJ8BsWd8lWLW8JLxFrk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=ohsPXQ+2MGQPzgzUxvTPOzQNuqKneVYxIG0jU45R8DCrhpjdZu57G9TTwtaHh+3xr
+         qtrDlfT9gkuPF0VHOVBt+gJaLmEm9Fe7ZOTTFIfXpeT61oAPw87ELZFBEBGS6uTMVi
+         +Iv/zGZOzgRwPfuNOdE3U8oxZBx9VfYylnLye23aa4GqNCe4jxhJEOFYQv4phLI/Zb
+         KXbtPw8XbmJT/kq85gpVcrNsdUyfpKdplLbQSovE9xIy9fjrA1PHr0i7wDywakhIws
+         yOijXqVpzG5yqVTRdkY/8kg9nO75fiUGH577jgQuyuCWM0URcoIPcoN4scfcA1Bzub
+         x69LybpDA2w9g==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 36C1E15C3AD1; Wed, 19 Oct 2022 23:02:43 -0400 (EDT)
+Date:   Wed, 19 Oct 2022 23:02:43 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
         fstests@vger.kernel.org
 Subject: Re: [PATCH] generic: check if one fs can detect damage at/after fs
  thaw
-Message-ID: <Y1CSNK1QHnQOYkC1@magnolia>
+Message-ID: <Y1C6U7KkBwndZiww@mit.edu>
 References: <20221019052955.30484-1-wqu@suse.com>
  <Y1AZl3o+iSqNZgMw@magnolia>
- <cb39519d-8e31-5f39-71fe-ebb0a886780e@gmx.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cb39519d-8e31-5f39-71fe-ebb0a886780e@gmx.com>
+In-Reply-To: <Y1AZl3o+iSqNZgMw@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 20, 2022 at 06:52:36AM +0800, Qu Wenruo wrote:
-> 
-> 
-> On 2022/10/19 23:36, Darrick J. Wong wrote:
-> > On Wed, Oct 19, 2022 at 01:29:55PM +0800, Qu Wenruo wrote:
-> > > [BACKGROUND]
-> > > There is bug report from btrfs mailing list that, hiberation can allow
+On Wed, Oct 19, 2022 at 08:36:55AM -0700, Darrick J. Wong wrote:
+> On Wed, Oct 19, 2022 at 01:29:55PM +0800, Qu Wenruo wrote:
+> > [BACKGROUND]
+> > There is bug report from btrfs mailing list that, hiberation can allow
+> > one to modify the frozen filesystem unexpectedly (using another OS).
+> > (https://lore.kernel.org/linux-btrfs/83bf3b4b-7f4c-387a-b286-9251e3991e34@bluemole.com/)
 > > 
-> > "hibernation".
+> > Later btrfs adds the check to make sure the fs is not changed
+> > unexpectedly, to prevent corruption from happening.
 > > 
-> > > one to modify the frozen filesystem unexpectedly (using another OS).
-> > > (https://lore.kernel.org/linux-btrfs/83bf3b4b-7f4c-387a-b286-9251e3991e34@bluemole.com/)
-> > > 
-> > > Later btrfs adds the check to make sure the fs is not changed
-> > > unexpectedly, to prevent corruption from happening.
-> > > 
-> > > [TESTCASE]
-> > > Here the new test case will create a basic filesystem, fill it with
-> > > something by using fsstress, then sync the fs, and finally freeze the fs.
-> > > 
-> > > Then corrupt the whole fs by overwriting the block device with 0xcd
-> > > (default seed from xfs_io pwrite command).
-> > > 
-> > > Finally we thaw the fs, and try if we can create a new file.
-> > > 
-> > > for EXT4, it will detect the corruption at touch time, causing -EUCLEAN.
+> > [TESTCASE]
+> > Here the new test case will create a basic filesystem, fill it with
+> > something by using fsstress, then sync the fs, and finally freeze the fs.
 > > 
-> > Heh, yikes.  That's pretty scary for ext4 since it still uses buffer
-> > heads from the block device to read/store metadata and older kernels are
-> > known to have crashing problems if (say) the feature bits in the primary
-> > superblock get changed.
-> > 
-> > I wonder if this should force errors=remount-ro for ext4 since
-> > errors=continue is dangerous and erorrs=panic will crash the test
-> > machine.
-> > 
-> > > For Btrfs, it will detect the corruption at thaw time, marking the
-> > > fs RO immediately, and later touch will return -EROFS.
-> > 
-> > What /does/ btrfs check, specifically?
-> 
-> - Read sb without using cache
-> 
-> - The same mount time sanity checks on the superblock
->   Which already implies an fsid check.
-> 
-> - Extra generation check
->   To make sure no one has touched out cake.
+> > Then corrupt the whole fs by overwriting the block device with 0xcd
+> > (default seed from xfs_io pwrite command).
 
-Ah, ok, so you compare the ondisk super with the incore version and
-complain if they don't match.  Makes sense.
+It seems to me that the test case is testing something very different
+from the originally stated concern, and what btrfs is testing.
 
-> >  Reading this makes me wonder if
-> > xfs shouldn't re-read its primary super on thaw to check that nobody ran
-> > us over with a backhoe, though that wouldn't help us in the hibernation
-> > case.  (Or does it?  Is userspace/systemd finally smart enough to freeze
-> > filesystems?)
-> 
-> I doubt if userspace/systemd is that smart, because the error report is
-> running not-that-old distro.
-> 
-> Especially for hibernation there is really no way for anyone to know if
-> our cakes are touched.
+The original concern is "something else modified the file system",
+which btrfs is testing by checking whether the file system generation
+number is different from the last recorded transaction id.
 
-Yeah, short of encrypting the primary super. :)
+The test is "something has trashed the file system by filling the
+block device by 0xcd; let's see how quickly the file system notices"
+which is quite different from the scenario described in the link and
+the commit description a05d3c915314 ("btrfs: check superblock to
+ensure the fs was not modified at thaw time").
 
-> > 
-> > > For XFS, it will detect the corruption at touch time, return -EUCLEAN.
-> > > (Without the cache drop, XFS seems to be very happy using the cache info
-> > > to do the work without any error though.)
-> > 
-> > Yep.
-> > 
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > > ---
-> > >   tests/generic/702     | 61 +++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/generic/702.out |  2 ++
-> > >   2 files changed, 63 insertions(+)
-> > >   create mode 100755 tests/generic/702
-> > >   create mode 100644 tests/generic/702.out
-> > > 
-> > > diff --git a/tests/generic/702 b/tests/generic/702
-> > > new file mode 100755
-> > > index 00000000..fc3624e1
-> > > --- /dev/null
-> > > +++ b/tests/generic/702
-> > > @@ -0,0 +1,61 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 702
-> > > +#
-> > > +# Test if the filesystem can detect the underlying disk has changed at
-> > > +# thaw time.
-> > > +#
-> > > +. ./common/preamble
-> > > +. ./common/filter
-> > > +_begin_fstest freeze quick
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +_supported_fs generic
-> > > +_fixed_by_kernel_commit a05d3c915314 \
-> > > +	"btrfs: check superblock to ensure the fs was not modified at thaw time"
-> > 
-> > Hmmm, it's not very useful for a test failure on (say) xfs spitting
-> > out a message about how this "may" get fixed with a btrfs patch.  How
-> > about:
-> > 
-> > $FSTYP = btrfs && _fixed_by_kernel_commit a05d3c915314 \
-> > 	"btrfs: check superbloc..."
-> 
-> That sounds pretty good.
-> 
-> > 
-> > > +
-> > > +# We will corrupt the device completely, thus should not check it after the test.
-> > > +_require_scratch_nocheck
-> > > +_require_freeze
-> > > +
-> > > +# Limit the fs to 512M so we won't waste too much time screwing it up later.
-> > > +_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-> > > +_scratch_mount
-> > > +
-> > > +# Populate the fs with something.
-> > > +$FSSTRESS_PROG -n 500 -d $SCRATCH_MNT >> $seqres.full
-> > > +
-> > > +# Sync to make sure no dirty journal
-> > > +sync
-> > > +
-> > > +# Drop all cache, so later write will need to read from disk, increasing
-> > > +# the chance of detecting the corruption.
-> > > +echo 3 > /proc/sys/vm/drop_caches
-> > > +
-> > > +$XFS_IO_PROG -x -c "freeze" $SCRATCH_MNT
-> > > +
-> > > +# Now screw up the block device
-> > > +$XFS_IO_PROG -f -c "pwrite 0 512M" -c sync $SCRATCH_DEV >> $seqres.full
-> > 
-> > directio and a larger buffer size to speed this up? e.g.
-> > 
-> > $XFS_IO_PROG -d -c 'pwrite -b 1m 0 512M' -c sync $SCRATCH_DEV
-> 
-> I guess no need for directio especially we're doing a sync after the write.
-> Although larger blocksize may only help a little considering by default
-> it's already buffered write.
+> What /does/ btrfs check, specifically?  Reading this makes me wonder if
+> xfs shouldn't re-read its primary super on thaw to check that nobody ran
+> us over with a backhoe, though that wouldn't help us in the hibernation
+> case.  (Or does it?  Is userspace/systemd finally smart enough to freeze
+> filesystems?)
 
-<nod>
+From looking at the commit described below, it appears to do some
+basic superblock sanity checks, and then it checks to see if the last
+commited transaction has changed from what has been recorded in the
+superblock.
 
-> > 
-> > > +
-> > > +# Thaw the fs, it may or may not report error, we will check it manually later.
-> > > +$XFS_IO_PROG -x -c "thaw" $SCRATCH_MNT
-> > 
-> > I'm a little surprised you don't check for btrfs returning an error
-> > here...?
-> 
-> Great you have asked!
-> 
-> This is the special pitfall related to thaw error handling.
-> 
-> If we return an error for .unfreeze_fs hook, the VFS treats it as we
-> failed to thaw the fs, and will still consider the fs frozen.
-> 
-> Thus for now, btrfs only output error message into dmesg during thaw,
-> but always return 0 to workaround it.
-> 
-> We may want a better way for .unfreeze_fs hook to distinguish between
-> "something really went wrong, but please consider it unfreezed" and
-> "nope, please keep it frozen".
+The simple stupid thing I could add in ext4 is to simply make a full
+copy of the ext4 superblock, and if *anything* in that 1k set of bytes
+has changed between the freeze and the thaw, call ext4_error(), and mark
+the file system corrupted.
 
-Ah, I guess it makes sense that you have to access the fs post-thaw to
-find out if it's still alive.
+We've been talking about changing the default for ext4 to remount the
+file system read-only, and if we did this then the behavior would be
+the same as btrfs.  Or maybe in the specific case of the superblock
+has changed between freeze and thaw, we will always remount the file
+system read-only.
 
---D
-
-> Thanks,
-> Qu
+> > For XFS, it will detect the corruption at touch time, return -EUCLEAN.
+> > (Without the cache drop, XFS seems to be very happy using the cache info
+> > to do the work without any error though.)
 > 
-> > 
-> > > +# If the fs detects something wrong, it should trigger error now.
-> > > +# We don't use the error message as golden output, as btrfs and ext4 use
-> > > +# different error number for different reasons.
-> > > +# (btrfs detects the change immediately at thaw time and mark the fs RO, thus
-> > > +#  touch returns -EROFS, while ext4 detects the change at journal write time,
-> > > +#  returning -EUCLEAN).
-> > > +touch $SCRATCH_MNT/foobar >>$seqres.full 2>&1
-> > > +if [ $? -eq 0 ]; then
-> > > +	echo "Failed to detect corrupted fs"
-> > > +else
-> > > +	echo "Detected corrupted fs (expected)"
-> > > +fi
-> > 
-> > But otherwise this test looks reasonable so far.
-> > 
-> > --D
-> > 
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/702.out b/tests/generic/702.out
-> > > new file mode 100644
-> > > index 00000000..c29311ff
-> > > --- /dev/null
-> > > +++ b/tests/generic/702.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 702
-> > > +Detected corrupted fs (expected)
-> > > --
-> > > 2.38.0
-> > > 
+> Yep.
+
+I would suggest not putting this test in generic/NNN, but put it in
+shared, and to let each file system opt-in to this test.  There are a
+whole bunch of file systems such such as jfs, reiserfs, vfat, exfat,
+etc., which could run this test, and depending on the specifics of how
+a file system might behave to determine whether the test "passes" or
+"fails" seems wrong.
+
+After all, what you're really doing is protecting against a specific
+form of "stupid user trick", and other Linux file systems happen to do
+something different when you completely trash the file system by
+overwriting the block device with 0xcd, callign what some other file
+system, whether it be f2fs, exfat, overlayfs, nfs, as a "failure"
+doesn't seem right.
+
+Moving it into shared also means you don't have to add extra checks to
+make sure the test gets skipped if there is no block device to trash
+(for example, if you are testing overlayfs, nfs, tmpfs, etc.)
+
+Cheers,
+
+					- Ted
