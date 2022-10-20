@@ -2,183 +2,105 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB26CC433FE
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Oct 2022 15:00:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FAC8C4332F
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Oct 2022 20:32:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229552AbiJTPA3 (ORCPT
+        id S229679AbiJTUcO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Oct 2022 11:00:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49196 "EHLO
+        Thu, 20 Oct 2022 16:32:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230274AbiJTPA0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2022 11:00:26 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F25FB156267;
-        Thu, 20 Oct 2022 08:00:25 -0700 (PDT)
+        with ESMTP id S229558AbiJTUcN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2022 16:32:13 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E807C1FB797;
+        Thu, 20 Oct 2022 13:32:12 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8E05561BB3;
-        Thu, 20 Oct 2022 15:00:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 744A5C433C1;
-        Thu, 20 Oct 2022 15:00:23 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 92EA1B828D6;
+        Thu, 20 Oct 2022 20:32:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32DADC433C1;
+        Thu, 20 Oct 2022 20:32:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666278025;
-        bh=FWuRBOv4CEW/SgOmhsI6/Vwus8qotrUPHbt4tJDazg0=;
+        s=k20201202; t=1666297930;
+        bh=7xwv/dLv0cVvjzu0MHHnsjyuHU9q5UbTs/+8hnxtDNs=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Tz6tNFwiShnrSbBBs8lPDXvZ3u90IpIija6FoiY7KSBFJtChVt+vucoQTWbG4Lzcn
-         vgHqmAsP0WeJrMezTZD0+YfpkY5ygI+wo30RK/bXfLiRwr32wqlIza7Zc+2MkwnVnj
-         fNuXB6H/pbcpDhuiPSsbmjEJfpqD7GkBUoQXxSCHt1zjzcWtJ48cCBMEQ2h2SldQ4h
-         zpg3B3RANJVQhseHQIluzzrlnAGKpVEFBert4Fx53l1+35zssisvxhqHveHuFoHJgf
-         LwW5L2jABqh4uk65mksu1H6Oo5s9WnRN1CZyOXmD42Cgb3iXwF2K1hhWewXQjyY2NT
-         qn68oP9Z7FflQ==
-Date:   Thu, 20 Oct 2022 23:00:19 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH] generic: check if one fs can detect damage at/after fs
- thaw
-Message-ID: <20221020150019.jp65m3kejbhds6mf@zlang-mailbox>
-References: <20221019052955.30484-1-wqu@suse.com>
+        b=sdJ6HdANe/bQIsRqic7l9F6in0UwAWJdroMuQmk4ossW4XgPcGNiru/rk9gCb+DWF
+         rU8X+Qw1/U4kfkIlb4LcpG1QMaf6frJRu0JeGcwhAqt/XAEYLKVib6qOwKN89QH/np
+         Py9SltXk+GWUe2r5FvYBiL5/32pRsRsw0FPUcfw59c8xWrZSFcGLEs8YNVjsuZCtDG
+         GL/WE9iUSdxsKcyaNL/M0RQ94AnK5LalrhgPIzbyIr4lgbF347LyJ4OPHIWGHpo8yi
+         eTtZiUezW9SOimgsjlJxg0mzeLqE2KpxmpHt6FPdT2W1XT4OO9LfO/7OZYUvE5xOQg
+         QbHJPCZnznqBQ==
+Date:   Thu, 20 Oct 2022 13:32:09 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] populate: unexport the metadump description text
+Message-ID: <Y1GwSUwtk1dVuKN4@magnolia>
+References: <166613310432.868003.6099082434184908563.stgit@magnolia>
+ <166613311003.868003.9672066347833155217.stgit@magnolia>
+ <20221020043547.rcojqbhxihkcaszi@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221019052955.30484-1-wqu@suse.com>
+In-Reply-To: <20221020043547.rcojqbhxihkcaszi@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 19, 2022 at 01:29:55PM +0800, Qu Wenruo wrote:
-> [BACKGROUND]
-> There is bug report from btrfs mailing list that, hiberation can allow
-> one to modify the frozen filesystem unexpectedly (using another OS).
-> (https://lore.kernel.org/linux-btrfs/83bf3b4b-7f4c-387a-b286-9251e3991e34@bluemole.com/)
+On Thu, Oct 20, 2022 at 12:35:47PM +0800, Zorro Lang wrote:
+> On Tue, Oct 18, 2022 at 03:45:10PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Make the variable that holds the contents of the metadump description
+> > file a local variable since we don't need it outside of that function.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > ---
 > 
-> Later btrfs adds the check to make sure the fs is not changed
-> unexpectedly, to prevent corruption from happening.
-> 
-> [TESTCASE]
-> Here the new test case will create a basic filesystem, fill it with
-> something by using fsstress, then sync the fs, and finally freeze the fs.
-> 
-> Then corrupt the whole fs by overwriting the block device with 0xcd
-> (default seed from xfs_io pwrite command).
-> 
-> Finally we thaw the fs, and try if we can create a new file.
-> 
-> for EXT4, it will detect the corruption at touch time, causing -EUCLEAN.
-> 
-> For Btrfs, it will detect the corruption at thaw time, marking the
-> fs RO immediately, and later touch will return -EROFS.
-> 
-> For XFS, it will detect the corruption at touch time, return -EUCLEAN.
-> (Without the cache drop, XFS seems to be very happy using the cache info
-> to do the work without any error though.)
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/generic/702     | 61 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/702.out |  2 ++
->  2 files changed, 63 insertions(+)
->  create mode 100755 tests/generic/702
->  create mode 100644 tests/generic/702.out
-> 
-> diff --git a/tests/generic/702 b/tests/generic/702
-> new file mode 100755
-> index 00000000..fc3624e1
-> --- /dev/null
-> +++ b/tests/generic/702
-> @@ -0,0 +1,61 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 702
-> +#
-> +# Test if the filesystem can detect the underlying disk has changed at
-> +# thaw time.
-> +#
-> +. ./common/preamble
-> +. ./common/filter
-> +_begin_fstest freeze quick
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs generic
-> +_fixed_by_kernel_commit a05d3c915314 \
-> +	"btrfs: check superblock to ensure the fs was not modified at thaw time"
-> +
-> +# We will corrupt the device completely, thus should not check it after the test.
-> +_require_scratch_nocheck
-> +_require_freeze
-> +
-> +# Limit the fs to 512M so we won't waste too much time screwing it up later.
-> +_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Populate the fs with something.
-> +$FSSTRESS_PROG -n 500 -d $SCRATCH_MNT >> $seqres.full
-> +
-> +# Sync to make sure no dirty journal
-> +sync
-> +
-> +# Drop all cache, so later write will need to read from disk, increasing
-> +# the chance of detecting the corruption.
-> +echo 3 > /proc/sys/vm/drop_caches
-> +
-> +$XFS_IO_PROG -x -c "freeze" $SCRATCH_MNT
-> +
-> +# Now screw up the block device
-> +$XFS_IO_PROG -f -c "pwrite 0 512M" -c sync $SCRATCH_DEV >> $seqres.full
-> +
-> +# Thaw the fs, it may or may not report error, we will check it manually later.
-> +$XFS_IO_PROG -x -c "thaw" $SCRATCH_MNT
-> +
-> +# If the fs detects something wrong, it should trigger error now.
-> +# We don't use the error message as golden output, as btrfs and ext4 use
-> +# different error number for different reasons.
-> +# (btrfs detects the change immediately at thaw time and mark the fs RO, thus
-> +#  touch returns -EROFS, while ext4 detects the change at journal write time,
-> +#  returning -EUCLEAN).
-> +touch $SCRATCH_MNT/foobar >>$seqres.full 2>&1
-> +if [ $? -eq 0 ]; then
-> +	echo "Failed to detect corrupted fs"
-> +else
-> +	echo "Detected corrupted fs (expected)"
-> +fi
+> OK, will merge this one in next release.
 
-Thanks for all help to review!
+Thank you!  Sorry about all the trouble last week. :(
 
-That `_require_freeze` will skip exfat and others which not support freeze.
+--D
 
-And `_require_block_device $SCRATCH_DEV` helps you to avoid this test run/fail on
-overlayfs, nfs, tmpfs, etc. Due to you try to write the $SCRATCH_DEV directly.
-
-And you can use `_supported_fs ^f2fs` to skip this test from some specified fs
-if they're not suit for this test.
-
-But I'm wondering if the last test step will fail on every fs soon? Except
-you're trying to test how fast a fs can find itself is corrupted. Or how
-about give some fs more chance/time to detect errors? Likes do more operations
-which enough to trigger errors on most fs?
-
-Thanks,
-Zorro
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/702.out b/tests/generic/702.out
-> new file mode 100644
-> index 00000000..c29311ff
-> --- /dev/null
-> +++ b/tests/generic/702.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 702
-> +Detected corrupted fs (expected)
-> -- 
-> 2.38.0
+> >  common/populate |    8 ++++----
+> >  1 file changed, 4 insertions(+), 4 deletions(-)
+> > 
+> > 
+> > diff --git a/common/populate b/common/populate
+> > index b2d37b47d8..58b07e33be 100644
+> > --- a/common/populate
+> > +++ b/common/populate
+> > @@ -901,15 +901,15 @@ _scratch_populate_cached() {
+> >  	local meta_tag="$(echo "${meta_descr}" | md5sum - | cut -d ' ' -f 1)"
+> >  	local metadump_stem="${TEST_DIR}/__populate.${FSTYP}.${meta_tag}"
+> >  
+> > -	# These variables are shared outside this function
+> > +	# This variable is shared outside this function
+> >  	POPULATE_METADUMP="${metadump_stem}.metadump"
+> > -	POPULATE_METADUMP_DESCR="${metadump_stem}.txt"
+> > +	local populate_metadump_descr="${metadump_stem}.txt"
+> >  
+> >  	# Don't keep metadata images cached for more 48 hours...
+> >  	rm -rf "$(find "${POPULATE_METADUMP}" -mtime +2 2>/dev/null)"
+> >  
+> >  	# Throw away cached image if it doesn't match our spec.
+> > -	cmp -s "${POPULATE_METADUMP_DESCR}" <(echo "${meta_descr}") || \
+> > +	cmp -s "${populate_metadump_descr}" <(echo "${meta_descr}") || \
+> >  		rm -rf "${POPULATE_METADUMP}"
+> >  
+> >  	# Try to restore from the metadump
+> > @@ -918,7 +918,7 @@ _scratch_populate_cached() {
+> >  
+> >  	# Oh well, just create one from scratch
+> >  	_scratch_mkfs
+> > -	echo "${meta_descr}" > "${POPULATE_METADUMP_DESCR}"
+> > +	echo "${meta_descr}" > "${populate_metadump_descr}"
+> >  	case "${FSTYP}" in
+> >  	"xfs")
+> >  		_scratch_xfs_populate $@
+> > 
 > 
