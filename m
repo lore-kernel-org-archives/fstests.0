@@ -2,425 +2,267 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5774FC4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 Oct 2022 01:32:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 666D1C433FE
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 Oct 2022 03:14:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229757AbiJUBcd (ORCPT
+        id S229949AbiJUDOE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Oct 2022 21:32:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53052 "EHLO
+        Thu, 20 Oct 2022 23:14:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229823AbiJUBcc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2022 21:32:32 -0400
-Received: from mail-ot1-x32b.google.com (mail-ot1-x32b.google.com [IPv6:2607:f8b0:4864:20::32b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 686BA213459;
-        Thu, 20 Oct 2022 18:32:28 -0700 (PDT)
-Received: by mail-ot1-x32b.google.com with SMTP id z11-20020a05683020cb00b00661a95cf920so957892otq.5;
-        Thu, 20 Oct 2022 18:32:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GnMndz08Z4hOCMwgrEsJod/SJaOcaM+AJrqhTVSpnZI=;
-        b=I7pkvlsq8uPVQfsPvAfY8PafspUhSNVQn5g3L94iCDQoxvYJtyTFMcS9/luO9bD3PA
-         7AZMJjVe9WZTAudLJHh6MsY2fNlH2H6XGHq3+CVYKG9/noOr/KE+oNgPBJ/IpS4XySQT
-         NzSucRGzX3j6d2JrQjjYzNdDyrFIBkajP6f8FP3VOinxuQgZpSQqDO0kUZ+WgLsWvXbz
-         u1FkuhvLWNsIwcU59UjACAQcl9AAeH43E/uCxzJvhZMC6EBZYFaYCG8DUHA66gBLTJDg
-         8f441M6GGxHQwWEPv+eCtUuFiaUXnzMJzEKw1brvkLaaUllTObNvkcKqGyajrT1KCX3g
-         PZrQ==
+        with ESMTP id S229542AbiJUDN7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Oct 2022 23:13:59 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9035613C1FA
+        for <fstests@vger.kernel.org>; Thu, 20 Oct 2022 20:13:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1666322036;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=BvptVinJwcmZE7hiJrJjd3K0DJZgErM1skFHa3yBiAQ=;
+        b=MxkAX6pB/PzNLvdP1x7gBmWpNTSDfu6CPK+udAcOyPoBk+eq2+nIJs+hwf9sCF8AqZD88f
+        k+rYmAGqWWJ90ETIXb+D3nttjJMuN/t288I5MuBBZ4j7O8cRtR6c1vC0bG6ByvD5qM6PWi
+        pU0m2YTtFWtg/Wfjryu2kfF6qQhXjn0=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-659-qZEUdP_xMEK0BRe9TiLM-A-1; Thu, 20 Oct 2022 23:13:55 -0400
+X-MC-Unique: qZEUdP_xMEK0BRe9TiLM-A-1
+Received: by mail-pj1-f70.google.com with SMTP id lx11-20020a17090b4b0b00b0020d7c0b426dso3175036pjb.6
+        for <fstests@vger.kernel.org>; Thu, 20 Oct 2022 20:13:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=GnMndz08Z4hOCMwgrEsJod/SJaOcaM+AJrqhTVSpnZI=;
-        b=cwUWk6Z29LMrNyBEdckEPc3KIRECU1knC6KEpVpJB/R552yiqZYNXhz9qPeSnXG6hP
-         S7bpFXBSnRRL7N8bUDYaMQrgM7SH08Ap5ajrU1P9eyLttoXpUNUOqQ9Za/doPRTiKTNj
-         j5FWWZ5CT2XSG5jLQYXckqtROSuX29NAEmJ27ck4O9/r2yLxlbjE9YULY/ScOl40S0hX
-         3PkqVqj1bQTp0ZrY2VSeHJ61ajgBQrJr8sfj0Ju9Kvc3VUnzy54f6aMifhjlu5eJ3L0a
-         TFK800x+EKWcW1nKawSXah3LaCojEHvYZYRIiJBmEerBsSE9Y329NM/X0tbwj3l7bY9q
-         7T1Q==
-X-Gm-Message-State: ACrzQf1DQOdwZUpGXHChKzk871CT4ilAwvcZznzBd3pCd65WwlILKDXX
-        KDgvcF1xNugm5m9JcdNXqBKEgPL6Dc++KEPd08s=
-X-Google-Smtp-Source: AMsMyM5kNSFiXhIA/bjCXQke6GknQP6Yj6cxIFKkEx0iysSqTxLoq5BKAYk9gmbArBNPfAXJmlSRoTrAX0MjhHEXASw=
-X-Received: by 2002:a05:6830:4487:b0:661:dba8:cc61 with SMTP id
- r7-20020a056830448700b00661dba8cc61mr8422043otv.256.1666315947414; Thu, 20
- Oct 2022 18:32:27 -0700 (PDT)
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=BvptVinJwcmZE7hiJrJjd3K0DJZgErM1skFHa3yBiAQ=;
+        b=0q2wf8I+d6r2IPbQsBNq4V1zS7Ss/1CH3wnloAS2Dm6T31PpeDs2FGMPqJYVcNCjkC
+         r386ZcYR1m+F7Xp4WNrVSaRPa59b/PlBVXQyrIlhnj8aghJ8mp3NHsKEv1smEqpH45nm
+         yF6BrXbWGX0Haj2C7k/78ETFDue0U9HgnY7iIWLvFz8zuckKJzSXfB8YJU1RZavMh+ne
+         gUazV/R/MsTJaYhbOOG007H4uy2zJsVYc5/Ik2jdOMoFvBgRJJ9XP8JTRdOeC5I6N4mW
+         fy58mAmugPzXoh6m2qi5gjf+fBAEHWPoDCRgsmzBY1HDfKTBRXPsPT2vz7Hcr+p7fv9K
+         n4yw==
+X-Gm-Message-State: ACrzQf1FqwK+zdsgrdp7QITi0GkOEd3L02DKjKtcPyEYyJ/GilSwNIfi
+        YVh62bxhmoBiVopeppZopAn3GvsmTrpVvigpurjWiBbk7xeIUe1oJYHQZuxoEFYI8iR9KapSXsr
+        nO4tr+qTcPpTGBNkK3Q==
+X-Received: by 2002:a17:90a:8c97:b0:20d:a1a2:bfda with SMTP id b23-20020a17090a8c9700b0020da1a2bfdamr19649723pjo.234.1666322033672;
+        Thu, 20 Oct 2022 20:13:53 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7OOu3KaK+5Q+o6FU7Ivg1fNDhsymAfO/z0/k/nZlDhLRm/UOM/Z5KqNGF3gwl1DGOBgZh+vw==
+X-Received: by 2002:a17:90a:8c97:b0:20d:a1a2:bfda with SMTP id b23-20020a17090a8c9700b0020da1a2bfdamr19649688pjo.234.1666322033273;
+        Thu, 20 Oct 2022 20:13:53 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id d4-20020a62f804000000b005628a30a500sm14061462pfh.41.2022.10.20.20.13.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Oct 2022 20:13:52 -0700 (PDT)
+Date:   Fri, 21 Oct 2022 11:13:48 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 3/3] xfs: refactor filesystem realtime geometry detection
+ logic
+Message-ID: <20221021031348.rteteenwvznnxcmk@zlang-mailbox>
+References: <166613312194.868141.5162859918517610030.stgit@magnolia>
+ <166613313870.868141.4913572781093963547.stgit@magnolia>
+ <20221020121534.pp7esou4wxneaz4i@zlang-mailbox>
+ <Y1G7xOI+0Nfwz5nJ@magnolia>
 MIME-Version: 1.0
-References: <20221014164600.2626-1-bingjingc@synology.com> <CAL3q7H6rOyeDf3pHBeDkq8VKgLQccwzo8KKu4-ybcp-Pb2DpJg@mail.gmail.com>
-In-Reply-To: <CAL3q7H6rOyeDf3pHBeDkq8VKgLQccwzo8KKu4-ybcp-Pb2DpJg@mail.gmail.com>
-From:   bingjing chang <bxxxjxxg@gmail.com>
-Date:   Fri, 21 Oct 2022 09:32:16 +0800
-Message-ID: <CAMmgxWH=35_Pr=Z87p_5CdshNDmik7h8rT0nPnmah5FpqE2CHA@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: test incremental send for orphan inodes
-To:     Filipe Manana <fdmanana@kernel.org>
-Cc:     bingjingc <bingjingc@synology.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <Y1G7xOI+0Nfwz5nJ@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Filipe Manana <fdmanana@kernel.org> =E6=96=BC 2022=E5=B9=B410=E6=9C=8817=E6=
-=97=A5 =E9=80=B1=E4=B8=80 =E6=99=9A=E4=B8=8A7:19=E5=AF=AB=E9=81=93=EF=BC=9A
->
-> On Fri, Oct 14, 2022 at 5:46 PM bingjingc <bingjingc@synology.com> wrote:
-> >
-> > From: BingJing Chang <bingjingc@synology.com>
-> >
-> > Test that an incremental send operation can handle orphan files or
-> > directories in or not in the parent snapshot and the send snapshot.
-> >
-> > This issue is fixed by a kernel patch with the commit 9ed0a72e5b355d
-> > ("btrfs: send: fix failures when processing inodes with no links")
-> >
-> > Signed-off-by: BingJing Chang <bingjingc@synology.com>
-> > ---
-> >  tests/btrfs/278     | 218 ++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/278.out |   3 +
-> >  2 files changed, 221 insertions(+)
-> >  create mode 100755 tests/btrfs/278
-> >  create mode 100644 tests/btrfs/278.out
-> >
-> > diff --git a/tests/btrfs/278 b/tests/btrfs/278
-> > new file mode 100755
-> > index 00000000..82da29e0
-> > --- /dev/null
-> > +++ b/tests/btrfs/278
-> > @@ -0,0 +1,218 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 BingJing Chang.
-> > +#
-> > +# FS QA Test No. btrfs/278
-> > +#
-> > +# Regression test for btrfs incremental send issue when processing ino=
-des
-> > +# with no links
-> > +#
-> > +# This issue is fixed by the following linux kernel btrfs patch:
-> > +#
-> > +#   commit 9ed0a72e5b355d ("btrfs: send: fix failures when processing
-> > +#   inodes with no links")
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick send
-> > +
-> > +# real QA test starts here
-> > +_supported_fs btrfs
-> > +_fixed_by_kernel_commit 9ed0a72e5b355d \
-> > +       "btrfs: send: fix failures when processing inodes with no links=
-"
-> > +_require_test
-> > +_require_scratch
-> > +_require_btrfs_command "property"
-> > +_require_fssum
-> > +
-> > +send_files_dir=3D$TEST_DIR/btrfs-test-$seq
-> > +
-> > +rm -fr $send_files_dir
-> > +mkdir $send_files_dir
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +_run_btrfs_util_prog subvolume create $SCRATCH_MNT/vol
-> > +
-> > +# Creating the first snapshot looks like:
-> > +#
-> > +# .                                                                  (=
-ino 256)
-> > +# |--- deleted.file                                                  (=
-ino 257)
-> > +# |--- deleted.dir/                                                  (=
-ino 258)
-> > +# |--- changed_subcase1.file                                         (=
-ino 259)
-> > +# |--- changed_subcase2.file                                         (=
-ino 260)
-> > +# |--- changed_subcase1.dir/                                         (=
-ino 261)
-> > +# |    |---- foo                                                     (=
-ino 262)
-> > +# |--- changed_subcase2.dir/                                         (=
-ino 263)
-> > +# |    |---- foo                                                     (=
-ino 264)
-> > +#
-> > +touch $SCRATCH_MNT/vol/deleted.file
-> > +mkdir $SCRATCH_MNT/vol/deleted.dir
-> > +touch $SCRATCH_MNT/vol/changed_subcase1.file
-> > +touch $SCRATCH_MNT/vol/changed_subcase2.file
-> > +mkdir $SCRATCH_MNT/vol/changed_subcase1.dir
-> > +touch $SCRATCH_MNT/vol/changed_subcase1.dir/foo
-> > +mkdir $SCRATCH_MNT/vol/changed_subcase2.dir
-> > +touch $SCRATCH_MNT/vol/changed_subcase2.dir/foo
-> > +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_M=
-NT/snap1
-> > +
-> > +# Delete the deleted.*, create a new file and a new directory, and the=
-n
-> > +# take the second snapshot looks like:
-> > +#
-> > +# .                                                                  (=
-ino 256)
-> > +# |--- changed_subcase1.file                                         (=
-ino 259)
-> > +# |--- changed_subcase2.file                                         (=
-ino 260)
-> > +# |--- changed_subcase1.dir/                                         (=
-ino 261)
-> > +# |    |---- foo                                                     (=
-ino 262)
-> > +# |--- changed_subcase2.dir/                                         (=
-ino 263)
-> > +# |    |---- foo                                                     (=
-ino 264)
-> > +# |--- new.file                                                      (=
-ino 265)
-> > +# |--- new.dir/                                                      (=
-ino 266)
-> > +#
-> > +unlink $SCRATCH_MNT/vol/deleted.file
-> > +rmdir $SCRATCH_MNT/vol/deleted.dir
-> > +touch $SCRATCH_MNT/vol/new.file
-> > +mkdir $SCRATCH_MNT/vol/new.dir
-> > +_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT/vol $SCRATCH_M=
-NT/snap2
-> > +
-> > +# Set the subvolume back to read-write mode to make orphans of the fir=
-st
-> > +# snapshot to look like:
->
-> This confused me. You mention setting the subvolume to RW, but what
-> happens is we are
-> setting the snapshot "snap1" to RW. So, something like:
->
-> "Set the snapshot "snap1" to read-write mode and turn several inodes
-> to orphans, so
-> that the snapshot will look like this:"
->
-> > +#
-> > +# .                                                                  (=
-ino 256)
-> > +# |--- (orphan) deleted.file                                         (=
-ino 257)
-> > +# |--- (orphan) deleted.dir/                                         (=
-ino 258)
-> > +# |--- (orphan) changed_subcase1.file                                (=
-ino 259)
-> > +# |--- changed_subcase2.file                                         (=
-ino 260)
-> > +# |--- (orphan) changed_subcase1.dir/                                (=
-ino 261)
-> > +# |--- changed_subcase2.dir/                                         (=
-ino 263)
-> > +# |    |---- foo                                                     (=
-ino 264)
-> > +#
-> > +# Note: To make an easy illustration, I just put a tag "(orphan)" in f=
-ront of
-> > +# their original names to indicate that they're deleted, but their ino=
-des can
-> > +# not be removed because of open file descriptors on them. Mention tha=
-t orphan
-> > +# inodes don't have names(paths).
-> > +#
-> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap1 ro false
-> > +exec 71<$SCRATCH_MNT/snap1/deleted.file
-> > +exec 72<$SCRATCH_MNT/snap1/deleted.dir
-> > +exec 73<$SCRATCH_MNT/snap1/changed_subcase1.file
-> > +exec 74<$SCRATCH_MNT/snap1/changed_subcase1.dir
-> > +unlink $SCRATCH_MNT/snap1/deleted.file
-> > +rmdir $SCRATCH_MNT/snap1/deleted.dir
-> > +unlink $SCRATCH_MNT/snap1/changed_subcase1.file
-> > +unlink $SCRATCH_MNT/snap1/changed_subcase1.dir/foo
-> > +rmdir $SCRATCH_MNT/snap1/changed_subcase1.dir
-> > +
-> > +# Turn the subvolume back to read-only mode as snapshots
->
-> Same here, and the sentence also seems unfinished. So:
->
-> "Turn the snapshot "snap1" back to read-only mode."
->
-> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap1 ro true
-> > +
-> > +# Set the subvolume back to read-write mode to make orphans of the sec=
-ond
-> > +# snapshot to look like:
->
-> Same here, it's the snapshot "snap2" and not the subvolume.
->
-> "Set the snapshot "snap2" to read-write mode and turn several inodes
-> to orphans, so
-> that the snapshot will look like this:"
->
-> > +#
-> > +# .                                                                  (=
-ino 256)
-> > +# |--- (orphan) changed_subcase1.file                                (=
-ino 259)
-> > +# |--- (orphan) changed_subcase2.file                                (=
-ino 260)
-> > +# |--- (orphan) changed_subcase1.dir/                                (=
-ino 261)
-> > +# |--- (orphan) changed_subcase2.dir/                                (=
-ino 263)
-> > +# |--- (orphan) new.file                                             (=
-ino 265)
-> > +# |--- (orphan) new.dir/                                             (=
-ino 266)
-> > +#
-> > +# Note: Same notice as above. Mention that orphan inodes don't have
-> > +# names(paths).
-> > +#
-> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro false
-> > +exec 81<$SCRATCH_MNT/snap2/changed_subcase1.file
-> > +exec 82<$SCRATCH_MNT/snap2/changed_subcase1.dir
-> > +exec 83<$SCRATCH_MNT/snap2/changed_subcase2.file
-> > +exec 84<$SCRATCH_MNT/snap2/changed_subcase2.dir
-> > +exec 85<$SCRATCH_MNT/snap2/new.file
-> > +exec 86<$SCRATCH_MNT/snap2/new.dir
-> > +unlink $SCRATCH_MNT/snap2/changed_subcase1.file
-> > +unlink $SCRATCH_MNT/snap2/changed_subcase1.dir/foo
-> > +rmdir $SCRATCH_MNT/snap2/changed_subcase1.dir
-> > +unlink $SCRATCH_MNT/snap2/changed_subcase2.file
-> > +unlink $SCRATCH_MNT/snap2/changed_subcase2.dir/foo
-> > +rmdir $SCRATCH_MNT/snap2/changed_subcase2.dir
-> > +unlink $SCRATCH_MNT/snap2/new.file
-> > +rmdir $SCRATCH_MNT/snap2/new.dir
-> > +
-> > +# Turn the subvolume back to read-only mode as snapshots
->
-> Same here, it's snapshot "snap2" and not the subvolume.
-> The sentence also seems unfinished.
->
-> "Turn the snapshot "snap2" back to read-only mode."
->
-> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro true
-> > +
-> > +# Test that a full send operation can handle orphans with no paths
-> > +_run_btrfs_util_prog send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1
-> > +
-> > +# Test that an incremental send operation can handle orphans.
-> > +#
-> > +# Here're descriptions for the details:
-> > +#
-> > +# Case 1: new.file and new.dir (BTRFS_COMPARE_TREE_NEW)
-> > +#        |  send snapshot  | action
-> > +#  --------------------------------
-> > +#  nlink |        0        | ignore
-> > +#
-> > +# They're new inodes in the send snapshots, while they don't have path=
-s.
->
-> snapshots -> snapshot
->
-> "They are new inodes in the send snapshot ("snap2"), but they don't
-> have paths because they have no links".
->
-> > +# Test that the send operation can ignore them in order not to generat=
-e
-> > +# the creation commands for them. Or it will fail in retrieving their
-> > +# current paths.
->
-> Mentioning the error would be useful:
->
->  "... Or it will fail, with -ENOENT, when trying to generate paths for th=
-em."
->
-> Other than those minor things, it looks good to me.
-> Test passes on a patched kernel and fails on an unpatched kernel.
->
-> Thanks so much for doing this!
->
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
->
+On Thu, Oct 20, 2022 at 02:21:08PM -0700, Darrick J. Wong wrote:
+> On Thu, Oct 20, 2022 at 08:15:34PM +0800, Zorro Lang wrote:
+> > On Tue, Oct 18, 2022 at 03:45:38PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > There are a lot of places where we open-code detecting the realtime
+> > > extent size and extent count of a specific filesystem.  Refactor this
+> > > into a couple of helpers to clean up the code.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > >  common/populate |    2 +-
+> > >  common/xfs      |   29 +++++++++++++++++++++++++++--
+> > >  tests/xfs/146   |    2 +-
+> > >  tests/xfs/147   |    2 +-
+> > >  tests/xfs/530   |    3 +--
+> > >  5 files changed, 31 insertions(+), 7 deletions(-)
+> > > 
+> > > 
+> > > diff --git a/common/populate b/common/populate
+> > > index 23b2fecf69..d9d4c6c300 100644
+> > > --- a/common/populate
+> > > +++ b/common/populate
+> > > @@ -323,7 +323,7 @@ _scratch_xfs_populate() {
+> > >  	fi
+> > >  
+> > >  	# Realtime Reverse-mapping btree
+> > > -	is_rt="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'rtextents=[1-9]')"
+> > > +	is_rt="$(_xfs_get_rtextents "$SCRATCH_MNT")"
+> > >  	if [ $is_rmapbt -gt 0 ] && [ $is_rt -gt 0 ]; then
+> > >  		echo "+ rtrmapbt btree"
+> > >  		nr="$((blksz * 2 / 32))"
+> > > diff --git a/common/xfs b/common/xfs
+> > > index 6445bfd9db..20da537a9d 100644
+> > > --- a/common/xfs
+> > > +++ b/common/xfs
+> > > @@ -174,6 +174,24 @@ _scratch_mkfs_xfs()
+> > >  	return $mkfs_status
+> > >  }
+> > >  
+> > > +# Get the number of realtime extents of a mounted filesystem.
+> > > +_xfs_get_rtextents()
+> > > +{
+> > > +	local path="$1"
+> > > +
+> > > +	$XFS_INFO_PROG "$path" | grep 'rtextents' | \
+> > > +		sed -e 's/^.*rtextents=\([0-9]*\).*$/\1/g'
+> > 
+> > Same as patch 2/3, how about:
+> > 
+> > 	$XFS_INFO_PROG "$path" | sed -n "s/^.*rtextents=\([[:digit:]]*\).*/\1/p"
+> 
+> Actually, if you don't mind, I'd like to retain the hoisted grep/sed
+> patterns in this patch (and patch 2) and add a new patch that simplifies
+> the grep|sed pattern throughout common/xfs.
 
-Thank you for the review. I revised the confusing sentences in patch v2.
+Sure, that makes sense too, I'm OK to have one more patch. Actually that's
+not a necessary change, I don't know if it's worth being a individual patch.
+Anyway, I have no objection on that:)
 
->
-> > +#
-> > +#
-> > +# Case 2: deleted.file and deleted.dir (BTRFS_COMPARE_TREE_DELETED)
-> > +#       | parent snapshot | action
-> > +# ----------------------------------
-> > +# nlink |        0        | as usual
-> > +#
-> > +# They're deleted in the parent snapshots but become orphans with no
-> > +# paths. Test that no deletion commands will be generated as usual.
-> > +# This case didn't fail before.
-> > +#
-> > +#
-> > +# Case 3: changed_*.file and changed_*.dir (BTRFS_COMPARE_TREE_CHANGED=
-)
-> > +#           |       | parent snapshot | send snapshot | action
-> > +# --------------------------------------------------------------------=
----
-> > +# subcase 1 | nlink |        0        |       0       | ignore
-> > +# subcase 2 | nlink |       >0        |       0       | new_gen(deleti=
-on)
-> > +#
-> > +# In subcase 1, test that the send operation can ignore them without t=
-rying
-> > +# to generate any commands.
-> > +#
-> > +# In subcase 2, test that the send operation can generate an unlink co=
-mmand
-> > +# for that file and test that it can generate a rename command for the
-> > +# non-empty directory first and a rmdir command to remove it finally. =
-Or
-> > +# the receive operation will fail with a wrong unlink on a non-empty
-> > +# directory.
-> > +#
-> > +_run_btrfs_util_prog send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.s=
-nap \
-> > +                    $SCRATCH_MNT/snap2
-> > +
-> > +$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-> > +$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-> > +       -x $SCRATCH_MNT/snap2/snap1 $SCRATCH_MNT/snap2
-> > +
-> > +# Recreate the filesystem by receiving both send streams and verify we=
- get
-> > +# the same content that the original filesystem had.
-> > +exec 71>&-
-> > +exec 72>&-
-> > +exec 73>&-
-> > +exec 74>&-
-> > +exec 81>&-
-> > +exec 82>&-
-> > +exec 83>&-
-> > +exec 84>&-
-> > +exec 85>&-
-> > +exec 86>&-
-> > +_scratch_unmount
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +# Add the first snapshot to the new filesystem by applying the first s=
-end
-> > +# stream.
-> > +_run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-> > +
-> > +# Test the incremental send stream
-> > +_run_btrfs_util_prog receive -f $send_files_dir/2.snap $SCRATCH_MNT
-> > +
-> > +$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/snap1
-> > +$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/snap2
-> > +
-> > +status=3D0
-> > +exit
-> > diff --git a/tests/btrfs/278.out b/tests/btrfs/278.out
-> > new file mode 100644
-> > index 00000000..82b93b4e
-> > --- /dev/null
-> > +++ b/tests/btrfs/278.out
-> > @@ -0,0 +1,3 @@
-> > +QA output created by 278
-> > +OK
-> > +OK
-> > --
-> > 2.37.1
-> >
+Thanks,
+Zorro
+
+> 
+> > 
+> > and ...
+> > 
+> > > +}
+> > > +
+> > > +# Get the realtime extent size of a mounted filesystem.
+> > > +_xfs_get_rtextsize()
+> > > +{
+> > > +	local path="$1"
+> > > +
+> > > +	$XFS_INFO_PROG "$path" | grep 'realtime.*extsz' | \
+> > > +		sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
+> > 
+> > ...
+> > 	$XFS_INFO_PROG "$path" | sed -n "s/^realtime.*extsz=\([[:digit:]]*\).*/\1/p"
+> 
+> But thanks for getting me most of the way there. :)
+> 
+> > > +}
+> > > +
+> > >  # Get the size of an allocation unit of a file.  Normally this is just the
+> > >  # block size of the file, but for realtime files, this is the realtime extent
+> > >  # size.
+> > > @@ -191,7 +209,7 @@ _xfs_get_file_block_size()
+> > >  	while ! $XFS_INFO_PROG "$path" &>/dev/null && [ "$path" != "/" ]; do
+> > >  		path="$(dirname "$path")"
+> > >  	done
+> > > -	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
+> > > +	_xfs_get_rtextsize "$path"
+> > >  }
+> > >  
+> > >  # Decide if this path is a file on the realtime device
+> > > @@ -436,13 +454,20 @@ _require_xfs_crc()
+> > >  # third option is -v, echo 1 for success and 0 for not.
+> > >  #
+> > >  # Starting with xfsprogs 4.17, this also works for unmounted filesystems.
+> > > +# The feature 'realtime' looks for rtextents > 0.
+> > >  _xfs_has_feature()
+> > >  {
+> > >  	local fs="$1"
+> > >  	local feat="$2"
+> > >  	local verbose="$3"
+> > > +	local feat_regex="1"
+> > >  
+> > > -	local answer="$($XFS_INFO_PROG "$fs" 2>&1 | grep -w -c "$feat=1")"
+> > > +	if [ "$feat" = "realtime" ]; then
+> > > +		feat="rtextents"
+> > > +		feat_regex="[1-9][0-9]*"
+> > > +	fi
+> > 
+> > How about use this format:
+> > 
+> > case "$feat" in
+> > realtime)
+> > 	feat="rtextents"
+> > 	feat_regex="[1-9][0-9]*"
+> > 	;;
+> > ...)
+> > 	feat="..."
+> > 	feat_regex="..."
+> > 	;;
+> > *)
+> > 	feat="$2“
+> > 	feat_regex="1"
+> > 	;;
+> > esac
+> > 
+> > due to I think you might add more "$feat" which not simply equal to 1/0 later :)
+> 
+> I haven't, but I don't mind setting things up for the future.
+> 
+> --D
+> 
+> > Others looks good to me.
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > +
+> > > +	local answer="$($XFS_INFO_PROG "$fs" 2>&1 | grep -E -w -c "$feat=$feat_regex")"
+> > >  	if [ "$answer" -ne 0 ]; then
+> > >  		test "$verbose" = "-v" && echo 1
+> > >  		return 0
+> > > diff --git a/tests/xfs/146 b/tests/xfs/146
+> > > index 5516d396bf..123bdff59f 100755
+> > > --- a/tests/xfs/146
+> > > +++ b/tests/xfs/146
+> > > @@ -31,7 +31,7 @@ _scratch_mkfs > $seqres.full
+> > >  _scratch_mount >> $seqres.full
+> > >  
+> > >  blksz=$(_get_block_size $SCRATCH_MNT)
+> > > -rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
+> > > +rextsize=$(_xfs_get_rtextsize "$SCRATCH_MNT")
+> > >  rextblks=$((rextsize / blksz))
+> > >  
+> > >  echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
+> > > diff --git a/tests/xfs/147 b/tests/xfs/147
+> > > index e21fdd330c..33b3c99633 100755
+> > > --- a/tests/xfs/147
+> > > +++ b/tests/xfs/147
+> > > @@ -29,7 +29,7 @@ _scratch_mkfs -r extsize=256k > $seqres.full
+> > >  _scratch_mount >> $seqres.full
+> > >  
+> > >  blksz=$(_get_block_size $SCRATCH_MNT)
+> > > -rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
+> > > +rextsize=$(_xfs_get_rtextsize "$SCRATCH_MNT")
+> > >  rextblks=$((rextsize / blksz))
+> > >  
+> > >  echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
+> > > diff --git a/tests/xfs/530 b/tests/xfs/530
+> > > index c960738db7..56f5e7ebdb 100755
+> > > --- a/tests/xfs/530
+> > > +++ b/tests/xfs/530
+> > > @@ -73,8 +73,7 @@ _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
+> > >  formatted_blksz="$(_get_block_size $SCRATCH_MNT)"
+> > >  test "$formatted_blksz" -ne "$dbsize" && \
+> > >  	_notrun "Tried to format with $dbsize blocksize, got $formatted_blksz."
+> > > -$XFS_INFO_PROG $SCRATCH_MNT | grep -E -q 'realtime.*blocks=0' && \
+> > > -	_notrun "Filesystem should have a realtime volume"
+> > > +_require_xfs_has_feature "$SCRATCH_MNT" realtime
+> > >  
+> > >  echo "Consume free space"
+> > >  fillerdir=$SCRATCH_MNT/fillerdir
+> > > 
+> 
+
