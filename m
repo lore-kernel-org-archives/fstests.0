@@ -2,141 +2,164 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13DB0C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Oct 2022 14:12:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE07EC38A2D
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Oct 2022 16:57:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233648AbiJZOMg (ORCPT
+        id S233961AbiJZQ55 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Oct 2022 10:12:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53958 "EHLO
+        Wed, 26 Oct 2022 12:57:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234211AbiJZOMb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Oct 2022 10:12:31 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D27C010D6BF
-        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 07:12:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1666793548;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=5gKSzBMGRs/uWtkQG1q7CTLEsgBVK2NaY8cijVYGGgA=;
-        b=SsdcsQshSUju4lda+utv+7YdEhxq0gt9oSwTL48tXXjpoagJrInYiaZreUHq9s2FyNSqwD
-        cDuBFmOne+QinjyLI1KIWGfQlY9nDRta++AWNNwh68OITjNaUGkgpZYfpLn2MhH6VYkqVe
-        1Aoi9b1mFxPTguginsfTtZKCVLoYbVQ=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-140-XWW8WXTJO4ukMBm3E3J_Xw-1; Wed, 26 Oct 2022 10:12:26 -0400
-X-MC-Unique: XWW8WXTJO4ukMBm3E3J_Xw-1
-Received: by mail-pl1-f199.google.com with SMTP id z5-20020a170903018500b00184aedd9c75so10294970plg.11
-        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 07:12:25 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5gKSzBMGRs/uWtkQG1q7CTLEsgBVK2NaY8cijVYGGgA=;
-        b=IDP2mKPkcaPXG5KNjH6gjO3Nz0Rt3EDfZOMd/cL09kRDFX272X+ht2zZNpB8ny2Zfk
-         3Y7I4LX5b1pktcZ1WMIvTam+XfTMwWAGUlCN4WkcRnqKZfqpT35S5Wf86ynu2eO54lAA
-         exxh0p+3rr1olcwRnW6Au9YyYkGNqZ/Nc8qSihMOfshsyQx80vtDHbssykAJfBf3XyNg
-         /ug6AC0kA4cdHLovmzQAsfN9NpRc9E1SQQZ4wIflk9VqJu1ey2itVDuydx7w4XhqYBq2
-         LONEFun9Q+YLOVc+ls3zBBJJVdKX5PhPix4i+g+0QHStnt1LLGjPnpyev6Tppu7d+KR/
-         kUjQ==
-X-Gm-Message-State: ACrzQf028tbqe7jhUaZuju+Ze1+9xYgQ0gp0rXdz9lcd2Q1hVrYDUdss
-        RQWp2xHKtYHvCtBld1Mbuc2I0+TGNfv6LRz8er2e9r/Ns2ZysVNvxXMYcIsYYpPbLcR9Cj1JcQq
-        fBjmpEo6BMMBZDvKdmQ==
-X-Received: by 2002:a17:903:32cb:b0:186:deec:cd9f with SMTP id i11-20020a17090332cb00b00186deeccd9fmr2522040plr.82.1666793545112;
-        Wed, 26 Oct 2022 07:12:25 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4vts4EIwMBrmcHQRDKwEWtkUdrUle9EHgYf9L9DAWDrNkCRpJjiebCyFeiTGY78iIplYU9sA==
-X-Received: by 2002:a17:903:32cb:b0:186:deec:cd9f with SMTP id i11-20020a17090332cb00b00186deeccd9fmr2522017plr.82.1666793544785;
-        Wed, 26 Oct 2022 07:12:24 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r17-20020a63ce51000000b0041a6638b357sm2854822pgi.72.2022.10.26.07.12.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Oct 2022 07:12:24 -0700 (PDT)
-Date:   Wed, 26 Oct 2022 22:12:18 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     xiubli@redhat.com
-Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
-        lhenriques@suse.de, ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        mchangir@redhat.com
-Subject: Re: [PATCH 2/2] encrypt: add ceph support
-Message-ID: <20221026141218.wg2h3ganvo2dx7hb@zlang-mailbox>
-References: <20221026070418.259351-1-xiubli@redhat.com>
- <20221026070418.259351-3-xiubli@redhat.com>
+        with ESMTP id S233945AbiJZQ5z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Oct 2022 12:57:55 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4586F925AC;
+        Wed, 26 Oct 2022 09:57:53 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id F227AB82397;
+        Wed, 26 Oct 2022 16:57:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DDB87C433D6;
+        Wed, 26 Oct 2022 16:57:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1666803470;
+        bh=dFJuz1FugrZGTqnATzSGk4wTU+SpCE4g0hBxihc28QI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=FuQxGgetYyBuq6r+choAAjUpYj7lacRJonXALJUGkfZYNTApwOdjxC3W6VwXg7W6Z
+         GE90qwZ/KnxBD2rG3M6gQhUT65WNQPEcYF0Wx1fxYADn40yYj8bCXqBpYGJPQUcIwk
+         7A/dUlTsSig1tn2fSqM+uRYor519BHWO4Y9dOkY5Q2XMyfDz5ZpiBhoWprSBrolXEd
+         BjIn+gt3n+yqjt0YuI3qPYF2FDEMnNei7mSlfyq5Y8+cRSg0KaKnxBURrnk6WOeOiE
+         CNC0CC7RJgg031QkAvUGec71Ih7HnepTH/y8aoHniUJqTw03rnnJi+kfhoabzJPdFG
+         Hp5Y6vcTKhjMg==
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH] xfs: new test to ensure xfs can capture IO errors correctly
+Date:   Thu, 27 Oct 2022 00:57:47 +0800
+Message-Id: <20221026165747.1146281-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221026070418.259351-3-xiubli@redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 26, 2022 at 03:04:18PM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
-> 
-> For ceph we couldn't use the mkfs to check whether the encryption
-> is support or not, we need to mount it first and then check the
-> 'set_encpolicy', etc.
-> 
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  common/encrypt | 17 +++++++++++++++++
->  1 file changed, 17 insertions(+)
-> 
-> diff --git a/common/encrypt b/common/encrypt
-> index fd620c41..e837c9de 100644
-> --- a/common/encrypt
-> +++ b/common/encrypt
-> @@ -153,6 +153,23 @@ _scratch_check_encrypted()
->  		# erase the UBI volume; reformated automatically on next mount
->  		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
->  		;;
-> +	ceph)
-> +		# Try to mount the filesystem. We need to check whether the encryption
-> +		# is support or not via the ioctl cmd, such as 'set_encpolicy'.
-> +		if ! _try_scratch_mount &>>$seqres.full; then
-> +			_notrun "kernel is unaware of $FSTYP encryption feature," \
-> +				"or mkfs options are not compatible with encryption"
-> +		fi
-> +
-> +		mkdir $SCRATCH_MNT/tmpdir
-> +		if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
-> +			grep -Eq 'Inappropriate ioctl for device|Operation not supported'
-> +		then
-> +			_notrun "kernel does not support $FSTYP encryption"
-> +		fi
-> +		rmdir $SCRATCH_MNT/tmpdir
-> +		_scratch_unmount
+There was a known xfs crash bug fixed by e001873853d8 ("xfs: ensure
+we capture IO errors correctly"), so trys to cover this bug and make
+sure xfs can capture IO errors correctly, won't panic and hang again.
 
-As I replied in patch 1/2, this function is a mkfs function, if ceph need a
-specific mkfs way, you can do it in this function, or you even can keep it
-empty
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-  ceph)
-	;;
+Hi,
 
-Or does a simple cleanup
+When I tried to tidy up our internal test cases recently, I found a very
+old case which trys to cover e001873853d8 ("xfs: ensure we capture IO errors
+correctly") which fix by Dave. At that time, we didn't support xfs injection,
+so we tested it by a systemtap script [1] to inject an ioerror.
 
-  ceph)
-	_scratch_cleanup_files
-	...
-	;;
+Now this bug has been fixed long long time ago (9+ years), and that stap script
+is already out of date, can't work with new kernel. But good news is we have xfs
+injection now, so I try to resume this test case in fstests.
 
-I'm not familar with ceph, that depends on you. But the change in this patch is
-not "mkfs", it's a checking, checking if the current $SCRATCH_MNT supports
-encryption, you should do it in other function which does that checking job, not
-change a mkfs function to be a check function.
+I didn't verify if this case can reproduce that bug on old rhel (which doesn't
+support error injection). The original case tried to inject errno 11, I'm
+not sure if it's worth trying more other errors. I searched "buf_ioerror" in
+fstests, found nothing. So maybe this bug is old enough, but it's worth covering
+this kind of test. So feel free to tell me if you have any suggestions :)
 
 Thanks,
 Zorro
 
-> +		;;
->  	*)
->  		_notrun "No encryption support for $FSTYP"
->  		;;
-> -- 
-> 2.31.1
-> 
+[1]
+probe module("xfs").function("xfs_buf_bio_end_io")
+{
+        if ($error == 0) {
+                if ($bio->bi_rw & (1 << 4)) {
+                        $error = -11;
+                        printf("%s: comm %s, pid %d, setting error 11\n",
+                                probefunc(), execname(), pid());
+                        print_stack(backtrace());
+                }
+        }
+}
+
+ tests/xfs/554     | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/554.out |  4 ++++
+ 2 files changed, 57 insertions(+)
+ create mode 100755 tests/xfs/554
+ create mode 100644 tests/xfs/554.out
+
+diff --git a/tests/xfs/554 b/tests/xfs/554
+new file mode 100755
+index 00000000..6935bfc0
+--- /dev/null
++++ b/tests/xfs/554
+@@ -0,0 +1,53 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 YOUR NAME HERE.  All Rights Reserved.
++#
++# FS QA Test 554
++#
++# There was a known xfs crash bug fixed by e001873853d8 ("xfs: ensure we
++# capture IO errors correctly"), so trys to cover this bug and make sure
++# xfs can capture IO errors correctly, won't panic and hang again.
++#
++. ./common/preamble
++_begin_fstest auto eio
++
++_cleanup()
++{
++	$KILLALL_PROG -q fsstress 2> /dev/null
++	# ensures all fsstress processes died
++	wait
++	# log replay, due to the buf_ioerror injection might leave dirty log
++	_scratch_cycle_mount
++	cd /
++	rm -r -f $tmp.*
++}
++
++# Import common functions.
++. ./common/inject
++
++# real QA test starts here
++_supported_fs xfs
++_require_command "$KILLALL_PROG" "killall"
++_require_scratch
++_require_xfs_debug
++_require_xfs_io_error_injection "buf_ioerror"
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++echo "Inject buf ioerror tag"
++_scratch_inject_error buf_ioerror 11
++
++echo "Random I/Os testing ..."
++$FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 50000 -p 100 >> $seqres.full &
++for ((i=0; i<5; i++));do
++	# Clear caches, then trys to use 'find' to trigger readahead
++	echo 3 > /proc/sys/vm/drop_caches
++	find $SCRATCH_MNT >/dev/null 2>&1
++	sleep 3
++done
++
++echo "No hang or panic"
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+new file mode 100644
+index 00000000..26910daa
+--- /dev/null
++++ b/tests/xfs/554.out
+@@ -0,0 +1,4 @@
++QA output created by 554
++Inject buf ioerror tag
++Random I/Os testing ...
++No hang or panic
+-- 
+2.31.1
 
