@@ -2,100 +2,65 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21AA3C38A02
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Oct 2022 03:08:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3957FA3742
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Oct 2022 07:04:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231549AbiJZDIg (ORCPT
+        id S232679AbiJZHEl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 Oct 2022 23:08:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46120 "EHLO
+        Wed, 26 Oct 2022 03:04:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232489AbiJZDIc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Oct 2022 23:08:32 -0400
-Received: from mail-pg1-x535.google.com (mail-pg1-x535.google.com [IPv6:2607:f8b0:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B4E3101EF
-        for <fstests@vger.kernel.org>; Tue, 25 Oct 2022 20:08:31 -0700 (PDT)
-Received: by mail-pg1-x535.google.com with SMTP id h185so13523652pgc.10
-        for <fstests@vger.kernel.org>; Tue, 25 Oct 2022 20:08:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20210112.gappssmtp.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=1TrGtjNZ4HefQTsduCfH5Dd6X9o9bvzQpBtAQ5hxSdo=;
-        b=AM0F77WH1KcyNA6fgnuW2WOm32n92D5rDMpFVirEoDRKeiuPjXHuwaRqt0RZoOdPjd
-         /mWEbarBXQv6FciREJ3OpiIx6N+gfTrQn2qJJWN+KHKBpddN8O4H/XDckIuATrCgPV6P
-         795VJej6GYDPt+xTAPCCaxm3mHnOJbn8cg1NFrlRp0paotgt6ELZwoTfEUhiqlcZgcNE
-         E2Tu7pd7XqxXe2qYiGBjExGifySBkT6bMUjftx5SRpfl212Pp/B2Ty02mTET/34TFI8w
-         PK/0DVShg1TvnfNpGDRZ1uUgQLuI30c0p+ZGO2l8fasILEnW8uInm2DTSjlTTIMMJ8rU
-         xviA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1TrGtjNZ4HefQTsduCfH5Dd6X9o9bvzQpBtAQ5hxSdo=;
-        b=Z3VAS0WsVB/QW6cs/Xp0snxkwXiVeB5AW8T2+gnpJ0qKHPUpdHbkIRpf4Ujnaesj1d
-         tH3dNNl1uOj0Xlar6TrJ7zFPPRvRYghyUHSnGqAv4ITEWH1YtlRBGdNuwad+541rgA3+
-         HiTPtUfoDK1dupTwyK+AISkye9nUQFQNi7XYpq+bbqFFO7hSBemZAcuHhWgYUIIFSu+g
-         2MS8VCMRHhPGjVCOCrloGsULg2Rv3XT6d5BtTUznRLcpPYiQviLTmmd4w49EWHywvO4u
-         +O9fPFCDW8Gqf8Iw3GDAxpTdWNeZucFaxTUw7zvyhU/NFoKUCRBKfOnpEW1W534JJ7/x
-         3Mrg==
-X-Gm-Message-State: ACrzQf2FtwhFTAPZ4/elPu28Z4IYBsphGRRKYu2rip+0ZAZui88j33vf
-        5ZS4ziaUrkOxfnRVjT9cxJzH+w==
-X-Google-Smtp-Source: AMsMyM5JEEWjL4hv9Jpw0juCgk7Hw7/RQ2jfSYLJIYKJo9PhpzVW/oNEbN+KCLc8LWLGY8x/rtiC+w==
-X-Received: by 2002:a05:6a00:1348:b0:56b:f5c0:1d9d with SMTP id k8-20020a056a00134800b0056bf5c01d9dmr10746719pfu.45.1666753710853;
-        Tue, 25 Oct 2022 20:08:30 -0700 (PDT)
-Received: from dread.disaster.area (pa49-181-106-210.pa.nsw.optusnet.com.au. [49.181.106.210])
-        by smtp.gmail.com with ESMTPSA id bf11-20020a170902b90b00b00186881688f2sm1852234plb.220.2022.10.25.20.08.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Oct 2022 20:08:30 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1onWmJ-006Skr-BY; Wed, 26 Oct 2022 14:08:27 +1100
-Date:   Wed, 26 Oct 2022 14:08:27 +1100
-From:   Dave Chinner <david@fromorbit.com>
-To:     Eric Whitney <enwlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu
-Subject: Re: [PATCH] generic/455: add $FSX_AVOID
-Message-ID: <20221026030827.GT2703033@dread.disaster.area>
-References: <20221021211950.510006-1-enwlinux@gmail.com>
+        with ESMTP id S232992AbiJZHEk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Oct 2022 03:04:40 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 707BAEE3C
+        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 00:04:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1666767875;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=qy6jRwuJera0Dg1UeCpGaUhg/SbswZwpnzi0R1uHwAw=;
+        b=Vt2RSsYDPntr1VPEoC1XUyiJAZTZcE07V4Zi/cLpeC77cctd/G8zoLsOEjBBWca6VpDiSZ
+        fLXtK0F+gEWwTjHe/bW7+UV4Tj0GCDDKh9moY9nj96Ap+ELmN/AL+1welWJY1bROhMzwwW
+        ded6q3DYuSTO7PxUZTccohgyP6GYcOY=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-70-Iw_7BFTVOw2yb3f8BgOO-Q-1; Wed, 26 Oct 2022 03:04:31 -0400
+X-MC-Unique: Iw_7BFTVOw2yb3f8BgOO-Q-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 14D20858F13;
+        Wed, 26 Oct 2022 07:04:31 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D87D11415117;
+        Wed, 26 Oct 2022 07:04:27 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     fstests@vger.kernel.org
+Cc:     david@fromorbit.com, djwong@kernel.org, lhenriques@suse.de,
+        ceph-devel@vger.kernel.org, jlayton@kernel.org,
+        mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH 0/2] encrypt: add ceph support
+Date:   Wed, 26 Oct 2022 15:04:16 +0800
+Message-Id: <20221026070418.259351-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221021211950.510006-1-enwlinux@gmail.com>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 21, 2022 at 05:19:50PM -0400, Eric Whitney wrote:
-> generic/455 fails when run on an ext4 bigalloc file system.  Its
-> fsx invocations can make insert range and collapse range calls whose
-> arguments are not cluster aligned, and ext4 will fail those calls for
-> bigalloc.  They can be suppressed by adding the FSX_AVOID environment
-> variable to the fsx invocation and setting its value appropriately in
-> the test environment, as is done for other fsx-based tests.  This
-> avoids the need to exclude the test to avoid failures and makes it
-> possible to take advantage of the remainder of its coverage.
-> 
-> Signed-off-by: Eric Whitney <enwlinux@gmail.com>
-> ---
->  tests/generic/455 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/455 b/tests/generic/455
-> index 649b5410..c13d872c 100755
-> --- a/tests/generic/455
-> +++ b/tests/generic/455
-> @@ -77,7 +77,7 @@ FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
->  seeds=(0 0 0 0)
->  # Run fsx for a while
->  for j in `seq 0 $((NUM_FILES-1))`; do
-> -	run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
-> +	run_check $here/ltp/fsx $FSX_OPTS $FSX_AVOID -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
+From: Xiubo Li <xiubli@redhat.com>
 
-generic/457 needs this fix as well.
+Xiubo Li (2):
+  encrypt: rename _scratch_mkfs_encrypted to _scratch_check_encrypted
+  encrypt: add ceph support
 
--Dave.
+ common/encrypt | 27 ++++++++++++++++++++++-----
+ 1 file changed, 22 insertions(+), 5 deletions(-)
+
 -- 
-Dave Chinner
-david@fromorbit.com
+2.31.1
+
