@@ -2,121 +2,184 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECFA0C38A2D
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Oct 2022 13:47:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3341AC38A2D
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Oct 2022 14:05:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233816AbiJZNrC (ORCPT
+        id S233686AbiJZOFD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Oct 2022 09:47:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45174 "EHLO
+        Wed, 26 Oct 2022 10:05:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37708 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233708AbiJZNq2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Oct 2022 09:46:28 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B1167EFC3
-        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 06:46:14 -0700 (PDT)
+        with ESMTP id S234118AbiJZOFB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Oct 2022 10:05:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E0854A838
+        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 07:04:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1666791973;
+        s=mimecast20190719; t=1666793093;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=bruAT5FN5UzkvBgHAVJeHTZnXfRT2vJaSunCwR3GLy0=;
-        b=CAuIXGhRrUJSlZFpP+OLd4K/dzKXi6pXDIGW5wy4YC1WmwiOwM7IIg5gnTIEz2muIwMmQd
-        ElKvSTNMxuUSrHLzbVahZezNwH4FVxU+5mSLlzDI86p3N09/tksAVY4YY26B7rJ0C8pCJY
-        rli2k4d7UG0IGojAEjCm8HbEob6mw3c=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=Z14ZXZUzGKjReZ1Rm3C0eR5qgCTXW0HUh+T1+61zw04=;
+        b=Pni3klrTd8DCXOjkCq9vF8XLiSz8b4+kaXHXYULBXE6B7NDJAr96A3Llvan3RB7bsfltyg
+        eFBDQqRmkVbfG5j53rLoT0/M6rFDZDwBNjLCMeAtaw773Yx9euvPJdvIQZ+BfPXvoNV8em
+        PtkbORUo3zKfmLNcH04vxb3A1tMiKpc=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-58-wAYOwz5eM-K_wSEB0U6odA-1; Wed, 26 Oct 2022 09:46:12 -0400
-X-MC-Unique: wAYOwz5eM-K_wSEB0U6odA-1
-Received: by mail-pj1-f71.google.com with SMTP id z9-20020a17090a468900b00202fdb32ba1so1245199pjf.1
-        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 06:46:11 -0700 (PDT)
+ us-mta-433-9ju447Y5PhOF90nKqijEqg-1; Wed, 26 Oct 2022 10:04:51 -0400
+X-MC-Unique: 9ju447Y5PhOF90nKqijEqg-1
+Received: by mail-pl1-f198.google.com with SMTP id t3-20020a170902e84300b00186ab03043dso5609819plg.20
+        for <fstests@vger.kernel.org>; Wed, 26 Oct 2022 07:04:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bruAT5FN5UzkvBgHAVJeHTZnXfRT2vJaSunCwR3GLy0=;
-        b=WDn2x+7M4Wb9scJEdHFIbqgTMiSh9m9lN67rgQyRubq3yUJ5PqMkIwqdtqIqYaujsr
-         xKUhKwkjW9lisy1pVIkAR2JDcvsqXMB8vX8jW5etj6U4aAA8RLG5I3Bqp9VrePnxy2wC
-         80gqGKats1WAyyDkHQwAE0Gz4/4thgmbGUfYp+4wDTkMhmtU5w8GNmTw90Rkx+ncju+B
-         hQ7+AiKg+xZ35PNucAbmZBT623BT8pNedKq5X056A17lzZVN5Y5odbiMbevsKGvGdEYV
-         Dc7pB6ybCo25ZFhQJgOdAUgRYbSnnef6i0oGk3BhcvqEF4gxvWo3KQeEfWc4GcNxsnjm
-         trgg==
-X-Gm-Message-State: ACrzQf1tluTBigc1HnkXNftFSIZAyz8NFATUiU5yILWPtniW07HV5uhF
-        faLTQ02L29sNlONXjEJfAoYWQCsQmSYZ8jW5+wFsDs9Yk1D8pDxwRTpYG/+io1rzLUfuiugBQeg
-        M8PHyU0SuOEojNwiIaA==
-X-Received: by 2002:a63:dc54:0:b0:44c:ce26:fa35 with SMTP id f20-20020a63dc54000000b0044cce26fa35mr38559242pgj.374.1666791970298;
-        Wed, 26 Oct 2022 06:46:10 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4BZAQADVkqt6gsC3mjYWhVJkJMQZXggkbquaa0yqbxe5S/0fYvhYvldFm2KPuwoMP2f2INQQ==
-X-Received: by 2002:a63:dc54:0:b0:44c:ce26:fa35 with SMTP id f20-20020a63dc54000000b0044cce26fa35mr38559227pgj.374.1666791970007;
-        Wed, 26 Oct 2022 06:46:10 -0700 (PDT)
+        bh=Z14ZXZUzGKjReZ1Rm3C0eR5qgCTXW0HUh+T1+61zw04=;
+        b=k00ZXkQlQPdUl2stRc7Gi0xAWZFBuUOfcnmxepeSfoCuPC6H6I1sge57nRBM0v9d/O
+         nwD9GLjAIQBFJvNxhFLjoJDoiNK8dSlesvhYMkEXRgzkZkeChgqP3KecSuDSo8G2QBm8
+         AT15XTMgSr0M1Bn5P4cAnz6bi9tQkHpcG3GQjgtm7n0urInFjsjNLN6pf7/mvzwyyjhN
+         NtzJ+GUCs7SAll5uvZFs5xasZcXqgSsD3ofdzN1hEocDgrvqTjHAGp8licv37eOo8juf
+         XkuglcEl93OliVjua6kYxWYiMs6XdaKwKd7wpj/HrDNcHh5mof9Wc4usXC7RNlWXNSDX
+         b9EQ==
+X-Gm-Message-State: ACrzQf0MKjaifC9udJSJCRFHoqCVEKLgigiEFhyyAMxiu+rbX2G0QGGN
+        xSuy2CC3tZOEkH0t4mH+iCvzL6YzCORD0m4pxcROdc/rVR1wM7yH0+K1sJwmITgLCK52PkotR3t
+        2/cZArqpuajVhy6q5bg==
+X-Received: by 2002:a63:5b48:0:b0:458:1e98:c862 with SMTP id l8-20020a635b48000000b004581e98c862mr36835963pgm.568.1666793090909;
+        Wed, 26 Oct 2022 07:04:50 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM45M/RvgraTMViFW3UGbjujQk/5HvQTV8sCwa+XIyNFe+kZR7mDAILVMFTri37ekCTWdyHkXA==
+X-Received: by 2002:a63:5b48:0:b0:458:1e98:c862 with SMTP id l8-20020a635b48000000b004581e98c862mr36835940pgm.568.1666793090617;
+        Wed, 26 Oct 2022 07:04:50 -0700 (PDT)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id a187-20020a621ac4000000b0056bcc744bdbsm3005438pfa.203.2022.10.26.06.46.07
+        by smtp.gmail.com with ESMTPSA id m3-20020a63fd43000000b004393c5a8006sm2872095pgj.75.2022.10.26.07.04.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Oct 2022 06:46:09 -0700 (PDT)
-Date:   Wed, 26 Oct 2022 21:46:04 +0800
+        Wed, 26 Oct 2022 07:04:49 -0700 (PDT)
+Date:   Wed, 26 Oct 2022 22:04:44 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Whitney <enwlinux@gmail.com>
-Cc:     Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org, tytso@mit.edu
-Subject: Re: [PATCH] generic/455: add $FSX_AVOID
-Message-ID: <20221026134604.ks5pview6j6ly4t4@zlang-mailbox>
-References: <20221021211950.510006-1-enwlinux@gmail.com>
- <20221026030827.GT2703033@dread.disaster.area>
+To:     xiubli@redhat.com
+Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
+        lhenriques@suse.de, ceph-devel@vger.kernel.org, jlayton@kernel.org,
+        mchangir@redhat.com
+Subject: Re: [PATCH 1/2] encrypt: rename _scratch_mkfs_encrypted to
+ _scratch_check_encrypted
+Message-ID: <20221026140444.6br63mundxivfsnn@zlang-mailbox>
+References: <20221026070418.259351-1-xiubli@redhat.com>
+ <20221026070418.259351-2-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221026030827.GT2703033@dread.disaster.area>
+In-Reply-To: <20221026070418.259351-2-xiubli@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 26, 2022 at 02:08:27PM +1100, Dave Chinner wrote:
-> On Fri, Oct 21, 2022 at 05:19:50PM -0400, Eric Whitney wrote:
-> > generic/455 fails when run on an ext4 bigalloc file system.  Its
-> > fsx invocations can make insert range and collapse range calls whose
-> > arguments are not cluster aligned, and ext4 will fail those calls for
-> > bigalloc.  They can be suppressed by adding the FSX_AVOID environment
-> > variable to the fsx invocation and setting its value appropriately in
-> > the test environment, as is done for other fsx-based tests.  This
-> > avoids the need to exclude the test to avoid failures and makes it
-> > possible to take advantage of the remainder of its coverage.
-> > 
-> > Signed-off-by: Eric Whitney <enwlinux@gmail.com>
-> > ---
-> >  tests/generic/455 | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/tests/generic/455 b/tests/generic/455
-> > index 649b5410..c13d872c 100755
-> > --- a/tests/generic/455
-> > +++ b/tests/generic/455
-> > @@ -77,7 +77,7 @@ FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
-> >  seeds=(0 0 0 0)
-> >  # Run fsx for a while
-> >  for j in `seq 0 $((NUM_FILES-1))`; do
-> > -	run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
-> > +	run_check $here/ltp/fsx $FSX_OPTS $FSX_AVOID -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
+On Wed, Oct 26, 2022 at 03:04:17PM +0800, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
 > 
-> generic/457 needs this fix as well.
+> For ceph we couldn't check the encryption feature by mkfs, we need
+> to mount it first and then check the 'get_encpolicy' ioctl cmd.
+> 
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
 
-Yes,
-$ grep -rsn here/ltp/fsx tests/|grep -Ev "FSX_AVOID|replay-ops"
-tests/generic/457:86:   run_check $here/ltp/fsx $FSX_OPTS -S 0 -j $j $SCRATCH_MNT/testfile$j &
-tests/generic/455:80:   run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
+This patch only does an *incomplete* function rename, without any change
+on that function body, that doesn't make sense, and even will bring in
+regression, due to lots of cases depend on this common function. If you
+really need to change a common function, please "grep" [1] this function
+in xfstests-dev/ to find out and check all places use it at least.
 
-Hi Eric,
-
-May you resend this patch? And you can keep Darrick's RVB in V2.
+The _scratch_mkfs_encrypted is a "mkfs" function, likes _scratch_mkfs. I
+think we shouldn't change its name. If you want to check if encryption
+feature is supported by ceph, I think you might hope to do that in
+_require_* functions, or you even can have a ceph specific function in
+common/ceph. Just not the way you did in this patchset.
 
 Thanks,
 Zorro
 
+[1]
+$ grep -rsn _scratch_mkfs_encrypted .
+./common/encrypt:32:    if ! _scratch_mkfs_encrypted &>>$seqres.full; then
+./common/encrypt:146:_scratch_mkfs_encrypted()
+./common/encrypt:174:# Like _scratch_mkfs_encrypted(), but add -O stable_inodes if applicable for the
+./common/encrypt:186:           _scratch_mkfs_encrypted
+./common/encrypt:926:           _scratch_mkfs_encrypted &>> $seqres.full
+./common/verity:178:_scratch_mkfs_encrypted_verity()
+./common/verity:190:            _notrun "$FSTYP not supported in _scratch_mkfs_encrypted_verity"
+./tests/ext4/024:36:_scratch_mkfs_encrypted &>>$seqres.full
+./tests/generic/395:22:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/396:21:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/580:23:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/581:36:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/595:35:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/613:29:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/621:57:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/429:36:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/397:28:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/398:28:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/421:24:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/440:29:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/419:29:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/435:33:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/593:24:_scratch_mkfs_encrypted &>> $seqres.full
+./tests/generic/576:34:_scratch_mkfs_encrypted_verity &>> $seqres.full
+
+
+
+>  common/encrypt | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
 > 
-> -Dave.
+> diff --git a/common/encrypt b/common/encrypt
+> index 45ce0954..fd620c41 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -29,7 +29,7 @@ _require_scratch_encryption()
+>  	# Make a filesystem on the scratch device with the encryption feature
+>  	# enabled.  If this fails then probably the userspace tools (e.g.
+>  	# e2fsprogs or f2fs-tools) are too old to understand encryption.
+> -	if ! _scratch_mkfs_encrypted &>>$seqres.full; then
+> +	if ! _scratch_check_encrypted &>>$seqres.full; then
+>  		_notrun "$FSTYP userspace tools do not support encryption"
+>  	fi
+>  
+> @@ -143,7 +143,7 @@ _require_encryption_policy_support()
+>  	rm -r $dir
+>  }
+>  
+> -_scratch_mkfs_encrypted()
+> +_scratch_check_encrypted()
+>  {
+>  	case $FSTYP in
+>  	ext4|f2fs)
+> @@ -171,7 +171,7 @@ _scratch_mkfs_sized_encrypted()
+>  	esac
+>  }
+>  
+> -# Like _scratch_mkfs_encrypted(), but add -O stable_inodes if applicable for the
+> +# Like _scratch_check_encrypted(), but add -O stable_inodes if applicable for the
+>  # filesystem type.  This is necessary for using encryption policies that include
+>  # the inode number in the IVs, e.g. policies with the IV_INO_LBLK_64 flag set.
+>  _scratch_mkfs_stable_inodes_encrypted()
+> @@ -183,7 +183,7 @@ _scratch_mkfs_stable_inodes_encrypted()
+>  		fi
+>  		;;
+>  	*)
+> -		_scratch_mkfs_encrypted
+> +		_scratch_check_encrypted
+>  		;;
+>  	esac
+>  }
+> @@ -923,7 +923,7 @@ _verify_ciphertext_for_encryption_policy()
+>  			      FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32) )); then
+>  		_scratch_mkfs_stable_inodes_encrypted &>> $seqres.full
+>  	else
+> -		_scratch_mkfs_encrypted &>> $seqres.full
+> +		_scratch_check_encrypted &>> $seqres.full
+>  	fi
+>  	_scratch_mount
+>  
 > -- 
-> Dave Chinner
-> david@fromorbit.com
+> 2.31.1
 > 
 
