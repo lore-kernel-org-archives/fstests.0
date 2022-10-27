@@ -2,119 +2,102 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 040B1FA3740
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Oct 2022 12:49:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEF1AECAAA1
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Oct 2022 12:52:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235895AbiJ0MtU (ORCPT
+        id S235574AbiJ0Mwk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 27 Oct 2022 08:49:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38100 "EHLO
+        Thu, 27 Oct 2022 08:52:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51072 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235900AbiJ0MtP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Oct 2022 08:49:15 -0400
+        with ESMTP id S235044AbiJ0Mwi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Oct 2022 08:52:38 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A59716F424
-        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 05:49:14 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2084A6A51E
+        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 05:52:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1666874953;
+        s=mimecast20190719; t=1666875157;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=cHqvMwxRqRdRD6fhEnjExRRGq07E2A9r8/jZD1+Fv8Y=;
-        b=Y+ODmrzv1o9aaryEyzeJAa6rCLHNn2xfaCI+zmm/jWCp/0fIzm+1qYfq/v7oUlZhhx3FBG
-        /u2Cgk7Nch0jD7oYys9PtzS579OkhqGIxIgYnCMU16fPGH/OuBAxC8zCMMmBgmczsOKwvb
-        5Sk4zg52x5m2qNoLhOIkn8JRmYuIFt4=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=ZOyMbmJZgxsgbqrGPqmAeeEUH+41Z5rxH+cR4EGVYzU=;
+        b=chEMPNrRholy3pvxPNoEoSUBdBBP4buCbAaAdiwfCJ2xhok+STKdtvtfMyWxEW1CxgLUq4
+        s6s83TP15xoC4YBe2gOMAWiCmS29+HpJ89sCstfvtDl+Q6ZWZpX74u1INrlR/dgbVtad3T
+        nA5PjqLmmroXFm0qzqXde5Z1SOr2Kj4=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-153-kzockvZKMsC5lHk6XuAVWw-1; Thu, 27 Oct 2022 08:49:12 -0400
-X-MC-Unique: kzockvZKMsC5lHk6XuAVWw-1
-Received: by mail-pj1-f72.google.com with SMTP id nl16-20020a17090b385000b002138288fd51so123596pjb.6
-        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 05:49:12 -0700 (PDT)
+ us-mta-657-AMx1ios4PQ6Y6OmdS_AmkQ-1; Thu, 27 Oct 2022 08:52:36 -0400
+X-MC-Unique: AMx1ios4PQ6Y6OmdS_AmkQ-1
+Received: by mail-pg1-f199.google.com with SMTP id r126-20020a632b84000000b004393806c06eso729434pgr.4
+        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 05:52:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cHqvMwxRqRdRD6fhEnjExRRGq07E2A9r8/jZD1+Fv8Y=;
-        b=QH/ppsc2jaYW0v301312MMpEwlcxAu+y9OZgErgARu/pChu0ApvdyaQ4tl3dcgQbTM
-         yLvD8pXbmdd6Uj1b432Iuos3r9+OnDFuLJNwJbIKnImrFEkvqkuQhqPsxVcWitxpiOvO
-         gCs4pRHaDsvoCiIQvHK2nPGGhmnLeawNC9U3FED6hC3CBzC7Ovb4u7YKjwm3v9Tjv+AX
-         rhmDBINlCHXJN72WOl2Apg6AYN2N4tzRYQAv86zBS5QyTcID6J64EsDUYUNvKguoQdhY
-         i5xH/L5ykyluSB8Fehhk85YQwBs3yB7Fl2gfoDmz5iwgc6z+tCzNuyAyXAMzdYqAQfxj
-         oThA==
-X-Gm-Message-State: ACrzQf1fHHtlMmJUW8ehlG3Cgx4JtGgouz6A2FRDhQnM7iuPfQ7knhzh
-        8tKSE4SVKVoq/2Tg5iDz/hrzCudW562PwZdRV18R3SqMU0N5yE75PDgxUSv+KeyJARxMTL2rl8e
-        RGz+rBoG5qE8VQZ0I1Q==
-X-Received: by 2002:aa7:94b1:0:b0:56c:8da8:4e3 with SMTP id a17-20020aa794b1000000b0056c8da804e3mr4133618pfl.62.1666874951250;
-        Thu, 27 Oct 2022 05:49:11 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4BjVbAuCIJjG2mfjadC4PhqrAigrSHZs2aTxvBOrojc11nh9kg5IOgvPJ31z+dghdvh28emw==
-X-Received: by 2002:aa7:94b1:0:b0:56c:8da8:4e3 with SMTP id a17-20020aa794b1000000b0056c8da804e3mr4133593pfl.62.1666874950919;
-        Thu, 27 Oct 2022 05:49:10 -0700 (PDT)
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZOyMbmJZgxsgbqrGPqmAeeEUH+41Z5rxH+cR4EGVYzU=;
+        b=YS8Lkkyr6BKjJlewOhMu5Bt1qQiyKVbrBjuoYRccQLZlb6jwi9sIUWJ0yhzOV4dgHD
+         gvkRg4a3BqAgod16Zi9Zb7MCP6k7JoBJ4K8sHHsWn7nJo+suNuAuw2/+WD7KszvlIINA
+         mwzcuy72myPmYBDeqcME5+8gDp5C+nIoD3dFffMIoJ33g2f/nccjpJ6q+0PMgl6CatzX
+         xe0w8YJ73KzinT/Lqan1//HQkWslulnHKJ9GAf3HcVxsvzi1pqWtn9ky0EJbC4pew4Fx
+         ZS6RLqAouw5yTodNTkXhoXLS2XLsJwgfFXleeY534gjOaON3exvurE02iiQc1a3WpH/Y
+         wx4w==
+X-Gm-Message-State: ACrzQf2fPLtf+VlJQsknCUPwPU+hs5JWi5anFJr7beYnzvtraz7SBrmp
+        cyUve8UkvotHNTxmqjFPKk4Km23MaFwIWA5auYiPNNyJOWzjBTbfAZ7Og/B14WTqIXl/lH+1Mny
+        3F8DivvSpsp6gdRST5Q==
+X-Received: by 2002:a65:6148:0:b0:458:88cd:f46 with SMTP id o8-20020a656148000000b0045888cd0f46mr8018721pgv.303.1666875154368;
+        Thu, 27 Oct 2022 05:52:34 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5ciDg4P10K5WHCo5gkuMkWl2MqrwJKf+3nDOwoQKJal1edjy5jZilBa2PzDpoHhuFomOQPng==
+X-Received: by 2002:a65:6148:0:b0:458:88cd:f46 with SMTP id o8-20020a656148000000b0045888cd0f46mr8018706pgv.303.1666875154110;
+        Thu, 27 Oct 2022 05:52:34 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id u4-20020a170902e5c400b001866049ddb1sm1153608plf.161.2022.10.27.05.49.07
+        by smtp.gmail.com with ESMTPSA id a6-20020a170902710600b001865e69b4d7sm1097255pll.264.2022.10.27.05.52.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 27 Oct 2022 05:49:10 -0700 (PDT)
-Date:   Thu, 27 Oct 2022 20:49:04 +0800
+        Thu, 27 Oct 2022 05:52:33 -0700 (PDT)
+Date:   Thu, 27 Oct 2022 20:52:28 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Xiubo Li <xiubli@redhat.com>
-Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
-        lhenriques@suse.de, ceph-devel@vger.kernel.org, jlayton@kernel.org,
+To:     =?utf-8?B?THXDrXM=?= Henriques <lhenriques@suse.de>
+Cc:     xiubli@redhat.com, fstests@vger.kernel.org, david@fromorbit.com,
+        djwong@kernel.org, ceph-devel@vger.kernel.org, jlayton@kernel.org,
         mchangir@redhat.com
 Subject: Re: [PATCH v2] encrypt: add ceph support
-Message-ID: <20221027124904.ibx62eqbyyqghdjm@zlang-mailbox>
+Message-ID: <20221027125228.myk36misrwadkawu@zlang-mailbox>
 References: <20221027030021.296548-1-xiubli@redhat.com>
  <20221027032023.6arvnrkl7fymdjqj@zlang-mailbox>
- <e5c876ce-8f0d-c51e-bb04-78c49ebf79c9@redhat.com>
+ <Y1pQz8LICOT1idp+@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <e5c876ce-8f0d-c51e-bb04-78c49ebf79c9@redhat.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <Y1pQz8LICOT1idp+@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 27, 2022 at 05:49:08PM +0800, Xiubo Li wrote:
-> 
-> On 27/10/2022 11:20, Zorro Lang wrote:
+On Thu, Oct 27, 2022 at 10:35:11AM +0100, Luís Henriques wrote:
+> On Thu, Oct 27, 2022 at 11:20:23AM +0800, Zorro Lang wrote:
 > > On Thu, Oct 27, 2022 at 11:00:21AM +0800, xiubli@redhat.com wrote:
 > > > From: Xiubo Li <xiubli@redhat.com>
 > > > 
 > > > Signed-off-by: Xiubo Li <xiubli@redhat.com>
 > > > ---
-> > >   common/encrypt | 3 +++
-> > >   1 file changed, 3 insertions(+)
+> > >  common/encrypt | 3 +++
+> > >  1 file changed, 3 insertions(+)
 > > > 
 > > > diff --git a/common/encrypt b/common/encrypt
 > > > index 45ce0954..1a77e23b 100644
 > > > --- a/common/encrypt
 > > > +++ b/common/encrypt
 > > > @@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
-> > >   		# erase the UBI volume; reformated automatically on next mount
-> > >   		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
-> > >   		;;
+> > >  		# erase the UBI volume; reformated automatically on next mount
+> > >  		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
+> > >  		;;
 > > > +	ceph)
 > > > +		_scratch_cleanup_files
-> 
-> Here I just skip ceph and it is enough. Because the
-> _require_scratch_encryption() will do the same thing as I did in my V1's 2/2
-> patch.
-
-Great, actually that's what I hope to know. So the ceph encryption testing
-can be supported naturally by just enabling ceph in _scratch_mkfs_encrypted.
-
-And from the testing output you showed in last patch, it looks good on testing
-ceph encryption. So I think this patch works as expected. I'll merger this
-patch if no more review points from ceph list. And feel free to improve cases
-in encrypt group later if someone fails on ceph.
-
-Thanks,
-Zorro
-
-> 
-> - Xiubo
-> 
 > > > +		;;
+> > 
 > > Any commits about that?
 > > 
 > > Sorry I'm not familar with cephfs, is this patch enough to help ceph to test
@@ -122,6 +105,33 @@ Zorro
 > > 
 > > Can "./check -g encrypt" work on ceph? May you paste this test result to help
 > > to review? And welcome review points from ceph list.
+> 
+> I think Xiubo's patch is likely to be required for enabling encryption
+> testing in ceph.  Simply doing a '_scratch_cleanup_files' is exactly what
+> network filesystems are doing on _scratch_mkfs().  Thus it makes sense for
+> ceph to do the same for testing fscrypt support, as we don't really have
+> an 'mkfs.ceph' tool.
+> 
+> Now, this patch alone is probably not enough to allow to do all the
+> validation we're looking for.  (But note that I did *not* tried it myself,
+> so I may be wrong.)  I think we'll need to go through each of the
+> 'encrypt' tests, run it in ceph and see if they are really testing what
+> they are supposed to.
+> 
+> But that's just my two cents ;-)
+
+Sure :) I just hope to know if this patch is enough to help those encrypt
+cases start running on ceph. As for some specific testing failures, that
+can be another patchset.
+
+Thanks,
+Zorro
+
+> 
+> Cheers,
+> --
+> Luís
+> 
 > > 
 > > Thanks,
 > > Zorro
@@ -145,11 +155,12 @@ Zorro
 > > tests/generic/593:24:_scratch_mkfs_encrypted &>> $seqres.full
 > > tests/generic/576:34:_scratch_mkfs_encrypted_verity &>> $seqres.full
 > > 
-> > >   	*)
-> > >   		_notrun "No encryption support for $FSTYP"
-> > >   		;;
+> > >  	*)
+> > >  		_notrun "No encryption support for $FSTYP"
+> > >  		;;
 > > > -- 
 > > > 2.31.1
 > > > 
+> > 
 > 
 
