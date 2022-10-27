@@ -2,143 +2,210 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7BD7C67871
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Oct 2022 09:49:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16CA3FA3742
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Oct 2022 10:51:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234855AbiJ0JtV (ORCPT
+        id S234722AbiJ0KvK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 27 Oct 2022 05:49:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53920 "EHLO
+        Thu, 27 Oct 2022 06:51:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35110 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233669AbiJ0JtU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Oct 2022 05:49:20 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FD3D96A11
-        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 02:49:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1666864158;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=JPnMJUFSiZja4F5PXIOoRcecDoK9y1I2PLfiYl/xC7A=;
-        b=hZxKmVGorKCUG+UGNAOvvYawY/qfU4a9+ZmBs3FNa/DCfzlIGg7fL/diniOVyNEbGObuFB
-        WelN1pCBRf5geFjSg/Av+Bnu6A62kz/aiIFyFPnFIEbNLaaUApjmoTuq7xEO0A3I6s3uFE
-        jxIqJfujbAYjGJnOTwN//1K2rupFJAA=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-359--l8tnAmUPuK8qSZYr8X7wQ-1; Thu, 27 Oct 2022 05:49:17 -0400
-X-MC-Unique: -l8tnAmUPuK8qSZYr8X7wQ-1
-Received: by mail-pl1-f198.google.com with SMTP id o7-20020a170902d4c700b001868cdac9adso710773plg.13
-        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 02:49:17 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-language:content-transfer-encoding:in-reply-to:mime-version
-         :user-agent:date:message-id:from:references:cc:to:subject
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=JPnMJUFSiZja4F5PXIOoRcecDoK9y1I2PLfiYl/xC7A=;
-        b=1YnQHF5jhX33hw89jdBgW2BRIaVtXW25Z7WWag8hTF/pRuPz7fhUXSpAzdS7DgD+1Z
-         NuOGDGtjVnbetu0NSY36MXidN31PMofmVGXRrmVd/4VxqVfzuIrzOCmHClDaWcGaA/41
-         gVYtThW3c2glAud6QX1raeCzekkCip+ib4lBRHDDVKH/NMLqx6v5ZJZj52HVKBYhjyb0
-         XXcB9g28zC3xNlDTZDGTkC1R/Lh95dO0P7dcDKjO0IYXWI7rIveNXGfGolwN3RwMeF0l
-         jzPT5hHYkWCtAcYZwbcIH1jAtNQMXi3/ZzooW8ErL20YixlU2iV+8eGbZcuN30vgWUkS
-         TQVw==
-X-Gm-Message-State: ACrzQf1TtglRcrbBOnptVcAuc5npzyipt4sikGMWN1Ko2pYF+DPaYtci
-        We2eGoHr6SGxY347YlKkY3zajaxtTKzAKRXvTVG9yeNaowKAI+zjdduwwYNV/6IpXski1+EyQUx
-        rQnJOsC8hMk8jgMjTjQ==
-X-Received: by 2002:a17:903:230d:b0:183:7f57:b5fe with SMTP id d13-20020a170903230d00b001837f57b5femr49344271plh.27.1666864156384;
-        Thu, 27 Oct 2022 02:49:16 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM6hKJISB1PmUit6j6Yll83nz76x0HJF9bmIZcRUTQWuovCdkHShh8xFbstuycBkXuQBen0mCw==
-X-Received: by 2002:a17:903:230d:b0:183:7f57:b5fe with SMTP id d13-20020a170903230d00b001837f57b5femr49344246plh.27.1666864156151;
-        Thu, 27 Oct 2022 02:49:16 -0700 (PDT)
-Received: from [10.72.13.65] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d125-20020a623683000000b0056c0b472c09sm797687pfa.211.2022.10.27.02.49.12
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 27 Oct 2022 02:49:15 -0700 (PDT)
-Subject: Re: [PATCH v2] encrypt: add ceph support
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
-        lhenriques@suse.de, ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        mchangir@redhat.com
-References: <20221027030021.296548-1-xiubli@redhat.com>
- <20221027032023.6arvnrkl7fymdjqj@zlang-mailbox>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <e5c876ce-8f0d-c51e-bb04-78c49ebf79c9@redhat.com>
-Date:   Thu, 27 Oct 2022 17:49:08 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S234833AbiJ0KvI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Oct 2022 06:51:08 -0400
+Received: from mail1.bemta37.messagelabs.com (mail1.bemta37.messagelabs.com [85.158.142.112])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69B037B2AB
+        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 03:51:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1666867864; i=@fujitsu.com;
+        bh=GE8KNhk5G6h0QHUz6zUBId59+CF7wkXvLuWEJYpeiZY=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=IDDuYgoBA8w2eazRPOFoJ/NOzXKn6PkTM6SqRlYr1heqQ2nfYeDAnC14LZL6qp1Ao
+         qBKth7Ttr8NIjc7GAxEpfSn2lXp6soh4adlR2dbapr1HDOjHn7+rwHYzjEMkz6EpbQ
+         AifoiZGE+dLm9It9AmMPSjhDodZphxFJWzLb9UMd3zfbY4+kRcsquvUksZk9OxBKzt
+         3NajU7TVoR+snCvC9iIuk1zlQA3GEHXzn4KVoQtcckxdERFRnvi9hKgXJcyeewVarl
+         fZy88etNDxsNf7SRUF/3Z6lSvWAWneIWUcpKBvjHewF81NOUn9kMHYBJWSjobjyFj/
+         OoNOZWXtZDokg==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrJIsWRWlGSWpSXmKPExsViZ8ORqDs9KSr
+  Z4M5Pc4vTLXvZLfae3MnqwOTxft9VNo/Pm+QCmKJYM/OS8isSWDM6jy9kLfgkWbHny0vGBsYl
+  ol2MXBxCAlsYJXoWL2SFcJYzSfSunszYxcgJ5OxnlGifHAdiswmoSeyc/pIFxBYRkJX4P2M1E
+  4jNLGAh0fi6mRXEFhaIkFiy5SIziM0ioCqx6UkTexcjBwevgJPE7hflIGEJAQWJKQ/fg5XwCg
+  hKnJz5hAVijITEwRcvmCFqFCXalvxjh7ArJGbNamOCsNUkrp7bxDyBkX8WkvZZSNoXMDKtYjQ
+  vTi0qSy3SNTLQSyrKTM8oyU3MzNFLrNJN1Est1c3LLyrJ0DXUSywv1kstLtYrrsxNzknRy0st
+  2cQIDM+U4qTEHYx9y/7oHWKU5GBSEuVNZIpKFuJLyk+pzEgszogvKs1JLT7EKMPBoSTB2xYHl
+  BMsSk1PrUjLzAHGCkxagoNHSYS3OgYozVtckJhbnJkOkTrFaMxxfuf+vcwcH/9c3MssxJKXn5
+  cqJc5rmghUKgBSmlGaBzcIFsOXGGWlhHkZGRgYhHgKUotyM0tQ5V8xinMwKgnzaoNM4cnMK4H
+  b9wroFCagU9bMDQM5pSQRISXVwFR7Jlvp193HfNzLhD6yNDaaZRy4vPzc30qfSY+W9M273bxK
+  fFVU7+NTiyb1+e3cabA9S11+f/nXyliRhZrr47cli9VtZPmpqM1mYNXIwG6juHpS8QfpNp+62
+  SFFUoxODFNmqTfvOPlp45STzp97aizUr4s/KssRsd7wuspr3krm16u/vxJ8WafkuSvHIZDp/h
+  3xnlopg6MTXt6e/7xzSt97KUveq6LT2X7x39E2eLTum6/umlXsk+Jdb7X4T00NmsnJcS5qh+L
+  WQ+cPF3Ge+3yreKlyb5m6nFWH+r8fB0oPJOvq3/u+aP1OTd09n3QdnZMtvOZsFHvHazczKvau
+  5GWm1oT/rmHyf/Ykz37xyEeJpTgj0VCLuag4EQC01CkiXAMAAA==
+X-Env-Sender: yangx.jy@fujitsu.com
+X-Msg-Ref: server-12.tower-728.messagelabs.com!1666867863!515784!1
+X-Originating-IP: [62.60.8.97]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.100.1; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 3724 invoked from network); 27 Oct 2022 10:51:03 -0000
+Received: from unknown (HELO n03ukasimr01.n03.fujitsu.local) (62.60.8.97)
+  by server-12.tower-728.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 27 Oct 2022 10:51:03 -0000
+Received: from n03ukasimr01.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTP id 5C13B100187;
+        Thu, 27 Oct 2022 11:51:03 +0100 (BST)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTPS id 50220100182;
+        Thu, 27 Oct 2022 11:51:03 +0100 (BST)
+Received: from 1376b0ab6900.localdomain (10.167.215.54) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Thu, 27 Oct 2022 11:51:01 +0100
+From:   Xiao Yang <yangx.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <zlang@redhat.com>, Xiao Yang <yangx.jy@fujitsu.com>
+Subject: [PATCH] common/config: Make test and scratch devices use the same mount options
+Date:   Thu, 27 Oct 2022 10:50:52 +0000
+Message-ID: <1666867852-134-1-git-send-email-yangx.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-In-Reply-To: <20221027032023.6arvnrkl7fymdjqj@zlang-mailbox>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain
+X-Originating-IP: [10.167.215.54]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Some cases(e.g. generic/519) check commands/features on test device but
+do tests on scratch device.  If some mount options can impact the check
+result, these cases may throw error instead if not run when we use
+different mount options for test and scratch devices.
 
-On 27/10/2022 11:20, Zorro Lang wrote:
-> On Thu, Oct 27, 2022 at 11:00:21AM +0800, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   common/encrypt | 3 +++
->>   1 file changed, 3 insertions(+)
->>
->> diff --git a/common/encrypt b/common/encrypt
->> index 45ce0954..1a77e23b 100644
->> --- a/common/encrypt
->> +++ b/common/encrypt
->> @@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
->>   		# erase the UBI volume; reformated automatically on next mount
->>   		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
->>   		;;
->> +	ceph)
->> +		_scratch_cleanup_files
+Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+---
+ common/config | 65 +++++++++++++++++++--------------------------------
+ 1 file changed, 24 insertions(+), 41 deletions(-)
 
-Here I just skip ceph and it is enough. Because the 
-_require_scratch_encryption() will do the same thing as I did in my V1's 
-2/2 patch.
-
-- Xiubo
-
->> +		;;
-> Any commits about that?
->
-> Sorry I'm not familar with cephfs, is this patch enough to help ceph to test
-> encrypted ceph? Due to you tried to do some "checking" job last time.
->
-> Can "./check -g encrypt" work on ceph? May you paste this test result to help
-> to review? And welcome review points from ceph list.
->
-> Thanks,
-> Zorro
->
-> [1]
-> $ grep -rsn _scratch_mkfs_encrypted tests/generic/
-> tests/generic/395:22:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/396:21:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/580:23:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/581:36:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/595:35:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/613:29:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/621:57:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/429:36:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/397:28:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/398:28:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/421:24:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/440:29:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/419:29:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/435:33:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/593:24:_scratch_mkfs_encrypted &>> $seqres.full
-> tests/generic/576:34:_scratch_mkfs_encrypted_verity &>> $seqres.full
->
->>   	*)
->>   		_notrun "No encryption support for $FSTYP"
->>   		;;
->> -- 
->> 2.31.1
->>
+diff --git a/common/config b/common/config
+index 5eaae447..6f428eae 100644
+--- a/common/config
++++ b/common/config
+@@ -334,89 +334,72 @@ if [ "$FSTYP" == "xfs" ]; then
+ 	export XFS_MKFS_HAS_NO_META_SUPPORT
+ fi
+ 
+-_mount_opts()
++_common_mount_opts()
+ {
+ 	case $FSTYP in
+ 	9p)
+-		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
++		echo $PLAN9_MOUNT_OPTIONS
+ 		;;
+ 	xfs)
+-		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
++		echo $XFS_MOUNT_OPTIONS
+ 		;;
+ 	udf)
+-		export MOUNT_OPTIONS=$UDF_MOUNT_OPTIONS
++		echo $UDF_MOUNT_OPTIONS
+ 		;;
+ 	nfs)
+-		export MOUNT_OPTIONS=$NFS_MOUNT_OPTIONS
++		echo $NFS_MOUNT_OPTIONS
+ 		;;
+ 	cifs)
+-		export MOUNT_OPTIONS=$CIFS_MOUNT_OPTIONS
++		echo $CIFS_MOUNT_OPTIONS
+ 		;;
+ 	ceph)
+-		export MOUNT_OPTIONS=$CEPHFS_MOUNT_OPTIONS
++		echo $CEPHFS_MOUNT_OPTIONS
+ 		;;
+ 	glusterfs)
+-		export MOUNT_OPTIONS=$GLUSTERFS_MOUNT_OPTIONS
++		echo $GLUSTERFS_MOUNT_OPTIONS
+ 		;;
+ 	overlay)
+-		export MOUNT_OPTIONS=$OVERLAY_MOUNT_OPTIONS
++		echo $OVERLAY_MOUNT_OPTIONS
+ 		;;
+ 	ext2|ext3|ext4|ext4dev)
+ 		# acls & xattrs aren't turned on by default on ext$FOO
+-		export MOUNT_OPTIONS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
++		echo "-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+ 		;;
+ 	f2fs)
+-		export MOUNT_OPTIONS="-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
++		echo "-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
+ 		;;
+ 	reiserfs)
+ 		# acls & xattrs aren't turned on by default on reiserfs
+-		export MOUNT_OPTIONS="-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
++		echo "-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
+ 		;;
+        reiser4)
+-               # acls & xattrs aren't supported by reiser4
+-               export MOUNT_OPTIONS=$REISER4_MOUNT_OPTIONS
+-               ;;
++		# acls & xattrs aren't supported by reiser4
++		echo $REISER4_MOUNT_OPTIONS
++		;;
+ 	gfs2)
+ 		# acls aren't turned on by default on gfs2
+-		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
++		echo "-o acl $GFS2_MOUNT_OPTIONS"
+ 		;;
+ 	tmpfs)
+ 		# We need to specify the size at mount, use 1G by default
+-		export MOUNT_OPTIONS="-o size=1G $TMPFS_MOUNT_OPTIONS"
++		echo "-o size=1G $TMPFS_MOUNT_OPTIONS"
+ 		;;
+ 	ubifs)
+-		export MOUNT_OPTIONS=$UBIFS_MOUNT_OPTIONS
++		echo $UBIFS_MOUNT_OPTIONS
+ 		;;
+ 	*)
+ 		;;
+ 	esac
+ }
+ 
++_mount_opts()
++{
++	export MOUNT_OPTIONS=$(_common_mount_opts)
++}
++
+ _test_mount_opts()
+ {
+-	case $FSTYP in
+-	9p)
+-		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
+-		;;
+-	cifs)
+-		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+-		;;
+-	ceph)
+-		export TEST_FS_MOUNT_OPTS=$CEPHFS_MOUNT_OPTIONS
+-		;;
+-	nfs)
+-		export TEST_FS_MOUNT_OPTS=$NFS_MOUNT_OPTIONS
+-		;;
+-	glusterfs)
+-		export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
+-		;;
+-	ext2|ext3|ext4|ext4dev)
+-		# acls & xattrs aren't turned on by default on older ext$FOO
+-		export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+-		;;
+-	*)
+-		;;
+-	esac
++	export TEST_FS_MOUNT_OPTS=$(_common_mount_opts)
+ }
+ 
+ _mkfs_opts()
+-- 
+2.34.1
 
