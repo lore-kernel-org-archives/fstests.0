@@ -2,147 +2,78 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57A22FA3743
-	for <linux-fstests@archiver.kernel.org>; Fri, 28 Oct 2022 17:42:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21370ECAAA1
+	for <linux-fstests@archiver.kernel.org>; Fri, 28 Oct 2022 19:52:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230286AbiJ1Rmt (ORCPT
+        id S229839AbiJ1Tw0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 28 Oct 2022 13:42:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46666 "EHLO
+        Fri, 28 Oct 2022 15:52:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230196AbiJ1Rm2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Oct 2022 13:42:28 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 476EE239228;
-        Fri, 28 Oct 2022 10:42:12 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D929E629E8;
-        Fri, 28 Oct 2022 17:42:11 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48AC9C433D6;
-        Fri, 28 Oct 2022 17:42:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666978931;
-        bh=RxTaVkDsCLZzGO/RDFqrWwUqp+ac6c4zJrkEz+Q3fe0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=pogLffJIkmSe6hHyAxOeigThZpu+JvrdiUH3NTB71/bt6KuirwHpH+jvoazptrDDO
-         oUA8PgfJC2l4Th1ijR2htyv33Ictght5xoj7KnoMmdFnUqe4nZUNU/6ZUgqXNTidu5
-         gL8UJ7zsdKPpnvjZL1I+5D2qdPe5u6Pxb2ddqF2zf+3aL7qd307Q5FVvUYZWe0BSVj
-         OVXejAbtPea3aFuy1Wcoa44DjzkvZUeTjAluYe+qv7b1qGy/9+dW2YVp9RtA3n4GBl
-         NetstZgL8qfgP+jfftdkowRL3n9dJwtNQYO13tZkkrsBf1LkZviL8lJhiD1XfNs49/
-         R0YIRK+0R4maQ==
-Subject: [PATCH 4/4] common: simplify grep pipe sed interactions
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, guaneryu@gmail.com, zlang@redhat.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Fri, 28 Oct 2022 10:42:10 -0700
-Message-ID: <166697893084.4183768.1057318180034267637.stgit@magnolia>
-In-Reply-To: <166697890818.4183768.10822596619783607332.stgit@magnolia>
-References: <166697890818.4183768.10822596619783607332.stgit@magnolia>
-User-Agent: StGit/0.19
+        with ESMTP id S229743AbiJ1TwZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Oct 2022 15:52:25 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D18D9245EA8;
+        Fri, 28 Oct 2022 12:52:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=ffjXFJfInRuY4KexRLpq5bVKkJ2P7hPt+j48cm2aYeA=; b=qAS/JAFmFk9DKJdgkhy5AeqPBP
+        KLXBfQyUgyZrToj2OeJ8E57MV6wv2GSdVchdawCnUrYWp+I56BaSJvMPIAzwiaeStiBqQc46XqJZ6
+        bqRheLwJOKrmLdgLsBbEjG4/X+BNqO7wUNqoa0gUgMzhnW8K8Lgi1EF0Tyzz+qZhy1PCyJey7V7xD
+        Gw2cKHhmQ8iYLf0RrJ5Ww6271NSOHJSjS/Vz590QrJVa9x4kV5OXCkOrdIWkAmnGc7XUWyObrz2D4
+        K4PvHsFgE+Xphrf5qVleUhs5q478YAONr/HwAtraPJdp+te9KW9MD0wFikm7IbDZd87REelkhKDH8
+        ycubKXoA==;
+Received: from j130084.upc-j.chello.nl ([24.132.130.84] helo=noisy.programming.kicks-ass.net)
+        by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1ooVOy-001VKK-9S; Fri, 28 Oct 2022 19:52:24 +0000
+Received: from hirez.programming.kicks-ass.net (hirez.programming.kicks-ass.net [192.168.1.225])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (Client did not present a certificate)
+        by noisy.programming.kicks-ass.net (Postfix) with ESMTPS id 322EE30029C;
+        Fri, 28 Oct 2022 21:52:19 +0200 (CEST)
+Received: by hirez.programming.kicks-ass.net (Postfix, from userid 1000)
+        id 18A482C26AB85; Fri, 28 Oct 2022 21:52:19 +0200 (CEST)
+Date:   Fri, 28 Oct 2022 21:52:18 +0200
+From:   Peter Zijlstra <peterz@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Yujie Liu <yujie.liu@intel.com>, oe-lkp@lists.linux.dev,
+        lkp@intel.com, Thomas Gleixner <tglx@linutronix.de>,
+        linux-kernel@vger.kernel.org, x86@kernel.org,
+        fengwei.yin@intel.com, ying.huang@intel.com,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [tip:x86/core] [kallsyms] f138918162:
+ WARNING:CPU:#PID:#at_fs/xfs/xfs_message.c:#xfs_buf_alert_ratelimited.cold-#[xfs]
+Message-ID: <Y1wy8nvCWmXssMnY@hirez.programming.kicks-ass.net>
+References: <202210241614.2ae4c1f5-yujie.liu@intel.com>
+ <Y1kDEmLeRA2UGeF8@hirez.programming.kicks-ass.net>
+ <Y1kiuTIYobR4nexS@hirez.programming.kicks-ass.net>
+ <Y1nobODPLUjcteJ0@yujie-X299>
+ <2543dfb1-d9dc-0888-dbea-e420a19d732c@intel.com>
+ <Y1qv3ku6ULHy8hOF@magnolia>
+ <Y1q2/fdvXI67MRch@hirez.programming.kicks-ass.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y1q2/fdvXI67MRch@hirez.programming.kicks-ass.net>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Oct 27, 2022 at 06:51:09PM +0200, Peter Zijlstra wrote:
+> 
+> > However, I noticed that the callsite in the WARNING: message has changed
+> > from the usual 'asswarn' (which is the caller of WARN_ON) to
+> > 'xfs_buf_alert_ratelimited', which seems totally wrong since XFS log
+> > recovery doesn't touch xfs_buf objects at all.
+> 
+> Yeah; and I've meanwhile found more cases where it goes sideways.
+> 
+> I'll revert this patch and try an alternative approach. I'll post
+> patches tomorrow or something.
 
-Zorro pointed out that the idiom "program | grep | sed" isn't necessary
-for field extraction -- sed is perfectly capable of performing a
-substitution and only printing the lines that match that substitution.
-Do that for the common helpers.
+Now posted:
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- common/ext4     |    9 +++++++++
- common/populate |    4 ++--
- common/xfs      |   11 ++++-------
- 3 files changed, 15 insertions(+), 9 deletions(-)
-
-
-diff --git a/common/ext4 b/common/ext4
-index f4c3c4139a..4a2eaa157f 100644
---- a/common/ext4
-+++ b/common/ext4
-@@ -191,3 +191,12 @@ _scratch_ext4_options()
- 	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
- 		SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${log_opt}"
- }
-+
-+# Get the inode flags for a particular inode number
-+_ext4_get_inum_iflags() {
-+	local dev="$1"
-+	local inumber="$2"
-+
-+	debugfs -R "stat <${inumber}>" "${dev}" 2> /dev/null | \
-+			sed -n 's/^.*Flags: \([0-9a-fx]*\).*$/\1/p'
-+}
-diff --git a/common/populate b/common/populate
-index d9d4c6c300..6e00499734 100644
---- a/common/populate
-+++ b/common/populate
-@@ -641,7 +641,7 @@ __populate_check_ext4_dformat() {
- 	extents=0
- 	etree=0
- 	debugfs -R "stat <${inode}>" "${dev}" 2> /dev/null | grep 'ETB[0-9]' -q && etree=1
--	iflags="$(debugfs -R "stat <${inode}>" "${dev}" 2> /dev/null | grep 'Flags:' | sed -e 's/^.*Flags: \([0-9a-fx]*\).*$/\1/g')"
-+	iflags="$(_ext4_get_inum_iflags "${dev}" "${inode}")"
- 	test "$(echo "${iflags}" | awk '{print and(strtonum($1), 0x80000);}')" -gt 0 && extents=1
- 
- 	case "${format}" in
-@@ -688,7 +688,7 @@ __populate_check_ext4_dir() {
- 
- 	htree=0
- 	inline=0
--	iflags="$(debugfs -R "stat <${inode}>" "${dev}" 2> /dev/null | grep 'Flags:' | sed -e 's/^.*Flags: \([0-9a-fx]*\).*$/\1/g')"
-+	iflags="$(_ext4_get_inum_iflags "${dev}" "${inode}")"
- 	test "$(echo "${iflags}" | awk '{print and(strtonum($1), 0x1000);}')" -gt 0 && htree=1
- 	test "$(echo "${iflags}" | awk '{print and(strtonum($1), 0x10000000);}')" -gt 0 && inline=1
- 
-diff --git a/common/xfs b/common/xfs
-index a995e0b5da..4f2cd46c91 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -179,8 +179,7 @@ _xfs_get_rtextents()
- {
- 	local path="$1"
- 
--	$XFS_INFO_PROG "$path" | grep 'rtextents' | \
--		sed -e 's/^.*rtextents=\([0-9]*\).*$/\1/g'
-+	$XFS_INFO_PROG "$path" | sed -n "s/^.*rtextents=\([[:digit:]]*\).*/\1/p"
- }
- 
- # Get the realtime extent size of a mounted filesystem.
-@@ -188,8 +187,7 @@ _xfs_get_rtextsize()
- {
- 	local path="$1"
- 
--	$XFS_INFO_PROG "$path" | grep 'realtime.*extsz' | \
--		sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
-+	$XFS_INFO_PROG "$path" | sed -n "s/^.*realtime.*extsz=\([[:digit:]]*\).*/\1/p"
- }
- 
- # Get the size of an allocation unit of a file.  Normally this is just the
-@@ -217,8 +215,7 @@ _xfs_get_dir_blocksize()
- {
- 	local fs="$1"
- 
--	$XFS_INFO_PROG "$fs" | grep 'naming.*bsize' | \
--		sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g'
-+	$XFS_INFO_PROG "$fs" | sed -n "s/^naming.*bsize=\([[:digit:]]*\).*/\1/p"
- }
- 
- # Set or clear the realtime status of every supplied path.  The first argument
-@@ -1267,7 +1264,7 @@ _force_xfsv4_mount_options()
- # Find AG count of mounted filesystem
- _xfs_mount_agcount()
- {
--	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
-+	$XFS_INFO_PROG "$1" | sed -n "s/^.*agcount=\([[:digit:]]*\).*/\1/p"
- }
- 
- # Wipe the superblock of each XFS AGs
-
+  https://lkml.kernel.org/r/20221028194022.388521751@infradead.org
