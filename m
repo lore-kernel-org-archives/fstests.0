@@ -2,153 +2,154 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ACB4ECAAA1
-	for <linux-fstests@archiver.kernel.org>; Fri, 28 Oct 2022 01:41:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3504C38A02
+	for <linux-fstests@archiver.kernel.org>; Fri, 28 Oct 2022 05:44:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234219AbiJ1Blr (ORCPT
+        id S229817AbiJ1FoO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 27 Oct 2022 21:41:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39074 "EHLO
+        Fri, 28 Oct 2022 01:44:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235210AbiJ1Blq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Oct 2022 21:41:46 -0400
+        with ESMTP id S229766AbiJ1FoN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Oct 2022 01:44:13 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 391DA7E039
-        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 18:40:53 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F0961B65F0
+        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 22:43:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1666921252;
+        s=mimecast20190719; t=1666935798;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=H6M9aZTCM9vZLMk834ZoOy59D6XIaZNXZ0cEk+GrpHM=;
-        b=jVMUwYb9ESNrMeBvuL0NS91Hh86Y+GtgivWd012D/2E3ZxQAPGB3woii0RSH6MpwW5JpD1
-        Sjk95OorbYgn3xQ/JMr07i+ZsE1AHH68Mqkty/2Npoc3yEnhOojalOjjbwjKGRc0xCGIWv
-        GAbxoMIblNv+avC8Nmy5U76Yr8P8UIE=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=0j4gnCVL6NM7Nbvyj5JHHnZVMzTo3vHJGnU3eakIC8E=;
+        b=Dgx+FL87s0+bLY/QBlvNpvhyTLeV23DC5RUl5plfgk3BkQfPoAG7miMwYMkCxoD1BB472T
+        3exbEdok9taReuo+awGvudjX7pVvan6jBHJNgkWfmp3hwEh4mWubnGeeX+C8b0i4NPudb6
+        Jb5NdiKW9RMf6dPMiMuChyKFQAVe1bI=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-107-oNUrk9NqMkmRctSsib3QaA-1; Thu, 27 Oct 2022 21:40:50 -0400
-X-MC-Unique: oNUrk9NqMkmRctSsib3QaA-1
-Received: by mail-pj1-f72.google.com with SMTP id q93-20020a17090a1b6600b0021311ab9082so1831530pjq.7
-        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 18:40:50 -0700 (PDT)
+ us-mta-675-PTvcmedvN6uM-0xmYd9MOQ-1; Fri, 28 Oct 2022 01:43:14 -0400
+X-MC-Unique: PTvcmedvN6uM-0xmYd9MOQ-1
+Received: by mail-pf1-f197.google.com with SMTP id m6-20020aa79006000000b0056bc283f477so2029476pfo.19
+        for <fstests@vger.kernel.org>; Thu, 27 Oct 2022 22:43:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-language:content-transfer-encoding:in-reply-to:mime-version
-         :user-agent:date:message-id:from:references:cc:to:subject
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=H6M9aZTCM9vZLMk834ZoOy59D6XIaZNXZ0cEk+GrpHM=;
-        b=AY++FFz4AzUx1A3sD8AuErhQRJ7UQOExc9qiar4kdGMsUbRrTOqs7IXP8HwkAq0zzu
-         QOi9tVEtLSE5PEJkhIi2gg3EEu+siR9tJl6vEV5ifXZl21KnotPFnyp08iYz4Qu+Nyt9
-         CbouEyu8WxKhBmSvJWlroDCpenpxpuxbWi05TFx9dQRR+fPE79WU9BkCUBiMSldNoTbi
-         4D05Vjw/nPoi1BwW6iA2s4gjlDs6HhADptmIJV9jF7mJUOosysy3ZK3ekVJezgGGeXWK
-         Q/UCqwW8pbz/qy0dtC7nhcBqopQoYh3t3pXv2wOaDzNvQ5ZiEq6Atv3l8ABK9L77aleR
-         XyJQ==
-X-Gm-Message-State: ACrzQf27/0aIQAHziHD+WyjR6w8hzB3EX6K7KFr0nG0rWx6T1bLwd787
-        VVEO+4lkC3G/wnd4UY7SttMiYwu8t6JUSSR1Yi+r4VTT+QaM8e0of9nlU4JABDlUssI0O/Qg3CO
-        BonR1hf+vCV63o7DRlQ==
-X-Received: by 2002:a17:902:ea06:b0:185:4c1f:7460 with SMTP id s6-20020a170902ea0600b001854c1f7460mr52707943plg.99.1666921249543;
-        Thu, 27 Oct 2022 18:40:49 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5vt0LfBiVkNNdEb0a8e8EGLreSRg4MQVdu+ngx6lv9b5RcZkfrM6CBNm2xsfDUmh3pelM9xQ==
-X-Received: by 2002:a17:902:ea06:b0:185:4c1f:7460 with SMTP id s6-20020a170902ea0600b001854c1f7460mr52707927plg.99.1666921249297;
-        Thu, 27 Oct 2022 18:40:49 -0700 (PDT)
-Received: from [10.72.13.65] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id y68-20020a636447000000b004582e25a595sm1652163pgb.41.2022.10.27.18.40.45
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 27 Oct 2022 18:40:48 -0700 (PDT)
-Subject: Re: [PATCH v2] encrypt: add ceph support
-To:     fstests@vger.kernel.org
-Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
-        lhenriques@suse.de, ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        mchangir@redhat.com
-References: <20221027030021.296548-1-xiubli@redhat.com>
-From:   Xiubo Li <xiubli@redhat.com>
-Message-ID: <9ba067d1-d62c-6894-c5b0-2d054130d453@redhat.com>
-Date:   Fri, 28 Oct 2022 09:40:43 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0j4gnCVL6NM7Nbvyj5JHHnZVMzTo3vHJGnU3eakIC8E=;
+        b=GlJ6k3et0LYbVwfCZmmWXkAx6gz1TeLS76Ru0CdX5fBaJ2pryfSREjoF41Be5Xjbk3
+         gJ737r3zbx9bTy3z8q2lJ5QDkcO8Mkk+DEKUYVf6IZDN5agGlmRmpChRcvwnEmTIVlP4
+         51tJekL0O6k1tX9iv1ifRBGUJZtlZjoq9CE31I9rNEqmkDtJz+cVEbws+jJFDE+j7Gft
+         iZCsAIHEIKIGlIJVHzvNgYjjNHVmnQ25X3fVRzXlq+RfOrwuaVrsxs9jDreeptcKrhoA
+         528K6SUwcACG3r44OxoE2hCHBxNOl/52FV6QHugMZpHnyAxUGPXWN6TJSHQ+gCeTJQRv
+         /lYA==
+X-Gm-Message-State: ACrzQf0GVeH++4ofXY4UluHPqC/Hqn4LrQJS+wCc37rDKIu/QAMpbtji
+        RftsnvElCbhLq941SGA9EO7VZ0kVUb1et2Q6C2oh/yinXPupLff3FEr9MCqR8IUl9YTffOKuK1I
+        IEEPCU/j+BsGVMBcP6g==
+X-Received: by 2002:a05:6a00:13aa:b0:56b:c782:107f with SMTP id t42-20020a056a0013aa00b0056bc782107fmr25278013pfg.43.1666935793084;
+        Thu, 27 Oct 2022 22:43:13 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM6je3tb2EpHtv09/a6ZbC6RjzN9BkUCl1cSFqogSHssUiCBTtqnJ4LPqx4BHHYZuBbU8GtJxg==
+X-Received: by 2002:a05:6a00:13aa:b0:56b:c782:107f with SMTP id t42-20020a056a0013aa00b0056bc782107fmr25277992pfg.43.1666935792752;
+        Thu, 27 Oct 2022 22:43:12 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id t1-20020a62d141000000b0056beae3dee2sm2110249pfl.145.2022.10.27.22.43.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 27 Oct 2022 22:43:11 -0700 (PDT)
+Date:   Fri, 28 Oct 2022 13:43:07 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: new test on xfs with corrupted sb_inopblock
+Message-ID: <20221028054307.jnxk3bju4qv76lro@zlang-mailbox>
+References: <20221027164254.1472306-1-zlang@kernel.org>
+ <Y1q5Wkkzq/7PIeyL@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20221027030021.296548-1-xiubli@redhat.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y1q5Wkkzq/7PIeyL@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The test result for ceph:
+On Thu, Oct 27, 2022 at 10:01:14AM -0700, Darrick J. Wong wrote:
+> On Fri, Oct 28, 2022 at 12:42:54AM +0800, Zorro Lang wrote:
+> > There's a known bug fix 392c6de98af1 ("xfs: sanitize sb_inopblock in
+> > xfs_mount_validate_sb"). So try to corrupt the sb_inopblock of xfs,
+> > to cover this bug.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/xfs/555     | 27 +++++++++++++++++++++++++++
+> >  tests/xfs/555.out |  4 ++++
+> >  2 files changed, 31 insertions(+)
+> >  create mode 100755 tests/xfs/555
+> >  create mode 100644 tests/xfs/555.out
+> > 
+> > diff --git a/tests/xfs/555 b/tests/xfs/555
+> > new file mode 100755
+> > index 00000000..7f46a9af
+> > --- /dev/null
+> > +++ b/tests/xfs/555
+> > @@ -0,0 +1,27 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 555
+> > +#
+> > +# Corrupt xfs sb_inopblock, make sure no crash. This's a test coverage of
+> > +# 392c6de98af1 ("xfs: sanitize sb_inopblock in xfs_mount_validate_sb")
+> 
+> _fixed_by_kernel_commit?
 
-[root@lxbceph1 xfstests-dev]# ./check -g encrypt
-FSTYP         -- ceph
-PLATFORM      -- Linux/x86_64 lxbceph1 6.1.0-rc1+ #164 SMP 
-PREEMPT_DYNAMIC Mon Oct 24 10:18:33 CST 2022
-MKFS_OPTIONS  -- 10.72.47.117:40267:/testB
-MOUNT_OPTIONS -- -o name=admin,nowsync,copyfrom,rasize=4096 -o 
-context=system_u:object_r:root_t:s0 10.72.47.117:40267:/testB /mnt/kcephfs.B
+Sure
 
-generic/395 187s ...  224s
-generic/396 164s ...  219s
-generic/397 177s ...  226s
-generic/398       [not run] kernel doesn't support renameat2 syscall
-generic/399       [not run] Filesystem ceph not supported in 
-_scratch_mkfs_sized_encrypted
-generic/419       [not run] kernel doesn't support renameat2 syscall
-generic/421 170s ...  219s
-generic/429 179s ...  237s
-generic/435         3874s
-generic/440 176s ...  216s
-generic/548       [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
-generic/549       [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
-generic/550       [not run] encryption policy '-c 9 -n 9 -f 0' is 
-unusable; probably missing kernel crypto API support
-generic/576       [not run] fsverity utility required, skipped this test
-generic/580        218s
-generic/581 209s ...  244s
-generic/582       [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
-generic/583       [not run] xfs_io fiemap  failed (old kernel/wrong fs?)
-generic/584       [not run] encryption policy '-c 9 -n 9 -v 2 -f 0' is 
-unusable; probably missing kernel crypto API support
-generic/592       [not run] kernel does not support encryption policy: 
-'-c 1 -n 4 -v 2 -f 8'
-generic/593 155s ...  223s
-generic/595 161s ...  194s
-generic/602       [not run] kernel does not support encryption policy: 
-'-c 1 -n 4 -v 2 -f 16'
-generic/613       [not run] _get_encryption_nonce() isn't implemented on 
-ceph
-generic/621       [not run] kernel doesn't support renameat2 syscall
-generic/693       [not run] encryption policy '-c 1 -n 10 -v 2 -f 0' is 
-unusable; probably missing kernel crypto API support
-Ran: generic/395 generic/396 generic/397 generic/398 generic/399 
-generic/419 generic/421 generic/429 generic/435 generic/440 generic/548 
-generic/549 generic/550 generic/576 generic/580 generic/581 generic/582 
-generic/583 generic/584 generic/592 generic/593 generic/595 generic/602 
-generic/613 generic/621 generic/693
-Not run: generic/398 generic/399 generic/419 generic/548 generic/549 
-generic/550 generic/576 generic/582 generic/583 generic/584 generic/592 
-generic/602 generic/613 generic/621 generic/693
-Passed all 26 tests
+> 
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_scratch_nocheck
+> > +
+> > +_scratch_mkfs >>$seqres.full
+> > +
+> > +echo "corrupt inopblock of sb 0"
+> > +_scratch_xfs_set_metadata_field "inopblock" "500" "sb 0" >> $seqres.full
+> > +echo "try to mount ..."
+> > +_try_scratch_mount 2>> $seqres.full && _fail "mount should not succeed"
+> > +
+> > +echo "no crash or hang"
+> 
+> You might want to check the scratch fs to make sure repair will deal
+> with the problem...?
 
-On 27/10/2022 11:00, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
->
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->   common/encrypt | 3 +++
->   1 file changed, 3 insertions(+)
->
-> diff --git a/common/encrypt b/common/encrypt
-> index 45ce0954..1a77e23b 100644
-> --- a/common/encrypt
-> +++ b/common/encrypt
-> @@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
->   		# erase the UBI volume; reformated automatically on next mount
->   		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
->   		;;
-> +	ceph)
-> +		_scratch_cleanup_files
-> +		;;
->   	*)
->   		_notrun "No encryption support for $FSTYP"
->   		;;
+I thought it's not a part of the original reproducer, so tried to save this
+time, especially xfs/350 xfs/351 already covered this part testing :) But if
+you think it's worth, I'll add it in next version.
+
+Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/555.out b/tests/xfs/555.out
+> > new file mode 100644
+> > index 00000000..36c3446e
+> > --- /dev/null
+> > +++ b/tests/xfs/555.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 555
+> > +corrupt inopblock of sb 0
+> > +try to mount ...
+> > +no crash or hang
+> > -- 
+> > 2.31.1
+> > 
+> 
 
