@@ -2,506 +2,233 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65635C38A02
-	for <linux-fstests@archiver.kernel.org>; Sat, 29 Oct 2022 02:05:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05169C38A02
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 Oct 2022 03:27:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229552AbiJ2CFt (ORCPT
+        id S229497AbiJ3D1c (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 28 Oct 2022 22:05:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37078 "EHLO
+        Sat, 29 Oct 2022 23:27:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229379AbiJ2CFs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Oct 2022 22:05:48 -0400
-Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.3])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFDC06D856
-        for <fstests@vger.kernel.org>; Fri, 28 Oct 2022 19:05:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1667009144; i=@fujitsu.com;
-        bh=jMRusdQofE7pnsNPpcEkRaTlsyK+Ss6aM+8YAHT+Z6Q=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=J0WHi0erpTbnFsuCyMgtxC8pgZapPupV/VbBuyPBZtMavyeqWQnhSoJRUFROjHcRz
-         46RA5LZPnWZdmbqRB4tzCR/EZoCewSHs9uQbwj/G2Kk5+c9F7VNqsIgou6iBvJUhct
-         bE2RGCxBE9EXqrY1zwUaREj5P/E86dzVEZN/8ycz4jLfhrNWo0RPuodxy4u93M098N
-         EAiLeDO4GbciXGrVfmI5SPYDPP6sViTV6lnCQT20vZpvCF40KBNqD7go4MNy0/kjVP
-         5E0qjl1srSZeQk3u4VBIf68ASMu5Vvet3gBxznyTPFYTdGxmh2PXmU26Byw/6Lhc/+
-         WPyI149MGfg3Q==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrJIsWRWlGSWpSXmKPExsViZ8OxWbe8Kyb
-  ZoO8kv8Xplr3sDowenzfJBTBGsWbmJeVXJLBmLNpzmb1gYWjFrtd5DYyPPboYuTiEBM4zSvza
-  toUNwjnEJLHt4DooZw+jxO5TK5m7GDk52AQ0JZ51LgCzRQRkJf7PWM0EYjMLqEssn/QLzBYWs
-  JS4vmIdI4jNIqAq8aPlJCuIzSvgITHh+Gx2EFtCQEFiysP3zBBxQYmTM5+wQMyRkDj44gUzRI
-  2ixKWOb4wQdoXErFltTBC2msTVc5uYJzDyz0LSPgtJ+wJGplWMZsWpRWWpRbqGhnpJRZnpGSW
-  5iZk5eolVuol6qaW65anFJbpGeonlxXqpxcV6xZW5yTkpenmpJZsYgaGYUqwWsIPx47I/eocY
-  JTmYlER5e81ikoX4kvJTKjMSizPii0pzUosPMcpwcChJ8Kp0AOUEi1LTUyvSMnOAcQGTluDgU
-  RLhjagFSvMWFyTmFmemQ6ROMepyTJ39bz+zEEtefl6qlDjvT5AZAiBFGaV5cCNgMXqJUVZKmJ
-  eRgYFBiKcgtSg3swRV/hWjOAejkjDv9TagKTyZeSVwm14BHcEEdET6pCiQI0oSEVJSDUxMf1W
-  r2g4ovU9jWjE9QdbSZGXGdMtfkbkOfu08Ije4u2wXWMUq7q5e1sJXovj/Z9fNuMQTk/fxfX3J
-  k95oKOdZpFH97omOLE8aczRvunJPzad/V9bcylt6ST9Cz21+l++7a50JLjIaFvfmndKKCfxq/
-  +Pc8Zk3/pedic17ucL84I2aCXt/r2F8fH1/v9y0nbtOHn0tPH1uc9fxlm1Xr5te13OLUt0xd8
-  7yw7fvr1KcuHlT5FLHIJm3m/Q26prrdtZ4PHogaZL/PdkxKNR68pGz3YmSQv22TiYrY5j393Z
-  bCwirW+xLvLtTwv/iXPWHV0TNBa40LOjTsr0Qo32b+cSryqdPvWt+hF2af6xpV5sSS3FGoqEW
-  c1FxIgDsRW/GTAMAAA==
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-13.tower-548.messagelabs.com!1667009143!19850!1
-X-Originating-IP: [62.60.8.179]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.100.1; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 28308 invoked from network); 29 Oct 2022 02:05:43 -0000
-Received: from unknown (HELO n03ukasimr04.n03.fujitsu.local) (62.60.8.179)
-  by server-13.tower-548.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 29 Oct 2022 02:05:43 -0000
-Received: from n03ukasimr04.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTP id EF148158
-        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 03:05:42 +0100 (BST)
-Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTPS id E15D3156
-        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 03:05:42 +0100 (BST)
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Sat, 29 Oct 2022 03:05:41 +0100
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v2] Add more related cases to perms group
-Date:   Sat, 29 Oct 2022 11:05:53 +0800
-Message-ID: <1667012753-2078-1-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
+        with ESMTP id S229489AbiJ3D1b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 29 Oct 2022 23:27:31 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EABE2BDD
+        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:26:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1667100395;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=PhENmxrdv21/LQQZ+n4qR4rHVXnbqDCp4cEUdYB5Vi0=;
+        b=GZjn8rKyLVXCYahIj2kex2PdkXx2pcrz0fQLOBbVZlemJCBGSXX7fBlvcQ9N0zpBrDdfAv
+        0aVpDBbp8aNo1XWawOvr+SwsgDobl2wGm2FUN4lFTXMJWnD5gGV+HBJPNwOLtx57eNb2OR
+        GRLJrHd6+L18bZPyQDRgMe/c7WqMT38=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-662-wAGUusASN76VAjDReX3o-g-1; Sat, 29 Oct 2022 23:26:32 -0400
+X-MC-Unique: wAGUusASN76VAjDReX3o-g-1
+Received: by mail-qk1-f198.google.com with SMTP id de21-20020a05620a371500b006eed31abb72so6664449qkb.6
+        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:26:32 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PhENmxrdv21/LQQZ+n4qR4rHVXnbqDCp4cEUdYB5Vi0=;
+        b=oVk/e566iIv/U272BRZHVl0C5yTj2hGLzQCE/+8/AM2K611TNQ6DkycdXkpbBlMPKl
+         Eiko/z1GTZgOxX6CKLXb6KufAYi0mqgrTqLk/vRO/P/pO+wFKMgT5z/YaphpuRJ4wObX
+         cNI+Q2e0jaVJ+L9hCC/tPFPkqLqL5mGDv8bmApx/1nJAjDJJQGAzWDlb8Udpas3ALjrd
+         5OnXelEWU0aPsW3cBFXKH3dhQ7wk1ti4Wn/w19eeE4J5gXmlpTu0GMFKI9c9LiAomQTq
+         h4NMvB9/3AnrzEgDgseDCDKD1QkPsBl8Tbo9OYu+esFD/Uo9EchSiFi7EsBfuQtB/nS+
+         h+OQ==
+X-Gm-Message-State: ACrzQf0aLKCj9dq36Vx6bIxYNPLBF2NgW8etR/ET+YY3jj/PCAVjZpbo
+        gCdR883ruxIiRkRb2adMXDIrmDNjYdWEBQc/MvID84vYfiShtKHr3RsfBvat4v0fEE5TKAa9Vgs
+        M6mSLuffsu1W+z+WqLw==
+X-Received: by 2002:a05:620a:1a9c:b0:6ee:8edc:ab47 with SMTP id bl28-20020a05620a1a9c00b006ee8edcab47mr4801593qkb.575.1667100391894;
+        Sat, 29 Oct 2022 20:26:31 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7z0ditu3+ZHE0V8w/E03gavqCFhUVs/gBp03Zo15wMDCfrCiClBnLUdnZspaLbgmjOoAvyAQ==
+X-Received: by 2002:a05:620a:1a9c:b0:6ee:8edc:ab47 with SMTP id bl28-20020a05620a1a9c00b006ee8edcab47mr4801587qkb.575.1667100391586;
+        Sat, 29 Oct 2022 20:26:31 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id bp11-20020a05620a458b00b006ce3f1af120sm2220825qkb.44.2022.10.29.20.26.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 29 Oct 2022 20:26:30 -0700 (PDT)
+Date:   Sun, 30 Oct 2022 11:26:26 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Xiao Yang <yangx.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] common/config: Make test and scratch devices use the
+ same mount options
+Message-ID: <20221030032626.i6hv5m6rlor6fxbc@zlang-mailbox>
+References: <1666867852-134-1-git-send-email-yangx.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1666867852-134-1-git-send-email-yangx.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- tests/generic/099 | 2 +-
- tests/generic/105 | 2 +-
- tests/generic/193 | 2 +-
- tests/generic/237 | 2 +-
- tests/generic/314 | 2 +-
- tests/generic/318 | 2 +-
- tests/generic/319 | 2 +-
- tests/generic/355 | 2 +-
- tests/generic/362 | 2 +-
- tests/generic/363 | 2 +-
- tests/generic/364 | 2 +-
- tests/generic/365 | 2 +-
- tests/generic/366 | 2 +-
- tests/generic/367 | 2 +-
- tests/generic/368 | 2 +-
- tests/generic/369 | 2 +-
- tests/generic/370 | 2 +-
- tests/generic/375 | 2 +-
- tests/generic/444 | 2 +-
- tests/generic/673 | 2 +-
- tests/generic/674 | 2 +-
- tests/generic/683 | 2 +-
- tests/generic/684 | 2 +-
- tests/generic/685 | 2 +-
- tests/generic/686 | 2 +-
- tests/generic/687 | 2 +-
- tests/overlay/004 | 2 +-
- tests/overlay/008 | 2 +-
- tests/overlay/015 | 2 +-
- tests/overlay/023 | 2 +-
- 30 files changed, 30 insertions(+), 30 deletions(-)
+On Thu, Oct 27, 2022 at 10:50:52AM +0000, Xiao Yang wrote:
+> Some cases(e.g. generic/519) check commands/features on test device but
+> do tests on scratch device.  If some mount options can impact the check
+> result, these cases may throw error instead if not run when we use
+> different mount options for test and scratch devices.
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+> ---
 
-diff --git a/tests/generic/099 b/tests/generic/099
-index 5cdac9ab..eab6f472 100755
---- a/tests/generic/099
-+++ b/tests/generic/099
-@@ -8,7 +8,7 @@
- #
- #!/bin/bash
- . ./common/preamble
--_begin_fstest acl auto quick
-+_begin_fstest acl auto quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/105 b/tests/generic/105
-index b422ea34..a05219df 100755
---- a/tests/generic/105
-+++ b/tests/generic/105
-@@ -10,7 +10,7 @@
- #   which pulls out an earlier mod
- #
- . ./common/preamble
--_begin_fstest acl auto quick
-+_begin_fstest acl auto quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/193 b/tests/generic/193
-index ddaff69b..e2710b07 100755
---- a/tests/generic/193
-+++ b/tests/generic/193
-@@ -7,7 +7,7 @@
- # Test permission checks in ->setattr
- #
- . ./common/preamble
--_begin_fstest metadata auto quick
-+_begin_fstest metadata auto quick perms
- 
- _register_cleanup "_cleanup_files"
- tag="added by qa $seq"
-diff --git a/tests/generic/237 b/tests/generic/237
-index f17e32e4..a12a4259 100755
---- a/tests/generic/237
-+++ b/tests/generic/237
-@@ -8,7 +8,7 @@
- # See also http://marc.info/?l=linux-btrfs&m=127434445620298&w=2
- #
- . ./common/preamble
--_begin_fstest auto quick acl
-+_begin_fstest auto quick acl perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/314 b/tests/generic/314
-index 68a2f716..9449d30f 100755
---- a/tests/generic/314
-+++ b/tests/generic/314
-@@ -7,7 +7,7 @@
- # Test SGID inheritance on subdirectories
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/318 b/tests/generic/318
-index ed50818a..71ee7666 100755
---- a/tests/generic/318
-+++ b/tests/generic/318
-@@ -13,7 +13,7 @@
- # the ACL was flushed and brought back from disk.
- #
- . ./common/preamble
--_begin_fstest acl attr auto quick
-+_begin_fstest acl attr auto quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/319 b/tests/generic/319
-index 082d93bc..0efb46be 100755
---- a/tests/generic/319
-+++ b/tests/generic/319
-@@ -12,7 +12,7 @@
- #     https://patchwork.kernel.org/patch/3046931/
- #
- . ./common/preamble
--_begin_fstest acl auto quick
-+_begin_fstest acl auto quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/355 b/tests/generic/355
-index 4bc69eeb..7c108d1b 100755
---- a/tests/generic/355
-+++ b/tests/generic/355
-@@ -7,7 +7,7 @@
- # Test clear of suid/sgid on direct write.
- #
- . ./common/preamble
--_begin_fstest auto quick
-+_begin_fstest auto quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/362 b/tests/generic/362
-index dcd0a27b..6e0e81ed 100755
---- a/tests/generic/362
-+++ b/tests/generic/362
-@@ -7,7 +7,7 @@
- # RichACL apply-masks test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/363 b/tests/generic/363
-index 8a441869..d3d888db 100755
---- a/tests/generic/363
-+++ b/tests/generic/363
-@@ -7,7 +7,7 @@
- # RichACL auto-inheritance test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/364 b/tests/generic/364
-index 538c0eb1..2c721fea 100755
---- a/tests/generic/364
-+++ b/tests/generic/364
-@@ -7,7 +7,7 @@
- # RichACL basic test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- . ./common/attr
-diff --git a/tests/generic/365 b/tests/generic/365
-index 21f31b86..d22f233a 100755
---- a/tests/generic/365
-+++ b/tests/generic/365
-@@ -7,7 +7,7 @@
- # RichACL chmod test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/366 b/tests/generic/366
-index e5969114..c005f809 100755
---- a/tests/generic/366
-+++ b/tests/generic/366
-@@ -7,7 +7,7 @@
- # RichACL chown test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/367 b/tests/generic/367
-index bed45215..db7b2956 100755
---- a/tests/generic/367
-+++ b/tests/generic/367
-@@ -7,7 +7,7 @@
- # RichACL create test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/368 b/tests/generic/368
-index 4b18e9f0..d2259b34 100755
---- a/tests/generic/368
-+++ b/tests/generic/368
-@@ -7,7 +7,7 @@
- # RichACL ctime test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/369 b/tests/generic/369
-index dbd20105..526de244 100755
---- a/tests/generic/369
-+++ b/tests/generic/369
-@@ -7,7 +7,7 @@
- # RichACL delete test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/370 b/tests/generic/370
-index acb0f424..8c17af0c 100755
---- a/tests/generic/370
-+++ b/tests/generic/370
-@@ -7,7 +7,7 @@
- # RichACL write-vs-append test
- #
- . ./common/preamble
--_begin_fstest auto quick richacl
-+_begin_fstest auto quick richacl perms
- 
- # Import common functions.
- 
-diff --git a/tests/generic/375 b/tests/generic/375
-index 746cdd55..438184b3 100755
---- a/tests/generic/375
-+++ b/tests/generic/375
-@@ -8,7 +8,7 @@
- # owning group.
- #
- . ./common/preamble
--_begin_fstest auto quick acl
-+_begin_fstest auto quick acl perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/444 b/tests/generic/444
-index 8f6b7c2c..71d2f6af 100755
---- a/tests/generic/444
-+++ b/tests/generic/444
-@@ -8,7 +8,7 @@
- # in the owning group and directory has default ACLs.
- #
- . ./common/preamble
--_begin_fstest auto quick acl
-+_begin_fstest auto quick acl perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/673 b/tests/generic/673
-index 4d8dc07e..6d1f49ea 100755
---- a/tests/generic/673
-+++ b/tests/generic/673
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a reflink.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/674 b/tests/generic/674
-index a3130249..c3ff1b7b 100755
---- a/tests/generic/674
-+++ b/tests/generic/674
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a deduplication.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/683 b/tests/generic/683
-index 4c93346d..302f8bb2 100755
---- a/tests/generic/683
-+++ b/tests/generic/683
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a fallocate.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/684 b/tests/generic/684
-index 03481e69..19ccb228 100755
---- a/tests/generic/684
-+++ b/tests/generic/684
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a fpunch.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/685 b/tests/generic/685
-index 6a108842..a58eccda 100755
---- a/tests/generic/685
-+++ b/tests/generic/685
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a fzero.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/686 b/tests/generic/686
-index 4279f76b..ef9ea47a 100755
---- a/tests/generic/686
-+++ b/tests/generic/686
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a finsert.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/687 b/tests/generic/687
-index 78cb6202..f4a1c1bb 100755
---- a/tests/generic/687
-+++ b/tests/generic/687
-@@ -7,7 +7,7 @@
- # Functional test for dropping suid and sgid bits as part of a fcollapse.
- #
- . ./common/preamble
--_begin_fstest auto clone quick
-+_begin_fstest auto clone quick perms
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/overlay/004 b/tests/overlay/004
-index 54ce8a8f..f03f628a 100755
---- a/tests/overlay/004
-+++ b/tests/overlay/004
-@@ -7,7 +7,7 @@
- # Test file copy up on overlayfs by changing mode bits.
- #
- . ./common/preamble
--_begin_fstest attr auto copyup quick
-+_begin_fstest attr auto copyup quick perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/overlay/008 b/tests/overlay/008
-index d14f22f2..7bab4fbe 100755
---- a/tests/overlay/008
-+++ b/tests/overlay/008
-@@ -11,7 +11,7 @@
- # d0e13f5 ovl: fix uid/gid when creating over whiteout
- #
- . ./common/preamble
--_begin_fstest auto quick whiteout
-+_begin_fstest auto quick whiteout perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/overlay/015 b/tests/overlay/015
-index fd23e373..f0c05579 100755
---- a/tests/overlay/015
-+++ b/tests/overlay/015
-@@ -7,7 +7,7 @@
- # SGID bit inheritance over whiteout.
- #
- . ./common/preamble
--_begin_fstest auto quick whiteout
-+_begin_fstest auto quick whiteout perms
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/overlay/023 b/tests/overlay/023
-index 95d5aa22..740c47c1 100755
---- a/tests/overlay/023
-+++ b/tests/overlay/023
-@@ -14,7 +14,7 @@
- #     Miklos Szeredi <mszeredi@redhat.com>
- #
- . ./common/preamble
--_begin_fstest auto quick attr
-+_begin_fstest auto quick attr perms
- 
- # Import common functions.
- . ./common/filter
--- 
-2.23.0
+This patch makes sense to me.
+
+Actually I'm a little curious about the history of _test_mount_opts() function,
+so I tried to check the commit log of fstests, then I found this function was
+brought in by 0e9141e49d4a ("common: add cifs support").
+
+This commit set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS same, then later patches
+(which trys to support a new fs) update mount_opts() but sometimes don't
+update _test_mount_opts(). I don't know if they're intended. From my narrow
+knowledge I think TEST_FS_MOUNT_OPTS and MOUNT_OPTS should keep consistent, if
+no specific setup. And the log history shows that we've tried to fix their
+inconsistent problems by some patches. E.g.
+  adf56068 ("common/config: add acl and user_xattr support for TEST_DEV")
+  643c6850 ("common/config: honor NFS_MOUNT_OPTIONS in _test_mount_opts")
+
+I think even if someone fs really need a different default TEST_FS_MOUNT_OPTS,
+we can change it in _test_mount_opts, or let them same.
+
+I gave this patch a little testing, but I can't test it on all fs we support.
+So I'll keep this patch a week, if anyone has any review points, please feel
+free to reply this email. If no, I'd like to give it my RVB at first.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+Thanks,
+Zorro
+
+>  common/config | 65 +++++++++++++++++++--------------------------------
+>  1 file changed, 24 insertions(+), 41 deletions(-)
+> 
+> diff --git a/common/config b/common/config
+> index 5eaae447..6f428eae 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -334,89 +334,72 @@ if [ "$FSTYP" == "xfs" ]; then
+>  	export XFS_MKFS_HAS_NO_META_SUPPORT
+>  fi
+>  
+> -_mount_opts()
+> +_common_mount_opts()
+>  {
+>  	case $FSTYP in
+>  	9p)
+> -		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
+> +		echo $PLAN9_MOUNT_OPTIONS
+>  		;;
+>  	xfs)
+> -		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
+> +		echo $XFS_MOUNT_OPTIONS
+>  		;;
+>  	udf)
+> -		export MOUNT_OPTIONS=$UDF_MOUNT_OPTIONS
+> +		echo $UDF_MOUNT_OPTIONS
+>  		;;
+>  	nfs)
+> -		export MOUNT_OPTIONS=$NFS_MOUNT_OPTIONS
+> +		echo $NFS_MOUNT_OPTIONS
+>  		;;
+>  	cifs)
+> -		export MOUNT_OPTIONS=$CIFS_MOUNT_OPTIONS
+> +		echo $CIFS_MOUNT_OPTIONS
+>  		;;
+>  	ceph)
+> -		export MOUNT_OPTIONS=$CEPHFS_MOUNT_OPTIONS
+> +		echo $CEPHFS_MOUNT_OPTIONS
+>  		;;
+>  	glusterfs)
+> -		export MOUNT_OPTIONS=$GLUSTERFS_MOUNT_OPTIONS
+> +		echo $GLUSTERFS_MOUNT_OPTIONS
+>  		;;
+>  	overlay)
+> -		export MOUNT_OPTIONS=$OVERLAY_MOUNT_OPTIONS
+> +		echo $OVERLAY_MOUNT_OPTIONS
+>  		;;
+>  	ext2|ext3|ext4|ext4dev)
+>  		# acls & xattrs aren't turned on by default on ext$FOO
+> -		export MOUNT_OPTIONS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+> +		echo "-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+>  		;;
+>  	f2fs)
+> -		export MOUNT_OPTIONS="-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
+> +		echo "-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
+>  		;;
+>  	reiserfs)
+>  		# acls & xattrs aren't turned on by default on reiserfs
+> -		export MOUNT_OPTIONS="-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
+> +		echo "-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
+>  		;;
+>         reiser4)
+> -               # acls & xattrs aren't supported by reiser4
+> -               export MOUNT_OPTIONS=$REISER4_MOUNT_OPTIONS
+> -               ;;
+> +		# acls & xattrs aren't supported by reiser4
+> +		echo $REISER4_MOUNT_OPTIONS
+> +		;;
+>  	gfs2)
+>  		# acls aren't turned on by default on gfs2
+> -		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
+> +		echo "-o acl $GFS2_MOUNT_OPTIONS"
+>  		;;
+>  	tmpfs)
+>  		# We need to specify the size at mount, use 1G by default
+> -		export MOUNT_OPTIONS="-o size=1G $TMPFS_MOUNT_OPTIONS"
+> +		echo "-o size=1G $TMPFS_MOUNT_OPTIONS"
+>  		;;
+>  	ubifs)
+> -		export MOUNT_OPTIONS=$UBIFS_MOUNT_OPTIONS
+> +		echo $UBIFS_MOUNT_OPTIONS
+>  		;;
+>  	*)
+>  		;;
+>  	esac
+>  }
+>  
+> +_mount_opts()
+> +{
+> +	export MOUNT_OPTIONS=$(_common_mount_opts)
+> +}
+> +
+>  _test_mount_opts()
+>  {
+> -	case $FSTYP in
+> -	9p)
+> -		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
+> -		;;
+> -	cifs)
+> -		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+> -		;;
+> -	ceph)
+> -		export TEST_FS_MOUNT_OPTS=$CEPHFS_MOUNT_OPTIONS
+> -		;;
+> -	nfs)
+> -		export TEST_FS_MOUNT_OPTS=$NFS_MOUNT_OPTIONS
+> -		;;
+> -	glusterfs)
+> -		export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
+> -		;;
+> -	ext2|ext3|ext4|ext4dev)
+> -		# acls & xattrs aren't turned on by default on older ext$FOO
+> -		export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+> -		;;
+> -	*)
+> -		;;
+> -	esac
+> +	export TEST_FS_MOUNT_OPTS=$(_common_mount_opts)
+>  }
+>  
+>  _mkfs_opts()
+> -- 
+> 2.34.1
+> 
 
