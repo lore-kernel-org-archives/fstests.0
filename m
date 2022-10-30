@@ -2,82 +2,82 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18FC4C38A02
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 Oct 2022 03:31:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B7C5C38A02
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 Oct 2022 03:32:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229616AbiJ3Dbw (ORCPT
+        id S229531AbiJ3Dcv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 29 Oct 2022 23:31:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55272 "EHLO
+        Sat, 29 Oct 2022 23:32:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55694 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229494AbiJ3Dbv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 29 Oct 2022 23:31:51 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 666934687D
-        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:30:49 -0700 (PDT)
+        with ESMTP id S229494AbiJ3Dcu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 29 Oct 2022 23:32:50 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CDFC46DB5
+        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:31:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667100648;
+        s=mimecast20190719; t=1667100713;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=K+I7AYE5xAGm+ej8pDmP4KSGlE35GPlIkSJSeNUr2io=;
-        b=PvXFOekRXbIwq332QNjDEEuxSpc8xNFTCEclK2uFNkyHPw2hj9k7SUeRaNm4fBc03td6wL
-        3dAUQvfUg9UowrsH/l4xYdxRg90aOdbfjgnLrg9bbv4TGDWNPfrzdDuRb6ZcyPGBdT6+FJ
-        A57SJdoGuZDfSYbJTbVT1g7psF8gBEM=
-Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
- [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=MKcEvPdmRY2uO5eAbMKVgW+hn0/Q5weE/T5XGHv7vm0=;
+        b=K2XFZk4/Lw9VrumWXkvLC7eAMUJlUryVFlNDxwZhQGy0UuDB+lqaqmyoZOEmyAO862MNZ5
+        IMiEjHjUgltLs4hkiuz/x4kXMi/13RXpawzhwl0PAzmIzzt8D0oTOsH1Auqehv+0rRMsw1
+        pHFLQ9b81M9adaXsnbPdwA/sXSUHnOQ=
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com
+ [209.85.160.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-399-c9AAAdVIPUex4GBDdkNn3g-1; Sat, 29 Oct 2022 23:30:47 -0400
-X-MC-Unique: c9AAAdVIPUex4GBDdkNn3g-1
-Received: by mail-qv1-f71.google.com with SMTP id q16-20020a0ce210000000b004ba8976d3aaso4570002qvl.5
-        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:30:46 -0700 (PDT)
+ us-mta-512-nITn_6EVNNeu8mk1u5StPA-1; Sat, 29 Oct 2022 23:31:51 -0400
+X-MC-Unique: nITn_6EVNNeu8mk1u5StPA-1
+Received: by mail-qt1-f197.google.com with SMTP id fp9-20020a05622a508900b003a503ff1d4cso4265006qtb.22
+        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:31:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=K+I7AYE5xAGm+ej8pDmP4KSGlE35GPlIkSJSeNUr2io=;
-        b=oFpayb3p8MqQLQerGym/N6kiGkJRVn2Zzn0+9Ycve8KDmYCNdyc2GZrXebwZci9Hdn
-         xqmDjGcBsMEkOX5vwqMMTvNWDE7XcSIu16R1Tl+I4YoQVIWLEXmHmmoY2NK0LMP9bsDY
-         Ilm9vS/p+Ihpz7sVGPwmw+cjF3mp+fmwVG7AWjulo7t7ne4kgmWPamzNLSC1Zc987UMu
-         9VlnYMDwYjafKxauWhSaoU8DNynCydm2/KdZvksqxz7yuPRhPlQi2C5lVSDQ0+Ccxo6D
-         dwykUpjDVApLOnEAe2jXPi3bmL+LOdcvltkhts7CqoWA6Fp31CY3h21XS+yrKcRngXAs
-         8vIw==
-X-Gm-Message-State: ACrzQf3HSFecCbacxlMXuvdvQAyLWK34FKoYJ1uWxCGAfWd543nc0R5K
-        OtxsXHcWZ5lNtEyMEHeIHLRPMu5bOnnnCBouMinJpv56imjplgdZ0IFFt4dkspokOirBY++YRv8
-        1s42sjW1ezXrBVO/i3Ya6FM1ZJAYa7hf++Xce7HpJQXnbgNwJZIuqCgl6V8Jq95/VWw==
-X-Received: by 2002:a05:6214:21e5:b0:4b3:f3e0:5432 with SMTP id p5-20020a05621421e500b004b3f3e05432mr5735936qvj.19.1667100646133;
-        Sat, 29 Oct 2022 20:30:46 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7ljld8T68BMfo7yp1VxLrt41hcEKHITaj02f7tM14dmzeKba/FEbtDcOQeoJSUJYKpPL/wMw==
-X-Received: by 2002:a05:6214:21e5:b0:4b3:f3e0:5432 with SMTP id p5-20020a05621421e500b004b3f3e05432mr5735922qvj.19.1667100645834;
-        Sat, 29 Oct 2022 20:30:45 -0700 (PDT)
+        bh=MKcEvPdmRY2uO5eAbMKVgW+hn0/Q5weE/T5XGHv7vm0=;
+        b=oZt2p4myFK/eNHzOEJ4D6OdvVHwlZ/jkkjcVPCW9eJIGwdraAG7tp7kWssGM/5QmP9
+         ftuHvAjZQQZpJDQo1VEpfyGLXMsmW6XJxmqSjvveNPFGnLZXD2TjcVMi93s4BUM6kA/+
+         DXDI6XGivpWFcAyJxcxn4wt6eXdIFmDqQOAZZZB/0ha/oIaVlVWd6b5xC8v+FvhfAGE/
+         ZGGm4jLitpId2wh4MZQDhZhGqN7sT13WyRHeHdoJkFl7ZjxwEPfgnnmSTf3w8UbB9ViG
+         SSVWtwP0FC8BLYLJlOeod6a0AkBN3epni+zYE1yMycGOXNB9TzCBa383wUJ4emMi4tp7
+         /jpg==
+X-Gm-Message-State: ACrzQf0xRPATbinSiScGVUZTVHZitTLioeYtqNKnSdJx0XBgAQS2kfqu
+        aeBThRIThoq0fK20mueznA6dA91SMQt57lj04Guwkz0LO2G6MwQ3GXrEr5fdcw8/3RIiMaBpg4j
+        03Q/lMs7M1EU9cFjkSznnXQai6EqhtbepIWd+PRDvV3jnIfLF1FTD4FS/VHPT6KR/uw==
+X-Received: by 2002:ac8:5849:0:b0:39a:8e35:1bfa with SMTP id h9-20020ac85849000000b0039a8e351bfamr5518535qth.573.1667100710651;
+        Sat, 29 Oct 2022 20:31:50 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7bx2KaTP4hWipW5/xbKquDnQ2o/mHUa8yEjHhJEExywCotoGffEqF9WtcSgFC1dxA1nU483Q==
+X-Received: by 2002:ac8:5849:0:b0:39a:8e35:1bfa with SMTP id h9-20020ac85849000000b0039a8e351bfamr5518524qth.573.1667100710320;
+        Sat, 29 Oct 2022 20:31:50 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id i22-20020ac871d6000000b003431446588fsm1736604qtp.5.2022.10.29.20.30.43
+        by smtp.gmail.com with ESMTPSA id u15-20020a05620a454f00b006fa0ca71bb6sm2225503qkp.88.2022.10.29.20.31.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 29 Oct 2022 20:30:45 -0700 (PDT)
-Date:   Sun, 30 Oct 2022 11:30:41 +0800
+        Sat, 29 Oct 2022 20:31:49 -0700 (PDT)
+Date:   Sun, 30 Oct 2022 11:31:45 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/4] xfs: refactor filesystem realtime geometry detection
- logic
-Message-ID: <20221030033041.giu6hui56dkipfl4@zlang-mailbox>
+Subject: Re: [PATCH 4/4] common: simplify grep pipe sed interactions
+Message-ID: <20221030033145.azfluzhja65jpf67@zlang-mailbox>
 References: <166697890818.4183768.10822596619783607332.stgit@magnolia>
- <166697892518.4183768.8627162682551184087.stgit@magnolia>
+ <166697893084.4183768.1057318180034267637.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <166697892518.4183768.8627162682551184087.stgit@magnolia>
+In-Reply-To: <166697893084.4183768.1057318180034267637.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 28, 2022 at 10:42:05AM -0700, Darrick J. Wong wrote:
+On Fri, Oct 28, 2022 at 10:42:10AM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> There are a lot of places where we open-code detecting the realtime
-> extent size and extent count of a specific filesystem.  Refactor this
-> into a couple of helpers to clean up the code.
+> Zorro pointed out that the idiom "program | grep | sed" isn't necessary
+> for field extraction -- sed is perfectly capable of performing a
+> substitution and only printing the lines that match that substitution.
+> Do that for the common helpers.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
@@ -85,128 +85,93 @@ On Fri, Oct 28, 2022 at 10:42:05AM -0700, Darrick J. Wong wrote:
 Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/populate |    2 +-
->  common/xfs      |   31 +++++++++++++++++++++++++++++--
->  tests/xfs/146   |    2 +-
->  tests/xfs/147   |    2 +-
->  tests/xfs/530   |    3 +--
->  5 files changed, 33 insertions(+), 7 deletions(-)
+>  common/ext4     |    9 +++++++++
+>  common/populate |    4 ++--
+>  common/xfs      |   11 ++++-------
+>  3 files changed, 15 insertions(+), 9 deletions(-)
 > 
 > 
+> diff --git a/common/ext4 b/common/ext4
+> index f4c3c4139a..4a2eaa157f 100644
+> --- a/common/ext4
+> +++ b/common/ext4
+> @@ -191,3 +191,12 @@ _scratch_ext4_options()
+>  	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+>  		SCRATCH_OPTIONS="$SCRATCH_OPTIONS ${log_opt}"
+>  }
+> +
+> +# Get the inode flags for a particular inode number
+> +_ext4_get_inum_iflags() {
+> +	local dev="$1"
+> +	local inumber="$2"
+> +
+> +	debugfs -R "stat <${inumber}>" "${dev}" 2> /dev/null | \
+> +			sed -n 's/^.*Flags: \([0-9a-fx]*\).*$/\1/p'
+> +}
 > diff --git a/common/populate b/common/populate
-> index 23b2fecf69..d9d4c6c300 100644
+> index d9d4c6c300..6e00499734 100644
 > --- a/common/populate
 > +++ b/common/populate
-> @@ -323,7 +323,7 @@ _scratch_xfs_populate() {
->  	fi
+> @@ -641,7 +641,7 @@ __populate_check_ext4_dformat() {
+>  	extents=0
+>  	etree=0
+>  	debugfs -R "stat <${inode}>" "${dev}" 2> /dev/null | grep 'ETB[0-9]' -q && etree=1
+> -	iflags="$(debugfs -R "stat <${inode}>" "${dev}" 2> /dev/null | grep 'Flags:' | sed -e 's/^.*Flags: \([0-9a-fx]*\).*$/\1/g')"
+> +	iflags="$(_ext4_get_inum_iflags "${dev}" "${inode}")"
+>  	test "$(echo "${iflags}" | awk '{print and(strtonum($1), 0x80000);}')" -gt 0 && extents=1
 >  
->  	# Realtime Reverse-mapping btree
-> -	is_rt="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'rtextents=[1-9]')"
-> +	is_rt="$(_xfs_get_rtextents "$SCRATCH_MNT")"
->  	if [ $is_rmapbt -gt 0 ] && [ $is_rt -gt 0 ]; then
->  		echo "+ rtrmapbt btree"
->  		nr="$((blksz * 2 / 32))"
+>  	case "${format}" in
+> @@ -688,7 +688,7 @@ __populate_check_ext4_dir() {
+>  
+>  	htree=0
+>  	inline=0
+> -	iflags="$(debugfs -R "stat <${inode}>" "${dev}" 2> /dev/null | grep 'Flags:' | sed -e 's/^.*Flags: \([0-9a-fx]*\).*$/\1/g')"
+> +	iflags="$(_ext4_get_inum_iflags "${dev}" "${inode}")"
+>  	test "$(echo "${iflags}" | awk '{print and(strtonum($1), 0x1000);}')" -gt 0 && htree=1
+>  	test "$(echo "${iflags}" | awk '{print and(strtonum($1), 0x10000000);}')" -gt 0 && inline=1
+>  
 > diff --git a/common/xfs b/common/xfs
-> index 9b6575b5f2..a995e0b5da 100644
+> index a995e0b5da..4f2cd46c91 100644
 > --- a/common/xfs
 > +++ b/common/xfs
-> @@ -174,6 +174,24 @@ _scratch_mkfs_xfs()
->  	return $mkfs_status
+> @@ -179,8 +179,7 @@ _xfs_get_rtextents()
+>  {
+>  	local path="$1"
+>  
+> -	$XFS_INFO_PROG "$path" | grep 'rtextents' | \
+> -		sed -e 's/^.*rtextents=\([0-9]*\).*$/\1/g'
+> +	$XFS_INFO_PROG "$path" | sed -n "s/^.*rtextents=\([[:digit:]]*\).*/\1/p"
 >  }
 >  
-> +# Get the number of realtime extents of a mounted filesystem.
-> +_xfs_get_rtextents()
-> +{
-> +	local path="$1"
-> +
-> +	$XFS_INFO_PROG "$path" | grep 'rtextents' | \
-> +		sed -e 's/^.*rtextents=\([0-9]*\).*$/\1/g'
-> +}
-> +
-> +# Get the realtime extent size of a mounted filesystem.
-> +_xfs_get_rtextsize()
-> +{
-> +	local path="$1"
-> +
-> +	$XFS_INFO_PROG "$path" | grep 'realtime.*extsz' | \
-> +		sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
-> +}
-> +
+>  # Get the realtime extent size of a mounted filesystem.
+> @@ -188,8 +187,7 @@ _xfs_get_rtextsize()
+>  {
+>  	local path="$1"
+>  
+> -	$XFS_INFO_PROG "$path" | grep 'realtime.*extsz' | \
+> -		sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
+> +	$XFS_INFO_PROG "$path" | sed -n "s/^.*realtime.*extsz=\([[:digit:]]*\).*/\1/p"
+>  }
+>  
 >  # Get the size of an allocation unit of a file.  Normally this is just the
->  # block size of the file, but for realtime files, this is the realtime extent
->  # size.
-> @@ -191,7 +209,7 @@ _xfs_get_file_block_size()
->  	while ! $XFS_INFO_PROG "$path" &>/dev/null && [ "$path" != "/" ]; do
->  		path="$(dirname "$path")"
->  	done
-> -	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
-> +	_xfs_get_rtextsize "$path"
->  }
->  
->  # Get the directory block size of a mounted filesystem.
-> @@ -427,13 +445,22 @@ _require_xfs_crc()
->  # third option is -v, echo 1 for success and 0 for not.
->  #
->  # Starting with xfsprogs 4.17, this also works for unmounted filesystems.
-> +# The feature 'realtime' looks for rtextents > 0.
->  _xfs_has_feature()
+> @@ -217,8 +215,7 @@ _xfs_get_dir_blocksize()
 >  {
 >  	local fs="$1"
->  	local feat="$2"
->  	local verbose="$3"
-> +	local feat_regex="1"
 >  
-> -	local answer="$($XFS_INFO_PROG "$fs" 2>&1 | grep -w -c "$feat=1")"
-> +	case "$feat" in
-> +	"realtime")
-> +		feat="rtextents"
-> +		feat_regex="[1-9][0-9]*"
-> +		;;
-> +	esac
-> +
-> +	local answer="$($XFS_INFO_PROG "$fs" 2>&1 | grep -E -w -c "$feat=$feat_regex")"
->  	if [ "$answer" -ne 0 ]; then
->  		test "$verbose" = "-v" && echo 1
->  		return 0
-> diff --git a/tests/xfs/146 b/tests/xfs/146
-> index 5516d396bf..123bdff59f 100755
-> --- a/tests/xfs/146
-> +++ b/tests/xfs/146
-> @@ -31,7 +31,7 @@ _scratch_mkfs > $seqres.full
->  _scratch_mount >> $seqres.full
+> -	$XFS_INFO_PROG "$fs" | grep 'naming.*bsize' | \
+> -		sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g'
+> +	$XFS_INFO_PROG "$fs" | sed -n "s/^naming.*bsize=\([[:digit:]]*\).*/\1/p"
+>  }
 >  
->  blksz=$(_get_block_size $SCRATCH_MNT)
-> -rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
-> +rextsize=$(_xfs_get_rtextsize "$SCRATCH_MNT")
->  rextblks=$((rextsize / blksz))
+>  # Set or clear the realtime status of every supplied path.  The first argument
+> @@ -1267,7 +1264,7 @@ _force_xfsv4_mount_options()
+>  # Find AG count of mounted filesystem
+>  _xfs_mount_agcount()
+>  {
+> -	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
+> +	$XFS_INFO_PROG "$1" | sed -n "s/^.*agcount=\([[:digit:]]*\).*/\1/p"
+>  }
 >  
->  echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
-> diff --git a/tests/xfs/147 b/tests/xfs/147
-> index e21fdd330c..33b3c99633 100755
-> --- a/tests/xfs/147
-> +++ b/tests/xfs/147
-> @@ -29,7 +29,7 @@ _scratch_mkfs -r extsize=256k > $seqres.full
->  _scratch_mount >> $seqres.full
->  
->  blksz=$(_get_block_size $SCRATCH_MNT)
-> -rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
-> +rextsize=$(_xfs_get_rtextsize "$SCRATCH_MNT")
->  rextblks=$((rextsize / blksz))
->  
->  echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
-> diff --git a/tests/xfs/530 b/tests/xfs/530
-> index c960738db7..56f5e7ebdb 100755
-> --- a/tests/xfs/530
-> +++ b/tests/xfs/530
-> @@ -73,8 +73,7 @@ _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
->  formatted_blksz="$(_get_block_size $SCRATCH_MNT)"
->  test "$formatted_blksz" -ne "$dbsize" && \
->  	_notrun "Tried to format with $dbsize blocksize, got $formatted_blksz."
-> -$XFS_INFO_PROG $SCRATCH_MNT | grep -E -q 'realtime.*blocks=0' && \
-> -	_notrun "Filesystem should have a realtime volume"
-> +_require_xfs_has_feature "$SCRATCH_MNT" realtime
->  
->  echo "Consume free space"
->  fillerdir=$SCRATCH_MNT/fillerdir
+>  # Wipe the superblock of each XFS AGs
 > 
 
