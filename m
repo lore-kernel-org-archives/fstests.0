@@ -2,233 +2,350 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05169C38A02
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 Oct 2022 03:27:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5204C433FE
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 Oct 2022 03:30:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229497AbiJ3D1c (ORCPT
+        id S229531AbiJ3DaL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 29 Oct 2022 23:27:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52402 "EHLO
+        Sat, 29 Oct 2022 23:30:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229489AbiJ3D1b (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 29 Oct 2022 23:27:31 -0400
+        with ESMTP id S229500AbiJ3DaK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 29 Oct 2022 23:30:10 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EABE2BDD
-        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:26:36 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD7C04684F
+        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:29:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667100395;
+        s=mimecast20190719; t=1667100549;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=PhENmxrdv21/LQQZ+n4qR4rHVXnbqDCp4cEUdYB5Vi0=;
-        b=GZjn8rKyLVXCYahIj2kex2PdkXx2pcrz0fQLOBbVZlemJCBGSXX7fBlvcQ9N0zpBrDdfAv
-        0aVpDBbp8aNo1XWawOvr+SwsgDobl2wGm2FUN4lFTXMJWnD5gGV+HBJPNwOLtx57eNb2OR
-        GRLJrHd6+L18bZPyQDRgMe/c7WqMT38=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=BF+JrY8YdtTEJujRzdlRAbzKK1KcUUNxwiz/HAD9FxU=;
+        b=g/b39Warfd0oDGWSr3SSOZEDir5ztQEOmCuZgpZm5rrdBD1E4jMKo+jpSAx7prtrg3UORb
+        sRxubrk2c5Ae1GTKAmq/xUqp9vTbAuFOjYetCudoS3Fg7ZR744GMb0N6CmeENS9X2kvT7C
+        4STzHFmekiEgPodyk8wO1liw1gCslZ0=
+Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
+ [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-662-wAGUusASN76VAjDReX3o-g-1; Sat, 29 Oct 2022 23:26:32 -0400
-X-MC-Unique: wAGUusASN76VAjDReX3o-g-1
-Received: by mail-qk1-f198.google.com with SMTP id de21-20020a05620a371500b006eed31abb72so6664449qkb.6
-        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:26:32 -0700 (PDT)
+ us-mta-184-jGKRWYkPPL6p7YwVlY7tNQ-1; Sat, 29 Oct 2022 23:29:07 -0400
+X-MC-Unique: jGKRWYkPPL6p7YwVlY7tNQ-1
+Received: by mail-qk1-f197.google.com with SMTP id u7-20020a05620a0c4700b006ee526183fcso6663228qki.8
+        for <fstests@vger.kernel.org>; Sat, 29 Oct 2022 20:29:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=PhENmxrdv21/LQQZ+n4qR4rHVXnbqDCp4cEUdYB5Vi0=;
-        b=oVk/e566iIv/U272BRZHVl0C5yTj2hGLzQCE/+8/AM2K611TNQ6DkycdXkpbBlMPKl
-         Eiko/z1GTZgOxX6CKLXb6KufAYi0mqgrTqLk/vRO/P/pO+wFKMgT5z/YaphpuRJ4wObX
-         cNI+Q2e0jaVJ+L9hCC/tPFPkqLqL5mGDv8bmApx/1nJAjDJJQGAzWDlb8Udpas3ALjrd
-         5OnXelEWU0aPsW3cBFXKH3dhQ7wk1ti4Wn/w19eeE4J5gXmlpTu0GMFKI9c9LiAomQTq
-         h4NMvB9/3AnrzEgDgseDCDKD1QkPsBl8Tbo9OYu+esFD/Uo9EchSiFi7EsBfuQtB/nS+
-         h+OQ==
-X-Gm-Message-State: ACrzQf0aLKCj9dq36Vx6bIxYNPLBF2NgW8etR/ET+YY3jj/PCAVjZpbo
-        gCdR883ruxIiRkRb2adMXDIrmDNjYdWEBQc/MvID84vYfiShtKHr3RsfBvat4v0fEE5TKAa9Vgs
-        M6mSLuffsu1W+z+WqLw==
-X-Received: by 2002:a05:620a:1a9c:b0:6ee:8edc:ab47 with SMTP id bl28-20020a05620a1a9c00b006ee8edcab47mr4801593qkb.575.1667100391894;
-        Sat, 29 Oct 2022 20:26:31 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7z0ditu3+ZHE0V8w/E03gavqCFhUVs/gBp03Zo15wMDCfrCiClBnLUdnZspaLbgmjOoAvyAQ==
-X-Received: by 2002:a05:620a:1a9c:b0:6ee:8edc:ab47 with SMTP id bl28-20020a05620a1a9c00b006ee8edcab47mr4801587qkb.575.1667100391586;
-        Sat, 29 Oct 2022 20:26:31 -0700 (PDT)
+        bh=BF+JrY8YdtTEJujRzdlRAbzKK1KcUUNxwiz/HAD9FxU=;
+        b=L2LNS0p+Y004Ced4db8qP0kKCYu9u29REtlECOPKfxPQ0h/x9KoXPz36SPPLEyv4XY
+         W1zQhaH3Dqn47ACLBsulWrXcg2HTaIR7qW5BUh5tSj6TW6isBbScRhql9NTC2yQ3EUUX
+         QZBvFfvUzuBMtenkOeyqUGyE5i5uAJbb4sSbP+2wdi/u5gYGd8uVST/XSlkxhwpt9Xit
+         4m3uCCYIz4OFoRBUkssyrFfShMdzUbBSLk0HtyS7/35TABVo+huleUsMozE2sCafjaG5
+         fvWPhSHI7s7DsUAfaheUS5vRzs9D5FFWa9Qz4QkREoI/j9MFurj456Ipym+VNWOknQb7
+         aUfw==
+X-Gm-Message-State: ACrzQf12xt8rj0htstQFhbeLPxValF+3lSOvlirDZ35iU5JTTKWgkFcI
+        yu0IFNWFeyn2VDTFQnJCf/C/b7C/jIsQ+oHpWvRCZBos/e68NChggfcUFUIO0bqs4fjHlnyLUzA
+        yKU4EeM1TAn0YuPZdNgQYOUdn4DVmucrHisUwKARjZNbYHg9eaSjStmtftxm/tX5s1Q==
+X-Received: by 2002:a05:620a:1a17:b0:6ce:7c1b:c27f with SMTP id bk23-20020a05620a1a1700b006ce7c1bc27fmr4928861qkb.42.1667100546577;
+        Sat, 29 Oct 2022 20:29:06 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM4ldRj6njtxWVrwifRAMmb8j/CnDdbG0Lb9xOscJJhkwxuzo9uczeC+j2j3AP1Ku+JdvO9egQ==
+X-Received: by 2002:a05:620a:1a17:b0:6ce:7c1b:c27f with SMTP id bk23-20020a05620a1a1700b006ce7c1bc27fmr4928848qkb.42.1667100546252;
+        Sat, 29 Oct 2022 20:29:06 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id bp11-20020a05620a458b00b006ce3f1af120sm2220825qkb.44.2022.10.29.20.26.29
+        by smtp.gmail.com with ESMTPSA id bt4-20020ac86904000000b0039bde72b14asm1668185qtb.92.2022.10.29.20.29.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 29 Oct 2022 20:26:30 -0700 (PDT)
-Date:   Sun, 30 Oct 2022 11:26:26 +0800
+        Sat, 29 Oct 2022 20:29:05 -0700 (PDT)
+Date:   Sun, 30 Oct 2022 11:29:01 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Xiao Yang <yangx.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common/config: Make test and scratch devices use the
- same mount options
-Message-ID: <20221030032626.i6hv5m6rlor6fxbc@zlang-mailbox>
-References: <1666867852-134-1-git-send-email-yangx.jy@fujitsu.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/4] xfs: refactor filesystem feature detection logic
+Message-ID: <20221030032901.wslzkjl6qkfilsu2@zlang-mailbox>
+References: <166697890818.4183768.10822596619783607332.stgit@magnolia>
+ <166697891394.4183768.6502837738759035236.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1666867852-134-1-git-send-email-yangx.jy@fujitsu.com>
+In-Reply-To: <166697891394.4183768.6502837738759035236.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 27, 2022 at 10:50:52AM +0000, Xiao Yang wrote:
-> Some cases(e.g. generic/519) check commands/features on test device but
-> do tests on scratch device.  If some mount options can impact the check
-> result, these cases may throw error instead if not run when we use
-> different mount options for test and scratch devices.
+On Fri, Oct 28, 2022 at 10:41:53AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+> There are a lot of places where we open-code detecting features of a
+> specific filesystem.  Refactor this into a couple of helpers in
+> preparation for adding stress tests for online repair and fuzzing.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
 
-This patch makes sense to me.
-
-Actually I'm a little curious about the history of _test_mount_opts() function,
-so I tried to check the commit log of fstests, then I found this function was
-brought in by 0e9141e49d4a ("common: add cifs support").
-
-This commit set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS same, then later patches
-(which trys to support a new fs) update mount_opts() but sometimes don't
-update _test_mount_opts(). I don't know if they're intended. From my narrow
-knowledge I think TEST_FS_MOUNT_OPTS and MOUNT_OPTS should keep consistent, if
-no specific setup. And the log history shows that we've tried to fix their
-inconsistent problems by some patches. E.g.
-  adf56068 ("common/config: add acl and user_xattr support for TEST_DEV")
-  643c6850 ("common/config: honor NFS_MOUNT_OPTIONS in _test_mount_opts")
-
-I think even if someone fs really need a different default TEST_FS_MOUNT_OPTS,
-we can change it in _test_mount_opts, or let them same.
-
-I gave this patch a little testing, but I can't test it on all fs we support.
-So I'll keep this patch a week, if anyone has any review points, please feel
-free to reply this email. If no, I'd like to give it my RVB at first.
-
+Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks,
-Zorro
-
->  common/config | 65 +++++++++++++++++++--------------------------------
->  1 file changed, 24 insertions(+), 41 deletions(-)
+>  common/populate |   14 ++++++-----
+>  common/rc       |    2 +-
+>  common/xfs      |   67 ++++++++++++++++++++++++++++++++++++++++++++++---------
+>  tests/xfs/097   |    2 +-
+>  tests/xfs/151   |    3 +-
+>  tests/xfs/271   |    2 +-
+>  tests/xfs/307   |    2 +-
+>  tests/xfs/308   |    2 +-
+>  tests/xfs/348   |    2 +-
+>  9 files changed, 70 insertions(+), 26 deletions(-)
 > 
-> diff --git a/common/config b/common/config
-> index 5eaae447..6f428eae 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -334,89 +334,72 @@ if [ "$FSTYP" == "xfs" ]; then
->  	export XFS_MKFS_HAS_NO_META_SUPPORT
->  fi
+> 
+> diff --git a/common/populate b/common/populate
+> index 58b07e33be..9fa1a06798 100644
+> --- a/common/populate
+> +++ b/common/populate
+> @@ -131,7 +131,7 @@ _populate_xfs_qmount_option()
+>  	fi
 >  
-> -_mount_opts()
-> +_common_mount_opts()
->  {
->  	case $FSTYP in
->  	9p)
-> -		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
-> +		echo $PLAN9_MOUNT_OPTIONS
->  		;;
+>  	# Turn on all the quotas
+> -	if $XFS_INFO_PROG "${TEST_DIR}" | grep -q 'crc=1'; then
+> +	if _xfs_has_feature "$TEST_DIR" crc; then
+>  		# v5 filesystems can have group & project quotas
+>  		quota="usrquota,grpquota,prjquota"
+>  	else
+> @@ -176,7 +176,7 @@ _scratch_xfs_populate() {
+>  
+>  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+>  	dblksz="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+> -	crc="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep crc= | sed -e 's/^.*crc=//g' -e 's/\([0-9]*\).*$/\1/g')"
+> +	crc="$(_xfs_has_feature "$SCRATCH_MNT" crc -v)"
+>  	if [ $crc -eq 1 ]; then
+>  		leaf_hdr_size=64
+>  	else
+> @@ -315,7 +315,7 @@ _scratch_xfs_populate() {
+>  	done
+>  
+>  	# Reverse-mapping btree
+> -	is_rmapbt="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'rmapbt=1')"
+> +	is_rmapbt="$(_xfs_has_feature "$SCRATCH_MNT" rmapbt -v)"
+>  	if [ $is_rmapbt -gt 0 ]; then
+>  		echo "+ rmapbt btree"
+>  		nr="$((blksz * 2 / 24))"
+> @@ -332,7 +332,7 @@ _scratch_xfs_populate() {
+>  	fi
+>  
+>  	# Reference-count btree
+> -	is_reflink="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'reflink=1')"
+> +	is_reflink="$(_xfs_has_feature "$SCRATCH_MNT" reflink -v)"
+>  	if [ $is_reflink -gt 0 ]; then
+>  		echo "+ reflink btree"
+>  		nr="$((blksz * 2 / 12))"
+> @@ -597,9 +597,9 @@ _scratch_xfs_populate_check() {
+>  	leaf_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_LEAF")"
+>  	node_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_NODE")"
+>  	btree_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_BTREE")"
+> -	is_finobt=$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'finobt=1')
+> -	is_rmapbt=$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'rmapbt=1')
+> -	is_reflink=$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep -c 'reflink=1')
+> +	is_finobt=$(_xfs_has_feature "$SCRATCH_MNT" finobt -v)
+> +	is_rmapbt=$(_xfs_has_feature "$SCRATCH_MNT" rmapbt -v)
+> +	is_reflink=$(_xfs_has_feature "$SCRATCH_MNT" reflink -v)
+>  
+>  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+>  	dblksz="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+> diff --git a/common/rc b/common/rc
+> index f4785c17ca..8060c03b7d 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -247,7 +247,7 @@ _supports_filetype()
+>  	local fstyp=`$DF_PROG $dir | tail -1 | $AWK_PROG '{print $2}'`
+>  	case "$fstyp" in
 >  	xfs)
-> -		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
-> +		echo $XFS_MOUNT_OPTIONS
+> -		$XFS_INFO_PROG $dir | grep -q "ftype=1"
+> +		_xfs_has_feature $dir ftype
 >  		;;
->  	udf)
-> -		export MOUNT_OPTIONS=$UDF_MOUNT_OPTIONS
-> +		echo $UDF_MOUNT_OPTIONS
->  		;;
->  	nfs)
-> -		export MOUNT_OPTIONS=$NFS_MOUNT_OPTIONS
-> +		echo $NFS_MOUNT_OPTIONS
->  		;;
->  	cifs)
-> -		export MOUNT_OPTIONS=$CIFS_MOUNT_OPTIONS
-> +		echo $CIFS_MOUNT_OPTIONS
->  		;;
->  	ceph)
-> -		export MOUNT_OPTIONS=$CEPHFS_MOUNT_OPTIONS
-> +		echo $CEPHFS_MOUNT_OPTIONS
->  		;;
->  	glusterfs)
-> -		export MOUNT_OPTIONS=$GLUSTERFS_MOUNT_OPTIONS
-> +		echo $GLUSTERFS_MOUNT_OPTIONS
->  		;;
->  	overlay)
-> -		export MOUNT_OPTIONS=$OVERLAY_MOUNT_OPTIONS
-> +		echo $OVERLAY_MOUNT_OPTIONS
->  		;;
->  	ext2|ext3|ext4|ext4dev)
->  		# acls & xattrs aren't turned on by default on ext$FOO
-> -		export MOUNT_OPTIONS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
-> +		echo "-o acl,user_xattr $EXT_MOUNT_OPTIONS"
->  		;;
->  	f2fs)
-> -		export MOUNT_OPTIONS="-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
-> +		echo "-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
->  		;;
->  	reiserfs)
->  		# acls & xattrs aren't turned on by default on reiserfs
-> -		export MOUNT_OPTIONS="-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
-> +		echo "-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
->  		;;
->         reiser4)
-> -               # acls & xattrs aren't supported by reiser4
-> -               export MOUNT_OPTIONS=$REISER4_MOUNT_OPTIONS
-> -               ;;
-> +		# acls & xattrs aren't supported by reiser4
-> +		echo $REISER4_MOUNT_OPTIONS
-> +		;;
->  	gfs2)
->  		# acls aren't turned on by default on gfs2
-> -		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
-> +		echo "-o acl $GFS2_MOUNT_OPTIONS"
->  		;;
->  	tmpfs)
->  		# We need to specify the size at mount, use 1G by default
-> -		export MOUNT_OPTIONS="-o size=1G $TMPFS_MOUNT_OPTIONS"
-> +		echo "-o size=1G $TMPFS_MOUNT_OPTIONS"
->  		;;
->  	ubifs)
-> -		export MOUNT_OPTIONS=$UBIFS_MOUNT_OPTIONS
-> +		echo $UBIFS_MOUNT_OPTIONS
->  		;;
->  	*)
->  		;;
->  	esac
+>  	ext2|ext3|ext4)
+>  		local dev=`$DF_PROG $dir | tail -1 | $AWK_PROG '{print $1}'`
+> diff --git a/common/xfs b/common/xfs
+> index e1c15d3d04..b2ac78de0c 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -413,6 +413,56 @@ _require_xfs_crc()
+>  	_scratch_unmount
 >  }
 >  
-> +_mount_opts()
+> +# If the xfs_info output for the given XFS filesystem mount mentions the given
+> +# feature.  If so, return 0 for success.  If not, return 1 for failure.  If the
+> +# third option is -v, echo 1 for success and 0 for not.
+> +#
+> +# Starting with xfsprogs 4.17, this also works for unmounted filesystems.
+> +_xfs_has_feature()
 > +{
-> +	export MOUNT_OPTIONS=$(_common_mount_opts)
+> +	local fs="$1"
+> +	local feat="$2"
+> +	local verbose="$3"
+> +
+> +	local answer="$($XFS_INFO_PROG "$fs" 2>&1 | grep -w -c "$feat=1")"
+> +	if [ "$answer" -ne 0 ]; then
+> +		test "$verbose" = "-v" && echo 1
+> +		return 0
+> +	fi
+> +
+> +	test "$verbose" = "-v" && echo 0
+> +	return 1
 > +}
 > +
->  _test_mount_opts()
->  {
-> -	case $FSTYP in
-> -	9p)
-> -		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
-> -		;;
-> -	cifs)
-> -		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
-> -		;;
-> -	ceph)
-> -		export TEST_FS_MOUNT_OPTS=$CEPHFS_MOUNT_OPTIONS
-> -		;;
-> -	nfs)
-> -		export TEST_FS_MOUNT_OPTS=$NFS_MOUNT_OPTIONS
-> -		;;
-> -	glusterfs)
-> -		export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
-> -		;;
-> -	ext2|ext3|ext4|ext4dev)
-> -		# acls & xattrs aren't turned on by default on older ext$FOO
-> -		export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
-> -		;;
-> -	*)
-> -		;;
-> -	esac
-> +	export TEST_FS_MOUNT_OPTS=$(_common_mount_opts)
+> +# Require that the xfs_info output for the given XFS filesystem mount mentions
+> +# the given feature flag.  If the third argument is -u (or is empty and the
+> +# second argument is $SCRATCH_MNT), unmount the fs on failure.  If a fourth
+> +# argument is supplied, it will be used as the _notrun message.
+> +_require_xfs_has_feature()
+> +{
+> +	local fs="$1"
+> +	local feat="$2"
+> +	local umount="$3"
+> +	local message="$4"
+> +
+> +	if [ -z "$umount" ] && [ "$fs" = "$SCRATCH_MNT" ]; then
+> +		umount="-u"
+> +	fi
+> +
+> +	_xfs_has_feature "$1" "$2" && return 0
+> +
+> +	test "$umount" = "-u" && umount "$fs" &>/dev/null
+> +
+> +	test -n "$message" && _notrun "$message"
+> +
+> +	case "$fs" in
+> +	"$TEST_DIR"|"$TEST_DEV")	fsname="test";;
+> +	"$SCRATCH_MNT"|"$SCRATCH_DEV")	fsname="scratch";;
+> +	*)				fsname="$fs";;
+> +	esac
+> +	_notrun "$2 not supported by $fsname filesystem type: $FSTYP"
+> +}
+> +
+>  # this test requires the xfs kernel support crc feature on scratch device
+>  #
+>  _require_scratch_xfs_crc()
+> @@ -420,7 +470,8 @@ _require_scratch_xfs_crc()
+>  	_scratch_mkfs_xfs >/dev/null 2>&1
+>  	_try_scratch_mount >/dev/null 2>&1 \
+>  	   || _notrun "Kernel doesn't support crc feature"
+> -	$XFS_INFO_PROG $SCRATCH_MNT | grep -q 'crc=1' || _notrun "crc feature not supported by this filesystem"
+> +	_require_xfs_has_feature $SCRATCH_MNT crc -u \
+> +		"crc feature not supported by this filesystem"
+>  	_scratch_unmount
 >  }
 >  
->  _mkfs_opts()
-> -- 
-> 2.34.1
+> @@ -739,10 +790,7 @@ _check_xfs_test_fs()
+>  _require_xfs_test_rmapbt()
+>  {
+>  	_require_test
+> -
+> -	if [ "$($XFS_INFO_PROG "$TEST_DIR" | grep -c "rmapbt=1")" -ne 1 ]; then
+> -		_notrun "rmapbt not supported by test filesystem type: $FSTYP"
+> -	fi
+> +	_require_xfs_has_feature "$TEST_DIR" rmapbt
+>  }
+>  
+>  _require_xfs_scratch_rmapbt()
+> @@ -751,10 +799,7 @@ _require_xfs_scratch_rmapbt()
+>  
+>  	_scratch_mkfs > /dev/null
+>  	_scratch_mount
+> -	if [ "$($XFS_INFO_PROG "$SCRATCH_MNT" | grep -c "rmapbt=1")" -ne 1 ]; then
+> -		_scratch_unmount
+> -		_notrun "rmapbt not supported by scratch filesystem type: $FSTYP"
+> -	fi
+> +	_require_xfs_has_feature "$SCRATCH_MNT" rmapbt
+>  	_scratch_unmount
+>  }
+>  
+> @@ -1357,8 +1402,8 @@ _require_scratch_xfs_bigtime()
+>  		_notrun "mkfs.xfs doesn't support bigtime feature"
+>  	_try_scratch_mount || \
+>  		_notrun "kernel doesn't support xfs bigtime feature"
+> -	$XFS_INFO_PROG "$SCRATCH_MNT" | grep -q -w "bigtime=1" || \
+> -		_notrun "bigtime feature not advertised on mount?"
+> +	_require_xfs_has_feature $SCRATCH_MNT bigtime -u \
+> +		"crc feature not supported by this filesystem"
+>  	_scratch_unmount
+>  }
+>  
+> diff --git a/tests/xfs/097 b/tests/xfs/097
+> index 4cad7216cd..1df34eeddc 100755
+> --- a/tests/xfs/097
+> +++ b/tests/xfs/097
+> @@ -42,7 +42,7 @@ _scratch_mkfs_xfs -m crc=1,finobt=1 > /dev/null
+>  
+>  echo "+ mount fs image"
+>  _scratch_mount
+> -$XFS_INFO_PROG "${SCRATCH_MNT}" | grep -q "finobt=1" || _notrun "finobt not enabled"
+> +_require_xfs_has_feature "$SCRATCH_MNT" finobt
+>  blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+>  
+>  echo "+ make some files"
+> diff --git a/tests/xfs/151 b/tests/xfs/151
+> index 66425f6710..b2fe16aefb 100755
+> --- a/tests/xfs/151
+> +++ b/tests/xfs/151
+> @@ -24,8 +24,7 @@ echo "Format filesystem and populate"
+>  _scratch_mkfs > $seqres.full
+>  _scratch_mount >> $seqres.full
+>  
+> -$XFS_INFO_PROG $SCRATCH_MNT | grep -q ftype=1 || \
+> -	_notrun "filesystem does not support ftype"
+> +_require_xfs_has_feature "$SCRATCH_MNT" ftype
+>  
+>  filter_ls() {
+>  	awk '
+> diff --git a/tests/xfs/271 b/tests/xfs/271
+> index 14d64cd0e5..d67ac4d6c1 100755
+> --- a/tests/xfs/271
+> +++ b/tests/xfs/271
+> @@ -37,7 +37,7 @@ agcount=$(_xfs_mount_agcount $SCRATCH_MNT)
+>  # same owner (per-AG metadata) for rmap btree blocks and blocks on the AGFL and
+>  # the reverse mapping index merges records, the number of per-AG extents
+>  # reported will vary depending on whether the refcount btree is enabled.
+> -$XFS_INFO_PROG $SCRATCH_MNT | grep -q reflink=1
+> +_require_xfs_has_feature "$SCRATCH_MNT" reflink
+>  has_reflink=$(( 1 - $? ))
+>  perag_metadata_exts=2
+>  test $has_reflink -gt 0 && perag_metadata_exts=$((perag_metadata_exts + 1))
+> diff --git a/tests/xfs/307 b/tests/xfs/307
+> index ba7204dd00..f3c970fadf 100755
+> --- a/tests/xfs/307
+> +++ b/tests/xfs/307
+> @@ -22,7 +22,7 @@ _require_scratch_reflink
+>  echo "Format"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _scratch_mount >> $seqres.full
+> -is_rmap=$($XFS_INFO_PROG $SCRATCH_MNT | grep -c "rmapbt=1")
+> +is_rmap=$(_xfs_has_feature $SCRATCH_MNT rmapbt -v)
+>  _scratch_unmount
+>  
+>  _get_agf_data() {
+> diff --git a/tests/xfs/308 b/tests/xfs/308
+> index d0f47f5038..6da6622e14 100755
+> --- a/tests/xfs/308
+> +++ b/tests/xfs/308
+> @@ -22,7 +22,7 @@ _require_scratch_reflink
+>  echo "Format"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _scratch_mount >> $seqres.full
+> -is_rmap=$($XFS_INFO_PROG $SCRATCH_MNT | grep -c "rmapbt=1")
+> +is_rmap=$(_xfs_has_feature $SCRATCH_MNT rmapbt -v)
+>  _scratch_xfs_unmount_dirty
+>  
+>  _get_agf_data() {
+> diff --git a/tests/xfs/348 b/tests/xfs/348
+> index faf2dca50b..d1645d9462 100755
+> --- a/tests/xfs/348
+> +++ b/tests/xfs/348
+> @@ -39,7 +39,7 @@ mknod $testdir/CHRDEV c 1 1
+>  mknod $testdir/BLKDEV b 1 1
+>  mknod $testdir/FIFO p
+>  
+> -$XFS_INFO_PROG $SCRATCH_MNT | grep -q "ftype=1" && FTYPE_FEATURE=1
+> +_xfs_has_feature $SCRATCH_MNT ftype && FTYPE_FEATURE=1
+>  
+>  # Record test dir inode for xfs_repair filter
+>  inode_filter=$tmp.sed
 > 
 
