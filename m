@@ -2,207 +2,116 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECD1BFA3740
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 11:11:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBFCAFA3743
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 15:05:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230133AbiJaLLi (ORCPT
+        id S230056AbiJaPFN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Oct 2022 07:11:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53378 "EHLO
+        Mon, 31 Oct 2022 11:05:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230107AbiJaLLg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 07:11:36 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BD13B847;
-        Mon, 31 Oct 2022 04:11:35 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 54903B815E2;
-        Mon, 31 Oct 2022 11:11:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FE14C433D7;
-        Mon, 31 Oct 2022 11:11:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667214693;
-        bh=KgBdBtmhw7LMT5jL6xTCRVd52JXwApMCk08xC5XsQ7E=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=nmQ1c2kw4JXFSnhAlEixf352xihZja5bkRoDQt/B+ELoL9uIqMQeL5NZj9VnRJ6Pr
-         3NMF0eyjlNJvS0gLIPf7xhr6hUIQ6+gpkCV/pETTqsF+IGzk81XGRfJmqM7139nYJD
-         CutYeiHO8uAaHFY6TLN/sfKLnRb5VYPh6uIHVJHeW8vEB8lHB4v7aQR1KQqcgnQVhb
-         mLvEE6gWaCzd8Rpo0eevJtuon8aFkYUqreyi9usXyBBLKqEpf2dRFzpSXrvWRrUd/Y
-         23XlPtZqhQ1o+hE00fDdjy2AQMSmiMtLdv8jZXlWBmMhevATymoEWEf5QhkuaVy8zj
-         KXi6glO12YKUA==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 2/3] btrfs: test that fiemap reports extent as not shared after deleting file
-Date:   Mon, 31 Oct 2022 11:11:20 +0000
-Message-Id: <27a0c4ab551b7a7410f4062f5235f20c88e77cfc.1667214081.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <cover.1667214081.git.fdmanana@suse.com>
-References: <cover.1667214081.git.fdmanana@suse.com>
+        with ESMTP id S229870AbiJaPFM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 11:05:12 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB18311178
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 08:04:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1667228656;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=ujuXgEg6GjhCjwVsOvEk/m6GYmLITMv/RPxyO4ahhr8=;
+        b=dWieQET3MwJsqCcRuf6WRmHLeFGAiw+mmTD6DTQjWIq96Tpa91P7VBIWA/07GfLAIgSuK9
+        h0dtg0VTMGKrkJIiMofk3nmn/jmQyscMl5J+7ioDSRRo5+WfIOdvKUWXBb86nzyQQGJ6Id
+        ORyPDeNkEYWRb75Vf11TY51Ufy6k+D8=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-325-JvhpkCUzN9-FTU_YA8PFnQ-1; Mon, 31 Oct 2022 11:04:12 -0400
+X-MC-Unique: JvhpkCUzN9-FTU_YA8PFnQ-1
+Received: by mail-pf1-f199.google.com with SMTP id t7-20020a62ea07000000b005619a832f68so5838325pfh.11
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 08:04:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ujuXgEg6GjhCjwVsOvEk/m6GYmLITMv/RPxyO4ahhr8=;
+        b=hYiFVna96/VJ/TA7c+vYZl/sicsXCxaPhOPzv7J44gwTiyzEU5tfNhpbvpL95TxM/V
+         +p5k9V7hnyuBDVIo4ZUP41hpBvqSQwlXKi2CO4DLmM175+hDRvcAB3YC9NHJZEWTnQTj
+         NumBarrgRgF0klnaDijcupm5ufM+usHy8lUQheGaUeSZbafGxghcB12fpUtS+N2jGh0v
+         K2nb1XC3Fire83Tr72+5CSKqq+enr6iN+m/BN2/Se6ga67NrUK3C/6/+1FVU7u4DzOyA
+         l+HzHk2umonzgZyGggfKy2iHuJEy1GWc9kiChaUtQUAmq4Bi7cP6bD4mGTIWleg8zCzt
+         SSpw==
+X-Gm-Message-State: ACrzQf1ABXqLMhPZ/RyGQyRIQDEsDnDwWndyyiYCIXcWXLD8ivFf6AOn
+        beWRo0ozxIdgBfXVqzr/hNAo8vOOyW8ULlD+ZEqN9spgGxh7GmzidGdqHYXU3TDZmaPi6XpWEMj
+        kQiRJOPGxA5yzrvRMAQ==
+X-Received: by 2002:a17:902:d2c4:b0:187:a4e:f9c1 with SMTP id n4-20020a170902d2c400b001870a4ef9c1mr11914217plc.168.1667228650003;
+        Mon, 31 Oct 2022 08:04:10 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7y3GxHIqxEDFFzyzofa1S5AAjRdS7RmaPIH0uair58A3Ku3nB4d3oMDxUxpuQqs6VwwIHQvg==
+X-Received: by 2002:a17:902:d2c4:b0:187:a4e:f9c1 with SMTP id n4-20020a170902d2c400b001870a4ef9c1mr11914190plc.168.1667228649697;
+        Mon, 31 Oct 2022 08:04:09 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id r20-20020a170902be1400b00186b758c9fasm4567644pls.33.2022.10.31.08.04.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 31 Oct 2022 08:04:08 -0700 (PDT)
+Date:   Mon, 31 Oct 2022 23:04:04 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     xiubli@redhat.com
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3] encrypt: add ceph support
+Message-ID: <20221031150404.etbrz45c7bkgcgdb@zlang-mailbox>
+References: <20221031083819.573521-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221031083819.573521-1-xiubli@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Mon, Oct 31, 2022 at 04:38:19PM +0800, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
+> 
+> This will enable ceph could run the fscrypt test cases, but not all.
+> Some of them will be skipped because of not supporting features.
+> 
+> Here will just skip ceph in _scratch_mkfs_encrypted() and in
+> _require_scratch_encryption() it will try to check "set_encpolicy"
+> to make sure whether kernel ceph support the encryption or not.
+> 
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+> 
+> V3:
+> - Add more commit comments.
 
-Test that if we have two files with shared extents, after removing one of
-the files, if we do a fiemap against the other file, it does not report
-extents as shared anymore.
+V2 patch has been merged and pushed.
 
-This exercises the processing of delayed references for data extents in
-the backref walking code, used by fiemap to determine if an extent is
-shared.
+Thanks,
+Zorro
 
-This used to fail until very recently and was fixed by the following
-kernel commit that landed in 6.1-rc2:
-
-  4fc7b5722824 (""btrfs: fix processing of delayed data refs during backref walking")
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/279     | 82 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/279.out | 39 +++++++++++++++++++++
- 2 files changed, 121 insertions(+)
- create mode 100755 tests/btrfs/279
- create mode 100644 tests/btrfs/279.out
-
-diff --git a/tests/btrfs/279 b/tests/btrfs/279
-new file mode 100755
-index 00000000..5b5824fd
---- /dev/null
-+++ b/tests/btrfs/279
-@@ -0,0 +1,82 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 279
-+#
-+# Test that if we have two files with shared extents, after removing one of the
-+# files, if we do a fiemap against the other file, it does not report extents as
-+# shared anymore.
-+#
-+# This exercises the processing of delayed references for data extents in the
-+# backref walking code, used by fiemap to determine if an extent is shared.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick subvol fiemap clone
-+
-+. ./common/filter
-+. ./common/reflink
-+. ./common/punch # for _filter_fiemap_flags
-+
-+_supported_fs btrfs
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_xfs_io_command "fiemap"
-+
-+_fixed_by_kernel_commit 4fc7b5722824 \
-+	"btrfs: fix processing of delayed data refs during backref walking"
-+
-+run_test()
-+{
-+	local file_path_1=$1
-+	local file_path_2=$2
-+	local do_sync=$3
-+
-+	$XFS_IO_PROG -f -c "pwrite 0 64K" $file_path_1 | _filter_xfs_io
-+	_cp_reflink $file_path_1 $file_path_2
-+
-+	if [ $do_sync -eq 1 ]; then
-+		sync
-+	fi
-+
-+	echo "Fiemap of $file_path_1 before deleting $file_path_2:" | \
-+		_filter_scratch
-+	$XFS_IO_PROG -c "fiemap -v" $file_path_1 | _filter_fiemap_flags
-+
-+	rm -f $file_path_2
-+
-+	echo "Fiemap of $file_path_1 after deleting $file_path_2:" | \
-+		_filter_scratch
-+	$XFS_IO_PROG -c "fiemap -v" $file_path_1 | _filter_fiemap_flags
-+}
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Create two test subvolumes, we'll reflink files between them.
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv1 | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv2 | _filter_scratch
-+
-+echo
-+echo "Testing with same subvolume and without transaction commit"
-+echo
-+run_test "$SCRATCH_MNT/subv1/f1" "$SCRATCH_MNT/subv1/f2" 0
-+
-+echo
-+echo "Testing with same subvolume and with transaction commit"
-+echo
-+run_test "$SCRATCH_MNT/subv1/f3" "$SCRATCH_MNT/subv1/f4" 1
-+
-+echo
-+echo "Testing with different subvolumes and without transaction commit"
-+echo
-+run_test "$SCRATCH_MNT/subv1/f5" "$SCRATCH_MNT/subv2/f6" 0
-+
-+echo
-+echo "Testing with different subvolumes and with transaction commit"
-+echo
-+run_test "$SCRATCH_MNT/subv1/f7" "$SCRATCH_MNT/subv2/f8" 1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/279.out b/tests/btrfs/279.out
-new file mode 100644
-index 00000000..a959a86d
---- /dev/null
-+++ b/tests/btrfs/279.out
-@@ -0,0 +1,39 @@
-+QA output created by 279
-+Create subvolume 'SCRATCH_MNT/subv1'
-+Create subvolume 'SCRATCH_MNT/subv2'
-+
-+Testing with same subvolume and without transaction commit
-+
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Fiemap of SCRATCH_MNT/subv1/f1 before deleting SCRATCH_MNT/subv1/f2:
-+0: [0..127]: shared|last
-+Fiemap of SCRATCH_MNT/subv1/f1 after deleting SCRATCH_MNT/subv1/f2:
-+0: [0..127]: last
-+
-+Testing with same subvolume and with transaction commit
-+
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Fiemap of SCRATCH_MNT/subv1/f3 before deleting SCRATCH_MNT/subv1/f4:
-+0: [0..127]: shared|last
-+Fiemap of SCRATCH_MNT/subv1/f3 after deleting SCRATCH_MNT/subv1/f4:
-+0: [0..127]: last
-+
-+Testing with different subvolumes and without transaction commit
-+
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Fiemap of SCRATCH_MNT/subv1/f5 before deleting SCRATCH_MNT/subv2/f6:
-+0: [0..127]: shared|last
-+Fiemap of SCRATCH_MNT/subv1/f5 after deleting SCRATCH_MNT/subv2/f6:
-+0: [0..127]: last
-+
-+Testing with different subvolumes and with transaction commit
-+
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Fiemap of SCRATCH_MNT/subv1/f7 before deleting SCRATCH_MNT/subv2/f8:
-+0: [0..127]: shared|last
-+Fiemap of SCRATCH_MNT/subv1/f7 after deleting SCRATCH_MNT/subv2/f8:
-+0: [0..127]: last
--- 
-2.35.1
+> 
+> 
+>  common/encrypt | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/common/encrypt b/common/encrypt
+> index 45ce0954..1a77e23b 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
+>  		# erase the UBI volume; reformated automatically on next mount
+>  		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
+>  		;;
+> +	ceph)
+> +		_scratch_cleanup_files
+> +		;;
+>  	*)
+>  		_notrun "No encryption support for $FSTYP"
+>  		;;
+> -- 
+> 2.31.1
+> 
 
