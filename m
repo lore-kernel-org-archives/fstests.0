@@ -2,125 +2,241 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 514CAECAAA1
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 16:24:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF8F3ECAAA1
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 16:42:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231294AbiJaQYf (ORCPT
+        id S231674AbiJaQmn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Oct 2022 12:24:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43378 "EHLO
+        Mon, 31 Oct 2022 12:42:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230197AbiJaQYe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 12:24:34 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85AD91262C
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 09:23:41 -0700 (PDT)
+        with ESMTP id S231735AbiJaQmm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 12:42:42 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD0E13898
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 09:41:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667233420;
+        s=mimecast20190719; t=1667234496;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=ZiQBDyOLjORds9X4KpGcz9QvStDMZKbZf/Q+zflwYq8=;
-        b=DXtcvETun4CZFpo05lHnmxewQLBmIt4wUJyn2IM3V87bN9ITnFLp8UNW8euUR6djD+032B
-        EzPMlBNmmRZv0B2bJKdRIHanlHOQgwzhn3iXzpaelaofLChRYDbXPAM3znWMi8uQUAEmmI
-        m/iLOUYfcRp0Dl9ZQQIMMKsSU5TCE4k=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=YGh6jUl6pL2pcWB7w0OY1LDk164YbQNLIed9ZQ1pCDY=;
+        b=hya8EyGVqbUEkuB9pP3Ph460mxx/Bd0IN07aIJwpRlNa4CKfjNX1p7ajFnOKTEhlxtR8T/
+        J/RWEedjJocsL8LiN+cL3tOQ7gQwA8y6X8KWx2RrZYFUuH79hGTLSUOzYQOvwgxRIqT8ES
+        tR0EpGwxth5gSDnna2GVMJjBRydT08w=
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com
+ [209.85.160.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-377--knn2YDMMUejuyqOw3VlaQ-1; Mon, 31 Oct 2022 12:23:39 -0400
-X-MC-Unique: -knn2YDMMUejuyqOw3VlaQ-1
-Received: by mail-qv1-f72.google.com with SMTP id em2-20020ad44f82000000b004af5338777cso6055851qvb.4
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 09:23:38 -0700 (PDT)
+ us-mta-616-WzqgosCcMFGkkf9zk6Ifzg-1; Mon, 31 Oct 2022 12:41:35 -0400
+X-MC-Unique: WzqgosCcMFGkkf9zk6Ifzg-1
+Received: by mail-qt1-f198.google.com with SMTP id g3-20020ac84b63000000b003a529c62a92so1269247qts.23
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 09:41:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ZiQBDyOLjORds9X4KpGcz9QvStDMZKbZf/Q+zflwYq8=;
-        b=1K9L4brk8mM9oKSabvxEtBCMmxlz5UNjJuUCh27Q9XoohsFBE1OI71TyzRURzTXvwT
-         o9HHT0sGZ7i6a5fXscXHfxvyKdbVOiUK43FYsxSFHf07Uromb9i8XPLrmVq76TxxxOTb
-         WLP7whJ11Efrg5MWpEQkw6eQWd9RI1G3C7jGWVMojiy1rY88YHy0HTVl68oYK9l2qlMJ
-         zg8rG6Gpnlc7yi8yECAUChpmR2BRb1BbSGlO4V92j3U9lK9DEnGsT+8YPzb7/fsu6Egw
-         JscsdB1HqFlxdzMgTTGQ1g6bZqiHsvVgZhgGvQF3BDqhzkkYjOSv+CGNYzjKnL+eFmQL
-         HYFg==
-X-Gm-Message-State: ACrzQf2sP8sMeNW11jhJsdmV9zrtsCxEXJlZgElxDOVxSsQpj1XAYf3i
-        wiTeGKdd6RQFxVGi1FHssNRy8lRFsw+XW8DA/PxeYggnLogOAkc0jiftcRBEOgn6JBdCX/oIpC2
-        VBOHSVqknRsiJ00OeNw==
-X-Received: by 2002:ac8:5b87:0:b0:39c:b5a6:193b with SMTP id a7-20020ac85b87000000b0039cb5a6193bmr11367771qta.461.1667233418557;
-        Mon, 31 Oct 2022 09:23:38 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7lsq3nqxthtuQzMmKbW42tZC9EWJhq3A+jycMYXQ7UT7Wklqi5Jifzc+rG8KWOFj8lPdgnVA==
-X-Received: by 2002:ac8:5b87:0:b0:39c:b5a6:193b with SMTP id a7-20020ac85b87000000b0039cb5a6193bmr11367742qta.461.1667233418300;
-        Mon, 31 Oct 2022 09:23:38 -0700 (PDT)
+        bh=YGh6jUl6pL2pcWB7w0OY1LDk164YbQNLIed9ZQ1pCDY=;
+        b=xs36MFSS6q252IEo/6CI3P1JZKw35w9MLcRhu1luzmptBwn/yzWvFvsQXyP+HPvRVC
+         UWQcJ2B8RjX3gn1FtPJ+E8hsEijrX8OZ7ldXu+lU//RW4zfENx2BjsqHR1tu0Gg7dJXf
+         EWz2+iWODRbYYZTGJOnncTeV/cg3Y0rw0lg+9WJFPFa5iHE8Pr8F0fyqk18tsA1kwE9T
+         CH8GyOUm2/2LoNw6wDzgiRiX4UaJ9X0K+wlwY6FDvTUj2M2Q9jOtPS3qwPK+SxYH4IVz
+         erEN5STM2NDLxE0UkShli6U0ePO0caWiomNvmfjfqZKl+1g8B3t6NnpKIsp6FiPvVjlF
+         +lKQ==
+X-Gm-Message-State: ACrzQf1joVmV06En46M4DKmDAP9vTFbx8YqHoQFMgxiep+TgTMIvh3mh
+        B9rdMDcWHp6p2UFfGb5BFEZRWXkLayPo4pz79vQZTNMFD/eMy2RLIoVoqdiVcyAWxQK59JfNQbO
+        WCBaq2D+b34nqbS6KXQ==
+X-Received: by 2002:a05:622a:8f:b0:3a5:d2f:729c with SMTP id o15-20020a05622a008f00b003a50d2f729cmr11317902qtw.211.1667234494586;
+        Mon, 31 Oct 2022 09:41:34 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM6UYwFr/CeJ7F4IL5Hn6P0UFcJrk+JhKdIX64EldE9RG/A/XbhjfH4Ztkiwirz38BzIjIAXhw==
+X-Received: by 2002:a05:622a:8f:b0:3a5:d2f:729c with SMTP id o15-20020a05622a008f00b003a50d2f729cmr11317883qtw.211.1667234494299;
+        Mon, 31 Oct 2022 09:41:34 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id s16-20020a05620a29d000b006cec8001bf4sm4964648qkp.26.2022.10.31.09.23.35
+        by smtp.gmail.com with ESMTPSA id t1-20020a05620a450100b006cbcdc6efedsm5022480qkp.41.2022.10.31.09.41.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Oct 2022 09:23:37 -0700 (PDT)
-Date:   Tue, 1 Nov 2022 00:23:32 +0800
+        Mon, 31 Oct 2022 09:41:33 -0700 (PDT)
+Date:   Tue, 1 Nov 2022 00:41:28 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fdmanana@kernel.org
 Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
         Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 1/3] common/punch: fix flags printing for filter
- _filter_fiemap_flags
-Message-ID: <20221031162332.glfpxari24rpwwtu@zlang-mailbox>
+Subject: Re: [PATCH 2/3] btrfs: test that fiemap reports extent as not shared
+ after deleting file
+Message-ID: <20221031164128.z4cujrkrcxe6ujqr@zlang-mailbox>
 References: <cover.1667214081.git.fdmanana@suse.com>
- <a1a5c698061d4c4e6c8994cde7b51969d8929de3.1667214081.git.fdmanana@suse.com>
+ <27a0c4ab551b7a7410f4062f5235f20c88e77cfc.1667214081.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a1a5c698061d4c4e6c8994cde7b51969d8929de3.1667214081.git.fdmanana@suse.com>
+In-Reply-To: <27a0c4ab551b7a7410f4062f5235f20c88e77cfc.1667214081.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 31, 2022 at 11:11:19AM +0000, fdmanana@kernel.org wrote:
+On Mon, Oct 31, 2022 at 11:11:20AM +0000, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> In the filter _filter_fiemap_flags, if we get a flags field that only has
-> the 'last' flag set, we end up printing the string "nonelast", which is
-> ugly and not intuitive.
+> Test that if we have two files with shared extents, after removing one of
+> the files, if we do a fiemap against the other file, it does not report
+> extents as shared anymore.
 > 
-> For example:
+> This exercises the processing of delayed references for data extents in
+> the backref walking code, used by fiemap to determine if an extent is
+> shared.
 > 
->   $XFS_IO_PROG -f -c "pwrite 0 64K" $SCRATCH_MNT/foo > /dev/null
->   $XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap_flags
+> This used to fail until very recently and was fixed by the following
+> kernel commit that landed in 6.1-rc2:
 > 
-> Gives:
-> 
->   0: [0..127]: nonelast
-> 
-> So fix this by updating the filter's awk code to reset the flags string to
-> an empty string if we have the "last" flag set and we haven't updated the
-> flags string before. So now the same test gives the following result:
-> 
->   0: [0..127]: last
+>   4fc7b5722824 (""btrfs: fix processing of delayed data refs during backref walking")
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
->  common/punch | 2 ++
->  1 file changed, 2 insertions(+)
+
+Looks good to me. As this's not a genericcase, I'm not sure if you need
+_require_congruent_file_oplen helper.
+
+Thanks,
+Zorro
+
+>  tests/btrfs/279     | 82 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/279.out | 39 +++++++++++++++++++++
+>  2 files changed, 121 insertions(+)
+>  create mode 100755 tests/btrfs/279
+>  create mode 100644 tests/btrfs/279.out
 > 
-> diff --git a/common/punch b/common/punch
-> index 47a29c92..94599c35 100644
-> --- a/common/punch
-> +++ b/common/punch
-> @@ -130,6 +130,8 @@ _filter_fiemap_flags()
->  			if (and(flags, 0x1)) {
->  				if (set) {
->  					flag_str = flag_str"|";
-> +				} else {
-> +					flag_str = "";
-
-Looks good to me.
-
-We have two cases (g/352, g/353) call this function, I just gave them a test,
-looks like this change doesn't affect them.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  				}
->  				flag_str = flag_str"last";
->  			}
+> diff --git a/tests/btrfs/279 b/tests/btrfs/279
+> new file mode 100755
+> index 00000000..5b5824fd
+> --- /dev/null
+> +++ b/tests/btrfs/279
+> @@ -0,0 +1,82 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 279
+> +#
+> +# Test that if we have two files with shared extents, after removing one of the
+> +# files, if we do a fiemap against the other file, it does not report extents as
+> +# shared anymore.
+> +#
+> +# This exercises the processing of delayed references for data extents in the
+> +# backref walking code, used by fiemap to determine if an extent is shared.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick subvol fiemap clone
+> +
+> +. ./common/filter
+> +. ./common/reflink
+> +. ./common/punch # for _filter_fiemap_flags
+> +
+> +_supported_fs btrfs
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +_require_xfs_io_command "fiemap"
+> +
+> +_fixed_by_kernel_commit 4fc7b5722824 \
+> +	"btrfs: fix processing of delayed data refs during backref walking"
+> +
+> +run_test()
+> +{
+> +	local file_path_1=$1
+> +	local file_path_2=$2
+> +	local do_sync=$3
+> +
+> +	$XFS_IO_PROG -f -c "pwrite 0 64K" $file_path_1 | _filter_xfs_io
+> +	_cp_reflink $file_path_1 $file_path_2
+> +
+> +	if [ $do_sync -eq 1 ]; then
+> +		sync
+> +	fi
+> +
+> +	echo "Fiemap of $file_path_1 before deleting $file_path_2:" | \
+> +		_filter_scratch
+> +	$XFS_IO_PROG -c "fiemap -v" $file_path_1 | _filter_fiemap_flags
+> +
+> +	rm -f $file_path_2
+> +
+> +	echo "Fiemap of $file_path_1 after deleting $file_path_2:" | \
+> +		_filter_scratch
+> +	$XFS_IO_PROG -c "fiemap -v" $file_path_1 | _filter_fiemap_flags
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Create two test subvolumes, we'll reflink files between them.
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv1 | _filter_scratch
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv2 | _filter_scratch
+> +
+> +echo
+> +echo "Testing with same subvolume and without transaction commit"
+> +echo
+> +run_test "$SCRATCH_MNT/subv1/f1" "$SCRATCH_MNT/subv1/f2" 0
+> +
+> +echo
+> +echo "Testing with same subvolume and with transaction commit"
+> +echo
+> +run_test "$SCRATCH_MNT/subv1/f3" "$SCRATCH_MNT/subv1/f4" 1
+> +
+> +echo
+> +echo "Testing with different subvolumes and without transaction commit"
+> +echo
+> +run_test "$SCRATCH_MNT/subv1/f5" "$SCRATCH_MNT/subv2/f6" 0
+> +
+> +echo
+> +echo "Testing with different subvolumes and with transaction commit"
+> +echo
+> +run_test "$SCRATCH_MNT/subv1/f7" "$SCRATCH_MNT/subv2/f8" 1
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/279.out b/tests/btrfs/279.out
+> new file mode 100644
+> index 00000000..a959a86d
+> --- /dev/null
+> +++ b/tests/btrfs/279.out
+> @@ -0,0 +1,39 @@
+> +QA output created by 279
+> +Create subvolume 'SCRATCH_MNT/subv1'
+> +Create subvolume 'SCRATCH_MNT/subv2'
+> +
+> +Testing with same subvolume and without transaction commit
+> +
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +Fiemap of SCRATCH_MNT/subv1/f1 before deleting SCRATCH_MNT/subv1/f2:
+> +0: [0..127]: shared|last
+> +Fiemap of SCRATCH_MNT/subv1/f1 after deleting SCRATCH_MNT/subv1/f2:
+> +0: [0..127]: last
+> +
+> +Testing with same subvolume and with transaction commit
+> +
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +Fiemap of SCRATCH_MNT/subv1/f3 before deleting SCRATCH_MNT/subv1/f4:
+> +0: [0..127]: shared|last
+> +Fiemap of SCRATCH_MNT/subv1/f3 after deleting SCRATCH_MNT/subv1/f4:
+> +0: [0..127]: last
+> +
+> +Testing with different subvolumes and without transaction commit
+> +
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +Fiemap of SCRATCH_MNT/subv1/f5 before deleting SCRATCH_MNT/subv2/f6:
+> +0: [0..127]: shared|last
+> +Fiemap of SCRATCH_MNT/subv1/f5 after deleting SCRATCH_MNT/subv2/f6:
+> +0: [0..127]: last
+> +
+> +Testing with different subvolumes and with transaction commit
+> +
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +Fiemap of SCRATCH_MNT/subv1/f7 before deleting SCRATCH_MNT/subv2/f8:
+> +0: [0..127]: shared|last
+> +Fiemap of SCRATCH_MNT/subv1/f7 after deleting SCRATCH_MNT/subv2/f8:
+> +0: [0..127]: last
 > -- 
 > 2.35.1
 > 
