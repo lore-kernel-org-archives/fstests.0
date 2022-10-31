@@ -2,116 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBFCAFA3743
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 15:05:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 514CAECAAA1
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 16:24:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230056AbiJaPFN (ORCPT
+        id S231294AbiJaQYf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Oct 2022 11:05:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40806 "EHLO
+        Mon, 31 Oct 2022 12:24:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229870AbiJaPFM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 11:05:12 -0400
+        with ESMTP id S230197AbiJaQYe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 12:24:34 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB18311178
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 08:04:17 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85AD91262C
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 09:23:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667228656;
+        s=mimecast20190719; t=1667233420;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=ujuXgEg6GjhCjwVsOvEk/m6GYmLITMv/RPxyO4ahhr8=;
-        b=dWieQET3MwJsqCcRuf6WRmHLeFGAiw+mmTD6DTQjWIq96Tpa91P7VBIWA/07GfLAIgSuK9
-        h0dtg0VTMGKrkJIiMofk3nmn/jmQyscMl5J+7ioDSRRo5+WfIOdvKUWXBb86nzyQQGJ6Id
-        ORyPDeNkEYWRb75Vf11TY51Ufy6k+D8=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=ZiQBDyOLjORds9X4KpGcz9QvStDMZKbZf/Q+zflwYq8=;
+        b=DXtcvETun4CZFpo05lHnmxewQLBmIt4wUJyn2IM3V87bN9ITnFLp8UNW8euUR6djD+032B
+        EzPMlBNmmRZv0B2bJKdRIHanlHOQgwzhn3iXzpaelaofLChRYDbXPAM3znWMi8uQUAEmmI
+        m/iLOUYfcRp0Dl9ZQQIMMKsSU5TCE4k=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-325-JvhpkCUzN9-FTU_YA8PFnQ-1; Mon, 31 Oct 2022 11:04:12 -0400
-X-MC-Unique: JvhpkCUzN9-FTU_YA8PFnQ-1
-Received: by mail-pf1-f199.google.com with SMTP id t7-20020a62ea07000000b005619a832f68so5838325pfh.11
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 08:04:12 -0700 (PDT)
+ us-mta-377--knn2YDMMUejuyqOw3VlaQ-1; Mon, 31 Oct 2022 12:23:39 -0400
+X-MC-Unique: -knn2YDMMUejuyqOw3VlaQ-1
+Received: by mail-qv1-f72.google.com with SMTP id em2-20020ad44f82000000b004af5338777cso6055851qvb.4
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 09:23:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ujuXgEg6GjhCjwVsOvEk/m6GYmLITMv/RPxyO4ahhr8=;
-        b=hYiFVna96/VJ/TA7c+vYZl/sicsXCxaPhOPzv7J44gwTiyzEU5tfNhpbvpL95TxM/V
-         +p5k9V7hnyuBDVIo4ZUP41hpBvqSQwlXKi2CO4DLmM175+hDRvcAB3YC9NHJZEWTnQTj
-         NumBarrgRgF0klnaDijcupm5ufM+usHy8lUQheGaUeSZbafGxghcB12fpUtS+N2jGh0v
-         K2nb1XC3Fire83Tr72+5CSKqq+enr6iN+m/BN2/Se6ga67NrUK3C/6/+1FVU7u4DzOyA
-         l+HzHk2umonzgZyGggfKy2iHuJEy1GWc9kiChaUtQUAmq4Bi7cP6bD4mGTIWleg8zCzt
-         SSpw==
-X-Gm-Message-State: ACrzQf1ABXqLMhPZ/RyGQyRIQDEsDnDwWndyyiYCIXcWXLD8ivFf6AOn
-        beWRo0ozxIdgBfXVqzr/hNAo8vOOyW8ULlD+ZEqN9spgGxh7GmzidGdqHYXU3TDZmaPi6XpWEMj
-        kQiRJOPGxA5yzrvRMAQ==
-X-Received: by 2002:a17:902:d2c4:b0:187:a4e:f9c1 with SMTP id n4-20020a170902d2c400b001870a4ef9c1mr11914217plc.168.1667228650003;
-        Mon, 31 Oct 2022 08:04:10 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM7y3GxHIqxEDFFzyzofa1S5AAjRdS7RmaPIH0uair58A3Ku3nB4d3oMDxUxpuQqs6VwwIHQvg==
-X-Received: by 2002:a17:902:d2c4:b0:187:a4e:f9c1 with SMTP id n4-20020a170902d2c400b001870a4ef9c1mr11914190plc.168.1667228649697;
-        Mon, 31 Oct 2022 08:04:09 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r20-20020a170902be1400b00186b758c9fasm4567644pls.33.2022.10.31.08.04.07
+        bh=ZiQBDyOLjORds9X4KpGcz9QvStDMZKbZf/Q+zflwYq8=;
+        b=1K9L4brk8mM9oKSabvxEtBCMmxlz5UNjJuUCh27Q9XoohsFBE1OI71TyzRURzTXvwT
+         o9HHT0sGZ7i6a5fXscXHfxvyKdbVOiUK43FYsxSFHf07Uromb9i8XPLrmVq76TxxxOTb
+         WLP7whJ11Efrg5MWpEQkw6eQWd9RI1G3C7jGWVMojiy1rY88YHy0HTVl68oYK9l2qlMJ
+         zg8rG6Gpnlc7yi8yECAUChpmR2BRb1BbSGlO4V92j3U9lK9DEnGsT+8YPzb7/fsu6Egw
+         JscsdB1HqFlxdzMgTTGQ1g6bZqiHsvVgZhgGvQF3BDqhzkkYjOSv+CGNYzjKnL+eFmQL
+         HYFg==
+X-Gm-Message-State: ACrzQf2sP8sMeNW11jhJsdmV9zrtsCxEXJlZgElxDOVxSsQpj1XAYf3i
+        wiTeGKdd6RQFxVGi1FHssNRy8lRFsw+XW8DA/PxeYggnLogOAkc0jiftcRBEOgn6JBdCX/oIpC2
+        VBOHSVqknRsiJ00OeNw==
+X-Received: by 2002:ac8:5b87:0:b0:39c:b5a6:193b with SMTP id a7-20020ac85b87000000b0039cb5a6193bmr11367771qta.461.1667233418557;
+        Mon, 31 Oct 2022 09:23:38 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM7lsq3nqxthtuQzMmKbW42tZC9EWJhq3A+jycMYXQ7UT7Wklqi5Jifzc+rG8KWOFj8lPdgnVA==
+X-Received: by 2002:ac8:5b87:0:b0:39c:b5a6:193b with SMTP id a7-20020ac85b87000000b0039cb5a6193bmr11367742qta.461.1667233418300;
+        Mon, 31 Oct 2022 09:23:38 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id s16-20020a05620a29d000b006cec8001bf4sm4964648qkp.26.2022.10.31.09.23.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Oct 2022 08:04:08 -0700 (PDT)
-Date:   Mon, 31 Oct 2022 23:04:04 +0800
+        Mon, 31 Oct 2022 09:23:37 -0700 (PDT)
+Date:   Tue, 1 Nov 2022 00:23:32 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     xiubli@redhat.com
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v3] encrypt: add ceph support
-Message-ID: <20221031150404.etbrz45c7bkgcgdb@zlang-mailbox>
-References: <20221031083819.573521-1-xiubli@redhat.com>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 1/3] common/punch: fix flags printing for filter
+ _filter_fiemap_flags
+Message-ID: <20221031162332.glfpxari24rpwwtu@zlang-mailbox>
+References: <cover.1667214081.git.fdmanana@suse.com>
+ <a1a5c698061d4c4e6c8994cde7b51969d8929de3.1667214081.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221031083819.573521-1-xiubli@redhat.com>
+In-Reply-To: <a1a5c698061d4c4e6c8994cde7b51969d8929de3.1667214081.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 31, 2022 at 04:38:19PM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
+On Mon, Oct 31, 2022 at 11:11:19AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> This will enable ceph could run the fscrypt test cases, but not all.
-> Some of them will be skipped because of not supporting features.
+> In the filter _filter_fiemap_flags, if we get a flags field that only has
+> the 'last' flag set, we end up printing the string "nonelast", which is
+> ugly and not intuitive.
 > 
-> Here will just skip ceph in _scratch_mkfs_encrypted() and in
-> _require_scratch_encryption() it will try to check "set_encpolicy"
-> to make sure whether kernel ceph support the encryption or not.
+> For example:
 > 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>   $XFS_IO_PROG -f -c "pwrite 0 64K" $SCRATCH_MNT/foo > /dev/null
+>   $XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap_flags
+> 
+> Gives:
+> 
+>   0: [0..127]: nonelast
+> 
+> So fix this by updating the filter's awk code to reset the flags string to
+> an empty string if we have the "last" flag set and we haven't updated the
+> flags string before. So now the same test gives the following result:
+> 
+>   0: [0..127]: last
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
+>  common/punch | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> V3:
-> - Add more commit comments.
+> diff --git a/common/punch b/common/punch
+> index 47a29c92..94599c35 100644
+> --- a/common/punch
+> +++ b/common/punch
+> @@ -130,6 +130,8 @@ _filter_fiemap_flags()
+>  			if (and(flags, 0x1)) {
+>  				if (set) {
+>  					flag_str = flag_str"|";
+> +				} else {
+> +					flag_str = "";
 
-V2 patch has been merged and pushed.
+Looks good to me.
 
-Thanks,
-Zorro
+We have two cases (g/352, g/353) call this function, I just gave them a test,
+looks like this change doesn't affect them.
 
-> 
-> 
->  common/encrypt | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/common/encrypt b/common/encrypt
-> index 45ce0954..1a77e23b 100644
-> --- a/common/encrypt
-> +++ b/common/encrypt
-> @@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
->  		# erase the UBI volume; reformated automatically on next mount
->  		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
->  		;;
-> +	ceph)
-> +		_scratch_cleanup_files
-> +		;;
->  	*)
->  		_notrun "No encryption support for $FSTYP"
->  		;;
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  				}
+>  				flag_str = flag_str"last";
+>  			}
 > -- 
-> 2.31.1
+> 2.35.1
 > 
 
