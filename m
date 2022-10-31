@@ -2,90 +2,71 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04720FA3740
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 08:39:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A16AC38A02
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Oct 2022 11:11:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229907AbiJaIjb (ORCPT
+        id S229628AbiJaLLe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Oct 2022 04:39:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59826 "EHLO
+        Mon, 31 Oct 2022 07:11:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229738AbiJaIja (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 04:39:30 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7ED51B0E
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 01:38:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667205509;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=1VBKNsYVeF98wLcvmwVUi6nLxNSU4oyPSq1mvCcwKF0=;
-        b=MyFnLV+Jpye8YNnbAMp+y6dN1YEQel5sl2Xu/I+CdU/EYFNhiUz3KDvowyZX1dkIxxAIDy
-        9NQlQXCi6emiv0j4KdIhc4ansvkBm0iOnjDP3PwI06I+VotA9piAPZc/IctmnrnqaRd8wP
-        vERdjYD/TIgfcNT5iMEnpdjbtFGnrsU=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-675-Bt9p7-IjMvuNroHaf1NQrw-1; Mon, 31 Oct 2022 04:38:26 -0400
-X-MC-Unique: Bt9p7-IjMvuNroHaf1NQrw-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S229477AbiJaLLd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Oct 2022 07:11:33 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2201FB847;
+        Mon, 31 Oct 2022 04:11:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D200F10115EF;
-        Mon, 31 Oct 2022 08:38:25 +0000 (UTC)
-Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 531052166B29;
-        Mon, 31 Oct 2022 08:38:22 +0000 (UTC)
-From:   xiubli@redhat.com
+        by ams.source.kernel.org (Postfix) with ESMTPS id CF6E1B815DE;
+        Mon, 31 Oct 2022 11:11:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5518C433D6;
+        Mon, 31 Oct 2022 11:11:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1667214690;
+        bh=7YmBhYVeDFrzS1hsd7DBgfZ85UL/8wACDPHpLw5wSK0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=mdO9swI6x7uUEYbHqzV25VxS0Kc5pnhKAEuzZrCCMTDGo9G6SQyD5HsjVYYXmFT7J
+         a0F+5zfDluRf0pRU9zjvBS6SOWXFRqvF04zCHY3HtEIg3BoCzDVsx80OSdq3S7C7m8
+         yiVtclVDlnKL6v9BuHSo5FPdvFWro0qW6v4Ayzg3vje0F7gVmucciFTYuoRnNwcwqH
+         jqGlNcFRbs+mr0B1Z9R20w3J6VOAkerwC2MjKr+UZkl7rFvYHnV/MQ8c6UTYeJ5463
+         qteDv3LIDuHSzOn7/igkafTdIeGc/KwgPVc/cZWh6JqZbhpydz/gz9+Hnt9dF4mlTJ
+         vZEYOaLECc2CQ==
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
-        lhenriques@suse.de, ceph-devel@vger.kernel.org, jlayton@kernel.org,
-        mchangir@redhat.com, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH v3] encrypt: add ceph support
-Date:   Mon, 31 Oct 2022 16:38:19 +0800
-Message-Id: <20221031083819.573521-1-xiubli@redhat.com>
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH 0/3] btrfs: add couple tests to check fiemap correctly reports extent sharedness
+Date:   Mon, 31 Oct 2022 11:11:18 +0000
+Message-Id: <cover.1667214081.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.6
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Xiubo Li <xiubli@redhat.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-This will enable ceph could run the fscrypt test cases, but not all.
-Some of them will be skipped because of not supporting features.
+This adds two new btrfs specific tests to verify fiemap correctly reports
+extent sharedness in a couple of scenarios recently fixed in kernel 6.1-rc2.
+More details on the test files.
 
-Here will just skip ceph in _scratch_mkfs_encrypted() and in
-_require_scratch_encryption() it will try to check "set_encpolicy"
-to make sure whether kernel ceph support the encryption or not.
+Filipe Manana (3):
+  common/punch: fix flags printing for filter _filter_fiemap_flags
+  btrfs: test that fiemap reports extent as not shared after deleting file
+  btrfs: test fiemap reports extent as not shared after COWing it in snapshot
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Xiubo Li <xiubli@redhat.com>
----
+ common/punch        |  2 ++
+ tests/btrfs/279     | 82 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/279.out | 39 +++++++++++++++++++++
+ tests/btrfs/280     | 64 +++++++++++++++++++++++++++++++++++
+ tests/btrfs/280.out | 21 ++++++++++++
+ 5 files changed, 208 insertions(+)
+ create mode 100755 tests/btrfs/279
+ create mode 100644 tests/btrfs/279.out
+ create mode 100755 tests/btrfs/280
+ create mode 100644 tests/btrfs/280.out
 
-V3:
-- Add more commit comments.
-
-
- common/encrypt | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/common/encrypt b/common/encrypt
-index 45ce0954..1a77e23b 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
- 		# erase the UBI volume; reformated automatically on next mount
- 		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
- 		;;
-+	ceph)
-+		_scratch_cleanup_files
-+		;;
- 	*)
- 		_notrun "No encryption support for $FSTYP"
- 		;;
 -- 
-2.31.1
+2.35.1
 
