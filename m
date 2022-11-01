@@ -2,204 +2,342 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7EB7C433FE
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Nov 2022 05:23:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33876FA3743
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Nov 2022 06:19:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229587AbiKAFXR (ORCPT
+        id S229471AbiKAGTO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Nov 2022 01:23:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42634 "EHLO
+        Tue, 1 Nov 2022 02:19:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229452AbiKAFXP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Nov 2022 01:23:15 -0400
+        with ESMTP id S229544AbiKAGTN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Nov 2022 02:19:13 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EC4817062
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 22:22:15 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37F121181C
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 23:18:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667280135;
+        s=mimecast20190719; t=1667283498;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=VG6ijif+/S920VObUBglHfPEbxM5EjXOWbtoaK7H22U=;
-        b=b+lBfxO8c9OYaPZBuuD7hHZ3dGMu/tTs4gJyYU4QBPb5fHLO3bENvJ0RZZktzsVJcWWKBL
-        1HaTmWAnBVDsVVFsbU/aZ7j16nHeXSHVkKNsabh86b5zDwEoS9YwTT2YnOlHej3U7H2c4b
-        yispXaBaD4cGtZWQt2pySOVXXXfRu04=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=ReNAaNCvttNfJJU14NWwmyF9zTKUt1F4dPQJzXRY2bY=;
+        b=Jyn4rS11joReE5D+uq+Qd8vEL22cEtVHE3MMiUGg6NPV0XvcQi4juNnDzUJ6S6wuIo/ZZW
+        s/Lzz7Re0XDMtzeC2GuRYlg9tfbFMXAglL/FApLLv8HTtOF3jT6fw87iYgEm9CGr+oCoIu
+        KPVJNwBitelbVmzFjvFkzsKVSzgXjM4=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-255-HX4ykeb8Ovu5HV2OhMGmdA-1; Tue, 01 Nov 2022 01:22:12 -0400
-X-MC-Unique: HX4ykeb8Ovu5HV2OhMGmdA-1
-Received: by mail-pg1-f197.google.com with SMTP id f19-20020a63f113000000b0046fde69a09dso1555113pgi.10
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 22:22:11 -0700 (PDT)
+ us-mta-451-j1QYHeM2PSSRpG1hEAcxIQ-1; Tue, 01 Nov 2022 02:18:17 -0400
+X-MC-Unique: j1QYHeM2PSSRpG1hEAcxIQ-1
+Received: by mail-qv1-f70.google.com with SMTP id q17-20020a056214019100b004b1d3c9f3acso7088033qvr.0
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 23:18:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=VG6ijif+/S920VObUBglHfPEbxM5EjXOWbtoaK7H22U=;
-        b=T0leWjYTXESoHlzX9upfOJVdF4ZsA0wOh+cCHRmpReMhgO2B3Z664rVFKoEDFP9TwZ
-         ExSNWTh1sGuF5xWii1PyVlOAYuqPlOjDy/1bQ+qvT3eQyS8qFQ+y77zk6mVnFhD9i438
-         qDTu5Zl2e+e8r9pEJ54AqlVgGV1BMY87iQ3VRln1aX3bt5nmb0shslVudvh784r08Dd5
-         /E0D4XRH6ktQfjS5qhtfUL+me8sbLSC0CgqOA3GEqNiJNaPMKMdxF4gU28izFIXTuo1n
-         e68AZE36OUxLBkUEwUxedw/DaObTEVGk1DHD47VTaZpx/BfpWuDQJIkR5gkzkGVzQnrn
-         uMnw==
-X-Gm-Message-State: ACrzQf3oSZAztMNWNEg+dTGMhpetehg8/1w0mz7x3fRbxxBT+zP+6QRp
-        2ced8K2N3LIULavxaZ+JUUrR75B5OkLnPu7ebZxU0pLWGem8i621UMtRqnQOzPunxh5cDMPtX7H
-        G3rXhF0GFyawEQ2KXLg==
-X-Received: by 2002:a17:903:2489:b0:187:3a59:570a with SMTP id p9-20020a170903248900b001873a59570amr694124plw.35.1667280130560;
-        Mon, 31 Oct 2022 22:22:10 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM68wJKSryy9/8JQ05+UgJGVRSK/EoZ5IUs+i+3bDqmtYnqFaNYVrBloxtYVQpX7tcT86WGWMA==
-X-Received: by 2002:a17:903:2489:b0:187:3a59:570a with SMTP id p9-20020a170903248900b001873a59570amr694101plw.35.1667280130207;
-        Mon, 31 Oct 2022 22:22:10 -0700 (PDT)
+        bh=ReNAaNCvttNfJJU14NWwmyF9zTKUt1F4dPQJzXRY2bY=;
+        b=lS3hwstb0yp/tjmMUL2neVD3A2Mgx2k9g6oHyO3+glc/61Ruu0Gk4vhM8354km7zal
+         AOmG3Aeg8iQOPyznSgNSMmovbrWm4emhxyJAoJDMcox4BmCvPUCJ4Jj/JOhExN7sqmqO
+         eZJQmDTsl2yKpChPSnrdPZEMJMymIa5yUL76r802FBpXN6luJtypilaEvY56y6qXEhaS
+         EUUibhUmNm+gPtsLAog0Hsp2DRqTupcmHExBWwn/Vtu8zYfAafwOeNLvObihSKm48nVe
+         wc25XRPptWoOtO0w2sGyufL03hOxBzsoaSrer9PMMy9ePzWuGcc+IdGtGd+RBa7eJ0r7
+         9CVA==
+X-Gm-Message-State: ACrzQf3EwiCx29hj5roF9FT/0g9OVtZiYA/eeOrLeDVc6/l/78jGYcLr
+        VPVVf67nvH67I+O6oMctBt8+RffnqOYS1ldc+//9DxKNX4MC8E1+5ZB/DMS/W+OiMhPoKcxqRlr
+        uGXV/NlyQEXNx5Qsufw==
+X-Received: by 2002:ac8:5aca:0:b0:3a5:73a:1aa5 with SMTP id d10-20020ac85aca000000b003a5073a1aa5mr13676608qtd.579.1667283496785;
+        Mon, 31 Oct 2022 23:18:16 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5j14dtqgjcciUgvd29cEyPkRdKRVXzLF4sZpvYZBeJymvVebiCYeAi4oP4pmnMnaGF8gNvvA==
+X-Received: by 2002:ac8:5aca:0:b0:3a5:73a:1aa5 with SMTP id d10-20020ac85aca000000b003a5073a1aa5mr13676597qtd.579.1667283496492;
+        Mon, 31 Oct 2022 23:18:16 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id y7-20020aa78f27000000b0056bb36c047asm5537976pfr.105.2022.10.31.22.22.07
+        by smtp.gmail.com with ESMTPSA id w29-20020a05620a0e9d00b006fa4cac54a5sm80518qkm.72.2022.10.31.23.18.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Oct 2022 22:22:09 -0700 (PDT)
-Date:   Tue, 1 Nov 2022 13:22:05 +0800
+        Mon, 31 Oct 2022 23:18:15 -0700 (PDT)
+Date:   Tue, 1 Nov 2022 14:18:11 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 3/3] btrfs: test fiemap reports extent as not shared
- after COWing it in snapshot
-Message-ID: <20221101052205.kq5o6pv66uw3pusg@zlang-mailbox>
-References: <cover.1667214081.git.fdmanana@suse.com>
- <e5ae81c52ccbd5245014564b6fbe370ec33c966b.1667214081.git.fdmanana@suse.com>
+To:     Catherine Hoang <catherine.hoang@oracle.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v3 1/4] common: add helpers for parent pointer tests
+Message-ID: <20221101061811.l3v7dko5kg5x4jbk@zlang-mailbox>
+References: <20221028215605.17973-1-catherine.hoang@oracle.com>
+ <20221028215605.17973-2-catherine.hoang@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e5ae81c52ccbd5245014564b6fbe370ec33c966b.1667214081.git.fdmanana@suse.com>
+In-Reply-To: <20221028215605.17973-2-catherine.hoang@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 31, 2022 at 11:11:21AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Fri, Oct 28, 2022 at 02:56:02PM -0700, Catherine Hoang wrote:
+> From: Allison Henderson <allison.henderson@oracle.com>
 > 
-> Test that if we have a large file, with file extent items spanning several
-> leaves in the fs tree, and that is shared due to a snapshot, if we COW one
-> of the extents, doing a fiemap will report the respective file range as
-> not shared.
+> Add helper functions in common/parent to parse and verify parent
+> pointers. Also add functions to check that mkfs, kernel, and xfs_io
+> support parent pointers.
 > 
-> This exercises the processing of delayed references for metadata extents
-> in the backref walking code, used by fiemap to determine if an extent is
-> shared.
-> 
-> This used to fail until very recently and was fixed by the following
-> kernel commit that landed in 6.1-rc2:
-> 
->   943553ef9b51 (""btrfs: fix processing of delayed tree block refs during backref walking")
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
+> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
 > ---
 
-Good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Looks good to me, just a few typo problem as below ...
 
->  tests/btrfs/280     | 64 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/280.out | 21 +++++++++++++++
->  2 files changed, 85 insertions(+)
->  create mode 100755 tests/btrfs/280
->  create mode 100644 tests/btrfs/280.out
+>  common/parent | 198 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/rc     |   3 +
+>  common/xfs    |  12 +++
+>  3 files changed, 213 insertions(+)
+>  create mode 100644 common/parent
 > 
-> diff --git a/tests/btrfs/280 b/tests/btrfs/280
-> new file mode 100755
-> index 00000000..06ef221e
-> --- /dev/null
-> +++ b/tests/btrfs/280
-> @@ -0,0 +1,64 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 280
-> +#
-> +# Test that if we have a large file, with file extent items spanning several
-> +# leaves in the fs tree, and that is shared due to a snapshot, if we COW one of
-> +# the extents, doing a fiemap will report the respective file range as not
-> +# shared.
-> +#
-> +# This exercises the processing of delayed references for metadata extents in
-> +# the backref walking code, used by fiemap to determine if an extent is shared.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick compress snapshot fiemap
-> +
-> +. ./common/filter
-> +. ./common/punch # for _filter_fiemap_flags
-> +
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_xfs_io_command "fiemap"
-> +
-> +_fixed_by_kernel_commit 943553ef9b51 \
-> +	"btrfs: fix processing of delayed tree block refs during backref walking"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +# We use compression because it's a very quick way to create a file with a very
-> +# large number of extents (compression limits the maximum extent size to 128K)
-> +# and while using very little disk space.
-> +_scratch_mount -o compress
-> +
-> +# A 128M file full of compressed extents results in a fs tree with a heigth
-> +# of 2 (root at level 1), so we'll end up with tree block references in the
-> +# extent tree (if the root was a leaf, we would have only data references).
-> +$XFS_IO_PROG -f -c "pwrite -b 1M 0 128M" $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +# Create a RW snapshot of the default subvolume.
-> +$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _filter_scratch
-> +
-> +echo
-> +echo "File foo fiemap before COWing extent:"
-> +echo
-> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap_flags
-> +
-> +echo
-> +echo "Overwriting file range [120M, 120M + 128K) in the snapshot"
-> +echo
-> +$XFS_IO_PROG -c "pwrite -b 128K 120M 128K" $SCRATCH_MNT/snap/foo | _filter_xfs_io
-> +# Now fsync the file to force COWing the extent and the path from the root of
-> +# the snapshot tree down to the leaf where the extent is at.
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/snap/foo
-> +
-> +echo
-> +echo "File foo fiemap after COWing extent in the snapshot:"
-> +echo
-> +# Now we should have all extents marked as shared except the 128K extent in the
-> +# file range [120M, 120M + 128K).
-> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap_flags
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/280.out b/tests/btrfs/280.out
+> diff --git a/common/parent b/common/parent
 > new file mode 100644
-> index 00000000..c3f82966
+> index 00000000..a0ba7d92
 > --- /dev/null
-> +++ b/tests/btrfs/280.out
-> @@ -0,0 +1,21 @@
-> +QA output created by 280
-> +wrote 134217728/134217728 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> +++ b/common/parent
+> @@ -0,0 +1,198 @@
+> +#
+> +# Parent pointer common functions
+> +#
 > +
-> +File foo fiemap before COWing extent:
+> +#
+> +# parse_parent_pointer parents parent_inode parent_pointer_name
+> +#
+> +# Given a list of parent pointers, find the record that matches
+> +# the given inode and filename
+> +#
+> +# inputs:
+> +# parents	: A list of parent pointers in the format of:
+> +#		  inode/generation/name_length/name
+> +# parent_inode	: The parent inode to search for
+> +# parent_name	: The parent name to search for
+> +#
+> +# outputs:
+> +# PPINO         : Parent pointer inode
+> +# PPGEN         : Parent pointer generation
+> +# PPNAME        : Parent pointer name
+> +# PPNAME_LEN    : Parent pointer name length
+> +#
+> +_parse_parent_pointer()
+> +{
+> +	local parents=$1
+> +	local pino=$2
+> +	local parent_pointer_name=$3
 > +
-> +0: [0..261887]: shared
-> +1: [261888..262143]: shared|last
+> +	local found=0
 > +
-> +Overwriting file range [120M, 120M + 128K) in the snapshot
+> +	# Find the entry that has the same inode as the parent
+> +	# and parse out the entry info
+> +	while IFS=\/ read PPINO PPGEN PPNAME_LEN PPNAME; do
+> +		if [ "$PPINO" != "$pino" ]; then
+> +			continue
+> +		fi
 > +
-> +wrote 131072/131072 bytes at offset 125829120
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +		if [ "$PPNAME" != "$parent_pointer_name" ]; then
+> +			continue
+> +		fi
 > +
-> +File foo fiemap after COWing extent in the snapshot:
+> +		found=1
+> +		break
+> +	done <<< $(echo "$parents")
 > +
-> +0: [0..245759]: shared
-> +1: [245760..246015]: none
-> +2: [246016..261887]: shared
-> +3: [261888..262143]: shared|last
+> +	# Check to see if we found anything
+> +	# We do not fail the test because we also use this
+> +	# routine to verify when parent pointers should
+> +	# be removed or updated  (ie a rename or a move
+> +	# operation changes your parent pointer)
+> +	if [ $found -eq "0" ]; then
+> +		return 1
+> +	fi
+> +
+> +	# Verify the parent pointer name length is correct
+> +	if [ "$PPNAME_LEN" -ne "${#parent_pointer_name}" ]
+> +	then
+> +		echo "*** Bad parent pointer:"\
+> +			"name:$PPNAME, namelen:$PPNAME_LEN"
+> +	fi
+> +
+> +	#return sucess
+> +	return 0
+> +}
+> +
+> +#
+> +# _verify_parent parent_path parent_pointer_name child_path
+> +#
+> +# Verify that the given child path lists the given parent as a parent pointer
+> +# and that the parent pointer name matches the given name
+> +#
+> +# Examples:
+> +#
+> +# #simple example
+> +# mkdir testfolder1
+> +# touch testfolder1/file1
+> +# verify_parent testfolder1 file1 testfolder1/file1
+
+_verify_parent
+
+> +#
+> +# # In this above example, we want to verify that "testfolder1"
+> +# # appears as a parent pointer of "testfolder1/file1".  Additionally
+> +# # we verify that the name record of the parent pointer is "file1"
+> +#
+> +#
+> +# #hardlink example
+> +# mkdir testfolder1
+> +# mkdir testfolder2
+> +# touch testfolder1/file1
+> +# ln testfolder1/file1 testfolder2/file1_ln
+> +# verify_parent testfolder2 file1_ln testfolder1/file1
+
+_verify_parent
+
+> +#
+> +# # In this above example, we want to verify that "testfolder2"
+> +# # appears as a parent pointer of "testfolder1/file1".  Additionally
+> +# # we verify that the name record of the parent pointer is "file1_ln"
+> +#
+> +_verify_parent()
+> +{
+> +	local parent_path=$1
+> +	local parent_pointer_name=$2
+> +	local child_path=$3
+> +
+> +	local parent_ppath="$parent_path/$parent_pointer_name"
+> +
+> +	# Verify parent exists
+> +	if [ ! -d $SCRATCH_MNT/$parent_path ]; then
+> +		_fail "$SCRATCH_MNT/$parent_path not found"
+> +	else
+> +		echo "*** $parent_path OK"
+> +	fi
+> +
+> +	# Verify child exists
+> +	if [ ! -f $SCRATCH_MNT/$child_path ]; then
+> +		_fail "$SCRATCH_MNT/$child_path not found"
+> +	else
+> +		echo "*** $child_path OK"
+> +	fi
+> +
+> +	# Verify the parent pointer name exists as a child of the parent
+> +	if [ ! -f $SCRATCH_MNT/$parent_ppath ]; then
+> +		_fail "$SCRATCH_MNT/$parent_ppath not found"
+> +	else
+> +		echo "*** $parent_ppath OK"
+> +	fi
+> +
+> +	# Get the inodes of both parent and child
+> +	pino="$(stat -c '%i' $SCRATCH_MNT/$parent_path)"
+> +	cino="$(stat -c '%i' $SCRATCH_MNT/$child_path)"
+> +
+> +	# Get all the parent pointers of the child
+> +	parents=($($XFS_IO_PROG -x -c \
+> +	 "parent -f -i $pino -n $parent_pointer_name" $SCRATCH_MNT/$child_path))
+> +	if [[ $? != 0 ]]; then
+> +		 _fail "No parent pointers found for $child_path"
+> +	fi
+> +
+> +	# Parse parent pointer output.
+> +	# This sets PPINO PPGEN PPNAME PPNAME_LEN
+> +	_parse_parent_pointer $parents $pino $parent_pointer_name
+> +
+> +	# If we didnt find one, bail out
+> +	if [ $? -ne 0 ]; then
+> +		_fail "No parent pointer record found for $parent_path"\
+> +			"in $child_path"
+> +	fi
+> +
+> +	# Verify the inode generated by the parent pointer name is
+> +	# the same as the child inode
+> +	pppino="$(stat -c '%i' $SCRATCH_MNT/$parent_ppath)"
+> +	if [ $cino -ne $pppino ]
+> +	then
+> +		_fail "Bad parent pointer name value for $child_path."\
+> +			"$SCRATCH_MNT/$parent_ppath belongs to inode $PPPINO,"\
+> +			"but should be $cino"
+> +	fi
+> +
+> +	echo "*** Verified parent pointer:"\
+> +			"name:$PPNAME, namelen:$PPNAME_LEN"
+> +	echo "*** Parent pointer OK for child $child_path"
+> +}
+> +
+> +#
+> +# _verify_parent parent_pointer_name pino child_path
+
+_verify_no_parent
+
+> +#
+> +# Verify that the given child path contains no parent pointer entry
+> +# for the given inode and file name
+> +#
+> +_verify_no_parent()
+> +{
+> +	local parent_pname=$1
+> +	local pino=$2
+> +	local child_path=$3
+> +
+> +	# Verify child exists
+> +	if [ ! -f $SCRATCH_MNT/$child_path ]; then
+> +		_fail "$SCRATCH_MNT/$child_path not found"
+> +	else
+> +		echo "*** $child_path OK"
+> +	fi
+> +
+> +	# Get all the parent pointers of the child
+> +	local parents=($($XFS_IO_PROG -x -c \
+> +	 "parent -f -i $pino -n $parent_pname" $SCRATCH_MNT/$child_path))
+> +	if [[ $? != 0 ]]; then
+> +		return 0
+> +	fi
+> +
+> +	# Parse parent pointer output.
+> +	# This sets PPINO PPGEN PPNAME PPNAME_LEN
+> +	_parse_parent_pointer $parents $pino $parent_pname
+> +
+> +	# If we didnt find one, return sucess
+> +	if [ $? -ne 0 ]; then
+> +		return 0
+> +	fi
+> +
+> +	_fail "Parent pointer entry found where none should:"\
+> +			"inode:$PPINO, gen:$PPGEN,"
+> +			"name:$PPNAME, namelen:$PPNAME_LEN"
+> +}
+> diff --git a/common/rc b/common/rc
+> index d1f3d56b..9fc0a785 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2539,6 +2539,9 @@ _require_xfs_io_command()
+>  		echo $testio | grep -q "invalid option" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+> +	"parent")
+> +		testio=`$XFS_IO_PROG -x -c "parent" $TEST_DIR 2>&1`
+> +		;;
+>  	"pwrite")
+>  		# -N (RWF_NOWAIT) only works with direct vectored I/O writes
+>  		local pwrite_opts=" "
+> diff --git a/common/xfs b/common/xfs
+> index 170dd621..7233a2db 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1399,3 +1399,15 @@ _xfs_filter_mkfs()
+>  		print STDOUT "realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX\n";
+>  	}'
+>  }
+> +
+> +# this test requires the xfs parent pointers feature
+> +#
+> +_require_xfs_parent()
+> +{
+> +	_scratch_mkfs_xfs_supported -n parent > /dev/null 2>&1 \
+> +		|| _notrun "mkfs.xfs does not support parent pointers"
+> +	_scratch_mkfs_xfs -n parent > /dev/null 2>&1
+> +	_try_scratch_mount >/dev/null 2>&1 \
+> +		|| _notrun "kernel does not support parent pointers"
+> +	_scratch_unmount
+> +}
 > -- 
-> 2.35.1
+> 2.25.1
 > 
 
