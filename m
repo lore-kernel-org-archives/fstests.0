@@ -2,341 +2,291 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33876FA3743
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Nov 2022 06:19:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA51CC433FE
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Nov 2022 06:24:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229471AbiKAGTO (ORCPT
+        id S229827AbiKAGYh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Nov 2022 02:19:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44726 "EHLO
+        Tue, 1 Nov 2022 02:24:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229544AbiKAGTN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Nov 2022 02:19:13 -0400
+        with ESMTP id S229742AbiKAGYg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Nov 2022 02:24:36 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37F121181C
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 23:18:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D12F0120BE
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 23:23:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667283498;
+        s=mimecast20190719; t=1667283820;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=ReNAaNCvttNfJJU14NWwmyF9zTKUt1F4dPQJzXRY2bY=;
-        b=Jyn4rS11joReE5D+uq+Qd8vEL22cEtVHE3MMiUGg6NPV0XvcQi4juNnDzUJ6S6wuIo/ZZW
-        s/Lzz7Re0XDMtzeC2GuRYlg9tfbFMXAglL/FApLLv8HTtOF3jT6fw87iYgEm9CGr+oCoIu
-        KPVJNwBitelbVmzFjvFkzsKVSzgXjM4=
-Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
- [209.85.219.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=saWnuQOKtaAumCRsjukAoWUGi36thDoFWlF5PEVAIHo=;
+        b=HG982ysOYBMY+kR+nh7W/LF3oMAlDJMVX5jb/L6MbktFDibxxdBhT7NBqQQVPEac56m3jv
+        7JqqwNYTuVdX+N2QVxFYjq9N//P8FmriBVMc7HsqvkNXM47gVM+QUQm9f75t41lT8TBT9k
+        B1pcwgzjjI/Vm7CaelsJ4ZcPF2906u0=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-451-j1QYHeM2PSSRpG1hEAcxIQ-1; Tue, 01 Nov 2022 02:18:17 -0400
-X-MC-Unique: j1QYHeM2PSSRpG1hEAcxIQ-1
-Received: by mail-qv1-f70.google.com with SMTP id q17-20020a056214019100b004b1d3c9f3acso7088033qvr.0
-        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 23:18:17 -0700 (PDT)
+ us-mta-113-_XddlOmfNU-WkMIDWUcG_Q-1; Tue, 01 Nov 2022 02:23:38 -0400
+X-MC-Unique: _XddlOmfNU-WkMIDWUcG_Q-1
+Received: by mail-qk1-f198.google.com with SMTP id i11-20020a05620a404b00b006eeb0791c1aso11411146qko.10
+        for <fstests@vger.kernel.org>; Mon, 31 Oct 2022 23:23:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ReNAaNCvttNfJJU14NWwmyF9zTKUt1F4dPQJzXRY2bY=;
-        b=lS3hwstb0yp/tjmMUL2neVD3A2Mgx2k9g6oHyO3+glc/61Ruu0Gk4vhM8354km7zal
-         AOmG3Aeg8iQOPyznSgNSMmovbrWm4emhxyJAoJDMcox4BmCvPUCJ4Jj/JOhExN7sqmqO
-         eZJQmDTsl2yKpChPSnrdPZEMJMymIa5yUL76r802FBpXN6luJtypilaEvY56y6qXEhaS
-         EUUibhUmNm+gPtsLAog0Hsp2DRqTupcmHExBWwn/Vtu8zYfAafwOeNLvObihSKm48nVe
-         wc25XRPptWoOtO0w2sGyufL03hOxBzsoaSrer9PMMy9ePzWuGcc+IdGtGd+RBa7eJ0r7
-         9CVA==
-X-Gm-Message-State: ACrzQf3EwiCx29hj5roF9FT/0g9OVtZiYA/eeOrLeDVc6/l/78jGYcLr
-        VPVVf67nvH67I+O6oMctBt8+RffnqOYS1ldc+//9DxKNX4MC8E1+5ZB/DMS/W+OiMhPoKcxqRlr
-        uGXV/NlyQEXNx5Qsufw==
-X-Received: by 2002:ac8:5aca:0:b0:3a5:73a:1aa5 with SMTP id d10-20020ac85aca000000b003a5073a1aa5mr13676608qtd.579.1667283496785;
-        Mon, 31 Oct 2022 23:18:16 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM5j14dtqgjcciUgvd29cEyPkRdKRVXzLF4sZpvYZBeJymvVebiCYeAi4oP4pmnMnaGF8gNvvA==
-X-Received: by 2002:ac8:5aca:0:b0:3a5:73a:1aa5 with SMTP id d10-20020ac85aca000000b003a5073a1aa5mr13676597qtd.579.1667283496492;
-        Mon, 31 Oct 2022 23:18:16 -0700 (PDT)
+        bh=saWnuQOKtaAumCRsjukAoWUGi36thDoFWlF5PEVAIHo=;
+        b=GHUoopKLZgdNNdI3zsqJXaCD7pe9Ovnv7knZS53rLyVg+7w24TFgU4sTQRjBNinlZq
+         r6peC8kVcwO5YCy++TOGHFAQMgBDgJLmzTvmiWjyayjj1276i40pg3YhFOmsAJKhEUnJ
+         pIIx4IsMiHQvxySETb2tCwpF62E1ClCIIFVCfvNgsOn+z15QQDuN4SUZP//EgAlW4KmG
+         dO+VL8aoMEzbmvWtCBeqmSfwNeo5wwMvtGK7VMcM+gmEmWrinQCSYOMXPQUDdYOGYXVl
+         s4RiuMYloSc6GYoZ6pjK8ZtcYm+HFw+rTiWQxGapevjbmS3ZWN9Wypj73jf2iRSB+QtD
+         AoGA==
+X-Gm-Message-State: ACrzQf1XmzUFQWkkUQD5vLM47xEUNMY9O1emkKMrJAYKQluPuS7uMeHQ
+        VYBgL5dLlct+jkzJeixtw1B3XWzcZh7MTCObZtmcCaR0AfUpRbCU9duzWiqeOLFURXpILjDQ2Vu
+        JG3wt5xD2Y+R8k00fSw==
+X-Received: by 2002:a05:620a:430d:b0:6d3:9dc9:d83d with SMTP id u13-20020a05620a430d00b006d39dc9d83dmr11985170qko.224.1667283817874;
+        Mon, 31 Oct 2022 23:23:37 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM5Kj87ZlUnJkHY4ISqQ4ax2b45v6LJMsW92AJAGZRuLIv/e205FPr4nTh4l0Nkl8C7sx0fcrA==
+X-Received: by 2002:a05:620a:430d:b0:6d3:9dc9:d83d with SMTP id u13-20020a05620a430d00b006d39dc9d83dmr11985162qko.224.1667283817585;
+        Mon, 31 Oct 2022 23:23:37 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w29-20020a05620a0e9d00b006fa4cac54a5sm80518qkm.72.2022.10.31.23.18.14
+        by smtp.gmail.com with ESMTPSA id bm2-20020a05620a198200b006cfc7f9eea0sm5988733qkb.122.2022.10.31.23.23.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Oct 2022 23:18:15 -0700 (PDT)
-Date:   Tue, 1 Nov 2022 14:18:11 +0800
+        Mon, 31 Oct 2022 23:23:36 -0700 (PDT)
+Date:   Tue, 1 Nov 2022 14:23:32 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Catherine Hoang <catherine.hoang@oracle.com>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v3 1/4] common: add helpers for parent pointer tests
-Message-ID: <20221101061811.l3v7dko5kg5x4jbk@zlang-mailbox>
+Subject: Re: [PATCH v3 2/4] xfs: add parent pointer test
+Message-ID: <20221101062332.n2dzuzo2l762dxjx@zlang-mailbox>
 References: <20221028215605.17973-1-catherine.hoang@oracle.com>
- <20221028215605.17973-2-catherine.hoang@oracle.com>
+ <20221028215605.17973-3-catherine.hoang@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221028215605.17973-2-catherine.hoang@oracle.com>
+In-Reply-To: <20221028215605.17973-3-catherine.hoang@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 28, 2022 at 02:56:02PM -0700, Catherine Hoang wrote:
+On Fri, Oct 28, 2022 at 02:56:03PM -0700, Catherine Hoang wrote:
 > From: Allison Henderson <allison.henderson@oracle.com>
 > 
-> Add helper functions in common/parent to parse and verify parent
-> pointers. Also add functions to check that mkfs, kernel, and xfs_io
-> support parent pointers.
+> Add a test to verify basic parent pointers operations (create, move, link,
+> unlink, rename, overwrite).
 > 
 > Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
 > Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
 > ---
-
-Looks good to me, just a few typo problem as below ...
-
->  common/parent | 198 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  common/rc     |   3 +
->  common/xfs    |  12 +++
->  3 files changed, 213 insertions(+)
->  create mode 100644 common/parent
+>  doc/group-names.txt |   1 +
+>  tests/xfs/554       | 101 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/554.out   |  59 ++++++++++++++++++++++++++
+>  3 files changed, 161 insertions(+)
+>  create mode 100755 tests/xfs/554
+>  create mode 100644 tests/xfs/554.out
 > 
-> diff --git a/common/parent b/common/parent
-> new file mode 100644
-> index 00000000..a0ba7d92
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index ef411b5e..8e35c699 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -77,6 +77,7 @@ nfs4_acl		NFSv4 access control lists
+>  nonsamefs		overlayfs layers on different filesystems
+>  online_repair		online repair functionality tests
+>  other			dumping ground, do not add more tests to this group
+> +parent			Parent pointer tests
+>  pattern			specific IO pattern tests
+>  perms			access control and permission checking
+>  pipe			pipe functionality
+> diff --git a/tests/xfs/554 b/tests/xfs/554
+
+Hi,
+
+xfs/554 has been taken, please rebase to the lastest for-next branch, or you
+can a big enough number (e.g. 999) to avoid merging conflict, then I can rename
+the name after merging.
+
+> new file mode 100755
+> index 00000000..44b77f9d
 > --- /dev/null
-> +++ b/common/parent
-> @@ -0,0 +1,198 @@
+> +++ b/tests/xfs/554
+> @@ -0,0 +1,101 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights Reserved.
 > +#
-> +# Parent pointer common functions
+> +# FS QA Test 554
+> +#
+> +# simple parent pointer test
 > +#
 > +
-> +#
-> +# parse_parent_pointer parents parent_inode parent_pointer_name
-> +#
-> +# Given a list of parent pointers, find the record that matches
-> +# the given inode and filename
-> +#
-> +# inputs:
-> +# parents	: A list of parent pointers in the format of:
-> +#		  inode/generation/name_length/name
-> +# parent_inode	: The parent inode to search for
-> +# parent_name	: The parent name to search for
-> +#
-> +# outputs:
-> +# PPINO         : Parent pointer inode
-> +# PPGEN         : Parent pointer generation
-> +# PPNAME        : Parent pointer name
-> +# PPNAME_LEN    : Parent pointer name length
-> +#
-> +_parse_parent_pointer()
-> +{
-> +	local parents=$1
-> +	local pino=$2
-> +	local parent_pointer_name=$3
+> +. ./common/preamble
+> +_begin_fstest auto quick parent
 > +
-> +	local found=0
+> +# get standard environment, filters and checks
+> +. ./common/parent
 > +
-> +	# Find the entry that has the same inode as the parent
-> +	# and parse out the entry info
-> +	while IFS=\/ read PPINO PPGEN PPNAME_LEN PPNAME; do
-> +		if [ "$PPINO" != "$pino" ]; then
-> +			continue
-> +		fi
-> +
-> +		if [ "$PPNAME" != "$parent_pointer_name" ]; then
-> +			continue
-> +		fi
-> +
-> +		found=1
-> +		break
-> +	done <<< $(echo "$parents")
-> +
-> +	# Check to see if we found anything
-> +	# We do not fail the test because we also use this
-> +	# routine to verify when parent pointers should
-> +	# be removed or updated  (ie a rename or a move
-> +	# operation changes your parent pointer)
-> +	if [ $found -eq "0" ]; then
-> +		return 1
-> +	fi
-> +
-> +	# Verify the parent pointer name length is correct
-> +	if [ "$PPNAME_LEN" -ne "${#parent_pointer_name}" ]
-> +	then
-> +		echo "*** Bad parent pointer:"\
-> +			"name:$PPNAME, namelen:$PPNAME_LEN"
-> +	fi
-> +
-> +	#return sucess
-> +	return 0
-> +}
-> +
-> +#
-> +# _verify_parent parent_path parent_pointer_name child_path
-> +#
-> +# Verify that the given child path lists the given parent as a parent pointer
-> +# and that the parent pointer name matches the given name
-> +#
-> +# Examples:
-> +#
-> +# #simple example
-> +# mkdir testfolder1
-> +# touch testfolder1/file1
-> +# verify_parent testfolder1 file1 testfolder1/file1
+> +# Modify as appropriate
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_sysfs debug/larp
 
-_verify_parent
+Is debug/larp needed by this case?
 
-> +#
-> +# # In this above example, we want to verify that "testfolder1"
-> +# # appears as a parent pointer of "testfolder1/file1".  Additionally
-> +# # we verify that the name record of the parent pointer is "file1"
-> +#
-> +#
-> +# #hardlink example
-> +# mkdir testfolder1
-> +# mkdir testfolder2
-> +# touch testfolder1/file1
-> +# ln testfolder1/file1 testfolder2/file1_ln
-> +# verify_parent testfolder2 file1_ln testfolder1/file1
+> +_require_xfs_parent
+> +_require_xfs_io_command "parent"
+> +
+> +# real QA test starts here
+> +
+> +# Create a directory tree using a protofile and
+> +# make sure all inodes created have parent pointers
+> +
+> +protofile=$tmp.proto
+> +
+> +cat >$protofile <<EOF
+> +DUMMY1
+> +0 0
+> +: root directory
+> +d--777 3 1
+> +: a directory
+> +testfolder1 d--755 3 1
+> +file1 ---755 3 1 /dev/null
+> +$
+> +: back in the root
+> +testfolder2 d--755 3 1
+> +file2 ---755 3 1 /dev/null
+> +: done
+> +$
+> +EOF
+> +
+> +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqres.full 2>&1 \
+> +	|| _fail "mkfs failed"
+> +_check_scratch_fs
+> +
+> +_scratch_mount >>$seqres.full 2>&1 \
+> +	|| _fail "mount failed"
 
-_verify_parent
+_scratch_mount calls _fail() inside.
 
-> +#
-> +# # In this above example, we want to verify that "testfolder2"
-> +# # appears as a parent pointer of "testfolder1/file1".  Additionally
-> +# # we verify that the name record of the parent pointer is "file1_ln"
-> +#
-> +_verify_parent()
-> +{
-> +	local parent_path=$1
-> +	local parent_pointer_name=$2
-> +	local child_path=$3
-> +
-> +	local parent_ppath="$parent_path/$parent_pointer_name"
-> +
-> +	# Verify parent exists
-> +	if [ ! -d $SCRATCH_MNT/$parent_path ]; then
-> +		_fail "$SCRATCH_MNT/$parent_path not found"
-> +	else
-> +		echo "*** $parent_path OK"
-> +	fi
-> +
-> +	# Verify child exists
-> +	if [ ! -f $SCRATCH_MNT/$child_path ]; then
-> +		_fail "$SCRATCH_MNT/$child_path not found"
-> +	else
-> +		echo "*** $child_path OK"
-> +	fi
-> +
-> +	# Verify the parent pointer name exists as a child of the parent
-> +	if [ ! -f $SCRATCH_MNT/$parent_ppath ]; then
-> +		_fail "$SCRATCH_MNT/$parent_ppath not found"
-> +	else
-> +		echo "*** $parent_ppath OK"
-> +	fi
-> +
-> +	# Get the inodes of both parent and child
-> +	pino="$(stat -c '%i' $SCRATCH_MNT/$parent_path)"
-> +	cino="$(stat -c '%i' $SCRATCH_MNT/$child_path)"
-> +
-> +	# Get all the parent pointers of the child
-> +	parents=($($XFS_IO_PROG -x -c \
-> +	 "parent -f -i $pino -n $parent_pointer_name" $SCRATCH_MNT/$child_path))
-> +	if [[ $? != 0 ]]; then
-> +		 _fail "No parent pointers found for $child_path"
-> +	fi
-> +
-> +	# Parse parent pointer output.
-> +	# This sets PPINO PPGEN PPNAME PPNAME_LEN
-> +	_parse_parent_pointer $parents $pino $parent_pointer_name
-> +
-> +	# If we didnt find one, bail out
-> +	if [ $? -ne 0 ]; then
-> +		_fail "No parent pointer record found for $parent_path"\
-> +			"in $child_path"
-> +	fi
-> +
-> +	# Verify the inode generated by the parent pointer name is
-> +	# the same as the child inode
-> +	pppino="$(stat -c '%i' $SCRATCH_MNT/$parent_ppath)"
-> +	if [ $cino -ne $pppino ]
-> +	then
-> +		_fail "Bad parent pointer name value for $child_path."\
-> +			"$SCRATCH_MNT/$parent_ppath belongs to inode $PPPINO,"\
-> +			"but should be $cino"
-> +	fi
-> +
-> +	echo "*** Verified parent pointer:"\
-> +			"name:$PPNAME, namelen:$PPNAME_LEN"
-> +	echo "*** Parent pointer OK for child $child_path"
-> +}
-> +
-> +#
-> +# _verify_parent parent_pointer_name pino child_path
+Thanks,
+Zorro
 
-_verify_no_parent
-
-> +#
-> +# Verify that the given child path contains no parent pointer entry
-> +# for the given inode and file name
-> +#
-> +_verify_no_parent()
-> +{
-> +	local parent_pname=$1
-> +	local pino=$2
-> +	local child_path=$3
 > +
-> +	# Verify child exists
-> +	if [ ! -f $SCRATCH_MNT/$child_path ]; then
-> +		_fail "$SCRATCH_MNT/$child_path not found"
-> +	else
-> +		echo "*** $child_path OK"
-> +	fi
+> +testfolder1="testfolder1"
+> +testfolder2="testfolder2"
+> +file1="file1"
+> +file2="file2"
+> +file3="file3"
+> +file1_ln="file1_link"
 > +
-> +	# Get all the parent pointers of the child
-> +	local parents=($($XFS_IO_PROG -x -c \
-> +	 "parent -f -i $pino -n $parent_pname" $SCRATCH_MNT/$child_path))
-> +	if [[ $? != 0 ]]; then
-> +		return 0
-> +	fi
+> +echo ""
+> +# Create parent pointer test
+> +_verify_parent "$testfolder1" "$file1" "$testfolder1/$file1"
 > +
-> +	# Parse parent pointer output.
-> +	# This sets PPINO PPGEN PPNAME PPNAME_LEN
-> +	_parse_parent_pointer $parents $pino $parent_pname
+> +echo ""
+> +# Move parent pointer test
+> +mv $SCRATCH_MNT/$testfolder1/$file1 $SCRATCH_MNT/$testfolder2/$file1
+> +_verify_parent "$testfolder2" "$file1" "$testfolder2/$file1"
 > +
-> +	# If we didnt find one, return sucess
-> +	if [ $? -ne 0 ]; then
-> +		return 0
-> +	fi
+> +echo ""
+> +# Hard link parent pointer test
+> +ln $SCRATCH_MNT/$testfolder2/$file1 $SCRATCH_MNT/$testfolder1/$file1_ln
+> +_verify_parent "$testfolder1" "$file1_ln" "$testfolder1/$file1_ln"
+> +_verify_parent "$testfolder1" "$file1_ln" "$testfolder2/$file1"
+> +_verify_parent "$testfolder2" "$file1"    "$testfolder1/$file1_ln"
+> +_verify_parent "$testfolder2" "$file1"    "$testfolder2/$file1"
 > +
-> +	_fail "Parent pointer entry found where none should:"\
-> +			"inode:$PPINO, gen:$PPGEN,"
-> +			"name:$PPNAME, namelen:$PPNAME_LEN"
-> +}
-> diff --git a/common/rc b/common/rc
-> index d1f3d56b..9fc0a785 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2539,6 +2539,9 @@ _require_xfs_io_command()
->  		echo $testio | grep -q "invalid option" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
-> +	"parent")
-> +		testio=`$XFS_IO_PROG -x -c "parent" $TEST_DIR 2>&1`
-> +		;;
->  	"pwrite")
->  		# -N (RWF_NOWAIT) only works with direct vectored I/O writes
->  		local pwrite_opts=" "
-> diff --git a/common/xfs b/common/xfs
-> index 170dd621..7233a2db 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1399,3 +1399,15 @@ _xfs_filter_mkfs()
->  		print STDOUT "realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX\n";
->  	}'
->  }
+> +echo ""
+> +# Remove hard link parent pointer test
+> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file1)"
+> +rm $SCRATCH_MNT/$testfolder2/$file1
+> +_verify_parent "$testfolder1" "$file1_ln" "$testfolder1/$file1_ln"
+> +_verify_no_parent "$file1" "$ino" "$testfolder1/$file1_ln"
 > +
-> +# this test requires the xfs parent pointers feature
-> +#
-> +_require_xfs_parent()
-> +{
-> +	_scratch_mkfs_xfs_supported -n parent > /dev/null 2>&1 \
-> +		|| _notrun "mkfs.xfs does not support parent pointers"
-> +	_scratch_mkfs_xfs -n parent > /dev/null 2>&1
-> +	_try_scratch_mount >/dev/null 2>&1 \
-> +		|| _notrun "kernel does not support parent pointers"
-> +	_scratch_unmount
-> +}
+> +echo ""
+> +# Rename parent pointer test
+> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder1/$file1_ln)"
+> +mv $SCRATCH_MNT/$testfolder1/$file1_ln $SCRATCH_MNT/$testfolder1/$file2
+> +_verify_parent "$testfolder1" "$file2" "$testfolder1/$file2"
+> +_verify_no_parent "$file1_ln" "$ino" "$testfolder1/$file2"
+> +
+> +echo ""
+> +# Over write parent pointer test
+> +touch $SCRATCH_MNT/$testfolder2/$file3
+> +_verify_parent "$testfolder2" "$file3" "$testfolder2/$file3"
+> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file3)"
+> +mv -f $SCRATCH_MNT/$testfolder2/$file3 $SCRATCH_MNT/$testfolder1/$file2
+> +_verify_parent "$testfolder1" "$file2" "$testfolder1/$file2"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
+> new file mode 100644
+> index 00000000..67ea9f2b
+> --- /dev/null
+> +++ b/tests/xfs/554.out
+> @@ -0,0 +1,59 @@
+> +QA output created by 554
+> +
+> +*** testfolder1 OK
+> +*** testfolder1/file1 OK
+> +*** testfolder1/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder1/file1
+> +
+> +*** testfolder2 OK
+> +*** testfolder2/file1 OK
+> +*** testfolder2/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder2/file1
+> +
+> +*** testfolder1 OK
+> +*** testfolder1/file1_link OK
+> +*** testfolder1/file1_link OK
+> +*** Verified parent pointer: name:file1_link, namelen:10
+> +*** Parent pointer OK for child testfolder1/file1_link
+> +*** testfolder1 OK
+> +*** testfolder2/file1 OK
+> +*** testfolder1/file1_link OK
+> +*** Verified parent pointer: name:file1_link, namelen:10
+> +*** Parent pointer OK for child testfolder2/file1
+> +*** testfolder2 OK
+> +*** testfolder1/file1_link OK
+> +*** testfolder2/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder1/file1_link
+> +*** testfolder2 OK
+> +*** testfolder2/file1 OK
+> +*** testfolder2/file1 OK
+> +*** Verified parent pointer: name:file1, namelen:5
+> +*** Parent pointer OK for child testfolder2/file1
+> +
+> +*** testfolder1 OK
+> +*** testfolder1/file1_link OK
+> +*** testfolder1/file1_link OK
+> +*** Verified parent pointer: name:file1_link, namelen:10
+> +*** Parent pointer OK for child testfolder1/file1_link
+> +*** testfolder1/file1_link OK
+> +
+> +*** testfolder1 OK
+> +*** testfolder1/file2 OK
+> +*** testfolder1/file2 OK
+> +*** Verified parent pointer: name:file2, namelen:5
+> +*** Parent pointer OK for child testfolder1/file2
+> +*** testfolder1/file2 OK
+> +
+> +*** testfolder2 OK
+> +*** testfolder2/file3 OK
+> +*** testfolder2/file3 OK
+> +*** Verified parent pointer: name:file3, namelen:5
+> +*** Parent pointer OK for child testfolder2/file3
+> +*** testfolder1 OK
+> +*** testfolder1/file2 OK
+> +*** testfolder1/file2 OK
+> +*** Verified parent pointer: name:file2, namelen:5
+> +*** Parent pointer OK for child testfolder1/file2
 > -- 
 > 2.25.1
 > 
