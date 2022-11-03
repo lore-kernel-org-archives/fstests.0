@@ -2,504 +2,437 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0CEAC433FE
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Nov 2022 03:48:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6E33C4332F
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Nov 2022 04:14:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230085AbiKCDsW (ORCPT
+        id S229830AbiKCEOK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Nov 2022 23:48:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41180 "EHLO
+        Thu, 3 Nov 2022 00:14:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229591AbiKCDsV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Nov 2022 23:48:21 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C7241573A
-        for <fstests@vger.kernel.org>; Wed,  2 Nov 2022 20:47:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667447246;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ghs2E5IaKHOn9UHqlxFqJnMXgbGOmXj+NdlQThsFock=;
-        b=ide0gURvKMmCFF6CJzllnTCL+Mgn8dxQXM4pG2PUJ2ulfImWE2AYGJO/TYLS8D/08lRUd0
-        l68HQhKOG2bcEtbbn2dZUJ5NW/4+qbaX8AHO+uvhEWAnfl5TtA1xXIx7o2+wJlaJeHQAOT
-        pQA5bUJJSlLWkzYwasWZQfi1uZgE0h4=
-Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
- [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-610-X3E3p5ImMtWyhEDbJIR4Jg-1; Wed, 02 Nov 2022 23:47:24 -0400
-X-MC-Unique: X3E3p5ImMtWyhEDbJIR4Jg-1
-Received: by mail-qv1-f71.google.com with SMTP id z18-20020a0cfed2000000b004bc28af6f7dso569610qvs.4
-        for <fstests@vger.kernel.org>; Wed, 02 Nov 2022 20:47:24 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ghs2E5IaKHOn9UHqlxFqJnMXgbGOmXj+NdlQThsFock=;
-        b=MN8Zahx1hdiSIMulF5sz9FYWe6ORff1kQZKkaC32QWN+EM6p2jPrDyojyF5tuN/ANm
-         I4qlfMORSA5chzvxOQ5zSbKefvBRPwgNJDI6Acby2RldXN4O8BOIg6PzNTgDj8N2CBXm
-         2gXYgqwlvvi75RtH7tvdG/HiwES/TMTUKH4mpW+SNLh/xoizAelZvZ+kfLO0lPoKaSJN
-         N5/qWqcGiWfpClWSUDyTpZXzgg1zaVOZ97XivDhoQp1uSwUj45iHx2hMPxtCULRSsUZl
-         F1A86NR32CwIrPCZq0we9uyItYJ8ZUv0W1sxe5SCTCSFBVdmgFLC/ihGrqx3yJCJjyTq
-         XUGg==
-X-Gm-Message-State: ACrzQf2W6vnNymOafd+NawLlxWgAAwLm+jSXv35xri3oPsPp5YydNk6e
-        kFmsOuupd9KqoeS4IsyW31TsYS+hOoCTCDBHXlz+esA+qJvnLXp2clYiyhSYHEq5kJSDchJsE1o
-        gSlVMtt/m05eDqDTRGA==
-X-Received: by 2002:a05:620a:480a:b0:6fa:3cfe:54a1 with SMTP id eb10-20020a05620a480a00b006fa3cfe54a1mr12202853qkb.412.1667447243674;
-        Wed, 02 Nov 2022 20:47:23 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM6BVAGQ6rqayzmm9liu3s/h7av2I/RdvJHvGjAbTRqL3RqqnctG54D8wXabhGgfVA22El/DUA==
-X-Received: by 2002:a05:620a:480a:b0:6fa:3cfe:54a1 with SMTP id eb10-20020a05620a480a00b006fa3cfe54a1mr12202840qkb.412.1667447243256;
-        Wed, 02 Nov 2022 20:47:23 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id h18-20020a05620a245200b006ecdfcf9d81sm5219948qkn.84.2022.11.02.20.47.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Nov 2022 20:47:22 -0700 (PDT)
-Date:   Thu, 3 Nov 2022 11:47:18 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] Add more related cases to perms group
-Message-ID: <20221103034718.4py55dqbbumnkhiy@zlang-mailbox>
-References: <1667012753-2078-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        with ESMTP id S230060AbiKCENx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Nov 2022 00:13:53 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5E0FE37;
+        Wed,  2 Nov 2022 21:13:47 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 107ACB8266D;
+        Thu,  3 Nov 2022 04:13:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B750C433D6;
+        Thu,  3 Nov 2022 04:13:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1667448824;
+        bh=4vmMIKGwWHMWxzhEcnUo/zck2KFQB6L16idHpamDdIY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=d9ad40yfq3K5Oxm+r8Jl35IKDn2YdADOb8M92Dyg7WMQQB9f40MbwFWqvg7JW5QJM
+         vt0Vvk2hxXG2zAdlxCfh+MYh+ZtA1SuIADC8RbZnqpG9zsVSG1GFVCJRLg+Pe4pagu
+         KslJ/KHJH+8lOegIn5E3xa+OAit5QoB9YVTkW+dF5WiLq43MvjeQdC9t/PUFtm5Khi
+         zto8yc0VmwORUjz/QZlZhAPoHliJPU07miLpgMRFE27j32FOur1dZdJoMN/OSaZIa+
+         U8JcVE6wrFDNRxVupv/MIOtahrXHqNatN9lplrCSPYL4q64084r0HxlLZ1cl0HpSzQ
+         MQlJKP0NfqaBA==
+Date:   Wed, 2 Nov 2022 21:13:44 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] xfs: test xfs_scrub phase 6 media error reporting
+Message-ID: <Y2M/+DIPjiyIDmxL@magnolia>
+References: <166742857552.1499365.12368724681885402947.stgit@magnolia>
+ <166742858119.1499365.3871531327329245525.stgit@magnolia>
+ <20221103031123.dtipsyq46wzbmp27@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1667012753-2078-1-git-send-email-xuyang2018.jy@fujitsu.com>
+In-Reply-To: <20221103031123.dtipsyq46wzbmp27@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Oct 29, 2022 at 11:05:53AM +0800, Yang Xu wrote:
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> ---
-
-Looks good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  tests/generic/099 | 2 +-
->  tests/generic/105 | 2 +-
->  tests/generic/193 | 2 +-
->  tests/generic/237 | 2 +-
->  tests/generic/314 | 2 +-
->  tests/generic/318 | 2 +-
->  tests/generic/319 | 2 +-
->  tests/generic/355 | 2 +-
->  tests/generic/362 | 2 +-
->  tests/generic/363 | 2 +-
->  tests/generic/364 | 2 +-
->  tests/generic/365 | 2 +-
->  tests/generic/366 | 2 +-
->  tests/generic/367 | 2 +-
->  tests/generic/368 | 2 +-
->  tests/generic/369 | 2 +-
->  tests/generic/370 | 2 +-
->  tests/generic/375 | 2 +-
->  tests/generic/444 | 2 +-
->  tests/generic/673 | 2 +-
->  tests/generic/674 | 2 +-
->  tests/generic/683 | 2 +-
->  tests/generic/684 | 2 +-
->  tests/generic/685 | 2 +-
->  tests/generic/686 | 2 +-
->  tests/generic/687 | 2 +-
->  tests/overlay/004 | 2 +-
->  tests/overlay/008 | 2 +-
->  tests/overlay/015 | 2 +-
->  tests/overlay/023 | 2 +-
->  30 files changed, 30 insertions(+), 30 deletions(-)
+On Thu, Nov 03, 2022 at 11:11:23AM +0800, Zorro Lang wrote:
+> On Wed, Nov 02, 2022 at 03:36:21PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Add new helpers to dmerror to provide for marking selected ranges
+> > totally bad -- both reads and writes will fail.  Create a new test for
+> > xfs_scrub to check that it reports media errors in data files correctly.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/dmerror    |  140 ++++++++++++++++++++++++++++++++++++++++++++++++
+> >  common/xfs        |    9 +++
+> >  tests/xfs/747     |  155 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/747.out |   12 ++++
+> >  4 files changed, 316 insertions(+)
+> >  create mode 100755 tests/xfs/747
+> >  create mode 100644 tests/xfs/747.out
+> > 
+> > 
+> > diff --git a/common/dmerror b/common/dmerror
+> > index 54122b12ea..ca71fc11b4 100644
+> > --- a/common/dmerror
+> > +++ b/common/dmerror
+> > @@ -250,3 +250,143 @@ _dmerror_load_working_table()
+> >  	[ $load_res -ne 0 ] && _fail "dmsetup failed to load error table"
+> >  	[ $resume_res -ne 0 ] && _fail  "dmsetup resume failed"
+> >  }
+> > +
+> > +# Given a list of (start, length) tuples on stdin, combine adjacent tuples into
+> > +# larger ones and write the new list to stdout.
+> > +__dmerror_combine_extents()
+> > +{
+> > +	awk 'BEGIN{start = 0; len = 0;}{
+> > +if (start + len == $1) {
+> > +	len += $2;
+> > +} else {
+> > +	if (len > 0)
+> > +		printf("%d %d\n", start, len);
+> > +	start = $1;
+> > +	len = $2;
+> > +}
+> > +} END {
+> > +	if (len > 0)
+> > +		printf("%d %d\n", start, len);
+> > +}'
+> > +}
+> > +
+> > +# Given a block device, the name of a preferred dm target, the name of an
+> > +# implied dm target, and a list of (start, len) tuples on stdin, create a new
+> > +# dm table which maps each of the tuples to the preferred target and all other
+> > +# areas to the implied dm target.
+> > +__dmerror_recreate_map()
+> > +{
+> > +	local device="$1"
+> > +	local preferred_tgt="$2"
+> > +	local implied_tgt="$3"
+> > +	local size=$(blockdev --getsz "$device")
+> > +
+> > +	local awk_program='
+> > +	BEGIN {
+> > +		implied_start = 0;
+> > +	}
+> > +	{
+> > +		extent_start = $1;
+> > +		extent_len = $2;
+> > +
+> > +		if (extent_start > size) {
+> > +			extent_start = size;
+> > +			extent_len = 0;
+> > +		} else if (extent_start + extent_len > size) {
+> > +			extent_len = size - extent_start;
+> > +		}
+> > +
+> > +		if (implied_start < extent_start)
+> > +			printf("%d %d %s %s %d\n", implied_start,
+> > +					extent_start - implied_start,
+> > +					implied_tgt, device, implied_start);
+> > +		printf("%d %d %s %s %d\n", extent_start, extent_len,
+> > +				preferred_tgt, device, extent_start);
+> > +		implied_start = extent_start + extent_len;
+> > +	}
+> > +	END {
+> > +		if (implied_start < size)
+> > +			printf("%d %d %s %s %d\n", implied_start,
+> > +					size - implied_start, implied_tgt,
+> > +					device, implied_start);
+> > +	}'
+> > +
+> > +	awk -v device="$device" -v size=$size -v implied_tgt="$implied_tgt" \
+> > +		-v preferred_tgt="$preferred_tgt" "$awk_program"
 > 
-> diff --git a/tests/generic/099 b/tests/generic/099
-> index 5cdac9ab..eab6f472 100755
-> --- a/tests/generic/099
-> +++ b/tests/generic/099
-> @@ -8,7 +8,7 @@
->  #
->  #!/bin/bash
->  . ./common/preamble
-> -_begin_fstest acl auto quick
-> +_begin_fstest acl auto quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/105 b/tests/generic/105
-> index b422ea34..a05219df 100755
-> --- a/tests/generic/105
-> +++ b/tests/generic/105
-> @@ -10,7 +10,7 @@
->  #   which pulls out an earlier mod
->  #
->  . ./common/preamble
-> -_begin_fstest acl auto quick
-> +_begin_fstest acl auto quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/193 b/tests/generic/193
-> index ddaff69b..e2710b07 100755
-> --- a/tests/generic/193
-> +++ b/tests/generic/193
-> @@ -7,7 +7,7 @@
->  # Test permission checks in ->setattr
->  #
->  . ./common/preamble
-> -_begin_fstest metadata auto quick
-> +_begin_fstest metadata auto quick perms
->  
->  _register_cleanup "_cleanup_files"
->  tag="added by qa $seq"
-> diff --git a/tests/generic/237 b/tests/generic/237
-> index f17e32e4..a12a4259 100755
-> --- a/tests/generic/237
-> +++ b/tests/generic/237
-> @@ -8,7 +8,7 @@
->  # See also http://marc.info/?l=linux-btrfs&m=127434445620298&w=2
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick acl
-> +_begin_fstest auto quick acl perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/314 b/tests/generic/314
-> index 68a2f716..9449d30f 100755
-> --- a/tests/generic/314
-> +++ b/tests/generic/314
-> @@ -7,7 +7,7 @@
->  # Test SGID inheritance on subdirectories
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/318 b/tests/generic/318
-> index ed50818a..71ee7666 100755
-> --- a/tests/generic/318
-> +++ b/tests/generic/318
-> @@ -13,7 +13,7 @@
->  # the ACL was flushed and brought back from disk.
->  #
->  . ./common/preamble
-> -_begin_fstest acl attr auto quick
-> +_begin_fstest acl attr auto quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/319 b/tests/generic/319
-> index 082d93bc..0efb46be 100755
-> --- a/tests/generic/319
-> +++ b/tests/generic/319
-> @@ -12,7 +12,7 @@
->  #     https://patchwork.kernel.org/patch/3046931/
->  #
->  . ./common/preamble
-> -_begin_fstest acl auto quick
-> +_begin_fstest acl auto quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/355 b/tests/generic/355
-> index 4bc69eeb..7c108d1b 100755
-> --- a/tests/generic/355
-> +++ b/tests/generic/355
-> @@ -7,7 +7,7 @@
->  # Test clear of suid/sgid on direct write.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/362 b/tests/generic/362
-> index dcd0a27b..6e0e81ed 100755
-> --- a/tests/generic/362
-> +++ b/tests/generic/362
-> @@ -7,7 +7,7 @@
->  # RichACL apply-masks test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/363 b/tests/generic/363
-> index 8a441869..d3d888db 100755
-> --- a/tests/generic/363
-> +++ b/tests/generic/363
-> @@ -7,7 +7,7 @@
->  # RichACL auto-inheritance test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/364 b/tests/generic/364
-> index 538c0eb1..2c721fea 100755
-> --- a/tests/generic/364
-> +++ b/tests/generic/364
-> @@ -7,7 +7,7 @@
->  # RichACL basic test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  . ./common/attr
-> diff --git a/tests/generic/365 b/tests/generic/365
-> index 21f31b86..d22f233a 100755
-> --- a/tests/generic/365
-> +++ b/tests/generic/365
-> @@ -7,7 +7,7 @@
->  # RichACL chmod test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/366 b/tests/generic/366
-> index e5969114..c005f809 100755
-> --- a/tests/generic/366
-> +++ b/tests/generic/366
-> @@ -7,7 +7,7 @@
->  # RichACL chown test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/367 b/tests/generic/367
-> index bed45215..db7b2956 100755
-> --- a/tests/generic/367
-> +++ b/tests/generic/367
-> @@ -7,7 +7,7 @@
->  # RichACL create test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/368 b/tests/generic/368
-> index 4b18e9f0..d2259b34 100755
-> --- a/tests/generic/368
-> +++ b/tests/generic/368
-> @@ -7,7 +7,7 @@
->  # RichACL ctime test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/369 b/tests/generic/369
-> index dbd20105..526de244 100755
-> --- a/tests/generic/369
-> +++ b/tests/generic/369
-> @@ -7,7 +7,7 @@
->  # RichACL delete test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/370 b/tests/generic/370
-> index acb0f424..8c17af0c 100755
-> --- a/tests/generic/370
-> +++ b/tests/generic/370
-> @@ -7,7 +7,7 @@
->  # RichACL write-vs-append test
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick richacl
-> +_begin_fstest auto quick richacl perms
->  
->  # Import common functions.
->  
-> diff --git a/tests/generic/375 b/tests/generic/375
-> index 746cdd55..438184b3 100755
-> --- a/tests/generic/375
-> +++ b/tests/generic/375
-> @@ -8,7 +8,7 @@
->  # owning group.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick acl
-> +_begin_fstest auto quick acl perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/444 b/tests/generic/444
-> index 8f6b7c2c..71d2f6af 100755
-> --- a/tests/generic/444
-> +++ b/tests/generic/444
-> @@ -8,7 +8,7 @@
->  # in the owning group and directory has default ACLs.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick acl
-> +_begin_fstest auto quick acl perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/673 b/tests/generic/673
-> index 4d8dc07e..6d1f49ea 100755
-> --- a/tests/generic/673
-> +++ b/tests/generic/673
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a reflink.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/674 b/tests/generic/674
-> index a3130249..c3ff1b7b 100755
-> --- a/tests/generic/674
-> +++ b/tests/generic/674
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a deduplication.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/683 b/tests/generic/683
-> index 4c93346d..302f8bb2 100755
-> --- a/tests/generic/683
-> +++ b/tests/generic/683
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a fallocate.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/684 b/tests/generic/684
-> index 03481e69..19ccb228 100755
-> --- a/tests/generic/684
-> +++ b/tests/generic/684
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a fpunch.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/685 b/tests/generic/685
-> index 6a108842..a58eccda 100755
-> --- a/tests/generic/685
-> +++ b/tests/generic/685
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a fzero.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/686 b/tests/generic/686
-> index 4279f76b..ef9ea47a 100755
-> --- a/tests/generic/686
-> +++ b/tests/generic/686
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a finsert.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/687 b/tests/generic/687
-> index 78cb6202..f4a1c1bb 100755
-> --- a/tests/generic/687
-> +++ b/tests/generic/687
-> @@ -7,7 +7,7 @@
->  # Functional test for dropping suid and sgid bits as part of a fcollapse.
->  #
->  . ./common/preamble
-> -_begin_fstest auto clone quick
-> +_begin_fstest auto clone quick perms
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/overlay/004 b/tests/overlay/004
-> index 54ce8a8f..f03f628a 100755
-> --- a/tests/overlay/004
-> +++ b/tests/overlay/004
-> @@ -7,7 +7,7 @@
->  # Test file copy up on overlayfs by changing mode bits.
->  #
->  . ./common/preamble
-> -_begin_fstest attr auto copyup quick
-> +_begin_fstest attr auto copyup quick perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/overlay/008 b/tests/overlay/008
-> index d14f22f2..7bab4fbe 100755
-> --- a/tests/overlay/008
-> +++ b/tests/overlay/008
-> @@ -11,7 +11,7 @@
->  # d0e13f5 ovl: fix uid/gid when creating over whiteout
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick whiteout
-> +_begin_fstest auto quick whiteout perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/overlay/015 b/tests/overlay/015
-> index fd23e373..f0c05579 100755
-> --- a/tests/overlay/015
-> +++ b/tests/overlay/015
-> @@ -7,7 +7,7 @@
->  # SGID bit inheritance over whiteout.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick whiteout
-> +_begin_fstest auto quick whiteout perms
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/overlay/023 b/tests/overlay/023
-> index 95d5aa22..740c47c1 100755
-> --- a/tests/overlay/023
-> +++ b/tests/overlay/023
-> @@ -14,7 +14,7 @@
->  #     Miklos Szeredi <mszeredi@redhat.com>
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick attr
-> +_begin_fstest auto quick attr perms
->  
->  # Import common functions.
->  . ./common/filter
-> -- 
-> 2.23.0
+> Hi,
 > 
+> OK, if you prefer this way, should __dmerror_combine_extents follow this way too :)
 
+Eh, ok.
+
+> > +}
+> > +
+> > +# Update the dm error table so that the range (start, len) maps to the
+> > +# preferred dm target, overriding anything that maps to the implied dm target.
+> > +# This assumes that the only desired targets for this dm device are the
+> > +# preferred and and implied targets.  The fifth argument is the scratch device
+> > +# that we want to change the table for.
+> > +__dmerror_change()
+> > +{
+> > +	local start="$1"
+> > +	local len="$2"
+> > +	local preferred_tgt="$3"
+> > +	local implied_tgt="$4"
+> > +	local whichdev="$5"
+> > +	local old_table
+> > +	local new_table
+> > +
+> > +	case "$whichdev" in
+> > +	"SCRATCH_DEV"|"")	whichdev="$SCRATCH_DEV";;
+> > +	"SCRATCH_LOGDEV"|"LOG")	whichdev="$NON_ERROR_LOGDEV";;
+> > +	"SCRATCH_RTDEV"|"RT")	whichdev="$NON_ERROR_RTDEV";;
+> > +	esac
+> > +
+> > +	case "$whichdev" in
+> > +	"$SCRATCH_DEV")		old_table="$DMERROR_TABLE";;
+> > +	"$NON_ERROR_LOGDEV")	old_table="$DMERROR_LOGTABLE";;
+> > +	"$NON_ERROR_RTDEV")	old_table="$DMERROR_RTTABLE";;
+> > +	*)
+> > +		echo "$whichdev: Unknown dmerror device."
+> > +		return
+> > +		;;
+> > +	esac
+> > +
+> > +	new_table="$( (echo "$old_table"; echo "$start $len $preferred_tgt") | \
+> > +		awk -v type="$preferred_tgt" '{if ($3 == type) print $0;}' | \
+> > +		sort -g | \
+> > +		__dmerror_combine_extents | \
+> > +		__dmerror_recreate_map "$whichdev" "$preferred_tgt" \
+> > +				"$implied_tgt" )"
+> > +
+> > +	case "$whichdev" in
+> > +	"$SCRATCH_DEV")		DMERROR_TABLE="$new_table";;
+> > +	"$NON_ERROR_LOGDEV")	DMERROR_LOGTABLE="$new_table";;
+> > +	"$NON_ERROR_RTDEV")	DMERROR_RTTABLE="$new_table";;
+> > +	esac
+> > +}
+> > +
+> > +# Reset the dm error table to everything ok.  The dm device itself must be
+> > +# remapped by calling _dmerror_load_error_table.
+> > +_dmerror_reset_table()
+> > +{
+> > +	DMERROR_TABLE="$DMLINEAR_TABLE"
+> > +	DMERROR_LOGTABLE="$DMLINEAR_LOGTABLE"
+> > +	DMERROR_RTTABLE="$DMLINEAR_RTTABLE"
+> > +}
+> > +
+> > +# Update the dm error table so that IOs to the given range will return EIO.
+> > +# The dm device itself must be remapped by calling _dmerror_load_error_table.
+> > +_dmerror_mark_range_bad()
+> > +{
+> > +	local start="$1"
+> > +	local len="$2"
+> > +	local dev="$3"
+> > +
+> > +	__dmerror_change "$start" "$len" error linear "$dev"
+> > +}
+> > +
+> > +# Update the dm error table so that IOs to the given range will succeed.
+> > +# The dm device itself must be remapped by calling _dmerror_load_error_table.
+> > +_dmerror_mark_range_good()
+> > +{
+> > +	local start="$1"
+> > +	local len="$2"
+> > +	local dev="$3"
+> > +
+> > +	__dmerror_change "$start" "$len" linear error "$dev"
+> > +}
+> > diff --git a/common/xfs b/common/xfs
+> > index 8ac1964e9c..f466d2c42f 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -218,6 +218,15 @@ _xfs_get_dir_blocksize()
+> >  	$XFS_INFO_PROG "$fs" | sed -n "s/^naming.*bsize=\([[:digit:]]*\).*/\1/p"
+> >  }
+> >  
+> > +# Decide if this path is a file on the realtime device
+> > +_xfs_is_realtime_file()
+> > +{
+> > +	if [ "$USE_EXTERNAL" != "yes" ] || [ -z "$SCRATCH_RTDEV" ]; then
+> > +		return 1
+> > +	fi
+> > +	$XFS_IO_PROG -c 'stat -v' "$1" | grep -q -w realtime
+> > +}
+> > +
+> >  # Set or clear the realtime status of every supplied path.  The first argument
+> >  # is either 'data' or 'realtime'.  All other arguments should be paths to
+> >  # existing directories or empty regular files.
+> > diff --git a/tests/xfs/747 b/tests/xfs/747
+> > new file mode 100755
+> > index 0000000000..8b828bc48d
+> > --- /dev/null
+> > +++ b/tests/xfs/747
+> > @@ -0,0 +1,155 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 747
+> > +#
+> > +# Check xfs_scrub's media scan can actually return diagnostic information for
+> > +# media errors in file data extents.
+> > +
+> > +. ./common/preamble
+> > +_begin_fstest auto quick scrub
+> 
+> Do we need "eio" at here?
+
+Yep, sorry, that one fell off somehwere.
+
+--D
+
+> Others look good to me.
+> 
+> Thanks,
+> Zorro
+> 
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	_dmerror_cleanup
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/fuzzy
+> > +. ./common/filter
+> > +. ./common/dmerror
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_dm_target error
+> > +_require_scratch
+> > +_require_scratch_xfs_crc
+> > +_require_scrub
+> > +
+> > +filter_scrub_errors() {
+> > +	_filter_scratch | sed \
+> > +		-e "s/offset $((fs_blksz * 2)) /offset 2FSB /g" \
+> > +		-e "s/length $fs_blksz.*/length 1FSB./g"
+> > +}
+> > +
+> > +_scratch_mkfs >> $seqres.full
+> > +_dmerror_init
+> > +_dmerror_mount >> $seqres.full 2>&1
+> > +
+> > +_supports_xfs_scrub $SCRATCH_MNT $SCRATCH_DEV || _notrun "Scrub not supported"
+> > +
+> > +# Write a file with 4 file blocks worth of data
+> > +victim=$SCRATCH_MNT/a
+> > +file_blksz=$(_get_file_block_size $SCRATCH_MNT)
+> > +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((4 * file_blksz))" -c "fsync" $victim >> $seqres.full
+> > +unset errordev
+> > +_xfs_is_realtime_file $victim && errordev="RT"
+> > +bmap_str="$($XFS_IO_PROG -c "bmap -elpv" $victim | grep "^[[:space:]]*0:")"
+> > +echo "$errordev:$bmap_str" >> $seqres.full
+> > +
+> > +phys="$(echo "$bmap_str" | $AWK_PROG '{print $3}')"
+> > +if [ "$errordev" = "RT" ]; then
+> > +	len="$(echo "$bmap_str" | $AWK_PROG '{print $4}')"
+> > +else
+> > +	len="$(echo "$bmap_str" | $AWK_PROG '{print $6}')"
+> > +fi
+> > +fs_blksz=$(_get_block_size $SCRATCH_MNT)
+> > +echo "file_blksz:$file_blksz:fs_blksz:$fs_blksz" >> $seqres.full
+> > +kernel_sectors_per_fs_block=$((fs_blksz / 512))
+> > +
+> > +# Did we get at least 4 fs blocks worth of extent?
+> > +min_len_sectors=$(( 4 * kernel_sectors_per_fs_block ))
+> > +test "$len" -lt $min_len_sectors && \
+> > +	_fail "could not format a long enough extent on an empty fs??"
+> > +
+> > +phys_start=$(echo "$phys" | sed -e 's/\.\..*//g')
+> > +
+> > +echo "$errordev:$phys:$len:$fs_blksz:$phys_start" >> $seqres.full
+> > +echo "victim file:" >> $seqres.full
+> > +od -tx1 -Ad -c $victim >> $seqres.full
+> > +
+> > +# Set the dmerror table so that all IO will pass through.
+> > +_dmerror_reset_table
+> > +
+> > +cat >> $seqres.full << ENDL
+> > +dmerror before:
+> > +$DMERROR_TABLE
+> > +$DMERROR_RTTABLE
+> > +<end table>
+> > +ENDL
+> > +
+> > +# All sector numbers that we feed to the kernel must be in units of 512b, but
+> > +# they also must be aligned to the device's logical block size.
+> > +logical_block_size=$(_min_dio_alignment $SCRATCH_DEV)
+> > +kernel_sectors_per_device_lba=$((logical_block_size / 512))
+> > +
+> > +# Mark as bad one of the device LBAs in the middle of the extent.  Target the
+> > +# second LBA of the third block of the four-block file extent that we allocated
+> > +# earlier, but without overflowing into the fourth file block.
+> > +bad_sector=$(( phys_start + (2 * kernel_sectors_per_fs_block) ))
+> > +bad_len=$kernel_sectors_per_device_lba
+> > +if (( kernel_sectors_per_device_lba < kernel_sectors_per_fs_block )); then
+> > +	bad_sector=$((bad_sector + kernel_sectors_per_device_lba))
+> > +fi
+> > +if (( (bad_sector % kernel_sectors_per_device_lba) != 0)); then
+> > +	echo "bad_sector $bad_sector not congruent with device logical block size $logical_block_size"
+> > +fi
+> > +_dmerror_mark_range_bad $bad_sector $bad_len $errordev
+> > +
+> > +cat >> $seqres.full << ENDL
+> > +dmerror after marking bad:
+> > +$DMERROR_TABLE
+> > +$DMERROR_RTTABLE
+> > +<end table>
+> > +ENDL
+> > +
+> > +_dmerror_load_error_table
+> > +
+> > +# See if the media scan picks it up.
+> > +echo "Scrub for injected media error (single threaded)"
+> > +
+> > +# Once in single-threaded mode
+> > +_scratch_scrub -b -x >> $seqres.full 2> $tmp.error
+> > +cat $tmp.error | filter_scrub_errors
+> > +
+> > +# Once in parallel mode
+> > +echo "Scrub for injected media error (multi threaded)"
+> > +_scratch_scrub -x >> $seqres.full 2> $tmp.error
+> > +cat $tmp.error | filter_scrub_errors
+> > +
+> > +# Remount to flush the page cache and reread to see the IO error
+> > +_dmerror_unmount
+> > +_dmerror_mount
+> > +echo "victim file:" >> $seqres.full
+> > +od -tx1 -Ad -c $victim >> $seqres.full 2> $tmp.error
+> > +cat $tmp.error | sed -e 's/read error: //g' | _filter_scratch
+> > +
+> > +# Scrub again to re-confirm the media error across a remount
+> > +echo "Scrub for injected media error (after remount)"
+> > +_scratch_scrub -x >> $seqres.full 2> $tmp.error
+> > +cat $tmp.error | filter_scrub_errors
+> > +
+> > +# Now mark the bad range good so that a retest shows no media failure.
+> > +_dmerror_mark_range_good $bad_sector $bad_len $errordev
+> > +_dmerror_load_error_table
+> > +
+> > +cat >> $seqres.full << ENDL
+> > +dmerror after marking good:
+> > +$DMERROR_TABLE
+> > +$DMERROR_RTTABLE
+> > +<end table>
+> > +ENDL
+> > +
+> > +echo "Scrub after removing injected media error"
+> > +
+> > +# Scrub one last time to make sure the error's gone.
+> > +_scratch_scrub -x >> $seqres.full 2> $tmp.error
+> > +cat $tmp.error | filter_scrub_errors
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/747.out b/tests/xfs/747.out
+> > new file mode 100644
+> > index 0000000000..714ceb2e56
+> > --- /dev/null
+> > +++ b/tests/xfs/747.out
+> > @@ -0,0 +1,12 @@
+> > +QA output created by 747
+> > +Scrub for injected media error (single threaded)
+> > +Unfixable Error: SCRATCH_MNT/a: media error at data offset 2FSB length 1FSB.
+> > +SCRATCH_MNT: unfixable errors found: 1
+> > +Scrub for injected media error (multi threaded)
+> > +Unfixable Error: SCRATCH_MNT/a: media error at data offset 2FSB length 1FSB.
+> > +SCRATCH_MNT: unfixable errors found: 1
+> > +od: SCRATCH_MNT/a: Input/output error
+> > +Scrub for injected media error (after remount)
+> > +Unfixable Error: SCRATCH_MNT/a: media error at data offset 2FSB length 1FSB.
+> > +SCRATCH_MNT: unfixable errors found: 1
+> > +Scrub after removing injected media error
+> > 
+> 
