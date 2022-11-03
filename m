@@ -2,317 +2,504 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 163F0C4332F
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Nov 2022 03:33:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0CEAC433FE
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Nov 2022 03:48:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229992AbiKCDdP (ORCPT
+        id S230085AbiKCDsW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Nov 2022 23:33:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35604 "EHLO
+        Wed, 2 Nov 2022 23:48:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41180 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229457AbiKCDdM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Nov 2022 23:33:12 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD8B016596
-        for <fstests@vger.kernel.org>; Wed,  2 Nov 2022 20:32:10 -0700 (PDT)
+        with ESMTP id S229591AbiKCDsV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Nov 2022 23:48:21 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C7241573A
+        for <fstests@vger.kernel.org>; Wed,  2 Nov 2022 20:47:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667446329;
+        s=mimecast20190719; t=1667447246;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=RoCJ4YpZUlayKjwSuLFeKOt+e0GWBKn2EWrKiuhsagY=;
-        b=QBY/V/FNsAch/oz0vnFKa8uBb/DK4VtS3w8mboo3FUH0muilz73XZl2SxiBhtHyXZ2rAs8
-        7VAypDrXhlNrEOrDlkdGzBgvQmrCfcnJIPpoEnWOsQxCLUENQSNFtyeNFPlvgqdzpfNa6P
-        +P7Z15CUkk0KcEXOBniwkKdtjysDdwU=
+        bh=ghs2E5IaKHOn9UHqlxFqJnMXgbGOmXj+NdlQThsFock=;
+        b=ide0gURvKMmCFF6CJzllnTCL+Mgn8dxQXM4pG2PUJ2ulfImWE2AYGJO/TYLS8D/08lRUd0
+        l68HQhKOG2bcEtbbn2dZUJ5NW/4+qbaX8AHO+uvhEWAnfl5TtA1xXIx7o2+wJlaJeHQAOT
+        pQA5bUJJSlLWkzYwasWZQfi1uZgE0h4=
 Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com
  [209.85.219.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-35-oUy2_DRnM4maDH6uq9w9dQ-1; Wed, 02 Nov 2022 23:32:08 -0400
-X-MC-Unique: oUy2_DRnM4maDH6uq9w9dQ-1
-Received: by mail-qv1-f71.google.com with SMTP id x2-20020a0cff22000000b004bb07bf7557so523997qvt.11
-        for <fstests@vger.kernel.org>; Wed, 02 Nov 2022 20:32:08 -0700 (PDT)
+ us-mta-610-X3E3p5ImMtWyhEDbJIR4Jg-1; Wed, 02 Nov 2022 23:47:24 -0400
+X-MC-Unique: X3E3p5ImMtWyhEDbJIR4Jg-1
+Received: by mail-qv1-f71.google.com with SMTP id z18-20020a0cfed2000000b004bc28af6f7dso569610qvs.4
+        for <fstests@vger.kernel.org>; Wed, 02 Nov 2022 20:47:24 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=RoCJ4YpZUlayKjwSuLFeKOt+e0GWBKn2EWrKiuhsagY=;
-        b=DbuCgfw9/Qc3y5MPEXDWXgt6megYYouVS0UQ8BokFx/ggxdLRafcVkwNZzpFDq3R9+
-         EyNxjEN6Ff0OgO6BsDb4Yo1YSm0GDxN/mqfqcl03XQEbkvRi4oxVhh6WbqL24P4CRPND
-         DWvuEBAR3yB5k44cmNLq+Xx6ekKqJTkziHPFngA2AbUnKFi2lw2p7J5zyo3pEQoGtcm2
-         AUuuybJc+lyrWy1eIIa/OS78PK+Bo8d6TB9FlfkuzEEDIupfVqP/l9vchFLVWRBMgbQ3
-         dZbHmUgid6IBxQL3s+Ywo9YGKsKthgz4PnvnvLaFChaCc0wT+bRw87ud4U1ZdbYASZuM
-         dtyA==
-X-Gm-Message-State: ACrzQf0LYeKbokUOprRSWo3hkK0rqudag8z41KCydg2rtxCpOT4t42B+
-        3IkZjuG2o38dc4UHc+yC11J+k/cvVUHrMk0xEOpoRjMkITyiSfmIfVnXCbv2ci/1R+ReHaB19vs
-        Qk3MGmyTzcCGUnsf+kg==
-X-Received: by 2002:a05:6214:27ec:b0:4bb:9dd4:3d67 with SMTP id jt12-20020a05621427ec00b004bb9dd43d67mr24119370qvb.12.1667446327661;
-        Wed, 02 Nov 2022 20:32:07 -0700 (PDT)
-X-Google-Smtp-Source: AMsMyM4YLOBNzIFqvGvflArT7HV2DPn0WS2fMtQh0VP+JLT7hW4EatKDM/8MulxzBocZEpOqqvD0IA==
-X-Received: by 2002:a05:6214:27ec:b0:4bb:9dd4:3d67 with SMTP id jt12-20020a05621427ec00b004bb9dd43d67mr24119355qvb.12.1667446327335;
-        Wed, 02 Nov 2022 20:32:07 -0700 (PDT)
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ghs2E5IaKHOn9UHqlxFqJnMXgbGOmXj+NdlQThsFock=;
+        b=MN8Zahx1hdiSIMulF5sz9FYWe6ORff1kQZKkaC32QWN+EM6p2jPrDyojyF5tuN/ANm
+         I4qlfMORSA5chzvxOQ5zSbKefvBRPwgNJDI6Acby2RldXN4O8BOIg6PzNTgDj8N2CBXm
+         2gXYgqwlvvi75RtH7tvdG/HiwES/TMTUKH4mpW+SNLh/xoizAelZvZ+kfLO0lPoKaSJN
+         N5/qWqcGiWfpClWSUDyTpZXzgg1zaVOZ97XivDhoQp1uSwUj45iHx2hMPxtCULRSsUZl
+         F1A86NR32CwIrPCZq0we9uyItYJ8ZUv0W1sxe5SCTCSFBVdmgFLC/ihGrqx3yJCJjyTq
+         XUGg==
+X-Gm-Message-State: ACrzQf2W6vnNymOafd+NawLlxWgAAwLm+jSXv35xri3oPsPp5YydNk6e
+        kFmsOuupd9KqoeS4IsyW31TsYS+hOoCTCDBHXlz+esA+qJvnLXp2clYiyhSYHEq5kJSDchJsE1o
+        gSlVMtt/m05eDqDTRGA==
+X-Received: by 2002:a05:620a:480a:b0:6fa:3cfe:54a1 with SMTP id eb10-20020a05620a480a00b006fa3cfe54a1mr12202853qkb.412.1667447243674;
+        Wed, 02 Nov 2022 20:47:23 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM6BVAGQ6rqayzmm9liu3s/h7av2I/RdvJHvGjAbTRqL3RqqnctG54D8wXabhGgfVA22El/DUA==
+X-Received: by 2002:a05:620a:480a:b0:6fa:3cfe:54a1 with SMTP id eb10-20020a05620a480a00b006fa3cfe54a1mr12202840qkb.412.1667447243256;
+        Wed, 02 Nov 2022 20:47:23 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id q21-20020a05620a0d9500b006eec09eed39sm9919269qkl.40.2022.11.02.20.32.05
+        by smtp.gmail.com with ESMTPSA id h18-20020a05620a245200b006ecdfcf9d81sm5219948qkn.84.2022.11.02.20.47.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Nov 2022 20:32:06 -0700 (PDT)
-Date:   Thu, 3 Nov 2022 11:32:02 +0800
+        Wed, 02 Nov 2022 20:47:22 -0700 (PDT)
+Date:   Thu, 3 Nov 2022 11:47:18 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Catherine Hoang <catherine.hoang@oracle.com>
-Cc:     "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v3 2/4] xfs: add parent pointer test
-Message-ID: <20221103033202.t2hyrqdiyc7mzy37@zlang-mailbox>
-References: <20221028215605.17973-1-catherine.hoang@oracle.com>
- <20221028215605.17973-3-catherine.hoang@oracle.com>
- <20221101062332.n2dzuzo2l762dxjx@zlang-mailbox>
- <64C0A63F-3440-4896-9E42-80DC1BB59809@oracle.com>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2] Add more related cases to perms group
+Message-ID: <20221103034718.4py55dqbbumnkhiy@zlang-mailbox>
+References: <1667012753-2078-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <64C0A63F-3440-4896-9E42-80DC1BB59809@oracle.com>
+In-Reply-To: <1667012753-2078-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 02, 2022 at 11:11:30PM +0000, Catherine Hoang wrote:
-> > On Oct 31, 2022, at 11:23 PM, Zorro Lang <zlang@redhat.com> wrote:
-> > 
-> > On Fri, Oct 28, 2022 at 02:56:03PM -0700, Catherine Hoang wrote:
-> >> From: Allison Henderson <allison.henderson@oracle.com>
-> >> 
-> >> Add a test to verify basic parent pointers operations (create, move, link,
-> >> unlink, rename, overwrite).
-> >> 
-> >> Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
-> >> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
-> >> ---
-> >> doc/group-names.txt |   1 +
-> >> tests/xfs/554       | 101 ++++++++++++++++++++++++++++++++++++++++++++
-> >> tests/xfs/554.out   |  59 ++++++++++++++++++++++++++
-> >> 3 files changed, 161 insertions(+)
-> >> create mode 100755 tests/xfs/554
-> >> create mode 100644 tests/xfs/554.out
-> >> 
-> >> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> >> index ef411b5e..8e35c699 100644
-> >> --- a/doc/group-names.txt
-> >> +++ b/doc/group-names.txt
-> >> @@ -77,6 +77,7 @@ nfs4_acl		NFSv4 access control lists
-> >> nonsamefs		overlayfs layers on different filesystems
-> >> online_repair		online repair functionality tests
-> >> other			dumping ground, do not add more tests to this group
-> >> +parent			Parent pointer tests
-> >> pattern			specific IO pattern tests
-> >> perms			access control and permission checking
-> >> pipe			pipe functionality
-> >> diff --git a/tests/xfs/554 b/tests/xfs/554
-> > 
-> > Hi,
-> > 
-> > xfs/554 has been taken, please rebase to the lastest for-next branch, or you
-> > can a big enough number (e.g. 999) to avoid merging conflict, then I can rename
-> > the name after merging.
-> 
-> Ah ok, I didn’t see that when I was sending out these tests. I’ll rebase this to the
-> latest for-next branch
-> > 
-> >> new file mode 100755
-> >> index 00000000..44b77f9d
-> >> --- /dev/null
-> >> +++ b/tests/xfs/554
-> >> @@ -0,0 +1,101 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2022, Oracle and/or its affiliates.  All Rights Reserved.
-> >> +#
-> >> +# FS QA Test 554
-> >> +#
-> >> +# simple parent pointer test
-> >> +#
-> >> +
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick parent
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/parent
-> >> +
-> >> +# Modify as appropriate
-> >> +_supported_fs xfs
-> >> +_require_scratch
-> >> +_require_xfs_sysfs debug/larp
-> > 
-> > Is debug/larp needed by this case?
-> 
-> I believe the parent pointer code now turns on larp mode automatically,
-> so it’s probably ok to remove this line since we aren’t explicitly turning
-> it on in the tests anymore.
+On Sat, Oct 29, 2022 at 11:05:53AM +0800, Yang Xu wrote:
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> ---
 
-Sorry I'm confused about this explanation:) Do you need to read/write the
-/sys/fs/xfs/debug/larp in this case? To make sure *parent* feature is 100%
-truned on? Can't _require_xfs_parent make sure current system support the
-parent feature ?
+Looks good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> > 
-> >> +_require_xfs_parent
-> >> +_require_xfs_io_command "parent"
-> >> +
-> >> +# real QA test starts here
-> >> +
-> >> +# Create a directory tree using a protofile and
-> >> +# make sure all inodes created have parent pointers
-> >> +
-> >> +protofile=$tmp.proto
-> >> +
-> >> +cat >$protofile <<EOF
-> >> +DUMMY1
-> >> +0 0
-> >> +: root directory
-> >> +d--777 3 1
-> >> +: a directory
-> >> +testfolder1 d--755 3 1
-> >> +file1 ---755 3 1 /dev/null
-> >> +$
-> >> +: back in the root
-> >> +testfolder2 d--755 3 1
-> >> +file2 ---755 3 1 /dev/null
-> >> +: done
-> >> +$
-> >> +EOF
-> >> +
-> >> +_scratch_mkfs -f -n parent=1 -p $protofile >>$seqres.full 2>&1 \
-> >> +	|| _fail "mkfs failed"
-> >> +_check_scratch_fs
-> >> +
-> >> +_scratch_mount >>$seqres.full 2>&1 \
-> >> +	|| _fail "mount failed"
-> > 
-> > _scratch_mount calls _fail() inside.
+>  tests/generic/099 | 2 +-
+>  tests/generic/105 | 2 +-
+>  tests/generic/193 | 2 +-
+>  tests/generic/237 | 2 +-
+>  tests/generic/314 | 2 +-
+>  tests/generic/318 | 2 +-
+>  tests/generic/319 | 2 +-
+>  tests/generic/355 | 2 +-
+>  tests/generic/362 | 2 +-
+>  tests/generic/363 | 2 +-
+>  tests/generic/364 | 2 +-
+>  tests/generic/365 | 2 +-
+>  tests/generic/366 | 2 +-
+>  tests/generic/367 | 2 +-
+>  tests/generic/368 | 2 +-
+>  tests/generic/369 | 2 +-
+>  tests/generic/370 | 2 +-
+>  tests/generic/375 | 2 +-
+>  tests/generic/444 | 2 +-
+>  tests/generic/673 | 2 +-
+>  tests/generic/674 | 2 +-
+>  tests/generic/683 | 2 +-
+>  tests/generic/684 | 2 +-
+>  tests/generic/685 | 2 +-
+>  tests/generic/686 | 2 +-
+>  tests/generic/687 | 2 +-
+>  tests/overlay/004 | 2 +-
+>  tests/overlay/008 | 2 +-
+>  tests/overlay/015 | 2 +-
+>  tests/overlay/023 | 2 +-
+>  30 files changed, 30 insertions(+), 30 deletions(-)
 > 
-> Ok, will remove this _fail call. Thanks!
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >> +
-> >> +testfolder1="testfolder1"
-> >> +testfolder2="testfolder2"
-> >> +file1="file1"
-> >> +file2="file2"
-> >> +file3="file3"
-> >> +file1_ln="file1_link"
-> >> +
-> >> +echo ""
-> >> +# Create parent pointer test
-> >> +_verify_parent "$testfolder1" "$file1" "$testfolder1/$file1"
-> >> +
-> >> +echo ""
-> >> +# Move parent pointer test
-> >> +mv $SCRATCH_MNT/$testfolder1/$file1 $SCRATCH_MNT/$testfolder2/$file1
-> >> +_verify_parent "$testfolder2" "$file1" "$testfolder2/$file1"
-> >> +
-> >> +echo ""
-> >> +# Hard link parent pointer test
-> >> +ln $SCRATCH_MNT/$testfolder2/$file1 $SCRATCH_MNT/$testfolder1/$file1_ln
-> >> +_verify_parent "$testfolder1" "$file1_ln" "$testfolder1/$file1_ln"
-> >> +_verify_parent "$testfolder1" "$file1_ln" "$testfolder2/$file1"
-> >> +_verify_parent "$testfolder2" "$file1"    "$testfolder1/$file1_ln"
-> >> +_verify_parent "$testfolder2" "$file1"    "$testfolder2/$file1"
-> >> +
-> >> +echo ""
-> >> +# Remove hard link parent pointer test
-> >> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file1)"
-> >> +rm $SCRATCH_MNT/$testfolder2/$file1
-> >> +_verify_parent "$testfolder1" "$file1_ln" "$testfolder1/$file1_ln"
-> >> +_verify_no_parent "$file1" "$ino" "$testfolder1/$file1_ln"
-> >> +
-> >> +echo ""
-> >> +# Rename parent pointer test
-> >> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder1/$file1_ln)"
-> >> +mv $SCRATCH_MNT/$testfolder1/$file1_ln $SCRATCH_MNT/$testfolder1/$file2
-> >> +_verify_parent "$testfolder1" "$file2" "$testfolder1/$file2"
-> >> +_verify_no_parent "$file1_ln" "$ino" "$testfolder1/$file2"
-> >> +
-> >> +echo ""
-> >> +# Over write parent pointer test
-> >> +touch $SCRATCH_MNT/$testfolder2/$file3
-> >> +_verify_parent "$testfolder2" "$file3" "$testfolder2/$file3"
-> >> +ino="$(stat -c '%i' $SCRATCH_MNT/$testfolder2/$file3)"
-> >> +mv -f $SCRATCH_MNT/$testfolder2/$file3 $SCRATCH_MNT/$testfolder1/$file2
-> >> +_verify_parent "$testfolder1" "$file2" "$testfolder1/$file2"
-> >> +
-> >> +# success, all done
-> >> +status=0
-> >> +exit
-> >> diff --git a/tests/xfs/554.out b/tests/xfs/554.out
-> >> new file mode 100644
-> >> index 00000000..67ea9f2b
-> >> --- /dev/null
-> >> +++ b/tests/xfs/554.out
-> >> @@ -0,0 +1,59 @@
-> >> +QA output created by 554
-> >> +
-> >> +*** testfolder1 OK
-> >> +*** testfolder1/file1 OK
-> >> +*** testfolder1/file1 OK
-> >> +*** Verified parent pointer: name:file1, namelen:5
-> >> +*** Parent pointer OK for child testfolder1/file1
-> >> +
-> >> +*** testfolder2 OK
-> >> +*** testfolder2/file1 OK
-> >> +*** testfolder2/file1 OK
-> >> +*** Verified parent pointer: name:file1, namelen:5
-> >> +*** Parent pointer OK for child testfolder2/file1
-> >> +
-> >> +*** testfolder1 OK
-> >> +*** testfolder1/file1_link OK
-> >> +*** testfolder1/file1_link OK
-> >> +*** Verified parent pointer: name:file1_link, namelen:10
-> >> +*** Parent pointer OK for child testfolder1/file1_link
-> >> +*** testfolder1 OK
-> >> +*** testfolder2/file1 OK
-> >> +*** testfolder1/file1_link OK
-> >> +*** Verified parent pointer: name:file1_link, namelen:10
-> >> +*** Parent pointer OK for child testfolder2/file1
-> >> +*** testfolder2 OK
-> >> +*** testfolder1/file1_link OK
-> >> +*** testfolder2/file1 OK
-> >> +*** Verified parent pointer: name:file1, namelen:5
-> >> +*** Parent pointer OK for child testfolder1/file1_link
-> >> +*** testfolder2 OK
-> >> +*** testfolder2/file1 OK
-> >> +*** testfolder2/file1 OK
-> >> +*** Verified parent pointer: name:file1, namelen:5
-> >> +*** Parent pointer OK for child testfolder2/file1
-> >> +
-> >> +*** testfolder1 OK
-> >> +*** testfolder1/file1_link OK
-> >> +*** testfolder1/file1_link OK
-> >> +*** Verified parent pointer: name:file1_link, namelen:10
-> >> +*** Parent pointer OK for child testfolder1/file1_link
-> >> +*** testfolder1/file1_link OK
-> >> +
-> >> +*** testfolder1 OK
-> >> +*** testfolder1/file2 OK
-> >> +*** testfolder1/file2 OK
-> >> +*** Verified parent pointer: name:file2, namelen:5
-> >> +*** Parent pointer OK for child testfolder1/file2
-> >> +*** testfolder1/file2 OK
-> >> +
-> >> +*** testfolder2 OK
-> >> +*** testfolder2/file3 OK
-> >> +*** testfolder2/file3 OK
-> >> +*** Verified parent pointer: name:file3, namelen:5
-> >> +*** Parent pointer OK for child testfolder2/file3
-> >> +*** testfolder1 OK
-> >> +*** testfolder1/file2 OK
-> >> +*** testfolder1/file2 OK
-> >> +*** Verified parent pointer: name:file2, namelen:5
-> >> +*** Parent pointer OK for child testfolder1/file2
-> >> -- 
-> >> 2.25.1
-> >> 
-> > 
+> diff --git a/tests/generic/099 b/tests/generic/099
+> index 5cdac9ab..eab6f472 100755
+> --- a/tests/generic/099
+> +++ b/tests/generic/099
+> @@ -8,7 +8,7 @@
+>  #
+>  #!/bin/bash
+>  . ./common/preamble
+> -_begin_fstest acl auto quick
+> +_begin_fstest acl auto quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/105 b/tests/generic/105
+> index b422ea34..a05219df 100755
+> --- a/tests/generic/105
+> +++ b/tests/generic/105
+> @@ -10,7 +10,7 @@
+>  #   which pulls out an earlier mod
+>  #
+>  . ./common/preamble
+> -_begin_fstest acl auto quick
+> +_begin_fstest acl auto quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/193 b/tests/generic/193
+> index ddaff69b..e2710b07 100755
+> --- a/tests/generic/193
+> +++ b/tests/generic/193
+> @@ -7,7 +7,7 @@
+>  # Test permission checks in ->setattr
+>  #
+>  . ./common/preamble
+> -_begin_fstest metadata auto quick
+> +_begin_fstest metadata auto quick perms
+>  
+>  _register_cleanup "_cleanup_files"
+>  tag="added by qa $seq"
+> diff --git a/tests/generic/237 b/tests/generic/237
+> index f17e32e4..a12a4259 100755
+> --- a/tests/generic/237
+> +++ b/tests/generic/237
+> @@ -8,7 +8,7 @@
+>  # See also http://marc.info/?l=linux-btrfs&m=127434445620298&w=2
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick acl
+> +_begin_fstest auto quick acl perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/314 b/tests/generic/314
+> index 68a2f716..9449d30f 100755
+> --- a/tests/generic/314
+> +++ b/tests/generic/314
+> @@ -7,7 +7,7 @@
+>  # Test SGID inheritance on subdirectories
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick
+> +_begin_fstest auto quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/318 b/tests/generic/318
+> index ed50818a..71ee7666 100755
+> --- a/tests/generic/318
+> +++ b/tests/generic/318
+> @@ -13,7 +13,7 @@
+>  # the ACL was flushed and brought back from disk.
+>  #
+>  . ./common/preamble
+> -_begin_fstest acl attr auto quick
+> +_begin_fstest acl attr auto quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/319 b/tests/generic/319
+> index 082d93bc..0efb46be 100755
+> --- a/tests/generic/319
+> +++ b/tests/generic/319
+> @@ -12,7 +12,7 @@
+>  #     https://patchwork.kernel.org/patch/3046931/
+>  #
+>  . ./common/preamble
+> -_begin_fstest acl auto quick
+> +_begin_fstest acl auto quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/355 b/tests/generic/355
+> index 4bc69eeb..7c108d1b 100755
+> --- a/tests/generic/355
+> +++ b/tests/generic/355
+> @@ -7,7 +7,7 @@
+>  # Test clear of suid/sgid on direct write.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick
+> +_begin_fstest auto quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/362 b/tests/generic/362
+> index dcd0a27b..6e0e81ed 100755
+> --- a/tests/generic/362
+> +++ b/tests/generic/362
+> @@ -7,7 +7,7 @@
+>  # RichACL apply-masks test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/363 b/tests/generic/363
+> index 8a441869..d3d888db 100755
+> --- a/tests/generic/363
+> +++ b/tests/generic/363
+> @@ -7,7 +7,7 @@
+>  # RichACL auto-inheritance test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/364 b/tests/generic/364
+> index 538c0eb1..2c721fea 100755
+> --- a/tests/generic/364
+> +++ b/tests/generic/364
+> @@ -7,7 +7,7 @@
+>  # RichACL basic test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  . ./common/attr
+> diff --git a/tests/generic/365 b/tests/generic/365
+> index 21f31b86..d22f233a 100755
+> --- a/tests/generic/365
+> +++ b/tests/generic/365
+> @@ -7,7 +7,7 @@
+>  # RichACL chmod test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/366 b/tests/generic/366
+> index e5969114..c005f809 100755
+> --- a/tests/generic/366
+> +++ b/tests/generic/366
+> @@ -7,7 +7,7 @@
+>  # RichACL chown test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/367 b/tests/generic/367
+> index bed45215..db7b2956 100755
+> --- a/tests/generic/367
+> +++ b/tests/generic/367
+> @@ -7,7 +7,7 @@
+>  # RichACL create test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/368 b/tests/generic/368
+> index 4b18e9f0..d2259b34 100755
+> --- a/tests/generic/368
+> +++ b/tests/generic/368
+> @@ -7,7 +7,7 @@
+>  # RichACL ctime test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/369 b/tests/generic/369
+> index dbd20105..526de244 100755
+> --- a/tests/generic/369
+> +++ b/tests/generic/369
+> @@ -7,7 +7,7 @@
+>  # RichACL delete test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/370 b/tests/generic/370
+> index acb0f424..8c17af0c 100755
+> --- a/tests/generic/370
+> +++ b/tests/generic/370
+> @@ -7,7 +7,7 @@
+>  # RichACL write-vs-append test
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick richacl
+> +_begin_fstest auto quick richacl perms
+>  
+>  # Import common functions.
+>  
+> diff --git a/tests/generic/375 b/tests/generic/375
+> index 746cdd55..438184b3 100755
+> --- a/tests/generic/375
+> +++ b/tests/generic/375
+> @@ -8,7 +8,7 @@
+>  # owning group.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick acl
+> +_begin_fstest auto quick acl perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/444 b/tests/generic/444
+> index 8f6b7c2c..71d2f6af 100755
+> --- a/tests/generic/444
+> +++ b/tests/generic/444
+> @@ -8,7 +8,7 @@
+>  # in the owning group and directory has default ACLs.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick acl
+> +_begin_fstest auto quick acl perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/673 b/tests/generic/673
+> index 4d8dc07e..6d1f49ea 100755
+> --- a/tests/generic/673
+> +++ b/tests/generic/673
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a reflink.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/674 b/tests/generic/674
+> index a3130249..c3ff1b7b 100755
+> --- a/tests/generic/674
+> +++ b/tests/generic/674
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a deduplication.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/683 b/tests/generic/683
+> index 4c93346d..302f8bb2 100755
+> --- a/tests/generic/683
+> +++ b/tests/generic/683
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a fallocate.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/684 b/tests/generic/684
+> index 03481e69..19ccb228 100755
+> --- a/tests/generic/684
+> +++ b/tests/generic/684
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a fpunch.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/685 b/tests/generic/685
+> index 6a108842..a58eccda 100755
+> --- a/tests/generic/685
+> +++ b/tests/generic/685
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a fzero.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/686 b/tests/generic/686
+> index 4279f76b..ef9ea47a 100755
+> --- a/tests/generic/686
+> +++ b/tests/generic/686
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a finsert.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/687 b/tests/generic/687
+> index 78cb6202..f4a1c1bb 100755
+> --- a/tests/generic/687
+> +++ b/tests/generic/687
+> @@ -7,7 +7,7 @@
+>  # Functional test for dropping suid and sgid bits as part of a fcollapse.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto clone quick
+> +_begin_fstest auto clone quick perms
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/overlay/004 b/tests/overlay/004
+> index 54ce8a8f..f03f628a 100755
+> --- a/tests/overlay/004
+> +++ b/tests/overlay/004
+> @@ -7,7 +7,7 @@
+>  # Test file copy up on overlayfs by changing mode bits.
+>  #
+>  . ./common/preamble
+> -_begin_fstest attr auto copyup quick
+> +_begin_fstest attr auto copyup quick perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/overlay/008 b/tests/overlay/008
+> index d14f22f2..7bab4fbe 100755
+> --- a/tests/overlay/008
+> +++ b/tests/overlay/008
+> @@ -11,7 +11,7 @@
+>  # d0e13f5 ovl: fix uid/gid when creating over whiteout
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick whiteout
+> +_begin_fstest auto quick whiteout perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/overlay/015 b/tests/overlay/015
+> index fd23e373..f0c05579 100755
+> --- a/tests/overlay/015
+> +++ b/tests/overlay/015
+> @@ -7,7 +7,7 @@
+>  # SGID bit inheritance over whiteout.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick whiteout
+> +_begin_fstest auto quick whiteout perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/overlay/023 b/tests/overlay/023
+> index 95d5aa22..740c47c1 100755
+> --- a/tests/overlay/023
+> +++ b/tests/overlay/023
+> @@ -14,7 +14,7 @@
+>  #     Miklos Szeredi <mszeredi@redhat.com>
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick attr
+> +_begin_fstest auto quick attr perms
+>  
+>  # Import common functions.
+>  . ./common/filter
+> -- 
+> 2.23.0
 > 
 
