@@ -2,74 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BA3BC4332F
-	for <linux-fstests@archiver.kernel.org>; Fri,  4 Nov 2022 20:59:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 794FAC433FE
+	for <linux-fstests@archiver.kernel.org>; Sat,  5 Nov 2022 03:23:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229667AbiKDU7V (ORCPT
+        id S229555AbiKEDXg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 4 Nov 2022 16:59:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52646 "EHLO
+        Fri, 4 Nov 2022 23:23:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33416 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229713AbiKDU7U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 Nov 2022 16:59:20 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACBEE3F05F;
-        Fri,  4 Nov 2022 13:59:16 -0700 (PDT)
+        with ESMTP id S229459AbiKEDXf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Nov 2022 23:23:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 560B82BB3D;
+        Fri,  4 Nov 2022 20:23:34 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 25663CE2E3B;
-        Fri,  4 Nov 2022 20:59:15 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51A8DC433C1;
-        Fri,  4 Nov 2022 20:59:13 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E5E5A6239C;
+        Sat,  5 Nov 2022 03:23:33 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8AB47C433C1;
+        Sat,  5 Nov 2022 03:23:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667595553;
-        bh=2DnjCwJhhqMLCsZwA0rRCeG/AkUzh69QXfmEHZY+dz4=;
+        s=k20201202; t=1667618613;
+        bh=iFTyhbCLwJZ86uIddXIjd1QI6r33HE0t/l4RhpPte4s=;
         h=From:To:Cc:Subject:Date:From;
-        b=s4vWe4rqi2o//OUfOcniAfs3S/x0IFNiVZfbLlQBCRYHeHPkckFKcqYbgGv9P2LbQ
-         VlwGPs1jz+tc1NsWWnUumXAXeqf+8HLNBuj2C18T+GVrARcIYNY4+tGGb8u7bEod6x
-         6WDt7JgDqjDqUvUegf6QxE1kieXVob+M6AB/Q6CdON2lPA4iXsDcmqVZ05Mr9AFDaW
-         Mo9eoSrq/ro106rFUfhvgS4pjzjlwb0VmLCPIWxGIcg5/75FEEd9ZoINOhLx0Zee1Y
-         IubOeAp0vj5Lz4F39ls4vQxXPT8AkVnnN3EA4LMtITiTb9acgw33O2cn77nMQnD5D2
-         VQ0hxx99vvO4w==
-From:   Eric Biggers <ebiggers@kernel.org>
+        b=ZEKrGfzkzsL33SDDGy4SPC34Z/J/aeq27pABFnRUO2oNheYcZOsgnByVm+WbZtohG
+         aIGIryCdyF4P6ucQHLiJxwhc+154p/7XBeQOYjBwvYFqn0LRwPGE6z78lnbHpP8J5F
+         BH6sXODxAJ1XWY1mge0Id+hSM+kjApXpYLVmyekn+wgvJ8KX7I4sooJntWvRj+bBip
+         ZwaHdUyFh/kWvr4oLLvhe5ZaTRhGuwQp6k2/XYtFtc0NHUsF6Rn2/IgkYRtZuZm/4n
+         gX/KEN6iCPE6QCRsjO8lbQJ8t6hK11oPeLDSU0zc+RoOe0qEcRmvjlgkER8V+i5OJo
+         sFdCmjDrZx56g==
+From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org,
-        Andrey Albershteyn <aalbersh@redhat.com>
-Subject: [xfstests PATCH v2 0/3] Fix test bugs related to fs.verity.require_signatures
-Date:   Fri,  4 Nov 2022 13:58:27 -0700
-Message-Id: <20221104205830.130132-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.38.1
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH] nfs: test files written size as expected
+Date:   Sat,  5 Nov 2022 11:23:29 +0800
+Message-Id: <20221105032329.2067299-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a replacement for Andrey's patchset
-"generic/577: fix hash check and add metadata cleaning".
-It handles some other things that were overlooked.
+Test nfs and its underlying fs, make sure file size as expected
+after writting a file, and the speculative allocation space can
+be shrunken.
 
-Changed v1 => v2:
-   - Slight code simplification (kept check for require_signatures
-     existence in _disable_fsverity_signatures() only)
-   - Added Reviewed-by tags
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
 
-Eric Biggers (3):
-  common/verity: fix _fsv_have_hash_algorithm() with required signatures
-  generic/577: add missing file removal before empty file test
-  tests: fix some tests for systems with fs.verity.require_signatures=1
+Hi,
 
- common/verity     | 58 ++++++++++++++++++++++++++++++-----------------
- tests/btrfs/290   |  9 ++++++++
- tests/btrfs/291   |  2 ++
- tests/generic/577 |  1 +
- tests/generic/624 |  8 +++++++
- tests/generic/692 |  8 +++++++
- 6 files changed, 65 insertions(+), 21 deletions(-)
+The original bug reproducer is:
+1. mount nfs3 backed by xfs
+2. dd if=/dev/zero of=/nfs/10M bs=1M count=10
+3. du -sh /nfs/10M                           
+16M	/nfs/10M 
 
+As this was a xfs issue, so cc linux-xfs@ to get review.
 
-base-commit: a75c5f50584e03ca7862ad51f48efd2d524d1dc5
+Thanks,
+Zorro
+
+ tests/nfs/002     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/nfs/002.out |  2 ++
+ 2 files changed, 45 insertions(+)
+ create mode 100755 tests/nfs/002
+ create mode 100644 tests/nfs/002.out
+
+diff --git a/tests/nfs/002 b/tests/nfs/002
+new file mode 100755
+index 00000000..3d29958d
+--- /dev/null
++++ b/tests/nfs/002
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 002
++#
++# Make sure nfs gets expected file size after writting a big sized file. It's
++# not only testing nfs, test its underlying fs too. For example a known old bug
++# on xfs (underlying fs) caused nfs get larger file size (e.g. 16M) after
++# writting 10M data to a file. It's fixed by a series of patches around
++# 579b62faa5fb16 ("xfs: add background scanning to clear eofblocks inodes")
++#
++. ./common/preamble
++_begin_fstest auto rw
++
++# real QA test starts here
++_supported_fs nfs
++_require_test
++
++localfile=$TEST_DIR/testfile.$seq
++rm -rf $localfile
++
++$XFS_IO_PROG -f -t -c "pwrite 0 10m" -c "fsync" $localfile >>$seqres.full 2>&1
++block_size=`stat -c '%B' $localfile`
++iblocks_expected=$((10 * 1024 * 1024 / $block_size))
++# Try several times for the speculative allocated file size can be shrunken
++res=1
++for ((i=0; i<10; i++));do
++	iblocks_real=`stat -c '%b' $localfile`
++	if [ "$iblocks_expected" = "$iblocks_real" ];then
++		res=0
++		break
++	fi
++	sleep 10
++done
++if [ $res -ne 0 ];then
++	echo "Write $iblocks_expected blocks, but get $iblocks_real blocks"
++fi
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/nfs/002.out b/tests/nfs/002.out
+new file mode 100644
+index 00000000..61705c7c
+--- /dev/null
++++ b/tests/nfs/002.out
+@@ -0,0 +1,2 @@
++QA output created by 002
++Silence is golden
 -- 
-2.38.1
+2.31.1
 
