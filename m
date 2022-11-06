@@ -2,126 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 168C1C433FE
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Nov 2022 12:11:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B380C4332F
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Nov 2022 12:25:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229786AbiKFMLo (ORCPT
+        id S229763AbiKFMZE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Nov 2022 07:11:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55214 "EHLO
+        Sun, 6 Nov 2022 07:25:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229783AbiKFMLn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Nov 2022 07:11:43 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4AECDE98
-        for <fstests@vger.kernel.org>; Sun,  6 Nov 2022 04:10:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667736639;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=/AYguhDDjAiXGEyUSpFE54KjLO8An9FvEOwXkRHJM3M=;
-        b=F+Bs67LqemD+tg/k+1TGAfjcd9ovnTwqq2aY+RqiDT+sWn0t00Z/58pXDVyWQ8NAsmAHVQ
-        KawtNYkxZu818CzissWBeA3FpxXjJThK7O2kOBXV32yfcnDNhyqslNBS4UH7xpUUTO5cwU
-        aor6IdEovyNIGA3NwwQS5DtVjQCEuso=
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
- [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-491-4Mam2oVENaCgfaG6x7mdiw-1; Sun, 06 Nov 2022 07:10:38 -0500
-X-MC-Unique: 4Mam2oVENaCgfaG6x7mdiw-1
-Received: by mail-qk1-f197.google.com with SMTP id j13-20020a05620a410d00b006e08208eb31so8033198qko.3
-        for <fstests@vger.kernel.org>; Sun, 06 Nov 2022 04:10:38 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/AYguhDDjAiXGEyUSpFE54KjLO8An9FvEOwXkRHJM3M=;
-        b=QH3kD6bhdVXrUXYGsnpXPmf1cXYDDXiynAY9A9NXPoLq55adt9wznSGON9hRoL/rfI
-         9JALTDcpFetL8E4dvzjbQLpXLcOe8C2dggx3MZJclYbJ1H7owQYJaHklRc2AEyAofu5R
-         vZse8rwzwzbEt4eqF1JJ/X6e5+2cz/oIMi9190OB+2KaBPofL0qQg0A4e6ccY+i88gQP
-         DV2W88rm6AsEoAqDOJ1xk0ZZxYt+IlJM9kDKEi+iU6NXQP8ytZd3uVBSZAmk9dOaCOOj
-         GxZswwtFqWHm/AZOfdvtufgqhuadlZ6j73uVcBgl2OQj251LTgXMhcTGORXxR37atkY0
-         bUAg==
-X-Gm-Message-State: ACrzQf1RlXUO1nLs18LXuncLEWjsNyIUD+cWoOWQY6YytD3lRfwUno0c
-        8mMbeTZyUCsotpNe0YK8TsICGEwVAREpaI5kbCEvtM5I8AdY1slGPkNrrak3/pHkJEX3Dckt9JN
-        k99ixC5RbHM0Gps0ZuA==
-X-Received: by 2002:a05:622a:99b:b0:3a5:1984:bdc4 with SMTP id bw27-20020a05622a099b00b003a51984bdc4mr33876635qtb.239.1667736637574;
-        Sun, 06 Nov 2022 04:10:37 -0800 (PST)
-X-Google-Smtp-Source: AMsMyM6wc1jHf9EEU7yBruRPGtlJvLEBihANIlhWcZNfeSaPZ2G0qrsAc7P8wTM7oR3GFJ2tJ9Fs9A==
-X-Received: by 2002:a05:622a:99b:b0:3a5:1984:bdc4 with SMTP id bw27-20020a05622a099b00b003a51984bdc4mr33876620qtb.239.1667736637302;
-        Sun, 06 Nov 2022 04:10:37 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w11-20020a05620a424b00b006f474e6a715sm4080625qko.131.2022.11.06.04.10.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 06 Nov 2022 04:10:36 -0800 (PST)
-Date:   Sun, 6 Nov 2022 20:10:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org, Eric Whitney <enwlinux@gmail.com>,
-        "Darrick J . Wong" <djwong@kernel.org>
-Subject: Re: [PATCH] generic: add missing $FSX_AVOID to fsx invocations
-Message-ID: <20221106121031.ywrlqu6w54kgnn2i@zlang-mailbox>
-References: <20221105182918.24099-1-tytso@mit.edu>
+        with ESMTP id S229741AbiKFMZD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Nov 2022 07:25:03 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE091E018
+        for <fstests@vger.kernel.org>; Sun,  6 Nov 2022 04:25:02 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 4A8C4B80B68
+        for <fstests@vger.kernel.org>; Sun,  6 Nov 2022 12:25:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B97BC433D6;
+        Sun,  6 Nov 2022 12:24:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1667737499;
+        bh=20PIyCugyH586DQQAJ2U9SqNyPEaT4BVEYTLW2Qne3w=;
+        h=Date:From:To:Subject:From;
+        b=NOqHfrL9lQczRnC0OzSvbJhzmC99YxogFWzTDRV5EG0egcLVTkUKyVV+zrypZsVvT
+         H1hk6nN0HNjCRjoXwt0yWtiOsIOIuPzKDPGPSCyEO5jIH3LCAhdLZXJYvvjabltB3E
+         egl8D7Q7VKYlr4RHR2TnqSzKimiqbkqHd85f2TmDQxnUZr7P4rLgeLQZ5HCAIQYKiS
+         f42vxJV/Io14SNqm9kKJE1iuJX4e2dSesTvGwcjiVG4L8iekFf61bFDy5q6fvgqqzG
+         Gh6iWS+JjSS57D+DgZOzqoM/Fc8REnhqFQPb8W6evbfl6abIZRCPzC0mcJDzGIoMlD
+         ewZMYNhP3wGYg==
+Date:   Sun, 06 Nov 2022 20:24:55 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2022.10.30 onto master branch
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="I853PUtbUz6G"
 Content-Disposition: inline
-In-Reply-To: <20221105182918.24099-1-tytso@mit.edu>
+Message-Id: <20221106122459.4B97BC433D6@smtp.kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Nov 05, 2022 at 02:29:18PM -0400, Theodore Ts'o wrote:
-> From: Eric Whitney <enwlinux@gmail.com>
-> 
-> generic/455 fails when run on an ext4 bigalloc file system.  Its
-> fsx invocations can make insert range and collapse range calls whose
-> arguments are not cluster aligned, and ext4 will fail those calls for
-> bigalloc.  They can be suppressed by adding the FSX_AVOID environment
-> variable to the fsx invocation and setting its value appropriately in
-> the test environment, as is done for other fsx-based tests.  This
-> avoids the need to exclude the test to avoid failures and makes it
-> possible to take advantage of the remainder of its coverage.
-> 
-> [ Also fix generic/457, as requested by Dave Chinner -- TYT]
-> 
-> Signed-off-by: Eric Whitney <enwlinux@gmail.com>
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> ---
-> 
-> This is a respin of "generic/455: add $FSX_AVOID" which Eric posted here:
-> https://lore.kernel.org/r/20221021211950.510006-1-enwlinux@gmail.com
-> it adds a similar fix for generic/457, as requested by Dave and Zorro.
 
-Thanks Ted, actually I'm going to merge this patch (with g/457 fix by myself)
-this week.
+--I853PUtbUz6G
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-But looks like you missed the change on g/457 (might forgot to commit). Anyway,
-I think it's not worth wasting one more week for this small change, I'll help
-to change g/457 when I merge this patch.
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2022.10.30 version (merged from for-next).
 
 Thanks,
 Zorro
 
-> 
->  tests/generic/455 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/455 b/tests/generic/455
-> index 649b54108..c13d872c6 100755
-> --- a/tests/generic/455
-> +++ b/tests/generic/455
-> @@ -77,7 +77,7 @@ FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
->  seeds=(0 0 0 0)
->  # Run fsx for a while
->  for j in `seq 0 $((NUM_FILES-1))`; do
-> -	run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
-> +	run_check $here/ltp/fsx $FSX_OPTS $FSX_AVOID -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
->  done
->  wait
->  
-> -- 
-> 2.31.0
-> 
+The new head of the master branch is commit:
 
+7d839ccc1a13 xfs: new test on xfs with corrupted sb_inopblock
+
+New commits:
+
+BingJing Chang (1):
+      [12f644786574] btrfs: test incremental send for orphan inodes
+
+Darrick J. Wong (5):
+      [65f937954f5e] populate: unexport the metadump description text
+      [3cfd47b936e9] xfs: refactor filesystem feature detection logic
+      [e33f8bfd0d70] xfs: refactor filesystem directory block size extraction logic
+      [898ace3b1835] xfs: refactor filesystem realtime geometry detection logic
+      [1153cd05b987] common: simplify grep pipe sed interactions
+
+Hironori Shiina (1):
+      [1ffa16c57368] xfs: test for fixing wrong root inode number in dump
+
+Lukas Czerner (1):
+      [2df0aa04659b] tests: Add missing _require_odirect from generic tests
+
+Xiubo Li (1):
+      [b38f94bbe96e] encrypt: add ceph support
+
+Zorro Lang (1):
+      [7d839ccc1a13] xfs: new test on xfs with corrupted sb_inopblock
+
+
+Code Diffstat:
+
+ common/dump             |   2 +-
+ common/encrypt          |   3 +
+ common/ext4             |   9 ++
+ common/populate         |  32 +++----
+ common/rc               |   2 +-
+ common/xfs              | 110 +++++++++++++++++++++---
+ src/Makefile            |   2 +-
+ src/fake-dump-rootino.c | 224 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/278         | 218 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/278.out     |   3 +
+ tests/generic/219       |   1 +
+ tests/generic/446       |   1 +
+ tests/generic/459       |   1 +
+ tests/generic/569       |   1 +
+ tests/generic/570       |   1 +
+ tests/generic/587       |   1 +
+ tests/xfs/097           |   2 +-
+ tests/xfs/099           |   2 +-
+ tests/xfs/100           |   2 +-
+ tests/xfs/101           |   2 +-
+ tests/xfs/102           |   2 +-
+ tests/xfs/105           |   2 +-
+ tests/xfs/112           |   2 +-
+ tests/xfs/113           |   2 +-
+ tests/xfs/146           |   2 +-
+ tests/xfs/147           |   2 +-
+ tests/xfs/151           |   3 +-
+ tests/xfs/271           |   2 +-
+ tests/xfs/307           |   2 +-
+ tests/xfs/308           |   2 +-
+ tests/xfs/348           |   2 +-
+ tests/xfs/530           |   3 +-
+ tests/xfs/554           |  75 ++++++++++++++++
+ tests/xfs/554.out       |  40 +++++++++
+ tests/xfs/555           |  32 +++++++
+ tests/xfs/555.out       |   6 ++
+ 36 files changed, 748 insertions(+), 50 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--I853PUtbUz6G
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmNnp2UACgkQlNbPkfr2
+tMxh3BAApQxX6rWJHuPdtE+V2YR9SSq6t+bq88iW8de6wvyBQhGh9xMU1f2ENsgD
+OYYSrLuETQyAyaYtL/PFtI70pBXQU1xC7INoLTZo/pc+6s9rKVzngiZ2uq5TJFuZ
+oZjM6KkVyz/2euYeUZJhvpc8PrN6x7vmuxhYwjcbva8KLZYHuUXatRX3/yS/+NFJ
+ut+BAwxIKo5JtPzEjuhiimV9CCzDs3C4A3HgEKNljKvJt1BQWrOngNOYae12kbq4
+6EAmIwGwarishQMD78C/+jpRS2gFOGxghIeEOHeMdzT9o6Rf1wArZTRcy8eoBVYF
+9hY2epe5KdismV8Bk77eimyO3AqC82U5b6ueC0ESBpnB9kf1dc3P/H7sqe6c14sM
+FclPS00oa9WExAmhb2JQNMbwJlT65qsYFUHi5MXCLrXohSPaBsFTLTQ0QNh9cbS6
+sCXea4Xpsj0ghI2LIjMazsg4RSw1BLjMBR0Br36tXnYjfPAdBfDCLaONSEpuDj83
+DrOREYXCiyxg9yLausLC869S2z+uekuootSD62o6cgG6GBfjcSwL6QAlpbAtRJi8
+2RjKf0lIzi8Upk/bRdIKoiDGyUqcGWKKp5t4X1pvmDdpdEK41mmethxs/jsdQHFT
+qwBEEGWcpccK+kWyge/Q4VxbSKTNMcEG6EyJDESPinhGp4F6w3Y=
+=d1lD
+-----END PGP SIGNATURE-----
+
+--I853PUtbUz6G--
