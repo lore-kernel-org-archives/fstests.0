@@ -2,84 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14F9BC433FE
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Nov 2022 10:54:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A0B1C4332F
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Nov 2022 16:35:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231592AbiKGKyK (ORCPT
+        id S231961AbiKGQfc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Nov 2022 05:54:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53950 "EHLO
+        Mon, 7 Nov 2022 11:35:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33510 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231482AbiKGKyJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Nov 2022 05:54:09 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FF691082
-        for <fstests@vger.kernel.org>; Mon,  7 Nov 2022 02:53:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667818395;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=bBH9bkxz89XttPnFbyTNBZMe1Y97uDZ/jyPp27K1H7k=;
-        b=iVPF1JxL+O5O7zDDutx9E47naXxrb3VT2ButC4L86ZFIAZ3saKR/aF9nWC5j5KuN6xZHGB
-        zlFNzLKioPM6gE38eqDId0DvXKpmii4VM5PJUVRfBtCiJ+btYMbCj7J6F2GIOEJ1iY6OxG
-        y1TfgSfMWLcYCB4tXd5Te4ADKihKZww=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-605-mYLYcTuoM2KxutneafsWpg-1; Mon, 07 Nov 2022 05:53:13 -0500
-X-MC-Unique: mYLYcTuoM2KxutneafsWpg-1
-Received: by mail-ej1-f72.google.com with SMTP id gt15-20020a1709072d8f00b007aaac7973fbso6189176ejc.23
-        for <fstests@vger.kernel.org>; Mon, 07 Nov 2022 02:53:13 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=bBH9bkxz89XttPnFbyTNBZMe1Y97uDZ/jyPp27K1H7k=;
-        b=4cdneCTLF414VgQBA2aL5dtdU1psvS4UOnF8ZctthR68ajdG/mlFW9Nkfz1aN4qLRH
-         oCfXgsqR4r7OtumUmQTCBRN2BG3B44yCiQpwTKlpCLf4bXsKnNenk/azS/19tfqvhE7g
-         /e46Q9EVXDD61P8B1QnPFU96wCidgbTd7aPTyiZzttKakerpZjLudLLTv/ZOMbSt6gkK
-         Btq47t5E5xajF/J2QRy7DgMKwDHw/uEWGF6eDL6AyjnqLeCAICUgEqfd2GAoqBOKF1yJ
-         25nN8cs4dTEewwSZ7l/0e8sJ6eU/w2paL6xlrPhmA7eFZ8wSddgzweg2qmUxZHYLg1bj
-         8xZA==
-X-Gm-Message-State: ANoB5plyRvfONIk311loL/I+yFofwGuu/mdh+8v2+zT5Njg5iNFoiN9O
-        qr5Xosn09tZYJZVUzlu48Bgj7giArFQIlf8GhNzgKSPv52Xc6bspH/CVxutIFpRB6nv4vjiEgqp
-        UdKVPBngfhzuOSs2b
-X-Received: by 2002:a17:906:d89:b0:7ae:6ba5:f324 with SMTP id m9-20020a1709060d8900b007ae6ba5f324mr3286349eji.299.1667818392463;
-        Mon, 07 Nov 2022 02:53:12 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf5TAMCHnXphi1w7WQOmF+OKizuLSEavYvn240ecj25BBAgHTUo0AHL6niOQhgMnl6lGEew5Jg==
-X-Received: by 2002:a17:906:d89:b0:7ae:6ba5:f324 with SMTP id m9-20020a1709060d8900b007ae6ba5f324mr3286336eji.299.1667818392277;
-        Mon, 07 Nov 2022 02:53:12 -0800 (PST)
-Received: from aalbersh.remote.csb ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id 21-20020a170906329500b00782ee6b34f2sm3187177ejw.183.2022.11.07.02.53.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Nov 2022 02:53:11 -0800 (PST)
-Date:   Mon, 7 Nov 2022 11:53:09 +0100
-From:   Andrey Albershteyn <aalbersh@redhat.com>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic: check logical-sector sized O_DIRECT
-Message-ID: <20221107105309.khksga5m7p766sed@aalbersh.remote.csb>
-References: <20221107045618.2772009-1-zlang@kernel.org>
+        with ESMTP id S232032AbiKGQfc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Nov 2022 11:35:32 -0500
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0FBAC20
+        for <fstests@vger.kernel.org>; Mon,  7 Nov 2022 08:35:29 -0800 (PST)
+Received: from letrec.thunk.org ([12.146.29.46])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 2A7GZGXf018629
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 7 Nov 2022 11:35:18 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1667838918; bh=FWtLEQYTWbEFsVEz+Z12WMUQDM6DCNUd7J0FJcZqjTc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=NzB/tZdI/CW7DEEdsrvL3hJWFEDgQ69PQ1MHvx0Tfpr4uf8sY/L5r2cKz+dWT4cEC
+         Usizf8IBGqsxq8MMG8mShdRY9EvlQkgfMkUD60sXu6W7v5YpIcI2cyY3kTHEZBfdZt
+         PSj/902SxqYu3gshciaxdy3Lpd4fRVcPLGIVt2b0C8D7tL+MAHrmyTdm7Kkr8rIOrV
+         FG3p1kl/yZ2gyH7OP2R6gbUwpsEfF6ZQTTIzJIshtKGwxPAFgwrYjOIYKuv6ThHw2T
+         RS744WRQ3LOaG3Ld5RVD7m2CbZpOzVMlAZ7i6+U0YFx06/X0gfORor5zs3ewC+kddH
+         SnAyDS11A0nCw==
+Received: by letrec.thunk.org (Postfix, from userid 15806)
+        id 220F18C00D2; Mon,  7 Nov 2022 11:35:16 -0500 (EST)
+Date:   Mon, 7 Nov 2022 11:35:16 -0500
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, Eric Whitney <enwlinux@gmail.com>,
+        "Darrick J . Wong" <djwong@kernel.org>
+Subject: Re: [PATCH] generic: add missing $FSX_AVOID to fsx invocations
+Message-ID: <Y2kzxKnYf8CLj49v@mit.edu>
+References: <20221105182918.24099-1-tytso@mit.edu>
+ <20221106121031.ywrlqu6w54kgnn2i@zlang-mailbox>
+ <Y2gqpYhf5n8Y43eZ@mit.edu>
+ <20221107020236.gdlmb5hxsaxxislo@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221107045618.2772009-1-zlang@kernel.org>
+In-Reply-To: <20221107020236.gdlmb5hxsaxxislo@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 07, 2022 at 12:56:18PM +0800, Zorro Lang wrote:
-> If the physical sector size is 4096, but the logical sector size
-> is 512, the 512b dio write/read should be allowed.
+On Mon, Nov 07, 2022 at 10:02:36AM +0800, Zorro Lang wrote:
+> I think it doesn't make sense to use $FSX_AVOID in `fsx --replay-ops` cases.
+> Due to generally the operations which a cases would like to replay are exact
+> steps to reproduce to a known bug. If we skip some operations (e.g. -F), it
+> doesn't make sense for this reproducer.
 > 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
+> The recommended way for this kind of cases is making sure current fs/system
+> support the operations will be run by fsx, especially those features are not
+> common on different fs/system....
+>
+> So it uses below _require_* helpers to make sure these operations are supported,
+> before testing:
+> 
+>   _require_xfs_io_command "falloc"
+>   _require_xfs_io_command "falloc" "-k"
+>   _require_xfs_io_command "fzero"
+>   _require_xfs_io_command "fcollapse"
+> 
+> That's my point, hope I didn't misunderstand what you said :)
 
-Looks good to me.
-Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+No, you didn't understand me.  :-)
 
--- 
-- Andrey
+For context, I have an out of tree patch (see attached), which I had
+tried upstreaming a while back, but it got rejected, so I've continued
+to keep it in my personal tree.  The basic idea is sometimes you might
+want to suppress a test even *though* _require_xfs_io_command seems to
+indicate that operation was supported.
 
+This might either be because the test didn't know about ext4
+bigalloc's cluster alignment requirements, or because a particular
+operation might just be *buggy* and being able to run tests as if a
+particular command wasn't supported was useful.
+
+It was rejected because the claim was that you could just exclude by
+group instead (e.g., "punch", "collapse") but I didn't trust that the
+group list would be kept up to date, so I never really agreed with
+that line of reasoning.  These days, given that group declaration are
+kept in the test script, it's much less likely to happen, but I've
+kept the patch in my tree because it's occasionally useful.
+
+At this point, it's admittedly pretty rarely needed since ext4's
+collapse and insert range commands are pretty solid modulo tests not
+understanding cluster alignment, but still, it's not much effort for
+me to keep carrying the patch and I don't expect it will ever get
+upstreamed.
+
+					- Ted
+
+commit c9d25475a94d5e53d7f18d247a17088999522862
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Sat Oct 17 14:39:26 2015 -0400
+
+    common: introduce XFS_IO_AVOID env var
+    
+    Like FSSTRESS_AVOID and FSX_AVOID, XFS_IO_AVOID can be used to avoid
+    using various advanced file system features such as "fpunch"
+    "fcollapse", "finsert", or "zero".  Tests that require an xfs_io
+    command which is included in the space-separated list found in the
+    XFS_IO_AVOID environment variable will be skipped using _notrun.
+    
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+diff --git a/README b/README
+index 4c4f22f85..42baff07b 100644
+--- a/README
++++ b/README
+@@ -245,6 +245,10 @@ Misc:
+    this option is supported for all filesystems currently only -overlay is
+    expected to run without issues. For other filesystems additional patches
+    and fixes to the test suite might be needed.
++ - setenv XFS_IO_AVOID, which may contain a list of space separated
++   xfs_io commands which will be avoided in case you want to exclude
++   tests that require the use of certain file system operations such
++   as "fpunch", "fcollapse", "finsert", or "zero".
+ 
+ ______________________
+ USING THE FSQA SUITE
+diff --git a/common/rc b/common/rc
+index eb67e0cdc..d1c07a4d0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2485,6 +2485,11 @@ _require_xfs_io_command()
+ 	local opts=""
+ 	local attr_info=""
+ 
++	if echo "$XFS_IO_AVOID" | grep -wq -- "$command"
++	then
++		_notrun "Avoiding xfs_io $command"
++	fi
++
+ 	local testfile=$TEST_DIR/$$.xfs_io
+ 	local testio
+ 	case $command in
