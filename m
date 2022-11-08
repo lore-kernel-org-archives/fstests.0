@@ -2,212 +2,188 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 859A7C43217
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Nov 2022 02:46:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B6F8C433FE
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Nov 2022 06:03:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232748AbiKHCqN (ORCPT
+        id S233149AbiKHGDv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Nov 2022 21:46:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60422 "EHLO
+        Tue, 8 Nov 2022 01:03:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233202AbiKHCqH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Nov 2022 21:46:07 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9653C2EF48
-        for <fstests@vger.kernel.org>; Mon,  7 Nov 2022 18:45:09 -0800 (PST)
+        with ESMTP id S233064AbiKHGDu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Nov 2022 01:03:50 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 238A3317DE
+        for <fstests@vger.kernel.org>; Mon,  7 Nov 2022 22:02:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1667875508;
+        s=mimecast20190719; t=1667887371;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=YJQtzZvo+8M13aUScJR/SPRR5S4zKby5pMUyPg7u0IE=;
-        b=NU7QGDt+oggJwW/7ygmG6D8QKBfPc4EO0VrMBd5G2KPNRxcRR21N2EwntbpCOURkrfbce0
-        GVXnGth/+z4QEuahWORkVdi0zPlGjoAQFar71g8ghnHp+/8+0QJtkOv2wvVwuK5Z2IHdvP
-        JOtwSNP8YTki2ExdH7uKh++6idZIt7E=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=2wi2cYOuCOjTRffHxFSHZytdUsNobPtQGapWaktS8Hs=;
+        b=UuTRDLbRY+wEV82bTHPONYxr+72f577tgMg30R4jrhi1N6lZ/yqUlRndOK6UvPbNP7/oeI
+        HufCv2jI+TtduOjOjKsoXjVNL65/6CPgZjhTt22rjB1a5YazqP56BNwKNzIXAZSYvW/7FB
+        cGODiO2PrNgqWgqLm7jggYRMIFFJ9dc=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-596-09t7XMemOgeAz7rIgPvTNQ-1; Mon, 07 Nov 2022 21:45:07 -0500
-X-MC-Unique: 09t7XMemOgeAz7rIgPvTNQ-1
-Received: by mail-pl1-f198.google.com with SMTP id i8-20020a170902c94800b0018712ccd6bbso10193156pla.1
-        for <fstests@vger.kernel.org>; Mon, 07 Nov 2022 18:45:07 -0800 (PST)
+ us-mta-217-TuOzp8jhNLG1Br1vAH-gjg-1; Tue, 08 Nov 2022 01:02:50 -0500
+X-MC-Unique: TuOzp8jhNLG1Br1vAH-gjg-1
+Received: by mail-qk1-f199.google.com with SMTP id ay43-20020a05620a17ab00b006fa30ed61fdso11950229qkb.5
+        for <fstests@vger.kernel.org>; Mon, 07 Nov 2022 22:02:50 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=YJQtzZvo+8M13aUScJR/SPRR5S4zKby5pMUyPg7u0IE=;
-        b=AYIY7pWWjersuL2JqTVnGTNzZx6N/MVmYeSdHvfXimBTg9VjTPvGz6hwnwJEwCbGyv
-         uWfuDI1sYxlc+KtFEzC3e3RqMaKGnOy0tYhx409s3nKC5BcziMTKI3lfWgrYHeeaFT3c
-         HH3VVKO7IWOOvj2ipGurToi/ELshOsbd7ymokNHDTqN0S4UnrRAe/dSdJr7zIcsP636X
-         2sfy3q3wIc3iaH5xAEItOFdjbSNIaZFzaJa5iMttV7tZEGgttMmqMhug5QyKvPLjRJ0G
-         gc4xJsYqEM/U6NMJ2OBhiEDE7BXg1ErRpDBAwLIS2YjH+XzvESByI8FKMQ0D3kmK3ru+
-         3nqQ==
-X-Gm-Message-State: ANoB5pmEwsL1iO5CzTC7lMBbAGqyXFWmf2NhjzgkrH9W8zt8ABsRxIxV
-        wWo6+XWGr2WRxuggGbGIAl6Khv+tA7lPp+nqMhyUhbiACdqi+tpn02xpkTxoKDT/9wWiraB8cWe
-        3lS5mHYkefdx44AOC3w==
-X-Received: by 2002:a17:902:a401:b0:188:79ba:d542 with SMTP id p1-20020a170902a40100b0018879bad542mr12718560plq.126.1667875506033;
-        Mon, 07 Nov 2022 18:45:06 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf6F6rrh+jG7BrnS2sEYhUIFQ9rx950wM7G2GznfnmJMBGXGLc/Ad8KotSKaVGtgHLGfS6dcHw==
-X-Received: by 2002:a17:902:a401:b0:188:79ba:d542 with SMTP id p1-20020a170902a40100b0018879bad542mr12718531plq.126.1667875505628;
-        Mon, 07 Nov 2022 18:45:05 -0800 (PST)
+        bh=2wi2cYOuCOjTRffHxFSHZytdUsNobPtQGapWaktS8Hs=;
+        b=BzQRAw+5bGuX73Fx5rK/iH8JzI/c0/SNRq0pMVvPnEIB9p6c2PR1hplxQdNabJglXG
+         hVNgLtmhHpIqG/qhHkOI3BamLYHU2yCXm/CYM+mMeqyr9CJ1eZpzPf60SxNrp53sZWiY
+         AC7BC0InnzNvIAtnDmGftcH2V1ul5Ch8H0CdY0BNFVX2MzweEXuo2YWf0uwny7IvRakU
+         9ZD5tYmAvldmUvmpBENP1XLPBMTJ2dOGZlp1GgfcrdQiY/zEoPPGtxnWz0y5zu8bbseq
+         l2re1R5FFmq2Xvqu+x1onFGnn318n2WTW7wdNbcyXpqCshsfJpUS5tSOdzKwHRogzLAF
+         GI3A==
+X-Gm-Message-State: ACrzQf0boj+xXf5MDHvFUT2cvFq1njLXkIZ6KXaA3Kcg3yHMa2hxzEwD
+        V08JNsoBOpfVsBENYfyeR5gjy1lDSehTQMKGx7YjgC8O294HpmuvOn7QMWZgV4XSpgZ3f5vVTYo
+        lotPHeM2gG6Jeow88rg==
+X-Received: by 2002:a05:6214:21ed:b0:4bb:e947:c59a with SMTP id p13-20020a05621421ed00b004bbe947c59amr43020736qvj.46.1667887369967;
+        Mon, 07 Nov 2022 22:02:49 -0800 (PST)
+X-Google-Smtp-Source: AMsMyM5VAf4+XKtbUbip6PzHrK5mLxiVeGAC9fqCDYNntMvhULNQOLUThIlEMaYtT8bN6c20bfBiVw==
+X-Received: by 2002:a05:6214:21ed:b0:4bb:e947:c59a with SMTP id p13-20020a05621421ed00b004bbe947c59amr43020701qvj.46.1667887369299;
+        Mon, 07 Nov 2022 22:02:49 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w184-20020a6262c1000000b0056b9ec7e2desm5164203pfb.125.2022.11.07.18.45.03
+        by smtp.gmail.com with ESMTPSA id r2-20020a05622a034200b003995f6513b9sm7680930qtw.95.2022.11.07.22.02.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Nov 2022 18:45:04 -0800 (PST)
-Date:   Tue, 8 Nov 2022 10:44:55 +0800
+        Mon, 07 Nov 2022 22:02:48 -0800 (PST)
+Date:   Tue, 8 Nov 2022 14:02:44 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-        Eric Whitney <enwlinux@gmail.com>
-Subject: Re: [PATCH] generic: add missing $FSX_AVOID to fsx invocations
-Message-ID: <20221108024455.6lhdrbfoqq53wj4p@zlang-mailbox>
-References: <20221105182918.24099-1-tytso@mit.edu>
- <20221106121031.ywrlqu6w54kgnn2i@zlang-mailbox>
- <Y2gqpYhf5n8Y43eZ@mit.edu>
- <20221107020236.gdlmb5hxsaxxislo@zlang-mailbox>
- <Y2kzxKnYf8CLj49v@mit.edu>
- <Y2lmFoNQ2ByXzCW0@magnolia>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] generic: shutdown might leave NULL files with nonzero
+ di_size
+Message-ID: <20221108060244.gixpw3v3cpwckkjq@zlang-mailbox>
+References: <20221105152324.2233310-1-zlang@kernel.org>
+ <Y2k1SzblcYRsSvzK@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y2lmFoNQ2ByXzCW0@magnolia>
+In-Reply-To: <Y2k1SzblcYRsSvzK@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 07, 2022 at 12:09:58PM -0800, Darrick J. Wong wrote:
-> On Mon, Nov 07, 2022 at 11:35:16AM -0500, Theodore Ts'o wrote:
-> > On Mon, Nov 07, 2022 at 10:02:36AM +0800, Zorro Lang wrote:
-> > > I think it doesn't make sense to use $FSX_AVOID in `fsx --replay-ops` cases.
-> > > Due to generally the operations which a cases would like to replay are exact
-> > > steps to reproduce to a known bug. If we skip some operations (e.g. -F), it
-> > > doesn't make sense for this reproducer.
-> > > 
-> > > The recommended way for this kind of cases is making sure current fs/system
-> > > support the operations will be run by fsx, especially those features are not
-> > > common on different fs/system....
-> > >
-> > > So it uses below _require_* helpers to make sure these operations are supported,
-> > > before testing:
-> > > 
-> > >   _require_xfs_io_command "falloc"
-> > >   _require_xfs_io_command "falloc" "-k"
-> > >   _require_xfs_io_command "fzero"
-> > >   _require_xfs_io_command "fcollapse"
-> > > 
-> > > That's my point, hope I didn't misunderstand what you said :)
+On Mon, Nov 07, 2022 at 08:41:47AM -0800, Darrick J. Wong wrote:
+> On Sat, Nov 05, 2022 at 11:23:24PM +0800, Zorro Lang wrote:
+> > An old issue might cause on-disk inode sizes are logged prematurely
+> > via the free eofblocks path on file close. Then fs shutdown might
+> > leave NULL files but their di_size > 0.
 > > 
-> > No, you didn't understand me.  :-)
-
-Wow, sorry I didn't realize that's a longer story :)
-
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
 > > 
-> > For context, I have an out of tree patch (see attached), which I had
-> > tried upstreaming a while back, but it got rejected, so I've continued
-> > to keep it in my personal tree.  The basic idea is sometimes you might
-> > want to suppress a test even *though* _require_xfs_io_command seems to
-> > indicate that operation was supported.
+> > V2 replace "fiemap" with "stat" command, to check if a file has extents.
+> > That helps this case more common.
 > > 
-> > This might either be because the test didn't know about ext4
-> > bigalloc's cluster alignment requirements, or because a particular
-> > operation might just be *buggy* and being able to run tests as if a
-> > particular command wasn't supported was useful.
+> > Thanks,
+> > Zorro
 > > 
-> > It was rejected because the claim was that you could just exclude by
-> > group instead (e.g., "punch", "collapse") but I didn't trust that the
-> > group list would be kept up to date, so I never really agreed with
-
-I agree that most of people don't pay much attention to the group names
-when they write a test case. And there're new group names sometimes,
-so we always need to supplement some group names later. But the group
-name is still helpful, so if you feel some cases missed some groups, please
-feel free to tell us :)
-
-> > that line of reasoning.  These days, given that group declaration are
-> > kept in the test script, it's much less likely to happen, but I've
-> > kept the patch in my tree because it's occasionally useful.
+> >  tests/generic/999     | 42 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/999.out |  5 +++++
+> >  2 files changed, 47 insertions(+)
+> >  create mode 100755 tests/generic/999
+> >  create mode 100644 tests/generic/999.out
 > > 
-> > At this point, it's admittedly pretty rarely needed since ext4's
-> > collapse and insert range commands are pretty solid modulo tests not
-> > understanding cluster alignment, but still, it's not much effort for
-> > me to keep carrying the patch and I don't expect it will ever get
-> > upstreamed.
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 00000000..8b4596e0
+> > --- /dev/null
+> > +++ b/tests/generic/999
 > 
-> If it's collapse/insert range you're specifically worried about, perhaps
-> its time to implement _get_file_block_size for ext4 so that
-> _test_congruent_file_oplen can exclude those tests that will get the
-> alignment wrong?
+> Ugh sorry     ^^^^^^^ I didn't notice this part and wrote my previous
+> response thinking this was an xfs-only test...
 
-Thanks Darrick, I'm thinking about this helper you wrote recently :)
-(The real name is _require_congruent_file_oplen in common/rc.)
+Oh, my bad, I forgot to change the "_supported_fs xfs" to "generic".
 
-Hi Ted, is this helpful if you write a _ext4_get_file_block_size (refer to
-_xfs_get_file_block_size in common/xfs), then call it in _get_file_block_size
-to help _require_congruent_file_oplen to get the correct length which is an
-integer multiple of the file's allocation unit size ?
+> 
+> > @@ -0,0 +1,42 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 999
+> > +#
+> > +# Test an issue in the truncate codepath where on-disk inode sizes are logged
+> > +# prematurely via the free eofblocks path on file close.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick shutdown
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_scratch_shutdown
+> > +_scratch_mkfs > $seqres.full 2>&1
+> > +_scratch_mount
+> > +
+> > +echo "Create many small files with one extent at least"
+> > +for ((i=0; i<10000; i++));do
+> > +	$XFS_IO_PROG -f -c "pwrite 0 4k" $SCRATCH_MNT/file.$i >/dev/null 2>&1
+> > +done
+> > +
+> > +echo "Shutdown the fs suddently"
+> > +_scratch_shutdown
+> > +
+> > +echo "Cycle mount"
+> > +_scratch_cycle_mount
+> > +
+> > +echo "Check file's (di_size > 0) extents"
+> > +for f in $(find $SCRATCH_MNT -type f -size +0);do
+> > +	# Check if the file has any extent
+> > +	if [ "$(stat -c "%b" $f)" = "0" ];then
+> > +		echo " - $f get no extents, but its di_size > 0"
+> > +		break
+> > +	fi
+> > +done
+> 
+> ...so whereas I was trying to suggest that you could use the GETFSXATTR
+> ioctl to return the extent count:
+> 
+> $XFS_IO_PROG -c stat $f | grep fsxattr.nextents | awk '{print $3}'
+> 
+> But that won't work outside of XFS.  To make this generic, I think you
+> have to do something like:
+> 
+> $FILEFRAG_PROG -v $f | wc -l
 
-If this's helpful for your first concern [1], please tell me. Then we can talk
-about your second concern [2], if it's still your main concern now :)
-
-"This might *[1]* either be because the test didn't know about ext4
- bigalloc's cluster alignment requirements, *[2]* or because a particular
- operation might just be *buggy* and being able to run tests as if a
- particular command wasn't supported was useful."
+I'm wondering if we must check extent is 0, how about check allocated block = 0?
+I tried [ "$(stat -c "%b" $f)" = "0" ], it fails on old kernel without this bug
+fix, and test passed on new kernel. Does that make sense for you?
 
 Thanks,
 Zorro
 
 > 
+> to see if there are any extents.
+> 
 > --D
 > 
-> > 
-> > 					- Ted
-> > 
-> > commit c9d25475a94d5e53d7f18d247a17088999522862
-> > Author: Theodore Ts'o <tytso@mit.edu>
-> > Date:   Sat Oct 17 14:39:26 2015 -0400
-> > 
-> >     common: introduce XFS_IO_AVOID env var
-> >     
-> >     Like FSSTRESS_AVOID and FSX_AVOID, XFS_IO_AVOID can be used to avoid
-> >     using various advanced file system features such as "fpunch"
-> >     "fcollapse", "finsert", or "zero".  Tests that require an xfs_io
-> >     command which is included in the space-separated list found in the
-> >     XFS_IO_AVOID environment variable will be skipped using _notrun.
-> >     
-> >     Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > 
-> > diff --git a/README b/README
-> > index 4c4f22f85..42baff07b 100644
-> > --- a/README
-> > +++ b/README
-> > @@ -245,6 +245,10 @@ Misc:
-> >     this option is supported for all filesystems currently only -overlay is
-> >     expected to run without issues. For other filesystems additional patches
-> >     and fixes to the test suite might be needed.
-> > + - setenv XFS_IO_AVOID, which may contain a list of space separated
-> > +   xfs_io commands which will be avoided in case you want to exclude
-> > +   tests that require the use of certain file system operations such
-> > +   as "fpunch", "fcollapse", "finsert", or "zero".
-> >  
-> >  ______________________
-> >  USING THE FSQA SUITE
-> > diff --git a/common/rc b/common/rc
-> > index eb67e0cdc..d1c07a4d0 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -2485,6 +2485,11 @@ _require_xfs_io_command()
-> >  	local opts=""
-> >  	local attr_info=""
-> >  
-> > +	if echo "$XFS_IO_AVOID" | grep -wq -- "$command"
-> > +	then
-> > +		_notrun "Avoiding xfs_io $command"
-> > +	fi
 > > +
-> >  	local testfile=$TEST_DIR/$$.xfs_io
-> >  	local testio
-> >  	case $command in
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/999.out b/tests/generic/999.out
+> > new file mode 100644
+> > index 00000000..50008783
+> > --- /dev/null
+> > +++ b/tests/generic/999.out
+> > @@ -0,0 +1,5 @@
+> > +QA output created by 999
+> > +Create many small files with one extent at least
+> > +Shutdown the fs suddently
+> > +Cycle mount
+> > +Check file's (di_size > 0) extents
+> > -- 
+> > 2.31.1
+> > 
 > 
 
