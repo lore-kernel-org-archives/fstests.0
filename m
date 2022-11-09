@@ -2,101 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BACAAC4321E
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 11:44:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC08EC4332F
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 13:07:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230099AbiKILoS (ORCPT
+        id S229937AbiKINHy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Nov 2022 06:44:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55638 "EHLO
+        Wed, 9 Nov 2022 08:07:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230303AbiKILoF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 06:44:05 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 286CA1A04E;
-        Wed,  9 Nov 2022 03:43:49 -0800 (PST)
+        with ESMTP id S229558AbiKINHw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 08:07:52 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08AB8C35;
+        Wed,  9 Nov 2022 05:07:51 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id DF060B81DF5;
-        Wed,  9 Nov 2022 11:43:47 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC1D2C433C1;
-        Wed,  9 Nov 2022 11:43:45 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 986CA61A0D;
+        Wed,  9 Nov 2022 13:07:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38603C433C1;
+        Wed,  9 Nov 2022 13:07:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667994226;
-        bh=j1Aieg493NQTqXY3czipEQEPMuHZTJs8oAvLJMoCCmw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=c7hmokEXp0AW0laL0H2Az8JrPTeMIjJ2zdN1lXWbBt+uKvfRz9agPWXC5Oi9qwf1v
-         MZD3d0JRigCdT0K1uh/q+vLBmoNtKXRTkXGvjuzNeaDhqE23yarIrqo3pR7CLP4AH3
-         Ct/kaV3Jxpsu0QSqthyZs/dUIOhJknAlMsENCgicur5sNwEVGfef++YH4AGmAbQLK6
-         zySRDe1WB5SL6gIk9m6FwhZX+DHh2rVb797DXcggGdzVXyAS7QOTeshnhN1WOSr/hT
-         UpwIab0ij8hiRF5hbOIS1NmsQUc9wXxNOBId04qDAY9abRJu2tj/mIR2Z+y1J1crGp
-         6XhWMZ2cofrXw==
-From:   fdmanana@kernel.org
+        s=k20201202; t=1667999270;
+        bh=v7HI9f/Y/UglMvT4d+sTDM2kcepv7L9axaYnTyifsgE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=XOMGP5GHeimkereeoUFxJA+3UWJyvPIP2FvpB2qQzxDCWSUMSexGku/LLeHF/zEdM
+         sGP0+BmABRzTVNndm4jCNXznkBNzUkLkXCLQ34s1MG8vpbaaiPK4++kPLNYhhYaC2K
+         0ohggI6rC+QwjwLJJMpD2OUhs5+SHHv5BUrJqDtqYxJhIKVtXEu12pM27rwjS041QD
+         sJkPKBfgHHOdEjdRWnfFK5+k5rWScIK/Foo+m+i4BIlDM6UAKBXfc7VihFrkhzxyte
+         3tPNfxZo5j3CBGQcZgpbzzsWG30nx35haB4Wgn+7GG0K+VWG7xma+w6m9wpleMtjsS
+         u+aO3WNyUJfwg==
+From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 3/3] btrfs: fix failure of tests that use defrag on btrfs-progs v6.0+
-Date:   Wed,  9 Nov 2022 11:43:36 +0000
-Message-Id: <d2723c3a1b0205c68f5e62ed5156672d93b2e270.1667993961.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <cover.1667993961.git.fdmanana@suse.com>
-References: <cover.1667993961.git.fdmanana@suse.com>
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH v3] generic: shutdown might leave NULL files with nonzero di_size
+Date:   Wed,  9 Nov 2022 21:07:46 +0800
+Message-Id: <20221109130746.3669020-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+An old issue might cause on-disk inode sizes are logged prematurely
+via the free eofblocks path on file close. Then fs shutdown might
+leave NULL files but their di_size > 0.
 
-Starting with btrfs-progs v6.0, the defrag command now prints to stdout
-the full path of the files it processes. This makes test cases btrfs/021
-and btrfs/256 fail because they don't expect any output from the defrag
-command.
-
-The change happened with the following commit in btrfs-progs:
-
-  dd724f21803d ("btrfs-progs: add logic to handle LOG_DEFAULT messages")
-
-So update the tests to ignore the stdout of the defrag command.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Zorro Lang <zlang@kernel.org>
 ---
- tests/btrfs/021 | 4 +++-
- tests/btrfs/256 | 4 +++-
- 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/tests/btrfs/021 b/tests/btrfs/021
-index 5943da2f..1b55834a 100755
---- a/tests/btrfs/021
-+++ b/tests/btrfs/021
-@@ -22,8 +22,10 @@ run_test()
- 
- 	sleep 0.5
- 
-+	# In new versions of btrfs-progs (6.0+), the defrag command outputs to
-+	# stdout the path of the files it operates on. So ignore that.
- 	find $SCRATCH_MNT -type f -print0 | xargs -0 \
--	$BTRFS_UTIL_PROG filesystem defrag -f
-+		$BTRFS_UTIL_PROG filesystem defrag -f > /dev/null
- 
- 	sync
- 	wait
-diff --git a/tests/btrfs/256 b/tests/btrfs/256
-index 1360c2c2..acbbc6fa 100755
---- a/tests/btrfs/256
-+++ b/tests/btrfs/256
-@@ -50,7 +50,9 @@ $FSSUM_PROG -A -f -w "$checksums_file" "$SCRATCH_MNT"
- # Now defrag each file.
- for sz in ${file_sizes[@]}; do
- 	echo "Defragging file with $sz bytes..." >> $seqres.full
--	$BTRFS_UTIL_PROG filesystem defragment "$SCRATCH_MNT/f_$sz"
-+	# In new versions of btrfs-progs (6.0+), the defrag command outputs to
-+	# stdout the path of the files it operates on. So ignore that.
-+	$BTRFS_UTIL_PROG filesystem defragment "$SCRATCH_MNT/f_$sz" > /dev/null
- done
- 
- # Verify the checksums after the defrag operations.
+Hi,
+
+V2 replace xfs_io fiemap command with stat command.
+V3 replace the stat with the filefrag command, and change the supported_fs
+from xfs to generic.
+
+Thanks,
+Zorro
+
+ tests/generic/999     | 46 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  5 +++++
+ 2 files changed, 51 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..ca666de7
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,46 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 999
++#
++# Test an issue in the truncate codepath where on-disk inode sizes are logged
++# prematurely via the free eofblocks path on file close.
++#
++. ./common/preamble
++_begin_fstest auto shutdown
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++_require_scratch_shutdown
++_require_command "$FILEFRAG_PROG" filefrag
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++echo "Create many small files with one extent at least"
++for ((i=0; i<10000; i++));do
++	$XFS_IO_PROG -f -c "pwrite 0 4k" $SCRATCH_MNT/file.$i >/dev/null 2>&1
++done
++
++echo "Shutdown the fs suddently"
++_scratch_shutdown
++
++echo "Cycle mount"
++_scratch_cycle_mount
++
++echo "Check file's (di_size > 0) extents"
++for f in $(find $SCRATCH_MNT -type f -size +0);do
++	# Check if the file has any extent
++	$FILEFRAG_PROG -v $f > $tmp.filefrag
++	grep -Eq ': 0 extents found' $tmp.filefrag
++	if [ $? -eq 0 ];then
++		echo " - $f get no extents, but its di_size > 0"
++		cat $tmp.filefrag
++		break
++	fi
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..50008783
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,5 @@
++QA output created by 999
++Create many small files with one extent at least
++Shutdown the fs suddently
++Cycle mount
++Check file's (di_size > 0) extents
 -- 
-2.35.1
+2.31.1
 
