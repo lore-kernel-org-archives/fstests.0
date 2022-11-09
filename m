@@ -2,126 +2,125 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F949C4332F
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 17:07:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B490C43217
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 18:06:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231344AbiKIRH6 (ORCPT
+        id S229781AbiKISGc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Nov 2022 12:07:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39156 "EHLO
+        Wed, 9 Nov 2022 13:06:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231136AbiKIRH5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 12:07:57 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EC8913A
-        for <fstests@vger.kernel.org>; Wed,  9 Nov 2022 09:06:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1668013613;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=tBwQZJIi2BVi9LjnoUI2prY0PEJGEFudVPWJ71X1164=;
-        b=H10GNN3/lMaw7KKbH7Lxe6yw/kpH23ZG9VI90qqdawbyQGnFVgl8McyR/tKBtFbRfRQTjL
-        QWG3FUxMM/C8C9l7YK7Wbpw8C2BQ3UIoODh49WHH72vD7TTh2wjEd6fyDBLM5jaK9yFT5F
-        wBs2Ryr5bevz+jglF17T8G+8ADfmVaM=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-455-FnkQEP5fOOyEgmIfQbc_KA-1; Wed, 09 Nov 2022 12:06:50 -0500
-X-MC-Unique: FnkQEP5fOOyEgmIfQbc_KA-1
-Received: by mail-pj1-f69.google.com with SMTP id q93-20020a17090a1b6600b0021311ab9082so1464229pjq.7
-        for <fstests@vger.kernel.org>; Wed, 09 Nov 2022 09:06:50 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tBwQZJIi2BVi9LjnoUI2prY0PEJGEFudVPWJ71X1164=;
-        b=y0dEqTxM5LJy0vPhprBmW8DF6gDZSnxiV+S3CLLNjONEbLAv8+UQpgxNP47uOp2Bsf
-         1qHkw7RmG71F3BgQF8zno85S4XYc6SyzCOdu5WdO6FvlFTfQfZaE9wK2Lmd5acXIRE49
-         Ij0oXgrgyteyWcFenm70ChLZ04U90d0Cri25LG/5/qhRr2M0DrFJ9Y1pRqpKO29FZnHB
-         PEr1YA2BszIck3B6IT9BgZ8FrTcJUKJevetQtjq6lxZ0LbJKG/j7p3pXrxv42EhMT3/G
-         qpVJdHn29gFXCdM1h50m7rNg4ZzsiiWouewK+JEAjngbmtLXZAVQrmZ0t/1l7fB7fLgG
-         UUpA==
-X-Gm-Message-State: ACrzQf3r0Cxc5Ch0xxesbUWUz+dwD9BD7dmuo8YIT6AXHGw0R4WH6iBj
-        tmRv2fRobjkZ4CinHc9pBi9U27OhzbWf5qYuDqI0KmZE/ntzt+4tE++9/9e7LfiqEGr/rFPyshp
-        u0T9oNT7lVeqohkHPYg==
-X-Received: by 2002:a17:902:9004:b0:187:4889:7dbb with SMTP id a4-20020a170902900400b0018748897dbbmr39833713plp.137.1668013609117;
-        Wed, 09 Nov 2022 09:06:49 -0800 (PST)
-X-Google-Smtp-Source: AMsMyM4Nz1d2XjHNMfa0GWVbcESlABQGlSzEx+6WG7jMFaMVzomyXr9mD1gEVt0gQT12YE058gNk9g==
-X-Received: by 2002:a17:902:9004:b0:187:4889:7dbb with SMTP id a4-20020a170902900400b0018748897dbbmr39833681plp.137.1668013608829;
-        Wed, 09 Nov 2022 09:06:48 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id u17-20020a634551000000b00439f027789asm7808687pgk.59.2022.11.09.09.06.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Nov 2022 09:06:48 -0800 (PST)
-Date:   Thu, 10 Nov 2022 01:06:43 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2 2/3] btrfs/053: fix test failure when running with
- btrfs-progs v6.0+
-Message-ID: <20221109170643.sfxl7nl47ro73pis@zlang-mailbox>
-References: <cover.1668011940.git.fdmanana@suse.com>
- <793a063833727ea80a1d0c6f13f531cff9581a1a.1668011940.git.fdmanana@suse.com>
+        with ESMTP id S229517AbiKISGb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 13:06:31 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F19D6FCC2;
+        Wed,  9 Nov 2022 10:06:30 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7352561965;
+        Wed,  9 Nov 2022 18:06:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8950C433D6;
+        Wed,  9 Nov 2022 18:06:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1668017189;
+        bh=def/zwDwIgnLvY6DS4LJlJj5V1RwdIlh0oQC8qKGHvA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=SPlGxW8qPxcnuMsP4wor+EnBYavO0TH8Bg+DsY3ubPkeaTY7oTcVNgDKhqmFdx1Sy
+         2YlFRuuYpuSYdzbLkg9y81/aI+bIFKpbHiYCTzN7BE8qdpwihiLf/sJbBi8AddpTRl
+         Kv5p42m/t1Lq7mysiUvaD6AngIDScJrge7TnrmMwyNMU5f0FYlWgS/VHNXv3ZrOcji
+         uW4w2r8UzN/WeOfa+L5sqYQ2kC/HTyLDryAOUM2VXfeAo9AhphR2h+0VNHpROvAfg+
+         c2PoNOG8TdtYVIbPDf2zwd3UTWyY6IDpzsMGVXfF9UnmPzXdLqVtKXV0CVe4ZX/JQJ
+         p3PzkA93X2wOw==
+Date:   Wed, 9 Nov 2022 10:06:29 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Filipe Manana <fdmanana@kernel.org>
+Cc:     Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+        Zorro Lang <zlang@redhat.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
+        Chuck Lever III <chuck.lever@oracle.com>,
+        "djwong@vger.kernel.org" <djwong@vger.kernel.org>,
+        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+Subject: Re: generic/650 makes v6.0-rc client unusable
+Message-ID: <Y2vsJc1CKuUNzGID@magnolia>
+References: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
+ <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
+ <20221109041951.wlgxac3buutvettq@shindev>
+ <CAL3q7H5eV9Sb1axmNgvcbG7UrgGTH3AovaibQuWMz44Jfo-8_w@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <793a063833727ea80a1d0c6f13f531cff9581a1a.1668011940.git.fdmanana@suse.com>
+In-Reply-To: <CAL3q7H5eV9Sb1axmNgvcbG7UrgGTH3AovaibQuWMz44Jfo-8_w@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 09, 2022 at 04:44:57PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Nov 09, 2022 at 10:36:04AM +0000, Filipe Manana wrote:
+> On Wed, Nov 9, 2022 at 4:22 AM Shinichiro Kawasaki
+> <shinichiro.kawasaki@wdc.com> wrote:
+> >
+> > On Sep 04, 2022 / 21:15, Zorro Lang wrote:
+> > > On Sat, Sep 03, 2022 at 06:43:29PM +0000, Chuck Lever III wrote:
+> > > > While investigating some of the other issues that have been
+> > > > reported lately, I've found that my v6.0-rc3 NFS/TCP client
+> > > > goes off the rails often (but not always) during generic/650.
+> > > >
+> > > > This is the test that runs a workload while offlining and
+> > > > onlining CPUs. My test client has 12 physical cores.
+> > > >
+> > > > The test appears to start normally, but then after a bit
+> > > > the NFS server workload drops to zero and the NFS mount
+> > > > disappears. I can't run programs (sudo, for example) on
+> > > > the client. Can't log in, even on the console. The console
+> > > > has a constant stream of "can't rotate log: Input/Output
+> > > > error" type messages.
+> >
+> > I also observe this failure when I ran fstests using btrfs on my HDDs.
+> > The failure is recreated almost always.
 > 
-> In btrfs-progs v6.0 the --leafsize (-l) command line option was removed
-> from mkfs.btrfs, so btrfs/053 can fail with v6.0+ in case the scratch
-> device does not have a btrfs filesystem created before running the test,
-> in which case mounting the scratch device fails.
+> I'm wondering what do you get in dmesg, any traces?
 > 
-> The change was introduced by the following btrfs-progs commit:
+> I've excluded the test from my runs for over an year now, due to some
+> crash that I reported
+> to the mm and cpu hotplug people here:
 > 
->   f7a768d62498 ("btrfs-progs: mkfs: remove support for option --leafsize")
+> https://lore.kernel.org/linux-mm/CAL3q7H4AyrZ5erimDyO7mOVeppd5BeMw3CS=wGbzrMZrp56ktA@mail.gmail.com/
 > 
-> Change the test to use --nodesize (-n) instead, since it exists in both
-> old and new btrfs-progs versions. Also redirect mkfs output to the test's
-> log file and fail explicitly if mkfs failed.
+> Unfortunately I had no reply from anyone who works or maintains those
+> subsystems.
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
+> It didn't happen very often, and I haven't tested again with recent kernels.
 
-This version looks good to me, thanks for fixing this.
+I've been testing with xfs/btrfs/ext4 nightly, and haven't seen any
+problems with the last two.  There's some very infrequent log accounting
+problem that is probably a regression from Dave's recent round of log
+refactorings, so once we're clear of the write race corruption problem,
+I intend to inquire about that.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Granted I also don't have hundreds-of-cpus machines to test this kind of
+stuff, so I don't know how well hotplug mania fares on a big iron.
 
->  tests/btrfs/053 | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/btrfs/053 b/tests/btrfs/053
-> index fbd2e7d9..67239f10 100755
-> --- a/tests/btrfs/053
-> +++ b/tests/btrfs/053
-> @@ -44,7 +44,7 @@ send_files_dir=$TEST_DIR/btrfs-test-$seq
->  rm -fr $send_files_dir
->  mkdir $send_files_dir
->  
-> -_scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
-> +_scratch_mkfs "--nodesize $leaf_size" >> $seqres.full 2>&1 || _fail "mkfs failed"
->  _scratch_mount
->  
->  echo "hello world" > $SCRATCH_MNT/foobar
-> @@ -72,7 +72,7 @@ _run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
->  _scratch_unmount
->  _check_scratch_fs
->  
-> -_scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
-> +_scratch_mkfs "--nodesize $leaf_size" >> $seqres.full 2>&1 || _fail "mkfs failed"
->  _scratch_mount
->  
->  _run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
-> -- 
-> 2.35.1
-> 
+I don't think it's valid to remove a test from the auto group because it
+uncovers bugs.  If test runner folks want to put it in their own exclude
+lists for their own convenience, that's fine with me.
 
+--D
+
+> >
+> > > >
+> > > > I haven't looked further into this yet. Actually I'm not
+> > > > quite sure where to start looking.
+> > > >
+> > > > I recently switched this client from a local /home to an
+> > > > NFS-mounted one, and that's where the xfstests are built
+> > > > and run from, fwiw.
+> > >
+> > > If most of users complain generic/650, I'd like to exclude g/650 from the
+> > > "auto" default run group. Any more points?
+> >
+> > +1. I wish to remove it from the "auto" group. Since I can not login to the test
+> > machine after the failure, I suggest to put it in the "dangerous" group.
+> >
+> > --
+> > Shin'ichiro Kawasaki
