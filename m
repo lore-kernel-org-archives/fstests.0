@@ -2,149 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BDC8C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 16:51:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F949C4332F
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 17:07:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229942AbiKIQvv (ORCPT
+        id S231344AbiKIRH6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Nov 2022 11:51:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51330 "EHLO
+        Wed, 9 Nov 2022 12:07:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39156 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230146AbiKIQvu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 11:51:50 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E3E51EEF4;
-        Wed,  9 Nov 2022 08:51:49 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 99D5ECE1FE3;
-        Wed,  9 Nov 2022 16:51:47 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD671C433C1;
-        Wed,  9 Nov 2022 16:51:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1668012705;
-        bh=ScExPiaZqx2HlutJDhwEJn2QRR5/82Ondv3X1/oizGA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sI3Xzc+iFbmZhfCrT3mMModxLux/wICXLRJmdHEwyQpEVQRSmNq6XrJyA7J5Jx85P
-         oL0rrYiZOZ2y572YRvI0MdloThxYeV+SVhxqzDyuSccg+zdl5Y8oEdrPGBzuc4uKX7
-         8vFJfXoV+fc9y93LaAhRMzkxBJQtV7kWwDfW1c3tTL/fySen6yOO+/vUEOK3aQ1QOV
-         XUbhP9xZGMEKJBJiSSXGP906tuc3j9zktgAa7/wr+M/s0rJkIh9GAFAaggWUxZYccL
-         BLRRSR2Ef+rHJFRewr6jh5JSyN41qzfdhYTYIQixrZ7TrxIWcmbrtKvjQYZQC6xZAi
-         YpoS8PQ05va7g==
-Date:   Wed, 9 Nov 2022 08:51:45 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v3] generic: shutdown might leave NULL files with nonzero
- di_size
-Message-ID: <Y2vaoY486TpfKXM3@magnolia>
-References: <20221109130746.3669020-1-zlang@kernel.org>
+        with ESMTP id S231136AbiKIRH5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 12:07:57 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EC8913A
+        for <fstests@vger.kernel.org>; Wed,  9 Nov 2022 09:06:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1668013613;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=tBwQZJIi2BVi9LjnoUI2prY0PEJGEFudVPWJ71X1164=;
+        b=H10GNN3/lMaw7KKbH7Lxe6yw/kpH23ZG9VI90qqdawbyQGnFVgl8McyR/tKBtFbRfRQTjL
+        QWG3FUxMM/C8C9l7YK7Wbpw8C2BQ3UIoODh49WHH72vD7TTh2wjEd6fyDBLM5jaK9yFT5F
+        wBs2Ryr5bevz+jglF17T8G+8ADfmVaM=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-455-FnkQEP5fOOyEgmIfQbc_KA-1; Wed, 09 Nov 2022 12:06:50 -0500
+X-MC-Unique: FnkQEP5fOOyEgmIfQbc_KA-1
+Received: by mail-pj1-f69.google.com with SMTP id q93-20020a17090a1b6600b0021311ab9082so1464229pjq.7
+        for <fstests@vger.kernel.org>; Wed, 09 Nov 2022 09:06:50 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=tBwQZJIi2BVi9LjnoUI2prY0PEJGEFudVPWJ71X1164=;
+        b=y0dEqTxM5LJy0vPhprBmW8DF6gDZSnxiV+S3CLLNjONEbLAv8+UQpgxNP47uOp2Bsf
+         1qHkw7RmG71F3BgQF8zno85S4XYc6SyzCOdu5WdO6FvlFTfQfZaE9wK2Lmd5acXIRE49
+         Ij0oXgrgyteyWcFenm70ChLZ04U90d0Cri25LG/5/qhRr2M0DrFJ9Y1pRqpKO29FZnHB
+         PEr1YA2BszIck3B6IT9BgZ8FrTcJUKJevetQtjq6lxZ0LbJKG/j7p3pXrxv42EhMT3/G
+         qpVJdHn29gFXCdM1h50m7rNg4ZzsiiWouewK+JEAjngbmtLXZAVQrmZ0t/1l7fB7fLgG
+         UUpA==
+X-Gm-Message-State: ACrzQf3r0Cxc5Ch0xxesbUWUz+dwD9BD7dmuo8YIT6AXHGw0R4WH6iBj
+        tmRv2fRobjkZ4CinHc9pBi9U27OhzbWf5qYuDqI0KmZE/ntzt+4tE++9/9e7LfiqEGr/rFPyshp
+        u0T9oNT7lVeqohkHPYg==
+X-Received: by 2002:a17:902:9004:b0:187:4889:7dbb with SMTP id a4-20020a170902900400b0018748897dbbmr39833713plp.137.1668013609117;
+        Wed, 09 Nov 2022 09:06:49 -0800 (PST)
+X-Google-Smtp-Source: AMsMyM4Nz1d2XjHNMfa0GWVbcESlABQGlSzEx+6WG7jMFaMVzomyXr9mD1gEVt0gQT12YE058gNk9g==
+X-Received: by 2002:a17:902:9004:b0:187:4889:7dbb with SMTP id a4-20020a170902900400b0018748897dbbmr39833681plp.137.1668013608829;
+        Wed, 09 Nov 2022 09:06:48 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id u17-20020a634551000000b00439f027789asm7808687pgk.59.2022.11.09.09.06.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Nov 2022 09:06:48 -0800 (PST)
+Date:   Thu, 10 Nov 2022 01:06:43 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH v2 2/3] btrfs/053: fix test failure when running with
+ btrfs-progs v6.0+
+Message-ID: <20221109170643.sfxl7nl47ro73pis@zlang-mailbox>
+References: <cover.1668011940.git.fdmanana@suse.com>
+ <793a063833727ea80a1d0c6f13f531cff9581a1a.1668011940.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221109130746.3669020-1-zlang@kernel.org>
+In-Reply-To: <793a063833727ea80a1d0c6f13f531cff9581a1a.1668011940.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 09, 2022 at 09:07:46PM +0800, Zorro Lang wrote:
-> An old issue might cause on-disk inode sizes are logged prematurely
-> via the free eofblocks path on file close. Then fs shutdown might
-> leave NULL files but their di_size > 0.
+On Wed, Nov 09, 2022 at 04:44:57PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> In btrfs-progs v6.0 the --leafsize (-l) command line option was removed
+> from mkfs.btrfs, so btrfs/053 can fail with v6.0+ in case the scratch
+> device does not have a btrfs filesystem created before running the test,
+> in which case mounting the scratch device fails.
+> 
+> The change was introduced by the following btrfs-progs commit:
+> 
+>   f7a768d62498 ("btrfs-progs: mkfs: remove support for option --leafsize")
+> 
+> Change the test to use --nodesize (-n) instead, since it exists in both
+> old and new btrfs-progs versions. Also redirect mkfs output to the test's
+> log file and fail explicitly if mkfs failed.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
+
+This version looks good to me, thanks for fixing this.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/btrfs/053 | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> Hi,
-> 
-> V2 replace xfs_io fiemap command with stat command.
-> V3 replace the stat with the filefrag command, and change the supported_fs
-> from xfs to generic.
-> 
-> Thanks,
-> Zorro
-> 
->  tests/generic/999     | 46 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999.out |  5 +++++
->  2 files changed, 51 insertions(+)
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
-> 
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 00000000..ca666de7
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,46 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 999
-> +#
-> +# Test an issue in the truncate codepath where on-disk inode sizes are logged
-> +# prematurely via the free eofblocks path on file close.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto shutdown
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_scratch
-> +_require_scratch_shutdown
-> +_require_command "$FILEFRAG_PROG" filefrag
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +echo "Create many small files with one extent at least"
-> +for ((i=0; i<10000; i++));do
-> +	$XFS_IO_PROG -f -c "pwrite 0 4k" $SCRATCH_MNT/file.$i >/dev/null 2>&1
-> +done
-> +
-> +echo "Shutdown the fs suddently"
-> +_scratch_shutdown
-> +
-> +echo "Cycle mount"
-> +_scratch_cycle_mount
-> +
-> +echo "Check file's (di_size > 0) extents"
-> +for f in $(find $SCRATCH_MNT -type f -size +0);do
-> +	# Check if the file has any extent
-> +	$FILEFRAG_PROG -v $f > $tmp.filefrag
-> +	grep -Eq ': 0 extents found' $tmp.filefrag
-> +	if [ $? -eq 0 ];then
-
-Bash nit: You could compress these two lines to:
-
-	if grep -E -q ': 0 extents found' $tmp.filefrag; then
-
-But otherwise this looks good.
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
-
-> +		echo " - $f get no extents, but its di_size > 0"
-> +		cat $tmp.filefrag
-> +		break
-> +	fi
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..50008783
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 999
-> +Create many small files with one extent at least
-> +Shutdown the fs suddently
-> +Cycle mount
-> +Check file's (di_size > 0) extents
+> diff --git a/tests/btrfs/053 b/tests/btrfs/053
+> index fbd2e7d9..67239f10 100755
+> --- a/tests/btrfs/053
+> +++ b/tests/btrfs/053
+> @@ -44,7 +44,7 @@ send_files_dir=$TEST_DIR/btrfs-test-$seq
+>  rm -fr $send_files_dir
+>  mkdir $send_files_dir
+>  
+> -_scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
+> +_scratch_mkfs "--nodesize $leaf_size" >> $seqres.full 2>&1 || _fail "mkfs failed"
+>  _scratch_mount
+>  
+>  echo "hello world" > $SCRATCH_MNT/foobar
+> @@ -72,7 +72,7 @@ _run_btrfs_util_prog send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
+>  _scratch_unmount
+>  _check_scratch_fs
+>  
+> -_scratch_mkfs "-l $leaf_size" >/dev/null 2>&1
+> +_scratch_mkfs "--nodesize $leaf_size" >> $seqres.full 2>&1 || _fail "mkfs failed"
+>  _scratch_mount
+>  
+>  _run_btrfs_util_prog receive -f $send_files_dir/1.snap $SCRATCH_MNT
 > -- 
-> 2.31.1
+> 2.35.1
 > 
+
