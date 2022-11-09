@@ -2,101 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47442C433FE
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 16:45:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BDC8C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 16:51:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230220AbiKIQpP (ORCPT
+        id S229942AbiKIQvv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Nov 2022 11:45:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48544 "EHLO
+        Wed, 9 Nov 2022 11:51:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51330 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230041AbiKIQpO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 11:45:14 -0500
+        with ESMTP id S230146AbiKIQvu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 11:51:50 -0500
 Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10EC02252B;
-        Wed,  9 Nov 2022 08:45:10 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E3E51EEF4;
+        Wed,  9 Nov 2022 08:51:49 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 4680DCE1FEA;
-        Wed,  9 Nov 2022 16:45:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CD3AC433C1;
-        Wed,  9 Nov 2022 16:45:06 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 99D5ECE1FE3;
+        Wed,  9 Nov 2022 16:51:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD671C433C1;
+        Wed,  9 Nov 2022 16:51:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1668012307;
-        bh=j1Aieg493NQTqXY3czipEQEPMuHZTJs8oAvLJMoCCmw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=YUZGFldR7KY1RuaX4oMDyVKCbpdNshSZRmLHHAnCsnlIfQIxC9cFc6FdbGo8rimLR
-         3XIfCVSVQBRpKdzif/JerQ5uR1HWj5SZGnOOQEeMGN0mq3oCflxJH+NgnT1mOWmzql
-         2kSCsxYnRIgqPSQ74Fg/OzMDf6+H83ltWGXjeZOqlDqVUlgJ5SY8t0xCs/pgTNSV1G
-         Ztdkn1Ty1H+4ECZ8uZ/rkWryIvIGbqb8tCuH/7liuW44nCwsQaSNNkiCWJZPPKm03d
-         JxUnTi0NNLIKe3Uy2EkDvzdt6hWztR1VIbmj3kJ8/s7lFjGbfDcTYgbUDB6Tq/NSVu
-         N/jSBTc/xCWbg==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2 3/3] btrfs: fix failure of tests that use defrag on btrfs-progs v6.0+
-Date:   Wed,  9 Nov 2022 16:44:58 +0000
-Message-Id: <e393451cb53b6b81804eaa41c6461b07a910eb62.1668011769.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <cover.1668011769.git.fdmanana@suse.com>
-References: <cover.1668011769.git.fdmanana@suse.com>
+        s=k20201202; t=1668012705;
+        bh=ScExPiaZqx2HlutJDhwEJn2QRR5/82Ondv3X1/oizGA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=sI3Xzc+iFbmZhfCrT3mMModxLux/wICXLRJmdHEwyQpEVQRSmNq6XrJyA7J5Jx85P
+         oL0rrYiZOZ2y572YRvI0MdloThxYeV+SVhxqzDyuSccg+zdl5Y8oEdrPGBzuc4uKX7
+         8vFJfXoV+fc9y93LaAhRMzkxBJQtV7kWwDfW1c3tTL/fySen6yOO+/vUEOK3aQ1QOV
+         XUbhP9xZGMEKJBJiSSXGP906tuc3j9zktgAa7/wr+M/s0rJkIh9GAFAaggWUxZYccL
+         BLRRSR2Ef+rHJFRewr6jh5JSyN41qzfdhYTYIQixrZ7TrxIWcmbrtKvjQYZQC6xZAi
+         YpoS8PQ05va7g==
+Date:   Wed, 9 Nov 2022 08:51:45 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v3] generic: shutdown might leave NULL files with nonzero
+ di_size
+Message-ID: <Y2vaoY486TpfKXM3@magnolia>
+References: <20221109130746.3669020-1-zlang@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221109130746.3669020-1-zlang@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Nov 09, 2022 at 09:07:46PM +0800, Zorro Lang wrote:
+> An old issue might cause on-disk inode sizes are logged prematurely
+> via the free eofblocks path on file close. Then fs shutdown might
+> leave NULL files but their di_size > 0.
+> 
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> ---
+> 
+> Hi,
+> 
+> V2 replace xfs_io fiemap command with stat command.
+> V3 replace the stat with the filefrag command, and change the supported_fs
+> from xfs to generic.
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/generic/999     | 46 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/999.out |  5 +++++
+>  2 files changed, 51 insertions(+)
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 00000000..ca666de7
+> --- /dev/null
+> +++ b/tests/generic/999
+> @@ -0,0 +1,46 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 999
+> +#
+> +# Test an issue in the truncate codepath where on-disk inode sizes are logged
+> +# prematurely via the free eofblocks path on file close.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto shutdown
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_scratch
+> +_require_scratch_shutdown
+> +_require_command "$FILEFRAG_PROG" filefrag
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +echo "Create many small files with one extent at least"
+> +for ((i=0; i<10000; i++));do
+> +	$XFS_IO_PROG -f -c "pwrite 0 4k" $SCRATCH_MNT/file.$i >/dev/null 2>&1
+> +done
+> +
+> +echo "Shutdown the fs suddently"
+> +_scratch_shutdown
+> +
+> +echo "Cycle mount"
+> +_scratch_cycle_mount
+> +
+> +echo "Check file's (di_size > 0) extents"
+> +for f in $(find $SCRATCH_MNT -type f -size +0);do
+> +	# Check if the file has any extent
+> +	$FILEFRAG_PROG -v $f > $tmp.filefrag
+> +	grep -Eq ': 0 extents found' $tmp.filefrag
+> +	if [ $? -eq 0 ];then
 
-Starting with btrfs-progs v6.0, the defrag command now prints to stdout
-the full path of the files it processes. This makes test cases btrfs/021
-and btrfs/256 fail because they don't expect any output from the defrag
-command.
+Bash nit: You could compress these two lines to:
 
-The change happened with the following commit in btrfs-progs:
+	if grep -E -q ': 0 extents found' $tmp.filefrag; then
 
-  dd724f21803d ("btrfs-progs: add logic to handle LOG_DEFAULT messages")
+But otherwise this looks good.
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-So update the tests to ignore the stdout of the defrag command.
+--D
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/021 | 4 +++-
- tests/btrfs/256 | 4 +++-
- 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/tests/btrfs/021 b/tests/btrfs/021
-index 5943da2f..1b55834a 100755
---- a/tests/btrfs/021
-+++ b/tests/btrfs/021
-@@ -22,8 +22,10 @@ run_test()
- 
- 	sleep 0.5
- 
-+	# In new versions of btrfs-progs (6.0+), the defrag command outputs to
-+	# stdout the path of the files it operates on. So ignore that.
- 	find $SCRATCH_MNT -type f -print0 | xargs -0 \
--	$BTRFS_UTIL_PROG filesystem defrag -f
-+		$BTRFS_UTIL_PROG filesystem defrag -f > /dev/null
- 
- 	sync
- 	wait
-diff --git a/tests/btrfs/256 b/tests/btrfs/256
-index 1360c2c2..acbbc6fa 100755
---- a/tests/btrfs/256
-+++ b/tests/btrfs/256
-@@ -50,7 +50,9 @@ $FSSUM_PROG -A -f -w "$checksums_file" "$SCRATCH_MNT"
- # Now defrag each file.
- for sz in ${file_sizes[@]}; do
- 	echo "Defragging file with $sz bytes..." >> $seqres.full
--	$BTRFS_UTIL_PROG filesystem defragment "$SCRATCH_MNT/f_$sz"
-+	# In new versions of btrfs-progs (6.0+), the defrag command outputs to
-+	# stdout the path of the files it operates on. So ignore that.
-+	$BTRFS_UTIL_PROG filesystem defragment "$SCRATCH_MNT/f_$sz" > /dev/null
- done
- 
- # Verify the checksums after the defrag operations.
--- 
-2.35.1
-
+> +		echo " - $f get no extents, but its di_size > 0"
+> +		cat $tmp.filefrag
+> +		break
+> +	fi
+> +done
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 00000000..50008783
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 999
+> +Create many small files with one extent at least
+> +Shutdown the fs suddently
+> +Cycle mount
+> +Check file's (di_size > 0) extents
+> -- 
+> 2.31.1
+> 
