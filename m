@@ -2,171 +2,166 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03F88C4332F
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 04:20:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11B95C433FE
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Nov 2022 05:47:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229702AbiKIEUP (ORCPT
+        id S229485AbiKIFrp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Nov 2022 23:20:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50250 "EHLO
+        Wed, 9 Nov 2022 00:47:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229509AbiKIET7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Nov 2022 23:19:59 -0500
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B01E1181C;
-        Tue,  8 Nov 2022 20:19:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1667967598; x=1699503598;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=A2586BYsOahTsgQvUCdaytclD/vORnQuTw5oC4Dkynk=;
-  b=Si+/aIX4/GI2yHDv4IFg1nzm1cBFr2uVFJrMAxsqFxGBgU2xO9lqp0dQ
-   anDnjR0TAEv0UUoYU33md598WYRLfEBir3cF2T/SD0BBIdd2QJtnw4IRT
-   nL88MBV+N8ppoFBeo5dzfznbLOa7hzFrWRQdnl73c5IaNgeWrxklc7ZMy
-   L1U948SIc+dKtASF3716F6phi1ZAy4eKvHPhdwB14b+qDIjcWwg/7RmFY
-   s9s0JgN6ei2TkimIH4Z9DQDfY1l2/gnyRqNppOQCE8RdNiJSfereJOnEw
-   BRmuNhxEzeltsqJoivYVZB1a1leaqBS7SlghB6muzQkT8v7zdJzjzqByu
-   g==;
-X-IronPort-AV: E=Sophos;i="5.96,149,1665417600"; 
-   d="scan'208";a="320161488"
-Received: from mail-co1nam11lp2169.outbound.protection.outlook.com (HELO NAM11-CO1-obe.outbound.protection.outlook.com) ([104.47.56.169])
-  by ob1.hgst.iphmx.com with ESMTP; 09 Nov 2022 12:19:56 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WZBEtoira7UyVmguWVbPvpIiN4kYlKSlwTaiesPYA1lwTxMOoOOICmYIHfM9KggSCl8ba6/ntti1oAJiT3HhIbdPqSQwIabivfuALmqttktrVNzUkaEXZoUbzHVq0hgdDY/QLqL3JyJBa0S/w/51W/dZL8eoeeTPre4SYvorljRFNYWeb9W77r7gqaO54xgs5c1FwVEz4IBBFdZb+vLxbDf/U83ouWHskfy+E6gvFIOOjMUeMIldWV2FY5ZyLpWtLYfzcHtOdc9SYuAynIM17vK8kgSk9oZ3zWfzu/NTZqA4rac8SGwQLge7p6ehOiICgP+MEL4RemE6F7pY3/uNrw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=A2586BYsOahTsgQvUCdaytclD/vORnQuTw5oC4Dkynk=;
- b=KYBa7ZMVPiRbogo8uUScZXFjZBK3Ghet+AMPLxBNK9Rg4/UM/xGNo/pFcCPK5NlD5ujgdUsz/6GtUHSDzWW3nrDl2jL2YohQ8LYcdBu2xk//XxZrZ8HxRzIu5GmgPpu0iI1AZtdEaOHdCRWHq0B2Ws1Y/MtwyR8ocwBcqgT7X6ZXHtKT6Clv7j+dssIEqCw/AdXILAbIC2TrAfu7GpSsSVWP05VomUYcCvTLAYgDfGt+CYps04h5usiyneKp/24tbc1jYYxmU91xJJheb6lxaTfDjirUKZ5RK+BmgVM+/Svm7PaxaCrC1xRikUXu9qgPF947oT2cAc39HrE6WulBiw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=A2586BYsOahTsgQvUCdaytclD/vORnQuTw5oC4Dkynk=;
- b=bCqnRdg1kuWLnTnCpUkUecZmzmm5xwkHq6bAaFJhgtHxIQbx/6ric6+BNniAQ4Mq6w7diW4IKYR6f+wSF8GaVYfOPrbsX8MjCcf9KnafPeZtmg8jbhYIEb4nXiC1XPpAvNLqku9jPm9KBQhJbki2JRu7nDIpN8N0vhJ5dZmU8hw=
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com (2603:10b6:8:f::6) by
- BN8PR04MB5875.namprd04.prod.outlook.com (2603:10b6:408:a8::14) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5791.26; Wed, 9 Nov 2022 04:19:53 +0000
-Received: from DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::d4b9:86e9:4fc8:d6e0]) by DM8PR04MB8037.namprd04.prod.outlook.com
- ([fe80::d4b9:86e9:4fc8:d6e0%7]) with mapi id 15.20.5791.027; Wed, 9 Nov 2022
- 04:19:53 +0000
-From:   Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-To:     Zorro Lang <zlang@redhat.com>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        Linux NFS Mailing List <linux-nfs@vger.kernel.org>,
-        Chuck Lever III <chuck.lever@oracle.com>,
-        "djwong@vger.kernel.org" <djwong@vger.kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
-Subject: Re: generic/650 makes v6.0-rc client unusable
-Thread-Topic: generic/650 makes v6.0-rc client unusable
-Thread-Index: AQHY8/KDAlsuTLAdeUqIt7enJlIXlA==
-Date:   Wed, 9 Nov 2022 04:19:53 +0000
-Message-ID: <20221109041951.wlgxac3buutvettq@shindev>
-References: <3E21DFEA-8DF7-484B-8122-D578BFF7F9E0@oracle.com>
- <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
-In-Reply-To: <20220904131553.bqdsfbfhmdpuujd3@zlang-mailbox>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM8PR04MB8037:EE_|BN8PR04MB5875:EE_
-x-ms-office365-filtering-correlation-id: 20a56cea-12cb-4825-d3f1-08dac209a701
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: mTkt64a5YVyT14lJ2TDwtjeAm26mbvNoBtt12KLXB1kNetWaIdntb8vuYGHNjGpj9Fg/fIzr60Qb7J1Bws6e7GI0Rh3PZS4sLWnW32fNWZgAHr0Sj82z2S/2iDyjqjHLsdiMTopmGResdPcouCwr/9Km84TIDLdlKnLO4OCQekPCgMVkdAIpMWgUxENO3T/jLHMZHxN+aU/kkdDkxDZSDlqclzFtF3DW0emFbs6CSJUUaWFDkBfqhHfkubVkMCatbWehZF8b3NFsPyUzejCzT0t5vCaUvyGSUv1nG4aLTNYSatzp8WQApiiLOo39k32paNbO9EmZsdsEVFkkfRmPPZiYkBe/iH5ZIW9a4mJwjFL6IJT5cclviAq6K4dLXyRj7cBkvzq2Ze1ldoCzgck6BRxnvQ8tZwwtRoHQDJj2y2ME8dhe+KFm983/B2cmBCvCUhxHwGCCdV35ZMsjX3n4Oh62eIkJuPDeuGl8yx9lIJeMdqhGuIdt1zum1RzrXuo/1ZnIvkX6L0AVFTwDYIEkRHX+fS650BSVWl/gR+u2DqffiwqDP5yECLjlaqGidoPLaELdV8nOGS9TN4Ij5sN7/bi7q/X+Q2GY4f7faRcwnh74nWXi4ueUVDO5z+C0E5mu31Cc6EG0p6vJ19/IQYaXD2O7xNvPfZipxuuBKbRB5y4TDUnInxmjSehaywJa4m48i0enyKvvHYgY5ntf8bdS7FgIaeY320wRXtGx5U8IYMTknkM9176kMv36uPxqbiCiXxaKrfq1lAZ14j7F9lr8VXoG8QxICkbOReHMxGHiMJM=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM8PR04MB8037.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(7916004)(4636009)(396003)(136003)(366004)(39860400002)(346002)(376002)(451199015)(44832011)(8936002)(5660300002)(41300700001)(8676002)(4326008)(86362001)(82960400001)(64756008)(6916009)(316002)(54906003)(6486002)(76116006)(2906002)(91956017)(66556008)(66446008)(66946007)(66476007)(71200400001)(478600001)(9686003)(6512007)(26005)(186003)(33716001)(38070700005)(38100700002)(83380400001)(6506007)(1076003)(122000001)(41533002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?0bOWeYja3LIMC73aEitdPx3y5gdfKU3mhaE8WxLIxEm82ZHTzx3ikkLcjky0?=
- =?us-ascii?Q?kBIbQlSNfhFFuwBTmz8GnPWo1Xslh0NGvD08REML+meK30bHUtsZjv613IuM?=
- =?us-ascii?Q?VJIxLcF2tBUc2oexD4PHug/ISFGJv8fWdL44964zh8Gm19oDBzSIpGmZdi4L?=
- =?us-ascii?Q?mJjjYYWWPrUo0e1YkEodKmkvMwxqPw5LmT2H72BPtMbB2L3icMZpNHWNfzqg?=
- =?us-ascii?Q?K8y5xYr0UJ2Zqo6Xn8yZCDxRqIw6IcPI8nIvNQGx+0HCWt45b0vbRsAnXC4u?=
- =?us-ascii?Q?mNyVcP3cif+6cXDqKcuYe3dhafkVSc1UdlZ9//6ut+nznabzJRQjWp4vKd0m?=
- =?us-ascii?Q?wU8B5ol+wOMgmXBUg9AVwuq5BNOrjxJK2ZgNPLER6H0WiDsWKZI3o56yaOjn?=
- =?us-ascii?Q?5YGgwEct/oxaLIicJTqJn5qm9M++QpK/OCMcgiICqsWJrKbMzXI0+mx8/VEu?=
- =?us-ascii?Q?jVmTs6I0LBUoh4xgcqRT7N4lty4mzbLsUBbs0OhcQ1r/zbqECijQbXZkQ6zS?=
- =?us-ascii?Q?5e3butdBxr/+ztyIex6X0XqRcFyySFkAGlAYfC34NetYtusZbCHDqnrbrLM8?=
- =?us-ascii?Q?sFKnsUcPee3C0Z5n+m4aqf9pkZduAkkZoxULA9PqNP/WPe3G78aIvsglAnQe?=
- =?us-ascii?Q?IYMP3mAeVIXN/8aRHeFm/nwTCo/pnznU9pA6SOTFkUx0UCtuMOZq0eeJtcm6?=
- =?us-ascii?Q?ueafEoI5e40keBnw8cFc/44hAkTb2zaJDSmpQ1KV7Nd3kXwfjW6BTIgXBHNv?=
- =?us-ascii?Q?4mM5WO1w2KWOqZ/hkAbz9aB6XNVsBkqBja74mXNyMrGAG6o8dBUXBpkOEhOs?=
- =?us-ascii?Q?6OfGasX6JEJ/Quyyj5XqIOIEkDngKYTzClsv7CmYhfkxcIftBUzJ5IWStDGx?=
- =?us-ascii?Q?G+Z8f/ZJnY/zhhkQZMqncauUN4ifSZyut8S5e4xTQ2i5DExkILM+nFfjDs57?=
- =?us-ascii?Q?6cXYDQywwinomYDluXNqCCXdwrUz/XvWmQ2+T8bTB6ZnBfWbsfVAzvqv89ez?=
- =?us-ascii?Q?84ifxq7vjsoXPabvjLJSi0wWWI9nrGUWpf0YmwG9awaN+N7dfGWHUcIo/AEa?=
- =?us-ascii?Q?LnSC+QolDko/oto/n4uSBMBqINnKI6tGscQUBszxI0Sk+L5fgqF0fpAmaPlZ?=
- =?us-ascii?Q?Yl/L1Dw4Ad3aEg709IvIDM/NrM4X3MsMGtpQ1XkaSVZBZDJWrm6KjAUdACkX?=
- =?us-ascii?Q?tAh7/HkPCQtAgnPYETykMRyhUuDx9BKWtvvi8XJzqFU/uX7tm78izGMcmHsv?=
- =?us-ascii?Q?ToMazUde4L+ldBTix8J0se93DPsEVgEFhxXo38ENLGhPwYwjHnIEqkUfeYZ1?=
- =?us-ascii?Q?Po84ncAXaVQ7DZrmEWZV81J/mpWnaRVq96N0ejqIn+0fS8JtJDOguKvH+Sy9?=
- =?us-ascii?Q?/wrKzryhlii0/+8Y3rGvd1ZgwHuXbBonkC4Q6fSd4XCJW5bWkJfOzuF2mi+L?=
- =?us-ascii?Q?t6bkvB9Z1/W7xRW3ga60zYN9q6k2pZ/0my6tsDlKZyhjj6pH3E4OID8O2pb3?=
- =?us-ascii?Q?n+vkXZIuyNAd4QsXW0ljS0bQ3gFIATGiU6ZcEjUMpCZq/DGpVlvXt9nSCiAz?=
- =?us-ascii?Q?CD5/N/bAZmVmKnYsuT2sSRdT+VW7fsl24XG/sA2vNn42/qR91Li9UjhU/9iY?=
- =?us-ascii?Q?NZu2wbeMMQIG/JwNFRELnCI=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <BDCC8D78500ED84FA601D0D61AF40063@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S229528AbiKIFro (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Nov 2022 00:47:44 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 739121DF3A;
+        Tue,  8 Nov 2022 21:47:43 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id B1E2C1F37F;
+        Wed,  9 Nov 2022 05:47:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1667972861; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=r7TCDm9fjp93B4cfyQyiwpeid2KNi7OLMiTe9FQ3Rz8=;
+        b=k4HungjjkENk+BQRaHP/K2oaBqyWu86VKJ2zfNAIj5shAkhwjoFpWNtven2UHLyMvPXoMa
+        GTQnYFvseP6az3ljZjTNEa95lyqL5z+JN2yeuPzaEX4Fbm7LtBuEC0WtAe5MaOx4WqVmM8
+        xBt8Ue3wsjwuvO9+mRPusBMw3otYL0s=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id BF5BC1376E;
+        Wed,  9 Nov 2022 05:47:40 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id LiRaIfw+a2MNAgAAMHmgww
+        (envelope-from <wqu@suse.com>); Wed, 09 Nov 2022 05:47:40 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH v2] fstests: btrfs: add a regression test case to make sure scrub can detect errors
+Date:   Wed,  9 Nov 2022 13:47:23 +0800
+Message-Id: <20221109054723.38635-1-wqu@suse.com>
+X-Mailer: git-send-email 2.38.1
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM8PR04MB8037.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 20a56cea-12cb-4825-d3f1-08dac209a701
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Nov 2022 04:19:53.8131
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: bo8DqozHHBT7Cb1p7RZ/LL+dZFIRhJvhb0NMV2vddF6CtPlx3/maGp7g/ou8qh3ffMWWKDUzSYePGToiTmRQYHYHmtlqP9LgZEfs1IjwD2I=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN8PR04MB5875
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sep 04, 2022 / 21:15, Zorro Lang wrote:
-> On Sat, Sep 03, 2022 at 06:43:29PM +0000, Chuck Lever III wrote:
-> > While investigating some of the other issues that have been
-> > reported lately, I've found that my v6.0-rc3 NFS/TCP client
-> > goes off the rails often (but not always) during generic/650.
-> >=20
-> > This is the test that runs a workload while offlining and
-> > onlining CPUs. My test client has 12 physical cores.
-> >=20
-> > The test appears to start normally, but then after a bit
-> > the NFS server workload drops to zero and the NFS mount
-> > disappears. I can't run programs (sudo, for example) on
-> > the client. Can't log in, even on the console. The console
-> > has a constant stream of "can't rotate log: Input/Output
-> > error" type messages.
+There is a regression in v6.1-rc kernel, which will prevent btrfs scrub
+from detecting corruption (thus no repair either).
 
-I also observe this failure when I ran fstests using btrfs on my HDDs.
-The failure is recreated almost always.
+The regression is caused by commit 786672e9e1a3 ("btrfs: scrub: use
+larger block size for data extent scrub").
 
-> >=20
-> > I haven't looked further into this yet. Actually I'm not
-> > quite sure where to start looking.
-> >=20
-> > I recently switched this client from a local /home to an
-> > NFS-mounted one, and that's where the xfstests are built
-> > and run from, fwiw.
->=20
-> If most of users complain generic/650, I'd like to exclude g/650 from the
-> "auto" default run group. Any more points?
+The new test case will:
 
-+1. I wish to remove it from the "auto" group. Since I can not login to the=
- test
-machine after the failure, I suggest to put it in the "dangerous" group.
+- Create a data extent with 2 sectors
+- Corrupt the second sector of above data extent
+- Scrub to make sure we detect the corruption
 
---=20
-Shin'ichiro Kawasaki=
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+Changelog:
+v2:
+- Remove include for common/btrfs
+  Which is included by default.
+
+- Add comment for why including common/filter
+  Needed by _btrfs_get_*() helpers.
+
+- Migrated to btrfs/278
+  Which is the latest result by "./new btrfs" on for-next branch.
+
+- Add "-s 4k" for _scratch_mkfs
+  To support systems with larger page sizes.
+
+- Remove comments from the template
+---
+ tests/btrfs/281     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/281.out |  2 ++
+ 2 files changed, 64 insertions(+)
+ create mode 100755 tests/btrfs/281
+ create mode 100644 tests/btrfs/281.out
+
+diff --git a/tests/btrfs/281 b/tests/btrfs/281
+new file mode 100755
+index 00000000..69b5ac02
+--- /dev/null
++++ b/tests/btrfs/281
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2022 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# A regression test for offending commit 786672e9e1a3 ("btrfs: scrub: use
++# larger block size for data extent scrub"), which makes btrfs scrub unable
++# to detect corruption if it's not the first sector of an data extent.
++#
++
++. ./common/preamble
++_begin_fstest auto quick scrub
++
++# For _btrfs_get_*() helpers which needs filtering.
++. ./common/filter
++
++_supported_fs btrfs
++_require_scratch
++
++# Need to use 4K as sector size
++_require_btrfs_support_sectorsize 4096
++_require_scratch
++
++_scratch_mkfs -s 4k >> $seqres.full
++_scratch_mount
++
++# Create a data extent with 2 sectors
++$XFS_IO_PROG -fc "pwrite -S 0xff 0 8k" $SCRATCH_MNT/foobar >> $seqres.full
++sync
++
++first_logical=$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
++echo "logical of the first sector: $first_logical" >> $seqres.full
++
++second_logical=$(( $first_logical + 4096 ))
++echo "logical of the second sector: $second_logical" >> $seqres.full
++
++second_physical=$(_btrfs_get_physical $second_logical 1)
++echo "physical of the second sector: $second_physical" >> $seqres.full
++
++second_dev=$(_btrfs_get_device_path $second_logical 1)
++echo "device of the second sector: $second_dev" >> $seqres.full
++
++_scratch_unmount
++
++# Corrupt the second sector of the data extent.
++$XFS_IO_PROG -c "pwrite -S 0x00 $second_physical 4k" $second_dev >> $seqres.full
++_scratch_mount
++
++# Redirect stderr and stdout, as if btrfs detected the unrepairable corruption,
++# it will output an error message.
++$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT &> $tmp.output
++cat $tmp.output >> $seqres.full
++_scratch_unmount
++
++if ! grep -q "csum=1" $tmp.output; then
++	echo "Scrub failed to detect corruption"
++fi
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/281.out b/tests/btrfs/281.out
+new file mode 100644
+index 00000000..3678e27f
+--- /dev/null
++++ b/tests/btrfs/281.out
+@@ -0,0 +1,2 @@
++QA output created by 281
++Silence is golden
+-- 
+2.38.0
+
