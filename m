@@ -2,276 +2,185 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 502ADC4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Nov 2022 02:26:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63C4FC4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Nov 2022 21:36:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229688AbiKKC0T (ORCPT
+        id S233695AbiKKVgs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Nov 2022 21:26:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43780 "EHLO
+        Fri, 11 Nov 2022 16:36:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231343AbiKKC0S (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Nov 2022 21:26:18 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3DA16239E
-        for <fstests@vger.kernel.org>; Thu, 10 Nov 2022 18:25:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1668133525;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=3S4jeX2vJh+LCNqFIlzIjLuqx9zHXq4CCQ8JM8M17f4=;
-        b=XuDqKUB2NWSU1VxGoZg5nNiXCdI5rv7f79UJTG89vLvTUJvdYl6URVabPRzdmc+XQo0nCG
-        JkDwNRYcLIoOn2d+ZcNA52axyJ/ith8aLo0KJeJ3kJj2cJLvsFAralMl34I2AKggnJltP4
-        EBPcESgayxNZ9xk+buVqyPIyssX4yjU=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-610-_7rsviITOJqGt-SDamWopw-1; Thu, 10 Nov 2022 21:25:20 -0500
-X-MC-Unique: _7rsviITOJqGt-SDamWopw-1
-Received: by mail-pf1-f200.google.com with SMTP id cj8-20020a056a00298800b0056cee8a0cf8so1967098pfb.9
-        for <fstests@vger.kernel.org>; Thu, 10 Nov 2022 18:25:20 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3S4jeX2vJh+LCNqFIlzIjLuqx9zHXq4CCQ8JM8M17f4=;
-        b=peX+w5MsUxwTTM1lzrfNFxD6d/EC85J0XSXoLEI4o2S6X348l4Nv3tGOIHgms8h6DA
-         K+e+IKSDrhOYO5RBLtz4a8WkIlnUwn0IzFNNBbBqAn7IJDA8UjU3NyfxhmGJsv81y9EA
-         iTtarO3dCprnWDJawGLX3gzIdhglZttRaDbS1RnOHA2H49gUKCQKVEXxAbIKdJwUX1YR
-         u8YW6pmMMBPlu/C0tON/EwQKzIdU6RBv5Rhhwe3VxsH23P4xeNrZAp1E9TcqhB268ZhS
-         AXyEsxDzZQ/QX3bjb2DFuh++X//QM351osW9GcUXkKEIpqHyKqtqRCYodp7YpgGdj4p9
-         YFMA==
-X-Gm-Message-State: ACrzQf2XGj4rB+FcPhq3PJN6p/5hbCWK4fXI6Zs4eC6NInrHV+RBTJ3C
-        3JdsCiFYpYxXtrJ079iiC9diP2X+5Hzq+J957veMSrmL3Rylnvq6XCRqE4UBy3BXWHBCg2kZQaJ
-        r2U0CZP3e4KHPP8uQvg==
-X-Received: by 2002:a17:90b:30c7:b0:213:5e6e:5d28 with SMTP id hi7-20020a17090b30c700b002135e6e5d28mr3101158pjb.60.1668133519701;
-        Thu, 10 Nov 2022 18:25:19 -0800 (PST)
-X-Google-Smtp-Source: AMsMyM5yo+znz1oGMg7I+9Fbbakkl0ZrtluZseaBW5w1uGKDikjwhcOZFkJfsGZk1EsXXkIWH260Qg==
-X-Received: by 2002:a17:90b:30c7:b0:213:5e6e:5d28 with SMTP id hi7-20020a17090b30c700b002135e6e5d28mr3101131pjb.60.1668133519317;
-        Thu, 10 Nov 2022 18:25:19 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id b31-20020a631b5f000000b0045751ef6423sm294359pgm.87.2022.11.10.18.25.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Nov 2022 18:25:18 -0800 (PST)
-Date:   Fri, 11 Nov 2022 10:25:14 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>,
-        Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic: add missing $FSX_AVOID to fsx invocations
-Message-ID: <20221111022514.uzk5a2ovnetutrzy@zlang-mailbox>
-References: <20221105182918.24099-1-tytso@mit.edu>
- <20221106121031.ywrlqu6w54kgnn2i@zlang-mailbox>
- <Y2gqpYhf5n8Y43eZ@mit.edu>
- <20221107020236.gdlmb5hxsaxxislo@zlang-mailbox>
- <Y2kzxKnYf8CLj49v@mit.edu>
- <Y2lmFoNQ2ByXzCW0@magnolia>
- <20221108024455.6lhdrbfoqq53wj4p@zlang-mailbox>
- <Y2pw08wrQbAfAtT5@mit.edu>
- <20221108155605.faqf7knxrdcdin4n@zlang-mailbox>
- <Y2qHkFxVvYlANCZc@magnolia>
+        with ESMTP id S232825AbiKKVgr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Nov 2022 16:36:47 -0500
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50C136417;
+        Fri, 11 Nov 2022 13:36:47 -0800 (PST)
+Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 2ABLYveD030173;
+        Fri, 11 Nov 2022 21:36:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : subject :
+ date : message-id : references : in-reply-to : content-type : content-id :
+ content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=CsodGAV8Z8elqtAIMlQo4/lCWUlfVvTdiOSLznAvMhI=;
+ b=qo3IS1MzOT1waulXdMsubCQ3l+forIKGPwtTWC3qZaNOrcvJHte0ssxcuNf6PX+k7g7B
+ 3/5vKSMAwKMMRkr5YTmoNA7mChia67XIJi0PfwfG+RYb25E/x3wPaoAvhSbSVDiUbh8U
+ 2tNqdFNp2LuBsAHeWlT4sgQfbpiZSRXcMozO4kM6taST6QrmFAFLV6ONU6cbYoBge0rJ
+ HuGQZtiGdad6A+8MUh5eWQ9u8GoOMrSEVo1waWovjUAI0O9+tSK3o+06WNSMSk9NST72
+ DMkUMDWaL0nZ7Bb9Sy2Agusr+xiXNH7VA5tnXFlljjWp2oG2TfmtwpoU1+gjJAEBukFr 9g== 
+Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3ksxea804h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 11 Nov 2022 21:36:46 +0000
+Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 2ABKon0G021280;
+        Fri, 11 Nov 2022 21:31:44 GMT
+Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2040.outbound.protection.outlook.com [104.47.66.40])
+        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3kpcsjf23n-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 11 Nov 2022 21:31:44 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=cWSJc7ZupYH0QeF+Uh8i10H3IX5NfIUFES8dxF1/FjgdLobriuMJUZ6MSHmqzRYPe6ma64Da82ugDCKwYC01UVjskXmoYjKckmZkfXJyswVUwumzHNtPR7KVVebcXLBDXg+WLN6M+GHHBrBu294xk4MMnySe/CWBnEC8+wTnkPz1VsPnxgvnAQsN8ZT/g6ulGMFmsyztpNVYqfvDFXT6uBfZE6PfiauMaqxXnE3bAPXdkm4nnzOXJGVplSsYL6YiqkJkVr8RYpXKhzITK9yQoe00c3sPR+k0QXZUXPfTuX3ap1mDz3JyrwJ2jvZpXpjRSouiWs5TQhA4LwjHV+4NgQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=CsodGAV8Z8elqtAIMlQo4/lCWUlfVvTdiOSLznAvMhI=;
+ b=WDFfZxbGO8ub6bKaSwTFsMwhLHhsc9CcHMfVJ1tbsMPuWynkbvGCvyI+6p1ujqxAqX5qRia8j7OgRrDbbthg8PHfpy5x/9KCSMme3M+qQ5yGMSe45Vm500IGcPCztwbQ6a4ferT4kts1UkKGpECIFYV3yd+8GqvwVw5aUWlBRGSKyQ61iZQyRImLbKe1jXCBxwVNYAcftbUcXCTiMxS+jYh0STRGvBScHGJGtN3I7mMHvdkTcnOUibF4p+670u6KqWwhEJDIM7ryuMZiL42qElcBtkhAu1DksTIZVK5M7uhF+EOEEbhXLB17ewcKk7O67aUDY0zaksp2f2rO0UrAtg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=CsodGAV8Z8elqtAIMlQo4/lCWUlfVvTdiOSLznAvMhI=;
+ b=dg/sg0FQkedTgV+IMaxUSCm2EFugVCfrI+RGwPgzrVkOkF/TzuLykWjROhOl9AzSQkMjjjlvk1TuQudFhQfzjIPiuUDHH+NcR4cWR0QGbZNDJmoRtl4Awc0PBaIRfxCmLljNoGonAdKNOoF9Oa9it9tO78sgCsiLGwTfVPEY+uQ=
+Received: from BY5PR10MB4306.namprd10.prod.outlook.com (2603:10b6:a03:211::7)
+ by PH7PR10MB6652.namprd10.prod.outlook.com (2603:10b6:510:20b::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5791.26; Fri, 11 Nov
+ 2022 21:31:42 +0000
+Received: from BY5PR10MB4306.namprd10.prod.outlook.com
+ ([fe80::c3f2:bf22:a83d:beb3]) by BY5PR10MB4306.namprd10.prod.outlook.com
+ ([fe80::c3f2:bf22:a83d:beb3%3]) with mapi id 15.20.5813.014; Fri, 11 Nov 2022
+ 21:31:42 +0000
+From:   Allison Henderson <allison.henderson@oracle.com>
+To:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        Catherine Hoang <catherine.hoang@oracle.com>,
+        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH v1] xfstests: test xfs_spaceman fsuuid command
+Thread-Topic: [PATCH v1] xfstests: test xfs_spaceman fsuuid command
+Thread-Index: AQHY9JDzxJG8qWqsNUaNzqqd9uE1GK46QNkA
+Date:   Fri, 11 Nov 2022 21:31:42 +0000
+Message-ID: <c46cc760f74bf4e3bc2c25683dfd7fc89f7cef2b.camel@oracle.com>
+References: <20221109222630.85053-1-catherine.hoang@oracle.com>
+In-Reply-To: <20221109222630.85053-1-catherine.hoang@oracle.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Evolution 3.44.4-0ubuntu1 
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: BY5PR10MB4306:EE_|PH7PR10MB6652:EE_
+x-ms-office365-filtering-correlation-id: c1dc4f01-8ee9-45e0-231c-08dac42c203d
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 9QTWtzU1m41uJ5rLEW58zSIeekAyi+s0i4zC6w+nhYyA69FaJZ6CPUm6qxiBsQeijMnMF5J3VDwFvLehmXL/auvGpdV1IgjxJGxoUQRvjNkR4yQtiqOuTG1zkxUOA3avBqUAu6YpHwTpFtJ+CrKSqER+ybPVLzPNXqELnlQ/3JAR2cUL9TsvMh+JUSCRq2nfiLFa7bO68ODAIezxwO+hT5ydyxQD/T8l3Ns5BlH1PIuiThz/PFoC+R+AS3kbWBjiODCaXpLvOHKN1NPO6HRwss7+fR/1YqAjg08W1T0JFp/FMw/chWxfGS5jmg06NHnpYgyX9ywPoX/0voTeIt6tRjDgYTXU3SNnPAjk9iAUAjHRLBdySayjQCGge3vHVro3I7+J2WH/E1/UOLJvWAN7SH2BkktmiMVbOWDyHofhY33rlqH6L8IC8f6+r/a9uKU32jP/zK29NI1k9ATLsdPaA4D6dLDXRN84o5JAkKaa4b6QzPIMznKb9rpGpf4bi1xX2c+gHsrvmr9pmG6oxKCpX/wF1UbzDaKU3ffUdxTdQFmjSptq4MOjXa8n5EP9EPt51OADriB8yA8GytNDqxUxOjfb7wdks3lQsnOJelGTqKp/wQHq+RsKYz+SvPG5YA3z2lzWst4yCvGwN0Cto3T4uhJxQ0BkvYLJJqckOpoJ18LZ5UneqntbAqqGKhUvM7bmmiNT+bK1KbIchvM1YES+9ClojckNGdw0soO5z+WWa7pHQ1jIm2UHPs4LmwHU6TQRnJVF/rS2NtRs3X/A5S86RA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BY5PR10MB4306.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(39860400002)(366004)(376002)(396003)(346002)(136003)(451199015)(186003)(6512007)(110136005)(26005)(38100700002)(122000001)(83380400001)(71200400001)(6506007)(2906002)(44832011)(2616005)(76116006)(316002)(478600001)(5660300002)(6486002)(41300700001)(450100002)(8936002)(66446008)(8676002)(64756008)(66476007)(66556008)(66946007)(36756003)(86362001)(38070700005);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?Q1BBZHhLOXVqUUNYSks1RVFrbmY5UFY4SUZ6czdhVldoUlVSajEyV0hGTEM4?=
+ =?utf-8?B?eXFka1RiOUxHdWZTcnpRbldxaVNqaDBXZWFaa0VsVVZHSmlEQ1pmL0JVYjF3?=
+ =?utf-8?B?OHJ2bkxiVjM0RUFybGFXa213NHR2QkJxSjE2M3ZKMzRPNDdEUmU2d0M1Q3lG?=
+ =?utf-8?B?OVJPa3NOYW96L2VEUG1iSXl0UHA1ekdmalN3NVhudVZudDdvV3BiKzVnaEpP?=
+ =?utf-8?B?bkNrOEpncHJUeEY0SlNNR0x0eVZxNUtZNWkwQ0JCdVBhbUU2Wlh5RFdoUFNZ?=
+ =?utf-8?B?M1NkcE1VQUJqMTV1L0I1ejNteWF4ZkE5QTdUY2RCS0Y3TmpmRjdEU0M5SnMx?=
+ =?utf-8?B?bGRJL25aS1VXek91alZZRjBraUhPMVRzUHJDWTJQUzh0SThmM1NBSnNGY083?=
+ =?utf-8?B?WDdLT2NRWVdValhmbklTTERPUWJxN2QzS2g1RTdicFRHS21ZN2s0SGgvbE8r?=
+ =?utf-8?B?dmNDbG1NdXhDbzJRZnlhODRIS1RlS1BQOVRqb1Q4WThocysrWnN0M3Fqc0to?=
+ =?utf-8?B?R0FaWWc3ZVV5Q3B6dlJRVlMxVjN5RTlueGdpaFhUeXlkZzdra0xsWXZHbzBv?=
+ =?utf-8?B?VE51eWJiOHlwb0Fjd0kxR2VNQTFFN283MTV1THZVaTlXeTlIK2x4bG8xV1Fs?=
+ =?utf-8?B?YjVoczg1YjZBRU8ydG83aVhCdndnM1JtVzdlM1VQRGhGdW45eTQreStkUEp0?=
+ =?utf-8?B?UDRZWUp5UFNQZS9tQm5BTlR6dng1MERlUXVXUXIvckxjRkJHMENJeEt3dVE2?=
+ =?utf-8?B?STRrWHNsS3ZXaTQ2ZnYreTdsbC9GUWp3b2ZtZ2haOXJEVnk1UzBKUWkxYndx?=
+ =?utf-8?B?Q0RUTnVKazcwVEx2MDB2UWR1OEdmbnE2S2VRMFlodW01QUpvdFQ0blh0NTh6?=
+ =?utf-8?B?eWw4R1hoc1NTRk1QLzU4N1RuOXphVnplQVlmL1hTZ2tqTnJVbzJZM21yT0gz?=
+ =?utf-8?B?QzhLZ0srellhdUsvZXhkUmlkUTltL1E3emlWUlEwamtnOHNaalhsNzBxUUdI?=
+ =?utf-8?B?QzZPT2tEdE5oU0p0aDF3K3NGMzNzWHJLeHN3MmdKbDZrVSszbnFzTkZOWjV0?=
+ =?utf-8?B?Mk5Wd3lITnJpTmJKUDVxUXovKzNrYVd5Nkl3RFRqNzBia1RYbmdTZmJ2cFhr?=
+ =?utf-8?B?R3d5R1NUeDN3YnYzZ2tXVGV3eExxanAvZVB3UTdtbWFXTHFuUUVkMEpNRnBT?=
+ =?utf-8?B?R091YUNkWDhTTE9VaXhSbG9yYlVrcTlJYkdzNmI2QVg5SWR0RFRJSU9rZlM0?=
+ =?utf-8?B?ZHNidDM0QVU4aWgwMmVqUzVJcEVDTFBZQ3o0dGZxSURsVkpLblJtM2RZRHhk?=
+ =?utf-8?B?aTVMR1dseG9aSzF3a011Um42RWk0bWZ5YkcrQlFQQ2FabDk3NVNtWU9oclJU?=
+ =?utf-8?B?UWlGcWlzUHZZWDhPRXhVSDAzU1F6TmNlc3BKc29xbGxzdEZqOUEwUmN6aDlk?=
+ =?utf-8?B?UDk0Kzh3bGp5MDE5MG9NeW1NamwxWnNmRWh0bVVFdFZMTHdVd3NjOWtUWlAr?=
+ =?utf-8?B?dVR2N0tXamRlT1lES3FxbkpwQTBTRnIzWWRKbHFJd1pMU0ozMFpYWjkvak8y?=
+ =?utf-8?B?NkJDeFRUTnRyNFlQSnJ5TEtOT1V2TnllbUllMW4vdldEVjdteEVxU0pKUVZO?=
+ =?utf-8?B?QWdiNWdPMHovU0NMNk5kS1U0LzNQR2wxWURKcldNMkhnZ1lrcHVzM1pjZUVQ?=
+ =?utf-8?B?c3lUb3d1SmhGMlFDR0tLVlN1SG15cmdEUFR6MTFkalo5NEpmK2JzRmVwM040?=
+ =?utf-8?B?eDhyc2pQTmFwUlRYRXV2RERvcEJ6SmV5cXRzL1hZaFJBNy8xNCtUOVlldSs0?=
+ =?utf-8?B?YlV1UEtyOG96T1p0Z2JKVVQ3OG9HcUhGQ1lKZ0RTS0JmdS84V2tEclVWelFT?=
+ =?utf-8?B?Vm8rdUVvZ3RmUm5zaFBkSDFCd2U3ZldXZ1ZrejFZWVpBNTdKa05GSDZXQ2pT?=
+ =?utf-8?B?MFJycy9LM0EySEE5M3VhUXdUcTBUN2RSM1dZOFJJUTZQb1FObmZMOEljbmw4?=
+ =?utf-8?B?cVlma3RMS1hRUVUvS0lqQ0FBUU1SL1JXM2FRVWc4TGxuZDhlQ2ZYekdsbEVH?=
+ =?utf-8?B?SE0wTkdHTmp0TUcydmtDNGlDVllXMGRQMUlwd1pBVzZ4TzZycWgzMXFvSHZW?=
+ =?utf-8?B?ZWtLWGNWYWIzc0tZYXBQSXorN3BIZmNrR1ZKQ1FTWS9zV1JjYUtXNlk5ZFcw?=
+ =?utf-8?Q?pS/barFk3XQ/54tb046u0ok=3D?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <FEAA252C41DA2342AC6836404F001B86@namprd10.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Y2qHkFxVvYlANCZc@magnolia>
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: rHhYpNdoIKICHClq/nnak+q8yW+vuXFZDRRaWw8Q7/IdKnnpvxdpS/apLvn3nBe7yklqw2qHyhzDtGxWom8Mybxpf9ACo+ifAmUNV6WNfbur3QFy4r/tJlnSeXZTSVZ0uqgSHbFm/Z3ay8jDa7/n6jJJlTC7iWJcRqDjBU+MH/PADl3aBCi/JsY3qjguEvJOUtMQz9Bdn5bW0pkf88g5ltbgR3KmEOHWEBbBouATlrVu/5a8QTF0KwaNhvUIRsOj2Y+nWDRDmO63kzDxbRhhkG/MfYaH1/KdUCDEJywwDBg8nbm4mJZ76Fuww1EYM/CorXTKQOWAzQ1/SbLDXCphjJE8tUSpWOVD8Yh1S0ptQJYlOZO+AVX6Q8psyzK06tWoqED74VpSY1U0LxoBZKJ3MEzhNkjK5SzsupAV0xpdcuCgVAvxFLluBbF9I0bTQw669Sn8z7BoIAiPYm0xZG1UuBKcso5/nZGmqxyxGY1dv3QcNRaXhX+lCpEqH4GuwKmecAUOuSd4/XkDEX8l9pLsF6EI6uJkIAXM+xyROiia72e+xNHCTGNR2VFz8Pi5fbgmHRGZcQFsYOAk3QNJI9gZX9jWZz93xlMekNlRoS/TgEtvDCHi/glI/vDIUFBq0HM1GDC9EdU6pU74Wx9+kL+l/WgtpodRy1bLWm4pcQh65soZ+iNNtV23HKJWWJ/4tOIrR78aZ5lAJGKKRVTJHTYuJW5uiYF3sFzaLLuqU7/3BgBPhDJ9keiXZifwVWjpXmexxPzFwFfLFdi9xta90O9ldsxSm7HXF/sb/uUCtkd0KKlAVgR9PI+opGixbZDPircZ
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BY5PR10MB4306.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: c1dc4f01-8ee9-45e0-231c-08dac42c203d
+X-MS-Exchange-CrossTenant-originalarrivaltime: 11 Nov 2022 21:31:42.4361
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: +u7OjIBJ/svH9+VQYLLML1xt4iyH3umgwj/Q5alV9ZzHEI3bOl9yJGcFJ5+6zujlaSVPS5+LNuPuYFUqJYxIy1Z6RcZunt3yvgX7Q/yHf/M=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR10MB6652
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.219,Aquarius:18.0.895,Hydra:6.0.545,FMLib:17.11.122.1
+ definitions=2022-11-11_11,2022-11-11_01,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxscore=0 spamscore=0
+ adultscore=0 malwarescore=0 mlxlogscore=999 bulkscore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2210170000
+ definitions=main-2211110145
+X-Proofpoint-ORIG-GUID: 5EXkN8zbirCrF0k00ihEz8C1BipkxVMb
+X-Proofpoint-GUID: 5EXkN8zbirCrF0k00ihEz8C1BipkxVMb
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 08, 2022 at 08:45:04AM -0800, Darrick J. Wong wrote:
-> On Tue, Nov 08, 2022 at 11:56:05PM +0800, Zorro Lang wrote:
-> > On Tue, Nov 08, 2022 at 10:08:03AM -0500, Theodore Ts'o wrote:
-> > > On Tue, Nov 08, 2022 at 10:44:55AM +0800, Zorro Lang wrote:
-> > > > > If it's collapse/insert range you're specifically worried about, perhaps
-> > > > > its time to implement _get_file_block_size for ext4 so that
-> > > > > _test_congruent_file_oplen can exclude those tests that will get the
-> > > > > alignment wrong?
-> > > > 
-> > > > Thanks Darrick, I'm thinking about this helper you wrote recently :)
-> > > > (The real name is _require_congruent_file_oplen in common/rc.)
-> > > > 
-> > > > Hi Ted, is this helpful if you write a _ext4_get_file_block_size (refer to
-> > > > _xfs_get_file_block_size in common/xfs), then call it in _get_file_block_size
-> > > > to help _require_congruent_file_oplen to get the correct length which is an
-> > > > integer multiple of the file's allocation unit size ?
-> > > 
-> > > Well, it's a bit more complicated than that, since there's a
-> > > distinction between the cluster size and block size.  The cluster size
-> > > is the allocation unit.  However, other things are done in units of
-> > > the block size, including how we report fiemap results, etc.
-> > > 
-> > > For example, take a look at generic/206.  It will try to create a file
-> > > system where the file system block size is the one fourth of the page
-> > > size --- so for x86, 1k.  However, for ext4, the default cluster size
-> > > for 16 times the block size, so for this file system the allocation
-> > > unit size is 16k.  If we make _get_file_block_size return 64k for all
-> > > files, then generic/206 will fail:
-> > > 
-> > >     pagesz=$(getconf PAGE_SIZE)
-> > >     blksz=$((pagesz / 4))
-> > >     ...
-> > >     _scratch_mkfs_blocksized $blksz > $seqres.full 2>&1
-> > >     ...
-> > >     real_blksz=$(_get_file_block_size $testdir)
-> > 
-> > Hmm... I'm wondering is it possible that g/206 need _get_block_size() at here?
-> > 
-> > Due to from the logic of _get_file_block_size() [1], extN call _get_block_size()
-> > directly. So if you feel a specific _ext4_get_file_block_size() isn't suit for
-> > g/206, maybe it turely want _get_block_size() at here?
-
-I just checked g/206 and other similar cases, I think they really need
-_get_file_block_size, not the _get_block_size.
-
-But for extN, as Ted said "it's a bit more complicated ...". If the
-_get_file_block_size should return different allocate size according
-to different later operations, how about let _get_file_block_size
-support an optional argument, so specify what kind of allocate size
-should be returned? XFS part can ignore this optional argument, if
-it doesn't care.
-
-Thanks,
-Zorro
-
-> > 
-> > [1]
-> > _get_file_block_size()
-> > {
-> >         if [ -z $1 ] || [ ! -d $1 ]; then
-> >                 echo "Missing mount point argument for _get_file_block_size"
-> >                 exit 1
-> >         fi
-> > 
-> >         case "$FSTYP" in
-> >         "ocfs2")
-> >                 stat -c '%o' $1
-> >                 ;;
-> >         "xfs")
-> >                 _xfs_get_file_block_size $1
-> >                 ;;
-> >         *)
-> >                 _get_block_size $1
-> >                 ;;
-> >         esac
-> > }
-> > 
-> > >     test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
-> > > 
-> > > I assume this works for xfs because only files in the real-time block
-> > > size will have a larger allocation unit size, but the root directory
-> > > has a allocation unit size of the "real" block size?
-> > > 
-> > > I suppose I could make a hypothetical _ext4_get_file_block_size lie
-> > > and return the "real" block size when it's called on the mount point,
-> > > but that seems kinda of gross, and it's also a lie, since the
-> > > allocation unit size for the root directory actually is the cluster
-> > > size, not the block size.
-> > > 
-> > > If I were going to be doing things from scratch, I'd make a
-> > > distinction between _get_file_allocation_size and
-> > > _get_file_system_block_size, which would be a lot *clearer* about what
-> > 
-> > Currently _get_block_size is more like _get_file_system_block_size, and
-> > _get_file_block_size is more like _get_file_allocation_size. Actually
-> > I'm confused about these two names before :)
-> 
-> Yes, both statements are correct.  They're both crappily named, one of
-> them by me. :(
-> 
-> > > is going on.  Even then, I could imagine some tests getting confused
-> > > with how, say, fiemap behaves with an ext4 file system with a 4k block
-> > > size and a 64k allocation unit size, so I'm not sure it's a complete
-> > > solution.  And doing this now would require quite a bit of code churn
-> > > in xfstests.
-> 
-> Yes, it has been, uh, fun to fix fstests so that xfs realtime with a 28k
-> allocation unit doesn't spray false failures everywhere.  I'm mostly
-> done now, I hope? ;)
-> 
-> (Or at least I haven't heard any complaints from Leah in a solid 2
-> months...)
-> 
-> > > > If this's helpful for your first concern [1], please tell me. Then we can talk
-> > > > about your second concern [2], if it's still your main concern now :)
-> > > > 
-> > > > "This might *[1]* either be because the test didn't know about ext4
-> > > >  bigalloc's cluster alignment requirements, *[2]* or because a particular
-> > > >  operation might just be *buggy* and being able to run tests as if a
-> > > >  particular command wasn't supported was useful."
-> > > 
-> > > So [1] is a real concern, and at the moment, we just suppress all of
-> > > the tests that try to use collapse/insert range.  For example, from
-> > > the ext4/bigalloc config file:
-> > > 
-> > >     # Until we can teach xfstests the difference between cluster size and
-> > >     # block size, avoid collapse_range and insert_range since these will
-> > >     # fail due the fact that these operations require cluster-aligned
-> > >     # ranges.
-> > >     export FSX_AVOID="-C -I"
-> > >     export FSSTRESS_AVOID="-f collapse=0 -f insert=0"
-> > >     export XFS_IO_AVOID="fcollapse finsert"
-> > >     TEST_SET_EXCLUDE="-x collapse,insert"
-> > 
-> > Thanks for pointing this out, I'll help to check all fcollapse and finsert
-> > related cases, and add them into collapse or insert group. We're keep improving
-> > group problem, most of cases really not take too much care about its group.
-> > And I'll pay more attention about the groups when I review patches.
-> 
-> <nod>
-> 
-> > > 
-> > > That's not ideal, and it's been on my todo list to try to fix it, when
-> > > I could get one of those round tuit's.  However, I had assumed that we
-> > > would split _get_file_block_size somehow, given the observation I've
-> > > made above.  So this was always been something that has put me off,
-> > > because it looked like a much larger project than say, "gee, I have an
-> > > hour or two on a weekend, let me see if I can fix this".
-> > 
-> > I'd like to help your team to deal with the fstests problems you hit in your
-> > using procedure, feel free to tell us the part you hope to fix/improve. I
-> > have to care about other teams too, so might need more time to evaluate and
-> > talk, sorry about that.
-> > 
-> > > 
-> > > [2] is practically not _really_ a concern any more.  It used to be
-> > > that one of the ways that I would root cause a failing test was to
-> > > suppress one of the advanced fallocate modes, whether it be
-> > > collapse/insert range, or going even further back, punch hole.  If
-> > > test then passed, then I could say, "ah, hah; the problem can probably
-> > > be localized to a certain part of the fs code."
-> > > 
-> > > However, that's mainly tests that are using fsstress and fsx, and we
-> > > have solutions for that.  And for other tests, I can examine the test
-> > > and see whether or not it's using collapse/insert range by inspection,
-> > > so it's really not that big of a deal.  I could imagine other file
-> > > systems who might find this useful in the future, if they were trying
-> > > to growing support for the more advanced fallocate modes --- but that
-> > > wouldn't *my* concern, and arguably those file systems could solve
-> > > problems alternate ways, such as having mount options that suppress
-> > > those fallocate modes entirely which could be used when running
-> > > xfstests.
-> > > 
-> > > 						- Ted
-> > > 
-> > > P.S.  I have noticed some tests that use collapse/insert range but
-> > > don't declare that they are in the collapse or insert groups.
-> > > Fortunately, all of these tests are also in the clone group, and so
-> > > they don't apply to ext4, so _I_ don't care.  :-)
-> > 
-> > Thanks, I'll try to check all collapse/insert related cases.
-> 
-> <nod> Bad throwback to the days when we didn't scrutinize group names
-> all that closely.  Someone probably ought to write a dumb linter that
-> can look for obvious patterns in a testcase and nominate group names.
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > 
-> 
-
+T24gV2VkLCAyMDIyLTExLTA5IGF0IDE0OjI2IC0wODAwLCBDYXRoZXJpbmUgSG9hbmcgd3JvdGU6
+DQo+IEFkZCBhIHRlc3QgdG8gdmVyaWZ5IHRoZSB4ZnNfc3BhY2VtYW4gZnN1dWlkIGZ1bmN0aW9u
+YWxpdHkuDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBDYXRoZXJpbmUgSG9hbmcgPGNhdGhlcmluZS5o
+b2FuZ0BvcmFjbGUuY29tPg0KTG9va3Mgc2ltcGxlIGVub3VnaA0KUmV2aWV3ZWQtYnk6IEFsbGlz
+b24gSGVuZGVyc29uIDxhbGxpc29uLmhlbmRlcnNvbkBvcmFjbGUuY29tPg0KDQo+IC0tLQ0KPiDC
+oHRlc3RzL3hmcy81NTfCoMKgwqDCoCB8IDMxICsrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysNCj4gwqB0ZXN0cy94ZnMvNTU3Lm91dCB8wqAgMiArKw0KPiDCoDIgZmlsZXMgY2hhbmdlZCwg
+MzMgaW5zZXJ0aW9ucygrKQ0KPiDCoGNyZWF0ZSBtb2RlIDEwMDc1NSB0ZXN0cy94ZnMvNTU3DQo+
+IMKgY3JlYXRlIG1vZGUgMTAwNjQ0IHRlc3RzL3hmcy81NTcub3V0DQo+IA0KPiBkaWZmIC0tZ2l0
+IGEvdGVzdHMveGZzLzU1NyBiL3Rlc3RzL3hmcy81NTcNCj4gbmV3IGZpbGUgbW9kZSAxMDA3NTUN
+Cj4gaW5kZXggMDAwMDAwMDAuLjBiNDFlNjkzDQo+IC0tLSAvZGV2L251bGwNCj4gKysrIGIvdGVz
+dHMveGZzLzU1Nw0KPiBAQCAtMCwwICsxLDMxIEBADQo+ICsjISAvYmluL2Jhc2gNCj4gKyMgU1BE
+WC1MaWNlbnNlLUlkZW50aWZpZXI6IEdQTC0yLjANCj4gKyMgQ29weXJpZ2h0IChjKSAyMDIyIE9y
+YWNsZS7CoCBBbGwgUmlnaHRzIFJlc2VydmVkLg0KPiArIw0KPiArIyBGUyBRQSBUZXN0IDU1Nw0K
+PiArIw0KPiArIyBUZXN0IHRvIHZlcmlmeSB4ZnNfc3BhY2VtYW4gZnN1dWlkIGZ1bmN0aW9uYWxp
+dHkNCj4gKyMNCj4gKy4gLi9jb21tb24vcHJlYW1ibGUNCj4gK19iZWdpbl9mc3Rlc3QgYXV0byBx
+dWljayBzcGFjZW1hbg0KPiArDQo+ICsjIHJlYWwgUUEgdGVzdCBzdGFydHMgaGVyZQ0KPiArX3N1
+cHBvcnRlZF9mcyB4ZnMNCj4gK19yZXF1aXJlX3hmc19zcGFjZW1hbl9jb21tYW5kICJmc3V1aWQi
+DQo+ICtfcmVxdWlyZV9zY3JhdGNoDQo+ICsNCj4gK19zY3JhdGNoX21rZnMgPj4gJHNlcXJlcy5m
+dWxsDQo+ICtfc2NyYXRjaF9tb3VudCA+PiAkc2VxcmVzLmZ1bGwNCj4gKw0KPiArZXhwZWN0ZWRf
+dXVpZD0iJChfc2NyYXRjaF94ZnNfYWRtaW4gLXUpIg0KPiArYWN0dWFsX3V1aWQ9IiQoJFhGU19T
+UEFDRU1BTl9QUk9HIC1jICJmc3V1aWQiICRTQ1JBVENIX01OVCkiDQo+ICsNCj4gK2lmIFsgIiRl
+eHBlY3RlZF91dWlkIiAhPSAiJGFjdHVhbF91dWlkIiBdOyB0aGVuDQo+ICvCoMKgwqDCoMKgwqDC
+oCBlY2hvICJleHBlY3RlZCBVVUlEICgkZXhwZWN0ZWRfdXVpZCkgIT0gYWN0dWFsIFVVSUQNCj4g
+KCRhY3R1YWxfdXVpZCkiDQo+ICtmaQ0KPiArDQo+ICtlY2hvICJTaWxlbmNlIGlzIGdvbGRlbiIN
+Cj4gKw0KPiArIyBzdWNjZXNzLCBhbGwgZG9uZQ0KPiArc3RhdHVzPTANCj4gK2V4aXQNCj4gZGlm
+ZiAtLWdpdCBhL3Rlc3RzL3hmcy81NTcub3V0IGIvdGVzdHMveGZzLzU1Ny5vdXQNCj4gbmV3IGZp
+bGUgbW9kZSAxMDA2NDQNCj4gaW5kZXggMDAwMDAwMDAuLjFmMWFlMWQ0DQo+IC0tLSAvZGV2L251
+bGwNCj4gKysrIGIvdGVzdHMveGZzLzU1Ny5vdXQNCj4gQEAgLTAsMCArMSwyIEBADQo+ICtRQSBv
+dXRwdXQgY3JlYXRlZCBieSA1NTcNCj4gK1NpbGVuY2UgaXMgZ29sZGVuDQoNCg==
