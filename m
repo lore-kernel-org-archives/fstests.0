@@ -2,97 +2,99 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FDB4C433FE
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Nov 2022 02:09:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6F93C4332F
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Nov 2022 17:54:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235067AbiKMCJE (ORCPT
+        id S233847AbiKMRy3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 12 Nov 2022 21:09:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47708 "EHLO
+        Sun, 13 Nov 2022 12:54:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233054AbiKMCJD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 12 Nov 2022 21:09:03 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B95713D3B;
-        Sat, 12 Nov 2022 18:09:01 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S231252AbiKMRy3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Nov 2022 12:54:29 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02E8ED11C
+        for <fstests@vger.kernel.org>; Sun, 13 Nov 2022 09:54:28 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 388B1336CA;
-        Sun, 13 Nov 2022 02:09:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1668305340; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=Jz0TZQje3XgXeIhuL22DcJvqvjJirGw/xoh5AkbGWGo=;
-        b=b03CCsJyI+0q1QwpaUO2TsOf5ffZiPacXY04xXdOnUarLnZaFh0A/CAPwNTS7YJvE+Fb57
-        PNRdBkhPLTq3IXAMSgpJSQsAxDbukOCZA1m1mF9GI9tlGgc7VvvN4voLlpk8YoGv7ESDcE
-        qSdEhAAnWGA8fp2QJqJuSYxBrF8th+k=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 49D75139C6;
-        Sun, 13 Nov 2022 02:08:59 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 1hWMBLtRcGO6YAAAMHmgww
-        (envelope-from <wqu@suse.com>); Sun, 13 Nov 2022 02:08:59 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] fstests: btrfs/021: redirect the output of defrag command
-Date:   Sun, 13 Nov 2022 10:08:41 +0800
-Message-Id: <20221113020841.40180-1-wqu@suse.com>
-X-Mailer: git-send-email 2.38.1
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 9126660B02
+        for <fstests@vger.kernel.org>; Sun, 13 Nov 2022 17:54:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E41ACC433D6;
+        Sun, 13 Nov 2022 17:54:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1668362066;
+        bh=ms9NnC+jS5tVOYHp5IDDqtxW5Yux11EhZpz1PPBjPa4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=IodnrzWoR+ZhHL+wZ8qZwH+tevyKoUUpxFq32NkgG+AMHoTD+yh7RaiFOW/SXps7g
+         3/+mmCJU5rPuZAP2i25k08QUh17nGuVKtlboHfCj71UalftOgMNswFzp/vkne1ckq3
+         d8D/vQTKHPGLNxdiJ+EwcVyFZXlgIE7BpKMdtzMGaLJx9RqS+1NfSLCPJu1kQZRXOr
+         2MKDfrz4h/T600//aXLXCBZakwNysvkkNbZjyxsFh455FLYBiGsZKQcVK9t0ubu6S7
+         w57fT+FI2hoxgYxqyovOb65HBSGkZSmyUmyRRdneK70HO4g3OKuiuI1rxycj8NQI+d
+         bnIcIvtlBlQfw==
+Date:   Sun, 13 Nov 2022 09:54:26 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     "yangx.jy@fujitsu.com" <yangx.jy@fujitsu.com>
+Cc:     "zlang@redhat.com" <zlang@redhat.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "bfoster@redhat.com" <bfoster@redhat.com>,
+        "Yasunori Gotou (Fujitsu)" <y-goto@fujitsu.com>
+Subject: Re: [PATCH RESEND 1/2] common/dmlogwrites: Extend _log_writes_init()
+ to accept the specified size
+Message-ID: <Y3EvUgtux4tP1tdY@magnolia>
+References: <20221023064810.847110-1-yangx.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221023064810.847110-1-yangx.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[BUG]
-Test case btrfs/021 will fail with v6.0 btrfs-progs, with the extra
-output:
+On Sun, Oct 23, 2022 at 06:48:13AM +0000, yangx.jy@fujitsu.com wrote:
+> It is unnecssary to always create a log-writes device based on
+> the size of the entire underlying device.
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+> ---
+>  common/dmlogwrites | 12 ++++++++++--
+>  1 file changed, 10 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/dmlogwrites b/common/dmlogwrites
+> index 9fa1c977..d7b23cec 100644
+> --- a/common/dmlogwrites
+> +++ b/common/dmlogwrites
+> @@ -61,12 +61,20 @@ _require_log_writes_dax_mountopt()
+>  
+>  _log_writes_init()
+>  {
+> -	blkdev=$1
+> +	local blkdev=$1
+> +	local range=$2
 
-     QA output created by 021
-    +/mnt/scratch/padding-0
-    +/mnt/scratch/padding-1
-    +/mnt/scratch/padding-2
-    +/mnt/scratch/padding-3
-    +/mnt/scratch/padding-4
-    +/mnt/scratch/padding-5
-    ...
+Range is a length in ... bytes?  The unit ought to be recorded in a
+comment for this function.
 
-[CAUSE]
-In fact this is a btrfs-progs bug, btrfs-progs commit db2f85c8751c
-("btrfs-progs: fi defrag: add global verbose option") changed the output
-level of defrag command.
+With that fixed, this looks ok to me
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-[FIX]
-This will be fixed in btrfs-progs, while as a workaround we can redirect
-the stdout into $seqres.full.
+--D
 
-If we hit some error, the stderr will still pollute the golden output
-and be caught by the test case.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/021 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/btrfs/021 b/tests/btrfs/021
-index 5943da2f..6b6383cb 100755
---- a/tests/btrfs/021
-+++ b/tests/btrfs/021
-@@ -23,7 +23,7 @@ run_test()
- 	sleep 0.5
- 
- 	find $SCRATCH_MNT -type f -print0 | xargs -0 \
--	$BTRFS_UTIL_PROG filesystem defrag -f
-+	$BTRFS_UTIL_PROG filesystem defrag -f >> $seqres.full
- 
- 	sync
- 	wait
--- 
-2.38.0
-
+> +	local BLK_DEV_SIZE
+>  
+>  	[ -z "$blkdev" ] && _fail \
+>  	"block dev must be specified for _log_writes_init"
+>  
+> -	local BLK_DEV_SIZE=`blockdev --getsz $blkdev`
+> +	if [ -z "$range" ]; then
+> +		BLK_DEV_SIZE=`blockdev --getsz $blkdev`
+> +	else
+> +		local blksz=`blockdev --getss $blkdev`
+> +		BLK_DEV_SIZE=$((range / blksz))
+> +	fi
+> +
+>  	LOGWRITES_NAME=logwrites-test
+>  	LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
+>  	LOGWRITES_TABLE="0 $BLK_DEV_SIZE log-writes $blkdev $LOGWRITES_DEV"
+> -- 
+> 2.34.1
