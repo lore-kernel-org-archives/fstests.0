@@ -2,123 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81D48C43219
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Nov 2022 11:32:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1484C4332F
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Nov 2022 14:58:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235927AbiKNLcl (ORCPT
+        id S236063AbiKNO6Q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Nov 2022 06:32:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58190 "EHLO
+        Mon, 14 Nov 2022 09:58:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60242 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235925AbiKNLcX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Nov 2022 06:32:23 -0500
+        with ESMTP id S235937AbiKNO5x (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Nov 2022 09:57:53 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6E4E111B
-        for <fstests@vger.kernel.org>; Mon, 14 Nov 2022 03:31:27 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A786F1BEA1
+        for <fstests@vger.kernel.org>; Mon, 14 Nov 2022 06:57:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1668425486;
+        s=mimecast20190719; t=1668437823;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=2rB3wzOCzs5u3el8ehNKoXXxgk2BS/YYI3SevxAA1is=;
-        b=DRH4A6RV61r/77yq1n7ME9HETTbTPHUWGacjHpcC6ZXQuoEwUKn2qSVPXsTvpKe167WOWr
-        GSY2Vf8LKt6aYhkj2TReyZr1Sh8up3vQosBvpeBLQZcRSU5SZJFxzoJXneDBULu6Nughi9
-        WsVzjwnIQC3duFHjSXuvefHWhvWu9dY=
+        bh=MnJeNBbkFDqVK7FuYTaPwZSP/3h9xze9dcrRnZF+i1I=;
+        b=fN0lsseks7hhJovQBzmHEAqsYhS6XXXC6+TW71piIFWz35S3UG6SAXKTRMI+7+Ggwuna1Z
+        6a+sRyMklesLyNpppUHRVCUf/g4Y3eUoefHYdPvrOBekEoXbjtWTA8blRyty5MMb9+pDSi
+        a9InoJszrUUIoER0wHraX5G4tMyTQFg=
 Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
  [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-43-fXNlCCv1MTSrjPTEecUroA-1; Mon, 14 Nov 2022 06:31:25 -0500
-X-MC-Unique: fXNlCCv1MTSrjPTEecUroA-1
-Received: by mail-qv1-f72.google.com with SMTP id 71-20020a0c804d000000b004b2fb260447so8267422qva.10
-        for <fstests@vger.kernel.org>; Mon, 14 Nov 2022 03:31:25 -0800 (PST)
+ us-mta-669-JuaSYf6XNv-a0lf0UnOy-Q-1; Mon, 14 Nov 2022 09:57:02 -0500
+X-MC-Unique: JuaSYf6XNv-a0lf0UnOy-Q-1
+Received: by mail-qv1-f72.google.com with SMTP id nn2-20020a056214358200b004bb7bc3dfdcso8645321qvb.23
+        for <fstests@vger.kernel.org>; Mon, 14 Nov 2022 06:57:02 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2rB3wzOCzs5u3el8ehNKoXXxgk2BS/YYI3SevxAA1is=;
-        b=XGH1YEFFgl2NuHpJNORqhZaTGey9NYfRvQj2DkwEea7zI25O+N9//dYUfp5jSu86zs
-         efcXPjnW1Oswei8gSOfPgzDfWbNDEg4ThNcw5hinBnFMYBYGJiZeEGMNPVSdp4JDnpmC
-         nMfiFZa3CsbolXDLTEN6Fatl7Kw85w1jo9k2YKh4W7LmxeC5IOyLiTAWNHKDxrptFDD2
-         FVkw2fHogFDQ7sDcFZJSjni1/EoyvSV4GVyAjIuyNyBsgD2gJ1V/BwHIpFOnVN+n+upO
-         B/aYIrOgc2P44/TQ8X4SAAMSOoVYI3gZTAHMH2gs0fJuL7TirSYqh7i5Ebbl8c+/dgTt
-         9kTg==
-X-Gm-Message-State: ANoB5pnInQJvwECuM03j/n/r9LSpx7gjXq6TwypB7cV1rCxSAtcBiEbM
-        VwakTFlFVwNKS7WqsIXyp3eh6gKk4SO5kX4dupe/EtCMEh7m8Pu3AcKbNDM2MfNLWXhAWmTlW47
-        dXsD2lZCJWYfXetEL
-X-Received: by 2002:a05:620a:439c:b0:6ba:f088:cfd8 with SMTP id a28-20020a05620a439c00b006baf088cfd8mr10738811qkp.736.1668425484859;
-        Mon, 14 Nov 2022 03:31:24 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf5M8qdrpic/fhkFnlbRtFhtHlz4b4OeT53tkj2RrFl/WJ0Rn+ohXNM70ECbMpU3dvieE7cLzw==
-X-Received: by 2002:a05:620a:439c:b0:6ba:f088:cfd8 with SMTP id a28-20020a05620a439c00b006baf088cfd8mr10738787qkp.736.1668425484375;
-        Mon, 14 Nov 2022 03:31:24 -0800 (PST)
-Received: from aalbersh.remote.csb ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id s13-20020a05620a16ad00b006fb112f512csm6177577qkj.74.2022.11.14.03.31.23
+        bh=MnJeNBbkFDqVK7FuYTaPwZSP/3h9xze9dcrRnZF+i1I=;
+        b=mH4Rhfr3MGujeqWcOz7q651MC3o/0ZuHWIdSsBvJA88V/wYZgMKUINmfL3tAqPeE9p
+         N39Ii6RwXA5zynht5qSGW8FqDVb6x00H07fwGF+cDP44HBQdKl6fwPp6n337DuBXP3rl
+         6r/oQLu2MARkbu2ITe2jGE2MfujsYZqNi57d3ugu6XELbSS9w1EFNq7a77Ec1Na4xKK1
+         hmPLuDt8nsOJNtF2lSHNAM3lrW5jaBKyf2ZQJmeQ6gntKF29KLRxIcSBhHCxJTXwBMRU
+         v1NRAejiPappLb3/Bf4+1F043AQi/QoF5tJW9HwCH3kpWKq8+tW683uOHz0KRALp/2PI
+         3SAQ==
+X-Gm-Message-State: ANoB5pklq7fHj51zotl1zLt3q5yhBULrVBvZkr1mA1vXVMLzVv33+eIb
+        a6w4cY7Ih4knnNMVl43Sbba5IWIjXgvdHc3MEGmRH6bn21mm2iP0FfQPodfu/GoSiMQ5ejeSM0b
+        bO50BxJ3YcVka/wtydQ==
+X-Received: by 2002:a05:620a:79b:b0:6fa:1032:10a1 with SMTP id 27-20020a05620a079b00b006fa103210a1mr11265339qka.167.1668437822025;
+        Mon, 14 Nov 2022 06:57:02 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf7+7bfbn9WprnRT62uoL1HgMrwCaAvtjPCkfpySC786akkJWIQJAndh8G8Eq87oqOpWgs2EiA==
+X-Received: by 2002:a05:620a:79b:b0:6fa:1032:10a1 with SMTP id 27-20020a05620a079b00b006fa103210a1mr11265318qka.167.1668437821740;
+        Mon, 14 Nov 2022 06:57:01 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id o5-20020ac87c45000000b003a494b61e67sm5776680qtv.46.2022.11.14.06.56.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Nov 2022 03:31:24 -0800 (PST)
-Date:   Mon, 14 Nov 2022 12:31:21 +0100
-From:   Andrey Albershteyn <aalbersh@redhat.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: update group name according to xfs_io command
- requirement
-Message-ID: <20221114113121.qgp4qs6ycc5ccdlj@aalbersh.remote.csb>
-References: <20221108183242.3362013-1-zlang@kernel.org>
- <20221111015835.j4pf2gqsd3qipjmj@zlang-mailbox>
+        Mon, 14 Nov 2022 06:57:01 -0800 (PST)
+Date:   Mon, 14 Nov 2022 22:56:56 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Xiao Yang <yangx.jy@fujitsu.com>
+Cc:     djwong@kernel.org, fstests@vger.kernel.org, bfoster@redhat.com,
+        y-goto@fujitsu.com
+Subject: Re: [PATCH v2 1/2] common/dmlogwrites: Extend _log_writes_init() to
+ accept the specified length
+Message-ID: <20221114145656.cn5bnvllpwaud2px@zlang-mailbox>
+References: <1668414903-13-1-git-send-email-yangx.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221111015835.j4pf2gqsd3qipjmj@zlang-mailbox>
+In-Reply-To: <1668414903-13-1-git-send-email-yangx.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Nov 11, 2022 at 09:58:35AM +0800, Zorro Lang wrote:
-> On Wed, Nov 09, 2022 at 02:32:42AM +0800, Zorro Lang wrote:
-> > When a test case requires someone xfs_io command, that nearly means
-> > that case belong that kind of test group. Likes fpunch for punch
-> > group, fcollapse for collapse group, falloc for prealloc group, fzero
-> > for zero group and so on.
-> > 
-> > Many fstests cases miss some test groups they should belong to, so
-> > this patch trys to supplement this lack,  according to the "xxxx"
-> > which required by _require_xfs_io_command "xxxx".
-> > 
-> > Reported-by: Theodore Ts'o <tytso@mit.edu>
-> > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > ---
-> > 
-> > Hi,
-> > 
-> > Ted complains the insert and collapse groups missing [1], cause he
-> > have to skip some cases by command of _require_xfs_io_command.
-> > 
-> > I think the group missing is the real problem and the first problem,
-> > so I'm trying to add missed groups to fstests cases, simply according
-> > to _require_xfs_io_command lines.
-> > 
-> > By a simple grep, I found there're too many cases contain _require_xfs_io_command,
-> > so I wrote a ugly temporary script to help to do this job automatically as [2].
-> > This script is not good enough, so I took a little time to do manual checking
-> > after running the script. Hope this patch helps, feel free to review or test,
-> > and please tell me if I miss something.
+On Mon, Nov 14, 2022 at 08:35:02AM +0000, Xiao Yang wrote:
+> It is unnecssary to always create a dm-log-writes device
+> based on the entire size of the target/underlying device.
 > 
-> Any comments about this change? I'm not asking for reviewing that script,
-> just the group names change :)
+> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+> ---
+
+Darrick has given his RVB [1]:
+
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+I think you can keep it in this V2 patch.
+
+Thanks,
+Zorro
+
+[1]
+https://lore.kernel.org/fstests/Y3EvUgtux4tP1tdY@magnolia/T/#m83b97790ba6570874f36cd0601747e1b6b155de2
+
+>  common/dmlogwrites | 18 ++++++++++++++++--
+>  1 file changed, 16 insertions(+), 2 deletions(-)
 > 
-> Thanks,
-> Zorro
+> diff --git a/common/dmlogwrites b/common/dmlogwrites
+> index 9fa1c977..c1c85de9 100644
+> --- a/common/dmlogwrites
+> +++ b/common/dmlogwrites
+> @@ -59,14 +59,28 @@ _require_log_writes_dax_mountopt()
+>  	fi
+>  }
+>  
+> +# Set up a dm-log-writes device
+> +#
+> +# blkdev: the specified target device
+> +# length(optional): the mapped length in bytes
+> +# Note that the entire size of the target device will be used
+> +# if length is not specified.
+>  _log_writes_init()
+>  {
+> -	blkdev=$1
+> +	local blkdev=$1
+> +	local length=$2
+> +	local BLK_DEV_SIZE
+>  
+>  	[ -z "$blkdev" ] && _fail \
+>  	"block dev must be specified for _log_writes_init"
+>  
+> -	local BLK_DEV_SIZE=`blockdev --getsz $blkdev`
+> +	if [ -z "$length" ]; then
+> +		BLK_DEV_SIZE=`blockdev --getsz $blkdev`
+> +	else
+> +		local blksz=`blockdev --getss $blkdev`
+> +		BLK_DEV_SIZE=$((length / blksz))
+> +	fi
+> +
+>  	LOGWRITES_NAME=logwrites-test
+>  	LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
+>  	LOGWRITES_TABLE="0 $BLK_DEV_SIZE log-writes $blkdev $LOGWRITES_DEV"
+> -- 
+> 2.34.1
 > 
-
-The changes looks good to me (also did some manual checking).
-Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
-
-But otherwise, I think, as it's in shape now it's more work for
-reviewer - to check those groups, as it could be done automatically
-maybe it make sense to add similar script to build system, maybe? :)
-
-Btw, which commands are considered to have their own group? pwrite,
-for example, doesn't have a group (so, those tests aren't changed).
-
--- 
-- Andrey
 
