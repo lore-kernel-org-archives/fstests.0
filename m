@@ -2,116 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BADF2C4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Nov 2022 11:24:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81D48C43219
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Nov 2022 11:32:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236376AbiKNLYc (ORCPT
+        id S235927AbiKNLcl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Nov 2022 06:24:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51530 "EHLO
+        Mon, 14 Nov 2022 06:32:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58190 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236458AbiKNLYP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Nov 2022 06:24:15 -0500
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D58826AE8;
-        Mon, 14 Nov 2022 03:19:58 -0800 (PST)
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MiJZO-1pQ2Z03oKE-00fOxX; Mon, 14
- Nov 2022 12:19:49 +0100
-Message-ID: <e2917c47-98b8-7236-4952-7c1be74e3946@gmx.com>
-Date:   Mon, 14 Nov 2022 19:19:45 +0800
+        with ESMTP id S235925AbiKNLcX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Nov 2022 06:32:23 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6E4E111B
+        for <fstests@vger.kernel.org>; Mon, 14 Nov 2022 03:31:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1668425486;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=2rB3wzOCzs5u3el8ehNKoXXxgk2BS/YYI3SevxAA1is=;
+        b=DRH4A6RV61r/77yq1n7ME9HETTbTPHUWGacjHpcC6ZXQuoEwUKn2qSVPXsTvpKe167WOWr
+        GSY2Vf8LKt6aYhkj2TReyZr1Sh8up3vQosBvpeBLQZcRSU5SZJFxzoJXneDBULu6Nughi9
+        WsVzjwnIQC3duFHjSXuvefHWhvWu9dY=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-43-fXNlCCv1MTSrjPTEecUroA-1; Mon, 14 Nov 2022 06:31:25 -0500
+X-MC-Unique: fXNlCCv1MTSrjPTEecUroA-1
+Received: by mail-qv1-f72.google.com with SMTP id 71-20020a0c804d000000b004b2fb260447so8267422qva.10
+        for <fstests@vger.kernel.org>; Mon, 14 Nov 2022 03:31:25 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2rB3wzOCzs5u3el8ehNKoXXxgk2BS/YYI3SevxAA1is=;
+        b=XGH1YEFFgl2NuHpJNORqhZaTGey9NYfRvQj2DkwEea7zI25O+N9//dYUfp5jSu86zs
+         efcXPjnW1Oswei8gSOfPgzDfWbNDEg4ThNcw5hinBnFMYBYGJiZeEGMNPVSdp4JDnpmC
+         nMfiFZa3CsbolXDLTEN6Fatl7Kw85w1jo9k2YKh4W7LmxeC5IOyLiTAWNHKDxrptFDD2
+         FVkw2fHogFDQ7sDcFZJSjni1/EoyvSV4GVyAjIuyNyBsgD2gJ1V/BwHIpFOnVN+n+upO
+         B/aYIrOgc2P44/TQ8X4SAAMSOoVYI3gZTAHMH2gs0fJuL7TirSYqh7i5Ebbl8c+/dgTt
+         9kTg==
+X-Gm-Message-State: ANoB5pnInQJvwECuM03j/n/r9LSpx7gjXq6TwypB7cV1rCxSAtcBiEbM
+        VwakTFlFVwNKS7WqsIXyp3eh6gKk4SO5kX4dupe/EtCMEh7m8Pu3AcKbNDM2MfNLWXhAWmTlW47
+        dXsD2lZCJWYfXetEL
+X-Received: by 2002:a05:620a:439c:b0:6ba:f088:cfd8 with SMTP id a28-20020a05620a439c00b006baf088cfd8mr10738811qkp.736.1668425484859;
+        Mon, 14 Nov 2022 03:31:24 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf5M8qdrpic/fhkFnlbRtFhtHlz4b4OeT53tkj2RrFl/WJ0Rn+ohXNM70ECbMpU3dvieE7cLzw==
+X-Received: by 2002:a05:620a:439c:b0:6ba:f088:cfd8 with SMTP id a28-20020a05620a439c00b006baf088cfd8mr10738787qkp.736.1668425484375;
+        Mon, 14 Nov 2022 03:31:24 -0800 (PST)
+Received: from aalbersh.remote.csb ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id s13-20020a05620a16ad00b006fb112f512csm6177577qkj.74.2022.11.14.03.31.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Nov 2022 03:31:24 -0800 (PST)
+Date:   Mon, 14 Nov 2022 12:31:21 +0100
+From:   Andrey Albershteyn <aalbersh@redhat.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: update group name according to xfs_io command
+ requirement
+Message-ID: <20221114113121.qgp4qs6ycc5ccdlj@aalbersh.remote.csb>
+References: <20221108183242.3362013-1-zlang@kernel.org>
+ <20221111015835.j4pf2gqsd3qipjmj@zlang-mailbox>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.0
-Content-Language: en-US
-To:     fdmanana@kernel.org, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <cover.1668011769.git.fdmanana@suse.com>
- <62ef22111c9cb654e6e5e50f7337105b9ef804d7.1668011769.git.fdmanana@suse.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Subject: Re: [PATCH v2 1/3] btrfs/003: fix failure on new btrfs-progs versions
-In-Reply-To: <62ef22111c9cb654e6e5e50f7337105b9ef804d7.1668011769.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Provags-ID: V03:K1:Mst8tHXG762uz5cFfsRpK2COEAp73GWM+7yGpjzYqmBGqKubuga
- MlcfnGWIOo+c48LY04CiqgXCVWL0aNJad6tcoeEz2exAXmcf1GueZYsXqohHnic/4i3avxu
- dB/hJo/7dxOc05347VykZ3ucozJcjk9ovHcb++woeLZMb09gBc4AvhoEHfV+WLc/CRA5DYy
- dKtKudnjEatWSna2NpUCQ==
-UI-OutboundReport: notjunk:1;M01:P0:3/HBKFO++SU=;M0F1RLarP5Kd8rTDx6mtO0rZFjv
- 5fBYJzTazWmxRQhWPggY+vqeXK/IymxG4wUbfAMdeoodElMIQI7ed3YtsgkztEG5z1hpcN+qG
- O6xFE952l8mSvjkbYHBBY30PhECXqZ8wff+K/qiVOsevouq0GlUBb22WfG6uXYCtn5Yrx72WM
- wfScDxKtLtuucH4Yqxj0+D0Ow214Q8bSEoHtxZSmbD/5EaFCALsjECD0iuyR9js5OGOexhIa6
- 2sqYzuzoBHcf/py3DvlP6mnny42eKd31HoLULA6Tx1W2HVjCogRc/qq6luYOIQQ+XNtKstkMU
- Be5sZVEwC+abY1q8hygqR537rsb9M2WBvX0hy75wu9WH9w9dfwGuIdyhLdBL/XPntsbDAo4hq
- JPNap6Bn0i9KrCyEpMGfyQ4fB72k4QIF5iCGCyF9PwZmRDqgRsXyILuIaxmwokZKoXJUjUQpe
- AeSfR2vJHsCBh09WB2oWlS3I0a07twfWNdV3TugrprD6rwbNlYaDA9Or+kT28TPLz6CYFYemZ
- tq2kR3pj59ykSSIsQ67+KFh2aMbsP6rZY+FK8f0psPZiJ/OoeYQjzWQR0BjW+K/nta5s0Q9fK
- WAmH5s+/UE7ypg5R3xByOHtwOucfsKVd9HoXeKbbPV3v9K9Rh1Peu8IqJPRkI+p1gIqVVJjw1
- XQluJ7gG3Td1mKCFz267UHJB138iilm9p6szrC7asu+uLnKfi9AwhQvr7EACLxq1BlvEvjy0U
- YDv/SqN3T6fd0v7pp2QqITqpbIvFquxfndDUkrJ50F9VfyVDdBS1wWP2L6rMh0uZBQMfmJywm
- 4dlTrdWyGfY2PSjfwbOGhffEmnMHyMkWv/l9OMH39l7OqZYzONEu1lg9/l5ZDhtDAy/m+tM6u
- orpXHdReem973kExC5irnZpSKQxaLPm53EqHB6B+b2anJVfOlOzGjunFIZQHVDJ0y8sJbC53w
- wr1t91zVHwc3a29pGmYLHg8kI54=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221111015835.j4pf2gqsd3qipjmj@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Nov 11, 2022 at 09:58:35AM +0800, Zorro Lang wrote:
+> On Wed, Nov 09, 2022 at 02:32:42AM +0800, Zorro Lang wrote:
+> > When a test case requires someone xfs_io command, that nearly means
+> > that case belong that kind of test group. Likes fpunch for punch
+> > group, fcollapse for collapse group, falloc for prealloc group, fzero
+> > for zero group and so on.
+> > 
+> > Many fstests cases miss some test groups they should belong to, so
+> > this patch trys to supplement this lack,  according to the "xxxx"
+> > which required by _require_xfs_io_command "xxxx".
+> > 
+> > Reported-by: Theodore Ts'o <tytso@mit.edu>
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> > 
+> > Hi,
+> > 
+> > Ted complains the insert and collapse groups missing [1], cause he
+> > have to skip some cases by command of _require_xfs_io_command.
+> > 
+> > I think the group missing is the real problem and the first problem,
+> > so I'm trying to add missed groups to fstests cases, simply according
+> > to _require_xfs_io_command lines.
+> > 
+> > By a simple grep, I found there're too many cases contain _require_xfs_io_command,
+> > so I wrote a ugly temporary script to help to do this job automatically as [2].
+> > This script is not good enough, so I took a little time to do manual checking
+> > after running the script. Hope this patch helps, feel free to review or test,
+> > and please tell me if I miss something.
+> 
+> Any comments about this change? I'm not asking for reviewing that script,
+> just the group names change :)
+> 
+> Thanks,
+> Zorro
+> 
 
+The changes looks good to me (also did some manual checking).
+Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
 
-On 2022/11/10 00:44, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Starting with btrfs-progs version 5.19, the output of 'filesystem show'
-> command changed when we have a missing device. The old output was like the
-> following:
-> 
->      Label: none  uuid: 139ef309-021f-4b98-a3a8-ce230a83b1e2
->              Total devices 2 FS bytes used 128.00KiB
->              devid    1 size 5.00GiB used 1.26GiB path /dev/loop0
->              *** Some devices missing
-> 
-> While the new output (btrfs-progs 5.19+) is like the following:
-> 
->      Label: none  uuid: 4a85a40b-9b79-4bde-8e52-c65a550a176b
->              Total devices 2 FS bytes used 128.00KiB
->              devid    1 size 5.00GiB used 1.26GiB path /dev/loop0
->              devid    2 size 0 used 0 path /dev/loop1 MISSING
-> 
-> More specifically it happened in the following btrfs-progs commit:
-> 
->      957a79c9b016 ("btrfs-progs: fi show: print missing device for a mounted file system")
-> 
-> This is making btrfs/003 fail with btrfs-progs 5.19+. Update the grep
-> filter in btrfs/003 so that it works with both output formats.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+But otherwise, I think, as it's in shape now it's more work for
+reviewer - to check those groups, as it could be done automatically
+maybe it make sense to add similar script to build system, maybe? :)
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+Btw, which commands are considered to have their own group? pwrite,
+for example, doesn't have a group (so, those tests aren't changed).
 
-After more digging, it shows that the test case itself will skip 
-non-deletable disks, thus it doesn't cover my LVM based test environment 
-at all.
+-- 
+- Andrey
 
-Thanks,
-Qu
-
-> ---
->   tests/btrfs/003 | 5 +++--
->   1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/btrfs/003 b/tests/btrfs/003
-> index cf605730..fae6d9d1 100755
-> --- a/tests/btrfs/003
-> +++ b/tests/btrfs/003
-> @@ -141,8 +141,9 @@ _test_replace()
->   	_devmgt_remove ${removed_dev_htl} $ds
->   	dev_removed=1
->   
-> -	$BTRFS_UTIL_PROG filesystem show $SCRATCH_DEV | grep "Some devices missing" >> $seqres.full || _fail \
-> -							"btrfs did not report device missing"
-> +	$BTRFS_UTIL_PROG filesystem show $SCRATCH_DEV | \
-> +		grep -ie '\bmissing\b' >> $seqres.full || \
-> +		_fail "btrfs did not report device missing"
->   
->   	# add a new disk to btrfs
->   	ds=${devs[@]:$(($n)):1}
