@@ -2,296 +2,128 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49DDEC4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Nov 2022 06:10:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE583C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Nov 2022 10:57:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231300AbiKVGKh (ORCPT
+        id S232571AbiKVK5o (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Nov 2022 01:10:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33412 "EHLO
+        Tue, 22 Nov 2022 05:57:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231923AbiKVGKf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Nov 2022 01:10:35 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46B932A70F
-        for <fstests@vger.kernel.org>; Mon, 21 Nov 2022 22:09:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1669097379;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=E0otfa5oIaXfFOn/qOpuKQ3hX2Udv94ppDYda4ZkcxI=;
-        b=fcnzoNQvguVEt0lLprFD18ybROXdf57qD2e5WC7MSTZHRMWRhJ66qopWtKpxXVoDxDpvMQ
-        +NqoFmdZAJ3uQ6vOyYbf2XTzoM24bgDw4Z54lVmrJjUL5HYBv7uYJpBrbImzNE9yE8kvUo
-        gFlmaz8EYSO1CMm8aajtxguF/fn7dqg=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-592-UsY5mlOCOj-CIfZC2cft4Q-1; Tue, 22 Nov 2022 01:09:37 -0500
-X-MC-Unique: UsY5mlOCOj-CIfZC2cft4Q-1
-Received: by mail-pf1-f199.google.com with SMTP id e8-20020a056a00162800b0056e953c5088so8771399pfc.2
-        for <fstests@vger.kernel.org>; Mon, 21 Nov 2022 22:09:37 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=E0otfa5oIaXfFOn/qOpuKQ3hX2Udv94ppDYda4ZkcxI=;
-        b=onXxKPdFJN+vASA/LJIkLTS/tt1XH/D4cuKUzHH0TxrlrkaCN1MViOWNE3zjxzk6+x
-         sl1Ofu0ClfHTy9Bwh/aMuZxrbQoWoKAjvRVcLUHfNI1SeaT5Jd8YD7KvcJkzHoRLjjTR
-         P4oXQaJPErVTbsfPHiimmkDg41YG2BRDfNu30F1b20UuT8wE5kF9zukmWIh0wAWVjuZr
-         9F3gp6FUlbDM6BcxhoZevfCwkuLyPKzY6VtaxzedvwLs8QE+Pr//V+Iz51urYXOhvBhf
-         F+AJncx0Yu6izELW2sZBcOoxRXFizs/Dg7kGs1gkwpNx+8LT2PtRvw+foDiFaGRdDfZ9
-         d7WA==
-X-Gm-Message-State: ANoB5pnBeMcyHNwyTksBLlEuUVpPCxYiUAqQIBXheKHC/OtdRZXP/HmY
-        smdAPI3yFO+2fTTQ7XZSXPMNl4HIqk3/W88CChQWhu39GN6PeJp8yYSQPvlm63D6HX2w+4RltEV
-        Lfg1uCjcd4oYL+QTxaA==
-X-Received: by 2002:a63:de4a:0:b0:429:983d:22f8 with SMTP id y10-20020a63de4a000000b00429983d22f8mr2391881pgi.165.1669097376226;
-        Mon, 21 Nov 2022 22:09:36 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf4lZhrFC3o+Cv91ip17F5Syxlw85Unv0JH5vucSWxf4+kuTEUWQzOs7kgg512kmH1HQBhrcGw==
-X-Received: by 2002:a63:de4a:0:b0:429:983d:22f8 with SMTP id y10-20020a63de4a000000b00429983d22f8mr2391867pgi.165.1669097375872;
-        Mon, 21 Nov 2022 22:09:35 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x4-20020a170902ec8400b001780e4e6b65sm11036329plg.114.2022.11.21.22.09.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 21 Nov 2022 22:09:35 -0800 (PST)
-Date:   Tue, 22 Nov 2022 14:09:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        linux-nfs@vger.kernel.org, Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] nfs: test files written size as expected
-Message-ID: <20221122060931.yjnuljl62cehrm2a@zlang-mailbox>
-References: <20221105032329.2067299-1-zlang@kernel.org>
- <20221121184745.p3duc7thj53s5fgv@zlang-mailbox>
- <Y3vTbHqT64gsQ573@magnolia>
+        with ESMTP id S232635AbiKVK5l (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Nov 2022 05:57:41 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBB5625CF;
+        Tue, 22 Nov 2022 02:57:38 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A771AB819F6;
+        Tue, 22 Nov 2022 10:57:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 473ADC433C1;
+        Tue, 22 Nov 2022 10:57:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1669114656;
+        bh=dSudoXz7KlBoU1Klan/84sEPqQWrkeKs1jTdna8n9qQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=c1xEeK3mb7by2grAU0c8mMy5GZw8KlM0ofIELtw+q41xshTfx9/g7gxW4tEjtOFCo
+         3Bvt7JMQLr2GQKI4uTXbaZY7QUqXVJWoWg7VRTtD1/58QDYhBMk2WEg7havS9AMpXD
+         Q7J6iNc+QKkK9YpC+4Ts/sBlMQhxme1f0LxdNhRNvqErKL1a6wOJLnmGkk6Qt/Qyh7
+         MXM/4pAy5fXik9SgsBAvmqFnzgjb7AnN0Mi9mBUUNf/cvk5LIQmmhm/htq989C4TXu
+         BUbMaeK2TH6I+4H/LywBDCMxZvroMDRTU9y/wP1RBkjibnhaDyMq0g/rZbkck7lIa1
+         mHUa9bA+xw13Q==
+Date:   Tue, 22 Nov 2022 11:57:31 +0100
+From:   Christian Brauner <brauner@kernel.org>
+To:     Miklos Szeredi <miklos@szeredi.hu>
+Cc:     linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>,
+        LSM <linux-security-module@vger.kernel.org>
+Subject: Re: sgid clearing rules?
+Message-ID: <20221122105731.parciulns5mg4jwr@wittgenstein>
+References: <CAJfpegsVAUUg5p6DbL1nA_oRF4Bui+saqbFjjYn=VYtd-N2Xew@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <Y3vTbHqT64gsQ573@magnolia>
+In-Reply-To: <CAJfpegsVAUUg5p6DbL1nA_oRF4Bui+saqbFjjYn=VYtd-N2Xew@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 21, 2022 at 11:37:16AM -0800, Darrick J. Wong wrote:
-> On Tue, Nov 22, 2022 at 02:47:45AM +0800, Zorro Lang wrote:
-> > On Sat, Nov 05, 2022 at 11:23:29AM +0800, Zorro Lang wrote:
-> > > Test nfs and its underlying fs, make sure file size as expected
-> > > after writting a file, and the speculative allocation space can
-> > > be shrunken.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > The original bug reproducer is:
-> > > 1. mount nfs3 backed by xfs
-> > > 2. dd if=/dev/zero of=/nfs/10M bs=1M count=10
-> > > 3. du -sh /nfs/10M                           
-> > > 16M	/nfs/10M 
-> > > 
-> > > As this was a xfs issue, so cc linux-xfs@ to get review.
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  tests/nfs/002     | 43 +++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/nfs/002.out |  2 ++
-> > >  2 files changed, 45 insertions(+)
-> > >  create mode 100755 tests/nfs/002
-> > >  create mode 100644 tests/nfs/002.out
-> > > 
-> > > diff --git a/tests/nfs/002 b/tests/nfs/002
-> > > new file mode 100755
-> > > index 00000000..3d29958d
-> > > --- /dev/null
-> > > +++ b/tests/nfs/002
-> > > @@ -0,0 +1,43 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 002
-> > > +#
-> > > +# Make sure nfs gets expected file size after writting a big sized file. It's
-> > > +# not only testing nfs, test its underlying fs too. For example a known old bug
-> > > +# on xfs (underlying fs) caused nfs get larger file size (e.g. 16M) after
-> > > +# writting 10M data to a file. It's fixed by a series of patches around
-> > > +# 579b62faa5fb16 ("xfs: add background scanning to clear eofblocks inodes")
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto rw
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs nfs
-> > > +_require_test
-> > > +
-> > > +localfile=$TEST_DIR/testfile.$seq
-> > > +rm -rf $localfile
-> > > +
-> > > +$XFS_IO_PROG -f -t -c "pwrite 0 10m" -c "fsync" $localfile >>$seqres.full 2>&1
-> > > +block_size=`stat -c '%B' $localfile`
-> > > +iblocks_expected=$((10 * 1024 * 1024 / $block_size))
-> > > +# Try several times for the speculative allocated file size can be shrunken
-> > > +res=1
-> > > +for ((i=0; i<10; i++));do
-> > > +	iblocks_real=`stat -c '%b' $localfile`
-> > > +	if [ "$iblocks_expected" = "$iblocks_real" ];then
-> > > +		res=0
-> > > +		break
-> > > +	fi
-> > > +	sleep 10
-> > > +done
-> > 
-> > Hmm... this case sometimes fails on kernel 6.1.0-rc6 [1] (nfs4.2 base on xfs),
-> > even I changed the sleep time to 20s * 10, it still fails. But I can't reproduce
-> > this failure if the underlying fs is ext4... cc linux-xfs, to check if I miss
-> > something for xfs? Or this's a xfs issue?
+On Mon, Nov 21, 2022 at 02:14:13PM +0100, Miklos Szeredi wrote:
+> I'm looking at sgid clearing in case of file modification.  Seems like
+> the intent was:
 > 
-> Could be anything, really -- speculative preallocation on the server, or
-> xattrs blowing up the attr fork.  You'd have to go query the file
-> mappings and whatnot of the xfs file on the server to find out.
+>  - if not a regular file, then don't clear
+>  - else if task has CAP_FSETID in init_user_ns, then don't clear
 
-Hi Darrick,
+This one is a remnant of the past. The code was simply not updated to
+reflect the new penultimate rule you mention below. This is fixed in
+-next based on the VFS work we did (It also includes Amirs patches we
+reviewed a few weeks ago for file_remove_privs() in ovl.).
 
-Thanks for your reply.
-
-When the number of blocks isn't as expected, I printed the bmap of the test
-file on xfs, it really shows 20480 blocks [1], not 32640 blocks.
-
-And I checked the xattr of the file on xfs, it doesn't has attr blocks [2], it's
-local format. Even if it has some attr blocks, 32640 too much bigger than 20480,
-I don't think selinux or other xattr takes that many blocks.
-
-Hmm... this test case passed on nfs3 and nfs4.0 with xfs, but fails on nfs4.1 or
-nfs4.2 with xfs. cc linux-nfs@ list to get more review.
-
-BTW, this case is an original regression test for a rhel bug:
-https://bugzilla.redhat.com/show_bug.cgi?id=955254 (you might can't open it)
-which blamed that "xfs files written over nfs are bigger due to speculative
-allocation and may never shrink while fs is mounted".
-
-Dave said:
-For NFS servers, keeping the speculative prealloc around for as long as possible
-is the desired behaviour. It will get truncated away when the inode is cycled
-out of the cache by memory pressure on the NFS server. So the code is currently
-behaving as designed.
-
-But there are changes upstream that give different behaviour, so we merged
-below xfs patches to "fix" that bug:
-
-  xfs: add EOFBLOCKS inode tagging/untagging
-  xfs: support a tag-based inode_ag_iterator
-  xfs: create helper to check whether to free eofblocks on inode
-  xfs: make xfs_free_eofblocks() non-static, return EAGAIN on trylock failure
-  xfs: create function to scan and clear EOFBLOCKS inodes
-  xfs: add XFS_IOC_FREE_EOFBLOCKS ioctl
-  xfs: add inode id filtering to eofblocks scan
-  xfs: support multiple inode id filtering in eofblocks scan
-  xfs: add minimum file size filtering to eofblocks scan
-  xfs: add background scanning to clear eofblocks inodes
-  xfs: limit speculative prealloc near ENOSPC thresholds
-  xfs: limit speculative prealloc size on sparse files
-  xfs: fix potential infinite loop in xfs_iomap_prealloc_size()
-  xfs: increase prealloc size to double that of the previous extent
-  xfs: fix xfs_iomap_eof_prealloc_initial_size type
-  xfs: Define a new function xfs_this_quota_on()
-  xfs: Define a new function xfs_inode_dquot()
-  xfs: reorganize xfs_iomap_prealloc_size to remove indentation
-  xfs: push rounddown_pow_of_two() to after prealloc throttle
-  xfs: pass xfs_dquot to xfs_qm_adjust_dqlimits() instead of xfs_disk_dquot_t
-  xfs: xfs_dquot prealloc throttling watermarks and low free space
-  xfs: add quota-driven speculative preallocation throttling
-  xfs: xfs_iomap_prealloc_size() tracepoint
-  xfs: don't use speculative prealloc for small files
-
-How I'm not sure if it's a bug again, or an expected result for nfs4.2 with xfs.
-
-Thanks,
-Zorro
-
-[1]
-/mnt/xfstests/test/nfs-server/testfile.002:
- EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
-   0: [0..20479]:      192..20671        0 (192..20671)     20480 000000
- FLAG Values:
-    0100000 Shared extent
-    0010000 Unwritten preallocated extent
-    0001000 Doesn't begin on stripe unit
-    0000100 Doesn't end   on stripe unit
-    0000010 Doesn't begin on stripe width
-    0000001 Doesn't end   on stripe width
-
-
-[2]
-core.format = 2 (extents)
-...
-core.size = 10485760     
-core.nblocks = 2560   
-core.extsize = 0            
-core.nextents = 1             
-core.naextents = 0       
-core.forkoff = 24          
-core.aformat = 1 (local)
-...
-u3.bmx[0] = [startoff,startblock,blockcount,extentflag] 
-0:[0,24,2560,0]
-a.sfattr.hdr.totsize = 47
-a.sfattr.hdr.count = 1
-a.sfattr.list[0].namelen = 7
-a.sfattr.list[0].valuelen = 33
-a.sfattr.list[0].root = 0
-a.sfattr.list[0].secure = 1
-a.sfattr.list[0].name = "selinux"
-a.sfattr.list[0].value = "system_u:object_r:unlabeled_t:s0\000"
-
+>  - else if group exec is set, then clear
+>  - else if gid is in task's group list, then don't clear
+>  - else if gid and uid are mapped in current namespace and task has
+> CAP_FSETID in current namespace, then don't clear
+>  - else clear
 > 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > [1]
-> > # ./check nfs/002
-> > FSTYP         -- nfs
-> > PLATFORM      -- Linux/x86_64 dell-per640-04 6.1.0-rc6 #1 SMP PREEMPT_DYNAMIC Mon Nov 21 00:51:20 EST 2022
-> > MKFS_OPTIONS  -- dell-per640-04.dell2.lab.eng.bos.redhat.com:/mnt/xfstests/scratch/nfs-server
-> > MOUNT_OPTIONS -- -o vers=4.2 -o context=system_u:object_r:root_t:s0 dell-per640-04.dell2.lab.eng.bos.redhat.com:/mnt/xfstests/scratch/nfs-server /mnt/xfstests/scratch/nfs-client
-> > 
-> > nfs/002 3s ... - output mismatch (see /var/lib/xfstests/results//nfs/002.out.bad)
-> >     --- tests/nfs/002.out       2022-11-21 01:29:33.861770474 -0500
-> >     +++ /var/lib/xfstests/results//nfs/002.out.bad      2022-11-21 13:27:37.424199056 -0500
-> >     @@ -1,2 +1,3 @@
-> >      QA output created by 002
-> >     +Write 20480 blocks, but get 32640 blocks
-> >      Silence is golden
-> >     ...
-> >     (Run 'diff -u /var/lib/xfstests/tests/nfs/002.out /var/lib/xfstests/results//nfs/002.out.bad'  to see the entire diff)
-> > Ran: nfs/002
-> > Failures: nfs/002
-> > Failed 1 of 1 tests
-> > 
-> > 
-> > > +if [ $res -ne 0 ];then
-> > > +	echo "Write $iblocks_expected blocks, but get $iblocks_real blocks"
-> > > +fi
-> > > +
-> > > +echo "Silence is golden"
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/nfs/002.out b/tests/nfs/002.out
-> > > new file mode 100644
-> > > index 00000000..61705c7c
-> > > --- /dev/null
-> > > +++ b/tests/nfs/002.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 002
-> > > +Silence is golden
-> > > -- 
-> > > 2.31.1
-> > > 
-> > 
-> 
+
+The setgid stripping series in -next implements these rules.
+
+> However behavior seems to deviate from that if group exec is clear and
+> *suid* bit is not set.  The reason is that inode_has_no_xattr() will
+> set S_NOSEC and __file_remove_privs() will bail out before even
+> starting to interpret the rules.
+
+Great observation. The dentry_needs_remove_privs() now calls the new
+setattr_should_drop_sgid() helper which drops the setgid bit according
+to the rules above. And yes, we should drop the S_IXGRP check from
+is_sxid() for consistency.
+The scenario where things get wonky with the S_IXGRP check present must
+be when setattr_should_drop_sgid() retains the setgid bit. In that case
+is_sxid() will mark the inode as not being security relevant even though
+the setgid bit is still set on it. This dates back to mandatory locking
+when the setgid bit was used for that. But mandatory locks are out of
+the door for a while now and this is no longer true and also wasn't
+enforced consistently for countless years even when they were still
+there. So we should make this helper consistent with the rest.
+
+I will run the patch below through xfstests with
+
+-g acl,attr,cap,idmapped,io_uring,perms,unlink
+
+which should cover all setgid tests (We've added plenty of new tests to
+the "perms" group.). Could you please review whether this make sense to you?
+
+From cbe6cec88c6cfc66e0fb61f602bb2810c3c48578 Mon Sep 17 00:00:00 2001
+From: Christian Brauner <brauner@kernel.org>
+Date: Tue, 22 Nov 2022 11:40:32 +0100
+Subject: [PATCH] fs: use consistent setgid checks in is_sxid()
+
+Now that we made the VFS setgid checking consistent an inode can't be
+marked security irrelevant even if the setgid bit is still set. Make
+this function consistent with the other helpers.
+
+Reported-by: Miklos Szeredi <miklos@szeredi.hu>
+Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+---
+ include/linux/fs.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index b39c5efca180..d07cadac547e 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -3527,7 +3527,7 @@ int __init list_bdev_fs_names(char *buf, size_t size);
+ 
+ static inline bool is_sxid(umode_t mode)
+ {
+-	return (mode & S_ISUID) || ((mode & S_ISGID) && (mode & S_IXGRP));
++	return (mode & S_ISUID) || ((mode & S_ISGID));
+ }
+ 
+ static inline int check_sticky(struct user_namespace *mnt_userns,
+
+base-commit: f380367f1811222c3853d942676a451a2353b762
+-- 
+2.34.1
 
