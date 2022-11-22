@@ -2,156 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 069FDC433FE
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Nov 2022 14:20:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40CC6C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Nov 2022 14:25:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233912AbiKVOUU (ORCPT
+        id S233133AbiKVOZP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Nov 2022 09:20:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39830 "EHLO
+        Tue, 22 Nov 2022 09:25:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233743AbiKVOUR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Nov 2022 09:20:17 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9556C67F67;
-        Tue, 22 Nov 2022 06:20:16 -0800 (PST)
+        with ESMTP id S233015AbiKVOZO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Nov 2022 09:25:14 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2F72DF7B
+        for <fstests@vger.kernel.org>; Tue, 22 Nov 2022 06:25:12 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2669961728;
-        Tue, 22 Nov 2022 14:20:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 54C8DC433D6;
-        Tue, 22 Nov 2022 14:20:14 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6EFDA61728
+        for <fstests@vger.kernel.org>; Tue, 22 Nov 2022 14:25:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BEF20C433C1
+        for <fstests@vger.kernel.org>; Tue, 22 Nov 2022 14:25:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1669126815;
-        bh=3b4JAkbPbOHvStFDBMyZzjgbzZs+yLv59iyVIqZjO+U=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=gIBUOLbdZoaT7XQq7YVPp/D8shsDqMnW3Oe+0+4NFXgIqN1pYimrfFbbmZ8rSi7PV
-         kaPR0pWoscmWAUusOQAEkHJACQHT2vvUEiN1FNm3a5IEJnU1AT7CWUmQs+/EZ/y0O1
-         zsM/0UnVw7bNVjY8Rh5xb3xVG3f6fMiwlBKZdbRdSV1NFK58DzUHtXRm6s8NLlYGGz
-         sVDKqBHVnCfsYE3luVuoK2pxv3ABRpy8BbCx2Pa5l0q4SBukL6/IVHqvGz3zjIoKx9
-         m0wd7ERHl2bYVOfEA/wIoWR7IwjdQrRPlxqIVdYgiFF1UqS66ciKnAVqa83DZd8sc8
-         ME1Hm8OuYIETQ==
-Date:   Tue, 22 Nov 2022 15:20:10 +0100
-From:   Christian Brauner <brauner@kernel.org>
-To:     Miklos Szeredi <miklos@szeredi.hu>
-Cc:     linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>,
-        LSM <linux-security-module@vger.kernel.org>
-Subject: Re: sgid clearing rules?
-Message-ID: <20221122142010.zchf2jz2oymx55qi@wittgenstein>
-References: <CAJfpegsVAUUg5p6DbL1nA_oRF4Bui+saqbFjjYn=VYtd-N2Xew@mail.gmail.com>
- <20221122105731.parciulns5mg4jwr@wittgenstein>
- <CAJfpegvtgFBesiuGO93HRidWw22gQgi8VN8xNGqK86qEm3sfng@mail.gmail.com>
+        s=k20201202; t=1669127111;
+        bh=YDMZtDgGdEr2fkV7ZbBmvHdIRj2vTDfSaKnxHXdFtL8=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=GGmj8+hyI8IZajUc4RXj7mbHxXWdcx6AhXyR/hGmBQ33F5YdZS4k4932PI8KFOLcO
+         /UlC1l4Zk56JwgFPgLMFB79RNmIgetCRc1XqcZRE2LFs39FgU/o6eDGMqq8sW2HVV8
+         Rd/YLHAUvURsQ/Xs8QCUiYnXgRb3ohrZjXB7083aspkfcyehjuMSdXWxshdGFhV15y
+         RI4XbM7/twfILajmylxFyJvPdZrJXt+fP4Kcg/FQA9TbCTzMRdCHJbKTBTiq/UfxZj
+         s28oAFhVg/jJiSYpx3krRmFwNaGAa9FlmCoVA0z6r/jEq0brovs1wp9fb2u8s4HqmT
+         b1toSQSWKRKlA==
+Received: by mail-oa1-f50.google.com with SMTP id 586e51a60fabf-14286d5ebc3so14096748fac.3
+        for <fstests@vger.kernel.org>; Tue, 22 Nov 2022 06:25:11 -0800 (PST)
+X-Gm-Message-State: ANoB5pnLhe1ZyZ6n4zJIjAlhjZ9blQ5Mmzo3rcTKtGdrt828SXv/d0n9
+        tdSfMKiJdpohVgSUPMc3axItW82TZSIpjaBT374=
+X-Google-Smtp-Source: AA0mqf4+hc+zQMw5RD76RpZuuDhS2h7RaFcr0Z5yxud1sAkJpL2GcXGJj5mLSbsILjM6DYXYfzEAnzzDrrkrvGmbpzY=
+X-Received: by 2002:a05:6870:cc89:b0:12b:fbe7:b793 with SMTP id
+ ot9-20020a056870cc8900b0012bfbe7b793mr15476848oab.92.1669127110891; Tue, 22
+ Nov 2022 06:25:10 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAJfpegvtgFBesiuGO93HRidWw22gQgi8VN8xNGqK86qEm3sfng@mail.gmail.com>
+References: <20221122141219.20325-1-jack@suse.cz>
+In-Reply-To: <20221122141219.20325-1-jack@suse.cz>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Tue, 22 Nov 2022 14:24:34 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7sM0j+iKAuM0mP1tWinaB7C9QkNdJsL-eZ+weycpoRhQ@mail.gmail.com>
+Message-ID: <CAL3q7H7sM0j+iKAuM0mP1tWinaB7C9QkNdJsL-eZ+weycpoRhQ@mail.gmail.com>
+Subject: Re: [PATCH] generic/614: Run test only for filesystems supporting delalloc
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 22, 2022 at 02:21:59PM +0100, Miklos Szeredi wrote:
-> On Tue, 22 Nov 2022 at 11:57, Christian Brauner <brauner@kernel.org> wrote:
-> >
-> > On Mon, Nov 21, 2022 at 02:14:13PM +0100, Miklos Szeredi wrote:
-> > > I'm looking at sgid clearing in case of file modification.  Seems like
-> > > the intent was:
-> > >
-> > >  - if not a regular file, then don't clear
-> > >  - else if task has CAP_FSETID in init_user_ns, then don't clear
-> >
-> > This one is a remnant of the past. The code was simply not updated to
-> > reflect the new penultimate rule you mention below. This is fixed in
-> > -next based on the VFS work we did (It also includes Amirs patches we
-> > reviewed a few weeks ago for file_remove_privs() in ovl.).
-> >
-> > >  - else if group exec is set, then clear
-> > >  - else if gid is in task's group list, then don't clear
-> > >  - else if gid and uid are mapped in current namespace and task has
-> > > CAP_FSETID in current namespace, then don't clear
-> > >  - else clear
-> > >
-> >
-> > The setgid stripping series in -next implements these rules.
-> >
-> > > However behavior seems to deviate from that if group exec is clear and
-> > > *suid* bit is not set.  The reason is that inode_has_no_xattr() will
-> > > set S_NOSEC and __file_remove_privs() will bail out before even
-> > > starting to interpret the rules.
-> >
-> > Great observation. The dentry_needs_remove_privs() now calls the new
-> > setattr_should_drop_sgid() helper which drops the setgid bit according
-> > to the rules above. And yes, we should drop the S_IXGRP check from
-> > is_sxid() for consistency.
-> > The scenario where things get wonky with the S_IXGRP check present must
-> > be when setattr_should_drop_sgid() retains the setgid bit.
-> 
-> Which is exactly what seems to happen in Test 9 and Test 11 in the
-> generic/68[3-7].
-> 
-> > In that case
-> > is_sxid() will mark the inode as not being security relevant even though
-> > the setgid bit is still set on it. This dates back to mandatory locking
-> > when the setgid bit was used for that. But mandatory locks are out of
-> > the door for a while now and this is no longer true and also wasn't
-> > enforced consistently for countless years even when they were still
-> > there. So we should make this helper consistent with the rest.
-> >
-> > I will run the patch below through xfstests with
-> >
-> > -g acl,attr,cap,idmapped,io_uring,perms,unlink
-> >
-> > which should cover all setgid tests (We've added plenty of new tests to
-> > the "perms" group.). Could you please review whether this make sense to you?
-> >
-> > From cbe6cec88c6cfc66e0fb61f602bb2810c3c48578 Mon Sep 17 00:00:00 2001
-> > From: Christian Brauner <brauner@kernel.org>
-> > Date: Tue, 22 Nov 2022 11:40:32 +0100
-> > Subject: [PATCH] fs: use consistent setgid checks in is_sxid()
-> >
-> > Now that we made the VFS setgid checking consistent an inode can't be
-> > marked security irrelevant even if the setgid bit is still set. Make
-> > this function consistent with the other helpers.
-> >
-> > Reported-by: Miklos Szeredi <miklos@szeredi.hu>
-> > Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
-> > ---
-> >  include/linux/fs.h | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/include/linux/fs.h b/include/linux/fs.h
-> > index b39c5efca180..d07cadac547e 100644
-> > --- a/include/linux/fs.h
-> > +++ b/include/linux/fs.h
-> > @@ -3527,7 +3527,7 @@ int __init list_bdev_fs_names(char *buf, size_t size);
-> >
-> >  static inline bool is_sxid(umode_t mode)
-> >  {
-> > -       return (mode & S_ISUID) || ((mode & S_ISGID) && (mode & S_IXGRP));
-> > +       return (mode & S_ISUID) || ((mode & S_ISGID));
-> 
-> Yes, this is what I meant.  This can be simplified to:
-> 
->        return mode & (S_ISUID | S_ISGID);
+On Tue, Nov 22, 2022 at 2:12 PM Jan Kara <jack@suse.cz> wrote:
+>
+> Simple filesystems such as ext2 or udf do not support delayed
+> allocation. Thus they allocate data blocks for mmap writes only during
+> writeback. This makes test generic/614 fail because it checks exactly
+> whether the blocks for the write are reserved before writeback happens.
+> Make the test depend on delayed allocation support.
+>
+> Signed-off-by: Jan Kara <jack@suse.cz>
 
-Thanks, will update accordingly.
+Looks good. I wasn't aware that a _require_scratch_delalloc helper
+existed already.
 
-Fwiw, enforcing the rules consistently across write operations and
-chmod/chown will lead to losing the setgid bit in cases were it might've
-been retained before.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-I've mentioned this a few times but it's worth repeating. For the sake
-of maintainability, consistency, and security this is a risk worth
-taking. I've mentioned this already in the last pull request that fixed
-issues in this area so Linus is aware that this is a user visible
-change we're risking on purpose. I'll mention this again in detail this
-time as well.
+Thanks.
 
-If this leads to regressions the fix is easy and we simply need to have
-special setgid handling in the write path again with different semantics
-from chmod/chown. We'll see. I'll update the tests if this second setgid
-cleanup gets merged. Before that just be aware that there might be
-failures for tests where unprivileged users modify a setgid file.
-
-Thanks!
-Christian
+> ---
+>  tests/generic/614 | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/tests/generic/614 b/tests/generic/614
+> index 06630f2249c7..3e2a587c8f90 100755
+> --- a/tests/generic/614
+> +++ b/tests/generic/614
+> @@ -16,6 +16,7 @@ _begin_fstest auto quick rw
+>  # real QA test starts here
+>  _supported_fs generic
+>  _require_scratch
+> +_require_scratch_delalloc
+>
+>  _scratch_mkfs >>$seqres.full 2>&1
+>  _scratch_mount
+> --
+> 2.35.3
+>
