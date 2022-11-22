@@ -2,128 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE583C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Nov 2022 10:57:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88685C433FE
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Nov 2022 12:52:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232571AbiKVK5o (ORCPT
+        id S230151AbiKVMwu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Nov 2022 05:57:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50476 "EHLO
+        Tue, 22 Nov 2022 07:52:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232635AbiKVK5l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Nov 2022 05:57:41 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBB5625CF;
-        Tue, 22 Nov 2022 02:57:38 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S233598AbiKVMwr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Nov 2022 07:52:47 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6064AE8E
+        for <fstests@vger.kernel.org>; Tue, 22 Nov 2022 04:52:43 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id A771AB819F6;
-        Tue, 22 Nov 2022 10:57:37 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 473ADC433C1;
-        Tue, 22 Nov 2022 10:57:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1669114656;
-        bh=dSudoXz7KlBoU1Klan/84sEPqQWrkeKs1jTdna8n9qQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=c1xEeK3mb7by2grAU0c8mMy5GZw8KlM0ofIELtw+q41xshTfx9/g7gxW4tEjtOFCo
-         3Bvt7JMQLr2GQKI4uTXbaZY7QUqXVJWoWg7VRTtD1/58QDYhBMk2WEg7havS9AMpXD
-         Q7J6iNc+QKkK9YpC+4Ts/sBlMQhxme1f0LxdNhRNvqErKL1a6wOJLnmGkk6Qt/Qyh7
-         MXM/4pAy5fXik9SgsBAvmqFnzgjb7AnN0Mi9mBUUNf/cvk5LIQmmhm/htq989C4TXu
-         BUbMaeK2TH6I+4H/LywBDCMxZvroMDRTU9y/wP1RBkjibnhaDyMq0g/rZbkck7lIa1
-         mHUa9bA+xw13Q==
-Date:   Tue, 22 Nov 2022 11:57:31 +0100
-From:   Christian Brauner <brauner@kernel.org>
-To:     Miklos Szeredi <miklos@szeredi.hu>
-Cc:     linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>,
-        LSM <linux-security-module@vger.kernel.org>
-Subject: Re: sgid clearing rules?
-Message-ID: <20221122105731.parciulns5mg4jwr@wittgenstein>
-References: <CAJfpegsVAUUg5p6DbL1nA_oRF4Bui+saqbFjjYn=VYtd-N2Xew@mail.gmail.com>
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 58479220C7;
+        Tue, 22 Nov 2022 12:52:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1669121562; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=7xwriU18XHuVrM4t1Z0J1z7CvG3pqewzAH+iZmduoPo=;
+        b=aiEJVYPbfP1I9vta5By+qrahruUl8xmwr1eKo1FKDJldRJns9TLEzyDQ5+cTuXkM+hiUux
+        N++nFQtw0z9nSsmfC2yp2iJWABhE/2x9i9wlJkarGe7RpzfNc4nwaP+DY8fcJpKTDNziPr
+        6lfkykmQ0ZmlWUKnPCKfkJUe9zgibnQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1669121562;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=7xwriU18XHuVrM4t1Z0J1z7CvG3pqewzAH+iZmduoPo=;
+        b=D/aD7kZmElCUqm4agdIenuWK2hLWz+RAtXnfemA2B6PlGHPXo2SytGHRti/R+ri+bwE3nT
+        V9SxJVYP0M46eQBA==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 3BE6713B01;
+        Tue, 22 Nov 2022 12:52:42 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id LiGbDhrGfGO1NwAAMHmgww
+        (envelope-from <jack@suse.cz>); Tue, 22 Nov 2022 12:52:42 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+        id 17CAEA070E; Tue, 22 Nov 2022 13:52:41 +0100 (CET)
+Date:   Tue, 22 Nov 2022 13:52:41 +0100
+From:   Jan Kara <jack@suse.cz>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Filipe Manana <fdmanana@kernel.org>, Jan Kara <jack@suse.cz>,
+        fstests@vger.kernel.org
+Subject: Re: Test generic/614
+Message-ID: <20221122125241.oz5wgbo55c6vdmuv@quack3>
+References: <20221121123636.ltwwxgoom5bd4eyd@quack3>
+ <CAL3q7H5fCW9ViD3R8pX9ekLrtF-NpaqaEX+SjmVH09jRsT53dQ@mail.gmail.com>
+ <Y3usnwK3MFba2kEw@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAJfpegsVAUUg5p6DbL1nA_oRF4Bui+saqbFjjYn=VYtd-N2Xew@mail.gmail.com>
+In-Reply-To: <Y3usnwK3MFba2kEw@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 21, 2022 at 02:14:13PM +0100, Miklos Szeredi wrote:
-> I'm looking at sgid clearing in case of file modification.  Seems like
-> the intent was:
+On Mon 21-11-22 08:51:43, Darrick J. Wong wrote:
+> On Mon, Nov 21, 2022 at 01:32:22PM +0000, Filipe Manana wrote:
+> > On Mon, Nov 21, 2022 at 12:37 PM Jan Kara <jack@suse.cz> wrote:
+> > >
+> > > Hello Filipe!
+> > 
+> > Hi Jan!
+> > 
+> > >
+> > > I have noticed test generic/614 is failing on ext2. The test creates sparse
+> > > file, maps it, and writes data to it through mmap. Then it checks i_blocks
+> > > has increased. However for ext2 (and other trivial filesystems supporting
+> > > sparse files but not implementing delayed allocation) this is bound to fail
+> > > because i_block gets incremented only during page writeback.
+> > >
+> > > So would your btrfs test make sense even if we called fsync(2) before
+> > > checking stat(2) results?
+> > 
+> > Calling fsync before calling stat would defeat the purpose of the test.
+> > I.e. the test would pass both with and without the btrfs fix.
+> > 
+> > So maybe adding the following to the test:
+> > 
+> > _supported_fs ^ext2
+> > 
+> > And listing all other filesystems not supporting delayed allocation?
+> > 
+> > Or adding a _require_delayed_allocation() helper to make it _notrun().
 > 
->  - if not a regular file, then don't clear
->  - else if task has CAP_FSETID in init_user_ns, then don't clear
+> _require_scratch_delalloc() ?
 
-This one is a remnant of the past. The code was simply not updated to
-reflect the new penultimate rule you mention below. This is fixed in
--next based on the VFS work we did (It also includes Amirs patches we
-reviewed a few weeks ago for file_remove_privs() in ovl.).
+Yeah, after some experimentation I think I can even sensibly detect
+delalloc using filefrag(1) (xfs_io's fiemap command always syncs file
+before doing fiemap). I'll give it a shot.
 
->  - else if group exec is set, then clear
->  - else if gid is in task's group list, then don't clear
->  - else if gid and uid are mapped in current namespace and task has
-> CAP_FSETID in current namespace, then don't clear
->  - else clear
-> 
-
-The setgid stripping series in -next implements these rules.
-
-> However behavior seems to deviate from that if group exec is clear and
-> *suid* bit is not set.  The reason is that inode_has_no_xattr() will
-> set S_NOSEC and __file_remove_privs() will bail out before even
-> starting to interpret the rules.
-
-Great observation. The dentry_needs_remove_privs() now calls the new
-setattr_should_drop_sgid() helper which drops the setgid bit according
-to the rules above. And yes, we should drop the S_IXGRP check from
-is_sxid() for consistency.
-The scenario where things get wonky with the S_IXGRP check present must
-be when setattr_should_drop_sgid() retains the setgid bit. In that case
-is_sxid() will mark the inode as not being security relevant even though
-the setgid bit is still set on it. This dates back to mandatory locking
-when the setgid bit was used for that. But mandatory locks are out of
-the door for a while now and this is no longer true and also wasn't
-enforced consistently for countless years even when they were still
-there. So we should make this helper consistent with the rest.
-
-I will run the patch below through xfstests with
-
--g acl,attr,cap,idmapped,io_uring,perms,unlink
-
-which should cover all setgid tests (We've added plenty of new tests to
-the "perms" group.). Could you please review whether this make sense to you?
-
-From cbe6cec88c6cfc66e0fb61f602bb2810c3c48578 Mon Sep 17 00:00:00 2001
-From: Christian Brauner <brauner@kernel.org>
-Date: Tue, 22 Nov 2022 11:40:32 +0100
-Subject: [PATCH] fs: use consistent setgid checks in is_sxid()
-
-Now that we made the VFS setgid checking consistent an inode can't be
-marked security irrelevant even if the setgid bit is still set. Make
-this function consistent with the other helpers.
-
-Reported-by: Miklos Szeredi <miklos@szeredi.hu>
-Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
----
- include/linux/fs.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index b39c5efca180..d07cadac547e 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -3527,7 +3527,7 @@ int __init list_bdev_fs_names(char *buf, size_t size);
- 
- static inline bool is_sxid(umode_t mode)
- {
--	return (mode & S_ISUID) || ((mode & S_ISGID) && (mode & S_IXGRP));
-+	return (mode & S_ISUID) || ((mode & S_ISGID));
- }
- 
- static inline int check_sticky(struct user_namespace *mnt_userns,
-
-base-commit: f380367f1811222c3853d942676a451a2353b762
+								Honza
 -- 
-2.34.1
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
