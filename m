@@ -2,74 +2,76 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8CEAC433FE
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Nov 2022 16:02:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 691EFC433FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 28 Nov 2022 16:03:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232535AbiK1QCz (ORCPT
+        id S232354AbiK1QDM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 28 Nov 2022 11:02:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38768 "EHLO
+        Mon, 28 Nov 2022 11:03:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232546AbiK1QCx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 Nov 2022 11:02:53 -0500
-Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4EBF10FE9
-        for <fstests@vger.kernel.org>; Mon, 28 Nov 2022 08:02:52 -0800 (PST)
-Received: by mail-qt1-x830.google.com with SMTP id w4so6988428qts.0
-        for <fstests@vger.kernel.org>; Mon, 28 Nov 2022 08:02:52 -0800 (PST)
+        with ESMTP id S232540AbiK1QDL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Nov 2022 11:03:11 -0500
+Received: from mail-qk1-x733.google.com (mail-qk1-x733.google.com [IPv6:2607:f8b0:4864:20::733])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA2A21116B
+        for <fstests@vger.kernel.org>; Mon, 28 Nov 2022 08:03:10 -0800 (PST)
+Received: by mail-qk1-x733.google.com with SMTP id k4so7552395qkj.8
+        for <fstests@vger.kernel.org>; Mon, 28 Nov 2022 08:03:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20210112.gappssmtp.com; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=4TCb2FWrNlQYd+Z4uzmL8P45oPWnl0JeHwwWpJYaobY=;
-        b=ABm74U9SsYqTgL5b8PH0IvS/B1JUrpb2DvIF0MmIbZ9gEKqkAxZe4pHmHJeF6Iw9b4
-         fMwjm856Xcnuq3WTTELwR3zvo01U3gkXIJm9QOQDKzE+wavofqV76u1uWIihrd1l0g4O
-         goQF4bFVYE0NtK+CFXMy/zAyaLtGVJZoy/zLU1xp2T7nJRQ+HBaaDRbbZ2IJHSpQwS1a
-         18832XJRA5ji4vCI+DgDcJ2DizyN2CHmSqEkldCrHe2u9f2cgQVDjTbr8g1LqUKx0eB6
-         CvTp5Cf1MBpJuSM862Rg8KO+3LF23/YGgT6nrsdD4lKZfB+FeyYaD5oyc/O4dvvdwBeS
-         SDzA==
+        bh=menkDLFTK0ucehS7YUSqDx7q0Zc1/XhysGCjN3/Cgds=;
+        b=vDwdH37/bVP2DKYQVvvp7f0ZEt/89cChNNSrOSioM7LU4HaF9oTUh4qYTWwKBWAxyu
+         rn08kOmHR2SDfmCi6jmeUkyANAItF38qyiFqehslm4380CCLLtOFNnTOO4ONLGmwPw3V
+         BZEFsL03oVuvZu4omaWouk9sNydlH59XYf7Rbi7kWANmQ6im/Lr72+xRaYs7e3ONVR2T
+         Fkvw/Lv6S6f5ehSuViIl30oqgmm/sLJsw4vLLYpYzn+gdxHS+XDM0H5MqKed0U9h1WkQ
+         Huoobe1f2WJZSPILcjQXFOxhSbMC6Ox4Q58msydjnCTax96i+9tg+U1fmGZ7necjFgb8
+         nhOw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=4TCb2FWrNlQYd+Z4uzmL8P45oPWnl0JeHwwWpJYaobY=;
-        b=THRxCX9AQe46trRBNTVggyP7pByodbrgXPuSYMqhqsQLonzj+0QvVb81Ecs6+i4Tbd
-         vMJGCoqmlDIHgl82ZaVlvIeCBio4Qyq74IMb2RogFtxlmOy3V9ccYeQi9f7HlngHtMjP
-         1VlQo2YUVIpV0HMjJ6X4lBdFp43b1NzqE7w/UVMl8Qnau7j62Zd0kEqw4GXN8qJapvJn
-         YuYdITApLpd05h5bKhfB2hszT7qmaxejLtt9pEsvz/V9Gj4E8xH27lsBR2cU2L+OLu+W
-         oVGXoWi+kexMfnzUzOA5pRH2HW+sle6yQqB4mYB2+0E0GajvWWvgEHf0cuwBiPVKZom9
-         fRuA==
-X-Gm-Message-State: ANoB5pma5hnW87qQAi2Hr+zshHJndxHVSW/1mCpiRFyTT1YVHpU/UuL8
-        e6V/trEBQc77YvJHN87pH2JH2A==
-X-Google-Smtp-Source: AA0mqf6XVOkcIpyKRULeoqoELu3EhmM9cvmxWOARjaQ/5E+PVX4xH3KWCHRxVUDc8/0C4+K6s3lRqQ==
-X-Received: by 2002:ac8:72d7:0:b0:3a5:2bb7:55d5 with SMTP id o23-20020ac872d7000000b003a52bb755d5mr48068775qtp.439.1669651371824;
-        Mon, 28 Nov 2022 08:02:51 -0800 (PST)
+        bh=menkDLFTK0ucehS7YUSqDx7q0Zc1/XhysGCjN3/Cgds=;
+        b=jPde/cijpNPAlnL84biqcG9KmHxPryU5e1ZXHdejSgQJ91hdG/PjYAJVJXoAj78i1E
+         XF+SZhjJziXuZaWVgwx2UFF0kJSgW2YjL4UOZiMiJtLB1Q/DQHjiG+AqFij/VM2bmcWg
+         SuEXwh9gEQH22Edg655gv94EhtCMTmCLA9T5Y8NzYWzN/y6Xzov9QRDAjuzhqMuA25B6
+         lQCZ+heTn8VN7jjVVbSZcNPHm36/0B6H3LMl+WJgq4SrJFy0UuU8cNi+tdCtzYPIMnoD
+         3kw5V+rXfeZYOFF7KT0ZpinHEY6YdXC2ksw4QmW5WCdP3d2blS/2dD4P2OGJ3LX1rrFA
+         lnGA==
+X-Gm-Message-State: ANoB5pltcyAefYkOOlLayZwAIC7mbtVyPbWgCSDgshXAaL3wrsjDNkEc
+        nDlm5/+Yjv5/04FxhOwfk8LH2Q==
+X-Google-Smtp-Source: AA0mqf4dMJmokOLhQEcXE69ImmSdhVnsKgVgdDNuyJDW+oh4VXWIqieB3SxbCCr+boRU8hdUiB0O8g==
+X-Received: by 2002:a37:ad0a:0:b0:6fa:2c9a:ae20 with SMTP id f10-20020a37ad0a000000b006fa2c9aae20mr33658449qkm.582.1669651389359;
+        Mon, 28 Nov 2022 08:03:09 -0800 (PST)
 Received: from localhost (cpe-174-109-170-245.nc.res.rr.com. [174.109.170.245])
-        by smtp.gmail.com with ESMTPSA id w23-20020ae9e517000000b006f9f3c0c63csm8452704qkf.32.2022.11.28.08.02.51
+        by smtp.gmail.com with ESMTPSA id ay14-20020a05622a228e00b003a51e6b6c95sm7066401qtb.14.2022.11.28.08.03.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Nov 2022 08:02:51 -0800 (PST)
-Date:   Mon, 28 Nov 2022 11:02:50 -0500
+        Mon, 28 Nov 2022 08:03:08 -0800 (PST)
+Date:   Mon, 28 Nov 2022 11:03:07 -0500
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
 Cc:     Zorro Lang <zlang@redhat.com>, linux-btrfs@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: skip btrfs/253 for zoned devices
-Message-ID: <Y4Tbqo7kALoStLco@localhost.localdomain>
-References: <20221128122952.51680-1-johannes.thumshirn@wdc.com>
+Subject: Re: [PATCH] fstests: skip btrfs/254 in case MIN_FSSIZE is more than
+ 1G
+Message-ID: <Y4Tbu6YMaiN03Bi6@localhost.localdomain>
+References: <20221128125105.52458-1-johannes.thumshirn@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221128122952.51680-1-johannes.thumshirn@wdc.com>
+In-Reply-To: <20221128125105.52458-1-johannes.thumshirn@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 28, 2022 at 04:29:52AM -0800, Johannes Thumshirn wrote:
-> The test-case btrfs/253 tests btrfs' chunk size setting, which is not
-> available on zoned btrfs, so the test will always fail.
+On Mon, Nov 28, 2022 at 04:51:05AM -0800, Johannes Thumshirn wrote:
+> The test-case btrfs/254 creates a 1G device-mapper setup, but this might
+> be too small for the filesystem to actually operate (i.e. in case of a
+> zoned block device which needs at least 5 zones).
 > 
-> Skip the test in case of a zoned device.
+> Skip the test if MIN_FSSIZE is set to a value above 1G.
 > 
 > Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
