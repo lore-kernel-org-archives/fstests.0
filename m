@@ -2,182 +2,102 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C368C47089
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Dec 2022 21:53:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADF65C4708C
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Dec 2022 23:36:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233732AbiLEVxM (ORCPT
+        id S230035AbiLEXgN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 5 Dec 2022 16:53:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52150 "EHLO
+        Mon, 5 Dec 2022 18:36:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51548 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234471AbiLEVwe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2022 16:52:34 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C69510BD;
-        Mon,  5 Dec 2022 13:51:47 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S233844AbiLEXfH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 5 Dec 2022 18:35:07 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E475A20197
+        for <fstests@vger.kernel.org>; Mon,  5 Dec 2022 15:34:55 -0800 (PST)
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0A81C6145D;
-        Mon,  5 Dec 2022 21:51:47 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C3A8C433D6;
-        Mon,  5 Dec 2022 21:51:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670277106;
-        bh=Olu60/zvHctA9q2QvuAkN6TloO5LFPtDY+bnO1kMQtg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lh7URQ4tJYdCZcp/5oX+2ltf/jMuP65iYexwU0jXaSZgmCUGlK+0D4LPuDadRAeoZ
-         xFWQJkApsN0/3L2vO3YycS0NQxYBjpW9ZxeGmAESSNWnPeYzKQIoaoy/eItmYB26eo
-         epGDHNRoGafKFQEV2WrflW4AOlRk56cAPGvEPKkLFO02STXpbQ8dknvJhvfgvvWzET
-         HAQpQWVbAOHKQjkgmE52nZzbnvelY1LNIXxcOFrBIzgmFeKeBj9OGiYM6GDM9eHppo
-         49ymloZWtXLtp8zKmwInARqHB8Hi/zOPCRGpnRJ2NW23Wt+z3fwuzd4FPCMPQ4W+ND
-         SV75os8ckx3OQ==
-Date:   Mon, 5 Dec 2022 13:51:45 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Allison Henderson <allison.henderson@oracle.com>
-Cc:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "ZiyangZhang@linux.alibaba.com" <ZiyangZhang@linux.alibaba.com>,
-        "hsiangkao@linux.alibaba.com" <hsiangkao@linux.alibaba.com>
-Subject: Re: [RESEND PATCH V2] common/populate: Ensure that S_IFDIR.FMT_BTREE
- is in btree format
-Message-ID: <Y45n8Xy+j3fV/TtG@magnolia>
-References: <20221202112740.1233028-1-ZiyangZhang@linux.alibaba.com>
- <030e253f14fcdff29d43bafa690435be06abacb4.camel@oracle.com>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 5DD8C1FDC1;
+        Mon,  5 Dec 2022 23:34:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1670283294; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=rGzHp5avc4pkNygT0hkozMmHcEIIS8RyjQ57fxCJi5U=;
+        b=xW0Cg1+wOt2XV4i9Ja39/G72l6gXbmFDvq1+SD+myNQTSVuSw4C1PlOXzkcvvzfVguhIZ3
+        zSfb+3kWAaC7XXSjE2098AoLp/Cr9hKqfByNOcTIm0MsEO0Ch+O7CO9rtZzS0cHryxsz6b
+        EPU4asq7N+AT31/Po72AIbWEu1/W7L8=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1670283294;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=rGzHp5avc4pkNygT0hkozMmHcEIIS8RyjQ57fxCJi5U=;
+        b=rhl01OiY4gMiK1XMTCNbbKr6SRfKjk/HeAi27Tmgz7rAJTVDTQ1rdeLfAgPJR+/fMABdp+
+        qXVxKpkgiavFlBAQ==
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 403471348F;
+        Mon,  5 Dec 2022 23:34:54 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap1.suse-dmz.suse.de with ESMTPSA
+        id gTgzDh6AjmNyEwAAGKfGzw
+        (envelope-from <ddiss@suse.de>); Mon, 05 Dec 2022 23:34:54 +0000
+Date:   Tue, 6 Dec 2022 00:35:42 +0100
+From:   David Disseldorp <ddiss@suse.de>
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4/044: Fix failure when mount options are
+ incompatible with ext3
+Message-ID: <20221206003542.50227091@echidna.fritz.box>
+In-Reply-To: <20221205124144.23770-1-jack@suse.cz>
+References: <20221205124144.23770-1-jack@suse.cz>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <030e253f14fcdff29d43bafa690435be06abacb4.camel@oracle.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Dec 03, 2022 at 12:26:57AM +0000, Allison Henderson wrote:
-> On Fri, 2022-12-02 at 19:27 +0800, Ziyang Zhang wrote:
-> > Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
-> > S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
-> > 
-> > Actually we just observed it can fail after apply our inode
-> > extent-to-btree workaround. The root cause is that the kernel may be
-> > too good at allocating consecutive blocks so that the data fork is
-> > still in extents format.
-> > 
-> > Therefore instead of using a fixed number, let's make sure the number
-> > of extents is large enough than (inode size - inode core size) /
-> > sizeof(xfs_bmbt_rec_t).
-> > 
-> > Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-> > Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-> > Signed-off-by: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
+Hi Jan,
+
+On Mon,  5 Dec 2022 13:41:44 +0100, Jan Kara wrote:
+
+> There are some mount options that are incompatible with ext3 filesystem
+> type. If they are used, this test fails because it tries to remount the
+> filesystem as ext3. The test makes sense even without remounting as ext3
+> so just make the test silently skip the remount.
 > 
-> New version looks much cleaner.  
-> Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
+>  tests/ext4/044 | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
 > 
-> > ---
-> > V2: take Darrick's advice to cleanup code
-> >  common/populate | 28 +++++++++++++++++++++++++++-
-> >  common/xfs      | 17 +++++++++++++++++
-> >  2 files changed, 44 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/common/populate b/common/populate
-> > index 6e004997..1ca76459 100644
-> > --- a/common/populate
-> > +++ b/common/populate
-> > @@ -71,6 +71,31 @@ __populate_create_dir() {
-> >         done
-> >  }
-> >  
-> > +# Create a large directory and ensure that it's a btree format
-> > +__populate_xfs_create_btree_dir() {
-> > +       local name="$1"
-> > +       local isize="$2"
-> > +       local icore_size="$(_xfs_inode_core_bytes)"
-> > +       # We need enough extents to guarantee that the data fork is
-> > in
-> > +       # btree format.  Cycling the mount to use xfs_db is too slow,
-> > so
-> > +       # watch for when the extent count exceeds the space after the
-> > +       # inode core.
-> > +       local max_nextents="$(((isize - icore_size) / 16))"
-> > +
-> > +       mkdir -p "${name}"
-> > +       d=0
-> > +       while true; do
-> > +               creat=mkdir
-> > +               test "$((d % 20))" -eq 0 && creat=touch
-> > +               $creat "${name}/$(printf "%.08d" "$d")"
-> > +               if [ "$((d % 40))" -eq 0 ]; then
-> > +                       nextents="$(_xfs_get_fsxattr nextents $name)"
-> > +                       [ $nextents -gt $max_nextents ] && break
-> > +               fi
-> > +               d=$((d+1))
-> > +       done
-> > +}
-> > +
-> >  # Add a bunch of attrs to a file
-> >  __populate_create_attr() {
-> >         name="$1"
-> > @@ -176,6 +201,7 @@ _scratch_xfs_populate() {
-> >  
-> >         blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-> >         dblksz="$(_xfs_get_dir_blocksize "$SCRATCH_MNT")"
-> > +       isize="$(_xfs_inode_size "$SCRATCH_MNT")"
-> >         crc="$(_xfs_has_feature "$SCRATCH_MNT" crc -v)"
-> >         if [ $crc -eq 1 ]; then
-> >                 leaf_hdr_size=64
-> > @@ -226,7 +252,7 @@ _scratch_xfs_populate() {
-> >  
-> >         # - BTREE
-> >         echo "+ btree dir"
-> > -       __populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE"
-> > "$((128 * dblksz / 40))" true
-> > +       __populate_xfs_create_btree_dir
-> > "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize"
-> >  
-> >         # Symlinks
-> >         # - FMT_LOCAL
-> > diff --git a/common/xfs b/common/xfs
-> > index 8ac1964e..0359e422 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -1486,3 +1486,20 @@ _require_xfsrestore_xflag()
-> >         $XFSRESTORE_PROG -h 2>&1 | grep -q -e '-x' || \
-> >                         _notrun 'xfsrestore does not support -x
-> > flag.'
-> >  }
-> > +
-> > +
-> > +# Number of bytes reserved for a full inode record, which includes
-> > the
-> > +# immediate fork areas.
-> > +_xfs_inode_size()
-> > +{
-> > +       local mntpoint="$1"
-> > +
-> > +       $XFS_INFO_PROG "$mntpoint" | grep 'meta-data=.*isize' | sed -
-> > e 's/^.*isize=\([0-9]*\).*$/\1/g'
-> > +}
-> > +
-> > +# Number of bytes reserved for only the inode record, excluding the
-> > +# immediate fork areas.
-> > +_xfs_inode_core_bytes()
-> > +{
-> > +       echo 176
-> > +}
+> diff --git a/tests/ext4/044 b/tests/ext4/044
+> index 50de5a40bdc7..96fa70cc0d1e 100755
+> --- a/tests/ext4/044
+> +++ b/tests/ext4/044
+> @@ -53,9 +53,10 @@ _within_tolerance "sec_ctime" $sec_ctime $sec 1 -v
+>  
+>  _scratch_unmount >> $seqres.full 2>&1
+>  
+> -# Test mount to ext3 then mount back to ext4 and check timestamp again
+> -_mount -t ext3 `_scratch_mount_options $*` || _fail "ext3 mount failed"
+> -_scratch_unmount >> $seqres.full 2>&1
+> +# Test mount to ext3 then mount back to ext4 and check timestamp again.  We
+> +# ignore if ext3 failed to mount. It can happen because some mount options are
+> +# incompatible with ext3. Still the test makes sense.
+> +_mount -t ext3 `_scratch_mount_options $*` >> $seqres.full 2>&1 && _scratch_unmount >> $seqres.full 2>&1
+>  _scratch_mount
 
-Please refactor all the other users:
+I suppose this makes sense compared to filtering or dropping all mount
+options. $* should always be empty here, right?
 
-$ git grep -w isize.*176
-tests/xfs/335:34:i_ptrs=$(( (isize - 176) / 56 ))
-tests/xfs/336:45:i_ptrs=$(( (isize - 176) / 56 ))
-tests/xfs/337:36:i_ptrs=$(( (isize - 176) / 56 ))
-tests/xfs/341:36:i_ptrs=$(( (isize - 176) / 48 ))
-tests/xfs/342:33:i_ptrs=$(( (isize - 176) / 56 ))
-
-(I'll test out this patch and try to do the same for ATTR.FMT_BTREE in
-the meantime)
-
---D
-
-> 
+Looks fine otherwise...
+Reviewed-by: David Disseldorp <ddiss@suse.de>
