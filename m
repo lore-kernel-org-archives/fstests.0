@@ -2,156 +2,191 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59697C4708C
-	for <linux-fstests@archiver.kernel.org>; Tue,  6 Dec 2022 17:29:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60725C63706
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Dec 2022 23:34:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233661AbiLFR35 (ORCPT
+        id S229732AbiLFXeX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 6 Dec 2022 12:29:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60858 "EHLO
+        Tue, 6 Dec 2022 18:34:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234997AbiLFR34 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2022 12:29:56 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 273B132064;
-        Tue,  6 Dec 2022 09:29:56 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B5E19617E3;
-        Tue,  6 Dec 2022 17:29:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1764FC433C1;
-        Tue,  6 Dec 2022 17:29:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670347795;
-        bh=ZPgd/wxE7HeJh6snrWE+aeZsC9INsvn4dtVjHdPyINo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=SjaU2FS4kPh606M1YYtxULhp2rOt6Su5rNwkBoFXhLnTEG0bG7XbWQPHNzhTlQXBr
-         owTbqzrE1kP+fY8gkl135y1tCXHS6+prBcexjOxMOZJMmbQCEmwBg+DzzX+j7aMiZm
-         X2Gp/LBChxsj8AfUUaYLUJkt0B2kDuhXN104kguWtpmaY/XAHKb4c0uAXAVddZkF9z
-         rd+xX1FWReZFgudhddlcI4XND5D5537SZRDGyssahjNxJhToZuPSFDPUlPCV03C9Ga
-         dfY+7cmHCqfyoooGtG49oqnflDbUBjWNbPOnDzUj1c6ueiGoRUD2xcE/4ZVQL0UY6O
-         0jf5i4efSTWCA==
-Date:   Tue, 6 Dec 2022 09:29:54 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        hsiangkao@linux.alibaba.com, allison.henderson@oracle.com
-Subject: Re: [PATCH V3 2/2] common/populate: Ensure that S_IFDIR.FMT_BTREE is
- in btree format
-Message-ID: <Y498Ej35Bf9Oi6Wx@magnolia>
-References: <20221206100517.1369625-1-ZiyangZhang@linux.alibaba.com>
- <20221206100517.1369625-3-ZiyangZhang@linux.alibaba.com>
+        with ESMTP id S229628AbiLFXeW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Dec 2022 18:34:22 -0500
+Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEDB436C4F
+        for <fstests@vger.kernel.org>; Tue,  6 Dec 2022 15:34:21 -0800 (PST)
+Received: by mail-pl1-x62a.google.com with SMTP id y4so15475748plb.2
+        for <fstests@vger.kernel.org>; Tue, 06 Dec 2022 15:34:21 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20210112.gappssmtp.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=I4Wbn5pZkcHLpPWnJuY5BTJQNj1XiKhXd++b0f6Ro7w=;
+        b=JeimpRI7znFP1YiQoRbB2Q/EBFoKwHiCvqe8qB196/jKgNrwjboAZMyCS9KGg47IbK
+         MUtT6FamseWbcWlPh1JCt8DyVkvTuLzHanPdfUvE+ErXzIKZZyTJI4/zQXFmWPfKpacg
+         WrhXi7ZPc5PnzlOOuc14t9e0WW0rTpRw9wbqsVn+S6LFr74e60f/cDchQOu1kGytEs89
+         IWzZo6vHIG4NznxfnAHMqwvPUcXj/rrnMHbAkjJv7+wPLW/dzZZBL3TU704RijReD4gt
+         RNCLvlWk2JjuFw4QIs8GbDg2aKSpkc5LUdXLbvCIn2DokSOVNh5cSBH6oBN/TiL/sLus
+         6xZA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=I4Wbn5pZkcHLpPWnJuY5BTJQNj1XiKhXd++b0f6Ro7w=;
+        b=dzWsYk6KOe9WyVxQ6ipiRsk06TWIToaDV3ANMhfEL/bKEaRhw0XiifkjiOjaNesWFN
+         xk9dB+ko3HPlFUPzXP/PrpzE4aTPRGUPFXV9zIasmYc4guCFa8yjaKwGZH8ijKEMNLeZ
+         +XCsUUt0IHU0RwakWXnzo3Whlq0mbv5YdsDZMMhPkRAoPQKO1KGp39cTO4P5OHCuF8LN
+         rN7Hz6FLwEy7AL+Vqpd2ThZ2rxiT44At6aMQYBTg2klGPyg6uuJf9MH5yoYGAihfFYHL
+         gSTMbOwjpjfZTIaRaQKrte7dLHAODFxe7Bd9HDyoEZcbkFRPACtCIgJ1WDJ/8COZqlMK
+         smEw==
+X-Gm-Message-State: ANoB5pl/UPzgJ/8sSUxgJKJyqe76erSGYDE0rRFSQVeD9nb1FtfResAX
+        aWxF2/y1biAjO7Sm2I/fT09I+c8B4G/sfLOl
+X-Google-Smtp-Source: AA0mqf5nyhkMfn0nGQtc66dJeFMg06Teq2W46crMLxJenvoHXJ6GNXAJKxn8q9AVaHFizDzScEGRKA==
+X-Received: by 2002:a17:903:22c4:b0:171:5092:4d12 with SMTP id y4-20020a17090322c400b0017150924d12mr73603982plg.107.1670369661190;
+        Tue, 06 Dec 2022 15:34:21 -0800 (PST)
+Received: from dread.disaster.area (pa49-181-138-158.pa.nsw.optusnet.com.au. [49.181.138.158])
+        by smtp.gmail.com with ESMTPSA id b18-20020a621b12000000b0057709fd0fccsm3782112pfb.153.2022.12.06.15.34.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 06 Dec 2022 15:34:20 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1p2hS5-005N9k-CT; Wed, 07 Dec 2022 10:34:17 +1100
+Date:   Wed, 7 Dec 2022 10:34:17 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>,
+        fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org,
+        Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
+Subject: Re: [PATCH] common/populate: Ensure that S_IFDIR.FMT_BTREE is in
+ btree format
+Message-ID: <20221206233417.GF2703033@dread.disaster.area>
+References: <20221201081208.40147-1-hsiangkao@linux.alibaba.com>
+ <Y4jNzE5YJ3wFtsaz@magnolia>
+ <Y4lhi+5nJNl0diaj@B-P7TQMD6M-0146.local>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221206100517.1369625-3-ZiyangZhang@linux.alibaba.com>
+In-Reply-To: <Y4lhi+5nJNl0diaj@B-P7TQMD6M-0146.local>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Dec 06, 2022 at 06:05:17PM +0800, Ziyang Zhang wrote:
-> Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
-> S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
+On Fri, Dec 02, 2022 at 10:23:07AM +0800, Gao Xiang wrote:
+> Hi Darrick,
 > 
-> Actually we just observed it can fail after apply our inode
-> extent-to-btree workaround. The root cause is that the kernel may be
-> too good at allocating consecutive blocks so that the data fork is
-> still in extents format.
-> 
-> Therefore instead of using a fixed number, let's make sure the number
-> of extents is large enough than (inode size - inode core size) /
-> sizeof(xfs_bmbt_rec_t).
-> 
-> Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-> Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-> Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-> Signed-off-by: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-> ---
->  common/populate | 28 +++++++++++++++++++++++++++-
->  common/xfs      |  9 +++++++++
->  2 files changed, 36 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/populate b/common/populate
-> index 6e004997..1ca76459 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -71,6 +71,31 @@ __populate_create_dir() {
->  	done
->  }
->  
-> +# Create a large directory and ensure that it's a btree format
-> +__populate_xfs_create_btree_dir() {
-> +	local name="$1"
-> +	local isize="$2"
-> +	local icore_size="$(_xfs_inode_core_bytes)"
-> +	# We need enough extents to guarantee that the data fork is in
-> +	# btree format.  Cycling the mount to use xfs_db is too slow, so
-> +	# watch for when the extent count exceeds the space after the
-> +	# inode core.
-> +	local max_nextents="$(((isize - icore_size) / 16))"
-> +
-> +	mkdir -p "${name}"
-> +	d=0
-> +	while true; do
-> +		creat=mkdir
-> +		test "$((d % 20))" -eq 0 && creat=touch
-> +		$creat "${name}/$(printf "%.08d" "$d")"
-> +		if [ "$((d % 40))" -eq 0 ]; then
-> +			nextents="$(_xfs_get_fsxattr nextents $name)"
-> +			[ $nextents -gt $max_nextents ] && break
-> +		fi
-> +		d=$((d+1))
-> +	done
-> +}
-> +
->  # Add a bunch of attrs to a file
->  __populate_create_attr() {
->  	name="$1"
-> @@ -176,6 +201,7 @@ _scratch_xfs_populate() {
->  
->  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
->  	dblksz="$(_xfs_get_dir_blocksize "$SCRATCH_MNT")"
-> +	isize="$(_xfs_inode_size "$SCRATCH_MNT")"
->  	crc="$(_xfs_has_feature "$SCRATCH_MNT" crc -v)"
->  	if [ $crc -eq 1 ]; then
->  		leaf_hdr_size=64
-> @@ -226,7 +252,7 @@ _scratch_xfs_populate() {
->  
->  	# - BTREE
->  	echo "+ btree dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$((128 * dblksz / 40))" true
-> +	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize"
+> On Thu, Dec 01, 2022 at 07:52:44AM -0800, Darrick J. Wong wrote:
+> > On Thu, Dec 01, 2022 at 04:12:08PM +0800, Gao Xiang wrote:
+> > > Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
+> > > S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
+> > > 
+> > > Actually we just observed it can fail after apply our inode
+> > > extent-to-btree workaround. The root cause is that the kernel may be
+> > > too good at allocating consecutive blocks so that the data fork is
+> > > still in extents format.
+> > > 
+> > > Therefore instead of using a fixed number, let's make sure the number
+> > > of extents is large enough than (inode size - inode core size) /
+> > > sizeof(xfs_bmbt_rec_t).
+> > > 
+> > > Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > Cc: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
+> > > Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+> > > ---
+> > >  common/populate | 22 +++++++++++++++++++++-
+> > >  1 file changed, 21 insertions(+), 1 deletion(-)
+> > > 
+> > > diff --git a/common/populate b/common/populate
+> > > index 6e004997..e179a300 100644
+> > > --- a/common/populate
+> > > +++ b/common/populate
+> > > @@ -71,6 +71,25 @@ __populate_create_dir() {
+> > >  	done
+> > >  }
+> > >  
+> > > +# Create a large directory and ensure that it's a btree format
+> > > +__populate_create_btree_dir() {
+> > 
+> > Since this encodes behavior specific to xfs, this ought to be called
+> > 
+> > __populate_xfs_create_btree_dir
+> > 
+> > or something like that.
+> > 
+> > > +	name="$1"
+> > > +	isize="$2"
+> > 
+> > These ought to be local variables, e.g.
+> > 
+> > 	local name="$1"
+> > 	local isize="$2"
+> > 
+> > So that they don't pollute the global name scope.  Yay bash.
+> > 
+> > > +
+> > > +	mkdir -p "${name}"
+> > > +	d=0
+> > > +	while true; do
+> > > +		creat=mkdir
+> > > +		test "$((d % 20))" -eq 0 && creat=touch
+> > > +		$creat "${name}/$(printf "%.08d" "$d")"
+> > > +		if [ "$((d % 40))" -eq 0 ]; then
+> > > +			nexts="$($XFS_IO_PROG -c "stat" $name | grep 'fsxattr.nextents' | sed -e 's/^.*nextents = //g' -e 's/\([0-9]*\).*$/\1/g')"
+> > 
+> > _xfs_get_fsxattr...
 
-The new helper function omits the "missing" parameter, which means that
-it no longer creates the directory entry blocks with a lot of free space
-in them, unlike current TOT.
+The grep/sed expression is also overly complex - it can easily be
+replaced with just this:
 
---D
+	nexts=`$XFS_IO_PROG -c "stat" $name | sed -ne 's/^fsxattr.nextents = //p'
 
->  
->  	# Symlinks
->  	# - FMT_LOCAL
-> diff --git a/common/xfs b/common/xfs
-> index 5180b9d3..744f0040 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1487,6 +1487,15 @@ _require_xfsrestore_xflag()
->  			_notrun 'xfsrestore does not support -x flag.'
->  }
->  
-> +# Number of bytes reserved for a full inode record, which includes the
-> +# immediate fork areas.
-> +_xfs_inode_size()
-> +{
-> +	local mntpoint="$1"
-> +
-> +	$XFS_INFO_PROG "$mntpoint" | grep 'meta-data=.*isize' | sed -e 's/^.*isize=\([0-9]*\).*$/\1/g'
-> +}
-> +
->  # Number of bytes reserved for only the inode record, excluding the
->  # immediate fork areas.
->  _xfs_inode_core_bytes()
-> -- 
-> 2.18.4
+The "-n" option to sed suppresses the printing of the stream
+(pattern space) to the output as it processes the input, which gets
+rid of the need for using grep to suppress non-matching input. The "p"
+suffix to the search string forces matched patterns to be printed to
+the output.
+
+This results in only matched, substituted pattern spaces to be
+printed, avoiding the need for grep and multiple sed regexes to be
+matched to strip the text down to just the integer string.
+
+> > > +			[ "$nexts" -gt "$(((isize - 176) / 16))" ] && break
+> > 
+> > Only need to calculate this once if you declare this at the top:
+> > 
+> > 	# We need enough extents to guarantee that the data fork is in
+> > 	# btree format.  Cycling the mount to use xfs_db is too slow, so
+> > 	# watch for when the extent count exceeds the space after the
+> > 	# inode core.
+> > 	local max_nextents="$(((isize - 176) / 16))"
+> > 
+> > and then you can do:
+> > 
+> > 			[[ $nexts -gt $max_nextents ]] && break
+> > 
+> > Also not a fan of hardcoding 176 around fstests, but I don't know how
+> > we'd detect that at all.
+> > 
+> > # Number of bytes reserved for only the inode record, excluding the
+> > # immediate fork areas.
+> > _xfs_inode_core_bytes()
+> > {
+> > 	echo 176
+> > }
+> > 
+> > I guess?  Or extract it from tests/xfs/122.out?
 > 
+> Thanks for your comments.
+> 
+> I guess hard-coded 176 in _xfs_inode_core_bytes() is fine for now
+> (It seems a bit weird to extract a number from a test expected result..)
+
+Which is wrong when testing a v4 filesystem - in that case the inode
+core size is 96 bytes and so max extents may be larger on v4
+filesystems than v5 filesystems....
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
