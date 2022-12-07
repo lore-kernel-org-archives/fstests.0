@@ -2,195 +2,193 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F023C352A1
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Dec 2022 18:03:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65450C352A1
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Dec 2022 18:07:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229713AbiLGSDz (ORCPT
+        id S229548AbiLGSHM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Dec 2022 13:03:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34872 "EHLO
+        Wed, 7 Dec 2022 13:07:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35668 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229456AbiLGSDz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Dec 2022 13:03:55 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D61865D697
-        for <fstests@vger.kernel.org>; Wed,  7 Dec 2022 10:03:00 -0800 (PST)
+        with ESMTP id S229456AbiLGSHL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Dec 2022 13:07:11 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F3A360364
+        for <fstests@vger.kernel.org>; Wed,  7 Dec 2022 10:06:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1670436179;
+        s=mimecast20190719; t=1670436371;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=mAUw8mr5gob9KRJvX/lopDofECYekDPnPXYYvZOjiaw=;
-        b=BxOcl5RvP3j51Mnc4BWa9S6QqzIDCbwDf9N8WhkjeyztC98fVo0QJvNO9/3mH2AzrEm7fr
-        3H5CQk8xILvlhtsaQiaKPCBEGgOleoKklziI4mAsMePcOM2Izv8aiXZb6Z1YbRmFNDr65B
-        JnPkFpgNYHwCUKBHRsmHiaIe9ygPQfI=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=Cc8/Fg69uZrlQsY/Dp+epYkPqMeZZR7m5O0VMtpROEo=;
+        b=RSNtnDJ767qpjg3J7OCVOZK2Ps2ilngYtCtieqONRVlAP9JQLu7G8xqIZk1vknmeAVlto3
+        AKU0RLqoBcJzn4+mW9j8r0+JNNJ1imUTNh2abo1QTrZdFSlRDbvx+S3vl28wz6QpLg77gB
+        0NLbzZdqKCnWKSAWt8GrRvQTMGkfzfc=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-530-EdmUnvW_NQqSy4BWL2Nt3A-1; Wed, 07 Dec 2022 13:02:58 -0500
-X-MC-Unique: EdmUnvW_NQqSy4BWL2Nt3A-1
-Received: by mail-pj1-f71.google.com with SMTP id l2-20020a17090add8200b00218daa1a812so14134939pjv.3
-        for <fstests@vger.kernel.org>; Wed, 07 Dec 2022 10:02:58 -0800 (PST)
+ us-mta-333-p1bcLCU9OeOHifsU1-r2Fg-1; Wed, 07 Dec 2022 13:06:06 -0500
+X-MC-Unique: p1bcLCU9OeOHifsU1-r2Fg-1
+Received: by mail-pl1-f200.google.com with SMTP id u9-20020a170902e80900b0018939ccbeedso20006553plg.20
+        for <fstests@vger.kernel.org>; Wed, 07 Dec 2022 10:06:06 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=mAUw8mr5gob9KRJvX/lopDofECYekDPnPXYYvZOjiaw=;
-        b=SG6SpWf4CY3mRcL7yxlGxfO1q//oteqrtAlLMJRJzXDQVKg6Ui5rCo0KXIXgd4Pg/D
-         TCg4ozFrUei31srMHuxDoWoJ/PAOmaMRCorUr5WY3ICYLdB/jywIHKeOf4quDFYm25T4
-         mMjRYr3FfL+ZE1TyyHnvQKqUPUApUYJcs3cA8UlfvgDSdgPDrHWbou0w39g1AY830+ua
-         wZNlrQ3ku0jRb4qmCcJdZH/zKZ3j5eA4pqoQTpbJ/7dK4d/ItTaL7dGn1wK9LdFlvoT+
-         Nk/1yNVYaP5yU4hOYvt4gDmUbn51gqZLGFymkIRHqCj+wn+lzoS/bERlwGjr2yIwhFuu
-         iPhw==
-X-Gm-Message-State: ANoB5pkbJDdxadksF9xRUvlfOvQE0aNJttq3EYJRAPtrsIqgYI5JLyJW
-        h9BwJK/x6cFGZ44U1YOgmB23KFx4pc8YD6+UfJGG5JETAEPeZ3S6aKwGpANHhYjgZ7RmBa8LQf0
-        h4BFmkKSpIUVmlnpB5A==
-X-Received: by 2002:a17:90a:fb92:b0:219:7a1e:e643 with SMTP id cp18-20020a17090afb9200b002197a1ee643mr880151pjb.9.1670436177319;
-        Wed, 07 Dec 2022 10:02:57 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf5R/SV86CymtgER73xU79VBUD+kCPQmx8Bcw/mX+h94Zbk2r5SiIQNSGAep7+7jjnqrx6tjOA==
-X-Received: by 2002:a17:90a:fb92:b0:219:7a1e:e643 with SMTP id cp18-20020a17090afb9200b002197a1ee643mr880145pjb.9.1670436176933;
-        Wed, 07 Dec 2022 10:02:56 -0800 (PST)
+        bh=Cc8/Fg69uZrlQsY/Dp+epYkPqMeZZR7m5O0VMtpROEo=;
+        b=Cr3Fs76DhxBf0o/b1DdVOHBkRnM9Q7bF3z35dkS/HBy8d/EI28dU14HSLcOcc2p+V7
+         Y0CEtrFMmLePzvVgozyFfrqK5EndvOvVl1mEw1OmiJZEUsywGU64QKoxvIUB5vOAEMH4
+         lBRCccwiroft+c6rZlcKAgEivAuQvRH7RtnwT7fnx8x9iNxrFEjtccC4L594ZqMK8Okl
+         3RmKhdwPazVFtA5ywezSfCMZD+xGAze3zaICj99nxqk1PN2eBM23pm59j1tdhOZvUWZl
+         3/14SxGB8WGES6vH35uIS4BfeSTSNtnymH7ynWdMekO44BIHqunlG97XGLipbOJ9ADVx
+         57FQ==
+X-Gm-Message-State: ANoB5pnGA2EsT6TZxVLaAA5/3oeQEO1uH85oeuYIXTzG5GSN1vu8U/+s
+        J/Ixb7gtADJXcZfK0uKbn+bz5wz538wq/fyxaWo9+31fM7iXBCKkrcKK67Ts+nsvpjAy7xlBjSw
+        JZ79E0wt//jgpgsIttw==
+X-Received: by 2002:a17:902:7c98:b0:188:5255:66b9 with SMTP id y24-20020a1709027c9800b00188525566b9mr913416pll.15.1670436365675;
+        Wed, 07 Dec 2022 10:06:05 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf4xsWVtejDsII/yMTA7C7BFBwMKum2E/HkQiIJqRZnTxgH138zyTeydfBimDZtyvmdqHCxiVg==
+X-Received: by 2002:a17:902:7c98:b0:188:5255:66b9 with SMTP id y24-20020a1709027c9800b00188525566b9mr913408pll.15.1670436365353;
+        Wed, 07 Dec 2022 10:06:05 -0800 (PST)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id n8-20020a17090a2bc800b002193f87fb4asm1486191pje.4.2022.12.07.10.02.54
+        by smtp.gmail.com with ESMTPSA id v7-20020a1709029a0700b00172cb8b97a8sm14960203plp.5.2022.12.07.10.06.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 07 Dec 2022 10:02:56 -0800 (PST)
-Date:   Thu, 8 Dec 2022 02:02:51 +0800
+        Wed, 07 Dec 2022 10:06:04 -0800 (PST)
+Date:   Thu, 8 Dec 2022 02:06:00 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org, hsiangkao@linux.alibaba.com,
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        djwong@kernel.org, hsiangkao@linux.alibaba.com,
         allison.henderson@oracle.com
-Subject: Re: [PATCH V3 2/2] common/populate: Ensure that S_IFDIR.FMT_BTREE is
- in btree format
-Message-ID: <20221207180251.fze2vdavljchgvbt@zlang-mailbox>
-References: <20221206100517.1369625-1-ZiyangZhang@linux.alibaba.com>
- <20221206100517.1369625-3-ZiyangZhang@linux.alibaba.com>
- <Y498Ej35Bf9Oi6Wx@magnolia>
+Subject: Re: [PATCH V4 1/2] common/xfs: Add a helper to export inode core size
+Message-ID: <20221207180600.5s3clfjx7qdjhuyp@zlang-mailbox>
+References: <20221207093147.1634425-1-ZiyangZhang@linux.alibaba.com>
+ <20221207093147.1634425-2-ZiyangZhang@linux.alibaba.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y498Ej35Bf9Oi6Wx@magnolia>
+In-Reply-To: <20221207093147.1634425-2-ZiyangZhang@linux.alibaba.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Dec 06, 2022 at 09:29:54AM -0800, Darrick J. Wong wrote:
-> On Tue, Dec 06, 2022 at 06:05:17PM +0800, Ziyang Zhang wrote:
-> > Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
-> > S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
-> > 
-> > Actually we just observed it can fail after apply our inode
-> > extent-to-btree workaround. The root cause is that the kernel may be
-> > too good at allocating consecutive blocks so that the data fork is
-> > still in extents format.
-> > 
-> > Therefore instead of using a fixed number, let's make sure the number
-> > of extents is large enough than (inode size - inode core size) /
-> > sizeof(xfs_bmbt_rec_t).
-> > 
-> > Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-> > Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-> > Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-> > Signed-off-by: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-> > ---
-> >  common/populate | 28 +++++++++++++++++++++++++++-
-> >  common/xfs      |  9 +++++++++
-> >  2 files changed, 36 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/common/populate b/common/populate
-> > index 6e004997..1ca76459 100644
-> > --- a/common/populate
-> > +++ b/common/populate
-> > @@ -71,6 +71,31 @@ __populate_create_dir() {
-> >  	done
-> >  }
-> >  
-> > +# Create a large directory and ensure that it's a btree format
-> > +__populate_xfs_create_btree_dir() {
-> > +	local name="$1"
-> > +	local isize="$2"
-> > +	local icore_size="$(_xfs_inode_core_bytes)"
-> > +	# We need enough extents to guarantee that the data fork is in
-> > +	# btree format.  Cycling the mount to use xfs_db is too slow, so
-> > +	# watch for when the extent count exceeds the space after the
-> > +	# inode core.
-> > +	local max_nextents="$(((isize - icore_size) / 16))"
-> > +
-> > +	mkdir -p "${name}"
-> > +	d=0
-> > +	while true; do
-> > +		creat=mkdir
-> > +		test "$((d % 20))" -eq 0 && creat=touch
-> > +		$creat "${name}/$(printf "%.08d" "$d")"
-> > +		if [ "$((d % 40))" -eq 0 ]; then
-> > +			nextents="$(_xfs_get_fsxattr nextents $name)"
-> > +			[ $nextents -gt $max_nextents ] && break
-> > +		fi
-> > +		d=$((d+1))
-> > +	done
-> > +}
-> > +
-> >  # Add a bunch of attrs to a file
-> >  __populate_create_attr() {
-> >  	name="$1"
-> > @@ -176,6 +201,7 @@ _scratch_xfs_populate() {
-> >  
-> >  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-> >  	dblksz="$(_xfs_get_dir_blocksize "$SCRATCH_MNT")"
-> > +	isize="$(_xfs_inode_size "$SCRATCH_MNT")"
-> >  	crc="$(_xfs_has_feature "$SCRATCH_MNT" crc -v)"
-> >  	if [ $crc -eq 1 ]; then
-> >  		leaf_hdr_size=64
-> > @@ -226,7 +252,7 @@ _scratch_xfs_populate() {
-> >  
-> >  	# - BTREE
-> >  	echo "+ btree dir"
-> > -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$((128 * dblksz / 40))" true
-> > +	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize"
+On Wed, Dec 07, 2022 at 05:31:46PM +0800, Ziyang Zhang wrote:
+> Some xfs test cases need the number of bytes reserved for only the inode
+> record, excluding the immediate fork areas. Now the value is hard-coded
+> and it is not a good chioce. Add a helper in common/xfs to export the
+> inode core size.
 > 
-> The new helper function omits the "missing" parameter, which means that
-> it no longer creates the directory entry blocks with a lot of free space
-> in them, unlike current TOT.
+> Signed-off-by: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
+> ---
 
-Hi Ziyang,
+Darrick has given RVB to this patch, if you didn't change anything from V3
+ou can keep it:
 
-Is there any reason we must drop this "missing" step. If no special reason, I'd
-like to keep the original operation (the missing parameter is "true") to free
-some space sparsely. I think that only removes some entries, won't remove the
-dir-blocks (generally), so it won't affect the btree format you create.
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Thanks,
-Zorro
-
+>  common/xfs    | 15 +++++++++++++++
+>  tests/xfs/335 |  3 ++-
+>  tests/xfs/336 |  3 ++-
+>  tests/xfs/337 |  3 ++-
+>  tests/xfs/341 |  3 ++-
+>  tests/xfs/342 |  3 ++-
+>  6 files changed, 25 insertions(+), 5 deletions(-)
 > 
-> --D
-> 
-> >  
-> >  	# Symlinks
-> >  	# - FMT_LOCAL
-> > diff --git a/common/xfs b/common/xfs
-> > index 5180b9d3..744f0040 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -1487,6 +1487,15 @@ _require_xfsrestore_xflag()
-> >  			_notrun 'xfsrestore does not support -x flag.'
-> >  }
-> >  
-> > +# Number of bytes reserved for a full inode record, which includes the
-> > +# immediate fork areas.
-> > +_xfs_inode_size()
-> > +{
-> > +	local mntpoint="$1"
-> > +
-> > +	$XFS_INFO_PROG "$mntpoint" | grep 'meta-data=.*isize' | sed -e 's/^.*isize=\([0-9]*\).*$/\1/g'
-> > +}
-> > +
-> >  # Number of bytes reserved for only the inode record, excluding the
-> >  # immediate fork areas.
-> >  _xfs_inode_core_bytes()
-> > -- 
-> > 2.18.4
-> > 
+> diff --git a/common/xfs b/common/xfs
+> index 8ac1964e..5074c350 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1486,3 +1486,18 @@ _require_xfsrestore_xflag()
+>  	$XFSRESTORE_PROG -h 2>&1 | grep -q -e '-x' || \
+>  			_notrun 'xfsrestore does not support -x flag.'
+>  }
+> +
+> +# Number of bytes reserved for only the inode record, excluding the
+> +# immediate fork areas.
+> +_xfs_inode_core_bytes()
+> +{
+> +	local dir="$1"
+> +	
+> +	if _xfs_has_feature "$dir" crc; then
+> +		# v5 filesystems
+> +		echo 176
+> +	else
+> +		# v4 filesystems
+> +		echo 96
+> +	fi
+> +}
+> diff --git a/tests/xfs/335 b/tests/xfs/335
+> index ccc508e7..2fd9be54 100755
+> --- a/tests/xfs/335
+> +++ b/tests/xfs/335
+> @@ -31,7 +31,8 @@ blksz="$(_get_block_size $SCRATCH_MNT)"
+>  echo "Create a three-level rtrmapbt"
+>  # inode core size is at least 176 bytes; btree header is 56 bytes;
+>  # rtrmap record is 32 bytes; and rtrmap key/pointer are 56 bytes.
+> -i_ptrs=$(( (isize - 176) / 56 ))
+> +i_core_size="$(_xfs_inode_core_bytes $SCRATCH_MNT)"
+> +i_ptrs=$(( (isize - i_core_size) / 56 ))
+>  bt_ptrs=$(( (blksz - 56) / 56 ))
+>  bt_recs=$(( (blksz - 56) / 32 ))
+>  
+> diff --git a/tests/xfs/336 b/tests/xfs/336
+> index b1de8e5f..085b43ae 100755
+> --- a/tests/xfs/336
+> +++ b/tests/xfs/336
+> @@ -42,7 +42,8 @@ rm -rf $metadump_file
+>  echo "Create a three-level rtrmapbt"
+>  # inode core size is at least 176 bytes; btree header is 56 bytes;
+>  # rtrmap record is 32 bytes; and rtrmap key/pointer are 56 bytes.
+> -i_ptrs=$(( (isize - 176) / 56 ))
+> +i_core_size="$(_xfs_inode_core_bytes $SCRATCH_MNT)"
+> +i_ptrs=$(( (isize - i_core_size) / 56 ))
+>  bt_ptrs=$(( (blksz - 56) / 56 ))
+>  bt_recs=$(( (blksz - 56) / 32 ))
+>  
+> diff --git a/tests/xfs/337 b/tests/xfs/337
+> index a2515e36..5d6b9964 100755
+> --- a/tests/xfs/337
+> +++ b/tests/xfs/337
+> @@ -33,7 +33,8 @@ blksz="$(_get_block_size $SCRATCH_MNT)"
+>  
+>  # inode core size is at least 176 bytes; btree header is 56 bytes;
+>  # rtrmap record is 32 bytes; and rtrmap key/pointer are 56 bytes.
+> -i_ptrs=$(( (isize - 176) / 56 ))
+> +i_core_size="$(_xfs_inode_core_bytes $SCRATCH_MNT)"
+> +i_ptrs=$(( (isize - i_core_size) / 56 ))
+>  bt_ptrs=$(( (blksz - 56) / 56 ))
+>  bt_recs=$(( (blksz - 56) / 32 ))
+>  
+> diff --git a/tests/xfs/341 b/tests/xfs/341
+> index f026aa37..c70dec3c 100755
+> --- a/tests/xfs/341
+> +++ b/tests/xfs/341
+> @@ -33,7 +33,8 @@ rtextsz_blks=$((rtextsz / blksz))
+>  
+>  # inode core size is at least 176 bytes; btree header is 56 bytes;
+>  # rtrmap record is 32 bytes; and rtrmap key/pointer are 56 bytes.
+> -i_ptrs=$(( (isize - 176) / 56 ))
+> +i_core_size="$(_xfs_inode_core_bytes $SCRATCH_MNT)"
+> +i_ptrs=$(( (isize - i_core_size) / 56 ))
+>  bt_recs=$(( (blksz - 56) / 32 ))
+>  
+>  blocks=$((i_ptrs * bt_recs + 1))
+> diff --git a/tests/xfs/342 b/tests/xfs/342
+> index 1ae414eb..4855627f 100755
+> --- a/tests/xfs/342
+> +++ b/tests/xfs/342
+> @@ -30,7 +30,8 @@ blksz="$(_get_block_size $SCRATCH_MNT)"
+>  
+>  # inode core size is at least 176 bytes; btree header is 56 bytes;
+>  # rtrmap record is 32 bytes; and rtrmap key/pointer are 56 bytes.
+> -i_ptrs=$(( (isize - 176) / 56 ))
+> +i_core_size="$(_xfs_inode_core_bytes $SCRATCH_MNT)"
+> +i_ptrs=$(( (isize - i_core_size) / 56 ))
+>  bt_recs=$(( (blksz - 56) / 32 ))
+>  
+>  blocks=$((i_ptrs * bt_recs + 1))
+> -- 
+> 2.18.4
 > 
 
