@@ -2,144 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64232C4332F
-	for <linux-fstests@archiver.kernel.org>; Fri,  9 Dec 2022 09:49:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C587AC4332F
+	for <linux-fstests@archiver.kernel.org>; Fri,  9 Dec 2022 14:00:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230144AbiLIJtE (ORCPT
+        id S229604AbiLIOAa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 9 Dec 2022 04:49:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55684 "EHLO
+        Fri, 9 Dec 2022 09:00:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229784AbiLIJsO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2022 04:48:14 -0500
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 551286B9A3;
-        Fri,  9 Dec 2022 01:46:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1670579170; x=1702115170;
-  h=from:to:subject:date:message-id:references:in-reply-to:
-   content-id:content-transfer-encoding:mime-version;
-  bh=joufdrNO2/FLdgGzlnaieoHfZ28FYCwNXGhrZ08f24E=;
-  b=pWH/3guYPiBXoUQPFiTnNQ79Y9OHjt6kRqWCjrzOjJwFSOVjbk8MGDZ5
-   W3gtLKR3bqM6LYkHBge2DKwHca5VgvUlItf3KMiI9GSuohs646+r0bKwl
-   KwYGy8/whg6AmGXOsiEHznVwEzCzrf5FbcWGNKXVam28wHMP6pzcnQlml
-   zCcvmlOakfw4KW3jJw8Dz1FzJdZ8IWowUU9DH3qB/XJkQZ4Ls5onI7i+e
-   OhwVSB6Pgn9BtmyH6t7dlv/80WPmJ2018XLqN9OsI+7ViNsLnLE4O7cv0
-   6OjUzXuTg8XGatI1nJK59duWWYjYojXXDV+ztcZz4/gtIbssJ/PnODTkf
-   g==;
-X-IronPort-AV: E=Sophos;i="5.96,230,1665417600"; 
-   d="scan'208";a="216479433"
-Received: from mail-dm6nam12lp2169.outbound.protection.outlook.com (HELO NAM12-DM6-obe.outbound.protection.outlook.com) ([104.47.59.169])
-  by ob1.hgst.iphmx.com with ESMTP; 09 Dec 2022 17:46:00 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=da05FXupO/IDtlslcPmoT+7eTLQSIQN6iYxNzwxILJczpPQgmHzVkLHMOSv38qSb3LIhmsKXPx4qpgUYL6ItAjsLbiRH2j9XoLibok6Atn2+BfporWdJnGFWJz3DNux1Bx5zISVOiJaCM1wb65awnSJ8niexFAFxX2T9YM/L3V2uPtgLaswPa2ZBk6uOHvtCW7aZSkUifN4USXFjEmXhH9mFEImmaXjftR7dl3m3rk7LqXdqVmx+n37YbI70JzLC6HlkbGZgqbLh5gyiwbPYEEcLzXI9Xn48yT0bC5bPjhxIBzfy7H2D7GF8a+29FIO3Ki0Uhc+tHxjNVjDnFbHhHA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=joufdrNO2/FLdgGzlnaieoHfZ28FYCwNXGhrZ08f24E=;
- b=THhj50lWFulPnxyHowoZZmk1rGYquT4moj4MyiJB2YtmoBcCrsiDFdsPvAbJzFNSlBzjpqNEMPpewIvFvfq9My9jRJCRmlgJGyE8QNXsPXmj6+5eOaFOoiWuD1Nz18z1DnZ+x9cdNmkWHD16gG5aJmN9dbgxK1SgkmYOL1osLxMxhOfOT9mIz1qilaxgFESptxcZyIVWAHIeGrl5gxFA0aaHw6ZQ4zTyejOrr1ImOOMeskazOaBO9j0y9LjN/A9SEr/Q2aFKlLmEyEQPTqG37bKhkF8Qtz31rL76llFDftTaEwklnLdPR90aOsJ4hsZSUvdG0PFPd+234IrwYwWdOA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=joufdrNO2/FLdgGzlnaieoHfZ28FYCwNXGhrZ08f24E=;
- b=iOz+6Nn6N47xTlu67gz6tX8e5NQtVT2aCDcm1M0Y+IJtdUV/6N+UnCHAV414sks0ia3luj1r/XxO9L3LU4VJSUO77TQzsRHzecPu4zZF9Lm5H5U4LRc7BLLck4XNAAVB3EIad1R3M88si2y2hITJR410xF5Iij86wDWhbse3n7Y=
-Received: from PH0PR04MB7416.namprd04.prod.outlook.com (2603:10b6:510:12::17)
- by DM6PR04MB5642.namprd04.prod.outlook.com (2603:10b6:5:16e::23) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5880.14; Fri, 9 Dec
- 2022 09:45:56 +0000
-Received: from PH0PR04MB7416.namprd04.prod.outlook.com
- ([fe80::f66f:ab77:6874:af4b]) by PH0PR04MB7416.namprd04.prod.outlook.com
- ([fe80::f66f:ab77:6874:af4b%9]) with mapi id 15.20.5880.018; Fri, 9 Dec 2022
- 09:45:56 +0000
-From:   Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-To:     Qu Wenruo <wqu@suse.com>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] fstests: btrfs/219: remove it from auto group
-Thread-Topic: [PATCH] fstests: btrfs/219: remove it from auto group
-Thread-Index: AQHZC5AWt97Y2jxf3kerOGN6ih5VBK5lTvCA
-Date:   Fri, 9 Dec 2022 09:45:56 +0000
-Message-ID: <12985c69-b166-18d4-e4b8-5737b41a23d2@wdc.com>
-References: <6c08b564ea499de6d34a1bd8bb0f435d73de2770.1670563995.git.wqu@suse.com>
-In-Reply-To: <6c08b564ea499de6d34a1bd8bb0f435d73de2770.1670563995.git.wqu@suse.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
- Gecko/20100101 Thunderbird/102.5.1
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH0PR04MB7416:EE_|DM6PR04MB5642:EE_
-x-ms-office365-filtering-correlation-id: bff16180-58fd-403d-a32a-08dad9ca2ba3
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: MHAjwTWFwmXM5tKgR2sfchkeaP4BSFtpwDm73B8P/aONgLK6xxx4YXvJwtUpQTJ/dIC+dZX2YrgCi8QruPJqDVh6UmfMSRRHCjP7j723VVwgjWV4PArgoO42Bvf3VA4rT8BJwAa4ZX3UrCnAfxCjA5lJOFLVvMO7kaMcmX60Skm+YiXnnMwOm4Eq8bUFKhItnwDP+RyCRi4n1jmq8Tkevz2rcYyMAE2wmB9YfOOsOCNxpjzJ1Tbh1T/uR2JrzCBCKh+H/xv6Q0BJcELwfloh4UD9zDaxAIDc5/YnW1OkoYcbjEhZHd744sWXgRmhdgM65rNqifJbynlUYBxvmAVVyk05OJqQDdq0Zq6gFZwtt/DWfliNsQXmeUcfcYHbD0fW4CbafAToekSnKwnqLK6eoGcvRjGDY1Ht7t6YqxpNeRUy9X7gxBJ38VmEYGRrWuZevELHHm100r5OD8NSps5J4OX/zFIgJ0Y/VJklU+QeAt7YM5Iq9KE387KftHegx1G0Jnp88zsEd2jeBbw+s9BZH5WxUPGA6+uPPhFHc9isrH0/u/6kEtzyDTbfbrEq0nuzOdYa2jj8gL6xzTxAwuL/9XRdf0rkKrE9B9Sxzz1cK26WMy10xBVijude+OP+/Fnv3gEH4XHAIjznHPsdRnCDsbePpnfce/vtVXmcQ6mEOSwj+Rve3LhzBTk9ulJQAwFZp32QgbofiPa6HXnBlIRUhoFN+nKnai+Y6cnUCRe8q4Zfaj9F9/G49BQBBmPzndbx12BG86TqgjDU3j38lPE1GA==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR04MB7416.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(376002)(346002)(39860400002)(136003)(366004)(451199015)(316002)(2906002)(41300700001)(19618925003)(478600001)(6486002)(31696002)(558084003)(91956017)(38070700005)(2616005)(82960400001)(66476007)(64756008)(8676002)(66946007)(66556008)(76116006)(66446008)(38100700002)(36756003)(6506007)(122000001)(71200400001)(86362001)(5660300002)(6512007)(186003)(26005)(110136005)(8936002)(31686004)(4270600006)(45980500001)(43740500002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?VVFqT3JMTDNrdklleEFnZnRmNXBlRHVVbG1DOXRnSmNELzVkOWJweTZLazZF?=
- =?utf-8?B?djMvTjdwYTVkV0NnNm4wREtJMit0NWpINFRLMDZ3WnBQVHJaSlp1SWNsSWFT?=
- =?utf-8?B?dzluRzdDUjcrS2RnVUdSWW85N2gvbWJFNzlQRUZVV09tOWE3UlVqa3l5dnBs?=
- =?utf-8?B?aGtKQWFSWVRTWXV6ZFozWFV2N09BTUFpeDFZdFZjYUw4Y0FxUERZenFvY05a?=
- =?utf-8?B?MGFzbEFHTzBmQ3F0ZHBUUmwycjNKUENGeGE0K0txd2dkN01MVHFlZmRSSitr?=
- =?utf-8?B?OWd0YUlaK0wzT0RrYWhGTnArOFE3dmlzWTRDSkQreGJaWGwreWNjV3NybWQz?=
- =?utf-8?B?THQvNmJtT2I4NUdmS0dmOSsvV21VWUpqUDI4dVYvVnJxKzJsKzFkandQTXRP?=
- =?utf-8?B?WTVBcVcvNk5zTXJLenNhcmVQYzVWMnJnS1dHZ3NCbHB3NFpXMnBibmpnZzNz?=
- =?utf-8?B?N0cvdEcrblFERkI0c05SWEtITWJaWGFGYi96LzZER2YyaXMxWllyeEo0NDdH?=
- =?utf-8?B?dnNYaXlIVGZrbW5EYXdHU3k4dFpkWkdZQUViODNYWmdPTktvUEtKaFhHSThZ?=
- =?utf-8?B?T0FKZXNHc3VMWWgvc1R3eXU5eG8vQXpzYWIra1MzcE5Lb01sQlNmdGxBWHVo?=
- =?utf-8?B?aWIwZTVnQ25udTZkZFRPWFcvVHhHRWwzVC9KUVpwU2tGUDZROEFBMmhsNEFo?=
- =?utf-8?B?LzZqZFhvS0hQaXdkNXJvRS91Q1EyeXdPQkFvVFU1b01uVi9hbE9UK2pFT2JS?=
- =?utf-8?B?RUxkZm1ldXRHSWVmVDRlcEZ2NmdwT2pyN2w1Y1QxWXk3Ym9kUzE2Q2NuV3Ey?=
- =?utf-8?B?cHozdit5ZnNJT1QzR3FZZEEwMUNsRkgrbjJwN0VDb2VkbzN6SWN2cTJINTFL?=
- =?utf-8?B?bXpoRGhJcEFpMFhzQjdNNGFQellWNG93VkY1ZlRkQmF6TUU3bDNEQW5IMlFI?=
- =?utf-8?B?aUFrNmRrL1hJUlFRelgyb3UvRUk4TCtCMGR5Z25SUHcrQXIzUWVoYmpzLzNl?=
- =?utf-8?B?WEkzWkhrNU1nZUFjL0NUNnVLUmYyeHZnRzNkUGlpaUZKRDZaVWZSbG5GRjBw?=
- =?utf-8?B?bGNhWmc3VlJnWWJkZEV3eTFBbk1ZWTZVQnh0KzJjKzFKb3luVUhNOThCVlMw?=
- =?utf-8?B?SGxhQVRIRms3R1VPUnNtUVdyTWNEYk51Q0N3S2tJK2MycTVETCsyOU80cjk5?=
- =?utf-8?B?ZVdMTzhFWndLTDdVZ0NRdFBqVzFWZVd6L0R5aFo1M3NHNFJwaVErU1lMMzhO?=
- =?utf-8?B?SjIzdmU2bUh0SWpQdlZ6NklFS3M0YkprODVnT0xsNFI4WnlIREl4KzdvL3Vq?=
- =?utf-8?B?OVhCR0lrNmtyanR4TEY4U1U3Q1ZnN1JoWEVkN0gvMEZIY0tmcUVDOGlmckZZ?=
- =?utf-8?B?ZlhTYTNJZllkTC9BSldUSVFsaDhaU1A0eTg1UFF6TXNyQk0xOEsyYnBoZFBa?=
- =?utf-8?B?UVdjSzY1aUJlSWVISUlZUm1UUTAzRjJpNTFKNUlpSklMeGJ6RDl2SGZhZTI3?=
- =?utf-8?B?V3pDQ3Z1UjAxbFY2UWNWTnMzRjhvRFpidXgzTVdNOUdFSjRxenh5Y1Nqci9a?=
- =?utf-8?B?YUxpSTBETW1FbGp6N3NNSUY1dHlGRHJHYW1XRldDdXJ3UCswcVkvUHZuM3kr?=
- =?utf-8?B?dEpoZ0FidU44YW9Jc1VxMGxzck5XYVdTT2RuV0NpRVJ1WTluNk9kRHd0V1N0?=
- =?utf-8?B?MC9UOFh2WnRtRFd4emhYcmFTZmlHbFVYTHUwVGRLQ0EyWGkrOEp2S0k1U2J1?=
- =?utf-8?B?WmJucXpMcm81dlVkcDlqQkpzYUFEMUt5aUtwV3ZPMy9vWXBEOHNrRDZVSGEx?=
- =?utf-8?B?aFh5QTJrU0ZHbGxZYVVseW1uc0Z4YTFUNkl6TnNzSm5zT1llSzRhbEszQVJu?=
- =?utf-8?B?QmhhQmdQd2JaTGhMcnR1cmNhRlRYTXVHZWwvR2R3SXluaFk1K1R2OStkU0w5?=
- =?utf-8?B?Y2k1SUdlYlpEem96cVlwUGt1eThXNFh5SG1NbHpkNDY1QytVSk81STc0Qndq?=
- =?utf-8?B?QU53SnNqRGJKdnk0LzFtMjUvVXBvSkhCeGFKbjZid05GZ0UxOFBQdi9QM3Br?=
- =?utf-8?B?N05Ud0xoOE9jVCt0dXZDNk5uZjVuNzAzWWxGK0hLOEZxN0NtQm5xUzV0RlZD?=
- =?utf-8?B?bEtzUzI5YjNnb3B4TzR1RVhEbjhXYjJkSlRJeXdWU0c4RzFrVmRXKzhqSUNK?=
- =?utf-8?B?alE9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <DC377C15EC353B4180DBE1B1E57FDF5B@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        with ESMTP id S229517AbiLIOA3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2022 09:00:29 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0B2777212
+        for <fstests@vger.kernel.org>; Fri,  9 Dec 2022 05:59:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1670594367;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=DtOqqrMaw2JPnbMZlrl9s4VFPCKR2oUUhKcTc9NPbrU=;
+        b=aZ71mdFNpZprmLHeu3GbWwW9APQ8kOS/Xvd/u65skmtf2NpcQsG0nKNFYkt+5LO+Ojx4d4
+        4xk8R0hLrCWxrE31f7KJ38KWCNd7Yp+xE2n7uZrrIeqMBwmuf2QZhh7t51/NqmiAA8LOSL
+        jWzjqm9uugn9CbX3n9+wNqGI0LiiW0w=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-411-ys0lnPJ1PF2VisEbycTL6Q-1; Fri, 09 Dec 2022 08:59:25 -0500
+X-MC-Unique: ys0lnPJ1PF2VisEbycTL6Q-1
+Received: by mail-pg1-f199.google.com with SMTP id f132-20020a636a8a000000b00473d0b600ebso3132589pgc.14
+        for <fstests@vger.kernel.org>; Fri, 09 Dec 2022 05:59:25 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DtOqqrMaw2JPnbMZlrl9s4VFPCKR2oUUhKcTc9NPbrU=;
+        b=z3rU9fhe7U6bQxjZ9J89+gQoKHwYoP7VG4HFU+3j1sQizWXwJ2qnCQQ5MFTok3WkIr
+         7q4vSYAyvf5/m6TMbm9kkeHoOLb5Vxy/40uwrro4D8T2su5UEymcq52STVHuzjGcV/ol
+         rp+i8UisVdn+EN8e0lKiCepUNpfhwo/jXG7Go6KIQI6V+PxlGhe/0YT2ZV+nILuWoLsO
+         Y/C9x7N/Syf4F3T7UCqXLz4We8bYlU+lCzlKbw9M7XFzMURHJWAfETniL726/IyXZUpA
+         xOl/Wh5QVBvnHqPqUf9ZisWY8PEtF+wI8AK+mz8v5JcOGoLMJd8tPmhG+bhhRU21zAtc
+         4Ijg==
+X-Gm-Message-State: ANoB5pkF73XZOTpA8oWYIHSgDUo1Xc0whoiW5PMBAv4K/Jl0XgLGqzMi
+        WKdrxYMfkaCn3ZC/ytIAMDc6WlE5loS/clNNg+3Oss+B7XV1Ydjl8BRYHmVgr+oe+QOwkGX4NXu
+        qTINmcunjjh1oFEvzNw==
+X-Received: by 2002:a17:902:aa87:b0:187:480d:f37a with SMTP id d7-20020a170902aa8700b00187480df37amr6067093plr.24.1670594364706;
+        Fri, 09 Dec 2022 05:59:24 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf7XeU7zx3Z/4j8KHFao/DE5TzvGEu2Zr+tz+EX1nih+YTt6iXrxho6S5MZ/+sEbb8q8PfcikA==
+X-Received: by 2002:a17:902:aa87:b0:187:480d:f37a with SMTP id d7-20020a170902aa8700b00187480df37amr6067078plr.24.1670594364392;
+        Fri, 09 Dec 2022 05:59:24 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id l11-20020a170902f68b00b00188fdae6e0esm1397877plg.44.2022.12.09.05.59.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 Dec 2022 05:59:23 -0800 (PST)
+Date:   Fri, 9 Dec 2022 21:59:19 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] ignore src/fake-dump-rootino and tests/xfs/216.out
+Message-ID: <20221209135919.txajl7kmt6pvmdcf@zlang-mailbox>
+References: <1670578130-13-1-git-send-email-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR04MB7416.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: bff16180-58fd-403d-a32a-08dad9ca2ba3
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Dec 2022 09:45:56.4487
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 7NwRBKtv3G9SWFkSHWZijblA5abzgh/jU+Ur8og4QhfEiiITLZ01EBuCiIyN2T5d6QDvq0o8+hlR+5jc7s6k2gvWlzGnOU4Ikoy1YNFAe3U=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB5642
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1670578130-13-1-git-send-email-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-TG9va3MgZ29vZCwNClJldmlld2VkLWJ5OiBKb2hhbm5lcyBUaHVtc2hpcm4gPGpvaGFubmVzLnRo
-dW1zaGlybkB3ZGMuY29tPg0K
+On Fri, Dec 09, 2022 at 09:28:49AM +0000, Shiyang Ruan wrote:
+> 1. The executable binary in src/ should be in ignore file.
+> 2. tests/xfs/216.out is a symlink generated at runtime, also should
+>    be ignored.
+> 
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> ---
+
+I think we can combine these two patches into one patch. Due to they all try to
+avoid dirty git tree after building/testing.
+
+After that, you can add:
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+Thanks,
+Zorro
+
+>  .gitignore | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/.gitignore b/.gitignore
+> index ad9f45437..a1107003a 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -80,6 +80,7 @@ tags
+>  /src/e4compact
+>  /src/ext4_resize
+>  /src/fault
+> +/src/fake-dump-rootino
+>  /src/feature
+>  /src/fiemap-tester
+>  /src/fill
+> @@ -205,6 +206,7 @@ tags
+>  /tests/xfs/033.out
+>  /tests/xfs/071.out
+>  /tests/xfs/096.out
+> +/tests/xfs/216.out
+>  
+>  # cscope files
+>  cscope.*
+> -- 
+> 2.38.1
+> 
+
