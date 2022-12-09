@@ -2,82 +2,111 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50478C4332F
-	for <linux-fstests@archiver.kernel.org>; Fri,  9 Dec 2022 08:39:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10EA5C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri,  9 Dec 2022 09:29:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229714AbiLIIjP (ORCPT
+        id S229738AbiLIJ3P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 9 Dec 2022 03:39:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46620 "EHLO
+        Fri, 9 Dec 2022 04:29:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49178 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229542AbiLIIjP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2022 03:39:15 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F02F4D5C6;
-        Fri,  9 Dec 2022 00:39:14 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229530AbiLIJ3O (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2022 04:29:14 -0500
+Received: from mail3.bemta32.messagelabs.com (mail3.bemta32.messagelabs.com [195.245.230.18])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FC0B45A3D
+        for <fstests@vger.kernel.org>; Fri,  9 Dec 2022 01:29:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1670578150; i=@fujitsu.com;
+        bh=AKYN9pHPTRqEfW9cPoDZBJ3ZiXYnLI8oGS2NYsugnYo=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=qZpjmvU8wBrU21xQNubfcaJKUmG5ppxl1HUyDRz6cEisDzA7vEpDnckv1mvnJ25Cq
+         O0C6QotsZ2tojmQa0Dxk8bUwTPp727VvjL3hzYQOzrJHd7bBy7JgEiiKz4MtiLrRuf
+         6lNOCtP7MvQ7xyZELSro362VTFdSkFFb50Pwa3aPNpCYdgkXwVtMMFA6jWbZAqcJHS
+         jmnfwIBZq9F95OVBvqJdqPxA4hycmU7HCbZqOjEi2ezwE6c4xzK0vgQ+FRYV+xZqGf
+         ijW/CgysMgV3BLjazonBUjDjVd6WdFNA1b+/Co0ZuBLCrV2f2KBYF9oI3/QibE0JQs
+         qe+gofrYzFc4w==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrGIsWRWlGSWpSXmKPExsViZ8OxWffZ/0n
+  JBn8XC1ucbtnL7sDo8XmTXABjFGtmXlJ+RQJrxsYjNxgLmlgrdjZcZG9gXMjSxcjFISRwnlFi
+  zpcjUM5BJoknkxuAHE4gZw+jxJ3txiA2m4COxIUFf1lBbBEBWYn/M1YzgdjMQPau5wvYQGxhA
+  XeJjsl9zCA2i4CKxIZf3UD1HBy8Ai4Si9r9QcISAgoSUx6+ByvhFRCUODnzCQvEGAmJgy9eMI
+  OUSwgoSczsjocor5CYNauNCcJWk7h6bhPzBEb+WUi6ZyHpXsDItIrRtDi1qCy1SNdML6koMz2
+  jJDcxM0cvsUo3US+1VLc8tbhE11AvsbxYL7W4WK+4Mjc5J0UvL7VkEyMwCFOK2Qt2MM5c9kfv
+  EKMkB5OSKG/gi0nJQnxJ+SmVGYnFGfFFpTmpxYcYZTg4lCR4D/4EygkWpaanVqRl5gAjAiYtw
+  cGjJML79AtQmre4IDG3ODMdInWKUZdjbcOBvcxCLHn5ealS4rxr/gAVCYAUZZTmwY2AReclRl
+  kpYV5GBgYGIZ6C1KLczBJU+VeM4hyMSsK8PL+BpvBk5pXAbXoFdAQT0BErv0wEOaIkESEl1cA
+  k6X6fJ4JD3OCk80Hz6o0XZxS39FlEKF/j4GOaqzLHJ2TG/V1iBcWbF7TnXlnc5c2x7k/m2oMa
+  n+6f/7pMgz+/RHZW/L0nmWphiYGxeVPdOg88yVhdUqEmFvk+ZnLy+knFZvt3zH/c+qDhsdjKE
+  K3EG+FLFv7cbjE7t961Wze8/ML64NzIxe8/FQdz/3zazh7vZb+tUDT2DZP/DxbhSYtSKiIZv+
+  +Z+9FcdvkqEX/ulmTZ33bvGW+4G8vvSMvMuLYuYEvWkXMnD/VPLG3fnvzkgoJrBHPpy027/7/
+  sKLlz6W3TBJVXP0S+lutNV/LafSvyZ5z0hD6xaVeiZs772r2pv+ttlailoPD1tTUWWhZKLMUZ
+  iYZazEXFiQD7wXLpSQMAAA==
+X-Env-Sender: ruansy.fnst@fujitsu.com
+X-Msg-Ref: server-16.tower-585.messagelabs.com!1670578150!131627!1
+X-Originating-IP: [62.60.8.179]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.101.2; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 30572 invoked from network); 9 Dec 2022 09:29:10 -0000
+Received: from unknown (HELO n03ukasimr04.n03.fujitsu.local) (62.60.8.179)
+  by server-16.tower-585.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 9 Dec 2022 09:29:10 -0000
+Received: from n03ukasimr04.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTP id E2F2F155
+        for <fstests@vger.kernel.org>; Fri,  9 Dec 2022 09:29:09 +0000 (GMT)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id EBFFE1FE95;
-        Fri,  9 Dec 2022 08:39:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1670575152; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=uKoT7BgiNHVQfcynSO54/bGdBA+IOGji+zSe9yDp/6k=;
-        b=O6pQU9TfkELUNhJYSDMM+aNqfO9G2HamVoGVgjGboF1lWF2GlCIwUcs+EAFwE5d77o8WoP
-        odcEPRTN+Y2pCYfD6e+kj9hynroKAQCtMpX4IhCqZucgZCwKEuj6WYzaik5/SsjRBNoVO+
-        RC6fDcFu2U2beUlthie77Eb40+5nXvg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1670575152;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=uKoT7BgiNHVQfcynSO54/bGdBA+IOGji+zSe9yDp/6k=;
-        b=rzUGFdHDZQ6hXjqIK4E9dDXC+baKZYInh5ZyCk3elyWn0a3Cqa93G+yU4/VYD+F/NrPAKK
-        m2FzH8xXJKtUggAA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id BEA5313597;
-        Fri,  9 Dec 2022 08:39:12 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id VVcRLTD0kmPjSQAAMHmgww
-        (envelope-from <ddiss@suse.de>); Fri, 09 Dec 2022 08:39:12 +0000
-Date:   Fri, 9 Dec 2022 09:40:01 +0100
-From:   David Disseldorp <ddiss@suse.de>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs/080: fix the stray '\'
-Message-ID: <20221209094001.5c5f1bce@echidna.fritz.box>
-In-Reply-To: <20221209061901.30511-1-wqu@suse.com>
-References: <20221209061901.30511-1-wqu@suse.com>
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTPS id D614F73
+        for <fstests@vger.kernel.org>; Fri,  9 Dec 2022 09:29:09 +0000 (GMT)
+Received: from localhost.localdomain (10.167.225.141) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.42; Fri, 9 Dec 2022 09:29:07 +0000
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <ruansy.fnst@fujitsu.com>
+Subject: [PATCH 1/2] ignore src/fake-dump-rootino and tests/xfs/216.out
+Date:   Fri, 9 Dec 2022 09:28:49 +0000
+Message-ID: <1670578130-13-1-git-send-email-ruansy.fnst@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-Originating-IP: [10.167.225.141]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri,  9 Dec 2022 14:19:01 +0800, Qu Wenruo wrote:
+1. The executable binary in src/ should be in ignore file.
+2. tests/xfs/216.out is a symlink generated at runtime, also should
+   be ignored.
 
-...
-> --- a/tests/btrfs/080
-> +++ b/tests/btrfs/080
-> @@ -76,7 +76,7 @@ workout()
->  # created fs doesn't get that feature enabled. With it enabled, the below fsck
->  # call wouldn't fail. This feature hasn't been enabled by default since it was
->  # introduced, but be safe and explicitly disable it.
-> -_scratch_mkfs -O list-all 2>&1 | grep -q '\bno\-holes\b'
-> +_scratch_mkfs -O list-all 2>&1 | grep -q '\bno-holes\b'
->  if [ $? -eq 0 ]; then
->  	mkfs_options="-O ^no-holes"
->  fi
+Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+---
+ .gitignore | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Looks good. I think I've hit this one too...
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+diff --git a/.gitignore b/.gitignore
+index ad9f45437..a1107003a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -80,6 +80,7 @@ tags
+ /src/e4compact
+ /src/ext4_resize
+ /src/fault
++/src/fake-dump-rootino
+ /src/feature
+ /src/fiemap-tester
+ /src/fill
+@@ -205,6 +206,7 @@ tags
+ /tests/xfs/033.out
+ /tests/xfs/071.out
+ /tests/xfs/096.out
++/tests/xfs/216.out
+ 
+ # cscope files
+ cscope.*
+-- 
+2.38.1
+
