@@ -2,162 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14872C4708D
-	for <linux-fstests@archiver.kernel.org>; Fri,  9 Dec 2022 16:37:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C05F4C4332F
+	for <linux-fstests@archiver.kernel.org>; Sat, 10 Dec 2022 02:31:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229612AbiLIQho (ORCPT
+        id S229470AbiLJCbn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 9 Dec 2022 11:37:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36712 "EHLO
+        Fri, 9 Dec 2022 21:31:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229604AbiLIQhn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2022 11:37:43 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08E7363CB;
-        Fri,  9 Dec 2022 08:37:43 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S229482AbiLJCbk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 9 Dec 2022 21:31:40 -0500
+Received: from mail1.bemta32.messagelabs.com (mail1.bemta32.messagelabs.com [195.245.230.66])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2DC72C67C
+        for <fstests@vger.kernel.org>; Fri,  9 Dec 2022 18:31:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1670639498; i=@fujitsu.com;
+        bh=VNMWe6LNnjFLgnYQq4iLCR2CvQUJhSbWvqpN6L7lSD4=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=coUJIKQfbaBoWKv5AY1icZaDY3qv/Ex3jZIX2hcmQHCCUu+WJFt+muXpCukPDb/TZ
+         z7q8dMVihGZYxSYxkIXZjWO4GHRZJEYSGyl4bTvbUkOMuRorubdVsR20IHisVbv9qZ
+         zSf6QE67kdbZPPmM2YDf8jK+UinZkZcthooJ/Xknp5V7iqeerQ633730mAp1Sxv1Ug
+         ApA2BZ9KZT4DwqAKga8ZtHKgQTDC2YFDt6YcZAvZq1w1Cbt5UOpY0nuxETkpkyXKgx
+         lp5MWnDNY3bnZgnnvrC/N0BjrdVvn3wRvGa09o6+yp2cUsk+fMfAFCHSqcqPtDUPhl
+         FsCKaX6nd2Ouw==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrBIsWRWlGSWpSXmKPExsViZ8OxWbfj/eR
+  kg+nbeS1Ot+xld2D0+LxJLoAxijUzLym/IoE14/TDrawFt9grFp7+zdTAuI+ti5GLQ0jgHKPE
+  jzdNLF2MnEDOQSaJ08fqIBJ7GSXeL7nKDpJgE9CRuLDgLyuILSIgK/F/xmomEJsZyN71fAEbi
+  C0s4CrxYOonMJtFQFXiy67ZYDW8Ai4Si8/0gi2QEFCQmPLwPTNEXFDi5MwnLBBzJCQOvngBFO
+  cAqlGSmNkdD1FeITFrVhsThK0mcfXcJuYJjPyzkHTPQtK9gJFpFaNZcWpRWWqRrqGhXlJRZnp
+  GSW5iZo5eYpVuol5qqW55anGJrqFeYnmxXmpxsV5xZW5yTopeXmrJJkZgIKYUM0zfwfhz2R+9
+  Q4ySHExKorzHoicnC/El5adUZiQWZ8QXleakFh9ilOHgUJLg7XwFlBMsSk1PrUjLzAFGBUxag
+  oNHSYQ36ilQmre4IDG3ODMdInWKUZdjbcOBvcxCLHn5ealS4ryVb4CKBECKMkrz4EbAIvQSo6
+  yUMC8jAwODEE9BalFuZgmq/CtGcQ5GJWHe/S+BpvBk5pXAbXoFdAQT0BErv0wEOaIkESEl1cA
+  0p6Hx/yKnaV/KF3Me82Of71TO0uz9QkNAj1diemuVPZ/Bj+KnxukLGA9zvLgctPP2nXajjq9s
+  GasdT966Kmcs/bl/5vSPBskLz1k/2i1355PHs/wXX9+tMrviFa7qe/UF35rN0g3zD80IC/S/e
+  0l4y3EJ198XcuWfHrNMfss+78QZ92BzOdMLsQx/Hxe/eFpsNcFN9WzmKc9TAcJ5ST9fKv4uP2
+  BwJc133cIp4ir6Yj0bIq6pvs+972SwK1b4W4XMqaW7d7xvLd07q2PjJrNu8ZypJed28jDzTl5
+  df/Xqn2sXVE2Ev0purPvtd+ia+cyOZVeuXVvY+7NX/6xC8OLw98uutP17q//JIe1Qu8Osf0os
+  xRmJhlrMRcWJABHVmcdLAwAA
+X-Env-Sender: ruansy.fnst@fujitsu.com
+X-Msg-Ref: server-9.tower-591.messagelabs.com!1670639496!105566!1
+X-Originating-IP: [62.60.8.179]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.101.2; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 7702 invoked from network); 10 Dec 2022 02:31:36 -0000
+Received: from unknown (HELO n03ukasimr04.n03.fujitsu.local) (62.60.8.179)
+  by server-9.tower-591.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 10 Dec 2022 02:31:36 -0000
+Received: from n03ukasimr04.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTP id D79C37B
+        for <fstests@vger.kernel.org>; Sat, 10 Dec 2022 02:31:35 +0000 (GMT)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 98CD462086;
-        Fri,  9 Dec 2022 16:37:42 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC0A0C433D2;
-        Fri,  9 Dec 2022 16:37:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670603862;
-        bh=smMrJqewc25T3hIhHjn4GyGcB83IzCz5LNVh5ACbXKs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=uDiVfSp8F4RjwIS96HmtyBz2TGj/iEIHUttErzaXVb3AJIOVRWoJ6SoVV69wC0ufA
-         hhwfq5WgeDoI41ARbAVvIritt6uPKbFkQKuueNIUZKCu60SIYNiq2ZlAo/a7vdVxB+
-         VNCXNk8HSZ27loqvASXgy+nN4+ZHTNKAxsg7zEuln4WGVCGNLBkeHWvN6DTy8EROKl
-         rTdh5QYrB25121GudWYjJcSoKLEUvRbBJaObp+46wpoIA6fAOCdrTcqAXjs/HN1Bw/
-         FUxA7wVpTuQzi16jsHvRoKis5mVUa8bp3fGmdw/+ttOYP+bthviDiVRcWuSRs0nc/9
-         nYlZHTDmEsXzw==
-Date:   Fri, 9 Dec 2022 08:37:41 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        zlang@redhat.com, david@fromorbit.com, hsiangkao@linux.alibaba.com,
-        allison.henderson@oracle.com
-Subject: Re: [PATCH V5 2/2] common/populate: Ensure that S_IFDIR.FMT_BTREE is
- in btree format
-Message-ID: <Y5NkVRNhQgZpWNMj@magnolia>
-References: <20221208072843.1866615-1-ZiyangZhang@linux.alibaba.com>
- <20221208072843.1866615-3-ZiyangZhang@linux.alibaba.com>
+        by n03ukasimr04.n03.fujitsu.local (Postfix) with ESMTPS id CB6D073
+        for <fstests@vger.kernel.org>; Sat, 10 Dec 2022 02:31:35 +0000 (GMT)
+Received: from localhost.localdomain (10.167.225.141) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.42; Sat, 10 Dec 2022 02:31:34 +0000
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <ruansy.fnst@fujitsu.com>
+Subject: [PATCH v2] add files to ignore & chmod 755 tests/generic/692
+Date:   Sat, 10 Dec 2022 02:31:05 +0000
+Message-ID: <1670639465-53-1-git-send-email-ruansy.fnst@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221208072843.1866615-3-ZiyangZhang@linux.alibaba.com>
+Content-Type: text/plain
+X-Originating-IP: [10.167.225.141]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Dec 08, 2022 at 03:28:43PM +0800, Ziyang Zhang wrote:
-> Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
-> S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
-> 
-> Actually we just observed it can fail after apply our inode
-> extent-to-btree workaround. The root cause is that the kernel may be
-> too good at allocating consecutive blocks so that the data fork is
-> still in extents format.
-> 
-> Therefore instead of using a fixed number, let's make sure the number
-> of extents is large enough than (inode size - inode core size) /
-> sizeof(xfs_bmbt_rec_t).
-> 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-> Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-> Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-> Signed-off-by: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-> ---
->  common/populate | 34 +++++++++++++++++++++++++++++++++-
->  common/xfs      |  9 +++++++++
->  2 files changed, 42 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/populate b/common/populate
-> index 6e004997..0d334a13 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -71,6 +71,37 @@ __populate_create_dir() {
->  	done
->  }
->  
-> +# Create a large directory and ensure that it's a btree format
-> +__populate_xfs_create_btree_dir() {
-> +	local name="$1"
-> +	local isize="$2"
-> +	local missing="$3"
-> +	local icore_size="$(_xfs_inode_core_bytes)"
+1. The executable binary in src/ should be in ignore file.
+2. tests/xfs/216.out is a symlink generated at runtime, also should be
+   ignored.
+3. tests/generic/692 was created with 644.  It should be 755 otherwise
+   its mode will be changed and dirty the git tree after test.
 
-Doesn't this helper require a path argument now?
+Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+---
+ .gitignore        | 2 ++
+ tests/generic/692 | 0
+ 2 files changed, 2 insertions(+)
+ mode change 100644 => 100755 tests/generic/692
 
---D
+diff --git a/.gitignore b/.gitignore
+index ad9f45437..a6f433f1d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -79,6 +79,7 @@ tags
+ /src/dirstress
+ /src/e4compact
+ /src/ext4_resize
++/src/fake-dump-rootino
+ /src/fault
+ /src/feature
+ /src/fiemap-tester
+@@ -205,6 +206,7 @@ tags
+ /tests/xfs/033.out
+ /tests/xfs/071.out
+ /tests/xfs/096.out
++/tests/xfs/216.out
+ 
+ # cscope files
+ cscope.*
+diff --git a/tests/generic/692 b/tests/generic/692
+old mode 100644
+new mode 100755
+-- 
+2.38.1
 
-> +	# We need enough extents to guarantee that the data fork is in
-> +	# btree format.  Cycling the mount to use xfs_db is too slow, so
-> +	# watch for when the extent count exceeds the space after the
-> +	# inode core.
-> +	local max_nextents="$(((isize - icore_size) / 16))"
-> +	local nr=0
-> +
-> +	mkdir -p "${name}"
-> +	while true; do
-> +		local creat=mkdir
-> +		test "$((nr % 20))" -eq 0 && creat=touch
-> +		$creat "${name}/$(printf "%.08d" "$nr")"
-> +		if [ "$((nr % 40))" -eq 0 ]; then
-> +			local nextents="$(_xfs_get_fsxattr nextents $name)"
-> +			[ $nextents -gt $max_nextents ] && break
-> +		fi
-> +		nr=$((nr+1))
-> +	done
-> +
-> +	test -z "${missing}" && return
-> +	seq 1 2 "${nr}" | while read d; do
-> +		rm -rf "${name}/$(printf "%.08d" "$d")"
-> +	done
-> +}
-> +
->  # Add a bunch of attrs to a file
->  __populate_create_attr() {
->  	name="$1"
-> @@ -176,6 +207,7 @@ _scratch_xfs_populate() {
->  
->  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
->  	dblksz="$(_xfs_get_dir_blocksize "$SCRATCH_MNT")"
-> +	isize="$(_xfs_get_inode_size "$SCRATCH_MNT")"
->  	crc="$(_xfs_has_feature "$SCRATCH_MNT" crc -v)"
->  	if [ $crc -eq 1 ]; then
->  		leaf_hdr_size=64
-> @@ -226,7 +258,7 @@ _scratch_xfs_populate() {
->  
->  	# - BTREE
->  	echo "+ btree dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$((128 * dblksz / 40))" true
-> +	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize" true
->  
->  	# Symlinks
->  	# - FMT_LOCAL
-> diff --git a/common/xfs b/common/xfs
-> index 674384a9..7aaa63c7 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1487,6 +1487,15 @@ _require_xfsrestore_xflag()
->  			_notrun 'xfsrestore does not support -x flag.'
->  }
->  
-> +# Number of bytes reserved for a full inode record, which includes the
-> +# immediate fork areas.
-> +_xfs_get_inode_size()
-> +{
-> +	local mntpoint="$1"
-> +
-> +	$XFS_INFO_PROG "$mntpoint" | sed -n '/meta-data=.*isize/s/^.*isize=\([0-9]*\).*$/\1/p'
-> +}
-> +
->  # Number of bytes reserved for only the inode record, excluding the
->  # immediate fork areas.
->  _xfs_get_inode_core_bytes()
-> -- 
-> 2.18.4
-> 
