@@ -2,90 +2,78 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAD5AC3DA71
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Dec 2022 07:08:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45BB1C3DA7A
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Dec 2022 07:08:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230118AbiLKHH7 (ORCPT
+        id S230138AbiLKHIB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Dec 2022 02:07:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42600 "EHLO
+        Sun, 11 Dec 2022 02:08:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42604 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230133AbiLKHHy (ORCPT
+        with ESMTP id S230139AbiLKHHy (ORCPT
         <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2022 02:07:54 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A8EABE30;
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 603C0BE3A;
         Sat, 10 Dec 2022 23:07:48 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 464B1B80954;
+        by ams.source.kernel.org (Postfix) with ESMTPS id D9249B808C8;
         Sun, 11 Dec 2022 07:07:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A9B8C433EF;
-        Sun, 11 Dec 2022 07:07:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 75D03C433F2;
+        Sun, 11 Dec 2022 07:07:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670742464;
-        bh=0PlfufLRdt0TiFkVc3hJh+Gbl/yW5nD7nXQiauHI8Hw=;
-        h=From:To:Cc:Subject:Date:From;
-        b=OZwYvK9/618gEChCFsudGCykW9DS9tQklTfiJcGAwnNZncdMO5iyoNSv28XNmKQ1w
-         mHwYiVy0nkyPqisbOHIi4vGeg7vpsKJtJJsFCu1jPG7Ddc7tbjtADLpZOjuOAyqK2J
-         E2OzTp3kOb8DtLSEUW+JVaQfwPkx48Pfem9B48L65YBjWgCZyP11gnLbmFacMwqLWT
-         YpdEYbdo6H/2/uyuEtyWOcTcP5Z6RBdGbnM7Oq3fZFW3o0gDfaHwbTB203DqMKalHW
-         ekLfMjANgWIvReoVKETBPIHh4TB2kmpL6OcDC0C/OxRaOEegk6r554FC0k7DuuvRzc
-         NHJnbe38Qcmfw==
+        s=k20201202; t=1670742465;
+        bh=gahW09+3l+fw+3uIQS4lcxLRkJ6BbxZYWnSjC+cmIws=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=AKT/gC7rOkzWf7slo3ggRc/4BooZ3kn+hc8OdW6DYOrUz7uegHmAos8ZUhXmppUUc
+         mKNaTsdoaqPP2nUNG9hmVSIxJtoPqRwZ47QpwCqCWx3QlPqmFiIr4cgA6FoGHvSmav
+         40eGARbix0mLBEc0Ntf+XiXNOEZPml+9eeeqw5pmtkjGHxuiq6URb+OEAy3SGG6nus
+         3Sbf2X5sWWcxr2F7pSH0SKCpJLm6CRxnh3bAGjER3rVr53JpnDFjK3qYiISouYGAyB
+         9IAdVHUUUER/HChUb6wd5DtnKROZnDL5cu7kv2PwFtv0AD87/tXRE3bDrSKHdfi4Qt
+         UajUm59h0qA+w==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH 00/10] xfstests: update verity tests for non-4K block and page size
-Date:   Sat, 10 Dec 2022 23:06:53 -0800
-Message-Id: <20221211070704.341481-1-ebiggers@kernel.org>
+Subject: [PATCH 04/10] common/verity: add _filter_fsverity_digest()
+Date:   Sat, 10 Dec 2022 23:06:57 -0800
+Message-Id: <20221211070704.341481-5-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.38.1
+In-Reply-To: <20221211070704.341481-1-ebiggers@kernel.org>
+References: <20221211070704.341481-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This series updates the verity xfstests to eliminate implicit
-assumptions that 'merkle_tree_block_size == fs_block_size == page_size
-== 4096', and to provide some test coverage for cases where
-merkle_tree_block_size differs from fs_block_size and/or page_size.  It
-doesn't add any new test scripts, but it does update some of the
-existing test scripts to test multiple block sizes.
+From: Eric Biggers <ebiggers@google.com>
 
-This goes along with my kernel patch series
-"fsverity: support for non-4K pages"
-(https://lore.kernel.org/linux-fsdevel/20221028224539.171818-1-ebiggers@kernel.org/T/#u).
-However, it's not necessary to wait for that kernel patch series to be
-applied before applying this xfstests patch series.
+Add a filter that replaces fs-verity digests with a fixed string.  This
+is needed because the fs-verity digests that some tests print are going
+to start depending on the default Merkle tree block size.
 
-Eric Biggers (10):
-  common/verity: add and use _fsv_can_enable()
-  common/verity: set FSV_BLOCK_SIZE to an appropriate value
-  common/verity: use FSV_BLOCK_SIZE by default
-  common/verity: add _filter_fsverity_digest()
-  generic/572: support non-4K Merkle tree block size
-  generic/573: support non-4K Merkle tree block size
-  generic/577: support non-4K Merkle tree block size
-  generic/574: test multiple Merkle tree block sizes
-  generic/624: test multiple Merkle tree block sizes
-  generic/575: test 1K Merkle tree block size
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ common/verity | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
- common/verity         |  84 +++++++++++++++-----
- tests/generic/572     |  21 ++---
- tests/generic/572.out |  10 +--
- tests/generic/573     |   8 +-
- tests/generic/574     | 174 ++++++++++++++++++++++++++----------------
- tests/generic/574.out |  83 ++------------------
- tests/generic/575     |  58 +++++++++-----
- tests/generic/575.out |   8 +-
- tests/generic/577     |  24 +++---
- tests/generic/577.out |  10 +--
- tests/generic/624     | 119 ++++++++++++++++++++---------
- tests/generic/624.out |  15 ++--
- 12 files changed, 346 insertions(+), 268 deletions(-)
-
-
-base-commit: 41f2bbdec5faa5d6522e86e63c1f30473a99dbfe
+diff --git a/common/verity b/common/verity
+index 1c706b80..b88e839b 100644
+--- a/common/verity
++++ b/common/verity
+@@ -406,3 +406,11 @@ _require_fsverity_max_file_size_limit()
+ 		;;
+ 	esac
+ }
++
++# Replace fs-verity digests, as formatted by the 'fsverity' tool, with <digest>.
++# This function can be used by tests where fs-verity digests depend on the
++# default Merkle tree block size (FSV_BLOCK_SIZE).
++_filter_fsverity_digest()
++{
++	sed -E 's/\b(sha(256|512)):[a-f0-9]{64,}\b/\1:<digest>/'
++}
 -- 
 2.38.1
 
