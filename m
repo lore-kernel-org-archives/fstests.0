@@ -2,42 +2,42 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 556FBC3DA78
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Dec 2022 07:08:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED24AC3DA79
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Dec 2022 07:08:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230170AbiLKHIA (ORCPT
+        id S230139AbiLKHIB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Dec 2022 02:08:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42598 "EHLO
+        Sun, 11 Dec 2022 02:08:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230138AbiLKHHy (ORCPT
+        with ESMTP id S230140AbiLKHHy (ORCPT
         <rfc822;fstests@vger.kernel.org>); Sun, 11 Dec 2022 02:07:54 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F04BFB48C;
-        Sat, 10 Dec 2022 23:07:47 -0800 (PST)
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65FE5BF5B;
+        Sat, 10 Dec 2022 23:07:48 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 38CBEB80945;
-        Sun, 11 Dec 2022 07:07:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3445C433D2;
-        Sun, 11 Dec 2022 07:07:44 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1E87EB80956;
+        Sun, 11 Dec 2022 07:07:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADF20C43396;
+        Sun, 11 Dec 2022 07:07:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670742464;
-        bh=RSlfrXXjhLYM9CdWMJaXYvN1wwoVOb0jnL6OewsqvWw=;
+        s=k20201202; t=1670742465;
+        bh=V8Ey0SwLCOJ9knxWE1VbNJnYffVGUO6Y70yYYPMrpqw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=P7v65V5VDfP6v1k3W80Yhb89hRy933STa450H0kl5kYytdoX82J+jACnDLBdHXXQn
-         bF+SuI41phhoGcn0o/1wbolbYERSlX1Rz61b3z0ewOaQLxVkyxuRuoVLLY2wopLbSm
-         FMDRNjKP4DvDDMjHlY1DoeLC992cxiZKup5rQ4of7CnXSNJmIDUSN2AfD8bw2nm1VV
-         PSa80tk9NzuL7LPYy8D+S+ioftgTIhspCXHwiOENn80PpRN5tpYxK1jzSaHwtR17M8
-         CwK/pt07d/yaDs7rqLYvBUqXwxzWVqINxusy8F4wDSxw+IqM5yAwq0pZgVzL+eCzT9
-         SzVohrz3SvxfA==
+        b=qObPhNNgn6VgTy4B9lHVKE4NsKO5Hd4eHJgFXF2r9E2LYNMrG97VoSPJ473+w5sHl
+         qQVGanARksA88mhGI9+QS0X88LMq18pZNnQwMJWT8ekJU2fZ/Jj9ni9DvIGXiMmkBi
+         f05wCrgsGecFd0ySfk2Zkw+4LFwLSPoDjJWwB9kVnYag5n+hgTkAW497qgD4PymVqW
+         5SaFYNvx4HWR/7/m2AC4bVdYSS4PRvmCXSbxGq6rEu5rXeznJbtqak8Zg1B23GOFfa
+         HnMNmSBgT12Y++mt9MMRRTB35xQb9/VbLQr51wJmzQsn38sGU1qzopW0e5BawpgIQ7
+         g73tiRR6jD8Bg==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH 01/10] common/verity: add and use _fsv_can_enable()
-Date:   Sat, 10 Dec 2022 23:06:54 -0800
-Message-Id: <20221211070704.341481-2-ebiggers@kernel.org>
+Subject: [PATCH 05/10] generic/572: support non-4K Merkle tree block size
+Date:   Sat, 10 Dec 2022 23:06:58 -0800
+Message-Id: <20221211070704.341481-6-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.38.1
 In-Reply-To: <20221211070704.341481-1-ebiggers@kernel.org>
 References: <20221211070704.341481-1-ebiggers@kernel.org>
@@ -49,84 +49,122 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Replace _fsv_have_hash_algorithm() with a more general function
-_fsv_can_enable() which checks whether 'fsverity enable' with the given
-parameters works.  For now it is just used with --hash-alg or with no
-parameters, but soon it will be used with --block-size too.
+Update generic/572 to not implicitly assume that the Merkle tree block
+size being used is 4096 bytes.  Also remove an unused function.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- common/verity     | 17 ++++++-----------
- tests/generic/575 |  2 +-
- tests/generic/577 |  2 +-
- 3 files changed, 8 insertions(+), 13 deletions(-)
+ tests/generic/572     | 21 ++++++---------------
+ tests/generic/572.out | 10 +++-------
+ 2 files changed, 9 insertions(+), 22 deletions(-)
 
-diff --git a/common/verity b/common/verity
-index f98dcb07..1a53a7ea 100644
---- a/common/verity
-+++ b/common/verity
-@@ -42,13 +42,7 @@ _require_scratch_verity()
- 	# The filesystem may have fs-verity enabled but not actually usable by
- 	# default.  E.g., ext4 only supports verity on extent-based files, so it
- 	# doesn't work on ext3-style filesystems.  So, try actually using it.
--	echo foo > $SCRATCH_MNT/tmpfile
--	_disable_fsverity_signatures
--	_fsv_enable $SCRATCH_MNT/tmpfile
--	local status=$?
--	_restore_prev_fsverity_signatures
--	rm -f $SCRATCH_MNT/tmpfile
--	if (( $status != 0 )); then
-+	if ! _fsv_can_enable $SCRATCH_MNT/tmpfile; then
- 		_notrun "$FSTYP verity isn't usable by default with these mkfs options"
- 	fi
- 
-@@ -256,15 +250,16 @@ _fsv_create_enable_file()
- 	_fsv_enable "$file" "$@"
+diff --git a/tests/generic/572 b/tests/generic/572
+index cded9ac6..d8071a34 100755
+--- a/tests/generic/572
++++ b/tests/generic/572
+@@ -9,7 +9,7 @@
+ # - conditions for enabling verity
+ # - verity files have correct contents and size
+ # - can't change contents of verity files, but can change metadata
+-# - can retrieve a verity file's measurement via FS_IOC_MEASURE_VERITY
++# - can retrieve a verity file's digest via FS_IOC_MEASURE_VERITY
+ #
+ . ./common/preamble
+ _begin_fstest auto quick verity
+@@ -48,15 +48,6 @@ verify_data_readable()
+ 	md5sum $file > /dev/null
  }
  
--_fsv_have_hash_algorithm()
-+_fsv_can_enable()
- {
--	local hash_alg=$1
--	local test_file=$2
-+	local test_file=$1
-+	shift
-+	local params=("$@")
+-verify_data_unreadable()
+-{
+-	local file=$1
+-
+-	# try both reading just the first data block, and reading until EOF
+-	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | filter_output
+-	md5sum $file |& filter_output
+-}
+-
+ _fsv_scratch_begin_subtest "Enabling verity on file with verity already enabled fails with EEXIST"
+ _fsv_create_enable_file $fsv_file
+ echo "(trying again)"
+@@ -94,7 +85,7 @@ verify_data_readable $fsv_file
+ _fsv_scratch_begin_subtest "Enabling verity can be interrupted"
+ dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
+ start_time=$(date +%s)
+-$FSVERITY_PROG enable $fsv_file &
++$FSVERITY_PROG enable --block-size=$FSV_BLOCK_SIZE $fsv_file &
+ sleep 0.5
+ kill %1
+ wait
+@@ -106,7 +97,7 @@ fi
+ _fsv_scratch_begin_subtest "Enabling verity on file with verity already being enabled fails with EBUSY"
+ dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
+ start_time=$(date +%s)
+-$FSVERITY_PROG enable $fsv_file &
++$FSVERITY_PROG enable --block-size=$FSV_BLOCK_SIZE $fsv_file &
+ sleep 0.5
+ _fsv_enable $fsv_file |& filter_output
+ kill %1
+@@ -129,7 +120,7 @@ verify_data_readable $fsv_file
  
- 	_disable_fsverity_signatures
- 	rm -f $test_file
- 	head -c 4096 /dev/zero > $test_file
--	_fsv_enable --hash-alg=$hash_alg $test_file &>> $seqres.full
-+	_fsv_enable $test_file "${params[@]}" &>> $seqres.full
- 	local status=$?
- 	_restore_prev_fsverity_signatures
- 	rm -f $test_file
-diff --git a/tests/generic/575 b/tests/generic/575
-index ffa6b61d..0ece8826 100755
---- a/tests/generic/575
-+++ b/tests/generic/575
-@@ -71,7 +71,7 @@ test_alg()
+ _fsv_scratch_begin_subtest "verity file can be measured"
+ _fsv_create_enable_file $fsv_file >> $seqres.full
+-_fsv_measure $fsv_file
++_fsv_measure $fsv_file | _filter_fsverity_digest
  
- 	_fsv_scratch_begin_subtest "Check for expected measurement values ($alg)"
+ _fsv_scratch_begin_subtest "verity file can be renamed"
+ _fsv_create_enable_file $fsv_file
+@@ -170,8 +161,8 @@ verify_data_readable $fsv_file
  
--	if ! _fsv_have_hash_algorithm $alg $fsv_file; then
-+	if ! _fsv_can_enable $fsv_file --hash-alg=$alg; then
- 		if [ "$alg" = sha256 ]; then
- 			_fail "Something is wrong - sha256 hash should always be available"
- 		fi
-diff --git a/tests/generic/577 b/tests/generic/577
-index 5f7e0573..85d680df 100755
---- a/tests/generic/577
-+++ b/tests/generic/577
-@@ -112,7 +112,7 @@ _fsv_enable $fsv_file --signature=$sigfile.salted --salt=abcd
- cmp $fsv_file $fsv_orig_file
+ # Test files <= 1 block in size.  These are a bit of a special case since there
+ # are no hash blocks; the root hash is calculated directly over the data block.
++_fsv_scratch_begin_subtest "verity on small files"
+ for size in 1 $((FSV_BLOCK_SIZE - 1)) $FSV_BLOCK_SIZE; do
+-	_fsv_scratch_begin_subtest "verity on $size-byte file"
+ 	head -c $size /dev/urandom > $fsv_orig_file
+ 	cp $fsv_orig_file $fsv_file
+ 	_fsv_enable $fsv_file
+@@ -179,7 +170,7 @@ for size in 1 $((FSV_BLOCK_SIZE - 1)) $FSV_BLOCK_SIZE; do
+ 	rm -f $fsv_file
+ done
  
- echo -e "\n# Testing non-default hash algorithm"
--if _fsv_have_hash_algorithm sha512 $fsv_file; then
-+if _fsv_can_enable $fsv_file --hash-alg=sha512; then
- 	reset_fsv_file
- 	_fsv_sign $fsv_orig_file $sigfile.sha512 --key=$keyfile \
- 		--cert=$certfile --hash-alg=sha512 > /dev/null
+-_fsv_scratch_begin_subtest "verity on 100M file (multiple levels in hash tree)"
++_fsv_scratch_begin_subtest "verity on 100MB file (multiple levels in hash tree)"
+ head -c 100000000 /dev/urandom > $fsv_orig_file
+ cp $fsv_orig_file $fsv_file
+ _fsv_enable $fsv_file
+diff --git a/tests/generic/572.out b/tests/generic/572.out
+index ad381629..d703835b 100644
+--- a/tests/generic/572.out
++++ b/tests/generic/572.out
+@@ -39,7 +39,7 @@ bash: SCRATCH_MNT/file.fsv: Operation not permitted
+ # verity file can be read
+ 
+ # verity file can be measured
+-sha256:be54121da3877f8852c65136d731784f134c4dd9d95071502e80d7be9f99b263
++sha256:<digest>
+ 
+ # verity file can be renamed
+ 
+@@ -58,16 +58,12 @@ sha256:be54121da3877f8852c65136d731784f134c4dd9d95071502e80d7be9f99b263
+ # Trying to measure non-verity file fails with ENODATA
+ ERROR: FS_IOC_MEASURE_VERITY failed on 'SCRATCH_MNT/file.fsv': No data available
+ 
+-# verity on 1-byte file
++# verity on small files
+ Files matched
+-
+-# verity on 4095-byte file
+ Files matched
+-
+-# verity on 4096-byte file
+ Files matched
+ 
+-# verity on 100M file (multiple levels in hash tree)
++# verity on 100MB file (multiple levels in hash tree)
+ Files matched
+ 
+ # verity on sparse file
 -- 
 2.38.1
 
