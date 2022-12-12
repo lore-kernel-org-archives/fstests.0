@@ -2,139 +2,81 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B175C4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Dec 2022 05:58:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1212C4332F
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Dec 2022 08:02:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230427AbiLLF6C (ORCPT
+        id S231455AbiLLICP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Dec 2022 00:58:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58552 "EHLO
+        Mon, 12 Dec 2022 03:02:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40992 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229639AbiLLF6A (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2022 00:58:00 -0500
-Received: from out30-56.freemail.mail.aliyun.com (out30-56.freemail.mail.aliyun.com [115.124.30.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4940C2AE6;
-        Sun, 11 Dec 2022 21:57:56 -0800 (PST)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R541e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045176;MF=ziyangzhang@linux.alibaba.com;NM=0;PH=DS;RN=8;SR=0;TI=SMTPD_---0VX1Kn9f_1670824634;
-Received: from localhost.localdomain(mailfrom:ZiyangZhang@linux.alibaba.com fp:SMTPD_---0VX1Kn9f_1670824634)
-          by smtp.aliyun-inc.com;
-          Mon, 12 Dec 2022 13:57:52 +0800
-From:   Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-To:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
-        hsiangkao@linux.alibaba.com, allison.henderson@oracle.com,
-        Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-Subject: [PATCH V6 2/2] common/populate: Ensure that S_IFDIR.FMT_BTREE is in btree format
-Date:   Mon, 12 Dec 2022 13:56:45 +0800
-Message-Id: <20221212055645.2067020-3-ZiyangZhang@linux.alibaba.com>
-X-Mailer: git-send-email 2.18.4
-In-Reply-To: <20221212055645.2067020-1-ZiyangZhang@linux.alibaba.com>
-References: <20221212055645.2067020-1-ZiyangZhang@linux.alibaba.com>
+        with ESMTP id S230504AbiLLICN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2022 03:02:13 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7E80DEB0
+        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 00:01:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1670832078;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type;
+        bh=LAb3JTnqC2Rt0QbOhwA5g+VvZUll4k3InXwUki0ojMo=;
+        b=LFOIcmUhWMWkfIHy1uKtBuAO3LpGfQENksEihnUqi4+v7451eJ5njoHmM2DlFwGoRPMW5S
+        Ubo3M7lFNVZ5U+5mzd+0030L3jdeRcfab+UsV1GC/8RzjZJ3JTX+wSztgJIdmMVfI7glpx
+        r/BM7lRpKlVuE2AjyjLQuAhkfs9NOBM=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-475-tZGtF1GkPPKGhft1HqbfIw-1; Mon, 12 Dec 2022 03:01:17 -0500
+X-MC-Unique: tZGtF1GkPPKGhft1HqbfIw-1
+Received: by mail-pj1-f71.google.com with SMTP id x17-20020a17090a8a9100b002196a3b190cso11646832pjn.6
+        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 00:01:17 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=LAb3JTnqC2Rt0QbOhwA5g+VvZUll4k3InXwUki0ojMo=;
+        b=q12OHOJ2lf7Rp5CPFaw4gmPL/kTeVBeoCoAKA/UC+YTKz1LM6Hhn35+iA+kGg2q92R
+         0XMSXxxYUr+ntBbKaDEwq5p6Tm6KOnCfRnWRTMIOGUQLNVvHs8Joq7XOBvxkK15ZYTFn
+         jUpZWd5PzyGnW8Y8cGvOknEmNXRXSd8EUcmR+h0T1tKbZnuiS+Guyot6/wRHz4kiyh+z
+         d5UgjTnhCtwvBiUMIce4G95RFJcImpABPhDkULIllfGw7kE5K/3g4xQz8N1dRebi9HA6
+         aqFTigjxeeDrYo53ssjlzel2j3uVVV9SaR6qxd5hIEQyeldGpsdQPr2/L6ePhKkxttyC
+         xwpg==
+X-Gm-Message-State: ANoB5pnOZpjIhurGeLXPMW0RADD+jQ6xZk/cMl5g/odtQoPUXr2M8Gy6
+        Iz4Bvh4RLYpwZBnTc+jwi9/2KAvTFQNWVEcMsRiUnAZRpc10+MG5nPf4AECQ7cEJl6H9uo6Gooe
+        Ks4JJZUA7DzWEbGKCucE5zak0BqThLWuuC9rks0l2+Jbijmxsi+gx0vf8J1flcRknyg==
+X-Received: by 2002:a17:90a:7381:b0:219:bd64:8e60 with SMTP id j1-20020a17090a738100b00219bd648e60mr15486349pjg.34.1670832076142;
+        Mon, 12 Dec 2022 00:01:16 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf5ATS+gDU0dlD0FoR3zwwdig6iGVrMy6dT8albPrenrWJ9CR6NyNWFICebpU5TU+6lVYDFjuw==
+X-Received: by 2002:a17:90a:7381:b0:219:bd64:8e60 with SMTP id j1-20020a17090a738100b00219bd648e60mr15486315pjg.34.1670832075697;
+        Mon, 12 Dec 2022 00:01:15 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id r4-20020a17090b050400b00218cd71781csm4764437pjz.51.2022.12.12.00.01.14
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 Dec 2022 00:01:15 -0800 (PST)
+Date:   Mon, 12 Dec 2022 16:01:12 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: My [ANNOUNCE] emails might be blocking somewhere ...
+Message-ID: <20221212080112.2gt3pp5v7hwmvqlb@zlang-mailbox>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
-S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
+Hi folks,
 
-Actually we just observed it can fail after apply our inode
-extent-to-btree workaround. The root cause is that the kernel may be
-too good at allocating consecutive blocks so that the data fork is
-still in extents format.
+I've updated fstests to v2022.12.11 yesterday, you can check the for-next
+branch to get it, that tag has my signature if you want to check.
 
-Therefore instead of using a fixed number, let's make sure the number
-of extents is large enough than (inode size - inode core size) /
-sizeof(xfs_bmbt_rec_t).
+I tried to send [ANNOUNCE] emails, my msmtp told me it's send it and exit
+0, but I can't see it on fstests@ list, even half day past. I've tried
+several times, but still can't see it. I can send it to myself by testing,
+but can't see it on fstests@ list. I'm trying to dig into this problem, not
+sure what's blocking my emails, so just inform by this email.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-Suggested-by: "Darrick J. Wong" <djwong@kernel.org>
-Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-Signed-off-by: Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
----
- common/populate | 34 +++++++++++++++++++++++++++++++++-
- common/xfs      |  9 +++++++++
- 2 files changed, 42 insertions(+), 1 deletion(-)
-
-diff --git a/common/populate b/common/populate
-index 6e004997..8f7f2113 100644
---- a/common/populate
-+++ b/common/populate
-@@ -71,6 +71,37 @@ __populate_create_dir() {
- 	done
- }
- 
-+# Create a large directory and ensure that it's a btree format
-+__populate_xfs_create_btree_dir() {
-+	local name="$1"
-+	local isize="$2"
-+	local missing="$3"
-+	local icore_size="$(_xfs_get_inode_core_bytes $SCRATCH_MNT)"
-+	# We need enough extents to guarantee that the data fork is in
-+	# btree format.  Cycling the mount to use xfs_db is too slow, so
-+	# watch for when the extent count exceeds the space after the
-+	# inode core.
-+	local max_nextents="$(((isize - icore_size) / 16))"
-+	local nr=0
-+
-+	mkdir -p "${name}"
-+	while true; do
-+		local creat=mkdir
-+		test "$((nr % 20))" -eq 0 && creat=touch
-+		$creat "${name}/$(printf "%.08d" "$nr")"
-+		if [ "$((nr % 40))" -eq 0 ]; then
-+			local nextents="$(_xfs_get_fsxattr nextents $name)"
-+			[ $nextents -gt $max_nextents ] && break
-+		fi
-+		nr=$((nr+1))
-+	done
-+
-+	test -z "${missing}" && return
-+	seq 1 2 "${nr}" | while read d; do
-+		rm -rf "${name}/$(printf "%.08d" "$d")"
-+	done
-+}
-+
- # Add a bunch of attrs to a file
- __populate_create_attr() {
- 	name="$1"
-@@ -176,6 +207,7 @@ _scratch_xfs_populate() {
- 
- 	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
- 	dblksz="$(_xfs_get_dir_blocksize "$SCRATCH_MNT")"
-+	isize="$(_xfs_get_inode_size "$SCRATCH_MNT")"
- 	crc="$(_xfs_has_feature "$SCRATCH_MNT" crc -v)"
- 	if [ $crc -eq 1 ]; then
- 		leaf_hdr_size=64
-@@ -226,7 +258,7 @@ _scratch_xfs_populate() {
- 
- 	# - BTREE
- 	echo "+ btree dir"
--	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$((128 * dblksz / 40))" true
-+	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize" true
- 
- 	# Symlinks
- 	# - FMT_LOCAL
-diff --git a/common/xfs b/common/xfs
-index 674384a9..7aaa63c7 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1487,6 +1487,15 @@ _require_xfsrestore_xflag()
- 			_notrun 'xfsrestore does not support -x flag.'
- }
- 
-+# Number of bytes reserved for a full inode record, which includes the
-+# immediate fork areas.
-+_xfs_get_inode_size()
-+{
-+	local mntpoint="$1"
-+
-+	$XFS_INFO_PROG "$mntpoint" | sed -n '/meta-data=.*isize/s/^.*isize=\([0-9]*\).*$/\1/p'
-+}
-+
- # Number of bytes reserved for only the inode record, excluding the
- # immediate fork areas.
- _xfs_get_inode_core_bytes()
--- 
-2.18.4
+Thanks,
+Zorro
 
