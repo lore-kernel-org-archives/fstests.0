@@ -2,108 +2,70 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2383C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 13 Dec 2022 02:53:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B86EC4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 13 Dec 2022 05:51:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230062AbiLMCxd (ORCPT
+        id S234049AbiLMFvP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Dec 2022 21:53:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55978 "EHLO
+        Tue, 13 Dec 2022 00:51:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230052AbiLMCxb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2022 21:53:31 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BDC6BC83
-        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 18:53:30 -0800 (PST)
+        with ESMTP id S233843AbiLMFvO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2022 00:51:14 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00B021A22E
+        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 21:51:13 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C4388B810B0
-        for <fstests@vger.kernel.org>; Tue, 13 Dec 2022 02:53:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F7E2C433D2;
-        Tue, 13 Dec 2022 02:53:27 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id B82C0B810D9
+        for <fstests@vger.kernel.org>; Tue, 13 Dec 2022 05:51:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48C5CC433D2;
+        Tue, 13 Dec 2022 05:51:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670900007;
-        bh=M5ZTl9AT6kV7Eg07bv3HgHQzDsV3UinLiSfhUqMTW4Y=;
+        s=k20201202; t=1670910671;
+        bh=Y/Zkh+tnT+UhqNTU3GieBPVoKiJZJmGTDoWpPoSuKQw=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sXdD0TawMZvndCUzf7lmne3aqymJH8aRxC3Gd4hW9p8XqJlL0Q3rIwV4/lVicFEdc
-         P4kU7bB7p5ecQraivPFlq3wduP8b+i8AGVBT6COZfH105yukq4eQa/N/fVFDcs9BS+
-         foIPo0+Q8oG4Vg0DZL9TFgzMJRSnufDMN3dG0p0lvftTeL0ASsEsNxaWV+sxX9zW+p
-         uj0cpzCP55m97qBvjOv0MjgYkU+wM4vVxCdQo9YGmkl/yDigvdosv3salFXbNxBw+Q
-         ns0ZV7iCOiufMv0QFtBscehsphZam0RRbbTehYqs2RXnsHRtmqvYYgNhGImDj69kRx
-         2DfGNxF31bwTQ==
-Date:   Mon, 12 Dec 2022 18:53:27 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
+        b=PsNvQ1EMZx61FgY2lxml3g3l4e1/0gdYZb4OVqTyPKmo0B9azjrd2KDFcpSZnj13W
+         Lo3FtRFaVwtzm8M2YaX1b6KlbuA4g1x9pAtUlB338BtoEPrd/RSQJ4lzBM7uB3ssI5
+         rKwR4782fz2tM1xeAK0yuWUQIbwCaS0RaGBT8LIBKKYesd0+KrHH3GUGTMcFOjUslR
+         QynFxKU6XMROya0zA+7Mxyxz1N0v9c0IIUv2IAjG0olRpFDhXmAyqVFfiAxAi9E1Po
+         msbgSfJo+79l9RFWkl5Nw5CMoHwbqaA0Wr9FVpox5ld0xAwlOy6YS9DMpPW+mdI0en
+         hw7qnE20n6NHw==
+Date:   Mon, 12 Dec 2022 21:51:09 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     David Disseldorp <ddiss@suse.de>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] check: use /var/tmp instead of /tmp
-Message-ID: <Y5fpJ168rNwwrfhI@magnolia>
-References: <20221212230646.4022294-1-leah.rumancik@gmail.com>
- <Y5e22dC9jxg4NnxS@magnolia>
- <Y5fb5viJh8Q7bVH0@google.com>
+Subject: Re: [PATCH 2/3] tests/generic/027: use c-style for loops
+Message-ID: <Y5gSzdGm2et5E1r+@sol.localdomain>
+References: <20221212230820.3466-1-ddiss@suse.de>
+ <20221212230820.3466-2-ddiss@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y5fb5viJh8Q7bVH0@google.com>
+In-Reply-To: <20221212230820.3466-2-ddiss@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 12, 2022 at 05:56:54PM -0800, Leah Rumancik wrote:
-> On Mon, Dec 12, 2022 at 03:18:49PM -0800, Darrick J. Wong wrote:
-> > On Mon, Dec 12, 2022 at 03:06:46PM -0800, Leah Rumancik wrote:
-> > > With the results recorded in /tmp, a crashing test results in a loss
-> > > of all prior test runs. Instead, record results in /var/tmp so that
-> > > it is possible to recover results from completed tests.
-> > 
-> > RESULT_BASE=/some/stable/storage ./check <args> ?
+On Tue, Dec 13, 2022 at 12:08:19AM +0100, David Disseldorp wrote:
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> ---
+>  tests/generic/027 | 8 ++------
+>  1 file changed, 2 insertions(+), 6 deletions(-)
 > 
-> So I am interested in the passing test results in addition to the
-> failed/skipped tests. I thought just the non-passing tests stored
-> artifacts here, is there some way to also tell which tests passed for
-> tests that don't write to .full? I was hoping to just grab the xml
-> file that is being generated by _make_testcase_report as it also
-> has the test runtimes which would be nice to have.
+> diff --git a/tests/generic/027 b/tests/generic/027
+> index 47f1981d..002be120 100755
+> --- a/tests/generic/027
+> +++ b/tests/generic/027
+> @@ -53,22 +53,18 @@ fi
+>  
+>  dir=$SCRATCH_MNT/testdir
+>  echo -n "iteration" >>$seqres.full
+> -i=1
+> -while [ $i -le $loop ]; do
+> +for ((i = 1; i < loop; i++)); do
 
-Oh, right, I forgot that the reporting only runs at the end of the
-section, which means that (short of invading the fstests internal state)
-there's no means to figure out where fstests was when it died, even if
-you pointed RESULT_BASE at some nfs mount or something.
+This does one fewer iteration than before.
 
-Does this help?
-
---D
-
-From: Darrick J. Wong <djwong@kernel.org>
-Subject: [PATCH] check: generate section reports between tests
-
-Generate the section report between tests so that the summary report
-always reflects the outcome of the most recent test.  This is useful for
-fstests status reporting, for people who anxiously await results.
-
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- check |   10 ++++++++++
- 1 file changed, 10 insertions(+)
-
-diff --git a/check b/check
-index d2e5129620..997547247f 100755
---- a/check
-+++ b/check
-@@ -841,6 +841,16 @@ function run_section()
- 		fi
- 		seqres="$REPORT_DIR/$seqnum"
- 
-+		# Generate the entire section report with whatever test results
-+		# we have so far.  Leave the $sect_time parameter empty so that
-+		# it's a little more obvious that this test run is incomplete.
-+		if $do_report; then
-+			local sect_now=`_wallclock`
-+			_make_section_report "$section" "${#try[*]}" \
-+					     "${#bad[*]}" "${#notrun[*]}" \
-+					     "" &> /dev/null
-+		fi
-+
- 		mkdir -p $RESULT_DIR
- 		rm -f ${RESULT_DIR}/require_scratch*
- 		rm -f ${RESULT_DIR}/require_test*
+- Eric
