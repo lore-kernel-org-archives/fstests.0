@@ -2,92 +2,122 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16C42C4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Dec 2022 23:18:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E811C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 13 Dec 2022 01:57:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229497AbiLLXSw (ORCPT
+        id S231964AbiLMB47 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Dec 2022 18:18:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39114 "EHLO
+        Mon, 12 Dec 2022 20:56:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229670AbiLLXSv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2022 18:18:51 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 863CC1C109
-        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 15:18:50 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2347761168
-        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 23:18:50 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79311C433EF;
-        Mon, 12 Dec 2022 23:18:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670887129;
-        bh=ViGNYJ3sOuiTFrIigcF+7YBnXTbvgNDQpFUoaFT/eUo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=rl2m6IC7ExPy/dlN/6onTMYuh8o3B+MTNYqz8CtG3XjU1VpO4BB4n8FN4sFh/oq89
-         rtG7itmSN0JxIwV6XUgLmZRyPK0aaRYnmjx9TN+hMWMttLUEAtDMgIUfan0qm753ir
-         +Vzng0Wz72FdVLdrEDHNgM3cng55drKIKkA+ZQn/uDh3wqCPBFO5MS33dELewy3rlU
-         Xzpg/XdcfcFCjzSUrmsJCmGKvYG/HT/NSfIYLjlh7LL6m42MlSl8XtKpl+3YGrGd1L
-         lQYshXx4TE6bzOGLIyMejwXAELS8Z0swWUzQynu3ritOCNjPzYOhUb/uKT14fBaE2b
-         YGCSHIKPq9ugg==
-Date:   Mon, 12 Dec 2022 15:18:49 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
+        with ESMTP id S234155AbiLMB47 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 12 Dec 2022 20:56:59 -0500
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66A811D331
+        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 17:56:58 -0800 (PST)
+Received: by mail-pl1-x631.google.com with SMTP id d15so4431007pls.6
+        for <fstests@vger.kernel.org>; Mon, 12 Dec 2022 17:56:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=u0T1L4t7pG42q3cWGx5E950lxskR1bn5EgYT9rrLe0Q=;
+        b=O9VYVocQZ/m02IeFBPOyuDGwbeYTkp89HcwUHZmnrIHk5skHA0mSk0F7SVDe2sYYC3
+         xgVMd1OV2n5UykwtRZVDR8XW+MirlOdgFXJ+O8CwdUvJL5X7JpBkcdPbaj1FvdEVlhgD
+         qWIq5LEDwhDt4NnL3/oVsHebPMDB0NQRBHBdnu9Ca29zAydjMCOAAmyWbeZ+XwG9uxs9
+         d1KhO4eNooD2r1ltrhuWXsWlvXCkzNrN5aCEEqxws3/R1dn5+gUJEjvSCPcRaRpEJBPk
+         IbmZsyoFlgCwmCFFrhISVSJ+4C3zaxv7URp7iXwAvX91dGSuU3mDq3yuVkUab+kE83uj
+         RxJg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=u0T1L4t7pG42q3cWGx5E950lxskR1bn5EgYT9rrLe0Q=;
+        b=BrfHkzOK6tv8r43KOYzfrvGIsRJ4pGt0kV7E+KcnzzvAGXF6NxISZLpUKgAzTqBLqj
+         9M7j4nSWNuyMdH+6Ui0+7uLrxWObQtnmSUT8dcVGgzaTKC4wF8rzsPZJ6d/t97Vax4oW
+         Jn7OKj4v7mf/GJenSPnNzKbMnulNXBic0dujge6Er1bymdE3zGnlu5UyOlm/6/qbBRBU
+         n08a8cB34tw+8I2Vaeabx4Bag9RPzJdG87wCMWK434DCk95tQmMHHh5AjQdETo77NKhA
+         zWMo4QmIQ8d3jG4DHj71jAd0Y6OIrO+T8nK4kbznwnINu+tSVl0wA1vg3v8kQgZJPu7Y
+         TPBA==
+X-Gm-Message-State: ANoB5plg7i8gFJ/+PfAzA7AouTSNeaSuT0k2vXNA2ZmuyIbJlFK8KulJ
+        4Pd+aDyw6otd3U9HPPV5QSM=
+X-Google-Smtp-Source: AA0mqf4gKzZPu1PQQEbGTUjIddYFgnhEw9zW1cQI72xCqh3IHiZ8v7FgF1Adtu3YVPll9m0quLDeNw==
+X-Received: by 2002:a17:902:cec1:b0:189:cef2:88e3 with SMTP id d1-20020a170902cec100b00189cef288e3mr25947837plg.57.1670896617720;
+        Mon, 12 Dec 2022 17:56:57 -0800 (PST)
+Received: from google.com ([2601:647:4701:18d0:e9a1:31d7:4ae:185a])
+        by smtp.gmail.com with ESMTPSA id d18-20020a170902f15200b00188b5d25438sm7078145plb.35.2022.12.12.17.56.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 Dec 2022 17:56:56 -0800 (PST)
+Date:   Mon, 12 Dec 2022 17:56:54 -0800
+From:   Leah Rumancik <leah.rumancik@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH] check: use /var/tmp instead of /tmp
-Message-ID: <Y5e22dC9jxg4NnxS@magnolia>
+Message-ID: <Y5fb5viJh8Q7bVH0@google.com>
 References: <20221212230646.4022294-1-leah.rumancik@gmail.com>
+ <Y5e22dC9jxg4NnxS@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221212230646.4022294-1-leah.rumancik@gmail.com>
+In-Reply-To: <Y5e22dC9jxg4NnxS@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 12, 2022 at 03:06:46PM -0800, Leah Rumancik wrote:
-> With the results recorded in /tmp, a crashing test results in a loss
-> of all prior test runs. Instead, record results in /var/tmp so that
-> it is possible to recover results from completed tests.
-
-RESULT_BASE=/some/stable/storage ./check <args> ?
-
-> Also, make sure tmp.arglist is wiped before each run to avoid
-> accidentally rerunning tests.
+On Mon, Dec 12, 2022 at 03:18:49PM -0800, Darrick J. Wong wrote:
+> On Mon, Dec 12, 2022 at 03:06:46PM -0800, Leah Rumancik wrote:
+> > With the results recorded in /tmp, a crashing test results in a loss
+> > of all prior test runs. Instead, record results in /var/tmp so that
+> > it is possible to recover results from completed tests.
 > 
-> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> ---
->  check | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> RESULT_BASE=/some/stable/storage ./check <args> ?
+
+So I am interested in the passing test results in addition to the
+failed/skipped tests. I thought just the non-passing tests stored
+artifacts here, is there some way to also tell which tests passed for
+tests that don't write to .full? I was hoping to just grab the xml
+file that is being generated by _make_testcase_report as it also
+has the test runtimes which would be nice to have.
+
 > 
-> diff --git a/check b/check
-> index d2e51296..21c00524 100755
-> --- a/check
-> +++ b/check
-> @@ -4,7 +4,7 @@
->  #
->  # Control script for QA
->  #
-> -tmp=/tmp/$$
-> +tmp=/var/tmp/$$
->  status=0
->  needwrap=true
->  needsum=true
-> @@ -46,7 +46,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
->  # by default don't output timestamps
->  timestamp=${TIMESTAMP:=false}
->  
-> -rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
-> +rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
-
-This part looks correct though.
-
---D
-
->  SRC_GROUPS="generic shared"
->  export SRC_DIR="tests"
-> -- 
-> 2.39.0.rc1.256.g54fd8350bd-goog
+> > Also, make sure tmp.arglist is wiped before each run to avoid
+> > accidentally rerunning tests.
+> > 
+> > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> > ---
+> >  check | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/check b/check
+> > index d2e51296..21c00524 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -4,7 +4,7 @@
+> >  #
+> >  # Control script for QA
+> >  #
+> > -tmp=/tmp/$$
+> > +tmp=/var/tmp/$$
+> >  status=0
+> >  needwrap=true
+> >  needsum=true
+> > @@ -46,7 +46,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
+> >  # by default don't output timestamps
+> >  timestamp=${TIMESTAMP:=false}
+> >  
+> > -rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
+> > +rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
 > 
+> This part looks correct though.
+> 
+> --D
+
+Thanks!
+Leah
+
+> >  SRC_GROUPS="generic shared"
+> >  export SRC_DIR="tests"
+> > -- 
+> > 2.39.0.rc1.256.g54fd8350bd-goog
+> > 
