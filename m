@@ -2,81 +2,94 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BEB8C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 13 Dec 2022 19:45:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40BA9C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 13 Dec 2022 19:58:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236639AbiLMTps (ORCPT
+        id S236501AbiLMT6P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 13 Dec 2022 14:45:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48404 "EHLO
+        Tue, 13 Dec 2022 14:58:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236292AbiLMTpr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2022 14:45:47 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DFF32648C;
-        Tue, 13 Dec 2022 11:45:46 -0800 (PST)
+        with ESMTP id S236668AbiLMT6P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Dec 2022 14:58:15 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 783DD6550
+        for <fstests@vger.kernel.org>; Tue, 13 Dec 2022 11:58:10 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id BCB17CE1784;
-        Tue, 13 Dec 2022 19:45:44 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 006FAC433D2;
-        Tue, 13 Dec 2022 19:45:42 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 1485E6172F
+        for <fstests@vger.kernel.org>; Tue, 13 Dec 2022 19:58:10 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3FFC9C433EF;
+        Tue, 13 Dec 2022 19:58:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670960743;
-        bh=H6sFmYbco8LL+0o7vvmGkF13QMXz8PHKYoiLXxW+LXo=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=s4mYqp/QS3Oqo9N3/9iyi7f5fyauHFGH5mdLXx8OExZSSH2K/9Z9ld+Qje90VNz/i
-         8p39rkTiv3Qzab7Ok/YLikB8JgIL+782t21jQ588DUlK9rkqSvpFCcsjTXRcl9aDvH
-         egTQ6uzT+OoAAastVM+scgf5JsJ7CC/jMXkg0p4h4fC4whLDDqKdlN14Tn8f6dScxQ
-         94pEiZMVg2AtUMLaCqRInttPh6mV3ENgWREpljCHUVQ5sI9fH0MYY+espaDbhxM2+W
-         A2y2dvLDf4lvYrj9umQ5R+tcWTfW1KHLZ13dBApGGXUAMdsprPDtEPvKhh7EHXTL7t
-         gW40UoG6fNycA==
-Subject: [PATCH 1/1] xfs/122: fix EFI/EFD log format structure size after flex
- array conversion
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, zlang@redhat.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 13 Dec 2022 11:45:42 -0800
-Message-ID: <167096074260.1750519.311637326793150150.stgit@magnolia>
-In-Reply-To: <167096073708.1750519.5668846655153278713.stgit@magnolia>
-References: <167096073708.1750519.5668846655153278713.stgit@magnolia>
-User-Agent: StGit/0.19
+        s=k20201202; t=1670961489;
+        bh=8GsDqzn1RlBPTJo0gmWgWpgWa1MgA//8VHZAegtsUSc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=QmWGFpuqkHMc5sw+gicBHDplvJu1VTx2rdRdZX7ys6ESdSjXEpmkHCWdmR6ubrEGb
+         SatsDtebbVxgtsLkEzbTx3TOmoTROIJVCDSnLbGf6mniy9LtMZWZtClZpgH9kMhNv7
+         pEX3uRC2x6ZmiRQoqPl5ZdLFhMlEcOFufLrLINnwBZcWF/NveY91qsZN/xFc4tXUQS
+         f5DNhje3DDQK6zyRbjJNvpMAG35+o/UBQYDpGB426UGuW9ZX55IVXb6T9UvV/bCO74
+         MwSvFq/dRscWkQmLpmEB9CGbzw5FoCDOZbuREYoBgfeEfRKuCUZZwdM+ZhBpoCmMY6
+         eM+wXp+KBnBrQ==
+Date:   Wed, 14 Dec 2022 03:58:03 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Cc:     David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH 1/3] common/attr: require xfs_spaceman for xfs acl_get_max
+Message-ID: <20221213195803.isycb4mdu6i5ai5v@zlang-mailbox>
+References: <20221212230820.3466-1-ddiss@suse.de>
+ <20221213144152.ae7oqrhtecuqwgya@zlang-mailbox>
+ <20221213163234.5ed9cfec@echidna.fritz.box>
+ <20221213182531.3aqgjfzhjoaomy2k@zlang-mailbox>
+ <20221213200831.427fb98a@echidna.fritz.box>
+ <Y5jSHQbViwRHRGd9@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y5jSHQbViwRHRGd9@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Dec 13, 2022 at 11:27:25AM -0800, Darrick J. Wong wrote:
+> On Tue, Dec 13, 2022 at 08:08:31PM +0100, David Disseldorp wrote:
+> > On Wed, 14 Dec 2022 02:25:31 +0800, Zorro Lang wrote:
+> > 
+> > > We should let xfsprogs decide how xfs_info works. xfs_info doesn't always
+> > > depends on xfs_spaceman, old xfs_info might use xfs_db or other things to
+> > > get xfs info, and I don't know if it'll be changed to use other command in
+> > > the future again.
+> > > 
+> > > So this change will cause all cases which call _require_acl_get_max will notrun
+> > > on old (maybe future) xfsprogs which doesn't has xfs_spaceman "info" command.
+> > > I think that's not what we want, so I'd like to drop this patch. Thanks for
+> > > your understanding.
+> > 
+> > I wasn't aware that the xfs_info->xfs_spaceman call path was a new
+> > change. With that in mind, I agree it makes sense to drop this patch.
+> 
+> Since 4.17, xfs_info requires xfs_spaceman if the fs is mounted, or
+> xfs_db if unmounted.  Before that, it required xfs_growfs and only
+> worked on mounted filesystems.
+> 
+> That said, perhaps _acl_get_max should be doing:
+> 
+> 	$XFS_INFO_PROG $TEST_DIR | _filter_mkfs > /dev/null 2> $tmp.info
+> 	test "${PIPESTATUS[0]}" -ne 0 && \
+> 		_fail "cannot get maximum acl count for xfs"
+> 
+> Rather than spraying whatever nonsense it does if spaceman is missing?
 
-Adjust this test since made EFI/EFD log item format structs proper flex
-arrays instead of array[1].
+Make more sense, but I don't think it's necessary to check return status
+of each command line. xfs_info generally works well, we can do this change
+when we have a real requirement in one day :)
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/xfs/122.out |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Thanks,
+Zorro
 
-
-diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-index a56cbee84f..95e53c5081 100644
---- a/tests/xfs/122.out
-+++ b/tests/xfs/122.out
-@@ -161,10 +161,10 @@ sizeof(xfs_disk_dquot_t) = 104
- sizeof(xfs_dq_logformat_t) = 24
- sizeof(xfs_dqblk_t) = 136
- sizeof(xfs_dsb_t) = 264
--sizeof(xfs_efd_log_format_32_t) = 28
--sizeof(xfs_efd_log_format_64_t) = 32
--sizeof(xfs_efi_log_format_32_t) = 28
--sizeof(xfs_efi_log_format_64_t) = 32
-+sizeof(xfs_efd_log_format_32_t) = 16
-+sizeof(xfs_efd_log_format_64_t) = 16
-+sizeof(xfs_efi_log_format_32_t) = 16
-+sizeof(xfs_efi_log_format_64_t) = 16
- sizeof(xfs_error_injection_t) = 8
- sizeof(xfs_exntfmt_t) = 4
- sizeof(xfs_exntst_t) = 4
-
+> 
+> --D
+> 
+> > Cheers, David
+> 
