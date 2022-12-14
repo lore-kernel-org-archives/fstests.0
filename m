@@ -2,114 +2,87 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2D5BC4332F
-	for <linux-fstests@archiver.kernel.org>; Wed, 14 Dec 2022 20:02:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 772C8C4332F
+	for <linux-fstests@archiver.kernel.org>; Wed, 14 Dec 2022 21:59:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229446AbiLNUCK (ORCPT
+        id S229627AbiLNV7g (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 14 Dec 2022 15:02:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33258 "EHLO
+        Wed, 14 Dec 2022 16:59:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229551AbiLNT7x (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 14 Dec 2022 14:59:53 -0500
-Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45B862BB18
-        for <fstests@vger.kernel.org>; Wed, 14 Dec 2022 11:57:03 -0800 (PST)
-Received: by mail-pj1-x1034.google.com with SMTP id o12so8099225pjo.4
-        for <fstests@vger.kernel.org>; Wed, 14 Dec 2022 11:57:03 -0800 (PST)
+        with ESMTP id S229460AbiLNV7f (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Dec 2022 16:59:35 -0500
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7504A264AF
+        for <fstests@vger.kernel.org>; Wed, 14 Dec 2022 13:59:34 -0800 (PST)
+Received: by mail-pg1-x52f.google.com with SMTP id r18so2901638pgr.12
+        for <fstests@vger.kernel.org>; Wed, 14 Dec 2022 13:59:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=9KA5UzORx8XHETx+1fQsz/eX07xZYpm8u5I5ex9CJ04=;
-        b=Ci3D9/+3QI5VESPS4gwtgFLx8bYGI6ryLeM1j+GGhkXvMw5bfejtKxGuwO+IlUhutu
-         XqVAyW2s0nPWXkBzI1Q6DyHZtd1lRTlzNHaa+qTebyM5Kvo8LKSIme0QD8Adx766PaGm
-         84Wof7e43F+oaJ32MRi1WIw9oSX9EiC9Ah0ISNN1ZJtwiQZWIO84XafRLKj40HcxgMqx
-         ahEkCIdDG+61xnUnOm6VDM0wcIslsfruS15gCUtPAv3TfPrb54Gg/IPCcK3QVkVc9TQH
-         phcxGcxrUo8dTtRCpVaj9dcn8KHmcIDUJE/dBqNQPU9RmJlwtTKgAOY6BouhsScK3nvt
-         wT5Q==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Wtus4HmyPW00KYIv0SMt8QozDDdtxpMrQQRN+C2cN2I=;
+        b=mAkcSMI3uWP4VTJOSo/YgvAHVbU9kOTwWnPG3i9Nx0QwSELm7sIHLR6aIQbxcTWnyW
+         ECornH5v9vBDRv1tSUVN+bH10mG5D4xZH1Znu8vKa3G/U1E9ObmtXKuPaJoDNBPRMk7d
+         T+pePLKWI/MReiAQ9mn8ZB2yTsfwfgekuoYhiXQkSE8UUDwMoOo4zTxsZVv/cZwbG80y
+         8hO2uWN/U1ROSSqhQ6S4+pla7h2H/WE2oVLmcsqq0oywrcOjyXu4hGMM4STNLaBE7j6s
+         vET7N35zlUo329tdc+ehtFXT808rVKiC3rya0mApEsbpbGHlp7NahcYP0Zj/IXghcOT0
+         Hq5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=9KA5UzORx8XHETx+1fQsz/eX07xZYpm8u5I5ex9CJ04=;
-        b=MoYR/GSFdmHRJfptr0Xs7L7f8WU9DiizHDPF4FkjjVN5/65EpsQGJpe17VvEmkRkZj
-         Hx6Wgnr0RVjXctMIbhA35SqZFdVnX+Q5PaHkkq131jjyr/crDJv9mHlYoWVd7jHza+vr
-         FlpueE+TJ+dyyhUsEXIO59Xl+XeJ50I/bj2adtKM7f0B4VYBgP0GB3gwq0FxIIpfbhNS
-         5CAIUZG5+zem53DeVeoACevfaoBH+c/wPcEtVyHOBt3rqtuiT/2w2/2xGN7Swwkr0Wza
-         5deAq0MtDhxfDgCanhDJnkz+JegBzP13n763T03aj1XvmG8tlUw0su/vJ+L6M9jIVpVO
-         kXmw==
-X-Gm-Message-State: ANoB5pkcSKsJpX7Ua3zXubTdGxF2JL8hm96bHeE0BxcPmITIZj1QfEkM
-        gYfenQ/m8j3Pa7YXljFgu+JmgdRzbrA=
-X-Google-Smtp-Source: AA0mqf7bcaTniKPJVufhZG33OOqsHmil7ABnJir0S9/NzhAEFXWUIF6qKX2p+RqW8h0Au/5kimvYxQ==
-X-Received: by 2002:a17:90a:e00a:b0:221:6db6:9660 with SMTP id u10-20020a17090ae00a00b002216db69660mr10680034pjy.11.1671047822607;
-        Wed, 14 Dec 2022 11:57:02 -0800 (PST)
-Received: from google.com ([2601:647:4701:18d0:591e:a21:c081:9a34])
-        by smtp.gmail.com with ESMTPSA id s18-20020a17090a5d1200b00218f830c63esm1795795pji.1.2022.12.14.11.57.01
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Wtus4HmyPW00KYIv0SMt8QozDDdtxpMrQQRN+C2cN2I=;
+        b=TGoRa5lGzLPzYorfdd8RZ+PVUcrX1aFz0UuDUITKlJw8x0zTG+v7CdRfuTmd34fnNB
+         ZkSytuLMm1J3T1oj0oVlT+bTmnNyRJWKHFyKyCW6LOFM3RQnIEZlqOD4Oa2wCgUh2aNF
+         V35nXduuB7qtOzVBAkzW7sRKXg4MEmeHyQUPpQUgJLLHJqtE96X8gRux17Y+CWvsDQaJ
+         ilWAuBfPhhaxb75VkbFsWlxp3eLsfVmAcOB3v/OXSMpKw3VEBKU7r7dHw0B8+vRmlC6T
+         8SelOF8y/Qjjxbbg0VIQVtM7C/y6VZ5EEfKeGJ6NnsQmOWX94CjW9fN4L1Iie572omJY
+         2FFQ==
+X-Gm-Message-State: ANoB5pnZ25Z4AKmiJvTn8Ib+Tm/pbOx4+7Fjv9kVv/27toBaKWCxpNF1
+        +cpUT1/oFhmK8SWS8g9hEmO8WTiEF7E=
+X-Google-Smtp-Source: AA0mqf4Tyrl8F7MYCtCr69aG6jPK5vH6+JXwI7oiRyrUx4v57nGtWjjdPge/+/unBfNFGD4UlYgzRw==
+X-Received: by 2002:a62:19c6:0:b0:576:cd93:2b06 with SMTP id 189-20020a6219c6000000b00576cd932b06mr27455946pfz.6.1671055173473;
+        Wed, 14 Dec 2022 13:59:33 -0800 (PST)
+Received: from lrumancik.svl.corp.google.com ([2620:15c:2d4:203:1793:c9f7:912a:ff55])
+        by smtp.gmail.com with ESMTPSA id c8-20020aa79528000000b005771f5ea2ebsm320978pfp.135.2022.12.14.13.59.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 Dec 2022 11:57:02 -0800 (PST)
-Date:   Wed, 14 Dec 2022 11:56:59 -0800
+        Wed, 14 Dec 2022 13:59:32 -0800 (PST)
 From:   Leah Rumancik <leah.rumancik@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] check: use /var/tmp instead of /tmp
-Message-ID: <Y5oqi3XdqDO/OcAE@google.com>
-References: <20221212230646.4022294-1-leah.rumancik@gmail.com>
- <Y5e22dC9jxg4NnxS@magnolia>
- <Y5fb5viJh8Q7bVH0@google.com>
- <Y5fpJ168rNwwrfhI@magnolia>
+To:     fstests@vger.kernel.org
+Cc:     djwong@kernel.org, Leah Rumancik <leah.rumancik@gmail.com>
+Subject: [PATCH] check: wipe tmp.arglist
+Date:   Wed, 14 Dec 2022 13:59:26 -0800
+Message-Id: <20221214215926.908628-1-leah.rumancik@gmail.com>
+X-Mailer: git-send-email 2.39.0.314.g84b9a713c41-goog
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Y5fpJ168rNwwrfhI@magnolia>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 12, 2022 at 06:53:27PM -0800, Darrick J. Wong wrote:
-> 
-> Does this help?
+Make sure tmp.arglist is wiped before each run to avoid
+accidentally rerunning tests.
 
-This should work for me! I'll go ahead and resend just the rm
-tmp.arglist change.
+Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+---
+ check | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks,
-Leah
+diff --git a/check b/check
+index d2e51296..81a30928 100755
+--- a/check
++++ b/check
+@@ -46,7 +46,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
+ # by default don't output timestamps
+ timestamp=${TIMESTAMP:=false}
+ 
+-rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
++rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
+ 
+ SRC_GROUPS="generic shared"
+ export SRC_DIR="tests"
+-- 
+2.39.0.314.g84b9a713c41-goog
 
-> 
-> --D
-> 
-> From: Darrick J. Wong <djwong@kernel.org>
-> Subject: [PATCH] check: generate section reports between tests
-> 
-> Generate the section report between tests so that the summary report
-> always reflects the outcome of the most recent test.  This is useful for
-> fstests status reporting, for people who anxiously await results.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  check |   10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> diff --git a/check b/check
-> index d2e5129620..997547247f 100755
-> --- a/check
-> +++ b/check
-> @@ -841,6 +841,16 @@ function run_section()
->  		fi
->  		seqres="$REPORT_DIR/$seqnum"
->  
-> +		# Generate the entire section report with whatever test results
-> +		# we have so far.  Leave the $sect_time parameter empty so that
-> +		# it's a little more obvious that this test run is incomplete.
-> +		if $do_report; then
-> +			local sect_now=`_wallclock`
-> +			_make_section_report "$section" "${#try[*]}" \
-> +					     "${#bad[*]}" "${#notrun[*]}" \
-> +					     "" &> /dev/null
-> +		fi
-> +
->  		mkdir -p $RESULT_DIR
->  		rm -f ${RESULT_DIR}/require_scratch*
->  		rm -f ${RESULT_DIR}/require_test*
