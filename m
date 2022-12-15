@@ -2,114 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC6D6C4332F
-	for <linux-fstests@archiver.kernel.org>; Thu, 15 Dec 2022 03:20:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A319C4332F
+	for <linux-fstests@archiver.kernel.org>; Thu, 15 Dec 2022 11:37:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229480AbiLODUo (ORCPT
+        id S230187AbiLOLho (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 14 Dec 2022 22:20:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41288 "EHLO
+        Thu, 15 Dec 2022 06:37:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229462AbiLODUm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 14 Dec 2022 22:20:42 -0500
-Received: from mail3.bemta32.messagelabs.com (mail3.bemta32.messagelabs.com [195.245.230.82])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F09D6165
-        for <fstests@vger.kernel.org>; Wed, 14 Dec 2022 19:20:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1671074437; i=@fujitsu.com;
-        bh=TAJK6VnJiRAmPh4tnEFbphOh+wsifPCs7q03yKNMzGs=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=Iq+YbtY+nXHHaDkQYu9UFq4qPoPP53dzoScSsRhdNoy8KkPgUhK0nWBPK68GVDgms
-         Amp4Ma8DKCuy6L0/T72n2B35J7UB6nELLeYfn/kyDDBpMEB9IxtH5E2+913agBBCQF
-         bqX3c08Lm5tzcbsqwVw89neB6CiXDfxNTUbH9OcpmS+ZLnHE9pyf7ah3LGdpnYyklY
-         Ghc1q2av43pu5RklE7MtngrNaoc0YFNp78kmfI4qyBtXj68CqXK5DmPtLTDVIiRpLg
-         86AaJlEha4HAqfsVtyYNEFYoBaVMaxkd+QgcsZx7+SeokncSgUmagujgTJG9EqXS4U
-         B4cFg9vw/QRKQ==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrJIsWRWlGSWpSXmKPExsViZ8ORqNsyaVa
-  ywaLlVhanW/ayOzB6fN4kF8AYxZqZl5RfkcCaseBJQME59oo9Fy+zNTDOZ+ti5OIQErjEKNF1
-  s40ZwjnKJDF/0kkWCGcPo8Ti/pXsXYycHGwCmhLPOhcwg9giArIS/2esZgKxmQXUJZZP+gVmC
-  wv4SBxtnwhWzyKgKnFlyWZGEJtXwFNi/9TdLCC2hICCxJSH75kh4oISJ2c+YYGYIyFx8MULZo
-  gaRYlLHd8YIewKiVmz2pggbDWJq+c2MU9g5J+FpH0WkvYFjEyrGM2KU4vKUot0DU30kooy0zN
-  KchMzc/QSq3QT9VJLdctTi0t0DfUSy4v1UouL9Yorc5NzUvTyUks2MQJDMaWYbdUOxl/L/ugd
-  YpTkYFIS5Z2nOStZiC8pP6UyI7E4I76oNCe1+BCjDAeHkgTvil6gnGBRanpqRVpmDjAuYNISH
-  DxKIryPQdK8xQWJucWZ6RCpU4y6HFNn/9vPLMSSl5+XKiXOKzsRqEgApCijNA9uBCxGLzHKSg
-  nzMjIwMAjxFKQW5WaWoMq/YhTnYFQS5p0/AWgKT2ZeCdymV0BHMAEdIXNvJsgRJYkIKakGJm7
-  BgzOTk7SvGs0qvqV47e2N1YpF6qeS2Wc+Tpjb80fI2WDj+xlbnO4539PjUL61iu2BhufsPrWX
-  Nbl9py8IF9SFxm+9tfjrspO1Kw8fClOwbV9fJGWqvrq84+LNHH291eoZqtL8Oz2slRg/t/s93
-  MeguGj2mhk/ZsyaV8HMHrlpV46USUjfq47zAU8eLOw/8d1P4NmG3l37Lxrop1rmMN1af75EYA
-  vTqvW2Nlu6Q2TVkhTMtDpPrLvK3ep/PzjvfshnZbUjXZeOTNbrObqjSEqDWcS/rtP/k+uUW+q
-  795xbu3nH55+f0lUEzdVXbg9fJGWU4esxe2XscRnh58f+5pSrWlXvCGZUzZHPTHHjVGIpzkg0
-  1GIuKk4EAFUJF4NMAwAA
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-23.tower-585.messagelabs.com!1671074436!160389!1
-X-Originating-IP: [62.60.8.97]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.101.2; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 6385 invoked from network); 15 Dec 2022 03:20:36 -0000
-Received: from unknown (HELO n03ukasimr01.n03.fujitsu.local) (62.60.8.97)
-  by server-23.tower-585.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 15 Dec 2022 03:20:36 -0000
-Received: from n03ukasimr01.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTP id 91D2310018D
-        for <fstests@vger.kernel.org>; Thu, 15 Dec 2022 03:20:36 +0000 (GMT)
-Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        with ESMTP id S230196AbiLOLhN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Dec 2022 06:37:13 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7366B2F671
+        for <fstests@vger.kernel.org>; Thu, 15 Dec 2022 03:35:25 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by n03ukasimr01.n03.fujitsu.local (Postfix) with ESMTPS id 862F5100043
-        for <fstests@vger.kernel.org>; Thu, 15 Dec 2022 03:20:36 +0000 (GMT)
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.42; Thu, 15 Dec 2022 03:20:34 +0000
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v1] src/vfs/utils: Reset errno to zero when detect O_TMPFILE
-Date:   Thu, 15 Dec 2022 12:21:41 +0800
-Message-ID: <1671078101-15585-1-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 0617421D5E;
+        Thu, 15 Dec 2022 11:35:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1671104124; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Tfd47DSgBUOyKzTS1lnmB2wa4M1JrOSlf44tLwh6xc4=;
+        b=GvLTb1UHMbnhhHW6uuO6HGRN6AZZG1e0pKiSmfpDS5YzfN0CLyHDhIddrJKP6obi7ZatYe
+        fPX+J87kxXBcjJE8FfqvUpkPwdXDmi29r78qFRu3PoN3soMvfAXLbnH8u5sIDDhflA3Bkn
+        s3AKG5MgR8hmg6nw7yC8OaB0phODTJQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1671104124;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Tfd47DSgBUOyKzTS1lnmB2wa4M1JrOSlf44tLwh6xc4=;
+        b=9sbkmdVG8vWAq+r1OAIwd/o+J8DXA/r44Cxxiq+jmruy4bI3/fKKSf7oW9EI+vkX4/esY8
+        ntMzMCZKFHdPiWBw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id D7364138E5;
+        Thu, 15 Dec 2022 11:35:23 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 9Z4wM3sGm2PJewAAMHmgww
+        (envelope-from <ddiss@suse.de>); Thu, 15 Dec 2022 11:35:23 +0000
+Date:   Thu, 15 Dec 2022 12:36:15 +0100
+From:   David Disseldorp <ddiss@suse.de>
+To:     Leah Rumancik <leah.rumancik@gmail.com>
+Cc:     fstests@vger.kernel.org, djwong@kernel.org
+Subject: Re: [PATCH] check: wipe tmp.arglist
+Message-ID: <20221215123615.657bcfad@echidna.fritz.box>
+In-Reply-To: <20221214215926.908628-1-leah.rumancik@gmail.com>
+References: <20221214215926.908628-1-leah.rumancik@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-For some filesystem that doesn't support O_TMPFILE, it will pass
-ENOTSUP errno to upper layer. so it will report the following error:
-QA output created by 696
-vfstest.c: 1818: setgid_create_umask - Success - failure: is_setgid
-vfstest.c: 2421: run_test - Operation not supported - failure...
+Hi Leah,
 
-To fix this, just reset errno before return.
+On Wed, 14 Dec 2022 13:59:26 -0800, Leah Rumancik wrote:
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- src/vfs/utils.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+> Make sure tmp.arglist is wiped before each run to avoid
+> accidentally rerunning tests.
+> 
+> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> ---
+>  check | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/check b/check
+> index d2e51296..81a30928 100755
+> --- a/check
+> +++ b/check
+> @@ -46,7 +46,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
+>  # by default don't output timestamps
+>  timestamp=${TIMESTAMP:=false}
+>  
+> -rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
+> +rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
+>  
+>  SRC_GROUPS="generic shared"
+>  export SRC_DIR="tests"
 
-diff --git a/src/vfs/utils.c b/src/vfs/utils.c
-index 6db7a11d..8b000506 100644
---- a/src/vfs/utils.c
-+++ b/src/vfs/utils.c
-@@ -921,10 +921,12 @@ bool openat_tmpfile_supported(int dirfd)
- 
- 	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
- 	if (fd == -1) {
--		if (errno == ENOTSUP)
-+		if (errno == ENOTSUP) {
-+			errno = 0; /* Don't report misleading errno. */
- 			return false;
--		else
-+		} else {
- 			return log_errno(false, "failure: create");
-+		}
- 	}
- 
- 	if (close(fd))
--- 
-2.27.0
+I can't quite see how "accidental rerun" can happen, given that
+_summary()/_wrapup() should remove any $tmp.arglist on completion,
+and a PID collision for $tmp would also be needed. That said, it still
+probably makes sense to be consistent with the other files here, so:
 
+Reviewed-by: David Disseldorp <ddiss@suse.de>
