@@ -2,47 +2,47 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC9B3C4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 16 Dec 2022 06:51:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DD22C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 16 Dec 2022 07:07:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229583AbiLPGvn (ORCPT
+        id S230071AbiLPHH6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 16 Dec 2022 01:51:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59744 "EHLO
+        Fri, 16 Dec 2022 02:07:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229471AbiLPGvm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2022 01:51:42 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 677F157B67;
-        Thu, 15 Dec 2022 22:51:41 -0800 (PST)
+        with ESMTP id S230077AbiLPHHe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2022 02:07:34 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24EFF37F90;
+        Thu, 15 Dec 2022 23:06:03 -0800 (PST)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id DFA3C33B67;
-        Fri, 16 Dec 2022 06:51:39 +0000 (UTC)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 67A235C9DA;
+        Fri, 16 Dec 2022 07:06:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1671173499; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+        t=1671174362; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
          mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=c47ZrksvcC+20FYyDUkQkjMf4qjqEYWZbJR5xQFWl4Y=;
-        b=DgTYyyG5i3k8ik2mjAnd77LIqs55SyO4SuZvqmtx1Qo616PjCGDh2UmK/en1jvY5Tt8Qzo
-        b7ZZQ+BguB8Fzsdc7J13Ahd0AkY7BJhk5u6OQ65oOMi0PCtgj/R4qcd6ZOJokhr/pq16mN
-        fRsXHOlkWs/5YdYqsFpHxx8EABPz0+g=
+        bh=ChZseXvr8dKeUIqCbZUneKtIuE30AtRyew04hdrxDUU=;
+        b=F7aeiFeRFrEZgpm1g0V+kGmxyUwR4lgOKlhgj/SS2kBUam+2maJfQU/VUjjVF46mgSxSr1
+        wAf2sk8xriBDgIWWJ7Jhzd5yzKt5CimF1H4AbR8MGLCaCR9wyvvCpX2AXjHQMKX5aMySWv
+        PKWJAmzsAHqFYAA69qWO7XMbJEUvK40=
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id EA51F138F0;
-        Fri, 16 Dec 2022 06:51:38 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 76DC5138F0;
+        Fri, 16 Dec 2022 07:06:01 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id 50F0K3oVnGMKfwAAMHmgww
-        (envelope-from <wqu@suse.com>); Fri, 16 Dec 2022 06:51:38 +0000
+        id VjxuD9kYnGOLBgAAMHmgww
+        (envelope-from <wqu@suse.com>); Fri, 16 Dec 2022 07:06:01 +0000
 From:   Qu Wenruo <wqu@suse.com>
 To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] fstests: report: always save the dmesg as system-err if KEEP_DMESG is set
-Date:   Fri, 16 Dec 2022 14:51:21 +0800
-Message-Id: <20221216065121.30181-1-wqu@suse.com>
+Subject: [PATCH] fstests: report: add arch and kernel version info into testsuite attributes
+Date:   Fri, 16 Dec 2022 15:05:43 +0800
+Message-Id: <20221216070543.31638-1-wqu@suse.com>
 X-Mailer: git-send-email 2.39.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -50,56 +50,38 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When KEEP_DMESG is set to "yes", we will always save the dmesg of any
-test case (no matter if it passed or not) into "$seqnum.dmesg".
+Although "testcase" tags contain the "timestamp" element, for day-0
+testing it can be hard to relate the timestamp to the tested kernel
+version.
 
-But this KEEP_DMESG behavior doesn't affect xunit report.
+Thus this patch will add a "kernel" element to the "testcase" tag, to
+indicate the kernel version we're running.
+Paired with CONFIG_LOCALVERSION_AUTO=y config, it will easily show the
+kernel commit we're testing.
 
-This patch will make xunit report to follow KEEP_DMESG setting.
-Since error is checked by testcase.failure attribute, this new
-<system-err> section should not cause the existing parsers to treat
-passed cases as errors.
-
-KEEP_DMESG is only followed if all the following conditions are met:
-
-- KEEP_DMESG is set to yes
-
-- Using xunit reporting
-  xunit-quite won't save the dmesg for passed test cases.
-
-This extra saved dmesg would definitely boost the xml size, but if the
-end user wants to save all the dmesg (for later verification), then I'd
-say it's a unavoidable cost.
+Since we're here, also add a "arch" element, as there are more and more
+aarch64 boards (From RK3399 to Apple M1) able to finish fstests in an
+acceptable duration, we can no longer assume x86_64 as our only
+platform.
 
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- common/report | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ common/report | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/common/report b/common/report
-index 64f9c866..4a747f8d 100644
+index 4a747f8d..92586527 100644
 --- a/common/report
 +++ b/common/report
-@@ -87,6 +87,19 @@ _xunit_make_testcase_report()
- 	echo -e "\t<testcase classname=\"xfstests.$sect_name\" name=\"$test_name\" time=\"$test_time\">" >> $report
- 	case $test_status in
- 	"pass")
-+		# If we have KEEP_DMESG and want full output, also save the
-+		# dmesg into the passed result
-+		if [ "$KEEP_DMESG" == yes -a "$quiet" != "yes" ]; then
-+			local dmesg_file="${REPORT_DIR}/${test_name}.dmesg"
-+			if [ -f "$dmesg_file" ]; then
-+				echo -e "\t\t<system-err>" >> $report
-+				printf	'<![CDATA[\n' >>$report
-+				cat "$dmesg_file" | tr -dc '[:print:][:space:]' | \
-+					encode_xml >>$report
-+				printf ']]>\n'	>>$report
-+				echo -e "\t\t</system-err>" >> $report
-+			fi
-+		fi
- 		;;
- 	"notrun")
- 		local notrun_file="${REPORT_DIR}/${test_name}.notrun"
+@@ -49,7 +49,7 @@ _xunit_make_section_report()
+ 		date_time=$(date +"%F %T")
+ 	fi
+ 	local stats="failures=\"$bad_count\" skipped=\"$notrun_count\" tests=\"$tests_count\" time=\"$sect_time\""
+-	local hw_info="hostname=\"$HOST\" timestamp=\"${date_time/ /T}\" "
++	local hw_info="hostname=\"$HOST\" timestamp=\"${date_time/ /T}\" arch=\"$(uname -m)\" kernel=\"$(uname -r)\""
+ 	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
+ 
+ 	# Properties
 -- 
 2.38.0
 
