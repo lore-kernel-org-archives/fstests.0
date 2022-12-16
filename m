@@ -2,86 +2,260 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DD22C4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 16 Dec 2022 07:07:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 067A5C46467
+	for <linux-fstests@archiver.kernel.org>; Fri, 16 Dec 2022 08:47:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230071AbiLPHH6 (ORCPT
+        id S229901AbiLPIru (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 16 Dec 2022 02:07:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35756 "EHLO
+        Fri, 16 Dec 2022 03:47:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230077AbiLPHHe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2022 02:07:34 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24EFF37F90;
-        Thu, 15 Dec 2022 23:06:03 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 67A235C9DA;
-        Fri, 16 Dec 2022 07:06:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1671174362; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=ChZseXvr8dKeUIqCbZUneKtIuE30AtRyew04hdrxDUU=;
-        b=F7aeiFeRFrEZgpm1g0V+kGmxyUwR4lgOKlhgj/SS2kBUam+2maJfQU/VUjjVF46mgSxSr1
-        wAf2sk8xriBDgIWWJ7Jhzd5yzKt5CimF1H4AbR8MGLCaCR9wyvvCpX2AXjHQMKX5aMySWv
-        PKWJAmzsAHqFYAA69qWO7XMbJEUvK40=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 76DC5138F0;
-        Fri, 16 Dec 2022 07:06:01 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id VjxuD9kYnGOLBgAAMHmgww
-        (envelope-from <wqu@suse.com>); Fri, 16 Dec 2022 07:06:01 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] fstests: report: add arch and kernel version info into testsuite attributes
-Date:   Fri, 16 Dec 2022 15:05:43 +0800
-Message-Id: <20221216070543.31638-1-wqu@suse.com>
-X-Mailer: git-send-email 2.39.0
+        with ESMTP id S230014AbiLPIrh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2022 03:47:37 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3B7AFC7
+        for <fstests@vger.kernel.org>; Fri, 16 Dec 2022 00:46:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1671180411;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=jPPDZPIaNuKnRMsNmGfNSikM7u5rNWllbaXS/BA8xWc=;
+        b=jHzcfrr1HokqqyswMlBWahNI+N/O13DZhP1QCdgaHNlyMZi8kvUK4QdH4NfZovscvteGP5
+        /7phTH2kobucaELbAf2Mxm6Ew6vmAhFtUIGmJNEvjEx4Y5GzrZ2uBraQa3YlP9uYqnk/0F
+        Ox7BHXwYxJg33d+7XOmKVYs4BNPUYDI=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-463-eoX71XJSNzCREBt5IgjOug-1; Fri, 16 Dec 2022 03:46:33 -0500
+X-MC-Unique: eoX71XJSNzCREBt5IgjOug-1
+Received: by mail-pj1-f70.google.com with SMTP id mn20-20020a17090b189400b0021941492f66so5871965pjb.0
+        for <fstests@vger.kernel.org>; Fri, 16 Dec 2022 00:46:33 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jPPDZPIaNuKnRMsNmGfNSikM7u5rNWllbaXS/BA8xWc=;
+        b=Q+FDv2DN1a3EdTdXRYOUeywqqUV2Y3Kks7ZYI6xN8aMYoQLEFsg+IBw1VH6edY0FYX
+         jdYMn77wDAE9EjGqs0i8cDDF/EUr7nNjA80VAfSMbciUnVV0GkthZEz8rw39xmfrPeev
+         ujrpdVUk+IpwN+S6usL/Mh5x368t9T/9+PNkMZIdruJwMwqGln5vBjPwUo55XM4rETyk
+         9osxVpfF+wsF99USEMo68/iaSjwD1ClBQv/29RubLasN22xrcEA+nzPbnjOhYBgjz+i0
+         CUn54KFDIwFcEhDdL9hl7v+NTZUQMcPQ7cYoBVJM96PAHXVTm0VPIHbyJtXhhznFfjMD
+         SeHw==
+X-Gm-Message-State: ANoB5pl94q9021qyFCFNGAWBC4RpzPpQ12IWiHc+LcMEJ9S0mmsyMMCX
+        /EPHoa/mOfOnfY1fVcbz6tCkBNmLDOYJhSGA8g/WL0NeB+2MeEHCIhneF8vJn+DHSm99eNNnIeB
+        E6WaWtwwBl9e4xxW5yQ==
+X-Received: by 2002:a17:902:f60f:b0:186:e378:91cf with SMTP id n15-20020a170902f60f00b00186e37891cfmr36917187plg.37.1671180392385;
+        Fri, 16 Dec 2022 00:46:32 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf5CotI8zkD8Wl/2bfnyakU3pj3sctEGpyyzGPPKmRFej9u29DYN5UaYcS3D/xO/bigL8jeCpQ==
+X-Received: by 2002:a17:902:f60f:b0:186:e378:91cf with SMTP id n15-20020a170902f60f00b00186e37891cfmr36917174plg.37.1671180391994;
+        Fri, 16 Dec 2022 00:46:31 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id e12-20020a170902b78c00b001837b19ebb8sm1010109pls.244.2022.12.16.00.46.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Dec 2022 00:46:31 -0800 (PST)
+Date:   Fri, 16 Dec 2022 16:46:27 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Boris Burkov <boris@bur.io>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        kernel-team@fb.com
+Subject: Re: [PATCH] btrfs: new test for logical inode resolution panic
+Message-ID: <20221216084627.ipg772ugfedo6mig@zlang-mailbox>
+References: <98d2055515cd765b0835a7f751a21cbb72c03621.1671059406.git.boris@bur.io>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <98d2055515cd765b0835a7f751a21cbb72c03621.1671059406.git.boris@bur.io>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Although "testcase" tags contain the "timestamp" element, for day-0
-testing it can be hard to relate the timestamp to the tested kernel
-version.
+On Wed, Dec 14, 2022 at 03:12:01PM -0800, Boris Burkov wrote:
+> If we create a file that has an inline extent followed by a prealloc
+> extent, then attempt to use the logical to inode ioctl on the prealloc
+> extent, but in the overwritten range, backref resolution will process
+> the inline extent. Depending on the leaf eb layout, this can panic.
+> Add a new test for this condition. In the long run, we can add spew when
+> we read out-of-bounds fields of inline extent items and simplify this
+> test to look for dmesg warnings rather than trying to force a fairly
+> fragile panic (dependent on non-standardized details of leaf layout).
+> 
+> The test causes a kernel panic unless:
+> btrfs: fix logical_ino ioctl panic
 
-Thus this patch will add a "kernel" element to the "testcase" tag, to
-indicate the kernel version we're running.
-Paired with CONFIG_LOCALVERSION_AUTO=y config, it will easily show the
-kernel commit we're testing.
+Hi,
 
-Since we're here, also add a "arch" element, as there are more and more
-aarch64 boards (From RK3399 to Apple M1) able to finish fstests in an
-acceptable duration, we can no longer assume x86_64 as our only
-platform.
+Thanks for this new case.
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- common/report | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Is this patch merged, does it has a commit id? BTW, please mark this
+known issue by _fixed_by_kernel_commit in case source code.
 
-diff --git a/common/report b/common/report
-index 4a747f8d..92586527 100644
---- a/common/report
-+++ b/common/report
-@@ -49,7 +49,7 @@ _xunit_make_section_report()
- 		date_time=$(date +"%F %T")
- 	fi
- 	local stats="failures=\"$bad_count\" skipped=\"$notrun_count\" tests=\"$tests_count\" time=\"$sect_time\""
--	local hw_info="hostname=\"$HOST\" timestamp=\"${date_time/ /T}\" "
-+	local hw_info="hostname=\"$HOST\" timestamp=\"${date_time/ /T}\" arch=\"$(uname -m)\" kernel=\"$(uname -r)\""
- 	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
- 
- 	# Properties
--- 
-2.38.0
+> is applied to the kernel.
+> 
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+>  tests/btrfs/279     | 95 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/279.out |  2 +
+>  2 files changed, 97 insertions(+)
+>  create mode 100755 tests/btrfs/279
+>  create mode 100644 tests/btrfs/279.out
+> 
+> diff --git a/tests/btrfs/279 b/tests/btrfs/279
+> new file mode 100755
+> index 00000000..ef77f84b
+> --- /dev/null
+> +++ b/tests/btrfs/279
+
+btrfs/279 was just token last weekend, please help to rebase to the latest
+fstests for-next branch, or change the 279 to a big enough number which won't
+cause conflict (I'll give it a proper number when merge it).
+
+> @@ -0,0 +1,95 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 279
+> +#
+> +# Given a file with extents:
+> +# [0 : 4096) (inline)
+> +# [4096 : N] (prealloc)
+> +# if a user uses the ioctl BTRFS_IOC_LOGICAL_INO[_V2] asking for the file of the
+> +# non-inline extent, it results in reading the offset field of the inline
+> +# extent, which is meaningless (it is full of user data..). If we are
+> +# particularly lucky, it can be past the end of the extent buffer, resulting in
+> +# a crash.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/dmlogwrites
+
+Does this case really use helpers in above two included files?
+
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch
+> +_require_xfs_io_command "falloc"
+
+Add this case to prealloc or preallocrw group
+
+> +_require_xfs_io_command "fsync"
+> +_require_xfs_io_command "pwrite"
+> +
+> +dump_tree() {
+> +	$BTRFS_UTIL_PROG inspect-internal dump-tree $SCRATCH_DEV
+
+_require_btrfs_command inspect-internal dump-tree
+
+> +}
+> +
+> +get_extent_data() {
+> +	local ino=$1
+> +	dump_tree $SCRATCH_DEV | grep -A4 "($ino EXTENT_DATA "
+> +}
+> +
+> +get_prealloc_offset() {
+> +	local ino=$1
+> +	get_extent_data $ino | grep "disk byte" | awk '{print $5}'
+> +}
+> +
+> +# This test needs to create conditions s.t. the special inode's inline extent
+> +# is the first item in a leaf. Therefore, fix a leaf size and add 
+> +# items that are otherwise not necessary to reproduce the inline-prealloc
+> +# condition to get to such a state.
+> +#
+> +# Roughly, the idea for getting the right item fill is to:
+> +# 1. create an extra file with a variable sized inline extent item
+> +# 2. create our evil file that will cause the panic
+> +# 3. create a whole bunch of files to create a bunch of dir/index items
+> +# 4. size the variable extent item s.t. the evil extent item is item 0 in the
+> +#    next leaf
+> +#
+> +# We do it in this somewhat convoluted way because the dir and index items all
+> +# come before any inode, inode_ref, or extent_data items. So we can predictably
+> +# create a bunch of them, then sneak in a funny sized extent to round out the
+> +# difference.
+> +
+> +_scratch_mkfs "--nodesize 16k" >/dev/null
+
+We recommend calling _fail at here if _scratch_mkfs fails with a *specified*
+option.
+
+_scratch_mkfs "--nodesize 16k" >>$seqres.full || _fail "mkfs failed"
+
+> +_scratch_mount
+> +
+> +f=$SCRATCH_MNT/f
+> +
+> +# the variable extra "leaf padding" file
+> +$XFS_IO_PROG -fc "pwrite -q 0 700" $f.pad
+> +
+> +# the evil file with an inline extent followed by a prealloc extent
+> +# created by falloc with keep-size, then two non-truncating writes to the front
+> +touch $f.evil
+
+Not sure if you reall use this touch command as you've used "-f" option for
+xfs_io.
+
+> +$XFS_IO_PROG -fc "falloc -k 0 1m" $f.evil
+> +$XFS_IO_PROG -fc fsync $f.evil
+> +ino=$(stat -c '%i' $f.evil)
+> +logical=$(get_prealloc_offset $ino)
+> +$XFS_IO_PROG -fc "pwrite -q 0 23" $f.evil
+> +$XFS_IO_PROG -fc fsync $f.evil
+> +$XFS_IO_PROG -fc "pwrite -q 0 23" $f.evil
+> +$XFS_IO_PROG -fc fsync $f.evil
+
+xfs_io commands can be combined in one line, to make the code looks clear (except
+you hope the fd closed after each command done) E.g:
+
+$XFS_IO_PROG -fc "falloc -k 0 1m" -c fsync $f.evil
+ino=$(stat -c '%i' $f.evil)
+logical=$(get_prealloc_offset $ino)
+$XFS_IO_PROG -c "pwrite -q 0 23" -c fsync \
+	     -c "pwrite -q 0 23" -c fsync \
+	     $f.evil
+
+> +sync
+> +
+> +# a bunch of inodes to stuff dir items in front of the extent items
+> +for i in $(seq 122); do
+> +	$XFS_IO_PROG -fc "pwrite -q 0 8192" $f.$i
+> +done
+> +sync
+> +
+> +btrfs inspect-internal logical-resolve $logical $SCRATCH_MNT | _filter_scratch
+   ^^
+   $BTRFS_UTIL_PROG
+
+_require_btrfs_command inspect-internal logical-resolve
+
+The .out file only has "Silence is golden", what's this _filter_scratch used for?
+
+> +_scratch_unmount
+
+Is the ending _scratch_unmount useful?
+
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/279.out b/tests/btrfs/279.out
+> new file mode 100644
+> index 00000000..c5906093
+> --- /dev/null
+> +++ b/tests/btrfs/279.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 279
+> +Silence is golden
+> -- 
+> 2.38.1
+> 
 
