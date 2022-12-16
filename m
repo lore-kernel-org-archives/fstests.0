@@ -2,276 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C77DC4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 16 Dec 2022 11:11:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D73CDC4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 16 Dec 2022 19:14:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229849AbiLPLLM (ORCPT
+        id S230134AbiLPTOW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 16 Dec 2022 06:11:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52308 "EHLO
+        Fri, 16 Dec 2022 14:14:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59408 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230134AbiLPLLI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2022 06:11:08 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3141DE02F;
-        Fri, 16 Dec 2022 03:11:04 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 743BE62069;
-        Fri, 16 Dec 2022 11:11:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D19DEC433EF;
-        Fri, 16 Dec 2022 11:11:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1671189063;
-        bh=VkPYQwmuEvl6Tt/hUcGzmhNbi4CuQ9bEwdH7yFzUlFI=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=LEjOBL4qx86zMyz99dDS2RkovbsN1Cqfmr5T4FxDJpF3zKakIxFK2GYpg6mOiVgoa
-         K+HzQ9FcjBv7hFwQtZzNfY1Iwa53RMsPRiP2QPrC/NK7rfoMjLrW8aAFRpnhcCvVj/
-         r9YsXN8zCD87An0sSOgg1jKCznWlgjTfFle8GEDQ+tJ2feuG0lFgk0zLs/Iw9lrlXN
-         y4TM96H1Af8xULclMLH4P0gS5V4y9NBIXOyjLvSZ4LEdohV7j5VKHr3HZmacXlQygZ
-         67n0kjDnvcyLwe4iTQOW9dG/ZaVDY5S0byn/up3OuQe/uScR7tJgkNjV3Xh03lpEVG
-         RDhMvSpJEqIIg==
-Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-144b21f5e5fso2781967fac.12;
-        Fri, 16 Dec 2022 03:11:03 -0800 (PST)
-X-Gm-Message-State: AFqh2ko5IJnaDiYPC9vhprWrVxaPp21ZVn7w0uOzlZNMzqVB112wPU/h
-        Tqh89d2jRqUiSh3vEoHzwaix+TETWXuxjnqodfY=
-X-Google-Smtp-Source: AMrXdXvz66vZ73BK//Lq5cY03axVzBOfdDCo3nHqXGbReZ6nWsxZwpaYvt4uiIWMXMEPDVkyzTpUlWdSUANvF5atWng=
-X-Received: by 2002:a05:6870:d0f:b0:144:6d8b:c318 with SMTP id
- mk15-20020a0568700d0f00b001446d8bc318mr949877oab.98.1671189062873; Fri, 16
- Dec 2022 03:11:02 -0800 (PST)
+        with ESMTP id S230171AbiLPTOV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Dec 2022 14:14:21 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB0CB6AD4C
+        for <fstests@vger.kernel.org>; Fri, 16 Dec 2022 11:13:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1671217997;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=e1bwQiGabmBjHPNRTkAkQlpGAffFVs1cMlAkDeaPPLU=;
+        b=b6inYiConDl0OxKMIt0KByr8DZAtdcqyQ4qXnwTrPPnlBkjVeCU0J1h/FKMBeqrMnL6GGL
+        XbL+OLUImSUXu2D5U19mok4937BqryhEmXiSd32AfjONINiQSkpXKjeW4u5OcjY6rdOFZq
+        +qzIKa5r9OqQIWdgG6C4ZdKL1cBabb0=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-324-9cWd5iFgMLKUSA693PqVCw-1; Fri, 16 Dec 2022 14:13:15 -0500
+X-MC-Unique: 9cWd5iFgMLKUSA693PqVCw-1
+Received: by mail-pg1-f199.google.com with SMTP id j21-20020a63fc15000000b00476d6932baeso1994158pgi.23
+        for <fstests@vger.kernel.org>; Fri, 16 Dec 2022 11:13:15 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=e1bwQiGabmBjHPNRTkAkQlpGAffFVs1cMlAkDeaPPLU=;
+        b=zVjMqFXaY45gbV89XfHzZaYWMcBaLg1NWGc5Ya2HmyIrxMUyI0vzxzzhUnSORc+IUv
+         LBFmte9d9Oh/at705XhJFosI2iMnEQRBWJcL87ogBqK+1zZ64hjYHxlsC+DIo5FXO0NK
+         xX4PHBfLxDkHMXh8tieA65ea8DBvUdmiMBcxYJtCIDLTd/RwaHlOKq0ThPV8cXntXG4B
+         BpVczgx0YkrEKRfPpCuyOPQ7ZjTFiMz3bAGV+saMmBd5Di+FxllrJD3Ar7qXAXY8MMpU
+         fbz2dflqIRwmCeV/KgFqwoBoocLnFGFgqJ+ByRu9mKLFoIAR0VbJ9IGk0ewwKOt6CCUK
+         5Chg==
+X-Gm-Message-State: ANoB5pnZfBoL/9Lbo1JShGpaaB2T1csMozbNGQ1I1MbjSS2hpBRh5/V8
+        XFVPWiWjuDxITL1c6+wpUwJJYkWmTdRB38NxpvAzamyskABEW3Mo77tUuKS85Uf71EGtGqJOajw
+        Ou3U+mELzkRJGukHB9w==
+X-Received: by 2002:a17:902:9683:b0:189:c93c:e5e6 with SMTP id n3-20020a170902968300b00189c93ce5e6mr35114315plp.33.1671217994540;
+        Fri, 16 Dec 2022 11:13:14 -0800 (PST)
+X-Google-Smtp-Source: AA0mqf48faDA/36Hh4LqJETb9zUcUzIQHXGHR3uds5+l3RrkL1/HkHapgMwqch4mjLP2+EYn2gUneA==
+X-Received: by 2002:a17:902:9683:b0:189:c93c:e5e6 with SMTP id n3-20020a170902968300b00189c93ce5e6mr35114301plp.33.1671217994220;
+        Fri, 16 Dec 2022 11:13:14 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id j4-20020a170902c3c400b001868981a18esm1996911plj.6.2022.12.16.11.13.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Dec 2022 11:13:13 -0800 (PST)
+Date:   Sat, 17 Dec 2022 03:13:09 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v1] src/vfs/utils: Reset errno to zero when detect
+ O_TMPFILE
+Message-ID: <20221216191309.2vmrkjjyrazqc5ht@zlang-mailbox>
+References: <1671078101-15585-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-References: <98d2055515cd765b0835a7f751a21cbb72c03621.1671059406.git.boris@bur.io>
-In-Reply-To: <98d2055515cd765b0835a7f751a21cbb72c03621.1671059406.git.boris@bur.io>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Fri, 16 Dec 2022 11:10:26 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H53SBc1uy8MAqAa0kTUxFPbPw8TqBcdunPQpNL70Q_5UQ@mail.gmail.com>
-Message-ID: <CAL3q7H53SBc1uy8MAqAa0kTUxFPbPw8TqBcdunPQpNL70Q_5UQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: new test for logical inode resolution panic
-To:     Boris Burkov <boris@bur.io>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        kernel-team@fb.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1671078101-15585-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 14, 2022 at 11:15 PM Boris Burkov <boris@bur.io> wrote:
->
-> If we create a file that has an inline extent followed by a prealloc
-> extent, then attempt to use the logical to inode ioctl on the prealloc
-> extent, but in the overwritten range, backref resolution will process
-> the inline extent. Depending on the leaf eb layout, this can panic.
-> Add a new test for this condition. In the long run, we can add spew when
-> we read out-of-bounds fields of inline extent items and simplify this
-> test to look for dmesg warnings rather than trying to force a fairly
-> fragile panic (dependent on non-standardized details of leaf layout).
->
-> The test causes a kernel panic unless:
-> btrfs: fix logical_ino ioctl panic
-> is applied to the kernel.
->
-> Signed-off-by: Boris Burkov <boris@bur.io>
-
-So in addition to feedback already received from David and Zorro, I
-have some comments inlined below.
-
+On Thu, Dec 15, 2022 at 12:21:41PM +0800, Yang Xu wrote:
+> For some filesystem that doesn't support O_TMPFILE, it will pass
+> ENOTSUP errno to upper layer. so it will report the following error:
+> QA output created by 696
+> vfstest.c: 1818: setgid_create_umask - Success - failure: is_setgid
+> vfstest.c: 2421: run_test - Operation not supported - failure...
+> 
+> To fix this, just reset errno before return.
+> 
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 > ---
->  tests/btrfs/279     | 95 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/279.out |  2 +
->  2 files changed, 97 insertions(+)
->  create mode 100755 tests/btrfs/279
->  create mode 100644 tests/btrfs/279.out
->
-> diff --git a/tests/btrfs/279 b/tests/btrfs/279
-> new file mode 100755
-> index 00000000..ef77f84b
-> --- /dev/null
-> +++ b/tests/btrfs/279
-> @@ -0,0 +1,95 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 279
-> +#
-> +# Given a file with extents:
-> +# [0 : 4096) (inline)
-> +# [4096 : N] (prealloc)
-> +# if a user uses the ioctl BTRFS_IOC_LOGICAL_INO[_V2] asking for the file of the
-> +# non-inline extent, it results in reading the offset field of the inline
-> +# extent, which is meaningless (it is full of user data..). If we are
-> +# particularly lucky, it can be past the end of the extent buffer, resulting in
-> +# a crash.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/dmlogwrites
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_xfs_io_command "falloc"
 
-Here it should be:
+I never hit this failure before, but this change make sense to me.
 
-_require_xfs_io_command "falloc" "-k"
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> +_require_xfs_io_command "fsync"
-> +_require_xfs_io_command "pwrite"
+>  src/vfs/utils.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+> index 6db7a11d..8b000506 100644
+> --- a/src/vfs/utils.c
+> +++ b/src/vfs/utils.c
+> @@ -921,10 +921,12 @@ bool openat_tmpfile_supported(int dirfd)
+>  
+>  	fd = openat(dirfd, ".", O_TMPFILE | O_RDWR, S_IXGRP | S_ISGID);
+>  	if (fd == -1) {
+> -		if (errno == ENOTSUP)
+> +		if (errno == ENOTSUP) {
+> +			errno = 0; /* Don't report misleading errno. */
+>  			return false;
+> -		else
+> +		} else {
+>  			return log_errno(false, "failure: create");
+> +		}
+>  	}
+>  
+>  	if (close(fd))
+> -- 
+> 2.27.0
+> 
 
-This is the first time I'm seeing a test requiring xfs_io to support
-the pwrite and fsync commands.
-Presumably there aren't any because either these commands always
-existed or they have been around for a very long time.
-
-> +
-> +dump_tree() {
-> +       $BTRFS_UTIL_PROG inspect-internal dump-tree $SCRATCH_DEV
-> +}
-> +
-> +get_extent_data() {
-> +       local ino=$1
-> +       dump_tree $SCRATCH_DEV | grep -A4 "($ino EXTENT_DATA "
-> +}
-> +
-> +get_prealloc_offset() {
-> +       local ino=$1
-> +       get_extent_data $ino | grep "disk byte" | awk '{print $5}'
-
-In fstests we use $AWK_PROG instead of bare 'awk'.
-
-> +}
-> +
-> +# This test needs to create conditions s.t. the special inode's inline extent
-> +# is the first item in a leaf. Therefore, fix a leaf size and add
-> +# items that are otherwise not necessary to reproduce the inline-prealloc
-> +# condition to get to such a state.
-> +#
-> +# Roughly, the idea for getting the right item fill is to:
-> +# 1. create an extra file with a variable sized inline extent item
-> +# 2. create our evil file that will cause the panic
-> +# 3. create a whole bunch of files to create a bunch of dir/index items
-> +# 4. size the variable extent item s.t. the evil extent item is item 0 in the
-> +#    next leaf
-> +#
-> +# We do it in this somewhat convoluted way because the dir and index items all
-> +# come before any inode, inode_ref, or extent_data items. So we can predictably
-> +# create a bunch of them, then sneak in a funny sized extent to round out the
-> +# difference.
-> +
-> +_scratch_mkfs "--nodesize 16k" >/dev/null
-
-So this will fail on a machine with a 64K page size (PPC for e.g.)
-using a kernel or btrfs-progs without subpage sector size support.
-That will make mkfs output an error to stderr and cause the test to fail.
-
-Please use a 64K node size and adapt the number of files below so that
-we get the problematic leaf layout to trigger
-the bug.
-
-Like this the test will be able to run, and reproduce the bug on an
-unpatched kernel, on machines with any page size
-and on kernels without subpage sector size support (thinking of SLE
-kernels for example).
-
-That's generally what we do when we need to exercise a particular leaf
-layout and allow the test to run on machines
-with any page size. For example btrfs/239 and btrfs/154 do this.
-
-> +_scratch_mount
-> +
-> +f=$SCRATCH_MNT/f
-> +
-> +# the variable extra "leaf padding" file
-> +$XFS_IO_PROG -fc "pwrite -q 0 700" $f.pad
-> +
-> +# the evil file with an inline extent followed by a prealloc extent
-> +# created by falloc with keep-size, then two non-truncating writes to the front
-> +touch $f.evil
-> +$XFS_IO_PROG -fc "falloc -k 0 1m" $f.evil
-> +$XFS_IO_PROG -fc fsync $f.evil
-> +ino=$(stat -c '%i' $f.evil)
-> +logical=$(get_prealloc_offset $ino)
-> +$XFS_IO_PROG -fc "pwrite -q 0 23" $f.evil
-> +$XFS_IO_PROG -fc fsync $f.evil
-> +$XFS_IO_PROG -fc "pwrite -q 0 23" $f.evil
-> +$XFS_IO_PROG -fc fsync $f.evil
-> +sync
-
-This is complex, and it doesn't provide any comments regarding:
-
-1) Why all this frenzy of fsync and a final sync (which makes the last
-fsync pointless)?
-
-2) Why do we need to write twice to the range [0, 23)?
-
-Wouldn't something more simple like this work too:
-
-$XFS_IO_PROG -fc "falloc -k 0 1m" $f.evil
-
-# sync to commit the transaction and make sure dump-tree sees the fs tree with
-# the prealloc extent when we try to get its bytenr.
-sync
-ino=$(stat -c '%i' $f.evil)
-logical=$(get_prealloc_offset $ino)
-
-# Do a write that will result in an inline extent.
-$XFS_IO_PROG -c "pwrite -q 0 23" $f.evil
-
-# A bunch of inodes to stuff dir items in front of the file extent items.
-for i in $(seq 122); do
-     $XFS_IO_PROG -fc "pwrite -q 0 8192" $f.$i
-done
-
-# Flush all dealloc so we get all the file extent items inserted in the fs tree.
-sync
-
-Please add comments about each necessary step, as I've done there.
-Otherwise it's very hard to understand why those steps are needed...
-
-I'm surprised no one commented on this before.
-I'm comfortable with btrfs' internals and yet I can't understand why
-there are so many steps, and what exactly each one is supposed to
-accomplish.
-
-> +
-> +# a bunch of inodes to stuff dir items in front of the extent items
-> +for i in $(seq 122); do
-> +       $XFS_IO_PROG -fc "pwrite -q 0 8192" $f.$i
-> +done
-> +sync
-> +
-> +btrfs inspect-internal logical-resolve $logical $SCRATCH_MNT | _filter_scratch
-> +_scratch_unmount
-
-The unmount is pointless, fstests framework will do that for us.
-
-Finally I would also like to see the _fixed_by_kernel_commit
-annotation in the test.
-Since the fix is not yet in Linus' tree, in IMO you can replace the
-commit hash with "xxxx..." and later update the test once it's merged
-in Linus' tree.
-
-Thanks.
-
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/279.out b/tests/btrfs/279.out
-> new file mode 100644
-> index 00000000..c5906093
-> --- /dev/null
-> +++ b/tests/btrfs/279.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 279
-> +Silence is golden
-> --
-> 2.38.1
->
