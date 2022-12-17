@@ -2,141 +2,125 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC278C4332F
-	for <linux-fstests@archiver.kernel.org>; Sat, 17 Dec 2022 10:01:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07062C4332F
+	for <linux-fstests@archiver.kernel.org>; Sat, 17 Dec 2022 10:34:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229911AbiLQKBZ (ORCPT
+        id S229566AbiLQKe2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 17 Dec 2022 05:01:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55584 "EHLO
+        Sat, 17 Dec 2022 05:34:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33980 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229650AbiLQKBY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 17 Dec 2022 05:01:24 -0500
+        with ESMTP id S230367AbiLQKe1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 17 Dec 2022 05:34:27 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A0D921A
-        for <fstests@vger.kernel.org>; Sat, 17 Dec 2022 02:00:37 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8F19165BA
+        for <fstests@vger.kernel.org>; Sat, 17 Dec 2022 02:33:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1671271236;
+        s=mimecast20190719; t=1671273221;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=QiA0eqs2hIrTXVUuAbOZCJqheHyB9QNMtE3D6bFqT3o=;
-        b=VfJ7jVJH2ZFzOVQ5GvttDGcCabqSqs2ota2bmMOQnVhXpiCxqUSrLeBXj5EeY2GKU+okhV
-        DmAgjGX0dyiMxD2WYHdSeJdRdwFAW8Uhvh0a1hNKyMsRkEQsC9JUT3yoDjHGM+00ze2viv
-        b7aV77vtXBefKrhzQ/gtOiF+mHNTvoI=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=tV8AoKPTx/CWbAFWLvSiiyPv/0YYAV4pZXVpcnZfEnc=;
+        b=d5TIyuQdoLbzFqeM5vovqCPyTLTyc9umY/t3T5vhVKiVyGfTxrevcpt5khGqefhjA5UfBf
+        DwDReKqazyq0w+2eep4RWFHSnXggyZh/AOZqt6zQHXtBw8+Ld/jpDaH2631P+hcrKfUSI4
+        +/NwmlpSCPNkQQhnjHFp4meV0FoaC7I=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-65-bYw2ldgUO1Ou1szcGjvmUA-1; Sat, 17 Dec 2022 05:00:34 -0500
-X-MC-Unique: bYw2ldgUO1Ou1szcGjvmUA-1
-Received: by mail-pj1-f69.google.com with SMTP id mg21-20020a17090b371500b00219767e0175so2236450pjb.1
-        for <fstests@vger.kernel.org>; Sat, 17 Dec 2022 02:00:34 -0800 (PST)
+ us-mta-365-xZmCUYzfNOqubF8qwP3PLw-1; Sat, 17 Dec 2022 05:33:39 -0500
+X-MC-Unique: xZmCUYzfNOqubF8qwP3PLw-1
+Received: by mail-pj1-f71.google.com with SMTP id o18-20020a17090aac1200b00219ca917708so5523844pjq.8
+        for <fstests@vger.kernel.org>; Sat, 17 Dec 2022 02:33:39 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=QiA0eqs2hIrTXVUuAbOZCJqheHyB9QNMtE3D6bFqT3o=;
-        b=ECb6ooJcR5tyg2n8LXmaTwRNxTWWANNwbSSfP1L5SF+xC+jNFGJJHCf7dwzfygP7Xo
-         G6s0cfcsbiWTCJKJgoLeKSjL1rLPVzG3BB4j9dkk7cm6yPCMNmewr+2fLPQnCy7Kvh8y
-         QgPvFTH1MzWA4ZmUJJKU7gFobZUMa1jPkZVmSTgZpLSrqcR+PiVqylc2D/DKWK5rhZ/Q
-         E7Z0kmzxrVf3Opl5yHI1ghxEo4R7XT4tWPRAwcuzEfC8xMgWKbeLg5SUNn9GLKJs6oRb
-         NDfX09Zs9Jp6HP9VxXUnWtQ+rzWB4y5pXts49UbXp63bHGUDSsuf+rUMEAbD7NulllJy
-         YtOQ==
-X-Gm-Message-State: ANoB5pmfRZKBhjsa78p27wq4mcVvYUkJqQJnsBTz8EHcBNliWe+YADlR
-        IQxlMWx6bQnHXowua0zPz6Vnj5vYTUmKBKpxACGm/DXyjFQQgdsd8ILdMwFdeJOk0mrhXiJGQVd
-        ceXQTzdHQX/ZNw+gmDg==
-X-Received: by 2002:a17:902:d192:b0:189:c19a:2cd9 with SMTP id m18-20020a170902d19200b00189c19a2cd9mr29951025plb.25.1671271233811;
-        Sat, 17 Dec 2022 02:00:33 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf5IuFjDnmGqXa9ce7q7mVU7eUmroPAmzsPZ/4PzEzc1n99LL0sS2IZjrNWwS83lpQd+1qw5MQ==
-X-Received: by 2002:a17:902:d192:b0:189:c19a:2cd9 with SMTP id m18-20020a170902d19200b00189c19a2cd9mr29951007plb.25.1671271233494;
-        Sat, 17 Dec 2022 02:00:33 -0800 (PST)
+        bh=tV8AoKPTx/CWbAFWLvSiiyPv/0YYAV4pZXVpcnZfEnc=;
+        b=ppc1ff8fV1QP7koFMYtJWg8fOu63NA7vXubszRbbhuuf8vrWJ2afrcSsoYxD95c6NI
+         FPR6cf2zLA3dOvs3fdy+wpdgY3JbOj6UcPqFQGJt8lB3ESEHyVBaPX9xSML8jYC+iHe3
+         Kt7mUQbxHACA9Na1DKLrYamojSXagGglXZIQCE96OYCMwLz8e4uMlRFtpTFXqdbkGieM
+         6mtoXS64LxrumBSvORgG6SqSnGu79Sh6pQjq0IDgThLL1M8lrnfGA5rW2JerqDfwnSZ+
+         uV9bW2ewQMabxLh8S2S7PZmZF9govI95qBJqlXcyRxJ3M6QdskFixaR3ZqGzn4Lu7QgA
+         jTjg==
+X-Gm-Message-State: AFqh2koGZ0naAG9mPBNfy3UcYUL/5k7d3hslOWLnYQYv8eCABX52+HLD
+        x01VodVrKzzTBH245oGYWK+it2rYSsY0Wp/d8NZTQ+gHFmuAg5LqYvWskJzQh3VFtU61QlCTY3X
+        q2KfJQ+nv96//IR7cww==
+X-Received: by 2002:a17:902:e993:b0:189:e290:c65f with SMTP id f19-20020a170902e99300b00189e290c65fmr1522417plb.66.1671273218336;
+        Sat, 17 Dec 2022 02:33:38 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXuxapm7cYP8eJ1kc3ILfhK4zfuEe6z+Qp4UMT2pD7m0lY/vDfxIaU8v33G4rUkOLcPj7C6Bkg==
+X-Received: by 2002:a17:902:e993:b0:189:e290:c65f with SMTP id f19-20020a170902e99300b00189e290c65fmr1522400plb.66.1671273218015;
+        Sat, 17 Dec 2022 02:33:38 -0800 (PST)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 13-20020a170902c24d00b00189348ab156sm3092346plg.283.2022.12.17.02.00.31
+        by smtp.gmail.com with ESMTPSA id g6-20020a170902c38600b0017f64ab80e5sm3190347plg.179.2022.12.17.02.33.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 17 Dec 2022 02:00:33 -0800 (PST)
-Date:   Sat, 17 Dec 2022 18:00:29 +0800
+        Sat, 17 Dec 2022 02:33:37 -0800 (PST)
+Date:   Sat, 17 Dec 2022 18:33:33 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] xfs/122: fix EFI/EFD log format structure size after
- flex array conversion
-Message-ID: <20221217100029.x4su3x5n3tlnuldi@zlang-mailbox>
-References: <167096073708.1750519.5668846655153278713.stgit@magnolia>
- <167096074260.1750519.311637326793150150.stgit@magnolia>
- <20221214184047.k3iaxggotcli4423@zlang-mailbox>
- <Y516UhlSugONPpVp@magnolia>
+Subject: Re: [PATCH 4/4] fuzzy: don't fail on compressed metadumps
+Message-ID: <20221217103333.knedx24lltmnodxq@zlang-mailbox>
+References: <167096070957.1750373.5715692265711468248.stgit@magnolia>
+ <167096073394.1750373.2942809607367883189.stgit@magnolia>
+ <20221217070329.holhjbwq6xcjrgsa@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y516UhlSugONPpVp@magnolia>
+In-Reply-To: <20221217070329.holhjbwq6xcjrgsa@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Dec 17, 2022 at 12:14:10AM -0800, Darrick J. Wong wrote:
-> On Thu, Dec 15, 2022 at 02:40:47AM +0800, Zorro Lang wrote:
-> > On Tue, Dec 13, 2022 at 11:45:42AM -0800, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Adjust this test since made EFI/EFD log item format structs proper flex
-> > > arrays instead of array[1].
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
+On Sat, Dec 17, 2022 at 03:03:29PM +0800, Zorro Lang wrote:
+> On Tue, Dec 13, 2022 at 11:45:33AM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
 > > 
-> > So we let this case fail on all older system/kernel? Is the kernel patch
-> > recommended to be merged on downstream kernel?
-> 
-> Yes, since there are certain buggy compilers that mishandle the array
-> size computation.  Prior to the introduction of xfs_ondisk.h, they were
-> silently writing out filesystem structures that would not be recognized
-> by more mainstream systems (e.g. x86).
-> 
-> OFC nearly all those reports about buggy compilers are for tiny
-> architectures that XFS doesn't work well on anyways, so in practice it
-> hasn't created any user problems (AFAIK).
-
-Thanks, may you provide this detailed explanation in commit log, and better
-to point out the kernel commits which is related with this testing change.
-
-Due to this case isn't a case for a known issue, I think it might be no
-suitable to add _fixed_by_kernel_commit in this case, but how about giving
-more details in commit log.
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
+> > This line in __scratch_xfs_fuzz_mdrestore:
 > > 
-> > >  tests/xfs/122.out |    8 ++++----
-> > >  1 file changed, 4 insertions(+), 4 deletions(-)
-> > > 
-> > > 
-> > > diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-> > > index a56cbee84f..95e53c5081 100644
-> > > --- a/tests/xfs/122.out
-> > > +++ b/tests/xfs/122.out
-> > > @@ -161,10 +161,10 @@ sizeof(xfs_disk_dquot_t) = 104
-> > >  sizeof(xfs_dq_logformat_t) = 24
-> > >  sizeof(xfs_dqblk_t) = 136
-> > >  sizeof(xfs_dsb_t) = 264
-> > > -sizeof(xfs_efd_log_format_32_t) = 28
-> > > -sizeof(xfs_efd_log_format_64_t) = 32
-> > > -sizeof(xfs_efi_log_format_32_t) = 28
-> > > -sizeof(xfs_efi_log_format_64_t) = 32
-> > > +sizeof(xfs_efd_log_format_32_t) = 16
-> > > +sizeof(xfs_efd_log_format_64_t) = 16
-> > > +sizeof(xfs_efi_log_format_32_t) = 16
-> > > +sizeof(xfs_efi_log_format_64_t) = 16
-> > >  sizeof(xfs_error_injection_t) = 8
-> > >  sizeof(xfs_exntfmt_t) = 4
-> > >  sizeof(xfs_exntst_t) = 4
-> > > 
+> > 	test -e "${POPULATE_METADUMP}"
 > > 
+> > Breaks spectacularly on a setup that uses DUMP_COMPRESSOR to compress
+> > the metadump files, because the metadump files get the compression
+> > program added to the name (e.g. "${POPULATE_METADUMP}.xz").  The check
+> > is wrong, and since the naming policy is an implementation detail of
+> > _xfs_mdrestore, let's get rid of the -e test.
+> > 
+> > However, we still need a way to fail the test if the metadump cannot be
+> > restored.  _xfs_mdrestore returns nonzero on failure, so use that
+> > instead.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
 > 
+> Looks good to me,
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> 
+> >  common/fuzzy |    5 ++---
+> >  1 file changed, 2 insertions(+), 3 deletions(-)
+> > 
+> > 
+> > diff --git a/common/fuzzy b/common/fuzzy
+> > index e634815eec..49c850f2d5 100644
+> > --- a/common/fuzzy
+> > +++ b/common/fuzzy
+> > @@ -156,10 +156,9 @@ __scratch_xfs_fuzz_unmount()
+> >  # Restore metadata to scratch device prior to field-fuzzing.
+> >  __scratch_xfs_fuzz_mdrestore()
+> >  {
+> > -	test -e "${POPULATE_METADUMP}" || _fail "Need to set POPULATE_METADUMP"
+> > -
+> >  	__scratch_xfs_fuzz_unmount
+> > -	_xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" compress
+> > +	_xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" compress || \
+
+FYI, I've also removed the "compress" parameter according to:
+  [PATCH v1.1 3/4] common/populate: move decompression code to _{xfs,ext4}_mdrestore
+When I merged this patch.
+
+> > +		_fail "${POPULATE_METADUMP}: Could not find metadump to restore?"
+> >  }
+> >  
+> >  __fuzz_notify() {
+> > 
 
