@@ -2,125 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07062C4332F
-	for <linux-fstests@archiver.kernel.org>; Sat, 17 Dec 2022 10:34:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71AAEC4332F
+	for <linux-fstests@archiver.kernel.org>; Sat, 17 Dec 2022 20:06:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229566AbiLQKe2 (ORCPT
+        id S229506AbiLQUG5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 17 Dec 2022 05:34:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33980 "EHLO
+        Sat, 17 Dec 2022 15:06:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230367AbiLQKe1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 17 Dec 2022 05:34:27 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8F19165BA
-        for <fstests@vger.kernel.org>; Sat, 17 Dec 2022 02:33:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1671273221;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=tV8AoKPTx/CWbAFWLvSiiyPv/0YYAV4pZXVpcnZfEnc=;
-        b=d5TIyuQdoLbzFqeM5vovqCPyTLTyc9umY/t3T5vhVKiVyGfTxrevcpt5khGqefhjA5UfBf
-        DwDReKqazyq0w+2eep4RWFHSnXggyZh/AOZqt6zQHXtBw8+Ld/jpDaH2631P+hcrKfUSI4
-        +/NwmlpSCPNkQQhnjHFp4meV0FoaC7I=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-365-xZmCUYzfNOqubF8qwP3PLw-1; Sat, 17 Dec 2022 05:33:39 -0500
-X-MC-Unique: xZmCUYzfNOqubF8qwP3PLw-1
-Received: by mail-pj1-f71.google.com with SMTP id o18-20020a17090aac1200b00219ca917708so5523844pjq.8
-        for <fstests@vger.kernel.org>; Sat, 17 Dec 2022 02:33:39 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tV8AoKPTx/CWbAFWLvSiiyPv/0YYAV4pZXVpcnZfEnc=;
-        b=ppc1ff8fV1QP7koFMYtJWg8fOu63NA7vXubszRbbhuuf8vrWJ2afrcSsoYxD95c6NI
-         FPR6cf2zLA3dOvs3fdy+wpdgY3JbOj6UcPqFQGJt8lB3ESEHyVBaPX9xSML8jYC+iHe3
-         Kt7mUQbxHACA9Na1DKLrYamojSXagGglXZIQCE96OYCMwLz8e4uMlRFtpTFXqdbkGieM
-         6mtoXS64LxrumBSvORgG6SqSnGu79Sh6pQjq0IDgThLL1M8lrnfGA5rW2JerqDfwnSZ+
-         uV9bW2ewQMabxLh8S2S7PZmZF9govI95qBJqlXcyRxJ3M6QdskFixaR3ZqGzn4Lu7QgA
-         jTjg==
-X-Gm-Message-State: AFqh2koGZ0naAG9mPBNfy3UcYUL/5k7d3hslOWLnYQYv8eCABX52+HLD
-        x01VodVrKzzTBH245oGYWK+it2rYSsY0Wp/d8NZTQ+gHFmuAg5LqYvWskJzQh3VFtU61QlCTY3X
-        q2KfJQ+nv96//IR7cww==
-X-Received: by 2002:a17:902:e993:b0:189:e290:c65f with SMTP id f19-20020a170902e99300b00189e290c65fmr1522417plb.66.1671273218336;
-        Sat, 17 Dec 2022 02:33:38 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXuxapm7cYP8eJ1kc3ILfhK4zfuEe6z+Qp4UMT2pD7m0lY/vDfxIaU8v33G4rUkOLcPj7C6Bkg==
-X-Received: by 2002:a17:902:e993:b0:189:e290:c65f with SMTP id f19-20020a170902e99300b00189e290c65fmr1522400plb.66.1671273218015;
-        Sat, 17 Dec 2022 02:33:38 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g6-20020a170902c38600b0017f64ab80e5sm3190347plg.179.2022.12.17.02.33.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 17 Dec 2022 02:33:37 -0800 (PST)
-Date:   Sat, 17 Dec 2022 18:33:33 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S229471AbiLQUG4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 17 Dec 2022 15:06:56 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CFFB2DF8;
+        Sat, 17 Dec 2022 12:06:55 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id AEE65B80926;
+        Sat, 17 Dec 2022 20:06:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 389E2C433EF;
+        Sat, 17 Dec 2022 20:06:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1671307612;
+        bh=vztAfKdt0IIPwAbygvpZfLuyd9G6PPujslXDQWB0Noc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=rmpnO9y6vHseH0zOPSkiIrgqjvvlTMwU6JpGie2wc+7o3I2/XZoxY1K6s9gKPfCCS
+         RaH7SGlkgPQ4luMTypbdEKFFZ5sOvt0pl2VD3Gn/r/98/oHRvnUWnJfszSRzQ7MZQA
+         vS7e3QEPKpv1REo9Bkop3ko14AkrqzmsIXbx8H9NG6uofFj71C3OeckuMxth1lAhTB
+         wZxbdqBaXDuWdUxbjTDWOtieZP47OhsfedKBdHqKdVIfrgjIxz4gRk9xmtSU2OeZQb
+         fAem4EPNVzccTgSmlPLVyCIlfrFN9KGUA7U4LBTOR9KNOAad+DKkHfjKLv7aQ6DVHW
+         HgimLSM0teedA==
+Date:   Sat, 17 Dec 2022 12:06:51 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 Subject: Re: [PATCH 4/4] fuzzy: don't fail on compressed metadumps
-Message-ID: <20221217103333.knedx24lltmnodxq@zlang-mailbox>
+Message-ID: <Y54hW+ecHDNtC7M9@magnolia>
 References: <167096070957.1750373.5715692265711468248.stgit@magnolia>
  <167096073394.1750373.2942809607367883189.stgit@magnolia>
  <20221217070329.holhjbwq6xcjrgsa@zlang-mailbox>
+ <20221217103333.knedx24lltmnodxq@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221217070329.holhjbwq6xcjrgsa@zlang-mailbox>
+In-Reply-To: <20221217103333.knedx24lltmnodxq@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Dec 17, 2022 at 03:03:29PM +0800, Zorro Lang wrote:
-> On Tue, Dec 13, 2022 at 11:45:33AM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
+On Sat, Dec 17, 2022 at 06:33:33PM +0800, Zorro Lang wrote:
+> On Sat, Dec 17, 2022 at 03:03:29PM +0800, Zorro Lang wrote:
+> > On Tue, Dec 13, 2022 at 11:45:33AM -0800, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > This line in __scratch_xfs_fuzz_mdrestore:
+> > > 
+> > > 	test -e "${POPULATE_METADUMP}"
+> > > 
+> > > Breaks spectacularly on a setup that uses DUMP_COMPRESSOR to compress
+> > > the metadump files, because the metadump files get the compression
+> > > program added to the name (e.g. "${POPULATE_METADUMP}.xz").  The check
+> > > is wrong, and since the naming policy is an implementation detail of
+> > > _xfs_mdrestore, let's get rid of the -e test.
+> > > 
+> > > However, we still need a way to fail the test if the metadump cannot be
+> > > restored.  _xfs_mdrestore returns nonzero on failure, so use that
+> > > instead.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
 > > 
-> > This line in __scratch_xfs_fuzz_mdrestore:
+> > Looks good to me,
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
 > > 
-> > 	test -e "${POPULATE_METADUMP}"
-> > 
-> > Breaks spectacularly on a setup that uses DUMP_COMPRESSOR to compress
-> > the metadump files, because the metadump files get the compression
-> > program added to the name (e.g. "${POPULATE_METADUMP}.xz").  The check
-> > is wrong, and since the naming policy is an implementation detail of
-> > _xfs_mdrestore, let's get rid of the -e test.
-> > 
-> > However, we still need a way to fail the test if the metadump cannot be
-> > restored.  _xfs_mdrestore returns nonzero on failure, so use that
-> > instead.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
+> > >  common/fuzzy |    5 ++---
+> > >  1 file changed, 2 insertions(+), 3 deletions(-)
+> > > 
+> > > 
+> > > diff --git a/common/fuzzy b/common/fuzzy
+> > > index e634815eec..49c850f2d5 100644
+> > > --- a/common/fuzzy
+> > > +++ b/common/fuzzy
+> > > @@ -156,10 +156,9 @@ __scratch_xfs_fuzz_unmount()
+> > >  # Restore metadata to scratch device prior to field-fuzzing.
+> > >  __scratch_xfs_fuzz_mdrestore()
+> > >  {
+> > > -	test -e "${POPULATE_METADUMP}" || _fail "Need to set POPULATE_METADUMP"
+> > > -
+> > >  	__scratch_xfs_fuzz_unmount
+> > > -	_xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" compress
+> > > +	_xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" compress || \
 > 
-> Looks good to me,
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> FYI, I've also removed the "compress" parameter according to:
+>   [PATCH v1.1 3/4] common/populate: move decompression code to _{xfs,ext4}_mdrestore
+> When I merged this patch.
+
+Thank you!  Sorry for the mess. :/
+
+--D
+
+> > > +		_fail "${POPULATE_METADUMP}: Could not find metadump to restore?"
+> > >  }
+> > >  
+> > >  __fuzz_notify() {
+> > > 
 > 
-> >  common/fuzzy |    5 ++---
-> >  1 file changed, 2 insertions(+), 3 deletions(-)
-> > 
-> > 
-> > diff --git a/common/fuzzy b/common/fuzzy
-> > index e634815eec..49c850f2d5 100644
-> > --- a/common/fuzzy
-> > +++ b/common/fuzzy
-> > @@ -156,10 +156,9 @@ __scratch_xfs_fuzz_unmount()
-> >  # Restore metadata to scratch device prior to field-fuzzing.
-> >  __scratch_xfs_fuzz_mdrestore()
-> >  {
-> > -	test -e "${POPULATE_METADUMP}" || _fail "Need to set POPULATE_METADUMP"
-> > -
-> >  	__scratch_xfs_fuzz_unmount
-> > -	_xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" compress
-> > +	_xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" compress || \
-
-FYI, I've also removed the "compress" parameter according to:
-  [PATCH v1.1 3/4] common/populate: move decompression code to _{xfs,ext4}_mdrestore
-When I merged this patch.
-
-> > +		_fail "${POPULATE_METADUMP}: Could not find metadump to restore?"
-> >  }
-> >  
-> >  __fuzz_notify() {
-> > 
-
