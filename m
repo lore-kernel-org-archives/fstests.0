@@ -2,212 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74DE2C10F1E
-	for <linux-fstests@archiver.kernel.org>; Sun, 18 Dec 2022 13:05:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E5A2C4332F
+	for <linux-fstests@archiver.kernel.org>; Sun, 18 Dec 2022 14:50:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230250AbiLRNFa (ORCPT
+        id S230463AbiLROu5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 18 Dec 2022 08:05:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35796 "EHLO
+        Sun, 18 Dec 2022 09:50:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50336 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229455AbiLRNF3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 18 Dec 2022 08:05:29 -0500
+        with ESMTP id S230078AbiLROu4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Dec 2022 09:50:56 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57F03B1E4
-        for <fstests@vger.kernel.org>; Sun, 18 Dec 2022 05:04:42 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEF54B1FD
+        for <fstests@vger.kernel.org>; Sun, 18 Dec 2022 06:50:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1671368681;
+        s=mimecast20190719; t=1671375009;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=23p9C3s5IBOEFe7ZfWJa03TZhPZkxaps97i9IBLIT6c=;
-        b=OT8U8uWSOkQNzGrzkumMp+rpzM/ixP89dQbDx9PFfrOVID4xKoffMDVI5iY3tTDJ9Otf5m
-        n58a0Yp9UW+wfvhY7D7IBGcQElqwuTKj4uV0EitcRaTI4MymsyMwraHTxc1DVIhiRHSFXK
-        bhR2dq98Zv7R5N12TxnELDICOIwE/L8=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:mime-version:mime-version:content-type:content-type;
+        bh=tXqa58NKmtZtZ8i8uKoOOOpwOMwP4FFZFlW94FVS9XM=;
+        b=Tc1ioqXM7Xh/d7YOzdCf/hLsCtkig2AtgkirGymJwxf/qc25l9vSZlkmP1QXvrGTYOJnL1
+        FPKEsr5wHd1RKmD6iuYnggbjfEJjZjBo9MZWOPWbNG7OXb1GjFLABsvRlPAxi8mJKCku7T
+        h9Mlk8CK8nxhOjcYj7nL2ZJVnxUE8EI=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-272-diATw1rLMbmp7l74fRgLow-1; Sun, 18 Dec 2022 08:04:40 -0500
-X-MC-Unique: diATw1rLMbmp7l74fRgLow-1
-Received: by mail-pf1-f199.google.com with SMTP id k22-20020aa79736000000b0057f3577fdbaso2812046pfg.8
-        for <fstests@vger.kernel.org>; Sun, 18 Dec 2022 05:04:40 -0800 (PST)
+ us-mta-628-PwrQPxWZPS2piFgPk-Ii2Q-1; Sun, 18 Dec 2022 09:50:07 -0500
+X-MC-Unique: PwrQPxWZPS2piFgPk-Ii2Q-1
+Received: by mail-pg1-f197.google.com with SMTP id e7-20020a636907000000b00486a75ac49dso2642566pgc.19
+        for <fstests@vger.kernel.org>; Sun, 18 Dec 2022 06:50:07 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=23p9C3s5IBOEFe7ZfWJa03TZhPZkxaps97i9IBLIT6c=;
-        b=SQCNfXTgescrdIF1n4l1rlK9Mq1+lyfACFXQt7IxtLM7eZuaniMDlpkVABWAsg1ex8
-         D0VUWi27/4o6QDTi9PWoTTT74uaoYggKN28ZbLXwUEn/942dqu1Mk/mApmYry4m06WXr
-         PPaIkBFeLTpjzLwgJbheNDJLDZIZ51eLSdL4ynCBugEOa3lz7BUHDI3pb0qtibOvQ/3o
-         q8KR5SONya6VMineMCjAjzK9FjqblTYkqB0OtXoIJoPmtnex3bSo8xWhe/j6jPTLbeyH
-         pQqdRE+ZzZNYH8ZRPoVL7Cg5M5pywue2165I72QazdTPfZf6MqRvuOgzxo77IIEvZuGf
-         QZcw==
-X-Gm-Message-State: AFqh2kqZzSSLG2n6BQIqIUAfdLwJm+tFi3xCGnVW0nSUsBsgastS2Gv/
-        RKL53fkLUbwcm7QyJBUtHL7xAXeUnrCc/EZfmPfhHxORJCcCodeWhqFlDSbz6EKIMm54lrTQJY6
-        o8WutOPxXoY51yb7QhQ==
-X-Received: by 2002:a17:902:f607:b0:186:8d78:740c with SMTP id n7-20020a170902f60700b001868d78740cmr7292861plg.6.1671368679290;
-        Sun, 18 Dec 2022 05:04:39 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXsekAvHg2Wc7kbORIhmByY9jMGcFJmmXncBX1qPuPM+pXY/CI9A2l/lnwWbLSyiBIThvzSkiQ==
-X-Received: by 2002:a17:902:f607:b0:186:8d78:740c with SMTP id n7-20020a170902f60700b001868d78740cmr7292811plg.6.1671368678674;
-        Sun, 18 Dec 2022 05:04:38 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id d9-20020a170903230900b00176dc67df44sm5026019plh.132.2022.12.18.05.04.35
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=tXqa58NKmtZtZ8i8uKoOOOpwOMwP4FFZFlW94FVS9XM=;
+        b=frYEiCaPcI1cGrder1u/5RFs9XP6mnJEgBt5aOe5Sb3Gc/D/A1YOhRbRMsxmjalHky
+         Ql+h6ILqfRHPps4JhHeCSago85UiARNUbFfsP7BbQr4RhrvJaL6lGQruXAigCMZ3DO6N
+         S7bJPAjEFezVNIEr/uTb9PdaZ5Er4wp8zyua2S8n/3936uVxigOT6/bCwuvC+c3UeTBv
+         I4MXMmoAz0IeFQ63aUlnfFsrUVfMbWu6Sdw5w85mKO2c6sbma7PbvfYduzDEy2cqVEAz
+         egVfYE4tgbKrrMagSNQyIz07jxcO9A3+6H38vytphnXSSUg/7iWndZsVjnLAWLQmFaCF
+         lLYQ==
+X-Gm-Message-State: AFqh2koHxKeWkJl1AUvj9QULvmi5bN1DkjYf2Er/S68fwhKEFLgKf8hc
+        82z08dO7CaU1wacSxnuhE6vSMaL6ROYBPc4LGeZ1Xh3paEF+hDiTtqRRTdRArmR4UBUpcnz9WRj
+        t4uYS8FQGxTABC0SY+uRo9bF5GPwQpg13Up+83fPYfU+vWMQuEuEuKnyMJp+WmoRRtg==
+X-Received: by 2002:a05:6a20:d2c6:b0:af:7233:5bfc with SMTP id ir6-20020a056a20d2c600b000af72335bfcmr7288000pzb.8.1671375006628;
+        Sun, 18 Dec 2022 06:50:06 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXuvx7x8WKCYnQC9xxqhXsdy4It7usp2mU7i1JIaDEgVmvomnxk/M4BTP7to95fonS+TLeVbOQ==
+X-Received: by 2002:a05:6a20:d2c6:b0:af:7233:5bfc with SMTP id ir6-20020a056a20d2c600b000af72335bfcmr7287976pzb.8.1671375006173;
+        Sun, 18 Dec 2022 06:50:06 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id s11-20020a65584b000000b004771bf66781sm4471788pgr.65.2022.12.18.06.50.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Dec 2022 05:04:37 -0800 (PST)
-Date:   Sun, 18 Dec 2022 21:04:32 +0800
+        Sun, 18 Dec 2022 06:50:05 -0800 (PST)
+Date:   Sun, 18 Dec 2022 22:50:01 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Christian Brauner <brauner@kernel.org>
-Subject: Re: Why fstests g/673 and g/683~687 suddently fail (on xfs, ext4...)
- on latest linux v6.1+ ?
-Message-ID: <20221218130432.fgitgsn522shmpwi@zlang-mailbox>
-References: <20221218103850.cbqdq3bmw7zl7iad@zlang-mailbox>
- <CAOQ4uxhmCgyorYVtD6=n=khqwUc=MPbZs+y=sqt09XbGoNm_tA@mail.gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2022.12.11 onto master branch
+Message-ID: <20221218145001.gjnhkryq2b2el3ef@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhmCgyorYVtD6=n=khqwUc=MPbZs+y=sqt09XbGoNm_tA@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Dec 18, 2022 at 02:11:01PM +0200, Amir Goldstein wrote:
-> On Sun, Dec 18, 2022 at 1:06 PM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > Hi,
-> >
-> > fstests generic/673 and generic/683~687 are a series of test cases to
-> > verify suid and sgid bits are dropped properly. xfs-list writes these
-> > cases to verify xfs behavior follows vfs, e.g. [1]. And these cases
-> > test passed on xfs and ext4 for long time. Even on my last regression
-> > test on linux v6.1-rc8+, they were passed too.
-> >
-> > But now the default behavior looks like be changed again, xfs and ext4
-> > start to fail [2] on latest linux v6.1+ (HEAD [0]), So there must be
-> > changed. I'd like to make sure what's changed, and if it's expected?
-> 
-> I think that is expected and I assume Christian was planning to fix the tests.
-> 
-> See Christian's pull request:
-> https://lore.kernel.org/linux-fsdevel/20221212112053.99208-1-brauner@kernel.org/
-> 
-> "Note, that some xfstests will now fail as these patches will cause the setgid
-> bit to be lost in certain conditions for unprivileged users modifying a setgid
-> file when they would've been kept otherwise. I think this risk is worth taking
-> and I explained and mentioned this multiple times on the list:
-> https://lore.kernel.org/linux-fsdevel/20221122142010.zchf2jz2oymx55qi@wittgenstein"
+Hi all,
 
-Hi Amir,
+The master branch of the xfstests repository at:
 
-Thanks for your reply. Yes, these test cases were failed on overlayfs, passed on
-xfs, ext4 and btrfs. Now it's reversed, overlayfs passed on this test, xfs and
-ext4 failed.
+        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Anyway, if this's an expected behavior change, and it's reviewed and accepted by
-linux upstream, I don't have objection. Just to make sure if there's a regression.
-Feel free to send patch to fstests@ to update the expected results, and show
-details about why change them again :)
+has just been updated to v2022.12.11 version. This tag is signed by me,
+feel free to rebase on it.
 
 Thanks,
 Zorro
 
-> 
-> Thanks,
-> Amir.
-> 
-> >
-> > Thanks,
-> > Zorro
-> >
-> > [0]
-> > commit f9ff5644bcc04221bae56f922122f2b7f5d24d62
-> > Author: Linus Torvalds <torvalds@linux-foundation.org>
-> > Date:   Sat Dec 17 08:55:19 2022 -0600
-> >
-> >     Merge tag 'hsi-for-6.2' of git://git.kernel.org/pub/scm/linux/kernel/git/sre/linux-h
-> >
-> > [1]
-> > commit e014f37db1a2d109afa750042ac4d69cf3e3d88e
-> > Author: Darrick J. Wong <djwong@kernel.org>
-> > Date:   Tue Mar 8 10:51:16 2022 -0800
-> >
-> >     xfs: use setattr_copy to set vfs inode attributes
-> >
-> > [2]
-> > FSTYP         -- xfs (debug)
-> > PLATFORM      -- Linux/s390x ibm-z-510 6.1.0+ #1 SMP Sat Dec 17 13:23:59 EST 2022
-> > MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
-> >
-> > generic/673       - output mismatch (see /var/lib/xfstests/results//generic/673.out.bad)
-> >     --- tests/generic/673.out   2022-12-17 13:57:40.336589178 -0500
-> >     +++ /var/lib/xfstests/results//generic/673.out.bad  2022-12-18 00:00:53.627210256 -0500
-> >     @@ -51,7 +51,7 @@
-> >      310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> >      2666 -rw-rwSrw- SCRATCH_MNT/a
-> >      3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
-> >     -2666 -rw-rwSrw- SCRATCH_MNT/a
-> >     +666 -rw-rw-rw- SCRATCH_MNT/a
-> >
-> >      Test 10 - qa_user, group-exec file, only sgid
-> >     ...
-> >     (Run 'diff -u /var/lib/xfstests/tests/generic/673.out /var/lib/xfstests/results//generic/673.out.bad'  to see the entire diff)
-> > Ran: generic/673
-> > Failures: generic/673
-> > Failed 1 of 1 tests
-> >
-> > FSTYP         -- xfs (debug)
-> > PLATFORM      -- Linux/s390x ibm-z-510 6.1.0+ #1 SMP Sat Dec 17 13:23:59 EST 2022
-> > MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
-> >
-> > generic/683       - output mismatch (see /var/lib/xfstests/results//generic/683.out.bad)
-> >     --- tests/generic/683.out   2022-12-17 13:57:40.696589178 -0500
-> >     +++ /var/lib/xfstests/results//generic/683.out.bad  2022-12-18 00:04:55.297220255 -0500
-> >     @@ -33,7 +33,7 @@
-> >
-> >      Test 9 - qa_user, non-exec file falloc, only sgid
-> >      2666 -rw-rwSrw- TEST_DIR/683/a
-> >     -2666 -rw-rwSrw- TEST_DIR/683/a
-> >     +666 -rw-rw-rw- TEST_DIR/683/a
-> >
-> >      Test 10 - qa_user, group-exec file falloc, only sgid
-> >     ...
-> >     (Run 'diff -u /var/lib/xfstests/tests/generic/683.out /var/lib/xfstests/results//generic/683.out.bad'  to see the entire diff)
-> > Ran: generic/683
-> > Failures: generic/683
-> > Failed 1 of 1 tests
-> >
-> > FSTYP         -- xfs (debug)
-> > PLATFORM      -- Linux/s390x ibm-z-510 6.1.0+ #1 SMP Sat Dec 17 13:23:59 EST 2022
-> > MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
-> >
-> > generic/684       - output mismatch (see /var/lib/xfstests/results//generic/684.out.bad)
-> >     --- tests/generic/684.out   2022-12-17 13:57:40.766589178 -0500
-> >     +++ /var/lib/xfstests/results//generic/684.out.bad  2022-12-18 00:05:27.597220255 -0500
-> >     @@ -33,7 +33,7 @@
-> >
-> >      Test 9 - qa_user, non-exec file fpunch, only sgid
-> >      2666 -rw-rwSrw- TEST_DIR/684/a
-> >     -2666 -rw-rwSrw- TEST_DIR/684/a
-> >     +666 -rw-rw-rw- TEST_DIR/684/a
-> >
-> >      Test 10 - qa_user, group-exec file fpunch, only sgid
-> >     ...
-> >     (Run 'diff -u /var/lib/xfstests/tests/generic/684.out /var/lib/xfstests/results//generic/684.out.bad'  to see the entire diff)
-> > Ran: generic/684
-> > Failures: generic/684
-> > Failed 1 of 1 tests
-> > ....
-> > ....
-> >
-> >
-> > Thanks,
-> > Zorro
-> >
-> 
+The new head of the master branch is commit:
+
+87ab8bdf20db fstests: batch update of file mode and untracked files
+
+New commits:
+
+Filipe Manana (4):
+      [676b0a09706d] btrfs: add a _require_btrfs_send_v2 helper
+      [1f423c9e6e05] common: make _filter_fiemap_flags optionally print the encoded flag
+      [6f6559a88eb2] btrfs/280: also verify that fiemap reports extents as encoded
+      [8742da385e00] btrfs: test a case with compressed send stream and a shared extent
+
+Jan Kara (2):
+      [7823f7c160d7] ext4/044: Fix failure when mount options are incompatible with ext3
+      [8ec6f05efca7] generic/273: Limit number of files by available inodes
+
+Johannes Thumshirn (1):
+      [6e470ab87ad6] fstests: skip btrfs/254 in case MIN_FSSIZE is more than 1G
+
+Qu Wenruo (2):
+      [3d7044904ac2] fstests: btrfs/080: fix the stray '\'
+      [e2e7b549380a] fstests: btrfs/219: remove it from auto group
+
+Shiyang Ruan (1):
+      [87ab8bdf20db] fstests: batch update of file mode and untracked files
+
+
+Code Diffstat:
+Code Diffstat:
+
+ .gitignore          |  2 ++
+ common/btrfs        | 14 +++++++++
+ common/punch        | 40 +++++++++++++++++++++---
+ tests/btrfs/080     |  2 +-
+ tests/btrfs/219     |  2 +-
+ tests/btrfs/254     |  1 +
+ tests/btrfs/280     |  4 +--
+ tests/btrfs/280.out | 12 ++++----
+ tests/btrfs/281     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/281.out | 17 ++++++++++
+ tests/ext4/044      |  7 +++--
+ tests/generic/273   | 16 ++++++++--
+ tests/generic/692   |  0
+ 13 files changed, 187 insertions(+), 19 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
 
