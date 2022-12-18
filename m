@@ -2,145 +2,201 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5C40C4332F
-	for <linux-fstests@archiver.kernel.org>; Sun, 18 Dec 2022 14:52:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93014C3DA79
+	for <linux-fstests@archiver.kernel.org>; Sun, 18 Dec 2022 18:30:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230470AbiLROw3 (ORCPT
+        id S231199AbiLRSay (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 18 Dec 2022 09:52:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50670 "EHLO
+        Sun, 18 Dec 2022 13:30:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230078AbiLROw2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 18 Dec 2022 09:52:28 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C7446319
-        for <fstests@vger.kernel.org>; Sun, 18 Dec 2022 06:51:43 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1671375102;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type;
-        bh=zZtrr+yTvsCcxDWafMuD6Bv5twrao+npT5jibS/OVjU=;
-        b=LUPqt7T4kYyQP8qqr808xvunrNTd5lT+T8fq7VQpYPeJ4Znddb3Uinn6c8OLvQSNOke+lJ
-        Fp5PeC5bJZmMi95dhWP2IS8GssnO0XDrH1N+2kLWpalOSb+dKD+NOqKqKc5FpY5BmiQg70
-        YoWah4jsP1MYoWENZkG9mrCTTlYpUaM=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-208-lb9cPnw_Pnad2vpZeb0dVA-1; Sun, 18 Dec 2022 09:51:41 -0500
-X-MC-Unique: lb9cPnw_Pnad2vpZeb0dVA-1
-Received: by mail-pg1-f199.google.com with SMTP id o8-20020a6548c8000000b0047927da1501so4065490pgs.18
-        for <fstests@vger.kernel.org>; Sun, 18 Dec 2022 06:51:41 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=zZtrr+yTvsCcxDWafMuD6Bv5twrao+npT5jibS/OVjU=;
-        b=A30CnAx17B+asMckqz2Kb221XyyW9dmFrnWoVQCbqGDpGjbGfYz1gFJzS/HYLC2CKy
-         qMnaz3HnsRH388mcVz4Knz6xCsJEKsKXoLDmLZsWlGNdkanVZpl1YQfasGZ/FencZwW3
-         dOe/uxI96cr/rMSWtZrxAY2LejbTSk6R2ZN/pPkTpap5o0X5Zf+5xrB0mLcPx05XJ90j
-         l6usLW+1IcL+6RuAvT7XID8xxRQ8Tfb9sQSxFdIVz/0h0A6nWX+cd56XN+UIOvKaExuU
-         lmDYVvY1aiM+UjoS5yL/Sy8YMJZtW65x5n55WpHqjgSjoEjeqRe62iPqYI21IVk6OWY3
-         0iIw==
-X-Gm-Message-State: AFqh2kr1yJF68mhhIKB3TGT7805iMdPGioy/5Syw0XCIrAkYAXNWKPmX
-        wvR5q6EzbL9s4EFWESMvKh9Sb3zAuSVAfs5T0k4q77lHmz5cWFeKwMN6OBpNfx9++pX7e8IKElt
-        eCriO1T8LFEQqgDK/ro/u07q1qLVKSn9WxLh6uBBHgr7rEP0PCsEk2zGpZridTMh95Q==
-X-Received: by 2002:a17:902:ea02:b0:187:2f28:bfd6 with SMTP id s2-20020a170902ea0200b001872f28bfd6mr7055524plg.21.1671375100041;
-        Sun, 18 Dec 2022 06:51:40 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXtAdPKHMB7O0tK6EIT3ZyEA0fuGWe9WLhyjqoPKG41KbO+1jA7hq72zqpDChvkURTHiuySDww==
-X-Received: by 2002:a17:902:ea02:b0:187:2f28:bfd6 with SMTP id s2-20020a170902ea0200b001872f28bfd6mr7055499plg.21.1671375099637;
-        Sun, 18 Dec 2022 06:51:39 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id g6-20020a170902c38600b0017f64ab80e5sm5167162plg.179.2022.12.18.06.51.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Dec 2022 06:51:38 -0800 (PST)
-Date:   Sun, 18 Dec 2022 22:51:34 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to e26310404671
-Message-ID: <20221218145134.mdvz7rbt7s23qwff@zlang-mailbox>
+        with ESMTP id S230173AbiLRSaG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Dec 2022 13:30:06 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D152CBE00;
+        Sun, 18 Dec 2022 10:14:41 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 549EE60DCF;
+        Sun, 18 Dec 2022 18:14:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1D55C433D2;
+        Sun, 18 Dec 2022 18:14:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1671387280;
+        bh=h+5T1W0dbq0VrSbd0eXpFWwkbNKlv3NdepKrKO5N/X0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=dDZAnqBL5dRU+C4AocCXG0LJs6s88+o21A2CzVvHw+R8n7Fmpt6ZGmdstE1vmQw9P
+         8U3dPmsC71VtH7QUIiUXr9Nb0svpp5Uk1vmBbKG32Svd6gd0oT6NihbWJox8n9aAVS
+         eRhJVXaFjr1iLMtV7+e0vp/g5pwOoWcJ+5DIeD89vr2JDgiPCG7tvSAyAO7aMdSYgC
+         HQdSYvM5iRudseuUhGYp2y7mwCpEkEOBMpH64zXu/GNxtXYd/U7dPnl2tiPyUConzn
+         CMLAr+PZNkPRb6D8wfkRg+kD4991YFMRfNTRiLXm7BBd3fYsIasuE9lyplsA0zdk6P
+         pYTb7xXp+zU0g==
+Date:   Sun, 18 Dec 2022 10:14:40 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Amir Goldstein <amir73il@gmail.com>, linux-fsdevel@vger.kernel.org,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        linux-ext4@vger.kernel.org, Christian Brauner <brauner@kernel.org>
+Subject: Re: Why fstests g/673 and g/683~687 suddently fail (on xfs, ext4...)
+ on latest linux v6.1+ ?
+Message-ID: <Y59YkDch8b6v/KfD@magnolia>
+References: <20221218103850.cbqdq3bmw7zl7iad@zlang-mailbox>
+ <CAOQ4uxhmCgyorYVtD6=n=khqwUc=MPbZs+y=sqt09XbGoNm_tA@mail.gmail.com>
+ <20221218130432.fgitgsn522shmpwi@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20221218130432.fgitgsn522shmpwi@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+On Sun, Dec 18, 2022 at 09:04:32PM +0800, Zorro Lang wrote:
+> On Sun, Dec 18, 2022 at 02:11:01PM +0200, Amir Goldstein wrote:
+> > On Sun, Dec 18, 2022 at 1:06 PM Zorro Lang <zlang@redhat.com> wrote:
+> > >
+> > > Hi,
+> > >
+> > > fstests generic/673 and generic/683~687 are a series of test cases to
+> > > verify suid and sgid bits are dropped properly. xfs-list writes these
+> > > cases to verify xfs behavior follows vfs, e.g. [1]. And these cases
+> > > test passed on xfs and ext4 for long time. Even on my last regression
+> > > test on linux v6.1-rc8+, they were passed too.
+> > >
+> > > But now the default behavior looks like be changed again, xfs and ext4
+> > > start to fail [2] on latest linux v6.1+ (HEAD [0]), So there must be
+> > > changed. I'd like to make sure what's changed, and if it's expected?
+> > 
+> > I think that is expected and I assume Christian was planning to fix the tests.
+> > 
+> > See Christian's pull request:
+> > https://lore.kernel.org/linux-fsdevel/20221212112053.99208-1-brauner@kernel.org/
+> > 
+> > "Note, that some xfstests will now fail as these patches will cause the setgid
+> > bit to be lost in certain conditions for unprivileged users modifying a setgid
+> > file when they would've been kept otherwise. I think this risk is worth taking
+> > and I explained and mentioned this multiple times on the list:
+> > https://lore.kernel.org/linux-fsdevel/20221122142010.zchf2jz2oymx55qi@wittgenstein"
+> 
+> Hi Amir,
+> 
+> Thanks for your reply. Yes, these test cases were failed on overlayfs, passed on
+> xfs, ext4 and btrfs. Now it's reversed, overlayfs passed on this test, xfs and
+> ext4 failed.
 
-The for-next branch of the xfstests repository at:
+Odd, I'll have to look into why things work here ... maybe it's the
+selinux contexts?
 
-        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> Anyway, if this's an expected behavior change, and it's reviewed and accepted by
+> linux upstream, I don't have objection. Just to make sure if there's a regression.
+> Feel free to send patch to fstests@ to update the expected results, and show
+> details about why change them again :)
 
-has just been updated and tagged as v2022.12.18 release.
+Somewhat unrelated, but are you going to merge
+https://lore.kernel.org/fstests/20220816121551.88407-1-glass@fydeos.io/
 
-Release note:
-1) No new case this week.
-2) Some improvement on common/populate and related part.
-3) Fix some issue of check script
+?
 
-More details refer to below, thanks for all your contribution!
+--D
 
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-e26310404671 fuzzy: don't fail on compressed metadumps
-
-New commits ([U]pdate):
-
-Darrick J. Wong (5):
-[U]      [a8a3cd342f90] xfs/018: fix attr value setting in this test
-[U]      [538abf799424] common/populate: create helpers to handle restoring metadumps
-[U]      [830b45aa636f] common/xfs: create a helper for restoring metadumps to the scratch devs
-[U]      [b8c6b5045afb] common/populate: move decompression code to _{xfs,ext4}_mdrestore
-[U]      [e26310404671] fuzzy: don't fail on compressed metadumps
-
-David Disseldorp (1):
-[U]      [210af953f709] check: ensure sect_stop is initialized if interrupted
-
-Leah Rumancik (1):
-[U]      [99b970640652] check: wipe tmp.arglist
-
-Qu Wenruo (1):
-[U]      [8a1c35e615fd] check: call _check_dmesg even if the test case failed
-
-Xiao Yang (1):
-[U]      [e4b8751d735e] xfs/243: add _require_scratch_delalloc()
-
-Yang Xu (1):
-[U]      [9c69817e88ef] src/vfs/utils: Reset errno to zero when detect O_TMPFILE
-
-Ziyang Zhang (2):
-[U]      [be957968f6fa] common/xfs: Add a helper to export inode core size
-[U]      [8fc059413cc1] common/populate: Ensure that S_IFDIR.FMT_BTREE is in btree format
-
-
-Code Diffstat:
-
- check             |  6 +++++-
- common/ext4       | 20 ++++++++++++++++++++
- common/fuzzy      |  5 ++---
- common/populate   | 49 +++++++++++++++++++++++++++++++++++--------------
- common/xfs        | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- src/vfs/utils.c   |  6 ++++--
- tests/xfs/018     | 17 +++++++++++++++--
- tests/xfs/018.out | 42 +++++++++++++++++++++++++++++++-----------
- tests/xfs/129     |  2 +-
- tests/xfs/234     |  2 +-
- tests/xfs/243     |  1 +
- tests/xfs/253     |  2 +-
- tests/xfs/284     |  2 +-
- tests/xfs/291     |  2 +-
- tests/xfs/335     |  3 ++-
- tests/xfs/336     |  5 +++--
- tests/xfs/337     |  3 ++-
- tests/xfs/341     |  3 ++-
- tests/xfs/342     |  3 ++-
- tests/xfs/432     |  2 +-
- tests/xfs/503     |  8 ++++----
- 21 files changed, 186 insertions(+), 49 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
+> Thanks,
+> Zorro
+> 
+> > 
+> > Thanks,
+> > Amir.
+> > 
+> > >
+> > > Thanks,
+> > > Zorro
+> > >
+> > > [0]
+> > > commit f9ff5644bcc04221bae56f922122f2b7f5d24d62
+> > > Author: Linus Torvalds <torvalds@linux-foundation.org>
+> > > Date:   Sat Dec 17 08:55:19 2022 -0600
+> > >
+> > >     Merge tag 'hsi-for-6.2' of git://git.kernel.org/pub/scm/linux/kernel/git/sre/linux-h
+> > >
+> > > [1]
+> > > commit e014f37db1a2d109afa750042ac4d69cf3e3d88e
+> > > Author: Darrick J. Wong <djwong@kernel.org>
+> > > Date:   Tue Mar 8 10:51:16 2022 -0800
+> > >
+> > >     xfs: use setattr_copy to set vfs inode attributes
+> > >
+> > > [2]
+> > > FSTYP         -- xfs (debug)
+> > > PLATFORM      -- Linux/s390x ibm-z-510 6.1.0+ #1 SMP Sat Dec 17 13:23:59 EST 2022
+> > > MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
+> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
+> > >
+> > > generic/673       - output mismatch (see /var/lib/xfstests/results//generic/673.out.bad)
+> > >     --- tests/generic/673.out   2022-12-17 13:57:40.336589178 -0500
+> > >     +++ /var/lib/xfstests/results//generic/673.out.bad  2022-12-18 00:00:53.627210256 -0500
+> > >     @@ -51,7 +51,7 @@
+> > >      310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
+> > >      2666 -rw-rwSrw- SCRATCH_MNT/a
+> > >      3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
+> > >     -2666 -rw-rwSrw- SCRATCH_MNT/a
+> > >     +666 -rw-rw-rw- SCRATCH_MNT/a
+> > >
+> > >      Test 10 - qa_user, group-exec file, only sgid
+> > >     ...
+> > >     (Run 'diff -u /var/lib/xfstests/tests/generic/673.out /var/lib/xfstests/results//generic/673.out.bad'  to see the entire diff)
+> > > Ran: generic/673
+> > > Failures: generic/673
+> > > Failed 1 of 1 tests
+> > >
+> > > FSTYP         -- xfs (debug)
+> > > PLATFORM      -- Linux/s390x ibm-z-510 6.1.0+ #1 SMP Sat Dec 17 13:23:59 EST 2022
+> > > MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
+> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
+> > >
+> > > generic/683       - output mismatch (see /var/lib/xfstests/results//generic/683.out.bad)
+> > >     --- tests/generic/683.out   2022-12-17 13:57:40.696589178 -0500
+> > >     +++ /var/lib/xfstests/results//generic/683.out.bad  2022-12-18 00:04:55.297220255 -0500
+> > >     @@ -33,7 +33,7 @@
+> > >
+> > >      Test 9 - qa_user, non-exec file falloc, only sgid
+> > >      2666 -rw-rwSrw- TEST_DIR/683/a
+> > >     -2666 -rw-rwSrw- TEST_DIR/683/a
+> > >     +666 -rw-rw-rw- TEST_DIR/683/a
+> > >
+> > >      Test 10 - qa_user, group-exec file falloc, only sgid
+> > >     ...
+> > >     (Run 'diff -u /var/lib/xfstests/tests/generic/683.out /var/lib/xfstests/results//generic/683.out.bad'  to see the entire diff)
+> > > Ran: generic/683
+> > > Failures: generic/683
+> > > Failed 1 of 1 tests
+> > >
+> > > FSTYP         -- xfs (debug)
+> > > PLATFORM      -- Linux/s390x ibm-z-510 6.1.0+ #1 SMP Sat Dec 17 13:23:59 EST 2022
+> > > MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
+> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
+> > >
+> > > generic/684       - output mismatch (see /var/lib/xfstests/results//generic/684.out.bad)
+> > >     --- tests/generic/684.out   2022-12-17 13:57:40.766589178 -0500
+> > >     +++ /var/lib/xfstests/results//generic/684.out.bad  2022-12-18 00:05:27.597220255 -0500
+> > >     @@ -33,7 +33,7 @@
+> > >
+> > >      Test 9 - qa_user, non-exec file fpunch, only sgid
+> > >      2666 -rw-rwSrw- TEST_DIR/684/a
+> > >     -2666 -rw-rwSrw- TEST_DIR/684/a
+> > >     +666 -rw-rw-rw- TEST_DIR/684/a
+> > >
+> > >      Test 10 - qa_user, group-exec file fpunch, only sgid
+> > >     ...
+> > >     (Run 'diff -u /var/lib/xfstests/tests/generic/684.out /var/lib/xfstests/results//generic/684.out.bad'  to see the entire diff)
+> > > Ran: generic/684
+> > > Failures: generic/684
+> > > Failed 1 of 1 tests
+> > > ....
+> > > ....
+> > >
+> > >
+> > > Thanks,
+> > > Zorro
+> > >
+> > 
+> 
