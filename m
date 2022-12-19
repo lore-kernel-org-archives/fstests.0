@@ -2,135 +2,140 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B720FC4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 19 Dec 2022 17:14:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15749C4332F
+	for <linux-fstests@archiver.kernel.org>; Mon, 19 Dec 2022 17:39:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231761AbiLSROz (ORCPT
+        id S231531AbiLSRjj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Dec 2022 12:14:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48746 "EHLO
+        Mon, 19 Dec 2022 12:39:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231447AbiLSROy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 12:14:54 -0500
+        with ESMTP id S231520AbiLSRji (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 12:39:38 -0500
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D41D8B4;
-        Mon, 19 Dec 2022 09:14:53 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53515DFC3;
+        Mon, 19 Dec 2022 09:39:37 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 86B1DB80E8F;
-        Mon, 19 Dec 2022 17:14:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 40B8EC433EF;
-        Mon, 19 Dec 2022 17:14:51 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 9C965B80F4B;
+        Mon, 19 Dec 2022 17:39:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F926C433D2;
+        Mon, 19 Dec 2022 17:39:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1671470091;
-        bh=+WgBR5vCZiRaQVVt2ZASYxwYdrHFhKZDpUBol1eIVEI=;
+        s=k20201202; t=1671471574;
+        bh=3ybeNYatPhSK4Ru9QK8QhYa5W4WwTDDt+trsi+s6QuA=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=G74Sv0MrkV0M8+car7t729FxdhONKptaOolvw7vKGgdK4UaFB6BuIKMh44Cpbv8A7
-         DTQ/7fjt/Mjcihch6VKe7v16vgMav58rsqEfgue/CmFP9uclzrAi2L5YQoHlape2Ym
-         spsLEXyqCrjjY3iFSfE+gdwP7iaRtyf9/2eou4oKw/XJSa90mKNYIGzyqOBTlwp69E
-         zS3vVkRQp9xdS3pIMeHVsan134tpD3bJt1TIOlE1MD0GyKIgHtrUS3/wfS0XDw5Me2
-         tWkndsAXpljeWG2TFAkvOcy0LftLFR4HoQmhTctztDDjTx6mu/Q8Hy6hDLV0mnBQZj
-         Dg0VIcAjoHxMA==
-Date:   Mon, 19 Dec 2022 09:14:50 -0800
+        b=qcVLBAHs0gmXzu/MaPuq9x6CLFrojyQya50Ue4vJaMuBELf5rzfvbbW5sZcBvr+fR
+         61tY5DmgFskMT4rS3CoSKYCJbefPNiFITSALEBvLh8JBnd2wRl2YvHlvdGO/RS5H3K
+         dbeJDjfVFwOM+aq8HPtDYYWYP3q7+MZmxG2SOZRRZ0GfQGNaqkdx0Ja0JEFOSptzw/
+         A/NdEBrIE5kJJkTiSkz1FS3C/2g7N47qBxO1FRqOjMkkWE6syn6bbKJwpO1/aVqJmd
+         qdHRz+P3ylBTuOftWMuBHOpeepJnq8F3kj1UDT0bMAcVmvU67gf12EGIx68pqhHGOC
+         zt/kN9e5JI2jA==
+Date:   Mon, 19 Dec 2022 09:39:33 -0800
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] xfs/122: fix EFI/EFD log format structure size after
- flex array conversion
-Message-ID: <Y6CcCsKPZWb4LMnq@magnolia>
-References: <167096073708.1750519.5668846655153278713.stgit@magnolia>
- <167096074260.1750519.311637326793150150.stgit@magnolia>
- <20221214184047.k3iaxggotcli4423@zlang-mailbox>
- <Y516UhlSugONPpVp@magnolia>
- <20221217100029.x4su3x5n3tlnuldi@zlang-mailbox>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: report: always save the dmesg as system-err if
+ KEEP_DMESG is set
+Message-ID: <Y6Ch1Qq9op2tmB1U@magnolia>
+References: <20221216065121.30181-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221217100029.x4su3x5n3tlnuldi@zlang-mailbox>
+In-Reply-To: <20221216065121.30181-1-wqu@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Dec 17, 2022 at 06:00:29PM +0800, Zorro Lang wrote:
-> On Sat, Dec 17, 2022 at 12:14:10AM -0800, Darrick J. Wong wrote:
-> > On Thu, Dec 15, 2022 at 02:40:47AM +0800, Zorro Lang wrote:
-> > > On Tue, Dec 13, 2022 at 11:45:42AM -0800, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > Adjust this test since made EFI/EFD log item format structs proper flex
-> > > > arrays instead of array[1].
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
-> > > 
-> > > So we let this case fail on all older system/kernel? Is the kernel patch
-> > > recommended to be merged on downstream kernel?
-> > 
-> > Yes, since there are certain buggy compilers that mishandle the array
-> > size computation.  Prior to the introduction of xfs_ondisk.h, they were
-> > silently writing out filesystem structures that would not be recognized
-> > by more mainstream systems (e.g. x86).
-> > 
-> > OFC nearly all those reports about buggy compilers are for tiny
-> > architectures that XFS doesn't work well on anyways, so in practice it
-> > hasn't created any user problems (AFAIK).
+On Fri, Dec 16, 2022 at 02:51:21PM +0800, Qu Wenruo wrote:
+> When KEEP_DMESG is set to "yes", we will always save the dmesg of any
+> test case (no matter if it passed or not) into "$seqnum.dmesg".
 > 
-> Thanks, may you provide this detailed explanation in commit log, and better
-> to point out the kernel commits which is related with this testing change.
+> But this KEEP_DMESG behavior doesn't affect xunit report.
+> 
+> This patch will make xunit report to follow KEEP_DMESG setting.
+> Since error is checked by testcase.failure attribute, this new
+> <system-err> section should not cause the existing parsers to treat
+> passed cases as errors.
+> 
+> KEEP_DMESG is only followed if all the following conditions are met:
+> 
+> - KEEP_DMESG is set to yes
 
-Will do.
+Feel free to push back against the proliferation of config variables,
+but perhaps this ought to be REPORT_DMESG={always,never,auto} ?
 
-> Due to this case isn't a case for a known issue, I think it might be no
-> suitable to add _fixed_by_kernel_commit in this case, but how about giving
-> more details in commit log.
+> - Using xunit reporting
+>   xunit-quite won't save the dmesg for passed test cases.
 
-Er.... xfs/122 isn't a regression test, so it's not testing previously
-broken and now fixed code.  While I sense that a few peoples'
-understanding of _fixed_by_kernel_commit might be constrained to "if
-this test fails, check that your kernel/*fsprogs have commit XXXXX", I
-myself have started `grep _fixed_by_kernel_commit' to find bug fixes and
-their related regression tests to suggest backports.
+          ^^^^^ "quiet"?
 
-...although I wonder if perhaps we should have a second set of
-_by_commit helpers that encode "not a regression test, but you might
-check such-and-such commit"?
+> This extra saved dmesg would definitely boost the xml size, but if the
+> end user wants to save all the dmesg (for later verification), then I'd
+> say it's a unavoidable cost.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  common/report | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+> 
+> diff --git a/common/report b/common/report
+> index 64f9c866..4a747f8d 100644
+> --- a/common/report
+> +++ b/common/report
+> @@ -87,6 +87,19 @@ _xunit_make_testcase_report()
+>  	echo -e "\t<testcase classname=\"xfstests.$sect_name\" name=\"$test_name\" time=\"$test_time\">" >> $report
+>  	case $test_status in
+>  	"pass")
+> +		# If we have KEEP_DMESG and want full output, also save the
+> +		# dmesg into the passed result
+> +		if [ "$KEEP_DMESG" == yes -a "$quiet" != "yes" ]; then
+> +			local dmesg_file="${REPORT_DIR}/${test_name}.dmesg"
+> +			if [ -f "$dmesg_file" ]; then
+> +				echo -e "\t\t<system-err>" >> $report
+> +				printf	'<![CDATA[\n' >>$report
+> +				cat "$dmesg_file" | tr -dc '[:print:][:space:]' | \
+> +					encode_xml >>$report
+> +				printf ']]>\n'	>>$report
+> +				echo -e "\t\t</system-err>" >> $report
+
+Hmm.  Does the junit xml schema[1] (that's what fstests implements, even
+if we call it xunit, and even though there's a separate xunit[2] format
+that is not the same!) actually allow us to have multiple <system-err>
+elements?
+
+For that matter, I look at things like this:
+
+	if [ -n "$quiet" ]; then
+	   :
+	elif [ -f "$dmesg_file" ]; then
+		echo -e "\t\t<system-err>" >> $report
+		printf	'<![CDATA[\n' >>$report
+		cat "$dmesg_file" | tr -dc '[:print:][:space:]' | encode_xml >>$report
+		printf ']]>\n'	>>$report
+		echo -e "\t\t</system-err>" >> $report
+	elif [ -s "$outbad_file" ]; then
+		echo -e "\t\t<system-err>" >> $report
+		printf	'<![CDATA[\n' >>$report
+		$diff "$out_src" "$outbad_file" | encode_xml >>$report
+		printf ']]>\n'	>>$report
+		echo -e "\t\t</system-err>" >> $report
+	fi
+
+and wonder why we prioritize recording dmesg output over .out.bad when
+we could do both?
 
 --D
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > >  tests/xfs/122.out |    8 ++++----
-> > > >  1 file changed, 4 insertions(+), 4 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-> > > > index a56cbee84f..95e53c5081 100644
-> > > > --- a/tests/xfs/122.out
-> > > > +++ b/tests/xfs/122.out
-> > > > @@ -161,10 +161,10 @@ sizeof(xfs_disk_dquot_t) = 104
-> > > >  sizeof(xfs_dq_logformat_t) = 24
-> > > >  sizeof(xfs_dqblk_t) = 136
-> > > >  sizeof(xfs_dsb_t) = 264
-> > > > -sizeof(xfs_efd_log_format_32_t) = 28
-> > > > -sizeof(xfs_efd_log_format_64_t) = 32
-> > > > -sizeof(xfs_efi_log_format_32_t) = 28
-> > > > -sizeof(xfs_efi_log_format_64_t) = 32
-> > > > +sizeof(xfs_efd_log_format_32_t) = 16
-> > > > +sizeof(xfs_efd_log_format_64_t) = 16
-> > > > +sizeof(xfs_efi_log_format_32_t) = 16
-> > > > +sizeof(xfs_efi_log_format_64_t) = 16
-> > > >  sizeof(xfs_error_injection_t) = 8
-> > > >  sizeof(xfs_exntfmt_t) = 4
-> > > >  sizeof(xfs_exntst_t) = 4
-> > > > 
-> > > 
-> > 
+[1] https://raw.githubusercontent.com/windyroad/JUnit-Schema/master/JUnit.xsd
+[2] https://xunit.net/docs/format-xml-v2
+
+> +			fi
+> +		fi
+>  		;;
+>  	"notrun")
+>  		local notrun_file="${REPORT_DIR}/${test_name}.notrun"
+> -- 
+> 2.38.0
 > 
