@@ -2,173 +2,80 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74FD7C4332F
-	for <linux-fstests@archiver.kernel.org>; Mon, 19 Dec 2022 19:02:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43391C4332F
+	for <linux-fstests@archiver.kernel.org>; Mon, 19 Dec 2022 19:03:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231726AbiLSTCR (ORCPT
+        id S230091AbiLSTD5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Dec 2022 14:02:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33578 "EHLO
+        Mon, 19 Dec 2022 14:03:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231136AbiLSTCP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 14:02:15 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C80825EC
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 11:01:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1671476470;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0q5UJuP9h45gJi3HybrDEvY0RvQUcRnvRSZzzGvEx2I=;
-        b=ArLVaLLrgb0n710wYwch+ISbKhjM/wqcCkgo5q6zmMXotaUNvJgCRRrhD/FlHCrP8hI7Dm
-        xGI96wGmz6twkwzkc9YBGqDELX4ICkPEpsW+xbglquAlkGN27icmhn0DJ+qDX8YUJDJBTp
-        FObdIemYg5VYtpM9xGz+CFvVhAwWkxI=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-107-CUGv2AX8MvWthsjCd3zkcw-1; Mon, 19 Dec 2022 14:01:09 -0500
-X-MC-Unique: CUGv2AX8MvWthsjCd3zkcw-1
-Received: by mail-pg1-f199.google.com with SMTP id x79-20020a633152000000b004785d1cf6bbso5903347pgx.6
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 11:01:08 -0800 (PST)
+        with ESMTP id S229895AbiLSTD4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 14:03:56 -0500
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35AEE185
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 11:03:55 -0800 (PST)
+Received: by mail-pg1-x52e.google.com with SMTP id 62so6784159pgb.13
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 11:03:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=bSShLd393sz20z+7teqVmz4hsC5xfFmWLeAPr6ZXujc=;
+        b=bSGN94DejCsRSoGltQ+tikuwfqCplGOg+rllbHXRi3kWL1pB9lKfAFmFjHp/No7mtE
+         ICuaXuE2BdkC3Y0TSFLzn140vqNVicpR4lZrAFthVTYE/HX0FrdwuQexCyUHE9T8U1K8
+         RHvQ+KkyPr5ixNk7uW1gmW03aIVnLV6ZEMSM1vEZG3XVMIKvyLNIxN9QL9DuM4TLtw8l
+         M1prghGbPJCtGoOaJPxvakeYV5CNi0YIS7DMFlsx9J/10iJVfcda+6qkYnCf29KZVeCW
+         pViiwwKO1En85nFqQT02d9iWbC1US3/6BAaZzFlgL+eFrxpmSySv8/mL26SgO4S+aDBl
+         TEPw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=0q5UJuP9h45gJi3HybrDEvY0RvQUcRnvRSZzzGvEx2I=;
-        b=h968uY3QeUGwGUedDPErw6Lc9Y5yda95yFxtq2/HIdGDK7IdxgWGnJ1PXuJXLayEBw
-         E0Aib5uNn+7MzI/rPvvESxMZHx/voByJIsKrjti7eg2pPtGPCGcxrPGsaRUg6CtZKFFm
-         vMQgf8dHhQ52gYTanUau6yGba3tzoUP8lY7yLwLu9IhdEyVqkOuNKcYAiLAd9P82zCzt
-         eamn+DMgO5Z63cMZRvykPC/OPioxKxz0DzsCYARxaUGyKaeRtVH+7jX52eTwStxIvJtK
-         E7+ErOV1nY467OuDoEDnae4Zss4icVREUg4FdZKsWnH2jvw380c4uQdbsEh3LQul2B82
-         3TOg==
-X-Gm-Message-State: ANoB5pkwNUWrPvJHI1Gvy/A7QzIJGva93Yp5V/8QkWIYFPDGZDydPIZZ
-        hoin4uwZrh+Bwh4RK7fej51JSiUJsOicCnn3QBi/vPLN/ahUq+6ltHoyMyRGCy9zFNZTtpM7Ng2
-        xlOJDuJVU9W54rvmh/Q==
-X-Received: by 2002:a17:903:22cd:b0:189:e16f:c268 with SMTP id y13-20020a17090322cd00b00189e16fc268mr61060331plg.20.1671476467953;
-        Mon, 19 Dec 2022 11:01:07 -0800 (PST)
-X-Google-Smtp-Source: AA0mqf48Q+jkloexmUN2m+8Bga7l9+DDj/BQcu59EiXLtpij/IAljW4N7DFg1VhNrT+5LMbYFxt5uw==
-X-Received: by 2002:a17:903:22cd:b0:189:e16f:c268 with SMTP id y13-20020a17090322cd00b00189e16fc268mr61060288plg.20.1671476467553;
-        Mon, 19 Dec 2022 11:01:07 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9-20020a170903230900b00176dc67df44sm7538108plh.132.2022.12.19.11.01.03
+        bh=bSShLd393sz20z+7teqVmz4hsC5xfFmWLeAPr6ZXujc=;
+        b=7LlbuAG3KqdQWysRLskHf5XFcknDvGgUFEWtmA8aErc+BMioemcgxpPw39WrFKa7S/
+         ul7N1cxhtNUWEYay1MwEYza/To9aPudooaDl+TL2d4WbfPnCDxe0v4QgJzHG7H8giVDA
+         Pb5ijBnIU6CABqCiQfXNX4Js1NZda2J7TdcjECXSnSyubbr6AR0IcjIJUpcM8+JHizVi
+         ZaFOMGTZWrkFt1U7vu4xKaEdyu5R/p1wPOwVTIuaIvnhf/S12UYyirvCPu8aDTjnqdyq
+         fg7TkTQWWwj2CfmmYuufSQqi3ouGkZwpG5E7JhZuGRMJc2omjxiIKcN8F+JXwjijElEW
+         qMHQ==
+X-Gm-Message-State: ANoB5pl/+H2CeGCD1n0C1Z6wHj0753SH//f3GYuoOGB5N8KXbi8FMtcA
+        YjGh0+yc5woxpND62/bcAFw+/HAD/UY=
+X-Google-Smtp-Source: AA0mqf7liFUujcIqlYGaEbBSu5xbjYLk1wqgs2sDd6pmcvbdwB4zAYVPzGz3O19IN1NQa5YEWyaipQ==
+X-Received: by 2002:aa7:9a0a:0:b0:577:272f:fdb with SMTP id w10-20020aa79a0a000000b00577272f0fdbmr45326883pfj.29.1671476634549;
+        Mon, 19 Dec 2022 11:03:54 -0800 (PST)
+Received: from google.com ([2620:0:1001:7810:171a:9e98:a79e:8f3c])
+        by smtp.gmail.com with ESMTPSA id w10-20020aa79a0a000000b00575afe3c188sm6964280pfj.150.2022.12.19.11.03.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Dec 2022 11:01:05 -0800 (PST)
-Date:   Tue, 20 Dec 2022 03:01:00 +0800
-From:   Zorro Lang <zlang@redhat.com>
+        Mon, 19 Dec 2022 11:03:54 -0800 (PST)
+Date:   Mon, 19 Dec 2022 11:03:51 -0800
+From:   Leah Rumancik <leah.rumancik@gmail.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] xfs/122: fix EFI/EFD log format structure size after
- flex array conversion
-Message-ID: <20221219190100.rmpmaks7ssnlclij@zlang-mailbox>
-References: <167096073708.1750519.5668846655153278713.stgit@magnolia>
- <167096074260.1750519.311637326793150150.stgit@magnolia>
- <20221214184047.k3iaxggotcli4423@zlang-mailbox>
- <Y516UhlSugONPpVp@magnolia>
- <20221217100029.x4su3x5n3tlnuldi@zlang-mailbox>
- <Y6CcCsKPZWb4LMnq@magnolia>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] check: wipe tmp.arglist
+Message-ID: <Y6C1lyZuJMrjOVzA@google.com>
+References: <20221214215926.908628-1-leah.rumancik@gmail.com>
+ <Y5tG94XQmBziqveE@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y6CcCsKPZWb4LMnq@magnolia>
+In-Reply-To: <Y5tG94XQmBziqveE@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 19, 2022 at 09:14:50AM -0800, Darrick J. Wong wrote:
-> On Sat, Dec 17, 2022 at 06:00:29PM +0800, Zorro Lang wrote:
-> > On Sat, Dec 17, 2022 at 12:14:10AM -0800, Darrick J. Wong wrote:
-> > > On Thu, Dec 15, 2022 at 02:40:47AM +0800, Zorro Lang wrote:
-> > > > On Tue, Dec 13, 2022 at 11:45:42AM -0800, Darrick J. Wong wrote:
-> > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > 
-> > > > > Adjust this test since made EFI/EFD log item format structs proper flex
-> > > > > arrays instead of array[1].
-> > > > > 
-> > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > > ---
-> > > > 
-> > > > So we let this case fail on all older system/kernel? Is the kernel patch
-> > > > recommended to be merged on downstream kernel?
-> > > 
-> > > Yes, since there are certain buggy compilers that mishandle the array
-> > > size computation.  Prior to the introduction of xfs_ondisk.h, they were
-> > > silently writing out filesystem structures that would not be recognized
-> > > by more mainstream systems (e.g. x86).
-> > > 
-> > > OFC nearly all those reports about buggy compilers are for tiny
-> > > architectures that XFS doesn't work well on anyways, so in practice it
-> > > hasn't created any user problems (AFAIK).
-> > 
-> > Thanks, may you provide this detailed explanation in commit log, and better
-> > to point out the kernel commits which is related with this testing change.
-> 
-> Will do.
-> 
-> > Due to this case isn't a case for a known issue, I think it might be no
-> > suitable to add _fixed_by_kernel_commit in this case, but how about giving
-> > more details in commit log.
-> 
-> Er.... xfs/122 isn't a regression test, so it's not testing previously
-> broken and now fixed code.  While I sense that a few peoples'
-> understanding of _fixed_by_kernel_commit might be constrained to "if
-> this test fails, check that your kernel/*fsprogs have commit XXXXX", I
-> myself have started `grep _fixed_by_kernel_commit' to find bug fixes and
-> their related regression tests to suggest backports.
+Oops, I originally ran into this when I was testing using /var/tmp
+instead of /tmp [1], but since we aren't going this route anymore, 
+I don't need this for my use case. I am attempting to auto-recover when
+a test crashes and relaunch the remaining tests and I was seeing some
+tests being rerun due to the lingering tmp.arglist file.
 
-I generally check _fixed_by_*, secondly check the comments in the code and
-the commit log related with the case.
+This could occur on the off chance someone's /tmp is persistent or if
+there wasn't a clean shutdown, maybe via an OOM kill? Perhaps it is
+worth including for consistency's sake. I can update the commit
+description if we want to keep it. Let me know your thoughts.
 
-> 
-> ...although I wonder if perhaps we should have a second set of
-> _by_commit helpers that encode "not a regression test, but you might
-> check such-and-such commit"?
+- Leah
 
-Yeah, the "fixed_by" sounds not precise for xfs/122. Maybe "_cover_commit" or
-some better names you have :)
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > >  tests/xfs/122.out |    8 ++++----
-> > > > >  1 file changed, 4 insertions(+), 4 deletions(-)
-> > > > > 
-> > > > > 
-> > > > > diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-> > > > > index a56cbee84f..95e53c5081 100644
-> > > > > --- a/tests/xfs/122.out
-> > > > > +++ b/tests/xfs/122.out
-> > > > > @@ -161,10 +161,10 @@ sizeof(xfs_disk_dquot_t) = 104
-> > > > >  sizeof(xfs_dq_logformat_t) = 24
-> > > > >  sizeof(xfs_dqblk_t) = 136
-> > > > >  sizeof(xfs_dsb_t) = 264
-> > > > > -sizeof(xfs_efd_log_format_32_t) = 28
-> > > > > -sizeof(xfs_efd_log_format_64_t) = 32
-> > > > > -sizeof(xfs_efi_log_format_32_t) = 28
-> > > > > -sizeof(xfs_efi_log_format_64_t) = 32
-> > > > > +sizeof(xfs_efd_log_format_32_t) = 16
-> > > > > +sizeof(xfs_efd_log_format_64_t) = 16
-> > > > > +sizeof(xfs_efi_log_format_32_t) = 16
-> > > > > +sizeof(xfs_efi_log_format_64_t) = 16
-> > > > >  sizeof(xfs_error_injection_t) = 8
-> > > > >  sizeof(xfs_exntfmt_t) = 4
-> > > > >  sizeof(xfs_exntst_t) = 4
-> > > > > 
-> > > > 
-> > > 
-> > 
-> 
-
+[1] https://lore.kernel.org/fstests/20221212230646.4022294-1-leah.rumancik@gmail.com/
