@@ -2,128 +2,78 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B094C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 00:00:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28865C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 00:01:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229461AbiLTAAQ (ORCPT
+        id S232240AbiLTABT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Dec 2022 19:00:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49262 "EHLO
+        Mon, 19 Dec 2022 19:01:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49850 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232372AbiLTAAO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 19:00:14 -0500
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF9EC12AA3
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 16:00:12 -0800 (PST)
-Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 2BK000qr006248
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 19 Dec 2022 19:00:01 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1671494402; bh=IYZ41/ONUgKeMJ3VQL7wbKBdlqxgeeEefwxpyFy9RcU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=V+b4FK4uRmyxKnYzmCm8yjFdQ7WMqAPjhCy6+7pGSxmT98lDYEldcB5Aw6xhXoLEU
-         gIcJ6f/cm/2W62qYMXpW9t/wcMBHy0PsDU0fVI+WMK00EuPmsPHyXD1xIgoB4Q+8st
-         pVSJ8IDvA2BtfSEE5Ukqi+Jf7JbKn9XEgcgkSgxNFQp9iE4npQYTl/XjluZkoQG7Qs
-         CS9SioxBODagsKMOuTEbvHk4DhHuv5ORXgiLnH0VlpZ3OeCOxV9oqtpGTXXWojEebl
-         ayn2QXENr2/3C3MNBWF3lTGGprRiADsMMSAAQAr5aabvGu9iTP+h6tg5vY79NsieTs
-         zxM5byHtyxcwQ==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 75EB515C3511; Mon, 19 Dec 2022 19:00:00 -0500 (EST)
-Date:   Mon, 19 Dec 2022 19:00:00 -0500
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Qu Wenruo <quwenruo.btrfs@gmx.com>, Qu Wenruo <wqu@suse.com>,
-        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: report: add arch and kernel version info into
- testsuite attributes
-Message-ID: <Y6D7AK6bY5PHGzds@mit.edu>
-References: <20221216070543.31638-1-wqu@suse.com>
- <Y6CmEBltWukgZ3rV@magnolia>
- <a1bc81ca-49fb-c67a-54cc-403287c26629@gmx.com>
- <Y6D4TT9Ids8RerEf@magnolia>
+        with ESMTP id S232798AbiLTABJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 19:01:09 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60391A46F;
+        Mon, 19 Dec 2022 16:01:05 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id F0C356117E;
+        Tue, 20 Dec 2022 00:01:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F891C433EF;
+        Tue, 20 Dec 2022 00:01:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1671494464;
+        bh=4zn2xuFc1yOSaUF7eMyuTKLng4SSlpqNcVU4ptwF3rE=;
+        h=Subject:From:To:Cc:Date:From;
+        b=iZ3i5yGJ7HxuCDpj6BHij9NO+F/l6u/Efs8875tkRbvRM2IIHKdvHN5I1DOmWrstc
+         +Wfpj+Mfrc78aHny193NOBLWwbrIUS9O9B/vaji/UKP8gDTw6G25nCCpxKbWZmWsPx
+         /BoadlJ/pgYKg3w4zYiGl3SMmYi9agQQbAMJLNhRdSmDbhiJ4IhofuR+R8C6mAm9bv
+         HBMjfSdH4YsZ5G+8CM5PiLjeB8k9MfsnLfCYmzQ3IT/kVNEmfNqNSjA/d/F8Ahvn1I
+         zDN0J4zlOoIF7Lsgkmfe2TiRCgw5VMZnP8UPi49OuRsUaL3zxn+yG/ZQplAgTj7NiB
+         sHZzhqSCNvPMg==
+Subject: [PATCHSET RFC 0/8] fstests: improve junit xml reporting
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     djwong@kernel.org, zlang@redhat.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
+        leah.rumancik@gmail.com, quwenruo.btrfs@gmx.com
+Date:   Mon, 19 Dec 2022 16:01:03 -0800
+Message-ID: <167149446381.332657.9402608531757557463.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Y6D4TT9Ids8RerEf@magnolia>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-For what it's worth, here is how I add properties to the xunit file.
-I do it after the fact using a tiny python script:
+Hi all,
 
-https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/usr/local/bin/update_properties_xunit
+This series improves the fstests reporting code in several ways.  First,
+change the ./check code to generate the report after every test, so that
+a cluster-based fstest scheduler can reschedule tests after a VM crash.
+Personally, I was using it to get live status on my tests dashboard.
 
-This way I can dump a lot of interesting information about the test
-run into the XML file.  (See attached for the beginning of a
-results.xml file generated by gce-xfstests.)
+The bulk of the patches in here improve the junit xml reporting so that
+we (a) actually declare which xml schema we're trying to emit and (b)
+capture a lot more information about what was being tested.
 
-I also have a handy script which allows me to run separate file system
-configs in separate VM's, and then combine the xunuit files together:
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
 
-https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/usr/local/bin/merge_xunit
-https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/usr/local/bin/combine_xunit
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
 
-I'm a **big** fan of this approach, since it allows me to take about
-24 hours worth of test runs, shard them across 12 different VM's, so
-that it akes about 2.5 hours of wall clock time to do a full ext4 test
-run.
+--D
 
-After all, cloud VM time is cheap; software engineering time is
-expensive.  :-)
-
-					- Ted
-					
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="xfstests" failures="6" skipped="160" tests="1045" time="14724" hostname="xfstests-ltm-
-20220825074228-aa" timestamp="2022-08-25T11:55:34">
-
-
-        <properties>
-
-
-                <property name="CMDLINE" value="--instance-name xfstests-ltm-20220825074228-aa --gce-zo
-ne us-west1-a --gs-bucket gce-xfstests --kernel gs://gce-xfstests/kernel.deb --bucket-subdir results --
-no-email -c xfs/4k -g auto --local-ssd-nvme --image-project gce-xfstests"/>
-                <property name="FSTESTIMG" value="gce-xfstests/xfstests-202208242313"/>
-                <property name="FSTESTPRJ" value="gce-xfstests"/>
-                <property name="KERNEL" value="kernel   6.0.0-rc2-xfstests #756 SMP PREEMPT_DYNAMIC Mon
- Aug 22 22:04:33 EDT 2022 x86_64"/>
-                <property name="FSTESTVER" value="blktests      4e07b0c (Fri, 15 Jul 2022 14:40:03 +090
-0)"/>
-                <property name="FSTESTVER" value="fio           fio-3.31 (Tue, 9 Aug 2022 14:41:25 -060
-0)"/>
-                <property name="FSTESTVER" value="fsverity      v1.5 (Sun, 6 Feb 2022 10:59:13 -0800)"/
->
-                <property name="FSTESTVER" value="ima-evm-utils v1.3.2 (Wed, 28 Oct 2020 13:18:08 -0400
-)"/>
-                <property name="FSTESTVER" value="nvme-cli      v1.16 (Thu, 11 Nov 2021 13:09:06 -0800)
-"/>
-                <property name="FSTESTVER" value="quota         v4.05-43-gd2256ac (Fri, 17 Sep 2021 14:
-04:16 +0200)"/>
-                <property name="FSTESTVER" value="util-linux    v2.38.1 (Thu, 4 Aug 2022 11:06:21 +0200
-)"/>
-                <property name="FSTESTVER" value="xfsprogs      v5.19.0 (Fri, 12 Aug 2022 13:45:01 -050
-0)"/>
-                <property name="FSTESTVER" value="xfstests-bld  bb566bcf (Wed, 24 Aug 2022 23:07:24 -04
-00)"/>
-                <property name="FSTESTVER" value="xfstests      v2022.08.21-8-g289f50f8b (Sun, 21 Aug 2
-022 15:21:34 -0400)"/>
-                <property name="FSTESTVER" value="zz_build-distro       bullseye"/>
-                <property name="FSTESTCFG" value="xfs/4k"/>
-                <property name="FSTESTSET" value="-g auto"/>
-                <property name="FSTESTEXC" value=""/>
-                <property name="FSTESTOPT" value="aex"/>
-                <property name="MNTOPTS" value=""/>
-                <property name="CPUS" value="2"/>
-                <property name="MEM" value="7680"/>
-                <property name="DMI_MEM" value="7680 MB (Max capacity)"/>
-                <property name="GCE ID" value="8073487017178750853"/>
-                <property name="MACHINE TYPE" value="n1-standard-2"/>
-                <property name="TESTRUNID" value="ltm-20220825074228-aa"/>
-                <property name="TESTCFG" value="xfs/4k"/>
-        </properties>
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=xunit-reporting-improvements
+---
+ check         |   10 +++
+ common/ext4   |    5 +
+ common/report |   77 +++++++++++++++++--
+ common/xfs    |   10 +++
+ doc/xunit.xsd |  226 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 318 insertions(+), 10 deletions(-)
+ create mode 100644 doc/xunit.xsd
 
