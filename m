@@ -2,111 +2,295 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55B41C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 03:30:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 065B3C10F1E
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 06:57:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232570AbiLTDaR (ORCPT
+        id S232858AbiLTG5A (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Dec 2022 22:30:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56828 "EHLO
+        Tue, 20 Dec 2022 01:57:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50624 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbiLTDaP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 22:30:15 -0500
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B64D10A0
-        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 19:30:14 -0800 (PST)
-Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 2BK3Tw0h031574
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 19 Dec 2022 22:30:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1671507002; bh=Qf6faypoXHGg6tawwxUgy9DzZhgNXLnAIn3mummMjhc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=gwomMzzH9z/BJ3PA7iMzZGRkjs/VohjHIgJ34dIuCg3pLdNvDDxNHxzRp15fyA8+X
-         nfXzyRgsBwYkPQ2NWtfLqa4QRIiEmOTVDjL41k8olr8C9gBm+IpAXU2UP+OIMRIU7Z
-         YqnMVSsHDaPxT7wwMrVZa5gzt2F8+Qo8QYXOzwmykYlwKnWlCAc3npSMygf8th9mOk
-         NkC1gnLjOUJzJFALY+C9X5KAKAGgUUh29BfQJzD6jey1LKuAfZ3xd8A6+ObHf7surc
-         2mc4840R3U3RjoCOBN9+KlzskRdiMLdkkYgP5LlKkdt7i4Lgf8wKD9pYHGrRACKwUt
-         Lf3Vd+GijTppA==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 523BB15C3511; Mon, 19 Dec 2022 22:29:58 -0500 (EST)
-Date:   Mon, 19 Dec 2022 22:29:58 -0500
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me, leah.rumancik@gmail.com,
-        quwenruo.btrfs@gmx.com
-Subject: Re: [PATCH 6/8] report: collect basic information about a test run
-Message-ID: <Y6EsNkIcA7bd9aHR@mit.edu>
-References: <167149446381.332657.9402608531757557463.stgit@magnolia>
- <167149449737.332657.1308561091226926848.stgit@magnolia>
+        with ESMTP id S229511AbiLTG47 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Dec 2022 01:56:59 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82BC72BF9
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 22:56:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1671519371;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=c9+Nr/9vTNFEp2yGiFd4gGItFfceJvuZ/1DBexQA1hk=;
+        b=UWlLYTo0yxAJO/EO7hDVMTEAsCTb7xE3Thb7bruVDzbe57sM2cF9R5gk0ipwO/reryxZYo
+        A19+Z0YLbBp7HaxuGtkx5k3gcf/ky3xsxrvN6YbrRmwmZv+3VPhgbHmUikHSwT+qU5Y9x9
+        bXwCsirjlLxdgBEj3sEDl4qIQlAMCg8=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-590-6xMIYRT8MWuJZAB8oHBYog-1; Tue, 20 Dec 2022 01:56:10 -0500
+X-MC-Unique: 6xMIYRT8MWuJZAB8oHBYog-1
+Received: by mail-pf1-f200.google.com with SMTP id p17-20020a056a0026d100b005769067d113so6299440pfw.3
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 22:56:10 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=c9+Nr/9vTNFEp2yGiFd4gGItFfceJvuZ/1DBexQA1hk=;
+        b=Sn+cW/Sqt3CNAvcCfTWnPl2H87pgDU5DoD/QbtoXzuEYHQu3CJy/WzOtbjwTLCDw1F
+         emhLRJxxxWutP0CxKJX8rQu0aQG207tYIFBnb4PDAB4iPGEqVPziWnJcUBaaYCIPe9sB
+         yPq/2Pfir4mX+qbjN0lKyOUDhgCf0j6HcrVLU35aQ1a1VoUlorZJi9dmLGcOqA4/SAlt
+         wL9qQi2PPv1pupIrfUq7ZHPMrOxALMPYNEQ24073oVl3msK9Fw0qMiOLlN23Qm4avQM3
+         6eQ99Npw5zJv4wU2zU7N5BvCL45JTNSWEYI4sVFDUu1Ce7h/rQNeJ4IcKL20kmEsxkBJ
+         Ka5Q==
+X-Gm-Message-State: AFqh2kqVWjt7mpKvvG6gfK/pq2BLWkQ8swYKpuRxi4rgolml8RLEJn/+
+        AwpDdrC72Si12nvOKQkvn0f/WbV+jLtLqtRZ+ezATY5e/mo499c8p4RfiJOi69wYuwzrtH6SxBu
+        6YiaPZ4bLCDsX679RdQ==
+X-Received: by 2002:a17:90a:c301:b0:223:acc1:837e with SMTP id g1-20020a17090ac30100b00223acc1837emr10669855pjt.31.1671519369244;
+        Mon, 19 Dec 2022 22:56:09 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXsEEdEQ8FUa+OclWLgc0aZCyGRAhx8ydiPiXuopFoLoK0ZenxLgUdYOubXu7sy2dBitC8I1ig==
+X-Received: by 2002:a17:90a:c301:b0:223:acc1:837e with SMTP id g1-20020a17090ac30100b00223acc1837emr10669837pjt.31.1671519368786;
+        Mon, 19 Dec 2022 22:56:08 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id h15-20020a17090a130f00b0021900ba8eeesm10438707pja.2.2022.12.19.22.56.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Dec 2022 22:56:08 -0800 (PST)
+Date:   Tue, 20 Dec 2022 14:56:04 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
+Subject: Re: [PATCH 09/10] generic/624: test multiple Merkle tree block sizes
+Message-ID: <20221220065604.eorvm6nlzamh6tyt@zlang-mailbox>
+References: <20221211070704.341481-1-ebiggers@kernel.org>
+ <20221211070704.341481-10-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <167149449737.332657.1308561091226926848.stgit@magnolia>
+In-Reply-To: <20221211070704.341481-10-ebiggers@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 19, 2022 at 04:01:37PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Sat, Dec 10, 2022 at 11:07:02PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Record various generic information about an fstests run when generating
-> a junit xml report.  This includes the cpu architecture, the kernel
-> revision, the CPU, memory, and numa node counts, and some information
-> about the block devices passed in.
+> Instead of only testing 4K Merkle tree blocks, test FSV_BLOCK_SIZE, and
+> also other sizes if they happen to be supported.  This allows this test
+> to run in cases where it couldn't before and improves test coverage in
+> cases where it did run before.
+> 
+> This required reworking the test to compute the expected digests using
+> the 'fsverity digest' command, instead of relying on .out file
+> comparisons.  (There isn't much downside to this, since comparison to
+> known-good file digests already happens in generic/575.  So if both the
+> kernel and fsverity-utils were to be broken in the same way, generic/575
+> would detect it.  generic/624 serves a different purpose.)
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  common/verity         |  11 ++++
+>  tests/generic/624     | 119 ++++++++++++++++++++++++++++++------------
+>  tests/generic/624.out |  15 ++----
+>  3 files changed, 101 insertions(+), 44 deletions(-)
+> 
+> diff --git a/common/verity b/common/verity
+> index b88e839b..36a0f7d1 100644
+> --- a/common/verity
+> +++ b/common/verity
+> @@ -263,6 +263,17 @@ _fsv_measure()
+>          $FSVERITY_PROG measure "$@" | awk '{print $1}'
+>  }
+>  
+> +_fsv_digest()
+> +{
+> +	local args=("$@")
+> +	# If the caller didn't explicitly specify a Merkle tree block size, then
+> +	# use FSV_BLOCK_SIZE.
+> +	if ! [[ " $*" =~ " --block-size" ]]; then
+> +		args+=("--block-size=$FSV_BLOCK_SIZE")
+> +	fi
+> +        $FSVERITY_PROG digest "${args[@]}" | awk '{print $1}'
+> +}
+> +
+>  _fsv_sign()
+>  {
+>  	local args=("$@")
+> diff --git a/tests/generic/624 b/tests/generic/624
+> index 7c447289..87a1e9d2 100755
+> --- a/tests/generic/624
+> +++ b/tests/generic/624
+> @@ -24,48 +24,99 @@ _cleanup()
+>  _supported_fs generic
+>  _require_scratch_verity
+>  _disable_fsverity_signatures
+> -# For the output of this test to always be the same, it has to use a specific
+> -# Merkle tree block size.
+> -if [ $FSV_BLOCK_SIZE != 4096 ]; then
+> -	_notrun "4096-byte verity block size not supported on this platform"
+> -fi
+> +fsv_orig_file=$SCRATCH_MNT/file
+> +fsv_file=$SCRATCH_MNT/file.fsv
+>  
+>  _scratch_mkfs_verity &>> $seqres.full
+>  _scratch_mount
+> -
+> -echo -e "\n# Creating a verity file"
+> -fsv_file=$SCRATCH_MNT/file
+> -# Always use the same file contents, so that the output of the test is always
+> -# the same.  Also use a file that is large enough to have multiple Merkle tree
+> -# levels, so that the test verifies that the blocks are returned in the expected
+> -# order.  A 1 MB file with SHA-256 and a Merkle tree block size of 4096 will
+> -# have 3 Merkle tree blocks (3*4096 bytes): two at level 0 and one at level 1.
+> -head -c 1000000 /dev/zero > $fsv_file
+> -merkle_tree_size=$((3 * FSV_BLOCK_SIZE))
+> -fsverity_descriptor_size=256
+> -_fsv_enable $fsv_file --salt=abcd
+> +_fsv_create_enable_file $fsv_file
+>  _require_fsverity_dump_metadata $fsv_file
+> -_fsv_measure $fsv_file
+>  
+> -echo -e "\n# Dumping Merkle tree"
+> -_fsv_dump_merkle_tree $fsv_file | sha256sum
+> +# Test FS_IOC_READ_VERITY_METADATA on a file that uses the given Merkle tree
+> +# block size.
+> +test_block_size()
+> +{
+> +	local block_size=$1
+> +	local digest_size=32 # assuming SHA-256
+> +	local i
+> +
+> +	# Create the file.  Make the file size big enough to result in multiple
+> +	# Merkle tree levels being needed.  The following expression computes a
+> +	# file size that needs 2 blocks at level 0, and thus 1 block at level 1.
+> +	local file_size=$((block_size * (2 * (block_size / digest_size))))
+> +	head -c $file_size /dev/zero > $fsv_orig_file
+> +	local tree_params=("--salt=abcd" "--block-size=$block_size")
+> +	cp $fsv_orig_file $fsv_file
+> +	_fsv_enable $fsv_file "${tree_params[@]}"
+> +
+> +	# Use the 'fsverity digest' command to compute the expected Merkle tree,
+> +	# descriptor, and file digest.
+> +	#
+> +	# Ideally we'd just hard-code expected values into the .out file and
+> +	# echo the actual values.  That doesn't quite work here, since all these
+> +	# values depend on the Merkle tree block size, and the Merkle tree block
+> +	# sizes that are supported (and thus get tested here) vary.  Therefore,
+> +	# we calculate the expected values in userspace with the help of
+> +	# 'fsverity digest', then do explicit comparisons with them.  This works
+> +	# fine as long as fsverity-utils and the kernel don't get broken in the
+> +	# same way, in which case generic/575 should detect the problem anyway.
+> +	local expected_file_digest=$(_fsv_digest $fsv_orig_file \
+> +		"${tree_params[@]}" \
+> +		--out-merkle-tree=$tmp.merkle_tree.expected \
+> +		--out-descriptor=$tmp.descriptor.expected)
+> +	local merkle_tree_size=$(_get_filesize $tmp.merkle_tree.expected)
+> +	local descriptor_size=$(_get_filesize $tmp.descriptor.expected)
+>  
+> -echo -e "\n# Dumping Merkle tree (in chunks)"
+> -# The above test may get the whole tree in one read, so also try reading it in
+> -# chunks.
+> -for (( i = 0; i < merkle_tree_size; i += 997 )); do
+> -	_fsv_dump_merkle_tree $fsv_file --offset=$i --length=997
+> -done | sha256sum
+> +	# 'fsverity measure' should return the expected file digest.
+> +	local actual_file_digest=$(_fsv_measure $fsv_file)
+> +	if [ "$actual_file_digest" != "$expected_file_digest" ]; then
+> +		echo "Measure returned $actual_file_digest but expected $expected_file_digest"
+> +	fi
+>  
+> -echo -e "\n# Dumping descriptor"
+> -# Note that the hash that is printed here should be the same hash that was
+> -# printed by _fsv_measure above.
+> -_fsv_dump_descriptor $fsv_file | sha256sum
+> +	# Test dumping the Merkle tree.
+> +	_fsv_dump_merkle_tree $fsv_file > $tmp.merkle_tree.actual
+> +	if ! cmp $tmp.merkle_tree.expected $tmp.merkle_tree.actual; then
+> +		echo "Dumped Merkle tree didn't match"
+> +	fi
+> +
+> +	# Test dumping the Merkle tree in chunks.
+> +	for (( i = 0; i < merkle_tree_size; i += 997 )); do
+> +		_fsv_dump_merkle_tree $fsv_file --offset=$i --length=997
+> +	done > $tmp.merkle_tree.actual
+> +	if ! cmp $tmp.merkle_tree.expected $tmp.merkle_tree.actual; then
+> +		echo "Dumped Merkle tree (in chunks) didn't match"
+> +	fi
+> +
+> +	# Test dumping the descriptor.
+> +	_fsv_dump_descriptor $fsv_file > $tmp.descriptor.actual
+> +	if ! cmp $tmp.descriptor.expected $tmp.descriptor.actual; then
+> +		echo "Dumped descriptor didn't match"
+> +	fi
+> +
+> +	# Test dumping the descriptor in chunks.
+> +	for (( i = 0; i < descriptor_size; i += 13 )); do
+> +		_fsv_dump_descriptor $fsv_file --offset=$i --length=13
+> +	done > $tmp.descriptor.actual
+> +	if ! cmp $tmp.descriptor.expected $tmp.descriptor.actual; then
+> +		echo "Dumped descriptor (in chunks) didn't match"
+> +	fi
+> +}
+>  
+> -echo -e "\n# Dumping descriptor (in chunks)"
+> -for (( i = 0; i < fsverity_descriptor_size; i += 13 )); do
+> -	_fsv_dump_descriptor $fsv_file --offset=$i --length=13
+> -done | sha256sum
+> +# Always test FSV_BLOCK_SIZE.  Also test some other block sizes if they happen
+> +# to be supported.
+> +_fsv_scratch_begin_subtest "Testing FS_IOC_READ_VERITY_METADATA with block_size=FSV_BLOCK_SIZE"
+> +test_block_size $FSV_BLOCK_SIZE
+> +for block_size in 1024 4096 16384 65536; do
+> +	_fsv_scratch_begin_subtest "Testing FS_IOC_READ_VERITY_METADATA with block_size=$block_size"
+> +	if (( block_size == FSV_BLOCK_SIZE )); then
+> +		continue
+> +	fi
+> +	if ! _fsv_can_enable $fsv_file --block-size=$block_size; then
+> +		echo "block_size=$block_size is unsupported" >> $seqres.full
+> +		continue
 
-It would be nice if there was a way that the test runner could pass
-information that would be added to the xunit properties.  As I
-mentioned in another e-mail, I currently do this via a post-processing
-step which adds the properties to the junit xml file via a python
-script.  And there are a number of additional properties that are used
-by my report generator[1] which takes the junit xml file as input, and
-generates a summary report which is convenient for humans.
+If a block size isn't supported, e.g. 1024. Then this case trys to skip that
+test, but it'll break golden image, due to the .out file contains each line
+of:
+  Testing FS_IOC_READ_VERITY_METADATA with block_size=1024/4096/16384/65536
 
-[1] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/usr/local/bin/gen_results_summary
+Do you expect that failure, or we shouldn't fail on that?
 
-Some of these properties include the version of xfstests, xfsprogs,
-and other key software components (for example, I've had test failures
-traced to bugs in fio, so knowing the version of fio that is used is
-super-handy).
+Thanks,
+Zorro
 
-So maybe we could pass in a properties file, either via a command-line
-option or an environment variable?  My script[2] uses a colon
-separated format, but I'm not wedded to that delimiter.
+> +	fi
+> +	test_block_size $block_size
+> +done
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/generic/624.out b/tests/generic/624.out
+> index 912826d3..97d5691a 100644
+> --- a/tests/generic/624.out
+> +++ b/tests/generic/624.out
+> @@ -1,16 +1,11 @@
+>  QA output created by 624
+>  
+> -# Creating a verity file
+> -sha256:11e4f886bf2d70a6ef3a8b6ce8e8c62c9e5d3263208b9f120ae46791f124be73
+> +# Testing FS_IOC_READ_VERITY_METADATA with block_size=FSV_BLOCK_SIZE
+>  
+> -# Dumping Merkle tree
+> -db88cdad554734cd648a1bfbb5be7f86646c54397847aab0b3f42a28829fed17  -
+> +# Testing FS_IOC_READ_VERITY_METADATA with block_size=1024
+>  
+> -# Dumping Merkle tree (in chunks)
+> -db88cdad554734cd648a1bfbb5be7f86646c54397847aab0b3f42a28829fed17  -
+> +# Testing FS_IOC_READ_VERITY_METADATA with block_size=4096
+>  
+> -# Dumping descriptor
+> -11e4f886bf2d70a6ef3a8b6ce8e8c62c9e5d3263208b9f120ae46791f124be73  -
+> +# Testing FS_IOC_READ_VERITY_METADATA with block_size=16384
+>  
+> -# Dumping descriptor (in chunks)
+> -11e4f886bf2d70a6ef3a8b6ce8e8c62c9e5d3263208b9f120ae46791f124be73  -
+> +# Testing FS_IOC_READ_VERITY_METADATA with block_size=65536
+> -- 
+> 2.38.1
+> 
 
-CMDLINE: "-c f2fs/default -g auto"
-FSTESTIMG: gce-xfstests/xfstests-amd64-202212131454
-FSTESTPRJ: gce-xfstests
-KERNEL: kernel	6.1.0-xfstests #2 SMP PREEMPT_DYNAMIC Mon Dec 12 16:09:40 EST 2022 x86_64
-FSTESTVER: blktests	068bd2a (Fri, 18 Nov 2022 08:38:35 +0900)
-FSTESTVER: fio		fio-3.31 (Tue, 9 Aug 2022 14:41:25 -0600)
-FSTESTVER: fsverity	v1.5 (Sun, 6 Feb 2022 10:59:13 -0800)
-FSTESTVER: ima-evm-utils	v1.3.2 (Wed, 28 Oct 2020 13:18:08 -0400)
-FSTESTVER: nvme-cli	v1.16 (Thu, 11 Nov 2021 13:09:06 -0800)
-FSTESTVER: quota		v4.05-52-gf7e24ee (Tue, 1 Nov 2022 11:45:06 +0100)
-FSTESTVER: util-linux	v2.38.1 (Thu, 4 Aug 2022 11:06:21 +0200)
-FSTESTVER: xfsprogs	v6.0.0 (Mon, 14 Nov 2022 12:06:23 +0100)
-FSTESTVER: xfstests-bld	65edab38 (Wed, 30 Nov 2022 12:11:57 -0500)
-FSTESTVER: xfstests	v2022.11.27-8-g3c178050c (Wed, 30 Nov 2022 10:25:39 -0500)
-FSTESTVER: zz_build-distro	bullseye
-FSTESTCFG: "f2fs/default"
-FSTESTSET: "-g auto"
-FSTESTEXC: ""
-FSTESTOPT: "aex"
-MNTOPTS: ""
-CPUS: "2"
-MEM: "7680"
-DMI_MEM: 8 GB (Max capacity)
-PARAM_MEM: 7680 (restricted by cmdline)
-GCE ID: "3198461547210171740"
-MACHINE TYPE: "e2-standard-2"
-TESTRUNID: tytso-20221213150813
-
-[2] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/usr/local/bin/update_properties_xunit
-
-Cheers,
-
-					- Ted
