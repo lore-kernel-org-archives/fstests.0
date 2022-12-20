@@ -2,128 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52DB8C4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 02:20:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41E65C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 03:17:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229969AbiLTCUR (ORCPT
+        id S232678AbiLTDRC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Dec 2022 21:20:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58692 "EHLO
+        Mon, 19 Dec 2022 22:17:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbiLTCUQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 21:20:16 -0500
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1B042DC2;
-        Mon, 19 Dec 2022 18:20:14 -0800 (PST)
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx004
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MSt8W-1pKCTM2qJK-00UIsV; Tue, 20
- Dec 2022 03:20:03 +0100
-Message-ID: <51d9d9af-1302-e555-ca8a-c57a5a89b848@gmx.com>
-Date:   Tue, 20 Dec 2022 10:19:57 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [PATCH 3/8] report: capture the time zone in the test report
- timestamp
-Content-Language: en-US
-To:     "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
-        leah.rumancik@gmail.com
+        with ESMTP id S232964AbiLTDRB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 22:17:01 -0500
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F353F2DC0
+        for <fstests@vger.kernel.org>; Mon, 19 Dec 2022 19:16:59 -0800 (PST)
+Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 2BK3GhnG026138
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 19 Dec 2022 22:16:44 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1671506205; bh=AUO3hX41d59kcr1GVWXAeTK09oFfMUrFiF1nZ3HcXAk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To;
+        b=mSFT9Eo+nzgri83W15A78YT0fFG3vpFSdCoVdUUd4p8QLYmn+uJdIgtpiqBCfZiqS
+         G0YFzXMVkwsufvuUN/65mTxAcG9LqOr4dC7cjywBh1uShxpS9+kknLni09H+F95THr
+         496Qmt3jqEnjoPwPU//MjIR0cM+2YfewYbiLpPvY8ov/vkfIs9NzexQ4+u2QWMj+DD
+         6M16zbf9uDoPdp42HDPekG9dhFkQCicdsGH3coWIYRhNdBjc5IBo+i9B0HunXvM8qI
+         OgxIndLWTlaSOsFVqHUqi/zkjr5VuKo7cZFvASLIZhCqHAi3gpuPNxnUHM9G77Q+a/
+         t2gz09wuswNqQ==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 9835D15C3511; Mon, 19 Dec 2022 22:16:43 -0500 (EST)
+Date:   Mon, 19 Dec 2022 22:16:43 -0500
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me, leah.rumancik@gmail.com,
+        quwenruo.btrfs@gmx.com
+Subject: Re: [PATCH 1/8] check: generate section reports between tests
+Message-ID: <Y6EpG8cpQDH0XuGz@mit.edu>
 References: <167149446381.332657.9402608531757557463.stgit@magnolia>
- <167149448068.332657.14583277548579655582.stgit@magnolia>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-In-Reply-To: <167149448068.332657.14583277548579655582.stgit@magnolia>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Provags-ID: V03:K1:x1LzitBWs/le09YHBfX6J2LTjozyzp4VtS5ohMgfg+EdVLW0mhr
- 9qbD7+UJS9C04wqGnEUQpL8UdofDZIcN6rraRmwL8YYjPdG3LoNhYdWmGrrNRsedv9x/8++
- kyutDL7NGofg/OvPUSA/miE5wX7JmlwFFWerzdC8o9/mE/I9pqlB5nImAZLmASBEBSbi3ip
- FrEfqkKzTJ6rMcjognV1g==
-UI-OutboundReport: notjunk:1;M01:P0:b4riFa13R0w=;939ZH4wSnWxKj7B+E6aGv0er9Sf
- Baahh4dd9HmMrFeB+1TxWu02YKtCXKGrBv1BMVgv06akO0t5jZhX2Iv+8p1Ciqx+E04DMN/1U
- QzlP0dICAEeZS3pe3L5nm65/g9F+xKCgn2X+lWMG3g1Zi2MARlmzgSuPPOTISQUug+eyWYqHe
- 3sqzpj9xGheZrRyiacMtgz5skKXdRNkEQ7m6qz0DJN65+GQDq1VJsWX9Cz7X70VxGtgNpdiPS
- GQ/mG8cupfbVjSyLLaeEVN/sb1eRoVhjHaAQbMsJ3hGk+ErJU4HetWTS2YBqyIENIfwZmu2LN
- rAWz2tsMxBQDtLqAfJc1QEoyE5K0GMlON1vnBLYZIspQq9jgs/6ejhGY2xBJ1TYMggTHYZ2up
- wYSyTTigbCqE/2abLt6ggnCsDgsGal8BSer6xsyit4yex5XcJNEFCWB25qQpY0dGtlY3i9Zp+
- to53A6AcRkxnfk1axOPOe1F6josZ8jUQECzYB5Lz89Vd0hK0uDFbtT2czgFCXjb6CLTsJJxXE
- qWEHkS2RM8v1Fh+5djm/9pSN1JR9mmr6+ssfi/1bOJRIjCC0Zzs6xFXo83yIMJ7Dz202+72pF
- HSqWwklI2GPjkYmO0U7xiYwG3pD74o5kCfsmLGG+RA20S+31u7919pPBxjg/aFmG3SH6Hmljx
- ZNgayY/qZ6JvPFvUT4ZCp61d3WHc6keQZ27Xqzj2Mz0xlhpZKY3TO72Aog8tSMzzXQgAcCELn
- hnXeqV0VGndOjWcA5JiulFKCRSlIiG+ExprqLlLlNDNXLzgXCBaSNEy//sb76AZMh/H3PWoS9
- kF7aLV4nkH5ska0j671MBMGrggPAzZjKJ5TSfKTHiBk+poefMwql+9ODfiz9lxnmANryob8YX
- T1kf/784lhQSgH2hOQB4uJ2+eStVoVhij/3HEivvzVXThIJs+617aitF/a2J8S4I61geL1B/5
- LDmD7K1Qp1HfeoLn9v/yMuhihZ4=
+ <167149446946.332657.17186597494532662986.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <167149446946.332657.17186597494532662986.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 2022/12/20 08:01, Darrick J. Wong wrote:
+On Mon, Dec 19, 2022 at 04:01:09PM -0800, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Make sure we put the time zone of the system running the test in the
-> timestamp that is recorded in the xunit report.  `date "+%F %T"' reports
-> the local time zone, not UTC.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Generate the section report between tests so that the summary report
+> always reflects the outcome of the most recent test.  Two usecases are
+> envisioned here -- if a cluster-based test runner anticipates that the
+> testrun could crash the VM, they can set REPORT_DIR to (say) an NFS
+> mount to preserve the intermediate results.  If the VM does indeed
+> crash, the scheduler can examine the state of the crashed VM and move
+> the tests to another VM.  The second usecase is a reporting agent that
+> runs in the VM to upload live results to a test dashboard.
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+Leah has been working on adding crash recovery for gce-xfstests.
+It'll be interesting to see how her work dovetails with your patches.
 
-Thanks,
-Qu
-> ---
->   common/report |    9 ++++++---
->   doc/xunit.xsd |    2 +-
->   2 files changed, 7 insertions(+), 4 deletions(-)
-> 
-> 
-> diff --git a/common/report b/common/report
-> index 1d84650270..1817132d51 100644
-> --- a/common/report
-> +++ b/common/report
-> @@ -38,6 +38,7 @@ _xunit_make_section_report()
->   	local bad_count="$3"
->   	local notrun_count="$4"
->   	local sect_time="$5"
-> +	local timestamp
->   
->   	if [ $sect_name == '-no-sections-' ]; then
->   		sect_name='global'
-> @@ -45,8 +46,10 @@ _xunit_make_section_report()
->   	local report=$tmp.report.xunit.$sect_name.xml
->   	# Header
->   	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
-> -	if [ -z "$date_time" ]; then
-> -		date_time=$(date +"%F %T")
-> +	if [ -n "$date_time" ]; then
-> +		timestamp="$(date -Iseconds --date="$date_time")"
-> +	else
-> +		timestamp="$(date -Iseconds)"
->   	fi
->   
->   	local fstests_ns="https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git"
-> @@ -58,7 +61,7 @@ _xunit_make_section_report()
->   
->    name="xfstests"
->    failures="$bad_count" skipped="$notrun_count" tests="$tests_count" time="$sect_time"
-> - hostname="$HOST" timestamp="${date_time/ /T}">
-> + hostname="$HOST" timestamp="$timestamp">
->   ENDL
->   
->   	# Properties
-> diff --git a/doc/xunit.xsd b/doc/xunit.xsd
-> index 0aef8a9839..67f586b816 100644
-> --- a/doc/xunit.xsd
-> +++ b/doc/xunit.xsd
-> @@ -12,7 +12,7 @@
->   	<xs:element name="testsuite" type="testsuite"/>
->   	<xs:simpleType name="ISO8601_DATETIME_PATTERN">
->   		<xs:restriction base="xs:dateTime">
-> -			<xs:pattern value="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"/>
-> +			<xs:pattern value="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{2}:[0-9]{2}"/>
->   		</xs:restriction>
->   	</xs:simpleType>
->   	<xs:element name="testsuites">
-> 
+The basic design we've worked out works by having the test framework
+recognize whether the VM had been had been previously been running
+tests.  We keep track of the last test that was run by hooking into
+$LOGGER_PROG.  We then use a python script[1] to append to the xunit file
+a test result for the test that was running at the time of the crash,
+and we set the test result to "error", and then we resume running
+tests from where we had left off.
+
+[1] https://github.com/lrumancik/xfstests-bld/blob/ltm-auto-resume-new/test-appliance/files/usr/local/bin/add_error_xunit
+
+To deal with cases where the kernel has deadlocked, when the test VM
+is launched by the LTM server, the LTM server will monitor the test
+VM, if the LTM server notices that the test VM has failed to make
+forward progress within a set time, it will force the test VM to
+reboot, at which point the recovery process described above kicks in.
+
+Eventually, we'll have the LTM server examine the serial console of
+the test VM, looking for indications of kernel panics and RCU / soft
+lockup warnings, so we can more quickly force a reboot when the system
+under test is clearly unhappy.
+
+The advantage of this design is that it doesen't require using NFS to
+store the results, and in theory we don't even need to use a separate
+monitoring VM; we could just use a software and kernel watchdogs to
+notice when the tests have stopped making forward progress.
+
+       	    	      	   	   - Ted
+
+P.S.  We're not using section reporting since we generally use launch
+separate VM's for each "section" so we can speed up the test run time
+by sharding across those VM's.  And then we have the LTM server merge
+the results together into a single test run report.
