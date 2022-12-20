@@ -2,24 +2,24 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C620AC4332F
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 01:15:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7911C4332F
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Dec 2022 02:18:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233032AbiLTBPq (ORCPT
+        id S229532AbiLTCSp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Dec 2022 20:15:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47540 "EHLO
+        Mon, 19 Dec 2022 21:18:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58470 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232880AbiLTBPQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 20:15:16 -0500
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEE5312A82;
-        Mon, 19 Dec 2022 17:14:24 -0800 (PST)
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MulqN-1oqK803UtH-00rnmr; Tue, 20
- Dec 2022 02:14:12 +0100
-Message-ID: <f447b1ab-ce5d-a736-6427-d1a3f33d20cf@gmx.com>
-Date:   Tue, 20 Dec 2022 09:14:07 +0800
+        with ESMTP id S229454AbiLTCSp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 19 Dec 2022 21:18:45 -0500
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 635632DC2;
+        Mon, 19 Dec 2022 18:18:35 -0800 (PST)
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MUosT-1pG51j1EDB-00Qmw3; Tue, 20
+ Dec 2022 03:18:23 +0100
+Message-ID: <fc3f7649-162d-c149-74eb-ac38699bcb85@gmx.com>
+Date:   Tue, 20 Dec 2022 10:18:18 +0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.6.0
@@ -28,31 +28,31 @@ To:     "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
         leah.rumancik@gmail.com
 References: <167149446381.332657.9402608531757557463.stgit@magnolia>
- <167149446946.332657.17186597494532662986.stgit@magnolia>
+ <167149447509.332657.12495196329565215003.stgit@magnolia>
 From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Subject: Re: [PATCH 1/8] check: generate section reports between tests
-In-Reply-To: <167149446946.332657.17186597494532662986.stgit@magnolia>
+Subject: Re: [PATCH 2/8] report: derive an xml schema for the xunit report
+In-Reply-To: <167149447509.332657.12495196329565215003.stgit@magnolia>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Provags-ID: V03:K1:2gtNygUJgFsRNF3UeOSuwrTow2Ggc+ktQz93CTikVkVgWwAftqb
- tZw79OLS3XEREQtEL9b3hYjItdsko1MAvPKdD7sNLDjN0XWSasTFuPciygfk8ijiZl+VC9U
- mLB2FJOiQ8nkJDVECTKbACCJRj7ffuphNkO7IvmMyjSMpr+0ew5NoQqTMu83mGkPtadM4hk
- ZRmk3Nu2QvXAhPUqHm5Pw==
-UI-OutboundReport: notjunk:1;M01:P0:3UV9RZGxgfo=;+xskkFKv3FjkAtVjFdCT7Fw26Sj
- bOOrqE5CaOA1cmGpH1piaPNPaqUO/V3GG2KhR/S/h4wM+SaiwZgace7u13IlKoiQMMu5rpQqI
- xRocpDeTxUaNMDRF4ZPt/PkKk9xOIgugG8m1W5ZOYHFBfP2Z+Flq0PPf2e+A7CDtQ4PGViBWn
- FrJP7zhAjp3j/mV9ePwKj5Ug688WlpBtCQWGLD+zy5a8duVPwwicgd1QLWfq9AXew08WiS5wt
- a+UKguJighbVsBY9BRlMkF5dCZvoIlu58JV+hTtWJ9Av8fYQm4gbkOF2xlVDG3Iw5YUVsGxeT
- ediY31lpuc8agNOgr1T0MPHcpwdIffGNFTF0Bxiuo3vzHZvpwF2Sk+CqgysvALlqdRrZi/dcu
- W/AB+rP+/GKkT4AYIP6yliSsSkw4KL255OLxHrRbKLJP4UgN8UPxZJNX+G7OZf7LrY2P5V9Dt
- MwdNU3VAr6L9MHLY0v0LrKxvtIVJg6srAY+8eAMZf6y20zSFeXXmdStWBzVkGbps9fifc6CdH
- u0/AIJAmFqRlw0c/r0nf9vzDt3nPwDhHsW3aFw/H7mUsXMZ7LDuXLE6jQ3rwd939e9ThWqRDa
- xfsbeUwH7+q7tyKHbGg89yLXVVri4opLFEkLnPYOHRGZYgDuX+49tH7+fNnULUGQZLQMveUsd
- JfycfIfFu7ZW4OECL4pC2+noMr+VG/Dp2ns80JdwS/FmZszHUTxkQvy77HTW4OrDb3O3S7Fa8
- uysNRcd2jK1wKy7wI5DscMNFfixjbFhu+8BLs0V63g0Z6VlQS7QvvUgdnVnGfgW0lhW/dUAQd
- kSHtTVMiJo2VmIY4fhOqFgBmfjw7ThQjnxJ9rY1bjrRBwzQYC0liLCecpRiLmPl5+/dTwUd4o
- 9akFw3jXqnrEPVXFSuMLYifDmUvEeKZy0x0WLAIG0IU4uMltluimwFgfGpidDK9jCvzRg1Npq
- LIq508IHG7Vel5d108AqhEjmFwc=
+X-Provags-ID: V03:K1:gJRU64qGqYy5KT3bkGZ+P0k0xXX+nC3+m0uWD2yIo8B8usnL3OV
+ z3Vlq493xweev7iCXRRVVrQr1AEcR8YD33ximIsI8HUOoHV1MzYvqdqSIGJtWijcHAyUO/s
+ WV0GaRixj3oomfPdlEKvIq4pV5ytZC5ypNRfpPKoYK7fjLzK3gBoYtwDqGvzpK+WMteFC62
+ VNtZvsveCvbxJdPgYnrgA==
+UI-OutboundReport: notjunk:1;M01:P0:CFatJcTPun8=;eGbL/tXS17urvQs2zOMWM5rpwwz
+ oXlrUvB5yRliG3HR/3uA+gCk1NCLP4XPsUOZsS1kkwxgop03wUUbU8r/y+AuprZkJw8z9Lxzn
+ ydZsQwXGqKra2FlqE8ati1BkwAGMfjwc74KrszjNzuBIzk3QegYPQbKz6Z4NKx7lqj/EAC+9E
+ t1Rbawav75+ppwV032L1H4kCQeVnbLEnqT4W8fPP4TXFpRKKYiUti1ZcHVDOyTmdTuN1F7eSD
+ RbhVt6z5e+flaLZVBKVJWGKawi0GxeJaQv0STgb81OM+vgniy8P0svfCtIZWsckVd8M0M/BvO
+ AA2KrAgztTP6wT/ql9aFI7sVN3fy/MoLrxprukjIWzAQVi/MBbjk/fG5PSn1n4khoGgfp2jFQ
+ 5OU9C8iaGnS3H4bB1VgLiT6d4y352MmYRi1F4z9d0SWctSQU4uRJWjXAzQAiYxfJwea9cQrfW
+ ef65u7h2fHN3yS82xNnAYKk09wdHwg7Kt2UG77cWOqiKpWIkRJFlMCdu1iVCPnrModZYUODZ5
+ Fx04Qrg+QvdS3QvZ+sk3aZllZJy6w92QHTlekEUGtRT6fVRckMMmmSsiLu51tR/861UBsxT8x
+ wMDlOLfELT6YGD0mVWZ8XCo9tmGZVaTnF2OJFURcyb1WQpUZrF911XWPKJr0bGhB/3DrPSwoH
+ BlDQ1LnXmmw5ItKiRwle69STkrUkeVciFZtCRYrc9qhjHFwls1fH0c32evl9a7TFrHpmq2Qc1
+ L06jQKOZhGL+BEARP+ROqreiXAG3mk3saN11NB5vR8vjUBAY1R6z+dQe8EKjicy96lsjow9kV
+ x3Qa65VD0G9S9TSfT/YFVIFncosuatrrsFjjrjEu9unmF8p9J8A6AOLylmxph/fyRhhaduBgX
+ X5opeXvZ/YM8x9gyrOfNVCn10Z140B8FYAnOWDQ2ItFSI8yHYnizcksqNvfrW/c270DlTGkJO
+ Abbn/qlzP/eD1GduVLn1QfwuOHo=
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
@@ -62,55 +62,98 @@ X-Mailing-List: fstests@vger.kernel.org
 On 2022/12/20 08:01, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Generate the section report between tests so that the summary report
-> always reflects the outcome of the most recent test.  Two usecases are
-> envisioned here -- if a cluster-based test runner anticipates that the
-> testrun could crash the VM, they can set REPORT_DIR to (say) an NFS
-> mount to preserve the intermediate results.  If the VM does indeed
-> crash, the scheduler can examine the state of the crashed VM and move
-> the tests to another VM.  The second usecase is a reporting agent that
-> runs in the VM to upload live results to a test dashboard.
+> The "xunit" report format emits an XML document that more or less
+> follows the junit xml schema.  However, there are two major exceptions:
+> 
+> 1. fstests does not emit an @errors attribute on the testsuite element
+> because we don't have the concept of unanticipated errors such as
+> "unchecked throwables".
+> 
+> 2. The system-out/system-err elements sound like they belong under the
+> testcase element, though the schema itself imprecisely says "while the
+> test was executed".  The schema puts them under the top-level testsuite
+> element, but we put them under the testcase element.
+> 
+> Define an xml schema for the xunit report format, and update the xml
+> headers to link to the schema file.  This enables consumers of the
+> reports to check mechanically that the incoming document follows the
+> format.
+
+One thing is, does the official XMLs use tabs as indents?
+
+We got some lines definitely too long for human to read.
+Any way to make them a little better?
+
+But overall, it really defines a good standard for us to follow.
+This is definitely a good start.
+
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->   check |   10 ++++++++++
->   1 file changed, 10 insertions(+)
-> 
-> 
-> diff --git a/check b/check
-> index 1ff0f44af1..70a0b537b1 100755
-> --- a/check
-> +++ b/check
-> @@ -842,6 +842,16 @@ function run_section()
->   		fi
->   		seqres="$REPORT_DIR/$seqnum"
->   
-> +		# Generate the entire section report with whatever test results
-> +		# we have so far.  Leave the $sect_time parameter empty so that
-> +		# it's a little more obvious that this test run is incomplete.
-> +		if $do_report; then
-> +			local sect_now=`_wallclock`
-> +			_make_section_report "$section" "${#try[*]}" \
-> +					     "${#bad[*]}" "${#notrun[*]}" \
-> +					     "" &> /dev/null
-> +		fi
-> +
+[...]
+> +						<xs:choice minOccurs="0" maxOccurs="2">
 
-In fact that's exactly what I just wanted to do next...
+For this, I prefer maxOccurs to be at least 3.
 
-However one problem I can't work around is the timestamp.
+We have 3 different possible outputs:
 
-Currently our timestamp is the finish time, with this change our 
-timestamp is the start time.
+- $seqnum.out.bad
+- $seqnum.full
+- $seqnum.dmesg
 
-I'm not sure if there is any strong definition on the timestamp, but 
-personally speaking, timestamp for the start time makes more sense to me.
-But there may be some users relying on the timestamp to be the ending time?
+[...]
+
+> +								</xs:annotation>
+> +								<xs:simpleType>
+> +									<xs:restriction base="pre-string">
+> +										<xs:whiteSpace value="preserve"/>
+> +									</xs:restriction>
+> +								</xs:simpleType>
+> +							</xs:element>
+> +							<xs:element name="system-err" minOccurs="0" maxOccurs="1">
+> +								<xs:annotation>
+> +									<xs:documentation xml:lang="en">Data that was written to standard error while the test was executed</xs:documentation>
+
+We don't use stderr, but $seqnum.full and $seqnum.dmesg.
+
+Or can we just rename the "system-out" and "system-err" to something 
+fstests specific? E.g.
+
+- system-output
+- system-full
+- system-dmesg
+
+Or the system-err/out thing is mostly to keep the compatibility?
+If so, I'd prefer some properties to make it explicit which output 
+represents which fstests specific output.
+
+> +								</xs:annotation>
+> +								<xs:simpleType>
+> +									<xs:restriction base="pre-string">
+> +										<xs:whiteSpace value="preserve"/>
+> +									</xs:restriction>
+> +								</xs:simpleType>
+> +							</xs:element>
+> +						</xs:choice>
+> +					</xs:sequence>
+> +					<xs:attribute name="name" type="xs:token" use="required">
+> +						<xs:annotation>
+> +							<xs:documentation xml:lang="en">Name of the test method</xs:documentation>
+
+Can we update the description to something more fstests specific, better 
+with an example?
+Like "test case number, e.g. generic/001".
+
+This can apply to most description copied from the JUnit doc.
+
+[...]
+> +		<xs:attribute name="timestamp" type="ISO8601_DATETIME_PATTERN" use="required">
+> +			<xs:annotation>
+> +				<xs:documentation xml:lang="en">when the test was executed. Timezone may not be specified.</xs:documentation>
+> +			</xs:annotation>
+
+This means the start time, thus all our existing timestamp is not 
+following the spec already.
 
 Thanks,
 Qu
-
->   		mkdir -p $RESULT_DIR
->   		rm -f ${RESULT_DIR}/require_scratch*
->   		rm -f ${RESULT_DIR}/require_test*
-> 
