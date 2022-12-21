@@ -2,245 +2,214 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E58D4C4332F
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 16:29:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B57A7C4167B
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 16:57:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231340AbiLUQ34 (ORCPT
+        id S229694AbiLUQ5G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Dec 2022 11:29:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59096 "EHLO
+        Wed, 21 Dec 2022 11:57:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234528AbiLUQ3x (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2022 11:29:53 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01C858FE0;
-        Wed, 21 Dec 2022 08:29:52 -0800 (PST)
+        with ESMTP id S229578AbiLUQ5F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2022 11:57:05 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5073C4;
+        Wed, 21 Dec 2022 08:57:04 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7ED0161804;
-        Wed, 21 Dec 2022 16:29:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA698C433EF;
-        Wed, 21 Dec 2022 16:29:51 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 819B261857;
+        Wed, 21 Dec 2022 16:57:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9972C433D2;
+        Wed, 21 Dec 2022 16:57:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1671640191;
-        bh=C1Vr6fmSIagYamAgfuEKem59cRb+RoCzIvlXvMjsMQ8=;
+        s=k20201202; t=1671641823;
+        bh=I5azBKcXw+FkB6zYEZyUEqcS9DZe0v83Q1kSgPM33YA=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=gPo6VzddwDGTHKPM5XH2JCRxiz8+4Xunzb5cNQNhfnupPjCldaBotfZA45x9aDy13
-         hkJjn/entotVddhIyPSrcy7lsZweq4td44ANykRqN1VEhoppPk02wDlsoyDyjbtDUn
-         cYrLDOYLNjF3y8gd5EbZb4ZSWHuSnhdEKLj0WydTcaGEQqG/VlxRZJluwChFfMnioV
-         hR7njsknCHCIoDIjssHtJCNHVKAHxnNSRy0knYSWb0Awody2pTlWekj3zEDuwcTPXE
-         Y4G+2huE7dUl4UqZKoZQzq5GLgrew2UHfSD6iExwyKOgyhGKF9pux66+UrrG11HSPC
-         v8YF9gXXq2L9g==
-Date:   Wed, 21 Dec 2022 08:29:51 -0800
+        b=pXoaMiqInh1micsNFzqZAq9vfa650BnNzgLwmc+YQBDhRLrCktVI1Bwi1ADBUzIb3
+         DTnn8ywDX7twzL3kF4LdskWSD0umnu9aAoE7DndnxQ42yC+tc3TpfEphExkXcZRrPx
+         /OoXPkUWeTskTlcZVaFBIwsp/R8WqZApbmF3HIjH/7FyYQpTydirkvbFL/sMzQlzdM
+         iSD3QIHcpI4H+fBUWWB6HfFPIWejoCWrvlKaBkL3s02QJQNgEJCq4p7aU3llOHK16W
+         xiF3Uy7gri4IxVl3OJFOgO5jpTcXi/MaLyuTFNPiyfNi/APrJX6axGkyg/zxww68dY
+         6Oe6SICzAfBvw==
+Date:   Wed, 21 Dec 2022 08:57:03 -0800
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Hironori Shiina <shiina.hironori@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Hironori Shiina <shiina.hironori@fujitsu.com>
-Subject: Re: [PATCH] xfs: Test bulkstat special query for root inode
-Message-ID: <Y6M0f5Dc19M31xoe@magnolia>
-References: <20221221161843.124707-1-shiina.hironori@fujitsu.com>
+To:     zlang@redhat.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
+        Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v1.1 2/3] xfs: regression test for writes racing with reclaim
+ writeback
+Message-ID: <Y6M632A1x7l9m4HQ@magnolia>
+References: <167158210534.235429.10062024114428012379.stgit@magnolia>
+ <167158211644.235429.5374511574924758421.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221221161843.124707-1-shiina.hironori@fujitsu.com>
+In-Reply-To: <167158211644.235429.5374511574924758421.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 21, 2022 at 11:18:43AM -0500, Hironori Shiina wrote:
-> This is a test for the fix:
->   bf3cb3944792 xfs: allow single bulkstat of special inodes
-> This fix added a feature to query the root inode number of a filesystem.
-> This test creates a file with a lower inode number than the root and run
-> a query for the root inode.
+From: Darrick J. Wong <djwong@kernel.org>
 
-oooh, a regression test, sweet!
+This test uses the new write delay debug knobs to set up a slow-moving
+write racing with writeback of an unwritten block at the end of the
+file range targetted by the slow write.  The test succeeds if the file
+does not end up corrupt and if the ftrace log captures a message about
+the revalidation occurring.
 
-> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
-> ---
->  common/xfs               |  7 +++++
->  src/Makefile             |  2 +-
->  src/xfs_get_root_inode.c | 49 +++++++++++++++++++++++++++++++
->  tests/xfs/557            | 63 ++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/557.out        |  2 ++
->  5 files changed, 122 insertions(+), 1 deletion(-)
->  create mode 100644 src/xfs_get_root_inode.c
->  create mode 100644 tests/xfs/557
->  create mode 100644 tests/xfs/557.out
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 7eee76c0..9275a79c 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1547,3 +1547,10 @@ _xfs_get_inode_core_bytes()
->  		echo 96
->  	fi
->  }
-> +
-> +_require_xfs_bulkstat_special_root()
-> +{
-> +	if $here/src/xfs_get_root_inode 2>&1 | grep -q 'not supported'; then
-> +		_notrun 'XFS_BULK_IREQ_SPECIAL_ROOT is not supported.'
-> +	fi
-> +}
-> diff --git a/src/Makefile b/src/Makefile
-> index afdf6b30..c850fdcb 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -19,7 +19,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
->  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
->  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
-> -	t_mmap_cow_memory_failure fake-dump-rootino
-> +	t_mmap_cow_memory_failure fake-dump-rootino xfs_get_root_inode
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/xfs_get_root_inode.c b/src/xfs_get_root_inode.c
-> new file mode 100644
-> index 00000000..d1b4f38d
-> --- /dev/null
-> +++ b/src/xfs_get_root_inode.c
-> @@ -0,0 +1,49 @@
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <fcntl.h>
-> +#include <xfs/xfs.h>
-> +
-> +int main(int argc, char *argv[]) {
-> +
-> +#ifdef XFS_BULK_IREQ_SPECIAL_ROOT
-> +
-> +	if (argc < 2) {
-> +		fprintf(stderr, "%s: requires path argument\n", argv[0]);
-> +		return 1;
-> +	}
-> +
-> +	char *path = argv[1];
-> +
-> +	int fd = open(path, O_RDONLY);
-> +	if (fd < 0) {
-> +		perror("open failed");
-> +		return 1;
-> +	}
-> +
-> +	size_t size = sizeof(struct xfs_bulkstat_req) + sizeof(struct xfs_bulkstat);
-> +	struct xfs_bulkstat_req *req = malloc(size);
+NOTE: I'm not convinced that madvise actually causes the page to be
+removed from the pagecache, which means that this is effectively a
+functional test for the invalidation, not a corruption reproducer.
+On the other hand, the functional test can be done quickly.
 
-Is there something about this C code that xfs_io -c 'bulkstat_single
-root' doesn't cover?
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+v1.1: add regression annotations
+---
+ tests/xfs/925     |  126 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/925.out |    2 +
+ 2 files changed, 128 insertions(+)
+ create mode 100755 tests/xfs/925
+ create mode 100644 tests/xfs/925.out
 
-(If you /do/ keep the C program, its binary needs to be listed in
-.gitignore.)
-
-> +	if (req == NULL) {
-> +		perror("malloc failed");
-> +		return 1;
-> +	}
-> +	memset(req, 0, sizeof(size));
-> +	req->hdr.flags = XFS_BULK_IREQ_SPECIAL;
-> +	req->hdr.ino = XFS_BULK_IREQ_SPECIAL_ROOT;
-> +	req->hdr.icount = 1;
-> +
-> +	int ret = ioctl(fd, XFS_IOC_BULKSTAT, req);
-> +	if (ret < 0) {
-> +		perror("ioctl failed");
-> +		return 1;
-> +	}
-> +	printf("%lu\n", req->bulkstat[0].bs_ino);
-> +
-> +	return 0;
-> +
-> +#else
-> +	fprintf(stderr, "XFS_BULK_IREQ_SPECIAL_ROOT is not supported\n");
-> +	return 1;
-> +#endif
-> +
-> +}
-> diff --git a/tests/xfs/557 b/tests/xfs/557
-> new file mode 100644
-> index 00000000..95b59088
-> --- /dev/null
-> +++ b/tests/xfs/557
-> @@ -0,0 +1,63 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
-> +#
-> +# FS QA Test No. 557
-> +#
-> +# This is a test for:
-> +#   bf3cb3944792 (xfs: allow single bulkstat of special inodes)
-> +# Create a filesystem which contains an inode with a lower number
-> +# than the root inode. Then verify that XFS_BULK_IREQ_SPECIAL_ROOT gets
-> +# the correct root inode number.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +_supported_fs xfs
-> +_require_xfs_io_command "falloc"
-> +_require_scratch
-> +_require_xfs_bulkstat_special_root
-> +
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +	"xfs: get root inode correctly at bulkstat"
-> +
-> +# A large stripe unit will put the root inode out quite far
-> +# due to alignment, leaving free blocks ahead of it.
-> +_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +# Mounting /without/ a stripe should allow inodes to be allocated
-> +# in lower free blocks, without the stripe alignment.
-> +_scratch_mount -o sunit=0,swidth=0
-> +
-> +root_inum=$(stat -c %i $SCRATCH_MNT)
-> +
-> +# Consume space after the root inode so that the blocks before
-> +# root look "close" for the next inode chunk allocation
-> +$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
-> +
-> +# And make a bunch of inodes until we (hopefully) get one lower
-> +# than root, in a new inode chunk.
-> +echo "root_inum: $root_inum" >> $seqres.full
-> +for i in $(seq 0 4096) ; do
-> +	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
-> +	touch $fname
-> +	inum=$(stat -c "%i" $fname)
-> +	[[ $inum -lt $root_inum ]] && break
-> +done
-> +
-> +echo "created: $inum" >> $seqres.full
-> +
-> +[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
-> +
-> +# Get root ino with XFS_BULK_IREQ_SPECIAL_ROOT
-> +bulkstat_root_inum=$($here/src/xfs_get_root_inode $SCRATCH_MNT)
-> +echo "bulkstat_root_inum: $bulkstat_root_inum" >> $seqres.full
-> +if [ $root_inum -ne $bulkstat_root_inum ]; then
-> +	echo "root ino mismatch: expected:${root_inum}, actual:${bulkstat_root_inum}"
-> +fi
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-
-Looks good to me otherwise. :)
-
---D
-
-> diff --git a/tests/xfs/557.out b/tests/xfs/557.out
-> new file mode 100644
-> index 00000000..1f1ae1d4
-> --- /dev/null
-> +++ b/tests/xfs/557.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 557
-> +Silence is golden
-> -- 
-> 2.38.1
-> 
+diff --git a/tests/xfs/925 b/tests/xfs/925
+new file mode 100755
+index 0000000000..49d22019d3
+--- /dev/null
++++ b/tests/xfs/925
+@@ -0,0 +1,126 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Oracle.  All Rights Reserved.
++#
++# FS QA Test 925
++#
++# This is a regression test for a data corruption bug that existed in iomap's
++# buffered write routines.
++#
++. ./common/preamble
++_begin_fstest auto quick rw
++
++# Import common functions.
++. ./common/inject
++. ./common/tracing
++
++# real QA test starts here
++_cleanup()
++{
++	test -n "$sentryfile" && rm -f $sentryfile
++	wait
++	_ftrace_cleanup
++	cd /
++	rm -r -f $tmp.* $sentryfile $tracefile
++}
++
++# Modify as appropriate.
++_supported_fs xfs
++_require_ftrace
++_require_xfs_io_command "falloc"
++_require_xfs_io_error_injection "write_delay_ms"
++_require_scratch
++
++_fixed_by_kernel_commit 304a68b9c63b \
++	"xfs: use iomap_valid method to detect stale cached iomaps"
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount >> $seqres.full
++
++# This is a pagecache test, so try to disable fsdax mode.
++$XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
++_require_pagecache_access $SCRATCH_MNT
++
++blocks=10
++blksz=$(get_page_size)
++filesz=$((blocks * blksz))
++dirty_offset=$(( filesz - 1 ))
++write_len=$(( ( (blocks - 1) * blksz) + 1 ))
++
++# Create a large file with a large unwritten range.
++$XFS_IO_PROG -f -c "falloc 0 $filesz" $SCRATCH_MNT/file >> $seqres.full
++
++# Write the same data to file.compare as we're about to do to file.  Do this
++# before slowing down writeback to avoid unnecessary delay.
++_pwrite_byte 0x58 $dirty_offset 1 $SCRATCH_MNT/file.compare >> $seqres.full
++_pwrite_byte 0x57 0 $write_len $SCRATCH_MNT/file.compare >> $seqres.full
++
++# Reinitialize the page cache for this file.
++_scratch_cycle_mount
++
++# Dirty the last page in the range and immediately set the write delay so that
++# any subsequent writes have to wait.
++$XFS_IO_PROG -c "pwrite -S 0x58 $dirty_offset 1" $SCRATCH_MNT/file >> $seqres.full
++_scratch_inject_error "write_delay_ms" 500
++
++_ftrace_setup
++_ftrace_record_events 'xfs_iomap_invalid'
++
++# Start a sentry to look for evidence of invalidation tracepoint tripping.  If
++# we see that, we know we've forced writeback to revalidate a mapping.  The
++# test has been successful, so turn off the delay.
++sentryfile=$TEST_DIR/$seq.sentry
++tracefile=$TEST_DIR/$seq.ftrace
++wait_for_errortag() {
++	while [ -e "$sentryfile" ]; do
++		_ftrace_dump | grep iomap_invalid >> "$tracefile"
++		if grep -q iomap_invalid "$tracefile"; then
++			_scratch_inject_error "write_delay_ms" 0
++			_ftrace_ignore_events
++			break;
++		fi
++		sleep 0.5
++	done
++}
++touch $sentryfile
++wait_for_errortag &
++
++# Start thread 1 + writeback above
++($XFS_IO_PROG -c "pwrite -S 0x57 -b $write_len 0 $write_len" \
++	$SCRATCH_MNT/file >> $seqres.full; rm -f $sentryfile) &
++sleep 1
++
++# Start thread 2 to simulate reclaim writeback via sync_file_range and fadvise
++# to drop the page cache.
++#	-c "fadvise -d $dirty_offset 1" \
++dirty_pageoff=$((filesz - blksz))
++$XFS_IO_PROG -c "sync_range -a -w $dirty_pageoff $blksz" \
++	-c "mmap -r 0 $filesz" \
++	-c "madvise -d 0 $filesz" \
++	$SCRATCH_MNT/file >> $seqres.full
++wait
++rm -f $sentryfile
++
++cat "$tracefile" >> $seqres.full
++grep -q iomap_invalid "$tracefile"
++saw_invalidation=$?
++
++# Flush everything to disk.  If the bug manifests, then after the cycle,
++# file should have stale 0x58 in block 0 because we silently dropped a write.
++_scratch_cycle_mount
++
++if ! cmp -s $SCRATCH_MNT/file $SCRATCH_MNT/file.compare; then
++	echo file and file.compare do not match
++	$XFS_IO_PROG -c 'bmap -celpv' -c 'bmap -elpv' $SCRATCH_MNT/file &>> $seqres.full
++	echo file.compare
++	od -tx1 -Ad -c $SCRATCH_MNT/file.compare
++	echo file
++	od -tx1 -Ad -c $SCRATCH_MNT/file
++elif [ $saw_invalidation -ne 0 ]; then
++	# The files matched, but nothing got logged about the revalidation?
++	echo "Expected to hear about write iomap invalidation?"
++fi
++
++echo Silence is golden
++status=0
++exit
+diff --git a/tests/xfs/925.out b/tests/xfs/925.out
+new file mode 100644
+index 0000000000..95088ce8a5
+--- /dev/null
++++ b/tests/xfs/925.out
+@@ -0,0 +1,2 @@
++QA output created by 925
++Silence is golden
