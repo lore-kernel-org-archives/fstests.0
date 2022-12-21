@@ -2,135 +2,221 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FE69C4332F
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 00:22:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5516C4167B
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 00:29:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234052AbiLUAWH (ORCPT
+        id S234277AbiLUA30 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Dec 2022 19:22:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56292 "EHLO
+        Tue, 20 Dec 2022 19:29:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57902 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233263AbiLUAWG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Dec 2022 19:22:06 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F26D1D0F9;
-        Tue, 20 Dec 2022 16:22:05 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id BE9A7B81AC3;
-        Wed, 21 Dec 2022 00:22:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6EE8DC433F0;
-        Wed, 21 Dec 2022 00:22:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1671582122;
-        bh=KYiX3pm4ohlM5vP001K74vZ2DZyQNZx8aZDkffrHxlM=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=fad8nInShhFLpRV57de7t+ikKjHykBfAbRlxpYxAEEwpdjdfut6YdJulxuTv+p7vx
-         SjEACbfDogc00ks0aD7tPAIH6zadNi40/QjSI8URDk6uypryr19D9AC08Ric8oinAn
-         01Hy4ITBCNO2Ucsy0zTEB+KFsJOp/af6SNql4D4+ig4Zq6RGuyfYHeMYb0NSVdxu9C
-         bAH6tB4qQTqlA/IpoEr5GtbM8SDxiRDKGadBCcucpKT7ZVEKx22hOMD7n9kGxUHUzX
-         GQG9dVHbFQQRi4kQOKGAhjlKFC1vd04foHC0L3TMdJytRCOS6MDml7VU9ujyrCxkkl
-         rJmH5xlMYj0Pg==
-Subject: [PATCH 3/3] xfs/179: modify test to trigger refcount update bugs
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, zlang@redhat.com
-Cc:     Dave Chinner <dchinner@redhat.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 20 Dec 2022 16:22:02 -0800
-Message-ID: <167158212200.235429.7810725831092358840.stgit@magnolia>
-In-Reply-To: <167158210534.235429.10062024114428012379.stgit@magnolia>
-References: <167158210534.235429.10062024114428012379.stgit@magnolia>
-User-Agent: StGit/0.19
+        with ESMTP id S229727AbiLUA3Z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Dec 2022 19:29:25 -0500
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B1EF19282;
+        Tue, 20 Dec 2022 16:29:23 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=ymsMt69UtWxrWU2zbfGlODAg4r7tVA3s2+bb2qRJp6Y=; b=qlNLwU0Y69wH4Ej4tIuftcS1c4
+        tegjkPNGTS5ebGZYg/lNvQOAbkGP9jD+yptaFYK/t3sX/Z2BVOdxQj8aEXK/TfeZsvtL5Nozut2LO
+        tqEiJzisYpZ0at6tpLV1c3+9X+bvRyGNO9kOFLZPKrtEfWCYlTcP2krZ8Z8xjAxis4+fY9lfLaMFf
+        TdIenL21GwCfkfgjVzgvbThnXJAsA/LdmFTTkzMH9fN4WbmfgwFnKg5xGxh20/2ftb0lR1if56+Jj
+        /OogEYxb9aviao3tvPx9bFGY1nWFYovs+N+LK/tGrQOn+Z09DDPDzRr3Cwe9MBikx5i+MFhR7pR6O
+        MbPIuAdw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1p7mz4-006PW9-P1; Wed, 21 Dec 2022 00:29:22 +0000
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH] fstests: update patien module remover usage
+Date:   Tue, 20 Dec 2022 16:29:22 -0800
+Message-Id: <20221221002922.1528013-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+kmod now has support for the patient module remover but
+it uses --wait instead of -p, and it does not have an option
+to wait forever. So let's just deprecate the "forever" option,
+and use update our code to use --wait.
 
-Upon enabling fsdax + reflink for XFS, this test began to report
-refcount metadata corruptions after being run.  Specifically, xfs_repair
-noticed single-block refcount records that could be combined but had not
-been.
+Since blktests is also getting support, and since they actually
+use 'make check' with consistent shellcheck checks, embrace the
+implementation there so we at least match solutions. That way if
+there are bugs in one we can fix them in the other project as well.
+The style changes are minor.
 
-The root cause of this is improper MAXREFCOUNT edge case handling in
-xfs_refcount_merge_extents.  When we're trying to find candidates for a
-record merge, we compute the refcount of the merged record, but without
-accounting for the fact that once a record hits rc_refcount ==
-MAXREFCOUNT, it is pinned that way forever.
+A few functional changes brought forward from the solution embraced
+by blktests
 
-Adjust this test to use a sub-filesize write for one of the COW writes,
-because this is how we force the extent merge code to run.
+  * sanity check for the modules sysfs directory to replace "-" with
+    "_" and document why we do that
+  * do not run if the module does not exist or is not loaded, that's
+    the addition of:
+    [ ! -e "/sys/module/$module_sys" ] && return 0
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 ---
- tests/xfs/179 |   32 +++++++++++++++++++++++++++++---
- 1 file changed, 29 insertions(+), 3 deletions(-)
 
+Although the blktests patch is not yet merged its on its v3 now.
+I *have not tested* this patch yet on fstests... once I do I'll
+poke back here.
 
-diff --git a/tests/xfs/179 b/tests/xfs/179
-index ec0cb7e5b4..98b01476c9 100755
---- a/tests/xfs/179
-+++ b/tests/xfs/179
-@@ -21,17 +21,29 @@ _require_scratch_nocheck
- _require_cp_reflink
- _require_test_program "punch-alternating"
+ README        |  3 +--
+ common/config | 31 +++++++++++++++++++------------
+ common/module | 28 ++++++++++++----------------
+ 3 files changed, 32 insertions(+), 30 deletions(-)
+
+diff --git a/README b/README
+index 4c4f22f853de..b2d4744593f3 100644
+--- a/README
++++ b/README
+@@ -222,8 +222,7 @@ Kernel/Modules related configuration:
+    test invocations. This assumes that the name of the module is the same
+    as FSTYP.
+  - Set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS to specify the amount of time we
+-   should try a patient module remove. The default is 50 seconds. Set this
+-   to "forever" and we'll wait forever until the module is gone.
++   should try a patient module remove. The default is 50 seconds.
+  - Set KCONFIG_PATH to specify your preferred location of kernel config
+    file. The config is used by tests to check if kernel feature is enabled.
  
-+_fixed_by_kernel_commit b25d1984aa88 \
-+	"xfs: estimate post-merge refcounts correctly"
+diff --git a/common/config b/common/config
+index b2802e5e0af1..8bc6b3d2ae3f 100644
+--- a/common/config
++++ b/common/config
+@@ -256,11 +256,15 @@ if [[ "$UDEV_SETTLE_PROG" == "" || ! -d /proc/net ]]; then
+ fi
+ export UDEV_SETTLE_PROG
+ 
+-# Set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS to "forever" if you want the patient
+-# modprobe removal to run forever trying to remove a module.
++_has_modprobe_patient()
++{
++	modprobe --help >& /dev/null || return 1
++	modprobe --help | grep -q "\-\-wait" || return 1
++	return 0
++}
 +
- echo "Format and mount"
- _scratch_mkfs -d agcount=1 > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
+ MODPROBE_REMOVE_PATIENT=""
+-modprobe --help >& /dev/null && modprobe --help | grep -q -1 "remove-patiently"
+-if [[ $? -ne 0 ]]; then
++if ! _has_modprobe_patient; then
+ 	if [[ -z "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
+ 		# We will open code our own implementation of patient module
+ 		# remover in fstests. Use a 50 second default.
+@@ -268,22 +272,25 @@ if [[ $? -ne 0 ]]; then
+ 	fi
+ else
+ 	MODPROBE_RM_PATIENT_TIMEOUT_ARGS=""
+-	if [[ ! -z "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
+-		if [[ "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" != "forever" ]]; then
+-			MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
+-			MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-t $MODPROBE_PATIENT_RM_TIMEOUT_MS"
++	if [[ -n "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
++		MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
++		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="--wait $MODPROBE_PATIENT_RM_TIMEOUT_MS"
++		if [[ "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" == "forever" ]];
++			echo "Warning: deprecated MODPROBE_PATIENT_RM_TIMEOUT_SECONDS forever setting"
++			echo "Just set this to a high value if you want this to linger for a long time"
++			exit 1
+ 		fi
+ 	else
+ 		# We export MODPROBE_PATIENT_RM_TIMEOUT_SECONDS here for parity
+-		# with environments without support for modprobe -p, but we
++		# with environments without support for modprobe --wait, but we
+ 		# only really need it exported right now for environments which
+-		# don't have support for modprobe -p to implement our own
++		# don't have support for modprobe --wait to implement our own
+ 		# patient module removal support within fstests.
+ 		export MODPROBE_PATIENT_RM_TIMEOUT_SECONDS="50"
+ 		MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
+-		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-t $MODPROBE_PATIENT_RM_TIMEOUT_MS"
++		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="--wait $MODPROBE_PATIENT_RM_TIMEOUT_MS"
+ 	fi
+-	MODPROBE_REMOVE_PATIENT="modprobe -p $MODPROBE_RM_PATIENT_TIMEOUT_ARGS"
++	MODPROBE_REMOVE_PATIENT="modprobe -r $MODPROBE_RM_PATIENT_TIMEOUT_ARGS"
+ fi
+ export MODPROBE_REMOVE_PATIENT
  
-+# This test modifies the refcount btree on the data device, so we must force
-+# rtinherit off so that the test files are created there.
-+_xfs_force_bdev data $SCRATCH_MNT
+diff --git a/common/module b/common/module
+index 6efab71d348e..bd205dafeaff 100644
+--- a/common/module
++++ b/common/module
+@@ -107,9 +107,9 @@ _patient_rmmod_check_refcnt()
+ # MODPROBE_PATIENT_RM_TIMEOUT_SECONDS prior to including this file.
+ # If you want this to try forever just set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS
+ # to the special value of "forever". This applies to both cases where kmod
+-# supports the patient module remover (modrobe -p) and where it does not.
++# supports the patient module remover (modrobe --wait) and where it does not.
+ #
+-# If your version of kmod supports modprobe -p, we instead use that
++# If your version of kmod supports modprobe --wait, we instead use that
+ # instead. Otherwise we have to implement a patient module remover
+ # ourselves.
+ _patient_rmmod()
+@@ -119,6 +119,12 @@ _patient_rmmod()
+ 	local max_tries=0
+ 	local mod_ret=0
+ 	local refcnt_is_zero=0
++	# Since we are looking for a directory we must adopt the
++	# specific directory used by scripts/Makefile.lib for
++	# KBUILD_MODNAME
++	local module_sys=${module//-/_}
 +
- testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
++	[ ! -e "/sys/module/$module_sys" ] && return 0
  
-+# Set the file size to 10x the block size to guarantee that the COW writes will
-+# touch multiple blocks and exercise the refcount extent merging code.  This is
-+# necessary to catch a bug in the refcount extent merging code that handles
-+# MAXREFCOUNT edge cases.
- blksz=65536
-+filesz=$((blksz * 10))
+ 	if [[ ! -z $MODPROBE_REMOVE_PATIENT ]]; then
+ 		$MODPROBE_REMOVE_PATIENT $module
+@@ -131,20 +137,13 @@ _patient_rmmod()
  
- echo "Create original files"
--_pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
-+_pwrite_byte 0x61 0 $filesz $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
+ 	max_tries=$max_tries_max
  
- echo "Change reference count"
-@@ -56,9 +68,23 @@ _scratch_xfs_db -c 'agf 0' -c 'addr refcntroot' -c 'p recs[1]' >> $seqres.full
- _scratch_mount >> $seqres.full
+-	# We must use a string check as otherwise if max_tries is set to
+-	# "forever" and we don't use a string check we can end up skipping
+-	# entering this loop.
+ 	while [[ "$max_tries" != "0" ]]; do
+-		_patient_rmmod_check_refcnt $module
+-		if [[ $? -eq 0 ]]; then
++		if _patient_rmmod_check_refcnt "$module_sys"; then
+ 			refcnt_is_zero=1
+ 			break
+ 		fi
+ 		sleep 1
+-		if [[ "$max_tries" == "forever" ]]; then
+-			continue
+-		fi
+-		let max_tries=$max_tries-1
++		((max_tries--))
+ 	done
  
- echo "CoW a couple files"
--_pwrite_byte 0x62 0 $blksz $testdir/file3 >> $seqres.full
--_pwrite_byte 0x62 0 $blksz $testdir/file5 >> $seqres.full
-+_pwrite_byte 0x62 0 $filesz $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x62 0 $filesz $testdir/file5 >> $seqres.full
-+
-+# For the last COW test, write single blocks at the start, middle, and end of
-+# the shared file to exercise a refcount btree update that targets a single
-+# block of the multiblock refcount record that we just modified.
-+#
-+# This trips a bug where XFS didn't correctly identify refcount record merge
-+# candidates when any of the records are pinned at MAXREFCOUNT.  The bug was
-+# originally discovered by enabling fsdax + reflink, but the bug can be
-+# triggered by any COW that doesn't target the entire extent.
-+#
-+# The bug was fixed by kernel commit b25d1984aa88 ("xfs: estimate post-merge
-+# refcounts correctly")
- _pwrite_byte 0x62 0 $blksz $testdir/file7 >> $seqres.full
-+_pwrite_byte 0x62 $((blksz * 4)) $blksz $testdir/file7 >> $seqres.full
-+_pwrite_byte 0x62 $((filesz - blksz)) $blksz $testdir/file7 >> $seqres.full
- 
- echo "Check scratch fs"
- _scratch_unmount
+ 	if [[ $refcnt_is_zero -ne 1 ]]; then
+@@ -169,17 +168,14 @@ _patient_rmmod()
+ 	# https://bugzilla.kernel.org/show_bug.cgi?id=212337
+ 	# https://bugzilla.kernel.org/show_bug.cgi?id=214015
+ 	while [[ $max_tries != 0 ]]; do
+-		if [[ -d /sys/module/$module ]]; then
++		if [[ -d /sys/module/$module_sys ]]; then
+ 			modprobe -r $module 2> /dev/null
+ 			mod_ret=$?
+ 			if [[ $mod_ret == 0 ]]; then
+ 				break;
+ 			fi
+ 			sleep 1
+-			if [[ "$max_tries" == "forever" ]]; then
+-				continue
+-			fi
+-			let max_tries=$max_tries-1
++			((max_tries--))
+ 		else
+ 			break
+ 		fi
+-- 
+2.35.1
 
