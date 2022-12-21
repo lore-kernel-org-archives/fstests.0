@@ -2,221 +2,120 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5516C4167B
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 00:29:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C480C4332F
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 07:09:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234277AbiLUA30 (ORCPT
+        id S229814AbiLUHJf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Dec 2022 19:29:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57902 "EHLO
+        Wed, 21 Dec 2022 02:09:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229727AbiLUA3Z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Dec 2022 19:29:25 -0500
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B1EF19282;
-        Tue, 20 Dec 2022 16:29:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=ymsMt69UtWxrWU2zbfGlODAg4r7tVA3s2+bb2qRJp6Y=; b=qlNLwU0Y69wH4Ej4tIuftcS1c4
-        tegjkPNGTS5ebGZYg/lNvQOAbkGP9jD+yptaFYK/t3sX/Z2BVOdxQj8aEXK/TfeZsvtL5Nozut2LO
-        tqEiJzisYpZ0at6tpLV1c3+9X+bvRyGNO9kOFLZPKrtEfWCYlTcP2krZ8Z8xjAxis4+fY9lfLaMFf
-        TdIenL21GwCfkfgjVzgvbThnXJAsA/LdmFTTkzMH9fN4WbmfgwFnKg5xGxh20/2ftb0lR1if56+Jj
-        /OogEYxb9aviao3tvPx9bFGY1nWFYovs+N+LK/tGrQOn+Z09DDPDzRr3Cwe9MBikx5i+MFhR7pR6O
-        MbPIuAdw==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1p7mz4-006PW9-P1; Wed, 21 Dec 2022 00:29:22 +0000
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH] fstests: update patien module remover usage
-Date:   Tue, 20 Dec 2022 16:29:22 -0800
-Message-Id: <20221221002922.1528013-1-mcgrof@kernel.org>
-X-Mailer: git-send-email 2.37.1
+        with ESMTP id S229448AbiLUHJe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2022 02:09:34 -0500
+Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6568014031;
+        Tue, 20 Dec 2022 23:09:33 -0800 (PST)
+Received: by mail-vs1-xe2f.google.com with SMTP id i188so7958259vsi.8;
+        Tue, 20 Dec 2022 23:09:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=MCEvZma3OnQaIelclFm2HbvVeCz2Orbe0R01dadB9Nw=;
+        b=k9LJOIRhdzrc2IVyMM8Ual3gH9tqKKp9GH6rhbJPLWmcUs2CdkH7rdxzSODiScI3Rk
+         73UaLIiVCOUUEhGfgnfYv+WImsAOXQUweIC8Obt8FMkyNGEmlix5zJm0I5GrlzN6mxz1
+         j3VtF2e3Ytl6h+R7VLswt0+dpWfbZN8CHyGrYXiMdiaNxzvv1GZneLe6TTekrGH8j01v
+         xDESBdHkJ+VYuXwlI5NIzqRkPTRIQlegJ5z7DrWG8hRqiIeWLpMbxy8FFoAUtTxJflKe
+         WUaVZ/IMOW+vlYzKdQHWr8We56YbblKhOGkNRa3dKMnm7zQUoxHPQvAao+gd+6FDhn0M
+         DesQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=MCEvZma3OnQaIelclFm2HbvVeCz2Orbe0R01dadB9Nw=;
+        b=ectNI3JWdFkfdP742/s4EG4zlHcP13Pu8wEKrB6uLjJDakf8D0/9iGARBvWvJve545
+         XYdVjR3/hNDLFc80xhuZ6Bbolo+67ktjY2+XkavzHuT9mjRGmeIIO/kaPsMnkOaPoZNr
+         ynUsSC8kiiY24CInUD1ct95238aPZGmUi5hhMMcZWLlCA3yX8SdRxTDiYNg0Z0g1Vf1/
+         ByL27rzAk6rDrutfYUOglbSLPshAkv082fGyZ0WQdgshay1hoOorhKiYcQOhcw27hKKH
+         1IwCrHX72a5bzyOU1fVYF749iwWVmeGEK0OGAGVScV39/wnZGrYi10IFzZ6txGP4dV0B
+         3hpQ==
+X-Gm-Message-State: AFqh2kq+Lhs4lK+YzpeuOSQS3k4+Or/50LdLs/tlSQg3XhdkYY+HOPg9
+        dm/jzXcZ4UXQAltTn7hH5Ttb/K+VSQsr0S6VmUVpowctp14=
+X-Google-Smtp-Source: AMrXdXsQNgxPsJ8Nz8ibTJvKK0zvHhtIXd4r1NBDykw6I03sF1m86tPqwGhiV2mH7C7JmIOU2MPBTscp0ldxELPoN8A=
+X-Received: by 2002:a67:f942:0:b0:3b1:48c:8218 with SMTP id
+ u2-20020a67f942000000b003b1048c8218mr88833vsq.71.1671606572490; Tue, 20 Dec
+ 2022 23:09:32 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+References: <167158210534.235429.10062024114428012379.stgit@magnolia> <167158211644.235429.5374511574924758421.stgit@magnolia>
+In-Reply-To: <167158211644.235429.5374511574924758421.stgit@magnolia>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 21 Dec 2022 09:09:19 +0200
+Message-ID: <CAOQ4uxgB1xXTcLTbU=0px_R0Ewc6nJpNiikcx+j8TA5PYHoVEg@mail.gmail.com>
+Subject: Re: [PATCH 2/3] xfs: regression test for writes racing with reclaim writeback
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-kmod now has support for the patient module remover but
-it uses --wait instead of -p, and it does not have an option
-to wait forever. So let's just deprecate the "forever" option,
-and use update our code to use --wait.
+On Wed, Dec 21, 2022 at 2:38 AM Darrick J. Wong <djwong@kernel.org> wrote:
+>
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> This test uses the new write delay debug knobs to set up a slow-moving
+> write racing with writeback of an unwritten block at the end of the
+> file range targetted by the slow write.  The test succeeds if the file
+> does not end up corrupt and if the ftrace log captures a message about
+> the revalidation occurring.
+>
+> NOTE: I'm not convinced that madvise actually causes the page to be
+> removed from the pagecache, which means that this is effectively a
+> functional test for the invalidation, not a corruption reproducer.
+> On the other hand, the functional test can be done quickly.
+>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/925     |  123 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/925.out |    2 +
+>  2 files changed, 125 insertions(+)
+>  create mode 100755 tests/xfs/925
+>  create mode 100644 tests/xfs/925.out
+>
+>
+> diff --git a/tests/xfs/925 b/tests/xfs/925
+> new file mode 100755
+> index 0000000000..29490370bb
+> --- /dev/null
+> +++ b/tests/xfs/925
+> @@ -0,0 +1,123 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 925
+> +#
+> +# This is a regression test for a data corruption bug that existed in iomap's
+> +# buffered write routines.
+> +#
 
-Since blktests is also getting support, and since they actually
-use 'make check' with consistent shellcheck checks, embrace the
-implementation there so we at least match solutions. That way if
-there are bugs in one we can fix them in the other project as well.
-The style changes are minor.
+Please mention the kernel fix commit when writing a new test for
+a bug fix.
+Otherwise, it is hard for LTS xfs maintainers to figure out how to
+test the backported fix.
+For example, if LTS maintainers run this test on LTS kernel it won't
+run because of the missing debug knob, so we need to make an
+effort to make sure that there is test coverage if we decide to backport
+the data corruption fix series.
 
-A few functional changes brought forward from the solution embraced
-by blktests
+My preference is using the _fixed_by_kernel_commit macro, because
+it is always better to standardize information needed by tools.
+If the printed $seqres.hints are a nuisance to some developers, I can easily
+turn off printing of $seqres.hints by default and make that print opt-in, but
+the collection of $seqres.hints files can only help analyse test failures on
+LTS kernels.
 
-  * sanity check for the modules sysfs directory to replace "-" with
-    "_" and document why we do that
-  * do not run if the module does not exist or is not loaded, that's
-    the addition of:
-    [ ! -e "/sys/module/$module_sys" ] && return 0
-
-Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
----
-
-Although the blktests patch is not yet merged its on its v3 now.
-I *have not tested* this patch yet on fstests... once I do I'll
-poke back here.
-
- README        |  3 +--
- common/config | 31 +++++++++++++++++++------------
- common/module | 28 ++++++++++++----------------
- 3 files changed, 32 insertions(+), 30 deletions(-)
-
-diff --git a/README b/README
-index 4c4f22f853de..b2d4744593f3 100644
---- a/README
-+++ b/README
-@@ -222,8 +222,7 @@ Kernel/Modules related configuration:
-    test invocations. This assumes that the name of the module is the same
-    as FSTYP.
-  - Set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS to specify the amount of time we
--   should try a patient module remove. The default is 50 seconds. Set this
--   to "forever" and we'll wait forever until the module is gone.
-+   should try a patient module remove. The default is 50 seconds.
-  - Set KCONFIG_PATH to specify your preferred location of kernel config
-    file. The config is used by tests to check if kernel feature is enabled.
- 
-diff --git a/common/config b/common/config
-index b2802e5e0af1..8bc6b3d2ae3f 100644
---- a/common/config
-+++ b/common/config
-@@ -256,11 +256,15 @@ if [[ "$UDEV_SETTLE_PROG" == "" || ! -d /proc/net ]]; then
- fi
- export UDEV_SETTLE_PROG
- 
--# Set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS to "forever" if you want the patient
--# modprobe removal to run forever trying to remove a module.
-+_has_modprobe_patient()
-+{
-+	modprobe --help >& /dev/null || return 1
-+	modprobe --help | grep -q "\-\-wait" || return 1
-+	return 0
-+}
-+
- MODPROBE_REMOVE_PATIENT=""
--modprobe --help >& /dev/null && modprobe --help | grep -q -1 "remove-patiently"
--if [[ $? -ne 0 ]]; then
-+if ! _has_modprobe_patient; then
- 	if [[ -z "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
- 		# We will open code our own implementation of patient module
- 		# remover in fstests. Use a 50 second default.
-@@ -268,22 +272,25 @@ if [[ $? -ne 0 ]]; then
- 	fi
- else
- 	MODPROBE_RM_PATIENT_TIMEOUT_ARGS=""
--	if [[ ! -z "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
--		if [[ "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" != "forever" ]]; then
--			MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
--			MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-t $MODPROBE_PATIENT_RM_TIMEOUT_MS"
-+	if [[ -n "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
-+		MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
-+		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="--wait $MODPROBE_PATIENT_RM_TIMEOUT_MS"
-+		if [[ "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" == "forever" ]];
-+			echo "Warning: deprecated MODPROBE_PATIENT_RM_TIMEOUT_SECONDS forever setting"
-+			echo "Just set this to a high value if you want this to linger for a long time"
-+			exit 1
- 		fi
- 	else
- 		# We export MODPROBE_PATIENT_RM_TIMEOUT_SECONDS here for parity
--		# with environments without support for modprobe -p, but we
-+		# with environments without support for modprobe --wait, but we
- 		# only really need it exported right now for environments which
--		# don't have support for modprobe -p to implement our own
-+		# don't have support for modprobe --wait to implement our own
- 		# patient module removal support within fstests.
- 		export MODPROBE_PATIENT_RM_TIMEOUT_SECONDS="50"
- 		MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
--		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-t $MODPROBE_PATIENT_RM_TIMEOUT_MS"
-+		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="--wait $MODPROBE_PATIENT_RM_TIMEOUT_MS"
- 	fi
--	MODPROBE_REMOVE_PATIENT="modprobe -p $MODPROBE_RM_PATIENT_TIMEOUT_ARGS"
-+	MODPROBE_REMOVE_PATIENT="modprobe -r $MODPROBE_RM_PATIENT_TIMEOUT_ARGS"
- fi
- export MODPROBE_REMOVE_PATIENT
- 
-diff --git a/common/module b/common/module
-index 6efab71d348e..bd205dafeaff 100644
---- a/common/module
-+++ b/common/module
-@@ -107,9 +107,9 @@ _patient_rmmod_check_refcnt()
- # MODPROBE_PATIENT_RM_TIMEOUT_SECONDS prior to including this file.
- # If you want this to try forever just set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS
- # to the special value of "forever". This applies to both cases where kmod
--# supports the patient module remover (modrobe -p) and where it does not.
-+# supports the patient module remover (modrobe --wait) and where it does not.
- #
--# If your version of kmod supports modprobe -p, we instead use that
-+# If your version of kmod supports modprobe --wait, we instead use that
- # instead. Otherwise we have to implement a patient module remover
- # ourselves.
- _patient_rmmod()
-@@ -119,6 +119,12 @@ _patient_rmmod()
- 	local max_tries=0
- 	local mod_ret=0
- 	local refcnt_is_zero=0
-+	# Since we are looking for a directory we must adopt the
-+	# specific directory used by scripts/Makefile.lib for
-+	# KBUILD_MODNAME
-+	local module_sys=${module//-/_}
-+
-+	[ ! -e "/sys/module/$module_sys" ] && return 0
- 
- 	if [[ ! -z $MODPROBE_REMOVE_PATIENT ]]; then
- 		$MODPROBE_REMOVE_PATIENT $module
-@@ -131,20 +137,13 @@ _patient_rmmod()
- 
- 	max_tries=$max_tries_max
- 
--	# We must use a string check as otherwise if max_tries is set to
--	# "forever" and we don't use a string check we can end up skipping
--	# entering this loop.
- 	while [[ "$max_tries" != "0" ]]; do
--		_patient_rmmod_check_refcnt $module
--		if [[ $? -eq 0 ]]; then
-+		if _patient_rmmod_check_refcnt "$module_sys"; then
- 			refcnt_is_zero=1
- 			break
- 		fi
- 		sleep 1
--		if [[ "$max_tries" == "forever" ]]; then
--			continue
--		fi
--		let max_tries=$max_tries-1
-+		((max_tries--))
- 	done
- 
- 	if [[ $refcnt_is_zero -ne 1 ]]; then
-@@ -169,17 +168,14 @@ _patient_rmmod()
- 	# https://bugzilla.kernel.org/show_bug.cgi?id=212337
- 	# https://bugzilla.kernel.org/show_bug.cgi?id=214015
- 	while [[ $max_tries != 0 ]]; do
--		if [[ -d /sys/module/$module ]]; then
-+		if [[ -d /sys/module/$module_sys ]]; then
- 			modprobe -r $module 2> /dev/null
- 			mod_ret=$?
- 			if [[ $mod_ret == 0 ]]; then
- 				break;
- 			fi
- 			sleep 1
--			if [[ "$max_tries" == "forever" ]]; then
--				continue
--			fi
--			let max_tries=$max_tries-1
-+			((max_tries--))
- 		else
- 			break
- 		fi
--- 
-2.35.1
-
+Thanks,
+Amir.
