@@ -2,162 +2,185 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B935C4332F
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Dec 2022 22:39:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF954C4332F
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Dec 2022 07:20:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234948AbiLUWjV (ORCPT
+        id S229833AbiLVHUG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Dec 2022 17:39:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48140 "EHLO
+        Thu, 22 Dec 2022 02:20:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39134 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235110AbiLUWjB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Dec 2022 17:39:01 -0500
-Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F03711A3A7;
-        Wed, 21 Dec 2022 14:38:32 -0800 (PST)
-Received: by mail-qt1-x82b.google.com with SMTP id j16so136121qtv.4;
-        Wed, 21 Dec 2022 14:38:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EWDvi6NA1oNJ6B4yhOwLG7WTkWiS1ZUVjFh9SQnNc1c=;
-        b=IMPK1P0MVIPOn5G2AfiM8yC5AOGhf1pnViwkQSucp28+YCutDJI4ZHxICASabxy88p
-         KFLbK0ThhiGMaudxKOE8n6ogyhhV1r6+Zo9eyCdt7X8VQ3uzdDf5Guj2U7WT02UYjQK4
-         N/DLLiLEWJ8oLkOiQxj4bwasqc3jh3NUQslXTXbERSsF3e+KcEIrEF1W16kVPgnEcV8v
-         F3CZkT2DjNI7pIXCKgesJNZTxjZC/XvQH1VX8r7GUOOomzXOsTkHZGtfId7e50kVmzzT
-         X6ffvWut6AVUj9ixVH6tlCOj763qlQjTWC0sDQtwu0Yby8BKVmhClBYNbDFFsttlM9Tm
-         l+IQ==
+        with ESMTP id S229630AbiLVHUF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Dec 2022 02:20:05 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C8F222BDA
+        for <fstests@vger.kernel.org>; Wed, 21 Dec 2022 23:19:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1671693555;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=U03EJ97qjDi03/Cgd8Neqw7yDGPypOWrxu6FNB3WBI4=;
+        b=VkAgp06AEr0EjO0FhxNyP8xNFr0Ye2bM/2kIYuhELxd+O76BG84dSYBYlh6NORD8HAkqdy
+        6IQSyWMOa5STl7h5tF56s65lFIQ3c55ZtZ1LNiwcR2S3I1A/fUBIZ3GglLpr/b96W932uX
+        IA3ji6vFXlsVNCKqhlbf3lfqrBdty7Y=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-517-9POWFfZYOq6LtcatTLtF9A-1; Thu, 22 Dec 2022 02:19:06 -0500
+X-MC-Unique: 9POWFfZYOq6LtcatTLtF9A-1
+Received: by mail-pl1-f200.google.com with SMTP id k18-20020a170902c41200b001896d523dc8so910834plk.19
+        for <fstests@vger.kernel.org>; Wed, 21 Dec 2022 23:19:06 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=EWDvi6NA1oNJ6B4yhOwLG7WTkWiS1ZUVjFh9SQnNc1c=;
-        b=VWmp1pOuEZZTeAKwRBLl8IZPeAp3bpvQSLp/2mOwYzkgDFNEPx7QszDHASIun/CCsx
-         gVrek26mueH7RWvhtdh9F+GjiBxyRCxnFNmMVUJVQvAdN8cyxsxFpcg6Z35iIoF1RvRu
-         5HkL2zqEBIU+pvbN/AfbHszdKUtw9jA49VJYS5CLQCdOHWEdXeMwjBwX8vTMjdH80Wkg
-         CxEd9pj3ys1KGeCAVcVuwWf0KVhRTV4l3aYn8NVzLUD3n4+nTckpqezapOB5dxi02UB+
-         4lcwtcypXVhghU3hd1VupZYjqMf/SpSTPPBS3jJHF7xQZHRx8L36+F3j7VG8b3RmiMqm
-         Ngkw==
-X-Gm-Message-State: AFqh2kqxi64qEaMPePD4AUn23SUIfOEMFJHD6pcFBFrlT8LuNRALaQn+
-        Alz8sv1S1L4AWxg3BgIs+oN+rLYZ/VEgBA==
-X-Google-Smtp-Source: AMrXdXvhGf3a3aGe4JNO4HdirPSaqxHoZ/OH91HJ6O+7ZZzG/UKzMMs6ZAW3phj0N0w4eMp1VTxOvg==
-X-Received: by 2002:ac8:6685:0:b0:3a8:123a:b549 with SMTP id d5-20020ac86685000000b003a8123ab549mr9204329qtp.46.1671662312063;
-        Wed, 21 Dec 2022 14:38:32 -0800 (PST)
-Received: from shiina-laptop.hsd1.ma.comcast.net ([2601:18f:47f:7270:54c1:7162:1772:f1d])
-        by smtp.gmail.com with ESMTPSA id z16-20020ac87cb0000000b003a7ec97c882sm9786591qtv.6.2022.12.21.14.38.31
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=U03EJ97qjDi03/Cgd8Neqw7yDGPypOWrxu6FNB3WBI4=;
+        b=Yh8oekvEuyJfTJdgQoXhAu0AOKd3+vHMpnNDg1BhQUyzFMxuTYktOfKqGdH7Wiz8RQ
+         89DXzd3LsfTBN/GFP08HOLZIh4RLsrM6m5OpBpkt4NTqcfzhEKejL1f6jB39F1bdafey
+         jx6FuVj0DjBlyhTDhzvNPksgm1SrEWrTymFa4WMDWeNVBEX2ATkt+RuCmh/Wr7WAqtDc
+         Q2MRNoP5amrKO11clGZitrH2t/CMOc7tlBWv1/SATxJbORlfosO0AbPMhNcDbmXVtEmV
+         P8ahJWYSpPtyrueIvfml8+WLXhExYp2S82ROltaIH59Yao+cF3aJmE3j5o9d7oo8pD05
+         P0vw==
+X-Gm-Message-State: AFqh2kowr94YMyIkg/n83H6vbPGJ5QeqtGMoWy7tC/mO+z3Vdy8WCY3j
+        Wvh5Vp0hf20E8PDDRftD7a2FQSm0y/4ckyIzHFgJMQvGa8U0yPB7BR4OCVPUwrAko8aDNKZoZh6
+        JHbvCN2qUe1vQfWcN4Q==
+X-Received: by 2002:a17:903:3255:b0:191:f83:636b with SMTP id ji21-20020a170903325500b001910f83636bmr5274144plb.25.1671693545501;
+        Wed, 21 Dec 2022 23:19:05 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXvCLzpcWgGtBV96Kz5Y59MkrD0rPFuMpKJvtAu5nILUd50raV4lECr3KIh8rsPq7aUMulHAVQ==
+X-Received: by 2002:a17:903:3255:b0:191:f83:636b with SMTP id ji21-20020a170903325500b001910f83636bmr5274134plb.25.1671693545121;
+        Wed, 21 Dec 2022 23:19:05 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id f10-20020a63510a000000b004351358f056sm55996pgb.85.2022.12.21.23.19.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Dec 2022 14:38:31 -0800 (PST)
-From:   Hironori Shiina <shiina.hironori@gmail.com>
-X-Google-Original-From: Hironori Shiina <shiina.hironori@fujitsu.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org,
-        Hironori Shiina <shiina.hironori@fujitsu.com>
-Subject: [PATCH v2] xfs: Test bulkstat special query for root inode
-Date:   Wed, 21 Dec 2022 17:38:05 -0500
-Message-Id: <20221221223805.148788-1-shiina.hironori@fujitsu.com>
-X-Mailer: git-send-email 2.38.1
-In-Reply-To: <20221221161843.124707-1-shiina.hironori@fujitsu.com>
-References: <20221221161843.124707-1-shiina.hironori@fujitsu.com>
+        Wed, 21 Dec 2022 23:19:04 -0800 (PST)
+Date:   Thu, 22 Dec 2022 15:19:00 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] xfs/122: fix EFI/EFD log format structure size after
+ flex array conversion
+Message-ID: <20221222071900.dngksnsq374c5cdj@zlang-mailbox>
+References: <167158209640.235360.13061162358544554094.stgit@magnolia>
+ <167158210207.235360.12388823078640206103.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <167158210207.235360.12388823078640206103.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a test for the fix:
-  bf3cb3944792 xfs: allow single bulkstat of special inodes
-This fix added a feature to query the root inode number of a filesystem.
-This test creates a file with a lower inode number than the root and run
-a query for the root inode.
+On Tue, Dec 20, 2022 at 04:21:42PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Adjust this test since made EFI/EFD log item format structs proper flex
+> arrays instead of array[1].
+> 
+> This adjustment was made to the kernel source tree as part of a project
+> to make the use of flex arrays more consistent throughout the kernel.
+> Converting array[1] and array[0] to array[] also avoids bugs in various
+> compiler ports that mishandle the array size computation.  Prior to the
+> introduction of xfs_ondisk.h, these miscomputations resulted in kernels
+> that would silently write out filesystem structures that would then not
+> be recognized by more mainstream systems (e.g.  x86).
+> 
+> OFC nearly all those reports about buggy compilers are for tiny
+> architectures that XFS doesn't work well on anyways, so in practice it
+> hasn't created any user problems (AFAIK).
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
----
- tests/xfs/557     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/557.out |  2 ++
- 2 files changed, 65 insertions(+)
- create mode 100644 tests/xfs/557
- create mode 100644 tests/xfs/557.out
+This version looks good to me, thanks for all these detailed information!
 
-diff --git a/tests/xfs/557 b/tests/xfs/557
-new file mode 100644
-index 00000000..608ce13c
---- /dev/null
-+++ b/tests/xfs/557
-@@ -0,0 +1,63 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
-+#
-+# FS QA Test No. 557
-+#
-+# This is a test for:
-+#   bf3cb3944792 (xfs: allow single bulkstat of special inodes)
-+# Create a filesystem which contains an inode with a lower number
-+# than the root inode. Then verify that XFS_BULK_IREQ_SPECIAL_ROOT gets
-+# the correct root inode number.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_supported_fs xfs
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "bulkstat_single"
-+_require_scratch
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"xfs: get root inode correctly at bulkstat"
-+
-+# A large stripe unit will put the root inode out quite far
-+# due to alignment, leaving free blocks ahead of it.
-+_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+# Mounting /without/ a stripe should allow inodes to be allocated
-+# in lower free blocks, without the stripe alignment.
-+_scratch_mount -o sunit=0,swidth=0
-+
-+root_inum=$(stat -c %i $SCRATCH_MNT)
-+
-+# Consume space after the root inode so that the blocks before
-+# root look "close" for the next inode chunk allocation
-+$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
-+
-+# And make a bunch of inodes until we (hopefully) get one lower
-+# than root, in a new inode chunk.
-+echo "root_inum: $root_inum" >> $seqres.full
-+for i in $(seq 0 4096) ; do
-+	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
-+	touch $fname
-+	inum=$(stat -c "%i" $fname)
-+	[[ $inum -lt $root_inum ]] && break
-+done
-+
-+echo "created: $inum" >> $seqres.full
-+
-+[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
-+
-+# Get root ino with XFS_BULK_IREQ_SPECIAL_ROOT
-+bulkstat_root_inum=$($XFS_IO_PROG -c 'bulkstat_single root' $SCRATCH_MNT | grep bs_ino | awk '{print $3;}')
-+echo "bulkstat_root_inum: $bulkstat_root_inum" >> $seqres.full
-+if [ $root_inum -ne $bulkstat_root_inum ]; then
-+	echo "root ino mismatch: expected:${root_inum}, actual:${bulkstat_root_inum}"
-+fi
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/557.out b/tests/xfs/557.out
-new file mode 100644
-index 00000000..1f1ae1d4
---- /dev/null
-+++ b/tests/xfs/557.out
-@@ -0,0 +1,2 @@
-+QA output created by 557
-+Silence is golden
--- 
-2.38.1
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  common/rc         |   15 +++++++++++++++
+>  tests/xfs/122     |    5 +++++
+>  tests/xfs/122.out |    8 ++++----
+>  3 files changed, 24 insertions(+), 4 deletions(-)
+> 
+> 
+> diff --git a/common/rc b/common/rc
+> index 8060c03b7d..67bd74dc89 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1502,6 +1502,21 @@ _fixed_by_kernel_commit()
+>  	_fixed_by_git_commit kernel $*
+>  }
+>  
+
+I'd like to give some comments to the new _wants_* helpers when I merge
+it (don't need send a new version again: ), to help others know the
+different usage of _wants_* and _fixed_by_*. How about below comment:
+
+# Compare with _fixed_by_* helpers, this helper is used for un-regression
+# test case, e.g. xfs/122. Or a case would like to mention a git commit
+# which is not a bug fix (maybe a default behavior/format change). Then
+# use this helpers.
+
+> +_wants_git_commit()
+> +{
+> +	local pkg=$1
+> +	shift
+> +
+> +	echo "This test wants $pkg fix:" >> $seqres.hints
+> +	echo "      $*" >> $seqres.hints
+> +	echo >> $seqres.hints
+> +}
+> +
+
+# Refer to _wants_git_commit
+
+Feel free to make it better :)
+
+Thanks,
+Zorro
+
+> +_wants_kernel_commit()
+> +{
+> +	_wants_git_commit kernel $*
+> +}
+> +
+>  _check_if_dev_already_mounted()
+>  {
+>  	local dev=$1
+> diff --git a/tests/xfs/122 b/tests/xfs/122
+> index 91083d6036..e616f1987d 100755
+> --- a/tests/xfs/122
+> +++ b/tests/xfs/122
+> @@ -17,6 +17,11 @@ _begin_fstest other auto quick clone realtime
+>  _supported_fs xfs
+>  _require_command "$INDENT_PROG" indent
+>  
+> +# Starting in Linux 6.1, the EFI log formats were adjusted away from using
+> +# single-element arrays as flex arrays.
+> +_wants_kernel_commit 03a7485cd701 \
+> +	"xfs: fix memcpy fortify errors in EFI log format copying"
+> +
+>  # filter out known changes to xfs type sizes
+>  _type_size_filter()
+>  {
+> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> index a56cbee84f..95e53c5081 100644
+> --- a/tests/xfs/122.out
+> +++ b/tests/xfs/122.out
+> @@ -161,10 +161,10 @@ sizeof(xfs_disk_dquot_t) = 104
+>  sizeof(xfs_dq_logformat_t) = 24
+>  sizeof(xfs_dqblk_t) = 136
+>  sizeof(xfs_dsb_t) = 264
+> -sizeof(xfs_efd_log_format_32_t) = 28
+> -sizeof(xfs_efd_log_format_64_t) = 32
+> -sizeof(xfs_efi_log_format_32_t) = 28
+> -sizeof(xfs_efi_log_format_64_t) = 32
+> +sizeof(xfs_efd_log_format_32_t) = 16
+> +sizeof(xfs_efd_log_format_64_t) = 16
+> +sizeof(xfs_efi_log_format_32_t) = 16
+> +sizeof(xfs_efi_log_format_64_t) = 16
+>  sizeof(xfs_error_injection_t) = 8
+>  sizeof(xfs_exntfmt_t) = 4
+>  sizeof(xfs_exntst_t) = 4
+> 
 
