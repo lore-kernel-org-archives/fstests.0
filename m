@@ -2,101 +2,151 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39E69C4332F
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Dec 2022 12:14:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0643FC4332F
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Dec 2022 18:10:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235475AbiLVMOd (ORCPT
+        id S229904AbiLVSKc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Dec 2022 07:14:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42740 "EHLO
+        Thu, 22 Dec 2022 13:10:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48352 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235389AbiLVMOK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Dec 2022 07:14:10 -0500
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C78AC3056D;
-        Thu, 22 Dec 2022 04:08:56 -0800 (PST)
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MuDXp-1osAVX1Z1B-00ualw; Thu, 22
- Dec 2022 13:08:55 +0100
-Message-ID: <701ca299-2595-c310-7c8a-2d58c65b2d4d@gmx.com>
-Date:   Thu, 22 Dec 2022 20:08:51 +0800
+        with ESMTP id S229764AbiLVSKb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Dec 2022 13:10:31 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60B3513EA3;
+        Thu, 22 Dec 2022 10:10:30 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1460FB81F3F;
+        Thu, 22 Dec 2022 18:10:29 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5B3DC433D2;
+        Thu, 22 Dec 2022 18:10:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1671732627;
+        bh=rFlJ5umulmnQkWwQiL8LQ//9yzUdQ47Bd3CzEt5sEqo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=LpmWJV6PwDlhm0CMyXVQ+RMaYy33g6F5JuBroPdia13vLCWAJvs98afnXP7MRGQ3D
+         OoPdB2Do29ezUmPSVBJJCiPaya2qU16wneb4Y8a/ce5JyG4lD2g+x1zr5Z6Fy/v44Y
+         gOv3FRZBJdp7TBWIpIAxT6H7ag+iMJ0etVVoRUM1VZWlPysqFHt4/1YUVhmXUE2JWd
+         zWRwa0Pz2kw10zF6l+MT0ZfAbNMy9wTREYYY6h5nnYoy+dJtqZTq0qolKlYS3ex4EK
+         JtCttVKI5voDE5fAnEqgwBy8UcxZLftEvs3X5nxbks8wW1lJvj/nQ/ePKshxbnpUS9
+         Q0+hjGGnlTMfw==
+Date:   Thu, 22 Dec 2022 10:10:27 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Hironori Shiina <shiina.hironori@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        Hironori Shiina <shiina.hironori@fujitsu.com>
+Subject: Re: [PATCH v2] xfs: Test bulkstat special query for root inode
+Message-ID: <Y6SdkwtvvMfvkakG@magnolia>
+References: <20221221161843.124707-1-shiina.hironori@fujitsu.com>
+ <20221221223805.148788-1-shiina.hironori@fujitsu.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Content-Language: en-US
-To:     fstests <fstests@vger.kernel.org>
-Cc:     "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Subject: Which dashboard do most fs developers use for the fstests results?
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Provags-ID: V03:K1:89FNElQoUiEOtRrEPgG9kY2U1yo+TRzUaAHd3VfnNjlKuRfy5Xd
- Z2jvQW5hz+NF6cgz2/9D0e7qxj2FPTLZWToYkzsZvR1sAI+8SmTZPLctpG2lZI8aMT3B72B
- jKkGofe0V/1ipznRx+w2sp358QeZwU7v80xOry6RHKrHA+Vf87pwW8KA6OTHYBoUXHXJN7m
- eONK75BsIA0Kzy4qJ6MRg==
-UI-OutboundReport: notjunk:1;M01:P0:2oxTcMEkT0Q=;dEfcCuYFS+RL/omHFD/ZmaKEM86
- mQXI27lF7Z9GhgbBSydqzRttoE9/ZVQbcOnbd2zUU3HjmgjjK+aeRmPx+7kV9Rpx1XJa9D+ic
- fmC6Lk1+oQydC8EPPthstNYgUpvZMkUksj92L7rxSROj18j2f6L1EGoS3md6K0Z7Tflpehlkd
- uVnpOMzCMQqtqBV9KxlUnVY+qNff04UdbzowZ7DV9If57lZ86stIuKX8k0yQ/e1Y6jz3vg/8a
- Wvbh3At6DipE2tl3rMQAhxjOoTm7lNsRG7aOyrytOsybPrIWbmPkWE/5SPGsqTgK6pHu3P9+h
- wBOLiGcuN1UhYoF2NdPijlu52SqCHa0zTD0AQixx0Ek602BqpLY2HtpF20M5BJ4Z5WCdhQOS4
- Wp9Uz9pGqH4jkzdm46M82qHryV1pG92VSTiVIOgapBxo3AQCbTZW6EPeCECKbvZgV9JoggW+6
- M/d2BfrcQh7ana3vQszCMXIZkK2PetZB74iQFkJPve1CHk9GPPw8b1UvKgXxQWdTQ713+FTy9
- D08ElVmb0mMJ95rJ4PVlHeJEC+8UNkvKmjtFXLIMRujVq06BGg/CVLMIzn8Fjs5GL6i2AhQZ7
- aJHwYvssy+3yXkjXhXs49fWyoeRGzeM4kKVoabp5QNb12d22tno7sMFmTYF8IihUsjLMd9Nc5
- FLceSc4K89SCeHzCt5STlPPivOvaz8s7Xa0rYcC0MeXC6GHMvyQEugiEzp89aqRDs3lvp1kIO
- 33Q/xwf1B9KcmNzLUi2+8V5A62agC+Mjpq+o0+feymz88Eo+eAs05HAS5aYNHyXjLhShbj9/a
- QBPoBC9uv+s8HWRtEhFNEbTFbSWkOF777ynPCPg2DHf4uwV8laXIrrGYHmld8CTBAm7GzFp87
- p5s4zC3KLsOMdjlaCl/EyBfPq5RWt+pDNVS/uXNC8GYYxMRpSVGnWnGN8ZjUgJBB3dWvg7Tiy
- uDgGAysBOnJyL2/MBdTtVLpkivQ=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221221223805.148788-1-shiina.hironori@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi,
+On Wed, Dec 21, 2022 at 05:38:05PM -0500, Hironori Shiina wrote:
+> This is a test for the fix:
+>   bf3cb3944792 xfs: allow single bulkstat of special inodes
+> This fix added a feature to query the root inode number of a filesystem.
+> This test creates a file with a lower inode number than the root and run
+> a query for the root inode.
+> 
+> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
 
-Recently I'm setting up my dashboard for my fstests results.
-My initial inspiration comes from Josef's static pages:
+Looks good to me,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-   http://toxicpanda.com/
+--D
 
-Generated by the following project:
-
-   https://github.com/josefbacik/fstest-results
-
-
-Then I build a similar script (using junit reporting from fstests 
-instead), not much results yet, but all tests will be done on aarch64 VMs:
-
-   https://h.anonymoususers.xyz:8443/results/
-
-Generated by my poorly crafted project:
-
-   https://github.com/adam900710/fstests_result_webui
-
-
-And I'm pretty sure other developers have their own dashboards.
-Darrick mentioned he has his own dashboard, and Theodore mentioned he 
-hit several btrfs test failures.
-
-I'm wondering if it's possible to share the dashboards for each other?
-
-Shared dashboards have the following advantage:
-
-- Let guys from other fses to have more reports
-   Ted's reports is very valuable for our btrfs guys.
-   If we have the access the dashboard to grab the needed info,
-   we're definitely going to improve our runs.
-
-- Learn better ways to build the dashboard
-   I learned a lot from Josef's script, and also learned a lot from
-   the fstests junit report.
-
-   But I'm also wondering if there is some better ways.
-   One possible solution I'm still exploring is InflexDB + Grafana.
-
-   If you guys can share such dashboards, we would have better chances
-   to learn from each other.
-
-Thanks,
-Qu
+> ---
+>  tests/xfs/557     | 63 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/557.out |  2 ++
+>  2 files changed, 65 insertions(+)
+>  create mode 100644 tests/xfs/557
+>  create mode 100644 tests/xfs/557.out
+> 
+> diff --git a/tests/xfs/557 b/tests/xfs/557
+> new file mode 100644
+> index 00000000..608ce13c
+> --- /dev/null
+> +++ b/tests/xfs/557
+> @@ -0,0 +1,63 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Fujitsu Limited. All Rights Reserved.
+> +#
+> +# FS QA Test No. 557
+> +#
+> +# This is a test for:
+> +#   bf3cb3944792 (xfs: allow single bulkstat of special inodes)
+> +# Create a filesystem which contains an inode with a lower number
+> +# than the root inode. Then verify that XFS_BULK_IREQ_SPECIAL_ROOT gets
+> +# the correct root inode number.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_supported_fs xfs
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "bulkstat_single"
+> +_require_scratch
+> +
+> +_fixed_by_kernel_commit XXXXXXXXXXXX \
+> +	"xfs: get root inode correctly at bulkstat"
+> +
+> +# A large stripe unit will put the root inode out quite far
+> +# due to alignment, leaving free blocks ahead of it.
+> +_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1 || _fail "mkfs failed"
+> +
+> +# Mounting /without/ a stripe should allow inodes to be allocated
+> +# in lower free blocks, without the stripe alignment.
+> +_scratch_mount -o sunit=0,swidth=0
+> +
+> +root_inum=$(stat -c %i $SCRATCH_MNT)
+> +
+> +# Consume space after the root inode so that the blocks before
+> +# root look "close" for the next inode chunk allocation
+> +$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
+> +
+> +# And make a bunch of inodes until we (hopefully) get one lower
+> +# than root, in a new inode chunk.
+> +echo "root_inum: $root_inum" >> $seqres.full
+> +for i in $(seq 0 4096) ; do
+> +	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
+> +	touch $fname
+> +	inum=$(stat -c "%i" $fname)
+> +	[[ $inum -lt $root_inum ]] && break
+> +done
+> +
+> +echo "created: $inum" >> $seqres.full
+> +
+> +[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
+> +
+> +# Get root ino with XFS_BULK_IREQ_SPECIAL_ROOT
+> +bulkstat_root_inum=$($XFS_IO_PROG -c 'bulkstat_single root' $SCRATCH_MNT | grep bs_ino | awk '{print $3;}')
+> +echo "bulkstat_root_inum: $bulkstat_root_inum" >> $seqres.full
+> +if [ $root_inum -ne $bulkstat_root_inum ]; then
+> +	echo "root ino mismatch: expected:${root_inum}, actual:${bulkstat_root_inum}"
+> +fi
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/557.out b/tests/xfs/557.out
+> new file mode 100644
+> index 00000000..1f1ae1d4
+> --- /dev/null
+> +++ b/tests/xfs/557.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 557
+> +Silence is golden
+> -- 
+> 2.38.1
+> 
