@@ -2,170 +2,115 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5078BC4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Dec 2022 02:57:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61D17C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Dec 2022 10:22:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229587AbiLWC5c (ORCPT
+        id S234990AbiLWKW0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Dec 2022 21:57:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51330 "EHLO
+        Fri, 23 Dec 2022 05:22:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51582 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235998AbiLWC5E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Dec 2022 21:57:04 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 515592B63D;
-        Thu, 22 Dec 2022 18:57:02 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S235961AbiLWKWS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Dec 2022 05:22:18 -0500
+Received: from mail1.bemta34.messagelabs.com (mail1.bemta34.messagelabs.com [195.245.231.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C8C5F6C
+        for <fstests@vger.kernel.org>; Fri, 23 Dec 2022 02:22:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1671790933; i=@fujitsu.com;
+        bh=cc8amIZPUWqINeUetP2R5Sh2+1uuKIwX5A3E8F/8w2g=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=uBnU0so5YtBG7JvEsXCycXg+WH7Dv/IgE3yH4o6WJ3iWlrqg94cJfQKrAKCdJVMKF
+         kxA3SBxXlXRAGca3RCpTtmpRi110EL6l6qCX/KFOAkPway7r0jJZ4cmR9/5QOOuBP9
+         0Ar1dX6lhG2WbFB0xpMDZAC7hWVhAIrwEI5ymXLSocNxAu3u0ylGoq1ldahQjbXfDh
+         tLT9K/f9gKWj+vFfxearzxC5KlKf0iQ3cHFLs4mAzjMa+/hbnG6TrwRs+asJkTbmnO
+         Uuv9YU2cKgWLJwjgibsXig9dOh0ocPGhhk85QcVVfev2c4x+kYrQqBk9TsZXAHzGDf
+         QJigCaqQchfAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrOIsWRWlGSWpSXmKPExsViZ8MxSTe0cWm
+  ywakdkhaXn/BZnG7Zy26x/+gjFgdmj02rOtk8Pm+SC2CKYs3MS8qvSGDN+DmzlbGgk61i3oZJ
+  LA2Mz1m6GLk4hAS2MEpc2XqVGcJZziTRNfkoVGY/o8T6/veMXYycHGwCahI7p79kAbFFBIwkv
+  pxcwg5iMwtYSHzoOsUEYgsLuEn8OHYPLM4ioCpx+E8nUJyDg1fAUeLxrgSQsISAgsSUh++ZQW
+  xeAUGJkzOfsECMkZA4+OIFM0SNokTbkn/sEHaFxKxZbUwQtprE1XObmCcw8s9C0j4LSfsCRqZ
+  VjGbFqUVlqUW6hpZ6SUWZ6RkluYmZOXqJVbqJeqmluuWpxSW6RnqJ5cV6qcXFesWVuck5KXp5
+  qSWbGIFhmlKsuG4H4/Rlf/QOMUpyMCmJ8q6SXposxJeUn1KZkVicEV9UmpNafIhRhoNDSYKXr
+  Q4oJ1iUmp5akZaZA4wZmLQEB4+SCO9kkDRvcUFibnFmOkTqFKMux9qGA3uZhVjy8vNSpcR5eR
+  uAigRAijJK8+BGwOL3EqOslDAvIwMDgxBPQWpRbmYJqvwrRnEORiVh3hyQVTyZeSVwm14BHcE
+  EdMS0mwtBjihJREhJNTDNurL8sOt0kbNpebfSu1fOMGSK9eR4tIQxyNtcP5eH9YC5VZrXHIMt
+  L2Rszf6xhv7SWDKjbseMaMWbda5mh5MmsD0/JnS/3GOl0481hcF7e/fNuf4k4me1z0olLZG7f
+  v96bn4pvvyyt8ljZoUDZ15bSzrvjUns6ioX133qmNl3ZGHQlikRfznmzN7qcFxWfJlRzAatuh
+  +aRvP8F2yYwFc859O+lFoO81t7j69RSzvC7CV9YF7QcoeTr25Isjb21zMGP062YvgSIbGk5OZ
+  h3V813l9tcg8wxiUl2f/v9YnVXHezzcb/z8W1+VKiVxOOPfh6M+SE8PYNhjoMOo9i+qdkncr7
+  H3t0HXfjt5J3V88qsRRnJBpqMRcVJwIANgXE0loDAAA=
+X-Env-Sender: yangx.jy@fujitsu.com
+X-Msg-Ref: server-20.tower-548.messagelabs.com!1671790933!3655!1
+X-Originating-IP: [62.60.8.146]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.101.2; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 20957 invoked from network); 23 Dec 2022 10:22:13 -0000
+Received: from unknown (HELO n03ukasimr02.n03.fujitsu.local) (62.60.8.146)
+  by server-20.tower-548.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 23 Dec 2022 10:22:13 -0000
+Received: from n03ukasimr02.n03.fujitsu.local (localhost [127.0.0.1])
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTP id 16FC51000D5;
+        Fri, 23 Dec 2022 10:22:13 +0000 (GMT)
+Received: from R01UKEXCASM126.r01.fujitsu.local (R01UKEXCASM126 [10.183.43.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 7213B255A6;
-        Fri, 23 Dec 2022 02:57:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1671764220; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=VmjwX/LYjcWyamL0EuTMi3M5g6zZR+Ov2Nf/jgOc8KY=;
-        b=uUzDrKKa7YRkIZCghXRltIT7NsCtokwVcYvNOmWKNTT5ueRmzNtkYhTiH2mTRAAvwV351C
-        XLPXXTABNBEjmComf12s9rG5To9xZglP65F/I5/WkWZV9hlP6KBcZ59WI60OB+6x0Ky212
-        cVlpgxY6ehw5uLHLjK2NlvH4wEEnnXQ=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8E1AB138E0;
-        Fri, 23 Dec 2022 02:56:59 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id ir3KFfsYpWOBXAAAMHmgww
-        (envelope-from <wqu@suse.com>); Fri, 23 Dec 2022 02:56:59 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] btrfs/154: migrate to python3
-Date:   Fri, 23 Dec 2022 10:56:42 +0800
-Message-Id: <20221223025642.33496-1-wqu@suse.com>
-X-Mailer: git-send-email 2.39.0
+        by n03ukasimr02.n03.fujitsu.local (Postfix) with ESMTPS id 09E9E1000C1;
+        Fri, 23 Dec 2022 10:22:13 +0000 (GMT)
+Received: from 60d65d211147.localdomain (10.167.215.54) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.42; Fri, 23 Dec 2022 10:22:10 +0000
+From:   Xiao Yang <yangx.jy@fujitsu.com>
+To:     <djwong@kernel.org>, <fstests@vger.kernel.org>
+CC:     <zlang@kernel.org>, Xiao Yang <yangx.jy@fujitsu.com>
+Subject: [PATCH] xfs/440: skip test if the dax mount option is enabled
+Date:   Fri, 23 Dec 2022 10:21:56 +0000
+Message-ID: <1671790916-13-1-git-send-email-yangx.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.167.215.54]
+X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test case btrfs/154 is still using python2 script, which is already EOL.
-Some rolling distros like Archlinux is no longer providing python2
-package anymore.
+With the enabled dax mount option, this test doesn't
+work well because unwritten extents will not be allocated
+according to the CoW extent size hint.
 
-This means btrfs/154 will be harder and harder to run.
+Try to fix the following error by the patch:
+$./check xfs/440
+    ...
+     fsgqa 64 0 0
+     Reflink and CoW
+     root 0 0 0
+    -fsgqa 1152 0 0
+    +fsgqa 128 0 0
+     Sync
+     root 0 0 0
+    ...
 
-To fix the problem, migreate the python script to python3, this involves
-the following changes:
-
-- Change common/config to use python3
-- Strong type conversion between string and bytes
-  This means, anything involved in the forged bytes has to be bytes.
-
-  And there is no safe way to convert forged bytes into string, unlike
-  python2.
-  I guess that's why the author went python2 in the first place.
-
-  Thankfully os.rename() still accepts forged bytes.
-
-- Use bytes specific checks for invalid chars.
-
-The updated script can still cause the needed conflicts, can be verified
-through "btrfs ins dump-tree" command.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
 ---
- common/config                   |  2 +-
- src/btrfs_crc32c_forged_name.py | 22 ++++++++++++++++------
- tests/btrfs/154                 |  4 ++--
- 3 files changed, 19 insertions(+), 9 deletions(-)
+ tests/xfs/440 | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/common/config b/common/config
-index b2802e5e..e2aba5a9 100644
---- a/common/config
-+++ b/common/config
-@@ -212,7 +212,7 @@ export NFS4_SETFACL_PROG="$(type -P nfs4_setfacl)"
- export NFS4_GETFACL_PROG="$(type -P nfs4_getfacl)"
- export UBIUPDATEVOL_PROG="$(type -P ubiupdatevol)"
- export THIN_CHECK_PROG="$(type -P thin_check)"
--export PYTHON2_PROG="$(type -P python2)"
-+export PYTHON3_PROG="$(type -P python3)"
- export SQLITE3_PROG="$(type -P sqlite3)"
- export TIMEOUT_PROG="$(type -P timeout)"
- export SETCAP_PROG="$(type -P setcap)"
-diff --git a/src/btrfs_crc32c_forged_name.py b/src/btrfs_crc32c_forged_name.py
-index 6c08fcb7..d29bbb70 100755
---- a/src/btrfs_crc32c_forged_name.py
-+++ b/src/btrfs_crc32c_forged_name.py
-@@ -59,9 +59,10 @@ class CRC32(object):
-     # deduce the 4 bytes we need to insert
-     for c in struct.pack('<L',fwd_crc)[::-1]:
-       bkd_crc = ((bkd_crc << 8) & 0xffffffff) ^ self.reverse[bkd_crc >> 24]
--      bkd_crc ^= ord(c)
-+      bkd_crc ^= c
+diff --git a/tests/xfs/440 b/tests/xfs/440
+index 496ee04e..eb9fbd73 100755
+--- a/tests/xfs/440
++++ b/tests/xfs/440
+@@ -23,6 +23,7 @@ _require_quota
+ _require_scratch_reflink
+ _require_cp_reflink
+ _require_user
++_exclude_scratch_mount_option dax
  
--    res = s[:pos] + struct.pack('<L', bkd_crc) + s[pos:]
-+    res = bytes(s[:pos], 'ascii') + struct.pack('<L', bkd_crc) + \
-+          bytes(s[pos:], 'ascii')
-     return res
- 
-   def parse_args(self):
-@@ -72,6 +73,12 @@ class CRC32(object):
-                         help="number of forged names to create")
-     return parser.parse_args()
- 
-+def has_invalid_chars(result: bytes):
-+    for i in result:
-+        if i == 0 or i == int.from_bytes(b'/', byteorder="little"):
-+            return True
-+    return False
-+
- if __name__=='__main__':
- 
-   crc = CRC32()
-@@ -80,12 +87,15 @@ if __name__=='__main__':
-   args = crc.parse_args()
-   dirpath=args.dir
-   while count < args.count :
--    origname = os.urandom (89).encode ("hex")[:-1].strip ("\x00")
-+    origname = os.urandom (89).hex()[:-1].strip ("\x00")
-     forgename = crc.forge(wanted_crc, origname, 4)
--    if ("/" not in forgename) and ("\x00" not in forgename):
-+    if not has_invalid_chars(forgename):
-       srcpath=dirpath + '/' + str(count)
--      dstpath=dirpath + '/' + forgename
--      file (srcpath, 'a').close()
-+      # We have to convert all strings to bytes to concatenate the forged
-+      # name (bytes).
-+      # Thankfully os.rename() can accept bytes directly.
-+      dstpath=bytes(dirpath, "ascii") + bytes('/', "ascii") + forgename
-+      open(srcpath, mode="a").close()
-       os.rename(srcpath, dstpath)
-       os.system('btrfs fi sync %s' % (dirpath))
-       count+=1;
-diff --git a/tests/btrfs/154 b/tests/btrfs/154
-index 240c504c..6be2d5f6 100755
---- a/tests/btrfs/154
-+++ b/tests/btrfs/154
-@@ -21,7 +21,7 @@ _begin_fstest auto quick
- 
- _supported_fs btrfs
- _require_scratch
--_require_command $PYTHON2_PROG python2
-+_require_command $PYTHON3_PROG python3
- 
- # Currently in btrfs the node/leaf size can not be smaller than the page
- # size (but it can be greater than the page size). So use the largest
-@@ -42,7 +42,7 @@ _scratch_mount
- #    ...
- #
- 
--$PYTHON2_PROG $here/src/btrfs_crc32c_forged_name.py -d $SCRATCH_MNT -c 310
-+$PYTHON3_PROG $here/src/btrfs_crc32c_forged_name.py -d $SCRATCH_MNT -c 310
- echo "Silence is golden"
- 
- # success, all done
+ echo "Format and mount"
+ _scratch_mkfs > "$seqres.full" 2>&1
 -- 
-2.39.0
+2.25.1
 
