@@ -2,42 +2,42 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0131C4708E
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Dec 2022 23:35:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2DECC54E76
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Dec 2022 23:35:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234211AbiL2XfJ (ORCPT
+        id S234216AbiL2XfK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Dec 2022 18:35:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44180 "EHLO
+        Thu, 29 Dec 2022 18:35:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229650AbiL2XfG (ORCPT
+        with ESMTP id S234244AbiL2XfG (ORCPT
         <rfc822;fstests@vger.kernel.org>); Thu, 29 Dec 2022 18:35:06 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27ACE17402;
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B0101740A;
         Thu, 29 Dec 2022 15:35:05 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B6BE56199D;
-        Thu, 29 Dec 2022 23:35:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 10A8FC43392;
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3B40C6198E;
+        Thu, 29 Dec 2022 23:35:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EF885C433D2;
         Thu, 29 Dec 2022 23:35:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1672356904;
-        bh=t4YxnTq55XKnzA6QkU3drS25kE9/QRlSDE3NErRiWn0=;
+        s=k20201202; t=1672356905;
+        bh=Xsl4WRll+T0cwHktEtlV+O8N99M2H9MXi9xfwKWCoVg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=uYPCFyp+boAasoOzgydoZbUP/9fMffDFUAFc1hgvDujeZttzCCf4Z+58orKsOrdEg
-         ZryK3UG1dPqhACf+Ebi/PofTxk/9k6x+fHS7IaFGfPmquxUPTOozuRO9T65ikUqMoQ
-         wfhfivkZIv/IxrAaAjdl+e6pKl0edbNkCJPTWVsxAvDOV0sCNI03i9eumLP6CAOkIS
-         Za5gI0t6Z6ls4utrPVmekcKxdLRexBuBu7jdOG1FmZZhqEFzJxlGfpXL3i+CN5alKP
-         NsqD8efkNt17/wnjJOLoKq1tYG9gzBL9Wv09bTOaaQFcGVRryxNxOF6BhACNUZWTrW
-         lRbrGw6LGI7Lg==
+        b=uA/qLvM7nacAm/4vBPW2w7yx5jP7YKveZt+NiU+MUrEapSK/0paLjh5bMT4L3bEbx
+         ZjMKnU9S6j9n0wAiwpCDutkxDAF3aTtIcogWjOUm8iwOKe1snxFsax8DBTVHk98K8f
+         W+ek/avXt/uH287CJVGCzmfQ1PnfvY+EweUs5pMFqlsuErwfhQUjzrhmDLD66N6017
+         X7UF0uHy3/ZhRWTCzRuEtEApshq/6gBnSrMwaXvom+xWUnnfhj3Wea9xH/6fuZeQKk
+         ShVmwm3WNlc0FdUjPrj94JOv38m9wprgLMVJd9qSlX90bSJFlo8z4zedVkQ3NaI5/7
+         yuPEuL2NMb6yA==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH v3 05/10] generic/572: support non-4K Merkle tree block size
-Date:   Thu, 29 Dec 2022 15:32:17 -0800
-Message-Id: <20221229233222.119630-6-ebiggers@kernel.org>
+Subject: [PATCH v3 09/10] generic/624: test multiple Merkle tree block sizes
+Date:   Thu, 29 Dec 2022 15:32:21 -0800
+Message-Id: <20221229233222.119630-10-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20221229233222.119630-1-ebiggers@kernel.org>
 References: <20221229233222.119630-1-ebiggers@kernel.org>
@@ -49,122 +49,211 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Update generic/572 to not implicitly assume that the Merkle tree block
-size being used is 4096 bytes.  Also remove an unused function.
+Instead of only testing 4K Merkle tree blocks, test FSV_BLOCK_SIZE, and
+also other sizes if they happen to be supported.  This allows this test
+to run in cases where it couldn't before and improves test coverage in
+cases where it did run before.
+
+This required reworking the test to compute the expected digests using
+the 'fsverity digest' command, instead of relying on .out file
+comparisons.  (There isn't much downside to this, since comparison to
+known-good file digests already happens in generic/575.  So if both the
+kernel and fsverity-utils were to be broken in the same way, generic/575
+would detect it.  generic/624 serves a different purpose.)
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/572     | 21 ++++++---------------
- tests/generic/572.out | 10 +++-------
- 2 files changed, 9 insertions(+), 22 deletions(-)
+ common/verity         |  11 ++++
+ tests/generic/624     | 119 ++++++++++++++++++++++++++++++------------
+ tests/generic/624.out |  15 ++----
+ 3 files changed, 101 insertions(+), 44 deletions(-)
 
-diff --git a/tests/generic/572 b/tests/generic/572
-index cded9ac6..d8071a34 100755
---- a/tests/generic/572
-+++ b/tests/generic/572
-@@ -9,7 +9,7 @@
- # - conditions for enabling verity
- # - verity files have correct contents and size
- # - can't change contents of verity files, but can change metadata
--# - can retrieve a verity file's measurement via FS_IOC_MEASURE_VERITY
-+# - can retrieve a verity file's digest via FS_IOC_MEASURE_VERITY
- #
- . ./common/preamble
- _begin_fstest auto quick verity
-@@ -48,15 +48,6 @@ verify_data_readable()
- 	md5sum $file > /dev/null
+diff --git a/common/verity b/common/verity
+index b88e839b..77c257d3 100644
+--- a/common/verity
++++ b/common/verity
+@@ -263,6 +263,17 @@ _fsv_measure()
+         $FSVERITY_PROG measure "$@" | awk '{print $1}'
  }
  
--verify_data_unreadable()
--{
--	local file=$1
--
--	# try both reading just the first data block, and reading until EOF
--	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | filter_output
--	md5sum $file |& filter_output
--}
--
- _fsv_scratch_begin_subtest "Enabling verity on file with verity already enabled fails with EEXIST"
- _fsv_create_enable_file $fsv_file
- echo "(trying again)"
-@@ -94,7 +85,7 @@ verify_data_readable $fsv_file
- _fsv_scratch_begin_subtest "Enabling verity can be interrupted"
- dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
- start_time=$(date +%s)
--$FSVERITY_PROG enable $fsv_file &
-+$FSVERITY_PROG enable --block-size=$FSV_BLOCK_SIZE $fsv_file &
- sleep 0.5
- kill %1
- wait
-@@ -106,7 +97,7 @@ fi
- _fsv_scratch_begin_subtest "Enabling verity on file with verity already being enabled fails with EBUSY"
- dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
- start_time=$(date +%s)
--$FSVERITY_PROG enable $fsv_file &
-+$FSVERITY_PROG enable --block-size=$FSV_BLOCK_SIZE $fsv_file &
- sleep 0.5
- _fsv_enable $fsv_file |& filter_output
- kill %1
-@@ -129,7 +120,7 @@ verify_data_readable $fsv_file
++_fsv_digest()
++{
++	local args=("$@")
++	# If the caller didn't explicitly specify a Merkle tree block size, then
++	# use FSV_BLOCK_SIZE.
++	if ! [[ " $*" =~ " --block-size" ]]; then
++		args+=("--block-size=$FSV_BLOCK_SIZE")
++	fi
++	$FSVERITY_PROG digest "${args[@]}" | awk '{print $1}'
++}
++
+ _fsv_sign()
+ {
+ 	local args=("$@")
+diff --git a/tests/generic/624 b/tests/generic/624
+index 7c447289..db4b6731 100755
+--- a/tests/generic/624
++++ b/tests/generic/624
+@@ -24,48 +24,99 @@ _cleanup()
+ _supported_fs generic
+ _require_scratch_verity
+ _disable_fsverity_signatures
+-# For the output of this test to always be the same, it has to use a specific
+-# Merkle tree block size.
+-if [ $FSV_BLOCK_SIZE != 4096 ]; then
+-	_notrun "4096-byte verity block size not supported on this platform"
+-fi
++fsv_orig_file=$SCRATCH_MNT/file
++fsv_file=$SCRATCH_MNT/file.fsv
  
- _fsv_scratch_begin_subtest "verity file can be measured"
- _fsv_create_enable_file $fsv_file >> $seqres.full
+ _scratch_mkfs_verity &>> $seqres.full
+ _scratch_mount
+-
+-echo -e "\n# Creating a verity file"
+-fsv_file=$SCRATCH_MNT/file
+-# Always use the same file contents, so that the output of the test is always
+-# the same.  Also use a file that is large enough to have multiple Merkle tree
+-# levels, so that the test verifies that the blocks are returned in the expected
+-# order.  A 1 MB file with SHA-256 and a Merkle tree block size of 4096 will
+-# have 3 Merkle tree blocks (3*4096 bytes): two at level 0 and one at level 1.
+-head -c 1000000 /dev/zero > $fsv_file
+-merkle_tree_size=$((3 * FSV_BLOCK_SIZE))
+-fsverity_descriptor_size=256
+-_fsv_enable $fsv_file --salt=abcd
++_fsv_create_enable_file $fsv_file
+ _require_fsverity_dump_metadata $fsv_file
 -_fsv_measure $fsv_file
-+_fsv_measure $fsv_file | _filter_fsverity_digest
  
- _fsv_scratch_begin_subtest "verity file can be renamed"
- _fsv_create_enable_file $fsv_file
-@@ -170,8 +161,8 @@ verify_data_readable $fsv_file
+-echo -e "\n# Dumping Merkle tree"
+-_fsv_dump_merkle_tree $fsv_file | sha256sum
++# Test FS_IOC_READ_VERITY_METADATA on a file that uses the given Merkle tree
++# block size.
++test_block_size()
++{
++	local block_size=$1
++	local digest_size=32 # assuming SHA-256
++	local i
++
++	# Create the file.  Make the file size big enough to result in multiple
++	# Merkle tree levels being needed.  The following expression computes a
++	# file size that needs 2 blocks at level 0, and thus 1 block at level 1.
++	local file_size=$((block_size * (2 * (block_size / digest_size))))
++	head -c $file_size /dev/zero > $fsv_orig_file
++	local tree_params=("--salt=abcd" "--block-size=$block_size")
++	cp $fsv_orig_file $fsv_file
++	_fsv_enable $fsv_file "${tree_params[@]}"
++
++	# Use the 'fsverity digest' command to compute the expected Merkle tree,
++	# descriptor, and file digest.
++	#
++	# Ideally we'd just hard-code expected values into the .out file and
++	# echo the actual values.  That doesn't quite work here, since all these
++	# values depend on the Merkle tree block size, and the Merkle tree block
++	# sizes that are supported (and thus get tested here) vary.  Therefore,
++	# we calculate the expected values in userspace with the help of
++	# 'fsverity digest', then do explicit comparisons with them.  This works
++	# fine as long as fsverity-utils and the kernel don't get broken in the
++	# same way, in which case generic/575 should detect the problem anyway.
++	local expected_file_digest=$(_fsv_digest $fsv_orig_file \
++		"${tree_params[@]}" \
++		--out-merkle-tree=$tmp.merkle_tree.expected \
++		--out-descriptor=$tmp.descriptor.expected)
++	local merkle_tree_size=$(_get_filesize $tmp.merkle_tree.expected)
++	local descriptor_size=$(_get_filesize $tmp.descriptor.expected)
  
- # Test files <= 1 block in size.  These are a bit of a special case since there
- # are no hash blocks; the root hash is calculated directly over the data block.
-+_fsv_scratch_begin_subtest "verity on small files"
- for size in 1 $((FSV_BLOCK_SIZE - 1)) $FSV_BLOCK_SIZE; do
--	_fsv_scratch_begin_subtest "verity on $size-byte file"
- 	head -c $size /dev/urandom > $fsv_orig_file
- 	cp $fsv_orig_file $fsv_file
- 	_fsv_enable $fsv_file
-@@ -179,7 +170,7 @@ for size in 1 $((FSV_BLOCK_SIZE - 1)) $FSV_BLOCK_SIZE; do
- 	rm -f $fsv_file
- done
+-echo -e "\n# Dumping Merkle tree (in chunks)"
+-# The above test may get the whole tree in one read, so also try reading it in
+-# chunks.
+-for (( i = 0; i < merkle_tree_size; i += 997 )); do
+-	_fsv_dump_merkle_tree $fsv_file --offset=$i --length=997
+-done | sha256sum
++	# 'fsverity measure' should return the expected file digest.
++	local actual_file_digest=$(_fsv_measure $fsv_file)
++	if [ "$actual_file_digest" != "$expected_file_digest" ]; then
++		echo "Measure returned $actual_file_digest but expected $expected_file_digest"
++	fi
  
--_fsv_scratch_begin_subtest "verity on 100M file (multiple levels in hash tree)"
-+_fsv_scratch_begin_subtest "verity on 100MB file (multiple levels in hash tree)"
- head -c 100000000 /dev/urandom > $fsv_orig_file
- cp $fsv_orig_file $fsv_file
- _fsv_enable $fsv_file
-diff --git a/tests/generic/572.out b/tests/generic/572.out
-index ad381629..d703835b 100644
---- a/tests/generic/572.out
-+++ b/tests/generic/572.out
-@@ -39,7 +39,7 @@ bash: SCRATCH_MNT/file.fsv: Operation not permitted
- # verity file can be read
+-echo -e "\n# Dumping descriptor"
+-# Note that the hash that is printed here should be the same hash that was
+-# printed by _fsv_measure above.
+-_fsv_dump_descriptor $fsv_file | sha256sum
++	# Test dumping the Merkle tree.
++	_fsv_dump_merkle_tree $fsv_file > $tmp.merkle_tree.actual
++	if ! cmp $tmp.merkle_tree.expected $tmp.merkle_tree.actual; then
++		echo "Dumped Merkle tree didn't match"
++	fi
++
++	# Test dumping the Merkle tree in chunks.
++	for (( i = 0; i < merkle_tree_size; i += 997 )); do
++		_fsv_dump_merkle_tree $fsv_file --offset=$i --length=997
++	done > $tmp.merkle_tree.actual
++	if ! cmp $tmp.merkle_tree.expected $tmp.merkle_tree.actual; then
++		echo "Dumped Merkle tree (in chunks) didn't match"
++	fi
++
++	# Test dumping the descriptor.
++	_fsv_dump_descriptor $fsv_file > $tmp.descriptor.actual
++	if ! cmp $tmp.descriptor.expected $tmp.descriptor.actual; then
++		echo "Dumped descriptor didn't match"
++	fi
++
++	# Test dumping the descriptor in chunks.
++	for (( i = 0; i < descriptor_size; i += 13 )); do
++		_fsv_dump_descriptor $fsv_file --offset=$i --length=13
++	done > $tmp.descriptor.actual
++	if ! cmp $tmp.descriptor.expected $tmp.descriptor.actual; then
++		echo "Dumped descriptor (in chunks) didn't match"
++	fi
++}
  
- # verity file can be measured
--sha256:be54121da3877f8852c65136d731784f134c4dd9d95071502e80d7be9f99b263
-+sha256:<digest>
+-echo -e "\n# Dumping descriptor (in chunks)"
+-for (( i = 0; i < fsverity_descriptor_size; i += 13 )); do
+-	_fsv_dump_descriptor $fsv_file --offset=$i --length=13
+-done | sha256sum
++# Always test FSV_BLOCK_SIZE.  Also test some other block sizes if they happen
++# to be supported.
++_fsv_scratch_begin_subtest "Testing block_size=FSV_BLOCK_SIZE"
++test_block_size $FSV_BLOCK_SIZE
++for block_size in 1024 4096 16384 65536; do
++	_fsv_scratch_begin_subtest "Testing block_size=$block_size if supported"
++	if (( block_size == FSV_BLOCK_SIZE )); then
++		continue # Skip redundant test case.
++	fi
++	if ! _fsv_can_enable $fsv_file --block-size=$block_size; then
++		echo "block_size=$block_size is unsupported" >> $seqres.full
++		continue
++	fi
++	test_block_size $block_size
++done
  
- # verity file can be renamed
+ # success, all done
+ status=0
+diff --git a/tests/generic/624.out b/tests/generic/624.out
+index 912826d3..0ea19ee5 100644
+--- a/tests/generic/624.out
++++ b/tests/generic/624.out
+@@ -1,16 +1,11 @@
+ QA output created by 624
  
-@@ -58,16 +58,12 @@ sha256:be54121da3877f8852c65136d731784f134c4dd9d95071502e80d7be9f99b263
- # Trying to measure non-verity file fails with ENODATA
- ERROR: FS_IOC_MEASURE_VERITY failed on 'SCRATCH_MNT/file.fsv': No data available
+-# Creating a verity file
+-sha256:11e4f886bf2d70a6ef3a8b6ce8e8c62c9e5d3263208b9f120ae46791f124be73
++# Testing block_size=FSV_BLOCK_SIZE
  
--# verity on 1-byte file
-+# verity on small files
- Files matched
--
--# verity on 4095-byte file
- Files matched
--
--# verity on 4096-byte file
- Files matched
+-# Dumping Merkle tree
+-db88cdad554734cd648a1bfbb5be7f86646c54397847aab0b3f42a28829fed17  -
++# Testing block_size=1024 if supported
  
--# verity on 100M file (multiple levels in hash tree)
-+# verity on 100MB file (multiple levels in hash tree)
- Files matched
+-# Dumping Merkle tree (in chunks)
+-db88cdad554734cd648a1bfbb5be7f86646c54397847aab0b3f42a28829fed17  -
++# Testing block_size=4096 if supported
  
- # verity on sparse file
+-# Dumping descriptor
+-11e4f886bf2d70a6ef3a8b6ce8e8c62c9e5d3263208b9f120ae46791f124be73  -
++# Testing block_size=16384 if supported
+ 
+-# Dumping descriptor (in chunks)
+-11e4f886bf2d70a6ef3a8b6ce8e8c62c9e5d3263208b9f120ae46791f124be73  -
++# Testing block_size=65536 if supported
 -- 
 2.39.0
 
