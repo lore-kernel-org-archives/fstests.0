@@ -2,62 +2,89 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 384C9C4167B
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Dec 2022 12:50:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 442D8C3DA79
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Dec 2022 12:53:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232614AbiL1Mua (ORCPT
+        id S233383AbiL2Mws (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Dec 2022 07:50:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59366 "EHLO
+        Thu, 29 Dec 2022 07:52:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230012AbiL1Mu3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Dec 2022 07:50:29 -0500
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64D94D69
-        for <fstests@vger.kernel.org>; Wed, 28 Dec 2022 04:50:28 -0800 (PST)
-Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 2BSCoCH7008131
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 28 Dec 2022 07:50:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1672231814; bh=uak1jgcZONJWkQcvhw58/SlzJBPz95ZtmHeL63ZOSyA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To;
-        b=aEWijW9a7/KBIBcgIW0Tvv5N/DK9NOZfmxs+FGiA4Jc1/bj3bFVQGB8GsmCk/rE96
-         ZFH0BI9E+AyMmSqB6Y2fHPrBmxoFp8plifvamZEIVj8Wap7dqYIGcgEDm01NgOZXvw
-         scXGIP9WDVO8BjmEmQ1x7fn3AUod7LOS7miaVEjMlpWmaljYsPatxdmSBsh4/uig5F
-         Yy9ATu2A/cGzDqUU0bD/tFPNTS9R9/2c1ajZsYF1ZJf4eHouTFfX+8He9EIjNpT3qf
-         ZL2haIqk8AQOPA14nBKSYIUmhtwhZGH9m+c4+ODCONzE6+IXKbkAvvlXplm0nrb63O
-         MAoxc/+U9Y6Ww==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 4A33015C4930; Wed, 28 Dec 2022 07:50:12 -0500 (EST)
-Date:   Wed, 28 Dec 2022 07:50:12 -0500
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v2 08/10] generic/574: test multiple Merkle tree block
- sizes
-Message-ID: <Y6w7hIQrZ37HbAng@mit.edu>
-References: <20221223010554.281679-1-ebiggers@kernel.org>
- <20221223010554.281679-9-ebiggers@kernel.org>
- <20221225124600.faouh6a7suhq2wuu@zlang-mailbox>
- <Y6kvXs33MmxVovNO@sol.localdomain>
+        with ESMTP id S233450AbiL2MwZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Dec 2022 07:52:25 -0500
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9866A13EB1
+        for <fstests@vger.kernel.org>; Thu, 29 Dec 2022 04:52:23 -0800 (PST)
+Received: from dggpeml500021.china.huawei.com (unknown [172.30.72.54])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4NjSqb4P31z9t1R;
+        Thu, 29 Dec 2022 20:48:27 +0800 (CST)
+Received: from [10.174.177.174] (10.174.177.174) by
+ dggpeml500021.china.huawei.com (7.185.36.21) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Thu, 29 Dec 2022 20:52:21 +0800
+Message-ID: <918b74a0-0451-6eb9-9d4a-6ae540cdc5f8@huawei.com>
+Date:   Thu, 29 Dec 2022 20:52:20 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Y6kvXs33MmxVovNO@sol.localdomain>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.1.2
+Subject: Re: supporting overlay+tmpfs breaks check -n -overlay -g auto
+To:     Murphy Zhou <jencce.kernel@gmail.com>,
+        fstests <fstests@vger.kernel.org>,
+        Gao Xiang <hsiangkao@linux.alibaba.com>
+References: <CADJHv_sJHyhgaJoAJCZY0VpO6u8vGHOzD3qBgv5EW3vYSNjfuA@mail.gmail.com>
+Content-Language: en-US
+From:   Baokun Li <libaokun1@huawei.com>
+CC:     "zhangyi (F)" <yi.zhang@huawei.com>,
+        "yukuai (C)" <yukuai3@huawei.com>
+In-Reply-To: <CADJHv_sJHyhgaJoAJCZY0VpO6u8vGHOzD3qBgv5EW3vYSNjfuA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.177.174]
+X-ClientProxiedBy: dggems703-chm.china.huawei.com (10.3.19.180) To
+ dggpeml500021.china.huawei.com (7.185.36.21)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Dec 25, 2022 at 09:21:34PM -0800, Eric Biggers wrote:
-> The joy of working with a shell scripting system where everyone has different
-> versions of everything installed...
+On 2022/12/12 9:42, Murphy Zhou wrote:
+> Hi,
+>
+> Bisecting points me to this commit:
+>
+> commit 92fb58afaa2f38a9369ad5791a4cbf135545617d
+> Author: Baokun Li <libaokun1@huawei.com>
+> Date:   Wed May 11 16:34:04 2022 +0800
+>
+>      common: xfstests support overlay+tmpfs
+>
+>
+> It breaks this command:
+> ./check -n -overlay -g auto
+>
+> As a result, it fails to show me the list of testcases.
+>
+> Please help to check.
+>
+> Thanks!
+> Murphy
 
-And this is why some large companies are still stuck on Bash v3
-because the SRE's are afraid that untold number of shell scripts will
-break in subtle and entertaining ways, leading to customer outages...
+Thank you very much for reporting this issue!
+I think I figured out the cause of the problem.
 
-      	 	    		       	       	  - Ted
+In the above commit, the "-t $OVL_BASE_FSTYP" command is used to
+specify the overlay base mount file system type. If FSTYP is used to
+specify BASE_FSTYP in config, the file system type can be identified.
+However, if you use the environment variable FSTYP to specify BASE_FSTYP,
+there is no corresponding logic. Sometimes, even FSTYP is not specified.
+In this case, the mounting command is similar to
+
+      "_mount -t /dev/sdb /tmp/scratch".
+
+As a result, the preceding problem is triggered.
+
+I will send a patch to fix the problem.
+Thanks!
+--
+With Best Regards,
+Baokun Li
