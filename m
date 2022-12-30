@@ -2,100 +2,107 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CABDAC46467
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Dec 2022 23:47:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EFAFCC10F1B
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Dec 2022 21:13:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233987AbiL2XrQ (ORCPT
+        id S235484AbiL3VN0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Dec 2022 18:47:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49680 "EHLO
+        Fri, 30 Dec 2022 16:13:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234319AbiL2XrN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Dec 2022 18:47:13 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E94113EB2;
-        Thu, 29 Dec 2022 15:47:12 -0800 (PST)
+        with ESMTP id S229519AbiL3VNZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Dec 2022 16:13:25 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 795891C40D;
+        Fri, 30 Dec 2022 13:13:24 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id EDD2261978;
-        Thu, 29 Dec 2022 23:47:11 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 300C5C433EF;
-        Thu, 29 Dec 2022 23:47:11 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 365A9B81C26;
+        Fri, 30 Dec 2022 21:13:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ACD8FC433EF;
+        Fri, 30 Dec 2022 21:13:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1672357631;
-        bh=BRwAOEDQdFfyBDo4SmXClaLm9XOgsxR0oc8PLSOuiUc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ZeRveALYkLoway30dBqq807Mv7kx+Z0u2Pvs5YpsG+WbclmYJtJhEBpH7YFSHekDF
-         l6SXfuofN/9Ab3nlvIyuwOGJ1WgVDf2oCDJVrSkwbREcsognPxeB+rFYAS/JgIfRU9
-         xi4Dnv64x/NlyO24Tqdy5vZ00A54fuymz+ACxyRi2lBvkzc1zuQlRC1OvnjpIhPYxb
-         nkJN5kJvsp6cSyoCQ566CyIolmBS/z4UAFEiQBbV6GVB7iT+HhuhksetXuxqzVMby4
-         VUU6M8yDRchKB4lMqMlpVcI71q1Ftd8lweijEpFOUY5+7JNGaMNlf657jXzdZ8sEtz
-         YJvlDMcgEd//Q==
-Date:   Thu, 29 Dec 2022 15:47:09 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v2 08/10] generic/574: test multiple Merkle tree block
- sizes
-Message-ID: <Y64m/WNnlKYBAFVk@sol.localdomain>
-References: <20221223010554.281679-1-ebiggers@kernel.org>
- <20221223010554.281679-9-ebiggers@kernel.org>
- <20221225124600.faouh6a7suhq2wuu@zlang-mailbox>
- <Y6kvXs33MmxVovNO@sol.localdomain>
- <20221229163215.zpwgul6faq2rhpay@zlang-mailbox>
+        s=k20201202; t=1672434801;
+        bh=SHf6Q4nQqn/WFPsljH3FIiwRu8zRTh2NBmsBnXPz+X0=;
+        h=Date:From:To:Cc:Subject:From;
+        b=qn2blO/I5TKRjQ7MuGWpbIpCR7UxL/l922b0eL2F0SHtz9vGlqil3N3FQakH5Wwgb
+         /YB7aY7zCEDMZovkImXPhWuBIl6e0yx/K4hfGAHTLnkm5ApfC6b9WENGoUPEcYRFW+
+         WzBjWM4qAolNmHm3eO+83sxDkOMsUmjVAl71NkRS5VBGTP937PeYBM3l7fXnTGP0N2
+         BM74AYDS5CbFke2pO0I+yVTI2UzS9NWkWyciETntZMRirCVzySCJI6sTsfXOR3EY6E
+         +lgWx5Nyz3kSBIIOk7KtDVSwU4k2TxzPX070lFeB/imcyq5SyNbwXIeukWSXZVbmlk
+         ySSkNXwn+W3OQ==
+Date:   Fri, 30 Dec 2022 13:13:21 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>,
+        Allison Henderson <allison.henderson@oracle.com>,
+        Chandan Babu R <chandanrlinux@gmail.com>,
+        Catherine Hoang <catherine.hoang@oracle.com>, djwong@kernel.org
+Cc:     xfs <linux-xfs@vger.kernel.org>, greg.marsden@oracle.com,
+        shirley.ma@oracle.com, konrad.wilk@oracle.com,
+        fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>,
+        Carlos Maiolino <cmaiolino@redhat.com>
+Subject: [NYE DELUGE 1/4] xfs: all pending online scrub improvements
+Message-ID: <Y69UceeA2MEpjMJ8@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221229163215.zpwgul6faq2rhpay@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Dec 30, 2022 at 12:32:15AM +0800, Zorro Lang wrote:
-> > 
-> > This test passes for me both before and after this patch series.
-> > 
-> > Both before and after, the way this is supposed to work is that in:
-> > 
-> > 	bash -c "trap '' SIGBUS; command_that_exits_with_sigbus"
-> > 
-> > ... bash should print "Bus error" to stderr due to
-> > 'command_that_exits_with_sigbus'.  That "Bus error" is then redirected.  Before
-> > it was redirected to a pipeline; after it is redirected to a file.
-> > 
-> > I think what's happening is that the version of bash your system has is not
-> > forking before exec'ing 'command_that_exits_with_sigbus'.  As a result, "Bus
-> > error" is printed by the *parent* bash process instead, skipping any redirection
-> > in the shell script.
-> > 
-> > Apparently skipping fork is a real thing in bash, and different versions of bash
-> > have had subtly different conditions for enabling it.  So this seems plausible.
-> > 
-> > Adding an extra command after 'command_that_exits_with_sigbus' should fix this:
-> > 
-> > 	bash -c "trap '' SIGBUS; command_that_exits_with_sigbus; true"
-> 
-> Thanks for this explanation, I think you're right!
-> 
-> I'm not sure if it's a bug of bash. If it's not a bug, I think we can do this
-> change (add a true) to avoid that failure. If it's a bug, hmmm..., I think we'd
-> better to avoid that failure too, due to we don't test for bash :-/
-> 
-> How about your resend this single patch (by version 2.1), to fix this problem.
-> Other patches looks good to me, I'd like to merge this patchset this weekend.
-> 
-> Thanks,
-> Zorro
+Hi everyone,
 
-I expect that the bash developers wouldn't consider this to be a bug, since it
-could only be fixed by removing the "skip fork" optimization entirely.
+As I've mentioned several times throughout 2022, I would like to merge
+the online fsck feature in time for the 2023 LTS kernel.  The first big
+step in this process is to merge all the pending bug fixes, validation
+improvements, and general reorganization of the existing metadata
+scrubbing functionality.
 
-Anyway, the workaround I suggested is simple enough.
+This first deluge starts with the design document for the entirety of
+the online fsck feature.  The design doc should be familiar to most of
+you, as it's been on the list for review for months already.  It
+outlines in brief the problems we're trying to solve, the use cases and
+testing plan, and the fundamental data structures and algorithms
+underlying the entire feature.
 
-I just resent the whole series, since it's confusing to have new versions of
-patches within existing series versions.  But only this one patch changed.
+After that come all the code changes to wrap up the metadata checking
+part of the feature.  The biggest piece here is the scrub drains that
+allow scrub to quiesce deferred ops targeting AGs so that it can
+cross-reference recordsets.  Most of the rest is tweaking the btree code
+so that we can do keyspace scans to look for conflicting records.
 
-Thanks!
+For this review, I would like people to focus the following:
 
-- Eric
+- Are the major subsystems sufficiently documented that you could figure
+  out what the code does?
+
+- Do you see any problems that are severe enough to cause long term
+  support hassles? (e.g. bad API design, writing weird metadata to disk)
+
+- Can you spot mis-interactions between the subsystems?
+
+- What were my blind spots in devising this feature?
+
+- Are there missing pieces that you'd like to help build?
+
+- Can I just merge all of this?
+
+The one thing that is /not/ in scope for this review are requests for
+more refactoring of existing subsystems.  While there are usually valid
+arguments for performing such cleanups, those are separate tasks to be
+prioritized separately.  I will get to them after merging online fsck.
+
+I've been running daily online scrubs of every computer I own for the
+last five years, which has helped me iron out real problems in (limited
+scope) production.  All issues observed in that time have been corrected
+in this submission.
+
+As a warning, the patches will likely take several days to trickle in.
+All four patch deluges are based off kernel 6.2-rc1, xfsprogs 6.1, and
+fstests 2022-12-25.
+
+Thank you all for your participation in the XFS community.  Have a safe
+New Years, and I'll see you all next year!
+
+--D
