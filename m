@@ -2,78 +2,76 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D64E5C4332F
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Dec 2022 21:14:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8C41C4332F
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Dec 2022 22:28:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231443AbiL3VOs (ORCPT
+        id S229749AbiL3W2v (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 30 Dec 2022 16:14:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37798 "EHLO
+        Fri, 30 Dec 2022 17:28:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51506 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229827AbiL3VOr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Dec 2022 16:14:47 -0500
+        with ESMTP id S231256AbiL3W2u (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Dec 2022 17:28:50 -0500
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C87211C912;
-        Fri, 30 Dec 2022 13:14:46 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 867A51C90C;
+        Fri, 30 Dec 2022 14:28:49 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 779B0B81C26;
-        Fri, 30 Dec 2022 21:14:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D41AC433D2;
-        Fri, 30 Dec 2022 21:14:44 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 417CBB81C22;
+        Fri, 30 Dec 2022 22:28:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EFDA2C433D2;
+        Fri, 30 Dec 2022 22:28:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1672434884;
-        bh=rsU6F54u9LqXgAXfzEBqRrCQOjFfTMYagsDaoP6e3j8=;
-        h=Date:From:To:Cc:Subject:From;
-        b=IeuYRSomh14X6VQTrbdlMPKCRY9/5FI1jUeIhQjUz7W7O6fGfmuhkWSbhrd/p3edv
-         JYEd8hUj8wD2wWnF0F0dVLgCsP1Cr5XPWwjKAgJRSI/nyFJHhBLG1MHu94kzNil6U3
-         KPjWzUGDFQyO5YhvG4q/AzZQHIh5+aJa/luEfFRv82t23l/df9+h/glH68p+L0x0yF
-         2rS6dINgFELu2xnh/vTMFMOXtq629qLZGCA0bpMMulsVmTJIQlHpyRGrmNcpas6DA8
-         65cZd+VLFbbnx073IMyEiBXo0TOfhqyZDQAaclVPYrYGF3jUVqQI7KHyEcavnab8i0
-         bESqWu9yrK0vw==
-Date:   Fri, 30 Dec 2022 13:14:43 -0800
+        s=k20201202; t=1672439327;
+        bh=Y6DVwqkfI3wrgqShxAwmMGjTVnowALHirCWuZFTxQNk=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=sYI3vL31oGzDeNH5vSUAHPNxsP/FUegUiNAtq9RlJfJJMynS1LRQPjBEU2bUGapE/
+         yJfIQvx6UlQxQ2Kcw9RSs6KkFUOBTDMjJ75FwA27OmQ53csEZBuD7o0/ZJOHOL97hi
+         XfmHd8sPxFfJ75/DmcODMXB6Trff2/d6uIpM3R3wBy2jF5yXYLTQya2Ds4OIgxTfhN
+         VzhcvG8eUpjDh54TqmO9EEmtUY13Mps5QQGo9PnhKG28rcZ0rKjm0d42vLeNAuWIBZ
+         o4lZCe0LMtUS11OQDORSE3Gmlv6xOzfW8UCrgUktmWDK0EP7SBp0Pl8rVpxnPR+tjU
+         WyKrY3swBmICw==
+Subject: [PATCHSET v24.0 00/16] fstests: refactor online fsck stress tests
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org
-Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: [NYE DELUGE 4/4] xfs: freespace defrag for online shrink
-Message-ID: <Y69Uw6W5aclS115x@magnolia>
+To:     zlang@redhat.com, djwong@kernel.org
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Fri, 30 Dec 2022 14:12:53 -0800
+Message-ID: <167243837296.694541.13203497631389630964.stgit@magnolia>
+In-Reply-To: <Y69UceeA2MEpjMJ8@magnolia>
+References: <Y69UceeA2MEpjMJ8@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-This fourth patch deluge has two faces -- one way of looking at it is
-that it is random odds and ends at the tail of my development tree.  A
-second interpretation is that it is necessary pieces for defragmenting
-free space, which is a precursor for online shrink of XFS filesystems.
+This series prepares us to begin creating stress tests for the XFS
+online fsck feature.  We start by hoisting the loop control code out of
+the one existing test (xfs/422) into common/fuzzy, and then we commence
+rearranging the code to make it easy to generate more and more tests.
+Eventually we will race fsstress against online scrub and online repair
+to make sure that xfs_scrub running on a correct filesystem cannot take
+it down by accident.
 
-The kernel side isn't that exciting -- we export refcounting information
-for space extents, and add a new fallocate mode for mapping exact
-portions of free filesystem space into a file.
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
 
-Userspace is where things get interesting!  The free space defragmenter
-is an iterative algorithm that assigns free space to a dummy file, and
-then uses the GETFSMAP and GETFSREFCOUNTS information to target file
-space extents in order of decreasing share counts.  Once an extent has
-been targeted, it uses reflinking to freeze the space, copies it
-elsewhere, and uses FIDEDUPERANGE to remap existing file data until the
-dummy file is the sole owner of the targetted space.  If metadata are
-involved, the defrag utility invokes online repair to rebuild the
-metadata somewhere else.
-
-When the defragmenter finishes, all the free space has been isolated to
-the dummy file, which can be unlinked and closed if defragmentation was
-the goal; or it could be passed to a shrinkfs operation.
-
-NOTE: There's also an experimental vectorization interface for scrub.
-Given how long it's likely to take to get to this fourth deluge, it
-might make more sense to integrate with io_uring when that day comes.
-
-As a warning, the patches will likely take several days to trickle in.
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=refactor-scrub-stress
+---
+ common/fuzzy        |  272 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ doc/group-names.txt |    1 
+ tests/xfs/422       |  109 ++------------------
+ tests/xfs/422.out   |    4 -
+ 4 files changed, 285 insertions(+), 101 deletions(-)
+
