@@ -2,185 +2,136 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 978BFC54E76
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Jan 2023 09:56:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 782E5C5479D
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Jan 2023 11:02:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232042AbjAFJ4W (ORCPT
+        id S232608AbjAFLCe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Jan 2023 04:56:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48094 "EHLO
+        Fri, 6 Jan 2023 06:02:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50886 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232456AbjAFJ4C (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Jan 2023 04:56:02 -0500
-Received: from out30-7.freemail.mail.aliyun.com (out30-7.freemail.mail.aliyun.com [115.124.30.7])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18E4110FA;
-        Fri,  6 Jan 2023 01:55:59 -0800 (PST)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R171e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045168;MF=ziyangzhang@linux.alibaba.com;NM=1;PH=DS;RN=5;SR=0;TI=SMTPD_---0VYzme23_1672998956;
-Received: from 30.97.56.214(mailfrom:ZiyangZhang@linux.alibaba.com fp:SMTPD_---0VYzme23_1672998956)
-          by smtp.aliyun-inc.com;
-          Fri, 06 Jan 2023 17:55:57 +0800
-Message-ID: <3d9d3d69-4a6b-0661-97ea-facc33149c80@linux.alibaba.com>
-Date:   Fri, 6 Jan 2023 17:55:54 +0800
+        with ESMTP id S232864AbjAFLCb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Jan 2023 06:02:31 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 897F86E406
+        for <fstests@vger.kernel.org>; Fri,  6 Jan 2023 03:02:29 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 4497EB81CFE
+        for <fstests@vger.kernel.org>; Fri,  6 Jan 2023 11:02:28 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D97DCC43396;
+        Fri,  6 Jan 2023 11:02:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1673002946;
+        bh=GjgWDxOJwFA+Wa5O+R2IGgaAj7WS5X49SNmm7TnzIFE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=W9T3rFkfTJK7W91B/DTEO5JE7eDJHRnM8ECjYxQIGZMb893byCpk17jtKpMorz778
+         gDVixR9sO9LDDjTrqbIQLoi7rTmCeKwag0+EJtjBrQSqyJ4CD8wQNuPR9Z0P04LanB
+         1wn7v9QuoqVuJ1NX6XKiYrbSgSpOkceR26M7uUkoNjd/+a0JAd1ARGuywXOO5d4tnd
+         QX2zICdcUvb2qOEnl39Xrsm6exZF4jrOwH2TJz06tdtf96pdgjs8AH3FN/8hc2kPdM
+         n1t4WC80p0Y+acGdXl7T3qOFxRYN+eFz9usqNeaPhehfAOcURByelA2/myx4/sgdmD
+         r0o86bHrvdPbA==
+Date:   Fri, 6 Jan 2023 12:02:17 +0100
+From:   Christian Brauner <brauner@kernel.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
+        Amir Goldstein <amir73il@gmail.com>
+Subject: Re: [PATCH] generic: update setgid tests
+Message-ID: <20230106110217.ut2ch3zs573mjnjj@wittgenstein>
+References: <20230103-fstests-setgid-v6-2-v1-1-b8972c303ebe@kernel.org>
+ <Y7RqOZK+liyY+RNY@magnolia>
+ <20230103213120.ucutrjaoykl3dpht@wittgenstein>
+ <Y7TEWaqOyTR1rJoA@magnolia>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
- Gecko/20100101 Thunderbird/102.6.1
-Subject: Re: [PATCH V6 2/2] common/populate: Ensure that S_IFDIR.FMT_BTREE is
- in btree format
-Content-Language: en-US
-To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-Cc:     "hsiangkao@linux.alibaba.com" <hsiangkao@linux.alibaba.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
-        "Darrick J. Wong" <djwong@kernel.org>
-References: <20221212055645.2067020-1-ZiyangZhang@linux.alibaba.com>
- <20221212055645.2067020-3-ZiyangZhang@linux.alibaba.com>
- <c984985a-ec53-9f32-ef93-946b0500bcd5@fujitsu.com>
- <0b95a29d-43ca-ba29-365f-9161a213dc17@linux.alibaba.com>
- <c9355efb-cebe-8efd-8844-1d00d649e602@fujitsu.com>
-From:   Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-In-Reply-To: <c9355efb-cebe-8efd-8844-1d00d649e602@fujitsu.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <Y7TEWaqOyTR1rJoA@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2023/1/3 17:58, xuyang2018.jy@fujitsu.com wrote:
-> on  2023/01/03 17:29, Ziyang Zhang wrote
->> On 2023/1/3 14:54, xuyang2018.jy@fujitsu.com wrote:
->>>
->>>
->>> on 2022/12/12 13:56, Ziyang Zhang wrote:
->>>
->>>> Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
->>>> S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
->>>>
->>>> Actually we just observed it can fail after apply our inode
->>>> extent-to-btree workaround. The root cause is that the kernel may be
->>>> too good at allocating consecutive blocks so that the data fork is
->>>> still in extents format.
->>>>
->>>> Therefore instead of using a fixed number, let's make sure the number
->>>> of extents is large enough than (inode size - inode core size) /
->>>> sizeof(xfs_bmbt_rec_t).
->>>
->>> After this patch, xfs/083 and xfs/155 failed on my envrionment(6.1.0+
->>> kernel).
->>>
->>> the 083 fail as below:
->>> 1 fuzzing xfs with FUZZ_ARGS=-3 -n 32 and FSCK_PASSES=10
->>>     2 + create scratch fs
->>>     3 meta-data=/dev/sdb9              isize=512    agcount=4,
->>> agsize=529878 blks
->>>     4          =                       sectsz=512   attr=2, projid32bit=1
->>>     5          =                       crc=1        finobt=1, sparse=1,
->>> rmapbt=0
->>>     6          =                       reflink=0    bigtime=1
->>> inobtcount=1 nrext64=0
->>>     7 data     =                       bsize=4096   blocks=2119510,
->>> imaxpct=25
->>>     8          =                       sunit=0      swidth=0 blks
->>>     9 naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
->>>    10 log      =internal log           bsize=4096   blocks=16384, version=2
->>>    11          =                       sectsz=512   sunit=0 blks,
->>> lazy-count=1
->>>    12 realtime =none                   extsz=4096   blocks=0, rtextents=0
->>>    13 + populate fs image
->>>    14 MOUNT_OPTIONS =  -o usrquota,grpquota,prjquota
->>>    15 + fill root ino chunk
->>>    16 + extents file
->>>    17 wrote 4096/4096 bytes at offset 0
->>>    18 4 KiB, 1 ops; 0.0187 sec (212.891 KiB/sec and 53.2226 ops/sec)
->>>    19 + btree extents file
->>>    20 wrote 2097152/2097152 bytes at offset 0
->>>    21 2 MiB, 2 ops; 0.0637 sec (31.370 MiB/sec and 31.3701 ops/sec)
->>>    22 + inline dir
->>>    23 + block dir
->>>    24 + leaf dir
->>>    25 + leafn dir
->>>    26 + node dir
->>>    27 + btree dir
->>>    28 + inline symlink
->>>    29 + extents symlink
->>>    30 + special
->>>    31 + local attr
->>>    32 + leaf attr
->>>    33 + node attr
->>>    34 + btree attr
->>>    35 + attr extents with a remote less-than-a-block value
->>>    36 + attr extents with a remote one-block value
->>>    37 + empty file
->>>    38 + freesp btree
->>>    39 wrote 4194304/4194304 bytes at offset 0
->>>    40 4 MiB, 4 ops; 0.0941 sec (42.470 MiB/sec and 42.4696 ops/sec)
->>>    41 + inobt btree
->>>    42 + real files
->>>    43 FILL FS
->>>    44 src_sz 2052 fs_sz 8342940 nr 203
->>>    45 failed to create ino 8578 dformat expected btree saw extents
->>>    46 failed to create ino 8578 dformat expected btree saw extents
->>>    47 (see /var/lib/xfstests/results//xfs/083.full for details)
->>>
->>>
->>> It seems this logic can't ensure to creat a btree format dir and it
->>> is a  extent format dir. Or I miss something?
->>>
->>>
->>> Best Regards
->>> Yang Xu
->>
->> Hi Yang,
->>
->> Looks like xfs/083 does call __populate_xfs_create_btree_dir.
+On Tue, Jan 03, 2023 at 04:12:09PM -0800, Darrick J. Wong wrote:
+> On Tue, Jan 03, 2023 at 10:31:20PM +0100, Christian Brauner wrote:
+> > On Tue, Jan 03, 2023 at 09:47:37AM -0800, Darrick J. Wong wrote:
+> > > On Tue, Jan 03, 2023 at 04:28:20PM +0100, Christian Brauner wrote:
+> > > > Over mutiple kernel releases we have reworked setgid inheritance
+> > > > significantly due to long-standing security issues, security issues that
+> > > > were reintroduced after they were fixed, and the subtle and difficult
+> > > > inheritance rules that plagued individual filesystems. We have lifted
+> > > > setgid inheritance into the VFS proper in earlier patches. Starting with
+> > > > kernel v6.2 we have made setgid inheritance consistent between the write
+> > > > and setattr (ch{mod,own}) paths.
+> > > > 
+> > > > The gist of the requirement is that in order to inherit the setgid bit
+> > > > the user needs to be in the group of the file or have CAP_FSETID in
+> > > > their user namespace. Otherwise the setgid bit will be dropped
+> > > > irregardless of the file's executability. Change the tests accordingly
+> > > > and annotate them with the commits that changed the behavior.
+> > > > 
+> > > > Note, that only with v6.2 setgid inheritance works correctly for
+> > > > overlayfs in the write path. Before this the setgid bit was always
+> > > > retained.
+> > > > 
+> > > > Link: https://lore.kernel.org/linux-ext4/CAOQ4uxhmCgyorYVtD6=n=khqwUc=MPbZs+y=sqt09XbGoNm_tA@mail.gmail.com
+> > > > Link: https://lore.kernel.org/linux-fsdevel/20221212112053.99208-1-brauner@kernel.org
+> > > > Link: https://lore.kernel.org/linux-fsdevel/20221122142010.zchf2jz2oymx55qi@wittgenstein
+> > > > Cc: Amir Goldstein <amir73il@gmail.com>
+> > > > Cc: Zorro Lang <zlang@redhat.com>
+> > > > Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+> > > > ---
+> > > >  tests/generic/673     | 12 +++++++++---
+> > > >  tests/generic/673.out |  8 ++++----
+> > > >  tests/generic/683     | 11 ++++++++---
+> > > >  tests/generic/683.out |  8 ++++----
+> > > >  tests/generic/684     | 11 ++++++++---
+> > > >  tests/generic/684.out |  8 ++++----
+> > > >  tests/generic/685     | 11 ++++++++---
+> > > >  tests/generic/685.out |  8 ++++----
+> > > >  8 files changed, 49 insertions(+), 28 deletions(-)
+> > > > 
+> > > > diff --git a/tests/generic/673 b/tests/generic/673
+> > > > index 6d1f49ea..1d8e4184 100755
+> > > > --- a/tests/generic/673
+> > > > +++ b/tests/generic/673
+> > > > @@ -23,6 +23,12 @@ _require_scratch_reflink
+> > > >  _scratch_mkfs >> $seqres.full
+> > > >  _scratch_mount
+> > > >  _require_congruent_file_oplen $SCRATCH_MNT 1048576
+> > > > +
+> > > > +# Due to multiple security issues and potential for subtle bugs around setgid
+> > > > +# inheritance the rules in the write and chmod/chown paths have been made
+> > > > +# consistent and are enforced by the VFS since kernel 6.2.
+> > > > +_fixed_in_kernel_version "v6.2"
+> > > 
+> > > Uh... will this new behavior get ported to the LTS kernels too, or are
+> > 
+> > I plan on backporting this but I would like to wait for a little while
+> > longer into the v6.2 cycle before doing this as everyone is just coming
+> > out of the holiday season trying to catch up.
+> > 
+> > > we simply changing the kernel behavior here?
+> > 
+> > Yes, this is a behavioral change. I made sure to mention the risks and
+> > reasons involved on the list along the patches and in the pull requests
+> > that were merged.
 > 
-> Yes.
->> Could you please share your test environment and config in
->> detail and I will try to reproduce your report.
+> <nod> Ok.  I'm cool with this so long as everyone else seems to be. :)
 > 
-> Of course, I use fedora31 and 6.1 kernel. xfsprogs uses upstream version 
-> xfsprogs: Release v6.0.0.
+> > > Also, this patch does correct the new test failures that I saw as soon
+> > > as I pulled 6.2-rc1, but it doesn't fix the finsert and fcollapse tests:
+> > 
+> > Indeed I have missed them because they were skipped:
+> > 
+> > generic/686       [not run] xfs_io finsert  failed (old kernel/wrong fs?)
+> > generic/687       [not run] xfs_io fcollapse  failed (old kernel/wrong fs?)
+> > 
+> > I'll update the series accordingly. Thanks for pointing that out.
 > 
-> local.config
-> export TEST_DEV=/dev/sdb8
-> export TEST_DIR=/mnt/xfstests/test
-> export SCRATCH_DEV=/dev/sdb9
-> export SCRATCH_MNT=/mnt/xfstests/scratch
-> export XFS_MKFS_OPTIONS="-b size=4096 -m reflink=1"
-> 
-> 
-> disk info:
-> /dev/sdb8       566241280 608184319  41943040    20G 83 Linux
-> /dev/sdb9       608186368 625142447  16956080   8.1G 83 Linux
-> 
-> 
-> BTW, xfs/273 xfs/495 that called _scratch_populate_cached also failed 
-> with this commit under selinux Permissive status and passed under 
-> selinux  enforcing status. I guess the extend attr fork was filled
-> in selinux enabled status, so we can create btree dir by smaller number 
-> files.
-> 
+> Ok, thank you!  And really thank you for digging through the hairy
+> setgid inheritance mess. :)
 
+Thanks for the kind words. Always appreciated! :)
+And thanks for all the help with the xfs patches over the last years.
 
-Hi Yang,
-
-Could you please try this patch:
-
-diff --git a/common/populate b/common/populate
-index 44b4af16..bedcdc41 100644
---- a/common/populate
-+++ b/common/populate
-@@ -81,7 +81,7 @@ __populate_xfs_create_btree_dir() {
-        # btree format.  Cycling the mount to use xfs_db is too slow, so
-        # watch for when the extent count exceeds the space after the
-        # inode core.
--       local max_nextents="$(((isize - icore_size) / 16))"
-+       local max_nextents="$(((isize - icore_size) / 16 + 1))"
-        local nr=0
- 
-        mkdir -p "${name}"
-
-This will add 1 to max_nextents. Then xfs/083 will pass on my env(6.1 kernel,
-6.0.0 xfsprogs, selinux disabled)
-
-Regards,
-Zhang
+Christian
