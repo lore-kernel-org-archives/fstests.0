@@ -2,215 +2,145 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BF7CC5479D
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Jan 2023 11:26:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CF01C54EBE
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Jan 2023 07:19:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236893AbjAIL0M (ORCPT
+        id S230009AbjAJHTh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 9 Jan 2023 06:26:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48484 "EHLO
+        Tue, 10 Jan 2023 02:19:37 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42040 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236909AbjAIL0J (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 9 Jan 2023 06:26:09 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B42418B02;
-        Mon,  9 Jan 2023 03:26:08 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A718161026;
-        Mon,  9 Jan 2023 11:26:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D426C433D2;
-        Mon,  9 Jan 2023 11:26:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673263567;
-        bh=hTQkNW33/zj9OUGsjVZCOwCU5TBwOqZnISHFMxgao80=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=SAiyskuMIE7L74uOrO291hd+zAPI5CzmOLPDL9q4d6S+YkhdAmHLoFgCfhuTymIFO
-         9XrsHBVifEhUsPtQxRFx+QDai2aRfbDKifdF/UYpTSijjorDfWala2U7hd7B6wT55L
-         +l31Q62ToXWyDLC1dgiJjYz0nLNCwT4vRcumDeKUOFSvXCjgkie7WZHuCTOzOxGmuG
-         W+efYlfUWM1t3CT9Gfkd+2A/KWPTBY01WzKg62QC3PYMfxD4th8GAlIU5z05obor6f
-         tSG3zNHwjnwhVmR9nkkcLJUTKPa3yHKFy24KLEi2QRf2SCZaQpsmG72dA4hm1FuRjk
-         jfWDedrD9sM+Q==
-Received: by mail-ot1-f46.google.com with SMTP id v15-20020a9d69cf000000b006709b5a534aso4966908oto.11;
-        Mon, 09 Jan 2023 03:26:06 -0800 (PST)
-X-Gm-Message-State: AFqh2kqmM0fFGq/RiWMAJtRKTIG+Pr0abJdpjRggIu+JypxBG+SKuxpM
-        EVy3pSvBSj9xRvK/XBAyFw1uQcU4ljI9CRrt7AM=
-X-Google-Smtp-Source: AMrXdXu4HUVzaLaMzF22Of/QL8k1hZQ2u3ZUSdF5ai1SJkp+c0G+4zQ2N++rdX7TDSROyIB1WZC5nxn+ajj+mJU24sw=
-X-Received: by 2002:a9d:5550:0:b0:670:9502:cc87 with SMTP id
- h16-20020a9d5550000000b006709502cc87mr4702427oti.363.1673263566127; Mon, 09
- Jan 2023 03:26:06 -0800 (PST)
+        with ESMTP id S229915AbjAJHTg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jan 2023 02:19:36 -0500
+Received: from out30-54.freemail.mail.aliyun.com (out30-54.freemail.mail.aliyun.com [115.124.30.54])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45AC8F40;
+        Mon,  9 Jan 2023 23:19:33 -0800 (PST)
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R101e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018046056;MF=ziyangzhang@linux.alibaba.com;NM=1;PH=DS;RN=7;SR=0;TI=SMTPD_---0VZI1-lx_1673335168;
+Received: from 30.97.56.223(mailfrom:ZiyangZhang@linux.alibaba.com fp:SMTPD_---0VZI1-lx_1673335168)
+          by smtp.aliyun-inc.com;
+          Tue, 10 Jan 2023 15:19:29 +0800
+Message-ID: <3a8baf86-e447-dead-e14d-93d504f84b3b@linux.alibaba.com>
+Date:   Tue, 10 Jan 2023 15:19:26 +0800
 MIME-Version: 1.0
-References: <2ba1050ace4aa65eff3082580b449fe1e97a3c5b.1673260375.git.fdmanana@suse.com>
- <20230109122027.4ff90c42@echidna.fritz.box>
-In-Reply-To: <20230109122027.4ff90c42@echidna.fritz.box>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Mon, 9 Jan 2023 11:25:30 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H4B9kik83HO32k=CrE632guicu4heVVYU8G3fS5oofh8w@mail.gmail.com>
-Message-ID: <CAL3q7H4B9kik83HO32k=CrE632guicu4heVVYU8G3fS5oofh8w@mail.gmail.com>
-Subject: Re: [PATCH] generic: test lseek with seek data mode on a one byte file
-To:     David Disseldorp <ddiss@suse.de>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
+ Gecko/20100101 Thunderbird/102.6.1
+Subject: Re: [PATCH V6 2/2] common/populate: Ensure that S_IFDIR.FMT_BTREE is
+ in btree format
+Content-Language: en-US
+To:     "djwong@kernel.org" <djwong@kernel.org>,
+        "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>,
+        dchinner@redhat.com
+Cc:     "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "hsiangkao@linux.alibaba.com" <hsiangkao@linux.alibaba.com>,
+        "allison.henderson@oracle.com" <allison.henderson@oracle.com>
+References: <20221212055645.2067020-1-ZiyangZhang@linux.alibaba.com>
+ <20221212055645.2067020-3-ZiyangZhang@linux.alibaba.com>
+ <c984985a-ec53-9f32-ef93-946b0500bcd5@fujitsu.com>
+From:   Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
+In-Reply-To: <c984985a-ec53-9f32-ef93-946b0500bcd5@fujitsu.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 9, 2023 at 11:19 AM David Disseldorp <ddiss@suse.de> wrote:
->
-> Looks fine:
-> Reviewed-by: David Disseldorp <ddiss@suse.de>
->
-> Minor nit below...
->
-> On Mon,  9 Jan 2023 10:34:15 +0000, fdmanana@kernel.org wrote:
->
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test that seeking for data on a 1 byte file works correctly, the returned
-> > offset should be 0 if the start offset is 0.
-> >
-> > This is a regression test motivated by a btrfs bug introduced in kernel
-> > 6.1, which got recently fixed by the following kernel commit:
-> >
-> >   2f2e84ca6066 ("btrfs: fix off-by-one in delalloc search during lseek")
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> >  src/seek_sanity_test.c | 36 ++++++++++++++++++++++++++++++++++++
-> >  tests/generic/706      | 36 ++++++++++++++++++++++++++++++++++++
-> >  tests/generic/706.out  |  2 ++
-> >  3 files changed, 74 insertions(+)
-> >  create mode 100755 tests/generic/706
-> >  create mode 100644 tests/generic/706.out
-> >
-> > diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-> > index 8a586f74..48b3ccc0 100644
-> > --- a/src/seek_sanity_test.c
-> > +++ b/src/seek_sanity_test.c
-> > @@ -292,6 +292,41 @@ out:
-> >       return ret;
-> >  }
-> >
-> > +/*
-> > + * Test seeking for data on a 1 byte file, both when there's delalloc and also
-> > + * after delalloc is flushed.
-> > + */
-> > +static int test22(int fd, int testnum)
-> > +{
-> > +     const char buf = 'X';
-> > +     int ret;
-> > +
-> > +     ret = do_pwrite(fd, &buf, 1, 0);
-> > +     if (ret)
-> > +             return ret;
-> > +
-> > +     /*
-> > +      * Our file as a size of 1 byte and that byte is in delalloc. Seeking
-> > +      * for data, with a start offset of 0, should return file offset 0.
-> > +      */
-> > +     ret = do_lseek(testnum, 1, fd, 1, SEEK_DATA, 0, 0);
-> > +     if (ret)
-> > +             return ret;
-> > +
-> > +     /* Flush all delalloc. */
-> > +     ret = fsync(fd);
-> > +     if (ret) {
-> > +             fprintf(stderr, "fsync failed: %s (%d)\n", strerror(errno), errno);
-> > +             return ret;
-> > +     }
-> > +
-> > +     /*
-> > +      * We should get the same result we got when we had delalloc, 0 is the
-> > +      * offset with data.
-> > +      */
-> > +     return do_lseek(testnum, 2, fd, 1, SEEK_DATA, 0, 0);
-> > +}
-> > +
-> >  /*
-> >   * Make sure hole size is properly reported when punched in the middle of a file
-> >   */
-> > @@ -1131,6 +1166,7 @@ struct testrec seek_tests[] = {
-> >         { 19, test19, "Test file SEEK_DATA from middle of a large hole" },
-> >         { 20, test20, "Test file SEEK_DATA from middle of a huge hole" },
-> >         { 21, test21, "Test file SEEK_HOLE that was created by PUNCH_HOLE" },
-> > +       { 22, test22, "Test a 1 byte file" },
-> >  };
-> >
-> >  static int run_test(struct testrec *tr)
-> > diff --git a/tests/generic/706 b/tests/generic/706
-> > new file mode 100755
-> > index 00000000..b3e7aa7c
-> > --- /dev/null
-> > +++ b/tests/generic/706
-> > @@ -0,0 +1,36 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test 706
-> > +#
-> > +# Test that seeking for data on a 1 byte file works correctly, the returned
-> > +# offset should be 0 if the start offset is 0.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick seek
-> > +
-> > +[ $FSTYP == "btrfs" ] &&
-> > +     _fixed_by_kernel_commit 2f2e84ca6066 \
-> > +     "btrfs: fix off-by-one in delalloc search during lseek"
-> > +
-> > +_supported_fs generic
-> > +_require_test
-> > +_require_seek_data_hole
-> > +_require_test_program "seek_sanity_test"
-> > +
-> > +test_file=$TEST_DIR/seek_sanity_testfile.$seq
->
-> Nit: test_file set and use below should be quoted.
+On 2023/1/3 14:54, xuyang2018.jy@fujitsu.com wrote:
+> 
+> 
+> on 2022/12/12 13:56, Ziyang Zhang wrote:
+> 
+>> Sometimes "$((128 * dblksz / 40))" dirents cannot make sure that
+>> S_IFDIR.FMT_BTREE could become btree format for its DATA fork.
+>>
+>> Actually we just observed it can fail after apply our inode
+>> extent-to-btree workaround. The root cause is that the kernel may be
+>> too good at allocating consecutive blocks so that the data fork is
+>> still in extents format.
+>>
+>> Therefore instead of using a fixed number, let's make sure the number
+>> of extents is large enough than (inode size - inode core size) /
+>> sizeof(xfs_bmbt_rec_t).
+> 
+> After this patch, xfs/083 and xfs/155 failed on my envrionment(6.1.0+ 
+> kernel).
+> 
+> the 083 fail as below:
+> 1 fuzzing xfs with FUZZ_ARGS=-3 -n 32 and FSCK_PASSES=10
+>    2 + create scratch fs
+>    3 meta-data=/dev/sdb9              isize=512    agcount=4, 
+> agsize=529878 blks
+>    4          =                       sectsz=512   attr=2, projid32bit=1
+>    5          =                       crc=1        finobt=1, sparse=1, 
+> rmapbt=0
+>    6          =                       reflink=0    bigtime=1 
+> inobtcount=1 nrext64=0
+>    7 data     =                       bsize=4096   blocks=2119510, 
+> imaxpct=25
+>    8          =                       sunit=0      swidth=0 blks
+>    9 naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+>   10 log      =internal log           bsize=4096   blocks=16384, version=2
+>   11          =                       sectsz=512   sunit=0 blks, 
+> lazy-count=1
+>   12 realtime =none                   extsz=4096   blocks=0, rtextents=0
+>   13 + populate fs image
+>   14 MOUNT_OPTIONS =  -o usrquota,grpquota,prjquota
+>   15 + fill root ino chunk
+>   16 + extents file
+>   17 wrote 4096/4096 bytes at offset 0
+>   18 4 KiB, 1 ops; 0.0187 sec (212.891 KiB/sec and 53.2226 ops/sec)
+>   19 + btree extents file
+>   20 wrote 2097152/2097152 bytes at offset 0
+>   21 2 MiB, 2 ops; 0.0637 sec (31.370 MiB/sec and 31.3701 ops/sec)
+>   22 + inline dir
+>   23 + block dir
+>   24 + leaf dir
+>   25 + leafn dir
+>   26 + node dir
+>   27 + btree dir
+>   28 + inline symlink
+>   29 + extents symlink
+>   30 + special
+>   31 + local attr
+>   32 + leaf attr
+>   33 + node attr
+>   34 + btree attr
+>   35 + attr extents with a remote less-than-a-block value
+>   36 + attr extents with a remote one-block value
+>   37 + empty file
+>   38 + freesp btree
+>   39 wrote 4194304/4194304 bytes at offset 0
+>   40 4 MiB, 4 ops; 0.0941 sec (42.470 MiB/sec and 42.4696 ops/sec)
+>   41 + inobt btree
+>   42 + real files
+>   43 FILL FS
+>   44 src_sz 2052 fs_sz 8342940 nr 203
+>   45 failed to create ino 8578 dformat expected btree saw extents
+>   46 failed to create ino 8578 dformat expected btree saw extents
+>   47 (see /var/lib/xfstests/results//xfs/083.full for details)
+> 
+> 
+> It seems this logic can't ensure to creat a btree format dir and it
+> is a  extent format dir. Or I miss something?
+> 
+> 
+> Best Regards
+> Yang Xu
 
-Well, in theory yes, due to paths with spaces.
-We do have many places in common/rc and other files that refer to
-TEST_DIR and SCRATCH_MNT without any quoting,
-so it's already borken for paths with spaces.
+Hi all,
 
-So I left it like that, just like generic/539 and other seek tests.
+__populate_xfs_create_btree_dir() will delete 50% files
+after creating all the files if we set "missing" to 1(true).
+This may transform the data fork from BTREE format to EXTENT
+format by merging blocks.
 
->
-> > +
-> > +_cleanup()
-> > +{
-> > +     cd /
-> > +     rm -f $tmp.*
-> > +     rm -f $test_file
-> > +}
-> > +
-> > +_run_seek_sanity_test -s 22 -e 22 $test_file > $seqres.full 2>&1 ||
-> > +     _fail "seek sanity check failed!"
->
-> Nit: I think it'd be nicer to avoid the redirect and _fail here, instead
-> filtering the FS magic / alloc size strings. I'm okay with it as-is
-> though.
+Without setting "missing", I find that xfs/083 xfs/155 xfs/273
+and xfs/495 pass.
 
-This is the pattern all seek tests do, for example generic/539.
-So I left it like that for consistency.
+BTW, I have heard that Dave has wrote allocation speedup code
+and thank Dave for looking into this as well.
 
-Thanks.
+Regards,
+Zhang
 
->
-> Cheers, David
->
-> > +
-> > +echo "Silence is golden"
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/706.out b/tests/generic/706.out
-> > new file mode 100644
-> > index 00000000..577697c6
-> > --- /dev/null
-> > +++ b/tests/generic/706.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 706
-> > +Silence is golden
->
+
