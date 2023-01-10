@@ -2,129 +2,102 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 048B5C46467
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Jan 2023 22:51:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7C69C54EBC
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Jan 2023 22:51:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234837AbjAJWvA (ORCPT
+        id S233314AbjAJWu6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Jan 2023 17:51:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52672 "EHLO
+        Tue, 10 Jan 2023 17:50:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235460AbjAJWt7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jan 2023 17:49:59 -0500
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1926D32EB5
-        for <fstests@vger.kernel.org>; Tue, 10 Jan 2023 14:49:13 -0800 (PST)
-Received: by mail-pf1-x433.google.com with SMTP id a30so10030320pfr.6
-        for <fstests@vger.kernel.org>; Tue, 10 Jan 2023 14:49:13 -0800 (PST)
+        with ESMTP id S235827AbjAJWty (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jan 2023 17:49:54 -0500
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3D4337268
+        for <fstests@vger.kernel.org>; Tue, 10 Jan 2023 14:49:12 -0800 (PST)
+Received: by mail-pj1-x102f.google.com with SMTP id cp9-20020a17090afb8900b00226a934e0e5so2248670pjb.1
+        for <fstests@vger.kernel.org>; Tue, 10 Jan 2023 14:49:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=fromorbit-com.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Wx72QwF6cg/7thZ1yaywDGiRxV5C6xJMmfXnQKTufAU=;
-        b=Of1t6szKqmpprN8W0WA0OBH3NUa3wKy4YzIaRxr753y8bCh2q35Y7QmB2AZ2+0IHv4
-         jfJMaxitRm0OJcFGYW4YffVIyjGnPqPYm+MiY8+Dr6cTD5s0ryXtMyLNiKu+O0dMViGT
-         pqHzy1gmO3TFZyB7jcUXudDHKZU0HXBeiTVCGlBzmUNEcr3qoS9K0uICe8gnSvQzHrs3
-         /Qi3ouw3k9fwWY3BsxIKxD3JvnMulgeDT+hKvyYJxRliiJBo5HFnegfpeSww6DliVIdj
-         HvPUoB2PE8BpgaORSw4oGIlvP52qGb+xLTDtBKjN86TCfDXLX1O1ASM1r01nhixphPhE
-         3TVQ==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=LfDnec9qbmTgRSFD9R1QXJlMPy1vdBjbqSM7pmLlMhc=;
+        b=v71HvwRZzSAgQQHM5fZcz5rhage71nVj93KR8ilgMTb0oMIHdyHg00hLhHIxuuSvs0
+         J2uQkYkFMXwn+dB2+omOqnYpjrFNId9TM7PliZscG4qRkWu44xiGC5QfY9kP4C04Y7vt
+         lCf5ULKCaEJWdSEIRwxRdx7Q8sgZiP4ZyyPEYOBOn/BdsE7eU96xaWgL1BoABQ+cNTx0
+         Akbgzh+OgexxBGmE+w78czkNFRJyurfd0FF1NfryL7EPu6aRS+uTmVfubi/e3VkpRoxY
+         siScxcWyqZ8VkfA/oJvexvbIijfItsZFOXYifMzS0NPj2AaN6rOCzoQjdBc0cXxtrh8R
+         jM4g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Wx72QwF6cg/7thZ1yaywDGiRxV5C6xJMmfXnQKTufAU=;
-        b=7RtVa6AO1sUssHXvrIlIYoqAReC+8jH2XPLBHkzZr/2ENYphe21DLHGEfKI7AJ2azx
-         ShT98WIQVLsO+csf9I2xWiZoulww2L/Eh6gW95LGXBepaqgYiuwKp0vLij0pf2+7BfR5
-         y8QcrcpkBXph7ZoqOiKPS5DUldh1kGljiLWNz/fwMJ89bAINFS/TANHk3uwf25NTiDHW
-         uIfdfz2KAbPDexc97bdhr4raEEd6kXmBOk123PkJuud8w8ezYEHt4daV79iqd4uaK064
-         V2RQ/WRAkRHv+yZcB7/5WukkXdOxi9RIyvdIT3qZ4Y5r9XVPyifTCTUVpmRCk1uJa7j5
-         d6vQ==
-X-Gm-Message-State: AFqh2kp5PWh+Pxo6VgFvqSkGnmi5sAVr+Shg+Z1EU5I9ZJ0I27Xth2mM
-        qwjwh8aKo+XImGbUaRBH6q/c5gZEnZ6kb6Cc
-X-Google-Smtp-Source: AMrXdXvTNqMnz9GlmPCmlNJM1rDjVFa4VEB0ybHw7lknkpFl7Nqz2MRgXXMIvBj8VOcS2C97uxeWTA==
-X-Received: by 2002:a05:6a00:4486:b0:589:85ed:4119 with SMTP id cu6-20020a056a00448600b0058985ed4119mr115041pfb.32.1673390952613;
-        Tue, 10 Jan 2023 14:49:12 -0800 (PST)
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=LfDnec9qbmTgRSFD9R1QXJlMPy1vdBjbqSM7pmLlMhc=;
+        b=WRHnRYuFLcelX9KSzxmTB1YAFgi4So16De1seGLNGhheKSwWqURjQp+5au2/vWZm05
+         0VakIeiNj8oXSjsqlRO9+5sIjOCtmweYDSeIBostCnP4yjf53iyV0uZfMKAMy1dgL0cQ
+         RmnCbuYkMDh2IIpjZ17saizu14fR93U+1Jy1TYS61yb0nBQpbjxim14GD23ZYlUeYdYH
+         WEGKMWycQ1U0+boV37mKSgAA+6UFZI69dF8mbGF3A8JNWbdsmiVIgmx6rsMN23SDpU6J
+         2qjf5DtH0HHBS9m5ND8ErkH5Zt9kXZT2CSdtL5kGEdADeAXppPGyAkf2HNgzG3uLvwCJ
+         h+GQ==
+X-Gm-Message-State: AFqh2kotbbTo8Uda1cYgBBXPROO5njWiAChcjUyYu0UIkaSnF156Hjo1
+        1d/FIC7j+ctF0auB8Hasz+vAa/8+WWy4cYDT
+X-Google-Smtp-Source: AMrXdXs4Hew5KbJLbf6Evm8V/OwLYklf9prE7dJ0e+IWcpvNiWsBFD+LKGjrVcYLqkEx5eUs9MZ+vQ==
+X-Received: by 2002:a17:902:be05:b0:192:a4e5:ac5f with SMTP id r5-20020a170902be0500b00192a4e5ac5fmr42989514pls.61.1673390951878;
+        Tue, 10 Jan 2023 14:49:11 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-146-207.pa.vic.optusnet.com.au. [49.186.146.207])
-        by smtp.gmail.com with ESMTPSA id b12-20020aa78ecc000000b00581a156b920sm8567225pfr.132.2023.01.10.14.49.11
+        by smtp.gmail.com with ESMTPSA id k7-20020a170902ce0700b001885d15e3c1sm8654752plg.26.2023.01.10.14.49.11
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Tue, 10 Jan 2023 14:49:11 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
         by dread.disaster.area with esmtp (Exim 4.92.3)
         (envelope-from <dave@fromorbit.com>)
-        id 1pFNQa-001Yl8-CS
+        id 1pFNQa-001Yl5-Ai
         for fstests@vger.kernel.org; Wed, 11 Jan 2023 09:49:08 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.96)
         (envelope-from <dave@devoid.disaster.area>)
-        id 1pFNQa-004unP-1C
+        id 1pFNQa-004unI-0v
         for fstests@vger.kernel.org;
         Wed, 11 Jan 2023 09:49:08 +1100
 From:   Dave Chinner <david@fromorbit.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH 2/3] populate: ensure btree directories are created reliably
-Date:   Wed, 11 Jan 2023 09:49:05 +1100
-Message-Id: <20230110224906.1171483-3-david@fromorbit.com>
+Subject: [PATCH 0/3] fstests: filesystem population fixes
+Date:   Wed, 11 Jan 2023 09:49:03 +1100
+Message-Id: <20230110224906.1171483-1-david@fromorbit.com>
 X-Mailer: git-send-email 2.38.1
-In-Reply-To: <20230110224906.1171483-1-david@fromorbit.com>
-References: <20230110224906.1171483-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Dave Chinner <dchinner@redhat.com>
+Hi folks,
 
-The population function creates an XFS btree format directory by
-polling the extent count of the inode and creating new dirents until
-the extent count goes over the limit that pushes it into btree
-format.
+common/populate operations are slow. They are not coded for
+performance, and do things in very slow ways. Mainly doing loops to
+create/remove files and forcing a task to be created and destroy for
+every individual operation. We can only fork a few thousand
+processes a second, whilst we can create or remove tens of thousands
+of files a second. Hence population speed is limited by fork/exit
+overhead, not filesystem speed. I also changed it to run all the
+creation steps in parallel, which means they run as fast as the
+filesystem can handle them rather than as fast as a single CPU can
+handle them.
 
-It then removes every second dirent to create empty space in the
-directory data to ensure that operations like metadump with
-obfuscation can check that they don't leak stale data from deleted
-dirents.
+patch 1 and patch 3 address these issues for common/populate and
+xfs/294.  I may update a bunch of other tests that use loop { touch
+file } to create thousands of files to speed them up as well.
 
-Whilst this does not result in directory data blocks being freed, it
-does not take into account the fact that the dabtree index has half
-the entries removed from it and that can result in btree nodes
-merging and extents being freed. This causes the extent count to go
-down, and the inode is converted back into extent form. The
-population checks then fail because it should be in btree form.
+The other patch in this series (patch 2) fixes the problem with
+populating an Xfs btree format directory, which currently fails
+because the removal step that creates sparse directory data also
+causes the dabtree index to get smaller and free blocks, taking the
+inode from btree to extent format and hence failing the populate
+checks.
 
-Fix this by counting the number of directory data extents rather than
-the total number of extents in the data fork. We can do this simply
-by using xfs_bmap and counting the number of extents returned as it
-does not report extents beyond EOF (which is where the dabtree is
-located). As the number of data blocks does not change with the
-dirent removal algorithm used, this will ensure that the inode data
-fork remains in btree format.
+More details are in the commit messages for change.
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- common/populate | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+Cheers,
 
-diff --git a/common/populate b/common/populate
-index 9b60fa5c1..7b5b16fb8 100644
---- a/common/populate
-+++ b/common/populate
-@@ -80,8 +80,11 @@ __populate_create_nfiles() {
- 			continue
- 		fi
- 
--		local nextents="$(_xfs_get_fsxattr nextents $name)"
--		if [ "${nextents}" -gt "${max_nextents}" ]; then
-+		# Extent count checks use data blocks only to avoid the removal
-+		# step from removing dabtree index blocks and reducing the
-+		# number of extents below the required threshold.
-+		local nextents="$(xfs_bmap ${name} |grep -v hole | wc -l)"
-+		if [ "$((nextents - 1))" -gt "${max_nextents}" ]; then
- 			echo ${d}
- 			break
- 		fi
--- 
-2.38.1
+Dave.
 
