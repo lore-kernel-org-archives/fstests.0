@@ -2,88 +2,185 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C739BC54EBC
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Jan 2023 15:52:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D56AC54EBC
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Jan 2023 17:23:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238599AbjAJPw0 (ORCPT
+        id S233756AbjAJRXM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Jan 2023 10:52:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53008 "EHLO
+        Tue, 10 Jan 2023 12:23:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50386 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234763AbjAJPwU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jan 2023 10:52:20 -0500
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA89C1CFC1;
-        Tue, 10 Jan 2023 07:52:19 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1673365939; x=1704901939;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=M4GwrJt1opbtDvgNpabk+tAE/i5fgxpaZKNOZlDQBr8=;
-  b=I85lsL3KXhp7JAle5tz2Ri61GAG9JdDwRfFSevB5kpnhYOpL9X9Wr9Yw
-   Rd2namIO5nv2FM8uZ6N+9fQWQ4HpaH3oZIkP/VYphw34ZarVjGVSXoQoS
-   zOfxoj4ahUy82pU+u+Y0Qz1Ua/bk0FnOYEwARdA6ujaSD0ZaJEAVaTzeR
-   s0l2SdAfdvJUVnzhavR+j+iyFq6ERHCmoHAHtilT0WGMhdkPLOfybuPPT
-   spF8dlM2jjJHP9KLpVNNJun5ToSvnR7iPKq5GqDRzOz5EToNaCXdIT+Qj
-   7/PiWcWUKDH4FSL8n7e0bVdtmpG+9XmGWEQ6nd/zF6s74eZ9YyqmdkA+N
-   A==;
-X-IronPort-AV: E=Sophos;i="5.96,315,1665417600"; 
-   d="scan'208";a="220565218"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 10 Jan 2023 23:52:19 +0800
-IronPort-SDR: 5/d0b4a/lboDJq1r6j4lCVdqP5yoiTk5UENgK1Z0nLvQADlXGBMr5DCru0ni8aBcRG45YLieeo
- VprFbUh8sMxEfgUa1Hbsx2c81JPMTuGwUBD6OHCzhVC1w9Jk4blqZxvpx4bVUcTBC7SlxBMG16
- dY/I88sZLE8NQUtV1vk+EJJgF9RWttY+RKmMicOHfprLsDSagv3+GEi8U97z6rLBFW36wMNqNO
- 72/Lp98NNm8mJkDKVWEhuTmQAtnwix7cIALTqu7ecsnQea3hwjqLDcajrV8BqllrulDns0I4jm
- uJQ=
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Jan 2023 07:10:09 -0800
-IronPort-SDR: E4O1/JCD8wIuorKOPhZGaS1eCDiduzNUDeFgG4YZmLEw00ccoD2ycT0+MTY/kdTFlmXr6odLAW
- FUj32vPXtglXiIIMV4EAB45tFOzgDCRc5TO7g+KwBdl/fCBo9AMyFwcH3IOK8BW+eZ6iw2eHQO
- rUlXo4ZggARGEfkroXsSXJ2+xBmTNr8F/OH34nVuLKly7UVLR/5dVHSQfQYbz1xjPZdlAlHTQa
- CBKf1+6V7y+MBrHf8fqfs4zX3tEPwpw/3DEzS+3Epfs6qsaikWsKUvlIANwoeHpj0uktBd/k1V
- 3BQ=
-WDCIronportException: Internal
-Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.72])
-  by uls-op-cesaip02.wdc.com with ESMTP; 10 Jan 2023 07:52:19 -0800
-From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
+        with ESMTP id S233973AbjAJRWg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jan 2023 12:22:36 -0500
+Received: from EUR03-DBA-obe.outbound.protection.outlook.com (mail-dbaeur03on2051.outbound.protection.outlook.com [40.107.104.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85C9530542
+        for <fstests@vger.kernel.org>; Tue, 10 Jan 2023 09:22:34 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Hj0DMuQmlhxJMngjX/Tr/7GCA8hAjDLDILFRpSOgWO5+WAYy4ezvvQfoVl0hVZnzdWVcuF7GmcX9C+wnsNoiLIbYMwhpKQ5SNRJVoezaT05YjXC76+TeXUVTzPCd8ckp88op1h7p75q2+RXejXZi80ReWYzisZdOkrcOIAYh8GKvjR+cA+kW8mFC/uiRzOOz4ZtN6e90pgP+U83b9uEg6d+MJk8fQ4AMeEmnYLgHmu8z31DiykoDcedtisnHRaF80rjenOjFwr2Mu3IwepkBDltITI/Ke5z7XuzNBbMoRvIlF+jUxtis+yh9Brzc+27bKYaFJHyDEGloeSC1hfGH6A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=u/pd3gqNPz5SqGzug1KEMCGVPKmKOMqs2Z3Xb+0AFcE=;
+ b=bZdYmzfyb3ZY59ENOJBphcZeyAhsuFaUm4qnXlN35JnkdDHnGVnV+o+vDJ+DmktufLYrS0HhKA/+IC3OY0SbuNfsJgDVROaA1Vr64aYWTg+EAB/5v8isFIndYgh4giucu+HnqCgT99ahdcRR7hpIP7znwxKzQfo6ujpIV5nrJNNSbL3Ec7ndwRCCz3Bgxl7RrMKG3b0eo6ZacZr61zj8hf0XYhLKDKq3oS0vr+LsKne72cBjzkQ08clmLH/laMcIazQ5v08npwskd6Jiio/UbXfc6U6+op2xNM0p416UQbw0Okanlt962/ouAgAzs7fNE29EE1m74cKfAiLF8rpgqg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=u/pd3gqNPz5SqGzug1KEMCGVPKmKOMqs2Z3Xb+0AFcE=;
+ b=ZT0L2hoTV+uQDDtOmX94pSZeUtmw7vByarP1IS/WLXODTZQxejHYSarAgT6St/Amh6pWfuABdwgmjSkB9MXTg0FGHrbxdNRn6ByGh5XOgyl4ONORt5xaJ9Y1a7QGjZGAMR9N8P0F8c6A3Mduokz9PHFmQAF4u3FZNorsWIJKBWDygV3ZDr7V5HwNrNeC7EPyqiTRbuYK7yFjBJRnjKOtI3LL9TqyUkQ80BtCeANuW/1uM2Z0pTRHfVapT3NOvRe+HGi8PV1vxhkZhvK/z10cY7Cx3iYlqRPFmXPzVk7DgOliVFs43OlNyAeTnBWOcgLretW+IcvEWiU0C9vHfsfN3w==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=suse.com;
+Received: from VI1PR0401MB2671.eurprd04.prod.outlook.com
+ (2603:10a6:800:55::10) by PAXPR04MB8671.eurprd04.prod.outlook.com
+ (2603:10a6:102:21e::18) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5986.18; Tue, 10 Jan
+ 2023 17:22:32 +0000
+Received: from VI1PR0401MB2671.eurprd04.prod.outlook.com
+ ([fe80::376e:9292:2ffb:afb0]) by VI1PR0401MB2671.eurprd04.prod.outlook.com
+ ([fe80::376e:9292:2ffb:afb0%6]) with mapi id 15.20.5986.018; Tue, 10 Jan 2023
+ 17:22:31 +0000
+From:   An Long <lan@suse.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH v2] btrfs/012: check if ext4 is available
-Date:   Tue, 10 Jan 2023 07:52:16 -0800
-Message-Id: <20230110155216.1809562-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.38.1
-MIME-Version: 1.0
+Cc:     An Long <lan@suse.com>
+Subject: [PATCH] btrfs/011: use $_btrfs_profile_configs to limit the tests
+Date:   Wed, 11 Jan 2023 01:22:21 +0800
+Message-Id: <20230110172221.24710-1-lan@suse.com>
+X-Mailer: git-send-email 2.35.3
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2PR02CA0101.apcprd02.prod.outlook.com
+ (2603:1096:4:92::17) To VI1PR0401MB2671.eurprd04.prod.outlook.com
+ (2603:10a6:800:55::10)
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: VI1PR0401MB2671:EE_|PAXPR04MB8671:EE_
+X-MS-Office365-Filtering-Correlation-Id: 43bbe371-5059-4863-1d04-08daf32f41bd
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: qh9Lnpnxq4dlaJEqX/umx+3vD7ANzqw2+PtMqyTchtkq0SBVAG2cUYmptoVtOCcJMiTwXMg2cnxOP2hkpXpKLwpTqIw5myf/U47ct/EKqNwLnSCzuXQIhqmvXtqvPm6flP1UZ2w7ujpONvmgbXfzf7+CrWhoSYXS2qoCIwx0wXrQt+HXvGzdt7/5GS/4zo9JfYBo8cahdQhd2h/heA4ff26AjlU2OnKwndXtebVAku9QY534M/8+aYS7fEW0B3fix2Z2lDUMIoGrP8Wqpj5pRqtfKWLcy7Fl+iSuuWBZaoguh6LX9XZmnRzmlqStnmINu7wAIWT0pRwM+KbCjvbDSS6Ol1cun3L6Q/P9xr0OyhyJCgSENgl3laTmd4Lr1jtP84V+GWwsvgHNoEDJc3x8NRCseQKo5HveC72HHTekAZ6FW2y3Mf5ygpNZDGfmdMw3/q0GTu7H/ApEL/YP6F7rwh+QFL2gOgLOm7lx5JbHERYkmdBSMpiZ70Fn72Og7Rri3Sfl64abCMdLC4waK1g4fK2Io2ygZipfYCcVr5lRl7z0vKqZKOl+4/DG/NmxeOs7rbh40KJgb5Vp9ROKL07UZhJv0KDhyrghl62FzzutNf71HjaqTCK113GOu6xzPL5lCagOwGeEsqFdPzNbNB3mSg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR0401MB2671.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(396003)(376002)(39860400002)(366004)(136003)(346002)(451199015)(6506007)(478600001)(6486002)(1076003)(107886003)(186003)(6916009)(6512007)(66476007)(8676002)(66946007)(6666004)(41300700001)(2616005)(4326008)(316002)(83380400001)(86362001)(38100700002)(66556008)(2906002)(8936002)(5660300002)(36756003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?hoxMPit+mZIdVziolWK5FsIs7GMCZlUcFY9hV6TIjC/W4TEPs2jG04IpY81T?=
+ =?us-ascii?Q?C6DfXp63bS85hNYDI0Wd4F3TajrEPmwdQQuGf2+uNGLKyoGMLfa/Rcrz9grn?=
+ =?us-ascii?Q?chPdsuNg24L6DlorYcSFKu9gaO5k2lTE4t1HQs2TEYpSHExvnl7KxXYOk2kN?=
+ =?us-ascii?Q?EPSdZ8H4fGxjmVpLOrH9fn10ezDc/5wce2qL/VfagXTPSN5hDYWTFQuXO/fg?=
+ =?us-ascii?Q?Gen+WbYLGcEFf+TTOdswbtJt6w5SO09EmKgOVAu+T4hLNzbSVIMgmtkJHoT2?=
+ =?us-ascii?Q?XOZOLLBoNf37l/m3bJC3SMYbXd88MIZKUehWSujNKFjJvpJ1+pXuTcgrdHAB?=
+ =?us-ascii?Q?E/0EuR6xKKOD3diwKXJf9LDgdSPIY8dASaNzjhdh6oT2rQ97UjYJU3kegpJq?=
+ =?us-ascii?Q?N9lfxeAD168bneq+BpihseSNr76sUB3Lypb83H73QEN4fThjL2g5P8sGJEFe?=
+ =?us-ascii?Q?ugO8zfeG0fRiyj3spXTJ7WNNwGWIsa7LHhw5ulGdVJn3YEseQPjArt5YJ3qv?=
+ =?us-ascii?Q?mvN5Fkzw126g8nvTtXJgczCAEsOwHwh0TLgnMfcfT4jgpBiFyLYHS+4Oq1GJ?=
+ =?us-ascii?Q?UOLUyp0o9BB/hKppDy6fom1PZBmPdsmn2iJJnyKyZSgtBUeLm6f3/fdDYv9g?=
+ =?us-ascii?Q?7Fi+f9Lj+VfnbXa8NNZOPcpcv5zW60nyAN4xnsLSCwuYeu0toIKRQNxofhTo?=
+ =?us-ascii?Q?eQUCZ4oMtvTaXxdP1GQCG8CIqgcVWuu9h7BjIQIgboaHGzaceqX7fWfRyj67?=
+ =?us-ascii?Q?5dWKvRY1zXQlkxK3cmjKy/GIg50/W5bmuuu0Ypk2LVyVycqIiqj8fI/Gq0Qy?=
+ =?us-ascii?Q?Bx+br7ot1W+6o4pMUtcrvr+4uTjHWVcMWVsVMvuKSepfSSkmAu1CtN+TnCQu?=
+ =?us-ascii?Q?VgbnIeZ7vh9pqrFGSOGXqfc0SP6ab1LZuE7qlxGm5gzirqnpZGFgevrl4R8s?=
+ =?us-ascii?Q?inhOV2phv5f3m434p5fvC6xbtYsOfAsb2AvQ0dqIF1zVbCNPnxf56aIKSuJv?=
+ =?us-ascii?Q?8jdxwJOKwLUkJalU0nrwgwFfMUmMnckJURWWuumYrfhCamq49XEnRZCrmdFI?=
+ =?us-ascii?Q?Q9RuLabUpuXfClM0o6F+cTokqZDn+BvbGQdYK9kjtiMvr41K3g6qCRo5kZRo?=
+ =?us-ascii?Q?ANd0tD3rL88LwupGdl67PBdFUsymIu8stEyc1BOmfA7mQhNvikgRJbRr+V5j?=
+ =?us-ascii?Q?25M52WLv6c9t0HcC6YX6gNJtCD3aVRKOaDWOW7iZTysA7sWQcisVo2BnCauD?=
+ =?us-ascii?Q?uZkBKQmKIV+qbN7CSzUUNCj4RPzQdhIX9TncBmeCQDtP96OPJ9GeXNty7vUk?=
+ =?us-ascii?Q?88XWQd7hi3UFQrWM9ruR/IY5Ycra2LlWKp3cOSVsCaUuM3YK1AODCARou8T6?=
+ =?us-ascii?Q?Otiz0wkH3JMdhEGGO8cWKeEW5s+jq3vLSsomBJaB/UTjVEgEah8uoh4mjEIN?=
+ =?us-ascii?Q?zrtBe0uFm5sKXx9ZSWr6Lt9XKthueasbivsiEkPuRaHN3wl4US3xCyGIkVLq?=
+ =?us-ascii?Q?l6hsYMVX2M1+RKiyORD+y0NtuTCzcOegNLD5pociwz0d5hTGiFnIxeSxoGdy?=
+ =?us-ascii?Q?VXTGVLxsWSiDCTT2BGivLLPRE7zJnccpe9v55HxC1FEkt7WN9x6KO+uaEUJl?=
+ =?us-ascii?Q?8/8M3LMcBPogWAA1Q2Wuuwg=3D?=
+X-OriginatorOrg: suse.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 43bbe371-5059-4863-1d04-08daf32f41bd
+X-MS-Exchange-CrossTenant-AuthSource: VI1PR0401MB2671.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Jan 2023 17:22:31.9209
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: NOnK/ImuEY4H+dgeyo/nxEgeMTcEMwf995SpchRnHD+Nxv1LxSY9V8iDcMJISG1q
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PAXPR04MB8671
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs/012 is requiring ext4 support to test the conversion, but the test
-case is only checking if mkfs.ext4 is available, not if the filesystem
-driver is actually available on the test host.
+Generally the tester need BTRFS_PROFILE_CONFIGS to test certain
+profiles. For example, skip raid56 as it's not supported.
 
-Check if the driver is available as well, before trying to run the test.
-
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Signed-off-by: An Long <lan@suse.com>
 ---
- tests/btrfs/012 | 1 +
- 1 file changed, 1 insertion(+)
+ tests/btrfs/011 | 48 ++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 38 insertions(+), 10 deletions(-)
 
-diff --git a/tests/btrfs/012 b/tests/btrfs/012
-index 60461a342545..d9faf81ce1ad 100755
---- a/tests/btrfs/012
-+++ b/tests/btrfs/012
-@@ -31,6 +31,7 @@ _require_command "$E2FSCK_PROG" e2fsck
- # ext4 does not support zoned block device
- _require_non_zoned_device "${SCRATCH_DEV}"
- _require_loop
-+_require_extra_fs ext4
+diff --git a/tests/btrfs/011 b/tests/btrfs/011
+index 6c3d037f..b9d175d1 100755
+--- a/tests/btrfs/011
++++ b/tests/btrfs/011
+@@ -22,6 +22,8 @@
+ . ./common/preamble
+ _begin_fstest auto replace volume
  
- BLOCK_SIZE=`_get_block_size $TEST_DIR`
++_btrfs_get_profile_configs
++
+ noise_pid=0
  
+ # Override the default cleanup function.
+@@ -237,18 +239,44 @@ btrfs_replace_test()
+ 	fi
+ }
+ 
+-workout "-m single -d single" 1 no 64
++if [[ "${_btrfs_profile_configs[@]}" =~ "-m single -d single" ]]; then
++	workout "-m single -d single" 1 no 64
++fi
++
+ # Mixed BG & RAID/DUP profiles are not supported on zoned btrfs
+ if ! _scratch_btrfs_is_zoned; then
+-	workout "-m dup -d single" 1 no 64
+-	workout "-m dup -d single" 1 cancel 1024
+-	workout "-m raid0 -d raid0" 2 no 64
+-	workout "-m raid1 -d raid1" 2 no 2048
+-	workout "-m raid10 -d raid10" 4 no 64
+-	workout "-m single -d single -M" 1 no 64
+-	workout "-m dup -d dup -M" 1 no 64
+-	workout "-m raid5 -d raid5" 2 no 64
+-	workout "-m raid6 -d raid6" 3 no 64
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m dup -d single" ]]; then
++		workout "-m dup -d single" 1 no 64
++		workout "-m dup -d single" 1 cancel 1024
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m raid0 -d raid0" ]]; then
++		workout "-m raid0 -d raid0" 2 no 64
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m raid1 -d raid1" ]]; then
++		workout "-m raid1 -d raid1" 2 no 2048
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m raid10 -d raid10" ]]; then
++		workout "-m raid10 -d raid10" 4 no 64
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m single -d single" ]]; then
++		workout "-m single -d single -M" 1 no 64
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m dup -d dup" ]]; then
++		workout "-m dup -d dup -M" 1 no 64
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m raid5 -d raid5" ]]; then
++		workout "-m raid5 -d raid5" 2 no 64
++	fi
++
++	if [[ "${_btrfs_profile_configs[@]}" =~ "-m raid6 -d raid6" ]]; then
++		workout "-m raid6 -d raid6" 3 no 64
++	fi
+ fi
+ 
+ echo "*** done"
 -- 
-2.38.1
+2.35.3
 
