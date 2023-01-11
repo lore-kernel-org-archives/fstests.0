@@ -2,429 +2,132 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C429EC46467
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 06:02:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 446EEC46467
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 10:00:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230340AbjAKGCp (ORCPT
+        id S232064AbjAKKAF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Jan 2023 01:02:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57290 "EHLO
+        Wed, 11 Jan 2023 05:00:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229688AbjAKGCm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 01:02:42 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E96164F1
-        for <fstests@vger.kernel.org>; Tue, 10 Jan 2023 22:02:40 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 14C11B81A53
-        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 06:02:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9BC96C433D2;
-        Wed, 11 Jan 2023 06:02:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673416957;
-        bh=XvYNtqInv33p4j7GcASFcl3Bwf+SesPKGLfdUox/xhM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=WQR7mBUDXY1XkLNP1/vg3P38TkDmUz2sURMshEj5TENGX9wUUc7//GgprlR86OUQl
-         rg7fD5G3bpAn6QsyO3DKluiqnlTlXOwUVWIMxpGzoo8/MsIGLfCybfsqS98pMgd0h/
-         LGU1CC0DInp8Jgz6ykq6xiVxwPj0e/ZKDIWSWCBkW4vDaZZH3r+8tPuedhKKOdsiqm
-         bWK6qydd3iOLRDIsbjfOUfrfaQvg5KHIyQzn1R1OiTUvV/FxScUAbSQfJV9PaxU8Cd
-         N9IlBo0rIquD8yKYOBBvuWxOqBv6M/rRA2llmpzWz3B9XM75qzLttXvqp2HaWDmCH1
-         PhJnMeWsLkJBQ==
-Date:   Tue, 10 Jan 2023 22:02:37 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Dave Chinner <david@fromorbit.com>
+        with ESMTP id S232120AbjAKJ7j (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 04:59:39 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44072193EE
+        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 01:56:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1673430976;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=fCqtpaxQt53nHswaEL2SHmpHivHPHqsA6MI0eluOxws=;
+        b=Ugk7mFYrwURjrhh0hRdV1brLjs2ZBH3jSP+KVw7sK2tOIYt0KpmGDVGQgs6SMNLrDAS07H
+        bkstid0vEJjPM0X0UXCqBSTgRbbif0+rcUBrX74dNmbWCxsPGeU0BThWdtsZ4Z9u7xbkZi
+        mZvQfPC3wNttaa+atWsi4Yqg9touNa8=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-47-vyEwSdU5PkiECNYEnLhsdQ-1; Wed, 11 Jan 2023 04:56:14 -0500
+X-MC-Unique: vyEwSdU5PkiECNYEnLhsdQ-1
+Received: by mail-pj1-f72.google.com with SMTP id 31-20020a17090a0fa200b00226e43409c2so6193157pjz.9
+        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 01:56:14 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fCqtpaxQt53nHswaEL2SHmpHivHPHqsA6MI0eluOxws=;
+        b=eHUsWolt6iOFcBIZoOMOXfdiv/l4eG1xDkw4P/uqRES6aktN9qu9wQOlRpunlxnqmN
+         q+40TFHWPQFzVAUKxFj6EdLSYrlor38ISfg6yb/mXRyjF0PT9BZWgQAOUkKlkLt1WO0O
+         rD6Hth3jEeHQGWj6zWn3YX14DcpD9Z1lZi+X63zhPLZY3N5vgxi3C0HtrJjBE2I45fWM
+         d09DiXTVBgq7kZUBmMGHTezcuc388xzll8RAGSPYoqlICvO6tvXAbi6heuhoBXyFtHvN
+         +BLqgedTQUgFAGpS9qpOiNxVRGooRpzs7leuAqBY8mX27kKpVBf0ewb7KQUTTAJVnnuM
+         tiyQ==
+X-Gm-Message-State: AFqh2kpnM2Bp6SIoRH/q09hoKSj8OnUvynElLyF24kkrYtDwVuz4PAC2
+        gCDAf0HmuSYjL/Pymq4n35HRhG1VK3s0snrYk25Q4CEP9kzcqoGgAkuSvQube374sPBPrb6pnsA
+        65l6DjOMvMm0U6aO2Xg==
+X-Received: by 2002:a05:6a20:499d:b0:af:767a:a7e1 with SMTP id fs29-20020a056a20499d00b000af767aa7e1mr1804987pzb.23.1673430973569;
+        Wed, 11 Jan 2023 01:56:13 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXtVqFMMx6ShhD2cEKl+VLLoqc9fnjcxI49YUnRCIh0vXSJMM84F9l0MqdrpQe3kY2wQJaL/xw==
+X-Received: by 2002:a05:6a20:499d:b0:af:767a:a7e1 with SMTP id fs29-20020a056a20499d00b000af767aa7e1mr1804974pzb.23.1673430973207;
+        Wed, 11 Jan 2023 01:56:13 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id jg7-20020a17090326c700b0019324fbec59sm7425393plb.41.2023.01.11.01.56.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 11 Jan 2023 01:56:12 -0800 (PST)
+Date:   Wed, 11 Jan 2023 17:56:09 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     David Disseldorp <ddiss@suse.de>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 1/3] populate: fix horrible performance due to excessive
- forking
-Message-ID: <Y75Q/dBXOIeIPonK@magnolia>
-References: <20230110224906.1171483-1-david@fromorbit.com>
- <20230110224906.1171483-2-david@fromorbit.com>
+Subject: Re: [PATCH] common/rc: drop SGI DMF specific _mount_ops_filter
+Message-ID: <20230111095609.xca2wmkgsdxaiwqt@zlang-mailbox>
+References: <20230110222243.6522-1-ddiss@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230110224906.1171483-2-david@fromorbit.com>
+In-Reply-To: <20230110222243.6522-1-ddiss@suse.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 11, 2023 at 09:49:04AM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Tue, Jan 10, 2023 at 11:22:43PM +0100, David Disseldorp wrote:
+> The _mount() helper function is the only caller of _mount_ops_filter(),
+> which appears to have been used in the past to replace the SGI DMF
+> specific mtpt= mount option setting.
 > 
-> xfs/155 is taking close on 4 minutes to populate the filesystem,
-> and most of that is because the populate functions are coded without
-> consideration of performance.
+> _mount() invocations could now be replaced with $MOUNT_PROG calls
+> directly, but I've retained the helper function for readability.
 > 
-> Most of the operations can be executed in parallel as the operate on
-> separate files or in separate directories.
-> 
-> Creating a zero length file in a shell script can be very fast if we
-> do the creation within the shell, but running touch, xfs_io or some
-> other process to create the file is extremely slow - performance is
-> limited by the process creation/destruction rate, not the filesystem
-> create rate. Same goes for unlinking files.
-> 
-> We can use 'echo -n > $file' to create or truncate an existing file
-> to zero length from within the shell. This is much, much faster than
-> calling touch.
-> 
-> For removing lots of files, there is no shell built in to do this
-> without forking, but we can easily build a file list and pipe it
-> to 'xargs rm -f' to execute rm with as many files as possible in one
-> execution.
-> 
-> Doing this removes approximately 50,000 process creat/destroy cycles
-> to populate the filesystem, reducing system time from ~200s to ~35s
-> to populate the filesystem. Along with running operations in
-> parallel, this brings the population time down from ~235s to less
-> than 45s.
-
-Hmm.  I took the nerdsnipe bait and came up with my own approach.  I
-replaced the shell loops with a perl script.  I didn't parallelize
-anything, but the perl script cut the runtime down to about ~35s.
-
-> The long tail of that 45s runtime time is the btree format attribute
-> tree create. That executes setfattr a very large number of times,
-> taking 44s to run and consuming 36s of system time mostly just
-> creating and destroying thousands of setfattr process contexts.
-> There's no easy shell coding solution to that issue, so that's for
-> another rainy day.
-
-...well it's pouring on the west coast here, so I'll post my solution
-that uses setfattr --restore tomorrow when I get it back from QA.
-Granted, I hadn't found a solution to the removexattr stuff yet, so I
-might keep working on that.
-
-(removexattr looks like a pain in perl though...)
-
-Anyway it's late now, I'll look at the diff tomorrow.
-
---D
-
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> Link: https://irix7.com/techpubs/007-3683-007.pdf
+> Signed-off-by: David Disseldorp <ddiss@suse.de>
 > ---
->  common/populate | 179 ++++++++++++++++++++++++++++--------------------
->  1 file changed, 104 insertions(+), 75 deletions(-)
+
+This makes sense to me. Likes we've removed dmapi things, this "-o mtpt"
+support can be removed too.
+
+The _mount_ops_filter() might can be brought back if we need a filter
+for _mount() in one day, I think that's another story. Now let's remove
+it if it's useless.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  common/rc | 15 +--------------
+>  1 file changed, 1 insertion(+), 14 deletions(-)
 > 
-> diff --git a/common/populate b/common/populate
-> index 44b4af166..9b60fa5c1 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -52,23 +52,64 @@ __populate_fragment_file() {
->  	test -f "${fname}" && $here/src/punch-alternating "${fname}"
+> diff --git a/common/rc b/common/rc
+> index 23530413..81ce1026 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -120,7 +120,7 @@ _get_hugepagesize()
+>  
+>  _mount()
+>  {
+> -    $MOUNT_PROG `_mount_ops_filter $*`
+> +    $MOUNT_PROG $*
 >  }
 >  
-> -# Create a large directory
-> -__populate_create_dir() {
-> -	name="$1"
-> -	nr="$2"
-> -	missing="$3"
-> +# Create a specified number of files or until the maximum extent count is
-> +# reached. If the extent count is reached, return the number of files created.
-> +# This is optimised for speed - do not add anything that executes a separate
-> +# process in every loop as this will slow it down by a factor of at least 5.
-> +__populate_create_nfiles() {
-> +	local name="$1"
-> +	local nr="$2"
-> +	local max_nextents="$3"
-> +	local d=0
->  
->  	mkdir -p "${name}"
-> -	seq 0 "${nr}" | while read d; do
-> -		creat=mkdir
-> -		test "$((d % 20))" -eq 0 && creat=touch
-> -		$creat "${name}/$(printf "%.08d" "$d")"
-> +	for d in `seq 0 "${nr}"`; do
-> +		local fname=""
-> +		printf -v fname "${name}/%.08d" "$d"
-> +
-> +		if [ "$((d % 20))" -eq 0 ]; then
-> +			mkdir ${fname}
-> +		else
-> +			echo -n > ${fname}
-> +		fi
-> +
-> +		if [ "${max_nextents}" -eq 0 ]; then
-> +			continue
-> +		fi
-> +		if [ "$((d % 40))" -ne 0 ]; then
-> +			continue
-> +		fi
-> +
-> +		local nextents="$(_xfs_get_fsxattr nextents $name)"
-> +		if [ "${nextents}" -gt "${max_nextents}" ]; then
-> +			echo ${d}
-> +			break
-> +		fi
->  	done
-> +}
-> +
-> +# remove every second file in the given directory. This is optimised for speed -
-> +# do not add anything that executes a separate process in each loop as this will
-> +# slow it down by at least factor of 10.
-> +__populate_remove_nfiles() {
-> +	local name="$1"
-> +	local nr="$2"
-> +	local d=1
-> +
-> +	for d in `seq 1 2 "${nr}"`; do
-> +		printf "${name}/%.08d " "$d"
-> +	done | xargs rm -f
-> +}
->  
-> +# Create a large directory
-> +__populate_create_dir() {
-> +	local name="$1"
-> +	local nr="$2"
-> +	local missing="$3"
-> +
-> +	__populate_create_nfiles "${name}" "${nr}" 0
->  	test -z "${missing}" && return
-> -	seq 1 2 "${nr}" | while read d; do
-> -		rm -rf "${name}/$(printf "%.08d" "$d")"
-> -	done
-> +	__populate_remove_nfiles "${name}" "${nr}"
+>  # Call _mount to do mount operation but also save mountpoint to
+> @@ -211,19 +211,6 @@ _test_options()
+>  	TEST_OPTIONS="$TEST_OPTIONS ${log_opt}logdev=$TEST_LOGDEV"
 >  }
 >  
->  # Create a large directory and ensure that it's a btree format
-> @@ -82,31 +123,18 @@ __populate_xfs_create_btree_dir() {
->  	# watch for when the extent count exceeds the space after the
->  	# inode core.
->  	local max_nextents="$(((isize - icore_size) / 16))"
-> -	local nr=0
+> -_mount_ops_filter()
+> -{
+> -    local params="$*"
+> -    local last_index=$(( $# - 1 ))
 > -
-> -	mkdir -p "${name}"
-> -	while true; do
-> -		local creat=mkdir
-> -		test "$((nr % 20))" -eq 0 && creat=touch
-> -		$creat "${name}/$(printf "%.08d" "$nr")"
-> -		if [ "$((nr % 40))" -eq 0 ]; then
-> -			local nextents="$(_xfs_get_fsxattr nextents $name)"
-> -			[ $nextents -gt $max_nextents ] && break
-> -		fi
-> -		nr=$((nr+1))
-> -	done
-> +	local nr=100000
->  
-> +	nr=$(__populate_create_nfiles "${name}" "${nr}" "${max_nextents}")
->  	test -z "${missing}" && return
-> -	seq 1 2 "${nr}" | while read d; do
-> -		rm -rf "${name}/$(printf "%.08d" "$d")"
-> -	done
-> +	__populate_remove_nfiles "${name}" "${nr}"
->  }
->  
->  # Add a bunch of attrs to a file
->  __populate_create_attr() {
-> -	name="$1"
-> -	nr="$2"
-> -	missing="$3"
-> +	local name="$1"
-> +	local nr="$2"
-> +	local missing="$3"
->  
->  	touch "${name}"
->  	seq 0 "${nr}" | while read d; do
-> @@ -121,17 +149,18 @@ __populate_create_attr() {
->  
->  # Fill up some percentage of the remaining free space
->  __populate_fill_fs() {
-> -	dir="$1"
-> -	pct="$2"
-> +	local dir="$1"
-> +	local pct="$2"
-> +	local nr=0
->  	test -z "${pct}" && pct=60
->  
->  	mkdir -p "${dir}/test/1"
->  	cp -pRdu "${dir}"/S_IFREG* "${dir}/test/1/"
->  
-> -	SRC_SZ="$(du -ks "${dir}/test/1" | cut -f 1)"
-> -	FS_SZ="$(( $(stat -f "${dir}" -c '%a * %S') / 1024 ))"
-> +	local SRC_SZ="$(du -ks "${dir}/test/1" | cut -f 1)"
-> +	local FS_SZ="$(( $(stat -f "${dir}" -c '%a * %S') / 1024 ))"
->  
-> -	NR="$(( (FS_SZ * ${pct} / 100) / SRC_SZ ))"
-> +	local NR="$(( (FS_SZ * ${pct} / 100) / SRC_SZ ))"
->  
->  	echo "FILL FS"
->  	echo "src_sz $SRC_SZ fs_sz $FS_SZ nr $NR"
-> @@ -220,45 +249,45 @@ _scratch_xfs_populate() {
->  	# Data:
->  
->  	# Fill up the root inode chunk
-> -	echo "+ fill root ino chunk"
-> +	( echo "+ fill root ino chunk"
->  	seq 1 64 | while read f; do
-> -		$XFS_IO_PROG -f -c "truncate 0" "${SCRATCH_MNT}/dummy${f}"
-> -	done
-> +		echo -n > "${SCRATCH_MNT}/dummy${f}"
-> +	done ) &
->  
->  	# Regular files
->  	# - FMT_EXTENTS
->  	echo "+ extents file"
-> -	__populate_create_file $blksz "${SCRATCH_MNT}/S_IFREG.FMT_EXTENTS"
-> +	__populate_create_file $blksz "${SCRATCH_MNT}/S_IFREG.FMT_EXTENTS" &
->  
->  	# - FMT_BTREE
->  	echo "+ btree extents file"
->  	nr="$((blksz * 2 / 16))"
-> -	__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
-> +	__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/S_IFREG.FMT_BTREE" &
->  
->  	# Directories
->  	# - INLINE
-> -	echo "+ inline dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_INLINE" 1
-> +	 echo "+ inline dir"
-> +	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_INLINE" 1 "" &
->  
->  	# - BLOCK
->  	echo "+ block dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BLOCK" "$((dblksz / 40))"
-> +	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BLOCK" "$((dblksz / 40))" "" &
->  
->  	# - LEAF
->  	echo "+ leaf dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dblksz / 12))"
-> +	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAF" "$((dblksz / 12))" "" &
->  
->  	# - LEAFN
->  	echo "+ leafn dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAFN" "$(( ((dblksz - leaf_hdr_size) / 8) - 3 ))"
-> +	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_LEAFN" "$(( ((dblksz - leaf_hdr_size) / 8) - 3 ))" "" &
->  
->  	# - NODE
->  	echo "+ node dir"
-> -	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_NODE" "$((16 * dblksz / 40))" true
-> +	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_NODE" "$((16 * dblksz / 40))" true &
->  
->  	# - BTREE
->  	echo "+ btree dir"
-> -	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize" true
-> +	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize" true &
->  
->  	# Symlinks
->  	# - FMT_LOCAL
-> @@ -280,20 +309,20 @@ _scratch_xfs_populate() {
->  
->  	# Attribute formats
->  	# LOCAL
-> -	echo "+ local attr"
-> -	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_LOCAL" 1
-> +	 echo "+ local attr"
-> +	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_LOCAL" 1 "" &
->  
->  	# LEAF
-> -	echo "+ leaf attr"
-> -	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_LEAF" "$((blksz / 40))"
-> +	 echo "+ leaf attr"
-> +	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_LEAF" "$((blksz / 40))" "" &
->  
->  	# NODE
->  	echo "+ node attr"
-> -	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_NODE" "$((8 * blksz / 40))"
-> +	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_NODE" "$((8 * blksz / 40))" "" &
->  
->  	# BTREE
->  	echo "+ btree attr"
-> -	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_BTREE" "$((64 * blksz / 40))" true
-> +	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_BTREE" "$((64 * blksz / 40))" true &
->  
->  	# trusted namespace
->  	touch ${SCRATCH_MNT}/ATTR.TRUSTED
-> @@ -321,68 +350,68 @@ _scratch_xfs_populate() {
->  	rm -rf "${SCRATCH_MNT}/attrvalfile"
->  
->  	# Make an unused inode
-> -	echo "+ empty file"
-> +	( echo "+ empty file"
->  	touch "${SCRATCH_MNT}/unused"
->  	$XFS_IO_PROG -f -c 'fsync' "${SCRATCH_MNT}/unused"
-> -	rm -rf "${SCRATCH_MNT}/unused"
-> +	rm -rf "${SCRATCH_MNT}/unused" ) &
->  
->  	# Free space btree
->  	echo "+ freesp btree"
->  	nr="$((blksz * 2 / 8))"
-> -	__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/BNOBT"
-> +	__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/BNOBT" &
->  
->  	# Inode btree
-> -	echo "+ inobt btree"
-> +	( echo "+ inobt btree"
->  	local ino_per_rec=64
->  	local rec_per_btblock=16
->  	local nr="$(( 2 * (blksz / rec_per_btblock) * ino_per_rec ))"
->  	local dir="${SCRATCH_MNT}/INOBT"
-> -	mkdir -p "${dir}"
-> -	seq 0 "${nr}" | while read f; do
-> -		touch "${dir}/${f}"
-> -	done
+> -    [ $last_index -gt 0 ] && shift $last_index
+> -    local fs_escaped=$1
 > -
-> -	seq 0 2 "${nr}" | while read f; do
-> -		rm -f "${dir}/${f}"
-> -	done
-> +	__populate_create_dir "${SCRATCH_MNT}/INOBT" "${nr}" true
-> +	) &
->  
->  	# Reverse-mapping btree
->  	is_rmapbt="$(_xfs_has_feature "$SCRATCH_MNT" rmapbt -v)"
->  	if [ $is_rmapbt -gt 0 ]; then
-> -		echo "+ rmapbt btree"
-> +		( echo "+ rmapbt btree"
->  		nr="$((blksz * 2 / 24))"
->  		__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/RMAPBT"
-> +		) &
->  	fi
->  
->  	# Realtime Reverse-mapping btree
->  	is_rt="$(_xfs_get_rtextents "$SCRATCH_MNT")"
->  	if [ $is_rmapbt -gt 0 ] && [ $is_rt -gt 0 ]; then
-> -		echo "+ rtrmapbt btree"
-> +		( echo "+ rtrmapbt btree"
->  		nr="$((blksz * 2 / 32))"
->  		$XFS_IO_PROG -R -f -c 'truncate 0' "${SCRATCH_MNT}/RTRMAPBT"
->  		__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/RTRMAPBT"
-> +		) &
->  	fi
->  
->  	# Reference-count btree
->  	is_reflink="$(_xfs_has_feature "$SCRATCH_MNT" reflink -v)"
->  	if [ $is_reflink -gt 0 ]; then
-> -		echo "+ reflink btree"
-> +		( echo "+ reflink btree"
->  		nr="$((blksz * 2 / 12))"
->  		__populate_create_file $((blksz * nr)) "${SCRATCH_MNT}/REFCOUNTBT"
->  		cp --reflink=always "${SCRATCH_MNT}/REFCOUNTBT" "${SCRATCH_MNT}/REFCOUNTBT2"
-> +		) &
->  	fi
->  
->  	# Copy some real files (xfs tests, I guess...)
->  	echo "+ real files"
->  	test $fill -ne 0 && __populate_fill_fs "${SCRATCH_MNT}" 5
->  
-> -	# Make sure we get all the fragmentation we asked for
-> -	__populate_fragment_file "${SCRATCH_MNT}/S_IFREG.FMT_BTREE"
-> -	__populate_fragment_file "${SCRATCH_MNT}/BNOBT"
-> -	__populate_fragment_file "${SCRATCH_MNT}/RMAPBT"
-> -	__populate_fragment_file "${SCRATCH_MNT}/RTRMAPBT"
-> -	__populate_fragment_file "${SCRATCH_MNT}/REFCOUNTBT"
-> +	# Wait for all file creation to complete before we start fragmenting
-> +	# the files as needed.
-> +	wait
-> +	__populate_fragment_file "${SCRATCH_MNT}/S_IFREG.FMT_BTREE" &
-> +	__populate_fragment_file "${SCRATCH_MNT}/BNOBT" &
-> +	__populate_fragment_file "${SCRATCH_MNT}/RMAPBT" &
-> +	__populate_fragment_file "${SCRATCH_MNT}/RTRMAPBT" &
-> +	__populate_fragment_file "${SCRATCH_MNT}/REFCOUNTBT" &
->  
-> +	wait
->  	umount "${SCRATCH_MNT}"
->  }
->  
+> -    echo $params | \
+> -        $PERL_PROG -ne "s#mtpt=[^,|^\n|^\s]*#mtpt=$fs_escaped\1\2#; print;"
+> -
+> -}
+> -
+>  # Used for mounting non-scratch devices (e.g. loop, dm constructs)
+>  # with the safe set of scratch mount options (e.g. loop image may be
+>  # hosted on $SCRATCH_DEV, so can't use external scratch devices).
 > -- 
-> 2.38.1
+> 2.35.3
 > 
+
