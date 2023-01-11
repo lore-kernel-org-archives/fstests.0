@@ -2,86 +2,121 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5117C5479D
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 20:30:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61C68C46467
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 20:48:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229844AbjAKUae (ORCPT
+        id S229934AbjAKUsw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Jan 2023 15:30:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46178 "EHLO
+        Wed, 11 Jan 2023 15:48:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239023AbjAKU2b (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 15:28:31 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8D5032260
-        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 12:28:10 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229539AbjAKUsv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 15:48:51 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D26D05FF8;
+        Wed, 11 Jan 2023 12:48:48 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id B2AB0344EB;
-        Wed, 11 Jan 2023 20:28:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1673468888; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=SC/kGg8MoGFFYMopNXzajUBT1srAyaayoed3Pqm2o1Q=;
-        b=aGg1F3WprvIRRvFPlijKJlm2uACM3DpjsQxUgmXHrIjl+XNlBHJxrlzXH5tBl0Fkpcf+t1
-        OxBTaTyEmw2/Qh+TK3R5hXKu6a56yUiRy/NWWvMmphAl2s4oZ3ta/uynbKOalhGREVZEDx
-        DBtDFJfB8SOxtKWoGWoCVL9bVkBfY1I=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1673468888;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=SC/kGg8MoGFFYMopNXzajUBT1srAyaayoed3Pqm2o1Q=;
-        b=Qps7kIGkEVH7PAV9YBPCz+4RjEn5EEr6y6QYgyvs7OcXwzl6lcDg5IvRmbmOuefJQXNubn
-        p48qHYEFK/kCcfCg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8A3B01358A;
-        Wed, 11 Jan 2023 20:28:08 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id xM0FINgbv2OiSAAAMHmgww
-        (envelope-from <ddiss@suse.de>); Wed, 11 Jan 2023 20:28:08 +0000
-Date:   Wed, 11 Jan 2023 21:29:12 +0100
-From:   David Disseldorp <ddiss@suse.de>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs/294: performance is unreasonably slow
-Message-ID: <20230111212912.36a3a212@echidna.fritz.box>
-In-Reply-To: <20230110224906.1171483-4-david@fromorbit.com>
-References: <20230110224906.1171483-1-david@fromorbit.com>
-        <20230110224906.1171483-4-david@fromorbit.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6B36C61E53;
+        Wed, 11 Jan 2023 20:48:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AF39EC433EF;
+        Wed, 11 Jan 2023 20:48:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1673470127;
+        bh=HzsRQDLfFJisGLIvMqbnFWr06oooTi1mp0LWzSJqKEE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=K2UO6+TFqKzTTio+chMxCyja8QqE3Mr2PTwbJfLvBYXiQltWFHfx3cdbrXlTii5na
+         f68CvFomlhYRO4iu75kg7/YDtk/n7lE8NBmsJXlm4uKY4UcSVUbrxxQuOcMMymCw/J
+         UrjSn3Z4Uth6aHXFJbDPhyRXK2guCqy5kDqyJwEuF2qje9khBEevkzVXVOKikwNOwL
+         YdOGFcXvvscQKVvMLlSS/wvrHtcWN6yLLFQtfeiHqUkzAt62FJmf2T+Shj0dlfDmbf
+         omMdD4KtntdzM0RIc28LAIfKgROdoYssadikI4i51EY63gPWrGasLPONN2IhXYO43a
+         3OFKVXmnw92QQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org,
+        Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Subject: [PATCH v2] generic/692: generalize the test for non-4K Merkle tree block sizes
+Date:   Wed, 11 Jan 2023 12:47:39 -0800
+Message-Id: <20230111204739.77828-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.39.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Dave!
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 
-On Wed, 11 Jan 2023 09:49:06 +1100, Dave Chinner wrote:
+Due to the assumption of the Merkle tree block size being 4K, the file
+size calculated for the second test case was taking way too long to hit
+EFBIG in case of larger block sizes like 64K.  Fix this by generalizing
+the calculation to any Merkle tree block size >= 1K.
 
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> This creates a bunch of files in a dir, then deletes 97% of them
-> attempting to leave 1 allocated inode per inode chunk so that they
-> aren't freed. Performance is badly limited by task creation and
-> destruction for each inode created. Fix this by using "echo -n >
-> file" rather than touch so that the shell creates the empty files
-> without needing to fork/exec a separate task for each creation.
-> 
-> This reduces runtime from 45s down to 15s.
+Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Co-developed-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+v2: Cleaned up the original patch from Ojaswin:
+    - Explained the calculations as they are done.
+    - Considered 11 levels instead of 8, to account for 1K blocks
+      potentially needing up to 11 levels.
+    - Increased 'scale' for real number results, and don't use 'scale'
+      at all for integer number results.
+    - Improved a variable name.
+    - Updated commit message.
 
-I see >7x improvement on a zram device, be it from a lower baseline :)
+ tests/generic/692 | 37 +++++++++++++++++++++++++------------
+ 1 file changed, 25 insertions(+), 12 deletions(-)
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+diff --git a/tests/generic/692 b/tests/generic/692
+index d6da734b..90832b16 100755
+--- a/tests/generic/692
++++ b/tests/generic/692
+@@ -51,18 +51,31 @@ _fsv_enable $fsv_file |& _filter_scratch
+ #
+ # The Merkle tree is stored with the leaf node level (L0) last, but it is
+ # written first.  To get an interesting overflow, we need the maximum file size
+-# (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
+-# don't have to write many blocks before getting an error.
+-#
+-# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
+-# padding, L0 is 1/128 of the file size while the other levels in total are
+-# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
+-# ignoring padding, for L0 start exactly at MAX, the file size must be s such
+-# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
+-# where MAX occurs *near* the start of L0 rather than *at* the start, we can
+-# just subtract an overestimate of the padding: 64K after the file contents,
+-# then 4K per level, where the consideration of 8 levels is sufficient.
+-sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
++# ($max_sz) to be in the middle of L0 -- ideally near the beginning of L0 so
++# that we don't have to write many blocks before getting an error.
++
++bs=$FSV_BLOCK_SIZE
++hash_size=32   # SHA-256
++hash_per_block=$(echo "scale=30; $bs/($hash_size)" | $BC -q)
++
++# Compute the proportion of the original file size that the non-leaf levels of
++# the Merkle tree take up.  Ignoring padding, this is 1/${hashes_per_block}^2 +
++# 1/${hashes_per_block}^3 + 1/${hashes_per_block}^4 + ...  Compute it using the
++# formula for the sum of a geometric series: \sum_{k=0}^{\infty} ar^k = a/(1-r).
++a=$(echo "scale=30; 1/($hash_per_block^2)" | $BC -q)
++r=$(echo "scale=30; 1/$hash_per_block" | $BC -q)
++nonleaves_relative_size=$(echo "scale=30; $a/(1-$r)" | $BC -q)
++
++# Compute the original file size where the leaf level L0 starts at $max_sz.
++# Padding is still ignored, so the real value is slightly smaller than this.
++sz=$(echo "$max_sz/(1+$nonleaves_relative_size)" | $BC -q)
++
++# Finally, to get a file size where $max_sz occurs just after the start of L0
++# rather than *at* the start of L0, subtract an overestimate of the padding: 64K
++# after the file contents, then $bs per level for 11 levels.  11 levels is the
++# most levels that can ever be needed, assuming the block size is at least 1K.
++sz=$(echo "$sz - 65536 - $bs*11" | $BC -q)
++
+ _fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
+ truncate -s $sz $fsv_file
+ _fsv_enable $fsv_file |& _filter_scratch
+-- 
+2.39.0
 
-Cheers, David
