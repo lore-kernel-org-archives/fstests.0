@@ -2,121 +2,101 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61C68C46467
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 20:48:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4668C5479D
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 20:52:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229934AbjAKUsw (ORCPT
+        id S230055AbjAKUwG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Jan 2023 15:48:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53544 "EHLO
+        Wed, 11 Jan 2023 15:52:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229539AbjAKUsv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 15:48:51 -0500
+        with ESMTP id S234951AbjAKUv5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 15:51:57 -0500
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D26D05FF8;
-        Wed, 11 Jan 2023 12:48:48 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D312A3D9F2
+        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 12:51:55 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6B36C61E53;
-        Wed, 11 Jan 2023 20:48:48 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AF39EC433EF;
-        Wed, 11 Jan 2023 20:48:47 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 54FA761E4F
+        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 20:51:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 980D2C433EF;
+        Wed, 11 Jan 2023 20:51:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673470127;
-        bh=HzsRQDLfFJisGLIvMqbnFWr06oooTi1mp0LWzSJqKEE=;
-        h=From:To:Cc:Subject:Date:From;
-        b=K2UO6+TFqKzTTio+chMxCyja8QqE3Mr2PTwbJfLvBYXiQltWFHfx3cdbrXlTii5na
-         f68CvFomlhYRO4iu75kg7/YDtk/n7lE8NBmsJXlm4uKY4UcSVUbrxxQuOcMMymCw/J
-         UrjSn3Z4Uth6aHXFJbDPhyRXK2guCqy5kDqyJwEuF2qje9khBEevkzVXVOKikwNOwL
-         YdOGFcXvvscQKVvMLlSS/wvrHtcWN6yLLFQtfeiHqUkzAt62FJmf2T+Shj0dlfDmbf
-         omMdD4KtntdzM0RIc28LAIfKgROdoYssadikI4i51EY63gPWrGasLPONN2IhXYO43a
-         3OFKVXmnw92QQ==
+        s=k20201202; t=1673470314;
+        bh=QnTd++72vORq2zGpgV7n7qf+bjnssqglsfjQQmN/ctQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=r5uXjAHLsQ9j6t1FqpiXmRYh31vR+vuczUAdsLaM9Z8NHgJ/NzLVpbV3r61q14cJe
+         Vfxg0OC9C6lVclLhXSVyLnw9HeM0hYYChobGRhT6b/nrDd56zqkEhR8oVioSCuyd7N
+         5F+6gTHfnnPIOI8ValcRuZtgCIk2sSs7rTTkjJFJwjKEy3cL752nJWIqlYfJkAenDt
+         vVS6P0JhM+9YbwzJ8CTrbbxZ2A57zSUqzv2hJm71bIaNI3LGf8IT7HSG3EqtBWxr+M
+         LXGI/m7q99fm3S2wwKEP4yZ8sJZRTIDd8ukVzEV7leescJjNiV8MQ16gEYUW5bCrCB
+         YptkqJ7KbPf7A==
+Date:   Wed, 11 Jan 2023 12:51:52 -0800
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org,
-        Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Subject: [PATCH v2] generic/692: generalize the test for non-4K Merkle tree block sizes
-Date:   Wed, 11 Jan 2023 12:47:39 -0800
-Message-Id: <20230111204739.77828-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.39.0
+To:     Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] generic/692: Generalize the test for non-4k merkle tree
+ block sizes
+Message-ID: <Y78haOvystSsS+nJ@sol.localdomain>
+References: <20230111175314.73346-1-ojaswin@linux.ibm.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230111175314.73346-1-ojaswin@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+On Wed, Jan 11, 2023 at 11:23:14PM +0530, Ojaswin Mujoo wrote:
+> Due to the assumtion of Merkle tree block size being 4k, the size calculated
+> for second test was taking way too long to hit EFBIG in case of bigger block
+> sizes like 64k. Fix this by genralizing the calculation.
+> 
+> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> ---
+>  tests/generic/692 | 21 +++++++++++++++------
+>  1 file changed, 15 insertions(+), 6 deletions(-)
+> 
+> diff --git a/tests/generic/692 b/tests/generic/692
+> index d6da734b..0a354802 100755
+> --- a/tests/generic/692
+> +++ b/tests/generic/692
+> @@ -54,15 +54,24 @@ _fsv_enable $fsv_file |& _filter_scratch
+>  # (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
+>  # don't have to write many blocks before getting an error.
+>  #
+> -# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
+> -# padding, L0 is 1/128 of the file size while the other levels in total are
+> -# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
+> +# For example, with SHA-256 and 4K blocks, there are 128 hashes per block. Thus,
+> +# ignoring padding, L0 is 1/128 of the file size while the other levels in total
+> +# are 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size. So still
+>  # ignoring padding, for L0 start exactly at MAX, the file size must be s such
+> -# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
+> +# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257). Then to get a file size
+>  # where MAX occurs *near* the start of L0 rather than *at* the start, we can
+>  # just subtract an overestimate of the padding: 64K after the file contents,
+> -# then 4K per level, where the consideration of 8 levels is sufficient.
+> -sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
+> +# then 4K per level, where the consideration of 8 levels is sufficient. Below
+> +# code generalizes this logic for all merkle tree sizes.
+> +bs=$FSV_BLOCK_SIZE
+> +hash_size=32   # SHA-256
+> +hash_per_block=$(echo "scale=20; $bs/($hash_size)" | $BC -q)
+> +a=$(echo "scale=20; 1/($hash_per_block^2)" | $BC -q)
+> +r=$(echo "scale=20; 1/$hash_per_block" | $BC -q)
+> +treesize_without_l1=$(echo "scale=20; $a/(1-$r)" | $BC -q)
+> +sz=$(echo "scale=20; $max_sz/(1+$treesize_without_l1)" | $BC -q)
+> +# adjust $sz so we are more likely to hit EFBIG while building level 1
+> +sz=$(echo "scale=20; $sz - 65536 - $bs*8" | $BC -q | cut -d. -f1)
+>  _fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
+>  truncate -s $sz $fsv_file
+>  _fsv_enable $fsv_file |& _filter_scratch
 
-Due to the assumption of the Merkle tree block size being 4K, the file
-size calculated for the second test case was taking way too long to hit
-EFBIG in case of larger block sizes like 64K.  Fix this by generalizing
-the calculation to any Merkle tree block size >= 1K.
+Thanks!  I'd like to improve the explanation of the calculation, and fix up a
+few other things, so I ended up just sending out an updated version of this
+patch --- I hope that's okay with you.  Can you take a look?
+https://lore.kernel.org/r/20230111204739.77828-1-ebiggers@kernel.org
 
-Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Co-developed-by: Eric Biggers <ebiggers@google.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
-v2: Cleaned up the original patch from Ojaswin:
-    - Explained the calculations as they are done.
-    - Considered 11 levels instead of 8, to account for 1K blocks
-      potentially needing up to 11 levels.
-    - Increased 'scale' for real number results, and don't use 'scale'
-      at all for integer number results.
-    - Improved a variable name.
-    - Updated commit message.
-
- tests/generic/692 | 37 +++++++++++++++++++++++++------------
- 1 file changed, 25 insertions(+), 12 deletions(-)
-
-diff --git a/tests/generic/692 b/tests/generic/692
-index d6da734b..90832b16 100755
---- a/tests/generic/692
-+++ b/tests/generic/692
-@@ -51,18 +51,31 @@ _fsv_enable $fsv_file |& _filter_scratch
- #
- # The Merkle tree is stored with the leaf node level (L0) last, but it is
- # written first.  To get an interesting overflow, we need the maximum file size
--# (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
--# don't have to write many blocks before getting an error.
--#
--# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
--# padding, L0 is 1/128 of the file size while the other levels in total are
--# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
--# ignoring padding, for L0 start exactly at MAX, the file size must be s such
--# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
--# where MAX occurs *near* the start of L0 rather than *at* the start, we can
--# just subtract an overestimate of the padding: 64K after the file contents,
--# then 4K per level, where the consideration of 8 levels is sufficient.
--sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
-+# ($max_sz) to be in the middle of L0 -- ideally near the beginning of L0 so
-+# that we don't have to write many blocks before getting an error.
-+
-+bs=$FSV_BLOCK_SIZE
-+hash_size=32   # SHA-256
-+hash_per_block=$(echo "scale=30; $bs/($hash_size)" | $BC -q)
-+
-+# Compute the proportion of the original file size that the non-leaf levels of
-+# the Merkle tree take up.  Ignoring padding, this is 1/${hashes_per_block}^2 +
-+# 1/${hashes_per_block}^3 + 1/${hashes_per_block}^4 + ...  Compute it using the
-+# formula for the sum of a geometric series: \sum_{k=0}^{\infty} ar^k = a/(1-r).
-+a=$(echo "scale=30; 1/($hash_per_block^2)" | $BC -q)
-+r=$(echo "scale=30; 1/$hash_per_block" | $BC -q)
-+nonleaves_relative_size=$(echo "scale=30; $a/(1-$r)" | $BC -q)
-+
-+# Compute the original file size where the leaf level L0 starts at $max_sz.
-+# Padding is still ignored, so the real value is slightly smaller than this.
-+sz=$(echo "$max_sz/(1+$nonleaves_relative_size)" | $BC -q)
-+
-+# Finally, to get a file size where $max_sz occurs just after the start of L0
-+# rather than *at* the start of L0, subtract an overestimate of the padding: 64K
-+# after the file contents, then $bs per level for 11 levels.  11 levels is the
-+# most levels that can ever be needed, assuming the block size is at least 1K.
-+sz=$(echo "$sz - 65536 - $bs*11" | $BC -q)
-+
- _fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
- truncate -s $sz $fsv_file
- _fsv_enable $fsv_file |& _filter_scratch
--- 
-2.39.0
-
+- Eric
