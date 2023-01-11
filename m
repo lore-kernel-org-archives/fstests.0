@@ -2,154 +2,107 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C482C46467
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 10:58:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94BD4C46467
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Jan 2023 12:17:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236002AbjAKK5f (ORCPT
+        id S229509AbjAKMRd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Jan 2023 05:57:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40434 "EHLO
+        Wed, 11 Jan 2023 07:17:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38060 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238467AbjAKK51 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 05:57:27 -0500
+        with ESMTP id S231602AbjAKMRb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Jan 2023 07:17:31 -0500
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C09031081
-        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 02:57:26 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2BC3C23
+        for <fstests@vger.kernel.org>; Wed, 11 Jan 2023 04:17:30 -0800 (PST)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 6D9CA1750D;
-        Wed, 11 Jan 2023 10:57:25 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 2C9C1177B2;
+        Wed, 11 Jan 2023 12:17:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1673434645; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=YShmFyTpAHmFyAl2Wwx5Tgt+HJDLBNJ6cEV+joY+qcg=;
-        b=qKeG8DO7U2LicHp51NJBB/YBsQnmXel5oe/IRa4YE+bFRkl/03BV3fsiCXTUYyEG5B4Ut0
-        G3wS9n3biF9ciBv50ZrxGZOhWVaEEuBGRKWrTel3ihd4IiKtQgildi0w48Na3AYT14j4A2
-        45fMBrMHMtrXv81fAf2Vq4nBj0/DwxU=
+        t=1673439449; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=idIsSYt0Hxc8YzEmgHr7YqIs3rVTq1+I/Fa3L+pw3jw=;
+        b=DlMCKrv5czHnxOyLXH+DLeBTn3z29D3tscNdV2QOWD/2H+wBpajTQEij3x5MfNRzyOjxRw
+        eoVtramnRXIooMGa5nlQ2ovDYnLHOUQZ23eQR0o7MQbepdW/pVP6Gu9d7KXoddYBhhKOhi
+        kjP5Vt6nGyU4nqGZ/D/PmZy71tFIL2E=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1673434645;
+        s=susede2_ed25519; t=1673439449;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=YShmFyTpAHmFyAl2Wwx5Tgt+HJDLBNJ6cEV+joY+qcg=;
-        b=9L1+4nw+bwvc6HiQYt8s6/YnzEEGmQGHqO5tNrJ2XVwodcJ8hs8wX8XG44CVt7N9ZyvkpH
-        p8DwfycMztHcyQDA==
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=idIsSYt0Hxc8YzEmgHr7YqIs3rVTq1+I/Fa3L+pw3jw=;
+        b=vKX52G3OuCkzt+1V0HGm3HuXU3DtqAxtu01l3EF66/Lxo57Y3DHtV7IPFTdUKdG5JcEwW3
+        7qRZAI700ToRvUCQ==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 52A1F13591;
-        Wed, 11 Jan 2023 10:57:25 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0D86D13591;
+        Wed, 11 Jan 2023 12:17:29 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id J+jXEhWWvmNvFgAAMHmgww
-        (envelope-from <ddiss@suse.de>); Wed, 11 Jan 2023 10:57:25 +0000
+        id YEO6AdmovmP1QwAAMHmgww
+        (envelope-from <ddiss@suse.de>); Wed, 11 Jan 2023 12:17:29 +0000
+Date:   Wed, 11 Jan 2023 13:18:33 +0100
 From:   David Disseldorp <ddiss@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     David Disseldorp <ddiss@suse.de>
-Subject: [PATCH] common/btrfs: avoid reinitialization of unsupported profile array
-Date:   Wed, 11 Jan 2023 11:58:27 +0100
-Message-Id: <20230111105827.16852-1-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
+To:     An Long <lan@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] btrfs/011: use $_btrfs_profile_configs to limit the
+ tests
+Message-ID: <20230111131833.471ada43@echidna.fritz.box>
+In-Reply-To: <20230110172221.24710-1-lan@suse.com>
+References: <20230110172221.24710-1-lan@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The _btrfs_get_profile_configs() unsupported array doesn't change
-between configs, so avoid reinitializing it on each loop iteration.
+Hi,
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
- common/btrfs | 66 ++++++++++++++++++++++++++--------------------------
- 1 file changed, 33 insertions(+), 33 deletions(-)
+On Wed, 11 Jan 2023 01:22:21 +0800, An Long wrote:
 
-diff --git a/common/btrfs b/common/btrfs
-index ee673a93..9531c914 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -201,6 +201,39 @@ _btrfs_get_profile_configs()
- 		return
- 	fi
- 
-+	local unsupported=()
-+	if [ "$1" == "replace" ]; then
-+		# We can't do replace with these profiles because they
-+		# imply only one device ($SCRATCH_DEV), and we need to
-+		# keep $SCRATCH_DEV around for _scratch_mount
-+		# and _check_scratch_fs.
-+		unsupported+=(
-+			"dup"
-+		)
-+	elif [ "$1" == "replace-missing" ]; then
-+		# We can't replace missing devices with these profiles
-+		# because there isn't enough redundancy.
-+		unsupported+=(
-+			"single"
-+			"dup"
-+			"raid0"
-+		)
-+	fi
-+
-+	if _scratch_btrfs_is_zoned; then
-+		# Zoned btrfs only supports SINGLE profile
-+		unsupported+=(
-+			"dup"
-+			"raid0"
-+			"raid1"
-+			"raid1c3"
-+			"raid1c4"
-+			"raid10"
-+			"raid5"
-+			"raid6"
-+		)
-+	fi
-+
- 	if [ -z "$BTRFS_PROFILE_CONFIGS" ]; then
- 		# Default configurations to test.
- 		local configs=(
-@@ -222,39 +255,6 @@ _btrfs_get_profile_configs()
- 	for cfg in "${configs[@]}"; do
- 		local supported=true
- 		local profiles=(${cfg/:/ })
--		if [ "$1" == "replace" ]; then
--			# We can't do replace with these profiles because they
--			# imply only one device ($SCRATCH_DEV), and we need to
--			# keep $SCRATCH_DEV around for _scratch_mount
--			# and _check_scratch_fs.
--			local unsupported=(
--				"dup"
--			)
--		elif [ "$1" == "replace-missing" ]; then
--			# We can't replace missing devices with these profiles
--			# because there isn't enough redundancy.
--			local unsupported=(
--				"single"
--				"dup"
--				"raid0"
--			)
--		else
--			local unsupported=()
--		fi
--
--		if _scratch_btrfs_is_zoned; then
--			# Zoned btrfs only supports SINGLE profile
--			unsupported+=(
--				"dup"
--				"raid0"
--				"raid1"
--				"raid1c3"
--				"raid1c4"
--				"raid10"
--				"raid5"
--				"raid6"
--			)
--		fi
- 
- 		for unsupp in "${unsupported[@]}"; do
- 			if [ "${profiles[0]}" == "$unsupp" -o "${profiles[1]}" == "$unsupp" ]; then
--- 
-2.35.3
+> Generally the tester need BTRFS_PROFILE_CONFIGS to test certain
+> profiles. For example, skip raid56 as it's not supported.
+> 
+> Signed-off-by: An Long <lan@suse.com>
+> ---
+>  tests/btrfs/011 | 48 ++++++++++++++++++++++++++++++++++++++----------
+>  1 file changed, 38 insertions(+), 10 deletions(-)
+> 
+> diff --git a/tests/btrfs/011 b/tests/btrfs/011
+> index 6c3d037f..b9d175d1 100755
+> --- a/tests/btrfs/011
+> +++ b/tests/btrfs/011
+> @@ -22,6 +22,8 @@
+>  . ./common/preamble
+>  _begin_fstest auto replace volume
+>  
+> +_btrfs_get_profile_configs
+...
+> +	if [[ "${_btrfs_profile_configs[@]}" =~ "-m raid1 -d raid1" ]]; then
+> +		workout "-m raid1 -d raid1" 2 no 2048
+> +	fi
 
+These regexes aren't anchored, so above could match "-m raid1 -d raid10"
+- not a problem given current profiles, but still not ideal.
+
+My preference would be to use a loop for filtering workout parameters
+against _btrfs_profile_configs, e.g.
+
+for i in "-m single -d single:1 no 64" \
+	 "-m dup -d single:1 no 64" \
+	 "-m dup -d single:1 cancel 1024" \
+	 ...; do
+	# confirm "${i%:*}" is in _btrfs_profile_configs...
+	workout "${i%:*}" ${i#*:}
+done
+
+Cheers, David
