@@ -2,142 +2,108 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2620C3DA78
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 Jan 2023 18:41:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26343C3DA78
+	for <linux-fstests@archiver.kernel.org>; Fri, 13 Jan 2023 19:56:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229763AbjAMSlr (ORCPT
+        id S230466AbjAMT4S (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 13 Jan 2023 13:41:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48450 "EHLO
+        Fri, 13 Jan 2023 14:56:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229567AbjAMSli (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jan 2023 13:41:38 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA3FB209
-        for <fstests@vger.kernel.org>; Fri, 13 Jan 2023 10:40:52 -0800 (PST)
+        with ESMTP id S230361AbjAMT4R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jan 2023 14:56:17 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BF8588A02
+        for <fstests@vger.kernel.org>; Fri, 13 Jan 2023 11:55:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1673635252;
+        s=mimecast20190719; t=1673639732;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=kG2DvsTsR9fanFrFZN99LQxWJl2RuPKBCl5toiClfpA=;
-        b=e0fmyfwqrMHPwyEL7pu5Vm3JxfoTxczdCUzb35KXzSKzb6KYnlC8F7smNmiO0C5CCiCXTn
-        qimb9m2+1EGMzVPykyThiA2/t7Ll0UJ8DidtXLJ0h4GDHK2RhW4WjknGZaLXX0rcF1FkaX
-        YiVsZ+cX9xpSZYvMU0UPyM8gTz9wBsk=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=0fanVzNUfL6eqnhnG4asoO4Rw1PuKiZnS4peRY6i51I=;
+        b=AqRkMdNKyPHwiLWWQpZ3YLX2lBtZSjlwOEl02JDF+yZe4sac2lvdBF9vHSflRzgFaGI/WW
+        KUt2w6ChJtWeaVEwLpkg0J1LOnCZsMwq8gOiwWJpnmRuaowQ4WOeen1CFQS2csoOHK+Ng3
+        gKVslh9Pga/9bIUQGw8jP8pqvZZDd1A=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-664-YMkYMWqON2Wfj6VK149GJw-1; Fri, 13 Jan 2023 13:40:50 -0500
-X-MC-Unique: YMkYMWqON2Wfj6VK149GJw-1
-Received: by mail-pl1-f198.google.com with SMTP id n1-20020a170902e54100b00192cc6850ffso15335364plf.18
-        for <fstests@vger.kernel.org>; Fri, 13 Jan 2023 10:40:50 -0800 (PST)
+ us-mta-621-2Bv2DdPOMwCY2cEnEcylaQ-1; Fri, 13 Jan 2023 14:55:30 -0500
+X-MC-Unique: 2Bv2DdPOMwCY2cEnEcylaQ-1
+Received: by mail-pf1-f200.google.com with SMTP id 24-20020aa79118000000b00580476432deso10769734pfh.23
+        for <fstests@vger.kernel.org>; Fri, 13 Jan 2023 11:55:30 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kG2DvsTsR9fanFrFZN99LQxWJl2RuPKBCl5toiClfpA=;
-        b=fMw/G5PmaIF7dVSIDUFPvNk/e4FkW6NRYpCceaM0kjA0sBsjklVoZXQlhOnrYSiapq
-         TtXYpYRgaSTdEvl0CcP2z5p3H20dVMfOi/2g9MSyelKZOnM7JmEZr8W+aVDfZr7N7dxn
-         D/x+cApy1P8tXrCO7pjRTPQhFmBauqO7/X22qjKVRYmDaZIfODeXEOHQyzRYWQ0mc1pl
-         QDmvdIESo50AdvHUfg74UJpfXkv6+WN5MQd+0QygidDjPK3gxnAnLIlWqjunoDkQz1SQ
-         R6MxOdUaYqKBUrftMd0t3HtFz+tNbjr6eLpqPEefENryN71rDZV0LBDo6UceJiF1fIV1
-         pvSw==
-X-Gm-Message-State: AFqh2kr+bZQoPojvLlZHIgKSldLlLQVQ3lV9QnhxLGBzZ6DW3Ocyon26
-        y7pREK7BMUzOsX/UC84Tml1qIB9cyPsd86YeoPkdwJd4SU5Ib+BInQusctaweOjaJVSo8duU+BT
-        eGlEUboPgsf59mTfq5A==
-X-Received: by 2002:a17:902:ba12:b0:194:4016:11ac with SMTP id j18-20020a170902ba1200b00194401611acmr15569330pls.30.1673635248901;
-        Fri, 13 Jan 2023 10:40:48 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXtBwaqx50lWMvBBnVbYhugmzzggi5UYhJssZunnA58DW/0r8XrDvfwyIWxzCCt7w1atb60JTA==
-X-Received: by 2002:a17:902:ba12:b0:194:4016:11ac with SMTP id j18-20020a170902ba1200b00194401611acmr15569310pls.30.1673635248539;
-        Fri, 13 Jan 2023 10:40:48 -0800 (PST)
+        bh=0fanVzNUfL6eqnhnG4asoO4Rw1PuKiZnS4peRY6i51I=;
+        b=BgAlltJ0I7oC2cZXitXeFoVm/2XmZYudlKuBUAS5VdjHeD9zaGL5/F+grPzuO/JaHR
+         kyUCHYMyavVohp/w1/ExsAxOPZQWAKtp02ZH3sT51txIQAip7MLKtLjXmjizzSEXPIxa
+         TUfs5pY67xW+7AuNuAQpJynkTxDoaYYFHPKBMu4YwwRrv8M4EHjsPiw6fDiHBNyeAGG8
+         6l8Eu6uq6P1p3DMRPXqvQmgmAYyfNIpmxd8CJ6kAcEeUe1LKQ0VnXtw9Ifq0b3SdoDcj
+         HzWWGK5LvQDFjSFHVJzhUEod1n6VSQWR5DyRVNVso2qEM8fA1JaaXSret/Xpp00NNNBw
+         a76g==
+X-Gm-Message-State: AFqh2kqXRmqGRRdD5B3lbJm4n7wZUp+TXNB22LiGokaQ4PdPUXRE3Wfq
+        TojwRFk2nPnt9C/5KO3TM91heFZt/zOthvLXNGpedSfH3VkIjewN/5TO8w5sJXz05updBLPqsg4
+        qsNQFIMwzO4sCPDWgNA==
+X-Received: by 2002:a17:902:7889:b0:192:6bc9:47ba with SMTP id q9-20020a170902788900b001926bc947bamr70368886pll.31.1673639729706;
+        Fri, 13 Jan 2023 11:55:29 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXt/HrFYraak3iyQ1RA7fsDCTMhAchPDVCurquktp0gMu56GuIQFYPKbHFa9jfnLOzcW6PVYEg==
+X-Received: by 2002:a17:902:7889:b0:192:6bc9:47ba with SMTP id q9-20020a170902788900b001926bc947bamr70368866pll.31.1673639729403;
+        Fri, 13 Jan 2023 11:55:29 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id n15-20020a170902d2cf00b0018963b8e131sm14377142plc.290.2023.01.13.10.40.47
+        by smtp.gmail.com with ESMTPSA id c19-20020a170902c1d300b00186b138706fsm14669807plc.13.2023.01.13.11.55.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Jan 2023 10:40:48 -0800 (PST)
-Date:   Sat, 14 Jan 2023 02:40:44 +0800
+        Fri, 13 Jan 2023 11:55:29 -0800 (PST)
+Date:   Sat, 14 Jan 2023 03:55:25 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     An Long <lan@suse.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] btrfs/011: use $_btrfs_profile_configs to limit the
- tests
-Message-ID: <20230113184044.3os5l5xuaie6vs33@zlang-mailbox>
-References: <20230111131833.471ada43@echidna.fritz.box>
- <20230113163547.18036-1-lan@suse.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 12/16] fuzzy: increase operation count for each fsstress
+ invocation
+Message-ID: <20230113195525.74tcppiq4cpf4mi5@zlang-mailbox>
+References: <167243837296.694541.13203497631389630964.stgit@magnolia>
+ <167243837460.694541.14076101650568669658.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230113163547.18036-1-lan@suse.com>
+In-Reply-To: <167243837460.694541.14076101650568669658.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jan 14, 2023 at 12:35:47AM +0800, An Long wrote:
-> Generally the tester need BTRFS_PROFILE_CONFIGS to test certain
-> profiles. For example, skip raid56 as it's not supported.
+On Fri, Dec 30, 2022 at 02:12:54PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Signed-off-by: An Long <lan@suse.com>
+> For online fsck stress testing, increase the number of filesystem
+> operations per fsstress run to 2 million, now that we have the ability
+> to kill fsstress if the user should push ^C to abort the test early.
+> This should guarantee a couple of hours of continuous stress testing in
+> between clearing the scratch filesystem.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/btrfs/011 | 31 +++++++++++++++++++++----------
->  1 file changed, 21 insertions(+), 10 deletions(-)
+>  common/fuzzy |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-> diff --git a/tests/btrfs/011 b/tests/btrfs/011
-> index 6c3d037f..6dfa1fd6 100755
-> --- a/tests/btrfs/011
-> +++ b/tests/btrfs/011
-> @@ -22,6 +22,8 @@
->  . ./common/preamble
->  _begin_fstest auto replace volume
+> 
+> diff --git a/common/fuzzy b/common/fuzzy
+> index 01cf7f00d8..3e23edc9e4 100644
+> --- a/common/fuzzy
+> +++ b/common/fuzzy
+> @@ -399,7 +399,9 @@ __stress_scrub_fsstress_loop() {
+>  	local end="$1"
+>  	local runningfile="$2"
 >  
-> +_btrfs_get_profile_configs
-> +
+> -	local args=$(_scale_fsstress_args -p 4 -d $SCRATCH_MNT -n 2000 $FSSTRESS_AVOID)
+> +	# As of March 2022, 2 million fsstress ops should be enough to keep
+> +	# any filesystem busy for a couple of hours.
+> +	local args=$(_scale_fsstress_args -p 4 -d $SCRATCH_MNT -n 2000000 $FSSTRESS_AVOID)
 
-Do you need to call it such early? I think this helper should be called after
-"_supported_fs btrfs" at least. Or maybe even after those _require_scratch_*
-things?
+Can fsstress "-l 0" option help?
 
->  noise_pid=0
+>  	echo "Running $FSSTRESS_PROG $args" >> $seqres.full
 >  
->  # Override the default cleanup function.
-> @@ -237,18 +239,27 @@ btrfs_replace_test()
->  	fi
->  }
->  
-> -workout "-m single -d single" 1 no 64
-> +if [[ "${_btrfs_profile_configs[@]}" =~ "-m single -d single"( |$) ]]; then
-> +	workout "-m single -d single" 1 no 64
-> +fi
-> +
->  # Mixed BG & RAID/DUP profiles are not supported on zoned btrfs
->  if ! _scratch_btrfs_is_zoned; then
-> -	workout "-m dup -d single" 1 no 64
-> -	workout "-m dup -d single" 1 cancel 1024
-> -	workout "-m raid0 -d raid0" 2 no 64
-> -	workout "-m raid1 -d raid1" 2 no 2048
-> -	workout "-m raid10 -d raid10" 4 no 64
-> -	workout "-m single -d single -M" 1 no 64
-> -	workout "-m dup -d dup -M" 1 no 64
-> -	workout "-m raid5 -d raid5" 2 no 64
-> -	workout "-m raid6 -d raid6" 3 no 64
-> +	for t in "-m dup -d single:1 no 64" \
-> +		"-m dup -d single:1 cancel 1024" \
-> +		"-m raid0 -d raid0:2 no 64" \
-> +		"-m raid1 -d raid1:2 no 2048" \
-> +		"-m raid10 -d raid10:4 no 64" \
-> +		"-m single -d single -M:1 no 64" \
-> +		"-m dup -d dup -M:1 no 64" \
-> +		"-m raid5 -d raid5:2 no 64" \
-> +		"-m raid6 -d raid6:3 no 64"; do
-> +		mkfs_option=${t%:*}
-> +		workout_option=${t#*:}
-> +		if [[ "${_btrfs_profile_configs[@]}" =~ "${mkfs_option/ -M}"( |$) ]]; then
-> +			workout "$mkfs_option" $workout_option
-> +		fi
-> +	done
->  fi
->  
->  echo "*** done"
-> -- 
-> 2.35.3
+>  	while __stress_scrub_running "$end" "$runningfile"; do
 > 
 
