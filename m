@@ -2,106 +2,140 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A578FC004D4
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 09:12:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18DF6C38147
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 14:36:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229819AbjARJM1 (ORCPT
+        id S230133AbjAROgO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Jan 2023 04:12:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38302 "EHLO
+        Wed, 18 Jan 2023 09:36:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230105AbjARJLO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 04:11:14 -0500
-Received: from mail3.bemta32.messagelabs.com (mail3.bemta32.messagelabs.com [195.245.230.18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 264406B9AD
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 00:29:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1674030561; i=@fujitsu.com;
-        bh=JNuzTBnr5JUWbKzaBPFlYbcK14IGGak3DO8EdWmaIXQ=;
-        h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-         In-Reply-To:Content-Type:Content-Transfer-Encoding;
-        b=Pqg6rWqZvLzZ7LpBhu15wVD+5m5nN4C32aT6OK5FCPoM3aHaAF+ljtcgQSYLiZpr0
-         wKX8xB3LGTVCwaC6TQPkqBRn1D+RGiJgs+WLXOM/juFhwWyOvVc7NxiojSp8UivB4m
-         uVrr+Wt1lkK3a01skNpUorMTNHQ4A4/wr9UCfxI6okY3S5oty+FdfoW3Iy1eje1Pz5
-         A7qSy6lhG9dZRGYM+woEX8AkC36whScdjsE/cmN15UffYWlTaM1c7ahldhCfRadUl+
-         /K6qSss0yAg5p5f6jXgKCodlD2IJ4fDL05dIrS5q6M1XBbXsN0LDdqgxEn1hxXxIuM
-         idCb85YHZsofg==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrNIsWRWlGSWpSXmKPExsViZ8ORpPtg7fF
-  kg6UfhC0uP+GzON2yl91i/9FHLA7MHptWdbJ5fN4kF8AUxZqZl5RfkcCa0bKumbFgCXPFpbt7
-  2RoYzzF1MXJxCAlsZJS42beADcJZyiSxtmsVcxcjJ5CznVHi+XxrEJtXwE5i4uJp7CA2i4Cqx
-  NJ7N9gh4oISJ2c+YQGxRQWSJK5uuMsKYgsLeElc6XzGBGKLCGhKHPl2DcxmFoiXuP52IdSyDY
-  wSL5feA0uwCahJ7Jz+EmwQp4CGxP6WC6wQDRYSi98cZIew5SW2v50DdpyEgKJE25J/7BB2pUT
-  rh18sELaaxNVzm5gnMArNQnLfLCSjZiEZtYCReRWjaXFqUVlqka6pXlJRZnpGSW5iZo5eYpVu
-  ol5qqW55anGJrqFeYnmxXmpxsV5xZW5yTopeXmrJJkZgHKQUM5btYOxe9kfvEKMkB5OSKO/r2
-  OPJQnxJ+SmVGYnFGfFFpTmpxYcYZTg4lCR4r88GygkWpaanVqRl5gBjEiYtwcGjJMJrvQYozV
-  tckJhbnJkOkTrFqCglzqu3GighAJLIKM2Da4OlgUuMslLCvIwMDAxCPAWpRbmZJajyrxjFORi
-  VhHmdVwJN4cnMK4Gb/gpoMRPQYo+SoyCLSxIRUlINTAG1AjVn2pJWcopxMgSZKFVfL+R8cnK5
-  rAPrdMPKdb8u/zrAclJ3w/pX58O0t0RPWn/2hdy0nfkJwh0tXgqVod8Ybm3yfbFrqsd3y/7Xz
-  g62Xp/5p3TxWDv6zXq8XUjJ/ojynxXG+6ovX9nbmCX5L/vR/dIJTuGi5pXBZ9bf/KDgVXoh4n
-  PeTRWmudqnl1/oE0yV/t0t/Gf7QceW9dcn951sEt/59kFwu0TaNt5YjUJuV0XWBc2m/lunJez
-  w+7iXgfeG+vptO3re9PEace8/yt/XNS3AIliGaWWb+43JP7NZGF6fOyLO1cpUu9X8xv+fIZ3X
-  3opU+c6zvPihuTP3sPPT75l14Z4TzfzzY9z6lFiKMxINtZiLihMBYuO7wn4DAAA=
-X-Env-Sender: yangx.jy@fujitsu.com
-X-Msg-Ref: server-4.tower-585.messagelabs.com!1674030560!485346!1
-X-Originating-IP: [62.60.8.98]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.102.1; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 13331 invoked from network); 18 Jan 2023 08:29:20 -0000
-Received: from unknown (HELO n03ukasimr03.n03.fujitsu.local) (62.60.8.98)
-  by server-4.tower-585.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 18 Jan 2023 08:29:20 -0000
-Received: from n03ukasimr03.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTP id E32DC1AF;
-        Wed, 18 Jan 2023 08:29:19 +0000 (GMT)
-Received: from R01UKEXCASM223.r01.fujitsu.local (R01UKEXCASM223 [10.182.185.121])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTPS id CB2971B4;
-        Wed, 18 Jan 2023 08:29:19 +0000 (GMT)
-Received: from [10.167.215.54] (10.167.215.54) by
- R01UKEXCASM223.r01.fujitsu.local (10.182.185.121) with Microsoft SMTP Server
- (TLS) id 15.0.1497.42; Wed, 18 Jan 2023 08:29:17 +0000
-Message-ID: <d3f2d9f3-429d-23d1-751c-70f9916fe0bc@fujitsu.com>
-Date:   Wed, 18 Jan 2023 16:29:12 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH] xfs/440: skip test if the dax mount option is enabled
+        with ESMTP id S229970AbjAROfq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 09:35:46 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4691024104
+        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 06:24:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1674051855;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=lfKGMY01UOVNs2XEWd6MIP0FrCTHviiP1TvDlkdcWhM=;
+        b=ie9eR34Fd8DDLArR7RB+IDs+qVdrgTIO1S6u4Nyb55MMX2JeK2zrxETNYe87QM9idlEh33
+        NlzvsJpHpJ/EQdWDr6V+YERzmE2NgV5vZrDGkmmfzYI0xOi1yU/2ewIO1/nLcQT7DJqNpF
+        TAo7DiRM/VfSB9AVYDwh6OtZaUzScgk=
+Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
+ [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-373-djfEFbKHPSudm59bUGA1ZA-1; Wed, 18 Jan 2023 09:24:14 -0500
+X-MC-Unique: djfEFbKHPSudm59bUGA1ZA-1
+Received: by mail-ed1-f71.google.com with SMTP id l17-20020a056402255100b00472d2ff0e59so23739308edb.19
+        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 06:24:13 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lfKGMY01UOVNs2XEWd6MIP0FrCTHviiP1TvDlkdcWhM=;
+        b=btmGRxOMFXxgiknKlAMNAE5T+zkENbtIux5+igCqhmtLVH/ZYWFO5GBZB6tOu4KKfy
+         6j/hoh2SODlqjwM+Kef7E0NQIUwORWZ9E26eIgvrGuiPAvvPDkkNKCbGyJA2LcZDbA4X
+         35Ztd3Ivhs5+gvc2BVbxrh4Fs9VjLRLvcnULT8PCTEkgiWoCO/32eq69xoqkz7E2uctE
+         yTWx9TPa796xQnzntbw1FCeBO2DmK17gAUrR+ugDoJ/C3pEoUgv1CEdOBQmSs+T6UZUT
+         ulDPL+PuhIphRqSQQX7jNITwXudWEzfBnjftK3c8yLbyK1bfJqQgr4sP+DLSBnpSCpb2
+         qHrA==
+X-Gm-Message-State: AFqh2krxIUgN+bPwLAEb4F3PYDfguUb8ZVzmwmgUZOoCGXeFlSfrF8SW
+        SsWZUJJaV/U9ewUbJ4UxCBxX5Fe6QWdZUG0LN85mxwjZeCWshJ+AJBkUuM/dcwtns9d9cegctKI
+        rjru2FGiK0JUh0uTt
+X-Received: by 2002:a50:ff08:0:b0:49b:7416:e3ff with SMTP id a8-20020a50ff08000000b0049b7416e3ffmr7155396edu.5.1674051852797;
+        Wed, 18 Jan 2023 06:24:12 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXsPC+0p5G7HHxc1ucF1IJLYzkmc+VFQvWdfQlaWShUE3jzkGnkgF8A1r+9zFabWuNF8MstP6A==
+X-Received: by 2002:a50:ff08:0:b0:49b:7416:e3ff with SMTP id a8-20020a50ff08000000b0049b7416e3ffmr7155381edu.5.1674051852544;
+        Wed, 18 Jan 2023 06:24:12 -0800 (PST)
+Received: from aalbersh.remote.csb ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id j4-20020aa7c0c4000000b004847513929csm14249854edp.72.2023.01.18.06.24.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Jan 2023 06:24:12 -0800 (PST)
+Date:   Wed, 18 Jan 2023 15:24:10 +0100
+From:   Andrey Albershteyn <aalbersh@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-CC:     "zlang@kernel.org" <zlang@kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-References: <1671790916-13-1-git-send-email-yangx.jy@fujitsu.com>
- <OS3PR01MB9499E00F5D2C42FCF847D81F83C29@OS3PR01MB9499.jpnprd01.prod.outlook.com>
- <Y8HOD3P3l5nnPJO+@magnolia>
-From:   Xiao Yang <yangx.jy@fujitsu.com>
-In-Reply-To: <Y8HOD3P3l5nnPJO+@magnolia>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.215.54]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM223.r01.fujitsu.local (10.182.185.121)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCHSET v2 0/4] fstests: filesystem population fixes
+Message-ID: <20230118142410.qxo3j64d7ebhw76j@aalbersh.remote.csb>
+References: <167400103044.1915094.5935980986164675922.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <167400103044.1915094.5935980986164675922.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2023/1/14 5:33, Darrick J. Wong wrote:
-> On Fri, Jan 13, 2023 at 04:53:41AM +0000,yangx.jy@fujitsu.com  wrote:
->> Hi Darrick,
->>
->> Is there any comment on the patch?
-> What happens if you set DAXINHERIT on the root directory and omit the
-> mount options?  Does it still fail?
-Hi Darrick,
-
-Yes, it still failed.  I have reviewed your patch set fixing the issue.
-
-Thanks a lot.
-
-Best Regards,
-Xiao Yang
+On Tue, Jan 17, 2023 at 04:42:02PM -0800, Darrick J. Wong wrote:
+> Hi all,
+> 
+> [original patchset cover letter from Dave]
+> 
+> common/populate operations are slow. They are not coded for
+> performance, and do things in very slow ways. Mainly doing loops to
+> create/remove files and forcing a task to be created and destroy for
+> every individual operation. We can only fork a few thousand
+> processes a second, whilst we can create or remove tens of thousands
+> of files a second. Hence population speed is limited by fork/exit
+> overhead, not filesystem speed. I also changed it to run all the
+> creation steps in parallel, which means they run as fast as the
+> filesystem can handle them rather than as fast as a single CPU can
+> handle them.
+> 
+> patch 1 and patch 3 address these issues for common/populate and
+> xfs/294.  I may update a bunch of other tests that use loop { touch
+> file } to create thousands of files to speed them up as well.
+> 
+> The other patch in this series (patch 2) fixes the problem with
+> populating an Xfs btree format directory, which currently fails
+> because the removal step that creates sparse directory data also
+> causes the dabtree index to get smaller and free blocks, taking the
+> inode from btree to extent format and hence failing the populate
+> checks.
+> 
+> More details are in the commit messages for change.
+> 
+> [further changes from Darrick]
+> 
+> This series moves the FMT_BTREE creation bugfix to be first in line,
+> since it's a bug fix.  Next, I convert the directory and xattr creation
+> loops into separate programs to reduce the execve overhead.  This alone
+> is sufficient for a 10x reduction in runtime without substantially
+> altering what gets written to disk and comes out in the xfs fsck fuzz
+> tests.
+> 
+> The last patch in this series starts parallelizing things, but I've left
+> most of that out since the parallelization patches make it harder to
+> reliably generate a filesystem image where we can fuzz a two-level inobt
+> and still mount the fs to run online fsck.
+> 
+> If you're going to start using this mess, you probably ought to just
+> pull from my git trees, which are linked below.
+> 
+> This is an extraordinary way to destroy everything.  Enjoy!
+> Comments and questions are, as always, welcome.
 > 
 > --D
 > 
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-populate-slowness
+> ---
+>  common/populate |   89 ++++++++++++++++++++++++++++++-------------------------
+>  src/popattr.py  |   62 ++++++++++++++++++++++++++++++++++++++
+>  src/popdir.pl   |   72 ++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 182 insertions(+), 41 deletions(-)
+>  create mode 100755 src/popattr.py
+>  create mode 100755 src/popdir.pl
 > 
+
+The patchset looks good to me:
+
+Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+
+-- 
+- Andrey
+
