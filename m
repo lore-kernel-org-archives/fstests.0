@@ -2,47 +2,57 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B875FC004D4
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 05:27:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1049C004D4
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 05:43:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229521AbjARF1s (ORCPT
+        id S229476AbjARFnq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Jan 2023 00:27:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40870 "EHLO
+        Wed, 18 Jan 2023 00:43:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44052 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229703AbjARF1K (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 00:27:10 -0500
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55F6154105;
-        Tue, 17 Jan 2023 21:27:09 -0800 (PST)
-Received: from canpemm500009.china.huawei.com (unknown [172.30.72.55])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4NxZ2y4tV2zRrKq;
-        Wed, 18 Jan 2023 13:25:14 +0800 (CST)
-Received: from [10.108.234.194] (10.108.234.194) by
- canpemm500009.china.huawei.com (7.192.105.203) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Wed, 18 Jan 2023 13:27:06 +0800
-Message-ID: <f6b28fd3-1f36-2bb0-aadd-d08b81a64835@huawei.com>
-Date:   Wed, 18 Jan 2023 13:27:05 +0800
+        with ESMTP id S229493AbjARFnp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 00:43:45 -0500
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D19577D4;
+        Tue, 17 Jan 2023 21:43:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=fxEKEN+/Ci3UEZisJd2606inXJaRH6/XkW2CcOD4vLE=; b=m9ABFkVcSn2dqtiIgA+Bgx4Za5
+        MlDXQJuI842YszURd5UDMoa/0BgA+FbRaUl4xhJgVgWuwGXe9OUosyNj6ep0kpN4m/64GhDYakFJq
+        IJuOF8EECdsIsnMIDl/h2qujUdMHfF6g5eUuHFn91nocM5Afd/Yor8g0lI9jq+wm8VDy6zzDGYTWA
+        PnkErXtHsNbE9wjJYfufMUIFkSSAG9WghryrYu2qv5N5fTUPUutv6qCN831M73ceznfRPKpSQ+4sm
+        95eVzPwWyX/u8bla8825+35XtUgSvACx3bPo5cdHXNIU+P/agJYwz54FgE3bePg0vHMGVET6GCAjv
+        k596Gdhw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1pI1EQ-00Gzyj-3I; Wed, 18 Jan 2023 05:43:30 +0000
+Date:   Tue, 17 Jan 2023 21:43:30 -0800
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/3] xfs: skip fragmentation tests when alwayscow mode is
+ enabled
+Message-ID: <Y8eHAsHvypUv3IuT@infradead.org>
+References: <167400102747.1914975.6709564559821901777.stgit@magnolia>
+ <167400102759.1914975.16224258103457998795.stgit@magnolia>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH] ext4: Add default commit interval test
-Content-Language: en-US
-To:     <fstests@vger.kernel.org>, <linux-ext4@vger.kernel.org>,
-        <lczerner@redhat.com>
-CC:     <zhangzhikang1@huawei.com>
-References: <20230118052515.3966391-1-wangjianjian3@huawei.com>
-From:   "wangjianjian (C)" <wangjianjian3@huawei.com>
-In-Reply-To: <20230118052515.3966391-1-wangjianjian3@huawei.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.108.234.194]
-X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
- canpemm500009.china.huawei.com (7.192.105.203)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <167400102759.1914975.16224258103457998795.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Ignore, sorry for the traffic...
+On Tue, Jan 17, 2023 at 04:43:00PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> If the always_cow debugging flag is enabled, all file writes turn into
+> copy writes.  This dramatically ramps up fragmentation in the filesystem
+> (intentionally!) so there's no point in complaining about fragmentation.
+
+Looks good:
+
+Reviewed-by: Christoph Hellwig <hch@lst.de>
