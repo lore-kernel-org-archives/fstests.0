@@ -2,299 +2,211 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E963BC32793
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 15:11:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F8E3C38147
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 15:21:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231679AbjARPLq (ORCPT
+        id S231146AbjARPVc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Jan 2023 10:11:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42112 "EHLO
+        Wed, 18 Jan 2023 10:21:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51850 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231703AbjARPKt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 10:10:49 -0500
+        with ESMTP id S230305AbjARPUn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 10:20:43 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB70F233D9
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 07:10:00 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C5E22CFFC
+        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 07:15:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1674054599;
+        s=mimecast20190719; t=1674054928;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=a9gQrpEkg7DUjBrf/Jkqe5bWwtz9rN+oGDEtYr7z9D8=;
-        b=Qwnuv6I81rrCRceFxCoFa8kKToCXl0GselBt4m31w8GDAXzPqKgDQGloCvwFK3WVJkgBWx
-        oZiF+jIzAhH9GMBpfkXUYq8w+3yk2AlV1XgGVMlxOx/aTb9oU6WaRYOTaGSo21+1K9MswA
-        MGaVhssZMuN+zL+LLJ28wFu4xFlZpp8=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=T4JBdUdMBoHs7hvAeeMHU3iDURrNTWwVZS8+jlT8fo0=;
+        b=HHvsQ4SnyGsqArORQUyIGYhUPfydFIOaH0rK5jsOsT/DNB3dS0BmgIlzMhyEzWOCqoliPh
+        wR6O5pqZjQDEpdO6bHYB7541wMsUGwQWMpi135Rxjkd0C1XBhITji/wZ16ODqDIJzFijFQ
+        q/pNEhBMfSUBsdx8SRE1cm7uoE2PkYM=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-558-kd_wccDXMYKkl6m---r3Og-1; Wed, 18 Jan 2023 10:09:55 -0500
-X-MC-Unique: kd_wccDXMYKkl6m---r3Og-1
-Received: by mail-pj1-f70.google.com with SMTP id x8-20020a17090a8a8800b0022941842cc0so1607809pjn.3
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 07:09:55 -0800 (PST)
+ us-mta-84-02dDIwVrNxSLagJJdZ-CTw-1; Wed, 18 Jan 2023 10:15:26 -0500
+X-MC-Unique: 02dDIwVrNxSLagJJdZ-CTw-1
+Received: by mail-pj1-f72.google.com with SMTP id oj11-20020a17090b4d8b00b00229a886e651so1457978pjb.0
+        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 07:15:26 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=a9gQrpEkg7DUjBrf/Jkqe5bWwtz9rN+oGDEtYr7z9D8=;
-        b=Ch7qa5jhnmXqi6Lj4QGwkB0DpISzCHI34gJ0wI087pDWQrdcdPXsy8lvqTMNwsLgvc
-         uuqQci8kWLjeBntlk2RE0HyQrnulDI/I8ad747Br7m9VH0snr6sn/tOCLigaY44YU285
-         7tfv7fywKw1ht1yuzL/LE76h9NcdzZqnoB0t5HNllmx2ABjwNzve6XhRf2SZljP3y9Zy
-         JP2WxsF+F/tS8qOh/CgmsyJMENfIHdmS7NcyMBNR9PzvrdxktvWoakreu2lx1PxtK6wY
-         EAsc6vmCy3St23K3q1CZcGWDmz9uqZAPAmghwK2zD8YblSzbxZKksu1gh+Mt83BPMdky
-         e+mg==
-X-Gm-Message-State: AFqh2kqHftDF9W0CFRq/PdhE+qYsDf/MpFMVBRzwZq+r68QPO1F1ys6G
-        tLZyo4v/bJXsl6sNK7k6ULkVHVL1/cWzPeFouftMDadQWWPieFT6AwdgXllt/p1mbzvNSsEB1uC
-        zDoY6O3o+Ypx99UXdnw==
-X-Received: by 2002:a17:902:bcc8:b0:194:c23d:59fd with SMTP id o8-20020a170902bcc800b00194c23d59fdmr826472pls.47.1674054594409;
-        Wed, 18 Jan 2023 07:09:54 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXv5DB4Q98LOQbavh/RHjL5cAOr8slroZ4GaDlJ9r6ToUZ6gVmTuVqfURvYW82n1PZbl8uF8wA==
-X-Received: by 2002:a17:902:bcc8:b0:194:c23d:59fd with SMTP id o8-20020a170902bcc800b00194c23d59fdmr826441pls.47.1674054593912;
-        Wed, 18 Jan 2023 07:09:53 -0800 (PST)
+        bh=T4JBdUdMBoHs7hvAeeMHU3iDURrNTWwVZS8+jlT8fo0=;
+        b=2UDwBbxUnYZWomlPoLamYNjKDHE9VPLEeFv2oSxe3OVf9X+lF7VEFPWSk+qze0KWFJ
+         Jg2yAzWEB+RTx+D1W3OAM/GoA6t7UjO1rn8/UiaRbuQ71O/u22kGE/EdxzAniHLzGqfF
+         fexV4olIDu+xFDYMR5pKIjgOGMx/uJKKWso+JIsNiWRZfKBiQugl1dK9MuIES+x01nww
+         IPHSH1y8XjKi552LVTSvUpP7b/rCtoKBJCKzBICOB6nM3JkSHjBzk88uO+Gz4KAUPHWY
+         vCWkS5IEqjTkXRSPriwJ0vyrRWLIK8X8tf1nZD/ZBwbjKOe4VOPcD2Gf+G75tOQSZthZ
+         JJ/w==
+X-Gm-Message-State: AFqh2kq+ATxqffAyBD8V+2h3k4csBnQig4i5iX3AiW0AxVdl9oRTO/vL
+        ey+fkZyQS6x80t5/3nIwP9DFGJVyNBwDCigfOiNWNLnQcB/50gD4Phq4d3TwBSGP3udeygrOTyI
+        pY943ZpsR+lTwR881rg==
+X-Received: by 2002:a05:6a00:1887:b0:589:d831:ad2a with SMTP id x7-20020a056a00188700b00589d831ad2amr11217171pfh.6.1674054925209;
+        Wed, 18 Jan 2023 07:15:25 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXsCSa5cUFVxx+1wz4SmlTTqWXDFHInZAWsMmTGiNXAKq2bUS7e3giYtVkhSjO5SpEbjtl1wBg==
+X-Received: by 2002:a05:6a00:1887:b0:589:d831:ad2a with SMTP id x7-20020a056a00188700b00589d831ad2amr11217142pfh.6.1674054924862;
+        Wed, 18 Jan 2023 07:15:24 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id q1-20020a170902a3c100b001899c2a0ae0sm23266373plb.40.2023.01.18.07.09.52
+        by smtp.gmail.com with ESMTPSA id d124-20020a621d82000000b0056bbeaa82b9sm22172066pfd.113.2023.01.18.07.15.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jan 2023 07:09:53 -0800 (PST)
-Date:   Wed, 18 Jan 2023 23:09:49 +0800
+        Wed, 18 Jan 2023 07:15:24 -0800 (PST)
+Date:   Wed, 18 Jan 2023 23:15:20 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/4] populate: remove file creation loops that take
- forever
-Message-ID: <20230118150949.pvcpq6nsskxkrtcs@zlang-mailbox>
+Subject: Re: [PATCH 3/4] populate: improve attr creation runtime
+Message-ID: <20230118151520.6xutv5uwc4cv5nlr@zlang-mailbox>
 References: <167400103044.1915094.5935980986164675922.stgit@magnolia>
- <167400103070.1915094.18012675472928079868.stgit@magnolia>
+ <167400103083.1915094.17122126052905864562.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <167400103070.1915094.18012675472928079868.stgit@magnolia>
+In-Reply-To: <167400103083.1915094.17122126052905864562.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jan 17, 2023 at 04:44:02PM -0800, Darrick J. Wong wrote:
+On Tue, Jan 17, 2023 at 04:44:18PM -0800, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Replace the file creation loops with a perl script that does everything
-> we want from a single process.  This reduces the runtime of
+> Replace the file creation loops with a python script that does
+> everything we want from a single process.  This reduces the runtime of
 > _scratch_xfs_populate substantially by avoiding thousands of execve
-> overhead.  On my system, this reduces the runtime of xfs/349 (with scrub
-> enabled) from ~140s to ~45s.
+> overhead.  This patch builds on the previous one by reducing the runtime
+> of xfs/349 from ~45s to ~15s.
+> 
+> For people who don't have python3, use setfattr's "restore" mode to bulk
+> create xattrs.  This reduces runtime to about ~25s.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
 
-Looks good to me,
+Thanks for making a fallback if there's not python3. The python logic and
+that fallback logic all look good to me.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/populate |   61 ++++++++++++++++++-----------------------------
->  src/popdir.pl   |   72 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 96 insertions(+), 37 deletions(-)
->  create mode 100755 src/popdir.pl
+Thanks,
+Zorro
+
+>  common/populate |   22 +++++++++++++++++---
+>  src/popattr.py  |   62 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 81 insertions(+), 3 deletions(-)
+>  create mode 100755 src/popattr.py
 > 
 > 
 > diff --git a/common/populate b/common/populate
-> index 84f4b8e374..180540aedd 100644
+> index 180540aedd..f34551d272 100644
 > --- a/common/populate
 > +++ b/common/populate
-> @@ -11,6 +11,7 @@ _require_populate_commands() {
->  	_require_xfs_io_command "falloc"
+> @@ -12,6 +12,10 @@ _require_populate_commands() {
 >  	_require_xfs_io_command "fpunch"
 >  	_require_test_program "punch-alternating"
-> +	_require_test_program "popdir.pl"
+>  	_require_test_program "popdir.pl"
+> +	if [ -n "${PYTHON3_PROG}" ]; then
+> +		_require_command $PYTHON3_PROG python3
+> +		_require_test_program "popattr.py"
+> +	fi
 >  	case "${FSTYP}" in
 >  	"xfs")
 >  		_require_command "$XFS_DB_PROG" "xfs_db"
-> @@ -54,55 +55,50 @@ __populate_fragment_file() {
+> @@ -108,9 +112,21 @@ __populate_create_attr() {
+>  	missing="$3"
 >  
->  # Create a large directory
->  __populate_create_dir() {
-> -	name="$1"
-> -	nr="$2"
-> -	missing="$3"
-> +	local name="$1"
-> +	local nr="$2"
-> +	local missing="$3"
-> +	shift; shift; shift
->  
->  	mkdir -p "${name}"
+>  	touch "${name}"
 > -	seq 0 "${nr}" | while read d; do
-> -		creat=mkdir
-> -		test "$((d % 20))" -eq 0 && creat=touch
-> -		$creat "${name}/$(printf "%.08d" "$d")"
+> -		setfattr -n "user.$(printf "%.08d" "$d")" -v "$(printf "%.08d" "$d")" "${name}"
 > -	done
-> +	$here/src/popdir.pl --dir "${name}" --end "${nr}" "$@"
+> +
+> +	if [ -n "${PYTHON3_PROG}" ]; then
+> +		${PYTHON3_PROG} $here/src/popattr.py --file "${name}" --end "${nr}"
+> +
+> +		test -z "${missing}" && return
+> +		${PYTHON3_PROG} $here/src/popattr.py --file "${name}" --start 1 --incr 2 --end "${nr}" --remove
+> +		return
+> +	fi
+> +
+> +	# Simulate a getfattr dump file so we can bulk-add attrs.
+> +	(
+> +		echo "# file: ${name}";
+> +		seq --format "user.%08g=\"abcdefgh\"" 0 "${nr}"
+> +		echo
+> +	) | setfattr --restore -
 >  
 >  	test -z "${missing}" && return
-> -	seq 1 2 "${nr}" | while read d; do
-> -		rm -rf "${name}/$(printf "%.08d" "$d")"
-> -	done
-> +	$here/src/popdir.pl --dir "${name}" --start 1 --incr 2 --end "${nr}" --remove "$@"
->  }
->  
->  # Create a large directory and ensure that it's a btree format
->  __populate_xfs_create_btree_dir() {
->  	local name="$1"
->  	local isize="$2"
-> -	local missing="$3"
-> +	local dblksz="$3"
-> +	local missing="$4"
->  	local icore_size="$(_xfs_get_inode_core_bytes $SCRATCH_MNT)"
->  	# We need enough extents to guarantee that the data fork is in
->  	# btree format.  Cycling the mount to use xfs_db is too slow, so
->  	# watch for when the extent count exceeds the space after the
->  	# inode core.
->  	local max_nextents="$(((isize - icore_size) / 16))"
-> -	local nr=0
-> +	local nr
-> +	local incr
-> +
-> +	# Add about one block's worth of dirents before we check the data fork
-> +	# format.
-> +	incr=$(( (dblksz / 8) / 100 * 100 ))
->  
->  	mkdir -p "${name}"
-> -	while true; do
-> -		local creat=mkdir
-> -		test "$((nr % 20))" -eq 0 && creat=touch
-> -		$creat "${name}/$(printf "%.08d" "$nr")"
-> +	for ((nr = 0; ; nr += incr)); do
-> +		$here/src/popdir.pl --dir "${name}" --start "${nr}" --end "$((nr + incr - 1))"
-> +
->  		# Extent count checks use data blocks only to avoid the removal
->  		# step from removing dabtree index blocks and reducing the
->  		# number of extents below the required threshold.
-> -		if [ "$((nr % 40))" -eq 0 ]; then
-> -			local nextents="$(xfs_bmap ${name} | grep -v hole | wc -l)"
-> -			[ "$((nextents - 1))" -gt $max_nextents ] && break
-> -		fi
-> -		nr=$((nr+1))
-> +		local nextents="$(xfs_bmap ${name} | grep -v hole | wc -l)"
-> +		[ "$((nextents - 1))" -gt $max_nextents ] && break
->  	done
->  
->  	test -z "${missing}" && return
-> -	seq 1 2 "${nr}" | while read d; do
-> -		rm -rf "${name}/$(printf "%.08d" "$d")"
-> -	done
-> +	$here/src/popdir.pl --dir "${name}" --start 1 --incr 2 --end "${nr}" --remove
->  }
->  
->  # Add a bunch of attrs to a file
-> @@ -224,9 +220,7 @@ _scratch_xfs_populate() {
->  
->  	# Fill up the root inode chunk
->  	echo "+ fill root ino chunk"
-> -	seq 1 64 | while read f; do
-> -		$XFS_IO_PROG -f -c "truncate 0" "${SCRATCH_MNT}/dummy${f}"
-> -	done
-> +	$here/src/popdir.pl --dir "${SCRATCH_MNT}" --start 1 --end 64 --format "dummy%u" --file-mult 1
->  
->  	# Regular files
->  	# - FMT_EXTENTS
-> @@ -261,7 +255,7 @@ _scratch_xfs_populate() {
->  
->  	# - BTREE
->  	echo "+ btree dir"
-> -	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize" true
-> +	__populate_xfs_create_btree_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BTREE" "$isize" "$dblksz" true
->  
->  	# Symlinks
->  	# - FMT_LOCAL
-> @@ -340,14 +334,7 @@ _scratch_xfs_populate() {
->  	local rec_per_btblock=16
->  	local nr="$(( 2 * (blksz / rec_per_btblock) * ino_per_rec ))"
->  	local dir="${SCRATCH_MNT}/INOBT"
-> -	mkdir -p "${dir}"
-> -	seq 0 "${nr}" | while read f; do
-> -		touch "${dir}/${f}"
-> -	done
-> -
-> -	seq 0 2 "${nr}" | while read f; do
-> -		rm -f "${dir}/${f}"
-> -	done
-> +	__populate_create_dir "${dir}" "${nr}" true --file-mult 1
->  
->  	# Reverse-mapping btree
->  	is_rmapbt="$(_xfs_has_feature "$SCRATCH_MNT" rmapbt -v)"
-> diff --git a/src/popdir.pl b/src/popdir.pl
+>  	seq 1 2 "${nr}" | while read d; do
+> diff --git a/src/popattr.py b/src/popattr.py
 > new file mode 100755
-> index 0000000000..dc0c046b7d
+> index 0000000000..397ced9d33
 > --- /dev/null
-> +++ b/src/popdir.pl
-> @@ -0,0 +1,72 @@
-> +#!/usr/bin/perl -w
+> +++ b/src/popattr.py
+> @@ -0,0 +1,62 @@
+> +#!/usr/bin/python3
 > +
 > +# Copyright (c) 2023 Oracle.  All rights reserved.
 > +# SPDX-License-Identifier: GPL-2.0
 > +#
-> +# Create a bunch of files and subdirs in a directory.
+> +# Create a bunch of xattrs in a file.
 > +
-> +use Getopt::Long;
-> +use File::Basename;
+> +import argparse
+> +import sys
+> +import os
 > +
-> +$progname=$0;
-> +GetOptions("start=i" => \$start,
-> +	   "end=i" => \$end,
-> +	   "file-mult=i" => \$file_mult,
-> +	   "incr=i" => \$incr,
-> +	   "format=s" => \$format,
-> +	   "dir=s" => \$dir,
-> +	   "remove!" => \$remove,
-> +	   "help!" => \$help,
-> +	   "verbose!" => \$verbose);
+> +parser = argparse.ArgumentParser(description = 'Mass create xattrs in a file')
+> +parser.add_argument(
+> +	'--file', required = True, type = str, help = 'manipulate this file')
+> +parser.add_argument(
+> +	'--start', type = int, default = 0,
+> +	help = 'create xattrs starting with this number')
+> +parser.add_argument(
+> +	'--incr', type = int, default = 1,
+> +	help = 'increment attr number by this much')
+> +parser.add_argument(
+> +	'--end', type = int, default = 1000,
+> +	help = 'stop at this attr number')
+> +parser.add_argument(
+> +	'--remove', dest = 'remove', action = 'store_true',
+> +	help = 'remove instead of creating')
+> +parser.add_argument(
+> +	'--format', type = str, default = '%08d',
+> +	help = 'printf formatting string for attr name')
+> +parser.add_argument(
+> +	'--verbose', dest = 'verbose', action = 'store_true',
+> +	help = 'verbose output')
 > +
+> +args = parser.parse_args()
 > +
-> +# check/remove output directory, get filesystem info
-> +if (defined $help) {
-> +  # newline at end of die message suppresses line number
-> +  print STDERR <<"EOF";
-> +Usage: $progname [options]
-> +Options:
-> +  --dir             chdir here before starting
-> +  --start=num       create names starting with this number (0)
-> +  --incr=num        increment file number by this much (1)
-> +  --end=num         stop at this file number (100)
-> +  --file-mult       create a regular file when file number is a multiple
-> +                    of this quantity (20)
-> +  --remove          remove instead of creating
-> +  --format=str      printf formatting string for file name ("%08d")
-> +  --verbose         verbose output
-> +  --help            this help screen
-> +EOF
-> +  exit(1) unless defined $help;
-> +  # otherwise...
-> +  exit(0);
-> +}
+> +fmtstring = "user.%s" % args.format
 > +
-> +if (defined $dir) {
-> +	chdir($dir) or die("chdir $dir");
-> +}
-> +$start = 0 if (!defined $start);
-> +$end = 100 if (!defined $end);
-> +$file_mult = 20 if (!defined $file_mult);
-> +$format = "%08d" if (!defined $format);
-> +$incr = 1 if (!defined $incr);
+> +# If we are passed a regular file, open it as a proper file descriptor and
+> +# pass that around for speed.  Otherwise, we pass the path.
+> +fp = None
+> +try:
+> +	fp = open(args.file, 'r')
+> +	fd = fp.fileno()
+> +	os.listxattr(fd)
+> +	if args.verbose:
+> +		print("using fd calls")
+> +except:
+> +	if args.verbose:
+> +		print("using path calls")
+> +	fd = args.file
 > +
-> +for ($i = $start; $i <= $end; $i += $incr) {
-> +	$fname = sprintf($format, $i);
+> +for i in range(args.start, args.end + 1, args.incr):
+> +	fname = fmtstring % i
 > +
-> +	if ($remove) {
-> +		$verbose && print "rm $fname\n";
-> +		unlink($fname) or rmdir($fname) or die("unlink $fname");
-> +	} elsif ($file_mult == 0 or ($i % $file_mult) == 0) {
-> +		# create a file
-> +		$verbose && print "touch $fname\n";
-> +		open(DONTCARE, ">$fname") or die("touch $fname");
-> +		close(DONTCARE);
-> +	} else {
-> +		# create a subdir
-> +		$verbose && print "mkdir $fname\n";
-> +		mkdir($fname, 0755) or die("mkdir $fname");
-> +	}
-> +}
-> +
-> +exit(0);
+> +	if args.remove:
+> +		if args.verbose:
+> +			print("removexattr %s" % fname)
+> +		os.removexattr(fd, fname)
+> +	else:
+> +		if args.verbose:
+> +			print("setxattr %s" % fname)
+> +		os.setxattr(fd, fname, b'abcdefgh')
 > 
 
