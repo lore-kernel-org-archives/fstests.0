@@ -2,156 +2,103 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FAD8C32793
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 16:27:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3655C38147
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Jan 2023 19:22:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229834AbjARQ1D (ORCPT
+        id S229663AbjARTWU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Jan 2023 11:27:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53382 "EHLO
+        Wed, 18 Jan 2023 14:22:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231169AbjARQ0N (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 11:26:13 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 294982F7B3
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 08:23:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1674059008;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=RGnao1lAV/nNnOtDlurEZBCllILrq8tNERQ9d8DE7Sc=;
-        b=UGW6gdHMX9oJJXD8buHzmzWwvPgYU3KRk9E9nPaMheIVju5Flf0CzyL0rETbceKg6dq2sX
-        BNcxoDMjJ0jvQYgqIqY2+YejSMrje5MfWenQGHe9l2raxAt9vBNcGEiBrGQFMB8gTRQfrk
-        mr8ReuhGzFP7tDiepuM1IaT4SCLgbAU=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-629-ULaoc5VXOsi_VcssoBxptg-1; Wed, 18 Jan 2023 11:23:27 -0500
-X-MC-Unique: ULaoc5VXOsi_VcssoBxptg-1
-Received: by mail-pj1-f70.google.com with SMTP id om10-20020a17090b3a8a00b002299e350deaso1732027pjb.1
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 08:23:26 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RGnao1lAV/nNnOtDlurEZBCllILrq8tNERQ9d8DE7Sc=;
-        b=nYzd869zojQn6Z5oziiTIpFSTW/dvwj9lUYS9AFPcQ+0vXqouu4QBzpVlWcCve3Qhg
-         9TCD7tEPVoZR7A/Zp2CgLxOx81IgkaWk8ahxSZGwvB1eTlJ6qRTF6Ub0fXmtiEmRv59O
-         gEvJO4xvac4IkBS0hzJleqfvdRMntptvDVWgAdpUCZzlSWYNkaCGohJyGltkQpbp4puV
-         SgVXhFtP2YuGZk61M8TL6olvwzJ1Kf9kO1VaV6xpSChMn58Ofx5dgzOjCkt7BmygcO6N
-         PNk+Nr/Ggrdz0BlkcyFhqHnacb70eXU+H6s3LPSPku6etkb2kaL+BmGrCKRgzMTOiw1e
-         EWBw==
-X-Gm-Message-State: AFqh2kqCZ17GAcuzcsVZnUeDE9M/63YT/xpLxTURqhWsNlmaEvTnQepR
-        q54koTrkvTWXzE89paQI8oGCF8z8SUFDoexm2vljHYOlyqdGC9g1zZCgzQaeK6yqz4cBT9fvpDg
-        5nup1B/IufyRuVEq3SQ==
-X-Received: by 2002:a05:6a21:3996:b0:b8:610f:cd43 with SMTP id ad22-20020a056a21399600b000b8610fcd43mr7226094pzc.35.1674059005802;
-        Wed, 18 Jan 2023 08:23:25 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXvWSr1cJAS4I7E+GTr5LaHjbixE6r0krRdym2rnNqIs7KfLy1Jk4pZsuq97h0RiA2WmXxHLBQ==
-X-Received: by 2002:a05:6a21:3996:b0:b8:610f:cd43 with SMTP id ad22-20020a056a21399600b000b8610fcd43mr7226075pzc.35.1674059005476;
-        Wed, 18 Jan 2023 08:23:25 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c4-20020a631c04000000b004774b5dc24dsm18998943pgc.12.2023.01.18.08.23.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jan 2023 08:23:24 -0800 (PST)
-Date:   Thu, 19 Jan 2023 00:23:10 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v3] generic/692: generalize the test for non-4K Merkle
- tree block sizes
-Message-ID: <20230118162310.bzhiubsbzu6bw3oa@zlang-mailbox>
-References: <20230111205828.88310-1-ebiggers@kernel.org>
+        with ESMTP id S229590AbjARTWT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jan 2023 14:22:19 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D316253B33;
+        Wed, 18 Jan 2023 11:22:18 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 796BAB81EC6;
+        Wed, 18 Jan 2023 19:22:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9FA9C433F0;
+        Wed, 18 Jan 2023 19:22:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1674069735;
+        bh=yjQncDbJeENGWSOLDdWMhn5Bloim0J4tjTJOQeS/9ws=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=AhWorewOTLEA1Sz+viHSXw7GmLjrwI+CHP/jGeaPWfPN1Pm+4Euiryk2E7Rls1IzP
+         AfOMutSQWdcEzk6oxAK3Ka6dK5UBH7PtWldoeS/CMkZz+9oWJFXDnQ23szfqh/PrLM
+         W9tn/88zmGT74ZrsSzb6xx7I6pYtx1X1BJjuQt3pZHQVhwF5Q4+ViEaJUrOoVgzMv2
+         Fzzs6NxaF1rLd4JM5E9dJK8Ko8fvkoZqGKMZMIqKYL0BGcW6xw5UVup3DbpLzjDp+3
+         Llfg/J37Q7Lgsh3FCkKzyRYyqMfgqMapGfc0SvqDJwogEeNAuJ2OALug7MRtT5X0vg
+         iUaenFUzGrRQw==
+Date:   Wed, 18 Jan 2023 11:22:15 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 4/4] populate: improve runtime of __populate_fill_fs
+Message-ID: <Y8hG59tdunKmATSw@magnolia>
+References: <167400103044.1915094.5935980986164675922.stgit@magnolia>
+ <167400103096.1915094.8399897640768588035.stgit@magnolia>
+ <20230118155403.pg7aq3gtcks2ptdz@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230111205828.88310-1-ebiggers@kernel.org>
+In-Reply-To: <20230118155403.pg7aq3gtcks2ptdz@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 11, 2023 at 12:58:28PM -0800, Eric Biggers wrote:
-> From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+On Wed, Jan 18, 2023 at 11:54:03PM +0800, Zorro Lang wrote:
+> On Tue, Jan 17, 2023 at 04:44:33PM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Run the copy loop in parallel to reduce runtime.  If filling the
+> > populated fs is selected (which it isn't by default in xfs/349), this
+> > reduces the runtime from ~18s to ~15s, since it's only making enough
+> > copies to reduce the free space by 5%.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/populate |    3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > 
+> > 
+> > diff --git a/common/populate b/common/populate
+> > index f34551d272..1c3c28463f 100644
+> > --- a/common/populate
+> > +++ b/common/populate
+> > @@ -151,8 +151,9 @@ __populate_fill_fs() {
+> >  	echo "FILL FS"
+> >  	echo "src_sz $SRC_SZ fs_sz $FS_SZ nr $NR"
+> >  	seq 2 "${NR}" | while read nr; do
+> > -		cp -pRdu "${dir}/test/1" "${dir}/test/${nr}"
+> > +		cp -pRdu "${dir}/test/1" "${dir}/test/${nr}" &
+> >  	done
+> > +	wait
 > 
-> Due to the assumption of the Merkle tree block size being 4K, the file
-> size calculated for the second test case was taking way too long to hit
-> EFBIG in case of larger block sizes like 64K.  Fix this by generalizing
-> the calculation to any Merkle tree block size >= 1K.
-> 
-> Signed-off-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> Co-developed-by: Eric Biggers <ebiggers@google.com>
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
-> v3: hashes_per_block, not hash_per_block
-> v2: Cleaned up the original patch from Ojaswin:
->     - Explained the calculations as they are done.
->     - Considered 11 levels instead of 8, to account for 1K blocks
->       potentially needing up to 11 levels.
->     - Increased 'scale' for real number results, and don't use 'scale'
->       at all for integer number results.
->     - Improved a variable name.
->     - Updated commit message.
+> I'm thinking about what'll happen if we do "Ctrl+c" on a running test which
+> is waiting for these cp operations.
 
-Hmm... There're two duplicated variables for "bc" --- BC and BC_PROG. I prefer
-the later one. Anyway it doesn't affect this patch. I'll use another patch to
-change all BC to BC_PROG, then remove BC.
+Hmm.  In the context of fstests running on a system with systemd, we run
+each test within a systemd scope and kill the scope when the test script
+exits.  That will tear down unclaimed background processes, but it's not
+a hard and fast guarantee that everyone has systemd.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+As for *general* bashisms, I guess the only solution is:
 
-> 
->  tests/generic/692 | 37 +++++++++++++++++++++++++------------
->  1 file changed, 25 insertions(+), 12 deletions(-)
-> 
-> diff --git a/tests/generic/692 b/tests/generic/692
-> index d6da734b..95f6ec04 100755
-> --- a/tests/generic/692
-> +++ b/tests/generic/692
-> @@ -51,18 +51,31 @@ _fsv_enable $fsv_file |& _filter_scratch
->  #
->  # The Merkle tree is stored with the leaf node level (L0) last, but it is
->  # written first.  To get an interesting overflow, we need the maximum file size
-> -# (MAX) to be in the middle of L0 -- ideally near the beginning of L0 so that we
-> -# don't have to write many blocks before getting an error.
-> -#
-> -# With SHA-256 and 4K blocks, there are 128 hashes per block.  Thus, ignoring
-> -# padding, L0 is 1/128 of the file size while the other levels in total are
-> -# 1/128**2 + 1/128**3 + 1/128**4 + ... = 1/16256 of the file size.  So still
-> -# ignoring padding, for L0 start exactly at MAX, the file size must be s such
-> -# that s + s/16256 = MAX, i.e. s = MAX * (16256/16257).  Then to get a file size
-> -# where MAX occurs *near* the start of L0 rather than *at* the start, we can
-> -# just subtract an overestimate of the padding: 64K after the file contents,
-> -# then 4K per level, where the consideration of 8 levels is sufficient.
-> -sz=$(echo "scale=20; $max_sz * (16256/16257) - 65536 - 4096*8" | $BC -q | cut -d. -f1)
-> +# ($max_sz) to be in the middle of L0 -- ideally near the beginning of L0 so
-> +# that we don't have to write many blocks before getting an error.
-> +
-> +bs=$FSV_BLOCK_SIZE
-> +hash_size=32   # SHA-256
-> +hashes_per_block=$(echo "scale=30; $bs/$hash_size" | $BC -q)
-> +
-> +# Compute the proportion of the original file size that the non-leaf levels of
-> +# the Merkle tree take up.  Ignoring padding, this is 1/($hashes_per_block^2) +
-> +# 1/($hashes_per_block^3) + 1/($hashes_per_block^4) + ...  Compute it using the
-> +# formula for the sum of a geometric series: \sum_{k=0}^{\infty} ar^k = a/(1-r).
-> +a=$(echo "scale=30; 1/($hashes_per_block^2)" | $BC -q)
-> +r=$(echo "scale=30; 1/$hashes_per_block" | $BC -q)
-> +nonleaves_relative_size=$(echo "scale=30; $a/(1-$r)" | $BC -q)
-> +
-> +# Compute the original file size where the leaf level L0 starts at $max_sz.
-> +# Padding is still ignored, so the real value is slightly smaller than this.
-> +sz=$(echo "$max_sz/(1+$nonleaves_relative_size)" | $BC -q)
-> +
-> +# Finally, to get a file size where $max_sz occurs just after the start of L0
-> +# rather than *at* the start of L0, subtract an overestimate of the padding: 64K
-> +# after the file contents, then $bs per level for 11 levels.  11 levels is the
-> +# most levels that can ever be needed, assuming the block size is at least 1K.
-> +sz=$(echo "$sz - 65536 - $bs*11" | $BC -q)
-> +
->  _fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
->  truncate -s $sz $fsv_file
->  _fsv_enable $fsv_file |& _filter_scratch
-> -- 
-> 2.39.0
-> 
+trap 'pkill -P $$' INT TERM QUIT EXIT
 
+To kill all the children of the test script.  Maybe we want that?  But I
+hate wrapping my brain around bash child process management, so yuck.
+
+I'll drop the parallel populate work, it's creating a lot of problems
+that I don't have time to solve while delivering only modest gains.
+
+--D
+
+> >  }
+> >  
+> >  # For XFS, force on all the quota options if quota is enabled
+> > 
+> 
