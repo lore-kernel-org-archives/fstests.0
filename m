@@ -2,140 +2,501 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CEDBC38142
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Jan 2023 05:10:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 923F7C004D4
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Jan 2023 10:06:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229501AbjASFKE (ORCPT
+        id S230365AbjASKGV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Jan 2023 00:10:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48670 "EHLO
+        Thu, 19 Jan 2023 05:06:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39138 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229787AbjASFJb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Jan 2023 00:09:31 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57CAE1BF0
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 21:04:15 -0800 (PST)
+        with ESMTP id S230367AbjASKGA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Jan 2023 05:06:00 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4512305FE
+        for <fstests@vger.kernel.org>; Thu, 19 Jan 2023 02:03:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1674104654;
+        s=mimecast20190719; t=1674122618;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=5gYkUw3+Oj4dvZjgQviThFCTAor37COUP9w9mLMlqLs=;
-        b=iGbE9+aYK0jEU2AGrlq+FnG+iGX0EGOBFqOTnq0wzOHKM19Pp7vnzQq0CBSn0kuPyycQTU
-        ndQyz1vzwBp8zKvBRszrQw9qRu+dezMG+DSSH7ecCH60ov5xDbktUFVhXaH0+yOnGECXx/
-        XsIyNCx5Ox1ydPr6x8I8PPQWjADM0os=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=ljoiPtqmLw7w9XNA0+M0g+TWHqmwEmndCJRe1l9JPl4=;
+        b=Q+eOJkqNmIHGCG1b1F6c4NSHhYVrMHwhhnqP/O3KVl7UbyaRiYMGz54bTKUdnkdXRLXl+J
+        4UiKuFRLTt2Yj/gAuS+LRrMjCeJB5c1rCLWbftPyO+zWJdNdM15vzZsG5B4EN007AuiDbp
+        UsrGoJCtueF0/CrrYkhnd7pXcKlQMhc=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-82-MsIHl5KxN_ejZjr7-KN4Lg-1; Thu, 19 Jan 2023 00:04:13 -0500
-X-MC-Unique: MsIHl5KxN_ejZjr7-KN4Lg-1
-Received: by mail-pf1-f197.google.com with SMTP id v23-20020aa78097000000b005748c087db1so419031pff.2
-        for <fstests@vger.kernel.org>; Wed, 18 Jan 2023 21:04:12 -0800 (PST)
+ us-mta-1-Dfqz-rtfM-27XqBxziGZMA-1; Thu, 19 Jan 2023 05:03:36 -0500
+X-MC-Unique: Dfqz-rtfM-27XqBxziGZMA-1
+Received: by mail-pl1-f199.google.com with SMTP id y8-20020a170902b48800b00192a600df83so1136357plr.15
+        for <fstests@vger.kernel.org>; Thu, 19 Jan 2023 02:03:36 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=5gYkUw3+Oj4dvZjgQviThFCTAor37COUP9w9mLMlqLs=;
-        b=7JT/Vv8+8OOe2ajuLortfIxm7t/j0iIvnwB+v3gfSEtG6lSszrQtrJYBOzjOURWh5u
-         a7ZbhwkMp1OaR0uU2Xfy+UbPdYjWyR2ch1dorrMFTzKi7y7NycZmj9CM/H/mn5jiR4dn
-         GKg8g1fw7BCiPW+83iWL4FeR14RfAO5nHxm0HlvYa/6tI5ecrFfguGXWgPHFaTeXoMge
-         RjGoXsLIeXEmZ7FLCxc6vEW80kxZtMch96zgeitv0hbd24Gn6qh/TC7g0eh22o2LpTsC
-         YTCSwR+wKV495Ns2A0jTlp86Mn4gIxdugRSlMZF8PE62OE8BSZGol8Y83bf4etkRb5Iz
-         rHPg==
-X-Gm-Message-State: AFqh2kpK5qxN0Mt0He4X0sLDk8sbiTQoV9z67DbFBUIpuhuKrhuVGOpt
-        7HrXrvXlolh4P3glq/UHW1sruK6CnyP4Gv/oVhqWwt5oxjx89P/MDcCrzNL2oFmhpeLbSF8FFwn
-        p19HOIrjGxGFpQBAf/g==
-X-Received: by 2002:a17:902:7c8d:b0:194:9c02:6ea1 with SMTP id y13-20020a1709027c8d00b001949c026ea1mr9987503pll.0.1674104651702;
-        Wed, 18 Jan 2023 21:04:11 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXtGGX3A1pewUAr8DyphHU09e15zgu3ZDH427MxcDeTcQ9Jv0dpKIkih8FRFU0uP69firlqTcw==
-X-Received: by 2002:a17:902:7c8d:b0:194:9c02:6ea1 with SMTP id y13-20020a1709027c8d00b001949c026ea1mr9987485pll.0.1674104651295;
-        Wed, 18 Jan 2023 21:04:11 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a13-20020a1709027e4d00b0019312dd3f99sm23710042pln.176.2023.01.18.21.04.09
+        bh=ljoiPtqmLw7w9XNA0+M0g+TWHqmwEmndCJRe1l9JPl4=;
+        b=MPZBlE/rcOC+rGWjdEgRWKOTh8RFwjVvrA8rvc5zV5dVIkgPw5a4mugBisGV5YSTC8
+         eAKhr38aGILZyccMkdghVF4WpPdcFXvWrGhS8Q58mrAxAj8JdX+CIwDubG21Gln8U+hF
+         RLBCqBxSgcWunPGJuxKgag2f2C4Ix7HOeGI4hoP3H+UfEJSwDYQZtRGStWeIn1/Anww1
+         b25k/SON2vsIUXZPvF0dHjwic9GDc59PuG4cCohUAC56AMcYP0s1KFQRsfl2uC3ITsEF
+         MGmo0rJuK3deaEgt6Ii0s0lNkeC8HNkOSHyHmcKxcgbav1aydHzJpiaRR2xEgCDcEdx1
+         lBuw==
+X-Gm-Message-State: AFqh2kpBY6rXVZR0PsxEcW1vgLhq4A3/ZfHU2Z1QEUyKHHgkSIbQ+q01
+        zprldR7m+Q7m0jRfbIJNKtpkc2cDYpIa+H/H/9XYcAhj26kMq0BuBdqS+hZlU9n3Smmy7tszAX0
+        Ymyqq7cWJVjRzjX1sFw==
+X-Received: by 2002:a05:6a20:1a24:b0:ad:4643:9fe2 with SMTP id cj36-20020a056a201a2400b000ad46439fe2mr9799798pzb.57.1674122615176;
+        Thu, 19 Jan 2023 02:03:35 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXuF557r8N2IYQk3YKMX/Mt12eWmSMHkFRkqXCga3ID49n90PSQYMU6d38W6Iut7YVSWF+R9Zw==
+X-Received: by 2002:a05:6a20:1a24:b0:ad:4643:9fe2 with SMTP id cj36-20020a056a201a2400b000ad46439fe2mr9799777pzb.57.1674122614653;
+        Thu, 19 Jan 2023 02:03:34 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id 8-20020a631448000000b004b25a51d6f4sm17505807pgu.36.2023.01.19.02.03.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jan 2023 21:04:10 -0800 (PST)
-Date:   Thu, 19 Jan 2023 13:04:06 +0800
+        Thu, 19 Jan 2023 02:03:34 -0800 (PST)
+Date:   Thu, 19 Jan 2023 18:03:29 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 4/4] populate: improve runtime of __populate_fill_fs
-Message-ID: <20230119050406.fqtf55c737yc35ze@zlang-mailbox>
-References: <167400103044.1915094.5935980986164675922.stgit@magnolia>
- <167400103096.1915094.8399897640768588035.stgit@magnolia>
- <20230118155403.pg7aq3gtcks2ptdz@zlang-mailbox>
- <Y8hG59tdunKmATSw@magnolia>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        linux-fsdevel@vger.kernel.org
+Subject: Re: [PATCH v3] generic: update setgid tests
+Message-ID: <20230119100329.xnmdckqrs3wi6dk2@zlang-mailbox>
+References: <20230103-fstests-setgid-v6-2-v3-1-5950c139bfcc@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y8hG59tdunKmATSw@magnolia>
+In-Reply-To: <20230103-fstests-setgid-v6-2-v3-1-5950c139bfcc@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 18, 2023 at 11:22:15AM -0800, Darrick J. Wong wrote:
-> On Wed, Jan 18, 2023 at 11:54:03PM +0800, Zorro Lang wrote:
-> > On Tue, Jan 17, 2023 at 04:44:33PM -0800, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Run the copy loop in parallel to reduce runtime.  If filling the
-> > > populated fs is selected (which it isn't by default in xfs/349), this
-> > > reduces the runtime from ~18s to ~15s, since it's only making enough
-> > > copies to reduce the free space by 5%.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  common/populate |    3 ++-
-> > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > > 
-> > > 
-> > > diff --git a/common/populate b/common/populate
-> > > index f34551d272..1c3c28463f 100644
-> > > --- a/common/populate
-> > > +++ b/common/populate
-> > > @@ -151,8 +151,9 @@ __populate_fill_fs() {
-> > >  	echo "FILL FS"
-> > >  	echo "src_sz $SRC_SZ fs_sz $FS_SZ nr $NR"
-> > >  	seq 2 "${NR}" | while read nr; do
-> > > -		cp -pRdu "${dir}/test/1" "${dir}/test/${nr}"
-> > > +		cp -pRdu "${dir}/test/1" "${dir}/test/${nr}" &
-> > >  	done
-> > > +	wait
-> > 
-> > I'm thinking about what'll happen if we do "Ctrl+c" on a running test which
-> > is waiting for these cp operations.
+On Thu, Jan 05, 2023 at 03:53:36PM +0100, Christian Brauner wrote:
+> Over mutiple kernel releases we have reworked setgid inheritance
+> significantly due to long-standing security issues, security issues that
+> were reintroduced after they were fixed, and the subtle and difficult
+> inheritance rules that plagued individual filesystems. We have lifted
+> setgid inheritance into the VFS proper in earlier patches. Starting with
+> kernel v6.2 we have made setgid inheritance consistent between the write
+> and setattr (ch{mod,own}) paths.
 > 
-> Hmm.  In the context of fstests running on a system with systemd, we run
-> each test within a systemd scope and kill the scope when the test script
-> exits.  That will tear down unclaimed background processes, but it's not
-> a hard and fast guarantee that everyone has systemd.
+> The gist of the requirement is that in order to inherit the setgid bit
+> the user needs to be in the group of the file or have CAP_FSETID in
+> their user namespace. Otherwise the setgid bit will be dropped
+> irregardless of the file's executability. Remove the obsolete tests as
+> they're not a security issue and will cause spurious warnings on older
+> distro kernels.
 > 
-> As for *general* bashisms, I guess the only solution is:
-> 
-> trap 'pkill -P $$' INT TERM QUIT EXIT
-> 
-> To kill all the children of the test script.  Maybe we want that?  But I
-> hate wrapping my brain around bash child process management, so yuck.
-> 
-> I'll drop the parallel populate work, it's creating a lot of problems
-> that I don't have time to solve while delivering only modest gains.
+> Note, that only with v6.2 setgid inheritance works correctly for
+> overlayfs in the write path. Before this the setgid bit was always
 
-Yeah, that makes things become complex. So I think if above change can bring
-in big performance improvement, we can do that (or use another way to do that,
-e.g. an independent program which main process can deal with its children).
-If the improvement is not obvious, I'd like not to bring in too many
-multi-bash-processes in common helper. What do you think?
+retained
 
-Thanks,
-Zorro
+(I'll fix that missing when I merge this patch)
 
 > 
-> --D
+> Link: https://lore.kernel.org/linux-ext4/CAOQ4uxhmCgyorYVtD6=n=khqwUc=MPbZs+y=sqt09XbGoNm_tA@mail.gmail.com
+> Link: https://lore.kernel.org/linux-fsdevel/20221212112053.99208-1-brauner@kernel.org
+> Link: https://lore.kernel.org/linux-fsdevel/20221122142010.zchf2jz2oymx55qi@wittgenstein
+> Cc: Amir Goldstein <amir73il@gmail.com>
+> Cc: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Christian Brauner (Microsoft) <brauner@kernel.org>
+> ---
+> Changes in v3:
+> - Miklos Szeredi <miklos@szeredi.hu>
+>   - Instead of fixing up the test which changed, remove them.
+> - Link to v2: https://lore.kernel.org/r/20230103-fstests-setgid-v6-2-v2-1-9c70ee2a4113@kernel.org
+
+This version looks good to me, old kernel and new kernel (v6.2) all test passed.
+If there's not more review points from VFS part, I'll merge this patch.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
 > 
-> > >  }
-> > >  
-> > >  # For XFS, force on all the quota options if quota is enabled
-> > > 
-> > 
+> Changes in v2:
+> - Darrick J. Wong <djwong@kernel.org>:
+>   - Also update generic/686 and generic/687.
+> - Link to v1: https://lore.kernel.org/r/20230103-fstests-setgid-v6-2-v1-1-b8972c303ebe@kernel.org
+> ---
+>  tests/generic/673     | 16 ++--------------
+>  tests/generic/673.out | 16 ++--------------
+>  tests/generic/683     | 16 ++--------------
+>  tests/generic/683.out | 12 ++----------
+>  tests/generic/684     | 16 ++--------------
+>  tests/generic/684.out | 12 ++----------
+>  tests/generic/685     | 16 ++--------------
+>  tests/generic/685.out | 12 ++----------
+>  tests/generic/686     | 16 ++--------------
+>  tests/generic/686.out | 12 ++----------
+>  tests/generic/687     | 16 ++--------------
+>  tests/generic/687.out | 12 ++----------
+>  12 files changed, 24 insertions(+), 148 deletions(-)
+> 
+> diff --git a/tests/generic/673 b/tests/generic/673
+> index 6d1f49ea..ac8b8c09 100755
+> --- a/tests/generic/673
+> +++ b/tests/generic/673
+> @@ -102,26 +102,14 @@ setup_testfile
+>  chmod a+rwxs $SCRATCH_MNT/a
+>  commit_and_check
+>  
+> -#Commit to a non-exec file by an unprivileged user leaves sgid.
+> -echo "Test 9 - qa_user, non-exec file, only sgid"
+> -setup_testfile
+> -chmod a+rw,g+rws $SCRATCH_MNT/a
+> -commit_and_check "$qa_user"
+> -
+>  #Commit to a group-exec file by an unprivileged user clears sgid
+> -echo "Test 10 - qa_user, group-exec file, only sgid"
+> +echo "Test 9 - qa_user, group-exec file, only sgid"
+>  setup_testfile
+>  chmod a+rw,g+rwxs $SCRATCH_MNT/a
+>  commit_and_check "$qa_user"
+>  
+> -#Commit to a user-exec file by an unprivileged user clears sgid
+> -echo "Test 11 - qa_user, user-exec file, only sgid"
+> -setup_testfile
+> -chmod a+rw,u+x,g+rws $SCRATCH_MNT/a
+> -commit_and_check "$qa_user"
+> -
+>  #Commit to a all-exec file by an unprivileged user clears sgid.
+> -echo "Test 12 - qa_user, all-exec file, only sgid"
+> +echo "Test 10 - qa_user, all-exec file, only sgid"
+>  setup_testfile
+>  chmod a+rwx,g+rwxs $SCRATCH_MNT/a
+>  commit_and_check "$qa_user"
+> diff --git a/tests/generic/673.out b/tests/generic/673.out
+> index 0817857d..4276fa01 100644
+> --- a/tests/generic/673.out
+> +++ b/tests/generic/673.out
+> @@ -47,25 +47,13 @@ Test 8 - root, all-exec file
+>  3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
+>  6777 -rwsrwsrwx SCRATCH_MNT/a
+>  
+> -Test 9 - qa_user, non-exec file, only sgid
+> -310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
+> -2666 -rw-rwSrw- SCRATCH_MNT/a
+> -3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
+> -2666 -rw-rwSrw- SCRATCH_MNT/a
+> -
+> -Test 10 - qa_user, group-exec file, only sgid
+> +Test 9 - qa_user, group-exec file, only sgid
+>  310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
+>  2676 -rw-rwsrw- SCRATCH_MNT/a
+>  3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
+>  676 -rw-rwxrw- SCRATCH_MNT/a
+>  
+> -Test 11 - qa_user, user-exec file, only sgid
+> -310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
+> -2766 -rwxrwSrw- SCRATCH_MNT/a
+> -3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
+> -2766 -rwxrwSrw- SCRATCH_MNT/a
+> -
+> -Test 12 - qa_user, all-exec file, only sgid
+> +Test 10 - qa_user, all-exec file, only sgid
+>  310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
+>  2777 -rwxrwsrwx SCRATCH_MNT/a
+>  3784de23efab7a2074c9ec66901e39e5  SCRATCH_MNT/a
+> diff --git a/tests/generic/683 b/tests/generic/683
+> index eea8d21b..304b1a48 100755
+> --- a/tests/generic/683
+> +++ b/tests/generic/683
+> @@ -110,26 +110,14 @@ setup_testfile
+>  chmod a+rwxs $junk_file
+>  commit_and_check "" "$verb" 64k 64k
+>  
+> -# Commit to a non-exec file by an unprivileged user leaves sgid.
+> -echo "Test 9 - qa_user, non-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a group-exec file by an unprivileged user clears sgid
+> -echo "Test 10 - qa_user, group-exec file $verb, only sgid"
+> +echo "Test 9 - qa_user, group-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rw,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+>  
+> -# Commit to a user-exec file by an unprivileged user clears sgid
+> -echo "Test 11 - qa_user, user-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,u+x,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a all-exec file by an unprivileged user clears sgid.
+> -echo "Test 12 - qa_user, all-exec file $verb, only sgid"
+> +echo "Test 10 - qa_user, all-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rwx,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+> diff --git a/tests/generic/683.out b/tests/generic/683.out
+> index ca29f6e6..de18ea5f 100644
+> --- a/tests/generic/683.out
+> +++ b/tests/generic/683.out
+> @@ -31,19 +31,11 @@ Test 8 - root, all-exec file falloc
+>  6777 -rwsrwsrwx TEST_DIR/683/a
+>  6777 -rwsrwsrwx TEST_DIR/683/a
+>  
+> -Test 9 - qa_user, non-exec file falloc, only sgid
+> -2666 -rw-rwSrw- TEST_DIR/683/a
+> -2666 -rw-rwSrw- TEST_DIR/683/a
+> -
+> -Test 10 - qa_user, group-exec file falloc, only sgid
+> +Test 9 - qa_user, group-exec file falloc, only sgid
+>  2676 -rw-rwsrw- TEST_DIR/683/a
+>  676 -rw-rwxrw- TEST_DIR/683/a
+>  
+> -Test 11 - qa_user, user-exec file falloc, only sgid
+> -2766 -rwxrwSrw- TEST_DIR/683/a
+> -2766 -rwxrwSrw- TEST_DIR/683/a
+> -
+> -Test 12 - qa_user, all-exec file falloc, only sgid
+> +Test 10 - qa_user, all-exec file falloc, only sgid
+>  2777 -rwxrwsrwx TEST_DIR/683/a
+>  777 -rwxrwxrwx TEST_DIR/683/a
+>  
+> diff --git a/tests/generic/684 b/tests/generic/684
+> index 541dbeb4..1ebffb01 100755
+> --- a/tests/generic/684
+> +++ b/tests/generic/684
+> @@ -110,26 +110,14 @@ setup_testfile
+>  chmod a+rwxs $junk_file
+>  commit_and_check "" "$verb" 64k 64k
+>  
+> -# Commit to a non-exec file by an unprivileged user leaves sgid.
+> -echo "Test 9 - qa_user, non-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a group-exec file by an unprivileged user clears sgid
+> -echo "Test 10 - qa_user, group-exec file $verb, only sgid"
+> +echo "Test 9 - qa_user, group-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rw,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+>  
+> -# Commit to a user-exec file by an unprivileged user clears sgid
+> -echo "Test 11 - qa_user, user-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,u+x,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a all-exec file by an unprivileged user clears sgid.
+> -echo "Test 12 - qa_user, all-exec file $verb, only sgid"
+> +echo "Test 10 - qa_user, all-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rwx,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+> diff --git a/tests/generic/684.out b/tests/generic/684.out
+> index 2e084ced..da5ada5e 100644
+> --- a/tests/generic/684.out
+> +++ b/tests/generic/684.out
+> @@ -31,19 +31,11 @@ Test 8 - root, all-exec file fpunch
+>  6777 -rwsrwsrwx TEST_DIR/684/a
+>  6777 -rwsrwsrwx TEST_DIR/684/a
+>  
+> -Test 9 - qa_user, non-exec file fpunch, only sgid
+> -2666 -rw-rwSrw- TEST_DIR/684/a
+> -2666 -rw-rwSrw- TEST_DIR/684/a
+> -
+> -Test 10 - qa_user, group-exec file fpunch, only sgid
+> +Test 9 - qa_user, group-exec file fpunch, only sgid
+>  2676 -rw-rwsrw- TEST_DIR/684/a
+>  676 -rw-rwxrw- TEST_DIR/684/a
+>  
+> -Test 11 - qa_user, user-exec file fpunch, only sgid
+> -2766 -rwxrwSrw- TEST_DIR/684/a
+> -2766 -rwxrwSrw- TEST_DIR/684/a
+> -
+> -Test 12 - qa_user, all-exec file fpunch, only sgid
+> +Test 10 - qa_user, all-exec file fpunch, only sgid
+>  2777 -rwxrwsrwx TEST_DIR/684/a
+>  777 -rwxrwxrwx TEST_DIR/684/a
+>  
+> diff --git a/tests/generic/685 b/tests/generic/685
+> index 29eca1a8..e4ada8e7 100755
+> --- a/tests/generic/685
+> +++ b/tests/generic/685
+> @@ -110,26 +110,14 @@ setup_testfile
+>  chmod a+rwxs $junk_file
+>  commit_and_check "" "$verb" 64k 64k
+>  
+> -# Commit to a non-exec file by an unprivileged user leaves sgid.
+> -echo "Test 9 - qa_user, non-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a group-exec file by an unprivileged user clears sgid
+> -echo "Test 10 - qa_user, group-exec file $verb, only sgid"
+> +echo "Test 9 - qa_user, group-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rw,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+>  
+> -# Commit to a user-exec file by an unprivileged user clears sgid
+> -echo "Test 11 - qa_user, user-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,u+x,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a all-exec file by an unprivileged user clears sgid.
+> -echo "Test 12 - qa_user, all-exec file $verb, only sgid"
+> +echo "Test 10 - qa_user, all-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rwx,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+> diff --git a/tests/generic/685.out b/tests/generic/685.out
+> index e611da3e..03eef362 100644
+> --- a/tests/generic/685.out
+> +++ b/tests/generic/685.out
+> @@ -31,19 +31,11 @@ Test 8 - root, all-exec file fzero
+>  6777 -rwsrwsrwx TEST_DIR/685/a
+>  6777 -rwsrwsrwx TEST_DIR/685/a
+>  
+> -Test 9 - qa_user, non-exec file fzero, only sgid
+> -2666 -rw-rwSrw- TEST_DIR/685/a
+> -2666 -rw-rwSrw- TEST_DIR/685/a
+> -
+> -Test 10 - qa_user, group-exec file fzero, only sgid
+> +Test 9 - qa_user, group-exec file fzero, only sgid
+>  2676 -rw-rwsrw- TEST_DIR/685/a
+>  676 -rw-rwxrw- TEST_DIR/685/a
+>  
+> -Test 11 - qa_user, user-exec file fzero, only sgid
+> -2766 -rwxrwSrw- TEST_DIR/685/a
+> -2766 -rwxrwSrw- TEST_DIR/685/a
+> -
+> -Test 12 - qa_user, all-exec file fzero, only sgid
+> +Test 10 - qa_user, all-exec file fzero, only sgid
+>  2777 -rwxrwsrwx TEST_DIR/685/a
+>  777 -rwxrwxrwx TEST_DIR/685/a
+>  
+> diff --git a/tests/generic/686 b/tests/generic/686
+> index a8ec23d5..d56aa7cc 100755
+> --- a/tests/generic/686
+> +++ b/tests/generic/686
+> @@ -110,26 +110,14 @@ setup_testfile
+>  chmod a+rwxs $junk_file
+>  commit_and_check "" "$verb" 64k 64k
+>  
+> -# Commit to a non-exec file by an unprivileged user leaves sgid.
+> -echo "Test 9 - qa_user, non-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a group-exec file by an unprivileged user clears sgid
+> -echo "Test 10 - qa_user, group-exec file $verb, only sgid"
+> +echo "Test 9 - qa_user, group-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rw,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+>  
+> -# Commit to a user-exec file by an unprivileged user clears sgid
+> -echo "Test 11 - qa_user, user-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,u+x,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a all-exec file by an unprivileged user clears sgid.
+> -echo "Test 12 - qa_user, all-exec file $verb, only sgid"
+> +echo "Test 10 - qa_user, all-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rwx,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+> diff --git a/tests/generic/686.out b/tests/generic/686.out
+> index aa1e6471..562e1ab9 100644
+> --- a/tests/generic/686.out
+> +++ b/tests/generic/686.out
+> @@ -31,19 +31,11 @@ Test 8 - root, all-exec file finsert
+>  6777 -rwsrwsrwx TEST_DIR/686/a
+>  6777 -rwsrwsrwx TEST_DIR/686/a
+>  
+> -Test 9 - qa_user, non-exec file finsert, only sgid
+> -2666 -rw-rwSrw- TEST_DIR/686/a
+> -2666 -rw-rwSrw- TEST_DIR/686/a
+> -
+> -Test 10 - qa_user, group-exec file finsert, only sgid
+> +Test 9 - qa_user, group-exec file finsert, only sgid
+>  2676 -rw-rwsrw- TEST_DIR/686/a
+>  676 -rw-rwxrw- TEST_DIR/686/a
+>  
+> -Test 11 - qa_user, user-exec file finsert, only sgid
+> -2766 -rwxrwSrw- TEST_DIR/686/a
+> -2766 -rwxrwSrw- TEST_DIR/686/a
+> -
+> -Test 12 - qa_user, all-exec file finsert, only sgid
+> +Test 10 - qa_user, all-exec file finsert, only sgid
+>  2777 -rwxrwsrwx TEST_DIR/686/a
+>  777 -rwxrwxrwx TEST_DIR/686/a
+>  
+> diff --git a/tests/generic/687 b/tests/generic/687
+> index ff3e2fe1..3a7f1fd5 100755
+> --- a/tests/generic/687
+> +++ b/tests/generic/687
+> @@ -110,26 +110,14 @@ setup_testfile
+>  chmod a+rwxs $junk_file
+>  commit_and_check "" "$verb" 64k 64k
+>  
+> -# Commit to a non-exec file by an unprivileged user leaves sgid.
+> -echo "Test 9 - qa_user, non-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a group-exec file by an unprivileged user clears sgid
+> -echo "Test 10 - qa_user, group-exec file $verb, only sgid"
+> +echo "Test 9 - qa_user, group-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rw,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+>  
+> -# Commit to a user-exec file by an unprivileged user clears sgid
+> -echo "Test 11 - qa_user, user-exec file $verb, only sgid"
+> -setup_testfile
+> -chmod a+rw,u+x,g+rws $junk_file
+> -commit_and_check "$qa_user" "$verb" 64k 64k
+> -
+>  # Commit to a all-exec file by an unprivileged user clears sgid.
+> -echo "Test 12 - qa_user, all-exec file $verb, only sgid"
+> +echo "Test 10 - qa_user, all-exec file $verb, only sgid"
+>  setup_testfile
+>  chmod a+rwx,g+rwxs $junk_file
+>  commit_and_check "$qa_user" "$verb" 64k 64k
+> diff --git a/tests/generic/687.out b/tests/generic/687.out
+> index c5116c27..f72f6d30 100644
+> --- a/tests/generic/687.out
+> +++ b/tests/generic/687.out
+> @@ -31,19 +31,11 @@ Test 8 - root, all-exec file fcollapse
+>  6777 -rwsrwsrwx TEST_DIR/687/a
+>  6777 -rwsrwsrwx TEST_DIR/687/a
+>  
+> -Test 9 - qa_user, non-exec file fcollapse, only sgid
+> -2666 -rw-rwSrw- TEST_DIR/687/a
+> -2666 -rw-rwSrw- TEST_DIR/687/a
+> -
+> -Test 10 - qa_user, group-exec file fcollapse, only sgid
+> +Test 9 - qa_user, group-exec file fcollapse, only sgid
+>  2676 -rw-rwsrw- TEST_DIR/687/a
+>  676 -rw-rwxrw- TEST_DIR/687/a
+>  
+> -Test 11 - qa_user, user-exec file fcollapse, only sgid
+> -2766 -rwxrwSrw- TEST_DIR/687/a
+> -2766 -rwxrwSrw- TEST_DIR/687/a
+> -
+> -Test 12 - qa_user, all-exec file fcollapse, only sgid
+> +Test 10 - qa_user, all-exec file fcollapse, only sgid
+>  2777 -rwxrwsrwx TEST_DIR/687/a
+>  777 -rwxrwxrwx TEST_DIR/687/a
+>  
+> 
+> ---
+> base-commit: fbd489798b31e32f0eaefcd754326a06aa5b166f
+> change-id: 20230103-fstests-setgid-v6-2-4ce5852d11e2
 > 
 
