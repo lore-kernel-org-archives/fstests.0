@@ -2,106 +2,345 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11D8FC00A5A
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Jan 2023 10:54:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19EF9C004D4
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Jan 2023 19:20:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229682AbjASKyX (ORCPT
+        id S231327AbjASTUv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Jan 2023 05:54:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44346 "EHLO
+        Thu, 19 Jan 2023 14:20:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60840 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229812AbjASKyP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Jan 2023 05:54:15 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54F2D6DB2B
-        for <fstests@vger.kernel.org>; Thu, 19 Jan 2023 02:54:13 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 0A200222C5;
-        Thu, 19 Jan 2023 10:54:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1674125652; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
+        with ESMTP id S231350AbjASTUW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Jan 2023 14:20:22 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B4549575D
+        for <fstests@vger.kernel.org>; Thu, 19 Jan 2023 11:18:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1674155891;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=iYfRtcUb1+DzFAIIQ4epuk09w7soAWIWiFpCd8LkXpw=;
-        b=OZFOcB8BP37TZLd8qppYdvNS3BUpcmAdeQsqqwX+7hmmLIE2cdxSxrIOotXw5e6g8WoUDE
-        2g4/+448S60gElsAwEWygimP84M3VlvMJ+8yZm5FNzK7KmrrlyfDB7JVZ4LE5jNZYjmV/f
-        XiZdg0i6xBZff9+ZzScuDU7VvnogBbk=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1674125652;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=iYfRtcUb1+DzFAIIQ4epuk09w7soAWIWiFpCd8LkXpw=;
-        b=9M/uIuPm00Ky8f+dLNxMa6KbEIDN+OOHB7e7RQG/U/qJD0OfYIzq5sVAxxtLW6XtxyM74k
-        +8fGiN7eKub8XuAQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id ECACB139F0;
-        Thu, 19 Jan 2023 10:54:11 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id 0mDHOVMhyWPlKwAAMHmgww
-        (envelope-from <jack@suse.cz>); Thu, 19 Jan 2023 10:54:11 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-        id D5D72A06B5; Thu, 19 Jan 2023 11:54:10 +0100 (CET)
-From:   Jan Kara <jack@suse.cz>
-To:     <fstests@vger.kernel.org>
-Cc:     Jan Kara <jack@suse.cz>
-Subject: [PATCH 2/2] common: Unmount udf filesystem prior checking
-Date:   Thu, 19 Jan 2023 11:54:03 +0100
-Message-Id: <20230119105410.9236-2-jack@suse.cz>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20230119104618.28701-1-jack@suse.cz>
-References: <20230119104618.28701-1-jack@suse.cz>
+        bh=YATicmREZ+7hBulqV///P49Tpvz3JAexF3cwhSVqvZw=;
+        b=MHrCPDsLX2ZKSgjz9V0iBHbLGJND3njQRNIbhGnY4iUBQi1tl/eF/ZXzvDB1myKNansTp2
+        ykF5bxgk2Db2XUTTqn11jaa27YMoJHkzRTJcJ8v3wXPT+cUbetGYnfO5G68ld3r/1LmVGw
+        CTvYfME5kfMscW59icgqFVK2kJzCHGc=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-12-YqwvhMjcOzCV3jeTJWUp1A-1; Thu, 19 Jan 2023 14:18:09 -0500
+X-MC-Unique: YqwvhMjcOzCV3jeTJWUp1A-1
+Received: by mail-pj1-f71.google.com with SMTP id pa16-20020a17090b265000b0020a71040b4cso1470553pjb.6
+        for <fstests@vger.kernel.org>; Thu, 19 Jan 2023 11:18:09 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=YATicmREZ+7hBulqV///P49Tpvz3JAexF3cwhSVqvZw=;
+        b=X8lOf5OkI14nxH8HpxFes1mSNDblC9qRHbh72+kgN4mLmI/vVexdsJbujHmAgYNfWH
+         A/yJSbsry67cqwrmbQraaR6OJ0seg22Y+Yke3WW0v3JsZEILZXuCOaKuG0pKhuoxk0pA
+         M+fijLC0ARO4t/8apykJz0bN4HIc6+h8mDB3T0/x3I8IKFQFi2R4tbnC304LCTlqOUIG
+         bp4DVaJLah95AH6dnaZokR3HuJSPrNsk0YXKc5k6Rv8S2ESCSPcYyu7KJUH1U5MikqGv
+         l9kdk5yfa16SORO9+v2HEkuidZRZ6ExWLL3UGGYcxmjhijpBdmpqqwAOgFKnGb+v62Uz
+         H/Ng==
+X-Gm-Message-State: AFqh2krsxv+hE4tHN6n6um+yMEILOUmg0CChfrkWjLp94XtbzRlhGhbl
+        aWxvBJxgKdeVEMqO2GNKtL7qSlBHBImf1PDlkMEZzmy38z94ZNLX8qVGko2QEoT56AlogAYvBjL
+        EDK1X6NT+ZU3ZyOfRzA==
+X-Received: by 2002:a17:902:cec7:b0:191:3993:801e with SMTP id d7-20020a170902cec700b001913993801emr16234563plg.56.1674155888731;
+        Thu, 19 Jan 2023 11:18:08 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXtBjGJF1dsMSWhoXTd7u+m08fWODNygWMruoC7vJ7fp/LBVk93THNTUFM1QgX08aQU2T2AadA==
+X-Received: by 2002:a17:902:cec7:b0:191:3993:801e with SMTP id d7-20020a170902cec700b001913993801emr16234538plg.56.1674155888374;
+        Thu, 19 Jan 2023 11:18:08 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id j14-20020a170903024e00b0019101215f63sm25582375plh.93.2023.01.19.11.18.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Jan 2023 11:18:07 -0800 (PST)
+Date:   Fri, 20 Jan 2023 03:18:03 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jakob Unterwurzacher <jakobunt@gmail.com>
+Cc:     guaneryu@gmail.com, fstests@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, miklos@szeredi.hu,
+        Miklos Szeredi <mszeredi@redhat.com>
+Subject: Re: [PATCH] xfstests: add fuse support
+Message-ID: <20230119191803.uekrd4azayp35r2b@zlang-mailbox>
+References: <20200217100800.GH2697@desktop>
+ <20230104193932.984531-1-jakobunt@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230104193932.984531-1-jakobunt@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-_check_udf_filesystem forgot to unmount the filesystem prior to checking
-it. That was leading to check failures.
+On Wed, Jan 04, 2023 at 08:39:33PM +0100, Jakob Unterwurzacher wrote:
+> From: Miklos Szeredi <miklos@szeredi.hu>
+> 
+> This allows using any fuse filesystem that can be mounted with
+> 
+>   mount -t fuse.$FUSE_SUBTYP ...
+> 
+> Changelog:
+> 
+> v2: Jan 3, 2022, Jakob Unterwurzacher
+> * Rebased to master
+> * Instructions updated
+> ** To not fail with libfuse version mismatch on passthrough_ll exe
+>    on Fedora
+> ** To use sudo
+> * Review comments from Eryu Guan addressed:
+> ** Comment updated to mention fuse
+> ** Renamed SUBTYP to FUSE_SUBTYP
+> ** Removed $SCRATCH_MNT/bin/sh check before "rm -rf"
+> ** _require_scratch_nocheck for fuse also checks for $SCRATCH_MNT
+> ** _require_test for fuse also checks for $TEST_DIR
+> 
+> v1: Jan 8, 2020, Miklos Szeredi
+> * Initial submission
+> * https://patchwork.kernel.org/project/linux-fsdevel/patch/20200108192504.GA893@miu.piliscsaba.redhat.com/
+> 
+> Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+> Signed-off-by: Jakob Unterwurzacher <jakobunt@gmail.com>
+> ---
+>  README.fuse       | 26 ++++++++++++++++++++++++++
+>  check             |  3 ++-
+>  common/config     |  9 +++++++--
+>  common/rc         | 24 ++++++++++++++++++------
+>  tests/generic/020 |  4 ++--
+>  5 files changed, 55 insertions(+), 11 deletions(-)
+>  create mode 100644 README.fuse
+> 
+> diff --git a/README.fuse b/README.fuse
+> new file mode 100644
+> index 00000000..35ad9c46
+> --- /dev/null
+> +++ b/README.fuse
+> @@ -0,0 +1,26 @@
+> +Here are instructions for testing fuse using the passthrough_ll example
+> +filesystem provided in the libfuse source tree:
+> +
+> +git clone git://github.com/libfuse/libfuse.git
+> +cd libfuse
+> +meson build
+> +cd build
+> +ninja
+> +cat << EOF | sudo tee /sbin/mount.fuse.passthrough_ll
+> +#!/bin/bash
+> +ulimit -n 1048576
+> +exec $(pwd)/example/passthrough_ll -ofsname="\$@"
+> +EOF
+> +sudo chmod +x /sbin/mount.fuse.passthrough_ll
+> +mkdir -p /mnt/test /mnt/scratch /home/test/test /home/test/scratch
+> +
+> +Use the following local.config file:
+> +
+> +export TEST_DEV=non1
+> +export TEST_DIR=/mnt/test
+> +export SCRATCH_DEV=non2
+> +export SCRATCH_MNT=/mnt/scratch
+> +export FSTYP=fuse
+> +export FUSE_SUBTYP=.passthrough_ll
+> +export FUSE_MOUNT_OPTIONS="-osource=/home/test/scratch,allow_other,default_permissions"
+> +export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,allow_other,default_permissions"
 
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- common/rc | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Hi,
 
-diff --git a/common/rc b/common/rc
-index de94e5a4cde4..df6f237cabaa 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3074,6 +3074,12 @@ _check_udf_filesystem()
- 	return
-     fi
- 
-+    # Is the filesystem mounted?
-+    local type=`_fs_type $device`
-+    if [ "$type" = "$FSTYP" ]; then
-+	local mountpoint=`_umount_or_remount_ro $device`
-+    fi
-+
-     local device=$1
-     local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
-     if [ -z "$blksz" ]; then
-@@ -3090,6 +3096,10 @@ _check_udf_filesystem()
- 	_udf_test_known_error_filter | \
- 	grep -E -iv "Error count:.*[0-9]+.*total occurrences:.*[0-9]+|Warning count:.*[0-9]+.*total occurrences:.*[0-9]+" && \
-         echo "Warning UDF Verifier reported errors see $seqres.checkfs." && return 1
-+    # Remount the filesystem
-+    if [ "$type" = "$FSTYP" ]; then
-+	_mount_or_remount_rw "$MOUNT_OPTIONS" $device $mountpoint
-+    fi
-     return 0
- }
- 
--- 
-2.35.3
+Long time ago I added glusterfs supporting, for testing kernel fuse module.
+Now we'll have general fuse supporting, that's good news. More and more things
+start to use fuse, I'm glad to see fstests support the fuse test :)
+
+This version looks good to me, just a tiny problem on the README.fuse. Generally
+if we want to set mount options for both TEST_DEV and SCRATCH_DEV, we use the
+the parameter likes FUSE_MOUNT_OPTIONS (refer to _mount_opts(), _test_mount_opts()
+and _common_mount_opts()). If you just want to set mount options for SCRATCH_DEV
+particularly, you might want:
+
+  export MOUNT_OPTIONS="-osource=/home/test/scratch,allow_other,default_permissions"
+  export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,allow_other,default_permissions"
+
+Others looks good to me, I'll give it a little testing, and merge it if can't
+find any issue.
+
+Thanks,
+Zorro
+
+
+> diff --git a/check b/check
+> index 1ff0f44a..e25037f1 100755
+> --- a/check
+> +++ b/check
+> @@ -60,6 +60,7 @@ check options
+>      -glusterfs		test GlusterFS
+>      -cifs		test CIFS
+>      -9p			test 9p
+> +    -fuse		test fuse
+>      -virtiofs		test virtiofs
+>      -overlay		test overlay
+>      -pvfs2		test PVFS2
+> @@ -279,7 +280,7 @@ while [ $# -gt 0 ]; do
+>  	case "$1" in
+>  	-\? | -h | --help) usage ;;
+>  
+> -	-nfs|-glusterfs|-cifs|-9p|-virtiofs|-pvfs2|-tmpfs|-ubifs)
+> +	-nfs|-glusterfs|-cifs|-9p|-fuse|-virtiofs|-pvfs2|-tmpfs|-ubifs)
+>  		FSTYP="${1:1}"
+>  		;;
+>  	-overlay)
+> diff --git a/common/config b/common/config
+> index e2aba5a9..6c8cb3a5 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -341,6 +341,9 @@ _common_mount_opts()
+>  	9p)
+>  		echo $PLAN9_MOUNT_OPTIONS
+>  		;;
+> +	fuse)
+> +		echo $FUSE_MOUNT_OPTIONS
+> +		;;
+>  	xfs)
+>  		echo $XFS_MOUNT_OPTIONS
+>  		;;
+> @@ -511,6 +514,8 @@ _source_specific_fs()
+>  		;;
+>  	9p)
+>  		;;
+> +	fuse)
+> +		;;
+>  	ceph)
+>  		. ./common/ceph
+>  		;;
+> @@ -583,8 +588,8 @@ _check_device()
+>  	fi
+>  
+>  	case "$FSTYP" in
+> -	9p|tmpfs|virtiofs)
+> -		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+> +	9p|fuse|tmpfs|virtiofs)
+> +		# 9p, fuse and virtiofs mount tags are just plain strings, so anything is allowed
+>  		# tmpfs doesn't use mount source, ignore
+>  		;;
+>  	ceph)
+> diff --git a/common/rc b/common/rc
+> index 23530413..c17e3f6e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -274,7 +274,7 @@ _try_scratch_mount()
+>  		_overlay_scratch_mount $*
+>  		return $?
+>  	fi
+> -	_mount -t $FSTYP `_scratch_mount_options $*`
+> +	_mount -t $FSTYP$FUSE_SUBTYP `_scratch_mount_options $*`
+>  	mount_ret=$?
+>  	[ $mount_ret -ne 0 ] && return $mount_ret
+>  	_idmapped_mount $SCRATCH_DEV $SCRATCH_MNT
+> @@ -458,7 +458,7 @@ _test_mount()
+>      fi
+>  
+>      _test_options mount
+> -    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> +    _mount -t $FSTYP$FUSE_SUBTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+>      mount_ret=$?
+>      [ $mount_ret -ne 0 ] && return $mount_ret
+>      _idmapped_mount $TEST_DEV $TEST_DIR
+> @@ -584,6 +584,9 @@ _test_mkfs()
+>      9p)
+>  	# do nothing for 9p
+>  	;;
+> +    fuse)
+> +	# do nothing for fuse
+> +	;;
+>      virtiofs)
+>  	# do nothing for virtiofs
+>  	;;
+> @@ -624,6 +627,9 @@ _mkfs_dev()
+>      9p)
+>  	# do nothing for 9p
+>  	;;
+> +    fuse)
+> +	# do nothing for fuse
+> +	;;
+>      virtiofs)
+>  	# do nothing for virtiofs
+>  	;;
+> @@ -691,7 +697,7 @@ _scratch_mkfs()
+>  	local mkfs_status
+>  
+>  	case $FSTYP in
+> -	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
+> +	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs)
+>  		# unable to re-create this fstyp, just remove all files in
+>  		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+>  		# created in previous runs
+> @@ -1587,7 +1593,7 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> -	9p|virtiofs)
+> +	9p|fuse|virtiofs)
+>  		if [ -z "$SCRATCH_DEV" ]; then
+>  			_notrun "this test requires a valid \$SCRATCH_DEV"
+>  		fi
+> @@ -1787,7 +1793,7 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> -	9p|virtiofs)
+> +	9p|fuse|virtiofs)
+>  		if [ -z "$TEST_DEV" ]; then
+>  			_notrun "this test requires a valid \$TEST_DEV"
+>  		fi
+> @@ -2986,7 +2992,7 @@ _mount_or_remount_rw()
+>  
+>  	if [ $USE_REMOUNT -eq 0 ]; then
+>  		if [ "$FSTYP" != "overlay" ]; then
+> -			_mount -t $FSTYP $mount_opts $device $mountpoint
+> +			_mount -t $FSTYP$FUSE_SUBTYP $mount_opts $device $mountpoint
+>  			_idmapped_mount $device $mountpoint
+>  		else
+>  			_overlay_mount $device $mountpoint
+> @@ -3124,6 +3130,9 @@ _check_test_fs()
+>      9p)
+>  	# no way to check consistency for 9p
+>  	;;
+> +    fuse)
+> +	# no way to check consistency for fuse
+> +	;;
+>      virtiofs)
+>  	# no way to check consistency for virtiofs
+>  	;;
+> @@ -3185,6 +3194,9 @@ _check_scratch_fs()
+>      9p)
+>  	# no way to check consistency for 9p
+>  	;;
+> +    fuse)
+> +	# no way to check consistency for fuse
+> +	;;
+>      virtiofs)
+>  	# no way to check consistency for virtiofs
+>  	;;
+> diff --git a/tests/generic/020 b/tests/generic/020
+> index b91bca34..be5cecad 100755
+> --- a/tests/generic/020
+> +++ b/tests/generic/020
+> @@ -56,7 +56,7 @@ _attr_get_max()
+>  {
+>  	# set maximum total attr space based on fs type
+>  	case "$FSTYP" in
+> -	xfs|udf|pvfs2|9p|ceph|nfs)
+> +	xfs|udf|pvfs2|9p|ceph|fuse|nfs)
+>  		max_attrs=1000
+>  		;;
+>  	ext2|ext3|ext4)
+> @@ -134,7 +134,7 @@ _attr_get_maxval_size()
+>  	pvfs2)
+>  		max_attrval_size=8192
+>  		;;
+> -	xfs|udf|9p)
+> +	xfs|udf|9p|fuse)
+>  		max_attrval_size=65536
+>  		;;
+>  	bcachefs)
+> -- 
+> 2.38.1
+> 
 
