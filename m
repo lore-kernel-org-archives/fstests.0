@@ -2,100 +2,123 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED34EC05027
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Jan 2023 07:00:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6B80C05027
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 Jan 2023 11:49:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229445AbjATHA2 (ORCPT
+        id S229967AbjATLtg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 Jan 2023 02:00:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46470 "EHLO
+        Fri, 20 Jan 2023 06:49:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbjATHA1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Jan 2023 02:00:27 -0500
-Received: from mail1.bemta32.messagelabs.com (mail1.bemta32.messagelabs.com [195.245.230.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 959CE8A68
-        for <fstests@vger.kernel.org>; Thu, 19 Jan 2023 23:00:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1674198025; i=@fujitsu.com;
-        bh=lqa5Wcjfjc0BIrst0pQ94M3ZeyGVdQrCkC6RHqjoZYA=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=YFQq83UAUvyGO/QgS4SkI5CnGpgOxCH0kO4I40ik8bNTtJhO847L7LR6V3MXTYwhs
-         oe3IPn9kc9dJJHv52LcIa+lBsVAyPy9ZuMctc6SqoelMbbSDwimk8kphaJ3uZNWmPG
-         yN90eK69YMgda0lSj9jjUA2J2xKKbc2N9sYIcJ7yxe3Agfzj+nQsza65JL+eTQ47x3
-         iMd2RongeUueLSB5ZMMxdeQkVQLd2d8pq/K38ocoNRR9XGDB5KoyKvkO9/KeyLUBdP
-         2dtNDrFF9oFJ8EoDuvSvZMOMEH7vYUAt1JuKNftDWDb7/ZKRphKx2SFyQMeGLYFBRs
-         43zReZGTcCy/w==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrFIsWRWlGSWpSXmKPExsViZ8ORpMthcyr
-  ZoG2dlsXplr3sDowenzfJBTBGsWbmJeVXJLBmrLm7galgNUvFsferGBsY7zJ3MXJxCAmcZ5TY
-  17SNDcI5zCTx8ONiVghnL6PE064lQGWcHGwCmhLPOheA2SICshL/Z6xmArGZBdQllk/6BWYLC
-  +hKNF1bzAhiswioSize9QOsnlfAQ2Ld5L1gNRICChJTHr6HigtKnJz5hAVijoTEwRcvmCFqFC
-  X+73rGCmFXSrR++MUCYatJXD23iXkCI/8sJO2zkLQvYGRaxWhWnFpUllqka2iml1SUmZ5Rkpu
-  YmaOXWKWbqJdaqlueWlyia6iXWF6sl1pcrFdcmZuck6KXl1qyiREYjCnFTM93MJ5d9kfvEKMk
-  B5OSKC+n0alkIb6k/JTKjMTijPii0pzU4kOMMhwcShK8i3SBcoJFqempFWmZOcDIgElLcPAoi
-  fBGWQGleYsLEnOLM9MhUqcYdTnWNhzYyyzEkpeflyolzrsbpEgApCijNA9uBCxKLzHKSgnzMj
-  IwMAjxFKQW5WaWoMq/YhTnYFQS5l0CMoUnM68EbtMroCOYgI74kHES5IiSRISUVAOTyRmDtw/
-  ilqi+scqtM/1pNv1j6IG7kiedLV0W/Z1QnbhV4Ef6vC4P7U19KSZi+y3FelJV3glaRDoc3bF5
-  hfI0IRNWpXt2i7+vOnC/5/L7olqthbYOfOyqAhNv+AfyTZZRXRSolTrRdOGDLCeFrLtu8+ZxB
-  L484fBjwyOlbTLZWz98Lu2udJffk7Hh8VSlQ0umyD/afnZL2v68NYEvjjKkrfi3a23HzDDe5Q
-  wLBB79e/ajTMXulSX33fy+tUkv20p1iu9eOfZR8Nq3gGb1oo1pr72efXIJ2XaYqW2p9cL/C1Z
-  LzjpmGp1uyWd+YVXGvYa+5Juxx7f9/zIr1lDOcuoZpwnfehKqtVw/s2q9yrFYp8RSnJFoqMVc
-  VJwIAEcdiDZNAwAA
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-6.tower-587.messagelabs.com!1674198024!164359!1
-X-Originating-IP: [62.60.8.98]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.102.1; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 31460 invoked from network); 20 Jan 2023 07:00:24 -0000
-Received: from unknown (HELO n03ukasimr03.n03.fujitsu.local) (62.60.8.98)
-  by server-6.tower-587.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 20 Jan 2023 07:00:24 -0000
-Received: from n03ukasimr03.n03.fujitsu.local (localhost [127.0.0.1])
-        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTP id 4D3C71B5
-        for <fstests@vger.kernel.org>; Fri, 20 Jan 2023 07:00:24 +0000 (GMT)
-Received: from R01UKEXCASM223.r01.fujitsu.local (R01UKEXCASM223 [10.182.185.121])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA384 (256/256 bits))
+        with ESMTP id S230080AbjATLtU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 Jan 2023 06:49:20 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7A64BD17E
+        for <fstests@vger.kernel.org>; Fri, 20 Jan 2023 03:48:31 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by n03ukasimr03.n03.fujitsu.local (Postfix) with ESMTPS id 40E6E1AE
-        for <fstests@vger.kernel.org>; Fri, 20 Jan 2023 07:00:24 +0000 (GMT)
-Received: from localhost.localdomain (10.167.215.99) by
- R01UKEXCASM223.r01.fujitsu.local (10.182.185.121) with Microsoft SMTP Server
- (TLS) id 15.0.1497.42; Fri, 20 Jan 2023 07:00:22 +0000
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH] xfs/557: Use fixed commit id
-Date:   Fri, 20 Jan 2023 02:00:12 -0500
-Message-ID: <1674198012-3942-1-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 7B2E922C38;
+        Fri, 20 Jan 2023 11:48:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1674215310; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Ps6uT8UXAOkvyI3EQlFiP60OVVYhXDbLvky04xODM00=;
+        b=0+8BzEsTH5vb4T5ZZv+FKoerU/IGkISeU5lpPJboGPyIWHOO9YjehFw3psZvBXZgtPiJzX
+        xvdgLnz0g+dfUJ5i4kSUilOdQLAtGqwkleYhZsV5m9nnUuBc6KoIjUDIp+mf9zpoS2scjB
+        eRWPfscB2t26Zb0SXbY8aK8xg3Gn1N0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1674215310;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Ps6uT8UXAOkvyI3EQlFiP60OVVYhXDbLvky04xODM00=;
+        b=p65cFZE1hAVUoozFBjrniast9ZXxVwCf7cL9+V14+tteR+7Kel/MfYyIXRIFwvcXQko3e7
+        Z5qHoWqFWdiOrVDQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5EB001390C;
+        Fri, 20 Jan 2023 11:48:30 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id b/PKFY5/ymN8AgAAMHmgww
+        (envelope-from <ddiss@suse.de>); Fri, 20 Jan 2023 11:48:30 +0000
+Date:   Fri, 20 Jan 2023 12:49:39 +0100
+From:   David Disseldorp <ddiss@suse.de>
+To:     An Long <lan@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v4] btrfs/011: use $_btrfs_profile_configs to limit the
+ tests
+Message-ID: <20230120124939.6441a073@echidna.fritz.box>
+In-Reply-To: <20230114031909.8294-1-lan@suse.com>
+References: <20230111131833.471ada43@echidna.fritz.box>
+        <20230114031909.8294-1-lan@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.215.99]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM223.r01.fujitsu.local (10.182.185.121)
-X-Virus-Scanned: ClamAV using ClamSMTP
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- tests/xfs/557 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Hi,
 
-diff --git a/tests/xfs/557 b/tests/xfs/557
-index 425695db..acc28252 100644
---- a/tests/xfs/557
-+++ b/tests/xfs/557
-@@ -18,7 +18,7 @@ _require_xfs_io_command "falloc"
- _require_xfs_io_command "bulkstat_single"
- _require_scratch
- 
--_fixed_by_kernel_commit XXXXXXXXXXXX \
-+_fixed_by_kernel_commit 817644fa4525 \
- 	"xfs: get root inode correctly at bulkstat"
- 
- # A large stripe unit will put the root inode out quite far
--- 
-2.23.0
+On Sat, 14 Jan 2023 11:19:09 +0800, An Long wrote:
 
+> Generally the tester need BTRFS_PROFILE_CONFIGS to test certain
+> profiles. For example, skip raid56 as it's not supported.
+> 
+> Signed-off-by: An Long <lan@suse.com>
+> ---
+>  tests/btrfs/011 | 30 ++++++++++++++++++++----------
+>  1 file changed, 20 insertions(+), 10 deletions(-)
+> 
+> diff --git a/tests/btrfs/011 b/tests/btrfs/011
+> index 6c3d037f..ac45e735 100755
+> --- a/tests/btrfs/011
+> +++ b/tests/btrfs/011
+> @@ -48,6 +48,7 @@ _require_scratch_dev_pool 5
+>  _require_scratch_dev_pool_equal_size
+>  _require_scratch_size $((10 * 1024 * 1024)) #kB
+>  _require_command "$WIPEFS_PROG" wipefs
+> +_btrfs_get_profile_configs
+>  
+>  rm -f $tmp.*
+>  
+> @@ -237,18 +238,27 @@ btrfs_replace_test()
+>  	fi
+>  }
+>  
+> -workout "-m single -d single" 1 no 64
+> +if [[ "${_btrfs_profile_configs[@]}" =~ "-m single -d single"( |$) ]]; then
+> +	workout "-m single -d single" 1 no 64
+> +fi
+> +
+>  # Mixed BG & RAID/DUP profiles are not supported on zoned btrfs
+>  if ! _scratch_btrfs_is_zoned; then
+> -	workout "-m dup -d single" 1 no 64
+> -	workout "-m dup -d single" 1 cancel 1024
+> -	workout "-m raid0 -d raid0" 2 no 64
+> -	workout "-m raid1 -d raid1" 2 no 2048
+> -	workout "-m raid10 -d raid10" 4 no 64
+> -	workout "-m single -d single -M" 1 no 64
+> -	workout "-m dup -d dup -M" 1 no 64
+> -	workout "-m raid5 -d raid5" 2 no 64
+> -	workout "-m raid6 -d raid6" 3 no 64
+> +	for t in "-m dup -d single:1 no 64" \
+> +		"-m dup -d single:1 cancel 1024" \
+> +		"-m raid0 -d raid0:2 no 64" \
+> +		"-m raid1 -d raid1:2 no 2048" \
+> +		"-m raid10 -d raid10:4 no 64" \
+> +		"-m single -d single -M:1 no 64" \
+> +		"-m dup -d dup -M:1 no 64" \
+
+This dup/dup case no longer gets run with a default
+_btrfs_profile_configs[]. Is that intentional?
+
+Cheers, David
