@@ -2,112 +2,141 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E703C05027
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Jan 2023 19:22:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71F06C25B4E
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 Jan 2023 13:29:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229561AbjATTWV (ORCPT
+        id S229807AbjAVN3R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 Jan 2023 14:22:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56110 "EHLO
+        Sun, 22 Jan 2023 08:29:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229609AbjATTWU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Jan 2023 14:22:20 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91015113EE
-        for <fstests@vger.kernel.org>; Fri, 20 Jan 2023 11:22:19 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S229566AbjAVN3R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 22 Jan 2023 08:29:17 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65A5D1C337
+        for <fstests@vger.kernel.org>; Sun, 22 Jan 2023 05:29:16 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 402D15FC4D;
-        Fri, 20 Jan 2023 19:22:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1674242538; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=VMPZT5s2npe7yu6CP96zsVmXem1hvQgYzhRDey+QNAc=;
-        b=JaKnqEswuhIJcRMLdMwfeZ6TIPUAjGiI85DEDneU2pifSMl7JOscJGLWH2FqmBLivAOCEq
-        ljeCk3y+kPwuH3kPZO8gaWXDsyciHULzJJ1lBPY9jHNnK/hwtLYT3IPvNsImo6MseUhb4K
-        fHtGFK9TlJ8XmKBS0aK4cQNVS882hcE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1674242538;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=VMPZT5s2npe7yu6CP96zsVmXem1hvQgYzhRDey+QNAc=;
-        b=c5d7LPmb3w//MDvzRfIYI+9lZBbdcSG8YpagsVhJm/YmPTcxPKS4HvMD5KD+p5qTdiH5Oq
-        u8UuPKhU3NXO4YCQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 3513813251;
-        Fri, 20 Jan 2023 19:22:18 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id YJPtDOrpymNiewAAMHmgww
-        (envelope-from <jack@suse.cz>); Fri, 20 Jan 2023 19:22:18 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-        id BA073A06B5; Fri, 20 Jan 2023 20:22:17 +0100 (CET)
-Date:   Fri, 20 Jan 2023 20:22:17 +0100
-From:   Jan Kara <jack@suse.cz>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Jan Kara <jack@suse.cz>, David Disseldorp <ddiss@suse.de>,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] common: Provide blocksize and ecclength to udf fsck
-Message-ID: <20230120192217.uf7g7dbz6xtvtevj@quack3>
-References: <20230119104618.28701-1-jack@suse.cz>
- <20230119105410.9236-1-jack@suse.cz>
- <20230120154123.7f59e1cc@echidna.fritz.box>
- <20230120154510.xgqweuagzmqup4ql@quack3>
- <20230120190815.fajw7d2cgwim7cju@zlang-mailbox>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 014C160C15
+        for <fstests@vger.kernel.org>; Sun, 22 Jan 2023 13:29:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7B29FC433EF;
+        Sun, 22 Jan 2023 13:29:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1674394155;
+        bh=5LALZmzo1KuKCk990G6Aam2ib7mpfgNmN2WVgQz3TbE=;
+        h=Date:From:To:Subject:From;
+        b=Z+xPAln6gIhtRJ38DfMEiOnv54yqa8KH2xiTldAIaDq63HYe3ner7zhchZ6VG82pk
+         371UWCCquzZTV0bpqTzWtXN+kYX2yPbhCO0Xkf0ywEfxoyJwY1lVurpIRu0bBG6rD5
+         btDyTbqFqj42wpuHGt/ZOf+QzKwuFc5tQUwaIM/hoxTcwWgdPazURf1ZnsHTTXsn1n
+         xnk13kFNSRVI73w9/nYAjUEzuYDgM/HiizXd9oAg4R2Idddf0jB4fLFITECyy4fsqt
+         avjQ2FWHU46n/3WGiD9Ktjj0Addz0Bqaz54DW+PRB9v7ELUMamGD5LyT+ViHLibDvB
+         K0yhZhaV6IY3w==
+Date:   Sun, 22 Jan 2023 21:29:09 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2023.01.15 onto master branch
+Message-ID: <20230122132909.azljhedgw5upxous@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230120190815.fajw7d2cgwim7cju@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat 21-01-23 03:08:15, Zorro Lang wrote:
-> On Fri, Jan 20, 2023 at 04:45:10PM +0100, Jan Kara wrote:
-> > Hello!
-> > 
-> > On Fri 20-01-23 15:41:23, David Disseldorp wrote:
-> > > On Thu, 19 Jan 2023 11:54:02 +0100, Jan Kara wrote:
-> > > > udf_test program used for verifying filesystem is not able to determine
-> > > > filesystem blocksize. Provide it in the options together with disabling
-> > > > ecclength as it is not used on harddrives.
-> > > > 
-> > > > Signed-off-by: Jan Kara <jack@suse.cz>
-> > > > ---
-> > > >  common/rc | 8 ++++++--
-> > > >  1 file changed, 6 insertions(+), 2 deletions(-)
-> > > > 
-> > > > diff --git a/common/rc b/common/rc
-> > > > index 8060c03b7d18..de94e5a4cde4 100644
-> > > > --- a/common/rc
-> > > > +++ b/common/rc
-> > > > @@ -3075,9 +3075,13 @@ _check_udf_filesystem()
-> > > >      fi
-> > > >  
-> > > >      local device=$1
-> > > > -    local opt_arg=""
-> > > > +    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
-> > > 
-> > > It looks as though mkudffs also accepts --blocksize= for this, so it
-> > > should also be handled here, IIUC.
-> 
-> And _scratch_mkfs_sized need blocksize too. If udf support blocksize parameter,
-> you might like to take a look at that helper too, due to it always use 4096 for udf
-> blocksize.
-> 
-> Similar helpers are _scratch_mkfs_geom (maybe not suit for udf) and
-> _scratch_mkfs_blocksized.
+Hi all,
 
-Thanks for the tips, I'll have a look into those next.
+The master branch of the xfstests repository at:
 
-									Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2023.01.15 version.
+
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+e64416195116 xfs: stress test xfs_scrub(8) with freeze and ro-remount loops
+
+New commits:
+
+Baokun Li (1):
+      [e3774b281662] overlay: avoid to use NULL OVL_BASE_FSTYP for mounting
+
+Darrick J. Wong (21):
+      [d11cbe84059c] xfs/422: create a new test group for fsstress/repair racers
+      [7594bbb51c87] xfs/422: move the fsstress/freeze/scrub racing logic to common/fuzzy
+      [8726d00c07a9] xfs/422: rework feature detection so we only test-format scratch once
+      [69f8e4b9660d] fuzzy: clean up scrub stress programs quietly
+      [47b2e809e8c8] fuzzy: rework scrub stress output filtering
+      [7e8c6ae6a371] fuzzy: explicitly check for common/inject in _require_xfs_stress_online_repair
+      [1286e151137e] fuzzy: give each test local control over what scrub stress tests get run
+      [7dad01eeeda8] fuzzy: test the scrub stress subcommands before looping
+      [20df87599f66] fuzzy: make scrub stress loop control more robust
+      [ae42d50a2acd] fuzzy: abort scrub stress testing if the scratch fs went down
+      [4564b9e5c515] fuzzy: clear out the scratch filesystem if it's too full
+      [ef4ba08094d9] fuzzy: increase operation count for each fsstress invocation
+      [871ddabd2c02] fuzzy: clean up frozen fses after scrub stress testing
+      [471e77707b83] fuzzy: make freezing optional for scrub stress tests
+      [c0806ff353c6] fuzzy: allow substitution of AG numbers when configuring scrub stress test
+      [fd1fad06abd2] fuzzy: delay the start of the scrub loop when stress-testing scrub
+      [a2056ca8917b] fuzzy: enhance scrub stress testing to use fsx
+      [310faada9642] fuzzy: refactor fsmap stress test to use our helper functions
+      [cbcb0632a81b] xfs: race fsmap with readonly remounts to detect crash or livelock
+      [303c484039fd] xfs: stress test xfs_scrub(8) with fsstress
+      [e64416195116] xfs: stress test xfs_scrub(8) with freeze and ro-remount loops
+
+David Disseldorp (1):
+      [280e3f32e6ef] common/rc: drop SGI DMF specific _mount_ops_filter
+
+Filipe Manana (1):
+      [fde636203ffd] generic: test lseek with seek data mode on a one byte file
+
+Johannes Thumshirn (1):
+      [2151aae2e038] btrfs/012: check if ext4 is available
+
+Qu Wenruo (1):
+      [b2188973c251] btrfs: add a test case to verify scrub speed throttle works
+
+
+Code Diffstat:
+
+ check                  |   1 +
+ common/fuzzy           | 484 +++++++++++++++++++++++++++++++++++++++++++++++++
+ common/overlay         |   7 +-
+ common/rc              |  15 +-
+ doc/group-names.txt    |   2 +
+ ltp/fsstress.c         |  18 +-
+ src/seek_sanity_test.c |  36 ++++
+ tests/btrfs/012        |   1 +
+ tests/btrfs/282        |  83 +++++++++
+ tests/btrfs/282.out    |   3 +
+ tests/generic/706      |  36 ++++
+ tests/generic/706.out  |   2 +
+ tests/xfs/285          |  44 ++---
+ tests/xfs/285.out      |   4 +-
+ tests/xfs/286          |  46 ++---
+ tests/xfs/286.out      |   4 +-
+ tests/xfs/422          | 109 ++---------
+ tests/xfs/422.out      |   4 +-
+ tests/xfs/517          |  91 +---------
+ tests/xfs/517.out      |   4 +-
+ tests/xfs/560          |  38 ++++
+ tests/xfs/560.out      |   2 +
+ tests/xfs/561          |  39 ++++
+ tests/xfs/561.out      |   2 +
+ tests/xfs/562          |  39 ++++
+ tests/xfs/562.out      |   2 +
+ tests/xfs/563          |  40 ++++
+ tests/xfs/563.out      |   2 +
+ tests/xfs/564          |  40 ++++
+ tests/xfs/564.out      |   2 +
+ tests/xfs/565          |  38 ++++
+ tests/xfs/565.out      |   2 +
+ tests/xfs/566          |  38 ++++
+ tests/xfs/566.out      |   2 +
+ 34 files changed, 1001 insertions(+), 279 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
