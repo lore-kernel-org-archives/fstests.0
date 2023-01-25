@@ -2,133 +2,81 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0D04C05027
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Jan 2023 09:38:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCC7FC27C76
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Jan 2023 11:07:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231872AbjAWJiG (ORCPT
+        id S235612AbjAYLHz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Jan 2023 04:38:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38812 "EHLO
+        Wed, 25 Jan 2023 06:07:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231489AbjAWJiF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Jan 2023 04:38:05 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E6F14EF4
-        for <fstests@vger.kernel.org>; Mon, 23 Jan 2023 01:38:04 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S235489AbjAYLHt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Jan 2023 06:07:49 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D3844EFD;
+        Wed, 25 Jan 2023 03:07:47 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 21559341F5;
-        Mon, 23 Jan 2023 09:38:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1674466683; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=Pfp5o58ccdf2xgm1YypZhtoaQWMC//ij1ULXNxnj0Yw=;
-        b=SfYAC/DikB5RL9Rby4DjdMoKYn2d+cfWkrkdgGp9SSnMyTv5r2Tn3FOkaG2zB/aC2yhJkD
-        Vo1tDI+myaDcmpRIybB41Hi25pGsVcdiwb/neNzcghgGDAfj8TLLcKUD1eA9XYmDHJMyqY
-        nAX64btDnXbblKFfds9AArKncm7iPDk=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1674466683;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=Pfp5o58ccdf2xgm1YypZhtoaQWMC//ij1ULXNxnj0Yw=;
-        b=1eHaKXkhv35AgoSF238C68u1qE48Ml/pFZevUgMqq7ruAy1zxgjV3qzdY7TqnssEasUEd5
-        L5Hr/j6Pf7r5k3Aw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0B038134F5;
-        Mon, 23 Jan 2023 09:38:03 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id lCu3AntVzmOofQAAMHmgww
-        (envelope-from <jack@suse.cz>); Mon, 23 Jan 2023 09:38:03 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-        id 859FEA06B5; Mon, 23 Jan 2023 10:38:02 +0100 (CET)
-From:   Jan Kara <jack@suse.cz>
-To:     <fstests@vger.kernel.org>
-Cc:     Jan Kara <jack@suse.cz>
-Subject: [PATCH] common: Improve blocksize support for udf
-Date:   Mon, 23 Jan 2023 10:38:00 +0100
-Message-Id: <20230123093800.3394-1-jack@suse.cz>
-X-Mailer: git-send-email 2.35.3
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B2568614B5;
+        Wed, 25 Jan 2023 11:07:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 595EFC433EF;
+        Wed, 25 Jan 2023 11:07:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1674644866;
+        bh=L8XTixrVtCzxClUEbNSHt2TV/A3T3CPgvgKiH449VHs=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Qrq8A/27LGVku+Ap1nJ5SIaA7FLKVJdwLgrRTaxW/tStlTkuHIlTBSeD+1MHvgvnQ
+         gAUQPwq6tnyE8FQZiMz/wH9iVNYzbebxfTI+5yF+JhUgqkF3seYSpdeOEIrRWFk6ey
+         SMheLnJXgo5XYhAoS1a2o/kZOWVJkAjibcL6J0r7P53w8njv9KszhN++OwhB5XzYoU
+         w571yHkUjT4h9W45763Yz1u/HcnbaBlizZh5pPitit2CzcVZgeXrDRm2Oaz08dw5GH
+         BxCCaYBnpoqMp+LcaWtgMKuxrnfkLHA3ZO6LJF2/+KD6Z5PgBZOdj8Fz2nTQAPDqmF
+         g4GnIFT5+VJPw==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs/299: update kernel commit hash and subject
+Date:   Wed, 25 Jan 2023 11:07:39 +0000
+Message-Id: <3ccaa4e5f43538891d312ba7e9e4b38d61434d35.1674644818.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add better support for blocksize selection in _scratch_mkfs_sized
-(accept another variant of mkfs options, select correct default block
-size if not specified). Also add blocksize selection support to
-_scratch_mkfs_blocksized.
+From: Filipe Manana <fdmanana@suse.com>
 
-For _check_udf_filesystem to keep working when blocksize is not
-specified in MKFS_OPTIONS, add detection of blocksize from a mounted
-filesystem.
+Test case btrfs/299 refers to a kernel patch with a subject of:
 
-Signed-off-by: Jan Kara <jack@suse.cz>
+   "btrfs: fix logical_ino ioctl panic"
+
+However when the patch was merged, the subject was renamed to:
+
+   "btrfs: fix resolving backrefs for inline extent followed by prealloc"
+
+So update the test with the correct subject and also add the commit's
+hash from Linus' tree.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- common/rc | 22 ++++++++++++++++------
- 1 file changed, 16 insertions(+), 6 deletions(-)
+ tests/btrfs/299 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index 7f80afe7aeec..e49918c9deab 100644
---- a/common/rc
-+++ b/common/rc
-@@ -922,9 +922,15 @@ _scratch_mkfs_sized()
- 	btrfs)
- 		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-s ?+([0-9]+).*/\1/p'`
- 		;;
--	ext2|ext3|ext4|ext4dev|udf|reiser4|ocfs2|reiserfs)
-+	ext2|ext3|ext4|ext4dev|reiser4|ocfs2|reiserfs)
- 		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 		;;
-+	udf)
-+		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-+		if [ -z "$def_blksz" ]; then
-+			def_blksz=512
-+		fi
-+		;;
- 	jfs)
- 		def_blksz=4096
- 		;;
-@@ -1116,6 +1122,9 @@ _scratch_mkfs_blocksized()
- 		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
- 								$SCRATCH_DEV
- 		;;
-+	udf)
-+		_scratch_mkfs -b $blocksize
-+		;;
- 	*)
- 		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
- 		;;
-@@ -3074,17 +3083,18 @@ _check_udf_filesystem()
- 	return
-     fi
+diff --git a/tests/btrfs/299 b/tests/btrfs/299
+index 42a08317..8ed23ac5 100755
+--- a/tests/btrfs/299
++++ b/tests/btrfs/299
+@@ -24,7 +24,8 @@ _require_scratch
+ _require_xfs_io_command "falloc" "-k"
+ _require_btrfs_command inspect-internal dump-tree
+ _require_btrfs_command inspect-internal logical-resolve
+-_fixed_by_kernel_commit xxxxxxxx "btrfs: fix logical_ino ioctl panic"
++_fixed_by_kernel_commit 560840afc3e6 \
++	"btrfs: fix resolving backrefs for inline extent followed by prealloc"
  
-+    local device=$1
-+    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-+    if [ -z "$blksz" ]; then
-+	blksz=512
-+    fi
-     # Is the filesystem mounted?
-     local type=`_fs_type $device`
-     if [ "$type" = "$FSTYP" ]; then
-+	blksz=`blockdev --getbsz $device`
- 	local mountpoint=`_umount_or_remount_ro $device`
-     fi
- 
--    local device=$1
--    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
--    if [ -z "$blksz" ]; then
--	blksz=512
--    fi
-     local opt_arg="-ecclength 1 -blocksize $blksz"
-     if [ $# -eq 2 ]; then
- 	opt_arg+=" -lastvalidblock $(( $2 - 1 ))"
+ dump_tree() {
+ 	$BTRFS_UTIL_PROG inspect-internal dump-tree $SCRATCH_DEV
 -- 
-2.35.3
+2.35.1
 
