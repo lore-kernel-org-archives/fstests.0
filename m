@@ -2,70 +2,70 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33E8AC27C76
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Jan 2023 22:03:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4E4BC54E94
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Jan 2023 22:43:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229668AbjAYWDU (ORCPT
+        id S229668AbjAYWnN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Jan 2023 17:03:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55044 "EHLO
+        Wed, 25 Jan 2023 17:43:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45122 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229816AbjAYWDT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Jan 2023 17:03:19 -0500
+        with ESMTP id S231225AbjAYWnM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Jan 2023 17:43:12 -0500
 Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C0E94608D;
-        Wed, 25 Jan 2023 14:03:18 -0800 (PST)
-Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
-        by mailout.nyi.internal (Postfix) with ESMTP id 5ED3E5C047F;
-        Wed, 25 Jan 2023 17:03:14 -0500 (EST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9915193F4;
+        Wed, 25 Jan 2023 14:43:11 -0800 (PST)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id 1138D5C053F;
+        Wed, 25 Jan 2023 17:43:11 -0500 (EST)
 Received: from mailfrontend1 ([10.202.2.162])
-  by compute1.internal (MEProxy); Wed, 25 Jan 2023 17:03:14 -0500
+  by compute3.internal (MEProxy); Wed, 25 Jan 2023 17:43:11 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
         :content-transfer-encoding:date:date:from:from:in-reply-to
         :message-id:mime-version:reply-to:sender:subject:subject:to:to;
-         s=fm3; t=1674684194; x=1674770594; bh=7tJNz6Sz0IXyW6vautvaD/HNm
-        ADeLucsnW6kfhveJ6g=; b=arXkpKrz+yn2DsFmUBdTscsMuiMSGBpbcd8OCY7+H
-        PbimijxBIQ8fW3bQPSK2j9zDNBPl8cZs9GHRhKUEWEtbDshNPKpbhXwgRgQ6Foj5
-        /rqZkNAuW1WdkH2YLZiQrCzVqVj1AoD9Y6Mo0r8TSdxBMIdLgkLuTHhZd9nkKTD5
-        cLuGmw+tpezL3AKSV9X2jLvZYp3iXJln20EFIlI96QUs+MbUoroH1PLOEQ6N3iQG
-        99K8A5zKmKez0mhoDfNvCw1xMYia+Evyh2Xki55vajbMnqn1zwruex8gzv2QGbYm
-        tnbsY2hKNRlO38qcqlCJ5i89dBgnPSx1v0rNGLodjoCcw==
+         s=fm3; t=1674686591; x=1674772991; bh=0IO/GIMPFXig6kNvOxbki0PKM
+        EmBoJp/ITuVT3/Rjqw=; b=RI4roIqU8gcYdQVNnW54LQ91QDfqAJzADVcclQRXg
+        lW8PariOxBFl7QklUuNDm//D/XOx0bg12bkCdndjnK9VNAaYE5No3NdPYrYFtO8i
+        0uC7sBHJubVX8D1heucA62vRbsoqU9ZEEVEYg4n1Sb/RWq/ASFpxgXfdpn7PvbuC
+        SR7gabnp5iETRPmNHS3dtBJ28xiwJOYJmB6IfI2A0TqNkwGi5IPehg7hvImCZMUo
+        g+6+3ExdGRl43ASGlBmaFIuou/mp6IBzQXHa2x6gpH2ddRVg/2cAds843KNRR/ZS
+        BqAA+DviFlpNhQ+K2P0JCk1bc3op6YakcLk3QZbypVlkA==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
         messagingengine.com; h=cc:content-transfer-encoding:date:date
         :feedback-id:feedback-id:from:from:in-reply-to:message-id
         :mime-version:reply-to:sender:subject:subject:to:to:x-me-proxy
         :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
-        1674684194; x=1674770594; bh=7tJNz6Sz0IXyW6vautvaD/HNmADeLucsnW6
-        kfhveJ6g=; b=MKfIY6xxdvA+V7+3Zy7wtE+sIgXvjw8/srBy7/KMYULyW6PeodV
-        wmUs14uhk7xvmRO7DXHe++7Vw2S9/FO5ShVvdRUs9qc+zR/8lCQdahtbeEMoH0OG
-        lAIVza8KTZ8j4ukFGaV3RVOXTFtoF0Gea0zaCfvDLSR+0VQkzFhfTZo1U+vv+U8j
-        cckF1UwDsREXBwo/93juxWOWPfXjOxzzIGBRlCDjabdDWr4QnvjMIUTuDiHY15Gv
-        QpEwh8ZVVVyYX6TCspz+NUsl+8jwVglcWUtW1zDYvm+7zfd7p0NvdA8TrbbxL5P+
-        zpNmx5Z5M8fAYkUc4A5bWZUVKDLCBY5mvHw==
-X-ME-Sender: <xms:IqfRYwzBJlr72s8D9cgLXOYzPrYJeQROfkuVCsQ6X_0Zw157R-SlZg>
-    <xme:IqfRY0QW99qDTR_ViuIr2bgD2CJUVfbnsOTasdOpPiL-zoOvkqOLbtiXIUU5w5Cfp
-    7Sd1rYPTqqZYSbq-wk>
-X-ME-Received: <xmr:IqfRYyXrRa9-t3BVaBnOG3cUxZ_po0QL7oLxbuaGs5l1-7OdkrJj54Tz>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedruddvvddgudehkecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
-    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
-    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
-    duteefkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
-    rghilhhfrhhomhepsghorhhishessghurhdrihho
-X-ME-Proxy: <xmx:IqfRY-jIB5NwktK9sHX056LwggP2MsooBXNh81wuVmEa0A9fnqbgyA>
-    <xmx:IqfRYyC_9DqndF1eq_fTvBthU6EURrH8ghhCtCiKpHzWBlSW60j5og>
-    <xmx:IqfRY_K8UnBmsKCT4dm6FkdF_agfIlaOPDycivibVCknOYjekr4Z0w>
-    <xmx:IqfRYz4JqAa5ht3Y-jNEIoLMDiPt4gldUBNrYXDd8XIaDmHs6kycQg>
+        1674686591; x=1674772991; bh=0IO/GIMPFXig6kNvOxbki0PKMEmBoJp/ITu
+        VT3/Rjqw=; b=mSHHl4eOntPo3sUvg1jYgYXAqctOziqwBMjLDC3s5i+9kRP8+kH
+        tT58hlFFrfQ/nKgB2Lodun+tzRTyeHaDVqOt3T145uU5joCvcZ4/EL16GRJXVXUq
+        YdnoHdzZ1f4jykACCxU7gynIXtsTyKb/NShyBLEYXMDHrR9LgmuKYmNJXfIKOVBi
+        Yj2By70QhEcXWe2cNkJiHc2c7JbDnh9bDBf06XjGzNcgWcNHsa6bOP0k86zpXEbL
+        wt0ivMyQI46T0SkN+vf8J4/0PCI5kWYMj6x7LsoyXeUco/c6242YwyGsjq8vMsJX
+        AKPa/20vGkhX+zhjapMFtBAyKgwuzklbbYw==
+X-ME-Sender: <xms:frDRYwc03_jJjlonTNzSD0lJ1l89WiDDEds-gVAIxFob4njH558VIA>
+    <xme:frDRYyONMdCGdd4z_8o_SMaO8bUlvKcVISOkXi7-Tmyh3oyBF7JUEnwUxwiYKsC1v
+    Ex17wLSweGAo6p3oUs>
+X-ME-Received: <xmr:frDRYxjiipcGY6udcoNugvttaWCpIxTv01g92ceYzAuC9C9hG5N0MgfQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedruddvfecutefuodetggdotefrodftvfcurf
+    hrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertdertddtne
+    cuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecu
+    ggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekudduteefke
+    fffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhf
+    rhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:frDRY19AR9C1UCFFg6xfCm1CAkdkSSwZnMwH5Zqdek22nHm79Pq5og>
+    <xmx:frDRY8uGA6hydFAr9_3RZap_0TBwXmKEqoPkulXXhJyG6CE55DRBxg>
+    <xmx:frDRY8FipYKAHFNPmCd-LIHgve_aeje6AaLHDXzruNbT0tfZ6b-R-Q>
+    <xmx:f7DRY5VYPIRlBtlr35x9NuqHMfuTFkUxnpcqM4q_uvDyt_C36olO8Q>
 Feedback-ID: i083147f8:Fastmail
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 25 Jan 2023 17:03:13 -0500 (EST)
+ 25 Jan 2023 17:43:10 -0500 (EST)
 From:   Boris Burkov <boris@bur.io>
 To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
         fstests@vger.kernel.org
-Subject: [PATCH] btrfs: test block group size class loading logic
-Date:   Wed, 25 Jan 2023 14:03:12 -0800
-Message-Id: <6f1788a52cea8d1028844d4815eb03ad666d675f.1674684147.git.boris@bur.io>
+Subject: [PATCH v2] btrfs: test block group size class loading logic
+Date:   Wed, 25 Jan 2023 14:43:09 -0800
+Message-Id: <4ea6df6e4f96b6e6101a16a1c94fc967d54558c7.1674686506.git.boris@bur.io>
 X-Mailer: git-send-email 2.38.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -77,22 +77,27 @@ Add a new test which checks that size classes in freshly loaded block
 groups after a cycle mount match size classes before going down
 
 Depends on the kernel patch:
-btrfs: fix size class loading logic
+btrfs: add size class stats to sysfs
 
 Signed-off-by: Boris Burkov <boris@bur.io>
 ---
- tests/btrfs/283     | 50 +++++++++++++++++++++++++++++++++++++++++++++
+v2: drop the fixed_by_kernel_commit since the fix is not out past the
+btrfs development tree, so the fix is getting rolled in to the original
+broken commit. Modified the commit message to note the dependency on the
+new sysfs counters.
+
+ tests/btrfs/283     | 49 +++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/283.out |  2 ++
- 2 files changed, 52 insertions(+)
+ 2 files changed, 51 insertions(+)
  create mode 100755 tests/btrfs/283
  create mode 100644 tests/btrfs/283.out
 
 diff --git a/tests/btrfs/283 b/tests/btrfs/283
 new file mode 100755
-index 00000000..cdd7bcc5
+index 00000000..b3614786
 --- /dev/null
 +++ b/tests/btrfs/283
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,49 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
@@ -103,7 +108,6 @@ index 00000000..cdd7bcc5
 +#
 +. ./common/preamble
 +_begin_fstest auto quick mount
-+_fixed_by_kernel_commit XXXXXXXX "btrfs: fix size class loading logic"
 +
 +sysfs_size_classes() {
 +	local uuid="$(findmnt -n -o UUID "$SCRATCH_MNT")"
