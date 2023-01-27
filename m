@@ -2,70 +2,181 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07DE5C54EAA
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Jan 2023 07:02:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4ACCC38142
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 Jan 2023 12:21:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229956AbjA0HCS (ORCPT
+        id S232573AbjA0MVC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 27 Jan 2023 02:02:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59234 "EHLO
+        Fri, 27 Jan 2023 07:21:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229948AbjA0HCQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 Jan 2023 02:02:16 -0500
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C451B1E1D2;
-        Thu, 26 Jan 2023 23:02:15 -0800 (PST)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 61E3F68D0E; Fri, 27 Jan 2023 08:02:10 +0100 (CET)
-Date:   Fri, 27 Jan 2023 08:02:09 +0100
-From:   Christoph Hellwig <hch@lst.de>
-To:     David Sterba <dsterba@suse.cz>
-Cc:     Josef Bacik <josef@toxicpanda.com>, Chris Mason <clm@fb.com>,
-        David Sterba <dsterba@suse.com>,
-        "Darrick J. Wong" <djwong@kernel.org>, linux-btrfs@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
-Subject: test not in the auto group, was: Re: [PATCH 23/34] btrfs: allow
- btrfs_submit_bio to split bios
-Message-ID: <20230127070209.GA3810@lst.de>
-References: <20230121065031.1139353-1-hch@lst.de> <20230121065031.1139353-24-hch@lst.de> <Y9GkVONZJFXVe8AH@localhost.localdomain> <20230126052143.GA28195@lst.de> <Y9K7pZq2h9aXiKCJ@localhost.localdomain> <20230126174611.GC15999@lst.de> <20230126183304.GZ11562@suse.cz>
+        with ESMTP id S234337AbjA0MU1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Jan 2023 07:20:27 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93A9B8626A;
+        Fri, 27 Jan 2023 04:17:19 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 62DAC61B76;
+        Fri, 27 Jan 2023 12:17:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C35ACC433EF;
+        Fri, 27 Jan 2023 12:17:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1674821837;
+        bh=SDXjR/Uz9gvxlij58B8eJYGYu04rFY4AInu4uPqjaWI=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Exq7pQz+TmUFdIAJx14HjCSo6jHmq7oNcALA5XTs8j0RKzlVnvc7vPHFVqjU5i+eu
+         J4mBHNpfWWkLivcr5zBsBPQJq96xrlUhs9jCdF57G3iqRluPsgqiJ2+dK1UvG0lWLX
+         zsa7mzEL9DZkX0A0NJ0Z3BGLCDInlWr9lo9Fig5cB+Uum+cH0tlKJBu+8DT20zbO8U
+         3lcA+tX65O6ikFP6eDSM2nNA00fLLgf3b8W+vaw9joT8G4KEc7t9p+FIl7PgQjRiz5
+         HIFPxP8gMno4zH7fyNwryVuPWSpsbvKATWPWtLwlxGqURvCQEQkDrrbOvhPsK0iZUD
+         faGW5RkYkpDZg==
+Received: by mail-oi1-f176.google.com with SMTP id r132so4042539oif.10;
+        Fri, 27 Jan 2023 04:17:17 -0800 (PST)
+X-Gm-Message-State: AFqh2kqHIi351GhpRLX4gZOJy6ng7/CifEe+E+V9Tz84kcqAh418Nh81
+        nwjF8IKuH+IDz6EUOu1MRltAmSNXMrxSpufoLPA=
+X-Google-Smtp-Source: AMrXdXs/bPR9r+Z1RYg7l0x8F8A81lKc2qxA8sjhf4e8jMipoz6D+TqGm0vy2bvaUmrbUTzeqcubADNkA1K3gzPvMdc=
+X-Received: by 2002:a05:6808:1b28:b0:35e:ac60:2452 with SMTP id
+ bx40-20020a0568081b2800b0035eac602452mr1857650oib.92.1674821836829; Fri, 27
+ Jan 2023 04:17:16 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230126183304.GZ11562@suse.cz>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+References: <fa66499531a46105f295af0f29d9fc253f361d78.1674755349.git.boris@bur.io>
+In-Reply-To: <fa66499531a46105f295af0f29d9fc253f361d78.1674755349.git.boris@bur.io>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Fri, 27 Jan 2023 12:16:40 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4Uc2=nZxCRkzMSd9DOH8DpsT1Lmac0mfXNDyS+7Vio7w@mail.gmail.com>
+Message-ID: <CAL3q7H4Uc2=nZxCRkzMSd9DOH8DpsT1Lmac0mfXNDyS+7Vio7w@mail.gmail.com>
+Subject: Re: [PATCH v4] btrfs: test block group size class loading logic
+To:     Boris Burkov <boris@bur.io>
+Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 26, 2023 at 07:33:04PM +0100, David Sterba wrote:
-> > Oh, I guess the lack of auto group means I've never tested it.  But
-> > it's a fairly bad bug, and I'm surprised nothing in auto hits an
-> > error after a bio split.  I'll need to find out if I can find a simpler
-> > reproducer as this warrants a regression test.
-> 
-> The 'auto' group is good for first tests, I'm running 'check -g all' on
-> my VM setups. If this is enough to trigger errors then we probably don't
-> need a separate regression test.
+On Thu, Jan 26, 2023 at 6:02 PM Boris Burkov <boris@bur.io> wrote:
+>
+> Add a new test which checks that size classes in freshly loaded block
+> groups after a cycle mount match size classes before going down
+>
+> Depends on the kernel patch:
+> btrfs: add size class stats to sysfs
+>
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+> Changelog:
+> v4:
+> Fix dump typo in _fixed_by_kernel_commit (left out leading underscore
+> copy+pasting). Re-tested happy and sad case...
+>
+> v3:
+> Re-add fixed_by_kernel_commit, but for the stats patch which is
+> required, but not a fix in the strictest sense.
+>
+> v2:
+> Drop the fixed_by_kernel_commit since the fix is not out past the btrfs
+> development tree, so the fix is getting rolled in to the original broken
+> commit. Modified the commit message to note the dependency on the new
+> sysfs counters.
+>
+>
+>  tests/btrfs/283     | 50 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/283.out |  2 ++
+>  2 files changed, 52 insertions(+)
+>  create mode 100755 tests/btrfs/283
+>  create mode 100644 tests/btrfs/283.out
+>
+> diff --git a/tests/btrfs/283 b/tests/btrfs/283
+> new file mode 100755
+> index 00000000..2176c8e4
+> --- /dev/null
+> +++ b/tests/btrfs/283
+> @@ -0,0 +1,50 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 283
+> +#
+> +# Test that mounting a btrfs filesystem properly loads block group size classes.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick mount
 
-Hmm.  The xfstests README says:
+Why the mount group? We aren't testing mount options.
+It's a bit odd to me.
 
-"By default the tests suite will run all the tests in the auto group. These
- are the tests that are expected to function correctly as regression tests,
- and it excludes tests that exercise conditions known to cause machine
- failures (i.e. the "dangerous" tests)."
+> +_fixed_by_kernel_commit xxxxxxxx "btrfs: add size class stats to sysfs".
 
-and my assumptions over decades of xfstests use has been that only tests
-that are broken, non-deterministic, or cause recent upstream kernels
-to crash are not in auto.
+Should be _wants_kernel_commit here, because it's a new feature and
+not a bug fix.
 
-Is there some kind of different rule for btrfs?  e.g. btrfs/125
-seems to complete quickly and does not actually seem to be dangerous.
-Besides that there's btrfs/185, which is very quick fuzzer, and btrfs/198
-which is a fairly normal test as far as I can tell.
+> +
+> +sysfs_size_classes() {
+> +       local uuid="$(findmnt -n -o UUID "$SCRATCH_MNT")"
+> +       cat "/sys/fs/btrfs/$uuid/allocation/data/size_classes"
+> +}
+> +
+> +_supported_fs btrfs
+> +_require_scratch
+> +_require_btrfs_fs_sysfs
 
-The generic tests also have a few !auto tests that look like they
-should be mostly in the auto group as well, in addition to a few broken
-and dangerous ones, and the blockdev ones from Darrick that should
-probably move to blktests.
+This alone is not enough.
 
-XFS mostly seems to have dangerous fuzzer tests in the !auto category.
+What if we are running in a kernel with btrfs' sysfs support but
+without the size classes?
+I.e. the allocation/data/size_classes path does not exist.
+
+Then the test fails with:
+
+cat: /sys/fs/btrfs/95da1e36-8411-468a-abeb-71652dc2092b/allocation/data/size_classes:
+No such file or directory
+
+Instead the test just be skipped, i.e. calling:  _notrun "allocation
+size classes not supported"
+
+Thanks.
+
+> +
+> +f="$SCRATCH_MNT/f"
+> +small=$((16 * 1024))
+> +medium=$((1024 * 1024))
+> +large=$((16 * 1024 * 1024))
+> +
+> +_scratch_mkfs >/dev/null
+> +_scratch_mount
+> +# Write files with extents in each size class
+> +$XFS_IO_PROG -fc "pwrite -q 0 $small" $f.small
+> +$XFS_IO_PROG -fc "pwrite -q 0 $medium" $f.medium
+> +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large
+> +# Sync to force the extent allocation
+> +sync
+> +pre=$(sysfs_size_classes)
+> +
+> +# cycle mount to drop the block group cache
+> +_scratch_cycle_mount
+> +
+> +# Another write causes us to actually load the block groups
+> +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large.2
+> +sync
+> +
+> +post=$(sysfs_size_classes)
+> +diff <(echo $pre) <(echo $post)
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/283.out b/tests/btrfs/283.out
+> new file mode 100644
+> index 00000000..efb2c583
+> --- /dev/null
+> +++ b/tests/btrfs/283.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 283
+> +Silence is golden
+> --
+> 2.39.1
+>
