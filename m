@@ -2,159 +2,284 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56B02C54EAA
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Jan 2023 16:55:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 044A5C54EED
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Jan 2023 17:19:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236268AbjA3QzR (ORCPT
+        id S237816AbjA3RTJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Jan 2023 11:55:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53124 "EHLO
+        Mon, 30 Jan 2023 12:19:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40010 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235920AbjA3QzQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Jan 2023 11:55:16 -0500
+        with ESMTP id S235858AbjA3RSy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Jan 2023 12:18:54 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9CDA3D931
-        for <fstests@vger.kernel.org>; Mon, 30 Jan 2023 08:54:31 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 661F22F7BE
+        for <fstests@vger.kernel.org>; Mon, 30 Jan 2023 09:18:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675097670;
+        s=mimecast20190719; t=1675099088;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=O+gNtsCfOW/4nZogkNifctL/uC+p/h1xy6+ZEqixrUE=;
-        b=gRm45/fRomtUlBj7h6HjTf0RljUyfaNq0h+4T7iQV6PDsKaLgTkCYGKCQjb5u4bmtXNXnZ
-        VZZdg8Gz8WFSok3uidXoF969Z46IVzC/Ha30Gpb1rcmPbmWsY638qrKv1xHj5bqlgK192l
-        3R+Oz8VQlvDfyukVqXEV0e9NzAdRQR8=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=CdFNcsfDEYS5tTq8lCJfmIeeOHHsyKjGcXyukBwUxe4=;
+        b=Xv7vSwGbxV3FIAIXxLwQRPlfhYCToYVrPWgIpHXVT8ml7bJ/1jMQLyV2AjFUmOTmDufhyC
+        Cz6/BiGoqYiUg0nrblemmHNvq12+nldYt8B/pz/1Bn5Z4HjaWs0zvlhV3BuN38fvQ+tWWL
+        UwCgwL9od5EIioQx3Wvx6JTYTmoNPG8=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-53-aHSDp1U4PDG7Ycc92j1vgQ-1; Mon, 30 Jan 2023 11:54:29 -0500
-X-MC-Unique: aHSDp1U4PDG7Ycc92j1vgQ-1
-Received: by mail-pg1-f198.google.com with SMTP id k16-20020a635a50000000b0042986056df6so5381810pgm.2
-        for <fstests@vger.kernel.org>; Mon, 30 Jan 2023 08:54:29 -0800 (PST)
+ us-mta-561-a3Ui_DmpNBGbu-CHsIY2gQ-1; Mon, 30 Jan 2023 12:18:07 -0500
+X-MC-Unique: a3Ui_DmpNBGbu-CHsIY2gQ-1
+Received: by mail-pl1-f197.google.com with SMTP id m7-20020a170902db0700b00194bd3c810aso6942684plx.23
+        for <fstests@vger.kernel.org>; Mon, 30 Jan 2023 09:18:07 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=O+gNtsCfOW/4nZogkNifctL/uC+p/h1xy6+ZEqixrUE=;
-        b=q9u78X+UGwTQVPmGdvC7n/ygkG7GussOrNeRs6WRkunFnC1Yk0KEKJqPkgZQovIvur
-         bgb3hzJDB0wfxPaYnWCxwtBubaxrS5xo+8vGR4JzJb2VxvsBvOIxlKo1WazlKeIoNI/g
-         pC0/J16OKYoVVujxxa6YHpQL7b4xEsU6WZlQogs0FD9CUisNsvMATJxoI9sVNn9b3Ud0
-         KPvHegZr9+HDZP0gGWjJTiw74RcQ0S+Y/xC7wmvftEOf/Ibz005yoHtd5q02OXgjRnAI
-         nXG3OrKkM6Q7eEC2fbVTjEhnflbdOAWnEwgDO5DVgNObhdzSrlaToWw7+YMPoKo+/mBY
-         k1Kw==
-X-Gm-Message-State: AO0yUKW8jI2RPibakBAccBgKOYpSsF4ez/0rxZ+4SbV4OYx4OkEaoM/O
-        XpVc5vTDaXBok7yxE2Nurjen973mGRgNclXMkG2lYMacQsrHjdZRiyQnKav4GzGsVq+5tMCOMBW
-        SMBL0nG26W+bAg0NqUQ==
-X-Received: by 2002:a17:903:4093:b0:194:7f1f:7dfc with SMTP id z19-20020a170903409300b001947f1f7dfcmr6663449plc.42.1675097668131;
-        Mon, 30 Jan 2023 08:54:28 -0800 (PST)
-X-Google-Smtp-Source: AK7set/k4w3gI59j4eCjU3/YLNbugPpxZgEPi3d7LZIBXroFjIg1nx6pvDKOum6ojBvtpUiWWsXekg==
-X-Received: by 2002:a17:903:4093:b0:194:7f1f:7dfc with SMTP id z19-20020a170903409300b001947f1f7dfcmr6663437plc.42.1675097667788;
-        Mon, 30 Jan 2023 08:54:27 -0800 (PST)
+        bh=CdFNcsfDEYS5tTq8lCJfmIeeOHHsyKjGcXyukBwUxe4=;
+        b=M9PMa3qMGtv0du/3qjvn9EZ1XRU+hWPMvfZojiJXzpDeDqoly4UA97PxuHgWBB+yRz
+         kLqMb65a6GEKjR+woSM4sxxJn/AsFrJfnrw3dJX4Qg7IxED/dTqQPYe1ix698smXdtsb
+         R42Ba8BkRhZDWRuYr4tO1LmXbC6JE4G2Ccy2hqLDUrnvDZHBFNFz4pX+qENkx5Ufp1d2
+         C+L16dCALEVbIR4T0B+sFyYdbXZnc3BiKwRyxG/sM4OQRXbg0kFBlWD7/AOSthDBGyhy
+         C/vWTvoOpq9yKKkxJcUWT9f18gpFCF3FW934h+eWpvZMjjE1wE+h3lO7ZvQeGZlu8+rk
+         sC3Q==
+X-Gm-Message-State: AO0yUKUfKLsYV52DJAgX45kZ7MtyQ9Xt1YQt1Sv5EZnfIYCo48LbKQ8E
+        /Y4iUP2xKPyuVWevTXj2keh2sSmFoi7oc3ldSdHeoszF5zTPLZLUsWGS/wIhr2+iGieB4un9aV0
+        2qLhvHmTTxNRW2d2exw==
+X-Received: by 2002:a05:6a20:3c9f:b0:bd:f7a:ef06 with SMTP id b31-20020a056a203c9f00b000bd0f7aef06mr5339580pzj.47.1675099085595;
+        Mon, 30 Jan 2023 09:18:05 -0800 (PST)
+X-Google-Smtp-Source: AK7set95SZ+VjJLB/l/hP5yjixqjezd3trOuuOcnbhCocQp2kI4BHGBXdYTV28+4YWdtmms+ihnB/Q==
+X-Received: by 2002:a05:6a20:3c9f:b0:bd:f7a:ef06 with SMTP id b31-20020a056a203c9f00b000bd0f7aef06mr5339553pzj.47.1675099085203;
+        Mon, 30 Jan 2023 09:18:05 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id jh2-20020a170903328200b00192d9b86318sm8057367plb.137.2023.01.30.08.54.26
+        by smtp.gmail.com with ESMTPSA id v15-20020a63bf0f000000b0047917991e83sm7038045pgf.48.2023.01.30.09.18.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Jan 2023 08:54:27 -0800 (PST)
-Date:   Tue, 31 Jan 2023 00:54:23 +0800
+        Mon, 30 Jan 2023 09:18:04 -0800 (PST)
+Date:   Tue, 31 Jan 2023 01:18:00 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Jan Kara <jack@suse.cz>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common: Improve blocksize support for udf
-Message-ID: <20230130165423.r2okhrub4mkdhbwx@zlang-mailbox>
-References: <20230123093800.3394-1-jack@suse.cz>
+To:     Hironori Shiina <shiina.hironori@gmail.com>
+Cc:     fstests@vger.kernel.org,
+        Hironori Shiina <shiina.hironori@fujitsu.com>
+Subject: Re: [PATCH v2 1/2] xfs: add helper to create fake root inode
+Message-ID: <20230130171800.dohjcyghqycvbppm@zlang-mailbox>
+References: <20230112222242.153502-1-shiina.hironori@fujitsu.com>
+ <20230112222242.153502-2-shiina.hironori@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230123093800.3394-1-jack@suse.cz>
+In-Reply-To: <20230112222242.153502-2-shiina.hironori@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 23, 2023 at 10:38:00AM +0100, Jan Kara wrote:
-> Add better support for blocksize selection in _scratch_mkfs_sized
-> (accept another variant of mkfs options, select correct default block
-> size if not specified). Also add blocksize selection support to
-> _scratch_mkfs_blocksized.
+On Thu, Jan 12, 2023 at 05:22:41PM -0500, Hironori Shiina wrote:
+> xfsdump used to cause a problem when there is an inode whose number is
+> lower than the root inode number. This patch adds a helper function to
+> reproduce such a situation for regression tests.
 > 
-> For _check_udf_filesystem to keep working when blocksize is not
-> specified in MKFS_OPTIONS, add detection of blocksize from a mounted
-> filesystem.
-> 
-> Signed-off-by: Jan Kara <jack@suse.cz>
+> Signed-off-by: Hironori Shiina <shiina.hironori@fujitsu.com>
 > ---
-
-Is this patch a replacement of below patch ?
-  [PATCH 1/2] common: Provide blocksize and ecclength to udf fsck
-
-Due to you've sent a patchset, and that 2nd patch has been reviewed but
-not merged:
-  [PATCH 2/2] common: Unmount udf filesystem prior checking
-
-I'm not sure if you write this one singly to replace the 1st patch, or be a
-supplement. Can you send these 2 or 3 patches in one patchset :)
-
-Thanks,
-Zorro
-
->  common/rc | 22 ++++++++++++++++------
->  1 file changed, 16 insertions(+), 6 deletions(-)
+>  common/xfs    | 38 ++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/545 | 31 ++++---------------------------
+>  tests/xfs/554 | 35 ++++++-----------------------------
+>  tests/xfs/557 | 31 ++++---------------------------
+>  4 files changed, 52 insertions(+), 83 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index 7f80afe7aeec..e49918c9deab 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -922,9 +922,15 @@ _scratch_mkfs_sized()
->  	btrfs)
->  		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-s ?+([0-9]+).*/\1/p'`
->  		;;
-> -	ext2|ext3|ext4|ext4dev|udf|reiser4|ocfs2|reiserfs)
-> +	ext2|ext3|ext4|ext4dev|reiser4|ocfs2|reiserfs)
->  		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
->  		;;
-> +	udf)
-> +		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-> +		if [ -z "$def_blksz" ]; then
-> +			def_blksz=512
-> +		fi
-> +		;;
->  	jfs)
->  		def_blksz=4096
->  		;;
-> @@ -1116,6 +1122,9 @@ _scratch_mkfs_blocksized()
->  		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
->  								$SCRATCH_DEV
->  		;;
-> +	udf)
-> +		_scratch_mkfs -b $blocksize
-> +		;;
->  	*)
->  		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
->  		;;
-> @@ -3074,17 +3083,18 @@ _check_udf_filesystem()
->  	return
->      fi
+> diff --git a/common/xfs b/common/xfs
+> index 7eee76c0..745d48d1 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1547,3 +1547,41 @@ _xfs_get_inode_core_bytes()
+>  		echo 96
+>  	fi
+>  }
+> +
+> +# Create a file with a lower inode number than the root inode number. For this
+> +# creation, this function runs mkfs and mount on the scratch device with
+> +# options. This function prints the root inode number and the created inode
+> +# number.
+> +_xfs_create_fake_root()
+
+If this function only work for SCRATCH_DEV, better to use "_scratch_" prefix,
+e.g. _scratch_xfs_create_fake_root()
+
+> +{
+> +	local root_inum
+> +	local inum
+> +
+> +	# A large stripe unit will put the root inode out quite far
+> +	# due to alignment, leaving free blocks ahead of it.
+> +	_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1 || _fail "mkfs failed"
+> +
+> +	# Mounting /without/ a stripe should allow inodes to be allocated
+> +	# in lower free blocks, without the stripe alignment.
+> +	_scratch_mount -o sunit=0,swidth=0
+> +
+> +	local root_inum=$(stat -c %i $SCRATCH_MNT)
+> +
+> +	# Consume space after the root inode so that the blocks before
+> +	# root look "close" for the next inode chunk allocation
+> +	$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
+> +
+> +	# And make a bunch of inodes until we (hopefully) get one lower
+> +	# than root, in a new inode chunk.
+> +	echo "root_inum: $root_inum" >> $seqres.full
+> +	for i in $(seq 0 4096) ; do
+> +		fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
+> +		touch $fname
+> +		inum=$(stat -c "%i" $fname)
+> +		[[ $inum -lt $root_inum ]] && break
+> +	done
+> +
+> +	echo "created: $inum" >> $seqres.full
+> +
+> +	echo "$root_inum $inum"
+
+This function might fail to get fake root, right? If it fails, as a common
+helper, I think it should _fail or _notrun(?) or return something to tell
+the caller.
+
+> +}
+> diff --git a/tests/xfs/545 b/tests/xfs/545
+> index ccb0dd6c..83785155 100755
+> --- a/tests/xfs/545
+> +++ b/tests/xfs/545
+> @@ -17,33 +17,10 @@ _supported_fs xfs
+>  _require_xfs_io_command "falloc"
+>  _require_scratch
 >  
-> +    local device=$1
-> +    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-> +    if [ -z "$blksz" ]; then
-> +	blksz=512
-> +    fi
->      # Is the filesystem mounted?
->      local type=`_fs_type $device`
->      if [ "$type" = "$FSTYP" ]; then
-> +	blksz=`blockdev --getbsz $device`
->  	local mountpoint=`_umount_or_remount_ro $device`
->      fi
+> -# A large stripe unit will put the root inode out quite far
+> -# due to alignment, leaving free blocks ahead of it.
+> -_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1
+> -
+> -# Mounting /without/ a stripe should allow inodes to be allocated
+> -# in lower free blocks, without the stripe alignment.
+> -_scratch_mount -o sunit=0,swidth=0
+> -
+> -root_inum=$(stat -c %i $SCRATCH_MNT)
+> -
+> -# Consume space after the root inode so that the blocks before
+> -# root look "close" for the next inode chunk allocation
+> -$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
+> -
+> -# And make a bunch of inodes until we (hopefully) get one lower
+> -# than root, in a new inode chunk.
+> -echo "root_inum: $root_inum" >> $seqres.full
+> -for i in $(seq 0 4096) ; do
+> -	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
+> -	touch $fname
+> -	inum=$(stat -c "%i" $fname)
+> -	[[ $inum -lt $root_inum ]] && break
+> -done
+> -
+> -echo "created: $inum" >> $seqres.full
+> -
+> -[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
+> +# Create a filesystem which contains a fake root inode
+> +inums=($(_xfs_create_fake_root))
+> +root_inum=${inums[0]}
+> +fake_inum=${inums[1]}
 >  
-> -    local device=$1
-> -    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-> -    if [ -z "$blksz" ]; then
-> -	blksz=512
-> -    fi
->      local opt_arg="-ecclength 1 -blocksize $blksz"
->      if [ $# -eq 2 ]; then
->  	opt_arg+=" -lastvalidblock $(( $2 - 1 ))"
+>  # Now try a dump and restore. Cribbed from xfs/068
+>  _create_dumpdir_stress
+> diff --git a/tests/xfs/554 b/tests/xfs/554
+> index 65084cb3..22ce7e28 100755
+> --- a/tests/xfs/554
+> +++ b/tests/xfs/554
+> @@ -21,33 +21,10 @@ _require_xfs_io_command "falloc"
+>  _require_scratch
+>  _require_xfsrestore_xflag
+>  
+> -# A large stripe unit will put the root inode out quite far
+> -# due to alignment, leaving free blocks ahead of it.
+> -_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1 || _fail "mkfs failed"
+> -
+> -# Mounting /without/ a stripe should allow inodes to be allocated
+> -# in lower free blocks, without the stripe alignment.
+> -_scratch_mount -o sunit=0,swidth=0
+> -
+> -root_inum=$(stat -c %i $SCRATCH_MNT)
+> -
+> -# Consume space after the root inode so that the blocks before
+> -# root look "close" for the next inode chunk allocation
+> -$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
+> -
+> -# And make a bunch of inodes until we (hopefully) get one lower
+> -# than root, in a new inode chunk.
+> -echo "root_inum: $root_inum" >> $seqres.full
+> -for i in $(seq 0 4096) ; do
+> -	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
+> -	touch $fname
+> -	inum=$(stat -c "%i" $fname)
+> -	[[ $inum -lt $root_inum ]] && break
+> -done
+> -
+> -echo "created: $inum" >> $seqres.full
+> -
+> -[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
+> +# Create a filesystem which contains a fake root inode
+> +inums=($(_xfs_create_fake_root))
+> +root_inum=${inums[0]}
+> +fake_inum=${inums[1]}
+>  
+>  # Now try a dump and restore. Cribbed from xfs/068
+>  _create_dumpdir_stress
+> @@ -59,10 +36,10 @@ _do_dump_file
+>  
+>  # Set the wrong root inode number to the dump file
+>  # as problematic xfsdump used to do.
+> -$here/src/fake-dump-rootino $dump_file $inum
+> +$here/src/fake-dump-rootino $dump_file $fake_inum
+>  
+>  _do_restore_file -x | \
+> -sed -e "s/rootino #${inum}/rootino #FAKENO/g" \
+> +sed -e "s/rootino #${fake_inum}/rootino #FAKENO/g" \
+>  	-e "s/# to ${root_inum}/# to ROOTNO/g" \
+>  	-e "/entries processed$/s/[0-9][0-9]*/NUM/g"
+>  
+> diff --git a/tests/xfs/557 b/tests/xfs/557
+> index 425695db..e1de919b 100644
+> --- a/tests/xfs/557
+> +++ b/tests/xfs/557
+> @@ -21,33 +21,10 @@ _require_scratch
+>  _fixed_by_kernel_commit XXXXXXXXXXXX \
+>  	"xfs: get root inode correctly at bulkstat"
+>  
+> -# A large stripe unit will put the root inode out quite far
+> -# due to alignment, leaving free blocks ahead of it.
+> -_scratch_mkfs_xfs -d sunit=1024,swidth=1024 > $seqres.full 2>&1 || _fail "mkfs failed"
+> -
+> -# Mounting /without/ a stripe should allow inodes to be allocated
+> -# in lower free blocks, without the stripe alignment.
+> -_scratch_mount -o sunit=0,swidth=0
+> -
+> -root_inum=$(stat -c %i $SCRATCH_MNT)
+> -
+> -# Consume space after the root inode so that the blocks before
+> -# root look "close" for the next inode chunk allocation
+> -$XFS_IO_PROG -f -c "falloc 0 16m" $SCRATCH_MNT/fillfile
+> -
+> -# And make a bunch of inodes until we (hopefully) get one lower
+> -# than root, in a new inode chunk.
+> -echo "root_inum: $root_inum" >> $seqres.full
+> -for i in $(seq 0 4096) ; do
+> -	fname=$SCRATCH_MNT/$(printf "FILE_%03d" $i)
+> -	touch $fname
+> -	inum=$(stat -c "%i" $fname)
+> -	[[ $inum -lt $root_inum ]] && break
+> -done
+> -
+> -echo "created: $inum" >> $seqres.full
+> -
+> -[[ $inum -lt $root_inum ]] || _notrun "Could not set up test"
+> +# Create a filesystem which contains a fake root inode
+> +inums=($(_xfs_create_fake_root))
+> +root_inum=${inums[0]}
+> +fake_inum=${inums[1]}
+>  
+>  # Get root ino with XFS_BULK_IREQ_SPECIAL_ROOT
+>  bulkstat_root_inum=$($XFS_IO_PROG -c 'bulkstat_single root' $SCRATCH_MNT | grep bs_ino | awk '{print $3;}')
 > -- 
-> 2.35.3
+> 2.39.0
 > 
 
