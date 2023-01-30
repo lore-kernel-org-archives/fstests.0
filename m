@@ -2,183 +2,178 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BBCDC54EAA
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Jan 2023 04:51:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68861C54EAA
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Jan 2023 05:01:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235601AbjA3EvN (ORCPT
+        id S229704AbjA3FBR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 29 Jan 2023 23:51:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46172 "EHLO
+        Mon, 30 Jan 2023 00:01:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49822 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235587AbjA3Euu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 29 Jan 2023 23:50:50 -0500
+        with ESMTP id S229614AbjA3FBQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Jan 2023 00:01:16 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FB9512592
-        for <fstests@vger.kernel.org>; Sun, 29 Jan 2023 20:49:33 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BCDB17156
+        for <fstests@vger.kernel.org>; Sun, 29 Jan 2023 21:00:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675054172;
+        s=mimecast20190719; t=1675054828;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=6z1eu5rovhiJyrakHESdj/dS1TaehQB7J6ADnmby9DA=;
-        b=ApJKcBGg9kt9vT8jyQ3oS7FAmp8kZXXj3XIkQxlJF0nFlPVizLu/NO/qDVIQ8td1AjLCQf
-        xbJniYeWk5Toy5O+vtNPdH1aQFAKumUF5sFhRL2Y/72z4VWO5+brn0JPoH+CkhgPB6NT83
-        QE0PYXjP7hIugf6XwTHsq47ZqkD0GrY=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=/bjD4P/4LAXrIHPoaPaYhmoOec0i/m/AToOjuW8QyxM=;
+        b=My4u+K6eMTlrKbQf1BlvPyrWHJPp42gEV3mdiZ0gt0NWIXFL8kCFW8BcPi4r9cpajTCV5+
+        s5WE/bIgeeP36cSIyGeJEZ0/rJ0NpfPC3cnRP1JXvQ/jWEbbfeWPAxJo+KLdcKO82w0TRO
+        cxewxhJ36r3hUQqriGv7dAwWv3JFRGc=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-408-flem1yX6PYOTzwClk1Go4Q-1; Sun, 29 Jan 2023 23:49:31 -0500
-X-MC-Unique: flem1yX6PYOTzwClk1Go4Q-1
-Received: by mail-pl1-f199.google.com with SMTP id q5-20020a170902e30500b001967df62d0dso1390308plc.18
-        for <fstests@vger.kernel.org>; Sun, 29 Jan 2023 20:49:31 -0800 (PST)
+ us-mta-14-OG3rGK81NeqHty-czdlzOg-1; Mon, 30 Jan 2023 00:00:24 -0500
+X-MC-Unique: OG3rGK81NeqHty-czdlzOg-1
+Received: by mail-pf1-f200.google.com with SMTP id l7-20020a62be07000000b0058de3976793so4825354pff.18
+        for <fstests@vger.kernel.org>; Sun, 29 Jan 2023 21:00:24 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6z1eu5rovhiJyrakHESdj/dS1TaehQB7J6ADnmby9DA=;
-        b=da7GHykaNP9FMyNxguJaHTKzP9e9RlZeB62rplsYPTejsqoMoPgLFuuwwDoZvX6tc8
-         0fnJTf1+vlNmsgOn1qTMTt3OwdbPotlnVnPLyeJ7Uhti/2S063qPsunZqjdAIjXwiUS3
-         0c+AnX3obHCIUNMkuxubWJAo1vERI/MjCcqeQuSEZjzAoao0ZQVHIf4lUIo5sbmYrMA0
-         YBGipN6PEsp6arxppEgNUjnhEZbstxnENOeEcxA3vJOZfhYhRJzH+DGQ0BpWCeLaRa2s
-         oxI5FQ6omcnE0/RnoQg0rm395JW03G1T44XlKVCjb+ANJ8nwKbMKpW2s7EV3mFxG+Lxa
-         wKrg==
-X-Gm-Message-State: AFqh2krFAnvAqyaWgkYvFpea/7ZR5B7brwsunea4LuPAwCxwFEMtoeXV
-        5iWAoxcNoIIZ+owuy/yuPY94nSVBrMqtSh3ADXCYZnj+vTqc282aawthA+421D2HzEONqXV7vxm
-        AFkggL9vq/FEKj4+cBg==
-X-Received: by 2002:a17:902:f650:b0:192:b43e:272 with SMTP id m16-20020a170902f65000b00192b43e0272mr55331511plg.53.1675054170315;
-        Sun, 29 Jan 2023 20:49:30 -0800 (PST)
-X-Google-Smtp-Source: AMrXdXvQS7i8RPR3zwGah3SZt73f9s2/8lqD/rCgSXE5y4gSE9tRL70f7xPeGD3d+Vrri/VhAvn8rA==
-X-Received: by 2002:a17:902:f650:b0:192:b43e:272 with SMTP id m16-20020a170902f65000b00192b43e0272mr55331500plg.53.1675054169988;
-        Sun, 29 Jan 2023 20:49:29 -0800 (PST)
+        bh=/bjD4P/4LAXrIHPoaPaYhmoOec0i/m/AToOjuW8QyxM=;
+        b=KawpROw+ey0rcXhFAdNOaBR6uk2IkBvLD3TOrd/WO2E8rbme0vtR94HHBdOAD+TF7d
+         dcbr1+QXAKiGRE8y6G/XBYRxAYbH6qtCryFhw+89OnPq9L7+QGagUyO0tJrkuLhfDulq
+         9RsYFLzzBLrbJo2ZuDy4xKoUlTYuJyZ9AArjmjePQl5ZTRaW/YLpbhOu/SoPVeFKTAOc
+         A3OIXKl3m7IbOyZEXwN6183jO1Zc9XQF8Hg6NJlAOxOU36YZWeoubt33Z9lU8RWhNp7c
+         dT/E37DaBO+LgWKvK00lQngG0fyEj7JuMhNv0fI3oCiyU3MEuEMzXGjHN0IMSTX3SPnS
+         3qpA==
+X-Gm-Message-State: AO0yUKXzpTw1lFzLnnDLqkmDvvq65aKH3zbkDYuZmH2eJlxJhRJ3hB4J
+        0arS/M4SOYfME+UV4QdotOnoGUNDgeD+/lKnbxw0+WfdKec9eirZ6Ftp36EhRrwOJ51V5gwNa7v
+        N/I4dOW9T/Uu5Yf13/w==
+X-Received: by 2002:a17:902:e74c:b0:196:42eb:a4b3 with SMTP id p12-20020a170902e74c00b0019642eba4b3mr9363160plf.62.1675054823130;
+        Sun, 29 Jan 2023 21:00:23 -0800 (PST)
+X-Google-Smtp-Source: AK7set/Psp/gm4HhzCSOMV2kc8p1B9doAnK+9UV6KSZRkKKwqIrgUcYKQkVLOAlmnZ8yooxWvVFEHw==
+X-Received: by 2002:a17:902:e74c:b0:196:42eb:a4b3 with SMTP id p12-20020a170902e74c00b0019642eba4b3mr9363138plf.62.1675054822829;
+        Sun, 29 Jan 2023 21:00:22 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id u4-20020a170902e80400b001960831d65dsm6660145plg.92.2023.01.29.20.49.27
+        by smtp.gmail.com with ESMTPSA id b8-20020a170902a9c800b001967cfc81a0sm1612144plr.287.2023.01.29.21.00.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Jan 2023 20:49:29 -0800 (PST)
-Date:   Mon, 30 Jan 2023 12:49:25 +0800
+        Sun, 29 Jan 2023 21:00:22 -0800 (PST)
+Date:   Mon, 30 Jan 2023 13:00:18 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Boris Burkov <boris@bur.io>
-Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v3] btrfs: test block group size class loading logic
-Message-ID: <20230130044925.jv23enewzb5xpdrl@zlang-mailbox>
-References: <16b9a9042169c25a10dd1867cedd14849d00dca5.1674755053.git.boris@bur.io>
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/707: Test moving directory while being grown
+Message-ID: <20230130050018.5tta53zaxlhmlmy4@zlang-mailbox>
+References: <20230126151512.5438-1-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <16b9a9042169c25a10dd1867cedd14849d00dca5.1674755053.git.boris@bur.io>
+In-Reply-To: <20230126151512.5438-1-jack@suse.cz>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 26, 2023 at 09:48:17AM -0800, Boris Burkov wrote:
-> Add a new test which checks that size classes in freshly loaded block
-> groups after a cycle mount match size classes before going down
+On Thu, Jan 26, 2023 at 04:15:12PM +0100, Jan Kara wrote:
+> Test how the filesystem can handle moving a directory to a different
+> directory (so that parent pointer gets updated) while it is grown. Ext4
+> and UDF had a bug where if the directory got converted to a different
+> type due to growth while rename is running, the filesystem got
+> corrupted.
 > 
-> Depends on the kernel patch:
-> btrfs: add size class stats to sysfs
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
+> Signed-off-by: Jan Kara <jack@suse.cz>
 > ---
-> Changelog:
-> v3:
-> Re-add fixed_by_kernel_commit, but for the stats patch which is
-> required, but not a fix in the strictest sense.
+>  tests/generic/707     | 54 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/707.out |  2 ++
+>  2 files changed, 56 insertions(+)
+>  create mode 100755 tests/generic/707
+>  create mode 100644 tests/generic/707.out
 > 
-> v2:
-> Drop the fixed_by_kernel_commit since the fix is not out past the btrfs
-> development tree, so the fix is getting rolled in to the original broken
-> commit. Modified the commit message to note the dependency on the new
-> sysfs counters.
-> 
->  tests/btrfs/283     | 50 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/283.out |  2 ++
->  2 files changed, 52 insertions(+)
->  create mode 100755 tests/btrfs/283
->  create mode 100644 tests/btrfs/283.out
-> 
-> diff --git a/tests/btrfs/283 b/tests/btrfs/283
+> diff --git a/tests/generic/707 b/tests/generic/707
 > new file mode 100755
-> index 00000000..d250a389
+> index 000000000000..25cbb7e98a23
 > --- /dev/null
-> +++ b/tests/btrfs/283
-> @@ -0,0 +1,50 @@
+> +++ b/tests/generic/707
+> @@ -0,0 +1,54 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> +# Copyright (c) 2023 Jan Kara, SUSE Linux.  All Rights Reserved.
 > +#
-> +# FS QA Test 283
+> +# FS QA Test 707
 > +#
-> +# Test that mounting a btrfs filesystem properly loads block group size classes.
-> +#
+> +# This is a test verifying whether the filesystem can gracefully handle
+> +# modifying of a directory while it is being moved, in particular the cases
+> +# where directory format changes
+> +# 
 > +. ./common/preamble
-> +_begin_fstest auto quick mount
-> +fixed_by_kernel_commit xxxxxxxx "btrfs: add size class stats to sysfs".
+> +_begin_fstest auto
+> +
+> +_supported_fs generic
+> +_require_scratch
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +cd $SCRATCH_MNT
 
-    +/root/git/xfstests/tests/btrfs/283: line 11: fixed_by_kernel_commit: command not found
+Is this necessary? Generally we use absolute path, e.g.
 
-It's "_fixed_by_kernel_commit", you missed the "_" prefix.
+xxxfile=$SCRATCH_MNT/xxxxxxx
+touch $xxxfile
+
+
 
 > +
-> +sysfs_size_classes() {
-> +	local uuid="$(findmnt -n -o UUID "$SCRATCH_MNT")"
-> +	cat "/sys/fs/btrfs/$uuid/allocation/data/size_classes"
+> +# Loop multiple times trying to hit the race
+> +loops=100
+> +files=500
+> +moves=500
 
-I hit below error:
-    +cat: /sys/fs/btrfs/7df0dfa8-b1cd-4646-bd30-8683bbf0a4f1/allocation/data/size_classes: No such file or directory
-    +cat: /sys/fs/btrfs/7df0dfa8-b1cd-4646-bd30-8683bbf0a4f1/allocation/data/size_classes: No such file or directory
+You might would like to try LOAD_FACTOR or TIME_FACTOR parameters?
 
-I think btrfs not always support the "allocation/data/size_classes" file. So
-we need to check if current kernel supports that, and _notrun if not. The
-_require_fs_sysfs might help you a bit.
+> +
+> +create_files()
+> +{
+> +	# We use slightly longer file name to make directory grow faster and
+> +	# hopefully convert between various types
+> +	for (( i = 0; i < $files; i++ )); do
+> +		touch somewhatlongerfilename$i
+> +	done
+> +}
+> +
+> +for (( i = 0; i <= $moves; i++ )); do
+> +	mkdir dir$i
+> +done
+> +
+> +for (( l = 0; l < $loops; l++ )); do
+> +	mkdir dir0/dir
+> +	pushd dir0/dir &>/dev/null
+
+Use absolute path can help save the pushd&popd operations.
+
+> +	create_files &
+
+If there're background processes, we should deal with it in _cleanup() clearly.
 
 Thanks,
 Zorro
 
-> +}
-> +
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_btrfs_fs_sysfs
-> +
-> +f="$SCRATCH_MNT/f"
-> +small=$((16 * 1024))
-> +medium=$((1024 * 1024))
-> +large=$((16 * 1024 * 1024))
-> +
-> +_scratch_mkfs >/dev/null
-> +_scratch_mount
-> +# Write files with extents in each size class
-> +$XFS_IO_PROG -fc "pwrite -q 0 $small" $f.small
-> +$XFS_IO_PROG -fc "pwrite -q 0 $medium" $f.medium
-> +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large
-> +# Sync to force the extent allocation
-> +sync
-> +pre=$(sysfs_size_classes)
-> +
-> +# cycle mount to drop the block group cache
-> +_scratch_cycle_mount
-> +
-> +# Another write causes us to actually load the block groups
-> +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large.2
-> +sync
-> +
-> +post=$(sysfs_size_classes)
-> +diff <(echo $pre) <(echo $post)
+> +	popd &>/dev/null
+> +	for (( i = 0; i < $moves; i++ )); do
+> +		mv dir$i/dir dir$((i+1))/dir
+> +	done
+> +	wait
+> +	rm -r dir$moves/dir
+> +done
 > +
 > +echo "Silence is golden"
-> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/283.out b/tests/btrfs/283.out
+> diff --git a/tests/generic/707.out b/tests/generic/707.out
 > new file mode 100644
-> index 00000000..efb2c583
+> index 000000000000..8e57a1d8c971
 > --- /dev/null
-> +++ b/tests/btrfs/283.out
+> +++ b/tests/generic/707.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 283
+> +QA output created by 707
 > +Silence is golden
 > -- 
-> 2.39.1
+> 2.35.3
 > 
 
