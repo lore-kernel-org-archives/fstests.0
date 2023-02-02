@@ -2,194 +2,122 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55696C636CC
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Feb 2023 00:51:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B74C2C63797
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Feb 2023 09:55:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230229AbjBAAvq (ORCPT
+        id S231921AbjBBJy7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 31 Jan 2023 19:51:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44424 "EHLO
+        Thu, 2 Feb 2023 04:54:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230054AbjBAAvp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 31 Jan 2023 19:51:45 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EED9F53E53;
-        Tue, 31 Jan 2023 16:51:43 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id A26D1B81ED8;
-        Wed,  1 Feb 2023 00:51:42 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44664C433D2;
-        Wed,  1 Feb 2023 00:51:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1675212701;
-        bh=AAtrCUas7Irka0a64PakqXYTXN1sXTLTSrj94KA+lYI=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=kSkpNaT25+SmwYQNRPVA1st51vbuE6m2A++wPWGgz2F4fBELgxjC9mtyhNsHTvg6u
-         8yhqpHmlm5dKvgdG3IkMmOsmUX2tBIgHR8USbWFlUAZ96OyNpciK5c8zSHyWUQ1us9
-         /JOxKu2Pr+fUUmMgyhGQ9I0ofCYf77Rx9uRPKzx6lmbNKLGrIRaf7p09NPKZDEe0Is
-         1tyHFr1GBwLd5w0fi1pfqpjgNgTTRFyeITmuIrQAlmTaaWsJwRfFHKqG6PCjAL2qKL
-         XakMkQEuOJ53VG1GFc+TWRLOQ6kSgL1OEuq0JZoC/no6bhCOJfdofVwBFNzmSb0VpW
-         SZTQAn64/TssA==
-Subject: [PATCH 2/2] generic/500: skip this test if formatting fails
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     zlang@redhat.com, djwong@kernel.org
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 31 Jan 2023 16:51:40 -0800
-Message-ID: <167521270079.2382722.2799074346773170090.stgit@magnolia>
-In-Reply-To: <167521268927.2382722.13701066927653225895.stgit@magnolia>
+        with ESMTP id S230251AbjBBJyv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2023 04:54:51 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCC5D2B2A2
+        for <fstests@vger.kernel.org>; Thu,  2 Feb 2023 01:53:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1675331603;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=/SByMCCSE7iGESK0C8jKYeU/Oz8Yx7hQvlLV9Zjs75M=;
+        b=cJWh4XXH9T//iWrjecbca8h40KnRdiCBd1uHKnD2bxI3XwXsDS0IoShwDlnVJabrgH/mmr
+        9g9efj4v/pZCzBDqjQf59gSPM19MtSq0n4sRQ/wgwQykc6MWg7V54t03O8M+CNDPNwfxtC
+        Y2w3cviEaOiLyqq7dliR7Elg1i0vVtc=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-623-vRBReP26O5uNVj18rOEo-w-1; Thu, 02 Feb 2023 04:53:22 -0500
+X-MC-Unique: vRBReP26O5uNVj18rOEo-w-1
+Received: by mail-pl1-f199.google.com with SMTP id y8-20020a170902b48800b00192a600df83so726248plr.15
+        for <fstests@vger.kernel.org>; Thu, 02 Feb 2023 01:53:22 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/SByMCCSE7iGESK0C8jKYeU/Oz8Yx7hQvlLV9Zjs75M=;
+        b=PxDK8d9rDzYyaWerlI+/bWm+NZa4GcUDt6Lzxn3ZZ94+MijfkFJREiZWpxTcVitDVs
+         TUXDy3qhov0dNlfu1JzCKGqzPcjSqglNBltqbP+kuIuMzcSVsPGf+f+YkuMEl1QQq/mk
+         ihPSo9lCfG7PTKSbR685LcI62QZfOEQyguLn5Lt2Idjp/um3PmYYY6qimZU5G7pXAaMh
+         2w8Hm/N/srLJncX7guRvv2WlWVGE1J0ZVpqCSBP5OJq2bCxH+YXqPQVt+RcPJKxz5XyS
+         9K14GkbW44LtDWG4EmvOLl82/sJGE7plCuX8tPbWV+npSiejHxrOtw9Umg0RVlwBdZrO
+         XDtQ==
+X-Gm-Message-State: AO0yUKWyK0ZeqlORybxEIL4avanndx7moFFisuZvuLI3GOwYgCg7BRC/
+        E7kiBnELx4GS1MNo0noZZBNph9P7obZ2vCj+nhM5rMTqTQ0z73QmHYqnoH3oAMwho8dA2S0z8RE
+        HnfByGIuu5xg4me32ZQ==
+X-Received: by 2002:a17:903:24c:b0:196:1678:3060 with SMTP id j12-20020a170903024c00b0019616783060mr1541829plh.0.1675331601048;
+        Thu, 02 Feb 2023 01:53:21 -0800 (PST)
+X-Google-Smtp-Source: AK7set8VH4oa3o+3DtXDJ8OeYIfGoSRKj1sBNnXS3pSnPtY6e8D3wlotGt6UjuIwNZkspQF6lerkhg==
+X-Received: by 2002:a17:903:24c:b0:196:1678:3060 with SMTP id j12-20020a170903024c00b0019616783060mr1541818plh.0.1675331600719;
+        Thu, 02 Feb 2023 01:53:20 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id f1-20020a170902ab8100b00196629652efsm10158727plr.286.2023.02.02.01.53.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Feb 2023 01:53:20 -0800 (PST)
+Date:   Thu, 2 Feb 2023 17:53:15 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic/038: set a maximum runtime on this test
+Message-ID: <20230202095315.l7f3vjv2hrcr3uou@zlang-mailbox>
 References: <167521268927.2382722.13701066927653225895.stgit@magnolia>
-User-Agent: StGit/0.19
+ <167521269515.2382722.13790661033478617605.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <167521269515.2382722.13790661033478617605.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Jan 31, 2023 at 04:51:35PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> This test races multiple FITRIM calls against multiple programs creating
+> 200k small files to ensure that there are no concurrency problems with
+> the allocator and the FITRIM code.  This is not necessarily quick, and
+> the test itself does not contain any upper bound on the runtime.  On my
+> system that simulates storage with DRAM this takes ~5 minutes to run; on
+> my cloud system with newly provided discard support, I killed the test
+> after 27 hours.
+> 
+> Constrain the runtime to about the customary 30s * TIME_FACTOR.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-This testcase exercises what happens when we race a filesystem
-perforing discard operations against a thin provisioning device that has
-run out of space.  To constrain runtime, it creates a 128M thinp volume
-and formats it.
+Looks good to me,
 
-However, if that initial format fails because (say) the 128M volume is
-too small, then the test fails.  This is really a case of test
-preconditions not being satisfied, so let's make the test _notrun when
-this happens.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- common/dmthin     |    7 ++++-
- common/rc         |   80 +++++++++++++++++++++++++++--------------------------
- tests/generic/500 |    3 +-
- 3 files changed, 48 insertions(+), 42 deletions(-)
-
-
-diff --git a/common/dmthin b/common/dmthin
-index 91147e47ac..7107d50804 100644
---- a/common/dmthin
-+++ b/common/dmthin
-@@ -234,5 +234,10 @@ _dmthin_mount()
- _dmthin_mkfs()
- {
- 	_scratch_options mkfs
--	_mkfs_dev $SCRATCH_OPTIONS $@ $DMTHIN_VOL_DEV
-+	_mkfs_dev $SCRATCH_OPTIONS "$@" $DMTHIN_VOL_DEV
-+}
-+_dmthin_try_mkfs()
-+{
-+	_scratch_options mkfs
-+	_try_mkfs_dev $SCRATCH_OPTIONS "$@" $DMTHIN_VOL_DEV
- }
-diff --git a/common/rc b/common/rc
-index 36eb90e1f1..376a0138b4 100644
---- a/common/rc
-+++ b/common/rc
-@@ -604,49 +604,49 @@ _test_mkfs()
-     esac
- }
- 
-+_try_mkfs_dev()
-+{
-+    case $FSTYP in
-+    nfs*)
-+	# do nothing for nfs
-+	;;
-+    9p)
-+	# do nothing for 9p
-+	;;
-+    fuse)
-+	# do nothing for fuse
-+	;;
-+    virtiofs)
-+	# do nothing for virtiofs
-+	;;
-+    overlay)
-+	# do nothing for overlay
-+	;;
-+    pvfs2)
-+	# do nothing for pvfs2
-+	;;
-+    udf)
-+        $MKFS_UDF_PROG $MKFS_OPTIONS $*
-+	;;
-+    btrfs)
-+        $MKFS_BTRFS_PROG $MKFS_OPTIONS $*
-+	;;
-+    ext2|ext3|ext4)
-+	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $*
-+	;;
-+    xfs)
-+	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $*
-+	;;
-+    *)
-+	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $*
-+	;;
-+    esac
-+}
-+
- _mkfs_dev()
- {
-     local tmp=`mktemp -u`
--    case $FSTYP in
--    nfs*)
--	# do nothing for nfs
--	;;
--    9p)
--	# do nothing for 9p
--	;;
--    fuse)
--	# do nothing for fuse
--	;;
--    virtiofs)
--	# do nothing for virtiofs
--	;;
--    overlay)
--	# do nothing for overlay
--	;;
--    pvfs2)
--	# do nothing for pvfs2
--	;;
--    udf)
--        $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
--	;;
--    btrfs)
--        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
--	;;
--    ext2|ext3|ext4)
--	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* \
--		2>$tmp.mkfserr 1>$tmp.mkfsstd
--	;;
--    xfs)
--	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* \
--		2>$tmp.mkfserr 1>$tmp.mkfsstd
--	;;
--    *)
--	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
--		2>$tmp.mkfserr 1>$tmp.mkfsstd
--	;;
--    esac
--
--    if [ $? -ne 0 ]; then
-+    if ! _try_mkfs_dev "$@" 2>$tmp.mkfserr 1>$tmp.mkfsstd; then
- 	# output stored mkfs output
- 	cat $tmp.mkfserr >&2
- 	cat $tmp.mkfsstd
-diff --git a/tests/generic/500 b/tests/generic/500
-index bc84d219fa..1151c8f234 100755
---- a/tests/generic/500
-+++ b/tests/generic/500
-@@ -58,7 +58,8 @@ CLUSTER_SIZE=$((64 * 1024 / 512))		# 64K
- 
- _dmthin_init $BACKING_SIZE $VIRTUAL_SIZE $CLUSTER_SIZE 0
- _dmthin_set_fail
--_dmthin_mkfs
-+_dmthin_try_mkfs >> $seqres.full 2>&1 || \
-+	_notrun "Could not format small thinp filesystem for test"
- _dmthin_mount
- 
- # There're two bugs at here, one is dm-thin bug, the other is filesystem
+>  tests/generic/038 |    6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> 
+> diff --git a/tests/generic/038 b/tests/generic/038
+> index 5c014ae389..e1176292fb 100755
+> --- a/tests/generic/038
+> +++ b/tests/generic/038
+> @@ -100,6 +100,8 @@ nr_files=$((50000 * LOAD_FACTOR))
+>  create_files()
+>  {
+>  	local prefix=$1
+> +	local now=$(date '+%s')
+> +	local end_time=$(( now + (TIME_FACTOR * 30) ))
+>  
+>  	for ((n = 0; n < 4; n++)); do
+>  		mkdir $SCRATCH_MNT/$n
+> @@ -113,6 +115,10 @@ create_files()
+>  				echo "Failed creating file $n/${prefix}_$i" >>$seqres.full
+>  				break
+>  			fi
+> +			if [ "$(date '+%s')" -ge $end_time ]; then
+> +				echo "runtime exceeded @ $i files" >> $seqres.full
+> +				break
+> +			fi
+>  		done
+>  		) &
+>  		create_pids[$n]=$!
+> 
 
