@@ -2,72 +2,94 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B27AC64EC4
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Feb 2023 20:44:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8651DC05027
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Feb 2023 21:13:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232680AbjBBUou (ORCPT
+        id S232095AbjBBVNl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Feb 2023 15:44:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41648 "EHLO
+        Thu, 2 Feb 2023 16:13:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32850 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232841AbjBBUof (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2023 15:44:35 -0500
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6DAC76AB;
-        Thu,  2 Feb 2023 12:44:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
-        Content-Type:Content-ID:Content-Description;
-        bh=74nszHLks+AFGqdfRGx6vNnWqXDqZ9xHI0qBKa9QcdI=; b=Bh63M/0nqGUZZvEkwrwA6JtjLg
-        6o8uQmpPAbwbDBcLTYskUV04rtjVxAbkRI8ywM/Cpg4QgkiduK6adIw3ab64Pf5IMVgLHdPjVDTBl
-        aFg3fWxnpxmnDgfKBu03xsCHOnK4kcN7ZNcdNL6rFyRosOEDWxJ2OH3HyqGJPOB9okC+kK4RFv5JW
-        x710OIFndtSvYOt8aghfbiSUMaoLwhFO3gM1DyXoahA8R0FHcoR780FR7VUl6VjqZywykxzxsTZsT
-        z7NGee99rYn2z4rassj8Q+UR5edf87SIIhF/tDMjeQicVliVbhgeiEiraaTJYPSgPnMq8cG0Ud4/t
-        ULWEZsfQ==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pNgRb-00Di7d-Ga; Thu, 02 Feb 2023 20:44:31 +0000
-From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
-To:     linux-fsdevel@vger.kernel.org
-Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
-        linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-mm@kvack.org,
-        Hugh Dickins <hughd@google.com>, linux-kernel@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH 4/5] afs: Zero bytes after 'oldsize' if we're expanding the file
-Date:   Thu,  2 Feb 2023 20:44:26 +0000
-Message-Id: <20230202204428.3267832-5-willy@infradead.org>
-X-Mailer: git-send-email 2.37.1
-In-Reply-To: <20230202204428.3267832-1-willy@infradead.org>
-References: <20230202204428.3267832-1-willy@infradead.org>
+        with ESMTP id S229881AbjBBVNk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2023 16:13:40 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D2835A373
+        for <fstests@vger.kernel.org>; Thu,  2 Feb 2023 13:13:33 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 0CE2A1FDBB
+        for <fstests@vger.kernel.org>; Thu,  2 Feb 2023 21:13:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1675372412; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=HvVoz8aoDpemURp01OtGmisMo9Jv5+Bt60uQOQ/SD6A=;
+        b=dJ6P2GOf+qRIaf8tJ9GOgn2hIOS7mXcSxSsm+wnu6JQj1YfqSi+reM84SGXxwhWgItXc8V
+        /FlDTTOjPIL1++QL5uH0Mt3NF5k9WQKVKr3Le9Vn5DZcOOl3aFRGkkE+9DTZ9aQg5j0pyF
+        Zoff5/IVIz8TitHniydsXAO9CHuBNu0=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id F2322139D0
+        for <fstests@vger.kernel.org>; Thu,  2 Feb 2023 21:13:31 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id KDlLOnsn3GOvAQAAMHmgww
+        (envelope-from <ailiop@suse.com>)
+        for <fstests@vger.kernel.org>; Thu, 02 Feb 2023 21:13:31 +0000
+From:   Anthony Iliopoulos <ailiop@suse.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] xfs/191: fix xattr leaf block emptying on 64k blocksized fses
+Date:   Thu,  2 Feb 2023 22:09:40 +0100
+Message-Id: <20230202210940.95791-1-ailiop@suse.com>
+X-Mailer: git-send-email 2.35.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-POSIX requires that "If the file size is increased, the extended area
-shall appear as if it were zero-filled".  It is possible to use mmap to
-write past EOF and that data will become visible instead of zeroes.
+This test is failing on filesystems with 64k blocksize since the leaf
+hdr.firstused field is 16 bit and as such trying to reset it to $dbsize
+overflows and is rejected by xfs_db. The leaf is never properly resetted
+and the discrepancy is picked up by xfs_repair, thus failing the test.
 
-Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+Fix it by setting it to XFS_ATTR3_LEAF_NULLOFF (0) as this is the proper
+on-disk value to indicate an empty leaf on 64k blocksized fses.
+
+Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
 ---
- fs/afs/inode.c | 2 ++
- 1 file changed, 2 insertions(+)
+ tests/xfs/191 | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/fs/afs/inode.c b/fs/afs/inode.c
-index 6d3a3dbe4928..92e2ba7625de 100644
---- a/fs/afs/inode.c
-+++ b/fs/afs/inode.c
-@@ -854,6 +854,8 @@ static void afs_setattr_edit_file(struct afs_operation *op)
+diff --git a/tests/xfs/191 b/tests/xfs/191
+index 4f0a9b9eeef5..8dd875fcd28b 100755
+--- a/tests/xfs/191
++++ b/tests/xfs/191
+@@ -78,10 +78,20 @@ make_empty_leaf() {
  
- 		if (size < i_size)
- 			truncate_pagecache(inode, size);
-+		else
-+			truncate_pagecache(inode, i_size);
- 		if (size != i_size)
- 			fscache_resize_cookie(afs_vnode_cache(vp->vnode),
- 					      vp->scb.status.size);
+ 	base=$(_scratch_xfs_get_metadata_field "hdr.freemap[0].base" "inode $inum" "ablock 0")
+ 
++	# 64k dbsize is a special case since it overflows the 16 bit firstused
++	# field and it needs to be set to the special XFS_ATTR3_LEAF_NULLOFF (0)
++	# value to indicate a null leaf. For more details see kernel commit:
++	# e87021a2bc10 ("xfs: use larger in-core attr firstused field and detect overflow").
++	if [ $dbsize -eq 65536 ]; then
++		firstused=0;
++	else
++		firstused=$dbsize;
++	fi
++
+ 	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" \
+ 		-c "write -d hdr.count 0" \
+ 		-c "write -d hdr.usedbytes 0" \
+-		-c "write -d hdr.firstused $dbsize" \
++		-c "write -d hdr.firstused $firstused" \
+ 		-c "write -d hdr.freemap[0].size $((dbsize - base))" \
+ 		-c print >> $seqres.full
+ }
 -- 
-2.35.1
+2.35.3
 
