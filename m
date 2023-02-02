@@ -2,31 +2,31 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED1BDC05027
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Feb 2023 20:44:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B27AC64EC4
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Feb 2023 20:44:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232933AbjBBUoi (ORCPT
+        id S232680AbjBBUou (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Feb 2023 15:44:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41642 "EHLO
+        Thu, 2 Feb 2023 15:44:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232067AbjBBUof (ORCPT
+        with ESMTP id S232841AbjBBUof (ORCPT
         <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2023 15:44:35 -0500
 Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C74C48A58;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6DAC76AB;
         Thu,  2 Feb 2023 12:44:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
         References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:
         Content-Type:Content-ID:Content-Description;
-        bh=CHTViCFku/KBgg0p6DZbUUb80eMrbMHO+BwTMmLL/c8=; b=Cnpe1akXRcTjrbOFxM+9HrW+ur
-        d1lfcvyzmUOAlYVR9x6xYmCbrq53KnUEe+yqtSAHOPbH7OHm0rewQg2RMYzAmtBFcYZE4oSeqLxMi
-        eCHHJ8dFrq4kz9d/JcMQzW5XpXnfBUje4e46WGl4WZgLZJBy7/sDkudm3R/iXLIpz5Vh7F5wllJ7I
-        OUkIXT5U0OkITUYHT6Dd+ODvKs5q3qcDfvn3fcX5d53emCWIimY8ED0Y5esijwiT7AN7seZkhU+G+
-        eFufWstFTegm87OA4SkZuEQOD6F1ZgjDbt9nNJNndVfqGOf533nK3ibsN/iH0hY3EkdfhgfQTwKHm
-        GPQu7rFA==;
+        bh=74nszHLks+AFGqdfRGx6vNnWqXDqZ9xHI0qBKa9QcdI=; b=Bh63M/0nqGUZZvEkwrwA6JtjLg
+        6o8uQmpPAbwbDBcLTYskUV04rtjVxAbkRI8ywM/Cpg4QgkiduK6adIw3ab64Pf5IMVgLHdPjVDTBl
+        aFg3fWxnpxmnDgfKBu03xsCHOnK4kcN7ZNcdNL6rFyRosOEDWxJ2OH3HyqGJPOB9okC+kK4RFv5JW
+        x710OIFndtSvYOt8aghfbiSUMaoLwhFO3gM1DyXoahA8R0FHcoR780FR7VUl6VjqZywykxzxsTZsT
+        z7NGee99rYn2z4rassj8Q+UR5edf87SIIhF/tDMjeQicVliVbhgeiEiraaTJYPSgPnMq8cG0Ud4/t
+        ULWEZsfQ==;
 Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pNgRa-00Di7O-Ue; Thu, 02 Feb 2023 20:44:31 +0000
+        id 1pNgRb-00Di7d-Ga; Thu, 02 Feb 2023 20:44:31 +0000
 From:   "Matthew Wilcox (Oracle)" <willy@infradead.org>
 To:     linux-fsdevel@vger.kernel.org
 Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
@@ -34,9 +34,9 @@ Cc:     "Matthew Wilcox (Oracle)" <willy@infradead.org>,
         linux-ext4@vger.kernel.org, linux-mm@kvack.org,
         Hugh Dickins <hughd@google.com>, linux-kernel@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: [PATCH 2/5] ext4: Zero bytes after 'oldsize' if we're expanding the file
-Date:   Thu,  2 Feb 2023 20:44:24 +0000
-Message-Id: <20230202204428.3267832-3-willy@infradead.org>
+Subject: [PATCH 4/5] afs: Zero bytes after 'oldsize' if we're expanding the file
+Date:   Thu,  2 Feb 2023 20:44:26 +0000
+Message-Id: <20230202204428.3267832-5-willy@infradead.org>
 X-Mailer: git-send-email 2.37.1
 In-Reply-To: <20230202204428.3267832-1-willy@infradead.org>
 References: <20230202204428.3267832-1-willy@infradead.org>
@@ -52,21 +52,22 @@ write past EOF and that data will become visible instead of zeroes.
 
 Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 ---
- fs/ext4/inode.c | 1 +
- 1 file changed, 1 insertion(+)
+ fs/afs/inode.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
-index 9d9f414f99fe..14e3fa99f733 100644
---- a/fs/ext4/inode.c
-+++ b/fs/ext4/inode.c
-@@ -5604,6 +5604,7 @@ int ext4_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
- 			if (!shrink) {
- 				pagecache_isize_extended(inode, oldsize,
- 							 inode->i_size);
-+				truncate_pagecache(inode, oldsize);
- 			} else if (ext4_should_journal_data(inode)) {
- 				ext4_wait_for_tail_page_commit(inode);
- 			}
+diff --git a/fs/afs/inode.c b/fs/afs/inode.c
+index 6d3a3dbe4928..92e2ba7625de 100644
+--- a/fs/afs/inode.c
++++ b/fs/afs/inode.c
+@@ -854,6 +854,8 @@ static void afs_setattr_edit_file(struct afs_operation *op)
+ 
+ 		if (size < i_size)
+ 			truncate_pagecache(inode, size);
++		else
++			truncate_pagecache(inode, i_size);
+ 		if (size != i_size)
+ 			fscache_resize_cookie(afs_vnode_cache(vp->vnode),
+ 					      vp->scb.status.size);
 -- 
 2.35.1
 
