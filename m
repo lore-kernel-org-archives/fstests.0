@@ -2,99 +2,216 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 208AAC05027
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 16:29:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BE88C05027
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 16:35:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232894AbjBCQ3q (ORCPT
+        id S232145AbjBCQfQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Feb 2023 11:29:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53154 "EHLO
+        Fri, 3 Feb 2023 11:35:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232338AbjBCQ3p (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 11:29:45 -0500
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FFA3A7ED7;
-        Fri,  3 Feb 2023 08:29:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=aKb0TcrT5HcwknHd0UpHTjJTmEsJjOCtGhiYiz34rX4=; b=F5eJctUgZhs3Fw+CRoaIZxwLr5
-        QLrqqcy2wvllXqLy302hai+Ai+zxqMtdQx9W1Y6Tg0bhXD9arU5mgpKe+m44Lv82ov2FoiuUbAJA/
-        dpQ1p9lIfH8mpwUIT4GDlkGxJpgJic3E+5q0zA67mFwusHbShYPeBbitkBNAcMDBZaKtttUuTTkuI
-        5vwv1oZBMEEPZRd8nTxIyMCh5ELDr6k0hrsIwc0xaBR07opZesopKjVl+vut4xXKESSa5GzOgD1gt
-        zifZLK3DMeyTLJwcNy1mg/3OVy6MIFZH5F7gKd50xvr3ldC4GrFIS0u7k+igKDP+YvGKkVYeryWiw
-        Ws461cTw==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pNywV-00ESXM-OO; Fri, 03 Feb 2023 16:29:39 +0000
-Date:   Fri, 3 Feb 2023 16:29:39 +0000
-From:   Matthew Wilcox <willy@infradead.org>
-To:     David Laight <David.Laight@aculab.com>
-Cc:     Andreas Dilger <adilger@dilger.ca>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "linux-afs@lists.infradead.org" <linux-afs@lists.infradead.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>,
-        "linux-mm@kvack.org" <linux-mm@kvack.org>,
-        Hugh Dickins <hughd@google.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH 0/5] Fix a minor POSIX conformance problem
-Message-ID: <Y902c9MRvXghKJMy@casper.infradead.org>
+        with ESMTP id S231905AbjBCQfQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 11:35:16 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 25ECE10D4;
+        Fri,  3 Feb 2023 08:35:15 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B66E861F6F;
+        Fri,  3 Feb 2023 16:35:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1656EC433D2;
+        Fri,  3 Feb 2023 16:35:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1675442114;
+        bh=LAFGFgePgf3ook4iBuOc/zox8M9eHm7XWKurXaYi9tU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=roStwUNZB17qeESPC5wt3x03laInHjWwbx3Ss06y3w9LYsMErvt627S9H7FpxMb1m
+         Og+GQc4Hpj5HsAu8K4dXX0QoT+twn1yLxlSE6JLBp+LjSpNqETOFOCz/KUcqkkQu97
+         2IIYFkvcWCfmrPXr+dppMqQUN7rSSUDrzje8gJz9RqamD68la3WroR4sjygBsewLvj
+         sXxDhRD0pcMI1Lp6yacKN1H0Jq8ak1v01dQ78Ov4xC3Z7W6BAqFbq+DwgO6x7BiP0R
+         mYKw1rfnsJ76aTMAA2yWAI4ZhazhlVOj5D4s+GY4aIaJKi81C2punu2APFLsVghkBa
+         sf7gha6q7Wi6Q==
+Date:   Fri, 3 Feb 2023 08:35:13 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
+Cc:     linux-fsdevel@vger.kernel.org, linux-afs@lists.infradead.org,
+        linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-mm@kvack.org, Hugh Dickins <hughd@google.com>,
+        linux-kernel@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 6/5] generic: test ftruncate zeroes bytes after EOF
+Message-ID: <Y903wcB2kAWwyR+2@magnolia>
 References: <20230202204428.3267832-1-willy@infradead.org>
- <DCEDB8BB-8D10-4E17-9C27-AE48718CB82F@dilger.ca>
- <Y90KTSXCKGd8Gaqc@casper.infradead.org>
- <c16be18cb68a4adbbcd73cf9be9472df@AcuMS.aculab.com>
+ <20230202204428.3267832-7-willy@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <c16be18cb68a4adbbcd73cf9be9472df@AcuMS.aculab.com>
+In-Reply-To: <20230202204428.3267832-7-willy@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Feb 03, 2023 at 04:23:32PM +0000, David Laight wrote:
-> From: Matthew Wilcox
-> > "The system shall always zero-fill any partial page at the end of an
-> > object. Further, the system shall never write out any modified portions
-> > of the last page of an object which are beyond its end. References
-> > within the address range starting at pa and continuing for len bytes to
-> > whole pages following the end of an object shall result in delivery of
-> > a SIGBUS signal."
-> > 
-> > https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
+On Thu, Feb 02, 2023 at 08:44:28PM +0000, Matthew Wilcox (Oracle) wrote:
+> https://pubs.opengroup.org/onlinepubs/9699919799/functions/ftruncate.html
+> specifies that "If the file size is increased, the extended area shall
+> appear as if it were zero-filled."  Many filesystems do not currently
+> do this for the portion of the page after EOF.
 > 
-> It also says (down at the bottom of the rational):
+> Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+> ---
+>  .gitignore            |  1 +
+>  src/Makefile          |  2 +-
+>  src/truncate-zero.c   | 50 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/707     | 31 +++++++++++++++++++++++++++
+>  tests/generic/707.out |  2 ++
+>  5 files changed, 85 insertions(+), 1 deletion(-)
+>  create mode 100644 src/truncate-zero.c
+>  create mode 100755 tests/generic/707
+>  create mode 100644 tests/generic/707.out
 > 
-> "The mmap() function can be used to map a region of memory that is larger
-> than the current size of the object. Memory access within the mapping but
-> beyond the current end of the underlying objects may result in SIGBUS
-> signals being sent to the process. The reason for this is that the size
-> of the object can be manipulated by other processes and can change at any
-> moment. The implementation should tell the application that a memory
-> reference is outside the object where this can be detected; otherwise,
-> written data may be lost and read data may not reflect actual data in the
-> object."
-> 
-> There are a lot of 'may' in that sentence.
-> Note that it only says that 'data written beyond the current eof may be
-> lost'.
-> I think that could be taken to take precedence over the zeroing clause
-> in ftruncate().
+> diff --git a/.gitignore b/.gitignore
+> index a6f433f1..6aa5bca9 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -169,6 +169,7 @@ tags
+>  /src/test-nextquota
+>  /src/testx
+>  /src/trunc
+> +/src/truncate-zero
+>  /src/truncfile
+>  /src/unwritten_mmap
+>  /src/unwritten_sync
+> diff --git a/src/Makefile b/src/Makefile
+> index afdf6b30..83ca11ac 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -19,7 +19,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+>  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+>  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+> -	t_mmap_cow_memory_failure fake-dump-rootino
+> +	t_mmap_cow_memory_failure fake-dump-rootino truncate-zero
+>  
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/truncate-zero.c b/src/truncate-zero.c
+> new file mode 100644
+> index 00000000..67f53912
+> --- /dev/null
+> +++ b/src/truncate-zero.c
+> @@ -0,0 +1,50 @@
 
-How can the _rationale_ (explicitly labelled as informative) for one
-function take precedence over the requirements for another function?
-This is nonsense.
+Needs to have a SPDX header and the customary Oracle copyright.
 
-> I'd bet a lot of beer that the original SYSV implementation (on with the
-> description is based) didn't zero the page buffer when ftruncate()
-> increased the file size.
-> Whether anything (important) actually relies on that is an interesting
-> question!
-> 
-> 	David
-> 
-> -
-> Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
-> Registration No: 1397386 (Wales)
+> +#include <fcntl.h>
+> +#include <stdio.h>
+> +#include <string.h>
+> +#include <sys/mman.h>
+> +#include <unistd.h>
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	char *buf;
+> +	int i, fd;
+> +
+> +	if (argc != 2) {
+> +		fprintf(stderr, "Usage: %s <file>\n", argv[0]);
+> +		return 1;
+> +	}
+> +
+> +	fd = open(argv[1], O_RDWR | O_CREAT, 0644);
+> +	if (fd < 0) {
+> +		perror(argv[1]);
+> +		return 1;
+> +	}
+> +
+> +	if (ftruncate(fd, 1) < 0) {
+> +		perror("ftruncate");
+> +		return 1;
+> +	}
+> +
+> +	buf = mmap(NULL, 1024, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+> +	if (buf == MAP_FAILED) {
+> +		perror("mmap");
+> +		return 1;
+> +	}
+> +
+> +	memset(buf, 'a', 10);
+> +
+> +	if (ftruncate(fd, 5) < 0) {
+> +		perror("ftruncate");
+> +		return 1;
+> +	}
+> +
+> +	if (memcmp(buf, "a\0\0\0\0", 5) == 0)
+> +		return 0;
+> +
+> +	fprintf(stderr, "Truncation did not zero new bytes:\n");
+> +	for (i = 0; i < 5; i++)
+> +		fprintf(stderr, "%#x ", buf[i]);
+> +	fputc('\n', stderr);
+> +
+> +	return 2;
+> +}
+> diff --git a/tests/generic/707 b/tests/generic/707
+> new file mode 100755
+> index 00000000..ddc82a9a
+> --- /dev/null
+> +++ b/tests/generic/707
+> @@ -0,0 +1,31 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Matthew Wilcox for Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 707
+> +#
+> +# Test whether we obey this part of POSIX-2017 ftruncate:
+> +# "If the file size is increased, the extended area shall appear as if
+> +# it were zero-filled"
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick posix
+> +
+> +_supported_fs generic
+> +_require_test
+> +_require_test_program "truncate-zero"
+> +
+> +test_file=$TEST_DIR/test.$seq
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $test_file
+> +}
+> +
+> +$here/src/truncate-zero $test_file > $seqres.full 2>&1 ||
+> +	_fail "truncate zero failed!"
+
+Omit the _fail here because any extra stdout/stderr output that is not
+in the .out file suffices to record the test as failed.
+
+_fail is only useful if you need to exit the shell script immediately.
+
+> +
+> +echo "Silence is golden"
+
+It's customary (though not required) to put "silence is golden" before
+"but my eyes still see"^W^W^W^W^Wthe test starts running programs.
+
+Other than those minor things, this looks reasonable to me.
+
+--D
+
+> +status=0
+> +exit
+> diff --git a/tests/generic/707.out b/tests/generic/707.out
+> new file mode 100644
+> index 00000000..8e57a1d8
+> --- /dev/null
+> +++ b/tests/generic/707.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 707
+> +Silence is golden
+> -- 
+> 2.35.1
 > 
