@@ -2,216 +2,108 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BE88C05027
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 16:35:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4042C05027
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 17:48:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232145AbjBCQfQ (ORCPT
+        id S233153AbjBCRsy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Feb 2023 11:35:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57290 "EHLO
+        Fri, 3 Feb 2023 12:48:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54068 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231905AbjBCQfQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 11:35:16 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 25ECE10D4;
-        Fri,  3 Feb 2023 08:35:15 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S232795AbjBCRsq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 12:48:46 -0500
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8436CDBFD
+        for <fstests@vger.kernel.org>; Fri,  3 Feb 2023 09:48:26 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B66E861F6F;
-        Fri,  3 Feb 2023 16:35:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1656EC433D2;
-        Fri,  3 Feb 2023 16:35:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1675442114;
-        bh=LAFGFgePgf3ook4iBuOc/zox8M9eHm7XWKurXaYi9tU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=roStwUNZB17qeESPC5wt3x03laInHjWwbx3Ss06y3w9LYsMErvt627S9H7FpxMb1m
-         Og+GQc4Hpj5HsAu8K4dXX0QoT+twn1yLxlSE6JLBp+LjSpNqETOFOCz/KUcqkkQu97
-         2IIYFkvcWCfmrPXr+dppMqQUN7rSSUDrzje8gJz9RqamD68la3WroR4sjygBsewLvj
-         sXxDhRD0pcMI1Lp6yacKN1H0Jq8ak1v01dQ78Ov4xC3Z7W6BAqFbq+DwgO6x7BiP0R
-         mYKw1rfnsJ76aTMAA2yWAI4ZhazhlVOj5D4s+GY4aIaJKi81C2punu2APFLsVghkBa
-         sf7gha6q7Wi6Q==
-Date:   Fri, 3 Feb 2023 08:35:13 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
-Cc:     linux-fsdevel@vger.kernel.org, linux-afs@lists.infradead.org,
-        linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-mm@kvack.org, Hugh Dickins <hughd@google.com>,
-        linux-kernel@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 6/5] generic: test ftruncate zeroes bytes after EOF
-Message-ID: <Y903wcB2kAWwyR+2@magnolia>
-References: <20230202204428.3267832-1-willy@infradead.org>
- <20230202204428.3267832-7-willy@infradead.org>
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 6C1325C236
+        for <fstests@vger.kernel.org>; Fri,  3 Feb 2023 17:47:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1675446474; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=mObJ04iT1s5hfCYpto/K0Ja5fdt02Q8JopYsXRQRfWM=;
+        b=IGwId4Wbe1W2DrCIQR81Tdgjq9OVxNnsMJ3NCyX1TsCeAk0yhiil0NNde3WJ0p/AekeUDx
+        cZ3B9J200r8Q/F6cTwTT3oJegT+DFPgyi6Hn8WHynIs6EVFxucYXFwwJRFaARxV2WShdaq
+        7YnhR9otlWlAtEQ/c5buwGcugYlPt4U=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5D23C1346D
+        for <fstests@vger.kernel.org>; Fri,  3 Feb 2023 17:47:54 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id P8XvFcpI3WP3AgAAMHmgww
+        (envelope-from <ailiop@suse.com>)
+        for <fstests@vger.kernel.org>; Fri, 03 Feb 2023 17:47:54 +0000
+From:   Anthony Iliopoulos <ailiop@suse.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v2] xfs/191: fix xattr leaf block emptying on 64k blocksized fses
+Date:   Fri,  3 Feb 2023 18:47:44 +0100
+Message-Id: <20230203174744.151270-1-ailiop@suse.com>
+X-Mailer: git-send-email 2.35.3
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230202204428.3267832-7-willy@infradead.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 02, 2023 at 08:44:28PM +0000, Matthew Wilcox (Oracle) wrote:
-> https://pubs.opengroup.org/onlinepubs/9699919799/functions/ftruncate.html
-> specifies that "If the file size is increased, the extended area shall
-> appear as if it were zero-filled."  Many filesystems do not currently
-> do this for the portion of the page after EOF.
-> 
-> Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
-> ---
->  .gitignore            |  1 +
->  src/Makefile          |  2 +-
->  src/truncate-zero.c   | 50 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/707     | 31 +++++++++++++++++++++++++++
->  tests/generic/707.out |  2 ++
->  5 files changed, 85 insertions(+), 1 deletion(-)
->  create mode 100644 src/truncate-zero.c
->  create mode 100755 tests/generic/707
->  create mode 100644 tests/generic/707.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index a6f433f1..6aa5bca9 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -169,6 +169,7 @@ tags
->  /src/test-nextquota
->  /src/testx
->  /src/trunc
-> +/src/truncate-zero
->  /src/truncfile
->  /src/unwritten_mmap
->  /src/unwritten_sync
-> diff --git a/src/Makefile b/src/Makefile
-> index afdf6b30..83ca11ac 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -19,7 +19,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
->  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
->  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
-> -	t_mmap_cow_memory_failure fake-dump-rootino
-> +	t_mmap_cow_memory_failure fake-dump-rootino truncate-zero
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/truncate-zero.c b/src/truncate-zero.c
-> new file mode 100644
-> index 00000000..67f53912
-> --- /dev/null
-> +++ b/src/truncate-zero.c
-> @@ -0,0 +1,50 @@
+This test is failing on filesystems with 64k blocksize since the leaf
+hdr.firstused field is 16 bit and as such trying to reset it to $dbsize
+overflows and is rejected by xfs_db. The leaf is never properly resetted
+and the discrepancy is picked up by xfs_repair, thus failing the test.
 
-Needs to have a SPDX header and the customary Oracle copyright.
+Fix it by setting it to XFS_ATTR3_LEAF_NULLOFF (0) as this is the proper
+on-disk value to indicate an empty leaf on 64k blocksized fses.
 
-> +#include <fcntl.h>
-> +#include <stdio.h>
-> +#include <string.h>
-> +#include <sys/mman.h>
-> +#include <unistd.h>
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	char *buf;
-> +	int i, fd;
-> +
-> +	if (argc != 2) {
-> +		fprintf(stderr, "Usage: %s <file>\n", argv[0]);
-> +		return 1;
-> +	}
-> +
-> +	fd = open(argv[1], O_RDWR | O_CREAT, 0644);
-> +	if (fd < 0) {
-> +		perror(argv[1]);
-> +		return 1;
-> +	}
-> +
-> +	if (ftruncate(fd, 1) < 0) {
-> +		perror("ftruncate");
-> +		return 1;
-> +	}
-> +
-> +	buf = mmap(NULL, 1024, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-> +	if (buf == MAP_FAILED) {
-> +		perror("mmap");
-> +		return 1;
-> +	}
-> +
-> +	memset(buf, 'a', 10);
-> +
-> +	if (ftruncate(fd, 5) < 0) {
-> +		perror("ftruncate");
-> +		return 1;
-> +	}
-> +
-> +	if (memcmp(buf, "a\0\0\0\0", 5) == 0)
-> +		return 0;
-> +
-> +	fprintf(stderr, "Truncation did not zero new bytes:\n");
-> +	for (i = 0; i < 5; i++)
-> +		fprintf(stderr, "%#x ", buf[i]);
-> +	fputc('\n', stderr);
-> +
-> +	return 2;
-> +}
-> diff --git a/tests/generic/707 b/tests/generic/707
-> new file mode 100755
-> index 00000000..ddc82a9a
-> --- /dev/null
-> +++ b/tests/generic/707
-> @@ -0,0 +1,31 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Matthew Wilcox for Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 707
-> +#
-> +# Test whether we obey this part of POSIX-2017 ftruncate:
-> +# "If the file size is increased, the extended area shall appear as if
-> +# it were zero-filled"
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick posix
-> +
-> +_supported_fs generic
-> +_require_test
-> +_require_test_program "truncate-zero"
-> +
-> +test_file=$TEST_DIR/test.$seq
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $test_file
-> +}
-> +
-> +$here/src/truncate-zero $test_file > $seqres.full 2>&1 ||
-> +	_fail "truncate zero failed!"
+Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+---
+ tests/xfs/191 | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-Omit the _fail here because any extra stdout/stderr output that is not
-in the .out file suffices to record the test as failed.
+v2:
+- moved upstream commit comment into a _fixed_by_kernel_commit
+- removed trailing semicolons from assignment statements
+- add rvbs
 
-_fail is only useful if you need to exit the shell script immediately.
+diff --git a/tests/xfs/191 b/tests/xfs/191
+index 4f0a9b9eeef5..7a02f1be217c 100755
+--- a/tests/xfs/191
++++ b/tests/xfs/191
+@@ -30,6 +30,7 @@ _supported_fs xfs
+ _require_scratch
+ _require_scratch_xfs_crc # V4 is deprecated
+ _fixed_by_kernel_commit 7be3bd8856fb "xfs: empty xattr leaf header blocks are not corruption"
++_fixed_by_kernel_commit e87021a2bc10 "xfs: use larger in-core attr firstused field and detect overflow"
+ _fixed_by_git_commit xfsprogs f50d3462c654 "xfs_repair: ignore empty xattr leaf blocks"
+ 
+ _scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+@@ -78,10 +79,19 @@ make_empty_leaf() {
+ 
+ 	base=$(_scratch_xfs_get_metadata_field "hdr.freemap[0].base" "inode $inum" "ablock 0")
+ 
++	# 64k dbsize is a special case since it overflows the 16 bit firstused
++	# field and it needs to be set to the special XFS_ATTR3_LEAF_NULLOFF (0)
++	# value to indicate a null leaf.
++	if [ $dbsize -eq 65536 ]; then
++		firstused=0
++	else
++		firstused=$dbsize
++	fi
++
+ 	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" \
+ 		-c "write -d hdr.count 0" \
+ 		-c "write -d hdr.usedbytes 0" \
+-		-c "write -d hdr.firstused $dbsize" \
++		-c "write -d hdr.firstused $firstused" \
+ 		-c "write -d hdr.freemap[0].size $((dbsize - base))" \
+ 		-c print >> $seqres.full
+ }
+-- 
+2.35.3
 
-> +
-> +echo "Silence is golden"
-
-It's customary (though not required) to put "silence is golden" before
-"but my eyes still see"^W^W^W^W^Wthe test starts running programs.
-
-Other than those minor things, this looks reasonable to me.
-
---D
-
-> +status=0
-> +exit
-> diff --git a/tests/generic/707.out b/tests/generic/707.out
-> new file mode 100644
-> index 00000000..8e57a1d8
-> --- /dev/null
-> +++ b/tests/generic/707.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 707
-> +Silence is golden
-> -- 
-> 2.35.1
-> 
