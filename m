@@ -2,33 +2,36 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 851FFC636D6
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 16:23:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 208AAC05027
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 16:29:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231732AbjBCQXj convert rfc822-to-8bit (ORCPT
+        id S232894AbjBCQ3q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Feb 2023 11:23:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46406 "EHLO
+        Fri, 3 Feb 2023 11:29:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232102AbjBCQXj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 11:23:39 -0500
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B9849E9C5
-        for <fstests@vger.kernel.org>; Fri,  3 Feb 2023 08:23:36 -0800 (PST)
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with both STARTTLS and AUTH (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mta-243-_ITs-rZGN66msvzu-eXIpg-1; Fri, 03 Feb 2023 16:23:33 +0000
-X-MC-Unique: _ITs-rZGN66msvzu-eXIpg-1
-Received: from AcuMS.Aculab.com (10.202.163.6) by AcuMS.aculab.com
- (10.202.163.6) with Microsoft SMTP Server (TLS) id 15.0.1497.45; Fri, 3 Feb
- 2023 16:23:32 +0000
-Received: from AcuMS.Aculab.com ([::1]) by AcuMS.aculab.com ([::1]) with mapi
- id 15.00.1497.045; Fri, 3 Feb 2023 16:23:32 +0000
-From:   David Laight <David.Laight@ACULAB.COM>
-To:     'Matthew Wilcox' <willy@infradead.org>,
-        Andreas Dilger <adilger@dilger.ca>
-CC:     "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        with ESMTP id S232338AbjBCQ3p (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 11:29:45 -0500
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FFA3A7ED7;
+        Fri,  3 Feb 2023 08:29:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=aKb0TcrT5HcwknHd0UpHTjJTmEsJjOCtGhiYiz34rX4=; b=F5eJctUgZhs3Fw+CRoaIZxwLr5
+        QLrqqcy2wvllXqLy302hai+Ai+zxqMtdQx9W1Y6Tg0bhXD9arU5mgpKe+m44Lv82ov2FoiuUbAJA/
+        dpQ1p9lIfH8mpwUIT4GDlkGxJpgJic3E+5q0zA67mFwusHbShYPeBbitkBNAcMDBZaKtttUuTTkuI
+        5vwv1oZBMEEPZRd8nTxIyMCh5ELDr6k0hrsIwc0xaBR07opZesopKjVl+vut4xXKESSa5GzOgD1gt
+        zifZLK3DMeyTLJwcNy1mg/3OVy6MIFZH5F7gKd50xvr3ldC4GrFIS0u7k+igKDP+YvGKkVYeryWiw
+        Ws461cTw==;
+Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1pNywV-00ESXM-OO; Fri, 03 Feb 2023 16:29:39 +0000
+Date:   Fri, 3 Feb 2023 16:29:39 +0000
+From:   Matthew Wilcox <willy@infradead.org>
+To:     David Laight <David.Laight@aculab.com>
+Cc:     Andreas Dilger <adilger@dilger.ca>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
         "linux-afs@lists.infradead.org" <linux-afs@lists.infradead.org>,
         "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
         "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>,
@@ -36,92 +39,62 @@ CC:     "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
         Hugh Dickins <hughd@google.com>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: RE: [PATCH 0/5] Fix a minor POSIX conformance problem
-Thread-Topic: [PATCH 0/5] Fix a minor POSIX conformance problem
-Thread-Index: AQHZN9J6uHKWfdvyUUW8SEkwX3xBiK69ZXmQ
-Date:   Fri, 3 Feb 2023 16:23:32 +0000
-Message-ID: <c16be18cb68a4adbbcd73cf9be9472df@AcuMS.aculab.com>
+Subject: Re: [PATCH 0/5] Fix a minor POSIX conformance problem
+Message-ID: <Y902c9MRvXghKJMy@casper.infradead.org>
 References: <20230202204428.3267832-1-willy@infradead.org>
  <DCEDB8BB-8D10-4E17-9C27-AE48718CB82F@dilger.ca>
  <Y90KTSXCKGd8Gaqc@casper.infradead.org>
-In-Reply-To: <Y90KTSXCKGd8Gaqc@casper.infradead.org>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [10.202.205.107]
+ <c16be18cb68a4adbbcd73cf9be9472df@AcuMS.aculab.com>
 MIME-Version: 1.0
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c16be18cb68a4adbbcd73cf9be9472df@AcuMS.aculab.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Matthew Wilcox
-> Sent: 03 February 2023 13:21
+On Fri, Feb 03, 2023 at 04:23:32PM +0000, David Laight wrote:
+> From: Matthew Wilcox
+> > "The system shall always zero-fill any partial page at the end of an
+> > object. Further, the system shall never write out any modified portions
+> > of the last page of an object which are beyond its end. References
+> > within the address range starting at pa and continuing for len bytes to
+> > whole pages following the end of an object shall result in delivery of
+> > a SIGBUS signal."
+> > 
+> > https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
 > 
-> On Thu, Feb 02, 2023 at 04:08:49PM -0700, Andreas Dilger wrote:
-> > On Feb 2, 2023, at 1:44 PM, Matthew Wilcox (Oracle) <willy@infradead.org> wrote:
-> > >
-> > > POSIX requires that on ftruncate() expansion, the new bytes must read
-> > > as zeroes.  If someone's mmap()ed the file and stored past EOF, for
-> > > most filesystems the bytes in that page will be not-zero.  It's a
-> > > pretty minor violation; someone could race you and write to the file
-> > > between the ftruncate() call and you reading from it, but it's a bit
-> > > of a QOI violation.
-> >
-> > Is it possible to have mmap return SIGBUS for the writes beyond EOF?
+> It also says (down at the bottom of the rational):
 > 
-> Well, no.  The hardware only tells us about accesses on a per-page
-> basis.  We could SIGBUS on writes that _start_ after EOF, but this
-> test doesn't do that (it starts before EOF and extends past EOF).
-> And once the page is mapped writable, there's no page fault taken
-> for subsequent writes.
+> "The mmap() function can be used to map a region of memory that is larger
+> than the current size of the object. Memory access within the mapping but
+> beyond the current end of the underlying objects may result in SIGBUS
+> signals being sent to the process. The reason for this is that the size
+> of the object can be manipulated by other processes and can change at any
+> moment. The implementation should tell the application that a memory
+> reference is outside the object where this can be detected; otherwise,
+> written data may be lost and read data may not reflect actual data in the
+> object."
 > 
-> > On the one hand, that might indicate incorrect behavior of the application,
-> > and on the other hand, it seems possible that the application doesn't
-> > know it is writing beyond EOF and expects that data to be read back OK?
+> There are a lot of 'may' in that sentence.
+> Note that it only says that 'data written beyond the current eof may be
+> lost'.
+> I think that could be taken to take precedence over the zeroing clause
+> in ftruncate().
+
+How can the _rationale_ (explicitly labelled as informative) for one
+function take precedence over the requirements for another function?
+This is nonsense.
+
+> I'd bet a lot of beer that the original SYSV implementation (on with the
+> description is based) didn't zero the page buffer when ftruncate()
+> increased the file size.
+> Whether anything (important) actually relies on that is an interesting
+> question!
 > 
-> POSIX says:
+> 	David
 > 
-> "The system shall always zero-fill any partial page at the end of an
-> object. Further, the system shall never write out any modified portions
-> of the last page of an object which are beyond its end. References
-> within the address range starting at pa and continuing for len bytes to
-> whole pages following the end of an object shall result in delivery of
-> a SIGBUS signal."
+> -
+> Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
+> Registration No: 1397386 (Wales)
 > 
-> https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
-
-It also says (down at the bottom of the rational):
-
-"The mmap() function can be used to map a region of memory that is larger
-than the current size of the object. Memory access within the mapping but
-beyond the current end of the underlying objects may result in SIGBUS
-signals being sent to the process. The reason for this is that the size
-of the object can be manipulated by other processes and can change at any
-moment. The implementation should tell the application that a memory
-reference is outside the object where this can be detected; otherwise,
-written data may be lost and read data may not reflect actual data in the
-object."
-
-There are a lot of 'may' in that sentence.
-Note that it only says that 'data written beyond the current eof may be
-lost'.
-I think that could be taken to take precedence over the zeroing clause
-in ftruncate().
-I'd bet a lot of beer that the original SYSV implementation (on with the
-description is based) didn't zero the page buffer when ftruncate()
-increased the file size.
-Whether anything (important) actually relies on that is an interesting
-question!
-
-	David
-
--
-Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
-Registration No: 1397386 (Wales)
-
