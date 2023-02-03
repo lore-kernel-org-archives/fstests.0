@@ -2,157 +2,104 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D761AC6379F
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Feb 2023 23:09:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31292C636D3
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 00:04:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232981AbjBBXJG (ORCPT
+        id S233424AbjBCAEg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Feb 2023 18:09:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36216 "EHLO
+        Thu, 2 Feb 2023 19:04:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232946AbjBBXJF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2023 18:09:05 -0500
-Received: from mail-pl1-x62d.google.com (mail-pl1-x62d.google.com [IPv6:2607:f8b0:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8198A7DBFD
-        for <fstests@vger.kernel.org>; Thu,  2 Feb 2023 15:09:02 -0800 (PST)
-Received: by mail-pl1-x62d.google.com with SMTP id n13so3475381plf.11
-        for <fstests@vger.kernel.org>; Thu, 02 Feb 2023 15:09:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dilger-ca.20210112.gappssmtp.com; s=20210112;
-        h=references:to:cc:in-reply-to:date:subject:mime-version:message-id
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=VqUjNnlLe9QrrnNqYH4vz9I08V1g+NAtbBxDawrBf84=;
-        b=tiXwB/YFL3/UVZmPjd1ZEHaio2kX0wKkQg/TK4XDyG5MggLDGQDJfWKEahDjvcVnDG
-         6olYuokRsSvkdJTx6NLxKE1iynQEBqIsubNzoIAZ81PLPSyV8X6yyr5yf3t+HAgsR9TU
-         AkeudAKrJPQJfqwzuJGdQqCsR3q6FfySNI5pTmzmZFWjadchc/wgnWagVWIb7KKRU9yP
-         amAQDGUyxDWKtYtYMMneMgVNvubuRf7HPQiN6fejbHo63bkHRKG9WFiiWUaHTiqv9lMF
-         In7o7qTQiJGykaRwM0RWpUxVPpcJTQ8wFN83IMVfu7hdpzyHzadr6ilm+dGarBCmTPsQ
-         Mh/g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=references:to:cc:in-reply-to:date:subject:mime-version:message-id
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=VqUjNnlLe9QrrnNqYH4vz9I08V1g+NAtbBxDawrBf84=;
-        b=iQhiZKRlRphJtMdRpXiLJS1+D2NjVC9XUSIPXyx7ZCkGWLrcl6kF2avJTteNQISD07
-         5SZyESj80w/BXqapHgg5lbq8kJ3iRV1/W8O/AAnaqYhISkb2EXmkX3D3/dAdZUnrLY4v
-         fmPG4QaWtQb29saEnvNz8zYKyIjtQdFQ2c7XqxXztvAvzStjpC/oih2UW2jdRpkGVDUd
-         srCcWzqDvJraoviueLxCSLra+l5/00pl8RBP37NvipHjkTCQNXro6hKNYzir7g0YvW9Q
-         yqHfboEphHbvJoPgUVTq/jwVY+iBXupzC6gWzpv7HCaKpg58tCfXTW3LADOv+doUaCve
-         Y6JA==
-X-Gm-Message-State: AO0yUKU0txL86q2ua0pecfg3lt+r0iZM72ptbXRIaQb04xu+3oT23AGu
-        pF3L+TfvtQCvDqE8uk9CAGeJnB5yOkoitHYjxNw=
-X-Google-Smtp-Source: AK7set945rckBnElMZ3rf+zcsuttJnQ5VSAsDV2YHSLk1UFGwfYjX3yosnFoI7MQkt1MREnq7QE/VA==
-X-Received: by 2002:a05:6a21:1586:b0:bd:b061:9527 with SMTP id nr6-20020a056a21158600b000bdb0619527mr7590449pzb.4.1675379341884;
-        Thu, 02 Feb 2023 15:09:01 -0800 (PST)
-Received: from cabot.adilger.int (S01061cabc081bf83.cg.shawcable.net. [70.77.221.9])
-        by smtp.gmail.com with ESMTPSA id o6-20020a637306000000b004d346876d37sm300348pgc.45.2023.02.02.15.09.00
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Feb 2023 15:09:01 -0800 (PST)
-From:   Andreas Dilger <adilger@dilger.ca>
-Message-Id: <DCEDB8BB-8D10-4E17-9C27-AE48718CB82F@dilger.ca>
-Content-Type: multipart/signed;
- boundary="Apple-Mail=_8DFD1D9F-16F3-4D17-914C-8298AD90A8D5";
- protocol="application/pgp-signature"; micalg=pgp-sha256
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Subject: Re: [PATCH 0/5] Fix a minor POSIX conformance problem
-Date:   Thu, 2 Feb 2023 16:08:49 -0700
-In-Reply-To: <20230202204428.3267832-1-willy@infradead.org>
-Cc:     linux-fsdevel@vger.kernel.org, linux-afs@lists.infradead.org,
-        linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-mm@kvack.org, Hugh Dickins <hughd@google.com>,
-        linux-kernel@vger.kernel.org, fstests@vger.kernel.org
-To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
-References: <20230202204428.3267832-1-willy@infradead.org>
-X-Mailer: Apple Mail (2.3273)
+        with ESMTP id S233411AbjBCAEd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Feb 2023 19:04:33 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 384D328D2B
+        for <fstests@vger.kernel.org>; Thu,  2 Feb 2023 16:04:28 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id ECB8DB810EE
+        for <fstests@vger.kernel.org>; Fri,  3 Feb 2023 00:04:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9307BC433D2;
+        Fri,  3 Feb 2023 00:04:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1675382665;
+        bh=WF75xBD3hCqtKCM5Rjj44CY2U0j8El4s25JaBDjuQww=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=lHcudj7V20oWNVUuldLwl4h6WBRNBknuFU4YRii6/hJqjjV5Fw1lTQgiIQNoLDYJC
+         h2/b//c3eLQ6TZxM78kx+fEIYnvj1pz/ZVApVwpQhJDsLaoRnQUzbDGeeq0xdNma8i
+         1owhGC8C2dPhJ+on4ssS5nwQ0By39/cGY+15SrutdDzc72qne59FHJIcChhTXJUper
+         z8R3fAWoKXZr5W5BOPcf0Eq0jjaZeoRB0xrZIs22UnisnwLufpkzKBIjVMLq0daWDB
+         /O4HK3gWi3UfZTn3dgklBmbh6QEgD8bxWYxbKx+CSCrirdbF5bQoiD+CTvNFuno/IJ
+         F1stHpf6kkkVw==
+Date:   Thu, 2 Feb 2023 16:04:25 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Anthony Iliopoulos <ailiop@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/191: fix xattr leaf block emptying on 64k blocksized
+ fses
+Message-ID: <Y9xPiT6wtGKQm7s3@magnolia>
+References: <20230202210940.95791-1-ailiop@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230202210940.95791-1-ailiop@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Thu, Feb 02, 2023 at 10:09:40PM +0100, Anthony Iliopoulos wrote:
+> This test is failing on filesystems with 64k blocksize since the leaf
+> hdr.firstused field is 16 bit and as such trying to reset it to $dbsize
+> overflows and is rejected by xfs_db. The leaf is never properly resetted
+> and the discrepancy is picked up by xfs_repair, thus failing the test.
+> 
+> Fix it by setting it to XFS_ATTR3_LEAF_NULLOFF (0) as this is the proper
+> on-disk value to indicate an empty leaf on 64k blocksized fses.
+> 
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+> ---
+>  tests/xfs/191 | 12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/191 b/tests/xfs/191
+> index 4f0a9b9eeef5..8dd875fcd28b 100755
+> --- a/tests/xfs/191
+> +++ b/tests/xfs/191
+> @@ -78,10 +78,20 @@ make_empty_leaf() {
+>  
+>  	base=$(_scratch_xfs_get_metadata_field "hdr.freemap[0].base" "inode $inum" "ablock 0")
+>  
+> +	# 64k dbsize is a special case since it overflows the 16 bit firstused
+> +	# field and it needs to be set to the special XFS_ATTR3_LEAF_NULLOFF (0)
+> +	# value to indicate a null leaf. For more details see kernel commit:
+> +	# e87021a2bc10 ("xfs: use larger in-core attr firstused field and detect overflow").
 
---Apple-Mail=_8DFD1D9F-16F3-4D17-914C-8298AD90A8D5
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=us-ascii
+Do we need a second _fixed_by_kernel_commit here?
 
-On Feb 2, 2023, at 1:44 PM, Matthew Wilcox (Oracle) =
-<willy@infradead.org> wrote:
->=20
-> POSIX requires that on ftruncate() expansion, the new bytes must read
-> as zeroes.  If someone's mmap()ed the file and stored past EOF, for
-> most filesystems the bytes in that page will be not-zero.  It's a
-> pretty minor violation; someone could race you and write to the file
-> between the ftruncate() call and you reading from it, but it's a bit
-> of a QOI violation.
+> +	if [ $dbsize -eq 65536 ]; then
+> +		firstused=0;
+> +	else
+> +		firstused=$dbsize;
 
-Is it possible to have mmap return SIGBUS for the writes beyond EOF?
-On the one hand, that might indicate incorrect behavior of the =
-application,
-and on the other hand, it seems possible that the application doesn't
-know it is writing beyond EOF and expects that data to be read back OK?
+Trailing semicolon not necessary here.
 
-What happens if it is writing beyond EOF, but the block hasn't even been
-allocated because PAGE_SIZE > blocksize?
+> +	fi
 
-IMHO, this seems better to stop the root of the problem (mmap() allowing
-bad writes), rather than trying to fix it after the fact.
+Otherwise, looks correct to me, so
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Cheers, Andreas
+--D
 
-> I've tested xfs (passes before & after), ext4 and tmpfs (both fail
-> before, pass after).  Testing from other FS developers appreciated.
-> fstest to follow; not sure how to persuade git-send-email to work on
-> multiple repositories
->=20
-> Matthew Wilcox (Oracle) (5):
->  truncate: Zero bytes after 'oldsize' if we're expanding the file
->  ext4: Zero bytes after 'oldsize' if we're expanding the file
->  tmpfs: Zero bytes after 'oldsize' if we're expanding the file
->  afs: Zero bytes after 'oldsize' if we're expanding the file
->  btrfs: Zero bytes after 'oldsize' if we're expanding the file
->=20
-> fs/afs/inode.c   | 2 ++
-> fs/btrfs/inode.c | 1 +
-> fs/ext4/inode.c  | 1 +
-> mm/shmem.c       | 2 ++
-> mm/truncate.c    | 7 +++++--
-> 5 files changed, 11 insertions(+), 2 deletions(-)
->=20
-> --
-> 2.35.1
->=20
-
-
-Cheers, Andreas
-
-
-
-
-
-
---Apple-Mail=_8DFD1D9F-16F3-4D17-914C-8298AD90A8D5
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename=signature.asc
-Content-Type: application/pgp-signature;
-	name=signature.asc
-Content-Description: Message signed with OpenPGP
-
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - http://gpgtools.org
-
-iQIzBAEBCAAdFiEEDb73u6ZejP5ZMprvcqXauRfMH+AFAmPcQoIACgkQcqXauRfM
-H+CNdBAAhriBgXO1g+TzG5HbJSljgcpvSaRMy+yNpMbCc6Fp/C3J3xQPJReOJDee
-5YOaqYEwU2ap/xwIjl+OtXpEy/zq8qwO9LCofufBtMH4akhS26i8lfWoXzeo8MzH
-+ibRkNMk7vamH8PT46gwMLNldqk5pt7Dxwu/XarWsDg98JxZVQvvmPJIcXtgsETA
-GLFrhm+SudzQVCeBGJS0I4ZU4eDNpJxiExlCpkR04wgHE3GvvQT2ehVjcQXasqwg
-z2u9r0VwflncAmvkgIpylxOXmSX44jwpnahJwk3dAP/DmdYRf3kQVooglndm5sAF
-aAj6kT/mVNKdg+GJSIHjnTJjCM7BFkyFxi06xKVWjSpfYvgA5PoY8egV20kHpA3i
-wRbxnoS3u5fxEx1KHj3HVnn7vhBnRsSC3AnZjLlTvtuqp7xKNMt5S5JnADLGZ6Ud
-wNrl27/8LceOvSG7E/9yOmzLUvbrzZoWSRRYIymwF/6H5g0Ki4voGImZ0l+Yn4OW
-sbgwcyJ1pq5Py4PgKY+iBPK61Gtk+sTOsfC3I2KWUy+7mAfQ23pfGMjY3EUNB5eC
-EXuEnYw1ePIXt2MSN9yPJLz5r882eLrdbkp0nD1jx85OJFFgJvlcZ0rmPyGpBrT7
-ZPq3/kKDUTwYJXO4cW+EuNV1rcTu2YttzPLBWzECgMhmXpdz0vI=
-=TgpS
------END PGP SIGNATURE-----
-
---Apple-Mail=_8DFD1D9F-16F3-4D17-914C-8298AD90A8D5--
+> +
+>  	_scratch_xfs_db -x -c "inode $inum" -c "ablock 0" \
+>  		-c "write -d hdr.count 0" \
+>  		-c "write -d hdr.usedbytes 0" \
+> -		-c "write -d hdr.firstused $dbsize" \
+> +		-c "write -d hdr.firstused $firstused" \
+>  		-c "write -d hdr.freemap[0].size $((dbsize - base))" \
+>  		-c print >> $seqres.full
+>  }
+> -- 
+> 2.35.3
+> 
