@@ -2,84 +2,103 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5443BC05027
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 14:36:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0E14C61DA4
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Feb 2023 15:07:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232461AbjBCOg0 (ORCPT
+        id S233639AbjBCPHL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Feb 2023 09:36:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52878 "EHLO
+        Fri, 3 Feb 2023 10:07:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232603AbjBCOg0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 09:36:26 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5266A83FA
-        for <fstests@vger.kernel.org>; Fri,  3 Feb 2023 06:36:25 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 122F35BE2E;
-        Fri,  3 Feb 2023 14:36:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1675434984; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=gTfjx5v29PdOZ/brVs6lZYrZYFsZscbQn7UiGdIY5lY=;
-        b=rJ9y4kQuxIBZcTnUO0jaV1FUdwBVyNm46dyGQP+DmOF/q3fVy+5V0s6eq1yq4radJf47tn
-        Bm2nI2o/OtHY5aXGLQ2PCZ+wFq+qJrdAGnp/v0IHNZN+2KVSDgdam8zJ7lmLM9LJpXf5cY
-        9V59RLSM9c2VZjQqcyKVxZnXUZHd134=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E234C1358A;
-        Fri,  3 Feb 2023 14:36:23 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id kNabNecb3WOhIwAAMHmgww
-        (envelope-from <gniebler@suse.com>); Fri, 03 Feb 2023 14:36:23 +0000
-From:   Gabriel Niebler <gniebler@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     Gabriel Niebler <gniebler@suse.com>
-Subject: [PATCH] common: Do not chown ro mountpoint when creating idmapped mount
-Date:   Fri,  3 Feb 2023 15:35:45 +0100
-Message-Id: <20230203143545.23689-1-gniebler@suse.com>
-X-Mailer: git-send-email 2.39.1
+        with ESMTP id S233657AbjBCPHK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Feb 2023 10:07:10 -0500
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 286FEA0E99;
+        Fri,  3 Feb 2023 07:07:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=DFUkqlIb1koR34QSR5KYPFYQ+oC2ej0KqthqG2wrzL8=; b=QTLBPiQNVGLCOGdfPgtGITnHy8
+        VdbEIQzfUpVRnoHj6uEvO9vNTNXB3Y5GAKE52fN3jq0ciwAKlSiiJniPLlZ9mW7lpssuUH3AHoauX
+        tZVG9s5oncmxw8GO3wfZRHq52EYoApCHer2IBgXz0X8NmYslkeLdNfL7irqEC8W1Hl1CskyZtzQk3
+        di4ZfKsWGctoXkMvrHi/SoFhY8QeTD9OaEUlRQ6qGCXYvAaL8p8cvhaNwgS3XvjDjxRXDUWl9PdWk
+        gclC2AyLWzE0WqfI2Atf8bmUX8wg49kdHjsRVo0OPzlYU1ARyDAyaa6dpiJLpDabruhiyI+kS6Ylf
+        Qbl9VHoQ==;
+Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1pNxeb-00EOZb-KF; Fri, 03 Feb 2023 15:07:05 +0000
+Date:   Fri, 3 Feb 2023 15:07:05 +0000
+From:   Matthew Wilcox <willy@infradead.org>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     linux-fsdevel@vger.kernel.org, linux-afs@lists.infradead.org,
+        linux-btrfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-mm@kvack.org, Hugh Dickins <hughd@google.com>,
+        linux-kernel@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/5] truncate: Zero bytes after 'oldsize' if we're
+ expanding the file
+Message-ID: <Y90jGVTFxU/QLM5o@casper.infradead.org>
+References: <20230202204428.3267832-1-willy@infradead.org>
+ <20230202204428.3267832-2-willy@infradead.org>
+ <Y90FYG+tNtBIl62S@bfoster>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y90FYG+tNtBIl62S@bfoster>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The function _idmapped_mount tries to change the ownership of the mountpoint
-for which it aims to create an idmapped mount, to ensure that the mapped UID
-and GID can actually create objects within it. Some tests set up a read-only
-mount, however, which lets the chown call fail. This patch fixes the
-function to check whether the mount is read-only and skip the chown, if so.
+On Fri, Feb 03, 2023 at 08:00:16AM -0500, Brian Foster wrote:
+> On Thu, Feb 02, 2023 at 08:44:23PM +0000, Matthew Wilcox (Oracle) wrote:
+> > POSIX requires that "If the file size is increased, the extended area
+> > shall appear as if it were zero-filled".  It is possible to use mmap to
+> > write past EOF and that data will become visible instead of zeroes.
+> > This fixes the problem for the filesystems which simply call
+> > truncate_setsize().  More complex filesystems will need their own
+> > patches.
+> > 
+> > Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+> > ---
+> >  mm/truncate.c | 7 +++++--
+> >  1 file changed, 5 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/mm/truncate.c b/mm/truncate.c
+> > index 7b4ea4c4a46b..cebfc5415e9a 100644
+> > --- a/mm/truncate.c
+> > +++ b/mm/truncate.c
+> > @@ -763,9 +763,12 @@ void truncate_setsize(struct inode *inode, loff_t newsize)
+> >  	loff_t oldsize = inode->i_size;
+> >  
+> >  	i_size_write(inode, newsize);
+> > -	if (newsize > oldsize)
+> > +	if (newsize > oldsize) {
+> >  		pagecache_isize_extended(inode, oldsize, newsize);
+> > -	truncate_pagecache(inode, newsize);
+> > +		truncate_pagecache(inode, oldsize);
+> > +	} else {
+> > +		truncate_pagecache(inode, newsize);
+> > +	}
+> 
+> I don't think this alone quite addresses the problem. Looking at ext4
+> for example, if the eof page is dirty and writeback occurs between the
+> i_size update (because writeback also zeroes the post-eof portion of the
+> page) and the truncate_setsize() call, we end up with pagecache
+> inconsistency because pagecache truncate doesn't dirty the page it
+> zeroes.
+> 
+> So for example, with this series plus a nefariously placed
+> filemap_flush() in ext4_setattr():
+> 
+> # xfs_io -fc "truncate 1" -c "mmap 0 1k" -c "mwrite 0 10" -c "truncate 5" -c "mread -v 0 5" /mnt/file
+> 00000000:  58 00 00 00 00  X....
+> # umount /mnt/; mount <dev> /mnt/
+> # xfs_io -c "mmap 0 1k" -c "mread -v 0 5" /mnt/file 
+> 00000000:  58 58 58 58 58  XXXXX
 
-Signed-off-by: Gabriel Niebler <gniebler@suse.com>
----
- common/rc | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index 81ce1026..19ab8062 100644
---- a/common/rc
-+++ b/common/rc
-@@ -414,8 +414,11 @@ _idmapped_mount()
- 
- 	# We create an idmapped mount where {g,u}id 0 writes to disk as
- 	# {g,u}id 10000000 and $(id -u fsgqa) + 10000000. We change ownership
--        # of $mnt so {g,u} id 0 can actually create objects in there.
--	chown 10000000:10000000 $mnt || return 1
-+	# of $mnt, provided it's not read-only, so {g,u} id 0 can actually
-+	# create objects in there.
-+	if [[ "$mount_rec" != *"ro,"* && "$mount_rec" != *",ro"* ]]; then
-+		chown 10000000:10000000 $mnt || return 1
-+	fi
- 	$here/src/vfs/mount-idmapped \
- 		--map-mount b:10000000:0:100000000000 \
- 		$mnt $tmp
--- 
-2.39.1
+Hm, so switch the order of i_size_write() and truncate_pagecache()?
+There could still be a store between old-EOF and new-EOF from another
+thread, which would then be visible, but I don't think you could prove
+that store should have been zeroed.  Not from the thread doing the
+ftruncate() anyway -- I think the thread doing the store could prove
+it, but that thread is relying on undefined behaviour anyway.
 
