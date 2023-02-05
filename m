@@ -2,1015 +2,154 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF2D3C636CC
-	for <linux-fstests@archiver.kernel.org>; Sun,  5 Feb 2023 13:05:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EF81C636CD
+	for <linux-fstests@archiver.kernel.org>; Sun,  5 Feb 2023 14:13:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229469AbjBENFR (ORCPT
+        id S229491AbjBEONz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 5 Feb 2023 08:05:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59434 "EHLO
+        Sun, 5 Feb 2023 09:13:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229379AbjBENFR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Feb 2023 08:05:17 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66A10FF38
-        for <fstests@vger.kernel.org>; Sun,  5 Feb 2023 05:04:29 -0800 (PST)
+        with ESMTP id S229457AbjBEONy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 5 Feb 2023 09:13:54 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C1837EF0
+        for <fstests@vger.kernel.org>; Sun,  5 Feb 2023 06:13:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675602268;
+        s=mimecast20190719; t=1675606397;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=z2ZWByRLgjcSLB/HS+AvGjWxosL4LxGH2i/VRn14BNU=;
-        b=CIAdqgxNMg0lu6FoyBxOFD7tNCdkyvIoRn87Vw8odezABILV1b3Cr3ujEUUDzVTUC0H+Pz
-        R2RXE3KcCu7oad/iXuE0lz1NyhV6rwvI/hbX61c2xnpZZKKTvScqG/IWXiQBZRyvWCJ0Hh
-        HH6fhpdWksu5rNAcQkpOy4MFUnBAbu8=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:mime-version:mime-version:content-type:content-type;
+        bh=QLpMju6WG0L2iqKFcuNMKobHrHCSz2CSxY0cua0Z1ow=;
+        b=LYLT6BnNTRiVe7K2ZqvSotKGL5zXlhaBejfBFAJwM9UbqQq94VnIlQHzS+OS6oaEaAcSF3
+        O8cPZeh+gl2ybFm4Fo2OTIrzv/PLQbGGm2mNAKi8vXKPoxXPtSEIHYPi5/qXxWeSfcmv1a
+        HJtq1nRSxt2tPDaLI1PYE8MDs58B420=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-35-JeIYMDM3PLW-BVOKEYki6g-1; Sun, 05 Feb 2023 08:04:19 -0500
-X-MC-Unique: JeIYMDM3PLW-BVOKEYki6g-1
-Received: by mail-pj1-f72.google.com with SMTP id e11-20020a17090a77cb00b0022925dd66d3so7224541pjs.4
-        for <fstests@vger.kernel.org>; Sun, 05 Feb 2023 05:04:19 -0800 (PST)
+ us-mta-150-4bf10YTKMeyKTOBGv_0NCA-1; Sun, 05 Feb 2023 09:13:15 -0500
+X-MC-Unique: 4bf10YTKMeyKTOBGv_0NCA-1
+Received: by mail-pl1-f200.google.com with SMTP id y9-20020a1709027c8900b00195e237dc8bso4936157pll.13
+        for <fstests@vger.kernel.org>; Sun, 05 Feb 2023 06:13:15 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=z2ZWByRLgjcSLB/HS+AvGjWxosL4LxGH2i/VRn14BNU=;
-        b=dzYaIz+iSkM8Bz964WldkJc42ZBcIROyA2ix1PxMqXb+CzJSPjRI6Ewe8zKppNgrNn
-         lV5LTpUxRfhH0UsM5N5ga5gCJ5aejcHJyLoa1em9dHqZGWGqrQ5eKtNbgxo+b97/F/cz
-         Y5wmLGeiSNx3iL5/hWC2ZF4G6yvhAbV6PeEzVMj7oC7ZH8L00SvVgIEKAY85wC8yPaop
-         /vLPmgwwbeLdYF3KtmOo52XGdsG1wqnHF9hShyUmfB/ODttBaFX+sTJqeOKYCxhiYN+n
-         sjznod+4/lB7ocjTEabt2zQ0+dVrk8MRSwJaNmMNu1JmoGEXQEDRcIzgIwMBq9QJ1p5a
-         +0sg==
-X-Gm-Message-State: AO0yUKU0XqrDaYA2VyebAhznMnwWRVDVd/p4O0OQfmZgkMsJWC8d4bIw
-        Hw278vomKMadSEybT4tSnRV2DvwAR/S1Nph8eeabN+GAJU6h/YgHoKXEfAjp7UFePfFAxwyie44
-        YNHcXmqXgrdoM6h6Jhw==
-X-Received: by 2002:a17:90b:4f8e:b0:22c:4dd3:5c4b with SMTP id qe14-20020a17090b4f8e00b0022c4dd35c4bmr18248539pjb.19.1675602258197;
-        Sun, 05 Feb 2023 05:04:18 -0800 (PST)
-X-Google-Smtp-Source: AK7set8rJcjalt1FjZ8nghShuUFvyAof1ZxarCJeIZtW+8Pa7OM3c7cTnKdyHle2MJe3G8qRWoxz/g==
-X-Received: by 2002:a17:90b:4f8e:b0:22c:4dd3:5c4b with SMTP id qe14-20020a17090b4f8e00b0022c4dd35c4bmr18248502pjb.19.1675602257566;
-        Sun, 05 Feb 2023 05:04:17 -0800 (PST)
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=QLpMju6WG0L2iqKFcuNMKobHrHCSz2CSxY0cua0Z1ow=;
+        b=wZ4at+x/P9X3z6SDuXa8JriNTn+NmCBUOsuKFPEhmYX9Bzr4RG5+fjYO0yja0sbqSL
+         mONDWU3fuyJLuezPpa+PFNF4eC9K63LMUKZWPgAMYNGDUGdVZ8a+tDmzI4wV1oswCp9B
+         mFjJx/qq65RzZwwURK09WPzqJSIePrx5zfYpzUVVmpp9MJtNjGjSWvfI1mElpspzkVJJ
+         9FIe4q9MFyQpuZ+Utwb+G2AxOY7xevC4EasHGxSYbnD7pqTW/bGg1bLB125h+otRS95s
+         WMf9oLmlE8OFvaAp8Mp5Aa1JM1SkRmKVU2TPs7lo3LZ8BjCnmEg/NSP4vi4lMTrjrlnS
+         hNTg==
+X-Gm-Message-State: AO0yUKXa2iFceI3Cvs6oyp/zgfO2Yytb25dr79WNIPBZq+Ahb7VRq9op
+        0IpiL6I7FaVH9B2mF7mU/i7DnobnrgqNE+KumFWQK3CZXoBmMTc6sgOP6IHXgHiyIdHb9ybjgRy
+        6h/4RIDszM5FRG0vLJA7oC0F8a/AKbYCyNz7Pwu1R5LG1OwgkHpIdwWKuCzGvlVLLkQ==
+X-Received: by 2002:a05:6a20:12cf:b0:be:ce7a:8728 with SMTP id v15-20020a056a2012cf00b000bece7a8728mr21930601pzg.53.1675606394528;
+        Sun, 05 Feb 2023 06:13:14 -0800 (PST)
+X-Google-Smtp-Source: AK7set+ALk8gJGGcRG4Unf/9sbhzAFxM5bbB1MmfNH7XlgeB3b3dFjWOnpQpUGqQp7SZPuv9i4slYQ==
+X-Received: by 2002:a05:6a20:12cf:b0:be:ce7a:8728 with SMTP id v15-20020a056a2012cf00b000bece7a8728mr21930577pzg.53.1675606394133;
+        Sun, 05 Feb 2023 06:13:14 -0800 (PST)
 Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id gz10-20020a17090b0eca00b00230a3b016fcsm1124757pjb.10.2023.02.05.05.04.15
+        by smtp.gmail.com with ESMTPSA id n18-20020a639712000000b004a281fb63c3sm4527837pge.87.2023.02.05.06.13.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Feb 2023 05:04:17 -0800 (PST)
-Date:   Sun, 5 Feb 2023 21:04:12 +0800
+        Sun, 05 Feb 2023 06:13:13 -0800 (PST)
+Date:   Sun, 5 Feb 2023 22:13:09 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/5] xfs: race fsstress with online scrubbers for AG and
- fs metadata
-Message-ID: <20230205130412.ksbvasc5ih4tr4a2@zlang-mailbox>
-References: <167243874614.722028.11987534226186856347.stgit@magnolia>
- <167243874639.722028.9759938995780056273.stgit@magnolia>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2023.01.22 onto master branch
+Message-ID: <20230205141309.wnujyhzsfgsii7pw@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <167243874639.722028.9759938995780056273.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Dec 30, 2022 at 02:19:06PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> For each XFS_SCRUB_TYPE_* that looks at AG or filesystem metadata,
-> create a test that runs that scrubber in the foreground and fsstress in
-> the background.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  common/quota        |   64 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  doc/group-names.txt |    1 +
+Hi all,
 
-[snip]
+The master branch of the xfstests repository at:
 
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index ac219e05b3..771ce937ae 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -35,6 +35,7 @@ dangerous_fuzzers	fuzzers that can crash your computer
->  dangerous_norepair	fuzzers to evaluate kernel metadata verifiers
->  dangerous_online_repair	fuzzers to evaluate xfs_scrub online repair
->  dangerous_fsstress_repair	race fsstress and xfs_scrub online repair
-> +dangerous_fsstress_scrub	race fsstress and xfs_scrub checking
+        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-We've added this group name, so this patch will hit conflict. But I think I
-can use `git am --3way ...` to apply this patch forcibly :)
+has just been updated to v2023.01.22 version.
 
 Thanks,
 Zorro
 
->  dangerous_repair	fuzzers to evaluate xfs_repair offline repair
->  dangerous_scrub		fuzzers to evaluate xfs_scrub checking
->  data			data loss checkers
-> diff --git a/tests/xfs/782 b/tests/xfs/782
-> new file mode 100755
-> index 0000000000..4801eda4bd
-> --- /dev/null
-> +++ b/tests/xfs/782
-> @@ -0,0 +1,37 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 782
-> +#
-> +# Race fsstress and superblock scrub for a while to see if we crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub sb %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/782.out b/tests/xfs/782.out
-> new file mode 100644
-> index 0000000000..6e378f0e53
-> --- /dev/null
-> +++ b/tests/xfs/782.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 782
-> +Silence is golden
-> diff --git a/tests/xfs/783 b/tests/xfs/783
-> new file mode 100755
-> index 0000000000..379a9369e5
-> --- /dev/null
-> +++ b/tests/xfs/783
-> @@ -0,0 +1,37 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 783
-> +#
-> +# Race fsstress and AGF scrub for a while to see if we crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub agf %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/783.out b/tests/xfs/783.out
-> new file mode 100644
-> index 0000000000..2522395956
-> --- /dev/null
-> +++ b/tests/xfs/783.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 783
-> +Silence is golden
-> diff --git a/tests/xfs/784 b/tests/xfs/784
-> new file mode 100755
-> index 0000000000..2b89361c36
-> --- /dev/null
-> +++ b/tests/xfs/784
-> @@ -0,0 +1,37 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 784
-> +#
-> +# Race fsstress and AGFL scrub for a while to see if we crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub agfl %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/784.out b/tests/xfs/784.out
-> new file mode 100644
-> index 0000000000..48d9b24dd0
-> --- /dev/null
-> +++ b/tests/xfs/784.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 784
-> +Silence is golden
-> diff --git a/tests/xfs/785 b/tests/xfs/785
-> new file mode 100755
-> index 0000000000..34a13b058d
-> --- /dev/null
-> +++ b/tests/xfs/785
-> @@ -0,0 +1,37 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 785
-> +#
-> +# Race fsstress and AGI scrub for a while to see if we crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub agi %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/785.out b/tests/xfs/785.out
-> new file mode 100644
-> index 0000000000..6ecb0c61b3
-> --- /dev/null
-> +++ b/tests/xfs/785.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 785
-> +Silence is golden
-> diff --git a/tests/xfs/786 b/tests/xfs/786
-> new file mode 100755
-> index 0000000000..157200ea8c
-> --- /dev/null
-> +++ b/tests/xfs/786
-> @@ -0,0 +1,38 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 786
-> +#
-> +# Race fsstress and freespace by block btree scrub for a while to see if we
-> +# crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub bnobt %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/786.out b/tests/xfs/786.out
-> new file mode 100644
-> index 0000000000..ccb9167df9
-> --- /dev/null
-> +++ b/tests/xfs/786.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 786
-> +Silence is golden
-> diff --git a/tests/xfs/787 b/tests/xfs/787
-> new file mode 100755
-> index 0000000000..91eaf5a7af
-> --- /dev/null
-> +++ b/tests/xfs/787
-> @@ -0,0 +1,38 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 787
-> +#
-> +# Race fsstress and free space by length btree scrub for a while to see if we
-> +# crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub cntbt %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/787.out b/tests/xfs/787.out
-> new file mode 100644
-> index 0000000000..fa7f038120
-> --- /dev/null
-> +++ b/tests/xfs/787.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 787
-> +Silence is golden
-> diff --git a/tests/xfs/788 b/tests/xfs/788
-> new file mode 100755
-> index 0000000000..f1369e5309
-> --- /dev/null
-> +++ b/tests/xfs/788
-> @@ -0,0 +1,38 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 788
-> +#
-> +# Race fsstress and inode btree scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -x 'dir' -s "scrub inobt %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/788.out b/tests/xfs/788.out
-> new file mode 100644
-> index 0000000000..5ddd661113
-> --- /dev/null
-> +++ b/tests/xfs/788.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 788
-> +Silence is golden
-> diff --git a/tests/xfs/789 b/tests/xfs/789
-> new file mode 100755
-> index 0000000000..550ff2c690
-> --- /dev/null
-> +++ b/tests/xfs/789
-> @@ -0,0 +1,39 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 789
-> +#
-> +# Race fsstress and free inode btree scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_has_feature "$SCRATCH_MNT" finobt
-> +_scratch_xfs_stress_scrub -x 'dir' -s "scrub finobt %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/789.out b/tests/xfs/789.out
-> new file mode 100644
-> index 0000000000..da88fc99cb
-> --- /dev/null
-> +++ b/tests/xfs/789.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 789
-> +Silence is golden
-> diff --git a/tests/xfs/790 b/tests/xfs/790
-> new file mode 100755
-> index 0000000000..c4e5779ef7
-> --- /dev/null
-> +++ b/tests/xfs/790
-> @@ -0,0 +1,39 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 790
-> +#
-> +# Race fsstress and reverse mapping btree scrub for a while to see if we crash
-> +# or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_has_feature "$SCRATCH_MNT" rmapbt
-> +_scratch_xfs_stress_scrub -s "scrub rmapbt %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/790.out b/tests/xfs/790.out
-> new file mode 100644
-> index 0000000000..7102c590f0
-> --- /dev/null
-> +++ b/tests/xfs/790.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 790
-> +Silence is golden
-> diff --git a/tests/xfs/791 b/tests/xfs/791
-> new file mode 100755
-> index 0000000000..6939d910c9
-> --- /dev/null
-> +++ b/tests/xfs/791
-> @@ -0,0 +1,40 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 791
-> +#
-> +# Race fsstress and reference count btree scrub for a while to see if we crash
-> +# or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_has_feature "$SCRATCH_MNT" reflink
-> +_scratch_xfs_stress_scrub -s "scrub refcountbt %agno%"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/791.out b/tests/xfs/791.out
-> new file mode 100644
-> index 0000000000..758905371d
-> --- /dev/null
-> +++ b/tests/xfs/791.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 791
-> +Silence is golden
-> diff --git a/tests/xfs/798 b/tests/xfs/798
-> new file mode 100755
-> index 0000000000..c5bdfad50a
-> --- /dev/null
-> +++ b/tests/xfs/798
-> @@ -0,0 +1,44 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 798
-> +#
-> +# Race fsstress and fscounter scrub on the realtime device for a while to see
-> +# if we crash or livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_realtime
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_has_feature "$SCRATCH_MNT" realtime
-> +
-> +# Force all files to be allocated on the realtime device
-> +_xfs_force_bdev realtime $SCRATCH_MNT
-> +
-> +_scratch_xfs_stress_scrub -s 'scrub fscounters'
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/798.out b/tests/xfs/798.out
-> new file mode 100644
-> index 0000000000..216d6e93f4
-> --- /dev/null
-> +++ b/tests/xfs/798.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 798
-> +Silence is golden
-> diff --git a/tests/xfs/800 b/tests/xfs/800
-> new file mode 100755
-> index 0000000000..cbcfb5f5a6
-> --- /dev/null
-> +++ b/tests/xfs/800
-> @@ -0,0 +1,40 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 800
-> +#
-> +# Race fsstress and realtime bitmap scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_realtime
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_has_feature "$SCRATCH_MNT" realtime
-> +_scratch_xfs_stress_scrub -s "scrub rtbitmap"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/800.out b/tests/xfs/800.out
-> new file mode 100644
-> index 0000000000..bdfaa2cecd
-> --- /dev/null
-> +++ b/tests/xfs/800.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 800
-> +Silence is golden
-> diff --git a/tests/xfs/801 b/tests/xfs/801
-> new file mode 100755
-> index 0000000000..a51fab523b
-> --- /dev/null
-> +++ b/tests/xfs/801
-> @@ -0,0 +1,47 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 801
-> +#
-> +# Race fsstress and realtime summary scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_realtime
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_has_feature "$SCRATCH_MNT" realtime
-> +
-> +# XXX the realtime summary scrubber isn't currently implemented upstream.
-> +# Don't bother trying to test it on those kernels
-> +$XFS_IO_PROG -c 'scrub rtsummary' -c 'scrub rtsummary' "$SCRATCH_MNT" 2>&1 | \
-> +	grep -q 'Scan was not complete' && \
-> +	_notrun "rtsummary scrub is incomplete"
-> +
-> +_scratch_xfs_stress_scrub -s "scrub rtsummary"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/801.out b/tests/xfs/801.out
-> new file mode 100644
-> index 0000000000..39481b38e2
-> --- /dev/null
-> +++ b/tests/xfs/801.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 801
-> +Silence is golden
-> diff --git a/tests/xfs/802 b/tests/xfs/802
-> new file mode 100755
-> index 0000000000..1f3b83882e
-> --- /dev/null
-> +++ b/tests/xfs/802
-> @@ -0,0 +1,40 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 802
-> +#
-> +# Race fsstress and user quota scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_quota_acct_enabled "$SCRATCH_DEV" usrquota
-> +_scratch_xfs_stress_scrub -s "scrub usrquota"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/802.out b/tests/xfs/802.out
-> new file mode 100644
-> index 0000000000..a69c05391f
-> --- /dev/null
-> +++ b/tests/xfs/802.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 802
-> +Silence is golden
-> diff --git a/tests/xfs/803 b/tests/xfs/803
-> new file mode 100755
-> index 0000000000..b2bb85672d
-> --- /dev/null
-> +++ b/tests/xfs/803
-> @@ -0,0 +1,40 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 803
-> +#
-> +# Race fsstress and group quota scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_quota_acct_enabled "$SCRATCH_DEV" grpquota
-> +_scratch_xfs_stress_scrub -s "scrub grpquota"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/803.out b/tests/xfs/803.out
-> new file mode 100644
-> index 0000000000..38ba741d0f
-> --- /dev/null
-> +++ b/tests/xfs/803.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 803
-> +Silence is golden
-> diff --git a/tests/xfs/804 b/tests/xfs/804
-> new file mode 100755
-> index 0000000000..129724eb11
-> --- /dev/null
-> +++ b/tests/xfs/804
-> @@ -0,0 +1,40 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 804
-> +#
-> +# Race fsstress and project quota scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_require_xfs_quota_acct_enabled "$SCRATCH_DEV" prjquota
-> +_scratch_xfs_stress_scrub -s "scrub prjquota"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/804.out b/tests/xfs/804.out
-> new file mode 100644
-> index 0000000000..5e0cb437e7
-> --- /dev/null
-> +++ b/tests/xfs/804.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 804
-> +Silence is golden
-> diff --git a/tests/xfs/805 b/tests/xfs/805
-> new file mode 100755
-> index 0000000000..aca9b9cdf4
-> --- /dev/null
-> +++ b/tests/xfs/805
-> @@ -0,0 +1,38 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Oracle. Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 805
-> +#
-> +# Race fsstress and summary counters scrub for a while to see if we crash or
-> +# livelock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest scrub dangerous_fsstress_scrub
-> +
-> +_cleanup() {
-> +	_scratch_xfs_stress_scrub_cleanup &> /dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +_register_cleanup "_cleanup" BUS
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/fuzzy
-> +. ./common/inject
-> +. ./common/xfs
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_stress_scrub
-> +
-> +_scratch_mkfs > "$seqres.full" 2>&1
-> +_scratch_mount
-> +_scratch_xfs_stress_scrub -s "scrub fscounters"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/805.out b/tests/xfs/805.out
-> new file mode 100644
-> index 0000000000..ac324c5874
-> --- /dev/null
-> +++ b/tests/xfs/805.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 805
-> +Silence is golden
-> 
+The new head of the master branch is commit:
+
+3aa3a26e075c xfstests: add fuse support
+
+New commits:
+
+Christian Brauner (1):
+      [81e6f6284499] generic: update setgid tests
+
+Darrick J. Wong (8):
+      [bbfa08730c1e] xfs: fix dax inode flag test failures
+      [8f8ba51412a0] xfs: fix reflink test failures when dax is enabled
+      [11afd20ba354] xfs/182: fix spurious direct write failure
+      [28aadc29ed2f] xfs: skip fragmentation tests when alwayscow mode is enabled
+      [1cb825fdefd7] xfs/{080,329,434,436}: add missing check for fallocate support
+      [49da0ed40794] various: test is not appropriate for always_cow mode
+      [3ea9a3274403] populate: remove file creation loops that take forever
+      [39bb1e3d3b2c] populate: improve attr creation runtime
+
+Dave Chinner (1):
+      [116804dc92d2] populate: ensure btree directories are created reliably
+
+Miklos Szeredi (1):
+      [3aa3a26e075c] xfstests: add fuse support
+
+Ojaswin Mujoo (1):
+      [c08fcc7fb71c] generic/692: generalize the test for non-4K Merkle tree block sizes
+
+
+Code Diffstat:
+
+ README.fuse           | 26 ++++++++++++++++
+ check                 |  3 +-
+ common/config         |  9 ++++--
+ common/populate       | 86 +++++++++++++++++++++++++++------------------------
+ common/rc             | 24 ++++++++++----
+ common/xfs            |  9 ++++++
+ src/Makefile          |  2 +-
+ src/popattr.py        | 62 +++++++++++++++++++++++++++++++++++++
+ src/popdir.pl         | 72 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/020     |  4 +--
+ tests/generic/392     | 10 ++++++
+ tests/generic/673     | 16 ++--------
+ tests/generic/673.out | 16 ++--------
+ tests/generic/683     | 16 ++--------
+ tests/generic/683.out | 12 ++-----
+ tests/generic/684     | 16 ++--------
+ tests/generic/684.out | 12 ++-----
+ tests/generic/685     | 16 ++--------
+ tests/generic/685.out | 12 ++-----
+ tests/generic/686     | 16 ++--------
+ tests/generic/686.out | 12 ++-----
+ tests/generic/687     | 16 ++--------
+ tests/generic/687.out | 12 ++-----
+ tests/generic/692     | 37 +++++++++++++++-------
+ tests/xfs/080         |  1 +
+ tests/xfs/128         |  2 +-
+ tests/xfs/182         |  5 +--
+ tests/xfs/182.out     |  1 -
+ tests/xfs/184         |  1 +
+ tests/xfs/192         |  2 ++
+ tests/xfs/198         |  1 +
+ tests/xfs/200         |  1 +
+ tests/xfs/204         |  2 ++
+ tests/xfs/211         |  1 +
+ tests/xfs/232         |  1 +
+ tests/xfs/326         | 12 +++++++
+ tests/xfs/329         |  1 +
+ tests/xfs/434         |  1 +
+ tests/xfs/436         |  1 +
+ tests/xfs/440         |  1 +
+ tests/xfs/558         |  6 ++++
+ 41 files changed, 340 insertions(+), 216 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
 
