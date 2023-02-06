@@ -2,145 +2,242 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7055FC636CD
-	for <linux-fstests@archiver.kernel.org>; Sun,  5 Feb 2023 14:16:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93EE0C61DA4
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Feb 2023 10:15:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229476AbjBEOQi (ORCPT
+        id S229920AbjBFKPn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 5 Feb 2023 09:16:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53300 "EHLO
+        Mon, 6 Feb 2023 05:15:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229457AbjBEOQh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Feb 2023 09:16:37 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3CBF7EF0
-        for <fstests@vger.kernel.org>; Sun,  5 Feb 2023 06:15:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675606549;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type;
-        bh=kIn/NEtfZX3r/UlfMuEd8UYiMaguSVpwwUOnBdvmfYQ=;
-        b=GQSPUba3qHlXCKBnxNPdKrH89deJII4EUruddYGpq8uoEN8drTPHy6tIhjTSwiZWcne0gM
-        4cXncaaTYpikuCSPZoTJhFRmp6eSeD3CTcOVfjnjUM5iOYHAAnzSeSR6Rs5oiFIxArG2hp
-        eEGkInhQ0o7YnQcFEdP5CjZVtKTfPVE=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-480-eldkBYXyNzG-9Ly75iavJA-1; Sun, 05 Feb 2023 09:15:48 -0500
-X-MC-Unique: eldkBYXyNzG-9Ly75iavJA-1
-Received: by mail-pj1-f70.google.com with SMTP id k15-20020a17090a590f00b002300fe6b09dso7307870pji.0
-        for <fstests@vger.kernel.org>; Sun, 05 Feb 2023 06:15:48 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=kIn/NEtfZX3r/UlfMuEd8UYiMaguSVpwwUOnBdvmfYQ=;
-        b=PRn9L25MSjxHqplUUfQ/SoXDMHm5SYx7Mc5OZO1in0tVwExr/SxpLwp+kkyOMhvoeD
-         RM07FeBJ0W9msidZNEmYKEflvsl18TFM5leEWo2iLpKG0FATuOITD4Dz8wkEyeQVYy2r
-         lf3a+UK33Q2oqmj2UHiOSxx1XljlG2zlIYteQiJEZnjbeFogvzt5qRi0bArBxGeh0TQO
-         ky4iKUyw5KcUDlmcrSE1Jhf528QlHgzAm/bNlZQNeuL9HN6KRltuWG64AJL+UsIo4UVW
-         r0fw9Bwemnsgm8x04s2A1ptbuhzt9wDjctwTTNvD+tNzbeY/BiJVVXSrVZw/sD5r891s
-         8aBg==
-X-Gm-Message-State: AO0yUKVyKNUc1W46Ml2YZr2hZ+dm0whttfmthFvTfPkw+OkT0vC9Q5ue
-        cRX5dAyS9D//0gDtGSt/CLC1r+wX1WEgDJnm7135HLvEdf7xSi+1wZhF1aRX9lVeeDhG0rnujSg
-        sM4WjQSZqyDkPtUsiG3g9h+TKmcvQBbx5IiCpxzdIVhCYI9CTuN8QlKe3YGTi8HbASA==
-X-Received: by 2002:aa7:9911:0:b0:592:5dd5:7655 with SMTP id z17-20020aa79911000000b005925dd57655mr14858539pff.28.1675606547027;
-        Sun, 05 Feb 2023 06:15:47 -0800 (PST)
-X-Google-Smtp-Source: AK7set/OS3Iiwsk3AL6LZf2dHuT5oJydgxdfalhis+aglN0L0U392BnJTExPve/wDrTVFVK/eHsdbw==
-X-Received: by 2002:aa7:9911:0:b0:592:5dd5:7655 with SMTP id z17-20020aa79911000000b005925dd57655mr14858520pff.28.1675606546601;
-        Sun, 05 Feb 2023 06:15:46 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c2-20020aa78802000000b005907716bf8bsm5208643pfo.60.2023.02.05.06.15.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Feb 2023 06:15:46 -0800 (PST)
-Date:   Sun, 5 Feb 2023 22:15:42 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.02.05
-Message-ID: <20230205141542.rsc235bvyppog66q@zlang-mailbox>
+        with ESMTP id S230256AbjBFKPi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Feb 2023 05:15:38 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EF3413D45;
+        Mon,  6 Feb 2023 02:15:34 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id B3D3BB80D7D;
+        Mon,  6 Feb 2023 10:15:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C47BC433EF;
+        Mon,  6 Feb 2023 10:15:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1675678531;
+        bh=bJNFTEth7TDKVvIaKPF1VNARoRk5lY04RZOVzIng1zw=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=ZksILt6emCTUSwYcjM3SjCeMk2zx5ZNPiKZTDPWlfJRbUmgk5KIK9gMO01Dr1IsXV
+         DkNoBY3nigWS6RFs0+Iq5Ti638t1koFgsFBTf/cvRqg8IFwejRSMEGqPNTHvPUMKke
+         /r7ICo1Gu5ieTVd2Mt5DR1z62axhfDgllihKfQJtQ9rCdDWHj+PolqFcQY/trg6L5L
+         KsAp4qk2Mvd//7TNpZOhh73n/p0tb/UuU+aPuwPrHY09CJWLVLGNKpNXy4YZ4y9ppm
+         EvlGoXzvwfvOO1FcDSRxulLz0RojNPk8f+xjBsd1Q0SntxdrChLi/9VLBHeO6nF22C
+         97zsOhXzB+2Gg==
+Received: by mail-oa1-f45.google.com with SMTP id 586e51a60fabf-16a10138faeso8169665fac.11;
+        Mon, 06 Feb 2023 02:15:31 -0800 (PST)
+X-Gm-Message-State: AO0yUKUgaBxcHO60JPVnZVawmdQ6axsdoaXe0WRp6j0hHI/ofcmalHVU
+        aogfeFL78uxHUPZ5NbYBrwFGaBNOxBrQ6ZdDPjM=
+X-Google-Smtp-Source: AK7set+B5ZfL2GpuXbBlBRCM+sH+fdXR4lpGgeY2C9G2o5mfL2YrimqFT9td87Q6YPQNap0St0aUsDa1J3XAa9d9OEk=
+X-Received: by 2002:a05:6870:f14a:b0:144:6d8b:c318 with SMTP id
+ l10-20020a056870f14a00b001446d8bc318mr1542822oac.98.1675678530428; Mon, 06
+ Feb 2023 02:15:30 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <a2a5700b744bca710ff0721f1d1fa268d76430fc.1675353192.git.fdmanana@suse.com>
+In-Reply-To: <a2a5700b744bca710ff0721f1d1fa268d76430fc.1675353192.git.fdmanana@suse.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Mon, 6 Feb 2023 10:14:54 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4i_CXH+sz0NtmuMBX5xg8Pjc3BOP0Kn1W-pwvKENGbzA@mail.gmail.com>
+Message-ID: <CAL3q7H4i_CXH+sz0NtmuMBX5xg8Pjc3BOP0Kn1W-pwvKENGbzA@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: add a stress test for send v2 streams
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+On Thu, Feb 2, 2023 at 4:00 PM <fdmanana@kernel.org> wrote:
+>
+> From: Filipe Manana <fdmanana@suse.com>
+>
+> Currently we don't have any test case in fstests to do randomized and
+> stress testing of the send stream v2, added in kernel 6.0 and support for
+> it in btrfs-progs v5.19. For the send v2 stream, we only have btrfs/281
+> that exercises a specific scenario which used to trigger a bug.
+>
+> So add a test that uses fsstress to generate a filesystem and exercise
+> both full and incremental send operations using the v2 send stream with
+> compressed extents, and then receive the streams without and with
+> decompression, to verify they work and produce the same results as in
+> the original filesystem. This is the same base idea as btrfs/007, but
+> for the send v2 stream with compressed data.
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-The for-next branch of the xfstests repository at:
+Zorro, this is missing in the last fstests update.
+The test was reviewed (by Anand), do you expect anything from my side?
 
-        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+I also often see other patches that get reviewed and don't get merged,
+even after several weeks. For example:
 
-has just been updated and tagged as v2023.02.05 release.
+https://lore.kernel.org/fstests/20230113070653.44512-1-wqu@suse.com/
 
-Release Notes:
-1) There're 3 new cases in this release -- btrfs/283, xfs/567, xfs/568 and
-   generic/707. Generally these 3 cases won't break (crash/hang) old kernel
-   testing.
-2) More update fix some test failures (case issue) or build warning.
-
-Thanks for all these contribution! More details as below.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-f6ab376b553d xfs/191: fix xattr leaf block emptying on 64k blocksized fses
-
-New commits ([N]ew, [U]pdate):
-
-Anand Jain (4):
-[U]      [7fa8a9a25bd1] fstests: doio.c, fix missing initialization of -C arg
-[U]      [8d8d05a8e222] fstests: fstest.c, fix compile warnings replace sprintf with snprintf
-[U]      [c569ebf56180] fstests: t_getcwd.c, fix a warning related to buffer overflow
-[U]      [1f12612b7c29] fstests: aiodio_sparse2.c, fix compiler warning buffer overflow
-
-Anthony Iliopoulos (1):
-[U]      [f6ab376b553d] xfs/191: fix xattr leaf block emptying on 64k blocksized fses
-
-Darrick J. Wong (2):
-[U]      [82961ee6b44f] generic/038: set a maximum runtime on this test
-[U]      [c7c1063809ef] generic/500: skip this test if formatting fails
-
-Filipe Manana (2):
-[U]      [d3db87166a6d] btrfs/299: update kernel commit hash and subject
-[N]      [276e00a966b3] btrfs: test send optimal cloning behaviour
-
-Hironori Shiina (2):
-[U]      [e100e9dfd87b] xfs: add helper to create fake root inode
-[N]      [6a19144c851c] xfs: test xfsrestore on multi-level dumpfiles with wrong root
-
-Jan Kara (1):
-[N]      [da69ce70dfcd] generic/707: Test moving directory while being grown
+Thanks.
 
 
-Code Diffstat:
-
- common/dmthin                        |    7 +-
- common/rc                            |   22 +-
- common/xfs                           |   40 +
- ltp/doio.c                           |    1 +
- src/aio-dio-regress/aiodio_sparse2.c |    1 +
- src/fstest.c                         |   17 +-
- src/t_getcwd.c                       |    4 +-
- tests/btrfs/283                      |   88 ++
- tests/btrfs/283.out                  |   26 +
- tests/btrfs/299                      |    3 +-
- tests/generic/038                    |    6 +
- tests/generic/500                    |    3 +-
- tests/generic/707                    |   70 ++
- tests/generic/707.out                |    2 +
- tests/xfs/191                        |   12 +-
- tests/xfs/545                        |   31 +-
- tests/xfs/554                        |   35 +-
- tests/xfs/557                        |   31 +-
- tests/xfs/567                        |  125 +++
- tests/xfs/567.out                    | 1517 ++++++++++++++++++++++++++++++++++
- tests/xfs/568                        |  213 +++++
- tests/xfs/568.out                    |  849 +++++++++++++++++++
- 22 files changed, 2999 insertions(+), 104 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
+> ---
+>  tests/btrfs/284     | 133 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/284.out |   2 +
+>  2 files changed, 135 insertions(+)
+>  create mode 100755 tests/btrfs/284
+>  create mode 100644 tests/btrfs/284.out
+>
+> diff --git a/tests/btrfs/284 b/tests/btrfs/284
+> new file mode 100755
+> index 00000000..0d31e5d9
+> --- /dev/null
+> +++ b/tests/btrfs/284
+> @@ -0,0 +1,133 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 284
+> +#
+> +# Test btrfs send stream v2, sending and receiving compressed data without
+> +# decompression at the sending side.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick send compress snapshot
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_btrfs_send_v2
+> +_require_test
+> +# The size needed is variable as it depends on the specific randomized
+> +# operations from fsstress and on the value of $LOAD_FACTOR. But require at
+> +# least $LOAD_FACTOR * 1G, just to be on the safe side.
+> +_require_scratch_size $(($LOAD_FACTOR * 1 * 1024 * 1024))
+> +_require_fssum
+> +
+> +send_files_dir=$TEST_DIR/btrfs-test-$seq
+> +
+> +rm -fr $send_files_dir
+> +mkdir $send_files_dir
+> +
+> +# Redirect stdout to the .full file and make it not part of the golden output.
+> +# This is because the number of available compression algorithms may vary across
+> +# kernel versions, so the number of times we are running this function is
+> +# variable.
+> +run_send_test()
+> +{
+> +       local algo=$1
+> +       local snapshot_cmd
+> +       local first_stream="$send_files_dir/snap1.stream"
+> +       local second_stream="$send_files_dir/snap2.stream"
+> +       local first_fssum="$send_files_dir/snap1.fssum"
+> +       local second_fssum="$send_files_dir/snap2.fssum"
+> +
+> +       _scratch_mkfs >> $seqres.full 2>&1
+> +       _scratch_mount -o compress=$algo
+> +
+> +       snapshot_cmd="$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT"
+> +       snapshot_cmd="$snapshot_cmd $SCRATCH_MNT/snap1"
+> +
+> +       # Use a single process so that in case of failure it's easier to
+> +       # reproduce by using the same seed (logged in $seqres.full).
+> +       run_check $FSSTRESS_PROG -d $SCRATCH_MNT -p 1 -n $((LOAD_FACTOR * 200)) \
+> +                 -w $FSSTRESS_AVOID -x "$snapshot_cmd" >> $seqres.full
+> +
+> +       $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 \
+> +                        >> $seqres.full
+> +
+> +       echo "Creating full and incremental send streams..." >> $seqres.full
+> +
+> +       $BTRFS_UTIL_PROG send --compressed-data -q -f $first_stream \
+> +                        $SCRATCH_MNT/snap1 2>&1 | tee -a $seqres.full
+> +       $BTRFS_UTIL_PROG send --compressed-data -q -f $second_stream \
+> +                        -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 2>&1 | \
+> +                        tee -a $seqres.full
+> +
+> +       echo "Computing the checksums for each snapshot..." >> $seqres.full
+> +
+> +       $FSSUM_PROG -A -f -w $first_fssum $SCRATCH_MNT/snap1 2>&1 | \
+> +               tee -a $seqres.full
+> +       $FSSUM_PROG -A -f -w $second_fssum -x $SCRATCH_MNT/snap2/snap1 \
+> +                   $SCRATCH_MNT/snap2 2>&1 | tee -a $seqres.full
+> +
+> +       echo "Creating a new fs to receive the streams..." >> $seqres.full
+> +
+> +       _scratch_unmount
+> +       _scratch_mkfs >> $seqres.full 2>&1
+> +       _scratch_mount
+> +
+> +       echo "Receiving the streams..." >> $seqres.full
+> +
+> +       $BTRFS_UTIL_PROG receive -q -f $first_stream $SCRATCH_MNT 2>&1 | \
+> +               tee -a $seqres.full
+> +       $BTRFS_UTIL_PROG receive -q -f $second_stream $SCRATCH_MNT 2>&1 | \
+> +               tee -a $seqres.full
+> +
+> +       echo "Verifying the checksums for each snapshot..." >> $seqres.full
+> +
+> +       # On success, fssum outputs only a single line with "OK" to stdout, and
+> +       # on error it outputs several lines to stdout telling about each file
+> +       # with data or metadata mismatches. Since the number of times we run
+> +       # fssum depends on the available compression algorithms for the running
+> +       # kernel, filter out the success case, so we don't have a mismatch with
+> +       # the golden output. We only want the mismatch with the golden output in
+> +       # case there's a checksum failure.
+> +       $FSSUM_PROG -r $first_fssum $SCRATCH_MNT/snap1 | grep -Ev '^OK$' | \
+> +               tee -a $seqres.full
+> +       $FSSUM_PROG -r $second_fssum $SCRATCH_MNT/snap2 | grep -Ev '^OK$' | \
+> +               tee -a $seqres.full
+> +
+> +       # Now receive again the streams in a new filesystem, but this time use
+> +       # the option --force-decompress of the receiver to verify that it works
+> +       # as expected.
+> +       echo "Creating a new fs to receive the streams with decompression..." >> $seqres.full
+> +
+> +       _scratch_unmount
+> +       _scratch_mkfs >> $seqres.full 2>&1
+> +       _scratch_mount
+> +
+> +       echo "Receiving the streams with decompression..." >> $seqres.full
+> +
+> +       $BTRFS_UTIL_PROG receive -q --force-decompress -f $first_stream $SCRATCH_MNT 2>&1 \
+> +               | tee -a $seqres.full
+> +       $BTRFS_UTIL_PROG receive -q --force-decompress -f $second_stream $SCRATCH_MNT 2>&1 \
+> +               | tee -a $seqres.full
+> +
+> +       echo "Verifying the checksums for each snapshot..." >> $seqres.full
+> +
+> +       $FSSUM_PROG -r $first_fssum $SCRATCH_MNT/snap1 | grep -Ev '^OK$' | \
+> +               tee -a $seqres.full
+> +       $FSSUM_PROG -r $second_fssum $SCRATCH_MNT/snap2 | grep -Ev '^OK$' | \
+> +               tee -a $seqres.full
+> +
+> +       _scratch_unmount
+> +       rm -f $send_files_dir/*
+> +}
+> +
+> +algo_list=($(_btrfs_compression_algos))
+> +for algo in ${algo_list[@]}; do
+> +       echo -e "\nTesting with $algo...\n" >> $seqres.full
+> +       run_send_test $algo
+> +done
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/284.out b/tests/btrfs/284.out
+> new file mode 100644
+> index 00000000..931839fe
+> --- /dev/null
+> +++ b/tests/btrfs/284.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 284
+> +Silence is golden
+> --
+> 2.35.1
+>
