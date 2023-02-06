@@ -2,159 +2,124 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB1C2C05027
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Feb 2023 11:13:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5B37C61DA4
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Feb 2023 14:46:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229499AbjBFLNb (ORCPT
+        id S231437AbjBFOqA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 6 Feb 2023 06:13:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33082 "EHLO
+        Mon, 6 Feb 2023 09:46:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229940AbjBFLNa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 Feb 2023 06:13:30 -0500
+        with ESMTP id S231521AbjBFOqA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Feb 2023 09:46:00 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E8652706
-        for <fstests@vger.kernel.org>; Mon,  6 Feb 2023 03:12:44 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F15123D8A
+        for <fstests@vger.kernel.org>; Mon,  6 Feb 2023 06:45:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675681964;
+        s=mimecast20190719; t=1675694712;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=tL8veezodjWjtH5rs2UBkdL3ewpOHvR0JsGYzkWyHsY=;
-        b=OejCsrCFbpDI0wd60CDcwuB6yJpWsWZ5Dv3v5p52JCULQNuRZ10VMX4tNbtdWEk48z3GtL
-        KV7OvcZi0KOBoPhZy+qJposen5E7es8KV3Bgq2GAg0Z+xUXXC8uADXoW7u7GwkL9ctp573
-        ODLGciCocadH4tFe4f03NmCrtZmIuXo=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=FFFgACxMG63xsljBooyBd6MYtPMvPQ8ghvIJM8Z5ucQ=;
+        b=Fb/x2PO5tioe0iNGqs0ybQooA0u111vEZDnjRuN/KJMUyQDYVt7t7wiO+4cz+/r2PeXz4e
+        XOtVb/vyzTRVzA5CnwzPvLJj2q1D5YaMe8KbFsQNkrFbKF9JNKIINz0Nh7ZDcHb08qtqdL
+        grjCxSHIlvkOzNC5GqM6JMqAJEZ+XXw=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-358-jy7xDYWiPlGUo27Nwlg3bQ-1; Mon, 06 Feb 2023 06:12:40 -0500
-X-MC-Unique: jy7xDYWiPlGUo27Nwlg3bQ-1
-Received: by mail-pj1-f69.google.com with SMTP id a20-20020a17090ad81400b0022c3185ebbeso4384825pjv.3
-        for <fstests@vger.kernel.org>; Mon, 06 Feb 2023 03:12:40 -0800 (PST)
+ us-mta-642-7xEfQYjiMUerOIpQbQGPew-1; Mon, 06 Feb 2023 09:45:11 -0500
+X-MC-Unique: 7xEfQYjiMUerOIpQbQGPew-1
+Received: by mail-pg1-f197.google.com with SMTP id e11-20020a63d94b000000b0048988ed9a6cso5188675pgj.1
+        for <fstests@vger.kernel.org>; Mon, 06 Feb 2023 06:45:11 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=tL8veezodjWjtH5rs2UBkdL3ewpOHvR0JsGYzkWyHsY=;
-        b=s+PGTFTHrnxt8YAXctXZ/qD0KSrITw/dfKYA1sK1J1HSNYqszhO1HR1G0c2fyXL9Bf
-         ZkQfMQv75QF4PlNxLuu06LcujGCuUWYeyXFEGVTyFJvGn3iXLSaDAZ8IsdFr10wDWgWD
-         ykMffH4HTrFcs+zigPt0bUl0Qx8wAEC2YAg348uqS/LKRR1kwQfB+CLSjsjZ8g+5Upqz
-         +R1CfH+SsZRwTLlt+leUMrNrPYKylFKVmiihjPXWCPdZgonXLQfMSEGo8a+46wtjRRDU
-         0VJade48n7lLEyvOBPKGF/9YuvhoKwiivHf7EoGCOt7DxxnaC7hF5jwsCBC/DWnHChRf
-         1SbQ==
-X-Gm-Message-State: AO0yUKV/bIx49VoiurQmSKIMjipC8OeNDxtf+4VOYkeT7XxgfapIDy2V
-        D8hrdbYvFmRWRgwSHXiQ1ibuwv3yK0yNltKBkAyClKmI7futW9nx9OoGO1eZcBrh2fIEVdPZUHd
-        intlK2UtoaphsGL6qPw==
-X-Received: by 2002:a17:902:c611:b0:194:5fc9:f55a with SMTP id r17-20020a170902c61100b001945fc9f55amr16273764plr.35.1675681959488;
-        Mon, 06 Feb 2023 03:12:39 -0800 (PST)
-X-Google-Smtp-Source: AK7set+83GIzpXTBvQfgdGbynT6+oTigLqm2oRK2RnVyOVPs4Znr8gBwtm4FXIBAOJvs6+PF01I+jA==
-X-Received: by 2002:a17:902:c611:b0:194:5fc9:f55a with SMTP id r17-20020a170902c61100b001945fc9f55amr16273745plr.35.1675681959012;
-        Mon, 06 Feb 2023 03:12:39 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d22-20020a170902aa9600b001965f761e6dsm6626021plr.182.2023.02.06.03.12.37
+        bh=FFFgACxMG63xsljBooyBd6MYtPMvPQ8ghvIJM8Z5ucQ=;
+        b=LIY5Y+YVzN6aes55XaW/wrLICzQSd+IhpLgwAxkFJmu2gXVUbiqm8xUBJVpTSqrdgJ
+         b5Y3RG+0zbtgpRFW6wG9ZEAgSQAY9KDBXX5fYa3H0rcY84UEFBTw9CM/+8nNp534h2gN
+         EXrBDPphdHfYbLTrTztUHvQXDs8BWKLlBAuZmdtULIl0l4wdnTyqDHAUNjRqZad6SGGw
+         /NJ7oK1Z+t+HOmfVmf7Zl+OlL83fF56pktrBFObx8z9wn5zgR9rw6Nt3B2IQGPID55DS
+         rGDOtpSF71it5mfKYYlApTlR7pucZxe8JTE32ZWxnH5StxFJBUTalS7O5UAA4aYeUUvS
+         hLMw==
+X-Gm-Message-State: AO0yUKVo+sIhgXnSvnoyLb4Ug1dkzcSJ5DNr90CJmTEvjM5OGEQRkJfR
+        c81P+oOtF2GWI/6j5zjrrL22N6KZrIPKIfsYz3IF0YbI6z9Bk1HaCmrbQ+JYLvthsLoQIH0X1fh
+        uSZbM71KacomHpjaMsQ==
+X-Received: by 2002:a17:902:e5c3:b0:197:9036:e70d with SMTP id u3-20020a170902e5c300b001979036e70dmr25257033plf.29.1675694710396;
+        Mon, 06 Feb 2023 06:45:10 -0800 (PST)
+X-Google-Smtp-Source: AK7set9dOrmcn4NebQhbhs3w9WoMgkRMjVVDJNiXxzL7gn4Uf9FXMVb8TyvkZCmVhGxJI81izua9/A==
+X-Received: by 2002:a17:902:e5c3:b0:197:9036:e70d with SMTP id u3-20020a170902e5c300b001979036e70dmr25257004plf.29.1675694710051;
+        Mon, 06 Feb 2023 06:45:10 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id g2-20020a170902c38200b00198f9f9c612sm4346960plg.179.2023.02.06.06.45.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Feb 2023 03:12:38 -0800 (PST)
-Date:   Mon, 6 Feb 2023 19:12:35 +0800
+        Mon, 06 Feb 2023 06:45:09 -0800 (PST)
+Date:   Mon, 6 Feb 2023 22:45:05 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Jan Kara <jack@suse.cz>
+To:     Gabriel Niebler <gniebler@suse.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v3 3/3] common: Improve blocksize support for udf
-Message-ID: <20230206111235.f2nwx2xmdwjtnv64@zlang-mailbox>
-References: <20230131123809.28200-1-jack@suse.cz>
- <20230131124005.14207-3-jack@suse.cz>
+Subject: Re: [PATCH 1/2] README: Add section to install required packages on
+ (open)SUSE
+Message-ID: <20230206144505.ymxhrsnf44zilo4i@zlang-mailbox>
+References: <20230131123839.16084-1-gniebler@suse.com>
+ <20230131123839.16084-2-gniebler@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230131124005.14207-3-jack@suse.cz>
+In-Reply-To: <20230131123839.16084-2-gniebler@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jan 31, 2023 at 01:39:59PM +0100, Jan Kara wrote:
-> Add better support for blocksize selection in _scratch_mkfs_sized
-> (accept another variant of mkfs options, select correct default block
-> size if not specified). Also add blocksize selection support to
-> _scratch_mkfs_blocksized.
+On Tue, Jan 31, 2023 at 01:38:38PM +0100, Gabriel Niebler wrote:
+> The README already lists how to install the required packages on other popular
+> distributions. Since a lot of filesystem development happens on SUSE systems and
+> both the commands as well as the list of packages are slightly different,
+> it only makes sense to include these as well.
 > 
-> For _check_udf_filesystem to keep working when blocksize is not
-> specified in MKFS_OPTIONS, add detection of blocksize from a mounted
-> filesystem.
-> 
-> Signed-off-by: Jan Kara <jack@suse.cz>
+> Signed-off-by: Gabriel Niebler <gniebler@suse.com>
 > ---
 
-This patch looks good to me, thanks for doing this for udf filesystem :)
-
-It's been long time, no patches from udf list to fstests list. For exmaple,
-The udf/102 missed the _setup_udf_scratchdir() helper (be removed) for long
-time, if you're working on udf testing, you might be interested in it.
-Anyway, I'll merge this patchset this week.
+No objection from me.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks,
-Zorro
-
->  common/rc | 22 ++++++++++++++++------
->  1 file changed, 16 insertions(+), 6 deletions(-)
+>  README | 20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
 > 
-> diff --git a/common/rc b/common/rc
-> index 7f80afe7aeec..e49918c9deab 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -922,9 +922,15 @@ _scratch_mkfs_sized()
->  	btrfs)
->  		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-s ?+([0-9]+).*/\1/p'`
->  		;;
-> -	ext2|ext3|ext4|ext4dev|udf|reiser4|ocfs2|reiserfs)
-> +	ext2|ext3|ext4|ext4dev|reiser4|ocfs2|reiserfs)
->  		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
->  		;;
-> +	udf)
-> +		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-> +		if [ -z "$def_blksz" ]; then
-> +			def_blksz=512
-> +		fi
-> +		;;
->  	jfs)
->  		def_blksz=4096
->  		;;
-> @@ -1116,6 +1122,9 @@ _scratch_mkfs_blocksized()
->  		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
->  								$SCRATCH_DEV
->  		;;
-> +	udf)
-> +		_scratch_mkfs -b $blocksize
-> +		;;
->  	*)
->  		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
->  		;;
-> @@ -3074,17 +3083,18 @@ _check_udf_filesystem()
->  	return
->      fi
+> diff --git a/README b/README
+> index 4c4f22f8..008d3875 100644
+> --- a/README
+> +++ b/README
+> @@ -77,6 +77,26 @@ RHEL or CentOS
+>      For OverlayFS build and install:
+>       - see https://github.com/hisilicon/overlayfs-progs
 >  
-> +    local device=$1
-> +    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-> +    if [ -z "$blksz" ]; then
-> +	blksz=512
-> +    fi
->      # Is the filesystem mounted?
->      local type=`_fs_type $device`
->      if [ "$type" = "$FSTYP" ]; then
-> +	blksz=`blockdev --getbsz $device`
->  	local mountpoint=`_umount_or_remount_ro $device`
->      fi
+> +SUSE Linux Enterprise or openSUSE
+> +---------------------------------
+> +
+> +1. Install all necessary packages from standard repositories:
+> +
+> +   $ sudo zypper install acct automake bc dbench duperemove dump fio gcc git \
+> +        indent libacl-devel libaio-devel libattr-devel libcap libcap-devel \
+> +        libtool liburing-devel libuuid-devel lvm2 make quota sqlite3 xfsprogs
+> +
+> +2. Install packages for the filesystem(s) being tested:
+> +
+> +    For btrfs install:
+> +     $ sudo zypper install btrfsprogs libbtrfs-devel
+> +
+> +    For XFS install:
+> +     $ sudo zypper install xfsdump xfsprogs-devel
+> +
+> +    For OverlayFS build and install:
+> +     - see https://github.com/hisilicon/overlayfs-progs
+> +
+>  Build and install test, libs and utils
+>  --------------------------------------
 >  
-> -    local device=$1
-> -    local blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(-b|--blocksize)[ =]?+([0-9]+).*/\2/p'`
-> -    if [ -z "$blksz" ]; then
-> -	blksz=512
-> -    fi
->      local opt_arg="-ecclength 1 -blocksize $blksz"
->      if [ $# -eq 2 ]; then
->  	opt_arg+=" -lastvalidblock $(( $2 - 1 ))"
 > -- 
-> 2.35.3
+> 2.39.1
 > 
 
