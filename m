@@ -2,184 +2,527 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60735C636D3
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Feb 2023 18:28:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2ACD2C636D4
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Feb 2023 18:43:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231248AbjBGS2G (ORCPT
+        id S230058AbjBGSnA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Feb 2023 13:28:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54458 "EHLO
+        Tue, 7 Feb 2023 13:43:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37534 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231288AbjBGS2F (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Feb 2023 13:28:05 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B11640C4
-        for <fstests@vger.kernel.org>; Tue,  7 Feb 2023 10:27:04 -0800 (PST)
+        with ESMTP id S230467AbjBGSm6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Feb 2023 13:42:58 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E43F1F5D6
+        for <fstests@vger.kernel.org>; Tue,  7 Feb 2023 10:42:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675794423;
+        s=mimecast20190719; t=1675795328;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=e9ojeXxC6P2gGayJYHiJl2hK0smZodxyGRrXU6MtMqI=;
-        b=I08hkbHqepT8Iu2eV9Rl//d54vatu2hQXqoZcSxLp6bWw5xW6geZphn/+IO2RdGf5s8D/h
-        uCAs+jJFXSoI1Gz1gu+y8KNJrKpv1s+4/yUa/aVvQgAvpwCRlRQRBqHq5j3SYWnL5GZOvL
-        uZHMlF7WXcmmH8VxGBRcZu0155kLdDg=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=berQRn2vAkjV0ErbxfLyHzd8AOWe8AfLjmkTkcqPfjI=;
+        b=DjMG5rLYoKWvbmr7vfEsSVrIO2ZeAazOLczBXScNP25wlc7+/swFeJt1589xWyFYRX9QVm
+        9cdziuScglt+gU08tIYUWlDYY8lVYyYfSWoWHZgnEtYoUuca2Dl9Dd8FaVwfOOpOJ827e/
+        Pxc9laca6rj7jajSu6xgQgxusk3a+DE=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-439-Z4zVBdqFM4m9krFuDZaSdQ-1; Tue, 07 Feb 2023 13:27:01 -0500
-X-MC-Unique: Z4zVBdqFM4m9krFuDZaSdQ-1
-Received: by mail-pf1-f197.google.com with SMTP id dc6-20020a056a0035c600b005a7f1614c18so846045pfb.4
-        for <fstests@vger.kernel.org>; Tue, 07 Feb 2023 10:27:01 -0800 (PST)
+ us-mta-56-Yd_kG5RwOD6LZgF5pjKL3g-1; Tue, 07 Feb 2023 13:42:07 -0500
+X-MC-Unique: Yd_kG5RwOD6LZgF5pjKL3g-1
+Received: by mail-pl1-f198.google.com with SMTP id ju17-20020a170903429100b00198f13d11e8so5370619plb.8
+        for <fstests@vger.kernel.org>; Tue, 07 Feb 2023 10:42:07 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=e9ojeXxC6P2gGayJYHiJl2hK0smZodxyGRrXU6MtMqI=;
-        b=4pNeYYIGmjBu7UIllNfG/NZdOHFv7IIUDtXFhHula2M9CzZGvhgY0xohRoJr0oFo5a
-         LnxOGuJ4zR4afQ2kR84tAJwe745zCLpeMdY7GtMcbMbUxp/LFn0Ra7WpJlxqIOLHdPp1
-         0roZKXbcxM4Fk9fNIKEdogXtM7MD1u65bWhxHR1xfZxGFrC2JRvyGOCOVh3LH1V5Eo1a
-         R7TIgqWMGMfQmwFcRCkmkVREgdfAJa/YTPrRvCaGknnua04G55WQ+//eMjo1xJRdaL9L
-         lzwupB4UcMi18pNbLoPFZh0z1LuA4GtHXGw7FX8qtQHQfjcmVJXbEWfzI+zqFvQaVT2d
-         g6PQ==
-X-Gm-Message-State: AO0yUKVjBBvOBChXvSZ7hb+PbgT3CsUF2LFXfIYmd6Gz9w4n644KyQtZ
-        QOMu1t83MGRW5PIKPd/AQ6ju3J6HvjJksdMwexEuqWpxhUyJ3RvnKXX3h39ev/FGggz1C8Gxiqs
-        Ifo8tX7P5LP4weiwTLQ==
-X-Received: by 2002:a17:902:c40f:b0:196:e8e:cd28 with SMTP id k15-20020a170902c40f00b001960e8ecd28mr4152518plk.15.1675794420526;
-        Tue, 07 Feb 2023 10:27:00 -0800 (PST)
-X-Google-Smtp-Source: AK7set/AFfjtjTdkkenNEMZorwNt2oVHOZwrp6+a3i0DrttOmpQf67XdNIxjtioPEdBa6NxtczXKmQ==
-X-Received: by 2002:a17:902:c40f:b0:196:e8e:cd28 with SMTP id k15-20020a170902c40f00b001960e8ecd28mr4152499plk.15.1675794420175;
-        Tue, 07 Feb 2023 10:27:00 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id g9-20020a170902868900b0019460ac7c6asm9102068plo.283.2023.02.07.10.26.58
+        bh=berQRn2vAkjV0ErbxfLyHzd8AOWe8AfLjmkTkcqPfjI=;
+        b=nk7ikswdraT8O4R4JsT+Xdq0MjS51wkWlohGqDFp5BXIYlma/nHv4qIacLTPk1nMAd
+         vbmXPg9chfVGjcimbdnVWJ4soDtxWqSg0xtyT9Dqpp3cdvgmKAhYDsuUrpPe5WnP/Fat
+         PDNchBAob/ObHsSNEU3l1zpamwmj/FYqbMnqibiQHACiqazlo4xUH+pPjXG0FJxDayBI
+         8V/QGvymoNkMznspO7Si06cvPUZj4cA++g8fVHpIh3GKurrf4eavDPfNuuUWOas9/5X/
+         giBVSQCnPUOE+orvCjxTmRC50GsKKUP2g/LeMsgv86pHA5mwuZWZPW+b2/sNieJVY3uy
+         Od7Q==
+X-Gm-Message-State: AO0yUKWrOSy/qUFK9PdFFcqtuZcPHSJKK8oSETOX7J1+X2MISg51k+5k
+        O5TRbkkSINgVOLreuyXVEjOFtJ41W6B1RyKwIBsZO0Lt1r23UmVh8uTX339PN+Hz22xYNC+8sR3
+        LSg2aiKrinINnGRgqKYg82N6LkkKf
+X-Received: by 2002:aa7:9a48:0:b0:593:dc7e:9882 with SMTP id x8-20020aa79a48000000b00593dc7e9882mr4039031pfj.27.1675795326027;
+        Tue, 07 Feb 2023 10:42:06 -0800 (PST)
+X-Google-Smtp-Source: AK7set9oFQ0csEj7xwz4sA4UupeakfmcRWmSZ5FbvJyI+VIKVyGn2B0Q2F2eqd79HljqKEvWtThFzQ==
+X-Received: by 2002:aa7:9a48:0:b0:593:dc7e:9882 with SMTP id x8-20020aa79a48000000b00593dc7e9882mr4039013pfj.27.1675795325665;
+        Tue, 07 Feb 2023 10:42:05 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 187-20020a6217c4000000b005825b8e0540sm9559212pfx.204.2023.02.07.10.42.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Feb 2023 10:26:59 -0800 (PST)
-Date:   Wed, 8 Feb 2023 02:26:56 +0800
+        Tue, 07 Feb 2023 10:42:05 -0800 (PST)
+Date:   Wed, 8 Feb 2023 02:42:01 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic: add missing $FSX_AVOID to fsx invocations
-Message-ID: <20230207182656.ekjt2lhbid6xf2cs@zlang-mailbox>
-References: <20221105182918.24099-1-tytso@mit.edu>
- <20221106121031.ywrlqu6w54kgnn2i@zlang-mailbox>
- <Y2gqpYhf5n8Y43eZ@mit.edu>
- <20221107020236.gdlmb5hxsaxxislo@zlang-mailbox>
- <Y2kzxKnYf8CLj49v@mit.edu>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v24.1 3/5] fuzzy: add a custom xfs find utility for scrub
+ stress tests
+Message-ID: <20230207184201.zjbjkojgf5b666xf@zlang-mailbox>
+References: <167243874614.722028.11987534226186856347.stgit@magnolia>
+ <167243874650.722028.10607547751700517177.stgit@magnolia>
+ <Y+KD9Qf80CuLl2ZD@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y2kzxKnYf8CLj49v@mit.edu>
+In-Reply-To: <Y+KD9Qf80CuLl2ZD@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 07, 2022 at 11:35:16AM -0500, Theodore Ts'o wrote:
-> On Mon, Nov 07, 2022 at 10:02:36AM +0800, Zorro Lang wrote:
-> > I think it doesn't make sense to use $FSX_AVOID in `fsx --replay-ops` cases.
-> > Due to generally the operations which a cases would like to replay are exact
-> > steps to reproduce to a known bug. If we skip some operations (e.g. -F), it
-> > doesn't make sense for this reproducer.
-> > 
-> > The recommended way for this kind of cases is making sure current fs/system
-> > support the operations will be run by fsx, especially those features are not
-> > common on different fs/system....
-> >
-> > So it uses below _require_* helpers to make sure these operations are supported,
-> > before testing:
-> > 
-> >   _require_xfs_io_command "falloc"
-> >   _require_xfs_io_command "falloc" "-k"
-> >   _require_xfs_io_command "fzero"
-> >   _require_xfs_io_command "fcollapse"
-> > 
-> > That's my point, hope I didn't misunderstand what you said :)
+On Tue, Feb 07, 2023 at 09:01:41AM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> No, you didn't understand me.  :-)
+> Create a new find(1) like utility that doesn't crash on directory tree
+> changes (like find does due to bugs in its loop detector) and actually
+> implements the custom xfs attribute predicates that we need for scrub
+> stress tests.  This program will be needed for a future patch where we
+> add stress tests for scrub and repair of file metadata.
 > 
-> For context, I have an out of tree patch (see attached), which I had
-> tried upstreaming a while back, but it got rejected, so I've continued
-> to keep it in my personal tree.  The basic idea is sometimes you might
-> want to suppress a test even *though* _require_xfs_io_command seems to
-> indicate that operation was supported.
-> 
-> This might either be because the test didn't know about ext4
-> bigalloc's cluster alignment requirements, or because a particular
-> operation might just be *buggy* and being able to run tests as if a
-> particular command wasn't supported was useful.
-> 
-> It was rejected because the claim was that you could just exclude by
-> group instead (e.g., "punch", "collapse") but I didn't trust that the
-> group list would be kept up to date, so I never really agreed with
-> that line of reasoning.  These days, given that group declaration are
-> kept in the test script, it's much less likely to happen, but I've
-> kept the patch in my tree because it's occasionally useful.
-> 
-> At this point, it's admittedly pretty rarely needed since ext4's
-> collapse and insert range commands are pretty solid modulo tests not
-> understanding cluster alignment, but still, it's not much effort for
-> me to keep carrying the patch and I don't expect it will ever get
-> upstreamed.
-> 
-> 					- Ted
-> 
-> commit c9d25475a94d5e53d7f18d247a17088999522862
-> Author: Theodore Ts'o <tytso@mit.edu>
-> Date:   Sat Oct 17 14:39:26 2015 -0400
-> 
->     common: introduce XFS_IO_AVOID env var
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+> v24.1: apply some autoupdate love to the m4 macros
+> ---
 
-Hi Ted,
+This version looks better to me, I'll merge it with a little change on
+.gitignore file to filter src/xfsfind.
 
-fstests has merged below change 2 month ago:
-  [PATCH] fstests: update group name according to xfs_io command requirement
-  https://lore.kernel.org/fstests/20221108183242.3362013-1-zlang@kernel.org/
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-So I'd like to check if it helps for the problem you described above?
-If not, I think we can think about the patch you metioned above.
-
-Thanks,
-Zorro
-
->     
->     Like FSSTRESS_AVOID and FSX_AVOID, XFS_IO_AVOID can be used to avoid
->     using various advanced file system features such as "fpunch"
->     "fcollapse", "finsert", or "zero".  Tests that require an xfs_io
->     command which is included in the space-separated list found in the
->     XFS_IO_AVOID environment variable will be skipped using _notrun.
->     
->     Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+>  configure.ac          |    5 +
+>  include/builddefs.in  |    4 +
+>  m4/package_libcdev.m4 |   44 +++++++
+>  m4/package_xfslibs.m4 |   15 +++
+>  src/Makefile          |   10 ++
+>  src/xfsfind.c         |  290 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  6 files changed, 368 insertions(+)
+>  create mode 100644 src/xfsfind.c
 > 
-> diff --git a/README b/README
-> index 4c4f22f85..42baff07b 100644
-> --- a/README
-> +++ b/README
-> @@ -245,6 +245,10 @@ Misc:
->     this option is supported for all filesystems currently only -overlay is
->     expected to run without issues. For other filesystems additional patches
->     and fixes to the test suite might be needed.
-> + - setenv XFS_IO_AVOID, which may contain a list of space separated
-> +   xfs_io commands which will be avoided in case you want to exclude
-> +   tests that require the use of certain file system operations such
-> +   as "fpunch", "fcollapse", "finsert", or "zero".
+> diff --git a/configure.ac b/configure.ac
+> index cbf8377988..e92bd6b26d 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -66,6 +66,11 @@ AC_PACKAGE_WANT_LINUX_FS_H
+>  AC_PACKAGE_WANT_LIBBTRFSUTIL
 >  
->  ______________________
->  USING THE FSQA SUITE
-> diff --git a/common/rc b/common/rc
-> index eb67e0cdc..d1c07a4d0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2485,6 +2485,11 @@ _require_xfs_io_command()
->  	local opts=""
->  	local attr_info=""
->  
-> +	if echo "$XFS_IO_AVOID" | grep -wq -- "$command"
-> +	then
-> +		_notrun "Avoiding xfs_io $command"
-> +	fi
+>  AC_HAVE_COPY_FILE_RANGE
+> +AC_HAVE_SEEK_DATA
+> +AC_HAVE_BMV_OF_SHARED
+> +AC_HAVE_NFTW
+> +AC_HAVE_RLIMIT_NOFILE
 > +
->  	local testfile=$TEST_DIR/$$.xfs_io
->  	local testio
->  	case $command in
+>  AC_CHECK_FUNCS([renameat2])
+>  AC_CHECK_FUNCS([reallocarray])
+>  AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
+> diff --git a/include/builddefs.in b/include/builddefs.in
+> index 6641209f81..dab10c968f 100644
+> --- a/include/builddefs.in
+> +++ b/include/builddefs.in
+> @@ -68,6 +68,10 @@ HAVE_FIEMAP = @have_fiemap@
+>  HAVE_FALLOCATE = @have_fallocate@
+>  HAVE_COPY_FILE_RANGE = @have_copy_file_range@
+>  HAVE_LIBBTRFSUTIL = @have_libbtrfsutil@
+> +HAVE_SEEK_DATA = @have_seek_data@
+> +HAVE_NFTW = @have_nftw@
+> +HAVE_BMV_OF_SHARED = @have_bmv_of_shared@
+> +HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
+>  
+>  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
+>  
+> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+> index 5c76c0f73e..98572aecd9 100644
+> --- a/m4/package_libcdev.m4
+> +++ b/m4/package_libcdev.m4
+> @@ -110,3 +110,47 @@ AC_DEFUN([AC_HAVE_COPY_FILE_RANGE],
+>      AC_SUBST(have_copy_file_range)
+>    ])
+>  
+> +# Check if we have SEEK_DATA
+> +AC_DEFUN([AC_HAVE_SEEK_DATA],
+> +  [ AC_MSG_CHECKING([for SEEK_DATA])
+> +    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+> +#define _GNU_SOURCE
+> +#include <sys/types.h>
+> +#include <unistd.h>
+> +    ]], [[
+> +         lseek(-1, 0, SEEK_DATA);
+> +    ]])],[have_seek_data=yes
+> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> +    AC_SUBST(have_seek_data)
+> +  ])
+> +
+> +# Check if we have nftw
+> +AC_DEFUN([AC_HAVE_NFTW],
+> +  [ AC_MSG_CHECKING([for nftw])
+> +    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+> +#define _GNU_SOURCE
+> +#include <stddef.h>
+> +#include <ftw.h>
+> +    ]], [[
+> +         nftw("/", (int (*)(const char *, const struct stat *, int, struct FTW *))1, 0, 0);
+> +    ]])],[have_nftw=yes
+> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> +    AC_SUBST(have_nftw)
+> +  ])
+> +
+> +# Check if we have RLIMIT_NOFILE
+> +AC_DEFUN([AC_HAVE_RLIMIT_NOFILE],
+> +  [ AC_MSG_CHECKING([for RLIMIT_NOFILE])
+> +    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+> +#define _GNU_SOURCE
+> +#include <sys/time.h>
+> +#include <sys/resource.h>
+> +    ]], [[
+> +         struct rlimit rlimit;
+> +
+> +         rlimit.rlim_cur = 0;
+> +         getrlimit(RLIMIT_NOFILE, &rlimit);
+> +    ]])],[have_rlimit_nofile=yes
+> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> +    AC_SUBST(have_rlimit_nofile)
+> +  ])
+> diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
+> index 0746cd1dc5..8ef58cc064 100644
+> --- a/m4/package_xfslibs.m4
+> +++ b/m4/package_xfslibs.m4
+> @@ -104,3 +104,18 @@ AC_DEFUN([AC_PACKAGE_NEED_XFSCTL_MACRO],
+>          exit 1
+>        ])
+>    ])
+> +
+> +# Check if we have BMV_OF_SHARED from the GETBMAPX ioctl
+> +AC_DEFUN([AC_HAVE_BMV_OF_SHARED],
+> +  [ AC_MSG_CHECKING([for BMV_OF_SHARED])
+> +    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+> +#define _GNU_SOURCE
+> +#include <xfs/xfs.h>
+> +    ]], [[
+> +         struct getbmapx obj;
+> +         ioctl(-1, XFS_IOC_GETBMAPX, &obj);
+> +         obj.bmv_oflags |= BMV_OF_SHARED;
+> +    ]])],[have_bmv_of_shared=yes
+> +       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> +    AC_SUBST(have_bmv_of_shared)
+> +  ])
+> diff --git a/src/Makefile b/src/Makefile
+> index f270015ce8..a574f7bd03 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -83,6 +83,16 @@ ifeq ($(HAVE_LIBCAP), true)
+>  LLDLIBS += -lcap
+>  endif
+>  
+> +ifeq ($(HAVE_SEEK_DATA), yes)
+> + ifeq ($(HAVE_NFTW), yes)
+> +  ifeq ($(HAVE_BMV_OF_SHARED), yes)
+> +   ifeq ($(HAVE_RLIMIT_NOFILE), yes)
+> +     TARGETS += xfsfind
+> +   endif
+> +  endif
+> + endif
+> +endif
+> +
+>  CFILES = $(TARGETS:=.c)
+>  LDIRT = $(TARGETS) fssum
+>  
+> diff --git a/src/xfsfind.c b/src/xfsfind.c
+> new file mode 100644
+> index 0000000000..6b0a93e793
+> --- /dev/null
+> +++ b/src/xfsfind.c
+> @@ -0,0 +1,290 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * find(1) but with special predicates for finding XFS attributes.
+> + * Copyright (C) 2022 Oracle.
+> + */
+> +#include <sys/time.h>
+> +#include <sys/resource.h>
+> +#include <sys/types.h>
+> +#include <stdio.h>
+> +#include <unistd.h>
+> +#include <ftw.h>
+> +#include <linux/fs.h>
+> +#include <xfs/xfs.h>
+> +
+> +#include "global.h"
+> +
+> +static int want_anyfile;
+> +static int want_datafile;
+> +static int want_attrfile;
+> +static int want_dir;
+> +static int want_regfile;
+> +static int want_sharedfile;
+> +static int report_errors = 1;
+> +
+> +static int
+> +check_datafile(
+> +	const char		*path,
+> +	int			fd)
+> +{
+> +	off_t			off;
+> +
+> +	off = lseek(fd, 0, SEEK_DATA);
+> +	if (off >= 0)
+> +		return 1;
+> +
+> +	if (errno == ENXIO)
+> +		return 0;
+> +
+> +	if (report_errors)
+> +		perror(path);
+> +
+> +	return -1;
+> +}
+> +
+> +static int
+> +check_attrfile(
+> +	const char		*path,
+> +	int			fd)
+> +{
+> +	struct fsxattr		fsx;
+> +	int			ret;
+> +
+> +	ret = ioctl(fd, XFS_IOC_FSGETXATTR, &fsx);
+> +	if (ret) {
+> +		if (report_errors)
+> +			perror(path);
+> +		return -1;
+> +	}
+> +
+> +	if (want_attrfile && (fsx.fsx_xflags & XFS_XFLAG_HASATTR))
+> +		return 1;
+> +	return 0;
+> +}
+> +
+> +#define BMAP_NR			33
+> +static struct getbmapx		bmaps[BMAP_NR];
+> +
+> +static int
+> +check_sharedfile(
+> +	const char		*path,
+> +	int			fd)
+> +{
+> +	struct getbmapx		*key = &bmaps[0];
+> +	unsigned int		i;
+> +	int			ret;
+> +
+> +	memset(key, 0, sizeof(struct getbmapx));
+> +	key->bmv_length = ULLONG_MAX;
+> +	/* no holes and don't flush dirty pages */
+> +	key->bmv_iflags = BMV_IF_DELALLOC | BMV_IF_NO_HOLES;
+> +	key->bmv_count = BMAP_NR;
+> +
+> +	while ((ret = ioctl(fd, XFS_IOC_GETBMAPX, bmaps)) == 0) {
+> +		struct getbmapx	*p = &bmaps[1];
+> +		xfs_off_t	new_off;
+> +
+> +		for (i = 0; i < key->bmv_entries; i++, p++) {
+> +			if (p->bmv_oflags & BMV_OF_SHARED)
+> +				return 1;
+> +		}
+> +
+> +		if (key->bmv_entries == 0)
+> +			break;
+> +		p = key + key->bmv_entries;
+> +		if (p->bmv_oflags & BMV_OF_LAST)
+> +			return 0;
+> +
+> +		new_off = p->bmv_offset + p->bmv_length;
+> +		key->bmv_length -= new_off - key->bmv_offset;
+> +		key->bmv_offset = new_off;
+> +	}
+> +	if (ret < 0) {
+> +		if (report_errors)
+> +			perror(path);
+> +		return -1;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static void
+> +print_help(
+> +	const char		*name)
+> +{
+> +	printf("Usage: %s [OPTIONS] path\n", name);
+> +	printf("\n");
+> +	printf("Print all file paths matching any of the given predicates.\n");
+> +	printf("\n");
+> +	printf("-a	Match files with xattrs.\n");
+> +	printf("-b	Match files with data blocks.\n");
+> +	printf("-d	Match directories.\n");
+> +	printf("-q	Ignore errors while walking directory tree.\n");
+> +	printf("-r	Match regular files.\n");
+> +	printf("-s	Match files with shared blocks.\n");
+> +	printf("\n");
+> +	printf("If no matching options are given, match all files found.\n");
+> +}
+> +
+> +static int
+> +visit(
+> +	const char		*path,
+> +	const struct stat	*sb,
+> +	int			typeflag,
+> +	struct FTW		*ftwbuf)
+> +{
+> +	int			printme = 1;
+> +	int			fd = -1;
+> +	int			retval = FTW_CONTINUE;
+> +
+> +	if (want_anyfile)
+> +		goto out;
+> +	if (want_regfile && typeflag == FTW_F)
+> +		goto out;
+> +	if (want_dir && typeflag == FTW_D)
+> +		goto out;
+> +
+> +	/*
+> +	 * We can only open directories and files; screen out everything else.
+> +	 * Note that nftw lies and reports FTW_F for device files, so check the
+> +	 * statbuf mode too.
+> +	 */
+> +	if (typeflag != FTW_F && typeflag != FTW_D) {
+> +		printme = 0;
+> +		goto out;
+> +	}
+> +
+> +	if (!S_ISREG(sb->st_mode) && !S_ISDIR(sb->st_mode)) {
+> +		printme = 0;
+> +		goto out;
+> +	}
+> +
+> +	fd = open(path, O_RDONLY);
+> +	if (fd < 0) {
+> +		if (report_errors) {
+> +			perror(path);
+> +			return FTW_STOP;
+> +		}
+> +
+> +		return FTW_CONTINUE;
+> +	}
+> +
+> +	if (want_datafile && typeflag == FTW_F) {
+> +		int ret = check_datafile(path, fd);
+> +		if (ret < 0 && report_errors) {
+> +			printme = 0;
+> +			retval = FTW_STOP;
+> +			goto out_fd;
+> +		}
+> +
+> +		if (ret == 1)
+> +			goto out_fd;
+> +	}
+> +
+> +	if (want_attrfile) {
+> +		int ret = check_attrfile(path, fd);
+> +		if (ret < 0 && report_errors) {
+> +			printme = 0;
+> +			retval = FTW_STOP;
+> +			goto out_fd;
+> +		}
+> +
+> +		if (ret == 1)
+> +			goto out_fd;
+> +	}
+> +
+> +	if (want_sharedfile) {
+> +		int ret = check_sharedfile(path, fd);
+> +		if (ret < 0 && report_errors) {
+> +			printme = 0;
+> +			retval = FTW_STOP;
+> +			goto out_fd;
+> +		}
+> +
+> +		if (ret == 1)
+> +			goto out_fd;
+> +	}
+> +
+> +	printme = 0;
+> +out_fd:
+> +	close(fd);
+> +out:
+> +	if (printme)
+> +		printf("%s\n", path);
+> +	return retval;
+> +}
+> +
+> +static void
+> +handle_sigabrt(
+> +	int		signal,
+> +	siginfo_t	*info,
+> +	void		*ucontext)
+> +{
+> +	fprintf(stderr, "Signal %u, exiting.\n", signal);
+> +	exit(2);
+> +}
+> +
+> +int
+> +main(
+> +	int			argc,
+> +	char			*argv[])
+> +{
+> +	struct rlimit		rlimit;
+> +	struct sigaction	abrt = {
+> +		.sa_sigaction	= handle_sigabrt,
+> +		.sa_flags	= SA_SIGINFO,
+> +	};
+> +	int			c;
+> +	int			ret;
+> +
+> +	while ((c = getopt(argc, argv, "abdqrs")) >= 0) {
+> +		switch (c) {
+> +		case 'a':	want_attrfile = 1;   break;
+> +		case 'b':	want_datafile = 1;   break;
+> +		case 'd':	want_dir = 1;        break;
+> +		case 'q':	report_errors = 0;   break;
+> +		case 'r':	want_regfile = 1;    break;
+> +		case 's':	want_sharedfile = 1; break;
+> +		default:
+> +			print_help(argv[0]);
+> +			return 1;
+> +		}
+> +	}
+> +
+> +	ret = getrlimit(RLIMIT_NOFILE, &rlimit);
+> +	if (ret) {
+> +		perror("RLIMIT_NOFILE");
+> +		return 1;
+> +	}
+> +
+> +	if (!want_attrfile && !want_datafile && !want_dir && !want_regfile &&
+> +	    !want_sharedfile)
+> +		want_anyfile = 1;
+> +
+> +	/*
+> +	 * nftw is known to abort() if a directory it is walking disappears out
+> +	 * from under it.  Handle this with grace if the caller wants us to run
+> +	 * quietly.
+> +	 */
+> +	if (!report_errors) {
+> +		ret = sigaction(SIGABRT, &abrt, NULL);
+> +		if (ret) {
+> +			perror("SIGABRT handler");
+> +			return 1;
+> +		}
+> +	}
+> +
+> +	for (c = optind; c < argc; c++) {
+> +		ret = nftw(argv[c], visit, rlimit.rlim_cur - 5,
+> +				FTW_ACTIONRETVAL | FTW_CHDIR | FTW_MOUNT |
+> +				FTW_PHYS);
+> +		if (ret && report_errors) {
+> +			perror(argv[c]);
+> +			break;
+> +		}
+> +	}
+> +
+> +	if (ret)
+> +		return 1;
+> +	return 0;
+> +}
 > 
 
