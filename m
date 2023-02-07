@@ -2,169 +2,103 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BD01C636CD
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Feb 2023 10:01:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43FFEC636CD
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Feb 2023 12:28:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231856AbjBGKBr (ORCPT
+        id S230460AbjBGM23 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Feb 2023 05:01:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59452 "EHLO
+        Tue, 7 Feb 2023 07:28:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231793AbjBGKBP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Feb 2023 05:01:15 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C8BE10C1
-        for <fstests@vger.kernel.org>; Tue,  7 Feb 2023 02:01:01 -0800 (PST)
+        with ESMTP id S229460AbjBGM22 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Feb 2023 07:28:28 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59B854EC6
+        for <fstests@vger.kernel.org>; Tue,  7 Feb 2023 04:28:27 -0800 (PST)
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 842C6377D2;
-        Tue,  7 Feb 2023 10:00:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1675764059; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 1290C3F6B3;
+        Tue,  7 Feb 2023 12:28:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1675772906; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=HE+uS3CHkxRsskYh2UtHW/HNaCrnzBU3JI42NNM3+UI=;
-        b=FpOmH+T2ZIPqygqG/oWhSmegLzMRbnTWjlbBw8Seb1mJeXZ5Hkvb2vC4zcKgdwfSjoVJuZ
-        ZKulhgkFvVE3gFV/Rg5/4nHwz/IJQI3Qfjwu8gAmYuKDckl/pHB6r+LeWgiR0y0MV8vM8m
-        VPvBARpqwXbbyuqDDosT9N2dVe+xylY=
+        bh=Ge6VVpgXRJLsRrA0LWxBC44psf1qJKlbLE+buhIgkhs=;
+        b=jmnZy8VpG1IhskOdy9ruO9VToPY7kcOROqAX50rKNy2k34MyRHd5aJ0uu8E4dLqN/XwlIh
+        pf/nIk9kHvzEk4iq3jrbV04pwcyn2QKMmSP+/9GvVVzESum/Cv8UsrLLjt4xTstpre92Ru
+        hOUt629rrq4B+244tdHsWNsqUn2vHu4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1675772906;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Ge6VVpgXRJLsRrA0LWxBC44psf1qJKlbLE+buhIgkhs=;
+        b=xlQ2GGvoLAV8ysUVevXEK5MJn0O+ukrAmjScFi5+ZFcK8CMt9agjTCgtf3wpQYhxXC+1X6
+        9BOQ4v0nbE37H0Bg==
 Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6324F13A8C;
-        Tue,  7 Feb 2023 10:00:59 +0000 (UTC)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id C442213467;
+        Tue,  7 Feb 2023 12:28:25 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap2.suse-dmz.suse.de with ESMTPSA
-        id mMi0Flsh4mPVFwAAMHmgww
-        (envelope-from <gabriel.niebler@suse.com>); Tue, 07 Feb 2023 10:00:59 +0000
-Message-ID: <bae014d8-aabe-8f80-260a-d2767019f49e@suse.com>
-Date:   Tue, 7 Feb 2023 11:00:58 +0100
+        id RoPcL+lD4mNXVwAAMHmgww
+        (envelope-from <jack@suse.cz>); Tue, 07 Feb 2023 12:28:25 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+        id 84F85A06D5; Tue,  7 Feb 2023 13:28:24 +0100 (CET)
+Date:   Tue, 7 Feb 2023 13:28:24 +0100
+From:   Jan Kara <jack@suse.cz>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
+Subject: Re: [PATCH v3 3/3] common: Improve blocksize support for udf
+Message-ID: <20230207122824.mmxbbxjwseo2fibu@quack3>
+References: <20230131123809.28200-1-jack@suse.cz>
+ <20230131124005.14207-3-jack@suse.cz>
+ <20230206111235.f2nwx2xmdwjtnv64@zlang-mailbox>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH] common/btrfs: avoid reinitialization of unsupported
- profile array
-Content-Language: en-US
-To:     David Disseldorp <ddiss@suse.de>, fstests@vger.kernel.org
-References: <20230111105827.16852-1-ddiss@suse.de>
-From:   Gabriel Niebler <gabriel.niebler@suse.com>
-In-Reply-To: <20230111105827.16852-1-ddiss@suse.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230206111235.f2nwx2xmdwjtnv64@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Am 11.01.23 um 11:58 schrieb David Disseldorp:
-> The _btrfs_get_profile_configs() unsupported array doesn't change
-> between configs, so avoid reinitializing it on each loop iteration.
+On Mon 06-02-23 19:12:35, Zorro Lang wrote:
+> On Tue, Jan 31, 2023 at 01:39:59PM +0100, Jan Kara wrote:
+> > Add better support for blocksize selection in _scratch_mkfs_sized
+> > (accept another variant of mkfs options, select correct default block
+> > size if not specified). Also add blocksize selection support to
+> > _scratch_mkfs_blocksized.
+> > 
+> > For _check_udf_filesystem to keep working when blocksize is not
+> > specified in MKFS_OPTIONS, add detection of blocksize from a mounted
+> > filesystem.
+> > 
+> > Signed-off-by: Jan Kara <jack@suse.cz>
+> > ---
 > 
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
-> ---
->   common/btrfs | 66 ++++++++++++++++++++++++++--------------------------
->   1 file changed, 33 insertions(+), 33 deletions(-)
+> This patch looks good to me, thanks for doing this for udf filesystem :)
 > 
-> diff --git a/common/btrfs b/common/btrfs
-> index ee673a93..9531c914 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -201,6 +201,39 @@ _btrfs_get_profile_configs()
->   		return
->   	fi
->   
-> +	local unsupported=()
-> +	if [ "$1" == "replace" ]; then
-> +		# We can't do replace with these profiles because they
-> +		# imply only one device ($SCRATCH_DEV), and we need to
-> +		# keep $SCRATCH_DEV around for _scratch_mount
-> +		# and _check_scratch_fs.
-> +		unsupported+=(
-> +			"dup"
-> +		)
-> +	elif [ "$1" == "replace-missing" ]; then
-> +		# We can't replace missing devices with these profiles
-> +		# because there isn't enough redundancy.
-> +		unsupported+=(
-> +			"single"
-> +			"dup"
-> +			"raid0"
-> +		)
-> +	fi
-> +
-> +	if _scratch_btrfs_is_zoned; then
-> +		# Zoned btrfs only supports SINGLE profile
-> +		unsupported+=(
-> +			"dup"
-> +			"raid0"
-> +			"raid1"
-> +			"raid1c3"
-> +			"raid1c4"
-> +			"raid10"
-> +			"raid5"
-> +			"raid6"
-> +		)
-> +	fi
-> +
->   	if [ -z "$BTRFS_PROFILE_CONFIGS" ]; then
->   		# Default configurations to test.
->   		local configs=(
-> @@ -222,39 +255,6 @@ _btrfs_get_profile_configs()
->   	for cfg in "${configs[@]}"; do
->   		local supported=true
->   		local profiles=(${cfg/:/ })
-> -		if [ "$1" == "replace" ]; then
-> -			# We can't do replace with these profiles because they
-> -			# imply only one device ($SCRATCH_DEV), and we need to
-> -			# keep $SCRATCH_DEV around for _scratch_mount
-> -			# and _check_scratch_fs.
-> -			local unsupported=(
-> -				"dup"
-> -			)
-> -		elif [ "$1" == "replace-missing" ]; then
-> -			# We can't replace missing devices with these profiles
-> -			# because there isn't enough redundancy.
-> -			local unsupported=(
-> -				"single"
-> -				"dup"
-> -				"raid0"
-> -			)
-> -		else
-> -			local unsupported=()
-> -		fi
-> -
-> -		if _scratch_btrfs_is_zoned; then
-> -			# Zoned btrfs only supports SINGLE profile
-> -			unsupported+=(
-> -				"dup"
-> -				"raid0"
-> -				"raid1"
-> -				"raid1c3"
-> -				"raid1c4"
-> -				"raid10"
-> -				"raid5"
-> -				"raid6"
-> -			)
-> -		fi
->   
->   		for unsupp in "${unsupported[@]}"; do
->   			if [ "${profiles[0]}" == "$unsupp" -o "${profiles[1]}" == "$unsupp" ]; then
+> It's been long time, no patches from udf list to fstests list. For exmaple,
+> The udf/102 missed the _setup_udf_scratchdir() helper (be removed) for long
+> time, if you're working on udf testing, you might be interested in it.
 
-This seems like a good change.
+So I did some larger UDF kernel changes in this cycle so I also found some
+time to do more testing which has shown all the problems. My plan is to run
+fstests for UDF more often and slowly reduce the amount of failing tests
+(so far I was more or less happy that the basic functionality looked solid
+and the kernel didn't crash during whole fstests run ;).
 
-It only makes sense and in my local testing it reduced btrfs test run 
-time by 10-17 seconds overall.
+> Anyway, I'll merge this patchset this week.
+> 
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Not a huge amount, but every little helps.
+Thanks!
 
+								Honza
 -- 
-Gabriel Niebler (he/him/his)
-Senior Full-Stack Web Developer
-
-SUSE
-
-gabriel.niebler@suse.com
-
-www.suse.com
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
