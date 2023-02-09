@@ -2,46 +2,104 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC093C05027
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Feb 2023 09:02:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8F5DC61DA4
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Feb 2023 14:41:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229798AbjBIJCS (ORCPT
+        id S230302AbjBIOlq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Feb 2023 04:02:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38904 "EHLO
+        Thu, 9 Feb 2023 09:41:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229862AbjBIJCQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 04:02:16 -0500
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0B23113FD;
-        Thu,  9 Feb 2023 01:02:07 -0800 (PST)
-Received: from canpemm500009.china.huawei.com (unknown [172.30.72.53])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4PC9mQ4Gn3z16NXH;
-        Thu,  9 Feb 2023 16:59:50 +0800 (CST)
-Received: from [10.108.234.194] (10.108.234.194) by
- canpemm500009.china.huawei.com (7.192.105.203) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Thu, 9 Feb 2023 17:02:02 +0800
-Message-ID: <ee4a4029-4fab-3147-8837-72f2a52c745b@huawei.com>
-Date:   Thu, 9 Feb 2023 17:02:02 +0800
+        with ESMTP id S230224AbjBIOlp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 09:41:45 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91422C648
+        for <fstests@vger.kernel.org>; Thu,  9 Feb 2023 06:41:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1675953659;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=WGTVV3BitmjG9OfxHngrxG4eroSVUzr+1PJmFw0NTBk=;
+        b=LSG9bsoMv8JxnbW99Zvm6LnJgS4i+AmXTLuptKon99KyMIe6w4z5VxbAxlh2X70StBI+Gm
+        6yYxNgFcqQQCEN1nk/UDhB/hWzN5H//J3OKAAQ7zdJUH9/lE9sSOJ8OKAdJ7+WbQUUOzuW
+        +zoDBBAbSwsbvQCDBo/6R6Og4tgsyks=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-31-SlCbBHNDOwWclv7nPufWKw-1; Thu, 09 Feb 2023 09:40:58 -0500
+X-MC-Unique: SlCbBHNDOwWclv7nPufWKw-1
+Received: by mail-pf1-f198.google.com with SMTP id ds10-20020a056a004aca00b0059c8629c220so1134425pfb.23
+        for <fstests@vger.kernel.org>; Thu, 09 Feb 2023 06:40:57 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WGTVV3BitmjG9OfxHngrxG4eroSVUzr+1PJmFw0NTBk=;
+        b=UWcjVbPhNwCoBM+IRSwUc1U9qacyxfPhHuep+gCukWuBNQ+p7CQTG13K7TyprJ9U9v
+         dmkwfv7/n+pBi4hwAPUQ9qDv/icYNnVt4vZ8tY+Et4qybVZVyi1lw7RfozbZl3EsHgpW
+         D+3hlv5kXXdHdB9Q87Y9jHVsvbN4Ab9UInO940q9PxxDiArB+OuQsX7gAStOjGcVO7wv
+         XiDgqEHak7sMRKnlu4J6WJcawj6sWx92cEbyjKjxFzcNG9gI1KJbpljxsHC4C/l5N6e3
+         pRBjdwpMdFTChd2aiZhgys/I9zao9fde1aI2nzALD88fthY/uBwEp+etkXD4inTlgelk
+         2kLA==
+X-Gm-Message-State: AO0yUKWlom9x1otGBJAdYNkZyCRFQyTJbG9iQ5yocEJIdKRdW1YxfbN9
+        V3Zz0pEtuQUdhftGQEMUcljI4NgZNfce0sFc3XOufJVLsfaV64QBvWHRO8awMkJQkjjtPu7KLcO
+        oJctJFWfvewZzM7m4jA==
+X-Received: by 2002:a17:902:e74c:b0:199:2a36:6c3f with SMTP id p12-20020a170902e74c00b001992a366c3fmr13563932plf.6.1675953656964;
+        Thu, 09 Feb 2023 06:40:56 -0800 (PST)
+X-Google-Smtp-Source: AK7set+Zh8gVy83LTrL9BduALKhHLCsA/K5oGbTXhePkUg41ifksDQdNu3wcew8oQUEPFViVeF6NJw==
+X-Received: by 2002:a17:902:e74c:b0:199:2a36:6c3f with SMTP id p12-20020a170902e74c00b001992a366c3fmr13563902plf.6.1675953656588;
+        Thu, 09 Feb 2023 06:40:56 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id g21-20020a170902869500b00195f242d0a0sm1558049plo.194.2023.02.09.06.40.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 09 Feb 2023 06:40:56 -0800 (PST)
+Date:   Thu, 9 Feb 2023 22:40:52 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: Re: run more tests in the auto group
+Message-ID: <20230209144052.qpc576kznevejhzj@zlang-mailbox>
+References: <20230209051355.358942-1-hch@lst.de>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH] ext4: Add default commit interval test
-Content-Language: en-US
-To:     <fstests@vger.kernel.org>, <linux-ext4@vger.kernel.org>,
-        <lczerner@redhat.com>
-References: <20230118052549.4068332-1-wangjianjian3@huawei.com>
-From:   "wangjianjian (C)" <wangjianjian3@huawei.com>
-In-Reply-To: <20230118052549.4068332-1-wangjianjian3@huawei.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.108.234.194]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- canpemm500009.china.huawei.com (7.192.105.203)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230209051355.358942-1-hch@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-any comments?
+On Thu, Feb 09, 2023 at 06:13:48AM +0100, Christoph Hellwig wrote:
+> Hi all,
+> 
+> this series adds a more tests to the auto and quick groups so that they
+> are run as part of the usual regressions tests.
+
+Thanks, I'm glad to see more stable cases be added into *auto* group.
+
+But as you said btrfs/219 still fails[1] now, so I hope we can use
+another patch to fix btrfs/219 singly, even if use _fixed_by_kernel_commit
+or _wants_kernel_commit to specify clarify why it's failed now.
+Others looks good to me. If you don't mind, I'll merge others, exclude
+btrfs/219 (before another patch improve it:)
+
+Thanks,
+Zorro
+
+[1]
+btrfs/219       [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//simpledev/btrfs/219.out.bad)
+    --- tests/btrfs/219.out     2022-04-29 23:07:22.997495284 +0800
+    +++ /root/git/xfstests/results//simpledev/btrfs/219.out.bad 2023-02-09 22:22:43.447510026 +0800
+    @@ -1,2 +1,4 @@
+     QA output created by 219
+    -Silence is golden
+    +We couldn't mount the old generation
+    +(see /root/git/xfstests/results//simpledev/btrfs/219.full for details)
+    +umount: /mnt/test/219.mnt: not mounted.
+    ...
+    (Run 'diff -u /root/git/xfstests/tests/btrfs/219.out /root/git/xfstests/results//simpledev/btrfs/219.out.bad'  to see the entire diff)
+
+> 
+
