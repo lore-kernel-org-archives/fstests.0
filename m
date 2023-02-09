@@ -2,113 +2,84 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58339C61DA4
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Feb 2023 15:19:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C070C636D6
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Feb 2023 16:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229968AbjBIPTI (ORCPT
+        id S229830AbjBIQNV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Feb 2023 10:19:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58868 "EHLO
+        Thu, 9 Feb 2023 11:13:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230199AbjBIPTH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 10:19:07 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3582111A
-        for <fstests@vger.kernel.org>; Thu,  9 Feb 2023 07:18:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1675955902;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=cWhspcrdA8JGurkoXO2AFlWlpIIswlVzwCA71sDnetc=;
-        b=cshOMSakYJea5+OfHgkfkzDhHc+ZEMFg+zsvd5qf9KPMEBJ5KQ8dIapu5/rNp9iIGeXYw2
-        ZIVa4w36WXFQV1UrydVufhg4ZJA31n17+SXXZli+iYqZKyIscah77eHoyZTWyQbg7K7R2v
-        50+eWJUpY81W7BGrNNyic3jRkcuFOvY=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-402-SiFMXxFJNraOUN45I-qFfw-1; Thu, 09 Feb 2023 10:18:20 -0500
-X-MC-Unique: SiFMXxFJNraOUN45I-qFfw-1
-Received: by mail-pl1-f199.google.com with SMTP id l1-20020a170903244100b0019a59370c75so1393252pls.7
-        for <fstests@vger.kernel.org>; Thu, 09 Feb 2023 07:18:20 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cWhspcrdA8JGurkoXO2AFlWlpIIswlVzwCA71sDnetc=;
-        b=YkH6biaF8WmqEXFp4A4U6PYkapY+WUAyt8LREmd4q7oX3i+hKsePBXR+viGlRC1JcO
-         WDxDQ7QipOfQdhGgZVCE8J4EQABTwQNC4/u/qZBUeht5q2ZCNjG2tz52rSDh1DIeG/xA
-         +ftKXrtKnlMwznJowAQYtz51FfrRJX3vwWIEyMBqa+231TxzAmzfL/Uf5FII6QbZiI6/
-         dx8kGtUSjoqXskaf+PXg3w4f/Jjwee4ArmT/vDJHalECODH4p4kMHu+wfnWQZvj0uxRC
-         DnYYRi51SBJHynMUjZIK+CFFpmaE/Ck/al31aZMJD/Shmpjmj1oPS5AqOizE1GJf0qhX
-         +rpQ==
-X-Gm-Message-State: AO0yUKW08eAlZLIVlk25OJSXwpnVwAf1gJWwAEPPc8KdXhAHXPeKdsBP
-        dlB1eryg/zX3HXoDXQq2DISIsCyVmhRfFkTCi97HRsMxjx+xYv/h/fs3KU+qtISSSJ/gtZkiOI2
-        MPIew7I9Bw6AXBPpLtw==
-X-Received: by 2002:a62:1a52:0:b0:58d:b8f8:5e2f with SMTP id a79-20020a621a52000000b0058db8f85e2fmr10098628pfa.10.1675955899889;
-        Thu, 09 Feb 2023 07:18:19 -0800 (PST)
-X-Google-Smtp-Source: AK7set/9Ds8xuBbk1pI7fmEQ3mUavnNXjeFsr1s4AdVKL8UhDsNdsSOhxsGt+de/xrKMLXQ9EBiFng==
-X-Received: by 2002:a62:1a52:0:b0:58d:b8f8:5e2f with SMTP id a79-20020a621a52000000b0058db8f85e2fmr10098607pfa.10.1675955899573;
-        Thu, 09 Feb 2023 07:18:19 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w3-20020aa78583000000b0059242cd5469sm1626134pfn.13.2023.02.09.07.18.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Feb 2023 07:18:19 -0800 (PST)
-Date:   Thu, 9 Feb 2023 23:18:15 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, shiina.hironori@gmail.com
-Subject: Re: [PATCH] common/xfs: use whole-word matching for
- _require_xfsrestore_xflag
-Message-ID: <20230209151815.tpyg4rvnv7bwersv@zlang-mailbox>
-References: <Y+KDnDHVCKK07yzI@magnolia>
+        with ESMTP id S229628AbjBIQNR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 11:13:17 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89ED7244A1;
+        Thu,  9 Feb 2023 08:13:13 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 25C3661B22;
+        Thu,  9 Feb 2023 16:13:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 77F4FC433EF;
+        Thu,  9 Feb 2023 16:13:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1675959192;
+        bh=QecBsobEFYAe0gYvqkMuPeIicTpdWCP6zl9gBffDX7A=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=HgRHSrsaTK6+7EDiPg8BzHplbA78UIuNO8eJzH//1YYVBOn6hcduE3JJbZyL4vyjp
+         f0wNybgYx3xVVVDebgVeAdFoq6ps7mms+CfFBtiiAPcck1t3C3xIKhOUiGftpt6/jN
+         Bg5n31oeIAiveCfBHeSnKnmEZAtmOH78YgY95mSyM547wBmd+/2UOZai62zxvcOccY
+         NBrfP/TNGMBNZnbRA6IADYl7/Z22rz2ygCQ6i6yib24vav4U9/kQOgvj+z4WNnUxTN
+         c+19lOcPakkMHhc/lrs3QLNikLteZoHRlM4LhqRuA1YrntO+djPihfUPo5GpLDKMun
+         AkrA5oIbK3gkA==
+Date:   Thu, 9 Feb 2023 08:13:11 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 6/7] generic: add 251 to the auto group
+Message-ID: <Y+Ublyc88P7mlg/i@magnolia>
+References: <20230209051355.358942-1-hch@lst.de>
+ <20230209051355.358942-7-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y+KDnDHVCKK07yzI@magnolia>
+In-Reply-To: <20230209051355.358942-7-hch@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 07, 2023 at 09:00:12AM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> On my system, the path to the xfsrestore binary is:
-> 
-> /code/xfsdump/build-x86_64/restore/xfsrestore
-> 
-> The grep command in _require_xfsrestore_xflag matches on the "build-x86"
-> part, even though my version of xfsrestore does not actually have a -x
-> flag.  Fix the string parsing to match entire words so that we only look
-> for -x in the help output.
-> 
-> (Maybe someone should patch xfsrestore -h to report basename(argv[0])
-> instead of argv[0]...)
-> 
-> Fixes: 1ffa16c573 ("xfs: test for fixing wrong root inode number in dump")
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+On Thu, Feb 09, 2023 at 06:13:54AM +0100, Christoph Hellwig wrote:
+> generic/251 isn't dangerous, doesn't takes overly long to run and doesn't
+> produce spurious failures, so add it to the auto group.
+
+How long does it take for you?  It generally takes 300-700s to run on my
+testing cloud.  That's not a reason to keep it out of the auto group,
+but I've been surveying the long running tests to find the ones that run
+stuff in a loop and subject them to TIME_FACTOR (or the new
+SOAK_DURATION knob that I'm working on to allow direct control of loop
+runtime) constraints.
+
+--D
+
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
-
-Good to me,
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  common/xfs |    2 +-
+>  tests/generic/251 | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/common/xfs b/common/xfs
-> index ba59889c3b..97c049e2ca 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1529,7 +1529,7 @@ _xfs_filter_mkfs()
+> diff --git a/tests/generic/251 b/tests/generic/251
+> index 192ab5cc..2a271cd1 100755
+> --- a/tests/generic/251
+> +++ b/tests/generic/251
+> @@ -10,7 +10,7 @@
+>  # corrupts the filesystem (data/metadata).
+>  #
+>  . ./common/preamble
+> -_begin_fstest ioctl trim
+> +_begin_fstest ioctl trim auto
 >  
->  _require_xfsrestore_xflag()
->  {
-> -	$XFSRESTORE_PROG -h 2>&1 | grep -q -e '-x' || \
-> +	$XFSRESTORE_PROG -h 2>&1 | grep -q -w -e '-x' || \
->  			_notrun 'xfsrestore does not support -x flag.'
->  }
->  
+>  tmp=`mktemp -d`
+>  trap "_cleanup; exit \$status" 0 1 3
+> -- 
+> 2.39.1
 > 
-
