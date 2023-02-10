@@ -2,323 +2,173 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA9E5C05027
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Feb 2023 01:03:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6096EC05027
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Feb 2023 13:39:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229869AbjBJBC7 (ORCPT
+        id S231775AbjBJNjZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Feb 2023 20:02:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51976 "EHLO
+        Fri, 10 Feb 2023 08:39:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55494 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229764AbjBJBC7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 20:02:59 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D3E75C8B2
-        for <fstests@vger.kernel.org>; Thu,  9 Feb 2023 17:02:57 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 48E34CE2643
-        for <fstests@vger.kernel.org>; Fri, 10 Feb 2023 01:02:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DDF54C433EF;
-        Fri, 10 Feb 2023 01:02:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1675990972;
-        bh=FvqaaQfP6lO3vsEcNEzOwQiMm9lgNzxL0qoFMiNf5x0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=a30YgKAi9zq88BWVyl883UHqVOPk5PU1k3jmUPUA5rkKXCmNe4sUwQ+PSsxUt1YTQ
-         v4NtKfReLY6puT2BFF4wRNF34zhHuF20xe13FtLs90FH9gOBjX3zxkSIdLbF1gxegt
-         REF008PsoG0P7rtbPXF9iDhZcr/9iuyNj6zlxPnRfuQ6GhNZUXlCzXmevebE/vt+1Y
-         /1wweaoYhsoii5mt320jMJv1YrtH4NPjvOIDNpB+pUQ5rhCb/Xwd3eCVXLTFAStAsa
-         KRgTT6yZSBg+Zc/VbyPCPQgdDiKXiUWTBsb8o1OIxaBh3geLM/PYmIGIU5WMoVlzFQ
-         OS3wFJ3WTn6mA==
-Date:   Thu, 9 Feb 2023 17:02:52 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     fstests@vger.kernel.org, zlang@redhat.com
-Subject: Re: [PATCH] debug: add tests for debugging testing setup
-Message-ID: <Y+WXvKlwBnmgTROk@magnolia>
-References: <20230209013143.2586104-1-leah.rumancik@gmail.com>
- <Y+Rewk2CmqrWDyVu@magnolia>
- <Y+VnDBnBZiHo20tk@google.com>
+        with ESMTP id S231668AbjBJNjY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Feb 2023 08:39:24 -0500
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C18231555F;
+        Fri, 10 Feb 2023 05:39:23 -0800 (PST)
+Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 31AAnaxh009134;
+        Fri, 10 Feb 2023 13:39:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : cc : references : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=PuA7Jfi3Db8nM1WhYvwml0G0MHCLdz4wVkN72xxriOA=;
+ b=qx4UTW0xZYuarHUwrJ8n7qNIomjyhs0KBf75kHl75HwRk79ZHmCICcy4fr5AeF2IJy42
+ Bi+t3YUZK4iiPazhh5h8Mo+SeLLV283aQE393LtfpsAC+02ds07C0XGZn2ro71sKmvtQ
+ 3hWK/m17RUoQAZ5nYr0oeGViIUaQncwYce5PITgyA6V0MCCclYWdwte0aO3bpzNS8iUh
+ 4m4M2B9cBdUr0r8DbWL5PhCshQQLLh6fWhpPXOvL4y3VQbIf/zhSDVbkN7OvmYCPCv8b
+ GdhX/cTlsaTnMLu7d1cRrhNLhRnuvw1VpGDCPpFCYQ50/0oSuPPMGLd7rX5VQ4HNQRJ0 Yg== 
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3nheyu5aac-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 10 Feb 2023 13:39:20 +0000
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 31ABWHaW036112;
+        Fri, 10 Feb 2023 13:39:19 GMT
+Received: from nam11-bn8-obe.outbound.protection.outlook.com (mail-bn8nam11lp2169.outbound.protection.outlook.com [104.47.58.169])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3nhdtgkkwd-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 10 Feb 2023 13:39:19 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=en7Aow6bKHvOvIv4NUitmRo/ak1LeY1kml26pn/yKWiQhIC/PxapVC4KVvMzxZm4i0vzQVRG3nGKklXrpozMIFyXqm7PMjKB8ppvV4xb1XbwVD7e3WWa4nv8NrNyNazN0y11VWtEVD+hLjjaC67iW2E+M+erIjRqwJGpBEIsi80gmAUsExwtn5XJlpqqmJm8oLAFhn4S9DlEhbf8XmnV8008f94DgRlRQjNYzcsaV35dY40cLs38NluretB14Z2NgzmnSuC4djYvb7i1r/h/7lKq8KPUVCf+SpSSEndaYuxFm09eETfCiPvyqV13C8bP/DnOLJXShMFN96sG4SrIHw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=PuA7Jfi3Db8nM1WhYvwml0G0MHCLdz4wVkN72xxriOA=;
+ b=KoC8UvKMI6KUG+KOz2bw8mXLAkFJW98y4Hskm3MGgTSHtEMGbGI7zYAmSSXK/miKwVI3nmcj8qMqdamtYoNCBLb13yeORstuK2/FPeP1hT+yHblhLdOgqILa09HJ64XhtSu6jiDpoiYZDEEilHrNRbMfVWI+kjTRL2aT7Vh0JiK6VjMT4WJPtuCJ5EW5Fn6I6p0lTuJXc2qfxqcFrpiGqHdThadEhb105T1y1FdubzSf+leAHSkyEXJO/VubHeHwvzyUbMEPKlbZbwI9NgeLRIIi/Pn4L6afYzL2DmHevag+t3yWTVRWQN4jxeSr3i5gFgpp4Xz3YaadYSO8HzrEDw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=PuA7Jfi3Db8nM1WhYvwml0G0MHCLdz4wVkN72xxriOA=;
+ b=X+DxTHyR9ptCJIx2gi/2BzxPrxyKdxmJj1u8seeVfqkEVl72A3LAw28YoJmB7abBV5AQBlEkmW2tfsynsnRJqL7oGAFDjdVI8Kktgb9iiWq23XKak/adBTbaTmR+8wI1AbZlS3ayHpE0Ucbg8XpuAhvxrT3xz3RNP42TQ6lRwus=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by DM4PR10MB6087.namprd10.prod.outlook.com (2603:10b6:8:bf::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6111.7; Fri, 10 Feb
+ 2023 13:39:18 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::560e:9c52:a6bd:4036]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::560e:9c52:a6bd:4036%9]) with mapi id 15.20.6086.011; Fri, 10 Feb 2023
+ 13:39:17 +0000
+Message-ID: <27b36b04-44a0-6a62-8a8c-109ac7058499@oracle.com>
+Date:   Fri, 10 Feb 2023 21:39:10 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.2
+Subject: Re: run more tests in the auto group
+To:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20230209051355.358942-1-hch@lst.de>
+From:   Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <20230209051355.358942-1-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SI2PR01CA0051.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:193::6) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Y+VnDBnBZiHo20tk@google.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DM4PR10MB6087:EE_
+X-MS-Office365-Filtering-Correlation-Id: adaa38da-5891-4a0b-9678-08db0b6c34ab
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 8VN3KtkAUAQ0ArfJvQ/TDKmJZlFggZgrDQU414sHxj6hFOmlGR1xpF1iVK/m2tNTKHJAkc9qH85Y5XMZXaU1ABEMjbCXMRbm5nQX/c6337mle/UcePki9vZJVIBWZwPyDKoylPBQC6Mi3Hnq0bwNpDABFIiU7/R2/H6V1LT3VDdzt51GsMQrbtT5gaYKQTTSxXEBl3WtQ3wdaTavxjdYZVl69cyjjr8/oRCoZMXbfxniUCt9KE1lQK7a6ybGQoDEafAAnj+SftlQbd1q33pOJOxLnVryx0HPJuBkfo1Y8NYsG/mW2HO8W01gwW9/gUDVAJ8UejjhD+t7a1Ia0nXmHFlzwgBCoK5BQi2ZWn12+PDQSKn2TSTfWik2XOEnSy1+AGOhvhxkIHmBo8Mn/2ECCnxCrpwFGeNjbiEo8TSNt3idmtr1ViFVLxtKnSZXn8Weat/nL2KIr4qp/SqPz34S20JkFG/mTUIo3QogIU1bEo2p8Fu/i6ushnmGGqXzrzzN1XPuMn6u7rykcOdrq3DlR+rZ30QHN0VSbgYyaBzSTn42CP9hxq+VN21mh4NU9zDy5DjsVQ/SyJKWo9yp7RZJJJkH64KdL2daJjK19zIu8UhLtZi0xwcl97X56rx3EWn7CQ7UUElkV8UcdNP1xG3+XISDYQ5QaEpWPTqWLlSfk9zNSr6R3z5HnYRVo8h7oXHXGOLzLQ0AwSXkrwGCAMaD/JZbNGGkGYFBeYbemy4X8Ag=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230025)(346002)(396003)(376002)(366004)(39860400002)(136003)(451199018)(31696002)(86362001)(36756003)(38100700002)(4326008)(26005)(186003)(8676002)(66476007)(66556008)(66946007)(6506007)(6512007)(4744005)(8936002)(5660300002)(41300700001)(6666004)(44832011)(478600001)(6486002)(316002)(2906002)(53546011)(2616005)(31686004)(45980500001)(43740500002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?cit1RDhMSVk0ajhhNHZSOWliY3laZ0o1TTVUN25KcmNIZC9DeTZMT05Bc1Nk?=
+ =?utf-8?B?M0d5RFlrMEZFYWt1U1MvM1F1NlVKbEhZczNSajJxVUZzOGJOT3poeVRvUnFC?=
+ =?utf-8?B?Njh6SXhqZWVzVHRIYVlhRnFqNDZtNm1xYXVIblBxemp2MWp2NWRZUVVxM3li?=
+ =?utf-8?B?bUlDRXlUVkUwVXk5bGczUnFobzNiSEpHa0IzTjdrWkhudDJWMktJNjdpbFJn?=
+ =?utf-8?B?WmV2bkVPZDhWUStqM1F2aFp5djVYZVdka0I4WUphdWdsUlNyZzd5NVJzQ0o0?=
+ =?utf-8?B?M2NQb1MvVHRRUkNKbFp6Uk8vTTEyUVptdmgzaDNkOUtDRC82VldPSWN5eGE3?=
+ =?utf-8?B?SUxKVk5PaXFMY3V1bnZlbVdWYjJSekZpbG1laGQyZUkrNzdZOHA5RFBFaDdj?=
+ =?utf-8?B?U1kxOHc0UGhsa2Vld00rOE5TdCtvVDhuSGNXNVdISjlGL0NGVXk2Wml2KzJQ?=
+ =?utf-8?B?MEhtZHkybWZhdmcrTEZsOHlicno5cjg0alFjNWVvUk1xWDFyZElxd3pNSW43?=
+ =?utf-8?B?OHNFeG9ucTVHdS9OTjZiNk9KZ1pnK3BuZ1N3clQybTJnZHp1RHVuVXFtYTlx?=
+ =?utf-8?B?VmFXYm5nSkpJN2JhaFYxOWNYODZRVmRxYXBSR1Exd1ZoZGVUdGhWM1Z3dmFT?=
+ =?utf-8?B?OXI1RzJNdThERG5nZlNHLzlmR3dxS1hWTVh1SDl5K3d5YXhzV1RBTUc0em96?=
+ =?utf-8?B?ZllCMGRUTVNsdjVXY0NUK3pzRUZ2UWRnMTI2SlBmZVRQTnlrdWlYMUw5RTZZ?=
+ =?utf-8?B?cHdVaUhwNEZUTFQ0TXN1ZEx6eGpITDJVWFE4S3VMRTl1L1Bxc0YrSUxKZVlv?=
+ =?utf-8?B?Tkt0T1p5azJyTnJGYWtPcVBGQkRySzF1L3ltZXFYYXE2Nm5qd1Iwd0dCYVpZ?=
+ =?utf-8?B?UUhSSFBPZlF6azFsSjZYa2pnc3Nwc1dpQnh6VkVsb3JPa2kydkRobGxjMjEx?=
+ =?utf-8?B?eVRRSHZGWkhwRXZ2cVZJY2xLK2JHZkphdkNjNkpCL3BqYVd3cUZXT3VFRmVB?=
+ =?utf-8?B?dVR6UHlNSk55VVBjdERyNXFTd0tYWnVnc01xUVNiSGEzdFRHVFZFeDU4azZ4?=
+ =?utf-8?B?N1c0TjhNVWZDRVFXVWczYlZDTmxUZmg1bFVHNXgrdU5rcHBkOXQwZldMNkIr?=
+ =?utf-8?B?ejJBWngzQzlTaHNmNm9kcmtZUmtPMVV5TzBrZXZ6NTZQWEgxajhXWUdvK3BC?=
+ =?utf-8?B?elIwYzlOeFBwR0RXdi82UHduQW9rcXFYcTRSbjg3cEdDMHFnNEVGR0R0RzhK?=
+ =?utf-8?B?NWhxWlFaMDJZT3Y4TURlMjZmWEhWSzBHOWVRSnFpRkxxZDFmZzVvSGxOUHND?=
+ =?utf-8?B?MEdla25sdzRCaWZJNGdtN0lOU0JxbllHZ3lOdFM2SFBaQ1l4dHF1ZFhuT2oy?=
+ =?utf-8?B?M0JtV000bUtOazBRNXp0SElna01QamhNb0VCUDBOamdWZWw2V3VXemh1Z2hs?=
+ =?utf-8?B?UDI5ZVZ0aUE1OENxRm1hUzR3K3hVYzhUbGpIc3N3UTZhWHcvbktVSU5zWGRT?=
+ =?utf-8?B?UGgwYjJKZkwvRDZPbVI4QjVqb1o1aVF6VTRxQXM1cUdwUHo0SDE2ZVhpOUlI?=
+ =?utf-8?B?bzA1RHhMVGs2M3dmNE5EdmNnQkVCaTFKTW5IRjNaanBNNitmS3BWOFQrUklz?=
+ =?utf-8?B?RVMwWGxzbXZBcnh2WHFaMjBQYWlTWkcrOCsrUHlSZmdWaEl3S0hGeXArRTJ3?=
+ =?utf-8?B?WTBnOXRUbEtKRjkwUWo3clppTnRIRFBVdlZkejNBMHcreDlSNXBYMXAyOGls?=
+ =?utf-8?B?WDg5MG05eWp0ekY5VXdQN1QvQWUzUUROek5DdnMrS3JRdUc5UGNaeS9ZRDk5?=
+ =?utf-8?B?ZlJicFV4dCt1MGRoOUM4VGdEb01zQmxpMmpUdlhRa2I5bHMreFo4TTZZckM3?=
+ =?utf-8?B?UGh6RWJhVVlGbTR0UGs0dkVBUGc2Rzc3SWJZaHRBRm0rWm02TnFXRXJpRUx0?=
+ =?utf-8?B?NGU1UnFJR3lCbktBbkNXeS9zYTYwN0hjY09HdmxUUnNYSFNscWMwdmQ2VzlF?=
+ =?utf-8?B?NDdXZlNaWml6R1Bab1RVNFBCNENKWmpWNmRNZlVPdFRzb3NsNE1NWFBaUzZj?=
+ =?utf-8?B?MnUyMThnN1NldytvWmVFRUliZGFNYkdmd2FXWDdKTmFFUUQzUHpjWUlodVJR?=
+ =?utf-8?B?cDBhbmE2ZTU4NTA4YUh6LzR2N1pNRkhKcW5kMXdLS3JnYTdBNWE5VmFXa0hp?=
+ =?utf-8?B?bnc9PQ==?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: SDW0h6BjnIYvjB51/wa7YTHbavS86AUKPqpP33beFMq9ONYpW0uHKFGLoCiiabTGDvFuRpal8vnyQYRmuD5IJqiaymt1HULZdLpWl7MLW6rcjCS/fO9VqmxaLxka4fhTh+unXz9DWJ1m2EQvOUN+vu9nB/xMc5hEk2XT79Tb/1N2mZLwlSXz1qcc/pQ/Ht8bWq9t0ojMornyw/3zM+FN14uPNa19Q31gBXWelKgF4YpTVcrbN7UhEvcVpTjUQEwKV+lrr1P6bhcQkyqiBvbUkLh0duHfjxjgPkwVOPsOMJcElxIOmMGwffY0BjJGi9WNQdCXdzaPvZxiV3sPE1e8AM0XzKx5C5gPzDm5vrmCyEdAWhxnynNeuJ8FAty+rADseXbCla2kzOP1O6QOHl/WUUOvGWVpITTJIqQ0WxO72yh0Ty5qDJzc2BLOheEZqGj4f8KjujAWXnrk33f2p304Py9ukdIrDaNE6ppAwTznkmlF/G9JiZZfAU/BmS4QTKDa/tpndEQNewO03Bqt1fO2179CUpPNzYaXGCG8+kRmF9zGb4+6UqAdCovCTYM7Nrr6d9hGqKw2xNENLADEfZ/BcNd8sDkxbFFn8O3PGdRaGKNz1k9eY4k7mc1QBlqXvvY3nIZoWVyqyU4lwndeA0eBcKb1p1GeYhE199c8mN00T+CPuxdqhgsj5TGNP60sX5eXz/691wKvv9PIWvzXWPVDDPFw2jIRLR5xY4TPFKgQTf7sHz5yEiGQJlnIabQrretF1WebgojSsRI/G4Hmy1TWlQ==
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: adaa38da-5891-4a0b-9678-08db0b6c34ab
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Feb 2023 13:39:17.6258
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: CoR8UTVDpD1iswQsoCUOOYAf0yrA+KIkb1s71tyjX6FQELcy1AelXrPxUMf2Hhl8YUJc8xU4PYRr7oI9lm08BA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR10MB6087
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.219,Aquarius:18.0.930,Hydra:6.0.562,FMLib:17.11.170.22
+ definitions=2023-02-10_08,2023-02-09_03,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 suspectscore=0 adultscore=0
+ malwarescore=0 mlxscore=0 phishscore=0 spamscore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2212070000
+ definitions=main-2302100112
+X-Proofpoint-GUID: b0DL8jxFZPmQwEqxeP8YHnSm5XS366r2
+X-Proofpoint-ORIG-GUID: b0DL8jxFZPmQwEqxeP8YHnSm5XS366r2
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 09, 2023 at 01:35:08PM -0800, Leah Rumancik wrote:
-> On Wed, Feb 08, 2023 at 06:47:30PM -0800, Darrick J. Wong wrote:
-> > On Wed, Feb 08, 2023 at 05:31:43PM -0800, Leah Rumancik wrote:
-> > > Many people have developed infrastructure around xfstests. In order to
-> > > test a setup, it would be helpful to have dummy tests that have
-> > > consistent test outcomes. Add a new test folder with the following
-> > > debugging tests:
-> > 
-> > Ooh, we've been needing selftests for a while, thanks!
-> > 
-> > > debug/001 pass
-> > > debug/002 fail
-> > > debug/003 skip
-> > > debug/004 crash
-> > > debug/005 hang
-> > > 
-> > > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> > > 
-> > > diff --git a/doc/group-names.txt b/doc/group-names.txt
-> > > index 6cc9af78..212da7e7 100644
-> > > --- a/doc/group-names.txt
-> > > +++ b/doc/group-names.txt
-> > > @@ -39,6 +39,7 @@ dangerous_scrub		fuzzers to evaluate xfs_scrub checking
-> > >  data			data loss checkers
-> > >  dax			direct access mode for persistent memory files
-> > >  db			xfs_db functional tests
-> > > +debug			tests with fixed results, used to validate testing setup
-> > 
-> > Bikeshed: Can we make the tag 'selftests' since debugging could refer to
-> > just about anything in the kernel/userspace/otherstuff stacks?
+On 09/02/2023 13:13, Christoph Hellwig wrote:
+> Hi all,
 > 
-> Ah sure, agreed selftests would be better, thanks.
-> 
-> > 
-> > Also a dangerous_selftests for tests that will crash or hang the test
-> > appliances.  I'd really like to run this every time I start up fstests,
-> > albeit without the dangerous ones. :)
-> 
-> How exactly would you plan to run it? To run just the non-dangerous tests,
-> you could do -g selftests/selftests -x selftests/dangerous_selftests. You
-> can't simply use -g selftests -x selftests_dangerous as right now
-> selftests is not being added to SRC_GROUPS.
+> this series adds a more tests to the auto and quick groups so that they
+> are run as part of the usual regressions tests.
 
-That's exactly what I was thinking.
+For patches 1-4
 
-> It would be nice to make it
-> behave more like a normal group though... If it doesn't matter that
-> these would run with -g all, I could just add it to SRC_GROUPS. If it'd be
-> best to skip these during running -g all, I could also update get_all_tests
-> to skip over the selftests folder. Do you think these should run with
-> -g all?
-
-Yes.
+      Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
 
-> 
-> > 
-> > Or <cough> fsteststests.
-> 
-> Ha :)
-> 
-> > 
-> > (No, really not that.)
-> > 
-> > >  dedupe			FIEDEDUPERANGE ioctl
-> > >  defrag			filesystem defragmenters
-> > >  dir			directory test functions
-> > > diff --git a/tests/debug/001 b/tests/debug/001
-> > > new file mode 100755
-> > > index 00000000..9567449c
-> > > --- /dev/null
-> > > +++ b/tests/debug/001
-> > > @@ -0,0 +1,14 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# FS QA Test No. 001
-> > > +#
-> > > +# A test that should always pass
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest debug
-> > > +
-> > > +echo "Silence is golden"
-> > > +status=0
-> > > +exit
-> > > +
-> > > diff --git a/tests/debug/001.out b/tests/debug/001.out
-> > > new file mode 100644
-> > > index 00000000..88678b8e
-> > > --- /dev/null
-> > > +++ b/tests/debug/001.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 001
-> > > +Silence is golden
-> > > diff --git a/tests/debug/002 b/tests/debug/002
-> > > new file mode 100755
-> > > index 00000000..12b45a94
-> > > --- /dev/null
-> > > +++ b/tests/debug/002
-> > > @@ -0,0 +1,14 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# FS QA Test No. 002
-> > > +#
-> > > +# A test that should always fail
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest debug
-> > > +
-> > > +echo "I am intentionally broken"
-> > 
-> > Would you mind slipping in another test to simulate tests that cannot
-> > satisfy preconditions and hence _fail?
-> 
-> What exactly do you mean? Like a test that just calls _fail to
-> simulate something like _scratch_mkfs || _fail "mkfs failed"?
+They also need the _fixed_by_kernel_commit attribute, which the 
+(upcoming) series [1] fixes.
 
-Yes.
+     [1] [PATCH 0/3] fstests: btrfs- add _fixed_by for new tests in the 
+auto group
 
---D
+However, for btrfs/125, it is most likely that there isn't a single
+patch that made it work.
 
-> > 
-> > > +status=0
-> > > +exit
-> > > +
-> > > diff --git a/tests/debug/002.out b/tests/debug/002.out
-> > > new file mode 100644
-> > > index 00000000..61705c7c
-> > > --- /dev/null
-> > > +++ b/tests/debug/002.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 002
-> > > +Silence is golden
-> > > diff --git a/tests/debug/003 b/tests/debug/003
-> > > new file mode 100755
-> > > index 00000000..813e6ff6
-> > > --- /dev/null
-> > > +++ b/tests/debug/003
-> > > @@ -0,0 +1,16 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# FS QA Test No. 003
-> > > +#
-> > > +# A test that should always be skipped
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest debug
-> > > +
-> > > +_notrun "Always skip me"
-> > > +
-> > > +echo "I should be skipped"
-> > > +status=0
-> > > +exit
-> > > +
-> > > diff --git a/tests/debug/003.out b/tests/debug/003.out
-> > > new file mode 100644
-> > > index 00000000..6895fc80
-> > > --- /dev/null
-> > > +++ b/tests/debug/003.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 003
-> > > +Silence is golden
-> > > diff --git a/tests/debug/004 b/tests/debug/004
-> > > new file mode 100755
-> > > index 00000000..2e5f1e43
-> > > --- /dev/null
-> > > +++ b/tests/debug/004
-> > > @@ -0,0 +1,17 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# FS QA Test No. 004
-> > > +#
-> > > +# A test that crashes
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest debug dangerous
-> > 
-> > _begin_fstest dangerous_selftest?
-> > 
-> Sure, will update.
-> 
-> > > +
-> > > +echo 1 > /proc/sys/kernel/sysrq
-> > > +echo c > /proc/sysrq-trigger
-> > > +
-> > > +echo "I should have crashed by now"
-> > > +status=0
-> > > +exit
-> > > +
-> > > diff --git a/tests/debug/004.out b/tests/debug/004.out
-> > > new file mode 100644
-> > > index 00000000..af8614ae
-> > > --- /dev/null
-> > > +++ b/tests/debug/004.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 004
-> > > +Silence is golden
-> > > diff --git a/tests/debug/005 b/tests/debug/005
-> > > new file mode 100755
-> > > index 00000000..1a213926
-> > > --- /dev/null
-> > > +++ b/tests/debug/005
-> > > @@ -0,0 +1,20 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +#
-> > > +# FS QA Test No. 005
-> > > +#
-> > > +# A test that hangs
-> > > +#
-> > > +
-> > > +. ./common/preamble
-> > > +_begin_fstest debug dangerous
-> > 
-> > Here too.
-> 
-> Ack
-> > 
-> > > +
-> > > +while :
-> > > +do
-> > > +    sleep 1d
-> > > +done
-> > > +
-> > > +echo "I should still be sleeping"
-> > > +status=0
-> > > +exit
-> > > +
-> > > diff --git a/tests/debug/005.out b/tests/debug/005.out
-> > > new file mode 100644
-> > > index 00000000..a5027f12
-> > > --- /dev/null
-> > > +++ b/tests/debug/005.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 005
-> > > +Silence is golden
-> > > diff --git a/tests/debug/Makefile b/tests/debug/Makefile
-> > > new file mode 100644
-> > > index 00000000..84556199
-> > > --- /dev/null
-> > > +++ b/tests/debug/Makefile
-> > > @@ -0,0 +1,24 @@
-> > > +#
-> > > +# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-> > > +#
-> > > +
-> > > +TOPDIR = ../..
-> > > +include $(TOPDIR)/include/builddefs
-> > > +include $(TOPDIR)/include/buildgrouplist
-> > > +
-> > > +DEBUG_DIR = debug
-> > > +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(DEBUG_DIR)
-> > > +DIRT = group.list
-> > > +
-> > > +default: $(DIRT)
-> > > +
-> > > +include $(BUILDRULES)
-> > > +
-> > > +install:
-> > > +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> > > +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> > > +	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> > > +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> > > +
-> > > +# Nothing.
-> > > +install-dev install-lib:
-> > > -- 
-> > > 2.39.1.519.gcb327c4b5f-goog
-> > > 
+Thanks, Anand
+
