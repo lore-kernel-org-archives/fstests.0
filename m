@@ -2,74 +2,54 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88B31C61DA4
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Feb 2023 21:47:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA9E5C05027
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Feb 2023 01:03:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230202AbjBIVrn (ORCPT
+        id S229869AbjBJBC7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Feb 2023 16:47:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42402 "EHLO
+        Thu, 9 Feb 2023 20:02:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229862AbjBIVrm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 16:47:42 -0500
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D404C25298
-        for <fstests@vger.kernel.org>; Thu,  9 Feb 2023 13:47:41 -0800 (PST)
-Received: by mail-pj1-x1036.google.com with SMTP id v18-20020a17090ae99200b00230f079dcd9so6678607pjy.1
-        for <fstests@vger.kernel.org>; Thu, 09 Feb 2023 13:47:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=AUVFbFq7E9kWzYX4gWe2TCjlvPpnQTwh4pQBzO0P0kg=;
-        b=RqhqlZBlPJMRwzxdwPmN6+QN9DXdJz2SJXxUPOLrIAp5v6D9MKS43et235mIdnQTmk
-         2n86DFGhlBfIw4S3T33WA69vXlbr/XQwvJ0I3+Hoko+HUAZQDwsA0HAIxi1vGipsDuJ/
-         M64g4U0R+mMnst2xDZRcf3MM0J44L6oEIH7n54OrX4WObzmpfxPcIHU5dccdZ45zMaZc
-         nvRqy9a76r4LnDC4pPmgswlKerKyDb0baw/dQ5IP3peXA8JHmukZFRmCkUdzp5xN2p7k
-         yydk/gqehsFwdMp9Nk+RCEjxNTf173oU2Iw08pZ8KmF6fB/8vsGFfdKDH/lqSbaDqWiJ
-         zd8w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=AUVFbFq7E9kWzYX4gWe2TCjlvPpnQTwh4pQBzO0P0kg=;
-        b=rj3icwlD1WoFvxhLxERSMSwwIm0tEgZr+mB28x1KigH5yiwky9vbpabByn4N7geZjq
-         nUke+PZ+bv3Zmu081g8sJhbwe43RTaCSQMRG5Aq7O5BMc6shkr8TBMJxxUoMBGX7I/Ez
-         oTCmQN1S1YHAZMDnNfpCLA6Q67xG9UdFF/iMz3kTyKHVQf4El02jE+1ThPsDbo3O4dM8
-         Mv2qN0W3yYtPjqUopsG8DVlBiNCARieE/SDOVZ+qekQqgK3fHfX+7Y9cNojm+peibP9n
-         eo2ZBDxADKDmXhYpf68K4LkuMDs9rksAkLfRhcoTm9QLAY5Zre5wC6rllmRj3hSnFWo3
-         vFIw==
-X-Gm-Message-State: AO0yUKVV3NUXu6bdl0d8iq9CGMQyDyzpNhAcsrIuwfHl0BdONUK7SbXo
-        xiueeCkT7osQzjqh2o74L6g=
-X-Google-Smtp-Source: AK7set/bkLelmKWs3Aifo+w6gXTYEwNgmEE6BNwf4BC6tfPBmrsJHy5ZNt6pqcMJ3knUruTNfkfCcg==
-X-Received: by 2002:a17:902:d1d5:b0:199:540c:46a0 with SMTP id g21-20020a170902d1d500b00199540c46a0mr4473957plb.3.1675979261246;
-        Thu, 09 Feb 2023 13:47:41 -0800 (PST)
-Received: from google.com ([2620:15c:2c1:200:67b8:d62f:3d52:62f])
-        by smtp.gmail.com with ESMTPSA id w20-20020a1709027b9400b00192a04bc620sm1951361pll.295.2023.02.09.13.47.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Feb 2023 13:47:40 -0800 (PST)
-Date:   Thu, 9 Feb 2023 13:47:38 -0800
-From:   Leah Rumancik <leah.rumancik@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S229764AbjBJBC7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Feb 2023 20:02:59 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D3E75C8B2
+        for <fstests@vger.kernel.org>; Thu,  9 Feb 2023 17:02:57 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 48E34CE2643
+        for <fstests@vger.kernel.org>; Fri, 10 Feb 2023 01:02:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DDF54C433EF;
+        Fri, 10 Feb 2023 01:02:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1675990972;
+        bh=FvqaaQfP6lO3vsEcNEzOwQiMm9lgNzxL0qoFMiNf5x0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=a30YgKAi9zq88BWVyl883UHqVOPk5PU1k3jmUPUA5rkKXCmNe4sUwQ+PSsxUt1YTQ
+         v4NtKfReLY6puT2BFF4wRNF34zhHuF20xe13FtLs90FH9gOBjX3zxkSIdLbF1gxegt
+         REF008PsoG0P7rtbPXF9iDhZcr/9iuyNj6zlxPnRfuQ6GhNZUXlCzXmevebE/vt+1Y
+         /1wweaoYhsoii5mt320jMJv1YrtH4NPjvOIDNpB+pUQ5rhCb/Xwd3eCVXLTFAStAsa
+         KRgTT6yZSBg+Zc/VbyPCPQgdDiKXiUWTBsb8o1OIxaBh3geLM/PYmIGIU5WMoVlzFQ
+         OS3wFJ3WTn6mA==
+Date:   Thu, 9 Feb 2023 17:02:52 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Leah Rumancik <leah.rumancik@gmail.com>
+Cc:     fstests@vger.kernel.org, zlang@redhat.com
 Subject: Re: [PATCH] debug: add tests for debugging testing setup
-Message-ID: <Y+Vp+qSoi/CFcfZA@google.com>
+Message-ID: <Y+WXvKlwBnmgTROk@magnolia>
 References: <20230209013143.2586104-1-leah.rumancik@gmail.com>
  <Y+Rewk2CmqrWDyVu@magnolia>
- <20230209055302.osegwiqx77lav4p2@zlang-mailbox>
+ <Y+VnDBnBZiHo20tk@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230209055302.osegwiqx77lav4p2@zlang-mailbox>
+In-Reply-To: <Y+VnDBnBZiHo20tk@google.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Oops, should have put all my replies this message. Please see my
-reply to Darrick's email as well.
-
-On Thu, Feb 09, 2023 at 01:53:02PM +0800, Zorro Lang wrote:
+On Thu, Feb 09, 2023 at 01:35:08PM -0800, Leah Rumancik wrote:
 > On Wed, Feb 08, 2023 at 06:47:30PM -0800, Darrick J. Wong wrote:
 > > On Wed, Feb 08, 2023 at 05:31:43PM -0800, Leah Rumancik wrote:
 > > > Many people have developed infrastructure around xfstests. In order to
@@ -86,7 +66,6 @@ On Thu, Feb 09, 2023 at 01:53:02PM +0800, Zorro Lang wrote:
 > > > debug/005 hang
 > > > 
 > > > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> > > ---
 > > > 
 > > > diff --git a/doc/group-names.txt b/doc/group-names.txt
 > > > index 6cc9af78..212da7e7 100644
@@ -100,20 +79,216 @@ On Thu, Feb 09, 2023 at 01:53:02PM +0800, Zorro Lang wrote:
 > > 
 > > Bikeshed: Can we make the tag 'selftests' since debugging could refer to
 > > just about anything in the kernel/userspace/otherstuff stacks?
+> 
+> Ah sure, agreed selftests would be better, thanks.
+> 
 > > 
 > > Also a dangerous_selftests for tests that will crash or hang the test
 > > appliances.  I'd really like to run this every time I start up fstests,
 > > albeit without the dangerous ones. :)
 > 
-> I agree with this. When I saw *debug*, I thought it's about some kernel/fs
-> debuging test, or it need kernel debug option. So *selftest* might be a better
-> name, or if someone has better idea :)
+> How exactly would you plan to run it? To run just the non-dangerous tests,
+> you could do -g selftests/selftests -x selftests/dangerous_selftests. You
+> can't simply use -g selftests -x selftests_dangerous as right now
+> selftests is not being added to SRC_GROUPS.
+
+That's exactly what I was thinking.
+
+> It would be nice to make it
+> behave more like a normal group though... If it doesn't matter that
+> these would run with -g all, I could just add it to SRC_GROUPS. If it'd be
+> best to skip these during running -g all, I could also update get_all_tests
+> to skip over the selftests folder. Do you think these should run with
+> -g all?
+
+Yes.
+
+
 > 
-> With group name changing, I think better to change tests/debug/ directory to
-> tests/selftests/.
+> > 
+> > Or <cough> fsteststests.
+> 
+> Ha :)
+> 
+> > 
+> > (No, really not that.)
+> > 
+> > >  dedupe			FIEDEDUPERANGE ioctl
+> > >  defrag			filesystem defragmenters
+> > >  dir			directory test functions
+> > > diff --git a/tests/debug/001 b/tests/debug/001
+> > > new file mode 100755
+> > > index 00000000..9567449c
+> > > --- /dev/null
+> > > +++ b/tests/debug/001
+> > > @@ -0,0 +1,14 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +#
+> > > +# FS QA Test No. 001
+> > > +#
+> > > +# A test that should always pass
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest debug
+> > > +
+> > > +echo "Silence is golden"
+> > > +status=0
+> > > +exit
+> > > +
+> > > diff --git a/tests/debug/001.out b/tests/debug/001.out
+> > > new file mode 100644
+> > > index 00000000..88678b8e
+> > > --- /dev/null
+> > > +++ b/tests/debug/001.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 001
+> > > +Silence is golden
+> > > diff --git a/tests/debug/002 b/tests/debug/002
+> > > new file mode 100755
+> > > index 00000000..12b45a94
+> > > --- /dev/null
+> > > +++ b/tests/debug/002
+> > > @@ -0,0 +1,14 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +#
+> > > +# FS QA Test No. 002
+> > > +#
+> > > +# A test that should always fail
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest debug
+> > > +
+> > > +echo "I am intentionally broken"
+> > 
+> > Would you mind slipping in another test to simulate tests that cannot
+> > satisfy preconditions and hence _fail?
+> 
+> What exactly do you mean? Like a test that just calls _fail to
+> simulate something like _scratch_mkfs || _fail "mkfs failed"?
 
-Will do!
+Yes.
 
+--D
+
+> > 
+> > > +status=0
+> > > +exit
+> > > +
+> > > diff --git a/tests/debug/002.out b/tests/debug/002.out
+> > > new file mode 100644
+> > > index 00000000..61705c7c
+> > > --- /dev/null
+> > > +++ b/tests/debug/002.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 002
+> > > +Silence is golden
+> > > diff --git a/tests/debug/003 b/tests/debug/003
+> > > new file mode 100755
+> > > index 00000000..813e6ff6
+> > > --- /dev/null
+> > > +++ b/tests/debug/003
+> > > @@ -0,0 +1,16 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +#
+> > > +# FS QA Test No. 003
+> > > +#
+> > > +# A test that should always be skipped
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest debug
+> > > +
+> > > +_notrun "Always skip me"
+> > > +
+> > > +echo "I should be skipped"
+> > > +status=0
+> > > +exit
+> > > +
+> > > diff --git a/tests/debug/003.out b/tests/debug/003.out
+> > > new file mode 100644
+> > > index 00000000..6895fc80
+> > > --- /dev/null
+> > > +++ b/tests/debug/003.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 003
+> > > +Silence is golden
+> > > diff --git a/tests/debug/004 b/tests/debug/004
+> > > new file mode 100755
+> > > index 00000000..2e5f1e43
+> > > --- /dev/null
+> > > +++ b/tests/debug/004
+> > > @@ -0,0 +1,17 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +#
+> > > +# FS QA Test No. 004
+> > > +#
+> > > +# A test that crashes
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest debug dangerous
+> > 
+> > _begin_fstest dangerous_selftest?
+> > 
+> Sure, will update.
+> 
+> > > +
+> > > +echo 1 > /proc/sys/kernel/sysrq
+> > > +echo c > /proc/sysrq-trigger
+> > > +
+> > > +echo "I should have crashed by now"
+> > > +status=0
+> > > +exit
+> > > +
+> > > diff --git a/tests/debug/004.out b/tests/debug/004.out
+> > > new file mode 100644
+> > > index 00000000..af8614ae
+> > > --- /dev/null
+> > > +++ b/tests/debug/004.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 004
+> > > +Silence is golden
+> > > diff --git a/tests/debug/005 b/tests/debug/005
+> > > new file mode 100755
+> > > index 00000000..1a213926
+> > > --- /dev/null
+> > > +++ b/tests/debug/005
+> > > @@ -0,0 +1,20 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +#
+> > > +# FS QA Test No. 005
+> > > +#
+> > > +# A test that hangs
+> > > +#
+> > > +
+> > > +. ./common/preamble
+> > > +_begin_fstest debug dangerous
+> > 
+> > Here too.
+> 
+> Ack
+> > 
+> > > +
+> > > +while :
+> > > +do
+> > > +    sleep 1d
+> > > +done
+> > > +
+> > > +echo "I should still be sleeping"
+> > > +status=0
+> > > +exit
+> > > +
+> > > diff --git a/tests/debug/005.out b/tests/debug/005.out
+> > > new file mode 100644
+> > > index 00000000..a5027f12
+> > > --- /dev/null
+> > > +++ b/tests/debug/005.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 005
+> > > +Silence is golden
 > > > diff --git a/tests/debug/Makefile b/tests/debug/Makefile
 > > > new file mode 100644
 > > > index 00000000..84556199
@@ -122,16 +297,6 @@ Will do!
 > > > @@ -0,0 +1,24 @@
 > > > +#
 > > > +# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-> 
-> Do you need to change this ^^ ?
-Ah yes, thanks!
-
-- Leah
-
-> 
-> Thanks,
-> Zorro
-> 
 > > > +#
 > > > +
 > > > +TOPDIR = ../..
@@ -157,5 +322,3 @@ Ah yes, thanks!
 > > > -- 
 > > > 2.39.1.519.gcb327c4b5f-goog
 > > > 
-> > 
-> 
