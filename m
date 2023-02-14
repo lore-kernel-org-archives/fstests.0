@@ -2,119 +2,169 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE2F2C05027
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Feb 2023 06:18:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0689C61DA4
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Feb 2023 08:01:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230162AbjBNGSx (ORCPT
+        id S229853AbjBNIBg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Feb 2023 01:18:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46646 "EHLO
+        Tue, 14 Feb 2023 03:01:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229539AbjBNGSw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Feb 2023 01:18:52 -0500
+        with ESMTP id S230340AbjBNIBV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Feb 2023 03:01:21 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 955B51205B
-        for <fstests@vger.kernel.org>; Mon, 13 Feb 2023 22:17:56 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A302A222D8
+        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 00:00:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676355475;
+        s=mimecast20190719; t=1676361614;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=FKIYuss8Y9Uq7QhmG2lxnu554KteJYlPqssqdGyUJks=;
-        b=WGohBzSlhz0Z1poOlAGd4i0Ia+EdX/bDXmzQhLAudmXT+i/LkFys+55i4LmQ77JukkdSOi
-        LAGPehyfVKWRtZfb5EtgZJdqG/G/eIlbh8teLi5n8S5ejV+72Scx1yKdypPy1axKBzVgKG
-        tljrtEydRgtsejKekmUyNN2G7sjQMAk=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=BgMue5w2JVSiPn5I5OoXQEIIrJbaZshclf45BstvmDM=;
+        b=HwbB0ps94XD0Xi9J9PoFXy9ogNjHIlS2WKeCoUqZZ7ANfGuTVdBCFrZG/TVptqGjZJRwOQ
+        HIAOvyYO5z+Gb1iLXmsIjQogOB85rYXtwZeFArzmgS+jBFerOsvzCLXxBf8bmH7sUy87OH
+        NfAH6fmBXma4Oti1YvyI3El8BRGgx74=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-346-2glEpL1CM0S8oy1qxrjP0Q-1; Tue, 14 Feb 2023 01:17:54 -0500
-X-MC-Unique: 2glEpL1CM0S8oy1qxrjP0Q-1
-Received: by mail-pj1-f70.google.com with SMTP id gn18-20020a17090ac79200b0022bef1f49c9so546380pjb.0
-        for <fstests@vger.kernel.org>; Mon, 13 Feb 2023 22:17:53 -0800 (PST)
+ us-mta-642-3LrGxRMhOyam-Tn5gYJSTA-1; Tue, 14 Feb 2023 03:00:13 -0500
+X-MC-Unique: 3LrGxRMhOyam-Tn5gYJSTA-1
+Received: by mail-pl1-f199.google.com with SMTP id u15-20020a170902a60f00b001992a366c3bso8745352plq.12
+        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 00:00:13 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=FKIYuss8Y9Uq7QhmG2lxnu554KteJYlPqssqdGyUJks=;
-        b=5jj+cRzbrESRImd2SAPxAi5orKf3pQMJ+xHGFGaawfm1Nm5RBagpZjOiJ1IukrLkLC
-         Wvt0a+XUAhCq3Ur0yWZo8SUYv1RvWRXlSuP+63ulrPp/M+UrUoVVqJ7zbcaEvfrvlX0A
-         xLeeA+hbLsZxIKj8rdmyI9iuRs7iNG47uymAUQfkKt74/UqoaoiKEYDtswQjhkIAw1iC
-         Z4GwpnpRFF0+Bmv1G80Y2RsezmpdcHR1V/X9QV8W9CoENQ+4T3h0Bdq1/1Y0eN48J1e/
-         1uWwcxYqgblaSGVlhNx15CfF62LoDeXgtFu+fn27P8yMi4gc96Z1dlHxVcXJoxVtQCU+
-         6V4Q==
-X-Gm-Message-State: AO0yUKWtDaBRQTygxQul6wF81Aei8aukXBMy9VpIuIwt+HWd275yVVV7
-        cG8aYohXDwvUAUiuysw5tK1h7vfNctk1oFDAPCX9BNuSjU/YElCXpPRG4avAwR+xAq6SysmhAPe
-        UcepB5UOgN25z7jYLq2xn6zeCAZqq
-X-Received: by 2002:a17:90b:17c7:b0:22b:f780:d346 with SMTP id me7-20020a17090b17c700b0022bf780d346mr1323519pjb.1.1676355472709;
-        Mon, 13 Feb 2023 22:17:52 -0800 (PST)
-X-Google-Smtp-Source: AK7set9vXD+0dhaiYwvmHrm8GMqAE78AYfs7aQkLPUycTqbh5tDmj3t2cOjipfb2nG0aFiElwzeXLw==
-X-Received: by 2002:a17:90b:17c7:b0:22b:f780:d346 with SMTP id me7-20020a17090b17c700b0022bf780d346mr1323502pjb.1.1676355472342;
-        Mon, 13 Feb 2023 22:17:52 -0800 (PST)
+        bh=BgMue5w2JVSiPn5I5OoXQEIIrJbaZshclf45BstvmDM=;
+        b=T5C0WN0ggHDHBIjsJ7ByXRaOM/0bd65rN/063MwIamOZkB/Ak60qgrzp/gXvxZClmP
+         r34w8dQ3ZVV9Zbv5Lc5McgW03NrsaOM1T7oJqLzzCePI/uAUUdSr22wW4ZjT3yki4QHm
+         9QgER/OafprWoifWR8PcGzUu6QTsKQv64TmsXVlxs4u+BFrE+q3bpu09E55wr2CrqSUy
+         +UOfBoF7K+4QDFR0gMPtyWFfv00gyuK42lDvEyONbXJqkIzmR/KUrWdrQifmxEwTnr8F
+         CB3t3W6ZwT1h3S/UV+3HLlqA3csqtsF+nNtRFDbZb8ZWs6aiWlt/TaWYmVZ9jnrmyeVa
+         K4tQ==
+X-Gm-Message-State: AO0yUKX6s/jMjJA+gXJuKM0dCqR+y3wv9Zh7+M2udOeKAR2BvePyL/4j
+        kYjDn6ZzvBj58NbysXKOJ955VYJ7ZlbM+cH7eqr7NdKwMLTeaFMfIzIIxNw/+aCqVfbK7Lo/VOl
+        7yHzQLkQlpaOkCPjcIQ==
+X-Received: by 2002:a17:90b:4d91:b0:233:f354:e7f6 with SMTP id oj17-20020a17090b4d9100b00233f354e7f6mr1338142pjb.46.1676361612238;
+        Tue, 14 Feb 2023 00:00:12 -0800 (PST)
+X-Google-Smtp-Source: AK7set/OiLgAlO0CU4FnmTlAHb/aGKd7gOqEeQReYo8YxH7F4/Is3a0ZIJvZir+rw28SM9AuSCa+OA==
+X-Received: by 2002:a17:90b:4d91:b0:233:f354:e7f6 with SMTP id oj17-20020a17090b4d9100b00233f354e7f6mr1338119pjb.46.1676361611837;
+        Tue, 14 Feb 2023 00:00:11 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id y5-20020a17090a134500b0023317104415sm6379337pjf.17.2023.02.13.22.17.50
+        by smtp.gmail.com with ESMTPSA id d3-20020a17090a3b0300b002340b73ded1sm2437899pjc.26.2023.02.14.00.00.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Feb 2023 22:17:52 -0800 (PST)
-Date:   Tue, 14 Feb 2023 14:17:48 +0800
+        Tue, 14 Feb 2023 00:00:11 -0800 (PST)
+Date:   Tue, 14 Feb 2023 16:00:07 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs/249, add _wants_kernel_commit
-Message-ID: <20230214061748.z4to5y6dr4byw3y7@zlang-mailbox>
-References: <a9970cfc5eef360f6eff8cd24b41f50c07c1d744.1676207936.git.anand.jain@oracle.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] fuzzy: use FORCE_REBUILD over injecting force_repair
+Message-ID: <20230214080007.i7m5hzlcmthd6ka3@zlang-mailbox>
+References: <167243874952.722591.1496636246267309523.stgit@magnolia>
+ <167243874964.722591.9199494099572054329.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a9970cfc5eef360f6eff8cd24b41f50c07c1d744.1676207936.git.anand.jain@oracle.com>
+In-Reply-To: <167243874964.722591.9199494099572054329.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Feb 13, 2023 at 05:45:09PM +0800, Anand Jain wrote:
-> Add the _wants_kernel_commit tag for the benifit of testing on the older
-> kernels.
+On Fri, Dec 30, 2022 at 02:19:09PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> For stress testing online repair, try to use the FORCE_REBUILD ioctl
+> flag over the error injection knobs whenever possible because the knobs
+> are very noisy and are not always available.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
+>  common/fuzzy |   34 +++++++++++++++++++++++++++++++---
+>  1 file changed, 31 insertions(+), 3 deletions(-)
+> 
+> 
+> diff --git a/common/fuzzy b/common/fuzzy
+> index f7f660bc31..14f7fdf03c 100644
+> --- a/common/fuzzy
+> +++ b/common/fuzzy
+> @@ -398,6 +398,9 @@ __stress_one_scrub_loop() {
+>  
+>  	local xfs_io_args=()
+>  	for arg in "$@"; do
+> +		if [ -n "$SCRUBSTRESS_USE_FORCE_REBUILD" ]; then
+> +			arg="$(echo "$arg" | sed -e 's/^repair/repair -R/g')"
+> +		fi
+>  		if echo "$arg" | grep -q -w '%agno%'; then
+>  			# Substitute the AG number
+>  			for ((agno = 0; agno < agcount; agno++)); do
+> @@ -695,13 +698,21 @@ _require_xfs_stress_scrub() {
+>  		_notrun 'xfs scrub stress test requires common/filter'
+>  }
+>  
+> +# Make sure that we can force repairs either by error injection or passing
+> +# FORCE_REBUILD via ioctl.
+> +__require_xfs_stress_force_rebuild() {
+> +	local output="$($XFS_IO_PROG -x -c 'repair -R probe' $SCRATCH_MNT 2>&1)"
+> +	test -z "$output" && return
+> +	_require_xfs_io_error_injection "force_repair"
+> +}
+> +
+>  # Make sure we have everything we need to run stress and online repair
+>  _require_xfs_stress_online_repair() {
+>  	_require_xfs_stress_scrub
+>  	_require_xfs_io_command "repair"
+>  	command -v _require_xfs_io_error_injection &>/dev/null || \
+>  		_notrun 'xfs repair stress test requires common/inject'
+> -	_require_xfs_io_error_injection "force_repair"
+> +	__require_xfs_stress_force_rebuild
+>  	_require_freeze
+>  }
+>  
+> @@ -783,7 +794,11 @@ __stress_scrub_check_commands() {
+>  	esac
+>  
+>  	for arg in "$@"; do
+> -		local cooked_arg="$(echo "$arg" | sed -e "s/%agno%/0/g")"
+> +		local cooked_arg="$arg"
+> +		if [ -n "$SCRUBSTRESS_USE_FORCE_REBUILD" ]; then
+> +			cooked_arg="$(echo "$cooked_arg" | sed -e 's/^repair/repair -R/g')"
+> +		fi
+> +		cooked_arg="$(echo "$cooked_arg" | sed -e "s/%agno%/0/g")"
+>  		testio=`$XFS_IO_PROG -x -c "$cooked_arg" "$cooked_tgt" 2>&1`
+>  		echo $testio | grep -q "Unknown type" && \
+>  			_notrun "xfs_io scrub subcommand support is missing"
+> @@ -943,10 +958,23 @@ _scratch_xfs_stress_scrub() {
+>  	echo "Loop finished at $(date)" >> $seqres.full
+>  }
+>  
+> +# Decide if we're going to force repairs either by error injection or passing
+> +# FORCE_REBUILD via ioctl.
+> +__scratch_xfs_stress_setup_force_rebuild() {
+> +	local output="$($XFS_IO_PROG -x -c 'repair -R probe' $SCRATCH_MNT 2>&1)"
+> +
+> +	if [ -z "$output" ]; then
+> +		export SCRUBSTRESS_USE_FORCE_REBUILD=1
 
-Besides this patch, you just sent another patchset:
-  [PATCH 0/3] fstests: btrfs- add _fixed_by for new tests in the auto group
-which try to add _fixed_by for some btrfs cases.
-
-I think we don't need to "fix" these things one by one, by lots of small patch
-pieces. If there's not special reason (e.g. someone case need more fix besides
-adding _fixed_by), how about combine them into one patch which "clarify the
-_fixed_by or _wants commits for btrfs cases (or only for someone group)"
+Do you need to use this parameter ^^ in another child process? Is the "export"
+necessary?
 
 Thanks,
 Zorro
 
->  tests/btrfs/249 | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/btrfs/249 b/tests/btrfs/249
-> index 7cc4996e387b..1b79e52dbe05 100755
-> --- a/tests/btrfs/249
-> +++ b/tests/btrfs/249
-> @@ -13,7 +13,7 @@
->  #  Dump 'btrfs filesystem usage', check it didn't fail
->  #
->  # Tests btrfs-progs bug fixed by the kernel patch and a btrfs-prog patch
-> -#   btrfs: sysfs add devinfo/fsid to retrieve fsid from the device
-> +#   btrfs: sysfs: add devinfo/fsid to retrieve actual fsid from the device
->  #   btrfs-progs: read fsid from the sysfs in device_is_seed
->  
->  . ./common/preamble
-> @@ -29,6 +29,8 @@ _supported_fs btrfs
->  _require_scratch_dev_pool 3
->  _require_command "$WIPEFS_PROG" wipefs
->  _require_btrfs_forget_or_module_loadable
-> +_wants_kernel_commit a26d60dedf9a \
-> +	"btrfs: sysfs: add devinfo/fsid to retrieve actual fsid from the device"
->  
->  _scratch_dev_pool_get 2
->  # use the scratch devices as seed devices
-> -- 
-> 2.31.1
+> +		return
+> +	fi
+> +
+> +	$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
+> +}
+> +
+>  # Start online repair, freeze, and fsstress in background looping processes,
+>  # and wait for 30*TIME_FACTOR seconds to see if the filesystem goes down.
+>  # Same requirements and arguments as _scratch_xfs_stress_scrub.
+>  _scratch_xfs_stress_online_repair() {
+> -	$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
+> +	__scratch_xfs_stress_setup_force_rebuild
+>  	XFS_SCRUB_FORCE_REPAIR=1 _scratch_xfs_stress_scrub "$@"
+>  }
 > 
 
