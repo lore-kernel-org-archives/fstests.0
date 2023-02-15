@@ -2,360 +2,86 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30D00C61DA4
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Feb 2023 22:03:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C7F9C05027
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Feb 2023 01:45:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233179AbjBNWDu (ORCPT
+        id S230182AbjBOBpo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Feb 2023 17:03:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55224 "EHLO
+        Tue, 14 Feb 2023 20:45:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233147AbjBNWDt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Feb 2023 17:03:49 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 801C430B04
-        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 14:03:27 -0800 (PST)
+        with ESMTP id S229949AbjBOBpn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Feb 2023 20:45:43 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37B2D3344E;
+        Tue, 14 Feb 2023 17:45:42 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B2ED8618CE
-        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 22:02:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F4BAC433EF;
-        Tue, 14 Feb 2023 22:02:54 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id BCFB1B81F80;
+        Wed, 15 Feb 2023 01:45:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58E2AC433D2;
+        Wed, 15 Feb 2023 01:45:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1676412174;
-        bh=yB8wR93Lx/pSaeOoHhc2j7uGEU4624GL/SIIAuGuWJU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Wd3KX68fdOPcmxqov9OJkUOtk8gmzBcHPT3EUCnFBJFVOlxfQHlyT81izX/ANAaGZ
-         c7HWFEn72i5DaxDrB5pxuYj7MtSIFTE0Gi43JhAO4rwzbQlddOUio1UWgpISI7v1tp
-         NDFcPPDDUY4sjGivGS4oGr44DzNpNOZMrni3Uxs6pLYJoaP8SfmMcZrj2Uwh6b1m0y
-         /dKLpiGC+X5ETB/lmLn6Zz1ubO/bvmodShmx/g/62kmg6MX9cLhI6mDsZplnDftOm3
-         zGJ20lKIT5tSVRCAyILehYuR3Bm6U/vxSzhoaTbuWeEK7Stoz5nLgAEgoj1wEg6wdH
-         80ebcxh0kgz5A==
-Date:   Tue, 14 Feb 2023 14:02:53 -0800
+        s=k20201202; t=1676425539;
+        bh=rrKsDdhYLteWwUyeZrY2ndBfO2M07qB9mUlzyVu4PLM=;
+        h=Subject:From:To:Cc:Date:From;
+        b=ElP9pn4yhMnGkiuJSjq+oS04XE9T8wzggKCj65RHZAloFUpqWaY+2vlChz77HP0nx
+         u0MEmpJR0dacjbB5MYyrgiXt86Q6D+tPQnyCaa7cKY84PmCGcJb3mN1JMQ2H/7GWUf
+         nnaShrDkbKFCi7LmvefJStzBjZD3yZi03T1cZNdfI0I+4/kFgkCYQuPV8KZHyVqI6u
+         21iCbUeD8yWJX+8Km16HruEHyFE8UER1JHmXbLGy1CSMTeeiLGyq1QKQvSvVbDXt8C
+         hAQ0oqZYB2eFEEQOnHUIDkEAmPvT6kGtmd6idgGXnQxQSB8mU4IoNBH7vVzSCW6vjE
+         KaFLUaDaTOCyw==
+Subject: [PATCHSET v2 00/14] fstests: improve junit xml reporting
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     fstests@vger.kernel.org, zlang@redhat.com
-Subject: Re: [PATCH v2] selftest: add tests for debugging testing setup
-Message-ID: <Y+wFDSF1zMipu8Gf@magnolia>
-References: <20230214215431.1425107-1-leah.rumancik@gmail.com>
+To:     djwong@kernel.org, zlang@redhat.com
+Cc:     Qu Wenruo <wqu@suse.com>, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me, leah.rumancik@gmail.com,
+        quwenruo.btrfs@gmx.com, tytso@mit.edu
+Date:   Tue, 14 Feb 2023 17:45:38 -0800
+Message-ID: <167642553879.2118945.15448815976865210889.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230214215431.1425107-1-leah.rumancik@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 14, 2023 at 01:54:31PM -0800, Leah Rumancik wrote:
-> Many people have developed infrastructure around xfstests. In order to
-> test a setup, it would be helpful to have dummy tests that have
-> consistent test outcomes. Add a new test folder with the following
-> tests:
-> 
-> selftest/001 pass
-> selftest/002 fail from output mismatch
-> selftest/003 fail via _fail
-> selftest/004 skip
-> selftest/005 crash
-> selftest/006 hang
-> 
-> Also, create two new groups: 'selftest' which includes tests 001-004 and
-> 'dangerous_selftest' which includes tests 005-006. The selftests will
-> run when running all tests but they are not part of the auto group.
-> 
-> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+Hi all,
 
-Yay, thank you!
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+This series improves the fstests reporting code in several ways.  First,
+change the ./check code to generate the report after every test, so that
+a cluster-based fstest scheduler can reschedule tests after a VM crash.
+Personally, I was using it to get live status on my tests dashboard.
+
+The bulk of the patches in here improve the junit xml reporting so that
+we (a) actually declare which xml schema we're trying to emit and (b)
+capture a lot more information about what was being tested.
+
+v2: shorten indenting in the schema file, record .dmesg files as a
+separate kernel-log tag, clarify what the timestamp attribute means,
+record the test suite start time and report generation time as separate
+attributes, make it possible to pass in a list of report variables,
+encode cdata correctly
+
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
 
-> ---
-> v1 -> v2:
-> 
-> - change name of folder from 'debug' to 'selftest'
-> - update tags to 'selftest' and 'dangerous_selftest'
-> - add selftest folder to SRC_GROUPS
-> - update copyright tag
-> - add test which _fails
-> 
-> v1: https://lore.kernel.org/fstests/20230209013143.2586104-1-leah.rumancik@gmail.com/
-> 
->  check                   |  2 +-
->  doc/group-names.txt     |  2 ++
->  tests/selftest/001      | 14 ++++++++++++++
->  tests/selftest/001.out  |  2 ++
->  tests/selftest/002      | 14 ++++++++++++++
->  tests/selftest/002.out  |  2 ++
->  tests/selftest/003      | 16 ++++++++++++++++
->  tests/selftest/003.out  |  2 ++
->  tests/selftest/004      | 16 ++++++++++++++++
->  tests/selftest/004.out  |  2 ++
->  tests/selftest/005      | 17 +++++++++++++++++
->  tests/selftest/005.out  |  2 ++
->  tests/selftest/006      | 20 ++++++++++++++++++++
->  tests/selftest/006.out  |  2 ++
->  tests/selftest/Makefile | 24 ++++++++++++++++++++++++
->  15 files changed, 136 insertions(+), 1 deletion(-)
->  create mode 100755 tests/selftest/001
->  create mode 100644 tests/selftest/001.out
->  create mode 100755 tests/selftest/002
->  create mode 100644 tests/selftest/002.out
->  create mode 100755 tests/selftest/003
->  create mode 100644 tests/selftest/003.out
->  create mode 100755 tests/selftest/004
->  create mode 100644 tests/selftest/004.out
->  create mode 100755 tests/selftest/005
->  create mode 100644 tests/selftest/005.out
->  create mode 100755 tests/selftest/006
->  create mode 100644 tests/selftest/006.out
->  create mode 100644 tests/selftest/Makefile
-> 
-> diff --git a/check b/check
-> index 4827532e..c2065cdc 100755
-> --- a/check
-> +++ b/check
-> @@ -48,7 +48,7 @@ timestamp=${TIMESTAMP:=false}
->  
->  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
->  
-> -SRC_GROUPS="generic shared"
-> +SRC_GROUPS="generic shared selftest"
->  export SRC_DIR="tests"
->  
->  usage()
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index 771ce937..ace59e05 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -38,6 +38,7 @@ dangerous_fsstress_repair	race fsstress and xfs_scrub online repair
->  dangerous_fsstress_scrub	race fsstress and xfs_scrub checking
->  dangerous_repair	fuzzers to evaluate xfs_repair offline repair
->  dangerous_scrub		fuzzers to evaluate xfs_scrub checking
-> +dangerous_selftest	selftests that crash/hang
->  data			data loss checkers
->  dax			direct access mode for persistent memory files
->  db			xfs_db functional tests
-> @@ -111,6 +112,7 @@ samefs			overlayfs when all layers are on the same fs
->  scrub			filesystem metadata scrubbers
->  seed			btrfs seeded filesystems
->  seek			llseek functionality
-> +selftest		tests with fixed results, used to validate testing setup
->  send			btrfs send/receive
->  shrinkfs		decreasing the size of a filesystem
->  shutdown		FS_IOC_SHUTDOWN ioctl
-> diff --git a/tests/selftest/001 b/tests/selftest/001
-> new file mode 100755
-> index 00000000..f326fc83
-> --- /dev/null
-> +++ b/tests/selftest/001
-> @@ -0,0 +1,14 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 001
-> +#
-> +# A test that should always pass
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/001.out b/tests/selftest/001.out
-> new file mode 100644
-> index 00000000..88678b8e
-> --- /dev/null
-> +++ b/tests/selftest/001.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 001
-> +Silence is golden
-> diff --git a/tests/selftest/002 b/tests/selftest/002
-> new file mode 100755
-> index 00000000..a3e463b8
-> --- /dev/null
-> +++ b/tests/selftest/002
-> @@ -0,0 +1,14 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 002
-> +#
-> +# A test that should always fail due to output mismatch
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +echo "I am intentionally broken"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/002.out b/tests/selftest/002.out
-> new file mode 100644
-> index 00000000..61705c7c
-> --- /dev/null
-> +++ b/tests/selftest/002.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 002
-> +Silence is golden
-> diff --git a/tests/selftest/003 b/tests/selftest/003
-> new file mode 100755
-> index 00000000..80d9ea90
-> --- /dev/null
-> +++ b/tests/selftest/003
-> @@ -0,0 +1,16 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 003
-> +#
-> +# A test that _fail's
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +_fail "I have _fail'ed"
-> +
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/003.out b/tests/selftest/003.out
-> new file mode 100644
-> index 00000000..6895fc80
-> --- /dev/null
-> +++ b/tests/selftest/003.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 003
-> +Silence is golden
-> diff --git a/tests/selftest/004 b/tests/selftest/004
-> new file mode 100755
-> index 00000000..eddf49af
-> --- /dev/null
-> +++ b/tests/selftest/004
-> @@ -0,0 +1,16 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 004
-> +#
-> +# A test that should always be skipped
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +_notrun "Always skip me"
-> +
-> +echo "I should be skipped"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/004.out b/tests/selftest/004.out
-> new file mode 100644
-> index 00000000..af8614ae
-> --- /dev/null
-> +++ b/tests/selftest/004.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 004
-> +Silence is golden
-> diff --git a/tests/selftest/005 b/tests/selftest/005
-> new file mode 100755
-> index 00000000..e8844d30
-> --- /dev/null
-> +++ b/tests/selftest/005
-> @@ -0,0 +1,17 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 005
-> +#
-> +# A test that crashes
-> +#
-> +. ./common/preamble
-> +_begin_fstest dangerous_selftest
-> +
-> +echo 1 > /proc/sys/kernel/sysrq
-> +echo c > /proc/sysrq-trigger
-> +
-> +echo "I should have crashed by now"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/005.out b/tests/selftest/005.out
-> new file mode 100644
-> index 00000000..a5027f12
-> --- /dev/null
-> +++ b/tests/selftest/005.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 005
-> +Silence is golden
-> diff --git a/tests/selftest/006 b/tests/selftest/006
-> new file mode 100755
-> index 00000000..c6fa0dc4
-> --- /dev/null
-> +++ b/tests/selftest/006
-> @@ -0,0 +1,20 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 006
-> +#
-> +# A test that hangs
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest dangerous_selftest
-> +
-> +while :
-> +do
-> +    sleep 1d
-> +done
-> +
-> +echo "I should still be sleeping"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/006.out b/tests/selftest/006.out
-> new file mode 100644
-> index 00000000..675c1b7c
-> --- /dev/null
-> +++ b/tests/selftest/006.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 006
-> +Silence is golden
-> diff --git a/tests/selftest/Makefile b/tests/selftest/Makefile
-> new file mode 100644
-> index 00000000..3ddfca37
-> --- /dev/null
-> +++ b/tests/selftest/Makefile
-> @@ -0,0 +1,24 @@
-> +#
-> +# Copyright (c) 2023 Google, Inc. All Rights Reserved.
-> +#
-> +
-> +TOPDIR = ../..
-> +include $(TOPDIR)/include/builddefs
-> +include $(TOPDIR)/include/buildgrouplist
-> +
-> +SELFTEST_DIR = selftest
-> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(SELFTEST_DIR)
-> +DIRT = group.list
-> +
-> +default: $(DIRT)
-> +
-> +include $(BUILDRULES)
-> +
-> +install:
-> +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> +	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> +
-> +# Nothing.
-> +install-dev install-lib:
-> -- 
-> 2.39.1.581.gbfd45094c4-goog
-> 
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=xunit-reporting-improvements
+---
+ README        |    3 +
+ check         |   11 +++
+ common/ext4   |    5 +
+ common/report |  119 +++++++++++++++++++++++-----
+ common/xfs    |   10 ++
+ doc/xunit.xsd |  246 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 374 insertions(+), 20 deletions(-)
+ create mode 100644 doc/xunit.xsd
+
