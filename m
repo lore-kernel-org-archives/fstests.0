@@ -2,388 +2,188 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EDC1C636D4
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Feb 2023 04:50:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57820C636CC
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Feb 2023 05:12:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231147AbjBOEux (ORCPT
+        id S233142AbjBOFM3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Feb 2023 23:50:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34424 "EHLO
+        Wed, 15 Feb 2023 00:12:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42964 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233111AbjBOEuh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Feb 2023 23:50:37 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D13C2D156
-        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 20:49:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676436589;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=e+GEQq4TALXXw29Xj5428WXSy3CiVElh8ggiQCuP678=;
-        b=CZ2Xi/NHF9jsr7vGzsZdM+Dm48V/8Rg7tQj1NsuaUA90Eoej1NKcgzcLJLgv/e7m8x8nmS
-        QLY/8dfrUhpfdkoH1GP1OcSZYd5fqllYS5plr5T2JwTKBbXUeFJ1vInW3EMFGdUK7YEvwV
-        OFnIj2R7jlgycOJ9uNSRGu6wQDMusZQ=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-402-v2lFXiC0PlWtb0KS_2b4PQ-1; Tue, 14 Feb 2023 23:49:46 -0500
-X-MC-Unique: v2lFXiC0PlWtb0KS_2b4PQ-1
-Received: by mail-pg1-f199.google.com with SMTP id f19-20020a631013000000b004e8c27fa528so6701040pgl.17
-        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 20:49:46 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=e+GEQq4TALXXw29Xj5428WXSy3CiVElh8ggiQCuP678=;
-        b=oSC16QDNfCwCJ5AV7Rg9UegQ7yTtyk6F5svM2Ls5LZ0DofyVh0RyKNaBPFyPSk+70Z
-         6HgOVlCivOlP3tUtFetK3VEy6C2aCJQzaWFzbAEp6y0PcUeyBn7fUhUNFFDYEFZXP+RM
-         e5gE/e9FlQHPtEkolcN4HD+/elWX6rl57Mv8pdB0Ehi++/2yvs1xLzzfu8T8DVcLeXsY
-         6AExmYyovYbvSfXIYJFoPQvY1bU8ShdZZ3ZBewQ9a7JIYc6f1gh2vBne1tMSyN78Bhh7
-         qzQijQXB9jPXB0t7BketqKRMT1mXlpYInxGSd7xR7GFqvbx+wU1O8pkz+zKE8Eaq+qzY
-         fI2w==
-X-Gm-Message-State: AO0yUKX3rClZL/6Q8ft5eGS4Fo761dQK3X4ccDJb74vsEPcJMNLj51RW
-        byqJI05R7YWYV7Y8h1eZ5u7VYCzMYheu2wgSni2hAWxKPhRTZK50bx+b/v7b07Miswgdt52u9ut
-        otlllfsGwi7sop2bZGA==
-X-Received: by 2002:a17:903:2843:b0:199:11aa:50d8 with SMTP id kq3-20020a170903284300b0019911aa50d8mr822023plb.33.1676436585605;
-        Tue, 14 Feb 2023 20:49:45 -0800 (PST)
-X-Google-Smtp-Source: AK7set/cA+d/q5iTjg9Qh3aWtOW46evo7OXgf8zozXgH2t/2p2KMaB6XlN6J8GknBe0y54IrwoJl4w==
-X-Received: by 2002:a17:903:2843:b0:199:11aa:50d8 with SMTP id kq3-20020a170903284300b0019911aa50d8mr822007plb.33.1676436585079;
-        Tue, 14 Feb 2023 20:49:45 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 21-20020a170902c25500b0019a8468cbedsm7199846plg.226.2023.02.14.20.49.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Feb 2023 20:49:44 -0800 (PST)
-Date:   Wed, 15 Feb 2023 12:49:41 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] selftest: add tests for debugging testing setup
-Message-ID: <20230215044941.xgk3crhvv2jlahx6@zlang-mailbox>
-References: <20230214215431.1425107-1-leah.rumancik@gmail.com>
+        with ESMTP id S231966AbjBOFM2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Feb 2023 00:12:28 -0500
+Received: from EUR04-HE1-obe.outbound.protection.outlook.com (mail-he1eur04on2074.outbound.protection.outlook.com [40.107.7.74])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6ABF1D905
+        for <fstests@vger.kernel.org>; Tue, 14 Feb 2023 21:12:26 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=W9POOaQ9FFjK5YUJ/DTtbgTTXxiaBGdwgI0K7k/2CPCGhs5Y+qgwD7IlIF1+AaM1v7xgh0YuJ64b1T9cS2VaZA4I7fw2FGTKuvQn2GZd+z20jjZzTpF0IorU1sNKEzMiddwqUGisrOOrrXPijdM9MB83QEJE61P5/7sqedw7tISWzZLFnzq+R9GI9fbclabU8U0PJ0q/fyqwLexAR2FCs20rB1Tq9y5Vzc6RqlgZIoDLMDItAoP4fRiStVmSk7jUtxBDOZw2jzoQd0V1q2eawGrd5DV/mzQWWY0bpK9qDGwo/bIy700WPe8yQsT2gBF65EYMJibV8b48JkdTeM16+A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=hsTxtVSZcmKLlrkzPaynpsonYkHE1cOl/pP8GKBDUuE=;
+ b=OdSroevvvWGsC3IZWhgDnalgXCP90KYnJf/qR0Mao+vTOjD0yesvoox6yT1cptUaOTa9Um1Dg+QbUaPfmdr0FLLW0MoRtqbfalXsfGSqADxpy4awIbEbFqf2UeWPsigGusoO2ra5j4YW/xhlhYlxBa4NQxXBOAv2yjbbDRdOLOgyxoggoFXBV15SLXOiQDPa1lGgLcfZRc0SRktCXoYN1KmPwf5uepY/ycpTKep9Glxripr2hu5n4Ik0+rIq2g3CpGWXhkkAo5lrwFGkzxF24PU2Dm4EA8cybbyfmaBpMeHiCZ43DvTBtlhOF9lmOEcLYKCOU4eTmOEyxuGVcnpIbA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=hsTxtVSZcmKLlrkzPaynpsonYkHE1cOl/pP8GKBDUuE=;
+ b=GUMyJqFj5NQv6McX6M8s/keopa1Qoh673+iKpuerGVE/wa3IW6PxXxNhFSvIYzBzMZbGbeLAvhqwZdHVMkOrVLy6bFbkXrWNee5DN/n5WqnK1MnCxvLlEOWJKQ2D1i/E+qZpF4nIOFYnxv4lM+ExcTyEaa2tRolloGdovzj4EikYotLV5dyrC4quDiXeUughBEe8eu3mgjGv1yf4lsr85HJ58psPZ75MAy0oAhv9/ClJyGNIO1ln3sjGJO2hp2Q3TG/Ob38j2MPMh8A6C3IjnYeBICEY5fXEbvEPBTOy5CwFqQDBjP7Gy0R81FHaYsqFgvkLzCSV4mfsystmd2gVMw==
+Received: from VI1PR04MB6863.eurprd04.prod.outlook.com (2603:10a6:803:12f::9)
+ by PA4PR04MB7566.eurprd04.prod.outlook.com (2603:10a6:102:f0::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6086.26; Wed, 15 Feb
+ 2023 05:12:23 +0000
+Received: from VI1PR04MB6863.eurprd04.prod.outlook.com
+ ([fe80::247a:5c9a:d3e6:6b3b]) by VI1PR04MB6863.eurprd04.prod.outlook.com
+ ([fe80::247a:5c9a:d3e6:6b3b%9]) with mapi id 15.20.6086.026; Wed, 15 Feb 2023
+ 05:12:22 +0000
+From:   Long An <lan@suse.com>
+To:     "ddiss@suse.de" <ddiss@suse.de>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH v5] btrfs/011: use $_btrfs_profile_configs to limit the
+ tests
+Thread-Topic: [PATCH v5] btrfs/011: use $_btrfs_profile_configs to limit the
+ tests
+Thread-Index: AQHZQIliO5cNCHRCZUW+wZSBgrBmiq7O750AgACHeAA=
+Date:   Wed, 15 Feb 2023 05:12:22 +0000
+Message-ID: <dad2d60b89a6dd8298aaf3476ba64adc2c4ef249.camel@suse.com>
+References: <20230111131833.471ada43@echidna.fritz.box>
+         <20230214153057.23971-1-lan@suse.com>
+         <20230214220728.000fd5d9@echidna.fritz.box>
+In-Reply-To: <20230214220728.000fd5d9@echidna.fritz.box>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=suse.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: VI1PR04MB6863:EE_|PA4PR04MB7566:EE_
+x-ms-office365-filtering-correlation-id: 1ad3e034-6192-46f5-69ac-08db0f133849
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 6omuvnTRO2J6PRF69ms9OQgeNLRvQEv9rZ7vBKf52HAX4Hy9bClG71VrWyswjFd5uuEy2bNjtPkCTIT0MqxTtt1QNI0JlCS1EagfVykQY1VJLenja+ikhwxT3RvxqOaHG1VLycN/kCs5Gmvi52sI2bUl7BWUSuTHeXM/YYNwG/1YpRtHBatmWA/me6K7RVpW1yRFOofXXj1GT7YC62G0h8H66iC1QscWyHqohUflsg3MWSrXTQWzacuaXW0AseJRRpeA5YRzK+Mp+mjZThJGtTjwujU6WrWMlHS7L8kMRX5B6O66XssomYuiizSnUZ6uviJWTmn8evwCnNUWSk1SKxo1BJAtvduX6ORCEGm4rB0NQgBb6aVxX9WwRlbDzSBQT8bbOhS0Zz7snTxCI2FpoIhz2yPIyjY6UxaAbuPqPKn95+InQTY9jRaCUjoDt7TDyOjK1qDzoYutqaPxliB5NqSUQApozO7h6HHS9Cr2cPDxrI1B2Umyn3QgLslTlIOFZEvqaA1djlDah0sMiBO7rcJTpvBVCdFYJ5sgeJWy+GB8Zcu1s9XMDlyAMvcILE1hUDR+kRt9d2OZMxgGfaavt5riIe5qiZbip4UfOXYRMJ8rOXzBs3smASodV8strQvnMxWMX7v0Ugn+m/6lWciyb48TBLTBuJqJBAcN9Tr1lmzR3TjjDr5DP7d81wKc8Cq6G7TW4fA7ocHp7hsxGrYHSQ==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR04MB6863.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230025)(396003)(376002)(136003)(39860400002)(366004)(346002)(451199018)(478600001)(83380400001)(36756003)(2906002)(6512007)(186003)(5660300002)(41300700001)(8936002)(6506007)(86362001)(71200400001)(6486002)(122000001)(38100700002)(2616005)(38070700005)(6916009)(66476007)(66556008)(316002)(64756008)(66946007)(91956017)(66446008)(4326008)(8676002)(76116006);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?R2hmV1hkSXlmN0dnQnAyZGd6YXdPd0JWY0toL2hxOXNOK0E1WUY1Njk5ZWs0?=
+ =?utf-8?B?d0toL3lHMW5jQ1RFQnhoMnplMHpQVzRwc2JVT2JCdHhWYVNjSTMvVGpqYkpW?=
+ =?utf-8?B?NE1mSHEzL2MyYWFrOHZQTGhVdkFiUm9kL3FUNk9kMlBpZnFwdDR6Ylc5TjZs?=
+ =?utf-8?B?UmxQRDVBRDhadXRSdTEvNTBmdk1KbjFwRDRYUlhRU1FCeUJLQzVQUmpNekVt?=
+ =?utf-8?B?a0dpT0h4ZDdxUWtOU2pqUXVJRDdoRVV1OURqemo1ZEtVTnRaMFhUTDlmUmI2?=
+ =?utf-8?B?bys0aWx6ckFoMHRhR1RwcWJCS0I2bnBReWhXeTZoWUNDUmQ1TjN5am55aEE5?=
+ =?utf-8?B?blV4aExLRm5tOHg0eFZTelJ4YjV6QXhkeFViNldwdVozZlo2MXVHd0k2ck9C?=
+ =?utf-8?B?MkpNbnVZbEFLUTZFQVdrWXJzR25CZkhxNUxHc1dKU3EvcExWRVVOSDZwWHZT?=
+ =?utf-8?B?Qm9DTHIwSUpsbEZCcmF0UTF6NVAvdFFob090aW9pYytXTGNDRU9sbUU1bklQ?=
+ =?utf-8?B?MFdUemFGalY5enZQbUw4ZmNKTms2SnBvdGxsbzRiYWgyNURxWUk1UVlkZzVY?=
+ =?utf-8?B?WktaYk1UMUttMWFOd3JEVlJwNm41T3NCQ2ZrMG92cTBqMHNGZlNPL2ticVNm?=
+ =?utf-8?B?VUk2ZnYzWi81T0RnWTVZSlIwZ3NGVFhTd1hhaitwZ2w4amRkMTllUS96TnYy?=
+ =?utf-8?B?MFBGS0NPZCttUVArZHlpejM0VGdJQVJGYjNha2R4Q1QvaXF2ZlJlTUFaWnRC?=
+ =?utf-8?B?eHN6QStHam0yejB5UlFvaE9qWFhXa0g3OFp5a0oxRmRZaktINGg2b21xcC9Y?=
+ =?utf-8?B?bmpJeGFCSHhhcGk2UmxSQlVIUUVtRllrQ2tBQnQyQzNqa3NKSHR1RC85YWRy?=
+ =?utf-8?B?Q25lemdRWTlqT0JTSXZaMyttRTFqNmVrTEZaeEN5TVlWRWJkSFhBNkRwcVpY?=
+ =?utf-8?B?ZTQrcm03ZUNDZUYrYlNBTjhFaS9ESWxSRk5vY3JxVFYrZHVISnJIa1E5SVBz?=
+ =?utf-8?B?cXpTUE5Wc1k3L1JvSC9EZDFCWGJFZUdRa2dtaHB4UTNENnNiQTVGTklNaW9G?=
+ =?utf-8?B?dTQ4enhSWmhHTTM0c0xmcjh5RFVEdklvUVcyam5HdUZSTk5mUjhqNUdVMnlL?=
+ =?utf-8?B?UFV1dW0yRlZJQzV6M2NMTGNYSkZubk9lSmVTZkNTMVI2OE1hZTNqaTU5MGJB?=
+ =?utf-8?B?L0Y4V0pNNVUyQnNWTERsN0RZZG1lMWdqS3poTnRhVVhuRnRyeFh0N296QS9R?=
+ =?utf-8?B?ZjRQYTRFSWNxTklVKzF3aU9aVGtDdnpKVjg4MmNnam8ycVR1VU41cTZhbmUv?=
+ =?utf-8?B?SXdheGNBaDVxaFAyVmNreXNkS2IvVTd1NUlXRDNBMHBrdFdKUzJlL21Xc1ps?=
+ =?utf-8?B?NktkbXdIZWlEbnpWUnhYNCs0OGI4TmZTbkI0OHZwd0hDbWNJMFhJcWVtQThj?=
+ =?utf-8?B?R3VzQkR1T1NlcHhvTHRjY1E0dlpITzI1N1NMS1UwTE43b3h5UkRnV0xsclFS?=
+ =?utf-8?B?dUtJdDNVWXJydmhLdmhNdXJhV0kyZnFtVE40RzBEZ0VITE9VOUErK0ZPOXlU?=
+ =?utf-8?B?dnU0VjdMRS8ybDI4ZEloRkhZZDB6SkxGQlNGS1lRY203MkhUVmVwNVNlRmxv?=
+ =?utf-8?B?cWFZWEx5WHVIUzFaS2lmeUl3WEtzNERWbXJNcXM2N0xHNmdSc2RmY05JMmEz?=
+ =?utf-8?B?YTFGNzBYSzFZNTQ4elNmbDBhOVRPQXJsZFltZ1IwTGxIN1JXT2ZRTG9iNEN2?=
+ =?utf-8?B?YzUxK0gvbEFQQlZnc2FRZ2lnc3FhdVdVbndFK2V5Q2VXSjFDQTloczFHVDk3?=
+ =?utf-8?B?a3ZsVXdmZVlYNyswMXcvbkxobDR3U3ViS3pMWWU1ZlcreldVZm5DUTdqRW00?=
+ =?utf-8?B?UktDN0pWbjZBdDBySDVmSTZ4MWFmOEFjbmpSUkNiWWZQeVlKOHZsdXVSUUEy?=
+ =?utf-8?B?dmZORzRsYXBUZjVQQ1pwYnBkTU1GWUNjNC9aNi9UT08zcms5WUVpY0F2aUJN?=
+ =?utf-8?B?ellPTkJYSE9VZ0o4cUhzMlUycTBTRVJDMFNXRXl6dkNuOTVWM1VZV3lpQm5j?=
+ =?utf-8?B?NkFia2pFUDlLdjVQUVFuc3ZaaklaZjN4bGlGRXRBaDM5VHlOVk1SczBzMXd6?=
+ =?utf-8?B?WkVRaXFZMUl4U1A1S0Q2aldlUUZmeWNZanB5bjB2cm1TTVNIdnVNQnRGNDJt?=
+ =?utf-8?Q?YvotyYBe6XNuct8YxcesK6DJwcqDby5CeogSzzvxlXu8?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <2271993664660246A233EC995B45B9EB@eurprd04.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230214215431.1425107-1-leah.rumancik@gmail.com>
+X-OriginatorOrg: suse.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: VI1PR04MB6863.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1ad3e034-6192-46f5-69ac-08db0f133849
+X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Feb 2023 05:12:22.6031
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 6lpocw+pT82Aqgwj/d2o+Y+NTujVctIgLUHZQmQd6sRcY7onzxOnSdgep86ZQ8zy
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB7566
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 14, 2023 at 01:54:31PM -0800, Leah Rumancik wrote:
-> Many people have developed infrastructure around xfstests. In order to
-> test a setup, it would be helpful to have dummy tests that have
-> consistent test outcomes. Add a new test folder with the following
-> tests:
-> 
-> selftest/001 pass
-> selftest/002 fail from output mismatch
-> selftest/003 fail via _fail
-> selftest/004 skip
-> selftest/005 crash
-> selftest/006 hang
-> 
-> Also, create two new groups: 'selftest' which includes tests 001-004 and
-> 'dangerous_selftest' which includes tests 005-006. The selftests will
-> run when running all tests but they are not part of the auto group.
-> 
-> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> ---
-> v1 -> v2:
-> 
-> - change name of folder from 'debug' to 'selftest'
-> - update tags to 'selftest' and 'dangerous_selftest'
-> - add selftest folder to SRC_GROUPS
-> - update copyright tag
-> - add test which _fails
-
-Thanks, this version looks good to me, just each case has a blank line at EOF.
-I'll help to remove those blank lines when I merge this patch.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-Thanks,
-Zorro
-
-
-> 
-> v1: https://lore.kernel.org/fstests/20230209013143.2586104-1-leah.rumancik@gmail.com/
-> 
->  check                   |  2 +-
->  doc/group-names.txt     |  2 ++
->  tests/selftest/001      | 14 ++++++++++++++
->  tests/selftest/001.out  |  2 ++
->  tests/selftest/002      | 14 ++++++++++++++
->  tests/selftest/002.out  |  2 ++
->  tests/selftest/003      | 16 ++++++++++++++++
->  tests/selftest/003.out  |  2 ++
->  tests/selftest/004      | 16 ++++++++++++++++
->  tests/selftest/004.out  |  2 ++
->  tests/selftest/005      | 17 +++++++++++++++++
->  tests/selftest/005.out  |  2 ++
->  tests/selftest/006      | 20 ++++++++++++++++++++
->  tests/selftest/006.out  |  2 ++
->  tests/selftest/Makefile | 24 ++++++++++++++++++++++++
->  15 files changed, 136 insertions(+), 1 deletion(-)
->  create mode 100755 tests/selftest/001
->  create mode 100644 tests/selftest/001.out
->  create mode 100755 tests/selftest/002
->  create mode 100644 tests/selftest/002.out
->  create mode 100755 tests/selftest/003
->  create mode 100644 tests/selftest/003.out
->  create mode 100755 tests/selftest/004
->  create mode 100644 tests/selftest/004.out
->  create mode 100755 tests/selftest/005
->  create mode 100644 tests/selftest/005.out
->  create mode 100755 tests/selftest/006
->  create mode 100644 tests/selftest/006.out
->  create mode 100644 tests/selftest/Makefile
-> 
-> diff --git a/check b/check
-> index 4827532e..c2065cdc 100755
-> --- a/check
-> +++ b/check
-> @@ -48,7 +48,7 @@ timestamp=${TIMESTAMP:=false}
->  
->  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
->  
-> -SRC_GROUPS="generic shared"
-> +SRC_GROUPS="generic shared selftest"
->  export SRC_DIR="tests"
->  
->  usage()
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index 771ce937..ace59e05 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -38,6 +38,7 @@ dangerous_fsstress_repair	race fsstress and xfs_scrub online repair
->  dangerous_fsstress_scrub	race fsstress and xfs_scrub checking
->  dangerous_repair	fuzzers to evaluate xfs_repair offline repair
->  dangerous_scrub		fuzzers to evaluate xfs_scrub checking
-> +dangerous_selftest	selftests that crash/hang
->  data			data loss checkers
->  dax			direct access mode for persistent memory files
->  db			xfs_db functional tests
-> @@ -111,6 +112,7 @@ samefs			overlayfs when all layers are on the same fs
->  scrub			filesystem metadata scrubbers
->  seed			btrfs seeded filesystems
->  seek			llseek functionality
-> +selftest		tests with fixed results, used to validate testing setup
->  send			btrfs send/receive
->  shrinkfs		decreasing the size of a filesystem
->  shutdown		FS_IOC_SHUTDOWN ioctl
-> diff --git a/tests/selftest/001 b/tests/selftest/001
-> new file mode 100755
-> index 00000000..f326fc83
-> --- /dev/null
-> +++ b/tests/selftest/001
-> @@ -0,0 +1,14 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 001
-> +#
-> +# A test that should always pass
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/001.out b/tests/selftest/001.out
-> new file mode 100644
-> index 00000000..88678b8e
-> --- /dev/null
-> +++ b/tests/selftest/001.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 001
-> +Silence is golden
-> diff --git a/tests/selftest/002 b/tests/selftest/002
-> new file mode 100755
-> index 00000000..a3e463b8
-> --- /dev/null
-> +++ b/tests/selftest/002
-> @@ -0,0 +1,14 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 002
-> +#
-> +# A test that should always fail due to output mismatch
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +echo "I am intentionally broken"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/002.out b/tests/selftest/002.out
-> new file mode 100644
-> index 00000000..61705c7c
-> --- /dev/null
-> +++ b/tests/selftest/002.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 002
-> +Silence is golden
-> diff --git a/tests/selftest/003 b/tests/selftest/003
-> new file mode 100755
-> index 00000000..80d9ea90
-> --- /dev/null
-> +++ b/tests/selftest/003
-> @@ -0,0 +1,16 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 003
-> +#
-> +# A test that _fail's
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +_fail "I have _fail'ed"
-> +
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/003.out b/tests/selftest/003.out
-> new file mode 100644
-> index 00000000..6895fc80
-> --- /dev/null
-> +++ b/tests/selftest/003.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 003
-> +Silence is golden
-> diff --git a/tests/selftest/004 b/tests/selftest/004
-> new file mode 100755
-> index 00000000..eddf49af
-> --- /dev/null
-> +++ b/tests/selftest/004
-> @@ -0,0 +1,16 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 004
-> +#
-> +# A test that should always be skipped
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +_notrun "Always skip me"
-> +
-> +echo "I should be skipped"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/004.out b/tests/selftest/004.out
-> new file mode 100644
-> index 00000000..af8614ae
-> --- /dev/null
-> +++ b/tests/selftest/004.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 004
-> +Silence is golden
-> diff --git a/tests/selftest/005 b/tests/selftest/005
-> new file mode 100755
-> index 00000000..e8844d30
-> --- /dev/null
-> +++ b/tests/selftest/005
-> @@ -0,0 +1,17 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 005
-> +#
-> +# A test that crashes
-> +#
-> +. ./common/preamble
-> +_begin_fstest dangerous_selftest
-> +
-> +echo 1 > /proc/sys/kernel/sysrq
-> +echo c > /proc/sysrq-trigger
-> +
-> +echo "I should have crashed by now"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/005.out b/tests/selftest/005.out
-> new file mode 100644
-> index 00000000..a5027f12
-> --- /dev/null
-> +++ b/tests/selftest/005.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 005
-> +Silence is golden
-> diff --git a/tests/selftest/006 b/tests/selftest/006
-> new file mode 100755
-> index 00000000..c6fa0dc4
-> --- /dev/null
-> +++ b/tests/selftest/006
-> @@ -0,0 +1,20 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 006
-> +#
-> +# A test that hangs
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest dangerous_selftest
-> +
-> +while :
-> +do
-> +    sleep 1d
-> +done
-> +
-> +echo "I should still be sleeping"
-> +status=0
-> +exit
-> +
-> diff --git a/tests/selftest/006.out b/tests/selftest/006.out
-> new file mode 100644
-> index 00000000..675c1b7c
-> --- /dev/null
-> +++ b/tests/selftest/006.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 006
-> +Silence is golden
-> diff --git a/tests/selftest/Makefile b/tests/selftest/Makefile
-> new file mode 100644
-> index 00000000..3ddfca37
-> --- /dev/null
-> +++ b/tests/selftest/Makefile
-> @@ -0,0 +1,24 @@
-> +#
-> +# Copyright (c) 2023 Google, Inc. All Rights Reserved.
-> +#
-> +
-> +TOPDIR = ../..
-> +include $(TOPDIR)/include/builddefs
-> +include $(TOPDIR)/include/buildgrouplist
-> +
-> +SELFTEST_DIR = selftest
-> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(SELFTEST_DIR)
-> +DIRT = group.list
-> +
-> +default: $(DIRT)
-> +
-> +include $(BUILDRULES)
-> +
-> +install:
-> +	$(INSTALL) -m 755 -d $(TARGET_DIR)
-> +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-> +	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-> +
-> +# Nothing.
-> +install-dev install-lib:
-> -- 
-> 2.39.1.581.gbfd45094c4-goog
-> 
-
+T24gVHVlLCAyMDIzLTAyLTE0IGF0IDIyOjA3ICswMTAwLCBEYXZpZCBEaXNzZWxkb3JwIHdyb3Rl
+Ogo+IEhpLAo+IAo+IE9uIFR1ZSwgMTQgRmViIDIwMjMgMjM6MzA6NTcgKzA4MDAsIEFuIExvbmcg
+d3JvdGU6Cj4gCj4gPiBHZW5lcmFsbHkgdGhlIHRlc3RlciBuZWVkIEJUUkZTX1BST0ZJTEVfQ09O
+RklHUyB0byB0ZXN0IGNlcnRhaW4KPiA+IHByb2ZpbGVzLiBGb3IgZXhhbXBsZSwgc2tpcCByYWlk
+NTYgYXMgaXQncyBub3Qgc3VwcG9ydGVkLgo+ID4gCj4gPiBGb3IgZHVwIHByb2ZpbGUsIGFkZCBk
+dXAgdG8gZGVmYXVsdCBwcm9maWxlIGNvbmZpZ3MKPiA+IAo+ID4gU2lnbmVkLW9mZi1ieTogQW4g
+TG9uZyA8bGFuQHN1c2UuY29tPgo+ID4gLS0tCj4gPiDCoGNvbW1vbi9idHJmc8KgwqDCoCB8wqAg
+NiArKysrKysKPiA+IMKgdGVzdHMvYnRyZnMvMDExIHwgMzAgKysrKysrKysrKysrKysrKystLS0t
+LS0tLS0tLS0tCj4gPiDCoDIgZmlsZXMgY2hhbmdlZCwgMjMgaW5zZXJ0aW9ucygrKSwgMTMgZGVs
+ZXRpb25zKC0pCj4gPiAKPiA+IGRpZmYgLS1naXQgYS9jb21tb24vYnRyZnMgYi9jb21tb24vYnRy
+ZnMKPiA+IGluZGV4IGVlNjczYTkzLi5lODU3YTQwZSAxMDA2NDQKPiA+IC0tLSBhL2NvbW1vbi9i
+dHJmcwo+ID4gKysrIGIvY29tbW9uL2J0cmZzCj4gPiBAQCAtMjEzLDYgKzIxMywxMiBAQCBfYnRy
+ZnNfZ2V0X3Byb2ZpbGVfY29uZmlncygpCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqAicmFpZDU6cmFpZDUiCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAicmFpZDY6cmFpZDYiCj4gPiDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoCkKPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqBpZiBbICIkMSIgPT0gImR1cCIgXTsgdGhlbgo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBjb25maWdzPSgKPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCR7Y29uZmlnc1sqXX0K
+PiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoCJkdXA6ZHVwIgo+ID4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqApCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZmkKPiAK
+PiBuaXQ6IGNvbmZpZ3MrPSgiZHVwOmR1cCIpIGNhbiBiZSB1c2VkIGZvciBhcHBlbmRpbmcgdG8g
+YmFzaCBhcnJheXMuCj4gCj4gPiDCoMKgwqDCoMKgwqDCoMKgZWxzZQo+ID4gwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqAjIFVzZXItcHJvdmlkZWQgY29uZmlndXJhdGlvbnMuCj4gPiDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGxvY2FsIGNvbmZpZ3M9KCR7QlRSRlNfUFJP
+RklMRV9DT05GSUdTW0BdfSkKPiA+IGRpZmYgLS1naXQgYS90ZXN0cy9idHJmcy8wMTEgYi90ZXN0
+cy9idHJmcy8wMTEKPiA+IGluZGV4IDZjM2QwMzdmLi44NTI3NDJlZSAxMDA3NTUKPiA+IC0tLSBh
+L3Rlc3RzL2J0cmZzLzAxMQo+ID4gKysrIGIvdGVzdHMvYnRyZnMvMDExCj4gPiBAQCAtNDgsNiAr
+NDgsNyBAQCBfcmVxdWlyZV9zY3JhdGNoX2Rldl9wb29sIDUKPiA+IMKgX3JlcXVpcmVfc2NyYXRj
+aF9kZXZfcG9vbF9lcXVhbF9zaXplCj4gPiDCoF9yZXF1aXJlX3NjcmF0Y2hfc2l6ZSAkKCgxMCAq
+IDEwMjQgKiAxMDI0KSkgI2tCCj4gPiDCoF9yZXF1aXJlX2NvbW1hbmQgIiRXSVBFRlNfUFJPRyIg
+d2lwZWZzCj4gPiArX2J0cmZzX2dldF9wcm9maWxlX2NvbmZpZ3MgZHVwCj4gPiDCoAo+ID4gwqBy
+bSAtZiAkdG1wLioKPiA+IMKgCj4gPiBAQCAtMjM3LDE5ICsyMzgsMjIgQEAgYnRyZnNfcmVwbGFj
+ZV90ZXN0KCkKPiA+IMKgwqDCoMKgwqDCoMKgwqBmaQo+ID4gwqB9Cj4gPiDCoAo+ID4gLXdvcmtv
+dXQgIi1tIHNpbmdsZSAtZCBzaW5nbGUiIDEgbm8gNjQKPiA+IC0jIE1peGVkIEJHICYgUkFJRC9E
+VVAgcHJvZmlsZXMgYXJlIG5vdCBzdXBwb3J0ZWQgb24gem9uZWQgYnRyZnMKPiA+IC1pZiAhIF9z
+Y3JhdGNoX2J0cmZzX2lzX3pvbmVkOyB0aGVuCj4gPiAtwqDCoMKgwqDCoMKgwqB3b3Jrb3V0ICIt
+bSBkdXAgLWQgc2luZ2xlIiAxIG5vIDY0Cj4gPiAtwqDCoMKgwqDCoMKgwqB3b3Jrb3V0ICItbSBk
+dXAgLWQgc2luZ2xlIiAxIGNhbmNlbCAxMDI0Cj4gPiAtwqDCoMKgwqDCoMKgwqB3b3Jrb3V0ICIt
+bSByYWlkMCAtZCByYWlkMCIgMiBubyA2NAo+ID4gLcKgwqDCoMKgwqDCoMKgd29ya291dCAiLW0g
+cmFpZDEgLWQgcmFpZDEiIDIgbm8gMjA0OAo+ID4gLcKgwqDCoMKgwqDCoMKgd29ya291dCAiLW0g
+cmFpZDEwIC1kIHJhaWQxMCIgNCBubyA2NAo+ID4gLcKgwqDCoMKgwqDCoMKgd29ya291dCAiLW0g
+c2luZ2xlIC1kIHNpbmdsZSAtTSIgMSBubyA2NAo+ID4gLcKgwqDCoMKgwqDCoMKgd29ya291dCAi
+LW0gZHVwIC1kIGR1cCAtTSIgMSBubyA2NAo+ID4gLcKgwqDCoMKgwqDCoMKgd29ya291dCAiLW0g
+cmFpZDUgLWQgcmFpZDUiIDIgbm8gNjQKPiA+IC3CoMKgwqDCoMKgwqDCoHdvcmtvdXQgIi1tIHJh
+aWQ2IC1kIHJhaWQ2IiAzIG5vIDY0Cj4gPiAtZmkKPiA+ICtmb3IgdCBpbiAiLW0gc2luZ2xlIC1k
+IHNpbmdsZToxIG5vIDY0IiBcCj4gPiArwqDCoMKgwqDCoMKgwqAiLW0gZHVwIC1kIHNpbmdsZTox
+IG5vIDY0IiBcCj4gPiArwqDCoMKgwqDCoMKgwqAiLW0gZHVwIC1kIHNpbmdsZToxIGNhbmNlbCAx
+MDI0IiBcCj4gPiArwqDCoMKgwqDCoMKgwqAiLW0gcmFpZDAgLWQgcmFpZDA6MiBubyA2NCIgXAo+
+ID4gK8KgwqDCoMKgwqDCoMKgIi1tIHJhaWQxIC1kIHJhaWQxOjIgbm8gMjA0OCIgXAo+ID4gK8Kg
+wqDCoMKgwqDCoMKgIi1tIHJhaWQxMCAtZCByYWlkMTA6NCBubyA2NCIgXAo+ID4gK8KgwqDCoMKg
+wqDCoMKgIi1tIHNpbmdsZSAtZCBzaW5nbGUgLU06MSBubyA2NCIgXAo+ID4gK8KgwqDCoMKgwqDC
+oMKgIi1tIGR1cCAtZCBkdXAgLU06MSBubyA2NCIgXAo+ID4gK8KgwqDCoMKgwqDCoMKgIi1tIHJh
+aWQ1IC1kIHJhaWQ1OjIgbm8gNjQiIFwKPiA+ICvCoMKgwqDCoMKgwqDCoCItbSByYWlkNiAtZCBy
+YWlkNjozIG5vIDY0IjsgZG8KPiA+ICvCoMKgwqDCoMKgwqDCoG1rZnNfb3B0aW9uPSR7dCU6Kn0K
+PiA+ICvCoMKgwqDCoMKgwqDCoHdvcmtvdXRfb3B0aW9uPSR7dCMqOn0KPiA+ICvCoMKgwqDCoMKg
+wqDCoGlmIFtbICIke19idHJmc19wcm9maWxlX2NvbmZpZ3NbQF19IiA9fiAiJHtta2ZzX29wdGlv
+bi8gLQo+ID4gTX0iKCB8JCkgXV07IHRoZW4KPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqB3b3Jrb3V0ICIkbWtmc19vcHRpb24iICR3b3Jrb3V0X29wdGlvbgo+ID4gK8KgwqDCoMKg
+wqDCoMKgZmkKPiA+ICtkb25lCj4gPiDCoAo+ID4gwqBlY2hvICIqKiogZG9uZSIKPiA+IMKgc3Rh
+dHVzPTAKPiAKPiBXaXRoIHRoZSBtaW5vciBuaXQgYWJvdmUgZml4ZWQsIGZlZWwgZnJlZSB0byBh
+ZGQ6Cj4gUmV2aWV3ZWQtYnk6IERhdmlkIERpc3NlbGRvcnAgPGRkaXNzQHN1c2UuZGU+CgpUaGFu
+a3MgRGF2aWQhIEl0J3MgcmVhbGx5IGEgZWxlZ2FuY2Ugd2F5IGZvciBhcHBlbmRpbmcuCg==
