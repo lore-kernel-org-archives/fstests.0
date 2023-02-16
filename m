@@ -2,167 +2,92 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21371C61DA4
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 16:24:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF414C636CC
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 17:56:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229558AbjBPQYI (ORCPT
+        id S230192AbjBPR44 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Feb 2023 11:24:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51968 "EHLO
+        Thu, 16 Feb 2023 12:56:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38444 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229913AbjBPQYD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2023 11:24:03 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9996E3D92C;
-        Thu, 16 Feb 2023 08:23:59 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S229993AbjBPR4p (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2023 12:56:45 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56CE71BD1
+        for <fstests@vger.kernel.org>; Thu, 16 Feb 2023 09:56:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1676570161;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=oFrFEVmfvr17svCMGFko3g1/FP+2QWUtmi0Zysq3Bsk=;
+        b=Ji0uMwMbQjzuv8eT4YPRzeS0EtEtra5fuS6niGO0v3/cVxMwB2r98fQFb43p3KMZCKnwdi
+        je5v7OPgaSpLTbndH1W7aNejIUwDYDG9iM+ezFGAroQlRLstAFZvYgc4fC/kgm+rknIkqj
+        6LLOaxFDx5HuB/yQUjG4gXqzSWKgtD8=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-262-ZWz405-qNEesiyi8Q_Em_w-1; Thu, 16 Feb 2023 12:55:58 -0500
+X-MC-Unique: ZWz405-qNEesiyi8Q_Em_w-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 39C53B8273D;
-        Thu, 16 Feb 2023 16:23:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 00C42C4339B;
-        Thu, 16 Feb 2023 16:23:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1676564637;
-        bh=qG9aT9Wrvd6So23bKWjivbNAzV0b+QMUihLhTO1c44M=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=IM+oRAO/YDFu/bJaR+EFaClmNttKNyDUgcLL/GM0zqVBbiu+e1ilspwCjEg7aQmAe
-         1BX4KGX7IZ/EwjokVMJ3x1gwwyzf/oRX/jZqixECBqRAIyyhMlAncFfnrvtXlDwZ2a
-         A3/PSd3aN+ry+k6+9S4ZFsKA7kwQ5C54zMhOLksJu+G/MrMxTmEHxy4wYwX5a8GE2Z
-         oyq9etcoIFKI+z8UkfndL+CVCVV56ECnEsDRLDT+eTjuB36I+DQeAy1aUMm+2MkdbV
-         tkRV4+Tj3oU6UwmAc6wCUCHmbZv46mIpjlxG778NCfUcVM51GD3uQup3aTcXM4Rdey
-         +/mqbTRXBRzjA==
-Received: by mail-oi1-f174.google.com with SMTP id bd6so2171788oib.6;
-        Thu, 16 Feb 2023 08:23:56 -0800 (PST)
-X-Gm-Message-State: AO0yUKVupp0QVvGv7fvQ1fYPzkteoxLdWX6NnxNntQJ0ad5OlIao0RSR
-        1mh6bZPyliA8sgr1FcYvzLgWyA7gKijvNW/wWO0=
-X-Google-Smtp-Source: AK7set+JYU3OT7RsAOpGMcou87JeqfYghePDx8FX+ptSWBcbr2n4HefKRfKKbx8sQJ61+q5p1U9sM9mHcja1YgxsdXk=
-X-Received: by 2002:a05:6808:2394:b0:37d:5e52:6844 with SMTP id
- bp20-20020a056808239400b0037d5e526844mr216584oib.98.1676564636099; Thu, 16
- Feb 2023 08:23:56 -0800 (PST)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 06412811E9C;
+        Thu, 16 Feb 2023 17:55:58 +0000 (UTC)
+Received: from redhat.com (unknown [10.22.18.183])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id BC222140EBF6;
+        Thu, 16 Feb 2023 17:55:57 +0000 (UTC)
+Date:   Thu, 16 Feb 2023 11:55:56 -0600
+From:   Bill O'Donnell <billodo@redhat.com>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic/604: fix test to actually create dirty inodes
+Message-ID: <Y+5uLFkce5waKBRI@redhat.com>
+References: <4dd1c7d583289c12d2acf8bfee3b555307399220.1676564465.git.fdmanana@suse.com>
 MIME-Version: 1.0
-References: <a5d8e8988d8ea9c8ee81a96c69566a112527dccd.1676562365.git.boris@bur.io>
-In-Reply-To: <a5d8e8988d8ea9c8ee81a96c69566a112527dccd.1676562365.git.boris@bur.io>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Thu, 16 Feb 2023 16:23:20 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H7a_F1GMsFgmcL0cbsE1EVi8-asScYHD3C-9NiHC-p5+A@mail.gmail.com>
-Message-ID: <CAL3q7H7a_F1GMsFgmcL0cbsE1EVi8-asScYHD3C-9NiHC-p5+A@mail.gmail.com>
-Subject: Re: [PATCH v7] btrfs: test block group size class loading logic
-To:     Boris Burkov <boris@bur.io>
-Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4dd1c7d583289c12d2acf8bfee3b555307399220.1676564465.git.fdmanana@suse.com>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 16, 2023 at 3:54 PM Boris Burkov <boris@bur.io> wrote:
->
-> Add a new test which checks that size classes in freshly loaded block
-> groups after a cycle mount match size classes before going down
->
-> Depends on the kernel patch:
-> btrfs: add size class stats to sysfs
->
-> Signed-off-by: Boris Burkov <boris@bur.io>
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Looks good to me now, thanks.
+On Thu, Feb 16, 2023 at 04:21:50PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> The test case generic/604 aims to test a scenario where at unmount time we
+> have many dirty inodes, however the test does not actually creates any
+> files, because it calls xfs_io without the -f argument, so xfs_io fails
+> but any error is ignored because stderr is redirected to /dev/null.
+> 
+> Fix this by passing -f to xfs_io and also stop redirecting stderr to
+> /dev/null, so that in case of any unexpected failure creating files, the
+> test fails.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+lgtm...
+Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
 
 > ---
-> Changelog:
-> v7:
-> Rebase, move to btrfs/284.
-> Remove mount test group.
-> v6:
-> Actually include changes for v5 in the commit.
-> v5:
-> Instead of using _fixed_by_kernel_commit, use require_fs_sysfs to handle
-> the needed sysfs file. The test is skipped on kernels without the file
-> and runs correctly on new ones.
-> v4:
-> Fix dumb typo in _fixed_by_kernel_commit (left out leading underscore
-> copy+pasting). Re-tested happy and sad case...
-> v3:
-> Re-add fixed_by_kernel_commit, but for the stats patch which is
-> required, but not a fix in the strictest sense.
-> v2:
-> Drop the fixed_by_kernel_commit since the fix is not out past the btrfs
-> development tree, so the fix is getting rolled in to the original broken
-> commit. Modified the commit message to note the dependency on the new
-> sysfs counters.
->
->  tests/btrfs/284     | 50 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/284.out |  2 ++
->  2 files changed, 52 insertions(+)
->  create mode 100755 tests/btrfs/284
->  create mode 100644 tests/btrfs/284.out
->
-> diff --git a/tests/btrfs/284 b/tests/btrfs/284
-> new file mode 100755
-> index 00000000..340b3cd9
-> --- /dev/null
-> +++ b/tests/btrfs/284
-> @@ -0,0 +1,50 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 284
-> +#
-> +# Test that mounting a btrfs filesystem properly loads block group size classes.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +sysfs_size_classes() {
-> +       local uuid="$(findmnt -n -o UUID "$SCRATCH_MNT")"
-> +       cat "/sys/fs/btrfs/$uuid/allocation/data/size_classes"
-> +}
-> +
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_btrfs_fs_sysfs
-> +_require_fs_sysfs allocation/data/size_classes
-> +
-> +f="$SCRATCH_MNT/f"
-> +small=$((16 * 1024))
-> +medium=$((1024 * 1024))
-> +large=$((16 * 1024 * 1024))
-> +
-> +_scratch_mkfs >/dev/null
-> +_scratch_mount
-> +# Write files with extents in each size class
-> +$XFS_IO_PROG -fc "pwrite -q 0 $small" $f.small
-> +$XFS_IO_PROG -fc "pwrite -q 0 $medium" $f.medium
-> +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large
-> +# Sync to force the extent allocation
-> +sync
-> +pre=$(sysfs_size_classes)
-> +
-> +# cycle mount to drop the block group cache
-> +_scratch_cycle_mount
-> +
-> +# Another write causes us to actually load the block groups
-> +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large.2
-> +sync
-> +
-> +post=$(sysfs_size_classes)
-> +diff <(echo $pre) <(echo $post)
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/284.out b/tests/btrfs/284.out
-> new file mode 100644
-> index 00000000..931839fe
-> --- /dev/null
-> +++ b/tests/btrfs/284.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 284
-> +Silence is golden
-> --
-> 2.39.1
->
+>  tests/generic/604 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/604 b/tests/generic/604
+> index 3c6b76a4..9c53fd57 100755
+> --- a/tests/generic/604
+> +++ b/tests/generic/604
+> @@ -22,7 +22,7 @@ _require_scratch
+>  _scratch_mkfs > /dev/null 2>&1
+>  _scratch_mount
+>  for i in $(seq 0 500); do
+> -	$XFS_IO_PROG -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null 2>&1
+> +	$XFS_IO_PROG -f -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null
+>  done
+>  _scratch_unmount &
+>  _scratch_mount
+> -- 
+> 2.35.1
+> 
+
