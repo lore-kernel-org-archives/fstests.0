@@ -2,177 +2,175 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EAC2C636D4
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Feb 2023 23:20:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0384CC636CC
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 00:59:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229534AbjBOXUi (ORCPT
+        id S229496AbjBPA7J (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Feb 2023 18:20:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37836 "EHLO
+        Wed, 15 Feb 2023 19:59:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50602 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229504AbjBOXUh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Feb 2023 18:20:37 -0500
-Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0652B42BE2;
-        Wed, 15 Feb 2023 15:20:35 -0800 (PST)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.west.internal (Postfix) with ESMTP id B05B93200942;
-        Wed, 15 Feb 2023 18:20:34 -0500 (EST)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute3.internal (MEProxy); Wed, 15 Feb 2023 18:20:35 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
-        :content-transfer-encoding:date:date:from:from:in-reply-to
-        :message-id:mime-version:reply-to:sender:subject:subject:to:to;
-         s=fm1; t=1676503234; x=1676589634; bh=nfcbJYLRBqiMTw9PoxE1v4oit
-        a3cF2XD3anoamKYM50=; b=fMAl59r6ZZIYUGQUO6aDzO0shAdFs0WY2OvxRDBir
-        V1mRkjF6zg5p1hP9o4LMJx39n4hUiKIp5Epr2VTjkb/9oYeJMEXRdM3nP3ibVHLs
-        k2MUp2EByTIU/GuFUp1iZTdw3IFonCxMC3/Y0E08zHID9jm/ADUYXeMp8icAQAml
-        dZsU6dRb+q2UZaldYH4ZbihVvN+N87H9kyv7MH+5pJfQaLAeg3UFHeQHYWKf6asK
-        5xxqJlJhqeOjYgRSTvPECRkTLiuGZBNXL/CooVBtKznG3oU5VfpsbLsCuawBx+27
-        i8wd561M6zjbJRrPNLzBm6ap2lMnTsuRN7+Gc0XxcnsnA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:message-id
-        :mime-version:reply-to:sender:subject:subject:to:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=
-        1676503234; x=1676589634; bh=nfcbJYLRBqiMTw9PoxE1v4oita3cF2XD3an
-        oamKYM50=; b=jBl6+OabyK7tT8Liy3pEtsKi4yEdI/j8W38E3vQs4Sq0BAr4mNs
-        3fLTSZEZbwipzdF2WxkqCz52exSO7FBmB4F7QkSC8uVQdAP1vLIC7rshIBuoGLrE
-        3RrsJe1hOSvzExvVC7rWIVEnSEjZNxJw40zAM6w0KwUc3tWc3fD3H00uTDdMboJU
-        wpa4B9KxzfNLxj4RSZ4yvkaewjr/NKeRnbeVRNrNCn4GedOmjeMWta+aopm3EPgw
-        hO/T/sNgANE0w5utU8ZYbBKBpIHJZUwyFkQ/9EbN4TiuujjqC/iYqc9/lfHtGv97
-        vrKJZE4p5dR8WJhlr9ixoc4AnSSHpqhGovA==
-X-ME-Sender: <xms:wmjtYyUuEwnRLuCBE0cniq_tHB_MdYwufHEi35S5Otsoi9nvNqViag>
-    <xme:wmjtY-n_sQC7SVhX3-wemHwOV75lArpEclnT83Hc54VGID_C04NKohtmU7GEV8cAq
-    9MsZMTy1i7bPrYpWW0>
-X-ME-Received: <xmr:wmjtY2ak4ScFAYqMrpXbxi1pe3U0ggfEfjCsrsYJShFTFK5Al1p6JfZY>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrudeiiedgtdelucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucenucfjughrpefhvffufffkofgggfestdekredtre
-    dttdenucfhrhhomhepuehorhhishcuuehurhhkohhvuceosghorhhishessghurhdrihho
-    qeenucggtffrrghtthgvrhhnpeduiedtleeuieejfeelffevleeifefgjeejieegkeduud
-    etfeekffeftefhvdejveenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgr
-    ihhlfhhrohhmpegsohhrihhssegsuhhrrdhioh
-X-ME-Proxy: <xmx:wmjtY5UPsvsOmsYWkRDyDkCq8nQ--E8zAzje_aWMOZBJAy4pqdbTUg>
-    <xmx:wmjtY8lEcPQxENYw_slZV1gWnrTMxC70SPjam7HgHo7d2qFAY_N4HQ>
-    <xmx:wmjtY-d7zCklmZzAmJzr4t9WaJURaBqrZzptl-xClu9ZZL1yxKicsg>
-    <xmx:wmjtY4uYgfAxB3kaPyidnOHJ-AWLGdRMHoFDfb2spC5eR25cLMCWLw>
-Feedback-ID: i083147f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 15 Feb 2023 18:20:33 -0500 (EST)
-From:   Boris Burkov <boris@bur.io>
-To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Subject: [PATCH v6] btrfs: test block group size class loading logic
-Date:   Wed, 15 Feb 2023 15:20:32 -0800
-Message-Id: <160e7557f66a6a34fd052d6834909aa02a702956.1676503163.git.boris@bur.io>
-X-Mailer: git-send-email 2.38.1
+        with ESMTP id S229487AbjBPA7I (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Feb 2023 19:59:08 -0500
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A03222BEE9
+        for <fstests@vger.kernel.org>; Wed, 15 Feb 2023 16:59:07 -0800 (PST)
+Received: by mail-pl1-x631.google.com with SMTP id h4so455892pll.9
+        for <fstests@vger.kernel.org>; Wed, 15 Feb 2023 16:59:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=CJGXyM0Oj+hhoOID8ZKywU88gr39cPAOBiyosSfazTg=;
+        b=dA8eeOgYvjchNUwXCp/ptDyuohelp4Mn8LtC4u57DoyLCK/mFy8zLfxFTHWHiFsSBq
+         9vvyUfZ8sQ1KH3bTZ8sC0kl04D2uJe5lGG59sPqX94v38AW6tBGNY8ULAaOVAMfUpzhj
+         upwsk4BmOWZ8rNCh818va+l29UEhVvOJrZb2Y+YE2pGTU3u92wOnTxd1g2mRs8v25n4V
+         RuUWF8xWhl91FIhXxnNsyyny/1CPYg5ZTmZSypcC1iALDZev9QTKY1sGVvvFVt6SEIXI
+         mjgh5tVY8tftGn+rpQ4yNsTBv1ld4ILGnk7eimZCXvUxk5V8Ma0/y6O5+qBI/DCfn3Rr
+         iEkg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CJGXyM0Oj+hhoOID8ZKywU88gr39cPAOBiyosSfazTg=;
+        b=dH8DpEQJ5PTfnE3hrEWdUxeDVNpoEXZ4WiZQ1Q/KOzpFe+0Lll2qPwJb3+3xRUfO6E
+         qQXDph8enVWS3L8uUZ7UAhSblPq7XaqBvKzGmQm/eKIOrM4vdc87pYQXOuf7MEK3jRuM
+         RUQjDtGJ4TGRDq/fbGDSE1CmQ7583EIIT0wx2a0o7tdiBHwpqlb/2ynrtRHV5RPIS/F9
+         br7nyiQON+5ZaqgEaNNm7uUAVzuGik1pPiB/UyNCIZS/hzFnM4Rg13VPR03FNURGLw1o
+         a6afIZRnfg1zjAyGDRJvKQudBLCMLSEdjuyF9tvDzdpCJJBxp9+8J+1w3PuMw1I+XKQw
+         XHgg==
+X-Gm-Message-State: AO0yUKW6chZfh8CCk0/UuRRCfE2RrRvit18BkoosfUtLsdij8oPh2kDj
+        mSWCwnJm+bQjWhiex2Xw++Q=
+X-Google-Smtp-Source: AK7set8s2q2TqsvrTN2cQ1lotMhM64+xPCXChQNe1KTVuHpX0K54GJu6mFaTBK66jnInwmBiR+9JUg==
+X-Received: by 2002:a05:6a20:7fa2:b0:c7:166d:686 with SMTP id d34-20020a056a207fa200b000c7166d0686mr820667pzj.26.1676509146949;
+        Wed, 15 Feb 2023 16:59:06 -0800 (PST)
+Received: from google.com ([2601:647:4701:18d0:959b:8a40:b914:6ab9])
+        by smtp.gmail.com with ESMTPSA id j5-20020aa78d05000000b0058a3d8eab6asm12328406pfe.134.2023.02.15.16.59.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 15 Feb 2023 16:59:06 -0800 (PST)
+Date:   Wed, 15 Feb 2023 16:59:04 -0800
+From:   Leah Rumancik <leah.rumancik@gmail.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] selftest: add tests for debugging testing setup
+Message-ID: <Y+1/2GwjLpM5cRF+@google.com>
+References: <20230214215431.1425107-1-leah.rumancik@gmail.com>
+ <20230215044941.xgk3crhvv2jlahx6@zlang-mailbox>
+ <CAOQ4uxguCkBjXydVLbDSGX7-aHd_G_tfD4u4fgvH9QCN=edA-g@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxguCkBjXydVLbDSGX7-aHd_G_tfD4u4fgvH9QCN=edA-g@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a new test which checks that size classes in freshly loaded block
-groups after a cycle mount match size classes before going down
+On Wed, Feb 15, 2023 at 07:57:55AM +0200, Amir Goldstein wrote:
+> On Wed, Feb 15, 2023 at 6:57 AM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Tue, Feb 14, 2023 at 01:54:31PM -0800, Leah Rumancik wrote:
+> > > Many people have developed infrastructure around xfstests. In order to
+> > > test a setup, it would be helpful to have dummy tests that have
+> > > consistent test outcomes. Add a new test folder with the following
+> > > tests:
+> > >
+> > > selftest/001 pass
+> > > selftest/002 fail from output mismatch
+> > > selftest/003 fail via _fail
+> > > selftest/004 skip
+> > > selftest/005 crash
+> > > selftest/006 hang
+> > >
+> > > Also, create two new groups: 'selftest' which includes tests 001-004 and
+> > > 'dangerous_selftest' which includes tests 005-006. The selftests will
+> > > run when running all tests but they are not part of the auto group.
+> > >
+> > > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> > > ---
+> > > v1 -> v2:
+> > >
+> > > - change name of folder from 'debug' to 'selftest'
+> > > - update tags to 'selftest' and 'dangerous_selftest'
+> > > - add selftest folder to SRC_GROUPS
+> > > - update copyright tag
+> > > - add test which _fails
+> >
+> > Thanks, this version looks good to me, just each case has a blank line at EOF.
+> > I'll help to remove those blank lines when I merge this patch.
+> >
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> >
+> > Thanks,
+> > Zorro
+> >
+> >
+> > >
+> > > v1: https://lore.kernel.org/fstests/20230209013143.2586104-1-leah.rumancik@gmail.com/
+> > >
+> > >  check                   |  2 +-
+> > >  doc/group-names.txt     |  2 ++
+> > >  tests/selftest/001      | 14 ++++++++++++++
+> > >  tests/selftest/001.out  |  2 ++
+> > >  tests/selftest/002      | 14 ++++++++++++++
+> > >  tests/selftest/002.out  |  2 ++
+> > >  tests/selftest/003      | 16 ++++++++++++++++
+> > >  tests/selftest/003.out  |  2 ++
+> > >  tests/selftest/004      | 16 ++++++++++++++++
+> > >  tests/selftest/004.out  |  2 ++
+> > >  tests/selftest/005      | 17 +++++++++++++++++
+> > >  tests/selftest/005.out  |  2 ++
+> > >  tests/selftest/006      | 20 ++++++++++++++++++++
+> > >  tests/selftest/006.out  |  2 ++
+> > >  tests/selftest/Makefile | 24 ++++++++++++++++++++++++
+> > >  15 files changed, 136 insertions(+), 1 deletion(-)
+> > >  create mode 100755 tests/selftest/001
+> > >  create mode 100644 tests/selftest/001.out
+> > >  create mode 100755 tests/selftest/002
+> > >  create mode 100644 tests/selftest/002.out
+> > >  create mode 100755 tests/selftest/003
+> > >  create mode 100644 tests/selftest/003.out
+> > >  create mode 100755 tests/selftest/004
+> > >  create mode 100644 tests/selftest/004.out
+> > >  create mode 100755 tests/selftest/005
+> > >  create mode 100644 tests/selftest/005.out
+> > >  create mode 100755 tests/selftest/006
+> > >  create mode 100644 tests/selftest/006.out
+> > >  create mode 100644 tests/selftest/Makefile
+> > >
+> > > diff --git a/check b/check
+> > > index 4827532e..c2065cdc 100755
+> > > --- a/check
+> > > +++ b/check
+> > > @@ -48,7 +48,7 @@ timestamp=${TIMESTAMP:=false}
+> > >
+> > >  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
+> > >
+> > > -SRC_GROUPS="generic shared"
+> > > +SRC_GROUPS="generic shared selftest"
+> 
+> I know this is a bit of bikeshedding,
+> but is it really needed to add selftest/* to SRC_GROUPS and then filter it out
+> by group?
+> 
+> Seems to me that it would be simpler to not add any new groups and use
+> ./check -g selftest/quick -g selftest/dangerous
+> to run the tests in the selftests subdir.
+> 
+> Just to be clear, the syntax above already works, nothing new to implement.
+> 
+> I do not object to adding the selftest groups if others like it better this way.
 
-Depends on the kernel patch:
-btrfs: add size class stats to sysfs
+I think it behaves more as expected when it is a part of SRC_GROUPS, but
+I will probably run these by specifying specific tests - so I don't
+care much about which groups are used / if it is in SRC_GROUPS or not,
+and I am happy to change it if others agree.
 
-Signed-off-by: Boris Burkov <boris@bur.io>
----
-Changelog:
-v6:
-Actually include changes for v5 in the commit.
-v5:
-Instead of using _fixed_by_kernel_commit, use require_fs_sysfs to handle
-the needed sysfs file. The test is skipped on kernels without the file
-and runs correctly on new ones.
-v4:
-Fix dumb typo in _fixed_by_kernel_commit (left out leading underscore
-copy+pasting). Re-tested happy and sad case...
+> 
+> It would also be nice to drop a line in README about running selftests.
 
-v3:
-Re-add fixed_by_kernel_commit, but for the stats patch which is
-required, but not a fix in the strictest sense.
+Sure, I can do this.
 
-v2:
-Drop the fixed_by_kernel_commit since the fix is not out past the btrfs
-development tree, so the fix is getting rolled in to the original broken
-commit. Modified the commit message to note the dependency on the new
-sysfs counters.
-
-
- tests/btrfs/283     | 50 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/283.out |  2 ++
- 2 files changed, 52 insertions(+)
- create mode 100755 tests/btrfs/283
- create mode 100644 tests/btrfs/283.out
-
-diff --git a/tests/btrfs/283 b/tests/btrfs/283
-new file mode 100755
-index 00000000..2c26b41e
---- /dev/null
-+++ b/tests/btrfs/283
-@@ -0,0 +1,50 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 283
-+#
-+# Test that mounting a btrfs filesystem properly loads block group size classes.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick mount
-+
-+sysfs_size_classes() {
-+	local uuid="$(findmnt -n -o UUID "$SCRATCH_MNT")"
-+	cat "/sys/fs/btrfs/$uuid/allocation/data/size_classes"
-+}
-+
-+_supported_fs btrfs
-+_require_scratch
-+_require_btrfs_fs_sysfs
-+_require_fs_sysfs allocation/data/size_classes
-+
-+f="$SCRATCH_MNT/f"
-+small=$((16 * 1024))
-+medium=$((1024 * 1024))
-+large=$((16 * 1024 * 1024))
-+
-+_scratch_mkfs >/dev/null
-+_scratch_mount
-+# Write files with extents in each size class
-+$XFS_IO_PROG -fc "pwrite -q 0 $small" $f.small
-+$XFS_IO_PROG -fc "pwrite -q 0 $medium" $f.medium
-+$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large
-+# Sync to force the extent allocation
-+sync
-+pre=$(sysfs_size_classes)
-+
-+# cycle mount to drop the block group cache
-+_scratch_cycle_mount
-+
-+# Another write causes us to actually load the block groups
-+$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large.2
-+sync
-+
-+post=$(sysfs_size_classes)
-+diff <(echo $pre) <(echo $post)
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/283.out b/tests/btrfs/283.out
-new file mode 100644
-index 00000000..efb2c583
---- /dev/null
-+++ b/tests/btrfs/283.out
-@@ -0,0 +1,2 @@
-+QA output created by 283
-+Silence is golden
--- 
-2.39.1
-
+> 
+> Thanks,
+> Amir.
