@@ -2,184 +2,228 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7F20C636D6
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 14:58:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44F0BC636CC
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 15:43:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229704AbjBPO65 (ORCPT
+        id S230405AbjBPPnr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Feb 2023 09:58:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38014 "EHLO
+        Thu, 16 Feb 2023 10:43:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47456 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229752AbjBPO64 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2023 09:58:56 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7167F1BF
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2023 06:57:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676559447;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=QdEdZZH1sp+EoGk6EFxFzqSvhRlpyVozLomptTXre8o=;
-        b=Wdk6Ll3L0SfT9PFHsv9F28b1JYg3+C9CF146dZqmZ9pGLZvZmrOsbnaZYLAhOicifUvHfa
-        5fgLW05PfblLDMzsDpG8eqLA/AnKlomg2XuGxW0U+D2lAtVQED/FKGLenZjDeCaAAsfWMD
-        sRMB1+KjpdYO4z1Xb9JOJQ+K5TWMbT0=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-422--U6_f-VmOKKGvsJA_hNG5Q-1; Thu, 16 Feb 2023 09:57:25 -0500
-X-MC-Unique: -U6_f-VmOKKGvsJA_hNG5Q-1
-Received: by mail-pl1-f197.google.com with SMTP id g12-20020a170902868c00b00199148d00f2so1135301plo.17
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2023 06:57:25 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QdEdZZH1sp+EoGk6EFxFzqSvhRlpyVozLomptTXre8o=;
-        b=c79WSe4l6O26VakuKdetxQMvQbd+sVACxrk6kUNTtjDPB+p1C7QxlP6vsPRASmTBrz
-         p/ZM5HFY6D8HTRRGoZxXBd+RB1zocrxyV3ypml+HH20FsYCZ7e6VUpfSoClEvFnbN/P5
-         FWFjIhmBYPYiVOcb76qLRJAV3H2CpDSkggCCy+20balQ3ZPXZN6KXjQvPGyDuEMYZL2w
-         +Sc8gvM2D0u0Rkqsjeu+E64FAC2DChxfkQSCpyPDIkGLoWcjoDu3eIXqqC4xLDCU/i0C
-         EwjMDfRw6IfSveTKRxNzEYN9+T57iYkrdQS/aTSLj48/yMGeBRm+xYgRFHRaD5/3ldsW
-         xt2A==
-X-Gm-Message-State: AO0yUKU6jIgzIbsdca2GxPW8uBpsghl5Fd3pSNTACEd/0xF4oxR5wilJ
-        Bx9PWZuhEMU7e7X0EaoNxDPs5qKfChJwKwAc6zZVTVjdpGCBm2w3BYF89gowkRZVY2tVJWfNfA0
-        aSbkuH67EaBtimEOeNg==
-X-Received: by 2002:a17:90a:35d:b0:233:c301:32c5 with SMTP id 29-20020a17090a035d00b00233c30132c5mr7215409pjf.45.1676559444719;
-        Thu, 16 Feb 2023 06:57:24 -0800 (PST)
-X-Google-Smtp-Source: AK7set9tn96Fk8+3ASn8R6UyKXaaBHqm2+NYuqL46X1BoAISw5l+77hCYvYvSDjLI16eCroqpDGQCw==
-X-Received: by 2002:a17:90a:35d:b0:233:c301:32c5 with SMTP id 29-20020a17090a035d00b00233c30132c5mr7215391pjf.45.1676559444365;
-        Thu, 16 Feb 2023 06:57:24 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id o18-20020a17090ac09200b00233e8a83853sm1316094pjs.34.2023.02.16.06.57.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Feb 2023 06:57:23 -0800 (PST)
-Date:   Thu, 16 Feb 2023 22:57:19 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] fuzzy: use FORCE_REBUILD over injecting force_repair
-Message-ID: <20230216145719.2e45h7czgbuxc7mh@zlang-mailbox>
-References: <167243874952.722591.1496636246267309523.stgit@magnolia>
- <167243874964.722591.9199494099572054329.stgit@magnolia>
- <20230214080007.i7m5hzlcmthd6ka3@zlang-mailbox>
- <Y+vQbNSkDoxsxU1i@magnolia>
+        with ESMTP id S230339AbjBPPnq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2023 10:43:46 -0500
+Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E034B44B6;
+        Thu, 16 Feb 2023 07:43:44 -0800 (PST)
+Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
+        by mailout.west.internal (Postfix) with ESMTP id 51240320094D;
+        Thu, 16 Feb 2023 10:43:41 -0500 (EST)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute1.internal (MEProxy); Thu, 16 Feb 2023 10:43:42 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
+        :content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm1; t=1676562220; x=1676648620; bh=2oGDTHi1in
+        0xzfjQAphEBWk3BAy7eEwYkJFBhEQCiVQ=; b=lJ47lEc1y4GVOq5cBn94siNy1X
+        XSH2pOjkYUn6GE64RImo9HrGphULI4qDIWjEq6D77a3YMGGtSochXOb5DprUCLfi
+        1V7a+nIh6/h040WW5xOOkwXRL+yKe+i62wVZBlHdhWVYpD5NA23cA8c3txhtjor1
+        hAIB3a/uGEonSTeMPpEgomuZmGRBgAD38WCpetgqMDoaZJUn7pv/9PT89g3klaRG
+        2CrLcsc54KrrlVRJFXwbK7fUugV8ZkjadbNLL4jlakNEz/idsIpY4orryz4+jdtA
+        IUn20sQmCKoscfu4SqfMWUjH8VjeaLCX0ZafjkdWJgUj8e9gwV9ag2TJochg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm1; t=1676562220; x=1676648620; bh=2oGDTHi1in0xzfjQAphEBWk3BAy7
+        eEwYkJFBhEQCiVQ=; b=KkqPQvFoRT0QJc2faLTuHLT2xDkaZVoO+oNJnOOcL8gT
+        o26Jrn48AfDHAfxAJiuhT1xty7y6nVgWr8MYmnUaf4EH4kvLBpxYQzWdhFiIMGYP
+        nWHLO9oOuY248jGBG4dMBBf3C+p+rtna6tkv6ImNVQVupANc3XUr6A4rxDacaOPY
+        7AGV7qKoEyU+nYj3r85diBMuZdQVQp/osD7P7xPY+x3rUJLfp6DrdiKhPYjq8Xnl
+        BmPyT4jjFDe1AJqit1QD0pqed8yuZ/o+k2+jn732kgxCSQvhb47ppQuAQDFGKhc/
+        SbsxKHcXCQPNjZ8EdjzP51ciZHKlt4Y50UMgkJvB9A==
+X-ME-Sender: <xms:LE_uY5W-UXOCWut8HHBrRrRoPzx1StAA49L2peRvgnPOSnmiMilqzQ>
+    <xme:LE_uY5kfWroEELGCx8F25VvIwQ-B_oiZhaKoNBZ8BjwRita_8gZxdv1NSBOWqxfDQ
+    Ve4Y9zv4qukQQNaE6g>
+X-ME-Received: <xmr:LE_uY1ZCLxeO5wZ5Q6hcoyPo2tqEZRxaGDdpN3GBOIwyZJ5_aFwGswiJ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrudeijedgjeekucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepfffhvfevuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhi
+    shcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpe
+    fgfeefjeejvdelieejleevleehgfelvdetgfeifeeiteeutdekudfgffejhefgheenucff
+    ohhmrghinheptdehrdhsohenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmh
+    grihhlfhhrohhmpegsohhrihhssegsuhhrrdhioh
+X-ME-Proxy: <xmx:LE_uY8Xu41QskKPRm_go8Z-NIsuCn6rhoEqyVhcH2toWGATMYygmBw>
+    <xmx:LE_uYzlscR3A8HC2wNch7tilV3Sk-HHeeR3Vde4RcdGdkVkKQbkzPw>
+    <xmx:LE_uY5fm-CMKkJ3tRrv0y5aXhDdh1dAch6GfJZeWZzKnbNfERCrD5A>
+    <xmx:LE_uY4xn3gUmAk_iHG4FudZyK11YXTvwTxwPrzA7HARXlORuvQYkpA>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 16 Feb 2023 10:43:39 -0500 (EST)
+Date:   Thu, 16 Feb 2023 07:43:38 -0800
+From:   Boris Burkov <boris@bur.io>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v6] btrfs: test block group size class loading logic
+Message-ID: <Y+5PKtUX/8gyNX/w@zen>
+References: <160e7557f66a6a34fd052d6834909aa02a702956.1676503163.git.boris@bur.io>
+ <CAL3q7H42GK2xu9ZSAKiDUG8ZRJzgudk-3DHE9f95Sqwc0iPKyQ@mail.gmail.com>
+ <20230216144952.wcr7r3hdesu2x2le@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Y+vQbNSkDoxsxU1i@magnolia>
+In-Reply-To: <20230216144952.wcr7r3hdesu2x2le@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 14, 2023 at 10:18:20AM -0800, Darrick J. Wong wrote:
-> On Tue, Feb 14, 2023 at 04:00:07PM +0800, Zorro Lang wrote:
-> > On Fri, Dec 30, 2022 at 02:19:09PM -0800, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > For stress testing online repair, try to use the FORCE_REBUILD ioctl
-> > > flag over the error injection knobs whenever possible because the knobs
-> > > are very noisy and are not always available.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+On Thu, Feb 16, 2023 at 10:49:52PM +0800, Zorro Lang wrote:
+> On Thu, Feb 16, 2023 at 12:11:39PM +0000, Filipe Manana wrote:
+> > On Wed, Feb 15, 2023 at 11:37 PM Boris Burkov <boris@bur.io> wrote:
+> > >
+> > > Add a new test which checks that size classes in freshly loaded block
+> > > groups after a cycle mount match size classes before going down
+> > >
+> > > Depends on the kernel patch:
+> > > btrfs: add size class stats to sysfs
+> > >
+> > > Signed-off-by: Boris Burkov <boris@bur.io>
 > > > ---
-> > >  common/fuzzy |   34 +++++++++++++++++++++++++++++++---
-> > >  1 file changed, 31 insertions(+), 3 deletions(-)
-> > > 
-> > > 
-> > > diff --git a/common/fuzzy b/common/fuzzy
-> > > index f7f660bc31..14f7fdf03c 100644
-> > > --- a/common/fuzzy
-> > > +++ b/common/fuzzy
-> > > @@ -398,6 +398,9 @@ __stress_one_scrub_loop() {
-> > >  
-> > >  	local xfs_io_args=()
-> > >  	for arg in "$@"; do
-> > > +		if [ -n "$SCRUBSTRESS_USE_FORCE_REBUILD" ]; then
-> > > +			arg="$(echo "$arg" | sed -e 's/^repair/repair -R/g')"
-> > > +		fi
-> > >  		if echo "$arg" | grep -q -w '%agno%'; then
-> > >  			# Substitute the AG number
-> > >  			for ((agno = 0; agno < agcount; agno++)); do
-> > > @@ -695,13 +698,21 @@ _require_xfs_stress_scrub() {
-> > >  		_notrun 'xfs scrub stress test requires common/filter'
-> > >  }
-> > >  
-> > > +# Make sure that we can force repairs either by error injection or passing
-> > > +# FORCE_REBUILD via ioctl.
-> > > +__require_xfs_stress_force_rebuild() {
-> > > +	local output="$($XFS_IO_PROG -x -c 'repair -R probe' $SCRATCH_MNT 2>&1)"
-> > > +	test -z "$output" && return
-> > > +	_require_xfs_io_error_injection "force_repair"
+> > > Changelog:
+> > > v6:
+> > > Actually include changes for v5 in the commit.
+> > > v5:
+> > > Instead of using _fixed_by_kernel_commit, use require_fs_sysfs to handle
+> > > the needed sysfs file. The test is skipped on kernels without the file
+> > > and runs correctly on new ones.
+> > > v4:
+> > > Fix dumb typo in _fixed_by_kernel_commit (left out leading underscore
+> > > copy+pasting). Re-tested happy and sad case...
+> > >
+> > > v3:
+> > > Re-add fixed_by_kernel_commit, but for the stats patch which is
+> > > required, but not a fix in the strictest sense.
+> > >
+> > > v2:
+> > > Drop the fixed_by_kernel_commit since the fix is not out past the btrfs
+> > > development tree, so the fix is getting rolled in to the original broken
+> > > commit. Modified the commit message to note the dependency on the new
+> > > sysfs counters.
+> > >
+> > >
+> > >  tests/btrfs/283     | 50 +++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/btrfs/283.out |  2 ++
+> > >  2 files changed, 52 insertions(+)
+> > >  create mode 100755 tests/btrfs/283
+> > >  create mode 100644 tests/btrfs/283.out
+> > >
+> > > diff --git a/tests/btrfs/283 b/tests/btrfs/283
+> > > new file mode 100755
+> > > index 00000000..2c26b41e
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/283
+> > > @@ -0,0 +1,50 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 283
+> > > +#
+> > > +# Test that mounting a btrfs filesystem properly loads block group size classes.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick mount
+> > 
+> > I'm still curious why the 'mount' group, and I've asked for that before.
+> > 
+> > We aren't testing a new mount option, so it feels weird for me.
+> 
+> Agree, the "mount" group looks not make sense.
+
+My mistake, sorry for overlooking this. My reasoning is that it tests
+the behavior on a fresh mount rather than while the fs is live, but it
+is not specific to mounting logic. Happy to remove it.
+
+> 
+> The btrfs/283 has been taken in v2023.02.05. So please make a rebase.
+
+Done. Is there any way we can try to script this process for the future
+with placeholders or something? It's kind of a drag to deal with
+in general. I'm happy to send some proposal if it's something you'd be
+interested in taking.
+
+> 
+> The "fixed_by_kernel_commit xxxx" part has been added and removed several times,
+> does this case need it or not? Or maybe you want a _wants_kernel_commit (just
+> ask for sure) ?
+
+Thanks for checking. I personally don't think it needs it. The commit it
+wants/needs is the commit that adds the sysfs file. I think that is
+adequately skipped and documented by the _require_fs_sysfs that Filipe
+suggested. If someone is really interested in this behavior, it is not
+too hard to find the kernel commit from the sysfs file.
+
+> 
+> Others look good to me.
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > Otherwise, it looks fine now. Thanks.
+> > 
+> > > +
+> > > +sysfs_size_classes() {
+> > > +       local uuid="$(findmnt -n -o UUID "$SCRATCH_MNT")"
+> > > +       cat "/sys/fs/btrfs/$uuid/allocation/data/size_classes"
 > > > +}
 > > > +
-> > >  # Make sure we have everything we need to run stress and online repair
-> > >  _require_xfs_stress_online_repair() {
-> > >  	_require_xfs_stress_scrub
-> > >  	_require_xfs_io_command "repair"
-> > >  	command -v _require_xfs_io_error_injection &>/dev/null || \
-> > >  		_notrun 'xfs repair stress test requires common/inject'
-> > > -	_require_xfs_io_error_injection "force_repair"
-> > > +	__require_xfs_stress_force_rebuild
-> > >  	_require_freeze
-> > >  }
-> > >  
-> > > @@ -783,7 +794,11 @@ __stress_scrub_check_commands() {
-> > >  	esac
-> > >  
-> > >  	for arg in "$@"; do
-> > > -		local cooked_arg="$(echo "$arg" | sed -e "s/%agno%/0/g")"
-> > > +		local cooked_arg="$arg"
-> > > +		if [ -n "$SCRUBSTRESS_USE_FORCE_REBUILD" ]; then
-> > > +			cooked_arg="$(echo "$cooked_arg" | sed -e 's/^repair/repair -R/g')"
-> > > +		fi
-> > > +		cooked_arg="$(echo "$cooked_arg" | sed -e "s/%agno%/0/g")"
-> > >  		testio=`$XFS_IO_PROG -x -c "$cooked_arg" "$cooked_tgt" 2>&1`
-> > >  		echo $testio | grep -q "Unknown type" && \
-> > >  			_notrun "xfs_io scrub subcommand support is missing"
-> > > @@ -943,10 +958,23 @@ _scratch_xfs_stress_scrub() {
-> > >  	echo "Loop finished at $(date)" >> $seqres.full
-> > >  }
-> > >  
-> > > +# Decide if we're going to force repairs either by error injection or passing
-> > > +# FORCE_REBUILD via ioctl.
-> > > +__scratch_xfs_stress_setup_force_rebuild() {
-> > > +	local output="$($XFS_IO_PROG -x -c 'repair -R probe' $SCRATCH_MNT 2>&1)"
+> > > +_supported_fs btrfs
+> > > +_require_scratch
+> > > +_require_btrfs_fs_sysfs
+> > > +_require_fs_sysfs allocation/data/size_classes
 > > > +
-> > > +	if [ -z "$output" ]; then
-> > > +		export SCRUBSTRESS_USE_FORCE_REBUILD=1
-> > 
-> > Do you need to use this parameter ^^ in another child process? Is the "export"
-> > necessary?
-> 
-> Nope, it's not required.
-
-OK, others looks good to me, will merge this patch without that "export".
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > +		return
-> > > +	fi
+> > > +f="$SCRATCH_MNT/f"
+> > > +small=$((16 * 1024))
+> > > +medium=$((1024 * 1024))
+> > > +large=$((16 * 1024 * 1024))
 > > > +
-> > > +	$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
-> > > +}
+> > > +_scratch_mkfs >/dev/null
+> > > +_scratch_mount
+> > > +# Write files with extents in each size class
+> > > +$XFS_IO_PROG -fc "pwrite -q 0 $small" $f.small
+> > > +$XFS_IO_PROG -fc "pwrite -q 0 $medium" $f.medium
+> > > +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large
+> > > +# Sync to force the extent allocation
+> > > +sync
+> > > +pre=$(sysfs_size_classes)
 > > > +
-> > >  # Start online repair, freeze, and fsstress in background looping processes,
-> > >  # and wait for 30*TIME_FACTOR seconds to see if the filesystem goes down.
-> > >  # Same requirements and arguments as _scratch_xfs_stress_scrub.
-> > >  _scratch_xfs_stress_online_repair() {
-> > > -	$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
-> > > +	__scratch_xfs_stress_setup_force_rebuild
-> > >  	XFS_SCRUB_FORCE_REPAIR=1 _scratch_xfs_stress_scrub "$@"
-> > >  }
-> > > 
+> > > +# cycle mount to drop the block group cache
+> > > +_scratch_cycle_mount
+> > > +
+> > > +# Another write causes us to actually load the block groups
+> > > +$XFS_IO_PROG -fc "pwrite -q 0 $large" $f.large.2
+> > > +sync
+> > > +
+> > > +post=$(sysfs_size_classes)
+> > > +diff <(echo $pre) <(echo $post)
+> > > +
+> > > +echo "Silence is golden"
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/btrfs/283.out b/tests/btrfs/283.out
+> > > new file mode 100644
+> > > index 00000000..efb2c583
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/283.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 283
+> > > +Silence is golden
+> > > --
+> > > 2.39.1
+> > >
 > > 
 > 
-
