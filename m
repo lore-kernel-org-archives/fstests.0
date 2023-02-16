@@ -2,92 +2,112 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF414C636CC
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 17:56:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FFF2C61DA4
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Feb 2023 20:32:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230192AbjBPR44 (ORCPT
+        id S229695AbjBPUcO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Feb 2023 12:56:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38444 "EHLO
+        Thu, 16 Feb 2023 15:32:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47938 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229993AbjBPR4p (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2023 12:56:45 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56CE71BD1
-        for <fstests@vger.kernel.org>; Thu, 16 Feb 2023 09:56:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676570161;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=oFrFEVmfvr17svCMGFko3g1/FP+2QWUtmi0Zysq3Bsk=;
-        b=Ji0uMwMbQjzuv8eT4YPRzeS0EtEtra5fuS6niGO0v3/cVxMwB2r98fQFb43p3KMZCKnwdi
-        je5v7OPgaSpLTbndH1W7aNejIUwDYDG9iM+ezFGAroQlRLstAFZvYgc4fC/kgm+rknIkqj
-        6LLOaxFDx5HuB/yQUjG4gXqzSWKgtD8=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-262-ZWz405-qNEesiyi8Q_Em_w-1; Thu, 16 Feb 2023 12:55:58 -0500
-X-MC-Unique: ZWz405-qNEesiyi8Q_Em_w-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S229489AbjBPUcN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Feb 2023 15:32:13 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74543196A9;
+        Thu, 16 Feb 2023 12:32:12 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 06412811E9C;
-        Thu, 16 Feb 2023 17:55:58 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.18.183])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id BC222140EBF6;
-        Thu, 16 Feb 2023 17:55:57 +0000 (UTC)
-Date:   Thu, 16 Feb 2023 11:55:56 -0600
-From:   Bill O'Donnell <billodo@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic/604: fix test to actually create dirty inodes
-Message-ID: <Y+5uLFkce5waKBRI@redhat.com>
-References: <4dd1c7d583289c12d2acf8bfee3b555307399220.1676564465.git.fdmanana@suse.com>
+        by sin.source.kernel.org (Postfix) with ESMTPS id E06FDCE24A9;
+        Thu, 16 Feb 2023 20:32:10 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3862EC433EF;
+        Thu, 16 Feb 2023 20:32:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1676579529;
+        bh=cYgZ65YwF9VUXYmPXMOy+IpSZagV2X0B5toKAmtIGPI=;
+        h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+        b=RG5zK9lM0VMwNxjG354g+qz1/75Y37zuMxHjx7A4ZLOlcE6BXmefM5Ll0um+Wf+Cw
+         KOhPe9V4HFAwkpqZYPc9uhhsW8n4W0Ia+BPVnRr/17NZOTXRtAYJlaOcZCVFetHE3J
+         ozCM1caehOq5arFde0gOdaZUDv/k3fgejhBH7woxSNmFsNBBwLK1HYm/KLR/cXBbwA
+         N0c6kMmwQ4vYs2GE4UMZRbqV37gT8/3BPFdFiWpXVPWDS0QxntQELa0yKZKhkEdz15
+         7nI53/foHIYfM3owlm3PMkoSInUQiXAYR6SBDDgxAhOYeeBexEUQZ1Nmi7UurYLOSH
+         nCG4P630iXlUA==
+Date:   Thu, 16 Feb 2023 12:32:08 -0800
+Subject: [PATCHSET 00/14] fstests: adjust tests for xfs parent pointers
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     djwong@kernel.org, zlang@redhat.com
+Cc:     Catherine Hoang <catherine.hoang@oracle.com>,
+        Allison Henderson <allison.henderson@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Message-ID: <167657884480.3481377.14824439551809919632.stgit@magnolia>
+In-Reply-To: <Y+6MxEgswrJMUNOI@magnolia>
+References: <Y+6MxEgswrJMUNOI@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4dd1c7d583289c12d2acf8bfee3b555307399220.1676564465.git.fdmanana@suse.com>
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 16, 2023 at 04:21:50PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> The test case generic/604 aims to test a scenario where at unmount time we
-> have many dirty inodes, however the test does not actually creates any
-> files, because it calls xfs_io without the -f argument, so xfs_io fails
-> but any error is ignored because stderr is redirected to /dev/null.
-> 
-> Fix this by passing -f to xfs_io and also stop redirecting stderr to
-> /dev/null, so that in case of any unexpected failure creating files, the
-> test fails.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-lgtm...
-Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
+Hi all,
 
-> ---
->  tests/generic/604 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/604 b/tests/generic/604
-> index 3c6b76a4..9c53fd57 100755
-> --- a/tests/generic/604
-> +++ b/tests/generic/604
-> @@ -22,7 +22,7 @@ _require_scratch
->  _scratch_mkfs > /dev/null 2>&1
->  _scratch_mount
->  for i in $(seq 0 500); do
-> -	$XFS_IO_PROG -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null 2>&1
-> +	$XFS_IO_PROG -f -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null
->  done
->  _scratch_unmount &
->  _scratch_mount
-> -- 
-> 2.35.1
-> 
+Adjust fstests as necessary to test the new xfs parent pointers feature.
+At some point this section needs to grow some specific functionality
+tests for repair and dumping.
+
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=pptrs
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=pptrs
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=pptrs
+---
+ common/parent                        |  209 +++++++
+ common/populate                      |   38 +
+ common/rc                            |    7 
+ common/xfs                           |   12 
+ doc/group-names.txt                  |    1 
+ src/popdir.pl                        |   11 
+ tests/generic/050                    |    9 
+ tests/generic/050.cfg                |    1 
+ tests/generic/050.out.xfsquotaparent |   23 +
+ tests/xfs/018                        |    7 
+ tests/xfs/021                        |   15 -
+ tests/xfs/021.cfg                    |    1 
+ tests/xfs/021.out.default            |    0 
+ tests/xfs/021.out.parent             |   64 ++
+ tests/xfs/122.out                    |    4 
+ tests/xfs/191                        |    7 
+ tests/xfs/206                        |    3 
+ tests/xfs/288                        |    7 
+ tests/xfs/306                        |    9 
+ tests/xfs/851                        |  116 ++++
+ tests/xfs/851.out                    |   69 ++
+ tests/xfs/852                        |   69 ++
+ tests/xfs/852.out                    | 1002 ++++++++++++++++++++++++++++++++++
+ tests/xfs/853                        |   85 +++
+ tests/xfs/853.out                    |   14 
+ 25 files changed, 1772 insertions(+), 11 deletions(-)
+ create mode 100644 common/parent
+ create mode 100644 tests/generic/050.out.xfsquotaparent
+ create mode 100644 tests/xfs/021.cfg
+ rename tests/xfs/{021.out => 021.out.default} (100%)
+ create mode 100644 tests/xfs/021.out.parent
+ create mode 100755 tests/xfs/851
+ create mode 100644 tests/xfs/851.out
+ create mode 100755 tests/xfs/852
+ create mode 100644 tests/xfs/852.out
+ create mode 100755 tests/xfs/853
+ create mode 100644 tests/xfs/853.out
 
