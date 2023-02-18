@@ -2,99 +2,148 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 368BAC61DA4
-	for <linux-fstests@archiver.kernel.org>; Sat, 18 Feb 2023 06:17:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A889C61DA4
+	for <linux-fstests@archiver.kernel.org>; Sat, 18 Feb 2023 06:27:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229563AbjBRGRL (ORCPT
+        id S229489AbjBRG1j (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 18 Feb 2023 01:17:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34232 "EHLO
+        Sat, 18 Feb 2023 01:27:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjBRGRK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 18 Feb 2023 01:17:10 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A6DD56EC2
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 22:16:27 -0800 (PST)
+        with ESMTP id S229445AbjBRG1i (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 18 Feb 2023 01:27:38 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8B075B75E
+        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 22:26:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676700986;
+        s=mimecast20190719; t=1676701608;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=APW3oIrUEWEjGiKY4gDaezSSYCh4pa4uaTuapF7axes=;
-        b=bjv3dJjMqGoddbyC7UDW/zZNFKEJ7v8alsWTpPpiznyVH9E7d3P1T7r4LH4wsXx+tArP4q
-        P1uzbE+X1m/ahoSPPFgiVEeeGY2tLIc6pApqBMEF0R9lC2W8Z5uxJaVgx2VCZzxlBCod+u
-        tX+Rqa1RVTEtSZ2iDCFYI+2Gekjo8Ug=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=l+/JHvh3v2kM5JmoBxRETigZRw4N8ej8MOHILKPPUtg=;
+        b=iI2TzLgV3FeufneOSCiUys4FyOaHf8y5V7ZLJ3NPFN/2key6BGc1EHPaYhsdwrfDIm+UVr
+        FW4ynRKSvifXCm5bV1MpahLJJUPnuLdbh6xVpx6jx2wWCL7pbB/C8R3eh+5irfs4i0A9Id
+        xLdxPhQeOSvexvBStTwUTTgyB0/jzfA=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-120-1fK1ixX7OLidzHTjlQYAJQ-1; Sat, 18 Feb 2023 01:16:24 -0500
-X-MC-Unique: 1fK1ixX7OLidzHTjlQYAJQ-1
-Received: by mail-pf1-f197.google.com with SMTP id o6-20020a056a00214600b005a8da78efedso4752pfk.2
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 22:16:24 -0800 (PST)
+ us-mta-47-BeQQQXCqNg-_5YnrYGkh_g-1; Sat, 18 Feb 2023 01:26:47 -0500
+X-MC-Unique: BeQQQXCqNg-_5YnrYGkh_g-1
+Received: by mail-pj1-f69.google.com with SMTP id o9-20020a17090a744900b002310ecae757so54546pjk.1
+        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 22:26:47 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=APW3oIrUEWEjGiKY4gDaezSSYCh4pa4uaTuapF7axes=;
-        b=J4E2YArXUTP+OAsheGqP3fwIgRBtukHg8ZtdGSwTvaJmv/CxyN/enxT3YHknranw3N
-         jZzkwqvV1hQKo0+sow2DpZDGQwkfMBOGy/rmlxcpuH9kZgzzCPjDoTPGQl8VqjyX1E+A
-         NWOKvVn3X6s9LytAAGc8y6siIbChHUngAuE7Vyevc+WIK0/MK1BX/MVkbEfVYSdUjhIh
-         abcT09gJ4pKekJpaCvWwuJK1cur5S54o/np4CIpeq4t8EvijAnQAHUv/yqSdxwE9GS7Q
-         uPr+VbOJ0UkWOg6+MhwF32TZYz9YUyF89TvtSZIyYzBCCVtJycm813vpspt+ZXHsK7fj
-         h6Iw==
-X-Gm-Message-State: AO0yUKXpp7S7bnr8+mglfMKHgXh2elA3cbdWnS6b/jRsST8OkkTNu1qj
-        nkZ/HlmvEL7MJr3Py1Hrie6PF4kE0FZkEFcosrDkCXVtXT9t1iOTvggY3959+TrqEfOM4gInUuX
-        9s5JsFFDK68IZokY2jBwpZobjWw==
-X-Received: by 2002:a62:3207:0:b0:5a8:f259:21ff with SMTP id y7-20020a623207000000b005a8f25921ffmr2898174pfy.14.1676700983558;
-        Fri, 17 Feb 2023 22:16:23 -0800 (PST)
-X-Google-Smtp-Source: AK7set9wqmFS6PWOBqSHVUEHyt/bHCfsFspW5IAN98x62TFf3khHQXVJ+PsyTaecy0FHxXowJKNAmA==
-X-Received: by 2002:a62:3207:0:b0:5a8:f259:21ff with SMTP id y7-20020a623207000000b005a8f25921ffmr2898161pfy.14.1676700983232;
-        Fri, 17 Feb 2023 22:16:23 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id t17-20020a62ea11000000b005ac8a51d591sm655123pfh.21.2023.02.17.22.16.21
+        bh=l+/JHvh3v2kM5JmoBxRETigZRw4N8ej8MOHILKPPUtg=;
+        b=2UUkkkXMKly9hFzWh9M26w2+JbiXxQ4ZHxHndNKo0oITIncgCuNrEbHY3IK5NEIVLf
+         rllnXg7JDCU0EngwqHL22OVdTP4pgehcoIweCrTOLqsXxsPgodvtLjHP8KctCD9Tedg2
+         B/oWfdxz6z++0dyN4X/Rj3t9TbUnkXfKQsvtg8/hSn+NsjOFk4CWZ6ytt+VAjKZJzkFj
+         mXNbPWXdK5HHQyVKnoH2my0w1WieoV6fQRSfPKywftONUXTyyFckMWTbs+8GVlD6Cbka
+         WY4aKJLGBskn1lJQ9PoDCL7SOackqP6vluXmV+gaaehKJIsjtevjQO6+5BKPjCDvwSxZ
+         x87g==
+X-Gm-Message-State: AO0yUKUFbHyevEakZfoWuu/CNV5F7RBMWi0uAsq8KtkYKqNk6/hOxqsf
+        SuUt8VnZknvb+4sf5/5BMtPNIt8KolGNJnCJY6ozjL3TJWqdESITLvIM3/0CC6rw7nxByCiap5p
+        RZIOjXf8Vprc5QcBvcsJTVPFztA==
+X-Received: by 2002:a17:90b:4c87:b0:233:c1b5:31f1 with SMTP id my7-20020a17090b4c8700b00233c1b531f1mr3757751pjb.23.1676701606153;
+        Fri, 17 Feb 2023 22:26:46 -0800 (PST)
+X-Google-Smtp-Source: AK7set/Skvf5FjJnhEm6YgtMLoX7HWrd7tHWH/Rsd+gjfe+LfL/wv3GAILjnghGIu9TIujtaemf02A==
+X-Received: by 2002:a17:90b:4c87:b0:233:c1b5:31f1 with SMTP id my7-20020a17090b4c8700b00233c1b531f1mr3757734pjb.23.1676701605765;
+        Fri, 17 Feb 2023 22:26:45 -0800 (PST)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id k14-20020a17090a590e00b0022bb6d75a6fsm595924pji.15.2023.02.17.22.26.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Feb 2023 22:16:22 -0800 (PST)
-Date:   Sat, 18 Feb 2023 14:16:19 +0800
+        Fri, 17 Feb 2023 22:26:45 -0800 (PST)
+Date:   Sat, 18 Feb 2023 14:26:41 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCHSET v24.0 0/2] fstests: fix a few bugs in fs population
-Message-ID: <20230218061619.djsl2ljza625qjx5@zlang-mailbox>
-References: <Y69Unb7KRM5awJoV@magnolia>
- <167243877612.728350.1799909806305296744.stgit@magnolia>
+To:     Gabriel Niebler <gniebler@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] README: Add tiny note concerning required scratch
+ devs for btrfs testing
+Message-ID: <20230218062641.vbfvo6lqfgtwiyth@zlang-mailbox>
+References: <20230131123839.16084-1-gniebler@suse.com>
+ <20230131123839.16084-3-gniebler@suse.com>
+ <20230206145207.kik5cczepdlgmexa@zlang-mailbox>
+ <f8d78191-089f-4407-dd2d-17f7e3be2580@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <167243877612.728350.1799909806305296744.stgit@magnolia>
+In-Reply-To: <f8d78191-089f-4407-dd2d-17f7e3be2580@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Dec 30, 2022 at 02:19:36PM -0800, Darrick J. Wong wrote:
-> Hi all,
+On Mon, Feb 06, 2023 at 05:29:14PM +0100, Gabriel Niebler wrote:
+> Am 06.02.23 um 15:52 schrieb Zorro Lang:
+> > On Tue, Jan 31, 2023 at 01:38:39PM +0100, Gabriel Niebler wrote:
+> > > Signed-off-by: Gabriel Niebler <gniebler@suse.com>
+> > > ---
+> > >   README | 2 +-
+> > >   1 file changed, 1 insertion(+), 1 deletion(-)
+> > > 
+> > > diff --git a/README b/README
+> > > index 008d3875..574cdd34 100644
+> > > --- a/README
+> > > +++ b/README
+> > > @@ -127,7 +127,7 @@ Setup Environment
+> > >       - device contents will be destroyed.
+> > >   4. (optional) Create SCRATCH device pool.
+> > > -    - needed for BTRFS testing
+> > > +    - needed for BTRFS testing (some tests require up to 5 disks of 10GB each)
+> > 
+> > Not sure about this part, so btrfs recommend 5 disks of 10GB each in
+> > SCRATCH_DEV_POOL, to run all btrfs related tests? Does anyone know that?
+> > Or can you provide the subcase names which need "5 disks of 10GB each",
+> > to help to check and review?
 > 
-> Before we start on an intense patchset of improving the XFS fuzz testing
-> framework, let's fix a couple of bugs in the code that creates sample
-> filesystems with all types of metadata.
+> Of course (and thanks for asking, as it turns out my recollection was
+> slightly wrong on that one):
 > 
-> If you're going to start using this mess, you probably ought to just
-> pull from my git trees, which are linked below.
+> To begin with, btrfs/011[1] states the "5 disks" requirement in the lengthy
+> comment at the top of the file:
+> """
+> # The amount of tests done depends on the number of devices in the
+> # SCRATCH_DEV_POOL. For full test coverage, at least 5 devices should
+> # be available (e.g. 5 partitions).
+> ""
+> ... but it doesn't say anything about device size.
 > 
-> This is an extraordinary way to destroy everything.  Enjoy!
-> Comments and questions are, as always, welcome.
+> btrfs/027[2] however checks the presence of 5 devices in $SCRATCH_DEV_POOL
+> directly in code and also runs a check to ensure that all of these devices
+> are *of the same size*.
 > 
-> --D
+> And then there are at least two tests that require $SCRATCH_DEV to be 10GB
+> or more in size:
+> - btrfs/079[3], which writes a 10G file to $SCRATCH_MNT and
+> - btrfs/253[4], which directly creates a 10G FS on $SCRATCH_DEV.
+> 
+> *Taken together*, this means that for full btrfs test coverage, one needs a
+> $SCRATCH_DEV_POOL with at least 5 devices of equal size in it and that size
+> has to be at least 10GB.
+> 
+> But that makes the remark wrong, strictly speaking, as there's no single
+> test that requires "at least 5 devices of 10GB each".
+> 
+> How about this: "(for full btrfs test coverage, use at least 5 devices of
+> equal size and at least 10GB)"
 
-Ack,
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Even for now 10GB is enough, but we can't always assue that. There's not a clear
+restriction about that. I think we can skip this sub-patch. At least we don't
+give others a recommendation which isn't assured by ourselves. So how about only
+merge the 1st patch.
 
 > 
-> fstests git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-populate-problems
-> ---
->  common/populate |   70 ++++++++++++++++++++++++++++++++++++-------------------
->  1 file changed, 46 insertions(+), 24 deletions(-)
+> > P.S. I'm thinking about if this "(...)" should be moved to below item.
+> >                                                          vvvvv
+> > >       - specifies 3 or more independent SCRATCH devices via the SCRATCH_DEV_POOL
+> > >         variable e.g SCRATCH_DEV_POOL="/dev/sda /dev/sdb /dev/sdc"
+> 
+> Fine by me! :-)
+> 
+> [1]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/011#n10
+> [2]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/027#n20
+> [3]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/079#n44
+> [4]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/253#n90
 > 
 
