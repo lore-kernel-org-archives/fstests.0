@@ -2,171 +2,200 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98D9CC636D6
-	for <linux-fstests@archiver.kernel.org>; Sat, 18 Feb 2023 00:27:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D40ADC61DA4
+	for <linux-fstests@archiver.kernel.org>; Sat, 18 Feb 2023 05:47:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229672AbjBRA1v (ORCPT
+        id S229481AbjBRFr4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Feb 2023 19:27:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40478 "EHLO
+        Sat, 18 Feb 2023 00:47:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229510AbjBRA1u (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Feb 2023 19:27:50 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0670C68ADC
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 16:26:59 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676680018;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=0TVOvyAkMinBR6Y3/er05/0qs6PJZeW5sD0yVjgNqbU=;
-        b=Vw8GoesVKrvXTh6qmmAj2u1AskaqVeDZ4VftRQnXFLk2n+abFNro0wCI11B83MmInZS4PU
-        1ZRilEYiBdnNZIOQK0fkJFhnvdLSzagOSC921rA0Pw4hpzMaYqYihDEsrQO6nrfZi/ZkjE
-        or8vJ76Qapi5xApjYck/m8FCQKs40dw=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-148-UENuAPgwN663RR3pSrk3bg-1; Fri, 17 Feb 2023 19:26:57 -0500
-X-MC-Unique: UENuAPgwN663RR3pSrk3bg-1
-Received: by mail-pl1-f200.google.com with SMTP id jd12-20020a170903260c00b001963da9cc71so1586415plb.11
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 16:26:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=0TVOvyAkMinBR6Y3/er05/0qs6PJZeW5sD0yVjgNqbU=;
-        b=RJLUh88wdcOv0b021i3ttLbnq68fq7AM3X0vUq8Aep3hTNo0otWynNi+OtF24Wvz4B
-         AZ2RQAd/BQsggrJksgSt2SPfAjwS/4EF5VttZHS6bnrtWKyXhPwBAYD41uiAWOfiDzdw
-         hFrtdElF2tSASc9A8Cn/96QeLgi8uQhJudpF5AzedAypMVOJfnftC6z2RgrLUEVHOPjp
-         gLduheEV2D3gw6LbADHQDci+Hmx7HPw8QwjhQglHNq1fP+jUXnMOA+IvKSHnDqgXxsLF
-         owddldEM9xRRGWIh1Aj6Hin55aeEyqm8gA2QtuEIGLqG3M/Oq/cKiNAHPXYjryRGWH50
-         SQEw==
-X-Gm-Message-State: AO0yUKXu1JzyeI27fFQFoRbTE2bt8dnd4E7/e3wR+WAOPUwIFbWJLP7k
-        wVbxK+3I8MFb4FFnqKoiD3EEqrkecLHqewu0cTXMuqfdT2H8SUcjzPkjbp0/fL321XqIXFX2KYT
-        LkmkR3rx/OH7dH/Ghurff0vp+n15j
-X-Received: by 2002:a17:902:ec8c:b0:196:7bfb:f0d1 with SMTP id x12-20020a170902ec8c00b001967bfbf0d1mr2116121plg.34.1676680016116;
-        Fri, 17 Feb 2023 16:26:56 -0800 (PST)
-X-Google-Smtp-Source: AK7set/pTQPbTBejLC3ZlGmTrp0zRFUymVN4NfxARLQed13IM33bE8WinIA3xyIncb7RXbmXQLDfSQ==
-X-Received: by 2002:a17:902:ec8c:b0:196:7bfb:f0d1 with SMTP id x12-20020a170902ec8c00b001967bfbf0d1mr2116099plg.34.1676680015714;
-        Fri, 17 Feb 2023 16:26:55 -0800 (PST)
-Received: from [10.72.12.155] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id bi12-20020a170902bf0c00b00194c1281ca9sm3654407plb.166.2023.02.17.16.26.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 17 Feb 2023 16:26:55 -0800 (PST)
-Message-ID: <3b1ea8e1-c6b0-1c5e-9db2-542861d12269@redhat.com>
-Date:   Sat, 18 Feb 2023 08:26:49 +0800
+        with ESMTP id S229461AbjBRFrz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 18 Feb 2023 00:47:55 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72BEBC661
+        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 21:47:53 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id E626CB82C9F
+        for <fstests@vger.kernel.org>; Sat, 18 Feb 2023 05:47:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4824EC433EF;
+        Sat, 18 Feb 2023 05:47:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1676699270;
+        bh=wOKIX/tXQard0vBGNGBzWP+INiQTguLsxOTUGLIVhbM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=uaOW5q93CYhzQoX3vqWqhC5NNgvLeTPSq0Ud9S72hJwUyKruR2d6NXra3k/ElJsCK
+         3XevL6SuAY6l4F/gXedol1+GJvKDlaIDzG0Oob5S5SyC0PCa0cu0VoR/LXq4EU8+TZ
+         fpIlVUa6JuaLakjvPrMxlLesklFhYiWfP2Lj4cClJuOpHLAkb4bGWQcZhKWcvfg47p
+         zBW/CdaIhfRw09+5J3afju5phYJDhPeiqfIAJcF0zcwu2oRMo8Ci44ilDeFJy6l50J
+         HvU64PSQiHM1JdEkR6ye76JTBGMlh4p5nYbrKOCnOT/87n56EbBTqJuqwhp2ibj+tu
+         9n06a9HK1LlqA==
+Date:   Sat, 18 Feb 2023 13:47:45 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     Leah Rumancik <leah.rumancik@gmail.com>
+Cc:     Zorro Lang <zlang@redhat.com>, Amir Goldstein <amir73il@gmail.com>,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v2] selftest: add tests for debugging testing setup
+Message-ID: <20230218054745.q4fxwrpvyzwwq6pd@zlang-mailbox>
+References: <20230214215431.1425107-1-leah.rumancik@gmail.com>
+ <20230215044941.xgk3crhvv2jlahx6@zlang-mailbox>
+ <CAOQ4uxguCkBjXydVLbDSGX7-aHd_G_tfD4u4fgvH9QCN=edA-g@mail.gmail.com>
+ <Y+1/2GwjLpM5cRF+@google.com>
+ <20230216054107.e2xed7ns4pcjqrc3@zlang-mailbox>
+ <Y+/KU+4yrm47q5Ny@google.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [PATCH] generic/020: fix really long attr test failure for ceph
-Content-Language: en-US
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, david@fromorbit.com,
-        ceph-devel@vger.kernel.org, vshankar@redhat.com, zlang@redhat.com
-References: <20230217124558.555027-1-xiubli@redhat.com>
- <Y++0t8qxK8et8fTg@magnolia>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <Y++0t8qxK8et8fTg@magnolia>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y+/KU+4yrm47q5Ny@google.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Feb 17, 2023 at 10:41:23AM -0800, Leah Rumancik wrote:
+> On Thu, Feb 16, 2023 at 01:41:07PM +0800, Zorro Lang wrote:
+> > On Wed, Feb 15, 2023 at 04:59:04PM -0800, Leah Rumancik wrote:
+> > > On Wed, Feb 15, 2023 at 07:57:55AM +0200, Amir Goldstein wrote:
+> > > > On Wed, Feb 15, 2023 at 6:57 AM Zorro Lang <zlang@redhat.com> wrote:
+> > > > >
+> > > > > On Tue, Feb 14, 2023 at 01:54:31PM -0800, Leah Rumancik wrote:
+> > > > > > Many people have developed infrastructure around xfstests. In order to
+> > > > > > test a setup, it would be helpful to have dummy tests that have
+> > > > > > consistent test outcomes. Add a new test folder with the following
+> > > > > > tests:
+> > > > > >
+> > > > > > selftest/001 pass
+> > > > > > selftest/002 fail from output mismatch
+> > > > > > selftest/003 fail via _fail
+> > > > > > selftest/004 skip
+> > > > > > selftest/005 crash
+> > > > > > selftest/006 hang
+> > > > > >
+> > > > > > Also, create two new groups: 'selftest' which includes tests 001-004 and
+> > > > > > 'dangerous_selftest' which includes tests 005-006. The selftests will
+> > > > > > run when running all tests but they are not part of the auto group.
+> > > > > >
+> > > > > > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> > > > > > ---
+> > > > > > v1 -> v2:
+> > > > > >
+> > > > > > - change name of folder from 'debug' to 'selftest'
+> > > > > > - update tags to 'selftest' and 'dangerous_selftest'
+> > > > > > - add selftest folder to SRC_GROUPS
+> > > > > > - update copyright tag
+> > > > > > - add test which _fails
+> > > > >
+> > > > > Thanks, this version looks good to me, just each case has a blank line at EOF.
+> > > > > I'll help to remove those blank lines when I merge this patch.
+> > > > >
+> > > > > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > > > >
+> > > > > Thanks,
+> > > > > Zorro
+> > > > >
+> > > > >
+> > > > > >
+> > > > > > v1: https://lore.kernel.org/fstests/20230209013143.2586104-1-leah.rumancik@gmail.com/
+> > > > > >
+> > > > > >  check                   |  2 +-
+> > > > > >  doc/group-names.txt     |  2 ++
+> > > > > >  tests/selftest/001      | 14 ++++++++++++++
+> > > > > >  tests/selftest/001.out  |  2 ++
+> > > > > >  tests/selftest/002      | 14 ++++++++++++++
+> > > > > >  tests/selftest/002.out  |  2 ++
+> > > > > >  tests/selftest/003      | 16 ++++++++++++++++
+> > > > > >  tests/selftest/003.out  |  2 ++
+> > > > > >  tests/selftest/004      | 16 ++++++++++++++++
+> > > > > >  tests/selftest/004.out  |  2 ++
+> > > > > >  tests/selftest/005      | 17 +++++++++++++++++
+> > > > > >  tests/selftest/005.out  |  2 ++
+> > > > > >  tests/selftest/006      | 20 ++++++++++++++++++++
+> > > > > >  tests/selftest/006.out  |  2 ++
+> > > > > >  tests/selftest/Makefile | 24 ++++++++++++++++++++++++
+> > > > > >  15 files changed, 136 insertions(+), 1 deletion(-)
+> > > > > >  create mode 100755 tests/selftest/001
+> > > > > >  create mode 100644 tests/selftest/001.out
+> > > > > >  create mode 100755 tests/selftest/002
+> > > > > >  create mode 100644 tests/selftest/002.out
+> > > > > >  create mode 100755 tests/selftest/003
+> > > > > >  create mode 100644 tests/selftest/003.out
+> > > > > >  create mode 100755 tests/selftest/004
+> > > > > >  create mode 100644 tests/selftest/004.out
+> > > > > >  create mode 100755 tests/selftest/005
+> > > > > >  create mode 100644 tests/selftest/005.out
+> > > > > >  create mode 100755 tests/selftest/006
+> > > > > >  create mode 100644 tests/selftest/006.out
+> > > > > >  create mode 100644 tests/selftest/Makefile
+> > > > > >
+> > > > > > diff --git a/check b/check
+> > > > > > index 4827532e..c2065cdc 100755
+> > > > > > --- a/check
+> > > > > > +++ b/check
+> > > > > > @@ -48,7 +48,7 @@ timestamp=${TIMESTAMP:=false}
+> > > > > >
+> > > > > >  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
+> > > > > >
+> > > > > > -SRC_GROUPS="generic shared"
+> > > > > > +SRC_GROUPS="generic shared selftest"
+> > > > 
+> > > > I know this is a bit of bikeshedding,
+> > > > but is it really needed to add selftest/* to SRC_GROUPS and then filter it out
+> > > > by group?
+> > > > 
+> > > > Seems to me that it would be simpler to not add any new groups and use
+> > > > ./check -g selftest/quick -g selftest/dangerous
+> > > > to run the tests in the selftests subdir.
+> > > > 
+> > > > Just to be clear, the syntax above already works, nothing new to implement.
+> > > > 
+> > > > I do not object to adding the selftest groups if others like it better this way.
+> > > 
+> > > I think it behaves more as expected when it is a part of SRC_GROUPS, but
+> > > I will probably run these by specifying specific tests - so I don't
+> > > care much about which groups are used / if it is in SRC_GROUPS or not,
+> > > and I am happy to change it if others agree.
+> > 
+> > I agree with the suggestion from Amir. The "selftest" should be an independent
+> > test group only be run when a tester intend to run it.
+> 
+> 
+> When you say "selftest" should be an independent test group, do you mean
+> we should keep the "selftest" and "dangerous_selftest" groups but just
+> remove the "selftest" folder from SRC_GROUPS? I think Amir was suggesting
+> to completely remove the test groups "selftest" and
+> "dangerous_selftest" as well as removing the folder from SRC_GROUPS.
 
-On 18/02/2023 01:09, Darrick J. Wong wrote:
-> On Fri, Feb 17, 2023 at 08:45:58PM +0800, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> If the CONFIG_CEPH_FS_SECURITY_LABEL is enabled the kernel ceph
->> itself will set the security.selinux extended attribute to MDS.
->> And it will also eat some space of the total size.
->>
->> Fixes: https://tracker.ceph.com/issues/58742
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   tests/generic/020 | 6 ++++--
->>   1 file changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/tests/generic/020 b/tests/generic/020
->> index be5cecad..594535b5 100755
->> --- a/tests/generic/020
->> +++ b/tests/generic/020
->> @@ -150,9 +150,11 @@ _attr_get_maxval_size()
->>   		# it imposes a maximum size for the full set of xattrs
->>   		# names+values, which by default is 64K.  Compute the maximum
->>   		# taking into account the already existing attributes
->> -		max_attrval_size=$(getfattr --dump -e hex $filename 2>/dev/null | \
->> +		size=$(getfattr --dump -e hex $filename 2>/dev/null | \
->>   			awk -F "=0x" '/^user/ {len += length($1) + length($2) / 2} END {print len}')
->> -		max_attrval_size=$((65536 - $max_attrval_size - $max_attrval_namelen))
->> +		selinux_size=$(getfattr -n 'security.selinux' --dump -e hex $filename 2>/dev/null | \
->> +			awk -F "=0x" '/^security/ {len += length($1) + length($2) / 2} END {print len}')
->> +		max_attrval_size=$((65536 - $size - $selinux_size - $max_attrval_namelen))
-> If this is a ceph bug, then why is the change being applied to the
-> section for FSTYP=ext* ?  Why not create a case statement for ceph?
+Oh, sorry for the confusion. I think generally no one run selftest cases with
+other cases together (correct me if someone has this requirement ;), so we can
+remove the selftest from SRC_GROUPS.
 
-Hi Darrick,
+About the new groups (selftest and dangerous_selftest), I'm both OK with or
+without them. (So let's keep them if no more objection:).
 
-The above change is already in the "ceph)" section:
+Besides that, we'd better to update the documentation, to shows we have
+selftest in tests/selftest directory, and how to add and run them. (in
+README or add a README.selftest).
 
-143         nfs)
-144                 # NFS doesn't provide a way to find out the 
-max_attrval_size for
-145                 # the underlying filesystem, so just use the lowest 
-value above.
-146                 max_attrval_size=1024
-147                 ;;
-148         ceph)
-149                 # CephFS does not have a maximum value for 
-attributes.  Instead,
-150                 # it imposes a maximum size for the full set of xattrs
-151                 # names+values, which by default is 64K. Compute the 
-maximum
-152                 # taking into account the already existing attributes
-153                 size=$(getfattr --dump -e hex $filename 2>/dev/null | \
-154                         awk -F "=0x" '/^user/ {len += length($1) + 
-length($2) / 2} END {print len}')
-155                 selinux_size=$(getfattr -n 'security.selinux' --dump 
--e hex $filename 2>/dev/null | \
-156                         awk -F "=0x" '/^security/ {len += length($1) 
-+ length($2) / 2} END {print len}')
-157                 max_attrval_size=$((65536 - $size - $selinux_size - 
-$max_attrval_namelen))
-158                 ;;
-159         *)
-160                 # Assume max ~1 block of attrs
-161                 BLOCK_SIZE=`_get_block_size $TEST_DIR`
-162                 # leave a little overhead
-163                 let max_attrval_size=$BLOCK_SIZE-256
+Thanks,
+Zorro
 
-I didn't find the ext* section in _attr_get_maxval_size(). Did I miss 
-something here ?
-
-I have double checked it again by pulling the latest source code, no any 
-change about this since my last pull yesterday.
-
-Thanks
-
-- Xiubo
-
-
-> --D
->
->>   		;;
->>   	*)
->>   		# Assume max ~1 block of attrs
->> -- 
->> 2.31.1
->>
--- 
-Best Regards,
-
-Xiubo Li (李秀波)
-
-Email: xiubli@redhat.com/xiubli@ibm.com
-Slack: @Xiubo Li
-
+> 
+> - Leah
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > > 
+> > > > It would also be nice to drop a line in README about running selftests.
+> > > 
+> > > Sure, I can do this.
+> > > 
+> > > > 
+> > > > Thanks,
+> > > > Amir.
+> > > 
+> > 
+> 
