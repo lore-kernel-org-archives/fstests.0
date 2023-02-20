@@ -2,148 +2,179 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A889C61DA4
-	for <linux-fstests@archiver.kernel.org>; Sat, 18 Feb 2023 06:27:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAA64C636CC
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Feb 2023 14:35:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229489AbjBRG1j (ORCPT
+        id S231703AbjBTOfo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 18 Feb 2023 01:27:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37920 "EHLO
+        Mon, 20 Feb 2023 09:35:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjBRG1i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 18 Feb 2023 01:27:38 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8B075B75E
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 22:26:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1676701608;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=l+/JHvh3v2kM5JmoBxRETigZRw4N8ej8MOHILKPPUtg=;
-        b=iI2TzLgV3FeufneOSCiUys4FyOaHf8y5V7ZLJ3NPFN/2key6BGc1EHPaYhsdwrfDIm+UVr
-        FW4ynRKSvifXCm5bV1MpahLJJUPnuLdbh6xVpx6jx2wWCL7pbB/C8R3eh+5irfs4i0A9Id
-        xLdxPhQeOSvexvBStTwUTTgyB0/jzfA=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-47-BeQQQXCqNg-_5YnrYGkh_g-1; Sat, 18 Feb 2023 01:26:47 -0500
-X-MC-Unique: BeQQQXCqNg-_5YnrYGkh_g-1
-Received: by mail-pj1-f69.google.com with SMTP id o9-20020a17090a744900b002310ecae757so54546pjk.1
-        for <fstests@vger.kernel.org>; Fri, 17 Feb 2023 22:26:47 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=l+/JHvh3v2kM5JmoBxRETigZRw4N8ej8MOHILKPPUtg=;
-        b=2UUkkkXMKly9hFzWh9M26w2+JbiXxQ4ZHxHndNKo0oITIncgCuNrEbHY3IK5NEIVLf
-         rllnXg7JDCU0EngwqHL22OVdTP4pgehcoIweCrTOLqsXxsPgodvtLjHP8KctCD9Tedg2
-         B/oWfdxz6z++0dyN4X/Rj3t9TbUnkXfKQsvtg8/hSn+NsjOFk4CWZ6ytt+VAjKZJzkFj
-         mXNbPWXdK5HHQyVKnoH2my0w1WieoV6fQRSfPKywftONUXTyyFckMWTbs+8GVlD6Cbka
-         WY4aKJLGBskn1lJQ9PoDCL7SOackqP6vluXmV+gaaehKJIsjtevjQO6+5BKPjCDvwSxZ
-         x87g==
-X-Gm-Message-State: AO0yUKUFbHyevEakZfoWuu/CNV5F7RBMWi0uAsq8KtkYKqNk6/hOxqsf
-        SuUt8VnZknvb+4sf5/5BMtPNIt8KolGNJnCJY6ozjL3TJWqdESITLvIM3/0CC6rw7nxByCiap5p
-        RZIOjXf8Vprc5QcBvcsJTVPFztA==
-X-Received: by 2002:a17:90b:4c87:b0:233:c1b5:31f1 with SMTP id my7-20020a17090b4c8700b00233c1b531f1mr3757751pjb.23.1676701606153;
-        Fri, 17 Feb 2023 22:26:46 -0800 (PST)
-X-Google-Smtp-Source: AK7set/Skvf5FjJnhEm6YgtMLoX7HWrd7tHWH/Rsd+gjfe+LfL/wv3GAILjnghGIu9TIujtaemf02A==
-X-Received: by 2002:a17:90b:4c87:b0:233:c1b5:31f1 with SMTP id my7-20020a17090b4c8700b00233c1b531f1mr3757734pjb.23.1676701605765;
-        Fri, 17 Feb 2023 22:26:45 -0800 (PST)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id k14-20020a17090a590e00b0022bb6d75a6fsm595924pji.15.2023.02.17.22.26.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Feb 2023 22:26:45 -0800 (PST)
-Date:   Sat, 18 Feb 2023 14:26:41 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Gabriel Niebler <gniebler@suse.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] README: Add tiny note concerning required scratch
- devs for btrfs testing
-Message-ID: <20230218062641.vbfvo6lqfgtwiyth@zlang-mailbox>
-References: <20230131123839.16084-1-gniebler@suse.com>
- <20230131123839.16084-3-gniebler@suse.com>
- <20230206145207.kik5cczepdlgmexa@zlang-mailbox>
- <f8d78191-089f-4407-dd2d-17f7e3be2580@suse.com>
+        with ESMTP id S230480AbjBTOfn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Feb 2023 09:35:43 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 419F5CDD4
+        for <fstests@vger.kernel.org>; Mon, 20 Feb 2023 06:35:42 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DC6CD60EB7
+        for <fstests@vger.kernel.org>; Mon, 20 Feb 2023 14:35:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D12FC433D2;
+        Mon, 20 Feb 2023 14:35:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1676903741;
+        bh=rn//Jsd5KW47fnLGP7X3G4q8MCfvfX3lfnjV73iYIqc=;
+        h=Date:From:To:Subject:From;
+        b=rhKxvdM1rqWw7Wc5jMycRXp8BtKVMLA2DekzVQFwIuUZzfSwWXnjmEsw7lTb0vhPz
+         +9C9ycYofEf1+tJF/xYsMQL+MiZPzTGTdFQXZvVZh2/ZnQhcikK2bsEWNaPdMCAU2h
+         goJshIHDBMbWJctoyk0mXQ3r1HZ6a2u5hj+XB+P8I3+caLZRZwG24Y5Fe/B1PxGO8d
+         nZ0KT6zaDrs+XhOkMr2JbZ1Gpq7vUQy9fazdGkB2fc+6SWtKfa3iI+nRoOs1QpblWE
+         yk5ogVm30jWoN2cT5zfydaEtHvewuTUu+qohwFavDza77pPRVDy9rj8Ikh5Tjm9Fma
+         7F3vh9uPoFm5Q==
+Date:   Mon, 20 Feb 2023 22:35:36 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2023.02.12 onto master branch
+Message-ID: <20230220143536.hh7essmm7aauuieb@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f8d78191-089f-4407-dd2d-17f7e3be2580@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Feb 06, 2023 at 05:29:14PM +0100, Gabriel Niebler wrote:
-> Am 06.02.23 um 15:52 schrieb Zorro Lang:
-> > On Tue, Jan 31, 2023 at 01:38:39PM +0100, Gabriel Niebler wrote:
-> > > Signed-off-by: Gabriel Niebler <gniebler@suse.com>
-> > > ---
-> > >   README | 2 +-
-> > >   1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/README b/README
-> > > index 008d3875..574cdd34 100644
-> > > --- a/README
-> > > +++ b/README
-> > > @@ -127,7 +127,7 @@ Setup Environment
-> > >       - device contents will be destroyed.
-> > >   4. (optional) Create SCRATCH device pool.
-> > > -    - needed for BTRFS testing
-> > > +    - needed for BTRFS testing (some tests require up to 5 disks of 10GB each)
-> > 
-> > Not sure about this part, so btrfs recommend 5 disks of 10GB each in
-> > SCRATCH_DEV_POOL, to run all btrfs related tests? Does anyone know that?
-> > Or can you provide the subcase names which need "5 disks of 10GB each",
-> > to help to check and review?
-> 
-> Of course (and thanks for asking, as it turns out my recollection was
-> slightly wrong on that one):
-> 
-> To begin with, btrfs/011[1] states the "5 disks" requirement in the lengthy
-> comment at the top of the file:
-> """
-> # The amount of tests done depends on the number of devices in the
-> # SCRATCH_DEV_POOL. For full test coverage, at least 5 devices should
-> # be available (e.g. 5 partitions).
-> ""
-> ... but it doesn't say anything about device size.
-> 
-> btrfs/027[2] however checks the presence of 5 devices in $SCRATCH_DEV_POOL
-> directly in code and also runs a check to ensure that all of these devices
-> are *of the same size*.
-> 
-> And then there are at least two tests that require $SCRATCH_DEV to be 10GB
-> or more in size:
-> - btrfs/079[3], which writes a 10G file to $SCRATCH_MNT and
-> - btrfs/253[4], which directly creates a 10G FS on $SCRATCH_DEV.
-> 
-> *Taken together*, this means that for full btrfs test coverage, one needs a
-> $SCRATCH_DEV_POOL with at least 5 devices of equal size in it and that size
-> has to be at least 10GB.
-> 
-> But that makes the remark wrong, strictly speaking, as there's no single
-> test that requires "at least 5 devices of 10GB each".
-> 
-> How about this: "(for full btrfs test coverage, use at least 5 devices of
-> equal size and at least 10GB)"
+Hi all,
 
-Even for now 10GB is enough, but we can't always assue that. There's not a clear
-restriction about that. I think we can skip this sub-patch. At least we don't
-give others a recommendation which isn't assured by ourselves. So how about only
-merge the 1st patch.
+The master branch of the xfstests repository at:
 
-> 
-> > P.S. I'm thinking about if this "(...)" should be moved to below item.
-> >                                                          vvvvv
-> > >       - specifies 3 or more independent SCRATCH devices via the SCRATCH_DEV_POOL
-> > >         variable e.g SCRATCH_DEV_POOL="/dev/sda /dev/sdb /dev/sdc"
-> 
-> Fine by me! :-)
-> 
-> [1]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/011#n10
-> [2]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/027#n20
-> [3]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/079#n44
-> [4]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/btrfs/253#n90
-> 
+        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
+has just been updated to v2023.02.12 version.
+
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+f6aca7f2ab08 xfs: add 080 to the auto and quick groups
+
+New commits:
+
+Benjamin Coddington (1):
+      [8029b849785a] generic/676: Unstable d_type handling for NFS READDIR
+
+Christoph Hellwig (7):
+      [fe85ceeba5f5] btrfs: add 198 to the auto group
+      [e7abef0c69c7] btrfs: add 125 to the auto and quick groups
+      [40df28198284] btrfs: add 185 to the auto and quick groups
+      [afcafb472d0c] generic: add 042 to the auto and quick groups
+      [a16be1750260] generic: add 125 to the auto group
+      [1e4bff9fedb7] generic: add 251 to the auto group
+      [f6aca7f2ab08] xfs: add 080 to the auto and quick groups
+
+Darrick J. Wong (6):
+      [3da787a95dba] xfs/357: switch fuzzing to agi 1
+      [e926c8ffee93] xfs: race fsstress with online scrubbers for AG and fs metadata
+      [3fec4791015e] fuzzy: add a custom xfs find utility for scrub stress tests
+      [28a30e56d551] fuzzy: allow xfs scrub stress tests to pick preconfigured fsstress configs
+      [8bdb40271c00] xfs: race fsstress with online scrubbers for file metadata
+      [1d828630570d] common/xfs: use whole-word matching for _require_xfsrestore_xflag
+
+David Disseldorp (1):
+      [02f8adf4b2d8] common/btrfs: avoid reinitialization of unsupported profile array
+
+Filipe Manana (1):
+      [e5dc5462471b] btrfs: add a stress test for send v2 streams
+
+Gabriel Niebler (2):
+      [a04ce1ddfca1] common: Do not chown ro mountpoint when creating idmapped mount
+      [711a7a2c2bb6] common: Chown mount even if already idmapped to account for remounts
+
+Jan Kara (3):
+      [d4d0c0f02a67] common: Provide blocksize and ecclength to udf fsck
+      [d36a4f164f83] common: Unmount udf filesystem prior checking
+      [99d0f81f194f] common: Improve blocksize support for udf
+
+
+Code Diffstat:
+
+ .gitignore            |   1 +
+ common/btrfs          |  66 ++++++------
+ common/fuzzy          | 166 +++++++++++++++++++++++++++--
+ common/quota          |  64 +++++++++++
+ common/rc             |  42 ++++++--
+ common/xfs            |   2 +-
+ configure.ac          |   5 +
+ include/builddefs.in  |   4 +
+ m4/package_libcdev.m4 |  44 ++++++++
+ m4/package_xfslibs.m4 |  15 +++
+ src/Makefile          |  10 ++
+ src/t_readdir_3.c     |  12 ++-
+ src/xfsfind.c         | 290 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/125       |   2 +-
+ tests/btrfs/185       |   2 +-
+ tests/btrfs/198       |   2 +-
+ tests/btrfs/284       | 133 +++++++++++++++++++++++
+ tests/btrfs/284.out   |   2 +
+ tests/generic/042     |   2 +-
+ tests/generic/125     |   2 +-
+ tests/generic/251     |   2 +-
+ tests/xfs/080         |   2 +-
+ tests/xfs/357         |   2 +-
+ tests/xfs/570         |  37 +++++++
+ tests/xfs/570.out     |   2 +
+ tests/xfs/571         |  37 +++++++
+ tests/xfs/571.out     |   2 +
+ tests/xfs/572         |  37 +++++++
+ tests/xfs/572.out     |   2 +
+ tests/xfs/573         |  37 +++++++
+ tests/xfs/573.out     |   2 +
+ tests/xfs/574         |  38 +++++++
+ tests/xfs/574.out     |   2 +
+ tests/xfs/575         |  38 +++++++
+ tests/xfs/575.out     |   2 +
+ tests/xfs/576         |  38 +++++++
+ tests/xfs/576.out     |   2 +
+ tests/xfs/577         |  39 +++++++
+ tests/xfs/577.out     |   2 +
+ tests/xfs/578         |  39 +++++++
+ tests/xfs/578.out     |   2 +
+ tests/xfs/579         |  40 +++++++
+ tests/xfs/579.out     |   2 +
+ tests/xfs/580         |  44 ++++++++
+ tests/xfs/580.out     |   2 +
+ tests/xfs/581         |  40 +++++++
+ tests/xfs/581.out     |   2 +
+ tests/xfs/582         |  47 ++++++++
+ tests/xfs/582.out     |   2 +
+ tests/xfs/583         |  40 +++++++
+ tests/xfs/583.out     |   2 +
+ tests/xfs/584         |  40 +++++++
+ tests/xfs/584.out     |   2 +
+ tests/xfs/585         |  40 +++++++
+ tests/xfs/585.out     |   2 +
+ tests/xfs/586         |  38 +++++++
+ tests/xfs/586.out     |   2 +
+ tests/xfs/587         |  38 +++++++
+ tests/xfs/587.out     |   2 +
+ tests/xfs/588         |  37 +++++++
+ tests/xfs/588.out     |   2 +
+ tests/xfs/589         |  39 +++++++
+ tests/xfs/589.out     |   2 +
+ tests/xfs/590         |  39 +++++++
+ tests/xfs/590.out     |   2 +
+ tests/xfs/591         |  37 +++++++
+ tests/xfs/591.out     |   2 +
+ tests/xfs/592         |  40 +++++++
+ tests/xfs/592.out     |   2 +
+ tests/xfs/593         |  38 +++++++
+ tests/xfs/593.out     |   2 +
+ tests/xfs/594         |  38 +++++++
+ tests/xfs/594.out     |   2 +
+ tests/xfs/595         |  39 +++++++
+ tests/xfs/595.out     |   2 +
+ 75 files changed, 1880 insertions(+), 58 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
