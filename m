@@ -2,41 +2,41 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAA64C636CC
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Feb 2023 14:35:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAE62C636CC
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Feb 2023 14:46:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231703AbjBTOfo (ORCPT
+        id S231993AbjBTOqy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Feb 2023 09:35:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58492 "EHLO
+        Mon, 20 Feb 2023 09:46:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230480AbjBTOfn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Feb 2023 09:35:43 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 419F5CDD4
-        for <fstests@vger.kernel.org>; Mon, 20 Feb 2023 06:35:42 -0800 (PST)
+        with ESMTP id S231950AbjBTOqx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Feb 2023 09:46:53 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 962131555D
+        for <fstests@vger.kernel.org>; Mon, 20 Feb 2023 06:46:51 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id DC6CD60EB7
-        for <fstests@vger.kernel.org>; Mon, 20 Feb 2023 14:35:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D12FC433D2;
-        Mon, 20 Feb 2023 14:35:40 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 43756B80B9A
+        for <fstests@vger.kernel.org>; Mon, 20 Feb 2023 14:46:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F85EC433D2;
+        Mon, 20 Feb 2023 14:46:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1676903741;
-        bh=rn//Jsd5KW47fnLGP7X3G4q8MCfvfX3lfnjV73iYIqc=;
+        s=k20201202; t=1676904409;
+        bh=OiSncXmTQ4BkyK3ohnG0SX/3z0VQjorbBGn0gQDJ61Y=;
         h=Date:From:To:Subject:From;
-        b=rhKxvdM1rqWw7Wc5jMycRXp8BtKVMLA2DekzVQFwIuUZzfSwWXnjmEsw7lTb0vhPz
-         +9C9ycYofEf1+tJF/xYsMQL+MiZPzTGTdFQXZvVZh2/ZnQhcikK2bsEWNaPdMCAU2h
-         goJshIHDBMbWJctoyk0mXQ3r1HZ6a2u5hj+XB+P8I3+caLZRZwG24Y5Fe/B1PxGO8d
-         nZ0KT6zaDrs+XhOkMr2JbZ1Gpq7vUQy9fazdGkB2fc+6SWtKfa3iI+nRoOs1QpblWE
-         yk5ogVm30jWoN2cT5zfydaEtHvewuTUu+qohwFavDza77pPRVDy9rj8Ikh5Tjm9Fma
-         7F3vh9uPoFm5Q==
-Date:   Mon, 20 Feb 2023 22:35:36 +0800
+        b=PPwIWpFASHzyUoAHxG5/4MyJTnOSdUui2R4ZmRy2IpuFgU4aa9Y46VEy6vC4O1COw
+         pr9kZJrwT3d2kP2x25csMs4uP7+nidSuwu+cF53sDBSZn4dTUXbnmMd09mUsQUO8vC
+         WhK2Mpzsj4kZRUveej0HYdftEfbDCEGvtwU2sGkSToSsoII7bcIlsdZv9fszBfpV4j
+         Z1qS3vAyOtjmq0qf+9CJR3Qi1g1+w85dgknomNjHS8JBSNgrzIXQyhOCh5Kczy3ooK
+         RuCBW0/lqJgF26aNbCLLqBd37V0aizEAGA+CZgMML1UukfFADrCKA2CfUBxz4/t7xV
+         uUHVcJlrBXs9g==
+Date:   Mon, 20 Feb 2023 22:46:44 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.02.12 onto master branch
-Message-ID: <20230220143536.hh7essmm7aauuieb@zlang-mailbox>
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.02.19
+Message-ID: <20230220144644.y5oj2uvyskite4ec@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -46,135 +46,131 @@ X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
         git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.02.12 version.
+has just been updated and tagged as v2023.02.19 release.
+
+Release notes:
+1) There're 25 new cases this week --- btrfs/285 and xfs/708~732. The btrfs/285
+   is in default auto test group, but xfs/708~732 are not in auto group, they're
+   about xfs online repair/scrub tests.
+2) As more cases were added into auto test group last week, so this release add
+   more _fixed_by/_wants tags to these cases, to help to clarify some failures
+   might happen on old downstream kernel.
+
+More update or bug fix refer to below. Thanks for all these contribution!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-f6aca7f2ab08 xfs: add 080 to the auto and quick groups
+9ba85b9a6f0f populate: fix some weirdness in __populate_check_xfs_agbtree_height
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Benjamin Coddington (1):
-      [8029b849785a] generic/676: Unstable d_type handling for NFS READDIR
+An Long (1):
+[U]      [4eb6985b70ab] btrfs/011: use $_btrfs_profile_configs to limit the tests
 
-Christoph Hellwig (7):
-      [fe85ceeba5f5] btrfs: add 198 to the auto group
-      [e7abef0c69c7] btrfs: add 125 to the auto and quick groups
-      [40df28198284] btrfs: add 185 to the auto and quick groups
-      [afcafb472d0c] generic: add 042 to the auto and quick groups
-      [a16be1750260] generic: add 125 to the auto group
-      [1e4bff9fedb7] generic: add 251 to the auto group
-      [f6aca7f2ab08] xfs: add 080 to the auto and quick groups
+Anand Jain (2):
+[U]      [085ee672b3d8] fstests: btrfs/185, 198 and 219 add _fixed_by_kernel_commit
+[U]      [63c4983ca5c5] fstests: btrfs/249: add _wants_kernel_commit and _fixed_by_git_commit
 
-Darrick J. Wong (6):
-      [3da787a95dba] xfs/357: switch fuzzing to agi 1
-      [e926c8ffee93] xfs: race fsstress with online scrubbers for AG and fs metadata
-      [3fec4791015e] fuzzy: add a custom xfs find utility for scrub stress tests
-      [28a30e56d551] fuzzy: allow xfs scrub stress tests to pick preconfigured fsstress configs
-      [8bdb40271c00] xfs: race fsstress with online scrubbers for file metadata
-      [1d828630570d] common/xfs: use whole-word matching for _require_xfsrestore_xflag
+Boris Burkov (1):
+[N]      [150efa34087d] btrfs: test block group size class loading logic
 
-David Disseldorp (1):
-      [02f8adf4b2d8] common/btrfs: avoid reinitialization of unsupported profile array
+Darrick J. Wong (16):
+[U]      [89224e31d44a] fuzzy: use FORCE_REBUILD over injecting force_repair
+[U]      [2690ec99261d] xfs: test rebuilding the entire filesystem with online fsck
+[N]      [76070f8f0e2c] xfs: stress test ag repair functions
+[N]      [4ec8fcc61022] xfs: race fsstress with online repair for inode record metadata
+[N]      [b3fc8bc8f7c0] xfs: test rebuilding xattrs when the data fork is btree format
+[N]      [ee1df86f65be] xfs: race fsstress with online repair for inode and fork metadata
+[N]      [4d1f5cae8771] xfs: ensure that online file data fork repairs don't hit EDQUOT
+[N]      [74a089e8bcb4] xfs: race fsstress with online repair for special file metadata
+[N]      [82d24c3cdac7] xfs: race fsstress with online scrub and repair for quota metadata
+[N]      [3a4d641020e8] xfs: race fsstress with online scrub and repair for quotacheck
+[N]      [c2c1a3f8c423] xfs: race fsstress with inode link count check and repair
+[N]      [a02d2818e9d1] xfs: test fs summary counter online repair
+[N]      [74065e2f1821] xfs: race fsstress with online repair for summary counters
+[U]      [a6cbb0cc0d5e] xfs/422: don't freeze while racing rmap repair and fsstress
+[U]      [215075d03ddf] populate: take a snapshot of the filesystem if creation fails
+[U]      [9ba85b9a6f0f] populate: fix some weirdness in __populate_check_xfs_agbtree_height
 
 Filipe Manana (1):
-      [e5dc5462471b] btrfs: add a stress test for send v2 streams
-
-Gabriel Niebler (2):
-      [a04ce1ddfca1] common: Do not chown ro mountpoint when creating idmapped mount
-      [711a7a2c2bb6] common: Chown mount even if already idmapped to account for remounts
-
-Jan Kara (3):
-      [d4d0c0f02a67] common: Provide blocksize and ecclength to udf fsck
-      [d36a4f164f83] common: Unmount udf filesystem prior checking
-      [99d0f81f194f] common: Improve blocksize support for udf
+[U]      [2cbd24f84a63] generic/604: fix test to actually create dirty inodes
 
 
 Code Diffstat:
 
- .gitignore            |   1 +
- common/btrfs          |  66 ++++++------
- common/fuzzy          | 166 +++++++++++++++++++++++++++--
- common/quota          |  64 +++++++++++
- common/rc             |  42 ++++++--
- common/xfs            |   2 +-
- configure.ac          |   5 +
- include/builddefs.in  |   4 +
- m4/package_libcdev.m4 |  44 ++++++++
- m4/package_xfslibs.m4 |  15 +++
- src/Makefile          |  10 ++
- src/t_readdir_3.c     |  12 ++-
- src/xfsfind.c         | 290 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/125       |   2 +-
- tests/btrfs/185       |   2 +-
- tests/btrfs/198       |   2 +-
- tests/btrfs/284       | 133 +++++++++++++++++++++++
- tests/btrfs/284.out   |   2 +
- tests/generic/042     |   2 +-
- tests/generic/125     |   2 +-
- tests/generic/251     |   2 +-
- tests/xfs/080         |   2 +-
- tests/xfs/357         |   2 +-
- tests/xfs/570         |  37 +++++++
- tests/xfs/570.out     |   2 +
- tests/xfs/571         |  37 +++++++
- tests/xfs/571.out     |   2 +
- tests/xfs/572         |  37 +++++++
- tests/xfs/572.out     |   2 +
- tests/xfs/573         |  37 +++++++
- tests/xfs/573.out     |   2 +
- tests/xfs/574         |  38 +++++++
- tests/xfs/574.out     |   2 +
- tests/xfs/575         |  38 +++++++
- tests/xfs/575.out     |   2 +
- tests/xfs/576         |  38 +++++++
- tests/xfs/576.out     |   2 +
- tests/xfs/577         |  39 +++++++
- tests/xfs/577.out     |   2 +
- tests/xfs/578         |  39 +++++++
- tests/xfs/578.out     |   2 +
- tests/xfs/579         |  40 +++++++
- tests/xfs/579.out     |   2 +
- tests/xfs/580         |  44 ++++++++
- tests/xfs/580.out     |   2 +
- tests/xfs/581         |  40 +++++++
- tests/xfs/581.out     |   2 +
- tests/xfs/582         |  47 ++++++++
- tests/xfs/582.out     |   2 +
- tests/xfs/583         |  40 +++++++
- tests/xfs/583.out     |   2 +
- tests/xfs/584         |  40 +++++++
- tests/xfs/584.out     |   2 +
- tests/xfs/585         |  40 +++++++
- tests/xfs/585.out     |   2 +
- tests/xfs/586         |  38 +++++++
- tests/xfs/586.out     |   2 +
- tests/xfs/587         |  38 +++++++
- tests/xfs/587.out     |   2 +
- tests/xfs/588         |  37 +++++++
- tests/xfs/588.out     |   2 +
- tests/xfs/589         |  39 +++++++
- tests/xfs/589.out     |   2 +
- tests/xfs/590         |  39 +++++++
- tests/xfs/590.out     |   2 +
- tests/xfs/591         |  37 +++++++
- tests/xfs/591.out     |   2 +
- tests/xfs/592         |  40 +++++++
- tests/xfs/592.out     |   2 +
- tests/xfs/593         |  38 +++++++
- tests/xfs/593.out     |   2 +
- tests/xfs/594         |  38 +++++++
- tests/xfs/594.out     |   2 +
- tests/xfs/595         |  39 +++++++
- tests/xfs/595.out     |   2 +
- 75 files changed, 1880 insertions(+), 58 deletions(-)
+ README              |  3 ++
+ common/btrfs        |  3 ++
+ common/fuzzy        | 71 +++++++++++++++++++++++++++++++++++---------
+ common/populate     | 70 ++++++++++++++++++++++++++++---------------
+ common/rc           |  2 +-
+ common/xfs          | 77 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/011     | 30 +++++++++++--------
+ tests/btrfs/185     |  2 ++
+ tests/btrfs/198     |  6 ++--
+ tests/btrfs/219     |  9 +++---
+ tests/btrfs/249     |  7 +++--
+ tests/btrfs/285     | 50 +++++++++++++++++++++++++++++++
+ tests/btrfs/285.out |  2 ++
+ tests/generic/604   |  2 +-
+ tests/xfs/422       |  4 +--
+ tests/xfs/708       | 37 +++++++++++++++++++++++
+ tests/xfs/708.out   |  2 ++
+ tests/xfs/709       | 37 +++++++++++++++++++++++
+ tests/xfs/709.out   |  2 ++
+ tests/xfs/710       | 38 ++++++++++++++++++++++++
+ tests/xfs/710.out   |  2 ++
+ tests/xfs/711       | 37 +++++++++++++++++++++++
+ tests/xfs/711.out   |  2 ++
+ tests/xfs/712       | 37 +++++++++++++++++++++++
+ tests/xfs/712.out   |  2 ++
+ tests/xfs/713       | 37 +++++++++++++++++++++++
+ tests/xfs/713.out   |  2 ++
+ tests/xfs/714       | 37 +++++++++++++++++++++++
+ tests/xfs/714.out   |  2 ++
+ tests/xfs/715       | 38 ++++++++++++++++++++++++
+ tests/xfs/715.out   |  2 ++
+ tests/xfs/716       | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/716.out   |  2 ++
+ tests/xfs/717       | 37 +++++++++++++++++++++++
+ tests/xfs/717.out   |  2 ++
+ tests/xfs/718       | 39 ++++++++++++++++++++++++
+ tests/xfs/718.out   |  2 ++
+ tests/xfs/719       | 39 ++++++++++++++++++++++++
+ tests/xfs/719.out   |  2 ++
+ tests/xfs/720       | 72 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/720.out   |  3 ++
+ tests/xfs/721       | 38 ++++++++++++++++++++++++
+ tests/xfs/721.out   |  2 ++
+ tests/xfs/722       | 39 ++++++++++++++++++++++++
+ tests/xfs/722.out   |  2 ++
+ tests/xfs/723       | 40 +++++++++++++++++++++++++
+ tests/xfs/723.out   |  2 ++
+ tests/xfs/724       | 40 +++++++++++++++++++++++++
+ tests/xfs/724.out   |  2 ++
+ tests/xfs/725       | 40 +++++++++++++++++++++++++
+ tests/xfs/725.out   |  2 ++
+ tests/xfs/726       | 40 +++++++++++++++++++++++++
+ tests/xfs/726.out   |  2 ++
+ tests/xfs/727       | 40 +++++++++++++++++++++++++
+ tests/xfs/727.out   |  2 ++
+ tests/xfs/728       | 38 ++++++++++++++++++++++++
+ tests/xfs/728.out   |  2 ++
+ tests/xfs/729       | 37 +++++++++++++++++++++++
+ tests/xfs/729.out   |  2 ++
+ tests/xfs/730       | 36 +++++++++++++++++++++++
+ tests/xfs/730.out   |  4 +++
+ tests/xfs/731       | 41 ++++++++++++++++++++++++++
+ tests/xfs/731.out   |  2 ++
+ tests/xfs/732       | 46 +++++++++++++++++++++++++++++
+ tests/xfs/732.out   |  2 ++
+ 65 files changed, 1369 insertions(+), 67 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
