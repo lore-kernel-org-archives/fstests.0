@@ -2,181 +2,282 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14E4CC61DA4
-	for <linux-fstests@archiver.kernel.org>; Thu, 23 Feb 2023 05:11:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09AECC636D7
+	for <linux-fstests@archiver.kernel.org>; Thu, 23 Feb 2023 10:28:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231493AbjBWFLM (ORCPT
+        id S233005AbjBWK2V (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 23 Feb 2023 00:11:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38560 "EHLO
+        Thu, 23 Feb 2023 05:28:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229379AbjBWFLL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2023 00:11:11 -0500
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5199F38657;
-        Wed, 22 Feb 2023 21:11:10 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S233408AbjBWK2P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Feb 2023 05:28:15 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3388F2ED52;
+        Thu, 23 Feb 2023 02:28:09 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 6484734674;
-        Thu, 23 Feb 2023 05:11:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1677129068; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=sWu4x91YC0eUQ1UqiNEytf8mMuQdnUWnTxOpaGL5N6s=;
-        b=koZ2hECHBmja3+mrfeR13qoaBtcN+QA/j/U3rfwOsn57+lA4Yn0hYiqq8KoVAhBP4PFiDQ
-        2BElnJkKK8hFARtJWyZuUZT9oTpIIyFRZUZ/UPN9GJP8BDwTJ9+ldqcEfUdBDTonKjSCtM
-        2Mq5zvmlKQUwS+/DHun1eZTOO+Tfjl8=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 775AE13524;
-        Thu, 23 Feb 2023 05:11:07 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id iGq3D2v19mMMGAAAMHmgww
-        (envelope-from <wqu@suse.com>); Thu, 23 Feb 2023 05:11:07 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] btrfs: add test case for NODATASUM dev-replace
-Date:   Thu, 23 Feb 2023 13:10:49 +0800
-Message-Id: <20230223051049.30086-1-wqu@suse.com>
-X-Mailer: git-send-email 2.39.1
+        by ams.source.kernel.org (Postfix) with ESMTPS id BA544B81988;
+        Thu, 23 Feb 2023 10:28:07 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7AFB9C4339E;
+        Thu, 23 Feb 2023 10:28:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1677148086;
+        bh=KJqe5+g6aX0j4/Capg1ZtCaaodH5rF7vMg2dc4xuWQA=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=pEUBqs2bLpf+0q0hLYqq2Sx3bcgiq3zAnrowzrCaOqdF5LGaR8iRR5fL55v0tb0WW
+         rBASU+MVwd+VtvsgUUKz2GbDmd+76U0bp7TemN9VY3VxHu+h/AJtc0/Q/r1IF4y3qt
+         9xlcrWmRrostfyiqyEcOU7pIf8VCub2nf9sUUe9CcoTdAW/6GQBwkmS1/ekifQZj/Y
+         93hUyTT90wXVIEGLzHqGNz/H4BmzAFKyW2OSEHkjaQ1aI99jOp576cWuh02XKYaqZZ
+         rcuJ31NsEy5hU/6ESz7eYatbivx1bqTmBgjCCRer9900JfCk3esOBlMiQPl3Lzp0xM
+         Z4dEIK+st/OxQ==
+Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-172334d5c8aso11032329fac.8;
+        Thu, 23 Feb 2023 02:28:06 -0800 (PST)
+X-Gm-Message-State: AO0yUKVchCZTYG2L9SiyHIaxwo1Vo4uQGYsN5h8x5MziXlp4Zzw5E2af
+        Jk3U8ZHyfTUTgMqIEaRyRrza0Looiin2HvslW7Y=
+X-Google-Smtp-Source: AK7set9p8pVo9Nex3Gask8lFz0xfEKFKiDCIW1EYg8eIfXlSX/pbtL4F/EkYsgKV1tP/acrRtiKb72K+63LAJ7F3MXo=
+X-Received: by 2002:a05:6870:d248:b0:16e:11dc:2513 with SMTP id
+ h8-20020a056870d24800b0016e11dc2513mr2516793oac.98.1677148085573; Thu, 23 Feb
+ 2023 02:28:05 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <eba2cc47c628ce065e742decac7bc1ef5a91ae54.1677094146.git.boris@bur.io>
+In-Reply-To: <eba2cc47c628ce065e742decac7bc1ef5a91ae54.1677094146.git.boris@bur.io>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Thu, 23 Feb 2023 10:27:29 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7_qTkgnbaP1PWDFKj+d6OrSYJKuTd9dcLV_6gRH_yMFA@mail.gmail.com>
+Message-ID: <CAL3q7H7_qTkgnbaP1PWDFKj+d6OrSYJKuTd9dcLV_6gRH_yMFA@mail.gmail.com>
+Subject: Re: [PATCH] generic: add test for direct io partial writes
+To:     Boris Burkov <boris@bur.io>
+Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-During my development on dev-replace, I made a mistake in RAID56
-dev-replace code where it can lead to NODATASUM corruption.
-Thankfully such corruption didn't reach upstream.
+On Wed, Feb 22, 2023 at 7:40 PM Boris Burkov <boris@bur.io> wrote:
+>
+> btrfs recently had a bug where a direct io partial write resulted in a
+> hole in the file. Add a new generic test which creates a 2MiB file,
+> mmaps it, touches the first byte, then does an O_DIRECT write of the
+> mmapped buffer into a new file. This should result in the mapped pages
+> being a mix of in and out of page cache and thus a partial write, for
+> filesystems using iomap and IOMAP_DIO_PARTIAL.
+>
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+>  .gitignore            |  1 +
+>  src/Makefile          |  2 +-
+>  src/dio-buf-fault.c   | 83 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/708     | 48 +++++++++++++++++++++++++
+>  tests/generic/708.out |  2 ++
+>  5 files changed, 135 insertions(+), 1 deletion(-)
+>  create mode 100644 src/dio-buf-fault.c
+>  create mode 100755 tests/generic/708
+>  create mode 100644 tests/generic/708.out
+>
+> diff --git a/.gitignore b/.gitignore
+> index cfff8f85..644290f0 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -72,6 +72,7 @@ tags
+>  /src/deduperace
+>  /src/detached_mounts_propagation
+>  /src/devzero
+> +/src/dio-buf-fault
+>  /src/dio-interleaved
+>  /src/dio-invalidate-cache
+>  /src/dirhash_collide
+> diff --git a/src/Makefile b/src/Makefile
+> index a574f7bd..24cd4747 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -19,7 +19,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>         t_ofd_locks t_mmap_collision mmap-write-concurrent \
+>         t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+>         t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+> -       t_mmap_cow_memory_failure fake-dump-rootino
+> +       t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault
+>
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>         preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/dio-buf-fault.c b/src/dio-buf-fault.c
+> new file mode 100644
+> index 00000000..36ff6710
+> --- /dev/null
+> +++ b/src/dio-buf-fault.c
+> @@ -0,0 +1,83 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> + */
+> +
+> +#ifndef _GNU_SOURCE
+> +#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
+> +#endif
+> +
+> +#include <sys/mman.h>
+> +#include <sys/types.h>
+> +#include <sys/stat.h>
+> +#include <err.h>
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <stdio.h>
+> +#include <unistd.h>
+> +
+> +/*
+> + * mmap a source file, then do a direct write of that mmapped region to a
+> + * destination file.
+> + */
+> +
+> +int prep_mmap_buffer(char *src_filename, int *fd, void **addr)
+> +{
+> +       struct stat st;
+> +       int ret;
+> +
+> +       *fd = open(src_filename, O_RDWR, 0666);
+> +       if (*fd == -1)
+> +               err(1, "failed to open %s", src_filename);
+> +
+> +       ret = fstat(*fd, &st);
+> +       if (ret)
+> +               err(1, "failed to stat %d", *fd);
+> +
+> +       *addr = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, *fd, 0);
+> +       if (*addr == MAP_FAILED)
+> +               err(1, "failed to mmap %d", *fd);
+> +
+> +       return st.st_size;
+> +}
+> +
+> +int do_dio(char *dst_filename, void *buf, size_t sz)
+> +{
+> +       int fd;
+> +       ssize_t ret;
+> +
+> +       fd = open(dst_filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
+> +       if (fd == -1)
+> +               err(1, "failed to open %s", dst_filename);
+> +       while (sz) {
+> +               ret = write(fd, buf, sz);
+> +               if (ret < 0) {
+> +                       if (errno == -EINTR)
+> +                               continue;
+> +                       else
+> +                               err(1, "failed to write %lu bytes to %d", sz, fd);
+> +               } else if (ret == 0) {
+> +                       break;
+> +               }
+> +               buf += ret;
+> +               sz -= ret;
+> +       }
+> +       return sz;
+> +}
+> +
+> +int main(int argc, char *argv[]) {
+> +       size_t sz;
+> +       int fd;
+> +       void *buf = NULL;
+> +       char c;
+> +
+> +       if (argc != 3)
+> +               errx(1, "no in and out file name arguments given");
+> +       sz = prep_mmap_buffer(argv[1], &fd, &buf);
 
-Inspired by such incident, here comes a new test case for btrfs
-dev-replace, the new case would:
+Minor thing: fd is not used by this function at all, can be moved to
+prep_mmap_buffer().
 
-- Populate the filesystem with nodatasum mount option
+> +
+> +       /* touch the first page of the mapping to bring it into cache */
+> +       c = ((char *)buf)[0];
+> +       printf("%u\n", c);
+> +
+> +       do_dio(argv[2], buf, sz);
+> +}
+> diff --git a/tests/generic/708 b/tests/generic/708
+> new file mode 100755
+> index 00000000..ff2e162b
+> --- /dev/null
+> +++ b/tests/generic/708
+> @@ -0,0 +1,48 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 708
+> +#
+> +# Test iomap direct_io partial writes.
+> +#
+> +# Create a reasonably large file, then run a program which mmaps it,
+> +# touches the first page, then dio writes it to a second file. This
+> +# can result in a page fault reading from the mmapped dio write buffer and
+> +# thus the iompap direct_io partial write codepath.
+> +#
+> +. ./common/preamble
+> +_begin_fstest quick auto
+> +_fixed_by_kernel_commit XXXX 'btrfs: fix dio continue after short write due to buffer page fault'
 
-- Run fssum to record the contents
-  Since the test case only cares about data contents, here we don't
-  include metadata like uid/gid/timestamp.
+It would be odd if the test fails on another fs and then fstests
+suggests that commit as a potential fix.
+So just do the following as we do in other generic tests:
 
-- Wipe one device
+[ $FSTYP == "btrfs" ] && \
+     _fixed_by_kernel_commit ....
 
-- Mount the fs with the missing device
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -r -f $tmp.*
+> +       rm -f $TEST_DIR/dio-buf-fault.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_test
+> +_require_odirect
+> +_require_test_program dio-buf-fault
+> +src=$TEST_DIR/dio-buf-fault.src
+> +dst=$TEST_DIR/dio-buf-fault.dst
+> +
+> +echo "Silence is golden"
+> +
+> +$XFS_IO_PROG -fc "pwrite -q 0 $((2 * 1024 * 1024))" $src
 
-- Verify the contents is still correct
+This is fine for the purpose of detecting that we don't leave a hole
+in the file as long as xfs_io decides to write bytes with a value
+different than 0x00.
+It happens to be that the default is 0xcd - it's not obvious and maybe
+one day it changes to 0x00 - making it explicit by passing -S 0xcd,
+or whatever value, makes it more clear IMO.
 
-- Replace the missing device
+> +sync
 
-- Verify the contents is still correct again
-  Before the verification, drop all cache to make sure the 2nd
-  verification is reading from the disks.
+Is the sync needed? Why? There should be a comment if it's needed.
 
-For current kernels, the test case should pass as expected.
+Otherwise it looks fine to me. Thanks.
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/286     | 78 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/286.out |  2 ++
- 2 files changed, 80 insertions(+)
- create mode 100755 tests/btrfs/286
- create mode 100644 tests/btrfs/286.out
-
-diff --git a/tests/btrfs/286 b/tests/btrfs/286
-new file mode 100755
-index 00000000..fb805256
---- /dev/null
-+++ b/tests/btrfs/286
-@@ -0,0 +1,78 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 286
-+#
-+# Make sure btrfs dev-replace on missing device won't cause data corruption
-+# for NODATASUM data.
-+#
-+. ./common/preamble
-+_begin_fstest auto replace
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_command "$WIPEFS_PROG" wipefs
-+_btrfs_get_profile_configs replace-missing
-+_require_fssum
-+_require_scratch_dev_pool 5
-+_scratch_dev_pool_get 4
-+_spare_dev_get
-+
-+workload()
-+{
-+	local profile=$1
-+	local victim="$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}')"
-+
-+	echo "=== Profile: $profile ===" >> $seqres.full
-+	rm -f $tmp.fssum
-+	_scratch_pool_mkfs "$profile" >> $seqres.full 2>&1
-+
-+	# Use nodatasum mount option, so all data won't have checksum.
-+	_scratch_mount -o nodatasum
-+
-+	$FSSTRESS_PROG -p 10 -n 200 -d $SCRATCH_MNT > /dev/null 2>&1
-+	sync
-+
-+	# Generate fssum for later verification, here we only care
-+	# about the file contents, thus we don't bother metadata at all.
-+	$FSSUM_PROG -n -d -f -w $tmp.fssum $SCRATCH_MNT
-+	_scratch_unmount
-+
-+	# Wipe devid 2
-+	$WIPEFS_PROG -a $victim >> $seqres.full 2>&1
-+
-+	# Mount the fs with the victim device missing
-+	_scratch_mount -o degraded,nodatasum
-+
-+	# Verify no data corruption first.
-+	echo "=== Verify the contents before replace ===" >> $seqres.full
-+	$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+	# Replace the missing device
-+	$BTRFS_UTIL_PROG replace start -Bf 2 $SPARE_DEV $SCRATCH_MNT >> $seqres.full
-+
-+	# Drop all cache to make sure later read are all from the disks
-+	echo 3 > /proc/sys/vm/drop_caches
-+
-+	# Re-check the file contents
-+	echo "=== Verify the contents after replace ===" >> $seqres.full
-+	$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+	_scratch_unmount
-+}
-+
-+for t in "${_btrfs_profile_configs[@]}"; do
-+	workload "$t"
-+done
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/286.out b/tests/btrfs/286.out
-new file mode 100644
-index 00000000..35c48006
---- /dev/null
-+++ b/tests/btrfs/286.out
-@@ -0,0 +1,2 @@
-+QA output created by 286
-+Silence is golden
--- 
-2.39.0
-
+> +$here/src/dio-buf-fault $src $dst >> $seqres.full || _fail "failed doing the dio copy"
+> +diff $src $dst
+> +
+> +# success, all done
+> +status=$?
+> +exit
+> diff --git a/tests/generic/708.out b/tests/generic/708.out
+> new file mode 100644
+> index 00000000..33c478ad
+> --- /dev/null
+> +++ b/tests/generic/708.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 708
+> +Silence is golden
+> --
+> 2.39.1
+>
