@@ -2,228 +2,188 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DEBEC64EC7
-	for <linux-fstests@archiver.kernel.org>; Sat, 25 Feb 2023 14:05:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66E3DC64ED6
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Feb 2023 15:26:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229524AbjBYOFq (ORCPT
+        id S230400AbjBZP0c (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 25 Feb 2023 09:05:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55972 "EHLO
+        Sun, 26 Feb 2023 10:26:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56624 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229504AbjBYOFp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 25 Feb 2023 09:05:45 -0500
+        with ESMTP id S231262AbjBZP0P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Feb 2023 10:26:15 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A02C91FCA
-        for <fstests@vger.kernel.org>; Sat, 25 Feb 2023 06:04:58 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65C9C233FF
+        for <fstests@vger.kernel.org>; Sun, 26 Feb 2023 07:19:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677333897;
+        s=mimecast20190719; t=1677424676;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=OQzCDhzDCbh7Xtv8hLDPUgBic6iX9oUnxAx86clXe14=;
-        b=BqkNwyGS9MDVsHwvgopBI+QBXzLWKJ2zPlrcM/NkqwWqoRK8YXBrcnIK9t7G1qspensEyn
-        nOE+DjTvSMyrQ3mYDeI1z+4b+Wm6nOgueCVDq1DTchWoDZ9J+YTzG7UmcJKgTh7EAXay1Q
-        ndyWBGkGzPsx0noPWikov9Nq2lLLGGw=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+         to:to:cc:mime-version:mime-version:content-type:content-type;
+        bh=s1/fUaEg65oKizGF2exT5LmxdQZ1BqDWdzC0vRQQxHc=;
+        b=PBAcLEoR3kNJsqkzcedOZb/cyyInhVhZEdh24eWQLlECL7jdOBF7rDJllHlhqeo4WBRRQr
+        06CN7/vydbG9vutICT/dtadxVgUEw0aqEhG38b1u9maWpJg/Wqdp249mxiSFuzOyLgxRh8
+        KAK6YZxPl/uUnRZ+RbcrekjADpNJSAY=
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
+ [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-426-fcfcCTGNOD6Cl-Y_9LR1gA-1; Sat, 25 Feb 2023 09:04:56 -0500
-X-MC-Unique: fcfcCTGNOD6Cl-Y_9LR1gA-1
-Received: by mail-pj1-f69.google.com with SMTP id mm13-20020a17090b358d00b002377ec65e7aso2650108pjb.7
-        for <fstests@vger.kernel.org>; Sat, 25 Feb 2023 06:04:55 -0800 (PST)
+ us-mta-376-v2erfkcFO1qt6BUYMVI5fQ-1; Sun, 26 Feb 2023 10:17:54 -0500
+X-MC-Unique: v2erfkcFO1qt6BUYMVI5fQ-1
+Received: by mail-pg1-f200.google.com with SMTP id d18-20020a63f252000000b00502f11fb2fcso837991pgk.6
+        for <fstests@vger.kernel.org>; Sun, 26 Feb 2023 07:17:54 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=OQzCDhzDCbh7Xtv8hLDPUgBic6iX9oUnxAx86clXe14=;
-        b=JOQ8EO0txMZd6VdRoSLRUAtXQShbEI0cAjhuro1wyDI47in2OA2Ifu0MvTdYU/D/4Z
-         e8c1dO3kUyzODaYBIASNfIerUOVqdN90JM2jXzobI29wvhp5poKBy9Q5eoPb5fE3XSD4
-         qkfLv8aOC9fYyzkRW5q4NnhEkhSCr/3FNgIv1BZu82/pbFe6kRl6MBV6LeRn+/l/mDdK
-         izSBB1Yte7+8DnUhinn255L6MmzrHNBSxIStpn/qy9B5t/vgHTXJFdlxLOHE5AW1ZAmr
-         2P9d4czxplHq59Vdi+d43joVpqpC31I9Y4B0/pHLZn7MgSlR/027Smr9pXjg5fe3NxhM
-         6SNg==
-X-Gm-Message-State: AO0yUKW6hZXcDYNyhXphhL5HJgnytmreioK4Pm+Uf78NE3tBNXOri4Hg
-        VCq/3b+yM7IXNTilWxim75dm7IwXUtFRwwl9jg/HDVaxuXbrSjeU/5xy/thoyLwGspgSUb7tFzT
-        Vd1RFf8SjF+MFYnqrHT5suDQC/I+cEiGFYT1u2VKoH1MqQX7TQevspv4HifxPq7n1+I+izV7nxA
+        h=content-disposition:mime-version:message-id:subject:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=s1/fUaEg65oKizGF2exT5LmxdQZ1BqDWdzC0vRQQxHc=;
+        b=4gboZpbolZSgiPDy0C4z6FoEvPCD/222n1zuetQZ9V7WAktRq9C7i9hRe9+OlmCncG
+         bMHeOVJSqwNU7QCiom9tvPZdPjgnxClzVR9CB86yZXQL2dqwjmt8UHlkYl8Z9dZo2nD/
+         UtQH/FdyXXVR8m0u3RHf4MAXMaTT7gqF+Irg3J/gX+BCf5nQ2ANH7HabS83IsPfnUog7
+         rCFF11c3vRnRW7/BknNZ1N0umxtyNjj0Wy03B0Roa/uNOQ3pkMATlglSEBxSInZEcZ6c
+         sXPU5Fcqpkd/xlY2YX+OP0ycMjs+5fd9DSdv5ukWBRXpUFTyDtMgJ1wijgDubZ5w2cij
+         dQBw==
+X-Gm-Message-State: AO0yUKWEyPT9W5hAmJm77DMMKGDDRKyeTRSqWnkA2EjSP8DYJYUO31WR
+        +G1pymhmgz9xeKp503HeFWf4is+j3V7z+iCdqP2ZFBhYHrbMXMYJqHjkfFSDAt5oOzslcaqxLgS
+        sOmGD3CDYGoHMsWb6cv2QPaNX9EBKO8gFedS8ZAaWECyGlvTAFpuvMiWW5tbuOJeH1NNwyuLYjQ
         ==
-X-Received: by 2002:a05:6a20:1590:b0:c6:d37c:2a62 with SMTP id h16-20020a056a20159000b000c6d37c2a62mr14375043pzj.11.1677333894506;
-        Sat, 25 Feb 2023 06:04:54 -0800 (PST)
-X-Google-Smtp-Source: AK7set/TXbdc67gcwusU5+PhJEEnVs+eclIQCCyC8rpqt4ekgzrnq3J74e8AuA0cTQaorxxohd2xnw==
-X-Received: by 2002:a05:6a20:1590:b0:c6:d37c:2a62 with SMTP id h16-20020a056a20159000b000c6d37c2a62mr14375000pzj.11.1677333893862;
-        Sat, 25 Feb 2023 06:04:53 -0800 (PST)
+X-Received: by 2002:a17:903:27c3:b0:19c:a3be:d9f5 with SMTP id km3-20020a17090327c300b0019ca3bed9f5mr13150554plb.48.1677424673446;
+        Sun, 26 Feb 2023 07:17:53 -0800 (PST)
+X-Google-Smtp-Source: AK7set+CONGL/soJ752w9TIARYRYmJdtvhuXySMAseoaSBSMOiKGasfRD/OBvi43H1Gj6z21Na3rBw==
+X-Received: by 2002:a17:903:27c3:b0:19c:a3be:d9f5 with SMTP id km3-20020a17090327c300b0019ca3bed9f5mr13150536plb.48.1677424672951;
+        Sun, 26 Feb 2023 07:17:52 -0800 (PST)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c24-20020aa78c18000000b00593adee79efsm1261231pfd.55.2023.02.25.06.04.51
+        by smtp.gmail.com with ESMTPSA id jh20-20020a170903329400b0019ccded6a46sm2772223plb.228.2023.02.26.07.17.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 25 Feb 2023 06:04:53 -0800 (PST)
-Date:   Sat, 25 Feb 2023 22:04:49 +0800
+        Sun, 26 Feb 2023 07:17:52 -0800 (PST)
+Date:   Sun, 26 Feb 2023 23:17:48 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] btrfs: add test case for NODATASUM dev-replace
-Message-ID: <20230225140449.zg2raqkqyz374mmj@zlang-mailbox>
-References: <20230223051049.30086-1-wqu@suse.com>
+Subject: [ANNOUNCE] fstests: merge v2023.02.19 onto master branch
+Message-ID: <20230226151748.7v5vxoouvi7y72os@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230223051049.30086-1-wqu@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 23, 2023 at 01:10:49PM +0800, Qu Wenruo wrote:
-> During my development on dev-replace, I made a mistake in RAID56
-> dev-replace code where it can lead to NODATASUM corruption.
-> Thankfully such corruption didn't reach upstream.
-> 
-> Inspired by such incident, here comes a new test case for btrfs
-> dev-replace, the new case would:
-> 
-> - Populate the filesystem with nodatasum mount option
-> 
-> - Run fssum to record the contents
->   Since the test case only cares about data contents, here we don't
->   include metadata like uid/gid/timestamp.
-> 
-> - Wipe one device
-> 
-> - Mount the fs with the missing device
-> 
-> - Verify the contents is still correct
-> 
-> - Replace the missing device
-> 
-> - Verify the contents is still correct again
->   Before the verification, drop all cache to make sure the 2nd
->   verification is reading from the disks.
-> 
-> For current kernels, the test case should pass as expected.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
+Hi all,
 
-There's not review points from btrfs list, and this case looks good to me,
-and I didn't find any problems on this case by a simple test [1]. So I'd
-like to merge this btrfs specific case directly.
+The master branch of the xfstests repository at:
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+        git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-[1]
-# ./check -s pooldev btrfs/286
-SECTION       -- pooldev
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.2.0-rc8-mainline+ #6 SMP PREEMPT_DYNAMIC Wed Feb 15 14:16:45 CST 2023
-MKFS_OPTIONS  -- /dev/mapper/testvg-scratchdev1
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev1 /mnt/scratch
+has just been updated to v2023.02.19 version.
 
-btrfs/286        41s
-Ran: btrfs/286
-Passed all 1 tests
+Thanks,
+Zorro
 
-SECTION       -- pooldev
-=========================
-Ran: btrfs/286
-Passed all 1 tests
+The new head of the master branch is commit:
 
->  tests/btrfs/286     | 78 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/286.out |  2 ++
->  2 files changed, 80 insertions(+)
->  create mode 100755 tests/btrfs/286
->  create mode 100644 tests/btrfs/286.out
-> 
-> diff --git a/tests/btrfs/286 b/tests/btrfs/286
-> new file mode 100755
-> index 00000000..fb805256
-> --- /dev/null
-> +++ b/tests/btrfs/286
-> @@ -0,0 +1,78 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 286
-> +#
-> +# Make sure btrfs dev-replace on missing device won't cause data corruption
-> +# for NODATASUM data.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto replace
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_command "$WIPEFS_PROG" wipefs
-> +_btrfs_get_profile_configs replace-missing
-> +_require_fssum
-> +_require_scratch_dev_pool 5
-> +_scratch_dev_pool_get 4
-> +_spare_dev_get
-> +
-> +workload()
-> +{
-> +	local profile=$1
-> +	local victim="$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}')"
-> +
-> +	echo "=== Profile: $profile ===" >> $seqres.full
-> +	rm -f $tmp.fssum
-> +	_scratch_pool_mkfs "$profile" >> $seqres.full 2>&1
-> +
-> +	# Use nodatasum mount option, so all data won't have checksum.
-> +	_scratch_mount -o nodatasum
-> +
-> +	$FSSTRESS_PROG -p 10 -n 200 -d $SCRATCH_MNT > /dev/null 2>&1
-> +	sync
-> +
-> +	# Generate fssum for later verification, here we only care
-> +	# about the file contents, thus we don't bother metadata at all.
-> +	$FSSUM_PROG -n -d -f -w $tmp.fssum $SCRATCH_MNT
-> +	_scratch_unmount
-> +
-> +	# Wipe devid 2
-> +	$WIPEFS_PROG -a $victim >> $seqres.full 2>&1
-> +
-> +	# Mount the fs with the victim device missing
-> +	_scratch_mount -o degraded,nodatasum
-> +
-> +	# Verify no data corruption first.
-> +	echo "=== Verify the contents before replace ===" >> $seqres.full
-> +	$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT >> $seqres.full 2>&1
-> +
-> +	# Replace the missing device
-> +	$BTRFS_UTIL_PROG replace start -Bf 2 $SPARE_DEV $SCRATCH_MNT >> $seqres.full
-> +
-> +	# Drop all cache to make sure later read are all from the disks
-> +	echo 3 > /proc/sys/vm/drop_caches
-> +
-> +	# Re-check the file contents
-> +	echo "=== Verify the contents after replace ===" >> $seqres.full
-> +	$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT >> $seqres.full 2>&1
-> +
-> +	_scratch_unmount
-> +}
-> +
-> +for t in "${_btrfs_profile_configs[@]}"; do
-> +	workload "$t"
-> +done
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/286.out b/tests/btrfs/286.out
-> new file mode 100644
-> index 00000000..35c48006
-> --- /dev/null
-> +++ b/tests/btrfs/286.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 286
-> +Silence is golden
-> -- 
-> 2.39.0
-> 
+9ba85b9a6f0f populate: fix some weirdness in __populate_check_xfs_agbtree_height
+
+New commits:
+
+An Long (1):
+      [4eb6985b70ab] btrfs/011: use $_btrfs_profile_configs to limit the tests
+
+Anand Jain (2):
+      [085ee672b3d8] fstests: btrfs/185, 198 and 219 add _fixed_by_kernel_commit
+      [63c4983ca5c5] fstests: btrfs/249: add _wants_kernel_commit and _fixed_by_git_commit
+
+Boris Burkov (1):
+      [150efa34087d] btrfs: test block group size class loading logic
+
+Darrick J. Wong (16):
+      [89224e31d44a] fuzzy: use FORCE_REBUILD over injecting force_repair
+      [2690ec99261d] xfs: test rebuilding the entire filesystem with online fsck
+      [76070f8f0e2c] xfs: stress test ag repair functions
+      [4ec8fcc61022] xfs: race fsstress with online repair for inode record metadata
+      [b3fc8bc8f7c0] xfs: test rebuilding xattrs when the data fork is btree format
+      [ee1df86f65be] xfs: race fsstress with online repair for inode and fork metadata
+      [4d1f5cae8771] xfs: ensure that online file data fork repairs don't hit EDQUOT
+      [74a089e8bcb4] xfs: race fsstress with online repair for special file metadata
+      [82d24c3cdac7] xfs: race fsstress with online scrub and repair for quota metadata
+      [3a4d641020e8] xfs: race fsstress with online scrub and repair for quotacheck
+      [c2c1a3f8c423] xfs: race fsstress with inode link count check and repair
+      [a02d2818e9d1] xfs: test fs summary counter online repair
+      [74065e2f1821] xfs: race fsstress with online repair for summary counters
+      [a6cbb0cc0d5e] xfs/422: don't freeze while racing rmap repair and fsstress
+      [215075d03ddf] populate: take a snapshot of the filesystem if creation fails
+      [9ba85b9a6f0f] populate: fix some weirdness in __populate_check_xfs_agbtree_height
+
+Filipe Manana (1):
+      [2cbd24f84a63] generic/604: fix test to actually create dirty inodes
+
+
+Code Diffstat:
+
+ README              |  3 ++
+ common/btrfs        |  3 ++
+ common/fuzzy        | 71 +++++++++++++++++++++++++++++++++++---------
+ common/populate     | 70 ++++++++++++++++++++++++++++---------------
+ common/rc           |  2 +-
+ common/xfs          | 77 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/011     | 30 +++++++++++--------
+ tests/btrfs/185     |  2 ++
+ tests/btrfs/198     |  6 ++--
+ tests/btrfs/219     |  9 +++---
+ tests/btrfs/249     |  7 +++--
+ tests/btrfs/285     | 50 +++++++++++++++++++++++++++++++
+ tests/btrfs/285.out |  2 ++
+ tests/generic/604   |  2 +-
+ tests/xfs/422       |  4 +--
+ tests/xfs/708       | 37 +++++++++++++++++++++++
+ tests/xfs/708.out   |  2 ++
+ tests/xfs/709       | 37 +++++++++++++++++++++++
+ tests/xfs/709.out   |  2 ++
+ tests/xfs/710       | 38 ++++++++++++++++++++++++
+ tests/xfs/710.out   |  2 ++
+ tests/xfs/711       | 37 +++++++++++++++++++++++
+ tests/xfs/711.out   |  2 ++
+ tests/xfs/712       | 37 +++++++++++++++++++++++
+ tests/xfs/712.out   |  2 ++
+ tests/xfs/713       | 37 +++++++++++++++++++++++
+ tests/xfs/713.out   |  2 ++
+ tests/xfs/714       | 37 +++++++++++++++++++++++
+ tests/xfs/714.out   |  2 ++
+ tests/xfs/715       | 38 ++++++++++++++++++++++++
+ tests/xfs/715.out   |  2 ++
+ tests/xfs/716       | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/716.out   |  2 ++
+ tests/xfs/717       | 37 +++++++++++++++++++++++
+ tests/xfs/717.out   |  2 ++
+ tests/xfs/718       | 39 ++++++++++++++++++++++++
+ tests/xfs/718.out   |  2 ++
+ tests/xfs/719       | 39 ++++++++++++++++++++++++
+ tests/xfs/719.out   |  2 ++
+ tests/xfs/720       | 72 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/720.out   |  3 ++
+ tests/xfs/721       | 38 ++++++++++++++++++++++++
+ tests/xfs/721.out   |  2 ++
+ tests/xfs/722       | 39 ++++++++++++++++++++++++
+ tests/xfs/722.out   |  2 ++
+ tests/xfs/723       | 40 +++++++++++++++++++++++++
+ tests/xfs/723.out   |  2 ++
+ tests/xfs/724       | 40 +++++++++++++++++++++++++
+ tests/xfs/724.out   |  2 ++
+ tests/xfs/725       | 40 +++++++++++++++++++++++++
+ tests/xfs/725.out   |  2 ++
+ tests/xfs/726       | 40 +++++++++++++++++++++++++
+ tests/xfs/726.out   |  2 ++
+ tests/xfs/727       | 40 +++++++++++++++++++++++++
+ tests/xfs/727.out   |  2 ++
+ tests/xfs/728       | 38 ++++++++++++++++++++++++
+ tests/xfs/728.out   |  2 ++
+ tests/xfs/729       | 37 +++++++++++++++++++++++
+ tests/xfs/729.out   |  2 ++
+ tests/xfs/730       | 36 +++++++++++++++++++++++
+ tests/xfs/730.out   |  4 +++
+ tests/xfs/731       | 41 ++++++++++++++++++++++++++
+ tests/xfs/731.out   |  2 ++
+ tests/xfs/732       | 46 +++++++++++++++++++++++++++++
+ tests/xfs/732.out   |  2 ++
+ 65 files changed, 1369 insertions(+), 67 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
 
