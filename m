@@ -2,95 +2,74 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAE74C64ED6
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Feb 2023 10:13:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60E5FC64ED8
+	for <linux-fstests@archiver.kernel.org>; Mon, 27 Feb 2023 13:50:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229910AbjB0KNU (ORCPT
+        id S230262AbjB0Nub (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 27 Feb 2023 05:13:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54194 "EHLO
+        Mon, 27 Feb 2023 08:50:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230019AbjB0KNT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Feb 2023 05:13:19 -0500
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C96181E2AD;
-        Mon, 27 Feb 2023 02:13:16 -0800 (PST)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 5D9EE1F8D9;
-        Mon, 27 Feb 2023 10:13:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1677492795; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
+        with ESMTP id S229535AbjB0NuU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Feb 2023 08:50:20 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62927D335
+        for <fstests@vger.kernel.org>; Mon, 27 Feb 2023 05:49:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1677505771;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=AbuiOjOJzAJUYkqY1Ibzd1+u3Q5cuRoukaLCph7M6nY=;
-        b=L76R8gOguvBHFVUtwObU6cDVg5pWdL0vbC3bl2cMtvZq1UDX4boWq9ii2STpbYwqnxLe8M
-        Ao3Z5vNNuFfa3E70SxfI0v7B7CZzPcapBCXmU8Vhl4gwICMau5qOwdApc+WrVrsOcGHi9U
-        VXt908VXu3BlrtcgD+1GsGQK7JGWZkY=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1677492795;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=AbuiOjOJzAJUYkqY1Ibzd1+u3Q5cuRoukaLCph7M6nY=;
-        b=FR4+alGHE/pAneVhbVyqC0R7SpKjbu+2plsalpDxw5IljaycxC8DQB+RS/jrVt4xm8UXzk
-        mErqgzqt8zmn1TCg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        bh=mbh0k81SJj8KXcQWsPETE7GSsJc/6C/vn1XuCZ3ElNk=;
+        b=OKqm8XDHhqlkxrLgGY9uTFRALqxxnalSHWB9++WrDalNEBS2CIK7DF0dtK/AkBqmJ/LQq4
+        JCWYLkF/sMwvylBrlP/UcNxYzMo18X7UggB7tATKvkHKT+TlcwKI0wVLtSqeoF4O4y9/kz
+        U59e7UYr0l0DNYxpAOKOVno0qmU+pl8=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-612-SA1C-3EVN9iuDzHDZrUQJg-1; Mon, 27 Feb 2023 08:49:29 -0500
+X-MC-Unique: SA1C-3EVN9iuDzHDZrUQJg-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 32CD313A43;
-        Mon, 27 Feb 2023 10:13:15 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id QYDsCjuC/GM0bgAAMHmgww
-        (envelope-from <ddiss@suse.de>); Mon, 27 Feb 2023 10:13:15 +0000
-Date:   Mon, 27 Feb 2023 11:14:41 +0100
-From:   David Disseldorp <ddiss@suse.de>
-To:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-Cc:     Zorro Lang <zlang@redhat.com>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2] common/rc: don't clear superblock for zoned scratch
- pools
-Message-ID: <20230227111441.5eac2e29@echidna.fritz.box>
-In-Reply-To: <0df9a175-b18d-4706-ae69-ed019b326924@wdc.com>
-References: <20230227082717.325929-1-johannes.thumshirn@wdc.com>
-        <20230227102351.2fa21c70@echidna.fritz.box>
-        <0df9a175-b18d-4706-ae69-ed019b326924@wdc.com>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 3EEC33C21C21;
+        Mon, 27 Feb 2023 13:49:29 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.33.36.18])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 28010404BEC5;
+        Mon, 27 Feb 2023 13:49:28 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+In-Reply-To: <20230202204428.3267832-5-willy@infradead.org>
+References: <20230202204428.3267832-5-willy@infradead.org> <20230202204428.3267832-1-willy@infradead.org>
+To:     "Matthew Wilcox (Oracle)" <willy@infradead.org>
+Cc:     dhowells@redhat.com, linux-fsdevel@vger.kernel.org,
+        linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-mm@kvack.org,
+        Hugh Dickins <hughd@google.com>, linux-kernel@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 4/5] afs: Zero bytes after 'oldsize' if we're expanding the file
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <2730678.1677505767.1@warthog.procyon.org.uk>
+Date:   Mon, 27 Feb 2023 13:49:27 +0000
+Message-ID: <2730679.1677505767@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.1
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, 27 Feb 2023 09:31:53 +0000, Johannes Thumshirn wrote:
+Matthew Wilcox (Oracle) <willy@infradead.org> wrote:
 
-> On 27.02.23 10:22, David Disseldorp wrote:
-> >> -		# to help better debug when something fails, we remove
-> >> -		# traces of previous btrfs FS on the dev.
-> >> -		dd if=/dev/zero of=$i bs=4096 count=100 > /dev/null 2>&1
-> >> +		# To help better debug when something fails, we remove
-> >> +		# traces of previous btrfs FS on the dev. For zoned devices we
-> >> +		# can't use dd as it'll lead to unaligned writes so simply
-> >> +		# reset the first two zones.
-> >> +		if [ "`_zone_type "$i"`" = "none" ]; then
-> >> +			dd if=/dev/zero of=$i bs=4096 count=100 > /dev/null 2>&1
-> >> +		else
-> >> +			blkzone reset -c 2 $i
-> >> +		fi  
-> > 
-> > IIUC, any output from blkzone reset will cause test failures - is that
-> > an intention here, or should output go to /dev/null like dd?
-> > 
-> > Looks fine otherwise.  
+> POSIX requires that "If the file size is increased, the extended area
+> shall appear as if it were zero-filled".  It is possible to use mmap to
+> write past EOF and that data will become visible instead of zeroes.
 > 
-> If all is well, blkzone reset won't have any output. So I guess we're fine.
+> Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
 
-Thanks for the confirmation. In that case:
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+That seems to work.  Do you want me to pass it on to Linus?  If not:
+
+Acked-by: David Howells <dhowells@redhat.com>
+
