@@ -2,321 +2,78 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5DDAC7EE23
-	for <linux-fstests@archiver.kernel.org>; Tue, 28 Feb 2023 01:56:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9447C64EC4
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Mar 2023 02:08:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229677AbjB1B4Y (ORCPT
+        id S229577AbjCACIX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 27 Feb 2023 20:56:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54702 "EHLO
+        Tue, 28 Feb 2023 21:08:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57776 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229515AbjB1B4X (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Feb 2023 20:56:23 -0500
+        with ESMTP id S229535AbjCACIW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Feb 2023 21:08:22 -0500
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 816C51B2EA
-        for <fstests@vger.kernel.org>; Mon, 27 Feb 2023 17:55:36 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2990C36693
+        for <fstests@vger.kernel.org>; Tue, 28 Feb 2023 18:07:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677549335;
+        s=mimecast20190719; t=1677636468;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=1+6mGWPsCO3IWrFa98JJlqYPD/D0nP40q9U3Bm8Cpyo=;
-        b=O0RQWyRYj+t1FrJjLT5VbJrqXQEYHowrFLEqdTUcCEHLzgg0SdBgFUqsRwmm/SNV1lto4H
-        UUaDyXsVwiQx5NDnwhvHDI3D6ia+RBxxpR076hXHMsR3JGQUGrChhz88ZKfO0QAqUVOL+p
-        XGFgySIQ83iEOINa6cpjuvXQcZpHNqA=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-59-HgBMKPB3N7uOOTocQpExjA-1; Mon, 27 Feb 2023 20:55:34 -0500
-X-MC-Unique: HgBMKPB3N7uOOTocQpExjA-1
-Received: by mail-pl1-f200.google.com with SMTP id e1-20020a17090301c100b0019cd429f407so4508246plh.17
-        for <fstests@vger.kernel.org>; Mon, 27 Feb 2023 17:55:34 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1+6mGWPsCO3IWrFa98JJlqYPD/D0nP40q9U3Bm8Cpyo=;
-        b=ABYIjyA9wDqXfXtt3KTAtEAbcQKhziKqaQGkxBYkuSOf8TsuW8e8AISt9qOa/p5Q1l
-         YnWtV5bS70u5Db5FiBY/XDeZiVLMmzbSfqsl782oVcK9WboXyrxfQgi7oYxKM2jPs3cL
-         p8QSC7FxpGEI9hAAOwkNq+kxRkFJBXPIhBiygbUrp6Zfm8q7mh0wyTykTSPFGgnu4Vtv
-         rL3WMuVWIcJUU+z3sUv2iYhH/U+AVAaXr0SxetZzTdHAIFrrR9KD5qUYzgxVRca1zsnS
-         P9fz75NM2rqha+D905qzyJ5TG5tNuVx8P0te75+NFrJVr0UEgXgzPIs2Rs785cNPjMZJ
-         gWfw==
-X-Gm-Message-State: AO0yUKUUErgNnVPQJCTu3mkViXWAzAsuU14BtgUwXdxSuBCGm95cCRJ3
-        bn5tejyafyZ/LrWsw3uosB+8XN0NA9oVNANay5LJBfjpVlTm0w8IAw4U/257LWtXBsHX+f4ELGz
-        JJi4AHQ3xTy2Ws0IC7/GEFiSRJg==
-X-Received: by 2002:a17:902:ce8f:b0:19d:181f:511 with SMTP id f15-20020a170902ce8f00b0019d181f0511mr1160500plg.30.1677549332823;
-        Mon, 27 Feb 2023 17:55:32 -0800 (PST)
-X-Google-Smtp-Source: AK7set9pGSpF8Pnja11dlEN8lTTyBYUD7kc1iBpNQKpbjj5zvzKMpTD+9hIIkA6+Ob6tTorUJ54B9w==
-X-Received: by 2002:a17:902:ce8f:b0:19d:181f:511 with SMTP id f15-20020a170902ce8f00b0019d181f0511mr1160479plg.30.1677549332362;
-        Mon, 27 Feb 2023 17:55:32 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x14-20020a170902a38e00b0019607984a5esm5236437pla.95.2023.02.27.17.55.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Feb 2023 17:55:31 -0800 (PST)
-Date:   Tue, 28 Feb 2023 09:55:28 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 6/7] fsx: support FIEXCHANGE_RANGE
-Message-ID: <20230228015528.a4z542srffjwzzd7@zlang-mailbox>
-References: <167243878818.732172.6392253687008406885.stgit@magnolia>
- <167243878899.732172.1539601356241657286.stgit@magnolia>
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=ED5XjjmM9m4o8ZkoSXU/xAeHv8sNQVmEbMS+K5GlgBs=;
+        b=Fuf1/NvkpZKKml0VOIkV7v36GjknKZgnFsMmsFJBPm/JiavhdeoT+Pu2lqzPoP1MPoGleW
+        vkSzQDmcJ8Ottm+RQoIz/pxf3ssmsnQQbReNaHBn7N7ORbZXAR5uCAzFTbLOouGm0ocor0
+        vxWvoTnzoN75M82U1Sanp1/NAKBFE+c=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-617-SJ8x4P1oO8CjWXI1UHz6cA-1; Tue, 28 Feb 2023 21:07:45 -0500
+X-MC-Unique: SJ8x4P1oO8CjWXI1UHz6cA-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id A874938123A5;
+        Wed,  1 Mar 2023 02:07:44 +0000 (UTC)
+Received: from lxbceph1.gsslab.pek2.redhat.com (unknown [10.72.47.117])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id F29DE2026D4B;
+        Wed,  1 Mar 2023 02:07:41 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     fstests@vger.kernel.org
+Cc:     david@fromorbit.com, djwong@kernel.org, ceph-devel@vger.kernel.org,
+        vshankar@redhat.com, zlang@redhat.com, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] generic/075: no need to move the .fsxlog to the same directory
+Date:   Wed,  1 Mar 2023 10:07:30 +0800
+Message-Id: <20230301020730.92354-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <167243878899.732172.1539601356241657286.stgit@magnolia>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.4
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Dec 30, 2022 at 02:19:49PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Upgrade fsx to support exchanging file contents.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+From: Xiubo Li <xiubli@redhat.com>
 
-Hi Darrick,
+Actually it was trying to move the '075.$_n.fsxlog' from results
+directory to the same results directory.
 
-I've merged most of patches of [NYE DELUGE 2/4], now I'm trying to merge
-the rest of it this time.
+Fixes: https://tracker.ceph.com/issues/58834
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ tests/generic/075 | 1 -
+ 1 file changed, 1 deletion(-)
 
-This patch will get build warning [1] from autoconf, can you rebase this patch
-to current for-next branch, and use autoupdate to update the configure.ac
-and lib/autoconf/general.m4 ?
-
-Thanks,
-Zorro
-
-[1]
-autoconf
-configure.ac:73: warning: The macro `AC_TRY_LINK' is obsolete.
-configure.ac:73: You should run autoupdate.
-./lib/autoconf/general.m4:2920: AC_TRY_LINK is expanded from...
-m4/package_libcdev.m4:161: AC_HAVE_FIEXCHANGE is expanded from...
-configure.ac:73: the top level
-./configure \   
-                --libexecdir=/usr/lib \
-                --exec_prefix=/var/lib
-
->  configure.ac          |    1 
->  include/builddefs.in  |    1 
->  ltp/Makefile          |    4 +
->  ltp/fsx.c             |  160 ++++++++++++++++++++++++++++++++++++++++++++++++-
->  m4/package_libcdev.m4 |   21 ++++++
->  src/fiexchange.h      |  101 +++++++++++++++++++++++++++++++
->  src/global.h          |    6 ++
->  7 files changed, 292 insertions(+), 2 deletions(-)
->  create mode 100644 src/fiexchange.h
-> 
-> 
-> diff --git a/configure.ac b/configure.ac
-> index e92bd6b26d..4687d8a3c0 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -70,6 +70,7 @@ AC_HAVE_SEEK_DATA
->  AC_HAVE_BMV_OF_SHARED
->  AC_HAVE_NFTW
->  AC_HAVE_RLIMIT_NOFILE
-> +AC_HAVE_FIEXCHANGE
-
-[snip]
-
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-
-Looks like we nearly used up most of letters for fsx, to avoid some operations.
-
-Maybe we can use a single option (e.g. -a means avoid) and suboptions to
-help that. For example "-a xchg_range,clone_range,dedupe_range" to avoid
-these 3 operations. Or use long option, e.g. --no-xchg-range, --no-clone-range
-to replace short ones.
-
-What do you think? (Anyway, that's not the problem of this patch)
-
-Thanks,
-Zorro
-
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2747,6 +2898,9 @@ main(int argc, char **argv)
->  		case 'I':
->  			insert_range_calls = 0;
->  			break;
-> +		case '0':
-> +			xchg_range_calls = 0;
-> +			break;
->  		case 'J':
->  			clone_range_calls = 0;
->  			break;
-> @@ -2988,6 +3142,8 @@ main(int argc, char **argv)
->  		dedupe_range_calls = test_dedupe_range();
->  	if (copy_range_calls)
->  		copy_range_calls = test_copy_range();
-> +	if (xchg_range_calls)
-> +		xchg_range_calls = test_xchg_range();
->  
->  	while (numops == -1 || numops--)
->  		if (!test())
-> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
-> index e1b381c16f..db663970c2 100644
-> --- a/m4/package_libcdev.m4
-> +++ b/m4/package_libcdev.m4
-> @@ -157,3 +157,24 @@ AC_DEFUN([AC_HAVE_RLIMIT_NOFILE],
->         AC_MSG_RESULT(no))
->      AC_SUBST(have_rlimit_nofile)
->    ])
-> +
-> +#
-> +# Check if we have a FIEXCHANGE_RANGE ioctl (Linux)
-> +#
-> +AC_DEFUN([AC_HAVE_FIEXCHANGE],
-> +  [ AC_MSG_CHECKING([for FIEXCHANGE_RANGE])
-> +    AC_TRY_LINK([
-> +#define _GNU_SOURCE
-> +#include <sys/syscall.h>
-> +#include <sys/ioctl.h>
-> +#include <unistd.h>
-> +#include <linux/fs.h>
-> +#include <linux/fiexchange.h>
-> +    ], [
-> +         struct file_xchg_range fxr;
-> +         ioctl(-1, FIEXCHANGE_RANGE, &fxr);
-> +    ], have_fiexchange=yes
-> +       AC_MSG_RESULT(yes),
-> +       AC_MSG_RESULT(no))
-> +    AC_SUBST(have_fiexchange)
-> +  ])
-> diff --git a/src/fiexchange.h b/src/fiexchange.h
-> new file mode 100644
-> index 0000000000..29b3ac0ff5
-> --- /dev/null
-> +++ b/src/fiexchange.h
-> @@ -0,0 +1,101 @@
-> +/* SPDX-License-Identifier: GPL-2.0-or-later WITH Linux-syscall-note */
-> +/*
-> + * FIEXCHANGE ioctl definitions, to facilitate exchanging parts of files.
-> + *
-> + * Copyright (C) 2022 Oracle.  All Rights Reserved.
-> + *
-> + * Author: Darrick J. Wong <djwong@kernel.org>
-> + */
-> +#ifndef _LINUX_FIEXCHANGE_H
-> +#define _LINUX_FIEXCHANGE_H
-> +
-> +#include <linux/types.h>
-> +
-> +/*
-> + * Exchange part of file1 with part of the file that this ioctl that is being
-> + * called against (which we'll call file2).  Filesystems must be able to
-> + * restart and complete the operation even after the system goes down.
-> + */
-> +struct file_xchg_range {
-> +	__s64		file1_fd;
-> +	__s64		file1_offset;	/* file1 offset, bytes */
-> +	__s64		file2_offset;	/* file2 offset, bytes */
-> +	__s64		length;		/* bytes to exchange */
-> +
-> +	__u64		flags;		/* see FILE_XCHG_RANGE_* below */
-> +
-> +	/* file2 metadata for optional freshness checks */
-> +	__s64		file2_ino;	/* inode number */
-> +	__s64		file2_mtime;	/* modification time */
-> +	__s64		file2_ctime;	/* change time */
-> +	__s32		file2_mtime_nsec; /* mod time, nsec */
-> +	__s32		file2_ctime_nsec; /* change time, nsec */
-> +
-> +	__u64		pad[6];		/* must be zeroes */
-> +};
-> +
-> +/*
-> + * Atomic exchange operations are not required.  This relaxes the requirement
-> + * that the filesystem must be able to complete the operation after a crash.
-> + */
-> +#define FILE_XCHG_RANGE_NONATOMIC	(1 << 0)
-> +
-> +/*
-> + * Check that file2's inode number, mtime, and ctime against the values
-> + * provided, and return -EBUSY if there isn't an exact match.
-> + */
-> +#define FILE_XCHG_RANGE_FILE2_FRESH	(1 << 1)
-> +
-> +/*
-> + * Check that the file1's length is equal to file1_offset + length, and that
-> + * file2's length is equal to file2_offset + length.  Returns -EDOM if there
-> + * isn't an exact match.
-> + */
-> +#define FILE_XCHG_RANGE_FULL_FILES	(1 << 2)
-> +
-> +/*
-> + * Exchange file data all the way to the ends of both files, and then exchange
-> + * the file sizes.  This flag can be used to replace a file's contents with a
-> + * different amount of data.  length will be ignored.
-> + */
-> +#define FILE_XCHG_RANGE_TO_EOF		(1 << 3)
-> +
-> +/* Flush all changes in file data and file metadata to disk before returning. */
-> +#define FILE_XCHG_RANGE_FSYNC		(1 << 4)
-> +
-> +/* Dry run; do all the parameter verification but do not change anything. */
-> +#define FILE_XCHG_RANGE_DRY_RUN		(1 << 5)
-> +
-> +/*
-> + * Do not exchange any part of the range where file1's mapping is a hole.  This
-> + * can be used to emulate scatter-gather atomic writes with a temp file.
-> + */
-> +#define FILE_XCHG_RANGE_SKIP_FILE1_HOLES (1 << 6)
-> +
-> +/*
-> + * Commit the contents of file1 into file2 if file2 has the same inode number,
-> + * mtime, and ctime as the arguments provided to the call.  The old contents of
-> + * file2 will be moved to file1.
-> + *
-> + * With this flag, all committed information can be retrieved even if the
-> + * system crashes or is rebooted.  This includes writing through or flushing a
-> + * disk cache if present.  The call blocks until the device reports that the
-> + * commit is complete.
-> + *
-> + * This flag should not be combined with NONATOMIC.  It can be combined with
-> + * SKIP_FILE1_HOLES.
-> + */
-> +#define FILE_XCHG_RANGE_COMMIT		(FILE_XCHG_RANGE_FILE2_FRESH | \
-> +					 FILE_XCHG_RANGE_FSYNC)
-> +
-> +#define FILE_XCHG_RANGE_ALL_FLAGS	(FILE_XCHG_RANGE_NONATOMIC | \
-> +					 FILE_XCHG_RANGE_FILE2_FRESH | \
-> +					 FILE_XCHG_RANGE_FULL_FILES | \
-> +					 FILE_XCHG_RANGE_TO_EOF | \
-> +					 FILE_XCHG_RANGE_FSYNC | \
-> +					 FILE_XCHG_RANGE_DRY_RUN | \
-> +					 FILE_XCHG_RANGE_SKIP_FILE1_HOLES)
-> +
-> +#define FIEXCHANGE_RANGE	_IOWR('X', 129, struct file_xchg_range)
-> +
-> +#endif /* _LINUX_FIEXCHANGE_H */
-> diff --git a/src/global.h b/src/global.h
-> index b44070993c..49570ef117 100644
-> --- a/src/global.h
-> +++ b/src/global.h
-> @@ -171,6 +171,12 @@
->  #include <sys/mman.h>
->  #endif
->  
-> +#ifdef HAVE_FIEXCHANGE
-> +# include <linux/fiexchange.h>
-> +#else
-> +# include "fiexchange.h"
-> +#endif
-> +
->  static inline unsigned long long
->  rounddown_64(unsigned long long x, unsigned int y)
->  {
-> 
+diff --git a/tests/generic/075 b/tests/generic/075
+index 9f24ad41..03a394a6 100755
+--- a/tests/generic/075
++++ b/tests/generic/075
+@@ -57,7 +57,6 @@ _do_test()
+     then
+ 	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
+ 	mv $out/$seq.$_n $seqres.$_n.full
+-	mv "$RESULT_DIR"/$seq.$_n.fsxlog $seqres.$_n.fsxlog
+ 	od -xAx $seqres.$_n.full > $seqres.$_n.bad
+ 	od -xAx "$RESULT_DIR"/$seq.$_n.fsxgood > $seqres.$_n.good
+ 	rm -f "$RESULT_DIR"/$seq.$_n.fsxgood
+-- 
+2.31.1
 
