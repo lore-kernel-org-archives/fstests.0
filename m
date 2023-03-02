@@ -2,277 +2,157 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E735C6FA8E
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Mar 2023 15:36:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAAD2C6FA8E
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Mar 2023 15:39:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229778AbjCBPgO (ORCPT
+        id S229659AbjCBPjf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Mar 2023 10:36:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37132 "EHLO
+        Thu, 2 Mar 2023 10:39:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229955AbjCBPgM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2023 10:36:12 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F7E42FCCD;
-        Thu,  2 Mar 2023 07:36:09 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B04D1615C5;
-        Thu,  2 Mar 2023 15:36:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B200C433D2;
-        Thu,  2 Mar 2023 15:36:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1677771368;
-        bh=vJjQOGiCTMVBSF/kIjB0P8kduISdTcD2TmsZ72jDPsE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=uSDkeQC94Rxgb0n2FyYwyVV9QzePaqEk/iK5P/ib6SbsfFxFfLmu2/+9ROPRdMhZ3
-         NQnEzKMbhN+ft/rY0hjHaQgrimnznuInHK8Uionov0vr4hdCViVJDkipNCiB1jzIQi
-         cb0b91c/LKPc2QgGGKCRrbQFTWzT2gcwwv3qi4/VbbDO3kwqygrxg+te5xhKewK/d+
-         9ZyMZ2BluC62f7gG7J7jgKoleZhJVQfd3StwD24zZIybnOcLTRFTOneGM8AL9Nu3b1
-         XP5oAuP4rxgg89QBvcrpSZHjM1ZQ31xnKhYOTgCMTM0hmxSMDfx2dB+sAhqB0v5DZ0
-         0LjD4Fj8hRaBA==
-Date:   Thu, 2 Mar 2023 07:36:07 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 7/7] fsstress: update for FIEXCHANGE_RANGE
-Message-ID: <ZADCZ6MiQGYgGMnS@magnolia>
-References: <167763954409.3796922.11086772690906428270.stgit@magnolia>
- <167763958362.3796922.2350291536547146358.stgit@magnolia>
- <20230302094206.k4aerwldv2squ667@zlang-mailbox>
+        with ESMTP id S229504AbjCBPje (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2023 10:39:34 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E97C7193F5
+        for <fstests@vger.kernel.org>; Thu,  2 Mar 2023 07:38:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1677771525;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=e4uwHdbnK9v7ba4aqvEqtG1jfeJ5xegqZGztujgU68U=;
+        b=E9OCagp+U5JT1G/OCspStkOuZ//yMfk+OxMBYnpQdyEgX5E0qi02OV74jyI7hNLYTIbqTc
+        S1Y0iR3fjhQy+rlKlAnyx4dFe/j06C3xEaV1bklehDmCTevtyRfbJXrM/4ElNjOPpuS6Fa
+        i4HpxsdAppzUZKC8/AO8LUXD46m1vOQ=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-164-dsUcW7cYOrCnWuSGHgaI0A-1; Thu, 02 Mar 2023 10:38:43 -0500
+X-MC-Unique: dsUcW7cYOrCnWuSGHgaI0A-1
+Received: by mail-pl1-f197.google.com with SMTP id k17-20020a170902d59100b0019abcf45d75so8704672plh.8
+        for <fstests@vger.kernel.org>; Thu, 02 Mar 2023 07:38:43 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1677771523;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=e4uwHdbnK9v7ba4aqvEqtG1jfeJ5xegqZGztujgU68U=;
+        b=0QU+N1l9+mEjfbNLi9Brd0EACYQ2sFG4QcHB2r4pw76PnLISL7JfNMDThGNSK4Oi8d
+         tc8UP+PC4h4BBWyr5RxlDItG1Dh/+kFjdYOa8r/btcoMk0jfUI+pKXut9SE5EZYLX+yl
+         DvF3ienTE3Jze3sQqLUNfFo9tb9e0j8HveeR7oCDFTDVUMUgSAJEtWSHtpgV4TLSUe25
+         9uZ/VOZDQB64f4xrzhlwo/1Dum9B5C9djzVvpsnQpopuW95v7+QNeXeZ9yjNf9yswv75
+         iyfxgwM8GzXjC3rVxI9djQzrdJwf5iO5ueJ2VgSw3Z61ELsgyAfePbVCuMjJkVJWFJhN
+         TJHw==
+X-Gm-Message-State: AO0yUKUGllkbvgIUItqX1gBLWxAjOib9EJIhKgNX57XIICiuYIwuoyoM
+        Ei+iOOlo9Trkm7rWg/JRM9NUokGUYVC1EDjtDplvh5zfdDf05l1YpJzfpH6jkcQSSRLaT3Y5OSq
+        rH7fpgLmPXpQjvjkEjQ==
+X-Received: by 2002:a17:903:2288:b0:19c:d452:b282 with SMTP id b8-20020a170903228800b0019cd452b282mr12322126plh.12.1677771522678;
+        Thu, 02 Mar 2023 07:38:42 -0800 (PST)
+X-Google-Smtp-Source: AK7set+krnQGaY0WGnJqb3tDCJGMjl+bg1/MR4tSPfkN/LorV8TIVojZi6uELXC0e6CwbEL8swRiJA==
+X-Received: by 2002:a17:903:2288:b0:19c:d452:b282 with SMTP id b8-20020a170903228800b0019cd452b282mr12322104plh.12.1677771522269;
+        Thu, 02 Mar 2023 07:38:42 -0800 (PST)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id e9-20020a170902d38900b0019337bf957dsm10466908pld.296.2023.03.02.07.38.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Mar 2023 07:38:41 -0800 (PST)
+Date:   Thu, 2 Mar 2023 23:38:37 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     xiubli@redhat.com
+Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
+        ceph-devel@vger.kernel.org, vshankar@redhat.com
+Subject: Re: [PATCH] generic/{075,112}: fix printing the incorrect return
+ value of fsx
+Message-ID: <20230302153837.w23cw5gbedmudwuk@zlang-mailbox>
+References: <20230301030620.137153-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230302094206.k4aerwldv2squ667@zlang-mailbox>
+In-Reply-To: <20230301030620.137153-1-xiubli@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 02, 2023 at 05:42:06PM +0800, Zorro Lang wrote:
-> On Tue, Feb 28, 2023 at 06:59:43PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Teach this stress tool to be able to use the file content exchange
-> > ioctl.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  ltp/fsstress.c |  168 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 168 insertions(+)
-> > 
-> > 
-> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > index 10608fb554..0fba3d92a0 100644
-> > --- a/ltp/fsstress.c
-> > +++ b/ltp/fsstress.c
-> > @@ -143,6 +143,7 @@ typedef enum {
-> >  	OP_URING_WRITE,
-> >  	OP_WRITE,
-> >  	OP_WRITEV,
-> > +	OP_XCHGRANGE,
-> >  	OP_LAST
-> >  } opty_t;
-> >  
-> > @@ -272,6 +273,8 @@ void	uring_read_f(opnum_t, long);
-> >  void	uring_write_f(opnum_t, long);
-> >  void	write_f(opnum_t, long);
-> >  void	writev_f(opnum_t, long);
-> > +void	xchgrange_f(opnum_t, long);
-> > +
-> >  char	*xattr_flag_to_string(int);
-> >  
-> >  struct opdesc	ops[OP_LAST]	= {
-> > @@ -340,6 +343,7 @@ struct opdesc	ops[OP_LAST]	= {
-> >  	[OP_URING_WRITE]   = {"uring_write",   uring_write_f,	1, 1 },
-> >  	[OP_WRITE]	   = {"write",	       write_f,		4, 1 },
-> >  	[OP_WRITEV]	   = {"writev",	       writev_f,	4, 1 },
-> > +	[OP_XCHGRANGE]	   = {"xchgrange",     xchgrange_f,	4, 1 },
+On Wed, Mar 01, 2023 at 11:06:20AM +0800, xiubli@redhat.com wrote:
+> From: Xiubo Li <xiubli@redhat.com>
 > 
-> Do you think this is a common operation which should use same frequency (4)
-> with read/write operations? I'd like to reduce the default freq=4 to 2 or 1
-> when I merge it. what do you think?
-
-Sounds fine to me, I copy-pasted the 4 from the line above.  :)
-
---D
-
-> Thanks,
-> Zorro
+> We need to save the result of the 'fsx' temporarily.
 > 
-> >  }, *ops_end;
-> >  
-> >  flist_t	flist[FT_nft] = {
-> > @@ -2494,6 +2498,170 @@ chown_f(opnum_t opno, long r)
-> >  	free_pathname(&f);
-> >  }
-> >  
-> > +/* exchange some arbitrary range of f1 to f2...fn. */
-> > +void
-> > +xchgrange_f(
-> > +	opnum_t			opno,
-> > +	long			r)
-> > +{
-> > +#ifdef FIEXCHANGE_RANGE
-> > +	struct file_xchg_range	fxr = { 0 };
-> > +	static __u64		swap_flags = 0;
-> > +	struct pathname		fpath1;
-> > +	struct pathname		fpath2;
-> > +	struct stat64		stat1;
-> > +	struct stat64		stat2;
-> > +	char			inoinfo1[1024];
-> > +	char			inoinfo2[1024];
-> > +	off64_t			lr;
-> > +	off64_t			off1;
-> > +	off64_t			off2;
-> > +	off64_t			max_off2;
-> > +	size_t			len;
-> > +	int			v1;
-> > +	int			v2;
-> > +	int			fd1;
-> > +	int			fd2;
-> > +	int			ret;
-> > +	int			tries = 0;
-> > +	int			e;
-> > +
-> > +	/* Load paths */
-> > +	init_pathname(&fpath1);
-> > +	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
-> > +		if (v1)
-> > +			printf("%d/%lld: xchgrange read - no filename\n",
-> > +				procid, opno);
-> > +		goto out_fpath1;
-> > +	}
-> > +
-> > +	init_pathname(&fpath2);
-> > +	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
-> > +		if (v2)
-> > +			printf("%d/%lld: xchgrange write - no filename\n",
-> > +				procid, opno);
-> > +		goto out_fpath2;
-> > +	}
-> > +
-> > +	/* Open files */
-> > +	fd1 = open_path(&fpath1, O_RDONLY);
-> > +	e = fd1 < 0 ? errno : 0;
-> > +	check_cwd();
-> > +	if (fd1 < 0) {
-> > +		if (v1)
-> > +			printf("%d/%lld: xchgrange read - open %s failed %d\n",
-> > +				procid, opno, fpath1.path, e);
-> > +		goto out_fpath2;
-> > +	}
-> > +
-> > +	fd2 = open_path(&fpath2, O_WRONLY);
-> > +	e = fd2 < 0 ? errno : 0;
-> > +	check_cwd();
-> > +	if (fd2 < 0) {
-> > +		if (v2)
-> > +			printf("%d/%lld: xchgrange write - open %s failed %d\n",
-> > +				procid, opno, fpath2.path, e);
-> > +		goto out_fd1;
-> > +	}
-> > +
-> > +	/* Get file stats */
-> > +	if (fstat64(fd1, &stat1) < 0) {
-> > +		if (v1)
-> > +			printf("%d/%lld: xchgrange read - fstat64 %s failed %d\n",
-> > +				procid, opno, fpath1.path, errno);
-> > +		goto out_fd2;
-> > +	}
-> > +	inode_info(inoinfo1, sizeof(inoinfo1), &stat1, v1);
-> > +
-> > +	if (fstat64(fd2, &stat2) < 0) {
-> > +		if (v2)
-> > +			printf("%d/%lld: xchgrange write - fstat64 %s failed %d\n",
-> > +				procid, opno, fpath2.path, errno);
-> > +		goto out_fd2;
-> > +	}
-> > +	inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v2);
-> > +
-> > +	if (stat1.st_size < (stat1.st_blksize * 2) ||
-> > +	    stat2.st_size < (stat2.st_blksize * 2)) {
-> > +		if (v2)
-> > +			printf("%d/%lld: xchgrange - files are too small\n",
-> > +				procid, opno);
-> > +		goto out_fd2;
-> > +	}
-> > +
-> > +	/* Never let us swap more than 1/4 of the files. */
-> > +	len = (random() % FILELEN_MAX) + 1;
-> > +	if (len > stat1.st_size / 4)
-> > +		len = stat1.st_size / 4;
-> > +	if (len > stat2.st_size / 4)
-> > +		len = stat2.st_size / 4;
-> > +	len = rounddown_64(len, stat1.st_blksize);
-> > +	if (len == 0)
-> > +		len = stat1.st_blksize;
-> > +
-> > +	/* Calculate offsets */
-> > +	lr = ((int64_t)random() << 32) + random();
-> > +	if (stat1.st_size == len)
-> > +		off1 = 0;
-> > +	else
-> > +		off1 = (off64_t)(lr % MIN(stat1.st_size - len, MAXFSIZE));
-> > +	off1 %= maxfsize;
-> > +	off1 = rounddown_64(off1, stat1.st_blksize);
-> > +
-> > +	/*
-> > +	 * If srcfile == destfile, randomly generate destination ranges
-> > +	 * until we find one that doesn't overlap the source range.
-> > +	 */
-> > +	max_off2 = MIN(stat2.st_size  - len, MAXFSIZE);
-> > +	do {
-> > +		lr = ((int64_t)random() << 32) + random();
-> > +		if (stat2.st_size == len)
-> > +			off2 = 0;
-> > +		else
-> > +			off2 = (off64_t)(lr % max_off2);
-> > +		off2 %= maxfsize;
-> > +		off2 = rounddown_64(off2, stat2.st_blksize);
-> > +	} while (stat1.st_ino == stat2.st_ino &&
-> > +		 llabs(off2 - off1) < len &&
-> > +		 tries++ < 10);
-> > +
-> > +	/* Swap data blocks */
-> > +	fxr.file1_fd = fd1;
-> > +	fxr.file1_offset = off1;
-> > +	fxr.length = len;
-> > +	fxr.file2_offset = off2;
-> > +	fxr.flags = swap_flags;
-> > +
-> > +retry:
-> > +	ret = ioctl(fd2, FIEXCHANGE_RANGE, &fxr);
-> > +	e = ret < 0 ? errno : 0;
-> > +	if (e == EOPNOTSUPP && !(swap_flags & FILE_XCHG_RANGE_NONATOMIC)) {
-> > +		swap_flags = FILE_XCHG_RANGE_NONATOMIC;
-> > +		fxr.flags |= swap_flags;
-> > +		goto retry;
-> > +	}
-> > +	if (v1 || v2) {
-> > +		printf("%d/%lld: xchgrange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
-> > +			procid, opno,
-> > +			fpath1.path, inoinfo1, (long long)off1, (long long)len,
-> > +			fpath2.path, inoinfo2, (long long)off2, (long long)len);
-> > +
-> > +		if (ret < 0)
-> > +			printf(" error %d", e);
-> > +		printf("\n");
-> > +	}
-> > +
-> > +out_fd2:
-> > +	close(fd2);
-> > +out_fd1:
-> > +	close(fd1);
-> > +out_fpath2:
-> > +	free_pathname(&fpath2);
-> > +out_fpath1:
-> > +	free_pathname(&fpath1);
-> > +#endif
-> > +}
-> > +
-> >  /* reflink some arbitrary range of f1 to f2. */
-> >  void
-> >  clonerange_f(
-> > 
+> Fixes: https://tracker.ceph.com/issues/58834
+> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> ---
+
+Hmm... how did you generate this patch? Did you change something before you
+send this patch out? I can't merge it simply, always got below errors [1] [2].
+May you help to generate this patch again purely?
+
+(Of course you can keep the RVB of Darrick)
+
+Thanks,
+Zorro
+
+[1]
+$ git am ./20230301_xiubli_generic_075_112_fix_printing_the_incorrect_return_value_of_fsx.mbx
+Applying: generic/{075,112}: fix printing the incorrect return value of fsx
+error: patch failed: tests/generic/075:53
+error: tests/generic/075: patch does not apply
+Patch failed at 0001 generic/{075,112}: fix printing the incorrect return value of fsx
+hint: Use 'git am --show-current-patch=diff' to see the failed patch
+When you have resolved this problem, run "git am --continue".
+If you prefer to skip this patch, run "git am --skip" instead.
+To restore the original branch and stop patching, run "git am --abort".
+
+[2]
+$ git am -3 ./20230301_xiubli_generic_075_112_fix_printing_the_incorrect_return_value_of_fsx.mbx
+Applying: generic/{075,112}: fix printing the incorrect return value of fsx
+error: sha1 information is lacking or useless (tests/generic/075).
+error: could not build fake ancestor
+Patch failed at 0001 generic/{075,112}: fix printing the incorrect return value of fsx
+hint: Use 'git am --show-current-patch=diff' to see the failed patch
+When you have resolved this problem, run "git am --continue".
+If you prefer to skip this patch, run "git am --skip" instead.
+To restore the original branch and stop patching, run "git am --abort".
+
+>  tests/generic/075 | 6 ++++--
+>  tests/generic/112 | 6 ++++--
+>  2 files changed, 8 insertions(+), 4 deletions(-)
 > 
+> diff --git a/tests/generic/075 b/tests/generic/075
+> index 03a394a6..bc3a11c7 100755
+> --- a/tests/generic/075
+> +++ b/tests/generic/075
+> @@ -53,9 +53,11 @@ _do_test()
+>  
+>      # This cd and use of -P gets full debug on "$RESULT_DIR" (not TEST_DEV)
+>      cd $out
+> -    if ! $here/ltp/fsx $_param -P "$RESULT_DIR" $seq.$_n $FSX_AVOID &>/dev/null
+> +    $here/ltp/fsx $_param -P "$RESULT_DIR" $seq.$_n $FSX_AVOID &>/dev/null
+> +    local res=$?
+> +    if [ $res -ne 0 ]
+>      then
+> -	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
+> +	echo "    fsx ($_param) failed, $res - compare $seqres.$_n.{good,bad,fsxlog}"
+>  	mv $out/$seq.$_n $seqres.$_n.full
+>  	od -xAx $seqres.$_n.full > $seqres.$_n.bad
+>  	od -xAx "$RESULT_DIR"/$seq.$_n.fsxgood > $seqres.$_n.good
+> diff --git a/tests/generic/112 b/tests/generic/112
+> index 971d0467..0e08cbf9 100755
+> --- a/tests/generic/112
+> +++ b/tests/generic/112
+> @@ -53,9 +53,11 @@ _do_test()
+>  
+>      # This cd and use of -P gets full debug on "$RESULT_DIR" (not TEST_DEV)
+>      cd $out
+> -    if ! $here/ltp/fsx $_param -P "$RESULT_DIR" $FSX_AVOID $seq.$_n &>/dev/null
+> +    $here/ltp/fsx $_param -P "$RESULT_DIR" $FSX_AVOID $seq.$_n &>/dev/null
+> +    local res=$?
+> +    if [ $res -ne 0 ]
+>      then
+> -	echo "    fsx ($_param) returned $? - see $seq.$_n.full"
+> +	echo "    fsx ($_param) returned $res - see $seq.$_n.full"
+>  	mv "$RESULT_DIR"/$seq.$_n.fsxlog $seqres.$_n.full
+>  	status=1
+>  	exit
+> -- 
+> 2.31.1
+> 
+
