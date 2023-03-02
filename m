@@ -2,108 +2,113 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68E5DC6FA9D
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Mar 2023 15:56:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE22FC678D4
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Mar 2023 07:17:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229706AbjCAP4B (ORCPT
+        id S229781AbjCBHRm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Mar 2023 10:56:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49308 "EHLO
+        Thu, 2 Mar 2023 02:17:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229564AbjCAP4B (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Mar 2023 10:56:01 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61C65367F7;
-        Wed,  1 Mar 2023 07:56:00 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 0CCE7B80EF8;
-        Wed,  1 Mar 2023 15:55:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8EA7C433EF;
-        Wed,  1 Mar 2023 15:55:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1677686157;
-        bh=HuN89FfjJGekQahoi0mfxn91ZSpPlUJstnL0bfpUvS8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qlXGgo+Y6ybI6ieH4zprnuuAFkzCHnU4tHrn/+XrokeudRQfIVJrWsOjoJiueYZ45
-         vCsi9KAktJPx/Pm6B7FxLUbwU9vZgOXK+rTrdvGepeDX0mXOTYx3jcYNAsQM47/reh
-         VKJSR+mvMUgBfxfVxbPmIhLoSnaBAkfpUnnAuH7hxwJJizpP1MnvPID2pvW5nH0gjb
-         5F7i7YtX01HX+nNFae6oX9puUP0QZHuDe6k6Jv13yEtihp2BmQyB7oS+T7+Nuz4gSG
-         oKHNZtk+WGSTlyypxsteOjxTQj4sXh/NgvnF3vHTzx9O9yAc7e0IsCdFg/cs1vGMko
-         7MvuVc7TlDzew==
-Date:   Wed, 1 Mar 2023 07:55:57 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     xiubli@redhat.com
-Cc:     fstests@vger.kernel.org, david@fromorbit.com,
-        ceph-devel@vger.kernel.org, vshankar@redhat.com, zlang@redhat.com
-Subject: Re: [PATCH] generic/{075,112}: fix printing the incorrect return
- value of fsx
-Message-ID: <Y/91jWK16jYSO0Tz@magnolia>
-References: <20230301030620.137153-1-xiubli@redhat.com>
+        with ESMTP id S229844AbjCBHRl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2023 02:17:41 -0500
+Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9F3C42BC2;
+        Wed,  1 Mar 2023 23:17:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1677741457; x=1709277457;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=jKjKVeOoQlubgjMcNjyaX/+L337Vay5aAn11Xd+BExk=;
+  b=SLlSwyDhE8yH8QRBFPBWQQsHj5KAHZk6Dll9VEK0HhhkFpZQf0G3BlFo
+   6mYlsKwkxWGFacExIbl67+E7FeKrMnMr91pygWaKJAuSrpWxDU6C8y/1M
+   7g9tbwEgTSJkM9FabGamta06RzrqsGgadeMkrRtk0VvfM2OaRgfyuu0BF
+   +PE3IoojXlNyfBhSAamS5N4XIX8wHlJ3tUPp8W0sqs855mcNSDo2q+8Iy
+   2JrFqcpUlY5zlLS/IQOzRKUDwcQ+l7Tmh3zhP3u5oWUsDNS7OSicBcKNb
+   OhnbqGkhFmZ8Qao3JEv3FupjOXSskaK0HR2xgOtNl6GL3gF6oUjkM8cju
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.98,226,1673884800"; 
+   d="scan'208";a="224604802"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 02 Mar 2023 15:17:36 +0800
+IronPort-SDR: E8H9TgEP8OLBi1m97xx7ck97ykJG5onhVWv4dyQd+P6buuBT8cc8uSoAKYT5HVK94REcuLcGBJ
+ AF3eXo2oAGPU9HkgIJSltXmCTv4O1d8Ui30Y59WVzmYv7UYXFWO2vHwN6mI8UMbjOjjkxoAt9k
+ remwkbi7l0YphWB8oimglRJqVXYI2dE75a+hdkTq0cq5aY9q2FRJ+5yR+t5eOyr44I7yRTW/ne
+ tNhSImIULh9vgNaRwSOh9PD2w2Rmi7uWhTzkqweUP+Vwm+Bf4UTHyslRA/g27OB9IMYuo6CrCJ
+ Go0=
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 01 Mar 2023 22:28:41 -0800
+IronPort-SDR: Mv/yvxUbfu8g4rVFIdMypBlwFLW1KNkwPsBygXjSo8x6tQyM5xhjHmZJrAC5NKTsxsyAWRD/GP
+ 1srGy3qLUHiKp7GdwnOv7iduA2RCzqrva04NhqlBUouJE24ZAorFEP0ChVtC+zjdXfws7Iojcz
+ gowvfUCMAfP1+XE/Pc3hcs/Qhgn+jFfcYheg7K0GwyjGBhASlt+i+9qETaUrDnWTX6ZldIt0r7
+ Xp6bhuMC4CC+zeKwJ6c9+fGhK4yob4Y6J9SEDePrRTItItBxOb6i05/yzUPRP0hInvDO0qvTAg
+ XpM=
+WDCIronportException: Internal
+Received: from 5cg217420n.ad.shared (HELO naota-xeon) ([10.225.50.90])
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 01 Mar 2023 23:17:36 -0800
+Date:   Thu, 2 Mar 2023 16:17:34 +0900
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc:     Zorro Lang <zlang@redhat.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v2] common/rc: don't clear superblock for zoned scratch
+ pools
+Message-ID: <20230302071057.6yc3t4ybwvexjqld@naota-xeon>
+References: <20230227082717.325929-1-johannes.thumshirn@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230301030620.137153-1-xiubli@redhat.com>
+In-Reply-To: <20230227082717.325929-1-johannes.thumshirn@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 01, 2023 at 11:06:20AM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
+On Mon, Feb 27, 2023 at 12:27:17AM -0800, Johannes Thumshirn wrote:
+> _require_scratch_dev_pool() zeros the first 100 sectors of each device to
+> clear eventual remains of older filesystems.
 > 
-> We need to save the result of the 'fsx' temporarily.
+> On zoned devices this won't work as a plain dd will end up creating
+> unaligned write errors failing all subsequent actions on the device.
 > 
-> Fixes: https://tracker.ceph.com/issues/58834
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> For zoned devices it is enough to simply reset the first two zones of the
+> device to achieve the same result.
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 > ---
->  tests/generic/075 | 6 ++++--
->  tests/generic/112 | 6 ++++--
->  2 files changed, 8 insertions(+), 4 deletions(-)
+>  common/rc | 12 +++++++++---
+>  1 file changed, 9 insertions(+), 3 deletions(-)
 > 
-> diff --git a/tests/generic/075 b/tests/generic/075
-> index 03a394a6..bc3a11c7 100755
-> --- a/tests/generic/075
-> +++ b/tests/generic/075
-> @@ -53,9 +53,11 @@ _do_test()
+> diff --git a/common/rc b/common/rc
+> index 654730b21ead..739abbdbfc8c 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3459,9 +3459,15 @@ _require_scratch_dev_pool()
+>  		            exit 1
+>  		        fi
+>  		fi
+> -		# to help better debug when something fails, we remove
+> -		# traces of previous btrfs FS on the dev.
+> -		dd if=/dev/zero of=$i bs=4096 count=100 > /dev/null 2>&1
+> +		# To help better debug when something fails, we remove
+> +		# traces of previous btrfs FS on the dev. For zoned devices we
+> +		# can't use dd as it'll lead to unaligned writes so simply
+> +		# reset the first two zones.
+> +		if [ "`_zone_type "$i"`" = "none" ]; then
+> +			dd if=/dev/zero of=$i bs=4096 count=100 > /dev/null 2>&1
+> +		else
+> +			blkzone reset -c 2 $i
+
+We can use "$BLKZONE_PROG reset ..." to honor common/config.
+
+With that,
+
+Reviewed-by: Naohiro Aota <naohiro.aota@wdc.com>
+
+> +		fi
+>  	done
+>  }
 >  
->      # This cd and use of -P gets full debug on "$RESULT_DIR" (not TEST_DEV)
->      cd $out
-> -    if ! $here/ltp/fsx $_param -P "$RESULT_DIR" $seq.$_n $FSX_AVOID &>/dev/null
-> +    $here/ltp/fsx $_param -P "$RESULT_DIR" $seq.$_n $FSX_AVOID &>/dev/null
-> +    local res=$?
-> +    if [ $res -ne 0 ]
->      then
-> -	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
-> +	echo "    fsx ($_param) failed, $res - compare $seqres.$_n.{good,bad,fsxlog}"
-
-Heh, oops.
-
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
->  	mv $out/$seq.$_n $seqres.$_n.full
->  	od -xAx $seqres.$_n.full > $seqres.$_n.bad
->  	od -xAx "$RESULT_DIR"/$seq.$_n.fsxgood > $seqres.$_n.good
-> diff --git a/tests/generic/112 b/tests/generic/112
-> index 971d0467..0e08cbf9 100755
-> --- a/tests/generic/112
-> +++ b/tests/generic/112
-> @@ -53,9 +53,11 @@ _do_test()
->  
->      # This cd and use of -P gets full debug on "$RESULT_DIR" (not TEST_DEV)
->      cd $out
-> -    if ! $here/ltp/fsx $_param -P "$RESULT_DIR" $FSX_AVOID $seq.$_n &>/dev/null
-> +    $here/ltp/fsx $_param -P "$RESULT_DIR" $FSX_AVOID $seq.$_n &>/dev/null
-> +    local res=$?
-> +    if [ $res -ne 0 ]
->      then
-> -	echo "    fsx ($_param) returned $? - see $seq.$_n.full"
-> +	echo "    fsx ($_param) returned $res - see $seq.$_n.full"
->  	mv "$RESULT_DIR"/$seq.$_n.fsxlog $seqres.$_n.full
->  	status=1
->  	exit
 > -- 
-> 2.31.1
+> 2.39.1
 > 
