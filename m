@@ -2,294 +2,106 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18AD4C7EE30
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Mar 2023 09:43:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E455C7EE30
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Mar 2023 10:05:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229912AbjCBJnY (ORCPT
+        id S229920AbjCBKFG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Mar 2023 04:43:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48044 "EHLO
+        Thu, 2 Mar 2023 05:05:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52822 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230039AbjCBJnO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2023 04:43:14 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5C6C3E637
-        for <fstests@vger.kernel.org>; Thu,  2 Mar 2023 01:42:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1677750135;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=o27jNhWWQ2yDbTFcPf4F9ELrfV/g1jYai+FNis861Jk=;
-        b=fz/1Il2LVI9z+OJ9bTQWeYfx4oOwByBZ9ylbge72OGFWXU7JPTXnQnmuFUZMA1F0Buqeej
-        eKEhHejRQAHbq7hWf9VgULqZKuuvp4GOyyRATnZU1apTiQrq4muRSztWTUPy0ze/TYGoRW
-        93NGOz8RaYoMDOJz2N4UV8vvKnC24c8=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
- us-mta-141-YJeqxCYrMQuiZjhoIo9z2Q-1; Thu, 02 Mar 2023 04:42:13 -0500
-X-MC-Unique: YJeqxCYrMQuiZjhoIo9z2Q-1
-Received: by mail-pg1-f197.google.com with SMTP id q15-20020a63d60f000000b00502e1c551aaso5491171pgg.21
-        for <fstests@vger.kernel.org>; Thu, 02 Mar 2023 01:42:12 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1677750132;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=o27jNhWWQ2yDbTFcPf4F9ELrfV/g1jYai+FNis861Jk=;
-        b=KCk8unqt4Es8uH7hKoEP8xbmuPxTmtMm5suSlFodhQ5ZIkQAJX0gicHgUoPf4AV2t3
-         ROrAiuSLvG0gL7c9X3kHV3OnMVSXZAce0lcpZ9HNlhpGAXtsv1BiqbCJaHXGfFcsWH7F
-         Dgnq6buZSMpw5cFYDqMIQ5VoARyU9PrRrfJwOaydfebIVIrTSFwfc/75sYx25JZaDNvI
-         Do/3CBJrqhtB23wm7HVZ5TAmQsDKZ1QXtTgMaCnp5nVErVV6E6Ete2ut7yF37E/coYZo
-         /BfQzZlEih6f895wYlVAWrGX6Z+o/GsjjPP/d8UkgZGJ/zTfvKy6cruEsCQHoIAeM9QO
-         yhwg==
-X-Gm-Message-State: AO0yUKXapTTRsVOylWWUAgxORwJjzlni5+eSuQk5r6fhLq8dap6JeW78
-        CobUA/qEE/Kb0Ehed69mVyvV2c9kq2zbLZlh8jShttvQ+yTWT2FwqB8TSatbNVykx1roXbsR/YW
-        +DDRb2UewoqCWLw+CGA==
-X-Received: by 2002:a17:902:cec8:b0:19d:74c:78e5 with SMTP id d8-20020a170902cec800b0019d074c78e5mr11285796plg.50.1677750131969;
-        Thu, 02 Mar 2023 01:42:11 -0800 (PST)
-X-Google-Smtp-Source: AK7set9K500yuY3hLqshKYn0GDUx+o/z+64xHtca82DvVmvrBnsno4A7GmzO40TrfyJ1SURei+onEg==
-X-Received: by 2002:a17:902:cec8:b0:19d:74c:78e5 with SMTP id d8-20020a170902cec800b0019d074c78e5mr11285775plg.50.1677750131488;
-        Thu, 02 Mar 2023 01:42:11 -0800 (PST)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id jg15-20020a17090326cf00b0019adbef6a63sm9946635plb.235.2023.03.02.01.42.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 Mar 2023 01:42:10 -0800 (PST)
-Date:   Thu, 2 Mar 2023 17:42:06 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 7/7] fsstress: update for FIEXCHANGE_RANGE
-Message-ID: <20230302094206.k4aerwldv2squ667@zlang-mailbox>
-References: <167763954409.3796922.11086772690906428270.stgit@magnolia>
- <167763958362.3796922.2350291536547146358.stgit@magnolia>
+        with ESMTP id S230374AbjCBKEv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Mar 2023 05:04:51 -0500
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAACC1E28F;
+        Thu,  2 Mar 2023 02:04:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1677751455; x=1709287455;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=ryv8OEA/cr4FOZ/HAmMgoOd7WZraPKixzNLPqcbKjxM=;
+  b=D4m6cylbewUXK+sU0mtZ115wOOPPEZnuJm31dgPk/a3V7oe5pDbaJjzY
+   P3klR4SDgUS+OGxUMZ8tgQjFAxLR1zhRyjqK0OGOTQBrL1jK0IOGIHgWy
+   VqsnFABwUpbCuDkBpqWqY/Eo8lUaOUDCiwpZVbChn3Y1+StmjKV6HkTtI
+   b7BiS86mgITkc1lgAcwWMMSk9fFOp30egUyEEEBUx06ZYB3qAe29y/1by
+   q6ctETh54ZhR/jCiG8VttDztY77pq73LocmYlhJQNo+/AG59oqpiJ+Vjm
+   pPQo+OJPVoNjWFAsKpJtUS9hjP7hhmuuBZg0c/UzAEjsGvl2idxMMGIOF
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.98,227,1673884800"; 
+   d="scan'208";a="328940252"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 02 Mar 2023 18:03:25 +0800
+IronPort-SDR: 368cVpuMUjsWJTC54QZJyDk3ZNKbsPmuB4/RGWJYGAR93u4jCtUcbYDeMssEOjoTDzGB0mg1b9
+ pSNpLXwOf6xVwinZdoGIHYsYAdCg8ndTZPdfzsCKcGe7cyNEhVZMS2S9ywgcU+XFA5OqwpsQaU
+ ObjNAUs0EcevFDxY3dyISeHKJIcaBbtviCRRLRBZEAC84rzrlwWP2msvLa8MKn8hbFbrrrM3P6
+ sTQDZhC+0W8wh8BIEDVnkiqDa/f+/uMQnqZuJeQy6pbjJ2za7s0A7uOAh9t+LzT5z4KSkRolx+
+ ZpE=
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 02 Mar 2023 01:14:29 -0800
+IronPort-SDR: iUoHSY+RZqucb4DjkiMm66YoNpeq9IqV2h3eoD9eJyDZJ6XuoDRnMZLQ2tWHD3ae3WO5m5N5q6
+ VyjQOYdzZRGC6gqNwqdtBoyfRDwlNYRRizQmOKfFAhYVRU7yDFcE60JpGM/y9EYQyuDLICPsuG
+ uVvEz0XmAWoBER4CXMsN8kiW+PC0DL1KQM6zuM+cgd9FVF/1Cy1PpSnyLjBDK+4EZNDOZZWd10
+ IYBO0dwNTb6edwCAxvjhqFG8BubX1rT0yt2WLMMH/NhMnTEE/Ju09K30lzZwqA3Kcrm1HljTJD
+ +rY=
+WDCIronportException: Internal
+Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.72])
+  by uls-op-cesaip01.wdc.com with ESMTP; 02 Mar 2023 02:03:25 -0800
+From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        David Disseldorp <ddiss@suse.de>,
+        Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH v3] common/rc: don't clear superblock for zoned scratch pools
+Date:   Thu,  2 Mar 2023 02:03:21 -0800
+Message-Id: <20230302100321.566715-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.39.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <167763958362.3796922.2350291536547146358.stgit@magnolia>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 28, 2023 at 06:59:43PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Teach this stress tool to be able to use the file content exchange
-> ioctl.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  ltp/fsstress.c |  168 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 168 insertions(+)
-> 
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 10608fb554..0fba3d92a0 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -143,6 +143,7 @@ typedef enum {
->  	OP_URING_WRITE,
->  	OP_WRITE,
->  	OP_WRITEV,
-> +	OP_XCHGRANGE,
->  	OP_LAST
->  } opty_t;
->  
-> @@ -272,6 +273,8 @@ void	uring_read_f(opnum_t, long);
->  void	uring_write_f(opnum_t, long);
->  void	write_f(opnum_t, long);
->  void	writev_f(opnum_t, long);
-> +void	xchgrange_f(opnum_t, long);
-> +
->  char	*xattr_flag_to_string(int);
->  
->  struct opdesc	ops[OP_LAST]	= {
-> @@ -340,6 +343,7 @@ struct opdesc	ops[OP_LAST]	= {
->  	[OP_URING_WRITE]   = {"uring_write",   uring_write_f,	1, 1 },
->  	[OP_WRITE]	   = {"write",	       write_f,		4, 1 },
->  	[OP_WRITEV]	   = {"writev",	       writev_f,	4, 1 },
-> +	[OP_XCHGRANGE]	   = {"xchgrange",     xchgrange_f,	4, 1 },
+_require_scratch_dev_pool() zeros the first 100 sectors of each device to
+clear eventual remains of older filesystems.
 
-Do you think this is a common operation which should use same frequency (4)
-with read/write operations? I'd like to reduce the default freq=4 to 2 or 1
-when I merge it. what do you think?
+On zoned devices this won't work as a plain dd will end up creating
+unaligned write errors failing all subsequent actions on the device.
 
-Thanks,
-Zorro
+For zoned devices it is enough to simply reset the first two zones of the
+device to achieve the same result.
 
->  }, *ops_end;
->  
->  flist_t	flist[FT_nft] = {
-> @@ -2494,6 +2498,170 @@ chown_f(opnum_t opno, long r)
->  	free_pathname(&f);
->  }
->  
-> +/* exchange some arbitrary range of f1 to f2...fn. */
-> +void
-> +xchgrange_f(
-> +	opnum_t			opno,
-> +	long			r)
-> +{
-> +#ifdef FIEXCHANGE_RANGE
-> +	struct file_xchg_range	fxr = { 0 };
-> +	static __u64		swap_flags = 0;
-> +	struct pathname		fpath1;
-> +	struct pathname		fpath2;
-> +	struct stat64		stat1;
-> +	struct stat64		stat2;
-> +	char			inoinfo1[1024];
-> +	char			inoinfo2[1024];
-> +	off64_t			lr;
-> +	off64_t			off1;
-> +	off64_t			off2;
-> +	off64_t			max_off2;
-> +	size_t			len;
-> +	int			v1;
-> +	int			v2;
-> +	int			fd1;
-> +	int			fd2;
-> +	int			ret;
-> +	int			tries = 0;
-> +	int			e;
-> +
-> +	/* Load paths */
-> +	init_pathname(&fpath1);
-> +	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
-> +		if (v1)
-> +			printf("%d/%lld: xchgrange read - no filename\n",
-> +				procid, opno);
-> +		goto out_fpath1;
-> +	}
-> +
-> +	init_pathname(&fpath2);
-> +	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
-> +		if (v2)
-> +			printf("%d/%lld: xchgrange write - no filename\n",
-> +				procid, opno);
-> +		goto out_fpath2;
-> +	}
-> +
-> +	/* Open files */
-> +	fd1 = open_path(&fpath1, O_RDONLY);
-> +	e = fd1 < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd1 < 0) {
-> +		if (v1)
-> +			printf("%d/%lld: xchgrange read - open %s failed %d\n",
-> +				procid, opno, fpath1.path, e);
-> +		goto out_fpath2;
-> +	}
-> +
-> +	fd2 = open_path(&fpath2, O_WRONLY);
-> +	e = fd2 < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd2 < 0) {
-> +		if (v2)
-> +			printf("%d/%lld: xchgrange write - open %s failed %d\n",
-> +				procid, opno, fpath2.path, e);
-> +		goto out_fd1;
-> +	}
-> +
-> +	/* Get file stats */
-> +	if (fstat64(fd1, &stat1) < 0) {
-> +		if (v1)
-> +			printf("%d/%lld: xchgrange read - fstat64 %s failed %d\n",
-> +				procid, opno, fpath1.path, errno);
-> +		goto out_fd2;
-> +	}
-> +	inode_info(inoinfo1, sizeof(inoinfo1), &stat1, v1);
-> +
-> +	if (fstat64(fd2, &stat2) < 0) {
-> +		if (v2)
-> +			printf("%d/%lld: xchgrange write - fstat64 %s failed %d\n",
-> +				procid, opno, fpath2.path, errno);
-> +		goto out_fd2;
-> +	}
-> +	inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v2);
-> +
-> +	if (stat1.st_size < (stat1.st_blksize * 2) ||
-> +	    stat2.st_size < (stat2.st_blksize * 2)) {
-> +		if (v2)
-> +			printf("%d/%lld: xchgrange - files are too small\n",
-> +				procid, opno);
-> +		goto out_fd2;
-> +	}
-> +
-> +	/* Never let us swap more than 1/4 of the files. */
-> +	len = (random() % FILELEN_MAX) + 1;
-> +	if (len > stat1.st_size / 4)
-> +		len = stat1.st_size / 4;
-> +	if (len > stat2.st_size / 4)
-> +		len = stat2.st_size / 4;
-> +	len = rounddown_64(len, stat1.st_blksize);
-> +	if (len == 0)
-> +		len = stat1.st_blksize;
-> +
-> +	/* Calculate offsets */
-> +	lr = ((int64_t)random() << 32) + random();
-> +	if (stat1.st_size == len)
-> +		off1 = 0;
-> +	else
-> +		off1 = (off64_t)(lr % MIN(stat1.st_size - len, MAXFSIZE));
-> +	off1 %= maxfsize;
-> +	off1 = rounddown_64(off1, stat1.st_blksize);
-> +
-> +	/*
-> +	 * If srcfile == destfile, randomly generate destination ranges
-> +	 * until we find one that doesn't overlap the source range.
-> +	 */
-> +	max_off2 = MIN(stat2.st_size  - len, MAXFSIZE);
-> +	do {
-> +		lr = ((int64_t)random() << 32) + random();
-> +		if (stat2.st_size == len)
-> +			off2 = 0;
-> +		else
-> +			off2 = (off64_t)(lr % max_off2);
-> +		off2 %= maxfsize;
-> +		off2 = rounddown_64(off2, stat2.st_blksize);
-> +	} while (stat1.st_ino == stat2.st_ino &&
-> +		 llabs(off2 - off1) < len &&
-> +		 tries++ < 10);
-> +
-> +	/* Swap data blocks */
-> +	fxr.file1_fd = fd1;
-> +	fxr.file1_offset = off1;
-> +	fxr.length = len;
-> +	fxr.file2_offset = off2;
-> +	fxr.flags = swap_flags;
-> +
-> +retry:
-> +	ret = ioctl(fd2, FIEXCHANGE_RANGE, &fxr);
-> +	e = ret < 0 ? errno : 0;
-> +	if (e == EOPNOTSUPP && !(swap_flags & FILE_XCHG_RANGE_NONATOMIC)) {
-> +		swap_flags = FILE_XCHG_RANGE_NONATOMIC;
-> +		fxr.flags |= swap_flags;
-> +		goto retry;
-> +	}
-> +	if (v1 || v2) {
-> +		printf("%d/%lld: xchgrange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
-> +			procid, opno,
-> +			fpath1.path, inoinfo1, (long long)off1, (long long)len,
-> +			fpath2.path, inoinfo2, (long long)off2, (long long)len);
-> +
-> +		if (ret < 0)
-> +			printf(" error %d", e);
-> +		printf("\n");
-> +	}
-> +
-> +out_fd2:
-> +	close(fd2);
-> +out_fd1:
-> +	close(fd1);
-> +out_fpath2:
-> +	free_pathname(&fpath2);
-> +out_fpath1:
-> +	free_pathname(&fpath1);
-> +#endif
-> +}
-> +
->  /* reflink some arbitrary range of f1 to f2. */
->  void
->  clonerange_f(
-> 
+Reviewed-by: David Disseldorp <ddiss@suse.de>
+Reviewed-by: Naohiro Aota <naohiro.aota@wdc.com>
+Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+---
+ common/rc | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 654730b21ead..dd0d17959db3 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3459,9 +3459,15 @@ _require_scratch_dev_pool()
+ 		            exit 1
+ 		        fi
+ 		fi
+-		# to help better debug when something fails, we remove
+-		# traces of previous btrfs FS on the dev.
+-		dd if=/dev/zero of=$i bs=4096 count=100 > /dev/null 2>&1
++		# To help better debug when something fails, we remove
++		# traces of previous btrfs FS on the dev. For zoned devices we
++		# can't use dd as it'll lead to unaligned writes so simply
++		# reset the first two zones.
++		if [ "`_zone_type "$i"`" = "none" ]; then
++			dd if=/dev/zero of=$i bs=4096 count=100 > /dev/null 2>&1
++		else
++			$BLKZONE_PROG reset -c 2 $i
++		fi
+ 	done
+ }
+ 
+-- 
+2.39.1
 
