@@ -2,32 +2,32 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38992C678D5
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Mar 2023 12:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5520C678D4
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Mar 2023 12:06:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231300AbjCGMGE (ORCPT
+        id S231296AbjCGMGP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Mar 2023 07:06:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47720 "EHLO
+        Tue, 7 Mar 2023 07:06:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47836 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231296AbjCGMGD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Mar 2023 07:06:03 -0500
+        with ESMTP id S230285AbjCGMGO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Mar 2023 07:06:14 -0500
 Received: from alerce.blitiri.com.ar (alerce.blitiri.com.ar [IPv6:2001:bc8:228b:9000::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7363A32522
-        for <fstests@vger.kernel.org>; Tue,  7 Mar 2023 04:06:00 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F4233B0DA
+        for <fstests@vger.kernel.org>; Tue,  7 Mar 2023 04:06:12 -0800 (PST)
 Received: from localhost.localdomain
         by sdfg.com.ar (chasquid) with ESMTPSA
         tls TLS_AES_128_GCM_SHA256
         (over submission, TLS-1.3, envelope from "rodrigo@sdfg.com.ar")
-        ; Tue, 07 Mar 2023 11:45:42 +0000
+        ; Tue, 07 Mar 2023 11:45:41 +0000
 From:   Rodrigo Campos <rodrigo@sdfg.com.ar>
 To:     fstests@vger.kernel.org
 Cc:     Christian Brauner <brauner@kernel.org>,
         Giuseppe Scrivano <gscrivan@redhat.com>,
         Rodrigo Campos <rodrigo@sdfg.com.ar>
-Subject: [PATCH 10/11] vfs: Add tmpfs tests for idmap mounts
-Date:   Tue,  7 Mar 2023 12:45:06 +0100
-Message-Id: <20230307114507.332309-11-rodrigo@sdfg.com.ar>
+Subject: [PATCH 06/11] vfs: Prepare tests in &s_idmapped_mounts to be reused inside a userns
+Date:   Tue,  7 Mar 2023 12:45:02 +0100
+Message-Id: <20230307114507.332309-7-rodrigo@sdfg.com.ar>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230307114507.332309-1-rodrigo@sdfg.com.ar>
 References: <20230307114507.332309-1-rodrigo@sdfg.com.ar>
@@ -37,506 +37,261 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patch calls all tests in the suite s_idmapped_mounts, but with a
-tmpfs directory mounted inside a userns. This directory is setup as the
-mount point for the test that runs nested.
-
-This excercises that tmpfs mounted inside a userns works as expected
-regarding idmap mounts.
-
-As some operations don't work inside a userns, we also set
-info.t_inside_userns to true, so operations not supported are properly
-skipped.
+Future patches will call these tests within a userns. So, let's skip
+operations not allowed inside a userns.
 
 Signed-off-by: Rodrigo Campos <rodrigo@sdfg.com.ar>
 ---
- src/vfs/Makefile                |   4 +-
- src/vfs/tmpfs-idmapped-mounts.c | 299 ++++++++++++++++++++++++++++++++
- src/vfs/tmpfs-idmapped-mounts.h |  15 ++
- src/vfs/vfstest.c               |  13 +-
- tests/tmpfs/001                 |  27 +++
- tests/tmpfs/001.out             |   2 +
- tests/tmpfs/Makefile            |  24 +++
- 7 files changed, 381 insertions(+), 3 deletions(-)
- create mode 100644 src/vfs/tmpfs-idmapped-mounts.c
- create mode 100644 src/vfs/tmpfs-idmapped-mounts.h
- create mode 100755 tests/tmpfs/001
- create mode 100644 tests/tmpfs/001.out
- create mode 100644 tests/tmpfs/Makefile
+ src/vfs/idmapped-mounts.c | 54 +++++++++++++++++++--------------------
+ 1 file changed, 27 insertions(+), 27 deletions(-)
 
-diff --git src/vfs/Makefile src/vfs/Makefile
-index 1b0b364b..4841da12 100644
---- src/vfs/Makefile
-+++ src/vfs/Makefile
-@@ -4,10 +4,10 @@ TOPDIR = ../..
- include $(TOPDIR)/include/builddefs
+diff --git src/vfs/idmapped-mounts.c src/vfs/idmapped-mounts.c
+index ed7948b6..828b2ea3 100644
+--- src/vfs/idmapped-mounts.c
++++ src/vfs/idmapped-mounts.c
+@@ -535,7 +535,7 @@ static int fsids_mapped(const struct vfstest_info *info)
+ 			die("failure: create");
  
- TARGETS = vfstest mount-idmapped
--CFILES_VFSTEST = vfstest.c btrfs-idmapped-mounts.c idmapped-mounts.c utils.c
-+CFILES_VFSTEST = vfstest.c btrfs-idmapped-mounts.c idmapped-mounts.c utils.c tmpfs-idmapped-mounts.c
- CFILES_MOUNT_IDMAPPED = mount-idmapped.c utils.c
+ 		/* create character device */
+-		if (mknodat(open_tree_fd, CHRDEV1, S_IFCHR | 0644, makedev(5, 1)))
++		if (!info->t_inside_userns && mknodat(open_tree_fd, CHRDEV1, S_IFCHR | 0644, makedev(5, 1)))
+ 			die("failure: create");
  
--HFILES = missing.h utils.h btrfs-idmapped-mounts.h idmapped-mounts.h
-+HFILES = missing.h utils.h btrfs-idmapped-mounts.h idmapped-mounts.h tmpfs-idmapped-mounts.h
- LLDLIBS += -pthread
- LDIRT = $(TARGETS)
- 
-diff --git src/vfs/tmpfs-idmapped-mounts.c src/vfs/tmpfs-idmapped-mounts.c
-new file mode 100644
-index 00000000..807d5c0e
---- /dev/null
-+++ src/vfs/tmpfs-idmapped-mounts.c
-@@ -0,0 +1,299 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+
-+#include "../global.h"
-+
-+#include <dirent.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <getopt.h>
-+#include <grp.h>
-+#include <limits.h>
-+#include <linux/limits.h>
-+#include <linux/types.h>
-+#include <pthread.h>
-+#include <pwd.h>
-+#include <sched.h>
-+#include <stdbool.h>
-+#include <sys/fsuid.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <sys/xattr.h>
-+#include <unistd.h>
-+
-+#include "missing.h"
-+#include "utils.h"
-+#include "vfstest.h"
-+#include "idmapped-mounts.h"
-+
-+static int tmpfs_nested_mount_setup(const struct vfstest_info *info, int (*test)(const struct vfstest_info *info))
-+{
-+	char path[PATH_MAX];
-+	int fret = -1;
-+
-+	/* Create mapping for userns
-+	 * Make the mapping quite long, so all nested userns that are created by
-+	 * any test we call is contained here (otherwise userns creation fails).
-+	 */
-+	struct mount_attr attr = {
-+		.attr_set	= MOUNT_ATTR_IDMAP,
-+		.userns_fd	= -EBADF,
-+	};
-+	attr.userns_fd = get_userns_fd(0, 10000, 200000);
-+	if (attr.userns_fd < 0) {
-+		log_stderr("failure: get_userns_fd");
-+		goto out_no_rm;
-+	}
-+
-+	if (!switch_userns(attr.userns_fd, 0, 0, false)) {
-+		log_stderr("failure: switch_userns");
-+		goto out_no_rm;
-+	}
-+
-+	/* create separate mount namespace */
-+	if (unshare(CLONE_NEWNS)) {
-+		log_stderr("failure: create new mount namespace");
-+		goto out_no_rm;
-+	}
-+
-+	/* Create DIR0 to mount there */
-+	if (mkdirat(info->t_mnt_fd, DIR0, 0777)) {
-+		log_stderr("failure: mkdirat");
-+		goto out_no_rm;
-+	}
-+	if (fchmodat(info->t_mnt_fd, DIR0, 0777, 0)) {
-+		log_stderr("failure: fchmodat");
-+		goto out_no_umount;
-+	}
-+
-+	snprintf(path, sizeof(path), "%s/%s", info->t_mountpoint, DIR0);
-+	if (sys_mount("tmpfs", path, "tmpfs", 0, NULL)) {
-+		log_stderr("failure: mount");
-+		goto out_no_umount;
-+	}
-+
-+	// Create a new info to use for test we will call.
-+	struct vfstest_info nested_test_info = *info;
-+	nested_test_info.t_inside_userns = true;
-+	nested_test_info.t_mountpoint = strdup(path);
-+	if (nested_test_info.t_mountpoint == NULL) {
-+		log_stderr("failure: strdup");
-+		goto out;
-+	}
-+	nested_test_info.t_mnt_fd = openat(-EBADF, nested_test_info.t_mountpoint, O_CLOEXEC | O_DIRECTORY);
-+	if (nested_test_info.t_mnt_fd < 0) {
-+		log_stderr("failure: openat");
-+		goto out;
-+	}
-+
-+	test_setup(&nested_test_info);
-+
-+	// Run the test.
-+	if ((*test)(&nested_test_info)) {
-+		log_stderr("failure: calling test");
-+		goto out;
-+	}
-+
-+	test_cleanup(&nested_test_info);
-+
-+	fret = 0;
-+	log_debug("Ran test");
-+out:
-+	snprintf(path, sizeof(path), "%s/" DIR0, info->t_mountpoint);
-+	sys_umount2(path, MNT_DETACH);
-+out_no_umount:
-+	if(rm_r(info->t_mnt_fd, DIR0))
-+		log_stderr("failure: rm_r");
-+out_no_rm:
-+	safe_close(attr.userns_fd);
-+	return fret;
-+}
-+
-+static int tmpfs_acls(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_acls);
-+}
-+static int tmpfs_create_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_create_in_userns);
-+}
-+static int tmpfs_device_node_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_device_node_in_userns);
-+}
-+static int tmpfs_fsids_mapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fsids_mapped);
-+}
-+static int tmpfs_fsids_unmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fsids_unmapped);
-+}
-+static int tmpfs_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_expected_uid_gid_idmapped_mounts);
-+}
-+static int tmpfs_fscaps_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fscaps_idmapped_mounts);
-+}
-+static int tmpfs_fscaps_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fscaps_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_fscaps_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fscaps_idmapped_mounts_in_userns_separate_userns);
-+}
-+
-+static int tmpfs_hardlink_crossing_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_hardlink_crossing_idmapped_mounts);
-+}
-+static int tmpfs_hardlink_from_idmapped_mount(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_hardlink_from_idmapped_mount);
-+}
-+static int tmpfs_hardlink_from_idmapped_mount_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_hardlink_from_idmapped_mount_in_userns);
-+}
-+
-+#ifdef HAVE_LIBURING_H
-+static int tmpfs_io_uring_idmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped);
-+}
-+static int tmpfs_io_uring_idmapped_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_userns);
-+}
-+static int tmpfs_io_uring_idmapped_unmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_unmapped);
-+}
-+static int tmpfs_io_uring_idmapped_unmapped_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_unmapped_userns);
-+}
-+#endif /* HAVE_LIBURING_H */
-+
-+static int tmpfs_protected_symlinks_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_protected_symlinks_idmapped_mounts);
-+}
-+static int tmpfs_protected_symlinks_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_protected_symlinks_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_rename_crossing_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_rename_crossing_idmapped_mounts);
-+}
-+static int tmpfs_rename_from_idmapped_mount(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_rename_from_idmapped_mount);
-+}
-+static int tmpfs_rename_from_idmapped_mount_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_rename_from_idmapped_mount_in_userns);
-+}
-+static int tmpfs_setattr_truncate_idmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setattr_truncate_idmapped);
-+}
-+static int tmpfs_setattr_truncate_idmapped_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setattr_truncate_idmapped_in_userns);
-+}
-+static int tmpfs_setgid_create_idmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setgid_create_idmapped);
-+}
-+static int tmpfs_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setgid_create_idmapped_in_userns);
-+}
-+static int tmpfs_setid_binaries_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setid_binaries_idmapped_mounts);
-+}
-+static int tmpfs_setid_binaries_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setid_binaries_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_setid_binaries_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setid_binaries_idmapped_mounts_in_userns_separate_userns);
-+}
-+static int tmpfs_sticky_bit_unlink_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_unlink_idmapped_mounts);
-+}
-+static int tmpfs_sticky_bit_unlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_unlink_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_sticky_bit_rename_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_rename_idmapped_mounts);
-+}
-+static int tmpfs_sticky_bit_rename_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_rename_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_symlink_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_symlink_idmapped_mounts);
-+}
-+static int tmpfs_symlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_symlink_idmapped_mounts_in_userns);
-+}
-+
-+static const struct test_struct t_tmpfs[] = {
-+	{ tmpfs_acls,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in user namespace",							      },
-+	{ tmpfs_create_in_userns,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in user namespace",							      },
-+	{ tmpfs_device_node_in_userns,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs device node in user namespace",								      },
-+	{ tmpfs_expected_uid_gid_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs expected ownership on idmapped mounts",							},
-+	{ tmpfs_fscaps_idmapped_mounts,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs fscaps on idmapped mounts",									},
-+	{ tmpfs_fscaps_idmapped_mounts_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs fscaps on idmapped mounts in user namespace",							},
-+	{ tmpfs_fscaps_idmapped_mounts_in_userns_separate_userns,		T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs fscaps on idmapped mounts in user namespace with different id mappings",			},
-+	{ tmpfs_fsids_mapped,							T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs mapped fsids",										      },
-+	{ tmpfs_fsids_unmapped,							T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs unmapped fsids",										      },
-+	{ tmpfs_hardlink_crossing_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs cross idmapped mount hardlink",								},
-+	{ tmpfs_hardlink_from_idmapped_mount,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs hardlinks from idmapped mounts",								},
-+	{ tmpfs_hardlink_from_idmapped_mount_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs hardlinks from idmapped mounts in user namespace",						},
-+#ifdef HAVE_LIBURING_H
-+	{ tmpfs_io_uring_idmapped,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts",								      },
-+	{ tmpfs_io_uring_idmapped_userns,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts in user namespace",					      },
-+	{ tmpfs_io_uring_idmapped_unmapped,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts with unmapped ids",					      },
-+	{ tmpfs_io_uring_idmapped_unmapped_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts with unmapped ids in user namespace",			      },
-+#endif
-+	{ tmpfs_protected_symlinks_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs following protected symlinks on idmapped mounts",						},
-+	{ tmpfs_protected_symlinks_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs following protected symlinks on idmapped mounts in user namespace",				},
-+	{ tmpfs_rename_crossing_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs cross idmapped mount rename",									},
-+	{ tmpfs_rename_from_idmapped_mount,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs rename from idmapped mounts",									},
-+	{ tmpfs_rename_from_idmapped_mount_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs rename from idmapped mounts in user namespace",						},
-+	{ tmpfs_setattr_truncate_idmapped,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setattr truncate on idmapped mounts",								},
-+	{ tmpfs_setattr_truncate_idmapped_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setattr truncate on idmapped mounts in user namespace",					},
-+	{ tmpfs_setgid_create_idmapped,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in directories with setgid bit set on idmapped mounts",			},
-+	{ tmpfs_setgid_create_idmapped_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
-+	{ tmpfs_setid_binaries_idmapped_mounts,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setid binaries on idmapped mounts",								},
-+	{ tmpfs_setid_binaries_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setid binaries on idmapped mounts in user namespace",						},
-+	{ tmpfs_setid_binaries_idmapped_mounts_in_userns_separate_userns,	T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setid binaries on idmapped mounts in user namespace with different id mappings",		},
-+	{ tmpfs_sticky_bit_unlink_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit unlink operations on idmapped mounts",						},
-+	{ tmpfs_sticky_bit_unlink_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit unlink operations on idmapped mounts in user namespace",				},
-+	{ tmpfs_sticky_bit_rename_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit rename operations on idmapped mounts",						},
-+	{ tmpfs_sticky_bit_rename_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit rename operations on idmapped mounts in user namespace",				},
-+	{ tmpfs_symlink_idmapped_mounts,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs symlink from idmapped mounts",									},
-+	{ tmpfs_symlink_idmapped_mounts_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs symlink from idmapped mounts in user namespace",						},
-+};
-+
-+
-+const struct test_suite s_tmpfs_idmapped_mounts = {
-+	.tests = t_tmpfs,
-+	.nr_tests = ARRAY_SIZE(t_tmpfs),
-+};
-diff --git src/vfs/tmpfs-idmapped-mounts.h src/vfs/tmpfs-idmapped-mounts.h
-new file mode 100644
-index 00000000..038d86a9
---- /dev/null
-+++ src/vfs/tmpfs-idmapped-mounts.h
-@@ -0,0 +1,15 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#ifndef __TMPFS_IDMAPPED_MOUNTS_H
-+#define __TMPFS_IDMAPPED_MOUNTS_H
-+
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+
-+#include "utils.h"
-+
-+extern const struct test_suite s_tmpfs_idmapped_mounts;
-+
-+#endif /* __TMPFS_IDMAPPED_MOUNTS_H */
-+
-diff --git src/vfs/vfstest.c src/vfs/vfstest.c
-index 9e15ad9a..3d75b1e3 100644
---- src/vfs/vfstest.c
-+++ src/vfs/vfstest.c
-@@ -23,6 +23,7 @@
- #include <unistd.h>
- 
- #include "btrfs-idmapped-mounts.h"
-+#include "tmpfs-idmapped-mounts.h"
- #include "idmapped-mounts.h"
- #include "missing.h"
- #include "utils.h"
-@@ -2317,6 +2318,7 @@ static void usage(void)
- 	fprintf(stderr, "--test-fscaps-regression            Run fscap regression tests\n");
- 	fprintf(stderr, "--test-nested-userns                Run nested userns idmapped mount testsuite\n");
- 	fprintf(stderr, "--test-btrfs                        Run btrfs specific idmapped mount testsuite\n");
-+	fprintf(stderr, "--test-tmpfs                        Run tmpfs specific idmapped mount testsuite\n");
- 	fprintf(stderr, "--test-setattr-fix-968219708108     Run setattr regression tests\n");
- 	fprintf(stderr, "--test-setxattr-fix-705191b03d50    Run setxattr regression tests\n");
- 	fprintf(stderr, "--test-setgid-create-umask          Run setgid with umask tests\n");
-@@ -2341,6 +2343,7 @@ static const struct option longopts[] = {
- 	{"test-setxattr-fix-705191b03d50",	no_argument,		0,	'j'},
- 	{"test-setgid-create-umask",		no_argument,		0,	'u'},
- 	{"test-setgid-create-acl",		no_argument,		0,	'l'},
-+	{"test-tmpfs",				no_argument,		0,	't'},
- 	{NULL,					0,			0,	  0},
- };
- 
-@@ -2481,7 +2484,7 @@ int main(int argc, char *argv[])
- 	bool idmapped_mounts_supported = false, test_btrfs = false,
- 	     test_core = false, test_fscaps_regression = false,
- 	     test_nested_userns = false, test_setattr_fix_968219708108 = false,
--	     test_setxattr_fix_705191b03d50 = false,
-+	     test_setxattr_fix_705191b03d50 = false, test_tmpfs = false,
- 	     test_setgid_create_umask = false, test_setgid_create_acl = false;
- 
- 	init_vfstest_info(&info);
-@@ -2530,6 +2533,9 @@ int main(int argc, char *argv[])
- 		case 'l':
- 			test_setgid_create_acl = true;
- 			break;
-+		case 't':
-+			test_tmpfs = true;
-+			break;
- 		case 'h':
- 			/* fallthrough */
- 		default:
-@@ -2623,6 +2629,11 @@ int main(int argc, char *argv[])
- 			goto out;
+ 		/* create symlink */
+@@ -764,7 +764,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
  	}
  
-+	if (test_tmpfs) {
-+		if (!run_suite(&info, &s_tmpfs_idmapped_mounts))
-+			goto out;
-+	}
-+
- 	fret = EXIT_SUCCESS;
- 
- out:
-diff --git tests/tmpfs/001 tests/tmpfs/001
-new file mode 100755
-index 00000000..37f5439e
---- /dev/null
-+++ tests/tmpfs/001
-@@ -0,0 +1,27 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Rodrigo Campos Catelin.  All Rights Reserved.
-+#
-+# FS QA Test 001
-+#
-+# Test that idmapped mounts behave correctly with tmpfs filesystem.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick idmapped
-+
-+# get standard environment, filters and checks
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs tmpfs
-+_require_idmapped_mounts
-+_require_test
-+
-+echo "Silence is golden"
-+
-+$here/src/vfs/vfstest --test-tmpfs --device "$TEST_DEV" \
-+	        --mount "$TEST_DIR" --fstype "$FSTYP"
-+
-+status=$?
-+exit
-diff --git tests/tmpfs/001.out tests/tmpfs/001.out
-new file mode 100644
-index 00000000..88678b8e
---- /dev/null
-+++ tests/tmpfs/001.out
-@@ -0,0 +1,2 @@
-+QA output created by 001
-+Silence is golden
-diff --git tests/tmpfs/Makefile tests/tmpfs/Makefile
-new file mode 100644
-index 00000000..b464b22b
---- /dev/null
-+++ tests/tmpfs/Makefile
-@@ -0,0 +1,24 @@
-+#
-+# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+include $(TOPDIR)/include/buildgrouplist
-+
-+GENERIC_DIR = generic
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GENERIC_DIR)
-+DIRT = group.list
-+
-+default: $(DIRT)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
+ 	/* create character device */
+-	if (mknodat(info->t_dir1_fd, CHRDEV1, S_IFCHR | 0644, makedev(5, 1))) {
++	if (!info->t_inside_userns && mknodat(info->t_dir1_fd, CHRDEV1, S_IFCHR | 0644, makedev(5, 1))) {
+ 		log_stderr("failure: mknodat");
+ 		goto out;
+ 	}
+@@ -825,7 +825,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
++	if (!info->t_inside_userns && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -857,7 +857,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -912,7 +912,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -942,7 +942,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: fchownat");
+ 		goto out;
+ 	}
+-	if (fchownat(info->t_dir1_fd, CHRDEV1, 2000, 2000, 0)) {
++	if (!info->t_inside_userns && fchownat(info->t_dir1_fd, CHRDEV1, 2000, 2000, 0)) {
+ 		log_stderr("failure: fchownat");
+ 		goto out;
+ 	}
+@@ -972,7 +972,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 2000, 2000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 2000, 2000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1002,7 +1002,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 12000, 12000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 12000, 12000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1032,7 +1032,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 32000, 32000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 32000, 32000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1064,7 +1064,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, HARDLINK1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(info->t_dir1_fd, CHRDEV1, 1000, 1000, 0))
++		if (!info->t_inside_userns && !fchownat(info->t_dir1_fd, CHRDEV1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, SYMLINK1, 2000, 2000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1079,7 +1079,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd2, HARDLINK1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(open_tree_fd2, CHRDEV1, 1000, 1000, 0))
++		if (!info->t_inside_userns && !fchownat(open_tree_fd2, CHRDEV1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd2, SYMLINK1, 2000, 2000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1094,7 +1094,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (fchownat(open_tree_fd1, HARDLINK1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+-		if (fchownat(open_tree_fd1, CHRDEV1, 1000, 1000, 0))
++		if (!info->t_inside_userns && fchownat(open_tree_fd1, CHRDEV1, 1000, 1000, 0))
+ 			die("failure: fchownat");
+ 		if (fchownat(open_tree_fd1, SYMLINK1, 2000, 2000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1109,7 +1109,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (!info->t_inside_userns && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1124,7 +1124,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1139,7 +1139,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, HARDLINK1, 0, 1000, 1000))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 1000, 1000))
++		if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 1000, 1000))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, SYMLINK1, AT_SYMLINK_NOFOLLOW, 2000, 2000))
+ 			die("failure: expected_uid_gid");
+@@ -1167,7 +1167,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 1000, 1000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 1000, 1000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1197,7 +1197,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 11000, 11000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 11000, 11000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1227,7 +1227,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 31000, 31000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 31000, 31000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1259,7 +1259,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, HARDLINK1, 0, 0, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(info->t_dir1_fd, CHRDEV1, 0, 0, 0))
++		if (!info->t_inside_userns && !fchownat(info->t_dir1_fd, CHRDEV1, 0, 0, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(info->t_dir1_fd, SYMLINK1, 3000, 3000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1274,7 +1274,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd1, HARDLINK1, 0, 0, 0))
+ 			die("failure: fchownat");
+-		if (!fchownat(open_tree_fd1, CHRDEV1, 0, 0, 0))
++		if (!info->t_inside_userns && !fchownat(open_tree_fd1, CHRDEV1, 0, 0, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd1, SYMLINK1, 3000, 3000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1289,7 +1289,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: fchownat");
+ 		if (fchownat(open_tree_fd2, HARDLINK1, 0, 0, 0))
+ 			die("failure: fchownat");
+-		if (fchownat(open_tree_fd2, CHRDEV1, 0, 0, 0))
++		if (!info->t_inside_userns && fchownat(open_tree_fd2, CHRDEV1, 0, 0, 0))
+ 			die("failure: fchownat");
+ 		if (!fchownat(open_tree_fd2, SYMLINK1, 3000, 3000, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW))
+ 			die("failure: fchownat");
+@@ -1304,7 +1304,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (!info->t_inside_userns && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(info->t_dir1_fd, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1319,7 +1319,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, HARDLINK1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
++		if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd1, SYMLINK1, AT_SYMLINK_NOFOLLOW, info->t_overflowuid, info->t_overflowgid))
+ 			die("failure: expected_uid_gid");
+@@ -1334,7 +1334,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, HARDLINK1, 0, 0, 0))
+ 			die("failure: expected_uid_gid");
+-		if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 0, 0))
++		if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 0, 0))
+ 			die("failure: expected_uid_gid");
+ 		if (!expected_uid_gid(open_tree_fd2, SYMLINK1, AT_SYMLINK_NOFOLLOW, 2000, 2000))
+ 			die("failure: expected_uid_gid");
+@@ -1362,7 +1362,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
++	if (!info->t_inside_userns && !expected_uid_gid(info->t_dir1_fd, CHRDEV1, 0, 0, 0)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1392,7 +1392,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd1, CHRDEV1, 0, 10000, 10000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+@@ -1422,7 +1422,7 @@ static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
+-	if (!expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
++	if (!info->t_inside_userns && !expected_uid_gid(open_tree_fd2, CHRDEV1, 0, 30000, 30000)) {
+ 		log_stderr("failure: expected_uid_gid");
+ 		goto out;
+ 	}
 -- 
 2.39.2
 
