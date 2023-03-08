@@ -2,162 +2,59 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69266C678D5
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Mar 2023 10:09:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34F4CC64EC4
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Mar 2023 11:14:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230118AbjCHKJp (ORCPT
+        id S230496AbjCHLOO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Mar 2023 05:09:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38794 "EHLO
+        Wed, 8 Mar 2023 06:14:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230093AbjCHKJo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Mar 2023 05:09:44 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EAB927D69;
-        Wed,  8 Mar 2023 02:09:43 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 6510BB81C14;
-        Wed,  8 Mar 2023 10:09:42 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 22D8AC433EF;
-        Wed,  8 Mar 2023 10:09:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678270181;
-        bh=6MFmD8pwATWBVFR/u+ZY17+kLUtQdscqLPcTZNzmMTY=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=FJy21Ph45xeAalcLFFpnV6KcLpd/Fi7s8Zz1RPGSPivs8rzODOZoBkumssIbQxrl/
-         HLGE7KaLfeLgJPsJEf0420d3fo89VuE5GRytBbvET7fkKSNArG1ZKsf6Fhv3TMBdHn
-         mI9F+stLNmhu1f5AtnmRdafpddMJogHMVk1jEOo99OEPj0zJQ4GPlrsi0Bq5qX7UW8
-         HF1quy29nXov7OOT2IxfwUGkI3xFmXAbMxdi+R/ya7aWfyhZ/BCxOPAt210BwsiC9u
-         QinI5twYOLKjvqImB2tO70T/Zz5XOu9kagW0me2i7MFo03Msjj/klBOiqso2k+pKNr
-         hfzh7fIVcwfEQ==
-Received: by mail-oa1-f50.google.com with SMTP id 586e51a60fabf-176b90e14a9so10540759fac.9;
-        Wed, 08 Mar 2023 02:09:41 -0800 (PST)
-X-Gm-Message-State: AO0yUKXw1FVv3Z1LBLLLqARS8B/tuk0X6UDXodyMJiPXD/zrRaEHupze
-        P+tL+ZjGCpX48nbizEmYyTpTtxmAtXkFCgd0HGs=
-X-Google-Smtp-Source: AK7set+vR7IXPqNgvytqOtBlh6yDoRDDIBeQGMox+qx6/NvUHnRMqyO64tx+JznogkjmHH0JeUGd/+AA6hcnhYUerWU=
-X-Received: by 2002:a05:6870:a8ab:b0:172:39d6:edc7 with SMTP id
- eb43-20020a056870a8ab00b0017239d6edc7mr4913893oab.4.1678270180291; Wed, 08
- Mar 2023 02:09:40 -0800 (PST)
+        with ESMTP id S231150AbjCHLOM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Mar 2023 06:14:12 -0500
+Received: from alerce.blitiri.com.ar (alerce.blitiri.com.ar [IPv6:2001:bc8:228b:9000::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C58B86BC0D
+        for <fstests@vger.kernel.org>; Wed,  8 Mar 2023 03:14:07 -0800 (PST)
+Received: from localhost.localdomain
+        by sdfg.com.ar (chasquid) with ESMTPSA
+        tls TLS_AES_128_GCM_SHA256
+        (over submission, TLS-1.3, envelope from "rodrigo@sdfg.com.ar")
+        ; Wed, 08 Mar 2023 11:14:03 +0000
+From:   Rodrigo Campos <rodrigo@sdfg.com.ar>
+To:     fstests@vger.kernel.org
+Cc:     Christian Brauner <brauner@kernel.org>,
+        Giuseppe Scrivano <gscrivan@redhat.com>,
+        Rodrigo Campos <rodrigo@sdfg.com.ar>
+Subject: [PATCH v2 3/9] vfs: Use tabs to indent, not spaces
+Date:   Wed,  8 Mar 2023 12:13:37 +0100
+Message-Id: <20230308111343.510970-4-rodrigo@sdfg.com.ar>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230308111343.510970-1-rodrigo@sdfg.com.ar>
+References: <20230308111343.510970-1-rodrigo@sdfg.com.ar>
 MIME-Version: 1.0
-References: <7be1169e950b807f24e4b2ac33177e44fc13e434.1678189053.git.fdmanana@suse.com>
- <5a542a82-b47b-ced3-97d6-a38b6e926522@oracle.com> <20230308084756.sdeko4gm4x4teuvx@zlang-mailbox>
- <dfd8863c-3a18-f5f1-8391-10fdf101ee62@oracle.com>
-In-Reply-To: <dfd8863c-3a18-f5f1-8391-10fdf101ee62@oracle.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Wed, 8 Mar 2023 10:09:03 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H7ocf8KNhB=b6dr6BskdzJW8qJGvS8ro9DRgRRpyH89qg@mail.gmail.com>
-Message-ID: <CAL3q7H7ocf8KNhB=b6dr6BskdzJW8qJGvS8ro9DRgRRpyH89qg@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/284: list a couple btrfs-progs git commits
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 8, 2023 at 9:17=E2=80=AFAM Anand Jain <anand.jain@oracle.com> w=
-rote:
->
->
->
-> On 3/8/23 16:47, Zorro Lang wrote:
-> > On Wed, Mar 08, 2023 at 04:03:57PM +0800, Anand Jain wrote:
-> >> On 07/03/2023 19:38, fdmanana@kernel.org wrote:
-> >>> From: Filipe Manana <fdmanana@suse.com>
-> >>>
-> >>> This test may often fail when running with btrfs-progs versions not v=
-ery
-> >>> recent. The corresponding git commits in btrfs-progs that fix issues
-> >>> uncovered by this test are:
-> >>>
-> >>> 1) 6f4a51886b37 ("btrfs-progs: receive: fix silent data loss after fa=
-ll back from encoded write")
-> >>>      Introduced in btrfs-progs v6.0.2;
-> >>>
-> >>> 2) e3209f8792f4 ("btrfs-progs: receive: fix a corruption when decompr=
-essing zstd extents"")
-> >>>      Introduced in btrfs-progs v6.2.
-> >>>
-> >>> So add the corresponding _fixed_by_git_commit calls to the test.
-> >>>
-> >>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> >>> ---
-> >>>    tests/btrfs/284 | 5 +++++
-> >>>    1 file changed, 5 insertions(+)
-> >>>
-> >>> diff --git a/tests/btrfs/284 b/tests/btrfs/284
-> >>> index 0d31e5d9..c6692668 100755
-> >>> --- a/tests/btrfs/284
-> >>> +++ b/tests/btrfs/284
-> >>> @@ -20,6 +20,11 @@ _require_test
-> >>>    _require_scratch_size $(($LOAD_FACTOR * 1 * 1024 * 1024))
-> >>>    _require_fssum
-> >>> +_fixed_by_git_commit btrfs-progs e3209f8792f4 \
-> >>> +   "btrfs-progs: receive: fix a corruption when decompressing zstd e=
-xtents"
-> >>> +_fixed_by_git_commit btrfs-progs 6f4a51886b37 \
-> >>> +   "btrfs-progs: receive: fix silent data loss after fall back from =
-encoded write"
-> >>> +
-> >>>    send_files_dir=3D$TEST_DIR/btrfs-test-$seq
-> >>>    rm -fr $send_files_dir
-> >>
-> >>
-> >> Along with this, why not check the btrfs-progs version using
-> >> 'btrfs --version' and call _not_run()?
-> >
-> > Does this case expose some known bugs, right? Or the failures due to so=
-me
-> > features missing?
-> >
->
-> It tests for a bug.
+Signed-off-by: Rodrigo Campos <rodrigo@sdfg.com.ar>
+---
+ src/vfs/vfstest.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-The test is meant to be a generic stress test for send v2 streams.
+diff --git src/vfs/vfstest.c src/vfs/vfstest.c
+index 20ade869..a840e007 100644
+--- src/vfs/vfstest.c
++++ src/vfs/vfstest.c
+@@ -105,7 +105,7 @@ static int hardlink_crossing_mounts(const struct vfstest_info *info)
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+ 
+-        if (chown_r(info->t_mnt_fd, T_DIR1, 10000, 10000)) {
++	if (chown_r(info->t_mnt_fd, T_DIR1, 10000, 10000)) {
+ 		log_stderr("failure: chown_r");
+ 		goto out;
+ 	}
+-- 
+2.39.2
 
-It happens to have uncovered 2 bugs (so far). And if it finds out more
-bugs in the future, I'll surely list more commits in it.
-
-So I don't get where you got the idea to skip running a test based on
-the btrfs-progs version.
-We don't do that anywhere in fstests, neither for btrfs-progs nor
-kernel or anything else. The reason was already pointed out to you:
-distros, vendors, often backport commits to older versions - working
-for a company with a distro, I would expect you to be familiar with
-that :)
-
-Thanks.
-
->
-> > If this case uncovers some known issues, then the failure is expected o=
-n unfixed
-> > version. We should let the failure exposing, not hide it by _notrun.
->
-> Makes sense.
->
-> > And the package version is not a good way to jundge if a issue is fixed=
- or a
-> > feature is merged. Due to many downstream packages might merge some ups=
-tream
-> > patches independently.
-> >
->
-> Yeah, I agree. You can guarantee that if btrfs-progs is plain vanilla.
->
-> Looks good as it is.
->
-> Reviewed-by: Anand Jain <anand.jain@oracle.com>
->
-> Thanks, Anand
->
-> > Thanks,
-> > Zorro
-> >
-> >>
-> >> Thanks, Anand
-> >>
-> >
