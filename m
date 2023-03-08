@@ -2,185 +2,192 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41CD0C6FA99
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Mar 2023 03:01:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6F0EC64EC4
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Mar 2023 08:04:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229480AbjCHDBR (ORCPT
+        id S229819AbjCHIEY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Mar 2023 22:01:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57664 "EHLO
+        Wed, 8 Mar 2023 03:04:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229724AbjCHDBQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Mar 2023 22:01:16 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B25B4AA26E
-        for <fstests@vger.kernel.org>; Tue,  7 Mar 2023 19:00:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1678244405;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=A7MD8U0/zV1Ogpc98sokCMyOL/bqsJ0/Z7A65mt9ZQc=;
-        b=B8xPltkz8/2CALqDbCx8C04IAdGOE3YF2fAmBZV0XPPir6KPnZZOfJ9zf8IEP03dzTdmmN
-        SSwpCxFQxpsH6GcKXpJzSm0J6nYLHsMylIR/rbSWIA+IxwrcpJNqCsElB9i316cvvXju5E
-        zHB3OCVfs/DfrMDs6hEHe4DfU5WORXo=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-193-XNTWo7p7MoGeK5tnqmhE8A-1; Tue, 07 Mar 2023 22:00:04 -0500
-X-MC-Unique: XNTWo7p7MoGeK5tnqmhE8A-1
-Received: by mail-pg1-f198.google.com with SMTP id e127-20020a636985000000b004bbc748ca63so3482421pgc.3
-        for <fstests@vger.kernel.org>; Tue, 07 Mar 2023 19:00:04 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678244403;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=A7MD8U0/zV1Ogpc98sokCMyOL/bqsJ0/Z7A65mt9ZQc=;
-        b=TibT0kjg9zNZzMzrEBo/vSk+hqL+HfDNmZNXvGMpI9u+RJK981cvr5M62i2FxHKUje
-         SZRTzpUgD8hIiF5/+1epCvb/xl+gcsCjKT1aV8+Ifnsr6DydtvibyMATcn77rK/9gNnv
-         D+Xg0dFRi+ZCS2vvPiMSeEXsebVeBbdCID9NIzlaA/81XMaWFSr/WvKONYDF9hmbFwOk
-         wAmzLl/ofeLpCiClgaSIcoimU1q+oxi8MoMrN7x/+osulIqPZ8VGga19wGv8atcpfQiz
-         x6tt0/OBA1qepg1G70sq0VXZHfa3CkZm83hzhD+mTOdymCnYAO1Tn+cDrAU9m9wlWRd6
-         BKiw==
-X-Gm-Message-State: AO0yUKVMdOwGYKscbQ1aPphuXGJ/zgY+FXQMNT12XhqyOo9NN2+8faAe
-        9YbaiYJRufkgN2TkrfMVnquMoz0hQBKd1EDhSOhQAy96aCsKc1DmDQQzrOmigpN120dc0WQ1JEa
-        LhdTuH2DgAyTrRvrF3Q==
-X-Received: by 2002:a62:6305:0:b0:5a9:cb6b:7839 with SMTP id x5-20020a626305000000b005a9cb6b7839mr15987964pfb.1.1678244403404;
-        Tue, 07 Mar 2023 19:00:03 -0800 (PST)
-X-Google-Smtp-Source: AK7set+JyLZzq5ZVnPBaSXKAaTyXDomTMm1WRbExOZDAecnOo+ElwPbLlW6nZci0fPAN4SAhHjNM+A==
-X-Received: by 2002:a62:6305:0:b0:5a9:cb6b:7839 with SMTP id x5-20020a626305000000b005a9cb6b7839mr15987949pfb.1.1678244403093;
-        Tue, 07 Mar 2023 19:00:03 -0800 (PST)
-Received: from [10.72.12.78] ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id x16-20020aa784d0000000b005e06234e70esm8481870pfn.59.2023.03.07.18.59.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Mar 2023 19:00:02 -0800 (PST)
-Message-ID: <8baedccc-d070-28c3-2754-3ad92a50b468@redhat.com>
-Date:   Wed, 8 Mar 2023 10:59:55 +0800
-MIME-Version: 1.0
+        with ESMTP id S229764AbjCHIEW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Mar 2023 03:04:22 -0500
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4587C95BDF;
+        Wed,  8 Mar 2023 00:04:20 -0800 (PST)
+Received: from pps.filterd (m0333520.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3287qbpZ018512;
+        Wed, 8 Mar 2023 08:04:14 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : cc : references : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2022-7-12;
+ bh=Uw3D1wk0BHcqo23KfznwuZA55s2OZQPyHYJE/q2GdSs=;
+ b=Opy/F22xmKyTEVZsasI3q96FO3CHGgE5ul32ULLH3m88eQvv/jL+amp8YNHOeCWUK+F4
+ IJ21bSffzpc5/bQ2RbeUf6oHFu1g2U5kzkmbgWn349rl7X/lCcUkQOZjoJ4s5FxmbL+k
+ ojFrwhH1bspjPIxdiNl3qv98cfebVlaxve2WGr15E6RuVIKijLTvQ8PEFVgiv/BAkTm7
+ HTI97YzmU3ue9J3YAX1h+jxnyjYkvwKRF+UbTwEjwEEYVau+U8O7/6cwpNCW5oHKdhLr
+ 4RwDEG3L/7R02whMgIpK3Br7PsVxPHG6G/nrBcnhjn52NVlw82a2f3PxfKgfo2o1Z0wS Zw== 
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3p415hyj7f-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 08 Mar 2023 08:04:13 +0000
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.5/8.17.1.5) with ESMTP id 32880Hwx015632;
+        Wed, 8 Mar 2023 08:04:08 GMT
+Received: from nam10-mw2-obe.outbound.protection.outlook.com (mail-mw2nam10lp2104.outbound.protection.outlook.com [104.47.55.104])
+        by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3p6fekwyuy-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 08 Mar 2023 08:04:08 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=b1utz7T4g5mZkUoP38mPYtChQhM9EVhA7Bz03zK3MK7UMardWMs7h08uXs9IOx+zpWFihnCsBJrufs7H6vUmycixWugRqiaEIffkRW/WNc7EHeIHgJ0SbFp2qeieW+Q4UIhHZgvzqt3VXEmGWBVLeh5Qa4v/btbhcMmYxWHhrduJDPVqZVGgoAJw7uwwtHcU/mJc4evinszQywg+pKf8GbiCoSV7aZmJpbtRCRclELEsZVAUfVd4ArdHaVm+4TWqvp2Q4ICaO4YQRHgEl9ekzPf7WGCqiU812IOWus3vus1sIUmSmrnQlGkicKkTiLlIKNy4nMYo2R6wdAxmIuntzQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Uw3D1wk0BHcqo23KfznwuZA55s2OZQPyHYJE/q2GdSs=;
+ b=U/vEOnXlGqY0Qn7zESExhgxHb2QWRZzaM8XwEAfVoisi3mXWP6Bmbv2f3rLykOOXnnIBpDR+ILociXeU33fAdcZKQhfwVvrLIp2U01RSAvFb1spQAffgOzaXGVvlJ+IJZ6PADMYGTfhjMMAlY3A37C+DksaVlUTfVMl4KddVQWlRFgZUkFIVR9fwnLlu6cvCQIaNMltzkLmG0bsZlAmDgB9YB890Od28RVF3KAXuc2P1ThO5bpjLe2zrXTLfa/BYf9EW3mYzP8VQH52gdFS4E7SkxoJ9lUb7BF8Z2sJzysAMkSnGEnuwVhtGK3nLtbfSqt0NJqo7v4r08Lh+ihIcgw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Uw3D1wk0BHcqo23KfznwuZA55s2OZQPyHYJE/q2GdSs=;
+ b=SHO4hE/DiYJBwuUsqt93nodLsfB3ehReJPJXkOduyXTm+SJpEF895C5eyFmPvdZBt58xYmmUBgvjoaB4bUjA/Ji5GFFAc6FxTz0H3+X+o1FbUs2+OL88pBlvxUNKH7H/Y6JzR3aZn/EG9wsVX6yG5+zm+YWxc9vGojsFVcwqNDM=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by DS0PR10MB6197.namprd10.prod.outlook.com (2603:10b6:8:c3::7) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6156.16; Wed, 8 Mar 2023 08:04:06 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::3eb1:c999:6a64:205c]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::3eb1:c999:6a64:205c%4]) with mapi id 15.20.6156.026; Wed, 8 Mar 2023
+ 08:04:06 +0000
+Message-ID: <5a542a82-b47b-ced3-97d6-a38b6e926522@oracle.com>
+Date:   Wed, 8 Mar 2023 16:03:57 +0800
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [PATCH] generic/{075,112}: fix printing the incorrect return
- value of fsx
+ Thunderbird/102.5.0
+Subject: Re: [PATCH] btrfs/284: list a couple btrfs-progs git commits
 Content-Language: en-US
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
-        ceph-devel@vger.kernel.org, vshankar@redhat.com
-References: <20230301030620.137153-1-xiubli@redhat.com>
- <20230302153837.w23cw5gbedmudwuk@zlang-mailbox>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20230302153837.w23cw5gbedmudwuk@zlang-mailbox>
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <7be1169e950b807f24e4b2ac33177e44fc13e434.1678189053.git.fdmanana@suse.com>
+From:   Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <7be1169e950b807f24e4b2ac33177e44fc13e434.1678189053.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SG2PR04CA0186.apcprd04.prod.outlook.com
+ (2603:1096:4:14::24) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS0PR10MB6197:EE_
+X-MS-Office365-Filtering-Correlation-Id: 86ff40fa-2c52-478b-6303-08db1fabafe1
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 5ZC0Nm11UmFuJE9kz3k73JR1tfSDjYWbaYbmPLdTvNAVqJ75S/NaCJggM95EemWxeppneyiburYFxRbj2G/E8EeQMrkLxEUDQ3ubAq90ymaWca63laVUFXlLRM8U0ncrEj8zL05lIUX4epKxrdXAc2/eThtqBHaW5w49b0tSQWxTI3HIGhRorcGbAQYnuEJpnCbMPZjHrH6vLCAbPwYy7at6WVhquDgs6Z1NKy9NRWUWVAHXVC/B9NfG4Clxaj2IivTAgqOetcJQsCJkGZpMZTiutY8FunXJyT/KRjYzLXrJF+Q1pUOSszO1lW1nnlHLV6FW5y3b1hd2yIrQHKxRqh2EfbHGZNeOm2g5rA938aCrX/ZBhrlFuIWUok6yFddYvjKZdocY2zUEeledtPyOeDyMptlk+Dr4y4rpoAQ1BriKI7+A77/oIJcCexcNu03kbEwDsbVgWa/WEcWpJCfqZQ1h3PLPT9n5FOqduLpdcb6eDMlP/eqHC9Nc40kC1ggZ8sltQB/M5pi7hagm63YV+dt+AzkmB5diUtqc4w8hELNw+exqyRG8wXhszU+4RYY5FYMQzdGtWoGrUkcOvgH/mQLwcKysp88abWLfkY4i2eZB0KgyP2zpeznRsgBmbcDfqdwWyJAjX7REq3HFBdEk4PenBr6vYXeixq7hTl+XRvH1oHVTyQKGTSbXalvwbFs0VRgzyZc7aPUmWGRlwsO5gD9Mw8gbV9+2/Yxpft454CU=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230025)(39860400002)(376002)(136003)(396003)(366004)(346002)(451199018)(478600001)(6486002)(6666004)(53546011)(6506007)(31686004)(316002)(2616005)(6512007)(186003)(26005)(66556008)(66946007)(8676002)(38100700002)(8936002)(66476007)(44832011)(5660300002)(4326008)(41300700001)(2906002)(36756003)(86362001)(31696002)(45980500001)(43740500002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?R3NncURnakQ1dzlLTEY1c2krTGtUZlZNWnFiMWQ5eTlnbjRCeWg3MDhwcmFs?=
+ =?utf-8?B?QUQ3YUhvcUM5YUFWd0pUOEZUTlVtWGlkSUdWSmNCWW5lQ2xHMGQyKzFGbHdF?=
+ =?utf-8?B?Q1FsVkxqdDFJQS9IMFlYVmVGRmIzS1hMeENpUnlITG9xQ01ibVJuZkxrRE1h?=
+ =?utf-8?B?ZjQyYVZaZlRyOHlpcllNMWFTK2ZkWUFnYVZZN0ZteXBoVkNvNW43Qm5Wb0ty?=
+ =?utf-8?B?bWdaSHB5UkVjWFlFNjkvUVNsMVlvSVBTVUxSekhvVndnVEhQZks2YjdiQTQv?=
+ =?utf-8?B?bEUzVGRaYjVEYUtkOFBxaHBtK0plZXJQdklLaUVIR1p4UWJ1T0FPSXI4QnJn?=
+ =?utf-8?B?N1dvMTc2TFFRUWEyYngxTlJBa1NBTVlxZnlsYlFPY2JWM3p5VXZaV1RhWHF2?=
+ =?utf-8?B?MHd0cVd5SEM5V0FTUHlGTDJ2Tm5zUTZwaGZrVzFEbFJJN3VzUEZ2b1VZTU9P?=
+ =?utf-8?B?aGtnME13NWRoVlZwYXUzT1d0bk92N2hCS01IUGhPYllCUCtDL1BlSXFqNkJL?=
+ =?utf-8?B?OG1ZTjBmYlc5alNiZFFNUU9mVlBod1pWZU8wK1lLb2lIOEFrMnNFYTZVWFBu?=
+ =?utf-8?B?Rnd0RUtJSTlYaTVoQWpvUTBaWUpNMW1GOHJQUzRpQWJuemFHc3J5bitITGNq?=
+ =?utf-8?B?dG5yVXRxYWxpQXkwYXM3cWhXemhoQXJxaFhUT2ZoWm5VejBkcEZnb2lrRFE3?=
+ =?utf-8?B?ZTJSMVlWTUxpUGpSanI3V1Z0YVBaRHd3YTQ5c2hBMVNqU0k1SVhFakg0dXA3?=
+ =?utf-8?B?SDYxdGUyQTBOemRyWkYycXdnblk1RmdvUmlpVUFhbVdjYkRXUHBvbC9wMlNw?=
+ =?utf-8?B?aU02NmRuZFRBbHZITUNJNXlHWTNXQVhPNjkyc3BmNllPcStRVVRKRnhSWmEw?=
+ =?utf-8?B?K0Z4aTNIUVh5S3JzaVZiM0ZTZEU1UElEQnNaODBkYUxPbWszVnhXS051UTBs?=
+ =?utf-8?B?OFhSdXJVTW1hdXQ4VmtvbGtlMHVESWY2MU9ERDgrVFpFWTBWSjdKL3FNVWh6?=
+ =?utf-8?B?NTZwVUxKM1pRUGFNVUlMd3pmbW5kRGIvSGkwZjNLbENJdFZXejhpK21Wb1Bn?=
+ =?utf-8?B?NW5aVnp2WmtoYlRMNlgxYmo0elBUOVB1MTN5VXB2ZUlpR0MxOFBqdEx4VXNN?=
+ =?utf-8?B?alpOWTFvRzJkS3BsaWhxYzRqeVkzQ1hTaXpLdHpkZXpQaDdESTNqNUlyRDFh?=
+ =?utf-8?B?M0krK1FOaTFaRzEyamUwNHc2U3dSRzFPZEpNSDEzWk1Xb1pKK0NVamhnL0pI?=
+ =?utf-8?B?THh1VFhuczZrMGlTdnVtNXNiUURXdGVzc0UyS3RhOWpubm00Zml1TklrZ0lI?=
+ =?utf-8?B?UGJqSlpnSHI5VEhrZXJuaDNIR1R5b3BFRitOMGtVRVZxWmNycHhOMG1XTHFl?=
+ =?utf-8?B?UUMwRTFGQWY1QkhzTlg2aGVuYkNIaTNRK044MEpueEtmVnh2UENjbjVUZ24w?=
+ =?utf-8?B?bnk1Yjc0cmFZMUZENWVjSmxhQWZDU29FWDk5dDlPN1YzQ3hTempocUZmNlgv?=
+ =?utf-8?B?SEJpVW5kOHRCNm9NMy9xTFlOQUVIZitVTFhWTElRVW1mU1R6YlN2U2N0Tks0?=
+ =?utf-8?B?aHpJRUVxTndqNng1MmpKUkltRFN6U2t0bHR2OE1vV01XUjM0am9VaVBnNE5q?=
+ =?utf-8?B?TlI5Tng1RlQ0a3V4aGFxcHZTQzBobVpGNFVhUzhwQ0Zzbk9uaXBIWTFDUGpO?=
+ =?utf-8?B?K0JCeFFKTDJZbjRNNnUxRE1NeDIxUGRvOFFiZlZGWFFSSW9YUzJUUEM5V2pw?=
+ =?utf-8?B?OVRnZ21DK0xSSXZKSUxuT2xZaXpsL1VYUUVaZUpNR2NhUzFJc3NZdU5PbHJR?=
+ =?utf-8?B?VDE2ZUhPN2JMZzFBVkZaRWY5UkhpV3N0Mi9NK25zQllWakNGM2RMK0JrcnFE?=
+ =?utf-8?B?SjBFenpKK2p0dXRtNTI3KytsejJaRTVTWGNselBIS01Jd1ZoTkRUN3E1K25I?=
+ =?utf-8?B?NStGdmtybmFmVGxBL1JxNXhoRmVFWnd1WjFNaHdKNTN6c3ovWjlLdG9vRk9m?=
+ =?utf-8?B?aGdzQWtPcCtQWUdJYzdGcUVkZEswLys4bmVkWEg4RHlHNWNTTmNTNndLc08y?=
+ =?utf-8?B?STkvM3VCenYrRHlUajB2eHZqVGtMQzVFUHFTaDVxNmVYVmZZWFphSCtlRHRQ?=
+ =?utf-8?Q?qBPKoX+jrJ9iFrD+gXMv3yb+8?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: pdhjdrpIKAQYFsqINyJdE01sQ0bm5c3nzR0FbqNPf0fyTxLRymY3DA47hvM09Z6Usr8z1gfQjfaFxQQU7YP++ME2x4AOY5KqaJVA4F9X3nR+34Y+WW98mfYFd4nsKUYKZwqtqJ2moyb8Dvn3bsB6ClP5vnFsd9C720sQ7LfQitkZNBqBZpAQuikbaWzWt7dC7Fgoc2L39oKQar51gmXI9Yuf+AxEfo5cxMqGtLmnbnCrNlwB2iXpDvpNSs/uCMkek+HeYAHpxaHPZkIINO+Kx3BMAoqWqAKPNduRXffnt/vQk6Y/WS3N0RSVkwS/l1gqlDlkm+7kJEuumcrQcjOm1WZua7dDXAk0A8y0wSgbrhn5VkbiBWGEs7KJc25zr4AuhexCjQZ+pEIP4Tjh85yLUqM6grOzB9ehE3Le66pj/eIaRIAgQzfP5NUaHVMwL6hRCzspVXr8BLA+tAYvGCzZzZKazyj9gHyIpkgldRCm2FOrfznmt35uzMhGyrZykKIJy+ziSoX4cFK8AzCFg7qzqQ97s1/jO3HU/tOvYGMrn1WHGF9yDCy9Qk7Ct5O2lPUp0egzuDQElGhrrreKBavJadWPkCugLSAr3o6qHcLJW3I5ZX4gvBmHjLVR/k/au+E0IKVv4+k3S1NMBUiewIr+IeGDwGEhyDAmGuGgyxld7mVIHzvcUjYDA/XUBxk56xYN9XPwLYFXhei/YG/RuSLQcRC+OL8EERQQ39b/3O0oXP4x4d1KUWECViTszToUiqjugSE9ByRiOHdNUDd9c46jg7I0dCQ4AYgLioyLFtP/B/LzujcTiwWFHPq029ADL8XZ
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 86ff40fa-2c52-478b-6303-08db1fabafe1
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Mar 2023 08:04:05.9169
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: s6nkuDNS2sTpK6tDMdhAUtINiXfcRGSOnccfkNPyEE8qioToFynCQccSWi76FfLCDdJ1jnYeywbEaWc0qQqybw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB6197
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-03-08_04,2023-03-07_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0 bulkscore=0
+ mlxlogscore=999 suspectscore=0 malwarescore=0 mlxscore=0 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2212070000
+ definitions=main-2303080068
+X-Proofpoint-GUID: HNOlRTgVTi7RXRkrMlb2vZtrDUPZjs1W
+X-Proofpoint-ORIG-GUID: HNOlRTgVTi7RXRkrMlb2vZtrDUPZjs1W
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On 07/03/2023 19:38, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> This test may often fail when running with btrfs-progs versions not very
+> recent. The corresponding git commits in btrfs-progs that fix issues
+> uncovered by this test are:
+> 
+> 1) 6f4a51886b37 ("btrfs-progs: receive: fix silent data loss after fall back from encoded write")
+>     Introduced in btrfs-progs v6.0.2;
+> 
+> 2) e3209f8792f4 ("btrfs-progs: receive: fix a corruption when decompressing zstd extents"")
+>     Introduced in btrfs-progs v6.2.
+> 
+> So add the corresponding _fixed_by_git_commit calls to the test.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>   tests/btrfs/284 | 5 +++++
+>   1 file changed, 5 insertions(+)
+> 
+> diff --git a/tests/btrfs/284 b/tests/btrfs/284
+> index 0d31e5d9..c6692668 100755
+> --- a/tests/btrfs/284
+> +++ b/tests/btrfs/284
+> @@ -20,6 +20,11 @@ _require_test
+>   _require_scratch_size $(($LOAD_FACTOR * 1 * 1024 * 1024))
+>   _require_fssum
+>   
+> +_fixed_by_git_commit btrfs-progs e3209f8792f4 \
+> +	"btrfs-progs: receive: fix a corruption when decompressing zstd extents"
+> +_fixed_by_git_commit btrfs-progs 6f4a51886b37 \
+> +	"btrfs-progs: receive: fix silent data loss after fall back from encoded write"
+> +
+>   send_files_dir=$TEST_DIR/btrfs-test-$seq
+>   
+>   rm -fr $send_files_dir
 
-On 02/03/2023 23:38, Zorro Lang wrote:
-> On Wed, Mar 01, 2023 at 11:06:20AM +0800, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> We need to save the result of the 'fsx' temporarily.
->>
->> Fixes: https://tracker.ceph.com/issues/58834
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
-> Hmm... how did you generate this patch? Did you change something before you
-> send this patch out? I can't merge it simply, always got below errors [1] [2].
-> May you help to generate this patch again purely?
 
-Hi Zorro,
+Along with this, why not check the btrfs-progs version using
+'btrfs --version' and call _not_run()?
 
-Sorry I missed this.
-
-Actually this will depend on the previous patch:
-
-"generic/075: no need to move the .fsxlog to the same directory"
-
-I forgot to mention that.
-
-Thanks
-
-- Xiubo
-
-
-> (Of course you can keep the RVB of Darrick)
->
-> Thanks,
-> Zorro
->
-> [1]
-> $ git am ./20230301_xiubli_generic_075_112_fix_printing_the_incorrect_return_value_of_fsx.mbx
-> Applying: generic/{075,112}: fix printing the incorrect return value of fsx
-> error: patch failed: tests/generic/075:53
-> error: tests/generic/075: patch does not apply
-> Patch failed at 0001 generic/{075,112}: fix printing the incorrect return value of fsx
-> hint: Use 'git am --show-current-patch=diff' to see the failed patch
-> When you have resolved this problem, run "git am --continue".
-> If you prefer to skip this patch, run "git am --skip" instead.
-> To restore the original branch and stop patching, run "git am --abort".
->
-> [2]
-> $ git am -3 ./20230301_xiubli_generic_075_112_fix_printing_the_incorrect_return_value_of_fsx.mbx
-> Applying: generic/{075,112}: fix printing the incorrect return value of fsx
-> error: sha1 information is lacking or useless (tests/generic/075).
-> error: could not build fake ancestor
-> Patch failed at 0001 generic/{075,112}: fix printing the incorrect return value of fsx
-> hint: Use 'git am --show-current-patch=diff' to see the failed patch
-> When you have resolved this problem, run "git am --continue".
-> If you prefer to skip this patch, run "git am --skip" instead.
-> To restore the original branch and stop patching, run "git am --abort".
->
->>   tests/generic/075 | 6 ++++--
->>   tests/generic/112 | 6 ++++--
->>   2 files changed, 8 insertions(+), 4 deletions(-)
->>
->> diff --git a/tests/generic/075 b/tests/generic/075
->> index 03a394a6..bc3a11c7 100755
->> --- a/tests/generic/075
->> +++ b/tests/generic/075
->> @@ -53,9 +53,11 @@ _do_test()
->>   
->>       # This cd and use of -P gets full debug on "$RESULT_DIR" (not TEST_DEV)
->>       cd $out
->> -    if ! $here/ltp/fsx $_param -P "$RESULT_DIR" $seq.$_n $FSX_AVOID &>/dev/null
->> +    $here/ltp/fsx $_param -P "$RESULT_DIR" $seq.$_n $FSX_AVOID &>/dev/null
->> +    local res=$?
->> +    if [ $res -ne 0 ]
->>       then
->> -	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
->> +	echo "    fsx ($_param) failed, $res - compare $seqres.$_n.{good,bad,fsxlog}"
->>   	mv $out/$seq.$_n $seqres.$_n.full
->>   	od -xAx $seqres.$_n.full > $seqres.$_n.bad
->>   	od -xAx "$RESULT_DIR"/$seq.$_n.fsxgood > $seqres.$_n.good
->> diff --git a/tests/generic/112 b/tests/generic/112
->> index 971d0467..0e08cbf9 100755
->> --- a/tests/generic/112
->> +++ b/tests/generic/112
->> @@ -53,9 +53,11 @@ _do_test()
->>   
->>       # This cd and use of -P gets full debug on "$RESULT_DIR" (not TEST_DEV)
->>       cd $out
->> -    if ! $here/ltp/fsx $_param -P "$RESULT_DIR" $FSX_AVOID $seq.$_n &>/dev/null
->> +    $here/ltp/fsx $_param -P "$RESULT_DIR" $FSX_AVOID $seq.$_n &>/dev/null
->> +    local res=$?
->> +    if [ $res -ne 0 ]
->>       then
->> -	echo "    fsx ($_param) returned $? - see $seq.$_n.full"
->> +	echo "    fsx ($_param) returned $res - see $seq.$_n.full"
->>   	mv "$RESULT_DIR"/$seq.$_n.fsxlog $seqres.$_n.full
->>   	status=1
->>   	exit
->> -- 
->> 2.31.1
->>
--- 
-Best Regards,
-
-Xiubo Li (李秀波)
-
-Email: xiubli@redhat.com/xiubli@ibm.com
-Slack: @Xiubo Li
-
+Thanks, Anand
