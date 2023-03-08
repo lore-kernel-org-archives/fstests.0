@@ -2,32 +2,32 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 500D6C742A7
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE4BEC678D5
 	for <linux-fstests@archiver.kernel.org>; Wed,  8 Mar 2023 11:14:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231139AbjCHLOU (ORCPT
+        id S230522AbjCHLOU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Wed, 8 Mar 2023 06:14:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57976 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230473AbjCHLON (ORCPT
+        with ESMTP id S230495AbjCHLON (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 8 Mar 2023 06:14:13 -0500
 Received: from alerce.blitiri.com.ar (alerce.blitiri.com.ar [IPv6:2001:bc8:228b:9000::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7A6D90B4B
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C68F683155
         for <fstests@vger.kernel.org>; Wed,  8 Mar 2023 03:14:07 -0800 (PST)
 Received: from localhost.localdomain
         by sdfg.com.ar (chasquid) with ESMTPSA
         tls TLS_AES_128_GCM_SHA256
         (over submission, TLS-1.3, envelope from "rodrigo@sdfg.com.ar")
-        ; Wed, 08 Mar 2023 11:14:06 +0000
+        ; Wed, 08 Mar 2023 11:14:05 +0000
 From:   Rodrigo Campos <rodrigo@sdfg.com.ar>
 To:     fstests@vger.kernel.org
 Cc:     Christian Brauner <brauner@kernel.org>,
         Giuseppe Scrivano <gscrivan@redhat.com>,
         Rodrigo Campos <rodrigo@sdfg.com.ar>
-Subject: [PATCH v2 9/9] vfs: Add tmpfs tests for idmap mounts
-Date:   Wed,  8 Mar 2023 12:13:43 +0100
-Message-Id: <20230308111343.510970-10-rodrigo@sdfg.com.ar>
+Subject: [PATCH v2 7/9] vfs: Make idmapped core tests public
+Date:   Wed,  8 Mar 2023 12:13:41 +0100
+Message-Id: <20230308111343.510970-8-rodrigo@sdfg.com.ar>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230308111343.510970-1-rodrigo@sdfg.com.ar>
 References: <20230308111343.510970-1-rodrigo@sdfg.com.ar>
@@ -37,519 +37,453 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patch calls all tests in the suite s_idmapped_mounts, but with a
-tmpfs directory mounted inside a userns. This directory is setup as the
-mount point for the test that runs nested.
+Tests on the suite s_idmapped_mounts are made public, future patches
+for tmpfs will call them.
 
-This excercises that tmpfs mounted inside a userns works as expected
-regarding idmap mounts.
-
-As some operations don't work inside a userns, we also set
-info.t_inside_userns to true, so operations not supported are properly
-skipped.
+While making them public, we add a "tcore_" prefix so we don't make so
+generic names public.
 
 Signed-off-by: Rodrigo Campos <rodrigo@sdfg.com.ar>
+Reviewed-by: Christian Brauner <brauner@kernel.org>
 ---
- src/vfs/Makefile                |   4 +-
- src/vfs/tmpfs-idmapped-mounts.c | 298 ++++++++++++++++++++++++++++++++
- src/vfs/tmpfs-idmapped-mounts.h |  15 ++
- src/vfs/utils.h                 |   2 +
- src/vfs/vfstest.c               |  13 +-
- tests/tmpfs/001                 |  27 +++
- tests/tmpfs/001.out             |   2 +
- tests/tmpfs/Makefile            |  24 +++
- 8 files changed, 382 insertions(+), 3 deletions(-)
- create mode 100644 src/vfs/tmpfs-idmapped-mounts.c
- create mode 100644 src/vfs/tmpfs-idmapped-mounts.h
- create mode 100755 tests/tmpfs/001
- create mode 100644 tests/tmpfs/001.out
- create mode 100644 tests/tmpfs/Makefile
+ src/vfs/idmapped-mounts.c | 136 +++++++++++++++++++-------------------
+ src/vfs/idmapped-mounts.h |  38 +++++++++++
+ 2 files changed, 106 insertions(+), 68 deletions(-)
 
-diff --git src/vfs/Makefile src/vfs/Makefile
-index 1b0b364b..4841da12 100644
---- src/vfs/Makefile
-+++ src/vfs/Makefile
-@@ -4,10 +4,10 @@ TOPDIR = ../..
- include $(TOPDIR)/include/builddefs
+diff --git src/vfs/idmapped-mounts.c src/vfs/idmapped-mounts.c
+index eb0df938..547182fe 100644
+--- src/vfs/idmapped-mounts.c
++++ src/vfs/idmapped-mounts.c
+@@ -28,7 +28,7 @@
  
- TARGETS = vfstest mount-idmapped
--CFILES_VFSTEST = vfstest.c btrfs-idmapped-mounts.c idmapped-mounts.c utils.c
-+CFILES_VFSTEST = vfstest.c btrfs-idmapped-mounts.c idmapped-mounts.c utils.c tmpfs-idmapped-mounts.c
- CFILES_MOUNT_IDMAPPED = mount-idmapped.c utils.c
+ static char t_buf[PATH_MAX];
  
--HFILES = missing.h utils.h btrfs-idmapped-mounts.h idmapped-mounts.h
-+HFILES = missing.h utils.h btrfs-idmapped-mounts.h idmapped-mounts.h tmpfs-idmapped-mounts.h
- LLDLIBS += -pthread
- LDIRT = $(TARGETS)
+-static int acls(const struct vfstest_info *info)
++int tcore_acls(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -254,7 +254,7 @@ out:
+ }
  
-diff --git src/vfs/tmpfs-idmapped-mounts.c src/vfs/tmpfs-idmapped-mounts.c
-new file mode 100644
-index 00000000..2db1e879
---- /dev/null
-+++ src/vfs/tmpfs-idmapped-mounts.c
-@@ -0,0 +1,298 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+
-+#include "../global.h"
-+
-+#include <dirent.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <getopt.h>
-+#include <grp.h>
-+#include <limits.h>
-+#include <linux/limits.h>
-+#include <linux/types.h>
-+#include <pthread.h>
-+#include <pwd.h>
-+#include <sched.h>
-+#include <stdbool.h>
-+#include <sys/fsuid.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <sys/xattr.h>
-+#include <unistd.h>
-+
-+#include "missing.h"
-+#include "utils.h"
-+#include "vfstest.h"
-+#include "idmapped-mounts.h"
-+
-+static int tmpfs_nested_mount_setup(const struct vfstest_info *info, int (*test)(const struct vfstest_info *info))
-+{
-+	char path[PATH_MAX];
-+	int fret = -1;
-+
-+	/* Create mapping for userns
-+	 * Make the mapping quite long, so all nested userns that are created by
-+	 * any test we call is contained here (otherwise userns creation fails).
-+	 */
-+	struct mount_attr attr = {
-+		.attr_set	= MOUNT_ATTR_IDMAP,
-+		.userns_fd	= -EBADF,
-+	};
-+	attr.userns_fd = get_userns_fd(0, 10000, 200000);
-+	if (attr.userns_fd < 0) {
-+		log_stderr("failure: get_userns_fd");
-+		goto out_no_rm;
-+	}
-+
-+	if (!switch_userns(attr.userns_fd, 0, 0, false)) {
-+		log_stderr("failure: switch_userns");
-+		goto out_no_rm;
-+	}
-+
-+	/* create separate mount namespace */
-+	if (unshare(CLONE_NEWNS)) {
-+		log_stderr("failure: create new mount namespace");
-+		goto out_no_rm;
-+	}
-+
-+	/* Create DIR0 to mount there */
-+	if (mkdirat(info->t_mnt_fd, DIR0, 0777)) {
-+		log_stderr("failure: mkdirat");
-+		goto out_no_rm;
-+	}
-+	if (fchmodat(info->t_mnt_fd, DIR0, 0777, 0)) {
-+		log_stderr("failure: fchmodat");
-+		goto out_no_umount;
-+	}
-+
-+	snprintf(path, sizeof(path), "%s/%s", info->t_mountpoint, DIR0);
-+	if (sys_mount("tmpfs", path, "tmpfs", 0, NULL)) {
-+		log_stderr("failure: mount");
-+		goto out_no_umount;
-+	}
-+
-+	// Create a new info to use for test we will call.
-+	struct vfstest_info nested_test_info = *info;
-+	nested_test_info.t_mountpoint = strdup(path);
-+	if (nested_test_info.t_mountpoint == NULL) {
-+		log_stderr("failure: strdup");
-+		goto out;
-+	}
-+	nested_test_info.t_mnt_fd = openat(-EBADF, nested_test_info.t_mountpoint, O_CLOEXEC | O_DIRECTORY);
-+	if (nested_test_info.t_mnt_fd < 0) {
-+		log_stderr("failure: openat");
-+		goto out;
-+	}
-+
-+	test_setup(&nested_test_info);
-+
-+	// Run the test.
-+	if ((*test)(&nested_test_info)) {
-+		log_stderr("failure: calling test");
-+		goto out;
-+	}
-+
-+	test_cleanup(&nested_test_info);
-+
-+	fret = 0;
-+	log_debug("Ran test");
-+out:
-+	snprintf(path, sizeof(path), "%s/" DIR0, info->t_mountpoint);
-+	sys_umount2(path, MNT_DETACH);
-+out_no_umount:
-+	if(rm_r(info->t_mnt_fd, DIR0))
-+		log_stderr("failure: rm_r");
-+out_no_rm:
-+	safe_close(attr.userns_fd);
-+	return fret;
-+}
-+
-+static int tmpfs_acls(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_acls);
-+}
-+static int tmpfs_create_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_create_in_userns);
-+}
-+static int tmpfs_device_node_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_device_node_in_userns);
-+}
-+static int tmpfs_fsids_mapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fsids_mapped);
-+}
-+static int tmpfs_fsids_unmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fsids_unmapped);
-+}
-+static int tmpfs_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_expected_uid_gid_idmapped_mounts);
-+}
-+static int tmpfs_fscaps_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fscaps_idmapped_mounts);
-+}
-+static int tmpfs_fscaps_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fscaps_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_fscaps_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_fscaps_idmapped_mounts_in_userns_separate_userns);
-+}
-+
-+static int tmpfs_hardlink_crossing_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_hardlink_crossing_idmapped_mounts);
-+}
-+static int tmpfs_hardlink_from_idmapped_mount(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_hardlink_from_idmapped_mount);
-+}
-+static int tmpfs_hardlink_from_idmapped_mount_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_hardlink_from_idmapped_mount_in_userns);
-+}
-+
-+#ifdef HAVE_LIBURING_H
-+static int tmpfs_io_uring_idmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped);
-+}
-+static int tmpfs_io_uring_idmapped_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_userns);
-+}
-+static int tmpfs_io_uring_idmapped_unmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_unmapped);
-+}
-+static int tmpfs_io_uring_idmapped_unmapped_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_unmapped_userns);
-+}
-+#endif /* HAVE_LIBURING_H */
-+
-+static int tmpfs_protected_symlinks_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_protected_symlinks_idmapped_mounts);
-+}
-+static int tmpfs_protected_symlinks_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_protected_symlinks_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_rename_crossing_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_rename_crossing_idmapped_mounts);
-+}
-+static int tmpfs_rename_from_idmapped_mount(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_rename_from_idmapped_mount);
-+}
-+static int tmpfs_rename_from_idmapped_mount_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_rename_from_idmapped_mount_in_userns);
-+}
-+static int tmpfs_setattr_truncate_idmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setattr_truncate_idmapped);
-+}
-+static int tmpfs_setattr_truncate_idmapped_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setattr_truncate_idmapped_in_userns);
-+}
-+static int tmpfs_setgid_create_idmapped(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setgid_create_idmapped);
-+}
-+static int tmpfs_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setgid_create_idmapped_in_userns);
-+}
-+static int tmpfs_setid_binaries_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setid_binaries_idmapped_mounts);
-+}
-+static int tmpfs_setid_binaries_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setid_binaries_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_setid_binaries_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_setid_binaries_idmapped_mounts_in_userns_separate_userns);
-+}
-+static int tmpfs_sticky_bit_unlink_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_unlink_idmapped_mounts);
-+}
-+static int tmpfs_sticky_bit_unlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_unlink_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_sticky_bit_rename_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_rename_idmapped_mounts);
-+}
-+static int tmpfs_sticky_bit_rename_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_sticky_bit_rename_idmapped_mounts_in_userns);
-+}
-+static int tmpfs_symlink_idmapped_mounts(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_symlink_idmapped_mounts);
-+}
-+static int tmpfs_symlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
-+{
-+	return tmpfs_nested_mount_setup(info, tcore_symlink_idmapped_mounts_in_userns);
-+}
-+
-+static const struct test_struct t_tmpfs[] = {
-+	{ tmpfs_acls,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in user namespace",							      },
-+	{ tmpfs_create_in_userns,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in user namespace",							      },
-+	{ tmpfs_device_node_in_userns,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs device node in user namespace",								      },
-+	{ tmpfs_expected_uid_gid_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs expected ownership on idmapped mounts",							},
-+	{ tmpfs_fscaps_idmapped_mounts,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs fscaps on idmapped mounts",									},
-+	{ tmpfs_fscaps_idmapped_mounts_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs fscaps on idmapped mounts in user namespace",							},
-+	{ tmpfs_fscaps_idmapped_mounts_in_userns_separate_userns,		T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs fscaps on idmapped mounts in user namespace with different id mappings",			},
-+	{ tmpfs_fsids_mapped,							T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs mapped fsids",										      },
-+	{ tmpfs_fsids_unmapped,							T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs unmapped fsids",										      },
-+	{ tmpfs_hardlink_crossing_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs cross idmapped mount hardlink",								},
-+	{ tmpfs_hardlink_from_idmapped_mount,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs hardlinks from idmapped mounts",								},
-+	{ tmpfs_hardlink_from_idmapped_mount_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs hardlinks from idmapped mounts in user namespace",						},
-+#ifdef HAVE_LIBURING_H
-+	{ tmpfs_io_uring_idmapped,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts",								      },
-+	{ tmpfs_io_uring_idmapped_userns,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts in user namespace",					      },
-+	{ tmpfs_io_uring_idmapped_unmapped,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts with unmapped ids",					      },
-+	{ tmpfs_io_uring_idmapped_unmapped_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts with unmapped ids in user namespace",			      },
-+#endif
-+	{ tmpfs_protected_symlinks_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs following protected symlinks on idmapped mounts",						},
-+	{ tmpfs_protected_symlinks_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs following protected symlinks on idmapped mounts in user namespace",				},
-+	{ tmpfs_rename_crossing_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs cross idmapped mount rename",									},
-+	{ tmpfs_rename_from_idmapped_mount,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs rename from idmapped mounts",									},
-+	{ tmpfs_rename_from_idmapped_mount_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs rename from idmapped mounts in user namespace",						},
-+	{ tmpfs_setattr_truncate_idmapped,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setattr truncate on idmapped mounts",								},
-+	{ tmpfs_setattr_truncate_idmapped_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setattr truncate on idmapped mounts in user namespace",					},
-+	{ tmpfs_setgid_create_idmapped,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in directories with setgid bit set on idmapped mounts",			},
-+	{ tmpfs_setgid_create_idmapped_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
-+	{ tmpfs_setid_binaries_idmapped_mounts,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setid binaries on idmapped mounts",								},
-+	{ tmpfs_setid_binaries_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setid binaries on idmapped mounts in user namespace",						},
-+	{ tmpfs_setid_binaries_idmapped_mounts_in_userns_separate_userns,	T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs setid binaries on idmapped mounts in user namespace with different id mappings",		},
-+	{ tmpfs_sticky_bit_unlink_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit unlink operations on idmapped mounts",						},
-+	{ tmpfs_sticky_bit_unlink_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit unlink operations on idmapped mounts in user namespace",				},
-+	{ tmpfs_sticky_bit_rename_idmapped_mounts,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit rename operations on idmapped mounts",						},
-+	{ tmpfs_sticky_bit_rename_idmapped_mounts_in_userns,			T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs sticky bit rename operations on idmapped mounts in user namespace",				},
-+	{ tmpfs_symlink_idmapped_mounts,					T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs symlink from idmapped mounts",									},
-+	{ tmpfs_symlink_idmapped_mounts_in_userns,				T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs symlink from idmapped mounts in user namespace",						},
-+};
-+
-+
-+const struct test_suite s_tmpfs_idmapped_mounts = {
-+	.tests = t_tmpfs,
-+	.nr_tests = ARRAY_SIZE(t_tmpfs),
-+};
-diff --git src/vfs/tmpfs-idmapped-mounts.h src/vfs/tmpfs-idmapped-mounts.h
-new file mode 100644
-index 00000000..038d86a9
---- /dev/null
-+++ src/vfs/tmpfs-idmapped-mounts.h
-@@ -0,0 +1,15 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#ifndef __TMPFS_IDMAPPED_MOUNTS_H
-+#define __TMPFS_IDMAPPED_MOUNTS_H
-+
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
-+
-+#include "utils.h"
-+
-+extern const struct test_suite s_tmpfs_idmapped_mounts;
-+
-+#endif /* __TMPFS_IDMAPPED_MOUNTS_H */
-+
-diff --git src/vfs/utils.h src/vfs/utils.h
-index f1681737..872fd96f 100644
---- src/vfs/utils.h
-+++ src/vfs/utils.h
-@@ -45,6 +45,8 @@
- #define DIR2 "dir2"
- #define DIR3 "dir3"
- #define DIR1_RENAME "dir1_rename"
-+// This directory may be used by tests that call another test.
-+#define DIR0 "dir0"
- #define HARDLINK1 "hardlink1"
- #define SYMLINK1 "symlink1"
- #define SYMLINK_USER1 "symlink_user1"
-diff --git src/vfs/vfstest.c src/vfs/vfstest.c
-index 325f04a1..f842117d 100644
---- src/vfs/vfstest.c
-+++ src/vfs/vfstest.c
-@@ -23,6 +23,7 @@
- #include <unistd.h>
+ /* Validate that basic file operations on idmapped mounts from a user namespace. */
+-static int create_in_userns(const struct vfstest_info *info)
++int tcore_create_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -372,7 +372,7 @@ out:
+ /* Validate that a caller whose fsids map into the idmapped mount within it's
+  * user namespace cannot create any device nodes.
+  */
+-static int device_node_in_userns(const struct vfstest_info *info)
++int tcore_device_node_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int open_tree_fd = -EBADF;
+@@ -431,7 +431,7 @@ out:
+ 	return fret;
+ }
  
- #include "btrfs-idmapped-mounts.h"
-+#include "tmpfs-idmapped-mounts.h"
- #include "idmapped-mounts.h"
- #include "missing.h"
- #include "utils.h"
-@@ -2316,6 +2317,7 @@ static void usage(void)
- 	fprintf(stderr, "--test-fscaps-regression            Run fscap regression tests\n");
- 	fprintf(stderr, "--test-nested-userns                Run nested userns idmapped mount testsuite\n");
- 	fprintf(stderr, "--test-btrfs                        Run btrfs specific idmapped mount testsuite\n");
-+	fprintf(stderr, "--test-tmpfs                        Run tmpfs specific idmapped mount testsuite\n");
- 	fprintf(stderr, "--test-setattr-fix-968219708108     Run setattr regression tests\n");
- 	fprintf(stderr, "--test-setxattr-fix-705191b03d50    Run setxattr regression tests\n");
- 	fprintf(stderr, "--test-setgid-create-umask          Run setgid with umask tests\n");
-@@ -2340,6 +2342,7 @@ static const struct option longopts[] = {
- 	{"test-setxattr-fix-705191b03d50",	no_argument,		0,	'j'},
- 	{"test-setgid-create-umask",		no_argument,		0,	'u'},
- 	{"test-setgid-create-acl",		no_argument,		0,	'l'},
-+	{"test-tmpfs",				no_argument,		0,	't'},
- 	{NULL,					0,			0,	  0},
+-static int fsids_mapped(const struct vfstest_info *info)
++int tcore_fsids_mapped(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, hardlink_target_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -563,7 +563,7 @@ out:
+ }
+ 
+ /* Validate that basic file operations on idmapped mounts. */
+-static int fsids_unmapped(const struct vfstest_info *info)
++int tcore_fsids_unmapped(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, hardlink_target_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -733,7 +733,7 @@ out:
+ }
+ 
+ /* Validate that changing file ownership works correctly on idmapped mounts. */
+-static int expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
++int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd1 = -EBADF, open_tree_fd2 = -EBADF;
+@@ -1451,7 +1451,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int fscaps_idmapped_mounts(const struct vfstest_info *info)
++int tcore_fscaps_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
+@@ -1599,7 +1599,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int fscaps_idmapped_mounts_in_userns(const struct vfstest_info *info)
++int tcore_fscaps_idmapped_mounts_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
+@@ -1812,7 +1812,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int fscaps_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
++int tcore_fscaps_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
+@@ -1961,7 +1961,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int hardlink_crossing_idmapped_mounts(const struct vfstest_info *info)
++int tcore_hardlink_crossing_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd1 = -EBADF, open_tree_fd2 = -EBADF;
+@@ -2061,7 +2061,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int hardlink_from_idmapped_mount(const struct vfstest_info *info)
++int tcore_hardlink_from_idmapped_mount(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2130,7 +2130,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int hardlink_from_idmapped_mount_in_userns(const struct vfstest_info *info)
++int tcore_hardlink_from_idmapped_mount_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2207,7 +2207,7 @@ out:
+ 
+ 
+ #ifdef HAVE_LIBURING_H
+-static int io_uring_idmapped(const struct vfstest_info *info)
++int tcore_io_uring_idmapped(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2338,7 +2338,7 @@ out_unmap:
+  * In no circumstances, even with recorded credentials can it be allowed to
+  * open the file.
+  */
+-static int io_uring_idmapped_unmapped(const struct vfstest_info *info)
++int tcore_io_uring_idmapped_unmapped(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2453,7 +2453,7 @@ out_unmap:
+ 	return fret;
+ }
+ 
+-static int io_uring_idmapped_userns(const struct vfstest_info *info)
++int tcore_io_uring_idmapped_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2624,7 +2624,7 @@ out_unmap:
+ 	return fret;
+ }
+ 
+-static int io_uring_idmapped_unmapped_userns(const struct vfstest_info *info)
++int tcore_io_uring_idmapped_unmapped_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2746,7 +2746,7 @@ out_unmap:
+ #endif /* HAVE_LIBURING_H */
+ 
+ /* Validate that protected symlinks work correctly on idmapped mounts. */
+-static int protected_symlinks_idmapped_mounts(const struct vfstest_info *info)
++int tcore_protected_symlinks_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir_fd = -EBADF, fd = -EBADF, open_tree_fd = -EBADF;
+@@ -2987,7 +2987,7 @@ out:
+ /* Validate that protected symlinks work correctly on idmapped mounts inside a
+  * user namespace.
+  */
+-static int protected_symlinks_idmapped_mounts_in_userns(const struct vfstest_info *info)
++int tcore_protected_symlinks_idmapped_mounts_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir_fd = -EBADF, fd = -EBADF, open_tree_fd = -EBADF;
+@@ -3234,7 +3234,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int rename_crossing_idmapped_mounts(const struct vfstest_info *info)
++int tcore_rename_crossing_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd1 = -EBADF, open_tree_fd2 = -EBADF;
+@@ -3332,7 +3332,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int rename_from_idmapped_mount(const struct vfstest_info *info)
++int tcore_rename_from_idmapped_mount(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -3399,7 +3399,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int rename_from_idmapped_mount_in_userns(const struct vfstest_info *info)
++int tcore_rename_from_idmapped_mount_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -3474,7 +3474,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int setattr_truncate_idmapped(const struct vfstest_info *info)
++int tcore_setattr_truncate_idmapped(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -3588,7 +3588,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int setattr_truncate_idmapped_in_userns(const struct vfstest_info *info)
++int tcore_setattr_truncate_idmapped_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -3780,7 +3780,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int setgid_create_idmapped(const struct vfstest_info *info)
++int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -3956,7 +3956,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int setgid_create_idmapped_in_userns(const struct vfstest_info *info)
++int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -4359,7 +4359,7 @@ out:
+ }
+ 
+ /* Validate that setid transitions are handled correctly on idmapped mounts. */
+-static int setid_binaries_idmapped_mounts(const struct vfstest_info *info)
++int tcore_setid_binaries_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, exec_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -4498,7 +4498,7 @@ out:
+  * running in a user namespace where the uid and gid of the setid binary have no
+  * mapping.
+  */
+-static int setid_binaries_idmapped_mounts_in_userns(const struct vfstest_info *info)
++int tcore_setid_binaries_idmapped_mounts_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, exec_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -4776,7 +4776,7 @@ out:
+  * running in a user namespace where the uid and gid of the setid binary have no
+  * mapping.
+  */
+-static int setid_binaries_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
++int tcore_setid_binaries_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, exec_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -5069,7 +5069,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int sticky_bit_unlink_idmapped_mounts(const struct vfstest_info *info)
++int tcore_sticky_bit_unlink_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -5362,7 +5362,7 @@ out:
+ /* Validate that the sticky bit behaves correctly on idmapped mounts for unlink
+  * operations in a user namespace.
+  */
+-static int sticky_bit_unlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
++int tcore_sticky_bit_unlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -5703,7 +5703,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int sticky_bit_rename_idmapped_mounts(const struct vfstest_info *info)
++int tcore_sticky_bit_rename_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -5960,7 +5960,7 @@ out:
+ /* Validate that the sticky bit behaves correctly on idmapped mounts for unlink
+  * operations in a user namespace.
+  */
+-static int sticky_bit_rename_idmapped_mounts_in_userns(const struct vfstest_info *info)
++int tcore_sticky_bit_rename_idmapped_mounts_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int dir_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -6264,7 +6264,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int symlink_idmapped_mounts(const struct vfstest_info *info)
++int tcore_symlink_idmapped_mounts(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -6349,7 +6349,7 @@ out:
+ 	return fret;
+ }
+ 
+-static int symlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
++int tcore_symlink_idmapped_mounts_in_userns(const struct vfstest_info *info)
+ {
+ 	int fret = -1;
+ 	int file1_fd = -EBADF, open_tree_fd = -EBADF;
+@@ -8852,42 +8852,42 @@ out:
+ }
+ 
+ static const struct test_struct t_idmapped_mounts[] = {
+-	{ acls,                                                         true,   "posix acls on regular mounts",                                                                 },
+-	{ create_in_userns,                                             true,   "create operations in user namespace",                                                          },
+-	{ device_node_in_userns,                                        true,   "device node in user namespace",                                                                },
+-	{ expected_uid_gid_idmapped_mounts,				true,	"expected ownership on idmapped mounts",							},
+-	{ fscaps_idmapped_mounts,					true,	"fscaps on idmapped mounts",									},
+-	{ fscaps_idmapped_mounts_in_userns,				true,	"fscaps on idmapped mounts in user namespace",							},
+-	{ fscaps_idmapped_mounts_in_userns_separate_userns,		true,	"fscaps on idmapped mounts in user namespace with different id mappings",			},
+-	{ fsids_mapped,                                                 true,   "mapped fsids",                                                                                 },
+-	{ fsids_unmapped,                                               true,   "unmapped fsids",                                                                               },
+-	{ hardlink_crossing_idmapped_mounts,				true,	"cross idmapped mount hardlink",								},
+-	{ hardlink_from_idmapped_mount,					true,	"hardlinks from idmapped mounts",								},
+-	{ hardlink_from_idmapped_mount_in_userns,			true,	"hardlinks from idmapped mounts in user namespace",						},
++	{ tcore_acls,                                                         true,   "posix acls on regular mounts",                                                                 },
++	{ tcore_create_in_userns,                                             true,   "create operations in user namespace",                                                          },
++	{ tcore_device_node_in_userns,                                        true,   "device node in user namespace",                                                                },
++	{ tcore_expected_uid_gid_idmapped_mounts,				true,	"expected ownership on idmapped mounts",							},
++	{ tcore_fscaps_idmapped_mounts,					true,	"fscaps on idmapped mounts",									},
++	{ tcore_fscaps_idmapped_mounts_in_userns,				true,	"fscaps on idmapped mounts in user namespace",							},
++	{ tcore_fscaps_idmapped_mounts_in_userns_separate_userns,		true,	"fscaps on idmapped mounts in user namespace with different id mappings",			},
++	{ tcore_fsids_mapped,                                                 true,   "mapped fsids",                                                                                 },
++	{ tcore_fsids_unmapped,                                               true,   "unmapped fsids",                                                                               },
++	{ tcore_hardlink_crossing_idmapped_mounts,				true,	"cross idmapped mount hardlink",								},
++	{ tcore_hardlink_from_idmapped_mount,					true,	"hardlinks from idmapped mounts",								},
++	{ tcore_hardlink_from_idmapped_mount_in_userns,			true,	"hardlinks from idmapped mounts in user namespace",						},
+ #ifdef HAVE_LIBURING_H
+-	{ io_uring_idmapped,						true,	"io_uring from idmapped mounts",								},
+-	{ io_uring_idmapped_userns,					true,	"io_uring from idmapped mounts in user namespace",						},
+-	{ io_uring_idmapped_unmapped,					true,	"io_uring from idmapped mounts with unmapped ids",						},
+-	{ io_uring_idmapped_unmapped_userns,				true,	"io_uring from idmapped mounts with unmapped ids in user namespace",				},
++	{ tcore_io_uring_idmapped,						true,	"io_uring from idmapped mounts",								},
++	{ tcore_io_uring_idmapped_userns,					true,	"io_uring from idmapped mounts in user namespace",						},
++	{ tcore_io_uring_idmapped_unmapped,					true,	"io_uring from idmapped mounts with unmapped ids",						},
++	{ tcore_io_uring_idmapped_unmapped_userns,				true,	"io_uring from idmapped mounts with unmapped ids in user namespace",				},
+ #endif
+-	{ protected_symlinks_idmapped_mounts,				true,	"following protected symlinks on idmapped mounts",						},
+-	{ protected_symlinks_idmapped_mounts_in_userns,			true,	"following protected symlinks on idmapped mounts in user namespace",				},
+-	{ rename_crossing_idmapped_mounts,				true,	"cross idmapped mount rename",									},
+-	{ rename_from_idmapped_mount,					true,	"rename from idmapped mounts",									},
+-	{ rename_from_idmapped_mount_in_userns,				true,	"rename from idmapped mounts in user namespace",						},
+-	{ setattr_truncate_idmapped,					true,	"setattr truncate on idmapped mounts",								},
+-	{ setattr_truncate_idmapped_in_userns,				true,	"setattr truncate on idmapped mounts in user namespace",					},
+-	{ setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
+-	{ setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
+-	{ setid_binaries_idmapped_mounts,				true,	"setid binaries on idmapped mounts",								},
+-	{ setid_binaries_idmapped_mounts_in_userns,			true,	"setid binaries on idmapped mounts in user namespace",						},
+-	{ setid_binaries_idmapped_mounts_in_userns_separate_userns,	true,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
+-	{ sticky_bit_unlink_idmapped_mounts,				true,	"sticky bit unlink operations on idmapped mounts",						},
+-	{ sticky_bit_unlink_idmapped_mounts_in_userns,			true,	"sticky bit unlink operations on idmapped mounts in user namespace",				},
+-	{ sticky_bit_rename_idmapped_mounts,				true,	"sticky bit rename operations on idmapped mounts",						},
+-	{ sticky_bit_rename_idmapped_mounts_in_userns,			true,	"sticky bit rename operations on idmapped mounts in user namespace",				},
+-	{ symlink_idmapped_mounts,					true,	"symlink from idmapped mounts",									},
+-	{ symlink_idmapped_mounts_in_userns,				true,	"symlink from idmapped mounts in user namespace",						},
++	{ tcore_protected_symlinks_idmapped_mounts,				true,	"following protected symlinks on idmapped mounts",						},
++	{ tcore_protected_symlinks_idmapped_mounts_in_userns,			true,	"following protected symlinks on idmapped mounts in user namespace",				},
++	{ tcore_rename_crossing_idmapped_mounts,				true,	"cross idmapped mount rename",									},
++	{ tcore_rename_from_idmapped_mount,					true,	"rename from idmapped mounts",									},
++	{ tcore_rename_from_idmapped_mount_in_userns,				true,	"rename from idmapped mounts in user namespace",						},
++	{ tcore_setattr_truncate_idmapped,					true,	"setattr truncate on idmapped mounts",								},
++	{ tcore_setattr_truncate_idmapped_in_userns,				true,	"setattr truncate on idmapped mounts in user namespace",					},
++	{ tcore_setgid_create_idmapped,					true,	"create operations in directories with setgid bit set on idmapped mounts",			},
++	{ tcore_setgid_create_idmapped_in_userns,				true,	"create operations in directories with setgid bit set on idmapped mounts in user namespace",	},
++	{ tcore_setid_binaries_idmapped_mounts,				true,	"setid binaries on idmapped mounts",								},
++	{ tcore_setid_binaries_idmapped_mounts_in_userns,			true,	"setid binaries on idmapped mounts in user namespace",						},
++	{ tcore_setid_binaries_idmapped_mounts_in_userns_separate_userns,	true,	"setid binaries on idmapped mounts in user namespace with different id mappings",		},
++	{ tcore_sticky_bit_unlink_idmapped_mounts,				true,	"sticky bit unlink operations on idmapped mounts",						},
++	{ tcore_sticky_bit_unlink_idmapped_mounts_in_userns,			true,	"sticky bit unlink operations on idmapped mounts in user namespace",				},
++	{ tcore_sticky_bit_rename_idmapped_mounts,				true,	"sticky bit rename operations on idmapped mounts",						},
++	{ tcore_sticky_bit_rename_idmapped_mounts_in_userns,			true,	"sticky bit rename operations on idmapped mounts in user namespace",				},
++	{ tcore_symlink_idmapped_mounts,					true,	"symlink from idmapped mounts",									},
++	{ tcore_symlink_idmapped_mounts_in_userns,				true,	"symlink from idmapped mounts in user namespace",						},
  };
  
-@@ -2480,7 +2483,7 @@ int main(int argc, char *argv[])
- 	bool idmapped_mounts_supported = false, test_btrfs = false,
- 	     test_core = false, test_fscaps_regression = false,
- 	     test_nested_userns = false, test_setattr_fix_968219708108 = false,
--	     test_setxattr_fix_705191b03d50 = false,
-+	     test_setxattr_fix_705191b03d50 = false, test_tmpfs = false,
- 	     test_setgid_create_umask = false, test_setgid_create_acl = false;
+ const struct test_suite s_idmapped_mounts = {
+diff --git src/vfs/idmapped-mounts.h src/vfs/idmapped-mounts.h
+index 3b0f0825..4a2c7b39 100644
+--- src/vfs/idmapped-mounts.h
++++ src/vfs/idmapped-mounts.h
+@@ -17,4 +17,42 @@ extern const struct test_suite s_setxattr_fix_705191b03d50;
+ extern const struct test_suite s_setgid_create_umask_idmapped_mounts;
+ extern const struct test_suite s_setgid_create_acl_idmapped_mounts;
  
- 	init_vfstest_info(&info);
-@@ -2529,6 +2532,9 @@ int main(int argc, char *argv[])
- 		case 'l':
- 			test_setgid_create_acl = true;
- 			break;
-+		case 't':
-+			test_tmpfs = true;
-+			break;
- 		case 'h':
- 			/* fallthrough */
- 		default:
-@@ -2622,6 +2628,11 @@ int main(int argc, char *argv[])
- 			goto out;
- 	}
- 
-+	if (test_tmpfs) {
-+		if (!run_suite(&info, &s_tmpfs_idmapped_mounts))
-+			goto out;
-+	}
++/* Core tests */
++int tcore_acls(const struct vfstest_info *info);
++int tcore_create_in_userns(const struct vfstest_info *info);
++int tcore_device_node_in_userns(const struct vfstest_info *info);
++int tcore_fsids_mapped(const struct vfstest_info *info);
++int tcore_fsids_unmapped(const struct vfstest_info *info);
++int tcore_expected_uid_gid_idmapped_mounts(const struct vfstest_info *info);
++int tcore_fscaps_idmapped_mounts(const struct vfstest_info *info);
++int tcore_fscaps_idmapped_mounts_in_userns(const struct vfstest_info *info);
++int tcore_fscaps_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info);
++int tcore_hardlink_crossing_idmapped_mounts(const struct vfstest_info *info);
++int tcore_hardlink_from_idmapped_mount(const struct vfstest_info *info);
++int tcore_hardlink_from_idmapped_mount_in_userns(const struct vfstest_info *info);
++#ifdef HAVE_LIBURING_H
++int tcore_io_uring_idmapped(const struct vfstest_info *info);
++int tcore_io_uring_idmapped_userns(const struct vfstest_info *info);
++int tcore_io_uring_idmapped_unmapped(const struct vfstest_info *info);
++int tcore_io_uring_idmapped_unmapped_userns(const struct vfstest_info *info);
++#endif
++int tcore_protected_symlinks_idmapped_mounts(const struct vfstest_info *info);
++int tcore_protected_symlinks_idmapped_mounts_in_userns(const struct vfstest_info *info);
++int tcore_rename_crossing_idmapped_mounts(const struct vfstest_info *info);
++int tcore_rename_from_idmapped_mount(const struct vfstest_info *info);
++int tcore_rename_from_idmapped_mount_in_userns(const struct vfstest_info *info);
++int tcore_setattr_truncate_idmapped(const struct vfstest_info *info);
++int tcore_setattr_truncate_idmapped_in_userns(const struct vfstest_info *info);
++int tcore_setgid_create_idmapped(const struct vfstest_info *info);
++int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info);
++int tcore_setid_binaries_idmapped_mounts(const struct vfstest_info *info);
++int tcore_setid_binaries_idmapped_mounts_in_userns(const struct vfstest_info *info);
++int tcore_setid_binaries_idmapped_mounts_in_userns_separate_userns(const struct vfstest_info *info);
++int tcore_sticky_bit_unlink_idmapped_mounts(const struct vfstest_info *info);
++int tcore_sticky_bit_unlink_idmapped_mounts_in_userns(const struct vfstest_info *info);
++int tcore_sticky_bit_rename_idmapped_mounts(const struct vfstest_info *info);
++int tcore_sticky_bit_rename_idmapped_mounts_in_userns(const struct vfstest_info *info);
++int tcore_symlink_idmapped_mounts(const struct vfstest_info *info);
++int tcore_symlink_idmapped_mounts_in_userns(const struct vfstest_info *info);
 +
- 	fret = EXIT_SUCCESS;
- 
- out:
-diff --git tests/tmpfs/001 tests/tmpfs/001
-new file mode 100755
-index 00000000..37f5439e
---- /dev/null
-+++ tests/tmpfs/001
-@@ -0,0 +1,27 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Rodrigo Campos Catelin.  All Rights Reserved.
-+#
-+# FS QA Test 001
-+#
-+# Test that idmapped mounts behave correctly with tmpfs filesystem.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick idmapped
-+
-+# get standard environment, filters and checks
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs tmpfs
-+_require_idmapped_mounts
-+_require_test
-+
-+echo "Silence is golden"
-+
-+$here/src/vfs/vfstest --test-tmpfs --device "$TEST_DEV" \
-+	        --mount "$TEST_DIR" --fstype "$FSTYP"
-+
-+status=$?
-+exit
-diff --git tests/tmpfs/001.out tests/tmpfs/001.out
-new file mode 100644
-index 00000000..88678b8e
---- /dev/null
-+++ tests/tmpfs/001.out
-@@ -0,0 +1,2 @@
-+QA output created by 001
-+Silence is golden
-diff --git tests/tmpfs/Makefile tests/tmpfs/Makefile
-new file mode 100644
-index 00000000..b464b22b
---- /dev/null
-+++ tests/tmpfs/Makefile
-@@ -0,0 +1,24 @@
-+#
-+# Copyright (c) 2003-2005 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+include $(TOPDIR)/include/buildgrouplist
-+
-+GENERIC_DIR = generic
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GENERIC_DIR)
-+DIRT = group.list
-+
-+default: $(DIRT)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
+ #endif /* __IDMAPPED_MOUNTS_H */
 -- 
 2.39.2
 
