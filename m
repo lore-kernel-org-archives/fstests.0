@@ -2,127 +2,58 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAFC4C7618A
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Mar 2023 14:38:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7028DC6FD1D
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Mar 2023 16:28:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231828AbjCTOiO (ORCPT
+        id S231477AbjCTQ2o (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Mar 2023 10:38:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41170 "EHLO
+        Mon, 20 Mar 2023 12:28:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231821AbjCTOiM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Mar 2023 10:38:12 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFA1528874
-        for <fstests@vger.kernel.org>; Mon, 20 Mar 2023 07:37:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1679323031;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=A2SRGUfnMO8mvkZquFgCSC0Q62U00XVLCISUha9Gsgs=;
-        b=aiF912UiQ7nQ/xtAFW3qj6woQlqg3nz1qo4QxgmRt2418ShQ/54phW8luUlCypH42WDihW
-        EbiNMJupLheL0cwVkHZFR6uDqvg0htm8HNEmu6jFNC1524IDWczznFcVlE3o+5Oas7Ta1b
-        LSApQbKmUKv3ZkaOodGMglHADbbMAl0=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-630-EsqfoRF1M0GSSR-oi1Kfhw-1; Mon, 20 Mar 2023 10:37:10 -0400
-X-MC-Unique: EsqfoRF1M0GSSR-oi1Kfhw-1
-Received: by mail-pl1-f198.google.com with SMTP id z16-20020a170902d55000b001a06f9b5e31so7394948plf.21
-        for <fstests@vger.kernel.org>; Mon, 20 Mar 2023 07:37:10 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679323029;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=A2SRGUfnMO8mvkZquFgCSC0Q62U00XVLCISUha9Gsgs=;
-        b=PswQFto+1SFP0bIsNGV7RyK8jxWUZidhNXyjxNhS6VI9DQeob/439FuNTX+fPAsoJl
-         jlAD8eDTOud5xYNQwxZn1YsiWwqHhUuwYnPJ09yRk/uS4+aFcL3DAYWUuW6WkQXGLZIL
-         C9VdY1GksSI0Kyek5GuVRUq9b5QMkMO35A+TPeeRYTwUMduJ983NoHuBf25IAUdT3BtX
-         aNRNkJ8IpaQpM2UJ6ws9IVtUqPZnp+/PDvKGVjNJUigQMqpFOpM2eKEPNwHZImwbZLc0
-         soik9xkP7O/o23hUlVfEJrDTNOctrGiCIH5mZ9ORJMSqVva3Lzc2eYmen5IRp4rAYKgd
-         FUYA==
-X-Gm-Message-State: AO0yUKUenZ1OO+KDIBDRmzWD6VeZwjBVDqbm3x3B3lVUoF8+gohIRYLv
-        j932S47zCkSv3dB86d7McJzjmJdoJWeGEE/IR97zPa87ygRWC0QjAJi+gLDmHyvw+brDYdieVbg
-        qRqjAiP3ap+GrGCgABQ==
-X-Received: by 2002:a62:58c3:0:b0:627:ff1d:db6d with SMTP id m186-20020a6258c3000000b00627ff1ddb6dmr2158350pfb.21.1679323029240;
-        Mon, 20 Mar 2023 07:37:09 -0700 (PDT)
-X-Google-Smtp-Source: AK7set9MC3AehNPabTEgIcr03ArQquXmHUE8qgzqnu6YDS3r78eCJnkF54JWUwwwV5ZYtkm+x21FQw==
-X-Received: by 2002:a62:58c3:0:b0:627:ff1d:db6d with SMTP id m186-20020a6258c3000000b00627ff1ddb6dmr2158326pfb.21.1679323028842;
-        Mon, 20 Mar 2023 07:37:08 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id z4-20020aa785c4000000b005810c4286d6sm6472979pfn.0.2023.03.20.07.37.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Mar 2023 07:37:08 -0700 (PDT)
-Date:   Mon, 20 Mar 2023 22:37:03 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     xiubli@redhat.com
-Cc:     fstests@vger.kernel.org, david@fromorbit.com, djwong@kernel.org,
-        ceph-devel@vger.kernel.org, vshankar@redhat.com
-Subject: Re: [PATCH] generic/075: no need to move the .fsxlog to the same
- directory
-Message-ID: <20230320143703.dv5ab4tnwrs5cnwl@zlang-mailbox>
-References: <20230301020730.92354-1-xiubli@redhat.com>
+        with ESMTP id S231732AbjCTQ21 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Mar 2023 12:28:27 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3754E38018;
+        Mon, 20 Mar 2023 09:20:23 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 118D66164F;
+        Mon, 20 Mar 2023 16:20:20 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6E4D3C433A0;
+        Mon, 20 Mar 2023 16:20:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1679329219;
+        bh=uD7tFlYygnM0Nz8LoRx1yUEH6hOCdKID6ZBO8i8zs7w=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nhAo+bxibffdU/UNSx7HZlk0+AlV2UrXEuUcKStEiGZb+Q49Ulnihyjy+ktm25zjR
+         WLn335cwsaBc/PWaXrQeEnw6nNfatNfKvGibGi6/pjYG2CXQ9eiWOWgA5NN0370yom
+         8N9nEhN910PMoyez/LIqX1QV5C5AmLf1NMHKTp61rAAZgh4JuzAWSgkSoXTpPWeLoa
+         2OK+Uguqi82GIowRbEZFLOPWuPQuK3tAUmyglvdf8TUKqBIMN9uGSx+pL0x6QfpH5d
+         WSVFnYXnyN10TZynOv98IfEcaESU364ReSQdXqTqDPReREQlgI+DkjqMLFbkIl8ms5
+         5CPmjbkuuU0vw==
+Date:   Mon, 20 Mar 2023 16:20:17 +0000
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
+Subject: Re: [PATCH 0/3] xfstests: make fscrypt-crypt-util self-tests work
+ with OpenSSL 3.0
+Message-ID: <ZBiHwYDLPk5gBWec@gmail.com>
+References: <20230319193847.106872-1-ebiggers@kernel.org>
+ <20230320140350.w4gg32a4f2kpv62s@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230301020730.92354-1-xiubli@redhat.com>
+In-Reply-To: <20230320140350.w4gg32a4f2kpv62s@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 01, 2023 at 10:07:30AM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
-> 
-> Actually it was trying to move the '075.$_n.fsxlog' from results
-> directory to the same results directory.
-> 
-> Fixes: https://tracker.ceph.com/issues/58834
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
-> ---
->  tests/generic/075 | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/tests/generic/075 b/tests/generic/075
-> index 9f24ad41..03a394a6 100755
-> --- a/tests/generic/075
-> +++ b/tests/generic/075
-> @@ -57,7 +57,6 @@ _do_test()
->      then
->  	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
->  	mv $out/$seq.$_n $seqres.$_n.full
-> -	mv "$RESULT_DIR"/$seq.$_n.fsxlog $seqres.$_n.fsxlog
+On Mon, Mar 20, 2023 at 10:03:50PM +0800, Zorro Lang wrote:
+> Just one tiny review point, I'd like to keep using same comment format, especially
+> in same source file. As src/fscrypt-crypt-util.c generally use "/* ... */", so
+> I'll change your "//..." to "/* ... */" when I merge it, if you don't mind.
 
-Hmm... Thoese $seq, $seqnum, $seqres, $RESULT_DIR and $REPORT_DIR are mess for
-me too :-D
+Yes that's fine.
 
-From the logic of xfstests/check:
-
-  if $OPTIONS_HAVE_SECTIONS; then
-          export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
-          REPORT_DIR="$RESULT_BASE/$section"
-  else
-          export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
-          REPORT_DIR="$RESULT_BASE"
-  fi
-  seqres="$REPORT_DIR/$seqnum"
-
-
-I think "$RESULT_DIR"/$seq equal to "$seqres", so this change makes sense to me.
-(Not sure if there're some special situations which I don't know :)
-
-The generic/075 is too old, lots of code in it can be removed or refactored, so
-I think it's not worth changing it bit by bit, I can refactor it totally, or if
-you'd like, you can do that.
-
-Thanks,
-Zorro
-
->  	od -xAx $seqres.$_n.full > $seqres.$_n.bad
->  	od -xAx "$RESULT_DIR"/$seq.$_n.fsxgood > $seqres.$_n.good
->  	rm -f "$RESULT_DIR"/$seq.$_n.fsxgood
-> -- 
-> 2.31.1
-> 
-
+- Eric
