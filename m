@@ -2,163 +2,99 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ED43C6FD1C
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Mar 2023 12:14:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29635C6FD20
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Mar 2023 20:13:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230056AbjCVMOr convert rfc822-to-8bit (ORCPT
+        id S231580AbjCXUNY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Mar 2023 08:14:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41238 "EHLO
+        Fri, 24 Mar 2023 16:13:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229688AbjCVMOq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Mar 2023 08:14:46 -0400
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7594C1C587;
-        Wed, 22 Mar 2023 05:14:45 -0700 (PDT)
-Received: by mail-ed1-f50.google.com with SMTP id h8so71969089ede.8;
-        Wed, 22 Mar 2023 05:14:45 -0700 (PDT)
+        with ESMTP id S230281AbjCXUNX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Mar 2023 16:13:23 -0400
+Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A7BBAD39
+        for <fstests@vger.kernel.org>; Fri, 24 Mar 2023 13:13:22 -0700 (PDT)
+Received: by mail-qt1-x833.google.com with SMTP id r5so2571430qtp.4
+        for <fstests@vger.kernel.org>; Fri, 24 Mar 2023 13:13:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20210112.gappssmtp.com; s=20210112; t=1679688801;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0t6BdfAxJFYOZ0ibuSqMV71Np9uiJrY1YLfyEZlCX5g=;
+        b=jEWpRaeVlMJMKHa1thRn1an4ZPed9lIqkBqKOsOD0y9PpUTBrz9ec9/BO1aPKY3r0u
+         BH8aXIJnIVw+Ud7h5AA2NETVDzd7dNyNikpiktlY8kWrmnanYvAsxBQSkOOkg3Be1cPH
+         XLbSSXFpA8OdEidc8m6sWYyRleq7agjSpWpcsBt8TSsDmnMtpMwYLpKcZAQuWaXrDq0C
+         F2GmQg0yD3doHb7dmvxjzjgtHsWy5UPqxlMq9x1QwkpZ0SaeZQgszra0O5iYj14SEoLY
+         CdbCj2Sz/F3VqgQOoJRfRjuGovJYPm+O1skcViBGsSTQIMXyLUrf4hAZPguTgV+Btbd2
+         xSkQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679487283;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=oh9QhLCuvfVYcQf/CMNMvbAp744bdFznA1TciHrugmM=;
-        b=qWU46RYC8xTO8lSEPH58IQxla7GN1qISrc8cDoy7q8ZkcOYuqxKHuoGQ/3GUUBZGYW
-         r07fZXMhJVSYUd7LUU3gT5dlkVXawOLZkhvbAx42+5VjlWoChdL/69yLYT0L+o43z8B+
-         ncs6/n3wgNfRWn56J3AaUlryP1xYDCHzAr8aZeCx3ljmoTKCx4Nh5Ym/Id3E7QJG2hrW
-         WVjt/ZAn3+Rmik+rkAlb3YF44PLAK/6bWvD/+BJRZqe/k2FB9/uQfwfCeynzuPGrI7Pm
-         uSj53VKy8nZXl9wRcToFmCT4b5Shl93qK6qF9Im325nS52unstrKr56gBxUU31BNvqTv
-         KSmg==
-X-Gm-Message-State: AO0yUKVUfqgbFHHxkwRZLsFyVqomZEcunfyWMNc5MQNcuqF+SBkwW5vf
-        BIhsTyMibp2A/XYzkff+NOH23RDrnTtDSQ==
-X-Google-Smtp-Source: AK7set/LIoFV19kqgkO7wxDP4N8uupZwVuHIlYq20/NltTWZe7jVZOrHieApqpwT2bXx6v4zbVBrTg==
-X-Received: by 2002:a17:906:829a:b0:90b:53f6:fd8b with SMTP id h26-20020a170906829a00b0090b53f6fd8bmr5872326ejx.31.1679487283518;
-        Wed, 22 Mar 2023 05:14:43 -0700 (PDT)
-Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com. [209.85.208.44])
-        by smtp.gmail.com with ESMTPSA id lz24-20020a170906fb1800b009334309eda5sm5282403ejb.196.2023.03.22.05.14.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 22 Mar 2023 05:14:43 -0700 (PDT)
-Received: by mail-ed1-f44.google.com with SMTP id h8so71968655ede.8;
-        Wed, 22 Mar 2023 05:14:42 -0700 (PDT)
-X-Received: by 2002:a05:6402:3496:b0:4ad:739c:b38e with SMTP id
- v22-20020a056402349600b004ad739cb38emr1488495edc.1.1679487282769; Wed, 22 Mar
- 2023 05:14:42 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1679688801;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=0t6BdfAxJFYOZ0ibuSqMV71Np9uiJrY1YLfyEZlCX5g=;
+        b=npD/HVAdm62H+XgRciDXOQKAVm9ZvtNe1dp8D91SW9W5aGf/XPvbSA5bGF8Ccj8wrB
+         P1AusX7z66KWqOzTOgOjuo+eCEseo1OoNAQKPzwovSYA1/Qkcs1+PK7K+O3ouI/gUa6l
+         RsQW6JblhSNsitFJiOCwTMo1rJ35WSAiJyrkquJUSfq9/wVDZrOonyOFTTBmu24aTWV+
+         XGKmVsQJ383KF3lZHqaPotE0rK7x+G1fY1Ztg3l9Ezi8H1O1n/buAuRczpQfd7oVJn/0
+         XO2cFu4YDHZywME989ygeiLjyzpu/xiOW995AkMhn0HT8yNZPdwi29Itm3sU4/AuPE4j
+         jXLA==
+X-Gm-Message-State: AO0yUKW+xwZGVBihVwkc1g7qAmjwdJftSO6mi302rchA/JkSkYbiIJ1q
+        MJZZjMf4XqOZKc+Tc3QFBfUv4A==
+X-Google-Smtp-Source: AK7set/q6eJyGQm3kC7hOJAylkJ5sKkOx3l4cupabF226kLTprxGnZKTIwGz+mlHcEmb0eMwu31HDw==
+X-Received: by 2002:a05:622a:342:b0:3bf:b70b:7804 with SMTP id r2-20020a05622a034200b003bfb70b7804mr7336335qtw.25.1679688801282;
+        Fri, 24 Mar 2023 13:13:21 -0700 (PDT)
+Received: from localhost (cpe-174-109-170-245.nc.res.rr.com. [174.109.170.245])
+        by smtp.gmail.com with ESMTPSA id v127-20020a379385000000b0074230493ccfsm14527444qkd.73.2023.03.24.13.13.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 Mar 2023 13:13:20 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        kernel-team@fb.com
+Subject: [PATCH] fstests: btrfs/012 don't follow symlinks for populating $SCRATCH_MNT
+Date:   Fri, 24 Mar 2023 16:13:19 -0400
+Message-Id: <8d1ac146d94eec8c77f08a6d04cd8d5248dc8dc8.1679688780.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
-References: <dc3eb7e8a9286b2eab1fd1829e56428300d51a5a.1679464212.git.wqu@suse.com>
-In-Reply-To: <dc3eb7e8a9286b2eab1fd1829e56428300d51a5a.1679464212.git.wqu@suse.com>
-From:   Neal Gompa <neal@gompa.dev>
-Date:   Wed, 22 Mar 2023 08:14:06 -0400
-X-Gmail-Original-Message-ID: <CAEg-Je-D9VR7G_kcr0u6CUqaGETsgDmr7xLvB348k-nMqdfjvQ@mail.gmail.com>
-Message-ID: <CAEg-Je-D9VR7G_kcr0u6CUqaGETsgDmr7xLvB348k-nMqdfjvQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/246: skip the test if the tested btrfs doesn't
- support inline extents creation
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        Hector Martin <marcan@marcan.st>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 22, 2023 at 1:59 AM Qu Wenruo <wqu@suse.com> wrote:
->
-> [FALSE ALERT]
-> If test case btrfs/246 is executed with a 16K page sized system (like
-> some aarch64 SoCs) using 4K sector size (would be the new default), the
-> test case would fail with output mismatch:
->
->   btrfs/246 1s ... - output mismatch (see ~/xfstests-dev/results//btrfs/246.out.bad)
->       --- tests/btrfs/246.out   2022-11-24 19:53:53.158470844 +0800
->       +++ ~/xfstests-dev/results//btrfs/246.out.bad     2023-03-22 13:27:34.975796048 +0800
->       @@ -3,3 +3,5 @@
->        0ca3bfdeda1ef5036bfa5dad078a9f15724e79cf296bd4388cf786bfaf4195d0  SCRATCH_MNT/foobar
->        sha256sum after mount cycle
->        0ca3bfdeda1ef5036bfa5dad078a9f15724e79cf296bd4388cf786bfaf4195d0  SCRATCH_MNT/foobar
->       +no inline extent found
->       +no compressed extent found
->       ...
->       (Run 'diff -u ~/xfstests-dev/tests/btrfs/246.out ~/xfstests-dev/results//btrfs/246.out.bad'  to see the entire diff)
->
-> [CAUSE]
-> For current btrfs subpage support, there are still some limitations:
->
-> - No compressed write if the range is not fully page aligned
-> - No inline extents creation
->   Reading inline extents is still supported
->
-> Thus we won't create such inlined compressed extent at all.
->
-> [FIX]
-> Just skip the test case if we can not even create a regular inline
-> extent.
->
-> This is done by a new require helper,
-> _require_btrfs_inline_extent_creation(), which would detect if btrfs can
-> even create an uncompressed inlined extent.
->
-> Reported-by: Hector Martin <marcan@marcan.st>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  common/btrfs    | 22 ++++++++++++++++++++++
->  tests/btrfs/246 |  3 +++
->  2 files changed, 25 insertions(+)
->
-> diff --git a/common/btrfs b/common/btrfs
-> index 7c32360376c2..344509ce300c 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -499,6 +499,28 @@ _require_btrfs_support_sectorsize()
->                 _notrun "sectorsize $sectorsize is not supported"
->  }
->
-> +_require_btrfs_inline_extents_creation()
-> +{
-> +       local ino
-> +
-> +       _require_xfs_io_command fiemap
-> +       _require_scratch
-> +
-> +       _scratch_mkfs &> /dev/null
-> +       _scratch_mount -o max_inline=2048,compress=none
-> +       _pwrite_byte 0x00 0 1024 $SCRATCH_MNT/inline &> /dev/null
-> +       sync
-> +       $XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/inline | tail -n 1 > $tmp.fiemap
-> +       _scratch_unmount
-> +       # 0x200 means inlined, 0x100 means not block aligned, 0x1 means
-> +       # the last extent.
-> +       if ! grep -q "0x301" $tmp.fiemap; then
-> +               rm -f -- $tmp.fiemap
-> +               _notrun "No inline extent creation support, maybe subpage?"
-> +       fi
-> +       rm -f -- $tmp.fiemap
-> +}
-> +
->  _btrfs_metadump()
->  {
->         local device="$1"
-> diff --git a/tests/btrfs/246 b/tests/btrfs/246
-> index 0dcc7c0d1a43..2fe54f959048 100755
-> --- a/tests/btrfs/246
-> +++ b/tests/btrfs/246
-> @@ -23,6 +23,9 @@ _cleanup()
->  _supported_fs btrfs
->  _require_scratch
->
-> +# If it's subpage case, we don't support inline extents creation for now.
-> +_require_btrfs_inline_extents_creation
-> +
->  _scratch_mkfs > /dev/null
->  _scratch_mount -o compress,max_inline=2048
->
-> --
-> 2.39.2
->
+/lib/modules/$(uname -r)/ can have symlinks to the source tree where the
+kernel was built from, which can have all sorts of stuff, which will
+make the runtime for this test exceedingly long.  We're just trying to
+copy some data into our tree to test with, we don't need the entire
+devel tree of whatever we're doing, so use -P to not follow symlinks
+when copying.
 
-LGTM.
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/btrfs/012 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Reviewed-by: Neal Gompa <neal@gompa.dev>
-
-
+diff --git a/tests/btrfs/012 b/tests/btrfs/012
+index d9faf81c..1b6e8a6b 100755
+--- a/tests/btrfs/012
++++ b/tests/btrfs/012
+@@ -43,7 +43,7 @@ mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
+ 
+ _require_fs_space $SCRATCH_MNT $(du -s /lib/modules/`uname -r` | ${AWK_PROG} '{print $1}')
+ 
+-cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT
++cp -aPR /lib/modules/`uname -r`/ $SCRATCH_MNT
+ _scratch_unmount
+ 
+ # Convert it to btrfs, mount it, verify the data
+@@ -67,7 +67,7 @@ umount $SCRATCH_MNT/mnt
+ 
+ # Now put some fresh data on the btrfs fs
+ mkdir -p $SCRATCH_MNT/new 
+-cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
++cp -aPR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
+ 
+ _scratch_unmount
+ 
 -- 
-真実はいつも一つ！/ Always, there's only one truth!
+2.26.3
+
