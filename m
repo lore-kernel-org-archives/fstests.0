@@ -2,41 +2,41 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AC0BC6FD1C
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Mar 2023 15:25:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E99EDC74A5B
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Mar 2023 15:26:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231822AbjCZPZB (ORCPT
+        id S232237AbjCZP0S (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 26 Mar 2023 11:25:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57224 "EHLO
+        Sun, 26 Mar 2023 11:26:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229621AbjCZPZB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Mar 2023 11:25:01 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E7211992
-        for <fstests@vger.kernel.org>; Sun, 26 Mar 2023 08:25:00 -0700 (PDT)
+        with ESMTP id S229621AbjCZP0R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Mar 2023 11:26:17 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE7C41992
+        for <fstests@vger.kernel.org>; Sun, 26 Mar 2023 08:26:16 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id DB911B80B72
-        for <fstests@vger.kernel.org>; Sun, 26 Mar 2023 15:24:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E99CCC433D2;
-        Sun, 26 Mar 2023 15:24:56 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5751460DE7
+        for <fstests@vger.kernel.org>; Sun, 26 Mar 2023 15:26:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 26D6DC433D2;
+        Sun, 26 Mar 2023 15:26:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1679844297;
-        bh=TLdjKxXpTK2uX9XYvX6Ey2LDUjm69fL/rkXuEWj/fgI=;
+        s=k20201202; t=1679844375;
+        bh=Dwh6erExi6RADr5K4g9iFDJhBqOZAG3IuBUOBgfDH6w=;
         h=Date:From:To:Subject:From;
-        b=ddX9HbURqaQf3Haw2rdsrRl1SgitCIoKbmMxVe9g8anpr9QUpSfh20vKwbmriMfMd
-         iBBQXoFhaVf0gsNtBLSdn5e+fjFEEPlZMi/CZwBK+jfN6Cai1UcKaiuZ1Iu9v79CbY
-         JrldJQCGhaan3HVaG2XiJkL/kw0cghuPef74CmaVzgXRq2hE2aSGxUD7w/xyh6RRAD
-         m1sSXRDeKVKRNJJ762DOLxzFBc9oVew3oZQR4ZiEl8QNFXNGRdiDog5iZDxMuVcv3i
-         BarLxdVmQ9jIRb/SMDiPK/10oR8EoySX6DYXFqY7Yi0eVQyMMrBq/pwdYRiTZ3pPda
-         1DXhaGxrnQt7A==
-Date:   Sun, 26 Mar 2023 23:24:53 +0800
+        b=oJP/NFpXcSCaFMWpALbBzmfbvVolUpwb28NzKDw7HCbz5ng5kwkQ3qjOdw9UATRAa
+         0bazG87ESEdKVnRlutu8KEjcqS4QLt4isD3IFiQyM1zGDM3i9x7Hdqq/VP9/Z8A0yD
+         yemOiYnApIc0CtT2n+W8kA6PqtfUXZJKYKhtm3LK25HmlQPre6jrpdFVkh9zpJt9Bg
+         b18XZKfYKLbhmHVygrh52us7/3zmxgK78NjYa0vSVrmHhAcd7/NFyiIQRnpj7zuvAi
+         tktJlbMUn+E0EflbE374IsO4kBMMVB5xZCD7QM7jt4Ii10WkqG/Gknx8LXssmB8LaA
+         8aTSwn60NfJ6g==
+Date:   Sun, 26 Mar 2023 23:26:11 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.03.19 onto master branch
-Message-ID: <20230326152452.mnkkbdqatilmjt5g@zlang-mailbox>
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.03.26
+Message-ID: <20230326152611.brcr3q7x4pxlh65q@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -46,62 +46,76 @@ X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.03.19 version.
+has just been updated and tagged as v2023.03.26 release.
+
+Release Notes:
+1) No new test case in this release.
+2) Some bug fix from fscrypt, btrfs, ceph side.
+3) A big update on fstests report generator (xml). This change collected
+   some suggestions from ext4 and btrfs users too, so it's worth a try if
+   you'd like to use this report function.
+
+Thanks for all these contribution, more details refer to below.
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-02200cb8853d xfs: stress test cycling parent pointers with online repair
+dc08f43f0fc9 report: allow test runners to inject arbitrary values
 
 New commits:
 
-Darrick J. Wong (1):
-      [02200cb8853d] xfs: stress test cycling parent pointers with online repair
+Darrick J. Wong (15):
+      [ec13788638b3] check: generate section reports between tests
+      [b76a6cdb40b5] report: derive an xml schema for the xunit report
+      [545315976e72] report: capture the time zone in the test report timestamp
+      [72dc174d42d9] report: clarify the meaning of the timestamp attribute
+      [a8963ceb25ef] report: record fstests start and report generation timestamps
+      [77bedb6a7db2] report: encode cdata sections correctly
+      [396d221df719] report: encode the kernel log as a separate xml element
+      [9c54fea5f5f9] report: sort properties by name
+      [e30945a820b4] report: pass property value to _xunit_add_property
+      [35de6ce721cc] report: encode xml entities in property values
+      [4f604f90f060] report: collect basic information about a test run
+      [391134eaf760] report: record optional environment variables
+      [159d630a3d53] report: record xfs-specific information about a test run
+      [ea9db87c90a1] report: record ext*-specific information about a test run
+      [dc08f43f0fc9] report: allow test runners to inject arbitrary values
 
-Filipe Manana (2):
-      [c7cc038e0a4d] btrfs/284: list a couple btrfs-progs git commits
-      [caac10c77786] btrfs/286: add missing calls to _scratch_dev_pool_put and _spare_dev_put
+Eric Biggers (3):
+      [593fcfbb573a] fscrypt-crypt-util: fix HKDF self-test with latest OpenSSL
+      [8727e8cb7810] fscrypt-crypt-util: use OpenSSL EVP API for AES self-tests
+      [5d6a0f38d175] fscrypt-crypt-util: fix XTS self-test with latest OpenSSL
 
-Rodrigo Campos (9):
-      [7f1135469db7] vfs: Don't open-code safe_close()
-      [2f94417630d5] vfs: Fix documentation typo
-      [e4332ec809d0] vfs: Use tabs to indent, not spaces
-      [f4f0038d5c48] vfs: Fix race condition on get_userns_fd()
-      [60de82ed2d23] vfs: Make switch_userns set PR_SET_DUMPABLE
-      [dd7d35111432] vfs: Prepare tests in &s_idmapped_mounts to be reused inside a userns
-      [6e230a617c67] vfs: Make idmapped core tests public
-      [4dd193b59b25] vfs: Export test_setup() and test_cleanup()
-      [3f96d37e3942] vfs: Add tmpfs tests for idmap mounts
+Khem Raj (1):
+      [2a280de522cf] m4: Check for FTW_ACTIONRETVAL along with nftw
+
+Qu Wenruo (1):
+      [3a9e43ba45fb] btrfs/246: skip the test if the tested btrfs doesn't support inline extents creation
+
+Xiubo Li (1):
+      [2d7d5f49e727] generic/020: fix another really long attr test failure for ceph
 
 
 Code Diffstat:
 
- common/fuzzy                    |  15 ++
- src/vfs/Makefile                |   4 +-
- src/vfs/idmapped-mounts.c       | 140 +++++++++---------
- src/vfs/idmapped-mounts.h       |  38 +++++
- src/vfs/tmpfs-idmapped-mounts.c | 305 ++++++++++++++++++++++++++++++++++++++++
- src/vfs/tmpfs-idmapped-mounts.h |  14 ++
- src/vfs/utils.c                 |  19 ++-
- src/vfs/utils.h                 |   4 +-
- src/vfs/vfstest.c               |  19 ++-
- src/vfs/vfstest.h               |  10 ++
- tests/btrfs/284                 |   5 +
- tests/btrfs/286                 |   3 +
- tests/tmpfs/001                 |  27 ++++
- tests/tmpfs/001.out             |   2 +
- tests/tmpfs/Makefile            |  24 ++++
- tests/xfs/799                   |  38 +++++
- tests/xfs/799.out               |   2 +
- tests/xfs/800                   |  38 +++++
- tests/xfs/800.out               |   2 +
- 19 files changed, 622 insertions(+), 87 deletions(-)
+ README                   |   3 +
+ check                    |  11 +++
+ common/btrfs             |  22 +++++
+ common/ext4              |   5 +
+ common/report            | 130 +++++++++++++++++++++----
+ common/xfs               |  11 +++
+ doc/xunit.xsd            | 246 +++++++++++++++++++++++++++++++++++++++++++++++
+ m4/package_libcdev.m4    |   2 +-
+ src/fscrypt-crypt-util.c |  50 ++++++++--
+ tests/btrfs/246          |   3 +
+ tests/generic/020        |   6 ++
+ 11 files changed, 459 insertions(+), 30 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
