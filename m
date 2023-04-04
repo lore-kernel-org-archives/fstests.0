@@ -2,165 +2,84 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B066C77B71
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 Apr 2023 17:14:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84656C761A6
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Apr 2023 22:16:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235669AbjDDRO5 (ORCPT
+        id S235827AbjDDWQ6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Apr 2023 13:14:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37500 "EHLO
+        Tue, 4 Apr 2023 18:16:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235842AbjDDROl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Apr 2023 13:14:41 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C9B31720;
-        Tue,  4 Apr 2023 10:14:40 -0700 (PDT)
+        with ESMTP id S229973AbjDDWQ5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Apr 2023 18:16:57 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEA9E40D9;
+        Tue,  4 Apr 2023 15:16:56 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 217B36378B;
-        Tue,  4 Apr 2023 17:14:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6F60FC4339C;
-        Tue,  4 Apr 2023 17:14:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 495E163962;
+        Tue,  4 Apr 2023 22:16:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3400BC433EF;
+        Tue,  4 Apr 2023 22:16:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1680628479;
-        bh=YaUvSAb+y+Cjb64X7Lrm9tby/Kb+5UTjRbbEV78qtVk=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=AyONJpNXKaLMFKaOhSSWFqJTNcbR8KyZFi907wXZjLR8By0KvxzrxkADm26HVSJdg
-         87pZbHXq117AiS7wENSNNfIIBGaAbnO09US11y0lcQ4cRw7vhTLoRx8AQsbqThN9Ti
-         sAou1kJDg50Ug+NiXGtrhH9vfZiLd+zaMxfQRv/iBLxG8G70cJZ0ONrDKZEmk9+jbn
-         kCzmVPLHrpa7VQ+t7BkLgv6dzA28ov1ROlx1OMrr8oRPcCylnGBRgfZOrVoatSpU46
-         m8tklPFCdAHD66VUnnu6oM3EhHEURsZV4bITFuVetU4lBd7HsAjjrgjP7ohCgefa5K
-         J0ZS0OzI+Bcgg==
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net,
-        linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org,
-        ocfs2-devel@oss.oracle.com, linux-unionfs@vger.kernel.org,
-        jack@suse.com, linux-xfs@vger.kernel.org, fdmanana@suse.com,
-        ebiggers@google.com, brauner@kernel.org, amir73il@gmail.com,
-        djwong@kernel.org, anand.jain@oracle.com
-Subject: [PATCH 3/5] fstests/MAINTAINERS: add supported mailing list
-Date:   Wed,  5 Apr 2023 01:14:09 +0800
-Message-Id: <20230404171411.699655-4-zlang@kernel.org>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230404171411.699655-1-zlang@kernel.org>
+        s=k20201202; t=1680646615;
+        bh=iq/IdV4ogpOzaM8KgGTnYC5Td3WCpb/PqmrSUjFcqq0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=hKIBSlBctkP5bivjN4Y21mckkcqW66+dkJqVt3sV5xlPSN1yzxtbcIDAa/udoQiUM
+         sYGbOLNwfOA0gXRR+Wndw2VsarlhINwbmR9rKVH1FeHvdejvWrBskWjfnQnco9YqvD
+         rpI3rk+9EzaMTkMEFIRuzDVL9UMVtvyfJBQ1f5Ze4NeqUuke7n1BCeowZBAWgMngKo
+         42ZuMczWbvBA3Owwg/N+nslkw274BP30Pj/y3YKUBj/353slDtMf8ZPciuUUqEM6Ip
+         0wa3X6hCp3Y9aaK3d1yKPuqKpW2wz0WLI7SD2d8mkTPKHHanh741qLv7i4NdaAMa8g
+         +Pz1NY60vkAcQ==
+Date:   Tue, 4 Apr 2023 15:16:53 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     fstests@vger.kernel.org, brauner@kernel.org,
+        linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org,
+        djwong@kernel.org, amir73il@gmail.com,
+        linux-unionfs@vger.kernel.org, anand.jain@oracle.com,
+        linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org,
+        fdmanana@suse.com, ocfs2-devel@oss.oracle.com, jack@suse.com,
+        linux-fsdevel@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 3/5] fstests/MAINTAINERS: add supported mailing list
+Message-ID: <20230404221653.GC1893@sol.localdomain>
 References: <20230404171411.699655-1-zlang@kernel.org>
+ <20230404171411.699655-4-zlang@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230404171411.699655-4-zlang@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The fstests supports different kind of fs testing, better to cc
-specific fs mailing list for specific fs testing, to get better
-reviewing points. So record these mailing lists and files related
-with them in MAINTAINERS file.
+Hi Zorro,
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
+On Wed, Apr 05, 2023 at 01:14:09AM +0800, Zorro Lang wrote:
+> +FSVERITY
+> +L:	fsverity@lists.linux.dev
+> +S:	Supported
+> +F:	common/verity
+> +
+> +FSCRYPT
+> +L:      linux-fscrypt@vger.kernel.org
+> +S:	Supported
+> +F:	common/encrypt
 
-If someone mailing list doesn't want to be in cc list of related fstests
-patch, please reply this email, I'll remove that line.
+Most of the encrypt and verity tests are in tests/generic/ and are in the
+'encrypt' or 'verity' test groups.
 
-Or if I missed someone mailing list, please feel free to tell me.
+These file patterns only pick up the common files, not the actual tests.
 
-Thanks,
-Zorro
+Have you considered adding a way to specify maintainers for a test group?
+Something like:
 
- MAINTAINERS | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 77 insertions(+)
+    G:      encrypt
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 09b1a5a3..620368cb 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -107,6 +107,83 @@ Maintainers List
- 	  should send patch to fstests@ at least. Other relevant mailing list
- 	  or reviewer or co-maintainer can be in cc list.
- 
-+BTRFS
-+L:	linux-btrfs@vger.kernel.org
-+S:	Supported
-+F:	tests/btrfs/
-+F:	common/btrfs
-+
-+CEPH
-+L:	ceph-devel@vger.kernel.org
-+S:	Supported
-+F:	tests/ceph/
-+F:	common/ceph
-+
-+CIFS
-+L:	linux-cifs@vger.kernel.org
-+S:	Supported
-+F:	tests/cifs
-+
-+EXT4
-+L:	linux-ext4@vger.kernel.org
-+S:	Supported
-+F:	tests/ext4/
-+F:	common/ext4
-+
-+F2FS
-+L:	linux-f2fs-devel@lists.sourceforge.net
-+S:	Supported
-+F:	tests/f2fs/
-+F:	common/f2fs
-+
-+FSVERITY
-+L:	fsverity@lists.linux.dev
-+S:	Supported
-+F:	common/verity
-+
-+FSCRYPT
-+L:      linux-fscrypt@vger.kernel.org
-+S:	Supported
-+F:	common/encrypt
-+
-+FS-IDMAPPED
-+L:	linux-fsdevel@vger.kernel.org
-+S:	Supported
-+F:	src/vfs/
-+
-+NFS
-+L:	linux-nfs@vger.kernel.org
-+S:	Supported
-+F:	tests/nfs/
-+F:	common/nfs
-+
-+OCFS2
-+L:	ocfs2-devel@oss.oracle.com
-+S:	Supported
-+F:	tests/ocfs2/
-+
-+OVERLAYFS
-+L:	linux-unionfs@vger.kernel.org
-+S:	Supported
-+F:	tests/overlay
-+F:	common/overlay
-+
-+UDF
-+R:	Jan Kara <jack@suse.com>
-+S:	Supported
-+F:	tests/udf/
-+
-+XFS
-+L:	linux-xfs@vger.kernel.org
-+S:	Supported
-+F:	common/dump
-+F:	common/fuzzy
-+F:	common/inject
-+F:	common/populate
-+F:	common/repair
-+F:	common/xfs
-+F:	tests/xfs/
-+
- ALL
- M:	Zorro Lang <zlang@kernel.org>
- L:	fstests@vger.kernel.org
--- 
-2.39.2
+and
 
+    G:      verity
+
+- Eric
