@@ -2,97 +2,112 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8BE6C76196
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Apr 2023 19:07:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 473FFC7618D
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Apr 2023 19:16:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229840AbjDFTHK (ORCPT
+        id S240180AbjDFTQd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Apr 2023 15:07:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36372 "EHLO
+        Thu, 6 Apr 2023 15:16:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230027AbjDFTHJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2023 15:07:09 -0400
+        with ESMTP id S229714AbjDFTQd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Apr 2023 15:16:33 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38E3930E4;
-        Thu,  6 Apr 2023 12:07:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B65BF2;
+        Thu,  6 Apr 2023 12:16:32 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id C2A3A64B41;
-        Thu,  6 Apr 2023 19:07:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 25709C433EF;
-        Thu,  6 Apr 2023 19:07:07 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EB2D8644AC;
+        Thu,  6 Apr 2023 19:16:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5569AC433D2;
+        Thu,  6 Apr 2023 19:16:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1680808027;
-        bh=7ozIwwBNug2non7XygOiUzDCqZmhf2FF30AU2MyEYnE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=bd7yjVqMJ3Eh8UQAAa9Z9GehnL+DLGK+LMh42dCiAX+VwT+fX3gU13qWvEWDrp9/c
-         XurN7beh5jhmKJRFr5cqasjqWLTKkoblKwoAG16JpPLpYZfPlNPoVSmyMLwwTR21Am
-         /RGfQ2EFGTgLKGixtyc5URz28xMMcm92YU1fb8MmMvS0vtu5/YQHmSC9TFJf8cP26m
-         5e2zA4IKI67icrsgiynhSbpg7c9RrqwRhjxIK0FKCMUQa0HNb4hl1xZbHieAxjzP0q
-         SR65TKY3AANfjzKOZFzFreX5h2l0oJ7vlWq7qPRCFXg/GDMXJd/ALP2BF1uQ5kjGsY
-         u4L3Bb/B4s6RA==
-Date:   Thu, 6 Apr 2023 12:07:06 -0700
+        s=k20201202; t=1680808591;
+        bh=Pw7hg/VCzok4Z0lC/uX8EjP0vsrjRxUryABK015JjMM=;
+        h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+        b=j10S8ZruxeMF/54fAtMzOifGisSKvFdA+ttjBTpGaianhLdwnLXP46sUrHIYBJUbJ
+         03IB6v6Bda2bu33muHynSPFmE/o6VyQ9W1XpodCVeFCRSKAANcPyulT8UFuOFaCSRP
+         +HhlKrNgYu6YZ9xC1CtKUKuUkNUTgkHi+SCxoSVT18DoMmKFfN1LlgjGh/I61UNOIu
+         azuiqH/IUsk2JTEk3UZ5FTrmSI+I4iTe9On60FbAxtyOo0xWWE2zAw5OyxciUR/YCL
+         88qyWwIZ9OgVq/6kqA1qBM/PmbEUq1mdXU0J3znNb8A5jeAUBqLP48DawIQ9PSpCHX
+         hzGjGfuBx424Q==
+Date:   Thu, 06 Apr 2023 12:16:30 -0700
+Subject: [PATCHSET v11 00/11] fstests: adjust tests for xfs parent pointers
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Allison Henderson <allison.henderson@oracle.com>
-Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCHSET DELUGE v11] xfs: Parent Pointers
-Message-ID: <20230406190706.GB360889@frogsfrogsfrogs>
-References: <20230406181038.GA360889@frogsfrogsfrogs>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+To:     zlang@redhat.com, djwong@kernel.org
+Cc:     Allison Henderson <allison.henderson@oracle.com>,
+        Catherine Hoang <catherine.hoang@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Message-ID: <168080829003.618488.1769223982280364994.stgit@frogsfrogsfrogs>
 In-Reply-To: <20230406181038.GA360889@frogsfrogsfrogs>
+References: <20230406181038.GA360889@frogsfrogsfrogs>
+User-Agent: StGit/0.19
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 06, 2023 at 11:10:38AM -0700, Darrick J. Wong wrote:
-> Hi everyone,
-> 
-> This submission contains all of the changes to the parent pointers
-> patchset that I've been working since last month's deluge.  The kernel
-> and xfsprogs patchsets are based on Allison's v10 tag from some time
-> ago.  To recap Allison's cover letter:
-> 
-> "The goal of this patch set is to add a parent pointer attribute to each
-> inode.  The attribute name containing the parent inode, generation, and
-> directory offset, while the  attribute value contains the file name.
-> This feature will enable future optimizations for online scrub, shrink,
-> nfs handles, verity, or any other feature that could make use of quickly
-> deriving an inodes path from the mount point."
-> 
-> v11 rebases everything against 6.3-rc5, and weaves all the changes that
-> I had made against v10 into Allison's original series.  The new xattr
-> NVLOOKUP mode that I introduced for v10 is critical for handling parent
-> pointer attr name collisions with grace, so that has been retained from
-> v10.  With that in place, I've replaced the diroffset in the ondisk
-> parent pointer with the dirent hash of the name.
-> 
-> Parent pointers now look like this:
-> 
-> 	(parent_ino, parent_gen, namehash) -> (name[])
-> 
-> I experimented with replacing the dahash with crc32c for this patchset
-> but left it out, having concluded that checksum operation has higher
-> overhead (thanks, crypto api!), would require someone to figure out crc
-> spoofing sufficiently well to keep metadump name obfuscation working,
-> and doesn't seem to improve collision resistance sufficiently to be
-> worth the added engineering cost.
-> 
-> As of this submission, I think this feature is ready to go once we've
-> merged the online repair code and rebased the online repair code to
-> actually commit the repaired directories.
-> 
-> If you want to pull the whole thing, use these links:
-> https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/log/?h=pptrs
-> https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=pptrs-drop-unnecessary
+Hi all,
 
-<sigh> Apparently vim undid my edit here; the correct URL is:
-https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=pptrs
+These are the test adjustments that are required for parent pointers.
+There's also a few new tests to ensure that the GETPARENTS ioctl (and
+hence the ondisk parent pointers) work the way they're supposed to.
+
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
 
-> https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=pptrs
-> 
-> --D
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=pptrs
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=pptrs
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=pptrs
+---
+ common/parent                        |  209 +++++++
+ common/populate                      |   38 +
+ common/rc                            |    7 
+ common/xfs                           |   12 
+ doc/group-names.txt                  |    1 
+ src/popdir.pl                        |   11 
+ tests/generic/050                    |   10 
+ tests/generic/050.cfg                |    1 
+ tests/generic/050.out.xfsquotaparent |   23 +
+ tests/xfs/018                        |    7 
+ tests/xfs/021                        |   15 -
+ tests/xfs/021.cfg                    |    1 
+ tests/xfs/021.out.default            |    0 
+ tests/xfs/021.out.parent             |   62 ++
+ tests/xfs/122.out                    |    3 
+ tests/xfs/191                        |    7 
+ tests/xfs/206                        |    3 
+ tests/xfs/288                        |    7 
+ tests/xfs/306                        |    9 
+ tests/xfs/851                        |  116 ++++
+ tests/xfs/851.out                    |   69 ++
+ tests/xfs/852                        |   69 ++
+ tests/xfs/852.out                    | 1002 ++++++++++++++++++++++++++++++++++
+ tests/xfs/853                        |   85 +++
+ tests/xfs/853.out                    |   14 
+ 25 files changed, 1770 insertions(+), 11 deletions(-)
+ create mode 100644 common/parent
+ create mode 100644 tests/generic/050.out.xfsquotaparent
+ create mode 100644 tests/xfs/021.cfg
+ rename tests/xfs/{021.out => 021.out.default} (100%)
+ create mode 100644 tests/xfs/021.out.parent
+ create mode 100755 tests/xfs/851
+ create mode 100644 tests/xfs/851.out
+ create mode 100755 tests/xfs/852
+ create mode 100644 tests/xfs/852.out
+ create mode 100755 tests/xfs/853
+ create mode 100644 tests/xfs/853.out
+
