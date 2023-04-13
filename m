@@ -2,133 +2,92 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7834DC77B6E
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Apr 2023 14:47:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 081D8C77B71
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Apr 2023 15:45:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229930AbjDMOrg (ORCPT
+        id S230403AbjDMPo7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Apr 2023 10:47:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42016 "EHLO
+        Thu, 13 Apr 2023 11:44:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230254AbjDMOrV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Apr 2023 10:47:21 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06F30AF21;
-        Thu, 13 Apr 2023 07:47:09 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7617763F23;
-        Thu, 13 Apr 2023 14:47:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D12BAC433EF;
-        Thu, 13 Apr 2023 14:47:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681397228;
-        bh=qulF/HwmerASmyWHD7x/6M06knaDveNuMk5qZGpjej4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=PN7xbsvFEx99YyG5cYOQtpF7uaCiU2O6m6/N0rF1p2oEsquYC5bTRgXjDnxtoulKP
-         71UH7JO11vsnB940OhD6xdZIzfszRTvyAsa4Dy7+b0j/81QMzP/AcLLNi2lIMQV47H
-         EOQI1p9RCc1+yoDRL4WTTGZjP3Uzi53xv40+PznQzI6niBsnjL0ExJ8lFe+/dTbaZz
-         qz1vulKOyeujmbmEqBrPMBpvR5GOb3pcWYgxd9fAuLUar5sfuhigdl3LBi/noqPV3A
-         dUOp3uZsJnuc2VvgngIGCnngSYAUM2Zfv80xL3XHOLEaMJUeOgUjkj+MbgMcAmOdOy
-         3bW/9LuIaZ8RQ==
-Date:   Thu, 13 Apr 2023 07:47:08 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Andrey Albershteyn <aalbersh@redhat.com>
+        with ESMTP id S231400AbjDMPo6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Apr 2023 11:44:58 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EE6C1712
+        for <fstests@vger.kernel.org>; Thu, 13 Apr 2023 08:44:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1681400646;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=squ5eir7T6UxKskfuIHNw09rOCoZSHwkrvOiBeWIBqo=;
+        b=I+Ci2MKlrp43+jyZkMSvh05BfL7DLFEJ+nWLTI+domVnkc1VGMo+WpbAGdEFiwsTtk7SK9
+        Q0Q/FCpfWC5f3jJw6ud74sV7hCX3j579CCwEmlMpQve9TUnkigGF0LxyWW3OobzlcKfDbM
+        +Rhhy27TOHpsiE1KEhri+bt9iYFHOcQ=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-553-myaMATDeNf-9LHrf2bTK8w-1; Thu, 13 Apr 2023 11:44:05 -0400
+X-MC-Unique: myaMATDeNf-9LHrf2bTK8w-1
+Received: by mail-qv1-f72.google.com with SMTP id bt7-20020ad455c7000000b005ef412e016fso2665441qvb.18
+        for <fstests@vger.kernel.org>; Thu, 13 Apr 2023 08:44:05 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1681400644; x=1683992644;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=squ5eir7T6UxKskfuIHNw09rOCoZSHwkrvOiBeWIBqo=;
+        b=Kug0Ez69N9cFghEPK22n2omwZLSfv/XjDSGWa7e6A0cqFU8peLV2mvGAzKAGdNkHaW
+         vqSOu3A+59rWJ9dsSANWozWftfXrg+iB+CACkOg5s5RVsDhIHok7HfymXJU9fss9UOn0
+         PAUCUhsk+W4FPxXlDUeJ/aQLLkkLBAdRzpYgTMt9wjjC9ruMbXuM5zC94FLRiqc4P5Jf
+         3gUT/P1ye6dD8VkG9sFKaVZohIH7gzjOxXUONDhXL7K3Q6rfpI+1HQ5n6HRDtNzI+lqG
+         nwn+Q1jUES6oFYc5fM5YJUuy+5wen5CmsCpDOFiyHLLY2/jYAuHlhf0Np17Zp2e0RSy3
+         6RFQ==
+X-Gm-Message-State: AAQBX9fU0EuWNOR0+LtLJA5hzSU0JK+MULgWufWOdMsZulga4rIfCdZU
+        lB7OuQzuWFw5vLIWvJb5aw9bfTfm4I78xtgX/jBdIRrVZboNl1AdS4JoSP2CMbPo+IzXoj62qG1
+        6x5kAhzHJnVKpVZCJxipOMOQz
+X-Received: by 2002:ac8:7f89:0:b0:3bf:d1c6:d375 with SMTP id z9-20020ac87f89000000b003bfd1c6d375mr3262189qtj.36.1681400644704;
+        Thu, 13 Apr 2023 08:44:04 -0700 (PDT)
+X-Google-Smtp-Source: AKy350YTWPIyg97x0Ux9S/G0S7I+ShE0QA+aAE5p3auD4U7HismQi6v5oQ30ApllDP3Eo85KitikFA==
+X-Received: by 2002:ac8:7f89:0:b0:3bf:d1c6:d375 with SMTP id z9-20020ac87f89000000b003bfd1c6d375mr3262131qtj.36.1681400643990;
+        Thu, 13 Apr 2023 08:44:03 -0700 (PDT)
+Received: from aalbersh.remote.csb ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id c3-20020ac84e03000000b003e635f0fdb4sm572602qtw.53.2023.04.13.08.43.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Apr 2023 08:43:59 -0700 (PDT)
+Date:   Thu, 13 Apr 2023 17:43:52 +0200
+From:   Andrey Albershteyn <aalbersh@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org, guan@eryu.me
 Subject: Re: [PATCHSET 0/3] fstests: direct specification of looping test
  duration
-Message-ID: <20230413144708.GL360895@frogsfrogsfrogs>
+Message-ID: <20230413154352.v55cc3tfhezxlw5s@aalbersh.remote.csb>
 References: <168123682679.4086541.13812285218510940665.stgit@frogsfrogsfrogs>
  <20230413104836.zw2uoe4mhocs3afz@aalbersh.remote.csb>
+ <20230413144708.GL360895@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230413104836.zw2uoe4mhocs3afz@aalbersh.remote.csb>
+In-Reply-To: <20230413144708.GL360895@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 13, 2023 at 12:48:36PM +0200, Andrey Albershteyn wrote:
-> On Tue, Apr 11, 2023 at 11:13:46AM -0700, Darrick J. Wong wrote:
-> > Hi all,
+On Thu, Apr 13, 2023 at 07:47:08AM -0700, Darrick J. Wong wrote:
+> On Thu, Apr 13, 2023 at 12:48:36PM +0200, Andrey Albershteyn wrote:
+> > >  tests/generic/648     |    8 +++--
+> > >  17 files changed, 229 insertions(+), 13 deletions(-)
+> > >  create mode 100644 src/soak_duration.awk
+> > > 
 > > 
-> > One of the things that I do as a maintainer is to designate a handful of
-> > VMs to run fstests for unusually long periods of time.  This practice I
-> > call long term soak testing.  There are actually three separate fleets
-> > for this -- one runs alongside the nightly builds, one runs alongside
-> > weekly rebases, and the last one runs stable releases.
-> > 
-> > My interactions with all three fleets is pretty much the same -- load
-> > current builds of software, and try to run the exerciser tests for a
-> > duration of time -- 12 hours, 6.5 days, 30 days, etc.  TIME_FACTOR does
-> > not work well for this usage model, because it is difficult to guess
-> > the correct time factor given that the VMs are hetergeneous and the IO
-> > completion rate is not perfectly predictable.
-> > 
-> > Worse yet, if you want to run (say) all the recoveryloop tests on one VM
-> > (because recoveryloop is prone to crashing), it's impossible to set a
-> > TIME_FACTOR so that each loop test gets equal runtime.  That can be
-> > hacked around with config sections, but that doesn't solve the first
-> > problem.
-> > 
-> > This series introduces a new configuration variable, SOAK_DURATION, that
-> > allows test runners to control directly various long soak and looping
-> > recovery tests.  This is intended to be an alternative to TIME_FACTOR,
-> > since that variable usually adjusts operation counts, which are
-> > proportional to runtime but otherwise not a direct measure of time.
-> > 
-> > With this override in place, I can configure the long soak fleet to run
-> > for exactly as long as I want them to, and they actually hit the time
-> > budget targets.  The recoveryloop fleet now divides looping-test time
-> > equally among the four that are in that group so that they all get ~3
-> > hours of coverage every night.
-> > 
-> > There are more tests that could use this than I actually modified here,
-> > but I've done enough to show this off as a proof of concept.
-> > 
-> > If you're going to start using this mess, you probably ought to just
-> > pull from my git trees, which are linked below.
-> > 
-> > This is an extraordinary way to destroy everything.  Enjoy!
-> > Comments and questions are, as always, welcome.
-> > 
-> > --D
-> > 
-> > fstests git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=soak-duration
-> > ---
-> >  check                 |   14 +++++++++
-> >  common/config         |    7 ++++
-> >  common/fuzzy          |    7 ++++
-> >  common/rc             |   34 +++++++++++++++++++++
-> >  common/report         |    1 +
-> >  ltp/fsstress.c        |   78 +++++++++++++++++++++++++++++++++++++++++++++++--
-> >  ltp/fsx.c             |   50 +++++++++++++++++++++++++++++++
-> >  src/soak_duration.awk |   23 ++++++++++++++
-> >  tests/generic/019     |    1 +
-> >  tests/generic/388     |    2 +
-> >  tests/generic/475     |    2 +
-> >  tests/generic/476     |    7 +++-
-> >  tests/generic/482     |    5 +++
-> >  tests/generic/521     |    1 +
-> >  tests/generic/522     |    1 +
-> >  tests/generic/642     |    1 +
-> >  tests/generic/648     |    8 +++--
-> >  17 files changed, 229 insertions(+), 13 deletions(-)
-> >  create mode 100644 src/soak_duration.awk
-> > 
+> > The set looks good to me (the second commit has different var name,
+> > but fine by me)
 > 
-> The set looks good to me (the second commit has different var name,
-> but fine by me)
+> Which variable name, specifically?
 
-Which variable name, specifically?
+STRESS_DURATION in the commit message
 
---D
+-- 
+- Andrey
 
-> Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
-> 
-> -- 
-> - Andrey
-> 
