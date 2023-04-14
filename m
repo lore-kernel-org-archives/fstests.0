@@ -2,93 +2,174 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 477FAC77B76
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Apr 2023 22:11:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD202C77B71
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Apr 2023 22:11:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229651AbjDNWL6 (ORCPT
+        id S229735AbjDNWL4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Apr 2023 18:11:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51342 "EHLO
+        Fri, 14 Apr 2023 18:11:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229721AbjDNWL4 (ORCPT
+        with ESMTP id S229651AbjDNWL4 (ORCPT
         <rfc822;fstests@vger.kernel.org>); Fri, 14 Apr 2023 18:11:56 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C6D14EE9
-        for <fstests@vger.kernel.org>; Fri, 14 Apr 2023 15:11:42 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id f2so11317413pjs.3
-        for <fstests@vger.kernel.org>; Fri, 14 Apr 2023 15:11:42 -0700 (PDT)
+Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D41C46A6
+        for <fstests@vger.kernel.org>; Fri, 14 Apr 2023 15:11:40 -0700 (PDT)
+Received: by mail-pj1-x1034.google.com with SMTP id 98e67ed59e1d1-2470524add2so624845a91.2
+        for <fstests@vger.kernel.org>; Fri, 14 Apr 2023 15:11:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1681510301; x=1684102301;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=U2E6oLT8a9wEsZkAUiDTeUjMtVbGXoTa5rKPpX0GQKU=;
-        b=idwbjr53furWG8SS9F7hFFaEV/Qn4Lh6NRgaw2/MnT1etLLsr2tDsoJLO1RLKGU+5r
-         hjRza6YPR4JSm/qD/suxo4xi7/qCnFm4P4jUcnaNAcH/WvKvwZ4qQ+UZIXublopWL5Vk
-         W04iM/iK+f2Kn4nACEJi0NYy0m657CRpAKkEC8zMPyu87tc16hMZiTqdQmiy+w6MDPx8
-         NyZO7Hgjr5bOzElBTOgDRBgrq9w6o5IVNRjpqtuWepYrMveQ2kWe0c9ShC3ObKEen2Po
-         EUwXsDBBCxy2Gwq47/MnaaO4a42TwIyzaG5EpJ6JkW5HLhQvVbAmY9tvypCXe2risnq4
-         OItw==
+        d=gmail.com; s=20221208; t=1681510299; x=1684102299;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=kx3PbbalI062dWizlOchskVV3mUuFApwM3tlPSmdRr0=;
+        b=DYtnAsOfwB/+hdN3EJ34iU2Mxe7zCIDkPM3SGIYPRuIYsF5fyhv+d+ukmaCj7zeWuE
+         pSW6OHryCMOCumQBjdijcxgoBgxcuJscerd+uxOYxCq2dbi/NUGkaleKMVtrAzY6/xPp
+         luWHqIPaieQ2xZqyAeZ2J2cPHLjvhg5s9HXHilVznmEITStX7I8SlWfPWQH7RazHuNtR
+         2upl4z2QIHj56+8b0a74Fo9BW2EMfxtRDqk85lx09v6InxA3j8P+y0CsxkVA/r6IsbBM
+         V9EfGK++O3jj8JR6WAFzlAhv0ngQ1KkzAkQ/FwSJAeQmb9wwrRgxhpAycjn5DaCIjmft
+         sMKg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681510301; x=1684102301;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=U2E6oLT8a9wEsZkAUiDTeUjMtVbGXoTa5rKPpX0GQKU=;
-        b=bWycVw/66/SvMAu2zKbddAV0ka5EmENoI2Q96bcvkpL/MwH1HMyS5vbBsmnd2Jk/rZ
-         dRpWdBX+zOlx9f4RtP73qgI8KWYEJDgQfabq3EWjG/V0xea4oD7rG9cjU1TkY8yoKqUj
-         CNPnzv+F5TjUNJB2aP092UaPCR6u476D//apKQ4qiWaaFV52Nwt4cVA4k8VCUhlpXPgu
-         0KmLg/RRFKRquoSNOvdTRMf/O2k9zywHe0KzYGIVBI/i8k+LLnVTOqpng7mrLj/j7ZR9
-         XJk2djhA9uCW/9wxaCHbAHlnSYyyD9rrG5mt7LYFJDKEOMsQOSExfimDPL/dD1jyLsjE
-         P6Xw==
-X-Gm-Message-State: AAQBX9cLk/Cde9t06pd+ep9Ae8B/JKJ0mVQHa/0NYlcAk61RvNpoI/QR
-        g5oZZOPEo44rZmVoRI4MZdIIbMfW0tc=
-X-Google-Smtp-Source: AKy350Y3rWj+xaM406WaJ2M75WNayOCRPpWa/Yw0K55f5764CM9EyS+d0Nbw2B650mDcqcl6FrCV4w==
-X-Received: by 2002:a05:6a20:1454:b0:ec:414f:8f9f with SMTP id a20-20020a056a20145400b000ec414f8f9fmr9291961pzi.25.1681510301401;
-        Fri, 14 Apr 2023 15:11:41 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1681510299; x=1684102299;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=kx3PbbalI062dWizlOchskVV3mUuFApwM3tlPSmdRr0=;
+        b=FPsbxc0n026yNDzVedSxQJCatUmgpzG4Dnb/ItygDuGsY2M1z/b1bV5g30Q93drLz3
+         K3GN45DQk6xx9qX2eOs3lyAsCN7/LG+ns1NsdWMV857OtEIj+wX9nKeU1LXS0jl2+TA/
+         Yq2WQqSBvq8aScEqsxGGPSWJLft8umS3cxOe7a0UK7h39OSztV4ZzDksR/qpL81fcd/7
+         OSlZTQwoAAzMCF+DZleD3ihy2NE9ucP4W50/pBVMECt4RO3MZo8YmMOnSXHoX3HZI5s3
+         lzfLij/Xq8hGpWarjd+Sw3aUPew5kpZ9E9FlsLs6I5leRxMv9ro1JOCN+TNIfJGMTYJs
+         TS/w==
+X-Gm-Message-State: AAQBX9dz8eVCym387yOXVKQX4qX3wC/6EPqDKUUIFoqzrTvKu/ygh0m9
+        yQ+Fc1wrUnPWuXouC0mjFOA3KU+mP8I=
+X-Google-Smtp-Source: AKy350Yo9OGRL/J7ToItGW9ZPxG8pcbOudRsIyZrxeU9NkdNyPZFTsfJJY8qgGmplJ+3lQv4rhfjmw==
+X-Received: by 2002:a05:6a00:2e82:b0:63b:e4:554 with SMTP id fd2-20020a056a002e8200b0063b00e40554mr11613363pfb.4.1681510299563;
+        Fri, 14 Apr 2023 15:11:39 -0700 (PDT)
 Received: from lrumancik.svl.corp.google.com ([2620:15c:2d4:203:1fb3:c400:8b7a:ed6])
-        by smtp.gmail.com with ESMTPSA id k14-20020aa792ce000000b0062e15c22cd8sm3473219pfa.48.2023.04.14.15.11.40
+        by smtp.gmail.com with ESMTPSA id k14-20020aa792ce000000b0062e15c22cd8sm3473219pfa.48.2023.04.14.15.11.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Apr 2023 15:11:41 -0700 (PDT)
+        Fri, 14 Apr 2023 15:11:39 -0700 (PDT)
 From:   Leah Rumancik <leah.rumancik@gmail.com>
 To:     fstests@vger.kernel.org
-Cc:     tytso@mit.edu, djwong@kernel.org,
-        Leah Rumancik <leah.rumancik@gmail.com>
-Subject: [PATCH 2/2] check: _check_filesystems for errors even if test failed
-Date:   Fri, 14 Apr 2023 15:11:33 -0700
-Message-ID: <20230414221133.3431400-2-leah.rumancik@gmail.com>
+Cc:     tytso@mit.edu, djwong@kernel.org
+Subject: [PATCH 1/2] check: try to fix the test device if it gets corrupted
+Date:   Fri, 14 Apr 2023 15:11:32 -0700
+Message-ID: <20230414221133.3431400-1-leah.rumancik@gmail.com>
 X-Mailer: git-send-email 2.40.0.634.g4ca3ef3211-goog
-In-Reply-To: <20230414221133.3431400-1-leah.rumancik@gmail.com>
-References: <20230414221133.3431400-1-leah.rumancik@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Previously, we would only run _check_filesystems to ensure that a test
-that appeared to pass did not have any filesystem corruption. However,
-in _check_filesystems, we also repair any errors found in the filesystem.
-Let's do this even if we already know the test failed so that subsequent
-tests aren't affected.
+From: Theodore Ts'o <tytso@mit.edu>
 
-Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+If the test device gets corrupted all subsequent tests will fail.  To
+prevent this from causing all subsequent tests to be useless, try
+repair the file system on TEST_DEV if possible.  We don't need to do
+this with the scratch device since that file system gets recreated
+each time anyway.
+
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- check | 1 +
- 1 file changed, 1 insertion(+)
+ check      |  7 ++++++-
+ common/rc  | 41 +++++++++++++++++++++++++++++++++++++++++
+ common/xfs | 12 ++++++++++++
+ 3 files changed, 59 insertions(+), 1 deletion(-)
 
 diff --git a/check b/check
-index befbf465..c18f02ca 100755
+index 1a58a2b2..befbf465 100755
 --- a/check
 +++ b/check
-@@ -972,6 +972,7 @@ function run_section()
- 			# Even though we failed, there may be something interesting in
- 			# dmesg which can help debugging.
- 			_check_dmesg
-+			(_adjust_oom_score 250; _check_filesystems)
- 			tc_status="fail"
- 		else
- 			# The test apparently passed, so check for corruption
+@@ -536,7 +536,12 @@ _check_filesystems()
+ 	local ret=0
+ 
+ 	if [ -f ${RESULT_DIR}/require_test ]; then
+-		_check_test_fs || ret=1
++		if ! _check_test_fs ; then
++			ret=1
++			echo "Trying to repair broken TEST_DEV file system"
++			_repair_test_fs
++			_test_mount
++		fi
+ 		rm -f ${RESULT_DIR}/require_test*
+ 	else
+ 		_test_unmount 2> /dev/null
+diff --git a/common/rc b/common/rc
+index 90749343..e8fc7e86 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1199,6 +1199,47 @@ _repair_scratch_fs()
+     esac
+ }
+ 
++_repair_test_fs()
++{
++	case $FSTYP in
++	xfs)
++		_repair_xfs_test_fs "$@" >$tmp.repair 2>&1
++		res=$?
++		if [ "$res" -ne 0 ]; then
++			echo "xfs_repair returns $res; replay log?" >>$tmp.repair
++			_test_mount
++			res=$?
++			if [ $res -gt 0 ]; then
++				echo "mount returns $res; zap log?" >>$tmp.repair
++				_xfs_repair_test_fs -L >>$tmp.repair 2>&1
++				echo "log zap returns $?" >> $tmp.repair
++			else
++				umount "$TEST_DEV"
++			fi
++			_xfs_repair_test_fs "$@" >>$tmp.repair 2>&1
++			res=$?
++		fi
++		;;
++	*)
++		# Let's hope fsck -y suffices...
++		fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
++		res=$?
++		if test "$res" -lt 4 ; then
++			res=0
++		fi
++		;;
++	esac
++	if [ $res -ne 0 ]; then
++		_log_err "_repair_test_fs: failed, err=$res"
++		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
++		cat $tmp.repair				>>$seqres.full
++		echo "*** end fsck.$FSTYP output"	>>$seqres.full
++
++	fi
++	rm -f $tmp.repair
++	return $res
++}
++
+ _get_pids_by_name()
+ {
+     if [ $# -ne 1 ]
+diff --git a/common/xfs b/common/xfs
+index e8e4832c..4a130493 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -988,6 +988,18 @@ _check_xfs_test_fs()
+ 	return $?
+ }
+ 
++# modeled after _scratch_xfs_repair
++_repair_xfs_test_fs()
++{
++	TEST_OPTIONS=""
++	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
++		TEST_OPTIONS="-l$TEST_LOGDEV"
++	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
++		TEST_OPTIONS=$TEST_OPTIONS" -r$TEST_RTDEV"
++	[ "$LARGE_TEST_DEV" = yes ] && TEST_OPTIONS=$TEST_OPTIONS" -t"
++	$XFS_REPAIR_PROG $TEST_OPTIONS $* $TEST_DEV
++}
++
+ _require_xfs_test_rmapbt()
+ {
+ 	_require_test
 -- 
 2.40.0.634.g4ca3ef3211-goog
 
