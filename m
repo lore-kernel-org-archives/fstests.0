@@ -2,121 +2,111 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B49E1C77B61
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Apr 2023 04:57:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84B1DC77B76
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Apr 2023 17:20:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229953AbjDQE5h (ORCPT
+        id S229854AbjDQRUb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Apr 2023 00:57:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45012 "EHLO
+        Mon, 17 Apr 2023 13:20:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229946AbjDQE5g (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Apr 2023 00:57:36 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E93E7F4
-        for <fstests@vger.kernel.org>; Sun, 16 Apr 2023 21:56:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1681707408;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=m3BnFojWZL/bG/zPigloJEN3ndYrUcDTrtcXiM6ketw=;
-        b=Tfkour2C0+F3rHH69b1aCjVz6sNkCG7GUQtd8rwk/Z14EqjYLCFv0Hee79bf9IoYZiz2rK
-        zWQH1SRZwRkD0mbVvlA/V4hGbSIFfyXtdnvPAIMOJB+V+vmVGxO7hs5XcP96IwWaeuEDO7
-        Yv7DVePAgL2/JngpqhdzhWwHauV5eGY=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-42-RfoIiu3iNGmA8TYOh53HUw-1; Mon, 17 Apr 2023 00:56:47 -0400
-X-MC-Unique: RfoIiu3iNGmA8TYOh53HUw-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1a6a1b6a1d9so3135095ad.3
-        for <fstests@vger.kernel.org>; Sun, 16 Apr 2023 21:56:46 -0700 (PDT)
+        with ESMTP id S229738AbjDQRUa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Apr 2023 13:20:30 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06BAFA5D4
+        for <fstests@vger.kernel.org>; Mon, 17 Apr 2023 10:20:03 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-506b2a08862so384047a12.3
+        for <fstests@vger.kernel.org>; Mon, 17 Apr 2023 10:20:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20221208; t=1681752002; x=1684344002;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WAjJ7fsw1baMcvYkROYwAezjzyqTLBZPQIKeC6DMbDE=;
+        b=nCM7YVxfYXIJYbasNcvG51xjEX31TaKPF6Xi0jagpcAS44LH3wO6NiRShDSLWnhhAG
+         od1uqApRKudFCIN4GtvMn2ymkfIlgaKATlfj5elZU+D/71eHwHMujid1jZdQkRYhF9iP
+         khKjVfGsLO+QKBUoanSdFjFfPBVX55RbKE2Z4apnhTy+U1gBdg8aCqQEqtfFqntoQrsH
+         j6OmumsvqhdbQ8FNqFcntWCpoFp7iSR/bIBiFjyLI6Wth/VZk0USE5XGUHVfi/+pONjb
+         ApQ5JPK1p/ZErSwzX37gzrjn7/pXuqdWnknau1bfdm2BLMCCFnh5Ecb1Gv/dDUOLB1eT
+         UqIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681707405; x=1684299405;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=m3BnFojWZL/bG/zPigloJEN3ndYrUcDTrtcXiM6ketw=;
-        b=CwysKR7By1cGq4ubi4noaYVN7BjybFph1HgqZ7tzrMEWcSuCLFvfGtP8j0TYTYIrWg
-         21zopl1sVWkWUy8EYdyIgfOV2IXuOIvRnEhQjXl5nX/enVK7HTkoSVCPcAZoMuaGMbMY
-         RVRn4TVJ4wAsWgPHZ6ReV0vwklXYDCFc6wf0oe7LisweR+ElpQoria5ET4Ay10EvQDsz
-         R78pDzm4jWHfdS0CVuToobkNN60YqW2fDq/91uK2lNjxvwMRW9cA3qdpABLniz66KpYC
-         jQ/tD8zBYjxc9plQyYAfqhvnFS1Q1eha65Zxy4OJbkG63WlYdsZ1UpPhNrtWzO2oJYSF
-         OOhQ==
-X-Gm-Message-State: AAQBX9d2vRrGzGN0bTOJ+5fc8wZnyBfegqm6txoS509zxkudaw4n8edc
-        VN1Uv8VNPwp9j+XfnRKMtM5S7urhzNIezlfd/Izc3+zFkm00o7meuxDOgNWVwyAtUNMG1JdNQB0
-        qm8lrT5TIX7+pQFehmQ==
-X-Received: by 2002:a05:6a00:17a9:b0:63b:8b47:453c with SMTP id s41-20020a056a0017a900b0063b8b47453cmr4698275pfg.1.1681707405382;
-        Sun, 16 Apr 2023 21:56:45 -0700 (PDT)
-X-Google-Smtp-Source: AKy350ZWVIyQhNc125Br02ERP6RgBnPbaIr0QiV5VeUubxkxkvksUIPHl2cGfx/uI1APHkaRJSGbXA==
-X-Received: by 2002:a05:6a00:17a9:b0:63b:8b47:453c with SMTP id s41-20020a056a0017a900b0063b8b47453cmr4698266pfg.1.1681707405127;
-        Sun, 16 Apr 2023 21:56:45 -0700 (PDT)
-Received: from [10.72.12.181] ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id y1-20020aa78541000000b00638b13ee6a7sm6648061pfn.25.2023.04.16.21.56.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 16 Apr 2023 21:56:44 -0700 (PDT)
-Message-ID: <34ad8dc4-6bf9-15b4-3c04-c43165ecb229@redhat.com>
-Date:   Mon, 17 Apr 2023 12:56:39 +0800
+        d=1e100.net; s=20221208; t=1681752002; x=1684344002;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=WAjJ7fsw1baMcvYkROYwAezjzyqTLBZPQIKeC6DMbDE=;
+        b=dPIbd9ldVBy4gBwcbJKJqPu47xczf3lz6Kv1jwKwAHS2GLzVsXcNOry7JthKlq204j
+         RLfC/vOzAcLArGTOXbGWRsNYaJUe7EZVxlMuMbMj/dv69xdpZ9sl+H24r0Q70W1PARX2
+         OoTZEixoB6Y62sRjaBbbv+RWcGrm4a57umIWWTQdqzR48WhxqaZYWsjAXarAW2BZjVd0
+         RoWvTVjYb8GknpcfslEjEmH1duDTM0VLTBzdRC2NtImhcHZRt0ETuEu5h6Zgf1/BgWj0
+         N0AiU67fs8pIm2mGH6Ui+s9uCF37dvImI9qKFYHZdrkDAFbjXwFdAfijZ5Fq8rmsQ6zX
+         wZUw==
+X-Gm-Message-State: AAQBX9dvZPWeb4XevrI0+WUNWRzaX/9ZnfwwuLWSoa+e717RduP6TbYA
+        PqCS5vOP0hlc9mkzGViZkDEUBH97SwRUCrvIpJ0fMQ==
+X-Google-Smtp-Source: AKy350Zc3JftionVcDCKfHHxpr3vPSqEciwVSrCM0PLyMGXtWTHfIx11Ss6MJT314ceBbIl9zl+KEodqdNj5eov4Rzg=
+X-Received: by 2002:a50:bb2e:0:b0:506:76a2:43dc with SMTP id
+ y43-20020a50bb2e000000b0050676a243dcmr6948416ede.4.1681752001806; Mon, 17 Apr
+ 2023 10:20:01 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.1
-Subject: Re: [PATCH] common/rc: skip ceph when atime is required
-Content-Language: en-US
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
-References: <20230417024134.30560-1-xiubli@redhat.com>
- <20230417041752.lryihlt7atnljfzo@zlang-mailbox>
-From:   Xiubo Li <xiubli@redhat.com>
-In-Reply-To: <20230417041752.lryihlt7atnljfzo@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20230414221133.3431400-1-leah.rumancik@gmail.com>
+ <20230414221133.3431400-2-leah.rumancik@gmail.com> <20230415004131.GC360885@frogsfrogsfrogs>
+In-Reply-To: <20230415004131.GC360885@frogsfrogsfrogs>
+From:   Leah Rumancik <lrumancik@google.com>
+Date:   Mon, 17 Apr 2023 10:19:25 -0700
+Message-ID: <CAMxqPXVGGOn6A5ijRwaw7k0JfYD2gHftDWOVBVq=jrE3JW9gDQ@mail.gmail.com>
+Subject: Re: [PATCH 2/2] check: _check_filesystems for errors even if test failed
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Leah Rumancik <leah.rumancik@gmail.com>, fstests@vger.kernel.org,
+        tytso@mit.edu
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Sure, will send out another set. Thanks!
 
-On 4/17/23 12:17, Zorro Lang wrote:
-> On Mon, Apr 17, 2023 at 10:41:34AM +0800, xiubli@redhat.com wrote:
->> From: Xiubo Li <xiubli@redhat.com>
->>
->> Ceph won't maintain the atime, so just skip the tests when the atime
->> is required.
->>
->> URL: https://tracker.ceph.com/issues/53844
->> Signed-off-by: Xiubo Li <xiubli@redhat.com>
->> ---
->>   common/rc | 3 +++
->>   1 file changed, 3 insertions(+)
->>
->> diff --git a/common/rc b/common/rc
->> index 90749343..3238842e 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -3999,6 +3999,9 @@ _require_atime()
->>   	nfs|cifs|virtiofs)
->>   		_notrun "atime related mount options have no effect on $FSTYP"
->>   		;;
->> +	ceph)
->> +                _notrun "atime not maintained by $FSTYP"
-> Make sense to me. I'll change this line a bit when I merge it, to keep the line
-> aligned (with above).
+On Fri, Apr 14, 2023 at 5:41=E2=80=AFPM Darrick J. Wong <djwong@kernel.org>=
+ wrote:
 >
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-Sure, thanks Zorro.
-
-- Xiubo
-
-
-> Thanks,
-> Zorro
+> On Fri, Apr 14, 2023 at 03:11:33PM -0700, Leah Rumancik wrote:
+> > Previously, we would only run _check_filesystems to ensure that a test
+> > that appeared to pass did not have any filesystem corruption. However,
+> > in _check_filesystems, we also repair any errors found in the filesyste=
+m.
+> > Let's do this even if we already know the test failed so that subsequen=
+t
+> > tests aren't affected.
+> >
+> > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> > ---
+> >  check | 1 +
+> >  1 file changed, 1 insertion(+)
+> >
+> > diff --git a/check b/check
+> > index befbf465..c18f02ca 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -972,6 +972,7 @@ function run_section()
+> >                       # Even though we failed, there may be something i=
+nteresting in
+> >                       # dmesg which can help debugging.
+> >                       _check_dmesg
+> > +                     (_adjust_oom_score 250; _check_filesystems)
 >
->> +		;;
->>   	esac
->>   
->>   }
->> -- 
->> 2.39.1
->>
-
+> Seeing as the test failed, do we care about the state of the scratch fs?
+> Would it be sufficient only to clean up the test fs to avoid cascading
+> damage?
+>
+> (Asking as someone who knows how impactful slow filesystem checking can
+> be on fstests runtimes... ;))
+>
+> --D
+>
+> >                       tc_status=3D"fail"
+> >               else
+> >                       # The test apparently passed, so check for corrup=
+tion
+> > --
+> > 2.40.0.634.g4ca3ef3211-goog
+> >
