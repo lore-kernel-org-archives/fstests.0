@@ -2,87 +2,80 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 552F6C77B71
-	for <linux-fstests@archiver.kernel.org>; Sat, 15 Apr 2023 00:41:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00F8EC77B77
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Apr 2023 02:42:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229491AbjDOAle (ORCPT
+        id S229876AbjDQCmg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Apr 2023 20:41:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53354 "EHLO
+        Sun, 16 Apr 2023 22:42:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229463AbjDOAle (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Apr 2023 20:41:34 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC40610C9
-        for <fstests@vger.kernel.org>; Fri, 14 Apr 2023 17:41:32 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S229902AbjDQCmd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Apr 2023 22:42:33 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D9EB1FF6
+        for <fstests@vger.kernel.org>; Sun, 16 Apr 2023 19:41:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1681699309;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=KbJ6n4UfhhFF14KmQ6w4Essp4HqkF6U7SnLMXZ66cQs=;
+        b=QRvO+bjNM1lYredEKoEkB+TW2yEdUH0Djok2/tMOuPjSSaoIdW4jhq+5MLwraFAv4Q71X4
+        InWhNRxCy7K2RaMYA9ZKiw4richwv5um+JSUTh+tBP/73MGq53OOcixtpaFN2A/gAreBRt
+        LmuDJYtBMlarFZ6r5yDRryw96aORaoU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-646-GSnOc7-yMvuZcK-weXw5kQ-1; Sun, 16 Apr 2023 22:41:47 -0400
+X-MC-Unique: GSnOc7-yMvuZcK-weXw5kQ-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 658A764ADA
-        for <fstests@vger.kernel.org>; Sat, 15 Apr 2023 00:41:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD5EDC433EF;
-        Sat, 15 Apr 2023 00:41:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681519291;
-        bh=DxTG7LxIgBZCit5gqn2HmpF0ufPP4IMO678IJGhAc4A=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=fEBJ9pyu9labfWwkN/NfwhFByxvfjMKM068AWP0xz8XLr8XwBiHINM7h13hTcZU4c
-         t0kRRAosjx1CgPKsaUmKGPpTQLBO7/tJ8jQM9vfdOeV8iarpbqhju/VM9WRbJwM6J8
-         +5nt++YuFcua9Z7vl2WrN3aKoG9W+fiUokkTOiesLgLsVd1+Ges7e8bboUhhSjxOGl
-         9kHoipCwo0IXm+FCyDX/mPAFpCq2xd7nK/D6NTvHE1sZ5wq+b175intjUpaI1HdvEl
-         2j085o1vufbaOiZpP4GiibCdVnHSzFRBHSwTkC+jyoliyLiq/k7NoNxhTbBxzRWdE7
-         NUbzWCQbFQDpQ==
-Date:   Fri, 14 Apr 2023 17:41:31 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     fstests@vger.kernel.org, tytso@mit.edu
-Subject: Re: [PATCH 2/2] check: _check_filesystems for errors even if test
- failed
-Message-ID: <20230415004131.GC360885@frogsfrogsfrogs>
-References: <20230414221133.3431400-1-leah.rumancik@gmail.com>
- <20230414221133.3431400-2-leah.rumancik@gmail.com>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 81CDF85A588;
+        Mon, 17 Apr 2023 02:41:47 +0000 (UTC)
+Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-181.pek2.redhat.com [10.72.12.181])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 987FB728FC;
+        Mon, 17 Apr 2023 02:41:43 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     fstests@vger.kernel.org
+Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] common/rc: skip ceph when atime is required
+Date:   Mon, 17 Apr 2023 10:41:34 +0800
+Message-Id: <20230417024134.30560-1-xiubli@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230414221133.3431400-2-leah.rumancik@gmail.com>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 14, 2023 at 03:11:33PM -0700, Leah Rumancik wrote:
-> Previously, we would only run _check_filesystems to ensure that a test
-> that appeared to pass did not have any filesystem corruption. However,
-> in _check_filesystems, we also repair any errors found in the filesystem.
-> Let's do this even if we already know the test failed so that subsequent
-> tests aren't affected.
-> 
-> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> ---
->  check | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/check b/check
-> index befbf465..c18f02ca 100755
-> --- a/check
-> +++ b/check
-> @@ -972,6 +972,7 @@ function run_section()
->  			# Even though we failed, there may be something interesting in
->  			# dmesg which can help debugging.
->  			_check_dmesg
-> +			(_adjust_oom_score 250; _check_filesystems)
+From: Xiubo Li <xiubli@redhat.com>
 
-Seeing as the test failed, do we care about the state of the scratch fs?
-Would it be sufficient only to clean up the test fs to avoid cascading
-damage?
+Ceph won't maintain the atime, so just skip the tests when the atime
+is required.
 
-(Asking as someone who knows how impactful slow filesystem checking can
-be on fstests runtimes... ;))
+URL: https://tracker.ceph.com/issues/53844
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
+---
+ common/rc | 3 +++
+ 1 file changed, 3 insertions(+)
 
---D
+diff --git a/common/rc b/common/rc
+index 90749343..3238842e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3999,6 +3999,9 @@ _require_atime()
+ 	nfs|cifs|virtiofs)
+ 		_notrun "atime related mount options have no effect on $FSTYP"
+ 		;;
++	ceph)
++                _notrun "atime not maintained by $FSTYP"
++		;;
+ 	esac
+ 
+ }
+-- 
+2.39.1
 
->  			tc_status="fail"
->  		else
->  			# The test apparently passed, so check for corruption
-> -- 
-> 2.40.0.634.g4ca3ef3211-goog
-> 
