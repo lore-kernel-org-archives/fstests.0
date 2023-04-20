@@ -2,43 +2,43 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F2EBC77B73
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Apr 2023 16:22:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56F8CC77B7C
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Apr 2023 16:22:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230510AbjDTQWM (ORCPT
+        id S231867AbjDTQWN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Apr 2023 12:22:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41832 "EHLO
+        Thu, 20 Apr 2023 12:22:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234026AbjDTQWI (ORCPT
+        with ESMTP id S234580AbjDTQWI (ORCPT
         <rfc822;fstests@vger.kernel.org>); Thu, 20 Apr 2023 12:22:08 -0400
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AE6C49D3
-        for <fstests@vger.kernel.org>; Thu, 20 Apr 2023 09:22:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB96B49F3
+        for <fstests@vger.kernel.org>; Thu, 20 Apr 2023 09:22:04 -0700 (PDT)
 Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 33KGLqN0022541
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 33KGLqcd022551
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Thu, 20 Apr 2023 12:21:53 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
         t=1682007713; bh=YWLxJxUxMr6ah8V2OuLflWjxik17j6fmDhvlsYp7qEw=;
         h=From:To:Cc:Subject:Date;
-        b=imK8mhJwqpN6xp35m4AnkH/Qa0aq5DQ3qeEnc1hpN+6Pu9xO5N0xq2KR9T/4EgW8h
-         5tgaHXtKht6K2Xpzgbz6ftc+LUQJDzGW6CMFvt2mKYG9en6Sgf/jZq8o61gd/xr6R9
-         +PpIALkPq6jMKqUN8OwsISCQ7zoJNxSt1wV5v3MJOhIA/DXdsUwJ9OyXp89x7Gfzsj
-         BDcbFzPyDDnYn9dlj8CXAjhfkK0QXF4pvg8oH7onLIoAANybTr+RiYC/PmIs2VEJAK
-         H/9oa9Gx3oJs7TgNHf0hoo1MONeLUYkBULiF8qFcbNDfDRpnnB67ZzFgTTAD9lWC0L
-         t2QewnnliQoZw==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 2FBE215C3448; Thu, 20 Apr 2023 12:08:40 -0400 (EDT)
+        b=le1qjDlWpaXboSR0gcX9bJxSyVnih9jF+cXz/g0NE7SMlKGPsx1NTz0+P0QnA6+mz
+         eDBu9b9s7KwgKJkN9ojvfo6v9aB2odJ2sBODGsg4NfoGQRaIfyoBRuTWxCVJPpvl6U
+         P8lmNUfDpXmcKJdF3qfSvtN2Z39MkhUpsep4Fl/XiSMbXUalv5n43/wpL9HwZ7c6GD
+         0bloGRcBx4KSFW2ASB9WcUGfebKIpn+G5/A3okb0ua0lodcS9ANKd6JTg71M16hIrH
+         VMXLqFDdpSIOC1TRdAiQIy7fLiG9Ljq68S0loicFnsHuS6CT9UnqPj6VJ6U2kuQwkM
+         jOu/ISGtHTMKg==
+Received: by cwcc.thunk.org (Postfix, from userid 0)
+        id 9542E15C5439; Wed, 19 Apr 2023 23:21:42 -0400 (EDT)
 From:   "Theodore Ts'o" <tytso@mit.edu>
 To:     fstests@vger.kernel.org
 Cc:     "Darrick J. Wong" <djwong@kernel.org>,
         "Theodore Ts'o" <tytso@mit.edu>
 Subject: [PATCH 0/2] Work around various report.xml compatibility issues
-Date:   Thu, 20 Apr 2023 12:08:35 -0400
-Message-Id: <20230420160837.1083228-1-tytso@mit.edu>
+Date:   Wed, 19 Apr 2023 23:20:54 -0400
+Message-Id: <20230420032056.789979-1-tytso@mit.edu>
 X-Mailer: git-send-email 2.31.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
