@@ -2,46 +2,46 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8987C77B73
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Apr 2023 16:22:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC55BC77B7C
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Apr 2023 16:22:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234596AbjDTQWJ (ORCPT
+        id S234616AbjDTQWK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Apr 2023 12:22:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41722 "EHLO
+        Thu, 20 Apr 2023 12:22:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41746 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231256AbjDTQWE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Apr 2023 12:22:04 -0400
+        with ESMTP id S234505AbjDTQWF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Apr 2023 12:22:05 -0400
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D44A422F
-        for <fstests@vger.kernel.org>; Thu, 20 Apr 2023 09:22:02 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2B0A49CF
+        for <fstests@vger.kernel.org>; Thu, 20 Apr 2023 09:22:03 -0700 (PDT)
 Received: from cwcc.thunk.org (pool-173-48-120-46.bstnma.fios.verizon.net [173.48.120.46])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 33KGLoOU022475
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 33KGLnio022423
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Thu, 20 Apr 2023 12:21:51 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
         t=1682007712; bh=9dNDKi/1/hsBwNGoWz/GuRFI84WiL8o3MRWrSQ8FSDo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=fRY5wpRsR2o2Vf13MHgWa99C/W+0H4vd3zEzDYAyy5hUDhsRBquyx7AFc+hJoCvX8
-         kaCJ9mEiOQGsUmZJz5AAxxax+euIDZQNyQgFmv6pIClK5Sv1x1Xm3m0EAusH6pWdxU
-         1HNszvwJX+T3I59SUO0jO6Vh74kVSVZW7FirizydAotsKDBnEE+ws8Ip1/f2hef2ih
-         F/hSDr+sxNeFE0vN5dEKATojF7k+SKTtb59BqgDeELGLaD4mBWWs5p0EuBhZBb3XC6
-         DpWd2bVbUTIoc8Et9JUi0WeLHB1BYk2CkpjnAAzUDsKxr7vLaB8JcBlNyVu+CupcRP
-         ChFCIeUW7Hj+Q==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 3167515C5441; Thu, 20 Apr 2023 12:08:40 -0400 (EDT)
+        b=McuwUHEhEzPQE9Gb7/jHITWChaChb3HCEdbOKuX2BuNpO5gnovGIdpEc19mjradu6
+         6Coj+KIGfU05Q0BClT14rSJt0NpkVKuNYuk1g8t5XGVXiMTLg8Vx4NgFJsXsGGPIB0
+         KspFfulD21FWMT1wQZ+HFto0ED/hcyM/AwoFl4gLSdeG1FQ9qJPckKqChz2++4fs7P
+         L/utMkyeSqveOIv1AjxZawU85yIQ19RPDN4909kPxi47rQM5JMLDscXCAoiCVCfoJP
+         isgvCAmIoHUwiO2YS0SrLg8Jz7eG5aM33jsxjo/mushrfxJuJtjDLfaMcnkSW/44gq
+         n532/GkzwBbEA==
+Received: by cwcc.thunk.org (Postfix, from userid 0)
+        id 96D9315C543A; Wed, 19 Apr 2023 23:21:42 -0400 (EDT)
 From:   "Theodore Ts'o" <tytso@mit.edu>
 To:     fstests@vger.kernel.org
 Cc:     "Darrick J. Wong" <djwong@kernel.org>,
         "Theodore Ts'o" <tytso@mit.edu>
 Subject: [PATCH 1/2] test-appliance: edit out xmlns from the result.xml file
-Date:   Thu, 20 Apr 2023 12:08:36 -0400
-Message-Id: <20230420160837.1083228-2-tytso@mit.edu>
+Date:   Wed, 19 Apr 2023 23:20:55 -0400
+Message-Id: <20230420032056.789979-2-tytso@mit.edu>
 X-Mailer: git-send-email 2.31.0
-In-Reply-To: <20230420160837.1083228-1-tytso@mit.edu>
-References: <20230420160837.1083228-1-tytso@mit.edu>
+In-Reply-To: <20230420032056.789979-1-tytso@mit.edu>
+References: <20230420032056.789979-1-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
