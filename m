@@ -2,202 +2,194 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8BBBC6FD18
-	for <linux-fstests@archiver.kernel.org>; Sat, 22 Apr 2023 16:17:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA16DC6FD18
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 Apr 2023 15:11:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229548AbjDVQRw (ORCPT
+        id S229516AbjDWPLC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 22 Apr 2023 12:17:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48874 "EHLO
+        Sun, 23 Apr 2023 11:11:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229595AbjDVQRr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 22 Apr 2023 12:17:47 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 908C01FDF;
-        Sat, 22 Apr 2023 09:17:45 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id 98e67ed59e1d1-24704a7bf34so2730367a91.1;
-        Sat, 22 Apr 2023 09:17:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1682180264; x=1684772264;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=i09eqEFp0fkOjuwtq7rmcXArU9WDRyTijzFdoLMRfcA=;
-        b=MngscLLq+1OTxCWbrpxQLEtvLW3jOcopho5c7Y0Y3ho4NpUHJUY0ldYzdRQBr9CyYc
-         SCsDN4Ag+d6USmfUbs+WPaQoNOHHUwhWKyLw6NuemvYauMw2t9BfCA8b4QM3m68itsEj
-         elfu09uGB5UfL1AZeLpjkTWEeXsL6ndaBtLXvPrPRWCclO5/tjGV5dIyjStU1tCdRhX2
-         V1QIybeFogvCzhtBx5MHnv0oysZtj9x1wELVF6O5tbZOh/sLeDdHsxZ86f1s2goCQbqx
-         QuPBsw0sS7HJ4ni0vIeWs95bit1QgTChZ/1vGAsrGERbwtHJCNC6GKI1RjIWsjdK2xJd
-         18Sw==
+        with ESMTP id S229456AbjDWPLB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Apr 2023 11:11:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A32891701
+        for <fstests@vger.kernel.org>; Sun, 23 Apr 2023 08:10:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1682262606;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=WkxH+1Pk2LMvn9WcA7WwBfz+qUxTw1THjiL+jwLCif4=;
+        b=M9X42s6+8TH2htx3H7+Rk8S6JFNRUb0R0eBdBWO9E9Ua1p2rcnsQ8mDjmFyvFSkxz7TB6c
+        VBRC6Lj7ZXFyrSaLq96wlRd7Dct8h70yscCeYFT/UF9GUpWxTNUXIU2pXTudKanfqPbW8+
+        9M/NPWDSpz6LBhHSWlZ1KSqyTaS0PJU=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-103-oxvCsCASNa24OGweCe392g-1; Sun, 23 Apr 2023 11:10:05 -0400
+X-MC-Unique: oxvCsCASNa24OGweCe392g-1
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-63d30b08700so18786946b3a.1
+        for <fstests@vger.kernel.org>; Sun, 23 Apr 2023 08:10:04 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682180264; x=1684772264;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=i09eqEFp0fkOjuwtq7rmcXArU9WDRyTijzFdoLMRfcA=;
-        b=Y2lbhVsZrL8dKdHrRa15oFiN5tB0I5CxrtbXXRA495nbQW4v+R3CaPOBG14NUyMGw9
-         dA37TdKjlTmQhRGDoAJMSmCdwmqe6fJmNXcko6etpbbFlX4OAHNjk6RPpBQSta/4DIfH
-         ucP9lqPH/3UO1FCoZgD5tUuAFA2j/ABfxvuLGMtcFkA+npJlmnMP00RfGMOJAaK71YBa
-         X+KJ0Thy8/MZ7TTxcXNBDV2UVhCacrZE2ZVBulsyZTtjYRJqw1OOEACmDWI695lu1gxL
-         nTrhQCYTfhVedGqL7A/IqiLlKayn9hgcf52ddSA6TmK/Bm2mKv5ELGMa3PFT+XSoiHPm
-         z+mQ==
-X-Gm-Message-State: AAQBX9f12d8zpcSztYbzBcy3ByCtWgEYsGztSK1v8UfPUQAQ8JyrlE5a
-        RaGavruSrniwhXCACy2BMPMBnAzV3+E=
-X-Google-Smtp-Source: AKy350YS8fSCXgGgRDftGYZ1TjdSkGixkexa5Q6eGuH18Dl/nlGD4sbF+2B0KENDToREPNEMQGuxsQ==
-X-Received: by 2002:a17:90a:c687:b0:247:54c7:1bdd with SMTP id n7-20020a17090ac68700b0024754c71bddmr8723418pjt.22.1682180264435;
-        Sat, 22 Apr 2023 09:17:44 -0700 (PDT)
-Received: from rh-tp.ibmuc.com ([2406:7400:63:2dd2:8818:e6e1:3a73:368c])
-        by smtp.gmail.com with ESMTPSA id w15-20020a170902d70f00b001a6c58e95d7sm4204688ply.269.2023.04.22.09.17.42
+        d=1e100.net; s=20221208; t=1682262604; x=1684854604;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WkxH+1Pk2LMvn9WcA7WwBfz+qUxTw1THjiL+jwLCif4=;
+        b=GRInTzH8QN9N0oEWVxevfCKrlapFoWIrGCUjsCgbH0KarBPw8d4pSGNAvujOlkQqUe
+         79xYYlw8Yq+PapvK/N9SdPkU0m/diQzmbLN4ZnHceUbUWhasCW83ITffs2tkX/lznOCN
+         mMpP7pcmyWbsnqekB40TvRm8w31oXeUIOTIXUcfxJjoL8YAXxvNizGhdYc3+myzmodBQ
+         JIrSH65bXHIMhj9H5ylJmbz66FsiTz36SVq1+DQqXDZBnFU70o1FQcDokcagrLTPYQ9v
+         jPhpf3waUEzFU0NLXj3iD4wstqIiSzkbgFqZLt+qqywXqzFV9RUE0lfEzaeMuPrUeAru
+         htyA==
+X-Gm-Message-State: AAQBX9d2dPpfE1MLBoJu0sCMNcX2KNioBD1Eds0vXvEzNljD2KlG/rm3
+        uwM4+R6IpY6vHMFO4nrvOPovhnyDKixtD0JYdr0Th3kUhn84MxrZBu71+gxuMI2B+9JF73L5gVO
+        vLbJUuV8aV2ziBbBB6g==
+X-Received: by 2002:a05:6a20:938a:b0:f2:1141:9d20 with SMTP id x10-20020a056a20938a00b000f211419d20mr12850454pzh.24.1682262604036;
+        Sun, 23 Apr 2023 08:10:04 -0700 (PDT)
+X-Google-Smtp-Source: AKy350YISeyW3DC3CUBUUjvoI8WtaOgDfCeIg/UiPVK6eF/+kO/CY6PfQqYqDU2etGh/8qTc2zTx9g==
+X-Received: by 2002:a05:6a20:938a:b0:f2:1141:9d20 with SMTP id x10-20020a056a20938a00b000f211419d20mr12850428pzh.24.1682262603625;
+        Sun, 23 Apr 2023 08:10:03 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id i64-20020a628743000000b0063b89da3adcsm5962216pfe.12.2023.04.23.08.10.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 22 Apr 2023 09:17:44 -0700 (PDT)
-From:   "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org, Baokun Li <libaokun1@huawei.com>,
-        "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-Subject: [RFC 2/2] ext4/061: Regression test of jbd2 journal_task race against unmount
-Date:   Sat, 22 Apr 2023 21:47:34 +0530
-Message-Id: <75819a20d2337c154e360c60ec53b7e519ebb97a.1682179372.git.ritesh.list@gmail.com>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <aa8a633b016114b94d10dd0f9f0b7a355aeb1d62.1682179372.git.ritesh.list@gmail.com>
-References: <aa8a633b016114b94d10dd0f9f0b7a355aeb1d62.1682179372.git.ritesh.list@gmail.com>
+        Sun, 23 Apr 2023 08:10:03 -0700 (PDT)
+Date:   Sun, 23 Apr 2023 23:09:59 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 3/3] misc: add duration for recovery loop tests
+Message-ID: <20230423150959.agkw6tlnvjbiymbg@zlang-mailbox>
+References: <168123682679.4086541.13812285218510940665.stgit@frogsfrogsfrogs>
+ <168123684394.4086541.1780469729949319721.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <168123684394.4086541.1780469729949319721.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test adds a testcase to catch race condition against
-reading of journal_task and parallel unmount.
-This patch in kernel fixes this [1]
+On Tue, Apr 11, 2023 at 11:14:03AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Make it so that we can run recovery loop tests for an exact number of
+> seconds.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  common/rc         |   34 ++++++++++++++++++++++++++++++++++
+>  tests/generic/019 |    1 +
+>  tests/generic/388 |    2 +-
+>  tests/generic/475 |    2 +-
+>  tests/generic/482 |    5 +++++
+>  tests/generic/648 |    8 ++++----
+>  6 files changed, 46 insertions(+), 6 deletions(-)
+> 
+> 
+> diff --git a/common/rc b/common/rc
+> index e89b0a3794..090f3d4938 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5078,6 +5078,40 @@ _save_coredump()
+>  	$COREDUMP_COMPRESSOR -f "$out_file"
+>  }
+>  
+> +# Decide if a soak test should continue looping.  The sole parameter is the
+> +# number of soak loops that the test wants to run by default.  The actual
+> +# loop iteration number is stored in SOAK_LOOPIDX until the loop completes.
+> +#
+> +# If the test runner set a SOAK_DURATION value, this predicate will keep
+> +# looping until it has run for at least that long.
+> +_soak_loop_running() {
+> +	local max_soak_loops="$1"
+> +
+> +	test -z "$SOAK_LOOPIDX" && SOAK_LOOPIDX=1
+> +
+> +	if [ -n "$SOAK_DURATION" ]; then
+> +		if [ -z "$SOAK_DEADLINE" ]; then
+> +			SOAK_DEADLINE="$(( $(date +%s) + SOAK_DURATION))"
+> +		fi
+> +
+> +		local now="$(date +%s)"
+> +		if [ "$now" -gt "$SOAK_DEADLINE" ]; then
+> +			unset SOAK_DEADLINE
+> +			unset SOAK_LOOPIDX
+> +			return 1
+> +		fi
+> +		SOAK_LOOPIDX=$((SOAK_LOOPIDX + 1))
+> +		return 0
+> +	fi
+> +
+> +	if [ "$SOAK_LOOPIDX" -gt "$max_soak_loops" ]; then
+> +		unset SOAK_LOOPIDX
+> +		return 1
+> +	fi
+> +	SOAK_LOOPIDX=$((SOAK_LOOPIDX + 1))
+> +	return 0
+> +}
+> +
+>  init_rc
+>  
+>  ################################################################################
+> diff --git a/tests/generic/019 b/tests/generic/019
+> index b68dd90c0d..b81c1d17ba 100755
+> --- a/tests/generic/019
+> +++ b/tests/generic/019
+> @@ -30,6 +30,7 @@ _cleanup()
+>  }
+>  
+>  RUN_TIME=$((20+10*$TIME_FACTOR))
+> +test -n "$SOAK_DURATION" && RUN_TIME="$SOAK_DURATION"
+>  NUM_JOBS=$((4*LOAD_FACTOR))
+>  BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+>  FILE_SIZE=$((BLK_DEV_SIZE * 512))
+> diff --git a/tests/generic/388 b/tests/generic/388
+> index 9cd737e8eb..4a5be6698c 100755
+> --- a/tests/generic/388
+> +++ b/tests/generic/388
+> @@ -42,7 +42,7 @@ _scratch_mkfs >> $seqres.full 2>&1
+>  _require_metadata_journaling $SCRATCH_DEV
+>  _scratch_mount
+>  
+> -for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
+> +while _soak_loop_running $((50 * TIME_FACTOR)); do
+>  	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p 4 >> $seqres.full &) \
+>  		> /dev/null 2>&1
+>  
+> diff --git a/tests/generic/475 b/tests/generic/475
+> index c426402ede..0cbf5131c2 100755
+> --- a/tests/generic/475
+> +++ b/tests/generic/475
+> @@ -41,7 +41,7 @@ _require_metadata_journaling $SCRATCH_DEV
+>  _dmerror_init
+>  _dmerror_mount
+>  
+> -for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
+> +while _soak_loop_running $((50 * TIME_FACTOR)); do
+>  	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p $((LOAD_FACTOR * 4)) >> $seqres.full &) \
+>  		> /dev/null 2>&1
+>  
+> diff --git a/tests/generic/482 b/tests/generic/482
+> index 28c83a232e..b980826b14 100755
+> --- a/tests/generic/482
+> +++ b/tests/generic/482
+> @@ -62,8 +62,13 @@ nr_cpus=$("$here/src/feature" -o)
+>  if [ $nr_cpus -gt 8 ]; then
+>  	nr_cpus=8
+>  fi
+> +
+>  fsstress_args=$(_scale_fsstress_args -w -d $SCRATCH_MNT -n 512 -p $nr_cpus \
+>  		$FSSTRESS_AVOID)
+> +
+> +# XXX dm-logwrites pins kernel memory for every write!
+> +# test -n "$SOAK_DURATION" && fsstress_args="$fsstress_args --duration=$SOAK_DURATION"
 
-    ext4_put_super()                cat /sys/fs/ext4/loop2/journal_task
-            |                               ext4_attr_show();
-    ext4_jbd2_journal_destroy();                    |
-            |                                journal_task_show()
-            |                                       |
-            |                               task_pid_vnr(NULL);
-    sbi->s_journal = NULL;
+Do you expect the second comment is a comment?
 
-RIP: 0010:__task_pid_nr_ns+0x4d/0xe0
-<...>
-Call Trace:
- <TASK>
- ext4_attr_show+0x1bd/0x3e0
- sysfs_kf_seq_show+0x8e/0x110
- seq_read_iter+0x11b/0x4d0
- vfs_read+0x216/0x2e0
- ksys_read+0x69/0xf0
- do_syscall_64+0x3f/0x90
- entry_SYSCALL_64_after_hwframe+0x72/0xdc
-[
+Others looks good to me. I'll test V2 and merge it if no regression from it.
 
-[1]: https://lore.kernel.org/all/20200318061301.4320-1-riteshh@linux.ibm.com/
-Commit: ext4: Unregister sysfs path before destroying jbd2 journal
-
-Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
----
- tests/ext4/061     | 82 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/061.out |  2 ++
- 2 files changed, 84 insertions(+)
- create mode 100755 tests/ext4/061
- create mode 100644 tests/ext4/061.out
-
-diff --git a/tests/ext4/061 b/tests/ext4/061
-new file mode 100755
-index 00000000..88bf138a
---- /dev/null
-+++ b/tests/ext4/061
-@@ -0,0 +1,82 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
-+#
-+# FS QA Test 061
-+#
-+# Regression test for https://lore.kernel.org/all/20200318061301.4320-1-riteshh@linux.ibm.com/
-+# ext4: Unregister sysfs path before destroying jbd2 journal
-+#
-+
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+pid_mloop=""
-+pids_jloop=""
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	{
-+		kill -SIGKILL $pid_mloop $pids_jloop
-+		wait $pid_mloop $pids_jloop
-+	} > /dev/null 2>&1
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs ext4
-+_fixed_by_kernel_commit 5e47868fb94b63c \
-+	"ext4: unregister sysfs path before destroying jbd2 journal"
-+_require_scratch
-+_require_fs_sysfs journal_task
-+
-+_scratch_mkfs_ext4 >> $seqres.full 2>&1
-+# mount filesystem
-+_scratch_mount >> $seqres.full 2>&1
-+scratch_dev=$(_short_dev $SCRATCH_DEV)
-+
-+function mount_loop()
-+{
-+	while [ 1 ]; do
-+		_scratch_unmount >> $seqres.full 2>&1
-+		sleep 1;
-+		_scratch_mount >> $seqres.full 2>&1
-+		sleep 1;
-+	done
-+}
-+
-+function read_journal_task_loop()
-+{
-+	while [ 1 ]; do
-+		cat /sys/fs/ext4/$scratch_dev/journal_task > /dev/null 2>&1
-+		sleep 1;
-+	done
-+}
-+
-+mount_loop &
-+pid_mloop=$!
-+
-+for i in $(seq 1 100); do
-+	read_journal_task_loop &
-+	pid=$!
-+	pids_jloop="${pids_jloop} ${pid}"
-+done
-+
-+sleep 20
-+{
-+	kill -SIGKILL $pid_mloop $pids_jloop
-+	wait $pid_mloop $pids_jloop
-+} > /dev/null 2>&1
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/061.out b/tests/ext4/061.out
-new file mode 100644
-index 00000000..273be9e0
---- /dev/null
-+++ b/tests/ext4/061.out
-@@ -0,0 +1,2 @@
-+QA output created by 061
-+Silence is golden
---
-2.39.2
+Thanks,
+Zorro
 
