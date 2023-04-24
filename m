@@ -2,246 +2,136 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B36CC77B7F
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Apr 2023 10:18:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 284DBC77B61
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Apr 2023 14:11:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231570AbjDXKSC (ORCPT
+        id S230455AbjDXOLo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Apr 2023 06:18:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43388 "EHLO
+        Mon, 24 Apr 2023 10:11:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231147AbjDXKSB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Apr 2023 06:18:01 -0400
-Received: from out30-132.freemail.mail.aliyun.com (out30-132.freemail.mail.aliyun.com [115.124.30.132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A90B6D8
-        for <fstests@vger.kernel.org>; Mon, 24 Apr 2023 03:17:59 -0700 (PDT)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R121e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045176;MF=ziyangzhang@linux.alibaba.com;NM=1;PH=DS;RN=5;SR=0;TI=SMTPD_---0VgswNQs_1682331476;
-Received: from 30.97.56.227(mailfrom:ZiyangZhang@linux.alibaba.com fp:SMTPD_---0VgswNQs_1682331476)
-          by smtp.aliyun-inc.com;
-          Mon, 24 Apr 2023 18:17:57 +0800
-Message-ID: <7243f364-e822-ce43-7e46-783c317d0a67@linux.alibaba.com>
-Date:   Mon, 24 Apr 2023 18:17:55 +0800
+        with ESMTP id S231425AbjDXOLl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Apr 2023 10:11:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46B3772BC
+        for <fstests@vger.kernel.org>; Mon, 24 Apr 2023 07:10:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1682345456;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=uzNwOO6HT/QwtgFN8jNb1hK7tEMs8K3rk0EVFiSkHN4=;
+        b=ZccomCxaPk6Qn+aB9u7z3s5W5KSe5G1oUr0xGzXNJP4Hd3dwlO2VUkIyoRllUXwpBUj0zN
+        Lsik7nmVHC16l3jw5dGGQfOLrBK7G3V4335wExipdaTMEHDrlMVdJNNccexeSBlDtD84gx
+        AYeEZDdJJqPLMFSsAdNt+vZlFhtWkd4=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-342-cbN-DGCoNTG8_zs0-ha2DA-1; Mon, 24 Apr 2023 10:10:48 -0400
+X-MC-Unique: cbN-DGCoNTG8_zs0-ha2DA-1
+Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9AD1E3814945;
+        Mon, 24 Apr 2023 14:10:47 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.42.28.62])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 0C813492B03;
+        Mon, 24 Apr 2023 14:10:44 +0000 (UTC)
+From:   David Howells <dhowells@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     David Howells <dhowells@redhat.com>,
+        "Darrick J. Wong" <djwong@kernel.org>, Eryu Guan <guan@eryu.me>,
+        Marc Dionne <marc.dionne@auristor.com>,
+        Jeffrey Altman <jaltman@auristor.com>,
+        linux-afs@lists.infradead.org
+Subject: [PATCH v2 0/6] xfstests: Add support for using xfstests to test AFS
+Date:   Mon, 24 Apr 2023 15:10:36 +0100
+Message-Id: <20230424141042.450535-1-dhowells@redhat.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
- Gecko/20100101 Thunderbird/102.9.0
-Subject: Re: [PATCH v2] src: fix detached_mounts_propagation compile errors
-Content-Language: en-US
-To:     Zorro Lang <zlang@redhat.com>,
-        Gao Xiang <hsiangkao@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, Christian Brauner <brauner@kernel.org>,
-        "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>
-References: <20230419032955.114278-1-hsiangkao@linux.alibaba.com>
- <20230420021106.41970-1-hsiangkao@linux.alibaba.com>
- <20230422135427.vbrnj6vh46omo34e@zlang-mailbox>
-From:   Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
-In-Reply-To: <20230422135427.vbrnj6vh46omo34e@zlang-mailbox>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2023/4/22 21:54, Zorro Lang wrote:
-> On Thu, Apr 20, 2023 at 10:11:06AM +0800, Gao Xiang wrote:
->> Newer glibc such as glibc 2.36 also defines 'struct mount_attr'
->> in addition to <linux/mount.h>.  It will report as below when
->> compiling with old linux kernel headers (without idmapped mounts,
->> such as kernel-headers 5.10.134) but with newer glibc (here checked
->> with glibc 2.36.6):
->>
->>     [CC]    detached_mounts_propagation
->> In file included from detached_mounts_propagation.c:29:
->> vfs/missing.h:115:8: error: redefinition of 'struct mount_attr'
->>   115 | struct mount_attr {
->>       |        ^~~~~~~~~~
->> In file included from detached_mounts_propagation.c:23:
->> /usr/include/sys/mount.h:210:8: note: originally defined here
->>   210 | struct mount_attr
->>       |        ^~~~~~~~~~
->> gmake[3]: *** [Makefile:102: detached_mounts_propagation] Error 1
->> gmake[2]: *** [include/buildrules:31: src] Error 2
->> make[1]: *** [Makefile:51: default] Error 2
->> make: *** [Makefile:49: default] Error 2
->>
->> Let's get rid of <linux/mount.h> as Christian suggested to avoid
->> potential incompatibility between these two headers.
->>
->> Cc: Christian Brauner <brauner@kernel.org>
->> Cc: "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>
->> Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
->> ---
-> 
-> This patch works on latest fedora, but it cause fstests can't be built on
-> RHEL-8 [1] and RHEL-9 [2], please check this incompatible problem.
-> 
-> Thanks,
-> Zorro
-> 
-> [1]
-> ...
-> Building include
-> Building lib
-> Building ltp
-> Building src
->     [CC]    feature
-> In file included from /usr/include/linux/fs.h:18,
->                  from /usr/include/xfs/linux.h:30,
->                  from /usr/include/xfs/xfs.h:9,
->                  from global.h:13,
->                  from feature.c:29:
-> /usr/include/sys/mount.h:35:3: error: expected identifier before numeric constant
->    MS_RDONLY = 1,  /* Mount read-only.  */
->    ^~~~~~~~~
-> gmake[2]: *** [Makefile:112: feature] Error 1
-> gmake[1]: *** [include/buildrules:31: src] Error 2
-> make: *** [Makefile:51: default] Error 2
-> 
-> [2]
-> ...
-> Building include
-> Building lib
-> Building ltp
-> Building src
->     [CC]    feature
-> In file included from /usr/include/linux/fs.h:19,
->                  from /usr/include/xfs/linux.h:36,
->                  from /usr/include/xfs/xfs.h:9,
->                  from global.h:13,
->                  from feature.c:29:
-> /usr/include/sys/mount.h:35:3: error: expected identifier before numeric constant
->    35 |   MS_RDONLY = 1,                /* Mount read-only.  */
->       |   ^~~~~~~~~
-> In file included from feature.c:49:
-> vfs/missing.h:116:8: error: redefinition of 'struct mount_attr'
->   116 | struct mount_attr {
->       |        ^~~~~~~~~~
-> In file included from /usr/include/linux/fs.h:19,
->                  from /usr/include/xfs/linux.h:36,
->                  from /usr/include/xfs/xfs.h:9,
->                  from global.h:13,
->                  from feature.c:29:
-> /usr/include/linux/mount.h:128:8: note: originally defined here
->   128 | struct mount_attr {
->       |        ^~~~~~~~~~
-> gmake[2]: *** [Makefile:112: feature] Error 1
-> gmake[1]: *** [include/buildrules:31: src] Error 2
-> make: *** [Makefile:51: default] Error 2
-> 
-> 
->>  configure.ac                      | 2 +-
->>  src/detached_mounts_propagation.c | 1 -
->>  src/vfs/missing.h                 | 1 +
->>  3 files changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/configure.ac b/configure.ac
->> index 4687d8a3..bb29f37e 100644
->> --- a/configure.ac
->> +++ b/configure.ac
->> @@ -74,7 +74,7 @@ AC_HAVE_FIEXCHANGE
->>  
->>  AC_CHECK_FUNCS([renameat2])
->>  AC_CHECK_FUNCS([reallocarray])
->> -AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
->> +AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <sys/mount.h>]])
->>  AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
->>  #include <stddef.h>
->>  #include <linux/btrfs.h>
->> diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
->> index 17db2c02..4041c75f 100644
->> --- a/src/detached_mounts_propagation.c
->> +++ b/src/detached_mounts_propagation.c
->> @@ -20,7 +20,6 @@
->>  #include <stdio.h>
->>  #include <stdlib.h>
->>  #include <string.h>
->> -#include <sys/mount.h>
->>  #include <sys/stat.h>
->>  #include <sys/syscall.h>
->>  #include <sys/types.h>
->> diff --git a/src/vfs/missing.h b/src/vfs/missing.h
->> index 059e742d..04ab33d1 100644
->> --- a/src/vfs/missing.h
->> +++ b/src/vfs/missing.h
->> @@ -18,6 +18,7 @@
->>  #include <sys/types.h>
->>  #include <syscall.h>
->>  #include <unistd.h>
->> +#include <sys/mount.h>
->>  
->>  #ifndef __NR_mount_setattr
->>  	#if defined __alpha__
->> -- 
->> 2.24.4
->>
+Here's a set of patches that make xfstests (mostly) work with the in-kernel
+AFS client.  It has to allow for a number of features of AFS, in
+particular:
 
-Hi Zorro,
+ (*) AFS has its own permissions service that makes use of authentication
+     tokens obtained from such as kerberos and uses this in combination
+     with ACLs to determine file access rights.  This overrides the use of
+     UNIX permissions and using su to impersonate another user doesn't
+     work.
 
-Can you try this patch, which is inspired by Yang Xu[1].
+ (*) AFS sets the inode UID field to the user ID associated with the
+     authentication token, not the client's fsuid when creating.
 
-[1]https://lore.kernel.org/fstests/ed0bb9f0-c255-10d7-d711-36a464cd6512@fujitsu.com/T/#me981ae064b3ecb151b3321a4ee77f5d916cb017c
+ (*) AFS doesn't support SUID/SGID/SVTX bits and doesn't propagate SGID on
+     directories, though it will propagate the GID.
 
-Regards,
-Zhang
+ (*) chown is rejected unless you have an authentication token that
+     indicates you're the owner of the file.
 
+I've added fixes/workarounds for the above.  There are five -g quick tests
+that fail if unauthenticated:
 
-Patch:
+ - generic/258
+ - generic/634
+	Fail because they try to use dates that the server refuses to
+	handle (and gives EOVERFLOW for).
 
-diff --git a/configure.ac b/configure.ac
-index cbf83779..060c0a5d 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -16,6 +16,7 @@ AC_CHECK_HEADERS([	assert.h		\
- 			sys/uuid.h		\
- 			sys/file.h		\
- 			sys/fcntl.h		\
-+			sys/mount.h		\
- 			sys/syssgi.h		\
- 			sys/param.h		\
- 			sys/stat.h		\
-@@ -27,6 +28,7 @@ AC_CHECK_HEADERS([	assert.h		\
- 			strings.h		\
- 			err.h			\
- 			linux/falloc.h		\
-+			linux/mount.h		\
- 			sys/fs/xfs_fsops.h	\
- 			sys/fs/xfs_itable.h	\
- 			xfs/platform_defs.h	\
-@@ -35,6 +37,10 @@ AC_CHECK_HEADERS([	assert.h		\
- 			sys/mman.h		\
- ])
- 
-+AC_CHECK_FUNCS_ONCE([
-+	mount_setattr	
-+])
-+
- AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
- #define _GNU_SOURCE
- #include <xfs/libxfs.h>])
-@@ -68,7 +74,13 @@ AC_PACKAGE_WANT_LIBBTRFSUTIL
- AC_HAVE_COPY_FILE_RANGE
- AC_CHECK_FUNCS([renameat2])
- AC_CHECK_FUNCS([reallocarray])
--AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
-+AC_CHECK_TYPES([struct mount_attr], [], [],[[
-+#ifdef HAVE_MOUNT_SETATTR
-+# include <sys/mount.h>
-+#elif HAVE_LINUX_MOUNT_H
-+# include <linux/mount.h>
-+#endif
-+]])
- AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
- #include <stddef.h>
- #include <linux/btrfs.h>
-diff --git a/src/vfs/missing.h b/src/vfs/missing.h
-index 059e742d..04ab33d1 100644
---- a/src/vfs/missing.h
-+++ b/src/vfs/missing.h
-@@ -18,6 +18,7 @@
- #include <sys/types.h>
- #include <syscall.h>
- #include <unistd.h>
-+#include <sys/mount.h>
- 
- #ifndef __NR_mount_setattr
- 	#if defined __alpha__
+ - generic/478
+	Fails because AFS file locking can't lock ranges.
+
+ - generic/633
+	Fails because of chown.
+
+ - generic/696
+	Fails because AFS doesn't propagate SGID in mkdir.  This may be a
+	client (kernel) bug, a server bug or a design feature.
+
+And if authenticated, the following additional failures occur because AFS
+uses its own ACLs and authentication:
+
+ - generic/087
+ - generic/126
+ - generic/193
+ - generic/088
+
+David
+
+Changes
+=======
+ver #2)
+ - Rebased.
+ - Dropped the patches to handle the DIO blocksize being 1 as none of the
+   quick tests now use it on AFS.
+ - Changed generic/696 to not supply "noacl" to AFS.
+
+Link: https://lore.kernel.org/r/162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk/ # v1
+
+David Howells (6):
+  Add AFS support
+  generic/314, afs: Allow for a filesystem that doesn't honour SGID
+    inheritance
+  generic/317, afs: Allow for a filesystem not to honour the local
+    uid/gid
+  generic/123, generic/128, afs: Allow for an fs that does its own perm
+    management
+  generic/531: Check for O_TMPFILE
+  generic/696: AFS doesn't support the "noacl" command line option
+
+ build/rpm/xfstests.spec.in   |  2 +-
+ check                        |  3 +-
+ common/config                | 15 ++++++--
+ common/rc                    | 69 ++++++++++++++++++++++++++++++++----
+ doc/requirement-checking.txt | 23 ++++++++++++
+ tests/generic/123            |  1 +
+ tests/generic/128            |  1 +
+ tests/generic/314            |  1 +
+ tests/generic/317            |  1 +
+ tests/generic/531            |  1 +
+ tests/generic/696            |  5 ++-
+ 11 files changed, 110 insertions(+), 12 deletions(-)
 
