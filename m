@@ -2,510 +2,310 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65271C7618E
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Apr 2023 18:28:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4562EC77B61
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Apr 2023 21:07:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232301AbjDXS2D (ORCPT
+        id S230340AbjDXVHp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Apr 2023 14:28:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33306 "EHLO
+        Mon, 24 Apr 2023 17:07:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231360AbjDXS2C (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Apr 2023 14:28:02 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD35D618B;
-        Mon, 24 Apr 2023 11:28:00 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6310F620BD;
-        Mon, 24 Apr 2023 18:28:00 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BDAD9C433EF;
-        Mon, 24 Apr 2023 18:27:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1682360879;
-        bh=kwXjWLPl/cDvcLsnOF3FqB7QICac+EpFqwUhz7eQYss=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=nYT6soWnUUmiPOGVqgDXnbgMF0809ajYbtMez7lJLQ6FKsroaX3BIHLGWvjsFwQsK
-         li45dibc1GN5iprwhnH6NfavxSwhmEN3BfLkk866/LOJxtjxwtLsCGDpeVJJzPsR0H
-         klITVHMzJrmvfQZBO/fn/KXwznfadCrX/Ddn894h+0Ygj74Crtm1AuuA88XUrFdt3n
-         9BFUnGRHPEeQjTLNFwqHnyd6mw/OKyGgZWpx82dSfij5onx/d5x/Zv1B/ufeAS1VqG
-         cJCmNpEtbvsEIZys0tM5Z6iwNS5CPX+EFK50wjO/4LtNhL3KqESgRTImLv6rVe1+I6
-         oDiKEhH/A7jFQ==
-Date:   Mon, 24 Apr 2023 11:27:59 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v2 2/3] misc: add duration for long soak tests
-Message-ID: <20230424182759.GH360885@frogsfrogsfrogs>
-References: <168123682679.4086541.13812285218510940665.stgit@frogsfrogsfrogs>
- <168123683823.4086541.4438928240640523731.stgit@frogsfrogsfrogs>
- <20230415002949.GZ360889@frogsfrogsfrogs>
- <20230422133316.eyxebbqe5rle2ipj@zlang-mailbox>
+        with ESMTP id S232440AbjDXVHo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Apr 2023 17:07:44 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95E4F6184
+        for <fstests@vger.kernel.org>; Mon, 24 Apr 2023 14:06:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1682370416;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=eyiEsxhqKo7Evs9Wh29L1S1TbPnWGlN8LcoQODm+gWo=;
+        b=PAXJ6pYCGiv5cyIcupieAfi9A/3KUb9/r6oNYFzLQ5HdJuKYt6lz4c5pZFCd85AD9/1Ase
+        R85i2bZV/LdwLA2ZEQVw2uYobwDCaDIrgOLVzuHYDIS7+tJ5HDFglQlc6CJroB/k0OjY66
+        9dhXxdB0CMao2471fLyQ0BXJ0hfMmcg=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-442-BEAz2-vWM7OxJUaZgi0A0A-1; Mon, 24 Apr 2023 17:06:55 -0400
+X-MC-Unique: BEAz2-vWM7OxJUaZgi0A0A-1
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2476a31ef4aso2768966a91.3
+        for <fstests@vger.kernel.org>; Mon, 24 Apr 2023 14:06:54 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1682370414; x=1684962414;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=eyiEsxhqKo7Evs9Wh29L1S1TbPnWGlN8LcoQODm+gWo=;
+        b=IhgSyUJososgz6IttJKrxZWows+3EPdExahBX/xXDWLgkojaPOZRty0j+8ZSCltIOg
+         gRtQTYStvOXtOa9OzoN+sQ5+ZD4fCPPNSmSL7DM4e2KftRvyIKsXmUyfEYgIS7GuOzJl
+         uGzApE14mzIL4ayONOQ6MLzOH4ZBmslY5jznTVErQHZyFvKQnBCqO7KEn9VYma5Wz7M+
+         XqsBPuk+gbltNNWfauOeYzuucyCIzuHon6fNM4/AmnwE5+HANND7VE/rKUSYwMBiCVnE
+         cG9nRnwzlnDnUYeYcVG2ibh6nFED0j92Vx+0N2j1OQGPb2a+nBk+kNTZJJ2GyFy/xUSz
+         0xSw==
+X-Gm-Message-State: AAQBX9cjB9rMFxCEP5t7axXbQu8IrnZRlrIFcoREeP352YohvvAjwS/8
+        937D3U17F1WrS0uMlozXom7yLw9gYTCYMjpo/0XtjPFGyNISCJtFq8KE6LTw/UYhOdUYuIRBHIa
+        EirDxpG+ze7o8pqwouA==
+X-Received: by 2002:a17:90a:ca81:b0:247:a272:71be with SMTP id y1-20020a17090aca8100b00247a27271bemr15387422pjt.46.1682370413976;
+        Mon, 24 Apr 2023 14:06:53 -0700 (PDT)
+X-Google-Smtp-Source: AKy350b1hlmk92Rl0SHnGAx1b3ulgtTKOZ3iPgfTjtxsq2ktlPqLx/YE0VwjmtFLENXF3WDd++sjxg==
+X-Received: by 2002:a17:90a:ca81:b0:247:a272:71be with SMTP id y1-20020a17090aca8100b00247a27271bemr15387404pjt.46.1682370413580;
+        Mon, 24 Apr 2023 14:06:53 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y3-20020a634943000000b0051b460fd90fsm6827330pgk.8.2023.04.24.14.06.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 24 Apr 2023 14:06:53 -0700 (PDT)
+Date:   Tue, 25 Apr 2023 05:06:48 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
+Cc:     Gao Xiang <hsiangkao@linux.alibaba.com>, fstests@vger.kernel.org,
+        Christian Brauner <brauner@kernel.org>,
+        "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>
+Subject: Re: [PATCH v2] src: fix detached_mounts_propagation compile errors
+Message-ID: <20230424210648.53l3k2xmuj53nusa@zlang-mailbox>
+References: <20230419032955.114278-1-hsiangkao@linux.alibaba.com>
+ <20230420021106.41970-1-hsiangkao@linux.alibaba.com>
+ <20230422135427.vbrnj6vh46omo34e@zlang-mailbox>
+ <7243f364-e822-ce43-7e46-783c317d0a67@linux.alibaba.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230422133316.eyxebbqe5rle2ipj@zlang-mailbox>
+In-Reply-To: <7243f364-e822-ce43-7e46-783c317d0a67@linux.alibaba.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Apr 22, 2023 at 09:33:16PM +0800, Zorro Lang wrote:
-> On Fri, Apr 14, 2023 at 05:29:49PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Apr 24, 2023 at 06:17:55PM +0800, Ziyang Zhang wrote:
+> On 2023/4/22 21:54, Zorro Lang wrote:
+> > On Thu, Apr 20, 2023 at 10:11:06AM +0800, Gao Xiang wrote:
+> >> Newer glibc such as glibc 2.36 also defines 'struct mount_attr'
+> >> in addition to <linux/mount.h>.  It will report as below when
+> >> compiling with old linux kernel headers (without idmapped mounts,
+> >> such as kernel-headers 5.10.134) but with newer glibc (here checked
+> >> with glibc 2.36.6):
+> >>
+> >>     [CC]    detached_mounts_propagation
+> >> In file included from detached_mounts_propagation.c:29:
+> >> vfs/missing.h:115:8: error: redefinition of 'struct mount_attr'
+> >>   115 | struct mount_attr {
+> >>       |        ^~~~~~~~~~
+> >> In file included from detached_mounts_propagation.c:23:
+> >> /usr/include/sys/mount.h:210:8: note: originally defined here
+> >>   210 | struct mount_attr
+> >>       |        ^~~~~~~~~~
+> >> gmake[3]: *** [Makefile:102: detached_mounts_propagation] Error 1
+> >> gmake[2]: *** [include/buildrules:31: src] Error 2
+> >> make[1]: *** [Makefile:51: default] Error 2
+> >> make: *** [Makefile:49: default] Error 2
+> >>
+> >> Let's get rid of <linux/mount.h> as Christian suggested to avoid
+> >> potential incompatibility between these two headers.
+> >>
+> >> Cc: Christian Brauner <brauner@kernel.org>
+> >> Cc: "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>
+> >> Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+> >> ---
 > > 
-> > Make it so that test runners can schedule long soak stress test programs
-> > for an exact number of seconds by setting the SOAK_DURATION config
-> > variable.
+> > This patch works on latest fedora, but it cause fstests can't be built on
+> > RHEL-8 [1] and RHEL-9 [2], please check this incompatible problem.
 > > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
-> > ---
-> > v2: fix commit message
-> > ---
-> >  check                 |   14 +++++++++
-> >  common/config         |    7 ++++
-> >  common/fuzzy          |    7 ++++
-> >  common/report         |    1 +
-> >  ltp/fsstress.c        |   78 +++++++++++++++++++++++++++++++++++++++++++++++--
-> >  ltp/fsx.c             |   50 +++++++++++++++++++++++++++++++
-> >  src/soak_duration.awk |   23 ++++++++++++++
-> >  tests/generic/476     |    5 +++
-> >  tests/generic/521     |    1 +
-> >  tests/generic/522     |    1 +
-> >  tests/generic/642     |    1 +
-> >  11 files changed, 182 insertions(+), 6 deletions(-)
-> >  create mode 100644 src/soak_duration.awk
+> > Thanks,
+> > Zorro
 > > 
-> > diff --git a/check b/check
-> > index e32b70d301..1d78cf27f4 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -366,6 +366,20 @@ if ! . ./common/rc; then
-> >  	exit 1
-> >  fi
-> >  
-> > +# If the test config specified a soak test duration, see if there are any
-> > +# unit suffixes that need converting to an integer seconds count.
-> > +if [ -n "$SOAK_DURATION" ]; then
-> > +	SOAK_DURATION="$(echo "$SOAK_DURATION" | \
-> > +		sed -e 's/^\([.0-9]*\)\([a-z]\)*/\1 \2/g' | \
-> > +		$AWK_PROG -f $here/src/soak_duration.awk)"
-> > +	if [ $? -ne 0 ]; then
-> > +		echo "$SOAK_DURATION"
-> 
-> echo SOAK_DURATION=$SOAK_DURATION ?
-
-Hmm.  On nonzero return, the awk script already specified the reason
-that the input was rejected, so I think this line can go away.
-
-> > +		status=1
-> > +		exit 1
-> > +	fi
-> > +	export SOAK_DURATION
-> 
-> Is this necessary? As you've exported SOAK_DURATION in common/config:
-> 
-> export SOAK_DURATION=${SOAK_DURATION:=}
-
-You're correct, it does not need to be re-exported.
-
-> > +fi
-> > +
-> >  if [ -n "$subdir_xfile" ]; then
-> >  	for d in $SRC_GROUPS $FSTYP; do
-> >  		[ -f $SRC_DIR/$d/$subdir_xfile ] || continue
-> > diff --git a/common/config b/common/config
-> > index 6c8cb3a5ba..fdd0aadbeb 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -57,6 +57,13 @@ export SOAK_PROC=3             # -p option to fsstress
-> >  export SOAK_STRESS=10000       # -n option to fsstress
-> >  export SOAK_PASSES=-1          # count of repetitions of fsstress (while soaking)
-> >  export EMAIL=root@localhost    # where auto-qa will send its status messages
-> > +
-> > +# For certain tests that run in tight loops, setting this variable allows the
-> > +# test runner to specify exactly how long the test should continue looping.
-> > +# This is independent of TIME_FACTOR.  Floating point numbers are allowed, and
-> > +# the unit suffixes m(inutes), h(ours), d(ays), and w(eeks) are supported.
-> > +export SOAK_DURATION=${SOAK_DURATION:=}
-> 
-> Better to describe more about the SOAK_DURATION (and TIME/LOAD_FACTOR) in
-> documentation (README?). To clarify the relationship of SOAK_DURATION with
-> other related parameters, and how the SOAK_DURATION works/be used.
-
-TIME_FACTOR is not documented in the README.  I'll add another patch to
-do that...
-
-> > +
-> >  export HOST_OPTIONS=${HOST_OPTIONS:=local.config}
-> >  export CHECK_OPTIONS=${CHECK_OPTIONS:="-g auto"}
-> >  export BENCH_PASSES=${BENCH_PASSES:=5}
-> > diff --git a/common/fuzzy b/common/fuzzy
-> > index 744d9ed65d..9c04bb5318 100644
-> > --- a/common/fuzzy
-> > +++ b/common/fuzzy
-> > @@ -1360,7 +1360,12 @@ _scratch_xfs_stress_scrub() {
-> >  	fi
-> >  
-> >  	local start="$(date +%s)"
-> > -	local end="$((start + (30 * TIME_FACTOR) ))"
-> > +	local end
-> > +	if [ -n "$SOAK_DURATION" ]; then
-> > +		end="$((start + SOAK_DURATION))"
-> > +	else
-> > +		end="$((start + (30 * TIME_FACTOR) ))"
-> > +	fi
-> >  	local scrub_startat="$((start + scrub_delay))"
-> >  	test "$scrub_startat" -gt "$((end - 10))" &&
-> >  		scrub_startat="$((end - 10))"
-> > diff --git a/common/report b/common/report
-> > index be930e0b06..9bfa09ecce 100644
-> > --- a/common/report
-> > +++ b/common/report
-> > @@ -67,6 +67,7 @@ __generate_report_vars() {
-> >  	REPORT_VARS["CPUS"]="$(getconf _NPROCESSORS_ONLN 2>/dev/null)"
-> >  	REPORT_VARS["MEM_KB"]="$(grep MemTotal: /proc/meminfo | awk '{print $2}')"
-> >  	REPORT_VARS["SWAP_KB"]="$(grep SwapTotal: /proc/meminfo | awk '{print $2}')"
-> > +	test -n "$SOAK_DURATION" && REPORT_VARS["SOAK_DURATION"]="$SOAK_DURATION"
-> >  
-> >  	test -e /sys/devices/system/node/possible && \
-> >  		REPORT_VARS["NUMA_NODES"]="$(cat /sys/devices/system/node/possible 2>/dev/null)"
-> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > index e60f2da929..0dc6545448 100644
-> > --- a/ltp/fsstress.c
-> > +++ b/ltp/fsstress.c
-> > @@ -386,6 +386,8 @@ char		*execute_cmd = NULL;
-> >  int		execute_freq = 1;
-> >  struct print_string	flag_str = {0};
-> >  
-> > +struct timespec deadline = { 0 };
-> > +
-> >  void	add_to_flist(int, int, int, int);
-> >  void	append_pathname(pathname_t *, char *);
-> >  int	attr_list_path(pathname_t *, char *, const int);
-> > @@ -459,6 +461,34 @@ void sg_handler(int signum)
-> >  	}
-> >  }
-> >  
-> > +bool
-> > +keep_looping(int i, int loops)
-> > +{
-> > +	int ret;
-> > +
-> > +	if (deadline.tv_nsec) {
-> > +		struct timespec now;
-> > +
-> > +		ret = clock_gettime(CLOCK_MONOTONIC, &now);
-> > +		if (ret) {
-> > +			perror("CLOCK_MONOTONIC");
-> > +			return false;
-> > +		}
-> > +
-> > +		return now.tv_sec <= deadline.tv_sec;
-> > +	}
-> > +
-> > +	if (!loops)
-> > +		return true;
-> > +
-> > +	return i < loops;
-> > +}
-> > +
-> > +static struct option longopts[] = {
-> > +	{"duration", optional_argument, 0, 256},
-> 
-> OK, we'd better to check those test cases use fsstress "-n" later, think about
-> if some of them should be replaced by "--duration".
-
-<nod> I'll update the fsstress/fsx --help screens to state that
---duration overrides -n/-N.
-
---D
-
-> Thanks,
-> Zorro
-> 
-> > +	{ }
-> > +};
-> > +
-> >  int main(int argc, char **argv)
-> >  {
-> >  	char		buf[10];
-> > @@ -478,13 +508,14 @@ int main(int argc, char **argv)
-> >  	struct sigaction action;
-> >  	int		loops = 1;
-> >  	const char	*allopts = "cd:e:f:i:l:m:M:n:o:p:rRs:S:vVwx:X:zH";
-> > +	long long	duration;
-> >  
-> >  	errrange = errtag = 0;
-> >  	umask(0);
-> >  	nops = sizeof(ops) / sizeof(ops[0]);
-> >  	ops_end = &ops[nops];
-> >  	myprog = argv[0];
-> > -	while ((c = getopt(argc, argv, allopts)) != -1) {
-> > +	while ((c = getopt_long(argc, argv, allopts, longopts, NULL)) != -1) {
-> >  		switch (c) {
-> >  		case 'c':
-> >  			cleanup = 1;
-> > @@ -579,6 +610,26 @@ int main(int argc, char **argv)
-> >  		case 'X':
-> >  			execute_freq = strtoul(optarg, NULL, 0);
-> >  			break;
-> > +		case 256:  /* --duration */
-> > +			if (!optarg) {
-> > +				fprintf(stderr, "Specify time with --duration=\n");
-> > +				exit(87);
-> > +			}
-> > +			duration = strtoll(optarg, NULL, 0);
-> > +			if (duration < 1) {
-> > +				fprintf(stderr, "%lld: invalid duration\n", duration);
-> > +				exit(88);
-> > +			}
-> > +
-> > +			i = clock_gettime(CLOCK_MONOTONIC, &deadline);
-> > +			if (i) {
-> > +				perror("CLOCK_MONOTONIC");
-> > +				exit(89);
-> > +			}
-> > +
-> > +			deadline.tv_sec += duration;
-> > +			deadline.tv_nsec = 1;
-> > +			break;
-> >  		case '?':
-> >  			fprintf(stderr, "%s - invalid parameters\n",
-> >  				myprog);
-> > @@ -721,7 +772,7 @@ int main(int argc, char **argv)
-> >  				}
-> >  			}
-> >  #endif
-> > -			for (i = 0; !loops || (i < loops); i++)
-> > +			for (i = 0; keep_looping(i, loops); i++)
-> >  				doproc();
-> >  #ifdef AIO
-> >  			if(io_destroy(io_ctx) != 0) {
-> > @@ -1121,6 +1172,26 @@ dirid_to_fent(int dirid)
-> >  	return NULL;
-> >  }
-> >  
-> > +bool
-> > +keep_running(opnum_t opno, opnum_t operations)
-> > +{
-> > +	int ret;
-> > +
-> > +	if (deadline.tv_nsec) {
-> > +		struct timespec now;
-> > +
-> > +		ret = clock_gettime(CLOCK_MONOTONIC, &now);
-> > +		if (ret) {
-> > +			perror("CLOCK_MONOTONIC");
-> > +			return false;
-> > +		}
-> > +
-> > +		return now.tv_sec <= deadline.tv_sec;
-> > +	}
-> > +
-> > +	return opno < operations;
-> > +}
-> > +
-> >  void
-> >  doproc(void)
-> >  {
-> > @@ -1149,7 +1220,7 @@ doproc(void)
-> >  	srandom(seed);
-> >  	if (namerand)
-> >  		namerand = random();
-> > -	for (opno = 0; opno < operations; opno++) {
-> > +	for (opno = 0; keep_running(opno, operations); opno++) {
-> >  		if (execute_cmd && opno && opno % dividend == 0) {
-> >  			if (verbose)
-> >  				printf("%lld: execute command %s\n", opno,
-> > @@ -1935,6 +2006,7 @@ usage(void)
-> >  	printf("   -V               specifies verifiable logging mode (omitting inode numbers)\n");
-> >  	printf("   -X ncmd          number of calls to the -x command (default 1)\n");
-> >  	printf("   -H               prints usage and exits\n");
-> > +	printf("   --duration=s     run for this many seconds\n");
-> >  }
-> >  
-> >  void
-> > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > index ee4b8fe45d..761d5e467f 100644
-> > --- a/ltp/fsx.c
-> > +++ b/ltp/fsx.c
-> > @@ -193,6 +193,8 @@ int fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
-> >  #define fsxread(a,b,c,d)	fsx_rw(READ, a,b,c,d)
-> >  #define fsxwrite(a,b,c,d)	fsx_rw(WRITE, a,b,c,d)
-> >  
-> > +struct timespec deadline;
-> > +
-> >  const char *replayops = NULL;
-> >  const char *recordops = NULL;
-> >  FILE *	fsxlogf = NULL;
-> > @@ -2457,6 +2459,7 @@ usage(void)
-> >          -Z: O_DIRECT (use -R, -W, -r and -w too)\n\
-> >  	--replay-ops opsfile: replay ops from recorded .fsxops file\n\
-> >  	--record-ops[=opsfile]: dump ops file also on success. optionally specify ops file name\n\
-> > +	--duration=seconds: run for this many seconds\n\
-> >  	fname: this filename is REQUIRED (no default)\n");
-> >  	exit(90);
-> >  }
-> > @@ -2739,9 +2742,33 @@ __test_fallocate(int mode, const char *mode_str)
-> >  #endif
-> >  }
-> >  
-> > +bool
-> > +keep_running(void)
-> > +{
-> > +	int ret;
-> > +
-> > +	if (deadline.tv_nsec) {
-> > +		struct timespec now;
-> > +
-> > +		ret = clock_gettime(CLOCK_MONOTONIC, &now);
-> > +		if (ret) {
-> > +			perror("CLOCK_MONOTONIC");
-> > +			return false;
-> > +		}
-> > +
-> > +		return now.tv_sec <= deadline.tv_sec;
-> > +	}
-> > +
-> > +	if (numops == -1)
-> > +		return true;
-> > +
-> > +	return numops-- != 0;
-> > +}
-> > +
-> >  static struct option longopts[] = {
-> >  	{"replay-ops", required_argument, 0, 256},
-> >  	{"record-ops", optional_argument, 0, 255},
-> > +	{"duration", optional_argument, 0, 254},
-> >  	{ }
-> >  };
-> >  
-> > @@ -2753,6 +2780,7 @@ main(int argc, char **argv)
-> >  	char logfile[PATH_MAX];
-> >  	struct stat statbuf;
-> >  	int o_flags = O_RDWR|O_CREAT|O_TRUNC;
-> > +	long long duration;
-> >  
-> >  	logfile[0] = 0;
-> >  	dname[0] = 0;
-> > @@ -2950,6 +2978,26 @@ main(int argc, char **argv)
-> >  			o_direct = O_DIRECT;
-> >  			o_flags |= O_DIRECT;
-> >  			break;
-> > +		case 254:  /* --duration */
-> > +			if (!optarg) {
-> > +				fprintf(stderr, "Specify time with --duration=\n");
-> > +				exit(87);
-> > +			}
-> > +			duration = strtoll(optarg, NULL, 0);
-> > +			if (duration < 1) {
-> > +				fprintf(stderr, "%lld: invalid duration\n", duration);
-> > +				exit(88);
-> > +			}
-> > +
-> > +			i = clock_gettime(CLOCK_MONOTONIC, &deadline);
-> > +			if (i) {
-> > +				perror("CLOCK_MONOTONIC");
-> > +				exit(89);
-> > +			}
-> > +
-> > +			deadline.tv_sec += duration;
-> > +			deadline.tv_nsec = 1;
-> > +			break;
-> >  		case 255:  /* --record-ops */
-> >  			if (optarg)
-> >  				snprintf(opsfile, sizeof(opsfile), "%s", optarg);
-> > @@ -3145,7 +3193,7 @@ main(int argc, char **argv)
-> >  	if (xchg_range_calls)
-> >  		xchg_range_calls = test_xchg_range();
-> >  
-> > -	while (numops == -1 || numops--)
-> > +	while (keep_running())
-> >  		if (!test())
-> >  			break;
-> >  
-> > diff --git a/src/soak_duration.awk b/src/soak_duration.awk
-> > new file mode 100644
-> > index 0000000000..6c38d09b39
-> > --- /dev/null
-> > +++ b/src/soak_duration.awk
-> > @@ -0,0 +1,23 @@
-> > +#!/usr/bin/awk
-> > +#
-> > +# Convert time interval specifications with suffixes to an integer number of
-> > +# seconds.
-> > +{
-> > +	nr = $1;
-> > +	if ($2 == "" || $2 ~ /s/)	# seconds
-> > +		;
-> > +	else if ($2 ~ /m/)		# minutes
-> > +		nr *= 60;
-> > +	else if ($2 ~ /h/)		# hours
-> > +		nr *= 3600;
-> > +	else if ($2 ~ /d/)		# days
-> > +		nr *= 86400;
-> > +	else if ($2 ~ /w/)		# weeks
-> > +		nr *= 604800;
-> > +	else {
-> > +		printf("%s: unknown suffix\n", $2);
-> > +		exit 1;
-> > +	}
-> > +
-> > +	printf("%d\n", nr);
-> > +}
-> > diff --git a/tests/generic/476 b/tests/generic/476
-> > index edb0be7b50..a162cda6b1 100755
-> > --- a/tests/generic/476
-> > +++ b/tests/generic/476
-> > @@ -33,7 +33,10 @@ _scratch_mount >> $seqres.full 2>&1
-> >  
-> >  nr_cpus=$((LOAD_FACTOR * 4))
-> >  nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
-> > -$FSSTRESS_PROG $FSSTRESS_AVOID -w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
-> > +fsstress_args=(-w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus)
-> > +test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
-> > +
-> > +$FSSTRESS_PROG $FSSTRESS_AVOID "${fsstress_args[@]}" >> $seqres.full
-> >  
-> >  # success, all done
-> >  status=0
-> > diff --git a/tests/generic/521 b/tests/generic/521
-> > index cde9d44775..22dd31a8ec 100755
-> > --- a/tests/generic/521
-> > +++ b/tests/generic/521
-> > @@ -35,6 +35,7 @@ fsx_args+=(-r $min_dio_sz)
-> >  fsx_args+=(-t $min_dio_sz)
-> >  fsx_args+=(-w $min_dio_sz)
-> >  fsx_args+=(-Z)
-> > +test -n "$SOAK_DURATION" && fsx_args+=(--duration="$SOAK_DURATION")
-> >  
-> >  run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
-> >  
-> > diff --git a/tests/generic/522 b/tests/generic/522
-> > index ae84fe04bb..f0cbcb245c 100755
-> > --- a/tests/generic/522
-> > +++ b/tests/generic/522
-> > @@ -29,6 +29,7 @@ fsx_args+=(-N $nr_ops)
-> >  fsx_args+=(-p $((nr_ops / 100)))
-> >  fsx_args+=(-o $op_sz)
-> >  fsx_args+=(-l $file_sz)
-> > +test -n "$SOAK_DURATION" && fsx_args+=(--duration="$SOAK_DURATION")
-> >  
-> >  run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
-> >  
-> > diff --git a/tests/generic/642 b/tests/generic/642
-> > index c0e274d843..eba90903a3 100755
-> > --- a/tests/generic/642
-> > +++ b/tests/generic/642
-> > @@ -49,6 +49,7 @@ for verb in attr_remove removefattr; do
-> >  done
-> >  args+=('-f' "setfattr=20")
-> >  args+=('-f' "attr_set=60")	# sets larger xattrs
-> > +test -n "$DURATION" && args+=(--duration="$DURATION")
-> >  
-> >  $FSSTRESS_PROG "${args[@]}" $FSSTRESS_AVOID -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
-> >  
+> > [1]
+> > ...
+> > Building include
+> > Building lib
+> > Building ltp
+> > Building src
+> >     [CC]    feature
+> > In file included from /usr/include/linux/fs.h:18,
+> >                  from /usr/include/xfs/linux.h:30,
+> >                  from /usr/include/xfs/xfs.h:9,
+> >                  from global.h:13,
+> >                  from feature.c:29:
+> > /usr/include/sys/mount.h:35:3: error: expected identifier before numeric constant
+> >    MS_RDONLY = 1,  /* Mount read-only.  */
+> >    ^~~~~~~~~
+> > gmake[2]: *** [Makefile:112: feature] Error 1
+> > gmake[1]: *** [include/buildrules:31: src] Error 2
+> > make: *** [Makefile:51: default] Error 2
 > > 
+> > [2]
+> > ...
+> > Building include
+> > Building lib
+> > Building ltp
+> > Building src
+> >     [CC]    feature
+> > In file included from /usr/include/linux/fs.h:19,
+> >                  from /usr/include/xfs/linux.h:36,
+> >                  from /usr/include/xfs/xfs.h:9,
+> >                  from global.h:13,
+> >                  from feature.c:29:
+> > /usr/include/sys/mount.h:35:3: error: expected identifier before numeric constant
+> >    35 |   MS_RDONLY = 1,                /* Mount read-only.  */
+> >       |   ^~~~~~~~~
+> > In file included from feature.c:49:
+> > vfs/missing.h:116:8: error: redefinition of 'struct mount_attr'
+> >   116 | struct mount_attr {
+> >       |        ^~~~~~~~~~
+> > In file included from /usr/include/linux/fs.h:19,
+> >                  from /usr/include/xfs/linux.h:36,
+> >                  from /usr/include/xfs/xfs.h:9,
+> >                  from global.h:13,
+> >                  from feature.c:29:
+> > /usr/include/linux/mount.h:128:8: note: originally defined here
+> >   128 | struct mount_attr {
+> >       |        ^~~~~~~~~~
+> > gmake[2]: *** [Makefile:112: feature] Error 1
+> > gmake[1]: *** [include/buildrules:31: src] Error 2
+> > make: *** [Makefile:51: default] Error 2
+> > 
+> > 
+> >>  configure.ac                      | 2 +-
+> >>  src/detached_mounts_propagation.c | 1 -
+> >>  src/vfs/missing.h                 | 1 +
+> >>  3 files changed, 2 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/configure.ac b/configure.ac
+> >> index 4687d8a3..bb29f37e 100644
+> >> --- a/configure.ac
+> >> +++ b/configure.ac
+> >> @@ -74,7 +74,7 @@ AC_HAVE_FIEXCHANGE
+> >>  
+> >>  AC_CHECK_FUNCS([renameat2])
+> >>  AC_CHECK_FUNCS([reallocarray])
+> >> -AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
+> >> +AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <sys/mount.h>]])
+> >>  AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
+> >>  #include <stddef.h>
+> >>  #include <linux/btrfs.h>
+> >> diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
+> >> index 17db2c02..4041c75f 100644
+> >> --- a/src/detached_mounts_propagation.c
+> >> +++ b/src/detached_mounts_propagation.c
+> >> @@ -20,7 +20,6 @@
+> >>  #include <stdio.h>
+> >>  #include <stdlib.h>
+> >>  #include <string.h>
+> >> -#include <sys/mount.h>
+> >>  #include <sys/stat.h>
+> >>  #include <sys/syscall.h>
+> >>  #include <sys/types.h>
+> >> diff --git a/src/vfs/missing.h b/src/vfs/missing.h
+> >> index 059e742d..04ab33d1 100644
+> >> --- a/src/vfs/missing.h
+> >> +++ b/src/vfs/missing.h
+> >> @@ -18,6 +18,7 @@
+> >>  #include <sys/types.h>
+> >>  #include <syscall.h>
+> >>  #include <unistd.h>
+> >> +#include <sys/mount.h>
+> >>  
+> >>  #ifndef __NR_mount_setattr
+> >>  	#if defined __alpha__
+> >> -- 
+> >> 2.24.4
+> >>
 > 
+> Hi Zorro,
+> 
+> Can you try this patch, which is inspired by Yang Xu[1].
+> 
+> [1]https://lore.kernel.org/fstests/ed0bb9f0-c255-10d7-d711-36a464cd6512@fujitsu.com/T/#me981ae064b3ecb151b3321a4ee77f5d916cb017c
+> 
+> Regards,
+> Zhang
+> 
+> 
+> Patch:
+
+Looks like not help [1]. The src/feature.c through global.h -> xfs/xfs.h
+-> xfs/linux.h -> linux/fs.h to include linux/mount.h, then it include
+"vfs/missing.h" manually. As you add "<sys/mount.h>" to vfs/missing.h,
+so there's a conflict. 
+
+Thanks,
+Zorro
+
+[1]
+# make
+Building include
+Building lib
+Building ltp
+Building src
+    [CC]    feature
+In file included from /usr/include/linux/fs.h:18,
+                 from /usr/include/xfs/linux.h:30,
+                 from /usr/include/xfs/xfs.h:9,
+                 from global.h:13,
+                 from feature.c:29:
+/usr/include/sys/mount.h:35:3: error: expected identifier before numeric constant
+   MS_RDONLY = 1,  /* Mount read-only.  */
+   ^~~~~~~~~
+gmake[2]: *** [Makefile:112: feature] Error 1
+gmake[1]: *** [include/buildrules:31: src] Error 2
+make: *** [Makefile:51: default] Error 2
+
+> 
+> diff --git a/configure.ac b/configure.ac
+> index cbf83779..060c0a5d 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -16,6 +16,7 @@ AC_CHECK_HEADERS([	assert.h		\
+>  			sys/uuid.h		\
+>  			sys/file.h		\
+>  			sys/fcntl.h		\
+> +			sys/mount.h		\
+>  			sys/syssgi.h		\
+>  			sys/param.h		\
+>  			sys/stat.h		\
+> @@ -27,6 +28,7 @@ AC_CHECK_HEADERS([	assert.h		\
+>  			strings.h		\
+>  			err.h			\
+>  			linux/falloc.h		\
+> +			linux/mount.h		\
+>  			sys/fs/xfs_fsops.h	\
+>  			sys/fs/xfs_itable.h	\
+>  			xfs/platform_defs.h	\
+> @@ -35,6 +37,10 @@ AC_CHECK_HEADERS([	assert.h		\
+>  			sys/mman.h		\
+>  ])
+>  
+> +AC_CHECK_FUNCS_ONCE([
+> +	mount_setattr	
+> +])
+> +
+>  AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
+>  #define _GNU_SOURCE
+>  #include <xfs/libxfs.h>])
+> @@ -68,7 +74,13 @@ AC_PACKAGE_WANT_LIBBTRFSUTIL
+>  AC_HAVE_COPY_FILE_RANGE
+>  AC_CHECK_FUNCS([renameat2])
+>  AC_CHECK_FUNCS([reallocarray])
+> -AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
+> +AC_CHECK_TYPES([struct mount_attr], [], [],[[
+> +#ifdef HAVE_MOUNT_SETATTR
+> +# include <sys/mount.h>
+> +#elif HAVE_LINUX_MOUNT_H
+> +# include <linux/mount.h>
+> +#endif
+> +]])
+>  AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
+>  #include <stddef.h>
+>  #include <linux/btrfs.h>
+> diff --git a/src/vfs/missing.h b/src/vfs/missing.h
+> index 059e742d..04ab33d1 100644
+> --- a/src/vfs/missing.h
+> +++ b/src/vfs/missing.h
+> @@ -18,6 +18,7 @@
+>  #include <sys/types.h>
+>  #include <syscall.h>
+>  #include <unistd.h>
+> +#include <sys/mount.h>
+>  
+>  #ifndef __NR_mount_setattr
+>  	#if defined __alpha__
+> 
+
