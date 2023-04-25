@@ -2,53 +2,42 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAC07C6FD18
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 Apr 2023 07:42:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32371C77B61
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 Apr 2023 07:49:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232815AbjDYHmx (ORCPT
+        id S233407AbjDYHtH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 Apr 2023 03:42:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52634 "EHLO
+        Tue, 25 Apr 2023 03:49:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233303AbjDYHmu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Apr 2023 03:42:50 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9097193
-        for <fstests@vger.kernel.org>; Tue, 25 Apr 2023 00:42:49 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7171560A56
-        for <fstests@vger.kernel.org>; Tue, 25 Apr 2023 07:42:49 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9DA2C433EF;
-        Tue, 25 Apr 2023 07:42:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1682408568;
-        bh=z8luO0Phv56gnkuLde0IZpZvL9kLD7SrG+JWuo3zqaY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=HVOi+zzUIqxaHXq8KNPqetWSCte0ySopCtkSfRMJIyHvRgplf2oSISGacawMcbX7O
-         5CkATDHKDH/8CJ/BTfX7Z3EWLTOQ2LDEI2pRdjSPsNS9XnTaP6K2q0R9nDFxknERVR
-         +muDAClQYz8YIgqmmwIG0U/5N30GD9JK63YMlptZlOAYYaCPcvspVKPVvP93emm9EL
-         pXbYx1/UGqAOXtyppNzQU2DkX5qQKsNxEu29fgWqQGHO3uzY72mDrH31mcmfdQBtQ4
-         JG2bYVIxVrYoOE1gi3pSstHVJn2SVRZ8GNBqsIPQtPnpZnMKFhvecHv9354gxcsMjP
-         wyWG4VajeeWfQ==
-Date:   Tue, 25 Apr 2023 09:42:44 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org, hsiangkao@linux.alibaba.com,
-        ZiyangZhang@linux.alibaba.com
-Subject: Re: [PATCH] src/detached_mounts_propagation: Fix compile error
-Message-ID: <20230425-bushaltestelle-zusprach-95047e3d0836@brauner>
-References: <1682400834-16985-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        with ESMTP id S233081AbjDYHsg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Apr 2023 03:48:36 -0400
+Received: from out30-100.freemail.mail.aliyun.com (out30-100.freemail.mail.aliyun.com [115.124.30.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C37DD308
+        for <fstests@vger.kernel.org>; Tue, 25 Apr 2023 00:47:53 -0700 (PDT)
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R461e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045192;MF=ziyangzhang@linux.alibaba.com;NM=1;PH=DS;RN=4;SR=0;TI=SMTPD_---0VgzEyOp_1682408869;
+Received: from 30.97.56.166(mailfrom:ZiyangZhang@linux.alibaba.com fp:SMTPD_---0VgzEyOp_1682408869)
+          by smtp.aliyun-inc.com;
+          Tue, 25 Apr 2023 15:47:50 +0800
+Message-ID: <7b567ffd-772d-11ee-957c-9621f3a581ff@linux.alibaba.com>
+Date:   Tue, 25 Apr 2023 15:47:49 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
+ Gecko/20100101 Thunderbird/102.9.0
+Subject: Re: [PATCH] src/detached_mounts_propagation: Fix compile error
+Content-Language: en-US
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>, fstests@vger.kernel.org
+Cc:     hsiangkao@linux.alibaba.com, brauner@kernel.org
+References: <1682400834-16985-1-git-send-email-xuyang2018.jy@fujitsu.com>
+From:   Ziyang Zhang <ZiyangZhang@linux.alibaba.com>
 In-Reply-To: <1682400834-16985-1-git-send-email-xuyang2018.jy@fujitsu.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 25, 2023 at 01:33:54PM +0800, Yang Xu wrote:
+On 2023/4/25 13:33, Yang Xu wrote:
 > Newer glibc such as glibc 2.36 also defines 'struct mount_attr'
 > in addition to <linux/mount.h>(we also include this kernel header when using
 > global.h).
@@ -69,13 +58,6 @@ On Tue, Apr 25, 2023 at 01:33:54PM +0800, Yang Xu wrote:
 > 
 > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 > ---
-
-There are neither enough drugs nor curses to express how enraging this
-header mess is. I've given up trying to understand what the "correct"
-solution is. So if this thing below works,
-
-Acked-by: Christian Brauner <brauner@kernel.org>
-
 >  src/detached_mounts_propagation.c | 5 ++---
 >  1 file changed, 2 insertions(+), 3 deletions(-)
 > 
@@ -109,6 +91,43 @@ Acked-by: Christian Brauner <brauner@kernel.org>
 >  		if (ret < 0) {
 >  			fprintf(stderr, "%m - Failed to unmount %s", target);
 >  			exit_code = EXIT_FAILURE;
-> -- 
-> 2.39.1
-> 
+
+Hi Yang,
+
+Unfortunately, we find another error after applying this patch:
+
+Building vfs
+    [CC]    vfstest
+In file included from utils.h:32,
+                 from utils.c:21:
+missing.h:115:8: error: redefinition of 'struct mount_attr'
+  115 | struct mount_attr {
+      |        ^~~~~~~~~~
+In file included from utils.c:13:
+/usr/include/sys/mount.h:210:8: note: originally defined here
+  210 | struct mount_attr
+      |        ^~~~~~~~~~
+gmake[4]: *** [Makefile:30: vfstest] Error 1
+gmake[3]: *** [../include/buildrules:31: vfs] Error 2
+gmake[2]: *** [include/buildrules:31: src] Error 2
+make[1]: *** [Makefile:51: default] Error 2
+make: *** [Makefile:49: default] Error 2
+
+
+Looks like we have to fix src/vfs/utils.c too because it includes both <sys/mount.h>
+and "utils.h" and "utils.h" includes "missing.h".
+
+I simply remove #include <sys/mount.h> in src/vfs/utils.c and it works:
+
+diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+index 6db7a11d..f30e3bd9 100644
+--- a/src/vfs/utils.c
++++ b/src/vfs/utils.c
+@@ -10,7 +10,6 @@
+ #include <stdlib.h>
+ #include <sys/eventfd.h>
+ #include <sys/fsuid.h>
+-#include <sys/mount.h>
+ #include <sys/prctl.h>
+ #include <sys/socket.h>
+ #include <sys/stat.h>
