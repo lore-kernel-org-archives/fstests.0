@@ -2,128 +2,83 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CA07C7618E
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 15:33:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B35B8C7618E
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 15:54:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229676AbjDZPd3 (ORCPT
+        id S240863AbjDZPyT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Apr 2023 11:33:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48070 "EHLO
+        Wed, 26 Apr 2023 11:54:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57740 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241313AbjDZPd3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 11:33:29 -0400
+        with ESMTP id S239512AbjDZPyS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 11:54:18 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02BA6E8
-        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 08:32:45 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 444FA4495
+        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 08:53:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1682523165;
+        s=mimecast20190719; t=1682524406;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=/UXzIOS42zwAbisYrvu9PUoIu4EfHsRshilah4JVYU0=;
-        b=YgbQU9YpOsteTDW2MTSLVsjT1auLn/2zyqy+ffWqa5+16LXxzhRA92ziAu7+htDSZqkb2m
-        w26HWNAL6eQqguYhvdJoR1SkKdUhqUwv4ONp7kUepkT1NMbh6IRX6S8u3b97V2ov53TVNg
-        /cwnuxmapJPrVI4pwhE9DaQV1zcc02A=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-297-McXKtKaLOW2r3MvpRAX-mw-1; Wed, 26 Apr 2023 11:32:43 -0400
-X-MC-Unique: McXKtKaLOW2r3MvpRAX-mw-1
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-24732cc0c8fso6708833a91.3
-        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 08:32:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682523162; x=1685115162;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/UXzIOS42zwAbisYrvu9PUoIu4EfHsRshilah4JVYU0=;
-        b=geG+eiGPJza4kfQGBbfyxgZVLyCjPIYNApojMJqoenjOxWoldXOYvTn/2oUWUdPdnh
-         IUA6a0QVO+S3hzltUHQpGUuFpUONH91ruKtD/nBTwHw++M4OA3m5xj+QgWbM5CfjbSbA
-         2rbxfAru3o1qhcs+SQjNeVCnOQM1+cGG6SGr6WUBXRH4q7yOSrB3ATbv8o+S5howY6KZ
-         DHCeBos1flkY7C4oiuMIP0XQ84Rk2Vd08zk5WAH3x9l1gKVnsb26p/aKqZz2Yd5uddS3
-         uSmciJ2JhZb4YVIAdZbRR/zeN4nrjY6yZFGKjVJHn6/QuBGN0ngnfr+w0PsbgPZSSGsH
-         I9YA==
-X-Gm-Message-State: AAQBX9fGsosmCkU7Fy/FLJwPXiL7XViERhASxlo//wSTw1eIa1CmO8mu
-        3LEgWL8MiWmKD7hgRwAWSyJA2/o8esaSFoTR69JaILSleofdoLFdU9n8XXEFPyUl+oMa77heNmA
-        V2m3LKkOEvVdZDv7jPg==
-X-Received: by 2002:a17:90a:ff0e:b0:249:78bb:2bea with SMTP id ce14-20020a17090aff0e00b0024978bb2beamr19861446pjb.32.1682523162500;
-        Wed, 26 Apr 2023 08:32:42 -0700 (PDT)
-X-Google-Smtp-Source: AKy350asQDgCLzrUaorMHKDuEDdXHPwCZiSMCSJM0g4S2+JnqW8HtnnksoOI1RWaAi8TtSWYqtgKfA==
-X-Received: by 2002:a17:90a:ff0e:b0:249:78bb:2bea with SMTP id ce14-20020a17090aff0e00b0024978bb2beamr19861431pjb.32.1682523162168;
-        Wed, 26 Apr 2023 08:32:42 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id z2-20020a6552c2000000b0051b3d5543c4sm6243249pgp.30.2023.04.26.08.32.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Apr 2023 08:32:41 -0700 (PDT)
-Date:   Wed, 26 Apr 2023 23:32:36 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     David Howells <dhowells@redhat.com>, fstests@vger.kernel.org,
-        Eryu Guan <guan@eryu.me>,
+        bh=9+GmJ/ykKNACImgWGAfUrF7ql2iTpLYV776t7F918fA=;
+        b=XZ4qerDxXxeXgxNamgmQfAJrEKn1kILzEmSlIjQqwfVoMG+vYDtHRXIcxUm7UiIN5PobCF
+        m+6lJ5KWt0tLy7AFX235DtQ58aUDqrI2/Yk/ZXqXmCqr/dDODENvxCNjLqQkRZBC2E0s7q
+        f+PcbQieXVbCciU18yU0sf9K5bPbQtU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-543-pbHgQt9JOmSXDP8MoJhzcA-1; Wed, 26 Apr 2023 11:53:24 -0400
+X-MC-Unique: pbHgQt9JOmSXDP8MoJhzcA-1
+Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D9A81A0F385;
+        Wed, 26 Apr 2023 15:53:23 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.42.28.174])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D93B5492B03;
+        Wed, 26 Apr 2023 15:53:22 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+In-Reply-To: <20230426143011.lktpz46bytvub6kh@zlang-mailbox>
+References: <20230426143011.lktpz46bytvub6kh@zlang-mailbox> <20230424141042.450535-1-dhowells@redhat.com> <20230424141042.450535-2-dhowells@redhat.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     dhowells@redhat.com, fstests@vger.kernel.org,
+        "Darrick J. Wong" <djwong@kernel.org>, Eryu Guan <guan@eryu.me>,
         Marc Dionne <marc.dionne@auristor.com>,
         Jeffrey Altman <jaltman@auristor.com>,
         linux-afs@lists.infradead.org
-Subject: Re: [PATCH v2 5/6] generic/531: Check for O_TMPFILE
-Message-ID: <20230426153236.lyfv3jnigl4kirtp@zlang-mailbox>
-References: <20230424141042.450535-1-dhowells@redhat.com>
- <20230424141042.450535-6-dhowells@redhat.com>
- <20230426144931.uxapfrnh6adcwevd@zlang-mailbox>
- <20230426145149.mjsuugpgusqr6oj2@zlang-mailbox>
- <20230426145450.GA59209@frogsfrogsfrogs>
+Subject: Re: [PATCH v2 1/6] Add AFS support
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230426145450.GA59209@frogsfrogsfrogs>
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <868872.1682524402.1@warthog.procyon.org.uk>
+Date:   Wed, 26 Apr 2023 16:53:22 +0100
+Message-ID: <868873.1682524402@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 26, 2023 at 07:54:50AM -0700, Darrick J. Wong wrote:
-> On Wed, Apr 26, 2023 at 10:51:49PM +0800, Zorro Lang wrote:
-> > On Wed, Apr 26, 2023 at 10:49:31PM +0800, Zorro Lang wrote:
-> > > On Mon, Apr 24, 2023 at 03:10:41PM +0100, David Howells wrote:
-> > > > Make generic/531 check that the filesystem under test supports O_TMPFILE
-> > > > before attempting to test it.
-> > > > 
-> > > > Signed-off-by: David Howells <dhowells@redhat.com>
-> > > > cc: linux-afs@lists.infradead.org
-> > > > ---
-> > > >  tests/generic/531 | 1 +
-> > > >  1 file changed, 1 insertion(+)
-> > > > 
-> > > > diff --git a/tests/generic/531 b/tests/generic/531
-> > > > index 5e84ca97..e5f3dddd 100755
-> > > > --- a/tests/generic/531
-> > > > +++ b/tests/generic/531
-> > > > @@ -20,6 +20,7 @@ testfile=$TEST_DIR/$seq.txt
-> > > >  # real QA test starts here
-> > > >  _supported_fs generic
-> > > >  _require_scratch
-> > > > +_require_xfs_io_command "-T"
-> > > 
-> > > Make sense,
-> > > 
-> > > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> > 
-> > Oh, generic/530 is similar with 531, why only 531 need this one?
-> 
-> AFS doesn't support shutdown, presumably.
-
-Oh, 530 require shutdown :)
+Zorro Lang <zlang@redhat.com> wrote:
 
 > 
-> (But yes, both tests should be _require-ing this.)
+> I nearly forget we have this file :-D
+> 
+> If you'd like to update some docs about AFS testing, you can check
+> README and README.config-sections.
 
-Yes, I'll add that to generic/530 too, when I merge it.
+I'll have a look at that.
 
-> 
-> --D
-> 
-> > > 
-> > > >  _require_test_program "t_open_tmpfiles"
-> > > >  
-> > > >  _scratch_mkfs >> $seqres.full 2>&1
-> > > > 
-> > 
-> 
+> So I hope to double check with you if the mount source must be started with
+> "%" ?
+
+or "#", yes.  Have a look here:
+
+	http://docs.openafs.org/AdminGuide/HDRWQ208.html#HDRWQ211
+
+The in-kernel afs fs takes a string in afs mountpoint format as its source.
+
+David
 
