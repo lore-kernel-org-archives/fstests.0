@@ -2,60 +2,60 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D127C7618E
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 14:41:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1F24C7618E
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 14:48:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241012AbjDZOlF (ORCPT
+        id S240555AbjDZOsG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Apr 2023 10:41:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45416 "EHLO
+        Wed, 26 Apr 2023 10:48:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240836AbjDZOlE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 10:41:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46B1A59FB
-        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 07:40:23 -0700 (PDT)
+        with ESMTP id S229744AbjDZOsF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 10:48:05 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86088D8
+        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 07:47:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1682520022;
+        s=mimecast20190719; t=1682520437;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=byOOcjZiDxWHApSomlqtTYrrNXC05udl/JfSDFfIbn8=;
-        b=b5ma68aW3dliS5nTNJ6f8jC7H0jxARkC7xzoZGZtDyF8YRETWgh6il/p2APXn+OyOG3zMu
-        wNSfXgHLefX8i8KqEbatBSWmnnZNT1Eo4JbWN5rb9qn1ktSv2La6rgdDvlXrLAvPvhy3Th
-        u+azwAM29SEpqKGGCV10eFHt0r4YaqE=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=loMCfPH/VYakfQmyKjfwXgGLWC1qMbq/grP5s/gHDhk=;
+        b=dyoahDDnvff9dmkBlBo4ObgLleUCn3CjB7YANnqK1QB4KMC02wd98qwjpvPRLDXAMI3HRD
+        egBbkSXsZsYS+ipcxpLHo2JY76vIDKdhLEyLczjQH4Bw4lZmRIljAq8SwQ0O0m2KJwZRtj
+        KX5gIMsrexD8UZIMFBLr6sUACX5WNVU=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-425-EW5p3iBkNKeGx1hbvZKIVA-1; Wed, 26 Apr 2023 10:40:20 -0400
-X-MC-Unique: EW5p3iBkNKeGx1hbvZKIVA-1
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2475e9ec1c5so3944128a91.0
-        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 07:40:20 -0700 (PDT)
+ us-mta-552-0GPZ4LH7Nly3VkLy7aYnBw-1; Wed, 26 Apr 2023 10:47:15 -0400
+X-MC-Unique: 0GPZ4LH7Nly3VkLy7aYnBw-1
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-52855ba7539so2068340a12.3
+        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 07:47:15 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682520020; x=1685112020;
+        d=1e100.net; s=20221208; t=1682520435; x=1685112435;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=byOOcjZiDxWHApSomlqtTYrrNXC05udl/JfSDFfIbn8=;
-        b=CqDlsiwwvxxLvpXZjCaKREyUpnQA1VCy3pJmukodzxTW0RlgrqMZSxxTrHvWjOx6yi
-         3COSLbqB2OKTktNhEQGlxDma04cpxU4vIkzI5LJz7rLyVVbKC/dnAzKcc6/Lxv9yAi+j
-         4VGIiQqgC+sKDWJ3Nhh++q8GgFLGb7YHBHsnP5LTCSVTs4Wg3xROIEQdr1Onr0LdkQwi
-         /bm6g/LnQpWlOIFxEngSh+RQnruGYChMeIMEDEzlf2mvADWp/b+VqRqvllVWeRMJml8Z
-         Ea3mxer77vSHOjNrjFF4tDv7MG8fRaAVgYWH222AtbjjlvAqovdkajAeDohC8sDHVOSg
-         RSYA==
-X-Gm-Message-State: AAQBX9eXTO2yFQvrP/dIaUdC8vFQYhFo0UxLEOYxIovxBfEQXoxFhxV7
-        mDH5dhQkqmiP8Sjg0JNWfta/UxnoDxN61lWGERPS+m53tT8s75LyaaRjPByoW0cGrTMs4oFpseA
-        WC3NdOBaAJ8zBl0hY4A==
-X-Received: by 2002:a17:90a:bb0f:b0:246:63c8:6abf with SMTP id u15-20020a17090abb0f00b0024663c86abfmr21667535pjr.20.1682520019696;
-        Wed, 26 Apr 2023 07:40:19 -0700 (PDT)
-X-Google-Smtp-Source: AKy350Y/4a2/peWv28zF15eEnA/yQ8zqV/l2wVIMLKbomPhRAsQr5V+/yqCpcsOJ5oxHS0Xd5aHxzg==
-X-Received: by 2002:a17:90a:bb0f:b0:246:63c8:6abf with SMTP id u15-20020a17090abb0f00b0024663c86abfmr21667515pjr.20.1682520019321;
-        Wed, 26 Apr 2023 07:40:19 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a7-20020a17090acb8700b00246b5a609d2sm9884520pju.27.2023.04.26.07.40.16
+        bh=loMCfPH/VYakfQmyKjfwXgGLWC1qMbq/grP5s/gHDhk=;
+        b=IhP+UkfntN9NsBHXgBmyFNfoMvXDqi9qCghHfJ9UNt3nAG9xl2bZQfe1IC//4PTBst
+         CxY4sQ7GqAmdFnVof9MQJKZ7UCUnzm5Fb1hL/DD87GZWIicCFQjBbbWPM5eiWNCldfbm
+         BwMEOJYk9eoOWw9qbbONYupAuJyo4eH6BfPYHpOeKW4+ezP2ZnqG79LuHReOpXk8WAep
+         mvs2+3REa9J77GuRHi3o/kLcjqs3PeeRdZ8rblZIohunZVG3JZudyX/ygDuwWCeiyFXi
+         tCVP1wZuDVzappzvASWDLCY298xadIRLAjrMP9EYjK3MLE0r2+xBHEBjV7iJvjI9ZADL
+         E4mA==
+X-Gm-Message-State: AAQBX9cIv4pwhb/wmUoKecN3L+TUcEgCelw2kLuCVdipeCFYFckd+SBL
+        NhBERY+put5ITRFI4gk28T8fmuygHWeLHp9YnL1DbjKbRjT+ZVPwSrKM3m4yz2aYq8a7WLdzR87
+        QcshsNh5j0ed4rsPAnQ==
+X-Received: by 2002:a17:90a:4741:b0:249:6a63:7b8e with SMTP id y1-20020a17090a474100b002496a637b8emr19920038pjg.5.1682520434243;
+        Wed, 26 Apr 2023 07:47:14 -0700 (PDT)
+X-Google-Smtp-Source: AKy350ZacCAdvjV9tFBV8NVWih4PJYyhU31iSGwBfjp91hjynhYn+a43SWgIE7kqQMxB/V+a0WmG0A==
+X-Received: by 2002:a17:90a:4741:b0:249:6a63:7b8e with SMTP id y1-20020a17090a474100b002496a637b8emr19920016pjg.5.1682520433858;
+        Wed, 26 Apr 2023 07:47:13 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id i4-20020a17090adc0400b00246aba3ebabsm11567214pjv.45.2023.04.26.07.47.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Apr 2023 07:40:18 -0700 (PDT)
-Date:   Wed, 26 Apr 2023 22:40:14 +0800
+        Wed, 26 Apr 2023 07:47:13 -0700 (PDT)
+Date:   Wed, 26 Apr 2023 22:47:08 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     David Howells <dhowells@redhat.com>
 Cc:     fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
@@ -63,60 +63,61 @@ Cc:     fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
         Marc Dionne <marc.dionne@auristor.com>,
         Jeffrey Altman <jaltman@auristor.com>,
         linux-afs@lists.infradead.org
-Subject: Re: [PATCH v2 3/6] generic/317, afs: Allow for a filesystem not to
- honour the local uid/gid
-Message-ID: <20230426144014.x73py4loqo6qkahz@zlang-mailbox>
+Subject: Re: [PATCH v2 4/6] generic/123, generic/128, afs: Allow for an fs
+ that does its own perm management
+Message-ID: <20230426144708.gxptshtwhw6wrubp@zlang-mailbox>
 References: <20230424141042.450535-1-dhowells@redhat.com>
- <20230424141042.450535-4-dhowells@redhat.com>
+ <20230424141042.450535-5-dhowells@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230424141042.450535-4-dhowells@redhat.com>
+In-Reply-To: <20230424141042.450535-5-dhowells@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 24, 2023 at 03:10:39PM +0100, David Howells wrote:
-> Each AFS cell has it's own set of user IDs that is uses internally, in its
-> ACL system and in its protection management protocol.  The user ID used by
-> the fileserver is selected from the set belonging to the fileserver's cell
-> according to the authentication token associated with an RPC operation -
-> and this is set as a file's user ID when it is created.
+On Mon, Apr 24, 2023 at 03:10:40PM +0100, David Howells wrote:
+> The AFS filesystem has its own distributed permission management system
+> that's based on a per-cell user and group database used in conjunction with
+> ACLs.  The user is determined by the authentication token acquired from the
+> kaserver or Kerberos, not by the local fsuid/fsgid.  For the most part, the
+> uid, gid and mask on a file are ignored.
 > 
-> This means that tests that expect to set a UID and see the same UID still
-> set afterwards will fail.
+> The generic/123 and generic/128 tests check that the UNIX permission bits do
+> what would normally be expected of them - but this fails on AFS.  Using "su"
+> to change the user is not effective on AFS.  Instead, "keyctl session" would
+> need to be used and an alternative authentication token would need to be
+> obtained.
 > 
-> Add a "_require_use_local_uidgid" clause to indicate that a test expects
-> internal UID/GID information to be seen in the stat output and should be
-> skipped if AFS's case.
+> Provide a "_require_unix_perm_checking" clause so that these tests can be
+> suppressed in cases such as AFS.
 > 
 > Signed-off-by: David Howells <dhowells@redhat.com>
-> cc: linux-afs@lists.infradead.org
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > ---
 
-Make sense. Maybe not only AFS need this, but that's another story in other
-patches. For this one:
-
+Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 >  common/rc                    | 9 +++++++++
 >  doc/requirement-checking.txt | 8 ++++++++
->  tests/generic/317            | 1 +
->  3 files changed, 18 insertions(+)
+>  tests/generic/123            | 1 +
+>  tests/generic/128            | 1 +
+>  4 files changed, 19 insertions(+)
 > 
 > diff --git a/common/rc b/common/rc
-> index 00c5fcfe..e0978a03 100644
+> index e0978a03..4dfc3301 100644
 > --- a/common/rc
 > +++ b/common/rc
-> @@ -5106,6 +5106,15 @@ _require_sgid_inheritance()
+> @@ -5115,6 +5115,15 @@ _require_use_local_uidgid()
 >  	esac
 >  }
 >  
-> +_require_use_local_uidgid()
+> +_require_unix_perm_checking()
 > +{
 > +	case $FSTYP in
 > +	afs)
-> +		_notrun "$FSTYP doesn't honour local uid and gid"
+> +		_notrun "$FSTYP doesn't perform traditional UNIX perm checking"
 > +		;;
 > +	esac
 > +}
@@ -125,42 +126,54 @@ Reviewed-by: Zorro Lang <zlang@redhat.com>
 >  
 >  ################################################################################
 > diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
-> index a3588ee9..f24ecf5c 100644
+> index f24ecf5c..802bf2a3 100644
 > --- a/doc/requirement-checking.txt
 > +++ b/doc/requirement-checking.txt
-> @@ -17,6 +17,7 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
->  	_require_chattr <letters>
+> @@ -18,6 +18,7 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
 >  	_require_exportfs
 >  	_require_sgid_inheritance
-> +	_require_use_local_uidgid
+>  	_require_use_local_uidgid
+> +	_require_unix_perm_checking
 >  
 >   (3) System call requirements.
 >  
-> @@ -104,6 +105,13 @@ _require_sgid_inheritance
->       of the SGID bit and the GID from a marked directory.  The test will be
->       skipped if not supported.
+> @@ -112,6 +113,13 @@ _require_use_local_uidgid
+>       filesystems, for example, may choose other settings or not even have these
+>       concepts available.  The test will be skipped if not supported.
 >  
-> +_require_use_local_uidgid
+> +_require_unix_perm_checking
 > +
-> +     The test requires that the $TEST_DEV filesystem sets the uid and gid of a
-> +     newly created file to the creating process's fsuid and fsgid.  Remote
-> +     filesystems, for example, may choose other settings or not even have these
-> +     concepts available.  The test will be skipped if not supported.
+> +     The test requires that the $TEST_DEV filesystem performs traditional UNIX
+> +     file permissions checking.  A remote filesystem, for example, might use
+> +     some alternative distributed permissions model involving authentication
+> +     tokens rather than the local fsuid/fsgid.
 > +
 >  
 >  ========================
 >  SYSTEM CALL REQUIREMENTS
-> diff --git a/tests/generic/317 b/tests/generic/317
-> index 134d5e3f..39cccc8b 100755
-> --- a/tests/generic/317
-> +++ b/tests/generic/317
-> @@ -38,6 +38,7 @@ _require_user
->  _require_ugid_map
->  _require_userns
->  _require_chown
-> +_require_use_local_uidgid
->  qa_user_id=`id -u $qa_user`
+> diff --git a/tests/generic/123 b/tests/generic/123
+> index f9b28abb..43f90b46 100755
+> --- a/tests/generic/123
+> +++ b/tests/generic/123
+> @@ -28,6 +28,7 @@ _supported_fs generic
 >  
->  _filter_output()
+>  _require_test
+>  _require_user
+> +_require_unix_perm_checking
+>  
+>  my_test_subdir=$TEST_DIR/123subdir
+>  
+> diff --git a/tests/generic/128 b/tests/generic/128
+> index dc1d43f4..924d6aa8 100755
+> --- a/tests/generic/128
+> +++ b/tests/generic/128
+> @@ -18,6 +18,7 @@ _supported_fs generic
+>  _require_scratch
+>  _require_user
+>  _require_chmod
+> +_require_unix_perm_checking
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_mount "-o nosuid"
 > 
 
