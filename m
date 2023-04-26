@@ -2,278 +2,156 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50F84C7618E
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 08:05:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B2B4C77B60
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 14:00:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239552AbjDZIFN (ORCPT
+        id S240570AbjDZOAj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Apr 2023 04:05:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59670 "EHLO
+        Wed, 26 Apr 2023 10:00:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240167AbjDZIFL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 04:05:11 -0400
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F26D3598;
-        Wed, 26 Apr 2023 01:05:01 -0700 (PDT)
-Received: by mail-pf1-x42d.google.com with SMTP id d2e1a72fcca58-63b7096e2e4so5649922b3a.2;
-        Wed, 26 Apr 2023 01:05:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1682496300; x=1685088300;
-        h=in-reply-to:subject:cc:to:from:message-id:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=SciRdqcR7n21lYLAgquNl0PXOwkcT56LabDCcxsO+B4=;
-        b=laxYLyoOPi9siIBETnLx+RgMNtgV3ecmPqfQ9jFfoPU/leADggHD8PkFpOSEl0MPtd
-         Z1edhd9VP/beJZ4fPImPTEEUihSTWu/GII6obgNL4D7OzxcCw7QAqVUzzLgtq8Yu9Yhm
-         3wRzP3USxg+PIpi4yYtTatqhb8AjsWhjffT5D+oM+Vhrrn5rMjz+dYuWZ4qDU+q50aTH
-         XwL3kHXO7S/zAN9rMuPBo2neL5OVPT83y3u6debfA8tqYg5oYJPWQnp433ySnufzP3wX
-         8wsoZXQ2HVls1ke+wWAy/VX6+UmszkjDyYSmkOsd/GSHAMqNLzDMTnvm/3SOiP0sl4N0
-         /6yw==
+        with ESMTP id S232584AbjDZOAi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 10:00:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B343659C
+        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 06:59:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1682517593;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=FWfb92iwXUPW0jc5Q5tQXl3a3kyst37kElU/p/azixE=;
+        b=g6WKP8SExV1qdzwdpBsBKNxu5SKovBOyqHSM0JzLaaQT/CDJf/jRJPC185rP/VPHPxehbs
+        nETsY1n0VXgSr7ZYuKQiH96w0jtsoweSVlO13289f4Zf1V+bK4nOkc0mHmZqbOzmpn6A14
+        IcWrMmnyLUC7z9u2Hz9f5vh9KmZzdSc=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-125-grC3Zl7ANaqvlZOeKWwXXA-1; Wed, 26 Apr 2023 09:59:51 -0400
+X-MC-Unique: grC3Zl7ANaqvlZOeKWwXXA-1
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-24bfaeb5ef1so375719a91.0
+        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 06:59:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682496300; x=1685088300;
-        h=in-reply-to:subject:cc:to:from:message-id:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=SciRdqcR7n21lYLAgquNl0PXOwkcT56LabDCcxsO+B4=;
-        b=jPPYzbqdSWrj6lF22jfBl7s5rTAqXU+cuoABKUtC4d5UWtJFNA988upUNCOkJeFzCS
-         8+IB2hfgQgiijXrzVYGBXAj6ez5lQUecXcTEHLVb3LuKtcQes2wz8JoVoyzfTtfIvsph
-         78UIYHh034jvQ0KS/xL0rZrRxTwOlLbi/ILOfXtN7+d4W9YLHIP4bXwgmSMq05HFndTa
-         /Tguai6AEjq7ACgfnQ+RJltUL0vJohK1w4ErgeHhhkU3PqpkZ3ptXDJMf5C3/OmS6h/x
-         ujUSUcRC6kYP/zOmsWZExG3hkLw5QZLM4Yiwxnbud44TdQr8d3fS4bWYovhT3VEU26mz
-         K6lA==
-X-Gm-Message-State: AAQBX9f1HmgMX8PjFYZHkAA7waEHKkWUNQRJDQIygDNUFZ91r40yaqlA
-        Ohb5jsPUm/rBpMBfZmaqGwk=
-X-Google-Smtp-Source: AKy350a7jb5A+lCqt7RWiq/FGahhrNGJnTB8y+yy+MqyA941BNPTheauFAluUHjEZScPvZitCB2RRw==
-X-Received: by 2002:a05:6a00:1250:b0:63d:3d08:4792 with SMTP id u16-20020a056a00125000b0063d3d084792mr25859150pfi.32.1682496300449;
-        Wed, 26 Apr 2023 01:05:00 -0700 (PDT)
-Received: from rh-tp ([2406:7400:63:80ba:df67:5773:54c8:514f])
-        by smtp.gmail.com with ESMTPSA id s23-20020a62e717000000b005aa60d8545esm10642634pfh.61.2023.04.26.01.04.57
+        d=1e100.net; s=20221208; t=1682517590; x=1685109590;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=FWfb92iwXUPW0jc5Q5tQXl3a3kyst37kElU/p/azixE=;
+        b=k1owzyEkhPzHpkIzcFfkaTbtMEHe5+35RAr1rp635fuxc+nHmdRxunyeu925giAHSe
+         WpuZz1z5DRlopGzhAgLRIkGMLbv27x1NZvz7rnofXi5QNt66meqcEeBmBz0Kbvz3mlkZ
+         vRjpD+2TLHC6rNAUxgS9yoXG1+9Jt/56cm/8NRsiNKhNBXz+csAmwzjlrx5YY1xnyp50
+         zBQVfnDY0fZQIg1Qy4FWCabLtwS07UEbfePE1zdEJ7IrqYV/i4Qof0D+KcpUaGVztyyr
+         XnYd5Vg7vTLrUedA2bG0iVmUIvoPt+ZjhNaU32e8/xQm3tgacbfVQKu8fXKWdR6UBNbw
+         YUrg==
+X-Gm-Message-State: AAQBX9fpLf3E6sT1EmpAEVUqPPeeTMyw+UXqA51CXUJywb/VN+vHMOG/
+        31AjtRWudmy3mKjd4jMb8YIfXXe3O4/9XPWN+Vc/8kb0JFE6P72zBD5wjjq8AynXdE2iOzYRSEG
+        +ojAjnvOprDJ+eEpZuA==
+X-Received: by 2002:a17:90a:3186:b0:23e:fa90:ba37 with SMTP id j6-20020a17090a318600b0023efa90ba37mr18236153pjb.49.1682517590488;
+        Wed, 26 Apr 2023 06:59:50 -0700 (PDT)
+X-Google-Smtp-Source: AKy350aFCqHow0zxAXERF6vWx7ivJ0lUhumMJyqYzNf2XhaTfyCEWNsYKacc4T+ZRrW7JyXJodK/gA==
+X-Received: by 2002:a17:90a:3186:b0:23e:fa90:ba37 with SMTP id j6-20020a17090a318600b0023efa90ba37mr18236128pjb.49.1682517589991;
+        Wed, 26 Apr 2023 06:59:49 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id bv21-20020a17090af19500b002465e66256asm9875791pjb.11.2023.04.26.06.59.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Apr 2023 01:04:59 -0700 (PDT)
-Date:   Wed, 26 Apr 2023 13:34:35 +0530
-Message-Id: <87pm7rgjcc.fsf@doe.com>
-From:   Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Baokun Li <libaokun1@huawei.com>
-Subject: Re: [RFC 1/2] ext4/060: Regression test against dioread_nolock mount option inconsistency
-In-Reply-To: <20230423154604.p65lfge3ari3jgeu@zlang-mailbox>
+        Wed, 26 Apr 2023 06:59:49 -0700 (PDT)
+Date:   Wed, 26 Apr 2023 21:59:44 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org, hsiangkao@linux.alibaba.com,
+        brauner@kernel.org, ZiyangZhang@linux.alibaba.com
+Subject: Re: [PATCH v2] src: Don't include <sys/mount.h> and <linux/mount.h>
+ together
+Message-ID: <20230426135944.46y4r5jsa7a2m4s4@zlang-mailbox>
+References: <7b567ffd-772d-11ee-957c-9621f3a581ff@linux.alibaba.com>
+ <1682410890-19102-1-git-send-email-xuyang2018.jy@fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1682410890-19102-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Zorro Lang <zlang@redhat.com> writes:
+On Tue, Apr 25, 2023 at 04:21:30PM +0800, Yang Xu wrote:
+> Newer glibc such as glibc 2.36 also defines 'struct mount_attr'
+> in addition to <linux/mount.h>.
+> 
+> Usually we should use glibc header instead of kernel header.
+> But now mount.h is a special case because both new glibc header and
+> kernel header all define "struct mount_attr'. They also define MS* macro.
+> 
+> Since we have some syscall wrapper in vfs/missing.h, we can use <linux.mount.h> directly
+> instead of <sys/mount.h> for detached_mounts_propagation.c.
+> 
+> For utils.c, it doesn't use the macro or function in <sys/mount.h>, so
+> remove it directly.
+> 
+> In fact, newer glibc(2.37-1)[1] has sloved conflict problem between <sys/mount.h> and <linux/mount.h>.
+> In the future(maybe ten years), we can remove this kernel header and use glibc header.
+> 
+> [1]https://sourceware.org/git/?p=glibc.git;a=commit;h=774058d72942249f71d74e7f2b639f77184160a6
+> 
+> Acked-by: Christian Brauner <brauner@kernel.org>
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> ---
 
-> On Sat, Apr 22, 2023 at 09:47:33PM +0530, Ritesh Harjani (IBM) wrote:
->> During ext4_writepages, ext4 queries dioread_nolock mount option twice
->> and if someone remount the filesystem in between with ^dioread_nolock,
->> then this can cause an inconsistency causing WARN_ON() to be triggered.
->>
->> This fix describes the problem in more detail -
->>
->> https://lore.kernel.org/linux-ext4/20230328090534.662l7yxj2e425j7w@quack3/T/#md19c34646e8b4a816498532c298a66ecf2ae77d4
->>
->> This test reproduces below warning for me w/o the fix.
->>
->> ------------[ cut here ]------------
->> WARNING: CPU: 2 PID: 26 at fs/ext4/page-io.c:231 ext4_put_io_end_defer+0xfb/0x140
->> Modules linked in:
->> CPU: 2 PID: 26 Comm: ksoftirqd/2 Not tainted 6.3.0-rc6-xfstests-00044-ga5c68786f1b1 #23
->> Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.15.0-0-g2dd4b9b3f840-prebuilt.qemu.org 04/01/2014
->> RIP: 0010:ext4_put_io_end_defer+0xfb/0x140
->> Code: 5d 41 5e 41 5f e9 a5 73 d0 00 5b 48 89 ef 5d 41 5c 41 5d 41 5e 41 5f e9 d3 fa ff ff 49 83 be a8 03 00 00 00 0f 84 7b ff fd
->> <...>
->> Call Trace:
->>  <TASK>
->>  blk_update_request+0x116/0x4c0
->>  ? finish_task_switch.isra.0+0xfb/0x320
->>  blk_mq_end_request+0x1e/0x40
->>  blk_complete_reqs+0x40/0x50
->>  __do_softirq+0xd8/0x3e1
->>  ? smpboot_thread_fn+0x30/0x280
->>  run_ksoftirqd+0x3a/0x60
->>  smpboot_thread_fn+0x1d8/0x280
->>  ? __pfx_smpboot_thread_fn+0x10/0x10
->>  kthread+0xf6/0x120
->>  ? __pfx_kthread+0x10/0x10
->>  ret_from_fork+0x2c/0x50
->>  </TASK>
->> [
->>
->> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
->> ---
->>  tests/ext4/060     | 88 ++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/ext4/060.out |  2 ++
->>  2 files changed, 90 insertions(+)
->>  create mode 100755 tests/ext4/060
->>  create mode 100644 tests/ext4/060.out
->>
->> diff --git a/tests/ext4/060 b/tests/ext4/060
->> new file mode 100755
->> index 00000000..d9fe1a99
->> --- /dev/null
->> +++ b/tests/ext4/060
->> @@ -0,0 +1,88 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
->> +#
->> +# FS QA Test 060
->> +#
->> +# This is to test a ext4 regression against inconsistent values of
->
-> Great, a new regression test case!
->
->> +# dioread_nolock mount option while in ext4_writepages path.
->> +# See - https://lore.kernel.org/linux-ext4/20230328090534.662l7yxj2e425j7w@quack3/T/#md19c34646e8b4a816498532c298a66ecf2ae77d4
->
-> You can use the commit id and subject to replace the link.
->
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick
->
-> also add mount/remount tag?
->
+The commit log makes sense to me. (Except some lines are too long, I prefer
+each general lines in commit log less than 70 chars. I'll adjust that a bit
+hen I merge it).
 
-Yes.
+This version looks good to me, and doesn't break RHEL 8/9 system this time.
+Thanks!
 
->> +
->> +PID1=""
->> +PIDS=""
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +# Override the default cleanup function.
->> + _cleanup()
->> +{
->> +	{
->> +		kill -SIGKILL $PID1 $PIDS
->> +		wait $PID1 $PIDS
->> +	} > /dev/null 2>&1
->
-> I think the curly braces "{ }" is not necessary. Refer to generic/390 to deal
-> with the background processes.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Ok, will check that.
+>  src/detached_mounts_propagation.c | 5 ++---
+>  src/vfs/utils.c                   | 1 -
+>  2 files changed, 2 insertions(+), 4 deletions(-)
+> 
+> diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
+> index 17db2c02..dd11f7be 100644
+> --- a/src/detached_mounts_propagation.c
+> +++ b/src/detached_mounts_propagation.c
+> @@ -20,7 +20,6 @@
+>  #include <stdio.h>
+>  #include <stdlib.h>
+>  #include <string.h>
+> -#include <sys/mount.h>
+>  #include <sys/stat.h>
+>  #include <sys/syscall.h>
+>  #include <sys/types.h>
+> @@ -127,7 +126,7 @@ int main(int argc, char *argv[])
+>  	if (ret < 0)
+>  		exit_log("%m - Failed to create new mount namespace");
+>  
+> -	ret = mount(NULL, base_dir, NULL, MS_REC | MS_SHARED, NULL);
+> +	ret = sys_mount(NULL, base_dir, NULL, MS_REC | MS_SHARED, NULL);
+>  	if (ret < 0)
+>  		exit_log("%m - Failed to make base_dir shared mountpoint");
+>  
+> @@ -174,7 +173,7 @@ int main(int argc, char *argv[])
+>  		}
+>  		close(fd_tree);
+>  
+> -		ret = umount2(target, MNT_DETACH);
+> +		ret = sys_umount2(target, MNT_DETACH);
+>  		if (ret < 0) {
+>  			fprintf(stderr, "%m - Failed to unmount %s", target);
+>  			exit_code = EXIT_FAILURE;
+> diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+> index 9e67ac37..0ab5de15 100644
+> --- a/src/vfs/utils.c
+> +++ b/src/vfs/utils.c
+> @@ -10,7 +10,6 @@
+>  #include <stdlib.h>
+>  #include <sys/eventfd.h>
+>  #include <sys/fsuid.h>
+> -#include <sys/mount.h>
+>  #include <sys/prctl.h>
+>  #include <sys/socket.h>
+>  #include <sys/stat.h>
+> -- 
+> 2.39.1
+> 
 
->
-> [ -n "$PIDS" ] && kill -9 $PIDS
-> wait $PIDS
->
-
-Sure.
-
->> +
->> +	cd /
->> +	rm -r -f $tmp.*
->> +}
->> +
->> +# Import common functions.
->> + . ./common/filter
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->
-> Remove this comment.
->
->> +_supported_fs ext4
->
-> _fixed_by_kernel_commit ?
->
-
-Yes, I will check the commit-id and will update it.
-
->> +_require_scratch
->> +
->> +_scratch_mkfs_ext4 >> $seqres.full 2>&1
->> +_scratch_mount
->> +_scratch_remount "dioread_nolock" >> $seqres.full 2>&1
->> +ret=$?
->
-> If the "$ret" is only used once as below...
->
->> +if [ $ret -ne 0 ]; then
->
-> ... then we can use "$?" directly.
->
->> +	_notrun "dioread_nolock mount option not supported"
->
-> When ext4 start to support dioread_nolock/dioread_lock ?
-
-Ok. yes looks like dioread_nolock is quiet old. Will drop the check.
-
->
-> If it's old enough, we don't need to check this option. Or we can have a new
-> helper (e.g. require_scratch_ext4_mount_option()). You can refer to
-> _require_scratch_ext4_feature(), or maybe we can change it to support mount
-> option test.
->
->> +fi
->> +
->> +testfile=$SCRATCH_MNT/testfile
->> +
->> +function run_buff_io_loop()
->> +{
->> +	# add buffered io case here
->> +	while [ 1 ]; do
->> +		xfs_io -fc "truncate 0" -c "pwrite 0 200M" -c "fsync" "$testfile.$1" > /dev/null 2>&1
->
-> I only find the $testfile is used at here once, if so you can make it as
-> a local variable of this function.
->
->> +		sleep 2;
->> +	done
->> +}
->> +
->> +function run_remount_loop()
->> +{
->> +	# add remount loop case here
->> +	while [ 1 ]; do
->> +		_scratch_remount "dioread_nolock" >> $seqres.full 2>&1
->> +		sleep 1
->> +		_scratch_remount "dioread_lock" >> $seqres.full 2>&1
->> +		sleep 1
->> +	done
->> +}
->> +
->> +run_remount_loop &
->> +PID1=$!
->
-> If you don't need to kill these processes in a specific order, I think
-> you can:
->
-> PIDS=$!
->
-
-ok.
-
->> +for i in $(seq 1 20); do
->> +	run_buff_io_loop $i &
->> +	PID=$!
->> +	PIDS="${PIDS} ${PID}"
->
-> PIDS="$PIDS $!"
->
->> +done
->> +
->> +sleep 10
->
-> $((10 * TIME_FACTOR)) ?
->
-
-Sure. will check more on TIME_FACTOR.
-
->> +
->> +{
->> +	kill -SIGKILL $PID1 $PIDS
->> +	wait $PID1 $PIDS
->> +} > /dev/null 2>&1
->
-> kill -9 $$PIDS
-> wait $PIDS
-> unset PIDS
->
-
-Thanks Zorro for the quick review. Agree with all of your comments.
-I will work on these and will send out v2 addressing your review
-comments.
-
--ritesh
