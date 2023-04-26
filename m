@@ -2,199 +2,278 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4BF9C77B7C
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 00:14:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50F84C7618E
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Apr 2023 08:05:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238377AbjDZAOq (ORCPT
+        id S239552AbjDZIFN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 Apr 2023 20:14:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41760 "EHLO
+        Wed, 26 Apr 2023 04:05:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232211AbjDZAOq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Apr 2023 20:14:46 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDA189EFB;
-        Tue, 25 Apr 2023 17:14:41 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 879D560C2B;
-        Wed, 26 Apr 2023 00:14:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E646DC433D2;
-        Wed, 26 Apr 2023 00:14:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1682468081;
-        bh=k5LDX4RN/ia+edWJnG7eb6flYPG7sT+wlDQ/TZqpHsY=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=ducWBJl5fvf/2SVfoclmun5qeEMpdmeDwxpPatnNcdlHV1f7t7TyKssBuB1UzalgR
-         bB2rudvzkPEAyzjEb0tvwoahY6Qjt6XbgeWJZTYbbwOQ8Vs5tBjo7s/omQoPM1X28I
-         N1CSiXqMs12fE3GR9GumKk9zTyFj0U4EJu4NIVDnAJUypsT8zns3xf5OskBsvXY1xj
-         sWAks+H7rbkQweMNmQRnlIKa6y9+dhw4pnyNqWNJmD/zb/p4JHYcG1qiq8FHPttBW3
-         3szgr3tOlQWgtyrDmhWvhtF/KyRpdnjNUZCAHkOSUz1wbc0aPqv1lUOk2vYWfdZ/d5
-         sLmlzUDoZxEpQ==
-Subject: [PATCH 4/4] misc: add duration for recovery loop tests
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     zlang@redhat.com, djwong@kernel.org
-Cc:     Andrey Albershteyn <aalbersh@redhat.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 25 Apr 2023 17:14:40 -0700
-Message-ID: <168246808052.732186.2436158006887650516.stgit@frogsfrogsfrogs>
-In-Reply-To: <168246805791.732186.9294980643404649.stgit@frogsfrogsfrogs>
-References: <168246805791.732186.9294980643404649.stgit@frogsfrogsfrogs>
-User-Agent: StGit/0.19
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S240167AbjDZIFL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Apr 2023 04:05:11 -0400
+Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F26D3598;
+        Wed, 26 Apr 2023 01:05:01 -0700 (PDT)
+Received: by mail-pf1-x42d.google.com with SMTP id d2e1a72fcca58-63b7096e2e4so5649922b3a.2;
+        Wed, 26 Apr 2023 01:05:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1682496300; x=1685088300;
+        h=in-reply-to:subject:cc:to:from:message-id:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=SciRdqcR7n21lYLAgquNl0PXOwkcT56LabDCcxsO+B4=;
+        b=laxYLyoOPi9siIBETnLx+RgMNtgV3ecmPqfQ9jFfoPU/leADggHD8PkFpOSEl0MPtd
+         Z1edhd9VP/beJZ4fPImPTEEUihSTWu/GII6obgNL4D7OzxcCw7QAqVUzzLgtq8Yu9Yhm
+         3wRzP3USxg+PIpi4yYtTatqhb8AjsWhjffT5D+oM+Vhrrn5rMjz+dYuWZ4qDU+q50aTH
+         XwL3kHXO7S/zAN9rMuPBo2neL5OVPT83y3u6debfA8tqYg5oYJPWQnp433ySnufzP3wX
+         8wsoZXQ2HVls1ke+wWAy/VX6+UmszkjDyYSmkOsd/GSHAMqNLzDMTnvm/3SOiP0sl4N0
+         /6yw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1682496300; x=1685088300;
+        h=in-reply-to:subject:cc:to:from:message-id:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=SciRdqcR7n21lYLAgquNl0PXOwkcT56LabDCcxsO+B4=;
+        b=jPPYzbqdSWrj6lF22jfBl7s5rTAqXU+cuoABKUtC4d5UWtJFNA988upUNCOkJeFzCS
+         8+IB2hfgQgiijXrzVYGBXAj6ez5lQUecXcTEHLVb3LuKtcQes2wz8JoVoyzfTtfIvsph
+         78UIYHh034jvQ0KS/xL0rZrRxTwOlLbi/ILOfXtN7+d4W9YLHIP4bXwgmSMq05HFndTa
+         /Tguai6AEjq7ACgfnQ+RJltUL0vJohK1w4ErgeHhhkU3PqpkZ3ptXDJMf5C3/OmS6h/x
+         ujUSUcRC6kYP/zOmsWZExG3hkLw5QZLM4Yiwxnbud44TdQr8d3fS4bWYovhT3VEU26mz
+         K6lA==
+X-Gm-Message-State: AAQBX9f1HmgMX8PjFYZHkAA7waEHKkWUNQRJDQIygDNUFZ91r40yaqlA
+        Ohb5jsPUm/rBpMBfZmaqGwk=
+X-Google-Smtp-Source: AKy350a7jb5A+lCqt7RWiq/FGahhrNGJnTB8y+yy+MqyA941BNPTheauFAluUHjEZScPvZitCB2RRw==
+X-Received: by 2002:a05:6a00:1250:b0:63d:3d08:4792 with SMTP id u16-20020a056a00125000b0063d3d084792mr25859150pfi.32.1682496300449;
+        Wed, 26 Apr 2023 01:05:00 -0700 (PDT)
+Received: from rh-tp ([2406:7400:63:80ba:df67:5773:54c8:514f])
+        by smtp.gmail.com with ESMTPSA id s23-20020a62e717000000b005aa60d8545esm10642634pfh.61.2023.04.26.01.04.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 26 Apr 2023 01:04:59 -0700 (PDT)
+Date:   Wed, 26 Apr 2023 13:34:35 +0530
+Message-Id: <87pm7rgjcc.fsf@doe.com>
+From:   Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Baokun Li <libaokun1@huawei.com>
+Subject: Re: [RFC 1/2] ext4/060: Regression test against dioread_nolock mount option inconsistency
+In-Reply-To: <20230423154604.p65lfge3ari3jgeu@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+Zorro Lang <zlang@redhat.com> writes:
 
-Make it so that we can run recovery loop tests for an exact number of
-seconds.
+> On Sat, Apr 22, 2023 at 09:47:33PM +0530, Ritesh Harjani (IBM) wrote:
+>> During ext4_writepages, ext4 queries dioread_nolock mount option twice
+>> and if someone remount the filesystem in between with ^dioread_nolock,
+>> then this can cause an inconsistency causing WARN_ON() to be triggered.
+>>
+>> This fix describes the problem in more detail -
+>>
+>> https://lore.kernel.org/linux-ext4/20230328090534.662l7yxj2e425j7w@quack3/T/#md19c34646e8b4a816498532c298a66ecf2ae77d4
+>>
+>> This test reproduces below warning for me w/o the fix.
+>>
+>> ------------[ cut here ]------------
+>> WARNING: CPU: 2 PID: 26 at fs/ext4/page-io.c:231 ext4_put_io_end_defer+0xfb/0x140
+>> Modules linked in:
+>> CPU: 2 PID: 26 Comm: ksoftirqd/2 Not tainted 6.3.0-rc6-xfstests-00044-ga5c68786f1b1 #23
+>> Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.15.0-0-g2dd4b9b3f840-prebuilt.qemu.org 04/01/2014
+>> RIP: 0010:ext4_put_io_end_defer+0xfb/0x140
+>> Code: 5d 41 5e 41 5f e9 a5 73 d0 00 5b 48 89 ef 5d 41 5c 41 5d 41 5e 41 5f e9 d3 fa ff ff 49 83 be a8 03 00 00 00 0f 84 7b ff fd
+>> <...>
+>> Call Trace:
+>>  <TASK>
+>>  blk_update_request+0x116/0x4c0
+>>  ? finish_task_switch.isra.0+0xfb/0x320
+>>  blk_mq_end_request+0x1e/0x40
+>>  blk_complete_reqs+0x40/0x50
+>>  __do_softirq+0xd8/0x3e1
+>>  ? smpboot_thread_fn+0x30/0x280
+>>  run_ksoftirqd+0x3a/0x60
+>>  smpboot_thread_fn+0x1d8/0x280
+>>  ? __pfx_smpboot_thread_fn+0x10/0x10
+>>  kthread+0xf6/0x120
+>>  ? __pfx_kthread+0x10/0x10
+>>  ret_from_fork+0x2c/0x50
+>>  </TASK>
+>> [
+>>
+>> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>> ---
+>>  tests/ext4/060     | 88 ++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/ext4/060.out |  2 ++
+>>  2 files changed, 90 insertions(+)
+>>  create mode 100755 tests/ext4/060
+>>  create mode 100644 tests/ext4/060.out
+>>
+>> diff --git a/tests/ext4/060 b/tests/ext4/060
+>> new file mode 100755
+>> index 00000000..d9fe1a99
+>> --- /dev/null
+>> +++ b/tests/ext4/060
+>> @@ -0,0 +1,88 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 060
+>> +#
+>> +# This is to test a ext4 regression against inconsistent values of
+>
+> Great, a new regression test case!
+>
+>> +# dioread_nolock mount option while in ext4_writepages path.
+>> +# See - https://lore.kernel.org/linux-ext4/20230328090534.662l7yxj2e425j7w@quack3/T/#md19c34646e8b4a816498532c298a66ecf2ae77d4
+>
+> You can use the commit id and subject to replace the link.
+>
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>
+> also add mount/remount tag?
+>
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
----
- common/rc         |   34 ++++++++++++++++++++++++++++++++++
- tests/generic/019 |    1 +
- tests/generic/388 |    2 +-
- tests/generic/475 |    2 +-
- tests/generic/482 |    1 +
- tests/generic/648 |    8 ++++----
- 6 files changed, 42 insertions(+), 6 deletions(-)
+Yes.
 
+>> +
+>> +PID1=""
+>> +PIDS=""
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +# Override the default cleanup function.
+>> + _cleanup()
+>> +{
+>> +	{
+>> +		kill -SIGKILL $PID1 $PIDS
+>> +		wait $PID1 $PIDS
+>> +	} > /dev/null 2>&1
+>
+> I think the curly braces "{ }" is not necessary. Refer to generic/390 to deal
+> with the background processes.
 
-diff --git a/common/rc b/common/rc
-index e89b0a3794..090f3d4938 100644
---- a/common/rc
-+++ b/common/rc
-@@ -5078,6 +5078,40 @@ _save_coredump()
- 	$COREDUMP_COMPRESSOR -f "$out_file"
- }
- 
-+# Decide if a soak test should continue looping.  The sole parameter is the
-+# number of soak loops that the test wants to run by default.  The actual
-+# loop iteration number is stored in SOAK_LOOPIDX until the loop completes.
-+#
-+# If the test runner set a SOAK_DURATION value, this predicate will keep
-+# looping until it has run for at least that long.
-+_soak_loop_running() {
-+	local max_soak_loops="$1"
-+
-+	test -z "$SOAK_LOOPIDX" && SOAK_LOOPIDX=1
-+
-+	if [ -n "$SOAK_DURATION" ]; then
-+		if [ -z "$SOAK_DEADLINE" ]; then
-+			SOAK_DEADLINE="$(( $(date +%s) + SOAK_DURATION))"
-+		fi
-+
-+		local now="$(date +%s)"
-+		if [ "$now" -gt "$SOAK_DEADLINE" ]; then
-+			unset SOAK_DEADLINE
-+			unset SOAK_LOOPIDX
-+			return 1
-+		fi
-+		SOAK_LOOPIDX=$((SOAK_LOOPIDX + 1))
-+		return 0
-+	fi
-+
-+	if [ "$SOAK_LOOPIDX" -gt "$max_soak_loops" ]; then
-+		unset SOAK_LOOPIDX
-+		return 1
-+	fi
-+	SOAK_LOOPIDX=$((SOAK_LOOPIDX + 1))
-+	return 0
-+}
-+
- init_rc
- 
- ################################################################################
-diff --git a/tests/generic/019 b/tests/generic/019
-index b68dd90c0d..b81c1d17ba 100755
---- a/tests/generic/019
-+++ b/tests/generic/019
-@@ -30,6 +30,7 @@ _cleanup()
- }
- 
- RUN_TIME=$((20+10*$TIME_FACTOR))
-+test -n "$SOAK_DURATION" && RUN_TIME="$SOAK_DURATION"
- NUM_JOBS=$((4*LOAD_FACTOR))
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- FILE_SIZE=$((BLK_DEV_SIZE * 512))
-diff --git a/tests/generic/388 b/tests/generic/388
-index 9cd737e8eb..4a5be6698c 100755
---- a/tests/generic/388
-+++ b/tests/generic/388
-@@ -42,7 +42,7 @@ _scratch_mkfs >> $seqres.full 2>&1
- _require_metadata_journaling $SCRATCH_DEV
- _scratch_mount
- 
--for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
-+while _soak_loop_running $((50 * TIME_FACTOR)); do
- 	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p 4 >> $seqres.full &) \
- 		> /dev/null 2>&1
- 
-diff --git a/tests/generic/475 b/tests/generic/475
-index c426402ede..0cbf5131c2 100755
---- a/tests/generic/475
-+++ b/tests/generic/475
-@@ -41,7 +41,7 @@ _require_metadata_journaling $SCRATCH_DEV
- _dmerror_init
- _dmerror_mount
- 
--for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
-+while _soak_loop_running $((50 * TIME_FACTOR)); do
- 	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p $((LOAD_FACTOR * 4)) >> $seqres.full &) \
- 		> /dev/null 2>&1
- 
-diff --git a/tests/generic/482 b/tests/generic/482
-index 28c83a232e..6d8396d982 100755
---- a/tests/generic/482
-+++ b/tests/generic/482
-@@ -64,6 +64,7 @@ if [ $nr_cpus -gt 8 ]; then
- fi
- fsstress_args=$(_scale_fsstress_args -w -d $SCRATCH_MNT -n 512 -p $nr_cpus \
- 		$FSSTRESS_AVOID)
-+
- devsize=$((1024*1024*200 / 512))	# 200m phys/virt size
- csize=$((1024*64 / 512))		# 64k cluster size
- lowspace=$((1024*1024 / 512))		# 1m low space threshold
-diff --git a/tests/generic/648 b/tests/generic/648
-index d7bf5697e1..3b3544ff49 100755
---- a/tests/generic/648
-+++ b/tests/generic/648
-@@ -74,14 +74,14 @@ snap_loop_fs() {
- 
- fsstress=($FSSTRESS_PROG $FSSTRESS_AVOID -d "$loopmnt" -n 999999 -p "$((LOAD_FACTOR * 4))")
- 
--for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
-+while _soak_loop_running $((25 * TIME_FACTOR)); do
- 	touch $scratch_aliveflag
- 	snap_loop_fs >> $seqres.full 2>&1 &
- 
- 	if ! _mount $loopimg $loopmnt -o loop; then
- 		rm -f $scratch_aliveflag
- 		_metadump_dev $loopimg $seqres.loop.$i.md
--		_fail "iteration $i loopimg mount failed"
-+		_fail "iteration $SOAK_LOOPIDX loopimg mount failed"
- 		break
- 	fi
- 
-@@ -126,12 +126,12 @@ for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
- 	done
- 	if [ $is_unmounted -ne 0 ];then
- 		cat $tmp.unmount.err
--		_fail "iteration $i scratch unmount failed"
-+		_fail "iteration $SOAK_LOOPIDX scratch unmount failed"
- 	fi
- 	_dmerror_load_working_table
- 	if ! _dmerror_mount; then
- 		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
--		_fail "iteration $i scratch mount failed"
-+		_fail "iteration $SOAK_LOOPIDX scratch mount failed"
- 	fi
- done
- 
+Ok, will check that.
 
+>
+> [ -n "$PIDS" ] && kill -9 $PIDS
+> wait $PIDS
+>
+
+Sure.
+
+>> +
+>> +	cd /
+>> +	rm -r -f $tmp.*
+>> +}
+>> +
+>> +# Import common functions.
+>> + . ./common/filter
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>
+> Remove this comment.
+>
+>> +_supported_fs ext4
+>
+> _fixed_by_kernel_commit ?
+>
+
+Yes, I will check the commit-id and will update it.
+
+>> +_require_scratch
+>> +
+>> +_scratch_mkfs_ext4 >> $seqres.full 2>&1
+>> +_scratch_mount
+>> +_scratch_remount "dioread_nolock" >> $seqres.full 2>&1
+>> +ret=$?
+>
+> If the "$ret" is only used once as below...
+>
+>> +if [ $ret -ne 0 ]; then
+>
+> ... then we can use "$?" directly.
+>
+>> +	_notrun "dioread_nolock mount option not supported"
+>
+> When ext4 start to support dioread_nolock/dioread_lock ?
+
+Ok. yes looks like dioread_nolock is quiet old. Will drop the check.
+
+>
+> If it's old enough, we don't need to check this option. Or we can have a new
+> helper (e.g. require_scratch_ext4_mount_option()). You can refer to
+> _require_scratch_ext4_feature(), or maybe we can change it to support mount
+> option test.
+>
+>> +fi
+>> +
+>> +testfile=$SCRATCH_MNT/testfile
+>> +
+>> +function run_buff_io_loop()
+>> +{
+>> +	# add buffered io case here
+>> +	while [ 1 ]; do
+>> +		xfs_io -fc "truncate 0" -c "pwrite 0 200M" -c "fsync" "$testfile.$1" > /dev/null 2>&1
+>
+> I only find the $testfile is used at here once, if so you can make it as
+> a local variable of this function.
+>
+>> +		sleep 2;
+>> +	done
+>> +}
+>> +
+>> +function run_remount_loop()
+>> +{
+>> +	# add remount loop case here
+>> +	while [ 1 ]; do
+>> +		_scratch_remount "dioread_nolock" >> $seqres.full 2>&1
+>> +		sleep 1
+>> +		_scratch_remount "dioread_lock" >> $seqres.full 2>&1
+>> +		sleep 1
+>> +	done
+>> +}
+>> +
+>> +run_remount_loop &
+>> +PID1=$!
+>
+> If you don't need to kill these processes in a specific order, I think
+> you can:
+>
+> PIDS=$!
+>
+
+ok.
+
+>> +for i in $(seq 1 20); do
+>> +	run_buff_io_loop $i &
+>> +	PID=$!
+>> +	PIDS="${PIDS} ${PID}"
+>
+> PIDS="$PIDS $!"
+>
+>> +done
+>> +
+>> +sleep 10
+>
+> $((10 * TIME_FACTOR)) ?
+>
+
+Sure. will check more on TIME_FACTOR.
+
+>> +
+>> +{
+>> +	kill -SIGKILL $PID1 $PIDS
+>> +	wait $PID1 $PIDS
+>> +} > /dev/null 2>&1
+>
+> kill -9 $$PIDS
+> wait $PIDS
+> unset PIDS
+>
+
+Thanks Zorro for the quick review. Agree with all of your comments.
+I will work on these and will send out v2 addressing your review
+comments.
+
+-ritesh
