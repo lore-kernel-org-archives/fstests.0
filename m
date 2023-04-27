@@ -2,113 +2,122 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6DD9C77B73
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Apr 2023 05:39:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96491C77B7E
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Apr 2023 08:27:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242675AbjD0Fjv (ORCPT
+        id S243132AbjD0I1y (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 27 Apr 2023 01:39:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51258 "EHLO
+        Thu, 27 Apr 2023 04:27:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232094AbjD0Fju (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Apr 2023 01:39:50 -0400
+        with ESMTP id S243092AbjD0I1t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Apr 2023 04:27:49 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D8A9E65
-        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 22:39:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6372B49DC
+        for <fstests@vger.kernel.org>; Thu, 27 Apr 2023 01:27:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1682573942;
+        s=mimecast20190719; t=1682584019;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=3IRv0xcvCBGXo8Vx75fT1GgV0k3FMDpkeMz40XQE2go=;
-        b=Oy7t9mtNwjHblOM+xWGGZSBk1dUWZMEeDT3uc60EyIVgSa/25Ps0l8q7hKDL8L0AcOI15n
-        pm+xnk5cwQsTSVCJLbISbVqW0Mp4fLEb+dNoTerKgYpUTGbBCPrupadJfgZLeQqSGJF6Vu
-        Gc+NIqxdbLwH/Huhy/4oZOzvBIl5EQU=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-308-0A7Z8aLUPtOP-L50QXdiuw-1; Thu, 27 Apr 2023 01:39:01 -0400
-X-MC-Unique: 0A7Z8aLUPtOP-L50QXdiuw-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-63b86fc03fcso5437628b3a.1
-        for <fstests@vger.kernel.org>; Wed, 26 Apr 2023 22:39:01 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682573940; x=1685165940;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3IRv0xcvCBGXo8Vx75fT1GgV0k3FMDpkeMz40XQE2go=;
-        b=BIbbX9jtTqi2fCXgu0TgLBKLqza9Re/QiCT5Q8KmEKOdVruyJRKpvKUsKbxklZByGj
-         NbxqOS5TMk+DiR76q2IfmDZi4SbVmOTZ26ZkThowxPjaIEws8t3RQnsjMLLe21fh8YlQ
-         RQY5cQ5lNywdruhZRMEMSPv04wkkQMQuN2iKvI/8XmrdeQMI1VvlulgMJqbUD194YS9g
-         HitkWh2KnGkfJkVh8tClZntYlNPXJ+UfoUr12rkTZLS8jcV9EjUqTIoBeJRgk5AkcTvt
-         cg1eEzqo6iMc48jIbrKHagT8Lxx8cANEAU9VUjlK695QHvqkaTUt5MlEjPtw3AOnoHdU
-         PiQQ==
-X-Gm-Message-State: AC+VfDyg8EYVGJCE8YGUYQQaPi/uQR1g48FA8RrkcmN3WZcmTaU40/+M
-        eoyUvbEp3SvVbi8tkkb/Xh55uQtzqTTGydmlIH4EkhunhOI5RS7H/OhDQGupyVb56Tp19PDY8+t
-        O5fQMb0kv6Vx0QTVREg==
-X-Received: by 2002:a05:6a20:9183:b0:ee:bfc0:2bfe with SMTP id v3-20020a056a20918300b000eebfc02bfemr438600pzd.60.1682573940232;
-        Wed, 26 Apr 2023 22:39:00 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ6MIqLUlGUvl5/P7TIxRPX3bIvx2EsU8GV5In4op/WwaWcV1pBkN9CdtSguiX7QvZwfdcfGyA==
-X-Received: by 2002:a05:6a20:9183:b0:ee:bfc0:2bfe with SMTP id v3-20020a056a20918300b000eebfc02bfemr438572pzd.60.1682573939795;
-        Wed, 26 Apr 2023 22:38:59 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id i14-20020a655b8e000000b0051f14839bf3sm10834387pgr.34.2023.04.26.22.38.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Apr 2023 22:38:59 -0700 (PDT)
-Date:   Thu, 27 Apr 2023 13:38:54 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     David Howells <dhowells@redhat.com>
-Cc:     fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
-        Eryu Guan <guan@eryu.me>,
-        Marc Dionne <marc.dionne@auristor.com>,
-        Jeffrey Altman <jaltman@auristor.com>,
-        linux-afs@lists.infradead.org
-Subject: Re: [PATCH v2 1/6] Add AFS support
-Message-ID: <20230427053854.gyccwirg7wwsy5ft@zlang-mailbox>
-References: <20230426194018.hrq3pme5wkxia5pm@zlang-mailbox>
- <20230426143011.lktpz46bytvub6kh@zlang-mailbox>
- <20230424141042.450535-1-dhowells@redhat.com>
- <20230424141042.450535-2-dhowells@redhat.com>
- <868873.1682524402@warthog.procyon.org.uk>
- <883621.1682541160@warthog.procyon.org.uk>
+         content-transfer-encoding:content-transfer-encoding;
+        bh=l6syDLggRiYjAStI+X0+pQOosy+q7w0nb4goYRoZwCE=;
+        b=XxewBXzUqqNRNlv2HJ5fNAyP7vEj1FfQjXVm58gYlXn+ww+LXifAjlnMIIM/X5rcXfz4tL
+        a6jJIjHKrHu424icHaLz8o3WAuJ/W73O/anteVV7cJpwG9tyRtUhabBNpSU11H2LkpkhRL
+        jdRF9tYOaRP6wegF1nobyeGjJI3HPx4=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-372-dI1KEEV-NJOdULEjrzKuFQ-1; Thu, 27 Apr 2023 04:26:56 -0400
+X-MC-Unique: dI1KEEV-NJOdULEjrzKuFQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id CA5773C10C74;
+        Thu, 27 Apr 2023 08:26:55 +0000 (UTC)
+Received: from warthog.procyon.org.uk (unknown [10.42.28.174])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 0E1951121314;
+        Thu, 27 Apr 2023 08:26:54 +0000 (UTC)
+Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
+        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
+        Kingdom.
+        Registered in England and Wales under Company Registration No. 3798903
+From:   David Howells <dhowells@redhat.com>
+To:     Steve French <sfrench@samba.org>
+cc:     dhowells@redhat.com, fstests@vger.kernel.org,
+        linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org
+Subject: Weird behaviour with cifs in xfstests shutdown tests
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <883621.1682541160@warthog.procyon.org.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <971804.1682584013.1@warthog.procyon.org.uk>
+Content-Transfer-Encoding: quoted-printable
+Date:   Thu, 27 Apr 2023 09:26:53 +0100
+Message-ID: <971805.1682584013@warthog.procyon.org.uk>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.3
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 26, 2023 at 09:32:40PM +0100, David Howells wrote:
-> Zorro Lang <zlang@redhat.com> wrote:
-> 
-> > > The in-kernel afs fs takes a string in afs mountpoint format as its source.
-> > 
-> > So do we need to change the below line:
-> > 
-> >   echo $SCRATCH_DEV | grep -q "^%" > /dev/null 2>&1
-> > 
-> > to
-> > 
-> >   echo "$SCRATCH_DEV" | grep -q ^[%#] 
-> > 
-> > ?
-> 
-> I think we want to require '%' to force a RW volume.  xfstests probably won't
-> work on a RO or backup volume.
+I'm seeing some failures running xfstests on cifs when it comes to tests t=
+hat
+do a shutdown of the filesystem, generic/392 for example:
 
-OK, thanks for this explanation, maybe we can you add this to be a comment of
-grep -q "^%". (I can help that when I merge it, if no more other changes).
+generic/392       [failed, exit status 1]- output mismatch (see /root/xfst=
+ests-dev/results//smb3/generic/392.out.bad)
+    --- tests/generic/392.out   2021-05-25 13:27:50.000000000 +0100
+    +++ /root/xfstests-dev/results//smb3/generic/392.out.bad    2023-04-27=
+ 09:07:42.402657080 +0100
+    @@ -1,11 +1,67 @@
+     QA output created by 392
+     =3D=3D=3D=3D i_size 1024 test with fsync =3D=3D=3D=3D
+    +stat: cannot statx '/xfstest.scratch/testfile': Input/output error
+    +Before:  "b: 8194 s: 4195328 a: 2023-04-27 09:07:39.410675400 +0100 m=
+: 2023-04-27 09:07:39.410675400 +0100 c: 2023-04-27 09:07:39.410675400 +01=
+00"
+    +After : =
 
-Now most (5/6) of patches of this patchset are reviewed, if you'd like to add
-more things in README or README.config-sections or other docs, I'll wait
-the v2 of this patch. Or I'll merge this patchset in next fstests release
-(might be this weekend).
+    +rm: cannot remove '/xfstest.scratch/testfile': Input/output error
+     =3D=3D=3D=3D i_size 4096 test with fsync =3D=3D=3D=3D
+    ...
+    (Run 'diff -u /root/xfstests-dev/tests/generic/392.out /root/xfstests-=
+dev/results//smb3/generic/392.out.bad'  to see the entire diff)
 
-Thanks,
-Zorro
+The problem appears to be that the CIFS_MOUNT_SHUTDOWN persists if there's
+another cifs mount from the same server present.  So in generic/392 it doe=
+s:
 
-> 
-> David
-> 
+	before=3D`stat "$stat_opt" $testfile`
+
+	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
+	_scratch_shutdown | tee -a $seqres.full
+	_scratch_cycle_mount
+
+	after=3D`stat "$stat_opt" $testfile`
+
+which cycles the *scratch* mount, but leaves the test mount still mounted =
+and
+then the 'after' stat fails with EIO.
+
+Testing this by hand:
+
+  mount //192.168.6.1/scratch /xfstest.scratch/ -o user=3Dshares,pass=3D..=
+.;\
+  touch /xfstest.scratch/testfile; \
+  stat /xfstest.scratch/testfile; \
+  ./src/godown /xfstest.scratch/; \
+  umount /xfstest.scratch/; \
+  mount //192.168.6.1/scratch /xfstest.scratch/ -o user=3Dshares,pass=3D..=
+.; \
+  stat /xfstest.scratch/testfile
+
+works, but will fail if I do:
+
+  mount //192.168.6.1/test /xfstest.test/ -o user=3Dshares,pass=3D...;
+
+first.
+
+Interestingly, the two mounts have different device numbers according to s=
+tat,
+so they would appear to have different superblocks.
+
+David
 
