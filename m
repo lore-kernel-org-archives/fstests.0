@@ -2,41 +2,41 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6987DC77B7D
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 May 2023 15:04:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64096C7EE22
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 May 2023 15:05:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233729AbjENPEI (ORCPT
+        id S234864AbjENPFN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 14 May 2023 11:04:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42492 "EHLO
+        Sun, 14 May 2023 11:05:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229585AbjENPEI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 14 May 2023 11:04:08 -0400
+        with ESMTP id S229585AbjENPFM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 May 2023 11:05:12 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCE071994
-        for <fstests@vger.kernel.org>; Sun, 14 May 2023 08:04:06 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 826E61994
+        for <fstests@vger.kernel.org>; Sun, 14 May 2023 08:05:11 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5E87B60C48
-        for <fstests@vger.kernel.org>; Sun, 14 May 2023 15:04:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1AEB8C433EF;
-        Sun, 14 May 2023 15:04:04 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 193B360C4A
+        for <fstests@vger.kernel.org>; Sun, 14 May 2023 15:05:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9AE9C433D2;
+        Sun, 14 May 2023 15:05:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684076645;
-        bh=4fYtgfI96A++rjFmVyNods5Y1R3jGfFaE6rpHN1wrtQ=;
+        s=k20201202; t=1684076710;
+        bh=Rh5jjoRZFKnf2ztHG2ANn02CVTSLLPIKlngyNnJpOPM=;
         h=Date:From:To:Subject:From;
-        b=Ok0OuoqzqaIW5I8NzFm5GePVoUejNM2RlfQH44ySZPesosoaDp5Pn3AWuV+gTmByg
-         qFd65lvAQf2PDn+dMSDsc0pRqo4ONlnhmuk6+4+Tlns7XkAQshW781rz2S+fLDw661
-         93t5kyU2Ol8Psf4VX6qxMXhKK5v4CVAPzkoxyw37/NEsrAVgQOp3FdMHIic2tqC4Es
-         3W0yGT+MAG2rx1Md6hBb3nvpa5LYbOJ+whNjnTTSTGGz1M7vFGBdUEqMrWPeHQ9mZW
-         uD4Zym56iSpw0+Yjrj9XFpkReqfeRM+TMaT3ebjDBxe9h4JRk+2kazDniUoEq/2qJ4
-         P7E/So3iMwLpg==
-Date:   Sun, 14 May 2023 23:03:59 +0800
+        b=u5X/pnOtxW1d+slvozGTfzJPc1PS7q8nbhk0eVPtDRDZYfqJqdg3TD+eaJv+7sF0Z
+         BVYjz+s2Of7TQN5Gn7s9Blvq+OLBFULfLtaOLk6zTIxjJU9hfizfFlTSHLtjBgL6G7
+         ej7VkFRthRiQzDuNdL5Wg+1V7aBNGYGt/is3TUUzezb0fz+NVO4GZEk9R+cCdKS/S5
+         nTdWmq2DAyfYCM/VcO4iqbzB7mdzfklcAoJDUZDElEjPDk+gRmuG1ZuV87HzSdQKIx
+         Z7EFHFHRIF+x8UbnzdmtHhO22RMoHZ0LwFsHKZaYUvMClypJFaYQSO8F9Kba49FxYD
+         uadIQIhIcPZ/g==
+Date:   Sun, 14 May 2023 23:05:06 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.05.01 onto master branch
-Message-ID: <20230514150359.zutlp7b72gih3iyv@zlang-mailbox>
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.05.14
+Message-ID: <20230514150506.uyrvrubbgbrrnytw@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -46,86 +46,66 @@ X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.05.01 version.
+has just been updated and tagged as v2023.05.14 release.
+
+Release Notes:
+1) There's 1 new test case in this release -- btrfs/287.
+2) A new group named "logical_resolve", for btrfs generally.
+
+More updates or fixes as below, thanks for all!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-2e361b3da66d misc: add duration for recovery loop tests
+33144e0693b5 generic/{094,225}: drop the file allocation unit requirements
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Darrick J. Wong (5):
-      [c63ce4a5eac8] xfs/517: add missing freeze command
-      [a1daffd9bbff] generic/476: reclassify this test as a long running soak stress test
-      [2b56a7d93ab0] readme: document TIME/LOAD_FACTOR
-      [3e85dd4fe423] misc: add duration for long soak tests
-      [2e361b3da66d] misc: add duration for recovery loop tests
+Darrick J. Wong (7):
+[U]      [8c5f19b701ea] fsx: fix indenting of columns in bad buffers report
+[U]      [f093a7503a6a] xfs/262: remove dangerous labels
+[U]      [23e11f53b4b6] generic/724,xfs/791: adjust test preconditions for post-EOF stripe zeroing
+[U]      [715d052a8faf] xfs/{243,245,272,274}: ignore raid alignment flags in bmap output
+[U]      [c387c694bde3] fiemap-tester: holes can be backed by unwritten extents
+[U]      [6a0bba58d043] fiemap: FIEMAP_EXTENT_LAST denotes the last record in the recordset
+[U]      [33144e0693b5] generic/{094,225}: drop the file allocation unit requirements
 
-David Howells (7):
-      [3e7529aff5d2] fstests: add AFS support
-      [2ce9cd8c026f] generic/314, afs: Allow for a filesystem that doesn't honour SGID inheritance
-      [ec575a86da79] generic/317, afs: Allow for a filesystem not to honour the local uid/gid
-      [f1f408150d09] generic/123, generic/128, afs: Allow for an fs that does its own perm management
-      [ddff883c8c3a] generic/531: Check for O_TMPFILE
-      [c71a4391eadd] generic/696: AFS doesn't support the "noacl" command line option
-      [5f6b9e575f1b] fstests: Doc changes for afs
-
-Leah Rumancik (1):
-      [4a444bc19a83] check: _check_filesystems for errors even if test failed
-
-Theodore Ts'o (1):
-      [c7d81cdecbef] check: try to fix the test device if it gets corrupted
-
-Xiubo Li (1):
-      [067acc189b6d] common/rc: skip ceph when atime is required
-
-Yang Xu (1):
-      [ea9160e0fcaf] src: Don't include <sys/mount.h> and <linux/mount.h> together
+Filipe Manana (5):
+[U]      [a580ecd1dfc6] common/btrfs: add helper to get the bytenr for a file extent item
+[N]      [f635f9c3153c] btrfs: add a test case for the logical to ino ioctl
+[U]      [7ab65dae2751] groups: add logical_resolve group for btrfs
+[U]      [802f42f7a5b2] btrfs/254: correct subject of the relevant kernel patch and add git commit
+[U]      [e35817daa103] btrfs/228: sync filesystem after creating subvolume
 
 
 Code Diffstat:
 
- README                            |  14 +++-
- README.config-sections            |   7 ++
- build/rpm/xfstests.spec.in        |   2 +-
- check                             |  23 +++++-
- common/config                     |  17 ++++-
- common/fuzzy                      |   7 +-
- common/rc                         | 151 ++++++++++++++++++++++++++++++++++++--
- common/report                     |   1 +
- common/xfs                        |  12 +++
- doc/group-names.txt               |   3 +-
- doc/requirement-checking.txt      |  23 ++++++
- doc/testing-afs.txt               |  36 +++++++++
- ltp/fsstress.c                    |  78 +++++++++++++++++++-
- ltp/fsx.c                         |  50 ++++++++++++-
- src/detached_mounts_propagation.c |   5 +-
- src/soak_duration.awk             |  23 ++++++
- src/vfs/utils.c                   |   1 -
- tests/generic/019                 |   1 +
- tests/generic/123                 |   1 +
- tests/generic/128                 |   1 +
- tests/generic/314                 |   1 +
- tests/generic/317                 |   1 +
- tests/generic/388                 |   2 +-
- tests/generic/475                 |   2 +-
- tests/generic/476                 |   7 +-
- tests/generic/482                 |   1 +
- tests/generic/521                 |   1 +
- tests/generic/522                 |   1 +
- tests/generic/531                 |   1 +
- tests/generic/642                 |   1 +
- tests/generic/648                 |   8 +-
- tests/generic/696                 |   5 +-
- tests/xfs/517                     |   2 +-
- 33 files changed, 456 insertions(+), 33 deletions(-)
+ common/btrfs        |  52 ++++++++++++++++++
+ doc/group-names.txt |   1 +
+ ltp/fsx.c           |   9 +--
+ src/fiemap-tester.c |  25 ++++-----
+ tests/btrfs/004     |   2 +-
+ tests/btrfs/228     |   5 ++
+ tests/btrfs/254     |   6 +-
+ tests/btrfs/287     | 154 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/287.out |  95 ++++++++++++++++++++++++++++++++
+ tests/btrfs/299     |  20 +------
+ tests/generic/094   |   5 --
+ tests/generic/225   |   5 --
+ tests/generic/724   |   2 +-
+ tests/xfs/243       |  12 ++--
+ tests/xfs/245       |   6 +-
+ tests/xfs/262       |   2 +-
+ tests/xfs/272       |   4 +-
+ tests/xfs/274       |   8 +--
+ tests/xfs/791       |   2 +-
+ 19 files changed, 347 insertions(+), 68 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
