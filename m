@@ -2,149 +2,104 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB0E0C77B73
-	for <linux-fstests@archiver.kernel.org>; Fri, 26 May 2023 20:02:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54B8DC77B7C
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 May 2023 14:33:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229999AbjEZUCb (ORCPT
+        id S229476AbjE1Odl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 26 May 2023 16:02:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36358 "EHLO
+        Sun, 28 May 2023 10:33:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231185AbjEZUCa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 26 May 2023 16:02:30 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D86C9E7
-        for <fstests@vger.kernel.org>; Fri, 26 May 2023 13:01:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1685131303;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=RtxFHX4zO2PyGGnkQ/d6tRFa7ESWSoq+efdP4qaVHnE=;
-        b=S4txcC5QeIaBof3mI3xm0jCTEj8vQvqsMpJ6DVetze6cjQ4SRssarkTFY4b6YCx6VZOtFR
-        uUlm7VhSCwlBCmJCaaeVqrGBVDuvdLBmfEHRrxBwZSyaWF9W+sEz92RXOdBroDslMuLY/E
-        6Lln9cSy4umuRIlpDn68XHfXOWyYWsY=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-416-m9Nh_54qNhuUORdIeeSrsw-1; Fri, 26 May 2023 16:01:41 -0400
-X-MC-Unique: m9Nh_54qNhuUORdIeeSrsw-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1ae3f6df2bfso7953515ad.1
-        for <fstests@vger.kernel.org>; Fri, 26 May 2023 13:01:41 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685131300; x=1687723300;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RtxFHX4zO2PyGGnkQ/d6tRFa7ESWSoq+efdP4qaVHnE=;
-        b=QxbYd4gINQFhp7WzY92zM325agJmsXGQ8MA1ZUDYSdTnvJU8cMJ0pWK2XhPEcHkc9Q
-         HBMXf8aYIIfM4Bh2vTqYSticHw1wyjSaYSu+fRVR1ZdhjYrvsVOU9df9H0jUR00SrltF
-         qFhFkF0407YIln9SJRTK1uPQQ/c7wjnI87bQZOJzWmPRuRwUbop97SFTkTZ8U3TZMqhU
-         3bMZDSXQh6iNfFaLJtkCCZFjw2EI6QRKjLu++5qH4XUD4DtUWXJRQbIcVSBKGLoRo/ej
-         bMeKrsnGOIHlwoIIzL63E5EetMTU0muzoRVskziFZuOLCw8/jJ/Sc470t9wYWKU4PfVu
-         9qJg==
-X-Gm-Message-State: AC+VfDw7M1T9QmsGJx3/A5ZZVtRlTCq3K6xKK6s4KhidhJznUiS/B+V/
-        XHUUC3QMvhJekZe51exmMI2ZP4bzB8eu5uMc0Y1p79wcXF1qV1AwaI7uLUdAQYugIl9JpUCHHL+
-        mMQNzgrs90BPP4klhGw==
-X-Received: by 2002:a17:903:32ca:b0:1ae:35b8:d59b with SMTP id i10-20020a17090332ca00b001ae35b8d59bmr4363186plr.41.1685131300597;
-        Fri, 26 May 2023 13:01:40 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ7mGHc+7Tbz/jrCFqua5oxiIYO43fr4qpedeGsD21KS75Cr1duJEXQpZxmXeCMm6k4o2c5Zrg==
-X-Received: by 2002:a17:903:32ca:b0:1ae:35b8:d59b with SMTP id i10-20020a17090332ca00b001ae35b8d59bmr4363145plr.41.1685131300097;
-        Fri, 26 May 2023 13:01:40 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w5-20020a170902d70500b001acad024c8asm3621776ply.40.2023.05.26.13.01.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 May 2023 13:01:38 -0700 (PDT)
-Date:   Sat, 27 May 2023 04:01:34 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 06/11] xfs/018: disable parent pointers for this test
-Message-ID: <20230526200134.cnhlqop277ntyyah@zlang-mailbox>
-References: <168506060845.3732476.15364197106064737675.stgit@frogsfrogsfrogs>
- <168506060929.3732476.6482579916222371853.stgit@frogsfrogsfrogs>
+        with ESMTP id S229445AbjE1Odk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 May 2023 10:33:40 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE579BD
+        for <fstests@vger.kernel.org>; Sun, 28 May 2023 07:33:39 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4FC8060CA0
+        for <fstests@vger.kernel.org>; Sun, 28 May 2023 14:33:39 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1437FC433D2;
+        Sun, 28 May 2023 14:33:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1685284418;
+        bh=jxlBOTModJoltPgqEJTp+W0V4HIWhifJUxH5wR/skNE=;
+        h=Date:From:To:Subject:From;
+        b=B1zc3DEMdk9Ujk9jJ2XGyfwUCOYNFahrtc0TjoZjUoUHKuwL1BQFdklIzlPIcgEJU
+         mpZFkv0Hz1j65HXOXWBfaOt0BNkYo4tO4WE+43YsMDVnxZ8gHNcLa/T4uBL1Op0rfx
+         pdF0Bskfa4DnKAc7fMhJ1qPM8i2CaYMIM7pvZK0aO2B60uad5lhMESdlPEj1DFmIH5
+         XdAryj3dB8Bd4rIMIBhX8bc2jAJAWsYD+ZZpCi0hFfmHL2+E6vO3qAbpu/dG1eGY3y
+         V6gDZ3v113GGebVEL38qsmdzkxbx74xzZYcTWLBF5yiS5RX/KMJEjW+OM3HL4AbfHT
+         HuLbQAESBA+OA==
+Date:   Sun, 28 May 2023 22:33:34 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2023.05.14 onto master branch
+Message-ID: <20230528143334.kdsv4hju5ehlqqtl@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <168506060929.3732476.6482579916222371853.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 25, 2023 at 07:03:39PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> This test depends heavily on the xattr formats created for new files.
-> Parent pointers break those assumptions, so force parent pointers off.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/xfs/018 |    7 ++++++-
->  tests/xfs/191 |    7 ++++++-
->  tests/xfs/288 |    7 ++++++-
->  3 files changed, 18 insertions(+), 3 deletions(-)
-> 
-> 
-> diff --git a/tests/xfs/018 b/tests/xfs/018
-> index 1ef51a2e61..34b6e91579 100755
-> --- a/tests/xfs/018
-> +++ b/tests/xfs/018
-> @@ -100,7 +100,12 @@ attr32l="X$attr32k"
->  attr64k="$attr32k$attr32k"
->  
->  echo "*** mkfs"
-> -_scratch_mkfs >/dev/null
-> +
-> +# Parent pointers change the xattr formats sufficiently to break this test.
-> +# Disable parent pointers if mkfs supports it.
-> +mkfs_args=()
-> +$MKFS_XFS_PROG 2>&1 | grep -q parent=0 && mkfs_args+=(-n parent=0)
+Hi all,
 
-Maybe we need a _require_no_xfs_parent() ?
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2023.05.14 version.
 
 Thanks,
 Zorro
 
-> +_scratch_mkfs "${mkfs_args[@]}" >/dev/null
->  
->  blk_sz=$(_scratch_xfs_get_sb_field blocksize)
->  err_inj_attr_sz=$(( blk_sz / 3 - 50 ))
-> diff --git a/tests/xfs/191 b/tests/xfs/191
-> index 7a02f1be21..0a6c20dad7 100755
-> --- a/tests/xfs/191
-> +++ b/tests/xfs/191
-> @@ -33,7 +33,12 @@ _fixed_by_kernel_commit 7be3bd8856fb "xfs: empty xattr leaf header blocks are no
->  _fixed_by_kernel_commit e87021a2bc10 "xfs: use larger in-core attr firstused field and detect overflow"
->  _fixed_by_git_commit xfsprogs f50d3462c654 "xfs_repair: ignore empty xattr leaf blocks"
->  
-> -_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> +# Parent pointers change the xattr formats sufficiently to break this test.
-> +# Disable parent pointers if mkfs supports it.
-> +mkfs_args=()
-> +$MKFS_XFS_PROG 2>&1 | grep -q parent=0 && mkfs_args+=(-n parent=0)
-> +
-> +_scratch_mkfs_xfs "${mkfs_args[@]}" | _filter_mkfs >$seqres.full 2>$tmp.mkfs
->  cat $tmp.mkfs >> $seqres.full
->  source $tmp.mkfs
->  _scratch_mount
-> diff --git a/tests/xfs/288 b/tests/xfs/288
-> index aa664a266e..6bfc9ac0c8 100755
-> --- a/tests/xfs/288
-> +++ b/tests/xfs/288
-> @@ -19,8 +19,13 @@ _supported_fs xfs
->  _require_scratch
->  _require_attrs
->  
-> +# Parent pointers change the xattr formats sufficiently to break this test.
-> +# Disable parent pointers if mkfs supports it.
-> +mkfs_args=()
-> +$MKFS_XFS_PROG 2>&1 | grep -q parent=0 && mkfs_args+=(-n parent=0)
-> +
->  # get block size ($dbsize) from the mkfs output
-> -_scratch_mkfs_xfs 2>/dev/null | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> +_scratch_mkfs_xfs "${mkfs_args[@]}" 2>/dev/null | _filter_mkfs 2>$tmp.mkfs >/dev/null
->  . $tmp.mkfs
->  
->  _scratch_mount
-> 
+The new head of the master branch is commit:
 
+33144e0693b5 generic/{094,225}: drop the file allocation unit requirements
+
+New commits:
+
+Darrick J. Wong (7):
+      [8c5f19b701ea] fsx: fix indenting of columns in bad buffers report
+      [f093a7503a6a] xfs/262: remove dangerous labels
+      [23e11f53b4b6] generic/724,xfs/791: adjust test preconditions for post-EOF stripe zeroing
+      [715d052a8faf] xfs/{243,245,272,274}: ignore raid alignment flags in bmap output
+      [c387c694bde3] fiemap-tester: holes can be backed by unwritten extents
+      [6a0bba58d043] fiemap: FIEMAP_EXTENT_LAST denotes the last record in the recordset
+      [33144e0693b5] generic/{094,225}: drop the file allocation unit requirements
+
+Filipe Manana (5):
+      [a580ecd1dfc6] common/btrfs: add helper to get the bytenr for a file extent item
+      [f635f9c3153c] btrfs: add a test case for the logical to ino ioctl
+      [7ab65dae2751] groups: add logical_resolve group for btrfs
+      [802f42f7a5b2] btrfs/254: correct subject of the relevant kernel patch and add git commit
+      [e35817daa103] btrfs/228: sync filesystem after creating subvolume
+
+
+Code Diffstat:
+
+ common/btrfs        |  52 ++++++++++++++++++
+ doc/group-names.txt |   1 +
+ ltp/fsx.c           |   9 +--
+ src/fiemap-tester.c |  25 ++++-----
+ tests/btrfs/004     |   2 +-
+ tests/btrfs/228     |   5 ++
+ tests/btrfs/254     |   6 +-
+ tests/btrfs/287     | 154 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/287.out |  95 ++++++++++++++++++++++++++++++++
+ tests/btrfs/299     |  20 +------
+ tests/generic/094   |   5 --
+ tests/generic/225   |   5 --
+ tests/generic/724   |   2 +-
+ tests/xfs/243       |  12 ++--
+ tests/xfs/245       |   6 +-
+ tests/xfs/262       |   2 +-
+ tests/xfs/272       |   4 +-
+ tests/xfs/274       |   8 +--
+ tests/xfs/791       |   2 +-
+ 19 files changed, 347 insertions(+), 68 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
