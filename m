@@ -2,41 +2,41 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54B8DC77B7C
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 May 2023 14:33:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D217C77B7E
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 May 2023 14:36:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229476AbjE1Odl (ORCPT
+        id S229445AbjE1OgL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 May 2023 10:33:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36314 "EHLO
+        Sun, 28 May 2023 10:36:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjE1Odk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 May 2023 10:33:40 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE579BD
-        for <fstests@vger.kernel.org>; Sun, 28 May 2023 07:33:39 -0700 (PDT)
+        with ESMTP id S229526AbjE1OgK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 May 2023 10:36:10 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4C6BBD
+        for <fstests@vger.kernel.org>; Sun, 28 May 2023 07:36:08 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4FC8060CA0
-        for <fstests@vger.kernel.org>; Sun, 28 May 2023 14:33:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1437FC433D2;
-        Sun, 28 May 2023 14:33:37 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 624A9615EB
+        for <fstests@vger.kernel.org>; Sun, 28 May 2023 14:36:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32F97C433D2;
+        Sun, 28 May 2023 14:36:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1685284418;
-        bh=jxlBOTModJoltPgqEJTp+W0V4HIWhifJUxH5wR/skNE=;
+        s=k20201202; t=1685284567;
+        bh=iM09MakMrpbVfWcKyzUn1jshMgFSShYy3B8aeVnZ4us=;
         h=Date:From:To:Subject:From;
-        b=B1zc3DEMdk9Ujk9jJ2XGyfwUCOYNFahrtc0TjoZjUoUHKuwL1BQFdklIzlPIcgEJU
-         mpZFkv0Hz1j65HXOXWBfaOt0BNkYo4tO4WE+43YsMDVnxZ8gHNcLa/T4uBL1Op0rfx
-         pdF0Bskfa4DnKAc7fMhJ1qPM8i2CaYMIM7pvZK0aO2B60uad5lhMESdlPEj1DFmIH5
-         XdAryj3dB8Bd4rIMIBhX8bc2jAJAWsYD+ZZpCi0hFfmHL2+E6vO3qAbpu/dG1eGY3y
-         V6gDZ3v113GGebVEL38qsmdzkxbx74xzZYcTWLBF5yiS5RX/KMJEjW+OM3HL4AbfHT
-         HuLbQAESBA+OA==
-Date:   Sun, 28 May 2023 22:33:34 +0800
+        b=hZ4TfqmV2wIbD++tqN06CKI01ZarC2pNXJ4XJNt74famK38XRNLAFWVcHRqzvs8xs
+         6+yAo98x1CK4+YjtQF9MzHo4MLHh6sqYiJNhm8PndKlq2qVE2fLiOk8JgpNGkxg72T
+         GbAS/L8fw32ax+5M7wFSg7fQOf80OlxJ95v12KedQJvwF4WqruehWAyEr1+kBnStDd
+         M8X5ohpuksBHPpB0eJgipeZ2wdwQEosvDBy7j7oKwlXiMC9Xn1fKZvzfWET9EPNqQJ
+         NRUkiFQTe7uRmNo4Wbv9cmArPu6tIMBtcmRppN5pUNSE9dK/nyjS+kpeZGuHgbo0d1
+         mEwswGnvFj2wQ==
+Date:   Sun, 28 May 2023 22:36:01 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.05.14 onto master branch
-Message-ID: <20230528143334.kdsv4hju5ehlqqtl@zlang-mailbox>
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.05.28
+Message-ID: <20230528143601.qcgbsxdegufprcrz@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -46,60 +46,61 @@ X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.05.14 version.
+has just been updated and tagged as v2023.05.28 release.
+
+Release Note:
+1) There's 1 new test case (generic/728) in this release.
+2) Update some btrfs _fixed_by_kernel_commit lines.
+3) Fix some failures caused by fstests or userspace updating.
+
+More details refer to below, thanks all!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-33144e0693b5 generic/{094,225}: drop the file allocation unit requirements
+596db5ee9182 fuzzy: skip online scrub and health checks if not supported
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Darrick J. Wong (7):
-      [8c5f19b701ea] fsx: fix indenting of columns in bad buffers report
-      [f093a7503a6a] xfs/262: remove dangerous labels
-      [23e11f53b4b6] generic/724,xfs/791: adjust test preconditions for post-EOF stripe zeroing
-      [715d052a8faf] xfs/{243,245,272,274}: ignore raid alignment flags in bmap output
-      [c387c694bde3] fiemap-tester: holes can be backed by unwritten extents
-      [6a0bba58d043] fiemap: FIEMAP_EXTENT_LAST denotes the last record in the recordset
-      [33144e0693b5] generic/{094,225}: drop the file allocation unit requirements
+Andrey Albershteyn (1):
+[U]      [df0238186fe5] fstests: fix compilation error in splice2pipe on old (<C99) compilers
 
-Filipe Manana (5):
-      [a580ecd1dfc6] common/btrfs: add helper to get the bytenr for a file extent item
-      [f635f9c3153c] btrfs: add a test case for the logical to ino ioctl
-      [7ab65dae2751] groups: add logical_resolve group for btrfs
-      [802f42f7a5b2] btrfs/254: correct subject of the relevant kernel patch and add git commit
-      [e35817daa103] btrfs/228: sync filesystem after creating subvolume
+Anna Schumaker (1):
+[N]      [a7afd52b4a89] generic: Add a test for xattr ctime updates
+
+Anthony Iliopoulos (1):
+[U]      [596db5ee9182] fuzzy: skip online scrub and health checks if not supported
+
+Filipe Manana (4):
+[U]      [e46a74f2e1d7] generic/708: fix commit subject and add its git hash
+[U]      [aeb0dccbadac] btrfs/213: add _fixed_by_kernel_commit tag and remove from dangerous group
+[U]      [4aa3e1dc28c9] btrfs/287: add git commit hash for the kernel fix
+[U]      [6dfe7b6b9033] btrfs/213: avoid occasional failure due to already finished balance
+
+Murphy Zhou (1):
+[U]      [199342c9fa48] common/{filter,quota}, xfs/1{06,52}: fix grep pattern
 
 
 Code Diffstat:
 
- common/btrfs        |  52 ++++++++++++++++++
- doc/group-names.txt |   1 +
- ltp/fsx.c           |   9 +--
- src/fiemap-tester.c |  25 ++++-----
- tests/btrfs/004     |   2 +-
- tests/btrfs/228     |   5 ++
- tests/btrfs/254     |   6 +-
- tests/btrfs/287     | 154 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/287.out |  95 ++++++++++++++++++++++++++++++++
- tests/btrfs/299     |  20 +------
- tests/generic/094   |   5 --
- tests/generic/225   |   5 --
- tests/generic/724   |   2 +-
- tests/xfs/243       |  12 ++--
- tests/xfs/245       |   6 +-
- tests/xfs/262       |   2 +-
- tests/xfs/272       |   4 +-
- tests/xfs/274       |   8 +--
- tests/xfs/791       |   2 +-
- 19 files changed, 347 insertions(+), 68 deletions(-)
+ common/filter         |  2 +-
+ common/fuzzy          |  6 ++++++
+ common/quota          |  2 +-
+ src/splice2pipe.c     |  5 +++--
+ tests/btrfs/213       | 21 +++++++++++++++++----
+ tests/btrfs/287       |  2 +-
+ tests/generic/708     |  3 ++-
+ tests/generic/728     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/728.out |  2 ++
+ tests/xfs/106         |  4 ++--
+ tests/xfs/152         |  4 ++--
+ 11 files changed, 80 insertions(+), 14 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
