@@ -2,70 +2,78 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06AC5C77B7A
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 May 2023 13:18:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08E09C77B73
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 May 2023 07:19:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229606AbjE2NSf (ORCPT
+        id S229572AbjE3HT1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 29 May 2023 09:18:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45546 "EHLO
+        Tue, 30 May 2023 03:19:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49932 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229657AbjE2NSe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 May 2023 09:18:34 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D8F9B7
-        for <fstests@vger.kernel.org>; Mon, 29 May 2023 06:18:06 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S230472AbjE3HTF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 May 2023 03:19:05 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EEF6187
+        for <fstests@vger.kernel.org>; Tue, 30 May 2023 00:17:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1685431014;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=4DzuXWdn5q+2H/HkXTGSP4YifSU43L78+nfm+Plm8nw=;
+        b=TQLcF/uaQ+n/PsyDCRhR2Kt1kIv4oKuqA224cGL89FZsnAsNW7kPeOc6L1COFtG/idg4LK
+        GhwEQWDZwJeMLNM9BAXpo6Ncwor+strrXv3kAnO9l5Sul7Ta1pEH8gtmt6LYbiBVlltTKy
+        HwGsEoW6S570TB7oas+OOpxKsiTBEg0=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-516-InVDwGGWPJWEQtJlN3gLZA-1; Tue, 30 May 2023 03:16:51 -0400
+X-MC-Unique: InVDwGGWPJWEQtJlN3gLZA-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0F1FA62440
-        for <fstests@vger.kernel.org>; Mon, 29 May 2023 13:18:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 27F75C4339B;
-        Mon, 29 May 2023 13:18:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1685366284;
-        bh=wlFqRXGTycWjUAA7jiPPKLThp5Qb2TEusrQvdLw6o2A=;
-        h=From:To:Cc:Subject:Date:From;
-        b=RjQ5l0l/n3tgO9iDGNusIb1NAUC8BLmywcKN6lFaY8N/vRqwgm/Df5PmQ5h0NcBAG
-         BpcMnzs7IVpuRVQDkspVBqVCWOzXP0Mg0ZtSCTmDZsokHe4ldBVEWx3q22NO7igcgp
-         l3+w1pZAsix5wTVkvqvivMkyMn47wV5uXZx+NNL82TLbz/PUcWxOkStpZvMwnBHV4r
-         IaGInQU/uMZ7Tf6LjQ7GvR3yzxGdhADYUlmKKOhvb8O793NdXuW/nAuC2Y0sG2Hgje
-         tHt9lULR7N39wnTL/n4Pw/+io48xC1kArldALFSfwVeqHr661z9aZpbkwaikgpC8qt
-         wVkEE8UfGhmxQ==
-From:   Chao Yu <chao@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     jaegeuk@kernel.org, fstests@vger.kernel.org,
-        Chao Yu <chao@kernel.org>
-Subject: [PATCH] generic/506: fix to call _scratch_enable_pquota()
-Date:   Mon, 29 May 2023 21:17:41 +0800
-Message-Id: <20230529131741.2642570-1-chao@kernel.org>
-X-Mailer: git-send-email 2.40.1
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9DCF73C0CEEA;
+        Tue, 30 May 2023 07:16:50 +0000 (UTC)
+Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-188.pek2.redhat.com [10.72.12.188])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D4A6A40C6CCC;
+        Tue, 30 May 2023 07:16:30 +0000 (UTC)
+From:   xiubli@redhat.com
+To:     fstests@vger.kernel.org
+Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
+        ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
+Subject: [PATCH] generic/020: add ceph-fuse support
+Date:   Tue, 30 May 2023 15:15:52 +0800
+Message-Id: <20230530071552.766424-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.2
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Otherwise, this testcase will fail due to project quota feature is not
-enabled in the image.
+From: Xiubo Li <xiubli@redhat.com>
 
-Signed-off-by: Chao Yu <chao@kernel.org>
+For ceph fuse client the fs type will be "ceph-fuse".
+
+Fixes: https://tracker.ceph.com/issues/61496
+Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- tests/generic/506 | 1 +
- 1 file changed, 1 insertion(+)
+ tests/generic/020 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/generic/506 b/tests/generic/506
-index ec91af78..d4aac68b 100755
---- a/tests/generic/506
-+++ b/tests/generic/506
-@@ -31,6 +31,7 @@ _require_quota
- _require_scratch_shutdown
- 
- _scratch_mkfs >/dev/null 2>&1
-+_scratch_enable_pquota
- _require_metadata_journaling $SCRATCH_DEV
- _qmount_option "prjquota"
- _qmount
+diff --git a/tests/generic/020 b/tests/generic/020
+index e00365a9..da258aa5 100755
+--- a/tests/generic/020
++++ b/tests/generic/020
+@@ -56,7 +56,7 @@ _attr_get_max()
+ {
+ 	# set maximum total attr space based on fs type
+ 	case "$FSTYP" in
+-	xfs|udf|pvfs2|9p|ceph|fuse|nfs)
++	xfs|udf|pvfs2|9p|ceph|fuse|nfs|ceph-fuse)
+ 		max_attrs=1000
+ 		;;
+ 	ext2|ext3|ext4)
 -- 
 2.40.1
 
