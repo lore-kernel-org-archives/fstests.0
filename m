@@ -2,101 +2,141 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37721C7EE23
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 09:58:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DA8EC77B7E
+	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 15:25:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232049AbjFAJ6c (ORCPT
+        id S234554AbjFAPZp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Jun 2023 05:58:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39872 "EHLO
+        Thu, 1 Jun 2023 11:25:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36140 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232094AbjFAJ6b (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2023 05:58:31 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D1FB18F
-        for <fstests@vger.kernel.org>; Thu,  1 Jun 2023 02:57:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1685613453;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=U+fOkF81GGBT+XwLUqOJ0uwq202pRZkLvnKPMCcnTy4=;
-        b=RV/CGFxRtShqa8Z+WSgtINXT2nA367mcizDuswF9NpOjx+q1XwK36MmSjE5YCGqxcZ2VNL
-        7Y+BVmwDbQusouC8R0xqExPNurd0G5YihCpcHKtHTjY9G3dHzbe9K2EmsZByCoJWwdIRvj
-        o9cvfguq8pZFdfUru7noTShs8+brRgE=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-621-sjdD1et8PY-AVrr0BUIpOw-1; Thu, 01 Jun 2023 05:57:32 -0400
-X-MC-Unique: sjdD1et8PY-AVrr0BUIpOw-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-64d138bd73aso317652b3a.0
-        for <fstests@vger.kernel.org>; Thu, 01 Jun 2023 02:57:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685613451; x=1688205451;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=U+fOkF81GGBT+XwLUqOJ0uwq202pRZkLvnKPMCcnTy4=;
-        b=TYsLJmI+gx2D8OuhjySyV9NDk8JAmBgBUd3n4i/CIMe+jzlPEa55HY9CLTCINGR0nE
-         zM+sef0Z+qxhnEXZPXntH83GyWvmj6KT1RjiWGK7e6za5JHYjuDRkW0ZQBy6m01rzsEW
-         5Fu7gC1JESXZfnumWfOjyyok/mMlTUckIaEW7MyHD4M8UplMC/9VjFG1ArXo8sE2kx9f
-         X3zkI6l5ISmM1zlsMVHw9WK3r3kWXtkNV5KX5EUaXn8Wf7RpqITi2UHK8itEYOVk4FW+
-         ryePPlJDRVIxOatP18eVn49x67nfUPfFxzmO4fye+3QJ98lkJx9h0QjA+3u3/DSo3AXv
-         Jpug==
-X-Gm-Message-State: AC+VfDzeKRRmRllql9qP880gGTuQdAI9uuXPJHOqJQMA2zGJeYpEMhKL
-        bU0INsISrKm1bvAa3udxJXThdC6Z80srAZl/N/cHsB0fwSZw3MVRAxeMP3WOb5ixY6m1q1wqjM3
-        xHG8X7vp3p5FFHnbzIqhRw84c6rnRCoU=
-X-Received: by 2002:a05:6a00:1741:b0:644:d220:64ac with SMTP id j1-20020a056a00174100b00644d22064acmr7289188pfc.2.1685613450877;
-        Thu, 01 Jun 2023 02:57:30 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ44lmB0CY8jK+0Ua129WxwxFhRTX4yjhp01RpMPcZJa2b+thgtFpSLgWxexvZl5EyqNmksCsA==
-X-Received: by 2002:a05:6a00:1741:b0:644:d220:64ac with SMTP id j1-20020a056a00174100b00644d22064acmr7289178pfc.2.1685613450606;
-        Thu, 01 Jun 2023 02:57:30 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id j22-20020aa79296000000b0064f4aeedaa2sm4715801pfa.105.2023.06.01.02.57.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Jun 2023 02:57:30 -0700 (PDT)
-Date:   Thu, 1 Jun 2023 17:57:26 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Chao Yu <chao@kernel.org>
-Cc:     jaegeuk@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/506: fix to call _scratch_enable_pquota()
-Message-ID: <20230601095726.74ojdhdrhdkqwdh7@zlang-mailbox>
-References: <20230529131741.2642570-1-chao@kernel.org>
+        with ESMTP id S234359AbjFAPZm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2023 11:25:42 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBAEF180;
+        Thu,  1 Jun 2023 08:25:37 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4B83A645FD;
+        Thu,  1 Jun 2023 15:25:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6280C433D2;
+        Thu,  1 Jun 2023 15:25:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1685633136;
+        bh=6vSgMN5Z4SCWUKhar46fFDRuM46IKZ/1Fs+WQHVYK7E=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=t3PKCMDH2r3qpbMMAEtM2A7s2nqT/DRsLLB2mToqNx3hSAY+u0Gws16OcD5NzDgAF
+         ym+5DRO5DVXPOdB4VHTizZaN35fW5vz8lUZiAOTew4tDmC5ck0kM3Ds+nOQjbEJ7rL
+         DuzSRKySJul/VX450E/NvOmzyCAmPbRAINOhD7cg/3sjhWrzmF+KgHjXMjbiuuOamu
+         KbN6hEATBav4BaEJf4iAL0aSjYcCQ4RJ2u8xOYap7VJp1hCjW77HS3UaeFuKQ210QK
+         eHD6uS9QB5ThmaKpKVs+1GwdHRyV67AQihWZbFybw2DRypHYR+bYDLluqYCbk7VeKS
+         kmW6zaH3ucJLQ==
+Date:   Thu, 1 Jun 2023 08:25:36 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic: add a test for device removal with dirty
+ data
+Message-ID: <20230601152536.GA16856@frogsfrogsfrogs>
+References: <20230601094224.1350253-1-hch@lst.de>
+ <20230601094224.1350253-2-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230529131741.2642570-1-chao@kernel.org>
+In-Reply-To: <20230601094224.1350253-2-hch@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 29, 2023 at 09:17:41PM +0800, Chao Yu wrote:
-> Otherwise, this testcase will fail due to project quota feature is not
-> enabled in the image.
+On Thu, Jun 01, 2023 at 11:42:23AM +0200, Christoph Hellwig wrote:
+> Test the removal of the underlying device when the file system still
+> has dirty data.
 > 
-> Signed-off-by: Chao Yu <chao@kernel.org>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->  tests/generic/506 | 1 +
->  1 file changed, 1 insertion(+)
+>  tests/generic/729     | 53 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/729.out |  2 ++
+>  2 files changed, 55 insertions(+)
+>  create mode 100755 tests/generic/729
+>  create mode 100644 tests/generic/729.out
 > 
-> diff --git a/tests/generic/506 b/tests/generic/506
-> index ec91af78..d4aac68b 100755
-> --- a/tests/generic/506
-> +++ b/tests/generic/506
-> @@ -31,6 +31,7 @@ _require_quota
->  _require_scratch_shutdown
->  
->  _scratch_mkfs >/dev/null 2>&1
-> +_scratch_enable_pquota
+> diff --git a/tests/generic/729 b/tests/generic/729
+> new file mode 100755
+> index 00000000..e3b52a51
+> --- /dev/null
+> +++ b/tests/generic/729
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
+> +# Copyright (c) 2023 Christoph Hellwig
+> +#
+> +# Test proper file system shut down when the block device is removed underneath
+> +# and there is dirty data.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
+> +	_put_scsi_debug_dev
+> +	rm -f $tmp.*
+> +}
+> +
+> +. ./common/filter
+> +. ./common/scsi_debug
+> +
+> +_supported_fs generic
+> +_require_scsi_debug
+> +
+> +physical=`blockdev --getpbsz $SCRATCH_DEV`
+> +logical=`blockdev --getss $SCRATCH_DEV`
 
-Make sense,
+These two tests need to _notrun if SCRATCH_DEV is not a blockdev or if
+SCRATCH_MNT is not a directory.  Normally _require_scratch_nocheck takes
+care of that.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Other than that they look ok.
 
->  _require_metadata_journaling $SCRATCH_DEV
->  _qmount_option "prjquota"
->  _qmount
+--D
+
+> +
+> +SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
+> +test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
+> +echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+> +
+> +_mkfs_dev $SCSI_DEBUG_DEV
+> +
+> +_mount $SCSI_DEBUG_DEV $SCRATCH_MNT
+> +
+> +# create a test file
+> +$XFS_IO_PROG -f -c "pwrite 0 1M" $SCRATCH_MNT/testfile >>$seqres.full
+> +
+> +# open a file descriptor for reading the file
+> +exec 3< $SCRATCH_MNT/testfile
+> +
+> +# delete the scsi debug device while it still has dirty data
+> +echo 1 > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/delete
+> +
+> +# try to read from the file, which should give us -EIO
+> +cat <&3 > /dev/null
+> +
+> +# close the file descriptor to not block unmount
+> +exec 3<&-
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/729.out b/tests/generic/729.out
+> new file mode 100644
+> index 00000000..8abf2b3c
+> --- /dev/null
+> +++ b/tests/generic/729.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 729
+> +cat: -: Input/output error
 > -- 
-> 2.40.1
+> 2.39.2
 > 
-
