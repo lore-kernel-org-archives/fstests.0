@@ -2,102 +2,100 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F502C7EE23
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 09:52:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37721C7EE23
+	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 09:58:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232633AbjFAJwC (ORCPT
+        id S232049AbjFAJ6c (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Jun 2023 05:52:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35270 "EHLO
+        Thu, 1 Jun 2023 05:58:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39872 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233030AbjFAJwA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2023 05:52:00 -0400
+        with ESMTP id S232094AbjFAJ6b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2023 05:58:31 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA29412F
-        for <fstests@vger.kernel.org>; Thu,  1 Jun 2023 02:51:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D1FB18F
+        for <fstests@vger.kernel.org>; Thu,  1 Jun 2023 02:57:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1685613076;
+        s=mimecast20190719; t=1685613453;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=OzIlMFRG7JVgyYici9Bt6+3TtN9Mm4P63XnmoTugrLk=;
-        b=PLGpcG6NlKaAuWCLAM9Bi7uIqw0BYhKOHobG1aplzXo1TA6jsCvh9mbckiW/Kv3DefSvp1
-        UNQ4t+G8/6Uq/hpD6alg5XStApTcAw1IB59T2t4s0W7QqAWc6yZzGEzCCShWgLcOHOkoYP
-        ojJGJv6FMQ8IEGxvuYobwvceg779wQI=
-Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
- [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=U+fOkF81GGBT+XwLUqOJ0uwq202pRZkLvnKPMCcnTy4=;
+        b=RV/CGFxRtShqa8Z+WSgtINXT2nA367mcizDuswF9NpOjx+q1XwK36MmSjE5YCGqxcZ2VNL
+        7Y+BVmwDbQusouC8R0xqExPNurd0G5YihCpcHKtHTjY9G3dHzbe9K2EmsZByCoJWwdIRvj
+        o9cvfguq8pZFdfUru7noTShs8+brRgE=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-637-TJWFKeYvMLu9buUlbx4HSQ-1; Thu, 01 Jun 2023 05:51:14 -0400
-X-MC-Unique: TJWFKeYvMLu9buUlbx4HSQ-1
-Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-33b88241696so5474155ab.1
-        for <fstests@vger.kernel.org>; Thu, 01 Jun 2023 02:51:14 -0700 (PDT)
+ us-mta-621-sjdD1et8PY-AVrr0BUIpOw-1; Thu, 01 Jun 2023 05:57:32 -0400
+X-MC-Unique: sjdD1et8PY-AVrr0BUIpOw-1
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-64d138bd73aso317652b3a.0
+        for <fstests@vger.kernel.org>; Thu, 01 Jun 2023 02:57:31 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685613074; x=1688205074;
+        d=1e100.net; s=20221208; t=1685613451; x=1688205451;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=OzIlMFRG7JVgyYici9Bt6+3TtN9Mm4P63XnmoTugrLk=;
-        b=f8BN1GVuiTLpDpnk2gGdH2wGC32XnGAM6tjON25Tj0t+rAbhNPsDkCIoAi7+MPV8Gn
-         UvLxaYHDSRdTutW8U9MnjgjGNnEyzTRoS+4HyQ1QUFBDEk6EcUB8fVszmof4JTG609I/
-         zJDt2Oj71mmNnA9V+nmzW0ikky5LDwyE+KtXS7+BoBgLg0ywyW/0pKwaPhGUOurFPv2c
-         Q0ce6LS5zdSw5YQQUgfedfq9iPU0jtAuYm6B31Jkqwb+oGemRljjQn89TjLCnV04xk9e
-         VKftXI9EVDxIS7jUFlq028rzS+JTyB9OARM0L3TPA2cNajTnKLcrWAiXH/fMMj3csirb
-         IqzA==
-X-Gm-Message-State: AC+VfDyxrBDPtVWIXRVd0LdChKGwG055RMoMwmJjaVVMdXb+4FRry9A3
-        z3jhx+OhcWqBa8bqrC4eIPcvblXin78r51F4sNbVghpT/v7nVfw5ubRYkQIGGYtIltqioLPlQab
-        yHjPPv+hkwRmVSMF4wvfOjuz4pYXNG6M=
-X-Received: by 2002:a92:c708:0:b0:33b:abaf:d493 with SMTP id a8-20020a92c708000000b0033babafd493mr5590431ilp.16.1685613073959;
-        Thu, 01 Jun 2023 02:51:13 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ7qPXazSRAYRxqRw6piwj80oKyUTmO7apVm4+a2/Fd4B4wcVr99CGP2dt0Y2TsYe7FsVLE+DQ==
-X-Received: by 2002:a92:c708:0:b0:33b:abaf:d493 with SMTP id a8-20020a92c708000000b0033babafd493mr5590423ilp.16.1685613073692;
-        Thu, 01 Jun 2023 02:51:13 -0700 (PDT)
+        bh=U+fOkF81GGBT+XwLUqOJ0uwq202pRZkLvnKPMCcnTy4=;
+        b=TYsLJmI+gx2D8OuhjySyV9NDk8JAmBgBUd3n4i/CIMe+jzlPEa55HY9CLTCINGR0nE
+         zM+sef0Z+qxhnEXZPXntH83GyWvmj6KT1RjiWGK7e6za5JHYjuDRkW0ZQBy6m01rzsEW
+         5Fu7gC1JESXZfnumWfOjyyok/mMlTUckIaEW7MyHD4M8UplMC/9VjFG1ArXo8sE2kx9f
+         X3zkI6l5ISmM1zlsMVHw9WK3r3kWXtkNV5KX5EUaXn8Wf7RpqITi2UHK8itEYOVk4FW+
+         ryePPlJDRVIxOatP18eVn49x67nfUPfFxzmO4fye+3QJ98lkJx9h0QjA+3u3/DSo3AXv
+         Jpug==
+X-Gm-Message-State: AC+VfDzeKRRmRllql9qP880gGTuQdAI9uuXPJHOqJQMA2zGJeYpEMhKL
+        bU0INsISrKm1bvAa3udxJXThdC6Z80srAZl/N/cHsB0fwSZw3MVRAxeMP3WOb5ixY6m1q1wqjM3
+        xHG8X7vp3p5FFHnbzIqhRw84c6rnRCoU=
+X-Received: by 2002:a05:6a00:1741:b0:644:d220:64ac with SMTP id j1-20020a056a00174100b00644d22064acmr7289188pfc.2.1685613450877;
+        Thu, 01 Jun 2023 02:57:30 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ44lmB0CY8jK+0Ua129WxwxFhRTX4yjhp01RpMPcZJa2b+thgtFpSLgWxexvZl5EyqNmksCsA==
+X-Received: by 2002:a05:6a00:1741:b0:644:d220:64ac with SMTP id j1-20020a056a00174100b00644d22064acmr7289178pfc.2.1685613450606;
+        Thu, 01 Jun 2023 02:57:30 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l7-20020a656807000000b0051416609fb7sm2521765pgt.61.2023.06.01.02.51.11
+        by smtp.gmail.com with ESMTPSA id j22-20020aa79296000000b0064f4aeedaa2sm4715801pfa.105.2023.06.01.02.57.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Jun 2023 02:51:12 -0700 (PDT)
-Date:   Thu, 1 Jun 2023 17:51:09 +0800
+        Thu, 01 Jun 2023 02:57:30 -0700 (PDT)
+Date:   Thu, 1 Jun 2023 17:57:26 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     xiubli@redhat.com
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
-Subject: Re: [PATCH] common/rc: skip ceph-fuse when atime is required
-Message-ID: <20230601095109.bzdb2nithqngngwd@zlang-mailbox>
-References: <20230601025207.857009-1-xiubli@redhat.com>
+To:     Chao Yu <chao@kernel.org>
+Cc:     jaegeuk@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/506: fix to call _scratch_enable_pquota()
+Message-ID: <20230601095726.74ojdhdrhdkqwdh7@zlang-mailbox>
+References: <20230529131741.2642570-1-chao@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230601025207.857009-1-xiubli@redhat.com>
+In-Reply-To: <20230529131741.2642570-1-chao@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 01, 2023 at 10:52:07AM +0800, xiubli@redhat.com wrote:
-> From: Xiubo Li <xiubli@redhat.com>
+On Mon, May 29, 2023 at 09:17:41PM +0800, Chao Yu wrote:
+> Otherwise, this testcase will fail due to project quota feature is not
+> enabled in the image.
 > 
-> Ceph won't maintain the atime, so just skip the tests when the atime
-> is required.
-> 
-> Fixes: https://tracker.ceph.com/issues/61551
-> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+> Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
+>  tests/generic/506 | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/tests/generic/506 b/tests/generic/506
+> index ec91af78..d4aac68b 100755
+> --- a/tests/generic/506
+> +++ b/tests/generic/506
+> @@ -31,6 +31,7 @@ _require_quota
+>  _require_scratch_shutdown
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+> +_scratch_enable_pquota
+
+Make sense,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 37074371..f3b92741 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4089,7 +4089,7 @@ _require_atime()
->  	nfs|afs|cifs|virtiofs)
->  		_notrun "atime related mount options have no effect on $FSTYP"
->  		;;
-> -	ceph)
-> +	ceph|ceph-fuse)
->  		_notrun "atime not maintained by $FSTYP"
->  		;;
->  	esac
+>  _require_metadata_journaling $SCRATCH_DEV
+>  _qmount_option "prjquota"
+>  _qmount
 > -- 
 > 2.40.1
 > 
