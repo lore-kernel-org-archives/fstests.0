@@ -2,54 +2,81 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 458F3C77B7E
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 15:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E71D7C7EE2E
+	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 16:05:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233506AbjFAP2h (ORCPT
+        id S234578AbjFAQFQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Jun 2023 11:28:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37298 "EHLO
+        Thu, 1 Jun 2023 12:05:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235061AbjFAP20 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2023 11:28:26 -0400
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4572E10CC;
-        Thu,  1 Jun 2023 08:28:10 -0700 (PDT)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 0600468AA6; Thu,  1 Jun 2023 17:27:41 +0200 (CEST)
-Date:   Thu, 1 Jun 2023 17:27:40 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
+        with ESMTP id S234890AbjFAQE4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Jun 2023 12:04:56 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60F66B3;
+        Thu,  1 Jun 2023 09:04:52 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E27BE64724;
+        Thu,  1 Jun 2023 16:04:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 392AFC433A7;
+        Thu,  1 Jun 2023 16:04:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1685635491;
+        bh=9VVhtE+h1olCMH+eToJqAsc27fiBafH1FhgqqxR9pNA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=HFrsjpMaETqDYTZ68oSD2CnSmqYkvfJRZxBgInCMrtdkSdZBAgo6FHv/jTLRQ8CuC
+         xLatnffnRgW7SoQ2hoiVC/7B8cE6P41HbYkz0DmMr+nSvVkZosegWy332KanmMw28n
+         Zixzjim4NlNaOD5ZQYdtA2lgnwkgCL+g4vYsIpTFHfmB3RjwmzTsihKpy4/3HLe8tl
+         kK8zclhvEHkQNCa7TJMQ4/BDikF8QKK81XMHmbt6w0gu9zD+yd5nK4lBjAklGixcsg
+         x3HPvkK03noL5asjuvqwApTPjPJA/sAjoWGcn0V924p+L/hpTjFBFfPCx1h3OTyiTO
+         QatKNTFjelFTA==
+Date:   Thu, 1 Jun 2023 09:04:50 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 Subject: Re: [PATCH 1/2] generic: add a test for device removal with dirty
  data
-Message-ID: <20230601152740.GA31938@lst.de>
-References: <20230601094224.1350253-1-hch@lst.de> <20230601094224.1350253-2-hch@lst.de> <20230601152536.GA16856@frogsfrogsfrogs>
+Message-ID: <20230601160450.GB16856@frogsfrogsfrogs>
+References: <20230601094224.1350253-1-hch@lst.de>
+ <20230601094224.1350253-2-hch@lst.de>
+ <20230601152536.GA16856@frogsfrogsfrogs>
+ <20230601152740.GA31938@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230601152536.GA16856@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20230601152740.GA31938@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 01, 2023 at 08:25:36AM -0700, Darrick J. Wong wrote:
-> > +_require_scsi_debug
-> > +
-> > +physical=`blockdev --getpbsz $SCRATCH_DEV`
-> > +logical=`blockdev --getss $SCRATCH_DEV`
+On Thu, Jun 01, 2023 at 05:27:40PM +0200, Christoph Hellwig wrote:
+> On Thu, Jun 01, 2023 at 08:25:36AM -0700, Darrick J. Wong wrote:
+> > > +_require_scsi_debug
+> > > +
+> > > +physical=`blockdev --getpbsz $SCRATCH_DEV`
+> > > +logical=`blockdev --getss $SCRATCH_DEV`
+> > 
+> > These two tests need to _notrun if SCRATCH_DEV is not a blockdev or if
+> > SCRATCH_MNT is not a directory.  Normally _require_scratch_nocheck takes
+> > care of that.
+> > 
+> > Other than that they look ok.
 > 
-> These two tests need to _notrun if SCRATCH_DEV is not a blockdev or if
-> SCRATCH_MNT is not a directory.  Normally _require_scratch_nocheck takes
-> care of that.
+> Can SCRATCH_MNT be not a directory?
+
+Good question.  AFAICT the only checks on it are in
+_require_scratch_nocheck itself...
+
+> But yeah, these tests should simply grow a
 > 
-> Other than that they look ok.
+> _require_block_device $SCRATCH_DEV
 
-Can SCRATCH_MNT be not a directory?
+...but you could set up the scsi_debug device and mount it on
+$TEST_DIR/foo which would avoid the issue of checking SCRATCH_*
+entirely.
 
-But yeah, these tests should simply grow a
+(Please remember to _require_test if you do though.)
 
-_require_block_device $SCRATCH_DEV
-
+--D
