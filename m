@@ -2,48 +2,48 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08E09C77B73
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 May 2023 07:19:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6991EC77B7A
+	for <linux-fstests@archiver.kernel.org>; Thu,  1 Jun 2023 02:55:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229572AbjE3HT1 (ORCPT
+        id S229476AbjFACzJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 May 2023 03:19:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49932 "EHLO
+        Wed, 31 May 2023 22:55:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37068 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230472AbjE3HTF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 May 2023 03:19:05 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EEF6187
-        for <fstests@vger.kernel.org>; Tue, 30 May 2023 00:17:37 -0700 (PDT)
+        with ESMTP id S231261AbjFACzI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 May 2023 22:55:08 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6E8F101
+        for <fstests@vger.kernel.org>; Wed, 31 May 2023 19:54:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1685431014;
+        s=mimecast20190719; t=1685588063;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding;
-        bh=4DzuXWdn5q+2H/HkXTGSP4YifSU43L78+nfm+Plm8nw=;
-        b=TQLcF/uaQ+n/PsyDCRhR2Kt1kIv4oKuqA224cGL89FZsnAsNW7kPeOc6L1COFtG/idg4LK
-        GhwEQWDZwJeMLNM9BAXpo6Ncwor+strrXv3kAnO9l5Sul7Ta1pEH8gtmt6LYbiBVlltTKy
-        HwGsEoW6S570TB7oas+OOpxKsiTBEg0=
+        bh=ksHu87aFMEBHIMoatjkPbQFSZ7Jwb6qU80T6hGmTLKE=;
+        b=BmS9JuO9Hdv0iZjQmr6rVzFOL+/JyYL9Ah3pJ8/JM6EuAGu9bQqvup+CKBg6qKX+xOtS+u
+        wEq88PyCk330vFMUhJg17g+ok6cHUJMLHJAFYwHWK1quhQLDOKBGcrWLGiPPPQLVF5VKQL
+        pwUyVVnOApJvckZiOJyeKEeccLRp9Mw=
 Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
  [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-516-InVDwGGWPJWEQtJlN3gLZA-1; Tue, 30 May 2023 03:16:51 -0400
-X-MC-Unique: InVDwGGWPJWEQtJlN3gLZA-1
+ us-mta-325-pXbHNVNIOvWzXNdCcvwZIA-1; Wed, 31 May 2023 22:54:20 -0400
+X-MC-Unique: pXbHNVNIOvWzXNdCcvwZIA-1
 Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9DCF73C0CEEA;
-        Tue, 30 May 2023 07:16:50 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id A67233C0ED40;
+        Thu,  1 Jun 2023 02:54:19 +0000 (UTC)
 Received: from li-a71a4dcc-35d1-11b2-a85c-951838863c8d.ibm.com.com (ovpn-12-188.pek2.redhat.com [10.72.12.188])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D4A6A40C6CCC;
-        Tue, 30 May 2023 07:16:30 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 55D7440C6EC4;
+        Thu,  1 Jun 2023 02:54:15 +0000 (UTC)
 From:   xiubli@redhat.com
 To:     fstests@vger.kernel.org
 Cc:     zlang@redhat.com, david@fromorbit.com, djwong@kernel.org,
         ceph-devel@vger.kernel.org, Xiubo Li <xiubli@redhat.com>
-Subject: [PATCH] generic/020: add ceph-fuse support
-Date:   Tue, 30 May 2023 15:15:52 +0800
-Message-Id: <20230530071552.766424-1-xiubli@redhat.com>
+Subject: [PATCH] common/rc: skip ceph-fuse when atime is required
+Date:   Thu,  1 Jun 2023 10:52:07 +0800
+Message-Id: <20230601025207.857009-1-xiubli@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.1 on 10.11.54.2
@@ -53,27 +53,28 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Xiubo Li <xiubli@redhat.com>
 
-For ceph fuse client the fs type will be "ceph-fuse".
+Ceph won't maintain the atime, so just skip the tests when the atime
+is required.
 
-Fixes: https://tracker.ceph.com/issues/61496
+Fixes: https://tracker.ceph.com/issues/61551
 Signed-off-by: Xiubo Li <xiubli@redhat.com>
 ---
- tests/generic/020 | 2 +-
+ common/rc | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/generic/020 b/tests/generic/020
-index e00365a9..da258aa5 100755
---- a/tests/generic/020
-+++ b/tests/generic/020
-@@ -56,7 +56,7 @@ _attr_get_max()
- {
- 	# set maximum total attr space based on fs type
- 	case "$FSTYP" in
--	xfs|udf|pvfs2|9p|ceph|fuse|nfs)
-+	xfs|udf|pvfs2|9p|ceph|fuse|nfs|ceph-fuse)
- 		max_attrs=1000
+diff --git a/common/rc b/common/rc
+index 37074371..f3b92741 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4089,7 +4089,7 @@ _require_atime()
+ 	nfs|afs|cifs|virtiofs)
+ 		_notrun "atime related mount options have no effect on $FSTYP"
  		;;
- 	ext2|ext3|ext4)
+-	ceph)
++	ceph|ceph-fuse)
+ 		_notrun "atime not maintained by $FSTYP"
+ 		;;
+ 	esac
 -- 
 2.40.1
 
