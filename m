@@ -2,148 +2,117 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7DA6C77B7A
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Jun 2023 14:29:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98D0DC7EE29
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jun 2023 01:42:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235592AbjFBO3H (ORCPT
+        id S230495AbjFEBmY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Jun 2023 10:29:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36148 "EHLO
+        Sun, 4 Jun 2023 21:42:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44890 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235309AbjFBO3E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Jun 2023 10:29:04 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55EB7E53;
-        Fri,  2 Jun 2023 07:29:02 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 79BCD650B6;
-        Fri,  2 Jun 2023 14:29:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D44C8C433EF;
-        Fri,  2 Jun 2023 14:29:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1685716140;
-        bh=ES8txbIpagFzONut7b9zDqG32fUYuXf0LLE1yj28c6k=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=huJ1t26v/bmYDIIW2KYAlMgqoUPoMiTi4AXB3m2CYW7RFCOXu3zo7rWT1KdT8CIEb
-         fYg5I8v2h2HYLrrqW+ED0lKu9tF57NCZcUM1BqvI9mfkQRky+SPD9jvmyHL/gypHD8
-         xcb/NPKuc8Z1HxQT/eHDIWsyYQvonRBk7DFrdffbRT2hXSPZWH9EAXczka4i9ScluU
-         bPw6BtIR6Yk/qpwiA9D6uuAjuD/vrGRVYWjqAD7ZwMXFU6L33SPV8sruwwmLn+6ukw
-         UOeV/cRZS3/tQOylEfJSXvQpKhnGv0+H2rTcnbXjlhrWQEVsVq/vgfDhbe3o/JKN0O
-         2Riv1VPnjdOZA==
-Date:   Fri, 2 Jun 2023 07:29:00 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 06/11] xfs/018: disable parent pointers for this test
-Message-ID: <20230602142900.GC16891@frogsfrogsfrogs>
-References: <168506060845.3732476.15364197106064737675.stgit@frogsfrogsfrogs>
- <168506060929.3732476.6482579916222371853.stgit@frogsfrogsfrogs>
- <20230526200134.cnhlqop277ntyyah@zlang-mailbox>
- <20230602010645.GB16891@frogsfrogsfrogs>
- <20230602102744.3wxbayhfwknvnqbm@zlang-mailbox>
+        with ESMTP id S230070AbjFEBmX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Jun 2023 21:42:23 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BF86A1
+        for <fstests@vger.kernel.org>; Sun,  4 Jun 2023 18:41:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1685929299;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=9dPxMNgp9Z5Jx7/cmyNMr458SLsz8+Wt5P0SKLMfTOM=;
+        b=Oki/j2cu/fXZsnLiHLud7aMFF/x7HYe6zRmqi6Nh8H/I20IDc6p5cnLlPNcZKLZv13/rfT
+        AgYvH+IJasdB4mmI4TIyVKVR5GJlM5rVjV9ZpEpARpdC8DkjKtnNZg01Qfw8l8dlASqLIr
+        RKc3W56attBQLlwUW/OX1OURjrfmBso=
+Received: from mail-ot1-f70.google.com (mail-ot1-f70.google.com
+ [209.85.210.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-185-Lcahb4ghOWmnKnG2IfOqzw-1; Sun, 04 Jun 2023 21:41:38 -0400
+X-MC-Unique: Lcahb4ghOWmnKnG2IfOqzw-1
+Received: by mail-ot1-f70.google.com with SMTP id 46e09a7af769-6b1622d8923so907520a34.2
+        for <fstests@vger.kernel.org>; Sun, 04 Jun 2023 18:41:38 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1685929297; x=1688521297;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=9dPxMNgp9Z5Jx7/cmyNMr458SLsz8+Wt5P0SKLMfTOM=;
+        b=Mx7+AgIuYwdO7RONCnvenZh4Ap/lsOsw2vR41Vm8kZA/LFQaj350WvF93MWt5R5RUY
+         7M2e7O7w3iNGEz6hXVUm/uNoHn5M9mi4rUGZcAwhBmPu/U+7Hi4rGwhaJl2h/gwLenta
+         MOwn6Ya/wxurs/hijkBXRh9f2piXX7LjSRDDaUmoGQHx4GE3VcrTn9bRBMUGMXT5XHJ+
+         EK4cDy/4nGcInlmmiEZXC691urjZdLapclvk5N3Ym1ZCvRtuKzexTDberAzUfXlELu1Z
+         k89tFfvqBQc6hsXqI1qKIjN4efm9JJKkP6GFa9qHN6tiutkuTv3z1rtfEg8KJfjiKsed
+         u9Wg==
+X-Gm-Message-State: AC+VfDxqg44N8c5a7CjuLghv3ufu7nT+DtXJNhAouYX19FzxVuk8amVb
+        5e8etfZ87tfU4RD5tt9pcAJ4ZLRmlDXNebLft5fmgfh46fg/7QMitNKN0au6nM9u1IkSyrSrlbH
+        q2Cg6Z7plWr+sa6SBWq2aF+9I4UuZ
+X-Received: by 2002:a05:6830:169a:b0:6ab:1c78:d5e with SMTP id k26-20020a056830169a00b006ab1c780d5emr8957181otr.5.1685929297711;
+        Sun, 04 Jun 2023 18:41:37 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ5+LD1A+zZFKBZya0yVPWFykITUF4pkHOOWCKXLjzSZzoZEuP2I7Fbrq+7zT8OGTW7freccug==
+X-Received: by 2002:a05:6830:169a:b0:6ab:1c78:d5e with SMTP id k26-20020a056830169a00b006ab1c780d5emr8957166otr.5.1685929297480;
+        Sun, 04 Jun 2023 18:41:37 -0700 (PDT)
+Received: from [10.72.12.216] ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id q16-20020a62e110000000b0063d29df1589sm4089971pfh.136.2023.06.04.18.41.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 04 Jun 2023 18:41:36 -0700 (PDT)
+Message-ID: <a90b085c-8744-cdbc-9f4f-3221723a7bd3@redhat.com>
+Date:   Mon, 5 Jun 2023 09:41:32 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230602102744.3wxbayhfwknvnqbm@zlang-mailbox>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.10.0
+Subject: Re: [PATCH] generic/020: add ceph-fuse support
+Content-Language: en-US
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org
+References: <20230530071552.766424-1-xiubli@redhat.com>
+ <20230602105038.tz2azxiaxzcrdu3l@zlang-mailbox>
+From:   Xiubo Li <xiubli@redhat.com>
+In-Reply-To: <20230602105038.tz2azxiaxzcrdu3l@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 02, 2023 at 06:27:44PM +0800, Zorro Lang wrote:
-> On Thu, Jun 01, 2023 at 06:06:45PM -0700, Darrick J. Wong wrote:
-> > On Sat, May 27, 2023 at 04:01:34AM +0800, Zorro Lang wrote:
-> > > On Thu, May 25, 2023 at 07:03:39PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > This test depends heavily on the xattr formats created for new files.
-> > > > Parent pointers break those assumptions, so force parent pointers off.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
-> > > >  tests/xfs/018 |    7 ++++++-
-> > > >  tests/xfs/191 |    7 ++++++-
-> > > >  tests/xfs/288 |    7 ++++++-
-> > > >  3 files changed, 18 insertions(+), 3 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/tests/xfs/018 b/tests/xfs/018
-> > > > index 1ef51a2e61..34b6e91579 100755
-> > > > --- a/tests/xfs/018
-> > > > +++ b/tests/xfs/018
-> > > > @@ -100,7 +100,12 @@ attr32l="X$attr32k"
-> > > >  attr64k="$attr32k$attr32k"
-> > > >  
-> > > >  echo "*** mkfs"
-> > > > -_scratch_mkfs >/dev/null
-> > > > +
-> > > > +# Parent pointers change the xattr formats sufficiently to break this test.
-> > > > +# Disable parent pointers if mkfs supports it.
-> > > > +mkfs_args=()
-> > > > +$MKFS_XFS_PROG 2>&1 | grep -q parent=0 && mkfs_args+=(-n parent=0)
-> > > 
-> > > Maybe we need a _require_no_xfs_parent() ?
-> > 
-> > We still want to run the test, we just don't want parent pointer
-> > xattrs muddying up the golden output.
-> 
-> But if there's a specified MKFS_OPTIONS="... -n parent=1", this change will cause
-> the whole test fails, right?
 
-Ahaha, thank you for pointing that out.  Yes, this should change
-parent=X to parent=0 if it's specified, or add parent=0 if not.
+On 6/2/23 18:50, Zorro Lang wrote:
+> On Tue, May 30, 2023 at 03:15:52PM +0800, xiubli@redhat.com wrote:
+>> From: Xiubo Li <xiubli@redhat.com>
+>>
+>> For ceph fuse client the fs type will be "ceph-fuse".
+>>
+>> Fixes: https://tracker.ceph.com/issues/61496
+>> Signed-off-by: Xiubo Li <xiubli@redhat.com>
+>> ---
+>>   tests/generic/020 | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/tests/generic/020 b/tests/generic/020
+>> index e00365a9..da258aa5 100755
+>> --- a/tests/generic/020
+>> +++ b/tests/generic/020
+>> @@ -56,7 +56,7 @@ _attr_get_max()
+> Hmm... generic/020 is a very old test case, I think this _attr_get_max might
+> can be a common helper in common/attr.
+Yeah, sounds reasonable.
+>>   {
+>>   	# set maximum total attr space based on fs type
+>>   	case "$FSTYP" in
+>> -	xfs|udf|pvfs2|9p|ceph|fuse|nfs)
+>> +	xfs|udf|pvfs2|9p|ceph|fuse|nfs|ceph-fuse)
+> Anyway, that's another story, for the purpose of this patch:
+>
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+>
+Thanks
 
---D
+- Xiubo
 
-> > 
-> > --D
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > +_scratch_mkfs "${mkfs_args[@]}" >/dev/null
-> > > >  
-> > > >  blk_sz=$(_scratch_xfs_get_sb_field blocksize)
-> > > >  err_inj_attr_sz=$(( blk_sz / 3 - 50 ))
-> > > > diff --git a/tests/xfs/191 b/tests/xfs/191
-> > > > index 7a02f1be21..0a6c20dad7 100755
-> > > > --- a/tests/xfs/191
-> > > > +++ b/tests/xfs/191
-> > > > @@ -33,7 +33,12 @@ _fixed_by_kernel_commit 7be3bd8856fb "xfs: empty xattr leaf header blocks are no
-> > > >  _fixed_by_kernel_commit e87021a2bc10 "xfs: use larger in-core attr firstused field and detect overflow"
-> > > >  _fixed_by_git_commit xfsprogs f50d3462c654 "xfs_repair: ignore empty xattr leaf blocks"
-> > > >  
-> > > > -_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > > > +# Parent pointers change the xattr formats sufficiently to break this test.
-> > > > +# Disable parent pointers if mkfs supports it.
-> > > > +mkfs_args=()
-> > > > +$MKFS_XFS_PROG 2>&1 | grep -q parent=0 && mkfs_args+=(-n parent=0)
-> > > > +
-> > > > +_scratch_mkfs_xfs "${mkfs_args[@]}" | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > > >  cat $tmp.mkfs >> $seqres.full
-> > > >  source $tmp.mkfs
-> > > >  _scratch_mount
-> > > > diff --git a/tests/xfs/288 b/tests/xfs/288
-> > > > index aa664a266e..6bfc9ac0c8 100755
-> > > > --- a/tests/xfs/288
-> > > > +++ b/tests/xfs/288
-> > > > @@ -19,8 +19,13 @@ _supported_fs xfs
-> > > >  _require_scratch
-> > > >  _require_attrs
-> > > >  
-> > > > +# Parent pointers change the xattr formats sufficiently to break this test.
-> > > > +# Disable parent pointers if mkfs supports it.
-> > > > +mkfs_args=()
-> > > > +$MKFS_XFS_PROG 2>&1 | grep -q parent=0 && mkfs_args+=(-n parent=0)
-> > > > +
-> > > >  # get block size ($dbsize) from the mkfs output
-> > > > -_scratch_mkfs_xfs 2>/dev/null | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> > > > +_scratch_mkfs_xfs "${mkfs_args[@]}" 2>/dev/null | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> > > >  . $tmp.mkfs
-> > > >  
-> > > >  _scratch_mount
-> > > > 
-> > > 
-> > 
-> 
+>>   		max_attrs=1000
+>>   		;;
+>>   	ext2|ext3|ext4)
+>> -- 
+>> 2.40.1
+>>
+
