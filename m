@@ -2,52 +2,52 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 557C9C77B7A
-	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 14:08:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33A49C77B73
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 14:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236496AbjFFOHb (ORCPT
+        id S232123AbjFFOLI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 6 Jun 2023 10:07:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47718 "EHLO
+        Tue, 6 Jun 2023 10:11:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50426 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237613AbjFFOHJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 10:07:09 -0400
+        with ESMTP id S237681AbjFFOLE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 10:11:04 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A015B10C6;
-        Tue,  6 Jun 2023 07:07:07 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0C2E10D4;
+        Tue,  6 Jun 2023 07:11:02 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 34B4560A75;
-        Tue,  6 Jun 2023 14:07:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 954FEC433D2;
-        Tue,  6 Jun 2023 14:07:06 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5260061230;
+        Tue,  6 Jun 2023 14:11:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC668C433D2;
+        Tue,  6 Jun 2023 14:11:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686060426;
-        bh=774dvXSS5tSsBcbry/7/BvnTg7DkNcfOxfLgDSoQB6Q=;
+        s=k20201202; t=1686060661;
+        bh=/J1/vJlOyrDXpsefNJXUpTzvvg0WZqhcW6UI6DDTwQE=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=klRU2Sd6b4Y+mTtqEBpUm4VL4HminM1fRPpXiK+zn15lKpgdG974KVCnCv2JkmXsT
-         a+VzF2ZXzYrNd2EMPa2pwuqy+pDk2Nq4ASFvgCGFUsx020j/+WUNTKd8ix6DffIPXB
-         D33dFc4idqNibMWK4GiuYtAIioEJf5Vryk3gONtg3hJVrZJxN39urJ8GNi5IQ2Wl0e
-         IZl9XkuOC9TU7OFPvX7VTvimG5ofhkCXb34JLiiQFLj7DawlRDMwldF6OT8n4csZZW
-         mWh1Vnp+I/GUHcZTYjp5il05YRYB/OCK8823CBa/PoAHjGBStW5xGV49iqX8A0Trwj
-         UNsmaGYt9hs3Q==
-Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-19f6211d4e1so5266607fac.1;
-        Tue, 06 Jun 2023 07:07:06 -0700 (PDT)
-X-Gm-Message-State: AC+VfDzWXmTAAPyAosiWIqkiSQzvS3qMyCTTdpeJNJ6Y+Oq2LVTk8N/1
-        jphUfJ512J6jZChxmhrE3eQvex7S456SRr3OOE8=
-X-Google-Smtp-Source: ACHHUZ5jldFBSImrR5V4/RqsLQCq877D4qe0D3065mT9DsCvhakgNQl6UPZQnvfkdR777JO+B3dI+c4gRTE0gQ9shJ0=
-X-Received: by 2002:a54:4881:0:b0:398:f76:36a5 with SMTP id
- r1-20020a544881000000b003980f7636a5mr1062074oic.56.1686060425667; Tue, 06 Jun
- 2023 07:07:05 -0700 (PDT)
+        b=QDM3NGnk2gaXroUpntTKssCT9luxQvgmHDHPuhh26oLldGU+mLXXQBd7LTYmD+TMN
+         2+AFFpqlp9anNpIAuU8oMhamDxX7o+pDSYz8+rmxJPNDplc/JaAL3s3Y33RFojkP0p
+         iT9YSkJjG0Q1h/MkLGeuAwGvGPYbUtc7+j07EF7ajxikYkN4BZCToOJlUQ2kMgzSg8
+         65voRRmPlA5x5/Z0qzbVkmPaKJEmHCc/nkkjgeHOHKNUC1Nf/wNF1ZQs+SfKv/TbqK
+         5iYiAr0PFbEf3oxM28kTSjtEtbwxEjV7tWkQucrguMQDxCnfSMB9535v1spF4ki260
+         QK0wkkLfIHEJw==
+Received: by mail-oa1-f47.google.com with SMTP id 586e51a60fabf-19f45faedfbso5137120fac.0;
+        Tue, 06 Jun 2023 07:11:01 -0700 (PDT)
+X-Gm-Message-State: AC+VfDzApd7n71vUY32ZC6etdHbqzgqr2hQn5BhsDyalGBJxelcybNha
+        bTpJLGR07l6MYBNnT/iR40qL+V5el5sAsWy+uAU=
+X-Google-Smtp-Source: ACHHUZ7wuapON9VdTY70S0CXb5qFgwe36oVEcQUJq3jj0XrMFU1RimHidzu6+BnhpFgO9zshBcPBHBSHqMFynffCvHs=
+X-Received: by 2002:a05:6870:9484:b0:19a:2178:ee94 with SMTP id
+ w4-20020a056870948400b0019a2178ee94mr1220700oal.26.1686060660713; Tue, 06 Jun
+ 2023 07:11:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230606105200.129464-1-wqu@suse.com>
-In-Reply-To: <20230606105200.129464-1-wqu@suse.com>
+References: <20230606110123.130226-1-wqu@suse.com>
+In-Reply-To: <20230606110123.130226-1-wqu@suse.com>
 From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Tue, 6 Jun 2023 15:06:29 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H7eqFYXuAK7V=1Fq8Wf-4D4svrPPnzt3oBp=qPy4sPCgQ@mail.gmail.com>
-Message-ID: <CAL3q7H7eqFYXuAK7V=1Fq8Wf-4D4svrPPnzt3oBp=qPy4sPCgQ@mail.gmail.com>
-Subject: Re: [PATCH v2] btrfs: add a test case to verify read-only scrub
+Date:   Tue, 6 Jun 2023 15:10:24 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H71Puc=zdSqPmnFKkmVExxH9AKwkeaGJOtb36imy+QYmg@mail.gmail.com>
+Message-ID: <CAL3q7H71Puc=zdSqPmnFKkmVExxH9AKwkeaGJOtb36imy+QYmg@mail.gmail.com>
+Subject: Re: [PATCH v2] btrfs: add a test case to verify the scrub error reports
 To:     Qu Wenruo <wqu@suse.com>
 Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
@@ -56,17 +56,29 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 6, 2023 at 12:03=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
+On Tue, Jun 6, 2023 at 12:05=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
 >
-> There is a regression on btrfs read-only scrub behavior.
+> There is a regression in recent v6.4 cycle where a scrub rewrite changed
+> how we report errors, especially repairable errors.
 >
-> The commit e02ee89baa66 ("btrfs: scrub: switch scrub_simple_mirror() to
-> scrub_stripe infrastructure") makes btrfs scrub to ignore the read-only
-> flag completely, causing scrub to always fix the corruption.
+> Before the rewrite, we report the initial errors hit, and the amount of
+> repairable errors.
+> While after the rewrite, we no longer report the initial errors, but
+> only the number of repairable errors.
 >
-> This test case would create an fs with repairable corruptions, then run
-> a read-only scrub, and finally to make sure the corruption is not
-> repaired.
+> This behavior change is a regression, thus needs a test case to prevent
+> such problem from happening again.
+>
+> The test case itself would:
+>
+> - Create a btrfs using DUP data profile and 4K sector size
+>
+> - Create a file with one 128K extent
+>
+> - Corrupt the first mirror of that 128K extent
+>
+> - Scrub and checks the detailed report
+>   Both corrected errors and csum errors should be 32.
 >
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 
@@ -74,45 +86,37 @@ Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
 Looks good, thanks.
 
+
 > ---
 > Changelog:
 > v2:
 > - Add _fixed_by_kernel_commit
->
-> - Reduce the golden output
->   Instead of the first 512 bytes, the first 16 bytes are more than
->   enough.
->
-> - Better golden output
->   Add two more steps explaining what the test is doing.
->
-> - Output the offset for the file operation inside the fs
->   The offset is fixed, no need to use _filter_xfs_io_offset.
->
 > - Remove the confusing comments on common/filter
+> - Use $AWK_PROG instead of calling awk directly
+> - Fix an error prompt which uses a copied string without updating
 > ---
->  tests/btrfs/288     | 70 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/288.out |  9 ++++++
->  2 files changed, 79 insertions(+)
->  create mode 100755 tests/btrfs/288
->  create mode 100644 tests/btrfs/288.out
+>  tests/btrfs/289     | 69 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/289.out |  2 ++
+>  2 files changed, 71 insertions(+)
+>  create mode 100755 tests/btrfs/289
+>  create mode 100644 tests/btrfs/289.out
 >
-> diff --git a/tests/btrfs/288 b/tests/btrfs/288
+> diff --git a/tests/btrfs/289 b/tests/btrfs/289
 > new file mode 100755
-> index 00000000..52245895
+> index 00000000..0d20109a
 > --- /dev/null
-> +++ b/tests/btrfs/288
-> @@ -0,0 +1,70 @@
+> +++ b/tests/btrfs/289
+> @@ -0,0 +1,69 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
 > +#
-> +# FS QA Test 288
+> +# FS QA Test 289
 > +#
-> +# Make sure btrfs-scrub respects the read-only flag.
+> +# Make sure btrfs-scrub reports errors correctly for repaired sectors.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto repair quick volume scrub
+> +_begin_fstest auto quick scrub repair
 > +
 > +. ./common/filter
 > +
@@ -120,76 +124,71 @@ Looks good, thanks.
 > +
 > +# Modify as appropriate.
 > +_supported_fs btrfs
-> +_require_scratch_dev_pool 2
-> +
+> +_require_scratch
 > +
 > +_require_odirect
 > +# Overwriting data is forbidden on a zoned block device
 > +_require_non_zoned_device "${SCRATCH_DEV}"
 > +
+> +# The errors reported would be in the unit of sector, thus the number
+> +# is dependent on the sectorsize.
+> +_require_btrfs_support_sectorsize 4096
+> +
 > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +       "btrfs: scrub: respect the read-only flag during repair"
+> +       "btrfs: scrub: also report errors hit during the initial read"
 > +
-> +_scratch_dev_pool_get 2
-> +
-> +# Step 1, create a raid btrfs with one 128K file
-> +echo "step 1......mkfs.btrfs"
-> +_scratch_pool_mkfs -d raid1 -b 1G >> $seqres.full 2>&1
+> +# Create a single btrfs with DUP data profile, and create one 128K file.
+> +_scratch_mkfs -s 4k -d dup -b 1G >> $seqres.full 2>&1
 > +_scratch_mount
-> +
 > +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foob=
-ar" |\
-> +       _filter_xfs_io
-> +
-> +# Step 2, corrupt one mirror so we can still repair the fs.
-> +echo "step 2......corrupt one mirror"
-> +# ensure btrfs-map-logical sees the tree updates
+ar" \
+> +       > /dev/null
 > +sync
 > +
-> +logical=3D$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
+> +logical=3D$(_btrfs_get_first_logical "$SCRATCH_MNT/foobar")
 > +
 > +physical1=3D$(_btrfs_get_physical ${logical} 1)
 > +devpath1=3D$(_btrfs_get_device_path ${logical} 1)
-> +
 > +_scratch_unmount
 > +
 > +echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
 > +       >> $seqres.full
-> +$XFS_IO_PROG -d -c "pwrite -S 0xf1 -b 64K $physical1 64K" $devpath1 \
-> +       > /dev/null
+> +$XFS_IO_PROG -d -c "pwrite -S 0xf1 -b 64K $physical1 128K" $devpath1 \
+> +       >> $seqres.full
 > +
-> +# Step 3, do a read-only scrub, which should not fix the corruption.
-> +echo "step 3......do a read-only scrub"
-> +_scratch_mount -o ro
-> +$BTRFS_UTIL_PROG scrub start -BRrd $SCRATCH_MNT >> $seqres.full 2>&1
-> +_scratch_unmount
+> +# Mount and do a scrub and compare the output
+> +_scratch_mount
+> +$BTRFS_UTIL_PROG scrub start -BR $SCRATCH_MNT >> $tmp.scrub_report 2>&1
+> +cat $tmp.scrub_report >> $seqres.full
 > +
-> +# Step 4, make sure the corruption is still there
-> +echo "step 4......verify the corruption is not repaired"
-> +echo "  the first 16 bytes of the extent at mirror 1:"
-> +$XFS_IO_PROG -c "pread -qv $physical1 16" $devpath1 |\
-> +       _filter_xfs_io_offset
+> +# Csum errors should be 128K/4K =3D 32
+> +csum_errors=3D$(grep "csum_errors" $tmp.scrub_report | $AWK_PROG '{print=
+ $2}')
+> +if [ $csum_errors -ne 32 ]; then
+> +       echo "csum_errors incorrect, expect 32 has $csum_errors"
+> +fi
 > +
-> +_scratch_dev_pool_put
-> +# success, all done
+> +# And all errors should be repaired, thus corrected errors should also b=
+e 32.
+> +corrected_errors=3D$(grep "corrected_errors" $tmp.scrub_report | $AWK_PR=
+OG '{print $2}')
+> +if [ $corrected_errors -ne 32 ]; then
+> +       echo "corrected_errors incorrect, expect 32 has $corrected_errors=
+"
+> +fi
+> +
+> +echo "Silence is golden"
+> +
 > +status=3D0
 > +exit
-> diff --git a/tests/btrfs/288.out b/tests/btrfs/288.out
+> diff --git a/tests/btrfs/289.out b/tests/btrfs/289.out
 > new file mode 100644
-> index 00000000..452bdc67
+> index 00000000..7d3b7f80
 > --- /dev/null
-> +++ b/tests/btrfs/288.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 288
-> +step 1......mkfs.btrfs
-> +wrote 131072/131072 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +step 2......corrupt one mirror
-> +step 3......do a read-only scrub
-> +step 4......verify the corruption is not repaired
-> +  the first 16 bytes of the extent at mirror 1:
-> +XXXXXXXX:  f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1  ............=
-....
+> +++ b/tests/btrfs/289.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 289
+> +Silence is golden
 > --
 > 2.39.0
 >
