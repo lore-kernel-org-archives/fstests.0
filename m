@@ -2,184 +2,194 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2395EC77B73
-	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 13:36:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 557C9C77B7A
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 14:08:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237737AbjFFNgm (ORCPT
+        id S236496AbjFFOHb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 6 Jun 2023 09:36:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56886 "EHLO
+        Tue, 6 Jun 2023 10:07:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237744AbjFFNgl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 09:36:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5691E6E
-        for <fstests@vger.kernel.org>; Tue,  6 Jun 2023 06:35:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686058549;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=yX21h3TXM8zP/ISklmpUnUl5jMiWsYN0w8KYNOdwwj8=;
-        b=Y+oQW/fe4bvdnMbo6YrYhuzrLuApX50gIqjFvfk544nZ3m4CAxqjga83YRKv6NRQzrFgfw
-        0lDJ4ifOEH3scpAmGPPp3kFvR6vvTgI2CkZoTiLT8gd7hupqE79M2cxHsLgcMicKnQ7Jp7
-        R6zwNmFnoTLmNejp2OFy7o+NJFtUWbg=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-551-2ax9wMa2Payq4AvSJAth8Q-1; Tue, 06 Jun 2023 09:35:47 -0400
-X-MC-Unique: 2ax9wMa2Payq4AvSJAth8Q-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S237613AbjFFOHJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 10:07:09 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A015B10C6;
+        Tue,  6 Jun 2023 07:07:07 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 5B0F4280D588
-        for <fstests@vger.kernel.org>; Tue,  6 Jun 2023 13:35:47 +0000 (UTC)
-Received: from pasta.redhat.com (unknown [10.45.225.216])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id CB9E8140E954;
-        Tue,  6 Jun 2023 13:35:46 +0000 (UTC)
-From:   Andreas Gruenbacher <agruenba@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] generic/728: Add mmap + DIO write test
-Date:   Tue,  6 Jun 2023 15:35:45 +0200
-Message-Id: <20230606133545.1152607-1-agruenba@redhat.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 34B4560A75;
+        Tue,  6 Jun 2023 14:07:07 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 954FEC433D2;
+        Tue,  6 Jun 2023 14:07:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1686060426;
+        bh=774dvXSS5tSsBcbry/7/BvnTg7DkNcfOxfLgDSoQB6Q=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=klRU2Sd6b4Y+mTtqEBpUm4VL4HminM1fRPpXiK+zn15lKpgdG974KVCnCv2JkmXsT
+         a+VzF2ZXzYrNd2EMPa2pwuqy+pDk2Nq4ASFvgCGFUsx020j/+WUNTKd8ix6DffIPXB
+         D33dFc4idqNibMWK4GiuYtAIioEJf5Vryk3gONtg3hJVrZJxN39urJ8GNi5IQ2Wl0e
+         IZl9XkuOC9TU7OFPvX7VTvimG5ofhkCXb34JLiiQFLj7DawlRDMwldF6OT8n4csZZW
+         mWh1Vnp+I/GUHcZTYjp5il05YRYB/OCK8823CBa/PoAHjGBStW5xGV49iqX8A0Trwj
+         UNsmaGYt9hs3Q==
+Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-19f6211d4e1so5266607fac.1;
+        Tue, 06 Jun 2023 07:07:06 -0700 (PDT)
+X-Gm-Message-State: AC+VfDzWXmTAAPyAosiWIqkiSQzvS3qMyCTTdpeJNJ6Y+Oq2LVTk8N/1
+        jphUfJ512J6jZChxmhrE3eQvex7S456SRr3OOE8=
+X-Google-Smtp-Source: ACHHUZ5jldFBSImrR5V4/RqsLQCq877D4qe0D3065mT9DsCvhakgNQl6UPZQnvfkdR777JO+B3dI+c4gRTE0gQ9shJ0=
+X-Received: by 2002:a54:4881:0:b0:398:f76:36a5 with SMTP id
+ r1-20020a544881000000b003980f7636a5mr1062074oic.56.1686060425667; Tue, 06 Jun
+ 2023 07:07:05 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
+References: <20230606105200.129464-1-wqu@suse.com>
+In-Reply-To: <20230606105200.129464-1-wqu@suse.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Tue, 6 Jun 2023 15:06:29 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7eqFYXuAK7V=1Fq8Wf-4D4svrPPnzt3oBp=qPy4sPCgQ@mail.gmail.com>
+Message-ID: <CAL3q7H7eqFYXuAK7V=1Fq8Wf-4D4svrPPnzt3oBp=qPy4sPCgQ@mail.gmail.com>
+Subject: Re: [PATCH v2] btrfs: add a test case to verify read-only scrub
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is the same as generic/647, but with an additional test that writes
-a memory-mapped page onto itself using direct I/O.
+On Tue, Jun 6, 2023 at 12:03=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
+>
+> There is a regression on btrfs read-only scrub behavior.
+>
+> The commit e02ee89baa66 ("btrfs: scrub: switch scrub_simple_mirror() to
+> scrub_stripe infrastructure") makes btrfs scrub to ignore the read-only
+> flag completely, causing scrub to always fix the corruption.
+>
+> This test case would create an fs with repairable corruptions, then run
+> a read-only scrub, and finally to make sure the corruption is not
+> repaired.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-For direct I/O writes, the kernel will invalidate the page cache before
-and after carrying out the write.  This puts filesystems that fault in
-pages on demand and then carry out the write with page faults disabled
-into a position in which they will not be able to make any progress.
----
- src/mmap-rw-fault.c   | 33 ++++++++++++++++++++++++++++++---
- tests/generic/728     | 41 +++++++++++++++++++++++++++++++++++++++++
- tests/generic/728.out |  2 ++
- 3 files changed, 73 insertions(+), 3 deletions(-)
- create mode 100755 tests/generic/728
- create mode 100644 tests/generic/728.out
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
-index 82f9d978..161d9f79 100644
---- a/src/mmap-rw-fault.c
-+++ b/src/mmap-rw-fault.c
-@@ -20,6 +20,7 @@
- #include <string.h>
- #include <errno.h>
- #include <err.h>
-+#include <getopt.h>
- 
- char *filename;
- unsigned int page_size;
-@@ -109,11 +110,29 @@ static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
- 	return count2;
- }
- 
-+static void usage(const char *argv0)
-+{
-+	fprintf(stderr, "Usage: %s [-2] {filename}\n", argv0);
-+	exit(2);
-+}
-+
- int main(int argc, char *argv[])
- {
--	if (argc != 2)
--		errx(1, "no test filename argument given");
--	filename = argv[1];
-+	int opt, opt_2 = 0;
-+
-+	while ((opt = getopt(argc, argv, "2")) != -1) {
-+		switch(opt) {
-+		case '2':
-+			opt_2 = 1;
-+			break;
-+		default:
-+			usage(argv[0]);
-+		}
-+	}
-+
-+	if (optind + 1 != argc)
-+		usage(argv[0]);
-+	filename = argv[optind];
- 
- 	page_size = ret = sysconf(_SC_PAGE_SIZE);
- 	if (ret == -1)
-@@ -179,6 +198,14 @@ int main(int argc, char *argv[])
- 		errx(1, "pread (D_DIRECT) from hole is broken");
- 	done();
- 
-+	if (opt_2) {
-+		init('f', O_RDWR | O_DIRECT);
-+		ret = do_write(fd, addr + page_size, page_size, page_size);
-+		if (ret != page_size)
-+			err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-+		done();
-+	}
-+
- 	if (unlink(filename))
- 		err(1, "unlink %s", filename);
- 
-diff --git a/tests/generic/728 b/tests/generic/728
-new file mode 100755
-index 00000000..13a88dc0
---- /dev/null
-+++ b/tests/generic/728
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 728
-+#
-+# Trigger page faults in the same file during read and write
-+#
-+# This is generic/647 with an additional test that writes a memory-mapped page
-+# onto itself using direct I/O.
-+#
-+# The kernel will invalidate the page cache
-+# before carrying out the write, so filesystems that fault in the target page before carrying out the direct I/O write will never make any progress.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -f $TEST_DIR/mmap-rw-fault.tmp
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_require_test
-+_require_odirect
-+_require_test_program mmap-rw-fault
-+
-+echo "Silence is golden"
-+
-+$here/src/mmap-rw-fault -2 $TEST_DIR/mmap-rw-fault.tmp
-+
-+status=$?
-+exit
-diff --git a/tests/generic/728.out b/tests/generic/728.out
-new file mode 100644
-index 00000000..ab39f45f
---- /dev/null
-+++ b/tests/generic/728.out
-@@ -0,0 +1,2 @@
-+QA output created by 728
-+Silence is golden
--- 
-2.40.0
+Looks good, thanks.
 
+> ---
+> Changelog:
+> v2:
+> - Add _fixed_by_kernel_commit
+>
+> - Reduce the golden output
+>   Instead of the first 512 bytes, the first 16 bytes are more than
+>   enough.
+>
+> - Better golden output
+>   Add two more steps explaining what the test is doing.
+>
+> - Output the offset for the file operation inside the fs
+>   The offset is fixed, no need to use _filter_xfs_io_offset.
+>
+> - Remove the confusing comments on common/filter
+> ---
+>  tests/btrfs/288     | 70 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/288.out |  9 ++++++
+>  2 files changed, 79 insertions(+)
+>  create mode 100755 tests/btrfs/288
+>  create mode 100644 tests/btrfs/288.out
+>
+> diff --git a/tests/btrfs/288 b/tests/btrfs/288
+> new file mode 100755
+> index 00000000..52245895
+> --- /dev/null
+> +++ b/tests/btrfs/288
+> @@ -0,0 +1,70 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 288
+> +#
+> +# Make sure btrfs-scrub respects the read-only flag.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto repair quick volume scrub
+> +
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch_dev_pool 2
+> +
+> +
+> +_require_odirect
+> +# Overwriting data is forbidden on a zoned block device
+> +_require_non_zoned_device "${SCRATCH_DEV}"
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: scrub: respect the read-only flag during repair"
+> +
+> +_scratch_dev_pool_get 2
+> +
+> +# Step 1, create a raid btrfs with one 128K file
+> +echo "step 1......mkfs.btrfs"
+> +_scratch_pool_mkfs -d raid1 -b 1G >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foob=
+ar" |\
+> +       _filter_xfs_io
+> +
+> +# Step 2, corrupt one mirror so we can still repair the fs.
+> +echo "step 2......corrupt one mirror"
+> +# ensure btrfs-map-logical sees the tree updates
+> +sync
+> +
+> +logical=3D$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
+> +
+> +physical1=3D$(_btrfs_get_physical ${logical} 1)
+> +devpath1=3D$(_btrfs_get_device_path ${logical} 1)
+> +
+> +_scratch_unmount
+> +
+> +echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
+> +       >> $seqres.full
+> +$XFS_IO_PROG -d -c "pwrite -S 0xf1 -b 64K $physical1 64K" $devpath1 \
+> +       > /dev/null
+> +
+> +# Step 3, do a read-only scrub, which should not fix the corruption.
+> +echo "step 3......do a read-only scrub"
+> +_scratch_mount -o ro
+> +$BTRFS_UTIL_PROG scrub start -BRrd $SCRATCH_MNT >> $seqres.full 2>&1
+> +_scratch_unmount
+> +
+> +# Step 4, make sure the corruption is still there
+> +echo "step 4......verify the corruption is not repaired"
+> +echo "  the first 16 bytes of the extent at mirror 1:"
+> +$XFS_IO_PROG -c "pread -qv $physical1 16" $devpath1 |\
+> +       _filter_xfs_io_offset
+> +
+> +_scratch_dev_pool_put
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/288.out b/tests/btrfs/288.out
+> new file mode 100644
+> index 00000000..452bdc67
+> --- /dev/null
+> +++ b/tests/btrfs/288.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 288
+> +step 1......mkfs.btrfs
+> +wrote 131072/131072 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +step 2......corrupt one mirror
+> +step 3......do a read-only scrub
+> +step 4......verify the corruption is not repaired
+> +  the first 16 bytes of the extent at mirror 1:
+> +XXXXXXXX:  f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1 f1  ............=
+....
+> --
+> 2.39.0
+>
