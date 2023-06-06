@@ -2,174 +2,184 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F875C7EE2C
-	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 11:05:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2395EC77B73
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 13:36:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232088AbjFFLE0 (ORCPT
+        id S237737AbjFFNgm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 6 Jun 2023 07:04:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41724 "EHLO
+        Tue, 6 Jun 2023 09:36:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56886 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231931AbjFFLDU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 07:03:20 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9AD51E5B;
-        Tue,  6 Jun 2023 04:01:42 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        with ESMTP id S237744AbjFFNgl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 09:36:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5691E6E
+        for <fstests@vger.kernel.org>; Tue,  6 Jun 2023 06:35:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1686058549;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=yX21h3TXM8zP/ISklmpUnUl5jMiWsYN0w8KYNOdwwj8=;
+        b=Y+oQW/fe4bvdnMbo6YrYhuzrLuApX50gIqjFvfk544nZ3m4CAxqjga83YRKv6NRQzrFgfw
+        0lDJ4ifOEH3scpAmGPPp3kFvR6vvTgI2CkZoTiLT8gd7hupqE79M2cxHsLgcMicKnQ7Jp7
+        R6zwNmFnoTLmNejp2OFy7o+NJFtUWbg=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-551-2ax9wMa2Payq4AvSJAth8Q-1; Tue, 06 Jun 2023 09:35:47 -0400
+X-MC-Unique: 2ax9wMa2Payq4AvSJAth8Q-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 5416B2199B;
-        Tue,  6 Jun 2023 11:01:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1686049301; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=yI5C52gMli8e4rAZOVZB6DDrp5/7w6W/rMv3GDdgrGY=;
-        b=i5kqsqwtytqoJhrMOqtTWyjDxutL2DttTIPZCh2kbMR4QsykW4KLR9+H0Qh/oko1x5y8VA
-        xJaatxUIzAtesI66aS7CveU5ilpz171wZJVI2aKZqaylumdx+Nhdsg4LU1/AcVcZs4r6OV
-        ubdx4rmKd2bHNsYnc1b2uUFwFMpAggQ=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7743C13776;
-        Tue,  6 Jun 2023 11:01:40 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id Io4eEBQSf2Q8CQAAMHmgww
-        (envelope-from <wqu@suse.com>); Tue, 06 Jun 2023 11:01:40 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH v2] btrfs: add a test case to verify the scrub error reports
-Date:   Tue,  6 Jun 2023 19:01:23 +0800
-Message-Id: <20230606110123.130226-1-wqu@suse.com>
-X-Mailer: git-send-email 2.40.1
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 5B0F4280D588
+        for <fstests@vger.kernel.org>; Tue,  6 Jun 2023 13:35:47 +0000 (UTC)
+Received: from pasta.redhat.com (unknown [10.45.225.216])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id CB9E8140E954;
+        Tue,  6 Jun 2023 13:35:46 +0000 (UTC)
+From:   Andreas Gruenbacher <agruenba@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH] generic/728: Add mmap + DIO write test
+Date:   Tue,  6 Jun 2023 15:35:45 +0200
+Message-Id: <20230606133545.1152607-1-agruenba@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-There is a regression in recent v6.4 cycle where a scrub rewrite changed
-how we report errors, especially repairable errors.
+This is the same as generic/647, but with an additional test that writes
+a memory-mapped page onto itself using direct I/O.
 
-Before the rewrite, we report the initial errors hit, and the amount of
-repairable errors.
-While after the rewrite, we no longer report the initial errors, but
-only the number of repairable errors.
-
-This behavior change is a regression, thus needs a test case to prevent
-such problem from happening again.
-
-The test case itself would:
-
-- Create a btrfs using DUP data profile and 4K sector size
-
-- Create a file with one 128K extent
-
-- Corrupt the first mirror of that 128K extent
-
-- Scrub and checks the detailed report
-  Both corrected errors and csum errors should be 32.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+For direct I/O writes, the kernel will invalidate the page cache before
+and after carrying out the write.  This puts filesystems that fault in
+pages on demand and then carry out the write with page faults disabled
+into a position in which they will not be able to make any progress.
 ---
-Changelog:
-v2:
-- Add _fixed_by_kernel_commit
-- Remove the confusing comments on common/filter
-- Use $AWK_PROG instead of calling awk directly
-- Fix an error prompt which uses a copied string without updating
----
- tests/btrfs/289     | 69 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/289.out |  2 ++
- 2 files changed, 71 insertions(+)
- create mode 100755 tests/btrfs/289
- create mode 100644 tests/btrfs/289.out
+ src/mmap-rw-fault.c   | 33 ++++++++++++++++++++++++++++++---
+ tests/generic/728     | 41 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/728.out |  2 ++
+ 3 files changed, 73 insertions(+), 3 deletions(-)
+ create mode 100755 tests/generic/728
+ create mode 100644 tests/generic/728.out
 
-diff --git a/tests/btrfs/289 b/tests/btrfs/289
+diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
+index 82f9d978..161d9f79 100644
+--- a/src/mmap-rw-fault.c
++++ b/src/mmap-rw-fault.c
+@@ -20,6 +20,7 @@
+ #include <string.h>
+ #include <errno.h>
+ #include <err.h>
++#include <getopt.h>
+ 
+ char *filename;
+ unsigned int page_size;
+@@ -109,11 +110,29 @@ static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
+ 	return count2;
+ }
+ 
++static void usage(const char *argv0)
++{
++	fprintf(stderr, "Usage: %s [-2] {filename}\n", argv0);
++	exit(2);
++}
++
+ int main(int argc, char *argv[])
+ {
+-	if (argc != 2)
+-		errx(1, "no test filename argument given");
+-	filename = argv[1];
++	int opt, opt_2 = 0;
++
++	while ((opt = getopt(argc, argv, "2")) != -1) {
++		switch(opt) {
++		case '2':
++			opt_2 = 1;
++			break;
++		default:
++			usage(argv[0]);
++		}
++	}
++
++	if (optind + 1 != argc)
++		usage(argv[0]);
++	filename = argv[optind];
+ 
+ 	page_size = ret = sysconf(_SC_PAGE_SIZE);
+ 	if (ret == -1)
+@@ -179,6 +198,14 @@ int main(int argc, char *argv[])
+ 		errx(1, "pread (D_DIRECT) from hole is broken");
+ 	done();
+ 
++	if (opt_2) {
++		init('f', O_RDWR | O_DIRECT);
++		ret = do_write(fd, addr + page_size, page_size, page_size);
++		if (ret != page_size)
++			err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
++		done();
++	}
++
+ 	if (unlink(filename))
+ 		err(1, "unlink %s", filename);
+ 
+diff --git a/tests/generic/728 b/tests/generic/728
 new file mode 100755
-index 00000000..0d20109a
+index 00000000..13a88dc0
 --- /dev/null
-+++ b/tests/btrfs/289
-@@ -0,0 +1,69 @@
++++ b/tests/generic/728
+@@ -0,0 +1,41 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
++# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
 +#
-+# FS QA Test 289
++# FS QA Test 728
 +#
-+# Make sure btrfs-scrub reports errors correctly for repaired sectors.
++# Trigger page faults in the same file during read and write
++#
++# This is generic/647 with an additional test that writes a memory-mapped page
++# onto itself using direct I/O.
++#
++# The kernel will invalidate the page cache
++# before carrying out the write, so filesystems that fault in the target page before carrying out the direct I/O write will never make any progress.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick scrub repair
++_begin_fstest auto quick
 +
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -f $TEST_DIR/mmap-rw-fault.tmp
++}
++
++# Import common functions.
 +. ./common/filter
 +
 +# real QA test starts here
 +
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_scratch
-+
++_supported_fs generic
++_require_test
 +_require_odirect
-+# Overwriting data is forbidden on a zoned block device
-+_require_non_zoned_device "${SCRATCH_DEV}"
-+
-+# The errors reported would be in the unit of sector, thus the number
-+# is dependent on the sectorsize.
-+_require_btrfs_support_sectorsize 4096
-+
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: scrub: also report errors hit during the initial read"
-+
-+# Create a single btrfs with DUP data profile, and create one 128K file.
-+_scratch_mkfs -s 4k -d dup -b 1G >> $seqres.full 2>&1
-+_scratch_mount
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" \
-+	> /dev/null
-+sync
-+
-+logical=$(_btrfs_get_first_logical "$SCRATCH_MNT/foobar")
-+
-+physical1=$(_btrfs_get_physical ${logical} 1)
-+devpath1=$(_btrfs_get_device_path ${logical} 1)
-+_scratch_unmount
-+
-+echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
-+	>> $seqres.full
-+$XFS_IO_PROG -d -c "pwrite -S 0xf1 -b 64K $physical1 128K" $devpath1 \
-+	>> $seqres.full
-+
-+# Mount and do a scrub and compare the output
-+_scratch_mount
-+$BTRFS_UTIL_PROG scrub start -BR $SCRATCH_MNT >> $tmp.scrub_report 2>&1
-+cat $tmp.scrub_report >> $seqres.full
-+
-+# Csum errors should be 128K/4K = 32
-+csum_errors=$(grep "csum_errors" $tmp.scrub_report | $AWK_PROG '{print $2}')
-+if [ $csum_errors -ne 32 ]; then
-+	echo "csum_errors incorrect, expect 32 has $csum_errors"
-+fi
-+
-+# And all errors should be repaired, thus corrected errors should also be 32. 
-+corrected_errors=$(grep "corrected_errors" $tmp.scrub_report | $AWK_PROG '{print $2}')
-+if [ $corrected_errors -ne 32 ]; then
-+	echo "corrected_errors incorrect, expect 32 has $corrected_errors"
-+fi
++_require_test_program mmap-rw-fault
 +
 +echo "Silence is golden"
 +
-+status=0
++$here/src/mmap-rw-fault -2 $TEST_DIR/mmap-rw-fault.tmp
++
++status=$?
 +exit
-diff --git a/tests/btrfs/289.out b/tests/btrfs/289.out
+diff --git a/tests/generic/728.out b/tests/generic/728.out
 new file mode 100644
-index 00000000..7d3b7f80
+index 00000000..ab39f45f
 --- /dev/null
-+++ b/tests/btrfs/289.out
++++ b/tests/generic/728.out
 @@ -0,0 +1,2 @@
-+QA output created by 289
++QA output created by 728
 +Silence is golden
 -- 
-2.39.0
+2.40.0
 
