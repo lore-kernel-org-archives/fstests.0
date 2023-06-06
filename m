@@ -2,199 +2,334 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C349C7EE24
-	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 09:45:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 168C8C77B7A
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jun 2023 10:31:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232971AbjFFJp6 (ORCPT
+        id S236261AbjFFKbH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 6 Jun 2023 05:45:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52208 "EHLO
+        Tue, 6 Jun 2023 06:31:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232450AbjFFJp5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 05:45:57 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 728DDE40;
-        Tue,  6 Jun 2023 02:45:56 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S236550AbjFFKau (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Jun 2023 06:30:50 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD6A0E55;
+        Tue,  6 Jun 2023 03:30:46 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E88386260F;
-        Tue,  6 Jun 2023 09:45:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E446C433EF;
-        Tue,  6 Jun 2023 09:45:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686044755;
-        bh=vxo0Q7/PaNRS0d8CJcjo+TcABy2jHL/uWIxfmA2lfuU=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=VSJWPlZj5MTKL8OU8ymujT8VqmaTqtSucF61qTfgkoij/KV0G5j1eIIegDFovm5jI
-         /qkTShqADUt1TV/B8NyoR7paNUZMBBvkSgUfe/sTIDtCv2Y4/VQJIYuOV+QdbS/esw
-         PqXrBwXoucgQT8aFr7TT96QefPX3lSRnHfYfS9joq4ojhgyLgKl+VBLmNi7rHZD+ll
-         xvkBiIUcPaU6fwvyb6PjP3xN3mtqYFRLaWcg3+CeN4HYm8/992OO/zI/HUXOgAByIb
-         2Ztm2BsqbNTTJmXkzZzgTwAczuxJNNsVdG5i8CJAi5HPyrdGXZnCu2Td2WhIEhwCDQ
-         POt6QGS5Insbw==
-Received: by mail-oo1-f41.google.com with SMTP id 006d021491bc7-541f4ee6f89so3956431eaf.2;
-        Tue, 06 Jun 2023 02:45:55 -0700 (PDT)
-X-Gm-Message-State: AC+VfDxlWs+vstiD76zZtCtGgV9S+KFVbG+B39itDXktItG5Pt4vwYwD
-        uauGQvHkUs8l3ZrCvTV/dJOtb0XMV8YikjL8kdQ=
-X-Google-Smtp-Source: ACHHUZ5x67MyKnGVgkbB/PoWKQdZhnxgjj1MtfU5L1OVp5HeTjbkjFmSNGf7UeUwex8efk8LLQFRazEQ8Anbn7KZ8AY=
-X-Received: by 2002:a05:6820:302:b0:558:a4cd:8813 with SMTP id
- l2-20020a056820030200b00558a4cd8813mr1183244ooe.9.1686044754372; Tue, 06 Jun
- 2023 02:45:54 -0700 (PDT)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 912CD1FD69;
+        Tue,  6 Jun 2023 10:30:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1686047445; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=fGG+0XA3Pt5q1mk1qeiXYZxnk976/0urlm/19hljb5E=;
+        b=km1eYGi61CAArOo+mEoba7kxjxb89qm+gjiY0dTU6Ano59k1OFfP2Sx88Gh0GinlwOg+oP
+        A5XH227h5N+YJe7T8/cGxaRmbWZvJRXOHoevMMKx+UfN4e5OcbvRml6gFMd+vtpj5LFfwh
+        kl9H7z55IxKsrzLkR2MuzR+/zk/91oQ=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id CD83813776;
+        Tue,  6 Jun 2023 10:30:44 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id cM1wJ9QKf2RTdQAAMHmgww
+        (envelope-from <wqu@suse.com>); Tue, 06 Jun 2023 10:30:44 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] btrfs/266: test case enhancement to cover more possible failures
+Date:   Tue,  6 Jun 2023 18:30:27 +0800
+Message-Id: <20230606103027.125617-1-wqu@suse.com>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-References: <20230606073233.75900-1-wqu@suse.com>
-In-Reply-To: <20230606073233.75900-1-wqu@suse.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Tue, 6 Jun 2023 10:45:18 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H7z7Cutdrm5f2VmqFHCbkO9wic_45GYre+9uOFKtdgsXA@mail.gmail.com>
-Message-ID: <CAL3q7H7z7Cutdrm5f2VmqFHCbkO9wic_45GYre+9uOFKtdgsXA@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: add a test case to verify the scrub error reports
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 6, 2023 at 8:41=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
-> There is a regression in recent v6.4 cycle where a scrub rewrite changed
-> how we report errors, especially repairable errors.
->
-> Before the rewrite, we report the initial errors hit, and the amount of
-> repairable errors.
-> While after the rewrite, we no longer report the initial errors, but
-> only the number of repairable errors.
->
-> This behavior change is a regression, thus needs a test case to prevent
-> such problem from happening again.
->
-> The test case itself would:
->
-> - Create a btrfs using DUP data profile and 4K sector size
->
-> - Create a file with one 128K extent
->
-> - Corrupt the first mirror of that 128K extent
->
-> - Scrub and checks the detailed report
->   Both corrected errors and csum errors should be 32.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/btrfs/289     | 67 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/289.out |  2 ++
->  2 files changed, 69 insertions(+)
->  create mode 100755 tests/btrfs/289
->  create mode 100644 tests/btrfs/289.out
->
-> diff --git a/tests/btrfs/289 b/tests/btrfs/289
-> new file mode 100755
-> index 00000000..914b6280
-> --- /dev/null
-> +++ b/tests/btrfs/289
-> @@ -0,0 +1,67 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 289
-> +#
-> +# Make sure btrfs-scrub reports errors correctly for repaired sectors.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick scrub repair
-> +
-> +# For filedefrag and all the filters
+[BACKGROUND]
+Recently I'm debugging a random failure with btrfs/266 with larger page
+sizes (64K page size, with either 64K sector size or 4K sector size).
 
-So almost the same comment as in the other test:
+During the tests, I found the test case itself can be further enhanced
+to make better coverage and easier debugging.
 
-This comment is a bit confusing. File defrag? The test doesn't exercise def=
-rag.
-I'm not seeing the test using filters either, the test is redirecting
-xfs_io's stdout to /dev/null
+[ENHANCEMENT]
 
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_scratch
-> +
-> +_require_odirect
-> +# Overwriting data is forbidden on a zoned block device
-> +_require_non_zoned_device "${SCRATCH_DEV}"
-> +
-> +# The errors reported would be in the unit of sector, thus the number
-> +# is dependent on the sectorsize.
-> +_require_btrfs_support_sectorsize 4096
+- Ensure every 64K block only has one good mirror
+  The initial layout is not pushing hard enough, some ranges have 2 good
+  mirrors while some only has one.
 
-So same as before, can we please get a _fixed_by_kernel_commit to
-identify the patch that fixes the regression?
+- Simplify the golden output
+  The current golden output contains 512 bytes output for the beginning
+  of each mirror.
 
-> +
-> +# Create a single btrfs with DUP data profile, and create one 128K file.
-> +_scratch_mkfs -s 4k -d dup -b 1G >> $seqres.full 2>&1
-> +_scratch_mount
-> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foob=
-ar" \
-> +       > /dev/null
-> +sync
-> +
-> +logical=3D$(_btrfs_get_first_logical "$SCRATCH_MNT/foobar")
-> +
-> +physical1=3D$(_btrfs_get_physical ${logical} 1)
-> +devpath1=3D$(_btrfs_get_device_path ${logical} 1)
-> +_scratch_unmount
-> +
-> +echo " corrupt stripe #1, devpath $devpath1 physical $physical1" \
-> +       >> $seqres.full
-> +$XFS_IO_PROG -d -c "pwrite -S 0xf1 -b 64K $physical1 128K" $devpath1 \
-> +       > /dev/null
-> +
-> +# Mount and do a scrub and compare the ouput
+  The 512 bytes output itself is both duplicating and not comprehensive
+  enough (see the next output).
 
-ouput -> output
+  This patch would remove the duplication part by only output one single
+  line for 16 bytes.
 
-> +_scratch_mount
-> +$BTRFS_UTIL_PROG scrub start -BR $SCRATCH_MNT >> $tmp.scrub_report 2>&1
-> +cat $tmp.scrub_report >> $seqres.full
-> +
-> +# Csum errors should be 128K/4K =3D 32
-> +csum_errors=3D$(grep "csum_errors" $tmp.scrub_report | awk '{print $2}')
+- Add extra output for all the 3 64K blocks
+  Each 64K of the involved file now has only one good mirror, and they
+  are all on different devices.
+  Thus only checking the beginning of the first 64K block is not good
+  enough.
 
-Use $AWK_PROG instead.
+  This patch would enhance this by output the first 16 bytes for all the
+  3 64K blocks on each device.
 
-> +if [ $csum_errors -ne 32 ]; then
-> +       echo "csum_errors incorrect, expect 32 has $csum_errors"
-> +fi
-> +
-> +# And all errors should be repaired, thus corrected errors should also b=
-e 32.
-> +corrected_errors=3D$(grep "corrected_errors" $tmp.scrub_report | awk '{p=
-rint $2}')
+- Add a final safenet to catch unexpected corruption
+  If we have some weird corruption after the first 16 bytes of each
+  64K blocks, we can still detect them using "btrfs check
+  --check-data-csum", which acts as offline scrub.
 
-Same here, $AWK_PROG instead.
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/266     |  59 ++++++++++++++++++++----
+ tests/btrfs/266.out | 109 ++++++++------------------------------------
+ 2 files changed, 68 insertions(+), 100 deletions(-)
 
-Otherwise, it looks fine, thanks.
+diff --git a/tests/btrfs/266 b/tests/btrfs/266
+index 42aff7c0..894c5c6e 100755
+--- a/tests/btrfs/266
++++ b/tests/btrfs/266
+@@ -25,7 +25,7 @@ _require_odirect
+ _require_non_zoned_device "${SCRATCH_DEV}"
+ 
+ _scratch_dev_pool_get 3
+-# step 1, create a raid1 btrfs which contains one 128k file.
++# step 1, create a raid1 btrfs which contains one 192k file.
+ echo "step 1......mkfs.btrfs"
+ 
+ mkfs_opts="-d raid1c3 -b 1G"
+@@ -33,7 +33,7 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+ 
+ _scratch_mount
+ 
+-$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 256K 0 256K" \
++$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 192K 0 192K" \
+ 	"$SCRATCH_MNT/foobar" | \
+ 	_filter_xfs_io_offset
+ 
+@@ -56,6 +56,13 @@ devpath3=$(_btrfs_get_device_path ${logical} 3)
+ 
+ _scratch_unmount
+ 
++# We corrupt the mirrors so that every 64K block only has one
++# good mirror. (X = corruption)
++#
++#		0	64K	128K	192K
++# Mirror 1	|XXXXXXXXXXXXXXX|	|
++# Mirror 2	|	|XXXXXXXXXXXXXXX|
++# Mirror 3	|XXXXXXX|	|XXXXXXX|
+ $XFS_IO_PROG -d -c "pwrite -S 0xbd -b 64K $physical3 64K" \
+ 	$devpath3 > /dev/null
+ 
+@@ -65,7 +72,7 @@ $XFS_IO_PROG -d -c "pwrite -S 0xba -b 64K $physical1 128K" \
+ $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $((physical2 + 65536)) 128K" \
+ 	$devpath2 > /dev/null
+ 
+-$XFS_IO_PROG -d -c "pwrite -S 0xbc -b 64K $((physical3 + (2 * 65536))) 128K"  \
++$XFS_IO_PROG -d -c "pwrite -S 0xbc -b 64K $((physical3 + (2 * 65536))) 64K"  \
+ 	$devpath3 > /dev/null
+ 
+ _scratch_mount
+@@ -73,19 +80,53 @@ _scratch_mount
+ # step 3, 128k dio read (this read can repair bad copy)
+ echo "step 3......repair the bad copy"
+ 
+-_btrfs_buffered_read_on_mirror 0 3 "$SCRATCH_MNT/foobar" 0 256K
+-_btrfs_buffered_read_on_mirror 1 3 "$SCRATCH_MNT/foobar" 0 256K
+-_btrfs_buffered_read_on_mirror 2 3 "$SCRATCH_MNT/foobar" 0 256K
++_btrfs_buffered_read_on_mirror 0 3 "$SCRATCH_MNT/foobar" 0 192K
++_btrfs_buffered_read_on_mirror 1 3 "$SCRATCH_MNT/foobar" 0 192K
++_btrfs_buffered_read_on_mirror 2 3 "$SCRATCH_MNT/foobar" 0 192K
+ 
+ _scratch_unmount
+ 
+ echo "step 4......check if the repair worked"
+-$XFS_IO_PROG -d -c "pread -v -b 512 $physical1 512" $devpath1 |\
++echo "Dev 1:"
++echo "  Physical offset + 0:"
++$XFS_IO_PROG -c "pread -qv $physical1 16" $devpath1 |\
+ 	_filter_xfs_io_offset
+-$XFS_IO_PROG -d -c "pread -v -b 512 $physical2 512" $devpath2 |\
++echo "  Physical offset + 64K:"
++$XFS_IO_PROG -c "pread -qv $((physical1 + 65536)) 16" $devpath1 |\
+ 	_filter_xfs_io_offset
+-$XFS_IO_PROG -d -c "pread -v -b 512 $physical3 512" $devpath3 |\
++echo "  Physical offset + 128K:"
++$XFS_IO_PROG -c "pread -qv $((physical1 + 131072)) 16" $devpath1 |\
+ 	_filter_xfs_io_offset
++echo
++
++echo "Dev 2:"
++echo "  Physical offset + 0:"
++$XFS_IO_PROG -c "pread -qv $physical2 16" $devpath2 |\
++	_filter_xfs_io_offset
++echo "  Physical offset + 64K:"
++$XFS_IO_PROG -c "pread -qv $((physical2 + 65536)) 16" $devpath2 |\
++	_filter_xfs_io_offset
++echo "  Physical offset + 128K:"
++$XFS_IO_PROG -c "pread -qv $((physical2 + 131072)) 16" $devpath2 |\
++	_filter_xfs_io_offset
++echo
++
++echo "Dev 3:"
++echo "  Physical offset + 0:"
++$XFS_IO_PROG -c "pread -v $physical3 16" $devpath3 |\
++	_filter_xfs_io_offset
++echo "  Physical offset + 64K:"
++$XFS_IO_PROG -c "pread -v $((physical3 + 65536)) 16" $devpath3 |\
++	_filter_xfs_io_offset
++echo "  Physical offset + 128K:"
++$XFS_IO_PROG -c "pread -v $((physical3 + 131072)) 16" $devpath3 |\
++	_filter_xfs_io_offset
++
++# Final step to use btrfs check to verify the csum of all mirrors.
++$BTRFS_UTIL_PROG check --check-data-csum $SCRATCH_DEV >> $seqres.full 2>&1
++if [ $? -ne 0 ]; then
++	echo "btrfs check found some data csum mismatch"
++fi
+ 
+ _scratch_dev_pool_put
+ # success, all done
+diff --git a/tests/btrfs/266.out b/tests/btrfs/266.out
+index fcf2f5b8..305e9c83 100644
+--- a/tests/btrfs/266.out
++++ b/tests/btrfs/266.out
+@@ -1,109 +1,36 @@
+ QA output created by 266
+ step 1......mkfs.btrfs
+-wrote 262144/262144 bytes
++wrote 196608/196608 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ step 2......corrupt file extent
+ step 3......repair the bad copy
+ step 4......check if the repair worked
++Dev 1:
++  Physical offset + 0:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++  Physical offset + 64K:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++  Physical offset + 128K:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++
++Dev 2:
++  Physical offset + 0:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++  Physical offset + 64K:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++  Physical offset + 128K:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++
++Dev 3:
++  Physical offset + 0:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-read 512/512 bytes
++read 16/16 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++  Physical offset + 64K:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-read 512/512 bytes
++read 16/16 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++  Physical offset + 128K:
+ XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-read 512/512 bytes
++read 16/16 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-- 
+2.39.0
 
-> +if [ $corrected_errors -ne 32 ]; then
-> +       echo "csum_errors incorrect, expect 32 has $corrected_errors"
-> +fi
-> +
-> +echo "Silence is golden"
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/289.out b/tests/btrfs/289.out
-> new file mode 100644
-> index 00000000..7d3b7f80
-> --- /dev/null
-> +++ b/tests/btrfs/289.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 289
-> +Silence is golden
-> --
-> 2.39.0
->
