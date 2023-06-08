@@ -2,107 +2,140 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88BC8C7EE23
-	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jun 2023 10:39:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC9B6C7EE29
+	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jun 2023 11:49:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232417AbjFHKjT (ORCPT
+        id S236204AbjFHLtE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 8 Jun 2023 06:39:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51082 "EHLO
+        Thu, 8 Jun 2023 07:49:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231439AbjFHKjS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jun 2023 06:39:18 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF6A8273E
-        for <fstests@vger.kernel.org>; Thu,  8 Jun 2023 03:38:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686220690;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0soHcIINz/aqkgOrMyGWCwcMQ5dQQuCg3zca+l6XCFI=;
-        b=XhjLU0mIdLhfZAGvnoY+/8qUKJgLpcsSr0Nhyh8pzRoKKgFSvZYyRUJ6ppsax/4G6adBEq
-        iakPAHumLnJ1cxVBPq/l/WHb/AeV2cKZvyrqlcSKZ62n7+YGY/ASxIblbPVBKBkYvIZ9Ek
-        nmejUcak8jD0xzHx5SkTFpCWB/r6aFU=
-Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
- [209.85.128.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-553-sB4LNGXRPoavtv_0bvPSeQ-1; Thu, 08 Jun 2023 06:38:09 -0400
-X-MC-Unique: sB4LNGXRPoavtv_0bvPSeQ-1
-Received: by mail-wm1-f69.google.com with SMTP id 5b1f17b1804b1-3f6089a9689so2765155e9.1
-        for <fstests@vger.kernel.org>; Thu, 08 Jun 2023 03:38:09 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686220688; x=1688812688;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0soHcIINz/aqkgOrMyGWCwcMQ5dQQuCg3zca+l6XCFI=;
-        b=cBEE+FHqG06tHKP/d3UUzR/UHnoJ9KBLxRFhFuokAtlCbrTfgTYYLdDS3OECaokH7M
-         k9VrMvTnQf7KkIHgsQTR0tmtvgKkOhScX5EF5QfKu4FBD2xIv0kU8dpDgKP2izWOjoXh
-         ubH3mnRPEdmpdtSqDmeS5jKD4qWxkX+76aVszGvBThzXXWgmH9eE7+AfpfR2iqRbn6v2
-         +HL0ly5spZLRnPzeRa0Qzd2vi+3zFp7rJAjT6luViyTEajZm/elvK/sB5h6cV9kDGezf
-         qYvbH7DYGMvm8Vc05B62IH3iYfuPj3J/MKh8mqEXVq+iDrE9FYqVslFsdoEPFn4aB8BG
-         BItg==
-X-Gm-Message-State: AC+VfDzFTv+0tp96PXYpHU123G4WuD/8c8am3jOu6N9MfopMs/XxF0G6
-        BkFi0QqhnpLJt4CbnW4hGzkrJy2pcUeTIC48IVBGAMTxEx2rg3WFsaUAU+1UH6I4+kGdvNn5KXz
-        gGVbsDMvohAnq0DrkRKSzCV6j
-X-Received: by 2002:a05:600c:21c5:b0:3f5:fb98:729e with SMTP id x5-20020a05600c21c500b003f5fb98729emr1125966wmj.22.1686220688118;
-        Thu, 08 Jun 2023 03:38:08 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ7unE9bT25qBnFU9fLIaLLec8dxlYXRLlL7cGYKN+eLbUks1/RHsbSIFbGTkpF6RsUqu7RlxQ==
-X-Received: by 2002:a05:600c:21c5:b0:3f5:fb98:729e with SMTP id x5-20020a05600c21c500b003f5fb98729emr1125950wmj.22.1686220687829;
-        Thu, 08 Jun 2023 03:38:07 -0700 (PDT)
-Received: from aalbersh.remote.csb ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id p19-20020a05600c205300b003f7cb42fa20sm1540906wmg.42.2023.06.08.03.38.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 08 Jun 2023 03:38:06 -0700 (PDT)
-Date:   Thu, 8 Jun 2023 12:38:04 +0200
-From:   Andrey Albershteyn <aalbersh@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCHSET 0/3] fstests: reduce scrub time in testing
-Message-ID: <20230608103804.uchw2l257ug3fa5c@aalbersh.remote.csb>
-References: <168609056295.2592490.1272515528324889317.stgit@frogsfrogsfrogs>
+        with ESMTP id S236431AbjFHLs6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jun 2023 07:48:58 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A3B82D56;
+        Thu,  8 Jun 2023 04:48:56 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 1A2491FDCA;
+        Thu,  8 Jun 2023 11:48:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1686224935; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=Uf/UTTWJLhcTogD3V9tpRQLUBS2lTLYRo2sYeoTITos=;
+        b=Cj7FLe3pHINkBS4RPvE81ccQ7HUo4KTGnQtaEdmcxhVmFfWwvY/3gSlOyN3A16ktfUxyA7
+        6xK4lrIJLrJGUosiRw5I+n2lnmMPCGOtHl6GPdxswH1rDG2Mc7KRTNbG1j75jC/CRK81h+
+        jXwWAsDorLmmzMZLrVEK6/+bemGkEpk=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 22E13138E6;
+        Thu,  8 Jun 2023 11:48:53 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id bJz3NSXAgWT1LgAAMHmgww
+        (envelope-from <wqu@suse.com>); Thu, 08 Jun 2023 11:48:53 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH RFC] common/btrfs: use _scratch_cycle_mount to ensure all page caches are dropped
+Date:   Thu,  8 Jun 2023 19:48:36 +0800
+Message-Id: <20230608114836.97523-1-wqu@suse.com>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <168609056295.2592490.1272515528324889317.stgit@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2023-06-06 15:29:22, Darrick J. Wong wrote:
-> Hi all,
-> 
-> For fuzz testing of the filesystem repair tools, there's no point in
-> having _check_xfs_filesystem rebuild the filesystem metadata with
-> xfs_repair or xfs_scrub after it's already been testing both.  This can
-> reduce the runtime of those tests considerably.
-> 
-> Do the same for xfs/503 since we're only concerned with testing that
-> metadump and mdrestore work properly.
-> 
-> If you're going to start using this mess, you probably ought to just
-> pull from my git trees, which are linked below.
-> 
-> This is an extraordinary way to destroy everything.  Enjoy!
-> Comments and questions are, as always, welcome.
-> 
-> --D
-> 
-> fstests git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=scrub-test-speedups
-> ---
->  common/fuzzy  |    7 ++++++-
->  common/rc     |    2 +-
->  common/xfs    |   31 ++++++++++++++++++++++---------
->  tests/xfs/503 |    2 ++
->  4 files changed, 31 insertions(+), 11 deletions(-)
-> 
+[BUG]
+There is a chance that btrfs/266 would fail on aarch64 with 64K page
+size. (No matter if it's 4K sector size or 64K sector size)
 
-The whole patchset looks good to me.
-Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+The failure indicates that one or more mirrors are not properly fixed.
 
+[CAUSE]
+I have added some trace events into the btrfs IO paths, including
+__btrfs_submit_bio() and __end_bio_extent_readpage().
+
+When the test failed, the trace looks like this:
+
+ 112819.764977: __btrfs_submit_bio: r/i=5/257 fileoff=0 mirror=1 len=196608 pid=33663
+                                    ^^^ Initial read on the full 192K file
+ 112819.766604: __btrfs_submit_bio: r/i=5/257 fileoff=0 mirror=2 len=65536 pid=21806
+				    ^^^ Repair on the first 64K block
+					Which would success
+ 112819.766760: __btrfs_submit_bio: r/i=5/257 fileoff=65536 mirror=2 len=65536 pid=21806
+				    ^^^ Repair on the second 64K block
+				 	Which would fail
+ 112819.767625: __btrfs_submit_bio: r/i=5/257 fileoff=65536 mirror=3 len=65536 pid=21806
+				    ^^^ Repair on the third 64K block
+					Which would success
+ 112819.770999: end_bio_extent_readpage: read finished, r/i=5/257 fileoff=0 len=196608 mirror=1 status=0
+					 ^^^ The repair succeeded, the
+					     full 192K read finished.
+
+ 112819.864851: __btrfs_submit_bio: r/i=5/257 fileoff=0 mirror=3 len=196608 pid=33665
+ 112819.874854: __btrfs_submit_bio: r/i=5/257 fileoff=0 mirror=1 len=65536 pid=31369
+ 112819.875029: __btrfs_submit_bio: r/i=5/257 fileoff=131072 mirror=1 len=65536 pid=31369
+ 112819.876926: end_bio_extent_readpage: read finished, r/i=5/257 fileoff=0 len=196608 mirror=3 status=0
+
+But above read only happen for mirror 1 and mirror 3, mirror 2 is not
+involved.
+This means by somehow, the read on mirror 2 didn't happen, mostly
+due to something wrong during the drop_caches call.
+
+It may be an async operation or some hardware specific behavior.
+
+On the other hand, for test cases doing the same operation but utilizing
+direct IO, aka btrfs/267, it never fails as we never populate the page
+cache thus would always read from the disk.
+
+[WORKAROUND]
+The root cause is in the "echo 3 > drop_caches", which I'm still
+debugging.
+
+But at the same time, we can workaround the problem by forcing a
+cycle mount of scratch device, inside _btrfs_buffered_read_on_mirror().
+
+By this we can ensure all page caches are dropped no matter if
+drop_caches is working correctly.
+
+With this patch, I no longer hit the failure on aarch64 with 64K page
+size anymore, while before this the test case would always fail during a
+-I 10 run.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+RFC:
+The root cause is still inside that "echo 3 > drop_caches", but I don't
+have any better solution if such fundamental debug function is not
+working as expected.
+
+Thus this is only a workaround, before I can pin down the root cause of
+that drop_cache hiccup.
+---
+ common/btrfs | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/common/btrfs b/common/btrfs
+index 344509ce..1d522c33 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -599,6 +599,11 @@ _btrfs_buffered_read_on_mirror()
+ 	local size=$5
+ 
+ 	echo 3 > /proc/sys/vm/drop_caches
++	# Above drop_caches doesn't seem to drop every pages on aarch64 with
++	# 64K page size.
++	# So here as a workaround, cycle mount the SCRATCH_MNT to ensure
++	# the cache are dropped.
++	_scratch_cycle_mount
+ 	while [[ -z $( (( BASHPID % nr_mirrors == mirror )) &&
+ 		exec $XFS_IO_PROG \
+ 			-c "pread -b $size $offset $size" $file) ]]; do
 -- 
-- Andrey
+2.39.1
 
