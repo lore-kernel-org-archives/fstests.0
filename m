@@ -2,139 +2,197 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB6FAC7EE29
-	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jun 2023 23:57:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D5E3C7EE29
+	for <linux-fstests@archiver.kernel.org>; Fri,  9 Jun 2023 01:50:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233586AbjFHX56 (ORCPT
+        id S230225AbjFIBul (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 8 Jun 2023 19:57:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35584 "EHLO
+        Thu, 8 Jun 2023 21:50:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230056AbjFHX55 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jun 2023 19:57:57 -0400
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-vi1eur04on2054.outbound.protection.outlook.com [40.107.8.54])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AEC62D52;
-        Thu,  8 Jun 2023 16:57:52 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=OFGzBWXwnuoqPX6O2VtC9SOV261SxLFHTVs7zi1ApgvpNNz33o86o8zV4Z5Jwd81LiJ+kcSiY5tNwpB28VRXSEklCP9K3XC+ei7KvALJYhhXwSGNURZl5JkCZb/mO30E4ElKb2q1kZB5rZqaZ0X7yp2TyKoOEdbSnC8RpyupIqupf0NiG4x0Vg7+26dNhTASlmS7OU/t1Jo39+U70BsYmPRTdQDnBlZLR6YzcWvzOTSnJsKkvftMLjxiT2SbXKAR+PdfQqF+QBGBR5Uyti5fa/W4l62RsZ9vXbjERjuUBYgzrCwbWjTJw2GjBJpH6TUPKB0NEUysiw4jkcFg+L/YBg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=lDabEfizBbWgST5oWdwpLoZ3yQSXbF0TLhgWxz3zqKk=;
- b=NAo5WlgvgVLHZ/e9gkPv6zOeD6wWAnSJShs/Pp8ckLCAL7LZO6sEJFQPX6wSQPy5HSxLYNV597uFVMaGjzyyRuktaPEzn3k13bebqOVNODST7dOtP2DeoRHCeqhye6QEaTeCvdJTo1ZF1M1cG+JzzONcNVagmwKKQx7wqihhIe9e5nyJ/67txNHntZ3H7T+Wj/qi4L3Qa5kvOG1r1F80I9KpQZKRzRdPo0ix3KpHo46RgLZ+cUe9ZoVgagyJ5l+/MID0IEFTHtFmfZTIL0IaV8U3Mn4n5oGtqjCwjIo478NuhoOWhTqNhfnVCct7ryLioWnumgknecB8/9aLoYOz+w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
- dkim=pass header.d=suse.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=lDabEfizBbWgST5oWdwpLoZ3yQSXbF0TLhgWxz3zqKk=;
- b=KieWHQS5L/Wrm/qOpQ8xiYHzm3YFfxLZBJrH6N/5cIDBqT/3OtAkEQi9YwD9+T8eraMHqXqFt9tDbRa9/lcUTxrPJjMxcEA1MRxPfo7xtlUTCLv5NMl4FxKXh7K5BfnFg8Bsh8+l7ea1VTkJ/kMX0UDXPX+ijpeMA3Bk+NYC8k5D6YLtR4+vZJclLZuQ3nM1FcrUYeA49k9rL+HFL0X0v2OdgmZmAuI/315Ipl9UJ6mOZ+En20sQQarL1+xdVwAjnyC8uo1VQA2z6F34a2Hf379NUriKcdfEfhIXVOlU/fFe1UwXQGrJ2Td19KlGpItvZgSwZ9MHkse9UTKmG42FvA==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=suse.com;
-Received: from AS8PR04MB8465.eurprd04.prod.outlook.com (2603:10a6:20b:348::19)
- by DB9PR04MB8494.eurprd04.prod.outlook.com (2603:10a6:10:2c6::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6455.32; Thu, 8 Jun
- 2023 23:57:48 +0000
-Received: from AS8PR04MB8465.eurprd04.prod.outlook.com
- ([fe80::7b80:d77b:1fc5:2ba2]) by AS8PR04MB8465.eurprd04.prod.outlook.com
- ([fe80::7b80:d77b:1fc5:2ba2%6]) with mapi id 15.20.6455.037; Thu, 8 Jun 2023
- 23:57:48 +0000
-Message-ID: <5790cd5a-04d9-bfe9-a8cc-0c09f784222d@suse.com>
-Date:   Fri, 9 Jun 2023 07:57:37 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.2
-Subject: Re: [PATCH RFC] common/btrfs: use _scratch_cycle_mount to ensure all
- page caches are dropped
-Content-Language: en-US
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20230608114836.97523-1-wqu@suse.com>
- <ZIHGb+KyYW72MVzp@infradead.org>
-From:   Qu Wenruo <wqu@suse.com>
-In-Reply-To: <ZIHGb+KyYW72MVzp@infradead.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: TY2PR06CA0003.apcprd06.prod.outlook.com
- (2603:1096:404:42::15) To AS8PR04MB8465.eurprd04.prod.outlook.com
- (2603:10a6:20b:348::19)
+        with ESMTP id S237975AbjFIBuk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jun 2023 21:50:40 -0400
+Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C8E71BF0;
+        Thu,  8 Jun 2023 18:50:38 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-565de553de1so19117327b3.0;
+        Thu, 08 Jun 2023 18:50:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1686275438; x=1688867438;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3PrEVhcdWvGMzkrCkSBgTh4Cw707KJXm+MPnJmxcEkE=;
+        b=at1XlIxto6bCYneLO1oRzUZa4vbKvxCANlIJO71p4YzjVt6UF/47baxsmpUlVYdmN/
+         +8+wYJkVwodY4o526p5OOZdJSXrYLqq6z3PT6FRxpOVHuCvcvSFEcxG4SpX8dcjiCAcA
+         HwrNl3YHVxYzOK7Gr18XIweaPdeHKctwR1vad+VxkCQc/oZRvq11I214SIz7zwMIi+NQ
+         bMiLovkflFP6up/5JMMocytiHnCj0a8OLg0x31Tc+U5BXdvKsE/H60pUVGiwpDtNzrzu
+         +Tq0o/P4vxC69Hqf8Givq9mBzEReQEEawIYYVRBBbWJF35+/5CtiYnuZpAcYNADVZUWY
+         jQ6A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686275438; x=1688867438;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=3PrEVhcdWvGMzkrCkSBgTh4Cw707KJXm+MPnJmxcEkE=;
+        b=ds1wxz9i3pU+qH6L5MWlvBcXrF0bT4xt7v77WDnUPjk2SaYg4TVdRO96+3GH8VSSGT
+         8QwNWMREY5X4phCXvQ0BUX/T4YOxrJkS92Lvp6oku+GEFPkO+1saaw7G4gzYOywUiKnf
+         QOASp0mDPaRwLBdLQKk9L6j6M1+tNtjB6VZjXYGh+zu7iAGJhUFekV1C6+ur1vPqCLun
+         oE38QAeDj09ZHb4vS9fWOIB1g1DlbVlaDD++kzUixywlp/nfNvtpNK0DHrvgbk3blFuv
+         yOrcSHa5m1SoK5xLlNQhqEtZainKFiQ0C8nxsHL3bsNm9zmVsmroX7GKa/NgEIV3pN2K
+         S2tQ==
+X-Gm-Message-State: AC+VfDw2NDDFLOfW+4JF79Gqe24d+auN/SoZ1f0LteHkNa2DFc+fLR8L
+        /GXtmjIiySuKHGtarmUMFpBlfFbMXz9kTAeXVVBJW3wY
+X-Google-Smtp-Source: ACHHUZ4mBu+RxK+bH13tCMdVJdQul+IdNAiaqpKjZe9BNG9G8Gk4K5jolHl7CaVE+oLy8OXwei/zMBYOWVnr2L4QMvs=
+X-Received: by 2002:a0d:df09:0:b0:568:b105:751 with SMTP id
+ i9-20020a0ddf09000000b00568b1050751mr1710274ywe.2.1686275437733; Thu, 08 Jun
+ 2023 18:50:37 -0700 (PDT)
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: AS8PR04MB8465:EE_|DB9PR04MB8494:EE_
-X-MS-Office365-Filtering-Correlation-Id: d07c10c4-3cb1-4e62-a4a1-08db687c28a9
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: XxWyQpy2qmcxKIL16fvIsQfhdGYLw5e1d2GkdUDlejN2dmTr7faR0KtpXSsF3Ha7fHoyCBDGP/v5a+4rZe8+tCbhwmvOXdVHoc97NVKowTw/zXfBRuSw4J8wD/JHclBKn1vPOOtb50kz2pAsqNegAG3SjduBip9o05vGpoyUO088OPVfqqdp9/bythEZ+hLgxU/3tof6nkKd5doMNdH5T/nxySMhvwc73i1UlIYHJG0215k6glo+NSsjFqOzPGUjGE2autYXWdoQOLXedCzCNcW0ywRpIBUegvUuaNMubt3dwBnbku2xKhG9v1pPy1EPNM+hHbhJSdMF6wH3GNtxRs0hhqeQrYUxSCWXXEMJB7UGAwPffEZlL1jFDXIBMt7oUmBLow5QHMH4fPdF0Ceekf5an0uBBR/evAXMOAEgLe3C57KVungz5Sx7y9OG2Yur1Jp4kvFMkcN4M/J5lQRccNCuiDWMG5OovL1w4qPJ7qK/wr1RGlNQjlYymGUCcxZONDVXLaM582i6m0IrRJ4yh+3Pl3GQmaTrprOfAgSXaNZj6fS+uBJxGNCMuAsfq4pXeWnlONMB6ARs1haHmfpGFScq27Rs9Df6x73s60uAu12tVw/8GubN3JhUiQGxtovwt//qpgXyuFLs83yiMwBDMw==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AS8PR04MB8465.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(39860400002)(376002)(366004)(396003)(136003)(346002)(451199021)(83380400001)(478600001)(8676002)(8936002)(66556008)(41300700001)(5660300002)(316002)(86362001)(6916009)(31696002)(66946007)(38100700002)(66476007)(6666004)(36756003)(6486002)(4744005)(2906002)(4326008)(6506007)(31686004)(6512007)(53546011)(186003)(2616005)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?ZjRDODFoNXVyWmZ6WUpSVk5LOUNFaHRZdkRNdVlHc2ZWREI1Wm02T3YzOU02?=
- =?utf-8?B?a0F4ZWVsOWxPQ2pDOEdlSnVpQnhPTkw1YmxXS1FEV2RVTUJVb3BlV1lySmZp?=
- =?utf-8?B?empHeDhYY0h3SEZaazNqb3BoNHhpNU9tc0lUNnZZSG1yMHRlWVZuVFBSL28r?=
- =?utf-8?B?SjhEY28xWXVqeVpHZTFlRkVjR0RvTEFsRmE0YUljeHZXYzJkMDJvajZlR0hE?=
- =?utf-8?B?UURIQTRuRzVhY01RNGx3UjFaNi96eWtCRlUvYzJjL1ZXTlIyQWtJcGIyaFhh?=
- =?utf-8?B?VVRzTnUyKytIb09UWW9NbFVSK0lPVjlhL1dOWGRDTDMxVThYd1hVaS9rZk1I?=
- =?utf-8?B?bU9OZjlBZHFnV0pMWmFQSUhmQXhxYjE0RnZPM1ZOaXRIYVUxN3cvT2QyWnIy?=
- =?utf-8?B?VURBeTJzMk9POTFBY0R5N0ZQcjZxajlseThtcGZaS1Y1RlFyNDRyTjg0Nnhm?=
- =?utf-8?B?ZWlVcHB4RDl0OUVXdVplbnl1clY0b2RyVXVXVmQ0WTNCaXk5SkJjWHdUeHlO?=
- =?utf-8?B?cThOdVdxVVhtOHh4cjQvVEE3bU1EZlprN3ZnZEhDUHhmNWhmdURUS21Hbi9j?=
- =?utf-8?B?bWNvYUprOGJkeXBBSlNTakFVYUdvcUtPUlg3TkkxTzFydTFQTFQrWnFISlJt?=
- =?utf-8?B?MEVkNVBjV3dXZHljWlpwaW5BUFpwU3FoSzhQL0NTUVo1Z0F6R3BPT2hPUWN1?=
- =?utf-8?B?VnVJb29yK2h0MDFXNS9mYWRBQUZBV0o4aXNRa3FpVFJRRWxGa2xyZG43T3Br?=
- =?utf-8?B?bXoyRXBUZEg0Qm90ZjhkTk9zcHhJTUFXSkpkYXJqNlZ3ejVBVXAyQzl5MWs0?=
- =?utf-8?B?dnN6TysycjN1U25PM0tPVFRVU3hPUG55bEIwTU4zRDNkMktiRXFWbEUybjk0?=
- =?utf-8?B?d1B6WE5FS2ZLdHRFblVKUEt5QU44WUdIdHVldlpramlOcGdpVjMra2JXWXR4?=
- =?utf-8?B?NnVGdWJlZHNrYUF2QXNDZWl0VERQYVUzR0RGcWFZK3ZYb2cxWUs3Wm5xV04r?=
- =?utf-8?B?WjhtK0ZQTzFnSWg4S05lWGNMNjgrMVEvTWJHMDV0QlBMaU14T1RGWHBIeTMw?=
- =?utf-8?B?MGkrdjNtUFVWZVlwaUlvaTBVOURpT0g1ZGlEa0tIT1dCajZzMHNTbjFXc0Vr?=
- =?utf-8?B?UkQ3QmZ6bXN4b0tHVHBZcXIyemhFai80Y3B2QjJ5MjFJaytwZ3FxQnA4Uys2?=
- =?utf-8?B?WnVDaHZNNWpBUjBzN3hKTVVoMGdxU2ZiRnlLcExDc041VDVrWndBRHhKN1Nq?=
- =?utf-8?B?SU02MVJvTTNZUWRnTW5wMVdGeDJsMGp0b21jb0xXSWQ5aVd5VkpwWjN0eDFv?=
- =?utf-8?B?YmN0UGdhQlVXYTEvaWJBL0JMN0pyYTMreHgyWUwxWU1JNVdGbGw2VWp4WkNT?=
- =?utf-8?B?Ui9JOGtzVGQ5ZTdHajVYV3dvaEIrWFVWRWZxVXRHaC90cG1PRnNGcnRBU25t?=
- =?utf-8?B?U2w0VVJscVFBVG9oRm1qVUdvalRmTWdtbStMSUxySjhBS3p6WkhiMFZ3aHA5?=
- =?utf-8?B?c0lkZ3lIckdvVTdMWURoQ0NENjcyMWlHc3NHbjRSVFUvaGtLZzh1bTBoY3pR?=
- =?utf-8?B?a3VacFFZNEJGSFVnNGtPU3hUVWxGbDhYdHJ2SHpabjFSeEIrL3hQcTNoVk9V?=
- =?utf-8?B?TVVKdEJvdDhRMHZZZ3o3MmFyeHR6VERhSGdKbk1wd1BIelhQMzFMcTFtSkRh?=
- =?utf-8?B?eFRvNUJjbG00aVNCQkh4TlhkM082TlRDQndORDliSGhHclNxa0RTVWMxa0FZ?=
- =?utf-8?B?eTZOdGprd2VZc2hOYW1FdHFUNUpleGVVMy9ROHFleGMzbTdNV0lQT3pPd0Fr?=
- =?utf-8?B?WnI0dG9yQzNHbnFybUlXbHQxaEk5OHpybjdnS056a0JhUjM0WldrR08wcjBh?=
- =?utf-8?B?aG1TMnIrUVBXVHJ6bWgwQXF4ZVhMU1VsV0duYVFzbnQ2OFMwd0NndzNpbVNJ?=
- =?utf-8?B?cnZoUmZiWlNpSzFwR1ExZFZVdlF3WTV5eHZsdjZtK2lieDBTSytUR3E1SWtJ?=
- =?utf-8?B?UWZmMHJXSHA4UXdJckRvcGlISWpBbzRXb25zVnlzK2VzSVlVekgyTTlHMnBO?=
- =?utf-8?B?TXppMDgvRzBseTIwQy9tRUZpN1lkbEdEdDN2RGlnLzJpckUzSjVvOFBjekt6?=
- =?utf-8?Q?Ibk/75Tglvx9Knjuu+9dgJ8db?=
-X-OriginatorOrg: suse.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: d07c10c4-3cb1-4e62-a4a1-08db687c28a9
-X-MS-Exchange-CrossTenant-AuthSource: AS8PR04MB8465.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Jun 2023 23:57:48.0452
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 7aBa+cxMZLNsQ+ol+wf2HjaL/64/236n+Z61BwxLQDj/tELZ1UWoWjdhyrTrDjhO
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB9PR04MB8494
+References: <20230531064024.1737213-1-ddouwsma@redhat.com> <20230531064024.1737213-2-ddouwsma@redhat.com>
+In-Reply-To: <20230531064024.1737213-2-ddouwsma@redhat.com>
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+Date:   Fri, 9 Jun 2023 09:50:26 +0800
+Message-ID: <CADJHv_v-YUrpT3MA8+2HcWb3B03V87ZQ2b0_pKR+LcAE4-9WUg@mail.gmail.com>
+Subject: Re: [PATCH v4] xfstests: add test for xfs_repair progress reporting
+To:     Donald Douwsma <ddouwsma@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Adding fstests
 
+On Wed, May 31, 2023 at 2:50=E2=80=AFPM Donald Douwsma <ddouwsma@redhat.com=
+> wrote:
+>
+> Confirm that xfs_repair reports on its progress if -o ag_stride is
+> enabled.
+>
+> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
 
-On 2023/6/8 20:15, Christoph Hellwig wrote:
-> On Thu, Jun 08, 2023 at 07:48:36PM +0800, Qu Wenruo wrote:
->>   	echo 3 > /proc/sys/vm/drop_caches
->> +	# Above drop_caches doesn't seem to drop every pages on aarch64 with
->> +	# 64K page size.
->> +	# So here as a workaround, cycle mount the SCRATCH_MNT to ensure
->> +	# the cache are dropped.
->> +	_scratch_cycle_mount
-> 
-> The _scratch_cycle_mount looks ok to me, but if we do that, there is
-> really no point in doing the drop_caches as well.
-
-Yep, we can remove that line. It's mostly a reminder for me to dig out 
-why that drop_caches doesn't work as expected.
+Ack.
 
 Thanks,
-Qu
+> ---
+> Changes since v3
+> - Rebase after tests/xfs/groups removal (tools/convert-group), drop _supp=
+orted_os
+> - Shorten the delay, remove superfluous dm-delay parameters
+> Changes since v2:
+> - Fix cleanup handling and function naming
+> - Added to auto group
+> Changes since v1:
+> - Use _scratch_xfs_repair
+> - Filter only repair output
+> - Make the filter more tolerant of whitespace and plurals
+> - Take golden output from 'xfs_repair: fix progress reporting'
+>
+>  tests/xfs/999     | 66 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/999.out | 15 +++++++++++
+>  2 files changed, 81 insertions(+)
+>  create mode 100755 tests/xfs/999
+>  create mode 100644 tests/xfs/999.out
+>
+> diff --git a/tests/xfs/999 b/tests/xfs/999
+> new file mode 100755
+> index 00000000..9e799f66
+> --- /dev/null
+> +++ b/tests/xfs/999
+> @@ -0,0 +1,66 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 521
+> +#
+> +# Test xfs_repair's progress reporting
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto repair
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +       _cleanup_delay > /dev/null 2>&1
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/dmdelay
+> +. ./common/populate
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_dm_target delay
+> +
+> +# Filter output specific to the formatters in xfs_repair/progress.c
+> +# Ideally we'd like to see hits on anything that matches
+> +# awk '/{FMT/' xfsprogs-dev/repair/progress.c
+> +filter_repair()
+> +{
+> +       sed -nre '
+> +       s/[0-9]+/#/g;
+> +       s/^\s+/ /g;
+> +       s/(# (week|day|hour|minute|second)s?(, )?)+/{progres}/g;
+> +       /#:#:#:/p
+> +       '
+> +}
+> +
+> +echo "Format and populate"
+> +_scratch_populate_cached nofill > $seqres.full 2>&1
+> +
+> +echo "Introduce a dmdelay"
+> +_init_delay
+> +DELAY_MS=3D38
+> +
+> +# Introduce a read I/O delay
+> +# The default in common/dmdelay is a bit too agressive
+> +BLK_DEV_SIZE=3D`blockdev --getsz $SCRATCH_DEV`
+> +DELAY_TABLE_RDELAY=3D"0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 $DELAY_MS"
+> +_load_delay_table $DELAY_READ
+> +
+> +echo "Run repair"
+> +SCRATCH_DEV=3D$DELAY_DEV _scratch_xfs_repair -o ag_stride=3D4 -t 1 2>&1 =
+|
+> +        tee -a $seqres.full > $tmp.repair
+> +
+> +cat $tmp.repair | filter_repair | sort -u
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> new file mode 100644
+> index 00000000..e27534d8
+> --- /dev/null
+> +++ b/tests/xfs/999.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 999
+> +Format and populate
+> +Introduce a dmdelay
+> +Run repair
+> + - #:#:#: Phase #: #% done - estimated remaining time {progres}
+> + - #:#:#: Phase #: elapsed time {progres} - processed # inodes per minut=
+e
+> + - #:#:#: check for inodes claiming duplicate blocks - # of # inodes don=
+e
+> + - #:#:#: process known inodes and inode discovery - # of # inodes done
+> + - #:#:#: process newly discovered inodes - # of # allocation groups don=
+e
+> + - #:#:#: rebuild AG headers and trees - # of # allocation groups done
+> + - #:#:#: scanning agi unlinked lists - # of # allocation groups done
+> + - #:#:#: scanning filesystem freespace - # of # allocation groups done
+> + - #:#:#: setting up duplicate extent list - # of # allocation groups do=
+ne
+> + - #:#:#: verify and correct link counts - # of # allocation groups done
+> + - #:#:#: zeroing log - # of # blocks done
+> --
+> 2.39.3
+>
