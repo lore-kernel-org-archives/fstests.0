@@ -2,65 +2,65 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D3AFC7EE2E
-	for <linux-fstests@archiver.kernel.org>; Sat, 10 Jun 2023 06:58:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30B8AC7EE29
+	for <linux-fstests@archiver.kernel.org>; Sat, 10 Jun 2023 07:04:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229949AbjFJG6d (ORCPT
+        id S229601AbjFJHEA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 10 Jun 2023 02:58:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60220 "EHLO
+        Sat, 10 Jun 2023 03:04:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229863AbjFJG6c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 10 Jun 2023 02:58:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 912A13A9E
-        for <fstests@vger.kernel.org>; Fri,  9 Jun 2023 23:57:48 -0700 (PDT)
+        with ESMTP id S229598AbjFJHD7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 10 Jun 2023 03:03:59 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BAE63AA1
+        for <fstests@vger.kernel.org>; Sat, 10 Jun 2023 00:03:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1686380267;
+        s=mimecast20190719; t=1686380598;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=HHkQ543QkLblaQMAJ7xg8xPkVXmZSphQVA2A+3RVS0A=;
-        b=LsWTq3u3/k1mhZyk1t75KvbPNoWCGChVOxmTjIIv3A9Z6IpK/latDhz0dGAwUcC39+dM22
-        oIzQ6e3dP0msKO9q+GBDfAzXi4JAYdYN3daplFrhNag2tYLlK4tI+DCXMguVisT7mvHhnS
-        WLOXvUexc9Gavs8H8GHqtUctfOezLvs=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=thxU3diO4BkJXBxEG+yq1ygYNN68uOVgHR/y83leKdc=;
+        b=hKwYh4gvgFwX7hjyIbYYlp3vGX+/g/Fn31dK0QFDp6YMTaI/2EzxabNLAFKFFZXlyQnpFJ
+        yTyjNWGE8oYGu1iZkeWP6IuDr4Q36JaC1m3CoR4x6Vi3Lo+ef120jmIsttCpTnxrUuWXgH
+        yO6f8aZo5QXa7jJ0gvLb/7tcMpC73Ok=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-546-sjkaBbuOMJu5Q_LIvnDucg-1; Sat, 10 Jun 2023 02:57:44 -0400
-X-MC-Unique: sjkaBbuOMJu5Q_LIvnDucg-1
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2566e9b14a4so1325571a91.2
-        for <fstests@vger.kernel.org>; Fri, 09 Jun 2023 23:57:43 -0700 (PDT)
+ us-mta-179-L9oFcl15NwyEb7xvLMdtGg-1; Sat, 10 Jun 2023 03:03:16 -0400
+X-MC-Unique: L9oFcl15NwyEb7xvLMdtGg-1
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-65313d304e6so1558064b3a.0
+        for <fstests@vger.kernel.org>; Sat, 10 Jun 2023 00:03:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686380262; x=1688972262;
+        d=1e100.net; s=20221208; t=1686380594; x=1688972594;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HHkQ543QkLblaQMAJ7xg8xPkVXmZSphQVA2A+3RVS0A=;
-        b=Gxj8CwAJuZFqzlMAoALf07r/Vw8ap402GBMFL2ZHRMk8dL/XbfqAO54AiIbxaN8h2I
-         WfhNBjXlhi8CA1/Xtx5ZTS/TfAJvE962exZgsQt8qjEYxNnCwJvvFxhnK/AKsV5X8hM/
-         Ln7TfgbKwu4ugxsFujGUTOELrTBizbTYGOOpC/kn8dUZ3Qk6CIE/vJgfvWb0NFPZRcgf
-         0wrBEbjj//g7tUF1tB3rAtWzF4mBQi4a9YdvhRPX1D2FLGfYE6dV+w4QTIQpJp4Z8MPF
-         t2n12yjzxo3wgPh4fTFPXU9sGxTAtMAgevYydXzemIc2OUAovw9G8MuHARqkvr1hsnQf
-         /0UQ==
-X-Gm-Message-State: AC+VfDxT9gWesxgWuRg9s9psLusabOS0FqLsvgPG136nyhI3PdvROJJZ
-        R4WrS8ACsCfNU0wQAIuZ6Mbuo9IV2R0cbq3owOevdHbGEfY+iqU6oVGDoeJ+DAlyu7WMfFWgAl7
-        MJ6zpkSywMlR9UM3oLmtj3mqT3VvK
-X-Received: by 2002:a17:902:f687:b0:1a6:6fe3:df8d with SMTP id l7-20020a170902f68700b001a66fe3df8dmr1515735plg.8.1686380262721;
-        Fri, 09 Jun 2023 23:57:42 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ5EmlKwr/AtNUDTxmM67FWKXsGHWxmk7k3DoGUAkuy0972Jv5WvojvqrhHYI1FAQOLVQV2DAA==
-X-Received: by 2002:a17:902:f687:b0:1a6:6fe3:df8d with SMTP id l7-20020a170902f68700b001a66fe3df8dmr1515727plg.8.1686380262418;
-        Fri, 09 Jun 2023 23:57:42 -0700 (PDT)
+        bh=thxU3diO4BkJXBxEG+yq1ygYNN68uOVgHR/y83leKdc=;
+        b=BM5jZZSuR57OCOHyycJ5Kn2GD9P2WC/GXRF+yPctjavVtyKTQ46vjwp8psNkG6gZKX
+         FqToedCS83AqP5gFdCjTc2U/lPMiRMt0lN0lPqtckpulztEwscjGlCQorz8GbLLuASqk
+         FQ38RrEBtODLIdsqV+WJEAI+NBFn96Jp9PuLpB9eOpfSHWCAkJI0xlPcBpCovztBfktr
+         9VtaVuEmjwA4rpsfPgEIdh2iIkYCRThbXXvov6xPWw9klmUuEpvX/lItTkiYkWfpi+k6
+         UBqZvZQSdOoJi1Sjs1E1H0wENcG+g7WefPRGCe8W1lLQuREdf5Yi8I0rcUSMdD1G55Jg
+         Tnhg==
+X-Gm-Message-State: AC+VfDyLthsWiZ23wRx/CSIukyAzBF9IipASKmTFQLphS/ixek2fqdzQ
+        0s9JZXac3cEWBJPnryDCxVXHQ8zmCQJGBTleq4ghUCVmVeKkBpL7g3dnH9bcQhgpDxDO8X4gwFp
+        4dgJP1nOMjSOrRF+KG00Cv8EhMDP8
+X-Received: by 2002:a05:6a21:6da3:b0:10a:be5c:6e2d with SMTP id wl35-20020a056a216da300b0010abe5c6e2dmr3550412pzb.39.1686380593779;
+        Sat, 10 Jun 2023 00:03:13 -0700 (PDT)
+X-Google-Smtp-Source: ACHHUZ40mYWWGeSfRo+5bDF3kL4JbS0PLuWUFatiZRBvAnhp1iW7pjF4NKP6Rt5qVfGD91zMBgZDWg==
+X-Received: by 2002:a05:6a21:6da3:b0:10a:be5c:6e2d with SMTP id wl35-20020a056a216da300b0010abe5c6e2dmr3550397pzb.39.1686380593488;
+        Sat, 10 Jun 2023 00:03:13 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 13-20020a170902c10d00b0019aaab3f9d7sm4343492pli.113.2023.06.09.23.57.40
+        by smtp.gmail.com with ESMTPSA id t26-20020a65609a000000b0053fed3131e6sm3537520pgu.65.2023.06.10.00.03.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Jun 2023 23:57:42 -0700 (PDT)
-Date:   Sat, 10 Jun 2023 14:57:38 +0800
+        Sat, 10 Jun 2023 00:03:13 -0700 (PDT)
+Date:   Sat, 10 Jun 2023 15:03:09 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Anand Jain <anand.jain@oracle.com>
 Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Subject: Re: [PATCH v2] btrfs/122: fix nodesize option in mfks.btrfs
-Message-ID: <20230610065738.2djgsxpdgebmuhax@zlang-mailbox>
+Message-ID: <20230610070309.kslef76hvdxi56xd@zlang-mailbox>
 References: <04c928cb434dae18eb4d4c2745847ed67dc3b213.1685365902.git.anand.jain@oracle.com>
  <a45349aa46e0b185acf59f3914e78dce245bb696.1685705269.git.anand.jain@oracle.com>
 MIME-Version: 1.0
@@ -88,9 +88,6 @@ On Fri, Jun 02, 2023 at 07:38:54PM +0800, Anand Jain wrote:
 > ---
 > v2: Remove the redundant explicit nodesize option from mkfs.btrfs.
 >     Changed: Title from "btrfs/122: adjust nodesize to match pagesize"
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
 >     
 > 
 >  tests/btrfs/122 | 4 +---
@@ -108,6 +105,14 @@ Reviewed-by: Zorro Lang <zlang@redhat.com>
 > -# subvolume tree
 > -_scratch_mkfs "--nodesize 16384" >/dev/null
 > +_scratch_mkfs >> $seqres.full || _fail "mkfs failed"
+
+Oh, generally we don't check the return status of default _scratch_mkfs, except
+there're specific arguments for _scratch_mkfs. Or we need to add "_fail" to each
+mkfs lines. So I'd like to remove that "_fail" when I merge it.
+
+Thanks,
+Zorro
+
 >  _scratch_mount
 >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
 >  
