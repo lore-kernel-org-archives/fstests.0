@@ -2,182 +2,192 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D3CCEB64D7
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jun 2023 01:14:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9D2DEB64D7
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jun 2023 01:51:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229655AbjFUBON (ORCPT
+        id S229676AbjFUBva (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Jun 2023 21:14:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57968 "EHLO
+        Tue, 20 Jun 2023 21:51:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229520AbjFUBOM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Jun 2023 21:14:12 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E37510D0
-        for <fstests@vger.kernel.org>; Tue, 20 Jun 2023 18:13:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1687310004;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=XmddsCl4LxAp90uqfpuwqG5H0+eikf9m3wLMFq+yZRY=;
-        b=Qij/tcDMsDWWK+iGidAHUrEfSaJo+uMMIGkfPMRSLjdY56mxfrSK0/QlhVcZPDTIfq7pke
-        Aj9ZvLvcUaMJd1GC2KjjBdEq43xvvbiBYKl0RMBoiGrMSPJLnZcn2F8YetrJ+XW0EQfO2h
-        DvoZtWVMWcDKAjeOne9yCe2yUubgh58=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-450-CmHt5qyPM9qkJupNt2Dyag-1; Tue, 20 Jun 2023 21:13:22 -0400
-X-MC-Unique: CmHt5qyPM9qkJupNt2Dyag-1
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-66871648c25so2762400b3a.1
-        for <fstests@vger.kernel.org>; Tue, 20 Jun 2023 18:13:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687310001; x=1689902001;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=XmddsCl4LxAp90uqfpuwqG5H0+eikf9m3wLMFq+yZRY=;
-        b=Fox0uIP4J+ONhVbqh6y0wX6x7mC7Mfi8hS3AfhL1HNuUjwkxeNqZVeK1/EvJiP3O6V
-         GPzJ50xtBLUd5/eaXrJ5ZYBwl8jT5FXJCWnCSCG4P2ZGxVhC/5VV5CQFA67inpoW78Fp
-         /mVaFb2fa+rDuPmkgx3DeskofwxYEylj8P85gc5YxOQuyx6rIMILDiorl+Hsmkjqltrv
-         n700oessz6YDXhzaIXnopHXMFa3jm+iwp8pjGmK6wOvA6a/l87sHvcjCbstsyhXOLthC
-         dctgoQoi2BFW3Pzaabb2ZxGzQVFVK/+5gBRYO6VVlwirkoFXrls2O748VZpL2UXyQgu5
-         VKBg==
-X-Gm-Message-State: AC+VfDyOkZEnNkuL2lobXr4P2Ommqwc5RVs6VPNJKc3FEP15a3RJI8K/
-        aVclYrSdqZ05Epu7RRvM91wdLRVF5Sp0oeM6QTuV1cnNXMWD43WGxiec3IKR/FxpWtaexa2YUnx
-        C9orLAgodV1MJ+l8q7rdLd5xY+M+q
-X-Received: by 2002:a05:6a21:9984:b0:11e:e940:441d with SMTP id ve4-20020a056a21998400b0011ee940441dmr17882764pzb.22.1687310000935;
-        Tue, 20 Jun 2023 18:13:20 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ6MSuyFZJGtpy6/jfZt6r/pm8NOfdQLYRsIB/gi8BE7VDlSkY8pj0y5+GwyIVhdtfMRlAnSUA==
-X-Received: by 2002:a05:6a21:9984:b0:11e:e940:441d with SMTP id ve4-20020a056a21998400b0011ee940441dmr17882745pzb.22.1687310000532;
-        Tue, 20 Jun 2023 18:13:20 -0700 (PDT)
-Received: from zlang-mailbox ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j2-20020a62b602000000b00660d80087a8sm1798098pff.187.2023.06.20.18.13.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Jun 2023 18:13:20 -0700 (PDT)
-Date:   Wed, 21 Jun 2023 09:13:16 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: reduce runtime of check -n
-Message-ID: <20230621011316.g6omv4j66jltoma2@zlang-mailbox>
-References: <20230619105058.2711467-1-amir73il@gmail.com>
+        with ESMTP id S229520AbjFUBv3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Jun 2023 21:51:29 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D56A172C;
+        Tue, 20 Jun 2023 18:51:28 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id B9CE81F88C;
+        Wed, 21 Jun 2023 01:51:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1687312285; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=gK0aH+iGPs+N2oFCLZtJA/ih2vgvBB5Ni6G2icAc8LY=;
+        b=B4yMaQCmfJ8OR6DXzVT9QRCrv2zlpxFEeilfrTrptPtcXzDFmH/cA7p2eb06Ad/ukexLmc
+        u6uGVmiUtd464vx9VXJT1IcRnoStuDZE/6oZ0nnrZWNQ1/4rZYw9P4Z3XAX7ibmAYiFN0T
+        ANqIuuTOrIobxswMPZChOwT/sFI9AM0=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id DACC4134B1;
+        Wed, 21 Jun 2023 01:51:24 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id GpwBKJxXkmTOTQAAMHmgww
+        (envelope-from <wqu@suse.com>); Wed, 21 Jun 2023 01:51:24 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] btrfs: add test case to verify the behavior with large RAID0 data chunks
+Date:   Wed, 21 Jun 2023 09:51:07 +0800
+Message-ID: <20230621015107.88931-1-wqu@suse.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230619105058.2711467-1-amir73il@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 19, 2023 at 01:50:58PM +0300, Amir Goldstein wrote:
-> kvm-xfstests invokes check -n twice to pre-process and generate the
-> tests-to-run list, which is then being passed as a long list of tests
-> for invkoing check in the command line.
-> 
-> check invokes dirname, basename and sed several times per test just
-> for doing basic string prefix/suffix trimming.
-> Use bash string pattern matching instead which is much faster.
-> 
-> Note that the following pattern matching expression change:
-> < test_dir=${test_dir#$SRC_DIR/*}
-> > t=${t#$SRC_DIR/}
-> does not change the meaning of the expression, because the
-> shortest match of "$SRC_DIR/*" that is being trimmed is "$SRC_DIR/"
-> and removing the tests/ prefix is what this code intended to do.
-> 
-> With check -n, there is no need to cleanup the results dir,
-> but check -n is doing that for every single listed test.
-> Move the cleanup of results dir to before actually running the test.
-> 
-> These improvements to check pre-test code cut down several minutes
-> from the time until tests actually start to run with kvm-xfstests.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
-> 
-> Zorro,
-> 
-> Just to clarify, this change is not expected to change behavior -
-> only to improve runtime of check -n and the things that happen
-> before the first test is invoked.
+There is a recent regression during v6.4 merge window, that a u32 left
+shift overflow can cause problems with large data chunks (over 4G
+sized).
 
-Hi Amir,
+This is the regression test case for it.
 
-Sure, it's good to me to improve the performace of 'check -n'. But as this patch
-changes the common logic of check file, I need to make sure it won't bring in
-regression at first by some testing. If it works fine, I'll ack and merge it.
+The test case itself would:
 
-Thanks,
-Zorro
+- Create a RAID0 chunk with a single 6G data chunk
+  This requires at least 6 devices from SCRATCH_DEV_POOL, and each
+  should be larger than 2G.
 
-> 
-> Thanks,
-> Amir.
-> 
->  check | 22 +++++++++-------------
->  1 file changed, 9 insertions(+), 13 deletions(-)
-> 
-> diff --git a/check b/check
-> index e36978c1..1a16eccb 100755
-> --- a/check
-> +++ b/check
-> @@ -399,9 +399,9 @@ if $have_test_arg; then
->  		*)	# Expand test pattern (e.g. xfs/???, *fs/001)
->  			list=$(cd $SRC_DIR; echo $1)
->  			for t in $list; do
-> -				test_dir=`dirname $t`
-> -				test_dir=${test_dir#$SRC_DIR/*}
-> -				test_name=`basename $t`
-> +				t=${t#$SRC_DIR/}
-> +				test_dir=${t%/*}
-> +				test_name=${t#*/}
->  				group_file=$SRC_DIR/$test_dir/group.list
->  
->  				if grep -Eq "^$test_name" $group_file; then
-> @@ -849,18 +849,14 @@ function run_section()
->  
->  		# the filename for the test and the name output are different.
->  		# we don't include the tests/ directory in the name output.
-> -		export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
-> -
-> -		# Similarly, the result directory needs to replace the tests/
-> -		# part of the test location.
-> -		group=`dirname $seq`
-> +		export seqnum=${seq#$SRC_DIR/}
-> +		group=${seqnum%/*}
->  		if $OPTIONS_HAVE_SECTIONS; then
-> -			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
->  			REPORT_DIR="$RESULT_BASE/$section"
->  		else
-> -			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
->  			REPORT_DIR="$RESULT_BASE"
->  		fi
-> +		export RESULT_DIR="$REPORT_DIR/$group"
->  		seqres="$REPORT_DIR/$seqnum"
->  
->  		# Generate the entire section report with whatever test results
-> @@ -872,9 +868,6 @@ function run_section()
->  					     "" &> /dev/null
->  		fi
->  
-> -		mkdir -p $RESULT_DIR
-> -		rm -f ${RESULT_DIR}/require_scratch*
-> -		rm -f ${RESULT_DIR}/require_test*
->  		echo -n "$seqnum"
->  
->  		if $showme; then
-> @@ -899,6 +892,9 @@ function run_section()
->  		fi
->  
->  		# really going to try and run this one
-> +		mkdir -p $RESULT_DIR
-> +		rm -f ${RESULT_DIR}/require_scratch*
-> +		rm -f ${RESULT_DIR}/require_test*
->  		rm -f $seqres.out.bad $seqres.hints
->  
->  		# check if we really should run it
-> -- 
-> 2.34.1
-> 
+- Fill the fs with 5G data
+
+- Make sure everything is fine
+  Including the data csums.
+
+- Delete half of the data
+
+- Do a fstrim
+  This would lead to out-of-boundary trim if the kernel is not patched.
+
+- Make sure everything is fine again
+  If not patched, we may have corrupted data due to the bad fstrim
+  above.
+
+For now, this test case only checks the behavior for RAID0.
+As for RAID10, we need 12 devices, which is out-of-reach for a lot of
+test envionrments.
+
+For RAID56, they would have a different test case, as they don't support
+discard inside the RAID56 chunks.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/292     | 83 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/292.out |  2 ++
+ 2 files changed, 85 insertions(+)
+ create mode 100755 tests/btrfs/292
+ create mode 100644 tests/btrfs/292.out
+
+diff --git a/tests/btrfs/292 b/tests/btrfs/292
+new file mode 100755
+index 00000000..d1e31603
+--- /dev/null
++++ b/tests/btrfs/292
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 292
++#
++# Test btrfs behavior with large chunks (size beyond 4G) for basic read-write
++# and discard.
++# This test focus on RAID0.
++#
++. ./common/preamble
++_begin_fstest auto raid volume trim
++
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_require_scratch_dev_pool 6
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix u32 overflows when left shifting @stripe_nr"
++
++_scratch_dev_pool_get 6
++
++
++datasize=$((5 * 1024 * 1024 * 1024))
++filesize=$((8 * 1024 * 1024))
++nr_files=$(($datasize / $filesize))
++
++# Make sure each device has at least 2G.
++# Btrfs has a limits on per-device stripe length of 1G.
++# Double that so that we can ensure a data chunk with 6G size.
++
++for i in $SCRATCH_DEV_POOL; do
++	devsize=$(blockdev --getsize64 "$i")
++	if [ $devsize -lt $((2 * 1024 * 1024 * 1024)) ]; then
++		_notrun "device $i is too small, need at least 2G"
++	fi
++done
++
++_scratch_pool_mkfs -m raid1 -d raid0 >> $seqres.full 2>&1
++_scratch_mount
++
++# Fill the data chunk with 5G data.
++for (( i = 0; i < $nr_files; i++ )); do
++	xfs_io -f -c "pwrite -i /dev/urandom 0 $filesize" $SCRATCH_MNT/file_$i > /dev/null
++done
++sync
++echo "=== With initial 5G data written ===" >> $seqres.full
++$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
++
++_scratch_unmount
++
++# Make sure we haven't corrupted anything.
++$BTRFS_UTIL_PROG check --check-data-csum $SCRATCH_DEV >> $seqres.full 2>&1
++if [ $? -ne 0 ]; then
++	_fail "data corruption detected after initial data filling"
++fi
++
++_scratch_mount
++# Delete half of the data, and do discard
++rm -rf - "$SCRATCH_MNT/*[02468]"
++sync
++$FSTRIM_PROG $SCRATCH_MNT
++
++echo "=== With 2.5G data trimmed ===" >> $seqres.full
++$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
++_scratch_unmount
++
++# Make sure fstrim didn't corrupte anything.
++$BTRFS_UTIL_PROG check --check-data-csum $SCRATCH_DEV >> $seqres.full 2>&1
++if [ $? -ne 0 ]; then
++	_fail "data corruption detected after initial data filling"
++fi
++
++_scratch_dev_pool_put
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/292.out b/tests/btrfs/292.out
+new file mode 100644
+index 00000000..627309d3
+--- /dev/null
++++ b/tests/btrfs/292.out
+@@ -0,0 +1,2 @@
++QA output created by 292
++Silence is golden
+-- 
+2.39.0
 
