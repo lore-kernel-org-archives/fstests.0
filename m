@@ -2,187 +2,127 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61124EB64DC
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jun 2023 13:50:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5610EB64D7
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jun 2023 06:01:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229634AbjFYNur (ORCPT
+        id S229731AbjFZGBR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Jun 2023 09:50:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41806 "EHLO
+        Mon, 26 Jun 2023 02:01:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35256 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229613AbjFYNup (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Jun 2023 09:50:45 -0400
-Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B9E51B1;
-        Sun, 25 Jun 2023 06:50:43 -0700 (PDT)
-Received: by mail-wr1-x42b.google.com with SMTP id ffacd0b85a97d-313f18f5295so30086f8f.3;
-        Sun, 25 Jun 2023 06:50:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687701041; x=1690293041;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tuIT3teTWVx1Ew+sE+FI2WXyDQcNmGaKrzdhreicHHA=;
-        b=PvVfaksoAKpRZPpqzhc9Z1JO34UF5gDwawXtacIo5t3iKpcQpAJ/1QV802ZvxTob5I
-         kNwlr58iKcTyA/JZ9Rkv7UDewrFwAzQu2bijL/qDMY+TsLRFQrxm0dDB+ZVQi2oESAaV
-         RD/gI1f6onwc3s53g0EMbuSgLuyqpaBgiwryXJAiwfsA6tvHn2IMaNdxomVww/GzMtye
-         4Arh1StYwqnPTzwzWbe7pTPly7DclkncJYN92Y7FMFhd6ghcUxoPOAKO7jQfriw8VEcb
-         MB/rxd0h7/LT+n/P5LzLxQiNVsld9+IQderDXfi8BX+P70oY6lPwbGsXWkKbVZoDPDNb
-         0yqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687701041; x=1690293041;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=tuIT3teTWVx1Ew+sE+FI2WXyDQcNmGaKrzdhreicHHA=;
-        b=LQ5O92ALKIqXRcv0B59ZvLMt2Rf7fUHlK1Z2CFvsjdSs7mJJ/8cR+qdSiC6cl23Fz4
-         PeY5zkiVzDbQqf0LXG9XhvCey0CeLZbkVONhv8dBfxaXikCBi31uqVJzuFVbWpOYhIiJ
-         Fhxy+x/qGwmdZOL1YYSSMIwdpaLwb5XrxCe7rnzBYxl02/7JmcXNUry6ZwsbfHfmcLQQ
-         reEQqebXMCpWBXrzzV4NkOrYOm30nl5gX3ZuHQLONfGLdIqTdjzSAWm8te34F18PW/UU
-         B1VS9ocBVnNncpRGA+u9UPCWT1Yfy3J7WlsvuToxlR7CJq9mMpJcWZkXMcntYDayPEOY
-         bu1Q==
-X-Gm-Message-State: AC+VfDx7U+3WhmIHmPFfyZyxsR9QaMLzV0uPknNLzd9H7oVMxRGcAUj5
-        obsztItCrGEfquTBAcQ2GJU=
-X-Google-Smtp-Source: ACHHUZ7Xl9clLEm3wMxOBrREBRlGAmjsixhdBEBy3VYGUQUVzWJ2uMcLTz3if8uVf8f3v7fKKPPq8w==
-X-Received: by 2002:adf:f34f:0:b0:30f:b1ee:5cd0 with SMTP id e15-20020adff34f000000b0030fb1ee5cd0mr23268862wrp.50.1687701041369;
-        Sun, 25 Jun 2023 06:50:41 -0700 (PDT)
-Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
-        by smtp.gmail.com with ESMTPSA id b3-20020adff243000000b003112b38fe90sm4667166wrp.79.2023.06.25.06.50.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Jun 2023 06:50:41 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Eric Biggers <ebiggers@google.com>,
-        Alexander Larsson <alexl@redhat.com>,
-        Leah Rumancik <leah.rumancik@gmail.com>,
-        fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
-Subject: [PATCH 2/3] test-appliance: remove redudant overlay configs
-Date:   Sun, 25 Jun 2023 16:50:32 +0300
-Message-Id: <20230625135033.3205742-3-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230625135033.3205742-1-amir73il@gmail.com>
-References: <20230625135033.3205742-1-amir73il@gmail.com>
+        with ESMTP id S229454AbjFZGBQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Jun 2023 02:01:16 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 611F0AB;
+        Sun, 25 Jun 2023 23:01:15 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 310261F8AA;
+        Mon, 26 Jun 2023 06:01:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1687759273; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=PZFbsmV365HuoxL76lupV2csZXLMuFzqoryYn+FFWIw=;
+        b=DYsNbkL5uMgwA9/hSf3SA/9///sfEKU2HUG9d2qYJoJw3l2dW7FCvKaPcY3RLmClgMyUoJ
+        rIx8wCh5+AIDLrhx55Z2zxm332GVBCdNM0thzRMxhx6/LKX5/EAT4xUlh3KCKAkhnG7Oe2
+        6gXb2k4Uiad3BdpfzjRDit2ZV6xJaY0=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1BD5B1391D;
+        Mon, 26 Jun 2023 06:01:11 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 3tqZNacpmWSVHwAAMHmgww
+        (envelope-from <wqu@suse.com>); Mon, 26 Jun 2023 06:01:11 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] common/btrfs: handle dmdust as mounted device in _btrfs_buffered_read_on_mirror()
+Date:   Mon, 26 Jun 2023 14:00:52 +0800
+Message-ID: <20230626060052.8913-1-wqu@suse.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since the introduction of syntax "-c ext4:overlay/small" - 5fec599
-("test-appliance: update config syntax to specify primary fstype"),
-there is no need for the -ext4 and -xfs ovelray config file variants,
-so remove them.
+[BUG]
+After commit ab41f0bddb73 ("common/btrfs: use _scratch_cycle_mount to
+ensure all page caches are dropped"), the test case btrfs/143 can fail
+like below:
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+ btrfs/143 6s ... [failed, exit status 1]- output mismatch (see ~/xfstests/results//btrfs/143.out.bad)
+    --- tests/btrfs/143.out 2020-06-10 19:29:03.818519162 +0100
+    +++ ~/xfstests/results//btrfs/143.out.bad 2023-06-19 17:04:00.575033899 +0100
+    @@ -1,37 +1,6 @@
+     QA output created by 143
+     wrote 131072/131072 bytes
+     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+................
+    -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+................
+    -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+................
+    -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+................
+
+[CAUSE]
+Test case btrfs/143 uses dm-dust device to emulate read errors, this
+means we can not use _scratch_cycle_mount to cycle mount $SCRATCH_MNT.
+
+As it would go mount $SCRATCH_DEV, not the dm-dust device to
+$SCRATCH_MNT.
+This prevents us to trigger read-repair (since no error would be hit)
+thus fail the test.
+
+[FIX]
+Since we can mount whatever device at $SCRATCH_MNT, we can not use
+_scratch_cycle_mount in this case.
+
+Instead implement a small helper to grab the mounted device and its
+mount options, and use the same device and mount options to cycle
+$SCRATCH_MNT mount.
+
+This would fix btrfs/143 and hopefully future test cases which use dm
+devices.
+
+Reported-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- .../files/root/fs/overlay/cfg/large-ext4           | 14 --------------
- test-appliance/files/root/fs/overlay/cfg/large-xfs | 14 --------------
- .../files/root/fs/overlay/cfg/small-ext4           | 14 --------------
- .../files/root/fs/overlay/cfg/small-ext4.exclude   |  1 -
- test-appliance/files/root/fs/overlay/cfg/small-xfs | 14 --------------
- .../files/root/fs/overlay/cfg/small-xfs.exclude    |  1 -
- 6 files changed, 58 deletions(-)
- delete mode 100644 test-appliance/files/root/fs/overlay/cfg/large-ext4
- delete mode 100644 test-appliance/files/root/fs/overlay/cfg/large-xfs
- delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-ext4
- delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-ext4.exclude
- delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-xfs
- delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-xfs.exclude
+ common/btrfs | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
 
-diff --git a/test-appliance/files/root/fs/overlay/cfg/large-ext4 b/test-appliance/files/root/fs/overlay/cfg/large-ext4
-deleted file mode 100644
-index e401147..0000000
---- a/test-appliance/files/root/fs/overlay/cfg/large-ext4
-+++ /dev/null
-@@ -1,14 +0,0 @@
--function check_filesystem()
--{
--	__check_filesystem "$LG_TST_DEV" "$LG_TST_MNT" "$LG_SCR_DEV" "$LG_SCR_MNT"
--}
--
--function format_filesystem()
--{
--	__format_filesystem "$LG_TST_DEV" "$LG_TST_MNT" "$LG_SCR_DEV" "$LG_SCR_MNT"
--}
--
--SIZE=large
--FSTESTTYP=ext4
--TESTNAME="overlayfs large"
--mkdir -p /test/tmp /test/scratch
-diff --git a/test-appliance/files/root/fs/overlay/cfg/large-xfs b/test-appliance/files/root/fs/overlay/cfg/large-xfs
-deleted file mode 100644
-index 627dc29..0000000
---- a/test-appliance/files/root/fs/overlay/cfg/large-xfs
-+++ /dev/null
-@@ -1,14 +0,0 @@
--function check_filesystem()
--{
--	__check_filesystem "$LG_TST_DEV" "$LG_TST_MNT" "$LG_SCR_DEV" "$LG_SCR_MNT"
--}
--
--function format_filesystem()
--{
--	__format_filesystem "$LG_TST_DEV" "$LG_TST_MNT" "$LG_SCR_DEV" "$LG_SCR_MNT"
--}
--
--SIZE=large
--FSTESTTYP=xfs
--TESTNAME="overlayfs large"
--mkdir -p /test/tmp /test/scratch
-diff --git a/test-appliance/files/root/fs/overlay/cfg/small-ext4 b/test-appliance/files/root/fs/overlay/cfg/small-ext4
-deleted file mode 100644
-index ce750e5..0000000
---- a/test-appliance/files/root/fs/overlay/cfg/small-ext4
-+++ /dev/null
-@@ -1,14 +0,0 @@
--function check_filesystem()
--{
--	__check_filesystem "$SM_TST_DEV" "$SM_TST_MNT" "$SM_SCR_DEV" "$SM_SCR_MNT"
--}
--
--function format_filesystem()
--{
--	__format_filesystem "$SM_TST_DEV" "$SM_TST_MNT" "$SM_SCR_DEV" "$SM_SCR_MNT"
--}
--
--SIZE=small
--FSTESTTYP=ext4
--TESTNAME="overlayfs small"
--mkdir -p /test/tmp /test/scratch
-diff --git a/test-appliance/files/root/fs/overlay/cfg/small-ext4.exclude b/test-appliance/files/root/fs/overlay/cfg/small-ext4.exclude
-deleted file mode 100644
-index a314778..0000000
---- a/test-appliance/files/root/fs/overlay/cfg/small-ext4.exclude
-+++ /dev/null
-@@ -1 +0,0 @@
--overlay/001	// requires (2*4G + 8k) free space on $SCRATCH_DEV.
-diff --git a/test-appliance/files/root/fs/overlay/cfg/small-xfs b/test-appliance/files/root/fs/overlay/cfg/small-xfs
-deleted file mode 100644
-index d0d8433..0000000
---- a/test-appliance/files/root/fs/overlay/cfg/small-xfs
-+++ /dev/null
-@@ -1,14 +0,0 @@
--function check_filesystem()
--{
--	__check_filesystem "$SM_TST_DEV" "$SM_TST_MNT" "$SM_SCR_DEV" "$SM_SCR_MNT"
--}
--
--function format_filesystem()
--{
--	__format_filesystem "$SM_TST_DEV" "$SM_TST_MNT" "$SM_SCR_DEV" "$SM_SCR_MNT"
--}
--
--FSTESTTYP=xfs
--SIZE=small
--TESTNAME="overlayfs small"
--mkdir -p /test/tmp /test/scratch
-diff --git a/test-appliance/files/root/fs/overlay/cfg/small-xfs.exclude b/test-appliance/files/root/fs/overlay/cfg/small-xfs.exclude
-deleted file mode 100644
-index a314778..0000000
---- a/test-appliance/files/root/fs/overlay/cfg/small-xfs.exclude
-+++ /dev/null
-@@ -1 +0,0 @@
--overlay/001	// requires (2*4G + 8k) free space on $SCRATCH_DEV.
+diff --git a/common/btrfs b/common/btrfs
+index 175b33ae..4a02b2cc 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -601,8 +601,18 @@ _btrfs_buffered_read_on_mirror()
+ 	# The drop_caches doesn't seem to drop every pages on aarch64 with
+ 	# 64K page size.
+ 	# So here as another workaround, cycle mount the SCRATCH_MNT to ensure
+-	# the cache are dropped.
+-	_scratch_cycle_mount
++	# the cache are dropped, but we can not use _scratch_cycle_mount, as
++	# we may mount whatever dm device at SCRATCH_MNT.
++	# So here we grab the mounted block device and its mount options, then
++	# unmount and re-mount with the same device and options.
++	local mount_info=$(_mount | grep "$SCRATCH_MNT")
++	if [ -z "$mount_info" ]; then
++		_fail "failed to grab mount info of $SCRATCH_MNT"
++	fi
++	local dev=$(echo $mount_info | $AWK_PROG '{print $1}')
++	local opts=$(echo $mount_info | $AWK_PROG '{print $6}' | sed 's/[()]//g')
++	_scratch_unmount
++	_mount $dev -o $opts $SCRATCH_MNT
+ 	while [[ -z $( (( BASHPID % nr_mirrors == mirror )) &&
+ 		exec $XFS_IO_PROG \
+ 			-c "pread -b $size $offset $size" $file) ]]; do
 -- 
-2.34.1
+2.39.0
 
