@@ -2,170 +2,190 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F054EB64D7
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jun 2023 17:33:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32B26EB64D7
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jun 2023 21:23:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229737AbjFZRdF (ORCPT
+        id S229847AbjFZVXp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 26 Jun 2023 13:33:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34404 "EHLO
+        Mon, 26 Jun 2023 17:23:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229520AbjFZRdE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 26 Jun 2023 13:33:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07B161B0
-        for <fstests@vger.kernel.org>; Mon, 26 Jun 2023 10:32:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1687800740;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=orLt4yP89X2UdvBr1TDvHLwF1RmryaYTro/txmG6+gc=;
-        b=I+Gfti9Y2XhWd1yWjneI3K+lKIxueirvNkWc103A9vC9vFHGBSK2srHfeUPnBvzszgH6GM
-        SKxM759fbLtjSEQOzn/zpppU2VIPq6+7a4cmmjvuPmAL9WOH5iubWyQEKaL/PmtPZ0yLKH
-        gk44fhIs/+0dfyudFklm3GSDgTS+NCQ=
-Received: from mail-io1-f69.google.com (mail-io1-f69.google.com
- [209.85.166.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-211-gacnuuhIP8WKWvx7NRMxvg-1; Mon, 26 Jun 2023 13:32:18 -0400
-X-MC-Unique: gacnuuhIP8WKWvx7NRMxvg-1
-Received: by mail-io1-f69.google.com with SMTP id ca18e2360f4ac-76c5c78bc24so256303539f.2
-        for <fstests@vger.kernel.org>; Mon, 26 Jun 2023 10:32:18 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687800737; x=1690392737;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=orLt4yP89X2UdvBr1TDvHLwF1RmryaYTro/txmG6+gc=;
-        b=kzCjKutxpfUv4AV7MVZQyOHDYiID1cDEoAaKblDkO64vcAKU5dzGQRdJTu0XRIU/Qh
-         wNs3Lots7uUaT3ISfHRr+w1C3TSffylJGIB2kCCnmvOC8oZGa1Zb/roW37ClqJo50Lcb
-         VkA97F+GuhA4qsODzDSxe3nkqp4e/NkNQNUAJIv7fWdIAQDn5gFfpCj1W94et4XDCM40
-         B/1GflctMkMzLouLPbwsXLvdXHJb8VWG86CdyuBUgcC6yh3MLXb6f3EFhEdBBjcq0tl1
-         IJlzRFeg3QuMcXESF63ni8XEaviI7VrkAc15WCxq5uWsk65wZAdaCcPWBdNGSfCgfsNW
-         gv7g==
-X-Gm-Message-State: AC+VfDw3WNU48PdpM90rcEcoX4tAjIECzE/7fonhviQQaD108y8ss+a2
-        ptUN0MGeP4CN7iCmuX+rAzWboJF7UjcYxA2kUgOPIVEuCfkTY6opJt7/jSgyDwMURYJf3bsUaX9
-        YXstnpD6q2cehcV94BaDigTi1PEiO
-X-Received: by 2002:a92:cf08:0:b0:345:b096:7eed with SMTP id c8-20020a92cf08000000b00345b0967eedmr1897157ilo.29.1687800737206;
-        Mon, 26 Jun 2023 10:32:17 -0700 (PDT)
-X-Google-Smtp-Source: ACHHUZ6iyGLahAd0AGIxF/uq63MSuaiipTmfrTYeWInBqx1njqaUluQ0bG38G/aCaJBu0jibWw/8Zw==
-X-Received: by 2002:a92:cf08:0:b0:345:b096:7eed with SMTP id c8-20020a92cf08000000b00345b0967eedmr1897136ilo.29.1687800736932;
-        Mon, 26 Jun 2023 10:32:16 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id t17-20020a62ea11000000b0066355064acbsm4049393pfh.104.2023.06.26.10.32.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 26 Jun 2023 10:32:16 -0700 (PDT)
-Date:   Tue, 27 Jun 2023 01:32:12 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
+        with ESMTP id S230206AbjFZVXn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Jun 2023 17:23:43 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8FAFB1;
+        Mon, 26 Jun 2023 14:23:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
+ s=s31663417; t=1687814616; x=1688419416; i=quwenruo.btrfs@gmx.com;
+ bh=UwP09Akvg1XGbiRQscD9xroA92Fcvt1/PTBtP9k8wzs=;
+ h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
+ b=dTRWmq2X1+DZNwOghfpPIf3q8IrduLDbsb5BkfJyRH+I0YytUPNOceVAsavx6FBaiPDBHKH
+ tn68nUgj1SPxBWEElBjSnyRZAWSuzVWSEyoAwvVxCtRYIWC7rjS9U/bTqJE77lTcyHVk72SHy
+ r85E6kPMV7dWg12ZSMcyqzJwiqkvD/dGjrSdR9QjxFfZRDuruOamfgZaLOZIQSf2MNZw217u8
+ NqD1Kcb/wizIGVCjT4KUGIzzt4LHEiM9u/pVYTLU8hhxJawrN/eGk/dt02wM2uRSxBpGl3pvs
+ Un2xeIk7yjx8OP6yNTFD8y3IauTPRNJayp59E/AP84kJgycVe/Wg==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MA7GM-1qJzZ71RFa-00Bcjn; Mon, 26
+ Jun 2023 23:23:36 +0200
+Message-ID: <c06e6b05-0a88-1466-0283-fa53cec2e06a@gmx.com>
+Date:   Tue, 27 Jun 2023 05:23:31 +0800
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.12.0
 Subject: Re: [PATCH] common/btrfs: handle dmdust as mounted device in
  _btrfs_buffered_read_on_mirror()
-Message-ID: <20230626173212.edlu34txg5t4luc6@zlang-mailbox>
+To:     Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
 References: <20230626060052.8913-1-wqu@suse.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230626060052.8913-1-wqu@suse.com>
+ <20230626173212.edlu34txg5t4luc6@zlang-mailbox>
+Content-Language: en-US
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+In-Reply-To: <20230626173212.edlu34txg5t4luc6@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:tissjajE9VJMIu0g97fIydHzFjPpgmDRUUXTuIJEcGwgtSS16ap
+ POsRMZcp8J//VOPFU3zh+avWLvA1edqTg29deAB7BTxTQJ6xs3UHcOp/8NvNVjoGDAHqjlq
+ KGCDSjHJHczoDCy1P90cd5UjezxFpTgkW57wrolsdqZUYzRzLcbHRaeQupYccbyzVrGCn1Q
+ VmiZ9hGrJG5VzYDBqzTlg==
+UI-OutboundReport: notjunk:1;M01:P0:MEPdkMkJoGA=;lbTotzBXgCn6aX7BkbNyAFhS3wu
+ YjkFyGz7BUtBpdd+9UmjS5k0jcXF0udmC2BO1UPif+N615COhhiUDQYw9mQ6fzpNekjR3hXcH
+ rFtrA98CqQtPGEUnUiOLRa8N4eOwVQP7ew8ixALKzMZi7N76yjMta2+0AzP5ZukGbbiyKK3y4
+ tDkNGz4Gfg6FyktEcL3KFpAcqUNm5jI0T5WZ9NUxPuLD6dIVFLypFXgGOMchUPExS7ivR7Nqf
+ cXNoNbSEUhSD77YOzfetY3JMx8ujbB68aJo0aqLy2Ljm6StsZykJWaPSJOfYG52aEhyE2l9Dv
+ chYZ1oSWSJkhyZ7AnvmSice0YSwNEZi7Mf6kRjkAMBPT2Ia/2it7saJL4ieKWAUFvue3v4iMF
+ dhh6kjSOoQdXRCMMW5usepDu9kKUVayYpZhO7q9t+A17+l1uk1hat80v/qm1mt2mvu5XsOlgW
+ P/FBFcnlZ4hdMCPT2+BEHJ233vFYFbRQmW05v+6HlIdAPsDOdSK719plQDzWltN0a2BVsR4Dj
+ O67PrKDh4ea12VzD3UvR7N22k4bylNmQES/YeC1pwbTY4DFnM+rie5Us8UHGgSJHqLkNeqZbf
+ AM7XwCaSQpvqZdVjtpGBq+m2Z6fcl8yEl6dI1dbyRiL5AaTpoSXZPcOIPCbuwEgAmfW10U43B
+ pJn0sUVg99KxazbrNdhgnSxt654+Du4swf1rJyQPNG8fQzB7dMr8Z37tousavrAJiYxebc56N
+ W6C1pK0uY5130G/lrc4ABckFKctoe7APhk/Af6SHbgBoeYx/gpWT3/8kfnHCHhJqNG+HihyeO
+ dRlLNztAcsXdvm46Rfhn3/YY8enS50EnofifkR9Ces/hlNym0h3I5NJILHUOtXvUkiENUZkyA
+ Ep824UZ1hRAeBkFhtUb4S5WKUqeBqLc+mFjBo1M3eQCaG07xjZHakX7tMCbVaJjhw6hXXExwu
+ 3buWeboV77yeeEiM9oXrabfGhGo=
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 26, 2023 at 02:00:52PM +0800, Qu Wenruo wrote:
-> [BUG]
-> After commit ab41f0bddb73 ("common/btrfs: use _scratch_cycle_mount to
-> ensure all page caches are dropped"), the test case btrfs/143 can fail
-> like below:
-> 
->  btrfs/143 6s ... [failed, exit status 1]- output mismatch (see ~/xfstests/results//btrfs/143.out.bad)
->     --- tests/btrfs/143.out 2020-06-10 19:29:03.818519162 +0100
->     +++ ~/xfstests/results//btrfs/143.out.bad 2023-06-19 17:04:00.575033899 +0100
->     @@ -1,37 +1,6 @@
->      QA output created by 143
->      wrote 131072/131072 bytes
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
-> 
-> [CAUSE]
-> Test case btrfs/143 uses dm-dust device to emulate read errors, this
-> means we can not use _scratch_cycle_mount to cycle mount $SCRATCH_MNT.
-> 
-> As it would go mount $SCRATCH_DEV, not the dm-dust device to
-> $SCRATCH_MNT.
-> This prevents us to trigger read-repair (since no error would be hit)
-> thus fail the test.
-> 
-> [FIX]
-> Since we can mount whatever device at $SCRATCH_MNT, we can not use
-> _scratch_cycle_mount in this case.
-> 
-> Instead implement a small helper to grab the mounted device and its
-> mount options, and use the same device and mount options to cycle
-> $SCRATCH_MNT mount.
-> 
-> This would fix btrfs/143 and hopefully future test cases which use dm
-> devices.
-> 
-> Reported-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  common/btrfs | 14 ++++++++++++--
->  1 file changed, 12 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index 175b33ae..4a02b2cc 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -601,8 +601,18 @@ _btrfs_buffered_read_on_mirror()
->  	# The drop_caches doesn't seem to drop every pages on aarch64 with
->  	# 64K page size.
->  	# So here as another workaround, cycle mount the SCRATCH_MNT to ensure
-> -	# the cache are dropped.
-> -	_scratch_cycle_mount
-> +	# the cache are dropped, but we can not use _scratch_cycle_mount, as
-> +	# we may mount whatever dm device at SCRATCH_MNT.
-> +	# So here we grab the mounted block device and its mount options, then
-> +	# unmount and re-mount with the same device and options.
-> +	local mount_info=$(_mount | grep "$SCRATCH_MNT")
-> +	if [ -z "$mount_info" ]; then
-> +		_fail "failed to grab mount info of $SCRATCH_MNT"
-> +	fi
-> +	local dev=$(echo $mount_info | $AWK_PROG '{print $1}')
-> +	local opts=$(echo $mount_info | $AWK_PROG '{print $6}' | sed 's/[()]//g')
 
-The `findmnt` can help to get $dev and $opts:
 
-  local dev=$(findmnt -n -T $SCRATCH_MNT -o SOURCE)
-  local opts=$(findmnt -n -T $SCRATCH_MNT -o OPTIONS)
+On 2023/6/27 01:32, Zorro Lang wrote:
+> On Mon, Jun 26, 2023 at 02:00:52PM +0800, Qu Wenruo wrote:
+>> [BUG]
+>> After commit ab41f0bddb73 ("common/btrfs: use _scratch_cycle_mount to
+>> ensure all page caches are dropped"), the test case btrfs/143 can fail
+>> like below:
+>>
+>>   btrfs/143 6s ... [failed, exit status 1]- output mismatch (see ~/xfst=
+ests/results//btrfs/143.out.bad)
+>>      --- tests/btrfs/143.out 2020-06-10 19:29:03.818519162 +0100
+>>      +++ ~/xfstests/results//btrfs/143.out.bad 2023-06-19 17:04:00.5750=
+33899 +0100
+>>      @@ -1,37 +1,6 @@
+>>       QA output created by 143
+>>       wrote 131072/131072 bytes
+>>       XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>>      -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>> ................
+>>      -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>> ................
+>>      -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>> ................
+>>      -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>> ................
+>>
+>> [CAUSE]
+>> Test case btrfs/143 uses dm-dust device to emulate read errors, this
+>> means we can not use _scratch_cycle_mount to cycle mount $SCRATCH_MNT.
+>>
+>> As it would go mount $SCRATCH_DEV, not the dm-dust device to
+>> $SCRATCH_MNT.
+>> This prevents us to trigger read-repair (since no error would be hit)
+>> thus fail the test.
+>>
+>> [FIX]
+>> Since we can mount whatever device at $SCRATCH_MNT, we can not use
+>> _scratch_cycle_mount in this case.
+>>
+>> Instead implement a small helper to grab the mounted device and its
+>> mount options, and use the same device and mount options to cycle
+>> $SCRATCH_MNT mount.
+>>
+>> This would fix btrfs/143 and hopefully future test cases which use dm
+>> devices.
+>>
+>> Reported-by: Filipe Manana <fdmanana@suse.com>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>>   common/btrfs | 14 ++++++++++++--
+>>   1 file changed, 12 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/common/btrfs b/common/btrfs
+>> index 175b33ae..4a02b2cc 100644
+>> --- a/common/btrfs
+>> +++ b/common/btrfs
+>> @@ -601,8 +601,18 @@ _btrfs_buffered_read_on_mirror()
+>>   	# The drop_caches doesn't seem to drop every pages on aarch64 with
+>>   	# 64K page size.
+>>   	# So here as another workaround, cycle mount the SCRATCH_MNT to ensu=
+re
+>> -	# the cache are dropped.
+>> -	_scratch_cycle_mount
+>> +	# the cache are dropped, but we can not use _scratch_cycle_mount, as
+>> +	# we may mount whatever dm device at SCRATCH_MNT.
+>> +	# So here we grab the mounted block device and its mount options, the=
+n
+>> +	# unmount and re-mount with the same device and options.
+>> +	local mount_info=3D$(_mount | grep "$SCRATCH_MNT")
+>> +	if [ -z "$mount_info" ]; then
+>> +		_fail "failed to grab mount info of $SCRATCH_MNT"
+>> +	fi
+>> +	local dev=3D$(echo $mount_info | $AWK_PROG '{print $1}')
+>> +	local opts=3D$(echo $mount_info | $AWK_PROG '{print $6}' | sed 's/[()=
+]//g')
+>
+> The `findmnt` can help to get $dev and $opts:
+>
+>    local dev=3D$(findmnt -n -T $SCRATCH_MNT -o SOURCE)
+>    local opts=3D$(findmnt -n -T $SCRATCH_MNT -o OPTIONS)
+>
+> If you hope to check you can keep:
+>
+>    if [ -z "$dev" -o -z "$opts" ];then
+>            _fail "failed to grab mount info of $SCRATCH_MNT"
+>    fi
 
-If you hope to check you can keep:
+That's really helpful!
 
-  if [ -z "$dev" -o -z "$opts" ];then
-          _fail "failed to grab mount info of $SCRATCH_MNT"
-  fi
+>
+>> +	_scratch_unmount
+>> +	_mount $dev -o $opts $SCRATCH_MNT
+>
+> I'm wondering can this help that, after you get the "real" device name:
+>
+>    SCRATCH_DEV=3D$dev _scratch_cycle_mount
 
-> +	_scratch_unmount
-> +	_mount $dev -o $opts $SCRATCH_MNT
+AFAIK we still need to specify the mount option.
 
-I'm wondering can this help that, after you get the "real" device name:
+As it's possible previous mount is specifying certain mount option
+that's not in MOUNT_OPTIONS environment variables.
 
-  SCRATCH_DEV=$dev _scratch_cycle_mount
+E.g. mounting a specific subvolume or a temporary mount option.
+
+Thus I believe we may still need to specific the mount options.
 
 Thanks,
-Zorro
+Qu
 
->  	while [[ -z $( (( BASHPID % nr_mirrors == mirror )) &&
->  		exec $XFS_IO_PROG \
->  			-c "pread -b $size $offset $size" $file) ]]; do
-> -- 
-> 2.39.0
-> 
-
+>
+> Thanks,
+> Zorro
+>
+>>   	while [[ -z $( (( BASHPID % nr_mirrors =3D=3D mirror )) &&
+>>   		exec $XFS_IO_PROG \
+>>   			-c "pread -b $size $offset $size" $file) ]]; do
+>> --
+>> 2.39.0
+>>
+>
