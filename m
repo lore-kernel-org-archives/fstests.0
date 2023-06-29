@@ -2,42 +2,42 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 456F5C001DE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7E77C001DD
 	for <linux-fstests@archiver.kernel.org>; Thu, 29 Jun 2023 22:25:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230487AbjF2WZh (ORCPT
+        id S229512AbjF2WZi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Jun 2023 18:25:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40394 "EHLO
+        Thu, 29 Jun 2023 18:25:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230037AbjF2WZf (ORCPT
+        with ESMTP id S230284AbjF2WZf (ORCPT
         <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2023 18:25:35 -0400
 Received: from box.fidei.email (box.fidei.email [71.19.144.250])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F34203583
-        for <fstests@vger.kernel.org>; Thu, 29 Jun 2023 15:25:33 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 810CA3584
+        for <fstests@vger.kernel.org>; Thu, 29 Jun 2023 15:25:34 -0700 (PDT)
 Received: from authenticated-user (box.fidei.email [71.19.144.250])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
         (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id AF020806B2;
-        Thu, 29 Jun 2023 18:17:33 -0400 (EDT)
+        by box.fidei.email (Postfix) with ESMTPSA id 067A5809D5;
+        Thu, 29 Jun 2023 18:17:44 -0400 (EDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1688077054; bh=fo8nuHTnikqI5Ttd77O8Z9DRDF+muN6DTBAVCB+dUP8=;
+        t=1688077065; bh=s9IkOPswFcoMbSUPlHIx6NlUBPocYX+B+nK2H9PE4AU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=be3WKVnzExiRxmu+ntfmhVSDIkptO2PU7CpXLnKv6WKzGimtbN4RKs818GxQpwdTo
-         aMAD6SpHV29fM3VkBPH4A5IaxjDW/JmPCJ+TuS6hhfcrMk85w1X6fAOdyVsd+uwp/m
-         MLUiJcvQH9EcDDnt1MbgcqOwshu9bavD/4x4CFjZ9ervKamR5iZasAXJfq4ewrBHR2
-         pwhoPeh3MSqKVkm/1bHxL5MN4fmuxjgFsWHrcw3nbEGnPospbCeXd+gdoJNILPxJl/
-         B0H/3xYqf3JS+8b9fBz22ojgJ8WTHCd6LkpQiNkV+5UHcHsX4qcRMt59BvmcRpBcMd
-         rklNGwqi4vXTQ==
+        b=MAlqqSWscwBcr8WOLjtTPx1/YFsQfdyqL/1NtKBq/Dj74Zn0WWltXR0T0RaHQbntM
+         zu4mqa3UaFN7Sz2TpJhX5dU4aBOpwuqDdTfKHIHuWXGArhHUvrfhI9tW+Wi3fWXcku
+         wpVIxQyCDbSb6T8AqfzXejfunhVqtS5PjHlZTR234WbI9+sGaCdY16HrEuaH+b5pxJ
+         Vi0SJsdPTIpu9q2OpXtGPYVd5jUK5LulEeAuNQRlLcUo7y57Vsh8Uu+BR5YAhGsD8s
+         gpwD+R/RJK0FmXJfgvgLnGjeBelT2sedNILdkiZf/mv4ik8s8pzyNk3wJ+RaGg13Ww
+         WCLctJLwlM+kg==
 From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
 To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
         kernel-team@meta.com, ebiggers@google.com, anand.jain@oracle.com,
         fdmanana@suse.com, linux-fscrypt@vger.kernel.org,
         fsverity@lists.linux.dev, zlang@kernel.org
 Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [RFC PATCH 1/8] common/encrypt: separate data and inode nonces
-Date:   Thu, 29 Jun 2023 18:17:16 -0400
-Message-Id: <bc535e5b948a5f494f4ac84fb8706d827dcf2cc6.1688076612.git.sweettea-kernel@dorminy.me>
+Subject: [RFC PATCH 8/8] btrfs: add simple test of reflink of encrypted data
+Date:   Thu, 29 Jun 2023 18:17:23 -0400
+Message-Id: <dbf938dfa6828b9307759c89a48237b16dbcb5a3.1688076612.git.sweettea-kernel@dorminy.me>
 In-Reply-To: <cover.1688076612.git.sweettea-kernel@dorminy.me>
 References: <cover.1688076612.git.sweettea-kernel@dorminy.me>
 MIME-Version: 1.0
@@ -46,111 +46,104 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs will have different inode and data nonces, so we need to be
-specific about which nonce each use needs. For now, there is no
-difference in the two functions.
+Make sure that we succeed at reflinking encrypted data.
 
-Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+Test deliberately numbered with a high number so it won't conflict with
+tests between now and merge.
 ---
- common/encrypt    | 33 ++++++++++++++++++++++++++-------
- tests/generic/613 |  4 ++--
- 2 files changed, 28 insertions(+), 9 deletions(-)
+ tests/btrfs/613     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/613.out | 13 ++++++++++
+ 2 files changed, 75 insertions(+)
+ create mode 100755 tests/btrfs/613
+ create mode 100644 tests/btrfs/613.out
 
-diff --git a/common/encrypt b/common/encrypt
-index 1a77e23b..04b6e5ac 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -488,7 +488,7 @@ _add_fscrypt_provisioning_key()
- # Retrieve the encryption nonce of the given inode as a hex string.  The nonce
- # was randomly generated by the filesystem and isn't exposed directly to
- # userspace.  But it can be read using the filesystem's debugging tools.
--_get_encryption_nonce()
-+_get_encryption_file_nonce()
- {
- 	local device=$1
- 	local inode=$2
-@@ -532,15 +532,34 @@ _get_encryption_nonce()
- 			}'
- 		;;
- 	*)
--		_fail "_get_encryption_nonce() isn't implemented on $FSTYP"
-+		_fail "_get_encryption_file_nonce() isn't implemented on $FSTYP"
- 		;;
- 	esac
- }
- 
--# Require support for _get_encryption_nonce()
-+# Retrieve the encryption nonce used to encrypt the data of the given inode as
-+# a hex string.  The nonce was randomly generated by the filesystem and isn't
-+# exposed directly to userspace.  But it can be read using the filesystem's
-+# debugging tools.
-+_get_encryption_data_nonce()
-+{
-+	local device=$1
-+	local inode=$2
+diff --git a/tests/btrfs/613 b/tests/btrfs/613
+new file mode 100755
+index 00000000..93c209c4
+--- /dev/null
++++ b/tests/btrfs/613
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023 YOUR NAME HERE.  All Rights Reserved.
++#
++# FS QA Test 613
++#
++# Check if reflinking one encrypted file on btrfs succeeds.
++#
++. ./common/preamble
++_begin_fstest auto encrypt
 +
-+	case $FSTYP in
-+	ext4|f2fs)
-+		_get_encryption_file_nonce $device $inode
-+		;;
-+	*)
-+		_fail "_get_encryption_data_nonce() isn't implemented on $FSTYP"
-+		;;
-+	esac
-+}
++# Import common functions.
++. ./common/encrypt
++. ./common/filter
++. ./common/reflink
 +
-+# Require support for _get_encryption_*nonce()
- _require_get_encryption_nonce_support()
- {
--	echo "Checking for _get_encryption_nonce() support for $FSTYP" >> $seqres.full
-+	echo "Checking for _get_encryption_*nonce() support for $FSTYP" >> $seqres.full
- 	case $FSTYP in
- 	ext4)
- 		_require_command "$DEBUGFS_PROG" debugfs
-@@ -554,7 +573,7 @@ _require_get_encryption_nonce_support()
- 		# the test fail in that case, as it was an f2fs-tools bug...
- 		;;
- 	*)
--		_notrun "_get_encryption_nonce() isn't implemented on $FSTYP"
-+		_notrun "_get_encryption_*nonce() isn't implemented on $FSTYP"
- 		;;
- 	esac
- }
-@@ -760,7 +779,7 @@ _do_verify_ciphertext_for_encryption_policy()
- 	echo "Verifying encrypted file contents" >> $seqres.full
- 	for f in "${test_contents_files[@]}"; do
- 		read -r src inode blocklist <<< "$f"
--		nonce=$(_get_encryption_nonce $SCRATCH_DEV $inode)
-+		nonce=$(_get_encryption_data_nonce $SCRATCH_DEV $inode)
- 		_dump_ciphertext_blocks $SCRATCH_DEV $blocklist > $tmp.actual_contents
- 		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
- 			--file-nonce=$nonce --block-size=$blocksize \
-@@ -780,7 +799,7 @@ _do_verify_ciphertext_for_encryption_policy()
- 	echo "Verifying encrypted file names" >> $seqres.full
- 	for f in "${test_filenames_files[@]}"; do
- 		read -r name inode dir_inode padding <<< "$f"
--		nonce=$(_get_encryption_nonce $SCRATCH_DEV $dir_inode)
-+		nonce=$(_get_encryption_file_nonce $SCRATCH_DEV $dir_inode)
- 		_get_ciphertext_filename $SCRATCH_DEV $inode $dir_inode \
- 			> $tmp.actual_name
- 		echo -n "$name" | \
-diff --git a/tests/generic/613 b/tests/generic/613
-index 4cf5ccc6..47c60e9c 100755
---- a/tests/generic/613
-+++ b/tests/generic/613
-@@ -68,10 +68,10 @@ echo -e "\n# Getting encryption nonces from inodes"
- echo -n > $tmp.nonces_hex
- echo -n > $tmp.nonces_bin
- for inode in "${inodes[@]}"; do
--	nonce=$(_get_encryption_nonce $SCRATCH_DEV $inode)
-+	nonce=$(_get_encryption_data_nonce $SCRATCH_DEV $inode)
- 	if (( ${#nonce} != 32 )) || [ -n "$(echo "$nonce" | tr -d 0-9a-fA-F)" ]
- 	then
--		_fail "Expected nonce to be 16 bytes (32 hex characters), but got \"$nonce\""
-+		_fail "Expected nonce for inode $inode to be 16 bytes (32 hex characters), but got \"$nonce\""
- 	fi
- 	echo $nonce >> $tmp.nonces_hex
- 	echo -ne "$(echo $nonce | sed 's/[0-9a-fA-F]\{2\}/\\x\0/g')" \
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++
++_require_test
++_require_scratch
++_require_cp_reflink
++_require_scratch_encryption -v 2
++_require_command "$KEYCTL_PROG" keyctl
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++dir=$SCRATCH_MNT/dir
++mkdir $dir
++_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++echo "Creating and reflinking a file"
++$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/test > /dev/null
++sync
++cp --reflink=always $dir/test $dir/test2
++sync
++
++echo "Can't reflink encrypted and unencrypted"
++cp --reflink=always $dir/test $SCRATCH_MNT/fail |& _filter_scratch
++
++echo "Diffing the file and its copy"
++diff $dir/test $dir/test2
++
++echo "Verifying the files are reflinked"
++_verify_reflink $dir/test $dir/test2
++
++echo "Diffing the files after remount"
++_scratch_cycle_mount
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++diff $dir/test $dir/test2
++
++echo "Diffing the files after key remove"
++echo 2 > /proc/sys/vm/drop_caches
++_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
++diff $dir/test $dir/test2 |& _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/613.out b/tests/btrfs/613.out
+new file mode 100644
+index 00000000..4895d6dd
+--- /dev/null
++++ b/tests/btrfs/613.out
+@@ -0,0 +1,13 @@
++QA output created by 613
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++Creating and reflinking a file
++Can't reflink encrypted and unencrypted
++cp: failed to clone 'SCRATCH_MNT/fail' from 'SCRATCH_MNT/dir/test': Invalid argument
++Diffing the file and its copy
++Verifying the files are reflinked
++Diffing the files after remount
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++Diffing the files after key remove
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++diff: SCRATCH_MNT/dir/test: No such file or directory
++diff: SCRATCH_MNT/dir/test2: No such file or directory
 -- 
 2.40.1
 
