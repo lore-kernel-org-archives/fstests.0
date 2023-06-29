@@ -2,84 +2,74 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F619C001B0
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6281C001B3
 	for <linux-fstests@archiver.kernel.org>; Thu, 29 Jun 2023 22:25:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229910AbjF2WZg (ORCPT
+        id S229646AbjF2WZh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Jun 2023 18:25:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40384 "EHLO
+        Thu, 29 Jun 2023 18:25:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229646AbjF2WZf (ORCPT
+        with ESMTP id S229512AbjF2WZf (ORCPT
         <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2023 18:25:35 -0400
-X-Greylist: delayed 479 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 29 Jun 2023 15:25:33 PDT
-Received: from box.fidei.email (box.fidei.email [71.19.144.250])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F30EA30F6
+Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F31EB30F7
         for <fstests@vger.kernel.org>; Thu, 29 Jun 2023 15:25:33 -0700 (PDT)
 Received: from authenticated-user (box.fidei.email [71.19.144.250])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
         (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id AE32980702;
-        Thu, 29 Jun 2023 18:17:31 -0400 (EDT)
+        by box.fidei.email (Postfix) with ESMTPSA id 418048082B;
+        Thu, 29 Jun 2023 18:17:43 -0400 (EDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1688077052; bh=tSjVvle2uSxcOZ/ckvaZRLq6Jdqi0bIN8G3EChW8wBU=;
-        h=From:To:Cc:Subject:Date:From;
-        b=sEJkDDgR2OCWn0nd0/afpZx/xb8Yo/cGdaIZHU7qg19lsZ+eiFuTpwZwo4rBH1m2h
-         SCabloxgV2GaU6L23WzFX4/qcXSMsthivJGxwH1/aliL+1cNwLoEwcCFulbDegJYCF
-         RLqWLWUTHcQFOYMPl03VTGkFxurdIGIRWW5/7uPej8iDzbcmj1s82n835TPnhrOokW
-         Tfvzas9n11HjFapO3d8/NMPhCa5vUAakCeZ6hTeVlR/Tch1nIUWExIzsNYOYhqRo3m
-         GWCudfjkEZBgtaTxXsRe8j0si5tn5UFrs36fpK6AzxzwH2e7aJXJJxJoD10hET4K5C
-         p0Y2ifVObxE/Q==
+        t=1688077063; bh=KsB5sQbySYMhE+PMRxhIhPEsjLq+a0xS6NkFqRAT2JM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=Gy5MvQKnjArRiu9JZMSBgQ4sQMwGCZFCPvgKafVg/j4tHWSO0NsHfqWmBaZ3g7vyW
+         nmsrXQFocRQuxsc0HACBkI3Jex5sr1r6p0UIocF7tVI6qc6tRGAUjOfSH9OkRN67eS
+         6WtfKKB7DizkqdJEY+ZLLR4rntD/x8W8/OdBVfN473YfVpVUWvUFoObtinm/5NqOkW
+         hLutD4sWe9P8+PiOJl0MenXVn2KImgLo+JEONzHHKX46KJ1ALtxrdhv3R74f0Esvei
+         ahRajI1yBzjeNwyw4EwRDfWmnuvYRyqD8mFZU3G0hBYJbRAWXIOa53TWQw97whqAPY
+         61aDrhMsuZ5Eg==
 From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
 To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
         kernel-team@meta.com, ebiggers@google.com, anand.jain@oracle.com,
         fdmanana@suse.com, linux-fscrypt@vger.kernel.org,
         fsverity@lists.linux.dev, zlang@kernel.org
 Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [RFC PATCH 0/8] fstests: add btrfs encryption testing
-Date:   Thu, 29 Jun 2023 18:17:15 -0400
-Message-Id: <cover.1688076612.git.sweettea-kernel@dorminy.me>
+Subject: [RFC PATCH 7/8] common/verity: explicitly don't allow btrfs encryption
+Date:   Thu, 29 Jun 2023 18:17:22 -0400
+Message-Id: <ea067593c9bc754c6194607ad9ef5b1ef37afd2d.1688076612.git.sweettea-kernel@dorminy.me>
+In-Reply-To: <cover.1688076612.git.sweettea-kernel@dorminy.me>
+References: <cover.1688076612.git.sweettea-kernel@dorminy.me>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a preliminary fstests side of the btrfs encryption feature;
-more tests are needed, but this gets the existing encryption tests
-working with btrfs. This requires the progs and the kernel changes: [1]
-[2].
+Currently btrfs encryption doesn't support verity, but it is planned to
+one day. To be explicit about the lack of support, add a custom error
+message to the combination.
 
-Marked as RFC because they're not ready to merge until all its
-dependencies finish landing.
+Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+---
+ common/verity | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-[1] https://lore.kernel.org/linux-btrfs/cover.1688068420.git.sweettea-kernel@dorminy.me/T/#t
-[2] https://lore.kernel.org/linux-btrfs/cover.1687988380.git.sweettea-kernel@dorminy.me/T/#t
-
-Sweet Tea Dorminy (8):
-  common/encrypt: separate data and inode nonces
-  common/encrypt: add btrfs to get_encryption_*nonce
-  common/encrypt: add btrfs to get_ciphertext_filename
-  common/encrypt: enable making a encrypted btrfs filesystem
-  generic/613: write some actual data for btrfs
-  tests: adjust encryption tests for extent encryption
-  common/verity: explicitly don't allow btrfs encryption
-  btrfs: add simple test of reflink of encrypted data
-
- common/encrypt      | 86 +++++++++++++++++++++++++++++++++++++++++----
- common/verity       |  4 +++
- tests/btrfs/613     | 62 ++++++++++++++++++++++++++++++++
- tests/btrfs/613.out | 13 +++++++
- tests/generic/429   |  6 ++++
- tests/generic/580   |  4 +++
- tests/generic/595   |  4 +++
- tests/generic/613   | 12 ++++---
- 8 files changed, 180 insertions(+), 11 deletions(-)
- create mode 100755 tests/btrfs/613
- create mode 100644 tests/btrfs/613.out
-
-
-base-commit: 87f90a2dae7a4adb7a0a314e27abae9aa1de78fb
+diff --git a/common/verity b/common/verity
+index 77c257d3..5002dd71 100644
+--- a/common/verity
++++ b/common/verity
+@@ -218,6 +218,10 @@ _scratch_mkfs_encrypted_verity()
+ 		# features with -O.  Instead -O must be supplied multiple times.
+ 		_scratch_mkfs -O encrypt -O verity
+ 		;;
++	btrfs)
++		# currently verity + encryption is not supported
++		_notrun "btrfs doesn't currently support verity + encryption"
++		;;
+ 	*)
+ 		_notrun "$FSTYP not supported in _scratch_mkfs_encrypted_verity"
+ 		;;
 -- 
 2.40.1
 
