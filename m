@@ -2,91 +2,195 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4D55EB64D9
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Jun 2023 22:25:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1C13EB64D9
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Jun 2023 01:36:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230229AbjF2WZj (ORCPT
+        id S231633AbjF3Bgg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Jun 2023 18:25:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40406 "EHLO
+        Thu, 29 Jun 2023 21:36:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44132 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230455AbjF2WZg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2023 18:25:36 -0400
-Received: from box.fidei.email (box.fidei.email [71.19.144.250])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A5F53588
-        for <fstests@vger.kernel.org>; Thu, 29 Jun 2023 15:25:35 -0700 (PDT)
-Received: from authenticated-user (box.fidei.email [71.19.144.250])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        with ESMTP id S229910AbjF3Bgf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2023 21:36:35 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F1612974;
+        Thu, 29 Jun 2023 18:36:33 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id 85C7080778;
-        Thu, 29 Jun 2023 18:17:36 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1688077057; bh=i0KcUcAyrGMIC1rkAvJHWWPwsKlFh9C7E3KShPZecpQ=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=FmKY/PEVkr8Lggi8AWIn5/LeqkL7CmYkv/qtytB645XYxd279Ow1Pr0ejCMk/Nr2x
-         CMHkVuqCIgdlC3C3lEwYfxpJG9lOnfPJkT8WtT/S83m9qDwbQejl97T/US/UNhoXZu
-         oZApUSt5cvQIujFC1ALCmOqDaie6pF79TWvAfDFFACuk5VgOxD4M1Xi7lNYk3k3QQH
-         XReu0Hw7hinuv1nN3fSVOXs6ivwUFohzdvYAoGysgGpXwsaBhtyICM95NEsAHtuW7k
-         GiybeQBSGMY9QheNzgGlNCMbNPIvUYFB4ocOPB4+imA7s4gGbEHS8UQANqWBRTY41z
-         zgyaLsVPypm2Q==
-From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        kernel-team@meta.com, ebiggers@google.com, anand.jain@oracle.com,
-        fdmanana@suse.com, linux-fscrypt@vger.kernel.org,
-        fsverity@lists.linux.dev, zlang@kernel.org
-Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [RFC PATCH 3/8] common/encrypt: add btrfs to get_ciphertext_filename
-Date:   Thu, 29 Jun 2023 18:17:18 -0400
-Message-Id: <023efcfc72f3ebe66ed66513529c207334ab9eea.1688076612.git.sweettea-kernel@dorminy.me>
-In-Reply-To: <cover.1688076612.git.sweettea-kernel@dorminy.me>
-References: <cover.1688076612.git.sweettea-kernel@dorminy.me>
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 113042184D;
+        Fri, 30 Jun 2023 01:36:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1688088992; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=NasBFd233rL1f8aXcJhqQNFQEcZ+GdRjh/S0vo4oVVQ=;
+        b=OkvehaNCyO4NrFuTosKWwr1VHDfw7Tyjj1ceUbv5376wcCE5HLOK4Q/Pe3jOOotLMonCLv
+        noOUYYFIBb8/WaEZSKYMjgM+dLalXvnFr865xNx9VXTOAlUx4/Q6WhBGBi4CtHshAYQ5D3
+        Qm3ILJTo6vLNyIGxSAmVSZE8/wrbyR0=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 5152B138F8;
+        Fri, 30 Jun 2023 01:36:31 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id 49Q9CZ8xnmQ/MAAAMHmgww
+        (envelope-from <wqu@suse.com>); Fri, 30 Jun 2023 01:36:31 +0000
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] btrfs: add a test case to make sure scrub can repair parity corruption
+Date:   Fri, 30 Jun 2023 09:36:14 +0800
+Message-ID: <20230630013614.56667-1-wqu@suse.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add the relevant call to get an encrypted filename from btrfs.
+There is a kernel regression caused by commit 75b470332965 ("btrfs:
+raid56: migrate recovery and scrub recovery path to use error_bitmap"),
+which leads to scrub not repairing corrupted parity stripes.
 
-Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+So here we add a test case to verify the P/Q stripe scrub behavior by:
+
+- Create a RAID5 or RAID6 btrfs with minimal amount of devices
+  This means 2 devices for RAID5, and 3 devices for RAID6.
+  This would result the parity stripe to be a mirror of the only data
+  stripe.
+
+  And since we have control of the content of data stripes, the content
+  of the P stripe is also fixed.
+
+- Create an 64K file
+  The file would cover one data stripe.
+
+- Corrupt the P stripe
+
+- Scrub the fs
+  If scrub is working, the P stripe would be repaired.
+
+  Unfortunately scrub can not report any P/Q corruption, limited by its
+  reporting structure.
+  So we can not use the return value of scrub to determine if we
+  repaired anything.
+
+- Verify the content of the P stripe
+
+- Use "btrfs check --check-data-csum" to double check
+
+By above steps, we can verify if the P stripe is properly fixed.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- common/encrypt | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ tests/btrfs/294     | 86 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/294.out |  2 ++
+ 2 files changed, 88 insertions(+)
+ create mode 100755 tests/btrfs/294
+ create mode 100644 tests/btrfs/294.out
 
-diff --git a/common/encrypt b/common/encrypt
-index fc1c8cc7..2c1925da 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -618,6 +618,19 @@ _get_ciphertext_filename()
- 	local dir_inode=$3
- 
- 	case $FSTYP in
-+	btrfs)
-+		# Extract the filename from the inode_ref object, similar to:
-+		# item 24 key (259 INODE_REF 257) itemoff 14826 itemsize 26
-+		# 	index 3 namelen 16 name: J\xf7\x15tD\x8eL\xae/\x98\x9f\x09\xc1\xb6\x09>
-+		#
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 1 "key ($inode INODE_REF " | tail -n 1 | \
-+			perl -ne '
-+				s/.*?name: //;
-+				chomp;
-+				s/\\x([[:xdigit:]]{2})/chr hex $1/eg;
-+				print;'
-+		;;
- 	ext4)
- 		# Extract the filename from the debugfs output line like:
- 		#
-@@ -715,6 +728,9 @@ _require_get_ciphertext_filename_support()
- 			_notrun "dump.f2fs (f2fs-tools) is too old; doesn't support showing unambiguous on-disk filenames"
- 		fi
- 		;;
-+	btrfs)
-+		_require_command "$BTRFS_UTIL_PROG" btrfs
-+		;;
- 	*)
- 		_notrun "_get_ciphertext_filename() isn't implemented on $FSTYP"
- 		;;
+diff --git a/tests/btrfs/294 b/tests/btrfs/294
+new file mode 100755
+index 00000000..97b85988
+--- /dev/null
++++ b/tests/btrfs/294
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 294
++#
++# Make sure btrfs scrub can fix parity stripe corruption
++#
++. ./common/preamble
++_begin_fstest auto quick raid scrub
++
++. ./common/filter
++
++_supported_fs btrfs
++_require_odirect
++_require_non_zoned_device "${SCRATCH_DEV}"
++_require_scratch_dev_pool 3
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: raid56: always verify the P/Q contents for scrub"
++
++workload()
++{
++	local profile=$1
++	local nr_devs=$2
++
++	echo "=== Testing $nr_devs devices $profile ===" >> $seqres.full
++	_scratch_dev_pool_get $nr_devs
++
++	_scratch_pool_mkfs -d $profile -m single >> $seqres.full 2>&1
++	# Disable space cache to prevent v1 space cache affecting
++	# the result.
++	_scratch_mount -o nospace_cache
++
++	# Create one 64K extent which would cover one data stripe.
++	$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 64K 0 64K" \
++		"$SCRATCH_MNT/foobar" > /dev/null
++	sync
++
++	# Corrupt the P/Q stripe
++	local logical=$(_btrfs_get_first_logical $SCRATCH_MNT/foobar)
++
++	# The 2nd copy is pointed to P stripe directly.
++	physical_p=$(_btrfs_get_physical ${logical} 2)
++	devpath_p=$(_btrfs_get_device_path ${logical} 2)
++
++	_scratch_unmount
++
++	echo "Corrupt stripe P at devpath $devpath_p physical $physical_p" \
++		>> $seqres.full
++	$XFS_IO_PROG -d -c "pwrite -S 0xff -b 64K $physical_p 64K" $devpath_p \
++		> /dev/null
++
++	# Do a scrub to try repair the P stripe.
++	_scratch_mount -o nospace_cache
++	$BTRFS_UTIL_PROG scrub start -BdR $SCRATCH_MNT >> $seqres.full 2>&1
++	_scratch_unmount
++
++	# Verify the repaired content directly
++	local output=$($XFS_IO_PROG -c "pread -qv $physical_p 16" $devpath_p | _filter_xfs_io_offset)
++	local expect="XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................"
++
++	echo "The first 16 bytes of parity stripe after scrub:" >> $seqres.full
++	echo $output >> $seqres.full
++	
++	if [ "$output" != "$expect" ]; then
++		echo "Unexpected parity content"
++		echo "has:"
++		echo "$output"
++		echo "expect"
++		echo "$expect"
++	fi
++
++	# Last safenet, let btrfs check --check-data-csum to do an offline scrub.
++	$BTRFS_UTIL_PROG check --check-data-csum $SCRATCH_DEV >> $seqres.full 2>&1
++	if [ $? -ne 0 ]; then
++		echo "Error detected after the scrub"
++	fi
++	_scratch_dev_pool_put
++}
++
++workload raid5 2
++workload raid6 3
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/294.out b/tests/btrfs/294.out
+new file mode 100644
+index 00000000..c09531de
+--- /dev/null
++++ b/tests/btrfs/294.out
+@@ -0,0 +1,2 @@
++QA output created by 294
++Silence is golden
 -- 
-2.40.1
+2.39.0
 
