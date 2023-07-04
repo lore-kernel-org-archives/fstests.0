@@ -2,66 +2,44 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82EEAEB64D9
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 Jul 2023 14:24:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 366B2EB64DA
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Jul 2023 15:52:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231513AbjGDOYU (ORCPT
+        id S229955AbjGDPwL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Jul 2023 10:24:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48140 "EHLO
+        Tue, 4 Jul 2023 11:52:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230048AbjGDOYT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2023 10:24:19 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D141AE47
-        for <fstests@vger.kernel.org>; Tue,  4 Jul 2023 07:23:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1688480616;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=57AtHpZhcPpEHLsInIfUqM25aW9rcqFnYP6msW9agQ0=;
-        b=OdkbNRNDSCRJbUHqufvfXrkzZV6eYI770RqnqIXtjiUqhhH9g3vtU1tU1tM2J1GqMyHxz2
-        e9s4elg+SN5Et5JvsH/KAKZDqOkf6fku9sz1Yiaw+BawDyyADIopMlVmn2WZQMJ9boYb49
-        UaQTHz4vXon/17NJ9EcHvM4sONcGFTQ=
-Received: from mail-ua1-f71.google.com (mail-ua1-f71.google.com
- [209.85.222.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-655-BzmK6uiSOaSVn1sLtC2GvA-1; Tue, 04 Jul 2023 10:23:34 -0400
-X-MC-Unique: BzmK6uiSOaSVn1sLtC2GvA-1
-Received: by mail-ua1-f71.google.com with SMTP id a1e0cc1a2514c-7940ffbfc8fso868322241.0
-        for <fstests@vger.kernel.org>; Tue, 04 Jul 2023 07:23:34 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1688480614; x=1691072614;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=57AtHpZhcPpEHLsInIfUqM25aW9rcqFnYP6msW9agQ0=;
-        b=WibrsbH2KAwEvF1coLcK+OFNDauYeskH9FqKVxKq9NSBuLZ6ZhDh7WvQXWnuFgm7JG
-         0ZA37MACl3jTnmC5K9h6xqB9RTEmoTSiqqvdZoAicdFCYN5cmf6qexT8Vb+JafqqfLZT
-         9PKpEM3VLQ5ns+pEubbquTFopcHVeHMw8pzU5xGiuWeowfUUko8/PDXvEcZSj5/barbV
-         gCJWpfRFybfH6+HBzgBw68zDz1i+gGqy7ZtskEyINPVQwyl3QOb6E+9vfMl9u4g1vyW2
-         8120sFowNJSLmZcPWgH0PhOFV/F4cQx3N7uKC7/Rah+SRI2YzZAUfBAt3tBZ8qE/j8YF
-         49sw==
-X-Gm-Message-State: ABy/qLasd3LZZTjAzDTriAYEAQj+QPaO24cX2QvBGB91Yy8VQRllvXXj
-        GGOvjVk1Y8NxWcco2uownDo+o5o+3SiFnn8QUaVln1TzpLGWeFU4Nr7tQII/YVVqLiB4CLQGAFl
-        uLutUzIp8k+rzcb61
-X-Received: by 2002:a67:fc19:0:b0:443:5927:d41b with SMTP id o25-20020a67fc19000000b004435927d41bmr6292385vsq.31.1688480614158;
-        Tue, 04 Jul 2023 07:23:34 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlFi7K6KdJZH2Fogg+A4zdTj9t10jEJx5femfLaZvfwZ3GO87oJ8A4Oinbz+v+OGm1najWGnMA==
-X-Received: by 2002:a67:fc19:0:b0:443:5927:d41b with SMTP id o25-20020a67fc19000000b004435927d41bmr6292376vsq.31.1688480613925;
-        Tue, 04 Jul 2023 07:23:33 -0700 (PDT)
-Received: from aalbersh.remote.csb ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id z26-20020ac83e1a000000b003f7a54fa72fsm1496655qtf.0.2023.07.04.07.23.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Jul 2023 07:23:33 -0700 (PDT)
-Date:   Tue, 4 Jul 2023 16:23:30 +0200
-From:   Andrey Albershteyn <aalbersh@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S231417AbjGDPwK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2023 11:52:10 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E87F6B2;
+        Tue,  4 Jul 2023 08:52:08 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7EBD66124D;
+        Tue,  4 Jul 2023 15:52:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D415CC433C7;
+        Tue,  4 Jul 2023 15:52:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1688485927;
+        bh=coDj5gZ453d+E9AncYL4hjykw36kfCVGmuQAdS18LO8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=FuTybsZCfZr0H8Iep+TsxWxMZFZk1dOLPxuaaT4sput9JmWdjQHCyq7GBtNOHBGiL
+         fDXwuokSyFCHrmMSfeNw8tTbXZ77DB/ExVAqUSMrlZs9c+ZP1mmcKKAA8DVk/gPpWv
+         WiG3aJdS4moew6Z1Ql/ivHZGBdGhSyNzPZziucoWXoFOHSzIK/WEtcd5mt39kfxaTr
+         5hodS1hhX8/kJ1e63FwmtdFGMSf1uwGa0pKM4QcNDouwqG8S+en8BG9zNbp8xRu3dd
+         D8eouFrPenVu0/3i0f7TK1GEokL7PC6Qrh5Tb6ojOyLWkrRI8re3LYCGViLpr2fhNl
+         b36IyVtfH3dmg==
+Date:   Tue, 4 Jul 2023 08:52:07 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Andrey Albershteyn <aalbersh@redhat.com>
 Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org, guan@eryu.me
 Subject: Re: [PATCH 5/5] xfs: test growfs of the realtime device
-Message-ID: <20230704142330.7svxnzrdgdys2x5x@aalbersh.remote.csb>
+Message-ID: <20230704155207.GN11441@frogsfrogsfrogs>
 References: <168840381298.1317961.1436890061506567407.stgit@frogsfrogsfrogs>
  <168840384128.1317961.1554188648447496379.stgit@frogsfrogsfrogs>
  <20230704140357.tg2yxfknkzniotve@aalbersh.remote.csb>
@@ -73,8 +51,118 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-oh those are from 041, haven't noticed
+On Tue, Jul 04, 2023 at 04:03:57PM +0200, Andrey Albershteyn wrote:
+> On 2023-07-03 10:04:01, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Create a new test to make sure that growfs on the realtime device works
+> > without corrupting anything.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/xfs/934     |   79 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/934.out |   19 +++++++++++++
+> >  2 files changed, 98 insertions(+)
+> >  create mode 100755 tests/xfs/934
+> >  create mode 100644 tests/xfs/934.out
+> > 
+> > 
+> > diff --git a/tests/xfs/934 b/tests/xfs/934
+> > new file mode 100755
+> > index 0000000000..f2db4050a7
+> > --- /dev/null
+> > +++ b/tests/xfs/934
+> > @@ -0,0 +1,79 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
+> 
+> Oracle?
 
--- 
-- Andrey
+Eh, this is really just a tweak of xfs/041 so I retained the old
+copyright.
 
+> > +#
+> > +# FS QA Test No. 934
+> > +#
+> > +# growfs QA tests - repeatedly fill/grow the rt volume of the filesystem check
+> > +# the filesystem contents after each operation.  This is the rt equivalent of
+> > +# xfs/041.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest growfs ioctl auto
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	_scratch_unmount
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +
+> > +_require_scratch
+> > +_require_realtime
+> > +_require_no_large_scratch_dev
+> > +_scratch_unmount 2>/dev/null
+> > +
+> > +_fill()
+> > +{
+> > +    if [ $# -ne 1 ]; then echo "Usage: _fill \"path\"" 1>&2 ; exit 1; fi
+> 
+> Is this needed for something?
+
+...and all the other weird bits are copied verbatim.
+
+Thanks for reviewing!
+
+--D
+
+> > +    _do "Fill filesystem" \
+> > +	"$here/src/fill2fs --verbose --dir=$1 --seed=0 --filesize=65536 --stddev=32768 --list=- >>$tmp.manifest"
+> > +}
+> > +
+> > +_do_die_on_error=message_only
+> > +rtsize=32
+> > +echo -n "Make $rtsize megabyte rt filesystem on SCRATCH_DEV and mount... "
+> > +_scratch_mkfs_xfs -rsize=${rtsize}m | _filter_mkfs 2> "$tmp.mkfs" >> $seqres.full
+> > +test "${PIPESTATUS[0]}" -eq 0 || _fail "mkfs failed"
+> > +
+> > +. $tmp.mkfs
+> > +onemeginblocks=`expr 1048576 / $dbsize`
+> > +_scratch_mount
+> > +
+> > +# We're growing the realtime device, so force new file creation there
+> > +_xfs_force_bdev realtime $SCRATCH_MNT
+> > +
+> > +echo "done"
+> > +
+> > +# full allocation group -> partial; partial -> expand partial + new partial;
+> > +# partial -> expand partial; partial -> full
+> > +# cycle through 33m -> 67m -> 75m -> 96m
+> > +for size in 33 67 75 96
+> > +do
+> > +    grow_size=`expr $size \* $onemeginblocks`
+> > +    _fill $SCRATCH_MNT/fill_$size
+> > +    _do "Grow filesystem to ${size}m" "xfs_growfs -R $grow_size $SCRATCH_MNT"
+> > +    echo -n "Flush filesystem... "
+> > +    _do "_scratch_unmount"
+> > +    _do "_try_scratch_mount"
+> > +    echo "done"
+> > +    echo -n "Check files... "
+> > +    if ! _do "$here/src/fill2fs_check $tmp.manifest"; then
+> > +      echo "fail (see $seqres.full)"
+> 
+> I think "fail" is already printed by _do
+> 
+> These are nitpicks, anyway looks good to me:
+> Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+> 
+> -- 
+> - Andrey
+> 
