@@ -2,167 +2,167 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 366B2EB64DA
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 Jul 2023 15:52:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8825EB64D9
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Jul 2023 23:51:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229955AbjGDPwL (ORCPT
+        id S231492AbjGDXv2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Jul 2023 11:52:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53366 "EHLO
+        Tue, 4 Jul 2023 19:51:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231417AbjGDPwK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2023 11:52:10 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E87F6B2;
-        Tue,  4 Jul 2023 08:52:08 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7EBD66124D;
-        Tue,  4 Jul 2023 15:52:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D415CC433C7;
-        Tue,  4 Jul 2023 15:52:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1688485927;
-        bh=coDj5gZ453d+E9AncYL4hjykw36kfCVGmuQAdS18LO8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=FuTybsZCfZr0H8Iep+TsxWxMZFZk1dOLPxuaaT4sput9JmWdjQHCyq7GBtNOHBGiL
-         fDXwuokSyFCHrmMSfeNw8tTbXZ77DB/ExVAqUSMrlZs9c+ZP1mmcKKAA8DVk/gPpWv
-         WiG3aJdS4moew6Z1Ql/ivHZGBdGhSyNzPZziucoWXoFOHSzIK/WEtcd5mt39kfxaTr
-         5hodS1hhX8/kJ1e63FwmtdFGMSf1uwGa0pKM4QcNDouwqG8S+en8BG9zNbp8xRu3dd
-         D8eouFrPenVu0/3i0f7TK1GEokL7PC6Qrh5Tb6ojOyLWkrRI8re3LYCGViLpr2fhNl
-         b36IyVtfH3dmg==
-Date:   Tue, 4 Jul 2023 08:52:07 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Andrey Albershteyn <aalbersh@redhat.com>
-Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 5/5] xfs: test growfs of the realtime device
-Message-ID: <20230704155207.GN11441@frogsfrogsfrogs>
-References: <168840381298.1317961.1436890061506567407.stgit@frogsfrogsfrogs>
- <168840384128.1317961.1554188648447496379.stgit@frogsfrogsfrogs>
- <20230704140357.tg2yxfknkzniotve@aalbersh.remote.csb>
+        with ESMTP id S229671AbjGDXv1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2023 19:51:27 -0400
+Received: from out162-62-58-211.mail.qq.com (out162-62-58-211.mail.qq.com [162.62.58.211])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CCEE187
+        for <fstests@vger.kernel.org>; Tue,  4 Jul 2023 16:51:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foxmail.com;
+        s=s201512; t=1688514680;
+        bh=KoRKg+TVRsQ3WKgtc8CcjtuWUIa5XhrtI4W7InydB6M=;
+        h=From:To:Cc:Subject:Date;
+        b=Nwjre8+EgvEFmq0kRr3Vc3OEncByopXFY+fouQuDqMPo7MhXoeMRXF3jzXiUlaERp
+         RHL5ykNYj6miu/DndSPO5/OVTOnY03AKqOiRp+zNV/zRljmCVyUGmBN74zhsBRaSV3
+         EbQYQl7GHhNyaFO8op+y1vU2VWoBkhfb9jZTtBOE=
+Received: from LAPTOP-NG0NVCKT.localdomain ([210.22.74.199])
+        by newxmesmtplogicsvrszc5-0.qq.com (NewEsmtp) with SMTP
+        id CD227E6D; Wed, 05 Jul 2023 07:51:18 +0800
+X-QQ-mid: xmsmtpt1688514678tunx7vhnv
+Message-ID: <tencent_BAC515047634B24F4B5D5052B5FCD6D23B09@qq.com>
+X-QQ-XMAILINFO: MmuCfgcSBfHxJ1oUmYyx5Cq6RCDeLdVUL69LgCqtRyGUYQk8nRCnQVrQmCPxCG
+         Vq0QJ7zoPMc7LOH1Tcu/MZ2HPZf6KiRTgQtprjtfw9SwMhBcbKymRZ1dQ5JSOy61e2SDQ+MLtfcM
+         dsF2FeljsO6Nym8WLntMUXf2NpO3n+mEYHOBfpIzbNzvktm3QY5nPOp/+ELRKcfMpWYKnpLvS+8S
+         qGI3kI+qK2otnhB9CpjPnyFEyrop4xyF7ZiViGJ2mJyCeXG3da59ju3710nWErPcguKzTLAR9s+2
+         a/w/egXjI/k8LNYW0dfHmeazpW6PuiMROr7CU7cusVrVOzAuY3UoQL4vGBMjtbguI4wMBfbdlMnN
+         HtqG282R6aObpuw1AdHHeMTiIzlgXmpdAqRs7OzIGsC5ocOKcCXLStIOxvyR+n/ZzaDt+o/fxpY+
+         Q2+mRGW/xTYGU7NUMU362c/BBxW6kg37V1aXS3RyEIS9VOMwU0R0O0lXLODkVkIxcvQaNdXPMifH
+         MG8kikKyukl3lc2Q3nk5basYLnJhor7UuKVxunQoAp4AFqOZtvDLhaguaqZl5BgYnYBmzOZKGGyi
+         1tSmqNE++YNw1T7EzTs6a0XFxmlGzm3mNb0wdLnqUIYLtFfJgGplnXt7gFNyf0KrU5+BNbRCs1Lt
+         J/I/qQjx9dgG774mxZ4M7snslcytgxktH4nK0rySGUwQOTIedb+tErCPvkc2QBfdp47a3wb1IgE5
+         qC9Nu59J27Zp2E2E2HE4GLqCYWu1yJwZPJxELPX44ndnxseepSuentrHS5HCOlUk+ZRHglwldaH7
+         CN2FJSTwLkwM+oAsZfuxKaPywjk1IP3QrDBgcnYnFXm5Xbv8MrMhqJuX3JHNZwSfxV73hkbMVAoH
+         p/+l5i+W/XiH1TPEswtCbZ6AyP8++cagKlFwwL622GvlkAFWPMgOga9SvKtg6VcVPObEsMjSJDEM
+         Eag2eTUSyQ1VvlXXNPCpKOY/oQG+iO/s9io54SJf3+xo0f1UbeeQ==
+X-QQ-XMRINFO: NyFYKkN4Ny6FSmKK/uo/jdU=
+From:   yuezhang.mo@foxmail.com
+To:     fstests@vger.kernel.org
+Cc:     zlang@redhat.com, billodo@redhat.com, djwong@kernel.org,
+        Yuezhang Mo <Yuezhang.Mo@foxmail.com>
+Subject: [PATCH v2] check: fix excluded tests are only expunged in the first iteration
+Date:   Wed,  5 Jul 2023 07:49:55 +0800
+X-OQ-MSGID: <20230704234954.123-1-yuezhang.mo@foxmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230704140357.tg2yxfknkzniotve@aalbersh.remote.csb>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 04, 2023 at 04:03:57PM +0200, Andrey Albershteyn wrote:
-> On 2023-07-03 10:04:01, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Create a new test to make sure that growfs on the realtime device works
-> > without corrupting anything.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/934     |   79 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/934.out |   19 +++++++++++++
-> >  2 files changed, 98 insertions(+)
-> >  create mode 100755 tests/xfs/934
-> >  create mode 100644 tests/xfs/934.out
-> > 
-> > 
-> > diff --git a/tests/xfs/934 b/tests/xfs/934
-> > new file mode 100755
-> > index 0000000000..f2db4050a7
-> > --- /dev/null
-> > +++ b/tests/xfs/934
-> > @@ -0,0 +1,79 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
-> 
-> Oracle?
+From: Yuezhang Mo <Yuezhang.Mo@foxmail.com>
 
-Eh, this is really just a tweak of xfs/041 so I retained the old
-copyright.
+If iterating more than once and excluding some tests, the
+excluded tests are expunged in the first iteration, but run in
+subsequent iterations. This is not expected.
 
-> > +#
-> > +# FS QA Test No. 934
-> > +#
-> > +# growfs QA tests - repeatedly fill/grow the rt volume of the filesystem check
-> > +# the filesystem contents after each operation.  This is the rt equivalent of
-> > +# xfs/041.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest growfs ioctl auto
-> > +
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	_scratch_unmount
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +
-> > +_require_scratch
-> > +_require_realtime
-> > +_require_no_large_scratch_dev
-> > +_scratch_unmount 2>/dev/null
-> > +
-> > +_fill()
-> > +{
-> > +    if [ $# -ne 1 ]; then echo "Usage: _fill \"path\"" 1>&2 ; exit 1; fi
-> 
-> Is this needed for something?
+The problem was caused by the temporary file saving the excluded
+tests being deleted by `rm -f $tmp.*` in _wrapup() at the end of
+the first iteration.
 
-...and all the other weird bits are copied verbatim.
+This commit saves the excluded tests into a variable instead of a
+temporary file.
 
-Thanks for reviewing!
+Signed-off-by: Yuezhang Mo <Yuezhang.Mo@foxmail.com>
+---
+ check | 30 ++++++++++++++++--------------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
 
---D
+diff --git a/check b/check
+index e36978c1..cb4b23bf 100755
+--- a/check
++++ b/check
+@@ -27,6 +27,7 @@ DUMP_OUTPUT=false
+ iterations=1
+ istop=false
+ loop_on_fail=0
++exclude_tests=()
+ 
+ # This is a global variable used to pass test failure text to reporting gunk
+ _err_msg=""
+@@ -46,7 +47,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
+ # by default don't output timestamps
+ timestamp=${TIMESTAMP:=false}
+ 
+-rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
++rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
+ 
+ SRC_GROUPS="generic shared"
+ export SRC_DIR="tests"
+@@ -302,13 +303,15 @@ while [ $# -gt 0 ]; do
+ 		;;
+ 	-e)
+ 		xfile=$2; shift ;
+-		echo "$xfile" | tr ', ' '\n\n' >> $tmp.xlist
++		readarray -t -O "${#exclude_tests[@]}" exclude_tests < \
++			<(echo "$xfile" | tr ', ' '\n\n')
+ 		;;
+ 
+ 	-E)	xfile=$2; shift ;
+ 		if [ -f $xfile ]; then
+-			sed "s/#.*$//" "$xfile" >> $tmp.xlist
+-	        fi
++			readarray -t -O ${#exclude_tests[@]} exclude_tests < \
++				<(sed "s/#.*$//" $xfile)
++		fi
+ 		;;
+ 	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+ 	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
+@@ -383,7 +386,7 @@ if [ -n "$subdir_xfile" ]; then
+ 	for d in $SRC_GROUPS $FSTYP; do
+ 		[ -f $SRC_DIR/$d/$subdir_xfile ] || continue
+ 		for f in `sed "s/#.*$//" $SRC_DIR/$d/$subdir_xfile`; do
+-			echo $d/$f >> $tmp.xlist
++			exclude_tests+=($d/$f)
+ 		done
+ 	done
+ fi
+@@ -570,13 +573,14 @@ _check_filesystems()
+ _expunge_test()
+ {
+ 	local TEST_ID="$1"
+-	if [ -s $tmp.xlist ]; then
+-		if grep -q $TEST_ID $tmp.xlist; then
++
++	for f in "${exclude_tests[@]}"; do
++		if [ "${TEST_ID}" == "$f" ]; then
+ 			echo "       [expunged]"
+-			return 1
++			return 0
+ 		fi
+-	fi
+-	return 0
++	done
++	return 1
+ }
+ 
+ # retain files which would be overwritten in subsequent reruns of the same test
+@@ -878,8 +882,7 @@ function run_section()
+ 		echo -n "$seqnum"
+ 
+ 		if $showme; then
+-			_expunge_test $seqnum
+-			if [ $? -eq 1 ]; then
++			if _expunge_test $seqnum; then
+ 				tc_status="expunge"
+ 			else
+ 				echo
+@@ -902,8 +905,7 @@ function run_section()
+ 		rm -f $seqres.out.bad $seqres.hints
+ 
+ 		# check if we really should run it
+-		_expunge_test $seqnum
+-		if [ $? -eq 1 ]; then
++		if _expunge_test $seqnum; then
+ 			tc_status="expunge"
+ 			_stash_test_status "$seqnum" "$tc_status"
+ 			continue
+-- 
+2.25.1
 
-> > +    _do "Fill filesystem" \
-> > +	"$here/src/fill2fs --verbose --dir=$1 --seed=0 --filesize=65536 --stddev=32768 --list=- >>$tmp.manifest"
-> > +}
-> > +
-> > +_do_die_on_error=message_only
-> > +rtsize=32
-> > +echo -n "Make $rtsize megabyte rt filesystem on SCRATCH_DEV and mount... "
-> > +_scratch_mkfs_xfs -rsize=${rtsize}m | _filter_mkfs 2> "$tmp.mkfs" >> $seqres.full
-> > +test "${PIPESTATUS[0]}" -eq 0 || _fail "mkfs failed"
-> > +
-> > +. $tmp.mkfs
-> > +onemeginblocks=`expr 1048576 / $dbsize`
-> > +_scratch_mount
-> > +
-> > +# We're growing the realtime device, so force new file creation there
-> > +_xfs_force_bdev realtime $SCRATCH_MNT
-> > +
-> > +echo "done"
-> > +
-> > +# full allocation group -> partial; partial -> expand partial + new partial;
-> > +# partial -> expand partial; partial -> full
-> > +# cycle through 33m -> 67m -> 75m -> 96m
-> > +for size in 33 67 75 96
-> > +do
-> > +    grow_size=`expr $size \* $onemeginblocks`
-> > +    _fill $SCRATCH_MNT/fill_$size
-> > +    _do "Grow filesystem to ${size}m" "xfs_growfs -R $grow_size $SCRATCH_MNT"
-> > +    echo -n "Flush filesystem... "
-> > +    _do "_scratch_unmount"
-> > +    _do "_try_scratch_mount"
-> > +    echo "done"
-> > +    echo -n "Check files... "
-> > +    if ! _do "$here/src/fill2fs_check $tmp.manifest"; then
-> > +      echo "fail (see $seqres.full)"
-> 
-> I think "fail" is already printed by _do
-> 
-> These are nitpicks, anyway looks good to me:
-> Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
-> 
-> -- 
-> - Andrey
-> 
