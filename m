@@ -2,167 +2,121 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8825EB64D9
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 Jul 2023 23:51:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65928C001B0
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Jul 2023 06:38:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231492AbjGDXv2 (ORCPT
+        id S229635AbjGEGiE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Jul 2023 19:51:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56812 "EHLO
+        Wed, 5 Jul 2023 02:38:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229671AbjGDXv1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2023 19:51:27 -0400
-Received: from out162-62-58-211.mail.qq.com (out162-62-58-211.mail.qq.com [162.62.58.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CCEE187
-        for <fstests@vger.kernel.org>; Tue,  4 Jul 2023 16:51:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foxmail.com;
-        s=s201512; t=1688514680;
-        bh=KoRKg+TVRsQ3WKgtc8CcjtuWUIa5XhrtI4W7InydB6M=;
-        h=From:To:Cc:Subject:Date;
-        b=Nwjre8+EgvEFmq0kRr3Vc3OEncByopXFY+fouQuDqMPo7MhXoeMRXF3jzXiUlaERp
-         RHL5ykNYj6miu/DndSPO5/OVTOnY03AKqOiRp+zNV/zRljmCVyUGmBN74zhsBRaSV3
-         EbQYQl7GHhNyaFO8op+y1vU2VWoBkhfb9jZTtBOE=
-Received: from LAPTOP-NG0NVCKT.localdomain ([210.22.74.199])
-        by newxmesmtplogicsvrszc5-0.qq.com (NewEsmtp) with SMTP
-        id CD227E6D; Wed, 05 Jul 2023 07:51:18 +0800
-X-QQ-mid: xmsmtpt1688514678tunx7vhnv
-Message-ID: <tencent_BAC515047634B24F4B5D5052B5FCD6D23B09@qq.com>
-X-QQ-XMAILINFO: MmuCfgcSBfHxJ1oUmYyx5Cq6RCDeLdVUL69LgCqtRyGUYQk8nRCnQVrQmCPxCG
-         Vq0QJ7zoPMc7LOH1Tcu/MZ2HPZf6KiRTgQtprjtfw9SwMhBcbKymRZ1dQ5JSOy61e2SDQ+MLtfcM
-         dsF2FeljsO6Nym8WLntMUXf2NpO3n+mEYHOBfpIzbNzvktm3QY5nPOp/+ELRKcfMpWYKnpLvS+8S
-         qGI3kI+qK2otnhB9CpjPnyFEyrop4xyF7ZiViGJ2mJyCeXG3da59ju3710nWErPcguKzTLAR9s+2
-         a/w/egXjI/k8LNYW0dfHmeazpW6PuiMROr7CU7cusVrVOzAuY3UoQL4vGBMjtbguI4wMBfbdlMnN
-         HtqG282R6aObpuw1AdHHeMTiIzlgXmpdAqRs7OzIGsC5ocOKcCXLStIOxvyR+n/ZzaDt+o/fxpY+
-         Q2+mRGW/xTYGU7NUMU362c/BBxW6kg37V1aXS3RyEIS9VOMwU0R0O0lXLODkVkIxcvQaNdXPMifH
-         MG8kikKyukl3lc2Q3nk5basYLnJhor7UuKVxunQoAp4AFqOZtvDLhaguaqZl5BgYnYBmzOZKGGyi
-         1tSmqNE++YNw1T7EzTs6a0XFxmlGzm3mNb0wdLnqUIYLtFfJgGplnXt7gFNyf0KrU5+BNbRCs1Lt
-         J/I/qQjx9dgG774mxZ4M7snslcytgxktH4nK0rySGUwQOTIedb+tErCPvkc2QBfdp47a3wb1IgE5
-         qC9Nu59J27Zp2E2E2HE4GLqCYWu1yJwZPJxELPX44ndnxseepSuentrHS5HCOlUk+ZRHglwldaH7
-         CN2FJSTwLkwM+oAsZfuxKaPywjk1IP3QrDBgcnYnFXm5Xbv8MrMhqJuX3JHNZwSfxV73hkbMVAoH
-         p/+l5i+W/XiH1TPEswtCbZ6AyP8++cagKlFwwL622GvlkAFWPMgOga9SvKtg6VcVPObEsMjSJDEM
-         Eag2eTUSyQ1VvlXXNPCpKOY/oQG+iO/s9io54SJf3+xo0f1UbeeQ==
-X-QQ-XMRINFO: NyFYKkN4Ny6FSmKK/uo/jdU=
-From:   yuezhang.mo@foxmail.com
-To:     fstests@vger.kernel.org
-Cc:     zlang@redhat.com, billodo@redhat.com, djwong@kernel.org,
-        Yuezhang Mo <Yuezhang.Mo@foxmail.com>
-Subject: [PATCH v2] check: fix excluded tests are only expunged in the first iteration
-Date:   Wed,  5 Jul 2023 07:49:55 +0800
-X-OQ-MSGID: <20230704234954.123-1-yuezhang.mo@foxmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S231739AbjGEGiC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jul 2023 02:38:02 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41FF710FA
+        for <fstests@vger.kernel.org>; Tue,  4 Jul 2023 23:37:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1688539036;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=NUWX5UvhowWYsdPQKhRlSWjHJ9IgFtq6PuCnNgnxE/c=;
+        b=cIlv3FgXK1ulMblPaBCA4gq7SC50ubNe0RiqMOPhzKtCUhCluZQyETb9+LZtoTB+o39mna
+        fnqJbtPibNHBVJAfPH3MHYCqwoiSX8euLutLBqu3YRNABdy3bLX7jD6lD59GjlxZ+e6Qvq
+        q/ZHtcdMYFSIkbxNSjsk4/GN1UyOOHc=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-553-mqJ5u4mqNq6YpOd7ZOUuVQ-1; Wed, 05 Jul 2023 02:37:15 -0400
+X-MC-Unique: mqJ5u4mqNq6YpOd7ZOUuVQ-1
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-553d076dce5so5675351a12.3
+        for <fstests@vger.kernel.org>; Tue, 04 Jul 2023 23:37:15 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1688539034; x=1691131034;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=NUWX5UvhowWYsdPQKhRlSWjHJ9IgFtq6PuCnNgnxE/c=;
+        b=YPG2hMK51Ub5kzxwEkuCKQbK7XpNxE3AxpUL0CbvGrZryufWs6Bk29CWyoSiIbxsb+
+         /Pxv0+wX/bhehAfnYoJOSeGjFXg/FM+4JI+zRJlGVFqEk6ktcE944qntes9Nlvnn56JJ
+         FiQ5/M7jbsJ0ivX4cHB+ZjZkxInl+jh47bRN+gIyNmXr0eIqUD5etcbi1gSb8JxaO9ol
+         BkIoqI10ILJVxIe7+jE0Ll7qpe3dnPPVvuJOX//zoQkjkEo+/I5yA7I1WoEUi4afkBTt
+         SiZDkwreNooDpxY1Toe0Ck5DO2wYWTS83HGdqCZwqoYVHMccNKtftbiuny3LpUPGhWvn
+         0n7g==
+X-Gm-Message-State: ABy/qLY5TMis3UEhRiETuGrdCNReWvso5Cuvhf4dsx1F6kryscjt0lc0
+        VAZx7j+slyzr5C2PGiuFsqo58KQ+Nd9rbCICulvQTOTXFYC+xmlMNSMKmXJ1AOGRdzTb+sDkuDc
+        IGfUQB/oQ/DQgZYQGxlIrDOwXyPR/q84=
+X-Received: by 2002:a05:6a20:3955:b0:11f:b885:e83a with SMTP id r21-20020a056a20395500b0011fb885e83amr14819064pzg.57.1688539033981;
+        Tue, 04 Jul 2023 23:37:13 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlHtcHVO2xFemkdavNw1sqIuI05mR6jkvj+chy+9Ote8/pYCCNbPd+dkvSc7hMq1p/UWQ7RhJw==
+X-Received: by 2002:a05:6a20:3955:b0:11f:b885:e83a with SMTP id r21-20020a056a20395500b0011fb885e83amr14819055pzg.57.1688539033672;
+        Tue, 04 Jul 2023 23:37:13 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 12-20020a170902c10c00b001b694140d96sm9233434pli.170.2023.07.04.23.37.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Jul 2023 23:37:13 -0700 (PDT)
+Date:   Wed, 5 Jul 2023 14:37:09 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 3/5] xfs/439: amend test to work with new log geometry
+ validation
+Message-ID: <20230705063709.4grbfaznsddnxf4c@zlang-mailbox>
+References: <168840381298.1317961.1436890061506567407.stgit@frogsfrogsfrogs>
+ <168840383001.1317961.12926483978316384291.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <168840383001.1317961.12926483978316384291.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Yuezhang Mo <Yuezhang.Mo@foxmail.com>
+On Mon, Jul 03, 2023 at 10:03:50AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> An upcoming patch moves more log validation checks to the superblock
+> verifier, so update this test as needed.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/439 |    6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+> 
+> 
+> diff --git a/tests/xfs/439 b/tests/xfs/439
+> index b7929493d1..8c69ece655 100755
+> --- a/tests/xfs/439
+> +++ b/tests/xfs/439
+> @@ -21,7 +21,9 @@ _begin_fstest auto quick fuzzers log
+>  _supported_fs xfs
+>  _require_scratch_nocheck
+>  # We corrupt XFS on purpose, and check if assert failures would crash system.
+> -_require_no_xfs_bug_on_assert
+> +# This used to be _require_no_xfs_bug_on_assert, but now we've fixed the sb
+> +# verifier to reject this before xfs_log_mount gets to it:
+> +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: journal geometry is not properly bounds checked"
 
-If iterating more than once and excluding some tests, the
-excluded tests are expunged in the first iteration, but run in
-subsequent iterations. This is not expected.
+This case is a regression test case for:
+  9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
 
-The problem was caused by the temporary file saving the excluded
-tests being deleted by `rm -f $tmp.*` in _wrapup() at the end of
-the first iteration.
+So I think it's better to write this major commit at first, before recording the
+secondary one.
 
-This commit saves the excluded tests into a variable instead of a
-temporary file.
+>  
+>  rm -f "$seqres.full"
+>  
+> @@ -33,7 +35,7 @@ blksz=$(_scratch_xfs_get_sb_field blocksize)
+>  _scratch_xfs_set_sb_field logsunit $((blksz - 1)) >> $seqres.full 2>&1
+>  
+>  # Check if logsunit is set correctly
+> -lsunit=$(_scratch_xfs_get_sb_field logsunit)
+> +lsunit=$(_scratch_xfs_get_sb_field logsunit 2>/dev/null)
 
-Signed-off-by: Yuezhang Mo <Yuezhang.Mo@foxmail.com>
----
- check | 30 ++++++++++++++++--------------
- 1 file changed, 16 insertions(+), 14 deletions(-)
+What kind of error should be ignored at here?
 
-diff --git a/check b/check
-index e36978c1..cb4b23bf 100755
---- a/check
-+++ b/check
-@@ -27,6 +27,7 @@ DUMP_OUTPUT=false
- iterations=1
- istop=false
- loop_on_fail=0
-+exclude_tests=()
- 
- # This is a global variable used to pass test failure text to reporting gunk
- _err_msg=""
-@@ -46,7 +47,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
- # by default don't output timestamps
- timestamp=${TIMESTAMP:=false}
- 
--rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
-+rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
- 
- SRC_GROUPS="generic shared"
- export SRC_DIR="tests"
-@@ -302,13 +303,15 @@ while [ $# -gt 0 ]; do
- 		;;
- 	-e)
- 		xfile=$2; shift ;
--		echo "$xfile" | tr ', ' '\n\n' >> $tmp.xlist
-+		readarray -t -O "${#exclude_tests[@]}" exclude_tests < \
-+			<(echo "$xfile" | tr ', ' '\n\n')
- 		;;
- 
- 	-E)	xfile=$2; shift ;
- 		if [ -f $xfile ]; then
--			sed "s/#.*$//" "$xfile" >> $tmp.xlist
--	        fi
-+			readarray -t -O ${#exclude_tests[@]} exclude_tests < \
-+				<(sed "s/#.*$//" $xfile)
-+		fi
- 		;;
- 	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
- 	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
-@@ -383,7 +386,7 @@ if [ -n "$subdir_xfile" ]; then
- 	for d in $SRC_GROUPS $FSTYP; do
- 		[ -f $SRC_DIR/$d/$subdir_xfile ] || continue
- 		for f in `sed "s/#.*$//" $SRC_DIR/$d/$subdir_xfile`; do
--			echo $d/$f >> $tmp.xlist
-+			exclude_tests+=($d/$f)
- 		done
- 	done
- fi
-@@ -570,13 +573,14 @@ _check_filesystems()
- _expunge_test()
- {
- 	local TEST_ID="$1"
--	if [ -s $tmp.xlist ]; then
--		if grep -q $TEST_ID $tmp.xlist; then
-+
-+	for f in "${exclude_tests[@]}"; do
-+		if [ "${TEST_ID}" == "$f" ]; then
- 			echo "       [expunged]"
--			return 1
-+			return 0
- 		fi
--	fi
--	return 0
-+	done
-+	return 1
- }
- 
- # retain files which would be overwritten in subsequent reruns of the same test
-@@ -878,8 +882,7 @@ function run_section()
- 		echo -n "$seqnum"
- 
- 		if $showme; then
--			_expunge_test $seqnum
--			if [ $? -eq 1 ]; then
-+			if _expunge_test $seqnum; then
- 				tc_status="expunge"
- 			else
- 				echo
-@@ -902,8 +905,7 @@ function run_section()
- 		rm -f $seqres.out.bad $seqres.hints
- 
- 		# check if we really should run it
--		_expunge_test $seqnum
--		if [ $? -eq 1 ]; then
-+		if _expunge_test $seqnum; then
- 			tc_status="expunge"
- 			_stash_test_status "$seqnum" "$tc_status"
- 			continue
--- 
-2.25.1
+>  [ $lsunit -ne $((blksz - 1)) ] && _notrun "failed to set sb_logsunit"
+>  
+>  # Mount and writing log may trigger a crash on buggy kernel
+> 
 
