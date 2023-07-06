@@ -2,64 +2,64 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA6D3EB64D9
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jul 2023 10:25:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DAA7EB64D9
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Jul 2023 10:26:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231281AbjGFKZ0 (ORCPT
+        id S230434AbjGFK0z (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Jul 2023 06:25:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60458 "EHLO
+        Thu, 6 Jul 2023 06:26:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60644 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229957AbjGFKZZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jul 2023 06:25:25 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFAA3DD
-        for <fstests@vger.kernel.org>; Thu,  6 Jul 2023 03:24:44 -0700 (PDT)
+        with ESMTP id S229660AbjGFK0w (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jul 2023 06:26:52 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE1DFDD
+        for <fstests@vger.kernel.org>; Thu,  6 Jul 2023 03:26:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1688639084;
+        s=mimecast20190719; t=1688639168;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=A63lyIBs1VR5pfZpltdeIG7F/0bdA3IWJCmKQZ/Z8lI=;
-        b=gKjzWW46/TqO9/gWQgT9HlnaEjFGEAIW/isFoDmj3EnA7zTxGWcHNmWdIeZSBnWrU4U/cc
-        yut+wUwbyjhdny+aCXRSduJTaMD+xhgW8ATZnh4VHAaXPmSs8d0oooCH2RWWrbNcJmFwUD
-        GAiLxZsMDVQ3WgkeqsMZx0Ds+nc/EQc=
-Received: from mail-il1-f200.google.com (mail-il1-f200.google.com
- [209.85.166.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=nr8c87Dw166iiK+BeyHam2+kseL0u8KTw29HsYgZ7TE=;
+        b=RTXNs7C/jaCdEqDmpJXz04Iezmxro9tq5C6PffuCGeb58Fbcudv7pmogM0YbdIczibu6Xl
+        TXAjIY6Qis4Sgua730QmCI8Aa+cJJ9f/bG5odiw6MscZskeUmOigbIrHbF4zw28fimE6ZT
+        BgkdgigrAE6zZVFV/dEnSjr2T5flCyE=
+Received: from mail-io1-f70.google.com (mail-io1-f70.google.com
+ [209.85.166.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-53-CyEedsQDOZChp8cHJIJxsw-1; Thu, 06 Jul 2023 06:24:42 -0400
-X-MC-Unique: CyEedsQDOZChp8cHJIJxsw-1
-Received: by mail-il1-f200.google.com with SMTP id e9e14a558f8ab-345e7434a79so2130775ab.1
-        for <fstests@vger.kernel.org>; Thu, 06 Jul 2023 03:24:42 -0700 (PDT)
+ us-mta-630-Lmag4U9vOpm67nRFM0QE9Q-1; Thu, 06 Jul 2023 06:26:06 -0400
+X-MC-Unique: Lmag4U9vOpm67nRFM0QE9Q-1
+Received: by mail-io1-f70.google.com with SMTP id ca18e2360f4ac-77e3eaa1343so18814739f.2
+        for <fstests@vger.kernel.org>; Thu, 06 Jul 2023 03:26:06 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1688639082; x=1691231082;
+        d=1e100.net; s=20221208; t=1688639166; x=1691231166;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=A63lyIBs1VR5pfZpltdeIG7F/0bdA3IWJCmKQZ/Z8lI=;
-        b=b78do5IV4on1LFMpZwFqaQuHj5F2MkH5hl2IqPDWpjhP8L6EB5weksrpMCVpwi5opd
-         h+dDELzJXh5bKwg1a5H0ugvhc52xWxMGzjYgI+RpnqJxR3utBJjy/5kptlE1K1ndUiRs
-         11940qjuRC6abqgvDG+QHgM7txXHOSz7QoOxK157eSbp6wkPNiCA0gFY8Tkrfy5s0nfR
-         VUEdjPSb4oZBGuJ/dZRJ3BGX1i00oe4DppRSq5+m3iPUHZ0o+QL0y049eFgbm8yE0xzV
-         f+F4ank3f3H7skYpzEh5WvJeAp1Kw7JBfRmHiGm3JZBFubPv1vEoH5//OmIh8ekFEM5/
-         YbOA==
-X-Gm-Message-State: ABy/qLaHH0mXrFXg9+CnvzcpvYwk7mVTxwNumK8jRmGbLHin7H1Ves1F
-        2gZao+OnLDsj6BOkcnH6PjwRp0DD8MeGL9EdKFyCD7uIq6eGcm1iuFTOQpXUod9WWGUfdF3eN0b
-        fi/S36Z6CpBK0Osr8dfHDVTb+YD3wXx/EXrjeFN0TWvQT
-X-Received: by 2002:a92:c803:0:b0:345:cc4d:bb7b with SMTP id v3-20020a92c803000000b00345cc4dbb7bmr1724846iln.6.1688639081897;
-        Thu, 06 Jul 2023 03:24:41 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlFsi/ILE5yudppFjjTFCadU7uj6+pDPYoTK0ET+XgI8Dy2atiaa5AFTgjzsH3vYzuBdp5gLXqI0spd/MT8FjF0=
-X-Received: by 2002:a92:c803:0:b0:345:cc4d:bb7b with SMTP id
- v3-20020a92c803000000b00345cc4dbb7bmr1724831iln.6.1688639081670; Thu, 06 Jul
- 2023 03:24:41 -0700 (PDT)
+        bh=nr8c87Dw166iiK+BeyHam2+kseL0u8KTw29HsYgZ7TE=;
+        b=MNwSqTc4YWPHGNq3iT8mmOYSNuiSCZixC14JfB5m2OBNdbYkCvzWpsKP+lw7VLlF39
+         4OqVXtWx1iK/tamOrdtedwLCBSMLmM4cPCzbM+qrhYqfWkS1e0tLWmSi8ZwYZak/PqjC
+         oRLrOobzV32PAcCd4BqrmguTH7O1vJfscB3ESVfqpOvPMFeUyjmmq6QA1l2wtBv7V5g3
+         DWVEK2ijyM+AzaXTRg4YQbUk85NHgCS/0PPwnJ66Z5vOdi4hGGgGavIPSaugyjcJmm/l
+         I9YzXKtRGxci4IC3kh8yQjlihvox+1f6Oq9MlEhrlJ/Tbt8bEGrsqMUfYmS0upm430R/
+         LO2A==
+X-Gm-Message-State: ABy/qLasE4xBQc0dwlGE2Kgsw6hTPDdlqXhfm2oHN4cdE4DDVO/WLUa7
+        YC0h5/tALICowfgSz2mg9KeKnpOeuQZA7GxwKz53ZeS9YNzkcDZy9/+38NuD8eqJYKgSrgiQPTj
+        i818aNXVoJPBiCzCswybvxjfH4J7d7T11yYGaIYglwwHy
+X-Received: by 2002:a92:c142:0:b0:345:775f:1a2f with SMTP id b2-20020a92c142000000b00345775f1a2fmr1722970ilh.14.1688639165945;
+        Thu, 06 Jul 2023 03:26:05 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlHTftu8A4Sjy3SmrcRvaP5pzqVXOV1/fySiKXtTlE0d+AuTSi4k8DXVkciZVx8wHIaFeFDbITLNk5AWqlMgqwk=
+X-Received: by 2002:a92:c142:0:b0:345:775f:1a2f with SMTP id
+ b2-20020a92c142000000b00345775f1a2fmr1722964ilh.14.1688639165702; Thu, 06 Jul
+ 2023 03:26:05 -0700 (PDT)
 MIME-Version: 1.0
-References: <cover.1688634271.git.alexl@redhat.com> <76c983397d13212ff3105ae05fe4240d830440a9.1688634271.git.alexl@redhat.com>
-In-Reply-To: <76c983397d13212ff3105ae05fe4240d830440a9.1688634271.git.alexl@redhat.com>
+References: <cover.1688634271.git.alexl@redhat.com> <669007608d711c1c4f6b8f835affc2660084f76c.1688634271.git.alexl@redhat.com>
+In-Reply-To: <669007608d711c1c4f6b8f835affc2660084f76c.1688634271.git.alexl@redhat.com>
 From:   Alexander Larsson <alexl@redhat.com>
-Date:   Thu, 6 Jul 2023 12:24:30 +0200
-Message-ID: <CAL7ro1GSF62xtzRuJDD9rQYT=cNGdhZHw+gatQwDPCNeWmn52g@mail.gmail.com>
-Subject: Re: [PATCH 1/4] overlay: add helper for mounting rdonly overlay
+Date:   Thu, 6 Jul 2023 12:25:54 +0200
+Message-ID: <CAL7ro1EORfKBHH7bad8ixKvDX3nhvL9FSMHy8uHp0HQ8DUPC7g@mail.gmail.com>
+Subject: Re: [PATCH 2/4] overlay/060: add test cases of follow to lowerdata
 To:     fstests@vger.kernel.org
 Cc:     linux-unionfs@vger.kernel.org, amir73il@gmail.com
 Content-Type: text/plain; charset="UTF-8"
@@ -72,43 +72,146 @@ On Thu, Jul 6, 2023 at 11:50=E2=80=AFAM <alexl@redhat.com> wrote:
 >
 > From: Amir Goldstein <amir73il@gmail.com>
 >
-> Allow passing empty upperdir to _overlay_mount_dirs().
+> Add test coverage for following metacopy from lower layer to
+> lower data with absolute, relative and no redirect.
 >
 > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
 Signed-off-by: Alexander Larsson <alexl@redhat.com>
 
 > ---
->  common/overlay | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
+>  tests/overlay/060     | 43 ++++++++++++++++++++++++++++++++++++++-----
+>  tests/overlay/060.out | 18 ++++++++++++++++++
+>  2 files changed, 56 insertions(+), 5 deletions(-)
 >
-> diff --git a/common/overlay b/common/overlay
-> index 20cafeb1..452b3b09 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -17,15 +17,19 @@ if [ -n "$OVL_BASE_FSTYP" ];then
->  fi
+> diff --git a/tests/overlay/060 b/tests/overlay/060
+> index 363207ba..f37755da 100755
+> --- a/tests/overlay/060
+> +++ b/tests/overlay/060
+> @@ -7,7 +7,7 @@
+>  # Test metadata only copy up functionality.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick metacopy prealloc
+> +_begin_fstest auto quick metacopy redirect prealloc
 >
->  # helper function to do the actual overlayfs mount operation
-> +# accepts "-" as upperdir for non-upper overlayfs
->  _overlay_mount_dirs()
->  {
->         local lowerdir=3D$1
->         local upperdir=3D$2
->         local workdir=3D$3
->         shift 3
-> +       local diropts=3D"-olowerdir=3D$lowerdir"
->
-> -       $MOUNT_PROG -t overlay -o lowerdir=3D$lowerdir -o upperdir=3D$upp=
-erdir \
-> -                   -o workdir=3D$workdir `_common_dev_mount_options $*`
-> +       [ -n "$upperdir" ] && [ "$upperdir" !=3D "-" ] && \
-> +               diropts+=3D",upperdir=3D$upperdir,workdir=3D$workdir"
-> +
-> +       $MOUNT_PROG -t overlay $diropts `_common_dev_mount_options $*`
+>  # Import common functions.
+>  . ./common/filter
+> @@ -123,6 +123,13 @@ mount_overlay()
+>         _overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o re=
+direct_dir=3Don,index=3Don,metacopy=3Don
 >  }
 >
->  # Mount with same options/mnt/dev of scratch mount, but optionally
+> +mount_ro_overlay()
+> +{
+> +       local _lowerdir=3D$1
+> +
+> +       _overlay_scratch_mount_dirs "$_lowerdir" "-" "-" -o ro,redirect_d=
+ir=3Dfollow,metacopy=3Don
+> +}
+> +
+>  umount_overlay()
+>  {
+>         $UMOUNT_PROG $SCRATCH_MNT
+> @@ -146,7 +153,8 @@ test_common()
+>         check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
+>         check_file_blocks $SCRATCH_MNT/$_target $_blocks
+>
+> -       # Make sure copied up file is a metacopy file.
+> +       # Trigger metadata copy up and check existence of metacopy xattr.
+> +       chmod 400 $SCRATCH_MNT/$_target
+>         umount_overlay
+>         check_metacopy $upperdir/$_target "y"
+>         check_file_size_contents $upperdir/$_target $_size ""
+> @@ -165,7 +173,7 @@ test_common()
+>  create_basic_files()
+>  {
+>         _scratch_mkfs
+> -       mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
+> +       mkdir -p $lowerdir/subdir $lowerdir2 $upperdir $workdir $workdir2
+>         mkdir -p $upperdir/$udirname
+>         echo "$lowerdata" > $lowerdir/$lowername
+>         chmod 600 $lowerdir/$lowername
+> @@ -184,12 +192,19 @@ create_lower_link()
+>
+>  prepare_midlayer()
+>  {
+> +       local _redirect=3D$1
+> +
+>         _scratch_mkfs
+>         create_basic_files
+> +       [ -n "$_redirect" ] && mv "$lowerdir/$lowername" "$lowerdir/$_red=
+irect"
+>         # Create midlayer
+>         _overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o red=
+irect_dir=3Don,index=3Don,metacopy=3Don
+> -       # Trigger a metacopy
+> -       chmod 400 $SCRATCH_MNT/$lowername
+> +       # Trigger a metacopy with or without redirect
+> +       if [ -n "$_redirect" ]; then
+> +               mv "$SCRATCH_MNT/$_redirect" "$SCRATCH_MNT/$lowername"
+> +       else
+> +               chmod 400 $SCRATCH_MNT/$lowername
+> +       fi
+>         umount_overlay
+>  }
+>
+> @@ -254,6 +269,24 @@ mount_overlay $lowerdir
+>  mv $SCRATCH_MNT/$lowerlink $SCRATCH_MNT/$ufile
+>  test_common $lowerdir $ufile $lowersize $lowerblocks "$lowerdata" "/$low=
+erlink"
+>
+> +echo -e "\n=3D=3D Check follow to lowerdata without redirect =3D=3D"
+> +prepare_midlayer
+> +mount_ro_overlay "$lowerdir2:$lowerdir"
+> +test_common "$lowerdir2:$lowerdir" $lowername $lowersize $lowerblocks \
+> +               "$lowerdata"
+> +
+> +echo -e "\n=3D=3D Check follow to lowerdata with relative redirect =3D=
+=3D"
+> +prepare_midlayer "$lowername.renamed"
+> +mount_ro_overlay "$lowerdir2:$lowerdir"
+> +test_common "$lowerdir2:$lowerdir" "$lowername" $lowersize $lowerblocks =
+\
+> +               "$lowerdata"
+> +
+> +echo -e "\n=3D=3D Check follow to lowerdata with absolute redirect =3D=
+=3D"
+> +prepare_midlayer "/subdir/$lowername"
+> +mount_ro_overlay "$lowerdir2:$lowerdir"
+> +test_common "$lowerdir2:$lowerdir" "$lowername" $lowersize $lowerblocks =
+\
+> +               "$lowerdata"
+> +
+>  # success, all done
+>  status=3D0
+>  exit
+> diff --git a/tests/overlay/060.out b/tests/overlay/060.out
+> index a4790d31..f4ce0244 100644
+> --- a/tests/overlay/060.out
+> +++ b/tests/overlay/060.out
+> @@ -40,3 +40,21 @@ check properties of metadata copied up file
+>  Unmount and Mount again
+>  check properties of metadata copied up file
+>  check properties of data copied up file
+> +
+> +=3D=3D Check follow to lowerdata without redirect =3D=3D
+> +check properties of metadata copied up file
+> +Unmount and Mount again
+> +check properties of metadata copied up file
+> +check properties of data copied up file
+> +
+> +=3D=3D Check follow to lowerdata with relative redirect =3D=3D
+> +check properties of metadata copied up file
+> +Unmount and Mount again
+> +check properties of metadata copied up file
+> +check properties of data copied up file
+> +
+> +=3D=3D Check follow to lowerdata with absolute redirect =3D=3D
+> +check properties of metadata copied up file
+> +Unmount and Mount again
+> +check properties of metadata copied up file
+> +check properties of data copied up file
 > --
 > 2.40.1
 >
