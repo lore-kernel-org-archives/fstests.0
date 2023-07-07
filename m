@@ -2,94 +2,153 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CAECEB64D9
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Jul 2023 14:56:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E79CAC001B0
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Jul 2023 15:01:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233141AbjGGO4G (ORCPT
+        id S232974AbjGGPBe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Jul 2023 10:56:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40318 "EHLO
+        Fri, 7 Jul 2023 11:01:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233145AbjGGO4F (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jul 2023 10:56:05 -0400
+        with ESMTP id S233227AbjGGPBc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jul 2023 11:01:32 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5D0B2115
-        for <fstests@vger.kernel.org>; Fri,  7 Jul 2023 07:55:56 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4E2E1FE2
+        for <fstests@vger.kernel.org>; Fri,  7 Jul 2023 08:01:31 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2E7D1618E5
-        for <fstests@vger.kernel.org>; Fri,  7 Jul 2023 14:55:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 83609C433C8;
-        Fri,  7 Jul 2023 14:55:55 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6248C61900
+        for <fstests@vger.kernel.org>; Fri,  7 Jul 2023 15:01:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B52BCC433C7;
+        Fri,  7 Jul 2023 15:01:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1688741755;
-        bh=+2lPvZOX4uiVu2d4EJUOMwkg/5jjlP29w5YI5jCVjgw=;
+        s=k20201202; t=1688742090;
+        bh=WBXI6iimnhNE0Z+C9D2kJXNvyBBBZL6KGvLBxgOgDeQ=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ntukMPnoiftF5dXWtzu+rvt79RgDx16VIeP7UaMf4PMn+BoEgPnCmU5eOdmHoolZC
-         C7CwshxucCYDncfP+mIAFIWJS92JfeKk9FKnwy2qyCgDFPt2iAKErghXLyWcwcTdfE
-         zds5B8fn3E0Rl1t+pYW6cIa4tZ4nMLTOqB2DvruJ57VgCywtusAhvCmJb0FObbBanu
-         xbJKSI67WZwtewPznU8YnFbEFh9j7gG7KfwGvgjgYuOJ6cFA4f6o5YKiJgZjagVytG
-         7xTYnhon70tF21C3AB+RbadhhkZc0/vZC8pFDg2wm3pYkIEQTY0xNokbxMvm3mFlTj
-         zQ8dfn7NtqsJA==
-Date:   Fri, 7 Jul 2023 07:55:54 -0700
+        b=TF3bNs98Zj1wvctm58Sz9erJoveH/tlC/HEzAfj+r4ApWkfmAbKiacwSNLrYuvJgL
+         s+IOruzulOAcrnXCo0khzoE5coQOsdchGvmxgKUQGHPK6yLB/n48UgseKg15FZqfg+
+         1cOwophg5da7RDzRaWzRmpnNzOOu7Jp1kYOl5wKadO+Q6jrV3ozmIN/Xw8PePk/FjO
+         iEFcB9IabG4AYI6pax4/DsmOdTJZwOjaW5yykwTPyr+LGvHciHUAHH/Zq1JRZ1o+TI
+         sEDkACCSNE8iDTw49biQ1RQCNlfxoYF2ki7VDHPxvUjq6txnDYyhSANOn+LVMfJtH5
+         /0H4/icIMSfKg==
+Date:   Fri, 7 Jul 2023 08:01:30 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Theodore Ts'o <tytso@mit.edu>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] report: remove xmlns specifier
-Message-ID: <20230707145554.GC11476@frogsfrogsfrogs>
+Subject: Re: [PATCH 1/2] report: safely update the result.xml file
+Message-ID: <20230707150130.GA11442@frogsfrogsfrogs>
 References: <20230706204232.1577765-1-tytso@mit.edu>
- <20230706204232.1577765-2-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230706204232.1577765-2-tytso@mit.edu>
+In-Reply-To: <20230706204232.1577765-1-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 06, 2023 at 04:42:32PM -0400, Theodore Ts'o wrote:
-> By specifying "xmlns=https://git.kernel.org/.../xfstests-dev.git",
-> this causes XML complaint parsers, such as used by the python
-> junitparser library, to put all of the XML elements into a namespace,
-> which then causes junitparser to toss its cookies.
+On Thu, Jul 06, 2023 at 04:42:31PM -0400, Theodore Ts'o wrote:
+> After every single test, we rewrite result.xml from scratch.  This
+> ensures that the XML file is always in a valid, parseable state, even
+> if the check script is killed or the machine crashes in the middle of
+> a test.
 > 
-> This can be worked-around in a test runner script via:
+> If the test is being run in a Cloud VM as a "spot" (Amazon, Azure, or
+> GCE) or "preemptible" (Oracle) instance, it is possible that the VM
+> can be halted whenever the Cloud provider needs the capacity for
+> customers who are willing to pay full price.  ("Spot" instances can be
+> 60% to 90% cheaper --- allowing the frugal kernel developer to get up
+> to 10 times more testing for the same amount of money.  :-)
 > 
->     sed -i.orig -e 's/xmlns=\".*\"//' "$RESULT_BASE/result.xml"
+> Since a "spot" VM can get terminated at any time, it is possible for
+> the VM to be terminated immediately after a test has completed and
+> while the result.xml file is in the middle of being written out.  In
+> that case, the result.xml file could partially written, resulting in
+> an invalid result.xml file and lost information about the tests run
+> before the VM was terminated.
 > 
-> but it's better not to include the xmlns line at all in the first
-> place, since this may cause other users of fstests who are using
-> the Python junitparser library a lot of headaches.
+> To address this race, write the new result.xml file as result.xml.new,
+> and only rename it to result.xml after the XML file is fully written
+> out.
 > 
-> Cc: "Darrick J. Wong" <djwong@kernel.org>
 > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  common/report | 19 +++++++++++--------
+>  1 file changed, 11 insertions(+), 8 deletions(-)
+> 
+> diff --git a/common/report b/common/report
+> index 9bfa09ecc..3ad14f94e 100644
+> --- a/common/report
+> +++ b/common/report
+> @@ -109,13 +109,15 @@ _xunit_make_section_report()
+>  	local notrun_count="$4"
+>  	local sect_time="$5"
+>  	local timestamp
+> +	local tmp_fn="$REPORT_DIR/result.xml.new"
+> +	local out_fn="$REPORT_DIR/result.xml"
+>  
+>  	if [ $sect_name == '-no-sections-' ]; then
+>  		sect_name='global'
+>  	fi
+>  	local report=$tmp.report.xunit.$sect_name.xml
+>  	# Header
+> -	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
+> +	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > "$tmp_fn"
 
-Yeah, I guess.  Note to self: xmlns needs to be in the file format from
-the start, or adding it will break parsers. :(
+Nit: You might want to rm -f $tmp_fn first to reduce the nastiness if
+someone plants a named pipe at that path.
 
-Sooo much engineering and yet it's easy to stop up the drain.
+>  	if [ -n "$test_start_time" ]; then
+>  		timestamp="$(date -Iseconds --date="$test_start_time")"
+>  	else
+> @@ -123,7 +125,7 @@ _xunit_make_section_report()
+>  	fi
+>  
+>  	local fstests_ns="https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git"
+> -	cat >> $REPORT_DIR/result.xml << ENDL
+> +	cat >> "$tmp_fn" << ENDL
+>  <testsuite
+>   xmlns="$fstests_ns"
+>   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+> @@ -142,19 +144,20 @@ ENDL
+>  	__generate_report_vars
+>  
+>  	# Properties
+> -	echo -e "\t<properties>" >> $REPORT_DIR/result.xml
+> +	echo -e "\t<properties>" >> "$tmp_fn"
+>  	(for key in "${!REPORT_VARS[@]}"; do
+>  		_xunit_add_property "$key" "${REPORT_VARS["$key"]}"
+>  	done;
+>  	for p in "${REPORT_ENV_LIST[@]}"; do
+>  		_xunit_add_property "$p" "${!p}"
+> -	done) | sort >> $REPORT_DIR/result.xml
+> -	echo -e "\t</properties>" >> $REPORT_DIR/result.xml
+> +	done) | sort >> "$tmp_fn"
+> +	echo -e "\t</properties>" >> "$tmp_fn"
+>  	if [ -f $report ]; then
+> -		cat $report >> $REPORT_DIR/result.xml
+> +		cat $report >> "$tmp_fn"
+>  	fi
+> -	echo "</testsuite>" >> $REPORT_DIR/result.xml
+> -	echo "Xunit report: $REPORT_DIR/result.xml"
+> +	echo "</testsuite>" >> "$tmp_fn"
+> +	mv "$tmp_fn" "$out_fn"
+
+Second nit: Make sure we actually wrote tmp_fn before blowing away the
+old report.
+
+sync "$tmp_fn" && mv "$tmp_fn" "$out_fn"
+
+With that fixed,
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
-> ---
->  common/report | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/common/report b/common/report
-> index 3ad14f94e..081df988f 100644
-> --- a/common/report
-> +++ b/common/report
-> @@ -127,7 +127,6 @@ _xunit_make_section_report()
->  	local fstests_ns="https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git"
->  	cat >> "$tmp_fn" << ENDL
->  <testsuite
-> - xmlns="$fstests_ns"
->   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
->   xsi:schemaLocation="$fstests_ns $fstests_ns/tree/doc/xunit.xsd"
+> +	echo "Xunit report: $out_fn"
+>  }
 >  
+>  _xunit_make_testcase_report()
 > -- 
 > 2.31.0
 > 
