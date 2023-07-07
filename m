@@ -2,189 +2,160 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFF5AEB64D9
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Jul 2023 13:20:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A5CAEB64DA
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Jul 2023 13:47:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232037AbjGGNUV (ORCPT
+        id S232570AbjGGNrj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Jul 2023 09:20:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46230 "EHLO
+        Fri, 7 Jul 2023 09:47:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59302 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229661AbjGGNUR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jul 2023 09:20:17 -0400
+        with ESMTP id S232589AbjGGNri (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jul 2023 09:47:38 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6360113
-        for <fstests@vger.kernel.org>; Fri,  7 Jul 2023 06:19:30 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69918210C
+        for <fstests@vger.kernel.org>; Fri,  7 Jul 2023 06:46:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1688735969;
+        s=mimecast20190719; t=1688737610;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=M/VAWBereIFqY0Yn0TWpxNF3FJMc3IqXEQA+wkQ6EKI=;
-        b=VXPZmknTbW/52412tzJNfl9DpALT7vJvjRnwtFF+4bIDDG3j/i7Xyd9ZKcakYmoU199q/q
-        hhJPki8rwOeiw1QzU1SPI3nd8NSCicudbfQ5L/B+yBEb4Oiuvb5grP3nISgxE64UiT1mUv
-        YqdVzs5RGJiMn3E9Aj9Ng7862zAGWZQ=
-Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com
- [209.85.210.71]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=nPGVUIcC1qJJ1XaHj0mfy4Zxe9fOQlDgv6/wUBzenA8=;
+        b=Yardust9uBDJpsx82M/zfpdnTln46JxPgI/FlIha8iT0K3zvosMy11PX5ywdcArDdLOr1I
+        XNuqVFt4yi+vdET4JyAAQIYhxvfdgDL+2fSL8ypUv71s5j/Ik14vWlhbyZQXb7g0+Zw0yx
+        2MLH6tm1mnBZBfV6/Vid0ibqtxFywKs=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-153--2hCX6vcPDKPhvG8Jy0cjQ-1; Fri, 07 Jul 2023 09:19:21 -0400
-X-MC-Unique: -2hCX6vcPDKPhvG8Jy0cjQ-1
-Received: by mail-ot1-f71.google.com with SMTP id 46e09a7af769-6b8810af3adso1340216a34.1
-        for <fstests@vger.kernel.org>; Fri, 07 Jul 2023 06:19:19 -0700 (PDT)
+ us-mta-359-95cDkAvFPt2NLsp101sLew-1; Fri, 07 Jul 2023 09:46:49 -0400
+X-MC-Unique: 95cDkAvFPt2NLsp101sLew-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1b890ca6718so21532435ad.0
+        for <fstests@vger.kernel.org>; Fri, 07 Jul 2023 06:46:49 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1688735959; x=1691327959;
+        d=1e100.net; s=20221208; t=1688737608; x=1691329608;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=M/VAWBereIFqY0Yn0TWpxNF3FJMc3IqXEQA+wkQ6EKI=;
-        b=IN7qpWFOmDPq5wbajPewF1LiSYp3svT2VUVH2uLipgUca7NIqSBAxEwj4XDPkujHvs
-         f6fLRS8Q2FII0a9hVqgPxoDggsCeN/jGf+elMV9o5/gxmniJHylOLcB1KWaaSBt3DiQL
-         O6iiI6YYtmrLD5lsTmpVR6bYdkYAc59uAHQ1KiCee+KMGM+jbA+p23pU8SioEu7nRYxS
-         UPmdKF4xrB0ZXwMM8PhdI4Eyqc8/XeSZz97EUeJubD9Rtr2tWCCg7EoWyN1SJGtXfUPt
-         8KqSmXP3ZLj7U0WL1MK7SL2/m283dwVk7KRnq76ytaL83IWXz31pbPVBNokAjAvolN9Q
-         pQhA==
-X-Gm-Message-State: ABy/qLYoyN3IRFGa3OO2j3I+17dstaQKobaRFDy/M4NyfJv+p/CP7lr/
-        3Zf+HPArqJfvdpwJUVeyNV/ovs8Mk4kKHyYcanwYUIsXNx6zVrYgmEISRYvvhOpxilhtfd9ryEC
-        8CjljDQSrjdOyh3/MYw==
-X-Received: by 2002:a05:6830:1252:b0:6b9:107b:5ea9 with SMTP id s18-20020a056830125200b006b9107b5ea9mr2388735otp.5.1688735958844;
-        Fri, 07 Jul 2023 06:19:18 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlHODbullLLme81Kqv5ForpMCFSzEaP9JP4kOFgSYEUQwkSHWrg3RN7QT6N3Kj7KqwToVvMsFw==
-X-Received: by 2002:a05:6830:1252:b0:6b9:107b:5ea9 with SMTP id s18-20020a056830125200b006b9107b5ea9mr2388711otp.5.1688735958542;
-        Fri, 07 Jul 2023 06:19:18 -0700 (PDT)
+        bh=nPGVUIcC1qJJ1XaHj0mfy4Zxe9fOQlDgv6/wUBzenA8=;
+        b=A2d+kfDm5+hHdXj19hksPS3skTh4qbGnroq8i8UvRVx2lIkg9kKxvp072dAKnuYQ0N
+         5H95nqsNX9uNm1F0yfhYzUZdx7kbtOLWVWcXkL2NHQAdKW8PYFkfDCQGEzwQ3uxTlNrw
+         KrRu6bvOJwJTxA/7XuLqIRAe12an1Go/y+qhCPREs0pAZEeBJwoTi5scdVMeqTTpk+pG
+         G12fvPKBdRXmehXWXyZLg8inp2+fLsYXUeN4IpA35JHBvNLLGDlo8sc+vmUNMwpNOjYH
+         3x6N6ZHKiBIHrXjm+mDb2UuyMbrBqKESCjWcFtS3Yg0hJLZNulcNqX7Hyz/frWnGD6wC
+         V+Tw==
+X-Gm-Message-State: ABy/qLaKfed/etoJ+BhaSluS/6Akq93I3fsI8VXYxw9w3sDcGl1OE4WF
+        mK1mryOvHIBh8XyNRzcdFwU3TSM/6zLA3p+BT8lTH9N1538zyDmNOmrywuGb3Khx91NHfku4zND
+        llRcokYsY5U1SPr6RZgyYmR5lX5iPaPs=
+X-Received: by 2002:a17:903:22cc:b0:1b8:9b1b:ae8e with SMTP id y12-20020a17090322cc00b001b89b1bae8emr4846555plg.59.1688737608029;
+        Fri, 07 Jul 2023 06:46:48 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlHy7O2+rHT5JyTOtm5gRhpi9OL5d7AU9Ejz4a03noCaSdwRPQrr1k+WX0bwu5fvNDgiDQQ1/Q==
+X-Received: by 2002:a17:903:22cc:b0:1b8:9b1b:ae8e with SMTP id y12-20020a17090322cc00b001b89b1bae8emr4846541plg.59.1688737607684;
+        Fri, 07 Jul 2023 06:46:47 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id g14-20020a63b14e000000b00553b9e0510esm2894610pgp.60.2023.07.07.06.19.17
+        by smtp.gmail.com with ESMTPSA id x24-20020a1709027c1800b001b9be79729csm1665030pll.165.2023.07.07.06.46.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Jul 2023 06:19:18 -0700 (PDT)
-Date:   Fri, 7 Jul 2023 21:19:14 +0800
+        Fri, 07 Jul 2023 06:46:47 -0700 (PDT)
+Date:   Fri, 7 Jul 2023 21:46:43 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     yuezhang.mo@foxmail.com
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] check: fix excluded tests are only expunged in the
- first iteration
-Message-ID: <20230707131914.x67xh76pasvbwyee@zlang-mailbox>
-References: <tencent_BAC515047634B24F4B5D5052B5FCD6D23B09@qq.com>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] common/btrfs: handle dmdust as mounted device in
+ _btrfs_buffered_read_on_mirror()
+Message-ID: <20230707134643.vysagmfx4gxk6jrj@zlang-mailbox>
+References: <20230629001010.36235-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <tencent_BAC515047634B24F4B5D5052B5FCD6D23B09@qq.com>
+In-Reply-To: <20230629001010.36235-1-wqu@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 05, 2023 at 07:49:55AM +0800, yuezhang.mo@foxmail.com wrote:
-> From: Yuezhang Mo <Yuezhang.Mo@foxmail.com>
+On Thu, Jun 29, 2023 at 08:10:10AM +0800, Qu Wenruo wrote:
+> [BUG]
+> After commit ab41f0bddb73 ("common/btrfs: use _scratch_cycle_mount to
+> ensure all page caches are dropped"), the test case btrfs/143 can fail
+> like below:
 > 
-> If iterating more than once and excluding some tests, the
-> excluded tests are expunged in the first iteration, but run in
-> subsequent iterations. This is not expected.
+>  btrfs/143 6s ... [failed, exit status 1]- output mismatch (see ~/xfstests/results//btrfs/143.out.bad)
+>     --- tests/btrfs/143.out 2020-06-10 19:29:03.818519162 +0100
+>     +++ ~/xfstests/results//btrfs/143.out.bad 2023-06-19 17:04:00.575033899 +0100
+>     @@ -1,37 +1,6 @@
+>      QA output created by 143
+>      wrote 131072/131072 bytes
+>      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> ................
+>     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> ................
+>     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> ................
+>     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> ................
 > 
-> The problem was caused by the temporary file saving the excluded
-> tests being deleted by `rm -f $tmp.*` in _wrapup() at the end of
-> the first iteration.
+> [CAUSE]
+> Test case btrfs/143 uses dm-dust device to emulate read errors, this
+> means we can not use _scratch_cycle_mount to cycle mount $SCRATCH_MNT.
 > 
-> This commit saves the excluded tests into a variable instead of a
-> temporary file.
+> As it would go mount $SCRATCH_DEV, not the dm-dust device to
+> $SCRATCH_MNT.
+> This prevents us to trigger read-repair (since no error would be hit)
+> thus fail the test.
 > 
-> Signed-off-by: Yuezhang Mo <Yuezhang.Mo@foxmail.com>
+> [FIX]
+> Since we can mount whatever device at $SCRATCH_MNT, we can not use
+> _scratch_cycle_mount in this case.
+> 
+> Instead implement a small helper to grab the mounted device and its
+> mount options, and use the same device and mount options to cycle
+> $SCRATCH_MNT mount.
+> 
+> This would fix btrfs/143 and hopefully future test cases which use dm
+> devices.
+> 
+> Reported-by: Filipe Manana <fdmanana@suse.com>
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Changelog:
+> v2:
+> - Use findmnt command to grab mount options and source device
 > ---
 
-This version looks good to me,
+This version looks good to me. Although the "_mount $dev -o $opts $SCRATCH_MNT"
+is a little odd, but as this's a btrfs only helper, so I think it's fine for
+btrfs at least.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  check | 30 ++++++++++++++++--------------
->  1 file changed, 16 insertions(+), 14 deletions(-)
+>  common/btrfs | 13 +++++++++++--
+>  1 file changed, 11 insertions(+), 2 deletions(-)
 > 
-> diff --git a/check b/check
-> index e36978c1..cb4b23bf 100755
-> --- a/check
-> +++ b/check
-> @@ -27,6 +27,7 @@ DUMP_OUTPUT=false
->  iterations=1
->  istop=false
->  loop_on_fail=0
-> +exclude_tests=()
->  
->  # This is a global variable used to pass test failure text to reporting gunk
->  _err_msg=""
-> @@ -46,7 +47,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
->  # by default don't output timestamps
->  timestamp=${TIMESTAMP:=false}
->  
-> -rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.* $tmp.arglist
-> +rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
->  
->  SRC_GROUPS="generic shared"
->  export SRC_DIR="tests"
-> @@ -302,13 +303,15 @@ while [ $# -gt 0 ]; do
->  		;;
->  	-e)
->  		xfile=$2; shift ;
-> -		echo "$xfile" | tr ', ' '\n\n' >> $tmp.xlist
-> +		readarray -t -O "${#exclude_tests[@]}" exclude_tests < \
-> +			<(echo "$xfile" | tr ', ' '\n\n')
->  		;;
->  
->  	-E)	xfile=$2; shift ;
->  		if [ -f $xfile ]; then
-> -			sed "s/#.*$//" "$xfile" >> $tmp.xlist
-> -	        fi
-> +			readarray -t -O ${#exclude_tests[@]} exclude_tests < \
-> +				<(sed "s/#.*$//" $xfile)
-> +		fi
->  		;;
->  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
->  	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
-> @@ -383,7 +386,7 @@ if [ -n "$subdir_xfile" ]; then
->  	for d in $SRC_GROUPS $FSTYP; do
->  		[ -f $SRC_DIR/$d/$subdir_xfile ] || continue
->  		for f in `sed "s/#.*$//" $SRC_DIR/$d/$subdir_xfile`; do
-> -			echo $d/$f >> $tmp.xlist
-> +			exclude_tests+=($d/$f)
->  		done
->  	done
->  fi
-> @@ -570,13 +573,14 @@ _check_filesystems()
->  _expunge_test()
->  {
->  	local TEST_ID="$1"
-> -	if [ -s $tmp.xlist ]; then
-> -		if grep -q $TEST_ID $tmp.xlist; then
-> +
-> +	for f in "${exclude_tests[@]}"; do
-> +		if [ "${TEST_ID}" == "$f" ]; then
->  			echo "       [expunged]"
-> -			return 1
-> +			return 0
->  		fi
-> -	fi
-> -	return 0
-> +	done
-> +	return 1
->  }
->  
->  # retain files which would be overwritten in subsequent reruns of the same test
-> @@ -878,8 +882,7 @@ function run_section()
->  		echo -n "$seqnum"
->  
->  		if $showme; then
-> -			_expunge_test $seqnum
-> -			if [ $? -eq 1 ]; then
-> +			if _expunge_test $seqnum; then
->  				tc_status="expunge"
->  			else
->  				echo
-> @@ -902,8 +905,7 @@ function run_section()
->  		rm -f $seqres.out.bad $seqres.hints
->  
->  		# check if we really should run it
-> -		_expunge_test $seqnum
-> -		if [ $? -eq 1 ]; then
-> +		if _expunge_test $seqnum; then
->  			tc_status="expunge"
->  			_stash_test_status "$seqnum" "$tc_status"
->  			continue
+> diff --git a/common/btrfs b/common/btrfs
+> index 175b33ae..0fec093d 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -601,8 +601,17 @@ _btrfs_buffered_read_on_mirror()
+>  	# The drop_caches doesn't seem to drop every pages on aarch64 with
+>  	# 64K page size.
+>  	# So here as another workaround, cycle mount the SCRATCH_MNT to ensure
+> -	# the cache are dropped.
+> -	_scratch_cycle_mount
+> +	# the cache are dropped, but we can not use _scratch_cycle_mount, as
+> +	# we may mount whatever dm device at SCRATCH_MNT.
+> +	# So here we grab the mounted block device and its mount options, then
+> +	# unmount and re-mount with the same device and options.
+> +	local dev=$(findmnt -n -T $SCRATCH_MNT -o SOURCE)
+> +	local opts=$(findmnt -n -T $SCRATCH_MNT -o OPTIONS)
+> +	if [ -z "$dev" -o -z "$opts" ]; then
+> +		_fail "failed to grab mount info of $SCRATCH_MNT"
+> +	fi
+> +	_scratch_unmount
+> +	_mount $dev -o $opts $SCRATCH_MNT
+>  	while [[ -z $( (( BASHPID % nr_mirrors == mirror )) &&
+>  		exec $XFS_IO_PROG \
+>  			-c "pread -b $size $offset $size" $file) ]]; do
 > -- 
-> 2.25.1
+> 2.39.0
 > 
 
