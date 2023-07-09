@@ -2,76 +2,124 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB07BEB64DD
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Jul 2023 09:17:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F1EAEB64DD
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 Jul 2023 13:18:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230030AbjGIJRT (ORCPT
+        id S230310AbjGINST (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 Jul 2023 05:17:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46498 "EHLO
+        Sun, 9 Jul 2023 09:18:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229494AbjGIJRR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jul 2023 05:17:17 -0400
-Received: from forward500c.mail.yandex.net (forward500c.mail.yandex.net [178.154.239.208])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35A83115
-        for <fstests@vger.kernel.org>; Sun,  9 Jul 2023 02:17:15 -0700 (PDT)
-Received: from mail-nwsmtp-smtp-production-main-92.myt.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-92.myt.yp-c.yandex.net [IPv6:2a02:6b8:c12:34a8:0:640:678e:0])
-        by forward500c.mail.yandex.net (Yandex) with ESMTP id BD4BC5EB98;
-        Sun,  9 Jul 2023 12:17:12 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-92.myt.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id BHTNLmHW0uQ0-YhEL6fNy;
-        Sun, 09 Jul 2023 12:17:12 +0300
-X-Yandex-Fwd: 1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail; t=1688894232;
-        bh=b95BdNRopZ+qkZuII8bP2vjSyKSj2k6yXfG+1dwOgE0=;
-        h=In-Reply-To:Cc:Date:References:To:From:Subject:Message-ID;
-        b=XXRNefWDZb2oYQiIDn8j2TSJpwlMmIcQ3dA/AeUiPP1Fqp0VTGXEgfsjSXUZfWtBr
-         h+nBglvkNX9kov9/qfoqcRdkGR3pdQs0pjBTySfhJhLrLr1yYmwcHlyYbVO93MADhL
-         r4WfAnFmAZFIlv+xDg6rFvF3Ab2Gthgp1Fld1tHc=
-Authentication-Results: mail-nwsmtp-smtp-production-main-92.myt.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
-Message-ID: <2fd915b0-fd6f-ffb6-8d6b-900ca484c8d2@yandex.ru>
-Date:   Sun, 9 Jul 2023 14:17:10 +0500
+        with ESMTP id S229505AbjGINSS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jul 2023 09:18:18 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1E3ACE
+        for <fstests@vger.kernel.org>; Sun,  9 Jul 2023 06:18:17 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 385F260BC4
+        for <fstests@vger.kernel.org>; Sun,  9 Jul 2023 13:18:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EEA59C433C7;
+        Sun,  9 Jul 2023 13:18:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1688908696;
+        bh=czKRNmEC2/w0IwxntOy9g50Mpwn3+PxCkCyMkjKbAaA=;
+        h=Date:From:To:Subject:From;
+        b=VGVuDFrHH2EA0Oy8syHoD0AvNCizdvhg2Jg9yo9M79cIWgBcV7O3SMSeGT28YARqI
+         1LCKsB8tvVaC+jpr1GRzao+hqckH6rke56Vw6son3/qH9l4IC3u4hrjq61K3xxhvNe
+         2e92O9VMb5myuyYfB6rDc8+HLm81xBbQ5sb/w81vMlFsgGJkoYi1W7ksKOyxs5RBCe
+         zuArmqG2L/72LE7vK2Z1ZN2W2EDZ5SL3OV5wPeJe7Dn7BS4dcLyPj3MmPyCFKg2Y0v
+         eu7LyT3m/g0DrWP5OFnLS1gLrWlTj+hLVR3PCerbbuBRIKApcmJLQ6wzIj6UYJQ2If
+         njTu7Ct3+6++g==
+Date:   Sun, 9 Jul 2023 21:18:12 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2023.06.18 onto master branch
+Message-ID: <20230709131812.7tsakif3kojyempl@zlang-mailbox>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH] t_ofd_locks: fix initialization sequence
-Content-Language: en-US
-From:   stsp <stsp2@yandex.ru>
-To:     Murphy Zhou <xzhou@redhat.com>, Jeff Layton <jlayton@kernel.org>
-Cc:     fstests@vger.kernel.org
-References: <20230630094051.3765376-1-stsp2@yandex.ru>
- <6ee5c9ee42388d2a2e25bf80b3d7db9c09384867.camel@kernel.org>
- <CALWRkkjb9hMmoHf3xa93mAEJBFM3hjB5K4dkWL+659dSGa0qsA@mail.gmail.com>
- <332cedf4-3580-86f8-3fd6-de32b67f155e@yandex.ru>
-In-Reply-To: <332cedf4-3580-86f8-3fd6-de32b67f155e@yandex.ru>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hi all,
 
-06.07.2023 13:54, stsp пишет:
->
-> 06.07.2023 13:41, Murphy Zhou пишет:
->> +                             semid = semget(semkey, 2, IPC_CREAT);
->>                                if (semctl(semid, 2, IPC_RMID, semu) 
->> == -1)
->> Good catch. This RMID is useless unless we have got the existing
->> semaphore. According to SEMGET(2), seems should be:
->>
->>      semid = semget(semkey, 2, 0);
->>
->> to obtain an existing semaphore?
->
-> Yes, I just wanted to avoid the purely
-> theoretical condition when someone
-> else removed this sem right before we
-> did second semget(). So I added IPC_CREAT
-> just as a safety measure.
-> Should I remove it?
+The master branch of the xfstests repository at:
 
-Ping!
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-So how should I proceed with the patch?
-Who can give reviewed-by?
+has just been updated to v2023.06.18 version.
 
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+87f90a2dae7a common/rc: Enable _test_mkfs to force a mkfs on a xfs filesystem
+
+New commits:
+
+Anand Jain (1):
+      [39bcfc9ab3dd] btrfs/122: fix nodesize option in mfks.btrfs
+
+Andreas Gruenbacher (1):
+      [6e9aa61ef386] generic: Add mmap + DIO write test
+
+Carlos Maiolino (1):
+      [87f90a2dae7a] common/rc: Enable _test_mkfs to force a mkfs on a xfs filesystem
+
+Chao Yu (1):
+      [e8fb7a0217ba] generic/506: fix to call _scratch_enable_pquota()
+
+Darrick J. Wong (6):
+      [156a8a107850] xfs/108: allow slightly higher block usage
+      [27d202f5c8de] xfs/155: discard stderr when checking for NEEDSREPAIR
+      [eef60725c850] xfs/155: improve logging in this test
+      [078bb0de7c21] fuzzy: disallow post-test online rebuilds when testing online fsck
+      [0adf9e7c0d59] xfs/503: don't rebuild the fs metadata when testing metadump
+      [8b88f4ca28ff] common/xfs: compress online repair rebuild output by default
+
+Eric Sandeen (1):
+      [3ed1150fd7b8] xfs: test shipped config files work properly with mkfs.xfs
+
+Qu Wenruo (4):
+      [685d1dadd526] btrfs: add a test case to verify read-only scrub
+      [2702c4208dae] btrfs: add a test case to verify the scrub error reports
+      [17c0dedf05fc] btrfs/106: avoid hard coded output to handle different page sizes
+      [ab41f0bddb73] common/btrfs: use _scratch_cycle_mount to ensure all page caches are dropped
+
+Xiubo Li (2):
+      [2343f7cca021] generic/020: add ceph-fuse support
+      [7cef6bf6dc8d] common/rc: skip ceph-fuse when atime is required
+
+
+Code Diffstat:
+
+ common/btrfs          |  6 ++++-
+ common/fuzzy          |  7 +++++-
+ common/rc             |  7 ++++--
+ common/xfs            | 31 ++++++++++++++++-------
+ src/mmap-rw-fault.c   | 33 +++++++++++++++++++++---
+ tests/btrfs/106       | 15 ++++++++---
+ tests/btrfs/106.out   | 18 ++-----------
+ tests/btrfs/122       |  4 +--
+ tests/btrfs/288       | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/288.out   |  9 +++++++
+ tests/btrfs/289       | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/289.out   |  2 ++
+ tests/generic/020     |  2 +-
+ tests/generic/506     |  1 +
+ tests/generic/729     | 42 +++++++++++++++++++++++++++++++
+ tests/generic/729.out |  2 ++
+ tests/xfs/108         | 14 ++++++++---
+ tests/xfs/155         |  7 +++---
+ tests/xfs/503         |  2 ++
+ tests/xfs/569         | 32 +++++++++++++++++++++++
+ tests/xfs/569.out     |  2 ++
+ 21 files changed, 329 insertions(+), 46 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
