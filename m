@@ -2,123 +2,92 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B610EB64DC
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Jul 2023 13:21:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DC73C001B0
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 Jul 2023 19:11:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229736AbjGINVq (ORCPT
+        id S229482AbjGITLS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 Jul 2023 09:21:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59346 "EHLO
+        Sun, 9 Jul 2023 15:11:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229505AbjGINVp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jul 2023 09:21:45 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03DCBEB
-        for <fstests@vger.kernel.org>; Sun,  9 Jul 2023 06:21:44 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        with ESMTP id S229441AbjGITLR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jul 2023 15:11:17 -0400
+Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03512106;
+        Sun,  9 Jul 2023 12:11:14 -0700 (PDT)
+Received: from authenticated-user (box.fidei.email [71.19.144.250])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9675560BB1
-        for <fstests@vger.kernel.org>; Sun,  9 Jul 2023 13:21:43 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5D900C433C8;
-        Sun,  9 Jul 2023 13:21:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1688908903;
-        bh=YZ7KnWSHVLbbmDcpHOXnZoOU1Kuk/wWKvZfgNQhPKl0=;
-        h=Date:From:To:Subject:From;
-        b=Uca7u1cix4JcCZrIqzy7m0AvwY4hsWb+4uY1uofUnk5xowEAVe3j3mH2RwYe1k1WJ
-         KkvQn8W5sXiw2dW4GOzr6Nuatx42G9kucNU2YFAlg9syEtCgpJeS/mJkl6885OSg2u
-         fmy5c5MdQROOWPt/9/UUmx6/EREbmJ01wy6t6QwTmnPWftJDLYPDXlHE1aKzfg9aOw
-         7kshRcdcyG9tkir0vH9AcaZF/MCFA0ubFjk0ZLS4vHzDJ4e2OewLtv7Ro+OehGVW2g
-         EWN97eXfuuu+5HcLwHPSPQurKBpKWtT0SSG433fI9isNlW2JcaXUBj73Zn23BlCcsq
-         iWSBfKe40mZ9Q==
-Date:   Sun, 9 Jul 2023 21:21:39 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.07.09
-Message-ID: <20230709132139.jnb4nupbwm4jkwt3@zlang-mailbox>
+        by box.fidei.email (Postfix) with ESMTPSA id 9EF3780380;
+        Sun,  9 Jul 2023 15:11:13 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
+        t=1688929874; bh=fB7FS2bicAzPtOhig8q3nYVJLH7SXzzwI3tUEHwhzvw=;
+        h=From:To:Cc:Subject:Date:From;
+        b=iLbhz/URnz11WNPlNG/k6udVgAJBXitqQFzub+OGBYzmLiH0tbg8xD1in9GSqxCUd
+         V5e+RgOR3DCsioAMIY4js0pztMOsk1nUio1DOweUwLbMxa1lH6iygiYIotquep00dq
+         DJyPelewJfRlYLSsX3d9yIE+WtGh8kESHd+1V4GTsEPejVL5ZcImo/Ql62NiM7dDT5
+         Ayu2Dhes/CdAxymvVLZ4w91CW3W+dtDzvV51+13YQ0XJLEMM74F5FOHyKqFvncXasU
+         YEmLne+sJYtBpcmeLiyS5gV1L46qDqaMZlly7+4BY9ttsMmovyyeFX/LQUR+T4NRL0
+         g+paAYqWGENyQ==
+From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        kernel-team@meta.com, ebiggers@google.com, anand.jain@oracle.com,
+        fdmanana@suse.com, linux-fscrypt@vger.kernel.org,
+        fsverity@lists.linux.dev, zlang@kernel.org
+Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+Subject: [RFC PATCH v2 0/8] fstests: add btrfs encryption testing
+Date:   Sun,  9 Jul 2023 15:11:03 -0400
+Message-Id: <cover.1688929294.git.sweettea-kernel@dorminy.me>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+This is a preliminary fstests side of the btrfs encryption feature;
+more tests are needed, but this gets the existing encryption tests
+working with btrfs. This requires the latest related progs and kernel
+changesets.
 
-The for-next branch of the xfstests repository at:
+Marked as RFC because they're not ready to merge until all its
+dependencies finish landing; this is primarily to demonstrate that
+extent encryption, between fscrypt and btrfs, does not significantly
+change user-visible behavior.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Changelog:
 
-has just been updated and tagged as v2023.07.09 release.
+RFC v2:
+- Reverted changes to generic/580 and generic/595 to match the new
+  'soft-delete' behavior introduced in v2 of kernel patchset
+  "fscrypt: add extent encryption". (change 6)
+- Removed extraneous syncs/drop_caches and added copyright to new test
+  (change 8), as per Filipe's comments.
 
-Releate notes:
-1) There're 3 new test cases this week --- xfs/596, btrfs/292 and btrfs/293.
-   xfs/596 is a functional test case for xfs rtdev only, the other two btrfs
-   cases are regression test for two (new) known btrfs fixes.
-2) Tow basic fix/improvement on check script, one for the -i option works with
-   -e and -E properly, the other helps the -n option run faster.
-3) Fix a regression test issue on btrfs with dmdust.
+RFC v1:
+- https://lore.kernel.org/linux-btrfs/cover.1688076612.git.sweettea-kernel@dorminy.me/T/#t
 
-More fixes and details refer to below, thanks for all these contribution!
+Sweet Tea Dorminy (8):
+  common/encrypt: separate data and inode nonces
+  common/encrypt: add btrfs to get_encryption_*nonce
+  common/encrypt: add btrfs to get_ciphertext_filename
+  common/encrypt: enable making a encrypted btrfs filesystem
+  generic/613: write some actual data for btrfs
+  tests: adjust generic/429 for extent encryption
+  common/verity: explicitly don't allow btrfs encryption
+  btrfs: add simple test of reflink of encrypted data
 
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-66fcf86bbaea report: remove xmlns specifier
-
-New commits:
-
-Amir Goldstein (2):
-      [3e7166ffb2ef] fstests: reduce runtime of check -n
-      [06cee93225c9] generic/604: Fix for overlayfs
-
-Darrick J. Wong (5):
-      [2fc1f5dc90f4] xfs/529: fix bogus failure when realtime is configured
-      [cfa2c8fadbc8] xfs/569: skip post-test fsck run
-      [08389a5aaa29] xfs/439: amend test to work with new log geometry validation
-      [14941ffecb85] xfs/041: force create files on the data device
-      [27211f9bb44b] xfs: test growfs of the realtime device
-
-Filipe Manana (1):
-      [db7fb78fda69] btrfs: test activating swapfile in the presence of snapshots
-
-Qu Wenruo (2):
-      [4ea344909aba] btrfs: add test case to verify the behavior with large RAID0 data chunks
-      [e7006c6dc1c2] common/btrfs: handle dmdust as mounted device in _btrfs_buffered_read_on_mirror()
-
-Stas Sergeev (1):
-      [2c29b9b58618] common/config: redirect modprobe helpinfo to stdout for busybox
-
-Theodore Ts'o (2):
-      [8bab8ef9872e] report: safely update the result.xml file
-      [66fcf86bbaea] report: remove xmlns specifier
-
-Yuezhang Mo (1):
-      [60054d5118fd] check: fix excluded tests are only expunged in the first iteration
+ common/encrypt      | 86 +++++++++++++++++++++++++++++++++++++++++----
+ common/verity       |  4 +++
+ tests/btrfs/613     | 59 +++++++++++++++++++++++++++++++
+ tests/btrfs/613.out | 13 +++++++
+ tests/generic/429   |  6 ++++
+ tests/generic/613   | 12 ++++---
+ 6 files changed, 169 insertions(+), 11 deletions(-)
+ create mode 100755 tests/btrfs/613
+ create mode 100644 tests/btrfs/613.out
 
 
-Code Diffstat:
+base-commit: 87f90a2dae7a4adb7a0a314e27abae9aa1de78fb
+-- 
+2.40.1
 
- check               | 52 +++++++++++++++---------------
- common/btrfs        | 13 ++++++--
- common/config       |  2 +-
- common/report       | 21 +++++++------
- tests/btrfs/292     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/292.out |  2 ++
- tests/btrfs/293     | 72 ++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/293.out | 17 ++++++++++
- tests/generic/604   |  4 ++-
- tests/xfs/041       |  3 ++
- tests/xfs/439       | 14 +++++++--
- tests/xfs/529       |  4 +++
- tests/xfs/569       |  2 +-
- tests/xfs/596       | 79 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/596.out   | 19 +++++++++++
- 15 files changed, 351 insertions(+), 44 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
