@@ -2,48 +2,48 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22EECC001B0
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 Jul 2023 09:09:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83915C001DD
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Jul 2023 09:09:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230227AbjGJJI7 (ORCPT
+        id S230258AbjGJJJA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 Jul 2023 05:08:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40566 "EHLO
+        Mon, 10 Jul 2023 05:09:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40508 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231520AbjGJJI3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jul 2023 05:08:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5449512A
-        for <fstests@vger.kernel.org>; Mon, 10 Jul 2023 02:07:41 -0700 (PDT)
+        with ESMTP id S231649AbjGJJIb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jul 2023 05:08:31 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDBE2F9
+        for <fstests@vger.kernel.org>; Mon, 10 Jul 2023 02:07:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1688980060;
+        s=mimecast20190719; t=1688980064;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=cEMT123v1QMT/712TnsgWDQE7HQrbA8EyxlF8Cy020c=;
-        b=hWiaO1ZnIl7LYekSuTopboVywyqUkICGF6D60R3EIOHJHpnxHfdOHlyxpBjFh1noP59RD2
-        lig/Gd5V9vrpm0Uvu5Lxp9PlNWoLELQt0OJGxg2fjRfXGpY71AelHtt8iukorYFFW6tH/I
-        QDHT6lzXX5moC1tJbAoac3luH/5OPgo=
+        bh=jOqyUhl8NTf8kHEQkvdVtlf3L1rHLUvCMXsUQXlLufw=;
+        b=gu4z3dbAaaB/ML8IooRbjfca6yNHk9iUBKRGCiG2E2q8XQ7XqUAd2VIBWsQ2DumZTQNsBo
+        zL9wDH0Q3RQ787DJwXWz+ROkQSvHmLZMPXmu3UmGDnnXrYuhgr4Hd/AcPWfunUkT6KEaHB
+        oc8XJp19w+pGaDTJfqIIM1UDQhPbmws=
 Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
  [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-660-uT3ylrojObCg3BggR2syGQ-1; Mon, 10 Jul 2023 05:07:37 -0400
-X-MC-Unique: uT3ylrojObCg3BggR2syGQ-1
+ us-mta-189-hrJnOh2IP8mnzgat3xKKjA-1; Mon, 10 Jul 2023 05:07:40 -0400
+X-MC-Unique: hrJnOh2IP8mnzgat3xKKjA-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1BC661006849;
-        Mon, 10 Jul 2023 09:07:37 +0000 (UTC)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 763931044591;
+        Mon, 10 Jul 2023 09:07:40 +0000 (UTC)
 Received: from greebo.redhat.com (unknown [10.39.193.57])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4B5D0F66A9;
-        Mon, 10 Jul 2023 09:07:36 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id A5E3DF66A8;
+        Mon, 10 Jul 2023 09:07:39 +0000 (UTC)
 From:   alexl@redhat.com
 To:     fstests@vger.kernel.org
 Cc:     linux-unionfs@vger.kernel.org, amir73il@gmail.com, alexl@redhat.com
-Subject: [PATCH v2 3/4] overlay: Add test for follow of lowerdata in data-only layers
-Date:   Mon, 10 Jul 2023 11:07:12 +0200
-Message-Id: <7be8e09a5cd34c6f3ab3f59f1803b8fc899bc62a.1688979643.git.alexl@redhat.com>
+Subject: [PATCH v2 4/4] overlay: Add test coverage for fs-verity support
+Date:   Mon, 10 Jul 2023 11:07:13 +0200
+Message-Id: <64c1dbba6fea2fe7a6f31a2e47657d0c2ea57d26.1688979643.git.alexl@redhat.com>
 In-Reply-To: <cover.1688979643.git.alexl@redhat.com>
 References: <cover.1688979643.git.alexl@redhat.com>
 MIME-Version: 1.0
@@ -53,80 +53,124 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Amir Goldstein <amir73il@gmail.com>
+From: Alexander Larsson <alexl@redhat.com>
 
-Add test coverage for following metacopy from lower layer to
-data-only lower layers.
+This tests that the right xattrs are set during copy-up, and
+that we properly fail on missing of erronous fs-verity digests
+when validating.
 
-Data-only lower layers are configured using the syntax:
-lowerdir=<lowerdir1>:<lowerdir2>::<lowerdata1>::<lowerdata2>.
-
-Test that lowerdata files can be followed only by absolute redirect
-from lower layer.
-
-Test that with two lowerdata dirs, we can lookup individual lowerdata
-files in both, and that a shared file is resolved from the uppermost
-lowerdata dir.
-
-There is also test case for lazy-data lookups, where we remove the
-lowerdata file and validate that we get metadata from the metacopy
-file, but open fails.
+We also ensure that verity=require fails if a metacopy has not
+fs-verity, and doesn't do a meta-coopy-up if the base file lacks
+verity.
 
 Signed-off-by: Alexander Larsson <alexl@redhat.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/overlay        |  13 ++
- tests/overlay/079     | 325 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/079.out |  42 ++++++
- 3 files changed, 380 insertions(+)
- create mode 100755 tests/overlay/079
- create mode 100644 tests/overlay/079.out
+ common/overlay        |  14 ++
+ common/verity         |  16 ++-
+ tests/overlay/080     | 326 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/080.out |   7 +
+ 4 files changed, 358 insertions(+), 5 deletions(-)
+ create mode 100755 tests/overlay/080
+ create mode 100644 tests/overlay/080.out
 
 diff --git a/common/overlay b/common/overlay
-index 452b3b09..816ed66d 100644
+index 816ed66d..7004187f 100644
 --- a/common/overlay
 +++ b/common/overlay
-@@ -201,6 +201,19 @@ _require_scratch_overlay_features()
+@@ -201,6 +201,20 @@ _require_scratch_overlay_features()
  	_scratch_unmount
  }
  
-+# Check kernel support for <lowerdirs>::<lowerdatadir> format
-+_require_scratch_overlay_lowerdata_layers()
++_require_scratch_overlay_verity()
 +{
-+	local lowerdirs="$OVL_BASE_SCRATCH_MNT/$OVL_UPPER::$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
++	local lowerdirs="$OVL_BASE_SCRATCH_MNT/$OVL_UPPER:$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
++
++	_require_scratch_verity "$OVL_BASE_FSTYP" "$OVL_BASE_SCRATCH_MNT"
 +
 +	_scratch_mkfs > /dev/null 2>&1
 +	_overlay_scratch_mount_dirs "$lowerdirs" "-" "-" \
-+		-o ro,redirect_dir=follow,metacopy=on > /dev/null 2>&1 || \
-+	        _notrun "overlay data-only layers not supported on ${SCRATCH_DEV}"
++		-o ro,redirect_dir=follow,metacopy=on,verity=on > /dev/null 2>&1 || \
++	        _notrun "overlay verity not supported on ${SCRATCH_DEV}"
 +
 +	_scratch_unmount
 +}
 +
- # Helper function to check underlying dirs of overlay filesystem
- _overlay_fsck_dirs()
+ # Check kernel support for <lowerdirs>::<lowerdatadir> format
+ _require_scratch_overlay_lowerdata_layers()
  {
-diff --git a/tests/overlay/079 b/tests/overlay/079
+diff --git a/common/verity b/common/verity
+index 77c257d3..e0937717 100644
+--- a/common/verity
++++ b/common/verity
+@@ -38,10 +38,13 @@ _require_scratch_verity()
+ 			"or mkfs options are not compatible with verity"
+ 	fi
+ 
++	local fstyp=${1:-$FSTYP}
++	local scratch_mnt=${2:-$SCRATCH_MNT}
++
+ 	# The filesystem may be aware of fs-verity but have it disabled by
+ 	# CONFIG_FS_VERITY=n.  Detect support via sysfs.
+-	if [ ! -e /sys/fs/$FSTYP/features/verity ]; then
+-		_notrun "kernel $FSTYP isn't configured with verity support"
++	if [ ! -e /sys/fs/$fstyp/features/verity ]; then
++		_notrun "kernel $fstyp isn't configured with verity support"
+ 	fi
+ 
+ 	# Select a default Merkle tree block size for when tests don't
+@@ -57,7 +60,7 @@ _require_scratch_verity()
+ 	#
+ 	# Therefore, we default to merkle_tree_block_size == min(fs_block_size,
+ 	# page_size).  That maximizes the chance of verity actually working.
+-	local fs_block_size=$(_get_block_size $SCRATCH_MNT)
++	local fs_block_size=$(_get_block_size $scratch_mnt)
+ 	local page_size=$(get_page_size)
+ 	if (( fs_block_size <= page_size )); then
+ 		FSV_BLOCK_SIZE=$fs_block_size
+@@ -68,8 +71,8 @@ _require_scratch_verity()
+ 	# The filesystem may have fs-verity enabled but not actually usable by
+ 	# default.  E.g., ext4 only supports verity on extent-based files, so it
+ 	# doesn't work on ext3-style filesystems.  So, try actually using it.
+-	if ! _fsv_can_enable $SCRATCH_MNT/tmpfile; then
+-		_notrun "$FSTYP verity isn't usable by default with these mkfs options"
++	if ! _fsv_can_enable $scratch_mnt/tmpfile; then
++		_notrun "$fstyp verity isn't usable by default with these mkfs options"
+ 	fi
+ 
+ 	_scratch_unmount
+@@ -201,6 +204,9 @@ _scratch_mkfs_verity()
+ 	btrfs)
+ 		_scratch_mkfs
+ 		;;
++	overlay)
++		_scratch_mkfs # This relies on the scratch fs supporting verity
++                ;;
+ 	*)
+ 		_notrun "No verity support for $FSTYP"
+ 		;;
+diff --git a/tests/overlay/080 b/tests/overlay/080
 new file mode 100755
-index 00000000..77f94598
+index 00000000..0b5dca09
 --- /dev/null
-+++ b/tests/overlay/079
-@@ -0,0 +1,325 @@
++++ b/tests/overlay/080
+@@ -0,0 +1,326 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
++# Copyright (C) 2023 Red Hat, Inc. All Rights Reserved.
 +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
 +#
-+# FS QA Test No. 079
++# FS QA Test No. 080
 +#
-+# Test data-only layers functionality.
++# Test fs-verity functionallity
 +#
 +. ./common/preamble
-+_begin_fstest auto quick metacopy redirect prealloc
++_begin_fstest auto quick metacopy redirect verity
 +
 +# Import common functions.
 +. ./common/filter
 +. ./common/attr
++. ./common/verity
 +
 +# real QA test starts here
 +_supported_fs overlay
@@ -135,44 +179,46 @@ index 00000000..77f94598
 +_require_scratch_nocheck
 +_require_scratch_overlay_features redirect_dir metacopy
 +_require_scratch_overlay_lowerdata_layers
-+_require_xfs_io_command "falloc"
++_require_scratch_overlay_verity
 +
 +# remove all files from previous tests
 +_scratch_mkfs
 +
-+# File size on lower
-+dataname="datafile"
-+sharedname="shared"
-+datacontent="data"
-+dataname2="datafile2"
-+datacontent2="data2"
-+datasize="4096"
++verityname="verityfile"
++noverityname="noverityfile"
++wrongverityname="wrongverityfile"
++missingverityname="missingverityfile"
++lowerdata="data1"
++lowerdata2="data2"
++lowerdata3="data3"
++lowerdata4="data4"
++lowersize="5"
 +
-+# Number of blocks allocated by filesystem on lower. Will be queried later.
-+datarblocks=""
-+datarblocksize=""
-+estimated_datablocks=""
-+
-+udirname="pureupper"
-+ufile="upperfile"
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
 +
 +# Check metacopy xattr
 +check_metacopy()
 +{
-+	local target=$1 exist=$2
++	local target=$1 exist=$2 dataonlybase=$3
 +	local out_f target_f
 +	local msg
 +
-+	out_f=$(_getfattr --absolute-names --only-values -n \
-+		$OVL_XATTR_METACOPY $target 2>&1 | _filter_scratch)
++	out_f=$( { _getfattr --absolute-names --only-values -n \
++		$OVL_XATTR_METACOPY $target 2>&3 | od -A n -t x1 -w256 ; } 3>&1 | _filter_scratch)
++        has_version0=`echo $out_f | awk 'NR==1{print $1 == 0}'`
 +
 +	if [ "$exist" == "y" ];then
-+		[ "$out_f" == "" ] && return
++		[ "$out_f" == "" -o "$has_version0" == "1" ] && return
 +		echo "Metacopy xattr does not exist on ${target}. stdout=$out_f"
 +		return
 +	fi
 +
-+	if [ "$out_f" == "" ];then
++	if [ "$out_f" == ""  -o "$has_version0" == "1" ];then
 +		echo "Metacopy xattr exists on ${target} unexpectedly."
 +		return
 +	fi
@@ -183,6 +229,28 @@ index 00000000..77f94598
 +	[ "$out_f" == "$msg" ] && return
 +
 +	echo "Error while checking xattr on ${target}. stdout=$out"
++}
++
++# Check verity set in metacopy
++check_verity()
++{
++	local target=$1 exist=$2
++	local out_f target_f
++	local msg
++
++	out_f=$( { _getfattr --absolute-names --only-values -n $OVL_XATTR_METACOPY $target 2>&3 | od -A n -t x1 -w256 ; } 3>&1 | _filter_scratch)
++
++	target_f=`echo $target | _filter_scratch`
++	msg="$target_f: trusted.overlay.metacopy: No such attribute"
++	has_digest=`echo $out_f | awk 'NR==1{print $4 == 1}'`
++
++	if [ "$exist" == "y" ]; then
++		[ "$out_f" == "$msg" -o "$has_digest" == "0" ] && echo "No verity on ${target}. stdout=$out_f"
++		return
++	fi
++
++	[ "$out_f" == "$msg" -o "$has_digest" == "0" ] && return
++	echo "Verity xattr exists on ${target} unexpectedly. stdout=$out_f"
 +}
 +
 +# Check redirect xattr
@@ -204,16 +272,7 @@ index 00000000..77f94598
 +
 +	actual_size=$(_get_filesize $target)
 +
-+	[ "$actual_size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is $actual_size"
-+}
-+
-+check_file_blocks()
-+{
-+	local target=$1 expected_blocks=$2 nr_blocks
-+
-+	nr_blocks=$(stat -c "%b" $target)
-+
-+	[ "$nr_blocks" == "$expected_blocks" ] || echo "Expected $expected_blocks blocks but actual number of blocks is ${nr_blocks}."
++	[ "$actual_size" == "$expected_size" ] || echo "Expected file size of $target $expected_size but actual size is $actual_size"
 +}
 +
 +check_file_contents()
@@ -228,21 +287,6 @@ index 00000000..77f94598
 +	[ "$actual" == "$expected" ] || echo "Expected file $target_f contents to be \"$expected\" but actual contents are \"$actual\""
 +}
 +
-+check_no_file_contents()
-+{
-+	local target=$1
-+	local actual target_f out_f
-+
-+	target_f=`echo $target | _filter_scratch`
-+	out_f=`cat $target 2>&1 | _filter_scratch`
-+	msg="cat: $target_f: No such file or directory"
-+
-+	[ "$out_f" == "$msg" ] && return
-+
-+	echo "$target_f unexpectedly has content"
-+}
-+
-+
 +check_file_size_contents()
 +{
 +	local target=$1 expected_size=$2 expected_content=$3
@@ -251,18 +295,130 @@ index 00000000..77f94598
 +	check_file_contents $target $expected_content
 +}
 +
++check_io_error()
++{
++	local target=$1
++	local actual target_f out_f
++
++	target_f=`echo $target | _filter_scratch`
++	out_f=`cat $target 2>&1 | _filter_scratch`
++	msg="cat: $target_f: Input/output error"
++
++	[ "$out_f" == "$msg" ] && return
++
++	echo "$target_f unexpectedly has no I/O error"
++}
++
++create_basic_files()
++{
++	local subdir=$1
++
++	_scratch_mkfs
++	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
++
++	if [ "$subdir" != "" ]; then
++	    mkdir $lowerdir/$subdir
++	fi
++
++	echo -n "$lowerdata" > $lowerdir/$subdir$verityname
++	echo -n "$lowerdata2" > $lowerdir/$subdir$noverityname
++	echo -n "$lowerdata3" > $lowerdir/$subdir$wrongverityname
++	echo -n "$lowerdata4" > $lowerdir/$subdir$missingverityname
++
++	for f in $verityname $noverityname $wrongverityname $missingverityname; do
++		chmod 600 $lowerdir/$subdir$f
++
++		if [ "$f" != "$noverityname" ]; then
++			_fsv_enable $lowerdir/$subdir$f
++		fi
++        done
++}
++
++prepare_midlayer()
++{
++	local dataonlybase=$1
++
++	subdir=""
++	if [ "$dataonlybase" == "y" ]; then
++	    subdir="base/"
++	fi
++
++	create_basic_files "$subdir"
++	# Create midlayer
++	_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on,index=on,verity=on,metacopy=on
++	for f in $verityname $noverityname $wrongverityname $missingverityname; do
++		if [ "$dataonlybase" == "y" ]; then
++		    mv $SCRATCH_MNT/base/$f $SCRATCH_MNT/$f
++		else
++		    chmod 400 $SCRATCH_MNT/$f
++		fi
++	done
++	umount_overlay
++
++	if [ "$dataonlybase" == "y" ]; then
++	    rm -rf $lowerdir2/base
++	fi
++
++	for f in $verityname $noverityname $wrongverityname $missingverityname; do
++		# Ensure we have right metacopy and verity xattrs
++		check_metacopy $lowerdir2/$f "y"
++
++		if [ "$f" == "$noverityname" ]; then
++		    check_verity $lowerdir2/$f "n"
++		else
++		    check_verity $lowerdir2/$f "y"
++		fi
++
++		if [ "$dataonlybase" == "y" ]; then
++			check_redirect $lowerdir2/$f "/base/$f"
++		fi
++
++		check_file_size_contents $lowerdir2/$f $lowersize ""
++	done
++
++	# Fixup missing and wrong verity in lowerdir
++	rm -f $lowerdir/$subdir$wrongverityname $lowerdir/$subdir$missingverityname
++	echo -n "changed" > $lowerdir/$subdir$wrongverityname
++	_fsv_enable $lowerdir/$subdir$wrongverityname
++	echo "$lowerdata4" > $lowerdir/$subdir$missingverityname
++}
++
++test_common()
++{
++	local dataonlybase=$1
++	local verity=$2
++
++	if [ $dataonlybase == "y" ]; then
++		mount_overlay "$lowerdir2::$lowerdir" $verity
++	else
++		mount_overlay "$lowerdir2:$lowerdir" $verity
++	fi
++
++	check_file_size_contents $SCRATCH_MNT/$verityname $lowersize "$lowerdata"
++
++	if [ "$verity" == "require" ]; then
++		check_io_error $SCRATCH_MNT/$noverityname
++	else
++		check_file_size_contents $SCRATCH_MNT/$noverityname $lowersize "$lowerdata2"
++	fi
++
++	if [ "$verity" == "off" ]; then
++		check_file_size_contents $SCRATCH_MNT/$wrongverityname $lowersize "changed"
++		check_file_size_contents $SCRATCH_MNT/$missingverityname $lowersize "$lowerdata4"
++	else
++		check_io_error $SCRATCH_MNT/$missingverityname
++		check_io_error $SCRATCH_MNT/$wrongverityname
++	fi
++
++	umount_overlay
++}
++
 +mount_overlay()
 +{
 +	local _lowerdir=$1
++	local _verity=$2
 +
-+	_overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o redirect_dir=on,index=on,metacopy=on
-+}
-+
-+mount_ro_overlay()
-+{
-+	local _lowerdir=$1
-+
-+	_overlay_scratch_mount_dirs "$_lowerdir" "-" "-" -o ro,redirect_dir=follow,metacopy=on
++	_overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o redirect_dir=on,index=on,metacopy=on,verity=$_verity
 +}
 +
 +umount_overlay()
@@ -270,221 +426,74 @@ index 00000000..77f94598
 +	$UMOUNT_PROG $SCRATCH_MNT
 +}
 +
-+test_no_access()
-+{
-+	local _target=$1
 +
-+	mount_ro_overlay "$lowerdir::$datadir2::$datadir"
++echo -e "\n== Check fsverity validation =="
 +
-+	stat $SCRATCH_MNT/$_target >> $seqres.full 2>&1 || \
-+		echo "No access to lowerdata layer $_target"
++prepare_midlayer "n"
++test_common "n" "off"
++prepare_midlayer "n"
++test_common "n" "on"
 +
-+	echo "Unmount and Mount rw"
-+	umount_overlay
-+	mount_overlay "$lowerdir::$datadir2::$datadir"
-+	stat $SCRATCH_MNT/$_target >> $seqres.full 2>&1 || \
-+		echo "No access to lowerdata layer $_target"
-+	umount_overlay
-+}
++# Now with data-only layers
++prepare_midlayer "y"
++test_common "y" "off"
++prepare_midlayer "y"
++test_common "y" "on"
 +
-+test_common()
-+{
-+	local _lowerdirs=$1 _target=$2 _size=$3 _blocks=$4 _data="$5"
-+	local _redirect=$6
++echo -e "\n== Check fsverity require =="
 +
-+	echo "Mount ro"
-+	mount_ro_overlay $_lowerdirs
++prepare_midlayer "n"
++test_common "n" "require"
 +
-+	# Check redirect xattr to lowerdata
-+	[ -n "$_redirect" ] && check_redirect $lowerdir/$_target "$_redirect"
++# Now with data-only layers
++prepare_midlayer "y"
++test_common "y" "require"
 +
-+	echo "check properties of metadata copied up file $_target"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	check_file_blocks $SCRATCH_MNT/$_target $_blocks
++echo -e "\n== Check fsverity copy-up =="
 +
-+	# Do a mount cycle and check size and contents again.
-+	echo "Unmount and Mount rw"
-+	umount_overlay
-+	mount_overlay $_lowerdirs
-+	echo "check properties of metadata copied up file $_target"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	check_file_blocks $SCRATCH_MNT/$_target $_blocks
++# Ensure Second level metacopy sets verity xattr
++prepare_midlayer "n"
++mount_overlay "$lowerdir2:$lowerdir" "on"
++chmod 200 $SCRATCH_MNT/$verityname
++umount_overlay
++check_metacopy $upperdir/$verityname "y"
++check_verity $upperdir/$verityname "y"
 +
-+	# Trigger metadata copy up and check existence of metacopy xattr.
-+	chmod 400 $SCRATCH_MNT/$_target
-+	umount_overlay
-+	check_metacopy $upperdir/$_target "y"
-+	check_file_size_contents $upperdir/$_target $_size ""
++# Ensure data copy up remove verity xattr
++create_basic_files ""
++mount_overlay "$lowerdir" "on"
++echo foo >> $SCRATCH_MNT/$verityname
++umount_overlay
++check_metacopy $upperdir/$verityname "n"
++check_verity $upperdir/$verityname "n"
 +
-+	# Trigger data copy up and check absence of metacopy xattr.
-+	mount_overlay $_lowerdirs
-+	$XFS_IO_PROG -c "falloc 0 1" $SCRATCH_MNT/$_target >> $seqres.full
-+	echo "check properties of data copied up file $_target"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	umount_overlay
-+	check_metacopy $upperdir/$_target "n"
-+	check_file_size_contents $upperdir/$_target $_size "$_data"
-+}
-+
-+test_lazy()
-+{
-+	local _target=$1
-+
-+	mount_overlay "$lowerdir::$datadir2::$datadir"
-+
-+	# Metadata should be valid
-+	check_file_size $SCRATCH_MNT/$_target $datasize
-+	check_file_blocks $SCRATCH_MNT/$_target $estimated_datablocks
-+
-+	# But have no content
-+	check_no_file_contents $SCRATCH_MNT/$_target
-+
-+	umount_overlay
-+}
-+
-+create_basic_files()
-+{
-+	_scratch_mkfs
-+	mkdir -p $datadir/subdir $datadir2/subdir $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-+	mkdir -p $upperdir/$udirname
-+	echo "$datacontent" > $datadir/$dataname
-+	chmod 600 $datadir/$dataname
-+	echo "$datacontent2" > $datadir2/$dataname2
-+	chmod 600 $datadir2/$dataname2
-+
-+	echo "$datacontent" > $datadir/$sharedname
-+	echo "$datacontent2" > $datadir2/$sharedname
-+	chmod 600 $datadir/$sharedname  $datadir2/$sharedname
-+
-+	# Create files of size datasize.
-+	for f in $datadir/$dataname $datadir2/$dataname2 $datadir/$sharedname $datadir2/$sharedname; do
-+		$XFS_IO_PROG -c "falloc 0 $datasize" $f
-+		$XFS_IO_PROG -c "fsync" $f
-+	done
-+
-+	# Query number of block
-+	datablocks=$(stat -c "%b" $datadir/$dataname)
-+
-+	# For lazy lookup file the block count is estimated based on size and block size
-+	datablocksize=$(stat -c "%B" $datadir/$dataname)
-+	estimated_datablocks=$(( ($datasize + $datablocksize - 1)/$datablocksize ))
-+}
-+
-+prepare_midlayer()
-+{
-+	local _redirect=$1
-+
-+	_scratch_mkfs
-+	create_basic_files
-+	if [ -n "$_redirect" ]; then
-+		mv "$datadir/$dataname" "$datadir/$_redirect"
-+		mv "$datadir2/$dataname2" "$datadir2/$_redirect.2"
-+		mv "$datadir/$sharedname" "$datadir/$_redirect.shared"
-+		mv "$datadir2/$sharedname" "$datadir2/$_redirect.shared"
-+	fi
-+	# Create midlayer
-+	_overlay_scratch_mount_dirs $datadir2:$datadir $lowerdir $workdir2 -o redirect_dir=on,index=on,metacopy=on
-+	# Trigger a metacopy with or without redirect
-+	if [ -n "$_redirect" ]; then
-+		mv "$SCRATCH_MNT/$_redirect" "$SCRATCH_MNT/$dataname"
-+		mv "$SCRATCH_MNT/$_redirect.2" "$SCRATCH_MNT/$dataname2"
-+		mv "$SCRATCH_MNT/$_redirect.shared" "$SCRATCH_MNT/$sharedname"
-+	else
-+		chmod 400 $SCRATCH_MNT/$dataname
-+		chmod 400 $SCRATCH_MNT/$dataname2
-+		chmod 400 $SCRATCH_MNT/$sharedname
-+	fi
-+	umount_overlay
-+}
-+
-+# Create test directories
-+datadir=$OVL_BASE_SCRATCH_MNT/data
-+datadir2=$OVL_BASE_SCRATCH_MNT/data2
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-+
-+echo -e "\n== Check no follow to lowerdata layer without redirect =="
-+prepare_midlayer
-+test_no_access "$dataname"
-+test_no_access "$dataname2"
-+test_no_access "$sharedname"
-+
-+echo -e "\n== Check no follow to lowerdata layer with relative redirect =="
-+prepare_midlayer "$dataname.renamed"
-+test_no_access "$dataname"
-+test_no_access "$dataname2"
-+test_no_access "$sharedname"
-+
-+echo -e "\n== Check follow to lowerdata layer with absolute redirect =="
-+prepare_midlayer "/subdir/$dataname"
-+test_common "$lowerdir::$datadir2::$datadir" "$dataname" $datasize $datablocks \
-+		"$datacontent" "/subdir/$dataname"
-+test_common "$lowerdir::$datadir2::$datadir" "$dataname2" $datasize $datablocks \
-+		"$datacontent2" "/subdir/$dataname.2"
-+# Shared file should be picked from upper datadir
-+test_common "$lowerdir::$datadir2::$datadir" "$sharedname" $datasize $datablocks \
-+		"$datacontent2" "/subdir/$dataname.shared"
-+
-+echo -e "\n== Check lazy follow to lowerdata layer =="
-+
-+prepare_midlayer "/subdir/$dataname"
-+rm $datadir/subdir/$dataname
-+test_lazy $dataname
-+
++# Ensure metacopy is only used if verity is enabled in lower for verity=require
++create_basic_files ""
++mount_overlay "$lowerdir" "require"
++chmod 200 $SCRATCH_MNT/$verityname
++chmod 200 $SCRATCH_MNT/$noverityname
++umount_overlay
++check_metacopy $upperdir/$verityname "y"
++check_verity $upperdir/$verityname "y"
++check_metacopy $upperdir/$noverityname "n"
++check_verity $upperdir/$noverityname "n"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/079.out b/tests/overlay/079.out
+diff --git a/tests/overlay/080.out b/tests/overlay/080.out
 new file mode 100644
-index 00000000..4807cdb5
+index 00000000..7d1f1d10
 --- /dev/null
-+++ b/tests/overlay/079.out
-@@ -0,0 +1,42 @@
-+QA output created by 079
++++ b/tests/overlay/080.out
+@@ -0,0 +1,7 @@
++QA output created by 080
 +
-+== Check no follow to lowerdata layer without redirect ==
-+No access to lowerdata layer datafile
-+Unmount and Mount rw
-+No access to lowerdata layer datafile
-+No access to lowerdata layer datafile2
-+Unmount and Mount rw
-+No access to lowerdata layer datafile2
-+No access to lowerdata layer shared
-+Unmount and Mount rw
-+No access to lowerdata layer shared
++== Check fsverity validation ==
 +
-+== Check no follow to lowerdata layer with relative redirect ==
-+No access to lowerdata layer datafile
-+Unmount and Mount rw
-+No access to lowerdata layer datafile
-+No access to lowerdata layer datafile2
-+Unmount and Mount rw
-+No access to lowerdata layer datafile2
-+No access to lowerdata layer shared
-+Unmount and Mount rw
-+No access to lowerdata layer shared
++== Check fsverity require ==
 +
-+== Check follow to lowerdata layer with absolute redirect ==
-+Mount ro
-+check properties of metadata copied up file datafile
-+Unmount and Mount rw
-+check properties of metadata copied up file datafile
-+check properties of data copied up file datafile
-+Mount ro
-+check properties of metadata copied up file datafile2
-+Unmount and Mount rw
-+check properties of metadata copied up file datafile2
-+check properties of data copied up file datafile2
-+Mount ro
-+check properties of metadata copied up file shared
-+Unmount and Mount rw
-+check properties of metadata copied up file shared
-+check properties of data copied up file shared
-+
-+== Check lazy follow to lowerdata layer ==
++== Check fsverity copy-up ==
 -- 
 2.40.1
 
