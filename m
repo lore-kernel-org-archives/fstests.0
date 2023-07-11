@@ -2,132 +2,81 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C463DC0015E
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 Jul 2023 10:09:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB8D0EB64DC
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 Jul 2023 15:52:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231241AbjGKKJn (ORCPT
+        id S231620AbjGKPwa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 11 Jul 2023 06:09:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48482 "EHLO
+        Tue, 11 Jul 2023 11:52:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230482AbjGKKJl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jul 2023 06:09:41 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79F6C133
-        for <fstests@vger.kernel.org>; Tue, 11 Jul 2023 03:09:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:To:From:Sender:
-        Reply-To:Cc:Content-Type:Content-ID:Content-Description;
-        bh=if3emhUGSgP6gNgZddWI0yTBqLUtCcW6N8m0eKArqmU=; b=QLPengPcLVyZwyURDhp9IZ0jVW
-        GWlPg7ZWAOXPV/SqKV1Xgv9WLLXv6J7+8IePp2K+BWs682UwpLDlgcXKO5B9PmFnBKlmDsTIGdNRI
-        dXsS94S1BRtIedFxQBWzZWchX1i+KE3fTEa4wWg7o2DuOd2DkwMRuZRE6pDNdQev8iPcEtOqkMUTJ
-        95dq+kUH41pI1HTb5x9NlqJj+6CPeT/Fg7fIxntjMrZJU9G2OzU0dL7hOTupGq0QlIBFWY8Z0KJgv
-        +vy/hRBfe8+bf0E1zw4V9Xv9u+kiqX2KXiCY0DzbZDCzL9L3IpxXj8SFmuxwfcf8K+e33fDPznX39
-        khqng3bg==;
-Received: from 2a02-8389-2341-5b80-39d3-4735-9a3c-88d8.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:39d3:4735:9a3c:88d8] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-        id 1qJAJQ-00EPCe-08
-        for fstests@vger.kernel.org;
-        Tue, 11 Jul 2023 10:09:40 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     fstests@vger.kernel.org
-Subject: [PATCH 2/2] generic: add a test for device removal without dirty data
-Date:   Tue, 11 Jul 2023 12:09:31 +0200
-Message-Id: <20230711100931.175680-3-hch@lst.de>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230711100931.175680-1-hch@lst.de>
-References: <20230711100931.175680-1-hch@lst.de>
+        with ESMTP id S231219AbjGKPw3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jul 2023 11:52:29 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 616A69C
+        for <fstests@vger.kernel.org>; Tue, 11 Jul 2023 08:51:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1689090711;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type;
+        bh=2aS3+6YGHduZDD1v2t1tUuR1t8lJ6ds7x80UTz92VwU=;
+        b=VAOByqOwCb6/8oVQXD1NYKz7I+fObEcT4LUVZuQz6/36wScekQwuxwbnxFZEfG7fDjNpqg
+        gYX2NvXFu+3kHoONq8+UKbVncdb0dboVwpWP4jvfMKAqwE3ha1X+BoTQAaZzj6CF3iDQd5
+        3V9fyt2wLQwJL826Zb2rGBvoIRIOKQ4=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-60-oGpheeOCNq-MdXv4mRVKdA-1; Tue, 11 Jul 2023 11:51:48 -0400
+X-MC-Unique: oGpheeOCNq-MdXv4mRVKdA-1
+Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D0EC91066544;
+        Tue, 11 Jul 2023 15:51:47 +0000 (UTC)
+Received: from file1-rdu.file-001.prod.rdu2.dc.redhat.com (unknown [10.11.5.21])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id BB1CC492B01;
+        Tue, 11 Jul 2023 15:51:47 +0000 (UTC)
+Received: by file1-rdu.file-001.prod.rdu2.dc.redhat.com (Postfix, from userid 12668)
+        id CB74F3096A42; Tue, 11 Jul 2023 15:51:42 +0000 (UTC)
+Received: from localhost (localhost [127.0.0.1])
+        by file1-rdu.file-001.prod.rdu2.dc.redhat.com (Postfix) with ESMTP id C78103F7CF;
+        Tue, 11 Jul 2023 17:51:42 +0200 (CEST)
+Date:   Tue, 11 Jul 2023 17:51:42 +0200 (CEST)
+From:   Mikulas Patocka <mpatocka@redhat.com>
+To:     Eryu Guan <eguan@redhat.com>, Zorro Lang <zlang@kernel.org>
+cc:     fstests@vger.kernel.org,
+        Kent Overstreet <kent.overstreet@linux.dev>
+Subject: [PATCH] generic/558: limit the number of spawned subprocesses
+Message-ID: <2bb7705c-9a1a-6185-4554-9121e5cda710@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=US-ASCII
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test the removal of the underlying device when the file system still
-does not have dirty data.
+When I run the test 558 on bcachefs, it works like a fork-bomb and kills
+the machine. The reason is that the "while" loop spawns "create_file"
+subprocesses faster than they are able to complete.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+This patch fixes the crash by limiting the number of subprocesses to 128.
+
+Signed-off-by: Mikulas Patocka <mpatocka@redhat.com>
+
 ---
- tests/generic/731     | 58 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/731.out |  2 ++
- 2 files changed, 60 insertions(+)
- create mode 100755 tests/generic/731
- create mode 100644 tests/generic/731.out
+ tests/generic/558 |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/tests/generic/731 b/tests/generic/731
-new file mode 100755
-index 00000000..4a6a2355
---- /dev/null
-+++ b/tests/generic/731
-@@ -0,0 +1,58 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-+# Copyright (c) 2023 Christoph Hellwig
-+#
-+# Test proper file system shut down when the block device is removed underneath
-+# and it has no dirty data.
-+#
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
-+	_put_scsi_debug_dev
-+	rm -f $tmp.*
-+}
-+
-+. ./common/filter
-+. ./common/scsi_debug
-+
-+# We don't actually use the test device, but we need a block based fs
-+_require_test
-+_require_block_device $TEST_DEV
-+_supported_fs generic
-+_require_scsi_debug
-+
-+physical=`blockdev --getpbsz $SCRATCH_DEV`
-+logical=`blockdev --getss $SCRATCH_DEV`
-+
-+SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
-+test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
-+echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
-+
-+_mkfs_dev $SCSI_DEBUG_DEV
-+
-+_mount $SCSI_DEBUG_DEV $SCRATCH_MNT
-+
-+# create a test file
-+$XFS_IO_PROG -f -c "pwrite 0 1M" -c "fsync" $SCRATCH_MNT/testfile >>$seqres.full
-+
-+# open a file descriptor for reading the file
-+exec 3< $SCRATCH_MNT/testfile
-+
-+# drop all caches and delete the scsi debug device
-+echo 3 > /proc/sys/vm/drop_caches
-+echo 1 > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/delete
-+
-+# try to read from the file, which should give us -EIO
-+cat <&3 > /dev/null
-+
-+# close the file descriptor to not block unmount
-+exec 3<&-
-+
-+status=0
-+exit
-diff --git a/tests/generic/731.out b/tests/generic/731.out
-new file mode 100644
-index 00000000..102c0522
---- /dev/null
-+++ b/tests/generic/731.out
-@@ -0,0 +1,2 @@
-+QA output created by 731
-+cat: -: Input/output error
--- 
-2.39.2
+Index: xfstests-dev/tests/generic/558
+===================================================================
+--- xfstests-dev.orig/tests/generic/558
++++ xfstests-dev/tests/generic/558
+@@ -48,6 +48,7 @@ echo "Create $((loop * file_per_dir)) fi
+ while [ $i -lt $loop ]; do
+ 	create_file $SCRATCH_MNT/testdir $file_per_dir $i >>$seqres.full 2>&1 &
+ 	let i=$i+1
++	if [ $((i % 128)) = 0 ]; then wait; fi
+ done
+ wait
+ 
 
