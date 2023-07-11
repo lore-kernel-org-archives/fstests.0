@@ -2,93 +2,53 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD5B3EB64D9
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 Jul 2023 09:10:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E21C0EB64DC
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 Jul 2023 10:09:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231273AbjGJJK5 (ORCPT
+        id S231139AbjGKKJj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 Jul 2023 05:10:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41202 "EHLO
+        Tue, 11 Jul 2023 06:09:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48370 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231358AbjGJJKv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jul 2023 05:10:51 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 945E9100
-        for <fstests@vger.kernel.org>; Mon, 10 Jul 2023 02:10:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1688980209;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=0q1N+KdGgbcn7sWWxv1wc0IDT0uUUrSHOTo56c4NlAo=;
-        b=fXyod4s0JWvlyPh7J4nPuwbYKSzK4BfTKj+ykz1dbvMzdyAoJwF3kbuXED6lCrEtov2b9p
-        9ld6ofadjhi/R9RTHYCmjk/ri5ENyg22Q8EB9FzDWaw0Zq8ddUBaujC7E6Kvn9B0hGITfV
-        h96uhnuUcf+aboYmp/CB2vmjxMr/ok4=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-573-JSY_sC8MPIqnQqGUgAwNNQ-1; Mon, 10 Jul 2023 05:07:25 -0400
-X-MC-Unique: JSY_sC8MPIqnQqGUgAwNNQ-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D5B93803B25;
-        Mon, 10 Jul 2023 09:07:24 +0000 (UTC)
-Received: from greebo.redhat.com (unknown [10.39.193.57])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 11552F5CED;
-        Mon, 10 Jul 2023 09:07:23 +0000 (UTC)
-From:   alexl@redhat.com
+        with ESMTP id S229468AbjGKKJg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jul 2023 06:09:36 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0E84A9
+        for <fstests@vger.kernel.org>; Tue, 11 Jul 2023 03:09:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:Message-Id:Date:Subject:To:From:Sender:Reply-To:Cc:Content-Type:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=lmPrliL9/DZw2AVbU1dsW5Q+Kb1nNBxiG7XeG1r/NRg=; b=QWgLMs3NY2KQrZmrelgVSXcUIW
+        rSi3ffWdKJQONruo6W1/O7KBi9feVEC837Fs298MpTefFSrWGow/o1Kd4CYlhQ9+y6/MndoQ15rtR
+        HqWM/HTMsSpDoYFFbpbDxe3AMo3Jdm5ypP5WhAU04geKu7QCAEeC1bO+rG/qgArY4103C2XQjXBBw
+        VkicsMV95+uLzVsmoEP2OYDYUSsrlmry0+efy+nmA2PIp5lagbjSsVrIWrpYEpnxqO3WtFJpBS71b
+        sULp9P2vlLNGGQAjprUUUY1n6vUxRlslyhcZdgB+NLtQHD0ekrh/GutB/h3a/rP2pGRysGIx42C2t
+        KxkKkaSA==;
+Received: from 2a02-8389-2341-5b80-39d3-4735-9a3c-88d8.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:39d3:4735:9a3c:88d8] helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
+        id 1qJAJL-00EP7q-0q
+        for fstests@vger.kernel.org;
+        Tue, 11 Jul 2023 10:09:35 +0000
+From:   Christoph Hellwig <hch@lst.de>
 To:     fstests@vger.kernel.org
-Cc:     linux-unionfs@vger.kernel.org, amir73il@gmail.com, alexl@redhat.com
-Subject: [PATCH v2 1/4] overlay: add helper for mounting rdonly overlay
-Date:   Mon, 10 Jul 2023 11:07:10 +0200
-Message-Id: <d1be127cafcbbc7b25798d220e8c568bb7972a7c.1688979643.git.alexl@redhat.com>
-In-Reply-To: <cover.1688979643.git.alexl@redhat.com>
-References: <cover.1688979643.git.alexl@redhat.com>
+Subject: add device removal test v2
+Date:   Tue, 11 Jul 2023 12:09:29 +0200
+Message-Id: <20230711100931.175680-1-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Amir Goldstein <amir73il@gmail.com>
+Hi all,
 
-Allow passing empty upperdir to _overlay_mount_dirs().
+this series adds two tests for removing a device underneath the
+file system.  This covers the new shutdown handling series I'm
+posting.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-Signed-off-by: Alexander Larsson <alexl@redhat.com>
----
- common/overlay | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/common/overlay b/common/overlay
-index 20cafeb1..452b3b09 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -17,15 +17,19 @@ if [ -n "$OVL_BASE_FSTYP" ];then
- fi
- 
- # helper function to do the actual overlayfs mount operation
-+# accepts "-" as upperdir for non-upper overlayfs
- _overlay_mount_dirs()
- {
- 	local lowerdir=$1
- 	local upperdir=$2
- 	local workdir=$3
- 	shift 3
-+	local diropts="-olowerdir=$lowerdir"
- 
--	$MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
--		    -o workdir=$workdir `_common_dev_mount_options $*`
-+	[ -n "$upperdir" ] && [ "$upperdir" != "-" ] && \
-+		diropts+=",upperdir=$upperdir,workdir=$workdir"
-+
-+	$MOUNT_PROG -t overlay $diropts `_common_dev_mount_options $*`
- }
- 
- # Mount with same options/mnt/dev of scratch mount, but optionally
--- 
-2.40.1
-
+Changes since v1:
+ - renumbered the tests
+ - add a check that the tests are only run on block based file systems
