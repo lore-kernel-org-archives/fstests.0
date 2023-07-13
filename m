@@ -2,204 +2,448 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45815C0015E
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Jul 2023 15:11:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B1A7C001E0
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Jul 2023 15:18:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232911AbjGMPLN (ORCPT
+        id S229821AbjGMPST (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Jul 2023 11:11:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46080 "EHLO
+        Thu, 13 Jul 2023 11:18:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232807AbjGMPLM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2023 11:11:12 -0400
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28CB5106
-        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 08:11:09 -0700 (PDT)
-Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36DEJ6Hn016913;
-        Thu, 13 Jul 2023 15:11:03 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2023-03-30;
- bh=s7zyAw4qaqe/kCnomdyqIAIdlgnjvwjgfXPP9jOy9JM=;
- b=nTJ8pldXSBoT0VYEnKGzE8R3YucrxOuEld4FhHGXVDTrI3BbTx5pA/8bVsKR7Inl8DiT
- pa479QzGXY5dwsVeQGfYaYReviNffTfu8aTTfd6LkAXdXQcRDidu7Ey/kXrjXe+VzKLB
- ePGBEaG1N+is6F//3HYgOfcjVlJBBYT5vh1iPvZNKEs3CFYVVdDSdWVdU915iVISqssS
- 3UgJAkmDyOfcHA/Tygjce9No9XaFR6la1ZHquakdLRh2qmaLx7Elw6K/njvk6E7GEp/E
- w33WosjkvapeQ9zcXsshpGqk/wyOaPZXgQFyBenp/p6DxRWutzDr4dPvESr0fNn2sfTj Fw== 
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3rr8xur903-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 13 Jul 2023 15:11:03 +0000
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 36DEFEuS008355;
-        Thu, 13 Jul 2023 15:11:02 GMT
-Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2176.outbound.protection.outlook.com [104.47.57.176])
-        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3rpx8esfw5-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 13 Jul 2023 15:11:02 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=K1qKva+1h48p7kitrJnUhf8d15bg0AFBbtcjaMVAewpje9MS6By8RridK0z3nbCtzV7VMY2QWkFiCiKAeA2usDyTBegISjUiRt9ovaVAzwYcatGgkIZg6HFSIVcZwuBSO7LpSAOAtXF5UEUVQM9CzohMPpwOnZkjMzvFMn2M1Q+BjVbKtSnbmADgBdtkWcjSTfLJQzPxbtbr9H1cSdyoAqQymHdJ8+ST1ZzhrGCqo4DcskMjTz0QBHzw74UF1q9JSjeVW6Ibb4e6RGrCtcZ/lZhNiEushhI9KDLcMO0sQLfbIeKn2R9qNi12IMId3erHfgRJW+PugnvHQTU8vqHEYw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=s7zyAw4qaqe/kCnomdyqIAIdlgnjvwjgfXPP9jOy9JM=;
- b=ALEYoq7sydPXwC8RmE3EFDY90Fm8ghpML2bnPhqbHQIP1/IIbbkzW5YheVST/O4gcvRnEHzaAFJkloZmbFRs7rSgLe316ZPwK/4m9+Nyhdva4ZIee9rFRYgoF0MofgJ51Q/G1+oWwVGchffm9aCuHqoUmgd7+1o8nxqjX30/98zkb8DZ137ElJT3tFAUh9FY4zRd7q7gl6aTAXMGbodvmUWtnzd0Cpes1lQ3MN9p9r+Ch1KqwKeZ4Wxo787BSWOmdHJdZwD6ujhqCXEHua9LN9NYm06JUrIQpbEZ5qUZvBZX9frsC8EZSxekUWJVQckEJFM9GlYPQx9cZv1RcAB89Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=s7zyAw4qaqe/kCnomdyqIAIdlgnjvwjgfXPP9jOy9JM=;
- b=gA4bDbJDJ7yallZEbhO7A7GwmkhJYY2L/M0tzmV6T8Adwlk7wrGn5ibpakumL0Ruq9eBkAKMQnc41MNoeoj6T3za8ybVyniH0VkC1XMUlcwVBCu9zqbKSK0HQMC6BEd1PfxSv61iO+ey1RmRWdNi/k6ozHk/R6/VN+Z3gQzuEnY=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by PH7PR10MB6153.namprd10.prod.outlook.com (2603:10b6:510:1f7::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6588.22; Thu, 13 Jul
- 2023 15:10:59 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::a42d:1dc1:64e1:f814]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::a42d:1dc1:64e1:f814%4]) with mapi id 15.20.6588.017; Thu, 13 Jul 2023
- 15:10:59 +0000
-Message-ID: <df936e0b-fdd1-458b-370f-5041108551b9@oracle.com>
-Date:   Thu, 13 Jul 2023 23:10:51 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH] btrfs/237: adapt the test to work with the new reclaim
- algorithm
-To:     Pankaj Raghav <p.raghav@samsung.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-        fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>
-Cc:     Pankaj Raghav <pankydev8@gmail.com>, gost.dev@samsung.com
-References: <CGME20221216105822eucas1p1370af7eb55b70fed78ee43f932b214d0@eucas1p1.samsung.com>
- <20221216105750.28493-1-p.raghav@samsung.com>
- <f6365013-ab73-5b2b-6dba-3b628dbe1b56@oracle.com>
- <b1bee446-4099-e605-ce59-e9cdaf19bd25@samsung.com>
-From:   Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <b1bee446-4099-e605-ce59-e9cdaf19bd25@samsung.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: SI2PR02CA0048.apcprd02.prod.outlook.com
- (2603:1096:4:196::23) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+        with ESMTP id S233700AbjGMPR4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2023 11:17:56 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCA08211F
+        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 08:16:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1689261413;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=qgfu1x6RsC4vMea5emhA3sJiRxc6PO/XJNdHPEORsD8=;
+        b=JyX45XoWkMQ/4c+4uzAiXbAIZpT20ETw48pNRERxVZu0EmBOpttytqjrm4PZwCqmRa155Z
+        5WwwCz2CV7+W430gw8QYOFB2I+lXOM2UqjgeFNOdoh3mYLEhcTNvsFjiY5eKP+eLQnKxxD
+        CaZ6c9yLr9E/urtPmPg728jp/2BiW1s=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-618-4z5UmZ7DMv2ClkrCIPiPKg-1; Thu, 13 Jul 2023 11:16:51 -0400
+X-MC-Unique: 4z5UmZ7DMv2ClkrCIPiPKg-1
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-262e0b15ad3so564904a91.2
+        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 08:16:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689261410; x=1691853410;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qgfu1x6RsC4vMea5emhA3sJiRxc6PO/XJNdHPEORsD8=;
+        b=Y+mMrl/vBDVrReTCxeihn6N4AHP8SbSdCTgYziBqrt/EqhIkNKyeuwO1qVJpcdMdqh
+         w1b+YHcb2hD0MfzN0ndmSRQF09GZv3cB59G0Tio6VugIyAjgOoEY4iMIn7sC8eAcrE6g
+         l4AyGQancMr8ubW6GbDXQpIG0K/PNWMXlVRimE1HNLeNqbjuo4RfybEz8Inmx38WNx42
+         83OyhTiBzoP7A0eo4t31/FoSv8XHs3shQLk2H5RoCsjRlr2npdsRcr5+wyrCtdCrwPSM
+         1xULNVUyKd/zD9NyvI87JFYJFCALxKKAtb1JOWPA2W9bMQO/nbncXJbpSF+U20HNA1Wh
+         ky0w==
+X-Gm-Message-State: ABy/qLZuPhOzJ1/z6fswFt8bx4+pxlISfoXTOtpu+a8h8TQsmOf+5W97
+        B9bXGURiUFBmFTgASlypSg+uct6H2j8CYUz0rxXwMaGlH+glY47s1MNP+5GcqeYuH8IFBLkuB+R
+        OEU/TUxMWY5C0vYF5EonoaISGWKkiqsE=
+X-Received: by 2002:a17:90b:1885:b0:263:2da2:fe9b with SMTP id mn5-20020a17090b188500b002632da2fe9bmr1607728pjb.21.1689261410292;
+        Thu, 13 Jul 2023 08:16:50 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlFQ7vbulpq2cqVvrqBlTpPeIInX23kTqtAcOvntX69+f8TnIhHkYY09e4KCOTLUXAnFtOn2cA==
+X-Received: by 2002:a17:90b:1885:b0:263:2da2:fe9b with SMTP id mn5-20020a17090b188500b002632da2fe9bmr1607712pjb.21.1689261409917;
+        Thu, 13 Jul 2023 08:16:49 -0700 (PDT)
+Received: from zlang-mailbox ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id gm13-20020a17090b100d00b00259e553f59bsm11910998pjb.20.2023.07.13.08.16.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Jul 2023 08:16:49 -0700 (PDT)
+Date:   Thu, 13 Jul 2023 23:16:45 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH] xfs: add a couple more tests for ascii-ci problems
+Message-ID: <20230713151645.7dztbrccuy2i4co7@zlang-mailbox>
+References: <20230711202528.GB11442@frogsfrogsfrogs>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|PH7PR10MB6153:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7fa804ef-87b0-4671-33bb-08db83b35d7a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: zJvAuumKpgNXMWmH0732eAthu/31EScAecBj6KFPthzQV5HUDpx1Q8i9TifYjMjXz8/PIoJeoGZYdbAWKoudAzfPQ3tMC+X0uOKYc0C9h8PxgQcdHtrgG8T7wMdA0ArRIGVN0Qyw5QXir7dC2uTv9Z3Dxy8jtk7qyWKNQNfW/5tsvniYygrhFAcDy0u+VVXQkC1A3LtpOalUpA/Yq2QwgW3ufD0p4/gkOkFdn309cPV1lEfGNvLYQwPts1smCC0OO99Un9Q5qkwFn0kqNlRxS89waK2d9GNAjFjEpBqOgL9NubZ1kjLx8FL6ZIJGgZUwZ+Y38Qv4mbMmIcx2cDuBxDWR3Mzr9XMvaxPm1z8d5bJZfrOKIXZXNgZ/3atmTa6UQHqYCjRzoBklMz7bVpmu3aBq9CM8sqY4ofNeUZku2CEnINacHLZ7kRViyX9/wCK7d9XvoNe3Sb+EtAqei8HWECEHI2GRUKMjb0ou7FWCMus5xTu+RYiVhOGLnnmOIyCZ+KOgc6Qrz1u5Aq04aL3GsL5NlJ1NcPNQD9Pqx/brNCj4oCXBmt1FIkBO0uEILXhapuJkmexYsSjJGBYVSMXyT0I4yP9GI0FkqHktblBiVENd5+flBIooIVl6sYvlWU9L9b5NExDoxKwejjuIhK17bA==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(366004)(346002)(376002)(136003)(39860400002)(396003)(451199021)(6486002)(966005)(6512007)(6666004)(186003)(6506007)(53546011)(83380400001)(36756003)(2616005)(26005)(86362001)(31696002)(38100700002)(4326008)(66476007)(66946007)(66556008)(2906002)(41300700001)(316002)(44832011)(31686004)(8936002)(8676002)(110136005)(5660300002)(478600001)(45980500001)(43740500002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?bkJNT0c5eUJ2bXFXSjNEd3pkUTJ4Sk92Nit2a3RKNWhTenErRldqd0NRN0Vz?=
- =?utf-8?B?QTdkcDV6RStFZ1ZGejRHSjgxMjhoVHk4ZmNCVEx4MmU4bFFjdC8vc2xkM1JN?=
- =?utf-8?B?cHNyNmZrdUxwWmEveGpiTFZnaWFPQXVYei9TZExFbFFlREcxU0lQZVJrdFhl?=
- =?utf-8?B?TlR1OTh5Q2doRG1rYUZlNXYvdW9jS1k2Tmk2OEtpU1FhSElFaXl1ZUhPZnpj?=
- =?utf-8?B?bGNlL25TeDErUGs1eVFBQ21aZFlQWHpwLzRUNHVkaGFtVFQ4UnNCV01yMkxG?=
- =?utf-8?B?eGR1T2lqNE9FaUM5cWpNUm5EUXpPNVRINXR5Tlh6dVpjUWJzTzB4aUVMYlk0?=
- =?utf-8?B?OVhnRzVkTnZlS1ErQkU0TjB4YjJtNk1iM2hpNGozNU5oRVVQRDU4aEQ2T2FC?=
- =?utf-8?B?aWhCeE80aVp2dkZzMUVRQWlMNVcwK2pPM0JET1hMeXNnU2RxaVpUa2VkODU0?=
- =?utf-8?B?U0s5azdaNFFRK2puSlRVeGZzOWxlVElpSkNNRE5LUDlYRE9KTVhjT3UwblBk?=
- =?utf-8?B?Sm0vVVl2NGdaSzNINVpHSDZ0bVMyUTlWRHJiYlJ3cEJ1aktjWXRIaHU1Z0tD?=
- =?utf-8?B?WmoyMHc0U2JMdDNTemZneHR5dnhLODJ4dWtCL04xbHJzWlExejd6ajVUeC9s?=
- =?utf-8?B?UnRDMU8rdzZJMjZGdDJsUmFBOVB3Zy9KNE1HSzhDZ2FkNlEwaHo3aXVTbjJW?=
- =?utf-8?B?djlCMW9EVEd5VlQwelZodytUNU9HSnRxbVVvVXFDNG54aDZ4ZzdXYVZCL210?=
- =?utf-8?B?STdZaWFTWjBIeEdFeU90L3ZvbVY4bUJUd2J5bXdqd0QwZzhJd0hPb1NjNGhu?=
- =?utf-8?B?RGJTODMyZksrWVlsU3BkcGVNUFREYWtSK1JUYko5WDl5UTFseXlmN2k5MDZk?=
- =?utf-8?B?S1hMUzVDdWd4THFQdmVNSS95OGdXRWJTTU0yekEzYzEvNU1pMTdDUDdocmVE?=
- =?utf-8?B?OElxTHN1alova0tJWGwvc2h1d25JQmkrK1dhendzenFSYzZhSDJURmREZHFL?=
- =?utf-8?B?cE1hZWR3OENVWmxJUDA3LzNuZzF4Z29RVzgxclZSdWV6MG9mOTBRUmNqUEs4?=
- =?utf-8?B?emN3VGZ6ZFFRUDFwU1BhTnk1Uy9aQW1BeUtNWHdDdWRNaE12cUhsZHg2R3dn?=
- =?utf-8?B?cmt4UzZlMmE0MmlVd01vSVp0ZHNPSGpvcTNieGM0T3U1cE5WTEJpcnY2SHY1?=
- =?utf-8?B?OVIycEdaWGhxQUpxSUdLeUQzM2hZNVdlRmJldEF1N2ZNTGdXVE5yYjJnaEdh?=
- =?utf-8?B?R3h3Z1hkblZ0S2ZKaFZQemNQcUNqTjVWWmpxSXZQZi84RUU3UjZ6dGl2cFpD?=
- =?utf-8?B?aGdpNi9pOWVYbjZMUFIvRUxsbjRFb1ZIRkxSYnYxaTZkSmNxcFRhZnVoRnZt?=
- =?utf-8?B?WEtsaE1yWXRHZlhiTWM1VEtBY3VocmQzWWMwRmpwRVRCV2R6VFFqWUgwb1Zr?=
- =?utf-8?B?UXFqZ2JDY1k5Tlp3Tk5TVExyK1FCL25DODArOWdBd1g0b0k2NmM0aUpDNnhl?=
- =?utf-8?B?QlE3dTh3cHpya2pFcklXamU1QVR2WjJzOFNJTmkrREhFWCtNSElyLzMxVXBt?=
- =?utf-8?B?RE14VjFoaVcyMjhlbGFGR3JRemFKSGlTdHgyZHhoMjUwM09LL2dUVkVGQjRT?=
- =?utf-8?B?Qk5BMEt2Q1pPMEFZM0U2WEE4NFlWK1BPS2wwa1hIcktneVVLdWtnNFhDKzFR?=
- =?utf-8?B?Q1Z1S3V5eXhUdkt0b3RrQ1IxcUNCb0VKcE1DTFRpZlpYNXFDRDNBTjFKaW9J?=
- =?utf-8?B?NHE3aHpZUm1QcVdIbytCQ0h1RHo2YTNxK0t5bFp6dnVybzRRK0VBQ0Jpb2hB?=
- =?utf-8?B?NFBNd0dpRkM2OGt4VVBkYVNxSXUxcW9obklaME5odWdpcENqNWlVaTk1M0I2?=
- =?utf-8?B?RUFjeXBkSlhRSWxVVk1ZUG1GejFiVVU2dFVnN2dmcGNsbUdNR3ROaVJtbEpR?=
- =?utf-8?B?cWM4Yys0aGJJcDFLYzh2RVdnL2oxSkdYZkx4Qm1NNTFGOCtnLzdDWTlSTk1U?=
- =?utf-8?B?elJxejNhcGJRK1NZZXhZRjhEZjY5NCs2VG9qU2ZRRXkwTm05V0VpdnNkek11?=
- =?utf-8?B?ZzhMaUR1Lyt1QUVhZDE2ZkVqTWZiUUI0d0hxYzI5Nm00N1dRMGxjRmlvMmQ5?=
- =?utf-8?Q?Z18VGqNrzKEawGICLXqxv+FKi?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: SqV6ODL38X1Oyo1NqBmxss0ZVSxhSMH52jnA+iKsmCxl/223rhC8HH/0sJfLXtC60va69X92l0hkz5RvFsMpjDZag1UOGjAJiZij42c7E+9KoDgxOIasUjTL63piIszrqZShK0N3LjmEsp/zA4+I69rETcv9bIC8XqcE182UxrSgABk3+d71N4kGIO1shW7peHsAd1Jpwra3puxFulKgUJWL228/F+sqpNZWrMYJqmRusA2C2qOmWSnZmO0Aan8zLpJyqSdOCT91B6/cKPe6dTS7LJsBoZjQSVEw4wSiuEJaKkp9fQW8xZIPHPyrgW3EmLGcTGsG/LBBKYXp0cTq9ZqOZ5esb4IXwNbFVgI+Ob6Wznx605Bn4sR7CsHwOxwuXl7AE1CBZFM5F8+KDZC3FccoXcEBJnIw8wX/5kvilhXsJasxeLDoQUt41IYu37yo7dYCQ0iiHu3OHlBsOO3C4s+Ueo+oGCqGnVz5SM3+u3o0uLfog6AJwgQRatiyeqO1z9468/NRdC+QyD/wNKWpzT3Ssd7Jjp01phYYIy4nG0nxKeOzcS4tYE01DJAO34sKAfFY9kOYmh8KDKImy58LHHUxs6ND7v0SlDP3tHKWEJM7Yik7JAVLJyWDB4+ubyv4jGqPq8MFw0T01ttcKM7GmUkkriNNMk/K3tRHvHVByuB9vxoGcL7xD42u/wgRAU89VzlJJ51pdBiNNuERZ7SWk5NVkKvemCwPpPnTgpFhno/AC1jhg36X7KEGZ0qCqkCFBQUyCqyzE++9XwXwXKlh2cMG7b4GadbsH3FFuI8MNCgFkEyTnXcsS1d4V+bzUM5p2scx6R79Bpf5ckggwknG3rbcwbYqpFq0lQ3h4iw+Fbt+03rjp8VXooP2eRwTUTir
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7fa804ef-87b0-4671-33bb-08db83b35d7a
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Jul 2023 15:10:59.7181
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: aDc8Vt443GrPmgbngI1xmZIbfd2oAOc2QaswnstarSon/tKtwSMsM4gg/4Mx1C/LIvaeuIjvfmGuRpgmgDImOA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR10MB6153
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-07-13_05,2023-07-13_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 spamscore=0 mlxlogscore=999
- adultscore=0 suspectscore=0 mlxscore=0 malwarescore=0 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2305260000
- definitions=main-2307130133
-X-Proofpoint-GUID: PAPFW4qvi7wFx4cDixAV8RobIvQg00QE
-X-Proofpoint-ORIG-GUID: PAPFW4qvi7wFx4cDixAV8RobIvQg00QE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230711202528.GB11442@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Tue, Jul 11, 2023 at 01:25:28PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Add some tests to make sure that userspace and the kernel actually
+> agree on how to do ascii case-insensitive directory lookups, and that
+> metadump can actually obfuscate such filesystems.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/859     |   64 ++++++++++++++++++++++++++++++++++
+>  tests/xfs/859.out |   24 +++++++++++++
+>  tests/xfs/860     |  100 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/860.out |    9 +++++
+>  tests/xfs/861     |   90 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/861.out |    2 +
+>  6 files changed, 289 insertions(+)
+>  create mode 100755 tests/xfs/859
+>  create mode 100644 tests/xfs/859.out
+>  create mode 100755 tests/xfs/860
+>  create mode 100644 tests/xfs/860.out
+>  create mode 100755 tests/xfs/861
+>  create mode 100644 tests/xfs/861.out
+> 
+> diff --git a/tests/xfs/859 b/tests/xfs/859
+> new file mode 100755
+> index 0000000000..e99619c12f
+> --- /dev/null
+> +++ b/tests/xfs/859
+> @@ -0,0 +1,64 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 859
+> +#
+> +# Make sure that the kernel and userspace agree on which byte sequences are
+> +# ASCII uppercase letters, and how to convert them.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto ci dir
+> +
+> +# Override the default cleanup function.
+> +# _cleanup()
+> +# {
+> +# 	cd /
+> +# 	rm -r -f $tmp.*
+> +# }
 
+Need to remove.
 
-On 13/07/2023 20:04, Pankaj Raghav wrote:
-> 
-> Hi Anand,
-> 
-> On 2023-07-12 09:06, Anand Jain wrote:
->> On 16/12/22 18:57, Pankaj Raghav wrote:
->>> Since 3687fcb0752a ("btrfs: zoned: make auto-reclaim less aggressive")
->>> commit and cc4804bfd639 ("btrfs: skip reclaim if block_group is empty"),
->>> reclaim algorithm has been changed to be less aggressive, which breaks this
->>> test.
->>>
->>> The test has been adapted so that the new auto-reclaim algorithm can be
->>> tested with the following flow:
->>> - Write a small file
->>> - Write a big file that crosses the reclaim limit
->>> - Delete the big file
->>> - Check that only the block group that contained the small file is reclaimed,
->>>     and the small file is relocated to a new block group.
->>> ---
->>
->> SOB is missing.
->>
->> Pankaj, this patch has not been integrated yet.
->> Could you please resend it?
->>
-> 
-> Actually, I encountered an issue with this testcase where it worked
-> perfectly well for smaller drives, but started to fail for bigger ZNS drives.
-> 
-> Thread: https://lore.kernel.org/all/20220819115337.35681-1-p.raghav@samsung.com/
-> 
-> Could you try it in your setup and see if it works correctly?
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +_fixed_by_kernel_commit a9248538facc "xfs: stabilize the dirent name transformation function used for ascii-ci dir hash computation"
+> +_fixed_by_kernel_commit 9dceccc5822f "xfs: use the directory name hash function for dir scrubbing"
+> +
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_mkfs_ciname
+> +
+> +_scratch_mkfs -n version=ci > $seqres.full
 
-Right. I'm also facing some issues. However, the stack trace indicates
-a memory error, which I attributed to my low-resourced nullb device.
-I'm trying to emulate a zoned device using other methods, but I haven't 
-been successful yet.
+Ok, as you've check the version=ci in _require_xfs_mkfs_ciname, I think we don't
+need check the return status of this _scratch_mkfs.
 
-Thanks, Anand
+> +_scratch_mount
+> +
+> +# Create a two-block directory to force leaf format
+> +mkdir "$SCRATCH_MNT/lol"
+> +touch "$SCRATCH_MNT/lol/autoexec.bat"
+> +i=0
+> +dblksz=$(_xfs_get_dir_blocksize "$SCRATCH_MNT")
+> +nr_dirents=$((dblksz * 2 / 256))
+> +
+> +for ((i = 0; i < nr_dirents; i++)); do
+> +	name="$(printf "y%0254d" $i)"
+> +	ln "$SCRATCH_MNT/lol/autoexec.bat" "$SCRATCH_MNT/lol/$name"
+> +done
+> +
+> +dirsz=$(stat -c '%s' $SCRATCH_MNT/lol)
+> +test $dirsz -gt $dblksz || echo "dir size $dirsz, expected at least $dblksz?"
+> +stat $SCRATCH_MNT/lol >> $seqres.full
+> +
+> +# Create names with extended ascii characters in them to exploit the fact
+> +# that the Linux kernel will transform extended ASCII uppercase characters
+> +# but libc won't.  Need to force LANG=C here so that awk doesn't spit out utf8
+> +# sequences.
+> +old_lang="$LANG"
+> +LANG=C
 
+Actually fstests test LANG=C by default in common/config:
+  export LANG=C
+  export LC_ALL=C
+
+Anyway, I don't mind we make sure LANG=C in this case.
+
+> +awk 'END { for (i = 192; i < 247; i++) printf("%c\n", i); }' < /dev/null | while read name; do
+> +	ln "$SCRATCH_MNT/lol/autoexec.bat" "$SCRATCH_MNT/lol/$name" 2>&1 | _filter_scratch
+> +done
+> +
+> +LANG=$old_lang
+
+How about package your code into a local function (e.g. do_test), then does:
+
+LANG=C do_test
+
+Will that help? If so, that can help to avoid the LANG set and restore. Or
+we'd better to restore the LANG in _cleanup of this case.
+
+(similar review points to below cases)
+
+Thanks,
+Zorro
+
+> +
+> +# Now just let repair run
+> +
+> +status=0
+> +exit
+> diff --git a/tests/xfs/859.out b/tests/xfs/859.out
+> new file mode 100644
+> index 0000000000..a4939ba670
+> --- /dev/null
+> +++ b/tests/xfs/859.out
+> @@ -0,0 +1,24 @@
+> +QA output created by 859
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\340': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\341': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\342': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\343': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\344': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\345': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\346': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\347': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\350': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\351': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\352': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\353': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\354': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\355': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\356': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\357': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\360': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\361': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\362': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\363': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\364': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\365': File exists
+> +ln: failed to create hard link 'SCRATCH_MNT/lol/'$'\366': File exists
+> diff --git a/tests/xfs/860 b/tests/xfs/860
+> new file mode 100755
+> index 0000000000..42f16efe6c
+> --- /dev/null
+> +++ b/tests/xfs/860
+> @@ -0,0 +1,100 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 860
+> +#
+> +# Make sure that metadump obfuscation works for filesystems with ascii-ci
+> +# enabled.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto dir ci
+> +
+> +_cleanup()
+> +{
+> +      cd /
+> +      rm -r -f $tmp.* $testdir
+> +}
+> +
+> +_fixed_by_git_commit xfsprogs 10a01bcd "xfs_db: fix metadump name obfuscation for ascii-ci filesystems"
+> +
+> +_supported_fs xfs
+> +_require_test
+> +_require_scratch
+> +_require_xfs_mkfs_ciname
+> +
+> +_scratch_mkfs -n version=ci > $seqres.full
+> +_scratch_mount
+> +
+> +# Create a two-block directory to force leaf format
+> +mkdir "$SCRATCH_MNT/lol"
+> +touch "$SCRATCH_MNT/lol/autoexec.bat"
+> +i=0
+> +dblksz=$(_xfs_get_dir_blocksize "$SCRATCH_MNT")
+> +nr_dirents=$((dblksz * 2 / 256))
+> +
+> +for ((i = 0; i < nr_dirents; i++)); do
+> +	name="$(printf "y%0254d" $i)"
+> +	ln "$SCRATCH_MNT/lol/autoexec.bat" "$SCRATCH_MNT/lol/$name"
+> +done
+> +
+> +dirsz=$(stat -c '%s' $SCRATCH_MNT/lol)
+> +test $dirsz -gt $dblksz || echo "dir size $dirsz, expected at least $dblksz?"
+> +stat $SCRATCH_MNT/lol >> $seqres.full
+> +
+> +# Create a two-block attr to force leaf format
+> +i=0
+> +for ((i = 0; i < nr_dirents; i++)); do
+> +	name="$(printf "user.%0250d" $i)"
+> +	$SETFATTR_PROG -n "$name" -v 1 "$SCRATCH_MNT/lol/autoexec.bat"
+> +done
+> +stat $SCRATCH_MNT/lol/autoexec.bat >> $seqres.full
+> +
+> +_scratch_unmount
+> +
+> +testdir=$TEST_DIR/$seq.metadumps
+> +mkdir -p $testdir
+> +metadump_file=$testdir/scratch.md
+> +metadump_file_a=${metadump_file}.a
+> +metadump_file_o=${metadump_file}.o
+> +metadump_file_ao=${metadump_file}.ao
+> +
+> +echo metadump
+> +_scratch_xfs_metadump $metadump_file >> $seqres.full
+> +
+> +echo metadump a
+> +_scratch_xfs_metadump $metadump_file_a -a >> $seqres.full
+> +
+> +echo metadump o
+> +_scratch_xfs_metadump $metadump_file_o -o >> $seqres.full
+> +
+> +echo metadump ao
+> +_scratch_xfs_metadump $metadump_file_ao -a -o >> $seqres.full
+> +
+> +echo mdrestore
+> +_scratch_xfs_mdrestore $metadump_file
+> +_scratch_mount
+> +_check_scratch_fs
+> +_scratch_unmount
+> +
+> +echo mdrestore a
+> +_scratch_xfs_mdrestore $metadump_file_a
+> +_scratch_mount
+> +_check_scratch_fs
+> +_scratch_unmount
+> +
+> +echo mdrestore o
+> +_scratch_xfs_mdrestore $metadump_file_o
+> +_scratch_mount
+> +_check_scratch_fs
+> +_scratch_unmount
+> +
+> +echo mdrestore ao
+> +_scratch_xfs_mdrestore $metadump_file_ao
+> +_scratch_mount
+> +_check_scratch_fs
+> +_scratch_unmount
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/860.out b/tests/xfs/860.out
+> new file mode 100644
+> index 0000000000..136fc5f7d6
+> --- /dev/null
+> +++ b/tests/xfs/860.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 860
+> +metadump
+> +metadump a
+> +metadump o
+> +metadump ao
+> +mdrestore
+> +mdrestore a
+> +mdrestore o
+> +mdrestore ao
+> diff --git a/tests/xfs/861 b/tests/xfs/861
+> new file mode 100755
+> index 0000000000..7b0a37a3f1
+> --- /dev/null
+> +++ b/tests/xfs/861
+> @@ -0,0 +1,90 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 861
+> +#
+> +# Make sure that the kernel and utilities can handle large numbers of dirhash
+> +# collisions in both the directory and extended attribute structures.
+> +#
+> +# This started as a regression test for the new 'hashcoll' function in xfs_db,
+> +# but became a regression test for an xfs_repair bug affecting hashval checks
+> +# applied to the second and higher node levels of a dabtree.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto dir
+> +
+> +_fixed_by_git_commit xfsprogs b7b81f336ac "xfs_repair: fix incorrect dabtree hashval comparison"
+> +
+> +_supported_fs xfs
+> +_require_xfs_db_command "hashcoll"
+> +_require_xfs_db_command "path"
+> +_require_scratch
+> +
+> +_scratch_mkfs > $seqres.full
+> +_scratch_mount
+> +
+> +crash_dir=$SCRATCH_MNT/lol/
+> +crash_attrs=$SCRATCH_MNT/hah
+> +
+> +mkdir -p "$crash_dir"
+> +touch "$crash_attrs"
+> +
+> +# Create enough dirents to fill two dabtree node blocks with names that all
+> +# hash to the same value.  Each dirent gets its own record in the dabtree,
+> +# so we must create enough dirents to get a dabtree of at least height 2.
+> +dblksz=$(_xfs_get_dir_blocksize "$SCRATCH_MNT")
+> +
+> +da_records_per_block=$((dblksz / 8))	# 32-bit hash and 32-bit before
+> +nr_dirents=$((da_records_per_block * 2))
+> +
+> +longname="$(mktemp --dry-run "$(perl -e 'print "X" x 255;')" | tr ' ' 'X')"
+> +echo "creating $nr_dirents dirents from '$longname'" >> $seqres.full
+> +_scratch_xfs_db -r -c "hashcoll -n $nr_dirents -p $crash_dir $longname"
+> +
+> +# Create enough xattrs to fill two dabtree nodes.  Each attribute leaf block
+> +# gets its own record in the dabtree, so we have to create enough attr blocks
+> +# (each full of attrs) to get a dabtree of at least height 2.
+> +blksz=$(_get_block_size "$SCRATCH_MNT")
+> +
+> +attr_records_per_block=$((blksz / 255))
+> +da_records_per_block=$((blksz / 8))	# 32-bit hash and 32-bit before
+> +nr_attrs=$((da_records_per_block * attr_records_per_block * 2))
+> +
+> +longname="$(mktemp --dry-run "$(perl -e 'print "X" x 249;')" | tr ' ' 'X')"
+> +echo "creating $nr_attrs attrs from '$longname'" >> $seqres.full
+> +_scratch_xfs_db -r -c "hashcoll -a -n $nr_attrs -p $crash_attrs $longname"
+> +
+> +_scratch_unmount
+> +
+> +# Make sure that there's one hash value dominating the dabtree block.
+> +# We don't require 100% because directories create dabtree records for dot
+> +# and dotdot.
+> +filter_hashvals() {
+> +	uniq -c | awk -v seqres_full="$seqres.full" \
+> +		'{print $0 >> seqres_full; tot += $1; if ($1 > biggest) biggest = $1;} END {if (biggest >= (tot - 2)) exit(0); exit(1);}'
+> +	test "${PIPESTATUS[1]}" -eq 0 || \
+> +		echo "Scattered dabtree hashes?  See seqres.full"
+> +}
+> +
+> +# Did we actually get a two-level dabtree for the directory?  Does it contain a
+> +# long run of hashes?
+> +echo "dir check" >> $seqres.full
+> +da_node_block_offset=$(( (2 ** 35) / blksz ))
+> +dir_db_args=(-c 'path /lol/' -c "dblock $da_node_block_offset" -c 'addr nbtree[0].before')
+> +dir_count="$(_scratch_xfs_db "${dir_db_args[@]}" -c 'print lhdr.count' | awk '{print $3}')"
+> +_scratch_xfs_db "${dir_db_args[@]}" -c "print lents[0-$((dir_count - 1))].hashval" | sed -e 's/lents\[[0-9]*\]/lents[NN]/g' | filter_hashvals
+> +
+> +# Did we actually get a two-level dabtree for the attrs?  Does it contain a
+> +# long run of hashes?
+> +echo "attr check" >> $seqres.full
+> +attr_db_args=(-c 'path /hah' -c "ablock 0" -c 'addr btree[0].before')
+> +attr_count="$(_scratch_xfs_db "${attr_db_args[@]}" -c 'print hdr.count' | awk '{print $3}')"
+> +_scratch_xfs_db "${attr_db_args[@]}" -c "print btree[0-$((attr_count - 1))].hashval" | sed -e 's/btree\[[0-9]*\]/btree[NN]/g' | filter_hashvals
+> +
+> +# Remount to get some coverage of xfs_scrub before seeing if xfs_repair
+> +# will trip over the large dabtrees.
+> +echo Silence is golden
+> +_scratch_mount
+> +status=0
+> +exit
+> diff --git a/tests/xfs/861.out b/tests/xfs/861.out
+> new file mode 100644
+> index 0000000000..d11b76c82e
+> --- /dev/null
+> +++ b/tests/xfs/861.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 861
+> +Silence is golden
 > 
-> I remember Johannes also looked into this issue, but we never came to any conclusion.
-> 
-> Regards,
-> Pankaj
-> 
+
