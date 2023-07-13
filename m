@@ -2,98 +2,153 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53CF7EB64DD
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Jul 2023 08:35:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCC65EB64DD
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Jul 2023 12:04:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234323AbjGMIfP (ORCPT
+        id S234481AbjGMMEg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Jul 2023 04:35:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39232 "EHLO
+        Thu, 13 Jul 2023 08:04:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60146 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234600AbjGMIel (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2023 04:34:41 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14F07358A
-        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 01:26:35 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id CA1E81F855;
-        Thu, 13 Jul 2023 08:26:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1689236793; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=kHzRGZ7rUnfC8XKOwXUCvUYUGVG3ukQlRh9Zi8x7M+o=;
-        b=E/klTTlhji02B+p3kLlNpWWvOLglqKcrVPtvqGfts9XHWmUj74/Y3HHGtc5zG7nQXoSFTw
-        0CMt6bjcd+KlQu4dohxMng5BMqx0TmyOJvG6Is4OaDHpLIG1rQ3zFNYF9Wm7xno1LQpE02
-        645tx+xCF7LukIl45LJmaWtNMxxqdsY=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1689236793;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=kHzRGZ7rUnfC8XKOwXUCvUYUGVG3ukQlRh9Zi8x7M+o=;
-        b=brRBQNkK/FIWROhXynUvX0IK/oM6DXBPrTODE2hf8HHExlrbgBWmx2JMx2OHQCgsRTzUN1
-        TxZI/sa+BJCLtYBQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 882ED133D6;
-        Thu, 13 Jul 2023 08:26:33 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id eGLqHTm1r2RwLQAAMHmgww
-        (envelope-from <lhenriques@suse.de>); Thu, 13 Jul 2023 08:26:33 +0000
-Received: from localhost (brahms.olymp [local])
-        by brahms.olymp (OpenSMTPD) with ESMTPA id c72b5c9d;
-        Thu, 13 Jul 2023 08:26:32 +0000 (UTC)
-From:   =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     "Darrick J . Wong" <djwong@kernel.org>,
-        =?UTF-8?q?Lu=C3=ADs=20Henriques?= <lhenriques@suse.de>
-Subject: [PATCH v3] common/rc: cleanup old .kmemleak files
-Date:   Thu, 13 Jul 2023 09:26:31 +0100
-Message-Id: <20230713082631.10666-1-lhenriques@suse.de>
+        with ESMTP id S234441AbjGMMEf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2023 08:04:35 -0400
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E57DC1FDB
+        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 05:04:32 -0700 (PDT)
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20230713120430euoutp026dfd7fabcba5c135150c5fafe7d86f3f~xa86XoVdp2151521515euoutp02f
+        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 12:04:30 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20230713120430euoutp026dfd7fabcba5c135150c5fafe7d86f3f~xa86XoVdp2151521515euoutp02f
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1689249870;
+        bh=1K0jI66/IDgija7Kwz8eCwurfPOVWszqc9VnbxWechU=;
+        h=Date:Subject:To:CC:From:In-Reply-To:References:From;
+        b=aO8s20cdo2W3/rW28104JC9dTt4+MJj5575HTbHfVXsq1gJxXZgq+9Os/tLNWW6/h
+         Ac9Q9GTDVU5UmuTfQ8CN7OsRwYi5UUSgBj9+kOgcdFPPfLqdMXYJiH97/za20wtAoC
+         0ingvdZDGIRSzLmJWonv1crwlWs91FSnDBM2GNtU=
+Received: from eusmges1new.samsung.com (unknown [203.254.199.242]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTP id
+        20230713120430eucas1p2f1795e8f73acd14c6aa4f4b7bbe7d3dd~xa86HcEEI1874418744eucas1p2J;
+        Thu, 13 Jul 2023 12:04:30 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+        eusmges1new.samsung.com (EUCPMTA) with SMTP id 71.87.42423.D48EFA46; Thu, 13
+        Jul 2023 13:04:29 +0100 (BST)
+Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
+        eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
+        20230713120429eucas1p158d28dce4bbd49b24466a1fa4bdac58d~xa85zj5O71008310083eucas1p1H;
+        Thu, 13 Jul 2023 12:04:29 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20230713120429eusmtrp140d38f426de7043d20c0458554a154a5~xa85y-7xe1854418544eusmtrp1a;
+        Thu, 13 Jul 2023 12:04:29 +0000 (GMT)
+X-AuditID: cbfec7f2-a3bff7000002a5b7-75-64afe84d118c
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+        eusmgms2.samsung.com (EUCPMTA) with SMTP id 0A.0E.14344.D48EFA46; Thu, 13
+        Jul 2023 13:04:29 +0100 (BST)
+Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
+        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20230713120429eusmtip24f5422e2f277754532d6cb3066b54537~xa85kxUxJ0132701327eusmtip2I;
+        Thu, 13 Jul 2023 12:04:29 +0000 (GMT)
+Received: from [10.66.0.134] (106.210.248.212) by CAMSVWEXC02.scsc.local
+        (2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
+        Thu, 13 Jul 2023 13:04:27 +0100
+Message-ID: <b1bee446-4099-e605-ce59-e9cdaf19bd25@samsung.com>
+Date:   Thu, 13 Jul 2023 14:04:26 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+        Thunderbird/102.13.0
+Subject: Re: [PATCH] btrfs/237: adapt the test to work with the new reclaim
+ algorithm
+To:     Anand Jain <anand.jain@oracle.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
+CC:     Pankaj Raghav <pankydev8@gmail.com>, <gost.dev@samsung.com>
+Content-Language: en-US
+From:   Pankaj Raghav <p.raghav@samsung.com>
+In-Reply-To: <f6365013-ab73-5b2b-6dba-3b628dbe1b56@oracle.com>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
+X-Originating-IP: [106.210.248.212]
+X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
+        CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprKKsWRmVeSWpSXmKPExsWy7djP87q+L9anGJxfaW7R+OcIs8Xplr3s
+        Fn+77jFZrLn5lMVi78mdrA6sHjtn3WX3+Pj0FovH+31X2Tw+b5LzaD/QzRTAGsVlk5Kak1mW
+        WqRvl8CVsaTvEUvBJc6Ki0+PMTcw3mbvYuTkkBAwkVh+cSNTFyMXh5DACkaJ1Uc3s0E4Xxgl
+        fp6fwQLhfGaUeLnkIytMy5qnN6CqljNK9F3ewQRX9a/xHzuEs5NRYs/ag0wgLbwCdhJPHx0C
+        a2cRUJVonPiTESIuKHFy5hMWEFtUIFpi/eO9bCC2sEC4xLemdWC2iMBURonuCXogNrOAvcSM
+        N7dZIWxxiVtP5gPN5+BgE9CSaOwEe4gTaNXC/V+ZIEo0JVq3/2aHsOUlmrfOZgYplxBQlni9
+        3gbimVqJU1tugd0vIfCFQ2L2zXtQX7pI7No1C8oWlnh1fAs0wGQkTk/uYYGwqyWe3vjNDNHc
+        wijRv3M9G8QCa4m+MzkQNY4SpyYcYIEI80nceCsIcQ6fxKRt05knMKrOQgqIWUgem4Xkg1lI
+        PljAyLKKUTy1tDg3PbXYMC+1XK84Mbe4NC9dLzk/dxMjMOWc/nf80w7Gua8+6h1iZOJgPMQo
+        wcGsJMKrsm1dihBvSmJlVWpRfnxRaU5q8SFGaQ4WJXFebduTyUIC6YklqdmpqQWpRTBZJg5O
+        qQYmtxUi3FtfBKmV3PkvbcNnuH+6RlhObrXV58UPctTe7t3yjHvNypDtvKsF9bPuzJrK+HTS
+        49Masy9wTlCuTfx/+DpHFe8yyw8vEl8VrRf5wHSjTJmhS1nReYdI2VX5sy/XlX3esvef2MzJ
+        AsZx09gsxMpsrj837ZZyuC7GxTS7MOHJ+bYPIaXcitMvbHjyjvm2iGXdMdYLbBz8r3qzRZQm
+        XrngbNvac/jXrLbcr08PFKyT/fF2WbBK+qGH5+IF97bK+H8K1A/fvzlO8eCWI2Zam3w3TVpQ
+        HuwSbZ7Q9IehRKvMe1KSkMGRE19E2KVDFvJekY3OzahP7fWa8Vx0foHP533OPzf9uK7Y7cJl
+        VKCixFKckWioxVxUnAgAO8pI4qgDAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrJIsWRmVeSWpSXmKPExsVy+t/xe7q+L9anGKy/oGjR+OcIs8Xplr3s
+        Fn+77jFZrLn5lMVi78mdrA6sHjtn3WX3+Pj0FovH+31X2Tw+b5LzaD/QzRTAGqVnU5RfWpKq
+        kJFfXGKrFG1oYaRnaGmhZ2RiqWdobB5rZWSqpG9nk5Kak1mWWqRvl6CXsaTvEUvBJc6Ki0+P
+        MTcw3mbvYuTkkBAwkVjz9AZbFyMXh5DAUkaJh5tOMEEkZCQ2frnKCmELS/y51sUGYgsJfGSU
+        WLy8HKJhJ6PEy5V3GEESvAJ2Ek8fHQJrYBFQlWic+BMqLihxcuYTFhBbVCBaYsOFR2C2sEC4
+        xLemdWBDRQSmMkp0T9ADsZkF7CVmvLnNCrHgIKNES3cbM0RCXOLWk/lA13FwsAloSTR2gn3A
+        CbR34f6vTBAlmhKt23+zQ9jyEs1bZzODlEsIKEu8Xm8D8UutxOe/zxgnMIrOQnLdLCQLZiGZ
+        NAvJpAWMLKsYRVJLi3PTc4uN9IoTc4tL89L1kvNzNzEC43TbsZ9bdjCufPVR7xAjEwfjIUYJ
+        DmYlEV6VbetShHhTEiurUovy44tKc1KLDzGaAoNoIrOUaHI+MFHklcQbmhmYGpqYWRqYWpoZ
+        K4nzehZ0JAoJpCeWpGanphakFsH0MXFwSjUwZfzziX9etvvUzV6F3Suv/5PdW/nR/LT3c70V
+        pyfPKZ14LNT7z5Z3M1cblrd7O/C/PydQ9uZsRHDH5lffFc/MtLdK//vXpeDqzKIwnl1Se9Nu
+        vWqMi9g38fSClll5GnM1Na4ruDHW9D7p/j05Zc+asBucz8VFtly4MP12f+rLCIvfYda73xld
+        fOZ5QG2DVpJB89FJH9euWctof9egNk/if9Yk6xVMB6IVVqzQqonnYJswTeLy3zXXrm5VmmHe
+        4i/DvzDy68EH523fpDn/LnyySLOB2d7bImJr352FPrt9uOqD5kp0X1Jp3HPAOpmjV8xgYlbA
+        ib8/mK0P7+y5EvI8brdOmNea+OVGWrs+d/xrKlBiKc5INNRiLipOBAB5pnG0XAMAAA==
+X-CMS-MailID: 20230713120429eucas1p158d28dce4bbd49b24466a1fa4bdac58d
+X-Msg-Generator: CA
+X-RootMTR: 20221216105822eucas1p1370af7eb55b70fed78ee43f932b214d0
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20221216105822eucas1p1370af7eb55b70fed78ee43f932b214d0
+References: <CGME20221216105822eucas1p1370af7eb55b70fed78ee43f932b214d0@eucas1p1.samsung.com>
+        <20221216105750.28493-1-p.raghav@samsung.com>
+        <f6365013-ab73-5b2b-6dba-3b628dbe1b56@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-I've spent a non-negligible amount of time looking into a kmemleak that
-didn't exist in the code I was testing because there was an old .kmemleak
-file in the results directory.  I don't think this is an intended behaviour,
-so I'm proposing to remove these files everytime we capture the result of a
-new scan.
 
-Signed-off-by: Luís Henriques <lhenriques@suse.de>
----
- common/rc | 4 ++++
- 1 file changed, 4 insertions(+)
+Hi Anand,
 
-Changes since v2:
-Incorporated comment from Darrick to explain the usage of '-f' in the test
+On 2023-07-12 09:06, Anand Jain wrote:
+> On 16/12/22 18:57, Pankaj Raghav wrote:
+>> Since 3687fcb0752a ("btrfs: zoned: make auto-reclaim less aggressive")
+>> commit and cc4804bfd639 ("btrfs: skip reclaim if block_group is empty"),
+>> reclaim algorithm has been changed to be less aggressive, which breaks this
+>> test.
+>>
+>> The test has been adapted so that the new auto-reclaim algorithm can be
+>> tested with the following flow:
+>> - Write a small file
+>> - Write a big file that crosses the reclaim limit
+>> - Delete the big file
+>> - Check that only the block group that contained the small file is reclaimed,
+>>    and the small file is relocated to a new block group.
+>> ---
+> 
+> SOB is missing.
+> 
+> Pankaj, this patch has not been integrated yet.
+> Could you please resend it?
+>
 
-Changes since v1:
-I realised that _capture_kmemleak() is called with /dev/null as argument, so
-this version is probably better.
+Actually, I encountered an issue with this testcase where it worked
+perfectly well for smaller drives, but started to fail for bigger ZNS drives.
 
-diff --git a/common/rc b/common/rc
-index 741579af82d2..5c4429ed0425 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4433,6 +4433,10 @@ _capture_kmemleak()
- 	local kern_knob="$DEBUGFS_MNT/kmemleak"
- 	local leak_file="$1"
- 
-+	# Some callers pass in /dev/null when they want to clear the
-+	# kernel's leak report file and do not care what was in that.
-+	[ -f "$leak_file" ] && rm -f "$leak_file"
-+
- 	# Tell the kernel to scan for memory leaks.  Apparently the write
- 	# returns before the scan is complete, so do it twice in the hopes
- 	# that twice is enough to capture all the leaks.
+Thread: https://lore.kernel.org/all/20220819115337.35681-1-p.raghav@samsung.com/
+
+Could you try it in your setup and see if it works correctly?
+
+I remember Johannes also looked into this issue, but we never came to any conclusion.
+
+Regards,
+Pankaj
+
