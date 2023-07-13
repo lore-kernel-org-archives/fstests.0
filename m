@@ -2,114 +2,239 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB910C001DE
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Jul 2023 20:30:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68EB0C001B0
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Jul 2023 23:09:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232575AbjGMUak (ORCPT
+        id S229992AbjGMXJq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Jul 2023 16:30:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56130 "EHLO
+        Thu, 13 Jul 2023 19:09:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231597AbjGMUak (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2023 16:30:40 -0400
-Received: from mail-oi1-x233.google.com (mail-oi1-x233.google.com [IPv6:2607:f8b0:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC4D02127
-        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 13:30:38 -0700 (PDT)
-Received: by mail-oi1-x233.google.com with SMTP id 5614622812f47-3a3a8d21208so1056740b6e.0
-        for <fstests@vger.kernel.org>; Thu, 13 Jul 2023 13:30:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20221208.gappssmtp.com; s=20221208; t=1689280238; x=1691872238;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=39txpBUCcuQ3c4p8/ix9ZxwfJot9Kz+g+t+rd2IqFAQ=;
-        b=uv4uVM+P3aHmx9uKsi6ws9E4z2dlHpLa8W0i/V2IOfOjWqsiYoWum+C2zIl9Q+kNei
-         U18sdQsnRV2RToymORiCiQrK0qZZ6USjHNjyAkkU5Z34492s2R78yRqW7JQFYKFQc84q
-         w3gOxheowgpXJSzd1ZBN6aedV9+oz2WbYUnhyLXqj0hnQvNN1Coz/ieuhP/DCJ/S55s1
-         rodosfmOWBJq6KRBaF5a9GyGFbK0tULm6zdHjhh/dlbDqw9ZiCCtbXnc1ZXNjzCDjuwj
-         C3RuSQZ/8yd7Jq/tpe1Tg3RQRcrJnInJvrhee4kRCjuOB9Aq7CNaUfIC2NONjcPNV2wt
-         0/OQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689280238; x=1691872238;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=39txpBUCcuQ3c4p8/ix9ZxwfJot9Kz+g+t+rd2IqFAQ=;
-        b=mCEDfwqmeBvGkK6syIdeYNocr1hc5SNy/4NbJFJjzDPH9AYElGC+aYroUX77BNtIb9
-         Y4qoBRAiD45T9InBCUkfJbfgF6SG9M1EhA+Xxb4yJ6Ie4DmAZtqmb1IQideodikTKTA5
-         c0ZFzuma6IGY6ah8RNEqoDNFGD+2L+QdYf+eVtK1UZPTV7cL1TtI2/PGNfcnSDm2bvL3
-         jTpw0pOIgOCUQjklIJjiOkbVBzbM6C93kzfw0J0n1vIDIj9pk5U+3zcDjbicDe0yW5XI
-         WI9G3/hjbaz4RFIOSLV+peKODoyTmjxiMupfM+HutS7+mU+m9lmS5Tx1cA629PTcU3PV
-         CNcw==
-X-Gm-Message-State: ABy/qLaj5i/yFlooUXhjKZCv+Yg+5S3wH14EXW//UQU1nF83bWdFXADN
-        vERjR3Rps6PXWneTIuSl9ZOxcQ==
-X-Google-Smtp-Source: APBJJlGvMD7joi4RHqcoLsfdAhZ8wScit7IjAs6MuwPBUK0GiC6HLcDRlYLJEvP/bLtrUpKbyvpKFw==
-X-Received: by 2002:a05:6808:1308:b0:3a1:df16:2eed with SMTP id y8-20020a056808130800b003a1df162eedmr3853143oiv.30.1689280237920;
-        Thu, 13 Jul 2023 13:30:37 -0700 (PDT)
-Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id q9-20020a25f909000000b00c6135ffd2fcsm1498906ybe.15.2023.07.13.13.30.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Jul 2023 13:30:37 -0700 (PDT)
-Date:   Thu, 13 Jul 2023 16:30:36 -0400
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     Boris Burkov <boris@bur.io>
-Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 3/5] common/btrfs: quota rescan helpers
-Message-ID: <20230713203036.GA207541@perftesting>
-References: <cover.1688600422.git.boris@bur.io>
- <0e9cb76f3ddad71bb36b70464b62423b77fd6399.1688600422.git.boris@bur.io>
+        with ESMTP id S229916AbjGMXJq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2023 19:09:46 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E26B172C;
+        Thu, 13 Jul 2023 16:09:42 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7CA4B60A70;
+        Thu, 13 Jul 2023 23:09:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 992A5C433C8;
+        Thu, 13 Jul 2023 23:09:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1689289780;
+        bh=BQUnTmDBddlxRHvOZ6/VzgVMFh5ycXpIlBQaFHVxBWY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=KO1cxiOL4XiocgTiv66xqzumu2NxX1I7gYuPmaYFGtcI/OoyvzyRE9YhoZd2cTTZW
+         vSY2O7BZlZgyHd3X9Koqjz4D8pIWoda3AQeVnjD7yk4bEQdMZTexHkAoqgBkUwwv/d
+         FqwRmM/FIukX4H1OLAMEWAuxwR9UyFwLigwkWJ46A6357oPWZZztXcj4GSN0cLFtgE
+         PQljHqIkqCobJyQpkXphEfJi2/k/N3Fx2nrAAhnzn0EFajPtXMqKyWo7TMIGMG4CU7
+         AA0hxtStKSTfQ7MuLFOod9xc97dfFoT0fJdMfj+hi3RAUCvwN2MWnIsOPy8L+iEbDm
+         546FMXW+pkf1Q==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org
+Subject: [fstests PATCH] generic: add a test for multigrain timestamps
+Date:   Thu, 13 Jul 2023 19:09:39 -0400
+Message-ID: <20230713230939.367068-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <0e9cb76f3ddad71bb36b70464b62423b77fd6399.1688600422.git.boris@bur.io>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 05, 2023 at 04:42:25PM -0700, Boris Burkov wrote:
-> Many btrfs tests explicitly trigger quota rescan. This is not a
-> meaningful operation for simple quotas, so we wrap it in a helper that
-> doesn't blow up quite so badly and lets us run those tests where the
-> rescan is a qgroup detail.
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
->  common/btrfs | 25 +++++++++++++++++++++++++
->  1 file changed, 25 insertions(+)
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index 66c065a10..d88feaded 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -715,6 +715,31 @@ _qgroup_mode()
->  	fi
->  }
->  
-> +_check_regular_qgroup()
-> +{
-> +	local mnt=$1
-> +
-> +	_qgroup_mode $mnt | grep -q 'qgroup'
-> +}
-> +
-> +_qgroup_rescan()
-> +{
-> +	local mnt=$1
-> +
-> +	_check_regular_qgroup $mnt || return 1
-> +	_run_btrfs_util_prog quota rescan -w $mnt
-> +}
-> +
-> +_require_qgroup_rescan()
-> +{
-> +	_scratch_mkfs >>$seqres.full 2>&1
-> +	_scratch_mount
-> +    _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> +    $BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT || \
-> +         _notrun "not able to run quota rescan"
-> +	_scratch_unmount
-> +}
+Ensure that the mtime and ctime apparently change, even when there are
+multiple writes in quick succession. Older kernels didn't do this, but
+there are patches in flight that should help ensure it in the future.
 
-Looks like whitespace errors here.  Thanks,
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ src/Makefile          |   2 +-
+ src/mgctime.c         | 107 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/730     |  25 ++++++++++
+ tests/generic/730.out |   1 +
+ 4 files changed, 134 insertions(+), 1 deletion(-)
+ create mode 100644 src/mgctime.c
+ create mode 100755 tests/generic/730
+ create mode 100644 tests/generic/730.out
 
-Josef
+This patchset is intended to test the new multigrain timestamp feature:
+
+    https://lore.kernel.org/linux-fsdevel/20230713-mgctime-v5-0-9eb795d2ae37@kernel.org/T/#t
+
+I had originally attempted to write this as a shell script, but it was
+too slow, which made it falsely pass on unpatched kernels.
+
+All current filesystems will fail this, so we may want to wait until
+we are closer to merging the kernel series.
+
+diff --git a/src/Makefile b/src/Makefile
+index 24cd47479140..aff7d07466f0 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -33,7 +33,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+ 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+ 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+-	uuid_ioctl
++	uuid_ioctl mgctime
+ 
+ EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+ 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py
+diff --git a/src/mgctime.c b/src/mgctime.c
+new file mode 100644
+index 000000000000..38e22a8613ff
+--- /dev/null
++++ b/src/mgctime.c
+@@ -0,0 +1,107 @@
++/*
++ * Older Linux kernels always use coarse-grained timestamps, with a
++ * resolution of around 1 jiffy. Writes that are done in quick succession
++ * on those kernels apparent change to the ctime or mtime.
++ *
++ * Newer kernels attempt to ensure that fine-grained timestamps are used
++ * when the mtime or ctime are queried from userland.
++ *
++ * Open a file and do a 1 byte write to it and then statx the mtime and ctime.
++ * Do that in a loop 1000 times and ensure that the value is different from
++ * the last.
++ *
++ * Copyright (c) 2023: Jeff Layton <jlayton@kernel.org>
++ */
++#define _GNU_SOURCE 1
++#include <stdio.h>
++#include <fcntl.h>
++#include <errno.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#include <stdint.h>
++#include <getopt.h>
++#include <stdbool.h>
++
++#define NUM_WRITES 1000
++
++static int64_t statx_ts_cmp(struct statx_timestamp *ts1, struct statx_timestamp *ts2)
++{
++	int64_t ret = ts2->tv_sec - ts1->tv_sec;
++
++	if (ret)
++		return ret;
++
++	ret = ts2->tv_nsec;
++	ret -= ts1->tv_nsec;
++
++	return ret;
++}
++
++int main(int argc, char **argv)
++{
++	int ret, fd, i;
++	struct statx stx = { };
++	struct statx_timestamp ctime, mtime;
++	bool verbose = false;
++
++	while ((i = getopt(argc, argv, "v")) != -1) {
++		switch (i) {
++		case 'v':
++			verbose = true;
++			break;
++		}
++	}
++
++	if (argc < 2) {
++		errno = -EINVAL;
++		perror("usage");
++	}
++
++	fd = open(argv[1], O_WRONLY|O_CREAT|O_TRUNC, 0644);
++	if (fd < 0) {
++		perror("open");
++		return 1;
++	}
++
++	ret = statx(fd, "", AT_EMPTY_PATH, STATX_MTIME|STATX_CTIME, &stx);
++	if (ret < 0) {
++		perror("stat");
++		return 1;
++	}
++
++	ctime = stx.stx_ctime;
++	mtime = stx.stx_mtime;
++
++	for (i = 0; i < NUM_WRITES; ++i) {
++		ssize_t written;
++
++		written = write(fd, "a", 1);
++		if (written < 0) {
++			perror("write");
++			return 1;
++		}
++
++		ret = statx(fd, "", AT_EMPTY_PATH, STATX_MTIME|STATX_CTIME, &stx);
++		if (ret < 0) {
++			perror("stat");
++			return 1;
++		}
++
++		if (verbose)
++			printf("%d: %llu.%u\n", i, stx.stx_ctime.tv_sec, stx.stx_ctime.tv_nsec);
++
++		if (!statx_ts_cmp(&ctime, &stx.stx_ctime)) {
++			printf("Duplicate ctime after write!\n");
++			return 1;
++		}
++
++		if (!statx_ts_cmp(&mtime, &stx.stx_mtime)) {
++			printf("Duplicate mtime after write!\n");
++			return 1;
++		}
++
++		ctime = stx.stx_ctime;
++		mtime = stx.stx_mtime;
++	}
++	return 0;
++}
+diff --git a/tests/generic/730 b/tests/generic/730
+new file mode 100755
+index 000000000000..c3f24aeb8534
+--- /dev/null
++++ b/tests/generic/730
+@@ -0,0 +1,25 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023, Jeff Layton <jlayton@redhat.com>
++#
++# FS QA Test No. 730
++#
++# Multigrain time test
++#
++# Open a file, and do 1 byte writes to it, and statx the file for
++# the ctime and mtime after each write. Ensure that they have changed
++# since the previous write.
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++# Override the default cleanup function.
++_require_test_program mgctime
++
++testfile="$TEST_DIR/test_mgtime_file.$$"
++
++$here/src/mgctime $testfile
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/730.out b/tests/generic/730.out
+new file mode 100644
+index 000000000000..5dbea532d60f
+--- /dev/null
++++ b/tests/generic/730.out
+@@ -0,0 +1 @@
++QA output created by 730
+-- 
+2.41.0
+
