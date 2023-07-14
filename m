@@ -2,115 +2,55 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B136EB64DC
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Jul 2023 15:15:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3D39EB64DC
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Jul 2023 17:13:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235611AbjGNPPB (ORCPT
+        id S235737AbjGNRNJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Jul 2023 11:15:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45012 "EHLO
+        Fri, 14 Jul 2023 13:13:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235274AbjGNPPA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2023 11:15:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10B33270D
-        for <fstests@vger.kernel.org>; Fri, 14 Jul 2023 08:14:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1689347654;
+        with ESMTP id S235454AbjGNRNI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2023 13:13:08 -0400
+Received: from out-46.mta1.migadu.com (out-46.mta1.migadu.com [IPv6:2001:41d0:203:375::2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36BC63C2A
+        for <fstests@vger.kernel.org>; Fri, 14 Jul 2023 10:12:26 -0700 (PDT)
+Date:   Fri, 14 Jul 2023 13:12:03 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+        t=1689354727;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Q3cA2UOOcR2TLL5+UN6pVf6RDBYDy7np+BK24tgmfA0=;
-        b=a8/DqCyntADP6mE0j4XZyXMT6Ylv/HjSDe+FAxU2PY+3Uqi5vRiecO/JBsj/Kbt0tCiMfF
-        zGRl2z4jU3vKA/xjpYnwY7AJRIkVVngBkj/GG5bT5du4IBclcCvlKZIr7SO5icomLbxj68
-        oWOp8b9v4eCEyGsj+JJB9n++xZbN74Q=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-646-_qZjBJ_SMV6p-8lEhXPYuw-1; Fri, 14 Jul 2023 11:14:10 -0400
-X-MC-Unique: _qZjBJ_SMV6p-8lEhXPYuw-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 85D0580027F;
-        Fri, 14 Jul 2023 15:14:09 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.16.84])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 3380C1454142;
-        Fri, 14 Jul 2023 15:14:09 +0000 (UTC)
-Date:   Fri, 14 Jul 2023 10:14:07 -0500
-From:   Bill O'Donnell <billodo@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me, mpatocka@redhat.com
-Subject: Re: [PATCH] generic/558: avoid forkbombs on filesystems with many
- free inodes
-Message-ID: <ZLFmPyYOSSzsDamk@redhat.com>
-References: <20230714145900.GM11442@frogsfrogsfrogs>
+        bh=0r2xpos2ys7F9o74CXpmEJ8xVz6mIgUhl9VgGqNVDrY=;
+        b=K76ou3lkR3D5u1PmKTR6gCDoZTqELDpYPY502UYFokePfxTt3yNyTxFEY5ivGtfSOPOJNb
+        u9UD71rEAh/9C2qz7e+bMYlcBxAnsx4lUUBzZbVvMioVndjuEKFo5E+ugUy/vUkT6Qf0+R
+        IkWk2nP97t2FYfgQvhnN7OTX6l47fRc=
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From:   Kent Overstreet <kent.overstreet@linux.dev>
+To:     Mikulas Patocka <mpatocka@redhat.com>
+Cc:     Zorro Lang <zlang@kernel.org>,
+        "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH] bcachefs: mark bch_inode_info and bkey_cached as
+ reclaimable
+Message-ID: <20230714171203.cwnid7jjs6oed5s6@moria.home.lan>
+References: <ea7fe56-dbac-27b8-33cc-5c722f366e63@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230714145900.GM11442@frogsfrogsfrogs>
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
+In-Reply-To: <ea7fe56-dbac-27b8-33cc-5c722f366e63@redhat.com>
+X-Migadu-Flow: FLOW_OUT
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 14, 2023 at 07:59:00AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Jul 13, 2023 at 06:00:28PM +0200, Mikulas Patocka wrote:
+> Mark these caches as reclaimable, so that available memory is correctly
+> reported when there is a lot of cached inodes.
 > 
-> Mikulas reported that this test became a forkbomb on his system when he
-> tested it with bcachefs.  Unlike XFS and ext4, which have large inodes
-> consuming hundreds of bytes, bcachefs has very tiny ones.  Therefore, it
-> reports a large number of free inodes on a freshly mounted 1GB fs (~15
-> million), which causes this test to try to create 15000 processes.
-> 
-> There's really no reason to do that -- all this test wanted to do was to
-> exhaust the number of inodes as quickly as possible using all available
-> CPUs, and then it ran xfs_repair to try to reproduce a bug.  Set the
-> number of subshells to 4x the CPU count and spread the work among them
-> instead of forking thousands of processes.
-> 
-> Reported-by: Mikulas Patocka <mpatocka@redhat.com>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> Tested-by: Mikulas Patocka <mpatocka@redhat.com>
+> Note that more work is needed - you should add __GFP_RECLAIMABLE to some 
+> of the kmalloc calls, so that they are allocated from the "kmalloc-rcl-*" 
+> caches.
 
-Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
-
-> ---
->  tests/generic/558 |   18 ++++++++++++------
->  1 file changed, 12 insertions(+), 6 deletions(-)
-> 
-> diff --git a/tests/generic/558 b/tests/generic/558
-> index 4e22ce656b..de5c28d00d 100755
-> --- a/tests/generic/558
-> +++ b/tests/generic/558
-> @@ -39,15 +39,21 @@ _scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
->  _scratch_mount
->  
->  i=0
-> -free_inode=`_get_free_inode $SCRATCH_MNT`
-> -file_per_dir=1000
-> -loop=$((free_inode / file_per_dir + 1))
-> +free_inodes=$(_get_free_inode $SCRATCH_MNT)
-> +nr_cpus=$(( $($here/src/feature -o) * 4 * LOAD_FACTOR ))
-> +echo "free inodes: $free_inodes nr_cpus: $nr_cpus" >> $seqres.full
-> +
-> +if ((free_inodes <= nr_cpus)); then
-> +	nr_cpus=1
-> +	files_per_dir=$free_inodes
-> +else
-> +	files_per_dir=$(( (free_inodes + nr_cpus - 1) / nr_cpus ))
-> +fi
->  mkdir -p $SCRATCH_MNT/testdir
->  
->  echo "Create $((loop * file_per_dir)) files in $SCRATCH_MNT/testdir" >>$seqres.full
-> -while [ $i -lt $loop ]; do
-> -	create_file $SCRATCH_MNT/testdir $file_per_dir $i >>$seqres.full 2>&1 &
-> -	let i=$i+1
-> +for ((i = 0; i < nr_cpus; i++)); do
-> +	create_file $SCRATCH_MNT/testdir $files_per_dir $i >>$seqres.full 2>&1 &
->  done
->  wait
->  
-> 
-
+What's that actualy do? grepping for __GFP_RECLAIMABLE doesn't turn up
+much. Is it just about segragating objects based on expected lifetime,
+or is there more going on?
