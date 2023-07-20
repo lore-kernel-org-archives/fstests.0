@@ -2,217 +2,152 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61668C001B0
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jul 2023 02:29:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8322FEB64DA
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jul 2023 06:17:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229591AbjGTC31 (ORCPT
+        id S229628AbjGTGRp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Jul 2023 22:29:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57998 "EHLO
+        Thu, 20 Jul 2023 02:17:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229452AbjGTC31 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2023 22:29:27 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A094F19BC;
-        Wed, 19 Jul 2023 19:29:25 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3579E618C7;
-        Thu, 20 Jul 2023 02:29:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91078C433C8;
-        Thu, 20 Jul 2023 02:29:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1689820164;
-        bh=FqO5cnh6b0X5cBI+2k+ipUGR32PbPDYsBzN/L+j55Iw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MAXMosJT8nMkpIXN/vcjRqGJ48HLTjjwnhawuf49I9u3aBTYtIBOOOwLW6sT0M61O
-         tlBVF27R0BO8YO8IwAPO4p3gD8sK19txs2aqfofOnu+PmiqbAGzD3e9l+YWhZQXqdF
-         UKia/ECAqpPbZbye0Cf/qD0z2wfrUW/YBllLt9TEdUwMDwTpNXdaMoAzkiAv6Hk0G5
-         NqQnTtxYhBxLWqr8E29zslmpQc3CSRQDkK5G1JvJcAYfuc9cG9SCyhNYKGWNMZjozC
-         Kd/5vEO3lzNd0c8RWY6SHk3KHige6v3dwFfTsBq66r4X4TfMC1YOJtWjt7f/9wCwu+
-         2tnNbXBlaVuDQ==
-Date:   Wed, 19 Jul 2023 19:29:24 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     tytso@mit.edu, kent.overstreet@linux.dev,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] check: generate gcov code coverage reports at the
- end of each section
-Message-ID: <20230720022924.GI11352@frogsfrogsfrogs>
-References: <168972905065.1698606.6829635791058054610.stgit@frogsfrogsfrogs>
- <168972906191.1698606.10738894314642211560.stgit@frogsfrogsfrogs>
- <20230719161916.qne7ng4lnu32pw3w@zlang-mailbox>
+        with ESMTP id S230106AbjGTGRe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jul 2023 02:17:34 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 317CD2690;
+        Wed, 19 Jul 2023 23:17:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=E0e/1EaMH+1miSlpA0RwJh3aYGH/AphNFDYbxLsUolQ=; b=3odo3/Lj8tk3rE8/ntxjabRO4E
+        lxt9ncq9FExqd5ZkyeMi6ma9MzZIEYBJUTW7ULmBW9JDV8BUDKe2MIg7ay1ttStMr3oMrwO7aQqGz
+        cn+lZiOOBT+nKxSce/umz8brqrvh2nq+OmAzVQtvrgMj1K/tvdX3AJ0Jwc3l2EKaoK8TgjlHk0/55
+        irpSg44jb+a+IgGBvb5JQxUyh8VhH00ERYeWjKW6rnP/joCuCXndNABsm7xS0NQC73oJ4VtD/Hvt2
+        9vX1T0BS4szVt4ecZ6Ev1zZ84OGjrqbvOggMhe3STS7m7g4+o4TjUpYFihRYE04IGBBfgolFzXrr/
+        ie5EqRuQ==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+        id 1qMMye-009usH-0G;
+        Thu, 20 Jul 2023 06:17:28 +0000
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org, patches@lists.linux.dev,
+        Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH] fstests: add helper to canonicalize devices used to enable persistent disks
+Date:   Wed, 19 Jul 2023 23:17:27 -0700
+Message-Id: <20230720061727.2363548-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.38.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230719161916.qne7ng4lnu32pw3w@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 20, 2023 at 12:19:16AM +0800, Zorro Lang wrote:
-> On Tue, Jul 18, 2023 at 06:11:01PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Support collecting kernel code coverage information as reported in
-> > debugfs.  At the start of each section, we reset the gcov counters;
-> > during the section wrapup, we'll collect the kernel gcov data.
-> > 
-> > If lcov is installed and the kernel source code is available, it will
-> > also generate a nice html report.  If a CLI web browser is available, it
-> > will also format the html report into text for easy grepping.
-> > 
-> > This requires the test runner to set REPORT_GCOV=1 explicitly and gcov
-> > to be enabled in the kernel.
-> > 
-> > Cc: tytso@mit.edu
-> > Cc: kent.overstreet@linux.dev
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> 
-> Hi Darrick,
-> 
-> Is that possible to split this function from check script to tools/ ?
+The filesystem configuration file does not allow you to use symlinks to
+devices given the existing sanity checks verify that the target end
+device matches the source.
 
-I don't mind separating it, though I don't see much reason to.  Are you
-concerned about ./check growing larger?
+Using a symlink is desirable if you want to enable persistent tests
+across reboots. For example you may want to use /dev/disk/by-id/nvme-eui.*
+so to ensure that the same drives are used even after reboot. This
+is very useful if you are testing for example with a virtualized
+environment and are using PCIe passthrough with other qemu NVMe drives
+with one or many NVMe drives.
 
---D
+To enable support just add a helper to canonicalize devices prior to
+running the tests.
 
-> Thanks,
-> Zorro
-> 
-> >  README |    3 ++
-> >  check  |   86 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 89 insertions(+)
-> > 
-> > 
-> > diff --git a/README b/README
-> > index 9790334db1..ccfdcbe703 100644
-> > --- a/README
-> > +++ b/README
-> > @@ -249,6 +249,9 @@ Kernel/Modules related configuration:
-> >     to "forever" and we'll wait forever until the module is gone.
-> >   - Set KCONFIG_PATH to specify your preferred location of kernel config
-> >     file. The config is used by tests to check if kernel feature is enabled.
-> > + - Set REPORT_GCOV to a directory path to make lcov and genhtml generate
-> > +   html reports from any gcov code coverage data collected by the kernel.
-> > +   If REPORT_GCOV is set to 1, the report will be written to $REPORT_DIR/gcov/.
-> >  
-> >  Test control:
-> >   - Set LOAD_FACTOR to a nonzero positive integer to increase the amount of
-> > diff --git a/check b/check
-> > index 97c7c4c7d1..3e6f27c653 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -451,6 +451,87 @@ _global_log() {
-> >  	fi
-> >  }
-> >  
-> > +GCOV_DIR=/sys/kernel/debug/gcov
-> > +
-> > +# Find the topmost directories of the .gcno directory hierarchy
-> > +_gcov_find_topdirs() {
-> > +	find "${GCOV_DIR}/" -name '*.gcno' -printf '%d|%h\n' | \
-> > +		sort -g -k 1 | \
-> > +		uniq | \
-> > +		$AWK_PROG -F '|' 'BEGIN { x = -1 } { if (x < 0) x = $1; if ($1 == x) printf("%s\n", $2);}'
-> > +}
-> > +
-> > +# Generate lcov html report from kernel gcov data if configured
-> > +_gcov_generate_report() {
-> > +	unset REPORT_GCOV	# don't trigger multiple times if ^C
-> > +
-> > +	local output_dir="$1"
-> > +	test -n "${output_dir}" || return
-> > +	test "$output_dir" = "1" && output_dir="$REPORT_DIR/gcov"
-> > +
-> > +	# Kernel support built in?
-> > +	test -d "$GCOV_DIR" || return
-> > +
-> > +	readarray -t gcno_dirs < <(_gcov_find_topdirs)
-> > +	test "${#gcno_dirs[@]}" -gt 0 || return
-> > +
-> > +	mkdir -p "${output_dir}/"
-> > +
-> > +	# Collect raw coverage data from the kernel
-> > +	readarray -t source_dirs < <(find "${GCOV_DIR}/" -mindepth 1 -maxdepth 1 -type d)
-> > +	for dir in "${source_dirs[@]}"; do
-> > +		cp -p -R -d -u "${dir}" "${output_dir}/"
-> > +	done
-> > +
-> > +	# If lcov is installed, use it to summarize the gcda data.
-> > +	# If it is not installed, there's no point in going forward
-> > +	command -v lcov > /dev/null || return
-> > +	local lcov=(lcov --exclude 'include*' --capture)
-> > +	lcov+=(--output-file "${output_dir}/gcov.report")
-> > +	for d in "${gcno_dirs[@]}"; do
-> > +		lcov+=(--directory "${d}")
-> > +	done
-> > +
-> > +	# Generate a detailed HTML report from the summary
-> > +	local gcov_start_time="$(date --date="${fstests_start_time:-now}")"
-> > +	local genhtml=()
-> > +	if command -v genhtml > /dev/null; then
-> > +		genhtml+=(genhtml -o "${output_dir}/" "${output_dir}/gcov.report")
-> > +		genhtml+=(--title "fstests on $(hostname -s) @ ${gcov_start_time}" --legend)
-> > +	fi
-> > +
-> > +	# Try to convert the HTML report summary as text for easier grepping if
-> > +	# there's an HTML renderer present
-> > +	local totext=()
-> > +	test "${#totext[@]}" -eq 0 && \
-> > +		command -v lynx &>/dev/null && \
-> > +		totext=(lynx -dump "${output_dir}/index.html" -width 120 -nonumbers -nolist)
-> > +	test "${#totext[@]}" -eq 0 && \
-> > +		command -v links &>/dev/null && \
-> > +		totext=(links -dump "${output_dir}/index.html" -width 120)
-> > +	test "${#totext[@]}" -eq 0 && \
-> > +		command -v elinks &>/dev/null && \
-> > +		totext=(elinks -dump "${output_dir}/index.html" --dump-width 120 --no-numbering --no-references)
-> > +
-> > +	# Analyze kernel data
-> > +	"${lcov[@]}" > "${output_dir}/gcov.stdout" 2> "${output_dir}/gcov.stderr"
-> > +	test "${#genhtml[@]}" -ne 0 && \
-> > +		"${genhtml[@]}" >> "${output_dir}/gcov.stdout" 2>> "${output_dir}/gcov.stderr"
-> > +	test "${#totext[@]}" -ne 0 && \
-> > +		"${totext[@]}" > "${output_dir}/index.txt" 2>> "${output_dir}/gcov.stderr"
-> > +}
-> > +
-> > +# Reset gcov usage data
-> > +_gcov_reset() {
-> > +	test -n "${REPORT_GCOV}" || return
-> > +
-> > +	if [ -w "${GCOV_DIR}/reset" ]; then
-> > +		echo 1 > "${GCOV_DIR}/reset"
-> > +	else
-> > +		unset REPORT_GCOV
-> > +	fi
-> > +}
-> > +
-> >  _wrapup()
-> >  {
-> >  	seq="check"
-> > @@ -527,6 +608,10 @@ _wrapup()
-> >  					     "${#bad[*]}" "${#notrun[*]}" \
-> >  					     "$((sect_stop - sect_start))"
-> >  		fi
-> > +
-> > +		# Generate code coverage report
-> > +		test -n "$REPORT_GCOV" && _gcov_generate_report "$REPORT_GCOV"
-> > +
-> >  		needwrap=false
-> >  	fi
-> >  
-> > @@ -801,6 +886,7 @@ function run_section()
-> >  	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
-> >  	fi
-> >  	echo
-> > +	_gcov_reset
-> >  	needwrap=true
-> >  
-> >  	if [ ! -z "$SCRATCH_DEV" ]; then
-> > 
-> 
+This allows one test runner, kdevops, which I just extended with
+support to use real NVMe drives. The drives it uses for the filesystem
+configuration optionally is with NVMe eui symlinks so to allow
+the same drives to be used over reboots.
+
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
+ check         |  1 +
+ common/config | 44 +++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 44 insertions(+), 1 deletion(-)
+
+diff --git a/check b/check
+index 89e7e7bf20df..d063d3f498fd 100755
+--- a/check
++++ b/check
+@@ -734,6 +734,7 @@ function run_section()
+ 	fi
+ 
+ 	get_next_config $section
++	_canonicalize_devices
+ 
+ 	mkdir -p $RESULT_BASE
+ 	if [ ! -d $RESULT_BASE ]; then
+diff --git a/common/config b/common/config
+index 936ac225f4b1..f5a3815a0435 100644
+--- a/common/config
++++ b/common/config
+@@ -655,6 +655,47 @@ _canonicalize_mountpoint()
+ 	echo "$parent/$base"
+ }
+ 
++# Enables usage of /dev/disk/by-id/ symlinks to persist target devices
++# over reboots
++_canonicalize_devices()
++{
++	if [ ! -z "$TEST_DEV" ] && [ -L $TEST_DEV ]; then
++		TEST_DEV=$(realpath -e $TEST_DEV)
++	fi
++
++	if [ ! -z "$SCRATCH_DEV" ] && [ -L $SCRATCH_DEV ]; then
++		SCRATCH_DEV=$(realpath -e $SCRATCH_DEV)
++	fi
++
++	if [ ! -z "$TEST_LOGDEV" ] && [ -L $TEST_LOGDEV ]; then
++		TEST_LOGDEV=$(realpath -e $TEST_LOGDEV)
++	fi
++
++	if [ ! -z "$TEST_RTDEV" ] && [ -L $TEST_RTDEV ]; then
++		TEST_RTDEV=$(realpath -e $TEST_RTDEV)
++	fi
++
++	if [ ! -z "$SCRATCH_RTDEV" ] && [ -L $SCRATCH_RTDEV ]; then
++		SCRATCH_RTDEV=$(realpath -e $SCRATCH_RTDEV)
++	fi
++
++	if [ ! -z "$LOGWRITES_DEV" ] && [ -L $LOGWRITES_DEV ]; then
++		LOGWRITES_DEV=$(realpath -e $LOGWRITES_DEV)
++	fi
++
++	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
++		NEW_SCRATCH_POOL=""
++		for i in $SCRATCH_DEV_POOL; do
++			if [ -L $i ]; then
++				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(realpath -e $i)"
++			else
++				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
++			fi
++		done
++		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
++	fi
++}
++
+ # On check -overlay, for the non multi section config case, this
+ # function is called on every test, before init_rc().
+ # When SCRATCH/TEST_* vars are defined in config file, config file
+@@ -785,7 +826,6 @@ get_next_config() {
+ 	fi
+ 
+ 	parse_config_section $1
+-
+ 	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
+ 		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
+ 		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
+@@ -901,5 +941,7 @@ else
+ 	fi
+ fi
+ 
++_canonicalize_devices
++
+ # make sure this script returns success
+ /bin/true
+-- 
+2.39.2
+
