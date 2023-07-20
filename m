@@ -2,152 +2,262 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA310C001B0
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jul 2023 01:40:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB488C001B0
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Jul 2023 02:28:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229903AbjGTBkc (ORCPT
+        id S229682AbjGTC2B (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Jul 2023 21:40:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48458 "EHLO
+        Wed, 19 Jul 2023 22:28:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229814AbjGTBkb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2023 21:40:31 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D37141BB
-        for <fstests@vger.kernel.org>; Wed, 19 Jul 2023 18:39:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1689817182;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=OchssuLsI8TgAPpPN1HYvAbN+Zz0angfOEiv64DZQpg=;
-        b=YSWiQHocpRboPTg8i3afG7wJ94p/OgQHPxrd4+u9uNcF3AcVT0wWWD8DuYEifIAMHHYFb3
-        HmzbIfCqrYesCozIdPwthxR//Ooh2GVkWtkVXLWzn1bwGCg8cytQlIHBhTwCm8zJDTirI/
-        Mr/l9hLbeOQ386Y156vNR5srnln9Dms=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-606-fc56IjxMMHWsMqSaUXeg1w-1; Wed, 19 Jul 2023 21:39:40 -0400
-X-MC-Unique: fc56IjxMMHWsMqSaUXeg1w-1
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-262e04a6fd1so125655a91.3
-        for <fstests@vger.kernel.org>; Wed, 19 Jul 2023 18:39:40 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689817179; x=1690421979;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=OchssuLsI8TgAPpPN1HYvAbN+Zz0angfOEiv64DZQpg=;
-        b=W3i94ymQ6FjhSFUwSSJpjrgMNNJY5AIrNKEKCGvDkKKHNBBPxOX6G7qQ3fj6IQH2Uj
-         ++sXry4ab//l7yUHRJyUE8Qp20kY83qCCmHM+kkPAATQlS8pk2uvSeL43W2WhaegTMiq
-         4ZXXFHXIR1ARNci+Q8ct33Ov1/AWZZ5EZfJaO/zVpmP3XLfie7hHWZzv8i6L57YreWkB
-         QwxmG3KbfgYvR35r63IEzoeyvSZGZA8WJEEcXpSMawPHtE9WZY0ox1uPdIVGz81u9B8n
-         Qy6xf2fhjoMwFkteMOthty3EUC+2PGTih4pnt/ORnmL40iwTrM+40XJfWK5XrGCrBXxc
-         UsMA==
-X-Gm-Message-State: ABy/qLYAbuDP+l9Au0BxQef5I+pLjRu6iD4x01nwdAxt2oCiDSOb3klT
-        o9JuKOOezZ42FHyU7nVJilht8JChVXsHiayJp0A5cF6fdMLFqBilYZsyC/epp2oFBbjco3pCEIS
-        EzWuBMZkriUFeTcj6bw==
-X-Received: by 2002:a17:90b:195:b0:265:d6d7:468 with SMTP id t21-20020a17090b019500b00265d6d70468mr676141pjs.24.1689817179324;
-        Wed, 19 Jul 2023 18:39:39 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlEM44lkwhqKYx3rhW6uGA9TwFBwP1NFM1xjeL//8vKhhOwWCL/UCm/oaQoBbr9Sym4eUoLc8Q==
-X-Received: by 2002:a17:90b:195:b0:265:d6d7:468 with SMTP id t21-20020a17090b019500b00265d6d70468mr676134pjs.24.1689817179045;
-        Wed, 19 Jul 2023 18:39:39 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id o4-20020a17090a420400b002638e5d2986sm1651422pjg.17.2023.07.19.18.39.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Jul 2023 18:39:38 -0700 (PDT)
-Date:   Thu, 20 Jul 2023 09:39:35 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] generic/558: avoid forkbombs on filesystems with
- many free inodes
-Message-ID: <20230720013935.vwrqz6kpa2ia2zjk@zlang-mailbox>
-References: <168972904158.1698538.17755661226352965399.stgit@frogsfrogsfrogs>
- <168972904731.1698538.2489183241457829688.stgit@frogsfrogsfrogs>
+        with ESMTP id S229452AbjGTC2A (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2023 22:28:00 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12B7119BC;
+        Wed, 19 Jul 2023 19:27:59 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 1D6C0618C7;
+        Thu, 20 Jul 2023 02:27:58 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 752C0C433C7;
+        Thu, 20 Jul 2023 02:27:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1689820077;
+        bh=Et/CGWZgqEOPtZDNlPty5xxGbgN5/uLyX+ztHtxhIlE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=N0x1lxzy2mUxMhZiF9Wc6UIec1ribQL2QGmy0ptTG4xOdehxFWpoJVnaK+rZSaM02
+         kGGJ+3N2UxSoef1phcO4xxBMAcDBOIGaN28NHRC/inD7xxhfPS128VXpF0LBxk5IZN
+         0GKIt1/WwCCHfqdb9w2OppA6TUQLhfTQQ8lZNSxjRdS2665ztFymks+rQNBCIYNw3M
+         sotxsfebA7rr4OSHaAqAY9TZkbxir4l9+VmzdxnilkpH852x4vxnivH95ISBzUkIbU
+         zBkV7383sJebBdpFrGD3yOXZdfeDpEW8ScK8KJwBuA8mh7C+HSnu0y0CXc2OwaVkUA
+         F6z8p0EauHV4g==
+Date:   Wed, 19 Jul 2023 19:27:56 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     tytso@mit.edu, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] check: add a -smoketest option
+Message-ID: <20230720022756.GH11352@frogsfrogsfrogs>
+References: <168972905065.1698606.6829635791058054610.stgit@frogsfrogsfrogs>
+ <168972905626.1698606.12419796694170752316.stgit@frogsfrogsfrogs>
+ <20230719151024.ef7vgjmtoxwxkmjm@zlang-mailbox>
+ <20230719152907.GA11377@frogsfrogsfrogs>
+ <20230719161115.byva7tvwoafkesga@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <168972904731.1698538.2489183241457829688.stgit@frogsfrogsfrogs>
+In-Reply-To: <20230719161115.byva7tvwoafkesga@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 18, 2023 at 06:10:47PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Jul 20, 2023 at 12:11:15AM +0800, Zorro Lang wrote:
+> On Wed, Jul 19, 2023 at 08:29:07AM -0700, Darrick J. Wong wrote:
+> > On Wed, Jul 19, 2023 at 11:10:24PM +0800, Zorro Lang wrote:
+> > > On Tue, Jul 18, 2023 at 06:10:56PM -0700, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > 
+> > > > Create a "-smoketest" parameter to check that will run generic
+> > > > filesystem smoke testing for five minutes apiece.  Since there are only
+> > > > five smoke tests, this is effectively a 16min super-quick test.
+> > > > 
+> > > > With gcov enabled, running these tests yields about ~75% coverage for
+> > > > iomap and ~60% for xfs; or ~50% for ext4 and ~75% for ext4; and ~45% for
+> > > > btrfs.  Coverage was about ~65% for the pagecache.
+> > > > 
+> > > > Cc: tytso@mit.edu
+> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > > ---
+> > > >  check               |    6 +++++-
+> > > >  doc/group-names.txt |    1 +
+> > > >  tests/generic/475   |    2 +-
+> > > >  tests/generic/476   |    2 +-
+> > > >  tests/generic/521   |    2 +-
+> > > >  tests/generic/522   |    2 +-
+> > > >  tests/generic/642   |    2 +-
+> > > >  7 files changed, 11 insertions(+), 6 deletions(-)
+> > > > 
+> > > > 
+> > > > diff --git a/check b/check
+> > > > index 89e7e7bf20..97c7c4c7d1 100755
+> > > > --- a/check
+> > > > +++ b/check
+> > > > @@ -68,6 +68,7 @@ check options
+> > > >      -pvfs2		test PVFS2
+> > > >      -tmpfs		test TMPFS
+> > > >      -ubifs		test ubifs
+> > > > +    -smoketest		run smoke tests for 4min each
+> > > 
+> > > We have both "smoketest" and "smoke", that's a bit confused :)
+> > 
+> > We do?  git grep doesn't show anything other than what I added:
+> > 
+> > $ git grep smoke
+> > check:71:    -smoketest         run smoke tests for 4min each
+> > check:294:      -smoketest)
+> > check:296:              GROUP_LIST="smoketest"
+> > doc/group-names.txt:123:smoketest               Simple smoke tests
+> > tests/generic/475:15:_begin_fstest shutdown auto log metadata eio recoveryloop smoketest
+> > tests/generic/476:11:_begin_fstest auto rw long_rw stress soak smoketest
+> > tests/generic/521:10:_begin_fstest soak long_rw smoketest
+> > tests/generic/522:10:_begin_fstest soak long_rw smoketest
+> > tests/generic/533:9:# Simple attr smoke tests for user EAs, dereived from generic/097.
+> > tests/generic/642:11:_begin_fstest auto soak attr long_rw stress smoketest
 > 
-> Mikulas reported that this test became a forkbomb on his system when he
-> tested it with bcachefs.  Unlike XFS and ext4, which have large inodes
-> consuming hundreds of bytes, bcachefs has very tiny ones.  Therefore, it
-> reports a large number of free inodes on a freshly mounted 1GB fs (~15
-> million), which causes this test to try to create 15000 processes.
+> Oh, sorry, my memory is a bit of jumbled ...
 > 
-> There's really no reason to do that -- all this test wanted to do was to
-> exhaust the number of inodes as quickly as possible using all available
-> CPUs, and then it ran xfs_repair to try to reproduce a bug.  Set the
-> number of subshells to 4x the CPU count and spread the work among them
-> instead of forking thousands of processes.
+> > 
+> > > >      -l			line mode diff
+> > > >      -udiff		show unified diff (default)
+> > > >      -n			show me, do not run tests
+> > > > @@ -290,7 +291,10 @@ while [ $# -gt 0 ]; do
+> > > >  		FSTYP=overlay
+> > > >  		export OVERLAY=true
+> > > >  		;;
+> > > > -
+> > > > +	-smoketest)
+> > > 
+> > > Hmm... I'm wondering if it's worth having a specific running option for
+> > > someone test group. If each "meaningful" testing way need a specific check
+> > > option, the ./check file will be too complicated.
+> > > 
+> > > If we need some recommended test ways, how about make some separated wrappers
+> > > of ./check? For example:
+> > > 
+> > > # mkdir fstests/runtest/
+> > > # cat > fstests/runtest/smoketest <<EOF
+> > > export SOAK_DURATION="4m"
+> > > ./check -g smoketest
+> > > EOF
+> > > 
+> > > Of course you can write more codes in it.
+> > 
+> > The goal here was to give casual developers an easy way to run a quick
+> > 15 minute exercise *without* having to write wrapper scripts or type
+> > all that in every time.  Compare:
+> > 
+> > $ ./check -smoketest
+> > 
+> > vs.
+> > 
+> > $ SOAK_DURATION=4m ./check -g smoketest
 > 
-> Reported-by: Mikulas Patocka <mpatocka@redhat.com>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> Tested-by: Mikulas Patocka <mpatocka@redhat.com>
-> Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
-> ---
+> Oh, I don't mean let users write that wrapper, I mean we provide some wrapper
+> scripts (to be recommended). E.g.
+> 
+> # ./runtest/smoaktest
+> 
+> If we give "smoaktest" a specific run option, what will we do if more people
+> want to add more options like that?
+> 
+> But a wrapper is not an offical running option, it's just a reference which
+> can be used directly or can be copied. Then we can have more wrappers from
+> each fs expert as reference, to recommend other users how to use fstests
+> specially. And I don't need to add options for each of them. What do you think?
 
-This version is good to me, will merge it.
+I disagree -- this is supposed to be a general smoketest that applies to
+any filesystem.  It's easy to discover this option via ./check --help.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Adding wrapper scripts means that now we have to find a separate way to
+advertise them and people have to find the wrapper on their own if they
+miss the advertising.
 
->  tests/generic/558 |   27 ++++++++++++++++++---------
->  1 file changed, 18 insertions(+), 9 deletions(-)
-> 
-> 
-> diff --git a/tests/generic/558 b/tests/generic/558
-> index 4e22ce656b..510b06f281 100755
-> --- a/tests/generic/558
-> +++ b/tests/generic/558
-> @@ -19,9 +19,8 @@ create_file()
->  	local prefix=$3
->  	local i=0
->  
-> -	while [ $i -lt $nr_file ]; do
-> +	for ((i = 0; i < nr_file; i++)); do
->  		echo -n > $dir/${prefix}_${i}
-> -		let i=$i+1
->  	done
->  }
->  
-> @@ -39,15 +38,25 @@ _scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
->  _scratch_mount
->  
->  i=0
-> -free_inode=`_get_free_inode $SCRATCH_MNT`
-> -file_per_dir=1000
-> -loop=$((free_inode / file_per_dir + 1))
-> +free_inodes=$(_get_free_inode $SCRATCH_MNT)
-> +# Round the number of inodes to create up to the nearest 1000, like the old
-> +# code did to make sure that we *cannot* allocate any more inodes at all.
-> +free_inodes=$(( ( (free_inodes + 999) / 1000) * 1000 ))
-> +nr_cpus=$(( $($here/src/feature -o) * 4 * LOAD_FACTOR ))
-> +echo "free inodes: $free_inodes nr_cpus: $nr_cpus" >> $seqres.full
-> +
-> +if ((free_inodes <= nr_cpus)); then
-> +	nr_cpus=1
-> +	files_per_dir=$free_inodes
-> +else
-> +	files_per_dir=$(( (free_inodes + nr_cpus - 1) / nr_cpus ))
-> +fi
->  mkdir -p $SCRATCH_MNT/testdir
-> +echo "nr_cpus: $nr_cpus files_per_dir: $files_per_dir" >> $seqres.full
->  
-> -echo "Create $((loop * file_per_dir)) files in $SCRATCH_MNT/testdir" >>$seqres.full
-> -while [ $i -lt $loop ]; do
-> -	create_file $SCRATCH_MNT/testdir $file_per_dir $i >>$seqres.full 2>&1 &
-> -	let i=$i+1
-> +echo "Create $((nr_cpus * files_per_dir)) files in $SCRATCH_MNT/testdir" >>$seqres.full
-> +for ((i = 0; i < nr_cpus; i++)); do
-> +	create_file $SCRATCH_MNT/testdir $files_per_dir $i >>$seqres.full 2>&1 &
->  done
->  wait
->  
-> 
+--D
 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > +		SOAK_DURATION="4m"
+> > > > +		GROUP_LIST="smoketest"
+> > > > +		;;
+> > > >  	-g)	group=$2 ; shift ;
+> > > >  		GROUP_LIST="$GROUP_LIST ${group//,/ }"
+> > > >  		;;
+> > > > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > > > index 1c35a39432..c3dcca3755 100644
+> > > > --- a/doc/group-names.txt
+> > > > +++ b/doc/group-names.txt
+> > > > @@ -118,6 +118,7 @@ selftest		tests with fixed results, used to validate testing setup
+> > > >  send			btrfs send/receive
+> > > >  shrinkfs		decreasing the size of a filesystem
+> > > >  shutdown		FS_IOC_SHUTDOWN ioctl
+> > > > +smoketest		Simple smoke tests
+> > > >  snapshot		btrfs snapshots
+> > > >  soak			long running soak tests whose runtime can be controlled
+> > > >                          directly by setting the SOAK_DURATION variable
+> > > > diff --git a/tests/generic/475 b/tests/generic/475
+> > > > index 0cbf5131c2..ce7fe013b1 100755
+> > > > --- a/tests/generic/475
+> > > > +++ b/tests/generic/475
+> > > > @@ -12,7 +12,7 @@
+> > > >  # testing efforts.
+> > > >  #
+> > > >  . ./common/preamble
+> > > > -_begin_fstest shutdown auto log metadata eio recoveryloop
+> > > > +_begin_fstest shutdown auto log metadata eio recoveryloop smoketest
+> > > >  
+> > > >  # Override the default cleanup function.
+> > > >  _cleanup()
+> > > > diff --git a/tests/generic/476 b/tests/generic/476
+> > > > index 8e93b73457..b1ae4df4d4 100755
+> > > > --- a/tests/generic/476
+> > > > +++ b/tests/generic/476
+> > > > @@ -8,7 +8,7 @@
+> > > >  # bugs in the write path.
+> > > >  #
+> > > >  . ./common/preamble
+> > > > -_begin_fstest auto rw long_rw stress soak
+> > > > +_begin_fstest auto rw long_rw stress soak smoketest
+> > > >  
+> > > >  # Override the default cleanup function.
+> > > >  _cleanup()
+> > > > diff --git a/tests/generic/521 b/tests/generic/521
+> > > > index 22dd31a8ec..0956e50171 100755
+> > > > --- a/tests/generic/521
+> > > > +++ b/tests/generic/521
+> > > > @@ -7,7 +7,7 @@
+> > > >  # Long-soak directio fsx test
+> > > >  #
+> > > >  . ./common/preamble
+> > > > -_begin_fstest soak long_rw
+> > > > +_begin_fstest soak long_rw smoketest
+> > > >  
+> > > >  # Import common functions.
+> > > >  . ./common/filter
+> > > > diff --git a/tests/generic/522 b/tests/generic/522
+> > > > index f0cbcb245c..0e4e6009ed 100755
+> > > > --- a/tests/generic/522
+> > > > +++ b/tests/generic/522
+> > > > @@ -7,7 +7,7 @@
+> > > >  # Long-soak buffered fsx test
+> > > >  #
+> > > >  . ./common/preamble
+> > > > -_begin_fstest soak long_rw
+> > > > +_begin_fstest soak long_rw smoketest
+> > > >  
+> > > >  # Import common functions.
+> > > >  . ./common/filter
+> > > > diff --git a/tests/generic/642 b/tests/generic/642
+> > > > index eba90903a3..e6a475a8b5 100755
+> > > > --- a/tests/generic/642
+> > > > +++ b/tests/generic/642
+> > > > @@ -8,7 +8,7 @@
+> > > >  # bugs in the xattr code.
+> > > >  #
+> > > >  . ./common/preamble
+> > > > -_begin_fstest auto soak attr long_rw stress
+> > > > +_begin_fstest auto soak attr long_rw stress smoketest
+> > > >  
+> > > >  _cleanup()
+> > > >  {
+> > > > 
+> > > 
+> > 
+> 
