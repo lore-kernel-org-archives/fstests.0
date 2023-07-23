@@ -2,113 +2,126 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D980C001B0
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 Jul 2023 15:30:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2032C001B0
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 Jul 2023 15:34:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229746AbjGWPar (ORCPT
+        id S229595AbjGWPeL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 Jul 2023 11:30:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57794 "EHLO
+        Sun, 23 Jul 2023 11:34:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58324 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbjGWPar (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jul 2023 11:30:47 -0400
+        with ESMTP id S229552AbjGWPeL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jul 2023 11:34:11 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A25631A5
-        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 08:30:46 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 535D91A7
+        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 08:34:10 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1F04F60DD0
-        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 15:30:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A4F18C433C8;
-        Sun, 23 Jul 2023 15:30:44 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E1AFF60DBA
+        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 15:34:09 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 949A0C433C8;
+        Sun, 23 Jul 2023 15:34:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690126245;
-        bh=CEesjs/njCqXmfI6D4XBVJpLQjxQ137vsjlFqo5znpc=;
+        s=k20201202; t=1690126449;
+        bh=nJ9tSPFJkWjqiWhI7AwsF156cKmXhMW2cXVarACSjAo=;
         h=Date:From:To:Subject:From;
-        b=UhvvE7qHjDR4jBrPh27gRRPGESCBILaHUVB492BD17PxRtLhxl2UY6f4WMEkNyDuV
-         9l1tgBhYMzcIX83al3JdCdXkHwF8dpiLY/tOKBe1JMKsOI1wlqAW567pa0F0IRBcd5
-         a9yIDzeGSN8e0FZy60brqT9/br2vl8+IC9h+21DYdiRgoJGJEEs54cA/sHktyilpZ5
-         QMIyZOumegHOEtSPZ2JrwfznvVtOer3TwXyNb32LFM7I6JGqYIZcuj242oRqciCYLH
-         fG88UesUyi+nfISGOuNDADyo+5SyEykUiEeUkEXCiRBjQO7Dk3QTAouaCSWDr6gtDn
-         ieTD84TXsdhsw==
-Date:   Sun, 23 Jul 2023 23:30:40 +0800
+        b=EaGhyTXnF1MT5Bd1R3NEZCcThhN+7prh6w4bdwg6RGIVIvpYQbED5ZYgnh0B4f6NW
+         xupjUc+EGAOcSS+KssSaIU8Nwwb7/+PmkCQQ/Lp6vEsZXR2G/FIxQ/Hem54clZA0Ov
+         ibQUI9nbxY0AkRfYSdEEvBDghpUNlqx4X023m6eFbh5SMybmUKGo24aMgkBTqFRR8Z
+         g8Vkw5pgWWZKuTlNqnqIHUwus29EN6uw9SFevZ4bsGNglBgN08Cahxw8mRM833sOQH
+         7qnvQTEne0U2wN3u3Ko5JiKIzZFm1GA2BW2M2DvQ678vw91KQtnoBCM70akpwwzJ9A
+         QyvMyiV57wxCQ==
+Date:   Sun, 23 Jul 2023 23:34:05 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.07.09 onto master branch
-Message-ID: <20230723153040.jgf3egnqfc4dc5f4@zlang-mailbox>
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.07.23
+Message-ID: <20230723153405.mjsjdpxdvivsqqym@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.07.09 version.
+has just been updated and tagged as v2023.07.23 release.
+
+Release Notes:
+1) There're 8 new test cases in this release, include:
+   -- btrfs/294, btrfs/295 and btrfs/296 are known btrfs regression test cases.
+   -- overlay/079 and overlay/080 are new feature test cases, for data-only
+      upperdir feature and fs-verity validation feature. (Note: overlay/060 is
+      changed too, we add new feature testing into it, but won't fail old kernel
+      testing).
+   -- xfs/597, xfs/598 and xfs/599 are functional test cases for ascii
+      case-insensitive directory lookup.
+2) Fix some issues on bcachefs testing, help fstests to work on it better.
+
+More details refer to below, thanks for all these contribution!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-66fcf86bbaea report: remove xmlns specifier
+8de535c53887 btrfs: add a test case to verify that per-fs features directory gets updated
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Amir Goldstein (2):
-      [3e7166ffb2ef] fstests: reduce runtime of check -n
-      [06cee93225c9] generic/604: Fix for overlayfs
+Alexander Larsson (1):
+[N]      [f2c9af189a76] overlay: Add test coverage for fs-verity support
 
-Darrick J. Wong (5):
-      [2fc1f5dc90f4] xfs/529: fix bogus failure when realtime is configured
-      [cfa2c8fadbc8] xfs/569: skip post-test fsck run
-      [08389a5aaa29] xfs/439: amend test to work with new log geometry validation
-      [14941ffecb85] xfs/041: force create files on the data device
-      [27211f9bb44b] xfs: test growfs of the realtime device
+Amir Goldstein (3):
+[U]      [23f643a0c3e4] overlay: add helper for mounting rdonly overlay
+[U]      [5f8c60fe8140] overlay/060: add test cases of follow to lowerdata
+[N]      [019122400875] overlay: Add test for follow of lowerdata in data-only layers
 
-Filipe Manana (1):
-      [db7fb78fda69] btrfs: test activating swapfile in the presence of snapshots
+Darrick J. Wong (2):
+[N]      [1cd6b612992a] xfs: add a couple more tests for ascii-ci problems
+[U]      [d28912bad3c0] generic/558: avoid forkbombs on filesystems with many free inodes
 
-Qu Wenruo (2):
-      [4ea344909aba] btrfs: add test case to verify the behavior with large RAID0 data chunks
-      [e7006c6dc1c2] common/btrfs: handle dmdust as mounted device in _btrfs_buffered_read_on_mirror()
+Luís Henriques (1):
+[U]      [05574f3cfc49] common/rc: cleanup old .kmemleak files
 
-Stas Sergeev (1):
-      [2c29b9b58618] common/config: redirect modprobe helpinfo to stdout for busybox
-
-Theodore Ts'o (2):
-      [8bab8ef9872e] report: safely update the result.xml file
-      [66fcf86bbaea] report: remove xmlns specifier
-
-Yuezhang Mo (1):
-      [60054d5118fd] check: fix excluded tests are only expunged in the first iteration
+Qu Wenruo (3):
+[N]      [6ca154c1b239] btrfs: add a test case to verify the write behavior of large RAID5 data chunks
+[N]      [9b84d93f225f] btrfs: add a test case to check btrfs won't crash on certain corruption
+[N]      [8de535c53887] btrfs: add a test case to verify that per-fs features directory gets updated
 
 
 Code Diffstat:
 
- check               | 52 +++++++++++++++---------------
- common/btrfs        | 13 ++++++--
- common/config       |  2 +-
- common/report       | 21 +++++++------
- tests/btrfs/292     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/292.out |  2 ++
- tests/btrfs/293     | 72 ++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/293.out | 17 ++++++++++
- tests/generic/604   |  4 ++-
- tests/xfs/041       |  3 ++
- tests/xfs/439       | 14 +++++++--
- tests/xfs/529       |  4 +++
- tests/xfs/569       |  2 +-
- tests/xfs/596       | 79 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/596.out   | 19 +++++++++++
- 15 files changed, 351 insertions(+), 44 deletions(-)
+ common/overlay        |  35 +++++-
+ common/rc             |   4 +
+ common/verity         |  16 ++-
+ tests/btrfs/294       |  72 +++++++++++
+ tests/btrfs/294.out   |   2 +
+ tests/btrfs/295       |  38 ++++++
+ tests/btrfs/295.out   |   2 +
+ tests/btrfs/296       |  66 ++++++++++
+ tests/btrfs/296.out   |   2 +
+ tests/generic/558     |  27 +++--
+ tests/overlay/060     |  43 ++++++-
+ tests/overlay/060.out |  18 +++
+ tests/overlay/079     | 325 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/079.out |  42 +++++++
+ tests/overlay/080     | 326 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/080.out |   7 ++
+ tests/xfs/597         |  56 +++++++++
+ tests/xfs/597.out     |  24 ++++
+ tests/xfs/598         | 101 ++++++++++++++++
+ tests/xfs/598.out     |   9 ++
+ tests/xfs/599         |  91 ++++++++++++++
+ tests/xfs/599.out     |   2 +
+ 22 files changed, 1287 insertions(+), 21 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
