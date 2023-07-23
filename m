@@ -2,154 +2,113 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25917C001B0
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 Jul 2023 04:50:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D980C001B0
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 Jul 2023 15:30:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229557AbjGWEuY (ORCPT
+        id S229746AbjGWPar (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 Jul 2023 00:50:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58954 "EHLO
+        Sun, 23 Jul 2023 11:30:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57794 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229452AbjGWEuX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jul 2023 00:50:23 -0400
+        with ESMTP id S229603AbjGWPar (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jul 2023 11:30:47 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82215E7A
-        for <fstests@vger.kernel.org>; Sat, 22 Jul 2023 21:50:22 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A25631A5
+        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 08:30:46 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D002E60B87
-        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 04:50:21 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 691B6C433C7;
-        Sun, 23 Jul 2023 04:50:20 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 1F04F60DD0
+        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 15:30:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A4F18C433C8;
+        Sun, 23 Jul 2023 15:30:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690087821;
-        bh=aFA4Rr0LTnO+kZe93zwJP0S7MHkIuufcT4HgSRJR7CI=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=P4HyM2XPzedzOO4MvbQ7vCr/wsxMVpBrj4SFP2MTEbrnj9I0FOJLiYxcjvTfmoY26
-         DqslWnnSqnr+F8xA1CHT7WGQp9KsO6oqjLUPwcVACriHGK+sDrU3haDtzbJlZ6E7Ao
-         FB/qZvsu9oJ01/j1ufHnUxbqT+m/8xhCcGYmy+MHlrazeZ0MpFv5k0Yd6wmW9Xe1bd
-         1hrGM42Lv3dl3Y4LbcRJLvfdRkuX7qWscRXEebPrZFWT/ufQrZa0jIOGqLi5ZPEl+U
-         NoJhN7lE/3JXStwgbnNfZxezfMRvqhJB2Rp3aVi1MQYtYNHUWIFQQ8VZkf24cE88mI
-         sb+Rc4yiGrRQQ==
+        s=k20201202; t=1690126245;
+        bh=CEesjs/njCqXmfI6D4XBVJpLQjxQ137vsjlFqo5znpc=;
+        h=Date:From:To:Subject:From;
+        b=UhvvE7qHjDR4jBrPh27gRRPGESCBILaHUVB492BD17PxRtLhxl2UY6f4WMEkNyDuV
+         9l1tgBhYMzcIX83al3JdCdXkHwF8dpiLY/tOKBe1JMKsOI1wlqAW567pa0F0IRBcd5
+         a9yIDzeGSN8e0FZy60brqT9/br2vl8+IC9h+21DYdiRgoJGJEEs54cA/sHktyilpZ5
+         QMIyZOumegHOEtSPZ2JrwfznvVtOer3TwXyNb32LFM7I6JGqYIZcuj242oRqciCYLH
+         fG88UesUyi+nfISGOuNDADyo+5SyEykUiEeUkEXCiRBjQO7Dk3QTAouaCSWDr6gtDn
+         ieTD84TXsdhsw==
+Date:   Sun, 23 Jul 2023 23:30:40 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     hch@lst.de
-Subject: [PATCH] generic: add a test for device removal with dirty data
-Date:   Sun, 23 Jul 2023 12:50:17 +0800
-Message-Id: <20230723045017.1706370-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20230711100931.175680-2-hch@lst.de>
-References: <20230711100931.175680-2-hch@lst.de>
+Subject: [ANNOUNCE] fstests: merge v2023.07.09 onto master branch
+Message-ID: <20230723153040.jgf3egnqfc4dc5f4@zlang-mailbox>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Christoph Hellwig <hch@lst.de>
+Hi all,
 
-Test the removal of the underlying device when the file system still
-has dirty data.
+The master branch of the xfstests repository at:
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Hi Christoph,
-
-I'd like to help this patchset to catch this or next fstests release. So I
-changed this patch a bit, if you feel good, I'll merge this patch as below.
-(Same to the 2nd patch).
-
-Change logs:
-1) Replace SCRATCH_DEV with TEST_DEV, replace SCRATCH_MNT with SCSI_DEBUG_MNT
-   which is a directory in TEST_DIR, due to we don't call _require_scratch
-   in this case.
-2) Call _fail if _mkfs_dev or _mount fails
+has just been updated to v2023.07.09 version.
 
 Thanks,
 Zorro
 
- tests/generic/730     | 59 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/730.out |  2 ++
- 2 files changed, 61 insertions(+)
- create mode 100755 tests/generic/730
- create mode 100644 tests/generic/730.out
+The new head of the master branch is commit:
 
-diff --git a/tests/generic/730 b/tests/generic/730
-new file mode 100755
-index 00000000..7886b38d
---- /dev/null
-+++ b/tests/generic/730
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-+# Copyright (c) 2023 Christoph Hellwig
-+#
-+# Test proper file system shut down when the block device is removed underneath
-+# and there is dirty data.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $SCSI_DEBUG_MNT >>$seqres.full 2>&1
-+	_put_scsi_debug_dev
-+	rm -r -f $tmp.*
-+}
-+
-+. ./common/filter
-+. ./common/scsi_debug
-+
-+_supported_fs generic
-+
-+# We don't actually use the test device, but we need a block based fs
-+_require_test
-+_require_block_device $TEST_DEV
-+_require_scsi_debug
-+
-+physical=`blockdev --getpbsz $TEST_DEV`
-+logical=`blockdev --getss $TEST_DEV`
-+
-+SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
-+test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
-+echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
-+
-+_mkfs_dev $SCSI_DEBUG_DEV || _fail "make $FSTYP on $SCSI_DEBUG_DEV"
-+SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
-+rm -rf $SCSI_DEBUG_MNT
-+mkdir $SCSI_DEBUG_MNT
-+run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
-+
-+# create a test file
-+$XFS_IO_PROG -f -c "pwrite 0 1M" $SCSI_DEBUG_MNT/testfile >>$seqres.full
-+
-+# open a file descriptor for reading the file
-+exec 3< $SCSI_DEBUG_MNT/testfile
-+
-+# delete the scsi debug device while it still has dirty data
-+echo 1 > /sys/block/$(_short_dev $SCSI_DEBUG_DEV)/device/delete
-+
-+# try to read from the file, which should give us -EIO
-+cat <&3 > /dev/null
-+
-+# close the file descriptor to not block unmount
-+exec 3<&-
-+
-+status=0
-+exit
-diff --git a/tests/generic/730.out b/tests/generic/730.out
-new file mode 100644
-index 00000000..79e96db8
---- /dev/null
-+++ b/tests/generic/730.out
-@@ -0,0 +1,2 @@
-+QA output created by 730
-+cat: -: Input/output error
--- 
-2.40.1
+66fcf86bbaea report: remove xmlns specifier
 
+New commits:
+
+Amir Goldstein (2):
+      [3e7166ffb2ef] fstests: reduce runtime of check -n
+      [06cee93225c9] generic/604: Fix for overlayfs
+
+Darrick J. Wong (5):
+      [2fc1f5dc90f4] xfs/529: fix bogus failure when realtime is configured
+      [cfa2c8fadbc8] xfs/569: skip post-test fsck run
+      [08389a5aaa29] xfs/439: amend test to work with new log geometry validation
+      [14941ffecb85] xfs/041: force create files on the data device
+      [27211f9bb44b] xfs: test growfs of the realtime device
+
+Filipe Manana (1):
+      [db7fb78fda69] btrfs: test activating swapfile in the presence of snapshots
+
+Qu Wenruo (2):
+      [4ea344909aba] btrfs: add test case to verify the behavior with large RAID0 data chunks
+      [e7006c6dc1c2] common/btrfs: handle dmdust as mounted device in _btrfs_buffered_read_on_mirror()
+
+Stas Sergeev (1):
+      [2c29b9b58618] common/config: redirect modprobe helpinfo to stdout for busybox
+
+Theodore Ts'o (2):
+      [8bab8ef9872e] report: safely update the result.xml file
+      [66fcf86bbaea] report: remove xmlns specifier
+
+Yuezhang Mo (1):
+      [60054d5118fd] check: fix excluded tests are only expunged in the first iteration
+
+
+Code Diffstat:
+
+ check               | 52 +++++++++++++++---------------
+ common/btrfs        | 13 ++++++--
+ common/config       |  2 +-
+ common/report       | 21 +++++++------
+ tests/btrfs/292     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/292.out |  2 ++
+ tests/btrfs/293     | 72 ++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/293.out | 17 ++++++++++
+ tests/generic/604   |  4 ++-
+ tests/xfs/041       |  3 ++
+ tests/xfs/439       | 14 +++++++--
+ tests/xfs/529       |  4 +++
+ tests/xfs/569       |  2 +-
+ tests/xfs/596       | 79 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/596.out   | 19 +++++++++++
+ 15 files changed, 351 insertions(+), 44 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
