@@ -2,132 +2,102 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 005F9C04A6A
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Jul 2023 15:29:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D017EB64DD
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Jul 2023 18:24:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229991AbjGXP3a (ORCPT
+        id S229898AbjGXSYW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Jul 2023 11:29:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48892 "EHLO
+        Mon, 24 Jul 2023 14:24:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231270AbjGXP33 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2023 11:29:29 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 972CEE5A
-        for <fstests@vger.kernel.org>; Mon, 24 Jul 2023 08:29:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:To:From:Sender:
-        Reply-To:Cc:Content-Type:Content-ID:Content-Description;
-        bh=aPI8T9C0EGuHaTUYooPEW1Zr7hx5O/cEtjB6CHx/XvE=; b=fU1v7ib6VpE/Eo1CMQHaFSV7sk
-        WE6cjkMfM+BNuYUYghDMrTThA635GcvAjampsKI+DBYQcq11EfDyC1DP1NfpOlggdu50Dyo5WtugO
-        pbdw8HRwIu9HsyQYJgV5S2pTqkwvFKrezlT/yPI/XBJWEY4WoWooseTYGfDyN1rU4iD8Yvw3hqcgd
-        2sOW1/RBempkidb3NBjtH8VSyAcbKU04Lti3aIgvOtv33GSoyPYP9euqLRCvF7yAkubZXlh0qberZ
-        Rdm3HKwbTMVhOF9fojVDI7WvhdfdNMd7Tp00nGak3hkTaEzjLHGk5uhMe5h4eTvSdDPyaptgTn+Kg
-        Kh1ydH+g==;
-Received: from 67-207-104-238.static.wiline.com ([67.207.104.238] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-        id 1qNxV2-004k4z-1Y
-        for fstests@vger.kernel.org;
-        Mon, 24 Jul 2023 15:29:28 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     fstests@vger.kernel.org
-Subject: [PATCH 2/2] generic: add a test for device removal without dirty data
-Date:   Mon, 24 Jul 2023 08:29:27 -0700
-Message-Id: <20230724152927.33094-3-hch@lst.de>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230724152927.33094-1-hch@lst.de>
+        with ESMTP id S229850AbjGXSYW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2023 14:24:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38662127
+        for <fstests@vger.kernel.org>; Mon, 24 Jul 2023 11:23:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1690223013;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=5jHqT74LBzBbNzQ3yq6+erVIVQ4pOAGvC4Knx/Vh83M=;
+        b=I9+xOXNk1uXCzX65iAqnrFkXQTfajbX/gv9r+X6u5evv9nnYvRHoLapCLzjcwaHaoaBukR
+        5CvqQlbpxgMgCKGaOiFHAZk6KEfxYsGY6oqoX7G5falZc4p9UChuknI6xYkqaZEmxDXCec
+        SFHMqq63+2gBEOociqL+W4/WGPWbWtA=
+Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
+ [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-198-1h3MVA-4PDGDxlPKlTAaVQ-1; Mon, 24 Jul 2023 14:23:31 -0400
+X-MC-Unique: 1h3MVA-4PDGDxlPKlTAaVQ-1
+Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-31421c900b7so2771592f8f.3
+        for <fstests@vger.kernel.org>; Mon, 24 Jul 2023 11:23:31 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1690223010; x=1690827810;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5jHqT74LBzBbNzQ3yq6+erVIVQ4pOAGvC4Knx/Vh83M=;
+        b=AwQ94tfH1wETYb3rvvDVh7wI1qwoXej42mIivTq+yitVmHwKjmkm3NFuIVHCG9H+BD
+         k/hKqarPtAeDICTWVylrTvxq0mZWg7Q1vxPlbyDzUI5qjB1tCMUBh/XZ5Tc4+aF2cH5Z
+         lVb3vaSOocn+T3qyzCM7CjK4pqAAybMNZCBU3cDvZOqjQRRETzjVTtNdGe8ESSbXhDfe
+         s7/JZ0kqUDFSx5td9nVJmM04HSiMcSM1sS4d31YBpUimxrRKgwi0YhgUAxIs3/EJXueN
+         YeQiUgFWuV583IKnGRR37SFqcLuNvnFksKTzaaw5ZiQX2YtP//D7mB12yp6xT/edIrGQ
+         IxYQ==
+X-Gm-Message-State: ABy/qLa9fUdGd3WuvbRwGUyKcc80qAIZWHAr6gtbO+sIneMfiR2mowKL
+        BvUwauHXGR90opC9Tqso1Haugrv74Ud6zluJNLtXnqak7pt0VWHa2URDTlwiOtl+5P4f9RIE1tc
+        4Npp1a+cd6syanP0Ky9jofoBZ
+X-Received: by 2002:adf:f84b:0:b0:314:377:5e43 with SMTP id d11-20020adff84b000000b0031403775e43mr7628667wrq.48.1690223010062;
+        Mon, 24 Jul 2023 11:23:30 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlE97pKdPvOQYsU4TJInTn+mPYkxW1PWjHd8dJ1OmbrPVF4iBMcswdibZ6XxJFPqFlV6YxS08Q==
+X-Received: by 2002:adf:f84b:0:b0:314:377:5e43 with SMTP id d11-20020adff84b000000b0031403775e43mr7628661wrq.48.1690223009710;
+        Mon, 24 Jul 2023 11:23:29 -0700 (PDT)
+Received: from aalbersh.remote.csb ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id f3-20020a056000128300b0030647449730sm13863738wrx.74.2023.07.24.11.23.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 24 Jul 2023 11:23:28 -0700 (PDT)
+Date:   Mon, 24 Jul 2023 20:23:26 +0200
+From:   Andrey Albershteyn <aalbersh@redhat.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic: add a test for device removal with dirty
+ data
+Message-ID: <20230724182326.tbrk7nwqukfmsl3k@aalbersh.remote.csb>
 References: <20230724152927.33094-1-hch@lst.de>
+ <20230724152927.33094-2-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230724152927.33094-2-hch@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test the removal of the underlying device when the file system still
-does not have dirty data.
+On 2023-07-24 08:29:26, Christoph Hellwig wrote:
+> Test the removal of the underlying device when the file system still
+> has dirty data.
+> 
+> snip
+>
+> +rm -rf $SCSI_DEBUG_MNT
+> +mkdir $SCSI_DEBUG_MNT
+> +run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
+> +
+> +# create a test file
+> +$XFS_IO_PROG -f -c "pwrite 0 1M" $SCSI_DEBUG_MNT/testfile >>$seqres.full
+> +
+> +# open a file descriptor for reading the file
+> +exec 3< $SCSI_DEBUG_MNT/testfile
+> +
+> +# delete the scsi debug device while it still has dirty data
+> +echo 1 > /sys/block/$(_short_dev $SCSI_DEBUG_DEV)/device/delete
+> +
+> +# try to read from the file, which should give us -EIO
+> +cat <&3 > /dev/null
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/generic/731     | 58 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/731.out |  2 ++
- 2 files changed, 60 insertions(+)
- create mode 100755 tests/generic/731
- create mode 100644 tests/generic/731.out
+hmm, maybe I missing something but won't cat always return -EIO
+here? I suppose the test will also pass without the behaviour you
+introduced.
 
-diff --git a/tests/generic/731 b/tests/generic/731
-new file mode 100755
-index 00000000..e1400d06
---- /dev/null
-+++ b/tests/generic/731
-@@ -0,0 +1,58 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2015 Red Hat Inc. All Rights Reserved.
-+# Copyright (c) 2023 Christoph Hellwig
-+#
-+# Test proper file system shut down when the block device is removed underneath
-+# and it has no dirty data.
-+#
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $SCSI_DEBUG_MNT >>$seqres.full 2>&1
-+	_put_scsi_debug_dev
-+	rm -f $tmp.*
-+}
-+
-+. ./common/filter
-+. ./common/scsi_debug
-+
-+# We don't actually use the test device, but we need a block based fs
-+_require_test
-+_require_block_device $TEST_DEV
-+_supported_fs generic
-+_require_scsi_debug
-+
-+SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 256`
-+test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
-+echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
-+
-+run_check _mkfs_dev $SCSI_DEBUG_DEV
-+
-+SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
-+rm -rf $SCSI_DEBUG_MNT
-+mkdir $SCSI_DEBUG_MNT
-+run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
-+
-+# create a test file
-+$XFS_IO_PROG -f -c "pwrite 0 1M" -c "fsync" $SCSI_DEBUG_MNT/testfile >>$seqres.full
-+
-+# open a file descriptor for reading the file
-+exec 3< $SCSI_DEBUG_MNT/testfile
-+
-+# drop all caches and delete the scsi debug device
-+echo 3 > /proc/sys/vm/drop_caches
-+echo 1 > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/delete
-+
-+# try to read from the file, which should give us -EIO
-+cat <&3 > /dev/null
-+
-+# close the file descriptor to not block unmount
-+exec 3<&-
-+
-+status=0
-+exit
-diff --git a/tests/generic/731.out b/tests/generic/731.out
-new file mode 100644
-index 00000000..102c0522
---- /dev/null
-+++ b/tests/generic/731.out
-@@ -0,0 +1,2 @@
-+QA output created by 731
-+cat: -: Input/output error
 -- 
-2.39.2
+- Andrey
 
