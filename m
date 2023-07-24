@@ -2,58 +2,59 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 587D2C001DE
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Jul 2023 13:32:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55CC4C001B0
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Jul 2023 14:10:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229675AbjGXNcl (ORCPT
+        id S230052AbjGXOK4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Jul 2023 09:32:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36430 "EHLO
+        Mon, 24 Jul 2023 10:10:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbjGXNcl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2023 09:32:41 -0400
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31631FD
-        for <fstests@vger.kernel.org>; Mon, 24 Jul 2023 06:32:40 -0700 (PDT)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id DCB2A67373; Mon, 24 Jul 2023 15:32:36 +0200 (CEST)
-Date:   Mon, 24 Jul 2023 15:32:36 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, hch@lst.de
-Subject: Re: [PATCH] generic: add a test for device removal with dirty data
-Message-ID: <20230724133236.GB20744@lst.de>
-References: <20230711100931.175680-2-hch@lst.de> <20230723045017.1706370-1-zlang@kernel.org>
+        with ESMTP id S229652AbjGXOKw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2023 10:10:52 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44D43E53;
+        Mon, 24 Jul 2023 07:10:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=t2f7OxCnIhgexboHEIgwS4S5Rsyc2tEzMFa7uxmIk3Q=; b=AiI+ZNKSyvPMV2uy88kWb5ScMM
+        TBPZTLKbQ6xVXTP4ry0gWDXt/be9Pn8Aijz4J/Lyttd0H4QyJO3ca6rqnW/9SIU5BbYD06Kozcz16
+        6EEx63VwJn+vJJGT80XCN7YfjFv2pTBi6SswP9pwKctOojaGaZOQtMq17BTh1jMFV+blMLuZQHaAC
+        F4dRA8udV7f238ixz1JZGHCLKG4fAeBaZQhbIvkOoFrP2ySSV7d7syhY+pl1YPlTIBeIxeU0xA1mE
+        Fh8lAtNE7ISKWPOb3JtIa9hPk30ug0D6WF3Tqgce8kFlY877q9Lap6S+4p9hq5U1J0bSOGcTO9May
+        DkcGgs1w==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+        id 1qNwGx-004ZDj-09;
+        Mon, 24 Jul 2023 14:10:51 +0000
+Date:   Mon, 24 Jul 2023 07:10:51 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] btrfs/294: reject zoned devices for now
+Message-ID: <ZL6Ga9zRjBmAEmA/@infradead.org>
+References: <20230724030423.92390-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230723045017.1706370-1-zlang@kernel.org>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20230724030423.92390-1-wqu@suse.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 23, 2023 at 12:50:17PM +0800, Zorro Lang wrote:
-> I'd like to help this patchset to catch this or next fstests release. So I
-> changed this patch a bit, if you feel good, I'll merge this patch as below.
-> (Same to the 2nd patch).
+On Mon, Jul 24, 2023 at 11:04:23AM +0800, Qu Wenruo wrote:
+> The test case itself is utilizing RAID5/6, which is not yet supported on
+> zoned device.
+> 
+> In the future we would use raid-stripe-tree (RST) feature, but for now
+> just reject zoned devices completely.
+> 
+> And since we're here, also update the _fixed_by_kernel_commit lines, as
+> the proper fix is already merged upstream.
 
-I've actually got a few other changes locally nad plant to send it out.
+Hmm, instead of spreading these checks, shouldn't we check that the
+RAID level is supported, and have one single nob for that based off
+it, similar to _btrfs_get_profile_configs()?
 
-> Change logs:
-> 1) Replace SCRATCH_DEV with TEST_DEV, replace SCRATCH_MNT with SCSI_DEBUG_MNT
->    which is a directory in TEST_DIR, due to we don't call _require_scratch
->    in this case.
-
-The SCSI_DEBUG_MNT change is fine.  The SCRATCH_DEV stuff I think we don't
-need at all, after all the sector size doesn't really matter for this
-test, so I've just dropped it.
-
-> 2) Call _fail if _mkfs_dev or _mount fails
-
-Shouldn't the mkfs side also use run_check ?
-
-Btw, your cleanups should also go into generic/108 from where I took
-the scsi_debug boilerplate.
-
-I'll resend later today, also incorporating your changes.
