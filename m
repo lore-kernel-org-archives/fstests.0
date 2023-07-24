@@ -2,214 +2,122 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1727CEB64DD
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Jul 2023 04:54:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE4C6C001B0
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Jul 2023 04:56:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229486AbjGXEyQ (ORCPT
+        id S229598AbjGXE42 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Jul 2023 00:54:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55318 "EHLO
+        Mon, 24 Jul 2023 00:56:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55702 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229456AbjGXEyP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2023 00:54:15 -0400
+        with ESMTP id S229456AbjGXE42 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2023 00:56:28 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2137DE40
-        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 21:53:30 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28B7AE41
+        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 21:55:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1690174409;
+        s=mimecast20190719; t=1690174537;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=vsHlX/n7W4m6UrgFt8MF5EoQoXZ4oFaCMhkv/WslBXA=;
-        b=KkMHS+hNCR5aUPloSghpKdT5sLTaQaSErLAHV4XsrwPeTcaz5dX+1YYier49TwN43Zz/xX
-        Cm13Z9CxipTlWLfzYLR8/D5LQec4+6DUfhw6r5Mcb9QCnPkkAz7IsF/EPIrZm1LNNbXnBO
-        HDniSGcFbmZnBCV1F+r0qhbQCrJ5b7M=
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
- [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=rlutq8Z7KDhlUXfrK5vwQPEoqf3nu5Bflb9MQCA4ltI=;
+        b=jR/4y4EJocQZK96jBPNV4W2L/9TxSO7grjgsXRYXZ5nl8be+DWJwf/z0Dox+Ies6b0Ul5n
+        2B+V2y121yovLK4pH56t29zli1en8GMd+dORju6sbEa+2nWxEcaSXEBp2tSt7gqSpiyUBV
+        sgvnoZarMuCM34o05T8hxRXprwd2XFM=
+Received: from mail-io1-f71.google.com (mail-io1-f71.google.com
+ [209.85.166.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-365-Iz73i3rMNLK3-HcWl4omyA-1; Mon, 24 Jul 2023 00:53:26 -0400
-X-MC-Unique: Iz73i3rMNLK3-HcWl4omyA-1
-Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-4055c2b8870so19099271cf.2
-        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 21:53:26 -0700 (PDT)
+ us-mta-207-yI1zpjXHP_WL-V_fXE_tYw-1; Mon, 24 Jul 2023 00:55:34 -0400
+X-MC-Unique: yI1zpjXHP_WL-V_fXE_tYw-1
+Received: by mail-io1-f71.google.com with SMTP id ca18e2360f4ac-7872be95468so303564339f.1
+        for <fstests@vger.kernel.org>; Sun, 23 Jul 2023 21:55:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690174406; x=1690779206;
+        d=1e100.net; s=20221208; t=1690174534; x=1690779334;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=vsHlX/n7W4m6UrgFt8MF5EoQoXZ4oFaCMhkv/WslBXA=;
-        b=Vf9AeSiSCalgzmzO599gZg8iaqNu9HjFNeq4z5adGo2JkVH/uDlh85A0mPQE5Q43X5
-         BSFQuZ/1tBeMpnapErgprT3CRfWH/jmxmTjdEJbriDaWV+uwqMHnoqtjzx8tBGzFy0Pm
-         ePNaK8v9jkuuos3oL1vK8uSEZv53Xb2QVfyKIhxokef85PhdV3M2i/lEz0CeI9sYehcg
-         sBcIL4ca9PhyzyPaqEX6bBiPn1Gn151UiBhH/Rs4iydutTFUghkFH8SewIwwyfx+SsMh
-         AXegmia+uRufV+9K3YHjMhuqxAWyKUMUeNAaTZa0YzCnrZHNLWRFXpvV/GF4vkiq/ExN
-         6K7w==
-X-Gm-Message-State: ABy/qLYEBJDn+P1e1ib12GODeDaCDqi0pFBTgPcKXJVqnshVeo46ahcd
-        JnJQQMShyEsj38e+BLcG+Vg5D4C9lMYF3dTHLVC8t8XtDVMCJumwxOKR6nJX5ZeINB26BCbTgAB
-        dv3qUY9I91BpCnNNw0Q==
-X-Received: by 2002:a05:622a:14d:b0:403:a701:1ac3 with SMTP id v13-20020a05622a014d00b00403a7011ac3mr7037995qtw.46.1690174406490;
-        Sun, 23 Jul 2023 21:53:26 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlHJXGtR8qre80qJv7FtxuUg85C9Fv9opJRtabOWwNM+k8D6RyGbQubiAXoYimAyAA5QLlSADA==
-X-Received: by 2002:a05:622a:14d:b0:403:a701:1ac3 with SMTP id v13-20020a05622a014d00b00403a7011ac3mr7037984qtw.46.1690174406222;
-        Sun, 23 Jul 2023 21:53:26 -0700 (PDT)
+        bh=rlutq8Z7KDhlUXfrK5vwQPEoqf3nu5Bflb9MQCA4ltI=;
+        b=hwc3NO4GE9wxhPt58gOOVfBSlYgg5THge0+voq8VwXnBmTm2M5CycJeHQOcUNOhwZ4
+         pL0u9Al7LvtyxfN1/yWGeOMoZm8s+RRoPL9Caj11n5rIvya/iUWpgq+f2CtASThEXwdT
+         cPqT0+k5bl10cbfrd+QUjJWho3/El6W7og2Gm1QaAe7Q8RBneG7/PJlI5fTJqqjmvHQC
+         31oGKfIc2IMt8/yf/2EmcuEd4NLGHraOjwg7ySGhFMU4wchy9b+ZwT9Ww0pgKEh5tQO+
+         nE/JaDaokUzuWqsozDSauDPlwdJElUE0SxZTk/F48m6wRQgyDbDOKJTvOspDCConouyW
+         BYUw==
+X-Gm-Message-State: ABy/qLY0as+8knCB1889CXXfK+doPXm8tUrmYy5VduLSNlDhkQBqDF3L
+        IHgfbN0yH3EGbJdEav3xydeE9c381u9VgcAnIrGUzq4SZMMwcaodgq1NRCEQN8XmZmYm6quAEaG
+        SVFroXOwpJbJT6DdEjw==
+X-Received: by 2002:a05:6e02:1103:b0:348:d70e:b7f0 with SMTP id u3-20020a056e02110300b00348d70eb7f0mr756162ilk.32.1690174534179;
+        Sun, 23 Jul 2023 21:55:34 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlHMW9PBYZZnSySVxXp2kK0+VdMZQ7SLoFpSK9lxWDc7LixiJQpyR/jom3Qk3I3/vlLJWhaExw==
+X-Received: by 2002:a05:6e02:1103:b0:348:d70e:b7f0 with SMTP id u3-20020a056e02110300b00348d70eb7f0mr756149ilk.32.1690174533947;
+        Sun, 23 Jul 2023 21:55:33 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id n12-20020a170902e54c00b001b8a00d4f7asm7751595plf.9.2023.07.23.21.53.24
+        by smtp.gmail.com with ESMTPSA id jh6-20020a170903328600b001aad714400asm7770244plb.229.2023.07.23.21.55.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 23 Jul 2023 21:53:25 -0700 (PDT)
-Date:   Mon, 24 Jul 2023 12:53:22 +0800
+        Sun, 23 Jul 2023 21:55:33 -0700 (PDT)
+Date:   Mon, 24 Jul 2023 12:55:30 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Naohiro Aota <Naohiro.Aota@wdc.com>
-Cc:     Qu Wenruo <wqu@suse.com>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] btrfs: add a test case to verify the write behavior of
- large RAID5 data chunks
-Message-ID: <20230724045322.nifh2um32gnk7ovw@zlang-mailbox>
-References: <20230622065438.86402-1-wqu@suse.com>
- <f7hsga77yx3zoh27yoji7yaziaw6dkgxnmdnaf44kowtfvqass@2fk3424qvnyu>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Naohiro Aota <Naohiro.Aota@wdc.com>
+Subject: Re: [PATCH] btrfs/294: reject zoned devices for now
+Message-ID: <20230724045530.mhtb3fnbdodpvfjb@zlang-mailbox>
+References: <20230724030423.92390-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f7hsga77yx3zoh27yoji7yaziaw6dkgxnmdnaf44kowtfvqass@2fk3424qvnyu>
+In-Reply-To: <20230724030423.92390-1-wqu@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 24, 2023 at 01:23:06AM +0000, Naohiro Aota wrote:
-> On Thu, Jun 22, 2023 at 02:54:38PM +0800, Qu Wenruo wrote:
-> > There is a recent regression during v6.4 merge window, that a u32 left
-> > shift overflow can cause problems with large data chunks (over 4G)
-> > sized.
-> > 
-> > This is especially nasty for RAID56, which can lead to ASSERT() during
-> > regular writes, or corrupt memory if CONFIG_BTRFS_ASSERT is not enabled.
-> > 
-> > This is the regression test case for it.
-> > 
-> > Unlike btrfs/292, btrfs doesn't support trim inside RAID56 chunks, thus
-> > the workflow is simplified:
-> > 
-> > - Create a RAID5 or RAID6 data chunk during mkfs
-> > 
-> > - Fill the fs with 5G data and sync
-> >   For unpatched kernel, the sync would crash the kernel.
-> > 
-> > - Make sure everything is fine
-> > 
-> > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > ---
-> >  tests/btrfs/293     | 72 +++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/293.out |  2 ++
-> >  2 files changed, 74 insertions(+)
-> >  create mode 100755 tests/btrfs/293
-> >  create mode 100644 tests/btrfs/293.out
-> > 
-> > diff --git a/tests/btrfs/293 b/tests/btrfs/293
-> > new file mode 100755
-> > index 00000000..68312682
-> > --- /dev/null
-> > +++ b/tests/btrfs/293
-> > @@ -0,0 +1,72 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test 293
-> > +#
-> > +# Test btrfs write behavior with large RAID56 chunks (size beyond 4G).
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto raid volume
-> > +
-> > +# Import common functions.
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs btrfs
-> > +_require_scratch_dev_pool 8
+On Mon, Jul 24, 2023 at 11:04:23AM +0800, Qu Wenruo wrote:
+> The test case itself is utilizing RAID5/6, which is not yet supported on
+> zoned device.
 > 
-> Could you add following lines?
+> In the future we would use raid-stripe-tree (RST) feature, but for now
+> just reject zoned devices completely.
 > 
-> # RAID5/6 not working on zoned mode.
-> _require_non_zoned_device "${SCRATCH_DEV}"
+> And since we're here, also update the _fixed_by_kernel_commit lines, as
+> the proper fix is already merged upstream.
 > 
-> With that, looks good to me.
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
 
-Hi Naohiro,
+Oh, good, you've sent this patch, ignore my reply to last patch.
+Looks good to me.
 
-This patch has been merged last weekend. If you feel this line is needed, please
-send another patch to 'fix' it.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 Thanks,
 Zorro
 
+>  tests/btrfs/294 | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
 > 
-> Reviewed-by: Naohiro Aota <naohiro.aota@wdc.com>
-> 
-> > +_fixed_by_kernel_commit a7299a18a179 \
-> > +	"btrfs: fix u32 overflows when left shifting @stripe_nr"
-> > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> > +	"btrfs: use a dedicated helper to convert stripe_nr to offset"
-> > +
-> > +_scratch_dev_pool_get 8
-> > +
-> > +datasize=$((5 * 1024 * 1024 * 1024))
-> > +
-> > +
-> > +workload()
-> > +{
-> > +	local data_profile=$1
-> > +
-> > +	_scratch_pool_mkfs -m raid1 -d $data_profile >> $seqres.full 2>&1
-> > +	_scratch_mount
-> > +	$XFS_IO_PROG -f -c "pwrite -b 1m 0 $datasize" $SCRATCH_MNT/foobar > /dev/null
-> > +
-> > +	# Unpatched kernel would trigger an ASSERT() or crash at writeback.
-> > +	sync
-> > +
-> > +	echo "=== With initial 5G data written ($data_profile) ===" >> $seqres.full
-> > +	$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
-> > +	_scratch_unmount
-> > +
-> > +	# Make sure we haven't corrupted anything.
-> > +	$BTRFS_UTIL_PROG check --check-data-csum $SCRATCH_DEV >> $seqres.full 2>&1
-> > +	if [ $? -ne 0 ]; then
-> > +		_scratch_dev_pool_put
-> > +		_fail "data corruption detected after initial data filling"
-> > +	fi
-> > +}
-> > +
-> > +# Make sure each device has at least 2G.
-> > +# Btrfs has a limits on per-device stripe length of 1G.
-> > +# Double that so that we can ensure a RAID6 data chunk with 6G size.
-> > +for i in $SCRATCH_DEV_POOL; do
-> > +	devsize=$(blockdev --getsize64 "$i")
-> > +	if [ $devsize -lt $((2 * 1024 * 1024 * 1024)) ]; then
-> > +		_scratch_dev_pool_put
-> > +		_notrun "device $i is too small, need at least 2G"
-> > +	fi
-> > +done
-> > +
-> > +workload raid5
-> > +workload raid6
-> > +
-> > +_scratch_dev_pool_put
-> > +echo "Silence is golden"
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/btrfs/293.out b/tests/btrfs/293.out
-> > new file mode 100644
-> > index 00000000..076fc056
-> > --- /dev/null
-> > +++ b/tests/btrfs/293.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 293
-> > +Silence is golden
-> > -- 
-> > 2.39.0
-> > 
+> diff --git a/tests/btrfs/294 b/tests/btrfs/294
+> index 61ce7d97..d7d13646 100755
+> --- a/tests/btrfs/294
+> +++ b/tests/btrfs/294
+> @@ -16,11 +16,15 @@ _begin_fstest auto raid volume
+>  
+>  # Modify as appropriate.
+>  _supported_fs btrfs
+> +
+> +# No zoned support for RAID56 yet.
+> +_require_non_zoned_device "${SCRATCH_DEV}"
+> +
+>  _require_scratch_dev_pool 8
+>  _fixed_by_kernel_commit a7299a18a179 \
+>  	"btrfs: fix u32 overflows when left shifting @stripe_nr"
+> -_fixed_by_kernel_commit xxxxxxxxxxxx \
+> -	"btrfs: use a dedicated helper to convert stripe_nr to offset"
+> +_fixed_by_kernel_commit cb091225a538 \
+> +	"btrfs: fix remaining u32 overflows when left shifting stripe_nr"
+>  
+>  _scratch_dev_pool_get 8
+>  
+> -- 
+> 2.41.0
 > 
 
