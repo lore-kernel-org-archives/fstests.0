@@ -2,249 +2,117 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BF2DC001DE
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 Jul 2023 15:54:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BED94C0015E
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 Jul 2023 16:18:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232726AbjGYPyp (ORCPT
+        id S229906AbjGYQSH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 Jul 2023 11:54:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35544 "EHLO
+        Tue, 25 Jul 2023 12:18:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232747AbjGYPyp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2023 11:54:45 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76B79211C;
-        Tue, 25 Jul 2023 08:54:41 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        with ESMTP id S232772AbjGYQR7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2023 12:17:59 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4BA32132;
+        Tue, 25 Jul 2023 09:17:48 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E77B1617B4;
-        Tue, 25 Jul 2023 15:54:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4BDCAC433C8;
-        Tue, 25 Jul 2023 15:54:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690300480;
-        bh=Tz60Ac0FER1CvTprz/6D26g4/Q0yzf0YB0v1K+OBh60=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=WeOhF5c6isuxxtBsASpJPFQcjkCIppflXFFX/hq8ddOj3/xYd+LuWZ57o8a5H0qOS
-         jmCH1VKiyEE34V7fClbvv425gb/ve4u9tzNMERuutZ/by0YfUceZKF6VSNs/vD9v0Y
-         NH6S8CO00AUt5wwb7pGI+BnLkoHek+tp0MrmERt0qGlwJx2nrlLXMXzOx41f77SWGB
-         T6jwLLSBaaoR4J6oI0wVQJYgVCt0rX66+ZIvyfmPg2aWUGixdXrk6/gwoHP3YzvxcX
-         CXkCS1u8jefdbPomf4qWQAsu13eztVeEQjB6n9a5IW1OidxybeDHPrVOZc22aaPRS/
-         ivUfCkZaGhY8w==
-Date:   Tue, 25 Jul 2023 08:54:39 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
-Subject: Re: [PATCH] fstests: add helper to canonicalize devices used to
- enable persistent disks
-Message-ID: <20230725155439.GF11340@frogsfrogsfrogs>
-References: <20230720061727.2363548-1-mcgrof@kernel.org>
- <20230725081307.xydlwjdl4lq3ts3m@zlang-mailbox>
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 70F1C21A5D;
+        Tue, 25 Jul 2023 16:17:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1690301867;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=yJ1pF6dtJMkYLjA9EXsmiDrip9+xiC4QIKK0a7ZzcWI=;
+        b=IDXHqoBL+fWDRrK4ZmXx0WQZqKZwuRyNF+1oCBGrOAOxB+DTrRKIv+MANTIfrXuSozTifF
+        d1FByKK52ic6HfhIZWnvrDw7NVtrY3kviTe5FNa3/f+v4xl8ubb4os25OS//6UsvPY9MN8
+        rM6M+jjknZNIM8+BQpeyHg2pd/0n2kg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1690301867;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=yJ1pF6dtJMkYLjA9EXsmiDrip9+xiC4QIKK0a7ZzcWI=;
+        b=K7CN3Q9H2IwEOKzbYDPiKkUt3glrgr2SoNXN31LWB+U/M0UppYhhj8PlwSr0eIP5jIeIUo
+        BCJjBXCRE35K6UAQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 3D8F813487;
+        Tue, 25 Jul 2023 16:17:47 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id qr/0Dav1v2SNPAAAMHmgww
+        (envelope-from <dsterba@suse.cz>); Tue, 25 Jul 2023 16:17:47 +0000
+Date:   Tue, 25 Jul 2023 18:11:03 +0200
+From:   David Sterba <dsterba@suse.cz>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     Naohiro Aota <Naohiro.Aota@wdc.com>,
+        "hch@infradead.org" <hch@infradead.org>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH] btrfs/294: reject zoned devices for now
+Message-ID: <20230725161103.GH20457@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <20230724030423.92390-1-wqu@suse.com>
+ <ZL6Ga9zRjBmAEmA/@infradead.org>
+ <olqvt73droizibdx445my4uekl7gmcmlpkhn6e4oedk3gnmikf@pfpwcncjnxn7>
+ <f0695163-d613-52e3-3443-2921dc2153c3@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230725081307.xydlwjdl4lq3ts3m@zlang-mailbox>
+In-Reply-To: <f0695163-d613-52e3-3443-2921dc2153c3@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 25, 2023 at 04:13:07PM +0800, Zorro Lang wrote:
-> On Wed, Jul 19, 2023 at 11:17:27PM -0700, Luis Chamberlain wrote:
-> > The filesystem configuration file does not allow you to use symlinks to
-> > devices given the existing sanity checks verify that the target end
-> > device matches the source.
+On Tue, Jul 25, 2023 at 08:58:34AM +0800, Qu Wenruo wrote:
+> 
+> 
+> On 2023/7/25 08:22, Naohiro Aota wrote:
+> > On Mon, Jul 24, 2023 at 07:10:51AM -0700, Christoph Hellwig wrote:
+> >> On Mon, Jul 24, 2023 at 11:04:23AM +0800, Qu Wenruo wrote:
+> >>> The test case itself is utilizing RAID5/6, which is not yet supported on
+> >>> zoned device.
+> >>>
+> >>> In the future we would use raid-stripe-tree (RST) feature, but for now
+> >>> just reject zoned devices completely.
+> >>>
+> >>> And since we're here, also update the _fixed_by_kernel_commit lines, as
+> >>> the proper fix is already merged upstream.
+> >>
+> >> Hmm, instead of spreading these checks, shouldn't we check that the
+> >> RAID level is supported, and have one single nob for that based off
+> >> it, similar to _btrfs_get_profile_configs()?
+> >>
 > > 
-> > Using a symlink is desirable if you want to enable persistent tests
-> > across reboots. For example you may want to use /dev/disk/by-id/nvme-eui.*
-> > so to ensure that the same drives are used even after reboot. This
-> > is very useful if you are testing for example with a virtualized
-> > environment and are using PCIe passthrough with other qemu NVMe drives
-> > with one or many NVMe drives.
+> > That's beneficial. We need to declare which profile the test going to use,
+> > something like this?
 > > 
-> > To enable support just add a helper to canonicalize devices prior to
-> > running the tests.
+> >    _btrfs_require_profile raid5 raid6
 > > 
-> > This allows one test runner, kdevops, which I just extended with
-> > support to use real NVMe drives. The drives it uses for the filesystem
-> > configuration optionally is with NVMe eui symlinks so to allow
-> > the same drives to be used over reboots.
+> > or
 > > 
-> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> > ---
-> 
-> Hi Luis,
-> 
-> Hmmm... this's a default behavior change for fstests, although I'm not sure
-> what will be affect. I'm wondering if we should do this in fstests. I don't
-> want to tell the users that the device names they give to fstests will always
-> be truned to real names from now on.
-> 
-> Generally the users of fstests provide the device names, so the users
-> might need to take care of the name is "/dev/mapper/testvg-testdev"
-> or "/dev/dm-4". The users can deal with the device names when their
-> script prepare to run fstests.
-> 
-> If more developers prefer this change, I'd like to make it to be
-> optional by an option of ./check at least, not always turn devname
-> to realpath. Welcome review points from others.
-
-Hmm.  SCRATCH_DEV=/dev/testvg/testlv works right now, it'd be sort of
-annoying to have "/dev/dm-4" get written into the report and then you've
-lost the correlation to whatever the user passed in.
-
-Oh wait.  My giant mound of ./check wrapper script already does that
-canonicalization and has for years.
-
-Ok.  Sounds good to me then. :P
-
-> >  check         |  1 +
-> >  common/config | 44 +++++++++++++++++++++++++++++++++++++++++++-
-> >  2 files changed, 44 insertions(+), 1 deletion(-)
+> >    _btrfs_require_profile data:dup
 > > 
-> > diff --git a/check b/check
-> > index 89e7e7bf20df..d063d3f498fd 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -734,6 +734,7 @@ function run_section()
-> >  	fi
-> >  
-> >  	get_next_config $section
-> > +	_canonicalize_devices
-> >  
-> >  	mkdir -p $RESULT_BASE
-> >  	if [ ! -d $RESULT_BASE ]; then
-> > diff --git a/common/config b/common/config
-> > index 936ac225f4b1..f5a3815a0435 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -655,6 +655,47 @@ _canonicalize_mountpoint()
-> >  	echo "$parent/$base"
-> >  }
-> >  
-> > +# Enables usage of /dev/disk/by-id/ symlinks to persist target devices
-> > +# over reboots
-> > +_canonicalize_devices()
-> > +{
-> > +	if [ ! -z "$TEST_DEV" ] && [ -L $TEST_DEV ]; then
+> > as the zoned mode cannot work with the DUP profile for data.
 > 
-> I think [ -L "$TEST_DEV" ] is enough.
-
-I don't think it is.
-
-$ unset moo
-$ [ -L $moo ]
-$ echo $?
-0
-$ realpath -e $moo
-realpath: missing operand
-Try 'realpath --help' for more information.
-
-> > +		TEST_DEV=$(realpath -e $TEST_DEV)
+> The latter one sounds good, considering zoned support differs for data 
+> and metadata profiles.
 > 
-> Anyone knows the difference of realpatch and readlink?
-
-readlink doesn't follow nested symlinks; realpath does:
-
-$ touch /tmp/a
-$ ln -s /tmp/a /tmp/b
-$ ln -s /tmp/b /tmp/c
-$ readlink /tmp/c
-/tmp/b
-$ realpath /tmp/c
-/tmp/a
-$ readlink -m /tmp/c
-/tmp/a
-
-> > +	fi
-> > +
-> > +	if [ ! -z "$SCRATCH_DEV" ] && [ -L $SCRATCH_DEV ]; then
-> > +		SCRATCH_DEV=$(realpath -e $SCRATCH_DEV)
-
-Extra question: Shouldn't we be putting theis ^^^ variables in quotes?
-
-Supposing someone starts passing in
-SCRATCH_DEV=/dev/disk/by-label/har har"
-
-This expression will barf everywhere:
-
-$ SCRATCH_DEV=$(realpath -e $SCRATCH_DEV)
-realpath: /dev/disk/by-label/har: No such file or directory
-realpath: har: No such file or directory
-
-Due to the lack of quoting on its way to turning that into /dev/sda3.
-Granted fstests has historically required no spaces in anything, but
-still, it's bad hygiene.
-
-[writing anything in bash is bad hygiene, but for the sweet sweet pipe
-goodness]
-
-> > +	fi
-> > +
-> > +	if [ ! -z "$TEST_LOGDEV" ] && [ -L $TEST_LOGDEV ]; then
-> > +		TEST_LOGDEV=$(realpath -e $TEST_LOGDEV)
-> > +	fi
-> > +
-> > +	if [ ! -z "$TEST_RTDEV" ] && [ -L $TEST_RTDEV ]; then
-> > +		TEST_RTDEV=$(realpath -e $TEST_RTDEV)
-> > +	fi
-> > +
-> > +	if [ ! -z "$SCRATCH_RTDEV" ] && [ -L $SCRATCH_RTDEV ]; then
-> > +		SCRATCH_RTDEV=$(realpath -e $SCRATCH_RTDEV)
-> > +	fi
-> > +
-> > +	if [ ! -z "$LOGWRITES_DEV" ] && [ -L $LOGWRITES_DEV ]; then
-> > +		LOGWRITES_DEV=$(realpath -e $LOGWRITES_DEV)
-> > +	fi
-> > +
-> > +	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
-> > +		NEW_SCRATCH_POOL=""
-> > +		for i in $SCRATCH_DEV_POOL; do
-> > +			if [ -L $i ]; then
-> > +				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(realpath -e $i)"
-> > +			else
-> > +				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
->                                                                      ^^^
+> Another thing is, do we have any sysfs files to indicate what profiles 
+> we support?
+> For now we only have a "zoned" features, but no dedicated zoned specific 
+> sysfs files.
 > 
-> What's this half ")" for ?
+> Would that be a good thing to consider?
 
-Some kind of typo, I assume...
-
---D
-
-> 
-> Thanks,
-> Zorro
-> 
-> 
-> > +			fi
-> > +		done
-> > +		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
-> > +	fi
-> > +}
-> > +
-> >  # On check -overlay, for the non multi section config case, this
-> >  # function is called on every test, before init_rc().
-> >  # When SCRATCH/TEST_* vars are defined in config file, config file
-> > @@ -785,7 +826,6 @@ get_next_config() {
-> >  	fi
-> >  
-> >  	parse_config_section $1
-> > -
-> >  	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
-> >  		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
-> >  		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-> > @@ -901,5 +941,7 @@ else
-> >  	fi
-> >  fi
-> >  
-> > +_canonicalize_devices
-> > +
-> >  # make sure this script returns success
-> >  /bin/true
-> > -- 
-> > 2.39.2
-> > 
-> 
+We don't have it but I think it's a good idea not just for testing, we
+export other information as the "features/supported_..." files. The
+profiles don't change often but with the incremental support for zoned
+this would make it easier for tests to keep up.
