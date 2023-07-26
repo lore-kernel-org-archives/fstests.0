@@ -2,295 +2,294 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E4DFC41513
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 Jul 2023 17:51:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B48DEEB64DD
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Jul 2023 00:05:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229650AbjGYRvg (ORCPT
+        id S230305AbjGZAFa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 Jul 2023 13:51:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46340 "EHLO
+        Tue, 25 Jul 2023 20:05:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229694AbjGYRvf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2023 13:51:35 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A4E7269A
-        for <fstests@vger.kernel.org>; Tue, 25 Jul 2023 10:50:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1690307416;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ofcHR9i21vUkgd+y9BiEJpoyobnlC1eSUMdsvDQGlv0=;
-        b=EyHr4m/cFMS2lEq2i9XLzdHtPmIg1S2r3fy5/ZWE/6HMINWTr+7vhTd1j+cuYFUeDQzDEL
-        vE7na+dRJaFQSR5joYbajrZm9eTba8J+ebVwrBCNlIhJ3vmXEzs7ti4slmzIPIIcjr9v5p
-        DMaMs8vKJjZoXYxsOoMAvGAr+8vJdpg=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-104-BS30NOMxNx-p_MixGk-bCg-1; Tue, 25 Jul 2023 13:50:15 -0400
-X-MC-Unique: BS30NOMxNx-p_MixGk-bCg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bba02d5bd7so12571425ad.2
-        for <fstests@vger.kernel.org>; Tue, 25 Jul 2023 10:50:14 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690307414; x=1690912214;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ofcHR9i21vUkgd+y9BiEJpoyobnlC1eSUMdsvDQGlv0=;
-        b=dfL95smUzhNYIYYjiYCtIG2u7+A8GhFgKOaOgOw3DnoodFsRF/uzNfuu/A7lmK/xPf
-         RoJGZ3Z5l1sCUuKgrW0cx+a3yrl6i+Do1cbJLikDrpSVFhE1GRvMEAhlZOGzAWNoEBf6
-         JoT2P2JL4w0rkyL+N31O/62GQs/idZBuXOwS2LmwpvjGvGVASfp8fEmf7NvvfEWpAbCE
-         QJ+JT+hfRZNHnmHjbJ8qE+htI+JsX2EuUe7x2ryeIHzy8wg+vXlL3xAnmIEFd8lNQPIr
-         KAos7Qm84c1Kx0RxS5D4m82LCOd+1b8whNFCGZJPvANfXK/fYd/gl6QhaDlC+FrfgEaa
-         bB1A==
-X-Gm-Message-State: ABy/qLYCnPVm3eqUasgeKa/mUSi6EYW9pI4CFLMxHg2Pda6LimgE5gfe
-        5MX8uJgzkpPWcxp42jOqRumKWjfmS0OsT+SArVZnGtZWUmt1gjW5Tt+okDWn5H29YDU/g2wppVN
-        3oiI9hX5P+TEbXteXqQ==
-X-Received: by 2002:a17:902:e890:b0:1b6:4bbd:c3b6 with SMTP id w16-20020a170902e89000b001b64bbdc3b6mr13434244plg.9.1690307413933;
-        Tue, 25 Jul 2023 10:50:13 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlHNsSBHwJphNTbtkW9JruDV0UxK7MpgcFSpPmHbJ+8/6yHsKeFpz31cLMGPa//IoEFaj7H+SQ==
-X-Received: by 2002:a17:902:e890:b0:1b6:4bbd:c3b6 with SMTP id w16-20020a170902e89000b001b64bbdc3b6mr13434227plg.9.1690307413590;
-        Tue, 25 Jul 2023 10:50:13 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id f20-20020a170902ab9400b001bb7a736b46sm7734730plr.104.2023.07.25.10.50.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Jul 2023 10:50:13 -0700 (PDT)
-Date:   Wed, 26 Jul 2023 01:50:09 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
-Subject: Re: [PATCH] fstests: add helper to canonicalize devices used to
- enable persistent disks
-Message-ID: <20230725175009.jv4hbqxtags6qh5r@zlang-mailbox>
-References: <20230720061727.2363548-1-mcgrof@kernel.org>
- <20230725081307.xydlwjdl4lq3ts3m@zlang-mailbox>
- <20230725155439.GF11340@frogsfrogsfrogs>
+        with ESMTP id S230451AbjGZAF2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2023 20:05:28 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B669A26B5;
+        Tue, 25 Jul 2023 17:05:26 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3CAE7618D8;
+        Wed, 26 Jul 2023 00:05:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91D4BC433C7;
+        Wed, 26 Jul 2023 00:05:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1690329925;
+        bh=gJbRbS+34C5ItptZi1jISonCZcQgQvF1MivI8Af2ORI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Fi3USB9jMoM1iBOwD5rhDqQsWazBpwBlGh5RvYVwMhI72YpZeCt89tsnrNcgAEd7X
+         0bHeUsuiPJ7dVzE14IBgT7cA6bG45IIG4LtQZ32uJTceWpZifVj6pug12+kLMION4e
+         dhhADu+9DVgaihg6OYG9Emrgoh7z1ttQYq1CJnm1dFgTLsPX+ONRcQcy8yN7vWAvcC
+         Fi5GlAhxI3QXBm3DRpsgFG9RfDjjW7eKj7r+/oGCv0AMOHZUz7Djkk716o1V9wNPi1
+         CrdtPrwby3IbYSqGefrG4N6uFkgnkkTUkmLbv8/IAqTMWsSu96bZgBZoDH2VA/XWnv
+         7AqMZBESofp5g==
+Date:   Tue, 25 Jul 2023 17:05:24 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     tytso@mit.edu, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] check: add a -smoketest option
+Message-ID: <20230726000524.GG11340@frogsfrogsfrogs>
+References: <168972905065.1698606.6829635791058054610.stgit@frogsfrogsfrogs>
+ <168972905626.1698606.12419796694170752316.stgit@frogsfrogsfrogs>
+ <20230719151024.ef7vgjmtoxwxkmjm@zlang-mailbox>
+ <20230719152907.GA11377@frogsfrogsfrogs>
+ <20230719161115.byva7tvwoafkesga@zlang-mailbox>
+ <20230720022756.GH11352@frogsfrogsfrogs>
+ <20230720143433.n5gkhukdkz7s5ab7@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230725155439.GF11340@frogsfrogsfrogs>
+In-Reply-To: <20230720143433.n5gkhukdkz7s5ab7@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 25, 2023 at 08:54:39AM -0700, Darrick J. Wong wrote:
-> On Tue, Jul 25, 2023 at 04:13:07PM +0800, Zorro Lang wrote:
-> > On Wed, Jul 19, 2023 at 11:17:27PM -0700, Luis Chamberlain wrote:
-> > > The filesystem configuration file does not allow you to use symlinks to
-> > > devices given the existing sanity checks verify that the target end
-> > > device matches the source.
+On Thu, Jul 20, 2023 at 10:34:33PM +0800, Zorro Lang wrote:
+> On Wed, Jul 19, 2023 at 07:27:56PM -0700, Darrick J. Wong wrote:
+> > On Thu, Jul 20, 2023 at 12:11:15AM +0800, Zorro Lang wrote:
+> > > On Wed, Jul 19, 2023 at 08:29:07AM -0700, Darrick J. Wong wrote:
+> > > > On Wed, Jul 19, 2023 at 11:10:24PM +0800, Zorro Lang wrote:
+> > > > > On Tue, Jul 18, 2023 at 06:10:56PM -0700, Darrick J. Wong wrote:
+> > > > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > > > 
+> > > > > > Create a "-smoketest" parameter to check that will run generic
+> > > > > > filesystem smoke testing for five minutes apiece.  Since there are only
+> > > > > > five smoke tests, this is effectively a 16min super-quick test.
+> > > > > > 
+> > > > > > With gcov enabled, running these tests yields about ~75% coverage for
+> > > > > > iomap and ~60% for xfs; or ~50% for ext4 and ~75% for ext4; and ~45% for
+> > > > > > btrfs.  Coverage was about ~65% for the pagecache.
+> > > > > > 
+> > > > > > Cc: tytso@mit.edu
+> > > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > > > > ---
+> > > > > >  check               |    6 +++++-
+> > > > > >  doc/group-names.txt |    1 +
+> > > > > >  tests/generic/475   |    2 +-
+> > > > > >  tests/generic/476   |    2 +-
+> > > > > >  tests/generic/521   |    2 +-
+> > > > > >  tests/generic/522   |    2 +-
+> > > > > >  tests/generic/642   |    2 +-
+> > > > > >  7 files changed, 11 insertions(+), 6 deletions(-)
+> > > > > > 
+> > > > > > 
+> > > > > > diff --git a/check b/check
+> > > > > > index 89e7e7bf20..97c7c4c7d1 100755
+> > > > > > --- a/check
+> > > > > > +++ b/check
+> > > > > > @@ -68,6 +68,7 @@ check options
+> > > > > >      -pvfs2		test PVFS2
+> > > > > >      -tmpfs		test TMPFS
+> > > > > >      -ubifs		test ubifs
+> > > > > > +    -smoketest		run smoke tests for 4min each
+> > > > > 
+> > > > > We have both "smoketest" and "smoke", that's a bit confused :)
+> > > > 
+> > > > We do?  git grep doesn't show anything other than what I added:
+> > > > 
+> > > > $ git grep smoke
+> > > > check:71:    -smoketest         run smoke tests for 4min each
+> > > > check:294:      -smoketest)
+> > > > check:296:              GROUP_LIST="smoketest"
+> > > > doc/group-names.txt:123:smoketest               Simple smoke tests
+> > > > tests/generic/475:15:_begin_fstest shutdown auto log metadata eio recoveryloop smoketest
+> > > > tests/generic/476:11:_begin_fstest auto rw long_rw stress soak smoketest
+> > > > tests/generic/521:10:_begin_fstest soak long_rw smoketest
+> > > > tests/generic/522:10:_begin_fstest soak long_rw smoketest
+> > > > tests/generic/533:9:# Simple attr smoke tests for user EAs, dereived from generic/097.
+> > > > tests/generic/642:11:_begin_fstest auto soak attr long_rw stress smoketest
 > > > 
-> > > Using a symlink is desirable if you want to enable persistent tests
-> > > across reboots. For example you may want to use /dev/disk/by-id/nvme-eui.*
-> > > so to ensure that the same drives are used even after reboot. This
-> > > is very useful if you are testing for example with a virtualized
-> > > environment and are using PCIe passthrough with other qemu NVMe drives
-> > > with one or many NVMe drives.
+> > > Oh, sorry, my memory is a bit of jumbled ...
 > > > 
-> > > To enable support just add a helper to canonicalize devices prior to
-> > > running the tests.
+> > > > 
+> > > > > >      -l			line mode diff
+> > > > > >      -udiff		show unified diff (default)
+> > > > > >      -n			show me, do not run tests
+> > > > > > @@ -290,7 +291,10 @@ while [ $# -gt 0 ]; do
+> > > > > >  		FSTYP=overlay
+> > > > > >  		export OVERLAY=true
+> > > > > >  		;;
+> > > > > > -
+> > > > > > +	-smoketest)
+> > > > > 
+> > > > > Hmm... I'm wondering if it's worth having a specific running option for
+> > > > > someone test group. If each "meaningful" testing way need a specific check
+> > > > > option, the ./check file will be too complicated.
+> > > > > 
+> > > > > If we need some recommended test ways, how about make some separated wrappers
+> > > > > of ./check? For example:
+> > > > > 
+> > > > > # mkdir fstests/runtest/
+> > > > > # cat > fstests/runtest/smoketest <<EOF
+> > > > > export SOAK_DURATION="4m"
+> > > > > ./check -g smoketest
+> > > > > EOF
+> > > > > 
+> > > > > Of course you can write more codes in it.
+> > > > 
+> > > > The goal here was to give casual developers an easy way to run a quick
+> > > > 15 minute exercise *without* having to write wrapper scripts or type
+> > > > all that in every time.  Compare:
+> > > > 
+> > > > $ ./check -smoketest
+> > > > 
+> > > > vs.
+> > > > 
+> > > > $ SOAK_DURATION=4m ./check -g smoketest
 > > > 
-> > > This allows one test runner, kdevops, which I just extended with
-> > > support to use real NVMe drives. The drives it uses for the filesystem
-> > > configuration optionally is with NVMe eui symlinks so to allow
-> > > the same drives to be used over reboots.
+> > > Oh, I don't mean let users write that wrapper, I mean we provide some wrapper
+> > > scripts (to be recommended). E.g.
 > > > 
-> > > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> > > ---
-> > 
-> > Hi Luis,
-> > 
-> > Hmmm... this's a default behavior change for fstests, although I'm not sure
-> > what will be affect. I'm wondering if we should do this in fstests. I don't
-> > want to tell the users that the device names they give to fstests will always
-> > be truned to real names from now on.
-> > 
-> > Generally the users of fstests provide the device names, so the users
-> > might need to take care of the name is "/dev/mapper/testvg-testdev"
-> > or "/dev/dm-4". The users can deal with the device names when their
-> > script prepare to run fstests.
-> > 
-> > If more developers prefer this change, I'd like to make it to be
-> > optional by an option of ./check at least, not always turn devname
-> > to realpath. Welcome review points from others.
-> 
-> Hmm.  SCRATCH_DEV=/dev/testvg/testlv works right now, it'd be sort of
-> annoying to have "/dev/dm-4" get written into the report and then you've
-> lost the correlation to whatever the user passed in.
-> 
-> Oh wait.  My giant mound of ./check wrapper script already does that
-> canonicalization and has for years.
-> 
-> Ok.  Sounds good to me then. :P
-
-So you hope fstests can do this translation (use real device name) by default?
-
-> 
-> > >  check         |  1 +
-> > >  common/config | 44 +++++++++++++++++++++++++++++++++++++++++++-
-> > >  2 files changed, 44 insertions(+), 1 deletion(-)
+> > > # ./runtest/smoaktest
 > > > 
-> > > diff --git a/check b/check
-> > > index 89e7e7bf20df..d063d3f498fd 100755
-> > > --- a/check
-> > > +++ b/check
-> > > @@ -734,6 +734,7 @@ function run_section()
-> > >  	fi
-> > >  
-> > >  	get_next_config $section
-> > > +	_canonicalize_devices
-> > >  
-> > >  	mkdir -p $RESULT_BASE
-> > >  	if [ ! -d $RESULT_BASE ]; then
-> > > diff --git a/common/config b/common/config
-> > > index 936ac225f4b1..f5a3815a0435 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -655,6 +655,47 @@ _canonicalize_mountpoint()
-> > >  	echo "$parent/$base"
-> > >  }
-> > >  
-> > > +# Enables usage of /dev/disk/by-id/ symlinks to persist target devices
-> > > +# over reboots
-> > > +_canonicalize_devices()
-> > > +{
-> > > +	if [ ! -z "$TEST_DEV" ] && [ -L $TEST_DEV ]; then
+> > > If we give "smoaktest" a specific run option, what will we do if more people
+> > > want to add more options like that?
+> > > 
+> > > But a wrapper is not an offical running option, it's just a reference which
+> > > can be used directly or can be copied. Then we can have more wrappers from
+> > > each fs expert as reference, to recommend other users how to use fstests
+> > > specially. And I don't need to add options for each of them. What do you think?
 > > 
-> > I think [ -L "$TEST_DEV" ] is enough.
-> 
-> I don't think it is.
-> 
-> $ unset moo
-> $ [ -L $moo ]
-
-The double quotation marks "" are needed.
-
-> $ echo $?
-> 0
-> $ realpath -e $moo
-> realpath: missing operand
-> Try 'realpath --help' for more information.
-> 
-> > > +		TEST_DEV=$(realpath -e $TEST_DEV)
+> > I disagree -- this is supposed to be a general smoketest that applies to
+> > any filesystem.  It's easy to discover this option via ./check --help.
 > > 
-> > Anyone knows the difference of realpatch and readlink?
+> > Adding wrapper scripts means that now we have to find a separate way to
+> > advertise them and people have to find the wrapper on their own if they
+> > miss the advertising.
 > 
-> readlink doesn't follow nested symlinks; realpath does:
-> 
-> $ touch /tmp/a
-> $ ln -s /tmp/a /tmp/b
-> $ ln -s /tmp/b /tmp/c
-> $ readlink /tmp/c
-> /tmp/b
-> $ realpath /tmp/c
-> /tmp/a
-> $ readlink -m /tmp/c
-> /tmp/a
+> Hmmm.. OK, but we also have other general test types, e.g. soak test, stress
+> test, rw test. Should we give each of them a specific option if anyone need
+> that?
 
-The -e option helps:
+If someone wants that, then ok.  The taret audience for this are the
+drive-by filesystem patch authors.  IOWs, people who have some small bug
+they want to try to fix and want to run a quick test to see if their
+change works.
 
-# readlink -e /tmp/c
-/tmp/a
-# realpath -e /tmp/c
-/tmp/a
+I don't think it's reasonable to expect drive-by'ers to know all that
+much about the fstests groups or spend the hours it takes to run -g all.
+As a maintainer, I prefer that these folks have done at least a small
+taste of QA before they start talking to the lists.
 
-> 
-> > > +	fi
-> > > +
-> > > +	if [ ! -z "$SCRATCH_DEV" ] && [ -L $SCRATCH_DEV ]; then
-> > > +		SCRATCH_DEV=$(realpath -e $SCRATCH_DEV)
-> 
-> Extra question: Shouldn't we be putting theis ^^^ variables in quotes?
+Most people probably won't know which groups they want unless they're
+already working with a maintainer on a specific feature.
 
-Make sense to me.
+This isn't intended for experts -- we experts have to know about test
+groups and flakey tests and whatnot, and that's fine.
 
-Thanks,
-Zorro
+--D
 
-> 
-> Supposing someone starts passing in
-> SCRATCH_DEV=/dev/disk/by-label/har har"
-> 
-> This expression will barf everywhere:
-> 
-> $ SCRATCH_DEV=$(realpath -e $SCRATCH_DEV)
-> realpath: /dev/disk/by-label/har: No such file or directory
-> realpath: har: No such file or directory
-> 
-> Due to the lack of quoting on its way to turning that into /dev/sda3.
-> Granted fstests has historically required no spaces in anything, but
-> still, it's bad hygiene.
-> 
-> [writing anything in bash is bad hygiene, but for the sweet sweet pipe
-> goodness]
-> 
-> > > +	fi
-> > > +
-> > > +	if [ ! -z "$TEST_LOGDEV" ] && [ -L $TEST_LOGDEV ]; then
-> > > +		TEST_LOGDEV=$(realpath -e $TEST_LOGDEV)
-> > > +	fi
-> > > +
-> > > +	if [ ! -z "$TEST_RTDEV" ] && [ -L $TEST_RTDEV ]; then
-> > > +		TEST_RTDEV=$(realpath -e $TEST_RTDEV)
-> > > +	fi
-> > > +
-> > > +	if [ ! -z "$SCRATCH_RTDEV" ] && [ -L $SCRATCH_RTDEV ]; then
-> > > +		SCRATCH_RTDEV=$(realpath -e $SCRATCH_RTDEV)
-> > > +	fi
-> > > +
-> > > +	if [ ! -z "$LOGWRITES_DEV" ] && [ -L $LOGWRITES_DEV ]; then
-> > > +		LOGWRITES_DEV=$(realpath -e $LOGWRITES_DEV)
-> > > +	fi
-> > > +
-> > > +	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
-> > > +		NEW_SCRATCH_POOL=""
-> > > +		for i in $SCRATCH_DEV_POOL; do
-> > > +			if [ -L $i ]; then
-> > > +				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(realpath -e $i)"
-> > > +			else
-> > > +				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
-> >                                                                      ^^^
-> > 
-> > What's this half ")" for ?
-> 
-> Some kind of typo, I assume...
-> 
-> --D
+> Thanks,
+> Zorro
 > 
 > > 
-> > Thanks,
-> > Zorro
+> > --D
 > > 
-> > 
-> > > +			fi
-> > > +		done
-> > > +		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
-> > > +	fi
-> > > +}
-> > > +
-> > >  # On check -overlay, for the non multi section config case, this
-> > >  # function is called on every test, before init_rc().
-> > >  # When SCRATCH/TEST_* vars are defined in config file, config file
-> > > @@ -785,7 +826,6 @@ get_next_config() {
-> > >  	fi
-> > >  
-> > >  	parse_config_section $1
-> > > -
-> > >  	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
-> > >  		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
-> > >  		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-> > > @@ -901,5 +941,7 @@ else
-> > >  	fi
-> > >  fi
-> > >  
-> > > +_canonicalize_devices
-> > > +
-> > >  # make sure this script returns success
-> > >  /bin/true
-> > > -- 
-> > > 2.39.2
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > > 
+> > > > --D
+> > > > 
+> > > > > Thanks,
+> > > > > Zorro
+> > > > > 
+> > > > > > +		SOAK_DURATION="4m"
+> > > > > > +		GROUP_LIST="smoketest"
+> > > > > > +		;;
+> > > > > >  	-g)	group=$2 ; shift ;
+> > > > > >  		GROUP_LIST="$GROUP_LIST ${group//,/ }"
+> > > > > >  		;;
+> > > > > > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > > > > > index 1c35a39432..c3dcca3755 100644
+> > > > > > --- a/doc/group-names.txt
+> > > > > > +++ b/doc/group-names.txt
+> > > > > > @@ -118,6 +118,7 @@ selftest		tests with fixed results, used to validate testing setup
+> > > > > >  send			btrfs send/receive
+> > > > > >  shrinkfs		decreasing the size of a filesystem
+> > > > > >  shutdown		FS_IOC_SHUTDOWN ioctl
+> > > > > > +smoketest		Simple smoke tests
+> > > > > >  snapshot		btrfs snapshots
+> > > > > >  soak			long running soak tests whose runtime can be controlled
+> > > > > >                          directly by setting the SOAK_DURATION variable
+> > > > > > diff --git a/tests/generic/475 b/tests/generic/475
+> > > > > > index 0cbf5131c2..ce7fe013b1 100755
+> > > > > > --- a/tests/generic/475
+> > > > > > +++ b/tests/generic/475
+> > > > > > @@ -12,7 +12,7 @@
+> > > > > >  # testing efforts.
+> > > > > >  #
+> > > > > >  . ./common/preamble
+> > > > > > -_begin_fstest shutdown auto log metadata eio recoveryloop
+> > > > > > +_begin_fstest shutdown auto log metadata eio recoveryloop smoketest
+> > > > > >  
+> > > > > >  # Override the default cleanup function.
+> > > > > >  _cleanup()
+> > > > > > diff --git a/tests/generic/476 b/tests/generic/476
+> > > > > > index 8e93b73457..b1ae4df4d4 100755
+> > > > > > --- a/tests/generic/476
+> > > > > > +++ b/tests/generic/476
+> > > > > > @@ -8,7 +8,7 @@
+> > > > > >  # bugs in the write path.
+> > > > > >  #
+> > > > > >  . ./common/preamble
+> > > > > > -_begin_fstest auto rw long_rw stress soak
+> > > > > > +_begin_fstest auto rw long_rw stress soak smoketest
+> > > > > >  
+> > > > > >  # Override the default cleanup function.
+> > > > > >  _cleanup()
+> > > > > > diff --git a/tests/generic/521 b/tests/generic/521
+> > > > > > index 22dd31a8ec..0956e50171 100755
+> > > > > > --- a/tests/generic/521
+> > > > > > +++ b/tests/generic/521
+> > > > > > @@ -7,7 +7,7 @@
+> > > > > >  # Long-soak directio fsx test
+> > > > > >  #
+> > > > > >  . ./common/preamble
+> > > > > > -_begin_fstest soak long_rw
+> > > > > > +_begin_fstest soak long_rw smoketest
+> > > > > >  
+> > > > > >  # Import common functions.
+> > > > > >  . ./common/filter
+> > > > > > diff --git a/tests/generic/522 b/tests/generic/522
+> > > > > > index f0cbcb245c..0e4e6009ed 100755
+> > > > > > --- a/tests/generic/522
+> > > > > > +++ b/tests/generic/522
+> > > > > > @@ -7,7 +7,7 @@
+> > > > > >  # Long-soak buffered fsx test
+> > > > > >  #
+> > > > > >  . ./common/preamble
+> > > > > > -_begin_fstest soak long_rw
+> > > > > > +_begin_fstest soak long_rw smoketest
+> > > > > >  
+> > > > > >  # Import common functions.
+> > > > > >  . ./common/filter
+> > > > > > diff --git a/tests/generic/642 b/tests/generic/642
+> > > > > > index eba90903a3..e6a475a8b5 100755
+> > > > > > --- a/tests/generic/642
+> > > > > > +++ b/tests/generic/642
+> > > > > > @@ -8,7 +8,7 @@
+> > > > > >  # bugs in the xattr code.
+> > > > > >  #
+> > > > > >  . ./common/preamble
+> > > > > > -_begin_fstest auto soak attr long_rw stress
+> > > > > > +_begin_fstest auto soak attr long_rw stress smoketest
+> > > > > >  
+> > > > > >  _cleanup()
+> > > > > >  {
+> > > > > > 
+> > > > > 
+> > > > 
 > > > 
 > > 
 > 
-
