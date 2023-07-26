@@ -2,231 +2,222 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2224C001DF
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Jul 2023 17:35:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F966C001DF
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Jul 2023 20:03:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232529AbjGZRfC (ORCPT
+        id S229815AbjGZUDg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Jul 2023 13:35:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34924 "EHLO
+        Wed, 26 Jul 2023 16:03:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46964 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232565AbjGZRex (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 13:34:53 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11B8C2695;
-        Wed, 26 Jul 2023 10:34:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=66wsCMpQU6FfBWm9l+EX673LWPMXJ2OOrUUr0K2e7g4=; b=SAiGzH+YNs/4c7c+fVGjD6Wi5b
-        66j65ZBDLnqU1rftVrAWXNxbSRQraEKMUHLdgCG/vvBinzOTK107lGJaY1pCJ0DD50CugUoOqlYAI
-        wE8669Fy28G/JulDPzzMyFzuvoLK4IW7P3WfaTMrZpMne0GDalRfVcGIkhdLccm5i9DKj9cpaDcsT
-        elqxek1ngORwtQpyNnlVyWVdsZmnB4RS2KkLPbtxd0wo+MsqdgKq5US3bOq6N48+/fCS8o6GF603v
-        npaDAdsWqmz9PSBYTHYOoYGIp4A/9IfUNgilLuHAd+UBg6/qtLnUBYyCDa3yi2XTSxW2MenGNFgGx
-        zPRbDAkg==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qOiPS-00BAtc-0C;
-        Wed, 26 Jul 2023 17:34:50 +0000
-Date:   Wed, 26 Jul 2023 10:34:50 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
-Subject: Re: [PATCH] fstests: add helper to canonicalize devices used to
- enable persistent disks
-Message-ID: <ZMFZOi3zJ8sevlb5@bombadil.infradead.org>
-References: <20230720061727.2363548-1-mcgrof@kernel.org>
- <20230725081307.xydlwjdl4lq3ts3m@zlang-mailbox>
- <20230725155439.GF11340@frogsfrogsfrogs>
- <20230725175009.jv4hbqxtags6qh5r@zlang-mailbox>
+        with ESMTP id S229924AbjGZUDf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 16:03:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B6AC26AE;
+        Wed, 26 Jul 2023 13:03:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 918A361C9A;
+        Wed, 26 Jul 2023 20:03:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADC89C433C8;
+        Wed, 26 Jul 2023 20:03:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1690401812;
+        bh=tTGZyVE7Fxwe20XQWb0Q6NTaOY7dMk1gosTaLl20W+s=;
+        h=From:To:Cc:Subject:Date:From;
+        b=LYZDLEqBHHCs/qtJ+TtfD3vaZw9ymaECIn9/7TUS4Cu2LfxrRaQrJZHmpLjseKbXy
+         jsPgCp/73eOyvH7TzYj+gmDSXckku5fftlpDb8TVegeANxCrDJeVl/8d8Zi1Wh9dYZ
+         0h7GL96hL6FU+SsrXG92gUNW0zoGXSvXeguQX/BoEJCYflitpEgm9O1vA/1V1m/7Jz
+         iXK5RBMQnF8izsdrF/DfKGg7/T1mcxWPIJz3G+uBjxGG0d/mnzm6qWqilDuAOJKWT2
+         MySbUgJ1qOWibZmeS406lZF5C8oXxO4aYumwWT13tYILAzw7/SokdUbs6dPC0H4XGl
+         seng6xY1qadIg==
+From:   Zorro Lang <zlang@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     djwong@kernel.org, tytso@mit.edu, linux-xfs@vger.kernel.org
+Subject: [PATCH] fstests: provides smoketest template
+Date:   Thu, 27 Jul 2023 04:03:27 +0800
+Message-Id: <20230726200327.239085-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230725175009.jv4hbqxtags6qh5r@zlang-mailbox>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 26, 2023 at 01:50:09AM +0800, Zorro Lang wrote:
-> On Tue, Jul 25, 2023 at 08:54:39AM -0700, Darrick J. Wong wrote:
-> > On Tue, Jul 25, 2023 at 04:13:07PM +0800, Zorro Lang wrote:
-> > > On Wed, Jul 19, 2023 at 11:17:27PM -0700, Luis Chamberlain wrote:
-> > > > Using a symlink is desirable if you want to enable persistent tests
-> > > > across reboots. For example you may want to use /dev/disk/by-id/nvme-eui.*
-> > > > so to ensure that the same drives are used even after reboot.
-> > >
-> > > If more developers prefer this change, I'd like to make it to be
-> > > optional by an option of ./check at least, not always turn devname
-> > > to realpath. Welcome review points from others.
-> > 
-> > Hmm.  SCRATCH_DEV=/dev/testvg/testlv works right now, it'd be sort of
-> > annoying to have "/dev/dm-4" get written into the report and then you've
-> > lost the correlation to whatever the user passed in.
-> > 
-> > Oh wait.  My giant mound of ./check wrapper script already does that
-> > canonicalization and has for years.
-> > 
-> > Ok.  Sounds good to me then. :P
-> 
-> So you hope fstests can do this translation (use real device name) by default?
+Darrick suggests that fstests can provide a simple smoketest, by running
+several generic filesystem smoke testing for five minutes apiece. Since
+there are only five smoke tests, this is effectively a 16min super-quick
+test.
 
-I'm fine if we make this optional too. In my next spin I'll add an
-option that does this.
+With gcov enabled, running these tests yields about ~75% coverage for
+iomap and ~60% for xfs; or ~50% for ext4 and ~75% for ext4; and ~45% for
+btrfs.  Coverage was about ~65% for the pagecache.
 
-> > > I think [ -L "$TEST_DEV" ] is enough.
-> > 
-> > I don't think it is.
-> > 
-> > $ unset moo
-> > $ [ -L $moo ]
-> 
-> The double quotation marks "" are needed.
+To implement that, this patch add a new "-t" option to ./check, and a
+new directory "template" under xfstests/, then we can have smoketest
+template, also can have more other testing templates.
 
-Indeed it does. Will go with that for v2.
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
 
-> > $ echo $?
-> > 0
-> > $ realpath -e $moo
-> > realpath: missing operand
-> > Try 'realpath --help' for more information.
-> > 
-> > > > +		TEST_DEV=$(realpath -e $TEST_DEV)
-> > > 
-> > > Anyone knows the difference of realpatch and readlink?
-> > 
-> > readlink doesn't follow nested symlinks; realpath does:
-> > 
-> > $ touch /tmp/a
-> > $ ln -s /tmp/a /tmp/b
-> > $ ln -s /tmp/b /tmp/c
-> > $ readlink /tmp/c
-> > /tmp/b
-> > $ realpath /tmp/c
-> > /tmp/a
-> > $ readlink -m /tmp/c
-> > /tmp/a
-> 
-> The -e option helps:
-> 
-> # readlink -e /tmp/c
-> /tmp/a
+Hi,
 
-I can trace readlink -e support back to 2004:
+This patch uses another way to achieve the smoketest requirement[1]. When
+I reviewed the patch from Darrick [2], I thought "smoketest" might not be
+the last one requirement likes that. I don't want to give each kind of
+tests a separated option. But we might can leave a hook for more fs-devel
+who have good testing templates for fstests.
 
-https://github.com/coreutils/coreutils/commit/e0b8973bd4b146b5fb39641a4ee7984e922c3ff5
+Although we have test groups, but those group names are too complex for
+the users who not always use fstests. So I'm thinking about providing
+some simple templates to run fstests, these templates base on test groups
+and some fstests global parameters, help users to know what kind of
+test they can do.
 
-> # realpath -e /tmp/c
-> /tmp/a
+Feel free to discuss, and if most of you prefer the original patch [2],
+I'll also think about merging the original one :)
 
-realpeath is much newer than readlink, it's first commit including
-support for -e dates back to 2011;
+Thanks,
+Zorro
 
-https://github.com/coreutils/coreutils/commit/77ea441f79aa115f79b47d9c1fc9c0004c5c7111
+[1]
+https://lore.kernel.org/fstests/20230726145441.lbzzokwigrztimyq@zlang-mailbox/T/#mabc0de98699f1b877c87caccb13809c9283c0606
+[2]
+https://lore.kernel.org/fstests/169033660570.3222210.3010411210438664310.stgit@frogsfrogsfrogs/T/#u
 
-And so canonicalizing with readlink is 7 years older and likely to be
-supported in more ancient distros with older coreutils. I'll go with
-readlink -e unless I hear otherwise.
 
-> > > > +	fi
-> > > > +
-> > > > +	if [ ! -z "$SCRATCH_DEV" ] && [ -L $SCRATCH_DEV ]; then
-> > > > +		SCRATCH_DEV=$(realpath -e $SCRATCH_DEV)
-> > 
-> > Extra question: Shouldn't we be putting theis ^^^ variables in quotes?
-> 
-> Make sense to me.
+ check               |  8 ++++++++
+ doc/group-names.txt |  1 +
+ templates/smoketest | 16 ++++++++++++++++
+ tests/generic/475   |  2 +-
+ tests/generic/476   |  2 +-
+ tests/generic/521   |  2 +-
+ tests/generic/522   |  2 +-
+ tests/generic/642   |  2 +-
+ 8 files changed, 30 insertions(+), 5 deletions(-)
+ create mode 100644 templates/smoketest
 
-Done. The only eye sore is how to convert the loop for the SCRATCH_DEV_POOL,
-here's what I have for a v2:
-
-diff --git a/README b/README
-index 1ca506492bf0..97ef63d6d693 100644
---- a/README
-+++ b/README
-@@ -268,6 +268,9 @@ Misc:
-    this option is supported for all filesystems currently only -overlay is
-    expected to run without issues. For other filesystems additional patches
-    and fixes to the test suite might be needed.
-+ - set CANON_DEVS=yes to canonicalize device symlinks. This will let you
-+   for example use something like TEST_DEV/dev/disk/by-id/nvme-* so the
-+   device remains persistent between reboots. This is disabled by default.
- 
- ______________________
- USING THE FSQA SUITE
 diff --git a/check b/check
-index 0bf5b22e061a..577e09655844 100755
+index 89e7e7bf..7100aae4 100755
 --- a/check
 +++ b/check
-@@ -711,6 +711,7 @@ function run_section()
- 	fi
- 
- 	get_next_config $section
-+	_canonicalize_devices
- 
- 	mkdir -p $RESULT_BASE
- 	if [ ! -d $RESULT_BASE ]; then
-diff --git a/common/config b/common/config
-index 6c8cb3a5ba68..7d74c285ac71 100644
---- a/common/config
-+++ b/common/config
-@@ -25,6 +25,9 @@
- # KEEP_DMESG -      whether to keep all dmesg for each test case.
- #                   yes: keep all dmesg
- #                   no: only keep dmesg with error/warning (default)
-+# CANON_DEVS -      whether or not to canonicalize device symlinks
-+#                   yes: canonicalize device symlinks
-+#                   no (default) do not canonicalize device if they are symlinks
+@@ -335,6 +335,14 @@ while [ $# -gt 0 ]; do
+ 		;;
+ 	-i)	iterations=$2; shift ;;
+ 	-I) 	iterations=$2; istop=true; shift ;;
++	-t)
++		source templates/$2
++		if [ $? -ne 0 ];then
++			echo "Cannot import the templates/$2"
++			exit 1
++		fi
++		shift
++		;;
+ 	-T)	timestamp=true ;;
+ 	-d)	DUMP_OUTPUT=true ;;
+ 	-b)	brief_test_summary=true;;
+diff --git a/doc/group-names.txt b/doc/group-names.txt
+index 1c35a394..c3dcca37 100644
+--- a/doc/group-names.txt
++++ b/doc/group-names.txt
+@@ -118,6 +118,7 @@ selftest		tests with fixed results, used to validate testing setup
+ send			btrfs send/receive
+ shrinkfs		decreasing the size of a filesystem
+ shutdown		FS_IOC_SHUTDOWN ioctl
++smoketest		Simple smoke tests
+ snapshot		btrfs snapshots
+ soak			long running soak tests whose runtime can be controlled
+                         directly by setting the SOAK_DURATION variable
+diff --git a/templates/smoketest b/templates/smoketest
+new file mode 100644
+index 00000000..40a0104b
+--- /dev/null
++++ b/templates/smoketest
+@@ -0,0 +1,16 @@
++##/bin/bash
++# For infrequent filesystem developers who simply want to run a quick test
++# of the most commonly used filesystem functionality, use this command:
++#
++#     ./check -t smoketest <other config options>
++#
++# This template helps fstests to run several tests to exercise the file I/O,
++# metadata, and crash recovery exercisers for four minutes apiece.  This
++# should complete in approximately 20 minutes.
++
++echo "**********************"
++echo "* A Quick Smoke Test *"
++echo "**********************"
++
++[ -z "$SOAK_DURATION" ] && SOAK_DURATION="4m"
++GROUP_LIST="smoketest"
+diff --git a/tests/generic/475 b/tests/generic/475
+index 0cbf5131..ce7fe013 100755
+--- a/tests/generic/475
++++ b/tests/generic/475
+@@ -12,7 +12,7 @@
+ # testing efforts.
  #
- # - These can be added to $HOST_CONFIG_DIR (witch default to ./config)
- #   below or a separate local configuration file can be used (using
-@@ -644,6 +647,32 @@ _canonicalize_mountpoint()
- 	echo "$parent/$base"
- }
+ . ./common/preamble
+-_begin_fstest shutdown auto log metadata eio recoveryloop
++_begin_fstest shutdown auto log metadata eio recoveryloop smoketest
  
-+# Enables usage of /dev/disk/by-id/ symlinks to persist target devices
-+# over reboots
-+_canonicalize_devices()
-+{
-+	if [ "$CANON_DEVS" != "yes" ]; then
-+		return
-+	fi
-+	[ -L "$TEST_DEV" ]	&& TEST_DEV=$(readlink -e "$TEST_DEV")
-+	[ -L $SCRATCH_DEV ]	&& SCRATCH_DEV=$(readlink -e "$SCRATCH_DEV")
-+	[ -L $TEST_LOGDEV ]	&& TEST_LOGDEV=$(readlink -e "$TEST_LOGDEV")
-+	[ -L $TEST_RTDEV ]	&& TEST_RTDEV=$(readlink -e "$TEST_RTDEV")
-+	[ -L $SCRATCH_RTDEV ]	&& SCRATCH_RTDEV=$(readlink -e "$SCRATCH_RTDEV")
-+	[ -L $LOGWRITES_DEV ]	&& LOGWRITES_DEV=$(readlink -e "$LOGWRITES_DEV")
-+	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
-+		NEW_SCRATCH_POOL=""
-+		for i in $SCRATCH_DEV_POOL; do
-+			if [ -L $i ]; then
-+				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(readlink -e $i)"
-+			else
-+				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
-+			fi
-+		done
-+		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
-+	fi
-+}
-+
- # On check -overlay, for the non multi section config case, this
- # function is called on every test, before init_rc().
- # When SCRATCH/TEST_* vars are defined in config file, config file
-@@ -774,7 +803,6 @@ get_next_config() {
- 	fi
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/generic/476 b/tests/generic/476
+index 8e93b734..b1ae4df4 100755
+--- a/tests/generic/476
++++ b/tests/generic/476
+@@ -8,7 +8,7 @@
+ # bugs in the write path.
+ #
+ . ./common/preamble
+-_begin_fstest auto rw long_rw stress soak
++_begin_fstest auto rw long_rw stress soak smoketest
  
- 	parse_config_section $1
--
- 	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
- 		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
- 		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-@@ -890,5 +918,7 @@ else
- 	fi
- fi
+ # Override the default cleanup function.
+ _cleanup()
+diff --git a/tests/generic/521 b/tests/generic/521
+index 22dd31a8..0956e501 100755
+--- a/tests/generic/521
++++ b/tests/generic/521
+@@ -7,7 +7,7 @@
+ # Long-soak directio fsx test
+ #
+ . ./common/preamble
+-_begin_fstest soak long_rw
++_begin_fstest soak long_rw smoketest
  
-+_canonicalize_devices
-+
- # make sure this script returns success
- /bin/true
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/generic/522 b/tests/generic/522
+index f0cbcb24..0e4e6009 100755
+--- a/tests/generic/522
++++ b/tests/generic/522
+@@ -7,7 +7,7 @@
+ # Long-soak buffered fsx test
+ #
+ . ./common/preamble
+-_begin_fstest soak long_rw
++_begin_fstest soak long_rw smoketest
+ 
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/generic/642 b/tests/generic/642
+index eba90903..e6a475a8 100755
+--- a/tests/generic/642
++++ b/tests/generic/642
+@@ -8,7 +8,7 @@
+ # bugs in the xattr code.
+ #
+ . ./common/preamble
+-_begin_fstest auto soak attr long_rw stress
++_begin_fstest auto soak attr long_rw stress smoketest
+ 
+ _cleanup()
+ {
+-- 
+2.40.1
+
