@@ -2,183 +2,72 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 018C2C001DE
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Jul 2023 14:55:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BC8EC001DC
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Jul 2023 16:28:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233992AbjGZOzg (ORCPT
+        id S229940AbjGZQ2f (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Jul 2023 10:55:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40340 "EHLO
+        Wed, 26 Jul 2023 12:28:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233512AbjGZOzf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 10:55:35 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C6892684
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2023 07:54:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1690383289;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=GInM7LYBvIjPovjW2qhN9wZ9AsgqFw8qJN5/ZwzfhKI=;
-        b=JI4lBV14htOS2Mck6REV5zKShhygPf7baO11NncvKUrAnnUcDr/4iXONuA62mtC7waTtr2
-        FEbcna/VhoR+qTzOtDOv6Y37+yJ3bTuiQ3haEmoax451QLcdpntFKG7R/fCsUxuR9puKgg
-        yoYIxfJa/4t49q/5diyYzY5RWKYE1DA=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-348-tDZ_ulLMO5mVFLn0bgCoJA-1; Wed, 26 Jul 2023 10:54:48 -0400
-X-MC-Unique: tDZ_ulLMO5mVFLn0bgCoJA-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1b9de8fbfc9so35648655ad.1
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2023 07:54:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690383287; x=1690988087;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GInM7LYBvIjPovjW2qhN9wZ9AsgqFw8qJN5/ZwzfhKI=;
-        b=XAwJ/mluUBdMVllVRxqu8rU1iaBFYNz9QpEy14kni5FSYMQfvb2Jqp4zUUkxbuFTUX
-         jNaDBeO4s/xU6TOCh6u9L6UdKR/KZrM4WZBzNAg8OUbdmNDtp1ymZMH6si/7UpWL5BUR
-         px7Vc6blwJ41IrV2fzmFzdZPVoT+XYo9g6NnYdJwrvw/tkHudt9UxkjxUxcjoxcp7Sno
-         8JW6ktNCh6c3aN9uajFW2j44/9h4XEfOVrMPpc4Q1LtyDkqYJjcif2hRB5eREVPclZuX
-         x/X59WYgqgZ4+gcftXGd3d24eUr9kmsKWZ7VJVyz89FynWrmx4TZPB61oFZgfoa8lt11
-         FcLw==
-X-Gm-Message-State: ABy/qLb5s6IjYgy4h/SJEJim/2F83LMZ2AmlTenHDhNHzHEyJPhq9ne/
-        ModkMYY9cNtheK33HdzgrobTV7XKWO/KV7DHqiXHH02jKBxogGUXFeMPDZ+nor8BQDOlTgfxZNT
-        L1qwOj21Y79uGwwYe+g==
-X-Received: by 2002:a17:902:e742:b0:1bb:a922:4a1a with SMTP id p2-20020a170902e74200b001bba9224a1amr2265399plf.6.1690383286902;
-        Wed, 26 Jul 2023 07:54:46 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlE1rDoCtwsVjgxw9H4T4mr3lGe+HQhHV98EaNwkWimPShRCGOv+HZVRmLwAXBWneHChuFjabA==
-X-Received: by 2002:a17:902:e742:b0:1bb:a922:4a1a with SMTP id p2-20020a170902e74200b001bba9224a1amr2265379plf.6.1690383286521;
-        Wed, 26 Jul 2023 07:54:46 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 20-20020a170902e9d400b001bba27d1b65sm6755032plk.85.2023.07.26.07.54.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Jul 2023 07:54:46 -0700 (PDT)
-Date:   Wed, 26 Jul 2023 22:54:41 +0800
-From:   Zorro Lang <zlang@redhat.com>
+        with ESMTP id S231230AbjGZQ2e (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 12:28:34 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0224D26AC;
+        Wed, 26 Jul 2023 09:28:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=Jpqp2YP168gbIvGSKxOfPUl7nleHM5Mjb5NJJ+LbOQE=; b=xRoJcZVvl6iJJ88vsjo/XnQJFL
+        SZpq2dgdbpT1Pq1g5mExcn+E8LnYtfGE3vtFn0iSsZyD2w7a0nQLJWjnyW5K+K9bZz3Gtc5tAIs6o
+        HNSdBzRI8XLC9QXNMF9CZ6U56Myz3lv8rZdifmunoEV7LzZxMt7sNyW/YFWXFeikZnWMAF1awRvs9
+        L4tQheeiid+rzxChSupLmabXdqRu33f39aL3qvQnd32rYIASE+GcgRtu/qn4Z2xE2mgkJnylpOnT5
+        X3AdzbhQW7m1u80CeopAF6adlQXI1hD6LT64QTTkaRSC1PCTLvVfrF6FPY4JANyW+399Za/gK+w5i
+        R+1O5SGA==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+        id 1qOhN9-00B0HX-10;
+        Wed, 26 Jul 2023 16:28:23 +0000
+Date:   Wed, 26 Jul 2023 09:28:23 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] check: add a -smoketest option
-Message-ID: <20230726145441.lbzzokwigrztimyq@zlang-mailbox>
-References: <168972905065.1698606.6829635791058054610.stgit@frogsfrogsfrogs>
- <168972905626.1698606.12419796694170752316.stgit@frogsfrogsfrogs>
- <20230719151024.ef7vgjmtoxwxkmjm@zlang-mailbox>
- <20230719152907.GA11377@frogsfrogsfrogs>
- <20230719161115.byva7tvwoafkesga@zlang-mailbox>
- <20230720022756.GH11352@frogsfrogsfrogs>
- <20230720143433.n5gkhukdkz7s5ab7@zlang-mailbox>
- <20230726000524.GG11340@frogsfrogsfrogs>
- <20230726060102.GB30264@mit.edu>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
+Subject: Re: [PATCH] fstests: add helper to canonicalize devices used to
+ enable persistent disks
+Message-ID: <ZMFJp5OZN3vnT/yI@bombadil.infradead.org>
+References: <20230720061727.2363548-1-mcgrof@kernel.org>
+ <20230725081307.xydlwjdl4lq3ts3m@zlang-mailbox>
+ <20230725155439.GF11340@frogsfrogsfrogs>
+ <20230726044132.GA30264@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230726060102.GB30264@mit.edu>
+In-Reply-To: <20230726044132.GA30264@mit.edu>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 26, 2023 at 02:01:02AM -0400, Theodore Ts'o wrote:
-> On Tue, Jul 25, 2023 at 05:05:24PM -0700, Darrick J. Wong wrote:
-> > 
-> > If someone wants that, then ok.  The taret audience for this are the
-> > drive-by filesystem patch authors.  IOWs, people who have some small bug
-> > they want to try to fix and want to run a quick test to see if their
-> > change works.
+On Wed, Jul 26, 2023 at 12:41:32AM -0400, Theodore Ts'o wrote:
+> On Tue, Jul 25, 2023 at 08:54:39AM -0700, Darrick J. Wong wrote:
+> > On Tue, Jul 25, 2023 at 04:13:07PM +0800, Zorro Lang wrote:
+> > > On Wed, Jul 19, 2023 at 11:17:27PM -0700, Luis Chamberlain wrote:
+> > > > The filesystem configuration file does not allow you to use symlinks to
+> > > > devices given the existing sanity checks verify that the target end
+> > > > device matches the source.
 > 
-> Zorro,
+> I'm a little confused.  Where are these "sanity checks" enforced?
+> I've been using
 > 
-> FYI, the context behind this was a comment I had made to Darrick that
-> the time necessary to run "-g quick" had been getting longer and
-> longer, and it might be nice to create a manually curated "-g smoke"
-> that was good enough for drive-by patch authors.  I was originally
-> thinking about a cut-down set of tests by selecting a subset of "-g
-> quick", but Darrick suggested that instead, we just run a very small
-> set of tests (mostly based on fsstress / fsx) and just run them in a
-> loop for 4 minutes or so.
+> SCRATCH_DEV=/dev/mapper/xt-vdc
 > 
-> We also talked about having a time budget (say, 15 minutes) and then
-> just dividing 15 time by the number of tests, and just run them in for
-> a specified soak time, so that the total time is known ahead of time.
-> 
-> To be honest, I was a bit dubious it could be that simple, but that's
-> where using kcov to show that you get a pretty good code coverage
-> using something that simple comes from.
-> 
-> > I don't think it's reasonable to expect drive-by'ers to know all that
-> > much about the fstests groups or spend the hours it takes to run -g all.
-> > As a maintainer, I prefer that these folks have done at least a small
-> > taste of QA before they start talking to the lists.
-> 
-> A big problem for the drive-by'ers is that that the top-level xfstests
-> README file is just plain scary, and has far too many steps for a
-> drive-by patch author to follow.
-> 
-> What I plan to add to a maintainer-entry-file.rst file for ext4 in the
-> kernel docs is to tell that drive-by posters that should run
-> "kvm-xfstests smoke" before submitting a patch, and setting up
-> kvm-xfstess is dead simple easy:
-> 
-> 
-> 1)  Install kvm-xfstests --- you only have to run this once
-> 
-> % git clone https://github.com/tytso/xfstests-bld fstests
-> % cd fstests
-> % make ; make install
-> 
-> # Optional, if your file system you are developing isn't ext4;
-> # change f2fs to the file system of your choice
-> % echo PRIMARY_FSTYPE=f2fs >> ~/.config/kvm-xfstests
-> 
-> 
-> 2) Build the kernel suitable for use with kvm-xfstests
-> 
-> % cd /path/to/your/kernel
-> % install-kconfig
-> % kbuild
-> 
-> 3) Run the smoke test --- assuming the cwd is /path/to/your/kernel
-> 
-> (Note: today this runs -g quick, but it would be good if this could be
-> faster)
-> 
-> % kvm-xfstests smoke 
-> 
-> 
-> It's simple, and since the kvm-xfstests script will download a
-> pre-compiled test appliance image automatically, there's no need to
-> require the drive-by tester to figure out how compile xfstests with
-> any of its prerequisites.
-> 
-> And once things are set up, then it's just a matter of running
-> "kbuild" to build your kernel after you make changes, and running
-> "kvm-xfstests smoke" to do a quick smoke testing run.
-> 
-> No muss, no fuss, no dirty dishes...   :-)
+> where /dev/mapper/xt-vdc is a symlink to /dev/dm-4 (or some such)
+> without any problems.  So I don't quite understand why we need to
+> canonicalize devices?
 
-Hi Ted,
+That might work, but try using /dev/disk/by-id/ stuff, that'll bust. So
+to keep existing expecations by fstests, it's needed.
 
-Thanks for this detailed explanation!
-
-Ahaha, I'm just waiting for Darrick wake up, then ask him is there any
-requirement/context about this patch. Due to he (looks like) a bit
-hurry to push this patch :)
-
-If most of you prefer this way (an ./check option, not a separated wrapper
-script), I'm OK with that.
-
-Just recently I'm a bit worry about the ./check code, it's becoming more
-and more complex. I hope to separate something from it, but many things
-entwined, and growing. Anyway that's another story, I'll look into this
-patchset and review it soon.
-
-Thanks,
-Zorro
-
-> 
-> Cheers,
-> 
-> 					- Ted
-> 
-
+  Luis
