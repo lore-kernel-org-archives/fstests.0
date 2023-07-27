@@ -2,167 +2,199 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CE6AC001DF
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Jul 2023 03:26:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99D80C0015E
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Jul 2023 09:14:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231253AbjG0D0d (ORCPT
+        id S233818AbjG0JOQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Jul 2023 23:26:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38980 "EHLO
+        Thu, 27 Jul 2023 05:14:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230512AbjG0D0c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 23:26:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FC0B1FFF
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2023 20:25:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1690428344;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=retRHZZ4WFUgburZXns/fqADaGNP8g2q2H1nB0JLVuY=;
-        b=ICRyDQLyjR7usM+EVdFOg+vtNszsceVvx7WgSdDkzh0XEW7oxiH0QE5rHrRmtJAwALO5SK
-        FLqa16L/6UZH9ZH3rdkGXwHNz5xx9F+/phjj9rEoGJL4EVDKS95uYrWH5+lXiCY8GaqSUm
-        JG2CS0FjT0FcWZjSJwBtT06DhLKTfzo=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-590-a4PEn0CWPf-oN6q69owI1A-1; Wed, 26 Jul 2023 23:25:43 -0400
-X-MC-Unique: a4PEn0CWPf-oN6q69owI1A-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1bbdced15f3so2355515ad.2
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2023 20:25:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690428342; x=1691033142;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=retRHZZ4WFUgburZXns/fqADaGNP8g2q2H1nB0JLVuY=;
-        b=Ba6UEdil5uH9Ayy8L/7hZ5Xm3uMWclfWy6iQcA27esneaNRQNPK/qh0lEBfO6I+/F2
-         +PPzDmGOIBug3IokQG/DI2w1H81l2ymqnKi4OOv5vRVvJiZIVlG8DbBiNw9EEUlFpkzW
-         7Fdfw6L9j/eccbfwdGJpyB7BeVwQ62w2WkyY1yk2XMJdqjO4HxeM0UX5YkkgfwuLzm1V
-         RtppAtr7ECEzxXWb9xmHWrxM+1IkpThTlHBNRYX1iQVMD0WNQ+ksesjG/oS9DkJ2JC8G
-         CVd8LE0RyDd1tX+z3yJ3zD1E7XqiHKP9xds0S3wgGioAhwWJuG9IT7D2GsElN8htTEty
-         llUQ==
-X-Gm-Message-State: ABy/qLat7v3B7wdJ9oGbxZVbcYVBosKA+q4t99i6UO7ly9vxaDCOXpvy
-        sVesu5j8UEGWrKzj3xWaAXH6L1nuFXl3QsyBdFlnx4QvrWsDewEkKcAzfiXajGHLgcjY5Y7DMjj
-        D+LU2Kf4C1vON7flon3fpLb4XIHIkrDY=
-X-Received: by 2002:a17:903:2311:b0:1b3:d4d5:beb2 with SMTP id d17-20020a170903231100b001b3d4d5beb2mr5591654plh.9.1690428342013;
-        Wed, 26 Jul 2023 20:25:42 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlGr6P6lhARPVq35Sz98PkJ7CfdygFWGoQHdTRc+q7xfzvanHeUOLNFNhOgou2zlwBQyALCaPQ==
-X-Received: by 2002:a17:903:2311:b0:1b3:d4d5:beb2 with SMTP id d17-20020a170903231100b001b3d4d5beb2mr5591635plh.9.1690428341700;
-        Wed, 26 Jul 2023 20:25:41 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a12-20020a170902eccc00b001b03b7f8adfsm301472plh.246.2023.07.26.20.25.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Jul 2023 20:25:41 -0700 (PDT)
-Date:   Thu, 27 Jul 2023 11:25:37 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] check: add a -smoketest option
-Message-ID: <20230727032537.hyqyuvemnwmh25d5@zlang-mailbox>
-References: <168972905626.1698606.12419796694170752316.stgit@frogsfrogsfrogs>
- <20230719151024.ef7vgjmtoxwxkmjm@zlang-mailbox>
- <20230719152907.GA11377@frogsfrogsfrogs>
- <20230719161115.byva7tvwoafkesga@zlang-mailbox>
- <20230720022756.GH11352@frogsfrogsfrogs>
- <20230720143433.n5gkhukdkz7s5ab7@zlang-mailbox>
- <20230726000524.GG11340@frogsfrogsfrogs>
- <20230726060102.GB30264@mit.edu>
- <20230726145441.lbzzokwigrztimyq@zlang-mailbox>
- <20230726205930.GC30264@mit.edu>
+        with ESMTP id S234665AbjG0JNZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Jul 2023 05:13:25 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07A0935B3;
+        Thu, 27 Jul 2023 02:04:41 -0700 (PDT)
+Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36R0sFLv006075;
+        Thu, 27 Jul 2023 09:04:41 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : content-transfer-encoding : content-type :
+ mime-version; s=corp-2023-03-30;
+ bh=V6hQmwk2GXPVZKMG6IClauZ9p7gWAqDyLlhJVj6fsFs=;
+ b=Ebkub+N12txJSZ0lkwaHH9uZGBIrNn9E/18OsfW7IDS8llQElTABT+BPSv82R6pL6UqL
+ pSB772niob7f0hIm8FzFQpF6Z2vYreb2b5tcXkh3CSxmhvrp0sRqHDlGngoU+Bw/Avag
+ KyXu+A5VEpkweadjwEvohuJW1dBuaoRVNmTPF1FfqYBZ3SAJM4Yw4CIG7e2eTT+5lyhY
+ 5rZq0iB8kwNOBK6kIVKWFKeBvNlFjedSBdbNqx9jpi/xpemOtQvw6B/2F+IsUL/neOda
+ seKdsKqJfjxQbHWGJT2gI9I3RlsOB3HN1UQdj2cws2WpOISlzSpzhNyMNNo3cpM4tohf SQ== 
+Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3s07nus81t-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 27 Jul 2023 09:04:41 +0000
+Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 36R7fOn5023025;
+        Thu, 27 Jul 2023 09:04:40 GMT
+Received: from nam04-dm6-obe.outbound.protection.outlook.com (mail-dm6nam04lp2044.outbound.protection.outlook.com [104.47.73.44])
+        by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3s05j7byx3-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 27 Jul 2023 09:04:40 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Grhtd9/SGLQzX3dXRTjN29NG9bx+LMvgdIdDhN3Dz/CYDJnL4+vaznuwucJ0PMupRWd5GYlveE0j3Th3kJs78RthNFEYz/GEYYpMY7p9eN10vQxUVDs93g+ZNSq+BW1a+Shklz5fj9I+fMnKZ7ZRjFPvULkdY8csP5NxtZbzjxacad34BWqBI+Yo3bKlVQDdU9vAScLcP2ctmTmyLfvsXHVHss6dkQh8HlLd0/C0ImqS0wl3p4B+ObgLDViY92H2/QmHALuidTaljNRLDdfggWEy5BARPD4eQqyiiOfwViCgf1U1VVV8fYnvvPhLILj/gUGo5R9lj83Z5NauETdHvw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=V6hQmwk2GXPVZKMG6IClauZ9p7gWAqDyLlhJVj6fsFs=;
+ b=FEMS3JS2MLcN6tRc4ymwDuybqvJR7V7QIrA4+HnqysIaV3UkQiGe4QmAghqrdXwOlthSTAGMJnX6i4mgg/yNTNomFeh9BjJ63ReO1WNQvQWPWMYmeEngbRPnDpn38cRO+Wg6x3a6XlnAEUYJ/6j8jOKpwME9toGV+fuPQTu0H0u2DW0kFkOZFgciC33r90bS90DszT8A1wNjRDNxNC3NgjWsIrQwNbDjTaAGH2bEjEf3DXKDR3kBLxo69HR3Syvr9eIs0Pn9N+8Axldh1dAjIOsqSQcyWz53RM8Rq7kOzh4uneSaUT5xdaYSe6jLvyzLzayuyNKnIh9lRciUcPhpTg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=V6hQmwk2GXPVZKMG6IClauZ9p7gWAqDyLlhJVj6fsFs=;
+ b=rdZpQquCGTB3ohcaNyNa6CF8ELDPwMhdmGkYAdIbRroPzV0+iSM+HQOO4MnuanFoGbp69EddG22j9AptGRwqPmqF3dqMTkknDE6Irp/X3s/JG8r/NyvCdrIOiCc+kuXmJ8JW9zrhHsMYr2Kf10IAJrRmrrKAi2WdwUpmAoT5SGY=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by BLAPR10MB4898.namprd10.prod.outlook.com (2603:10b6:208:327::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6631.29; Thu, 27 Jul
+ 2023 09:04:38 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::b3cb:e0d9:ef96:aa56]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::b3cb:e0d9:ef96:aa56%4]) with mapi id 15.20.6631.026; Thu, 27 Jul 2023
+ 09:04:38 +0000
+From:   Anand Jain <anand.jain@oracle.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH RFC] fstests: add configuration option for executing post mkfs commands
+Date:   Thu, 27 Jul 2023 17:04:29 +0800
+Message-Id: <9c6d36835c04f18a59005a8994ba128970bac20a.1690446808.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.38.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2PR06CA0241.apcprd06.prod.outlook.com
+ (2603:1096:4:ac::25) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230726205930.GC30264@mit.edu>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|BLAPR10MB4898:EE_
+X-MS-Office365-Filtering-Correlation-Id: 35a9e077-daef-45fe-0c82-08db8e80816a
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: gDwvVnSvC1TiAgC2TsafbvHaqtXqU2NrbZx8Fcn8hvbB1GiJDlnt58C3tHGRUGOlt/3HFYxDDbqpuMJMK5cHBZ+vp8gQDu/DzGMAzo+zzFZRc3gIGNoyjl4cNVKKrsLypMwVN+d31A86cO716ZXojQn/X6TH6qTEWph2CTdfmA0lao3tWig9fOV6sbTWQM1sel8ptMXQ5hCoc4PWAcd+pvPNQDRJ5TrEHG9cR2V9+Ft/XnT7oYthjabsec0oPR+ES2LTBxYN/PbKBDtawEd9wUakRy69gfXFusNLp2ax7o+jjokp++GE4hH+H7TY6TowL+X0Kw+0DAsecnUaHr4rPhLr11rupS2IESFATfRh8dTDXSgDlg1vIYD9mzOx6k7aYSjbUWZVmgSDAA5Vz2nzPkRYRseSWjlyjPf3u1vWs/kQQFXsf4pAoGUwr8ErjtHIcD95fvKB7hfidvTuJ6RU27aK9tXfyzqYExsMgHOY41N8AToltvxDiWaCumzoBaNecVfn6WnfsR24fE4JtMOmyh+Agk6rJt5X8bkMgEwRsh77amEEmknyXQZKHoteo4EK
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(346002)(366004)(376002)(39860400002)(136003)(396003)(451199021)(8676002)(5660300002)(83380400001)(2616005)(186003)(26005)(44832011)(6506007)(86362001)(8936002)(6666004)(6916009)(4326008)(316002)(6486002)(66946007)(66556008)(41300700001)(66476007)(6512007)(478600001)(450100002)(38100700002)(2906002)(36756003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?lFDbzFomrxKHyPEMsAWdSeFVYJRbGGKxmH77L6mJi+cDMCHGH7fjuRu/cFje?=
+ =?us-ascii?Q?KQxHaM5r4kG2EjhiygF0q/aMbHh4n19CEByWzzFcfd+xhviZqzQmGFIRKbM/?=
+ =?us-ascii?Q?nAm3/PvWZdGzZeO4jSHL1a/YXklTYoDjWfYwMYbOSASGLwncJGzW9Vsw1Tzo?=
+ =?us-ascii?Q?VXKT5LVvQhoDkVceDLQel3YWpGlHQV0IFgPv8skQk999qjdPIkpzXHSgBOvS?=
+ =?us-ascii?Q?3bP9ZIjQWfhLq4IhSRCwsoYWnN0fD54C/Prw3Uor3B1RRL04URpP0xhJypY8?=
+ =?us-ascii?Q?u8lNUoJuhBQQBuvwN8XyeY0q21Yxi4yWu5hmkQiRFwq4lUkSkhN5XzwYhD9H?=
+ =?us-ascii?Q?Jplhgl7EjQBJ/5AIltyIjpWiB0RYEAE09zHM0ZCHwOHhrI8h4a1VYaZ1UJ8/?=
+ =?us-ascii?Q?KNIeXuPfjkI0pboffV8caZyzKcRARhvpIXK0EVL0UoCj2yKpZu4wcZ6Yw9lG?=
+ =?us-ascii?Q?fWjUZWZKC4QgxF4TSLFNiQk7Vkmgz0awgA3ikjIJzOjVI5h1Lk/6dInKHzxk?=
+ =?us-ascii?Q?AXBWzkehhlHEc3kH3nT5tW+xfYX4WMerj4pb9+iQFFkpxTLoCKzPe3clXMCW?=
+ =?us-ascii?Q?DAIs+athCkl4g8nSBuElPZf3QRFbXfpTGMvsDnySEWOUSx8v3hWUbdiYaz0e?=
+ =?us-ascii?Q?bUg+y2RnJJfHYUoeMFMwshcDWO01SW+6oh7bqXnX501rxOQWadnPK1c3AFmZ?=
+ =?us-ascii?Q?DYd8eozpDcleP3bJJtOBDkX6g4hKii9CcMGV7bTflX+bO7OeRo17B7Aw8nqP?=
+ =?us-ascii?Q?0Q4wZ8DbAATvHxDikdBtTlVqkQcgjscppdNGkF8kJuLQJrPVm1OweSWT3HT6?=
+ =?us-ascii?Q?6QhrnlDt7/NjX4VY+mO9OfNcXD7Lm/Tfzt18BHFkYYyqzlpOVW5x9BsC1BMT?=
+ =?us-ascii?Q?W+0EHGNoLSO/On0G7yZwbRnGrG55H8Q90VjGUyt/cERG5Lh02kXsim8m7+vG?=
+ =?us-ascii?Q?VKyfC5BElY+C7Ie36zQ1wEbBG2a37EzkJztRCxKkoUsdvzLEydjPkdtVIsTc?=
+ =?us-ascii?Q?RhUozVHxef8+injJVAc4rW/5c0gTFo94+no/lO2FEpTFhI6PSc520MZzNVok?=
+ =?us-ascii?Q?6FYMxpBq2M4PT3SV2hR5WUchrPLVjU2I6XOqJfAaPDSlnnRdvfEyi42h5bg/?=
+ =?us-ascii?Q?KCEY7mpPjz5YHNABhgkH5EZbuLYwkuwSSHbWBvnKwY/Z/uaAIB57A2xLZz2K?=
+ =?us-ascii?Q?Ibl65d9RhIDMEe7ji9yUfBKdCBuyNNrNdepYuS+ZtKSPQ/ceZP/oV+ip2ize?=
+ =?us-ascii?Q?PDLhYh9XYmI59yHxTU8q3YtPrCJGQ9XwlnBft55pNfDHhkic4c8tg7UHVAUJ?=
+ =?us-ascii?Q?cLK5uoY0jDYOuznqBPn7hJdtQlZXvWKWO16eh5e6cNlUlhAWf1dHM2GVtMM2?=
+ =?us-ascii?Q?OGxRQtYirIZYMrAHZ342yyl1MvZlRxkA2NJSdtfazxBVQz1qng6WWuY56TX/?=
+ =?us-ascii?Q?ytbt6MnKtve/J29avjImIi1O7g22WHOpM1ADc6oZfhHsnPpnBVWbaik5aOI+?=
+ =?us-ascii?Q?XVV4IxCudtPnEOIMmgMS8zTlK9bWroYLl/nOxGSnOs3OOCEVdk330y8SoCGl?=
+ =?us-ascii?Q?4Bql41fsWf8BPvY7sTbYFNxUkT2tEmnTnOORM0+L?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: fcBNmG9zaeWBHKQpbtq6446ntElpljA0PTQj+21lMg4sVC29qnj5hu1Yg6+07tehexXvGXsbgyisbXPxLpgNlD9WHc/tc8M9Ecxd//sA6ivMxk3S9tzOUsVyZJVHFSVMS+zVLG/bl8I2eJwHQMhNoWPR95ChSnDFcOK5+NzALpZVuqvPT4qg5b+1QWJHgBQPFcaM4oT3Tb2Y/xpWMnevKxX+Kbrff9TuCwqYR6z6lVDIMarYFKHAEZnw1zol7vvtOS+n7xHurPpsddO/YwXi7jmgyC/vY1/5HbB3yxfFzdiQlAyW4OmozLZ7lWSb5/42JJ+yrlZxeTLpvIRQxBaSC4+H1qqcScCbPsrmxWylH8qWpclQoecRiFQWsLH5xrOKkuz8SM0eh6dWeegHF9Uui7Z49TBIC5ge8YX4QltvO4Tt/aOpzx0NSBmWI6IKFuDNulh9To8uY44iJc5ZOYgeGriovOkJxk2/A5PX3KTj6bChNw4Shvy03fvFG/kkYHfSBPFt774dE9Sq8SE02MZ2/LkftYMlIVngqQ9gw10sKtBhQxN3K62xS4urcoUeP37I8eZgWI0fg1g9xfW/84nvSxibBcFUBCfcBIMk3Pf2Hy27h3nFmbWp0OyY3Ck0sV10Nrru4xo21Xhg9shCsArZEtnkNOSBXMz5AiQlhMUHleq65fGa6N4BRtbTvGA/srg37+h48KY9aj1HLlIpbXiT3q2wBGKENkBvEwSWm7Jafjc/J478wJPEtsTDmBY7WfnQCpj/IPPoIYRY8nGo5m5qTw==
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 35a9e077-daef-45fe-0c82-08db8e80816a
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jul 2023 09:04:38.4561
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: ookznoxZTaLfQqwEPdpc55kZ6Dg+EHidq117v/RfGowHa3CvBWbnsncwpky0/SQr9k88Or0wFX8PyRXx1vKscg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR10MB4898
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-26_08,2023-07-26_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 spamscore=0 adultscore=0
+ phishscore=0 bulkscore=0 malwarescore=0 mlxscore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2306200000
+ definitions=main-2307270080
+X-Proofpoint-ORIG-GUID: qmfbRWUJaVRfwIZer5RJbijeSHqk38ZP
+X-Proofpoint-GUID: qmfbRWUJaVRfwIZer5RJbijeSHqk38ZP
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 26, 2023 at 04:59:30PM -0400, Theodore Ts'o wrote:
-> On Wed, Jul 26, 2023 at 10:54:41PM +0800, Zorro Lang wrote:
-> > 
-> > Ahaha, I'm just waiting for Darrick wake up, then ask him is there any
-> > requirement/context about this patch. Due to he (looks like) a bit
-> > hurry to push this patch :)
-> > 
-> > If most of you prefer this way (an ./check option, not a separated wrapper
-> > script), I'm OK with that.
-> 
-> I'm agnostic on that front, since I already *have* my own wrapper
-> script.  So if we need to do it in the wrapper script, I'm certainly
-> OK with that.  OTOH, if we think it's a feature which is generally
-> interesting to multiple developers and/or test wrappers, maybe it
-> makes sense to push things into the ./check sccript.
-> 
-> So I certainly don't have any objections to adding support to my
-> /root/runtests.sh so that "{gce,kvm,android}-xfstests smoke" gets ends
-> up running the moral equivalent of:
-> 
-> SOAK_DURATION=4m ./check -g smoketest
+This patch introduces a new configuration file parameter, POST_MKFS_CMD,
+which, when set, will run immediately it after the mkfs command for the
+FSTYP btrfs.
 
-Hi Ted,
+	For example:
+	POST_MKFS_CMD="btrfstune -m"
 
-Now we provide two ways to help to customize testing in fstests:
+Currently, only btrfstune's '-m' option is tested. However, there may be
+more btrfstune options, so having this parameter as a config makes sense.
+Additionally, there can be other commands besides btrfstune.
 
-1)
-https://lore.kernel.org/fstests/20230727030529.r4ivp6dmtrht5zo2@zlang-mailbox/T/#mc5cdb59344f4cd681515bf0fab501d7f30f1e263
+The mkfs helper functions in common/rc sends the SCRATCH_DEV as an argument
+to the set POST_MKFS_CMD, which may not be compatible with other commands.
+However, as of now, since those usecases are still unknown, we can modify
+it later. For now, I'm marking this as RFC, I'm open to feedback if any.
 
-2)
-https://lore.kernel.org/fstests/169033660570.3222210.3010411210438664310.stgit@frogsfrogsfrogs/T/#u
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ common/rc | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-Which one do you like to use? I'd like to hear more review points before I
-choose one to merge.
-
-Thanks,
-Zorro
-
-> 
-> ... and adding extra special case support in the check script just for
-> this use case.  I'm doing enough other stuff in runtests.sh[1] that
-> it's really not a big deal for me.  :-)
-> 
-> [1] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/runtests.sh
-> 
-> 
-> More generally, there are some "intresting" hacks --- for example, I
-> want to be able to run code in between every single test run, and the
-> way I do it is a big ugly, but effective.  I basically set
-> 
-> LOGGER_PROG to my own special script, gce-logger[2]
-> 
-> [2] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/usr/local/lib/gce-logger
-> 
-> and this allows the user to upload a script which will get run in
-> between every single individual fstest (e.g., to grab information from
-> BPF, or grab and reset lockstats, etc.).  This script also updates the
-> VM metadata so someone can query the VM to find out what test it's
-> currently running, and the percentage completion for that VM.
-> 
-> I could have asked for extra features in check, but whenever possible
-> I try to work around it to limit the number of special things just for
-> my set of wrapper scripts.
-> 
-> 
-> > Just recently I'm a bit worry about the ./check code, it's becoming more
-> > and more complex. I hope to separate something from it, but many things
-> > entwined, and growing. Anyway that's another story, I'll look into this
-> > patchset and review it soon.
-> 
-> Well, I don't use the config sections feature at all, because my
-> wrapper script has a lot more functionality than what you can get with
-> the config sections, so I just pass in TEST_DEV, SCRATCH_DEV,
-> MKFS_OPTIONS, etc., via environment variables, and I have my own set
-> of scripts to set up te test parameters.
-> 
-> So if you were going to simplify things by removing config sections,
-> *I* wouldn't care.  Enough other people might be using it that
-> changing the fstests interface for this might raise a lot of
-> objections from other folks, though.
-> 
-> Cheers,
-> 
-> 					- Ted
-> 
+diff --git a/common/rc b/common/rc
+index 5c4429ed0425..3e3c84259f38 100644
+--- a/common/rc
++++ b/common/rc
+@@ -667,6 +667,9 @@ _mkfs_dev()
+ 	exit 1
+     fi
+     rm -f $tmp.mkfserr $tmp.mkfsstd
++    if [[ -v POST_MKFS_CMD ]]; then
++	$POST_MKFS_CMD $(echo $* | $AWK_PROG '{print $1}')
++    fi
+ }
+ 
+ # remove all files in $SCRATCH_MNT, useful when testing on NFS/AFS/CIFS
+@@ -757,6 +760,9 @@ _scratch_mkfs()
+ 	esac
+ 
+ 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $*
++	if [[ -v POST_MKFS_CMD ]]; then
++		$POST_MKFS_CMD $SCRATCH_DEV
++	fi
+ 	return $?
+ }
+ 
+@@ -878,7 +884,11 @@ _scratch_pool_mkfs()
+ {
+     case $FSTYP in
+     btrfs)
+-        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL > /dev/null
++        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL
++	if [[ -v POST_MKFS_CMD ]]; then
++		$POST_MKFS_CMD $(echo $SCRATCH_DEV_POOL |\
++						$AWK_PROG '{print $1}')
++	fi
+         ;;
+     *)
+         echo "_scratch_pool_mkfs is not implemented for $FSTYP" 1>&2
+-- 
+2.39.3
 
