@@ -2,160 +2,130 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D85C04A94
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Jul 2023 21:24:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B313FEB64DD
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Jul 2023 22:15:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231761AbjG0VYz (ORCPT
+        id S232738AbjG0WP0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 27 Jul 2023 17:24:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48118 "EHLO
+        Thu, 27 Jul 2023 18:15:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230399AbjG0VYm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Jul 2023 17:24:42 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C30D4220;
-        Thu, 27 Jul 2023 14:24:20 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9187661F3C;
-        Thu, 27 Jul 2023 21:23:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3A3EC433C7;
-        Thu, 27 Jul 2023 21:23:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690493036;
-        bh=USI9e9KT6MOYKuPlMt//BD0ugBb5+AjE87OXuTIB68E=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ZN81gHycm0s/S46NkxSdWddSjNcTtPSJdLUY7f8cPiyloK3KfuYgYxSV8D8RylIpS
-         QymzDQo1TfqZupC/UT0VDUrB4KGcxxTqbH9KufeRRhGbkkZHUAghnRNnI04WdB/eCh
-         r4raibokSjMkC5jUbUYkpkU2etSd17kwiTDuuYJkGq1wEar2zfANkv1eT3r62r6Nq4
-         ArFPqHrYMQkR5KoZcITTWMP7NpVcoAnWpZ6Wz0QPSDzAK95QKQF7kvZ2AG8TOZyl0I
-         eUUR3YjRVR1nzp7BKQTkGjMJeNjfDaH0+L7+I0xR4aJekMr6xa6pJrs5CdcoPmt2eG
-         phmi7YXD/jKzw==
-Date:   Thu, 27 Jul 2023 14:23:55 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@kernel.org>
-Cc:     fstests@vger.kernel.org, tytso@mit.edu, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] fstests: add smoketest group
-Message-ID: <20230727212355.GD11352@frogsfrogsfrogs>
-References: <20230727185315.530134-1-zlang@kernel.org>
- <20230727185315.530134-2-zlang@kernel.org>
+        with ESMTP id S232753AbjG0WPZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Jul 2023 18:15:25 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C24EE78;
+        Thu, 27 Jul 2023 15:15:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
+ s=s31663417; t=1690496118; x=1691100918; i=quwenruo.btrfs@gmx.com;
+ bh=tHBaZvQYsrn4NKoqjXmpgLdFlBY9dtppWa7RAlofW5U=;
+ h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
+ b=V3UDKpGc7iU/DJ3ORpOk0bh70AUo7SJ2jpljncKJNCzDwpZvnMT8xj57tE/2BKjv5QmMLLb
+ bmRqbkx8Wd/l/6VbkwO5KZTfG8x/yf73mEClROl3KnfMpJHnCJfg1vfVft06jiuCNH4AlELBg
+ 8GeAADsL8879yFGnXjPYEHE5ZoxPTZ5CHZFnvsBrFuoyVYjrJinAvMW9kw/z8u54XywqtOIDn
+ fjDAJCnPiSMicQ/Qaz/4CYhCwlHx6BE2Ln1JENmdCjPL07IDgjHvcXoR7bAKFluz/ODAczj85
+ 7/6nVEdsGqvAp/y/x44Tb+EWhxxODG7bxox+Aeh2OahXrXAz4J8Q==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MG9g4-1qfcK13LbA-00GV7L; Fri, 28
+ Jul 2023 00:15:18 +0200
+Message-ID: <1ff02767-621c-01ac-66fe-7ff3be3b71db@gmx.com>
+Date:   Fri, 28 Jul 2023 06:15:14 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230727185315.530134-2-zlang@kernel.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.12.0
+Subject: Re: [PATCH] btrfs/294: reject zoned devices for now
+To:     Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20230724030423.92390-1-wqu@suse.com>
+ <20230727155041.u5yr3rtxneqhq2vl@zlang-mailbox>
+Content-Language: en-US
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+In-Reply-To: <20230727155041.u5yr3rtxneqhq2vl@zlang-mailbox>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:F031XwBHTjjwaK5gYDPutXSWrFtU7iS/4GUqPxTXGebE+3NJlK2
+ 3S0Y3leoouEp6yQXN79mr5rvKRyA5Ot3Ic9uCqRlAbcwiuv/WHti8i3GUioJ6mces4WzK9n
+ ZMXV6pwn05F+w+8WkvZHfcE3LpcNbNReNc/pDpYkY3zPiQ8+4PudCEUtKx9QCGKVWzJoKdG
+ lAqT1dGalc1tQRG2zSTcQ==
+UI-OutboundReport: notjunk:1;M01:P0:PcMaKy9+iEg=;ba5Og9wdxauxGWpOd8WVzJU52mn
+ wmXft8aVYjC50pWBDztwuhZoE0OB9oVVzlIo5upaYBRzBKBqNLwgxLQsP5eQMYfxZLAsvg7gG
+ Yqk0++3Utoa7YjbkZYZtuNEx6juF880P8RJnnzinb17h5BHpWFibUH2EsOD4TXS5JTLDAg+nZ
+ 7PKJ/MPOMJoEvO0uXazZUlsWRpkm7kkm1ctld3NwRpjo3uwG/jo1a+QD/kQdXpVzHaE9Fu6ZD
+ bnecwDOqHH2BTsOfVSK/z8EmMUkpA8DWyTsWIGxrUihovzNDnMRqWrVUc/oyNShGdLHkkxWrV
+ XCJNch64NVU1JPTACYMvBK/0K7TJu/O7xYZ1//roRtP0dD1sajiXXIRNGALLdUqOXckQShDom
+ AGGrGz4az91C5WiTVzvLcXm4gfVzs6R8Kf66+240et6xxFp5HinXxsXlj/ToD3S7cevkRjhUZ
+ JnISrmK18Znq2Ru34gxfBcRas1Y6EuImywH9rRCaFDMR1XE7xYSlzic2Eh9sJUdYrkDdo9Exf
+ dXV4HAWXOWpinRbcdaHFLIdKbBSrRHMz9sCFM9h0CGqoL7j52PPwdNRQkoeoI+SDWDVkHeL3Y
+ E8DSqrquXu5whAIxiFVz/Y7pFNB0j1ckGh6+a0SaN0/Bn+Aa5tqiCmDWWPH7J/kCAEd1SlXF2
+ PBbB9tnWVu/np6ODUPa9qF4sr+R/KALnfi/E4B5PfBHr756KCbzeJTVTfmMptlNHDlPR/1rRP
+ +nu9Z6Q+qW81fozyOrFrhwx8w2DHEt/DwJmf5+a4Bj0XvTF8dxUqotjbeSJf8GOVK+7nHjEVf
+ VK4f5m01NkfUisa6PS9dxxcnEpEaiHdQZac57fliNeig0hzN9HNIyjBTIAO7CjZnCA4o5ZR5M
+ 0I65UEk0M4oUXkRyUlKmCLpuyBDs5DZsJYhcBJUhSuCRSrB2OfdXqrDIp80I5d32FM+kupaCV
+ YEM2LGuezeJeoU+IxznYyB1Dg6Y=
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 28, 2023 at 02:53:14AM +0800, Zorro Lang wrote:
-> Darrick suggests that fstests can provide a simple smoketest, by
-> running several generic filesystem smoke testing for five minutes
-> apiece (SOAK_DURATION="5m"). Since there are only five smoke tests,
-> this is effectively a 20min super-quick test.
-> 
-> With gcov enabled, running these tests yields about ~75% coverage for
-> iomap and ~60% for xfs; or ~50% for ext4 and ~75% for ext4; and ~45%
-> for btrfs.  Coverage was about ~65% for the pagecache.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
 
-Er... this excerpt looks good to me! :)
 
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+On 2023/7/27 23:50, Zorro Lang wrote:
+> On Mon, Jul 24, 2023 at 11:04:23AM +0800, Qu Wenruo wrote:
+>> The test case itself is utilizing RAID5/6, which is not yet supported o=
+n
+>> zoned device.
+>>
+>> In the future we would use raid-stripe-tree (RST) feature, but for now
+>> just reject zoned devices completely.
+>>
+>> And since we're here, also update the _fixed_by_kernel_commit lines, as
+>> the proper fix is already merged upstream.
+>>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>
+> Just check before next fstests release. This patch has been reviewed, bu=
+t looks
+> like there're still more review points from btrfs list. So will you send=
+ a new
+> version to replace this patch?
 
-(is that even allowed??)
+IMHO the patch is fine to be merged for now.
 
---D
+The new comments are mostly a future work idea, which needs some time to
+develop and extra kernel features.
 
-> ---
->  doc/group-names.txt | 1 +
->  tests/generic/475   | 2 +-
->  tests/generic/476   | 2 +-
->  tests/generic/521   | 2 +-
->  tests/generic/522   | 2 +-
->  tests/generic/642   | 2 +-
->  6 files changed, 6 insertions(+), 5 deletions(-)
-> 
-> diff --git a/doc/group-names.txt b/doc/group-names.txt
-> index 1c35a394..c3dcca37 100644
-> --- a/doc/group-names.txt
-> +++ b/doc/group-names.txt
-> @@ -118,6 +118,7 @@ selftest		tests with fixed results, used to validate testing setup
->  send			btrfs send/receive
->  shrinkfs		decreasing the size of a filesystem
->  shutdown		FS_IOC_SHUTDOWN ioctl
-> +smoketest		Simple smoke tests
->  snapshot		btrfs snapshots
->  soak			long running soak tests whose runtime can be controlled
->                          directly by setting the SOAK_DURATION variable
-> diff --git a/tests/generic/475 b/tests/generic/475
-> index 0cbf5131..ce7fe013 100755
-> --- a/tests/generic/475
-> +++ b/tests/generic/475
-> @@ -12,7 +12,7 @@
->  # testing efforts.
->  #
->  . ./common/preamble
-> -_begin_fstest shutdown auto log metadata eio recoveryloop
-> +_begin_fstest shutdown auto log metadata eio recoveryloop smoketest
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/476 b/tests/generic/476
-> index 8e93b734..b1ae4df4 100755
-> --- a/tests/generic/476
-> +++ b/tests/generic/476
-> @@ -8,7 +8,7 @@
->  # bugs in the write path.
->  #
->  . ./common/preamble
-> -_begin_fstest auto rw long_rw stress soak
-> +_begin_fstest auto rw long_rw stress soak smoketest
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/generic/521 b/tests/generic/521
-> index 22dd31a8..0956e501 100755
-> --- a/tests/generic/521
-> +++ b/tests/generic/521
-> @@ -7,7 +7,7 @@
->  # Long-soak directio fsx test
->  #
->  . ./common/preamble
-> -_begin_fstest soak long_rw
-> +_begin_fstest soak long_rw smoketest
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/522 b/tests/generic/522
-> index f0cbcb24..0e4e6009 100755
-> --- a/tests/generic/522
-> +++ b/tests/generic/522
-> @@ -7,7 +7,7 @@
->  # Long-soak buffered fsx test
->  #
->  . ./common/preamble
-> -_begin_fstest soak long_rw
-> +_begin_fstest soak long_rw smoketest
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/generic/642 b/tests/generic/642
-> index eba90903..e6a475a8 100755
-> --- a/tests/generic/642
-> +++ b/tests/generic/642
-> @@ -8,7 +8,7 @@
->  # bugs in the xattr code.
->  #
->  . ./common/preamble
-> -_begin_fstest auto soak attr long_rw stress
-> +_begin_fstest auto soak attr long_rw stress smoketest
->  
->  _cleanup()
->  {
-> -- 
-> 2.40.1
-> 
+Thanks,
+Qu
+>
+> Thanks,
+> Zorro
+>
+>>   tests/btrfs/294 | 8 ++++++--
+>>   1 file changed, 6 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/tests/btrfs/294 b/tests/btrfs/294
+>> index 61ce7d97..d7d13646 100755
+>> --- a/tests/btrfs/294
+>> +++ b/tests/btrfs/294
+>> @@ -16,11 +16,15 @@ _begin_fstest auto raid volume
+>>
+>>   # Modify as appropriate.
+>>   _supported_fs btrfs
+>> +
+>> +# No zoned support for RAID56 yet.
+>> +_require_non_zoned_device "${SCRATCH_DEV}"
+>> +
+>>   _require_scratch_dev_pool 8
+>>   _fixed_by_kernel_commit a7299a18a179 \
+>>   	"btrfs: fix u32 overflows when left shifting @stripe_nr"
+>> -_fixed_by_kernel_commit xxxxxxxxxxxx \
+>> -	"btrfs: use a dedicated helper to convert stripe_nr to offset"
+>> +_fixed_by_kernel_commit cb091225a538 \
+>> +	"btrfs: fix remaining u32 overflows when left shifting stripe_nr"
+>>
+>>   _scratch_dev_pool_get 8
+>>
+>> --
+>> 2.41.0
+>>
+>
