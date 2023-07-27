@@ -2,107 +2,83 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A50BC001DE
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Jul 2023 01:26:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E73C2C001DE
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Jul 2023 01:36:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231143AbjG0B0Q (ORCPT
+        id S230135AbjG0Bgh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Jul 2023 21:26:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55456 "EHLO
+        Wed, 26 Jul 2023 21:36:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229511AbjG0B0P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 21:26:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCCDE196;
-        Wed, 26 Jul 2023 18:26:14 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4DC2061CED;
-        Thu, 27 Jul 2023 01:26:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A0239C433C8;
-        Thu, 27 Jul 2023 01:26:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690421173;
-        bh=if7mzj0ehLrHlgt0FgMdKCzlq6hqghMUjN16hVUhVM8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Ar7csIzQfRs9zXZqq0NCp1cuwNpYNmhrdE2AH8tqnXWLoyvzcFgU0qHMhiKQYpHa+
-         +CaOIRsVu46Sb2dLfYX9TXHvAo/e2MXs3LAEkUmKVsdnSBOYCRtjxE/FGjVXtr10Tf
-         6creTx5kKdaOSgCq2IPka5Hsq1+vks0wibV+Unyi5dkYIbkcIdPHbscqbaQBCnvhc5
-         1E/LgntaOerIjuPPwkuOoOjRPONuTJk4031afPIY/2vSml+7LB2txsRVN614k9AfZl
-         wCzentE2XxjsemndmXKVrkx9BqjIpiQ7aHjl2J7V1wkgklxbqfg0gvPOcHrMvEv8uQ
-         ESvg3+eRgw/QQ==
-Date:   Wed, 26 Jul 2023 18:26:13 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
-Subject: Re: [PATCH] fstests: add helper to canonicalize devices used to
- enable persistent disks
-Message-ID: <20230727012613.GD11377@frogsfrogsfrogs>
-References: <20230720061727.2363548-1-mcgrof@kernel.org>
- <20230725081307.xydlwjdl4lq3ts3m@zlang-mailbox>
- <20230725155439.GF11340@frogsfrogsfrogs>
- <20230726044132.GA30264@mit.edu>
- <ZMFJp5OZN3vnT/yI@bombadil.infradead.org>
- <20230727011330.GE30264@mit.edu>
+        with ESMTP id S229552AbjG0Bgg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2023 21:36:36 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BC7E1738
+        for <fstests@vger.kernel.org>; Wed, 26 Jul 2023 18:36:35 -0700 (PDT)
+Received: from cwcc.thunk.org (pool-173-48-115-64.bstnma.fios.verizon.net [173.48.115.64])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 36R1aRNw008596
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 26 Jul 2023 21:36:28 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1690421789; bh=iTEWQUGieEs+LNXYVRdxSu8zpe9pdoHjwLq/GuVDLR4=;
+        h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+        b=fW8hwkNNMLQz8CXvNjgvq7gM8e1Og2ZE/+AuDxqI5Y+1OgThsK16P5TvW4h+MmDGz
+         aNsj3BAd0s2awLPT+s0LR5XKGjqoTK6dbW8R12K4EJRrO5qzXfDpOrbiwsJIZq0KsZ
+         GqOa62gXa/T5r+ZYBMdJQMzshviwK+JnIfNFrxVZmIs4wOU02SKolcBFNIRW92edJq
+         I+rneAZhDBc9tVBUV7b5wKwACzhTSzB52JYXNlYgeammuZK87tz1eHxHZOQwdKEYjH
+         K8R45uBW5AM0tzxet9NlnxiRs1ndGveXmebEDpQyhAxGgXko6J1fqIkDe9DijIdu9E
+         WSIW3xEV5t/1Q==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 58D4E15C04DF; Wed, 26 Jul 2023 21:36:27 -0400 (EDT)
+Date:   Wed, 26 Jul 2023 21:36:27 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] check: add a -smoketest option
+Message-ID: <20230727013627.GF30264@mit.edu>
+References: <168972905626.1698606.12419796694170752316.stgit@frogsfrogsfrogs>
+ <20230719151024.ef7vgjmtoxwxkmjm@zlang-mailbox>
+ <20230719152907.GA11377@frogsfrogsfrogs>
+ <20230719161115.byva7tvwoafkesga@zlang-mailbox>
+ <20230720022756.GH11352@frogsfrogsfrogs>
+ <20230720143433.n5gkhukdkz7s5ab7@zlang-mailbox>
+ <20230726000524.GG11340@frogsfrogsfrogs>
+ <20230726060102.GB30264@mit.edu>
+ <20230726145441.lbzzokwigrztimyq@zlang-mailbox>
+ <20230726205930.GC30264@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230727011330.GE30264@mit.edu>
+In-Reply-To: <20230726205930.GC30264@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 26, 2023 at 09:13:30PM -0400, Theodore Ts'o wrote:
-> On Wed, Jul 26, 2023 at 09:28:23AM -0700, Luis Chamberlain wrote:
-> > > I'm a little confused.  Where are these "sanity checks" enforced?
-> > > I've been using
-> > > 
-> > > SCRATCH_DEV=/dev/mapper/xt-vdc
-> > > 
-> > > where /dev/mapper/xt-vdc is a symlink to /dev/dm-4 (or some such)
-> > > without any problems.  So I don't quite understand why we need to
-> > > canonicalize devices?
-> > 
-> > That might work, but try using /dev/disk/by-id/ stuff, that'll bust. So
-> > to keep existing expecations by fstests, it's needed.
-> 
-> What goes wrong, and why?  /dev/disk/by-id/<disk-id> is a symlink,
-> just like /dev/mapper/<vg>-<lv> is a symlink.
-> 
-> What am I missing?
+As an aside, while I was testing my updates to the kvm-quickstart[1]
+documentation, I timed how long it takes to run "-g quick" for a basic
+ext4 file system config with 4k blocks using a desktop NVMe SSD for
+the test and scratch devices.
 
-# mkfs.xfs -f /dev/sda
-# mount /dev/sda /mnt
-# TEST_DIR=/mnt TEST_DEV=/dev/sda FSTYP=xfs ./check generic/110
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 flax-mtr01 6.5.0-rc3-djwx #rc3 SMP PREEMPT_DYNAMIC Wed Jul 26 14:26:48 PDT 2023
+[1] https://github.com/tytso/xfstests-bld/blob/test/Documentation/kvm-quickstart.md
 
-generic/110        2s
-Ran: generic/110
-Passed all 1 tests
+It took 62 minutes, or a little over an hour.  Yowza!  I hadn't
+realized that "kvm-xfstests smoke" was now taking that long.  It used
+to be that using a slower SSD (an Intel SATA-attached SSD dating from
+2008) I could run "-g quick" in 15 minutes.  Clearly, things were a
+lot simpler back then.  :-)
 
-versus:
+Anyway, I definitely need to replace what "kvm-xfstests smoke" does
+with something else much more abbrevuated before I start requesting
+drive-by patch submitters to run an fstests "smoke test".  Because an
+hour isn't it.  Ideally, I'd like to keep it under 10 minutes if at
+all possible, but we still want the testing to be likely to detect
+most of the sort of simple problems that a drive-by patch submitter
+might be likely find....
 
-# TEST_DIR=/mnt TEST_DEV=/dev/disk/by-id/scsi-0QEMU_RAMDISK_drive-scsi0-0-0-0 FSTYP=xfs ./check generic/110
-mount: /mnt: /dev/sda already mounted on /mnt.
-common/rc: retrying test device mount with external set
-mount: /mnt: /dev/sda already mounted on /mnt.
-common/rc: could not mount /dev/disk/by-id/scsi-0QEMU_RAMDISK_drive-scsi0-0-0-0 on /mnt
-# umount /mnt
-# TEST_DIR=/mnt TEST_DEV=/dev/disk/by-id/scsi-0QEMU_RAMDISK_drive-scsi0-0-0-0 FSTYP=xfs ./check generic/110
-TEST_DEV=/dev/disk/by-id/scsi-0QEMU_RAMDISK_drive-scsi0-0-0-0 is mounted but not on TEST_DIR=/mnt - aborting
-Already mounted result:
-/dev/sda /mnt
+The fundamental question is how to do get the maximal amount of value
+given a limited test budget.
 
-(This is not really how I run fstests, it's just the minimum example.)
-
---D
-
-> Thanks,
-> 
-> 						- Ted
-> 
+					- Ted
