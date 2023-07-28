@@ -2,58 +2,74 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC946C001DE
-	for <linux-fstests@archiver.kernel.org>; Fri, 28 Jul 2023 15:49:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC064C001DE
+	for <linux-fstests@archiver.kernel.org>; Fri, 28 Jul 2023 15:53:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237004AbjG1PtV (ORCPT
+        id S235953AbjG1Px3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 28 Jul 2023 11:49:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37300 "EHLO
+        Fri, 28 Jul 2023 11:53:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40634 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234149AbjG1PtV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jul 2023 11:49:21 -0400
+        with ESMTP id S235915AbjG1PxR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jul 2023 11:53:17 -0400
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D90726A0
-        for <fstests@vger.kernel.org>; Fri, 28 Jul 2023 08:49:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2EC42D73
+        for <fstests@vger.kernel.org>; Fri, 28 Jul 2023 08:53:16 -0700 (PDT)
 Received: from cwcc.thunk.org (pool-173-48-113-23.bstnma.fios.verizon.net [173.48.113.23])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 36SFn7wU024452
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 36SFr7sF026396
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 28 Jul 2023 11:49:08 -0400
+        Fri, 28 Jul 2023 11:53:08 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-        t=1690559349; bh=dK1M710zNGZ+RdOpkjFXQ/ecu2+hXHc4ExQvkHlFlCM=;
+        t=1690559589; bh=Qqr/MU18MyiS/ezQUTMOrC0+9lxvD/2nk4bpVh/aU9U=;
         h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-        b=clWAPuKUrm2pkrEXX6oUeSjbgrXaPLsU9A4cH0+SeRAn2T4W35LQbMQoybyNjnxZ5
-         HRPTh81BZpyBfLsfDp0BcO31Y5SBx5qcww7JE3tUIEYJg1a22oTbyQ+1h0++wddq4u
-         P8XPp8N973w1QEUs1gWmP3ef4qPwakk9ekw98I/1g8Okgor2zO5wGWtyEXorY2YaD/
-         B6fJg7uJdQAlTw6ZCOwVg0SOc+rwJix9M8uC2MHoUgKtDoKiWJQhW2Qrrx3Nhi8ISJ
-         o82iJzuJiLPUrQvjrmSYAqB6jB53JBfTi7fo4dLPIO5SKgFi6mr06otHAo3Fp0dPKo
-         e/ESOlkd4BPcQ==
+        b=XceItTv+6uvH7UkuLNNLE/UI72UWqcEpGCUt/cQIVpXjzsOZXHtHQ0vD+STo3ERg8
+         VKHOl6T1930uk5IHi9VEty2VR+EQWxqFhYu812IjlztDy3TdX7+D682Fdcg2HVAOPF
+         e/v486+97EFeQMYxm+sW9Wvb7TAg9VITJoeiYkvzAybRnWxOggP902yYoT4wbYySG1
+         c3iJG0xaMbCanNoQgUkHndM7xvaboF54JbIqDSlXHmwQGYi2BxFARXC38JGw8JmdI0
+         sI4afatl6fTdXF/1IDOxu7uTeQ3Av+8mc+assLBxDfijWXTpG7DWPebMJ8jznR6Npw
+         8YYE4KdPZMp8g==
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id BC3DE15C04EF; Fri, 28 Jul 2023 11:49:07 -0400 (EDT)
-Date:   Fri, 28 Jul 2023 11:49:07 -0400
+        id B772015C04EF; Fri, 28 Jul 2023 11:53:07 -0400 (EDT)
+Date:   Fri, 28 Jul 2023 11:53:07 -0400
 From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: install soak_duration.awk
-Message-ID: <20230728154907.GA606216@mit.edu>
-References: <20230727190512.357064-1-tytso@mit.edu>
- <20230727191824.GF11377@frogsfrogsfrogs>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] check: add a -smoketest option
+Message-ID: <20230728155307.GB606216@mit.edu>
+References: <20230719161115.byva7tvwoafkesga@zlang-mailbox>
+ <20230720022756.GH11352@frogsfrogsfrogs>
+ <20230720143433.n5gkhukdkz7s5ab7@zlang-mailbox>
+ <20230726000524.GG11340@frogsfrogsfrogs>
+ <20230726060102.GB30264@mit.edu>
+ <20230726145441.lbzzokwigrztimyq@zlang-mailbox>
+ <20230726205930.GC30264@mit.edu>
+ <20230727032537.hyqyuvemnwmh25d5@zlang-mailbox>
+ <20230727143326.GG30264@mit.edu>
+ <20230727153046.dl4palugnyidxoe7@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230727191824.GF11377@frogsfrogsfrogs>
+In-Reply-To: <20230727153046.dl4palugnyidxoe7@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 27, 2023 at 12:18:24PM -0700, Darrick J. Wong wrote:
-> > installed or the checks script will bomb out of SOAK_DURATION is set
+On Thu, Jul 27, 2023 at 11:30:46PM +0800, Zorro Lang wrote:
+> 
+> Yeah, I'd like to tidy the ./check, include the option names. But change the
+> check option format will affect many users, cause most of their scripts go
+> wrong suddently, then they need to check and use new option format. That's
+> why I still not touch this part.
 
-One more typo fix:  s/of/if/
+What if we add support for the double-hyphen variant for those options
+that use a syingle-hyphen, and then wait say, a year or so, and then
+add a deprecation warning to the single hyphen options, and then a
+year latter drop support the single-hypen variant?
 
-I think I've gotten way too spoiled by automatic spell/grammar
-checking in GMail and Google Docs....
+I can send a patch for the first part of the process if you think that
+makes sense....
 
-							- Ted
+      	     	       	    	   - Ted
