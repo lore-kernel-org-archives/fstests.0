@@ -2,39 +2,39 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26AA0C001E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Jul 2023 11:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49BE6C001DE
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Jul 2023 11:28:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230299AbjGaL2h (ORCPT
+        id S231135AbjGaL2j (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 Jul 2023 07:28:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39784 "EHLO
+        Mon, 31 Jul 2023 07:28:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229731AbjGaL2h (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 Jul 2023 07:28:37 -0400
-Received: from forward103c.mail.yandex.net (forward103c.mail.yandex.net [178.154.239.214])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3760BF
-        for <fstests@vger.kernel.org>; Mon, 31 Jul 2023 04:28:35 -0700 (PDT)
+        with ESMTP id S229731AbjGaL2i (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 31 Jul 2023 07:28:38 -0400
+Received: from forward102c.mail.yandex.net (forward102c.mail.yandex.net [178.154.239.213])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 126E491
+        for <fstests@vger.kernel.org>; Mon, 31 Jul 2023 04:28:36 -0700 (PDT)
 Received: from mail-nwsmtp-smtp-production-main-60.sas.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-60.sas.yp-c.yandex.net [IPv6:2a02:6b8:c14:150a:0:640:1aa5:0])
-        by forward103c.mail.yandex.net (Yandex) with ESMTP id 6030960066;
-        Mon, 31 Jul 2023 14:28:31 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-60.sas.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id MSOJdagWl0U0-KYnGl77G;
-        Mon, 31 Jul 2023 14:28:30 +0300
+        by forward102c.mail.yandex.net (Yandex) with ESMTP id D27F6600CF;
+        Mon, 31 Jul 2023 14:28:34 +0300 (MSK)
+Received: by mail-nwsmtp-smtp-production-main-60.sas.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id MSOJdagWl0U0-z8ulo98l;
+        Mon, 31 Jul 2023 14:28:34 +0300
 X-Yandex-Fwd: 1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail; t=1690802911;
-        bh=GATLOu1LaHyBPlnFRlJKJrrgqGFi0jVwZeALJwdkdsA=;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail; t=1690802914;
+        bh=sFuQMaLGVPdU9K8xCfR12g8MVJlYYiAWFXXUMC3pX/4=;
         h=Message-Id:Date:In-Reply-To:Cc:Subject:References:To:From;
-        b=HxGsFCA9TLyOcclwJXTkTUhrBxMkxYOW6WIYyqW+AbVjlBlvi5iXY7Q6hJev2EsoD
-         mczMHtcLejmD7m/2SvUA5sFYjbQOATGUMeSz2xhl+Vco5M9btjaJYji4Od0PwoutuS
-         MeFI//TnlpgD2doj5s/quSFggsX1GIHnqO9Eg8j8=
+        b=NbY+3egbUXEiTiTWwEKab6z2vUo+524JzpFXHx4qpm/NbcBF7aKtrcG1rgDwhnDq4
+         Zl4uHioza8IJ2LmcG4PT76RdRpr67VCoxDOPMqOMZiNWZXIHeKLvgwQPWab0YOCLeg
+         OwsBCoxQ9rwMTo2m1801OKEJnXqR9ng5rTIqiNmU=
 Authentication-Results: mail-nwsmtp-smtp-production-main-60.sas.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
 From:   Stas Sergeev <stsp2@yandex.ru>
 To:     fstests@vger.kernel.org
 Cc:     Stas Sergeev <stsp2@yandex.ru>, Murphy Zhou <xzhou@redhat.com>,
         Jeff Layton <jlayton@kernel.org>, Zorro Lang <zlang@redhat.com>
-Subject: [PATCH 1/2] t_ofd_locks: fix stalled semaphore handling
-Date:   Mon, 31 Jul 2023 16:28:06 +0500
-Message-Id: <20230731112807.1463846-2-stsp2@yandex.ru>
+Subject: [PATCH 2/2] t_ofd_locks: fix sem initialization sequence
+Date:   Mon, 31 Jul 2023 16:28:07 +0500
+Message-Id: <20230731112807.1463846-3-stsp2@yandex.ru>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230731112807.1463846-1-stsp2@yandex.ru>
 References: <20230731112807.1463846-1-stsp2@yandex.ru>
@@ -44,15 +44,19 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Currently IPC_RMID was attempted on a semid returned after failed
-semget() with flags=IPC_CREAT|IPC_EXCL. So nothing was actually removed.
+The locker was waiting for sem_otime on sem0 to became non-zero after
+incrementing sem0 himself. So sem_otime was never 0 at the time of
+checking it, so the check was redundant/wrong.
 
-This patch introduces the much more reliable scheme where the sem key
-is provided from the wrapper script, after making sure there are no
-stalled semaphores with that key.
+This patch:
+- moves the increment of sem1 to the lock-tester site
+- lock-setter waits for that sem1 event, for which this patch replaces
+  the wait loop on sem_otime with GETVAL loop, adding a small sleep
+- increment of sem0 to 2 moved past that sem1 event. That sem0 event
+  is currently not used/waited.
 
-This patch uses $BASHPID for sem key, and adds the -K option to
-t_ofd_locks to pass the sem key.
+This guarantees that the lock-setter is working only after lock-getter
+is fully initialized.
 
 CC: fstests@vger.kernel.org
 CC: Murphy Zhou <xzhou@redhat.com>
@@ -61,154 +65,78 @@ CC: Zorro Lang <zlang@redhat.com>
 
 Signed-off-by: Stas Sergeev <stsp2@yandex.ru>
 ---
- src/t_ofd_locks.c | 48 ++++++++++++-----------------------------------
- tests/generic/478 | 14 ++++++++++----
- 2 files changed, 22 insertions(+), 40 deletions(-)
+ src/t_ofd_locks.c | 44 +++++++++++++++++++++++++-------------------
+ 1 file changed, 25 insertions(+), 19 deletions(-)
 
 diff --git a/src/t_ofd_locks.c b/src/t_ofd_locks.c
-index e77f2659..95739dc7 100644
+index 95739dc7..b7b2022d 100644
 --- a/src/t_ofd_locks.c
 +++ b/src/t_ofd_locks.c
-@@ -180,16 +180,16 @@ int main(int argc, char **argv)
- 	int setlk_macro = F_OFD_SETLKW;
- 	int getlk_macro = F_OFD_GETLK;
- 	struct timespec ts;
--	key_t semkey;
-+	key_t semkey = -1;
- 	unsigned short vals[2];
- 	union semun semu;
- 	struct semid_ds sem_ds;
- 	struct sembuf sop;
--	int opt, ret, retry;
-+	int opt, ret;
+@@ -296,32 +296,29 @@ int main(int argc, char **argv)
+ 		semu.array = vals;
+ 		if (semctl(semid, 2, SETALL, semu) == -1)
+ 			err_exit("init sem", errno);
+-		/* Inc both new sem to 2 */
+-		sop.sem_num = 0;
+-		sop.sem_op = 1;
+-		sop.sem_flg = 0;
+-		ts.tv_sec = 5;
+-		ts.tv_nsec = 0;
+-		if (semtimedop(semid, &sop, 1, &ts) == -1)
+-			err_exit("inc sem0 2", errno);
+-		sop.sem_num = 1;
+-		sop.sem_op = 1;
+-		sop.sem_flg = 0;
+-		ts.tv_sec = 5;
+-		ts.tv_nsec = 0;
+-		if (semtimedop(semid, &sop, 1, &ts) == -1)
+-			err_exit("inc sem1 2", errno);
  
- 	//avoid libcap errno bug
- 	errno = 0;
--	while((opt = getopt(argc, argv, "sgrwo:l:PRWtFd")) != -1) {
-+	while((opt = getopt(argc, argv, "sgrwo:l:PRWtFdK:")) != -1) {
- 		switch(opt) {
- 		case 's':
- 			lock_cmd = 1;
-@@ -227,6 +227,9 @@ int main(int argc, char **argv)
- 		case 'd':
- 			use_dup = 1;
- 			break;
-+		case 'K':
-+			semkey = atoi(optarg);
-+			break;
- 		default:
- 			usage(argv[0]);
- 			return -1;
-@@ -276,37 +279,15 @@ int main(int argc, char **argv)
- 		err_exit("test_ofd_getlk", errno);
- 	}
- 
--	if((semkey = ftok(argv[optind], 255)) == -1)
-+	if (semkey == -1)
-+		semkey = ftok(argv[optind], 255);
-+	if (semkey == -1)
- 		err_exit("ftok", errno);
- 
- 	/* setlk, and always init the semaphore at setlk time */
- 	if (lock_cmd == 1) {
--		/*
--		 * Init the semaphore, with a key related to the testfile.
--		 * getlk routine will wait untill this sem has been created and
--		 * iniialized.
--		 *
--		 * We must make sure the semaphore set is newly created, rather
--		 * then the one left from last run. In which case getlk will
--		 * exit immediately and left setlk routine waiting forever.
--		 * Also because newly created semaphore has zero sem_otime,
--		 * which is used here to sync with getlk routine.
--		 */
--		retry = 0;
--		do {
--			semid = semget(semkey, 2, IPC_CREAT|IPC_EXCL);
--			if (semid < 0 && errno == EEXIST) {
--				/* remove sem set after one round of test */
--				if (semctl(semid, 2, IPC_RMID, semu) == -1)
--					err_exit("rmid 0", errno);
--				retry++;
--			} else if (semid < 0)
--				err_exit("semget", errno);
--			else
--				retry = 10;
--		} while (retry < 5);
--		/* We can't create a new semaphore set in 5 tries */
--		if (retry == 5)
-+		semid = semget(semkey, 2, IPC_CREAT|IPC_EXCL);
-+		if (semid < 0)
- 			err_exit("semget", errno);
- 
- 		/* Init both new sem to 1 */
-@@ -393,7 +374,7 @@ int main(int argc, char **argv)
- 	/* getlck */
- 	if (lock_cmd == 0) {
- 		/* wait sem created and initialized */
--		retry = 5;
-+		int retry = 5;
+ 		/*
+-		 * Wait initialization complete. semctl(2) only update
+-		 * sem_ctime, semop(2) will update sem_otime.
++		 * Wait initialization complete.
+ 		 */
+ 		ret = -1;
  		do {
- 			semid = semget(semkey, 2, 0);
- 			if (semid != -1)
-@@ -406,11 +387,6 @@ int main(int argc, char **argv)
- 				err_exit("getlk_semget", errno);
- 			}
- 		} while (1);
--		do {
--			memset(&sem_ds, 0, sizeof(sem_ds));
--			semu.buf = &sem_ds;
++			if (ret != -1)
++				usleep(100000);
+ 			memset(&sem_ds, 0, sizeof(sem_ds));
+ 			semu.buf = &sem_ds;
 -			ret = semctl(semid, 0, IPC_STAT, semu);
 -		} while (!(ret == 0 && sem_ds.sem_otime != 0));
++			ret = semctl(semid, 1, GETVAL, semu);
++			if (ret == -1)
++				err_exit("wait sem1 2", errno);
++		} while (ret != 2);
++
++		/* Inc sem0 to 2 */
++		sop.sem_num = 0;
++		sop.sem_op = 1;
++		sop.sem_flg = 0;
++		ts.tv_sec = 5;
++		ts.tv_nsec = 0;
++		if (semtimedop(semid, &sop, 1, &ts) == -1)
++			err_exit("inc sem0 2", errno);
  
+ 		/* place the lock */
+ 		if (fcntl(fd, setlk_macro, &flk) < 0)
+@@ -388,6 +385,15 @@ int main(int argc, char **argv)
+ 			}
+ 		} while (1);
+ 
++		/* inc sem1 to 2 (initialization completed) */
++		sop.sem_num = 1;
++		sop.sem_op = 1;
++		sop.sem_flg = 0;
++		ts.tv_sec = 5;
++		ts.tv_nsec = 0;
++		if (semtimedop(semid, &sop, 1, &ts) == -1)
++			err_exit("inc sem1 2", errno);
++
  		/* wait sem0 == 0 (setlk and close fd done) */
  		sop.sem_num = 0;
-diff --git a/tests/generic/478 b/tests/generic/478
-index 480762d2..2478256b 100755
---- a/tests/generic/478
-+++ b/tests/generic/478
-@@ -94,6 +94,9 @@ _supported_fs generic
- _require_test
- _require_ofd_locks
- 
-+# rm possibly stalled sem
-+ipcrm -S $BASHPID 2>/dev/null
-+
- # real QA test starts here
- # prepare a 4k testfile in TEST_DIR
- $XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
-@@ -101,8 +104,11 @@ $XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
- 
- do_test()
- {
--	local soptions="$1"
--	local goptions="$2"
-+	local _so="$1 -K $BASHPID"
-+	local _go="$2 -K $BASHPID"
-+	shift 2
-+	local soptions="$_so"
-+	local goptions="$_go"
- 	# print options and getlk output for debug
- 	echo $* >> $seqres.full 2>&1
- 	# -s : do setlk
-@@ -113,7 +119,7 @@ do_test()
- 	wait $!
- 
- 	# add -F to clone with CLONE_FILES
--	soptions="$1 -F"
-+	soptions="$_so -F"
- 	# with -F, new locks are always file to place
- 	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
- 	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
-@@ -121,7 +127,7 @@ do_test()
- 	wait $!
- 
- 	# add -d to dup and close
--	soptions="$1 -d"
-+	soptions="$_so -d"
- 	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
- 	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
- 		tee -a $seqres.full
+ 		sop.sem_op = 0;
 -- 
 2.39.2
 
