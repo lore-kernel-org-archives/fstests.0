@@ -2,60 +2,44 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7619EC0015E
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Aug 2023 13:58:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63163C04A94
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Aug 2023 15:23:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231332AbjHAN57 (ORCPT
+        id S233797AbjHAPXx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Aug 2023 09:57:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55044 "EHLO
+        Tue, 1 Aug 2023 11:23:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234350AbjHAN5v (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Aug 2023 09:57:51 -0400
-Received: from mail-qk1-x72b.google.com (mail-qk1-x72b.google.com [IPv6:2607:f8b0:4864:20::72b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E18671BDB
-        for <fstests@vger.kernel.org>; Tue,  1 Aug 2023 06:57:49 -0700 (PDT)
-Received: by mail-qk1-x72b.google.com with SMTP id af79cd13be357-76595a7b111so400417785a.2
-        for <fstests@vger.kernel.org>; Tue, 01 Aug 2023 06:57:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20221208.gappssmtp.com; s=20221208; t=1690898269; x=1691503069;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=mCHZGDzkrmwQUzNfxZDMdHWShttn4Q70y30+JhEO2z0=;
-        b=Qqg13spJoOB8w+wu5zzO+njpL2IwtY112mfgdomV3/uZiQf+tZQ4VVi0O7qY3d37J2
-         hjLxFdLYwPQLxoxO6wRocoXmwBtIhbYH8GKw2bHMIBaug5Suoq8xvWJiWA7hA1k9HRR3
-         65zM19jmm4bCb4UgOaA0dIVTawM35HH28zQcAeQbl5O2xYXf1D2hERhHYfpBRiYr9lmP
-         Nju2R0felmVDy3V3OAYcyfZMI/qqYiXVTrL7Jzn/e55NBMLwAt+ImedInxQifi0UD2jW
-         bpavl/5dGmkvks2IuwUG5jCGe18asGxHd4yYr2yZcwyN5j38WJAdkfXTNrqfpzwoC/op
-         Qq6A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690898269; x=1691503069;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=mCHZGDzkrmwQUzNfxZDMdHWShttn4Q70y30+JhEO2z0=;
-        b=Yc9LSkElhY4Qe+ixv7XIedIoGEVanjzA7zOU0wWUjrC6oKEWTtu8Ix4kQMATGoIjiA
-         t93Gu1+uqvNpFBg8X5+abNFiVKjL+qdiIYD79d+2oQj7yKaLX6FfdjmljE43q1eqnuqB
-         uDT6Aj6Qu/2jTICq9C7SyHLL8cb/iU9fYxwJ4ZZYkRik2vK+l9H4gVNbdU1Q9tdOM+SZ
-         64dIGLA7Hu8Yo+zpjWplwVxSdYEINxbxN/Hsbft+BZUKNsPOK6xGh1MCNhgzX+MGYX29
-         aMKX1hWaHKbIFL2EC7ZUpmG5W4XMBk5BW/T3a4prB82cQvJRhhnil04daFFqNHptKuW0
-         utwQ==
-X-Gm-Message-State: ABy/qLbE9+sQtYmRkqBQ+fe+6/N67o1TCZH1UM/epORs/VBREqIjOEEQ
-        ujue1VByWgKt6P7WSH8I7/+JYgm0pI7APu5Ob9dB0w==
-X-Google-Smtp-Source: APBJJlFL+vubFr36JTCpInVrbL6owfUFU75Pu+Sgw4SW2fVPiqsSo7tf10bI+zDJ3hzvQQ9TD12jUA==
-X-Received: by 2002:a05:620a:4727:b0:75e:bf51:29a6 with SMTP id bs39-20020a05620a472700b0075ebf5129a6mr15046627qkb.65.1690898268872;
-        Tue, 01 Aug 2023 06:57:48 -0700 (PDT)
-Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id oq7-20020a05620a610700b00767c961eb47sm4167614qkn.43.2023.08.01.06.57.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 01 Aug 2023 06:57:48 -0700 (PDT)
-Date:   Tue, 1 Aug 2023 09:57:47 -0400
-From:   Josef Bacik <josef@toxicpanda.com>
+        with ESMTP id S233962AbjHAPXs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Aug 2023 11:23:48 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2203C1BFF;
+        Tue,  1 Aug 2023 08:23:41 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id ABD3F615E6;
+        Tue,  1 Aug 2023 15:23:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 046A3C433C7;
+        Tue,  1 Aug 2023 15:23:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1690903420;
+        bh=6PhYTfBwbPcPfCVSOnSUdSsqtFOl2waVK7ehhABee4Q=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=pA0VGahY0A4YUzEjpmvn6YJiqhLZn5dmIVRoyz/o5meKmXoqZ5W6oykMluI2gSDFA
+         uzvnJyfxWOR/1Y0pZZcmRBytUzfnGhnkF8df+QN5V3N9M1vd1BLwp/YmcuNevMmAOW
+         SK+DlXDqSu70y0PEeD4WrmQvbDYv7mGGMr52RM7IgiEWBmYSUO7Z9vKSky+s5o9sep
+         wGuxRu+4ILZutvg+9vVxQZHkQyWFdRsTh2mFEcLAICEu/mteiZJ1YUGHDCSH33VzWl
+         Kb+zjZ2u/KCnKMfpZXzJRCpYfLO5CfD08K0qviBtGQazJR3ySaDhBJCGKiX2RwUFYG
+         QBg41G/Z5XkQw==
+Date:   Tue, 1 Aug 2023 08:23:39 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Qu Wenruo <wqu@suse.com>
 Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Subject: Re: [PATCH] btrfs/276: allow a slight increase in the number of
  extents
-Message-ID: <20230801135747.GA2012161@perftesting>
+Message-ID: <20230801152339.GK11340@frogsfrogsfrogs>
 References: <20230801065529.50122-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -100,9 +84,119 @@ On Tue, Aug 01, 2023 at 02:55:29PM +0800, Qu Wenruo wrote:
 > the test.
 > 
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/276     | 41 ++++++++++++++++++++++++++++++++++++-----
+>  tests/btrfs/276.out |  4 ----
+>  2 files changed, 36 insertions(+), 9 deletions(-)
+> 
+> diff --git a/tests/btrfs/276 b/tests/btrfs/276
+> index 944b0c8f..a63b28bb 100755
+> --- a/tests/btrfs/276
+> +++ b/tests/btrfs/276
+> @@ -65,10 +65,17 @@ count_not_shared_extents()
+>  
+>  # Create a 16G file as that results in 131072 extents, all with a size of 128K
+>  # (due to compression), and a fs tree with a height of 3 (root node at level 2).
+> +#
+> +# But due to writeback can happen halfway, we may have slightly more extents
+> +# than 128K, so we allow 5% increase in the number of extents.
+> +#
+>  # We want to verify later that fiemap correctly reports the sharedness of each
+>  # extent, even when it needs to switch from one leaf to the next one and from a
+>  # node at level 1 to the next node at level 1.
+>  #
+> +nr_extents_lower=$((128 * 1024))
+> +nr_extents_upper=$((128 * 1024 + 128 * 1024 / 20))
+> +
+>  $XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_io
+>  
+>  # Sync to flush delalloc and commit the current transaction, so fiemap will see
+> @@ -76,13 +83,22 @@ $XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_io
+>  sync
+>  
+>  # All extents should be reported as non shared (131072 extents).
+> -echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> +found1=$(count_not_shared_extents)
+> +echo "Number of non-shared extents in the whole file: ${found1}" >> $seqres.full
+> +
+> +if [ $found1 -lt $nr_extents_lower -o $found1 -gt $nr_extents_upper ]; then
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+_within_tolerance "initial nr of extents" $found1 131072 5%  ?
 
-Thanks,
+--D
 
-Josef
+> +	echo "unexpected initial number of extents, has $found1 expect [$nr_extents_lower, $nr_extents_upper]"
+> +fi
+>  
+>  # Creating a snapshot.
+>  $BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _filter_scratch
+>  
+>  # We have a snapshot, so now all extents should be reported as shared.
+> -echo "Number of shared extents in the whole file: $(count_shared_extents)"
+> +found2=$(count_shared_extents)
+> +echo "Number of shared extents in the whole file: ${found2}" >> $seqres.full
+> +if [ $found2 -ne $found1 ]; then
+> +	echo "unexpected shared extents, has $found2 expect $found1"
+> +fi
+>  
+>  # Now COW two file ranges, of 1M each, in the snapshot's file.
+>  # So 16 extents should become non-shared after this.
+> @@ -97,8 +113,18 @@ sync
+>  
+>  # Now we should have 16 non-shared extents and 131056 (131072 - 16) shared
+>  # extents.
+> -echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> -echo "Number of shared extents in the whole file: $(count_shared_extents)"
+> +found3=$(count_not_shared_extents)
+> +found4=$(count_shared_extents)
+> +echo "Number of non-shared extents in the whole file: ${found3}"
+> +echo "Number of shared extents in the whole file: ${found4}" >> $seqres.full
+> +
+> +if [ $found3 != 16 ]; then
+> +	echo "Unexpected number of non-shared extents, has $found3 expect 16"
+> +fi
+> +
+> +if [ $found4 != $(( $found1 - $found3 )) ]; then
+> +	echo "Unexpected number of shared extents, has $found4 expect $(( $found1 - $found3 ))"
+> +fi
+>  
+>  # Check that the non-shared extents are indeed in the expected file ranges (each
+>  # with 8 extents).
+> @@ -117,7 +143,12 @@ _scratch_remount commit=1
+>  sleep 1.1
+>  
+>  # Now all extents should be reported as not shared (131072 extents).
+> -echo "Number of non-shared extents in the whole file: $(count_not_shared_extents)"
+> +found5=$(count_not_shared_extents)
+> +echo "Number of non-shared extents in the whole file: ${found5}" >> $seqres.full
+> +
+> +if [ $found5 != $found1 ]; then
+> +	echo "Unexpected final number of non-shared extents, has $found5 expect $found1"
+> +fi
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
+> index 3bf5a5e6..e318c2e9 100644
+> --- a/tests/btrfs/276.out
+> +++ b/tests/btrfs/276.out
+> @@ -1,16 +1,12 @@
+>  QA output created by 276
+>  wrote 17179869184/17179869184 bytes at offset 0
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -Number of non-shared extents in the whole file: 131072
+>  Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> -Number of shared extents in the whole file: 131072
+>  wrote 1048576/1048576 bytes at offset 8388608
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>  wrote 1048576/1048576 bytes at offset 12884901888
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>  Number of non-shared extents in the whole file: 16
+> -Number of shared extents in the whole file: 131056
+>  Number of non-shared extents in range [8M, 9M): 8
+>  Number of non-shared extents in range [12G, 12G + 1M): 8
+>  Delete subvolume (commit): 'SCRATCH_MNT/snap'
+> -Number of non-shared extents in the whole file: 131072
+> -- 
+> 2.41.0
+> 
